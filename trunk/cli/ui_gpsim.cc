@@ -108,15 +108,15 @@ Integer CGpsimUserInterface::s_iRAMAddrMask(      "UIRAMAddressMask",        0xf
 
 CGpsimUserInterface s_GpsimUI(s_psEnglishMessages);
 
+GlobalVerbosityAccessor verbose;
+
 void initialize_ConsoleUI()
 {
   CGpsimUserInterface::s_iValueRadix;
   CGpsimUserInterface::s_sValueHexPrefix;
   s_GpsimUI.SetStreams(stdin, stdout);
-}
-
-extern "C" IUserInterface & GetUserInterface(void) {
-  return s_GpsimUI;
+  // Connect the console to the simulation core
+  SetUserInterface(&s_GpsimUI);
 }
 
 ///

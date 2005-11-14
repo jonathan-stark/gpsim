@@ -10,7 +10,7 @@
   * file types.
   */
 
-void GPSIM_EXPORT RegisterProgramFileType(ProgramFileType * pPFT) {
+void LIBGPSIM_EXPORT RegisterProgramFileType(ProgramFileType * pPFT) {
   ProgramFileTypeList::GetList().push_back(pPFT);
 }
 

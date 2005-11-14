@@ -109,9 +109,9 @@ cmd_break::cmd_break(void)
 void cmd_break::list(guint64 value)
 {
   if(value == CMDBREAK_BAD_BREAK_NUMBER)
-    bp.dump();
+    get_bp().dump();
   else
-    bp.dump1((unsigned int)value);
+    get_bp().dump1((unsigned int)value);
 }
 
 const char *TOO_FEW_ARGS="missing register or location\n";
@@ -173,8 +173,8 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pE
   if (pAddress != NULL) { 
     gint64 iAddress;
     pAddress->get(iAddress);
-    b = bp.set_execution_break(GetActiveCPU(), (unsigned int)iAddress);
-    if (!bp.set_expression(b,pExpr))
+    b = get_bp().set_execution_break(GetActiveCPU(), (unsigned int)iAddress);
+    if (!get_bp().set_expression(b,pExpr))
       delete pExpr;
     return b;
   }
@@ -183,7 +183,7 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pE
   if (pRegSymbol) {
     b = set_break(co->value, pRegSymbol->getReg()->address);
     
-    if (!bp.set_expression(b,pExpr))
+    if (!get_bp().set_expression(b,pExpr))
       delete pExpr;
     return b;
   }
@@ -338,7 +338,7 @@ unsigned int cmd_break::set_break(int bit_flag)
   switch(bit_flag) {
 
   case STK_OVERFLOW:
-    b = bp.set_stk_overflow_break(GetActiveCPU());
+    b = get_bp().set_stk_overflow_break(GetActiveCPU());
 
     if(b < MAX_BREAKPOINTS)
       cout << "break when stack over flows.  " <<
@@ -347,7 +347,7 @@ unsigned int cmd_break::set_break(int bit_flag)
     break;
 
   case STK_UNDERFLOW:
-    b = bp.set_stk_underflow_break(GetActiveCPU());
+    b = get_bp().set_stk_underflow_break(GetActiveCPU());
 
     if(b < MAX_BREAKPOINTS)
       cout << "break when stack under flows.  " <<
@@ -357,7 +357,7 @@ unsigned int cmd_break::set_break(int bit_flag)
 
 
   case WDT:
-    b = bp.set_wdt_break(GetActiveCPU());
+    b = get_bp().set_wdt_break(GetActiveCPU());
 
     if(b < MAX_BREAKPOINTS)
       cout << "break when wdt times out.  " <<
@@ -366,16 +366,16 @@ unsigned int cmd_break::set_break(int bit_flag)
     break;
 
   case CYCLE:
-    bp.dump(Breakpoints::BREAK_ON_CYCLE);
+    get_bp().dump(Breakpoints::BREAK_ON_CYCLE);
     break;
   case EXECUTION:
-    bp.dump(Breakpoints::BREAK_ON_EXECUTION);
+    get_bp().dump(Breakpoints::BREAK_ON_EXECUTION);
     break;
   case WRITE:
-    bp.dump(Breakpoints::BREAK_ON_REG_WRITE);
+    get_bp().dump(Breakpoints::BREAK_ON_REG_WRITE);
     break;
   case READ:
-    bp.dump(Breakpoints::BREAK_ON_REG_READ);
+    get_bp().dump(Breakpoints::BREAK_ON_REG_READ);
     break;
   default:
     cout << TOO_FEW_ARGS;
@@ -398,7 +398,7 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
   switch(bit_flag) {
 
   case CYCLE:
-    b = bp.set_cycle_break(GetActiveCPU(),value);
+    b = get_bp().set_cycle_break(GetActiveCPU(),value);
 
     if(b < MAX_BREAKPOINTS)
       cout << "break at cycle: " << value << " break #: " <<  b << '\n';
@@ -408,7 +408,7 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
     break;
 
   case EXECUTION:
-    b = bp.set_execution_break(GetActiveCPU(), value);
+    b = get_bp().set_execution_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
       const char * pLabel = get_symbol_table().findProgramAddressLabel(value);
       const char * pFormat = *pLabel == 0
@@ -424,7 +424,7 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
 
   case WRITE:
 
-    b = bp.set_write_break(GetActiveCPU(), value);
+    b = get_bp().set_write_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
       Register * pReg = get_symbol_table().findRegister(value);
       const char * pFormat = pReg->name().empty()
@@ -436,7 +436,7 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
     break;
 
   case READ:
-    b = bp.set_read_break(GetActiveCPU(), value);
+    b = get_bp().set_read_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
       Register * pReg = get_symbol_table().findRegister(value);
       const char * pFormat =  pReg->name().empty()
@@ -454,11 +454,11 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
   }
 
   
-  if (pExpr && (bp.bIsValid(b) || !bp.set_expression(b,pExpr)))
+  if (pExpr && (get_bp().bIsValid(b) || !get_bp().set_expression(b,pExpr)))
     delete pExpr;
 
-  if (bp.bIsValid(b))
-    bp.dump1(b);
+  if (get_bp().bIsValid(b))
+    get_bp().dump1(b);
 
   return b;
 }
@@ -493,7 +493,7 @@ unsigned int cmd_break::set_break(int bit_flag,
     break;
 
   case READ:
-    b = bp.set_read_value_break(GetActiveCPU(), reg,op,value,mask);
+    b = get_bp().set_read_value_break(GetActiveCPU(), reg,op,value,mask);
     str = "read from";
     pReg = get_symbol_table().findRegister(reg);
     pFormat = pReg->name().empty()
@@ -502,7 +502,7 @@ unsigned int cmd_break::set_break(int bit_flag,
     break;
 
   case WRITE:
-    b = bp.set_write_value_break(GetActiveCPU(), reg,op,value,mask);
+    b = get_bp().set_write_value_break(GetActiveCPU(), reg,op,value,mask);
     str = "written to";
     pReg = get_symbol_table().findRegister(reg);
     pFormat = pReg->name().empty()
@@ -511,7 +511,7 @@ unsigned int cmd_break::set_break(int bit_flag,
     break;
   }
 
-  if( bp.bIsValid(b)) {
+  if( get_bp().bIsValid(b)) {
     // example: break when 1 is written to register 0
     string sValue;
     if(mask == 0 || mask == uDefRegMask) {

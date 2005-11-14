@@ -1693,7 +1693,7 @@ void AttributeStimulus::setClientAttribute(Value *v)
 
   attr = v;
 
-  if(verbose && v)
+  if((bool)verbose && v)
     cout << " attached " << name() << " to attribute: " << v->name() << endl;
 }
 

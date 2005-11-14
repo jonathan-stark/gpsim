@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "trigger.h"
 #include "pic-instructions.h"
 #include "registers.h"
+#include "exports.h"
 
 using namespace std;
 
@@ -179,7 +180,7 @@ class Breakpoints;
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access the Breakpoints object directly!
-Breakpoints &get_bp(void);
+LIBGPSIM_EXPORT Breakpoints & get_bp(void);
 #else
 // we are in gpsim: use of get_bp() is recommended,
 // even if the bp object can be accessed directly.

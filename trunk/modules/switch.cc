@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #include <errno.h>
 #include <stdlib.h>

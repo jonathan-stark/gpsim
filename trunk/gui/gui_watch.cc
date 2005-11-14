@@ -238,25 +238,25 @@ popup_activated(GtkWidget *widget, gpointer data)
       entry->put_value(value);
       break;
     case MENU_BREAK_READ:
-      bp.set_read_break(entry->cpu,entry->address);
+      get_bp().set_read_break(entry->cpu,entry->address);
       break;
     case MENU_BREAK_WRITE:
-      bp.set_write_break(entry->cpu,entry->address);
+      get_bp().set_write_break(entry->cpu,entry->address);
       break;
     case MENU_BREAK_READ_VALUE:
       value = gui_get_value("value to read for breakpoint:");
       if(value<0)
 	break; // Cancel
-      bp.set_read_value_break(entry->cpu,entry->address,value);
+      get_bp().set_read_value_break(entry->cpu,entry->address,value);
       break;
     case MENU_BREAK_WRITE_VALUE:
       value = gui_get_value("value to write for breakpoint:");
       if(value<0)
 	break; // Cancel
-      bp.set_write_value_break(entry->cpu,entry->address,value);
+      get_bp().set_write_value_break(entry->cpu,entry->address,value);
       break;
     case MENU_BREAK_CLEAR:
-      bp.clear_all_register(entry->cpu,entry->address);
+      get_bp().clear_all_register(entry->cpu,entry->address);
       break;
     case MENU_COLUMNS:
       select_columns(popup_ww, popup_ww->watch_clist);

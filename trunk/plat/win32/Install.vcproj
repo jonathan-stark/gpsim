@@ -1915,6 +1915,20 @@ copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\src\ValueCollections.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\src\xref.h">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1944,15 +1958,14 @@ copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
 			Name="Libraries"
 			Filter="">
 			<File
-				RelativePath="..\..\gpsim\Debug GUI\gpsim.lib">
+				RelativePath="..\..\src\Debug GUI\libgpsim.lib">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Install $(InputFileName)"
 						CommandLine="if not exist &quot;$(GPSIMLIB)\*.*&quot; md &quot;$(GPSIMLIB)&quot;
-copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;
-"
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;"
 						Outputs="$(GPSIMLIB)\$(InputFileName)"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1961,8 +1974,7 @@ copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;
 						Name="VCCustomBuildTool"
 						Description="Install $(InputFileName)"
 						CommandLine="if not exist &quot;$(GPSIMLIB)\*.*&quot; md &quot;$(GPSIMLIB)&quot;
-copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;
-"
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;"
 						Outputs="$(GPSIMLIB)\$(InputFileName)"/>
 				</FileConfiguration>
 			</File>

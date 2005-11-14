@@ -108,7 +108,7 @@ int FileExtCompare(const char *pExt1, const char *pExt2) {
 #endif
 }
 
-bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
+bool LIBGPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
   string s(pszFile);
   translatePath(s);
   string::size_type pos = s.find_last_of('.');

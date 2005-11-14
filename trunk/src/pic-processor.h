@@ -167,7 +167,7 @@ class ConfigMode {
 /*==================================================================
  * FIXME - move these global references somewhere else
  */
-extern int     verbose;         // If non-zero, then print diagnostics while initializing
+#include "cmd_gpsim.h"
 extern guint64 gui_update_rate; // The rate (in simulation cycles) at which the gui is updated
 
 /*==================================================================

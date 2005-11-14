@@ -70,7 +70,7 @@ void cmd_set::set(void)
 {
 
   cout << "r | radix = " << radix << " (not fully functional)\n";
-  cout << "v | verbose =  " << verbose << '\n';
+  cout << "v | verbose =  " << (unsigned int)verbose << '\n';
   //  cout << "gui_update = " << gi.update_rate << '\n';
 }
 
@@ -102,7 +102,7 @@ void cmd_set::set(int bit_flag, Expression *expr)
 
   switch(bit_flag) {
   case SET_VERBOSE:
-    verbose = number;
+    GetUserInterface().SetVerbosity(number);
     break;
   default:
     cout << " Invalid set option\n";

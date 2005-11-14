@@ -10,7 +10,6 @@
 void gui_new_processor (unsigned int pic_id);
 void gui_new_source (unsigned int pic_id);
 
-void gui_simulation_has_stopped(gpointer _gp);
 void update_register(unsigned int reg_number);
 void update_program_memory(GUI_Processor *gp, unsigned int reg_number);
 

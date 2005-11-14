@@ -2,8 +2,7 @@
 #define __ICD_H__
 
 #include "gpsim_classes.h"
-
-extern int use_icd; // Flag indicating if the ICD is active.
+#include "exports.h"
 
 #define ID_LOC_ADDR      0x2000
 #define DEVICE_ID_ADDR   0x2006
@@ -17,6 +16,7 @@ extern int use_icd; // Flag indicating if the ICD is active.
 
 
 
+LIBGPSIM_EXPORT bool get_use_icd();
 int icd_connect(char *dev);
 int icd_reconnect(void);
 int icd_disconnect(void);

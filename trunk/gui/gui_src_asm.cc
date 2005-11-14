@@ -296,8 +296,8 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatLine(int id, unsigned int line)
     {
       e = (BreakPointInfo*)p->data;
 	      
-      if(e->getLine() > line)
-	break;
+      if(e->getLine() > (int)line)
+        break;
       p=p->next;
     }
 
@@ -972,65 +972,71 @@ static gint sigh_button_event(GtkWidget *widget,
 
     assert(event&&sbaw);
 
+    assert(sbaw->notebook != 0);
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
+    assert(id >= 0 && id < SBAW_NRFILES);
+    assert(sbaw->pages[id].source_text != 0);
+    assert(GTK_TEXT(sbaw->pages[id].source_text)->vadj != 0);
     vadj_value=(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
-	popup_sbaw=sbaw;
+      popup_sbaw=sbaw;
 
-	sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y+vadj_value));
+      sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y+vadj_value));
 
-	for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-	    item=menu_items[i].item;
+      for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++) {
+        item=menu_items[i].item;
 	    
-	    switch(menu_items[i].id){
-	    case MENU_SELECT_SYMBOL:
+        switch(menu_items[i].id){
+        case MENU_SELECT_SYMBOL:
 #if GTK_MAJOR_VERSION >= 2
-              {
-                gint start, end;
+        {
+          gint start, end;
 
-                if (!gtk_editable_get_selection_bounds(
-                  GTK_EDITABLE(popup_sbaw->pages[id].source_text),
-                  &start, &end))
-		{
-		    gtk_widget_set_sensitive (item, FALSE);
-		}
-		else
-		{
-		    gtk_widget_set_sensitive (item, TRUE);
-		}
-              }
-		break;
+          if (!gtk_editable_get_selection_bounds(
+                      GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+                      &start, &end))
+          {
+            gtk_widget_set_sensitive (item, FALSE);
+          }
+          else
+          {
+            gtk_widget_set_sensitive (item, TRUE);
+          }
+          break;
+        }
 #else
-		// Why does "if(editable->has_selection)" not work? FIXME
-		if(GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos
-		   ==GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos)
-		{
-		    gtk_widget_set_sensitive (item, FALSE);
-		}
-		else
-		{
-		    gtk_widget_set_sensitive (item, TRUE);
-		}
-		break;
+          // Why does "if(editable->has_selection)" not work? FIXME
+          assert(GTK_EDITABLE(popup_sbaw->pages[id].source_text));
+          if(GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos
+            == GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos)
+          {
+            gtk_widget_set_sensitive (item, FALSE);
+          }
+          else
+          {
+            gtk_widget_set_sensitive (item, TRUE);
+          }
+          break;
 #endif
-	    default:
-		break;
+        default:
+          break;
+        }
 	    }
-	}
 
-	gtk_menu_popup(GTK_MENU(sbaw->popup_menu), 0, 0, 0, 0,
-		       3, event->time);
+      assert(GTK_MENU(sbaw->popup_menu));
+      gtk_menu_popup(GTK_MENU(sbaw->popup_menu), 0, 0, 0, 0,
+                     3, event->time);
 
 #if GTK_MAJOR_VERSION < 2
-	// override pages[id].source_text's handler
-	// is there a better way? FIXME
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
+      // override pages[id].source_text's handler
+      // is there a better way? FIXME
+      gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
 #endif
-	return 1;
+      return 1;
     }
 
     // FIXME, doesn't get button4/5 in gtk2???
@@ -1038,20 +1044,20 @@ static gint sigh_button_event(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS && event->button==4)
     { // wheel scroll up
       printf("scroll up\n");
-	GTK_TEXT(sbaw->pages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
-	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
-	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
-	gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-	return 1;
+      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
+      if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
+         GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
+      gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+      return 1;
     }
     if(event->type==GDK_BUTTON_PRESS && event->button==5)
     { // wheel scroll down
       printf("scroll down\n");
-	GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
-	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
-	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
-	gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-	return 1;
+      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
+      if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
+        GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
+      gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+      return 1;
     }
     return 0;
 }
@@ -1066,11 +1072,11 @@ static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
 
     if(adj_to_update && adj )
     {
-	if (adj_to_update->upper >= adj->value )
-	{
-	  //printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
-	    gtk_adjustment_set_value(adj_to_update, adj->value);
-	}
+      if (adj_to_update->upper >= adj->value )
+      {
+        //printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
+        gtk_adjustment_set_value(adj_to_update, adj->value);
+      }
     }
 
     return 0;

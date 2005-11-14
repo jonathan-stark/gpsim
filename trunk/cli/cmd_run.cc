@@ -27,12 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_run.h"
 
 #include "../src/pic-processor.h"
-#include "../src/value.h"
 
 extern void redisplay_prompt(void);  // in input.cc
-
-// Attribute describing the simulator's verboseness
-extern Integer *verbosity;  // in ../src/init.cc
 
 cmd_run c_run;
 
@@ -59,9 +55,11 @@ cmd_run::cmd_run(void)
 void cmd_run::run()
 {
 
+  Integer &verbosity = *get_symbol_table().findInteger("sim.verbosity");
+
   get_interface().start_simulation();
 
-  if(verbosity && verbosity->getVal())
+  if((int)verbosity)
     redisplay_prompt();
 
 }

@@ -61,7 +61,6 @@ guint64 simulation_start_cycle;
 //  FIXME -  move these global references somewhere else
 
 // don't print out a bunch of garbage while initializing
-int     verbose=0;
 
 
 //================================================================================
@@ -250,8 +249,17 @@ void pic_processor::pm_write (void)
 
 }
 
-int realtime_mode=0;
-int realtime_mode_with_gui=0;
+static bool realtime_mode = false;
+static bool realtime_mode_with_gui = false;
+
+void EnableRealTimeMode(bool bEnable) {
+  realtime_mode = bEnable;
+}
+
+void EnableRealTimeModeWithGui(bool bEnable) {
+  realtime_mode_with_gui = bEnable;
+}
+
 extern void update_gui(void);
 
 class RealTimeBreakPoint : public TriggerObject
@@ -420,7 +428,7 @@ void pic_processor::save_state()
 //
 void pic_processor::run (bool refresh)
 {
-  if(use_icd)
+  if(get_use_icd())
   {
     cout  << "WARNING: gui_refresh is not being called " 
 	  <<  __FILE__<<':'<<__LINE__<<endl;
@@ -513,7 +521,7 @@ void pic_processor::run (bool refresh)
 void pic_processor::step (unsigned int steps, bool refresh)
 {
 
-  if(use_icd)
+  if(get_use_icd())
   {
       if(steps!=1)
       {
@@ -612,7 +620,7 @@ void pic_processor::reset (RESET_TYPE r)
 {
   bool bHaltSimulation = true;
 
-  if(use_icd)
+  if(get_use_icd())
   {
       puts("RESET");
       icd_reset();
@@ -871,7 +879,7 @@ bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 
     config_modes->config_mode = (config_modes->config_mode & ~7) | (cfg_word & 7);
 
-    if(verbose && config_modes)
+    if((bool)verbose && config_modes)
       config_modes->print();
 
     return true;

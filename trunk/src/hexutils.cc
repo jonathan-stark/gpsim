@@ -70,6 +70,8 @@ PicHexProgramFileType::PicHexProgramFileType() {
   RegisterProgramFileType(this);
 }
 
+#include "cmd_gpsim.h"
+
 int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
                                            const char *pFilename,
                                            FILE *inputfile) {

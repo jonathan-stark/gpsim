@@ -55,7 +55,6 @@ Boston, MA 02111-1307, USA.  */
 //  FIXME -  move these global references somewhere else
 
 // don't print out a bunch of garbage while initializing
-extern int     verbose;
 
 
 //================================================================================

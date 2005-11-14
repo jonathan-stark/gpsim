@@ -74,7 +74,7 @@ bool gUsingThreads()
 //---------------------------------------------------------------------------
 void gpsim_set_bulk_mode(int flag)
 {
-  if(use_icd)
+  if(get_use_icd())
   {
     icd_set_bulk(flag);
   }
@@ -568,3 +568,82 @@ const char *get_dir_delim(const char *path)
   return strrchr(path, '/');
 #endif
 }
+
+class NullConsole : public ISimConsole {
+public:
+  virtual void Printf(const char *fmt, ...) {}
+  virtual void VPrintf(const char *fmt, va_list argptr) {}
+  virtual void Puts(const char*) {}
+  virtual void Putc(const char) {}
+  virtual char* Gets(char *, int) { return "";}
+};
+
+
+class NullUserInterface : public IUserInterface {
+  NullConsole m_Console;
+public:
+  virtual ISimConsole &GetConsole() { return m_Console; };
+  virtual void DisplayMessage(unsigned int uStringID, ...) {};
+  virtual void DisplayMessage(FILE * pOut, unsigned int uStringID, ...) {};
+  virtual void DisplayMessage(const char *fmt, ...) {};
+  virtual void DisplayMessage(FILE * pOut, const char *fmt, ...) {};
+
+  virtual const char * FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask) {return "";}
+  virtual const char * FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask, int iRadix) {return "";}
+  virtual const char * FormatRegisterAddress(unsigned int uAddress,
+    unsigned int uMask) {return "";}
+  virtual const char * FormatLabeledValue(const char * pLabel,
+    unsigned int uValue) {return "";}
+  virtual const char * FormatValue(unsigned int uValue) {return "";}
+  virtual const char * FormatValue(gint64 uValue) {return "";}
+  virtual const char * FormatValue(gint64 uValue, guint64 uMask) {return "";}
+  virtual const char * FormatValue(gint64 uValue, guint64 uMask,
+    int iRadix) {return "";}
+
+  virtual char *       FormatValue(char *str, int len,
+    int iRegisterSize, RegisterValue value) {return "";}
+
+  virtual void SetProgramAddressRadix(int iRadix) {}
+  virtual void SetRegisterAddressRadix(int iRadix) {}
+  virtual void SetValueRadix(int iRadix) {}
+
+  virtual void SetProgramAddressMask(unsigned int uMask) {}
+  virtual void SetRegisterAddressMask(unsigned int uMask) {}
+  virtual void SetValueMask(unsigned int uMask) {}
+
+  virtual void NotifyExitOnBreak(int iExitCode) {}
+};
+
+NullUserInterface g_DefaultUI;
+static IUserInterface *g_GpsimUI = &g_DefaultUI;
+LIBGPSIM_EXPORT  IUserInterface & GetUserInterface(void) {
+  return *g_GpsimUI;
+}
+
+LIBGPSIM_EXPORT  void SetUserInterface(IUserInterface * pGpsimUI) {
+  if(pGpsimUI) {
+    g_GpsimUI = pGpsimUI;
+  }
+  else {
+    g_GpsimUI = &g_DefaultUI;
+  }
+}
+
+// For libgpsim.dll
+// The console now owns the verbose flags. At some point as set
+// of functions called TraceDisplayXXX() the conditionally
+// display message depending on the verbose flags.
+// I'll leave this it as it for now because I'm in the middle
+// of making the src project its own DLL on windows and I have 
+// enough changes for now.
+// Replaced the int verbose = 0; with GlobalVerbosityAccessor verbose.
+// GlobalVerbosityAccessor that has overridden operators for 'if(verbose)'
+// and 'if(verbose&4)' to still work as desired.
+// The purpose was to decouple verbose from cli and gui. Now these
+// modules (acutally gpsim.exe) will allocate there own
+// GlobalVerbosityAccessor verbose object to gain access to the
+// verbose flags and for the overridden operators.
+GlobalVerbosityAccessor verbose;
+

@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MISC_H__
 #define __MISC_H__
 
-extern int verbose; 
+#include "../src/cmd_gpsim.h"
 
 // miscellaneous definitions that are used
 

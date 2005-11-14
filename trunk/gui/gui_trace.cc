@@ -105,12 +105,12 @@ public:
     if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
       return;
 
-    strncpy(trace_string,trace.string_buffer,TRACE_STRING);
+    strncpy(trace_string,get_trace().string_buffer,TRACE_STRING);
 
-    if(trace_string[0] && (trace.string_cycle>=tw->last_cycle)) {
-      tw->last_cycle = trace.string_cycle;
-      tw->trace_map[tw->trace_map_index].cycle = trace.string_cycle;
-      tw->trace_map[tw->trace_map_index].simulation_trace_index = trace.string_index;
+    if(trace_string[0] && (get_trace().string_cycle>=tw->last_cycle)) {
+      tw->last_cycle = get_trace().string_cycle;
+      tw->trace_map[tw->trace_map_index].cycle = get_trace().string_cycle;
+      tw->trace_map[tw->trace_map_index].simulation_trace_index = get_trace().string_index;
 
       // Advance the trace_map_index using rollover arithmetic
       if(++tw->trace_map_index >= MAXTRACES)
@@ -118,7 +118,7 @@ public:
 
       clist=GTK_CLIST(tw->trace_clist);
 
-      sprintf(cycle_string,"0x%016" PRINTF_INT64_MODIFIER "x", trace.string_cycle);
+      sprintf(cycle_string,"0x%016" PRINTF_INT64_MODIFIER "x", get_trace().string_cycle);
 
       gtk_clist_append  (clist, entry);
       
@@ -170,9 +170,9 @@ void Trace_Window::Update(void)
   trace_flags |= GTF_ENABLE_XREF_UPDATES;
   if(get_cycles().value-last_cycle>=MAXTRACES)
     // redraw the whole thing
-    trace.dump(MAXTRACES, 0);
+    get_trace().dump(MAXTRACES, 0);
   else 
-    trace.dump(get_cycles().value-last_cycle, 0);
+    get_trace().dump(get_cycles().value-last_cycle, 0);
 
 
   trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
@@ -205,8 +205,8 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
   cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = 0;
-  if(trace.xref)
-    trace.xref->_add((gpointer) cross_reference);
+  if(get_trace().xref)
+    get_trace().xref->_add((gpointer) cross_reference);
 
 }
 

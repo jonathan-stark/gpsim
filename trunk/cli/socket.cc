@@ -1255,7 +1255,7 @@ void start_server(void)
 
   sinkServer.init(SIM_SINK_PORT);
   sinkServer.AssignChannel(sink_server_accept);
-  gi.add_interface(new SocketInterface(&sinkServer));
+  get_interface().add_interface(new SocketInterface(&sinkServer));
 
 
 

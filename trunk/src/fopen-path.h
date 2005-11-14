@@ -19,13 +19,15 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include "exports.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void InitSourceSearchAsSymbol();
-extern void set_search_path (const char *path);
-extern FILE *fopen_path (const char *filename, const char *perms);
+LIBGPSIM_EXPORT void InitSourceSearchAsSymbol();
+LIBGPSIM_EXPORT void set_search_path (const char *path);
+LIBGPSIM_EXPORT FILE *fopen_path (const char *filename, const char *perms);
 
 #ifdef __cplusplus
 }

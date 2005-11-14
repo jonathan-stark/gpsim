@@ -481,7 +481,7 @@ static void push_input_stack(void)
 static int recognize(int token_id,const char *description)
 {
   /* add optional debugging stuff here */
-  if(verbose && description)
+  if((bool)verbose && description)
     cout << "scan: " << description << endl;
 
   return(token_id);

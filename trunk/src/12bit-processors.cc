@@ -75,7 +75,7 @@ bool _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
 
     config_word = cfg_word;
 
-    if(verbose && config_modes)
+    if((bool)verbose && config_modes)
       config_modes->print();
 
     return true;
