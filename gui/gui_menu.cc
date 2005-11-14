@@ -201,7 +201,10 @@ public:
   void update();
   void parseLine(const char*);
   void toggleBreak(int line);
+
 private:
+  void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
+
   GtkTextView *m_view;
   GtkLayout   *m_layout;
   ColorButton *m_LabelColor;
@@ -209,6 +212,13 @@ private:
   ColorButton *m_SymbolColor;
   ColorButton *m_CommentColor;
   ColorButton *m_ConstantColor;
+
+  GtkStyle *symbol_text_style;       // for symbols in .asm display
+  GtkStyle *label_text_style;        // for label in .asm display
+  GtkStyle *instruction_text_style;  // for instruction in .asm display
+  GtkStyle *number_text_style;       // for numbers in .asm display
+  GtkStyle *comment_text_style;      // for comments in .asm display
+  GtkStyle *default_text_style;      // the rest
 
   GtkWidget   *m_SampleNotebook;
   GtkPositionType m_TabPosition;
@@ -602,20 +612,27 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *colorVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
+    set_style_colors("black", "white", &default_text_style);
+    set_style_colors("dark green", "white", &symbol_text_style);
+    set_style_colors("orange", "white", &label_text_style);
+    set_style_colors("red", "white", &instruction_text_style);
+    set_style_colors("blue", "white", &number_text_style);
+    set_style_colors("dim gray", "white", &comment_text_style);
+
     m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), 
-				      &sbaw->label_text_style->fg[GTK_STATE_NORMAL],
+				      &label_text_style->fg[GTK_STATE_NORMAL],
 				      "Label", this);
     m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), 
-				      &sbaw->instruction_text_style->fg[GTK_STATE_NORMAL],
+				      &instruction_text_style->fg[GTK_STATE_NORMAL],
 				      "Mnemonic", this);
     m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), 
-				      &sbaw->symbol_text_style->fg[GTK_STATE_NORMAL],
+				      &symbol_text_style->fg[GTK_STATE_NORMAL],
 				      "Symbols", this);
     m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox),
-				      &sbaw->number_text_style->fg[GTK_STATE_NORMAL],
+				      &number_text_style->fg[GTK_STATE_NORMAL],
 				      "Constants", this);
     m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox),
-				      &sbaw->comment_text_style->fg[GTK_STATE_NORMAL],
+				      &comment_text_style->fg[GTK_STATE_NORMAL],
 				      "Comments", this);
   }
 
@@ -739,6 +756,20 @@ void SourceBrowserPreferences::apply()
 {
   printf ("apply source browser preferences\n");
 }
+
+void SourceBrowserPreferences::set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
+{
+  GdkColor text_fg;
+  GdkColor text_bg;
+
+  gdk_color_parse(fg_color, &text_fg);
+  gdk_color_parse(bg_color, &text_bg);
+  *style = gtk_style_new();
+  (*style)->base[GTK_STATE_NORMAL] = text_bg;
+  (*style)->fg[GTK_STATE_NORMAL] = text_fg;
+
+}
+
 //========================================================================
 gpsimGuiPreferences::gpsimGuiPreferences()
 {
@@ -748,7 +779,7 @@ gpsimGuiPreferences::gpsimGuiPreferences()
   window = LocalWindow;
   gtk_widget_show (window);
 
-  gtk_window_set_title (GTK_WINDOW (window), "Preferences");
+  gtk_window_set_title (GTK_WINDOW (window), "Preferences ***EXPERIMENTAL***");
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
   GtkWidget *vbox = GTK_DIALOG (window)->vbox;

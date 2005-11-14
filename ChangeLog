@@ -1,3 +1,7 @@
+2005-11-13 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc: The experimental Preferences window caused a
+	crash if it was opened, but the source browser was not opened.
+
 2005-11-13 Borut Razem <borut.razem@siol.net>
 
 	* plat/win32/gpsim.def: MSVC sync
