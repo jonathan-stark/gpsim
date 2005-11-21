@@ -275,7 +275,7 @@ void DataPort::update_pin_directions(bool new_direction)
 	pins[i]->update_direction(direction,true);
 
 	if(pins[i]->snode)
-	  pins[i]->snode->update(0);
+	  pins[i]->snode->update();
       }
     }
   }
