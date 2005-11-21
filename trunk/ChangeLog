@@ -5,6 +5,9 @@
 	* src\value.cc src\value.h: Fixed bitmask issue with the copy
 	constructor of Integer. Added assignment operator to Integer
 	from const Integer&.
+	* src\ValueCollections.cc src\ValueCollections.h again:
+	Implemented the omitted ability to do array=value and
+	array[range]=value.
 
 2005-11-12 J.R. Heisey <jrheisey@sourceforge.com>
 	* src\12bit-processors.cc, src\breakpoints.h, cli\cmd_break.cc,
