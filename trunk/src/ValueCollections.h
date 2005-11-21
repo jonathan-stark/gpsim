@@ -82,6 +82,7 @@ public:
   virtual unsigned int GetSize() = 0;
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0) = 0;
   virtual void SetAt(unsigned int uIndex, Value *pValue) = 0;
+  virtual void set(Value *pValue);
   virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr);
   virtual unsigned int GetLowerBound() = 0;
   virtual unsigned int GetUpperBound() = 0;
@@ -196,7 +197,9 @@ public:
     else {
     }
   }
-
+#if 0
+  // I think this is reduntant and the template function
+  // IIndexedCollection::SetAt() is enough.
   virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr) {
     ExprList_t::iterator it;
     ExprList_t::iterator itEnd = pIndexers->end();
@@ -209,7 +212,19 @@ public:
         if(pIntIndex != NULL) {
           SetAt(int(*pIntIndex), pValue);
         }
-        if(pIndex != NULL) {
+        else {
+        AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
+        if(pRange) {
+          unsigned uEnd = pRange->get_rightVal() + 1;
+          for(unsigned int uIndex = pRange->get_leftVal(); uIndex < uEnd; uIndex++) {
+            SetAt(uIndex, pValue);
+          }
+        }
+        else {
+          throw Error("indexer not valid");
+        }
+      }
+      if(pIndex != NULL) {
           delete pIndex;
         }
       }
@@ -218,6 +233,7 @@ public:
 //    }
     delete pValue;
   }
+#endif
 
   void SetAt(unsigned int uIndex, _CT *pValue) {
     if((uIndex + 1 - m_uLower) < m_Array.size() && uIndex <= m_uLower) {
@@ -240,9 +256,6 @@ public:
     return GetAt(uIndex);
   }
 
-#if 0
-  _CT & operator[](Expression *pIndexExpr);
-#endif
   _CT & operator[](Expression *pIndexExpr) {
     Value *pIndex = pIndexExpr->evaluate();
     String *pStr;
@@ -284,17 +297,6 @@ public:
       if(*(_CT*)(*itLastEqualed) != *(_CT*)(*it)) {
         PushValue(iFirstIndex, iCurrentIndex - 1,
                   *itLastEqualed, aList, aValue);
-#if 0
-        if(iFirstIndex == (iCurrentIndex - 1)) {
-          sIndex << (*itLastEqualed)->name() << '\000';
-        }
-        else {
-          sIndex << Value::name() << "[" << iFirstIndex << ".."
-                 << iCurrentIndex -1 << "]" << '\000';
-        }
-        aList.push_back(string(sIndex.str()));
-        aValue.push_back((*itLastEqualed)->toString());
-#endif
         iFirstIndex = iCurrentIndex;
         iColumnWidth = max(iColumnWidth, (int)aList.back().size());
         itLastEqualed = it;
@@ -306,19 +308,6 @@ public:
     if(iFirstIndex <= iCurrentIndex) {
       PushValue(iFirstIndex, iCurrentIndex,
                 *itLastEqualed, aList, aValue);
-#if 0
-      ostringstream sIndex;
-      if(iFirstIndex == iCurrentIndex) {
-        sIndex << (*itLastEqualed)->name();
-      }
-      else {
-        sIndex << Value::name() << "[" << iFirstIndex
-               << ".." << iCurrentIndex << "]";
-      }
-      sIndex << '\000';
-      aList.push_back(string(sIndex.str()));
-      aValue.push_back((*itLastEqualed)->toString());
-#endif
       iColumnWidth = max(iColumnWidth, (int)aList.back().size());
     }
   }
@@ -333,6 +322,8 @@ public:
 
   void SetLowerBound(unsigned int uIndex) {
     m_uLower = uIndex;
+    // Now iterate through the elements and change
+    // and pre-formatted element names.
     typename VectorType::iterator it;
     typename VectorType::iterator itEnd = m_Array.end();
     unsigned int iNameBufferLen = 256;

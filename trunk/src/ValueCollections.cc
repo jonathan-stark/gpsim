@@ -35,6 +35,13 @@ void IIndexedCollection::SetAddressRadix(int iRadix) {
   }
 }
 
+void IIndexedCollection::set(Value * pValue) {
+  unsigned int  uUpper = GetUpperBound() + 1;
+  for(unsigned int uIndex = GetLowerBound(); uIndex < uUpper; uIndex++) {
+    SetAt(uIndex, pValue);
+  }
+}
+
 void IIndexedCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
   ExprList_t::iterator it;
   ExprList_t::iterator itEnd = pIndexers->end();
@@ -46,6 +53,18 @@ void IIndexedCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
       Integer *pIntIndex = dynamic_cast<Integer*>(pIndex);
       if(pIntIndex != NULL) {
         SetAt(int(*pIntIndex), pValue);
+      }
+      else {
+        AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
+        if(pRange) {
+          unsigned uEnd = pRange->get_rightVal() + 1;
+          for(unsigned int uIndex = pRange->get_leftVal(); uIndex < uEnd; uIndex++) {
+            SetAt(uIndex, pValue);
+          }
+        }
+        else {
+          throw Error("indexer not valid");
+        }
       }
       if(pIndex != NULL) {
         delete pIndex;
