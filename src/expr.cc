@@ -186,11 +186,10 @@ string IndexedSymbol::toString() {
     try {
       ostringstream sOut;
       if(m_pExprList==NULL)  {
-        sOut << pIndexedCollection->toString() << '\000';
+        sOut << pIndexedCollection->toString() << ends;
         return sOut.str();
       }
       else {
-        unsigned int uUpperBound = pIndexedCollection->GetUpperBound();
         ExprList_t::iterator it;
         ExprList_t::iterator itEnd = m_pExprList->end();
         for(it = m_pExprList->begin(); it != itEnd; it++) {
@@ -223,7 +222,9 @@ string IndexedSymbol::toString() {
           }
           if(pInt) {
             unsigned int uIndex = (unsigned int)pInt->getVal();
-            if(uIndex <= uUpperBound) {
+            unsigned int uUpperBound = pIndexedCollection->GetUpperBound();
+            if(uIndex >= pIndexedCollection->GetLowerBound() &&
+               uIndex <= pIndexedCollection->GetUpperBound() ) {
               Value &Value = pIndexedCollection->GetAt(uIndex);
               sOut << Value.name() << " = " << Value.toString() << endl;
             }
@@ -239,7 +240,7 @@ string IndexedSymbol::toString() {
           delete pIndex;
         }
       }
-      sOut << '\000';
+      sOut << ends;
       return sOut.str();
     }
     catch(Error e) {
