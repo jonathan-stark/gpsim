@@ -1,3 +1,6 @@
+2005-11-20 Scott Dattalo  <scott@dattalo.com>
+	* lcd.cc: updated to new gpsim stimulus API.
+
 2005-08-30 Scott Dattalo  <scott@dattalo.com>
 	* configure.in: changed version to 0.2.5
 
