@@ -322,6 +322,11 @@ public:
     symbol(pName) {
     m_pData = pSymbol;
   }
+  AliasedSymbol(const char * pName, Value *pSymbol, const char *pDoc) :
+    symbol(pName) {
+    m_pData = pSymbol;
+    set_description(pDoc);
+  }
   // The following functions are implemented to call the
   // contained object. The name() and new_name() function
   // will return and set the name of the alias.

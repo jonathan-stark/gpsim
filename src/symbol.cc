@@ -630,7 +630,7 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
     Value *val = *sti;
     if(val && (typeid(*val) != typeid(line_number_symbol)) &&
       beginsWith(val->name(), sBeginsWith)) {
-      if(typeid(val) != typeid(IIndexedCollection*)) {
+      if(dynamic_cast<IIndexedCollection*>(val) == NULL) {
         cout << val->name() << " = " ;
       }
       cout << val->toString() << endl;
