@@ -617,7 +617,7 @@ bool Boolean::operator!=(Value *rv)
 Integer::Integer(const Integer &new_value) {
   Integer & nv = (Integer&)new_value;
   nv.get(value);
-  bitmask = def_bitmask;
+  bitmask = new_value.bitmask;
 }
 
 Integer::Integer(gint64 newValue)

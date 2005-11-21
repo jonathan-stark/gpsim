@@ -407,6 +407,14 @@ public:
     return (unsigned int)i;
   }
 
+  inline Integer & operator =(const Integer &i) {
+    Integer & ii = (Integer &)i;
+    gint64 iNew = (gint64)ii;
+    set(iNew);
+    bitmask = i.bitmask;
+    return *this;
+  }
+
   inline Integer & operator =(int i) {
     set(i);
     return *this;
