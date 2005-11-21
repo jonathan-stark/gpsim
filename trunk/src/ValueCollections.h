@@ -89,6 +89,33 @@ public:
                                  vector<string> &aList,
                                  vector<string> &aValue) = 0;
 
+  template<class _ValueType>
+  void ConsolidateValues(int &iColumnWidth,
+                         vector<string> &aList,
+                         vector<string> &aValue,
+                         _ValueType *_V = 0) {
+    unsigned int  uFirstIndex = GetLowerBound();
+    unsigned int  uIndex;
+    unsigned int  uUpper = GetUpperBound() + 1;
+    _ValueType    LastValue((_ValueType&)GetAt(uFirstIndex));
+    for(uIndex = uFirstIndex + 1; uIndex < uUpper; uIndex++) {
+      _ValueType &curValue = (_ValueType&)GetAt(uIndex);
+      if(LastValue != curValue) {
+        PushValue(uFirstIndex, uIndex - 1,
+                  &LastValue, aList, aValue);
+        iColumnWidth = max(iColumnWidth, (int)aList.back().size());
+        uFirstIndex = uIndex;
+        LastValue = curValue;
+      }
+    }
+    uIndex--;
+    // Record the last set of elements
+    if(uFirstIndex <= uIndex) {
+      PushValue(uFirstIndex, uIndex,
+                &LastValue, aList, aValue);
+      iColumnWidth = max(iColumnWidth, (int)aList.back().size());
+    }
+  }
   virtual char *toString(char *pBuffer, int len);
   virtual string toString();
   void PushValue(int iFirstIndex, int iCurrentIndex,
@@ -96,6 +123,7 @@ public:
                  vector<string> &asIndexes, vector<string> &asValue);
   virtual string toString(int iColumnWidth, vector<string> &asIndexes,
                           vector<string> &asValue);
+  virtual string ElementIndexedName(unsigned int iIndex);
 
   Integer *     findInteger(const char *s);
   void          SetAddressRadix(int iRadix);
@@ -103,6 +131,7 @@ public:
   char  m_szPrefix[3];
   int   m_iAddressRadix;
 };
+
 
 
 template<class _CT, class _ST>
@@ -253,7 +282,7 @@ public:
     for(it = itLastEqualed = m_Array.begin(); it != itEnd; it++) {
       ostringstream sIndex;
       if(*(_CT*)(*itLastEqualed) != *(_CT*)(*it)) {
-        PushValue(iFirstIndex, iCurrentIndex,
+        PushValue(iFirstIndex, iCurrentIndex - 1,
                   *itLastEqualed, aList, aValue);
 #if 0
         if(iFirstIndex == (iCurrentIndex - 1)) {

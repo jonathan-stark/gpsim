@@ -77,12 +77,22 @@ void IIndexedCollection::PushValue(int iFirstIndex, int iCurrentIndex,
     sIndex << hex; 
   }
   sIndex << Value::name() << "[" << m_szPrefix << iFirstIndex;
-  if(iFirstIndex != (iCurrentIndex - 1)) {
-    sIndex << ".." << m_szPrefix << iCurrentIndex -1;
+  if(iFirstIndex != iCurrentIndex) {
+    sIndex << ".." << m_szPrefix << iCurrentIndex;
   }
-  sIndex << "]" << '\000';
+  sIndex << "]" << ends;
   asIndexes.push_back(string(sIndex.str()));
   asValue.push_back(pValue->toString());
+}
+
+string IIndexedCollection::ElementIndexedName(unsigned int iIndex) {
+  ostringstream sIndex;
+  if(m_iAddressRadix == 16) {
+    sIndex << hex; 
+  }
+  sIndex << Value::name() << "[" << m_szPrefix << iIndex;
+  sIndex << "]" << ends;
+  return sIndex.str();
 }
 
 string IIndexedCollection::toString(int iColumnWidth, vector<string> &asIndexes,
@@ -103,7 +113,7 @@ string IIndexedCollection::toString(int iColumnWidth, vector<string> &asIndexes,
     if(itElement + 1 != itElementEnd)
       sOut << endl;
   }
-  sOut << '\000';
+  sOut << ends;
   return sOut.str();
 }
 
