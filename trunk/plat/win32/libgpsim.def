@@ -122,6 +122,7 @@ EXPORTS
     ?DecodeUInt32@Packet@@QAE_NAAI@Z
     ?DecodeUInt64@Packet@@QAE_NAA_K@Z
     ?DisplayError@ProgramFileType@@UAEXHPBD0@Z
+    ?ElementIndexedName@IIndexedCollection@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@Z
     ?EncodeHeader@Packet@@QAE_NXZ
     ?EncodeObjectType@Packet@@QAE_NI@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
@@ -144,6 +145,7 @@ EXPORTS
     ?Register@CCommandManager@@QAEHPAVICommandHandler@@@Z
     ?RegisterProgramFileType@@YAXPAVProgramFileType@@@Z
     ?SetAddressRadix@IIndexedCollection@@QAEXH@Z
+    ?SetAt@IIndexedCollection@@UAEXPAV?$list@PAVExpression@@V?$allocator@PAVExpression@@@std@@@std@@PAVExpression@@@Z
     ?SetDefaultProcessor@CSimulationContext@@QAE_NPBD0@Z
     ?TrimWhiteSpaceFromString@@YAPADPAD@Z
     ?add@Symbol_Table@@QAE_NPAVValue@@@Z
@@ -161,6 +163,7 @@ EXPORTS
     ?add_ioport@Symbol_Table@@QAEXPAVPortRegister@@@Z
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
     ?add_processor@CSimulationContext@@QAEPAVProcessor@@PAV2@@Z
+    ?add_processor@CSimulationContext@@QAEPAVProcessor@@PBD0@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBD@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBDI@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
