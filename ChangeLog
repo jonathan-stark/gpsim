@@ -5,6 +5,9 @@
 	from the executable. Please do the same with any other globals
 	you find and that I missed.
 
+	src\expr.cc: Implemented dumping a range of an indexed variable
+	using the integer range operator. (i.e. ramData[3:20]
+
 2005-11-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src\symbol.cc src\symbol.h src\ValueCollections.cc
 	src\ValueCollections.h: Fixed couple bugs and added additional
