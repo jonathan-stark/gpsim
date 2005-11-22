@@ -73,7 +73,7 @@ cmd_log::cmd_log(void)
 
 void cmd_log::log(void)
 {
-  trace_log.status();
+  GetTraceLog().status();
 }
 
 
@@ -118,10 +118,10 @@ void cmd_log::log(cmd_options *opt)
 
   switch(opt->value) {
   case LOG_ON:
-    trace_log.enable_logging(0);
+    GetTraceLog().enable_logging(0);
     break;
   case LOG_OFF:
-    trace_log.disable_logging();
+    GetTraceLog().disable_logging();
     break;
   default:
     cout << " Invalid log option\n";
@@ -139,10 +139,10 @@ void cmd_log::log(cmd_options *opt, const char *str, guint64 val, guint64 mask)
 
   switch(opt->value) {
   case LOG_ON:
-    trace_log.enable_logging(str);
+    GetTraceLog().enable_logging(str);
     break;
   case LOG_OFF:
-    trace_log.disable_logging();
+    GetTraceLog().disable_logging();
     break;
   case WRITE:
   case READ:
@@ -183,7 +183,7 @@ void cmd_log::log(cmd_options *opt, guint64 r, guint64 v, guint64 m)
     cout << "logging on file int,int,int (ignoring)"  << endl;
     break;
   case LOG_OFF:
-    trace_log.disable_logging();
+    GetTraceLog().disable_logging();
     break;
   case WRITE:
     b = get_bp().set_notify_write(GetActiveCPU(), reg);

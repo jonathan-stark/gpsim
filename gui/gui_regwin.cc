@@ -820,19 +820,20 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_LOG_SETTINGS:
       gui_get_log_settings(&filename, &mode);
       if(filename!=0)
-	trace_log.enable_logging(filename,mode);
+        GetTraceLog().enable_logging(filename,mode);
       break;
     case MENU_LOG_READ:
-      for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    trace_log.enable_logging();
-	    // FIXME the register type is ignored here (and in all other cases
-	    // where we're logging -- it's assumed that the register address is
-	    // for ram, even if in fact the user requests eeprom.
-	    get_bp().set_notify_read(popup_rw->gp->cpu,address);
-	  }
+      for(j=range.row0;j<=range.rowi;j++) {
+        for(i=range.col0;i<=range.coli;i++)
+        {
+          address=popup_rw->row_to_address[j]+i;
+          GetTraceLog().enable_logging();
+          // FIXME the register type is ignored here (and in all other cases
+          // where we're logging -- it's assumed that the register address is
+          // for ram, even if in fact the user requests eeprom.
+          get_bp().set_notify_read(popup_rw->gp->cpu,address);
+        }
+      }
       break;
     case MENU_LOG_WRITE:
       for(j=range.row0;j<=range.rowi;j++)

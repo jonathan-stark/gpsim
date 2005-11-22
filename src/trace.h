@@ -450,7 +450,20 @@ public:
 
 };
 
+#if defined(_WIN32)
+// we are in a module: don't access trace_log object directly!
+LIBGPSIM_EXPORT TraceLog & GetTraceLog(void);
+#else
+// we are in gpsim: use of GetTraceLog() is recommended,
+// even if trace_log object can be accessed directly.
 extern TraceLog trace_log;
+
+inline TraceLog &GetTraceLog(void)
+{
+  return trace_log;
+}
+#endif
+
 
 //-----------------------------------------------------------
 class ProfileKeeper : public TriggerObject

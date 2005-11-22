@@ -37,7 +37,7 @@ void simulation_cleanup(void)
 
   // Flush the log file (if there is one).
 
-  trace_log.close_logfile();
+  GetTraceLog().close_logfile();
 
 }
 
