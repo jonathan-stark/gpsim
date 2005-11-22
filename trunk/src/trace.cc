@@ -45,14 +45,21 @@ Trace trace;               /* Instantiate the trace buffer class.
 // create an instance of inline get_trace() method by taking its address
 Trace &(*dummy_trace)(void) = get_trace;
 
+TraceLog trace_log;
+ProfileKeeper profile_keeper;
+
+#if defined(_WIN32)
+TraceLog &GetTraceLog(void) {
+  return trace_log;
+}
+#endif
+
 /*Trace trace_log_buffer;   * The trace_log_buffer is a special trace
 			    * buffer intended for logging events that will
 			    * ultimately be written to a file. Each logged
 			    * event is individually time tagged making it
 			    * easy to post process.
 			    */
-TraceLog trace_log;
-ProfileKeeper profile_keeper;
 
 //========================================================================
 traceValue::traceValue(void)

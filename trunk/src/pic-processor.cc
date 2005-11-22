@@ -709,7 +709,7 @@ pic_processor::pic_processor(void)
   pll_factor = 0;
 
   // Test code for logging to disk:
-  trace_log.switch_cpus(this);
+  GetTraceLog().switch_cpus(this);
 }
 
 //-------------------------------------------------------------------
