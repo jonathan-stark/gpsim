@@ -196,7 +196,12 @@ string IndexedSymbol::toString() {
           Value * pIndex = (*it)->evaluate();
           AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
           if(pRange) {
-            cout << "indexing using a range is not implemented" << endl;
+            unsigned uEnd = pRange->get_rightVal() + 1;
+            for(unsigned int uIndex = pRange->get_leftVal(); uIndex < uEnd; uIndex++) {
+              Value &Value = pIndexedCollection->GetAt(uIndex);
+              sOut << Value.name() << " = " << Value.toString() << endl;
+            }
+            continue;
           }
           Integer *pInt;
           String *pName = dynamic_cast<String*>(pIndex);
