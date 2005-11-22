@@ -1,4 +1,11 @@
-2005-11-12 J.R. Heisey <jrheisey@sourceforge.com>
+2005-11-22 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli\cmd_log.cc gui\gui_regwin.cc src\init.cc src\pic-processor.cc,
+	src\trace.cc src\trace.h: Changed references of trace_log to
+	GetTraceLog() to decouple the global trace_log in the libgpsim.so/dll
+	from the executable. Please do the same with any other globals
+	you find and that I missed.
+
+2005-11-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src\symbol.cc src\symbol.h src\ValueCollections.cc
 	src\ValueCollections.h: Fixed couple bugs and added additional
 	support for ndexable variables.
@@ -9,7 +16,7 @@
 	Implemented the omitted ability to do array=value and
 	array[range]=value.
 
-2005-11-12 J.R. Heisey <jrheisey@sourceforge.com>
+2005-11-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src\12bit-processors.cc, src\breakpoints.h, cli\cmd_break.cc,
 	cli\cmd_clear.cc, src\cmd_gpsim.h, cli\cmd_log.cc, cli\cmd_run.cc,
 	cli\cmd_set.cc, gpsim\CopyDlls.bat, src\exports.h, src\fopen-path.h,
