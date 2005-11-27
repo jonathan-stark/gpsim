@@ -12,15 +12,17 @@ include ../plat/win32/make.mingw
 
 # Nothing much configurable below
 
-LIBS = ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib \
-	../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib \
-	../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib \
-	../gpsim/gpsim.lib
+LIBS = 	-L $(POPT_PATH)/lib -l popt \
+	-L $(GLIB_PATH)/lib -l glib-2.0 -l gobject-2.0 \
+	-L $(GTK_PATH)/lib -l gdk-win32-2.0 -l gtk-win32-2.0 \
+	-L $(PANGO_PATH)/lib -l pango-1.0 \
+	../src/libgpsim.a
 
-INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
-	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \
-	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0 \
-	-I ../../atk/include/atk-1.0
+INCLUDES = -I ../plat/win32 \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
+	-I $(PANGO_PATH)/include/pango-1.0 \
+	-I $(ATK_PATH)/include/atk-1.0
 
 DEFINES += -DHAVE_GUI
 

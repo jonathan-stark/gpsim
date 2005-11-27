@@ -1,3 +1,9 @@
+2005-11-27 Borut Razem <borut.razem@siol.net>
+
+	* plat/win32/gpsim.nsi, plat/win32/make.mingw, cli/makefile.mingw,
+	  gpsim/makefile.mingw, gui/makefile.mingw, modules/makefile.mingw,
+	  src/makefile.mingw, regression/README: MINGW sync
+
 2005-11-22 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli\cmd_log.cc gui\gui_regwin.cc src\init.cc src\pic-processor.cc,
 	src\trace.cc src\trace.h: Changed references of trace_log to

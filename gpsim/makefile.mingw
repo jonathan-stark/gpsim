@@ -7,15 +7,6 @@ TOP = ../..
 
 include ../plat/win32/make.mingw
 
-# Put the path to where your gtk libraries are kept
-GTK_PATH = ../../gtk+
-GLIB_PATH = ../../glib
-PANGO_PATH = ../../pango
-ATK_PATH = ../../atk
-POPT_PATH = ../../popt
-GTKEXTRA_PATH = ../../gtkextra-2
-READLINE_PATH = ../../readline
-
 ################################################################
 
 # Nothing much configurable below
@@ -28,10 +19,11 @@ LIBS = -l wsock32 \
      -L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0 \
      $(GTKEXTRA_PATH)/lib/libgtkextra-win32-2.1_dll.a
 
-gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a ../src/libsrc.a
+gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a ../src/libgpsim.a
 
-INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
-	-I ../../glib/lib/glib-2.0/include -I ../../popt/include
+INCLUDES = -I ../plat/win32 \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(POPT_PATH)/include
 
 DEFINES += -DHAVE_GUI
 

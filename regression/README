@@ -23,7 +23,11 @@ Running
 If you want to perform a regression test with the default set up then
 run:
 
-./run_regression.sh
+On *nix:
+  ./run_regression.sh
+
+On WIN32 + Cygwin from the shell:
+  ./run_regression.sh '/cygdrive/c/Program Files/gpsim/bin'
 
 (You may need to change the file to an executable [chmod +x]).
 This should step through each test and print PASS or FAIL results.
