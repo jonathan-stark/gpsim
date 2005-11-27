@@ -11,10 +11,12 @@ include ../plat/win32/make.mingw
 
 # Nothing much configurable below
 
-INCLUDES = -I . -I ../plat/win32 -I ../../glib/include/glib-2.0 \
-	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \
-	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0 \
-	-I ../../atk/include/atk-1.0 -I ../../gtkextra-2
+INCLUDES = -I . -I ../plat/win32 \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
+	-I $(PANGO_PATH)/include/pango-1.0 \
+	-I $(ATK_PATH)/include/atk-1.0 \
+	-I $(GTKEXTRA_PATH)
 
 DEFINES += -DHAVE_GUI
 

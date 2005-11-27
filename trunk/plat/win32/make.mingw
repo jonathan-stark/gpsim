@@ -30,6 +30,18 @@ TOP = ..
 endif
 
 ################
+# Paths to external libraries
+
+GTK_PATH = ../../gtk+
+GLIB_PATH = ../../glib
+PANGO_PATH = ../../pango
+ATK_PATH = ../../atk
+POPT_PATH = ../../popt
+GTKEXTRA_PATH = ../../gtkextra-2
+READLINE_PATH = ../../readline
+PTHREAD_PATH = ../../pthreads
+
+################
 # Compiler to use. The -fnative-struct switch is important so that the
 # produced libraries are also callable from MSVC-compiled code. Only
 # gcc 2.95 or later for mingw (distributed by Mumit Khan) have the
@@ -85,4 +97,4 @@ CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) $(DEPCFLAGS) $(WARNINGS)
 default: all
 
 clean::
-	-$(RM) *.o *.i *.exe *.dll *.a *.base *.exp *.lib
+	-$(RM) *.o *.i *.exe *.dll *.a *.base *.exp *.lib *.def

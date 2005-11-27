@@ -123,6 +123,7 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\bin"
   SetOverwrite ifnewer
   File "${GPSIM_ROOT}\gpsim\gpsim.exe"
+  File "${GPSIM_ROOT}\src\libgpsim.dll"
   File "${GPSIM_ROOT}\modules\libgpsim_modules.dll"
   File "${GPSIM_ROOT}\plat\win32\modules.def"
   File "${PKG_ROOT}\bin\asprintf.dll"
@@ -144,7 +145,7 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\bin\libpangoft2-1.0-0.dll"
   File "${PKG_ROOT}\bin\libpangowin32-1.0-0.dll"
   File "${PKG_ROOT}\bin\popt1.dll"
-  File "${PKG_ROOT}\bin\pthreadVC2.dll"
+  File "${PKG_ROOT}\bin\pthreadGC2.dll"
   File "${PKG_ROOT}\bin\readline.dll"
 
   SetOutPath "$INSTDIR\doc"
@@ -461,6 +462,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\asprintf.dll"
   Delete "$INSTDIR\bin\charset.dll"
   Delete "$INSTDIR\bin\gpsim.exe"
+  Delete "$INSTDIR\bin\gtkextra-win32-2.1.dll"
   Delete "$INSTDIR\bin\iconv.dll"
   Delete "$INSTDIR\bin\intl.dll"
   Delete "$INSTDIR\bin\libatk-1.0-0.dll"
@@ -469,6 +471,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libglib-2.0-0.dll"
   Delete "$INSTDIR\bin\libgmodule-2.0-0.dll"
   Delete "$INSTDIR\bin\libgobject-2.0-0.dll"
+  Delete "$INSTDIR\bin\libgpsim.dll"
   Delete "$INSTDIR\bin\libgthread-2.0-0.dll"
   Delete "$INSTDIR\bin\libgtk-win32-2.0-0.dll"
   Delete "$INSTDIR\bin\libiconv-2.dll"
@@ -480,7 +483,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\msvcr71.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\readline.dll"
-  Delete "$INSTDIR\bin\pthreadVC2.dll"
+  Delete "$INSTDIR\bin\pthreadGC2.dll"
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"
