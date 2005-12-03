@@ -202,7 +202,9 @@ public:
   EEDATA eedata;
   EEADR  eeadr;
 
-  Register **rom;          //  and the data area.
+  Register **rom;           //  and the data area.
+  RegisterCollection *m_UiAccessOfRom; // User access to the rom.
+
   unsigned int rom_size;
   unsigned int wr_adr,wr_data;  // latched adr and data for eewrites.
   unsigned int rd_adr;          // latched adr for eereads.

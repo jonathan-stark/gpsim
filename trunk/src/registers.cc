@@ -532,12 +532,16 @@ InvalidRegister::InvalidRegister(void)
   address = AN_INVALID_ADDRESS;
 }
 
-RegisterCollection::RegisterCollection (Processor *pProcessor) :
-  IIndexedCollection(16), m_ReturnValue(0) {
+RegisterCollection::RegisterCollection (Processor   *pProcessor, 
+					const char  *pC_collection_name,
+					Register   **ppRegisters,
+					unsigned int uiSize) :
+  IIndexedCollection(16), m_ReturnValue(0) 
+{
   m_pProcessor = pProcessor;
-  Value::new_name("ramData");
-  m_ppRegisters = pProcessor->registers;
-  m_uSize = pProcessor->register_memory_size();
+  Value::new_name(pC_collection_name);
+  m_ppRegisters = ppRegisters;
+  m_uSize = uiSize;
   get_symbol_table().add(this);
 }
 

@@ -478,9 +478,13 @@ protected:
 };
 
 // Used in the command prompt interface
-class RegisterCollection : public IIndexedCollection {
+class RegisterCollection : public IIndexedCollection 
+{
 public:
-  RegisterCollection(Processor *pProcessor);
+  RegisterCollection(Processor *pProcessor, 
+		     const char *collection_name,
+		     Register   **ppRegisters,
+		     unsigned int uiSize);
   virtual unsigned int GetSize();
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0);
   virtual void SetAt(unsigned int uIndex, Value *pValue);
