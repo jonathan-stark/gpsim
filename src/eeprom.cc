@@ -388,7 +388,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
       rom[i]->value.put(0);
       rom[i]->alias_mask = 0;
 
-      sprintf (str, "eeprom reg 0x%02x", i);
+      sprintf (str, "eereg0x%02x", i);
       rom[i]->new_name(str);
 
     }
@@ -396,6 +396,11 @@ void EEPROM::initialize(unsigned int new_rom_size)
   if(cpu) {
     cpu->ema.set_cpu(cpu);
     cpu->ema.set_Registers(rom, rom_size);
+    m_UiAccessOfRom = new RegisterCollection(cpu,
+					     "eeData",
+					     rom,
+					     rom_size);
+
   }
 
 }

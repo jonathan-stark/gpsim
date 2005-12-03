@@ -78,6 +78,8 @@ public:
   char *name_str;
 
   Register **rom;          //  and the data area.
+  RegisterCollection *m_UiAccessOfRom; // User access to the rom.
+
   unsigned int rom_size;
   unsigned int xfr_addr,xfr_data;  // latched adr and data from I2C.
   unsigned int bit_count;
