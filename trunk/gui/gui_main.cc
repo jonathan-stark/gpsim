@@ -371,6 +371,32 @@ void GUI_Interface::Update(gpointer object)
 
 
 
+/*------------------------------------------------------------------
+ * 
+ */
+#if GTK_MAJOR_VERSION >= 2
+int gStringWidth(PangoFontDescription *font, const char *str)
+{
+  return (font && str) ? gdk_string_width (gdk_font_from_description(font),str) : 0;
+}
+int gStringHeight(PangoFontDescription *font, const char *str)
+{
+  return (font && str) ? gdk_string_height (gdk_font_from_description(font),str) : 0;
+}
+GdkFont *gFontFromDescription(PangoFontDescription *font)
+{
+  return (font ? gdk_font_from_description(font) : 0);
+}
+#else
+int gStringWidth(GdkFont *font, const char *str)
+{
+  return (font && str) ? gdk_string_width (font,str) : 0;
+}
+int gStringHeight(GdkFont *font, const char *str)
+{
+  return (font && str) ? gdk_string_height (font,str) : 0;
+}
+#endif
 
 
 /*------------------------------------------------------------------

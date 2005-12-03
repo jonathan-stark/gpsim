@@ -224,6 +224,18 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw);
 int gui_get_value(char *prompt);
 
 
+//------------------------------------------------------------------------
+// Functions to abstract differences between gtk 1.x and 2.x
+#if GTK_MAJOR_VERSION >= 2
+int gStringWidth(PangoFontDescription *font, const char *str);
+int gStringHeight(PangoFontDescription *font, const char *str);
+GdkFont *gFontFromDescription(PangoFontDescription *);
+#else
+int gStringWidth(GdkFont *font, const char *str);
+int gStringHeight(GdkFont *font, const char *str);
+GdkFont *gFontFromDescription(GdkFont *pF) { return pF;}
+#endif
+
 #endif // __GUI_H__
 
 #endif // HAVE_GUI

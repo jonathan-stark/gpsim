@@ -25,13 +25,14 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-processor.h"
 #include "stimuli.h"
 #include "packages.h"
+#include <math.h>
 
 Package::Package(void)
 {
 
   pins = 0;
   number_of_pins = 0;
-  pin_position = 0;
+  m_pinGeometry = 0;
 
 }
 
@@ -54,7 +55,7 @@ void Package::create_pkg(unsigned int _number_of_pins)
 
   pins = new IOPIN *[number_of_pins];
 
-  pin_position =  new float[number_of_pins];
+  m_pinGeometry =  new PinGeometry[number_of_pins];
 
   for(unsigned int i=0; i<number_of_pins; i++)
   {
@@ -67,9 +68,9 @@ void Package::create_pkg(unsigned int _number_of_pins)
 
     // Positions for DIL package
     if(i<pins_per_side)
-      pin_position[i]=(i)/((float)(pins_per_side-0.9999));
+      m_pinGeometry[i].pin_position=(i)/((float)(pins_per_side-0.9999));
     else
-      pin_position[i]=(i-pins_per_side)/((float)(pins_per_side-0.9999))+(float)2.0;
+      m_pinGeometry[i].pin_position=(i-pins_per_side)/((float)(pins_per_side-0.9999))+(float)2.0;
   }
 
 
@@ -116,22 +117,38 @@ IOPIN *Package::get_pin(unsigned int pin_number)
 //-------------------------------------------------------------------
 float Package::get_pin_position(unsigned int pin_number)
 {
-    if(number_of_pins==0 ||
-       pin_number<=0 ||
-       pin_number>number_of_pins)
-	return 0.0;
-
-    return pin_position[pin_number-1];
+  return (bIsValidPinNumber(pin_number) ? m_pinGeometry[pin_number-1].pin_position : 0.0);
 }
 
 void Package::set_pin_position(unsigned int pin_number, float position)
 {
-    if(number_of_pins==0 ||
-       pin_number<=0 ||
-       pin_number>number_of_pins)
-	return;
+  if (bIsValidPinNumber(pin_number)) {
+    m_pinGeometry[pin_number-1].bNew = false;
+    m_pinGeometry[pin_number-1].pin_position=position;
+  }
+}
 
-    pin_position[pin_number-1]=position;
+void Package::setPinGeometry(unsigned int pin_number, float x, float y, 
+			     int orientation, bool bShowName)
+{
+  if (bIsValidPinNumber(pin_number)) {
+    m_pinGeometry[pin_number-1].bNew = true;
+    m_pinGeometry[pin_number-1].m_x = x;
+    m_pinGeometry[pin_number-1].m_y = y;
+    m_pinGeometry[pin_number-1].m_orientation = orientation;
+    m_pinGeometry[pin_number-1].m_bShowPinname = bShowName;
+  }
+}
+
+PinGeometry *Package::getPinGeometry(unsigned int pin_number)
+{
+  static PinGeometry BAD_PIN;
+
+  if (bIsValidPinNumber(pin_number)) {
+    m_pinGeometry[pin_number-1].convertToNew();
+    return &m_pinGeometry[pin_number-1];
+  }
+  return &BAD_PIN;
 }
 
 //-------------------------------------------------------------------
@@ -186,4 +203,20 @@ int Package::get_pin_state(unsigned int pin_number)
 
 }
 
+//------------------------------------------------------------------------
+void PinGeometry::convertToNew()
+{
 
+  if (!bNew) {
+
+    m_orientation = (int) floor (pin_position);
+    if (m_orientation) {
+      m_x = 0.0;
+      m_y = pin_position;
+    } else {
+      m_x = pin_position - m_orientation;
+      m_y = 0.0;
+    }
+    m_bShowPinname = true;
+  }
+}

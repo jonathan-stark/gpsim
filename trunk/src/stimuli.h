@@ -408,7 +408,6 @@ class IOPIN : public stimulus
 
   virtual char getBitChar();
   virtual void show();
-
 protected:
   bool bDrivenState;       // binary state we're being driven to
   char cForcedDrivenState; // forced state when no snode is attached.
