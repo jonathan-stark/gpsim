@@ -1,3 +1,20 @@
+2005-12-02 Scott Dattalo <scott@dattalo.com>
+	* eeprom.cc, eeprom.h, i2c-ee.cc, i2c-ee.h, registers.cc,
+	registers.h, processors.cc:
+	Extended the RegisterCollection class to support an arbitrary
+	array of Registers. Added CLI access to the EEPROM.
+	Usage:
+	   eeData 
+	shows all eeprom registers.
+	   eeData[expression] 
+	shows one or several eeprom registers.
+	* packages.cc, packages.h: Added better support for module pin
+	placement.
+	* gui/gui.h, gui/gui_breadboard.cc, gui/gui_breadboard.h,
+	gui/gui_main.cc: Cleaned up package creation in preparation for
+	a graphic LCD module.
+
+
 2005-11-27 Borut Razem <borut.razem@siol.net>
 
 	* plat/win32/gpsim.nsi, plat/win32/make.mingw, cli/makefile.mingw,

@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 class Breadboard_Window;
 
-enum eOrientation {LEFT, RIGHT, UP, DOWN};
+enum eOrientation {LEFT, UP, RIGHT, DOWN};
 enum eDirection {PIN_INPUT, PIN_OUTPUT};
 typedef enum {PIN_DIGITAL, PIN_ANALOG, PIN_OTHER} pintype;
 
@@ -48,81 +48,170 @@ typedef struct _path
 } path;
 // End routing types
 
-class GuiPin
+
+class GuiModule;
+//========================================================================
+
+//
+// GuiBreadBoardObject - Base class for things that can be drawn in the
+//                       breadboard window.
+//
+
+class GuiBreadBoardObject
 {
 public:
-  GuiPin(Breadboard_Window *, int x, int y, eOrientation _or, IOPIN *);
+  GuiBreadBoardObject(Breadboard_Window *,int x, int y);
+  virtual ~GuiBreadBoardObject();
+
+  virtual void Draw()=0;
+  virtual void Update()=0;
+  virtual void Destroy()=0;
+
+  
+  bool IsBuilt() { return m_bIsBuilt;}
+  Breadboard_Window *bbw() { return m_bbw;}
+  void SetPosition(int x, int y);
+  int x()      { return m_x;}
+  int y()      { return m_y;}
+  int width()  { return m_width; }
+  int height() { return m_height; }
+
+protected:
+  Breadboard_Window *m_bbw;
+
+  int    m_x;               // Position in layout widget
+  int    m_y;               // Position in layout widget
+  int    m_width;           // 
+  int    m_height;          //
+  bool   m_bIsBuilt;        // True after the object gets displayed.
+};
+
+//------------------------------------------------------------------------
+// GuiPin
+class GuiPin : public GuiBreadBoardObject
+{
+public:
+  GuiPin(Breadboard_Window *, GuiModule *,IOPIN *, unsigned int pin_number);
   bool getState() {return value;}
   void putState(bool bNewState) { value = bNewState;}
   void toggleState();
   void toggleDirection();
 
   void addXref(CrossReferenceToGUI *);
-  void draw();
-  void update();
-  void destroy();
+  virtual void Draw();
+  virtual void Update();
+  virtual void Destroy();
 
+  void SetModulePosition(int x, int y);
+  int module_x() { return m_module_x; }
+  int module_y() { return m_module_y; }
+
+  void SetLabelPosition(int x, int y);
+  int label_x() { return m_label_x; }
+  int label_y() { return m_label_y; }
+  void DrawLabel(GdkPixmap *pix_map);
+
+  void SetOrientation(eOrientation o) { orientation = o; }
+
+  unsigned int number() { return m_pkgPinNumber; }
   Stimulus_Node *getSnode() {return iopin ? iopin->snode : 0;}
   IOPIN *getIOpin() {return iopin;}
-  Breadboard_Window *bbw;
+  const char *pinName() const;
 
-
-  GtkWidget *widget;
+  GtkWidget *m_pinDrawingArea;
   GdkPixmap *pixmap;
   GdkGC *gc;
-
-  int x;
-  int y;
-  int width;
-  int height;
-
-  int layout_xpos, layout_ypos;
 
   eDirection direction;
   eOrientation orientation;
   pintype type;
 
 protected:
-  bool value;
+  bool   value;
   IOPIN *iopin;
   CrossReferenceToGUI *xref;
+
+  GuiModule *m_pModule;     // Module to which this pin belongs.
+  int    m_module_x;        // Pin coordinates within parent module
+  int    m_module_y;        //
+
+  int    m_label_x;         // Pin Label coordinates (within parent module).
+  int    m_label_y;
+
+  int    m_pkgPinNumber;    // 
 };
 
 
 enum module_type {PIC_MODULE, EXTERNAL_MODULE};
 
-class GuiModule
+//------------------------------------------------------------------------
+// GuiModule
+// 
+// The GuiModule holds the graphics for a gpsim module that is displayed in
+// the bread board window. The GuiModule serves as the link between the gui
+// and the simulation engine. In other words, the GuiModule provides an 
+// interface through which the simulation engine may be accessed.
+//
+// All GuiModules have a one-to-one with a gpsim Module. (see src/modules.h)
+// The GuiModule knows how to get access to a Module's pin information.
+//
+class GuiModule : public GuiBreadBoardObject
 {
 public:
-  bool bIsBuilt;              // True after the module gets displayed.
-  Module *module;
-  Breadboard_Window *bbw;
-  GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
-  GtkWidget *name_widget;    // Name of widget, positioned above module_widget.
-  int x;                     // Position in layout widget
-  int y;                     // Position in layout widget
-  int width;                 // Width of module_widget
-  int height;                // Height of module_widget
-
-  int pinnamewidth;
-
-  int pin_count;
-
-  GdkPixmap *module_pixmap;
-  GdkPixmap *name_pixmap;
-
-  GtkWidget *tree_item;
-
-  GList *pins;
-
   GuiModule(Module *, Breadboard_Window *);
   void SetPosition(int x, int y);
   double Distance(int x, int y);
-  void Refresh();
-  void Build();
+
+  virtual void Update();
+  virtual void UpdatePins();
+  virtual void Build();
+  virtual void Draw();
+  virtual void Destroy();
+  virtual void DrawCaseOutline(GtkWidget *);
+
+  virtual void AddPin(unsigned int);
+  virtual void AddPinGeometry(GuiPin *);
+
+  void BuildReferenceDesignator();
+
+  int pin_count() { return m_pin_count; }
+  GList * pins() { return m_pins; }
+  Module *module() { return m_module; }
+  GtkWidget *module_widget() { return m_module_widget; }
+  GtkWidget *name_widget() { return m_name_widget; }
+  GtkWidget *tree_item() { return m_tree_item; }
+  GdkPixmap *module_pixmap() { return m_module_pixmap; }
+  GdkPixmap *name_pixmap() { return m_name_pixmap; }
+
+protected:
+
+  Module    *m_module;
+  GtkWidget *m_module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap
+  GtkWidget *m_pinLabel_widget;// A drawing area for pin labels.
+  int        m_module_x;       // These coordinates are an offset from m_x and m_y defined in  
+  int        m_module_y;       /* GuiBreadBoardObject. Their purpose is to allow clients to 
+				* reposition a customly created module_widget */
+
+  GtkWidget *m_name_widget;    // Name of widget, positioned above module_widget.
+
+  int m_pin_count;
+
+  GdkPixmap *m_module_pixmap;
+  GdkPixmap *m_name_pixmap;
+
+  GtkWidget *m_tree_item;
+
+  GList *m_pins;
+
+
 };
 
-
+class GuiDipModule : public GuiModule
+{
+public:
+  GuiDipModule(Module *, Breadboard_Window *);
+  virtual void DrawCaseOutline(GtkWidget *);
+};
 
 struct gui_node
 {
@@ -136,53 +225,54 @@ struct gui_node
 
 
 
-class Breadboard_Window : public GUI_Object {
- public:
+class Breadboard_Window : public GUI_Object
+{
+public:
 
 #if GTK_MAJOR_VERSION >= 2
-    PangoFontDescription *pinstatefont;
-    PangoFontDescription *pinnamefont;
+  PangoFontDescription *pinstatefont;
+  PangoFontDescription *pinnamefont;
 #else
-    GdkFont *pinstatefont;
-    GdkFont *pinnamefont;
+  GdkFont *pinstatefont;
+  GdkFont *pinnamefont;
 #endif
-    int pinnameheight;
+  int pinnameheight;
 
-    GtkWidget *layout;
+  GtkWidget *layout;
 
-    GdkGC *pinname_gc;
-    GdkGC *pinline_gc;
-    GdkGC *case_gc;
+  GdkGC *pinname_gc;
+  GdkGC *pinline_gc;
+  GdkGC *case_gc;
 
-    GList *modules;
+  GList *modules;
 
-    GtkWidget *tree;
+  GtkWidget *tree;
 
-    GtkWidget *pic_frame;
-    GtkWidget *node_frame;
-    GtkWidget *module_frame;
-    GtkWidget *stimulus_frame;
+  GtkWidget *pic_frame;
+  GtkWidget *node_frame;
+  GtkWidget *module_frame;
+  GtkWidget *stimulus_frame;
 
-    GtkWidget *pic_settings_clist;
-    GtkWidget *attribute_clist;
-    GtkWidget *attribute_entry;
-    GtkWidget *attribute_button;
+  GtkWidget *pic_settings_clist;
+  GtkWidget *attribute_clist;
+  GtkWidget *attribute_entry;
+  GtkWidget *attribute_button;
 
-    GtkWidget *node_tree;
+  GtkWidget *node_tree;
 
-    GtkWidget *node_clist;
+  GtkWidget *node_clist;
 
-    GtkWidget *stimulus_settings_label;
+  GtkWidget *stimulus_settings_label;
 
-    GtkWidget *stimulus_add_node_button;
+  GtkWidget *stimulus_add_node_button;
 
-    GdkPixmap *layout_pixmap;
+  GdkPixmap *layout_pixmap;
 
-    GtkAdjustment *hadj, *vadj;
+  GtkAdjustment *hadj, *vadj;
 
-    GuiPin *selected_pin;
-    struct gui_node *selected_node;
-    GuiModule *selected_module;
+  GuiPin *selected_pin;
+  struct gui_node *selected_node;
+  GuiModule *selected_module;
 
 
   Breadboard_Window(GUI_Processor *gp);
@@ -194,6 +284,9 @@ class Breadboard_Window : public GUI_Object {
 
   GtkWidget *add_button(const char *label, const char *name,
 			GtkSignalFunc f, GtkWidget *box);
+
+private:
+  GuiModule *m_MainCpuModule;
 };
 
 

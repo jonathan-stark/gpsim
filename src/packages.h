@@ -54,7 +54,24 @@ enum PACKAGE_PIN_ERRORS
   E_PIN_OUT_OF_RANGE,
   E_PIN_EXISTS
 };
-  
+// The PinGeometry holds information the gui can query to build 
+// a graphical representation of the pin.
+struct PinGeometry
+{
+  PinGeometry() : pin_position(0.0), bNew(false), m_bShowPinname(false) {}
+  void convertToNew(); // transition from old to new style
+
+  float pin_position;
+
+  // Newer style
+  bool  bNew;
+  float m_x;
+  float m_y;
+  int   m_orientation;
+  bool  m_bShowPinname;
+};
+
+
 class Package
 {
 public:
@@ -68,19 +85,12 @@ public:
 		  * simulating the pin.
 		  */
 
-  // pin_position is used by the breadboard to position the pin
-  // Its value can be in the range from 0.0000 to 3.9999.
-  // 0.0 is upmost left position. 0.9999 is lowest left.
-  // 1.0 is leftmost bottom position. 1.99 is rightmost bottom.. A.S.O
-  float *pin_position;
-
   Package(void);
   Package(unsigned int number_of_pins);
 
   void assign_pin(unsigned int pin_number, IOPIN *pin);
   void create_pkg(unsigned int _number_of_pins);
 
-  // void map_pins(IOPIN_map *iopin_map_ptr, int num_of_iopins)
   unsigned int isa(void){return _NO_PACKAGE_;};
   virtual void create_iopin_map(void);
 
@@ -91,6 +101,22 @@ public:
   virtual void set_pin_position(unsigned int pin_number, float position);
   int pin_existance(unsigned int pin_number);
   IOPIN *get_pin(unsigned int pin_number);
+
+  void setPinGeometry(unsigned int pin_number, float x, float y, int orientation, bool bShowName);
+  PinGeometry *getPinGeometry(unsigned int pin_number);
+
+protected:
+  inline bool bIsValidPinNumber(unsigned int pin_number)
+  {
+    return (pin_number > 0) && (pin_number<=number_of_pins);
+  }
+
+  // pin_position is used by the breadboard to position the pin
+  // Its value can be in the range from 0.0000 to 3.9999.
+  // 0.0 is upmost left position. 0.9999 is lowest left.
+  // 1.0 is leftmost bottom position. 1.99 is rightmost bottom.. A.S.O
+  // float *pin_position;
+  PinGeometry *m_pinGeometry;
 };
 
 #endif // __PACKAGES_H__
