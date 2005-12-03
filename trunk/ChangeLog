@@ -1,3 +1,8 @@
+2005-12-03 Robert Pearce <rob@bdt-home.demon.co.uk>
+
+	* src/p12.cc, src/p12.h, src/pic-processors.cc,
+	src/pic-processors.h: Added the 10F202.
+
 2005-12-02 Scott Dattalo <scott@dattalo.com>
 	* eeprom.cc, eeprom.h, i2c-ee.cc, i2c-ee.h, registers.cc,
 	registers.h, processors.cc:

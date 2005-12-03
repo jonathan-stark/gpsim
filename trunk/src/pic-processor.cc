@@ -74,6 +74,8 @@ guint64 simulation_start_cycle;
 
 ProcessorConstructor pP10F200(P10F200::construct ,
 			      "__10F200", "pic10f200",  "p10f200", "10f200");
+ProcessorConstructor pP10F202(P10F202::construct ,
+			      "__10F202", "pic10f202",  "p10f202", "10f202");
 ProcessorConstructor pP12C508(P12C508::construct ,
 			      "__12C508", "pic12c508",  "p12c508", "12c508");
 ProcessorConstructor pP12C509(P12C509::construct ,

@@ -581,3 +581,48 @@ P10F200::P10F200(void)
 }
 
 
+//------------------------------------------------------------------------
+
+void P10F202::create(void)
+{
+
+  create_iopin_map();
+
+  _12bit_processor::create();
+
+  add_file_registers(0x08, 0x1f, 0);    // 10F202 has 24 bytes RAM
+  P12C508::create_sfr_map();
+  create_invalid_registers ();
+
+  tmr0.set_cpu(this,m_gpio,2);
+  tmr0.start(0);
+
+  pc->reset();
+}
+
+
+Processor * P10F202::construct(void)
+{
+
+  P10F202 *p = new P10F202;
+
+  p->pc->set_reset_address(0x1ff);
+
+  p->create();
+  p->create_symbols();
+
+  p->name_str = "p10f202";
+  symbol_table.add_module(p,p->name_str.c_str());
+
+  return p;
+
+}
+
+
+P10F202::P10F202(void)
+{
+  if(verbose)
+    cout << "10f202 constructor, type = " << isa() << '\n';
+}
+
+
