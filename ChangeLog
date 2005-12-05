@@ -1,3 +1,15 @@
+2005-12-05 Scott Dattalo <scott@dattalo.com>
+
+	* gui/gui_src_asm.cc: Source browser crashed if there was no
+	instruction at the current PC.
+
+	* regression/instructions_16bit/18f452.lkr: mchip stock linker
+	script has a bug with hard coded interrupt routine size.
+
+2005-12-04 Robert Pearce <rob@bdt-home.demon.co.uk>
+
+	* src/p12.cc, src/p12.h: Added pullups to 12bit-core I/O pins
+
 2005-12-03 Robert Pearce <rob@bdt-home.demon.co.uk>
 
 	* src/p12.cc, src/p12.h, src/pic-processors.cc,
