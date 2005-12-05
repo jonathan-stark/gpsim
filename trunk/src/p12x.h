@@ -31,6 +31,10 @@ public:
        unsigned int numIopins, 
        unsigned int enableMask);
   void setbit(unsigned int bit_number, bool new_value);
+  void setPullUp ( bool bNewPU );
+
+private:
+  bool m_bPU;
 };
 
 class P12C508 : public  _12bit_processor

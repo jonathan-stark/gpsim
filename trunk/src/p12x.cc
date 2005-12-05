@@ -90,10 +90,11 @@ void P12C508::enter_sleep()
 }
 
 
-void  P12C508::option_new_bits_6_7(unsigned int)
+void  P12C508::option_new_bits_6_7(unsigned int bits)
 {
   if(verbose)
     cout << "p12c508 option_new_bits_6_7\n";
+  m_gpio->setPullUp ( (bits & (1<<6)) == (1<<6) );
 }
 
 void P12C508::create_sfr_map(void)
@@ -483,6 +484,22 @@ so the processor is waking up\n";
     }
 
   }
+}
+
+void GPIO::setPullUp ( bool bNewPU )
+{
+  m_bPU = !bNewPU;
+
+  if ( verbose & 16 )
+    printf("GPIO::setPullUp() =%d\n",(m_bPU?1:0));
+
+  unsigned int mask = getEnableMask();
+  for (unsigned int i=0, m=1; mask; i++, m<<= 1)
+    if (mask & m)
+    {
+      mask ^= m;
+      getPin(i)->update_pullup ( m_bPU ? '1' : '0', true );
+    }
 }
 
 
