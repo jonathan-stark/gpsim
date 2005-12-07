@@ -783,6 +783,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   m_monitor=0;
 
   if(iop) {
+
+#if 0
     iop->attach_iopin(this,b);
 
     // assign the name to the I/O pin.
@@ -814,6 +816,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
     }
 
     new_name(name_str);
+#endif
+    printf("WARNING:%s:%d deprecated usage of IOPINs\n",__FILE__,__LINE__);
   } else {
     // there's no IO port associated with this pin.
 
@@ -857,18 +861,20 @@ void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
 
 void IOPIN::attach_to_port(IOPORT *i, unsigned int b)
 {
-  iop = i; 
   iobit=b;
+
+  iop = i; 
   if(iop)
-    iop->attach_iopin(this,b);
+    iop->addPin(this,b);
+
+  printf("WARNING:%s:%d Deprecated usage of IOPINs\n",__FILE__,__LINE__);
 }
 
 void IOPIN::disconnect_from_port()
 {
-  if(iop) {
-    //iop->detach_iopin(this);
+  if(iop) 
     iop = 0;
-  }
+
   iobit = 0;
 }
 
@@ -879,9 +885,6 @@ IOPIN::~IOPIN()
 
 void IOPIN::attach(Stimulus_Node *s)
 {
-  if(iop)
-    iop->attach_node(s,iobit);
-
   snode = s;
 }
 

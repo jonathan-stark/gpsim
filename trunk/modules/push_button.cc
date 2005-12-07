@@ -69,8 +69,6 @@ void PushButton::create_iopin_map(void)
 
   pshb_port = new IOPORT(1);
   pshb_port->value.put(0);
-  pshb_port->valid_iopins = 0x01;
-
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the

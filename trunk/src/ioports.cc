@@ -741,31 +741,27 @@ unsigned int IOPORT::get_value(void)
 
   // Update the stimuli - if there are any
 
-  if(stimulus_mask) {
+  unsigned int current_value = value.get();
+  
+  unsigned int i=0;
+  unsigned int m=1;
 
-    unsigned int current_value = value.get();
+  for(i=0; i<num_iopins; i++, m<<=1) {
+    if(pins[i] && pins[i]->snode) {
 
-    unsigned int i=0;
-    unsigned int m=1;
+      double v = pins[i]->snode->get_nodeVoltage();
 
-    for(i=0; i<num_iopins; i++, m<<=1) {
-      if(pins[i] && pins[i]->snode) {
-
-	double v = pins[i]->snode->get_nodeVoltage();
-
-	if(current_value & m) {
-	  // this io bit is currently a high
-	  if(v <= pins[i]->get_h2l_threshold())
-	    current_value ^= m;
-	} else
-	  if (v > pins[i]->get_l2h_threshold())
-	    current_value ^= m;
-      }
+      if(current_value & m) {
+	// this io bit is currently a high
+	if(v <= pins[i]->get_h2l_threshold())
+	  current_value ^= m;
+      } else
+	if (v > pins[i]->get_l2h_threshold())
+	  current_value ^= m;
     }
-
-    value.put(current_value);
-
   }
+
+  value.put(current_value);
 
   return(value.get());
 }
@@ -920,6 +916,28 @@ IOPIN *IOPORT::getIO(unsigned int pin_number)
 // one of the bits of the I/O port.
 //
 //-------------------------------------------------------------------
+IOPIN *IOPORT::addPin(IOPIN * new_pin, unsigned int bit_position)
+{
+
+  if(bit_position < num_iopins)
+
+    pins[bit_position] = new_pin;
+
+  else
+    cout << "Warning: iopin pin number ("<<bit_position 
+	 <<") is invalid for " << name() << ". Max iopins " << num_iopins << '\n';
+
+  if(verbose)
+    cout << "attaching iopin to ioport " << name() << '\n';
+
+  return new_pin;
+}
+//-------------------------------------------------------------------
+// attach_iopin
+//   This will store a pointer to the iopin that is associated with
+// one of the bits of the I/O port.
+//
+//-------------------------------------------------------------------
 void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
 {
 
@@ -992,6 +1010,7 @@ IOPORT::IOPORT(unsigned int _num_iopins)
 {
   stimulus_mask = 0;
   num_iopins = _num_iopins;
+  valid_iopins = (1<<num_iopins) - 1;
   address = 0;
   value.put(0);
   internal_latch = 0;

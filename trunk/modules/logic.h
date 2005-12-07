@@ -109,8 +109,6 @@ public:
 
   GdkPixmap *pixmap;
 
-  //  IOPORT  *port;
-
   LogicGate(void);
   ~LogicGate(void);
 

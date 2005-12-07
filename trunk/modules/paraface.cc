@@ -119,7 +119,6 @@ public:
 
 Paraface_Port::Paraface_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
-
 }
 
 void Paraface_Port::setbit(unsigned int bit_number, bool new_value)
@@ -263,12 +262,10 @@ void Paraface::create_iopin_map(void)
 
     input_port = new InputPort(5);
     input_port->value.put(0);
-    input_port->valid_iopins=0x1f;
     input_port->paraface = this;
 
     output_port = new OutputPort(8);
     output_port->value.put(0);
-    input_port->valid_iopins=0xff;
     output_port->paraface = this;
 
 

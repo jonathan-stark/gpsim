@@ -339,6 +339,29 @@ class IOPORT : public sfr_register
 {
 public:
 
+  IOPORT(unsigned int _num_iopins=8);
+  ~IOPORT();
+
+  IOPIN *addPin(IOPIN *, unsigned int iPinNumber);
+  IOPIN *getIO(unsigned int pin_number);
+
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+
+  // setbit() is called when a stimulus writes a value to one
+  // of the I/O pins in this Port.
+  virtual void setbit(unsigned int bit_number, bool new_value);
+
+  virtual bool get_bit(unsigned int bit_number);
+
+  virtual unsigned int get(void);
+  virtual unsigned int get_value(void);
+
+
+  virtual void trace_register_write(void);
+
+protected:
+
   /// The I/O pins associated with this I/O port.
   /// This could be anything (or nothing.)
   IOPIN  **pins;
@@ -351,32 +374,18 @@ public:
     internal_latch, // 
     num_iopins;     // Number of I/O pins attached to this port
 
-  virtual void put(unsigned int new_value);
-  virtual void put_value(unsigned int new_value);
 
-  // setbit() is called when a stimulus writes a value to one
-  // of the I/O pins in this Port.
-  virtual void setbit(unsigned int bit_number, bool new_value);
 
-  virtual bool get_bit(unsigned int bit_number);
-  virtual double get_bit_voltage(unsigned int bit_number);
 
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
-
-  IOPIN *getIO(unsigned int pin_number);
+  // Deprecated functions of the IOPORT class 
 
   /// Stimuli 
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);
   void attach_node(Stimulus_Node *new_node, unsigned int bit_position);
-
-  virtual void trace_register_write(void);
+  virtual double get_bit_voltage(unsigned int bit_number);
   virtual void change_pin_direction(unsigned int bit_number, bool new_direction);
-
-  IOPORT(unsigned int _num_iopins=8);
-  ~IOPORT();
 
 };
 
