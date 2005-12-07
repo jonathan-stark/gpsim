@@ -1,3 +1,12 @@
+2005-12-06 Scott Dattalo <scott@dattalo.com>
+
+	* src/ioports.h, src/ioports.cc: Cleaned up the IOPORT class and
+	deprecated some old functions.
+	* src/stimuli.cc: use new IOPORT class functions.
+	* modules/encoder.cc, modules/logic.h, modules/paraface.cc,
+	modules/push_button.cc: Updated to new I/O port class api.
+	* gui/gui_src_asm.cc: Removed printf debug
+
 2005-12-05 Scott Dattalo <scott@dattalo.com>
 
 	* gui/gui_src_asm.cc: Source browser crashed if there was no

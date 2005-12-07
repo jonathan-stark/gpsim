@@ -433,8 +433,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if(sbawFileId == 0xffffffff)
     return;
 
-  printf("%s:%d file id =%d address=%d\n",__FUNCTION__,__LINE__,sbawFileId,address);
-
   for(i=0;i<SBAW_NRFILES;i++) {
     if(pages[i].pageindex_to_fileid == sbawFileId)
       id=i;
@@ -457,7 +455,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
   new_pcw = pages[id].source_pcwidget;
 
   row = pma->get_src_line(address);
-  printf("%s:%d file row =%d\n",__FUNCTION__,__LINE__,row);
 
   if(row==(int)INVALID_VALUE)
     return;

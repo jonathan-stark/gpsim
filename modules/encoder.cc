@@ -74,8 +74,6 @@ void Encoder::create_iopin_map(void)
 
   enc_port = new IOPORT(2);
   enc_port->value.put(0);
-  enc_port->valid_iopins = 0x03;
-
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
