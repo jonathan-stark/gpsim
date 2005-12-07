@@ -281,43 +281,6 @@ void DataPort::update_pin_directions(bool new_direction)
   }
 }
 
-unsigned int DataPort::get(void)
-{
-
-  return IOPORT::get();
-
-#if 0
-  unsigned int v=0;
-
-#ifdef BROKEN_GET_METHOD
-  
-  for(int i=7; i>=0; i--) {
-    if(pins[i]) {
-      v = (v << 1) | ((pins[i]->getDrivingState()) ? 1 : 0);
-    }
-
-  }
-
-#else
-
-  //cout << "LCD DataPort::get - stim_mask is " << stimulus_mask << "\n";
-  if(stimulus_mask)
-    {
-      v = update_stimuli();
-      // cout << "DataPort::get - stimuli give " << v << "\n";
-      v |= (value.get() & ~stimulus_mask);
-    }
-
-#endif
-
-  value.put(v);
-
-  gTrace->raw(read_trace.get() | value.get());
-
-  return value.get();
-#endif
-}
-
 //-----------------------------------------------------
 
 ControlPort::ControlPort (LcdDisplay *_lcd, unsigned int _num_iopins) 
@@ -377,10 +340,22 @@ void DataPort::put(unsigned int new_value)
 }
 
 //---------------------------------------------------------------
-Lcd_bi_directional::Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name) :
-  IO_bi_directional(i, b,opt_name)
+Lcd_Input::Lcd_Input(LcdDisplay *pLcd,IOPORT *i, unsigned int b,char *opt_name) :
+  IOPIN(i, b)
+{
+  new_name((pLcd->name() + "." + opt_name).c_str());
+  i->addPin(this,b);
+}
+
+//---------------------------------------------------------------
+Lcd_bi_directional::Lcd_bi_directional(LcdDisplay *pLcd,
+				       IOPORT *i, 
+				       unsigned int b,char *opt_name) :
+  IO_bi_directional(i, b)
 {
   // FIXME - we may want to readjust the Pin impedances
+  new_name((pLcd->name() + "." + opt_name).c_str());
+  i->addPin(this,b);
 }
 
 
@@ -465,18 +440,18 @@ void LcdDisplay::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  assign_pin(4, new Lcd_Input(control_port, 0,"DC"));  // Control
-  assign_pin(5, new Lcd_Input(control_port, 1,"RW"));
-  assign_pin(6, new Lcd_Input(control_port, 2,"E"));
+  assign_pin(4, new Lcd_Input(this,control_port, 0,"DC"));  // Control
+  assign_pin(5, new Lcd_Input(this,control_port, 1,"RW"));
+  assign_pin(6, new Lcd_Input(this,control_port, 2,"E"));
 
-  assign_pin(7, new Lcd_bi_directional(data_port, 0,"d0"));  // Data bus
-  assign_pin(8, new Lcd_bi_directional(data_port, 1,"d1"));
-  assign_pin(9, new Lcd_bi_directional(data_port, 2,"d2"));
-  assign_pin(10, new Lcd_bi_directional(data_port,3,"d3"));
-  assign_pin(11, new Lcd_bi_directional(data_port,4,"d4"));
-  assign_pin(12, new Lcd_bi_directional(data_port,5,"d5"));
-  assign_pin(13, new Lcd_bi_directional(data_port,6,"d6"));
-  assign_pin(14, new Lcd_bi_directional(data_port,7,"d7"));
+  assign_pin(7, new Lcd_bi_directional(this,data_port, 0,"d0"));  // Data bus
+  assign_pin(8, new Lcd_bi_directional(this,data_port, 1,"d1"));
+  assign_pin(9, new Lcd_bi_directional(this,data_port, 2,"d2"));
+  assign_pin(10, new Lcd_bi_directional(this,data_port,3,"d3"));
+  assign_pin(11, new Lcd_bi_directional(this,data_port,4,"d4"));
+  assign_pin(12, new Lcd_bi_directional(this,data_port,5,"d5"));
+  assign_pin(13, new Lcd_bi_directional(this,data_port,6,"d6"));
+  assign_pin(14, new Lcd_bi_directional(this,data_port,7,"d7"));
 
   data_port->update_pin_directions(false);
 

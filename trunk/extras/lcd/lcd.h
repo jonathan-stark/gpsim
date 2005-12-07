@@ -77,7 +77,7 @@ class ControlPort : public Lcd_Port, public TriggerObject
 public:
 
   guint64 break_delta;
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   virtual void assert_event(void);
   ControlPort (LcdDisplay *_lcd,unsigned int _num_iopins=8);
   virtual void callback(void);
@@ -89,13 +89,12 @@ public:
   bool direction;
   bool acceptingData;
 
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   virtual void assert_event(void);
   virtual void setbit(unsigned int bit_number, bool new_value);
   DataPort (LcdDisplay *_lcd,unsigned int _num_iopins=8);
   void update_pin_directions(bool);
 
-  unsigned int get(void);
 };
 
 // Create a class derived from the IO_input class that
@@ -108,7 +107,7 @@ class Lcd_Input : public IOPIN
 {
 public:
 
-  Lcd_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IOPIN(i,b,opt_name) { };
+  Lcd_Input (LcdDisplay *,IOPORT *i, unsigned int b, char *opt_name);
 
 };
 
@@ -116,7 +115,7 @@ class Lcd_bi_directional : public IO_bi_directional
 {
 public:
 
-  Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  Lcd_bi_directional(LcdDisplay *, IOPORT *i, unsigned int b,char *opt_name);
 
 };
 
