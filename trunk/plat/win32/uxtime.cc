@@ -26,7 +26,10 @@ Definitions, missing in MSVC libraries
 #include <errno.h>
 
 #include "uxtime.h"
-#include "unistd.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int
 gettimeofday(struct timeval *tv, struct timezone *tz)
@@ -102,3 +105,7 @@ unsigned int sleep(unsigned int seconds)
 
   return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif
