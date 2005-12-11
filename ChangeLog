@@ -1,3 +1,26 @@
+2005-12-10 J.R. Heisey <jrheisey@sourceforge.com>src/registers.h:
+	* src/expr.cc, src/ValueCollections.cc, src/ValueCollections.h:
+	Added toString(ExprList_t*) and move some code from
+	IndexedSymbol::toString() into it.
+	* src/modules.cc, src/modules.h: Added functions for deleting
+	module libraries.
+	* 14bit-processors.cc, src/14bit-processors.h, src/p12x.h,
+	src/16bit-processors.h, src/p16f62x.cc, src/p16x5x.cc,
+	src/p16x5x.h, src/p16x6x.cc,src/p16x7x.cc, src/p16x8x.cc,
+	src/p18x.cc, src/p18x.h, src/Makefile.am, src/makefile.mingw,
+	src/src.vcproj, src/ioports.cc, src/ioports.h, src/pic-ioports.cc,
+	src/pic-ioports.h: Moved PicPortBRegister, PicTrisRegister and
+	PicPortRegister definitions into these files from ioports.cc
+	and ioports.h. Added pic-ioports.cc,h to build files. This was
+	motivated by moving undesirable code for the SWIG script
+	language builds.
+	* src/value.cc, src/value.h: Renamed New() to NewObject() to
+	avoid conflict with SWIG.
+	* src/breakpoints.h, src/interface.h, src/os_dependent.cc,
+	src/pic-instructions.h, src/pic-processor.cc, src/pic-processor.h,
+	src/processor.cc, src/processor.h, src/stimuli.h, src/trace.h:
+	removed unneeded reference to the header unistd.h.
+
 2005-12-06 Scott Dattalo <scott@dattalo.com>
 
 	* src/ioports.h, src/ioports.cc: Cleaned up the IOPORT class and
