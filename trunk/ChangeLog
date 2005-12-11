@@ -1,3 +1,10 @@
+2005-12-11 Borut Razem <borut.razem@siol.net>
+
+	* src/16bit-instructions.h, src/breakpoints.h, src/pic-instructions.h,
+	  src/pic-instructions.cc, src/processor.h, src/processor.cc:
+	  fixed gcc errors: processor.h:150: error: using typedef-name
+	  `instruction::INSTRUCTION_TYPES' after `enum'
+
 2005-12-10 J.R. Heisey <jrheisey@sourceforge.com>src/registers.h:
 	* src/expr.cc, src/ValueCollections.cc, src/ValueCollections.h:
 	Added toString(ExprList_t*) and move some code from

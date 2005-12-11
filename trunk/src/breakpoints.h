@@ -66,7 +66,7 @@ public:
 			 unsigned int new_address, 
 			 unsigned int bp);
 
-  virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
   virtual bool isBase() { return false;}
   virtual bool eval_Expression();
@@ -81,7 +81,7 @@ class Notify_Instruction : public Breakpoint_Instruction
 		     unsigned int address, 
 		     unsigned int bp, 
 		     TriggerObject *cb);
-  virtual INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
   virtual void execute(void);
   virtual char const * bpName() { return "Notify Execution"; }
 
@@ -94,7 +94,7 @@ class Profile_Start_Instruction : public Notify_Instruction
 			    unsigned int address, 
 			    unsigned int bp, 
 			    TriggerObject *cb);
-  virtual INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Start"; }
 };
 
@@ -105,7 +105,7 @@ class Profile_Stop_Instruction : public Notify_Instruction
 			   unsigned int address, 
 			   unsigned int bp, 
 			   TriggerObject *cb);
-  virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Stop"; }
 };
 

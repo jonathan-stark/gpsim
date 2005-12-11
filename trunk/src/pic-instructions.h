@@ -51,8 +51,6 @@ public:
     ASSERTION_INSTRUCTION
   };
 
-  typedef enum INSTRUCTION_TYPES INSTRUCTION_TYPES;
-
   /*
    * Not all instructions derived from the instruction
    * class use these constants... 
@@ -87,7 +85,7 @@ public:
   virtual int get_lst_line() { return(lst_line); }
   virtual int get_file_id() {return(file_id); }
   virtual int get_hll_file_id() {return(hll_file_id); }
-  virtual INSTRUCTION_TYPES isa() {return NORMAL_INSTRUCTION;}
+  virtual enum INSTRUCTION_TYPES isa() {return NORMAL_INSTRUCTION;}
   virtual guint64 getCyclesUsed() { return cycle_count;}
   virtual bool isBase() = 0;
   void decode(Processor *new_cpu, unsigned int new_opcode);
@@ -151,7 +149,7 @@ public:
   virtual int get_lst_line();
   virtual int get_file_id();
   virtual int get_hll_file_id();
-  virtual INSTRUCTION_TYPES isa();
+  virtual enum INSTRUCTION_TYPES isa();
   virtual void initialize(bool init_state);
   virtual char *name(char *,int len);
   virtual bool isBase();
@@ -180,7 +178,7 @@ public:
   invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
   invalid_instruction(Processor *new_cpu,unsigned int address, 
     unsigned int new_opcode);
-  virtual INSTRUCTION_TYPES isa() {return INVALID_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa() {return INVALID_INSTRUCTION;};
   //virtual char *name(char *str){return("INVALID");};
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new invalid_instruction(new_cpu,new_opcode);}
