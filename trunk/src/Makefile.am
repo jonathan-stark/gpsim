@@ -36,7 +36,7 @@ libgpsim_la_SOURCES = \
 	intcon.cc \
 	interface.cc \
 	ioports.cc \
-        lxt_write.c \
+	lxt_write.c \
 	modules.cc \
 	os_dependent.cc \
 	p12x.cc \
@@ -52,6 +52,7 @@ libgpsim_la_SOURCES = \
 	pic-processor.cc \
 	pic-registers.cc \
 	pic-instructions.cc \
+	pic-ioports.cc \
 	pie.cc \
 	pir.cc \
 	processor.cc \
@@ -72,7 +73,7 @@ libgpsim_la_SOURCES = \
 	expr.cc	\
 	operator.cc \
 	value.cc \
-        ValueCollections.cc
+	ValueCollections.cc
 
 gpsiminclude_HEADERS = \
 	12bit-instructions.h \
@@ -122,6 +123,7 @@ gpsiminclude_HEADERS = \
 	pic-packages.h \
 	pic-processor.h \
 	pic-registers.h \
+	pic-ioports.h \
 	picdis.h \
 	pie.h \
 	pir.h \
@@ -147,7 +149,7 @@ gpsiminclude_HEADERS = \
 	errors.h \
 	expr.h \
 	value.h \
-        ValueCollections.h
+	ValueCollections.h
 
 
 
