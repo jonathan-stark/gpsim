@@ -75,6 +75,7 @@ src_OBJECTS =			\
 	pic-instructions.o	\
 	pic-processor.o		\
 	pic-registers.o		\
+	pic-ioports.o		\
 	pie.o			\
 	protocol.o		\
 	pir.o			\

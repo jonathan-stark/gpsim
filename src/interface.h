@@ -26,7 +26,6 @@ Boston, MA 02111-1307, USA.  */
  */
 
 #include <stdio.h>
-#include <unistd.h>
 #include <glib.h>
 #include "modules.h"
 #include "symbol.h"

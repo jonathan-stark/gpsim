@@ -35,7 +35,7 @@ void IIndexedCollection::SetAddressRadix(int iRadix) {
   }
 }
 
-void IIndexedCollection::set(Value * pValue) {
+void IIndexedCollection::Set(Value * pValue) {
   unsigned int  uUpper = GetUpperBound() + 1;
   for(unsigned int uIndex = GetLowerBound(); uIndex < uUpper; uIndex++) {
     SetAt(uIndex, pValue);
@@ -63,7 +63,13 @@ void IIndexedCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
           }
         }
         else {
-          throw Error("indexer not valid");
+          register_symbol *pReg = dynamic_cast<register_symbol*>(pIndex);
+          if(pReg) {
+            SetAt(pReg->getReg()->address, pValue);
+          }
+          else {
+            throw Error("indexer not valid");
+          }
         }
       }
       if(pIndex != NULL) {
@@ -87,6 +93,79 @@ string IIndexedCollection::toString() {
   ConsolidateValues(iColumnWidth, asIndexes, asValue);
   return toString(iColumnWidth, asIndexes, asValue);
 }
+
+#if  1
+string IIndexedCollection::toString(ExprList_t* pIndexerExprs) {
+  try {
+    ostringstream sOut;
+    if(pIndexerExprs==NULL)  {
+      sOut << toString() << ends;
+      return sOut.str();
+    }
+    else {
+      ExprList_t::iterator it;
+      ExprList_t::iterator itEnd = pIndexerExprs->end();
+      for(it = pIndexerExprs->begin(); it != itEnd; it++) {
+        Value * pIndex = (*it)->evaluate();
+        AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
+        if(pRange) {
+          unsigned uEnd = pRange->get_rightVal() + 1;
+          for(unsigned int uIndex = pRange->get_leftVal(); uIndex < uEnd; uIndex++) {
+            Value &Value = GetAt(uIndex);
+            sOut << Value.name() << " = " << Value.toString() << endl;
+          }
+          continue;
+        }
+        Integer *pInt;
+        String *pName = dynamic_cast<String*>(pIndex);
+        if(pName) {
+          pInt = get_symbol_table().findInteger(pName->getVal());
+        }
+        else {
+          pInt = dynamic_cast<Integer*>(pIndex);
+        }
+        Integer temp(0);
+        if(pInt == NULL) {
+          // This is a temp workaround. I would expect a register symbol
+          // evaluate to an Integer object containing the value of the
+          // register. It currently returns an object that is a copy 
+          // of the register_symbol object.
+          register_symbol *pReg = dynamic_cast<register_symbol*>(pIndex);
+          if(pReg) {
+            gint64 i;
+            pReg->get(i);
+            temp.set(i);
+            pInt = &temp;
+          }
+        }
+        if(pInt) {
+          unsigned int uIndex = (unsigned int)pInt->getVal();
+          unsigned int uUpperBound = GetUpperBound();
+          if(uIndex >= GetLowerBound() &&
+              uIndex <= GetUpperBound() ) {
+            Value &Value = GetAt(uIndex);
+            sOut << Value.name() << " = " << Value.toString() << endl;
+          }
+          else {
+            sOut << "Error: Index " << uIndex << " is out of range" << endl;
+          }
+        }
+        else {
+          sOut << "Error: The index specified for '"
+            << name() << "' does not contain a valid index."
+            << endl;
+        }
+        delete pIndex;
+      }
+    }
+    sOut << ends;
+    return sOut.str();
+  }
+  catch(Error e) {
+    return e.toString();
+  }
+}
+#endif
 
 void IIndexedCollection::PushValue(int iFirstIndex, int iCurrentIndex,
                                    Value *pValue,
@@ -136,7 +215,7 @@ string IIndexedCollection::toString(int iColumnWidth, vector<string> &asIndexes,
   return sOut.str();
 }
 
-Integer * IIndexedCollection::findInteger(const char *s) {
+Integer * IIndexedCollection::FindInteger(const char *s) {
   return get_symbol_table().findInteger(s);
 }
 

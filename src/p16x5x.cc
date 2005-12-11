@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "packages.h"
 #include "p16x5x.h"
+#include "pic-ioports.h"
 
 #include "symbol.h"
 

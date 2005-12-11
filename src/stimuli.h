@@ -23,7 +23,6 @@ Boston, MA 02111-1307, USA.  */
 #define __STIMULI_H__
 #include <iostream>
 #include <string>
-#include <unistd.h>
 #include <glib.h>
 using namespace std;
 #include <list>

@@ -384,6 +384,14 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
   }
 }
 
+Module_Library::~Module_Library(void) {
+  if(_handle) {
+    free_library(_handle);
+  }
+  if(_name)
+    delete _name;
+}
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 ICommandHandler *Module_Library::GetCli() {
@@ -598,6 +606,23 @@ Module_Library * module_get_library(const char* name) {
       return t;
   }
   return NULL;
+}
+
+void module_free_library(const char* name) {
+  string sPath(name);
+  FixupLibraryName(sPath);
+  string sName;
+  module_canonical_name(sPath, sName);
+  for (module_iterator = module_list.begin();  
+       module_iterator != module_list.end(); 
+       ++module_iterator) {
+
+    Module_Library *t = *module_iterator;
+    if (strcmp(t->name(), sName.c_str()) == 0) {
+      module_list.erase(module_iterator);
+      delete t;
+    }
+  }
 }
 
 ICommandHandler * module_get_command_handler(const char *name) {

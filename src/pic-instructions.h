@@ -24,7 +24,6 @@ Boston, MA 02111-1307, USA.  */
 
 
 #ifdef HAVE_GUI
-#include <unistd.h>
 #include <glib.h>
 #endif
 
@@ -51,6 +50,8 @@ public:
     MULTIWORD_INSTRUCTION,
     ASSERTION_INSTRUCTION
   };
+
+  typedef enum INSTRUCTION_TYPES INSTRUCTION_TYPES;
 
   /*
    * Not all instructions derived from the instruction
@@ -91,7 +92,7 @@ public:
   virtual bool isBase() = 0;
   void decode(Processor *new_cpu, unsigned int new_opcode);
   void add_line_number_symbol(int address);
-  void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
+  virtual void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
   virtual char *ReadSrcLine(char *buf, int nBytes);
   virtual char *ReadLstLine(char *buf, int nBytes);

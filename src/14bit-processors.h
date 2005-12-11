@@ -29,6 +29,12 @@ Boston, MA 02111-1307, USA.  */
 
      // forward references
 class _14bit_processor;
+class PicPortRegister;
+class PicTrisRegister;
+
+class PicPortBRegister;
+class PicTrisRegister;
+class PortBSink;
 class IOPIN;
 
 extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst);

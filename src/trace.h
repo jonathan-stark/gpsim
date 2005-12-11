@@ -21,7 +21,6 @@ Boston, MA 02111-1307, USA.  */
 #ifndef  __TRACE_H__
 #define  __TRACE_H__
 
-#include <unistd.h>
 #include <stdio.h>
 #include <glib.h>
 

@@ -23,15 +23,12 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 #include <string>
-
+#include <assert.h>
 
 #include "../config.h"
-#include "pic-processor.h"
-#include "14bit-processors.h"  // %%% FIXME %%% remove the dependencies on this
+#include "cmd_gpsim.h"
 #include "ioports.h"
-#include "interface.h"
-#include "p16x6x.h"
-#include "p16f62x.h"
+#include "trace.h"
 
 #include "stimuli.h"
 
@@ -131,16 +128,6 @@ private:
 };
 
 
-class PortSink : public SignalSink
-{
-public:
-  PortSink(PortRegister *portReg, unsigned int iobit);
-  virtual void setSinkState(char);
-private:
-  PortRegister *m_PortRegister;
-  unsigned int  m_iobit;
-};
-
 PortSink::PortSink(PortRegister *portReg, unsigned int iobit)
   : m_PortRegister(portReg), m_iobit(iobit)
 {
@@ -163,6 +150,7 @@ PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
 {
 
 }
+
 void PortRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
@@ -514,161 +502,6 @@ void PinModule::updateUI()
   m_port->updateUI();
 }
 
-
-
-
-
-//------------------------------------------------------------------------
-
-PicPortRegister::PicPortRegister(const char *port_name,
-				 unsigned int numIopins, 
-				 unsigned int enableMask)
-  : PortRegister(numIopins, false), m_tris(0)
-{
-  new_name(port_name);
-  PicPortRegister::setEnableMask(enableMask);
-}
-
-void PicPortRegister::setEnableMask(unsigned int newEnableMask)
-{
-  unsigned int maskDiff = getEnableMask() ^ newEnableMask;
-
-  for (unsigned int i=0, m=1; i<mNumIopins; i++, m<<= 1)
-    if (maskDiff & m) {
-      PinModule *pmP = new PinModule(this,i);
-      PortModule::addPinModule(pmP,i);
-      pmP->setDefaultSource(new PicSignalSource(this, i));
-      pmP->addSink(new PortSink(this, i));
-    }
-
-  PortRegister::setEnableMask(newEnableMask);
-}
-class PicSignalControl : public SignalControl
-{
-public:
-  PicSignalControl(Register *_reg, unsigned int bitPosition)
-    : m_register(_reg), m_bitMask(1<<bitPosition)
-  {
-  }
-  char getState()
-  {
-    return m_register ? m_register->get3StateBit(m_bitMask) : '?';
-  }
-private:
-  Register *m_register;
-  unsigned int m_bitMask;
-};
-void PicPortRegister::setTris(PicTrisRegister *new_tris)
-{
-  if (!m_tris) {
-    m_tris = new_tris;
-
-    for (unsigned int i=0; i<mNumIopins; i++) {
-      operator[](i).setDefaultControl(new PicSignalControl(m_tris, i));
-    }
-
-  }
-}
-//------------------------------------------------------------------------
-
-PicTrisRegister::PicTrisRegister(const char *tris_name, PicPortRegister *_port)
-  : sfr_register(),m_port(_port)
-{
-  new_name(tris_name);
-  if (m_port)
-    m_port->setTris(this);
-}
-void PicTrisRegister::put(unsigned int new_value)
-{
-  value.data = new_value;
-  if (m_port)
-    m_port->updatePort();
-}
-
-unsigned int PicTrisRegister::get(void)
-{
-  return value.data;
-}
-
-
-
-
-PicPortBRegister::PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask)
-  : PicPortRegister(port_name, numIopins, enableMask),
-    m_bRBPU(false),
-    m_bIntEdge(false)
-{
-}
-
-void PicPortBRegister::put(unsigned int new_value)
-{
-  trace.raw(write_trace.get() | value.data);
-
-  unsigned int diff = mEnableMask & (new_value ^ value.data);
-  if(diff) {
-    drivingValue = new_value & mEnableMask;
-    value.data = drivingValue;
-    // If no stimuli are connected to the Port pins, then the driving
-    // value and the driven value are the same. If there are external
-    // stimuli (or perhaps internal peripherals) overdriving or overriding
-    // this port, then the call to updatePort() will update 'drivenValue'
-    // to its proper value.
-    rvDrivenValue.data = drivingValue;
-    rvDrivenValue.init = 0;
-    updatePort();
-  }
-
-  cpu14->intcon->set_rbif(false);
-}
-
-unsigned int PicPortBRegister::get()
-{
-  cpu14->intcon->set_rbif(false);
-
-  return rvDrivenValue.data;
-}
-
-//------------------------------------------------------------------------
-// setbit
-// FIXME - a sink should be created for the intf and rbif functions.
-
-void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
-{
-  Dprintf(("PicPortBRegister::setbit() bit=%d,val=%c\n",bit_number,new3State));
-
-  bool bNewValue = new3State=='1' || new3State=='W';
-  if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
-      && (bNewValue == m_bIntEdge))
-    cpu14->intcon->set_intf(true);
-
-
-  PortRegister::setbit(bit_number, new3State);
-
-  unsigned int bitMask = (1<<bit_number) & 0xF0;
-
-  if ( (drivingValue ^ rvDrivenValue.data) & m_tris->get() & bitMask )
-    cpu14->intcon->set_rbif(true);
-}
-
-void PicPortBRegister::setRBPU(bool bNewRBPU)
-{
-  m_bRBPU = !bNewRBPU;
-
-  Dprintf(("PicPortBRegister::setRBPU() =%d\n",(m_bRBPU?1:0)));
-
-  unsigned int mask = getEnableMask();
-  for (unsigned int i=0, m=1; mask; i++, m<<= 1)
-    if (mask & m) {
-      mask ^= m;
-      operator[](i).getPin().update_pullup(m_bRBPU ? '1' : '0',true);
-    }
-
-}
-
-void PicPortBRegister::setIntEdge(bool bNewIntEdge)
-{
-  m_bIntEdge = bNewIntEdge;
-}
 
 
 //-------------------------------------------------------------------

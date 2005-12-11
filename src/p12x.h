@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __P12X_H__
 
 #include "12bit-processors.h"
+#include "pic-ioports.h"
 #include "i2c-ee.h"
 
 class GPIO : public PicPortRegister

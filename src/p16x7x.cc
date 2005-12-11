@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 
 #include "p16x7x.h"
+#include "pic-ioports.h"
 #include "stimuli.h"
 
 //#define DEBUG_AD

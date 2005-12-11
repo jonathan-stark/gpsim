@@ -494,6 +494,7 @@ public:
 //  virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr);
   virtual unsigned int GetLowerBound();
   virtual unsigned int GetUpperBound();
+private:
   Processor *   m_pProcessor;
   Register **   m_ppRegisters;
   unsigned int  m_uSize;

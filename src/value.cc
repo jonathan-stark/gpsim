@@ -426,7 +426,7 @@ bool Boolean::Parse(const char *pValue, bool &bValue) {
   return false;
 }
 
-Boolean * Boolean::New(const char *_name, const char *pValue, const char *desc) {
+Boolean * Boolean::NewObject(const char *_name, const char *pValue, const char *desc) {
   bool bValue;
   if(Parse(pValue, bValue)) {
     return new Boolean(_name, bValue);
@@ -712,7 +712,7 @@ bool Integer::Parse(const char *pValue, gint64 &iValue) {
     return false;
 }
 
-Integer * Integer::New(const char *_name, const char *pValue, const char *desc) {
+Integer * Integer::NewObject(const char *_name, const char *pValue, const char *desc) {
   gint64 iValue;
   if(Parse(pValue, iValue)) {
     return new Integer(_name, iValue, desc);
@@ -931,7 +931,7 @@ bool Float::Parse(const char *pValue, double &fValue)
   return pValue ? sscanf(pValue,"%lg",&fValue) == 1 : false;
 }
 
-Float * Float::New(const char *_name, const char *pValue, const char *desc) {
+Float * Float::NewObject(const char *_name, const char *pValue, const char *desc) {
   double fValue;
   if(Parse(pValue, fValue)) {
     return new Float(_name, fValue);
