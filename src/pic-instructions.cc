@@ -213,7 +213,7 @@ int AliasedInstruction::get_hll_file_id()
 {
   return getReplaced()->get_hll_file_id();
 }
-instruction::INSTRUCTION_TYPES AliasedInstruction::isa()
+enum instruction::INSTRUCTION_TYPES AliasedInstruction::isa()
 {
   return getReplaced()->isa();
 }

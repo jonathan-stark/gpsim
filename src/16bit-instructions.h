@@ -65,7 +65,7 @@ class multi_word_instruction : public instruction
   bool initialized;
 
   virtual int instruction_size(void) { return 2;}
-  virtual INSTRUCTION_TYPES isa(void) {return MULTIWORD_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa(void) {return MULTIWORD_INSTRUCTION;};
   virtual bool isBase() { return true;}
 
   virtual void initialize(bool init_state) { initialized = init_state; }
