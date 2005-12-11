@@ -82,10 +82,17 @@ public:
   virtual unsigned int GetSize() = 0;
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0) = 0;
   virtual void SetAt(unsigned int uIndex, Value *pValue) = 0;
-  virtual void set(Value *pValue);
+  virtual void Set(Value *pValue);
   virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr);
   virtual unsigned int GetLowerBound() = 0;
   virtual unsigned int GetUpperBound() = 0;
+  void          SetAddressRadix(int iRadix);
+
+  virtual string toString(ExprList_t* pIndexerExprs);
+  virtual char * toString(char *pBuffer, int len);
+  virtual string toString();
+
+protected:
   virtual void ConsolidateValues(int &iColumnWidth,
                                  vector<string> &aList,
                                  vector<string> &aValue) = 0;
@@ -117,18 +124,17 @@ public:
       iColumnWidth = max(iColumnWidth, (int)aList.back().size());
     }
   }
-  virtual char *toString(char *pBuffer, int len);
-  virtual string toString();
   void PushValue(int iFirstIndex, int iCurrentIndex,
                  Value *pValue,
                  vector<string> &asIndexes, vector<string> &asValue);
   virtual string toString(int iColumnWidth, vector<string> &asIndexes,
                           vector<string> &asValue);
+//  virtual string toString(ExprList_t* pIndexers, Expression *pExpr);
   virtual string ElementIndexedName(unsigned int iIndex);
 
-  Integer *     findInteger(const char *s);
-  void          SetAddressRadix(int iRadix);
+  Integer *     FindInteger(const char *s);
 
+protected:
   char  m_szPrefix[3];
   int   m_iAddressRadix;
 };
@@ -197,43 +203,6 @@ public:
     else {
     }
   }
-#if 0
-  // I think this is reduntant and the template function
-  // IIndexedCollection::SetAt() is enough.
-  virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr) {
-    ExprList_t::iterator it;
-    ExprList_t::iterator itEnd = pIndexers->end();
-    Value * pValue = pExpr->evaluate();
-//    _CT * pCTValue = dynamic_cast<_CT*>(pValue);
-//    if(pCTValue != NULL) {
-      for(it = pIndexers->begin(); it != itEnd; it++) {
-        Value * pIndex = (*it)->evaluate();
-        Integer *pIntIndex = dynamic_cast<Integer*>(pIndex);
-        if(pIntIndex != NULL) {
-          SetAt(int(*pIntIndex), pValue);
-        }
-        else {
-        AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
-        if(pRange) {
-          unsigned uEnd = pRange->get_rightVal() + 1;
-          for(unsigned int uIndex = pRange->get_leftVal(); uIndex < uEnd; uIndex++) {
-            SetAt(uIndex, pValue);
-          }
-        }
-        else {
-          throw Error("indexer not valid");
-        }
-      }
-      if(pIndex != NULL) {
-          delete pIndex;
-        }
-      }
-//    }
-//    else {
-//    }
-    delete pValue;
-  }
-#endif
 
   void SetAt(unsigned int uIndex, _CT *pValue) {
     if((uIndex + 1 - m_uLower) < m_Array.size() && uIndex <= m_uLower) {

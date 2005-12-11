@@ -375,6 +375,9 @@
 				RelativePath=".\pic-instructions.cc">
 			</File>
 			<File
+				RelativePath=".\pic-ioports.cc">
+			</File>
+			<File
 				RelativePath=".\pic-processor.cc">
 			</File>
 			<File
@@ -424,6 +427,9 @@
 			</File>
 			<File
 				RelativePath=".\uart.cc">
+			</File>
+			<File
+				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
 			<File
 				RelativePath=".\value.cc">
@@ -623,6 +629,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 				RelativePath=".\pic-instructions.h">
 			</File>
 			<File
+				RelativePath=".\pic-ioports.h">
+			</File>
+			<File
 				RelativePath=".\pic-packages.h">
 			</File>
 			<File
@@ -701,9 +710,6 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 				RelativePath=".\xref.h">
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\plat\win32\uxtime.cc">
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #define __16_BIT_PROCESSORS_H__
 
 #include "pic-processor.h"
+#include "pic-ioports.h"
 #include "intcon.h"
 #include "16bit-registers.h"
 #include "16bit-tmrs.h"

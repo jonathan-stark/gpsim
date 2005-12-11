@@ -24,7 +24,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include  <iostream>
 #include <iomanip>
-#include <unistd.h>
 #include <glib.h>
 #include <string>
 #include "trigger.h"

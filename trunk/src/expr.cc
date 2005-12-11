@@ -183,74 +183,9 @@ string IndexedSymbol::toString() {
     return string("The symbol ") + m_pSymbol->name() + " is not an indexed variable";
   }
   else {
-    try {
-      ostringstream sOut;
-      if(m_pExprList==NULL)  {
-        sOut << pIndexedCollection->toString() << ends;
-        return sOut.str();
-      }
-      else {
-        ExprList_t::iterator it;
-        ExprList_t::iterator itEnd = m_pExprList->end();
-        for(it = m_pExprList->begin(); it != itEnd; it++) {
-          Value * pIndex = (*it)->evaluate();
-          AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
-          if(pRange) {
-            unsigned uEnd = pRange->get_rightVal() + 1;
-            for(unsigned int uIndex = pRange->get_leftVal(); uIndex < uEnd; uIndex++) {
-              Value &Value = pIndexedCollection->GetAt(uIndex);
-              sOut << Value.name() << " = " << Value.toString() << endl;
-            }
-            continue;
-          }
-          Integer *pInt;
-          String *pName = dynamic_cast<String*>(pIndex);
-          if(pName) {
-            pInt = get_symbol_table().findInteger(pName->getVal());
-          }
-          else {
-            pInt = dynamic_cast<Integer*>(pIndex);
-          }
-          Integer temp(0);
-          if(pInt == NULL) {
-            // This is a temp workaround. I would expect a register symbol
-            // evaluate to an Integer object containing the value of the
-            // register. It currently returns an object that is a copy 
-            // of the register_symbol object.
-            register_symbol *pReg = dynamic_cast<register_symbol*>(pIndex);
-            if(pReg) {
-              gint64 i;
-              pReg->get(i);
-              temp.set(i);
-              pInt = &temp;
-            }
-          }
-          if(pInt) {
-            unsigned int uIndex = (unsigned int)pInt->getVal();
-            unsigned int uUpperBound = pIndexedCollection->GetUpperBound();
-            if(uIndex >= pIndexedCollection->GetLowerBound() &&
-               uIndex <= pIndexedCollection->GetUpperBound() ) {
-              Value &Value = pIndexedCollection->GetAt(uIndex);
-              sOut << Value.name() << " = " << Value.toString() << endl;
-            }
-            else {
-              sOut << "Error: Index " << uIndex << " is out of range" << endl;
-            }
-          }
-          else {
-            cout << "Error: The index specified for '"
-              << m_pSymbol->name() << "' does not contain a valid index."
-              << endl;
-          }
-          delete pIndex;
-        }
-      }
-      sOut << ends;
-      return sOut.str();
-    }
-    catch(Error e) {
-      return e.toString();
-    }
+    ostringstream sOut;
+    sOut << pIndexedCollection->toString(m_pExprList) << ends;
+    return sOut.str();
   }
   return string("IndexedSymbol not initialized");
 }

@@ -20,7 +20,6 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef __PIC_PROCESSORS_H__
 #define __PIC_PROCESSORS_H__
-#include <unistd.h>
 #include <glib.h>
 #include <stdio.h>
 

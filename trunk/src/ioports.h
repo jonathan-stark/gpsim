@@ -256,6 +256,7 @@ private:
 };
 
 
+
 ///------------------------------------------------------------
 class PortRegister : public sfr_register, public PortModule
 {
@@ -284,52 +285,16 @@ protected:
   RegisterValue rvDrivenValue;
 };
 
-///------------------------------------------------------------
-class PicTrisRegister;
-class PicPortRegister : public PortRegister
+
+class PortSink : public SignalSink
 {
 public:
-  PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
-  void setTris(PicTrisRegister *new_tris);
-  virtual void setEnableMask(unsigned int nEnableMask);
-  Register *getTris();
-protected:
-  PicTrisRegister *m_tris;
-};
-
-class PicTrisRegister : public sfr_register
-{
-
-public:
-
-  PicTrisRegister(const char *tris_name, PicPortRegister *);
-  virtual void put(unsigned int new_value);
-  virtual unsigned int get();
-  
-protected:
-  PicPortRegister *m_port;
-};
-
-class PicPortBRegister : public PicPortRegister
-{
-public:
-  PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
-
-  virtual void put(unsigned int new_value);
-  virtual unsigned int get();
-  virtual void setbit(unsigned int bit_number, char new_value);
-  void setRBPU(bool);
-  void setIntEdge(bool);
+  PortSink(PortRegister *portReg, unsigned int iobit);
+  virtual void setSinkState(char);
 private:
-  enum {
-    eIntEdge = 1<<6,
-    eRBPU    = 1<<7
-  };
-  bool m_bRBPU;
-  bool m_bIntEdge;
-
+  PortRegister *m_PortRegister;
+  unsigned int  m_iobit;
 };
-
 
 
 

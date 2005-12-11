@@ -274,7 +274,7 @@ public:
   Boolean(bool newValue);
   Boolean(const char *_name, bool newValue, const char *desc=0);
   static bool Parse(const char *pValue, bool &bValue);
-  static Boolean * New(const char *_name, const char *pValue, const char *desc);
+  static Boolean * NewObject(const char *_name, const char *pValue, const char *desc);
   virtual ~Boolean();
 
   string toString();
@@ -334,7 +334,7 @@ public:
   Integer(gint64 new_value);
   Integer(const char *_name, gint64 new_value, const char *desc=0);
   static bool       Parse(const char *pValue, gint64 &iValue);
-  static Integer *  New(const char *_name, const char *pValue, const char *desc);
+  static Integer *  NewObject(const char *_name, const char *pValue, const char *desc);
 
   virtual ~Integer();
 
@@ -494,7 +494,7 @@ public:
   Float(double newValue = 0.0);
   Float(const char *_name, double newValue, const char *desc=0);
   static bool Parse(const char *pValue, double &fValue);
-  static Float * New(const char *_name, const char *pValue, const char *desc);
+  static Float * NewObject(const char *_name, const char *pValue, const char *desc);
   virtual ~Float();
 
   virtual string toString();

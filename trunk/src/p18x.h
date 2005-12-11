@@ -24,6 +24,9 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-processors.h"
 #include "eeprom.h"
 
+class PicPortRegister;
+class PicTrisRegister;
+class PicLatchRegister;
 
 class P18C2x2 : public _16bit_processor
 {

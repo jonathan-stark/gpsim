@@ -34,6 +34,9 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "12bit-processors.h"
 
+class PicPortRegister;
+class PicTrisRegister;
+class PicLatchRegister;
 
 
 class P16C54 : public  _12bit_processor

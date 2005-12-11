@@ -38,6 +38,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 
 #include "p16x6x.h"
+#include "pic-ioports.h"
 #include "intcon.h"
 
 void P16X6X_processor::create_symbols()

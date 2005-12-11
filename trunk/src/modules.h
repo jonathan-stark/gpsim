@@ -77,10 +77,7 @@ public:
 
   Module_Library(const char *new_name, void *library_handle);
 
-  ~Module_Library(void) {
-    if(_name)
-      delete _name;
-  };
+  ~Module_Library(void);
 
   char *name(void) {
     return(_name);
@@ -226,7 +223,9 @@ void free_error_message(char * pszError);
 void module_display_available(void);
 void module_list_modules(void);
 bool module_load_library(const char *library_name);
+void module_free_library(const char* name);
 void module_load_module(const char * module_type, const char * module_new_name=0);
+Module_Library * module_get_library(const char* name);
 void module_reset_all(RESET_TYPE r);
 
 void module_pins(char *module_name);
