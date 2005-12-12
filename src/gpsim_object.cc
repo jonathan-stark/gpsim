@@ -59,6 +59,8 @@ string gpsimObject::showType()
   of the type. The memory pointed to is cached and should never
   be directly deallocated.
   */
+  // Skip over the word 'class '.
+  name += 6;
 #else
   #warning --->You might want to clean up the result of typeid() here...
 #endif
