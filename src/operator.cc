@@ -2,7 +2,7 @@
 
 #include "operator.h"
 #include "errors.h"
-
+#include "symbol.h"
 
 
 static bool isFloat(Value *v)
@@ -89,6 +89,7 @@ UnaryOperator::UnaryOperator(string theOpString, Expression* expr_)
 
 UnaryOperator::~UnaryOperator()
 {
+  delete expr;
 }
 
 
@@ -113,20 +114,20 @@ string UnaryOperator::toString()
 
 Value* UnaryOperator::evaluate()
 {
-  Value* tmp;
+  Value* tmp, *vReturn;
 
   // start evaluating our operand expression:
   tmp = expr->evaluate();
 
   // Apply the specific operator to the evaluated operand:
-  tmp = applyOp(tmp);
+  vReturn = applyOp(tmp);
 
   // If the result is constant, save the result for future use:
   //if (tmp->isConstant()) {
   //  value = tmp;
   //}
-
-  return tmp;
+  delete tmp;
+  return vReturn;
 }
 
 /*****************************************************************
@@ -717,3 +718,55 @@ Value* OpIndirect::applyOp(Value* operand)
 
   return rVal;
 }
+
+/******************************************************************************
+ The unary '*' operator - indirect access
+******************************************************************************/
+OpAddressOf::OpAddressOf(Expression* expr)
+  : UnaryOperator("&", expr)
+{
+}
+
+OpAddressOf::~OpAddressOf()
+{
+}
+
+Value* OpAddressOf::evaluate()
+{
+  Value* tmp;
+
+  // start evaluating our operand expression:
+  LiteralSymbol *pSym = dynamic_cast<LiteralSymbol *>(expr);
+  if (pSym) {
+    tmp = applyOp(pSym->GetSymbol());
+  }
+  else {
+    throw new TypeMismatch(showOp(), expr->showType());
+  }
+  return tmp;
+}
+
+Value* OpAddressOf::applyOp(Value* operand)
+{
+  Value* rVal=0;
+
+  //FIXME - this doesn't work!!
+  register_symbol *pReg =dynamic_cast<register_symbol*>(operand);
+  if (pReg) {
+    rVal = new Integer(pReg->getAddress());
+  }
+  else {
+    AliasedSymbol *pSym = dynamic_cast<AliasedSymbol*>(operand);
+    if (pSym) {
+      pReg = dynamic_cast<register_symbol*>(pSym);
+      if (pReg) {
+        rVal = new Integer(pReg->getAddress());
+      }
+    }
+  }
+  if(rVal==0) {
+    throw new TypeMismatch(showOp(), operand->showType());
+  }
+  return rVal;
+}
+

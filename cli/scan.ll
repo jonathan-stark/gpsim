@@ -299,6 +299,8 @@ abort_gpsim_now {
 "||"                {return(recognize(LOR_T, "||"));}
 
 ":"                 {return(recognize(COLON_T, ":"));}
+"!"                 {return(recognize(LNOT_T,"!"));}
+"~"                 {return(recognize(ONESCOMP_T,"~"));}
 "+"                 {return(recognize(PLUS_T,"+"));}
 "-"                 {return(recognize(MINUS_T,"-"));}
 "*"                 {return(recognize(MPY_T,"*"));}
@@ -828,6 +830,10 @@ void init_cmd_state(void)
   }
 
   //YY_FLUSH_BUFFER;
+}
+
+void FlushLexerBuffer() {
+  YY_FLUSH_BUFFER;
 }
 
 static void pushLexerState()

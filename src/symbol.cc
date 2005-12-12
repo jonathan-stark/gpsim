@@ -775,6 +775,16 @@ symbol::~symbol(void)
 {
 }
 
+Value* symbol::evaluate()
+{
+  string msg("symbol '");
+  msg.append(this->name());
+  msg.append("' of type '");
+  msg.append(showType());
+  msg.append("' cannot not be evaluated in an expression");
+  throw Error( msg );
+}
+
 //------------------------------------------------------------------------
 string symbol::toString()
 {
@@ -1062,6 +1072,12 @@ Register *register_symbol::getReg()
   return reg;
 }
 
+Value* register_symbol::evaluate() {
+  gint64 v;
+  get(v);
+  return new Integer(v);
+}
+
 //------------------------------------------------------------------------
 w_symbol::w_symbol(const char *_name, Register *_reg)
   : register_symbol(_name, _reg)
@@ -1089,6 +1105,11 @@ string address_symbol::toString()
   snprintf(buf,sizeof(buf), " at address %d = 0x%X",i,i);
   
   return name() + string(buf);
+}
+
+Value* address_symbol::evaluate()
+{
+  return copy();
 }
 
 line_number_symbol::line_number_symbol(const char *_name, unsigned int _val)
@@ -1182,6 +1203,11 @@ Value *attribute_symbol::copy()
 {
   if (attribute)
     return attribute->copy();
+  return copy();
+}
+
+Value* attribute_symbol::evaluate()
+{
   return copy();
 }
 

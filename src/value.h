@@ -141,6 +141,7 @@ public:
   // Some Value types that are used for symbol classes
   // contain a gpsimValue type that have update listeners.
   virtual void update(void) {}
+  virtual Value* evaluate() { return copy(); }
 
  private:
   const char *cpDescription;

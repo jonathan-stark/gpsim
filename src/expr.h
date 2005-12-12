@@ -78,6 +78,7 @@ public:
   virtual ~LiteralSymbol();
   virtual Value* evaluate();
   string toString();
+  Value *GetSymbol();
 
  private:
   Value *sym;
@@ -135,6 +136,19 @@ public:
 
 private:
   String* value;
+};
+
+class RegisterExpression : public Expression {
+
+public:
+
+  RegisterExpression(unsigned int uAddress);
+  virtual ~RegisterExpression();
+  virtual Value* evaluate();
+  string toString();
+
+ private:
+  unsigned int  m_uAddress;
 };
 
 #endif // __EXPR_H__
