@@ -1,3 +1,24 @@
+2005-12-11 J.R. Heisey <jrheisey@sourceforge.com
+	* src\expr.cc, src\expr.h, src\operator.cc, src\operator.h,
+	cli\parse.yy, cli\scan.ll, src\symbol.cc, src\symbol.h,
+	src\value.cc src\value.h: Problems with expression evaluation.
+	Could not evaluate A=-X. Added evaluate() function to class
+	Value and a pecialized implementations to relevant derived
+	classes. The LiteralSymbol::evaluate() now calls the symbols
+	evaluate() so that a register_symbol will return the register
+	contents.
+	* Also implemented reg(int) as an expression so it can be
+	included in calculations
+	* Implemented the ampersand character as an 'address of' operator
+	Fixed minus sign for negation and one's complement.
+	* I don't think it is necessary to implement * as a indirection
+	operator unless we have symbols that represent an address to
+	storage (i.e. a pointer). I would think that it would be
+	reasonable to expect a register symbol to return the register
+	contents with out using an operator as it has been.
+	* src/gpsim_object.cc: gpsimObject:showType() now does not
+	include the word class for the type for Windows.
+
 2005-12-11 Borut Razem <borut.razem@siol.net>
 
 	* src/16bit-instructions.h, src/breakpoints.h, src/pic-instructions.h,
