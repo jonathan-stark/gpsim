@@ -329,4 +329,14 @@ public:
   Value* applyOp(Value* value);
 };
 
+// -----------------------------------------------------------------
+class OpAddressOf : public UnaryOperator {
+
+public:
+  OpAddressOf(Expression* expr);
+  virtual ~OpAddressOf();
+  Value* OpAddressOf::evaluate();
+  Value* applyOp(Value* value);
+};
+
 #endif // __OPERATOR_H__

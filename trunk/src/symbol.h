@@ -309,6 +309,7 @@ class symbol : public Value
 {
 public:
 
+  virtual Value* evaluate();
   virtual string toString();
 
   symbol(const char *);
@@ -350,9 +351,11 @@ public:
   virtual void get(double &v) {m_pData->get(v);}
   virtual void get(char *v, int len) {m_pData->get(v,len);}
   virtual void get(Packet &v) {m_pData->get(v);}
+  virtual Value *getValue() { return m_pData; }
 
   virtual char *toString(char *v, int len) { return m_pData->toString(v,len);}
-  virtual string toString() { return m_pData->toString();}
+  virtual string toString() { return m_pData->toString(); }
+  virtual Value* evaluate() { return m_pData->evaluate(); }
 protected:
   Value *m_pData;
 };
@@ -460,6 +463,7 @@ public:
   unsigned int getBitmask(void);
 
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
+  Value*       evaluate();
 
   Register *getReg();
   /// copy the object value to a user char array
@@ -501,6 +505,7 @@ public:
 
   address_symbol(const char *, unsigned int);
   virtual string toString();
+  virtual Value* evaluate();
 };
 
 class line_number_symbol : public address_symbol
@@ -576,6 +581,7 @@ public:
   virtual void set_xref(Value *);
   virtual Value *get_xref();
   virtual Value *copy();
+  virtual Value* evaluate();
 
 };
 

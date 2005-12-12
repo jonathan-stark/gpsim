@@ -132,11 +132,13 @@ void Value::set(Value *v)
   throw new Error(" cannot assign a Value to a " + showType());
 }
 
+// JRH - Note: If this function Value::set(Expression) is ever
+//       used anywhere besides yyparse() you may want to move
+//       the delete expr; statement into the calling code.
 void Value::set(Expression *expr)
 {
-  Value *v=0;
-
   try {
+    Value *v=0;
 
     if(!expr)
       throw new Error(" null expression ");
@@ -146,7 +148,7 @@ void Value::set(Expression *expr)
       throw new Error(" cannot evaluate expression ");
 
     set(v);
-
+    delete v;
   }
 
 
@@ -157,7 +159,6 @@ void Value::set(Expression *expr)
   }
 
 
-  delete v;
   delete expr;
 
 }

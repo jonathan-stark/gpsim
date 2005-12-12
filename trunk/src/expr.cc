@@ -3,12 +3,14 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <assert.h>
 
 #include "expr.h"
 #include "operator.h"
 #include "errors.h"
 #include "symbol.h"
 #include "ValueCollections.h"
+#include "processor.h"
 
 using namespace std;
 
@@ -33,6 +35,7 @@ LiteralBoolean::LiteralBoolean(Boolean* value_)
   //if (value_==0) {
   //  throw new Internal ("LiteralBoolean::LiteralBoolean(): NULL value ptr");
   //}
+  assert(value_ != 0);
   value = value_;
 }
 
@@ -56,6 +59,7 @@ string LiteralBoolean::toString()
 LiteralInteger::LiteralInteger(Integer* newValue)
   : Expression()
 {
+  assert(newValue != 0);
   value = newValue;
 }
 
@@ -83,11 +87,13 @@ LiteralFloat::LiteralFloat(Float* value_)
   //if (value_==0) {
   //  throw new Internal ("LiteralFloat::LiteralFloat(): NULL value ptr");
   //}
+  assert(value_ != 0);
   value = value_;
 }
 
 LiteralFloat::~LiteralFloat()
 {
+  delete value;
 }
 
 Value* LiteralFloat::evaluate()
@@ -114,6 +120,7 @@ LiteralString::LiteralString(String* value_)
 
 LiteralString::~LiteralString()
 {
+  delete value;
 }
 
 Value* LiteralString::evaluate()
@@ -138,6 +145,7 @@ string LiteralString::toString()
 LiteralSymbol::LiteralSymbol(Value *_sym)
   : sym(_sym)
 {
+  assert(_sym != 0);
 }
 
 LiteralSymbol::~LiteralSymbol()
@@ -146,7 +154,12 @@ LiteralSymbol::~LiteralSymbol()
 
 Value* LiteralSymbol::evaluate()
 {
-  return  sym->copy();
+  return  sym->evaluate();
+}
+
+Value *LiteralSymbol::GetSymbol()
+{
+  return sym;
 }
 
 string LiteralSymbol::toString()
@@ -159,6 +172,8 @@ string LiteralSymbol::toString()
 
 IndexedSymbol::IndexedSymbol(Value *pSymbol, ExprList_t*pExprList)
 : m_pSymbol(pSymbol), m_pExprList(pExprList) {
+  assert(pSymbol != 0);
+  assert(pExprList != 0);
 }
 
 IndexedSymbol::~IndexedSymbol() {
@@ -190,3 +205,41 @@ string IndexedSymbol::toString() {
   return string("IndexedSymbol not initialized");
 }
 
+
+/*****************************************************************
+ * The RegisterExpression class
+ *
+ * The literal symbol is a thin 'literal' wrapper for the symbol class.
+ * The command line parser uses RegisterExpression whenever an expression
+ * encounters a symbol. 
+ */
+
+RegisterExpression::RegisterExpression(unsigned int uAddress)
+  : m_uAddress(uAddress)
+{
+}
+
+RegisterExpression::~RegisterExpression()
+{
+}
+
+Value* RegisterExpression::evaluate()
+{
+  Register *pReg = get_active_cpu()->rma.get_register(m_uAddress);
+  if(pReg) {
+    return new Integer(pReg->get_value());
+  }
+  else {
+    static char sFormat[] = "reg(%d) is not a valid register";
+    char sBuffer[sizeof(sFormat) + 10];
+    sprintf(sBuffer, sFormat, m_uAddress);
+    throw Error(string(sBuffer));
+  }
+}
+
+string RegisterExpression::toString()
+{
+  char sBuffer[10];
+  sprintf(sBuffer, "%d", m_uAddress);
+  return string(sBuffer);
+}

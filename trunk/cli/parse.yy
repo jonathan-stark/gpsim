@@ -83,6 +83,8 @@ extern int quit_state;
 extern command *getLastKnownCommand();
 extern void init_cmd_state();
 extern const char * GetLastFullCommand();
+// From scan.ll
+void FlushLexerBuffer();
 
 void yyerror(char *message)
 {
@@ -91,6 +93,11 @@ void yyerror(char *message)
   if (last)
     printf(" Last command: %s\n", last);
   init_cmd_state();
+  // JRH - I added this hoping that it is an appropriate
+  //       place to clear the lexer buffer. An example of
+  //       failed command where this is needed is to index
+  //       into an undefined symbol. (i.e. undefinedsymbol[0])
+  FlushLexerBuffer();
 }
 
 
@@ -411,7 +418,7 @@ dump_cmd:
           ;
 
 eval_cmd:
-	  SYMBOL_T                            {c_symbol.dump_one($1);}
+	        SYMBOL_T                      {c_symbol.dump_one($1);}
           | SYMBOL_T EQU_T expr         {
                                           $1->set($3);
                                           $1->update();
@@ -831,6 +838,8 @@ string_list
 
 expr    : binary_expr                   {$$=$1;}
         | unary_expr                    {$$=$1;}
+        | REG_T '(' LITERAL_INT_T ')'   { $$=new RegisterExpression((unsigned int)$3->getVal());
+                                          delete $3; }
         ;
 
 array   : '{' expr_list '}'             {$$=$2;}
@@ -903,9 +912,8 @@ unary_expr
         | MINUS_T     unary_expr   %prec UNARYOP_PREC   {$$ = new OpNegate($2);}
         | ONESCOMP_T  unary_expr   %prec UNARYOP_PREC   {$$ = new OpOnescomp($2);}
         | LNOT_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpLogicalNot($2);}
-        | MPY_T       unary_expr   %prec UNARYOP_PREC   {$$ = new OpIndirect($2);}
+        | AND_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpAddressOf($2);}
         | '(' expr ')'                                  {$$=$2;}
-
         ;
 
 literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}
