@@ -34,6 +34,7 @@ public:
   void dump_one(const char *sym_name);
   void dump_one(Value *);
   void dump(Value *, ExprList_t*);
+  void EvaluateAndDisplay(Expression *pExpr);
 
   void Set(Value *s, ExprList_t*e, Expression *pExpr);
 
