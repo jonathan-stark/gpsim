@@ -1,3 +1,6 @@
+2005-12-12 J.R. Heisey <jrheisey@sourceforge.com
+* I've implemented the indirection operator.
+
 2005-12-11 J.R. Heisey <jrheisey@sourceforge.com
 	* src\expr.cc, src\expr.h, src\operator.cc, src\operator.h,
 	cli\parse.yy, cli\scan.ll, src\symbol.cc, src\symbol.h,
@@ -11,11 +14,6 @@
 	included in calculations
 	* Implemented the ampersand character as an 'address of' operator
 	Fixed minus sign for negation and one's complement.
-	* I don't think it is necessary to implement * as a indirection
-	operator unless we have symbols that represent an address to
-	storage (i.e. a pointer). I would think that it would be
-	reasonable to expect a register symbol to return the register
-	contents with out using an operator as it has been.
 	* src/gpsim_object.cc: gpsimObject:showType() now does not
 	include the word class for the type for Windows.
 
