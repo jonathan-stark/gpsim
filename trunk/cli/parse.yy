@@ -419,6 +419,10 @@ dump_cmd:
 
 eval_cmd:
 	        SYMBOL_T                      {c_symbol.dump_one($1);}
+          | '(' expr ')'                {
+                                          c_symbol.EvaluateAndDisplay($2);
+                                          delete $2;
+                                        }
           | SYMBOL_T EQU_T expr         {
                                           $1->set($3);
                                           $1->update();
@@ -912,7 +916,8 @@ unary_expr
         | MINUS_T     unary_expr   %prec UNARYOP_PREC   {$$ = new OpNegate($2);}
         | ONESCOMP_T  unary_expr   %prec UNARYOP_PREC   {$$ = new OpOnescomp($2);}
         | LNOT_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpLogicalNot($2);}
-        | AND_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpAddressOf($2);}
+        | MPY_T       unary_expr   %prec UNARYOP_PREC   {$$ = new OpIndirect($2);}
+        | AND_T       unary_expr   %prec UNARYOP_PREC   {$$ = new OpAddressOf($2);}
         | '(' expr ')'                                  {$$=$2;}
         ;
 

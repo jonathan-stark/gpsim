@@ -3,6 +3,7 @@
 #include "operator.h"
 #include "errors.h"
 #include "symbol.h"
+#include "processor.h"
 
 
 static bool isFloat(Value *v)
@@ -701,12 +702,19 @@ OpIndirect::~OpIndirect()
 Value* OpIndirect::applyOp(Value* operand)
 {
   Value* rVal=0;
-
-  //FIXME - this doesn't work!!
-
   if (isInteger(operand)) {
     Integer* iOp = (Integer*)(operand);
-    rVal = new Integer(iOp->getVal());
+    // hmm ... what about ema? Need a different indirection operator?
+    Register *pReg = get_active_cpu()->rma.get_register(*iOp);
+    if(pReg) {
+      rVal = new Integer(pReg->get());
+    }
+    else {
+      static char sFormat[] = "Value $%x is an invalid memory address";
+      char sMsg[sizeof(sFormat) + 10];
+      sprintf(sMsg, sFormat, (int)iOp->getVal());
+      throw new Error(string(sMsg));
+    }
   }
   else if (isFloat(operand) ) {
     Float* fOp = (Float*)(operand);
@@ -750,7 +758,6 @@ Value* OpAddressOf::applyOp(Value* operand)
 {
   Value* rVal=0;
 
-  //FIXME - this doesn't work!!
   register_symbol *pReg =dynamic_cast<register_symbol*>(operand);
   if (pReg) {
     rVal = new Integer(pReg->getAddress());
