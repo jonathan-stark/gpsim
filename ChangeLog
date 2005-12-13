@@ -1,5 +1,12 @@
 2005-12-12 J.R. Heisey <jrheisey@sourceforge.com
-* I've implemented the indirection operator.
+	* cli\cmd_symbol.cc, cli\cmd_symbol.h, src\operator.cc,
+	cli\parse.yy: I've reconsidered regarding implementing
+	and indirection operator. The ampersand character may
+	now be used to reference a integer value or a register
+	symbol as an indirection operator. I've also made
+	it possible to type only an expression enclosed in parens.
+	The expression will evaluate and be printed on the next
+	console.
 
 2005-12-11 J.R. Heisey <jrheisey@sourceforge.com
 	* src\expr.cc, src\expr.h, src\operator.cc, src\operator.h,
