@@ -44,7 +44,7 @@ public:
   virtual unsigned int get(void);
   virtual void setbit(unsigned int bit_number, char new_value);
 
-  void setEnableMask(unsigned int nEnableMask);
+  virtual void setEnableMask(unsigned int nEnableMask);
 
   PicLatchRegister(const char *, PortRegister *);
 

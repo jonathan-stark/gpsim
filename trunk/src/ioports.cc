@@ -103,10 +103,10 @@ void PeripheralSignalSource::toggle()
 //
 //-------------------------------------------------------------------
 
-class PicSignalSource : public SignalControl
+class SignalSource : public SignalControl
 {
 public:
-  PicSignalSource(PortRegister *_reg, unsigned int bitPosition)
+  SignalSource(PortRegister *_reg, unsigned int bitPosition)
     : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
@@ -116,7 +116,7 @@ public:
     //  (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
     char r = m_register ? (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
     /**/
-    Dprintf(("PicSignalSource::getState() %s  bitmask:0x%x state:%c\n",
+    Dprintf(("SignalSource::getState() %s  bitmask:0x%x state:%c\n",
 	     (m_register?m_register->name().c_str():"NULL"),
 	     m_bitMask,r));
     /**/
@@ -151,10 +151,29 @@ PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
 
 }
 
+void PortRegister::setEnableMask(unsigned int newEnableMask)
+{
+  unsigned int maskDiff = getEnableMask() ^ newEnableMask;
+
+  for (unsigned int i=0, m=1; i<mNumIopins; i++, m<<= 1)
+    if (maskDiff & m) {
+      PinModule *pmP = new PinModule(this,i);
+      PortModule::addPinModule(pmP,i);
+      pmP->setDefaultSource(new SignalSource(this, i));
+      pmP->addSink(new PortSink(this, i));
+    }
+
+  mEnableMask = newEnableMask;
+}
+
 void PortRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
 
+  put_value(new_value);
+}
+void PortRegister::put_value(unsigned int new_value)
+{
   Dprintf(("PortRegister::put old=0x%x:new=0x%x\n",value.data,new_value));
 
   unsigned int diff = mEnableMask & (new_value ^ value.data);
@@ -232,13 +251,6 @@ unsigned int PortRegister::getDriving()
 {
   return drivingValue;
 }
-class PortLatch : public Register
-{
-public:
-
-private:
-  PortRegister *port_register;
-};
 //========================================================================
 //========================================================================
 static PinModule AnInvalidPinModule;
@@ -501,8 +513,6 @@ void PinModule::updateUI()
 {
   m_port->updateUI();
 }
-
-
 
 //-------------------------------------------------------------------
 //

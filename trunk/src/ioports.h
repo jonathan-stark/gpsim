@@ -165,7 +165,10 @@ private:
 
 ///------------------------------------------------------------
 /// PortModule - Manages all of the I/O pins associated with a single
-/// port. The PortModule supplies the interface to the I/O pin's.
+/// port. The PortModule supplies the interface to the I/O pin's. It
+/// is designed to handle a group of I/O pins. However, the low level
+/// I/O pin processing is handled by PinModule objects contained within
+/// the PortModule.
 
 class PortModule
 {
@@ -174,31 +177,79 @@ public:
   PortModule(unsigned int numIopins);
   virtual ~PortModule();
 
-  void updatePort();
-  void updatePin(unsigned int iPinNumber);
+  /// updatePort -- loop through update all I/O pins
+
+  virtual void updatePort();
+
+  /// updatePin -- Update a single I/O pin
+
+  virtual void updatePin(unsigned int iPinNumber);
+
+  /// updateUI -- convey pin state info to a User Interface (e.g. the gui).
 
   virtual void   updateUI();
-  SignalControl *addSource(SignalControl *, unsigned int iPinNumber);
-  SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
-  SignalControl *addPullupControl(SignalControl *, unsigned int iPinNumber);
-  SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
-  IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
+
+  /// addPinModule -- supply a pin module at a particular bit position.
+  ///      Most of the low level I/O pin related processing will be handled
+  ///      here. The PortModule per-pin helper methods below essentially
+  ///      call methods in the PinModule to do the dirty work.
+  ///      Each bit position can have only one PinModule. If multiple 
+  ///      modules are added, only the first will be used and the others
+  ///      will be ignored.
+
   void           addPinModule(PinModule *, unsigned int iPinNumber);
+
+  /// addSource -- supply a pin with a source of data. There may
+
+  SignalControl *addSource(SignalControl *, unsigned int iPinNumber);
+
+  /// addControl -- supply a pin with a data direction control
+
+  SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
+
+  /// addPullupControl -- supply a pin with a pullup control
+
+  SignalControl *addPullupControl(SignalControl *, unsigned int iPinNumber);
+
+  /// addSink -- supply a sink to receive info driven on to a pin
+
+  SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
+
+  /// addPin -- supply an I/O pin. Note, this will create a default pin module
+  ///           if one is not already created.
+
+  IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
+
+  /// getPin -- an I/O pin accessor. This returns the I/O pin at a particular
+  ///           bit position.
+
   IOPIN         *getPin(unsigned int iPinNumber);
+
+  /// operator[] -- PinModule accessor. This returns the pin module at
+  ///               a particular bit position.
 
   PinModule &operator [] (unsigned int pin_number);
 
 protected:
   unsigned int mNumIopins;
+
 private:
+
+  /// PinModule -- The array of PinModules that are handled by PortModule.
+
   PinModule  **iopins;
 };
 
 ///------------------------------------------------------------
-/// PinModule - manages the interface to an I/O pin. The parent class
-/// 'PinMonitor', allows the PinModule to be registered with the I/O
-/// pin. In other words, when the I/O pin changes state, the PinModule
-/// will be notified.
+/// PinModule - manages the interface to a physical I/O pin. Both
+/// simple and complex I/O pins are handled. An example of a simple
+/// I/O is one where there is a single data source, data sink and
+/// control, like say the GPIO pin on a small PIC. A complex pin
+/// is one that is multiplexed with peripherals.
+/// 
+/// The parent class 'PinMonitor', allows the PinModule to be 
+/// registered with the I/O pin. In other words, when the I/O pin 
+/// changes state, the PinModule will be notified.
 
 class PinModule : public PinMonitor
 {
@@ -206,7 +257,12 @@ public:
   PinModule();
   PinModule(PortModule *, unsigned int _pinNumber, IOPIN *new_pin=0);
   virtual ~PinModule() {}
+
+  /// updatePinModule -- The low level I/O pin state is resolved here 
+  /// by examined the direction and state of the I/O pin. 
+
   void updatePinModule();
+
   /// refreshPinOnUpdate - modal behavior. If set to true, then
   /// a pin's state will always be refreshed whenever the PinModule
   /// is updated. If false, then the pin is updated only if there
@@ -227,6 +283,8 @@ public:
   char getPullupControlState();
 
   IOPIN &getPin() { return *m_pin;}
+
+  /// 
   virtual void setDrivenState(char);
   virtual void setDrivingState(char);
   virtual void set_nodeVoltage(double);
@@ -264,15 +322,14 @@ public:
   PortRegister(unsigned int numIopins, unsigned int enableMask);
 
   virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
   virtual void putDrive(unsigned int new_drivingValue);
   virtual unsigned int getDriving();
   virtual void setbit(unsigned int bit_number, char new_value);
-  virtual void setEnableMask(unsigned int nEnableMask)
-  {
-    mEnableMask = nEnableMask;
-  }
+  virtual void setEnableMask(unsigned int nEnableMask);
+
   unsigned int getEnableMask()
   {
     return mEnableMask;
@@ -284,7 +341,6 @@ protected:
   unsigned int  drivingValue;
   RegisterValue rvDrivenValue;
 };
-
 
 class PortSink : public SignalSink
 {

@@ -30,7 +30,6 @@ class PicPortRegister : public PortRegister
 public:
   PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
   void setTris(PicTrisRegister *new_tris);
-  virtual void setEnableMask(unsigned int nEnableMask);
   Register *getTris();
 protected:
   PicTrisRegister *m_tris;
