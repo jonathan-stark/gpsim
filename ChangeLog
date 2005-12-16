@@ -1,3 +1,9 @@
+2005-12-16 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.h, src/ioports.cc, src/pic-ioports.h,
+	src/pic-ioports.cc: moved some of the functionality in the
+	PicPort classes upto the generic Port classes. Also added
+	comments. 
+
 2005-12-12 J.R. Heisey <jrheisey@sourceforge.com
 	* cli\cmd_symbol.cc, cli\cmd_symbol.h, src\operator.cc,
 	cli\parse.yy: I've reconsidered regarding implementing
