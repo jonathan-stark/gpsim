@@ -776,7 +776,7 @@ gpsim_completion (const char *text, int start, int end)
 }
 
 
-#ifdef HAVE_GUI
+//#ifdef HAVE_GUI
 
 //============================================================================ 
 //
@@ -795,7 +795,7 @@ static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer
 
   return TRUE;
 }
-#endif
+//#endif
 
 //============================================================================
 //
@@ -845,7 +845,10 @@ void exit_gpsim(void)
 
 #ifdef HAVE_READLINE
   rl_callback_handler_remove();
+#ifdef HAVE_GUI
   g_io_channel_unref(channel);
+#endif
+
 #endif
 
   CSimulationContext::GetContext()->GetContext()->Clear();
@@ -905,8 +908,10 @@ void initialize_readline (void)
   win32_fd_to_raw(fileno(stdin));
 #endif
 
+#if defined HAVE_READLINE && defined HAVE_GUI
   rl_getc_function = gpsim_rl_getc;
   channel = g_io_channel_unix_new (fileno(stdin));
+#endif
 
 #ifdef _WIN32
 #if GLIB_MAJOR_VERSION < 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 6)
@@ -921,7 +926,9 @@ void initialize_readline (void)
     g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
   }
 #else
-  g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+  #if defined HAVE_READLINE && defined HAVE_GUI
+    g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+  #endif
 #endif
   rl_callback_handler_install (prompt, have_line);
 
