@@ -230,7 +230,7 @@ public:
     String *pStr;
     if((pStr = dynamic_cast<String*>(pIndex)) != NULL) {
       // pIndex = get_symbol_table().findInteger(pStr->getVal());
-      pIndex = findInteger(pStr->getVal());
+      pIndex = FindInteger(pStr->getVal());
     }
     if(dynamic_cast<Integer*>(pIndex) != NULL) {
       unsigned int uIndex = (unsigned int)*pIndex;
