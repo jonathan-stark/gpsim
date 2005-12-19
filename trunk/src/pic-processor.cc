@@ -22,6 +22,8 @@ Boston, MA 02111-1307, USA.  */
 #ifdef _WIN32
 #include "uxtime.h"
 #include "unistd.h"
+#else
+#include <unistd.h>
 #endif
 #ifndef _MSC_VER
 #include <sys/time.h>

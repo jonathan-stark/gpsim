@@ -1,3 +1,10 @@
+2005-12-19 Scott Dattalo <scott@dattalo.com>
+	* src/icd.cc, src/modules.cc, src/pic-processor.cc,
+	src/sim_context.cc, modules/paraface.cc: Re-added needed unistd.h
+	includes that were removed on 2005-12-10. New systems may not
+	unistd, but older ones do.
+
+
 2005-12-17 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: removed glib dependencies for non-gui builds
 	
