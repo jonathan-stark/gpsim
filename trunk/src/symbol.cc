@@ -368,10 +368,14 @@ register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress)
     register_symbol *pRegSymbol = dynamic_cast<register_symbol*>(*sti);
     if(pRegSymbol != 0) {
       Register * pReg = pRegSymbol->getReg();
-      if (pReg && pReg->get_cpu() == NULL)
-        cout << " Null cpu for reg named:"<<pReg->name()<<endl;
-      assert(pReg->get_cpu() != NULL);
-      if(pRegSymbol->getAddress() == uAddress &&
+      if (0 && pReg && pReg->get_cpu() == NULL) {
+	// hmmm  we need to fix this... It's possible for 
+	// modules (which are not processors) to have registers.
+        //cout << " Null cpu for reg named:"<<pReg->name()<<endl;
+
+      }
+      //assert(pReg->get_cpu() != NULL);
+      if(pReg && pReg->get_cpu() && pRegSymbol->getAddress() == uAddress &&
         pRegSymbol->getBitmask() == pReg->get_cpu()->register_mask() &&
         // This function will find the first symbol that
         // uses the entire bit field of the register.
