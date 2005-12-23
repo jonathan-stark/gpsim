@@ -168,7 +168,6 @@ Processor * CSimulationContext::add_processor(Processor *p)
     // Tell the gui or any modules that are interfaced to gpsim
     // that a new processor has been declared.
     gi.new_processor(p);
-    instantiated_modules_list.push_back(p);
 
     return p;
 
@@ -176,7 +175,8 @@ Processor * CSimulationContext::add_processor(Processor *p)
 }
 
 int CSimulationContext::LoadProgram(const char *filename,
-                                    const char *pProcessorType) {
+                                    const char *pProcessorType,
+                                    Processor **ppProcessor) {
   bool bReturn = false;
   Processor *pProcessor;
   FILE * pFile = fopen_path (filename, "rb");
@@ -226,6 +226,9 @@ int CSimulationContext::LoadProgram(const char *filename,
     // Tell all of the interfaces that a new program exists.
     gi.new_program(pProcessor);
   }
+  if(ppProcessor != NULL) {
+    *ppProcessor = pProcessor;
+  }
   return bReturn;
 }
 
@@ -266,6 +269,18 @@ void CSimulationContext::Clear() {
     }
   GetSymbolTable().clear_all();
   processor_list.clear();
+}
+
+void CSimulationContext::Reset(RESET_TYPE r) {
+  Symbol_Table &ST = get_symbol_table();
+  Symbol_Table::module_symbol_iterator it;
+  Symbol_Table::module_symbol_iterator itEnd = ST.endModuleSymbol();
+  for(it = ST.beginModuleSymbol(); it != itEnd; it++) {
+      Module *m = (*it)->get_module();
+      if(m) {
+        m->reset(r);
+      }
+  }
 }
 
 extern Symbol_Table symbol_table;  // There's only one instance of "the" symbol table

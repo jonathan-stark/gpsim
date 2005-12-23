@@ -155,7 +155,7 @@ void cmd_processor::processor(int bit_flag)
     {
 
     case 1:
-      ProcessorConstructorList::GetList()->dump();
+      cout << ProcessorConstructorList::GetList()->DisplayString();
       break;
 
     case 2:

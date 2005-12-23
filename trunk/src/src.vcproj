@@ -429,6 +429,9 @@
 				RelativePath=".\uart.cc">
 			</File>
 			<File
+				RelativePath=".\ui.cc">
+			</File>
+			<File
 				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
 			<File
@@ -699,6 +702,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\uart.h">
+			</File>
+			<File
+				RelativePath=".\ui.h">
 			</File>
 			<File
 				RelativePath=".\value.h">

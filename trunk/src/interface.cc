@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #define GPSIM_VERSION VERSION 
 #include "gpsim_def.h"
 
+#include "sim_context.h"
 #include "processor.h"
 #include "xref.h"
 #include "interface.h"
@@ -391,7 +392,7 @@ void gpsimInterface::start_simulation (void)
 
 void gpsimInterface::reset (void)
 {
-  module_reset_all(SIM_RESET);
+  CSimulationContext::GetContext()->Reset(SIM_RESET);
 }
 
 bool gpsimInterface::bSimulating()
@@ -567,68 +568,6 @@ const char *get_dir_delim(const char *path)
 #else
   return strrchr(path, '/');
 #endif
-}
-
-class NullConsole : public ISimConsole {
-public:
-  virtual void Printf(const char *fmt, ...) {}
-  virtual void VPrintf(const char *fmt, va_list argptr) {}
-  virtual void Puts(const char*) {}
-  virtual void Putc(const char) {}
-  virtual char* Gets(char *, int) { return "";}
-};
-
-
-class NullUserInterface : public IUserInterface {
-  NullConsole m_Console;
-public:
-  virtual ISimConsole &GetConsole() { return m_Console; };
-  virtual void DisplayMessage(unsigned int uStringID, ...) {};
-  virtual void DisplayMessage(FILE * pOut, unsigned int uStringID, ...) {};
-  virtual void DisplayMessage(const char *fmt, ...) {};
-  virtual void DisplayMessage(FILE * pOut, const char *fmt, ...) {};
-
-  virtual const char * FormatProgramAddress(unsigned int uAddress,
-    unsigned int uMask) {return "";}
-  virtual const char * FormatProgramAddress(unsigned int uAddress,
-    unsigned int uMask, int iRadix) {return "";}
-  virtual const char * FormatRegisterAddress(unsigned int uAddress,
-    unsigned int uMask) {return "";}
-  virtual const char * FormatLabeledValue(const char * pLabel,
-    unsigned int uValue) {return "";}
-  virtual const char * FormatValue(unsigned int uValue) {return "";}
-  virtual const char * FormatValue(gint64 uValue) {return "";}
-  virtual const char * FormatValue(gint64 uValue, guint64 uMask) {return "";}
-  virtual const char * FormatValue(gint64 uValue, guint64 uMask,
-    int iRadix) {return "";}
-
-  virtual char *       FormatValue(char *str, int len,
-    int iRegisterSize, RegisterValue value) {return "";}
-
-  virtual void SetProgramAddressRadix(int iRadix) {}
-  virtual void SetRegisterAddressRadix(int iRadix) {}
-  virtual void SetValueRadix(int iRadix) {}
-
-  virtual void SetProgramAddressMask(unsigned int uMask) {}
-  virtual void SetRegisterAddressMask(unsigned int uMask) {}
-  virtual void SetValueMask(unsigned int uMask) {}
-
-  virtual void NotifyExitOnBreak(int iExitCode) {}
-};
-
-NullUserInterface g_DefaultUI;
-static IUserInterface *g_GpsimUI = &g_DefaultUI;
-LIBGPSIM_EXPORT  IUserInterface & GetUserInterface(void) {
-  return *g_GpsimUI;
-}
-
-LIBGPSIM_EXPORT  void SetUserInterface(IUserInterface * pGpsimUI) {
-  if(pGpsimUI) {
-    g_GpsimUI = pGpsimUI;
-  }
-  else {
-    g_GpsimUI = &g_DefaultUI;
-  }
 }
 
 // For libgpsim.dll

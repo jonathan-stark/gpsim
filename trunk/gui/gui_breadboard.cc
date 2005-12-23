@@ -1921,7 +1921,6 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     static GtkWidget *module_clist;
     GtkWidget *cancelbutton;
     static int cancel;
-    list <Module_Library *> :: iterator mi;
     static char module_type[STRING_SIZE];
 
     GtkWidget *vbox;
@@ -1970,59 +1969,60 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
     gtk_clist_clear(GTK_CLIST(module_clist));
 
+  ModuleLibrary::FileList::iterator  mi;
+  ModuleLibrary::FileList::iterator  itFileListEnd(ModuleLibrary::GetFileList().end());
         // Add all modules
-	for (mi = module_list.begin();
-	     mi != module_list.end();
+  for (mi = ModuleLibrary::GetFileList().begin();
+	     mi != itFileListEnd;
 	     mi++)
 	{
 
-	    Module_Library *t = *mi;
-	    cout << t->name() << '\n';
+    ModuleLibrary::File *t = *mi;
+	  cout << t->name() << '\n';
+    Module_Types * pFileTypes;
+	  if(pFileTypes = t->get_mod_list()) {
+      // Loop through the list and display all of the modules.
+      int i=0;
+    
+      while(pFileTypes[i].names[0])
+      {   
+        char name[STRING_SIZE];
+        char library[STRING_SIZE];
+        char *text[2]={name, library};
+        int row;
 
-	    if(t->module_list) {
-		// Loop through the list and display all of the modules.
-		int i=0;
+        strncpy(name,pFileTypes[i].names[0], STRING_SIZE);
+        strncpy(library,t->name(), STRING_SIZE);
 
-		while(t->module_list[i].names[0])
-		{   
-		    char name[STRING_SIZE];
-		    char library[STRING_SIZE];
-		    char *text[2]={name, library};
-		    int row;
+        row = gtk_clist_append(GTK_CLIST(module_clist),
+                               text);
 
-		    strncpy(name,t->module_list[i].names[0], STRING_SIZE);
-		    strncpy(library,t->name(), STRING_SIZE);
+        gtk_clist_set_row_data (GTK_CLIST(module_clist),
+                                row,
+                                (gpointer)pFileTypes[i].names[0]);
 
-		    row = gtk_clist_append(GTK_CLIST(module_clist),
-					   text);
-
-		    gtk_clist_set_row_data (GTK_CLIST(module_clist),
-					    row,
-					    (gpointer)t->module_list[i].names[0]);
-
-                    i++;
-		}
-	    }
-	}
-
-
-    gtk_widget_show(dialog);
-
-    gtk_grab_add(dialog);
-    while(cancel==-1 && GTK_WIDGET_VISIBLE(dialog))
-	gtk_main_iteration();
-    gtk_grab_remove(dialog);
-
-
-    if(cancel==(int)TRUE)
-    {
-	gtk_widget_hide(dialog);
-	return 0;
+        i++;
+      }
     }
+  }
 
+  gtk_widget_show(dialog);
+
+  gtk_grab_add(dialog);
+  while(cancel==-1 && GTK_WIDGET_VISIBLE(dialog))
+    gtk_main_iteration();
+  gtk_grab_remove(dialog);
+
+
+  if(cancel==(int)TRUE)
+  {
     gtk_widget_hide(dialog);
+    return 0;
+  }
 
-    return module_type;
+  gtk_widget_hide(dialog);
+
+  return module_type;
 }
 
 #if 0
@@ -2113,7 +2113,7 @@ static void add_library(GtkWidget *button, Breadboard_Window *bbw)
     library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
 
     if(library_name)
-      module_load_library(library_name);
+      ModuleLibrary::LoadFile(library_name);
 }
 
 static void add_module(GtkWidget *button, Breadboard_Window *bbw)
@@ -2126,10 +2126,10 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 
     if(module_type!=0)
     {
-	module_name = gui_get_string("Module name", module_type);
+        module_name = gui_get_string("Module name", module_type);
         grab_next_module = 1;
         if(module_name != 0)
-	    module_load_module(module_type, module_name);
+          ModuleLibrary::NewObject(module_type, module_name);
     }
 }
 
@@ -2294,7 +2294,6 @@ static const char *gui_get_filename(char *filename)
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
     FILE *fo;
-    list <Module_Library *> :: iterator mi;
     GList *module_iterator;
     Module *m;
     const char *filename;
@@ -2333,12 +2332,14 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
-    for (mi = module_list.begin();
-         mi != module_list.end();
-         mi++)
+    ModuleLibrary::FileList::iterator  mi;
+          // Add all modules
+    for (mi = ModuleLibrary::GetFileList().begin();
+	      mi != ModuleLibrary::GetFileList().end();
+	      mi++)
     {
 
-      Module_Library *t = *mi;
+      ModuleLibrary::File *t = *mi;
       fprintf(fo, "module library %s\n",
       t->name());
     }
@@ -2916,9 +2917,6 @@ void GuiModule::AddPin(unsigned int pin_number)
 void GuiModule::AddPinGeometry(GuiPin *pin)
 {
   eOrientation orientation;
-  char *name;
-
-
   unsigned int pin_number = pin->number();
 
   // Get the X and Y coordinates for this pin 
@@ -4100,15 +4098,15 @@ void Breadboard_Window::Build(void)
   draw_nodes(this);
 
   // Look module list
-  list <Module *>::iterator mi;
-  for(mi = instantiated_modules_list.begin();
-  	mi!=instantiated_modules_list.end();
-	mi++)
+  Symbol_Table::module_symbol_iterator mi = get_symbol_table().beginModuleSymbol();
+  Symbol_Table::module_symbol_iterator itModEnd = get_symbol_table().endModuleSymbol();
+  for(mi = get_symbol_table().beginModuleSymbol();
+      mi!=itModEnd;
+      mi++)
   {
-  	NewModule(*mi);
+  	NewModule((*mi)->get_module());
   }
 
-#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
   // Loop node list
   Symbol_Table &ST = get_symbol_table();
   Symbol_Table::node_symbol_iterator it;
@@ -4120,9 +4118,6 @@ void Breadboard_Window::Build(void)
     	NodeConfigurationChanged(node);
     }
   }
-#else
-  cout <<"WARNING: symbol table is broken - can't save the node list\n";
-#endif
   gtk_widget_show(window);
 
   Update();

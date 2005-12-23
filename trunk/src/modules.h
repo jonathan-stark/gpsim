@@ -34,6 +34,8 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <string>
 #include <map>
+#include <vector>
+#include <assert.h>
 
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
@@ -61,40 +63,150 @@ enum SIMULATION_MODES
   eSM_RUNNING_OVER
 };
 
+class Module;
+class Processor;
 
-//----------------------------------------------------------
-// An instance of the Module_Library class is created each
-// time a library of modules is opened.
+template<class _Type>
+class OrderedVector : public vector<_Type*> {
 
-class Module_Library {
-  char *_name;
-  void *_handle;
-  Module_Types * (*get_mod_list)(void);
+  struct NameLessThan : binary_function<_Type*, _Type*, bool> {
+    bool operator()(const _Type* left, const _Type* right) const {
+      return strcmp(left->m_pName, right->m_pName) < 0;
+    }
+  };
 
 public:
+  typedef typename vector<_Type*>::iterator iterator;
 
-  Module_Types *module_list;
-
-  Module_Library(const char *new_name, void *library_handle);
-
-  ~Module_Library(void);
-
-  char *name(void) {
-    return(_name);
+  OrderedVector() {
   }
-
-  void *handle(void) {
-    return _handle;
+  bool  Exists(const char *pName) {
+    return Get(pName) != NULL;
   }
-
-  ICommandHandler *GetCli();
+  iterator FindIt(const char *pName) {
+    _Type KeyValue(pName);
+    iterator sti = lower_bound(vector<_Type*>::begin( ), vector<_Type*>::end( ),
+      &KeyValue, NameLessThan());
+    if( sti != vector<_Type*>::end() && strcmp((*sti)->m_pName, pName) == 0) {
+      return sti;
+    }
+    return vector<_Type*>::end();
+  }
+  _Type *Get(const char *pName) {
+    _Type KeyValue(pName);
+    iterator sti = lower_bound(vector<_Type*>::begin( ), vector<_Type*>::end( ),
+      &KeyValue, NameLessThan());
+    if( sti != vector<_Type*>::end() && strcmp((*sti)->m_pName, pName) == 0) {
+      return *sti;
+    }
+    return NULL;
+  }
+  bool Add(_Type *pObject) {
+    iterator it = lower_bound(vector<_Type*>::begin( ), vector<_Type*>::end( ),
+      pObject, NameLessThan());
+    if(it == vector<_Type*>::end() || strcmp((*it)->m_pName, pObject->m_pName) != 0) {
+      insert(it, pObject);
+      return true;
+    }
+    return false;
+  }
 };
 
-ICommandHandler * module_get_command_handler(const char *name);
+typedef Module * (*FNMODULECONSTRUCTOR) (const char *);
 
-extern list <Module_Library *> module_list;
+class ModuleLibrary {
+public:
+//  static ModuleLibrary & GetSingleton() { return *m_pLibrary;};
 
-extern list <Module *> instantiated_modules_list;
+  static void         LoadFile(const char *pFilename);
+  static void         FreeFile(const char *pFilename);
+  static Module *     NewObject(const char *pTypeName, const char *pName = NULL);
+  static void         Delete(Module *);
+
+  static ICommandHandler * GetCommandHandler(const char *pName);
+
+  static string       DisplayFileList();
+  static string       DisplayModuleTypeList();
+  static string       DisplayModuleList();
+  static string       DisplayProcessorTypeList();
+  static string       DisplayModulePins(char *pName);
+#if 0
+  static Processor *  NewProcessorFromFile(const char *pName);
+  static Processor *  NewProcessorFromType(const char *pType,
+                                           const char *pName);
+  static void         DeleteProcessor(Processor *);
+#endif
+
+private:
+  static void         MakeCanonicalName(string &sPath, string &sName);
+  static bool         FileExists(const string &sName);
+  static bool         AddFile(const char *library_name,
+                              void *library_handle);
+
+public:
+#ifndef SWIG
+  // Module file refers to a dynamically loaded program library. (dll or so)
+  class File {
+  public:
+    File(const char * pName, void * pHandle = NULL) {
+      m_pName = strdup(pName);
+      m_pHandle = pHandle;
+    }
+    ~File() {
+      free((void*)m_pName);
+    }
+
+    ICommandHandler *GetCli();
+    const char *name() {
+      return(m_pName);
+    }
+
+    const char * m_pName;
+    void * m_pHandle;
+    Module_Types * (*get_mod_list)(void);
+  };
+  /*
+    FileList tracks loaded library files. (i.e .dll and .so files)
+  */
+  typedef OrderedVector<File>     FileList;
+  static  FileList &              GetFileList();
+
+  // Module Type refers to each Module_Type exposed a module file.
+  // This includes aliased names.
+  class Type {
+  public:
+    Type(const char * pName, FNMODULECONSTRUCTOR pConstructor = NULL) {
+      m_pName = pName;
+      m_pConstructor = pConstructor;
+    }
+    const char *        m_pName;
+    FNMODULECONSTRUCTOR m_pConstructor;
+  };
+
+  /*
+    TypeList is a consolidated list of all module type names
+    from all loaded library files.
+  */
+  class TypeList : public OrderedVector<Type> {
+      Module *NewObject(const char *pName);
+  };
+  static  TypeList &          GetTypeList();
+#endif
+
+private:
+  static  FileList            m_FileList;
+  static  TypeList            m_TypeList;
+
+  ModuleLibrary() {};
+  ~ModuleLibrary() {};
+  static  int             m_iSequenceNumber;
+  /*
+    ModuleList is a list of all allocated modules.
+    JRH - I'm not convinced that his is needed.
+  */
+  typedef vector<Module*> ModuleList;
+  static  ModuleList      m_ModuleList;
+};
 
 
 //------------------------------------------------------------------------
@@ -103,6 +215,7 @@ extern list <Module *> instantiated_modules_list;
 
 class Module : public gpsimObject {
 public:
+  friend class ModuleLibrary;
 
   list<Value *> attributes;         // A list of attributes that pertain to the Module
   Package  *package;                // A package for the module
@@ -128,10 +241,8 @@ public:
 
   void add_attribute(Value *);
 
-  virtual void set(const char *cP,int len=0);
-  virtual void get(char *, int len);
   virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
-  virtual void dump_attributes(int show_values=1);
+  virtual string  DisplayAttributes(bool show_values=true);
   virtual void initializeAttributes();
 
   /// Reset 
@@ -156,9 +267,13 @@ public:
   void run_script(string &script_name);
 
 
-  const virtual char *type(void) { return (name_str.c_str()); };
+  void SetType(ModuleLibrary::Type *pType);
+#ifndef SWIG
+  const virtual char *GetTypeName() { return m_pType->m_pName; }
+  // deprecated
+  const virtual char *type(void) { return m_pType->m_pName; }
+#endif
 
-  static Module *construct(char *);
   Module(void);
   virtual ~Module();
 
@@ -185,7 +300,7 @@ private:
 
 protected:
   char *version;
-
+  ModuleLibrary::Type *m_pType;
 };
 
 class Module_Types
@@ -195,6 +310,9 @@ public:
   char *names[2];
   Module * (*module_constructor) (const char *module_name);
 };
+
+#ifndef SWIG
+const int Module_Types_Name_Count = sizeof(((Module_Types*)NULL)->names) / sizeof(char*);
 
 
 /**
@@ -220,14 +338,7 @@ void * load_library(const char *library_name, char **pszError);
 void * get_library_export(const char *name, void *library_handle, char **pszError);
 void free_library(void *handle);
 void free_error_message(char * pszError);
-void module_display_available(void);
-void module_list_modules(void);
-bool module_load_library(const char *library_name);
-void module_free_library(const char* name);
-void module_load_module(const char * module_type, const char * module_new_name=0);
-Module_Library * module_get_library(const char* name);
-void module_reset_all(RESET_TYPE r);
+#endif
 
-void module_pins(char *module_name);
-void module_update(char *module_name);
+
 #endif // __MODULES_H__
