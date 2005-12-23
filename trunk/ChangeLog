@@ -1,5 +1,19 @@
+
+2005-12-23 J.R. Heisey <jrheisey@sourceforge.com
+	* src/breakpoints.cc, src/cmd_gpsim.h, cli/cmd_module.cc,
+	cli/cmd_processor.cc, gpsim/gpsim.vcproj, gui/gui_breadboard.cc,
+	src/interface.cc, plat/win32/libgpsim.def, src/Makefile.am,
+	src/makefile.mingw, src/modules.cc, src/modules.h,
+	src/processor.cc, src/processor.h, src/sim_context.cc,
+	src/sim_context.h, src/src.vcproj, src/symbol.cc, src/symbol.h,
+	cli/ui_gpsim.cc, src/ui.cc, src/ui.h: Refactored the functions
+	in module.cxx into a ModuleLibary class that contains various
+	lists in preparation for a gpsim Perl API. Also fixed the
+	gui_breadboard iteration of modules. Now they display
+	properly.
+
 2005-12-23 Scott Dattalo <scott@dattalo.com>
-	* src/symbol.cc: findRegsiterSymbol dumped core if a register was
+	* src/symbol.cc: findRegisterSymbol dumped core if a register was
 	being loaded from a module (and not from a processor)
 	* src/os_dependent.cc, src/processor.cc: Relative paths were
 	getting concatenated to absolute paths
