@@ -209,6 +209,9 @@ FILE *fopen_path(const char *filename, const char *perms)
           if ('\\' == *cp)
             *cp = '/';
         }
+	if (verbose) {
+	  printf ("Trying to open %s\n", nameBuff);
+	}
         fp = fopen (nameBuff, perms);	// try it
         if (0 != fp) {
           if (verbose)

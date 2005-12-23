@@ -78,24 +78,32 @@ unsigned long get_error();
 #include <errno.h>
 #endif
 
-void translatePath(string &sPath) {
+//------------------------------------------------------------------------
+// Convert forward slashes and backslashes into the os-dependent
+// slash
+void translatePath(string &sPath)
+{
   string::size_type nPos;
-  while ( (nPos = sPath.find(FOLDERDELIMITERALTERNATIVE)) != string::npos) {
+  while ( (nPos = sPath.find(FOLDERDELIMITERALTERNATIVE)) != string::npos)
     sPath[nPos] = FOLDERDELIMITER;
-  }
 }
 
-void EnsureTrailingFolderDelimiter(string &sPath) {
+//------------------------------------------------------------------------
+// EnsureTrailingFolderDelimiter -- append a directory delimeter (slash)
+// to the string if one is not present already.
+
+void EnsureTrailingFolderDelimiter(string &sPath)
+{
   string::reference rLast = sPath.at(sPath.size() - 1);
-  if(rLast == FOLDERDELIMITERALTERNATIVE) {
+  if(rLast == FOLDERDELIMITERALTERNATIVE)
     rLast = FOLDERDELIMITER;
-  }
-  else if(rLast != FOLDERDELIMITER) {
+  else if(rLast != FOLDERDELIMITER)
     sPath.push_back(FOLDERDELIMITER);
-  }
 }
 
-int FileExtCompare(const char *pExt1, const char *pExt2) {
+//------------------------------------------------------------------------
+int FileExtCompare(const char *pExt1, const char *pExt2)
+{
   if(*pExt1 == '.')
     pExt1++;
   if(*pExt2 == '.')
@@ -106,8 +114,9 @@ int FileExtCompare(const char *pExt1, const char *pExt2) {
   return strcmp(pExt1, pExt2);
 #endif
 }
-
-bool LIBGPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
+//------------------------------------------------------------------------
+bool LIBGPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt)
+{
   string s(pszFile);
   translatePath(s);
   string::size_type pos = s.find_last_of('.');
@@ -121,6 +130,7 @@ bool LIBGPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) 
   }
 }
 
+//------------------------------------------------------------------------
 /// SplitPathAndFile()
 /// Note this function does not verify whether the trailing
 /// is actually a file component.
@@ -227,7 +237,11 @@ void CFileSearchPath::AddPathFromFilePath(string &sFolder, string &sFile) {
     }
   }
 }
-
+//------------------------------------------------------------------------
+bool bHasAbsolutePath(string &fname)
+{
+  return fname[0] == FOLDERDELIMITER;
+}
 //---------------------------
 //OS agnostic library loader
 

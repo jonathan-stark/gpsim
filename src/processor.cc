@@ -2248,9 +2248,12 @@ int FileContextList::Find(string &fname)
   return -1;
 }
 
+extern bool bHasAbsolutePath(string &fname);
+
 int FileContextList::Add(string &new_name)
 {
-  string sFull = sSourcePath + new_name;
+  
+  string sFull = bHasAbsolutePath(new_name) ? new_name : (sSourcePath + new_name);
   push_back(FileContext(sFull));
   lastFile++;
   if(CSimulationContext::GetContext()->IsSourceEnabled()) {
@@ -2265,6 +2268,9 @@ int FileContextList::Add(string &new_name)
 
 int FileContextList::Add(char *new_name)
 {
+  string sNewName(new_name);
+  return Add (sNewName);
+  /*
   string sFull = sSourcePath + new_name;
   push_back(FileContext(sFull));
   lastFile++;
@@ -2274,6 +2280,7 @@ int FileContextList::Add(char *new_name)
          << "  id = " << lastFile << endl;
 
   return lastFile-1;
+  */
 }
 
 FileContext *FileContextList::operator [] (int file_id)

@@ -1,3 +1,10 @@
+2005-12-23 Scott Dattalo <scott@dattalo.com>
+	* src/symbol.cc: findRegsiterSymbol dumped core if a register was
+	being loaded from a module (and not from a processor)
+	* src/os_dependent.cc, src/processor.cc: Relative paths were
+	getting concatenated to absolute paths
+	* src/16bit-processors.cc: ccp1 is now associated with portc2
+	
 2005-12-19 Scott Dattalo <scott@dattalo.com>
 	* src/icd.cc, src/modules.cc, src/pic-processor.cc,
 	src/sim_context.cc, modules/paraface.cc: Re-added needed unistd.h
