@@ -34,8 +34,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Installing libgpsim.dll to $(TargetDir)"
-				CommandLine="copy &quot;..\src\Debug GUI\libgpsim.dll&quot; &quot;$(TargetDir)&quot;
-"
+				CommandLine="copy &quot;..\src\Debug GUI\libgpsim.dll&quot; &quot;$(TargetDir)&quot;"
 				AdditionalDependencies="&quot;..\..\src\Debug GUI\libgpsim.dll&quot;"
 				Outputs="libgpsim.dll"/>
 			<Tool

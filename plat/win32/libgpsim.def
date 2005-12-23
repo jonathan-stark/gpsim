@@ -115,6 +115,7 @@ EXPORTS
     ??AFileContextList@@QAEPAVFileContext@@H@Z
     ??APortModule@@QAEAAVPinModule@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
+    ??Emodule_symbol_iterator@Symbol_Table@@QAE?AV01@H@Z
     ?Add@FileContextList@@QAEHPAD@Z
     ?Add@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?AddModulePathFromFilePath@@YAXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -125,7 +126,15 @@ EXPORTS
     ?DecodeString@Packet@@QAE_NPADH@Z
     ?DecodeUInt32@Packet@@QAE_NAAI@Z
     ?DecodeUInt64@Packet@@QAE_NAA_K@Z
+    ?Delete@ModuleLibrary@@SAXPAVModule@@@Z
+    ?DisplayAttributes@Module@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z
     ?DisplayError@ProgramFileType@@UAEXHPBD0@Z
+    ?DisplayFileList@ModuleLibrary@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?DisplayModuleList@ModuleLibrary@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?DisplayModulePins@ModuleLibrary@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAD@Z
+    ?DisplayModuleTypeList@ModuleLibrary@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?DisplayProcessorTypeList@ModuleLibrary@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?DisplayString@ProcessorConstructorList@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?ElementIndexedName@IIndexedCollection@@MAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@Z
     ?EncodeHeader@Packet@@QAE_NXZ
     ?EncodeObjectType@Packet@@QAE_NI@Z
@@ -134,19 +143,24 @@ EXPORTS
     ?Execute@CCommandManager@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PBD@Z
     ?Exist@Symbol_Table@@QAE_NPBD@Z
     ?Find@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?FreeFile@ModuleLibrary@@SAXPBD@Z
     ?GetActiveCPU@CSimulationContext@@QAEPAVProcessor@@XZ
     ?GetBreakpoints@CSimulationContext@@QAEAAVBreakpoints@@XZ
     ?GetCapabilities@Processor@@QAEKXZ
+    ?GetCommandHandler@ModuleLibrary@@SAPAVICommandHandler@@PBD@Z
     ?GetContext@CSimulationContext@@SAPAV1@XZ
+    ?GetFileList@ModuleLibrary@@SAAAV?$OrderedVector@VFile@ModuleLibrary@@@@XZ
     ?GetList@ProcessorConstructorList@@SAPAV1@XZ
     ?GetManager@CCommandManager@@SAAAV1@XZ
     ?GetSymbolTable@CSimulationContext@@QAEAAVSymbol_Table@@XZ
     ?Initialize@CSimulationContext@@QAEXXZ
     ?Initialize@Token@gpsim@@QAEXP6APAXPAX@Z0@Z
     ?ListToConsole@CCommandManager@@QAEXXZ
-    ?LoadProgram@CSimulationContext@@QAEHPBD0@Z
+    ?LoadFile@ModuleLibrary@@SAXPBD@Z
+    ?LoadProgram@CSimulationContext@@QAEHPBD0PAPAVProcessor@@@Z
     ?NewObject@Float@@SAPAV1@PBD00@Z
     ?NewObject@Integer@@SAPAV1@PBD00@Z
+    ?NewObject@ModuleLibrary@@SAPAVModule@@PBD0@Z
     ?Parse@Boolean@@SA_NPBDAA_N@Z
     ?Parse@Float@@SA_NPBDAAN@Z
     ?Parse@Integer@@SA_NPBDAA_J@Z
@@ -156,6 +170,7 @@ EXPORTS
     ?ReadSrcLine@instruction@@UAEPADPADH@Z
     ?Register@CCommandManager@@QAEHPAVICommandHandler@@@Z
     ?RegisterProgramFileType@@YAXPAVProgramFileType@@@Z
+    ?Reset@CSimulationContext@@QAEXW4RESET_TYPE@@@Z
     ?Set@IIndexedCollection@@UAEXPAVValue@@@Z
     ?SetAddressRadix@IIndexedCollection@@QAEXH@Z
     ?SetAt@IIndexedCollection@@UAEXPAV?$list@PAVExpression@@V?$allocator@PAVExpression@@@std@@@std@@PAVExpression@@@Z
@@ -203,6 +218,7 @@ EXPORTS
     ?bIsValid@Breakpoints@@QAE_NI@Z
     ?bSimulating@gpsimInterface@@QAE_NXZ
     ?bUsingGUI@gpsimInterface@@QAE_NXZ
+    ?beginModuleSymbol@Symbol_Table@@QAE?AVmodule_symbol_iterator@1@XZ
     ?beginNodeSymbol@Symbol_Table@@QAE?AV?$symbol_iterator_t@Vnode_symbol@@@1@XZ
     ?bp@@3VBreakpoints@@A
     ?breakpoint@Cycle_Counter@@AAEXXZ
@@ -256,11 +272,9 @@ EXPORTS
     ?disassemble@Processor@@UAEXHH@Z
     ?dump_ASCII_art@BoolEventLogger@@QAEX_K0H@Z
     ?dump@Breakpoints@@QAEXH@Z
-    ?dump@ProcessorConstructorList@@SAXXZ
     ?dump@Trace@@QAEHHPAU_iobuf@@@Z
     ?dump1@Breakpoints@@QAE_NIH@Z
     ?dump_all@Symbol_Table@@QAEXXZ
-    ?dump_attributes@Module@@UAEXH@Z
     ?dump_bus_list@@YAXXZ
     ?dump_filtered@Symbol_Table@@QAEXABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?dump_last_instruction@Trace@@QAEXXZ
@@ -275,10 +289,12 @@ EXPORTS
     ?enableLogging@Trace@@QAEXPAD@Z
     ?enable_logging@TraceLog@@QAEXPBDH@Z
     ?enable_profiling@ProfileKeeper@@QAEXXZ
+    ?endModuleSymbol@Symbol_Table@@QAE?AVmodule_symbol_iterator@1@XZ
     ?endNodeSymbol@Symbol_Table@@QAE?AV?$symbol_iterator_t@Vnode_symbol@@@1@XZ
     ?event@ThreeStateEventLogger@@QAEXD@Z
     ?eval_Expression@TriggerObject@@UAE_NXZ
     ?eval_Expression@Breakpoint_Instruction@@UAE_NXZ
+    ?evaluate@symbol@@UAEPAVValue@@XZ
     ?event@BoolEventLogger@@QAEX_N@Z
     ?execute@AliasedInstruction@@UAEXXZ
     ?find@Symbol_Table@@QAEPAVValue@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -314,7 +330,6 @@ EXPORTS
     ?get@Integer@@UAEXAAVPacket@@@Z
     ?get@Integer@@UAEXAA_J@Z
     ?get@Integer@@UAEXPADH@Z
-    ?get@Module@@UAEXPADH@Z
     ?get@PortRegister@@UAEIXZ
     ?get@Processor@@UAEXPADH@Z
     ?get@String@@UAEXAAVPacket@@@Z
@@ -370,6 +385,7 @@ EXPORTS
     ?get_cpu@gpsimValue@@QBEPAVProcessor@@XZ
     ?get_cycles@@YAAAVCycle_Counter@@XZ
     ?get_dir_delim@@YAPBDPBD@Z
+    ?get_errMsg@AnError@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?get_file_id@AliasedInstruction@@UAEHXZ
     ?get_file_id@ProgramMemoryAccess@@QAEII@Z
     ?get_frequency@Processor@@UAENXZ
@@ -417,7 +433,6 @@ EXPORTS
     ?init_register_memory@Processor@@UAEXI@Z
     ?initializeAttributes@Module@@UAEXXZ
     ?initializeAttributes@Processor@@UAEXXZ
-    ?instantiated_modules_list@@3V?$list@PAVModule@@V?$allocator@PAVModule@@@std@@@std@@A
     ?instruction_size@AliasedInstruction@@UAEHXZ
     ?interrupt@Program_Counter@@UAEXI@Z
     ?isa@AliasedInstruction@@UAE?AW4INSTRUCTION_TYPES@instruction@@XZ
@@ -428,13 +443,6 @@ EXPORTS
     ?list@Processor@@UAEXIIII@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
     ?log@TraceRawLog@@QAEXXZ
-    ?module_display_available@@YAXXZ
-    ?module_get_command_handler@@YAPAVICommandHandler@@PBD@Z
-    ?module_list@@3V?$list@PAVModule_Library@@V?$allocator@PAVModule_Library@@@std@@@std@@A
-    ?module_list_modules@@YAXXZ
-    ?module_load_library@@YA_NPBD@Z
-    ?module_load_module@@YAXPBD0@Z
-    ?module_pins@@YAXPAD@Z
     ?name@AliasedInstruction@@UAEPADPADH@Z
     ?name@gpsimObject@@UBEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
@@ -464,6 +472,7 @@ EXPORTS
     ?put_opcode@ProgramMemoryAccess@@QAEXII@Z
     ?put_value@AliasedInstruction@@UAEXI@Z
     ?put_value@IOPORT@@UAEXI@Z
+    ?put_value@PortRegister@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ
     ?reassign_break@Cycle_Counter@@QAE_N_K0PAVTriggerObject@@@Z
@@ -500,7 +509,6 @@ EXPORTS
     ?set@Integer@@UAEXPAVValue@@@Z
     ?set@Integer@@UAEXPBDH@Z
     ?set@Integer@@UAEX_J@Z
-    ?set@Module@@UAEXPBDH@Z
     ?set@Processor@@UAEXPBDH@Z
     ?set@String@@UAEXAAVPacket@@@Z
     ?set@String@@UAEXPAVValue@@@Z
@@ -576,6 +584,7 @@ EXPORTS
     ?setDefaultControl@PinModule@@QAEXPAVSignalControl@@@Z
     ?setDefaultSource@PinModule@@QAEXPAVSignalControl@@@Z
     ?setDefaultPullupControl@PinModule@@QAEXPAVSignalControl@@@Z
+    ?setEnableMask@PortRegister@@UAEXI@Z
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?show@BinaryOperator@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
@@ -649,7 +658,8 @@ EXPORTS
     ?update_pullup@IO_bi_directional_pu@@UAEXD_N@Z
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@MAEHXZ
-    ?updatePort@PortModule@@QAEXXZ
+    ?updatePin@PortModule@@UAEXI@Z
+    ?updatePort@PortModule@@UAEXXZ
     ?updateUI@PinModule@@UAEXXZ
     ?updateUI@PortRegister@@UAEXXZ
     ?waitForChild@Token@gpsim@@QAEXXZ

@@ -70,7 +70,7 @@ enum SYMBOL_TYPE
 };
 
 
-class Symbol_Table : private vector<Value*> {
+class Symbol_Table : protected vector<Value*> {
 private:
   struct NameLessThan : binary_function<Value*, Value*, bool> {
     bool operator()(const Value* left, const Value* right) const {
@@ -110,6 +110,7 @@ public:
   void dump_one(string *s);
   void dump_type(type_info const&t);
   void dump_filtered(const string & sSymbol);
+  string DisplayType(type_info const &symt);
 
   Value *find(const char *s);
   Value *find(const string &s);
@@ -133,7 +134,7 @@ public:
   module_symbol *findModuleSymbol(const char *s);
   Module *      findModule(const char *s);
 
-private:
+protected:
   template<class _symbol_t>
   _symbol_t * findSymbol(const char *s, _symbol_t*)
   {
@@ -191,9 +192,10 @@ public:
     return _Myt::end();
   }
 
-private:
+protected:
   template<class _symbol_t>
   class symbol_iterator_t : iterator {
+  friend class module_symbol_iterator;
   public:
     symbol_iterator_t() {
       m_pSymbolTable = NULL;
@@ -234,7 +236,7 @@ private:
 			++*this;
 			return (_Tmp);
 			}
-  private:
+  protected:
     Symbol_Table *m_pSymbolTable;
   };
 
@@ -267,6 +269,26 @@ public:
   stimulus_symbol_iterator beginStimulusSymbol();
   stimulus_symbol_iterator endStimulusSymbol();
 
+  ///
+  /// module_symbol iterator declarations
+  ///
+  class module_symbol_iterator : public symbol_iterator_t<module_symbol> {
+  public:
+    module_symbol_iterator() {
+    }
+
+    module_symbol_iterator(const module_symbol_iterator & it) :
+      symbol_iterator_t<module_symbol>(it) {
+    }
+
+    module_symbol_iterator(Symbol_Table *pSymbolTable, iterator it) :
+      symbol_iterator_t<module_symbol>(pSymbolTable, it) {
+    }
+
+    module_symbol_iterator operator++(int);
+  };
+  module_symbol_iterator beginModuleSymbol();
+  module_symbol_iterator endModuleSymbol();
 
   ///
   ///   Symbols defined from gpsim command line

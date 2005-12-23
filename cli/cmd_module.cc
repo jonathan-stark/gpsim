@@ -106,7 +106,7 @@ void cmd_module::module(void)
 
   if(verbose)
     cout << "cmd_module: display modules\n";
-  module_list_modules();
+  cout << ModuleLibrary::DisplayModuleList();
 
 }
 
@@ -119,13 +119,13 @@ void cmd_module::module(cmd_options *opt)
     {
 
     case CMD_MOD_LIST:
-      module_display_available();
+      cout << ModuleLibrary::DisplayFileList();
       break;
 
     default:
       cout << "cmd_module error:";
       if(opt->name)
-	cout << " no parameters with option: " << opt->name;
+        cout << " no parameters with option: " << opt->name;
       cout << endl;
     }
 
@@ -152,8 +152,8 @@ void cmd_module::module(cmd_options_str *cos,
       s1 = *si;
     
       if(strs->size() >= 2) {
-	++si;
-	s2 = *si;
+        ++si;
+        s2 = *si;
       }
     }
 
@@ -189,11 +189,12 @@ void cmd_module::module(cmd_options_str *cos)
     {
     case CMD_MOD_LIB:
       if(verbose)
-        cout << "module command got the library " << cos->str << '\n';
-      if(module_load_library(cos->str)) {
-        ICommandHandler * handler = module_get_command_handler(cos->str);
-        if (handler != NULL)
-          CCommandManager::GetManager().Register(handler);
+        cout << "module command got the library " << cos->str << endl;
+      try {
+        ModuleLibrary::LoadFile(cos->str);
+      }
+      catch(Error *pError) {
+        cout << pError->get_errMsg();
       }
       break;
     case CMD_MOD_LOAD:
@@ -201,7 +202,9 @@ void cmd_module::module(cmd_options_str *cos)
       // gpsim assign the name.
       if(verbose)
         cout << "module command got the module " << cos->str << '\n';
-      module_load_module(cos->str);
+      if(ModuleLibrary::NewObject(cos->str) == NULL) {
+        GetUserInterface().DisplayMessage("module type %s not created\n");
+      }
       break;
 
     case CMD_MOD_DUMP:
@@ -209,7 +212,7 @@ void cmd_module::module(cmd_options_str *cos)
       break;
 
     case CMD_MOD_PINS:
-      module_pins(cos->str);
+      ModuleLibrary::DisplayModulePins(cos->str);
       break;
 
     default:
@@ -229,9 +232,9 @@ void  cmd_module::module(cmd_options_str *cos, const char *op1)
 
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library 
-
-      module_load_module( cos->str,  op1);
-
+      if(ModuleLibrary::NewObject(cos->str,  op1) == NULL) {
+        GetUserInterface().DisplayMessage("module type %s not created\n");
+      }
       break;
 
     default:

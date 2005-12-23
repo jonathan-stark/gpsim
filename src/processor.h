@@ -661,7 +661,7 @@ class ProcessorConstructorList : public list <ProcessorConstructor *> {
 public:
   ProcessorConstructorList() {}
   static ProcessorConstructor * findByType(const char *type);
-  static void dump(void);
+  static string DisplayString(void);
   static ProcessorConstructorList *GetList();
 private:
   static ProcessorConstructorList *processor_list;

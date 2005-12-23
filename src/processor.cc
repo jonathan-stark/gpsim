@@ -2009,9 +2009,9 @@ ProcessorConstructor *ProcessorConstructorList::findByType(const char *name)
 // dump() --  Print out a list of all of the processors
 //
 
-void ProcessorConstructorList::dump(void)
+string ProcessorConstructorList::DisplayString(void)
 {
-
+  ostringstream stream;
   list <ProcessorConstructor *> :: iterator processor_iterator;
 
   const int nPerRow = 4;   // Number of names to print per row.
@@ -2047,7 +2047,7 @@ void ProcessorConstructorList::dump(void)
     for(i=0; i<nPerRow && processor_iterator != processor_list->end(); i++) {
 
       p = *processor_iterator++;
-      cout << p->names[1];
+      stream << p->names[1];
 
       if(i<nPerRow-1) {
 
@@ -2056,12 +2056,13 @@ void ProcessorConstructorList::dump(void)
 
         k = longest + 2 - strlen(p->names[1]);
         for(j=0; j<k; j++)
-          cout << ' ';
+          stream << ' ';
       }
     }
-    cout << '\n';
+    stream << endl;
   } 
-
+  stream << ends;
+  return string(stream.str());
 }
 
 

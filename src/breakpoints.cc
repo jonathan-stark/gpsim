@@ -1549,8 +1549,9 @@ void CommandAssertion::execute()
   //printf("execute command: %s -- post = %s\n",command,(bPostAssertion?"true":"false"));
 
   ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
-  pCli->Execute(command, 0);
-
+  if(pCli) {
+    pCli->Execute(command, 0);
+  }
   if(!bPostAssertion && m_replaced)
     m_replaced->execute();
 }

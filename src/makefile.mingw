@@ -94,6 +94,7 @@ src_OBJECTS =			\
 	value.o			\
 	xref.o			\
 	ValueCollections.o	\
+	ui.o        \
 	uxtime.o
 
 ../config.h : ../config_win32.h.in

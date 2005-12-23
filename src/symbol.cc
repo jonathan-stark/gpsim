@@ -566,6 +566,41 @@ Symbol_Table::stimulus_symbol_iterator Symbol_Table::endStimulusSymbol() {
     (stimulus_symbol*)NULL);
 }
 
+
+Symbol_Table::module_symbol_iterator Symbol_Table::beginModuleSymbol() {
+  iterator it;
+  iterator itEnd = _Myt::end();
+  for(it = _Myt::begin(); itEnd != it; it++) {
+    if(dynamic_cast<module_symbol*>(*it) != NULL &&
+      dynamic_cast<attribute_symbol*>(*it) == NULL) {
+      return module_symbol_iterator(this, it);
+    }
+  }
+  return module_symbol_iterator(this, itEnd);
+//  return (module_symbol_iterator)beginSymbol(
+//    (module_symbol_iterator*)NULL,
+//    (module_symbol*)NULL);
+}
+
+Symbol_Table::module_symbol_iterator Symbol_Table::endModuleSymbol() {
+  return endSymbol((module_symbol_iterator*) NULL,
+    (module_symbol*)NULL);
+}
+
+Symbol_Table::module_symbol_iterator
+Symbol_Table::module_symbol_iterator::operator++(int) {
+  // postincrement
+  Symbol_Table::iterator & it = (Symbol_Table::iterator&)*this;
+  for(it++; it != m_pSymbolTable->end(); it++) {
+    if(dynamic_cast<module_symbol*>(*it) != NULL &&
+      dynamic_cast<attribute_symbol*>(*it) == NULL) {
+      return (*this);
+    }
+  }
+  return (*this);
+}
+
+
 bool Symbol_Table::Exist(const char *s) {
   return this->FindIt(s) != end();
 }
@@ -647,6 +682,12 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
 
 void Symbol_Table::dump_type(type_info const &symt)
 {
+  cout << DisplayType(symt);
+}
+
+string Symbol_Table::DisplayType(type_info const &symt)
+{
+  ostringstream stream;
   // Now loop through the whole table and display all instances of the type of interest
   int first=1;     // On the first encounter of one, display the title
   iterator sti = begin();
@@ -655,15 +696,16 @@ void Symbol_Table::dump_type(type_info const &symt)
     if(sym && (typeid(*sym) == symt)) {
       if(first) {
         first = 0;
-        cout << "Symbol Table for \"" << sym->showType() << "\"\n";
+        stream << "Symbol Table for \"" << sym->showType() << "\"" << endl;
       }
 
-      cout << sym->toString() << endl;
+      stream << sym->toString() << endl;
     }
     sti++;
   }
   if(first)
-    cout << "No symbols found\n";
+    stream << "No symbols found" << endl << ends;
+  return string(stream.str());
 }
 
 bool IsClearable(Value* value)
@@ -1140,14 +1182,14 @@ Value *module_symbol::copy()
 }
 void module_symbol::set(const char *cP,int len)
 {
-  if(module)
-    module->set(cP,len);
+  throw new Error("object cannot be assigned a value\n");
 }
 
 void module_symbol::get(char *cP, int len)
 {
-  if(module)
-    module->get(cP,len);
+  if(cP) {
+    *cP = 0;
+  }
 }
 
 //------------------------------------------------------------------------
