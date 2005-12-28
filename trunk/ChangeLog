@@ -1,4 +1,14 @@
-
+2005-12-28 Roy Rankin <rrankin@ihug.com.au>
+	* modules/usart.cc, modules/usart.h: Fixed bugs in
+	mSendByte. Fixed usart attributes. Cleaned up error messages.
+	* modules/usart.cc, modules/usart.h: Added a gui interface to the
+	usart module.
+	* examples/modules/usart_gui/Makefile: New
+	* examples/modules/usart_gui/README: New
+	* examples/modules/usart_gui/usart_gui.asm: New
+	* examples/modules/usart_gui/usart_gui.stc: New. The usart_gui
+	example illustrates the new Usart GUI interface. 
+	
 2005-12-23 J.R. Heisey <jrheisey@sourceforge.com
 	* src/breakpoints.cc, src/cmd_gpsim.h, cli/cmd_module.cc,
 	cli/cmd_processor.cc, gpsim/gpsim.vcproj, gui/gui_breadboard.cc,
