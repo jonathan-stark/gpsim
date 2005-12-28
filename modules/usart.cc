@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
+#define DEFAULT_BAUD    9600
 
 #include <errno.h>
 #include <stdlib.h>
@@ -45,6 +46,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
+#define GTK_ENABLE_BROKEN
 #include <gtk/gtk.h>
 #endif
 
@@ -104,101 +106,6 @@ confined to the limited number of discrete baud rates.
 
 
 **********************************************************************************/
-
-
-//--------------------------------------------------------------
-//
-//  BRG
-//
-// Serial Port Baud Rate Generator
-//
-//
-//--------------------------------------------------------------
-
-class BRG       //  : public TriggerObject
-{
-public:
-  double baud;
-  guint64 time_per_bit;
-  guint64 last_time;
-  guint64 start_time;
-  guint64 future_time;
-
-
-  BRG(void) {
-    set_baud_rate(125000); // Default baud rate.
-    
-  }
-
-#if 0
-  virtual void callback(void) {
-    cout << "SPBRG::" << __FUNCTION__ << " is not implemented\n";
-
-    //pic_processor *cpu = gpsim_get_active_cpu();
-    last_time = get_cycles().get();
-
-    cout << "SPBRG rollover at cycle " << last_time << '\n';
-
-    //if(rcsta->value & _RCSTA::SPEN) {
-      // If the serial port is enabled, then set another 
-      // break point for the next clock edge.
-      get_next_cycle_break();
-
-      //}
-
-  };
-#endif
-
-  virtual void start(void) {
-
-    last_time = get_cycles().get();
-    start_time = last_time;
-
-    //future_time = last_time + time_per_bit;
-
-    //gpsim_set_break(future_time, this);
-    //get_next_cycle_break();
-
-
-    //if(verbose)
-    //cout << "SPBRG::start   last_cycle = " << 
-    //  hex << last_time << " future_cycle = " << future_time << '\n';
-
-  };
-
-#if 0
-  virtual void get_next_cycle_break(void) {
-    future_time = last_time + time_per_bit;
-
-    get_cycles().set_break(future_time, this);
-
-
-  };
-#endif
-
-  void set_baud_rate(double new_baud) {
-    //cout << "SPBRG::" << __FUNCTION__ << "\n";
-
-    baud = new_baud;
-
-    if(get_active_cpu() && baud>0.0) {
-
-      time_per_bit = (guint64)(get_active_cpu()->get_frequency()/baud);
-
-      Dprintf(("Baud:%f time_per_bit=%lld\n",baud,time_per_bit));
-    }
-  };
-
-#if 0
-  virtual guint64 get_cpu_cycle(unsigned int edges_from_now) {
-    cout << "SPBRG::" << __FUNCTION__ << " is not implemented\n";
-  };
-#endif
-
-};
-
-
-
 
 
 //--------------------------------------------------------------
@@ -303,7 +210,6 @@ public:
 class TXREG : public TriggerObject
 {
 private:
-  //BRG         *brg;
 
   bool empty_flag;
   double baud;
@@ -345,10 +251,10 @@ private:
     txpin = 0;
     usart = 0;
 
-    baud = 9600;
     bits_per_byte = 8;
     stop_bits = 1;
     use_parity = 0;
+    set_baud_rate(DEFAULT_BAUD);
 
     tx_byte = '0';
 
@@ -409,7 +315,7 @@ private:
 
 
   virtual void callback(void) {
-    if(1) {
+    if(0) {
       cout << " usart module TXREG::" << __FUNCTION__ << "\n";
     }
 
@@ -418,7 +324,11 @@ private:
 
     if(txpin) {
       txpin->putState((txr & 1) ? true : false);
-      cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
+      if (0)
+      {
+          cout << "usart tx module sent a " << (txr&1) <<  
+		" bit count " << bit_count << '\n';
+      }
     }
 
     if(bit_count) {
@@ -428,10 +338,12 @@ private:
       get_cycles().set_break(future_time, this);
     } else {
       // We've sent the whole byte. 
-
+    /*	output data sent from GUI if configured */
+#ifndef HAVE_GUI
       if(usart && usart->mGetTxByte(tx_byte))
 	mSendByte(tx_byte);
       else
+#endif
 	empty();
     }
 
@@ -441,13 +353,13 @@ private:
   void mSendByte(unsigned _tx_byte) 
   {
     
-    if(1) {
+    if(0) {
       cout << "\n\n";
       cout << "TXREG::" << __FUNCTION__ << "\n";
       cout << "\n\n";
     }
 
-    mBuildTXpacket(tx_byte);
+    mBuildTXpacket(_tx_byte);
     last_time = get_cycles().get();
     future_time = last_time + time_per_bit;
     get_cycles().set_break(future_time, this);
@@ -464,8 +376,11 @@ private:
     // total bits = byte + start and stop bits
     bit_count = bits_per_byte + 1 + 1;
 
-    cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb 
+    if (0)
+    {
+        cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb 
 	 <<" txr 0x" << txr << "  bits " << bit_count << '\n';
+    }
 
   }
 
@@ -478,6 +393,7 @@ private:
 // Create a receive register 
 // 
 //
+char *RXError_str[] = {"OK", "NoStartBit", "NoStopBit", "BadParity", NULL };
 
 class RCREG : public TriggerObject
 {
@@ -485,7 +401,6 @@ class RCREG : public TriggerObject
 
   USART_RXPIN *rxpin;
 
-#define DEFAULT_BAUD    250000
 #define MAX_PW  0xfffffff
 
 #define RX_ERR_OVERRUN        1
@@ -600,7 +515,6 @@ private:
   bool autobaud;
 
   IOPIN   *rcpin;
-  //BRG     brg;
   unsigned int *fifo;
 
 
@@ -623,8 +537,7 @@ RCREG::RCREG(USARTModule *pUsart)
   set_stop_bits(1.0);
   set_noparity();
 
-  //set_baud_rate(DEFAULT_BAUD);
-  set_baud_rate(250000);
+  set_baud_rate(DEFAULT_BAUD);
 }
 
 //------------------------------------------------------------------------
@@ -650,8 +563,10 @@ void RCREG::callback()
       if (re == eNoError) {
 	Dprintf((" Successfully recieved 0x%02x\n",rx_byte));
 	m_usart->newRxByte(rx_byte);
+	m_usart->show_tx(rx_byte);
       } else {
-	Dprintf((" Failed to decode byte\n"));
+        printf("RCREG::callback Failed to decode byte %s \n", 
+		RXError_str[re]);
       }
 
     } else {
@@ -833,49 +748,6 @@ public:
 
 
 
-
-//--------------------------------------------------------------
-//  Usart Attributes - derived from gpsim's FloatAttribute
-// 
-//--------------------------------------------------------------
-class UsartAttribute : public Float {
-
-public:
-  enum UA_TYPE {
-    UA_BAUDRATE,
-    UA_STARTBITS,
-    UA_STOPBITS,
-  } ;
-
-  UA_TYPE type;
-
-
-  UsartAttribute(char *_name, UA_TYPE new_type, double def_val) :
-    Float(def_val)
-  {
-
-    cout << "USART Attribute constructor\n";
-
-    type = new_type;
-    new_name(_name);
-  }
-
-
-  void set(double new_val) {
-
-    cout << "Setting usart attribute\n";
-
-    Float::set(new_val);
-
-  };
-
-
-  void set(int v) {
-    set(double(v));
-  };
-};
-
-
 //
 //  USART attributes
 //
@@ -902,7 +774,7 @@ public:
   RCREG *rcreg;
 
   RxBaudRateAttribute(RCREG *prcreg)
-    : Integer("rxbaud",9600,"USART Module Receiver baud rate"), rcreg(prcreg)
+    : Integer("rxbaud",DEFAULT_BAUD,"USART Module Receiver baud rate"), rcreg(prcreg)
   {
     assert(rcreg);
   }
@@ -911,12 +783,12 @@ public:
   void set(Value *v) {
 
 
-    cout << "Setting Rx baud rate attribute!\n";
     Integer::set(v);
 
     gint64 b;
     get(b);
     rcreg->set_baud_rate(b);
+    cout << "Setting Rx baud rate attribute to " << dec << b << "\n";
 
   };
   virtual string toString()
@@ -933,7 +805,7 @@ public:
   TXREG *txreg;
 
   TxBaudRateAttribute(TXREG *ptxreg)
-    : Integer("txbaud",9600,"USART Module Transmitter baud rate"), txreg(ptxreg)
+    : Integer("txbaud",DEFAULT_BAUD,"USART Module Transmitter baud rate"), txreg(ptxreg)
   {
     assert(txreg);
   }
@@ -945,6 +817,7 @@ public:
     gint64 b;
     get(b);
     txreg->set_baud_rate(b);
+    cout << "Setting Tx baud rate attribute to " << dec << b << "\n";
   }
   virtual string toString()
   {
@@ -1080,10 +953,6 @@ void USARTModule::create_iopin_map(void)
   m_txreg->usart = this; // Point back to the module
   m_rcreg->rxpin = rxpin;
 
-  //usart->brg->put(0);
-  //usart->spbrg->set_baud_rate(38400);
-  //usart->rcsta->put(_RCSTA::SPEN | _RCSTA::CREN);
-
 }
 //--------------------------------------------------------------
 void USARTModule::get(char *cP, int len)
@@ -1126,6 +995,9 @@ USARTModule::USARTModule(const char *_name)
   add_attribute(m_TxBuffer);
 
 
+  CreateGraphics();
+
+
   assert(m_rcreg);
   assert(m_txreg);
   assert(m_RxBaud);
@@ -1140,3 +1012,99 @@ USARTModule::~USARTModule()
     // FIXME
 }
 
+//--------------------------------------------------------------
+void USARTModule::SendByte(unsigned tx_byte)
+{
+        if (m_txreg)
+            m_txreg->mSendByte(tx_byte);
+};
+
+#ifdef HAVE_GUI
+static bool ctl = false;	// true when ctrl key is down
+
+static gint
+key_press(GtkWidget *widget,
+          GdkEventKey *key,
+          gpointer data)
+{
+	unsigned int c = key->keyval;
+
+        gtk_signal_emit_stop_by_name (GTK_OBJECT (widget), "key_press_event");
+	if(c == 0xffe3 || c == 0xffe4) // key is left or right ctrl
+	{
+	    ctl = true;
+	    return(1);
+	}
+	if (ctl && c < 0xff00)	// build control character
+	{
+		Dprintf(("CTL 0x%02x\n", c));
+		c &= 0x1f;
+	}
+	if ( c < 0xff20)	// send character to usart
+	{
+	    c &= 0xff;
+	    ((USARTModule *)data)->USARTModule::SendByte(c);
+	    Dprintf(("Send %c 0x%x\n", c,c));
+	}
+	else
+	{
+		Dprintf(( "0x%02x\n", c));
+	}
+	return(1);
+}
+static gint
+key_release(GtkWidget *widget,
+          GdkEventKey *key,
+          gpointer data)
+{
+	unsigned int c = key->keyval;
+	if(c == 0xffe3 || c == 0xffe4)	// Capture release of ctrl key
+	{
+	    ctl = false;
+	}
+	return(1);
+}
+
+// Display charater from usart on GUI text window
+void USARTModule::show_tx(unsigned int data)
+{
+	data &= 0xff;
+	gtk_text_insert (GTK_TEXT(text), NULL, NULL, NULL, (char *)&data, 1);
+}
+// Create a GUI text window 
+void USARTModule::CreateGraphics()
+{
+
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  text = gtk_text_new (NULL, NULL);
+  gtk_text_set_editable (GTK_TEXT (text), TRUE);
+  gtk_container_add (GTK_CONTAINER (window), text);
+  gtk_window_set_title(GTK_WINDOW(window), "USART");
+  gtk_window_set_default_size (GTK_WINDOW(window), 300, 100);
+
+  gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK);
+
+  gtk_signal_connect(GTK_OBJECT(text),"key_press_event",
+                     (GtkSignalFunc) key_press,
+                     this);
+  gtk_signal_connect(GTK_OBJECT(text),"key_release_event",
+                     (GtkSignalFunc) key_release,
+                     this);
+
+  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+                        GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
+                                                                                
+
+  gtk_widget_show_all(window);
+}
+
+#else //HAVE_GUI
+void USARTModule::show_tx(unsigned int data)
+{
+	data &= 0xff;
+	printf("%s byte=0x%x\n", __FUNCTION__, data);
+}
+void USARTModule::CreateGraphics()
+{
+}
+#endif //HAVE_GUI

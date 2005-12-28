@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 
 #ifdef HAVE_GUI
+#define GTK_ENABLE_BROKEN
 #include <gtk/gtk.h>
 #endif
 
@@ -47,6 +48,16 @@ class RxBuffer;
 class USARTModule : public Module
 {
  public:
+
+#ifdef HAVE_GUI
+  GtkWidget *window, *text;
+ 
+#endif // HAVE_GUI
+ 
+  void CreateGraphics(void);
+  virtual void show_tx(unsigned int data);
+  virtual void SendByte(unsigned tx_byte);
+
 
   // Inheritances from the Package class
   virtual void create_iopin_map();
