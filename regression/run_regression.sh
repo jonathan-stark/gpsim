@@ -17,6 +17,9 @@ fi
 
 RT=./rt.sh
 
+# Basic breakpoint test
+${RT} breakpoints sim
+
 # Instruction set simulation of the mid-range devices
 ${RT} instructions_14bit sim
 
