@@ -1068,34 +1068,47 @@ key_release(GtkWidget *widget,
 // Display charater from usart on GUI text window
 void USARTModule::show_tx(unsigned int data)
 {
+  if(get_interface().bUsingGUI()) {
+
 	data &= 0xff;
 	gtk_text_insert (GTK_TEXT(text), NULL, NULL, NULL, (char *)&data, 1);
+
+  }
+
 }
 // Create a GUI text window 
 void USARTModule::CreateGraphics()
 {
 
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  text = gtk_text_new (NULL, NULL);
-  gtk_text_set_editable (GTK_TEXT (text), TRUE);
-  gtk_container_add (GTK_CONTAINER (window), text);
-  gtk_window_set_title(GTK_WINDOW(window), "USART");
-  gtk_window_set_default_size (GTK_WINDOW(window), 300, 100);
+  if(get_interface().bUsingGUI()) {
 
-  gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK);
+    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    text = gtk_text_new (NULL, NULL);
+    gtk_text_set_editable (GTK_TEXT (text), TRUE);
+    gtk_container_add (GTK_CONTAINER (window), text);
+    gtk_window_set_title(GTK_WINDOW(window), "USART");
+    gtk_window_set_default_size (GTK_WINDOW(window), 300, 100);
 
-  gtk_signal_connect(GTK_OBJECT(text),"key_press_event",
-                     (GtkSignalFunc) key_press,
-                     this);
-  gtk_signal_connect(GTK_OBJECT(text),"key_release_event",
-                     (GtkSignalFunc) key_release,
-                     this);
+    gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK);
 
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+    gtk_signal_connect(GTK_OBJECT(text),"key_press_event",
+		       (GtkSignalFunc) key_press,
+		       this);
+    gtk_signal_connect(GTK_OBJECT(text),"key_release_event",
+		       (GtkSignalFunc) key_release,
+		       this);
+
+    gtk_signal_connect (GTK_OBJECT (window), "destroy",
                         GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
                                                                                 
 
-  gtk_widget_show_all(window);
+    gtk_widget_show_all(window);
+
+  } else {
+    window = 0;
+    text = 0;
+  }
+
 }
 
 #else //HAVE_GUI
