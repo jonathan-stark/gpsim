@@ -1,0 +1,10 @@
+Graphic LCD modules for gpsim
+
+Directories:
+
+src/   -- source code for gpsim module
+examples/ -- PIC assembly code illustrating the module.
+utils/ -- Utility for converting PNG files into gpasm include files.
+
+
+
