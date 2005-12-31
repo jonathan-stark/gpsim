@@ -1,3 +1,7 @@
+2005-12-31 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: added examples/modules/usart_gui/*.* and
+	  extras/graphic_lcd/*.* to the WIN32 setup
+
 2005-12-28 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc, modules/usart.h: Fixed bugs in
 	mSendByte. Fixed usart attributes. Cleaned up error messages.
@@ -8,7 +12,7 @@
 	* examples/modules/usart_gui/usart_gui.asm: New
 	* examples/modules/usart_gui/usart_gui.stc: New. The usart_gui
 	example illustrates the new Usart GUI interface. 
-	
+
 2005-12-23 J.R. Heisey <jrheisey@sourceforge.com
 	* src/breakpoints.cc, src/cmd_gpsim.h, cli/cmd_module.cc,
 	cli/cmd_processor.cc, gpsim/gpsim.vcproj, gui/gui_breadboard.cc,
@@ -28,17 +32,16 @@
 	* src/os_dependent.cc, src/processor.cc: Relative paths were
 	getting concatenated to absolute paths
 	* src/16bit-processors.cc: ccp1 is now associated with portc2
-	
+
 2005-12-19 Scott Dattalo <scott@dattalo.com>
 	* src/icd.cc, src/modules.cc, src/pic-processor.cc,
 	src/sim_context.cc, modules/paraface.cc: Re-added needed unistd.h
 	includes that were removed on 2005-12-10. New systems may not
 	unistd, but older ones do.
 
-
 2005-12-17 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: removed glib dependencies for non-gui builds
-	
+
 2005-12-16 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.h, src/ioports.cc, src/pic-ioports.h,
 	src/pic-ioports.cc: moved some of the functionality in the
@@ -145,7 +148,6 @@
 
 
 2005-11-27 Borut Razem <borut.razem@siol.net>
-
 	* plat/win32/gpsim.nsi, plat/win32/make.mingw, cli/makefile.mingw,
 	  gpsim/makefile.mingw, gui/makefile.mingw, modules/makefile.mingw,
 	  src/makefile.mingw, regression/README: MINGW sync
