@@ -1,3 +1,7 @@
+2006-01-02 Scott Dattalo <scott@dattalo.com>
+	* configure.ac, cli/input.cc, cli/socket.cc: add configuration
+	option to inhibit the socket interface.
+
 2005-12-31 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: added examples/modules/usart_gui/*.* and
 	  extras/graphic_lcd/*.* to the WIN32 setup
