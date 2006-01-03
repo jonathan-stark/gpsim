@@ -1,3 +1,6 @@
+
+#ifdef USE_SOCKETS
+
 /*
    Copyright (C) 2004 T. Scott Dattalo
 
@@ -1277,3 +1280,5 @@ void stop_server(void)
 #endif
 }
 #endif   // if USE_THREADS
+
+#endif // USE_SOCKETS

@@ -117,8 +117,10 @@ extern void  scanPushMacroState(Macro *);
 
 extern int quit_parse;
 
+#ifdef HAVE_SOCKETS
 extern void start_server(void);
 extern void stop_server(void);
+#endif // HAVE_SOCKETS
 
 
 static Boolean  &s_bSTCEcho = *new Boolean("CliTrace", false,
@@ -300,7 +302,9 @@ void initialize_gpsim(void)
   if(gUsingThreads()) 
     initialize_threads();
   initialize_signals();
+#ifdef HAVE_SOCKETS
   start_server();
+#endif
 }
 
 
@@ -852,7 +856,9 @@ void exit_gpsim(void)
 #endif
 
   CSimulationContext::GetContext()->GetContext()->Clear();
+#ifdef HAVE_SOCKETS
   stop_server();
+#endif
 
   exit(0);
 }
