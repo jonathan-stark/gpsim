@@ -33,24 +33,26 @@ else
 	AC_DEFINE([HAVE_GUI],[],[True if GUI is being used])
 fi
 
-dnl --enable-gtk1 : link with GTK+ 1.x
-dnl    The default is to link with GTK+ 2.x
 
-AC_ARG_ENABLE(gtk1,
-     [  --enable-gtk1           Use GTK+ 1.x for the gui (deprecated)],
+dnl --enable-sockets : allows gpsim to be controlled from a socket interface
+dnl    The default is to not use sockets.
+
+AC_ARG_ENABLE(sockets,
+     [  --enable-sockets        Allows gpsim to be controlled via a socket interface],
      [case "${enableval}" in
-       yes) use_gtk1=yes ;;
-       no)  use_gtk1=no ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-gtk1) ;;
-     esac],[use_gtk1=no])
+       yes) use_sockets=yes ;;
+       no)  use_sockets=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-sockets) ;;
+     esac],[use_sockets=no])
 
-if test "$use_gtk1" = "no"; then
-        echo linking with GTK+ 2.x
+if test "$use_sockets" = "no"; then
+        echo disabling gpsim socket interface
 else
-        echo linking with GTK+ 1.x
+        echo enabling gpsim socket interface
         [
-         use_gtk1=yes
+         use_sockets=yes
         ]
+	AC_DEFINE([HAVE_SOCKETS],[],[True if gpsim socket interface is being used])
 fi
 
 GTK=
@@ -65,7 +67,7 @@ if test "$use_gui" = "no"; then
     AC_MSG_ERROR(Cannot find glib-config: glib is needed even for non-gui version.)
   fi
 
-  X_LDFLAGS=`$GLIBCONFIG --libs`
+  X_LDFLAGS=`$GLIBCONFIG --libs gthread gmodule`
   X_CFLAGS=`$GLIBCONFIG --cflags`
   Y_LDFLAGS=
   Y_CFLAGS=
@@ -228,5 +230,6 @@ gpsim-$PACKAGE_VERSION is now configured for $canonical_host_type
 
   gui:                  $use_gui
   GTK+ 1.x              $use_gtk1
+  Socket interface:     $use_sockets
 
 ])
