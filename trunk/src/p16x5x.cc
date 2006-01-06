@@ -165,12 +165,8 @@ void P16C54::create_sfr_map()
 void P16C54::create_symbols()
 {
 
-  pic_processor::create_symbols();
-  symbol_table.add_register(m_porta);
-  symbol_table.add_register(m_trisa);
+  _12bit_processor::create_symbols();
 
-  symbol_table.add_register(m_portb);
-  symbol_table.add_register(m_trisb);
 }
 
 void P16C54::create()
@@ -269,9 +265,6 @@ void P16C55::create_sfr_map()
 void P16C55::create_symbols()
 {
   P16C54::create_symbols();
-
-  symbol_table.add_register(m_portc);
-  symbol_table.add_register(m_trisc);
 
 }
 

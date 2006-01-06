@@ -548,14 +548,6 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 	    string cmd(buff);
 	    cpu->add_command(script,cmd);
 	  }
-	  /*
-	  if(pCli) {
-	    char buff[256];
-	    snprintf(buff,sizeof(buff),"break e %d %s\n",laddress,DebugMessage);
-	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(buff,0))
-	      printf("cod: Failed to parse assertion:%s\n",buff);
-	  }
-	  */
           break;
         case 'e':
         case 'E':

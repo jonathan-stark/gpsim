@@ -108,7 +108,7 @@ void Cycle_Counter_breakpoint_list::clear()
 {
   bActive = false;
   if(f)
-    f->clear_break();
+    f->clear_trigger();
 }
 
 void Cycle_Counter_breakpoint_list::invoke()
@@ -791,13 +791,15 @@ public:
     i = (sw) ? sw->get() : 0;
     Integer::set(i);
   }
-  virtual void set_break()
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0)
   {
     if(sw) sw->set_break(true);
+    return -1;  // FIXME
   }
-  virtual void clear_break()
+  virtual int clear_break()
   {
     if(sw) sw->set_break(false);
+    return -1;  // FIXME
   }
 
 };

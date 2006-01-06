@@ -294,3 +294,125 @@ void ThreeStateEventLogger::event(char state)
   }
 
 }
+
+
+void ThreeStateEventLogger::dump(int start_index, int end_index)
+{
+    
+  if((start_index > (int)max_events) || (start_index <= 0 ))
+    start_index = 0;
+
+  if(end_index == -1)
+    end_index = index;
+
+  if(start_index == end_index)
+    return;
+
+  // Loop through and dump events between the start and end points requested
+
+  do {
+    cout << hex << "0x" << start_index << " = 0x" << pTimeBuffer[start_index];
+    cout << " : " << pEventBuffer[start_index] << endl;
+
+    start_index = (start_index + 1) & max_events;
+
+  }while ( start_index != end_index);
+
+}
+
+void ThreeStateEventLogger::dump_ASCII_art(guint64 time_step,
+					   guint64 start_time,
+					   int end_index)
+{
+
+
+  int start_index = get_index(start_time);
+
+  if((start_index > (int)max_events) || (start_index <= 0 )) {
+    start_index = 0;
+    start_time = pTimeBuffer[0];
+  }
+
+  if(pTimeBuffer[start_index] == 0) {
+    start_index = 0;
+    start_time = pTimeBuffer[0];
+  }
+
+  if( (end_index > (int)max_events) || (end_index <= 0 ))
+    end_index = index;
+
+  if(start_index == end_index)
+    return;
+
+  // Loop through and dump events between the start and end points requested
+
+  guint64 min_pulse = pTimeBuffer[end_index] - pTimeBuffer[start_index];
+  unsigned long i = start_index;
+  int j = (start_index+1) & max_events;
+
+  do {
+
+    if(  (pTimeBuffer[j] - pTimeBuffer[i]) < min_pulse )
+      min_pulse = (pTimeBuffer[j] - pTimeBuffer[i]);
+
+    i = j;
+    j = ++j & max_events; 
+
+  }while (j != end_index);
+
+  cout << "minimum pulse width :" << min_pulse << '\n';
+
+  if(min_pulse == 0) { // bummer - there's an error in the log
+    min_pulse = 1;
+    cout << "log error - minimum pulse width shouldn't be zero\n";
+  }
+
+  time_step = 0;
+  time_step = time_step ? time_step : ((min_pulse>2) ? min_pulse/2 : 1);
+
+  int num_chars = 0;
+  guint64 t = start_time; //buffer[start_index];
+  guint64 stop_time = gcycles->get();
+
+  i = start_index;
+  do {
+    if(t<=pTimeBuffer[end_index])
+      j = get_index(t);
+    else
+      j = end_index;
+
+    cout << pEventBuffer[j];
+    /*
+    switch(j-i) {
+    case 0:
+    case 1:
+      if(i&1)
+	cout <<'-';
+      else
+	cout <<'_';
+      break;
+    case 2:
+      cout << '|';
+      break;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+      cout << (j-i);
+      break;
+    default:
+      cout << '*';
+    }
+    */
+    i = j;
+    t += time_step;
+  } while( t<stop_time && num_chars++<1000);
+
+  cout << '\n';
+
+  //cout << "\nend of ASCII art\n";
+
+}

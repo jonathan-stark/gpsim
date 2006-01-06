@@ -77,6 +77,8 @@ public:
   LiteralSymbol(Value *, ExprList_t*);
   virtual ~LiteralSymbol();
   virtual Value* evaluate();
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
+  virtual int clear_break();
   string toString();
   Value *GetSymbol();
 
@@ -105,6 +107,7 @@ public:
   LiteralInteger(Integer* value);
   virtual ~LiteralInteger();
   virtual Value* evaluate();
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
   string toString();
 
 private:

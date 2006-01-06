@@ -159,7 +159,7 @@ Processor * P16F871::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16f871");
   symbol_table.add_module(p,p->name().c_str());
@@ -173,6 +173,8 @@ void P16F871::create_symbols(void)
 
   if(verbose)
     cout << "f871 create symbols\n";
+
+  Pic14Bit::create_symbols();
 
 }
 
@@ -306,7 +308,7 @@ Processor * P16F873::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
 
   return p;
@@ -318,6 +320,9 @@ void P16F873::create_symbols(void)
 
   if(verbose)
     cout << "f873 create symbols\n";
+
+  Pic14Bit::create_symbols();
+
 }
 
 P16F873::P16F873(void)
@@ -349,7 +354,7 @@ Processor * P16F876::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
 
@@ -388,7 +393,7 @@ void P16F876::create_symbols(void)
 
   if(verbose)
     cout << "f876 create symbols\n";
-
+  Pic14Bit::create_symbols();
 }
 
 P16F876::P16F876(void)
@@ -516,7 +521,7 @@ Processor * P16F874::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   return p;
 
@@ -527,6 +532,8 @@ void P16F874::create_symbols(void)
 
   if(verbose)
     cout << "f874 create symbols\n";
+  Pic14Bit::create_symbols();
+
 }
 
 P16F874::P16F874(void)
@@ -585,7 +592,7 @@ Processor * P16F877::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   return p;
 
@@ -596,6 +603,7 @@ void P16F877::create_symbols(void)
 
   if(verbose)
     cout << "f877 create symbols\n";
+  Pic14Bit::create_symbols();
 
 }
 

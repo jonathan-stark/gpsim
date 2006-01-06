@@ -132,10 +132,6 @@ public:
   virtual void set_xref(Value *);
   virtual Value *get_xref();
 
-  /// breakpoints
-  virtual void set_break();
-  virtual void clear_break();
-
   virtual void setClearableSymbol(bool bClear);
   virtual bool isClearable();
   // Some Value types that are used for symbol classes
@@ -367,6 +363,8 @@ public:
   }
 
   gint64 getVal() { return value; }
+
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
 
   virtual Value *copy() { return new Integer(value); }
   /// copy the object value to a user char array

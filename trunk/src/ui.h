@@ -47,6 +47,7 @@ public:
     unsigned int uMask, int iRadix) = 0;
   virtual const char * FormatRegisterAddress(unsigned int uAddress,
     unsigned int uMask) = 0;
+  virtual const char * FormatRegisterAddress(Register *) = 0;
   virtual const char * FormatLabeledValue(const char * pLabel,
     unsigned int uValue) = 0;
   virtual const char * FormatValue(unsigned int uValue) = 0;
@@ -134,6 +135,7 @@ extern GlobalVerbosityAccessor verbose;
 #define IDS_PROCESSOR_INIT_FAILED             13
 #define IDS_FILE_NEED_PROCESSOR_SPECIFIED     14
 #define IDS_LIST_FILE_NOT_FOUND               15
-
+#define IDS_HIT_BREAK                         16
+#define IDS_LAST_VALID_GPSIM_ID               17
 
 #endif

@@ -192,7 +192,7 @@ void Value::get(guint64 &i)
 void Value::get(bool &b)
 {
   throw new Error(showType() +
-		  " cannot be converted to an integer ");
+		  " cannot be converted to a boolean");
 }
 
 void Value::get(double &d)
@@ -260,14 +260,6 @@ Value *Value::get_xref()
   return xref;
 }
 
-void Value::set_break()
-{
-  cout << showType() << " objects do not support break points\n";
-}
-void Value::clear_break()
-{
-  cout << showType() << " objects do not support break points\n";
-}
 //------------------------------------------------------------------------
 // gpsimValue
 
@@ -752,6 +744,29 @@ void Integer::get(Packet &pb)
 
   unsigned int j = (unsigned int) (i &0xffffffff);
   pb.EncodeUInt32(j);
+}
+
+int Integer::set_break(ObjectBreakTypes bt, Expression *expr)
+{
+  Processor *pCpu = get_active_cpu();
+  if (pCpu) {
+
+    // Legacy code compatibility!
+
+    if ( bt == eBreakWrite || bt == eBreakRead ) {
+
+      // Cast the integer into a register and set a register break point
+      unsigned int iRegAddress = (unsigned int) value;
+      Register *pReg = &pCpu->rma[iRegAddress];
+      return get_bp().set_break(bt, pReg, expr);
+    } else if ( bt == eBreakExecute) {
+
+      unsigned int iProgAddress = (unsigned int) value;
+      return get_bp().set_execution_break(pCpu, iProgAddress, expr);
+    }
+  }
+  
+  return -1;
 }
 
 string Integer::toString()

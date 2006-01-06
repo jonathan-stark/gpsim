@@ -161,6 +161,10 @@ public:
   {
     return pTimeBuffer[index & max_events];
   }
+  void dump(int start_index, int end_index=-1);
+  void dump_ASCII_art(guint64 time_step, 
+		      guint64 start_time,
+		      int end_index=-1);
 
 
 };

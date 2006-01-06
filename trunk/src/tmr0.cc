@@ -102,7 +102,7 @@ void TMR0::stop(void)
     get_value();
 
     state &= (~1);      // the timer is disabled.
-    clear_break();
+    clear_trigger();
 
   }
 }
@@ -149,7 +149,7 @@ void TMR0::start(int restart_value, int sync)
 
 }
 
-void TMR0::clear_break(void)
+void TMR0::clear_trigger()
 {
   Dprintf(("\n"));
 

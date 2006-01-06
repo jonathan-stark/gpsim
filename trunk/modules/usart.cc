@@ -67,7 +67,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/bitlog.h"
 
 
-//#define DEBUG
+#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
@@ -534,7 +534,7 @@ RCREG::RCREG(USARTModule *pUsart)
 
   autobaud = false;
   set_bits_per_byte(8);
-  set_stop_bits(1.0);
+  set_stop_bits(0.9);
   set_noparity();
 
   set_baud_rate(DEFAULT_BAUD);
@@ -544,7 +544,7 @@ RCREG::RCREG(USARTModule *pUsart)
 void RCREG::callback() 
 {
 
-  Dprintf((" usart module RCREG\n"));
+  Dprintf((" usart module RCREG time:0x%llx=%lld\n",get_cycles().get(),get_cycles().get()));
 
 
   switch(receive_state) {
@@ -572,6 +572,12 @@ void RCREG::callback()
     } else {
       receive_state = RS_WAITING_FOR_START;
       cout << "Looks like we've overrun\n";
+#if defined(DEBUG)
+      cout << "Baud:" << baud << " = " << time_per_bit << " cycles\n";
+      cout << "Log of received data:\n";
+      rx_event->dump(rx_event->get_index(get_cycles().get() - 2000));
+      rx_event->dump_ASCII_art(1,get_cycles().get() - 2000);
+#endif
     }
 
     break;

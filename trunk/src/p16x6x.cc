@@ -44,9 +44,6 @@ Boston, MA 02111-1307, USA.  */
 void P16X6X_processor::create_symbols()
 {
   Pic14Bit::create_symbols();
-
-  symbol_table.add_register(m_portc);
-  symbol_table.add_register(m_trisc);
 }
 
 void P16C61::create(void)
@@ -71,7 +68,7 @@ Processor * P16C61::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c61");
   symbol_table.add_module(p,p->name().c_str());
@@ -385,7 +382,7 @@ Processor * P16C62::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c62");
   symbol_table.add_module(p,p->name().c_str());
@@ -498,7 +495,7 @@ Processor * P16C63::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c63");
   symbol_table.add_module(p,p->name().c_str());

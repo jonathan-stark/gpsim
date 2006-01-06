@@ -117,3 +117,16 @@ string gpsimObject::toString()
 {
   return showType();
 }
+
+// If derived classes don't redefine set_break and clear_break then
+// the default behavior is to not support these capabilities.
+int gpsimObject::set_break(ObjectBreakTypes bt, Expression *expr)
+{
+  //cout << showType() << " objects do not support break points\n";
+  return -1;
+}
+int gpsimObject::clear_break()
+{
+  //cout << showType() << " objects do not support break points\n";
+  return -1;
+}

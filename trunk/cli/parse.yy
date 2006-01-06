@@ -203,10 +203,6 @@ extern int yylex(YYSTYPE* lvalP);
 %type <ExprList_P>              expr_list
 %type <ExprList_P>              array
 
-%type <Expression_P>            break_mask_expr
-%type <Expression_P>            break_boolean_expr
-
-// %type  <SymbolList_P>           symbol_list
 %type  <PinList_P>              pin_list
 %type  <Pin_P>                  pin
 
@@ -374,29 +370,32 @@ break_cmd
           | break_set                         {  }
           | break_set ',' LITERAL_STRING_T
             {
-	      if (get_bp().bIsValid($1)) {
-          string m = string($3->getVal());
-          get_bp().set_message((unsigned int)$1,m);
-	      }
-	      delete $3;
-	    }
+              if (get_bp().bIsValid($1)) {
+                string m = string($3->getVal());
+                get_bp().set_message((unsigned int)$1,m);
+              }
+              delete $3;
+            }
           ;
 
 
-break_set
-          : BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
-          | BREAK bit_flag SYMBOL_T           {$$=c_break.set_break($2,$3);}
-          | BREAK bit_flag SYMBOL_T expr      {$$=c_break.set_break($2,$3,$4);}
-          | BREAK bit_flag LITERAL_INT_T      {$$=c_break.set_break($2,$3); delete $3;}
-          | BREAK bit_flag LITERAL_INT_T expr {$$=c_break.set_break($2,$3,$4); delete $3;}
-          | BREAK bit_flag break_boolean_expr {$$=c_break.set_break($2,$3);}
+break_set 
+//          : BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
+//          | BREAK bit_flag SYMBOL_T           {$$=c_break.set_break($2,$3);}
+//          | BREAK bit_flag SYMBOL_T expr      {$$=c_break.set_break($2,$3,$4);}
+//          | BREAK bit_flag LITERAL_INT_T      {$$=c_break.set_break($2,$3); delete $3;}
+//          | BREAK bit_flag LITERAL_INT_T expr {$$=c_break.set_break($2,$3,$4); delete $3;}
+          : BREAK bit_flag expr               {$$=c_break.set_break($2,$3);}
+          | BREAK bit_flag expr expr          {$$=c_break.set_break($2,$3,$4);}
           | BREAK bit_flag                    {$$=c_break.set_break($2);}
+/*
           | BREAK bit_flag REG_T '(' LITERAL_INT_T ')'  
             {
               // break r|w reg(number)
               $$=c_break.set_break($2->value, $5->getVal());
               delete $5;
             }
+*/
           ;
 
 bus_cmd
@@ -891,25 +890,6 @@ binary_expr
         | expr   COLON_T     expr       {$$ = new OpAbstractRange($1, $3);}
         ;
 
-// break w A == 2
-// break r A == 2
-// break r A & 0xff == 2
-// break w A & 0x1f == 5
-
-break_mask_expr 
-        : SYMBOL_T                                        {$$ = new LiteralSymbol($1);}
-        | SYMBOL_T          AND_T     LITERAL_INT_T       {$$ = new OpAnd(new LiteralSymbol($1), new LiteralSymbol($3));}
-        ;
-
-break_boolean_expr
-        : break_mask_expr   EQ_T      LITERAL_INT_T       {$$ = new OpEq( $1, new LiteralSymbol($3));}
-//        | break_mask_expr   NE_T      LITERAL_INT_T       {$$ = new OpNe( $1, new LiteralSymbol($3));}
-//        | break_mask_expr   LT_T      LITERAL_INT_T       {$$ = new OpLt( $1, new LiteralSymbol($3));}
-//        | break_mask_expr   GT_T      LITERAL_INT_T       {$$ = new OpGt( $1, new LiteralSymbol($3));}
-//        | break_mask_expr   LE_T      LITERAL_INT_T       {$$ = new OpLe( $1, new LiteralSymbol($3));}
-//        | break_mask_expr   GE_T      LITERAL_INT_T       {$$ = new OpGe( $1, new LiteralSymbol($3));}
-        ;
-        
 unary_expr
         : literal                       {$$=$1;}
         | PLUS_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpPlus($2);}

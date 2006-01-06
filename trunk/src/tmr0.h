@@ -59,8 +59,8 @@ public:
   virtual bool get_t0se();
   virtual void set_t0if(void);
   virtual void reset(RESET_TYPE r);
-  virtual void clear_break(void); 
   virtual void callback_print(void);
+  virtual void clear_trigger();
 
   virtual void set_cpu(Processor *, PortRegister *, unsigned int pin);
   virtual void set_cpu(Processor *new_cpu, PinModule *pin);

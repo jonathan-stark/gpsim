@@ -31,6 +31,8 @@ Boston, MA 02111-1307, USA.  */
 #include "registers.h"
 #include "exports.h"
 
+#include "gpsim_object.h" // defines ObjectBreakTypes
+
 using namespace std;
 
 extern Integer *verbosity;  // in ../src/init.cc
@@ -261,67 +263,69 @@ public:
     return iterator(m_iMaxAllocated);
   }
 
-  unsigned int  global_break;
-  bool          m_bExitOnBreak;   // enabled from command line option
+  int  global_break;
+  bool m_bExitOnBreak;   // enabled from command line option
   void EnableExitOnBreak(bool bExitOnBreak) {
     m_bExitOnBreak = bExitOnBreak;
   }
 
-  unsigned int breakpoint_number,last_breakpoint;
+  int breakpoint_number,last_breakpoint;
 
 
   Breakpoints(void);
-  unsigned int set_breakpoint(BREAKPOINT_TYPES,Processor *,
-			      unsigned int, 
-			      unsigned int,
-			      TriggerObject *f = 0);
-  unsigned int set_breakpoint(TriggerObject *);
+  int set_breakpoint(BREAKPOINT_TYPES,Processor *,
+		     unsigned int, 
+		     unsigned int,
+		     TriggerObject *f = 0);
+  int set_breakpoint(TriggerObject *,Expression *pExpr=0);
 
-  unsigned int set_execution_break(Processor *cpu, unsigned int address);
-  unsigned int set_notify_break(Processor *cpu, 
+  int set_execution_break(Processor *cpu, unsigned int address, Expression *pExpr=0);
+  int set_notify_break(Processor *cpu, 
 				unsigned int address, 
 				TriggerObject *cb);
-  unsigned int set_profile_start_break(Processor *cpu, 
+  int set_profile_start_break(Processor *cpu, 
 				       unsigned int address, 
 				       TriggerObject *f1 = 0);
-  unsigned int set_profile_stop_break(Processor *cpu, 
+  int set_profile_stop_break(Processor *cpu, 
 				      unsigned int address, 
 				      TriggerObject *f1 = 0);
-  unsigned int set_read_break(Processor *cpu, unsigned int register_number);
-  unsigned int set_write_break(Processor *cpu, unsigned int register_number);
-  unsigned int set_read_value_break(Processor *cpu, 
+  int set_read_break(Processor *cpu, unsigned int register_number);
+  int set_write_break(Processor *cpu, unsigned int register_number);
+  int set_read_value_break(Processor *cpu, 
 				    unsigned int register_number, 
 				    unsigned int value, 
 				    unsigned int mask=0xff);
-  unsigned int set_write_value_break(Processor *cpu,
+  int set_write_value_break(Processor *cpu,
 				    unsigned int register_number,
 				    unsigned int value,
 				    unsigned int mask=0xff);
-  unsigned int set_read_value_break(Processor *cpu, 
+  int set_read_value_break(Processor *cpu, 
             unsigned int register_number, 
             unsigned int op,
             unsigned int value, 
             unsigned int mask=0xff);
-  unsigned int set_write_value_break(Processor *cpu,
+  int set_write_value_break(Processor *cpu,
             unsigned int register_number,
             unsigned int op,
             unsigned int value,
             unsigned int mask=0xff);
-  unsigned int set_cycle_break(Processor *cpu,
+  int set_break(gpsimObject::ObjectBreakTypes bt, Register *, Expression *pExpr=0);
+
+  int set_cycle_break(Processor *cpu,
 			       guint64 cycle,
 			       TriggerObject *f = 0);
-  unsigned int set_wdt_break(Processor *cpu);
-  unsigned int set_stk_overflow_break(Processor *cpu);
-  unsigned int set_stk_underflow_break(Processor *cpu);
-  unsigned int check_cycle_break(unsigned int abp);
+  int set_wdt_break(Processor *cpu);
+  int set_stk_overflow_break(Processor *cpu);
+  int set_stk_underflow_break(Processor *cpu);
+  int check_cycle_break(unsigned int abp);
 
-  unsigned int set_notify_read(Processor *cpu, unsigned int register_number);
-  unsigned int set_notify_write(Processor *cpu, unsigned int register_number);
-  unsigned int set_notify_read_value(Processor *cpu,
-				     unsigned int register_number,
-				     unsigned int value,
-				     unsigned int mask=0xff);
-  unsigned int set_notify_write_value(Processor *cpu, 
+  int set_notify_read(Processor *cpu, unsigned int register_number);
+  int set_notify_write(Processor *cpu, unsigned int register_number);
+  int set_notify_read_value(Processor *cpu,
+			    unsigned int register_number,
+			    unsigned int value,
+			    unsigned int mask=0xff);
+  int set_notify_write_value(Processor *cpu, 
 				      unsigned int register_number,
 				      unsigned int value, 
 				      unsigned int mask=0xff);
@@ -419,111 +423,38 @@ class BreakpointRegister : public Register, public TriggerObject
 {
 public:
 
-  Register *m_replaced;       // A pointer to the register that this break replaces
 
-  BreakpointRegister(void) : TriggerObject(0)
-  { m_replaced = 0;};
+  BreakpointRegister(Processor *, TriggerAction *, Register *);
+
   BreakpointRegister(Processor *, int, int );
   BreakpointRegister(Processor *, TriggerAction *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
-  virtual string &name(void) const
-    {
-      if(m_replaced)
-        return m_replaced->name();
-      else
-        return gpsimValue::name();
-    };
-  /* direct all accesses to the member functions of the
-   * register that is being replaced. Note that we assume
-   * "m_replaced" is properly initialized which it will be
-   * if this object is accessed. (Why? well, we only access
-   * register notify/breaks via the PIC's file register 
-   * memory and never directly access them. But the only
-   * way this instantiation can be accessed is if it successfully
-   * replaced a file register object */
-
-  virtual void put_value(unsigned int new_value)
-    {
-      m_replaced->put_value(new_value);
-    }
-  virtual void put(unsigned int new_value)
-    {
-      m_replaced->put(new_value);
-    }
-
-  virtual void putRV(RegisterValue rv)
-    {
-      m_replaced->putRV(rv);
-    }
-
-  virtual unsigned int get_value(void)
-    {
-      return(m_replaced->get_value());
-    }
-  virtual RegisterValue getRV(void)
-    {
-      return m_replaced->getRV();
-    }
-  virtual RegisterValue getRVN(void) {
-    return m_replaced->getRVN();
-  }
-  virtual unsigned int get(void)
-    {
-      return(m_replaced->get());
-    }
-
-  virtual Register *getReg(void)
-    {
-      if(m_replaced)
-        return m_replaced;
-      else
-        return this;
-    }
-
-  virtual void setbit(unsigned int bit_number, bool new_value)
-    {
-      m_replaced->setbit(bit_number, new_value);
-    }
-
-  virtual bool get_bit(unsigned int bit_number)
-    {
-      return(m_replaced->get_bit(bit_number));
-    }
-
-  virtual double get_bit_voltage(unsigned int bit_number)
-    {
-      return(m_replaced->get_bit_voltage(bit_number));
-    }
-
-  virtual bool hasBreak(void)
-    { 
-      return true;
-    }
-
-  virtual void update(void)
-    {
-      if(m_replaced)
-        m_replaced->update();
-    }
-
-  virtual void add_xref(void *an_xref)
-    {
-      if(m_replaced)
-        m_replaced->add_xref(an_xref);
-    }
-
-  virtual void remove_xref(void *an_xref)
-    {
-      if(m_replaced)
-        m_replaced->remove_xref(an_xref);
-    }
-
+  virtual string &name(void) const;
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual void putRV(RegisterValue rv);
+  virtual unsigned int get_value(void);
+  virtual RegisterValue getRV(void);
+  virtual RegisterValue getRVN(void);
+  virtual unsigned int get(void);
+  virtual Register *getReg(void);
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
+  virtual bool hasBreak(void);
+  virtual void update(void);
+  virtual void add_xref(void *an_xref);
+  virtual void remove_xref(void *an_xref);
   void replace(Processor *_cpu, unsigned int reg);
   virtual bool set_break(void);
   unsigned int clear(unsigned int bp_num);
   virtual void print(void);
   virtual void clear(void);
+
+protected:
+  BreakpointRegister();
+  Register *m_replaced;       // A pointer to the register that this break replaces
 
 };
 
@@ -566,7 +497,8 @@ public:
       unsigned int uRegMask, unsigned int uRegTestValue);
   PFNISBREAKCONDITION m_pfnIsBreak;
 
-  enum {
+  enum BRV_Ops {
+    eBRInvalid,
     eBREquals,
     eBRNotEquals,
     eBRGreaterThen,

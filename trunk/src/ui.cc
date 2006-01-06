@@ -27,6 +27,7 @@ const char * s_psEnglishMessages[] = {
   "the program file type does not contain processor\n"    // first part of IDS_FILE_NEED_PROCESSOR_SPECIFIED
   "you need to specify processor with the processor command\n", // IDS_FILE_NEED_PROCESSOR_SPECIFIED
   "an appropriate list file for %s was not found\n",      // IDS_LIST_FILE_NOT_FOUND
+  "Hit breakpoint %d\n",                                  // IDS_HIT_BREAK 
   NULL,     // IDS_
 };
 
@@ -47,6 +48,7 @@ public:
     unsigned int uMask);
   virtual const char * FormatProgramAddress(unsigned int uAddress,
     unsigned int uMask, int iRadix);
+  virtual const char * FormatRegisterAddress(Register *);
   virtual const char * FormatRegisterAddress(unsigned int uAddress,
     unsigned int uMask);
   virtual const char * FormatLabeledValue(const char * pLabel,
@@ -138,6 +140,8 @@ public:
     unsigned int uMask) {return "";}
   virtual const char * FormatProgramAddress(unsigned int uAddress,
     unsigned int uMask, int iRadix) {return "";}
+  virtual const char * FormatRegisterAddress(Register *)
+  { return ""; }
   virtual const char * FormatRegisterAddress(unsigned int uAddress,
     unsigned int uMask) {return "";}
   virtual const char * FormatLabeledValue(const char * pLabel,
@@ -295,6 +299,16 @@ const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress,
 const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress,
     unsigned int uMask, int iRadix) {
   return FormatValue((gint64)uAddress, uMask, iRadix, s_sProgAddrHexPrefix);
+}
+
+const char * CGpsimUserInterface::FormatRegisterAddress(Register *pReg)
+{
+  if (!pReg)
+    return "";
+
+  return FormatLabeledValue(pReg->name().c_str(),
+			    pReg->address,
+			    s_iRAMAddrMask, s_iRAMAddrRadix, s_sRAMAddrHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatRegisterAddress(unsigned int uAddress,

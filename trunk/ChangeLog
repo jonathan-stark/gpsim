@@ -1,10 +1,62 @@
 2006-01-02 Scott Dattalo <scott@dattalo.com>
+	* src/ui.h, src/ui.cc: added another method for formatting
+	registers (though this might be removed later).
+	* src/value.h, src/value.cc: Moved Value specific breakpoint
+	functionality to the Value class. Fixed typo in an error message.
+	* src/symbol.cc, src/symbol.h: Fixed a bug with clearing the symbol table.
+	 - Added breakpoint expression compilation to the register_symbol
+	 class (this was previously being handled in cli/cmd_break.cc).
+	 - The w_symbol now is printed out as a W register.
+	* src/module.h, src/processor.h: moved the register_size and
+	register_mask methods from the processor class to the module
+	class. (Modules can have regsiters too!).
+	* src/p16x7x.cc, src/p16x6x.cc, src/p16x5x.cc, src/p16f87x.cc,
+	src/p16f62x.cc, src/16bit-processors.cc, src/14bit-processors.cc: 
+	W was not getting added to the symbol table.
+	* src/gpsim_time.cc: stopwatch changes to conform to value class api.
+	* src/breakpoints.cc, src/breakpoints.h: cleaned up/fixed printout of
+	register breakpoints. Added a more generic 'set_break()' method
+	that replaces several other specific methods (the old ones haven't
+	been removed yet).
+	* cli/parse.yy: certain read and write break points were not
+	getting parsed properly.
+	* cli/scan.ll: echo command was failing to be recognized.
+	* cli/cmd_break.cc: moved most of the expression parsing into the
+	simulation engine. 
+	* src/expr.h, src/expr.cc: LiteralSymbols are cast into either
+	registers or program memory address when breaks are set on them.
+	* src/cod.cc: pruned some dead code.
+	* src/tmr0.cc, src/tmr0.h: TMR0 class now conforms to new break API.
+
+2006-01-02 Scott Dattalo <scott@dattalo.com>
 	* configure.ac, cli/input.cc, cli/socket.cc: add configuration
 	option to inhibit the socket interface.
 
 2005-12-31 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: added examples/modules/usart_gui/*.* and
 	  extras/graphic_lcd/*.* to the WIN32 setup
+
+2005-12-30 Scott Dattalo <scott@dattalo.com>
+	* src/value.cc, src/value.h: Clarified error message when user
+	attempts to set or clear breakpoints on register symboles. Also,
+	fixed error message on Integer casts to Booleans.
+	* src/bitlog.h, src/bitlog.cc: Added dump() and dump_ASCII_art()
+	methods to the ThreeStateEventLogger class. These are debug
+	functions used to examine event logs.
+	* modules/usart.cc: Utilize new event logger utilities.
+	
+
+2005-12-28 Scott Dattalo <scott@dattalo.com>
+	* regression/breakpoints, regression/breakpoints/breakpoints.asm,
+	regression/breakpoints/Makefile,
+	regression/breakpoints/16f873.lkr,
+	regression/breakpoints/breakpoints.stc: Added a regression test
+	for testing breakpoints. (Not much there yet)
+
+2005-12-28 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.cc, src/breakpoints.cc: gpsim would crash if a
+	break point was set on a register that did not have a symbol table
+	entry. 
 
 2005-12-28 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc, modules/usart.h: Fixed bugs in
