@@ -1909,12 +1909,7 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
   // If there are breakpoints set on the register, then drill down
   // through them until we get to the real register.
 
-  while(reg->isa() == Register::BP_REGISTER)
-    reg = ((BreakpointRegister *)reg)->m_replaced;
-
-
-  return reg;
-
+  return reg ? reg->getReg() : 0;
 }
 
 //--------------------------------------------------------------------------

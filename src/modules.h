@@ -245,6 +245,10 @@ public:
   virtual string  DisplayAttributes(bool show_values=true);
   virtual void initializeAttributes();
 
+  /// Registers - mostly processors, but can apply to complex modules
+  virtual unsigned int register_mask () const { return 0xff;}
+  virtual unsigned int register_size () const { return 1;}
+
   /// Reset 
 
   virtual void reset(RESET_TYPE r);

@@ -399,7 +399,8 @@ class register_symbol : public symbol
 {
 protected:
   Register *reg;
-  /** m_uMask is used to mask out bits not associated
+  /** Scott to JR -- I don't understand this comment about m_uMask
+    * m_uMask is used to mask out bits not associated
     * with the symbol when retrieving the value from the
     * register. Masked bit values are right shifted such
     * that if the 16th bit is high in the register and
@@ -419,6 +420,9 @@ protected:
   unsigned int m_uMaskShift;
 
   unsigned int SetMaskedValue(unsigned int uValue);
+  /// breakpoints
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
+  virtual int clear_break();
 
 public:
   register_symbol(const register_symbol &);
@@ -528,6 +532,8 @@ public:
   address_symbol(const char *, unsigned int);
   virtual string toString();
   virtual Value* evaluate();
+  /// breakpoints
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
 };
 
 class line_number_symbol : public address_symbol
@@ -612,6 +618,7 @@ class w_symbol : public register_symbol
 {
  public:
   w_symbol(const char*, Register *);
+  virtual string toString();
 };
 
 

@@ -117,6 +117,21 @@ void cmd_break::list(guint64 value)
 const char *TOO_FEW_ARGS="missing register or location\n";
 const char *TOO_MANY_ARGS="too many arguments\n";
 
+
+//------------------------------------------------------------------------
+static gpsimObject::ObjectBreakTypes MapBreakActions(int co_value)
+{
+  switch(co_value) {
+  case READ:
+    return gpsimObject::eBreakRead;
+  case WRITE:
+    return gpsimObject::eBreakWrite;
+  case EXECUTION:
+    return gpsimObject::eBreakExecute;
+  }
+  return gpsimObject::eBreakAny;
+}
+
 //------------------------------------------------------------------------
 // Certain break options are incompatible with certain symbol types.
 // E.g. it doesn't make sense to associate the 'execute' option with
@@ -162,12 +177,19 @@ static bool bCheckOptionCompatibility(cmd_options *co, Value *pValue)
 //
 //  break w temp1  PC>=InterruptStart && PC<InterruptEnd
 
+#if 0
 unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
 {
   if (!bCheckOptionCompatibility(co, pValue) || !GetActiveCPU())
     return MAX_BREAKPOINTS;
 
   unsigned int b = MAX_BREAKPOINTS;
+  int i = pValue ? pValue->set_break(MapBreakActions(co->value), pExpr) : -1;
+  if (i>=0) {
+    b = i;
+    delete pExpr;
+    return b;
+  }
 
   Integer * pAddress = dynamic_cast<Integer*>(pValue);
   if (pAddress != NULL) { 
@@ -179,17 +201,10 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pE
     return b;
   }
 
-  register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
-  if (pRegSymbol) {
-    b = set_break(co->value, pRegSymbol->getReg()->address);
-    
-    if (!get_bp().set_expression(b,pExpr))
-      delete pExpr;
-    return b;
-  }
-
   return b;
 }
+#endif
+
 //------------------------------------------------------------------------
 //  set_break(cmd_options *co, Value *pValue)
 //
@@ -198,6 +213,7 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pE
 //   break e|r|w ADDRESS_SYMBOL
 //   break r|w REGISTER_SYMBOL
 //
+#if 0
 unsigned int cmd_break::set_break(cmd_options *co, Value *pValue)
 {
   if (bCheckOptionCompatibility(co, pValue)) {
@@ -216,6 +232,7 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue)
 
   return MAX_BREAKPOINTS;
 }
+#endif
 
 static int MapComparisonOperatorToBreakOperator(ComparisonOperator *pCompareOp) {
   switch(pCompareOp->isa()) {
@@ -237,7 +254,14 @@ static int MapComparisonOperatorToBreakOperator(ComparisonOperator *pCompareOp) 
 }
 
 //------------------------------------------------------------------------
-unsigned int cmd_break::set_break(cmd_options *co, Expression *pExpr)
+// It doesn't appear that this method called anymore. The parser rule that
+// calls it has been commented out. The reason this rule is commented out is
+// that it introduces a bison shift/conflict.
+#if 1
+unsigned int cmd_break::set_break(cmd_options *co, 
+				  Expression *pExpr1,
+				  Expression *pExpr2)
+
 {
 
   if (!co) {
@@ -246,34 +270,46 @@ unsigned int cmd_break::set_break(cmd_options *co, Expression *pExpr)
   }
 
   unsigned int bit_flag = co->value;
-  if (!pExpr)
+  if (!pExpr1)
     return set_break(bit_flag);
+
+  // See if the expression supports break points. If it does, the break points
+  // will get set and the expressions deleted.
+  int i = pExpr1 ? pExpr1->set_break(MapBreakActions(co->value), pExpr2) : -1;
+  if (i>=0) {
+    get_bp().dump1(i);
+    return i;
+  }
 
   unsigned int b = MAX_BREAKPOINTS;
 
-  ComparisonOperator *pCompareExpr = dynamic_cast<ComparisonOperator *>(pExpr);
+  cout << pExpr1->toString() << endl;
+  ComparisonOperator *pCompareExpr = dynamic_cast<ComparisonOperator *>(pExpr1);
   if (pCompareExpr != NULL) {
      
     Register * pReg = NULL;
     int  uMask = GetActiveCPU()->register_mask();
     LiteralSymbol* pLeftSymbol = dynamic_cast<LiteralSymbol*>(pCompareExpr->getLeft());
     if (pLeftSymbol != NULL) {
-      register_symbol *pRegSym = dynamic_cast<register_symbol*>(pLeftSymbol->evaluate());
-      pReg = pRegSym->getReg();
-      delete pRegSym;
+      register_symbol *pRegSym = dynamic_cast<register_symbol*>(pLeftSymbol->GetSymbol());
+      pReg =  pRegSym ? pRegSym->getReg() : 0;
     }
     else {
       OpAnd* pLeftOp = dynamic_cast<OpAnd*>(pCompareExpr->getLeft());
       if (pLeftOp != NULL) {
         pLeftSymbol = dynamic_cast<LiteralSymbol*>(pLeftOp->getLeft());
-        register_symbol *pRegSym = dynamic_cast<register_symbol*>(pLeftSymbol->evaluate());
-        pReg = pRegSym->getReg();
+        register_symbol *pRegSym = pLeftSymbol ? 
+	  dynamic_cast<register_symbol*>(pLeftSymbol->evaluate()) : 0;
+        pReg = pRegSym ? pRegSym->getReg() : 0;
 
         LiteralSymbol* pRightSymbol = dynamic_cast<LiteralSymbol*>(pLeftOp->getRight());
-        Integer *pInteger = dynamic_cast<Integer*>(pRightSymbol->evaluate());
-        gint64 i64;
-        pInteger->get(i64);
-        uMask = (int)i64;
+        Integer *pInteger = pRightSymbol ?
+	  dynamic_cast<Integer*>(pRightSymbol->evaluate()) : 0;
+	if (pInteger) {
+	  gint64 i64;
+	  pInteger->get(i64);
+	  uMask = (int)i64;
+	}
         delete pRegSym;
         delete pInteger;
       }
@@ -299,13 +335,26 @@ unsigned int cmd_break::set_break(cmd_options *co, Expression *pExpr)
     }
   }
   else {
-    cout << pExpr->show() << " of type " << pExpr->showType() <<
-      " not allowed\n";
+    // See if this is a LiteralInteger or LiteralSymbol
+    LiteralInteger* pInteger = dynamic_cast<LiteralInteger*>(pExpr1);
+    if (pInteger) {
+        int uValue;
+        Value *pInt = pInteger->evaluate();
+        pInt->get(uValue);
+        delete pInt;
+        b = set_break(bit_flag, uValue);
+    } else {
+
+      cout << pExpr1->show() << " of type " << pExpr1->showType() <<
+	" not allowed\n";
+    }
+
   }
-  delete pExpr;
+  delete pExpr1;
 
   return b;
 }
+#endif
 
 unsigned int cmd_break::set_break(cmd_options *co)
 {
@@ -317,15 +366,6 @@ unsigned int cmd_break::set_break(cmd_options *co)
 
   int bit_flag = co->value;
   return set_break(bit_flag);
-}
-
-// attribute breakpoints
-unsigned int cmd_break::set_break(Value *v)
-{
-  if (v)
-    v->set_break();
-
-  return MAX_BREAKPOINTS;
 }
 
 unsigned int cmd_break::set_break(int bit_flag)
@@ -386,7 +426,8 @@ unsigned int cmd_break::set_break(int bit_flag)
 }
 
 
-unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
+unsigned int cmd_break::set_break(int bit_flag, guint64 v, 
+				  Expression *pExpr)
 {
 
   unsigned int b = MAX_BREAKPOINTS;
@@ -427,11 +468,15 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
     b = get_bp().set_write_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
       Register * pReg = get_symbol_table().findRegister(value);
-      const char * pFormat = pReg->name().empty()
-        ? "break when register: %s0x%x is written. break #: 0x%x\n"
-        : "break when register: %s(0x%x) is written. break #: 0x%x\n";
-      GetUserInterface().DisplayMessage(pFormat,
-        pReg->name().c_str(), value, b);
+      if (pReg) {
+	const char * pFormat = pReg->name().empty()
+	  ? "break when register: %s0x%x is written. break #: 0x%x\n"
+	  : "break when register: %s(0x%x) is written. break #: 0x%x\n";
+	GetUserInterface().DisplayMessage(pFormat,
+					  pReg->name().c_str(), value, b);
+      } else 
+	GetUserInterface().DisplayMessage("break when register 0x%x is written. break #: 0x%x\n",
+					  value, b);
     }
     break;
 
@@ -439,11 +484,15 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
     b = get_bp().set_read_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
       Register * pReg = get_symbol_table().findRegister(value);
-      const char * pFormat =  pReg->name().empty()
-        ? "break when register: %s0x%x is read. break #: 0x%x\n"
-        : "break when register: %s(0x%x) is read. break #: 0x%x\n";
-      GetUserInterface().DisplayMessage(pFormat,
-        pReg->name().c_str(), value, b);
+      if (pReg) {
+	const char * pFormat =  pReg->name().empty()
+	  ? "break when register: %s0x%x is read. break #: 0x%x\n"
+	  : "break when register: %s(0x%x) is read. break #: 0x%x\n";
+	GetUserInterface().DisplayMessage(pFormat,
+					  pReg->name().c_str(), value, b);
+      } else
+	GetUserInterface().DisplayMessage("break when register 0x%x is read. break #: 0x%x\n",
+					  value, b);
     } 
     break;
 

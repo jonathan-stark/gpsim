@@ -182,11 +182,6 @@ void Pic14Bit::create_symbols(void)
   // add a special symbol for W
   symbol_table.add_w(W);
 
-  symbol_table.add_register(m_portb);
-  symbol_table.add_register(m_porta);
-  symbol_table.add_register(m_trisb);
-  symbol_table.add_register(m_trisa);
-
 }
 
 //-------------------------------------------------------------------

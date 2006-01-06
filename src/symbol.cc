@@ -713,7 +713,8 @@ bool IsClearable(Value* value)
   return value->isClearable();
 }
 
-void Symbol_Table::clear() {
+void Symbol_Table::clear()
+{
   iterator it;
   iterator itEnd = end();
 
@@ -744,12 +745,13 @@ void Symbol_Table::Reinitialize()
   clear();
 }
 
-void Symbol_Table::clear_all() {
+void Symbol_Table::clear_all() 
+{
   iterator it;
-  iterator itEnd = end();
-  for(it = begin(); it != itEnd; it++) {
+
+  for(it = begin(); it != end(); ++it)
     delete *it;
-  }
+
   _Myt::clear();
 }
 
@@ -918,15 +920,17 @@ void register_symbol::setMask(Register *pReg) {
   m_uMaskShift = BitShiftCount(m_uMask);
 }
 
-unsigned int register_symbol::getAddress(void) {
-  return reg->address;
+unsigned int register_symbol::getAddress()
+{
+  return reg ? reg->address : 0xffffffff;
 }
 
 unsigned int register_symbol::getBitmask(void) {
   return m_uMask;
 }
 
-string &register_symbol::name(void) const {
+string &register_symbol::name() const 
+{
   return (string &)name_str;
 }
 
@@ -1124,10 +1128,36 @@ Value* register_symbol::evaluate() {
   return new Integer(v);
 }
 
+int register_symbol::set_break(ObjectBreakTypes bt, 
+			       Expression *pExpr)
+{
+  get_bp().set_break(bt,reg,pExpr);
+}
+
+int register_symbol::clear_break()
+{
+  cout << showType() << " objects breakpoints can only be cleared by 'clear #'\n   where # is the breakpoint number\n";
+  return -1;
+}
+
 //------------------------------------------------------------------------
 w_symbol::w_symbol(const char *_name, Register *_reg)
   : register_symbol(_name, _reg)
 {
+}
+string w_symbol::toString()
+{
+  if(reg) {
+    char buff[256];
+    char bits[256];
+
+    reg->toBitStr(bits,sizeof(bits));
+
+    snprintf(buff,sizeof(buff)," = 0x%02x = 0b", reg->get_value() & 0xff);
+
+    return name() + string(buff) + string(bits);
+  }
+  return string("");
 }
 
 //------------------------------------------------------------------------
@@ -1156,6 +1186,14 @@ string address_symbol::toString()
 Value* address_symbol::evaluate()
 {
   return copy();
+}
+int address_symbol::set_break(ObjectBreakTypes bt, 
+			      Expression *pExpr)
+{
+  if (bt == gpsimObject::eBreakExecute)
+    return get_bp().set_execution_break(get_active_cpu(),getVal(),pExpr);
+
+  return -1;
 }
 
 line_number_symbol::line_number_symbol(const char *_name, unsigned int _val)

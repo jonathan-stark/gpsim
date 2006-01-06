@@ -149,9 +149,7 @@ void P16F62x::create_symbols(void)
   if(verbose)
     cout << "62x create symbols\n";
 
-  symbol_table.add_register(m_portb);
-  symbol_table.add_register(m_porta);
-
+  Pic14Bit::create_symbols();
 }
 
 void P16F62x::set_out_of_range_pm(unsigned int address, unsigned int value)
@@ -283,7 +281,7 @@ Processor * P16F627::construct(void)
 
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
   p->new_name("p16f627");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -310,7 +308,7 @@ Processor * P16F628::construct(void)
 
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
   p->new_name("p16f628");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -339,7 +337,7 @@ pic_processor * P16F648::construct(void)
   p->P16F62x::create(0x2f, 256);
   p->create_sfr_map();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
   p->new_name("p16f648");
   symbol_table.add_module(p,p->name().c_str());
 

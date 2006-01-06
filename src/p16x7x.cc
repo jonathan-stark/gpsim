@@ -393,6 +393,7 @@ void P16C71::create_sfr_map(void)
 
 void P16C71::create_symbols(void)
 {
+  pic_processor::create_symbols();
 }
 
 void P16C71::create(void)
@@ -413,7 +414,7 @@ Processor * P16C71::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c71");
   symbol_table.add_module(p,p->name().c_str());
@@ -501,7 +502,7 @@ Processor * P16C712::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c712");
   symbol_table.add_module(p,p->name().c_str());
@@ -530,7 +531,7 @@ Processor * P16C716::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c716");
   symbol_table.add_module(p,p->name().c_str());
@@ -608,7 +609,7 @@ void P16C72::create_symbols(void)
 
   if(verbose)
     cout << "c72 create symbols\n";
-
+  pic_processor::create_symbols();
 }
 
 
@@ -630,7 +631,7 @@ Processor * P16C72::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
 
   p->new_name("p16c72");
@@ -714,7 +715,7 @@ void P16C73::create_symbols(void)
 
   if(verbose)
     cout << "c73 create symbols\n";
-
+  pic_processor::create_symbols();
 }
 
 
@@ -736,7 +737,7 @@ Processor * P16C73::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c73");
   symbol_table.add_module(p,p->name().c_str());
@@ -824,7 +825,7 @@ void P16C74::create_symbols(void)
 
   if(verbose)
     cout << "c74 create symbols\n";
-
+  Pic14Bit::create_symbols();
 }
 
 
@@ -846,7 +847,7 @@ Processor * P16C74::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->new_name("p16c74");
   symbol_table.add_module(p,p->name().c_str());

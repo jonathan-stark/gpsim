@@ -79,6 +79,11 @@ string LiteralInteger::toString()
   return value->toString();
 }
 
+int LiteralInteger::set_break(ObjectBreakTypes bt, Expression *expr)
+{
+  return value ? value->set_break(bt,expr) : -1;
+}
+
 /*****************************************************************
  * The LiteralFloat class.
  */
@@ -168,6 +173,16 @@ string LiteralSymbol::toString()
     return sym->name();
 
   return string("");
+}
+
+int LiteralSymbol::set_break(ObjectBreakTypes bt, Expression *expr)
+{
+  return sym ? sym->set_break(bt,expr) : -1;
+}
+
+int LiteralSymbol::clear_break()
+{
+  return sym ? sym->clear_break() : -1;
 }
 
 IndexedSymbol::IndexedSymbol(Value *pSymbol, ExprList_t*pExprList)

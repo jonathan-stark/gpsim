@@ -104,9 +104,9 @@ class TriggerObject
   // Invoked to display info about the breakpoint.
   virtual void callback_print(void);
 
-  // clear_break is invoked when the breakpoint associated with
+  // clear_trigger is invoked when the breakpoint associated with
   // this object is cleared. 
-  virtual void clear_break(void) {};
+  virtual void clear_trigger(void) {};
 
   // Will search for a place to store this break point.
   virtual int find_free(void);

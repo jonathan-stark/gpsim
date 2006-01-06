@@ -374,11 +374,14 @@ abort_gpsim_now {
 %}
 
 "echo"{S}.*{NL} {
-   fprintf(yyout,"%s",&yytext[5]);
+  fprintf(yyout,"%s",&yytext[5]);
+  return recognize(EOLN_T, " end of line");
+
   }
 
 "echo"{NL} {
-   fprintf(yyout,"\n");
+  fprintf(yyout,"\n");
+  return recognize(EOLN_T, " end of line");
   }
 
 
