@@ -53,6 +53,8 @@ ${RT} macro_test sim
 
 ${RT} logic_test sim
 
+${RT} resistor sim
+
 ${RT} usart_test sim
 
 ${RT} tmr0_16bit sim
