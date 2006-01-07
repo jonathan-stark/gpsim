@@ -249,6 +249,7 @@ Module * PullupResistor::pd_construct(const char *_new_name)
   pur->create_iopin_map();
 
   pur->res.set_Vth(0);
+  pur->res.set_Vpullup(0.0);
 
   return pur;
 

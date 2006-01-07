@@ -1232,7 +1232,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
   : IO_bi_directional(i, b,opt_name,_iopp)
 {
   Vpullup = Vth;
-  Zpullup = 10e3;
+  Zpullup = 20e3;
   bPullUp = false;
 }
 
@@ -1871,7 +1871,7 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
         if(pPinArgument->m_iFlags & Pin_t::eActiveProc) {
           pMod = get_active_cpu();
         }
-        else {
+        else if ( pPinArgument->m_sModuleName ) {
           // this dynamic_cast always fails here
           pMod = dynamic_cast<Module*>(pPinArgument->m_sModuleName);
           if(pMod == NULL) {
@@ -1927,7 +1927,8 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
           }
           else {
             bSuccess = false;
-            if(pPin == NULL) {
+            if(pPin == NULL && 
+		strcmp(pPinArgument->m_sPin->showType().c_str(), "module_symbol")) {
               int iValue = -1;
               if(pPinArgument->m_sPin) {
                 pPinArgument->m_sPin->get(iValue);
@@ -1942,7 +1943,7 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
             }
             else {
               GetUserInterface().DisplayMessage(
-                  "attach error: pin argument '%s' type(%s) is not of type Integer\n",
+                  "attach error: pin argument '%s' type(%s) is not of type Integer or stimulus\n",
                   pPinArgument->m_sPin->name().c_str(),
                   pPinArgument->m_sPin->showType().c_str());
               }
