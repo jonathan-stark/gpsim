@@ -471,7 +471,7 @@ public:
 		       double _ZthFloating = 1e6,
 		       double _VthIn = 0.3,
 		       double _ZthIn = 1e8,
-		       double _Zpullup = 10e3
+		       double _Zpullup = 20e3
 		       );
 
   IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);

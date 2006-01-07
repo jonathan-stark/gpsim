@@ -1,3 +1,25 @@
+2006-01-07 Scott Dattalo <scott@dattalo.com>
+	* regression/resistor/resistor.asm: Tiny comment change
+	* regression/run_regression.ch: Added the resistor regression test
+	to the test suite.
+	
+2006-01-07 Roy Rankin <rrankin@ihug.com.au>
+	* modules/resistor.cc: Pulldown resistor voltage is now set to 0
+	Volts.
+	* src/stimulus.h, src/stimuli.cc: Adjusted default resistance
+	values for stimuli to more closely match PIC I/O pins.
+	* regression/resistor/resistor.asm: Set pulldown resistance for
+	the pulldown resistor.
+	
+2006-01-06 Roy Rankin <rrankin@ihug.com.au>
+	* src/stimuli.cc: Fixed crash regarding module pin names.
+	* regression/resistor/Makefile: New regression test for the
+	resistor module.
+	* regression/resistor/resistor.asm:
+	* regression/resistor/resistor.stc:
+	* regression/resistor/16f873.lkr:
+
+
 2006-01-02 Scott Dattalo <scott@dattalo.com>
 	* src/ui.h, src/ui.cc: added another method for formatting
 	registers (though this might be removed later).
