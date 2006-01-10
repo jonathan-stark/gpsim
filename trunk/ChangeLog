@@ -1,3 +1,23 @@
+2006-01-10 J.R. Heisey <jrheisey@users.sourceforge.com
+	* gui\gui_watch.cc gui\gui_watch.h, gui\gui.h, gui\gui_object.cc,
+	gui\settings.h, gui\settings_exdbm.cc, gui\settings_exdbm.h,
+	plat\win32\settings_reg.cpp, plat\win32\settings_reg.h:
+	Fixed bug where loading a hex file a second time in the same
+	gpsim sesssion caused the watch window to be populated with
+	multiple instances of the same previously entered symbols.
+	Created a config_remove() function to remove entries from
+	the Settings database.
+	* src\sim_context.cc, src\sim_context.h, src\symbol.cc,
+	cli\input.cc: Changed catch_control_c() function to call
+	CSimulationContext::NotifyUserCanceled() rather than
+	Breakpoints:halt(). NotifyUserCanceled() now calls halt() and other
+	processing depending the context.
+	Added code to allow a user to abort the symbol listing to the
+	console by pressing CTRL-C.
+	* gui\gui_regwin.cc: Fixed some crashing bugs that occured when
+	you click on a watch window row when the register window has
+	not been built.
+
 2006-01-06 Roy Rankin <rrankin@ihug.com.au>
 	* modules/led.cc, modules/led.h: Added dynamic gui update to the
 	led modules.
