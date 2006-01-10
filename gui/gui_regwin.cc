@@ -1076,24 +1076,26 @@ int Register_Window::row_height(int col)
 
 void Register_Window::UpdateLabel(void)
 {
-  int row, col;
+  int row = -1, col = -1;
 
   //row=register_sheet->active_cell.row;
   //col=register_sheet->active_cell.col;
-  gtk_sheet_get_active_cell(register_sheet, &row, &col);
+  if(register_sheet != 0) {
+    gtk_sheet_get_active_cell(register_sheet, &row, &col);
 
-  if(col >= REGISTERS_PER_ROW)
-    gtk_label_set(GTK_LABEL(location), "  ascii  ");
-  else {
+    if(col > -1 && row > -1) {
+      if(col >= REGISTERS_PER_ROW)
+        gtk_label_set(GTK_LABEL(location), "  ascii  ");
+      else {
 
-    GUIRegister *reg = getRegister(row,col);
+        GUIRegister *reg = getRegister(row,col);
 
-    const char *n = reg ? reg->name() : "INVALID_REGISTER";
+        const char *n = reg ? reg->name() : "INVALID_REGISTER";
 
-    gtk_label_set(GTK_LABEL(location), n);
+        gtk_label_set(GTK_LABEL(location), n);
+      }
+    }
   }
-
-
 }
 
 //------------------------------------------------------------------------
@@ -1108,19 +1110,21 @@ void Register_Window::UpdateEntry(void)
   const char *text; 
   GtkWidget * sheet_entry;
 
-  sheet_entry = gtk_sheet_get_entry(register_sheet);
-  gtk_sheet_get_active_cell(register_sheet, &row, &col);
+  if(register_sheet != 0) {
+    sheet_entry = gtk_sheet_get_entry(register_sheet);
+    gtk_sheet_get_active_cell(register_sheet, &row, &col);
 
-  if(row_to_address[row] < 0)
-    return;
+    if(row_to_address[row] < 0)
+      return;
 
-  GUIRegister *reg = getRegister(row,col);
+    GUIRegister *reg = getRegister(row,col);
 
-  if(reg && reg->bIsValid() )
+    if(reg && reg->bIsValid() )
     {
       if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
           gtk_entry_set_text(GTK_ENTRY(entry), text);
     }
+  }
 }
 
 //------------------------------------------------------------------------
