@@ -215,6 +215,7 @@ int config_get_variable(const char *module, const char *entry, int *value);
 int config_set_variable(const char *module, const char *entry, int value);
 int config_get_string(const char *module, const char *entry, char **string);
 int config_set_string(const char *module, const char *entry, const char *string);
+int config_remove(const char *module, const char *entry);
 
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 

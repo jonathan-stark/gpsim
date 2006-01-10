@@ -37,6 +37,7 @@ public:
   virtual bool set(const char *module, const char *entry, int value) = 0;
   virtual bool get(const char *module, const char *entry, char **string) = 0;
   virtual bool get(const char *module, const char *entry, int *value) = 0;
+  virtual bool remove(const char *module, const char *entry) = 0;
 
   virtual ~Settings()
   {

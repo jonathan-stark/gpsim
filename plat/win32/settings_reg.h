@@ -31,6 +31,7 @@ public:
   virtual bool set(const char *module, const char *entry, int value);
   virtual bool get(const char *module, const char *entry, char **str);
   virtual bool get(const char *module, const char *entry, int *value);
+  virtual bool remove(const char *module, const char *entry);
 };
 
 #endif  //_SETTINGS_REG_H

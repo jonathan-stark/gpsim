@@ -111,3 +111,20 @@ bool SettingsReg::get(const char *module, const char *entry, int *value)
 
   return ret;
 }
+
+bool SettingsReg::remove(const char *module, const char *entry)
+{
+  HKEY key;
+  bool ret = true;
+  string reg_path = name + module;
+
+  if (RegOpenKeyEx(HKEY_CURRENT_USER, reg_path.c_str(), 0,  KEY_SET_VALUE, &key) != ERROR_SUCCESS)
+    return 0;
+
+  if (RegDeleteValue(key, entry) != ERROR_SUCCESS)
+    ret = 0;
+
+  RegCloseKey(key);
+
+  return ret;
+}
