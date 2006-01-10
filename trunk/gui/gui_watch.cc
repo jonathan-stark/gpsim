@@ -190,6 +190,61 @@ void Watch_Window::UpdateMenus(void)
   }
 }
 
+int Watch_Window::set_config(void) {
+  int iRet = GUI_Object::set_config();
+  WriteSymbolList();
+  return iRet;
+}
+
+void Watch_Window::WriteSymbolList()
+{
+  // delete previous list
+  DeleteSymbolList();
+  // write the current list
+  WatchEntry *entry;
+  guint uSize = g_list_length(watches);
+  char cwv[100];
+  char *vname;
+  for (guint i = 0; i<uSize; i++) {
+    snprintf(cwv, sizeof(cwv), "WV%d",i);
+    vname = 0;
+    entry = (WatchEntry*) g_list_nth_data(watches, i);
+    config_set_string(name(), cwv, entry->pRegSymbol->name().c_str());
+  }
+  
+}
+
+void Watch_Window::DeleteSymbolList() {
+  int i=0;
+  char cwv[100];
+  while (i<1000) {
+    snprintf(cwv, sizeof(cwv), "WV%d",i++);
+    if (config_remove(name(), cwv) == 0 ) {
+      break;
+    }
+  }
+}
+
+void Watch_Window::ReadSymbolList()
+{
+  // now read symbols watched from a prior simulation session
+  int i=0;
+  char cwv[100];
+  char *vname;
+  while (i<1000) {
+    snprintf(cwv, sizeof(cwv), "WV%d",i++);
+    vname = 0;
+    if (config_get_string(name(), cwv, &vname) ) {
+      Value *val = get_symbol_table().find(vname);
+      if(val != 0) {
+        Add(val);
+      }
+    }
+    else
+      break;
+  }
+}
+
 static void unselect_row(GtkCList *clist,
 			 gint row,
 			 gint column,
@@ -655,11 +710,6 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
 
   UpdateMenus();
 
-  static int wv=0;
-  char cwv[100];
-  snprintf(cwv, sizeof(cwv), "WV%d",wv);
-  wv++;
-  config_set_string(name(), cwv, vname);
 }
 
 //---
@@ -693,23 +743,7 @@ void Watch_Window::NewProcessor(GUI_Processor *_gp)
   if (!gp || !gp->cpu)
     return;
 
-  int i;
-
-  // now read symbols watched from a prior simulation session
-  i=0;
-  char cwv[100];
-  char *vname;
-  while (i<1000) {
-    snprintf(cwv, sizeof(cwv), "WV%d",i++);
-    vname = 0;
-    if (config_get_string(name(), cwv, &vname) ) {
-      Value *val = get_symbol_table().find(vname);
-      Add(val);
-    }
-    else
-      break;
-  }
-  
+  ReadSymbolList();
 }
 //------------------------------------------------------------------------
 // ClearWatches

@@ -62,6 +62,12 @@ class Watch_Window : public  GUI_Object
   virtual void Update();
   virtual void UpdateMenus();
   virtual void NewProcessor(GUI_Processor *gp);
+
+  // Override set_config() to save variable list on app exit
+  virtual int set_config(void);
+  void         ReadSymbolList();
+  void         WriteSymbolList();
+  void         DeleteSymbolList();
 };
 
 

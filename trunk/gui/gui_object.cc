@@ -277,4 +277,9 @@ int config_get_string(const char *module, const char *entry, char **str)
   return settings->get(module, entry, str);
 }
 
+int config_remove(const char *module, const char *entry)
+{
+  return settings->remove(module, entry);
+}
+
 #endif  // HAVE_GUI

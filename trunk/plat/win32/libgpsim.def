@@ -152,6 +152,7 @@ EXPORTS
     ?GetFileList@ModuleLibrary@@SAAAV?$OrderedVector@VFile@ModuleLibrary@@@@XZ
     ?GetList@ProcessorConstructorList@@SAPAV1@XZ
     ?GetManager@CCommandManager@@SAAAV1@XZ
+    ?GetSymbol@LiteralSymbol@@QAEPAVValue@@XZ
     ?GetSymbolTable@CSimulationContext@@QAEAAVSymbol_Table@@XZ
     ?Initialize@CSimulationContext@@QAEXXZ
     ?Initialize@Token@gpsim@@QAEXP6APAXPAX@Z0@Z
@@ -161,6 +162,7 @@ EXPORTS
     ?NewObject@Float@@SAPAV1@PBD00@Z
     ?NewObject@Integer@@SAPAV1@PBD00@Z
     ?NewObject@ModuleLibrary@@SAPAVModule@@PBD0@Z
+    ?NotifyUserCanceled@CSimulationContext@@QAEXXZ
     ?Parse@Boolean@@SA_NPBDAA_N@Z
     ?Parse@Float@@SA_NPBDAAN@Z
     ?Parse@Integer@@SA_NPBDAA_J@Z
@@ -230,14 +232,13 @@ EXPORTS
     ?callback_print@TriggerObject@@UAEXXZ
     ?callback_print@source_stimulus@@UAEXXZ
     ?change_pin_direction@IOPORT@@MAEXI_N@Z
-    ?check_cycle_break@Breakpoints@@QAEII@Z
     ?clear@Breakpoint_Instruction@@UAEXXZ
     ?clear@Breakpoints@@QAEXI@Z
     ?clear@TriggerObject@@UAEXXZ
     ?clear_all@Breakpoints@@QAEXPAVProcessor@@@Z
     ?clear_all_register@Breakpoints@@QAEXPAVProcessor@@I@Z
     ?clear_break@Cycle_Counter@@QAEXPAVTriggerObject@@@Z
-    ?clear_break@Value@@UAEXXZ
+    ?clear_break@gpsimObject@@UAEHXZ
     ?clear_break_at_address@ProgramMemoryAccess@@UAEHIPAVinstruction@@@Z
     ?clear_break_at_address@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
     ?clear_break_at_line@ProgramMemoryAccess@@UAEXII@Z
@@ -272,8 +273,10 @@ EXPORTS
     ?disassemble@Processor@@UAEXHH@Z
     ?dump_ASCII_art@BoolEventLogger@@QAEX_K0H@Z
     ?dump@Breakpoints@@QAEXH@Z
+    ?dump@ThreeStateEventLogger@@QAEXHH@Z
     ?dump@Trace@@QAEHHPAU_iobuf@@@Z
     ?dump1@Breakpoints@@QAE_NIH@Z
+    ?dump_ASCII_art@ThreeStateEventLogger@@QAEX_K0H@Z
     ?dump_all@Symbol_Table@@QAEXXZ
     ?dump_bus_list@@YAXXZ
     ?dump_filtered@Symbol_Table@@QAEXABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -538,16 +541,17 @@ EXPORTS
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
     ?set_break@Breakpoint_Instruction@@UAE_NXZ
     ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
-    ?set_break@Value@@UAEXXZ
+    ?set_break@Integer@@UAEHW4ObjectBreakTypes@gpsimObject@@PAVExpression@@@Z
+    ?set_break@gpsimObject@@UAEHW4ObjectBreakTypes@1@PAVExpression@@@Z
     ?set_break_at_address@ProgramMemoryAccess@@UAEII@Z
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
-    ?set_breakpoint@Breakpoints@@QAEIPAVTriggerObject@@@Z
+    ?set_breakpoint@Breakpoints@@QAEHPAVTriggerObject@@PAVExpression@@@Z
     ?set_cpu@MemoryAccess@@UAEXPAVProcessor@@@Z
     ?set_cpu@gpsimValue@@UAEXPAVProcessor@@@Z
-    ?set_cycle_break@Breakpoints@@QAEIPAVProcessor@@_KPAVTriggerObject@@@Z
+    ?set_cycle_break@Breakpoints@@QAEHPAVProcessor@@_KPAVTriggerObject@@@Z
     ?set_description@Value@@QAEXPBD@Z
-    ?set_execution_break@Breakpoints@@QAEIPAVProcessor@@I@Z
+    ?set_execution_break@Breakpoints@@QAEHPAVProcessor@@IPAVExpression@@@Z
     ?set_expression@Breakpoints@@QAE_NIPAVExpression@@@Z
     ?set_Expression@TriggerObject@@UAEXPAVExpression@@@Z
     ?set_frequency@Processor@@QAEXN@Z
@@ -558,26 +562,26 @@ EXPORTS
     ?set_nodeVoltage@PinModule@@UAEXN@Z
     ?set_nodeVoltage@Stimulus_Node@@QAEXN@Z
     ?set_notify_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
-    ?set_notify_read@Breakpoints@@QAEIPAVProcessor@@I@Z
-    ?set_notify_read_value@Breakpoints@@QAEIPAVProcessor@@III@Z
-    ?set_notify_write@Breakpoints@@QAEIPAVProcessor@@I@Z
-    ?set_notify_write_value@Breakpoints@@QAEIPAVProcessor@@III@Z
+    ?set_notify_read@Breakpoints@@QAEHPAVProcessor@@I@Z
+    ?set_notify_read_value@Breakpoints@@QAEHPAVProcessor@@III@Z
+    ?set_notify_write@Breakpoints@@QAEHPAVProcessor@@I@Z
+    ?set_notify_write_value@Breakpoints@@QAEHPAVProcessor@@III@Z
     ?set_out_of_range_pm@Processor@@UAEXII@Z
     ?set_profile_start_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
     ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
+    ?set_read_break@Breakpoints@@QAEHPAVProcessor@@I@Z
     ?set_read_trace@Register@@UAEXI@Z
-    ?set_read_break@Breakpoints@@QAEIPAVProcessor@@I@Z
-    ?set_read_value_break@Breakpoints@@QAEIPAVProcessor@@III@Z
-    ?set_read_value_break@Breakpoints@@QAEIPAVProcessor@@IIII@Z
-    ?set_stk_overflow_break@Breakpoints@@QAEIPAVProcessor@@@Z
-    ?set_stk_underflow_break@Breakpoints@@QAEIPAVProcessor@@@Z
+    ?set_read_value_break@Breakpoints@@QAEHPAVProcessor@@III@Z
+    ?set_read_value_break@Breakpoints@@QAEHPAVProcessor@@IIII@Z
+    ?set_stk_overflow_break@Breakpoints@@QAEHPAVProcessor@@@Z
+    ?set_stk_underflow_break@Breakpoints@@QAEHPAVProcessor@@@Z
     ?set_trace_command@Program_Counter@@UAEXI@Z
     ?set_update_rate@gpsimInterface@@QAEX_K@Z
-    ?set_wdt_break@Breakpoints@@QAEIPAVProcessor@@@Z
+    ?set_wdt_break@Breakpoints@@QAEHPAVProcessor@@@Z
+    ?set_write_break@Breakpoints@@QAEHPAVProcessor@@I@Z
     ?set_write_trace@Register@@UAEXI@Z
-    ?set_write_break@Breakpoints@@QAEIPAVProcessor@@I@Z
-    ?set_write_value_break@Breakpoints@@QAEIPAVProcessor@@III@Z
-    ?set_write_value_break@Breakpoints@@QAEIPAVProcessor@@IIII@Z
+    ?set_write_value_break@Breakpoints@@QAEHPAVProcessor@@III@Z
+    ?set_write_value_break@Breakpoints@@QAEHPAVProcessor@@IIII@Z
     ?set_xref@Value@@UAEXPAV1@@Z
     ?setBreakOnReset@Processor@@UAEX_N@Z
     ?setClearableSymbol@Value@@UAEX_N@Z

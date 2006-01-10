@@ -193,3 +193,44 @@ bool SettingsEXdbm::get(const char *module, const char *entry, int *value)
 
   return true;
 }
+
+bool SettingsEXdbm::remove(const char *module, const char *entry)
+{
+  int ret;
+  DB_LIST list;
+
+  list = eXdbmGetList(dbid, 0, (char *)module);
+  if (list == false)
+  {
+    ret = eXdbmCreateList(dbid, 0, (char *)module, 0);
+    if(ret == -1)
+    {
+      puts(eXdbmGetErrorString(eXdbmGetLastError()));
+      return false;
+    }
+
+    list = eXdbmGetList(dbid, 0, (char *)module);
+    if (list == 0)
+    {
+      puts(eXdbmGetErrorString(eXdbmGetLastError()));
+      return false;
+    }
+  }
+
+  // We have the list
+  ret = eXdbmDeleteEntry(dbid, list, (char *)entry);
+  if (ret == -1)
+  {
+    return false;
+  }
+  ret = eXdbmUpdateDatabase(dbid);
+  if (ret == -1)
+  {
+    puts(eXdbmGetErrorString(eXdbmGetLastError()));
+    return false;
+  }
+
+  return true;
+}
+
+
