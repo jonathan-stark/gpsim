@@ -227,12 +227,12 @@ static LLStack *Stack=0;
 void catch_control_c(int sig)
 {
 #ifdef _WIN32
+  CSimulationContext::GetContext()->NotifyUserCanceled();
   if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
     == eSM_RUNNING) {
     // If we get a CTRL->C while processing a command file
     // we should probably stop the command file processing.
     clear_input_buffer();
-    CSimulationContext::GetContext()->GetBreakpoints().halt();
   }
   ::signal(SIGINT, catch_control_c);
 #else
@@ -244,7 +244,7 @@ void catch_control_c(int sig)
   //if(simulation_mode != STOPPED)
   //  {
       cout << "<CTRL C> break\n";
-      bp.halt();
+      CSimulationContext::GetContext()->NotifyUserCanceled();
   //  }
   //else {
   //  cout << "caught control c, but it doesn't seem gpsim was simulating\n";

@@ -63,6 +63,10 @@ public:
   Breakpoints &   GetBreakpoints();
   Processor *     GetActiveCPU();
   bool            IsSourceEnabled() { return m_bEnableLoadSource; }
+  void            NotifyUserCanceled();
+  void            SetUserCanceledFlag(bool *pbUserCanceled) {
+    m_pbUserCanceled = pbUserCanceled ;
+  }
 
   static CSimulationContext *GetContext();
 
@@ -70,6 +74,7 @@ protected:
   CProcessorList processor_list;
   string m_DefProcessorName;
   string m_DefProcessorNameNew;
+  bool * m_pbUserCanceled;
 
   // active_cpu_id is the id of the currently active cpu. In other words:
   //  active_cpu_id == active_cpu->processor_id
