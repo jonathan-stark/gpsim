@@ -57,9 +57,12 @@ class Led_Input : public IOPIN
 {
 public:
 
-  Led_Input (IOPORT *i, unsigned int b, char *opt_name) 
+  Led_Input (IOPORT *i, unsigned int b, const char *opt_name) 
     : IOPIN(i,b,opt_name,(Register **)0)
-    { }
+    { 
+  	new_name(opt_name);
+
+    }
 
 };
 
@@ -108,7 +111,7 @@ typedef struct {
 
 typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
 
-class Led_7Segments : public Led_base
+class Led_7Segments : public Led_base, public TriggerObject
 {
 public:
 
@@ -151,6 +154,7 @@ public:
 
   void build_segments( int w, int h);
 
+  virtual void callback(void);
   virtual void build_window( void );
   virtual void update(void);
   virtual void update( GtkWidget *drawable,   
@@ -170,7 +174,7 @@ public:
 // Simple LED
 //
 
-class Led: public Led_base
+class Led: public Led_base, public TriggerObject
 {
 public:
 
@@ -185,6 +189,7 @@ public:
   Led(void);
   ~Led(void);
 
+  virtual void callback(void);
   virtual void build_window( void );
   virtual void update(void);
   virtual void update( GtkWidget *drawable,   
