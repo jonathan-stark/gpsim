@@ -73,6 +73,7 @@ CSimulationContext::CSimulationContext() :
   active_cpu_id = 0;
   cpu_ids = 0;
   m_bEnableLoadSource.setClearableSymbol(false);
+  m_pbUserCanceled = NULL;
 }
 
 void CSimulationContext::Initialize() {
@@ -280,6 +281,20 @@ void CSimulationContext::Reset(RESET_TYPE r) {
       if(m) {
         m->reset(r);
       }
+  }
+}
+
+void CSimulationContext::NotifyUserCanceled() {
+  if(m_pbUserCanceled != NULL) {
+    *m_pbUserCanceled = true;
+    m_pbUserCanceled = NULL;
+    return;
+  }
+  if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
+    == eSM_RUNNING) {
+    // If we get a CTRL->C while processing a command file
+    // we should probably stop the command file processing.
+    CSimulationContext::GetContext()->GetBreakpoints().halt();
   }
 }
 

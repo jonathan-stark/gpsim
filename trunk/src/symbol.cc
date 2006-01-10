@@ -45,6 +45,7 @@ Boston, MA 02111-1307, USA.  */
 #include "errors.h"
 #include "protocol.h"
 #include "cmd_gpsim.h"
+#include "sim_context.h"
 
 class IIndexedCollection;
 
@@ -622,11 +623,13 @@ void Symbol_Table::dump_one(const char *str)
 void Symbol_Table::dump_all(void)
 {
   cout << "  Symbol Table\n";
+  bool bUserCanceled = false;
+  CSimulationContext::GetContext()->SetUserCanceledFlag(&bUserCanceled);
   iterator sti = begin();
   iterator last;
   while( sti != end()) {
     Value *val = *sti;
-    if(val &&(typeid(*val) != typeid(line_number_symbol))) {
+    if(val && (typeid(*val) != typeid(line_number_symbol))) {
       if(dynamic_cast<IIndexedCollection*>(val) == NULL) {
         cout << val->name() << " = " ;
       }
@@ -638,7 +641,12 @@ void Symbol_Table::dump_all(void)
     if(sti != end() && (*last)->name() == (*sti)->name()) {
       cout << "***************** Duplicate Found ***********" << endl;
     }
+    if(bUserCanceled) {
+      cout << endl << "Symbol dump canceled." << endl;
+      break;
+    }
   }
+  CSimulationContext::GetContext()->SetUserCanceledFlag(NULL);
 }
 
 bool beginsWith(string &sTarget, string &sBeginsWith) {
@@ -655,6 +663,8 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
     dump_all();
     return;
   }
+  bool bUserCanceled = false;
+  CSimulationContext::GetContext()->SetUserCanceledFlag(&bUserCanceled);
   if(sSymbol[nLastCharPos] == '.') {
     sBeginsWith = sSymbol.substr(0, nLastCharPos);
   }
@@ -677,7 +687,12 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
       }
     last = sti;
     sti++;
+    if(bUserCanceled) {
+      cout << endl << "Symbol dump canceled." << endl;
+      break;
+    }
   }
+  CSimulationContext::GetContext()->SetUserCanceledFlag(NULL);
 }
 
 void Symbol_Table::dump_type(type_info const &symt)
@@ -1131,7 +1146,7 @@ Value* register_symbol::evaluate() {
 int register_symbol::set_break(ObjectBreakTypes bt, 
 			       Expression *pExpr)
 {
-  get_bp().set_break(bt,reg,pExpr);
+  return get_bp().set_break(bt,reg,pExpr);
 }
 
 int register_symbol::clear_break()
