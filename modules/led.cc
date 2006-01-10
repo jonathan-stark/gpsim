@@ -76,6 +76,7 @@ Boston, MA 02111-1307, USA.  */
 #include <math.h>
 
 #include "../src/gpsim_interface.h"
+#include "../src/gpsim_time.h"
 
 #include "led.h"
 #include "../src/packages.h"
@@ -143,6 +144,14 @@ void Led_Port::trace_register_write(void)
 void Led_7Segments::update(void)
 {
   update(darea, w_width,w_height);
+}
+
+void Led_7Segments::callback(void)
+{
+                                                                                
+  get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
+  update();
+                                                                                
 }
 
 void Led_7Segments::update(  GtkWidget *widget,
@@ -530,6 +539,7 @@ Led_7Segments::Led_7Segments(void)
 
   interface = new LED_Interface(this);
   get_interface().add_interface(interface);
+  callback();
 }
 
 Led_7Segments::~Led_7Segments(void)
@@ -563,12 +573,13 @@ void Led_7Segments::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
-  if(pin_name) {
-    port->new_name(pin_name);
+  char *mod_name = (char*)name().c_str();   // Get the name of this logic gate
+  if(!mod_name) 
+  {
+	new_name("led");
+	mod_name=(char*)name().c_str();
   }
-  else
-    port->new_name("pin");
+  port->new_name(mod_name);
 
 
   // Define the physical package.
@@ -600,14 +611,14 @@ void Led_7Segments::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
   // Now, I'd normally put this is loop, but to be explicit...
-  assign_pin(1, new Led_Input(port, 0,"cc"));  // cathode
-  assign_pin(2, new Led_Input(port, 1,"seg0"));  // segment 0 (a)
-  assign_pin(3, new Led_Input(port, 2,"seg1"));  // segment 1 (b)
-  assign_pin(4, new Led_Input(port, 3,"seg2"));  // segment 2 (c)
-  assign_pin(5, new Led_Input(port, 4,"seg3"));  // segment 3 (d)
-  assign_pin(6, new Led_Input(port, 5,"seg4"));  // segment 4 (e)
-  assign_pin(7, new Led_Input(port, 6,"seg5"));  // segment 5 (f)
-  assign_pin(8, new Led_Input(port, 7,"seg6"));  // segment 6 (g)
+  assign_pin(1, new Led_Input(port, 0,(name() + ".cc").c_str()));  // cathode
+  assign_pin(2, new Led_Input(port, 1,(name() + ".seg0").c_str()));  // segment 0 (a)
+  assign_pin(3, new Led_Input(port, 2,(name() + ".seg1").c_str()));  // segment 1 (b)
+  assign_pin(4, new Led_Input(port, 3,(name() + ".seg2").c_str()));  // segment 2 (c)
+  assign_pin(5, new Led_Input(port, 4,(name() + ".seg3").c_str()));  // segment 3 (d)
+  assign_pin(6, new Led_Input(port, 5,(name() + ".seg4").c_str()));  // segment 4 (e)
+  assign_pin(7, new Led_Input(port, 6,(name() + ".seg5").c_str()));  // segment 5 (f)
+  assign_pin(8, new Led_Input(port, 7,(name() + ".seg6").c_str()));  // segment 6 (g)
 
 
   initializeAttributes();
@@ -641,6 +652,13 @@ void Led::update(void)
   update(darea, w_width,w_height);
 }
 
+void Led::callback(void)
+{
+                                                                                
+  get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
+  update();
+                                                                                
+}
 void Led::update(  GtkWidget *widget,
 		   guint new_width,
 		   guint new_height)
@@ -768,6 +786,7 @@ Led::Led(void)
 
   interface = new LED_Interface(this);
   get_interface().add_interface(interface);
+  callback();
 }
 
 Led::~Led(void)
@@ -802,12 +821,12 @@ void Led::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = (char*)name().c_str();
-  if(pin_name) {
-    port->new_name(pin_name);
+  char *mod_name = (char*)name().c_str();
+  if(!mod_name) {
+    new_name("led");
+    mod_name = (char*)name().c_str();
   }
-  else
-    port->new_name("pin");
+  port->new_name(mod_name);
 
   create_pkg(1);
 
@@ -815,7 +834,7 @@ void Led::create_iopin_map(void)
   package->set_pin_position(1,0.5);
 
   // Define the LED Cathode. (The anode is implicitly tied to VCC)
-  assign_pin(1, new Led_Input(port, 0,"in"));
+  assign_pin(1, new Led_Input(port, 0,(name() + ".in").c_str()));
   initializeAttributes();
 }
 

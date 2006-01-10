@@ -1,3 +1,7 @@
+2006-01-06 Roy Rankin <rrankin@ihug.com.au>
+	* modules/led.cc, modules/led.h: Added dynamic gui update to the
+	led modules.
+
 2006-01-07 Scott Dattalo <scott@dattalo.com>
 	* regression/resistor/resistor.asm: Tiny comment change
 	* regression/run_regression.ch: Added the resistor regression test
