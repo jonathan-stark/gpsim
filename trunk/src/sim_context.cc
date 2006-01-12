@@ -50,6 +50,7 @@ Boston, MA 02111-1307, USA.  */
 #include "breakpoints.h"
 #include "trace.h"
 
+char * get_error_message();
 
 //================================================================================
 // Global Declarations
@@ -189,7 +190,7 @@ int CSimulationContext::LoadProgram(const char *filename,
     cerr << "failed to open program file ";
     cerr << filename;
     cerr << ": ";
-    cerr << get_error();
+    cerr << get_error_message();
     cerr << endl;
     cerr << "current working directory is ";
     cerr << cw;

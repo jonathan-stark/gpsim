@@ -36,10 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "exports.h"
 #include "modules.h"
 
-#ifndef _WIN32
-#include <dlfcn.h>
-#define STRICMP strcasecmp
-#else
+#ifdef _WIN32
 #define G_PLATFORM_WIN32
 #define G_OS_WIN32
 #include <glib/gmem.h>
@@ -49,7 +46,13 @@ Boston, MA 02111-1307, USA.  */
 
 #define STRICMP stricmp
 
-#endif
+#else
+
+#include <dlfcn.h>
+#include <string.h>
+#define STRICMP strcasecmp
+
+#endif	// _WIN32
 
 using namespace std;
 
@@ -66,7 +69,7 @@ using namespace std;
 #endif
 
 char * get_error_message();
-unsigned long get_error();
+unsigned long get_error(char *);
 
 #ifdef _WIN32
 #define OS_E_FILENOTFOUND 0x0000007E
@@ -251,15 +254,15 @@ static void * sLoad(const char *library_name)
     return 0;
 
   void *handle;
-#ifndef _WIN32
+#ifdef _WIN32
+  handle = (void *)LoadLibrary((LPCSTR)library_name);
+#else
   // According to the man page for dlopen, the RTLD_GLOBAL flag can
   // be or'd with the second pararmeter of the function call. However,
   // under Linux at least, this apparently cause *all* symbols to
   // disappear.
 
   handle = dlopen (library_name, RTLD_NOW); // | RTLD_GLOBAL);
-#else
-  handle = (void *)LoadLibrary((LPCSTR)library_name);
 #endif
   return handle;
 }
@@ -307,22 +310,9 @@ void * load_library(const char *library_name, char **pszError)
     return handle;
 
   *pszError = get_error_message();
-  unsigned long uError = get_error();
-#ifdef _WIN32
-  if(uError != OS_E_FILENOTFOUND) {
-#else
-  if(true) {
-#endif
-    if (*pszError) 
-      printf("Failed loading %s: %s\nNow trying to find %s in the directory paths\n",
-            sPath.c_str(), *pszError,sPath.c_str());
-  }
-#ifdef _WIN32
-  if(uError == OS_E_FILENOTFOUND) {
-#else
-  printf("Debug: need to define OS_E_FILENOTFOUND for Linux and test error code for failed load_library() : error = %lu\n", uError);
-  if(true) {
-#endif
+  unsigned long uError = get_error(*pszError);
+
+  if (uError == OS_E_FILENOTFOUND) {
     // Failed to find the library in the system paths, so try to load
     // from one of our paths.
 
@@ -337,9 +327,12 @@ void * load_library(const char *library_name, char **pszError)
       if (NULL != handle) {
         return handle;
       }
+      *pszError = get_error_message();
     }
-    *pszError = get_error_message();
   }
+  if (*pszError)
+      printf("Failed loading %s: %s\n",
+            sPath.c_str(), *pszError);
   return NULL;
 }
 
@@ -352,19 +345,27 @@ void free_library(void *handle)
 #endif
 }
 
-unsigned long get_error() {
+unsigned long get_error(char *err_str) {
 #ifdef _WIN32
   return GetLastError();
 #else
-  return errno;
+  /*
+  ** In Linux and likely all Unix like OSs, dlopen leaves errno as 0
+  ** even after failure, If so, look in error string returned by dlerror 
+  ** to try to determine if file was not found. RRR
+  */ 
+  unsigned long ret = errno;	// in Linux errno is 0 
+  if (! ret && err_str && strstr(err_str, "No such file"))
+	ret = OS_E_FILENOTFOUND;
+  return ret;
 #endif
 }
 
 char * get_error_message() {
-#ifndef _WIN32
-  return dlerror();
-#else
+#ifdef _WIN32
   return g_win32_error_message(GetLastError());
+#else
+  return dlerror();
 #endif
 }
 
@@ -375,14 +376,14 @@ void free_error_message(char * pszError)
 #endif
 }
 
-void * get_library_export(const char *name, void *library_handle, char **pszError)
+void * get_library_export(const char *name, void *library_handle, char ** const pszError)
 {
   void * pExport;
-#ifndef _WIN32
+#ifdef _WIN32
+  pExport = (void*)GetProcAddress((HMODULE)library_handle, name);
+#else
   dlerror();	// Clear possible previous errors
   pExport = dlsym(library_handle, name);
-#else
-  pExport = (void*)GetProcAddress((HMODULE)library_handle, name);
 #endif
   if (NULL == pExport && pszError != NULL) {
     *pszError = get_error_message();
