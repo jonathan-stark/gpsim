@@ -77,6 +77,7 @@ void          ModuleLibrary::LoadFile(const char *pFilename) {
   MakeCanonicalName(sPath, sName);
   if(!FileExists(sName)) {
     if ((handle = ::load_library(sPath.c_str(), &pszError)) == NULL) {
+#ifdef THROW
       ostringstream stream;
 
       char cw[_MAX_PATH];
@@ -93,6 +94,7 @@ void          ModuleLibrary::LoadFile(const char *pFilename) {
       stream << endl << ends;
       free_error_message(pszError);
       throw new Error(stream.str());
+#endif THROW
     }
     else {
 

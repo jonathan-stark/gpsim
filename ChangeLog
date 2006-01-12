@@ -1,3 +1,19 @@
+2006-01-12 Scott Dattalo <scott@dattalo.com>
+	* src/errors.h, src/sim_context.cc: Slight clean up to Roy's
+	patch.
+	
+2006-01-12 Roy Rankin <rrankin@ihug.com.au>
+	* src/modules.cc: remove library load failure exception throw. In
+	Linux, a failed module library load command from the command
+	window repeats the error message already printed.  Even worse, if
+	the failure occurs fromthe breadboard GUI "Add libs" function,
+	gpsim crashes. 
+	
+	* src/os_dependent.cc: Fix up error handling on library loads for
+	Linux. Also for readability changed #ifndef _WIN32 to #ifdef
+	_WIN32 reversing the cases.
+
+
 2006-01-10 J.R. Heisey <jrheisey@users.sourceforge.com
 	* gui\gui_watch.cc gui\gui_watch.h, gui\gui.h, gui\gui_object.cc,
 	gui\settings.h, gui\settings_exdbm.cc, gui\settings_exdbm.h,
