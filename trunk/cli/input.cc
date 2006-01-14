@@ -472,31 +472,6 @@ int parse_string_only(const char * str) {
   return iRet;
 }
 
-//========================================================================
-//
-// FIXME TSD --16aug05 -- Is this really still needed? Remove after Oct05
-#if 0
-static int check_old_command(char *s)
-{
-    char new_command[256];
-    { // "module position <modulename> <xpos> <ypos>
-    	char module_name[256];
-      int xpos, ypos;
-    	if(sscanf(s,"module position %s %d %d\n",module_name, &xpos, &ypos)==3)
-      {
-        cout<<"Found old style \"module position\" command"<<endl;
-        sprintf(new_command,"%s.xpos=%d.0\n",module_name,xpos);
-        add_string_to_input_buffer(new_command);
-        cout<<"Translation: "<<new_command<<endl;
-        sprintf(new_command,"%s.ypos=%d.0\n",module_name,ypos);
-        add_string_to_input_buffer(new_command);
-        cout<<"Translation: "<<new_command<<endl;
-        return 1;
-      }
-    }
-    return 0;
-}
-#endif
 void process_command_file(const char * file_name)
 {
 
@@ -551,10 +526,7 @@ void process_command_file(const char * file_name)
             str[iLast-1] = '\n';
           }
 #endif
-#if 0
-          if(!check_old_command(s))
-#endif
-              add_string_to_input_buffer(s);
+	  add_string_to_input_buffer(s);
       }
 
       fclose(cmd_file);
@@ -985,9 +957,17 @@ int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
   if (verbose & 4)
     cout << "GCLICommandHandler::Execute Script:" << endl;
 
+  if (script.size() == 0)
+    return CMD_ERR_OK;
+
   // We need to execute the script now. There may be other commands
   // currently pending, so a new command stream is created and the
-  // commands that are in this script are placed there.
+  // commands that are in this script are placed there. The current
+  // command stream is temporarily disabled and then re-enabled at
+  // the end of this function.
+
+  LLStack *saveStack = Stack;
+  Stack = 0;
 
   start_new_input_stream();
   add_string_to_input_buffer("\n");
@@ -1002,10 +982,12 @@ int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
     add_string_to_input_buffer((char *) cmd->c_str());
   }
 
-  // -- don't start the parser yet...
-  // we need to review this, but if the parser starts now, then it
-  // becomes difficult to Execute several scripts in a row.
-  //start_parse();
+  // Start parsing the script that we just placed into the command stream
+  start_parse();
+  delete Stack;
+
+  // Restore the original command stream.
+  Stack = saveStack;
 
   return CMD_ERR_OK;
 }
