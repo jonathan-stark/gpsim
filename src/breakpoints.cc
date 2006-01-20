@@ -220,21 +220,21 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt,
   Register *pRegInExpr = 0;
   if (pExpr) {
 
-    // attempt to compile expressions of these types:
-    //
-    //
-    //             ComparisonOperator
-    //                 /          \
-    //              OpAnd     LiteralInteger
-    //            /      \
-    // register_symbol   LiteralInteger
-    //
-    //   --- OR --- 
-    //
-    //             ComparisonOperator
-    //                 /          \
-    //       register_symbol     LiteralInteger
-    //
+    /* attempt to compile expressions of these types:
+     *
+     *
+     *             ComparisonOperator
+     *                 /          \
+     *              OpAnd     LiteralInteger
+     *            /      \
+     * register_symbol   LiteralInteger
+     *
+     *   --- OR --- 
+     *
+     *             ComparisonOperator
+     *                 /          \
+     *       register_symbol     LiteralInteger
+     */
 
     ComparisonOperator *pCompareExpr = dynamic_cast<ComparisonOperator *>(pExpr);
 

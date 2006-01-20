@@ -91,7 +91,7 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
   iterator it;
   iterator itLast;
   iterator itEnd = end();
-  int iReturn;
+  int iReturn = ProgramFileType::SUCCESS;
   for(it = begin(); it != itEnd; it++) {
     itLast = it;
     fseek(pFile, 0, SEEK_SET);

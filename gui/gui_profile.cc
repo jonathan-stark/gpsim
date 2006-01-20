@@ -25,6 +25,9 @@ Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 
 #include "../config.h"
+
+//#define GTKEXTRA_2
+
 #ifdef HAVE_GUI
 
 #include <unistd.h>
@@ -50,6 +53,9 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkplot.h>
 #include <gtkextra/gtkplotdata.h>
 #include <gtkextra/gtkplotcanvas.h>
+#ifdef GTKEXTRA_2
+#include <gtkextra/gtkplotcanvasplot.h>
+#endif
 #include <gtkextra/gtkplotbar.h>
 #include <gtkextra/gtkplotps.h>
 #include <gtkextra/gtkplotprint.h>
@@ -799,6 +805,19 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gdk_color_parse("black", &color2);
 	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
+#ifdef GTKEXTRA_2
+	gtk_plot_hide_legends(GTK_PLOT(active_plot));
+	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP),0);
+	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM),0);
+	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT),0);
+	gtk_plot_axis_set_visible(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP), TRUE);
+	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
+	gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(canvas), gtk_plot_canvas_plot_new(GTK_PLOT(active_plot)), PLOTXPOS, PLOTYPOS, PLOTWIDTH, PLOTHEIGHT);
+	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP));
+	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM));
+	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT));
+	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT));
+#else
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
 
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
@@ -811,6 +830,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
+#endif
 	gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
 	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
 	gtk_widget_show(active_plot);
@@ -821,12 +841,19 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
+#ifdef GTKEXTRA_2
+    gtk_plot_axis_set_ticks(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT), tickdelta, 0);
+    gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
+    gtk_plot_axis_set_labels_numbers(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT),
+				     maxy < 10000 ? GTK_PLOT_LABEL_FLOAT : GTK_PLOT_LABEL_EXP, 0);
+#else
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_Y, tickdelta, 0);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
 				     GTK_PLOT_AXIS_LEFT,
 				     maxy<10000?0:GTK_PLOT_LABEL_EXP,
                                      0);
+#endif
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, 0, 0, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
@@ -1094,6 +1121,16 @@ int plot_routine_histogram(Profile_Window *pw)
 	gdk_color_parse("black", &color2);
 	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
+#ifdef GTKEXTRA_2
+	gtk_plot_hide_legends(GTK_PLOT(active_plot));
+	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP),0);
+	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT),0);
+	gtk_plot_axis_set_visible(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP), TRUE);
+	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
+	gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(canvas), gtk_plot_canvas_plot_new(GTK_PLOT(active_plot)), PLOTXPOS, PLOTYPOS, PLOTWIDTH, PLOTHEIGHT);
+	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP));
+	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT));
+#else
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
@@ -1102,6 +1139,7 @@ int plot_routine_histogram(Profile_Window *pw)
 	gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
+#endif
 	gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
 	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
 	gtk_widget_show(active_plot);
@@ -1112,6 +1150,17 @@ int plot_routine_histogram(Profile_Window *pw)
 	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
+#ifdef GTKEXTRA_2
+    gtk_plot_axis_set_ticks(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT), tickdelta_y, 1);
+    gtk_plot_axis_set_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT), "Frequency");
+    gtk_plot_axis_set_labels_numbers(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT),
+				     GTK_PLOT_LABEL_FLOAT, 0);
+
+    gtk_plot_axis_set_ticks(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT), tickdelta_x, 1);
+    gtk_plot_axis_set_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM), "Cycles");
+    gtk_plot_axis_set_labels_numbers(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM),
+				     maxx<10000 ? GTK_PLOT_LABEL_FLOAT : GTK_PLOT_LABEL_EXP, 0);
+#else
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_Y, tickdelta_y, 1);
     gtk_plot_axis_set_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT, "Frequency");
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
@@ -1125,7 +1174,7 @@ int plot_routine_histogram(Profile_Window *pw)
 				     GTK_PLOT_AXIS_BOTTOM,
 				     maxx<10000?0:GTK_PLOT_LABEL_EXP,
 				     0);
-
+#endif
     gtk_plot_set_range(GTK_PLOT(active_plot), minx, (gdouble)maxx, 0., (gdouble)maxy);
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, 0, 0, numpoints);

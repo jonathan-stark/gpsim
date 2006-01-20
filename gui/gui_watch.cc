@@ -568,7 +568,6 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 
   RegisterValue rvMaskedNewValue;
   unsigned int uBitmask;
-  unsigned int uBitmaskForMaskedValue = entry->cpu->register_mask();
 
   entry->put_shadow(rvNewValue);
 

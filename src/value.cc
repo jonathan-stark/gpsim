@@ -689,7 +689,7 @@ void Integer::set(const char *buffer, int buf_size)
 bool Integer::Parse(const char *pValue, gint64 &iValue) {
     if(::isdigit(*pValue)) {
       if(strchr(pValue, '.')) {
-        false;
+        return false;
       }
       else {
         // decimal or 0x integer

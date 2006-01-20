@@ -2923,7 +2923,6 @@ void GuiModule::AddPinGeometry(GuiPin *pin)
   // (the coordinates are referenced to the module's origin)
   int pin_x, pin_y;
   int label_x, label_y;
-  float pin_position;
 
   const PinGeometry *pPinGeometry = m_module->package->getPinGeometry(pin_number);
 
@@ -2966,12 +2965,15 @@ void GuiModule::AddPinGeometry(GuiPin *pin)
 
       orientation = DOWN;
       break;
-
+    default:
+      printf("################### Error:\n");
+      printf("Undefined orientation.\n");
+      assert(0);
     }
   } else {
 
     // old style -- to be deprecated.
-    pin_position=m_module->package->get_pin_position(pin_number);
+    float pin_position=m_module->package->get_pin_position(pin_number);
 
     // Put pin in layout
     if(pin_position>=0.0 && pin_position<1.0) {

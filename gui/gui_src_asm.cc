@@ -451,7 +451,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   }
 
-  GtkWidget *pSourceWindow = pages[id].source_text;
   new_pcw = pages[id].source_pcwidget;
 
   row = pma->get_src_line(address);
@@ -1083,6 +1082,8 @@ static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
     return 0;
 }
 
+
+#if 0 //warning: 'gint drag_scroll_cb(void*)' defined but not used
 static float drag_scroll_speed;
 static gint drag_scroll_cb(gpointer data)
 {
@@ -1108,6 +1109,7 @@ static gint drag_scroll_cb(gpointer data)
     
     return TRUE; // refresh timer
 }
+#endif
 
 /*
  This is handler for motion, button press and release for source_layout.
@@ -1121,19 +1123,19 @@ static gint marker_cb(GtkWidget *w1,
 		      GdkEventButton *event,
 		     SourceBrowserAsm_Window *sbaw)
 {
-  static int dragbreak=0;
-  static int dragstartline;
+  //static int dragbreak=0;
+  //static int dragstartline;
   //BreakPointInfo *bpi;
   //BreakPointInfo *dragbpi;
   static int button_pressed;
   static int button_pressed_y;
   static int button_pressed_x;
-  static int dragwidget_oldy;
+  //static int dragwidget_oldy;
   // int pixel;
   // unsigned int address=0;
     
-  static GtkWidget *dragwidget;
-  static int dragwidget_x;
+  //static GtkWidget *dragwidget;
+  //static int dragwidget_x;
   static gdouble vadj_value=0.0;
     
 
@@ -2920,6 +2922,7 @@ int SourceBrowserParent_Window::set_config()
   * I am finding were here in the old version.
   */
 
+#if 0 //warning: 'void text_insert(SourceBrowserAsm_Window*, int, GtkStyle*, char*, int)' defined but not used
 static void text_insert(SourceBrowserAsm_Window *sbaw,
 			int id,
 			GtkStyle *style, 
@@ -2936,5 +2939,6 @@ static void text_insert(SourceBrowserAsm_Window *sbaw,
 		  text,
 		  length);
 }
+#endif
 
 #endif // HAVE_GUI

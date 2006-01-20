@@ -1867,7 +1867,7 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
         AttachStimulusToNode(sn, pPin->name(), pPin);
       }
       else {
-        Module *pMod;
+        Module *pMod = NULL;
         if(pPinArgument->m_iFlags & Pin_t::eActiveProc) {
           pMod = get_active_cpu();
         }
@@ -2020,7 +2020,7 @@ void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName, stimulus *st
 }
 
 stimulus *Pin_t::GetStimulus() {
-  stimulus_symbol * pPinSymbol;
+  stimulus_symbol * pPinSymbol = NULL;
   if(m_sPin) {
     pPinSymbol = dynamic_cast<stimulus_symbol*>(m_sPin);
   }
