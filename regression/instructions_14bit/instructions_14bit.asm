@@ -493,7 +493,7 @@ BankLoop:
 	goto	BankLoop
 	
 done:
-  .assert  ",\"*** PASSED MidRange core instruction test\""
+  .assert  "\"*** PASSED MidRange core instruction test\""
 	bcf	STATUS,RP0
 	
 	NOP
@@ -632,7 +632,7 @@ test_pcl4:
 	goto	$
 
 failed:
-  .assert  ",\"*** FAILED MidRange core instruction test\""
+  .assert  "\"*** FAILED MidRange core instruction test\""
 	goto	done
 
 	end

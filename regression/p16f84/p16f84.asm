@@ -64,7 +64,7 @@ a_to_b_loop:
 
 	BSF	PORTA,4		;Port A bit 4 is an open collector.
 	BTFSC	PORTB,4
-  .assert  ",\"*** FAILED 16f84 test -RA4 stuck high\""
+  .assert  "\"*** FAILED 16f84 test -RA4 stuck high\""
 	 GOTO	FAILED
 
 
@@ -125,10 +125,10 @@ b_to_a_loop:
 	GOTO	done
 
 FAILED:
-  .assert  ",\"*** FAILED 16f84 test\""
+  .assert  "\"*** FAILED 16f84 test\""
 	INCF	failures,F
 done:
-  .assert  ",\"*** PASSED 16f84 test\""
+  .assert  "\"*** PASSED 16f84 test\""
 	GOTO	$
 
 

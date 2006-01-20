@@ -60,11 +60,11 @@ b_to_a_loop:
 	DECFSZ	PORTB,W
 	 bra	b_to_a_loop
 
-  .assert  ",\"*** PASSED 18F452 port test\""
+  .assert  "\"*** PASSED 18F452 port test\""
 	bra	$
 
 FAILED:
-  .assert  ",\"*** FAILED 18F452 port test\""
+  .assert  "\"*** FAILED 18F452 port test\""
 	bra	$
 
   end

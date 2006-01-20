@@ -134,7 +134,7 @@ test_pcl4:
         ;;
 success:
 done:	        
-  .assert  ",\"*** PASSED 12bit core instruction test\""
+  .assert  "\"*** PASSED 12bit core instruction test\""
         goto    $       
 
         NOP
@@ -145,7 +145,7 @@ done:
 failed: 
         movlw   1
         movwf   failures
-  .assert  ",\"*** FAILED: 12bit core instruction test\""
+  .assert  "\"*** FAILED: 12bit core instruction test\""
 	goto	done
 start:  
 

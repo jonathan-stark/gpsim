@@ -41,10 +41,10 @@ mac_loop:
         movf	failures,W
 	skpz
 failed:	
-  .assert  ",\"*** FAILED Macro test\""
+  .assert  "\"*** FAILED Macro test\""
 	 goto	$
 done:
-  .assert  ",\"*** PASSED Macro test\""
+  .assert  "\"*** PASSED Macro test\""
         goto    done
 
         end

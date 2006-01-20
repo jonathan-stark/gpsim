@@ -53,14 +53,15 @@ start
    .sim "step 6"
 
 	call	delay
-
+   .sim "echo Breakpoints:"
+   .sim "break"
    .sim "break w var1"
-   .sim "run"
+;   .sim "run"
    .sim "var1=4"
    .sim "echo stepping over breakpoint"
    .sim "step"
    .sim "trace 5"
-   .sim "run"
+;   .sim "run"
    .assert "var1==0"
 	incf	var1,F	;This write will cause a break
    .assert "var1==4"
@@ -72,7 +73,7 @@ passed:
 done:
   ; If no expression is specified, then break unconditionally
 
-  .assert  ",\"*** PASSED breakpoint test\""
+  .assert  "\"*** PASSED breakpoint test\""
         goto    done
 
 

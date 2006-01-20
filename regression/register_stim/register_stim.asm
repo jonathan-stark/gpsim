@@ -80,10 +80,10 @@ L1:
          goto	failed
 
 done:
-  .assert  ",\"*** PASSED Register Stimulation test\""
+  .assert  "\"*** PASSED Register Stimulation test\""
         goto    done
 
 failed:	
-  .assert  ",\"*** FAILED Register Stimulation test\""
+  .assert  "\"*** FAILED Register Stimulation test\""
 	goto	failed
         end

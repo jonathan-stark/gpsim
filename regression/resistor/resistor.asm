@@ -102,7 +102,7 @@ done:
 #define UNRELEASED_GPASM
                                                                                 
  ifdef UNRELEASED_GPASM
-  .assert  ",\"*** PASSED Resistor Module test\""
+  .assert  "\"*** PASSED Resistor Module test\""
  else
   .assert  ""
  endif

@@ -88,11 +88,11 @@ FillWaitForWrite:
 	skpz
 	 goto	failed
 done:
-  .assert  ",\"*** PASSED 12CE518 internal EEPROM test\""
+  .assert  "\"*** PASSED 12CE518 internal EEPROM test\""
         goto    done
 
 failed:
-  .assert  ",\"*** FAILED 12CE518 internal EEPROM test\""
+  .assert  "\"*** FAILED 12CE518 internal EEPROM test\""
 	goto	$
 
 	end
