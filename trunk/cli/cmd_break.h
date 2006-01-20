@@ -35,17 +35,11 @@ public:
   void list(guint64 value=CMDBREAK_BAD_BREAK_NUMBER);
 
   unsigned int set_break(cmd_options *co);
-  //  unsigned int set_break(Value *);
-  //  unsigned int set_break(cmd_options *co, Value *pValue);
-  unsigned int set_break(cmd_options *co, Expression *pExpr1, Expression *pExpr2=0);
-  //  unsigned int set_break(cmd_options *co, Value *pValue, Expression *pExpr);
-  unsigned int set_break(int bit_flag,guint64 reg, int op,guint64 value,guint64 mask);
-  unsigned int set_break(int bit_flag);
-  unsigned int set_break(int bit_flag,guint64 value, Expression *pExpr=0);
-private:
-  string & GenBitPattern(string &sBits, unsigned int value,
-                         unsigned int mask);
+  unsigned int set_break(cmd_options *co, ExprList_t *pEL);
 
+private:
+  unsigned int set_break(cmd_options *co, Expression *pExpr1, Expression *pExpr2=0);
+  unsigned int set_break(int bit_flag);
 };
 
 extern cmd_break c_break;

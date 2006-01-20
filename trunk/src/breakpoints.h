@@ -391,6 +391,7 @@ public:
     }
 
   bool dump1(unsigned int bp_num, int dump_type = BREAK_DUMP_ALL);
+  bool dump(TriggerObject *);
   void dump(int dump_type = BREAK_DUMP_ALL);
   void dump_traced(unsigned int b);
   void clear(unsigned int b);
