@@ -150,6 +150,11 @@ Value* ComparisonOperator::applyOp(Value* leftValue, Value* rightValue)
 {
   return new Boolean(leftValue->compare(this,rightValue));
 }
+int ComparisonOperator::set_break(ObjectBreakTypes bt, Expression *pExpr)
+{
+  return get_bp().set_break(bt, (Register *)0, this);
+
+}
 
 /******************************************************************************
  Operator: AbstractRange 

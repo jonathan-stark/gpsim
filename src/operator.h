@@ -108,6 +108,7 @@ public:
   bool greater() { return bGreater;}
 
   virtual ComparisonTypes isa()=0;
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
 
 protected:
   bool bLess;
