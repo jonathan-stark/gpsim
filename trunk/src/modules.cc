@@ -94,7 +94,7 @@ void          ModuleLibrary::LoadFile(const char *pFilename) {
       stream << endl << ends;
       free_error_message(pszError);
       throw new Error(stream.str());
-#endif THROW
+#endif //THROW
     }
     else {
 

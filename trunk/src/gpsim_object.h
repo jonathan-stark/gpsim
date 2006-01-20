@@ -93,9 +93,6 @@ public:
     : m_type(_type)
   {
   }
-  ~BreakType()
-  {
-  }
   virtual int type()
   {
     return m_type;

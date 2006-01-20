@@ -80,6 +80,7 @@ return(nmemb);
 }
 
 
+#if 0 //warning: 'lt_emit_u64' defined but not used
 static int lt_emit_u64(struct lt_trace *lt, int valueh, int valuel)
 {
 int rc;
@@ -91,6 +92,7 @@ if((rc=lt_emit_u32(lt, valueh)))
 
 return(rc);
 }
+#endif
 
 
 static int lt_emit_double(struct lt_trace *lt, double value)

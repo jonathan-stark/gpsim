@@ -2,7 +2,7 @@
 /*
    Copyright (C) 1998,1999 T. Scott Dattalo
 
-This file is part of gpsim.
+This file is part of gpsim.read_message_area
 
 gpsim is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -475,8 +475,6 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
   // this indirect way of accessing the CLI since we don't wish
   // for code in the src/ directory to depend directly on code
   // in the cli/ (or any other) directory.
-  ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
-
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_MESSTAB]);
 
   if(start_block) {

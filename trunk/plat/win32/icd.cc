@@ -30,8 +30,6 @@ Dummy icd implementation for WIN32 platform.
 #include <fcntl.h>
 #include "icd.h"
 
-static bool use_icd = false;
-
 bool get_use_icd() {
   return false;
 }

@@ -164,7 +164,9 @@ const char * CFileSearchPath::Find(string &path) {
 }
 
 static CFileSearchPath asDllSearchPath;
+#if defined(_DEBUG)
 static bool bAltPaths = false;
+#endif
 void AddModulePathFromFilePath(string &sFolder) {
   string sFile;
   asDllSearchPath.AddPathFromFilePath(sFolder, sFile);

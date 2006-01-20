@@ -1,7 +1,50 @@
+2005-01-20 Borut Razem <borut.razem@siol.net>
+	* src/gpsim_object.h: removed empty destructor from class BreakType
+	  in order to avoid gcc warning: `class BreakType' has virtual
+	  functions but non-virtual destructor
+	* src/breakpoints.cc: changed // comments to /**/ in order to avoid
+	  gcc warning: multi-line comment
+	* src/cod.cc: removed gcc warning: unused variable 'pCli'
+	* src/os_dependent.cc: removed gcc warning: 'bAltPaths' defined but not
+	  used
+	* program_files.cc: removed gcc warning: 'iReturn' might be used
+	  uninitialized in this function
+	* src/stimuli.cc: removed gcc warning: 'pPinSymbol' might be used
+	  uninitialized in this function and warning: 'pMod' might be used
+	  uninitialized in this function
+	* value.cc: removed gcc warning: statement has no effect
+	* src/ValueCollection.cc: removed gcc warning: unused variable
+	  'uUpperBound'
+	* src/lxt_write.c: removed gcc warning: 'lt_emit_u64' defined but not
+	  used
+	* src/modules.cc: removed gcc warning: extra tokens at end of #endif
+	  directive
+	* plat/win32/icd.c: removed gcc warning: 'use_icd' defined but not used
+	* gui/gui_breadbord.cc: removed warning: 'orientation' might be used
+	  uninitialized in this function
+	  warning: 'pin_x' might be used uninitialized in this function
+	  warning: 'pin_y' might be used uninitialized in this function
+	  warning: 'label_x' might be used uninitialized in this function
+	  warning: 'label_y' might be used uninitialized in this function
+	* gui/gui_menu.cc: removed gcc warning: unused variable 'start'
+	  warning: unused variable 'end'
+	  warning: unused variable 'color'
+	  warning: unused variable 'tag'
+	  warning: unused variable 'cParray'
+	* gui/gui_src_asm.cc: removed gcc warning: unused variable 'dragbreak'
+	  warning: unused variable 'dragstartline'
+	  warning: unused variable 'dragwidget_oldy'
+	  warning: unused variable 'dragwidget'
+	  warning: unused variable 'dragwidget_x'
+	  warning: 'gint drag_scroll_cb(void*)' defined but not used
+	  warning: 'void text_insert(SourceBrowserAsm_Window*, int, GtkStyle*,
+	  char*, int)' defined but not used
+	* gui/gui_watch.cc: warning: unused variable 'uBitmaskForMaskedValue'
+
 2006-01-20 Scott Dattalo <scott@dattalo.com>
 	* src/trigger.cc, src/breakpoints.cc: Breakpoint messages were not
 	getting printed when execution breakpoints were hit.
-	
+
 2006-01-19 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h, src/breakpoints.cc
 	Rewrote breakpoint parsing. gpsim recently introduced an
@@ -23,7 +66,7 @@
 	    break type condition [expression] [,"message"]
 	The new syntax is:
 	    break type condition [,expression] [,"message"]
-	
+
 	The difference is that the new syntax requires a comma between the
 	condition and the qualifying expression.
 
@@ -59,14 +102,14 @@
 2006-01-12 Scott Dattalo <scott@dattalo.com>
 	* src/errors.h, src/sim_context.cc: Slight clean up to Roy's
 	patch.
-	
+
 2006-01-12 Roy Rankin <rrankin@ihug.com.au>
 	* src/modules.cc: remove library load failure exception throw. In
 	Linux, a failed module library load command from the command
 	window repeats the error message already printed.  Even worse, if
 	the failure occurs fromthe breadboard GUI "Add libs" function,
 	gpsim crashes. 
-	
+
 	* src/os_dependent.cc: Fix up error handling on library loads for
 	Linux. Also for readability changed #ifndef _WIN32 to #ifdef
 	_WIN32 reversing the cases.
@@ -100,7 +143,7 @@
 	* regression/resistor/resistor.asm: Tiny comment change
 	* regression/run_regression.ch: Added the resistor regression test
 	to the test suite.
-	
+
 2006-01-07 Roy Rankin <rrankin@ihug.com.au>
 	* modules/resistor.cc: Pulldown resistor voltage is now set to 0
 	Volts.
@@ -108,7 +151,7 @@
 	values for stimuli to more closely match PIC I/O pins.
 	* regression/resistor/resistor.asm: Set pulldown resistance for
 	the pulldown resistor.
-	
+
 2006-01-06 Roy Rankin <rrankin@ihug.com.au>
 	* src/stimuli.cc: Fixed crash regarding module pin names.
 	* regression/resistor/Makefile: New regression test for the

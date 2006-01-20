@@ -665,11 +665,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   {
 
     GtkTextBuffer *buffer;
-    GtkTextIter start, end;
     PangoFontDescription *font_desc;
-    GdkColor color;
-    GtkTextTag *tag;
-    char cParray[20];
 
     m_view = GTK_TEXT_VIEW (gtk_text_view_new ());
     gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
