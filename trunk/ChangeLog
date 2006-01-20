@@ -1,4 +1,8 @@
-2006-01-13 Scott Dattalo <scott@dattalo.com>
+2006-01-20 Scott Dattalo <scott@dattalo.com>
+	* src/trigger.cc, src/breakpoints.cc: Breakpoint messages were not
+	getting printed when execution breakpoints were hit.
+	
+2006-01-19 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h, src/breakpoints.cc
 	Rewrote breakpoint parsing. gpsim recently introduced an
 	expression option for breakpoints. As this feature was refined, it
