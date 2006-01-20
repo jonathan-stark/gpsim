@@ -544,7 +544,7 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 	  {
 	    string script("assertions");
 	    char buff[256];
-	    snprintf(buff,sizeof(buff),"break e %d %s\n",laddress,DebugMessage);
+	    snprintf(buff,sizeof(buff),"break e %d, %s\n",laddress,DebugMessage);
 	    string cmd(buff);
 	    cpu->add_command(script,cmd);
 	  }
