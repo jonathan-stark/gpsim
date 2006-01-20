@@ -1,7 +1,7 @@
 EXPORTS
     ??0AbstractRange@@QAE@II@Z
-	  ??0AliasedInstruction@@QAE@XZ
-	  ??0AttributeStimulus@@QAE@PBD@Z
+    ??0AliasedInstruction@@QAE@XZ
+    ??0AttributeStimulus@@QAE@PBD@Z
     ??0Bit@@QAE@AAVRegisterValue@@I@Z
     ??0BoolEventLogger@@QAE@I@Z
     ??0Boolean@@QAE@_N@Z
@@ -410,6 +410,7 @@ EXPORTS
     ?get_src_line@AliasedInstruction@@UAEHXZ
     ?get_src_line@ProgramMemoryAccess@@QAEII@Z
     ?get_trace@@YAAAVTrace@@XZ
+    ?get_update_rate@gpsimInterface@@QAE_KXZ
     ?get_value@AliasedInstruction@@UAEIXZ
     ?get_value@IOPORT@@UAEIXZ
     ?get_value@PortRegister@@UAEIXZ
@@ -673,4 +674,3 @@ EXPORTS
     get_library_export
     free_error_message
     free_library
-

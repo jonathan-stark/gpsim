@@ -1,4 +1,5 @@
 2005-01-20 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
 	* src/gpsim_object.h: removed empty destructor from class BreakType
 	  in order to avoid gcc warning: `class BreakType' has virtual
 	  functions but non-virtual destructor
