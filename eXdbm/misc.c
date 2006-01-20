@@ -478,6 +478,7 @@ int DeleteListEntry(TDbmListEntry *list, char *entryname)
   hash_value = HashValueGenerator(entryname);
 
   node = list->child[hash_value];
+  if(node==NULL) return(-1);
 
   found = 0;
   before = NULL;
