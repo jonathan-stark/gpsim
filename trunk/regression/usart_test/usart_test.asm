@@ -207,7 +207,7 @@ start
 	nop
 
 done:
-  .assert  ",\"*** PASSED Usart Module test\""
+  .assert  "\"*** PASSED Usart Module test\""
 
 
 	clrf	rxFlag

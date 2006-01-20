@@ -52,11 +52,11 @@ b_to_c_loop:
 
 done:
 
-  .assert  ",\"*** PASSED Node Test on 16f877\""
+  .assert  "\"*** PASSED Node Test on 16f877\""
 	goto	$
 
 FAILED:
-  .assert  ",\"*** FAILED Node Test on 16f877\""
+  .assert  "\"*** FAILED Node Test on 16f877\""
 	goto	$
 
 

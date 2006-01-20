@@ -56,10 +56,10 @@ begin:
 
         xorlw   EXPECTED_PULSES
         skpz
-  .assert  ",\"*** FAILED digital stimulus test\""
+  .assert  "\"*** FAILED digital stimulus test\""
          incf   failures,F
 done:
-  .assert  ",\"*** PASSED digital stimulus test\""
+  .assert  "\"*** PASSED digital stimulus test\""
         goto    done
 
         end

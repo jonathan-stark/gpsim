@@ -96,11 +96,11 @@ start
 
 done:
 
-  .assert  ",\"*** PASSED Switch Test on 16f877\""
+  .assert  "\"*** PASSED Switch Test on 16f877\""
 	goto	$
 
 FAILED:
-  .assert  ",\"*** FAILED Switch Test on 16f877\""
+  .assert  "\"*** FAILED Switch Test on 16f877\""
 	goto	$
 
 

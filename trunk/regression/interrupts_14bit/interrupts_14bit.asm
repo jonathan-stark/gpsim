@@ -319,11 +319,11 @@ rbif_l1:
 
 
 done:   
-  .assert  ",\"*** PASSED MidRange core interrupt test\""
+  .assert  "\"*** PASSED MidRange core interrupt test\""
         goto    $
 
 failed:	
-  .assert  ",\"*** FAILED MidRange core interrupt test\""
+  .assert  "\"*** FAILED MidRange core interrupt test\""
         goto    $
 
         end

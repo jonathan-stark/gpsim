@@ -419,13 +419,13 @@ L_psa16bitInitComplete:
 
 	nop
 done:
-  .assert  ",\"*** PASSED 16bit-core TMR0 test\""
+  .assert  "\"*** PASSED 16bit-core TMR0 test\""
         bra     $
 
 failed:
         movlw   1
         movwf   failures
-  .assert  ",\"*** FAILED 16bit-core TMR0 test\""
+  .assert  "\"*** FAILED 16bit-core TMR0 test\""
         bra     done
 
  end

@@ -653,13 +653,13 @@ TestTablat:
 TableReadEnd:	
 
 done:
-  .assert  ",\"*** PASSED 16bit-core instruction test\""
+  .assert  "\"*** PASSED 16bit-core instruction test\""
         bra     $
 
 failed:
         movlw   1
         movwf   failures
-  .assert  ",\"*** FAILED 16bit-core instruction test\""
+  .assert  "\"*** FAILED 16bit-core instruction test\""
         bra     done
 
 
