@@ -210,16 +210,14 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt,
 			   Register *pReg, 
 			   Expression *pExpr)
 {
-  if (!pReg)
-    return -1;
-
   int iValue = -1;
   int iMask  = -1;
   bool bCompiledExpression = false;
   BreakpointRegister_Value::BRV_Ops op = BreakpointRegister_Value::eBRInvalid;
 
-  Processor *pCpu = (pReg->get_cpu()) ? pReg->get_cpu() : get_active_cpu();
+  Processor *pCpu = (pReg && pReg->get_cpu()) ? pReg->get_cpu() : get_active_cpu();
 
+  Register *pRegInExpr = 0;
   if (pExpr) {
 
     // attempt to compile expressions of these types:
@@ -252,7 +250,21 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt,
     register_symbol *pRegSym = pLeftSymbol ? 
       dynamic_cast<register_symbol*>(pLeftSymbol->GetSymbol()) : 0;
 
-    Register *pRegInExpr = pRegSym ? pRegSym->getReg() : 0;
+    pRegInExpr = pRegSym ? pRegSym->getReg() : 0;
+
+    if (!pRegInExpr) {
+      // Legacy code... try to cast the left most integer into a register.
+      LiteralInteger *pLeftRegAsInteger = pLeftOp ? 
+	dynamic_cast<LiteralInteger*>(pLeftOp->getLeft()) : 
+	dynamic_cast<LiteralInteger*>(pCompareExpr->getLeft()) ;
+
+      Integer *pRegAddress = pLeftRegAsInteger ?
+	dynamic_cast<Integer*>(pLeftRegAsInteger->evaluate()) : 0;
+
+      pRegInExpr = (pRegAddress && pCpu) ? &pCpu->rma[(int)pRegAddress->getVal()] : 0;
+
+      delete pRegAddress;
+    }
 
     LiteralInteger* pRightSymbol = pLeftOp ?
       dynamic_cast<LiteralInteger*>(pLeftOp->getRight()) : 0;
@@ -283,6 +295,13 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt,
     delete pMask;
     delete pValue;
   }
+
+  // If there was no register passed in as an input and we failed to compile
+  // the expression (and hence unable to extract a register from the expression)
+  // then don't set a break.
+  pReg = pReg ? pReg : pRegInExpr;
+  if (!pReg)
+    return -1;
 
   if (bt ==  gpsimObject::eBreakWrite) {
     if (bCompiledExpression) {
@@ -534,6 +553,22 @@ int Breakpoints::check_cycle_break(unsigned int abp)
 
 }
 
+bool Breakpoints::dump(TriggerObject *pTO)
+{
+  if (!pTO)
+    return false;
+
+
+  pTO->print();
+  if (pTO->bHasExpression()) {
+    cout << "    Expression:";
+    pTO->printExpression();
+  }
+  if(pTO->message().size())
+    GetUserInterface().DisplayMessage("    Message:%s\n", pTO->message().c_str());
+
+  return true;
+}
 bool Breakpoints::dump1(unsigned int bp_num, int dump_type)
 {
   if(!bIsValid(bp_num)) {
@@ -543,7 +578,7 @@ bool Breakpoints::dump1(unsigned int bp_num, int dump_type)
   }
 
   BreakStatus &bs = break_status[bp_num];
-  BREAKPOINT_TYPES break_type = break_status[bp_num].type;
+
   if(bs.bpo) {
     switch(dump_type) {
     case BREAK_ON_EXECUTION:
@@ -566,50 +601,45 @@ bool Breakpoints::dump1(unsigned int bp_num, int dump_type)
 	// for 'break r' we dump register read classes
 	break;
       }
-      return false;
+    default:
+      break;
     }
 
-    bs.bpo->print();
-    if (bs.bpo->bHasExpression()) {
-      cout << "    Expression:";
-      bs.bpo->printExpression();
-    }
-    return true;
-  }
+    return dump(bs.bpo);
+  } else {
 
-  bool set_by_user = 0;
+    BREAKPOINT_TYPES break_type = break_status[bp_num].type;
+    switch (break_type) {
 
-  switch (break_type)
-    {
     case BREAK_ON_CYCLE:
-      // JRH - 6/30/2005, Looks like this code is dead to me.
-      cout << hex << setw(0) << bp_num << ": " << bs.cpu->name() << "  ";
       {
-      guint64 cyc =  bs.arg2;
-      cyc = (cyc <<32)  | bs.arg1;
-      cout << "cycle " << hex << setw(16) << setfill('0') <<  cyc << '\n';
+	const char * pFormat = "%d: cycle 0x%" PRINTF_INT64_MODIFIER "x  = %" PRINTF_INT64_MODIFIER "d\n";
+
+	guint64 cyc =  bs.arg2;
+	cyc = (cyc <<32)  | bs.arg1;
+	GetUserInterface().DisplayMessage(pFormat, bp_num, cyc, cyc);
       }
-      set_by_user = 1;
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
     case BREAK_ON_STK_OVERFLOW:
       cout << hex << setw(0) << bp_num << ": " << bs.cpu->name() << "  ";
       cout << "stack " << ((break_type == BREAK_ON_STK_OVERFLOW)?"ov":"und") << "er flow\n";
-      set_by_user = 1;
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
       cout << hex << setw(0) << bp_num << ": " << bs.cpu->name() << "  ";
       cout << "wdt time out\n";
-      set_by_user = 1;
       break;
     default:
+      return false;
       break;
 
     }
 
-  return(set_by_user);
+  }
+
+  return true;
 
 }
 
@@ -931,8 +961,6 @@ void Breakpoint_Instruction::print(void)
                                       : "%d: %s %s at %s(0x%x)\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), pLabel, address);
-  if(message().size())
-    GetUserInterface().DisplayMessage("    Message:%s\n", message().c_str());
 }
 
 void Breakpoint_Instruction::clear(void)
@@ -1463,19 +1491,6 @@ void BreakpointRegister_Value::print(void)
 				    bpn,cpu->name().c_str(), bpName(),
 				    sName.c_str(), pReg->address, break_mask, 
 				    m_sOperator.c_str(),break_value);
-
-/*
-  Why was this even here???
-
-  const char * pLabel = get_symbol_table().
-    findProgramAddressLabel(address);
-  const char *pFormat = *pLabel == 0 
-    ? "%d: %s  %s: [%s0x%x] & 0x%x %s 0x%x\n"
-    : "%d: %s  %s: %s(0x%x) & 0x%x %s 0x%x\n";
-  GetUserInterface().DisplayMessage(pFormat,
-    bpn, cpu->name().c_str(), bpName(), pLabel, address, break_mask,
-    m_sOperator.c_str(), break_value);
-*/
 }
 
 

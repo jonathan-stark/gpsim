@@ -67,18 +67,20 @@ cmd_break::cmd_break(void)
                      "gpsim supports execution style breaks, register access breaks,\n"
                      "complex expression breaks, attribute breaks, and other special breaks.\n"
                      "Program Memory breaks:\n"
-                     "  break e|r|w ADDRESS [expr] [,\"message\"]\n"
+                     "  break e|r|w ADDRESS [,expr] [,\"message\"]\n"
                      "    Halts when the address is executed, read, or written. The ADDRESS can be \n"
                      "    a symbol or a number. If the optional expr is specified, then it must\n"
                      "    evaluate to true before the simulation will halt. The optional message\n"
 		     "    allows a description to be associated with the break."
                      "Register Memory breaks:\n"
-                     "  break r|w REGISTER [expr] [,\"message\"]\n"
+                     "  break r|w REGISTER [,expr] [,\"message\"]\n"
                      "    Halts when 'REGISTER' is read or written and the optional expression\n"
                      "    evaluates to true.\n"
                      "  break r|w boolean_expression\n"
-                     "    older style to be deprecated..."
-                     "Cycle counter breaks:"
+                     "    The boolean expression can only be of the form:\n"
+		     "       a) reg & mask == value\n"
+		     "       b) reg == value\n"
+                     "Cycle counter breaks:\n"
                      "  break c VALUE  [,\"message\"]\n"
                      "    Halts when the cycle counter reaches 'VALUE'.\n"
                      "Attribute breaks:\n"
@@ -98,7 +100,7 @@ cmd_break::cmd_break(void)
                      "\tbreak w reg1 == 0  # break if a zero is written to register reg1\n"
                      "\tbreak w reg2 & 0x30 == 0xf0 # break if '3' is written to the\n"
                      "\t                            # upper nibble or reg2\n"
-                     "\tbreak w reg3 (reg4 > 45)    # break if reg4>45 while writing to reg3\n"
+                     "\tbreak w reg3, (reg4 > 45)   # break if reg4>45 while writing to reg3\n"
                      "\tbreak c 1000000    # break on the one million'th cycle\n"
                      );
 
@@ -133,131 +135,97 @@ static gpsimObject::ObjectBreakTypes MapBreakActions(int co_value)
 }
 
 //------------------------------------------------------------------------
-// Certain break options are incompatible with certain symbol types.
-// E.g. it doesn't make sense to associate the 'execute' option with
-// a register. 
-
-static bool bCheckOptionCompatibility(cmd_options *co, Value *pValue)
+unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
 {
-  if(co && pValue) {
-
-    if(co->value==READ || co->value==WRITE || co->value==EXECUTION) {
-      Integer * pAddress = dynamic_cast<Integer*>(pValue);
-      if (pAddress)
-	return true;
-    }
-
-    if(co->value==READ || co->value==WRITE) {
-      register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
-      if (pRegSymbol)
-	return true;
-    }
-
-    if(co->value==CYCLE)
-      return true;
-
-    printf("Syntax error:  %s is incompatible with the '%s' break option\n",
-	   pValue->name().c_str(), co->name);
-
-  }
-
-  return false;
-}
-//------------------------------------------------------------------------
-// set_break(cmd_options *co, Value *pValue, Expression *pExpr)
-// 
-// supports the following breaks:
-//
-//   break e|r|w ADDRESS_SYMBOL expression
-//   break r|w REGISTER_SYMBOL expression
-//
-// Example:
-//
-// Halt execution if the interrupt routine writes to the register 'temp1':
-//
-//  break w temp1  PC>=InterruptStart && PC<InterruptEnd
-
-#if 0
-unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
-{
-  if (!bCheckOptionCompatibility(co, pValue) || !GetActiveCPU())
+  if (!co) {
+    list();
     return MAX_BREAKPOINTS;
-
-  unsigned int b = MAX_BREAKPOINTS;
-  int i = pValue ? pValue->set_break(MapBreakActions(co->value), pExpr) : -1;
-  if (i>=0) {
-    b = i;
-    delete pExpr;
-    return b;
   }
 
-  Integer * pAddress = dynamic_cast<Integer*>(pValue);
-  if (pAddress != NULL) { 
-    gint64 iAddress;
-    pAddress->get(iAddress);
-    b = get_bp().set_execution_break(GetActiveCPU(), (unsigned int)iAddress);
-    if (!get_bp().set_expression(b,pExpr))
-      delete pExpr;
-    return b;
+  if (!pEL || pEL->size()>3) {
+    // FIXME - fix this error message
+    cout << "ERROR: Bad expression for break command\n";
+    return MAX_BREAKPOINTS;
   }
 
-  return b;
-}
-#endif
 
-//------------------------------------------------------------------------
-//  set_break(cmd_options *co, Value *pValue)
-//
-//  Supports the following breaks:
-//
-//   break e|r|w ADDRESS_SYMBOL
-//   break r|w REGISTER_SYMBOL
-//
-#if 0
-unsigned int cmd_break::set_break(cmd_options *co, Value *pValue)
-{
-  if (bCheckOptionCompatibility(co, pValue)) {
+  ExprList_itor ei = pEL->begin();
+  Expression *pFirst = *ei;
+  ++ei;
+  Expression *pSecond = (ei != pEL->end()) ? *ei : 0;
+  ++ei;
+  Expression *pThird = (ei != pEL->end()) ? *ei : 0;
 
-    Integer * pAddress = dynamic_cast<Integer*>(pValue);
-    if (pAddress != NULL) { 
-      gint64 iAddress;
-      pAddress->get(iAddress);
-      return set_break(co->value, iAddress);
+  LiteralString *pString=0;
+  string m;
+  if (pSecond) {
+    pString = dynamic_cast<LiteralString*>(pSecond);
+    if (pString) {
+      String *pS = (String *)pString->evaluate();
+      m = string(pS->getVal());
+      delete pSecond;
+      delete pS;
+      pSecond =0;
     }
-
-    register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
-    if (pRegSymbol)
-      return  set_break(co->value, pRegSymbol->getReg()->address);
   }
 
-  return MAX_BREAKPOINTS;
-}
-#endif
-
-static int MapComparisonOperatorToBreakOperator(ComparisonOperator *pCompareOp) {
-  switch(pCompareOp->isa()) {
-    case ComparisonOperator::eOpEq:
-      return BreakpointRegister_Value::eBREquals;
-    case ComparisonOperator::eOpGe:
-      return BreakpointRegister_Value::eBRGreaterThenEquals;
-    case ComparisonOperator::eOpGt:
-      return BreakpointRegister_Value::eBRGreaterThen;
-    case ComparisonOperator::eOpLe:
-      return BreakpointRegister_Value::eBRLessThenEquals;
-    case ComparisonOperator::eOpLt:
-      return BreakpointRegister_Value::eBRLessThen;
-    case ComparisonOperator::eOpNe:
-      return BreakpointRegister_Value::eBRNotEquals;
+  // If there is a third expression and the second expression is not
+  // a string, then try to cast the third expression into a string.
+  if (pThird && !pString) {
+    pString = dynamic_cast<LiteralString*>(pThird);
+    if (pString) {
+      String *pS = (String *)pString->evaluate();
+      m = string(pS->getVal());
+      delete pThird;
+      delete pS;
+      pThird =0;
+    }
   }
-  assert(false);
-  return BreakpointRegister_Value::eBREquals;
+
+  if (!pFirst)
+    return set_break(co->value);
+
+  // See if the expression supports break points. If it does, the break points
+  // will get set and the expressions deleted.
+  int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), pSecond) : -1;
+
+  if (bpn<0) {
+
+    // We failed to set a break point from the first expression. 
+    // It may be that we have a type of break point that is not supported
+    // by the expression code.
+
+    if (co->value==CYCLE) {
+      LiteralInteger *pLitInt = dynamic_cast<LiteralInteger*>(pFirst);
+      Integer *pInt = pLitInt ? dynamic_cast<Integer*>(pLitInt->evaluate()) : 0;
+      guint64 ui64Val =  pInt ? (guint64)pInt->getVal() : 0;
+      if (pInt)
+	bpn = get_bp().set_cycle_break(GetActiveCPU(),ui64Val);
+      delete pInt;
+    }
+  }
+
+  if (bpn>=0) {
+    if (pString)
+      get_bp().set_message(bpn, m);
+    get_bp().dump1(bpn);
+  } else {
+
+    delete pFirst;
+    delete pSecond;
+  }
+
+  return bpn;
+
 }
 
 //------------------------------------------------------------------------
-// It doesn't appear that this method called anymore. The parser rule that
-// calls it has been commented out. The reason this rule is commented out is
-// that it introduces a bison shift/conflict.
-#if 1
+// set_break(cmd_options *co, 
+//           Expression *pExpr1,
+//           Expression *pExpr2)
+//
+// Given two expressions, this function will call the set
+
 unsigned int cmd_break::set_break(cmd_options *co, 
 				  Expression *pExpr1,
 				  Expression *pExpr2)
@@ -282,79 +250,13 @@ unsigned int cmd_break::set_break(cmd_options *co,
   }
 
   unsigned int b = MAX_BREAKPOINTS;
-
-  cout << pExpr1->toString() << endl;
-  ComparisonOperator *pCompareExpr = dynamic_cast<ComparisonOperator *>(pExpr1);
-  if (pCompareExpr != NULL) {
-     
-    Register * pReg = NULL;
-    int  uMask = GetActiveCPU()->register_mask();
-    LiteralSymbol* pLeftSymbol = dynamic_cast<LiteralSymbol*>(pCompareExpr->getLeft());
-    if (pLeftSymbol != NULL) {
-      register_symbol *pRegSym = dynamic_cast<register_symbol*>(pLeftSymbol->GetSymbol());
-      pReg =  pRegSym ? pRegSym->getReg() : 0;
-    }
-    else {
-      OpAnd* pLeftOp = dynamic_cast<OpAnd*>(pCompareExpr->getLeft());
-      if (pLeftOp != NULL) {
-        pLeftSymbol = dynamic_cast<LiteralSymbol*>(pLeftOp->getLeft());
-        register_symbol *pRegSym = pLeftSymbol ? 
-	  dynamic_cast<register_symbol*>(pLeftSymbol->evaluate()) : 0;
-        pReg = pRegSym ? pRegSym->getReg() : 0;
-
-        LiteralSymbol* pRightSymbol = dynamic_cast<LiteralSymbol*>(pLeftOp->getRight());
-        Integer *pInteger = pRightSymbol ?
-	  dynamic_cast<Integer*>(pRightSymbol->evaluate()) : 0;
-	if (pInteger) {
-	  gint64 i64;
-	  pInteger->get(i64);
-	  uMask = (int)i64;
-	}
-        delete pRegSym;
-        delete pInteger;
-      }
-    }
-    if (pReg != NULL) {
-      LiteralInteger* pInteger = dynamic_cast<LiteralInteger*>((LiteralInteger*)pCompareExpr->getRight());
-      if (pInteger != NULL) {
-        int iOperator = MapComparisonOperatorToBreakOperator(pCompareExpr);
-        int uValue;
-        Value *pInt = pInteger->evaluate();
-        pInt->get(uValue);
-        delete pInt;
-        b = set_break(bit_flag, pReg->address, iOperator, uValue, uMask);
-      }
-      else {
-        cout << pCompareExpr->show() << " of type " << pCompareExpr->showType() <<
-          " not allowed\n";
-      }
-    }
-    else {
-      cout << pCompareExpr->getLeft()->show() << " of type " << pCompareExpr->getLeft()->showType() <<
-        " not allowed\n";
-    }
-  }
-  else {
-    // See if this is a LiteralInteger or LiteralSymbol
-    LiteralInteger* pInteger = dynamic_cast<LiteralInteger*>(pExpr1);
-    if (pInteger) {
-        int uValue;
-        Value *pInt = pInteger->evaluate();
-        pInt->get(uValue);
-        delete pInt;
-        b = set_break(bit_flag, uValue);
-    } else {
-
-      cout << pExpr1->show() << " of type " << pExpr1->showType() <<
-	" not allowed\n";
-    }
-
-  }
   delete pExpr1;
+  delete pExpr2;
 
   return b;
+
 }
-#endif
+
 
 unsigned int cmd_break::set_break(cmd_options *co)
 {
@@ -423,180 +325,4 @@ unsigned int cmd_break::set_break(int bit_flag)
   }
 
   return b;
-}
-
-
-unsigned int cmd_break::set_break(int bit_flag, guint64 v, 
-				  Expression *pExpr)
-{
-
-  unsigned int b = MAX_BREAKPOINTS;
-  if(!GetActiveCPU())
-    return b;
-
-  unsigned int value = (unsigned int)v;
-
-  switch(bit_flag) {
-
-  case CYCLE:
-    b = get_bp().set_cycle_break(GetActiveCPU(),value);
-
-    if(b < MAX_BREAKPOINTS)
-      cout << "break at cycle: " << value << " break #: " <<  b << '\n';
-    else
-      cout << "failed to set cycle break\n";
-
-    break;
-
-  case EXECUTION:
-    b = get_bp().set_execution_break(GetActiveCPU(), value);
-    if(b < MAX_BREAKPOINTS) {
-      const char * pLabel = get_symbol_table().findProgramAddressLabel(value);
-      const char * pFormat = *pLabel == 0
-        ? "break at address: %s0x%x break #: 0x%x\n"
-        : "break at address: %s(0x%x) break #: 0x%x\n";
-      GetUserInterface().DisplayMessage(pFormat,
-        pLabel, value, b);
-    }
-    else
-      GetUserInterface().DisplayMessage("failed to set execution break (check the address)\n");
-
-    break;
-
-  case WRITE:
-
-    b = get_bp().set_write_break(GetActiveCPU(), value);
-    if(b < MAX_BREAKPOINTS) {
-      Register * pReg = get_symbol_table().findRegister(value);
-      if (pReg) {
-	const char * pFormat = pReg->name().empty()
-	  ? "break when register: %s0x%x is written. break #: 0x%x\n"
-	  : "break when register: %s(0x%x) is written. break #: 0x%x\n";
-	GetUserInterface().DisplayMessage(pFormat,
-					  pReg->name().c_str(), value, b);
-      } else 
-	GetUserInterface().DisplayMessage("break when register 0x%x is written. break #: 0x%x\n",
-					  value, b);
-    }
-    break;
-
-  case READ:
-    b = get_bp().set_read_break(GetActiveCPU(), value);
-    if(b < MAX_BREAKPOINTS) {
-      Register * pReg = get_symbol_table().findRegister(value);
-      if (pReg) {
-	const char * pFormat =  pReg->name().empty()
-	  ? "break when register: %s0x%x is read. break #: 0x%x\n"
-	  : "break when register: %s(0x%x) is read. break #: 0x%x\n";
-	GetUserInterface().DisplayMessage(pFormat,
-					  pReg->name().c_str(), value, b);
-      } else
-	GetUserInterface().DisplayMessage("break when register 0x%x is read. break #: 0x%x\n",
-					  value, b);
-    } 
-    break;
-
-  case STK_OVERFLOW:
-  case STK_UNDERFLOW:
-  case WDT:
-    cout << TOO_MANY_ARGS;
-  }
-
-  
-  if (pExpr && (get_bp().bIsValid(b) || !get_bp().set_expression(b,pExpr)))
-    delete pExpr;
-
-  if (get_bp().bIsValid(b))
-    get_bp().dump1(b);
-
-  return b;
-}
-
-unsigned int cmd_break::set_break(int bit_flag,
-                                  guint64 r,
-                                  int     op,
-                                  guint64 v,
-                                  guint64 m)
-{
-
-  unsigned int b = MAX_BREAKPOINTS;
-  if(!GetActiveCPU())
-    return b;
-
-  const char *str = "err";
-  unsigned int reg = (unsigned int)r;
-  unsigned int value = (unsigned int)v;
-  unsigned int mask = (unsigned int)m;
-  const char * pFormat = 0;
-  Register * pReg = 0;
-  unsigned int uDefRegMask = GetActiveCPU()->register_mask();
-
-  switch(bit_flag) {
-
-  case CYCLE:
-  case EXECUTION:
-  case STK_OVERFLOW:
-  case STK_UNDERFLOW:
-  case WDT:
-    cout << TOO_MANY_ARGS;
-    break;
-
-  case READ:
-    b = get_bp().set_read_value_break(GetActiveCPU(), reg,op,value,mask);
-    str = "read from";
-    pReg = get_symbol_table().findRegister(reg);
-    pFormat = pReg->name().empty()
-      ? "break when %s is read from register %s0x%x. break #: 0x%x\n"
-      : "break when %s is read from register %s(0x%x). break #: 0x%x\n";
-    break;
-
-  case WRITE:
-    b = get_bp().set_write_value_break(GetActiveCPU(), reg,op,value,mask);
-    str = "written to";
-    pReg = get_symbol_table().findRegister(reg);
-    pFormat = pReg->name().empty()
-      ? "break when %s is written to register %s0x%x. break #: 0x%x\n"
-      : "break when %s is written to register %s(0x%x). break #: 0x%x\n";
-    break;
-  }
-
-  if( get_bp().bIsValid(b)) {
-    // example: break when 1 is written to register 0
-    string sValue;
-    if(mask == 0 || mask == uDefRegMask) {
-      sValue = "0x";
-      ostringstream s;
-      s << hex << (value&0xff);
-      sValue += s.str();
-    }
-    else {
-      sValue = "bit pattern ";
-      GenBitPattern(sValue, value, mask);
-    }
-    GetUserInterface().DisplayMessage(pFormat,
-      sValue.c_str(), pReg->name().c_str(), reg, b);
-  }
-
-  return b;
-
-}
-
-string & cmd_break::GenBitPattern(string &sBits, unsigned int value,
-                                  unsigned int mask) {
-  unsigned int uFirstBit = 0x80;
-  if(uFirstBit > 1) {
-    uFirstBit <<= (GetActiveCPU()->register_size() - 1) * 8;
-  }
-  for(unsigned int ui=uFirstBit; ui; ui>>=1) {
-    if(ui & mask) {
-      if(ui & value)
-        sBits.push_back('1');
-      else
-        sBits.push_back('0');
-    }
-    else {
-      sBits.push_back('X');
-    }
-  }
-  return sBits;
 }
