@@ -1,3 +1,57 @@
+2006-01-13 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h, src/breakpoints.cc
+	Rewrote breakpoint parsing. gpsim recently introduced an
+	expression option for breakpoints. As this feature was refined, it
+	turned out that the best way to handle expressions was with a two
+	level approach. At the high level, there is a 'break condition',
+	e.g. 'break w MyVariable'. The condition in this case is to break
+	if the variable 'MyVariable' is written to. At the next level,
+	there is a qualifying expression. For example:
+	   break w MyVariable, ((PC > IntVector) && (PC<IntVectorEnd))
+	In other words, this break occurs if the interrupt routine is
+	executing when ever 'MyVariable' is written to. 
+	 One of the refinements was to turn the 'break condition' into an
+	expression. Eg. 'break w ((MyVar &0xf)==4)'. Here, the condition
+	is an expression. This condition can have an additional qualifying
+	expression.
+	     *** Command Line Syntax Change ***
+	The old syntax is:
+	    break type condition [expression] [,"message"]
+	The new syntax is:
+	    break type condition [,expression] [,"message"]
+	
+	The difference is that the new syntax requires a comma between the
+	condition and the qualifying expression.
+
+	* cli/input.cc: embedded scripts were not executing in proper
+	order.
+
+	* regression/breakpoints/breakpoints.asm,
+	regression/digital_stim/digital_stim.asm,
+	regression/instructions_12bit/instructions_12bit.asm,
+	regression/instructions_14bit/instructions_14bit.asm,
+	regression/instructions_16bit/instructions_16bit.asm,
+	regression/interrupts_14bit/interrupts_14bit.asm,
+	regression/logic_test/logic_test.asm,
+	regression/macro_test/macro_test.asm,
+	regression/node_test/node_test.asm,
+	regression/p12ce518/p12ce518.asm, regression/p16f84/p16f84.asm,
+	regression/p18f452_ports/p18f452_ports.asm,
+	regression/register_stim/register_stim.asm,
+	regression/resistor/resistor.asm,
+	regression/switch_test/switch_test.asm,
+	regression/tmr0_16bit/tmr0_16bit.asm,
+	regression/usart_test/usart_test.asm:
+	Updated regression tests with the new breakpoint syntax.
+
+	* src/cod.cc: Insert commas between breakpoint expressions.
+
+	* src/operator.cc, src/operator.h: Comparison expressions now
+	support breakpoints
+
+	* eXdbm/misc.c: Deleting a non-existent item from the data base
+	was causing a crash.
+
 2006-01-12 Scott Dattalo <scott@dattalo.com>
 	* src/errors.h, src/sim_context.cc: Slight clean up to Roy's
 	patch.

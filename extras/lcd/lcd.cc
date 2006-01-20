@@ -197,7 +197,7 @@ void LcdBusy::set(double waitTime)
 
 void LcdBusy::clear(void)
 {
-  clear_break();
+  clear_trigger();
   bBusyState = false;
 }
 
