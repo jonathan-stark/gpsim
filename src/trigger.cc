@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "expr.h"
 #include "errors.h"
 #include "breakpoints.h"
-
+#include "ui.h"
 #include <iostream>
 #include <iomanip>
 
@@ -129,12 +129,18 @@ int TriggerObject::find_free(void)
 
 void TriggerObject::print(void)
 {
-  cout << "Generic breakpoint " << bpn << endl;
+  printExpression();
+
+  if (message().size())
+    GetUserInterface().DisplayMessage("    Message:%s\n", message().c_str());
+
 }
+
 void TriggerObject::printExpression()
 {
   if (m_PExpr)
     cout << m_PExpr->toString() << endl;
+
 }
 
 void TriggerObject::clear(void)

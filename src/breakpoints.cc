@@ -560,12 +560,14 @@ bool Breakpoints::dump(TriggerObject *pTO)
 
 
   pTO->print();
+  /*
   if (pTO->bHasExpression()) {
     cout << "    Expression:";
     pTO->printExpression();
   }
   if(pTO->message().size())
     GetUserInterface().DisplayMessage("    Message:%s\n", pTO->message().c_str());
+  */
 
   return true;
 }
@@ -961,6 +963,8 @@ void Breakpoint_Instruction::print(void)
                                       : "%d: %s %s at %s(0x%x)\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), pLabel, address);
+
+  TriggerObject::print();
 }
 
 void Breakpoint_Instruction::clear(void)
@@ -1164,6 +1168,8 @@ void RegisterAssertion::print(void)
     : "  break when register %s(0x%x) ANDed with 0x%x equals 0x%x\n" ;
   GetUserInterface().DisplayMessage(pFormat,
     sName.c_str(), regAddress, regMask, regValue);
+  TriggerObject::print();
+
 }
 //------------------------------------------------------------------------------
 BreakpointRegister::BreakpointRegister()
@@ -1274,6 +1280,8 @@ void BreakpointRegister::print()
     GetUserInterface().DisplayMessage("%d:  %s: reg(0x%x)\n",
 				      bpn, bpName(), 
 				      address);
+  TriggerObject::print();
+
 
 }
 string &BreakpointRegister::name(void) const
@@ -1491,6 +1499,8 @@ void BreakpointRegister_Value::print(void)
 				    bpn,cpu->name().c_str(), bpName(),
 				    sName.c_str(), pReg->address, break_mask, 
 				    m_sOperator.c_str(),break_value);
+  TriggerObject::print();
+
 }
 
 
