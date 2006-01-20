@@ -1,3 +1,7 @@
+2006-01-18 Scott Dattalo  <scott@dattalo.com>
+	* lcd.cc: updated to new gpsim trigger object API (clear_break was
+	renamed to clear_trigger).
+	
 2005-12-06 Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc: updated to new gpsim iopin API
 

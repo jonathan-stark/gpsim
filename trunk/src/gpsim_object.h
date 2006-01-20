@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 using namespace std;
 
+class BreakType;
 
 /// gpsimObject - base class for most of gpsim's objects
 /// 
@@ -82,4 +83,24 @@ protected:
 
 };
 
+//------------------------------------------------------------------------
+// BreakTypes
+//
+class BreakType
+{
+public:
+  BreakType(int _type) 
+    : m_type(_type)
+  {
+  }
+  ~BreakType()
+  {
+  }
+  virtual int type()
+  {
+    return m_type;
+  }
+protected:
+  int m_type;
+};
 #endif //  __GPSIM_OBJECT_H__
