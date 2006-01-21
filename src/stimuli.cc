@@ -1887,9 +1887,16 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
           }
         }
         if(pMod == NULL) {
-          GetUserInterface().DisplayMessage(
-            "attach error: did not find module '%s'\n",
-            pPinArgument->m_sModuleName->name().c_str());
+          if (NULL == pPinArgument->m_sModuleName) {
+            GetUserInterface().DisplayMessage(
+              "attach error: did not find pin '%s'\n",
+              pPinArgument->m_sPin->name().c_str());
+          }
+          else {
+            GetUserInterface().DisplayMessage(
+              "attach error: did not find module '%s'\n",
+              pPinArgument->m_sModuleName->name().c_str());
+          }
           bSuccess = false;
         }
         else {
@@ -2065,9 +2072,16 @@ IOPIN *Pin_t::GetIOPin() {
     }
   }
   if(pMod == NULL) {
-    GetUserInterface().DisplayMessage(
-      "attach error: did not find module '%s'\n",
-      m_sModuleName->name().c_str());
+    if (NULL == m_sModuleName) {
+      GetUserInterface().DisplayMessage(
+        "attach error: did not find pin '%s'\n",
+        m_sPin->name().c_str());
+    }
+    else {
+      GetUserInterface().DisplayMessage(
+        "attach error: did not find module '%s'\n",
+        m_sModuleName->name().c_str());
+    }
     bSuccess = false;
   }
   else {

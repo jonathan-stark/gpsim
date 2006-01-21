@@ -203,7 +203,7 @@ void cmd_module::module(cmd_options_str *cos)
       if(verbose)
         cout << "module command got the module " << cos->str << '\n';
       if(ModuleLibrary::NewObject(cos->str) == NULL) {
-        GetUserInterface().DisplayMessage("module type %s not created\n");
+        GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
       }
       break;
 
@@ -233,7 +233,7 @@ void  cmd_module::module(cmd_options_str *cos, const char *op1)
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library 
       if(ModuleLibrary::NewObject(cos->str,  op1) == NULL) {
-        GetUserInterface().DisplayMessage("module type %s not created\n");
+        GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
       }
       break;
 
