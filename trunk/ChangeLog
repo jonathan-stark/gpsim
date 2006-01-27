@@ -1,4 +1,8 @@
 2006-01-27 Scott Dattalo <scott@dattalo.com>
+	* configure.ac: changed version from 0.21.11 to 0.21.12-pre
+	* cli/scan.ll: conditionally use YY_* macros.
+	
+2006-01-27 Scott Dattalo <scott@dattalo.com>
 	* Makefile.am, configure.ac, src/Makefile.am: update makefiles for
 	dspic support.
 	* src/dspic/Makefile.am, src/dspic/dspic-instructions.cc,

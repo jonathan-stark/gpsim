@@ -46,7 +46,11 @@ Boston, MA 02111-1307, USA.  */
 
 /* Since our parser is reentrant, it needs to pass us a pointer
  * to the yylval that it would like us to use */
+#ifdef YY_PROTO
 #define YY_DECL int yylex YY_PROTO(( YYSTYPE* yylvalP ))
+#else
+#define YY_DECL int yylex ( YYSTYPE* yylvalP )
+#endif
 extern int yyparse(void);
 
 /* This is the max length of a line within a macro definition */
@@ -832,11 +836,14 @@ void init_cmd_state(void)
     pLexerState->mode = 0;
   }
 
-  //YY_FLUSH_BUFFER;
 }
 
 void FlushLexerBuffer() {
+#ifdef YY_FLUSH_BUFFER
   YY_FLUSH_BUFFER;
+#else
+  yy_flush_buffer( YY_CURRENT_BUFFER );
+#endif
 }
 
 static void pushLexerState()
