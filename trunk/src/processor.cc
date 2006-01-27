@@ -478,6 +478,14 @@ void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int v
 
 }
 
+void Processor::init_program_memory_at_index(unsigned int uIndex, 
+					     const unsigned char *bytes, int nBytes)
+{
+
+  for (int i =0; i<nBytes; i+=2)
+    init_program_memory_at_index(uIndex+i, (((unsigned int)bytes[i+1])<<8)  | bytes[i]);
+
+}
 
 
 //-------------------------------------------------------------------
@@ -502,7 +510,7 @@ void Processor::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   cout << "Warning::Out of range address " << address << " value " << value << endl;
-  cout << "Max allowed address is " << (program_memory_size()-1) << '\n';
+  cout << "Max allowed address is 0x" << hex << (program_memory_size()-1) << '\n';
 
 }
 

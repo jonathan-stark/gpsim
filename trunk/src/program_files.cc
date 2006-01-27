@@ -2,6 +2,7 @@
 #include "program_files.h"
 #include "pic-processor.h"
 #include "cod.h"
+#include "hexutils.h"
 #include "cmd_gpsim.h"
 
 /**
@@ -68,10 +69,10 @@ void ProgramFileType::DisplayError(int err, const char *pProgFilename,
   */
 ProgramFileTypeList * ProgramFileTypeList::s_ProgramFileTypeList =
   new ProgramFileTypeList();
-// We will instanciate g_HexFileType and g_CodFileType here to be sure
-// they are instanciated after s_ProgramFileTypeList. The objects will 
+// We will instantiate g_HexFileType and g_CodFileType here to be sure
+// they are instantiated after s_ProgramFileTypeList. The objects will 
 // move should the PIC code moved to its own external module.
-static PicHexProgramFileType g_HexFileType;
+static IntelHexProgramFileType g_HexFileType;
 static PicCodProgramFileType g_CodFileType;
 
 ProgramFileTypeList &ProgramFileTypeList::GetList() {

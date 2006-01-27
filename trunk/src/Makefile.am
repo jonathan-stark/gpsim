@@ -97,6 +97,7 @@ gpsiminclude_HEADERS = \
 	cod.h \
 	eeprom.h \
 	exports.h \
+	hexutils.h \
 	i2c-ee.h \
 	fopen-path.h \
 	gpsim_classes.h \

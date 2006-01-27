@@ -901,9 +901,9 @@ bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 //
 // load_hex
 //
-extern int readihex16 (pic_processor *cpu, FILE * file);
 
-bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile) {
+bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile)
+{
   Processor * pProcessor = this;
   // Tries the file type based on the file extension first.
   // If it fails tries the other type. This code will need
@@ -911,7 +911,7 @@ bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile) {
   // because then we cannot garrentee that these file types
   // will be the first two in the list.
   ProgramFileType * aFileTypes[] = {
-    ProgramFileTypeList::GetList()[0],  // PicHexProgramFileType
+    ProgramFileTypeList::GetList()[0],  // IntelHexProgramFileType
     ProgramFileTypeList::GetList()[1]   // PicCodProgramFileType
   };
   if(IsFileExtension(pFilename,"cod")) {
