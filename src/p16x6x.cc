@@ -236,8 +236,8 @@ void P16X6X_processor::create_sfr_map()
   add_sfr_register(get_pir1(),   0x0c, RegisterValue(0,0),"pir1");
   add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
 
-  add_sfr_register(&tmr1l,  0x0e, RegisterValue(0,0));
-  add_sfr_register(&tmr1h,  0x0f, RegisterValue(0,0));
+  add_sfr_register(&tmr1l,  0x0e, RegisterValue(0,0),"tmr1l");
+  add_sfr_register(&tmr1h,  0x0f, RegisterValue(0,0),"tmr1h");
 
   add_sfr_register(&pcon,   0x8e, RegisterValue(0,0),"pcon");
 

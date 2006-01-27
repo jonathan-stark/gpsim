@@ -426,6 +426,8 @@ public:
   virtual void init_program_memory(unsigned int address, unsigned int value);
   virtual void init_program_memory_at_index(unsigned int address,
     unsigned int value);
+  virtual void init_program_memory_at_index(unsigned int address, 
+					    const unsigned char *, int nBytes);
   virtual unsigned int program_memory_size(void) const {return 0;};
   void build_program_memory(unsigned int *memory,
 			    unsigned int minaddr, 
@@ -438,6 +440,9 @@ public:
   virtual bool         IsAddressInRange(unsigned int address) {
     return address < program_memory_size();
   }
+
+  // opcode_size - number of bytes for an opcode.
+  virtual int opcode_size() { return 2;}
 
   //
   // Symbolic debugging
@@ -465,9 +470,6 @@ public:
 
   // restore the processor state
   virtual void load_state(FILE *);
-
-//  virtual bool is_hex_file(const char *hex_file)=0;
-//  virtual bool load_hex(FILE *)=0;
 
   //
   // Execution control

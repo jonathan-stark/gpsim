@@ -31,10 +31,25 @@ Boston, MA 02111-1307, USA.  */
 
 #include "exports.h"
 #include "pic-processor.h"
+#include "hexutils.h"
 #include "program_files.h"
 
+
+//------------------------------------------------------------------------
+// IntelHexProgramFileType -- constructor
+//
+// When a IntelHexProgramFileType is instantiated, it will get placed
+// on to a 'ProgramFileType' list. This list is then used (ultimately)
+// by the 'load' command to load files of this type.
+
+IntelHexProgramFileType::IntelHexProgramFileType()
+{
+  RegisterProgramFileType(this);
+}
+
+
 int 
-PicHexProgramFileType::getachar (FILE * file)
+IntelHexProgramFileType::getachar (FILE * file)
 {
   int c;
 
@@ -46,7 +61,7 @@ PicHexProgramFileType::getachar (FILE * file)
 }
 
 unsigned char 
-PicHexProgramFileType::getbyte (FILE * file)
+IntelHexProgramFileType::getbyte (FILE * file)
 {
   unsigned char byte;
   unsigned int data;
@@ -60,19 +75,14 @@ PicHexProgramFileType::getbyte (FILE * file)
 }
 
 unsigned int
-PicHexProgramFileType::getword(FILE *file)
+IntelHexProgramFileType::getword(FILE *file)
 {
   unsigned char lo = getbyte(file);
   return ((getbyte(file) << 8) | lo);
 }
-
-PicHexProgramFileType::PicHexProgramFileType() {
-  RegisterProgramFileType(this);
-}
-
 #include "cmd_gpsim.h"
 
-int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
+int IntelHexProgramFileType::LoadProgramFile(Processor **pProcessor,
                                            const char *pFilename,
                                            FILE *inputfile) {
   if(verbose)
@@ -102,11 +112,11 @@ int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
   return iReturn;
 }
 
-int PicHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
+int IntelHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 {
   int address;
   int linetype = 0;
-  int wordsthisline;
+  int wordsthisline, bytesthisline;
   int i;
   int lineCount = 1;
   int csby;
@@ -122,7 +132,8 @@ int PicHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
       }
 
       checksum = 0;
-      wordsthisline = getbyte (file) / 2;
+      bytesthisline = getbyte (file);
+      wordsthisline = bytesthisline  / 2;
       hi = getbyte (file);
       lo = getbyte (file);
       address = (hi << 8 | lo) / 2;
@@ -132,6 +143,38 @@ int PicHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 
       linetype = getbyte (file);	/* 0 for data, 1 for end  */
 
+      switch (linetype ) {
+      case 0:      // Data record
+	{
+	  unsigned char buff[256];
+	  bytesthisline &= 0xff;
+	  for (i = 0; i < bytesthisline; i++) 
+	    buff[i] = getbyte(file);
+
+	  cpu->init_program_memory_at_index(address, buff, bytesthisline);
+	}
+      case 1:      // End of hex file
+	return SUCCESS;
+      case 4:      // Extended address
+	{
+	  unsigned char b1, b2;
+	  b1 = getbyte (file);		// not sure what these mean
+	  b2 = getbyte (file);
+
+	  if ((0 != address) || (0 != b1) || (0 != b2)) {
+	    printf ("Error! Unhandled Extended linear address! %x %.2x%.2x\n",
+		    address, b1, b2);
+	    return ERR_BAD_FILE;
+	  }
+	  // Should do something with all this info
+	  // BUG: must fix this for pic18 support
+	}
+	break;
+      default:
+	printf ("Error! Unknown record type! %d\n", linetype);
+        return ERR_BAD_FILE;
+      }
+#if 0
       if (linetype == 1)	/* lets get out of here hit the end */
         break;
 
@@ -156,6 +199,7 @@ int PicHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
         printf ("Error! Unknown record type! %d\n", linetype);
         return ERR_BAD_FILE;
       }
+#endif
 
       csby = getbyte (file);	/* get the checksum byte */
       /* this should make the checksum zero */

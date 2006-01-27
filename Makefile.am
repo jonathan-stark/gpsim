@@ -1,5 +1,5 @@
 
-SUBDIRS = cli xpms eXdbm gui src gpsim modules examples doc
+SUBDIRS = cli xpms eXdbm gui src gpsim modules examples doc src/dspic
 
 dist-hook:
 	cp gpsim.spec $(distdir)     

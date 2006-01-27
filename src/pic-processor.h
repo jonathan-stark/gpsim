@@ -286,30 +286,6 @@ public:
 };
 
 
-/*
- *  PicHexProgramFileType
- *  Note that the code is in hexutils.cc
- *
- */
-
-class PicHexProgramFileType : public ProgramFileType {
-private:
-  unsigned char checksum;
-
-  int           readihex16 (Processor **pProcessor, FILE * file);
-  int           getachar (FILE * file);
-  unsigned char getbyte (FILE * file);
-  unsigned int  getword(FILE *file);
-
-public:
-  PicHexProgramFileType();
-
-  // ProgramFileType overrides
-  virtual int  LoadProgramFile(Processor **pProcessor, const char *pFilename,
-                               FILE *pFile);
-};
-
-
 #define cpu_pic ( (pic_processor *)cpu)
 
 #endif

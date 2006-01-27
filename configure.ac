@@ -212,6 +212,7 @@ AC_CONFIG_FILES([Makefile
                  gui/Makefile
                  modules/Makefile
                  src/Makefile
+		 src/dspic/Makefile
                  xpms/Makefile
                  gpsim.spec])
 
