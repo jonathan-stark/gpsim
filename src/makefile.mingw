@@ -26,6 +26,10 @@ all :				\
 	../config.h		\
 	libgpsim.dll 
 
+libgpsim_LIBS =			\
+	libsrc.a		\
+	./dspic/libgpsim_dspic.a
+
 src_OBJECTS =			\
 	12bit-hexdecode.o	\
 	12bit-processors.o	\
@@ -94,7 +98,7 @@ src_OBJECTS =			\
 	value.o			\
 	xref.o			\
 	ValueCollections.o	\
-	ui.o        \
+	ui.o			\
 	uxtime.o
 
 ../config.h : ../config_win32.h.in
@@ -106,8 +110,19 @@ icd.o : ../plat/win32/icd.cc
 uxtime.o : ../plat/win32/uxtime.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
 
-################ The libsrc LIB
+################ The libgpsim_dspic LIB
 
-libgpsim.dll: $(src_OBJECTS)
-	$(CXX) --shared $(src_OBJECTS) $(DLL_LDLIBS) \
+./dspic/libgpsim_dspic.a :
+	cd ./dspic && $(MAKE) -f makefile.mingw all
+
+################# The libsrc LIB
+
+libsrc.a : $(src_OBJECTS)
+	$(RM) -f $@
+	$(AR) $(ARFLAGS) $@ $(src_OBJECTS)
+
+################ The libgpsim DLL
+
+libgpsim.dll: $(libgpsim_LIBS)
+	$(CXX) --shared -Wl,--whole-archive $(libgpsim_LIBS) -Wl,--no-whole-archive $(DLL_LDLIBS) \
 	 -o $@ -Wl,--out-implib,libgpsim.a -Wl,--output-def,libgpsim.def -Wl,-s

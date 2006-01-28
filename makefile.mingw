@@ -3,7 +3,7 @@
 
 ## Use: make -f makefile.mingw
 
-PARTS=cli src gui gpsim modules doc plat/win32
+PARTS=cli src src/dspic gui gpsim modules doc plat/win32
 CLEAN_PARTS=$(PARTS)
 
 all :
