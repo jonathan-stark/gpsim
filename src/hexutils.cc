@@ -114,6 +114,7 @@ int IntelHexProgramFileType::LoadProgramFile(Processor **pProcessor,
 
 int IntelHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 {
+  int extended_address = 0;
   int address;
   int linetype = 0;
   int wordsthisline, bytesthisline;
@@ -151,8 +152,10 @@ int IntelHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 	  for (i = 0; i < bytesthisline; i++) 
 	    buff[i] = getbyte(file);
 
-	  cpu->init_program_memory_at_index(address, buff, bytesthisline);
+	  cpu->init_program_memory_at_index(address|extended_address,
+					    buff, bytesthisline);
 	}
+	break;
       case 1:      // End of hex file
 	return SUCCESS;
       case 4:      // Extended address
@@ -161,13 +164,10 @@ int IntelHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 	  b1 = getbyte (file);		// not sure what these mean
 	  b2 = getbyte (file);
 
-	  if ((0 != address) || (0 != b1) || (0 != b2)) {
-	    printf ("Error! Unhandled Extended linear address! %x %.2x%.2x\n",
-		    address, b1, b2);
-	    return ERR_BAD_FILE;
-	  }
-	  // Should do something with all this info
-	  // BUG: must fix this for pic18 support
+	  extended_address = 	(((unsigned int)b1)<<23) | (((unsigned int)b2)<<15);
+	  printf ("Extended linear address %x %x\n",
+		  address, extended_address);
+
 	}
 	break;
       default:

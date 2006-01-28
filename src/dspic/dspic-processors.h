@@ -29,6 +29,19 @@ class dsPicProcessor : public Processor
 {
 public:
 
+  dsPicProcessor();
+
+  // create - build the dsPic
+  virtual void create ();
+  virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual unsigned int register_memory_size () const { return 0x1000;};
+
+  virtual int  map_pm_address2index(int address) {return address/2;};
+  virtual int  map_pm_index2address(int index) {return index*2;};
+
+  virtual unsigned int register_size () const { return 2;}
+  virtual unsigned int register_mask () const { return 0xffff;};
+
 
   // opcode_size - number of bytes for an opcode.
   // The opcode's are really only 3 bytes, however in

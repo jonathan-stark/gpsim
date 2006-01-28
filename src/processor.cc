@@ -460,6 +460,11 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
 void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int value)
 {
   unsigned int address = map_pm_index2address(uIndex);
+  if (!program_memory) {
+    printf("ERROR: internal bug %s:%d",__FILE__,__LINE__);
+    exit(1);
+  }
+
   if(uIndex < program_memory_size()) {
 
     if(program_memory[uIndex] != 0 && program_memory[uIndex]->isa() != instruction::INVALID_INSTRUCTION) {
@@ -771,6 +776,10 @@ void Processor::disassemble (signed int s, signed int e)
   const int iConsoleWidth = 80;
   char str[iConsoleWidth];
   char str2[iConsoleWidth];
+  if (!pc) {
+    printf("ERROR: Internal bug %s:%d\n",__FILE__,__LINE__);
+    exit(1);
+  }
   unsigned uPCAddress = pc->get_value();
   const char *pszPC;
   char cBreak;
@@ -836,8 +845,8 @@ void Processor::disassemble (signed int s, signed int e)
       int iSrc = iOperandsWidth - (strlen(str) - iNumonicWidth - 1);
       //        Console.Printf("0.........1.........2.........3.........4.........5.........6.........7.........");
       //        Console.Printf("%d, strlen(str)=%d\n", iNumonicWidth, strlen(str));
-      Console.Printf(
-		     "% 3s%c%04x  %04x  %s %*s%s\n",
+      const char *pFormat = (opcode_size() <=2) ?  "% 3s%c%04x  %04x  %s %*s%s\n" :  "% 3s%c%04x  %06x  %s %*s%s\n";
+      Console.Printf(pFormat,		     
 		     pszPC, cBreak, uAddress, inst->get_opcode(), 
 		     str, iSrc, "", str2);
     }
