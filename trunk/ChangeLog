@@ -1,3 +1,7 @@
+2006-01-28 Borut Razem <borut.razem@siol.net>
+	* makefile.mingw, src/makefile.mingw, gpsim/makefile.mingw,
+	  plat/win32/make.mingw: added dspic to MINGW
+
 2006-01-27 Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-registers.cc, src/dspic/dspic-registers.cc:
 	added to CVS - initial support of dspic family registers
@@ -15,7 +19,7 @@
 2006-01-27 Scott Dattalo <scott@dattalo.com>
 	* configure.ac: changed version from 0.21.11 to 0.21.12-pre
 	* cli/scan.ll: conditionally use YY_* macros.
-	
+
 2006-01-27 Scott Dattalo <scott@dattalo.com>
 	* Makefile.am, configure.ac, src/Makefile.am: update makefiles for
 	dspic support.
@@ -33,13 +37,13 @@
 	src/processor.h: minor changes to deal with Hexfiles.
 	* src/p16x6x.cc: TMR1L and TMR1H were named as just tmrl and tmrh
 
-2005-01-21 Borut Razem <borut.razem@siol.net>
+2006-01-21 Borut Razem <borut.razem@siol.net>
 	* src/stimuli.cc: fixed bug exposed by resistor regression test,
 	  see the comment "; the following test for a core dump bug" in
 	  regression/resistor/resistor.asm
 	* cli/cmd_module.cc: added missing paramterer to DisplayMessage() call
 
-2005-01-20 Borut Razem <borut.razem@siol.net>
+2006-01-20 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 	* src/gpsim_object.h: removed empty destructor from class BreakType
 	  in order to avoid gcc warning: `class BreakType' has virtual

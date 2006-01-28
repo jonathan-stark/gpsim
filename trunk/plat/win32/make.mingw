@@ -32,14 +32,14 @@ endif
 ################
 # Paths to external libraries
 
-GTK_PATH = ../../gtk+
-GLIB_PATH = ../../glib
-PANGO_PATH = ../../pango
-ATK_PATH = ../../atk
-POPT_PATH = ../../popt
-GTKEXTRA_PATH = ../../gtkextra-2
-READLINE_PATH = ../../readline
-PTHREAD_PATH = ../../pthreads
+GTK_PATH = $(TOP)/gtk+
+GLIB_PATH = $(TOP)/glib
+PANGO_PATH = $(TOP)/pango
+ATK_PATH = $(TOP)/atk
+POPT_PATH = $(TOP)/popt
+GTKEXTRA_PATH = $(TOP)/gtkextra-2
+READLINE_PATH = $(TOP)/readline
+PTHREAD_PATH = $(TOP)/pthreads
 
 ################
 # Compiler to use. The -fnative-struct switch is important so that the
@@ -51,7 +51,7 @@ CCOMPILER = gcc
 CC = $(CCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 CXXCOMPILER = c++
 CXX = $(CXXCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
-				
+
 ################
 # Various other tools
 

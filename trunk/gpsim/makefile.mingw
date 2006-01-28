@@ -19,7 +19,9 @@ LIBS = -l wsock32 \
      -L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0 \
      $(GTKEXTRA_PATH)/lib/libgtkextra-win32-2.1_dll.a
 
-gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a ../src/libgpsim.a
+gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a
+
+libgpsim_LIBS = ../src/libgpsim.a
 
 INCLUDES = -I ../plat/win32 \
 	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
@@ -42,20 +44,15 @@ gpsim_OBJECTS =			\
 ../gui/libgui.a :
 	cd ../gui && $(MAKE) -f makefile.mingw all
 
-../src/libsrc.a :
-	cd ../src && $(MAKE) -f makefile.mingw all
-
 ../cli/libcli.a :
 	cd ../cli && $(MAKE) -f makefile.mingw all
+
+../src/libgpsim.a :
+	cd ../src && $(MAKE) -f makefile.mingw all
 
 ################ The gpsim EXE
 
 gpsim.exe : $(gpsim_OBJECTS) $(gpsim_LIBS)
 	$(CXX) $(CFLAGS) $(CLDFLAGS) \
 	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib \
-	-Wl,-u,__ZN15BoolEventLogger14dump_ASCII_artEyyi \
-	-Wl,-u,__Z14get_active_cpuv \
-	-Wl,-u,__Z13get_interfacev \
-	-Wl,-u,__Z10get_cyclesv \
-	-Wl,-u,__ZN8Register15get_trace_stateEv \
-	-o gpsim.exe $(gpsim_OBJECTS) $(gpsim_LIBS) $(LIBS)
+	-o gpsim.exe $(gpsim_OBJECTS) -Wl,--whole-archive $(gpsim_LIBS) -Wl,--no-whole-archive $(libgpsim_LIBS) $(LIBS)
