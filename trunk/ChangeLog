@@ -1,4 +1,18 @@
 2006-01-27 Scott Dattalo <scott@dattalo.com>
+	* src/dspic/dspic-registers.cc, src/dspic/dspic-registers.cc:
+	added to CVS - initial support of dspic family registers
+	* src/dspic/Makefile.am: dspic-registers added
+	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h:
+	stubbed out the entire dspic instruction set.
+	* src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h:
+	added initialization code to allow the dspic to be instantiated.
+	* src/hexutils.cc: fixed two buglets introduced in earlier checkin
+	* src/pic-instructions.cc: the invalid_instruction constructor now
+	calls the Instruction constructor.
+	* src/processor.cc: The disassemble method can now accommodate the
+	dspic's 24-bit opcodes.
+
+2006-01-27 Scott Dattalo <scott@dattalo.com>
 	* configure.ac: changed version from 0.21.11 to 0.21.12-pre
 	* cli/scan.ll: conditionally use YY_* macros.
 	

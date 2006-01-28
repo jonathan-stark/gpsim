@@ -80,19 +80,16 @@ void invalid_instruction::execute(void)
 };
 
 invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,0)
 {
-  cpu=new_cpu;
-  opcode=new_opcode;
   new_name("INVALID");
 }
 
 invalid_instruction::invalid_instruction(Processor *new_cpu,
                                          unsigned int address, 
                                          unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,address)
 {
-  cpu=new_cpu;
-  m_uAddrOfInstr = address;
-  opcode=new_opcode;
   new_name("INVALID");
 }
 

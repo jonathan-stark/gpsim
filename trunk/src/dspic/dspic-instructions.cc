@@ -33,7 +33,230 @@ using namespace dspic_instructions;
 
 struct instruction_constructor op_dsPic[] = {
 
-  { 0xff0000,  0x000000,  NOP::construct }
+  { 0xff8000,  0xb40000,  ADD::construct },  // f to W
+  { 0xff8000,  0xb00000,  ADD::construct },  // Lit
+  { 0xf80000,  0x400000,  ADD::construct },  // Wb + Lit -> Wd
+  { 0xff7fff,  0xcb0000,  ADD::construct },  // add accumulators
+
+  { 0xff8000,  0xb48000,  ADDC::construct },  // f to W
+  { 0xff8000,  0xb08000,  ADDC::construct },  // Lit
+  { 0xf80000,  0x480000,  ADDC::construct },  // Wb + Lit -> Wd
+
+  { 0xff8000,  0xb60000,  AND::construct },  // f to W
+  { 0xff8000,  0xb20000,  AND::construct },  // Lit
+  { 0xf80000,  0x600060,  AND::construct },  // Wb + Lit -> Wd
+  { 0xf80000,  0x600000,  AND::construct },
+
+  { 0xff8000,  0xd58000,  ASR::construct },  // f to W
+  { 0xff8000,  0xd18000,  ASR::construct },  // Lit
+  { 0xff8070,  0xde8000,  ASR::construct },  // Wb + Lit -> Wd
+
+  { 0xff0000,  0xa90000,  BCLR::construct },
+  { 0xff0b80,  0xa10000,  BCLR::construct },
+
+  { 0xf00000,  0x300000,  BRA::construct },   // branch literal offset
+  { 0xfffff0,  0x016000,  BRA::construct },   // computed branch
+  { 0xfc0000,  0x0c0000,  BRA::construct },   // branch on accumulator state
+
+  { 0xff0000,  0xa80000,  BSET::construct },
+  { 0xff0b80,  0xa00000,  BSET::construct },
+
+  { 0xff0780,  0xad0000,  BSW::construct },
+
+  { 0xff0000,  0xaa0000,  BTG::construct },
+
+  { 0xff0000,  0xaf0000,  BTS::construct },
+  { 0xff0000,  0xab0000,  BTST::construct },
+  { 0xff0780,  0xa30000,  BTST::construct },
+  { 0xff0780,  0xa50000,  BTST::construct },
+
+  { 0xff0000,  0xac0000,  BTSTS::construct },
+  { 0xff0780,  0xa40000,  BTSTS::construct },
+
+  { 0xff0001,  0x020000,  CALL::construct },
+  { 0xfffff0,  0x010000,  CALL::construct },
+
+  { 0xff8000,  0xef0000,  CLR::construct },
+  { 0xff807f,  0xeb0000,  CLR::construct },
+  { 0xff4000,  0xc30000,  CLR::construct },
+
+  { 0xffffff,  0xfe6000,  CLRWDT::construct },
+
+  { 0xff8000,  0xee8000,  COM::construct },
+  { 0xff8000,  0xea8000,  COM::construct },
+
+  { 0xffa000,  0xe30000,  CP::construct },
+  { 0xff83e0,  0xe10060,  CP::construct },
+  { 0xff8380,  0xe10000,  CP::construct },
+
+  { 0xffa000,  0xe20000,  CP0::construct },
+  { 0xfffb80,  0xe00000,  CP0::construct },
+
+  { 0xffa000,  0xe38000,  CPB::construct },
+  { 0xff83e0,  0xe18060,  CPB::construct },
+  { 0xff8380,  0xe18000,  CPB::construct },
+
+  { 0xfe03f0,  0xe60000,  CPS::construct },
+
+  { 0xfffff0,  0xfd4000,  DAW::construct },
+
+  { 0xff8000,  0xed0000,  DEC::construct },
+  { 0xff8000,  0xe90000,  DEC::construct },
+
+  { 0xff8000,  0xed8000,  DEC::construct }, // DEC2
+  { 0xff8000,  0xe98000,  DEC::construct }, // DEC2
+
+  { 0xffc000,  0xfc0000,  DISI::construct },
+
+  { 0xff8030,  0xd80000,  DIV::construct },
+  { 0xff8030,  0xd88000,  DIV::construct },
+  { 0xff87f0,  0xd90000,  DIV::construct },
+
+  { 0xffc000,  0x080000,  DO::construct },
+  { 0xfffff0,  0x088000,  DO::construct },
+
+  { 0xfc4c03,  0xf04003,  ED::construct },
+  { 0xfc4c03,  0xf04002,  ED::construct },
+
+  { 0xfff870,  0xfd0000,  EXCH::construct },
+
+  { 0xfff800,  0xdf0000,  FB::construct },  // FBCL
+  { 0xfff800,  0xcf8000,  FB::construct },  // FF1L
+  { 0xfff800,  0xcf0000,  FB::construct },  // FF1R
+
+  { 0xff0000,  0x040000,  GOTO::construct },
+  { 0xfffff0,  0x014000,  GOTO::construct },
+
+  { 0xff8000,  0xec0000,  DEC::construct },
+  { 0xff8000,  0xe80000,  DEC::construct },
+
+  { 0xff8000,  0xec8000,  DEC::construct }, // INC2
+  { 0xff8000,  0xe88000,  DEC::construct }, // DEC2
+
+  { 0xff8000,  0xb70000,  IOR::construct },  // f to W
+  { 0xff8000,  0xb30000,  IOR::construct },  // Lit
+  { 0xf80000,  0x700000,  IOR::construct },  // Wb + Lit -> Wd
+
+  { 0xff0000,  0xca0000,  LAC::construct },
+  { 0xffc001,  0xfa0000,  LNK::construct },
+
+  { 0xff8000,  0xd50000,  LSR::construct },  // Note LSR is similar to ASR
+  { 0xff8000,  0xd10000,  LSR::construct },  // Lit
+  { 0xff8070,  0xde0000,  LSR::construct },  // Wb + Lit -> Wd
+
+  { 0xf84000,  0xc00000,  MAC::construct },
+  { 0xfc4003,  0xf00000,  MAC::construct },
+
+  { 0xff8000,  0xbf8000,  MOV::construct },
+  { 0xffa000,  0xb7a000,  MOV::construct },
+  { 0xf80000,  0x800000,  MOV::construct },
+  { 0xf80000,  0x880000,  MOV::construct },
+  { 0xfff000,  0xb3c000,  MOV::construct },  //MOV.B
+  { 0xf00000,  0x200000,  MOV::construct },
+  { 0xf80000,  0x900000,  MOV::construct },
+  { 0xf80000,  0x980000,  MOV::construct },
+  { 0xf80000,  0x780000,  MOV::construct },
+  { 0xfff880,  0xbe0000,  MOV::construct },  //MOV.D
+  { 0xffc071,  0xbe8000,  MOV::construct },  //MOV.D
+
+  { 0xff4000,  0xc70000,  MOVSAC::construct },
+
+  { 0xf84003,  0xc00003,  MPY::construct },  // degenerate to MAC
+  { 0xf84003,  0xc04003,  MPY::construct },  // MPY.N and MSC
+
+  { 0xffa000,  0xbc0000,  MUL::construct },
+  { 0xff8000,  0xb98000,  MUL::construct },  //MUL.SS
+  { 0xff8060,  0xb90000,  MUL::construct },  //MUL.SU
+  { 0xff8000,  0xb88000,  MUL::construct },  //MUL.US
+  { 0xff8060,  0xb80000,  MUL::construct },  //MUL.UU
+
+  { 0xff8000,  0xee0000,  NEG::construct },
+  { 0xff8000,  0xea0000,  NEG::construct },
+  { 0xff7fff,  0xcb1000,  NEG::construct },
+
+  { 0xff0000,  0x000000,  NOP::construct },
+  { 0xff0000,  0xff0000,  NOP::construct },
+
+  { 0xff0001,  0xf90000,  POP::construct },
+  { 0xf8407f,  0x78004f,  POP::construct },
+  { 0xfff8ff,  0xbe004f,  POP::construct },
+  { 0xffffff,  0xfe8000,  POP::construct },  // POP.S
+
+  { 0xff0001,  0xf80000,  PUSH::construct },
+  { 0xf87f80,  0x781f80,  PUSH::construct },
+  { 0xfffff1,  0xbe9f80,  PUSH::construct },
+  { 0xffffff,  0xfea000,  PUSH::construct },  // PUSH.S
+
+  { 0xfffffe,  0xfe4000,  PWRSAV::construct },
+
+  { 0xff0000,  0x070000,  RCALL::construct },
+  { 0xfffff0,  0x012000,  RCALL::construct },
+
+  { 0xffc000,  0x090000,  REPEAT::construct },
+  { 0xfffff0,  0x098000,  REPEAT::construct },
+
+  { 0xffffff,  0xfe0000,  RESET::construct },
+
+  { 0xffffff,  0x064000,  RET::construct },  // RETFIE
+  { 0xff8000,  0x050000,  RET::construct },  // RETLW
+  { 0xffffff,  0x060000,  RET::construct },  // RETURN
+
+  { 0xff8000,  0xd68000,  ROT::construct },  // RLC
+  { 0xff8000,  0xd28000,  ROT::construct },  // RLC
+  { 0xff8000,  0xd60000,  ROT::construct },  // RLNC
+  { 0xff8000,  0xd20000,  ROT::construct },  // RLNC
+  { 0xff8000,  0xd78000,  ROT::construct },  // RRC
+  { 0xff8000,  0xd38000,  ROT::construct },  // RRC
+  { 0xff8000,  0xd70000,  ROT::construct },  // RNC
+  { 0xff8000,  0xd30000,  ROT::construct },  // RNC
+
+  { 0xff0000,  0xcc0000,  SAC::construct },
+  { 0xff0000,  0xcd0000,  SAC::construct },  // SAC.R
+
+  { 0xfff800,  0xfb0000,  SE::construct },
+
+  { 0xff8000,  0xef8000,  SETM::construct },
+  { 0xff807f,  0xeb8000,  SETM::construct },
+
+  { 0xff7fc0,  0xc80040,  SFTAC::construct },
+  { 0xff7ff0,  0xc80000,  SFTAC::construct },
+
+  { 0xff8000,  0xd40000,  SL::construct },
+  { 0xff8000,  0xd00000,  SL::construct },
+  { 0xff8070,  0xdd0040,  SL::construct },
+  { 0xff8070,  0xdd0000,  SL::construct },
+
+  { 0xff8000,  0xb50000,  SUB::construct },
+  { 0xff8000,  0xb10000,  SUB::construct },
+  { 0xf80000,  0x500000,  SUB::construct },
+
+  { 0xff7fff,  0xcb3000,  SUB::construct },
+
+  { 0xff8000,  0xb58000,  SUB::construct }, //SUBB
+  { 0xff8000,  0xb18000,  SUB::construct },
+  { 0xf80000,  0x580000,  SUB::construct },
+
+  { 0xff8000,  0xbd8000,  SUB::construct }, //SUBBR
+  { 0xf80000,  0x180000,  SUB::construct },
+
+  { 0xff8000,  0xbd0000,  SUB::construct }, //SUBR
+  { 0xf80000,  0x100000,  SUB::construct },
+
+  { 0xffbff0,  0xfd8000,  SWAP::construct },
+
+  { 0xff8000,  0xba8000,  TBLRD::construct }, //TBLRDH
+  { 0xff8000,  0xba0000,  TBLRD::construct }, //TBLRDL
+
+  { 0xff8000,  0xbb8000,  TBLWT::construct }, //TBLWTH
+  { 0xff8000,  0xbb0000,  TBLWT::construct }, //TBLWTL
+
+  { 0xffffff,  0xfa8000,  ULNK::construct },
+
+  { 0xff8000,  0xb68000,  XOR::construct },  // f to W
+  { 0xff8000,  0xb28000,  XOR::construct },  // Lit
+  { 0xf80000,  0x680000,  XOR::construct },  // Wb + Lit -> Wd
+
+  { 0xffc000,  0xfb8000,  ZE::construct }
 
 };
 
@@ -42,6 +265,8 @@ const int NUM_OP_DSPIC = sizeof(op_dsPic) / sizeof(op_dsPic[0]);
 
 instruction * dsPicProcessor::disasm (unsigned int address, unsigned int inst)
 {
+
+  printf("dspic disasm addr 0x%x, opcode 0x%x\n",address,inst);
 
   instruction *pi;
 
@@ -65,7 +290,609 @@ namespace dspic_instructions
 {
   //--------------------------------------------------
 
+  ADD::ADD (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("add");
+    printf("constructing a ADD\n");
+  }
+
+  void ADD::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  ADDC::ADDC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("addc");
+    printf("constructing a ADDC\n");
+  }
+
+  void ADDC::execute()
+  {
+  }
+
+
+  //--------------------------------------------------
+
+  AND::AND (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("and");
+    printf("constructing a AND\n");
+  }
+
+  void AND::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  ASR::ASR (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("asr");
+    printf("constructing a ASR\n");
+  }
+
+  void ASR::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BCLR::BCLR (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("bclr");
+    printf("constructing a BCLR\n");
+  }
+
+  void BCLR::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("bra");
+    printf("constructing a BRA\n");
+  }
+
+  void BRA::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BSET::BSET (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("bset");
+    printf("constructing a BSET\n");
+  }
+
+  void BSET::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BSW::BSW (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("bsw ");
+    printf("constructing a BSW\n");
+  }
+
+  void BSW::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BTG::BTG (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("btg ");
+    printf("constructing a BTG\n");
+  }
+
+  void BTG::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BTS::BTS (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("bts");
+    printf("constructing a BTS\n");
+  }
+
+  void BTS::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BTST::BTST (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("btst");
+    printf("constructing a BTST\n");
+  }
+
+  void BTST::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  BTSTS::BTSTS (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("btsts");
+    printf("constructing a BTSTS\n");
+  }
+
+  void BTSTS::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CALL::CALL (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("call");
+    printf("constructing a CALL\n");
+  }
+
+  void CALL::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CLR::CLR (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("clr");
+    printf("constructing a CLR\n");
+  }
+
+  void CLR::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("clrwdt");
+    printf("constructing a CLRWDT\n");
+  }
+
+  void CLRWDT::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  COM::COM (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("com");
+    printf("constructing a COM\n");
+  }
+
+  void COM::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CP::CP (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("cp");
+    printf("constructing a CP\n");
+  }
+
+  void CP::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CP0::CP0 (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("cp0");
+    printf("constructing a CP0\n");
+  }
+
+  void CP0::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CPB::CPB (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("cpb");
+    printf("constructing a CPB\n");
+  }
+
+  void CPB::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  CPS::CPS (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("cps");
+    printf("constructing a CPS\n");
+  }
+
+  void CPS::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  DAW::DAW (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("daw");
+    printf("constructing a DAW\n");
+  }
+
+  void DAW::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  DEC::DEC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("dec");
+    printf("constructing a DEC\n");
+  }
+
+  void DEC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  DISI::DISI (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("disi");
+    printf("constructing a DISI\n");
+  }
+
+  void DISI::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  DIV::DIV (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("div");
+    printf("constructing a DIV\n");
+  }
+
+  void DIV::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  DO::DO (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("do");
+    printf("constructing a DO\n");
+  }
+
+  void DO::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  ED::ED (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("ed");
+    printf("constructing a ED\n");
+  }
+
+  void ED::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  EXCH::EXCH (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("exch");
+    printf("constructing a EXCH\n");
+  }
+
+  void EXCH::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  FB::FB (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("fb");
+    printf("constructing a FB\n");
+  }
+
+  void FB::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("goto");
+    printf("constructing a GOTO\n");
+  }
+
+  void GOTO::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  INC::INC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("inc");
+    printf("constructing a INC\n");
+  }
+
+  void INC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  IOR::IOR (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("ior");
+    printf("constructing a IOR\n");
+  }
+
+  void IOR::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  LAC::LAC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("lac");
+    printf("constructing a LAC\n");
+  }
+
+  void LAC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  LNK::LNK (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("lnk");
+    printf("constructing a LNK\n");
+  }
+
+  void LNK::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  LSR::LSR (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("lsr");
+    printf("constructing a LSR\n");
+  }
+
+  void LSR::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  MAC::MAC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("mac");
+    printf("constructing a MAC\n");
+  }
+
+  void MAC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  MOV::MOV (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("mov");
+    printf("constructing a MOV\n");
+  }
+
+  void MOV::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  MOVSAC::MOVSAC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("movsac");
+    printf("constructing a MOVSAC\n");
+  }
+
+  void MOVSAC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  MPY::MPY (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("mpy");
+    printf("constructing a MPY\n");
+  }
+
+  void MPY::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  MUL::MUL (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("mul");
+    printf("constructing a MUL\n");
+  }
+
+  void MUL::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  NEG::NEG (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("neg");
+    printf("constructing a NEG\n");
+  }
+
+  void NEG::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
   NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
   {
 
     decode(new_cpu,new_opcode);
@@ -78,15 +905,312 @@ namespace dspic_instructions
     // but there is a chance that this info will be accessed
     // before that occurs).
 
-    file_id = 0;
-    src_line = 0;
-    lst_line = 0;
-    
+    printf("constructing a NOP\n");
   }
 
-  void NOP::execute(void)
+  void NOP::execute()
   {
     //cpu_pic->pc->increment();
+  }
+
+  //--------------------------------------------------
+
+  POP::POP (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("pop");
+    printf("constructing a POP\n");
+  }
+
+  void POP::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("push");
+    printf("constructing a PUSH\n");
+  }
+
+  void PUSH::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  PWRSAV::PWRSAV (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("pwrsav");
+    printf("constructing a PWRSAV\n");
+  }
+
+  void PWRSAV::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("rcall");
+    printf("constructing a RCALL\n");
+  }
+
+  void RCALL::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  REPEAT::REPEAT (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("repeat");
+    printf("constructing a REPEAT\n");
+  }
+
+  void REPEAT::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  RESET::RESET (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("reset");
+    printf("constructing a RESET\n");
+  }
+
+  void RESET::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  RET::RET (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("ret");
+    printf("constructing a RET\n");
+  }
+
+  void RET::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  ROT::ROT (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("rot");
+    printf("constructing a ROT\n");
+  }
+
+  void ROT::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SAC::SAC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("sac");
+    printf("constructing a SAC\n");
+  }
+
+  void SAC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SE::SE (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("se");
+    printf("constructing a SE\n");
+  }
+
+  void SE::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SETM::SETM (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("setm");
+    printf("constructing a SETM\n");
+  }
+
+  void SETM::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SFTAC::SFTAC (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("sftac");
+    printf("constructing a SFTAC\n");
+  }
+
+  void SFTAC::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SL::SL (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("sl");
+    printf("constructing a SL\n");
+  }
+
+  void SL::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SUB::SUB (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("sub");
+    printf("constructing a SUB\n");
+  }
+
+  void SUB::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  SWAP::SWAP (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("swap");
+    printf("constructing a SWAP\n");
+  }
+
+  void SWAP::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("tblrd");
+    printf("constructing a TBLRD\n");
+  }
+
+  void TBLRD::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("tblwt");
+    printf("constructing a TBLWT\n");
+  }
+
+  void TBLWT::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  ULNK::ULNK (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("ulnk");
+    printf("constructing a ULNK\n");
+  }
+
+  void ULNK::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  XOR::XOR (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("xor");
+    printf("constructing a XOR\n");
+  }
+
+  void XOR::execute()
+  {
+  }
+
+  //--------------------------------------------------
+
+  ZE::ZE (Processor *new_cpu, unsigned int new_opcode)
+    : instruction(new_cpu, new_opcode, 0)
+  {
+
+    decode(new_cpu,new_opcode);
+    new_name("ZE");
+    printf("constructing a ZE\n");
+  }
+
+  void ZE::execute()
+  {
   }
 
 
