@@ -1030,6 +1030,12 @@ void Float::get(Packet &pb)
   pb.EncodeFloat(d);
 }
 
+Value *Float::copy() {
+  double d;
+  get(d);
+  return new Float(d);
+}
+
 string Float::toString()
 {
   return toString("%#-16.16g");
