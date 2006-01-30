@@ -1,3 +1,14 @@
+2005-01-29 J.R. Heisey <jrheisey@sourceforge.com
+	* cli/cmd_break.cc: I prevent ei from being incremented for
+	pThird if pSecond does not exist. This was causing a crash
+	in Windows because pThird ended up point to the same object
+	as pFirst. (go figure) Later pThird was getting deleted then
+	pFirst (the same object) was getting referenced causing the
+	crash.
+	(i.e. break e MYLABEL where MYLABEL is not defined.) I also
+	added a check to bpn == -1 and write an error. This provides
+	an error message if a code symbol is not defined.
+
 2006-01-28 Borut Razem <borut.razem@siol.net>
 	* makefile.mingw, src/makefile.mingw, gpsim/makefile.mingw,
 	  plat/win32/make.mingw: added dspic to MINGW
