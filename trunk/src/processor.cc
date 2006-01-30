@@ -255,9 +255,9 @@ void Processor::init_register_memory (unsigned int memory_size)
 // fills the voids.
 //
 
-void Processor::create_invalid_registers (void)
+void Processor::create_invalid_registers ()
 {
-  unsigned int i;
+  unsigned int addr;
 
   if(verbose)
     cout << "Creating invalid registers " << register_memory_size()<<"\n";
@@ -269,19 +269,18 @@ void Processor::create_invalid_registers (void)
   // individual invalid file registers. By default, gpsim halts whenever
   // there is an invalid file register access.
 
-  for (i = 0; i < register_memory_size(); i++)
-    {
-      if (0 == registers[i])
-      {
-	  registers[i] = new InvalidRegister(i);
-	  //registers[i]->address = 0;    // BAD_REGISTER;
-	  registers[i]->alias_mask = 0;
-	  registers[i]->value.put(0);	// unimplemented registers are read as 0
+  for (addr = 0; addr < register_memory_size(); addr+=map_rm_index2address(1)) {
 
-	  registers[i]->set_cpu(this);
+    unsigned int index = map_rm_address2index(addr);
 
-	}
+    if (0 == registers[index]) {
+
+      registers[index] = new InvalidRegister(addr);
+      registers[index]->alias_mask = 0;
+      registers[index]->set_cpu(this);
+
     }
+  }
 
 }
 

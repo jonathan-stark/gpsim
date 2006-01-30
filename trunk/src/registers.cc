@@ -227,8 +227,8 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 //
 
 Register::Register(void)
+  : gpsimValue(0), alias_mask(0)
 {
-  cpu = 0;
   new_name("file_register");
 
   // For now, initialize the register with valid data and set that data equal to 0.
@@ -518,10 +518,11 @@ unsigned int InvalidRegister::get(void)
 
 
 InvalidRegister::InvalidRegister(unsigned int at_address)
+  : Register()
 {
 
   char name_str[100];
-  sprintf (name_str, "invalid fr  0x%02x", at_address);
+  sprintf (name_str, "INVREG_%X", at_address);
   new_name(name_str);
   address = at_address;
 }

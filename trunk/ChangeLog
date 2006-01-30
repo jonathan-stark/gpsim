@@ -1,3 +1,21 @@
+2006-01-30 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/processor.h: added methods for mapping
+	register addresses into register indexes (for the dspic) and use
+	this to create invalid registers.
+	* src/registers.cc: contructors now propagate calls to parents
+	* gui/gui_regwin.cc: a non-existent register at address 0 was
+	crashing the register window
+	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
+	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h,
+	src/dspic/dspic-registers.cc, src/dspic/dspic-registers.h:
+	dspic port:
+	  -- added register memory
+	  -- added W0-W15
+	  -- invalid registers populate register space
+	  -- added Program Counter
+	  -- single stepping works.
+	  -- GOTO, RCALL and BRA instructions are now supported.
+
 2005-01-29 J.R. Heisey <jrheisey@sourceforge.com
 	* cli/cmd_break.cc: I prevent ei from being incremented for
 	pThird if pSecond does not exist. This was causing a crash
