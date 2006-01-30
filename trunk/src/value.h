@@ -514,7 +514,7 @@ public:
 
   double getVal() { return value; }
 
-  virtual Value *copy() { return new Float(value); }
+  virtual Value *copy();
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
 
