@@ -411,6 +411,8 @@ public:
   void alias_file_registers(unsigned int start_address, 
 			    unsigned int end_address, 
 			    unsigned int alias_offset);
+  virtual int  map_rm_address2index(int address) {return address;};
+  virtual int  map_rm_index2address(int index) {return index;};
   virtual void init_register_memory(unsigned int memory_size);
   virtual unsigned int register_memory_size () const { return 0;}
   virtual unsigned int CalcJumpAbsoluteAddress(unsigned int uInstAddr,

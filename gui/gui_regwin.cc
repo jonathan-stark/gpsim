@@ -270,14 +270,20 @@ bool GUIRegister::hasBreak(void)
 char *GUIRegister::name(void)
 {
 
+  static char buffer[128];
+
   Register *reg = get_register();
+  if (!reg) {
+    sprintf(buffer,"NULL");
+    return buffer;
+  }
+
   register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(
     reg->address);
 
   if(!reg || reg->isa()==Register::INVALID_REGISTER)
     return 0;
 
-  static char buffer[128];
   if(bIsAliased) {
     sprintf(buffer,"alias (%s)", reg->name().c_str());
   }
