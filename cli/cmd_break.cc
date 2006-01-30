@@ -152,8 +152,14 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
   ExprList_itor ei = pEL->begin();
   Expression *pFirst = *ei;
   ++ei;
-  Expression *pSecond = (ei != pEL->end()) ? *ei : 0;
-  ++ei;
+  Expression *pSecond;
+  if(ei != pEL->end()) {
+    pSecond = *ei;
+    ++ei;
+  }
+  else {
+    pSecond = NULL;
+  }
   Expression *pThird = (ei != pEL->end()) ? *ei : 0;
 
   LiteralString *pString=0;
@@ -188,7 +194,10 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
   // See if the expression supports break points. If it does, the break points
   // will get set and the expressions deleted.
   int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), pSecond) : -1;
-
+  if (bpn == -1) {
+    GetUserInterface().DisplayMessage("break cannot be set on %s\n",
+      pFirst->toString().c_str());
+  }
   if (bpn<0) {
 
     // We failed to set a break point from the first expression. 
@@ -200,7 +209,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
       Integer *pInt = pLitInt ? dynamic_cast<Integer*>(pLitInt->evaluate()) : 0;
       guint64 ui64Val =  pInt ? (guint64)pInt->getVal() : 0;
       if (pInt)
-	bpn = get_bp().set_cycle_break(GetActiveCPU(),ui64Val);
+        bpn = get_bp().set_cycle_break(GetActiveCPU(),ui64Val);
       delete pInt;
     }
   }
@@ -212,7 +221,8 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
   } else {
 
     delete pFirst;
-    delete pSecond;
+    if(pSecond != 0)
+      delete pSecond;
   }
 
   return bpn;
