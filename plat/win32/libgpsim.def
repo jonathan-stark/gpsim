@@ -252,6 +252,7 @@ EXPORTS
     ?computed_goto@Program_Counter@@UAEXI@Z
     ?construct@Stimulus_Node@@SAPAV1@PBD@Z
     ?convertToNew@PinGeometry@@QAEXXZ
+    ?copy@Float@@UAEPAVValue@@XZ
     ?copy@Integer@@UAEPAVValue@@XZ
     ?copy@String@@UAEPAVValue@@XZ
     ?copy@Value@@UAEPAV1@XZ
@@ -396,6 +397,7 @@ EXPORTS
     ?get_hll_src_line@AliasedInstruction@@UAEHXZ
     ?get_index@BoolEventLogger@@QAEI_K@Z
     ?get_index@ThreeStateEventLogger@@QAEI_K@Z
+    ?init_program_memory_at_index@Processor@@UAEXIPBEH@Z
     ?initialize@AliasedInstruction@@UAEX_N@Z
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_iop@IOPIN@@UAEPAVRegister@@XZ
