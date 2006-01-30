@@ -25,8 +25,16 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include "../symbol.h"
 #include "../program_files.h"
+#include "../packages.h"
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//  Globals
+//
+
 
 using namespace dspic;
+using namespace dspic_registers;
 
 ProcessorConstructor pdsPic30F6010(dsPic30F6010::construct ,
 				   "__30f6010", "dspic30f6010",  "30f6010", "30f610");
@@ -34,14 +42,25 @@ ProcessorConstructor pdsPic30F6010(dsPic30F6010::construct ,
 
 namespace dspic {
 
+  Trace *gTrace=0;              // Points to gpsim's global trace object.
+  Cycle_Counter *gCycles=0;  	// Points to gpsim's global cycle counter.
+
   //-------------------------------------------------------------------
   //
   // dsPicProcessor -- constructor.
 
   dsPicProcessor::dsPicProcessor()
   {
-    pc = new dsPicProgramCounter();
+    gTrace = &get_trace();
+    gCycles = &get_cycles();
+
+    pcl = new PCL();
+
+    pc = new dsPicProgramCounter(this,pcl);
+
+    m_stack.init(this);
   }
+
   //-------------------------------------------------------------------
   //
   // create
@@ -51,10 +70,45 @@ namespace dspic {
   void dsPicProcessor::create()
   {
     init_program_memory (program_memory_size());
+    pc->memory_size_mask = program_memory_size()-1;
+    init_register_memory (register_memory_size()/2);
 
-    init_register_memory (register_memory_size());
+    create_sfr_map();
+    create_invalid_registers();
 
   }
+
+
+  //-------------------------------------------------------------------
+  //
+  void dsPicProcessor::add_sfr_register(dspic_registers::dsPicRegister *pReg, 
+					unsigned int addr, const char *pName,
+					RegisterValue *rv
+					)
+  {
+    if (!pReg)
+      return;
+
+    printf("adding sfr %s\n",pReg->name().c_str());
+    pReg->set_cpu(this);
+    if (addr < register_memory_size()) {
+
+      registers[map_rm_address2index(addr)] = pReg;
+      if (pName)
+	pReg->new_name(pName);
+      pReg->address = addr;
+      pReg->alias_mask = 0;
+      get_symbol_table().add_register(pReg);
+      if (rv) {
+	pReg->value = *rv;
+	pReg->por_value = *rv;
+      }
+      pReg->set_write_trace(getWriteTT(addr));
+      pReg->set_read_trace(getReadTT(addr));
+    }
+
+  }
+
   //-------------------------------------------------------------------
   //
   // load_hex
@@ -72,6 +126,44 @@ namespace dspic {
     return false;
   }
 
+  //------------------------------------------------------------------------
+  void dsPicProcessor::create_sfr_map()
+  {
+    unsigned int j;
+
+    // Initialize the General Purpose Registers:
+
+    //add_file_registers(0xf80, 0xf7f, 0);
+    unsigned int start_address = 0x0800/2;
+    unsigned int end_address   = 0x27ff/2;
+    char str[100];
+    for  (j = start_address; j <= end_address; j++) {
+
+      registers[j] = new dsPicRegister;
+      registers[j]->alias_mask = 0;
+      registers[j]->address = j;
+      registers[j]->set_write_trace(getWriteTT(j));
+      registers[j]->set_read_trace(getReadTT(j));
+
+      //The default register name is simply its address
+      sprintf (str, "R%03X", j);
+      registers[j]->new_name(str);
+      registers[j]->set_cpu(this);
+    }
+
+    RegisterValue porv(0,0);
+
+    for (j=0; j<16; j++) {
+      char buff[16];
+      snprintf(buff, 16, "W%d",j);
+      add_sfr_register(&W[j], j, buff,&porv);
+    }
+
+    add_sfr_register(pcl,   0x02e/2);
+
+  }
+
+  //------------------------------------------------------------------------
   void dsPicProcessor::init_program_memory_at_index(unsigned int uIndex,
 						    const unsigned char *bytes,
 						    int nBytes)
@@ -85,10 +177,11 @@ namespace dspic {
 
 
   }
+
   //------------------------------------------------------------------------
   void dsPicProcessor::step_one(bool refresh)
   {
-
+    program_memory[pc->value]->execute();
   }
   void dsPicProcessor::interrupt()
   {
@@ -100,8 +193,12 @@ namespace dspic {
   {
   }
 
+
+
+
   //------------------------------------------------------------------------
   // dsPIC30F6010
+  //------------------------------------------------------------------------
 
   Processor * dsPic30F6010::construct()
   {
@@ -114,6 +211,26 @@ namespace dspic {
 
     p->create();
     return p;
+  }
+
+  //------------------------------------------------------------
+  //
+  void dsPic30F6010::create()
+  {
+    create_iopin_map();
+
+    dsPicProcessor::create();
+
+  }
+
+  //------------------------------------------------------------
+  //
+  void dsPic30F6010::create_iopin_map()
+  {
+    package = new Package(80);
+
+    if(!package)
+      return;
   }
 
 };

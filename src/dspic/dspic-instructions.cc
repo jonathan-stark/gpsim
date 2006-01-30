@@ -26,12 +26,20 @@ Boston, MA 02111-1307, USA.  */
 using namespace dspic;
 using namespace dspic_instructions;
 
+namespace dspic {
+  extern Trace *gTrace;              // Points to gpsim's global trace object.
+  extern Cycle_Counter *gCycles;     // Points to gpsim's global cycle counter.
+}
 
 
-//namespace dspic_instructions {};
+struct dsPicInstructionConstructor {
+  unsigned int inst_mask;
+  unsigned int opcode;
+  instruction * (*inst_constructor) (Processor *cpu, unsigned int inst,unsigned int addr);
+};
 
 
-struct instruction_constructor op_dsPic[] = {
+struct dsPicInstructionConstructor op_dsPic[] = {
 
   { 0xff8000,  0xb40000,  ADD::construct },  // f to W
   { 0xff8000,  0xb00000,  ADD::construct },  // Lit
@@ -270,12 +278,10 @@ instruction * dsPicProcessor::disasm (unsigned int address, unsigned int inst)
 
   instruction *pi;
 
-  setCurrentDisasmAddress(address);
-
   pi = 0;
   for(int i =0; i<NUM_OP_DSPIC; i++)
     if((op_dsPic[i].inst_mask & inst) == op_dsPic[i].opcode)
-      pi = op_dsPic[i].inst_constructor(this, inst);
+      pi = op_dsPic[i].inst_constructor(this, inst,address);
 
   if(pi == 0)
     pi = invalid_instruction::construct(this, inst);
@@ -288,10 +294,99 @@ instruction * dsPicProcessor::disasm (unsigned int address, unsigned int inst)
 
 namespace dspic_instructions
 {
+
+  //--------------------------------------------------
+  MultiWordInstruction::MultiWordInstruction(Processor *new_cpu, 
+						 unsigned int new_opcode,
+						 unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr),
+      word2_opcode(0), PMaddress(addr), PMindex(addr/2), initialized(false)
+  {
+  }
+
+
+  //--------------------------------------------------
+  MultiWordBranch::MultiWordBranch(Processor *new_cpu, 
+				       unsigned int new_opcode,
+				       unsigned int addr)
+    : MultiWordInstruction(new_cpu, new_opcode, addr)
+  {
+  }
+
+  void MultiWordBranch::runtime_initialize()
+  {
+    if(cpu_dsPic->program_memory[PMindex+1] != &bad_instruction) {
+  
+      word2_opcode = cpu_dsPic->program_memory[PMindex+1]->get_opcode();
+
+      cpu_dsPic->program_memory[PMindex+1]->
+	update_line_number(file_id,src_line, lst_line, 0, 0);
+
+      // extract the destination address from the two-word opcode
+      destination_index = ((word2_opcode & 0x7f)<<15) | ((opcode>>1) & 0x7fff);
+      initialized = true;
+    }
+  }
+
+  char * MultiWordBranch::name(char *return_str,int len)
+  {
+    if(!initialized)
+      runtime_initialize();
+
+    snprintf(return_str,len,"%s\t0x%05x",
+	     gpsimValue::name().c_str(),
+	     destination_index<<1);
+
+    return(return_str);
+  }
+
+
+  //--------------------------------------------------
+  LiteralBranch::LiteralBranch(Processor *new_cpu, 
+			       unsigned int new_opcode,
+			       unsigned int addr,
+			       const char *_name)
+    : instruction(new_cpu, new_opcode, addr), mcP_conditionName("")
+  {
+    new_name(_name);
+    unsigned int signExtendedOffset = 
+      ((new_opcode&0xffff)<<1) | ((new_opcode & (1<<15)) ? 0xfffe0000 : 0);
+    m_destination = (addr + 2 + signExtendedOffset) & 0xfffffe;
+  }
+  char *LiteralBranch::name(char *buff,int len)
+  {
+    if (buff) {
+      char sign = (opcode & (1<<15)) ? '-' : '+';
+
+      int offset= (((sign=='-') ?
+		    ((opcode^0xffff)+1) : opcode) << 1) & 0x1fffe;
+      
+      snprintf(buff, len, "%s\t%s#0x%06x  ; $%c0x%x", 
+	       instruction::name().c_str(),
+	       mcP_conditionName,
+	       m_destination, 
+	       sign, offset);
+    }
+    return buff;
+  }
+
+  //--------------------------------------------------
+  ImmediateInstruction::ImmediateInstruction(Processor *new_cpu, 
+					     unsigned int new_opcode,
+					     unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr), m_L(new_opcode & 0xfffe)
+  {
+  }
+  char *ImmediateInstruction::name(char *buff,int len)
+  {
+    if (buff) {
+      snprintf(buff, len, "%s\t#0x%04x", instruction::name().c_str(),m_L);
+    }
+  }
   //--------------------------------------------------
 
-  ADD::ADD (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ADD::ADD (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -301,12 +396,13 @@ namespace dspic_instructions
 
   void ADD::execute()
   {
+    cpu_dsPic->pc->increment();
   }
 
   //--------------------------------------------------
 
-  ADDC::ADDC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ADDC::ADDC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -321,8 +417,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  AND::AND (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  AND::AND (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -336,8 +432,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  ASR::ASR (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ASR::ASR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -351,8 +447,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BCLR::BCLR (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BCLR::BCLR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -366,23 +462,75 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BRA::BRA (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : LiteralBranch(new_cpu, new_opcode, addr, "bra")
   {
-
-    decode(new_cpu,new_opcode);
     new_name("bra");
-    printf("constructing a BRA\n");
+    switch ((opcode>>16) & 0x0f) {
+    case OV:    // Overflow
+      mcP_conditionName = "OV,";
+      break;
+    case C:     // Carry and GEU
+      mcP_conditionName = "C,";
+      break;
+    case Z:     // Zero
+      mcP_conditionName = "Z,";
+      break;
+    case N:     // Negative
+      mcP_conditionName = "N,";
+      break;
+    case LE:    // Less than or equal to
+      mcP_conditionName = "LE,";
+      break;
+    case LT:    // Less than
+      mcP_conditionName = "LT,";
+      break;
+    case LEU:   // Less than or equal unsigned
+      mcP_conditionName = "LEU,";
+      break;
+    case UN:    // Unconditionally
+      mcP_conditionName = "";
+      break;
+    case NOV:   // No overflow
+      mcP_conditionName = "NOV,";
+      break;
+    case NC:    // No Carry and LTU (less than unsigned)
+      mcP_conditionName = "NC,";
+      break;
+    case NZ:    // Not zero
+      mcP_conditionName = "NZ,";
+      break;
+    case NN:    // Not Negative
+      mcP_conditionName = "NN,";
+      break;
+    case GT:    // Greater than
+      mcP_conditionName = "GT,";
+      break;
+    case GE:    // Greater than or equal
+      mcP_conditionName = "GE,";
+      break;
+    case GTU:   // Greater than unsigned
+      mcP_conditionName = "GTU,";
+      break;
+    case NU:    // not used...
+    default:
+      break;
+
+    }
   }
 
   void BRA::execute()
   {
+    if (m_condition) 
+      cpu_dsPic->pc->jump(m_destination>>1);
+    else
+      cpu_dsPic->pc->increment();
   }
 
   //--------------------------------------------------
 
-  BSET::BSET (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BSET::BSET (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -396,8 +544,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BSW::BSW (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BSW::BSW (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -411,8 +559,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BTG::BTG (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BTG::BTG (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -426,8 +574,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BTS::BTS (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BTS::BTS (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -441,8 +589,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BTST::BTST (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BTST::BTST (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -456,8 +604,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  BTSTS::BTSTS (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  BTSTS::BTSTS (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -471,8 +619,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CALL::CALL (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CALL::CALL (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -486,8 +634,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CLR::CLR (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CLR::CLR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -501,8 +649,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -516,8 +664,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  COM::COM (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  COM::COM (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -531,8 +679,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CP::CP (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CP::CP (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -546,8 +694,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CP0::CP0 (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CP0::CP0 (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -561,8 +709,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CPB::CPB (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CPB::CPB (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -576,8 +724,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  CPS::CPS (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  CPS::CPS (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -591,8 +739,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  DAW::DAW (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  DAW::DAW (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -606,8 +754,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  DEC::DEC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  DEC::DEC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -621,8 +769,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  DISI::DISI (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  DISI::DISI (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -636,8 +784,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  DIV::DIV (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  DIV::DIV (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -651,8 +799,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  DO::DO (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  DO::DO (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -666,8 +814,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  ED::ED (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ED::ED (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -681,8 +829,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  EXCH::EXCH (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  EXCH::EXCH (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -696,8 +844,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  FB::FB (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  FB::FB (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -711,8 +859,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : MultiWordBranch(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -722,12 +870,17 @@ namespace dspic_instructions
 
   void GOTO::execute()
   {
+    if(!initialized)
+      runtime_initialize();
+
+    cpu_dsPic->pc->jump(destination_index);
+
   }
 
   //--------------------------------------------------
 
-  INC::INC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  INC::INC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -741,8 +894,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  IOR::IOR (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  IOR::IOR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -756,8 +909,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  LAC::LAC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  LAC::LAC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -771,23 +924,28 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  LNK::LNK (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  LNK::LNK (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : ImmediateInstruction(new_cpu, new_opcode, addr)
   {
-
-    decode(new_cpu,new_opcode);
     new_name("lnk");
-    printf("constructing a LNK\n");
   }
 
   void LNK::execute()
   {
+    unsigned int tos = cpu_dsPic->W[15].get_value();
+    unsigned int tos_index = tos>>1;
+    cpu_dsPic->registers[tos_index]->put(cpu_dsPic->W[14].get());
+    cpu_dsPic->W[14].put(tos+2);
+    cpu_dsPic->W[15].put(tos+2+m_L);
+
+    cpu_dsPic->pc->increment();
+
   }
 
   //--------------------------------------------------
 
-  LSR::LSR (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  LSR::LSR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -801,8 +959,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MAC::MAC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  MAC::MAC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -816,8 +974,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MOV::MOV (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  MOV::MOV (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -831,8 +989,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MOVSAC::MOVSAC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  MOVSAC::MOVSAC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -846,8 +1004,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MPY::MPY (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  MPY::MPY (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -861,8 +1019,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MUL::MUL (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  MUL::MUL (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -876,8 +1034,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  NEG::NEG (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  NEG::NEG (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -891,8 +1049,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  NOP::NOP (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -915,8 +1073,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  POP::POP (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  POP::POP (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -930,8 +1088,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -945,8 +1103,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  PWRSAV::PWRSAV (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  PWRSAV::PWRSAV (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -960,23 +1118,21 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : LiteralBranch(new_cpu, new_opcode, addr,"rcall")
   {
-
-    decode(new_cpu,new_opcode);
-    new_name("rcall");
-    printf("constructing a RCALL\n");
   }
 
   void RCALL::execute()
   {
+    cpu_dsPic->m_stack.push();
+    cpu_dsPic->pc->jump(m_destination>>1);
   }
 
   //--------------------------------------------------
 
-  REPEAT::REPEAT (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  REPEAT::REPEAT (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -990,8 +1146,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  RESET::RESET (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  RESET::RESET (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1005,8 +1161,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  RET::RET (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  RET::RET (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1020,8 +1176,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  ROT::ROT (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ROT::ROT (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1035,8 +1191,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SAC::SAC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SAC::SAC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1050,8 +1206,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SE::SE (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SE::SE (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1065,8 +1221,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SETM::SETM (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SETM::SETM (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1080,8 +1236,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SFTAC::SFTAC (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SFTAC::SFTAC (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1095,8 +1251,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SL::SL (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SL::SL (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1110,8 +1266,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SUB::SUB (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SUB::SUB (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1125,8 +1281,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  SWAP::SWAP (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  SWAP::SWAP (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1140,8 +1296,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1155,8 +1311,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1170,8 +1326,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  ULNK::ULNK (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ULNK::ULNK (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1185,8 +1341,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  XOR::XOR (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  XOR::XOR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
@@ -1200,8 +1356,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  ZE::ZE (Processor *new_cpu, unsigned int new_opcode)
-    : instruction(new_cpu, new_opcode, 0)
+  ZE::ZE (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    : instruction(new_cpu, new_opcode, addr)
   {
 
     decode(new_cpu,new_opcode);
