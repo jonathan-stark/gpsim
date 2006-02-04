@@ -87,6 +87,42 @@ public:
     set(double(r));
   };
 };
+class CapacitanceAttribute : public Float {
+
+public:
+  PullupResistor *pur;
+
+
+  CapacitanceAttribute(PullupResistor *ppur) 
+    : Float(0.0)
+  {
+
+    pur = ppur;
+    if(!pur)
+      return;
+
+    new_name("Capacitance");
+
+    Float::set(pur->res.get_Cth());
+  }
+
+
+  void set(double r) {
+
+    Float::set(r);
+
+    if(!pur)
+      return;
+
+    pur->res.set_Cth(r);
+
+  };
+
+
+  void set(int r) {
+    set(double(r));
+  };
+};
 
 
 //--------------------------------------------------------------
@@ -267,9 +303,13 @@ PullupResistor::PullupResistor(const char *init_name)
   // Note ResistanceAttribute is designed to give access
   // to res.Zth with a symbol name of "modulename + '.resistance'".
   ResistanceAttribute *attr = new ResistanceAttribute(this);
+  CapacitanceAttribute *cattr = new CapacitanceAttribute(this);
+
   add_attribute(attr);
+  add_attribute(cattr);
 
   attr->set(10e3);
+  cattr->set(0.);
   res.setDriving(false);
   res.update_pullup('1',true);
 

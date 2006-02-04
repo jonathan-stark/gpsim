@@ -1,3 +1,18 @@
+2006-02-04 Scott Dattalo <scott@dattalo.com>
+	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
+	src/dspic/dspic-processors.cc: 
+	Added support for the Literal, Register Direct,  and Register
+	Indirect addressing modes.
+
+2006-02-03 Roy Rankin <rrankin@ihug.com.au>
+	* src/processor.cc, src/pic-processor:
+	The pic-processor class was over-writing the
+	cycles_per_instruction value in the processor class
+	* modules/switch.cc, modules/switch.h, modules/resistor.cc,
+	regression/switch_test/switch_test.stc,
+	regression/switch_test/switch_test.asm: 
+	Switch modules now handle analog inputs and RC loads.
+	
 2006-01-30 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/processor.h: added methods for mapping
 	register addresses into register indexes (for the dspic) and use
@@ -15,6 +30,9 @@
 	  -- added Program Counter
 	  -- single stepping works.
 	  -- GOTO, RCALL and BRA instructions are now supported.
+
+2006-01-25 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_profile.cc: fix core dump
 
 2005-01-29 J.R. Heisey <jrheisey@sourceforge.com
 	* cli/cmd_break.cc: I prevent ei from being incremented for
