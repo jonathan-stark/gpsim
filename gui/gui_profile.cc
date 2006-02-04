@@ -2292,7 +2292,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
     // register, then we can profile it.
     //
 
-    if(reg->isa() != Register::INVALID_REGISTER    // i.e. the register is valid
+    if(reg && reg->isa() != Register::INVALID_REGISTER    // i.e. the register is valid
           &&
        !((reg->isa() == Register::SFR_REGISTER) || (i != reg->address)) ) {
 
