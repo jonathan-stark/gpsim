@@ -23,6 +23,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../pic-instructions.h"
 
+namespace dspic
+{
+  class dsPicProcessor;
+};
+
 namespace dspic_instructions
 {
   //---------------------------------------------------------
@@ -86,6 +91,182 @@ namespace dspic_instructions
     virtual bool isBase() { return true;}
   protected:
     unsigned int m_L;
+  };
+
+  //----------------------------------------------------------------------
+  class AddressingMode 
+  {
+  public:
+    AddressingMode(dspic::dsPicProcessor *cpu, 
+		   unsigned int addr);
+    virtual RegisterValue get()=0;
+    virtual void put(RegisterValue &)=0;
+    virtual char *name(char *buff, int len)=0;
+    /**/
+    static AddressingMode *construct(dspic::dsPicProcessor *new_cpu, 
+				     unsigned int new_mode, unsigned int addr);
+    /**/
+
+    enum {
+      eDirect = 0,
+      eIndirect,
+      eIndirectPostDec,
+      eIndirectPostInc,
+      eIndirectPreDec,
+      eIndirectPreInc,
+      eIndirectRegOffset,
+      eIndirectRegOffset_,
+      eLiteral=6,
+      eLiteral_=7,
+    };
+
+  protected:
+    dspic::dsPicProcessor *m_cpu;
+    unsigned int m_mode;
+    unsigned int m_addr;
+    static const RegisterValue m_unknown;
+  };
+  //----------------------------------------------------------------------
+  class LiteralAddressingMode : public AddressingMode
+  {
+  public:
+    LiteralAddressingMode(dspic::dsPicProcessor *cpu, 
+			  unsigned int addr);
+    virtual RegisterValue get() {return m_rv;}
+    virtual void put(RegisterValue &) {} // maybe we should throw an error?
+    virtual char *name(char *buff, int len);
+  private:
+    RegisterValue m_rv;
+  };
+  //----------------------------------------------------------------------
+  class RegisterAddressingMode : public AddressingMode
+  {
+  public:
+    RegisterAddressingMode(dspic::dsPicProcessor *cpu, 
+		      unsigned int addr, 
+		      const char *format);
+    virtual char *name(char *buff, int len);
+  protected:
+    const char *m_cPformat;
+  };
+  //----------------------------------------------------------------------
+  class RegDirectAddrMode : public RegisterAddressingMode
+  {
+  public:
+    RegDirectAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+    virtual RegisterValue get();
+    virtual void put(RegisterValue &);
+  };
+  //----------------------------------------------------------------------
+  class RegIndirectAddrMode : public RegisterAddressingMode
+  {
+  public:
+    RegIndirectAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+    virtual RegisterValue get();
+    virtual void put(RegisterValue &);
+  };
+
+  //----------------------------------------------------------------------
+  class RegIndirectPostDecAddrMode : public RegisterAddressingMode
+  {
+  public:
+    RegIndirectPostDecAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+    virtual RegisterValue get();
+    virtual void put(RegisterValue &);
+  };
+  //----------------------------------------------------------------------
+  class RegIndirectPostIncAddrMode : public RegisterAddressingMode
+  {
+  public:
+    RegIndirectPostIncAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+    virtual RegisterValue get();
+    virtual void put(RegisterValue &);
+  };
+  //----------------------------------------------------------------------
+  class RegIndirectPreDecAddrMode : public RegisterAddressingMode
+  {
+  public:
+    RegIndirectPreDecAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+    virtual RegisterValue get();
+    virtual void put(RegisterValue &);
+  };
+
+  //----------------------------------------------------------------------
+  class RegIndirectPreIncAddrMode : public RegisterAddressingMode
+  {
+  public:
+    RegIndirectPreIncAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+    virtual RegisterValue get();
+    virtual void put(RegisterValue &);
+  };
+
+  //----------------------------------------------------------------------
+  class RegisterInstruction : public instruction
+  {
+  public:
+    RegisterInstruction(Processor *new_cpu, 
+			unsigned int new_opcode,
+			unsigned int addr,
+			const char *_name);
+    virtual bool isBase() { return true;}
+    virtual unsigned int source() = 0;
+    virtual void destination(unsigned int) = 0;
+  protected:
+    AddressingMode *m_base;
+    AddressingMode *m_source;
+    AddressingMode *m_destination;
+  };
+
+  //----------------------------------------------------------------------
+  class RegisterDirectLiteralInstruction : public RegisterInstruction
+  {
+  public:
+    RegisterDirectLiteralInstruction(Processor *new_cpu, 
+				     unsigned int new_opcode,
+				     unsigned int addr,
+				     const char *new_name);
+    virtual char *name(char *,int len);
+    virtual unsigned int source();
+    virtual void destination(unsigned int);
+  protected:
+    unsigned int m_unsignedLit;
+    unsigned int m_Waddress;
+    bool m_bByteOperation;
+  };
+ 
+  //----------------------------------------------------------------------
+  class RegisterToRegisterInstruction : public RegisterInstruction
+  {
+  public:
+    RegisterToRegisterInstruction(Processor *new_cpu, 
+				  unsigned int new_opcode,
+				  unsigned int addr,
+				  const char *new_name);
+    virtual char *name(char *,int len);
+    virtual unsigned int source();
+    virtual void destination(unsigned int);
+  protected:
+    bool m_bByteOperation;
+  };
+ 
+  //----------------------------------------------------------------------
+  class ADDR : public RegisterToRegisterInstruction
+  {
+  public:
+    ADDR(Processor *new_cpu, unsigned int new_opcode, unsigned int addr);
+    virtual void execute();
+    static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+    {return new ADDR(new_cpu,new_opcode,addr);}
+  };
+
+  //----------------------------------------------------------------------
+  class ADDL : public RegisterDirectLiteralInstruction
+  {
+  public:
+    ADDL(Processor *new_cpu, unsigned int new_opcode, unsigned int addr);
+    virtual void execute();
+    static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
+      {return new ADDL(new_cpu,new_opcode,addr);}
   };
 
   //----------------------------------------------------------------------

@@ -156,10 +156,10 @@ namespace dspic {
     for (j=0; j<16; j++) {
       char buff[16];
       snprintf(buff, 16, "W%d",j);
-      add_sfr_register(&W[j], j, buff,&porv);
+      add_sfr_register(&W[j], j*2, buff,&porv);
     }
 
-    add_sfr_register(pcl,   0x02e/2);
+    add_sfr_register(pcl,   0x02e);
 
   }
 
