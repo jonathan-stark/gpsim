@@ -1,8 +1,7 @@
 
-   ;;  Node test 
+   ;;  Switch test 
    ;;
-   ;;  The purpose of this program is to verify that nodes
-   ;; can interconnect I/O pins.
+   ;;  Test switch with capacitance and without capacitance
 
 
 	list    p=16f877                ; list directive to define processor
@@ -21,6 +20,8 @@
 ;----------------------------------------------------------------------
 GPR_DATA                UDATA
 temp            RES     1
+temp1		RES	1
+temp2		RES	1
 
   GLOBAL done
 
@@ -39,29 +40,12 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 ;----------------------------------------------------------------------
 MAIN    CODE
 start
-   .sim "module library libgpsim_modules"
-   .sim "module load switch SW1"
-   .sim "module load pullup R1"
-   .sim "module load pullup R2"
 
-   .sim "node nb0"
-   .sim "node nc0"
-
-   .sim "attach nb0 portb0 SW1.A R1.pin"
-   .sim "attach nc0 portc0 SW1.B R2.pin"
-
-   ; First make sure that the switch is open
-   .sim "SW1.state=false"
-
-
-;   .sim "set verbose 0xff"
-
-
-	MOVLW	0xff
 	BSF	STATUS,RP0
 
+	movlw	0x07		; RA2-RA0 are inputs
+	movwf	TRISA
 	CLRF	TRISB^0x80	;Port B is an output
-	MOVWF	TRISC^0x80	;Port C is an input
 
 	BCF 	STATUS,RP0
 
@@ -71,13 +55,13 @@ start
 
 	BCF	PORTB,0
 
-   .assert "(portc & 1) == 1"
+   .assert "(porta & 3) == 0"	; both sides of switch whould be 0
 
 	nop
 
 	BSF	PORTB,0
 
-   .assert "(portc & 1) == 1"
+   .assert "(porta & 3) == 1"	; drive side only high
 
 	nop
 
@@ -85,15 +69,72 @@ start
    .command "SW1.state=true"
 	nop
 
-   .assert "(portc & 1) == 1"
+   .assert "(porta & 3) == 1"	; drive side only high because of capacitance
+ 	nop
+
+       call    delay
+
+   .assert "(porta & 3) == 3"	
+	nop
+
+	BCF	PORTB,0		; change drive voltage
+
+
+
+       call    delay
+
+   .assert "(porta & 3) == 0"   ; both sides now low
+	nop
+	movf	PORTA,W
+
+	BSF	PORTB,0		; drive high again
+	call	delay
+
+   .assert "(porta & 3) == 3"	; make sure both sides are high
+	nop
+
+   ; Open the switch:	
+   .command "SW1.state=false"
+	nop
+
+;   .assert "(porta & 3) == 3"	; capacitance should hold both sides high
+;				; for a while
+;	nop
+;
+;	call delay
+
+   .assert "(porta & 3) == 1"   ; only one side high
 	nop
 
 	BCF	PORTB,0
 
-   .assert "(portc & 1) == 0"
-
+   .assert "(porta & 3) == 0"
 	nop
 
+;	Turn off Capacitance to test DC behaviour
+;
+   .command "PD1.Capacitance=0"
+	nop
+   .command "PU1.Capacitance=0"
+	nop
+
+   .assert "(porta & 3) == 0"
+	nop
+
+	BSF	PORTB,0		; Drive one side of switch high
+   .assert "(porta & 3) == 1"
+	nop
+
+   ; Close the switch:	
+   .command "SW1.state=true"
+	nop
+
+   .assert "(porta & 3) == 3"	; Both side should now be high
+	nop
+
+	BCF	PORTB,0
+   .assert "(porta & 3) == 0"	; Both side should now be low
+	nop
 done:
 
   .assert  "\"*** PASSED Switch Test on 16f877\""
@@ -103,6 +144,17 @@ FAILED:
   .assert  "\"*** FAILED Switch Test on 16f877\""
 	goto	$
 
+
+delay		; delay about 11,500 cycles or  1.2 ms at 10 Mhz
+       movlw   9
+       movwf	temp2
+       clrf    temp1
+delay_loop
+        decfsz  temp1,f
+         goto   $+2
+        decfsz  temp2,f
+         goto   delay_loop
+        return
 
 
   end

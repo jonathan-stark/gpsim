@@ -43,6 +43,7 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 #include <string>
 #include <iostream>
+#include <math.h>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
@@ -52,6 +53,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 #include "../src/symbol.h"
 #include "../src/gpsim_interface.h"
+#include "../src/gpsim_time.h"
 
 #include "switch.h"
 
@@ -65,15 +67,16 @@ public:
 
   virtual void   getThevenin(double &v, double &z, double &c);
 
-  virtual double get_Zth() { return m_Zopen;}
   virtual void set_nodeVoltage(double v);
 
   void PropagateVoltage(double v);
   double get_Zclosed() { return  m_Zclosed; }
+  double get_Zopen() { return  m_Zopen; }
 private:
   Switch *m_pParent;
   bool bRefreshing;
 
+  double m_Zth;
   double m_Zclosed;
   double m_Zopen;
 };
@@ -81,22 +84,17 @@ private:
 
 SwitchPin::SwitchPin(Switch *parent, const char *_name)
   : IO_bi_directional(0, 0, _name), m_pParent(parent), bRefreshing(false),
-    m_Zclosed(100), m_Zopen(1e12)
+    m_Zclosed(10), m_Zopen(1e12), m_Zth(1e12)
 {
   assert(m_pParent);
 }
 
 void SwitchPin::getThevenin(double &v, double &z, double &c)
 {
-  if (!bRefreshing) {
-    bRefreshing = true;
     m_pParent->getThevenin(this, v, z, c);
-    bRefreshing = false;
-  } else {
-    v = 0;
-    z = m_Zopen;
-    c = 0;
-  }
+    if (verbose)
+	cout << "SwitchPin::getThevenin :" << name() << " v=" << v 
+		<< " z=" << z << endl;
 }
 
 void SwitchPin::set_nodeVoltage(double v)
@@ -115,7 +113,9 @@ void SwitchPin::PropagateVoltage(double v)
 {
 
   if (!bRefreshing)
+  {
     snode->set_nodeVoltage(v);
+  }
 }
 
 //========================================================================
@@ -204,9 +204,15 @@ void Switch::buttonToggled ()
 {
   bool b = (gtk_toggle_button_get_active(m_button)==TRUE) ? true : false;
 
+  if (! m_pinA->snode || ! m_pinB->snode)
+  {
+	cout << "\n WARNING both pins of " << name() 
+		<< " must be connected to nodes\n";
+	return;
+  }
   m_aState->set(b); 
 
-  update();
+  //update();
 }
 
 //------------------------------------------------------------------------
@@ -227,7 +233,7 @@ void Switch::update()
   if (m_pinA->snode)
     m_pinA->snode->update();
 
-  if (!m_bCurrentState)
+  if (!m_bCurrentState && m_pinB->snode)
     m_pinB->snode->update();
 }
 //------------------------------------------------------------------------
@@ -235,28 +241,25 @@ void Switch::update()
 //
 // This is called by one of the switch's pins. The purpose is to obtain
 // the electrical state of the switch. If the switch is closed, then the
-// electrical state on the other side (that is on the other side as referred
-// to the callee's side) is obtained and the switch impedance (resistance)
-// is added in. If the switch is open, then the call is reflected back
-// down to the callee.
+// voltage of the closed switch is computed based on the stimulus on both
+// sides of the switch. Each pin of the switch then acts as a voltage source.
+// If the switch is open, the pin impedance is set to a very high value
+// so it has no effect on the other stimulus on the pin's node.
 
 void Switch::getThevenin(SwitchPin *pin, double &v, double &z, double &c)
 {
-  if (m_bCurrentState) {
+  if (m_bCurrentState) 		// switch is closed
+  {
 
-    // The switch is closed.
-
-    if (pin == m_pinA)
-      m_pinB->getThevenin(v, z, c);
-    else if (pin == m_pinB)
-      m_pinA->getThevenin(v, z, c);
-    else
-      return;  // shouldn't ever happen.
-
-    z += pin->get_Zclosed();
-
-  } else
-    pin->getThevenin(v, z, c);
+ 	v = do_voltage(pin);  	// switch voltage
+        z = 100.;		// low impedance to act as voltage source
+  } 
+  else				// Switch is open set high impedance
+  {
+        settlingTimeStep = 0;
+	initial_voltage = -5.0;       // undefined value
+	z = pin->get_Zopen();
+  }
 
 }
 //------------------------------------------------------------------------
@@ -316,11 +319,176 @@ Switch::Switch()
 
   name_str = strdup("Switch");
   
-  //interface_id = gpsim_register_interface((gpointer)this);
+  initial_voltage = -5.0;	// undefined value
 }
 
 Switch::~Switch(void)
 {
 
+}
+
+/*
+** do_voltage computes the voltage at the closed switch by doing a Thevenin
+** computation on all stimiuli connected to both pins of the switch 
+** excluding the pin stimulus themself.
+*/
+double Switch::do_voltage(SwitchPin *pin)
+{
+
+    double conductance=0.0;   // Thevenin conductance.
+    double Cth=0;
+    double current=0.0;
+    double C1, C2;
+    double V1, V2;
+    double Zth;
+                                                                                
+    if (verbose)
+        cout << "\nmulti-node summing: " << pin->name() << endl;
+
+
+    if (pin == m_pinA)
+    {
+        V2 = m_pinB->get_nodeVoltage();
+        sum_Thevenin(m_pinB, current, conductance, Cth);
+    }
+    else if (pin == m_pinB)
+    {
+        V2 = m_pinA->get_nodeVoltage();
+        sum_Thevenin(m_pinA, current, conductance, Cth);
+    }
+    else
+    {
+	cout << "WARNING: Switch::do_voltage() pin not valid value\n";
+	return(0);
+    }
+
+    C2 = Cth;
+
+    V1 = pin->get_nodeVoltage();
+    sum_Thevenin(pin, current, conductance, Cth);
+    C1 = Cth - C2;
+
+
+    Zth = 1.0/conductance;
+    finalVoltage = current * Zth;
+    current_time_constant = Cth * Zth;
+                                                                                
+    //
+    // it take about 4 time constants to be resonably close to DC value
+    // just use the DC value if the time constant it too short
+    //
+    if((guint64)(current_time_constant*get_cycles().cycles_per_second()) < 1000) 
+    {
+	if (verbose)
+    	{
+	    cout << "Switch::do_voltage() use DC as current_time_constant=" << 
+		current_time_constant << endl;
+    	}
+	initial_voltage = -5.0;
+      	voltage = finalVoltage;
+  	return(voltage);
+    } else {
+                                                                                
+      //
+      // If finalVoltage != initial_voltage then start a new calculation.
+      // This can mean either a new calculation or one of the node 
+      // voltages changed
+      //
+      if (fabs(finalVoltage - initial_voltage) > 0.1) 
+      {
+	  initial_voltage = finalVoltage;
+          voltage = (V1*C1 + V2*C2)/Cth;
+	  cap_start_cycles = 0;
+	  if (verbose)
+	  {
+		cout << "Switch::do_voltage() current_time_constant " << 
+			current_time_constant ;
+	  	cout << " cps "<< dec << get_cycles().cycles_per_second() << 
+			endl;
+    		cout << "\tV1=" << V1 << " C1=" << C1 << " V2=" << V2 << 
+			" C2=" << C2 << endl;
+	  	cout << "\tCapaitance voltage =" <<voltage << endl;
+	  }
+          settlingTimeStep = (guint64) (0.11 * get_cycles().cycles_per_second() * current_time_constant);
+      }
+      else
+      {
+	      double Time_Step;
+	      double expz;
+	//
+	// increase time step as capacitor charges more slowly as final
+	// voltage is approached.
+	//
+	    settlingTimeStep  = (guint64) (1.5 * settlingTimeStep);
+
+	      //
+	      // The following is an exact calculation, assuming no circuit 
+	      // changes,  regardless of time step.
+	      //
+	    Time_Step = (get_cycles().value - cap_start_cycles)/
+		      (get_cycles().cycles_per_second()*current_time_constant);
+	    expz = exp(-Time_Step);
+	    voltage = finalVoltage* (1.-expz) + voltage * expz;
+      }
+      // Are we there yet ?
+      if (fabs(finalVoltage - voltage) < 0.1)
+      {
+	if (verbose)
+	{
+	    cout << "Switch::do_voltage() Reached final Voltage " << 
+		finalVoltage << " voltage " << voltage << endl;
+	}
+	voltage = finalVoltage;
+	settlingTimeStep = 0;
+	initial_voltage = -5.0;
+	return(voltage);
+      }
+      cap_start_cycles = get_cycles().value;
+
+      if (verbose & 2)
+      {
+
+	cout << "Switch::do_voltage() Target voltage=" <<
+		finalVoltage << " current voltage=" << voltage <<
+		"  Next TimeStep=" <<dec <<  settlingTimeStep << endl;
+      }
+                                                                                
+                                                                                
+      get_cycles().set_break(get_cycles().value + settlingTimeStep,this);
+    }
+
+    return(voltage);
+}
+
+/*
+** Sum the Thevenin parameters for all stimuli connected to pin except for the 
+** pin stimulus itself. This is a helper function for do_voltage().
+*/
+void Switch::sum_Thevenin(SwitchPin *pin, double &current, double &conductance,
+	double &Cth)
+{
+      stimulus *sptr;
+
+      if (!pin || ! pin->snode) return;
+      for(sptr =  pin->snode->stimuli; sptr; sptr = sptr->next) 
+      {
+        double V1,Z1,C1;
+	if (pin->name() != sptr->name())
+	{
+            sptr->getThevenin(V1,Z1,C1);
+	    if (verbose)
+            	cout << " N: " <<sptr->name() << " V=" << V1
+        		<< " Z=" << Z1 << " C=" << C1 << endl;
+                                                                                
+            double Cs = 1 / Z1;
+            current += V1 * Cs;
+            conductance += Cs;
+            Cth += C1;
+	}
+      }
+}
+void Switch::callback()
+{
+	update();
 }
 #endif // HAVE_GUI

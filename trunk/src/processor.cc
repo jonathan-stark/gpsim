@@ -77,12 +77,13 @@ Processor::Processor(void)
   m_pConstructorObject = 0;
   m_Capabilities = 0;
   if(verbose)
-    cout << "pic_processor constructor\n";
+    cout << "processor constructor\n";
 
   pc = 0;
 
   mFrequency = new Float("frequency",20e6, " oscillator frequency.");
   set_ClockCycles_per_Instruction(1);
+  get_cycles().set_cycles_per_second((guint64)(get_frequency()/clocks_per_inst));
   set_Vdd(5.0);
   setWarnMode(true);
   setSafeMode(true);

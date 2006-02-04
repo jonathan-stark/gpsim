@@ -33,7 +33,8 @@ Boston, MA 02111-1307, USA.  */
 class SwitchPin;       // defined and implemented in switch.cc
 class SwitchAttribute; //    "            "
 
-class Switch : public Module
+class Switch : public Module, public TriggerObject
+
 {
   void create_widget(Switch *sw);
 public:
@@ -57,6 +58,12 @@ public:
 
   void buttonToggled();
 
+  virtual double Switch::do_voltage(SwitchPin *pin);
+  virtual void Switch::sum_Thevenin(SwitchPin *pin, double &current, 
+		double &conductance, double &Cth);
+  virtual void callback(void);
+  virtual double get_nodeVoltage() { return voltage; }
+
 protected:
   SwitchPin *m_pinA;
   SwitchPin *m_pinB;
@@ -64,6 +71,15 @@ protected:
   // State of the switch
   bool m_bCurrentState;
   SwitchAttribute *m_aState;
+
+  double voltage;
+  double current_time_constant; // The most recent time constant
+  double initial_voltage;   // node voltage at the instant of change
+  double finalVoltage;      // Target voltage when settling
+  guint64 settlingTimeStep;
+  guint64 cap_start_cycles;
+
+                                                                                
 
   //
   double Zopen, Zclosed;

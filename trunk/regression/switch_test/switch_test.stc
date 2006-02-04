@@ -1,3 +1,28 @@
 
-
 load switch_test.cod
+
+
+# Module libraries:
+module library libgpsim_modules.so
+
+
+module load switch SW1
+SW1.state=false
+
+module load pullup PU1
+PU1.resistance=10000.
+PU1.Capacitance=1.00e-07
+
+module load pulldown PD1
+PD1.resistance=10000.
+PD1.Capacitance=2.00e-06
+
+# Connections:
+node nb0
+attach nb0 SW1.A portb0 porta0
+
+node nc0
+attach nc0 SW1.B PD1.pin porta1
+
+frequency 10e6
+# End.
