@@ -41,7 +41,7 @@ struct dsPicInstructionConstructor {
 
 struct dsPicInstructionConstructor op_dsPic[] = {
 
-  { 0xff8000,  0xb00000,  ADDL::construct },  // Lit
+  { 0xff8000,  0xb00000,  ADDR::construct },  // Lit
   { 0xf80000,  0x400000,  ADDR::construct },  // Wb + Lit -> Wd
   { 0xff7fff,  0xcb0000,  ADD::construct },  // add accumulators
 
@@ -343,39 +343,6 @@ namespace dspic_instructions
 
 
   //--------------------------------------------------
-  /*
-  char *AddressingMode::name(char *buff,int len)
-  {
-    if (!buff)
-      return buff;
-
-    switch (m_mode) {
-    case 0:
-      snprintf(buff,len,"%s",m_cpu->registers[m_addr]->name().c_str());
-      break;
-    case 1:
-      snprintf(buff,len,"[%s]",m_cpu->registers[m_addr]->name().c_str());
-      break;
-    case 2:
-      snprintf(buff,len,"[%s--]",m_cpu->registers[m_addr]->name().c_str());
-      break;
-    case 3:
-      snprintf(buff,len,"[%s++]",m_cpu->registers[m_addr]->name().c_str());
-      break;
-    case 4:
-      snprintf(buff,len,"[--%s]",m_cpu->registers[m_addr]->name().c_str());
-      break;
-    case 5:
-      snprintf(buff,len,"[++%s]",m_cpu->registers[m_addr]->name().c_str());
-      break;
-    default:
-      snprintf(buff,len,"#0x%x",m_addr);
-      break;
-    }
-    return buff;
-  }
-  */
-  //--------------------------------------------------
 
 
   LiteralAddressingMode::LiteralAddressingMode(dspic::dsPicProcessor *cpu, 
@@ -620,91 +587,44 @@ namespace dspic_instructions
   RegisterInstruction::RegisterInstruction(Processor *new_cpu, 
 					   unsigned int new_opcode,
 					   unsigned int addr,
-					   const char *_name)
+					   const char *_name,
+					   bool bHasBase)
     : instruction(new_cpu, new_opcode, addr),
+      m_bHasBase(bHasBase),
+      m_bByteOperation((new_opcode & (1<<14)) != 0),
       m_base(0), m_source(0), m_destination(0)
   {
     new_name(_name);
   }
-  //--------------------------------------------------
-  RegisterDirectLiteralInstruction::RegisterDirectLiteralInstruction
-  (Processor *new_cpu, 
-   unsigned int new_opcode,
-   unsigned int addr,
-   const char *_name)
-    : RegisterInstruction(new_cpu, new_opcode, addr, _name),
-      m_unsignedLit((new_opcode>>4) & ((new_opcode & (1<<14) ? 0xff: 0x3ff))),
-      m_Waddress(new_opcode & 0xf),
-      m_bByteOperation((new_opcode & (1<<14)) != 0)
-  {
-    m_destination = new RegDirectAddrMode(cpu_dsPic,m_Waddress);
-    m_source = new LiteralAddressingMode(cpu_dsPic,m_unsignedLit);
-  }
-
-  unsigned int  RegisterDirectLiteralInstruction::source()
-  {
-    return 0;
-  }
-
-  void RegisterDirectLiteralInstruction::destination(unsigned int nv)
-  {
-  }
-
-  char *RegisterDirectLiteralInstruction::name(char *buff,int len)
-  {
-    if (buff) {
-      snprintf(buff, len, "%s%s\t#0x%03x, %s", 
-	       instruction::name().c_str(),
-	       (m_bByteOperation ? ".b" :""),
-	       m_unsignedLit,
-	       cpu_dsPic->registers[m_Waddress]->name().c_str()
-	       );
-    }
-    return buff;
-  }
-
   //--------------------------------------------------
   //--------------------------------------------------
   RegisterToRegisterInstruction::RegisterToRegisterInstruction
   (Processor *new_cpu, 
    unsigned int new_opcode,
    unsigned int addr,
-   const char *_name)
-    : RegisterInstruction(new_cpu, new_opcode, addr, _name),
-      m_bByteOperation((new_opcode & (1<<14)) != 0)
+   const char *_name,
+   int nOperands
+   )
+    : RegisterInstruction(new_cpu, new_opcode, addr, _name, nOperands>2 ? true : false)
   {
-    printf("REgister to register : opcode=0x%x\n",opcode);
-    m_base = new RegDirectAddrMode(cpu_dsPic, (opcode>>15) & 0xf);
-    m_source = AddressingMode::construct(cpu_dsPic,
-					 (opcode >> 4) & 0x7,
-					 opcode & 0x1f);
-    m_destination = AddressingMode::construct(cpu_dsPic,
-					      (opcode >> 11) & 0x7,
-					      (opcode >> 7)  & 0xf);
+    printf("REgister to register : opcode=0x%x, noperands=%d\n",opcode,nOperands);
+    if (m_bHasBase) {
+      m_base = new RegDirectAddrMode(cpu_dsPic, (opcode>>15) & 0xf);
+      m_source = AddressingMode::construct(cpu_dsPic,
+					   (opcode >> 4) & 0x7,
+					   opcode & 0x1f);
+      m_destination = AddressingMode::construct(cpu_dsPic,
+						(opcode >> 11) & 0x7,
+						(opcode >> 7)  & 0xf);
+    } else {
+      m_base =  new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
+      m_destination = new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
+      m_source = new LiteralAddressingMode(cpu_dsPic,
+					   (opcode>>4) & (opcode & (1<<14) ? 0xff: 0x3ff));
+    }
+
 
     assert(m_source && m_destination);
-    /*
-    // If this is not a literal addressing mode, then the source
-    // register address is only 4 bits. In Literal addressing, the
-    // literal address is a 5-bit field  aliased with the source address.
-
-      m_WsAddress (opcode & 0x1f),
-      m_WdAddress ((opcode>>7) & 0xf),
-      m_WbAddress ((opcode>>15) & 0xf),
-      m_SourceAddressingMode ((opcode >> 4) & 0x7),
-      m_DestinationAddressingMode ((opcode >> 11) & 0x7),
-    if (m_SourceAddressingMode < 6)
-      m_WsAddress &= 0xf;
-    */
-  }
-
-  unsigned int  RegisterToRegisterInstruction::source()
-  {
-    return 0;
-  }
-
-  void RegisterToRegisterInstruction::destination(unsigned int nv)
-  {
   }
 
   char *RegisterToRegisterInstruction::name(char *buff,int len)
@@ -716,31 +636,59 @@ namespace dspic_instructions
     char cpSource[256];
     char cpDestination[256];
 
-    snprintf(buff, len, "%s%s\t%s,%s,%s", 
-	     instruction::name().c_str(),
-	     (m_bByteOperation ? ".b" :""),
-	     m_base->name(cpBase,sizeof(cpBase)),
-	     m_source->name(cpSource,sizeof(cpSource)),
-	     m_destination->name(cpDestination,sizeof(cpDestination))
-	     );
+    if (m_bHasBase)
+      snprintf(buff, len, "%s%s\t%s,%s,%s", 
+	       instruction::name().c_str(),
+	       (m_bByteOperation ? ".b" :""),
+	       m_base->name(cpBase,sizeof(cpBase)),
+	       m_source->name(cpSource,sizeof(cpSource)),
+	       m_destination->name(cpDestination,sizeof(cpDestination))
+	       );
+    else
+      snprintf(buff, len, "%s%s\t%s, %s", 
+	       instruction::name().c_str(),
+	       (m_bByteOperation ? ".b" :""),
+	       m_source->name(cpBase,sizeof(cpBase)),
+	       m_destination->name(cpDestination,sizeof(cpDestination))
+	       );
 
     return buff;
   }
   //--------------------------------------------------
 
-  ADDR::ADDR (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
-    : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"add")
+  ADDR::ADDR (Processor *new_cpu, 
+	      unsigned int new_opcode, 
+	      unsigned int addr,
+	      int nOperands)
+    : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"add",nOperands)
   {
   }
 
   void ADDR::execute()
   {
-    // RegisterValue srcRV = 
+    RegisterValue baseRV(m_base ? m_base->get() : m_destination->get());
+    RegisterValue srcRV (m_source->get());
+    RegisterValue resRV (srcRV);
+
+    resRV.data += baseRV.data;
+    resRV.init |= baseRV.init;
+
+    m_destination->put(resRV);
+
+    unsigned flags = 
+      ((resRV.data & 0xffff  )  ? 0  : eZ) |
+      ((resRV.data & 0x10000 )  ? eC : 0) |
+      (((resRV.data ^ baseRV.data ^ srcRV.data)&0x10) ? eDC : 0) |
+      (((resRV.data & ~baseRV.data & ~srcRV.data | 
+	 ~resRV.data & baseRV.data & srcRV.data) & 0x8000) ? eOV : 0) |
+      ((resRV.data & 0x8000 )  ? eN : 0);
+
+    cpu_dsPic->m_status.putFlags(flags, eC|eZ|eOV|eN|eDC, 0);
     cpu_dsPic->pc->increment();
   }
 
   //--------------------------------------------------
-
+  /*
   ADDL::ADDL (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
     : RegisterDirectLiteralInstruction(new_cpu, new_opcode, addr,"add")
   {
@@ -750,6 +698,7 @@ namespace dspic_instructions
   {
     cpu_dsPic->pc->increment();
   }
+  */
   //--------------------------------------------------
 
   ADD::ADD (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)

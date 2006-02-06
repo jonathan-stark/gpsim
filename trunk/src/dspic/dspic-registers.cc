@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "dspic-registers.h"
 #include "dspic-processors.h"
+#include "../trace.h"
 
 #if defined(PROPAGATE_UNKNOWNS)
 bool gbPropagateUnknown=false;
@@ -57,7 +58,7 @@ namespace dspic_registers {
 
   void PCL::put(unsigned int new_value)
   {
-    trace.raw(write_trace.get() | value.get());
+    dspic::gTrace->raw(write_trace.get() | value.get());
     cpu_dsPic->pc->computed_goto(new_value);
   }
 
@@ -87,6 +88,9 @@ namespace dspic_registers {
     : m_cpu(pcpu), m_pcl(pPCL)
   {
     printf("dspic program counter.\n");
+
+    set_trace_command(dspic::gTrace->allocateTraceType(new PCTraceType(pcpu,0,1)));
+
   }
 
   //--------------------------------------------------
@@ -96,7 +100,7 @@ namespace dspic_registers {
   void dsPicProgramCounter::jump(unsigned int new_address)
   {
 
-    trace.raw(trace_other | (value<<1));
+    dspic::gTrace->raw(trace_other | (value<<1));
     value = new_address & memory_size_mask;
 
     m_pcl->value.put(value & 0xffff);
@@ -109,7 +113,7 @@ namespace dspic_registers {
   {
     printf("dspic %s.\n",__FUNCTION__);
 
-    trace.raw(trace_other | (value<<1));
+    dspic::gTrace->raw(trace_other | (value<<1));
 
     // Use the new_address and the cached pclath (or page select bits
     // for 12 bit cores) to generate the destination address: 
@@ -131,7 +135,7 @@ namespace dspic_registers {
   {
     printf("dspic program counter::%s. (0x%x)\n",__FUNCTION__,new_value);
 
-    trace.raw(trace_other | (value<<1));
+    dspic::gTrace->raw(trace_other | (value<<1));
 
     value = new_value & memory_size_mask;
     m_pcl->value.put(value & 0xff);
@@ -158,7 +162,7 @@ namespace dspic_registers {
   {
 
     // Trace the value of the program counter before it gets changed.
-    trace.raw(trace_increment | value);
+    dspic::gTrace->raw(trace_increment | value);
     value = (value + 1) & memory_size_mask;
 
     // Update pcl. Note that we don't want to pcl.put() because that 

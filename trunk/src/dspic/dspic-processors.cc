@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../symbol.h"
 #include "../program_files.h"
 #include "../packages.h"
+#include "../trace.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //

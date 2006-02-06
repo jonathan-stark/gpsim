@@ -85,7 +85,8 @@ namespace dspic {
 
     // Public Data members:
     dspic_registers::dsPicRegister W[16];
-    dspic_registers::Stack m_stack;
+    dspic_registers::Stack  m_stack;
+    dspic_registers::Status m_status;
 
   protected:
     unsigned int m_current_disasm_address;  // Used only when .hex files are loaded
