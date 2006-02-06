@@ -145,6 +145,48 @@ namespace dspic_registers {
 
   //------------------------------------------------------------
   //
+  class Status : public dsPicRegister
+  {
+  public:
+
+    enum {
+      eC    = 1<<0,
+      eZ    = 1<<1,
+      eOV   = 1<<2,
+      eN    = 1<<3,
+      eRA   = 1<<4,
+      eIPLD = 1<<5,
+      eIPL1 = 1<<6,
+      eIPL2 = 1<<7,
+      eDC   = 1<<8,
+      eDA   = 1<<9,
+      eSAB  = 1<<10,
+      eOAB  = 1<<11,
+      eSB   = 1<<12,
+      eSA   = 1<<13,
+      eOB   = 1<<14,
+      eOA   = 1<<15
+    };
+
+    inline void traceWrite()
+    {
+      dspic::gTrace->raw(write_trace.get() | value.get());
+      dspic::gTrace->raw(write_trace.geti() | value.geti());
+    }
+
+    inline void putFlags(unsigned int flags, 
+			 unsigned int mask,
+			 unsigned int uninit)
+    {
+      traceWrite();
+      value.data = (value.data & ~mask) | flags;
+      value.init &= ~mask;
+      value.init |= uninit;
+    }
+
+  };
+  //------------------------------------------------------------
+  //
   class PCL : public dsPicRegister
   {
   public:

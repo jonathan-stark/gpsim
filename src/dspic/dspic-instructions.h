@@ -30,6 +30,27 @@ namespace dspic
 
 namespace dspic_instructions
 {
+
+  // Fix me - duplicate of the status register bit definitions.
+  enum {
+    eC    = 1<<0,
+    eZ    = 1<<1,
+    eOV   = 1<<2,
+    eN    = 1<<3,
+    eRA   = 1<<4,
+    eIPLD = 1<<5,
+    eIPL1 = 1<<6,
+    eIPL2 = 1<<7,
+    eDC   = 1<<8,
+    eDA   = 1<<9,
+    eSAB  = 1<<10,
+    eOAB  = 1<<11,
+    eSB   = 1<<12,
+    eSA   = 1<<13,
+    eOB   = 1<<14,
+    eOA   = 1<<15
+  };
+
   //---------------------------------------------------------
   class MultiWordInstruction : public instruction
   {
@@ -207,33 +228,16 @@ namespace dspic_instructions
     RegisterInstruction(Processor *new_cpu, 
 			unsigned int new_opcode,
 			unsigned int addr,
-			const char *_name);
+			const char *_name,
+			bool bHasBase);
     virtual bool isBase() { return true;}
-    virtual unsigned int source() = 0;
-    virtual void destination(unsigned int) = 0;
   protected:
+    bool m_bHasBase; // true for instructions with 3 operands.
+    bool m_bByteOperation;
     AddressingMode *m_base;
     AddressingMode *m_source;
     AddressingMode *m_destination;
   };
-
-  //----------------------------------------------------------------------
-  class RegisterDirectLiteralInstruction : public RegisterInstruction
-  {
-  public:
-    RegisterDirectLiteralInstruction(Processor *new_cpu, 
-				     unsigned int new_opcode,
-				     unsigned int addr,
-				     const char *new_name);
-    virtual char *name(char *,int len);
-    virtual unsigned int source();
-    virtual void destination(unsigned int);
-  protected:
-    unsigned int m_unsignedLit;
-    unsigned int m_Waddress;
-    bool m_bByteOperation;
-  };
- 
   //----------------------------------------------------------------------
   class RegisterToRegisterInstruction : public RegisterInstruction
   {
@@ -241,32 +245,24 @@ namespace dspic_instructions
     RegisterToRegisterInstruction(Processor *new_cpu, 
 				  unsigned int new_opcode,
 				  unsigned int addr,
-				  const char *new_name);
+				  const char *new_name,
+				  int nOperands);
     virtual char *name(char *,int len);
-    virtual unsigned int source();
-    virtual void destination(unsigned int);
-  protected:
-    bool m_bByteOperation;
   };
  
   //----------------------------------------------------------------------
   class ADDR : public RegisterToRegisterInstruction
   {
   public:
-    ADDR(Processor *new_cpu, unsigned int new_opcode, unsigned int addr);
+    ADDR(Processor *new_cpu, unsigned int new_opcode, 
+	 unsigned int addr, int nOperands);
     virtual void execute();
     static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
-    {return new ADDR(new_cpu,new_opcode,addr);}
-  };
-
-  //----------------------------------------------------------------------
-  class ADDL : public RegisterDirectLiteralInstruction
-  {
-  public:
-    ADDL(Processor *new_cpu, unsigned int new_opcode, unsigned int addr);
-    virtual void execute();
-    static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
-      {return new ADDL(new_cpu,new_opcode,addr);}
+    {
+      if ((new_opcode & 0xf00000) == 0x400000)
+	return new ADDR(new_cpu,new_opcode,addr,3);
+      return new ADDR(new_cpu,new_opcode,addr,2);
+    }
   };
 
   //----------------------------------------------------------------------

@@ -1,3 +1,10 @@
+2006-02-05 Scott Dattalo <scott@dattalo.com>
+	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
+	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h,
+	src/dspic/dspic-registers.cc, src/dspic/dspic-registers.h:
+	Unified the Literal and Register Direct addressing modes.
+	Added support for the Status register.
+
 2006-02-04 Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
 	src/dspic/dspic-processors.cc: 
