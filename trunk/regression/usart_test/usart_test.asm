@@ -108,8 +108,8 @@ start
    .sim "node PIC_rx"
 
    ;; Tie the USART module to the PIC
-   .sim "attach PIC_tx portc6 U1.RX"
-   .sim "attach PIC_rx portc7 U1.TX"
+   .sim "attach PIC_tx portc6 U1.RXPIN"
+   .sim "attach PIC_rx portc7 U1.TXPIN"
 
    ;; Set the USART module's Baud Rate
 

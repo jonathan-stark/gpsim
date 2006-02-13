@@ -1,9 +1,23 @@
+2006-02-08 Scott Dattalo <scott@dattalo.com>
+	* modules/usart.cc:
+	Renamed the usart RX and TX pins to RXPIN and TXPIN. The old names
+	conflict with the names of constants. (This is a problem with
+	absolute mode code.)
+	Updated the gui to use gtk_text_view instead of the obsolete
+	gtk_text. (note this change really needs to be made for all of
+	gpsim's gui!)
+
+2006-02-08 Scott Dattalo <scott@dattalo.com>
+	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h:
+	Support for some versions of the MOV instruction.
+
 2006-02-05 Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
 	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h,
 	src/dspic/dspic-registers.cc, src/dspic/dspic-registers.h:
 	Unified the Literal and Register Direct addressing modes.
 	Added support for the Status register.
+	Program counter tracing is now supported.
 
 2006-02-04 Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
