@@ -273,7 +273,7 @@ const int NUM_OP_DSPIC = sizeof(op_dsPic) / sizeof(op_dsPic[0]);
 instruction * dsPicProcessor::disasm (unsigned int address, unsigned int inst)
 {
 
-  printf("dspic disasm addr 0x%x, opcode 0x%x\n",address,inst);
+  //printf("dspic disasm addr 0x%x, opcode 0x%x\n",address,inst);
 
   instruction *pi;
 
@@ -559,7 +559,7 @@ namespace dspic_instructions
       int offset= (((sign=='-') ?
 		    ((opcode^0xffff)+1) : opcode) << 1) & 0x1fffe;
       
-      snprintf(buff, len, "%s\t%s#0x%06x  ; $%c0x%x", 
+      snprintf(buff, len, "%s\t%s#0x%06x\t; $%c0x%x", 
 	       instruction::name().c_str(),
 	       mcP_conditionName,
 	       m_destination, 
@@ -587,10 +587,8 @@ namespace dspic_instructions
   RegisterInstruction::RegisterInstruction(Processor *new_cpu, 
 					   unsigned int new_opcode,
 					   unsigned int addr,
-					   const char *_name,
-					   bool bHasBase)
+					   const char *_name)
     : instruction(new_cpu, new_opcode, addr),
-      m_bHasBase(bHasBase),
       m_bByteOperation((new_opcode & (1<<14)) != 0),
       m_base(0), m_source(0), m_destination(0)
   {
@@ -603,12 +601,20 @@ namespace dspic_instructions
    unsigned int new_opcode,
    unsigned int addr,
    const char *_name,
-   int nOperands
+   eAddressingModes addrMode
    )
-    : RegisterInstruction(new_cpu, new_opcode, addr, _name, nOperands>2 ? true : false)
+    : RegisterInstruction(new_cpu, new_opcode, addr, _name),
+      m_addrMode(addrMode)
   {
-    printf("REgister to register : opcode=0x%x, noperands=%d\n",opcode,nOperands);
-    if (m_bHasBase) {
+
+    switch(m_addrMode) {
+    case eRegisterDirect:
+      m_base =  new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
+      m_destination = new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
+      m_source = new LiteralAddressingMode(cpu_dsPic,
+					   (opcode>>4) & (opcode & (1<<14) ? 0xff: 0x3ff));
+      break;
+    case eRegisterIndirect:
       m_base = new RegDirectAddrMode(cpu_dsPic, (opcode>>15) & 0xf);
       m_source = AddressingMode::construct(cpu_dsPic,
 					   (opcode >> 4) & 0x7,
@@ -616,15 +622,10 @@ namespace dspic_instructions
       m_destination = AddressingMode::construct(cpu_dsPic,
 						(opcode >> 11) & 0x7,
 						(opcode >> 7)  & 0xf);
-    } else {
-      m_base =  new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
-      m_destination = new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
-      m_source = new LiteralAddressingMode(cpu_dsPic,
-					   (opcode>>4) & (opcode & (1<<14) ? 0xff: 0x3ff));
+      break;
+    default:
+      assert(0);
     }
-
-
-    assert(m_source && m_destination);
   }
 
   char *RegisterToRegisterInstruction::name(char *buff,int len)
@@ -636,7 +637,16 @@ namespace dspic_instructions
     char cpSource[256];
     char cpDestination[256];
 
-    if (m_bHasBase)
+    switch(m_addrMode) {
+    case eRegisterDirect:
+      snprintf(buff, len, "%s%s\t%s, %s", 
+	       instruction::name().c_str(),
+	       (m_bByteOperation ? ".b" :""),
+	       m_source->name(cpBase,sizeof(cpBase)),
+	       m_destination->name(cpDestination,sizeof(cpDestination))
+	       );
+      break;
+    case eRegisterIndirect:
       snprintf(buff, len, "%s%s\t%s,%s,%s", 
 	       instruction::name().c_str(),
 	       (m_bByteOperation ? ".b" :""),
@@ -644,13 +654,10 @@ namespace dspic_instructions
 	       m_source->name(cpSource,sizeof(cpSource)),
 	       m_destination->name(cpDestination,sizeof(cpDestination))
 	       );
-    else
-      snprintf(buff, len, "%s%s\t%s, %s", 
-	       instruction::name().c_str(),
-	       (m_bByteOperation ? ".b" :""),
-	       m_source->name(cpBase,sizeof(cpBase)),
-	       m_destination->name(cpDestination,sizeof(cpDestination))
-	       );
+      break;
+    default:
+      break;
+    }
 
     return buff;
   }
@@ -659,8 +666,8 @@ namespace dspic_instructions
   ADDR::ADDR (Processor *new_cpu, 
 	      unsigned int new_opcode, 
 	      unsigned int addr,
-	      int nOperands)
-    : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"add",nOperands)
+	      eAddressingModes addrMode)
+    : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"add",addrMode)
   {
   }
 
@@ -1290,18 +1297,38 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MOV::MOV (Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
-    : instruction(new_cpu, new_opcode, addr)
+  MOV::MOV (Processor *new_cpu, 
+	    unsigned int new_opcode, 
+	    unsigned int addr,
+	    eAddressingModes addrMode)
+    : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"mov",addrMode)
   {
-
-    decode(new_cpu,new_opcode);
-    new_name("mov");
-    printf("constructing a MOV\n");
+    printf("MOV instruction opcode:0x%x mode=%d\n",opcode,m_addrMode);
   }
 
   void MOV::execute()
   {
+    RegisterValue baseRV(m_base ? m_base->get() : m_destination->get());
+    RegisterValue srcRV (m_source->get());
+    RegisterValue resRV (srcRV);
+
+    resRV.data += baseRV.data;
+    resRV.init |= baseRV.init;
+
+    m_destination->put(resRV);
+
+    unsigned flags = 
+      ((resRV.data & 0xffff  )  ? 0  : eZ) |
+      ((resRV.data & 0x10000 )  ? eC : 0) |
+      (((resRV.data ^ baseRV.data ^ srcRV.data)&0x10) ? eDC : 0) |
+      (((resRV.data & ~baseRV.data & ~srcRV.data | 
+	 ~resRV.data & baseRV.data & srcRV.data) & 0x8000) ? eOV : 0) |
+      ((resRV.data & 0x8000 )  ? eN : 0);
+
+    cpu_dsPic->m_status.putFlags(flags, eC|eZ|eOV|eN|eDC, 0);
+    cpu_dsPic->pc->increment();
   }
+
 
   //--------------------------------------------------
 
@@ -1379,7 +1406,7 @@ namespace dspic_instructions
     // but there is a chance that this info will be accessed
     // before that occurs).
 
-    printf("constructing a NOP\n");
+    //printf("constructing a NOP\n");
   }
 
   void NOP::execute()

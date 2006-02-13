@@ -228,15 +228,18 @@ namespace dspic_instructions
     RegisterInstruction(Processor *new_cpu, 
 			unsigned int new_opcode,
 			unsigned int addr,
-			const char *_name,
-			bool bHasBase);
+			const char *_name);
     virtual bool isBase() { return true;}
   protected:
-    bool m_bHasBase; // true for instructions with 3 operands.
     bool m_bByteOperation;
     AddressingMode *m_base;
     AddressingMode *m_source;
     AddressingMode *m_destination;
+  };
+  //++++++++++++++++++++++++++++++++++++++++
+  enum eAddressingModes {
+    eRegisterDirect,
+    eRegisterIndirect
   };
   //----------------------------------------------------------------------
   class RegisterToRegisterInstruction : public RegisterInstruction
@@ -246,8 +249,11 @@ namespace dspic_instructions
 				  unsigned int new_opcode,
 				  unsigned int addr,
 				  const char *new_name,
-				  int nOperands);
+				  eAddressingModes addrMode);
     virtual char *name(char *,int len);
+  protected:
+    eAddressingModes m_addrMode;
+    //bool m_bHasBase; // true for instructions with 3 operands.
   };
  
   //----------------------------------------------------------------------
@@ -255,13 +261,13 @@ namespace dspic_instructions
   {
   public:
     ADDR(Processor *new_cpu, unsigned int new_opcode, 
-	 unsigned int addr, int nOperands);
+	 unsigned int addr, eAddressingModes addrMode);
     virtual void execute();
     static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
     {
       if ((new_opcode & 0xf00000) == 0x400000)
-	return new ADDR(new_cpu,new_opcode,addr,3);
-      return new ADDR(new_cpu,new_opcode,addr,2);
+	return new ADDR(new_cpu,new_opcode,addr,eRegisterIndirect);
+      return new ADDR(new_cpu,new_opcode,addr,eRegisterDirect);
     }
   };
 
@@ -668,14 +674,19 @@ namespace dspic_instructions
   };
 
   //----------------------------------------------------------------------
-  class MOV : public instruction
+  //----------------------------------------------------------------------
+  class MOV : public RegisterToRegisterInstruction
   {
   public:
-    MOV(Processor *new_cpu, unsigned int new_opcode, unsigned int addr);
+    MOV(Processor *new_cpu, unsigned int new_opcode, 
+	 unsigned int addr, eAddressingModes addrMode);
     virtual void execute();
-    virtual bool isBase() { return true;}
     static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
-    {return new MOV(new_cpu,new_opcode, addr);}
+    {
+      if ((new_opcode & 0xf78000) == 0xb78000)
+	return new MOV(new_cpu,new_opcode,addr,eRegisterDirect);
+      return new MOV(new_cpu,new_opcode,addr,eRegisterIndirect);
+    }
   };
 
   //----------------------------------------------------------------------
