@@ -179,11 +179,11 @@ LL
 
 done:
 
-  .assert  ",\"*** PASSED LCD test\""
+  .assert  "\"*** PASSED LCD test\""
 	goto	$
 
 FAILED:
-  .assert  ",\"*** FAILED LCD test\""
+  .assert  "\"*** FAILED LCD test\""
 	goto	$
 
 

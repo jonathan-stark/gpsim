@@ -67,7 +67,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/bitlog.h"
 
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
@@ -125,7 +125,7 @@ public:
     usart = _usart;
 
     string n(usart->name());
-    n = n + ".RX";
+    n = n + ".RXPIN";
     new_name(n.c_str());
 
     // Let the pin think it's in the high state. If this is wrong,
@@ -186,7 +186,7 @@ public:
     usart = _usart;
 
     string n(usart->name());
-    n = n + ".TX";
+    n = n + ".TXPIN";
     new_name(n.c_str());
     bDrivingState = true;
     update_direction(1,true);   // Make the TX pin an output.
@@ -944,8 +944,8 @@ void USARTModule::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  USART_TXPIN *txpin = new USART_TXPIN(this, 0,"TX");
-  USART_RXPIN *rxpin = new USART_RXPIN(this, 1,"RX");
+  USART_TXPIN *txpin = new USART_TXPIN(this, 0,"TXPIN");
+  USART_RXPIN *rxpin = new USART_RXPIN(this, 1,"RXPIN");
 
 
   assign_pin(1, txpin);
@@ -1076,9 +1076,14 @@ void USARTModule::show_tx(unsigned int data)
 {
   if(get_interface().bUsingGUI()) {
 
-	data &= 0xff;
-	gtk_text_insert (GTK_TEXT(text), NULL, NULL, NULL, (char *)&data, 1);
-
+    data &= 0xff;
+    if (data != 0x0a) {
+      GtkTextBuffer *buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+      GtkTextIter iter;
+      gtk_text_buffer_get_end_iter(buff, &iter);
+      gtk_text_buffer_insert(buff,&iter,(char *)&data, 1);
+      gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0.0, 1.0);
+    }
   }
 
 }
@@ -1087,13 +1092,24 @@ void USARTModule::CreateGraphics()
 {
 
   if(get_interface().bUsingGUI()) {
-
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    text = gtk_text_new (NULL, NULL);
-    gtk_text_set_editable (GTK_TEXT (text), TRUE);
-    gtk_container_add (GTK_CONTAINER (window), text);
     gtk_window_set_title(GTK_WINDOW(window), "USART");
-    gtk_window_set_default_size (GTK_WINDOW(window), 300, 100);
+    gtk_window_set_default_size (GTK_WINDOW (window), 300, 100);
+
+    GtkWidget *pSW = gtk_scrolled_window_new (0,0);
+    gtk_container_add (GTK_CONTAINER (window), pSW);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
+				    GTK_POLICY_AUTOMATIC,
+				    GTK_POLICY_AUTOMATIC);
+    text = gtk_text_view_new ();
+    gtk_text_view_set_editable (GTK_TEXT_VIEW (text), TRUE);
+    gtk_container_add (GTK_CONTAINER (pSW), text);
+
+    /* Change default font throughout the widget */
+    PangoFontDescription *font_desc;
+    font_desc = pango_font_description_from_string ("Courier 10");
+    gtk_widget_modify_font (text, font_desc);
+    pango_font_description_free (font_desc);
 
     gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK);
 
