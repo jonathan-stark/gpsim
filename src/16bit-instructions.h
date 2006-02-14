@@ -84,6 +84,92 @@ class multi_word_branch : public multi_word_instruction
 };
 
 //---------------------------------------------------------
+class ADDULNK : public instruction 
+{
+
+public:
+  ADDULNK(Processor *new_cpu, unsigned int new_opcode,const char *);
+  virtual bool isBase() { return true;}
+  virtual void execute(void);
+  virtual char *name(char *,int);
+protected:
+  unsigned int m_lit;
+};
+
+//---------------------------------------------------------
+class ADDFSR : public instruction 
+{
+
+public:
+  ADDFSR(Processor *new_cpu, unsigned int new_opcode,const char *);
+  virtual bool isBase() { return true;}
+  virtual void execute(void);
+  virtual char *name(char *,int);
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
+  {
+    if (((new_opcode>>6)&3) == 3)
+      if (new_opcode & 0x100)
+	return new ADDULNK(new_cpu,new_opcode,"subulnk");
+      else
+	return new ADDULNK(new_cpu,new_opcode,"addulnk");
+    if (new_opcode & 0x100)
+      return new ADDFSR(new_cpu,new_opcode,"subfsr");
+    return new ADDFSR(new_cpu,new_opcode,"addfsr");
+  }
+protected:
+  unsigned int m_fsr;
+  unsigned int m_lit;
+  Indirect_Addressing *ia;
+};
+
+//---------------------------------------------------------
+class CALLW : public instruction
+{
+public:
+  CALLW(Processor *new_cpu, unsigned int new_opcode);
+  virtual bool isBase() { return true;}
+  virtual void execute(void);
+  virtual char *name(char *,int);
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
+  {
+    return new CALLW(new_cpu,new_opcode);
+  }
+};
+//---------------------------------------------------------
+class MOVSF : public multi_word_instruction
+{
+public:
+
+  MOVSF(Processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  virtual char *name(char *,int);
+  void runtime_initialize(void);
+
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
+    {return new MOVSF(new_cpu,new_opcode);}
+protected:
+  unsigned int source,destination;
+
+};
+
+//---------------------------------------------------------
+class PUSHL : public instruction
+{
+public:
+  PUSHL(Processor *new_cpu, unsigned int new_opcode);
+  virtual bool isBase() { return true;}
+  virtual void execute(void);
+  virtual char *name(char *,int);
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
+  {
+    return new PUSHL(new_cpu,new_opcode);
+  }
+protected:
+  unsigned int m_lit;
+};
+
+
+//---------------------------------------------------------
 class ADDLW16 : public ADDLW 
 {
 

@@ -125,6 +125,198 @@ char * multi_word_branch::name(char *return_str,int len)
   return(return_str);
 }
 
+//---------------------------------------------------------
+ADDULNK::ADDULNK(Processor *new_cpu, unsigned int new_opcode, const char *pName)
+  : instruction(new_cpu,  new_opcode,0)
+{
+  m_lit = opcode & 0x3f;
+  new_name(pName);
+
+}
+char *ADDULNK::name(char *return_str,int len)
+{
+
+  snprintf(return_str,len,"%s\t0x%x",
+	   gpsimValue::name().c_str(),
+	   m_lit);
+
+  return(return_str);
+}
+void ADDULNK::execute(void)
+{
+  if (opcode & 0x100)
+    cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() - m_lit); // SUBULNK
+  else
+    cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() + m_lit); // ADDULNK
+  cpu16->pc->new_address(cpu16->stack->pop());
+}
+
+//---------------------------------------------------------
+ADDFSR::ADDFSR(Processor *new_cpu, unsigned int new_opcode, const char *pName)
+  : instruction(new_cpu,  new_opcode,0)
+{
+  m_fsr = (opcode>>6)&3;
+  m_lit = opcode & 0x3f;
+  switch(m_fsr) {
+  case 0:
+    ia = &cpu16->ind0;
+    break;
+
+  case 1:
+    ia = &cpu16->ind1;
+    break;
+
+  case 2:
+    ia = &cpu16->ind2;
+    break;
+
+  case 3:
+    ia = &cpu16->ind2;
+  }
+
+  new_name(pName);
+
+}
+
+char *ADDFSR::name(char *return_str,int len)
+{
+
+  snprintf(return_str,len,"%s\t%d,0x%x",
+	   gpsimValue::name().c_str(),
+	   m_fsr,
+	   m_lit);
+
+  return(return_str);
+}
+
+
+void ADDFSR::execute()
+{
+  if (opcode & 0x100)
+    ia->put_fsr(ia->get_fsr_value() - m_lit);  //SUBFSR
+  else
+    ia->put_fsr(ia->get_fsr_value() + m_lit);  //ADDFSR
+  cpu16->pc->increment();
+}
+
+//--------------------------------------------------
+CALLW::CALLW(Processor *new_cpu, unsigned int new_opcode)
+  :instruction (new_cpu, new_opcode, 0)
+{
+}
+char *CALLW::name(char *return_str,int len)
+{
+
+  snprintf(return_str,len,"%s",
+	   gpsimValue::name().c_str());
+  return(return_str);
+}
+void CALLW::execute()
+{
+  cpu16->stack->push(cpu16->pc->get_next());
+  cpu16->pcl->put(cpu16->W->get());
+  cpu16->pc->increment();
+}
+
+//--------------------------------------------------
+PUSHL::PUSHL(Processor *new_cpu, unsigned int new_opcode)
+  :instruction (new_cpu, new_opcode, 0),
+   m_lit(new_opcode & 0xff)
+{
+}
+char *PUSHL::name(char *return_str,int len)
+{
+
+  snprintf(return_str,len,"%s\t0x%x",
+	   gpsimValue::name().c_str(),m_lit);
+  return(return_str);
+}
+void PUSHL::execute()
+{
+  cpu16->ind2.put(m_lit);
+  cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() -1);
+  cpu16->pc->increment();
+}
+
+//--------------------------------------------------
+
+MOVSF::MOVSF (Processor *new_cpu, unsigned int new_opcode)
+{
+  opcode = new_opcode;
+  cpu = new_cpu;
+  PMaddress = cpu16->getCurrentDisasmAddress();
+  PMindex   = cpu16->getCurrentDisasmIndex();
+  initialized = false;
+  destination = 0;
+  source = opcode & 0x7f;
+
+  if (opcode & 0x80)
+    new_name("movss");
+  else
+    new_name("movsf");
+}
+
+void MOVSF::runtime_initialize(void)
+{
+  if(cpu_pic->program_memory[PMindex+1])
+    {
+      word2_opcode = cpu_pic->program_memory[PMindex+1]->get_opcode();
+
+      if((word2_opcode & 0xf000) != 0xf000) 
+	{
+	  cout << "16bit-instructions.cc MOVSF error\n";
+	  return;
+	}
+
+      cpu_pic->program_memory[PMindex+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
+      destination = word2_opcode & ((opcode & 0x80) ? 0x7f : 0xfff);
+      initialized = true;
+    }
+
+}
+
+char *MOVSF::name(char *return_str,int len)
+{
+
+  if(!initialized)
+    runtime_initialize();
+
+  if (opcode & 0x80)
+    snprintf(return_str,len,"%s\t[0x%x],[0x%x]",
+	     gpsimValue::name().c_str(),
+	     source, destination);
+  else
+    snprintf(return_str,len,"%s\t[0x%x],%s",
+	     gpsimValue::name().c_str(),
+	     source,
+	     cpu_pic->registers[destination]->name().c_str());
+
+
+  return(return_str);
+}
+
+
+void MOVSF::execute()
+{
+  if(!initialized)
+    runtime_initialize();
+
+  unsigned int source_addr = (cpu16->ind2.get_fsr_value() + source)&0xfff;
+
+  unsigned int r =  cpu_pic->registers[source_addr]->get();
+  cpu16->pc->skip();
+
+  unsigned int destination_addr =
+    (opcode & 0x80) ? 
+    (cpu16->ind2.get_fsr_value() + source)&0xfff
+    :
+    destination;
+  cpu_pic->registers[destination]->put(r);
+
+  cpu16->pc->increment();
+
+}
+
 //--------------------------------------------------
 void ADDLW16::execute(void)
 {
@@ -1026,13 +1218,8 @@ char *LFSR::name(char *return_str,int len)
 
 void LFSR::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(!initialized)
     runtime_initialize();
-
-  //cpu16->registers[fsr].put(k);
-  //cout << "LFSR: not implemented\n";
 
   ia->put_fsr(k);
 
@@ -1597,8 +1784,6 @@ char *RETFIE16::name(char  *return_str,int len)
 //--------------------------------------------------
 void RETURN16::execute(void)
 {
-
-  // trace.instruction(opcode);
 
   cpu16->pc->new_address(cpu16->stack->pop());
   if(fast)
