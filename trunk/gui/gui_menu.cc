@@ -179,9 +179,9 @@ public:
     m_buffer = pBuffer; 
     char cParray[20];
     m_tag = gtk_text_buffer_create_tag (pBuffer, m_label,
-				      "foreground",
-				      getPreferred(cParray),
-				      NULL);
+					"foreground",
+					getPreferred(cParray),
+					NULL);
 
 
   }
@@ -200,6 +200,7 @@ public:
   void apply();
   void update();
   void parseLine(const char*);
+  void parseLine(int opcode, const char*);
   void toggleBreak(int line);
 
 private:
@@ -218,7 +219,11 @@ private:
   GtkStyle *instruction_text_style;  // for instruction in .asm display
   GtkStyle *number_text_style;       // for numbers in .asm display
   GtkStyle *comment_text_style;      // for comments in .asm display
-  GtkStyle *default_text_style;      // the rest
+  GtkStyle *linenumber_text_style;   // for line numbers and opcodes in .asm display
+  GtkStyle *default_text_style;      // for everything else.
+
+  GtkTextTag *m_BreakpointTag;
+  GtkTextTag *m_NoBreakpointTag;
 
   GtkWidget   *m_SampleNotebook;
   GtkPositionType m_TabPosition;
@@ -533,10 +538,22 @@ void SourceBrowserPreferences::toggleBreak(int line)
     gtk_widget_show_all (widget);
   }
 
+  if (m_view) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
+    GtkTextIter iBegin;
+    GtkTextIter iEnd;
+
+    gtk_text_buffer_get_end_iter (buffer, &iEnd);
+    gtk_text_buffer_get_iter_at_line(buffer, &iBegin, line);
+    #define STRLEN_OF_LINENUMBER_AND_OPCODE 10
+    gtk_text_buffer_get_iter_at_line_offset(buffer, &iEnd, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
+    gtk_text_buffer_apply_tag (buffer, m_BreakpointTag, &iBegin, &iEnd);
+
+  }
 }
 
 
-void SourceBrowserPreferences::parseLine(const char *cP)
+void SourceBrowserPreferences::parseLine(int opcode, const char *cP)
 {
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
   GtkTextIter iEnd;
@@ -545,9 +562,12 @@ void SourceBrowserPreferences::parseLine(const char *cP)
 
   char buf[64];
   int line_number = gtk_text_buffer_get_line_count(buffer);
-  static int opcode=0x1234;
 
-  snprintf(buf, sizeof(buf), "%5d %04X ",line_number,opcode);
+  if (opcode > 0) 
+    snprintf(buf, sizeof(buf), "%5d %04X ",line_number,opcode);
+  else
+    snprintf(buf, sizeof(buf), "%5d %s ",line_number,"    ");
+
   //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, buf, -1, "margin", NULL);
   gtk_text_buffer_insert (buffer, &iEnd, buf, -1);
 
@@ -587,6 +607,10 @@ void SourceBrowserPreferences::parseLine(const char *cP)
     } else 
       i++;
   }
+}
+void SourceBrowserPreferences::parseLine(const char *cP)
+{
+  parseLine(0, cP);
 }
 //========================================================================
 SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
@@ -634,6 +658,9 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox),
 				      &comment_text_style->fg[GTK_STATE_NORMAL],
 				      "Comments", this);
+
+
+
   }
 
   {
@@ -687,8 +714,26 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_text_buffer_create_tag (buffer, "margin",
 				"left_margin", 50,
 				NULL);
-    parseLine("Label: MOVF    Temp1,W ;Comment\n");
-    parseLine("       MOVLW   0x42    ;Comment");
+
+    m_BreakpointTag = gtk_text_buffer_create_tag (buffer, "Breakpoint",
+						  "foreground","black",
+						  "background","red",
+						  NULL);
+    m_NoBreakpointTag = gtk_text_buffer_create_tag (buffer, "NoBreakpoint",
+						    "foreground","black",
+						    "background","white",
+						    NULL);
+
+    g_signal_connect (G_OBJECT (m_BreakpointTag), "event",
+		      GTK_SIGNAL_FUNC(TagEvent),
+		      0);
+    g_signal_connect (G_OBJECT (m_NoBreakpointTag), "event",
+		      GTK_SIGNAL_FUNC(TagEvent),
+		      0);
+
+    parseLine(0x1234,"Label: MOVF    Temp1,W ;Comment\n");
+    parseLine(0xabcd,"       MOVLW   0x42    ;Comment\n");
+    parseLine("; Line only with a comment\n");
 
 
     m_LabelColor->apply();
@@ -720,6 +765,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_widget_set_usize(GTK_WIDGET(m_layout),PIXMAP_SIZE*2,0);
     gtk_widget_show(GTK_WIDGET(m_layout));
 
+    toggleBreak(2);
+
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(m_layout),
 		       FALSE,FALSE, 0);
 
@@ -730,7 +777,6 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     GtkWidget *label = gtk_label_new("file1.asm");
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),
-			     //GTK_WIDGET(m_view),
 			     hbox,
 			     label);
 
@@ -745,6 +791,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   gtk_widget_show_all(hbox2);
   gtk_widget_show_all(vbox3);
+
 
 }
 
