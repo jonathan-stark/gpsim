@@ -669,6 +669,7 @@ EXPORTS
     ?updatePort@PortModule@@UAEXXZ
     ?updateUI@PinModule@@UAEXXZ
     ?updateUI@PortRegister@@UAEXXZ
+    ?verbose@@3VGlobalVerbosityAccessor@@A
     ?waitForChild@Token@gpsim@@QAEXXZ
     GetUserInterface
     get_symbol_table
