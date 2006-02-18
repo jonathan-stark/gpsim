@@ -62,3 +62,5 @@ ${RT} tmr0_16bit sim
 #${RT} ccp ccp
 
 ${RT} switch_test sim
+
+${RT} p18f sim

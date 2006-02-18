@@ -6,13 +6,19 @@ else
   PATH := ../../gpsim:$(PATH)
 endif
 
+ifdef EXTENDED_INSTRUCTIONS
+  ASM_FLAGS = -c --extended
+else
+  ASM_FLAGS = -c
+endif
+
 GPSIM = gpsim
 
 %.o : %.asm
-	gpasm -c $<
+	gpasm $(ASM_FLAGS) $<
 
 # Each regression test has a target 'all'
 top: all
 
 clean:
-	rm -f *~ *.o *.lst *.map *.hex
+	rm -f *~ *.o *.lst *.map *.hex *.cod
