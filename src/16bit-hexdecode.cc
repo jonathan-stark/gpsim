@@ -50,6 +50,8 @@ struct instruction_constructor op_18cxx[] = {
   { 0xfe00,  0xe800,  ADDFSR::construct },
   { 0xffff,  0x0014,  CALLW::construct },
   { 0xff00,  0xeb00,  MOVSF::construct },
+  { 0xff00,  0xea00,  PUSHL::construct },
+  { 0xff00,  0xeb00,  MOVSF::construct },
 
   { 0xff00,  0x0f00,  ADDLW16::construct },
   { 0xfc00,  0x2400,  ADDWF16::construct },

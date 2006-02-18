@@ -627,7 +627,8 @@ void Program_Counter16::computed_goto(unsigned int new_address)
 
   value = ( (new_address | cpu_pic->get_pclath_branching_modpcl() )>>1) & memory_size_mask;
 
-  cpu_pic->pcl->value.put((value<<1) & 0xff);    // see Update pcl comment in Program_Counter::increment()
+  // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value.put((value<<1) & 0xff);
 
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
@@ -674,6 +675,7 @@ void Program_Counter16::put_value(unsigned int new_value)
   value = (new_value) & memory_size_mask;
   cpu_pic->pcl->value.put(value & 0xff);
   cpu_pic->pclath->value.put((value >> 8) & 0xff);
+  cpu16->pclatu.value.put((value >> 16) & 0xff);
 
 
   cpu_pic->pcl->update();

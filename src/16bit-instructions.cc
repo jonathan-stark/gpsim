@@ -203,6 +203,7 @@ void ADDFSR::execute()
 CALLW::CALLW(Processor *new_cpu, unsigned int new_opcode)
   :instruction (new_cpu, new_opcode, 0)
 {
+  new_name("callw");
 }
 char *CALLW::name(char *return_str,int len)
 {
@@ -223,6 +224,7 @@ PUSHL::PUSHL(Processor *new_cpu, unsigned int new_opcode)
   :instruction (new_cpu, new_opcode, 0),
    m_lit(new_opcode & 0xff)
 {
+  new_name("pushl");
 }
 char *PUSHL::name(char *return_str,int len)
 {
@@ -308,10 +310,10 @@ void MOVSF::execute()
 
   unsigned int destination_addr =
     (opcode & 0x80) ? 
-    (cpu16->ind2.get_fsr_value() + source)&0xfff
+    (cpu16->ind2.get_fsr_value() + destination)&0xfff
     :
     destination;
-  cpu_pic->registers[destination]->put(r);
+  cpu_pic->registers[destination_addr]->put(r);
 
   cpu16->pc->increment();
 

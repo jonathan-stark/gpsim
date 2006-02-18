@@ -210,9 +210,10 @@ void _16bit_processor :: create_sfr_map()
     delete pcl;
   pcl = new PCL16();
 
-  add_sfr_register(pcl,    0xff9);
-  add_sfr_register(pclath, 0xffa);
-  //add_sfr_register(&pclatu, 0xffb);
+  add_sfr_register(pcl,     0xff9);
+  add_sfr_register(pclath,  0xffa);
+  add_sfr_register(&pclatu, 0xffb, porv, "pclatu");
+
   stack = &stack16;
   add_sfr_register(&stack16.stkptr,  0xffc,porv,"stkptr");
   add_sfr_register(&stack16.tosl,    0xffd,porv,"tosl");

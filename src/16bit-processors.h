@@ -127,6 +127,8 @@ public:
 
   sfr_register prodh,prodl;
 
+  sfr_register pclatu;
+
   Fast_Stack   fast_stack;
   Indirect_Addressing  ind0;
   Indirect_Addressing  ind1;
@@ -172,15 +174,15 @@ public:
 
   // Return the portion of pclath that is used during branching instructions
   virtual unsigned int get_pclath_branching_jump(void)
-    {
-      return ((pclath->value.get() & 0x18)<<8);
-    }
+  {
+    return ((pclatu.value.get()<<16) | ((pclath->value.get() & 0xf8)<<8));
+  }
 
   // Return the portion of pclath that is used during modify PCL instructions
   virtual unsigned int get_pclath_branching_modpcl(void)
-    {
-      return((pclath->value.get() & 0x1f)<<8);
-    }
+  {
+    return ((pclatu.value.get()<<16) | ((pclath->value.get() & 0xff)<<8));
+  }
 
   virtual void option_new_bits_6_7(unsigned int);
 
