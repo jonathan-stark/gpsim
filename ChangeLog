@@ -1,7 +1,22 @@
 2006-02-19 Borut Razem <borut.razem@siol.net>
-	* regression/switch_test/switch_test.stc: removed .so extension
+	* regression/switch_test/switch_test.stc,
+	  examples/modules/usart_gui/usart_gui.stc: removed .so extension
 	  from "module library libgpsim_modules.so" so that it runs on WIN32
 	  platform
+	* src/modules.cc: made ModuleLibrary::MakeCanonicalName() a dummy
+	  method on WIN32 platform. Is it really needed on *nix?
+	* src/os_dependent.cc: introduced GPSIM_MODULE_PATH environment
+	  variable on WIN32 platform  to define additional directories where
+	  modules are searched. The search order for WIN32 is as follows:
+	    1. The directory specified by library_name.
+	    2. The current directory.
+	    3. The system directory.
+	    4. The 16-bit system directory.
+	    5. The Windows directory.
+	    6. The directory from which the application loaded
+	      followed by directories listed in GPSIM_MODULE_PATH environment
+	      variable followed by directories listed in PATH environment
+	      variable.
 
 2006-02-17 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-instructions.cc, src/16bit-instructions.h,
