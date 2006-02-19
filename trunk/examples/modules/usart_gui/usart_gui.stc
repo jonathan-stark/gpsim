@@ -12,7 +12,7 @@ load s usart_gui.cod
 # Set the Clock frequency to 4 Mhz.
 frequency 4000000
 
-module library libgpsim_modules.so
+module library libgpsim_modules
  
 # load the usart module from the module library and give it a name
                                                                                 

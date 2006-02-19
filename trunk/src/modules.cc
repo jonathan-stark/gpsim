@@ -320,11 +320,10 @@ bool ModuleLibrary::AddFile(const char *library_name, void *library_handle)
 }
 
 void ModuleLibrary::MakeCanonicalName(string &sPath, string &sName) {
-  GetFileName(sPath, sName);
 #ifdef _WIN32
-  for(unsigned int i = 0; i < sName.size(); i++) {
-    sName[i] = ::toupper(sName[i]);
-  }
+  sName = sPath;
+#else
+  GetFileName(sPath, sName);
 #endif
 }
 
