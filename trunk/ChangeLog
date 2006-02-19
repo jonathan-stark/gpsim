@@ -1,3 +1,8 @@
+2006-02-19 Borut Razem <borut.razem@siol.net>
+	* regression/switch_test/switch_test.stc: removed .so extension
+	  from "module library libgpsim_modules.so" so that it runs on WIN32
+	  platform
+
 2006-02-17 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-instructions.cc, src/16bit-instructions.h,
 	src/16bit-hexdecode.cc: Fixed a few bugs with the newly added
@@ -15,7 +20,6 @@
 	p18f/extended_instructions.asm, p18f/instructions.asm,
 	p18f/startup.stc:
 	Regression test for the 18f extended instructions.
-	
 
 2006-02-16 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync

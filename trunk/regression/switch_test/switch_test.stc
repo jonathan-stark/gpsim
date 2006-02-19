@@ -3,7 +3,7 @@ load switch_test.cod
 
 
 # Module libraries:
-module library libgpsim_modules.so
+module library libgpsim_modules
 
 
 module load switch SW1
