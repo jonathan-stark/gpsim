@@ -264,11 +264,6 @@ static void set_path(void)
     old_path = _tgetenv(PATH_STR);
     size_t old_path_len = _tcslen(old_path);
 
-    PTCH module_path = _tgetenv(GPSIM_MODULE_PATH_STR);
-    size_t module_path_len = 0;
-    if (NULL != module_path)
-      size_t module_path_len = _tcslen(module_path);
-
     TCHAR exe_path[_MAX_PATH];
     TCHAR exe_drive[_MAX_DRIVE];
     TCHAR exe_dir[_MAX_DIR];
@@ -277,23 +272,30 @@ static void set_path(void)
     _tmakepath(exe_path, exe_drive, exe_dir, NULL, NULL);
     size_t exe_len = strlen(exe_path);
 
-    size_t new_len = PATH_STR_LEN + exe_len + module_path_len + old_path_len + (3 * sizeof TCHAR);
-    PTCH new_path = new TCHAR[new_len];
+    PTCH new_path;
 
-    if (NULL != module_path)
+    PTCH module_path = _tgetenv(GPSIM_MODULE_PATH_STR);
+    if (NULL != module_path) {
+      size_t new_len = PATH_STR_LEN + exe_len + _tcslen(module_path) + old_path_len + (4 * sizeof(TCHAR));
+      new_path = new TCHAR[new_len];
       _sntprintf(new_path, new_len, PATH_STR "=%s;%s;%s", exe_path, module_path, old_path);
-    else
+    }
+    else {
+      size_t new_len = PATH_STR_LEN + exe_len + old_path_len + (3 * sizeof(TCHAR));
+      new_path = new TCHAR[new_len];
       _sntprintf(new_path, new_len, PATH_STR "=%s;%s", exe_path, old_path);
+    }
     _putenv(new_path);
     delete [] new_path;
   }
 }
 
+#if 0
 static void reset_path(void)
 {
   if (NULL != old_path) {
     size_t old_path_len = _tcslen(old_path);
-    size_t new_len = PATH_STR_LEN + old_path_len + (2 * sizeof TCHAR);
+    size_t new_len = PATH_STR_LEN + old_path_len + (2 * sizeof(TCHAR));
     PTCH new_path = new char[new_len];
     _sntprintf(new_path, new_len, PATH_STR "=%s", old_path);
     _putenv(new_path);
@@ -301,6 +303,7 @@ static void reset_path(void)
     old_path = NULL;
   }
 }
+#endif
 #endif
 
 /*
