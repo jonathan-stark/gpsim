@@ -1,3 +1,7 @@
+2006-02-20 Borut Razem <borut.razem@siol.net>
+	* src/os_dependent.cc: reverted changes I made 2006-02-19,
+	  since the GPSIMPATH functionality was already implemented
+
 2006-02-20 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc: Symbol_Table::clear() crashes when the simulation
 	engine is used as a stand alone library (Reported by David Saxtion).

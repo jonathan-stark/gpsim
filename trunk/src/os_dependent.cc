@@ -43,7 +43,6 @@ Boston, MA 02111-1307, USA.  */
 #include <glib/gwin32.h>
 #include <direct.h>
 #include <windows.h>
-#include <tchar.h>
 
 #define STRICMP stricmp
 
@@ -251,73 +250,6 @@ bool bHasAbsolutePath(string &fname)
 //---------------------------
 //OS agnostic library loader
 
-#ifdef _WIN32
-static TCHAR *old_path = NULL;
-
-#define PATH_STR              "PATH"
-#define PATH_STR_LEN          (sizeof(PATH_STR) - 1)
-#define GPSIM_MODULE_PATH_STR "GPSIM_MODULE_PATH"
-
-static void set_path(void)
-{
-  if (NULL == old_path) {
-    old_path = _tgetenv(PATH_STR);
-    size_t old_path_len = _tcslen(old_path);
-
-    TCHAR exe_path[_MAX_PATH];
-    TCHAR exe_drive[_MAX_DRIVE];
-    TCHAR exe_dir[_MAX_DIR];
-    GetModuleFileName(NULL, exe_path, _MAX_PATH);
-    _tsplitpath(exe_path, exe_drive, exe_dir, NULL, NULL);
-    _tmakepath(exe_path, exe_drive, exe_dir, NULL, NULL);
-    size_t exe_len = strlen(exe_path);
-
-    PTCH new_path;
-
-    PTCH module_path = _tgetenv(GPSIM_MODULE_PATH_STR);
-    if (NULL != module_path) {
-      size_t new_len = PATH_STR_LEN + exe_len + _tcslen(module_path) + old_path_len + (4 * sizeof(TCHAR));
-      new_path = new TCHAR[new_len];
-      _sntprintf(new_path, new_len, PATH_STR "=%s;%s;%s", exe_path, module_path, old_path);
-    }
-    else {
-      size_t new_len = PATH_STR_LEN + exe_len + old_path_len + (3 * sizeof(TCHAR));
-      new_path = new TCHAR[new_len];
-      _sntprintf(new_path, new_len, PATH_STR "=%s;%s", exe_path, old_path);
-    }
-    _putenv(new_path);
-    delete [] new_path;
-  }
-}
-
-#if 0
-static void reset_path(void)
-{
-  if (NULL != old_path) {
-    size_t old_path_len = _tcslen(old_path);
-    size_t new_len = PATH_STR_LEN + old_path_len + (2 * sizeof(TCHAR));
-    PTCH new_path = new char[new_len];
-    _sntprintf(new_path, new_len, PATH_STR "=%s", old_path);
-    _putenv(new_path);
-    delete [] new_path;
-    old_path = NULL;
-  }
-}
-#endif
-#endif
-
-/*
-  The search order for WIN32 is as follows:
-    1. The directory specified by library_name.
-    2. The current directory.
-    3. The system directory.
-    4. The 16-bit system directory.
-    5. The Windows directory.
-    6. The directory from which the application loaded
-      followed by directories listed in GPSIM_MODULE_PATH environment variable
-      followed by directories listed in PATH environment variable.
- */
-
 static void * sLoad(const char *library_name)
 {
   if(!library_name)
@@ -325,8 +257,7 @@ static void * sLoad(const char *library_name)
 
   void *handle;
 #ifdef _WIN32
-  set_path();
-  handle = (void *)LoadLibraryEx((PTCH)library_name, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+  handle = (void *)LoadLibrary((LPCSTR)library_name);
 #else
   // According to the man page for dlopen, the RTLD_GLOBAL flag can
   // be or'd with the second pararmeter of the function call. However,
