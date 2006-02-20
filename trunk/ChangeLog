@@ -1,3 +1,7 @@
+2006-02-20 Scott Dattalo <scott@dattalo.com>
+	* src/symbol.cc: Symbol_Table::clear() crashes when the simulation
+	engine is used as a stand alone library (Reported by David Saxtion).
+
 2006-02-19 Borut Razem <borut.razem@siol.net>
 	* regression/switch_test/switch_test.stc,
 	  examples/modules/usart_gui/usart_gui.stc: removed .so extension
