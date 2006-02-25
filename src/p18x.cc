@@ -450,8 +450,6 @@ void P18F242::create()
   if(verbose)
     cout << " 18f242 create \n";
 
-  P18C242::create();
-
   e = new EEPROM_PIR;
   e->set_cpu(this);
   // We might want to pass this value in for larger eeproms
@@ -463,6 +461,7 @@ void P18F242::create()
   // assign this eeprom to the processor
   set_eeprom_pir(e);
 
+  P18C242::create();
 }
 
 /*
@@ -571,8 +570,6 @@ void P18F442::create()
   if(verbose)
     cout << " 18f442 create \n";
 
-  P18C442::create();
-
   e = new EEPROM_PIR;
   e->set_cpu(this);
   // We might want to pass this value in for larger eeproms
@@ -584,6 +581,7 @@ void P18F442::create()
   // assign this eeprom to the processor
   set_eeprom_pir(e);
 
+  P18C442::create();
 }
 /*
 void P18F442::create_sfr_map()

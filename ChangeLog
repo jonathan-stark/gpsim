@@ -1,3 +1,6 @@
+2006-02-25 Borut Razem <borut.razem@siol.net>
+	* src/p18x.cc: EEPROM sfr registers were not mapped on 16 bit pics
+
 2006-02-20 Borut Razem <borut.razem@siol.net>
 	* src/os_dependent.cc: reverted changes I made 2006-02-19,
 	  since the GPSIMPATH functionality was already implemented
