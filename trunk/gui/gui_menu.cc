@@ -124,6 +124,14 @@ about_cb (gpointer             callback_data,
 
 }
 
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#if !defined(NEW_SOURCE_BROWSER)
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 //========================================================================
 
@@ -202,6 +210,7 @@ public:
   void parseLine(const char*);
   void parseLine(int opcode, const char*);
   void toggleBreak(int line);
+  void movePC(int line);
 
 private:
   void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
@@ -224,6 +233,8 @@ private:
 
   GtkTextTag *m_BreakpointTag;
   GtkTextTag *m_NoBreakpointTag;
+
+  GtkTextTag *m_CurrentLineTag;
 
   GtkWidget   *m_SampleNotebook;
   GtkPositionType m_TabPosition;
@@ -340,7 +351,7 @@ const char *ColorSelection::getPreferred(char *cParray)
   return cParray;
 }
 
-bool isButtonEvent (GdkEventType type)
+static bool isButtonEvent (GdkEventType type)
 {
   return 
     type == GDK_BUTTON_PRESS ||
@@ -349,7 +360,7 @@ bool isButtonEvent (GdkEventType type)
     type == GDK_BUTTON_RELEASE;
 
 }
-gboolean    TagEvent  (GtkTextTag *texttag,
+static gboolean    TagEvent  (GtkTextTag *texttag,
 		       GObject *arg1,
 		       GdkEvent *event,
 		       GtkTextIter *arg2,
@@ -514,6 +525,7 @@ void SourceBrowserPreferences::toggleBreak(int line)
 
   static GdkPixmap *pixmap_break = 0;
   static GdkBitmap *bp_mask = 0;
+  static GtkWidget *widget = 0;
 
   if (pixmap_break == 0) {
     GtkStyle  *style;
@@ -524,8 +536,8 @@ void SourceBrowserPreferences::toggleBreak(int line)
 						&bp_mask,
 						&style->bg[GTK_STATE_NORMAL],
 						(gchar**)break_xpm);
-    GtkWidget *widget = gtk_image_new_from_pixmap (pixmap_break,
-						   bp_mask);
+    widget = gtk_image_new_from_pixmap (pixmap_break,
+					bp_mask);
     /*
     GtkTextChildAnchor *anchor =
       gtk_text_buffer_create_child_anchor (buffer, &iEnd);
@@ -538,6 +550,27 @@ void SourceBrowserPreferences::toggleBreak(int line)
     gtk_widget_show_all (widget);
   }
 
+  /*
+  if (m_layout && m_view) {
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
+    GtkTextIter iBegin;
+    gint y, height;
+
+    gtk_text_buffer_get_iter_at_line(buffer, &iBegin, line);
+    gtk_text_view_get_line_yrange   (m_view, &iBegin, &y, &height);
+
+    printf(" line for break y=%d, height=%d\n",y,height);
+    gtk_layout_put(GTK_LAYOUT(m_layout),
+		   widget,
+		   0,
+		   y + height/2
+		   );
+
+  }
+  */
+
+  //if (0) {
   if (m_view) {
     GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
     GtkTextIter iBegin;
@@ -553,8 +586,54 @@ void SourceBrowserPreferences::toggleBreak(int line)
 }
 
 
+void SourceBrowserPreferences::movePC(int line)
+{
+
+  if (m_view) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
+    GtkTextIter iBegin;
+    GtkTextIter iEnd;
+
+    #define STRLEN_OF_LINENUMBER_AND_OPCODE 10
+    gtk_text_buffer_get_iter_at_line(buffer, &iEnd, line+1);
+    gtk_text_buffer_get_iter_at_line_offset(buffer, &iBegin, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
+    gtk_text_buffer_apply_tag (buffer, m_CurrentLineTag, &iBegin, &iEnd);
+
+  }
+}
+
 void SourceBrowserPreferences::parseLine(int opcode, const char *cP)
 {
+
+  static GdkPixmap *pixmap_break = 0;
+  static GdkBitmap *bp_mask = 0;
+  static GtkWidget *widget = 0;
+
+  if (pixmap_break == 0) {
+    GtkStyle  *style;
+
+    style=gtk_style_new();
+
+    pixmap_break = gdk_pixmap_create_from_xpm_d(LocalWindow->window,
+						&bp_mask,
+						&style->bg[GTK_STATE_NORMAL],
+						(gchar**)break_xpm);
+    widget = gtk_image_new_from_pixmap (pixmap_break,
+					bp_mask);
+    /*
+    GtkTextChildAnchor *anchor =
+      gtk_text_buffer_create_child_anchor (buffer, &iEnd);
+
+    gtk_text_view_add_child_at_anchor (m_view,
+				       widget,
+				       anchor);
+    */
+
+    gtk_widget_show_all (widget);
+  }
+
+
+
   GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
   GtkTextIter iEnd;
 
@@ -724,6 +803,10 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 						    "background","white",
 						    NULL);
 
+    m_CurrentLineTag = gtk_text_buffer_create_tag (buffer, "CurrentLine",
+						  "background","light green",
+						  NULL);
+
     g_signal_connect (G_OBJECT (m_BreakpointTag), "event",
 		      GTK_SIGNAL_FUNC(TagEvent),
 		      0);
@@ -733,7 +816,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     parseLine(0x1234,"Label: MOVF    Temp1,W ;Comment\n");
     parseLine(0xabcd,"       MOVLW   0x42    ;Comment\n");
-    parseLine("; Line only with a comment\n");
+    parseLine(       "                       ; Line only with a comment\n");
 
 
     m_LabelColor->apply();
@@ -754,7 +837,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
 
 
-
+    /*
     const int PAGE_BORDER = 3;
     const int PIXMAP_SIZE = 14;
     GtkWidget *hbox = gtk_hbox_new(0,0);
@@ -765,24 +848,22 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_widget_set_usize(GTK_WIDGET(m_layout),PIXMAP_SIZE*2,0);
     gtk_widget_show(GTK_WIDGET(m_layout));
 
-    toggleBreak(2);
-
     gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(m_layout),
 		       FALSE,FALSE, 0);
 
     gtk_box_pack_start_defaults(GTK_BOX(hbox), GTK_WIDGET(m_view));
 
     gtk_widget_show(hbox);
-
+    */
 
     GtkWidget *label = gtk_label_new("file1.asm");
-    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),
-			     hbox,
-			     label);
+    //gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),hbox,label);
+    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),GTK_WIDGET(m_view),label);
 
     label = gtk_label_new("file2.asm");
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),emptyBox,label);
+
 
 
 
@@ -792,6 +873,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   gtk_widget_show_all(hbox2);
   gtk_widget_show_all(vbox3);
 
+  toggleBreak(2);
+  movePC(1);
 
 }
 
@@ -899,6 +982,14 @@ void gpsimGuiPreferences::apply()
 {
   printf ("apply gui preferences\n");
 }
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#endif //if !defined(NEW_SOURCE_BROWSER)
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //========================================================================
 void
@@ -1471,8 +1562,10 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,"<ToggleItem>" },
   { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
 
+#if !defined(NEW_SOURCE_BROWSER)
   { "/_Edit",     0, 0,       0, "<Branch>" },
   { "/Edit/Preferences",        0, (GtkItemFactoryCallback)gpsimGuiPreferences::setup, 0 },
+#endif
 
   { "/_Help",            0,         0,                     0, "<LastBranch>" },
   { "/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },

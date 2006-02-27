@@ -22,11 +22,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_PROCESSOR_H__
 #define __GUI_PROCESSOR_H__
 
+//#define NEW_SOURCE_BROWSER
 
 // Forward references to all of the classes.
 
 class RAM_RegisterWindow;
 class EEPROM_RegisterWindow;
+#if defined(NEW_SOURCE_BROWSER)
+class SourceWindow;
+#endif
 class SourceBrowser_Window;
 class SourceBrowserParent_Window;
 class Symbol_Window;
@@ -52,6 +56,9 @@ class GUI_Processor {
 
   RAM_RegisterWindow *regwin_ram;
   EEPROM_RegisterWindow *regwin_eeprom;
+#if defined(NEW_SOURCE_BROWSER)
+  SourceWindow *source_window;
+#endif
   SourceBrowser_Window *program_memory;
   SourceBrowserParent_Window *source_browser;
   Symbol_Window *symbol_window;

@@ -73,7 +73,8 @@ enum window_types {
   WT_scope_window,
   WT_status_bar,
   WT_sfr_window,
-  WT_list_source_window
+  WT_list_source_window,
+  WT_SourceWindow
 };
 
 //
