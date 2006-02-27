@@ -2208,14 +2208,14 @@ void FileContext::close() {
 //----------------------------------------
 int FileContext::get_address(unsigned int line_number)
 {
-  if(line_number < max_line()  && pm_address)
+  if(line_number <= max_line()  && pm_address)
     return (*pm_address)[line_number];
   return -1;
 }
 //----------------------------------------
 void FileContext::put_address(unsigned int line_number, unsigned int address)
 {
-  if(line_number < max_line()  && pm_address)
+  if(line_number <= max_line()  && pm_address)
     (*pm_address)[line_number] = address;
 }
 
