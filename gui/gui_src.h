@@ -29,6 +29,135 @@ class SourceBrowserParent_Window;
 class StatusBar_Window;
 class Value;
 
+
+#if defined(NEW_SOURCE_BROWSER)
+
+class SourceWindow;
+
+//========================================================================
+// TextStyle
+// 
+class TextStyle
+{
+public:
+
+  TextStyle (const char *pName,
+	 const char *pFGColor,
+	 const char *pBGColor);
+
+  GtkTextTag *tag() { return m_pTag; }
+  virtual void doubleClickEvent(GtkTextIter *);
+protected:
+  GtkTextTag *m_pTag;
+  GtkStyle   *m_pStyle;
+  const char *m_cpName;
+};
+
+//========================================================================
+// SourcePage
+// A single source file.
+class NSourcePage
+{
+public:
+  NSourcePage(SourceWindow *, int file_id);
+
+
+  void Close(void);
+
+
+
+  unsigned int pageindex_to_fileid;
+  GtkTextView   *m_view;
+  GtkTextBuffer *m_buffer;
+private:
+  SourceWindow  *m_Parent;
+};
+
+class SourceWindow : public GUI_Object
+{
+public:
+  SourceWindow(GUI_Processor *gp, const char *newName=0);
+
+  virtual void Build();
+  virtual void SetTitle();
+
+
+  void set_pma(ProgramMemoryAccess *new_pma);
+  void Create(void);
+  virtual void SelectAddress(int address);
+  virtual void SelectAddress(Value *);
+  virtual void Update(void);
+  virtual void UpdateLine(int address);
+  virtual void SetPC(int address);
+  virtual void CloseSource(void);
+  virtual void NewSource(GUI_Processor *gp);
+
+  void step(int n=1);
+  void step_over();
+  void stop();
+  void run();
+  void finish();
+
+  void parseLine(NSourcePage *pPage, const char*);
+  void parseLine(NSourcePage *pPage, int opcode, const char*);
+  void toggleBreak(NSourcePage *pPage, int line);
+  void movePC(int line);
+  bool bSourceLoaded() { return m_bSourceLoaded; }
+
+private:
+  int AddPage(FileContext *, int file_id);
+  ProgramMemoryAccess *pma;      // pointer to the processor's pma.
+  StatusBar_Window *status_bar;  // display's PC, status, etc.
+  SIMULATION_MODES last_simulation_mode;
+  string sLastPmaName;
+
+
+  struct _PC {
+    bool bIsActive;
+    int  page;                // Notebook page containing the source
+    GtkTextBuffer *pBuffer;   // Buffer containing the Program Counter
+    GtkTextIter   iBegin;     // Start of where highlight begins
+    GtkTextIter   iEnd;       // End of highlight 
+  } mProgramCounter;
+
+
+private:
+  void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
+  void addTagRange(NSourcePage *pPage, TextStyle *,
+		   int start_index, int end_index);
+
+  GtkTextTagTable *mpTagTable;
+
+  TextStyle *mLabel;       // for label in .asm display
+  TextStyle *mMnemonic;    // for instruction in .asm display
+  TextStyle *mSymbol;      // for symbols in .asm display
+  TextStyle *mComment;     // for comments in .asm display
+  TextStyle *mConstant;    // for numbers in .asm display
+  TextStyle *mDefault;     // for everything else.
+
+  TextStyle *mBreakpointTag;   // for breakpoints
+  TextStyle *mNoBreakpointTag;
+  TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
+
+  GtkWidget   *m_Notebook;
+  GtkPositionType m_TabPosition;
+
+  // FIXME - change these items to list objects
+  NSourcePage **pages;
+
+
+  // do we need this:
+  bool m_bLoadSource;
+  bool m_bSourceLoaded;
+
+};
+
+#endif
+
+
+
+
+
 class SourceBrowser_Window : public GUI_Object {
  public:
   GtkWidget *vbox;               // for children to put widgets in
@@ -289,6 +418,15 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 };
 
 
+
+#if defined(NEW_SOURCE_BROWSER)
+#define SOURCE_WINDOW SourceWindow
+#else
+#define SOURCE_WINDOW SourceBrowserAsm_Window
+#endif
+
+
+
 //
 // The Source Browser Child window.
 // 
@@ -315,9 +453,10 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void ChangeView(int view_state);
   virtual int set_config();
 
-  SourceBrowserAsm_Window *getChild(int);
-  list<SourceBrowserAsm_Window *> children;
+  SOURCE_WINDOW *getChild(int);
+  list<SOURCE_WINDOW *> children;
 };
+
 
 
 

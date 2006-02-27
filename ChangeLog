@@ -1,3 +1,20 @@
+2006-02-27 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: FileContext put_address and get_address
+	methods were ignoring the last line of files.
+	* gui/gui_src.h: Rewrote the source browser using the gtk+-2.X
+	API.
+	*** NOTE *** The older version of the source browser is still
+	present and enabled by default. To enable the new browser,
+	'NEW_SOURCE_BROWSER' needs to be defined. (This can either be
+	accomplished by ./configure or by editing gui/gui_processor.h
+	* gui/gui.h, gui/gui_processor.h: Added new source window class to
+	list of gui classes.
+	* gui/gui_menu.cc: ifdef'd removed the source browser preference
+	configuration (for now)
+	* gui/gui_object.cc, gui/gui_object.h: set_name() now requires const
+	char * instead of just char *.
+
+
 2006-02-25 Borut Razem <borut.razem@siol.net>
 	* src/p18x.cc: EEPROM sfr registers were not mapped on 16 bit pics
 

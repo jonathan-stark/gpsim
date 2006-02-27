@@ -82,7 +82,7 @@ char *GUI_Object::name(void)
   return p;
 }
 
-void GUI_Object::set_name(char *new_name)
+void GUI_Object::set_name(const char *new_name)
 {
   if(new_name)
     name_str = string(new_name);
@@ -240,8 +240,6 @@ int GUI_Object::set_config(void)
   if(window) {
     gdk_window_get_root_origin(window->window,&x,&y);
     gdk_window_get_size(window->window,&width,&height);
-    //printf("%s  ",name());
-    //printf("set_config: %s enabled:%d x:%d y:%d w:%d h:%d\n",name(),enabled,x,y,width,height);
   }
 
   config_set_variable(pName, "enabled", ((enabled) ? 1 : 0) );
