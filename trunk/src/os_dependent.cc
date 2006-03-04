@@ -68,8 +68,8 @@ using namespace std;
 #define PATHDELIMITER ":"
 #endif
 
-char * get_error_message();
-unsigned long get_error(char *);
+const char * get_error_message();
+unsigned long get_error(const char *);
 
 #ifdef _WIN32
 #define OS_E_FILENOTFOUND 0x0000007E
@@ -297,7 +297,7 @@ void GetFileNameBase(string &sPath, string &sName) {
   }
 }
 
-void * load_library(const char *library_name, char **pszError)
+void * load_library(const char *library_name, const char **pszError)
 {
   void *handle;
 
@@ -347,7 +347,7 @@ void free_library(void *handle)
 #endif
 }
 
-unsigned long get_error(char *err_str) {
+unsigned long get_error(const char *err_str) {
 #ifdef _WIN32
   return GetLastError();
 #else
@@ -363,7 +363,7 @@ unsigned long get_error(char *err_str) {
 #endif
 }
 
-char * get_error_message() {
+const char * get_error_message() {
 #ifdef _WIN32
   return g_win32_error_message(GetLastError());
 #else
@@ -378,7 +378,7 @@ void free_error_message(char * pszError)
 #endif
 }
 
-void * get_library_export(const char *name, void *library_handle, char ** const pszError)
+void * get_library_export(const char *name, void *library_handle, const char ** pszError)
 {
   void * pExport;
 #ifdef _WIN32

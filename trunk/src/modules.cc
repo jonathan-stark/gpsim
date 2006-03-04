@@ -66,9 +66,10 @@ ModuleLibrary::TypeList   ModuleLibrary::m_TypeList;
 ModuleLibrary::ModuleList ModuleLibrary::m_ModuleList;
 
 
-void          ModuleLibrary::LoadFile(const char *pFilename) {
+void          ModuleLibrary::LoadFile(const char *pFilename) 
+{
   void *handle;
-  char *pszError;
+  const char *pszError;
   bool bReturn = false;
 
   string sPath(pFilename);
@@ -267,7 +268,7 @@ void          ModuleLibrary::DeleteProcessor(Processor *) {
 
 bool ModuleLibrary::AddFile(const char *library_name, void *library_handle)
 {
-  char * error;
+  const char * error;
   if(library_name) {
     string sName(library_name);
     MakeCanonicalName(sName, sName);

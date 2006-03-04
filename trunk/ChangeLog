@@ -1,4 +1,10 @@
 2006-03-04 Scott Dattalo <scott@dattalo.com>
+	* src/modules.h, src/modules.cc, src/os_dependent.cc: Changed
+	references from char * to const char * for error strings
+	processing. (Alex Holden reports that on BSD dlerror returns const
+	char * where as on linux it returns plain char *).
+
+2006-03-04 Scott Dattalo <scott@dattalo.com>
 	* cli/ui_gpsim.cc: GlobalVerbosityAccessor verbose was declared
 	twice! (Thanks to Alex Holden for pointing this out).
 	
