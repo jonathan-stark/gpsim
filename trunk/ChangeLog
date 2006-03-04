@@ -1,3 +1,7 @@
+2006-03-04 Scott Dattalo <scott@dattalo.com>
+	* cli/ui_gpsim.cc: GlobalVerbosityAccessor verbose was declared
+	twice! (Thanks to Alex Holden for pointing this out).
+	
 2006-02-27 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: FileContext put_address and get_address
 	methods were ignoring the last line of files.
