@@ -8,7 +8,7 @@
 #include "../src/symbol.h"
 #include "../src/cmd_manager.h"
 
-GlobalVerbosityAccessor verbose;
+extern GlobalVerbosityAccessor verbose;
 
 ///
 ///  CGpsimConsole
