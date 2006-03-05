@@ -96,7 +96,78 @@ public:
 
 #if defined(NEW_SOURCE_BROWSER)
 
+#define BP_PIXEL_SIZE        10
+#define PC_PIXEL_SIZE        10
+#define MARGIN_WIDTH    (PC_PIXEL_SIZE + BP_PIXEL_SIZE)
+
 static map<GtkTextView*, NSourcePage *> PageMap;
+
+
+
+/* This function is taken from gtk+/tests/testtext.c */
+static void
+gtk_source_view_get_lines (GtkTextView  *text_view,
+			   gint          first_y,
+			   gint          last_y,
+			   GArray       *buffer_coords,
+			   GArray       *numbers,
+			   gint         *countp)
+{
+  GtkTextIter iter;
+  gint count;
+  gint size;
+  gint last_line_num = -1;	
+
+  g_array_set_size (buffer_coords, 0);
+  g_array_set_size (numbers, 0);
+  
+  /* Get iter at first y */
+  gtk_text_view_get_line_at_y (text_view, &iter, first_y, NULL);
+
+  /* For each iter, get its location and add it to the arrays.
+   * Stop when we pass last_y
+   */
+  count = 0;
+  size = 0;
+
+  while (!gtk_text_iter_is_end (&iter))
+    {
+      gint y, height;
+      
+      gtk_text_view_get_line_yrange (text_view, &iter, &y, &height);
+
+      g_array_append_val (buffer_coords, y);
+      last_line_num = gtk_text_iter_get_line (&iter);
+      g_array_append_val (numbers, last_line_num);
+      	
+      ++count;
+
+      if ((y + height) >= last_y)
+	break;
+      
+      gtk_text_iter_forward_line (&iter);
+    }
+
+  if (gtk_text_iter_is_end (&iter))
+    {
+      gint y, height;
+      gint line_num;
+      
+      gtk_text_view_get_line_yrange (text_view, &iter, &y, &height);
+
+      line_num = gtk_text_iter_get_line (&iter);
+
+      if (line_num != last_line_num)
+	{
+	  g_array_append_val (buffer_coords, y);
+	  g_array_append_val (numbers, line_num);
+	  ++count;
+	}
+    }
+
+  *countp = count;
+}
+
 
 //------------------------------------------------------------------------
 // 
@@ -132,7 +203,71 @@ view_button_press(GtkTextView *pView,
 		  SourceWindow *pSW)
 {
   printf("Received button press for view %p\n",pSW);
+  printf(" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y);
   //printf("Received button press for view\n");
+  if (pButton->window == gtk_text_view_get_window (pView,
+						  GTK_TEXT_WINDOW_LEFT)) 
+  {
+
+    NSourcePage *pPage = PageMap[pView];
+    gint x = pButton->x;
+    gint y = pButton->y;
+
+    gtk_text_view_window_to_buffer_coords (pView,
+					   GTK_TEXT_WINDOW_LEFT,
+					   x,
+					   y,
+					   &x,
+					   &y);
+    GtkTextIter iter;
+    gint line;
+    gtk_text_view_get_line_at_y (pView, &iter, y, NULL);
+    line = gtk_text_iter_get_line (&iter);
+    pSW->toggleBreak(pPage, line);
+
+  }
+
+  return FALSE;
+}
+static gint
+view_expose(GtkTextView *pView,
+	    GdkEventExpose *pEvent, 
+	    SourceWindow *pSW)
+{
+
+  if (pEvent->window == gtk_text_view_get_window (pView,
+						  GTK_TEXT_WINDOW_LEFT)) 
+  {
+    //gtk_source_view_paint_margin (view, event);
+    //event_handled = TRUE;
+    printf("Expose event for view margin %p\n",pSW);
+
+    gint y1 = pEvent->area.y;
+    gint y2 = y1 + pEvent->area.height;
+
+    NSourcePage *pPage = PageMap[pView];
+
+    /* get the extents of the line printing */
+
+    gtk_text_view_window_to_buffer_coords (pView,
+					   GTK_TEXT_WINDOW_LEFT,
+					   0,
+					   y1,
+					   NULL,
+					   &y1);
+
+    gtk_text_view_window_to_buffer_coords (pView,
+					   GTK_TEXT_WINDOW_LEFT,
+					   0,
+					   y2,
+					   NULL,
+					   &y2);
+
+    pSW->updateMargin(pPage, y1,y2);
+  } 
+  else
+    printf("Expose event for view %p\n",pSW);
+
   return FALSE;
 }
 //------------------------------------------------------------------------
@@ -343,13 +478,9 @@ void TextStyle::doubleClickEvent(GtkTextIter *pIter)
 }
 
 //========================================================================
-NSourcePage::NSourcePage(SourceWindow *pParent, int file_id)
-  : m_Parent(pParent), m_view(0), m_buffer(0), pageindex_to_fileid(file_id)
+NSourcePage::NSourcePage(SourceWindow *pParent, FileContext   *pFC, int file_id)
+  : m_Parent(pParent), m_view(0), m_buffer(0), m_fileid(file_id), m_pFC(pFC)
 {
-  if (m_Parent) {
-
-
-  }
 }
 //------------------------------------------------------------------------
 SourceWindow::SourceWindow(GUI_Processor *pgp, const char *newName)
@@ -485,24 +616,12 @@ void SourceWindow::addTagRange(NSourcePage *pPage, TextStyle *pStyle,
 void SourceWindow::toggleBreak(NSourcePage *pPage, int line)
 {
   if (pma && pPage) {
-    pma->toggle_break_at_line(pPage->pageindex_to_fileid ,line+1);
+    int address = pma->find_address_from_line(pPage->m_pFC,line+1);
+    if (address >= 0)
+      pma->toggle_break_at_line(pPage->m_fileid ,line+1);
 
   }
 
-  /*
-  if (page && page->m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (page->m_view);
-    GtkTextIter iBegin;
-    GtkTextIter iEnd;
-
-    gtk_text_buffer_get_end_iter (buffer, &iEnd);
-    gtk_text_buffer_get_iter_at_line(buffer, &iBegin, line);
-    #define STRLEN_OF_LINENUMBER_AND_OPCODE 10
-    gtk_text_buffer_get_iter_at_line_offset(buffer, &iEnd, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
-    gtk_text_buffer_apply_tag (buffer, m_BreakpointTag, &iBegin, &iEnd);
-
-  }
-  */
 }
 //------------------------------------------------------------------------
 // movePC
@@ -510,19 +629,6 @@ void SourceWindow::toggleBreak(NSourcePage *pPage, int line)
 // 
 void SourceWindow::movePC(int line)
 {
-  /*
-  if (page->m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (page->m_view);
-    GtkTextIter iBegin;
-    GtkTextIter iEnd;
-
-    #define STRLEN_OF_LINENUMBER_AND_OPCODE 10
-    gtk_text_buffer_get_iter_at_line(buffer, &iEnd, line+1);
-    gtk_text_buffer_get_iter_at_line_offset(buffer, &iBegin, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
-    gtk_text_buffer_apply_tag (buffer, m_CurrentLineTag, &iBegin, &iEnd);
-
-  }
-  */
 }
 
 //------------------------------------------------------------------------
@@ -538,11 +644,17 @@ void SourceWindow::parseLine(NSourcePage *pPage, int opcode, const char *cP)
 
   char buf[64];
   int line_number = gtk_text_buffer_get_line_count(pPage->m_buffer);
-
+#if defined(SHOW_LINE_NUMBERS)
   if (opcode >= 0) 
     snprintf(buf, sizeof(buf), "%5d %04X ",line_number,opcode);
   else
     snprintf(buf, sizeof(buf), "%5d %s ",line_number,"    ");
+#else
+  if (opcode >= 0) 
+    snprintf(buf, sizeof(buf), "%04X ",opcode);
+  else
+    snprintf(buf, sizeof(buf), "%s ","    ");
+#endif
 
   gtk_text_buffer_insert (pPage->m_buffer, &iEnd, buf, -1);
 
@@ -700,9 +812,14 @@ void SourceWindow::Update(void)
 
 }
 
-#define STRLEN_OF_LINENUMBER_AND_OPCODE 10
-#define STRLEN_OF_LINENUMBER  5
-#define STROFFSET_OF_OPCODE   (STRLEN_OF_LINENUMBER + 1)
+#if defined(SHOW_LINE_NUMBERS)
+  #define STRLEN_OF_LINENUMBER  5
+  #define STROFFSET_OF_OPCODE   (STRLEN_OF_LINENUMBER + 1)
+#else
+  #define STRLEN_OF_LINENUMBER  0
+#define STROFFSET_OF_OPCODE   (STRLEN_OF_LINENUMBER)
+#endif
+
 #define STRLEN_OF_OPCODE      4
 
 //------------------------------------------------------------------------
@@ -718,7 +835,7 @@ void SourceWindow::UpdateLine(int address)
   int i,id=-1;
 
   for(i=0;i<SBAW_NRFILES && id<0;i++) {
-    if(pages[i]->pageindex_to_fileid==pma->get_file_id(address))
+    if(pages[i]->m_fileid==pma->get_file_id(address))
       id=i;
   }
   /*
@@ -763,10 +880,107 @@ void SourceWindow::UpdateLine(int address)
 
 
 //------------------------------------------------------------------------
+//
+
+void SourceWindow::updateMargin(NSourcePage *pPage, int y1, int y2)
+{
+
+  if (!pPage || !pma)
+    return;
+
+  GtkTextView * text_view = pPage->m_view;
+  GArray *numbers;
+  GArray *pixels;
+  gint count;
+
+  int PCline = pma->get_src_line(pma->get_PC());
+
+  if(PCline==(int)INVALID_VALUE)
+    PCline = -1;
+
+  numbers = g_array_new (FALSE, FALSE, sizeof (gint));
+  pixels = g_array_new (FALSE, FALSE, sizeof (gint));
+    
+  /* get the line numbers and y coordinates. */
+  gtk_source_view_get_lines (text_view,
+			     y1,
+			     y2,
+			     pixels,
+			     numbers,
+			     &count);
+
+
+  GdkWindow *win = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_LEFT);
+
+  int i=0;
+  while (i < count) {
+    
+    gint pos;
+    gint line = g_array_index (numbers, gint, i) + 1;
+
+    gtk_text_view_buffer_to_window_coords (text_view,
+					   GTK_TEXT_WINDOW_LEFT,
+					   0,
+					   g_array_index (pixels, gint, i),
+					   NULL,
+					   &pos);
+    if (line == PCline)
+      gtk_paint_arrow 
+	(GTK_WIDGET (text_view)->style,
+	 win,
+	 GTK_STATE_NORMAL,  //GTK_WIDGET_STATE (pages[id]>m_view),
+	 GTK_SHADOW_OUT,     // GtkShadowType shadow_type,
+	 NULL, 
+	 GTK_WIDGET (text_view),
+	 NULL,
+	 GTK_ARROW_RIGHT,   //GtkArrowType arrow_type,
+	 TRUE,              //gboolean fill,
+	 BP_PIXEL_SIZE,pos, PC_PIXEL_SIZE,15);
+
+    int address = pma->find_address_from_line(pPage->m_pFC,line);
+    if(pma->address_has_break(address))
+      gtk_paint_diamond
+	(GTK_WIDGET (text_view)->style,
+	 win,
+	 GTK_STATE_NORMAL,  //GTK_WIDGET_STATE (pages[id]>m_view),
+	 GTK_SHADOW_OUT,     // GtkShadowType shadow_type,
+	 NULL, 
+	 GTK_WIDGET (text_view),
+	 NULL,
+	 0,
+	 pos,
+	 BP_PIXEL_SIZE,
+	 BP_PIXEL_SIZE);
+    else if (address >= 0) {
+
+      gtk_paint_diamond
+	(GTK_WIDGET (text_view)->style,
+	 win,
+	 GTK_STATE_NORMAL,  //GTK_WIDGET_STATE (pages[id]>m_view),
+	 GTK_SHADOW_IN,     // GtkShadowType shadow_type,
+	 NULL, 
+	 GTK_WIDGET (text_view),
+	 NULL,
+	 0,
+	 pos,
+	 BP_PIXEL_SIZE,
+	 BP_PIXEL_SIZE);
+    }
+    ++i;
+
+  }
+
+  g_array_free (pixels, TRUE);
+  g_array_free (numbers, TRUE);
+
+}
+
+//------------------------------------------------------------------------
 // SetPC
 //
 // Highlight the line corresponding to the current program counter.
 //
+
 void SourceWindow::SetPC(int address)
 {
   Dprintf((" \n"));
@@ -779,72 +993,84 @@ void SourceWindow::SetPC(int address)
     return;
   int id;
   for (id=0; id<SBAW_NRFILES; id++)
-    if(pages[id]->pageindex_to_fileid == sbawFileId)
+    if(pages[id]->m_fileid == sbawFileId)
       break;
 
   if (id >= SBAW_NRFILES)
     return;
-
-  if (mProgramCounter.bIsActive)
+  int oldPCpage = -1;
+  if (mProgramCounter.bIsActive) {
+#if defined(SHOW_LINE_NUMBERS)
     gtk_text_buffer_remove_tag (mProgramCounter.pBuffer,
 				mCurrentLineTag->tag(),
 				&mProgramCounter.iBegin,
 				&mProgramCounter.iEnd);
+#endif
+    oldPCpage = mProgramCounter.page;
+  }
+  mProgramCounter.page = id;
 
-  int line = pma->get_src_line(address);
-  if(line==(int)INVALID_VALUE)
+  int PCline = pma->get_src_line(address);
+  if(PCline==(int)INVALID_VALUE)
     return;
-  line--;
+  PCline--;
+
+  GdkWindow *win = gtk_text_view_get_window (pages[id]->m_view, GTK_TEXT_WINDOW_LEFT);
+  GdkRectangle PCloc;
+
   mProgramCounter.bIsActive = true;
   mProgramCounter.pBuffer = pages[id]->m_buffer;
   gtk_text_buffer_get_iter_at_line(mProgramCounter.pBuffer,
 				   &mProgramCounter.iBegin,
-				   line);
+				   PCline);
+#if defined(SHOW_LINE_NUMBERS)
   gtk_text_buffer_get_iter_at_line_offset(mProgramCounter.pBuffer,
 					  &mProgramCounter.iEnd,
-					  line,
+					  PCline,
 					  STRLEN_OF_LINENUMBER);
 
   gtk_text_buffer_apply_tag (mProgramCounter.pBuffer,
 			     mCurrentLineTag->tag(),
 			     &mProgramCounter.iBegin,
 			     &mProgramCounter.iEnd);
+#endif
 
-  { 
-    GdkRectangle location;
-    gtk_text_view_get_iter_location (pages[id]->m_view,
-				     &mProgramCounter.iBegin,
-				     &location);
+  // Now we're going to check if the program counter is in view or not.
 
-    gint wx, wy;
-    gtk_text_view_buffer_to_window_coords
-      (pages[id]->m_view,
-       GTK_TEXT_WINDOW_WIDGET,
-       location.x,location.y,
-       &wx, &wy);
+  // Get the program counter location
+  gtk_text_view_get_iter_location (pages[id]->m_view,
+				   &mProgramCounter.iBegin,
+				   &PCloc);
+  // Get the viewable region of the text buffer. The region is in buffer coordinates.
+  GdkRectangle vRect;
+  gtk_text_view_get_visible_rect  (pages[id]->m_view,
+				   &vRect);
 
-    
-    GdkRectangle vRect;
+  // Now normalize the program counter's location. If yloc is between
+  // 0 and 1.0 then the program counter is viewable. If not, then we
+  // we need to scroll the text view so that the program counter is
+  // viewable.
+  double yloc = (PCloc.y - vRect.y) / (double) (vRect.height);
+
+  if ( yloc < 0.05  || yloc > 0.95) {
+    gtk_text_view_scroll_to_iter (pages[id]->m_view,
+				  &mProgramCounter.iBegin,
+				  0.0,
+				  TRUE,
+				  0.0, 0.3);
     gtk_text_view_get_visible_rect  (pages[id]->m_view,
 				     &vRect);
 
-    double yloc = (location.y - vRect.y) / (double) (vRect.height);
-
-    printf ("Current pc location: x=%d, y=%d, vx=%d,vy=%d,vw=%d,vh=%d, sx=%d,sy=%d, wx=%d wy=%d  yloc=%g\n",
-	    location.x,location.y, 
-	    vRect.x,vRect.y,vRect.width,vRect.height,
-	    pages[id]->m_view->xoffset,pages[id]->m_view->yoffset,
-	    wx,wy,
-	    yloc);
-
-    if ( yloc < 0.05  || yloc > 0.95)
-      gtk_text_view_scroll_to_iter (pages[id]->m_view,
-				    &mProgramCounter.iBegin,
-				    0.0,
-				    TRUE,
-				    0.0, 0.3);
- }
+  }
+  vRect.x=0;
+  vRect.y=0;
+  vRect.width=MARGIN_WIDTH;
+  // Send an expose event to repaint the whole margin
+  gdk_window_invalidate_rect
+    (win, &vRect, TRUE);
+  //gdk_window_process_updates (win, TRUE);
 }
+
 void SourceWindow::CloseSource(void)
 {
   Dprintf((" \n"));
@@ -1002,12 +1228,15 @@ int SourceWindow::AddPage(FileContext *pFC, int file_id)
     
   assert(id<SBAW_NRFILES && id >=0);
 
-  NSourcePage *page = new NSourcePage(this, file_id);
+  NSourcePage *page = new NSourcePage(this, pFC, file_id);
 
   pages[id] = page;
 
   page->m_buffer = gtk_text_buffer_new (mpTagTable);
   page->m_view   = (GtkTextView *)gtk_text_view_new_with_buffer(page->m_buffer);
+  gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (page->m_view),
+					GTK_TEXT_WINDOW_LEFT,
+					MARGIN_WIDTH);
 
   PageMap[page->m_view] = page;
 
@@ -1016,6 +1245,9 @@ int SourceWindow::AddPage(FileContext *pFC, int file_id)
 		   (gpointer) this);
   g_signal_connect(GTK_OBJECT(page->m_view),"button_press_event",
 		   (GtkSignalFunc) view_button_press,
+		   (gpointer) this);
+  g_signal_connect(GTK_OBJECT(page->m_view),"expose_event",
+		   (GtkSignalFunc) view_expose,
 		   (gpointer) this);
 
 
