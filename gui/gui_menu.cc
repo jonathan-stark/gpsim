@@ -127,7 +127,7 @@ about_cb (gpointer             callback_data,
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#if !defined(NEW_SOURCE_BROWSER)
+#if defined(NEW_SOURCE_BROWSER)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -200,22 +200,24 @@ private:
   GtkTextBuffer *m_buffer;
 };
 
-class SourceBrowserPreferences
+class SourceBrowserPreferences 
 {
 public:
   SourceBrowserPreferences(GtkWidget *pParent);
 
   void apply();
   void update();
-  void parseLine(const char*);
-  void parseLine(int opcode, const char*);
+  //void parseLine(const char*);
+  //void parseLine(int opcode, const char*);
   void toggleBreak(int line);
   void movePC(int line);
 
 private:
   void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
 
-  GtkTextView *m_view;
+  NSourcePage *m_pPage;
+
+  //GtkTextView *m_view;
   GtkLayout   *m_layout;
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
@@ -444,60 +446,6 @@ static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescri
 
 
 //========================================================================
-static int isString(const char *cP)
-{
-  int i=0;
-
-  if (isalpha(*cP) || *cP=='_')
-    while (isalnum(cP[i]) || cP[i]=='_')
-      i++;
-  return i;
-}
-
-static int isWhiteSpace(const char *cP)
-{
-  int i=0;
-
-  while (cP[i]==' ' || cP[i]=='\t')
-    i++;
-  return i;
-}
-
-static int isHexNumber(const char *cP)
-{
-  int i=0;
-  if ((*cP == '0' && toupper(cP[1])=='X') ||
-      (*cP == '$')) {
-    i = (*cP=='0') ? 2 : 1;
-
-    while (isxdigit(cP[i]))
-      i++;
-  }
-  return i;
-}
-static int isNumber(const char *cP)
-{
-  int i=isHexNumber(cP);
-  if (!i)
-    while (isdigit(cP[i]))
-      i++;
-  return i;
-}
-
-static bool isEnd(const char c)
-{
-  return c=='\n' || c==0;
-}
-
-static int isComment(const char *cP)
-{
-  int i = (*cP==';') ? 1 : 0;
-  if (i)
-    while (!isEnd(cP[i]))
-      i++;
-  return i;
-}
-
 //#include "../xpms/break.xpm"
 static char * break_xpm[] = {
 "12 12 3 1",
@@ -570,9 +518,8 @@ void SourceBrowserPreferences::toggleBreak(int line)
   }
   */
 
-  //if (0) {
-  if (m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
+  if (m_pPage && m_pPage->m_view) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_pPage->m_view);
     GtkTextIter iBegin;
     GtkTextIter iEnd;
 
@@ -589,8 +536,8 @@ void SourceBrowserPreferences::toggleBreak(int line)
 void SourceBrowserPreferences::movePC(int line)
 {
 
-  if (m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
+  if (m_pPage && m_pPage->m_view) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_pPage->m_view);
     GtkTextIter iBegin;
     GtkTextIter iEnd;
 
@@ -602,103 +549,15 @@ void SourceBrowserPreferences::movePC(int line)
   }
 }
 
-void SourceBrowserPreferences::parseLine(int opcode, const char *cP)
-{
 
-  static GdkPixmap *pixmap_break = 0;
-  static GdkBitmap *bp_mask = 0;
-  static GtkWidget *widget = 0;
-
-  if (pixmap_break == 0) {
-    GtkStyle  *style;
-
-    style=gtk_style_new();
-
-    pixmap_break = gdk_pixmap_create_from_xpm_d(LocalWindow->window,
-						&bp_mask,
-						&style->bg[GTK_STATE_NORMAL],
-						(gchar**)break_xpm);
-    widget = gtk_image_new_from_pixmap (pixmap_break,
-					bp_mask);
-    /*
-    GtkTextChildAnchor *anchor =
-      gtk_text_buffer_create_child_anchor (buffer, &iEnd);
-
-    gtk_text_view_add_child_at_anchor (m_view,
-				       widget,
-				       anchor);
-    */
-
-    gtk_widget_show_all (widget);
-  }
-
-
-
-  GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
-  GtkTextIter iEnd;
-
-  gtk_text_buffer_get_end_iter (buffer, &iEnd);
-
-  char buf[64];
-  int line_number = gtk_text_buffer_get_line_count(buffer);
-
-  if (opcode > 0) 
-    snprintf(buf, sizeof(buf), "%5d %04X ",line_number,opcode);
-  else
-    snprintf(buf, sizeof(buf), "%5d %s ",line_number,"    ");
-
-  //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, buf, -1, "margin", NULL);
-  gtk_text_buffer_insert (buffer, &iEnd, buf, -1);
-
-  int offset = gtk_text_iter_get_offset (&iEnd);
-
-  //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, cP, -1, "margin", NULL);
-  gtk_text_buffer_insert (buffer, &iEnd, cP, -1);
-
-  int i=0;
-  int j=0;
-  bool bHaveMnemonic = false;
-
-  if (i != (j = isString(cP))) {
-    //printf ("label %d:%d %d\n",i,j,offset);
-    m_LabelColor->addTagRange(i+offset,j+offset);
-    i=j;
-  }
-  while (!isEnd(cP[i])) {
-
-    if ( (j=isWhiteSpace(&cP[i])) != 0) {
-      //printf ("White space %d:%d\n",i,i+j);
-      i += j;
-    } else if ( (j=isString(&cP[i])) != 0) {
-      if (bHaveMnemonic)
-	m_SymbolColor->addTagRange(i+offset,i+j+offset);
-      else
-	m_MnemonicColor->addTagRange(i+offset,i+j+offset);
-      bHaveMnemonic = true;
-      i += j;
-    } else if ( (j=isNumber(&cP[i])) != 0) {
-      m_ConstantColor->addTagRange(i+offset,i+j+offset);
-      i += j;
-    } else if ( (j=isComment(&cP[i])) != 0) {
-      m_CommentColor->addTagRange(i+offset,i+j+offset);
-      i += j;
-      return;
-    } else 
-      i++;
-  }
-}
-void SourceBrowserPreferences::parseLine(const char *cP)
-{
-  parseLine(0, cP);
-}
 //========================================================================
 SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 {
 
   if (!gp && !gp->source_browser)
     return;
-  SourceBrowserAsm_Window *sbaw = gp->source_browser->getChild(0);
-  if (!sbaw)
+  SourceWindow *sw = gp->source_browser->getChild(0);
+  if (!sw)
     return;
 
   GtkWidget *hbox2 = gtk_hbox_new(0,0);
@@ -767,23 +626,24 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   }
 
   preferences_AddFontSelect(GTK_WIDGET(vbox3), "Mnemonic", "font");
+  m_pPage = new NSourcePage(sw,0,-1);
 
   {
 
-    GtkTextBuffer *buffer;
     PangoFontDescription *font_desc;
 
-    m_view = GTK_TEXT_VIEW (gtk_text_view_new ());
-    gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
-    gtk_text_view_set_editable  (m_view, FALSE);
+    m_pPage->m_buffer = gtk_text_buffer_new (sw->getTagTable());
+    m_pPage->m_view   = (GtkTextView *)gtk_text_view_new_with_buffer(m_pPage->m_buffer);
+
+    gtk_text_view_set_wrap_mode (m_pPage->m_view, GTK_WRAP_NONE);
+    gtk_text_view_set_editable  (m_pPage->m_view, FALSE);
 
     /* Change default font throughout the widget */
     font_desc = pango_font_description_from_string ("Courier 12");
-    gtk_widget_modify_font (GTK_WIDGET (m_view), font_desc);
+    gtk_widget_modify_font (GTK_WIDGET (m_pPage->m_view), font_desc);
     pango_font_description_free (font_desc);
 
-    buffer = gtk_text_view_get_buffer (m_view);
-
+#if 0
     m_LabelColor->setBuffer(buffer);
     m_MnemonicColor->setBuffer(buffer);
     m_CommentColor->setBuffer(buffer);
@@ -813,11 +673,11 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     g_signal_connect (G_OBJECT (m_NoBreakpointTag), "event",
 		      GTK_SIGNAL_FUNC(TagEvent),
 		      0);
-
+    /*
     parseLine(0x1234,"Label: MOVF    Temp1,W ;Comment\n");
     parseLine(0xabcd,"       MOVLW   0x42    ;Comment\n");
     parseLine(       "                       ; Line only with a comment\n");
-
+    */
 
     m_LabelColor->apply();
     m_MnemonicColor->apply();
@@ -864,6 +724,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),emptyBox,label);
 
+#endif
 
 
 
@@ -986,7 +847,7 @@ void gpsimGuiPreferences::apply()
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#endif //if !defined(NEW_SOURCE_BROWSER)
+#endif //if defined(NEW_SOURCE_BROWSER)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1562,7 +1423,7 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,"<ToggleItem>" },
   { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
 
-#if !defined(NEW_SOURCE_BROWSER)
+#if defined(NEW_SOURCE_BROWSER)
   { "/_Edit",     0, 0,       0, "<Branch>" },
   { "/Edit/Preferences",        0, (GtkItemFactoryCallback)gpsimGuiPreferences::setup, 0 },
 #endif

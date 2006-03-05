@@ -1,4 +1,10 @@
 2006-03-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src.cc: See comment on
+	2006-02-27. Removed the line numbers from the source
+	browser. Changed the current PC and breakpoint indicator. Also,
+	now clicking on a break indicator toggles a break point.
+	
+2006-03-04 Scott Dattalo <scott@dattalo.com>
 	* src/modules.h, src/modules.cc, src/os_dependent.cc: Changed
 	references from char * to const char * for error strings
 	processing. (Alex Holden reports that on BSD dlerror returns const

@@ -59,14 +59,13 @@ protected:
 class NSourcePage
 {
 public:
-  NSourcePage(SourceWindow *, int file_id);
+  NSourcePage(SourceWindow *, FileContext   *, int file_id);
 
 
   void Close(void);
 
-
-
-  unsigned int pageindex_to_fileid;
+  unsigned int   m_fileid;
+  FileContext   *m_pFC;
   GtkTextView   *m_view;
   GtkTextBuffer *m_buffer;
 private:
@@ -91,6 +90,7 @@ public:
   virtual void SetPC(int address);
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
+  void updateMargin(NSourcePage *pPage, int y1, int y2);
 
   void step(int n=1);
   void step_over();
@@ -104,6 +104,7 @@ public:
   void movePC(int line);
   bool bSourceLoaded() { return m_bSourceLoaded; }
 
+  GtkTextTagTable *getTagTable() { return mpTagTable; }
 private:
   int AddPage(FileContext *, int file_id);
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
@@ -121,7 +122,7 @@ private:
   } mProgramCounter;
 
 
-private:
+protected:
   void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
   void addTagRange(NSourcePage *pPage, TextStyle *,
 		   int start_index, int end_index);
@@ -138,8 +139,10 @@ private:
   TextStyle *mBreakpointTag;   // for breakpoints
   TextStyle *mNoBreakpointTag;
   TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
+  GtkStyle  *mBreakStyle;
 
-  GtkWidget   *m_Notebook;
+  GtkWidget *m_Notebook;
+
   GtkPositionType m_TabPosition;
 
   // FIXME - change these items to list objects
