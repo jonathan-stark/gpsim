@@ -358,7 +358,7 @@ class IOPIN : public stimulus
 
   IOPIN(const char *n=0,
 	double _Vth=5.0, 
-	double _Zth=250,
+	double _Zth=1e6,
 	double _ZthWeak = 1e3,
 	double _ZthFloating = 1e6
 	);
