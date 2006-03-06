@@ -59,61 +59,34 @@ GTK=
 GDK=
 GLIB=
 
+AC_PATH_PROG(PKGCONFIG, pkg-config, no, ${PATH})
+
+if test $PKGCONFIG = "no"; then
+  AC_MSG_ERROR(Cannot find pkg-config)
+fi
+
 if test "$use_gui" = "no"; then
-  dnl glib checks
-  AC_PATH_PROG(GLIBCONFIG, glib-config, no, ${PATH})
+  dnl glib2 checks
 
-  if test $GLIBCONFIG = "no"; then
-    AC_MSG_ERROR(Cannot find glib-config: glib is needed even for non-gui version.)
-  fi
-
-  X_LDFLAGS=`$GLIBCONFIG --libs gthread gmodule`
-  X_CFLAGS=`$GLIBCONFIG --cflags`
+  X_LDFLAGS=`$PKGCONFIG --libs glib-2.0 gthread-2.0 gmodule-2.0`
+  X_CFLAGS=`$PKGCONFIG --cflags glib-2.0`
   Y_LDFLAGS=
   Y_CFLAGS=
 else
-  if test "$use_gtk1" = "yes"; then
-    dnl gtk checks
-    dnl note that the gtk12-config is the name of gtk-config on BSD
-    AC_PATH_PROG(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
-    dnl  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
+  dnl gtk2 checks
 
-    if test $GTKCONFIG = "no"; then
-      AC_MSG_ERROR(Cannot find gtk-config)
-    fi
-
-    AC_PATH_PROG(GTKEXTRACONFIG, gtkextra-config, no, ${PATH})
-
-    if test $GTKEXTRACONFIG = "no"; then
-      AC_MSG_ERROR(Cannot find gtkextra-config)
-    fi
-
-    X_LDFLAGS=`$GTKCONFIG --libs gthread`
-    X_CFLAGS=`$GTKCONFIG --cflags`
-    Y_LDFLAGS=`$GTKEXTRACONFIG --libs`
-    Y_CFLAGS=`$GTKEXTRACONFIG --cflags`
-  else
-    dnl gtk2 checks
-    AC_PATH_PROG(PKGCONFIG, pkg-config, no, ${PATH})
-
-    if test $PKGCONFIG = "no"; then
-      AC_MSG_ERROR(Cannot find pkg-config)
-    fi
-
-    $PKGCONFIG --exists gtkextra-2.0
-    if test $? != 0; then
-      AC_MSG_ERROR(Cannot find gtkextra-2.0 package)
-    fi
-
-    X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
-    X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
-    Y_LDFLAGS=`$PKGCONFIG --libs gtkextra-2.0`
-    Y_CFLAGS=`$PKGCONFIG --cflags gtkextra-2.0`
-    GTK_VERSION_T=`$PKGCONFIG --modversion gtk+-2.0`
-    echo linking with gtk-$GTK_VERSION_T
-    AC_DEFINE_UNQUOTED([GTK_VERSION],"$GTK_VERSION_T",[gtk version])
+  $PKGCONFIG --exists gtkextra-2.0
+  if test $? != 0; then
+    AC_MSG_ERROR(Cannot find gtkextra-2.0 package)
   fi
 
+  X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
+  X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
+  Y_LDFLAGS=`$PKGCONFIG --libs gtkextra-2.0`
+  Y_CFLAGS=`$PKGCONFIG --cflags gtkextra-2.0`
+  GTK_VERSION_T=`$PKGCONFIG --modversion gtk+-2.0`
+  echo linking with gtk-$GTK_VERSION_T
+  AC_DEFINE_UNQUOTED([GTK_VERSION],"$GTK_VERSION_T",[gtk version])
 fi
 
 wi_LIB_READLINE
@@ -126,7 +99,6 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AC_PROG_YACC
 AM_PROG_LEX
 AM_PROG_LIBTOOL
@@ -230,7 +202,6 @@ gpsim-$PACKAGE_VERSION is now configured for $canonical_host_type
   C++ compiler:         $CXX $CPPFLAGS $CXXFLAGS
 
   gui:                  $use_gui
-  GTK+ 1.x              $use_gtk1
   Socket interface:     $use_sockets
 
 ])

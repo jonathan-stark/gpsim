@@ -1,6 +1,6 @@
 # gpsim.nsi - NSIS installer script for gpsim
 #
-# Copyright (c) 2004 Borut Razem
+# Copyright (c) 2004-2006 Borut Razem
 #
 # This file is part of gpsim.
 #
@@ -28,7 +28,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "gpsim"
 !ifndef PRODUCT_VERSION
-!define PRODUCT_VERSION "0.21.11"
+!define PRODUCT_VERSION "0.21.12-pre"
 !endif
 !define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_WEB_SITE "http://www.dattalo.com/gnupic/gpsim.html"
@@ -197,7 +197,7 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-arabic-fc.dll"
 
   SetOutPath "$INSTDIR\lib\gpsim"
-  File "${GPSIM_ROOT}\gpsim\gpsim.lib"
+  File "${GPSIM_ROOT}\src\libgpsim.a"
   File "${GPSIM_ROOT}\plat\win32\modules.def"
 
   SetOutPath "$INSTDIR\"
@@ -374,6 +374,21 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\extras\rs232-gen\README"
   File "${GPSIM_ROOT}\extras\rs232-gen\rs232-gen.c"
 
+  SetOutPath "$INSTDIR\extras\usart_con"
+  File "${GPSIM_ROOT}\extras\usart_con\AUTHORS"
+  File "${GPSIM_ROOT}\extras\usart_con\autogen.sh"
+  File "${GPSIM_ROOT}\extras\usart_con\ChangeLog"
+  File "${GPSIM_ROOT}\extras\usart_con\configure.in"
+  File "${GPSIM_ROOT}\extras\usart_con\COPYING"
+  File "${GPSIM_ROOT}\extras\usart_con\INSTALL"
+  File "${GPSIM_ROOT}\extras\usart_con\Makefile.am"
+  File "${GPSIM_ROOT}\extras\usart_con\makefile.mingw"
+  File "${GPSIM_ROOT}\extras\usart_con\module_manager.cc"
+  File "${GPSIM_ROOT}\extras\usart_con\NEWS"
+  File "${GPSIM_ROOT}\extras\usart_con\README"
+  File "${GPSIM_ROOT}\extras\usart_con\usart_con.cc"
+  File "${GPSIM_ROOT}\extras\usart_con\usart_con.h"
+
 SectionEnd
 
 Section -Icons
@@ -455,7 +470,7 @@ Section Uninstall
   Delete "$INSTDIR\extras\rs232-gen\example\*.*"
   Delete "$INSTDIR\extras\rs232-gen\*.*"
 
-  Delete "$INSTDIR\lib\gpsim\gpsim.lib"
+  Delete "$INSTDIR\lib\gpsim\libgpsim.a"
   Delete "$INSTDIR\lib\gpsim\modules.def"
 
   Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-arabic-fc.dll"
@@ -580,10 +595,8 @@ Section Uninstall
   RMDir "$INSTDIR\examples\scripts"
   RMDir "$INSTDIR\examples"
   
-  RMDir "$INSTDIR\extras\graphic_lcd\examples"
-  RMDir "$INSTDIR\extras\graphic_lcd\src"
-  RMDir "$INSTDIR\extras\graphic_lcd\utils"
-  RMDir "$INSTDIR\extras\graphic_lcd"
+  RMDir /r "$INSTDIR\extras\graphic_lcd"
+  RMDir /r "$INSTDIR\extras\usart_con"
   RMDir "$INSTDIR\extras\lcd\examples"
   RMDir "$INSTDIR\extras\lcd"
   RMDir "$INSTDIR\extras\rs232-gen\example"

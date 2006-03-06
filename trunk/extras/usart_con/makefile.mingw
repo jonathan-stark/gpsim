@@ -1,0 +1,47 @@
+## Makefile for building the usart_con with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+ifdef DEBUG
+  OPTIMIZE = -O2 -g
+else
+  OPTIMIZE = -O2
+  CLDFLAGS = -Wl,--strip-all
+endif
+
+ifndef GLIB_PATH
+  GLIB_PATH = ../../../glib
+endif
+
+CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) -Wall
+
+CXX = c++ -mno-cygwin -mtune=pentium -mms-bitfields
+
+.cc.o:
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
+	../../lib/gpsim/libgpsim.a
+
+INCLUDES = -I ../../include \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include
+
+all :				\
+	libgpsim_usart_con.dll 
+
+libgpsim_usart_con_OBJECTS =	\
+	module_manager.o	\
+	usart_con.o
+
+################ The modules DLL
+
+libgpsim_usart_con.dll : $(libgpsim_usart_con_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_usart_con.dll ../../lib/gpsim/modules.def $(libgpsim_usart_con_OBJECTS) $(LIBS)
+
+clean :
+	-rm -f *.o *.dll

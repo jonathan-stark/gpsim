@@ -1,0 +1,86 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(usart_con.cc)
+AM_CONFIG_HEADER(config.h)
+
+dnl AC_CANONICAL_SYSTEM
+
+LCD_MAJOR_VERSION=0
+LCD_MINOR_VERSION=1
+LCD_MICRO_VERSION=0
+LCD_VERSION=$LCD_MAJOR_VERSION.$LCD_MINOR_VERSION.$LCD_MICRO_VERSION
+
+AM_INIT_AUTOMAKE(usart_con, $LCD_VERSION)
+
+AC_SUBST(LCD_MAJOR_VERSION)
+AC_SUBST(LCD_MINOR_VERSION)
+AC_SUBST(LCD_MICRO_VERSION)
+AC_SUBST(LCD_VERSION)
+
+dnl Checks for programs.
+dnl AC_PROG_YACC
+
+dnl compilers
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+dnl library tools
+AM_PROG_LIBTOOL
+
+
+dnl Checks for libraries.
+dnl Replace `main' with a function in -lfl:
+dnl AC_CHECK_LIB(fl, main)
+dnl Replace `main' with a function in -lreadline:
+
+dnl glib2 checks
+AC_PATH_PROG(PKGCONFIG, pkg-config, no, ${PATH})
+
+if test $PKGCONFIG = "no"; then
+  AC_MSG_ERROR(Cannot find pkg-config)
+fi
+
+LDEXTRA=
+CFEXTRA=
+GLIB=
+X_LDFLAGS=`$PKGCONFIG --libs glib-2.0`
+X_CFLAGS=`$PKGCONFIG --cflags glib-2.0`
+
+AC_SUBST(X_CFLAGS)
+AC_SUBST(X_LDFLAGS)
+AC_SUBST(GLIB)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+dnl AC_CHECK_HEADERS(malloc.h sys/file.h unistd.h)
+
+dnl Set lang to C++ after checking for C Gtk; checks after this will use CXX 
+dnl  instead of CC
+AC_LANG_CPLUSPLUS
+
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+AC_FUNC_ALLOCA
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(strdup strstr strtod strtol strtoul)
+
+AC_OUTPUT(Makefile)
+
+AC_MSG_RESULT([
+
+usart_con-$LCD_VERSION is now configured for $canonical_host_type
+
+  Source directory:     $srcdir
+  Installation prefix:  $prefix
+  C compiler:           $CC $XTRA_CFLAGS $CFLAGS
+  C++ compiler:         $CXX $XTRA_CXXFLAGS $CXXFLAGS
+])
