@@ -337,7 +337,7 @@ Requirements
 
 gpsim has been developed under Linux.
  It should build and run just fine under the popular Linux distributions
- like Redhat.
+ like Fedora, Ubuntu, etc.
  gpsim has also been ported to the MAC, MicroSoft Windows, Solaris, and
  BSD.
  Two packages gpsim requires that may not be available with all Linux distributi
@@ -1038,7 +1038,7 @@ x
 
 \layout Standard
 
-examine and/or modify memory
+(deprecated) examine and/or modify memory
 \end_inset 
 </cell>
 </row>
@@ -2316,24 +2316,57 @@ x
 \end_inset 
 
 
+\layout Standard
+
+The 
+\emph on 
+x
+\emph default 
+ command is deprecated.
+ It's former use was to examine and modify memory.
+ The preferred way to do this now is with expressions.
+ The help for 
+\emph on 
+x
+\emph default 
+ now indicates this:
 \layout LyX-Code
 
-x [file_register] [new_value]
+x examine command -- deprecated
 \layout LyX-Code
 
-  options:
+  Instead of the using a special command to examine and modify
 \layout LyX-Code
 
-    file_register - ram location to be examined or modified.
+  variables, it's possible to directly access them using gpsim's
 \layout LyX-Code
 
-    new_value - the new value written to the file_register.
+  expression parsing.
+ For example, to examine a variable:
 \layout LyX-Code
 
-    if no options are specified, then the entire contents
+gpsim> my_variable
 \layout LyX-Code
 
-    of the file registers will be displayed (dump).
+my_variable [0x27] = 0x00 = 0b00000000
+\layout LyX-Code
+
+  To modify a variable
+\layout LyX-Code
+
+gpsim> my_variable = 10
+\layout LyX-Code
+
+  It's also possible to assign the value of register to another
+\layout LyX-Code
+
+gpsim> my_variable = porta
+\layout LyX-Code
+
+  Or to assign the results of an expression:
+\layout LyX-Code
+
+gpsim> my_variable = (porta ^ portc) & 0x0f 
 \layout LyX-Code
 
  

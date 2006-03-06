@@ -1,4 +1,8 @@
 2006-03-06 Scott Dattalo <scott@dattalo.com>
+	* doc/gpsim.lyx, doc/gpsim.pdf: Updated the documentation to
+	reflect the deprecation of the X command
+	
+2006-03-06 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: Moved the
 	gtk text tag table to the source browser parent class. Added a
 	SourceBuffer class to wrap the text buffers. With these changes,
