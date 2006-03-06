@@ -1,3 +1,16 @@
+2006-03-05 Borut Razem <borut.razem@siol.net>
+	* configure.ac: removed GTK+ 1.x leftovers
+	* plat/win32/gpsim.nsi: remove extras/graphic_lcd/* when uninstalling
+	  gpsim, added extras/usart_con
+	* extras/usart_con/AUTHORS, extras/usart_con/autogen.sh,
+	  extras/usart_con/ChangeLog, extras/usart_con/configure.in,
+	  extras/usart_con/COPYING, extras/usart_con/INSTALL,
+	  extras/usart_con/Makefile.am, extras/usart_con/makefile.mingw,
+	  extras/usart_con/module_manager.cc, extras/usart_con/NEWS,
+	  extras/usart_con/README, extras/usart_con/usart_con.cc,
+	  extras/usart_con/usart_con.h: receive-only usart module,
+	  received characters are printed to the console
+
 2006-03-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src.cc: See comment on
 	2006-02-27. Removed the line numbers from the source
@@ -29,7 +42,6 @@
 	configuration (for now)
 	* gui/gui_object.cc, gui/gui_object.h: set_name() now requires const
 	char * instead of just char *.
-
 
 2006-02-25 Borut Razem <borut.razem@siol.net>
 	* src/p18x.cc: EEPROM sfr registers were not mapped on 16 bit pics
