@@ -28,7 +28,7 @@ class SourceBrowserAsm_Window;
 class SourceBrowserParent_Window;
 class StatusBar_Window;
 class Value;
-
+class SourceBrowserParent_Window;
 
 #if defined(NEW_SOURCE_BROWSER)
 
@@ -54,20 +54,40 @@ protected:
 };
 
 //========================================================================
+class SourceBuffer
+{
+public:
+  SourceBuffer(FileContext  *, SourceBrowserParent_Window *);
+  GtkTextBuffer *m_buffer;
+  FileContext   *m_pFC;
+  void addTagRange(TextStyle *,
+		   int start_index, int end_index);
+
+  void clearBreak(int line);
+  void setBreak(int line);
+
+
+  SourceBrowserParent_Window *m_pParent;
+};
+
+
+//========================================================================
 // SourcePage
 // A single source file.
+
 class NSourcePage
 {
 public:
   NSourcePage(SourceWindow *, FileContext   *, int file_id);
 
+  GtkTextBuffer *buffer() { return m_pBuffer->m_buffer; }
 
   void Close(void);
 
   unsigned int   m_fileid;
   FileContext   *m_pFC;
   GtkTextView   *m_view;
-  GtkTextBuffer *m_buffer;
+  SourceBuffer  *m_pBuffer;
 private:
   SourceWindow  *m_Parent;
 };
@@ -75,7 +95,7 @@ private:
 class SourceWindow : public GUI_Object
 {
 public:
-  SourceWindow(GUI_Processor *gp, const char *newName=0);
+  SourceWindow(GUI_Processor *gp, SourceBrowserParent_Window *,const char *newName=0);
 
   virtual void Build();
   virtual void SetTitle();
@@ -98,15 +118,13 @@ public:
   void run();
   void finish();
 
-  void parseLine(NSourcePage *pPage, const char*);
-  void parseLine(NSourcePage *pPage, int opcode, const char*);
   void toggleBreak(NSourcePage *pPage, int line);
   void movePC(int line);
   bool bSourceLoaded() { return m_bSourceLoaded; }
 
-  GtkTextTagTable *getTagTable() { return mpTagTable; }
+  GtkTextTagTable *getTagTable(); // { return mpTagTable; }
 private:
-  int AddPage(FileContext *, int file_id);
+  int AddPage(SourceBuffer *pSourceBuffer);
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
   StatusBar_Window *status_bar;  // display's PC, status, etc.
   SIMULATION_MODES last_simulation_mode;
@@ -127,27 +145,14 @@ protected:
   void addTagRange(NSourcePage *pPage, TextStyle *,
 		   int start_index, int end_index);
 
-  GtkTextTagTable *mpTagTable;
-
-  TextStyle *mLabel;       // for label in .asm display
-  TextStyle *mMnemonic;    // for instruction in .asm display
-  TextStyle *mSymbol;      // for symbols in .asm display
-  TextStyle *mComment;     // for comments in .asm display
-  TextStyle *mConstant;    // for numbers in .asm display
-  TextStyle *mDefault;     // for everything else.
-
-  TextStyle *mBreakpointTag;   // for breakpoints
-  TextStyle *mNoBreakpointTag;
-  TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
-  GtkStyle  *mBreakStyle;
+  // FIXME - change these items to list objects
+  NSourcePage **pages;
 
   GtkWidget *m_Notebook;
 
   GtkPositionType m_TabPosition;
 
-  // FIXME - change these items to list objects
-  NSourcePage **pages;
-
+  SourceBrowserParent_Window *m_pParent;
 
   // do we need this:
   bool m_bLoadSource;
@@ -458,6 +463,36 @@ class SourceBrowserParent_Window : public GUI_Object
 
   SOURCE_WINDOW *getChild(int);
   list<SOURCE_WINDOW *> children;
+
+#if defined(NEW_SOURCE_BROWSER)
+
+  ProgramMemoryAccess *pma;      // pointer to the processor's pma.
+
+  GtkTextTagTable *getTagTable() { return mpTagTable; }
+  void CreateSourceBuffers(GUI_Processor *gp);
+  void parseLine(SourceBuffer *pBuffer, const char*);
+  void parseLine(SourceBuffer *pBuffer, int opcode, const char*);
+  void parseSource(SourceBuffer *pBuffer,FileContext *pFC);
+
+  //protected:
+
+  GtkTextTagTable *mpTagTable;
+
+  TextStyle *mLabel;       // for label in .asm display
+  TextStyle *mMnemonic;    // for instruction in .asm display
+  TextStyle *mSymbol;      // for symbols in .asm display
+  TextStyle *mComment;     // for comments in .asm display
+  TextStyle *mConstant;    // for numbers in .asm display
+  TextStyle *mDefault;     // for everything else.
+
+  TextStyle *mBreakpointTag;   // for breakpoints
+  TextStyle *mNoBreakpointTag;
+  TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
+  GtkStyle  *mBreakStyle;
+
+  // FIXME - change these items to list objects
+  SourceBuffer **ppSourceBuffers;
+#endif
 };
 
 

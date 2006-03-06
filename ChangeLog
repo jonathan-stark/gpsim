@@ -1,3 +1,17 @@
+2006-03-06 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: Moved the
+	gtk text tag table to the source browser parent class. Added a
+	SourceBuffer class to wrap the text buffers. With these changes,
+	multiple source browsers will share the same text buffers.
+
+2006-03-06 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_x.cc: The x command has been deprecated.
+	
+2006-03-05 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.h: The default Thevenin resistance for an IOPIN was
+	too low. This caused an INPUT only pin to appear as though if it
+	was driving! (Bug reported by Alex Holden).
+
 2006-03-05 Borut Razem <borut.razem@siol.net>
 	* configure.ac: removed GTK+ 1.x leftovers
 	* plat/win32/gpsim.nsi: remove extras/graphic_lcd/* when uninstalling

@@ -632,8 +632,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     PangoFontDescription *font_desc;
 
-    m_pPage->m_buffer = gtk_text_buffer_new (sw->getTagTable());
-    m_pPage->m_view   = (GtkTextView *)gtk_text_view_new_with_buffer(m_pPage->m_buffer);
+    //m_pPage->m_buffer = gtk_text_buffer_new (sw->getTagTable());
+    //m_pPage->m_view   = (GtkTextView *)gtk_text_view_new_with_buffer(m_pPage->m_buffer);
 
     gtk_text_view_set_wrap_mode (m_pPage->m_view, GTK_WRAP_NONE);
     gtk_text_view_set_editable  (m_pPage->m_view, FALSE);
