@@ -45,8 +45,22 @@ cmd_x::cmd_x(void)
 { 
   name = "x";
 
-  brief_doc = string("examine and/or modify memory");
+  brief_doc = string("[deprecated] examine and/or modify memory");
 
+  long_doc = string ("\nx examine command -- deprecated\n\
+\tInstead of the using a special command to examine and modify\n\
+\tvariables, it's possible to directly access them using gpsim's\n\
+\texpression parsing. For example, to examine a variable:\n\
+gpsim> my_variable\n\
+my_variable [0x27] = 0x00 = 0b00000000\n\
+\tTo modify a variable\n\
+gpsim> my_variable = 10\n\
+\tIt's also possible to assign the value of register to another\n\
+gpsim> my_variable = porta\n\
+\tOr to assign the results of an expression:\n\
+gpsim> my_variable = (porta ^ portc) & 0x0f\n");
+
+  /*
   long_doc = string ("\nx [file_register] [new_value]\n\
 \toptions:\n\
 \t\tfile_register - ram location to be examined or modified.\n\
@@ -54,7 +68,7 @@ cmd_x::cmd_x(void)
 \t\tif no options are specified, then the entire contents\n\
 \t\tof the file registers will be displayed (dump).\n\
 ");
-
+  */
   op = cmd_x_options; 
 }
 
