@@ -147,16 +147,15 @@ void dump_stimulus_list(void)
   Symbol_Table::stimulus_symbol_iterator it;
   Symbol_Table::stimulus_symbol_iterator itEnd = ST.endStimulusSymbol();
   for(it = ST.beginStimulusSymbol(); it != itEnd; it++) {
-      stimulus *t = (*it)->getStimulus();
-      if(t) {
-        cout << "stimulus ";
-        cout << t->name();
-        if(t->snode)
-          cout << " attached to " << t->snode->name();
-        cout << '\n';
-      }
+    stimulus *t = (*it)->getStimulus();
+    if(t) {
+      cout << t->name();
+      //if(t->snode)
+      // cout << " attached to " << t->snode->name();
+      t->show();
+      cout << '\n';
     }
-  cout << "returning from dump\n";
+  }
 
 }
 
@@ -1468,8 +1467,8 @@ void ValueStimulus::show()
 
     double d;
     (*si).v->get(d);
-    cout << "    " << dec << (*si).time
-	 <<  '\t'  << d
+    cout << "    t=" << dec << (*si).time
+	 <<  ",v="  << d
 	 << '\n';
 
   }
