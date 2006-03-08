@@ -1,3 +1,9 @@
+2006-03-07 Scott Dattalo <scott@dattalo.com>
+	* src/gui_src_asm.cc: Turned off debugging. Added a gtk event
+	queue wait.
+	* src/gui_processor.h: The default is to now enable the new source
+	browser.
+	
 2006-03-06 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: The stimulus command without any options now
 	shows more information. In particular, value stimuli (the ones

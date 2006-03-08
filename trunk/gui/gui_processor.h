@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_PROCESSOR_H__
 #define __GUI_PROCESSOR_H__
 
-//#define NEW_SOURCE_BROWSER
+#define NEW_SOURCE_BROWSER
 
 // Forward references to all of the classes.
 
