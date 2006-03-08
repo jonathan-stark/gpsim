@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <errno.h>
 
-#define DEBUG
+//#define DEBUG
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -194,7 +194,7 @@ view_key_press(GtkTextView *pView,
 
   NSourcePage *page = PageMap[pView];
  
-  printf("Received key press for view. line=%d page%p\n",line,page);
+  Dprintf(("Received key press for view. line=%d page%p\n",line,page));
 
   switch (key->keyval) {
   case 'b':
@@ -212,8 +212,8 @@ view_button_press(GtkTextView *pView,
 		  GdkEventButton *pButton, 
 		  SourceWindow *pSW)
 {
-  printf("Received button press for view %p\n",pSW);
-  printf(" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y);
+  Dprintf(("Received button press for view %p\n",pSW));
+  Dprintf((" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y));
   //printf("Received button press for view\n");
   if (pButton->window == gtk_text_view_get_window (pView,
 						  GTK_TEXT_WINDOW_LEFT)) 
@@ -250,7 +250,7 @@ view_expose(GtkTextView *pView,
   {
     //gtk_source_view_paint_margin (view, event);
     //event_handled = TRUE;
-    printf("Expose event for view margin %p\n",pSW);
+    Dprintf(("Expose event for view margin %p\n",pSW));
 
     gint y1 = pEvent->area.y;
     gint y2 = y1 + pEvent->area.height;
@@ -275,9 +275,9 @@ view_expose(GtkTextView *pView,
 
     pSW->updateMargin(pPage, y1,y2);
   } 
-  else
-    printf("Expose event for view %p\n",pSW);
-
+  else {
+    Dprintf(("Expose event for view %p\n",pSW));
+  }
   return FALSE;
 }
 //------------------------------------------------------------------------
@@ -409,8 +409,8 @@ static gboolean TagEvent (GtkTextTag *texttag,
 			  TextStyle *pTextStyle)
 {
   /**/
-  printf("Received tag event signal Tag:%p arg1:%p Event:%p iter:%p user:%p %08X Line:%d\n",
-	 texttag, arg1,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
+  Dprintf(("Received tag event signal Tag:%p arg1:%p Event:%p iter:%p user:%p %08X Line:%d\n",
+	   texttag, arg1,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2)));
   /**/
   if (isButtonEvent(event->type)) {
     GdkEventButton *evtButton = (GdkEventButton *) event;
@@ -427,8 +427,8 @@ static gboolean TagEvent (GtkTextTag *texttag,
       GSignalQuery query;
       g_signal_query (signal_id, &query);
 
-      printf ("Signal id=%d name=%s n_params=%d\n",signal_id,query.signal_name,
-	      query.n_params);
+      Dprintf (("Signal id=%d name=%s n_params=%d\n",signal_id,query.signal_name,
+		query.n_params));
 
       GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (arg1));
       gboolean b=FALSE;
@@ -436,8 +436,8 @@ static gboolean TagEvent (GtkTextTag *texttag,
 	//g_signal_emit_by_name (toplevel, "button_press_event",evtButton,&b);
 	g_signal_emit_by_name (GTK_WIDGET (arg1), "button_press_event",evtButton,&b);
       } else 
-	printf("arg1 is not toplevel\n");
-      //gtk_signal_emit_by_name(GTK_OBJECT(arg1), "button_press_event", args);
+	printf("TagEvent: arg1 is not toplevel\n");
+
     }
     /*
     printf("Button Event: button:%d  modifier:%d coords(%g,%g)\n",
@@ -518,11 +518,9 @@ void SourceBuffer::addTagRange(TextStyle *pStyle,
   g_signal_connect (G_OBJECT (pStyle->tag()), "event",
 		    GTK_SIGNAL_FUNC(TagEvent),
 		    this);
-
-
-  //printf("Added TagRange event for %p\n",this);
-
 }
+//------------------------------------------------------------------------
+// 
 void SourceBuffer::setBreak(int line)
 {
   GtkTextIter iBegin, iEnd;
@@ -544,6 +542,7 @@ void SourceBuffer::setBreak(int line)
 
 
 }
+//------------------------------------------------------------------------
 void SourceBuffer::clearBreak(int line)
 {
   GtkTextIter iBegin, iEnd;
@@ -735,7 +734,32 @@ void SourceWindow::Build()
 //
 void SourceWindow::SetTitle()
 {
-  gtk_window_set_title (GTK_WINDOW (window), "FIXME -SourceBrowser");
+
+  if (!gp || !gp->cpu || !pma)
+    return;
+    
+  
+  if (last_simulation_mode != eSM_INITIAL &&
+    ((last_simulation_mode == eSM_RUNNING &&
+    gp->cpu->simulation_mode == eSM_RUNNING) ||
+    (last_simulation_mode != eSM_RUNNING &&
+    gp->cpu->simulation_mode != eSM_RUNNING)) &&
+    sLastPmaName == pma->name()) {
+      return;
+  }
+
+  last_simulation_mode = gp->cpu->simulation_mode;
+  char * sStatus;
+  if (gp->cpu->simulation_mode == eSM_RUNNING)
+    sStatus = "Run";
+  else // if (gp->cpu->simulation_mode == eSM_STOPPED)
+    sStatus = "Stopped";
+  char buffer[256];
+  snprintf(buffer,sizeof(buffer), "Source Browser: [%s] %s", sStatus, pma != NULL ?
+    pma->name().c_str() : "" );
+  sLastPmaName = pma->name();
+  gtk_window_set_title (GTK_WINDOW (window), buffer);
+
 }
 
 
@@ -937,6 +961,7 @@ void SourceWindow::SetPC(int address)
   if (id >= SBAW_NRFILES)
     return;
   int oldPCpage = -1;
+  bool bFirstUpdate=true;
   if (mProgramCounter.bIsActive) {
 #if defined(SHOW_LINE_NUMBERS)
     gtk_text_buffer_remove_tag (mProgramCounter.pBuffer,
@@ -945,7 +970,9 @@ void SourceWindow::SetPC(int address)
 				&mProgramCounter.iEnd);
 #endif
     oldPCpage = mProgramCounter.page;
-  }
+    bFirstUpdate=false;
+  } else
+    GTKWAIT;
 
   gtk_notebook_set_page(GTK_NOTEBOOK(m_Notebook),id);
 
@@ -993,7 +1020,7 @@ void SourceWindow::SetPC(int address)
   // viewable.
   double yloc = (PCloc.y - vRect.y) / (double) (vRect.height);
 
-  if ( yloc < 0.05  || yloc > 0.95) {
+  if ( yloc < 0.05  || yloc > 0.95 || bFirstUpdate) {
     gtk_text_view_scroll_to_iter (pages[id]->m_view,
 				  &mProgramCounter.iBegin,
 				  0.0,
@@ -1078,12 +1105,6 @@ void SourceWindow::NewSource(GUI_Processor *gp)
   m_bSourceLoaded = 1;
 
 
-  address=pProc->pma->get_PC();
-  if(address==INVALID_VALUE)
-      puts("Warning, PC is invalid?");
-  else
-      SetPC(address);
-
   // update breakpoint widgets
   unsigned uPMMaxIndex = pProc->program_memory_size();
   for(unsigned int uPMIndex=0; uPMIndex < uPMMaxIndex; uPMIndex++) {
@@ -1091,6 +1112,12 @@ void SourceWindow::NewSource(GUI_Processor *gp)
     if(pma->address_has_break(address))
       UpdateLine(address);
   }
+
+  address=pProc->pma->get_PC();
+  if(address==INVALID_VALUE)
+      puts("Warning, PC is invalid?");
+  else
+      SetPC(address);
 
   Dprintf((" Source is loaded\n"));
 
