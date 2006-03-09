@@ -107,7 +107,7 @@ MAIN    CODE
 start	
 
    .sim ".frequency=20e6"
-   .sim "module library libgpsim_modules.so"
+   .sim "module library libgpsim_modules"
    .sim "module load usart U1"
  ;  .sim "U1.xpos = 250.0"
 ;   .sim "U1.ypos = 80.0"
@@ -116,8 +116,8 @@ start
    .sim "node PIC_rx"
 
    ;; Tie the USART module to the PIC
-   .sim "attach PIC_tx portc6 U1.RX"
-   .sim "attach PIC_rx portc7 U1.TX"
+   .sim "attach PIC_tx portc6 U1.RXPIN"
+   .sim "attach PIC_rx portc7 U1.TXPIN"
 
    ;; Set the USART module's Baud Rate
 
@@ -215,7 +215,7 @@ start
 	nop
 
 done:
-  .assert  ",\"*** PASSED Usart Module test\""
+  .assert  "\"*** PASSED Usart Module test\""
 	goto	done
 
 
