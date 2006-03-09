@@ -36,8 +36,8 @@ node PIC_rx
                                                                                 
 # Let the usart receiver monitor the data flow.
                                                                                 
-attach PIC_tx portb2 U1.RX
-attach PIC_rx portb1 U1.TX
+attach PIC_tx portb2 U1.RXPIN
+attach PIC_rx portb1 U1.TXPIN
                                                                                 
 # set the usart module's baud rate
 U1.txbaud=9600
