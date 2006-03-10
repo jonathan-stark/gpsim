@@ -400,7 +400,8 @@ void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 
   list <TraceObject *> :: reverse_iterator toIter;
 
-  fprintf(fp,"0x%016LX %s ",tf->cycle_time,cpu->name().c_str());
+  fprintf(fp,"0x%016" PRINTF_INT64_MODIFIER "X %s ",
+    tf->cycle_time,cpu->name().c_str());
   print(fp);
 
   for(toIter = tf->traceObjects.rbegin();
