@@ -34,6 +34,7 @@ endif
 
 GTK_PATH = $(TOP)/gtk+
 GLIB_PATH = $(TOP)/glib
+CAIRO_PATH = $(TOP)/cairo
 PANGO_PATH = $(TOP)/pango
 ATK_PATH = $(TOP)/atk
 POPT_PATH = $(TOP)/popt
