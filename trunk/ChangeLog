@@ -1,3 +1,14 @@
+2006-03-12 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_menu.cc:
+	- Gui Preferences for source browser is *almost* working now. It's
+	possible to modify colors, but the state of the colors are not
+	being saved in the gpsim config file. Also, the line number,
+	address, opcode configuration is not completed.
+	- The Source browser now utilized the text_view margin for
+	displaying addresses and opcodes. Also, breakpoints changes the
+	margin field text to red. (This duplicated the diamond indicator,
+	but I plan to use that for modifying complex breakpoints).
+
 2006-03-12 Borut Razem <borut.razem@siol.net>
 
 	* plat/win32/gpsim.nsi, doc/gpsimWin32.html, plat/win32/make.mingw,

@@ -35,6 +35,18 @@ class SourceBrowserParent_Window;
 class SourceWindow;
 
 //========================================================================
+class ColorHolder
+{
+public:
+  ColorHolder (const char *pcColor);
+
+  GdkColor   mCurrentColor, mSaveColor;
+
+  bool set(GdkColor *pNewColor, bool saveOld);
+  void apply();
+  bool revert();
+};
+//========================================================================
 // TextStyle
 // 
 class TextStyle
@@ -42,26 +54,43 @@ class TextStyle
 public:
 
   TextStyle (const char *pName,
-	 const char *pFGColor,
-	 const char *pBGColor);
+	     const char *pFGColor,
+	     const char *pBGColor);
 
   GtkTextTag *tag() { return m_pTag; }
+
+  void apply();
+  void revert();
+  void setFG(GdkColor *pNewColor);
+
   virtual void doubleClickEvent(GtkTextIter *);
+  
+  ColorHolder  mFG;
+  ColorHolder  mBG;
+
 protected:
   GtkTextTag *m_pTag;
-  GtkStyle   *m_pStyle;
-  const char *m_cpName;
 };
 
 //========================================================================
-class SourceBuffer
+class gpsimTextBuffer
 {
 public:
-  SourceBuffer(FileContext  *, SourceBrowserParent_Window *);
-  GtkTextBuffer *m_buffer;
-  FileContext   *m_pFC;
+  gpsimTextBuffer(GtkTextTagTable *);
+
   void addTagRange(TextStyle *,
 		   int start_index, int end_index);
+
+  GtkTextBuffer *m_buffer;
+
+};
+
+//========================================================================
+class SourceBuffer : public gpsimTextBuffer
+{
+public:
+  SourceBuffer(GtkTextTagTable *, FileContext  *, SourceBrowserParent_Window *);
+  FileContext   *m_pFC;
 
   void clearBreak(int line);
   void setBreak(int line);
@@ -88,6 +117,7 @@ public:
   FileContext   *m_pFC;
   GtkTextView   *m_view;
   SourceBuffer  *m_pBuffer;
+  int            m_marginWidth;
 private:
   SourceWindow  *m_Parent;
 };
@@ -470,8 +500,8 @@ class SourceBrowserParent_Window : public GUI_Object
 
   GtkTextTagTable *getTagTable() { return mpTagTable; }
   void CreateSourceBuffers(GUI_Processor *gp);
-  void parseLine(SourceBuffer *pBuffer, const char*);
-  void parseLine(SourceBuffer *pBuffer, int opcode, const char*);
+  void parseLine(gpsimTextBuffer *pBuffer, const char*);
+  void parseLine(gpsimTextBuffer *pBuffer, int opcode, const char*);
   void parseSource(SourceBuffer *pBuffer,FileContext *pFC);
 
   //protected:

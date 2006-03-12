@@ -99,6 +99,9 @@ public:
 #define BP_PIXEL_SIZE        10
 #define PC_PIXEL_SIZE        10
 #define MARGIN_WIDTH    (PC_PIXEL_SIZE + BP_PIXEL_SIZE)
+#define PC_START  (MARGIN_WIDTH - PC_PIXEL_SIZE)
+#define BP_START  (MARGIN_WIDTH - PC_PIXEL_SIZE-BP_PIXEL_SIZE)
+
 #if defined(SHOW_LINE_NUMBERS)
   #define STRLEN_OF_LINENUMBER  5
   #define STROFFSET_OF_OPCODE   (STRLEN_OF_LINENUMBER + 1)
@@ -252,12 +255,12 @@ view_expose(GtkTextView *pView,
     //event_handled = TRUE;
     Dprintf(("Expose event for view margin %p\n",pSW));
 
+
     gint y1 = pEvent->area.y;
     gint y2 = y1 + pEvent->area.height;
 
     NSourcePage *pPage = PageMap[pView];
 
-    /* get the extents of the line printing */
 
     gtk_text_view_window_to_buffer_coords (pView,
 					   GTK_TEXT_WINDOW_LEFT,
@@ -274,6 +277,7 @@ view_expose(GtkTextView *pView,
 					   &y2);
 
     pSW->updateMargin(pPage, y1,y2);
+
   } 
   else {
     Dprintf(("Expose event for view %p\n",pSW));
@@ -453,60 +457,104 @@ static gboolean TagEvent (GtkTextTag *texttag,
 }
 
 //------------------------------------------------------------------------
+ColorHolder::ColorHolder (const char *pcColor)
+/*  : m_cpCurr(0), m_cpTemp(0) */
+{
+  gdk_color_parse(pcColor, &mCurrentColor);
+  mSaveColor  = mCurrentColor;
+  
+}
+bool ColorHolder::set(GdkColor *pNewColor, bool saveOld)
+{
+  if (!saveOld)
+    mSaveColor  = *pNewColor;
+
+  if (!gdk_color_equal(pNewColor,&mCurrentColor)) {
+    mCurrentColor = *pNewColor;
+    return true;
+  }
+
+  return false;
+}
+
+void ColorHolder::apply()
+{
+  mSaveColor = mCurrentColor;
+}
+bool ColorHolder::revert()
+{
+  return set(&mSaveColor,true);
+}
+
+//------------------------------------------------------------------------
 TextStyle::TextStyle (const char *cpName,
 		      const char *pFGColor,
 		      const char *pBGColor)
-  : m_cpName(cpName)
+  : mFG(pFGColor), mBG(pBGColor)
 {
-  GdkColor text_fg;
-  GdkColor text_bg;
-
-  gdk_color_parse(pFGColor, &text_fg);
-  gdk_color_parse(pBGColor, &text_bg);
-  m_pStyle = gtk_style_new();
-  m_pStyle->base[GTK_STATE_NORMAL] = text_bg;
-  m_pStyle->fg[GTK_STATE_NORMAL] = text_fg;
 
   m_pTag = gtk_text_tag_new(cpName);
 
   g_object_set(G_OBJECT (m_pTag),
-	       "foreground", pFGColor,
-	       "background", pBGColor);
+	       "foreground-gdk", &mFG.mCurrentColor,
+	       "background-gdk", &mBG.mCurrentColor,NULL);
 
   g_signal_connect (G_OBJECT (m_pTag), "event",
 		    GTK_SIGNAL_FUNC(TagEvent),
 		    this);
-
-
 }
 
-
+void TextStyle::setFG(GdkColor *pNewColor)
+{
+  if (mFG.set(pNewColor,true)) {
+    g_object_set(G_OBJECT (m_pTag),
+		 "foreground-gdk", &mFG.mCurrentColor,NULL);
+  }
+}
 //------------------------------------------------------------------------
 void TextStyle::doubleClickEvent(GtkTextIter *pIter)
 {
 
 }
+void TextStyle::apply()
+{
+  mFG.apply();
+  mBG.apply();
+}
+void TextStyle::revert()
+{
+  if (mBG.revert())
+    g_object_set(G_OBJECT (m_pTag),
+		 "background-gdk", &mBG.mCurrentColor,NULL);
+
+  if (mFG.revert())
+    g_object_set(G_OBJECT (m_pTag),
+		 "foreground-gdk", &mFG.mCurrentColor,NULL);
+    
+}
 
 //========================================================================
-SourceBuffer::SourceBuffer(FileContext  *pFC,  SourceBrowserParent_Window *pParent)
-  : m_pFC(pFC), m_pParent(pParent)
+gpsimTextBuffer::gpsimTextBuffer(GtkTextTagTable *pTagTable)
 {
+  assert(pTagTable);
 
-  assert(pParent);
-  assert(pFC);
+  m_buffer = gtk_text_buffer_new (pTagTable);
 
-  m_buffer = gtk_text_buffer_new (pParent->mpTagTable);
-
-  pFC->open("r");
+  assert(m_buffer);
 }
 
 //------------------------------------------------------------------------
-// addTagRange(int start_index, int end_index)
+// addTagRange(TextStyle *pStyle,int start_index, int end_index)
 //
 // Addtag range applies the tag state to a range of text in the buffer
-void SourceBuffer::addTagRange(TextStyle *pStyle,
-			       int start_index, int end_index)
+// using a given text style (i.e. the style contains a gtkTextTag)
+
+void gpsimTextBuffer::addTagRange(TextStyle *pStyle,
+				  int start_index, int end_index)
 {
+
+  if (!pStyle)
+    return;
 
   GtkTextIter    start;
   GtkTextIter    end;
@@ -519,10 +567,24 @@ void SourceBuffer::addTagRange(TextStyle *pStyle,
 		    GTK_SIGNAL_FUNC(TagEvent),
 		    this);
 }
+
+//========================================================================
+SourceBuffer::SourceBuffer(GtkTextTagTable *pTable,
+			   FileContext  *pFC,  SourceBrowserParent_Window *pParent)
+  : gpsimTextBuffer(pTable), m_pFC(pFC), m_pParent(pParent)
+{
+
+  assert(pParent);
+  assert(pFC);
+  pFC->open("r");
+}
+
 //------------------------------------------------------------------------
 // 
 void SourceBuffer::setBreak(int line)
 {
+  Dprintf ((" setBreak line %d\n",line));
+  /*
   GtkTextIter iBegin, iEnd;
   gtk_text_buffer_get_iter_at_line_offset
     (m_buffer,
@@ -539,12 +601,14 @@ void SourceBuffer::setBreak(int line)
 			     m_pParent->mBreakpointTag->tag(),
 			     &iBegin,
 			     &iEnd);
-
+  */
 
 }
 //------------------------------------------------------------------------
 void SourceBuffer::clearBreak(int line)
 {
+  Dprintf ((" clearBreak line %d\n",line));
+  /*
   GtkTextIter iBegin, iEnd;
   gtk_text_buffer_get_iter_at_line_offset
     (m_buffer,
@@ -561,12 +625,13 @@ void SourceBuffer::clearBreak(int line)
 			      m_pParent->mBreakpointTag->tag(),
 			      &iBegin,
 			      &iEnd);
+  */
 }
 
 
 //========================================================================
 NSourcePage::NSourcePage(SourceWindow *pParent, FileContext   *pFC, int file_id)
-  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_fileid(file_id), m_pFC(pFC)
+  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_marginWidth(0),m_fileid(file_id), m_pFC(pFC)
 {
 }
 //------------------------------------------------------------------------
@@ -816,7 +881,7 @@ void SourceWindow::UpdateLine(int address)
 {
   assert(address>=0);
 
-  Dprintf((" address=%d\n",address));
+  Dprintf((" UpdateLine at address=%d\n",address));
 
   if(!bSourceLoaded() || !pma)
     return;
@@ -835,6 +900,44 @@ void SourceWindow::UpdateLine(int address)
       pPage->m_pBuffer->clearBreak(line);
       if(pma->address_has_break(address))
 	pPage->m_pBuffer->setBreak(line);
+
+      GtkTextIter iBegin;
+      gtk_text_buffer_get_iter_at_line
+	(gtk_text_view_get_buffer(pPage->m_view),
+	 &iBegin,
+	 line);
+
+      int y, h;
+
+      gtk_text_view_get_line_yrange (pPage->m_view,
+				     &iBegin,
+				     &y,
+				     &h);
+      /*
+      updateMargin(pPage,y,y+h);
+      */
+      if (pPage->m_marginWidth) {
+
+	GdkRectangle vRect;
+
+	gtk_text_view_buffer_to_window_coords
+	  (pPage->m_view,
+	   GTK_TEXT_WINDOW_LEFT,
+	   0,
+	   y,
+	   NULL,
+	   &y);
+
+	vRect.x=0;
+	vRect.y=y;
+	vRect.width=pPage->m_marginWidth;
+	vRect.height=h;
+
+	Dprintf((" UpdateLine line=%d invalidating region %d,%d  %d,%d\n",line,0,y,vRect.width,h));
+	// Send an expose event to repaint the whole margin
+	gdk_window_invalidate_rect
+	  (gtk_text_view_get_window (pPage->m_view, GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
+      }
 
       return;
     }
@@ -871,8 +974,33 @@ void SourceWindow::updateMargin(NSourcePage *pPage, int y1, int y2)
 			     numbers,
 			     &count);
 
+  Dprintf((" y1=%d y2=%d\n",y1,y2));
 
   GdkWindow *win = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_LEFT);
+
+
+  /* set size. */
+  gchar str [256];
+  PangoLayout *layout;
+  gint text_width;
+
+  const char *pcFormat = "%d %04X %04X";
+  g_snprintf (str, sizeof (str),
+	      "%4d %04X:%04X",
+	      MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)), 0x9999, 0x9999);
+  layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
+
+  pango_layout_get_pixel_size (layout, &text_width, NULL);
+  text_width+=2;
+
+  pPage->m_marginWidth = text_width + MARGIN_WIDTH;
+  //pango_layout_set_width (layout, text_width);
+  //pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
+  //pango_layout_set_wrap(layout, PANGO_WRAP_CHAR);
+
+  gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (text_view),
+					GTK_TEXT_WINDOW_LEFT,
+					text_width+MARGIN_WIDTH);
 
   int i=0;
   while (i < count) {
@@ -886,44 +1014,71 @@ void SourceWindow::updateMargin(NSourcePage *pPage, int y1, int y2)
 					   g_array_index (pixels, gint, i),
 					   NULL,
 					   &pos);
-    if (line == PCline)
+
+    int address = pma->find_address_from_line(pPage->m_pFC,line);
+
+    bool bHasBreak = address>=0 && pma->address_has_break(address);
+
+    if (1) {
+      // Line numbers:
+
+      if (address < 0)
+	g_snprintf (str, sizeof (str),
+		    "%4d", line);
+      else {
+	unsigned int opcode = gp->cpu->pma->get_opcode(address)&0x7fff;
+	if (bHasBreak) 
+	  g_snprintf (str, sizeof (str),
+		      "<span foreground=\"red\"><b>%4d %04X:%04X</b></span>", line,address,opcode);
+	else
+	  g_snprintf (str, sizeof (str),
+		      "%4d %04X:%04X", line,address,opcode);
+
+      }
+
+      pango_layout_set_markup (layout, str, -1);
+
+      gtk_paint_layout (GTK_WIDGET (text_view)->style,
+			win,
+			GTK_STATE_NORMAL,
+			FALSE,
+			NULL,
+			GTK_WIDGET (text_view),
+			NULL,
+			2, //text_width + 2, 
+			pos,
+			layout);
+
+    }
+
+
+    if (line == PCline) {
       gtk_paint_arrow 
 	(GTK_WIDGET (text_view)->style,
 	 win,
-	 GTK_STATE_NORMAL,  //GTK_WIDGET_STATE (pages[id]>m_view),
-	 GTK_SHADOW_OUT,     // GtkShadowType shadow_type,
+	 GTK_STATE_NORMAL,
+	 GTK_SHADOW_OUT,    // GtkShadowType shadow_type,
 	 NULL, 
 	 GTK_WIDGET (text_view),
 	 NULL,
 	 GTK_ARROW_RIGHT,   //GtkArrowType arrow_type,
 	 TRUE,              //gboolean fill,
-	 BP_PIXEL_SIZE,pos, PC_PIXEL_SIZE,15);
+	 text_width+PC_START,pos, PC_PIXEL_SIZE,15);
+      Dprintf((" updating PC at line %d\n", line));
+    }
 
-    int address = pma->find_address_from_line(pPage->m_pFC,line);
-    if(pma->address_has_break(address))
-      gtk_paint_diamond
-	(GTK_WIDGET (text_view)->style,
-	 win,
-	 GTK_STATE_NORMAL,  //GTK_WIDGET_STATE (pages[id]>m_view),
-	 GTK_SHADOW_OUT,     // GtkShadowType shadow_type,
-	 NULL, 
-	 GTK_WIDGET (text_view),
-	 NULL,
-	 0,
-	 pos,
-	 BP_PIXEL_SIZE,
-	 BP_PIXEL_SIZE);
-    else if (address >= 0) {
+    if (address >= 0) {
+      // There is code associated with this line.
 
       gtk_paint_diamond
 	(GTK_WIDGET (text_view)->style,
 	 win,
-	 GTK_STATE_NORMAL,  //GTK_WIDGET_STATE (pages[id]>m_view),
-	 GTK_SHADOW_IN,     // GtkShadowType shadow_type,
+	 GTK_STATE_NORMAL,
+	 pma->address_has_break(address) ? GTK_SHADOW_IN : GTK_SHADOW_OUT,
 	 NULL, 
 	 GTK_WIDGET (text_view),
 	 NULL,
-	 0,
+	 text_width+BP_START,
 	 pos,
 	 BP_PIXEL_SIZE,
 	 BP_PIXEL_SIZE);
@@ -1030,13 +1185,16 @@ void SourceWindow::SetPC(int address)
 				     &vRect);
 
   }
-  vRect.x=0;
-  vRect.y=0;
-  vRect.width=MARGIN_WIDTH;
-  // Send an expose event to repaint the whole margin
-  gdk_window_invalidate_rect
-    (win, &vRect, TRUE);
-  //gdk_window_process_updates (win, TRUE);
+
+  // If there is a margin, then invalidate it so gtk will go off and redraw it.
+  if (pages[id]->m_marginWidth) {
+    vRect.x=0;
+    vRect.y=0;
+    vRect.width=pages[id]->m_marginWidth;
+    // Send an expose event to repaint the whole margin
+    gdk_window_invalidate_rect
+      (win, &vRect, TRUE);
+  }
 }
 
 void SourceWindow::CloseSource(void)
@@ -3951,7 +4109,7 @@ int SourceBrowserParent_Window::set_config()
 // parseLine
 //
 // 
-void SourceBrowserParent_Window::parseLine(SourceBuffer *pBuffer, int opcode, const char *cP)
+void SourceBrowserParent_Window::parseLine(gpsimTextBuffer *pBuffer, int opcode, const char *cP)
 {
 
   GtkTextIter iEnd;
@@ -3960,6 +4118,7 @@ void SourceBrowserParent_Window::parseLine(SourceBuffer *pBuffer, int opcode, co
 
   char buf[64];
   int line_number = gtk_text_buffer_get_line_count(pTextBuffer);
+  /*
 #if defined(SHOW_LINE_NUMBERS)
   if (opcode >= 0) 
     snprintf(buf, sizeof(buf), "%5d %04X ",line_number,opcode);
@@ -3973,6 +4132,7 @@ void SourceBrowserParent_Window::parseLine(SourceBuffer *pBuffer, int opcode, co
 #endif
 
   gtk_text_buffer_insert (pTextBuffer, &iEnd, buf, -1);
+  */
 
   int offset = gtk_text_iter_get_offset (&iEnd);
 
@@ -4012,7 +4172,7 @@ void SourceBrowserParent_Window::parseLine(SourceBuffer *pBuffer, int opcode, co
 // parseLine
 //
 // 
-void SourceBrowserParent_Window::parseLine(SourceBuffer *pBuffer,const char *cP)
+void SourceBrowserParent_Window::parseLine(gpsimTextBuffer *pBuffer,const char *cP)
 {
   parseLine(pBuffer,0, cP);
 }
@@ -4080,7 +4240,7 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
       {
 
 	if (i < SBAW_NRFILES) {
-	  ppSourceBuffers[i] = new SourceBuffer(fc, this);
+	  ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
 	  parseSource(ppSourceBuffers[i], fc);
 	}
 

@@ -135,34 +135,6 @@ about_cb (gpointer             callback_data,
 
 //========================================================================
 
-// class ColorSelection 
-//
-// A class to keep track of the state of configurable colors.
-//
-class ColorSelection
-{
-public:
-  ColorSelection(GdkColor *pC)
-    : m_current(pC)
-  {
-    m_preferred=0;
-    setPreferred(pC);
-  }
-  bool hasChanged()    { return gdk_color_equal(m_current,m_preferred) != TRUE;}
-  GdkColor *getPreferred() { return m_preferred;}
-  const char *getPreferred(char *);
-  void setPreferred(GdkColor *cP_preferred) 
-  { 
-    if (m_preferred)
-      gdk_color_free(m_preferred);
-    m_preferred = gdk_color_copy(cP_preferred);
-  }
-protected:
-  GdkColor *m_current;
-  GdkColor *m_preferred;
-};
-
-
 // class ColorButton
 //
 // Creates a GtkColorButton and places it into a parent widget.
@@ -170,34 +142,22 @@ protected:
 // call back into this class and keep track of the selected 
 // color state.
 class SourceBrowserPreferences;
-class ColorButton : public ColorSelection
+class ColorButton
 {
 public:
   ColorButton (GtkWidget *pParent, 
-	       GdkColor *pC, 
+	       TextStyle *pStyle,
 	       const char *label,
 	       SourceBrowserPreferences *
 	       );
   static void setColor_cb(GtkColorButton *widget,
 			  ColorButton    *This);
   void apply();
-  void addTagRange(int start_index, int end_index);
-  void setBuffer(GtkTextBuffer *pBuffer)
-  {
-    m_buffer = pBuffer; 
-    char cParray[20];
-    m_tag = gtk_text_buffer_create_tag (pBuffer, m_label,
-					"foreground",
-					getPreferred(cParray),
-					NULL);
-
-
-  }
+  void cancel();
+  TextStyle *m_pStyle;
 private:
   SourceBrowserPreferences *m_prefs;
-  GtkTextTag *m_tag;
   const char *m_label;
-  GtkTextBuffer *m_buffer;
 };
 
 class SourceBrowserPreferences 
@@ -206,37 +166,21 @@ public:
   SourceBrowserPreferences(GtkWidget *pParent);
 
   void apply();
+  void cancel();
   void update();
-  //void parseLine(const char*);
-  //void parseLine(int opcode, const char*);
   void toggleBreak(int line);
   void movePC(int line);
 
 private:
-  void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
 
-  NSourcePage *m_pPage;
+  GtkTextView   *m_view;
+  gpsimTextBuffer *m_gpsimBuffer;
 
-  //GtkTextView *m_view;
-  GtkLayout   *m_layout;
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
   ColorButton *m_SymbolColor;
   ColorButton *m_CommentColor;
   ColorButton *m_ConstantColor;
-
-  GtkStyle *symbol_text_style;       // for symbols in .asm display
-  GtkStyle *label_text_style;        // for label in .asm display
-  GtkStyle *instruction_text_style;  // for instruction in .asm display
-  GtkStyle *number_text_style;       // for numbers in .asm display
-  GtkStyle *comment_text_style;      // for comments in .asm display
-  GtkStyle *linenumber_text_style;   // for line numbers and opcodes in .asm display
-  GtkStyle *default_text_style;      // for everything else.
-
-  GtkTextTag *m_BreakpointTag;
-  GtkTextTag *m_NoBreakpointTag;
-
-  GtkTextTag *m_CurrentLineTag;
 
   GtkWidget   *m_SampleNotebook;
   GtkPositionType m_TabPosition;
@@ -249,8 +193,6 @@ public:
   gpsimGuiPreferences();
   ~gpsimGuiPreferences();
 
-  void apply();
-
   static void setup (gpointer             callback_data,
 		     guint                callback_action,
 		     GtkWidget           *widget);
@@ -260,9 +202,9 @@ private:
   SourceBrowserPreferences *m_SourceBrowser;
 
   static gint cancel_cb (gpsimGuiPreferences *Self);
-
   static gint apply_cb  (gpsimGuiPreferences *Self);
-
+  void apply() { m_SourceBrowser->apply();}
+  void cancel() { m_SourceBrowser->cancel();}
   GtkWidget *window;
 };
 static GtkWidget *LocalWindow=0;
@@ -279,6 +221,7 @@ void gpsimGuiPreferences::setup (gpointer             callback_data,
 gint gpsimGuiPreferences::cancel_cb (gpsimGuiPreferences  *Self)
 {
   printf (" cancel preferences %p \n",Self);
+  Self->cancel();
   delete Self;
   return TRUE;
 }
@@ -310,14 +253,14 @@ static void setFont_cb (GtkWidget     *pFontButton,
 
 //------------------------------------------------------------------------
 // ColorButton Constructor
-ColorButton::ColorButton(GtkWidget *pParent, GdkColor *pColor, 
+ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
 			 const char *colorName,SourceBrowserPreferences *prefs)
-  : ColorSelection(pColor), m_prefs(prefs), m_label(colorName)
+  : m_pStyle(pStyle),m_prefs(prefs), m_label(colorName)
 {
   GtkWidget *hbox        = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
 
-  GtkWidget *colorButton = gtk_color_button_new_with_color (pColor);
+  GtkWidget *colorButton = gtk_color_button_new_with_color (&pStyle->mFG.mCurrentColor);
   gtk_color_button_set_title (GTK_COLOR_BUTTON(colorButton), colorName);
   gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
   gtk_widget_show(colorButton);
@@ -326,7 +269,6 @@ ColorButton::ColorButton(GtkWidget *pParent, GdkColor *pColor,
 		      "color-set", 
 		      GTK_SIGNAL_FUNC(setColor_cb),
 		      this);
-  printf("create color button %s %p %p\n",colorName,colorButton,this);
   const int cBORDER = 10; // pixels
   GtkWidget *label       = gtk_label_new(colorName);
   gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
@@ -343,16 +285,18 @@ void ColorButton::setColor_cb(GtkColorButton *widget,
   printf("setColor_cb  %p %p\n",widget,This);
   GdkColor newColor;
   gtk_color_button_get_color (widget, &newColor);
-  This->setPreferred(&newColor);
-  This->apply();
-}
-const char *ColorSelection::getPreferred(char *cParray)
-{
-  sprintf(cParray,"#%04X%04X%04X",
-	  m_preferred->red, m_preferred->green, m_preferred->blue);
-  return cParray;
+  This->m_pStyle->setFG(&newColor);
 }
 
+void ColorButton::apply()
+{
+  m_pStyle->apply();
+}
+void ColorButton::cancel()
+{
+  m_pStyle->revert();
+}
+//------------------------------------------------------------------------
 static bool isButtonEvent (GdkEventType type)
 {
   return 
@@ -382,33 +326,6 @@ static gboolean    TagEvent  (GtkTextTag *texttag,
   }
   return FALSE;
 }
-
-//------------------------------------------------------------------------
-// addTagRange(int start_index, int end_index)
-//
-// Each color button has an associated buffer and tag. 
-// Addtag range applies the tag state to a range of text in the buffer
-void ColorButton::addTagRange(int start_index, int end_index)
-{
-  GtkTextIter    start;
-  GtkTextIter    end;
-  gtk_text_buffer_get_iter_at_offset (m_buffer, &start, start_index);
-  gtk_text_buffer_get_iter_at_offset (m_buffer, &end, end_index);
-
-  gtk_text_buffer_apply_tag (m_buffer, m_tag, &start, &end);
-
-  g_signal_connect (G_OBJECT (m_tag), "event",
-		    GTK_SIGNAL_FUNC(TagEvent),
-		    this);
-  printf("Added TagRange event for %p\n",this);
-
-}
-
-void ColorButton::apply()
-{
-  char array[20];
-  g_object_set(m_tag, "foreground" , getPreferred(array), NULL);
-}
 //------------------------------------------------------------------------
 
 static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescription,
@@ -418,7 +335,6 @@ static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescri
 
   gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
   GtkWidget *hbox        = gtk_hbox_new(0,0);
-  //gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
   gtk_container_add (GTK_CONTAINER (frame), hbox);
 
   //GtkWidget *fontButton = gtk_font_button_new_with_font (fontName);
@@ -517,36 +433,28 @@ void SourceBrowserPreferences::toggleBreak(int line)
 
   }
   */
-
-  if (m_pPage && m_pPage->m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_pPage->m_view);
-    GtkTextIter iBegin;
-    GtkTextIter iEnd;
-
-    gtk_text_buffer_get_end_iter (buffer, &iEnd);
-    gtk_text_buffer_get_iter_at_line(buffer, &iBegin, line);
-    #define STRLEN_OF_LINENUMBER_AND_OPCODE 10
-    gtk_text_buffer_get_iter_at_line_offset(buffer, &iEnd, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
-    gtk_text_buffer_apply_tag (buffer, m_BreakpointTag, &iBegin, &iEnd);
-
-  }
 }
 
 
 void SourceBrowserPreferences::movePC(int line)
 {
+  /*
+  if (m_view) {
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
 
-  if (m_pPage && m_pPage->m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_pPage->m_view);
-    GtkTextIter iBegin;
-    GtkTextIter iEnd;
+    if (buffer && gtk_text_buffer_get_line_count (buffer)>0) {
 
-    #define STRLEN_OF_LINENUMBER_AND_OPCODE 10
-    gtk_text_buffer_get_iter_at_line(buffer, &iEnd, line+1);
-    gtk_text_buffer_get_iter_at_line_offset(buffer, &iBegin, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
-    gtk_text_buffer_apply_tag (buffer, m_CurrentLineTag, &iBegin, &iEnd);
+      GtkTextIter iBegin;
+      GtkTextIter iEnd;
 
+#define STRLEN_OF_LINENUMBER_AND_OPCODE 10
+      gtk_text_buffer_get_iter_at_line(buffer, &iEnd, line+1);
+      gtk_text_buffer_get_iter_at_line_offset
+	(buffer, &iBegin, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
+      gtk_text_buffer_apply_tag (buffer, m_CurrentLineTag, &iBegin, &iEnd);
+    }
   }
+  */
 }
 
 
@@ -556,9 +464,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   if (!gp && !gp->source_browser)
     return;
-  SourceWindow *sw = gp->source_browser->getChild(0);
-  if (!sw)
-    return;
+  SourceBrowserParent_Window *sw = gp->source_browser;
 
   GtkWidget *hbox2 = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
@@ -574,27 +480,20 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *colorVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
-    set_style_colors("black", "white", &default_text_style);
-    set_style_colors("dark green", "white", &symbol_text_style);
-    set_style_colors("orange", "white", &label_text_style);
-    set_style_colors("red", "white", &instruction_text_style);
-    set_style_colors("blue", "white", &number_text_style);
-    set_style_colors("dim gray", "white", &comment_text_style);
-
     m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), 
-				      &label_text_style->fg[GTK_STATE_NORMAL],
+				      sw->mLabel,
 				      "Label", this);
     m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), 
-				      &instruction_text_style->fg[GTK_STATE_NORMAL],
+				      sw->mMnemonic,
 				      "Mnemonic", this);
     m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), 
-				      &symbol_text_style->fg[GTK_STATE_NORMAL],
+				      sw->mSymbol,
 				      "Symbols", this);
     m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox),
-				      &number_text_style->fg[GTK_STATE_NORMAL],
+				      sw->mConstant,
 				      "Constants", this);
     m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox),
-				      &comment_text_style->fg[GTK_STATE_NORMAL],
+				      sw->mComment,
 				      "Comments", this);
 
 
@@ -626,65 +525,20 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   }
 
   preferences_AddFontSelect(GTK_WIDGET(vbox3), "Mnemonic", "font");
-  m_pPage = new NSourcePage(sw,0,-1);
-
   {
 
     PangoFontDescription *font_desc;
 
-    //m_pPage->m_buffer = gtk_text_buffer_new (sw->getTagTable());
-    //m_pPage->m_view   = (GtkTextView *)gtk_text_view_new_with_buffer(m_pPage->m_buffer);
+    m_gpsimBuffer = new gpsimTextBuffer (sw->getTagTable());
+    m_view        = (GtkTextView *)gtk_text_view_new_with_buffer(m_gpsimBuffer->m_buffer);
 
-    gtk_text_view_set_wrap_mode (m_pPage->m_view, GTK_WRAP_NONE);
-    gtk_text_view_set_editable  (m_pPage->m_view, FALSE);
+    gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
+    gtk_text_view_set_editable  (m_view, FALSE);
 
     /* Change default font throughout the widget */
     font_desc = pango_font_description_from_string ("Courier 12");
-    gtk_widget_modify_font (GTK_WIDGET (m_pPage->m_view), font_desc);
+    gtk_widget_modify_font (GTK_WIDGET (m_view), font_desc);
     pango_font_description_free (font_desc);
-
-#if 0
-    m_LabelColor->setBuffer(buffer);
-    m_MnemonicColor->setBuffer(buffer);
-    m_CommentColor->setBuffer(buffer);
-    m_SymbolColor->setBuffer(buffer);
-    m_ConstantColor->setBuffer(buffer);
-
-    gtk_text_buffer_create_tag (buffer, "margin",
-				"left_margin", 50,
-				NULL);
-
-    m_BreakpointTag = gtk_text_buffer_create_tag (buffer, "Breakpoint",
-						  "foreground","black",
-						  "background","red",
-						  NULL);
-    m_NoBreakpointTag = gtk_text_buffer_create_tag (buffer, "NoBreakpoint",
-						    "foreground","black",
-						    "background","white",
-						    NULL);
-
-    m_CurrentLineTag = gtk_text_buffer_create_tag (buffer, "CurrentLine",
-						  "background","light green",
-						  NULL);
-
-    g_signal_connect (G_OBJECT (m_BreakpointTag), "event",
-		      GTK_SIGNAL_FUNC(TagEvent),
-		      0);
-    g_signal_connect (G_OBJECT (m_NoBreakpointTag), "event",
-		      GTK_SIGNAL_FUNC(TagEvent),
-		      0);
-    /*
-    parseLine(0x1234,"Label: MOVF    Temp1,W ;Comment\n");
-    parseLine(0xabcd,"       MOVLW   0x42    ;Comment\n");
-    parseLine(       "                       ; Line only with a comment\n");
-    */
-
-    m_LabelColor->apply();
-    m_MnemonicColor->apply();
-    m_CommentColor->apply();
-    m_SymbolColor->apply();
-    m_ConstantColor->apply();
-
 
 
     GtkWidget *frame = gtk_frame_new ("Sample");
@@ -697,29 +551,11 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
 
 
-    /*
-    const int PAGE_BORDER = 3;
-    const int PIXMAP_SIZE = 14;
-    GtkWidget *hbox = gtk_hbox_new(0,0);
-    gtk_container_set_border_width (GTK_CONTAINER (hbox), PAGE_BORDER);
-
-    GtkAdjustment *source_layout_adj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
-    m_layout = GTK_LAYOUT(gtk_layout_new(0,source_layout_adj));
-    gtk_widget_set_usize(GTK_WIDGET(m_layout),PIXMAP_SIZE*2,0);
-    gtk_widget_show(GTK_WIDGET(m_layout));
-
-    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(m_layout),
-		       FALSE,FALSE, 0);
-
-    gtk_box_pack_start_defaults(GTK_BOX(hbox), GTK_WIDGET(m_view));
-
-    gtk_widget_show(hbox);
-    */
-
     GtkWidget *label = gtk_label_new("file1.asm");
-    //gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),hbox,label);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),GTK_WIDGET(m_view),label);
+    sw->parseLine(m_gpsimBuffer, 0x3034, "  MOVLW   0x34    ; Comment");
 
+#if 0
     label = gtk_label_new("file2.asm");
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),emptyBox,label);
@@ -734,27 +570,30 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   gtk_widget_show_all(hbox2);
   gtk_widget_show_all(vbox3);
 
-  toggleBreak(2);
-  movePC(1);
+  //  toggleBreak(2);
+  //  movePC(1);
 
 }
 
 void SourceBrowserPreferences::apply()
 {
   printf ("apply source browser preferences\n");
+
+  m_LabelColor->apply();
+  m_MnemonicColor->apply();
+  m_SymbolColor->apply();
+  m_ConstantColor->apply();
+  m_CommentColor->apply();
 }
 
-void SourceBrowserPreferences::set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
+void SourceBrowserPreferences::cancel()
 {
-  GdkColor text_fg;
-  GdkColor text_bg;
-
-  gdk_color_parse(fg_color, &text_fg);
-  gdk_color_parse(bg_color, &text_bg);
-  *style = gtk_style_new();
-  (*style)->base[GTK_STATE_NORMAL] = text_bg;
-  (*style)->fg[GTK_STATE_NORMAL] = text_fg;
-
+  printf ("cancel source browser preferences\n");
+  m_LabelColor->cancel();
+  m_MnemonicColor->cancel();
+  m_SymbolColor->cancel();
+  m_ConstantColor->cancel();
+  m_CommentColor->cancel();
 }
 
 //========================================================================
@@ -837,11 +676,6 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
   gtk_widget_destroy (window);
 
   //delete m_SourceBrowser;
-}
-
-void gpsimGuiPreferences::apply()
-{
-  printf ("apply gui preferences\n");
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
