@@ -1,3 +1,7 @@
+2006-03-12 Borut Razem <borut.razem@siol.net>
+	* config_win32.h.in: added #define _USE_MATH_DEFINES, so that M_PI
+	  is defined in MSVC math.h
+
 2006-03-12 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_menu.cc:
 	- Gui Preferences for source browser is *almost* working now. It's
