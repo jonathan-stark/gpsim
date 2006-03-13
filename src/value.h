@@ -291,7 +291,7 @@ public:
 
   bool getVal() { return value; }
 
-  static Boolean* Boolean::typeCheck(Value* val, string valDesc);
+  static Boolean* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
   virtual Value *copy() { return new Boolean(value); }
@@ -371,9 +371,9 @@ public:
   virtual char *toString(char *, int len);
   virtual char *toBitStr(char *, int len);
 
-  static Integer* Integer::typeCheck(Value* val, string valDesc);
-  static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
-  static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax);
+  static Integer* typeCheck(Value* val, string valDesc);
+  static Integer* assertValid(Value* val, string valDesc, gint64 valMin);
+  static Integer* assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
   inline operator gint64() {
@@ -619,7 +619,7 @@ public:
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
 
-  static AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc);
+  static AbstractRange* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
 private:
