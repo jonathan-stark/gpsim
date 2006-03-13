@@ -138,6 +138,7 @@ PicTrisRegister::PicTrisRegister(const char *tris_name, PicPortRegister *_port)
 }
 void PicTrisRegister::put(unsigned int new_value)
 {
+  trace.raw(write_trace.get() | value.data);
   value.data = new_value;
   if (m_port)
     m_port->updatePort();

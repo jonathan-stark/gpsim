@@ -1,3 +1,6 @@
+2006-03-12 Scott Dattalo <scott@dattalo.com>
+	* src/pic-ioports.cc: PIC TRIS writes were not getting traced.
+
 2006-03-12 Borut Razem <borut.razem@siol.net>
 	* config_win32.h.in: added #define _USE_MATH_DEFINES, so that M_PI
 	  is defined in MSVC math.h
