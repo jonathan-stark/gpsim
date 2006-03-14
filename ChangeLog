@@ -1,3 +1,6 @@
+2006-03-13 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: hex files were not getting loaded properly.
+
 2006-03-12 Scott Dattalo <scott@dattalo.com>
 	* src/pic-ioports.cc: PIC TRIS writes were not getting traced.
 

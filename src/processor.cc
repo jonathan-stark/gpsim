@@ -487,8 +487,8 @@ void Processor::init_program_memory_at_index(unsigned int uIndex,
 					     const unsigned char *bytes, int nBytes)
 {
 
-  for (int i =0; i<nBytes; i+=2)
-    init_program_memory_at_index(uIndex+i, (((unsigned int)bytes[i+1])<<8)  | bytes[i]);
+  for (int i =0; i<nBytes/2; i++)
+    init_program_memory_at_index(uIndex+i, (((unsigned int)bytes[2*i+1])<<8)  | bytes[2*i]);
 
 }
 
