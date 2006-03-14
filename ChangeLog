@@ -1,5 +1,6 @@
 2006-03-14 Borut Razem <borut.razem@siol.net>
 	* src/dspic/makefile.mingw: added
+	* plat/win32/gpsim.nsi: fixed typo
 
 2006-03-13 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: hex files were not getting loaded properly.

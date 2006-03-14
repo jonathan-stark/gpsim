@@ -553,7 +553,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libpangocairo-1.0-0.dll"
   Delete "$INSTDIR\bin\libpangoft2-1.0-0.dll"
   Delete "$INSTDIR\bin\libpangowin32-1.0-0.dll"
-  Delete "$INSTDIR\bin\libpbg12.dll"
+  Delete "$INSTDIR\bin\libpng13.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\pthreadGC2.dll"
   Delete "$INSTDIR\bin\readline.dll"
