@@ -21,7 +21,4 @@ protected:
   FILE * m_pfIn;
 };
 
-class CGpsimUserInterface;
-extern "C" CGpsimUserInterface s_GpsimUI;
-
 #endif
