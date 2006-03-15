@@ -1,3 +1,7 @@
+2006-03-15 Alain Portal <aportal@univ-montp2.fr>
+	* src/p12.h: Remove redundant class scoping (causes errors with
+	gcc-4.1)
+	
 2006-03-14 Borut Razem <borut.razem@siol.net>
 	* src/dspic/makefile.mingw: added
 	* plat/win32/gpsim.nsi: fixed typo
