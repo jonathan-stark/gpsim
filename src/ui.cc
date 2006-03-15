@@ -36,7 +36,7 @@ public:
   CGpsimUserInterface(const char *paStrings[]);
   virtual ~CGpsimUserInterface() {}
 
-  void CGpsimUserInterface::SetStreams(FILE *in, FILE *out);
+  void         SetStreams(FILE *in, FILE *out);
   virtual ISimConsole &GetConsole();
   virtual void SetConsole(ISimConsole *pConsole);
   virtual void DisplayMessage(unsigned int uStringID, ...);
@@ -110,8 +110,6 @@ String  CGpsimUserInterface::s_sRAMAddrHexPrefix( "UIRAMAddressHexPrefix",    "$
 Integer CGpsimUserInterface::s_iValueMask(        "UIValueMask",             0xff);
 Integer CGpsimUserInterface::s_iProgAddrMask(     "UIProgamAddressMask",     0xff);
 Integer CGpsimUserInterface::s_iRAMAddrMask(      "UIRAMAddressMask",        0xff);
-
-CGpsimUserInterface s_GpsimUI(s_psEnglishMessages);
 
 
 class NullConsole : public ISimConsole {
