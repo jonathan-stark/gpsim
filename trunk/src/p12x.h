@@ -113,7 +113,7 @@ class P12CE518 : public P12C508
 
   virtual PROCESSOR_TYPE isa(void){return _P12CE518_;};
   virtual void tris_instruction(unsigned int tris_register);
-  virtual void P12CE518::set_eeprom(I2C_EE *e);
+  virtual void set_eeprom(I2C_EE *e);
 
   P12CE518(void);
   static Processor *construct(void);
