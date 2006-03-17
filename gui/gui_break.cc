@@ -54,8 +54,6 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_watch.h"
 #include "gui_statusbar.h"
 
-extern GUI_Processor *gp;
-
 class linkXREF : public CrossReferenceToGUI
 {
 public:

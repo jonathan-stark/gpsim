@@ -1040,7 +1040,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   if(errno != EINVAL && n != (int) reg->get_shadow().data)
     {
-      reg->put_value(n & gp->cpu->register_mask());
+      reg->put_value(n & gpGuiProcessor->cpu->register_mask());
       rw->UpdateASCII(row);
     }
 

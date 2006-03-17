@@ -213,7 +213,7 @@ static void add_range(Profile_Window *pw,
     gcycles=0;
     for(i=startaddress;i<endaddress;i++)
     {
-      gcycles+=gp->cpu->cycles_used(i);
+      gcycles+=gpGuiProcessor->cpu->cycles_used(i);
     }
     sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",gcycles);
 
@@ -2061,7 +2061,7 @@ public:
 
   void callback(void)
   {
-    if(!gp || !gp->cpu || !pw->gp->cpu)
+    if(!gpGuiProcessor || !gpGuiProcessor->cpu || !pw->gp->cpu)
       return;
 
     if(startcycle==END_OF_TIME) {
@@ -2091,7 +2091,7 @@ public:
 
   void callback(void)
   {
-    if(!gp || !gp->cpu || !pw->gp->cpu)
+    if(!gpGuiProcessor || !gpGuiProcessor->cpu || !pw->gp->cpu)
       return;
 
     if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME) {
