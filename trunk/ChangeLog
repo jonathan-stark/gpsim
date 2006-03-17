@@ -1,3 +1,18 @@
+2006-03-15 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, gui/gui_src_asm.cc:
+	Added .lst files to the source browser.
+	Added the "ColorHolder" class to wrap a GdkColor that can be
+	changed and reverted back to its original value.
+	The colors for the source browser are now saved.
+	Line numbers, addresses, and opcodes in the margin can be
+	selectively enabled
+	* gui/gui_menu.cc:
+	Example code for src browser configuration is now rendered in a
+	SourcePage.
+	* gui/gui_statusbar.cc, gui/gui_main.cc, gui/gui.h,
+	gui/gui_regwin.cc, gui/gui_break.cc, gui/gui_profile.cc: The
+	global 'gp' has been renamed gpGuiProcessor.
+
 2006-03-15 Alain Portal <aportal@univ-montp2.fr>
 	* src/p12.h: Remove redundant class scoping (causes errors with
 	gcc-4.1)

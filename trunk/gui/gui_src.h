@@ -43,12 +43,16 @@ public:
   GdkColor   mCurrentColor, mSaveColor;
 
   bool set(GdkColor *pNewColor, bool saveOld);
+  char *get(char *, int );
   void apply();
   bool revert();
 };
 //========================================================================
 // TextStyle
-// 
+//
+// A TextSyle is wrapper around a GtkTextTag and provides a simple way
+// to change the text foreground and background colors. Also, color 
+// editing is supported.
 class TextStyle
 {
 public:
@@ -59,44 +63,66 @@ public:
 
   GtkTextTag *tag() { return m_pTag; }
 
-  void apply();
-  void revert();
+  void apply();   // Permanently apply a change that the user has made.
+  void revert();  // Remove a change the user has made
+
   void setFG(GdkColor *pNewColor);
 
   virtual void doubleClickEvent(GtkTextIter *);
   
-  ColorHolder  mFG;
-  ColorHolder  mBG;
+  ColorHolder  mFG;  // Foreground color
+  ColorHolder  mBG;  // Background color
 
 protected:
   GtkTextTag *m_pTag;
 };
 
 //========================================================================
-class gpsimTextBuffer
+class SourceBuffer
 {
 public:
-  gpsimTextBuffer(GtkTextTagTable *);
+  SourceBuffer(GtkTextTagTable *,FileContext *,SourceBrowserParent_Window *);
+  void parseLine(const char*, int parseStyle);
 
   void addTagRange(TextStyle *,
 		   int start_index, int end_index);
 
   GtkTextBuffer *m_buffer;
-
+  SourceBrowserParent_Window *m_pParent;
+  FileContext   *m_pFC;
 };
 
+
 //========================================================================
-class SourceBuffer : public gpsimTextBuffer
+// The SourcePageMargin holds configuration information for the left margin
+// of a SourcePage. The left margin is where line numbers, addresses, opcodes,
+// breakpoints, and current program counter are all shown.
+class SourcePageMargin
 {
 public:
-  SourceBuffer(GtkTextTagTable *, FileContext  *, SourceBrowserParent_Window *);
-  FileContext   *m_pFC;
+  SourcePageMargin();
 
-  void clearBreak(int line);
-  void setBreak(int line);
+  void enableLineNumbers(bool b)
+  {
+    m_bShowLineNumbers = b;
+  }
+  void enableAddresses(bool b)
+  {
+    m_bShowAddresses = b;
+  }
+  void enableOpcode(bool b)
+  {
+    m_bShowOpcodes = b;
+  }
 
-
-  SourceBrowserParent_Window *m_pParent;
+  bool formatMargin(char *,int, int line,int addr,int opcode);
+  bool bLineNumbers() { return m_bShowLineNumbers; }
+  bool bAddresses()   { return m_bShowAddresses; }
+  bool bOpcodes()     { return m_bShowOpcodes; }
+private:
+  bool m_bShowLineNumbers;
+  bool m_bShowAddresses;
+  bool m_bShowOpcodes;
 };
 
 
@@ -110,6 +136,8 @@ public:
   NSourcePage(SourceWindow *, FileContext   *, int file_id);
 
   GtkTextBuffer *buffer() { return m_pBuffer->m_buffer; }
+  //  void updateMargin(NSourcePage *pPage, int y1, int y2);
+  void updateMargin(int y1, int y2);
 
   void Close(void);
 
@@ -125,7 +153,10 @@ private:
 class SourceWindow : public GUI_Object
 {
 public:
-  SourceWindow(GUI_Processor *gp, SourceBrowserParent_Window *,const char *newName=0);
+  SourceWindow(GUI_Processor *gp, 
+	       SourceBrowserParent_Window *,
+	       bool bUseConfig,
+	       const char *newName=0);
 
   virtual void Build();
   virtual void SetTitle();
@@ -140,8 +171,12 @@ public:
   virtual void SetPC(int address);
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
-  void updateMargin(NSourcePage *pPage, int y1, int y2);
 
+  virtual int getPCLine(int page);
+  virtual int getAddress(NSourcePage *pPage, int line);
+  virtual bool bAddressHasBreak(int address);
+  virtual int getOpcode(int address);
+  int  AddPage(SourceBuffer *pSourceBuffer, const char *fName);
   void step(int n=1);
   void step_over();
   void stop();
@@ -152,7 +187,9 @@ public:
   void movePC(int line);
   bool bSourceLoaded() { return m_bSourceLoaded; }
 
-  GtkTextTagTable *getTagTable(); // { return mpTagTable; }
+  GtkTextTagTable *getTagTable();
+
+  SourcePageMargin m_margin;
 private:
   int AddPage(SourceBuffer *pSourceBuffer);
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
@@ -500,8 +537,7 @@ class SourceBrowserParent_Window : public GUI_Object
 
   GtkTextTagTable *getTagTable() { return mpTagTable; }
   void CreateSourceBuffers(GUI_Processor *gp);
-  void parseLine(gpsimTextBuffer *pBuffer, const char*);
-  void parseLine(gpsimTextBuffer *pBuffer, int opcode, const char*);
+  //void parseLine(gpsimTextBuffer *pBuffer, const char*, int parseStyle);
   void parseSource(SourceBuffer *pBuffer,FileContext *pFC);
 
   //protected:
