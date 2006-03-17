@@ -66,7 +66,7 @@ static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
   unsigned int value;
   char *bad_position;
 
-  if(!gp || !gp->cpu || !le || !le->entry)
+  if(!gpGuiProcessor || !gpGuiProcessor->cpu || !le || !le->entry)
     return;
 
   text=gtk_entry_get_text (GTK_ENTRY (le->entry));

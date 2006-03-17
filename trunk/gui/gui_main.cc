@@ -74,7 +74,7 @@ void link_src_to_gpsim(GUI_Processor *gp);
  * --- Global variables
  */
 
-GUI_Processor *gp=0;
+GUI_Processor *gpGuiProcessor=0;
 GSList *gui_processors=0;
 unsigned int interface_id=0;
 
@@ -466,8 +466,8 @@ int gui_init (int argc, char **argv)
 
 
   gte();
-  gp = new GUI_Processor();
-  interface_id = get_interface().add_interface(new GUI_Interface(gp));
+  gpGuiProcessor = new GUI_Processor();
+  interface_id = get_interface().add_interface(new GUI_Interface(gpGuiProcessor));
   gtl();
 
   return(0);

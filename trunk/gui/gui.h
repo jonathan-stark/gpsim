@@ -198,8 +198,7 @@ public:
 //
 
 extern GtkItemFactory *item_factory;
-// gui_processor.c
-extern GUI_Processor *gp;
+extern GUI_Processor *gpGuiProcessor;
 
 void exit_gpsim(void);
 
