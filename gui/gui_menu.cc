@@ -65,7 +65,7 @@ typedef struct _note_book_item
 
 GtkItemFactory *item_factory=0;
 
-extern GUI_Processor *gp;
+extern GUI_Processor *gpGuiProcessor;
 
 static void 
 do_quit_app(GtkWidget *widget) 
@@ -160,7 +160,7 @@ private:
   const char *m_label;
 };
 
-class SourceBrowserPreferences 
+class SourceBrowserPreferences : public SourceWindow
 {
 public:
   SourceBrowserPreferences(GtkWidget *pParent);
@@ -173,8 +173,7 @@ public:
 
 private:
 
-  GtkTextView   *m_view;
-  gpsimTextBuffer *m_gpsimBuffer;
+  NSourcePage *m_pPage;
 
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
@@ -361,110 +360,25 @@ static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescri
 }
 
 
-//========================================================================
-//#include "../xpms/break.xpm"
-static char * break_xpm[] = {
-"12 12 3 1",
-" 	c None",
-".	c gray",
-"X	c white",
-"   .......    ",
-"  .........   ",
-" ...........  ",
-" ...XXXXX.... ",
-" ...XXXXX.... ",
-" ...XXXXX.... ",
-" ...XXXXX.... ",
-" ...XXXXX.... ",
-" ...........  ",
-"  .........   ",
-"   .......    ",
-"              "};
 void SourceBrowserPreferences::toggleBreak(int line)
 {
 
-  //GtkWidget *widget = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD,
-  //						  GTK_ICON_SIZE_BUTTON);
-  //GtkWidget *widget = gtk_check_button_new();
-
-  static GdkPixmap *pixmap_break = 0;
-  static GdkBitmap *bp_mask = 0;
-  static GtkWidget *widget = 0;
-
-  if (pixmap_break == 0) {
-    GtkStyle  *style;
-
-    style=gtk_style_new();
-
-    pixmap_break = gdk_pixmap_create_from_xpm_d(LocalWindow->window,
-						&bp_mask,
-						&style->bg[GTK_STATE_NORMAL],
-						(gchar**)break_xpm);
-    widget = gtk_image_new_from_pixmap (pixmap_break,
-					bp_mask);
-    /*
-    GtkTextChildAnchor *anchor =
-      gtk_text_buffer_create_child_anchor (buffer, &iEnd);
-
-    gtk_text_view_add_child_at_anchor (m_view,
-				       widget,
-				       anchor);
-    */
-
-    gtk_widget_show_all (widget);
-  }
-
-  /*
-  if (m_layout && m_view) {
-
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
-    GtkTextIter iBegin;
-    gint y, height;
-
-    gtk_text_buffer_get_iter_at_line(buffer, &iBegin, line);
-    gtk_text_view_get_line_yrange   (m_view, &iBegin, &y, &height);
-
-    printf(" line for break y=%d, height=%d\n",y,height);
-    gtk_layout_put(GTK_LAYOUT(m_layout),
-		   widget,
-		   0,
-		   y + height/2
-		   );
-
-  }
-  */
 }
 
 
 void SourceBrowserPreferences::movePC(int line)
 {
-  /*
-  if (m_view) {
-    GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
-
-    if (buffer && gtk_text_buffer_get_line_count (buffer)>0) {
-
-      GtkTextIter iBegin;
-      GtkTextIter iEnd;
-
-#define STRLEN_OF_LINENUMBER_AND_OPCODE 10
-      gtk_text_buffer_get_iter_at_line(buffer, &iEnd, line+1);
-      gtk_text_buffer_get_iter_at_line_offset
-	(buffer, &iBegin, line, STRLEN_OF_LINENUMBER_AND_OPCODE);
-      gtk_text_buffer_apply_tag (buffer, m_CurrentLineTag, &iBegin, &iEnd);
-    }
-  }
-  */
 }
 
 
 //========================================================================
 SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
+  : SourceWindow(0,0,false,0)
 {
 
-  if (!gp && !gp->source_browser)
+  if (!gpGuiProcessor && !gpGuiProcessor->source_browser)
     return;
-  SourceBrowserParent_Window *sw = gp->source_browser;
+  SourceBrowserParent_Window *sw = gpGuiProcessor->source_browser;
 
   GtkWidget *hbox2 = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
@@ -524,20 +438,23 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   }
 
-  preferences_AddFontSelect(GTK_WIDGET(vbox3), "Mnemonic", "font");
+  preferences_AddFontSelect(GTK_WIDGET(vbox3), "Font Selector", "font");
+
   {
 
     PangoFontDescription *font_desc;
 
-    m_gpsimBuffer = new gpsimTextBuffer (sw->getTagTable());
-    m_view        = (GtkTextView *)gtk_text_view_new_with_buffer(m_gpsimBuffer->m_buffer);
+    m_pPage       = new NSourcePage(0,0,-1);
+    m_pPage->m_pBuffer = new SourceBuffer (sw->getTagTable(),0,sw);
+    m_pPage->m_view    = (GtkTextView *)gtk_text_view_new_with_buffer
+      (m_pPage->m_pBuffer->m_buffer);
 
-    gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
-    gtk_text_view_set_editable  (m_view, FALSE);
+    gtk_text_view_set_wrap_mode (m_pPage->m_view, GTK_WRAP_NONE);
+    gtk_text_view_set_editable  (m_pPage->m_view, FALSE);
 
     /* Change default font throughout the widget */
     font_desc = pango_font_description_from_string ("Courier 12");
-    gtk_widget_modify_font (GTK_WIDGET (m_view), font_desc);
+    gtk_widget_modify_font (GTK_WIDGET (m_pPage->m_view), font_desc);
     pango_font_description_free (font_desc);
 
 
@@ -552,8 +469,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
 
     GtkWidget *label = gtk_label_new("file1.asm");
-    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),GTK_WIDGET(m_view),label);
-    sw->parseLine(m_gpsimBuffer, 0x3034, "  MOVLW   0x34    ; Comment");
+    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),GTK_WIDGET(m_pPage->m_view),label);
+    m_pPage->m_pBuffer->parseLine( "  MOVLW   0x34    ; Comment",1);
 
 #if 0
     label = gtk_label_new("file2.asm");
@@ -704,10 +621,10 @@ file_selection_ok (GtkWidget        *w,
   const char *file;
   char msg[200];
 
-  if(gp)
+  if(gpGuiProcessor)
   {
     file=gtk_file_selection_get_filename (fs);
-    if(!gpsim_open(gp->cpu, file, NULL))
+    if(!gpsim_open(gpGuiProcessor->cpu, file, NULL))
     {
       sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
       gui_message(msg);
@@ -775,46 +692,46 @@ toggle_window (gpointer             callback_data,
 
   menu_item = gtk_item_factory_get_item (item_factory,
 					 gtk_item_factory_path_from_widget (widget));
-  if(gp && menu_item) {
+  if(gpGuiProcessor && menu_item) {
     
     int view_state =  GTK_CHECK_MENU_ITEM(menu_item)->active ? VIEW_SHOW : VIEW_HIDE;
 			
     switch(callback_action) {
     case WT_opcode_source_window:
-      gp->program_memory->ChangeView(view_state);
+      gpGuiProcessor->program_memory->ChangeView(view_state);
       break;
     case WT_asm_source_window:
-      gp->source_browser->ChangeView(view_state);
+      gpGuiProcessor->source_browser->ChangeView(view_state);
       break;
     case WT_register_window:
-      gp->regwin_ram->ChangeView(view_state);
+      gpGuiProcessor->regwin_ram->ChangeView(view_state);
       break;
     case WT_eeprom_window:
-      gp->regwin_eeprom->ChangeView(view_state);
+      gpGuiProcessor->regwin_eeprom->ChangeView(view_state);
       break;
     case WT_watch_window:
-      gp->watch_window->ChangeView(view_state);
+      gpGuiProcessor->watch_window->ChangeView(view_state);
       break;
     case WT_symbol_window:
-      gp->symbol_window->ChangeView(view_state);
+      gpGuiProcessor->symbol_window->ChangeView(view_state);
       break;
     case WT_breadboard_window:
-      gp->breadboard_window->ChangeView(view_state);
+      gpGuiProcessor->breadboard_window->ChangeView(view_state);
       break;
     case WT_stack_window:
-      gp->stack_window->ChangeView(view_state);
+      gpGuiProcessor->stack_window->ChangeView(view_state);
       break;
     case WT_trace_window:
-      gp->trace_window->ChangeView(view_state);
+      gpGuiProcessor->trace_window->ChangeView(view_state);
       break;
     case WT_profile_window:
-      gp->profile_window->ChangeView(view_state);
+      gpGuiProcessor->profile_window->ChangeView(view_state);
       break;
     case WT_stopwatch_window:
-      gp->stopwatch_window->ChangeView(view_state);
+      gpGuiProcessor->stopwatch_window->ChangeView(view_state);
       break;
     case WT_scope_window:
-      //gp->scope_window->ChangeView(view_state);
+      //gpGuiProcessor->scope_window->ChangeView(view_state);
       cout << " The Scope is disabled right now\n";
       break;
     default:
@@ -830,44 +747,44 @@ toggle_window (gpointer             callback_data,
 static void 
 runbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu)
-    gp->cpu->pma->run();
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
+    gpGuiProcessor->cpu->pma->run();
 }
 
 static void 
 stopbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu)
-    gp->cpu->pma->stop();
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
+    gpGuiProcessor->cpu->pma->stop();
 }
     
 static void 
 stepbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) 
-    gp->cpu->pma->step(1);
+  if(gpGuiProcessor && gpGuiProcessor->cpu) 
+    gpGuiProcessor->cpu->pma->step(1);
 }
     
 static void 
 overbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) 
-    gp->cpu->pma->step_over();
+  if(gpGuiProcessor && gpGuiProcessor->cpu) 
+    gpGuiProcessor->cpu->pma->step_over();
 
 }
     
 static void 
 finishbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) 
-    gp->cpu->pma->finish();
+  if(gpGuiProcessor && gpGuiProcessor->cpu) 
+    gpGuiProcessor->cpu->pma->finish();
 }
 
 static void 
 resetbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu)
-    gp->cpu->reset(POR_RESET);
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
+    gpGuiProcessor->cpu->reset(POR_RESET);
 }
 
 
@@ -964,8 +881,8 @@ void UpdateRateMenuItem::Select()
     get_interface().set_update_rate(update_rate);
   }
 
-  if(gp && gp->cpu)
-    gp->cpu->pma->stop();
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
+    gpGuiProcessor->cpu->pma->stop();
 
   config_set_variable("dispatcher", "SimulationMode", id);
 
@@ -1023,7 +940,7 @@ public:
     : TimeFormatter(tw,menu,"MicroSeconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value * 1e6;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value * 1e6;
     snprintf(buf,size, "%19.2f us",time_db);
   }
 };
@@ -1035,7 +952,7 @@ public:
     : TimeFormatter(tw,menu,"MilliSeconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value * 1e3;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value * 1e3;
     snprintf(buf,size, "%19.3f ms",time_db);
   }
 };
@@ -1047,7 +964,7 @@ public:
     : TimeFormatter(tw,menu,"Seconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value;
     snprintf(buf,size, "%19.3f Sec",time_db);
   }
 };
@@ -1059,7 +976,7 @@ public:
     : TimeFormatter(tw,menu,"HH:MM:SS.mmm") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value;
     double v=time_db;
     int hh=(int)(v/3600),mm,ss,cc;
     v-=hh*3600.0;
@@ -1308,7 +1225,7 @@ void dispatch_Update()
   if(!dispatcher_window)
     return;
 
-  if(gp && gp->cpu) {
+  if(gpGuiProcessor && gpGuiProcessor->cpu) {
 
     TheWindow.Update();
 
