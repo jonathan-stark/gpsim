@@ -159,12 +159,16 @@ Section "MainSection" SEC01
 
   SetOutPath "$INSTDIR\etc\gtk-2.0"
   File "${PKG_ROOT}\etc\gtk-2.0\gdk-pixbuf.loaders"
+  File "${PKG_ROOT}\share\themes\MS-Windows\gtk-2.0\gtkrc"
 
   SetOutPath "$INSTDIR\etc\pango"
   File "${PKG_ROOT}\etc\pango\pango.aliases"
   File "${PKG_ROOT}\etc\pango\pango.modules"
 
-  SetOutPath "$INSTDIR\lib\gtk-2.0\2.4.0\immodules\"
+  SetOutPath "$INSTDIR\lib\gtk-2.0\2.4.0"
+  File /r "${PKG_ROOT}\lib\gtk-2.0\2.4.0\engines"
+
+  SetOutPath "$INSTDIR\lib\gtk-2.0\2.4.0\immodules"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\immodules\im-am-et.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\immodules\im-ti-et.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\immodules\im-ti-er.dll"
@@ -175,7 +179,7 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\immodules\im-cedilla.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\immodules\im-viqr.dll"
 
-  SetOutPath "$INSTDIR\lib\gtk-2.0\2.4.0\loaders\"
+  SetOutPath "$INSTDIR\lib\gtk-2.0\2.4.0\loaders"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\loaders\libpixbufloader-xpm.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\loaders\libpixbufloader-xbm.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\loaders\libpixbufloader-wbmp.dll"
@@ -199,6 +203,9 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-basic-win32.dll"
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-basic-fc.dll"
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-arabic-fc.dll"
+
+  SetOutPath "$INSTDIR"
+  File /r "${PKG_ROOT}\share"
 
   SetOutPath "$INSTDIR\lib\gpsim"
   File "${GPSIM_ROOT}\src\libgpsim.a"
@@ -574,9 +581,11 @@ Section Uninstall
   RMDir "$INSTDIR\lib\pango"
   RMDir "$INSTDIR\lib\gtk-2.0\2.4.0\loaders"
   RMDir "$INSTDIR\lib\gtk-2.0\2.4.0\immodules"
+  RMDir /r "$INSTDIR\lib\gtk-2.0\2.4.0\engines"
   RMDir "$INSTDIR\lib\gtk-2.0\2.4.0"
   RMDir "$INSTDIR\lib\gtk-2.0"
   RMDir "$INSTDIR\lib"
+  RMDir /r "$INSTDIR\share"
   RMDir "$INSTDIR\etc\pango"
   RMDir "$INSTDIR\etc\gtk-2.0"
   RMDir "$INSTDIR\etc"
