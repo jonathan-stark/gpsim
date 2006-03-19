@@ -110,12 +110,12 @@ public:
   {
     m_bShowAddresses = b;
   }
-  void enableOpcode(bool b)
+  void enableOpcodes(bool b)
   {
     m_bShowOpcodes = b;
   }
 
-  bool formatMargin(char *,int, int line,int addr,int opcode);
+  bool formatMargin(char *,int, int line,int addr,int opcode,bool bBreak);
   bool bLineNumbers() { return m_bShowLineNumbers; }
   bool bAddresses()   { return m_bShowAddresses; }
   bool bOpcodes()     { return m_bShowOpcodes; }
@@ -124,7 +124,6 @@ private:
   bool m_bShowAddresses;
   bool m_bShowOpcodes;
 };
-
 
 //========================================================================
 // SourcePage
@@ -140,7 +139,7 @@ public:
   void updateMargin(int y1, int y2);
 
   void Close(void);
-
+  void setFont(const char *);
   unsigned int   m_fileid;
   FileContext   *m_pFC;
   GtkTextView   *m_view;
@@ -148,6 +147,7 @@ public:
   int            m_marginWidth;
 private:
   SourceWindow  *m_Parent;
+  char          *m_cpFont;
 };
 
 class SourceWindow : public GUI_Object
@@ -166,7 +166,7 @@ public:
   void Create(void);
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
-  virtual void Update(void);
+  virtual void Update();
   virtual void UpdateLine(int address);
   virtual void SetPC(int address);
   virtual void CloseSource(void);
@@ -182,14 +182,15 @@ public:
   void stop();
   void run();
   void finish();
-
   void toggleBreak(NSourcePage *pPage, int line);
   void movePC(int line);
   bool bSourceLoaded() { return m_bSourceLoaded; }
 
   GtkTextTagTable *getTagTable();
 
-  SourcePageMargin m_margin;
+  SourcePageMargin &margin();
+  const char *getFont();
+
 private:
   int AddPage(SourceBuffer *pSourceBuffer);
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
@@ -539,7 +540,11 @@ class SourceBrowserParent_Window : public GUI_Object
   void CreateSourceBuffers(GUI_Processor *gp);
   //void parseLine(gpsimTextBuffer *pBuffer, const char*, int parseStyle);
   void parseSource(SourceBuffer *pBuffer,FileContext *pFC);
-
+  SourcePageMargin &margin();
+  void setTabPosition(int tt);
+  int getTabPosition() { return m_TabType; }
+  void setFont(const char *);
+  const char *getFont();
   //protected:
 
   GtkTextTagTable *mpTagTable;
@@ -555,6 +560,10 @@ class SourceBrowserParent_Window : public GUI_Object
   TextStyle *mNoBreakpointTag;
   TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
   GtkStyle  *mBreakStyle;
+
+  SourcePageMargin m_margin;
+  int m_TabType;
+  char *m_FontDescription;
 
   // FIXME - change these items to list objects
   SourceBuffer **ppSourceBuffers;

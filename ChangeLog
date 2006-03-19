@@ -1,3 +1,8 @@
+2006-03-19 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc:
+	The preferences window now configures the source browser tabs,
+	margins, and font.
+
 2006-03-19 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: added share and lib\gtk-2.0\2.4.0\engines to
 	  the package, use share\themes\MS-Windows\gtk-2.0\gtkrc as the
