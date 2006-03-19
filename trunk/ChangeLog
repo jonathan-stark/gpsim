@@ -2,6 +2,7 @@
 	* plat/win32/gpsim.nsi: added share and lib\gtk-2.0\2.4.0\engines to
 	  the package, use share\themes\MS-Windows\gtk-2.0\gtkrc as the
 	  default gtkrc
+	* gpsim/regression/rt.sh: failure detection
 
 2006-03-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc:

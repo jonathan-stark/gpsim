@@ -38,12 +38,17 @@ LOGFILE='simresults.log'
 touch $LOGFILE
 
 # Run the simulation and save the results
-make $2 >$LOGFILE
-
-# Convention simulations will print a message containing the
-# the word PASSED
-grep "PASSED" $LOGFILE
+make $2 | tee -a $LOGFILE |\
+sed -n -e '/running\.\.\./,$ {
+/^ *Message:/ {
+s/^ *Message:\(.*\)$/\1/p
+q
+}
+}
+$ a\
+FAILED
+' | grep "PASSED"
 
 if [ $? -ne 0 ] ; then
-  echo "$1/make $2 -- regression test FAILED"
+  echo "!!! FAILED $1/make $2"
 fi
