@@ -208,7 +208,7 @@ view_button_press(GtkTextView *pView,
 {
   Dprintf(("Received button press for view %p\n",pSW));
   Dprintf((" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y));
-  //printf("Received button press for view\n");
+
   if (pButton->window == gtk_text_view_get_window (pView,
 						  GTK_TEXT_WINDOW_LEFT)) 
   {
@@ -635,7 +635,8 @@ void SourceBuffer::clearBreak(int line)
 
 //========================================================================
 NSourcePage::NSourcePage(SourceWindow *pParent, FileContext   *pFC, int file_id)
-  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_marginWidth(0),m_fileid(file_id), m_pFC(pFC)
+  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_marginWidth(0),m_fileid(file_id), m_pFC(pFC),
+    m_cpFont(0)
 {
 }
 //------------------------------------------------------------------------
@@ -875,6 +876,26 @@ void SourceWindow::Update()
 {
   Dprintf((" \n"));
 
+  if (m_Notebook && 
+      ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==FALSE
+	&& m_pParent->getTabPosition()<0) ||
+       (m_pParent->getTabPosition() != gtk_notebook_get_tab_pos(GTK_NOTEBOOK(m_Notebook))))) {
+
+    if (m_pParent->getTabPosition()<0) {
+      gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),FALSE);
+    } else {
+      gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),TRUE);
+      gtk_notebook_set_tab_pos(GTK_NOTEBOOK(m_Notebook), (GtkPositionType) m_pParent->getTabPosition());
+    }
+  }
+
+  if (m_Notebook) {
+    gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
+
+    if (currPage>=0 && currPage < SBAW_NRFILES)
+      pages[currPage]->setFont(m_pParent->getFont());
+  }
+
   if(!gp || !pma || ! window)
     return;
 
@@ -979,7 +1000,7 @@ int SourceWindow::getOpcode(int address)
   return (address >= 0) ? gp->cpu->pma->get_opcode(address) : address;
 }
 
-bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int opcode)
+bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int opcode, bool bBreak)
 {
   if (str) {
 
@@ -987,6 +1008,10 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
     int npos = 0;
 
     *str=0;
+
+    npos = bBreak ? g_snprintf(&str[pos], len, "<span foreground=\"red\"><b>") : 0;
+    pos += npos;
+    len -= npos;
 
     npos = m_bShowLineNumbers ? g_snprintf(&str[pos], len, "%d",line) : 0;
     pos += npos;
@@ -997,9 +1022,13 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
     len -= npos;
 
     
-    pos += (m_bShowOpcodes && opcode >= 0) ? 
+    npos = (m_bShowOpcodes && opcode >= 0) ? 
       g_snprintf(&str[pos], len, "%c%04X", m_bShowAddresses?':':' ', opcode) 
       : 0;
+    pos += npos;
+    len -= npos;
+
+    pos += bBreak ? g_snprintf(&str[pos], len, "</b></span>") : 0;
 
     return pos != 0;
   }
@@ -1037,9 +1066,9 @@ void NSourcePage::updateMargin(int y1, int y2)
   PangoLayout *layout=0;
   gint text_width=0;
 
-  if ( m_Parent->m_margin.formatMargin(str, sizeof(str),
-		MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
-		0x9999, 0x9999) ) {
+  if ( m_Parent->margin().formatMargin(str, sizeof(str),
+				       MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
+				       0x9999, 0x9999,false) ) {
 
     layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
 
@@ -1071,8 +1100,8 @@ void NSourcePage::updateMargin(int y1, int y2)
 
     if (layout) {
 
-      if ( m_Parent->m_margin.formatMargin(str, sizeof(str),
-				 line, address,m_Parent->getOpcode(address))) {
+      if ( m_Parent->margin().formatMargin(str, sizeof(str),
+					   line, address,m_Parent->getOpcode(address),bHasBreak)) {
 
 	pango_layout_set_markup (layout, str, -1);
 
@@ -1088,39 +1117,6 @@ void NSourcePage::updateMargin(int y1, int y2)
 			  layout);
 
       }
-
-    }
-
-    if (0) {
-      // Line numbers:
-
-
-      if (address < 0)
-	g_snprintf (str, sizeof (str),
-		    "%4d", line);
-      else {
-	unsigned int opcode = m_Parent->getOpcode(address);
-	if (bHasBreak) 
-	  g_snprintf (str, sizeof (str),
-		      "<span foreground=\"red\"><b>%4d %04X:%04X</b></span>", line,address,opcode);
-	else
-	  g_snprintf (str, sizeof (str),
-		      "%4d %04X:%04X", line,address,opcode);
-
-      }
-
-      pango_layout_set_markup (layout, str, -1);
-
-      gtk_paint_layout (GTK_WIDGET (text_view)->style,
-			win,
-			GTK_STATE_NORMAL,
-			FALSE,
-			NULL,
-			GTK_WIDGET (text_view),
-			NULL,
-			2, //text_width + 2, 
-			pos,
-			layout);
 
     }
 
@@ -1164,7 +1160,27 @@ void NSourcePage::updateMargin(int y1, int y2)
   g_array_free (numbers, TRUE);
 
 }
+void NSourcePage::setFont(const char *cp_newFont)
+{
+  if (cp_newFont) {
 
+    if (m_cpFont && strcmp(cp_newFont,m_cpFont)==0)
+      return;
+
+    if (m_cpFont)
+      free(m_cpFont);
+
+    m_cpFont = strndup(cp_newFont,256);
+
+
+    /* Change default font throughout the widget */
+    PangoFontDescription *font_desc;
+    font_desc = pango_font_description_from_string (m_cpFont);
+    gtk_widget_modify_font (GTK_WIDGET (m_view), font_desc);
+    pango_font_description_free (font_desc);
+
+  }
+}
 //------------------------------------------------------------------------
 // SetPC
 //
@@ -1265,6 +1281,16 @@ void SourceWindow::CloseSource(void)
 {
   Dprintf((" \n"));
 }
+
+SourcePageMargin &SourceWindow::margin()
+{
+  return m_pParent->margin();
+}
+const char *SourceWindow::getFont()
+{
+  return m_pParent->getFont();
+}
+
 void SourceWindow::NewSource(GUI_Processor *gp)
 {
   Dprintf((" \n"));
@@ -1379,12 +1405,16 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
 
   label=gtk_label_new(label_string);
 
+  GtkWidget *pFrame = gtk_frame_new(NULL);
+
   GtkWidget *pSW = gtk_scrolled_window_new (0,0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
 				  GTK_POLICY_AUTOMATIC,
 				  GTK_POLICY_AUTOMATIC);
-  gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),pSW,label);
-  int id = gtk_notebook_page_num(GTK_NOTEBOOK(m_Notebook),pSW);
+  gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),pFrame,label);
+
+  int id = gtk_notebook_page_num(GTK_NOTEBOOK(m_Notebook),pFrame);
+  gtk_container_add (GTK_CONTAINER (pFrame), pSW);
     
   assert(id<SBAW_NRFILES && id >=0);
 
@@ -1415,20 +1445,14 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
 
   gtk_container_add (GTK_CONTAINER (pSW), GTK_WIDGET(page->m_view));
 
-  if (1) {
-    PangoFontDescription *font_desc;
+  gtk_text_view_set_wrap_mode (page->m_view, GTK_WRAP_NONE);
+  gtk_text_view_set_editable  (page->m_view, FALSE);
 
-    gtk_text_view_set_wrap_mode (page->m_view, GTK_WRAP_NONE);
-    gtk_text_view_set_editable  (page->m_view, FALSE);
-
-    /* Change default font throughout the widget */
-    font_desc = pango_font_description_from_string ("Courier 10");
-    gtk_widget_modify_font (GTK_WIDGET (page->m_view), font_desc);
-    pango_font_description_free (font_desc);
-
+  {
+    page->setFont(m_pParent->getFont());
   }
 
-  gtk_widget_show_all(pSW);
+  gtk_widget_show_all(pFrame);
 
   return id;
     
@@ -3981,6 +4005,7 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
 
 #if defined(NEW_SOURCE_BROWSER)
   pma = 0;
+  m_TabType = GTK_POS_BOTTOM;
   mpTagTable = gtk_text_tag_table_new();
 
   const char *sName = "source_config";
@@ -4011,6 +4036,18 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
 			    "black",
 			    "white");
 
+  if (!config_get_variable(sName, "tab_position", &m_TabType))
+    m_TabType = GTK_POS_LEFT;
+  int b=1;
+  config_get_variable(sName, "line_numbers", &b);
+  margin().enableLineNumbers(b!=0);
+
+  config_get_variable(sName, "addresses", &b);
+  margin().enableAddresses(b!=0);
+
+  config_get_variable(sName, "opcodes", &b);
+  margin().enableOpcodes(b!=0);
+
   mBreakpointTag   = new TextStyle("BreakPoint","black", "red");
   mNoBreakpointTag = new TextStyle("NoBreakPoint","black", "white");
   mCurrentLineTag  = new TextStyle("CurrentLine","black", "light green");
@@ -4025,6 +4062,12 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   gtk_text_tag_table_add (mpTagTable, mBreakpointTag->tag());
   gtk_text_tag_table_add (mpTagTable, mNoBreakpointTag->tag());
   gtk_text_tag_table_add (mpTagTable, mCurrentLineTag->tag());
+
+  m_FontDescription = 0;
+  if (config_get_string(sName, "font", &fg))
+    setFont(fg);
+  else
+    setFont("Serif 8");
 
   ppSourceBuffers = new SourceBuffer *[SBAW_NRFILES];
   for (int i=0; i<SBAW_NRFILES; i++)
@@ -4198,13 +4241,20 @@ int SourceBrowserParent_Window::set_config()
   config_set_string(sName,"symbol_fg",mSymbol->mFG.get(buff, sizeof(buff)));
   config_set_string(sName,"comment_fg",mComment->mFG.get(buff, sizeof(buff)));
   config_set_string(sName,"constant_fg",mConstant->mFG.get(buff, sizeof(buff)));
+
+  config_set_string(sName,"font", getFont());
+
+  config_set_variable(sName, "tab_position", getTabPosition());
+  config_set_variable(sName, "line_numbers", margin().bLineNumbers());
+  config_set_variable(sName, "addresses", margin().bAddresses());
+  config_set_variable(sName, "opcodes", margin().bOpcodes());
+
 #endif
 
   return 0;
 }
 
 #if defined(NEW_SOURCE_BROWSER)
-
 //------------------------------------------------------------------------
 // parseLine
 //
@@ -4262,6 +4312,36 @@ void SourceBuffer::parseLine(const char *cP,
       i++;
   }
 }
+
+
+//------------------------------------------------------------------------
+SourcePageMargin &SourceBrowserParent_Window::margin()
+{
+  return m_margin;
+}
+
+//------------------------------------------------------------------------
+void SourceBrowserParent_Window::setTabPosition(int tt)
+{
+  m_TabType = tt;
+  Update();
+}
+
+//------------------------------------------------------------------------
+void SourceBrowserParent_Window::setFont(const char *cpNewFont)
+{
+  if (cpNewFont) {
+    if (m_FontDescription)
+      free(m_FontDescription);
+    m_FontDescription = strndup(cpNewFont,256);
+    Update();
+  }
+}
+const char *SourceBrowserParent_Window::getFont()
+{
+  return m_FontDescription;
+}
+
 //------------------------------------------------------------------------
 // parseSource
 void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *pFC)

@@ -134,7 +134,7 @@ about_cb (gpointer             callback_data,
 
 
 //========================================================================
-
+//
 // class ColorButton
 //
 // Creates a GtkColorButton and places it into a parent widget.
@@ -160,6 +160,79 @@ private:
   const char *m_label;
 };
 
+//========================================================================
+//
+// class MarginButton
+//
+// Creates a GtkCheckButton that is used to select whether line numbers,
+// addresses or opcodes will be displayed in the source browser margin.
+
+class MarginButton
+{
+public:
+  enum eMarginType {
+    eLineNumbers,
+    eAddresses,
+    eOpcodes
+  };
+  MarginButton (GtkWidget *pParent,
+		const char *pName,
+		eMarginType id,
+		SourceBrowserPreferences *
+	       );
+  static void toggle_cb(GtkToggleButton *widget,
+			MarginButton    *This);
+  void set_active();
+private:
+  GtkWidget *m_button;
+  SourceBrowserPreferences *m_prefs;
+  eMarginType m_id;
+};
+
+//========================================================================
+//
+// class TabButton
+//
+// Creates a GtkCheckButton that is used to select whether line numbers,
+// addresses or opcodes will be displayed in the source browser margin.
+
+class TabButton
+{
+public:
+  TabButton (GtkWidget *pParent, GtkWidget *pButton,
+	     int id,
+	     SourceBrowserPreferences *
+	     );
+  static void toggle_cb(GtkToggleButton *widget,
+			TabButton    *This);
+  void set_active();
+private:
+  GtkWidget *m_button;
+  SourceBrowserPreferences *m_prefs;
+  int m_id;
+};
+
+//========================================================================
+//
+// class FontSelection
+//
+
+class FontSelection
+{
+public:
+  FontSelection (GtkWidget *pParent, 
+		 SourceBrowserPreferences *
+		 );
+  static void setFont_cb(GtkFontButton *widget,
+			FontSelection  *This);
+  void setFont();
+private:
+  SourceBrowserPreferences *m_prefs;
+  GtkWidget *m_fontButton;
+};
+
+//========================================================================
+//
 class SourceBrowserPreferences : public SourceWindow
 {
 public:
@@ -171,9 +244,14 @@ public:
   void toggleBreak(int line);
   void movePC(int line);
 
+  virtual int getPCLine(int page);
+  virtual int getAddress(NSourcePage *pPage, int line);
+  virtual bool bAddressHasBreak(int address);
+  virtual int getOpcode(int address);
+  void setTabPosition(int);
+  void setFont(const char *);
+  const char *getFont();
 private:
-
-  NSourcePage *m_pPage;
 
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
@@ -181,8 +259,19 @@ private:
   ColorButton *m_CommentColor;
   ColorButton *m_ConstantColor;
 
-  GtkWidget   *m_SampleNotebook;
-  GtkPositionType m_TabPosition;
+  MarginButton *m_LineNumbers;
+  MarginButton *m_Addresses;
+  MarginButton *m_Opcodes;
+
+  int m_currentTabPosition;
+  int m_originalTabPosition;
+  TabButton    *m_Up;
+  TabButton    *m_Left;
+  TabButton    *m_Down;
+  TabButton    *m_Right;
+  TabButton    *m_None;
+
+  FontSelection *m_FontSelector;
 };
 
 //------------------------------------------------------------------------
@@ -219,35 +308,17 @@ void gpsimGuiPreferences::setup (gpointer             callback_data,
 
 gint gpsimGuiPreferences::cancel_cb (gpsimGuiPreferences  *Self)
 {
-  printf (" cancel preferences %p \n",Self);
+
   Self->cancel();
   delete Self;
   return TRUE;
 }
 gint gpsimGuiPreferences::apply_cb  (gpsimGuiPreferences *Self)
 {
-  printf (" apply preferences\n");
+
   Self->apply();
   delete Self;
   return TRUE;
-}
-
-//========================================================================
-struct sTest
-{
-  const char *cName;
-  int id;
-};
-
-static void setFont_cb (GtkWidget     *pFontButton,
-			gpointer      callback_data)
-{
-
-  sTest *s = (sTest *) callback_data;
-  if (s)
-    printf("setFont_cb %s %d\n", s->cName, s->id);
-
-  printf("Font %s\n", gtk_font_button_get_font_name (GTK_FONT_BUTTON(pFontButton)));
 }
 
 //------------------------------------------------------------------------
@@ -270,18 +341,16 @@ ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
 		      this);
   const int cBORDER = 10; // pixels
   GtkWidget *label       = gtk_label_new(colorName);
-  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
+  gtk_box_pack_start (GTK_BOX(hbox),label,FALSE,FALSE, cBORDER);
   gtk_widget_show (label);
 
   gtk_widget_show (hbox);
-
-
 }
+
 //------------------------------------------------------------------------
 void ColorButton::setColor_cb(GtkColorButton *widget,
 			      ColorButton    *This)
 {
-  printf("setColor_cb  %p %p\n",widget,This);
   GdkColor newColor;
   gtk_color_button_get_color (widget, &newColor);
   This->m_pStyle->setFG(&newColor);
@@ -295,6 +364,127 @@ void ColorButton::cancel()
 {
   m_pStyle->revert();
 }
+
+//------------------------------------------------------------------------
+MarginButton::MarginButton(GtkWidget *pParent, const char *pName,
+			   eMarginType id,
+			   SourceBrowserPreferences *prefs)
+  : m_id(id), m_prefs(prefs)
+
+{
+  m_button = gtk_check_button_new_with_label (pName);
+  bool bState;
+  switch (m_id) {
+  case eLineNumbers:
+    bState = m_prefs->margin().bLineNumbers();
+    break;
+  case eAddresses:
+    bState = m_prefs->margin().bAddresses();
+    break;
+  case eOpcodes:
+    bState = m_prefs->margin().bOpcodes();
+    break;
+  }
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(m_button),
+				bState);
+  gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 10);
+
+  gtk_signal_connect (GTK_OBJECT(m_button),
+		      "toggled", 
+		      GTK_SIGNAL_FUNC(toggle_cb),
+		      this);
+}
+//------------------------------------------------------------------------
+void MarginButton::toggle_cb(GtkToggleButton *widget,
+			     MarginButton    *This)
+{
+  //  This->m_pStyle->setFG(&newColor);
+  This->set_active();
+}
+void MarginButton::set_active()
+{
+  bool bNewState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_button)) == TRUE;
+  switch (m_id) {
+  case eLineNumbers:
+    m_prefs->margin().enableLineNumbers(bNewState);
+    break;
+  case eAddresses:
+    m_prefs->margin().enableAddresses(bNewState);
+    break;
+  case eOpcodes:
+    m_prefs->margin().enableOpcodes(bNewState);
+    break;
+  }
+
+}
+
+//------------------------------------------------------------------------
+TabButton::TabButton(GtkWidget *pParent, GtkWidget *pButton,
+		     int id,
+		     SourceBrowserPreferences *prefs)
+  : m_id(id), m_button(pButton), m_prefs(prefs)
+{
+  gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 5);
+
+  gtk_signal_connect (GTK_OBJECT(m_button),
+		      "toggled", 
+		      GTK_SIGNAL_FUNC(toggle_cb),
+		      this);
+}
+//------------------------------------------------------------------------
+void TabButton::toggle_cb(GtkToggleButton *widget,
+			  TabButton    *This)
+{
+  //  This->m_pStyle->setFG(&newColor);
+  This->set_active();
+}
+void TabButton::set_active()
+{
+  if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_button)) == TRUE)
+    m_prefs->setTabPosition(m_id);
+}
+
+//------------------------------------------------------------------------
+FontSelection::FontSelection (GtkWidget *pParent,
+			      SourceBrowserPreferences *pPrefs)
+  : m_prefs(pPrefs)
+{
+  GtkWidget *frame = gtk_frame_new ("Font");
+
+  gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
+  GtkWidget *hbox        = gtk_hbox_new(0,0);
+  gtk_container_add (GTK_CONTAINER (frame), hbox);
+
+  m_fontButton = gtk_font_button_new_with_font (m_prefs->getFont());
+  const char *fontDescription = "Font Selector";
+  gtk_font_button_set_title (GTK_FONT_BUTTON(m_fontButton), fontDescription);
+  gtk_box_pack_start (GTK_BOX(hbox),m_fontButton,FALSE, FALSE, 0);
+  gtk_widget_show(m_fontButton);
+
+  gtk_signal_connect (GTK_OBJECT(m_fontButton), 
+		      "font-set", 
+		      GTK_SIGNAL_FUNC(setFont_cb),
+		      this);
+
+  const char *fontName = "font";
+  const int cBORDER = 10; // pixels
+  GtkWidget *label       = gtk_label_new(fontName);
+  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
+  gtk_widget_show (label);
+
+  gtk_widget_show (hbox);
+}
+//------------------------------------------------------------------------
+void FontSelection::setFont_cb (GtkFontButton *pFontButton,
+				FontSelection *This)
+{
+  This->setFont();
+}
+void FontSelection::setFont()
+{
+  m_prefs->setFont(gtk_font_button_get_font_name (GTK_FONT_BUTTON(m_fontButton)));
+}
+
 //------------------------------------------------------------------------
 static bool isButtonEvent (GdkEventType type)
 {
@@ -330,33 +520,6 @@ static gboolean    TagEvent  (GtkTextTag *texttag,
 static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescription,
 				      const char *fontName  )
 {
-  GtkWidget *frame = gtk_frame_new ("Font");
-
-  gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
-  GtkWidget *hbox        = gtk_hbox_new(0,0);
-  gtk_container_add (GTK_CONTAINER (frame), hbox);
-
-  //GtkWidget *fontButton = gtk_font_button_new_with_font (fontName);
-  GtkWidget *fontButton = gtk_font_button_new ();
-  gtk_font_button_set_title (GTK_FONT_BUTTON(fontButton), fontDescription);
-  gtk_box_pack_start (GTK_BOX(hbox),fontButton,FALSE, FALSE, 0);
-  gtk_widget_show(fontButton);
-
-  sTest *s = new sTest();
-  s->cName = fontDescription;
-  s->id = 42;
-
-  gtk_signal_connect (GTK_OBJECT(fontButton), 
-		      "font-set", 
-		      GTK_SIGNAL_FUNC(setFont_cb),
-		      s);
-
-  const int cBORDER = 10; // pixels
-  GtkWidget *label       = gtk_label_new(fontName);
-  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
-  gtk_widget_show (label);
-
-  gtk_widget_show (hbox);
 }
 
 
@@ -378,37 +541,54 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   if (!gpGuiProcessor && !gpGuiProcessor->source_browser)
     return;
-  SourceBrowserParent_Window *sw = gpGuiProcessor->source_browser;
 
-  GtkWidget *hbox2 = gtk_hbox_new(0,0);
-  gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
+  GtkWidget *notebook = gtk_notebook_new();
+  gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_TOP);
+  gtk_box_pack_start (GTK_BOX (pParent), notebook, TRUE, TRUE, 0);
+  gtk_widget_show(notebook);
 
-  GtkWidget *vbox3 = gtk_vbox_new(0,0);
-  gtk_box_pack_start (GTK_BOX (hbox2), vbox3, FALSE, TRUE, 0);
+  m_pParent = gpGuiProcessor->source_browser;
+  GtkWidget *label;
+
+  //GtkWidget *hbox2 = gtk_hbox_new(0,0);
+  //gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
+
+  //GtkWidget *vbox3 = gtk_vbox_new(0,0);
+  //gtk_box_pack_start (GTK_BOX (hbox2), vbox3, FALSE, TRUE, 0);
 
   {
     // Color Frame for Source Browser configuration
+
+    GtkWidget *vbox = gtk_vbox_new(0,0);
+
     GtkWidget *colorFrame = gtk_frame_new ("Colors");
-    gtk_box_pack_start (GTK_BOX (hbox2), colorFrame, FALSE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (vbox), colorFrame, FALSE, TRUE, 0);
 
     GtkWidget *colorVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
     m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), 
-				      sw->mLabel,
+				      m_pParent->mLabel,
 				      "Label", this);
     m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), 
-				      sw->mMnemonic,
+				      m_pParent->mMnemonic,
 				      "Mnemonic", this);
     m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), 
-				      sw->mSymbol,
+				      m_pParent->mSymbol,
 				      "Symbols", this);
     m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox),
-				      sw->mConstant,
+				      m_pParent->mConstant,
 				      "Constants", this);
     m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox),
-				      sw->mComment,
+				      m_pParent->mComment,
 				      "Comments", this);
+
+    // Font selector
+    //preferences_AddFontSelect(GTK_WIDGET(vbox), "Font Selector", "font");
+    m_FontSelector = new FontSelection(vbox,this);
+
+    label = gtk_label_new("Font");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox,label);
 
 
 
@@ -416,66 +596,73 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   {
     // Tab Frame for the Source browser
-    m_TabPosition = GTK_POS_TOP;
-    GtkWidget *tabFrame = gtk_frame_new ("Tabs");
-    gtk_box_pack_start (GTK_BOX (vbox3), tabFrame, FALSE, TRUE, 0);
+    m_currentTabPosition = m_pParent->getTabPosition();
+    m_originalTabPosition = m_currentTabPosition;
 
-    GtkWidget *radioUp    = gtk_radio_button_new_with_label (NULL,"up");
-    GtkRadioButton *rb    = GTK_RADIO_BUTTON(radioUp);
-    GtkWidget *radioLeft  = gtk_radio_button_new_with_label_from_widget (rb,"left");
-    GtkWidget *radioDown  = gtk_radio_button_new_with_label_from_widget (rb,"down");
-    GtkWidget *radioRight = gtk_radio_button_new_with_label_from_widget (rb,"right");
-    GtkWidget *radioNone  = gtk_radio_button_new_with_label_from_widget (rb,"none");
+    GtkWidget *radioUp  = gtk_radio_button_new_with_label (NULL,"up");
+    GtkRadioButton *rb  = GTK_RADIO_BUTTON(radioUp);
 
     GtkWidget *tabVbox = gtk_vbox_new(0,0);
-    gtk_container_add (GTK_CONTAINER (tabFrame), tabVbox);
-    
-    gtk_box_pack_start (GTK_BOX (tabVbox), radioUp,   FALSE, TRUE, 0);
-    gtk_box_pack_start (GTK_BOX (tabVbox), radioLeft, FALSE, TRUE, 0);
-    gtk_box_pack_start (GTK_BOX (tabVbox), radioDown, FALSE, TRUE, 0);
-    gtk_box_pack_start (GTK_BOX (tabVbox), radioRight,FALSE, TRUE, 0);
-    gtk_box_pack_start (GTK_BOX (tabVbox), radioNone, FALSE, TRUE, 0);
+
+    m_Up    = new TabButton(tabVbox, radioUp, GTK_POS_TOP, this);
+    m_Left  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"left"),
+			   GTK_POS_LEFT, this);
+    m_Down  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"down"),
+			   GTK_POS_BOTTOM, this);
+    m_Right = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"right"),
+			   GTK_POS_RIGHT, this);
+    m_None  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"none"),
+			   -1, this);
+
+    label = gtk_label_new("Tabs");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),tabVbox,label);
 
   }
 
-  preferences_AddFontSelect(GTK_WIDGET(vbox3), "Font Selector", "font");
+  {
+    // Source browser margin 
+    GtkWidget *marginVbox = gtk_vbox_new(0,0);
+    m_LineNumbers = new MarginButton(marginVbox, "Line Numbers", 
+				     MarginButton::eLineNumbers, this);
+    m_Addresses   = new MarginButton(marginVbox, "Addresses", 
+				     MarginButton::eAddresses, this);
+    m_Opcodes     = new MarginButton(marginVbox, "Opcodes", 
+				     MarginButton::eOpcodes, this);
+
+    label = gtk_label_new("Margin");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),marginVbox,label);
+
+  }
 
   {
 
     PangoFontDescription *font_desc;
 
-    m_pPage       = new NSourcePage(0,0,-1);
-    m_pPage->m_pBuffer = new SourceBuffer (sw->getTagTable(),0,sw);
-    m_pPage->m_view    = (GtkTextView *)gtk_text_view_new_with_buffer
-      (m_pPage->m_pBuffer->m_buffer);
-
-    gtk_text_view_set_wrap_mode (m_pPage->m_view, GTK_WRAP_NONE);
-    gtk_text_view_set_editable  (m_pPage->m_view, FALSE);
-
-    /* Change default font throughout the widget */
-    font_desc = pango_font_description_from_string ("Courier 12");
-    gtk_widget_modify_font (GTK_WIDGET (m_pPage->m_view), font_desc);
-    pango_font_description_free (font_desc);
+    SourceBuffer *pBuffer = new SourceBuffer (m_pParent->getTagTable(),0,m_pParent);
 
 
     GtkWidget *frame = gtk_frame_new ("Sample");
     gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
     
-    m_SampleNotebook = gtk_notebook_new();
-    gtk_notebook_set_tab_pos((GtkNotebook*)m_SampleNotebook,m_TabPosition);
+    m_Notebook = gtk_notebook_new();
+    gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
 
-    gtk_container_add (GTK_CONTAINER (frame), m_SampleNotebook);
+    gtk_container_add (GTK_CONTAINER (frame), m_Notebook);
 
+    bIsBuilt = true;
 
+    int id = AddPage (pBuffer, "file1.asm");
 
-    GtkWidget *label = gtk_label_new("file1.asm");
-    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),GTK_WIDGET(m_pPage->m_view),label);
-    m_pPage->m_pBuffer->parseLine( "  MOVLW   0x34    ; Comment",1);
+    //GtkWidget *label = gtk_label_new("file1.asm");
+    //gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),GTK_WIDGET(m_pPage->m_view),label);
+    //m_pPage->m_pBuffer->parseLine( "  MOVLW   0x34    ; Comment",1);
+
+    pages[id]->m_pBuffer->parseLine( "  MOVLW   0x34    ; Comment",1);
 
 #if 0
     label = gtk_label_new("file2.asm");
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
-    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),emptyBox,label);
+    gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),emptyBox,label);
 
 #endif
 
@@ -483,34 +670,66 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   }
 
+  setTabPosition(m_currentTabPosition);
+  gtk_widget_show_all(notebook);
 
-  gtk_widget_show_all(hbox2);
-  gtk_widget_show_all(vbox3);
+}
 
-  //  toggleBreak(2);
-  //  movePC(1);
+void SourceBrowserPreferences::setTabPosition(int tabPosition)
+{
+  m_currentTabPosition = tabPosition;
+  m_pParent->setTabPosition(tabPosition);
+  Update();
+}
 
+void SourceBrowserPreferences::setFont(const char *cpFont)
+{
+  m_pParent->setFont(cpFont);
+}
+
+const char *SourceBrowserPreferences::getFont()
+{
+  return m_pParent->getFont();
 }
 
 void SourceBrowserPreferences::apply()
 {
-  printf ("apply source browser preferences\n");
-
   m_LabelColor->apply();
   m_MnemonicColor->apply();
   m_SymbolColor->apply();
   m_ConstantColor->apply();
   m_CommentColor->apply();
+
+  m_pParent->setTabPosition(m_currentTabPosition);
 }
 
 void SourceBrowserPreferences::cancel()
 {
-  printf ("cancel source browser preferences\n");
+
   m_LabelColor->cancel();
   m_MnemonicColor->cancel();
   m_SymbolColor->cancel();
   m_ConstantColor->cancel();
   m_CommentColor->cancel();
+
+  m_pParent->setTabPosition(m_originalTabPosition);
+}
+
+int SourceBrowserPreferences::getPCLine(int page)
+{
+  return 1;
+}
+int SourceBrowserPreferences::getAddress(NSourcePage *pPage, int line)
+{
+  return 0x1234;
+}
+bool SourceBrowserPreferences::bAddressHasBreak(int address)
+{
+  return false;
+}
+int SourceBrowserPreferences::getOpcode(int address)
+{
+  return 0xABCD;
 }
 
 //========================================================================
@@ -522,36 +741,17 @@ gpsimGuiPreferences::gpsimGuiPreferences()
   window = LocalWindow;
   gtk_widget_show (window);
 
-  gtk_window_set_title (GTK_WINDOW (window), "Preferences ***EXPERIMENTAL***");
+  gtk_window_set_title (GTK_WINDOW (window), "Source Browser configuration");
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
   GtkWidget *vbox = GTK_DIALOG (window)->vbox;
 
-  GtkWidget *notebook = gtk_notebook_new();
-  gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_TOP);
-  gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
-  gtk_widget_show(notebook);
+  m_SourceBrowser = new SourceBrowserPreferences(vbox);
+  gtk_widget_show_all(vbox);
 
   GtkWidget *label;
   GtkWidget *vbox2;
 
-
-  // source browser preferences...
-  
-  vbox2 = gtk_vbox_new(0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox2), 3);
-  label = gtk_label_new("Source Browser");
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
-
-  m_SourceBrowser = new SourceBrowserPreferences(vbox2);
-  gtk_widget_show_all(vbox2);
-
-
-  vbox2 = gtk_vbox_new(0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (vbox2), 3);
-  label=gtk_label_new("RAM");
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
-  gtk_widget_show(vbox2);
 
   // Cancel and Apply buttons
 
@@ -582,13 +782,11 @@ gpsimGuiPreferences::gpsimGuiPreferences()
   gtk_widget_show (window);
   gtk_grab_add (window);
 
-  printf("Created preferences %p %p %s\n",this, window, gtk_widget_get_name(window));
 }
 
 gpsimGuiPreferences::~gpsimGuiPreferences()
 {
 
-  printf("Destroying preferences %p %p\n",this, window);
 
   gtk_widget_destroy (window);
 
