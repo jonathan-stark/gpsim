@@ -1,3 +1,8 @@
+2006-03-19 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: added share and lib\gtk-2.0\2.4.0\engines to
+	  the package, use share\themes\MS-Windows\gtk-2.0\gtkrc as the
+	  default gtkrc
+
 2006-03-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc:
 	Added .lst files to the source browser.
@@ -43,14 +48,12 @@
 	but I plan to use that for modifying complex breakpoints).
 
 2006-03-12 Borut Razem <borut.razem@siol.net>
-
 	* plat/win32/gpsim.nsi, doc/gpsimWin32.html, plat/win32/make.mingw,
 	  cli/makefile.mingw, gpsim/makefile.mingw, gui/makefile.mingw,
 	  modules/makefile.mingw: glib-2.8.6, gtk+-2.8.13, pango-1.10.2,
 	  atk-1.10.3, cairo-1.0.2, ...
 
 2006-03-09 Borut Razem <borut.razem@siol.net>
-
 	* examples/modules/usart_gui/usart_gui.asm,
 	  examples/modules/usart_gui/usart_gui.stc:
 	  Renamed the usart RX and TX pins to RXPIN and TXPIN
