@@ -1,3 +1,11 @@
+2006-03-20 Scott Dattalo <scott@dattalo.com>
+	* regression/breakpoints.asm: Embedded script error was causing
+	regression test to fail. 
+	* regression/rt.sh: Minor fix to Borut's regression test
+	enhancement; the 'tee' command was appending multiple regression
+	tests to the same log file. Also, on Athlon 64's, the tee command
+	was causing pipe errors for some reason.
+	
 2006-03-19 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc:
 	The preferences window now configures the source browser tabs,
