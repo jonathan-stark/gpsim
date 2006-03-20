@@ -38,7 +38,9 @@ LOGFILE='simresults.log'
 touch $LOGFILE
 
 # Run the simulation and save the results
-make $2 | tee -a $LOGFILE |\
+make $2 > $LOGFILE
+
+cat $LOGFILE |\
 sed -n -e '/running\.\.\./,$ {
 /^ *Message:/ {
 s/^ *Message:\(.*\)$/\1/p

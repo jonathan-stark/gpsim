@@ -41,27 +41,13 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 MAIN    CODE
 start
 
-  ; Don't let the simulation run forever.
-   .sim "break c 0x10000"
-
-
         clrf    var1
         clrf    var2
         clrf    var3
 
 
-   .sim "step 6"
 
 	call	delay
-   .sim "echo Breakpoints:"
-   .sim "break"
-   .sim "break w var1"
-;   .sim "run"
-   .sim "var1=4"
-   .sim "echo stepping over breakpoint"
-   .sim "step"
-   .sim "trace 5"
-;   .sim "run"
    .assert "var1==0"
 	incf	var1,F	;This write will cause a break
    .assert "var1==4"
@@ -82,7 +68,20 @@ delay:
 	goto	$+1
 	return
 
-  end
+
+  ; Don't let the simulation run forever.
+   .sim "break c 0x10000"
+   .sim "step 6"
+   .sim "echo Breakpoints:"
+   .sim "break"
+   .sim "break w var1"
+   .sim "run"
+   .sim "var1=4"
+   .sim "echo stepping over breakpoint"
+   .sim "step"
+   .sim "trace 5"
+   .sim "run"
+
 
 
   end
