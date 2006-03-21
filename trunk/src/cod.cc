@@ -536,11 +536,13 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
         // between them.
       
         switch(DebugType) {
+        // The 'A' and 'E' options in gpasm specifies a list of gpsim commands
+        // that are to be executed after the .cod file has been loaded.
         case 'a':
         case 'A':
           // assertion
 	  {
-	    string script("assertions");
+	    string script("directive");
 	    char buff[256];
 	    snprintf(buff,sizeof(buff),"break e %d, %s\n",laddress,DebugMessage);
 	    string cmd(buff);
@@ -550,10 +552,8 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
         case 'e':
         case 'E':
           // gpsim command
-	  // The 'E' option in gpasm specifies a list of gpsim commands that
-	  // are to be executed after the .cod file has been loaded.
 	  {
-	    string script("startup");
+	    string script("directive");
 	    string cmd(DebugMessage);
 	    cmd = cmd + '\n';
 	    cpu->add_command(script,cmd);
@@ -1107,9 +1107,7 @@ _Cleanup:
   if(*pcpu != NULL) {
     (*pcpu)->reset(POR_RESET);
     bp.clear_global();
-    string script("assertions");
-    (*pcpu)->run_script(script);
-    script = "startup";
+    string script("directive");
     (*pcpu)->run_script(script);
   }
   return error_code;

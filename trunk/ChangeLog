@@ -1,3 +1,8 @@
+2006-03-21 Borut Razem <borut.razem@siol.net>
+	* src/cod.cc: fixed bug "[ 1448454 ] usart_test - ERROR: == comparison
+	  is not defined for String" by merging "assertions" and "assertions"
+	  lists to a single "directive" list
+
 2006-03-20 Scott Dattalo <scott@dattalo.com>
 	* regression/breakpoints.asm: Embedded script error was causing
 	regression test to fail. 
