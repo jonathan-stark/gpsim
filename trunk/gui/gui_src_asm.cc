@@ -331,6 +331,16 @@ key_press(GtkWidget *widget,
 }
 
 //========================================================================
+static int delete_event(GtkWidget *widget,
+			GdkEvent  *event,
+                        SourceWindow *sw)
+{
+    sw->ChangeView(VIEW_HIDE);
+    return TRUE;
+}
+
+
+//========================================================================
 // Helper functions for parsing 
 static int isString(const char *cP)
 {
@@ -661,7 +671,7 @@ SourceWindow::SourceWindow(GUI_Processor *pgp,
   if (newName)
     set_name(newName);
   else
-    set_name("new_source_browser");
+    set_name("source_browser");
 
   wc = WC_source;
   wt = WT_SourceWindow;
@@ -773,6 +783,10 @@ void SourceWindow::Build()
 		   (GtkSignalFunc) key_press,
 		   (gpointer) this);
 
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+		      GTK_SIGNAL_FUNC(delete_event),
+		      (gpointer) this);
+
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
   SetTitle();
@@ -875,6 +889,8 @@ void SourceWindow::SelectAddress(Value *)
 void SourceWindow::Update()
 {
   Dprintf((" \n"));
+  if (!window || !enabled)
+    return;
 
   if (m_Notebook && 
       ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==FALSE
@@ -914,7 +930,7 @@ void SourceWindow::UpdateLine(int address)
 
   Dprintf((" UpdateLine at address=%d\n",address));
 
-  if(!bSourceLoaded() || !pma)
+  if(!bSourceLoaded() || !pma || !enabled)
     return;
 
   int currFileId = pma->get_file_id(address);
@@ -1390,7 +1406,7 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
   if (!bIsBuilt || !pSourceBuffer)
     return -1;
 
-  //FileContext   *pFC = pSourceBuffer->m_pFC;
+  GTKWAIT;
 
   char str[256], *label_string;
   GtkWidget *hbox, *label, *vscrollbar;
@@ -4119,7 +4135,7 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
       child++;
       sprintf(child_name,"source_browser%d",child);
 #if defined(NEW_SOURCE_BROWSER)
-      sbaw = new SOURCE_WINDOW(gp,this, child_name);
+      sbaw = new SOURCE_WINDOW(gp,this, true, child_name);
 #else
       sbaw = new SOURCE_WINDOW(gp,child_name);
 #endif
