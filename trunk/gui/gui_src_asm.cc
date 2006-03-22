@@ -267,7 +267,6 @@ view_expose(GtkTextView *pView,
 					   NULL,
 					   &y2);
 
-    //pSW->updateMargin(pPage, y1,y2);
     pPage->updateMargin(y1,y2);
 
   } 
@@ -994,14 +993,8 @@ void SourceWindow::UpdateLine(int address)
 //
 int SourceWindow::getPCLine(int page)
 {
-  int PCline = -1;
-
-  if (pma && mProgramCounter.bIsActive && mProgramCounter.page == page) {
-    PCline = pma->get_src_line(pma->get_PC());
-    if(PCline==(int)INVALID_VALUE)
-      PCline = -1;
-  }
-  return PCline;
+  return (mProgramCounter.bIsActive && mProgramCounter.page == page) ?
+    mProgramCounter.line : -1;
 }
 int SourceWindow::getAddress(NSourcePage *pPage, int line)
 {
@@ -1082,9 +1075,10 @@ void NSourcePage::updateMargin(int y1, int y2)
   PangoLayout *layout=0;
   gint text_width=0;
 
+  gint addr_opcode = m_pFC->IsList() ? -1 : 0x9999;
   if ( m_Parent->margin().formatMargin(str, sizeof(str),
 				       MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
-				       0x9999, 0x9999,false) ) {
+				       addr_opcode, addr_opcode,false) ) {
 
     layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
 
@@ -1110,14 +1104,15 @@ void NSourcePage::updateMargin(int y1, int y2)
 					   NULL,
 					   &pos);
 
-    int address    = m_Parent->getAddress(this,line);
+    int address    = m_pFC->IsList() ? -1 : m_Parent->getAddress(this,line);
+    int opcode     = m_pFC->IsList() ? -1 : m_Parent->getOpcode(address);
     bool bHasBreak = m_Parent->bAddressHasBreak(address);
 
 
     if (layout) {
 
       if ( m_Parent->margin().formatMargin(str, sizeof(str),
-					   line, address,m_Parent->getOpcode(address),bHasBreak)) {
+					   line, address,opcode,bHasBreak)) {
 
 	pango_layout_set_markup (layout, str, -1);
 
@@ -1183,10 +1178,8 @@ void NSourcePage::setFont(const char *cp_newFont)
     if (m_cpFont && strcmp(cp_newFont,m_cpFont)==0)
       return;
 
-    if (m_cpFont)
-      free(m_cpFont);
-
-    m_cpFont = strndup(cp_newFont,256);
+    g_free(m_cpFont);
+    m_cpFont = g_strndup(cp_newFont,256);
 
 
     /* Change default font throughout the widget */
@@ -1210,20 +1203,40 @@ void SourceWindow::SetPC(int address)
   if (!bSourceLoaded() || !pma)
     return;
 
+  int currPage = m_Notebook ? 
+    gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook)) :
+    -1;
+
   // Get the file id associated with the program counter address
   int sbawFileId  = pma->get_file_id(address);
   if(sbawFileId == 0xffffffff)
     return;
 
-  // Find the source browser page containing this file
-  // FIXME -- this should be an stl map 
-  int id;
-  for (id=0; id<SBAW_NRFILES; id++)
-    if(pages[id]->m_fileid == sbawFileId)
-      break;
+  int id = -1;
+  int PCline=-1;
 
-  if (id >= SBAW_NRFILES)
-    return;   // page was not found.
+  if (currPage>=0  && pages[currPage]->m_pFC->IsList()) {
+    // Don't automatically switch away from a page if it is a list file
+    id = currPage;
+    PCline = pma->getFromAddress(address)->get_lst_line();
+    printf("list file PC=0x%x, line=%d\n",address,PCline);
+  } else {
+    for (id=0; id<SBAW_NRFILES; id++)
+      if(pages[id]->m_fileid == sbawFileId)
+	break;
+
+    if (id >= SBAW_NRFILES)
+      return;   // page was not found.
+
+    // Switch to the source browser page that contains the program counter.
+    gtk_notebook_set_page(GTK_NOTEBOOK(m_Notebook),id);
+
+    // Get the source line number associated with the program counter address.
+    PCline = pma->get_src_line(address);
+    if(PCline==(int)INVALID_VALUE)
+      return;
+    //PCline--;
+  }
 
   int oldPCpage = -1;
   bool bFirstUpdate=true;
@@ -1233,16 +1246,8 @@ void SourceWindow::SetPC(int address)
   } else
     GTKWAIT;
 
-  // Switch to the source browser page that contains the program counter.
-  gtk_notebook_set_page(GTK_NOTEBOOK(m_Notebook),id);
-
   mProgramCounter.page = id;
-
-  // Get the source line number associated with the program counter address.
-  int PCline = pma->get_src_line(address);
-  if(PCline==(int)INVALID_VALUE)
-    return;
-  PCline--;
+  mProgramCounter.line = PCline;
 
   // Get a pointer to text_view margin window.
   GdkWindow *win = gtk_text_view_get_window (pages[id]->m_view, GTK_TEXT_WINDOW_LEFT);
@@ -4347,9 +4352,8 @@ void SourceBrowserParent_Window::setTabPosition(int tt)
 void SourceBrowserParent_Window::setFont(const char *cpNewFont)
 {
   if (cpNewFont) {
-    if (m_FontDescription)
-      free(m_FontDescription);
-    m_FontDescription = strndup(cpNewFont,256);
+    g_free(m_FontDescription);
+    m_FontDescription = g_strndup(cpNewFont,256);
     Update();
   }
 }
@@ -4417,14 +4421,8 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
       {
 
 	if (i < SBAW_NRFILES) {
-
 	  ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
 	  parseSource(ppSourceBuffers[i], fc);
-	  /*
-	  if( strcmp(file_name+iNameLength-4,".lst")
-	      &&strcmp(file_name+iNameLength-4,".LST") ) {
-	  }
-	  */
 	}
 
        } else {

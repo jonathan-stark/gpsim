@@ -202,6 +202,7 @@ private:
   struct _PC {
     bool bIsActive;
     int  page;                // Notebook page containing the source
+    int  line;                // Line within the page.
     GtkTextBuffer *pBuffer;   // Buffer containing the Program Counter
     GtkTextIter   iBegin;     // Start of where highlight begins
     GtkTextIter   iEnd;       // End of highlight 

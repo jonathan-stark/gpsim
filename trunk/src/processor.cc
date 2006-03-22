@@ -533,7 +533,7 @@ void Processor::attach_src_line(unsigned int address,
   unsigned int uIndex = map_pm_address2index(address);
   if(uIndex < program_memory_size()) {
 
-    program_memory[uIndex]->update_line_number(file_id,sline,lst_line,0,0);
+    program_memory[uIndex]->update_line_number(file_id,sline,lst_line,-1,-1);
 
     //printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
 
@@ -541,15 +541,6 @@ void Processor::attach_src_line(unsigned int address,
 
     if(fc && sline > fc->max_line())
       fc->max_line(sline);
-
-    // If there's a listing file then handle it as well
-    if(files.list_id() >=0 && lst_line != 0) {
-      fc = files[files.list_id()];
-    
-      // FIX ME - what is this '+5' junk?
-      if(fc && lst_line+5 > fc->max_line())
-        fc->max_line(lst_line+5);
-    }
 
   }
 
@@ -625,6 +616,7 @@ void Processor::read_src_files(void)
     }
   }
 
+  // Associate source files with the instructions they generated.
   unsigned int addr;
   for(addr = 0; addr<program_memory_size(); addr++) {
 
@@ -639,6 +631,38 @@ void Processor::read_src_files(void)
     }
   }
 
+  // Associate the list file with 
+  if (files.list_id() >= 0) {
+
+    // Parse the list file.
+    printf("read_src_files List file:%d %d\n",files.list_id(),files.nsrc_files());
+
+    FileContext *fc = files[files.list_id()];
+    if (!fc)
+      return;
+
+    fc->rewind();
+
+    char buf[256];
+    int line =0;
+
+    while(fc->gets(buf,256)) {
+
+      int address;
+      int opcode;
+
+      if (sscanf(buf,"%x   %x",&address, &opcode) == 2) {
+
+	printf ("%x:%x %s\n",address, opcode,buf);
+	unsigned int uIndex = map_pm_address2index(address);
+	program_memory[uIndex]->update_line_number(-1,-1,line+1,-1,-1);
+      }
+
+      line++;
+    }
+    fc->max_line(line-1);
+    fc->ReadSource();
+  }
 #endif
 }
 
@@ -651,8 +675,8 @@ void Processor::read_src_files(void)
 //
 void Processor::list(unsigned int file_id, 
 		     unsigned int pc_val, 
-		     unsigned int start_line, 
-		     unsigned int end_line)
+		     int start_line, 
+		     int end_line)
 {
 
 
@@ -689,13 +713,14 @@ void Processor::list(unsigned int file_id,
   if(fc == NULL)
     return;
 
-  if(start_line < 0) start_line = 0;
-
-  if(end_line > fc->max_line())
-    end_line = fc->max_line();
-
+  start_line = (start_line < 0) ? 0 : start_line;
+  end_line   = (end_line <= start_line) ? (start_line + 5) : end_line;
+  end_line   = (end_line > fc->max_line()) ? fc->max_line() : end_line;
   cout << " listing " << fc->name() << " Starting line " << start_line
        << " Ending line " << end_line << '\n';
+
+  if (end_line == start_line)
+    return;
 
 
   for(unsigned int i=start_line; i<=end_line; i++)
@@ -703,9 +728,7 @@ void Processor::list(unsigned int file_id,
 
     char buf[256];
 
-    fc->ReadLine(i,
-		    buf,
-		    sizeof(buf));
+    fc->ReadLine(i, buf, sizeof(buf));
 
     if (pc_line == i)
       cout << "==>";
@@ -923,8 +946,8 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   
   if(fc)
   {
-  	int offset=0;
-  	while((unsigned int)(src_line+offset)<fc->max_line())
+    int offset=0;
+    while((unsigned int)(src_line+offset)<fc->max_line())
     {
       closest_address = fc->get_address(src_line+offset);
       if(closest_address>=0)
@@ -2085,8 +2108,9 @@ FileContext::FileContext(string &new_name)
   name_str = new_name;
   fptr = NULL;
   line_seek = 0;
-  _max_line =0;
+  _max_line = 0;
   pm_address = 0;
+  m_bIsList = false;
 }
 
 FileContext::FileContext(char *new_name)
@@ -2096,6 +2120,7 @@ FileContext::FileContext(char *new_name)
   line_seek = 0;
   _max_line =0;
   pm_address = 0;
+  m_bIsList = false;
 }
 
 FileContext::~FileContext(void)
@@ -2232,12 +2257,12 @@ FileContextList::~FileContextList(void)
 {
   FileContextList::iterator it;
   FileContextList::iterator itEnd = end();
-  for (it = begin(); it != itEnd; it++) {
+  for (it = begin(); it != itEnd; it++)
     it->close();
-  }
 }
 
-bool EndsWith(string &sSubject, string &sSubstring) {
+static bool EndsWith(string &sSubject, string &sSubstring)
+{
   if(sSubject.size() < sSubstring.size()) {
     return false;
   }
@@ -2252,7 +2277,6 @@ int FileContextList::Find(string &fname)
 {
   if(lastFile) {
     for (int i = 0; i < lastFile; i++) {
-//      if ((*this)[i]->name() == fname)
       if(EndsWith((*this)[i]->name(), fname)) {
         return i;
       }
@@ -2283,17 +2307,6 @@ int FileContextList::Add(char *new_name)
 {
   string sNewName(new_name);
   return Add (sNewName);
-  /*
-  string sFull = sSourcePath + new_name;
-  push_back(FileContext(sFull));
-  lastFile++;
-  back().open("r");
-  if(verbose)
-    cout << "Added new file named: " << new_name 
-         << "  id = " << lastFile << endl;
-
-  return lastFile-1;
-  */
 }
 
 FileContext *FileContextList::operator [] (int file_id)
@@ -2341,4 +2354,19 @@ void FileContextList::SetSourcePath(const char *pPath) {
   string sFolder, sFile;
   SplitPathAndFile(sPath, sSourcePath, sFile);
   EnsureTrailingFolderDelimiter(sSourcePath);
+}
+
+//----------------------------------------
+// 
+void FileContextList::list_id(int new_list_id)
+{
+  FileContext *fc = operator[](list_file_id);
+  if (fc)
+    fc->setListId(false);
+
+  list_file_id = new_list_id;
+  fc = operator[](list_file_id);
+  if (fc)
+    fc->setListId(true);
+
 }

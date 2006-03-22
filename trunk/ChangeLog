@@ -1,3 +1,16 @@
+2006-03-22 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc, src/pic-instructions.cc, src/processor.cc,
+	src/processor.h: 
+	Fixed list file processing. Now the file context class knows if it
+	owns a .lst file versus a .asm or .inc file. 
+	* gui/gui_src.h, gui/gui_src_asm.cc:
+	List files are now displayed in the source browser. The program
+	counter indicator tracks correctly. Breakpoints can not be
+	controlled from within the list file view yet.
+	Changed strndup calls to g_strndup. The form is a GNU extension
+	while the latter is part of glib, but both do the same thing. This
+	removes an OS dependency.
+
 2006-03-21 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_object.cc: removed debug printf
 	* gui/gui_src_asm.cc: Added a delete_event handler for the source
