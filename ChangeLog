@@ -1,3 +1,13 @@
+2006-03-21 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_object.cc: removed debug printf
+	* gui/gui_src_asm.cc: Added a delete_event handler for the source
+	browser; killing the source browser window was causing gpsim to
+	crash otherwise. 
+	The source browser name has been updated to match the old
+	browser's name (this is mainly for registry and .gpsim settings).
+	Added GTK_WAIT's for slower machines. Apparently gtk's event queue
+	is getting overwhelmed while the source browser is being created.
+	
 2006-03-21 Borut Razem <borut.razem@siol.net>
 	* src/cod.cc: fixed bug "[ 1448454 ] usart_test - ERROR: == comparison
 	  is not defined for String" by merging "assertions" and "assertions"

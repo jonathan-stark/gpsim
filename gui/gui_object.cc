@@ -106,7 +106,8 @@ void GUI_Object::UpdateMenuItem(void)
 
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),enabled);
   } else {
-    printf("GUI_Object::UpdateMenuItem(void) -- 0 menu\n");
+    //printf("GUI_Object::UpdateMenuItem(void) -- 0 menu\n");
+    ;
   }
 
 
