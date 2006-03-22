@@ -30,7 +30,7 @@ and documentation for compiling programs that use the gpsim library.
 %setup
 
 %build
-./configure --prefix=/usr
+./configure --prefix=/usr --disable-gui
 make
 
 %clean
@@ -43,6 +43,7 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 %files
 %defattr(-, root, root)
 %{_bindir}/gpsim
+%{_libdir}/libgpsim*.so*
 %doc AUTHORS COPYING ChangeLog INSTALL NEWS README 
 %doc doc/gpsim.lyx doc/gpsim.pdf
 
