@@ -50,7 +50,7 @@ Boston, MA 02111-1307, USA.  */
 #include "breakpoints.h"
 #include "trace.h"
 
-char * get_error_message();
+const char * get_error_message();
 
 //================================================================================
 // Global Declarations
