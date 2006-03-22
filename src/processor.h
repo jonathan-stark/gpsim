@@ -37,7 +37,7 @@ class Processor;
 class ProcessorConstructor;
 class ProgramFileType;
 class FileContext;
-
+class FileContextList;
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
@@ -229,15 +229,23 @@ class RegisterMemoryAccess : public MemoryAccess
 
 class FileContext
 {
- private:
-  string name_str;    
-  FILE   *fptr;
-  vector<int> *line_seek;
-  vector<int> *pm_address;
-  unsigned int _max_line;
+private:
+  string name_str;         // File name
+  FILE   *fptr;            // File ptr when the file is opened
+  vector<int> *line_seek;  // A vector of file offsets to the start of lines
+  vector<int> *pm_address; // A vector of program memory addresses for lines 
+  unsigned int _max_line;  // number of lines in the file
 
+  friend class FileContextList;
+protected:
+  bool m_bIsList;          // True if this is a list file.
 
- public:
+  void setListId(bool b)
+  { 
+    m_bIsList = b; 
+  }
+public:
+  // cache -- deprecated - this was used with the old gui source browser
   typedef vector<gpsimObject*> Cache;
   Cache m_cache;
 
@@ -252,39 +260,44 @@ class FileContext
   void open(const char *mode);
   void close();
   bool IsOpen() { return fptr != NULL; }
+  bool IsList() { return m_bIsList; }
 
+  /// get_address - given a line number, return the program memory address
   int get_address(unsigned int line);
+  /// put_address - associate a line number with a program memory address.
   void put_address(unsigned int line, unsigned int address);
 
   string &name(void)
-    {
-      return name_str;
-    }
+  {
+    return name_str;
+  }
 
   void max_line(unsigned int new_max_line)
-    {
-      _max_line = new_max_line;
-    }
+  {
+    _max_line = new_max_line;
+  }
 
   unsigned int max_line(void)
-    {
-      return _max_line;
-    }
+  {
+    return _max_line;
+  }
 
 };
 
 //------------------------------------------------------------------------
 //
-// FileContextList
+// FileContextList - a vector of FileContext objects.
+//
+// 
 class FileContextList : private vector<FileContext>
 {
- public:
+public:
 #ifndef _MSC_VER
-   typedef vector<FileContext> _Myt;
+  typedef vector<FileContext> _Myt;
 #endif
 
   FileContextList();
-  ~FileContextList(void);
+  ~FileContextList();
 
   int Add(string& new_name);
   int Add(char *new_name);
@@ -293,27 +306,23 @@ class FileContextList : private vector<FileContext>
 
   FileContext *operator [] (int file_number);
 
-  void list_id(int new_list_id) 
-    {
-      list_file_id = new_list_id;
-    }
-
-  int list_id(void)
-    {
-      return list_file_id;
-    }
+  void list_id(int new_list_id);
+  int list_id()
+  {
+    return list_file_id;
+  }
 
   int nsrc_files(void) 
-    {
-      return (int) size();
-    }
+  {
+    return (int) size();
+  }
 
   char *ReadLine(int file_id, int line_number, char *buf, int nBytes);
   char *gets(int file_id, char *buf, int nBytes);
   void rewind(int file_id);
   void SetSourcePath(const char *pPath);
 
- private:
+private:
   string sSourcePath;
   int lastFile;
   int list_file_id;
@@ -550,8 +559,8 @@ public:
 			    signed int end_address);
   virtual void list(unsigned int file_id, 
 		    unsigned int pcval, 
-		    unsigned int start_line, 
-		    unsigned int end_line);
+		    int start_line, 
+		    int end_line);
 
   // Configuration control
 

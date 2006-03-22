@@ -390,6 +390,8 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
 
     if(!found_lst_in_cod) {
       cpu->files.Add(lstfilename);
+      cpu->files.list_id(num_files);
+
       if(verbose)
         printf("List file %s wasn't in .cod\n",lstfilename);
     }
@@ -413,7 +415,6 @@ _Cleanup:
 //-----------------------------------------------------------
 void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 {
-  int lst_line_number = 6;
   int j,start_block,end_block,offset;
   int file_id, sline,smod;
   unsigned int address;
@@ -435,7 +436,6 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
       for(offset=0; offset<(COD_BLOCK_SIZE-COD_LS_SIZE); offset += COD_LS_SIZE) {
 
 	if((temp_block[offset+COD_LS_SMOD] & 4) == 0) {
-	  lst_line_number++;
 	  file_id = temp_block[offset+COD_LS_SFILE];
 	  address = get_short_int(&temp_block[offset+COD_LS_SLOC]);
 	  //address = cpu->map_pm_address2index(address);
@@ -446,7 +446,7 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 	      (address <= cpu->program_memory_size()) &&
 	      (smod == 0x80) )
 
-	    cpu->attach_src_line(address,file_id,sline,lst_line_number);
+	    cpu->attach_src_line(address,file_id,sline,-1);
 	  
 	}
       }

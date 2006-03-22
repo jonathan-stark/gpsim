@@ -114,14 +114,22 @@ void instruction::add_line_number_symbol(int address)
   symbol_table.add_line_number(address);
 
 }
+//------------------------------------------------------------------------
+// update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
+// 
+// map the instruction to the source file that generated it.
+// If a line number is less than 0, then this means that the
+// existing mapping should remain unchanged. This allows this 
+// method to be called multiple times; once for each type of
+// mapping.
 
 void instruction::update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
 {
-  file_id = file;
-  src_line = sline;
-  lst_line = lline;
-  hll_src_line = hllsline;
-  hll_file_id = hllfile;
+  file_id      = file<0     ? file_id      : file;
+  src_line     = sline<0    ? src_line     : sline;
+  lst_line     = lline<0    ? lst_line     : lline;
+  hll_src_line = hllsline<0 ? hll_src_line : hllsline;
+  hll_file_id  = hllfile<0  ? hll_file_id  : hllfile;
 }
 char *instruction::ReadSrcLine(char *buf, int nBytes)
 {
