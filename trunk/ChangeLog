@@ -1,3 +1,7 @@
+2006-03-22 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc:
+	Last change cause segv in preferences editor.
+
 2006-03-22 J.R. Heisey <jrheisey@sourceforge.com
 	* /src/sim_context.cc: Modified forward declaration of
 	get_error_message() to match recent definition change.

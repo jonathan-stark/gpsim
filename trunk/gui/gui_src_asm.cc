@@ -1075,7 +1075,7 @@ void NSourcePage::updateMargin(int y1, int y2)
   PangoLayout *layout=0;
   gint text_width=0;
 
-  gint addr_opcode = m_pFC->IsList() ? -1 : 0x9999;
+  gint addr_opcode = (m_pFC && !m_pFC->IsList()) ? 0x9999 : -1;
   if ( m_Parent->margin().formatMargin(str, sizeof(str),
 				       MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
 				       addr_opcode, addr_opcode,false) ) {
@@ -1104,9 +1104,9 @@ void NSourcePage::updateMargin(int y1, int y2)
 					   NULL,
 					   &pos);
 
-    int address    = m_pFC->IsList() ? -1 : m_Parent->getAddress(this,line);
-    int opcode     = m_pFC->IsList() ? -1 : m_Parent->getOpcode(address);
-    bool bHasBreak = m_Parent->bAddressHasBreak(address);
+  int address    = m_pFC && !m_pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
+  int opcode     = m_pFC && !m_pFC->IsList() ? m_Parent->getOpcode(address) : -1;
+  bool bHasBreak = m_Parent->bAddressHasBreak(address);
 
 
     if (layout) {
