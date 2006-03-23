@@ -1,6 +1,11 @@
 2006-03-22 J.R. Heisey <jrheisey@sourceforge.com
 	* config_win32.h.in, plat/win32/fd2raw.cpp: Removed strndup()
 	for Visual Studio. Using g_strndup() from glib instead
+	* src/os_dependent.cc, src/modules.h: Change parameter of 
+	free_error_message() from char * to const char * to go along with the change to
+	get_error_message().
+	* gpsim/gpsim.vcproj: Changed library from readline-static.lib to
+	readline.lib in the debug build which is the correct debug library file.
 
 2006-03-22 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, gui/gui_symbols.cc: use glib's g_strndup() instead
