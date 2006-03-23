@@ -1,3 +1,7 @@
+2006-03-22 J.R. Heisey <jrheisey@sourceforge.com
+	* config_win32.h.in, plat/win32/fd2raw.cpp: Created strndup()
+	function for Visual Studio build.
+
 2006-03-22 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc:
 	Last change cause segv in preferences editor.
