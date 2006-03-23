@@ -82,6 +82,7 @@ EXPORTS
     ??0TraceFrame@@QAE@XZ
     ??0TriggerObject@@QAE@XZ
     ??0Token@gpsim@@QAE@XZ
+    ??0TypeMismatch@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@00@Z
     ??0Value@@QAE@XZ
     ??0ValueStimulus@@QAE@PBD@Z
     ??0gpsimObject@@QAE@XZ
@@ -446,7 +447,8 @@ EXPORTS
     ?isClearable@Value@@UAE_NXZ
     ?isModified@ProgramMemoryAccess@@QAE_NI@Z
     ?isValid@TraceType@@UAE_NI@Z
-    ?list@Processor@@UAEXIIII@Z
+    ?list@Processor@@UAEXIIHH@Z
+    ?list_id@FileContextList@@QAEXH@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
     ?log@TraceRawLog@@QAEXXZ
     ?name@AliasedInstruction@@UAEPADPADH@Z
