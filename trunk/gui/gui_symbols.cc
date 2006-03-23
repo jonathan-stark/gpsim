@@ -207,15 +207,6 @@ static void unselect_row(GtkCList *clist,
 }
 
 
-static char *_strndup(const char *s, int len)
-{
-#if defined(strndup)
-  return strndup(s,len);
-#else
-  return strdup(s);
-#endif
-}
-
 void Symbol_Window::Update(void)
 {
 
@@ -260,8 +251,8 @@ void Symbol_Window::Update(void)
     char **entry = (char**)malloc(3*sizeof(char*));
     const int cMaxLength = 32;
 
-    entry[0] = _strndup(sym->name().c_str(), cMaxLength);
-    entry[1] = _strndup(sym->showType().c_str(), cMaxLength);
+    entry[0] = g_strndup(sym->name().c_str(), cMaxLength);
+    entry[1] = g_strndup(sym->showType().c_str(), cMaxLength);
     entry[2] = (char*)malloc(cMaxLength);
     if (typeid(*sym) == typeid(register_symbol)) {
       Register * pReg = ((register_symbol*)sym)->getReg();
