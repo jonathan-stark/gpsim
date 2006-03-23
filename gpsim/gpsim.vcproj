@@ -34,12 +34,13 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Installing libgpsim.dll to $(TargetDir)"
-				CommandLine="copy &quot;..\src\Debug GUI\libgpsim.dll&quot; &quot;$(TargetDir)&quot;"
+				CommandLine="copy &quot;..\src\Debug GUI\libgpsim.dll&quot; &quot;$(TargetDir)&quot;
+"
 				AdditionalDependencies="&quot;..\..\src\Debug GUI\libgpsim.dll&quot;"
 				Outputs="libgpsim.dll"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib &quot;..\src\Debug GUI\libgpsim.lib&quot; ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gdk_pixbuf-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.1_dll.lib ../../readline/lib/readline-static.lib ../eXdbm/Debug/eXdbm.lib"
+				AdditionalDependencies="wsock32.lib &quot;..\src\Debug GUI\libgpsim.lib&quot; ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gdk_pixbuf-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ..\..\gtkextra-2\lib\libgtkextra-win32-2.1_dll.lib ../../readline/lib/readline.lib ../eXdbm/Debug/eXdbm.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
