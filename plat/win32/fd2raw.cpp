@@ -62,11 +62,6 @@ static int win32_setmode(int fd, int mode)
 
   return ret;
 }
-
-char *strndup(const char *s, size_t size) {
-  return strdup(s);
-}
-
 #endif
 
 
