@@ -371,10 +371,10 @@ const char * get_error_message() {
 #endif
 }
 
-void free_error_message(char * pszError)
+void free_error_message(const char * pszError)
 {
 #ifdef _WIN32
-  g_free(pszError);
+  g_free((gpointer)pszError);
 #endif
 }
 

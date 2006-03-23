@@ -341,7 +341,7 @@ void FixupLibraryName(string &sPath);
 void * load_library(const char *library_name, const char **pszError);
 void * get_library_export(const char *name, void *library_handle, const char **pszError);
 void free_library(void *handle);
-void free_error_message(char * pszError);
+void free_error_message(const char * pszError);
 #endif
 
 
