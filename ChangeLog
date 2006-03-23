@@ -1,3 +1,7 @@
+2006-03-22 J.R. Heisey <jrheisey@sourceforge.com
+	* config_win32.h.in, plat/win32/fd2raw.cpp: Removed strndup()
+	for Visual Studio. Using g_strndup() from glib instead
+
 2006-03-22 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, gui/gui_symbols.cc: use glib's g_strndup() instead
 	of strndup.
