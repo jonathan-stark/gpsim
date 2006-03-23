@@ -109,6 +109,8 @@
 #ifdef _MSC_VER
 #ifndef __FUNCTION__
 #define __FUNCTION__  __FILE__
+
+char *strndup(const char *s, size_t size);
 #endif
 
 #define snprintf  _snprintf
