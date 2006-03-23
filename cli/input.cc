@@ -672,15 +672,6 @@ void cli_main(void)
 /*                                                                  */
 /* **************************************************************** */
 
-static char *_strndup(const char *s, int len)
-{
-#if defined(strndup)
-  return strndup(s,len);
-#else
-  return strdup(s);
-#endif
-}
-
 /* Generator function for command completion.  STATE lets us know whether
    to start from scratch; without any state (i.e. STATE == 0), then we
    start at the top of the list. */
@@ -700,7 +691,7 @@ command_generator (const char *text, int state)
     {
 
       if(strstr(command_list[i]->name, text) == command_list[i]->name)
-	return(_strndup(command_list[i++]->name, cMaxStringLen));
+	return(g_strndup(command_list[i++]->name, cMaxStringLen));
 
       i++;
     }
@@ -711,7 +702,7 @@ command_generator (const char *text, int state)
   // otherwise readline crashes on windows.)
 #ifdef _WIN32
   if(state == 0)
-    return _strndup(text,cMaxStringLen);
+    return g_strndup(text,cMaxStringLen);
 #endif
 
   return 0;
