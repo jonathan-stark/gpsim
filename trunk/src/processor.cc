@@ -2053,7 +2053,7 @@ FileContext::FileContext(string &new_name)
   m_bIsList = false;
 }
 
-FileContext::FileContext(char *new_name)
+FileContext::FileContext(const char *new_name)
 {
   name_str = string(new_name);
   fptr = NULL;
@@ -2258,7 +2258,7 @@ int FileContextList::Add(string &new_name)
   return lastFile-1;
 }
 
-int FileContextList::Add(char *new_name)
+int FileContextList::Add(const char *new_name)
 {
   string sNewName(new_name);
   return Add (sNewName);
