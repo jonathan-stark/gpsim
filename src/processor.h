@@ -250,7 +250,7 @@ public:
   Cache m_cache;
 
   FileContext(string &new_name);
-  FileContext(char *new_name);
+  FileContext(const char *new_name);
   ~FileContext();
 
   void ReadSource();
@@ -291,7 +291,7 @@ public:
   ~FileContextList();
 
   int Add(string& new_name);
-  int Add(char *new_name);
+  int Add(const char *new_name);
 
   int Find(string &fname);
 

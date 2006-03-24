@@ -122,19 +122,26 @@ public:
   register_symbol * findRegisterSymbol(unsigned int uAddress,
                                        unsigned int uBitmask);
   const char *  findProgramAddressLabel(unsigned int address);
-  // This was intended to be used by disassembly code. I added
+
+  // This was intended to be used by disassembly code. I (JR) added
   // this then I figured out that it is not useful unless
   // you have a cross reference to every address that references
   // the symbol. So I'm leaving the code for the future when
   // the constant object includes a list of address references.
   const char *  findConstant(unsigned int uValue,
     unsigned int uReferencedFromAddress);
+  // Convenience functions for accessing symbols of a specific type.
+  // In general, provide a string containing the symbol name to access
+  // the symbol.
   Integer *     findInteger(const char *s);
   Boolean *     findBoolean(const char *s);
   module_symbol *findModuleSymbol(const char *s);
   Module *      findModule(const char *s);
+  String *      findString(const char *s);
 
 protected:
+  // 'findSymbol' is a template that will create type-specific code
+  // for searching the symbol table.
   template<class _symbol_t>
   _symbol_t * findSymbol(const char *s, _symbol_t*)
   {

@@ -502,6 +502,11 @@ Stimulus_Node * Symbol_Table::findNode(const char *s)
   return ((Stimulus_Node *)0);
 }
 
+String * Symbol_Table::findString(const char *s)
+{
+  return findSymbol(s, (String *)NULL);
+}
+
 template<class _symbol_iterator_t, class _symbol_t>
 _symbol_iterator_t Symbol_Table::beginSymbol(_symbol_iterator_t *pit, _symbol_t*psym) {
   iterator it;
