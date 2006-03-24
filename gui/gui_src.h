@@ -34,6 +34,17 @@ class SourceBrowserParent_Window;
 
 class SourceWindow;
 
+enum eSourceFileType {
+  eUnknownSource=0, // Unknown File type
+  eAsmSource,       // Assembly source files
+  eCSource,         // C source files
+  eJalSource,       // JAL source files
+  eListSource,      // List files
+  eAsmIncSource,    // Include files for assembly
+  eCIncSource,      // Include files for C
+  eHexSource        // Hex files
+};
+
 //========================================================================
 class ColorHolder
 {
@@ -90,6 +101,10 @@ public:
   GtkTextBuffer *m_buffer;
   SourceBrowserParent_Window *m_pParent;
   FileContext   *m_pFC;
+  eSourceFileType getSrcType();
+  void setSrcType(eSourceFileType);
+private:
+  eSourceFileType m_SourceFile_t;
 };
 
 
@@ -128,18 +143,20 @@ private:
 //========================================================================
 // SourcePage
 // A single source file.
-
+//
+// The SourcePage class associates a single file with a single GtkTextBuffer.
+// manages
 class NSourcePage
 {
 public:
   NSourcePage(SourceWindow *, FileContext   *, int file_id);
 
   GtkTextBuffer *buffer() { return m_pBuffer->m_buffer; }
-  //  void updateMargin(NSourcePage *pPage, int y1, int y2);
   void updateMargin(int y1, int y2);
 
   void Close(void);
   void setFont(const char *);
+
   unsigned int   m_fileid;
   FileContext   *m_pFC;
   GtkTextView   *m_view;
@@ -190,14 +207,15 @@ public:
 
   SourcePageMargin &margin();
   const char *getFont();
-
+  gint switch_page_cb(guint newPage);
 private:
   int AddPage(SourceBuffer *pSourceBuffer);
+
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
   StatusBar_Window *status_bar;  // display's PC, status, etc.
   SIMULATION_MODES last_simulation_mode;
   string sLastPmaName;
-
+  int m_currentPage;          // Notebook page currently displayed.
 
   struct _PC {
     bool bIsActive;

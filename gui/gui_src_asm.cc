@@ -554,7 +554,7 @@ SourcePageMargin::SourcePageMargin()
 SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
 			   SourceBrowserParent_Window *pParent)
 
-  :  m_pFC(pFC), m_pParent(pParent)
+  :  m_pFC(pFC), m_pParent(pParent), m_SourceFile_t(eUnknownSource)
 {
 
   assert(pTagTable);
@@ -564,6 +564,18 @@ SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
   assert(m_buffer);
 
 }
+//------------------------------------------------------------------------
+
+eSourceFileType SourceBuffer::getSrcType()
+{
+  return m_SourceFile_t;
+}
+void SourceBuffer::setSrcType(eSourceFileType new_SrcType)
+{
+  m_SourceFile_t = new_SrcType;
+}
+
+
 //------------------------------------------------------------------------
 // addTagRange(TextStyle *pStyle,int start_index, int end_index)
 //
@@ -644,10 +656,12 @@ void SourceBuffer::clearBreak(int line)
 
 //========================================================================
 NSourcePage::NSourcePage(SourceWindow *pParent, FileContext   *pFC, int file_id)
-  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_marginWidth(0),m_fileid(file_id), m_pFC(pFC),
+  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_marginWidth(0),
+    m_fileid(file_id), m_pFC(pFC),
     m_cpFont(0)
 {
 }
+
 //------------------------------------------------------------------------
 SourceWindow::SourceWindow(GUI_Processor *pgp, 
 			   SourceBrowserParent_Window *pParent,
@@ -745,7 +759,7 @@ void SourceWindow::toggleBreak(NSourcePage *pPage, int line)
   if (pma && pPage) {
     int address = pma->find_address_from_line(pPage->m_pFC,line+1);
     if (address >= 0)
-      pma->toggle_break_at_line(pPage->m_fileid ,line+1);
+      pma->toggle_break_at_address(address);
 
   }
 
@@ -758,6 +772,22 @@ void SourceWindow::movePC(int line)
 {
 }
 
+//------------------------------------------------------------------------
+static gint cb_notebook_switchpage (GtkNotebook     *notebook,
+				    GtkNotebookPage *page,
+				    guint            page_num,
+				    SourceWindow     *pSW)
+{
+  return pSW->switch_page_cb(page_num);
+}
+gint SourceWindow::switch_page_cb(guint newPage)
+{
+  if (m_currentPage != newPage) {
+    m_currentPage = newPage;
+    Update();
+  }
+  return TRUE;
+}
 //------------------------------------------------------------------------
 // Build
 //
@@ -795,6 +825,11 @@ void SourceWindow::Build()
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
   m_Notebook = gtk_notebook_new();
+  m_currentPage = 0;
+  gtk_signal_connect (GTK_OBJECT (m_Notebook), "switch-page",
+		      GTK_SIGNAL_FUNC(cb_notebook_switchpage),
+		      (gpointer) this);
+
   gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
 
   gtk_box_pack_start (GTK_BOX (vbox), m_Notebook, TRUE, TRUE, 0);
@@ -932,69 +967,70 @@ void SourceWindow::UpdateLine(int address)
   if(!bSourceLoaded() || !pma || !enabled)
     return;
 
+  gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
+  NSourcePage *pPage = pages[currPage];
+
   int currFileId = pma->get_file_id(address);
 
-  for(int i=0;i<SBAW_NRFILES;i++) {
+  
+  int line = (pPage->m_pFC->IsList()) ?
+    pma->getFromAddress(address)->get_lst_line() :
+    pma->get_src_line(address);
 
-    if(pages[i]->m_fileid==currFileId) {
+  //int line  = pma->get_src_line(address) - 1;
 
-      // The page containing this address has been found.
+  line -= 1;
 
-      int line  = pma->get_src_line(address) - 1;
-      NSourcePage *pPage = pages[i];
+  GtkTextIter iBegin;
+  gtk_text_buffer_get_iter_at_line
+    (gtk_text_view_get_buffer(pPage->m_view),
+     &iBegin,
+     line);
 
-      /*
-      pPage->m_pBuffer->clearBreak(line);
-      if(pma->address_has_break(address))
-	pPage->m_pBuffer->setBreak(line);
-      */
+  int y, h;
 
-      GtkTextIter iBegin;
-      gtk_text_buffer_get_iter_at_line
-	(gtk_text_view_get_buffer(pPage->m_view),
-	 &iBegin,
-	 line);
+  gtk_text_view_get_line_yrange (pPage->m_view,
+				 &iBegin,
+				 &y,
+				 &h);
+  if (pPage->m_marginWidth) {
 
-      int y, h;
+    GdkRectangle vRect;
 
-      gtk_text_view_get_line_yrange (pPage->m_view,
-				     &iBegin,
-				     &y,
-				     &h);
-      if (pPage->m_marginWidth) {
+    gtk_text_view_buffer_to_window_coords
+      (pPage->m_view,
+       GTK_TEXT_WINDOW_LEFT,
+       0,
+       y,
+       NULL,
+       &y);
 
-	GdkRectangle vRect;
+    vRect.x=0;
+    vRect.y=y;
+    vRect.width=pPage->m_marginWidth;
+    vRect.height=h;
 
-	gtk_text_view_buffer_to_window_coords
-	  (pPage->m_view,
-	   GTK_TEXT_WINDOW_LEFT,
-	   0,
-	   y,
-	   NULL,
-	   &y);
-
-	vRect.x=0;
-	vRect.y=y;
-	vRect.width=pPage->m_marginWidth;
-	vRect.height=h;
-
-	Dprintf((" UpdateLine line=%d invalidating region %d,%d  %d,%d\n",line,0,y,vRect.width,h));
-	// Send an expose event to repaint the whole margin
-	gdk_window_invalidate_rect
-	  (gtk_text_view_get_window (pPage->m_view, GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
-      }
-
-      return;
-    }
+    Dprintf((" UpdateLine line=%d invalidating region %d,%d  %d,%d\n",line,0,y,vRect.width,h));
+    // Send an expose event to repaint the whole margin
+    gdk_window_invalidate_rect
+      (gtk_text_view_get_window (pPage->m_view, GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
   }
+
+  return;
 }
 
 //------------------------------------------------------------------------
 //
 int SourceWindow::getPCLine(int page)
 {
-  return (mProgramCounter.bIsActive && mProgramCounter.page == page) ?
-    mProgramCounter.line : -1;
+  if (mProgramCounter.bIsActive && mProgramCounter.page == page)
+    return mProgramCounter.line;
+
+  NSourcePage *pPage = pages[page];
+
+  return (pPage->m_pFC->IsList()) ?
+    pma->getFromAddress(pma->get_PC())->get_lst_line() :
+    pma->get_src_line(pma->get_PC());
 }
 int SourceWindow::getAddress(NSourcePage *pPage, int line)
 {
@@ -1104,9 +1140,9 @@ void NSourcePage::updateMargin(int y1, int y2)
 					   NULL,
 					   &pos);
 
-  int address    = m_pFC && !m_pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
-  int opcode     = m_pFC && !m_pFC->IsList() ? m_Parent->getOpcode(address) : -1;
-  bool bHasBreak = m_Parent->bAddressHasBreak(address);
+    int address    = m_pFC && !m_pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
+    int opcode     = m_pFC && !m_pFC->IsList() ? m_Parent->getOpcode(address) : -1;
+    bool bHasBreak = m_Parent->bAddressHasBreak(m_Parent->getAddress(this,line));
 
 
     if (layout) {
@@ -1147,7 +1183,7 @@ void NSourcePage::updateMargin(int y1, int y2)
       Dprintf((" updating PC at line %d\n", line));
     }
 
-    if (address >= 0) {
+    if (m_Parent->getAddress(this,line) >= 0) {
       // There is code associated with this line.
 
       gtk_paint_diamond
@@ -1219,7 +1255,6 @@ void SourceWindow::SetPC(int address)
     // Don't automatically switch away from a page if it is a list file
     id = currPage;
     PCline = pma->getFromAddress(address)->get_lst_line();
-    printf("list file PC=0x%x, line=%d\n",address,PCline);
   } else {
     for (id=0; id<SBAW_NRFILES; id++)
       if(pages[id]->m_fileid == sbawFileId)
@@ -1229,7 +1264,8 @@ void SourceWindow::SetPC(int address)
       return;   // page was not found.
 
     // Switch to the source browser page that contains the program counter.
-    gtk_notebook_set_page(GTK_NOTEBOOK(m_Notebook),id);
+    if (currPage != id)
+      gtk_notebook_set_page(GTK_NOTEBOOK(m_Notebook),id);
 
     // Get the source line number associated with the program counter address.
     PCline = pma->get_src_line(address);
@@ -1469,9 +1505,7 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
   gtk_text_view_set_wrap_mode (page->m_view, GTK_WRAP_NONE);
   gtk_text_view_set_editable  (page->m_view, FALSE);
 
-  {
-    page->setFont(m_pParent->getFont());
-  }
+  page->setFont(m_pParent->getFont());
 
   gtk_widget_show_all(pFrame);
 
@@ -4366,17 +4400,17 @@ const char *SourceBrowserParent_Window::getFont()
 // parseSource
 void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *pFC)
 {
-
   pFC->rewind();
 
   char text_buffer[256];
   int line = 1;
+
   while(pFC->gets(text_buffer, sizeof(text_buffer))) {
 
     int address;
-    address = gp->cpu->pma->find_address_from_line(pFC,line);
+    // The syntax highlighting doesn't work on list files 
+    address = pFC->IsList() ? -1 : gp->cpu->pma->find_address_from_line(pFC,line);
 
-    //if(address >= 0)
     pBuffer->parseLine(text_buffer,address);
 
     line++;
