@@ -1,3 +1,13 @@
+2006-03-22 Scott Dattalo <scott@dattalo.com>
+	* src/processor.h, src/processor.cc: The FileContext class now
+	handles list files.
+	* gui/gui_src_asm.cc, gui/gui_src.h, gui/gui_menu.cc: Breakpoints
+	can be manipulated through the list file view of the source
+	browser.
+	Switching pages in the source browser now updates the margin.
+	The preferences editor 'Margins' and 'Tabs' were combined into
+	just 'Margins'.
+
 2006-03-22 J.R. Heisey <jrheisey@sourceforge.com
 	* config_win32.h.in, plat/win32/fd2raw.cpp: Removed strndup()
 	for Visual Studio. Using g_strndup() from glib instead

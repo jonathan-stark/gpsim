@@ -230,11 +230,11 @@ class RegisterMemoryAccess : public MemoryAccess
 class FileContext
 {
 private:
-  string name_str;         // File name
-  FILE   *fptr;            // File ptr when the file is opened
-  vector<int> *line_seek;  // A vector of file offsets to the start of lines
-  vector<int> *pm_address; // A vector of program memory addresses for lines 
-  unsigned int _max_line;  // number of lines in the file
+  string name_str;           // File name
+  FILE   *fptr;              // File ptr when the file is opened
+  vector<int> *line_seek;    // A vector of file offsets to the start of lines
+  vector<int> *pm_address;   // A vector of program memory addresses for lines 
+  unsigned int m_uiMaxLine;  // number of lines in the file
 
   friend class FileContextList;
 protected:
@@ -251,9 +251,9 @@ public:
 
   FileContext(string &new_name);
   FileContext(char *new_name);
-  ~FileContext(void);
+  ~FileContext();
 
-  void ReadSource(void);
+  void ReadSource();
   char *ReadLine(unsigned int line_number, char *buf, unsigned int nBytes);
   char *gets(char *buf, unsigned int nBytes);
   void rewind(void);
@@ -271,16 +271,7 @@ public:
   {
     return name_str;
   }
-
-  void max_line(unsigned int new_max_line)
-  {
-    _max_line = new_max_line;
-  }
-
-  unsigned int max_line(void)
-  {
-    return _max_line;
-  }
+  unsigned int max_line();
 
 };
 

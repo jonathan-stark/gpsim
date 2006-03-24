@@ -531,19 +531,8 @@ void Processor::attach_src_line(unsigned int address,
 				unsigned int lst_line)
 {
   unsigned int uIndex = map_pm_address2index(address);
-  if(uIndex < program_memory_size()) {
-
+  if(uIndex < program_memory_size())
     program_memory[uIndex]->update_line_number(file_id,sline,lst_line,-1,-1);
-
-    //printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
-
-    FileContext *fc = files[file_id];
-
-    if(fc && sline > fc->max_line())
-      fc->max_line(sline);
-
-  }
-
 }
 
 //-------------------------------------------------------------------
@@ -554,48 +543,6 @@ void Processor::attach_src_line(unsigned int address,
 
 void Processor::read_src_files(void)
 {
-#if USE_OLD_FILE_CONTEXT == 1
-
-  // Are there any src files ?
-  for(int i=0; i<number_of_source_files; i++) {
-
-
-    // did this src file generate any code?
-    if(files[i].max_line > 0) {
-      
-      // Create an array whose index corresponds to the
-      // line number of a source file line and whose data
-      // is the offset (in bytes) from the beginning of the 
-      // file. (e.g. files[3].line_seek[20] references the
-      // 20th line of the third source file.)
-      files[i].line_seek = new int[files[i].max_line+1];
-
-      // Create an array whose index is a source file line 
-      // number and whose data is the program memory address
-      // associated with this lines. Note, this array is initalized
-      // to all -1's here, but later will get filled with the
-      // proper addresses.
-
-      files[i].pm_address = new int[files[i].max_line+1];
-
-      if( 0 == (files[i].file_ptr = fopen_path(files[i].name,"r")))
-        continue;
-
-      rewind(files[i].file_ptr);
-
-      char buf[256],*s;
-      files[i].line_seek[0] = 0;
-      for(int j=1; j<=files[i].max_line; j++) {
-        files[i].pm_address[j] = -1;
-        files[i].line_seek[j] = ftell(files[i].file_ptr);
-        s = fgets(buf,256,files[i].file_ptr);
-        if(s != buf)
-	        break;
-      }
-    }
-  }
-#else
-
   int i;
   // Are there any src files ?
   for(i=0; i<files.nsrc_files(); i++) {
@@ -641,29 +588,27 @@ void Processor::read_src_files(void)
     if (!fc)
       return;
 
+    fc->ReadSource();
     fc->rewind();
 
     char buf[256];
-    int line =0;
+    int line = 1;
 
-    while(fc->gets(buf,256)) {
+    while(fc->gets(buf,sizeof(buf))) {
 
       int address;
       int opcode;
 
       if (sscanf(buf,"%x   %x",&address, &opcode) == 2) {
-
-	printf ("%x:%x %s\n",address, opcode,buf);
 	unsigned int uIndex = map_pm_address2index(address);
-	program_memory[uIndex]->update_line_number(-1,-1,line+1,-1,-1);
+	program_memory[uIndex]->update_line_number(-1,-1,line,-1,-1);
+	fc->put_address(line,address);
       }
 
       line++;
     }
-    fc->max_line(line-1);
-    fc->ReadSource();
+
   }
-#endif
 }
 
 
@@ -992,12 +937,7 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 //-------------------------------------------------------------------
 int ProgramMemoryAccess::find_address_from_line(FileContext *fc, int src_line)
 {
-  if(!cpu)
-    return -1;
-
-  if(fc)
-    return fc->get_address(src_line);
-  return -1;
+  return (cpu && fc) ? fc->get_address(src_line) : -1;
 }
 //--------------------------------------------------------------------------
 //
@@ -2108,7 +2048,7 @@ FileContext::FileContext(string &new_name)
   name_str = new_name;
   fptr = NULL;
   line_seek = 0;
-  _max_line = 0;
+  m_uiMaxLine = 0;
   pm_address = 0;
   m_bIsList = false;
 }
@@ -2118,7 +2058,7 @@ FileContext::FileContext(char *new_name)
   name_str = string(new_name);
   fptr = NULL;
   line_seek = 0;
-  _max_line =0;
+  m_uiMaxLine = 0;
   pm_address = 0;
   m_bIsList = false;
 }
@@ -2143,7 +2083,7 @@ FileContext::~FileContext(void)
 void FileContext::ReadSource(void)
 {
 
-  if( (max_line() < 0) || name_str.length() == 0)
+  if( (max_line() <= 0) || name_str.length() == 0)
     return;
 
   const char *str = name_str.c_str();
@@ -2209,7 +2149,20 @@ char *FileContext::gets(char *buf, unsigned int nBytes)
 }
 
 //----------------------------------------
-void FileContext::rewind(void)
+unsigned int FileContext::max_line()
+{
+  if(fptr && !m_uiMaxLine) {
+    char buff[256];
+    rewind();
+    m_uiMaxLine=0;
+    while(fgets(buff,sizeof(buff),fptr))
+      m_uiMaxLine++;
+  }
+  return m_uiMaxLine;
+}
+
+//----------------------------------------
+void FileContext::rewind()
 {
   if(fptr)
     fseek(fptr,0,SEEK_SET);
@@ -2218,12 +2171,14 @@ void FileContext::rewind(void)
 //----------------------------------------
 void FileContext::open(const char *mode)
 {
-  if(!fptr)
+  if(!fptr) {
     fptr = fopen_path(name_str.c_str(), mode);
-
+    max_line();
+  }
 }
 //----------------------------------------
-void FileContext::close() {
+void FileContext::close()
+{
   if(fptr != NULL) {
     fclose(fptr);
     fptr = NULL;
@@ -2240,7 +2195,7 @@ int FileContext::get_address(unsigned int line_number)
 //----------------------------------------
 void FileContext::put_address(unsigned int line_number, unsigned int address)
 {
-  if(line_number <= max_line()  && pm_address)
+  if(line_number <= max_line()  && pm_address && (*pm_address)[line_number]<0)
     (*pm_address)[line_number] = address;
 }
 

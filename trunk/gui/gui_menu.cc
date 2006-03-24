@@ -550,12 +550,6 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   m_pParent = gpGuiProcessor->source_browser;
   GtkWidget *label;
 
-  //GtkWidget *hbox2 = gtk_hbox_new(0,0);
-  //gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
-
-  //GtkWidget *vbox3 = gtk_vbox_new(0,0);
-  //gtk_box_pack_start (GTK_BOX (hbox2), vbox3, FALSE, TRUE, 0);
-
   {
     // Color Frame for Source Browser configuration
 
@@ -567,19 +561,19 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *colorVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
-    m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), 
+    m_LabelColor    = new ColorButton(colorVbox, 
 				      m_pParent->mLabel,
 				      "Label", this);
-    m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), 
+    m_MnemonicColor = new ColorButton(colorVbox, 
 				      m_pParent->mMnemonic,
 				      "Mnemonic", this);
-    m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), 
+    m_SymbolColor   = new ColorButton(colorVbox, 
 				      m_pParent->mSymbol,
 				      "Symbols", this);
-    m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox),
+    m_ConstantColor = new ColorButton(colorVbox,
 				      m_pParent->mConstant,
 				      "Constants", this);
-    m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox),
+    m_CommentColor  = new ColorButton(colorVbox,
 				      m_pParent->mComment,
 				      "Comments", this);
 
@@ -599,10 +593,15 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     m_currentTabPosition = m_pParent->getTabPosition();
     m_originalTabPosition = m_currentTabPosition;
 
+    GtkWidget *hbox = gtk_hbox_new(0,0);
+    GtkWidget *tabFrame = gtk_frame_new ("Notebook Tabs");
+    gtk_box_pack_start (GTK_BOX (hbox), tabFrame, FALSE, TRUE, 0);
+
     GtkWidget *radioUp  = gtk_radio_button_new_with_label (NULL,"up");
     GtkRadioButton *rb  = GTK_RADIO_BUTTON(radioUp);
 
     GtkWidget *tabVbox = gtk_vbox_new(0,0);
+    gtk_container_add (GTK_CONTAINER (tabFrame), tabVbox);
 
     m_Up    = new TabButton(tabVbox, radioUp, GTK_POS_TOP, this);
     m_Left  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"left"),
@@ -614,14 +613,13 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     m_None  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"none"),
 			   -1, this);
 
-    label = gtk_label_new("Tabs");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),tabVbox,label);
 
-  }
-
-  {
     // Source browser margin 
+    GtkWidget *marginFrame = gtk_frame_new ("Margin");
+    gtk_box_pack_start (GTK_BOX (hbox), marginFrame, FALSE, TRUE, 0);
     GtkWidget *marginVbox = gtk_vbox_new(0,0);
+    gtk_container_add (GTK_CONTAINER (marginFrame), marginVbox);
+
     m_LineNumbers = new MarginButton(marginVbox, "Line Numbers", 
 				     MarginButton::eLineNumbers, this);
     m_Addresses   = new MarginButton(marginVbox, "Addresses", 
@@ -629,8 +627,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     m_Opcodes     = new MarginButton(marginVbox, "Opcodes", 
 				     MarginButton::eOpcodes, this);
 
-    label = gtk_label_new("Margin");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),marginVbox,label);
+    label = gtk_label_new("Margins");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
 
   }
 
@@ -645,7 +643,9 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
     
     m_Notebook = gtk_notebook_new();
-    gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
+    //m_currentTabPosition = m_pParent->getTabPosition();
+    //gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
+    setTabPosition(m_pParent->getTabPosition());
 
     gtk_container_add (GTK_CONTAINER (frame), m_Notebook);
 
@@ -653,11 +653,9 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     int id = AddPage (pBuffer, "file1.asm");
 
-    //GtkWidget *label = gtk_label_new("file1.asm");
-    //gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),GTK_WIDGET(m_pPage->m_view),label);
-    //m_pPage->m_pBuffer->parseLine( "  MOVLW   0x34    ; Comment",1);
-
-    pages[id]->m_pBuffer->parseLine( "  MOVLW   0x34    ; Comment",1);
+    pages[id]->m_pBuffer->parseLine( "        MOVLW   0x34       ; Comment",1);
+    pages[id]->m_pBuffer->parseLine( "; Comment only",1);
+    pages[id]->m_pBuffer->parseLine( "Label:  ADDWF  Variable,F  ; Comment",1);
 
 #if 0
     label = gtk_label_new("file2.asm");
@@ -670,7 +668,6 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   }
 
-  setTabPosition(m_currentTabPosition);
   gtk_widget_show_all(notebook);
 
 }
@@ -679,6 +676,12 @@ void SourceBrowserPreferences::setTabPosition(int tabPosition)
 {
   m_currentTabPosition = tabPosition;
   m_pParent->setTabPosition(tabPosition);
+  if (tabPosition >= 0) {
+    gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),TRUE);
+    gtk_notebook_set_tab_pos(GTK_NOTEBOOK(m_Notebook), (GtkPositionType) m_currentTabPosition);
+  } else {
+    gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),FALSE);
+  }
   Update();
 }
 
