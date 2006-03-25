@@ -312,6 +312,10 @@
 	regression/switch_test/switch_test.asm: 
 	Switch modules now handle analog inputs and RC loads.
 	
+2006-01-30 J.R. Heisey <jrheisey@sourceforge.com
+	* Changed the implementation of Float::copy() to use the get()
+	function to retrieve the value.
+
 2006-01-30 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/processor.h: added methods for mapping
 	register addresses into register indexes (for the dspic) and use
