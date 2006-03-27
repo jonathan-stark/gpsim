@@ -51,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
 #define BITCOL 5
 #define LASTCOL BITCOL
 
-static char *watch_titles[]={"name","address","dec","hex ","ascii","bits"};
+static char *watch_titles[]={"name","address","dec","hex","ascii","bits"};
 
 #define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
@@ -209,7 +209,8 @@ void Watch_Window::WriteSymbolList()
     snprintf(cwv, sizeof(cwv), "WV%d",i);
     vname = 0;
     entry = (WatchEntry*) g_list_nth_data(watches, i);
-    config_set_string(name(), cwv, entry->pRegSymbol->name().c_str());
+    if (entry && entry->pRegSymbol)
+      config_set_string(name(), cwv, entry->pRegSymbol->name().c_str());
   }
   
 }
@@ -878,8 +879,19 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
 
     if (!config_get_variable(name(),watch_titles[i],&coldata[i].isVisible))
       config_set_variable(name(),watch_titles[i],1);
-
   }
+
+#ifndef WIN32
+  { 
+    // Fix a db error in previous versions of gpsim
+    int j;
+    while (config_get_variable(name(),"hex",&j))
+      config_remove(name(), "hex");
+
+    const int hexIndex=3;
+    config_set_variable(name(),watch_titles[hexIndex],coldata[hexIndex].isVisible);
+  }
+#endif
 
   if(enabled)
     Build();
