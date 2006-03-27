@@ -1,3 +1,14 @@
+2006-03-27 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_watch.cc:
+	- Watch window was causing segv for the case when a watched
+	register did not have an entry in the symbol table.
+	- Fixed a bug where the "hex" attribute was being repeatedly added
+	to the eXdbm data base. Note this fix was only applied to
+	non-WIN32 OSes
+	* gui/gui_regwin.cc, gui/gui_regwin.h: The register window cells
+	were not getting resized correctly whenever the font was
+	changed. Also, the default font was changed to Monospace.
+	
 2006-03-24 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.h, src/symbol.cc: Added a convenience function for
 	searching the symbol table for strings.

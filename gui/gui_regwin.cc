@@ -88,7 +88,7 @@ private:
 
 public:
 
-  virtual void execute(void)=0;
+  virtual void execute()=0;
 
 };
 
@@ -101,7 +101,7 @@ private:
 
 class Menu_BreakClear : public RegWindowMenuItem {
 public:
-  virtual void execute(void) {
+  virtual void execute() {
     printf("BreakClear");
   }
 
@@ -153,7 +153,7 @@ Register_Window *popup_rw;
 // get_register
 // get the "real" register. If 'bTopLevelOnly' is true
 // 
-Register *GUIRegister::get_register(void)
+Register *GUIRegister::get_register()
 {
   if(!rma)
     return 0;
@@ -181,7 +181,7 @@ void GUIRegister::put_shadow(RegisterValue new_value)
   shadow = new_value;
 }
 
-unsigned int GUIRegister::get_value(void)
+unsigned int GUIRegister::get_value()
 {
   Register *reg = get_register();
 
@@ -192,7 +192,7 @@ unsigned int GUIRegister::get_value(void)
 }
 
 
-RegisterValue GUIRegister::getRV(void)
+RegisterValue GUIRegister::getRV()
 {
   Register *reg = get_register();
 
@@ -239,7 +239,7 @@ bool GUIRegister::hasChanged(RegisterValue &current_value) const
   return (shadow != current_value);
 }
 
-void GUIRegister::Clear_xref(void)
+void GUIRegister::Clear_xref()
 {
   Register *reg = get_register();
 
@@ -258,7 +258,7 @@ void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
   xref = new_xref;
 }
 
-bool GUIRegister::hasBreak(void)
+bool GUIRegister::hasBreak()
 {
 
   if(rma)
@@ -267,7 +267,7 @@ bool GUIRegister::hasBreak(void)
   return false;
 }
 
-char *GUIRegister::name(void)
+char *GUIRegister::name()
 {
 
   static char buffer[128];
@@ -298,14 +298,14 @@ char *GUIRegister::name(void)
   return buffer;
 }
 
-bool GUIRegister::bIsValid(void)
+bool GUIRegister::bIsValid()
 {
   if(rma && (*rma)[address].getReg())
     return true;
   return false;
 }
 
-bool GUIRegister::bIsSFR(void)
+bool GUIRegister::bIsSFR()
 {
   if(rma && (*rma)[address].isa() == Register::SFR_REGISTER)
     return true;
@@ -372,9 +372,9 @@ public:
   { 
     printf("(gui_regwin)Warning: writing to invalid register\n");
   };
-  unsigned int get_value(void) { return 0;};
+  unsigned int get_value() { return 0;};
 
-  InvalidGuiRegister(void) {
+  InvalidGuiRegister() {
     rma=0;
   }
 private:
@@ -384,7 +384,35 @@ private:
 static InvalidGuiRegister THE_invalid_register;
 
 //========================================================================
+// GtkSheet extensions
+//
+// The gtk_sheet api does not provide access to row and column labels.
+// This means we can manipulate the font the way the cells can be manipulated
 
+static GtkSheetButton *
+gtk_sheet_row_button_get(GtkSheet *sheet, gint row)
+{
+  g_return_val_if_fail (sheet != NULL, NULL);
+  g_return_val_if_fail (GTK_IS_SHEET (sheet), NULL);
+
+  if(row < 0 || row > sheet->maxrow) return NULL;
+
+  return (&sheet->row[row].button);
+}
+
+static void
+gtk_sheet_REALLY_set_row_height(GtkSheet *sheet, gint row, gint height)
+{
+  g_return_if_fail (sheet != NULL);
+  g_return_if_fail (GTK_IS_SHEET (sheet));
+
+  if (row < 0 || row > sheet->maxrow)
+    return;
+
+  sheet->row[row].height = height;
+}
+
+//========================================================================
 // get_value
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
@@ -1049,30 +1077,32 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 //------------------------------------------------------------------------
 int Register_Window::column_width(int col)
 {
+  PangoLayout *layout=0;
+  /*
+    layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
 
+    pango_layout_get_pixel_size (layout, &text_width, NULL);
+    text_width+=2;
+  */
   int esthetic_padding = 6;   // pixels 
 
   if(!char_width)
     return 0;
 
   if(col < 0)
-    return char_width * 3 + esthetic_padding;
+    return char_width * 3;
 
   if(col < REGISTERS_PER_ROW)
-    return char_width * chars_per_column + esthetic_padding;
+    return char_width * chars_per_column; // + esthetic_padding;
 
-  return char_width * REGISTERS_PER_ROW + esthetic_padding;
+  //return char_width * (REGISTERS_PER_ROW + 4) + esthetic_padding;
+  return char_width * REGISTERS_PER_ROW;
 }
 
 //------------------------------------------------------------------------
-int Register_Window::row_height(int col)
+int Register_Window::row_height(int row)
 {
-  int esthetic_padding = 6;  // pixels 
-
-  if(!char_width)
-    return 0;
-
-  return 3 * char_width + esthetic_padding;
+  return char_height ? char_height : 20;
 }
 
 //------------------------------------------------------------------------
@@ -1080,7 +1110,7 @@ int Register_Window::row_height(int col)
 //
 //
 
-void Register_Window::UpdateLabel(void)
+void Register_Window::UpdateLabel()
 {
   int row = -1, col = -1;
 
@@ -1109,7 +1139,7 @@ void Register_Window::UpdateLabel(void)
 //
 //
 
-void Register_Window::UpdateEntry(void)
+void Register_Window::UpdateEntry()
 {
   gint row, col;
 
@@ -1138,7 +1168,7 @@ void Register_Window::UpdateEntry(void)
 //
 //
 
-void Register_Window::UpdateLabelEntry(void)
+void Register_Window::UpdateLabelEntry()
 {
   UpdateLabel();
   UpdateEntry();
@@ -1156,7 +1186,43 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
   return 0; // what should be returned?, FIXME
 }
 
-int Register_Window::LoadStyles(void)
+//------------------------------------------------------------------------
+void Register_Window::UpdateStyle()
+{
+  if (!register_sheet || !normalfont)
+    return;
+
+  GtkSheetRange range;
+
+  //gtk_sheet_freeze(register_sheet);
+
+  // Update the font for the cells
+  range.row0=0;
+  range.rowi=register_sheet->maxrow;
+  range.col0=0;
+  range.coli=register_sheet->maxcol;
+  gtk_sheet_range_set_font(register_sheet, &range, normalfont);
+
+  // Update the font for the row and column labels
+  gtk_widget_modify_font(GTK_WIDGET(register_sheet),normalfont);
+
+  // Adjust the cell sizes based on the font size
+  int i;
+  for(i=0; i<=register_sheet->maxcol; i++)
+    gtk_sheet_set_column_width (register_sheet, i, column_width(i));
+  for(i=0; i<=register_sheet->maxrow; i++)
+    gtk_sheet_REALLY_set_row_height (register_sheet, i, row_height(i));
+
+
+  gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
+  gtk_sheet_set_column_titles_height(register_sheet, row_height(0));
+  //gtk_sheet_thaw(register_sheet);
+
+
+}
+
+//------------------------------------------------------------------------
+int Register_Window::LoadStyles()
 {
 #if GTK_MAJOR_VERSION >= 2
   normalfont = pango_font_description_from_string(normalfont_string);
@@ -1167,19 +1233,23 @@ int Register_Window::LoadStyles(void)
   if(!normalfont)
   {
     char_width = 0;
+    char_height = 0;
     return 0;
   }
 
 #if GTK_MAJOR_VERSION >= 2
-  //char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
-  //printf("%s\npango size %d, char_width %d\n",normalfont_string,
-  //	 pango_font_description_get_size(normalfont),char_width);
-  // FIXME - this clearly is not correct.
-  // what is wanted is a way to determine the width of a 'typical' character.
-  // We have the 'Font Description', but not the 'Font'. There is a way 
-  // to get the width of a character given the font by calling:
-  // pango_font_metrics_get_approximate_digit_width(PangoFontMetrics *)
-  char_width =pango_font_description_get_size(normalfont)*2/(3*1024);
+  {
+    PangoRectangle rect;
+    PangoLayout *layout;
+
+    layout = gtk_widget_create_pango_layout (GTK_WIDGET(register_sheet), "A");
+    pango_layout_set_font_description (layout, normalfont);
+
+    pango_layout_get_extents (layout, NULL, &rect);
+    char_width =  PANGO_PIXELS(rect.width);
+    char_height = PANGO_PIXELS(rect.height + (rect.height<<1))>>1;
+    g_object_unref(G_OBJECT(layout));
+  }
 
 #else
   char_width = gdk_string_width (normalfont,"9");
@@ -1196,7 +1266,7 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
     settings_active=0;
 }
 
-int Register_Window::SettingsDialog(void)
+int Register_Window::SettingsDialog()
 {
   static GtkWidget *dialog=0;    // fixme
   GtkWidget *button;
@@ -1204,9 +1274,7 @@ int Register_Window::SettingsDialog(void)
   static GtkWidget *normalfontstringentry;   //fixme
   GtkWidget *label;
   int fonts_ok=0;
-  GtkSheet *sheet=0;
-  GtkSheetRange range;
-  int i;
+
 
   if(!dialog)
   {
@@ -1254,14 +1322,15 @@ int Register_Window::SettingsDialog(void)
 
 
 
+#if GTK_MAJOR_VERSION >= 2
+  PangoFontDescription *font=0;
+#else
+  GdkFont *font=0;
+#endif
+
   while(fonts_ok!=1)
   {
     char fontname[256];
-#if GTK_MAJOR_VERSION >= 2
-    PangoFontDescription *font;
-#else
-    GdkFont *font;
-#endif
 
     settings_active=1;
     while(settings_active)
@@ -1298,25 +1367,8 @@ int Register_Window::SettingsDialog(void)
   }
 
   gtk_sheet_freeze(register_sheet);
-  range.row0=0;
-  range.rowi=sheet->maxrow;
-  range.col0=0;
-  range.coli=sheet->maxcol;
-  //gtk_sheet_range_set_font(sheet, &range, normalfont);
-
-  // FIXME - this code doesn't look right. 'i' iterates over both
-  // the columns and rows. If there are more rows then columns, then
-  // this code breaks.
-
-  for(i=0; i<=register_sheet->maxcol; i++){
-    gtk_sheet_set_column_width (register_sheet, i, column_width(i));
-    //gtk_sheet_set_row_height (register_sheet, i, row_height(i));
-  }
-
-  gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
-  gtk_sheet_set_column_titles_height(register_sheet, row_height(0));
+  UpdateStyle();
   gtk_sheet_thaw(register_sheet);
-
   gtk_widget_hide(dialog);
 
   return 0;
@@ -1799,7 +1851,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 }
 
 
-void Register_Window::Update(void)
+void Register_Window::Update()
 {
 
   int address;
@@ -1844,7 +1896,7 @@ void Register_Window::Update(void)
 }
 
 //------------------------------------------------------------------------
-void Register_Window::SetRegisterSize(void)
+void Register_Window::SetRegisterSize()
 {
   if(gp && gp->cpu)
     register_size = gp->cpu->register_size();
@@ -1864,8 +1916,8 @@ void Register_Window::SetRegisterSize(void)
     int i;
     char buffer[10];
 
+    // Column labels
     for(i=0; i<register_sheet->maxcol; i++){
-
       sprintf(buffer,"%02x",i);
       gtk_sheet_column_button_add_label(register_sheet, i, buffer);
       gtk_sheet_set_column_title(register_sheet, i, buffer);
@@ -1873,7 +1925,7 @@ void Register_Window::SetRegisterSize(void)
     }
 
 
-
+    // ASCII column
     i = REGISTERS_PER_ROW;
     sprintf(buffer,"ASCII");
     gtk_sheet_column_button_add_label(register_sheet, i, buffer);
@@ -1921,9 +1973,6 @@ GUIRegisterList::~GUIRegisterList() {
 //------------------------------------------------------------------------
 void Register_Window::NewProcessor(GUI_Processor *_gp)
 {
-
-
-#define NAME_SIZE 32
   gint i,j, border_mask, border_width;
   unsigned int reg_number;
   CrossReferenceToGUI *cross_reference;
@@ -1948,7 +1997,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   j=0;
   i=0;
 
-  gtk_sheet_set_row_height (register_sheet, j, row_height(i));
+  gtk_sheet_REALLY_set_row_height (register_sheet, j, row_height(i));
 
   SetRegisterSize();
 
@@ -1991,7 +2040,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
         if(register_sheet->maxrow<j)
         {
           gtk_sheet_add_row(register_sheet,1);
-          gtk_sheet_set_row_height (register_sheet, j, row_height(0));
+          gtk_sheet_REALLY_set_row_height (register_sheet, j, row_height(0));
         }
 
         sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
@@ -2008,14 +2057,18 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     gtk_sheet_delete_rows(register_sheet,j,register_sheet->maxrow-j);
 
   registers_loaded = 1;
-    
+
+  /*    
+  gtk_widget_modify_font(GTK_WIDGET(register_sheet),normalfont);
+
   range.row0=0;
   range.rowi=register_sheet->maxrow;
   range.col0=0;
   range.coli=register_sheet->maxcol;
 
-  //gtk_sheet_range_set_font(register_sheet, &range, normalfont);
-
+  gtk_sheet_range_set_font(register_sheet, &range, normalfont);
+  */
+  UpdateStyle();
   border_mask = GTK_SHEET_RIGHT_BORDER |
     GTK_SHEET_LEFT_BORDER |
     GTK_SHEET_BOTTOM_BORDER |
@@ -2065,7 +2118,7 @@ static int delete_event(GtkWidget *widget,
 //
 //
 
-void Register_Window::Build(void)
+void Register_Window::Build()
 {
 
   if(bIsBuilt)
@@ -2105,20 +2158,8 @@ void Register_Window::Build(void)
     register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [EEPROM]"));
     gtk_window_set_title(GTK_WINDOW(window), "register viewer [EEPROM]");
   }
-    
-  /// DEBUG ///
-  //#if defined(GTK_VERSION)
-#if 0
-  const char *gtk_version = GTK_VERSION;
-  if (gtk_version[0] == '2' && gtk_version[2] >= '6') {
-    gtk_sheet_hide_row_titles(register_sheet);
-    gtk_sheet_hide_column_titles(register_sheet);
-  }
-#endif
-  /// DEBUG ///
-
-  //  GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
-
+  //gtk_sheet_hide_column_titles(register_sheet);
+  //gtk_sheet_hide_row_titles(register_sheet);
   /* create popupmenu */
   popup_menu=build_menu(this);
 
@@ -2130,7 +2171,7 @@ void Register_Window::Build(void)
 
   /**************************** load fonts *********************************/
 #if GTK_MAJOR_VERSION >= 2
-#define DEFAULT_NORMALFONT "Courier Roman 14"
+#define DEFAULT_NORMALFONT "Monospace 10"
 #else
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
 #endif
@@ -2150,7 +2191,7 @@ void Register_Window::Build(void)
       SettingsDialog();
       }
   }
-
+  UpdateStyle();
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), this);
 
@@ -2233,7 +2274,7 @@ void Register_Window::Build(void)
 }
 
 //------------------------------------------------------------------------
-Register_Window::Register_Window(void)
+Register_Window::Register_Window()
 {
   register_sheet = NULL;
   printf("WARNING: calling default constructor: %s\n",__FUNCTION__);

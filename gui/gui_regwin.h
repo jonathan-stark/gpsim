@@ -64,15 +64,16 @@ class Register_Window : public GUI_Object
   int registers_loaded; // non zero when registers array is loaded
 
 
-  virtual void Build(void);
-  int LoadStyles(void);
-  int SettingsDialog(void);
-  void SetRegisterSize(void);
-  virtual void Update(void);
+  virtual void Build();
+  int LoadStyles();
+  int SettingsDialog();
+  void UpdateStyle();
+  void SetRegisterSize();
+  virtual void Update();
   virtual void UpdateASCII(int row);
-  virtual void UpdateLabel(void);
-  virtual void UpdateEntry(void);
-  virtual void UpdateLabelEntry(void);
+  virtual void UpdateLabel();
+  virtual void UpdateEntry();
+  virtual void UpdateLabelEntry();
   virtual void SelectRegister(Value *);
   virtual void SelectRegister(int reg_number);
   virtual void NewProcessor(GUI_Processor *gp);
@@ -83,13 +84,14 @@ class Register_Window : public GUI_Object
   int row_height(int row);
 
   Register_Window(GUI_Processor *gp);
-  Register_Window(void);
+  Register_Window();
 
  private:
   // Formatting
   int register_size;    // The size (in bytes) of a single register
   char *pCellFormat;    // dynamically created format string
   int char_width;       // nominal character width.
+  int char_height;      // nominal character height
   int chars_per_column; // width of 1 column
 };
 
@@ -100,7 +102,7 @@ class RAM_RegisterWindow : public Register_Window
  public:
   RAM_RegisterWindow(GUI_Processor *gp);
   virtual void NewProcessor(GUI_Processor *gp);
-  virtual void Update(void);
+  virtual void Update();
 
   StatusBar_Window *sbw;
 
