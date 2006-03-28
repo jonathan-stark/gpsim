@@ -1,3 +1,11 @@
+2006-03-28 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc, gui/gui_src.h: 
+	- If there are many source files, the notebook will now allow the
+	tabs to be scrolled.
+	- Source files are now only rendered whenever the page in which
+	they reside is brought into view. (Otherwise, large projects will
+	take a very long time to load).
+
 2006-03-27 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_watch.cc:
 	- Watch window was causing segv for the case when a watched

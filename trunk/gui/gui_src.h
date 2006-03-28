@@ -97,14 +97,18 @@ public:
 
   void addTagRange(TextStyle *,
 		   int start_index, int end_index);
-
-  GtkTextBuffer *m_buffer;
+  GtkTextBuffer *getBuffer();
   SourceBrowserParent_Window *m_pParent;
   FileContext   *m_pFC;
   eSourceFileType getSrcType();
   void setSrcType(eSourceFileType);
+
+  bool IsParsed();
+  void parse();
 private:
   eSourceFileType m_SourceFile_t;
+  bool m_bParsed;
+  GtkTextBuffer *m_buffer;
 };
 
 
@@ -149,22 +153,27 @@ private:
 class NSourcePage
 {
 public:
-  NSourcePage(SourceWindow *, FileContext   *, int file_id);
+  NSourcePage(SourceWindow *, SourceBuffer  *, int file_id, GtkWidget *);
 
-  GtkTextBuffer *buffer() { return m_pBuffer->m_buffer; }
+  GtkTextBuffer *buffer();
+  GtkTextView   *getView();
   void updateMargin(int y1, int y2);
 
   void Close(void);
   void setFont(const char *);
+  void setSource();
+  bool bHasSource();
+  
+  FileContext *getFC();
 
   unsigned int   m_fileid;
-  FileContext   *m_pFC;
-  GtkTextView   *m_view;
   SourceBuffer  *m_pBuffer;
   int            m_marginWidth;
 private:
   SourceWindow  *m_Parent;
   char          *m_cpFont;
+  GtkWidget     *m_pContainer;
+  GtkTextView   *m_view;
 };
 
 class SourceWindow : public GUI_Object
