@@ -554,7 +554,8 @@ SourcePageMargin::SourcePageMargin()
 SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
 			   SourceBrowserParent_Window *pParent)
 
-  :  m_pFC(pFC), m_pParent(pParent), m_SourceFile_t(eUnknownSource)
+  :  m_pFC(pFC), m_pParent(pParent), m_SourceFile_t(eUnknownSource),
+     m_bParsed(false)
 {
 
   assert(pTagTable);
@@ -601,6 +602,26 @@ void SourceBuffer::addTagRange(TextStyle *pStyle,
 		    this);
 }
 
+//------------------------------------------------------------------------
+bool SourceBuffer::IsParsed()
+{
+  return m_bParsed;
+}
+
+//------------------------------------------------------------------------
+void SourceBuffer::parse()
+{
+  if (IsParsed() || !m_pParent)
+    return;
+
+  m_pParent->parseSource(this, m_pFC);
+
+}
+GtkTextBuffer *SourceBuffer::getBuffer()
+{
+  parse();
+  return m_buffer;
+}
 
 //------------------------------------------------------------------------
 // 
@@ -655,13 +676,18 @@ void SourceBuffer::clearBreak(int line)
 
 
 //========================================================================
-NSourcePage::NSourcePage(SourceWindow *pParent, FileContext   *pFC, int file_id)
-  : m_Parent(pParent), m_view(0), m_pBuffer(0), m_marginWidth(0),
-    m_fileid(file_id), m_pFC(pFC),
-    m_cpFont(0)
+NSourcePage::NSourcePage(SourceWindow *pParent, SourceBuffer *pBuffer, 
+			 int file_id, GtkWidget *pContainer)
+  : m_Parent(pParent), m_view(0), m_pBuffer(pBuffer), m_marginWidth(0),
+    m_fileid(file_id), m_cpFont(0), m_pContainer(pContainer)
 {
 }
 
+
+GtkTextBuffer *NSourcePage::buffer() 
+{
+  return m_pBuffer ? m_pBuffer->getBuffer() : 0;
+}
 //------------------------------------------------------------------------
 SourceWindow::SourceWindow(GUI_Processor *pgp, 
 			   SourceBrowserParent_Window *pParent,
@@ -757,7 +783,7 @@ void SourceWindow::set_style_colors(const char *fg_color, const char *bg_color, 
 void SourceWindow::toggleBreak(NSourcePage *pPage, int line)
 {
   if (pma && pPage) {
-    int address = pma->find_address_from_line(pPage->m_pFC,line+1);
+    int address = pma->find_address_from_line(pPage->getFC(),line+1);
     if (address >= 0)
       pma->toggle_break_at_address(address);
 
@@ -831,7 +857,7 @@ void SourceWindow::Build()
 		      (gpointer) this);
 
   gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
-
+  gtk_notebook_set_scrollable ((GtkNotebook*)m_Notebook, TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), m_Notebook, TRUE, TRUE, 0);
 
   status_bar = new StatusBar_Window();
@@ -942,8 +968,10 @@ void SourceWindow::Update()
   if (m_Notebook) {
     gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
 
-    if (currPage>=0 && currPage < SBAW_NRFILES)
+    if (currPage>=0 && currPage < SBAW_NRFILES) {
+      pages[currPage]->setSource();
       pages[currPage]->setFont(m_pParent->getFont());
+    }
   }
 
   if(!gp || !pma || ! window)
@@ -970,10 +998,12 @@ void SourceWindow::UpdateLine(int address)
   gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
   NSourcePage *pPage = pages[currPage];
 
+  pPage->setSource();
+
   int currFileId = pma->get_file_id(address);
 
   
-  int line = (pPage->m_pFC->IsList()) ?
+  int line = (pPage->getFC()->IsList()) ?
     pma->getFromAddress(address)->get_lst_line() :
     pma->get_src_line(address);
 
@@ -983,13 +1013,13 @@ void SourceWindow::UpdateLine(int address)
 
   GtkTextIter iBegin;
   gtk_text_buffer_get_iter_at_line
-    (gtk_text_view_get_buffer(pPage->m_view),
+    (gtk_text_view_get_buffer(pPage->getView()),
      &iBegin,
      line);
 
   int y, h;
 
-  gtk_text_view_get_line_yrange (pPage->m_view,
+  gtk_text_view_get_line_yrange (pPage->getView(),
 				 &iBegin,
 				 &y,
 				 &h);
@@ -998,7 +1028,7 @@ void SourceWindow::UpdateLine(int address)
     GdkRectangle vRect;
 
     gtk_text_view_buffer_to_window_coords
-      (pPage->m_view,
+      (pPage->getView(),
        GTK_TEXT_WINDOW_LEFT,
        0,
        y,
@@ -1013,7 +1043,7 @@ void SourceWindow::UpdateLine(int address)
     Dprintf((" UpdateLine line=%d invalidating region %d,%d  %d,%d\n",line,0,y,vRect.width,h));
     // Send an expose event to repaint the whole margin
     gdk_window_invalidate_rect
-      (gtk_text_view_get_window (pPage->m_view, GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
+      (gtk_text_view_get_window (pPage->getView(), GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
   }
 
   return;
@@ -1028,13 +1058,13 @@ int SourceWindow::getPCLine(int page)
 
   NSourcePage *pPage = pages[page];
 
-  return (pPage->m_pFC->IsList()) ?
+  return (pPage->getFC()->IsList()) ?
     pma->getFromAddress(pma->get_PC())->get_lst_line() :
     pma->get_src_line(pma->get_PC());
 }
 int SourceWindow::getAddress(NSourcePage *pPage, int line)
 {
-  return pma->find_address_from_line(pPage->m_pFC,line);
+  return pma->find_address_from_line(pPage->getFC(),line);
 }
 bool SourceWindow::bAddressHasBreak(int address)
 {
@@ -1044,7 +1074,7 @@ int SourceWindow::getOpcode(int address)
 {
   return (address >= 0) ? gp->cpu->pma->get_opcode(address) : address;
 }
-
+//------------------------------------------------------------------------
 bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int opcode, bool bBreak)
 {
   if (str) {
@@ -1080,6 +1110,74 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
 
   return false;
 }
+//------------------------------------------------------------------------
+bool NSourcePage::bHasSource()
+{
+  return m_pBuffer != 0;
+}
+FileContext * NSourcePage::getFC()
+{
+  return m_pBuffer ? m_pBuffer->m_pFC : 0;
+}
+
+//------------------------------------------------------------------------
+GtkTextView *NSourcePage::getView()
+{
+  setSource();
+  return m_view;
+}
+
+//------------------------------------------------------------------------
+void NSourcePage::setSource()
+{
+  Dprintf((" \n"));
+
+  if (!m_pBuffer)
+    return;
+  Dprintf((" \n"));
+  if (m_view)
+    return;
+  Dprintf((" \n"));
+  if (!m_pContainer)
+    return;
+  Dprintf((" \n"));
+
+  m_view = (GtkTextView *)gtk_text_view_new_with_buffer(m_pBuffer->getBuffer());
+
+  gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (m_view),
+					GTK_TEXT_WINDOW_LEFT,
+					MARGIN_WIDTH);
+
+  PageMap[m_view] = this;
+
+  g_signal_connect(GTK_OBJECT(m_view),"key_press_event",
+		   (GtkSignalFunc) view_key_press,
+		   (gpointer) m_Parent);
+  g_signal_connect(GTK_OBJECT(m_view),"button_press_event",
+		   (GtkSignalFunc) view_button_press,
+		   (gpointer) m_Parent);
+  g_signal_connect(GTK_OBJECT(m_view),"expose_event",
+		   (GtkSignalFunc) view_expose,
+		   (gpointer) m_Parent);
+
+  GtkWidget *pSW = gtk_scrolled_window_new (0,0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
+				  GTK_POLICY_AUTOMATIC,
+				  GTK_POLICY_AUTOMATIC);
+
+  gtk_container_add (GTK_CONTAINER (m_pContainer), pSW);
+  gtk_container_add (GTK_CONTAINER (pSW), GTK_WIDGET(m_view));
+
+  gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
+  gtk_text_view_set_editable  (m_view, FALSE);
+
+  setFont(m_Parent->getFont());
+
+  gtk_widget_show_all(m_pContainer);
+
+}
+
+//------------------------------------------------------------------------
 void NSourcePage::updateMargin(int y1, int y2)
 {
 
@@ -1110,8 +1208,8 @@ void NSourcePage::updateMargin(int y1, int y2)
   gchar str [256];
   PangoLayout *layout=0;
   gint text_width=0;
-
-  gint addr_opcode = (m_pFC && !m_pFC->IsList()) ? 0x9999 : -1;
+  FileContext *pFC = getFC();
+  gint addr_opcode = (pFC && !pFC->IsList()) ? 0x9999 : -1;
   if ( m_Parent->margin().formatMargin(str, sizeof(str),
 				       MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
 				       addr_opcode, addr_opcode,false) ) {
@@ -1140,8 +1238,8 @@ void NSourcePage::updateMargin(int y1, int y2)
 					   NULL,
 					   &pos);
 
-    int address    = m_pFC && !m_pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
-    int opcode     = m_pFC && !m_pFC->IsList() ? m_Parent->getOpcode(address) : -1;
+    int address    = pFC && !pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
+    int opcode     = pFC && !pFC->IsList() ? m_Parent->getOpcode(address) : -1;
     bool bHasBreak = m_Parent->bAddressHasBreak(m_Parent->getAddress(this,line));
 
 
@@ -1207,9 +1305,10 @@ void NSourcePage::updateMargin(int y1, int y2)
   g_array_free (numbers, TRUE);
 
 }
+//------------------------------------------------------------------------
 void NSourcePage::setFont(const char *cp_newFont)
 {
-  if (cp_newFont) {
+  if (m_view && cp_newFont) {
 
     if (m_cpFont && strcmp(cp_newFont,m_cpFont)==0)
       return;
@@ -1243,6 +1342,9 @@ void SourceWindow::SetPC(int address)
     gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook)) :
     -1;
 
+  if (currPage>=0 && currPage < SBAW_NRFILES)
+    pages[currPage]->setSource();
+
   // Get the file id associated with the program counter address
   int sbawFileId  = pma->get_file_id(address);
   if(sbawFileId == 0xffffffff)
@@ -1251,7 +1353,7 @@ void SourceWindow::SetPC(int address)
   int id = -1;
   int PCline=-1;
 
-  if (currPage>=0  && pages[currPage]->m_pFC->IsList()) {
+  if (currPage>=0  && pages[currPage]->getFC()->IsList()) {
     // Don't automatically switch away from a page if it is a list file
     id = currPage;
     PCline = pma->getFromAddress(address)->get_lst_line();
@@ -1286,11 +1388,11 @@ void SourceWindow::SetPC(int address)
   mProgramCounter.line = PCline;
 
   // Get a pointer to text_view margin window.
-  GdkWindow *win = gtk_text_view_get_window (pages[id]->m_view, GTK_TEXT_WINDOW_LEFT);
+  GdkWindow *win = gtk_text_view_get_window (pages[id]->getView(), GTK_TEXT_WINDOW_LEFT);
   GdkRectangle PCloc;
 
   mProgramCounter.bIsActive = true;
-  mProgramCounter.pBuffer = pages[id]->m_pBuffer->m_buffer;
+  mProgramCounter.pBuffer = pages[id]->buffer();
   gtk_text_buffer_get_iter_at_line(mProgramCounter.pBuffer,
 				   &mProgramCounter.iBegin,
 				   PCline);
@@ -1298,12 +1400,12 @@ void SourceWindow::SetPC(int address)
   // Now we're going to check if the program counter is in view or not.
 
   // Get the program counter location
-  gtk_text_view_get_iter_location (pages[id]->m_view,
+  gtk_text_view_get_iter_location (pages[id]->getView(),
 				   &mProgramCounter.iBegin,
 				   &PCloc);
   // Get the viewable region of the text buffer. The region is in buffer coordinates.
   GdkRectangle vRect;
-  gtk_text_view_get_visible_rect  (pages[id]->m_view,
+  gtk_text_view_get_visible_rect  (pages[id]->getView(),
 				   &vRect);
 
   // Now normalize the program counter's location. If yloc is between
@@ -1313,12 +1415,12 @@ void SourceWindow::SetPC(int address)
   double yloc = (PCloc.y - vRect.y) / (double) (vRect.height);
 
   if ( yloc < 0.05  || yloc > 0.95 || bFirstUpdate) {
-    gtk_text_view_scroll_to_iter (pages[id]->m_view,
+    gtk_text_view_scroll_to_iter (pages[id]->getView(),
 				  &mProgramCounter.iBegin,
 				  0.0,
 				  TRUE,
 				  0.0, 0.3);
-    gtk_text_view_get_visible_rect  (pages[id]->m_view,
+    gtk_text_view_get_visible_rect  (pages[id]->getView(),
 				     &vRect);
 
   }
@@ -1464,48 +1566,17 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
 
   GtkWidget *pFrame = gtk_frame_new(NULL);
 
-  GtkWidget *pSW = gtk_scrolled_window_new (0,0);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
-				  GTK_POLICY_AUTOMATIC,
-				  GTK_POLICY_AUTOMATIC);
   gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),pFrame,label);
 
   int id = gtk_notebook_page_num(GTK_NOTEBOOK(m_Notebook),pFrame);
-  gtk_container_add (GTK_CONTAINER (pFrame), pSW);
     
   assert(id<SBAW_NRFILES && id >=0);
 
-  NSourcePage *page = new NSourcePage(this, pSourceBuffer->m_pFC, id);
+  NSourcePage *page = new NSourcePage(this, pSourceBuffer, id,pFrame);
 
   pages[id] = page;
-  
-  page->m_pBuffer = pSourceBuffer;
-  page->m_view   = (GtkTextView *)gtk_text_view_new_with_buffer(pSourceBuffer->m_buffer);
-  gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (page->m_view),
-					GTK_TEXT_WINDOW_LEFT,
-					MARGIN_WIDTH);
 
-  PageMap[page->m_view] = page;
-
-  g_signal_connect(GTK_OBJECT(page->m_view),"key_press_event",
-		   (GtkSignalFunc) view_key_press,
-		   (gpointer) this);
-  g_signal_connect(GTK_OBJECT(page->m_view),"button_press_event",
-		   (GtkSignalFunc) view_button_press,
-		   (gpointer) this);
-  g_signal_connect(GTK_OBJECT(page->m_view),"expose_event",
-		   (GtkSignalFunc) view_expose,
-		   (gpointer) this);
-
-
-  Dprintf(("AddPage  m_view=%p m_buffer=%p\n",page->m_view, pSourceBuffer->m_buffer));
-
-  gtk_container_add (GTK_CONTAINER (pSW), GTK_WIDGET(page->m_view));
-
-  gtk_text_view_set_wrap_mode (page->m_view, GTK_WRAP_NONE);
-  gtk_text_view_set_editable  (page->m_view, FALSE);
-
-  page->setFont(m_pParent->getFont());
+  //page->setSource();
 
   gtk_widget_show_all(pFrame);
 
