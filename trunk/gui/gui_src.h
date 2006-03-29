@@ -157,6 +157,7 @@ public:
 
   GtkTextBuffer *buffer();
   GtkTextView   *getView();
+  void invalidateView();
   void updateMargin(int y1, int y2);
 
   void Close(void);
