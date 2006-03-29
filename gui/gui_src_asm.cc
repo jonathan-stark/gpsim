@@ -614,7 +614,9 @@ void SourceBuffer::parse()
   if (IsParsed() || !m_pParent)
     return;
 
+  Dprintf(("parsing source buffer %s\n",m_pFC->name().c_str()));
   m_pParent->parseSource(this, m_pFC);
+  m_bParsed = true;
 
 }
 GtkTextBuffer *SourceBuffer::getBuffer()
@@ -808,12 +810,39 @@ static gint cb_notebook_switchpage (GtkNotebook     *notebook,
 }
 gint SourceWindow::switch_page_cb(guint newPage)
 {
+  Dprintf((" Switch page call back-- page=%d\n",newPage));
   if (m_currentPage != newPage) {
     m_currentPage = newPage;
-    Update();
+
+    NSourcePage *pPage = pages[m_currentPage];
+
+    if (!pPage)
+      return TRUE;
+
+    pPage->setSource();
+    pPage->invalidateView();
+
   }
   return TRUE;
 }
+//------------------------------------------------------------------------
+//
+void NSourcePage::invalidateView()
+{
+  if (m_view) {
+    GdkRectangle vRect;
+	  
+    vRect.x=0;
+    vRect.y=0;
+    vRect.width=100;
+    vRect.height=100;
+    gdk_window_invalidate_rect
+      (gtk_text_view_get_window (m_view, 
+				 GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
+  }
+
+}
+
 //------------------------------------------------------------------------
 // Build
 //
@@ -1134,13 +1163,14 @@ void NSourcePage::setSource()
 
   if (!m_pBuffer)
     return;
-  Dprintf((" \n"));
   if (m_view)
     return;
-  Dprintf((" \n"));
   if (!m_pContainer)
     return;
-  Dprintf((" \n"));
+
+  Dprintf(("SetSource fileid %d\n",m_fileid));
+
+  m_pBuffer->parse();
 
   m_view = (GtkTextView *)gtk_text_view_new_with_buffer(m_pBuffer->getBuffer());
 
@@ -1181,6 +1211,8 @@ void NSourcePage::setSource()
 void NSourcePage::updateMargin(int y1, int y2)
 {
 
+  Dprintf((" updateMargin y1=%d y2=%d\n",y1,y2));
+
   GtkTextView * text_view = m_view;
   GArray *numbers;
   GArray *pixels;
@@ -1190,7 +1222,16 @@ void NSourcePage::updateMargin(int y1, int y2)
 
   numbers = g_array_new (FALSE, FALSE, sizeof (gint));
   pixels = g_array_new (FALSE, FALSE, sizeof (gint));
-    
+
+  GdkWindow *win = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_LEFT);
+
+  if (y1 < 0) {
+    gint width;
+    y1 = 0;
+    gdk_window_get_size(win,&width,&y2);
+    Dprintf((" updateMargin updating whole margin y1=%d y2=%d\n",y1,y2));
+  }
+
   /* get the line numbers and y coordinates. */
   gtk_source_view_get_lines (text_view,
 			     y1,
@@ -1199,9 +1240,6 @@ void NSourcePage::updateMargin(int y1, int y2)
 			     numbers,
 			     &count);
 
-  Dprintf((" y1=%d y2=%d\n",y1,y2));
-
-  GdkWindow *win = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_LEFT);
 
 
   /* set size. */
@@ -4522,15 +4560,11 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
       int iNameLength = strlen(file_name);
 
       if(strcmp(file_name+iNameLength-4,".cod")
-        &&strcmp(file_name+iNameLength-4,".COD"))
-      {
+	 && strcmp(file_name+iNameLength-4,".COD")
+	 && (i < SBAW_NRFILES) ) 
+	ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
 
-	if (i < SBAW_NRFILES) {
-	  ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
-	  parseSource(ppSourceBuffers[i], fc);
-	}
-
-       } else {
+      else {
         if(verbose)
           printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
                   file_name);

@@ -1,4 +1,13 @@
 2006-03-28 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc, gui/gui_src.h:
+	Source files are now only parsed whenever they're brought into
+	view. (The previous commit parsed the source, but only placed it
+	into a gtk_text_view whenever the source was brought into view).
+	
+	* src/processor.cc: Config addresses in the .lst file were causing
+	a segv when the list file was processed.
+
+2006-03-28 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_src.h: 
 	- If there are many source files, the notebook will now allow the
 	tabs to be scrolled.

@@ -582,7 +582,7 @@ void Processor::read_src_files(void)
   if (files.list_id() >= 0) {
 
     // Parse the list file.
-    printf("read_src_files List file:%d %d\n",files.list_id(),files.nsrc_files());
+    //printf("read_src_files List file:%d %d\n",files.list_id(),files.nsrc_files());
 
     FileContext *fc = files[files.list_id()];
     if (!fc)
@@ -601,8 +601,10 @@ void Processor::read_src_files(void)
 
       if (sscanf(buf,"%x   %x",&address, &opcode) == 2) {
 	unsigned int uIndex = map_pm_address2index(address);
-	program_memory[uIndex]->update_line_number(-1,-1,line,-1,-1);
-	fc->put_address(line,address);
+	if (uIndex < program_memory_size()) {
+	  program_memory[uIndex]->update_line_number(-1,-1,line,-1,-1);
+	  fc->put_address(line,address);
+	}
       }
 
       line++;
