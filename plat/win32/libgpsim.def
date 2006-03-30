@@ -117,7 +117,7 @@ EXPORTS
     ??APortModule@@QAEAAVPinModule@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
     ??Emodule_symbol_iterator@Symbol_Table@@QAE?AV01@H@Z
-    ?Add@FileContextList@@QAEHPAD@Z
+    ?Add@FileContextList@@QAEHPBD@Z
     ?Add@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?AddModulePathFromFilePath@@YAXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?Clear@CSimulationContext@@QAEXXZ
@@ -318,6 +318,7 @@ EXPORTS
     ?findRegisterSymbol@Symbol_Table@@QAEPAVregister_symbol@@I@Z
     ?findRegisterSymbol@Symbol_Table@@QAEPAVregister_symbol@@II@Z
     ?findRegisterSymbol@Symbol_Table@@QAEPAVregister_symbol@@PBD@Z
+    ?findString@Symbol_Table@@QAEPAVString@@PBD@Z
     ?finish@Processor@@UAEXXZ
     ?finish@ProgramMemoryAccess@@UAEXXZ
     ?forceDrivenState@IOPIN@@UAEXD@Z
