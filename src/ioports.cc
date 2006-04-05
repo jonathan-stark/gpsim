@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
@@ -153,14 +153,28 @@ PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
 
 void PortRegister::setEnableMask(unsigned int newEnableMask)
 {
-  unsigned int maskDiff = getEnableMask() ^ newEnableMask;
+  //unsigned int maskDiff = getEnableMask() ^ newEnableMask;
+  unsigned int oldEnableMask = getEnableMask();
 
   for (unsigned int i=0, m=1; i<mNumIopins; i++, m<<= 1)
-    if (maskDiff & m) {
-      PinModule *pmP = new PinModule(this,i);
-      PortModule::addPinModule(pmP,i);
-      pmP->setDefaultSource(new SignalSource(this, i));
-      pmP->addSink(new PortSink(this, i));
+    if ((newEnableMask & m) && ! (oldEnableMask & m )) 
+    {
+      PinModule *pmP = PortModule::getIOpins(i); 
+      if (!pmP)
+      {
+          pmP = new PinModule(this,i);
+          PortModule::addPinModule(pmP,i);
+          pmP->setDefaultSource(new SignalSource(this, i));
+          pmP->addSink(new PortSink(this, i));
+      }
+      else
+      {
+        if (pmP->getSourceState() == '?')
+	{
+           pmP->setDefaultSource(new SignalSource(this, i));
+           pmP->addSink(new PortSink(this, i));
+	}
+      }
     }
 
   mEnableMask = newEnableMask;
@@ -174,7 +188,7 @@ void PortRegister::put(unsigned int new_value)
 }
 void PortRegister::put_value(unsigned int new_value)
 {
-  Dprintf(("PortRegister::put old=0x%x:new=0x%x\n",value.data,new_value));
+  Dprintf(("PortRegister::put_value old=0x%x:new=0x%x\n",value.data,new_value));
 
   unsigned int diff = mEnableMask & (new_value ^ value.data);
   drivingValue = new_value & mEnableMask;
@@ -215,7 +229,7 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
     trace.raw(write_trace.get()  | value.data);
     trace.raw(write_trace.geti() | value.init);
 
-    Dprintf(("PortRegister::setbit() bit=%d,val=%c\n",bit_number,new3State));
+    Dprintf(("PortRegister::setbit() %s bit=%d,val=%c\n",name().c_str(), bit_number,new3State));
 
     if (new3State=='1' || new3State=='W') {
       rvDrivenValue.data |= (1<<bit_number);
@@ -280,6 +294,16 @@ PinModule &PortModule::operator [] (unsigned int iPinNumber)
 
   // error...
   return AnInvalidPinModule;
+}
+
+PinModule * PortModule::getIOpins(unsigned int iPinNumber)
+{
+
+  if (iPinNumber < mNumIopins && iopins[iPinNumber] != &AnInvalidPinModule)
+    return iopins[iPinNumber];
+
+  // error...
+  return (PinModule *)0;
 }
 
 
@@ -432,6 +456,8 @@ void PinModule::setDefaultControl(SignalControl *newDefaultControl)
     m_defaultControl = newDefaultControl;
     setControl(m_defaultControl);
   }
+  else
+	delete newDefaultControl;
 }
 void PinModule::setControl(SignalControl *newControl)
 {

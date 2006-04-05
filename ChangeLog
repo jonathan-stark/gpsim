@@ -1,3 +1,19 @@
+2006-04-05 Roy Rankin <rrankin@ihug.com.au>
+	* src/ioports.h src/ioports.cc : Fix setEnableMask() so it works 
+	  when pin is already added. Stop memory leak in newDefaultControl().
+	* src/pic-ioports.cc: setTris() can be run multiple times.
+	* src/p16f62x.cc src/cod.cc: Correct error in Oscillator configuration 
+	  bit processing. Pins 5, 6 and 7 of port A may be I/O depending on 
+	  configuration bits. Pin names changed depending on configuration 
+	  bits.
+	* src/p16x6x.cc: Bit 5 of port A is I/O for all of 16X6x family 
+	  p16x63 and higher.
+	* src/eeprom.h src/eeprom.cc src/p16f87x.cc: fix bugs in writing to 
+	  EEPROM and added FLASH program writing using wide mode (p16f87x).
+	* regression/run_regression.sh: add directory regression/eeprom_wide
+	  with files Makefile, 16f873.lkr, eedate_wide.asm and eeprom_wide.stc
+	  for regression testing of EEPROM and FLASH single byte wide 
+	  read-write operations.
 2006-03-28 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_src.h:
 	Source files are now only parsed whenever they're brought into

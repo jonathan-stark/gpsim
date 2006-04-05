@@ -225,6 +225,10 @@ void P16X6X_processor::create_sfr_map()
 
   Pic14Bit::create_sfr_map();
 
+  // P16x63 and higher have porta5
+  m_porta->setEnableMask(0x3f);
+  m_porta->setTris(m_trisa);
+
   // The 16c62,c64 have general purpose registers
   // at addresses 20-7f and a0-bf
   add_file_registers(0x20, 0x7f, 0);

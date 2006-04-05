@@ -39,13 +39,16 @@ ${RT} p16f84 sim
 ${RT} p18f452_ports sim
 
 #${RT} p16f628 p16f628
-#${RT} p16f873 p16f873
+
+#${RT} p16f873 sim
 
 ${RT} digital_stim sim
 
 ${RT} register_stim sim
 
 ${RT} p12ce518 sim
+
+${RT} eeprom_wide sim
 
 ${RT} interrupts_14bit sim
 

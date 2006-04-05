@@ -118,14 +118,14 @@ private:
 
 void PicPortRegister::setTris(PicTrisRegister *new_tris)
 {
-  if (!m_tris) {
+  if (!m_tris)
     m_tris = new_tris;
 
-    for (unsigned int i=0; i<mNumIopins; i++) {
-      operator[](i).setDefaultControl(new PicSignalControl(m_tris, i));
+    unsigned int mask = getEnableMask();
+    for (unsigned int i=0, m = 1; i<mNumIopins; i++, m <<= 1) {
+      if (mask & m)
+          operator[](i).setDefaultControl(new PicSignalControl(m_tris, i));
     }
-
-  }
 }
 //------------------------------------------------------------------------
 

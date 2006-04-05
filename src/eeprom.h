@@ -232,7 +232,7 @@ public:
 };
 
 
-class EEPROM_WIDE : public EEPROM
+class EEPROM_WIDE : public EEPROM_PIR
 {
 public:
 

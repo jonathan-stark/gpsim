@@ -230,6 +230,8 @@ public:
 
   PinModule &operator [] (unsigned int pin_number);
 
+  PinModule * getIOpins(unsigned int pin_number);
+
 protected:
   unsigned int mNumIopins;
 
