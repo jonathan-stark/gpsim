@@ -1,6 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
+		 2006 Roy Rankin
 
 This file is part of gpsim.
 
@@ -511,8 +512,7 @@ void EEPROM_WIDE::callback(void)
     if(eecon1.value.get() & EECON1::EEPGD) {
       // read program memory
       
-      int opcode = cpu->pma->get_opcode(eeadr.value.get() | (eeadrh.value.get() << 8));
-      //cout << "read " << i << " from program memory\n";
+      int opcode = cpu->pma->get_opcode(rd_adr);
       eedata.value.put(opcode & 0xff);
       eedatah.value.put((opcode>>8) & 0xff);
 
@@ -522,13 +522,23 @@ void EEPROM_WIDE::callback(void)
 
     eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
     break;
-  case EECON2::EEREADY_FOR_WRITE:
+
+  case EECON2::EEWRITE_IN_PROGRESS:
     //cout << "eewrite\n";
 
-    if(wr_adr < rom_size)
-      rom[wr_adr]->value.put(wr_data);
-    else
-      cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
+    if(eecon1.value.get() & EECON1::EEPGD) // write program memory
+    {
+	cpu->init_program_memory_at_index(wr_adr, wr_data);
+    }
+    else				  // read eeprom memory
+    {
+        if(wr_adr < rom_size)
+	{
+           rom[wr_adr]->value.put(wr_data);
+	}
+        else
+           cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
+    }
 
     write_is_complete();
 
@@ -538,9 +548,8 @@ void EEPROM_WIDE::callback(void)
       eecon2.unarm();
     break;
 
-    eecon1.value.put(eecon1.value.get() & (~EECON1::WR));
   default:
-    cout << "EEPROM::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
+    cout << "EEPROM_WIDE::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
   }
 }
 

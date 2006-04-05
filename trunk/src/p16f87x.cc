@@ -124,6 +124,14 @@ void P16F871::create(void)
 
   P16C74::create();
 
+  EEPROM_WIDE *e;
+  e = new EEPROM_WIDE;
+  e->set_cpu(this);
+  e->initialize(128);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon_reg);
+  set_eeprom_wide(e);
+
   status->rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
   indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
@@ -143,18 +151,9 @@ Processor * P16F871::construct(void)
 {
 
   P16F871 *p = new P16F871;
-  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f871 construct\n";
-
-  e = new EEPROM_WIDE;
-  e->set_cpu(p);
-  e->initialize(64);
-  e->set_intcon(&p->intcon_reg);
-
-  // assign the eeprom to the processor
-  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();
@@ -275,6 +274,14 @@ void P16F873::create(void)
 
   P16C73::create();
 
+  EEPROM_WIDE *e;
+  e = new EEPROM_WIDE;
+  e->set_cpu(this);
+  e->initialize(128);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon_reg);
+  set_eeprom_wide(e);
+
   status->rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
   indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
@@ -290,20 +297,11 @@ Processor * P16F873::construct(void)
 {
 
   P16F873 *p = new P16F873;
-  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f873 construct\n";
 
   p->new_name("p16f873");
-
-  e = new EEPROM_WIDE;
-  e->set_cpu(p);
-  e->initialize(128);
-  e->set_intcon(&p->intcon_reg);
-
-  // assign the eeprom to the processor
-  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();
@@ -338,18 +336,11 @@ Processor * P16F876::construct(void)
 {
 
   P16F876 *p = new P16F876;
-  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f876 construct\n";
 
   p->new_name("p16f876");
-
-  e = new EEPROM_WIDE;
-  e->set_cpu(p);
-  e->initialize(256);
-  e->set_intcon(&p->intcon_reg);
-  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();
@@ -378,6 +369,15 @@ void P16F876::create(void)
     cout << " f876 create \n";
 
   P16F873::create();
+
+  EEPROM_WIDE *e;
+  e = new EEPROM_WIDE;
+  e->set_cpu(this);
+  e->initialize(128);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon_reg);
+  set_eeprom_wide(e);
+
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
   delete_file_registers(0xf0,0xff);
@@ -488,6 +488,14 @@ void P16F874::create(void)
 
   P16C74::create();
 
+  EEPROM_WIDE *e;
+  e = new EEPROM_WIDE;
+  e->set_cpu(this);
+  e->initialize(128);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon_reg);
+  set_eeprom_wide(e);
+
   status->rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
   indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
@@ -503,20 +511,12 @@ Processor * P16F874::construct(void)
 {
 
   P16F874 *p = new P16F874;
-  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f874 construct\n";
 
   p->new_name("p16f874");
 
-  e = new EEPROM_WIDE;
-  e->set_cpu(p);
-  e->initialize(128);
-  e->set_intcon(&p->intcon_reg);
-
-  // assign the eeprom to the processor
-  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();
@@ -560,6 +560,15 @@ void P16F877::create(void)
     cout << " f877 create \n";
 
   P16F874::create();
+
+  EEPROM_WIDE *e;
+  e = new EEPROM_WIDE;
+  e->set_cpu(this);
+  e->initialize(128);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon_reg);
+  set_eeprom_wide(e);
+
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
   delete_file_registers(0xf0,0xff);
@@ -581,13 +590,8 @@ Processor * P16F877::construct(void)
 
   if(verbose)
     cout << " f877 construct\n";
-  p->new_name("p16f877");
 
-  EEPROM_WIDE *e = new EEPROM_WIDE;
-  e->set_cpu(p);
-  e->initialize(256);
-  e->set_intcon(&p->intcon_reg);
-  p->set_eeprom_wide(e);
+  p->new_name("p16f877");
 
   p->create();
   p->create_invalid_registers ();
