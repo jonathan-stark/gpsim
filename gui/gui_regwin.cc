@@ -1075,27 +1075,33 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 }
 
 //------------------------------------------------------------------------
+// int column_width(int col)
+//
+// Return the width of one of the register sheet columns. 
+//
+// Column = -1 is the row label
+// Columns 0-REGISTERS_PER_ROW are ram/registers
+// Column REGISTERS_PER_ROW is an ASCII string of the row data.
+//
+// The width of the column is based on width of a single character,
+// char_width. This width is depends on the font and is computed in
+// LoadStyles()
+//
+// FIXME: column_width assumes there are fewer than 0x1000 registers.
 int Register_Window::column_width(int col)
 {
-  PangoLayout *layout=0;
-  /*
-    layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
-
-    pango_layout_get_pixel_size (layout, &text_width, NULL);
-    text_width+=2;
-  */
-  int esthetic_padding = 6;   // pixels 
-
   if(!char_width)
     return 0;
 
+  // Row Labels
   if(col < 0)
     return char_width * 3;
 
+  // Register data
   if(col < REGISTERS_PER_ROW)
-    return char_width * chars_per_column; // + esthetic_padding;
+    return char_width * chars_per_column;
 
-  //return char_width * (REGISTERS_PER_ROW + 4) + esthetic_padding;
+  // ASCII column
   return char_width * (REGISTERS_PER_ROW + 1) + char_width/2;
 }
 
@@ -1873,6 +1879,7 @@ void Register_Window::Update()
   }
 
 
+  gtk_sheet_freeze(register_sheet);
   for(j = 0; j<=GTK_SHEET(register_sheet)->maxrow; j++) {
 
     if(row_to_address[j]==-1)
@@ -1893,6 +1900,9 @@ void Register_Window::Update()
     if(bRowChanged)
       UpdateASCII(j);
   }
+
+  gtk_sheet_thaw(register_sheet);
+
 }
 
 //------------------------------------------------------------------------
@@ -2058,18 +2068,11 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   registers_loaded = 1;
 
-  /*    
-  gtk_widget_modify_font(GTK_WIDGET(register_sheet),normalfont);
-  */
-
   range.row0=0;
   range.rowi=register_sheet->maxrow;
   range.col0=0;
   range.coli=register_sheet->maxcol;
 
-  /*
-  gtk_sheet_range_set_font(register_sheet, &range, normalfont);
-  */
   UpdateStyle();
   border_mask = GTK_SHEET_RIGHT_BORDER |
     GTK_SHEET_LEFT_BORDER |
@@ -2088,10 +2091,11 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   gtk_sheet_range_set_border(register_sheet, &range, border_mask, border_width, 0);
 
+  gtk_sheet_thaw(register_sheet);
+
   // set values in the sheet
   Update();
 
-  gtk_sheet_thaw(register_sheet);
     
   SelectRegister(0);
 
