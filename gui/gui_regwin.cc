@@ -1096,7 +1096,7 @@ int Register_Window::column_width(int col)
     return char_width * chars_per_column; // + esthetic_padding;
 
   //return char_width * (REGISTERS_PER_ROW + 4) + esthetic_padding;
-  return char_width * REGISTERS_PER_ROW;
+  return char_width * (REGISTERS_PER_ROW + 1) + char_width/2;
 }
 
 //------------------------------------------------------------------------
@@ -1709,7 +1709,7 @@ void Register_Window::UpdateASCII(gint row)
 
     name[i] = registers->Get(row_to_address[row] + i)->get_shadow().data;
 
-    if( (name[i] < ' ') || (name[i]>'z'))
+    if( (name[i] < ' ') || (name[i]>'~'))
       name[i] = '.';
 
   }
@@ -2060,12 +2060,14 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   /*    
   gtk_widget_modify_font(GTK_WIDGET(register_sheet),normalfont);
+  */
 
   range.row0=0;
   range.rowi=register_sheet->maxrow;
   range.col0=0;
   range.coli=register_sheet->maxcol;
 
+  /*
   gtk_sheet_range_set_font(register_sheet, &range, normalfont);
   */
   UpdateStyle();
