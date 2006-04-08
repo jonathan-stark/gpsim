@@ -498,14 +498,6 @@ void P16F876::create(void)
 
   P16F873::create();
 
-  EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
-  e->set_cpu(this);
-  e->initialize(128);
-  e->set_pir_set(get_pir_set());
-  e->set_intcon(&intcon_reg);
-  set_eeprom_wide(e);
-
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
   delete_file_registers(0xf0,0xff);
@@ -567,14 +559,6 @@ void P16F876A::create(void)
     cout << " f876A create \n";
 
   P16F873A::create();
-
-  EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
-  e->set_cpu(this);
-  e->initialize(128);
-  e->set_pir_set(get_pir_set());
-  e->set_intcon(&intcon_reg);
-  set_eeprom_wide(e);
 
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
@@ -900,14 +884,6 @@ void P16F877::create(void)
 
   P16F874::create();
 
-  EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
-  e->set_cpu(this);
-  e->initialize(128);
-  e->set_pir_set(get_pir_set());
-  e->set_intcon(&intcon_reg);
-  set_eeprom_wide(e);
-
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
   delete_file_registers(0xf0,0xff);
@@ -971,14 +947,6 @@ void P16F877A::create(void)
     cout << " f877A create \n";
 
   P16F874A::create();
-
-  EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
-  e->set_cpu(this);
-  e->initialize(128);
-  e->set_pir_set(get_pir_set());
-  e->set_intcon(&intcon_reg);
-  set_eeprom_wide(e);
 
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
