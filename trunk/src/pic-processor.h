@@ -77,9 +77,13 @@ enum PROCESSOR_TYPE
   _P16C74_,
   _P16F871_,
   _P16F873_,
+  _P16F873A_,
   _P16F874_,
+  _P16F874A_,
   _P16F876_,
+  _P16F876A_,
   _P16F877_,
+  _P16F877A_,
   _P17C7xx_,
   _P17C75x_,
   _P17C752_,
@@ -198,7 +202,6 @@ class pic_processor : public Processor
 public:
 
   #define FILE_REGISTERS  0x100
-  #define DEFAULT_PIC_CLOCK 4000000
 
 
   unsigned int config_word;      // as read from hex or cod file
