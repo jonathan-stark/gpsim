@@ -169,7 +169,7 @@ Processor * CSimulationContext::add_processor(Processor *p)
     trace.switch_cpus(p);
     // Tell the gui or any modules that are interfaced to gpsim
     // that a new processor has been declared.
-    //gi.new_processor(p); // Moved to after reading configuration word
+    gi.new_processor(p);
 
     return p;
 
