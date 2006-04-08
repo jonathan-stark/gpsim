@@ -398,6 +398,7 @@ public:
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get(void);
   virtual unsigned int get_value(void);
+  virtual void reset(RESET_TYPE r);
 
   PCL(void);
 };
