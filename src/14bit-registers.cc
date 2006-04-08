@@ -424,6 +424,15 @@ unsigned int PCL::get_value(void)
   value.put(cpu_pic->pc->get_value() & 0xff);
   return(value.get());
 }
+//------------------------------------------------------------
+// PCL reset
+// 
+void PCL::reset(RESET_TYPE r)
+{
+  trace.raw(write_trace.get() | value.get());
+  putRV_notrace(por_value);
+}
+
 //--------------------------------------------------
 // member functions for the PCLATH base class
 //--------------------------------------------------
