@@ -1082,7 +1082,6 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
   ccpu->set_config_word(ccpu->config_word_address(),0xffff);
 
   read_hex_from_cod(ccpu);
-  gi.new_processor(ccpu);	// Configuration data may effect graphic
 
   ccpu->files.SetSourcePath(filename);
   read_src_files_from_cod(ccpu);
