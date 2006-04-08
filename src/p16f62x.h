@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"
 
 #include "eeprom.h"
+#include "comparator.h"
 
 /***************************************************************************
  *
@@ -35,62 +36,6 @@ Boston, MA 02111-1307, USA.  */
  * 
  *
  ***************************************************************************/
-
-class CMCON : public sfr_register
-{
- public:
-
-
-  enum CMCON_bits
-    {
-      CM0 = 1<<0,
-      CM1 = 1<<1,
-      CM2 = 1<<2,
-      CIS = 1<<3,
-      C1INV = 1<<4,
-      C2INV = 1<<5,
-      C1OUT = 1<<6,
-      C2OUT = 1<<7,
-    };
-
-  bool enabled(void) { return ((value.get() & (CM0|CM1|CM2)) != (CM0|CM1|CM2)); };
-
-  CMCON(void);
-};
-
-class VRCON : public sfr_register
-{
- public:
-
-
-  enum VRCON_bits
-    {
-      VR0 = 1<<0,
-      VR1 = 1<<1,
-      VR2 = 1<<2,
-      VR3 = 1<<3,
-
-      VRR = 1<<5,
-      VROE = 1<<6,
-      VREN = 1<<7
-    };
-
-  VRCON(void);
-};
-
-class COMPARATOR_MODULE
-{
- public:
-
-  IOPORT *comparator_port;
-
-  CMCON cmcon;
-  VRCON vrcon;
-
-  bool enabled(void) { return cmcon.enabled(); };
-
-};
-
 
 class P16F62x : public P16X6X_processor
 {

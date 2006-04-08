@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x7x.h"
 
 #include "eeprom.h"
+#include "comparator.h"
 
 class IOPORT;
 
@@ -89,6 +90,19 @@ class P16F873 : public P16C73
 
 };
 
+class P16F873A : public P16F873
+{
+ public:
+ COMPARATOR_MODULE comparator;
+  virtual PROCESSOR_TYPE isa(void){return _P16F873A_;};
+//  virtual void create_symbols(void);
+  void create_sfr_map(void);
+  void create(void);
+
+  P16F873A(void);
+  static Processor *construct(void);
+};
+
 
 class P16F876 : public P16F873
 {
@@ -104,10 +118,26 @@ class P16F876 : public P16F873
   static Processor *construct(void);
 };
 
+class P16F876A : public P16F873A
+{
+ public:
+ COMPARATOR_MODULE comparator;
+  virtual PROCESSOR_TYPE isa(void){return _P16F876A_;};
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+//  virtual void create_symbols(void);
+  void create_sfr_map(void);
+  void create(void);
+  virtual unsigned int register_memory_size () const { return 0x200;};
+
+  P16F876A(void);
+  static Processor *construct(void);
+};
+
 
 class P16F874 : public P16C74
 {
  public:
+ COMPARATOR_MODULE comparator;
   ADRES  adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
@@ -142,6 +172,48 @@ class P16F877 : public P16F874
   void create(void);
 
   P16F877(void);
+  static Processor *construct(void);
+};
+
+class P16F874A : public P16C74
+{
+ public:
+ COMPARATOR_MODULE comparator;
+  ADRES  adresl;
+
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+
+  virtual PROCESSOR_TYPE isa(void){return _P16F874A_;};
+  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+  void create(void);
+  virtual unsigned int register_memory_size () const { return 0x200;};
+
+  P16F874A(void);
+  static Processor *construct(void);
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // use set_eeprom_wide as P16F873 expect a wide EEPROM
+    assert(0);
+  }
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
+};
+
+class P16F877A : public P16F874A
+{
+ public:
+ COMPARATOR_MODULE comparator;
+  virtual PROCESSOR_TYPE isa(void){return _P16F877A_;};
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+  void create(void);
+
+  P16F877A(void);
   static Processor *construct(void);
 };
 

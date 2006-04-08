@@ -93,6 +93,14 @@ void PIR1v1::clear_rcif(void)
   value.put(value.get() & ~RCIF);
 }
 
+void PIR1v1::set_cmif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | CMIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
+
 void PIR1v2::clear_sspif(void)
 {
   trace.raw(write_trace.get() | value.get());

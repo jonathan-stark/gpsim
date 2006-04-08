@@ -24,6 +24,7 @@ libgpsim_la_SOURCES = \
 	bytelog.cc \
 	breakpoints.cc \
 	cod.cc \
+	comparator.cc \
 	cmd_manager.cc \
 	eeprom.cc \
 	errors.cc \
@@ -95,6 +96,7 @@ gpsiminclude_HEADERS = \
 	cmd_gpsim.h \
 	cmd_manager.h \
 	cod.h \
+	comparator.h \
 	eeprom.h \
 	exports.h \
 	hexutils.h \

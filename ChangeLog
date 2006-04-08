@@ -1,3 +1,16 @@
+2006-04-08 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.h src/pic-processor.cc src/p16f87x.h
+	  p16f87x.cc: Add support for p16f87xA which are p16f87x
+	  with 2 comparators and vref.
+	* src/p16f62x.h src/p16f62x.cc src/Makefile.am src/pir.cc src/pir.h: 
+	  new files src/comparator.h src/comparator.cc 
+	  to add comparator and vref functions.
+	* new directory regression/comparator with new files 
+	  compar_628.asm compar_628.stc compar_877a.asm 
+	  compar_877a.stc compar_873a.asm compar_873a.stc
+	  Makefile 16f628.lkr 16f877a.lkr 16f873.lkr 
+	  for comparator regression tests.
+	* regression/run_regression.sh: invoke comparator regression tests
 2006-04-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/ioports.h src/ioports.cc : Fix setEnableMask() so it works 
 	  when pin is already added. Stop memory leak in newDefaultControl().

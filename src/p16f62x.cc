@@ -41,17 +41,6 @@ Boston, MA 02111-1307, USA.  */
 #include "packages.h"
 #include "symbol.h"
 
-CMCON::CMCON(void)
-{
-  value.put(0);
-}
-
-VRCON::VRCON(void)
-{
-  value.put(0);
-}
-
-
 void P16F62x::create_iopin_map(void)
 {
   package = new Package(18);
@@ -131,14 +120,15 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
   //1usart.initialize_14(this,get_pir_set(),portb,1);
 
-  add_sfr_register(&comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
-  add_sfr_register(&comparator.vrcon, 0x9f, RegisterValue(0,0),"vrcon");
-
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
 
-  // Link the comparator and porta
-  //1((PORTA_62x*)porta)->comparator = &comparator;
+  // Link the comparator and voltage ref to porta
+  comparator.initialize(get_pir_set(), &(*m_porta)[2], &(*m_porta)[0], 
+	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[4]);
+
+  add_sfr_register(comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
+  add_sfr_register(&comparator.vrcon, 0x9f, RegisterValue(0,0),"vrcon");
 
   // Link ccp1 and portb
   //1((PORTB_62x*)portb)->ccp1con = &ccp1con;
