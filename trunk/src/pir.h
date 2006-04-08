@@ -116,10 +116,7 @@ enum
       put(get() | RCIF);
     }
 
-  inline void set_cmif(void)
-    {
-      put(get() | CMIF);
-    }
+  void set_cmif(void);
 
   inline void set_eeif(void)
     {
@@ -309,11 +306,6 @@ enum
   void set_eeif(void)
     {
       put(get() | EEIF);
-    }
-
-  void set_cmif(void)
-    {
-      put(get() | CMIF);
     }
 
   PIR2v2(void)
@@ -512,6 +504,12 @@ class PIR_SET_1 : public PIR_SET
   virtual void set_tmr2if(void) {
     assert(pir1 != 0);
     pir1->set_tmr2if();
+  }
+
+  // Comparator
+  virtual void set_cmif(void) {
+    assert(pir1 != 0);
+    pir1->set_cmif();
   }
 
   // private:

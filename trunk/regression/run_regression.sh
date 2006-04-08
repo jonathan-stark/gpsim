@@ -67,3 +67,6 @@ ${RT} tmr0_16bit sim
 ${RT} switch_test sim
 
 ${RT} p18f sim
+
+${RT} comparator sim
+
