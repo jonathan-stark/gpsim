@@ -1,3 +1,7 @@
+2006-04-08 Scott Dattalo <scott@dattalo.com>
+	* INSTALL: re-instated - somehow it got wiped out on 04-05
+	* ltconfig, missing, mkinstalldirs, stamp-h.in: removed from CVS.
+
 2006-04-08 Roy Rankin <rrankin@ihug.com.au>
 	* src/cod.cc src/sim_context.cc: backout Pin names changing in
 	  2006-04-05 patch until better method can be found.
@@ -34,7 +38,17 @@
 	  with files Makefile, 16f873.lkr, eedate_wide.asm and eeprom_wide.stc
 	  for regression testing of EEPROM and FLASH single byte wide 
 	  read-write operations.
-2006-03-28 Scott Dattalo <scott@dattalo.com>
+
+2006-03-30 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_regwin.cc: In 03-27 changes, a variable initialization
+	got commented out and caused a segv on some systems
+	
+2006-03-30 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-registers.h, src/14bit-registers.cc: Resetting the
+	program counter low register (PCL) was causing the cycle counter
+	to advance by one.
+
+2006-03-29 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_src.h:
 	Source files are now only parsed whenever they're brought into
 	view. (The previous commit parsed the source, but only placed it
