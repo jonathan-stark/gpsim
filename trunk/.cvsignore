@@ -11,3 +11,6 @@ stamp-h
 *.obj
 *.sbr
 *.o
+install-sh
+missing
+mkinstalldirs
