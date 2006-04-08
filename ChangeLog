@@ -1,4 +1,11 @@
 2006-04-08 Roy Rankin <rrankin@ihug.com.au>
+	* src/cod.cc src/sim_context.cc: backout Pin names changing in
+	  2006-04-05 patch until better method can be found.
+	* gui/gui_regwin.cc: fix core dump of ram window and ascii part of
+	  register windows not showing all characters.
+	* src/p16f87x.cc: fix eeprom being initialized twice for most 
+	  p16f87x processors.
+2006-04-08 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.h src/pic-processor.cc src/p16f87x.h
 	  p16f87x.cc: Add support for p16f87xA which are p16f87x
 	  with 2 comparators and vref.
