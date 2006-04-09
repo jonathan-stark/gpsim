@@ -369,11 +369,10 @@ void ColorButton::cancel()
 MarginButton::MarginButton(GtkWidget *pParent, const char *pName,
 			   eMarginType id,
 			   SourceBrowserPreferences *prefs)
-  : m_id(id), m_prefs(prefs)
-
+  : m_prefs(prefs), m_id(id)
 {
   m_button = gtk_check_button_new_with_label (pName);
-  bool bState;
+  bool bState = false;
   switch (m_id) {
   case eLineNumbers:
     bState = m_prefs->margin().bLineNumbers();
@@ -422,7 +421,7 @@ void MarginButton::set_active()
 TabButton::TabButton(GtkWidget *pParent, GtkWidget *pButton,
 		     int id,
 		     SourceBrowserPreferences *prefs)
-  : m_id(id), m_button(pButton), m_prefs(prefs)
+  : m_button(pButton), m_prefs(prefs), m_id(id)
 {
   gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 5);
 
@@ -486,6 +485,7 @@ void FontSelection::setFont()
 }
 
 //------------------------------------------------------------------------
+#if 0 // defined but not used
 static bool isButtonEvent (GdkEventType type)
 {
   return 
@@ -495,6 +495,7 @@ static bool isButtonEvent (GdkEventType type)
     type == GDK_BUTTON_RELEASE;
 
 }
+
 static gboolean    TagEvent  (GtkTextTag *texttag,
 		       GObject *arg1,
 		       GdkEvent *event,
@@ -521,6 +522,7 @@ static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescri
 				      const char *fontName  )
 {
 }
+#endif
 
 
 void SourceBrowserPreferences::toggleBreak(int line)
@@ -633,9 +635,6 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   }
 
   {
-
-    PangoFontDescription *font_desc;
-
     SourceBuffer *pBuffer = new SourceBuffer (m_pParent->getTagTable(),0,m_pParent);
 
 
@@ -751,9 +750,6 @@ gpsimGuiPreferences::gpsimGuiPreferences()
 
   m_SourceBrowser = new SourceBrowserPreferences(vbox);
   gtk_widget_show_all(vbox);
-
-  GtkWidget *label;
-  GtkWidget *vbox2;
 
 
   // Cancel and Apply buttons

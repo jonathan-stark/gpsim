@@ -133,7 +133,7 @@ bool INTCON_14_PIR::check_peripheral_interrupt()
 //
 //----------------------------------------------------------------------
 INTCON_16::INTCON_16()
-  : rcon(0), intcon2(0), interrupt_vector(0)
+  : interrupt_vector(0), rcon(0), intcon2(0)
 {
 
 }

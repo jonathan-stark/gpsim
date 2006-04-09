@@ -128,7 +128,7 @@ WatchEntry::WatchEntry()
 }
 //========================================================================
 ColumnData::ColumnData()
-  : ww(0),isVisible(1), bIsValid(true)
+  : isVisible(1), bIsValid(true), ww(0)
 {
 }
 
@@ -881,7 +881,6 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
       config_set_variable(name(),watch_titles[i],1);
   }
 
-#ifndef WIN32
   { 
     // Fix a db error in previous versions of gpsim
     int j;
@@ -891,7 +890,6 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
     const int hexIndex=3;
     config_set_variable(name(),watch_titles[hexIndex],coldata[hexIndex].isVisible);
   }
-#endif
 
   if(enabled)
     Build();

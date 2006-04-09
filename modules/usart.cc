@@ -524,7 +524,7 @@ private:
 //------------------------------------------------------------------------
 
 RCREG::RCREG(USARTModule *pUsart)
-  : m_usart(pUsart), rcpin(0), start_bit_event(0), m_cLastRXState('?')
+  : m_usart(pUsart), m_cLastRXState('?'), start_bit_event(0), rcpin(0)
 {
   assert(m_usart);
 
