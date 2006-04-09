@@ -264,6 +264,9 @@
 				RelativePath=".\cod.cc">
 			</File>
 			<File
+				RelativePath=".\comparator.cc">
+			</File>
+			<File
 				RelativePath=".\eeprom.cc">
 			</File>
 			<File
@@ -501,6 +504,9 @@
 			</File>
 			<File
 				RelativePath=".\cod.h">
+			</File>
+			<File
+				RelativePath=".\comparator.h">
 			</File>
 			<File
 				RelativePath="..\config.h">

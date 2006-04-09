@@ -5,6 +5,8 @@
 	  extras/graphic_lcd/utils/konqueror.png,
 	  extras/graphic_lcd/utils/konqueror16X16.png,
 	  extras/graphic_lcd/utils/konqueror3.png: mime-type image/png
+	* src/src.vcproj, src/makefile.mingw:
+	  new files src/comparator.h src/comparator.cc
 
 2006-04-08 Scott Dattalo <scott@dattalo.com>
 	* ChangeLog: experimental SVN checkin.
