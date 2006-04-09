@@ -361,12 +361,13 @@ IOPIN *PortModule::getPin(unsigned int iPinNumber)
 // PinModule
 
 PinModule::PinModule()
-  : PinMonitor(), m_pin(0),m_port(0), m_pinNumber(0),
+  : PinMonitor(),
     m_cLastControlState('?'), m_cLastSinkState('?'),
     m_cLastSourceState('?'), m_cLastPullupControlState('?'),
-    m_activeControl(0),m_defaultControl(0),
-    m_activeSource(0),m_defaultSource(0),
-    m_activePullupControl(0),m_defaultPullupControl(0)
+    m_defaultSource(0), m_activeSource(0),
+    m_defaultControl(0), m_activeControl(0),
+    m_defaultPullupControl(0), m_activePullupControl(0),
+    m_pin(0), m_port(0), m_pinNumber(0)
 {
 
 }
@@ -375,11 +376,11 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
   : PinMonitor(),
     m_cLastControlState('?'), m_cLastSinkState('?'),
     m_cLastSourceState('?'), m_cLastPullupControlState('?'),
-    m_activeControl(0),m_defaultControl(0),
-    m_activeSource(0),m_defaultSource(0),
-    m_activePullupControl(0),m_defaultPullupControl(0),
-    m_pin(_pin),m_port(_port), m_pinNumber(_pinNumber),
-  m_bForcedUpdate(false)
+    m_defaultSource(0), m_activeSource(0),
+    m_defaultControl(0), m_activeControl(0),
+    m_defaultPullupControl(0), m_activePullupControl(0),
+    m_pin(_pin), m_port(_port), m_pinNumber(_pinNumber),
+    m_bForcedUpdate(false)
 {
   setPin(m_pin);
 }

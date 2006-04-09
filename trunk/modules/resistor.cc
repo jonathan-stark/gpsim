@@ -237,8 +237,8 @@ void PullupResistor::create_iopin_map(void)
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
-  IOPIN *iop = get_pin(1);
   /*
+  IOPIN *iop = get_pin(1);
   if(iop) {
     cout << "pullup resistor pin name: "<<iop->name() << '\n';
     cout << "voltage " << iop->get_Vth() << '\n';

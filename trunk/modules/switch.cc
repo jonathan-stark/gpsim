@@ -84,7 +84,7 @@ private:
 
 SwitchPin::SwitchPin(Switch *parent, const char *_name)
   : IO_bi_directional(0, 0, _name), m_pParent(parent), bRefreshing(false),
-    m_Zclosed(10), m_Zopen(1e12), m_Zth(1e12)
+    m_Zth(1e12), m_Zclosed(10), m_Zopen(1e12)
 {
   assert(m_pParent);
 }
@@ -313,8 +313,8 @@ Module * Switch::construct(const char *_new_name=0)
 }
 
 Switch::Switch()
-  : m_pinA(0), m_pinB(0), m_aState(0), m_button(0),
-    Zopen(1e8), Zclosed(10)
+  : m_pinA(0), m_pinB(0), m_aState(0),
+    Zopen(1e8), Zclosed(10), m_button(0)
 {
 
   name_str = strdup("Switch");

@@ -389,6 +389,7 @@ static InvalidGuiRegister THE_invalid_register;
 // The gtk_sheet api does not provide access to row and column labels.
 // This means we can manipulate the font the way the cells can be manipulated
 
+#if 0 // defined but not used
 static GtkSheetButton *
 gtk_sheet_row_button_get(GtkSheet *sheet, gint row)
 {
@@ -399,6 +400,7 @@ gtk_sheet_row_button_get(GtkSheet *sheet, gint row)
 
   return (&sheet->row[row].button);
 }
+#endif
 
 static void
 gtk_sheet_REALLY_set_row_height(GtkSheet *sheet, gint row, gint height)

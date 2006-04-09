@@ -37,16 +37,15 @@ instruction::instruction()
 }
 
 instruction::instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr)
-  : opcode(uOpCode), 
-    m_uAddrOfInstr(uAddrOfInstr),
-    m_bIsModified(false),
+  : m_bIsModified(false),
     cycle_count(0),
+    opcode(uOpCode), 
+    m_uAddrOfInstr(uAddrOfInstr),
     file_id(-1),
     hll_file_id(-1),
     src_line(-1),
     lst_line(-1),
     hll_src_line(-1)
-
 {
   cpu = pProcessor;
 }

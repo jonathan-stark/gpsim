@@ -282,8 +282,6 @@ key_press(GtkWidget *widget,
 	  GdkEventKey *key, 
 	  SourceWindow *pSW)
 {
-  int low_level_step=0;
-
   if (!pSW || !key) 
     return FALSE;
 
@@ -507,8 +505,6 @@ TextStyle::TextStyle (const char *cpName,
 	       "foreground-gdk", &mFG.mCurrentColor,
 	       "background-gdk", &mBG.mCurrentColor,NULL);
 
-  char test[200];
-
   g_signal_connect (G_OBJECT (m_pTag), "event",
 		    GTK_SIGNAL_FUNC(TagEvent),
 		    this);
@@ -554,7 +550,7 @@ SourcePageMargin::SourcePageMargin()
 SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
 			   SourceBrowserParent_Window *pParent)
 
-  :  m_pFC(pFC), m_pParent(pParent), m_SourceFile_t(eUnknownSource),
+  :  m_pParent(pParent), m_pFC(pFC), m_SourceFile_t(eUnknownSource),
      m_bParsed(false)
 {
 
@@ -680,8 +676,8 @@ void SourceBuffer::clearBreak(int line)
 //========================================================================
 NSourcePage::NSourcePage(SourceWindow *pParent, SourceBuffer *pBuffer, 
 			 int file_id, GtkWidget *pContainer)
-  : m_Parent(pParent), m_view(0), m_pBuffer(pBuffer), m_marginWidth(0),
-    m_fileid(file_id), m_cpFont(0), m_pContainer(pContainer)
+  : m_fileid(file_id), m_pBuffer(pBuffer), m_marginWidth(0),
+    m_Parent(pParent), m_cpFont(0), m_pContainer(pContainer), m_view(0)
 {
 }
 
@@ -697,10 +693,9 @@ SourceWindow::SourceWindow(GUI_Processor *pgp,
 			   const char *newName)
   : GUI_Object (),
     pma(0),
-    m_pParent(pParent),
     status_bar(0),
-    last_simulation_mode(eSM_INITIAL)
-
+    last_simulation_mode(eSM_INITIAL),
+    m_pParent(pParent)
 {
   Dprintf(("Constructor \n"));
 
@@ -1028,8 +1023,6 @@ void SourceWindow::UpdateLine(int address)
   NSourcePage *pPage = pages[currPage];
 
   pPage->setSource();
-
-  int currFileId = pma->get_file_id(address);
 
   
   int line = (pPage->getFC()->IsList()) ?
@@ -1493,10 +1486,6 @@ void SourceWindow::NewSource(GUI_Processor *gp)
   Dprintf((" \n"));
 
   int i;
-  int id;
-  
-  const char *file_name;
-  int file_id;
 
   unsigned int address;
 
@@ -1590,8 +1579,7 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
   GTKWAIT;
 
   char str[256], *label_string;
-  GtkWidget *hbox, *label, *vscrollbar;
-  GtkStyle *style=0;
+  GtkWidget *label;
 
   strncpy(str,fName,sizeof(str));
 
@@ -1721,7 +1709,7 @@ void PixmapObject::CreateFromXPM(GdkWindow *window,
 
 //========================================================================
 BreakPointInfo::BreakPointInfo(int _address, int _line, int _index, int _pos)
-  : address(_address), line(_line), index(_index), pos(_pos),
+  : address(_address), pos(_pos), index(_index), line(_line),
     break_widget(0), canbreak_widget(0)
 {
 }
@@ -4433,9 +4421,6 @@ void SourceBuffer::parseLine(const char *cP,
   GtkTextBuffer *pTextBuffer = m_buffer;
   gtk_text_buffer_get_end_iter (pTextBuffer, &iEnd);
 
-  char buf[64];
-  int line_number = gtk_text_buffer_get_line_count(pTextBuffer);
-
   int offset = gtk_text_iter_get_offset (&iEnd);
 
   gtk_text_buffer_insert (pTextBuffer, &iEnd, cP, -1);
@@ -4533,12 +4518,8 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
   Dprintf((" \n"));
 
   int i;
-  int id;
   
   const char *file_name;
-  int file_id;
-
-  unsigned int address;
 
   if(!gp || !gp->cpu || !gp->cpu->pma)
     return;

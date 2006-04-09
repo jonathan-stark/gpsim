@@ -115,10 +115,12 @@ static menu_item range_menu_items[] = {
     {"Snapshot to plot", MENU_PLOT},
 };
 
+#if 0 // defined but not used
 static menu_item plot_menu_items[] = {
     {"Save postscript...", MENU_SAVE_PS},
     {"Print", MENU_PRINT},
 };
+#endif
 
 static menu_item exestats_menu_items[] = {
     {"Plot distribution", MENU_PLOT},
@@ -156,6 +158,7 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
     free(entry);
 }
 
+#if 0 // defined but not used
 static unsigned int lookup_address_symbol(const char *name)
 {
   Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
@@ -463,6 +466,7 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
 	break;
     }
 }
+#endif
 
 // called when user has selected a menu item in exestats tab
 static void
@@ -489,6 +493,7 @@ exestats_popup_activated(GtkWidget *widget, gpointer data)
     }
 }
 
+#if 0 // defined but not used
 // called from plot_do_popup
 static GtkWidget *
 plot_build_menu(Profile_Window *pw)
@@ -525,6 +530,7 @@ plot_build_menu(Profile_Window *pw)
 
   return menu;
 }
+#endif
 
 // called from exestats_do_popup
 static GtkWidget *
@@ -587,6 +593,7 @@ exestats_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
     return FALSE;
 }
 
+#if 0 // defined but not used
 // button press handler
 static gint
 plot_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
@@ -610,6 +617,7 @@ plot_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
     }
     return FALSE;
 }
+#endif
 
 int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpoints)
 {

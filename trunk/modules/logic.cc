@@ -302,7 +302,6 @@ void LogicGate::create_iopin_map(void)
 
   Logic_Input *LIP;
 
-  char p[4] = "in0";
   int j;
 
 
