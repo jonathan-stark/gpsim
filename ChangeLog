@@ -1,3 +1,11 @@
+2006-04-09 Borut Razem <borut.razem@siol.net>
+	* extras/graphic_lcd/utils/custom.png,
+	  extras/graphic_lcd/utils/fontimage.png,
+	  extras/graphic_lcd/utils/gpsim1.png,
+	  extras/graphic_lcd/utils/konqueror.png,
+	  extras/graphic_lcd/utils/konqueror16X16.png,
+	  extras/graphic_lcd/utils/konqueror3.png: mime-type image/png
+
 2006-04-08 Scott Dattalo <scott@dattalo.com>
 	* ChangeLog: experimental SVN checkin.
 
@@ -12,6 +20,7 @@
 	  register windows not showing all characters.
 	* src/p16f87x.cc: fix eeprom being initialized twice for most 
 	  p16f87x processors.
+
 2006-04-08 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.h src/pic-processor.cc src/p16f87x.h
 	  p16f87x.cc: Add support for p16f87xA which are p16f87x
@@ -25,6 +34,7 @@
 	  Makefile 16f628.lkr 16f877a.lkr 16f873.lkr 
 	  for comparator regression tests.
 	* regression/run_regression.sh: invoke comparator regression tests
+
 2006-04-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/ioports.h src/ioports.cc : Fix setEnableMask() so it works 
 	  when pin is already added. Stop memory leak in newDefaultControl().
