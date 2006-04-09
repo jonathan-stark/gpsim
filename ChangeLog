@@ -1,4 +1,7 @@
 2006-04-08 Scott Dattalo <scott@dattalo.com>
+	* ChangeLog: experimental SVN checkin.
+
+2006-04-08 Scott Dattalo <scott@dattalo.com>
 	* INSTALL: re-instated - somehow it got wiped out on 04-05
 	* ltconfig, missing, mkinstalldirs, stamp-h.in: removed from CVS.
 
