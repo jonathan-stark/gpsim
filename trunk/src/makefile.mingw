@@ -49,6 +49,7 @@ src_OBJECTS =			\
 	bytelog.o		\
 	cmd_manager.o		\
 	cod.o			\
+	comparator.o		\
 	eeprom.o		\
 	errors.o		\
 	expr.o			\
