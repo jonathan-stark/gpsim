@@ -34,7 +34,7 @@ echo "run" >> $STARTUP_STC
 echo "quit" >> $STARTUP_STC
 echo "" >> $STARTUP_STC
 
-LOGFILE='simresults.log'
+LOGFILE="$2results.log"
 touch $LOGFILE
 
 # Run the simulation and save the results
