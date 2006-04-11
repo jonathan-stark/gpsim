@@ -98,7 +98,7 @@ CM_stimulus::CM_stimulus(CMCON * arg, const char *cPname,double _Vth, double _Zt
 
 void   CM_stimulus::set_nodeVoltage(double v)
 {
-       int i = _cmcon->get();	// recalculate comparator values
+        _cmcon->get();	// recalculate comparator values
         nodeVoltage = v;
 }
 
@@ -148,6 +148,8 @@ unsigned int CMCON_1::get()
     double Vhigh1, Vlow1;
     double Vhigh2, Vlow2;
 
+    Vhigh1 = Vhigh2 = 5.0;	// just to avoid compiler warning
+    Vlow1 = Vlow2 = 0.0;	// just to avoid compiler warning
     switch (cmcon_val & 0x07)
     {
     case 0:	// Comparitor reset 
@@ -263,6 +265,8 @@ unsigned int CMCON_2::get()
     double Vhigh1, Vlow1;
     double Vhigh2, Vlow2;
 
+    Vhigh1 = Vhigh2 = 5.0;	// just to avoid compiler warning
+    Vlow1 = Vlow2 = 0.0;	// just to avoid compiler warning
     switch (cmcon_val & 0x07)
     {
     case 0:	// Comparitor reset 
@@ -641,7 +645,7 @@ void VRCON::put(unsigned int new_value)
 	else 	// not outputing voltage to pin
 	{
 	    if (diff & 0x0f)	// did value of vreference change ?
-		unsigned int i = _cmcon->get();
+		_cmcon->get();
 	    if(vr_PinModule && vr_PinModule->getPin().snode)
 	    {
                 vr_PinModule->getPin().snode->detach_stimulus(vr_pu);
