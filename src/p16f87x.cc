@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 // p16f87x
 //
 //  This file supports:
-//    P16F874 P16F877
+//    P16F874  P16F877
 //    P16F871  P16F873
 //    P16F876  P16F873A
 //    P14F874A P16F876A
@@ -161,9 +161,7 @@ Processor * P16F871::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
-
   p->new_name("p16f871");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -225,6 +223,7 @@ void P16F873::create_sfr_map(void)
 
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
 
+                                                                                
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
@@ -273,6 +272,7 @@ void P16F873::create_sfr_map(void)
 
 void P16F873::create(void)
 {
+
   if(verbose)
     cout << " f873 create \n";
 
@@ -297,6 +297,7 @@ void P16F873::create(void)
 
 
 
+
 Processor * P16F873::construct(void)
 {
 
@@ -306,11 +307,10 @@ Processor * P16F873::construct(void)
     cout << " f873 construct\n";
 
   p->new_name("p16f873");
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
+  symbol_table.add_module(p,p->name().c_str());
 
 
   return p;
@@ -441,12 +441,10 @@ Processor * P16F873A::construct(void)
     cout << " f873A construct\n";
 
   p->new_name("p16f873A");
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
-
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -469,12 +467,9 @@ Processor * P16F876::construct(void)
     cout << " f876 construct\n";
 
   p->new_name("p16f876");
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
-
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -497,6 +492,7 @@ void P16F876::create(void)
     cout << " f876 create \n";
 
   P16F873::create();
+
 
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
@@ -531,12 +527,9 @@ Processor * P16F876A::construct(void)
     cout << " f876A construct\n";
 
   p->new_name("p16f876A");
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
-
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -608,6 +601,7 @@ void P16F874::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+                                                                                
 
   adres.new_name("adresh");
   adresl.new_name("adresl");
@@ -691,12 +685,10 @@ Processor * P16F874::construct(void)
     cout << " f874 construct\n";
 
   p->new_name("p16f874");
-
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -842,11 +834,10 @@ Processor * P16F874A::construct(void)
     cout << " f874A construct\n";
 
   p->new_name("p16f874A");
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -907,11 +898,10 @@ Processor * P16F877::construct(void)
     cout << " f877 construct\n";
 
   p->new_name("p16f877");
-
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -969,12 +959,12 @@ Processor * P16F877A::construct(void)
 
   if(verbose)
     cout << " f877A construct\n";
-  p->new_name("p16f877A");
 
+  p->new_name("p16f877A");
   p->create();
   p->create_invalid_registers ();
-
   p->create_symbols();
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
