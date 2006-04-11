@@ -327,6 +327,74 @@ key_press(GtkWidget *widget,
 
 }
 
+//======================================================================
+// 
+// When a user right-clicks in the source browser, a menu will popup.
+// There can only be one menu active at any given time.
+
+
+//
+//  'aPopupMenu' pointer is a local pointer to a GtkMenu. 
+// 
+
+static GtkWidget *aPopupMenu=0;
+
+//
+// 'pViewContainingPopup' is a pointer to the GtkTextView that was active
+// when the popup menu was opened.
+//
+
+static GtkTextView *pViewContainingPopup=0;
+
+
+typedef enum {
+    MENU_FIND_TEXT,
+    MENU_FIND_PC,
+    MENU_MOVE_PC,
+    MENU_RUN_HERE,
+    MENU_BP_HERE,
+    MENU_SELECT_SYMBOL,
+    MENU_STEP,
+    MENU_STEP_OVER,
+    MENU_RUN,
+    MENU_STOP,
+    MENU_FINISH,
+    MENU_RESET,
+    MENU_SETTINGS,
+    MENU_PROFILE_START_HERE,
+    MENU_PROFILE_STOP_HERE,
+    MENU_ADD_TO_WATCH,
+} menu_id;
+
+
+typedef struct _menu_item {
+    char *name;
+    menu_id id;
+    GtkWidget *item;
+} menu_item;
+
+static menu_item menu_items[] = {
+    {"Find PC",         MENU_FIND_PC,0},
+    {"Run here",        MENU_RUN_HERE,0},
+    {"Move PC here",    MENU_MOVE_PC,0},
+    {"Breakpoint here", MENU_BP_HERE,0},
+    {"Profile start here", MENU_PROFILE_START_HERE,0},
+    {"Profile stop here", MENU_PROFILE_STOP_HERE,0},
+    {"Add to watch",    MENU_ADD_TO_WATCH,0},
+    {"Find text...",    MENU_FIND_TEXT,0},
+    {"Settings...",     MENU_SETTINGS,0},
+};
+
+static menu_item submenu_items[] = {
+    {"Step",            MENU_STEP,0},
+    {"Step Over",       MENU_STEP_OVER,0},
+    {"Run",             MENU_RUN,0},
+    {"Stop",            MENU_STOP,0},
+    {"Reset",           MENU_RESET,0},
+    {"Finish",          MENU_FINISH,0},
+};
+
+
 //========================================================================
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
@@ -411,18 +479,17 @@ static gboolean TagEvent (GtkTextTag *texttag,
 			  GtkTextIter *arg2,
 			  TextStyle *pTextStyle)
 {
-  /**/
-  Dprintf(("Received tag event signal Tag:%p arg1:%p Event:%p iter:%p user:%p %08X Line:%d\n",
-	   texttag, arg1,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2)));
-  /**/
+  /*
+  static int seq=0;
+  printf("Received tag event signal Tag:%p arg1:%p seq %d Event:%p iter:%p user:%p %08X Line:%d\n",
+	 texttag, arg1,seq++,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
+  */
   if (isButtonEvent(event->type)) {
     GdkEventButton *evtButton = (GdkEventButton *) event;
 
     if (event->type == GDK_2BUTTON_PRESS  && evtButton->button == 1) {
       Dprintf (("Double click left mouse\n"));
       pTextStyle->doubleClickEvent(arg2);
-      //const gchar *signal = (const gchar *)g_object_get_data (arg1,"button_press::event");
-      //g_signal_emit_by_name (arg1, signal);
 
       gint signal_id =  g_signal_lookup ("button_press_event", 
 					 G_TYPE_FROM_INSTANCE(arg1));
@@ -447,12 +514,22 @@ static gboolean TagEvent (GtkTextTag *texttag,
 	   evtButton->button, evtButton->state, evtButton->x,evtButton->y);
     */
     // If the right mouse button is pressed then suppress the GTK pop up menu.
-    if (evtButton->button == 3)
-      return TRUE;
+    if (evtButton->button == 3) {
 
-    return TRUE;
+      if (aPopupMenu) {
+	if (GTK_IS_TEXT_VIEW(arg1))
+	  pViewContainingPopup = GTK_TEXT_VIEW(arg1);
+
+	gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
+		       3, evtButton->time);
+      }
+
+      return TRUE;
+    }
+
+    return FALSE;
   }
-  return TRUE;
+  return FALSE;
 }
 
 //------------------------------------------------------------------------
@@ -761,6 +838,13 @@ void SourceWindow::finish()
 }
 
 //------------------------------------------------------------------------
+void SourceWindow::reset()
+{
+  if (gp && gp->cpu)
+    gp->cpu->reset(POR_RESET);
+}
+
+//------------------------------------------------------------------------
 void SourceWindow::set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
 {
   GdkColor text_fg;
@@ -839,6 +923,245 @@ void NSourcePage::invalidateView()
 }
 
 //------------------------------------------------------------------------
+SourceWindow *_popup_sbaw;
+
+static void
+_popup_activated(GtkWidget *widget, gpointer data)
+{
+  menu_item *item;
+  unsigned int id, address, line;
+  char text[256];
+
+  SourceWindow *pSW = 0;
+  if (!pViewContainingPopup) {
+    printf("Warning popup without a textview\n");
+  } else {
+
+    NSourcePage *pPage = PageMap[pViewContainingPopup];
+    pSW = pPage ? pPage->getParent() : 0;
+  }
+
+  item = (menu_item *)data;
+
+  switch(item->id) {
+
+  case MENU_SETTINGS:
+    //settings_dialog(popup_sbaw);
+
+    printf(" menu settings\n");
+    break;
+  case MENU_FIND_TEXT:
+    //gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
+    //gtk_widget_show(searchdlg.window);
+
+    printf(" menu find text\n");
+    break;
+  case MENU_FIND_PC:
+    //address=popup_sbaw->pma->get_PC();
+    //popup_sbaw->SetPC(address);
+
+    printf(" menu find pc\n");
+    break;
+  case MENU_MOVE_PC:
+    //line = popup_sbaw->menu_data->getLine();
+    //address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+    //if(address!=INVALID_VALUE)
+    //  popup_sbaw->pma->set_PC(address);
+
+    printf(" menu move pc\n");
+    break;
+
+  case MENU_RUN_HERE:
+    //line = popup_sbaw->menu_data->getLine()+1;
+    //address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
+    //if(address!=INVALID_VALUE)
+    //  popup_sbaw->gp->cpu->run_to_address(address);
+
+    printf(" menu run here\n");
+    break;
+
+  case MENU_BP_HERE:
+    //line = popup_sbaw->menu_data->getLine() + 1;
+    //popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
+
+    printf(" menu bp here\n");
+    break;
+  case MENU_PROFILE_START_HERE:
+    /*
+      line = popup_sbaw->menu_data->line;
+      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+
+      popup_sbaw->gp->profile_window->StartExe(address);
+    */
+    printf(" menu profile start\n");
+    break;
+
+  case MENU_PROFILE_STOP_HERE:
+    /*
+      line = popup_sbaw->menu_data->line;
+
+      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+
+      popup_sbaw->gp->profile_window->StopExe(address);
+    */
+    printf(" menu profile stop\n");
+    break;
+
+  case MENU_SELECT_SYMBOL:
+  case MENU_ADD_TO_WATCH:
+    /* {
+      gint i, temp;
+      gint start, end;
+
+
+#if GTK_MAJOR_VERSION >= 2
+      if (!gtk_editable_get_selection_bounds(
+					     GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+					     &start, &end))
+        break;
+#else
+      start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
+      end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
+#endif
+      if(start != end) {
+        if(start>end)
+	  {
+	    temp=start;
+	    start=end;
+	    end=temp;
+	  }
+        if((end-start+2)>256) // FIXME bounds?
+          end=start+256-2;
+        for(i=start;i<end;i++)
+          text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
+
+        unsigned int uLastCharIndex = i-start;
+        text[uLastCharIndex]=0;
+        TrimWhiteSpaceFromString(text);
+
+        if(text[0] != 0) {
+          register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
+          if(pReg == NULL) {
+            // We also try upper cased.
+            string sName(text);
+            toupper(sName);
+            pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+          }
+          if(pReg == NULL) {
+            // We also try with a '_' prefix.
+            string sName("_");
+            sName.append(text);
+            pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+            if(pReg == NULL) {
+              // We also try upper cased.
+              toupper(sName);
+              pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+            }
+          }
+
+          if(pReg == NULL) {
+            GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
+							GTK_DIALOG_MODAL,
+							GTK_MESSAGE_WARNING,
+							GTK_BUTTONS_OK,
+							"The symbol '%s' does not exist as a register symbol.\n"
+							"Only register based symbols may be added to the Watch window.",
+							text);
+            gtk_dialog_run (GTK_DIALOG (dialog));
+            gtk_widget_destroy (dialog);
+          }
+          else {
+            popup_sbaw->gp->watch_window->Add(pReg);
+          }
+        }
+      }
+    }
+    */
+    printf(" men add to watch \n");
+    break;
+  case MENU_STEP:
+    if (pSW)
+      pSW->step();
+    break;
+  case MENU_STEP_OVER:
+    if (pSW)
+      pSW->step_over();
+    break;
+  case MENU_RUN:
+    if (pSW)
+      pSW->run();
+    break;
+  case MENU_STOP:
+    if (pSW)
+      pSW->stop();
+    break;
+  case MENU_RESET:
+    if (pSW)
+      pSW->reset();
+    break;
+  case MENU_FINISH:
+    if (pSW)
+      pSW->finish();
+    break;
+  default:
+    puts("Unhandled menuitem?");
+    break;
+  }
+
+  pViewContainingPopup=0;
+
+}
+
+
+//------------------------------------------------------------------------
+static GtkWidget *
+_build_menu(SourceWindow *sbaw)
+{
+  GtkWidget *menu;
+  GtkWidget *submenu;
+  GtkWidget *item;
+  unsigned int i;
+  int id;
+
+  _popup_sbaw=sbaw;
+
+  menu=gtk_menu_new();
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+    item=gtk_menu_item_new_with_label(menu_items[i].name);
+    menu_items[i].item=item;
+    gtk_signal_connect(GTK_OBJECT(item),"activate",
+		       (GtkSignalFunc) _popup_activated,
+		       &menu_items[i]);
+
+    gtk_widget_show(item);
+    gtk_menu_append(GTK_MENU(menu),item);
+  }
+
+  submenu=gtk_menu_new();
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (submenu), item);
+  gtk_widget_show (item);
+  for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
+    item=gtk_menu_item_new_with_label(submenu_items[i].name);
+    submenu_items[i].item=item;
+    gtk_signal_connect(GTK_OBJECT(item),"activate",
+		       (GtkSignalFunc) _popup_activated,
+		       &submenu_items[i]);
+
+    GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+
+    gtk_widget_show(item);
+    gtk_menu_append(GTK_MENU(submenu),item);
+  }
+  item = gtk_menu_item_new_with_label ("Controls");
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
+
+  return menu;
+}
+
+//------------------------------------------------------------------------
 // Build
 //
 // 
@@ -894,6 +1217,9 @@ void SourceWindow::Build()
   gtk_widget_show_all(window);
   gtk_widget_show_all(vbox);
   gtk_widget_show_all(m_Notebook);
+
+
+  aPopupMenu = _build_menu(this);
 
   bIsBuilt = true;
   if(m_bLoadSource) {
@@ -1133,6 +1459,12 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
   return false;
 }
 //------------------------------------------------------------------------
+SourceWindow *NSourcePage::getParent()
+{
+  return m_Parent;
+}
+
+//------------------------------------------------------------------------
 bool NSourcePage::bHasSource()
 {
   return m_pBuffer != 0;
@@ -1166,7 +1498,7 @@ void NSourcePage::setSource()
   m_pBuffer->parse();
 
   m_view = (GtkTextView *)gtk_text_view_new_with_buffer(m_pBuffer->getBuffer());
-
+  printf("NSourcePage::setSource() - view=%p\n",m_view);
   gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (m_view),
 					GTK_TEXT_WINDOW_LEFT,
 					MARGIN_WIDTH);
@@ -1623,54 +1955,6 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
 //#define PIXMAP_POS(sbaw,e) ((e)->pixel+(sbaw)->layout_offset+-PIXMAP_SIZE/2-(e)->font_center)
 
 extern int gui_question(char *question, char *a, char *b);
-
-
-typedef enum {
-    MENU_FIND_TEXT,
-    MENU_FIND_PC,
-    MENU_MOVE_PC,
-    MENU_RUN_HERE,
-    MENU_BP_HERE,
-    MENU_SELECT_SYMBOL,
-    MENU_STEP,
-    MENU_STEP_OVER,
-    MENU_RUN,
-    MENU_STOP,
-    MENU_FINISH,
-    MENU_RESET,
-    MENU_SETTINGS,
-    MENU_PROFILE_START_HERE,
-    MENU_PROFILE_STOP_HERE,
-    MENU_ADD_TO_WATCH,
-} menu_id;
-
-
-typedef struct _menu_item {
-    char *name;
-    menu_id id;
-    GtkWidget *item;
-} menu_item;
-
-static menu_item menu_items[] = {
-    {"Find PC",         MENU_FIND_PC,0},
-    {"Run here",        MENU_RUN_HERE,0},
-    {"Move PC here",    MENU_MOVE_PC,0},
-    {"Breakpoint here", MENU_BP_HERE,0},
-    {"Profile start here", MENU_PROFILE_START_HERE,0},
-    {"Profile stop here", MENU_PROFILE_STOP_HERE,0},
-    {"Add to watch",    MENU_ADD_TO_WATCH,0},
-    {"Find text...",    MENU_FIND_TEXT,0},
-    {"Settings...",     MENU_SETTINGS,0},
-};
-
-static menu_item submenu_items[] = {
-    {"Step",            MENU_STEP,0},
-    {"Step Over",       MENU_STEP_OVER,0},
-    {"Run",             MENU_RUN,0},
-    {"Stop",            MENU_STOP,0},
-    {"Reset",           MENU_RESET,0},
-    {"Finish",          MENU_FINISH,0},
-};
 
 static int file_id_to_source_mode[100];
 
