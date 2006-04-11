@@ -1,3 +1,8 @@
+2006-04-11 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, gui/gui_src_asm.cc: Right-button mouse clicks now
+	bring up a menu. Currently, not all of the menu items are
+	supported. Furthermore, only GtkTextTag'd text responds. 
+
 2006-04-11 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f87x.cc: if code read with breadboard closed, breadboard
 	  did not show processor.

@@ -157,6 +157,8 @@ public:
 
   GtkTextBuffer *buffer();
   GtkTextView   *getView();
+  SourceWindow  *getParent();
+
   void invalidateView();
   void updateMargin(int y1, int y2);
 
@@ -209,6 +211,7 @@ public:
   void stop();
   void run();
   void finish();
+  void reset();
   void toggleBreak(NSourcePage *pPage, int line);
   void movePC(int line);
   bool bSourceLoaded() { return m_bSourceLoaded; }
