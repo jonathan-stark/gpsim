@@ -68,5 +68,7 @@ ${RT} switch_test sim
 
 ${RT} p18f sim
 
-${RT} comparator sim
+${RT} comparator sim_628
+
+${RT} comparator sim_877a
 
