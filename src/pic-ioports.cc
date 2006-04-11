@@ -172,8 +172,6 @@ void PicPortBRegister::put(unsigned int new_value)
     // stimuli (or perhaps internal peripherals) overdriving or overriding
     // this port, then the call to updatePort() will update 'drivenValue'
     // to its proper value.
-    rvDrivenValue.data = drivingValue;
-    rvDrivenValue.init = 0;
     updatePort();
   }
 
