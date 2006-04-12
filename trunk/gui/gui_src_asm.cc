@@ -201,38 +201,7 @@ view_key_press(GtkTextView *pView,
 
   return TRUE;
 }
-static gint
-view_button_press(GtkTextView *pView,
-		  GdkEventButton *pButton, 
-		  SourceWindow *pSW)
-{
-  Dprintf(("Received button press for view %p\n",pSW));
-  Dprintf((" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y));
 
-  if (pButton->window == gtk_text_view_get_window (pView,
-						  GTK_TEXT_WINDOW_LEFT)) 
-  {
-
-    NSourcePage *pPage = PageMap[pView];
-    gint x = (gint) pButton->x;
-    gint y = (gint) pButton->y;
-
-    gtk_text_view_window_to_buffer_coords (pView,
-					   GTK_TEXT_WINDOW_LEFT,
-					   x,
-					   y,
-					   &x,
-					   &y);
-    GtkTextIter iter;
-    gint line;
-    gtk_text_view_get_line_at_y (pView, &iter, y, NULL);
-    line = gtk_text_iter_get_line (&iter);
-    pSW->toggleBreak(pPage, line);
-
-  }
-
-  return FALSE;
-}
 static gint
 view_expose(GtkTextView *pView,
 	    GdkEventExpose *pEvent, 
@@ -395,6 +364,57 @@ static menu_item submenu_items[] = {
 };
 
 
+//------------------------------------------------------------------------
+// view_button_press
+// Event handler for text view mouse clicks.
+static gint
+view_button_press(GtkTextView *pView,
+		  GdkEventButton *pButton, 
+		  SourceWindow *pSW)
+{
+  printf("Received button press for view %p\n",pSW);
+  printf(" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y);
+
+  if (pButton->window == gtk_text_view_get_window (pView,
+						  GTK_TEXT_WINDOW_LEFT)) 
+  {
+    // Margin 
+    NSourcePage *pPage = PageMap[pView];
+    gint x = (gint) pButton->x;
+    gint y = (gint) pButton->y;
+
+    gtk_text_view_window_to_buffer_coords (pView,
+					   GTK_TEXT_WINDOW_LEFT,
+					   x,
+					   y,
+					   &x,
+					   &y);
+    GtkTextIter iter;
+    gint line;
+    gtk_text_view_get_line_at_y (pView, &iter, y, NULL);
+    line = gtk_text_iter_get_line (&iter);
+    pSW->toggleBreak(pPage, line);
+
+  } else {
+    // Text (i.e. not the margin
+    if (pButton->button == 3) {
+
+      if (aPopupMenu) {
+	if (GTK_IS_TEXT_VIEW(pView))
+	  pViewContainingPopup = pView;
+
+	gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
+		       3, pButton->time);
+      }
+
+      return TRUE;
+    }
+   
+  }
+
+  return FALSE;
+}
+
 //========================================================================
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
@@ -479,17 +499,18 @@ static gboolean TagEvent (GtkTextTag *texttag,
 			  GtkTextIter *arg2,
 			  TextStyle *pTextStyle)
 {
-  /*
+  /**/
   static int seq=0;
   printf("Received tag event signal Tag:%p arg1:%p seq %d Event:%p iter:%p user:%p %08X Line:%d\n",
 	 texttag, arg1,seq++,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
-  */
+  /**/
   if (isButtonEvent(event->type)) {
     GdkEventButton *evtButton = (GdkEventButton *) event;
 
     if (event->type == GDK_2BUTTON_PRESS  && evtButton->button == 1) {
       Dprintf (("Double click left mouse\n"));
-      pTextStyle->doubleClickEvent(arg2);
+      if (pTextStyle)
+	pTextStyle->doubleClickEvent(arg2);
 
       gint signal_id =  g_signal_lookup ("button_press_event", 
 					 G_TYPE_FROM_INSTANCE(arg1));
@@ -669,10 +690,6 @@ void SourceBuffer::addTagRange(TextStyle *pStyle,
   gtk_text_buffer_get_iter_at_offset (m_buffer, &end, end_index);
 
   gtk_text_buffer_apply_tag (m_buffer, pStyle->tag(), &start, &end);
-
-  g_signal_connect (G_OBJECT (pStyle->tag()), "event",
-		    GTK_SIGNAL_FUNC(TagEvent),
-		    this);
 }
 
 //------------------------------------------------------------------------
