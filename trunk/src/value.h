@@ -120,12 +120,6 @@ public:
 
   virtual Value *copy();
 
-  /// description - get a description of this value. If the value has 
-  /// a name, then 'help value_name' will display the description.
-
-  virtual string description();
-  void set_description(const char *);
-
   /// xrefs - a cross reference allows a Value to notify another
   /// Value when it is changed.
 
@@ -139,8 +133,7 @@ public:
   virtual void update(void) {}
   virtual Value* evaluate() { return copy(); }
 
- private:
-  const char *cpDescription;
+private:
   Value *xref;
 protected:
   bool m_bClearableSymbol;

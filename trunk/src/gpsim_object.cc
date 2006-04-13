@@ -28,6 +28,12 @@ Boston, MA 02111-1307, USA.  */
 //========================================================================
 
 gpsimObject::gpsimObject()
+: cpDescription(0)
+{
+}
+
+gpsimObject::gpsimObject(const char *_name, const char *desc)
+  : name_str(_name),cpDescription(desc)
 {
 }
 
@@ -129,4 +135,17 @@ int gpsimObject::clear_break()
 {
   //cout << showType() << " objects do not support break points\n";
   return -1;
+}
+
+string gpsimObject::description()
+{
+  if(cpDescription)
+    return string(cpDescription);
+  else
+    return string("no description");
+}
+
+void  gpsimObject::set_description(const char *new_description)
+{
+  cpDescription = new_description;
 }

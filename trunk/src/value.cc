@@ -87,16 +87,14 @@ string &toupper(string & sStr) {
 
 //------------------------------------------------------------------------
 Value::Value()
-  : cpDescription(0), xref(0)
+  : xref(0), m_bClearableSymbol(true)
 {
-  m_bClearableSymbol = true;
 }
 
 Value::Value(const char *_name, const char *desc)
-  : cpDescription(desc), xref(0)
+  : gpsimObject(_name,desc), xref(0), m_bClearableSymbol(true)
 {
-  m_bClearableSymbol = true;
-  new_name(_name);
+  
 }
 
 Value::~Value()
@@ -226,19 +224,6 @@ Value *Value::copy()
 {
   throw new Error(" cannot copy " + showType());
 
-}
-
-string Value::description()
-{
-  if(cpDescription)
-    return string(cpDescription);
-  else
-    return string("no description");
-}
-
-void  Value::set_description(const char *new_description)
-{
-  cpDescription = new_description;
 }
 
 void Value::set_xref(Value *v)

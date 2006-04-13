@@ -37,8 +37,10 @@ class gpsimObject {
  public:
 
   gpsimObject();
+  gpsimObject(const char *_name, const char *desc=0);
   virtual ~gpsimObject();
 
+  /// Get the name of the object
   virtual string &name(void) const;
 
   /// copy the name to a user char array
@@ -48,9 +50,18 @@ class gpsimObject {
   virtual char *toString(char *, int len);
   virtual char *toBitStr(char *, int len);
 
+  /// Assign a new name to the object
   virtual void new_name(const char *);
   virtual void new_name(string &);
 
+  /// description - get a description of this object. If the object has 
+  /// a name, then 'help value_name' at the command line will display
+  /// the description.
+
+  virtual string description();
+  void set_description(const char *);
+
+  /// Access object-specific information
   string show();
   string showType();
   virtual string toString();
@@ -78,8 +89,8 @@ class gpsimObject {
 
 protected:
 
-  string  name_str;               // A unique name to describe the Value
-
+  string  name_str;               // A unique name to describe the object
+  const char *cpDescription;      // A desciption of the object
 
 };
 
