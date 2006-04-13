@@ -37,328 +37,39 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-ioports.h"
 #include "stimuli.h"
 
+
 //#define DEBUG_AD
 
 
-static PinModule AnInvalidAnalogInput;
-
 //------------------------------------------------------
-// ADRES
-//
-
-void ADRES::put(int new_value)
+class P16C71::PIR_16C71 : public PIR_SET
 {
-
-  trace.raw(write_trace.get() | value.get());
-
-  if(new_value > 255)
-    value.put(255);
-  else if (new_value < 0)
-    value.put(0);
-  else
-    value.put(new_value);
-}
-
-
-//------------------------------------------------------
-// ADCON0
-//
-ADCON0::ADCON0()
-  : ad_state(AD_IDLE)
-{
-}
-
-void ADCON0::setA2DBits(unsigned int nBits)
-{
-  m_A2DScale = (1<<nBits) - 1;
-}
-
-void ADCON0::start_conversion(void)
-{
-
-  #ifdef DEBUG_AD
-  cout << "starting A/D conversion\n";
-  #endif
-
-  if(!(value.get() & ADON) ) {
-    //cout << " A/D converter is disabled\n";
-    stop_conversion();
-    return;
+public:
+  PIR_16C71(ADCON0 *adcon0)
+    : m_adcon0(adcon0)
+  {
   }
 
-  guint64 fc = get_cycles().value + Tad_2;
-
-  if(ad_state != AD_IDLE)
-    {
-      // The A/D converter is either 'converting' or 'acquiring'
-      // in either case, there is callback break that needs to be moved.
-
-      stop_conversion();
-      get_cycles().reassign_break(future_cycle, fc, this);
-    }
-  else
-    get_cycles().set_break(fc, this);
-
-  future_cycle = fc;
-  ad_state = AD_ACQUIRING;
-
-}
-
-void ADCON0::stop_conversion(void)
-{
-
-  #ifdef DEBUG_AD
-  cout << "stopping A/D conversion\n";
-  #endif
-  ad_state = AD_IDLE;
-
-}
-
-
-
-void ADCON0::put(unsigned int new_value)
-{
-
-  trace.raw(write_trace.get() | value.get());
-
-  // Get the A/D Conversion Clock Select bits
-  // 
-  // This switch case will get the ADCS bits and set the Tad, or The A/D
-  // converter clock period. The A/D clock period is faster than the instruction
-  // cycle period when the two ADCS bits are zero. However, this is handled by
-  // dealing with twice the Tad, or Tad_2. Now if the ADCS bits are zero, Tad_2
-  // will equal Tinst. It turns out that the A/D converter takes an even number
-  // of Tad periods to make a conversion.
-
-  switch(new_value & (ADCS0 | ADCS1))
-    {
-
-    case 0:
-      Tad_2 = 1;
-      break;
-
-    case ADCS0:
-      Tad_2 = 2;
-      break;
-
-    case ADCS1:
-      Tad_2 = 32;
-
-    case (ADCS0|ADCS1):
-      Tad_2 = 3;   // %%% FIX ME %%% I really need to implement 'absolute time'
-
-    }
-    
-  unsigned int old_value=value.get();
-  // SET: Reflect it first!
-  value.put(new_value);
-  if(new_value & ADON)
-    {
-      // The A/D converter is being turned on (or maybe left on)
-
-      //if(((new_value ^ value) & GO) == GO)
-      if((new_value & ~old_value) & GO)
-	{
-	  // The 'GO' bit is being turned on, which is request to initiate
-	  // and A/D conversion
-	  start_conversion();
-	}
-    }
-  else
-    {
-      stop_conversion();
-    }
-
-}
-
-void ADCON0::put_conversion(void)
-{
-  double dRefSep = m_dSampledVrefHi - m_dSampledVrefLo;
-  double dNormalizedVoltage;
-
-  dNormalizedVoltage = (dRefSep>0.0) ? 
-    (m_dSampledVoltage - m_dSampledVrefLo)/dRefSep : 0.0;
-  dNormalizedVoltage = dNormalizedVoltage>1.0 ? 1.0 : dNormalizedVoltage;
-
-  unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage);
-
-  if(adresl) {   // non-null for 16f877
-
-
-    if(verbose)
-      cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
-    if(adcon1->value.get() & ADCON1::ADFM) {
-      adresl->put(converted & 0xff);
-      adres->put( (converted >> 8) & 0x3);
-    } else {
-      adresl->put((converted << 6) & 0xc0);
-      adres->put( (converted >> 2) & 0xff);
-    }
-
-  } else {
-
-    if(verbose)
-      cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
-
-    adres->put((converted ) & 0xff);
-
+  virtual bool interrupt_status()
+  {
+    return m_adcon0->getADIF();
   }
+private:
+  ADCON0 *m_adcon0;
+};
 
-}
-
-// ADCON0 callback is called when the cycle counter hits the break point that
-// was set in ADCON0::put.
-
-void ADCON0::callback(void)
-{
-  int channel;
-  #ifdef DEBUG_AD
-  cout<<"ADCON0 Callback: " << hex << cycles.value << '\n';
-  #endif
-
-  //
-  // The a/d converter is simulated with a state machine. 
-  // 
-
-  switch(ad_state)
-    {
-    case AD_IDLE:
-      cout << "ignoring ad callback since ad_state is idle\n";
-      break;
-
-    case AD_ACQUIRING:
-      channel = (value.get() >> 3) & channel_mask;
-
-      m_dSampledVoltage = adcon1->getChannelVoltage(channel);
-      m_dSampledVrefHi  = adcon1->getVrefHi();
-      m_dSampledVrefLo  = adcon1->getVrefLo();
-
-      future_cycle = get_cycles().value + 5*Tad_2;
-      get_cycles().set_break(future_cycle, this);
-      
-      ad_state = AD_CONVERTING;
-
-      break;
-
-    case AD_CONVERTING:
-
-      put_conversion();
-
-      // Clear the GO/!DONE flag.
-      value.put(value.get() & (~GO));
-      set_interrupt();
-
-      ad_state = AD_IDLE;
-    }
-
-}
-
-//------------------------------------------------------
+//------------------------------------------------------------------------
 //
-void ADCON0::set_interrupt(void)
+P16C71::P16C71()
 {
-  value.put(value.get() | ADIF);
-  intcon->peripheral_interrupt();
+  if(verbose)
+    cout << "c71 constructor, type = " << isa() << '\n';
 
-}
-
-//------------------------------------------------------
-//
-void ADCON0_withccp::set_interrupt(void)
-{
-
-  pir_set->set_adif();
-
+  m_pir = new PIR_16C71(&adcon0);
 }
 
 
-//------------------------------------------------------
-// ADCON1
-//
-ADCON1::ADCON1()
-  : m_AnalogPins(0), m_nAnalogChannels(0),
-    mValidCfgBits(0)
-{
-  for (int i=0; i<cMaxConfigurations; i++) {
-    setChannelConfiguration(i, 0);
-    setVrefLoConfiguration(i, 0xffff);
-    setVrefHiConfiguration(i, 0xffff);
-  }
-}
-
-void ADCON1::setChannelConfiguration(unsigned int cfg, unsigned int bitMask)
-{
-  if (cfg < cMaxConfigurations) 
-    m_configuration_bits[cfg] = bitMask;
-}
-
-void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
-{
-  if (cfg < cMaxConfigurations) 
-    Vreflo_position[cfg] = channel;
-}
-
-void ADCON1::setVrefHiConfiguration(unsigned int cfg, unsigned int channel)
-{
-  if (cfg < cMaxConfigurations) 
-    Vrefhi_position[cfg] = channel;
-}
-
-void ADCON1::setNumberOfChannels(unsigned int nChannels)
-{
-  if (m_nAnalogChannels || !nChannels)
-    return;
-
-  m_nAnalogChannels = nChannels;
-  m_AnalogPins = new PinModule *[m_nAnalogChannels];
-
-  for (unsigned int i=0; i<m_nAnalogChannels; i++)
-    m_AnalogPins[i] = &AnInvalidAnalogInput;
-}
-
-void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
-{
-  if (m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
-    m_AnalogPins[channel] = newPin;
-  }
-}
-
-
-//------------------------------------------------------
-double ADCON1::getChannelVoltage(unsigned int channel)
-{
-  double voltage=0.0;
-  if(channel <= m_nAnalogChannels) {
-    if ( (1<<channel) & m_configuration_bits[value.data & mValidCfgBits]) {
-      PinModule *pm = m_AnalogPins[channel];
-      voltage = (pm != &AnInvalidAnalogInput) ? 
-	pm->getPin().get_nodeVoltage() : 0.0;
-    }
-  }
-
-  return voltage;
-}
-
-double ADCON1::getVrefHi()
-{
-  if (Vrefhi_position[value.data & mValidCfgBits] < m_nAnalogChannels)
-    return getChannelVoltage(Vrefhi_position[value.data & mValidCfgBits]);
-
-  return ((Processor *)cpu)->get_Vdd();
-}
-
-double ADCON1::getVrefLo()
-{
-  if (Vreflo_position[value.data & mValidCfgBits] < m_nAnalogChannels)
-    return getChannelVoltage(Vreflo_position[value.data & mValidCfgBits]);
-
-  return 0.0;
-}
-
-//------------------------------------------------------
-
-
-void P16C71::create_sfr_map(void)
+void P16C71::create_sfr_map()
 {
 
   if(verbose)
@@ -382,21 +93,23 @@ void P16C71::create_sfr_map(void)
   adcon1.setChannelConfiguration(3, 0x00);
   adcon1.setVrefHiConfiguration(1, 3);
 
-  adcon0.adres = &adres;
-  adcon0.adresl = 0;
-  adcon0.adcon1 = &adcon1;
-  adcon0.intcon = &intcon_reg;
+  adcon0.setAdres(&adres);
+  adcon0.setAdresLow(0);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
   intcon = &intcon_reg;
+
+  intcon_reg.set_pir_set(m_pir);
 
 }
 
 
-void P16C71::create_symbols(void)
+void P16C71::create_symbols()
 {
   pic_processor::create_symbols();
 }
 
-void P16C71::create(void)
+void P16C71::create()
 {
 
   P16C61::create();
@@ -405,7 +118,7 @@ void P16C71::create(void)
 
 }
 
-Processor * P16C71::construct(void)
+Processor * P16C71::construct()
 {
 
   P16C71 *p = new P16C71;
@@ -424,16 +137,10 @@ Processor * P16C71::construct(void)
 }
 
 
-P16C71::P16C71(void)
-{
-  if(verbose)
-    cout << "c71 constructor, type = " << isa() << '\n';
-}
-
 
 //--------------------------------------
 
-void P16C712::create_sfr_map(void)
+void P16C712::create_sfr_map()
 {
 
   if(verbose)
@@ -449,10 +156,10 @@ void P16C712::create_sfr_map(void)
   add_sfr_register(&adres,  0x1E, RegisterValue(0,0));
 
   //1adcon0.analog_port = porta;
-  adcon0.adres = &adres;
-  adcon0.adresl = 0;
-  adcon0.adcon1 = &adcon1;
-  adcon0.intcon = &intcon_reg;
+  adcon0.setAdres(&adres);
+  adcon0.setAdresLow(0);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
   //adcon0.channel_mask = 3;
   intcon = &intcon_reg;
 
@@ -481,7 +188,7 @@ void P16C712::create_sfr_map(void)
 
 
 
-void P16C712::create(void)
+void P16C712::create()
 {
 
   if(verbose)
@@ -493,7 +200,7 @@ void P16C712::create(void)
 
 }
 
-Processor * P16C712::construct(void)
+Processor * P16C712::construct()
 {
 
   P16C712 *p = new P16C712;
@@ -512,7 +219,7 @@ Processor * P16C712::construct(void)
 }
 
 
-P16C712::P16C712(void)
+P16C712::P16C712()
 {
   if(verbose)
     cout << "c712 constructor, type = " << isa() << '\n';
@@ -522,7 +229,7 @@ P16C712::P16C712(void)
 
 //--------------------------------------
 
-Processor * P16C716::construct(void)
+Processor * P16C716::construct()
 {
 
   P16C716 *p = new P16C716;
@@ -541,7 +248,7 @@ Processor * P16C716::construct(void)
 }
 
 
-P16C716::P16C716(void)
+P16C716::P16C716()
 {
   if(verbose)
     cout << "c716 constructor, type = " << isa() << '\n';
@@ -551,7 +258,7 @@ P16C716::P16C716(void)
 
 //--------------------------------------
 
-void P16C72::create_sfr_map(void)
+void P16C72::create_sfr_map()
 {
 
   if(verbose)
@@ -566,10 +273,10 @@ void P16C72::create_sfr_map(void)
 
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
-  adcon0.adres = &adres;
-  adcon0.adresl = 0;
-  adcon0.adcon1 = &adcon1;
-  adcon0.intcon = &intcon_reg;
+  adcon0.setAdres(&adres);
+  adcon0.setAdresLow(0);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
   //adcon0.channel_mask = 7;  // even though there are only 5 inputs...
@@ -604,7 +311,7 @@ void P16C72::create_sfr_map(void)
 }
 
 
-void P16C72::create_symbols(void)
+void P16C72::create_symbols()
 {
 
   if(verbose)
@@ -613,7 +320,7 @@ void P16C72::create_symbols(void)
 }
 
 
-void P16C72::create(void)
+void P16C72::create()
 {
 
   P16C62::create();
@@ -622,7 +329,7 @@ void P16C72::create(void)
 
 }
 
-Processor * P16C72::construct(void)
+Processor * P16C72::construct()
 {
 
   P16C72 *p = new P16C72;
@@ -642,7 +349,7 @@ Processor * P16C72::construct(void)
 }
 
 
-P16C72::P16C72(void)
+P16C72::P16C72()
 {
   if(verbose)
     cout << "c72 constructor, type = " << isa() << '\n';
@@ -652,7 +359,7 @@ P16C72::P16C72(void)
 
 //--------------------------------------
 
-void P16C73::create_sfr_map(void)
+void P16C73::create_sfr_map()
 {
 
   if(verbose)
@@ -669,10 +376,10 @@ void P16C73::create_sfr_map(void)
 
   //1adcon0.analog_port = porta;
   //2adcon0.analog_port2 = 0;
-  adcon0.adres = &adres;
-  adcon0.adresl = 0;
-  adcon0.adcon1 = &adcon1;
-  adcon0.intcon = &intcon_reg;
+  adcon0.setAdres(&adres);
+  adcon0.setAdresLow(0);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
   //adcon0.channel_mask = 7;  // even though there are only 5 inputs...
@@ -710,7 +417,7 @@ void P16C73::create_sfr_map(void)
 }
 
 
-void P16C73::create_symbols(void)
+void P16C73::create_symbols()
 {
 
   if(verbose)
@@ -719,7 +426,7 @@ void P16C73::create_symbols(void)
 }
 
 
-void P16C73::create(void)
+void P16C73::create()
 {
 
   P16C63::create();
@@ -728,7 +435,7 @@ void P16C73::create(void)
 
 }
 
-Processor * P16C73::construct(void)
+Processor * P16C73::construct()
 {
 
   P16C73 *p = new P16C73;
@@ -747,7 +454,7 @@ Processor * P16C73::construct(void)
 }
 
 
-P16C73::P16C73(void)
+P16C73::P16C73()
 {
   if(verbose)
     cout << "c73 constructor, type = " << isa() << '\n';
@@ -760,7 +467,7 @@ P16C73::P16C73(void)
 //           16C74
 //
 
-void P16C74::create_sfr_map(void)
+void P16C74::create_sfr_map()
 {
 
   if(verbose)
@@ -777,10 +484,10 @@ void P16C74::create_sfr_map(void)
 
   //1adcon0.analog_port = porta;
   //1adcon0.analog_port2 = porte;
-  adcon0.adres = &adres;
-  adcon0.adresl = 0;
-  adcon0.adcon1 = &adcon1;
-  adcon0.intcon = &intcon_reg;
+  adcon0.setAdres(&adres);
+  adcon0.setAdresLow(0);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
   //adcon0.channel_mask = 7;
@@ -820,7 +527,7 @@ void P16C74::create_sfr_map(void)
 }
 
 
-void P16C74::create_symbols(void)
+void P16C74::create_symbols()
 {
 
   if(verbose)
@@ -829,7 +536,7 @@ void P16C74::create_symbols(void)
 }
 
 
-void P16C74::create(void)
+void P16C74::create()
 {
 
   P16C65::create();
@@ -838,7 +545,7 @@ void P16C74::create(void)
 
 }
 
-Processor * P16C74::construct(void)
+Processor * P16C74::construct()
 {
 
   P16C74 *p = new P16C74;
@@ -857,7 +564,7 @@ Processor * P16C74::construct(void)
 }
 
 
-P16C74::P16C74(void)
+P16C74::P16C74()
 {
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';

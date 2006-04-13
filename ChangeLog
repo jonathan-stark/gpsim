@@ -1,3 +1,29 @@
+2006-04-13 Scott Dattalo <scott@dattalo.com>
+
+	* src/Makefile.am, src/a2dconverter.h, src/a2dconverter.cc: New
+	Files.
+	* src/p16f87x.cc, src/p16x7x.h, src/p16x7x.cc:  Removed
+	a2d-specific stuff from p16x7x.[h,cc] and placed it into
+	a2dconverter.[h,cc].
+	Also, the p16c71 doesn't have a PIR register. The INTCON class
+	assumes that there is one. So a special (non-existant) PIR
+	register has been created that is not instantiated in the register
+	map, but is capable of communicating PIR-specific information with
+	those peripherals that implement their own PIR functionality (this
+	is currently only the P16C71 A2D module).
+	* src/pir.h: The PIR_SET used to be a pure virtual base
+	class. This class needs to be redesigned... 
+	* src/pir.h: Made class members private.
+	* src/gpsim_object.h, src/gpsim_object.cc, src/value.h,
+	src/value.cc: Moved Value descriptions into the parent gpsimObject
+	class. The purpose of this change is to provide a uniform way in
+	which gpsimObjects (like processors and modules) can describe
+	themselves.
+
+	* modules/resistor.cc: Added a voltage attribute to pull up
+	resistors. Now pullup resistors can be used as general purpose
+	voltage sources.
+	
 2006-04-11 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Double clicks in the source browser were
 	causing segv's
