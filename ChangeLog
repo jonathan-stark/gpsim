@@ -7,7 +7,7 @@
 	  regression/comparator/compar_677.stc,
 	  regression/eeprom_wide/eeprom_wide.stc: changed libgpsim_modules.so
 	  with libgpsim_modules so that it runs on WIN32
-	* src/makefile.mingw, src/src.vcproj: WIN32 sync
+	* src/makefile.mingw, src/src.vcproj, plat/win32/libgpsim.def: WIN32 sync
 
 2006-04-13 Scott Dattalo <scott@dattalo.com>
 
@@ -34,7 +34,7 @@
 	* modules/resistor.cc: Added a voltage attribute to pull up
 	resistors. Now pullup resistors can be used as general purpose
 	voltage sources.
-	
+
 2006-04-11 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Double clicks in the source browser were
 	causing segv's
@@ -160,13 +160,13 @@
 	* gui/gui_regwin.cc, gui/gui_regwin.h: The register window cells
 	were not getting resized correctly whenever the font was
 	changed. Also, the default font was changed to Monospace.
-	
+
 2006-03-24 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.h, src/symbol.cc: Added a convenience function for
 	searching the symbol table for strings.
 	* src/processor.h, src/processor.cc: Change FileContext::Add
 	method to accept only a const char *.
-	
+
 2006-03-24 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/processor.cc: The FileContext class now
 	handles list files.

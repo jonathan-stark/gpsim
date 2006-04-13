@@ -266,7 +266,7 @@ EXPORTS
     ?Debug@Processor@@UAEXXZ
     ?debug@AliasedInstruction@@UAEXXZ
     ?decode@instruction@@QAEXPAVProcessor@@I@Z
-    ?description@Value@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+	?description@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?destroyProgramMemoryAccess@Processor@@UAEXPAVProgramMemoryAccess@@@Z
     ?detach_stimulus@Stimulus_Node@@QAEXPAVstimulus@@@Z
     ?detach@stimulus@@UAEXPAVStimulus_Node@@@Z
@@ -556,7 +556,7 @@ EXPORTS
     ?set_cpu@MemoryAccess@@UAEXPAVProcessor@@@Z
     ?set_cpu@gpsimValue@@UAEXPAVProcessor@@@Z
     ?set_cycle_break@Breakpoints@@QAEHPAVProcessor@@_KPAVTriggerObject@@@Z
-    ?set_description@Value@@QAEXPBD@Z
+	?set_description@gpsimObject@@QAEXPBD@Z
     ?set_execution_break@Breakpoints@@QAEHPAVProcessor@@IPAVExpression@@@Z
     ?set_expression@Breakpoints@@QAE_NIPAVExpression@@@Z
     ?set_Expression@TriggerObject@@UAEXPAVExpression@@@Z
