@@ -75,7 +75,7 @@ void P16F871::create_sfr_map(void)
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
-  adcon0.adresl = &adresl;
+  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -227,7 +227,7 @@ void P16F873::create_sfr_map(void)
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
-  adcon0.adresl = &adresl;
+  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -390,7 +390,7 @@ void P16F873A::create_sfr_map(void)
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
-  adcon0.adresl = &adresl;
+  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -606,7 +606,7 @@ void P16F874::create_sfr_map(void)
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
-  adcon0.adresl = &adresl;
+  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -755,7 +755,7 @@ void P16F874A::create_sfr_map(void)
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
-  adcon0.adresl = &adresl;
+  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);

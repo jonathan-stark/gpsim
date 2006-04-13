@@ -19,6 +19,7 @@ libgpsim_la_SOURCES = \
 	16bit-hexdecode.cc \
 	16bit-tmrs.cc \
 	attributes.cc \
+	a2dconverter.cc \
 	bitlog.cc \
 	bit.cc \
 	bytelog.cc \
