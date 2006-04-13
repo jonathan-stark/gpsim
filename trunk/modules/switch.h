@@ -58,8 +58,8 @@ public:
 
   void buttonToggled();
 
-  virtual double Switch::do_voltage(SwitchPin *pin);
-  virtual void Switch::sum_Thevenin(SwitchPin *pin, double &current, 
+  virtual double do_voltage(SwitchPin *pin);
+  virtual void sum_Thevenin(SwitchPin *pin, double &current, 
 		double &conductance, double &Cth);
   virtual void callback(void);
   virtual double get_nodeVoltage() { return voltage; }

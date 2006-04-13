@@ -43,6 +43,7 @@ src_OBJECTS =			\
 	16bit-processors.o	\
 	16bit-registers.o	\
 	16bit-tmrs.o		\
+	a2dconverter.o		\
 	attributes.o		\
 	bitlog.o		\
 	breakpoints.o		\

@@ -39,7 +39,7 @@ namespace dspic {
 
     // create - build the dsPic
     virtual void create ();
-    virtual void dsPicProcessor::create_sfr_map();
+    virtual void create_sfr_map();
 
     virtual unsigned int program_memory_size() const { return 0x1000; };
     virtual unsigned int register_memory_size () const { return 0x2800;};
