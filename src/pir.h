@@ -44,7 +44,7 @@ public:
   }
   virtual void set_ccpif(){}
 
-  virtual bool interrupt_status(void)
+  virtual bool interrupt_status()
     {
       if( value.get() & valid_bits & pie->value.get())
 	return true;
@@ -90,59 +90,59 @@ enum
     EEIF    = 1<<7      // 16f62x
 };
 
-  inline void set_tmr1if(void)
+  inline void set_tmr1if()
     {
       put(get() | TMR1IF);
     }
 
-  inline void set_tmr2if(void)
+  inline void set_tmr2if()
     {
       put(get() | TMR2IF);
     }
 
-  void set_ccpif(void)
+  void set_ccpif()
     {
       put(get() | CCP1IF);
     }
 
-  inline void set_sspif(void)
+  inline void set_sspif()
     {
       put(get() | SSPIF);
     }
 
-  void set_txif(void);
-  inline void set_rcif(void)
+  void set_txif();
+  inline void set_rcif()
     {
       put(get() | RCIF);
     }
 
-  void set_cmif(void);
+  void set_cmif();
 
-  inline void set_eeif(void)
+  inline void set_eeif()
     {
       put(get() | EEIF);
     }
 
-  unsigned int get_sspif(void)
+  unsigned int get_sspif()
   {
 	return value.get() & SSPIF;
   }
-  void clear_sspif(void);
+  void clear_sspif();
 
- unsigned int get_txif(void)
+ unsigned int get_txif()
    {
      return value.get() & TXIF;
    }
- void clear_txif(void);
+ void clear_txif();
 
- unsigned int get_rcif(void)
+ unsigned int get_rcif()
    {
      return value.get() & RCIF;
    }
- void clear_rcif(void);
+ void clear_rcif();
  
 
- PIR1v1(void)
+ PIR1v1()
    {
      // Even though TXIF is a valid bit, it can't be written by the PIC
      // source code.  Its state reflects whether the usart txreg is full
@@ -174,60 +174,60 @@ public:
       PSPIF   = 1<<7
     };
  
-  inline void set_tmr1if(void)
+  inline void set_tmr1if()
     {
       put(get() | TMR1IF);
     }
 
-  inline void set_tmr2if(void)
+  inline void set_tmr2if()
     {
       put(get() | TMR2IF);
     }
 
-  void set_ccpif(void)
+  void set_ccpif()
     {
       put(get() | CCP1IF);
     }
 
-  inline void set_sspif(void)
+  inline void set_sspif()
     {
       put(get() | SSPIF);
     }
 
-  unsigned int get_sspif(void)
+  unsigned int get_sspif()
     {
       return value.get() & SSPIF;
     }
-  void clear_sspif(void);
+  void clear_sspif();
 
-  void set_txif(void);
-  inline void set_rcif(void)
+  void set_txif();
+  inline void set_rcif()
     {
       put(get() | RCIF);
     }
 
-  inline void set_adif(void)
+  inline void set_adif()
     {
       put(get() | ADIF);
     }
 
-  inline void set_pspif(void)
+  inline void set_pspif()
     {
       put(get() | PSPIF);
     }
 
-  unsigned int get_txif(void)
+  unsigned int get_txif()
     {
       return value.get() & TXIF;
     }
-  void clear_txif(void);
-  unsigned int get_rcif(void)
+  void clear_txif();
+  unsigned int get_rcif()
     {
       return value.get() & RCIF;
     }
-  void clear_rcif(void);
+  void clear_rcif();
  
-  PIR1v2(void)
+  PIR1v2()
     {
       // Even though TXIF is a valid bit, it can't be written by the PIC
       // source code.  Its state reflects whether the usart txreg is full
@@ -252,12 +252,12 @@ enum
     CCP2IF  = 1<<0
 };
 
-  void set_ccpif(void)
+  void set_ccpif()
     {
       put(get() | CCP2IF);
     }
 
-  PIR2v1(void)
+  PIR2v1()
     {
       valid_bits = CCP2IF;
     }
@@ -283,32 +283,32 @@ enum
     CMIF    = 1<<6		/* only on the PIC18F4xx devices */
 };
 
-  void set_eccp1if(void)
+  void set_eccp1if()
     {
       put(get() | ECCP1IF);
     }
 
-  void set_tmr3if(void)
+  void set_tmr3if()
     {
       put(get() | TMR3IF);
     }
 
-  void set_lvdif(void)
+  void set_lvdif()
     {
       put(get() | LVDIF);
     }
 
-  void set_bclif(void)
+  void set_bclif()
     {
       put(get() | BCLIF);
     }
 
-  void set_eeif(void)
+  void set_eeif()
     {
       put(get() | EEIF);
     }
 
-  PIR2v2(void)
+  PIR2v2()
     {
       valid_bits = ECCP1IF | TMR3IF | LVDIF | BCLIF | EEIF | CMIF;
     }
@@ -337,47 +337,47 @@ enum
     IRXIF   = 1<<7
 };
 
-  void set_rxb0if(void)
+  void set_rxb0if()
     {
       put(get() | RXB0IF);
     }
 
-  void set_rxb1if(void)
+  void set_rxb1if()
     {
       put(get() | RXB1IF);
     }
 
-  void set_txb0if(void)
+  void set_txb0if()
     {
       put(get() | TXB0IF);
     }
 
-  void set_txb1if(void)
+  void set_txb1if()
     {
       put(get() | TXB1IF);
     }
 
-  void set_txb2if(void)
+  void set_txb2if()
     {
       put(get() | TXB2IF);
     }
 
-  void set_errif(void)
+  void set_errif()
     {
       put(get() | ERRIF);
     }
 
-  void set_wakif(void)
+  void set_wakif()
     {
       put(get() | WAKIF);
     }
 
-  void set_irxif(void)
+  void set_irxif()
     {
       put(get() | IRXIF);
     }
 
-  PIR3v2(void)
+  PIR3v2()
     {
       valid_bits = RXB0IF | RXB1IF | TXB0IF | TXB1IF | TXB2IF | ERRIF |
                    WAKIF | IRXIF;
@@ -399,30 +399,52 @@ enum
 class PIR_SET
 {
 public:
-  virtual bool interrupt_status(void) = 0;
+  virtual bool interrupt_status()
+  {
+    return false;
+  }
 
   // uart stuff
-  virtual bool get_txif(void) = 0;
-  virtual void set_txif(void) = 0;
-  virtual void clear_txif(void) = 0;
-  virtual bool get_rcif(void) = 0;
-  virtual void set_rcif(void) = 0;
-  virtual void clear_rcif(void) = 0;
+  virtual bool get_txif()
+  {
+    return false;
+  }
+  virtual void set_txif()
+  {}
+  virtual void clear_txif()
+  {}
+  virtual bool get_rcif()
+  {
+    return false;
+  }
+  virtual void set_rcif()
+  {}
+  virtual void clear_rcif()
+  {}
 	
   // ssp stuff
-  virtual bool get_sspif(void) = 0;
-  virtual void set_sspif(void) = 0;
-  virtual void clear_sspif(void) = 0;
+  virtual bool get_sspif()
+  {
+    return false;
+  }
+  virtual void set_sspif()
+  {}
+  virtual void clear_sspif()
+  {}
 
   // eeprom stuff
-  virtual void set_eeif(void) = 0;
+  virtual void set_eeif()
+  {}
 
   // CCP stuff
-  virtual void set_ccpif(void) = 0;
+  virtual void set_ccpif()
+  {}
 
   // Timer stuff
-  virtual void set_tmr1if(void) = 0;
-  virtual void set_tmr2if(void) = 0;
+  virtual void set_tmr1if()
+  {}
+  virtual void set_tmr2if()
+  {}
 };
 
 
@@ -435,7 +457,7 @@ class PIR_SET_1 : public PIR_SET
   void set_pir1(PIR1v1 *p1) { pir1 = p1; }
   void set_pir2(PIR2v1 *p2) { pir2 = p2; }
 
-  virtual bool interrupt_status(void) {
+  virtual bool interrupt_status() {
     assert(pir1 != 0);
     if (pir2 != 0)
       return (pir1->interrupt_status() ||
@@ -445,74 +467,74 @@ class PIR_SET_1 : public PIR_SET
   }
 
   // uart stuff
-  virtual bool get_txif(void) {
+  virtual bool get_txif() {
     assert(pir1 != 0);
     return (pir1->get_txif() != 0);
   }
-  virtual void set_txif(void) {
+  virtual void set_txif() {
     assert(pir1 != 0);
     pir1->set_txif();
   }
-  virtual void clear_txif(void) {
+  virtual void clear_txif() {
     assert(pir1 != 0);
     pir1->clear_txif();
   }
-  virtual bool get_rcif(void) {
+  virtual bool get_rcif() {
     assert(pir1 != 0);
     return (pir1->get_rcif() != 0);
   }
-  virtual void set_rcif(void) {
+  virtual void set_rcif() {
     assert(pir1 != 0);
     pir1->set_rcif();
   }
-  virtual void clear_rcif(void) {
+  virtual void clear_rcif() {
     assert(pir1 != 0);
     pir1->clear_rcif();
   }
 	
   // ssp stuff
-  virtual bool get_sspif(void) {
+  virtual bool get_sspif() {
     assert(pir1 != 0);
     return (pir1->get_sspif() != 0);
   }
-  virtual void set_sspif(void) {
+  virtual void set_sspif() {
     assert(pir1 != 0);
     pir1->set_sspif();
   }
-  virtual void clear_sspif(void) {
+  virtual void clear_sspif() {
     assert(pir1 != 0);
     pir1->clear_sspif();
   }
 
   // eeprom stuff
-  virtual void set_eeif(void) {
+  virtual void set_eeif() {
     assert(pir1 != 0);
     pir1->set_eeif();
   }
 
   // CCP stuff
-  virtual void set_ccpif(void) {
+  virtual void set_ccpif() {
     assert(pir1 != 0);
     pir1->set_ccpif();
   }
 
   // Timer stuff
-  virtual void set_tmr1if(void) {
+  virtual void set_tmr1if() {
     assert(pir1 != 0);
     pir1->set_tmr1if();
   }
-  virtual void set_tmr2if(void) {
+  virtual void set_tmr2if() {
     assert(pir1 != 0);
     pir1->set_tmr2if();
   }
 
   // Comparator
-  virtual void set_cmif(void) {
+  virtual void set_cmif() {
     assert(pir1 != 0);
     pir1->set_cmif();
   }
 
-  // private:
+private:
   PIR1v1	*pir1;
   PIR2v1	*pir2;
 };
@@ -528,82 +550,82 @@ class PIR_SET_2 : public PIR_SET
   void set_pir2(PIR2v2 *p2) { pir2 = p2; }
   void set_pir3(PIR3v2 *p3) { pir3 = p3; }
 
-  virtual bool interrupt_status(void) {
+  virtual bool interrupt_status() {
     assert(pir1 != 0);
     assert(pir2 != 0);
     return (pir1->interrupt_status() || pir2->interrupt_status());
   }
 
   // uart stuff
-  virtual bool get_txif(void) {
+  virtual bool get_txif() {
     assert(pir1 != 0);
     return (pir1->get_txif() != 0);
   }
-  virtual void set_txif(void) {
+  virtual void set_txif() {
     assert(pir1 != 0);
     pir1->set_txif();
   }
-  virtual void clear_txif(void) {
+  virtual void clear_txif() {
     assert(pir1 != 0);
     pir1->clear_txif();
   }
-  virtual bool get_rcif(void) {
+  virtual bool get_rcif() {
     assert(pir1 != 0);
     return (pir1->get_rcif() != 0);
   }
-  virtual void set_rcif(void) {
+  virtual void set_rcif() {
     assert(pir1 != 0);
     pir1->set_rcif();
   }
-  virtual void clear_rcif(void) {
+  virtual void clear_rcif() {
     assert(pir1 != 0);
     pir1->clear_rcif();
   }
 	
   // ssp stuff
-  virtual bool get_sspif(void) {
+  virtual bool get_sspif() {
     assert(pir1 != 0);
     return (pir1->get_sspif() != 0);
   }
-  virtual void set_sspif(void) {
+  virtual void set_sspif() {
     assert(pir1 != 0);
     pir1->set_sspif();
   }
-  virtual void clear_sspif(void) {
+  virtual void clear_sspif() {
     assert(pir1 != 0);
     pir1->clear_sspif();
   }
 
 
   // eeprom stuff
-  virtual void set_eeif(void) {
+  virtual void set_eeif() {
     assert(pir2 != 0);
     pir2->set_eeif();
   }
 
   // CCP stuff
-  virtual void set_ccpif(void) {
+  virtual void set_ccpif() {
     assert(pir1 != 0);
     pir1->set_ccpif();
   }
 
   // Timer stuff
-  virtual void set_tmr1if(void) {
+  virtual void set_tmr1if() {
     assert(pir1 != 0);
     pir1->set_tmr1if();
   }
-  virtual void set_tmr2if(void) {
+  virtual void set_tmr2if() {
     assert(pir1 != 0);
     pir1->set_tmr2if();
   }
 
   // A/D stuff - not part of base PIR_SET class
-  virtual void set_adif(void) {
+  virtual void set_adif() {
     assert(pir1 != 0);
     pir1->set_adif();
   }
 
-  // private:
+private:
   PIR1v2	*pir1;
   PIR2v2	*pir2;
   PIR3v2	*pir3;
