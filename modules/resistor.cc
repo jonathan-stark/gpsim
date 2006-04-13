@@ -50,6 +50,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/symbol.h"
 #include "../src/value.h"
 
+//----------------------------------------
 
 class ResistanceAttribute : public Float {
 
@@ -58,16 +59,11 @@ public:
 
 
   ResistanceAttribute(PullupResistor *ppur) 
-    : Float(0.0)
+    : Float("resistance",0.0,"resistance value of the pullup"),
+      pur(ppur)
   {
-
-    pur = ppur;
-    if(!pur)
-      return;
-
-    new_name("resistance");
-
-    Float::set(pur->res.get_Zth());
+    if(pur)
+      Float::set(pur->res.get_Zth());
   }
 
 
@@ -75,10 +71,8 @@ public:
 
     Float::set(r);
 
-    if(!pur)
-      return;
-
-    pur->res.set_Zpullup(r);
+    if(pur)
+      pur->res.set_Zpullup(r);
 
   };
 
@@ -87,6 +81,9 @@ public:
     set(double(r));
   };
 };
+
+//----------------------------------------
+
 class CapacitanceAttribute : public Float {
 
 public:
@@ -94,16 +91,11 @@ public:
 
 
   CapacitanceAttribute(PullupResistor *ppur) 
-    : Float(0.0)
+    : Float("Capacitance",0.0,"pin capacitance of pullup resistor"),
+      pur(ppur)
   {
-
-    pur = ppur;
-    if(!pur)
-      return;
-
-    new_name("Capacitance");
-
-    Float::set(pur->res.get_Cth());
+    if(pur)
+      Float::set(pur->res.get_Cth());
   }
 
 
@@ -111,10 +103,8 @@ public:
 
     Float::set(r);
 
-    if(!pur)
-      return;
-
-    pur->res.set_Cth(r);
+    if(pur)
+      pur->res.set_Cth(r);
 
   };
 
@@ -124,19 +114,47 @@ public:
   };
 };
 
+//----------------------------------------
+
+class VoltageAttribute : public Float {
+
+public:
+  PullupResistor *pur;
+
+
+  VoltageAttribute(PullupResistor *ppur) 
+    : Float("voltage",0.0,"Voltage of pullup resistor"),
+      pur(ppur)
+  {
+    if(pur)
+      Float::set(pur->res.get_Vpullup());
+  }
+
+
+  void set(double r) {
+
+    Float::set(r);
+
+    if(pur)
+      pur->res.set_Vpullup(r);
+
+  };
+
+
+  void set(int r) {
+    set(double(r));
+  };
+};
 
 //--------------------------------------------------------------
 void Resistor_IOPORT::trace_register_write(void)
 {
-
-  //get_trace().module1(value.get());
   get_trace().raw(value.get());
 }
 
 //--------------------------------------------------------------
 Resistor::Resistor(void)
 {
-
   name_str = strdup("Resistor");
 }
 
@@ -304,14 +322,17 @@ PullupResistor::PullupResistor(const char *init_name)
   // to res.Zth with a symbol name of "modulename + '.resistance'".
   ResistanceAttribute *attr = new ResistanceAttribute(this);
   CapacitanceAttribute *cattr = new CapacitanceAttribute(this);
+  VoltageAttribute *vattr = new VoltageAttribute(this);
 
   add_attribute(attr);
   add_attribute(cattr);
+  add_attribute(vattr);
 
   attr->set(10e3);
   cattr->set(0.);
   res.setDriving(false);
   res.update_pullup('1',true);
+  vattr->set(res.get_Vpullup());
 
 #ifdef MANAGING_GUI
   pu_window = 0;
