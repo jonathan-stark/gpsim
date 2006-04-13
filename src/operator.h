@@ -336,7 +336,7 @@ class OpAddressOf : public UnaryOperator {
 public:
   OpAddressOf(Expression* expr);
   virtual ~OpAddressOf();
-  Value* OpAddressOf::evaluate();
+  Value* evaluate();
   Value* applyOp(Value* value);
 };
 

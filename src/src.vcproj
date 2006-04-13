@@ -243,6 +243,9 @@
 				RelativePath=".\16bit-tmrs.cc">
 			</File>
 			<File
+				RelativePath=".\a2dconverter.cc">
+			</File>
+			<File
 				RelativePath=".\attributes.cc">
 			</File>
 			<File
@@ -480,6 +483,9 @@
 			</File>
 			<File
 				RelativePath=".\16bit-tmrs.h">
+			</File>
+			<File
+				RelativePath=".\a2dconverter.h">
 			</File>
 			<File
 				RelativePath=".\attributes.h">

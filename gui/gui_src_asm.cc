@@ -946,8 +946,6 @@ static void
 _popup_activated(GtkWidget *widget, gpointer data)
 {
   menu_item *item;
-  unsigned int id, address, line;
-  char text[256];
 
   SourceWindow *pSW = 0;
   if (!pViewContainingPopup) {
@@ -1138,7 +1136,6 @@ _build_menu(SourceWindow *sbaw)
   GtkWidget *submenu;
   GtkWidget *item;
   unsigned int i;
-  int id;
 
   _popup_sbaw=sbaw;
 

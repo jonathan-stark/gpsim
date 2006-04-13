@@ -1,3 +1,14 @@
+2006-04-13 Borut Razem <borut.razem@siol.net>
+	* gui/gui_src_asm.cc: removed warnings
+	* modules/switch.h, src/dspic/dspic-processors.h, src/operator.h:
+	  enable compilation on Fedora Core 5 (gcc 4.1.0)
+	* regression/comparator/compar_628.stc,
+	  regression/comparator/compar_673a.stc,
+	  regression/comparator/compar_677.stc,
+	  regression/eeprom_wide/eeprom_wide.stc: changed libgpsim_modules.so
+	  with libgpsim_modules so that it runs on WIN32
+	* src/makefile.mingw, src/src.vcproj: WIN32 sync
+
 2006-04-13 Scott Dattalo <scott@dattalo.com>
 
 	* src/Makefile.am, src/a2dconverter.h, src/a2dconverter.cc: New

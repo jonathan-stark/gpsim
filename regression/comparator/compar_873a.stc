@@ -4,7 +4,7 @@
 load compar_873a.cod
 
 # Module libraries:
-module library libgpsim_modules.so
+module library libgpsim_modules
 
 
 # Modules:
