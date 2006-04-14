@@ -1249,6 +1249,11 @@ void module_symbol::get(char *cP, int len)
   }
 }
 
+string module_symbol::description()
+{
+  return module ? module->description() : string("no description");
+}
+
 //------------------------------------------------------------------------
 
 attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)

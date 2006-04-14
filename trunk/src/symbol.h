@@ -566,6 +566,7 @@ public:
   virtual string toString();
   Module *get_module() { return module;}
   virtual Value *copy();
+  virtual string description();
 
   /// The set and get methods for the module_symbol take char strings
   /// as their inputs. These strings are dynamically decoded such
