@@ -499,11 +499,11 @@ static gboolean TagEvent (GtkTextTag *texttag,
 			  GtkTextIter *arg2,
 			  TextStyle *pTextStyle)
 {
-  /**/
+  /*
   static int seq=0;
   printf("Received tag event signal Tag:%p arg1:%p seq %d Event:%p iter:%p user:%p %08X Line:%d\n",
 	 texttag, arg1,seq++,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
-  /**/
+  */
   if (isButtonEvent(event->type)) {
     GdkEventButton *evtButton = (GdkEventButton *) event;
 
