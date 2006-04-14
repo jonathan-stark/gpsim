@@ -72,3 +72,4 @@ ${RT} comparator sim_628
 
 ${RT} comparator sim_877a
 
+${RT} a2d sim_71
