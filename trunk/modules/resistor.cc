@@ -135,9 +135,10 @@ public:
 
     Float::set(r);
 
-    if(pur)
+    if(pur) {
       pur->res.set_Vpullup(r);
-
+      pur->res.updateNode();
+    }
   };
 
 
@@ -312,11 +313,20 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 //--------------------------------------------------------------
 PullupResistor::PullupResistor(const char *init_name)
 {
-  // Create the resistor:
 
+  // set the module name
   if(init_name)
-    // set the module name
     new_name(init_name);
+
+  set_description("\
+pullup resistor or generic voltage source\n\
+ Attributes:\n\
+ .resistance - pullup resistance\n\
+ .voltage - pullup or drive voltage\n\
+ .capacitance - pin capacitance\n\
+");
+
+  cout << description() << endl;
 
   // Note ResistanceAttribute is designed to give access
   // to res.Zth with a symbol name of "modulename + '.resistance'".
