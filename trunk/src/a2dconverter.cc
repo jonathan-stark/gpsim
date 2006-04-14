@@ -185,6 +185,10 @@ void ADCON0::put_conversion(void)
 
   unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage);
 
+  if (verbose)
+    printf("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
+	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage);
+
   if(adresl) {   // non-null for 16f877
 
 

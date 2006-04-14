@@ -97,6 +97,8 @@ void P16C71::create_sfr_map()
   adcon0.setAdresLow(0);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(8);
+
   intcon = &intcon_reg;
 
   intcon_reg.set_pir_set(m_pir);
