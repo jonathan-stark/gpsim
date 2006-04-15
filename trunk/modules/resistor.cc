@@ -91,7 +91,7 @@ public:
 
 
   CapacitanceAttribute(PullupResistor *ppur) 
-    : Float("Capacitance",0.0,"pin capacitance of pullup resistor"),
+    : Float("capacitance",0.0,"pin capacitance of pullup resistor"),
       pur(ppur)
   {
     if(pur)
