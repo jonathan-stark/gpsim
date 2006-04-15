@@ -3,6 +3,7 @@
 	* src/a2dconverter.*: svn:keywords=Author Date Id Revision,
 	  svn:eol-style=native
 	* src/a2dconverter.cc: corrected include path to "../config.h"
+	* regression/switch_test/switch_test.stc: corected 'capacitance'
 
 2006-04-15 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-registers.h, src/16bit-processors.cc,

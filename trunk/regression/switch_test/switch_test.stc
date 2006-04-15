@@ -11,11 +11,11 @@ SW1.state=false
 
 module load pullup PU1
 PU1.resistance=10000.
-PU1.Capacitance=1.00e-07
+PU1.capacitance=1.00e-07
 
 module load pulldown PD1
 PD1.resistance=10000.
-PD1.Capacitance=2.00e-06
+PD1.capacitance=2.00e-06
 
 # Connections:
 node nb0
