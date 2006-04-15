@@ -564,20 +564,21 @@ void stimulus::show()
 string stimulus::toString() 
 {
   ostringstream s;
-  s << name();
+
+  s << "stimulus ";
   if(snode)
     s << " attached to " << snode->name();
   s << endl
-       << "  Vth=" << get_Vth() << "V"
-       << "  Zth=" << get_Zth() << " ohms"
-       << "  Cth=" << get_Cth() << " F"
-       << "  nodeVoltage= " << get_nodeVoltage() << "V"
-       << endl 
-       << " Driving=" << getDriving()
-       << " drivingState=" << getDrivingState()
-       << " drivenState=" << getDrivenState()
-       << " bitState=" << getBitChar()
-       << endl;
+    << " Vth=" << get_Vth() << "V"
+    << " Zth=" << get_Zth() << " ohms"
+    << " Cth=" << get_Cth() << "F"
+    << " nodeVoltage= " << get_nodeVoltage() << "V"
+    << endl 
+    << " Driving=" << getDriving()
+    << " drivingState=" << getDrivingState()
+    << " drivenState=" << getDrivenState()
+    << " bitState=" << getBitChar();
+
   return s.str();
 }
 void stimulus::attach(Stimulus_Node *s)
