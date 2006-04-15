@@ -1285,6 +1285,23 @@ USART_MODULE16::USART_MODULE16(void)
 }
 
 //-------------------------------------------------------------------
+ADCON0_16::ADCON0_16()
+  : m_pPir(0)
+{
+}
+
+void ADCON0_16::setPir(PIR *pPir)
+{
+  m_pPir = pPir;
+}
+
+void ADCON0_16::set_interrupt()
+{
+  if (m_pPir)
+    m_pPir->set_adif();
+}
+
+//-------------------------------------------------------------------
 //
 //  Table Reads and Writes
 //

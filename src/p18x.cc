@@ -335,6 +335,9 @@ void P18C4x2::create_sfr_map()
   add_sfr_register(m_trisd,       0xf95,RegisterValue(0xff,0));
   add_sfr_register(m_trise,       0xf96,RegisterValue(0x07,0));
 
+  adcon1.setIOPin(5, &(*m_porte)[0]);
+  adcon1.setIOPin(6, &(*m_porte)[1]);
+  adcon1.setIOPin(7, &(*m_porte)[2]);
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
 

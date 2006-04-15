@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-tmrs.h"
 #include "pir.h"
 #include "uart.h"
+#include "a2dconverter.h"
 
 // forward references
 
@@ -89,7 +90,10 @@ public:
   PicLatchRegister *m_latc;
 
 
-
+  ADCON0_16    adcon0;
+  ADCON1       adcon1;
+  ADRES        adresl;
+  ADRES        adresh;
   INTCON_16    intcon;
   INTCON2      intcon2;
   INTCON3      intcon3;

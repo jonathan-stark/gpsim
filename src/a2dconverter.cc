@@ -27,6 +27,13 @@ Boston, MA 02111-1307, USA.  */
 
 static PinModule AnInvalidAnalogInput;
 
+#define DEBUG
+#if defined(DEBUG)
+#include "config.h"
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
 
 //------------------------------------------------------
 // ADRES
@@ -79,12 +86,10 @@ void ADCON0::setA2DBits(unsigned int nBits)
 void ADCON0::start_conversion(void)
 {
 
-  #ifdef DEBUG_AD
-  cout << "starting A/D conversion\n";
-  #endif
+  Dprintf(("starting A/D conversion\n"));
 
   if(!(value.get() & ADON) ) {
-    //cout << " A/D converter is disabled\n";
+    Dprintf((" A/D converter is disabled\n"));
     stop_conversion();
     return;
   }
@@ -110,9 +115,8 @@ void ADCON0::start_conversion(void)
 void ADCON0::stop_conversion(void)
 {
 
-  #ifdef DEBUG_AD
-  cout << "stopping A/D conversion\n";
-  #endif
+  Dprintf(("stopping A/D conversion\n"));
+
   ad_state = AD_IDLE;
 
 }
@@ -155,22 +159,18 @@ void ADCON0::put(unsigned int new_value)
   unsigned int old_value=value.get();
   // SET: Reflect it first!
   value.put(new_value);
-  if(new_value & ADON)
-    {
-      // The A/D converter is being turned on (or maybe left on)
+  if(new_value & ADON) {
+    // The A/D converter is being turned on (or maybe left on)
 
-      //if(((new_value ^ value) & GO) == GO)
-      if((new_value & ~old_value) & GO)
-	{
-	  // The 'GO' bit is being turned on, which is request to initiate
-	  // and A/D conversion
-	  start_conversion();
-	}
+    if((new_value & ~old_value) & GO) {
+      if (verbose)
+	printf("starting A2D conversion\n");
+      // The 'GO' bit is being turned on, which is request to initiate
+      // and A/D conversion
+      start_conversion();
     }
-  else
-    {
-      stop_conversion();
-    }
+  } else
+    stop_conversion();
 
 }
 
@@ -185,15 +185,14 @@ void ADCON0::put_conversion(void)
 
   unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage);
 
-  if (verbose)
-    printf("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
-	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage);
+  Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
+	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
 
   if(adresl) {   // non-null for 16f877
 
 
-    if(verbose)
-      cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
+    Dprintf(("10-bit result 0x%x\n",converted &0x3ff));
+
     if(adcon1->value.get() & ADCON1::ADFM) {
       adresl->put(converted & 0xff);
       adres->put( (converted >> 8) & 0x3);
@@ -204,8 +203,7 @@ void ADCON0::put_conversion(void)
 
   } else {
 
-    if(verbose)
-      cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
+    Dprintf(("8-bit result 0x%x\n",converted & 0xff));
 
     adres->put((converted ) & 0xff);
 
@@ -219,9 +217,8 @@ void ADCON0::put_conversion(void)
 void ADCON0::callback(void)
 {
   int channel;
-  #ifdef DEBUG_AD
-  cout<<"ADCON0 Callback: " << hex << cycles.value << '\n';
-  #endif
+
+  Dprintf((" ADCON0 Callback: 0x%"PRINTF_INT64_MODIFIER"x\n",cycles.value));
 
   //
   // The a/d converter is simulated with a state machine. 
@@ -230,7 +227,7 @@ void ADCON0::callback(void)
   switch(ad_state)
     {
     case AD_IDLE:
-      cout << "ignoring ad callback since ad_state is idle\n";
+      Dprintf(("ignoring ad callback since ad_state is idle\n"));
       break;
 
     case AD_ACQUIRING:
@@ -239,6 +236,9 @@ void ADCON0::callback(void)
       m_dSampledVoltage = adcon1->getChannelVoltage(channel);
       m_dSampledVrefHi  = adcon1->getVrefHi();
       m_dSampledVrefLo  = adcon1->getVrefLo();
+
+      Dprintf(("Acquiring channel:%d V=%g reflo=%g refhi=%g\n",
+	       channel,m_dSampledVoltage,m_dSampledVrefLo,m_dSampledVrefHi));
 
       future_cycle = get_cycles().value + 5*Tad_2;
       get_cycles().set_break(future_cycle, this);
@@ -325,8 +325,11 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
 
 void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
 {
-  if (m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
+  if (channel < m_nAnalogChannels && 
+      m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
     m_AnalogPins[channel] = newPin;
+  } else {
+    printf("%s:%d WARNING invalid channel number config for ADCON1\n",__FILE__,__LINE__);
   }
 }
 
