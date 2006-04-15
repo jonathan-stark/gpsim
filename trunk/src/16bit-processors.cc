@@ -128,17 +128,10 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ccpr1l,	  0xfbe,porv,"ccpr1l");
   add_sfr_register(&ccpr1h,	  0xfbf,porv,"ccpr1h");
 
-//   add_sfr_register(&adcon1,	  0xfc1,porv,"adcon1");
-//   add_sfr_register(&adcon2,	  0xfc2,porv,"adcon2");
-//   add_sfr_register(&adresl,	  0xfc3,porv,"adresl");
-//   add_sfr_register(&adresh,	  0xfc4,porv,"adresh");
-
-  //Fixme - temporary hack
-  add_file_registers(0xfc1, 0xfc4, 0);
-  rma[0xfc1].new_name("adcon1");
-  rma[0xfc2].new_name("adcon2");
-  rma[0xfc3].new_name("adresl");
-  rma[0xfc4].new_name("adresh");
+  add_sfr_register(&adcon1,	  0xfc1,porv,"adcon1");
+  add_sfr_register(&adcon0,	  0xfc2,porv,"adcon0");
+  add_sfr_register(&adresl,	  0xfc3,porv,"adresl");
+  add_sfr_register(&adresh,	  0xfc4,porv,"adresh");
 
   add_sfr_register(&ssp.sspcon1,  0xfc5,porv,"sspcon1");
   add_sfr_register(&ssp.sspcon2,  0xfc6,porv,"sspcon2");
@@ -231,8 +224,6 @@ void _16bit_processor :: create_sfr_map()
   }
 
   // Initialize all of the register cross linkages
-  //get_pir_set()->set_pir1(get_pir1());
-  //get_pir_set()->set_pir2(get_pir2());
   pir_set_def.set_pir1(&pir1);
   pir_set_def.set_pir2(&pir2);
 
@@ -286,6 +277,56 @@ void _16bit_processor :: create_sfr_map()
   // All of the status bits on the 16bit core are writable
   status->write_mask = 0xff;
 
+
+  adcon0.setAdresLow(&adresl);
+  adcon0.setAdres(&adresh);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon);
+  adcon0.setPir(&pir1);
+  adcon0.setA2DBits(10);
+
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3);
+
+  adcon1.setNumberOfChannels(8);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  // AN5,AN6 and AN7 exist only on devices with a PORTE.
+  adcon1.setChannelConfiguration(0, 0xff);
+  adcon1.setChannelConfiguration(1, 0xff);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
+  adcon1.setChannelConfiguration(8, 0xff);
+  adcon1.setChannelConfiguration(9, 0x3f);
+  adcon1.setChannelConfiguration(10, 0x3f);
+  adcon1.setChannelConfiguration(11, 0x3f);
+  adcon1.setChannelConfiguration(12, 0x1f);
+  adcon1.setChannelConfiguration(13, 0x0f);
+  adcon1.setChannelConfiguration(14, 0x01);
+  adcon1.setChannelConfiguration(15, 0x0d);
+
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
+  adcon1.setVrefHiConfiguration(8, 3);
+  adcon1.setVrefHiConfiguration(10, 3);
+  adcon1.setVrefHiConfiguration(11, 3);
+  adcon1.setVrefHiConfiguration(12, 3);
+  adcon1.setVrefHiConfiguration(13, 3);
+  adcon1.setVrefHiConfiguration(15, 3);
+
+  adcon1.setVrefLoConfiguration(8, 2);
+  adcon1.setVrefLoConfiguration(11, 2);
+  adcon1.setVrefLoConfiguration(12, 2);
+  adcon1.setVrefLoConfiguration(13, 2);
+  adcon1.setVrefLoConfiguration(15, 2);
 
 }
 

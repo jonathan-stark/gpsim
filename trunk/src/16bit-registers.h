@@ -33,7 +33,7 @@ class InvalidRegister;   // Forward reference
 #include "14bit-tmrs.h"
 #include "pir.h"
 #include "uart.h"
-
+#include "a2dconverter.h"
 #define _16BIT_REGISTER_MASK   0xfff
 
 class _16bit_processor;
@@ -547,40 +547,20 @@ class USART_MODULE16  : public USART_MODULE
   USART_MODULE16(void);
 
 };
-#if 0
-class PORTC16 : public PIC_IOPORT
+
+
+//-------------------------------------------------------------------
+
+class ADCON0_16 : public ADCON0
 {
 public:
+  ADCON0_16();
+  virtual void set_interrupt();
 
-enum
-{
-    T1CKI = 1 << 0,
-    T1OSO = 1 << 0,
-    T1OSI = 1 << 1,
-    CCP2  = 1 << 1,
-    CCP1  = 1 << 2,
-    SCK   = 1 << 3,
-    SCL   = 1 << 3,  /* SCL and SCK share the same pin */
-    SDI   = 1 << 4,
-    SDA   = 1 << 4,  /* SDA and SDI share the same pin */
-    SDO   = 1 << 5,
-    TX    = 1 << 6,
-    CK    = 1 << 6,
-    RX    = 1 << 7,
-    DT    = 1 << 7
+  virtual void setPir(PIR *);
+private:
+  PIR *m_pPir;
 };
-
-
-  CCPCON *ccp1con;
-  USART_MODULE16 *usart;
-
-  PORTC16(void);
-  unsigned int get(void);
-  void setbit(unsigned int bit_number, bool new_value);
-  virtual void put(unsigned int new_value);
-  void update_pin_directions(unsigned int new_tris);
-};
-#endif
 
 //-------------------------------------------------------------------
 #if 0

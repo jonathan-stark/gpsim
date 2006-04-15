@@ -1,3 +1,15 @@
+2006-04-15 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-registers.h, src/16bit-processors.cc,
+	  src/16bit-registers.cc, src/16bit-processors.h, src/p18x.cc,
+	  src/a2dconverter.cc:
+	  A2D is now working (but not fully tested) for the 16bit core.
+	* src/pir.h: Redesigned PIR base class in the first attempt in
+	  removing PIR_SET classes
+	* src/symbol.cc, src/stimuli.cc: Fixed symbol table dump.
+	* regression/a2d/Makefile, regression/a2d/p18f452.asm: Regression
+	  test for the 18f452 A2D converter.
+	* modules/resistor.cc: Made 'Capacitance' attribute lower case.
+
 2006-04-13 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: removed debug printf
 	* modules/resistor.cc: Added module description.
@@ -7,7 +19,8 @@
 	module description.
 	* regression/run_regression.sh: added A2D regression test for the
 	p16c71.
-	* a2d/Makefile, a2d/p16c71.asm, a2d/16c71.lkr:
+	* a2d/Makefile, a2d/p16c71.asm, a2d/16c71.lkr: A2D regression test
+	for the 16c71.
 
 
 2006-04-13 Borut Razem <borut.razem@siol.net>
