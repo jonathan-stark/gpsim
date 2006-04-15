@@ -42,7 +42,34 @@ public:
     intcon(0),pie(0),valid_bits(0)
   {
   }
+
+  // The PIR base class supports no PIR bits directly
+  virtual void clear_sspif(){}
+  virtual void clear_rcif(){}
+  virtual void clear_txif(){}
+  virtual void set_adif(){}
+  virtual void set_bclif(){}
   virtual void set_ccpif(){}
+  virtual void set_cmif(){}
+  virtual void set_eccp1if(){}
+  virtual void set_eeif(){}
+  virtual void set_errif(){}
+  virtual void set_irxif(){}
+  virtual void set_lvdif(){}
+  virtual void set_pspif(){}
+  virtual void set_rcif(){}
+  virtual void set_rxb0if(){}
+  virtual void set_rxb1if(){}
+  virtual void set_sspif(){}
+  virtual void set_tmr1if(){}
+  virtual void set_tmr2if(){}
+  virtual void set_tmr3if(){}
+  virtual void set_txb0if(){}
+  virtual void set_txb1if(){}
+  virtual void set_txb2if(){}
+  virtual void set_txif(){}
+  virtual void set_wakif(){}
+
 
   virtual bool interrupt_status()
     {
@@ -78,8 +105,7 @@ class PIR1v1 : public PIR
 {
 public:
 
-enum
-{
+  enum {
     TMR1IF  = 1<<0,
     TMR2IF  = 1<<1,
     CCP1IF  = 1<<2,
@@ -88,67 +114,67 @@ enum
     RCIF    = 1<<5,
     CMIF    = 1<<6,     // 16f62x
     EEIF    = 1<<7      // 16f62x
-};
+  };
 
-  inline void set_tmr1if()
-    {
-      put(get() | TMR1IF);
-    }
-
-  inline void set_tmr2if()
-    {
-      put(get() | TMR2IF);
-    }
-
-  void set_ccpif()
-    {
-      put(get() | CCP1IF);
-    }
-
-  inline void set_sspif()
-    {
-      put(get() | SSPIF);
-    }
-
-  void set_txif();
-  inline void set_rcif()
-    {
-      put(get() | RCIF);
-    }
-
-  void set_cmif();
-
-  inline void set_eeif()
-    {
-      put(get() | EEIF);
-    }
-
-  unsigned int get_sspif()
+  virtual void set_tmr1if()
   {
-	return value.get() & SSPIF;
+    put(get() | TMR1IF);
+  }
+
+  virtual void set_tmr2if()
+  {
+    put(get() | TMR2IF);
+  }
+
+  virtual void set_ccpif()
+  {
+    put(get() | CCP1IF);
+  }
+
+  virtual void set_sspif()
+  {
+    put(get() | SSPIF);
+  }
+
+  virtual void set_txif();
+  virtual void set_rcif()
+  {
+    put(get() | RCIF);
+  }
+
+  virtual void set_cmif();
+
+  virtual void set_eeif()
+  {
+    put(get() | EEIF);
+  }
+
+  virtual unsigned int get_sspif()
+  {
+    return value.get() & SSPIF;
   }
   void clear_sspif();
 
- unsigned int get_txif()
-   {
-     return value.get() & TXIF;
-   }
- void clear_txif();
+  unsigned int get_txif()
+  {
+    return value.get() & TXIF;
+  }
+  void clear_txif();
 
- unsigned int get_rcif()
-   {
-     return value.get() & RCIF;
-   }
- void clear_rcif();
+  unsigned int get_rcif()
+  {
+    return value.get() & RCIF;
+  }
+  virtual void clear_rcif();
  
 
- PIR1v1()
-   {
-     // Even though TXIF is a valid bit, it can't be written by the PIC
-     // source code.  Its state reflects whether the usart txreg is full
-     // or not.
-     valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
-   }
+  PIR1v1()
+  {
+    // Even though TXIF is a valid bit, it can't be written by the PIC
+    // source code.  Its state reflects whether the usart txreg is full
+    // or not.
+    valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
+  }
 };
 
 
@@ -162,78 +188,77 @@ class PIR1v2 : public PIR
 {
 public:
 
-  enum
-    {
-      TMR1IF  = 1<<0,
-      TMR2IF  = 1<<1,
-      CCP1IF  = 1<<2,
-      SSPIF   = 1<<3,
-      TXIF    = 1<<4,
-      RCIF    = 1<<5,
-      ADIF    = 1<<6,     // 18cxxx
-      PSPIF   = 1<<7
-    };
+  enum {
+    TMR1IF  = 1<<0,
+    TMR2IF  = 1<<1,
+    CCP1IF  = 1<<2,
+    SSPIF   = 1<<3,
+    TXIF    = 1<<4,
+    RCIF    = 1<<5,
+    ADIF    = 1<<6,     // 18cxxx
+    PSPIF   = 1<<7
+  };
  
-  inline void set_tmr1if()
-    {
-      put(get() | TMR1IF);
-    }
+  virtual void set_tmr1if()
+  {
+    put(get() | TMR1IF);
+  }
 
-  inline void set_tmr2if()
-    {
-      put(get() | TMR2IF);
-    }
+  virtual void set_tmr2if()
+  {
+    put(get() | TMR2IF);
+  }
 
-  void set_ccpif()
-    {
-      put(get() | CCP1IF);
-    }
+  virtual void set_ccpif()
+  {
+    put(get() | CCP1IF);
+  }
 
-  inline void set_sspif()
-    {
-      put(get() | SSPIF);
-    }
+  virtual void set_sspif()
+  {
+    put(get() | SSPIF);
+  }
 
   unsigned int get_sspif()
-    {
-      return value.get() & SSPIF;
-    }
-  void clear_sspif();
+  {
+    return value.get() & SSPIF;
+  }
+  virtual void clear_sspif();
 
-  void set_txif();
-  inline void set_rcif()
-    {
-      put(get() | RCIF);
-    }
+  virtual void set_txif();
+  virtual void set_rcif()
+  {
+    put(get() | RCIF);
+  }
 
-  inline void set_adif()
-    {
-      put(get() | ADIF);
-    }
+  virtual void set_adif()
+  {
+    put(get() | ADIF);
+  }
 
-  inline void set_pspif()
-    {
-      put(get() | PSPIF);
-    }
+  virtual void set_pspif()
+  {
+    put(get() | PSPIF);
+  }
 
-  unsigned int get_txif()
-    {
-      return value.get() & TXIF;
-    }
-  void clear_txif();
+  virtual unsigned int get_txif()
+  {
+    return value.get() & TXIF;
+  }
+  virtual void clear_txif();
   unsigned int get_rcif()
-    {
-      return value.get() & RCIF;
-    }
-  void clear_rcif();
+  {
+    return value.get() & RCIF;
+  }
+  virtual void clear_rcif();
  
   PIR1v2()
-    {
-      // Even though TXIF is a valid bit, it can't be written by the PIC
-      // source code.  Its state reflects whether the usart txreg is full
-      // or not.
-      valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
-    }
+  {
+    // Even though TXIF is a valid bit, it can't be written by the PIC
+    // source code.  Its state reflects whether the usart txreg is full
+    // or not.
+    valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
+  }
 };
 
 
@@ -252,7 +277,7 @@ enum
     CCP2IF  = 1<<0
 };
 
-  void set_ccpif()
+  virtual void set_ccpif()
     {
       put(get() | CCP2IF);
     }
@@ -283,27 +308,27 @@ enum
     CMIF    = 1<<6		/* only on the PIC18F4xx devices */
 };
 
-  void set_eccp1if()
+  virtual void set_eccp1if()
     {
       put(get() | ECCP1IF);
     }
 
-  void set_tmr3if()
+  virtual void set_tmr3if()
     {
       put(get() | TMR3IF);
     }
 
-  void set_lvdif()
+  virtual void set_lvdif()
     {
       put(get() | LVDIF);
     }
 
-  void set_bclif()
+  virtual void set_bclif()
     {
       put(get() | BCLIF);
     }
 
-  void set_eeif()
+  virtual void set_eeif()
     {
       put(get() | EEIF);
     }
@@ -337,42 +362,42 @@ enum
     IRXIF   = 1<<7
 };
 
-  void set_rxb0if()
+  virtual void set_rxb0if()
     {
       put(get() | RXB0IF);
     }
 
-  void set_rxb1if()
+  virtual void set_rxb1if()
     {
       put(get() | RXB1IF);
     }
 
-  void set_txb0if()
+  virtual void set_txb0if()
     {
       put(get() | TXB0IF);
     }
 
-  void set_txb1if()
+  virtual void set_txb1if()
     {
       put(get() | TXB1IF);
     }
 
-  void set_txb2if()
+  virtual void set_txb2if()
     {
       put(get() | TXB2IF);
     }
 
-  void set_errif()
+  virtual void set_errif()
     {
       put(get() | ERRIF);
     }
 
-  void set_wakif()
+  virtual void set_wakif()
     {
       put(get() | WAKIF);
     }
 
-  void set_irxif()
+  virtual void set_irxif()
     {
       put(get() | IRXIF);
     }
