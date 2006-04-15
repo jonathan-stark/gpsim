@@ -639,7 +639,6 @@ void Symbol_Table::dump_all(void)
         cout << val->name() << " = " ;
       }
       cout << val->toString() << endl;
-      //cout << val->name() << ": " << val->showType() << endl;
     }
     last = sti;
     sti++;
@@ -688,7 +687,6 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
         cout << val->name() << " = " ;
       }
       cout << val->toString() << endl;
-      //cout << val->name() << ": " << val->showType() << endl;
       }
     last = sti;
     sti++;
@@ -970,15 +968,15 @@ string register_symbol::toString()
     unsigned int uValue = reg->get_value() & m_uMask;
     uValue  = uValue >> m_uMaskShift;
     if ( (unsigned int)((1<<(4*iDigits))-1) != m_uMask)
-      snprintf(buff,sizeof(buff)," [0x%x] BITS 0x%0*x = 0x%0*x = 0b",
+      snprintf(buff,sizeof(buff),"[0x%x] BITS 0x%0*x = 0x%0*x = 0b",
 	       reg->address, iDigits, m_uMask,
 	       iDigits, uValue);
     else
-      snprintf(buff,sizeof(buff)," [0x%x] = 0x%0*x = 0b",
+      snprintf(buff,sizeof(buff),"[0x%x] = 0x%0*x = 0b",
 	       reg->address, 
 	       iDigits, uValue);
 
-    return name() + string(buff) + string(bits);
+    return string(buff) + string(bits);
   }
   return string("");
 }
@@ -1174,7 +1172,7 @@ string w_symbol::toString()
 
     snprintf(buff,sizeof(buff)," = 0x%02x = 0b", reg->get_value() & 0xff);
 
-    return name() + string(buff) + string(bits);
+    return string(buff) + string(bits);
   }
   return string("");
 }
@@ -1199,7 +1197,7 @@ string address_symbol::toString()
   int i = (int)getVal();
   snprintf(buf,sizeof(buf), " at address %d = 0x%X",i,i);
   
-  return name() + string(buf);
+  return string(buf);
 }
 
 Value* address_symbol::evaluate()
@@ -1274,7 +1272,7 @@ string attribute_symbol::toString()
 {
 
   if(attribute)
-    return attribute->showType()+": " + attribute->name() + " = " + attribute->toString();
+    return attribute->toString();
   else
     return string("(null)");
 }
@@ -1452,7 +1450,7 @@ void stimulus_symbol::new_name(string &sNewName) {
 string stimulus_symbol::toString()
 {
   if(s)
-    return name() + ": " + s->toString();
+    return s->toString();
   return name();
 }
 
