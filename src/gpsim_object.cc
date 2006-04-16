@@ -33,8 +33,10 @@ gpsimObject::gpsimObject()
 }
 
 gpsimObject::gpsimObject(const char *_name, const char *desc)
-  : name_str(_name),cpDescription(desc)
+  : cpDescription(desc)
 {
+  if (_name)
+    name_str = _name;
 }
 
 gpsimObject::~gpsimObject()
