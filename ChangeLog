@@ -1,3 +1,13 @@
+2006-04-16 Scott Dattalo <scott@dattalo.com>
+	* modules/gpsim_modules.cc, modules/Makefile.am, modules/ttl.cc,
+	modules/ttl.h: Began a TTL module. Right now it contains only a
+	'377.
+	* regression/run_regression.sh, regression/ttl/18f452.lkr,
+	regression/ttl/Makefile, regression/ttl/ttl377.asm: Regression
+	test for the newly added '377 module in the ttl library.
+	* src/modules.h, src/modules.cc, gpsim_object.cc: Modules can now
+	be constructed with a name and a description.
+	
 2006-04-15 Scott Dattalo <scott@dattalo.com>
 	* regression/switch_test/switch_test.asm: corrected 'capacitance'
 

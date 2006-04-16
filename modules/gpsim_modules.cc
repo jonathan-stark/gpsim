@@ -63,6 +63,7 @@ support:
 #include "led.h"
 #include "video.h"
 #include "encoder.h"
+#include "ttl.h"
 #endif
 
 /*
@@ -109,6 +110,9 @@ Module_Types available_modules[] =
 
   // Encoder
   { {"Encoder", "encoder"}, Encoder::construct},
+
+  // TTL devices
+  { {"TTL377", "ttl377"}, TTL::TTL377::construct},
 #endif
 
   // No more modules
