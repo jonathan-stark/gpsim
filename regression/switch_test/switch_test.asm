@@ -113,9 +113,9 @@ start
 
 ;	Turn off Capacitance to test DC behaviour
 ;
-   .command "PD1.Capacitance=0"
+   .command "PD1.capacitance=0"
 	nop
-   .command "PU1.Capacitance=0"
+   .command "PU1.capacitance=0"
 	nop
 
    .assert "(porta & 3) == 0"
