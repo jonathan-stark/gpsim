@@ -15,7 +15,8 @@ libgpsim_modules_la_SOURCES = \
 	led.cc led.h \
 	video.cc video.h \
 	push_button.cc push_button.h \
-	encoder.cc encoder.h
+	encoder.cc encoder.h \
+	ttl.cc ttl.h
 
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@
