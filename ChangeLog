@@ -1,3 +1,6 @@
+2006-04-15 Scott Dattalo <scott@dattalo.com>
+	* regression/switch_test/switch_test.asm: corrected 'capacitance'
+
 2006-04-15 Borut Razem <borut.razem@siol.net>
 	* cli/cli.vcproj, cli/makefile.mingw: added define YYSTACK_USE_ALLOCA
 	* src/a2dconverter.*: svn:keywords=Author Date Id Revision,
