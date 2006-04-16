@@ -299,6 +299,23 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ttl.cc">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="HAVE_GUI"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="HAVE_GUI"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\usart.cc">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -377,6 +394,9 @@
 			</File>
 			<File
 				RelativePath=".\switch.h">
+			</File>
+			<File
+				RelativePath=".\ttl.h">
 			</File>
 			<File
 				RelativePath=".\usart.h">

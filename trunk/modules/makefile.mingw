@@ -41,6 +41,7 @@ modules_OBJECTS =		\
 	push_button.o		\
 	resistor.o		\
 	switch.o		\
+	ttl.o			\
 	usart.o			\
 	video.o
 

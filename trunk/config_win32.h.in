@@ -99,7 +99,7 @@
 
 /* Version number of package */
 #undef VERSION
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
 #define PRINTF_INT64_MODIFIER "I64"
 #else
 #define PRINTF_INT64_MODIFIER "ll"

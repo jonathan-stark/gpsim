@@ -1,3 +1,8 @@
+2006-04-16 Borut Razem <borut.razem@siol.net>
+	* config_win32.h.in: fixed bug [ 1470012 ] Breakpoints regression
+	  test crashes mingw gpsim
+	* modules/makefile.mingw, modules/modules.vcproj: WIN32 sync
+
 2006-04-16 Scott Dattalo <scott@dattalo.com>
 	* modules/gpsim_modules.cc, modules/Makefile.am, modules/ttl.cc,
 	modules/ttl.h: Began a TTL module. Right now it contains only a
@@ -41,7 +46,6 @@
 	p16c71.
 	* a2d/Makefile, a2d/p16c71.asm, a2d/16c71.lkr: A2D regression test
 	for the 16c71.
-
 
 2006-04-13 Borut Razem <borut.razem@siol.net>
 	* gui/gui_src_asm.cc: removed warnings
