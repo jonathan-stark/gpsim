@@ -376,7 +376,8 @@ Module *ModuleLibrary::TypeList::NewObject(const char *pName) {
  * LCDs and so on. 
  */
 
-Module::Module(void)
+Module::Module(const char *_name, const char *desc)
+  : gpsimObject(_name, desc)
 {
 
   package = 0;

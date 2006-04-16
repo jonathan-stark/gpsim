@@ -230,7 +230,7 @@ public:
     
   */
 
-  virtual int get_pin_count(void);
+  virtual int get_pin_count();
   virtual string &get_pin_name(unsigned int pin_number);
   virtual int get_pin_state(unsigned int pin_number);
   virtual IOPIN *get_pin(unsigned int pin_number);
@@ -254,11 +254,11 @@ public:
   virtual void reset(RESET_TYPE r);
 
   /// Version
-  virtual char *get_version(void) { return version;}
+  virtual char *get_version() { return version;}
 
   /// gui
   virtual void set_widget(void * a_widget) {widget = a_widget;}
-  virtual void *get_widget(void) {return widget;}
+  virtual void *get_widget() {return widget;}
 
   /// cli
   /// Modules can have gpsim CLI scripts associated with them. 
@@ -275,10 +275,10 @@ public:
 #ifndef SWIG
   const virtual char *GetTypeName() { return m_pType->m_pName; }
   // deprecated
-  const virtual char *type(void) { return m_pType->m_pName; }
+  const virtual char *type() { return m_pType->m_pName; }
 #endif
 
-  Module(void);
+  Module(const char *_name=0, const char *desc=0);
   virtual ~Module();
 
   /// Functions to support actual hardware
