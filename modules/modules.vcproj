@@ -126,23 +126,6 @@
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath=".\binary_indicator.cc">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HAVE_GUI"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.3/include/glib-2.0&quot;;&quot;../../glib-2.2.3/lib/glib-2.0/include&quot;;&quot;../../gtk+-2.2.4/include/gtk-2.0&quot;;&quot;../../gtk+-2.2.4/lib/gtk-2.0/include&quot;;;&quot;../../pango-1.2.5/include/pango-1.0&quot;;&quot;../../atk-1.2.4/include/atk-1.0&quot;"
-						PreprocessorDefinitions="HAVE_GUI"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\dummy.c">
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -354,9 +337,6 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\binary_indicator.h">
-			</File>
 			<File
 				RelativePath=".\encoder.h">
 			</File>
