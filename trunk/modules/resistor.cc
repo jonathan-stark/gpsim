@@ -147,6 +147,7 @@ public:
   };
 };
 
+#if 0
 //--------------------------------------------------------------
 void Resistor_IOPORT::trace_register_write(void)
 {
@@ -229,6 +230,7 @@ Module * Resistor::construct(const char *_new_name)
   return resP;
 
 }
+#endif
 
 //--------------------------------------------------------------
 // PullupResistor::create_iopin_map 

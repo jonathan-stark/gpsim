@@ -8,15 +8,15 @@ libgpsim_modules_la_SOURCES = \
 	gpsim_modules.cc \
 	resistor.cc resistor.h \
 	usart.cc usart.h \
-	paraface.cc paraface.h \
 	switch.cc switch.h \
 	logic.cc logic.h \
 	led.cc led.h \
-	video.cc video.h \
 	push_button.cc push_button.h \
 	encoder.cc encoder.h \
 	ttl.cc ttl.h
 
+##	paraface.cc paraface.h \  # TSD - removed 16APR06
+##	video.cc video.h \ # TSD - removed 17APR06
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@
 

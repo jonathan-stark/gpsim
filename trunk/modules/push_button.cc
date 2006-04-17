@@ -67,18 +67,18 @@ void PushButton::create_iopin_map(void)
   //   an I/O port.
 
 
-  pshb_port = new IOPORT(1);
-  pshb_port->value.put(0);
+  //pshb_port = new IOPORT(1);
+  //pshb_port->value.put(0);
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = (char*)name().c_str();   // Get the name of this switch
-  if(pin_name) {
-    pshb_port->new_name(pin_name);
-  }
+  //char *pin_name = (char*)name().c_str();   // Get the name of this switch
+  //if(pin_name) {
+  //  pshb_port->new_name(pin_name);
+  //}
 
 
 
@@ -99,21 +99,13 @@ void PushButton::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  assign_pin(1, new IO_bi_directional(pshb_port, 0,"out"));
+  pshb_pin = new IO_bi_directional((name() + ".out").c_str());
+
+  assign_pin(1, pshb_pin);
   package->set_pin_position(1,2.5); // Position pin on middle right side of package
 
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-
-  pshb_pin = get_pin(1);
   if(pshb_pin)
-    {
-      get_symbol_table().add_stimulus(pshb_pin);
-      pshb_pin->update_direction(1,true);
-      if(pshb_pin->snode)
-	pshb_pin->snode->update();
-    }
+    pshb_pin->update_direction(1,true);
 
 }
 
@@ -123,23 +115,13 @@ static void
 press_cb (GtkButton *button, PushButton *pb)
 
 {
-
-  if(pb->pshb_port->value.get() == 0)
-    pb->pshb_port->put_value(TRUE);
-  else
-    pb->pshb_port->put_value(FALSE);
-	
+  if (pb && pb->pshb_pin)
+    pb->pshb_pin->toggle();
 }
 
 static void
 released_cb (GtkButton *button, PushButton *pb)
 {
-  //    int state = gtk_toggle_button_get_active(button);
-  if(pb->pshb_port->value.get() == 0)
-    pb->pshb_port->put_value(TRUE);
-  else
-    pb->pshb_port->put_value(FALSE);
-	
 }
 
 void PushButton::create_widget(PushButton *pb)
@@ -189,6 +171,6 @@ PushButton::PushButton(void)
 
 PushButton::~PushButton(void)
 {
-  delete pshb_port;
+  delete pshb_pin;
 }
 #endif // HAVE_GUI

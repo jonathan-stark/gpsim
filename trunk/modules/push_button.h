@@ -38,7 +38,6 @@ class PushButton : public Module
     void create_widget(PushButton *pb);
 public:
 
-    IOPORT *pshb_port;
     IOPIN *pshb_pin;
 
     PushButton(void);

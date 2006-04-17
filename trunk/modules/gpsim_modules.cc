@@ -55,12 +55,13 @@ support:
 
 #ifdef HAVE_GUI
 #ifndef _WIN32
-#include "paraface.h"
+//#include "paraface.h"
 #endif
 #include "switch.h"
 #include "logic.h"
 #include "led.h"
-#include "video.h"
+#include "push_button.h"
+//#include "video.h"
 #include "encoder.h"
 #include "ttl.h"
 #endif
@@ -79,6 +80,7 @@ Module_Types available_modules[] =
 
   { {"pullup",           "pu"},   PullupResistor::pu_construct },
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
+  { {"pushbutton",       "pb"},   PushButton::construct },
 
   // USART
   { {"usart",            "usart"}, USARTModule::USART_construct},
@@ -86,7 +88,11 @@ Module_Types available_modules[] =
 #ifdef HAVE_GUI
 #ifndef _WIN32
   // Parallel port interface
+  /*
+    TSD - removed 16APR06 - The parallel port interface uses the deprecated
+    IOPORT class. 
   { {"parallel_interface",         "paraface"}, Paraface::construct},
+  */
 #endif
 
   // Switch
@@ -102,9 +108,11 @@ Module_Types available_modules[] =
   { {"led_7segments", "led7s"}, Leds::Led_7Segments::construct},
   { {"led", "led"}, Leds::Led::construct},
 
+  /*
+    TSD Removed 17APR06
   // Video
   { {"PAL_video", "video"}, Video::construct},
-
+  */
   // Encoder
   { {"Encoder", "encoder"}, Encoder::construct},
 

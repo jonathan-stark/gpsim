@@ -1,3 +1,12 @@
+2006-04-17 Scott Dattalo <scott@dattalo.com>
+	* modules/gpsim_modules.cc, modules/push_button.cc,
+	modules/resistor.cc, modules/push_button.h, modules/resistor.h,
+	modules/encoder.cc, modules/encoder.h, modules/Makefile.am:
+	- Removed references to the deprecated IOPORT class. 
+	- Temporarily removed the video and the parallel_port modules (I
+	  don't have a way to test them).
+	- The push button module can now be used again.
+
 2006-04-17 Borut Razem <borut.razem@siol.net>
 	* config_win32.h.in: added the explanation why the warning is good:
 	  warning: `I' flag used with `%x' printf format

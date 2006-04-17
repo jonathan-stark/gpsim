@@ -64,29 +64,6 @@ void Encoder::create_iopin_map(void)
 {
 
 
-  // Create an I/O port to which the I/O pins can interface
-  //   The module I/O pins are treated in a similar manner to
-  //   the pic I/O pins. Each pin has a unique pin number that
-  //   describes it's position on the physical package. This
-  //   pin can then be logically grouped with other pins to define
-  //   an I/O port.
-
-
-  enc_port = new IOPORT(2);
-  enc_port->value.put(0);
-
-  // Here, we name the port `pin'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the logic gate (which is assigned by the user and
-  //   obtained with the name() member function call).
-
-  char *pin_name = (char*)name().c_str();   // Get the name of this switch
-  if(pin_name) {
-    enc_port->new_name(pin_name);
-  }
-
-
-
   // Define the physical package.
   //   The Package class, which is a parent of all of the modules,
   //   is responsible for allocating memory for the I/O pins.
@@ -104,33 +81,29 @@ void Encoder::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  assign_pin(1, new IO_bi_directional(enc_port, 0,"a"));
+  a_pin = new IO_bi_directional((name() + ".a").c_str());
+  assign_pin(1, a_pin);
   package->set_pin_position(1,(float)0.0);
-  assign_pin(2, new IO_bi_directional(enc_port, 1,"b"));
+  b_pin = new IO_bi_directional((name() + ".b").c_str());
+  assign_pin(1, b_pin);
   package->set_pin_position(2,(float)0.9999);
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  a_pin = get_pin(1);
-  if(a_pin)
-    {
-      get_symbol_table().add_stimulus(a_pin);
-      a_pin->update_direction(1,true);
-      if(a_pin->snode)
-	a_pin->snode->update();
-      //enc_port->attach_iopin(a_pin, 0);
-    }
-  b_pin = get_pin(2);
-  if(b_pin)
-    {
-      get_symbol_table().add_stimulus(b_pin);
-      b_pin->update_direction(1,true);
-      if(b_pin->snode)
-	b_pin->snode->update();
-      //enc_port->attach_iopin(b_pin, 1);
-    }
+  if(a_pin) {
+    get_symbol_table().add_stimulus(a_pin);
+    a_pin->update_direction(1,true);
+    if(a_pin->snode)
+      a_pin->snode->update();
+  }
+  if(b_pin) {
+    get_symbol_table().add_stimulus(b_pin);
+    b_pin->update_direction(1,true);
+    if(b_pin->snode)
+      b_pin->snode->update();
+  }
 }
 
 //--------------------------------------------------------------
@@ -201,7 +174,8 @@ Encoder::Encoder(void)
 
 Encoder::~Encoder(void)
 {
-  delete enc_port;
+  delete a_pin;
+  delete b_pin;
 }
 
 void
@@ -237,13 +211,13 @@ Encoder::send_ccw(void)
 void
 Encoder::toggle_a()
 {
-    enc_port->put_value(enc_port->value.get()^PIN_A);
+  a_pin->toggle();
 }
 
 void
 Encoder::toggle_b()
 {
-    enc_port->put_value(enc_port->value.get()^PIN_B);
+  b_pin->toggle();
 }
 
 void
@@ -264,14 +238,10 @@ Encoder::callback()
 	    break;
 	case rot_moving_cw:
 	    toggle_b();
-	    assert(!(enc_port->value.get() & PIN_A) ==
-		   !(enc_port->value.get() & PIN_B));
 	    rs = rot_detent;
 	    break;
 	case rot_moving_ccw:
 	    toggle_a();
-	    assert(!(enc_port->value.get() & PIN_A) ==
-		   !(enc_port->value.get() & PIN_B));
 	    rs = rot_detent;
 	    break;
 	default:
