@@ -39,39 +39,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/trace.h"
 #include "../src/ioports.h"
 
+# if 0
 class Resistor;
-
-// Resistor_IO - IO pin definition for a resistor.
-#if 0
-class Resistor_IO : public IO_bi_directional
-{
-public:
-
-  //Resistor *res;
-
-  //virtual SOURCE_TYPE isa(void) {return RESISTOR;};
-
-  Resistor_IO(IOPORT *i, unsigned int b,char *opt_name=NULL) :
-    IO_bi_directional( i, b, opt_name) {}
-
-  virtual double get_Vth();
-  virtual double get_Zth();
-};
-
-class PUResistor_IO : public IOPIN
-{
-public:
-
-  //resistor *res;
-
-  PUResistor_IO(void);
-
-  virtual double get_Vth();
-  virtual double get_Zth();
-
-};
-#endif
-
 class Resistor_IOPORT : public IOPORT
 {
 public:
@@ -99,7 +68,7 @@ public:
   static Module *construct(const char *new_name=NULL);
 
 };
-
+#endif
 
 class PullupResistor : public Module 
 {

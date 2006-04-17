@@ -39,7 +39,6 @@ class Encoder : public Module, private TriggerObject
     void create_widget(Encoder *enc);
 public:
 
-    IOPORT *enc_port;
     IOPIN *a_pin;
     IOPIN *b_pin;
 
