@@ -78,13 +78,11 @@ Start:
    .sim "attach nClk porte0 U1.CP"
    .sim "attach nE porte1 U1.E"
 
-   ;# Gui 
- ifdef GUI
    .sim "p18f452.xpos = 24.00000000000000"
    .sim "p18f452.ypos = 24.00000000000000"
    .sim "U1.xpos = 156.0000000000000"
    .sim "U1.ypos = 24.00000000000000"
- endif
+
 	nop
 
 	CLRF	TRISB
