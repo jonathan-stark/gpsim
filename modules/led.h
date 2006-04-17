@@ -33,73 +33,43 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
-class LED_Interface;  // Defined in led.cc
 
-// Create a few classes from which an LED may be constructed
+namespace Leds {
 
-class Led_Port : public IOPORT
-{
-public:
+  class LED_Interface;  // Defined in led.cc
+  class Led_Input;
 
-  virtual void trace_register_write(void);
+  //------------------------------------------------------------------------
+  // LED base class
 
-  Led_Port (unsigned int _num_iopins=8);
+  class Led_base : public Module
+  {
+  public:
 
-};
-
-// Create a class derived from the IO_input class that
-// will allow us to intercept when the I/O input is being
-// driven. (This isn't done for PIC I/O pins because the
-// logic for handling I/O pin changes resides in the IOPORT
-// class.)
-
-class Led_Input : public IOPIN
-{
-public:
-
-  Led_Input (IOPORT *i, unsigned int b, const char *opt_name) 
-    : IOPIN(i,b,opt_name,(Register **)0)
-    { 
-  	new_name(opt_name);
-
-    }
-
-};
+    virtual void build_window() = 0;
+    virtual void update() = 0;
+    virtual void update( GtkWidget *drawable,   
+			 guint max_width,
+			 guint max_height) = 0;
+    LED_Interface *interface;
+  };
 
 
-//------------------------------------------------------------------------
-// LED base class
+  //------------------------------------------------------------------------
+  // 7-segment leds
 
-class Led_base : public Module
-{
- public:
-
-  virtual void build_window( void ) = 0;
-  virtual void update(void) = 0;
-  virtual void update( GtkWidget *drawable,   
-		       guint max_width,
-		       guint max_height) = 0;
-  LED_Interface *interface;
-  Led_Port  *port;
-
-};
-
-
-//------------------------------------------------------------------------
-// 7-segment leds
-
-// define a point
-typedef struct {
-   float x;
-   float y;
-} XfPoint;
+  // define a point
+  typedef struct {
+    float x;
+    float y;
+  } XfPoint;
 
 #define MAX_PTS		6	/* max # of pts per segment polygon */
 #define NUM_SEGS	7	/* number of segments in a digit */
-/*
- * These constants give the bit positions for the segmask[]
- * digit masks.
- */
+  /*
+   * These constants give the bit positions for the segmask[]
+   * digit masks.
+   */
 #define TOP		0
 #define TOP_RIGHT	1
 #define BOT_RIGHT	2
@@ -107,104 +77,109 @@ typedef struct {
 #define BOT_LEFT	4
 #define TOP_LEFT	5
 #define MIDDLE		6
-//#define DECIMAL_POINT   7
+  //#define DECIMAL_POINT   7
 
-typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
+  typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
 
-class Led_7Segments : public Led_base, public TriggerObject
-{
-public:
+  class Led_7Segments : public Led_base, public TriggerObject
+  {
+  public:
 
-  struct {
-    GdkPoint p[7];  // Segments 
-  } segments[7];
+    struct {
+      GdkPoint p[7];  // Segments 
+    } segments[7];
 
-  GdkPoint offset;
-  int height,
-    slant,
-    segment_thickness;
+    GdkPoint offset;
+    int height,
+      slant,
+      segment_thickness;
 
-  float sxw;
+    float sxw;
 
-  float		angle;		// rise over run 
-  float		width_factor;   // ratio of digit to segment width 
-  float		small_ratio;	// ratio of small to large digits
-  float		sec_gap;	// gap between normal digits and 
-                                // seconds, as ratio to digit width 
-  float		space_factor;   /* ratio of digit width to border sp.*/
-
-
-  guint w_width;
-  guint w_height;
-
-  segment_pts seg_pts;
-
-  GtkWidget *darea;
-  GdkGC *segment_gc;
-
-  GdkColor led_segment_on_color;
-  GdkColor led_segment_off_color;
-  GdkColor led_background_color;
-
-  //gpointer cbp;  // cycle break point pointer (need to delete in destructor)
-
-  Led_7Segments(void);
-  ~Led_7Segments(void);  
+    float		angle;		// rise over run 
+    float		width_factor;   // ratio of digit to segment width 
+    float		small_ratio;	// ratio of small to large digits
+    float		sec_gap;	// gap between normal digits and 
+    // seconds, as ratio to digit width 
+    float		space_factor;   /* ratio of digit width to border sp.*/
 
 
-  void build_segments( int w, int h);
+    guint w_width;
+    guint w_height;
 
-  virtual void callback(void);
-  virtual void build_window( void );
-  virtual void update(void);
-  virtual void update( GtkWidget *drawable,   
-		       guint max_width,
-		       guint max_height);
+    segment_pts seg_pts;
 
-  // Inheritances from the Package class
-  virtual void create_iopin_map(void);
+    GtkWidget *darea;
+    GdkGC *segment_gc;
 
-  // Inheritance from Module class
-  const virtual char *type(void) { return ("led_7segments"); };
-  static Module *construct(const char *new_name);
+    GdkColor led_segment_on_color;
+    GdkColor led_segment_off_color;
+    GdkColor led_background_color;
 
-};
-
-//------------------------------------------------------------------------
-// Simple LED
-//
-
-class Led: public Led_base, public TriggerObject
-{
-public:
-
-  GtkWidget *darea;
-  GdkGC *gc;
-  GdkColor led_segment_on_color;
-  GdkColor led_segment_off_color;
-  int w_width, w_height;
-
-  gpointer cbp;  // cycle break point pointer (need to delete in destructor)
-
-  Led(void);
-  ~Led(void);
-
-  virtual void callback(void);
-  virtual void build_window( void );
-  virtual void update(void);
-  virtual void update( GtkWidget *drawable,   
-	       guint max_width,
-	       guint max_height);
-
-  // Inheritances from the Package class
-  virtual void create_iopin_map(void);
-
-  // Inheritance from Module class
-  const virtual char *type(void) { return ("led"); };
-  static Module *construct(const char *new_name);
+    Led_7Segments();
+    ~Led_7Segments();  
 
 
-};
+    void build_segments( int w, int h);
 
+    virtual void callback();
+    virtual void build_window();
+    virtual void update();
+    virtual void update( GtkWidget *drawable,   
+			 guint max_width,
+			 guint max_height);
+    unsigned int getPinState();
 
+    // Inheritances from the Package class
+    virtual void create_iopin_map();
+
+    // Inheritance from Module class
+    const virtual char *type() { return ("led_7segments"); };
+    static Module *construct(const char *new_name);
+
+  private:
+    //unsigned int m_segmentStates;
+    Led_Input **m_pins;
+    int m_nPins;
+
+  };
+
+  //------------------------------------------------------------------------
+  // Simple LED
+  //
+
+  class Led: public Led_base, public TriggerObject
+  {
+  public:
+
+    GtkWidget *darea;
+    GdkGC *gc;
+    GdkColor led_segment_on_color;
+    GdkColor led_segment_off_color;
+    int w_width, w_height;
+
+    gpointer cbp;  // cycle break point pointer (need to delete in destructor)
+
+    Led();
+    ~Led();
+
+    virtual void callback();
+    virtual void build_window();
+    virtual void update();
+    virtual void update( GtkWidget *drawable,   
+			 guint max_width,
+			 guint max_height);
+
+    // Inheritances from the Package class
+    virtual void create_iopin_map();
+
+    // Inheritance from Module class
+    const virtual char *type() { return ("led"); };
+    static Module *construct(const char *new_name);
+
+  private:
+    Led_Input *m_pin;
+  };
+
+} // end of namespace Led
 #endif //  __LED_H__

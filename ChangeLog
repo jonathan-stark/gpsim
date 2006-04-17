@@ -1,3 +1,14 @@
+2006-04-16 Scott Dattalo <scott@dattalo.com>
+	* modules/ttl.cc: TTLbase now calls initializeAttributes(). This
+	defines xpos and ypos attributes.
+	* regression/ttl/ttl377.asm: xpos and ypos are initialized by the
+	builtin script.
+	* modules/led.cc, modules/led.h: Redesigned I/O pins to remove
+	references to the deprecated IOPORT class.
+	* modules/gpsim_modules.cc: Place Led classes in their own
+	namespace.
+	
+
 2006-04-16 Borut Razem <borut.razem@siol.net>
 	* config_win32.h.in: fixed bug [ 1470012 ] Breakpoints regression
 	  test crashes mingw gpsim
