@@ -81,385 +81,395 @@ Boston, MA 02111-1307, USA.  */
 #include "led.h"
 #include "../src/packages.h"
 
-//--------------------------------------------------------------
-//
-// Create an "interface" to gpsim
-//
+namespace Leds {
+
+  //--------------------------------------------------------------
+  //
+  // Create an "interface" to gpsim
+  //
 
 
-class LED_Interface : public Interface
-{
-private:
-  Led_base *led;
-  int lastport;
-
-public:
-
-  //virtual void UpdateObject (gpointer xref,int new_value);
-  //virtual void RemoveObject (gpointer xref);
-  virtual void SimulationHasStopped (gpointer object)
+  class LED_Interface : public Interface
   {
-    GuiUpdate(object);
+  private:
+    Led_base *led;
+    int lastport;
+
+  public:
+
+    virtual void SimulationHasStopped (gpointer object)
+    {
+      GuiUpdate(object);
+    }
+    virtual void GuiUpdate  (gpointer object)
+    {
+      if(led) 
+	led->update();
+      /* {
+	int portval = led->port->get_value();
+	if(lastport != portval) {
+	  lastport=portval;
+	  led->update();
+	}
+
+      }
+      */
+    }
+
+
+    LED_Interface(Led_base *_led) : Interface((gpointer *) _led)
+    {
+      led = _led;
+      lastport = -1;
+    }
+
+  };
+
+
+  class Led_Input : public IOPIN
+  {
+  public:
+    Led_Input(const char *n, Led_base *pParent);
+
+    virtual void setDrivenState(bool);
+
+  private:
+    Led_base *m_pParent;
+  };
+
+
+  //------------------------------------------------------------------------
+  //
+  Led_Input::Led_Input(const char *n, Led_base *pParent)
+    : IOPIN(n), m_pParent(pParent)
+  {
   }
 
-  //virtual void NewProcessor (unsigned int processor_id);
-  //virtual void NewModule (Module *module);
-  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
-  //virtual void NewProgram  (unsigned int processor_id);
-  virtual void GuiUpdate  (gpointer object)
+  void Led_Input::setDrivenState(bool bNewState)
   {
-    if(led)
-    {
-      int portval = led->port->get_value();
-      if(lastport != portval)
+    IOPIN::setDrivenState(bNewState);
+  }
+
+  //------------------------------------------------------------------------
+  void Led_7Segments::update()
+  {
+    update(darea, w_width,w_height);
+  }
+
+  void Led_7Segments::callback()
+  {
+                                                                                
+    get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
+    update();
+                                                                                
+  }
+
+  void Led_7Segments::update(  GtkWidget *widget,
+			       guint new_width,
+			       guint new_height)
+  {
+
+    guint i;
+
+    w_width = new_width;
+    w_height = new_height;
+    GdkDrawable *drawable = widget->window;
+
+    if(!GTK_WIDGET_REALIZED(widget))
+      return;
+
+    if(segment_gc==NULL)
       {
-	lastport=portval;
-	led->update();
+	segment_gc = gdk_gc_new(darea->window);
+	gdk_gc_set_line_attributes(segment_gc,
+				   5,
+				   GDK_LINE_SOLID,
+				   GDK_CAP_ROUND,
+				   GDK_JOIN_ROUND);
+	g_assert(segment_gc!=NULL);
+      }
+
+
+    // not a very O-O way of doing it... but here we go directly
+    // to the I/O port and get the values of the segments
+    int segment_states = getPinState();
+
+    GdkGC *gc = segment_gc;
+
+    gdk_gc_set_foreground(gc,
+			  &led_background_color);
+
+    gdk_draw_rectangle (drawable, gc,
+			TRUE,
+			0,
+			0,
+			w_width,
+			w_height);
+
+
+    // cout << "expose led, segment states = " << segment_states << '\n';
+
+    if( (segment_states & 1) == 0) {
+      // common cathode, cathode must be low to turn
+      //digits on.
+
+      gdk_gc_set_foreground(gc,&led_segment_on_color);
+
+      for(i=0; i<7; i++) {
+	if(segment_states & (2<<i))
+	  gdk_draw_polygon ( drawable,
+			     gc,
+			     TRUE,
+			     segments[i].p,
+			     6);
+
+
       }
     }
-  }
 
+    gdk_gc_set_foreground(gc,&led_segment_off_color);
 
-  LED_Interface(Led_base *_led) : Interface((gpointer *) _led)
-  {
-    led = _led;
-    lastport = -1;
-  }
-
-};
-
-Led_Port::Led_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
-{
-
-}
-
-void Led_Port::trace_register_write(void)
-{
-
-  //get_trace().module1(value.get());
-  get_trace().raw(value.get());
-}
-
-
-void Led_7Segments::update(void)
-{
-  update(darea, w_width,w_height);
-}
-
-void Led_7Segments::callback(void)
-{
-                                                                                
-  get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
-  update();
-                                                                                
-}
-
-void Led_7Segments::update(  GtkWidget *widget,
-			     guint new_width,
-			     guint new_height)
-{
-
-  guint i;
-
-  w_width = new_width;
-  w_height = new_height;
-  GdkDrawable *drawable = widget->window;
-
-  if(!GTK_WIDGET_REALIZED(widget))
-    return;
-
-  if(segment_gc==NULL)
-  {
-      segment_gc = gdk_gc_new(darea->window);
-      gdk_gc_set_line_attributes(segment_gc,
-				 5,
-				 GDK_LINE_SOLID,
-				 GDK_CAP_ROUND,
-				 GDK_JOIN_ROUND);
-      g_assert(segment_gc!=NULL);
-  }
-
-
-  // not a very O-O way of doing it... but here we go directly
-  // to the I/O port and get the values of the segments
-  int segment_states = port->get_value();
-
-  GdkGC *gc = segment_gc;
-
-  gdk_gc_set_foreground(gc,
-			&led_background_color);
-
-  gdk_draw_rectangle (drawable, gc,
-		      TRUE,
-		      0,
-		      0,
-		      w_width,
-		      w_height);
-
-
-  // cout << "expose led, segment states = " << segment_states << '\n';
-
-  if( (segment_states & 1) == 0) {
-    // common cathode, cathode must be low to turn
-    //digits on.
-
-    gdk_gc_set_foreground(gc,&led_segment_on_color);
+    // turn off the segments that aren't being driven.
 
     for(i=0; i<7; i++) {
-      if(segment_states & (2<<i))
+      if((segment_states & (2<<i)) == 0)
 	gdk_draw_polygon ( drawable,
 			   gc,
 			   TRUE,
 			   segments[i].p,
 			   6);
 
-
     }
   }
 
-  gdk_gc_set_foreground(gc,&led_segment_off_color);
 
-  // turn off the segments that aren't being driven.
+  static gint
+  led7_expose_event (GtkWidget *widget,
+		     GdkEvent  *event,
+		     gpointer   user_data)
+  {
 
-  for(i=0; i<7; i++) {
-    if((segment_states & (2<<i)) == 0)
-	gdk_draw_polygon ( drawable,
-			   gc,
-			   TRUE,
-			   segments[i].p,
-			   6);
 
+    Led_7Segments *led;
+    guint max_width;
+    guint max_height;
+
+    g_return_val_if_fail (widget != NULL, TRUE);
+    g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+
+    // de-reference the user_data into an led object
+    led = (Led_7Segments *)user_data;
+
+    max_width = widget->allocation.width;
+    max_height = widget->allocation.height;
+
+    led->update(widget,max_width,max_height);
+
+    return TRUE;
   }
-}
+
+  static gint
+  cursor_event (GtkWidget          *widget,
+		GdkEvent           *event,
+		gpointer  *user_data)
+  {
+    if ((event->type == GDK_BUTTON_PRESS) &&
+	((event->button.button == 1) ||
+	 (event->button.button == 3)))
+      {
+	return TRUE;
+      }
+
+    return FALSE;
+  }
+
+  //-------------------------------------------------------------------
+  // build_segments
+  //
+  // from Dclock.c (v.2.0) -- a digital clock widget.
+  // Copyright (c) 1988 Dan Heller <argv@sun.com>
+  // Modifications 2/93 by Tim Edwards <tim@sinh.stanford.edu>
+  // And further modifications by Scott Dattalo <scott@dattalo.com>
+  //
+  // Each segment on the LED is comprised of a 6 point polygon.
+  // This routine will calculate what those points should be and
+  // store them an arrary. 
+
+  void Led_7Segments::build_segments( int w, int h)
+  {
+    XfPoint *pts;
+    float spacer, hskip, fslope, bslope, midpt, seg_width, segxw;
+    float invcosphi, invsinphi, invcospsi, invsinpsi, slope;
+    float dx1, dx2, dx3, dx4, dx5, dx6, dy1, dy2, dy5, dy6;
+    float xfactor, temp_xpts[4];
 
 
-static gint
-led7_expose_event (GtkWidget *widget,
-		  GdkEvent  *event,
-		  gpointer   user_data)
-{
+    w_width = w;
+    w_height = h;
 
+    // Hard code the display parameters...
 
-  Led_7Segments *led;
-  guint max_width;
-  guint max_height;
+    space_factor = (float)0.13;
+    width_factor = (float)0.13;
+    sxw = (float)0.13;
+    angle = 6;
 
-  g_return_val_if_fail (widget != NULL, TRUE);
-  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
-
-  // de-reference the user_data into an led object
-  led = (Led_7Segments *)user_data;
-
-  max_width = widget->allocation.width;
-  max_height = widget->allocation.height;
-
-  led->update(widget,max_width,max_height);
-
-  return TRUE;
-}
-
-static gint
-cursor_event (GtkWidget          *widget,
-	      GdkEvent           *event,
-	      gpointer  *user_data)
-{
-  if ((event->type == GDK_BUTTON_PRESS) &&
-      ((event->button.button == 1) ||
-       (event->button.button == 3)))
-    {
-      return TRUE;
-    }
-
-  return FALSE;
-}
-
-//-------------------------------------------------------------------
-// build_segments
-//
-// from Dclock.c (v.2.0) -- a digital clock widget.
-// Copyright (c) 1988 Dan Heller <argv@sun.com>
-// Modifications 2/93 by Tim Edwards <tim@sinh.stanford.edu>
-// And further modifications by Scott Dattalo <scott@dattalo.com>
-//
-// Each segment on the LED is comprised of a 6 point polygon.
-// This routine will calculate what those points should be and
-// store them an arrary. 
-
-void Led_7Segments::build_segments( int w, int h)
-{
-  XfPoint *pts;
-  float spacer, hskip, fslope, bslope, midpt, seg_width, segxw;
-  float invcosphi, invsinphi, invcospsi, invsinpsi, slope;
-  float dx1, dx2, dx3, dx4, dx5, dx6, dy1, dy2, dy5, dy6;
-  float xfactor, temp_xpts[4];
-
-
-  w_width = w;
-  w_height = h;
-
-  // Hard code the display parameters...
-
-  space_factor = (float)0.13;
-  width_factor = (float)0.13;
-  sxw = (float)0.13;
-  angle = 6;
-
-  /* define various useful constants */
+    /* define various useful constants */
  
-  segxw = sxw * w;
-  slope = angle;
-  seg_width = width_factor * w;
-  spacer = (float)w * space_factor;
-  hskip = (float)(seg_width * 0.125);
-  fslope = 1 / (segxw/seg_width + 1/slope);
-  bslope = -1 / (segxw/seg_width - 1/slope);
-  midpt = (float)h / 2;
+    segxw = sxw * w;
+    slope = angle;
+    seg_width = width_factor * w;
+    spacer = (float)w * space_factor;
+    hskip = (float)(seg_width * 0.125);
+    fslope = 1 / (segxw/seg_width + 1/slope);
+    bslope = -1 / (segxw/seg_width - 1/slope);
+    midpt = (float)h / 2;
 
-  /* define some trigonometric values */
-  /*  phi is the forward angle separating two segments; 
-      psi is the reverse angle separating two segments. */
+    /* define some trigonometric values */
+    /*  phi is the forward angle separating two segments; 
+	psi is the reverse angle separating two segments. */
 
-  invsinphi = sqrt(1 + fslope * fslope) / fslope;
-  invcosphi = sqrt(1 + 1/(fslope * fslope)) * fslope;
-  invsinpsi = sqrt(1 + bslope * bslope) / -bslope;
-  invcospsi = sqrt(1 + 1/(bslope * bslope)) * bslope;
+    invsinphi = sqrt(1 + fslope * fslope) / fslope;
+    invcosphi = sqrt(1 + 1/(fslope * fslope)) * fslope;
+    invsinpsi = sqrt(1 + bslope * bslope) / -bslope;
+    invcospsi = sqrt(1 + 1/(bslope * bslope)) * bslope;
 
-  /* define offsets from easily-calculated points for 6 situations */
+    /* define offsets from easily-calculated points for 6 situations */
 
-  dx1 = hskip * invsinphi / (slope/fslope - 1);
-  dy1 = hskip * invcosphi / (1 - fslope/slope);
-  dx2 = hskip * invsinpsi / (1 - slope/bslope);
-  dy2 = hskip * invcospsi / (bslope/slope - 1);
-  dx3 = hskip * invsinphi;
-  dx4 = hskip * invsinpsi;
-  dx5 = hskip * invsinpsi / (1 - fslope/bslope);
-  dy5 = hskip * invcospsi / (bslope/fslope - 1);
-  dx6 = dy5;
-  dy6 = dx5;
+    dx1 = hskip * invsinphi / (slope/fslope - 1);
+    dy1 = hskip * invcosphi / (1 - fslope/slope);
+    dx2 = hskip * invsinpsi / (1 - slope/bslope);
+    dy2 = hskip * invcospsi / (bslope/slope - 1);
+    dx3 = hskip * invsinphi;
+    dx4 = hskip * invsinpsi;
+    dx5 = hskip * invsinpsi / (1 - fslope/bslope);
+    dy5 = hskip * invcospsi / (bslope/fslope - 1);
+    dx6 = dy5;
+    dy6 = dx5;
 
-  /* calculate some simple reference points */
+    /* calculate some simple reference points */
 
-  temp_xpts[0] = spacer + (h - seg_width)/slope;
-  temp_xpts[1] = spacer + (h - seg_width/2)/slope + segxw/2;
-  temp_xpts[2] = spacer + h/slope + segxw;
-  temp_xpts[3] = temp_xpts[0] + segxw;
+    temp_xpts[0] = spacer + (h - seg_width)/slope;
+    temp_xpts[1] = spacer + (h - seg_width/2)/slope + segxw/2;
+    temp_xpts[2] = spacer + h/slope + segxw;
+    temp_xpts[3] = temp_xpts[0] + segxw;
 
-  xfactor = w - 2 * spacer - h / slope - segxw;
+    xfactor = w - 2 * spacer - h / slope - segxw;
 
-  /*
-  cout << "temp_xpts[2] " << temp_xpts[2] << '\n';
-  cout << "dx3 " << dx3 << '\n';
-  cout << "fslope " << fslope << '\n';
-  */
+    /*
+      cout << "temp_xpts[2] " << temp_xpts[2] << '\n';
+      cout << "dx3 " << dx3 << '\n';
+      cout << "fslope " << fslope << '\n';
+    */
 
-  /* calculate the digit positions */
+    /* calculate the digit positions */
 
-  pts = seg_pts[TOP];
-  pts[0].y = pts[1].y = 0;
-  pts[0].x = temp_xpts[2] - dx3;
-  pts[1].x = w - spacer - segxw + dx4;
-  pts[2].y = pts[5].y = (seg_width / 2) - dy5 - dy6;
-  pts[5].x = temp_xpts[1] + dx5 - dx6;
-  pts[2].x = pts[5].x + xfactor;
-  pts[3].y = pts[4].y = seg_width;
-  pts[4].x = temp_xpts[3] + dx4;
-  pts[3].x = temp_xpts[0] + xfactor - dx3; 
+    pts = seg_pts[TOP];
+    pts[0].y = pts[1].y = 0;
+    pts[0].x = temp_xpts[2] - dx3;
+    pts[1].x = w - spacer - segxw + dx4;
+    pts[2].y = pts[5].y = (seg_width / 2) - dy5 - dy6;
+    pts[5].x = temp_xpts[1] + dx5 - dx6;
+    pts[2].x = pts[5].x + xfactor;
+    pts[3].y = pts[4].y = seg_width;
+    pts[4].x = temp_xpts[3] + dx4;
+    pts[3].x = temp_xpts[0] + xfactor - dx3; 
 
-  pts = &(seg_pts[MIDDLE][0]);
-  pts[0].y = pts[1].y = midpt - seg_width/2;
-  pts[0].x = spacer + (h - pts[0].y)/slope + segxw;
-  pts[1].x = pts[0].x - segxw + xfactor;
-  pts[2].y = pts[5].y = midpt;
-  pts[3].y = pts[4].y = midpt + seg_width/2;
-  pts[5].x = spacer + (h - pts[5].y)/slope + segxw/2;
-  pts[2].x = pts[5].x + xfactor;
-  pts[4].x = pts[0].x - seg_width/slope;
-  pts[3].x = spacer + (h - pts[3].y)/slope + xfactor;
+    pts = &(seg_pts[MIDDLE][0]);
+    pts[0].y = pts[1].y = midpt - seg_width/2;
+    pts[0].x = spacer + (h - pts[0].y)/slope + segxw;
+    pts[1].x = pts[0].x - segxw + xfactor;
+    pts[2].y = pts[5].y = midpt;
+    pts[3].y = pts[4].y = midpt + seg_width/2;
+    pts[5].x = spacer + (h - pts[5].y)/slope + segxw/2;
+    pts[2].x = pts[5].x + xfactor;
+    pts[4].x = pts[0].x - seg_width/slope;
+    pts[3].x = spacer + (h - pts[3].y)/slope + xfactor;
 
-  pts = &(seg_pts[BOTTOM][0]);
-  pts[3].y = pts[4].y = (float)h;
-  pts[2].y = pts[5].y = h - (seg_width / 2) + dy5 + dy6;
-  pts[0].y = pts[1].y = h - seg_width;
-  pts[0].x = spacer + segxw + seg_width/slope + dx3;  
-  pts[1].x = spacer + (h - pts[1].y)/slope + xfactor - dx4;
-  pts[4].x = spacer + segxw - dx4;
-  pts[5].x = spacer + segxw/2 + (h - pts[5].y)/slope + dx6 - dx5;
-  pts[2].x = pts[5].x + xfactor;
-  pts[3].x = spacer + xfactor + dx3;
+    pts = &(seg_pts[BOTTOM][0]);
+    pts[3].y = pts[4].y = (float)h;
+    pts[2].y = pts[5].y = h - (seg_width / 2) + dy5 + dy6;
+    pts[0].y = pts[1].y = h - seg_width;
+    pts[0].x = spacer + segxw + seg_width/slope + dx3;  
+    pts[1].x = spacer + (h - pts[1].y)/slope + xfactor - dx4;
+    pts[4].x = spacer + segxw - dx4;
+    pts[5].x = spacer + segxw/2 + (h - pts[5].y)/slope + dx6 - dx5;
+    pts[2].x = pts[5].x + xfactor;
+    pts[3].x = spacer + xfactor + dx3;
 
-  pts = &(seg_pts[TOP_LEFT][0]);
-  pts[0].y = seg_width / 2 - dy6 + dy5;
-  pts[1].y = seg_width + dy2;
-  pts[2].y = seg_pts[MIDDLE][0].y - 2 * dy1;
-  pts[3].y = seg_pts[MIDDLE][5].y - 2 * dy6;
-  pts[4].y = seg_pts[MIDDLE][0].y;
-  pts[5].y = seg_width - dy1;
-  pts[0].x = temp_xpts[1] - dx5 - dx6;
-  pts[1].x = temp_xpts[3] - dx2;
-  pts[2].x = seg_pts[MIDDLE][0].x + 2 * dx1; 
-  pts[3].x = seg_pts[MIDDLE][5].x - 2 * dx6;
-  pts[4].x = spacer + (h - pts[4].y)/slope;
-  pts[5].x = temp_xpts[0] + dx1;
+    pts = &(seg_pts[TOP_LEFT][0]);
+    pts[0].y = seg_width / 2 - dy6 + dy5;
+    pts[1].y = seg_width + dy2;
+    pts[2].y = seg_pts[MIDDLE][0].y - 2 * dy1;
+    pts[3].y = seg_pts[MIDDLE][5].y - 2 * dy6;
+    pts[4].y = seg_pts[MIDDLE][0].y;
+    pts[5].y = seg_width - dy1;
+    pts[0].x = temp_xpts[1] - dx5 - dx6;
+    pts[1].x = temp_xpts[3] - dx2;
+    pts[2].x = seg_pts[MIDDLE][0].x + 2 * dx1; 
+    pts[3].x = seg_pts[MIDDLE][5].x - 2 * dx6;
+    pts[4].x = spacer + (h - pts[4].y)/slope;
+    pts[5].x = temp_xpts[0] + dx1;
 
-  pts = &(seg_pts[BOT_LEFT][0]);
-  pts[0].y = seg_pts[MIDDLE][5].y + 2 * dy5;
-  pts[1].y = seg_pts[MIDDLE][4].y + 2 * dy2;
-  pts[2].y = seg_pts[BOTTOM][0].y - dy1;
-  pts[3].y = seg_pts[BOTTOM][5].y - 2 * dy6;
-  pts[4].y = h - seg_width + dy2;
-  pts[5].y = midpt + seg_width/2;
-  pts[0].x = seg_pts[MIDDLE][5].x - 2 * dx5;
-  pts[1].x = seg_pts[MIDDLE][4].x - 2 * dx2;
-  pts[2].x = seg_pts[BOTTOM][0].x - dx3 + dx1;
-  pts[3].x = seg_pts[BOTTOM][5].x - 2 * dx6;
-  pts[4].x = spacer + seg_width / slope - dx2;
-  pts[5].x = spacer + (midpt - seg_width/2) / slope;
+    pts = &(seg_pts[BOT_LEFT][0]);
+    pts[0].y = seg_pts[MIDDLE][5].y + 2 * dy5;
+    pts[1].y = seg_pts[MIDDLE][4].y + 2 * dy2;
+    pts[2].y = seg_pts[BOTTOM][0].y - dy1;
+    pts[3].y = seg_pts[BOTTOM][5].y - 2 * dy6;
+    pts[4].y = h - seg_width + dy2;
+    pts[5].y = midpt + seg_width/2;
+    pts[0].x = seg_pts[MIDDLE][5].x - 2 * dx5;
+    pts[1].x = seg_pts[MIDDLE][4].x - 2 * dx2;
+    pts[2].x = seg_pts[BOTTOM][0].x - dx3 + dx1;
+    pts[3].x = seg_pts[BOTTOM][5].x - 2 * dx6;
+    pts[4].x = spacer + seg_width / slope - dx2;
+    pts[5].x = spacer + (midpt - seg_width/2) / slope;
 
-  pts = &(seg_pts[TOP_RIGHT][0]);
-  pts[0].y = seg_width/2 - dy5 + dy6;
-  pts[1].y = seg_width - dy2;
-  pts[2].y = midpt - seg_width/2;
-  pts[3].y = midpt - 2 * dy5;
-  pts[4].y = pts[2].y - 2 * dy2;
-  pts[5].y = seg_width + dy1;
-  pts[0].x = temp_xpts[1] + xfactor + dx5 + dx6;
-  pts[1].x = temp_xpts[3] + xfactor + dx1;
-  pts[2].x = seg_pts[MIDDLE][0].x + xfactor;
-  pts[3].x = seg_pts[MIDDLE][5].x + xfactor + dx5 * 2;
-  pts[4].x = seg_pts[TOP_LEFT][4].x + xfactor + dx2 * 2;
-  pts[5].x = temp_xpts[0] + xfactor - dx1;
+    pts = &(seg_pts[TOP_RIGHT][0]);
+    pts[0].y = seg_width/2 - dy5 + dy6;
+    pts[1].y = seg_width - dy2;
+    pts[2].y = midpt - seg_width/2;
+    pts[3].y = midpt - 2 * dy5;
+    pts[4].y = pts[2].y - 2 * dy2;
+    pts[5].y = seg_width + dy1;
+    pts[0].x = temp_xpts[1] + xfactor + dx5 + dx6;
+    pts[1].x = temp_xpts[3] + xfactor + dx1;
+    pts[2].x = seg_pts[MIDDLE][0].x + xfactor;
+    pts[3].x = seg_pts[MIDDLE][5].x + xfactor + dx5 * 2;
+    pts[4].x = seg_pts[TOP_LEFT][4].x + xfactor + dx2 * 2;
+    pts[5].x = temp_xpts[0] + xfactor - dx1;
 
-  pts = &(seg_pts[BOT_RIGHT][0]);
-  pts[0].y = seg_pts[MIDDLE][2].y + 2 * dy6;
-  pts[1].y = midpt + seg_width / 2;
-  pts[2].y = h - seg_width + dy1;
-  pts[3].y = h - (seg_width / 2) + dy6 - dy5;
-  pts[4].y = h - seg_width - dy2;
-  pts[5].y = seg_pts[MIDDLE][3].y + 2 * dy1;
-  pts[0].x = seg_pts[MIDDLE][2].x + 2 * dx6;
-  pts[1].x = seg_pts[MIDDLE][3].x + segxw;
-  pts[2].x = seg_pts[BOTTOM][1].x + dx4 + segxw - dx1;
-  pts[3].x = seg_pts[BOTTOM][2].x + 2 * dx5;
-  pts[4].x = seg_pts[BOTTOM][1].x + dx4 + dx2;
-  pts[5].x = seg_pts[MIDDLE][3].x - 2 * dx1;
+    pts = &(seg_pts[BOT_RIGHT][0]);
+    pts[0].y = seg_pts[MIDDLE][2].y + 2 * dy6;
+    pts[1].y = midpt + seg_width / 2;
+    pts[2].y = h - seg_width + dy1;
+    pts[3].y = h - (seg_width / 2) + dy6 - dy5;
+    pts[4].y = h - seg_width - dy2;
+    pts[5].y = seg_pts[MIDDLE][3].y + 2 * dy1;
+    pts[0].x = seg_pts[MIDDLE][2].x + 2 * dx6;
+    pts[1].x = seg_pts[MIDDLE][3].x + segxw;
+    pts[2].x = seg_pts[BOTTOM][1].x + dx4 + segxw - dx1;
+    pts[3].x = seg_pts[BOTTOM][2].x + 2 * dx5;
+    pts[4].x = seg_pts[BOTTOM][1].x + dx4 + dx2;
+    pts[5].x = seg_pts[MIDDLE][3].x - 2 * dx1;
 
-  // Convert the floating point points into integers.
-  int i,j;
-  for(i=0; i<NUM_SEGS; i++) {
+    // Convert the floating point points into integers.
+    int i,j;
+    for(i=0; i<NUM_SEGS; i++) {
 
-    for(j=0; j<MAX_PTS; j++) {
+      for(j=0; j<MAX_PTS; j++) {
 
-      segments[i].p[j].x = (int)seg_pts[i][j].x;
-      segments[i].p[j].y = (int)seg_pts[i][j].y;
+	segments[i].p[j].x = (int)seg_pts[i][j].x;
+	segments[i].p[j].y = (int)seg_pts[i][j].y;
+      }
     }
+
   }
 
-}
-
-void Led_7Segments::build_window(void)
-{
-  GtkWidget *main_vbox;
-  GtkWidget *vbox;
+  void Led_7Segments::build_window()
+  {
+    GtkWidget *main_vbox;
+    GtkWidget *vbox;
 
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
@@ -519,222 +529,199 @@ void Led_7Segments::build_window(void)
 
     gdk_color_alloc(gdk_colormap_get_system(), &led_background_color);
 
-//  }
+    //  }
 
 
-}
-
-//--------------------------------------------------------------
-
-Led_7Segments::Led_7Segments(void)
-{
-
-  //cout << "7-segment led constructor\n";
-  new_name("LED7SEG");
-
-  if(get_interface().bUsingGUI()) {
-    build_segments(100, 100);
-    build_window();
   }
 
-  interface = new LED_Interface(this);
-  get_interface().add_interface(interface);
-  callback();
-}
+  //--------------------------------------------------------------
 
-Led_7Segments::~Led_7Segments(void)
-{
-  delete port;
-}
-
-//--------------------------------------------------------------
-// create_iopin_map 
-//
-//  This is where the information for the Module's package is defined.
-// Specifically, the I/O pins of the module are created.
-
-void Led_7Segments::create_iopin_map(void)
-{
-
-
-  // Create an I/O port to which the I/O pins can interface
-  //   The module I/O pins are treated in a similar manner to
-  //   the pic I/O pins. Each pin has a unique pin number that
-  //   describes it's position on the physical package. This
-  //   pin can then be logically grouped with other pins to define
-  //   an I/O port. 
-
-
-  port = new Led_Port(8);
-  port->value.put(0);
-
-  // Here, we name the port `pin'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the logic gate (which is assigned by the user and
-  //   obtained with the name() member function call).
-
-  char *mod_name = (char*)name().c_str();   // Get the name of this logic gate
-  if(!mod_name) 
+  Led_7Segments::Led_7Segments()
   {
-	new_name("led");
-	mod_name=(char*)name().c_str();
-  }
-  port->new_name(mod_name);
 
+    //cout << "7-segment led constructor\n";
+    new_name("LED7SEG");
 
-  // Define the physical package.
-  //   The Package class, which is a parent of all of the modules,
-  //   is responsible for allocating memory for the I/O pins.
-  //
-  //   The 7-segment LED has 8 pins
-
-  create_pkg(8);
-
-  // Position pins on left side of package
-  float pos=0.0;
-  const float dp = (float)(0.9999/7.0);
-  package->set_pin_position(1,pos);pos+=dp;
-  package->set_pin_position(2,pos);pos+=dp;
-  package->set_pin_position(3,pos);pos+=dp;
-  package->set_pin_position(4,pos);pos+=dp;
-  package->set_pin_position(5,pos);pos+=dp;
-  package->set_pin_position(6,pos);pos+=dp;
-  package->set_pin_position(7,pos);pos+=dp;
-  package->set_pin_position(8,pos);pos+=dp;
-
-  // Define the I/O pins and assign them to the package.
-  //   There are two things happening here. First, there is
-  //   a new I/O pin that is being created. For the binary 
-  //   indicator, both pins are inputs. The second thing is
-  //   that the pins are "assigned" to the package. If we
-  //   need to reference these newly created I/O pins (like
-  //   below) then we can call the member function 'get_pin'.
-
-  // Now, I'd normally put this is loop, but to be explicit...
-  assign_pin(1, new Led_Input(port, 0,(name() + ".cc").c_str()));  // cathode
-  assign_pin(2, new Led_Input(port, 1,(name() + ".seg0").c_str()));  // segment 0 (a)
-  assign_pin(3, new Led_Input(port, 2,(name() + ".seg1").c_str()));  // segment 1 (b)
-  assign_pin(4, new Led_Input(port, 3,(name() + ".seg2").c_str()));  // segment 2 (c)
-  assign_pin(5, new Led_Input(port, 4,(name() + ".seg3").c_str()));  // segment 3 (d)
-  assign_pin(6, new Led_Input(port, 5,(name() + ".seg4").c_str()));  // segment 4 (e)
-  assign_pin(7, new Led_Input(port, 6,(name() + ".seg5").c_str()));  // segment 5 (f)
-  assign_pin(8, new Led_Input(port, 7,(name() + ".seg6").c_str()));  // segment 6 (g)
-
-
-  initializeAttributes();
-
-}
-
-//--------------------------------------------------------------
-// construct
-
-Module * Led_7Segments::construct(const char *_new_name=0)
-{
-
-//  cout << " 7-segment LED display constructor\n";
-
-  Led_7Segments *l7sP = new Led_7Segments ;
-  l7sP->new_name(_new_name);
-  l7sP->create_iopin_map();
-
-  return l7sP;
-
-}
-
-
-
-
-//-------------------------------------------------------------
-// Led (simple)
-//-------------------------------------------------------------
-void Led::update(void)
-{
-  update(darea, w_width,w_height);
-}
-
-void Led::callback(void)
-{
-                                                                                
-  get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
-  update();
-                                                                                
-}
-void Led::update(  GtkWidget *widget,
-		   guint new_width,
-		   guint new_height)
-{
-  if(!get_interface().bUsingGUI())
-    return;
-
-  w_width = new_width;
-  w_height = new_height;
-  GdkDrawable *drawable = widget->window;
-
-  if(!GTK_WIDGET_REALIZED(widget))
-    return;
-
-  if(gc==NULL)
-  {
-      gc = gdk_gc_new(darea->window);
-      gdk_gc_set_line_attributes(gc,
-				 5,
-				 GDK_LINE_SOLID,
-				 GDK_CAP_ROUND,
-				 GDK_JOIN_ROUND);
-      g_assert(gc!=NULL);
-  }
-
-
-  int state = port->get_value();
-
-  gdk_gc_set_foreground(gc,&led_segment_off_color);
-  gdk_draw_rectangle (drawable, gc,
-		      TRUE,
-		      0,
-		      0,
-		      w_width,
-		      w_height);
-
-    if(state)
-    {
-	gdk_gc_set_foreground(gc,&led_segment_on_color);
-	gdk_draw_arc(drawable, gc,
-		     TRUE,
-		     0,
-		     0,
-		     w_width,
-		     w_height,
-                     0,64*360);
+    if(get_interface().bUsingGUI()) {
+      build_segments(100, 100);
+      build_window();
     }
-}
+
+    interface = new LED_Interface(this);
+    get_interface().add_interface(interface);
+    callback();
+  }
+
+  Led_7Segments::~Led_7Segments()
+  {
+    for (int i=0; i<8; i++)
+      delete m_pins[i];
+    delete [] m_pins;
+  }
+
+  //--------------------------------------------------------------
+  // create_iopin_map 
+  //
+  //  This is where the information for the Module's package is defined.
+  // Specifically, the I/O pins of the module are created.
+
+  void Led_7Segments::create_iopin_map()
+  {
+
+    // Define the physical package.
+    //   The Package class, which is a parent of all of the modules,
+    //   is responsible for allocating memory for the I/O pins.
+    //
+    //   The 7-segment LED has 8 pins
+
+    create_pkg(8);
+    m_pins = new Led_Input *[8];
+
+    // Position pins on left side of package
+    float pos=0.0;
+    const float dp = (float)(0.9999/7.0);
+    package->set_pin_position(1,pos);pos+=dp;
+    package->set_pin_position(2,pos);pos+=dp;
+    package->set_pin_position(3,pos);pos+=dp;
+    package->set_pin_position(4,pos);pos+=dp;
+    package->set_pin_position(5,pos);pos+=dp;
+    package->set_pin_position(6,pos);pos+=dp;
+    package->set_pin_position(7,pos);pos+=dp;
+    package->set_pin_position(8,pos);pos+=dp;
 
 
-static gint
-led_expose_event (GtkWidget *widget,
-		  GdkEvent  *event,
-		  gpointer   user_data)
-{
+    // Here, we create and name the I/O pins. In gpsim, we will reference
+    //   the bit positions as LED.seg0, LED.seg1, ..., where LED is the
+    //   user-assigned name of the 7-segment LED
+
+    m_pins[0] = new Led_Input( (name() + ".cc").c_str(), this);
+    int i;
+    for (char ch='0',i = 1; i<8; i++,ch++)
+      m_pins[i] = new Led_Input((name() + ".seg"+ch).c_str(), this);
+
+    for (i=0; i<8; i++)
+      assign_pin(i+1,m_pins[i]);
+
+    initializeAttributes();
+
+  }
+
+  //--------------------------------------------------------------
+  unsigned int Led_7Segments::getPinState()
+  {
+    unsigned int s=0;
+    for (int i=0; i<8; i++)
+      s = (s>>1) | (m_pins[i]->getDrivenState() ? 0x80 : 0);
+    return s;
+
+  }
+
+  //--------------------------------------------------------------
+  // construct
+
+  Module * Led_7Segments::construct(const char *_new_name=0)
+  {
+
+    Led_7Segments *l7sP = new Led_7Segments ;
+    l7sP->new_name(_new_name);
+    l7sP->create_iopin_map();
+
+    return l7sP;
+
+  }
 
 
-  Led *led;
-  guint max_width;
-  guint max_height;
 
-  g_return_val_if_fail (widget != NULL, TRUE);
-  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
 
-  // de-reference the user_data into an led object
-  led = (Led *)user_data;
+  //-------------------------------------------------------------
+  // Led (simple)
+  //-------------------------------------------------------------
+  void Led::update()
+  {
+    update(darea, w_width,w_height);
+  }
 
-  max_width = widget->allocation.width;
-  max_height = widget->allocation.height;
+  void Led::callback()
+  {
+                                                                                
+    get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
+    update();
+                                                                                
+  }
+  void Led::update(  GtkWidget *widget,
+		     guint new_width,
+		     guint new_height)
+  {
+    if(!get_interface().bUsingGUI())
+      return;
 
-  led->update(widget,max_width,max_height);
+    w_width = new_width;
+    w_height = new_height;
+    GdkDrawable *drawable = widget->window;
 
-  return TRUE;
-}
-void Led::build_window(void)
-{
+    if(!GTK_WIDGET_REALIZED(widget))
+      return;
+
+    if(gc==NULL)
+      {
+	gc = gdk_gc_new(darea->window);
+	gdk_gc_set_line_attributes(gc,
+				   5,
+				   GDK_LINE_SOLID,
+				   GDK_CAP_ROUND,
+				   GDK_JOIN_ROUND);
+	g_assert(gc!=NULL);
+      }
+
+
+    gdk_gc_set_foreground(gc,&led_segment_off_color);
+    gdk_draw_rectangle (drawable, gc,
+			TRUE,
+			0,
+			0,
+			w_width,
+			w_height);
+
+    if(m_pin->getDrivenState()) {
+      gdk_gc_set_foreground(gc,&led_segment_on_color);
+      gdk_draw_arc(drawable, gc,
+		   TRUE,
+		   0,
+		   0,
+		   w_width,
+		   w_height,
+		   0,64*360);
+    }
+  }
+
+
+  static gint
+  led_expose_event (GtkWidget *widget,
+		    GdkEvent  *event,
+		    gpointer   user_data)
+  {
+
+
+    Led *led;
+    guint max_width;
+    guint max_height;
+
+    g_return_val_if_fail (widget != NULL, TRUE);
+    g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+
+    // de-reference the user_data into an led object
+    led = (Led *)user_data;
+
+    max_width = widget->allocation.width;
+    max_height = widget->allocation.height;
+
+    led->update(widget,max_width,max_height);
+
+    return TRUE;
+  }
+
+  void Led::build_window()
+  {
     GtkWidget *main_vbox;
 
     main_vbox = gtk_vbox_new (FALSE, 5);
@@ -773,83 +760,62 @@ void Led::build_window(void)
 
     gdk_color_alloc(gdk_colormap_get_system(), &led_segment_off_color);
 
-}
-
-//--------------------------------------------------------------
-
-Led::Led(void)
-{
-  new_name("LED");
-
-  if(get_interface().bUsingGUI())
-    build_window();
-
-  interface = new LED_Interface(this);
-  get_interface().add_interface(interface);
-  callback();
-}
-
-Led::~Led(void)
-{
-  //gpsim_unregister_interface(interface_id);
-  delete port;
-}
-
-//--------------------------------------------------------------
-// create_iopin_map 
-//
-//  This is where the information for the Module's package is defined.
-// Specifically, the I/O pins of the module are created.
-
-void Led::create_iopin_map(void)
-{
-
-
-  // Create an I/O port to which the I/O pins can interface
-  //   The module I/O pins are treated in a similar manner to
-  //   the pic I/O pins. Each pin has a unique pin number that
-  //   describes it's position on the physical package. This
-  //   pin can then be logically grouped with other pins to define
-  //   an I/O port. 
-
-
-  port = new Led_Port(1);
-  port->value.put(0);
-
-  // Here, we name the port `pin'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the logic gate (which is assigned by the user and
-  //   obtained with the name() member function call).
-
-  char *mod_name = (char*)name().c_str();
-  if(!mod_name) {
-    new_name("led");
-    mod_name = (char*)name().c_str();
   }
-  port->new_name(mod_name);
 
-  create_pkg(1);
+  //--------------------------------------------------------------
 
-  // Position pin on left side of package
-  package->set_pin_position(1,0.5);
+  Led::Led()
+  {
+    new_name("LED");
 
-  // Define the LED Cathode. (The anode is implicitly tied to VCC)
-  assign_pin(1, new Led_Input(port, 0,(name() + ".in").c_str()));
-  initializeAttributes();
+    if(get_interface().bUsingGUI())
+      build_window();
+
+    interface = new LED_Interface(this);
+    get_interface().add_interface(interface);
+    callback();
+  }
+
+  Led::~Led()
+  {
+    delete m_pin;
+  }
+
+  //--------------------------------------------------------------
+  // create_iopin_map 
+  //
+  //  This is where the information for the Module's package is defined.
+  // Specifically, the I/O pins of the module are created.
+
+  void Led::create_iopin_map()
+  {
+
+
+    create_pkg(1);
+
+    // Position pin on left side of package
+    package->set_pin_position(1,0.5);
+
+    // Define the LED Cathode. (The anode is implicitly tied to VCC)
+
+    m_pin = new Led_Input((name() + ".in").c_str(), this);
+    assign_pin(1, m_pin);
+    initializeAttributes();
+  }
+
+  //--------------------------------------------------------------
+  // construct
+
+  Module * Led::construct(const char *_new_name=0)
+  {
+
+    Led *ledP = new Led;
+    ledP->new_name(_new_name);
+    ledP->create_iopin_map();
+
+    return ledP;
+
+  }
+
 }
-
-//--------------------------------------------------------------
-// construct
-
-Module * Led::construct(const char *_new_name=0)
-{
-
-  Led *ledP = new Led;
-  ledP->new_name(_new_name);
-  ledP->create_iopin_map();
-
-  return ledP;
-
-}
-
 #endif //HAVE_GUI

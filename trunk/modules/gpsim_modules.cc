@@ -102,8 +102,8 @@ Module_Types available_modules[] =
   { {"not",  "not"},  NOTGate::construct},
 
   // Leds
-  { {"led_7segments", "led7s"}, Led_7Segments::construct},
-  { {"led", "led"}, Led::construct},
+  { {"led_7segments", "led7s"}, Leds::Led_7Segments::construct},
+  { {"led", "led"}, Leds::Led::construct},
 
   // Video
   { {"PAL_video", "video"}, Video::construct},
@@ -220,8 +220,3 @@ Module * getmodule(void)
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-void test2(void)
-{
-  printf("%s - c++ declared\n", __FUNCTION__);
-}
