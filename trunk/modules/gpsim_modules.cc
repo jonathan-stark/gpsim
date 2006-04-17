@@ -50,7 +50,6 @@ support:
 #include "../config.h"    // get the definition for HAVE_GUI
 
 #include "../src/modules.h"
-#include "binary_indicator.h"
 #include "resistor.h"
 #include "usart.h"
 
@@ -77,9 +76,7 @@ public:
 */
 Module_Types available_modules[] =
 {
-  { {"binary_indicator", "bi"},   Binary_Indicator::construct },
 
-  //  { "resistor",         "res",  Resistor::construct }
   { {"pullup",           "pu"},   PullupResistor::pu_construct },
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
 
@@ -206,15 +203,6 @@ void test(void)
   //cout << "This is a test\n";
   printf("%s\n",__FUNCTION__);
 
-}
-
-Module * getmodule(void)
-{
-  Module *bi = Binary_Indicator::construct();
-
-  cout << "gpsim_modules created a binary indicator name:  " 
-       << bi->name() <<'\n';
-  return bi;
 }
 
 #ifdef __cplusplus

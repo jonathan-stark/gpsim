@@ -1,4 +1,10 @@
 2006-04-16 Scott Dattalo <scott@dattalo.com>
+	* modules/binary_indicator.cc,h: removed from gpsim. This module
+	did absolutely nothing.
+	* modules/gpsim_modules.cc, modules/Makefile.am: removed
+	references to the binary_indicator.
+
+2006-04-16 Scott Dattalo <scott@dattalo.com>
 	* modules/ttl.cc: TTLbase now calls initializeAttributes(). This
 	defines xpos and ypos attributes.
 	* regression/ttl/ttl377.asm: xpos and ypos are initialized by the
