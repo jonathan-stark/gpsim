@@ -34,7 +34,6 @@ all :				\
 
 modules_OBJECTS =		\
 	gpsim_modules.o		\
-	binary_indicator.o	\
 	encoder.o		\
 	led.o			\
 	logic.o			\

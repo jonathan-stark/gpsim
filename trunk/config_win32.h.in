@@ -99,7 +99,16 @@
 
 /* Version number of package */
 #undef VERSION
+
 #if defined _MSC_VER || defined __MINGW32__
+/*
+ * The following define causes the following warning:
+ * warning: `I' flag used with `%x' printf format
+ * when copiled with mingw or cygwin -mno-cygwin gcc.
+ * This is correct, because the mingw compilation links against msvcrt.dll,
+ * which uses "I46" for 64 bit integer (long long) printf lenght modifier,
+ * instead of "ll" used by libc.
+ */
 #define PRINTF_INT64_MODIFIER "I64"
 #else
 #define PRINTF_INT64_MODIFIER "ll"
