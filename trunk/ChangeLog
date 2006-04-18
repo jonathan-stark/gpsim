@@ -1,3 +1,7 @@
+2006-04-17 J.R. Heisey <jrheisey@sourceforge.com
+	* cli/cmd_module.cc, src\os_dependent.cc: Changed env var
+	from GPSIMPATH to GPSIM_MODULE_PATH.
+
 2006-04-17 Scott Dattalo <scott@dattalo.com>
 	* modules/gpsim_modules.cc, modules/push_button.cc,
 	modules/resistor.cc, modules/push_button.h, modules/resistor.h,
