@@ -81,7 +81,7 @@ cmd_module::cmd_module(void)
     "\tthe information you wish to display (dump is the default).\n"
     "\n"
     "\tDevelopers of gpsim and developers building libraries for use with\n"
-    "\tgpsim may find it useful to set the GPSIMPATH environment variable\n"
+    "\tgpsim may find it useful to set the GPSIM_MODULE_PATH environment variable\n"
     "\tto the target folder of the library module that is under development.\n"
     "\tMultiple folders may be delimited with a ':' for Linux and ';' for\n"
     "\tWindows.\n"
