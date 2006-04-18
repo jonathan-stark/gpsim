@@ -171,7 +171,7 @@ void AddModulePathFromFilePath(string &sFolder) {
   string sFile;
   asDllSearchPath.AddPathFromFilePath(sFolder, sFile);
   char * pszGpsimModulePath;
-  if((pszGpsimModulePath = getenv("GPSIMPATH")) != NULL) {
+  if((pszGpsimModulePath = getenv("GPSIM_MODULE_PATH")) != NULL) {
     char * pLast = pszGpsimModulePath;
     char * pChar = strchr(pszGpsimModulePath, PATHDELIMITER[0]);
     string sFolder;
