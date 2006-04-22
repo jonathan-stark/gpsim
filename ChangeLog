@@ -1,3 +1,6 @@
+2006-04-11 Roy Rankin <rrankin@ihug.com.au>
+	* modules/switch.cc modules/switch.h: fix windows regression problem
+
 2006-04-17 J.R. Heisey <jrheisey@sourceforge.com
 	* cli/cmd_module.cc, src\os_dependent.cc: Changed env var
 	from GPSIMPATH to GPSIM_MODULE_PATH.
