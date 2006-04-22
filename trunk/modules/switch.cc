@@ -221,7 +221,7 @@ void Switch::setState(bool bNewState)
 {
   if (m_button)
     gtk_toggle_button_set_active(m_button, bNewState ? TRUE : FALSE);
-  if ( m_bCurrentState != bNewState) {
+  if ( switch_closed() != bNewState) {
     m_bCurrentState = bNewState;
     update();
   }
@@ -233,7 +233,7 @@ void Switch::update()
   if (m_pinA->snode)
     m_pinA->snode->update();
 
-  if (!m_bCurrentState && m_pinB->snode)
+  if (!switch_closed() && m_pinB->snode)
     m_pinB->snode->update();
 }
 //------------------------------------------------------------------------
@@ -248,7 +248,8 @@ void Switch::update()
 
 void Switch::getThevenin(SwitchPin *pin, double &v, double &z, double &c)
 {
-  if (m_bCurrentState) 		// switch is closed
+  c = 0;
+  if (switch_closed()) 		// switch is closed
   {
 
  	v = do_voltage(pin);  	// switch voltage
@@ -257,7 +258,8 @@ void Switch::getThevenin(SwitchPin *pin, double &v, double &z, double &c)
   else				// Switch is open set high impedance
   {
         settlingTimeStep = 0;
-	initial_voltage = -5.0;       // undefined value
+	v = initial_voltage;
+	initial_voltage = -0.3;       // undefined value
 	z = pin->get_Zopen();
   }
 
@@ -265,7 +267,7 @@ void Switch::getThevenin(SwitchPin *pin, double &v, double &z, double &c)
 //------------------------------------------------------------------------
 void Switch::set_nodeVoltage(SwitchPin *pin, double v)
 {
-  if (m_bCurrentState) {
+  if (switch_closed()) {
 
     // The switch is closed.
 
@@ -319,7 +321,7 @@ Switch::Switch()
 
   name_str = strdup("Switch");
   
-  initial_voltage = -5.0;	// undefined value
+  initial_voltage = -0.5;	// undefined value
 }
 
 Switch::~Switch(void)
@@ -384,7 +386,7 @@ double Switch::do_voltage(SwitchPin *pin)
 	    cout << "Switch::do_voltage() use DC as current_time_constant=" << 
 		current_time_constant << endl;
     	}
-	initial_voltage = -5.0;
+	initial_voltage = -0.5;
       	voltage = finalVoltage;
   	return(voltage);
     } else {
@@ -440,7 +442,7 @@ double Switch::do_voltage(SwitchPin *pin)
 	}
 	voltage = finalVoltage;
 	settlingTimeStep = 0;
-	initial_voltage = -5.0;
+	initial_voltage = -0.5;
 	return(voltage);
       }
       cap_start_cycles = get_cycles().value;
