@@ -565,7 +565,7 @@ string stimulus::toString()
 {
   ostringstream s;
 
-  s << "stimulus ";
+  s << " stimulus ";
   if(snode)
     s << " attached to " << snode->name();
   s << endl
@@ -1281,9 +1281,9 @@ double IO_bi_directional_pu::get_Vth()
   
   /**/
   if(verbose & 1)
-    cout << name() << "get_Vth "
+    cout << name() << " get_Vth PU "
 	 << " driving=" << getDriving()
-	 << " bDrivingState=" << bDrivingState
+	 << " DrivingState=" << getDrivingState()
 	 << " bDrivenState=" << bDrivenState
 	 << " Vth=" << Vth
 	 << " VthIn=" << VthIn
@@ -1363,6 +1363,17 @@ IO_open_collector::IO_open_collector(const char *_name)
 
 double IO_open_collector::get_Vth()
 {
+  /**/
+  if(verbose & 1)
+    cout << name() << " get_Vth OC"
+	 << " driving=" << getDriving()
+	 << " DrivingState=" << getDrivingState()
+	 << " bDrivenState=" << bDrivenState
+	 << " Vth=" << Vth
+	 << " VthIn=" << VthIn
+	 << " bPullUp=" << bPullUp << endl;
+  /**/  
+
   if(getDriving() && !getDrivingState())
     return 0.0;
 
