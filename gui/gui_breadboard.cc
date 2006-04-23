@@ -59,7 +59,7 @@ Boston, MA 02111-1307, USA.  */
 
 #define FOORADIUS (CASELINEWIDTH) // radius of center top milling
 
-#define LABELPAD 0 // increase this so wide lines doesn't clutter labels
+#define LABELPAD 4 // increase this so wide lines doesn't clutter labels
 
 static GdkColor high_output_color;
 static GdkColor low_output_color;
@@ -2689,13 +2689,26 @@ void GuiPin::SetLabelPosition(int x, int y)
 // GuiPin::DrawLabel() - draw the label for a single pin 
 //
 // 
-void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
+int GuiPin::DrawLabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
 {
   const char *name;
+  int orient;
 
-  name = iopin ? iopin->name().c_str() : 0;
+  name = iopin ? iopin->name().c_str() : "";
+  if(*name && m_bbw && iopin->get_name_updated()) {
+    iopin->clr_name_updated();
 
-  if(name && m_bbw) {
+    orient = (m_label_x <= LABELPAD+CASELINEWIDTH)?0:2; // Left or Right label?
+
+    // Clear label area
+    gdk_draw_rectangle (module_pixmap,
+			m_bbw->window->style->white_gc,
+                        TRUE,
+		  	m_label_x,
+		  	m_label_y-m_height+CASEOFFSET,
+                        pinnameWidths[orient],
+                        m_height);
+
     gdk_draw_text(module_pixmap,
 #if GTK_MAJOR_VERSION >= 2
 		  gdk_font_from_description(m_bbw->pinnamefont),
@@ -2706,8 +2719,9 @@ void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
 		  m_label_x,
 		  m_label_y,
 		  name,strlen(name));
+    return 1;
   }
-  
+  return 0;
 }
 //------------------------------------------------------------------------
 void GuiPin::addXref(CrossReferenceToGUI *newXref)
@@ -2813,12 +2827,40 @@ void GuiModule::Update()
 
 void GuiModule::UpdatePins()
 {
+  int change = 0;
   GList *pin_iter;
   pin_iter=m_pins;
   while(pin_iter!=0) {
     GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
     pin->Update();
+    change = pin->DrawLabel(m_module_pixmap, pinnameWidths)?1:change;
     pin_iter = pin_iter->next;
+  }
+  if (change)	// Pin label changed redo pin list
+  {
+      GtkWidget *hackSubtree = gtk_tree_new();
+      GtkWidget *sub_tree_item;
+
+      gtk_tree_item_remove_subtree(GTK_TREE_ITEM(m_tree_item));
+      gtk_widget_show(hackSubtree);
+      gtk_tree_item_set_subtree(GTK_TREE_ITEM(m_tree_item), hackSubtree);
+      pin_iter=m_pins;
+      while(pin_iter!=0) {
+    	GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
+    	const char *name=pin->pinName();
+    	if(name) {
+      	    sub_tree_item = gtk_tree_item_new_with_label (name);
+
+      	    gtk_signal_connect(GTK_OBJECT(sub_tree_item),
+			 "select",
+			 (GtkSignalFunc) treeselect_stimulus,
+			 pin);
+      	    gtk_widget_show(sub_tree_item);
+      	    gtk_tree_append(GTK_TREE(hackSubtree), sub_tree_item);
+    	}
+
+        pin_iter = pin_iter->next;
+     }
   }
 
 }
@@ -2992,7 +3034,7 @@ void GuiModule::AddPinGeometry(GuiPin *pin)
       pin_y=(int)(m_height/2+((3.0-pin_position-0.5)*hackPackageHeight))-pinspacing/2;
       orientation = RIGHT;
 
-      label_x=LABELPAD+m_width/2+FOORADIUS;
+      label_x= m_width/2  + CASELINEWIDTH;
       label_y=(int)((3.0-pin_position)*hackPackageHeight);
       label_y+=LABELPAD+CASELINEWIDTH+pinspacing/2-m_bbw->pinnameheight/3;
       label_y+=PINLENGTH/2;
@@ -3181,7 +3223,6 @@ void GuiModule::Build()
 
   // Find the length of the longest pin name in each direction
   // The directions are in the order of left, up , right, down.
-  int pinnameWidths[4] = {0,0,0,0};
   int pinmax_x = 0;
   int pinmax_y = 0;
   for(i=1;i<=m_pin_count;i++) {
@@ -3216,7 +3257,7 @@ void GuiModule::Build()
 
     // Create a static representation.
 
-    m_width =  pinnameWidths[0] + pinnameWidths[2] + FOORADIUS;
+    m_width =  pinnameWidths[0] + pinnameWidths[2] + 2 * FOORADIUS;
     m_width += 2*CASELINEWIDTH+2*LABELPAD;
 
     m_height = m_module->get_pin_count()/2*pinspacing; // pin name height
@@ -3305,6 +3346,8 @@ void GuiModule::Build()
 
   // Create pins
   GtkWidget *hackSubtree = gtk_tree_new();
+  GtkWidget *sub_tree_item;
+
   gtk_widget_show(hackSubtree);
   gtk_tree_item_set_subtree(GTK_TREE_ITEM(m_tree_item), hackSubtree);
 
@@ -3313,19 +3356,20 @@ void GuiModule::Build()
   while(pin_iter!=0) {
     GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
     AddPinGeometry(pin);
-    pin->DrawLabel(m_module_pixmap);
+    pin->DrawLabel(m_module_pixmap, pinnameWidths);
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout),pin->m_pinDrawingArea,0,0);
 
     // Add pin to tree
     const char *name=pin->pinName();
     if(name) {
-      m_tree_item = gtk_tree_item_new_with_label (name);
-      gtk_signal_connect(GTK_OBJECT(m_tree_item),
+      sub_tree_item = gtk_tree_item_new_with_label (name);
+
+      gtk_signal_connect(GTK_OBJECT(sub_tree_item),
 			 "select",
 			 (GtkSignalFunc) treeselect_stimulus,
 			 pin);
-      gtk_widget_show(m_tree_item);
-      gtk_tree_append(GTK_TREE(hackSubtree), m_tree_item);
+      gtk_widget_show(sub_tree_item);
+      gtk_tree_append(GTK_TREE(hackSubtree), sub_tree_item);
     }
 
     pin_iter = pin_iter->next;
@@ -3369,6 +3413,10 @@ GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   m_tree_item=0;
 
   m_pins=0;
+  pinnameWidths[0] = 0;
+  pinnameWidths[1] = 0;
+  pinnameWidths[2] = 0;
+  pinnameWidths[3] = 0;
 
   if(m_bbw)
     m_bbw->modules=g_list_append(m_bbw->modules, this);
