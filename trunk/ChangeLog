@@ -1,4 +1,10 @@
-2006-04-11 Roy Rankin <rrankin@ihug.com.au>
+2006-04-23 Roy Rankin <rrankin@ihug.com.au>
+      * src/gpsim_object.h src/gpsim_object.cc gui/gui_breadboard.h
+        gui/gui_breadboard.cc: Allow pin names to be changed after breadboard
+	is started.
+      * src/stimuli.cc: minor output format change and new debuging output
+
+2006-04-22 Roy Rankin <rrankin@ihug.com.au>
 	* modules/switch.cc modules/switch.h: fix windows regression problem
 
 2006-04-17 J.R. Heisey <jrheisey@sourceforge.com

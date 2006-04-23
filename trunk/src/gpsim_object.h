@@ -25,6 +25,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include <string>
 using namespace std;
+#ifndef FALSE
+#define FALSE 0
+#define TRUE  1
+#endif
 
 class BreakType;
 
@@ -87,7 +91,12 @@ class gpsimObject {
   virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
   virtual int clear_break();
 
+  virtual bool get_name_updated(void) { return name_updated; }
+  virtual void clr_name_updated(void) { name_updated = FALSE; }
+
 protected:
+
+  bool name_updated;         // True if object name has changed
 
   string  name_str;               // A unique name to describe the object
   const char *cpDescription;      // A desciption of the object

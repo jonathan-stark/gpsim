@@ -109,7 +109,7 @@ public:
   void SetLabelPosition(int x, int y);
   int label_x() { return m_label_x; }
   int label_y() { return m_label_y; }
-  void DrawLabel(GdkPixmap *pix_map);
+  int DrawLabel(GdkPixmap *pix_map,  int pinnameWidths[]);
 
   void SetOrientation(eOrientation o) { orientation = o; }
 
@@ -194,6 +194,7 @@ protected:
 
   GtkWidget *m_name_widget;    // Name of widget, positioned above module_widget.
 
+  int pinnameWidths[4];
   int m_pin_count;
 
   GdkPixmap *m_module_pixmap;
