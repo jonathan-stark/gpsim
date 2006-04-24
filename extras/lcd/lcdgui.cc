@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "lcd.h"
 #include "lcdfont.h"
+#include "hd44780.h"
 
 /****************************************************************
  * CreateXPMdataFromLCDdata -
@@ -142,6 +143,11 @@ void LcdFont::update_pixmap(int pos, _5X7 *tempchar, LcdDisplay *lcdP)
                                CreateXPMdataFromLCDdata(lcdP, tempchar));
 }
 
+GdkPixmap *LcdFont::getPixMap(unsigned int index)
+{
+  return ( (index < num_elements) && pixmaps[index]) ? pixmaps[index] : pixmaps[0];
+}
+
 void LcdDisplay::update_cgram_pixmaps()
 {
   int i, j, k;
@@ -153,7 +159,7 @@ void LcdDisplay::update_cgram_pixmaps()
   for (i = 0; i < CGRAM_SIZE / 8; i++) {
     for (j = 0; j < 7; j++) {
       for (k = 0; k < 5; k++) {
-        if (cgram[8 * i + j] & (1 << (4 - k)))
+        if (m_hd44780->getCGRam(8 * i + j) & (1 << (4 - k)))
           tempchar[j][k] = '.';
         else
           tempchar[j][k] = ' ';
@@ -163,7 +169,7 @@ void LcdDisplay::update_cgram_pixmaps()
     fontP->update_pixmap(i, &tempchar, this);
 
   }
-  cgram_updated = FALSE;
+  cgram_updated = false;
 }
 
 GdkPixmap *LcdDisplay::get_pixmap(gint row, gint col)
@@ -172,15 +178,7 @@ GdkPixmap *LcdDisplay::get_pixmap(gint row, gint col)
   if (cgram_updated)
     update_cgram_pixmaps();
 
-  if(fontP) {
-
-    if(fontP->pixmaps[ch_data[row][col]])
-      return fontP->pixmaps[ch_data[row][col]];
-    else
-      return fontP->pixmaps[0];
-  }
-
-  return NULL;
+  return fontP ? fontP->getPixMap(m_hd44780->getDDRam(row,col))  : 0;
 }
 
 
@@ -331,13 +329,6 @@ void LcdDisplay::CreateGraphics (void)
       strcat(buf," (in one row)");
     title = (gchar *)strdup(buf);
 
-    ch_data = (gint **)malloc(rows * sizeof(gint *));
-    for(i=0; i<rows; i++) {
-      ch_data[i] = (gint *)malloc(cols * sizeof(gint));
-      for(j=0; j<cols; j++)
-	ch_data[i][j] = q++ % FONT_LEN;
-    }
-
     gtk_widget_realize (window);
 
     gtk_window_set_title(GTK_WINDOW(window), "LCD");
@@ -406,15 +397,14 @@ void LcdDisplay::CreateGraphics (void)
 
 }
 
-void LcdDisplay::move_cursor(int new_row, int new_column)
+void LcdDisplay::move_cursor(unsigned int new_row, unsigned int new_column)
 {
 
-  if( (new_row >= 0  && new_row < rows)  &&
-      (new_column >= 0  && new_column < cols) ) {
-
+  if( new_row < rows && new_column < cols ) {
     cursor.row = new_row;
     cursor.col = new_column;
   }
+  m_hd44780->moveCursor(new_row, new_column);
 
 }
 
@@ -422,63 +412,7 @@ void LcdDisplay::clear_display(void)
 {
   int i,j;
 
-  if(!ch_data)
-    return;
-
-  for(i=0; i<rows; i++)
-    for(j=0; j<cols; j++)
-      ch_data[i][j] = ' ';
-  
-  move_cursor(0,0);
+  m_hd44780->clearDisplay();
+  m_hd44780->moveCursor(0,0);
 }
 
-void LcdDisplay::write_data(int data)
-{
-  if (debug & LCD_DEBUG_TRACE_DATA)
-    cout << "lcd_write " << data << " to " << (in_cgram ? "cgram" : "data")
-              << " at " << (in_cgram ? cgram_cursor : cursor.col) << "\n";
-  if (in_cgram) {
-    cgram[cgram_cursor] = data;
-    cgram_cursor = (cgram_cursor + 1) & CGRAM_MASK;
-    cgram_updated = TRUE;
-    return;
-  }
-
-  if(cursor.col < cols) {
-    ch_data[cursor.row][cursor.col] = data & 0xff;
-    cursor.col++;
-  }
-
-  //set_busy(39);	// busy for 39 usec after DDRAM write
-}
-
-void LcdDisplay::write_ddram_address(int data)
-{
-  //
-  // The first 0x40 memory locations are mapped to
-  // row 0 and the second 0x40 to row 1. Now only
-  // the first 40 (decimal not hex) locations are
-  // valid RAM. And of course, only the first 20 
-  //of these can be displayed in a 2x20 display.
-  //
-
-  data &= 0x7f;
-
-  cursor.col = (data & 0x3f) % 40;
-  cursor.row = (data & 0x40) ? 1 : 0;
-
-  if (in_cgram && debug)
-    cout << "Leaving CGRAM update mode\n";
-  in_cgram = FALSE;
-
-}
-
-void LcdDisplay::write_cgram_address(int data)
-{
-  data &= CGRAM_MASK;
-
-  cgram_cursor = data;
-  if ((!in_cgram) && debug)
-    cout << "Entering CGRAM update mode\n";
-  in_cgram = TRUE;
-}

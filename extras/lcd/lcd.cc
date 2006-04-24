@@ -59,11 +59,99 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
+#include "hd44780.h"
 #include "lcd.h"
 #include <gpsim/gpsim_time.h>
 
 
 Trace *gTrace=0;                // Points to gpsim's global trace object.
+
+
+#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
+//------------------------------------------------------------------------
+// I/O pins for the LCD
+//------------------------------------------------------------------------
+// The LCD_InputPin is the base class for the E, RW and DC
+// pins. This class is derived from the IO_bi_directional class,
+// although the pins are never driven as outputs. The setDrivenState
+// method is overridden to capture when this pin is driven.
+
+class LCD_InputPin : public IO_bi_directional
+{
+public:
+
+  LCD_InputPin (LcdDisplay *, const char *pinName, ePins pin);
+
+  // Capture when a node drives this pin.
+  virtual void setDrivenState(bool new_dstate);
+
+  char CurrentState() { return m_cDrivenState; }
+private:
+
+  // The IO_bi_directional constructor will initialize the direction
+  // to be an input. We'll override the update_direction method so that
+  // this will never change.
+
+  virtual void update_direction(unsigned int,bool refresh)
+  { 
+    // Disallow pin direction changes.
+  }
+
+  LcdDisplay *m_pLCD;
+  ePins m_pin;
+  char m_cDrivenState;
+};
+
+//------------------------------------------------------------------------
+//
+
+class LCDSignalControl : public SignalControl
+{
+public:
+  LCDSignalControl(LcdDisplay *pLCD)
+    : m_pLCD(pLCD)
+  {
+    assert(m_pLCD);
+  }
+  char getState()
+  {
+    // returning a 1 indicates the data bus is an input (the LCD module
+    // is being written to).
+    char state = m_pLCD->dataBusDirection() ? '1' : '0';
+    //Dprintf(("LCDSignalControl returning:%c\n",state));
+    return state;
+  }
+
+private:
+  LcdDisplay *m_pLCD;
+};
+
+//------------------------------------------------------------------------
+//
+LCD_InputPin::LCD_InputPin (LcdDisplay *pLCD, const char *pinName, ePins pin)
+  : IO_bi_directional(pinName), m_pLCD(pLCD), m_pin(pin)
+{
+
+}
+
+void LCD_InputPin::setDrivenState(bool new_dstate)
+{
+  IO_bi_directional::setDrivenState(new_dstate);
+  char cState = getBitChar();
+
+  //  Dprintf(("LCD_InputPin setDrivenState:%d, cState:%c\n",new_dstate,cState));
+
+  if (m_cDrivenState != cState) {
+    m_cDrivenState = cState;
+    m_pLCD->UpdatePinState(m_pin, cState);
+  }
+}
 
 //------------------------------------------------------------------------
 // Tracing
@@ -186,178 +274,6 @@ void LCD_Interface::Update (gpointer)
     ((LcdDisplay *)lcd)->update();
 }
 
-//--------------------------------------------------------------
-void LcdBusy::set(double waitTime)
-{
-  if(!bBusyState) {
-    bBusyState = true;
-    get_cycles().set_break(get_cycles().get(waitTime), this);
-  }
-}
-
-void LcdBusy::clear(void)
-{
-  clear_trigger();
-  bBusyState = false;
-}
-
-//--------------------------------------------------------------
-void LcdBusy::callback(void)
-{
-  bBusyState = false;
-}
-
-//--------------------------------------------------------------
-// LcdPort class
-//
-// The LcdPort class is derived from the gpsim class "IOPORT".
-// As such, it inherits all of the IOPROT's functionality (like
-// tracing, stimulus interface, etc.). The LcdPort class extends
-// IOPORT by redirecting changes to the LCD state machine.
-
-Lcd_Port::Lcd_Port (LcdDisplay *_lcd, unsigned int _num_iopins)
-  : IOPORT(_num_iopins), lcd(_lcd)
-{
-  if(lcd) {
-    set_write_trace(lcd->getWriteTT()->type);
-    set_read_trace(lcd->getReadTT()->type);
-  }
-
-}
-void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
-{
-
-  int bit_mask = 1<<bit_number;
-  unsigned int current_value = value.get();
-  bool current_bit_value = (current_value & bit_mask) ? true : false;
-
-  if( current_bit_value != new_value) {
-
-    gTrace->raw(write_trace.get() | value.get());
-  
-    value.put(value.get() ^ bit_mask);
-    assert_event();
-
-    internal_latch = (current_value & bit_mask) | (internal_latch & ~bit_mask);
-  }
-}
-
-void Lcd_Port::assert_event(void)
-{
-  cout << __FUNCTION__ << " shouldn't be called\n";
-}
-
-
-DataPort::DataPort (LcdDisplay *_lcd, unsigned int _num_iopins) 
-  : Lcd_Port(_lcd, _num_iopins)
-{
-  value.put(0);
-}
-
-void DataPort::setbit(unsigned int bit_number, bool new_value)
-{
-  if((lcd->control_port->value.get() & 6) == 4){  //E is high and R/W is low
-
-    Lcd_Port::setbit(bit_number, new_value);  // RW bit is low-> write
-  } 
-
-}
-void DataPort::update_pin_directions(bool new_direction)
-{
-
-  if(new_direction != direction) {
-
-    direction = new_direction;
-
-    // Change the directions of the I/O pins
-    for(int i=0; i<8; i++) {
-      if(pins[i]) {
-	pins[i]->update_direction(direction,true);
-
-	if(pins[i]->snode)
-	  pins[i]->snode->update();
-      }
-    }
-  }
-}
-
-//-----------------------------------------------------
-
-ControlPort::ControlPort (LcdDisplay *_lcd, unsigned int _num_iopins) 
-  : Lcd_Port(_lcd, _num_iopins)
-{
-  break_delta = 100000;
-}
-
-void ControlPort::assert_event(void)
-{
-  
-  lcd->advanceState(lcd->ControlEvents[value.get() & 7].e);
-}
-
-void ControlPort::put(unsigned int new_value)
-{
-
-  unsigned int old_value = value.get();
-
-  Lcd_Port::put(new_value);
-
-  if((old_value ^ value.get()) & 2) {  // R/W bit has changed states
-    if(value.get() & 2)
-      lcd->data_port->update_pin_directions(true);   // It's high, so make data lines outputs
-    else
-      lcd->data_port->update_pin_directions(false);  // make them inputs.
-  }
-
-  if( (old_value ^ value.get()) & 0x7) 
-    assert_event();
-}
-
-void ControlPort::callback(void)
-{
-  if(lcd && lcd->debug & LCD_DEBUG_ENABLE)
-    cout << "ControlPort::callback(void)\n";
-
-  get_cycles().set_break_delta(break_delta, this);
-
-}
-
-void DataPort::assert_event(void)
-{
-  lcd->advanceState(DataChange);
-}
-
-void DataPort::put(unsigned int new_value)
-{
-
-  unsigned int old_value = value.get();
-
-  Lcd_Port::put(new_value);
-
-  if( (old_value ^ value.get()) & 0xff)
-    lcd->advanceState(DataChange);
-
-}
-
-//---------------------------------------------------------------
-Lcd_Input::Lcd_Input(LcdDisplay *pLcd,IOPORT *i, unsigned int b,char *opt_name) :
-  IOPIN(i, b)
-{
-  new_name((pLcd->name() + "." + opt_name).c_str());
-  i->addPin(this,b);
-}
-
-//---------------------------------------------------------------
-Lcd_bi_directional::Lcd_bi_directional(LcdDisplay *pLcd,
-				       IOPORT *i, 
-				       unsigned int b,char *opt_name) :
-  IO_bi_directional(i, b)
-{
-  // FIXME - we may want to readjust the Pin impedances
-  new_name((pLcd->name() + "." + opt_name).c_str());
-  i->addPin(this,b);
-}
-
 
 //---------------------------------------------------------------
 
@@ -401,7 +317,7 @@ void LcdDisplay::create_iopin_map(void)
   //   pin can then be logically grouped with other pins to define
   //   an I/O port. 
 
-
+  /*
   control_port = new ControlPort(this,8);
   control_port->value.put(0);
 
@@ -409,18 +325,19 @@ void LcdDisplay::create_iopin_map(void)
 
   data_port = new DataPort(this, 8);
   data_port->value.put(0);
+  */
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
-
+  /*
   char *pin_name = (char*)name().c_str();   // Get the name of this LCD
   if(pin_name) {
     data_port->new_name(pin_name);
     control_port->new_name(pin_name);
   }
-
+  */
 
 
   // Define the physical package.
@@ -440,30 +357,44 @@ void LcdDisplay::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  assign_pin(4, new Lcd_Input(this,control_port, 0,"DC"));  // Control
-  assign_pin(5, new Lcd_Input(this,control_port, 1,"RW"));
-  assign_pin(6, new Lcd_Input(this,control_port, 2,"E"));
+  m_E  = new LCD_InputPin(this, (name() + ".E").c_str(),eE);
+  m_RW = new LCD_InputPin(this, (name() + ".RW").c_str(),eRW);
+  m_DC = new LCD_InputPin(this, (name() + ".DC").c_str(),eDC);
 
-  assign_pin(7, new Lcd_bi_directional(this,data_port, 0,"d0"));  // Data bus
-  assign_pin(8, new Lcd_bi_directional(this,data_port, 1,"d1"));
-  assign_pin(9, new Lcd_bi_directional(this,data_port, 2,"d2"));
-  assign_pin(10, new Lcd_bi_directional(this,data_port,3,"d3"));
-  assign_pin(11, new Lcd_bi_directional(this,data_port,4,"d4"));
-  assign_pin(12, new Lcd_bi_directional(this,data_port,5,"d5"));
-  assign_pin(13, new Lcd_bi_directional(this,data_port,6,"d6"));
-  assign_pin(14, new Lcd_bi_directional(this,data_port,7,"d7"));
+  // Control
+  assign_pin(4, m_DC);
+  assign_pin(5, m_RW);
+  assign_pin(6, m_E);
 
-  data_port->update_pin_directions(false);
+  assign_pin( 7, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
+  assign_pin( 8, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
+  assign_pin( 9, m_dataBus->addPin(new IO_bi_directional((name() + ".d2").c_str()),2));
+  assign_pin(10, m_dataBus->addPin(new IO_bi_directional((name() + ".d3").c_str()),3));
+  assign_pin(11, m_dataBus->addPin(new IO_bi_directional((name() + ".d4").c_str()),4));
+  assign_pin(12, m_dataBus->addPin(new IO_bi_directional((name() + ".d5").c_str()),5));
+  assign_pin(13, m_dataBus->addPin(new IO_bi_directional((name() + ".d6").c_str()),6));
+  assign_pin(14, m_dataBus->addPin(new IO_bi_directional((name() + ".d7").c_str()),7));
+
+  // Provide a SignalControl object that the dataBus port can query
+  // to determine which direction to drive the data bus.
+  // (See <gpsim/ioports.h> for more documentation on port behavior.
+  //  But in summary, when an I/O port updates its I/O pins, it will 
+  //  query the pin drive direction via the SignalControl object. )
+
+  SignalControl *pPortDirectionControl = new LCDSignalControl(this);
+  for (int i=0; i<8; i++)
+    (*m_dataBus)[i].setControl(pPortDirectionControl);
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
-
+  /*
   for(int i =1; i<get_pin_count(); i++) {
     IOPIN *p = get_pin(i);
     if(p)
       get_symbol_table().add_stimulus(p);
   }
+  */
 }
 
 //--------------------------------------------------------------
@@ -493,8 +424,8 @@ TraceType *LcdDisplay::getReadTT()
 Module * LcdDisplay::construct(const char *new_name=NULL)
 {
 
-  LcdDisplay *lcdP = new LcdDisplay(2,20);
-  lcdP->new_name((char*)new_name);
+  LcdDisplay *lcdP = new LcdDisplay(new_name,2,20);
+  //lcdP->new_name((char*)new_name);
   lcdP->create_iopin_map();
 
 
@@ -502,20 +433,24 @@ Module * LcdDisplay::construct(const char *new_name=NULL)
   lcdP->set_crt_resolution(3,3);
   lcdP->set_contrast(1.0);
 
-  lcdP->InitStateMachine();
+  //lcdP->testHD44780();
 
   return lcdP;
 
 }
 
-LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
+LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
+  : m_controlState(0)
 {
 
   if (verbose)
      cout << "LcdDisplay constructor\n";
-  new_name("Lcd Display");
+  new_name(_name);
 
-  mode_flag = _8BIT_MODE_FLAG;
+  m_hd44780 = new HD44780();
+
+
+  //  mode_flag = _8BIT_MODE_FLAG;
   data_latch = 0;
   data_latch_phase = 1;
   last_event = eWC;
@@ -530,10 +465,8 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   cursor.row = 0;
   cursor.col = 0;
 
-  in_cgram = FALSE;
   cgram_updated = FALSE;
-  cgram_cursor = 0;
-  memset(&cgram[0], 0xff, sizeof(cgram));
+
   // The font is created dynamically later on.
   fontP = NULL;
 
@@ -549,6 +482,12 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   interface = new LCD_Interface(this);
   get_interface().add_interface(interface);
 
+  m_dataBus = new PortRegister(8, 0);
+  m_dataBus->new_name( (name() + ".data").c_str());
+  get_symbol_table().add_register(m_dataBus);
+  m_dataBus->setEnableMask(0xff);
+
+
   CreateGraphics();
 
 
@@ -560,9 +499,11 @@ LcdDisplay::~LcdDisplay()
       cout << "LcdDisplay destructor\n";
 
   //gpsim_unregister_interface(interface_id);
-  delete data_port;
-  get_cycles().clear_break(control_port); // Hmmmm. FIXME.
-  delete control_port;
+  delete m_dataBus;
+  delete m_E;
+  delete m_DC;
+  delete m_RW;
+
   delete interface;
 
   gtk_widget_destroy(window);
@@ -571,6 +512,52 @@ LcdDisplay::~LcdDisplay()
 
 }
 
+//------------------------------------------------------------------------
+bool LcdDisplay::dataBusDirection()
+{
+  return m_hd44780->dataBusDirection();
+}
+
+//------------------------------------------------------------------------
+
+void LcdDisplay::UpdatePinState(ePins pin, char cState)
+{
+
+  // One of the control lines has changed states. So refresh the
+  // hd44780 with the most current data bus value.
+  // If the data bus I/O's are inputs, then copy the I/O pin 
+  // data bus state to the chip data bus:
+
+  if (m_hd44780->dataBusDirection())
+    m_hd44780->driveDataBus(m_dataBus->get());
+
+  bool bState = (cState =='1') || (cState =='W');
+  switch (pin) {
+  case eDC:
+    m_hd44780->setDC(bState);
+    break;
+  case eE:
+    m_hd44780->setE(bState);
+    break;
+  case eRW:
+    m_hd44780->setRW(bState);
+    break;
+  }
+
+  // If the hd44780 is driving, then place that
+  // data onto the data bus.
+  if (m_hd44780->dataBusDirection())
+    m_dataBus->put(m_hd44780->getDataBus());
+
+  m_dataBus->updatePort();
+
+}
+//------------------------------------------------------------------------
+void LcdDisplay::testHD44780()
+{
+  if (m_hd44780)
+    m_hd44780->test();
+}
 //-----------------------------------------------------------------
 // Displaytech 161A, added by Salvador E. Tropea <set@computer.org>
 // construct
@@ -581,19 +568,19 @@ Module * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
   if (verbose)
      cout << " LCD 161A display constructor\n";
 
-  LcdDisplayDisplaytech161A *lcdP = new LcdDisplayDisplaytech161A(2,8,TWO_ROWS_IN_ONE);
+  LcdDisplayDisplaytech161A *lcdP = new LcdDisplayDisplaytech161A(new_name,2,8,TWO_ROWS_IN_ONE);
   lcdP->new_name((char*)new_name);
   lcdP->create_iopin_map();
 
-  lcdP->InitStateMachine();
+  //  lcdP->InitStateMachine();
 
   return lcdP;
 
 }
 
-LcdDisplayDisplaytech161A::LcdDisplayDisplaytech161A(int aRows, int aCols,
+LcdDisplayDisplaytech161A::LcdDisplayDisplaytech161A(const char *pN, int aRows, int aCols,
   unsigned aType) :
-  LcdDisplay(aRows,aCols,aType)
+  LcdDisplay(pN,aRows,aCols,aType)
 {
 }
 
