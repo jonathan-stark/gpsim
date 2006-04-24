@@ -1,3 +1,7 @@
+2006-04-17 Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_object.h, src/gpsim_object.cc: Removed TRUE and FALSE
+	definitions.
+
 2006-04-23 Roy Rankin <rrankin@ihug.com.au>
       * src/gpsim_object.h src/gpsim_object.cc gui/gui_breadboard.h
         gui/gui_breadboard.cc: Allow pin names to be changed after breadboard
