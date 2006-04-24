@@ -1,3 +1,16 @@
+2006-04-23 Scott Dattalo  <scott@dattalo.com>
+	* configure.in: changed version to 0.2.6
+	* Makefile.am: removed lcdengine.cc added hd44780.[cc,h]
+	* hd44780.cc, hd44780.h: The HD44780 logic formerly coded in
+	lcdengined now resides in it's on file. Furthermore, the logic has
+	been greatly simplified. Now the LCD display features are distinct
+	from the HD44780 chip features.
+	* lcd.h, lcd.cc: Utilize the new hd44780 chip model. Also, the I/O
+	ports no longer use the deprecated IOPORT class.
+	* lcdgui.cc: DDRAM accesses now are made through the HD44780
+	class.
+	* lcdengine.cc: removed from the repository.
+
 2006-01-18 Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc: updated to new gpsim trigger object API (clear_break was
 	renamed to clear_trigger).
