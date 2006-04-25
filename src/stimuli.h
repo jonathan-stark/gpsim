@@ -33,7 +33,9 @@ using namespace std;
 /* forward references: */
 class Stimulus_Node;
 class stimulus;
+#if defined(OLD_IOPORT_DESIGN)
 class IOPORT;
+#endif
 class IOPIN;
 class symbol;
 
@@ -351,10 +353,11 @@ class IOPIN : public stimulus
       DIR_INPUT,
       DIR_OUTPUT
     };
-
+#if defined(OLD_IOPORT_DESIGN)
   IOPORT *iop;         // Two ways to access parent port
   Register **iopp;     // this second one is used to set break points.
   unsigned int iobit;  // 
+#endif
 
   IOPIN(const char *n=0,
 	double _Vth=5.0, 
@@ -362,16 +365,20 @@ class IOPIN : public stimulus
 	double _ZthWeak = 1e3,
 	double _ZthFloating = 1e6
 	);
+
+#if defined(OLD_IOPORT_DESIGN)
   IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
+#endif
   ~IOPIN();
 
   virtual void setMonitor(PinMonitor *);
   virtual PinMonitor *getMonitor() { return m_monitor; }
 
+#if defined(OLD_IOPORT_DESIGN)
   void attach_to_port(IOPORT *i, unsigned int b);
   IOPORT *getIOPort();
   void disconnect_from_port();
-
+#endif
   virtual void set_nodeVoltage(double v);
   virtual bool getDrivingState(void);
   virtual void setDrivingState(bool new_dstate);
@@ -393,7 +400,9 @@ class IOPIN : public stimulus
   virtual void set_h2l_threshold(double V) {h2l_threshold=V;}
   virtual double get_h2l_threshold() { return h2l_threshold;}
 
+#if defined(OLD_IOPORT_DESIGN)
   virtual Register *get_iop(void);
+#endif
   virtual void toggle(void);
   virtual void attach(Stimulus_Node *s);
 
@@ -436,8 +445,9 @@ public:
 		    double _ZthFloating = 1e6,
 		    double _VthIn = 0.3,
 		    double _ZthIn = 1e8);
+#if defined(OLD_IOPORT_DESIGN)
   IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
-
+#endif
   virtual double get_Zth();
   virtual double get_Vth();
   virtual char getBitChar();
@@ -474,7 +484,9 @@ public:
 		       double _Zpullup = 20e3
 		       );
 
+#if defined(OLD_IOPORT_DESIGN)
   IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
+#endif
   ~IO_bi_directional_pu();
   virtual double get_Vth();
   virtual double get_Zth();
@@ -497,8 +509,9 @@ class IO_open_collector : public IO_bi_directional_pu
 {
 public:
   IO_open_collector(const char *n=0);
+#if defined(OLD_IOPORT_DESIGN)
   IO_open_collector(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
-
+#endif
   virtual double get_Vth();
   virtual double get_Zth();
   virtual char getBitChar();

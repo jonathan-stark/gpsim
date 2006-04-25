@@ -52,7 +52,9 @@ public:
   I2C_EE *eeprom;
 
   I2C_EE_PIN (I2C_EE *_eeprom, char *_name) 
-    : IO_open_collector((IOPORT *)0,1,_name) { 
+    : IO_open_collector(_name)
+	     //  : IO_open_collector((IOPORT *)0,1,_name)
+  { 
 
     eeprom = _eeprom;
 

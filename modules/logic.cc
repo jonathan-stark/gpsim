@@ -222,7 +222,7 @@ void Logic_Input::setDrivenState( bool new_state)
     bDrivenState  = new_state;
 
     if(LGParent) {
-      LGParent->update_input_pin(iobit, new_state);
+      LGParent->update_input_pin(m_iobit, new_state);
       LGParent->update_state();
     }
   }

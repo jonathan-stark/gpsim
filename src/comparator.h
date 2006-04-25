@@ -137,8 +137,6 @@ class COMPARATOR_MODULE
 {
  public:
 
-  IOPORT *comparator_port;
-
   CMCON *cmcon;
   VRCON vrcon;
 

@@ -1,4 +1,13 @@
-2006-04-17 Scott Dattalo <scott@dattalo.com>
+2006-04-24 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc, src/ioports.h: Fully deprecated the IOPORT
+	class. The old IOPORT class is still present, but conditionally
+	disabled.
+	* modules/logic.cc, modules/usart.cc, modules/logic.h,
+	modules/switch.cc, src/stimuli.cc, src/stimuli.h, src/cod.cc,
+	src/comparator.h, src/i2c-ee.cc: Removed all references to the
+	IOPORT class.
+
+2006-04-23 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_object.h, src/gpsim_object.cc: Removed TRUE and FALSE
 	definitions.
 
