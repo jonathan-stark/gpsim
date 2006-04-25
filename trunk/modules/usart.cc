@@ -120,7 +120,7 @@ public:
 
   USART_RXPIN (USARTModule *_usart,
 	       unsigned int b, 
-	       char *opt_name=NULL) : IO_bi_directional_pu(0,b,opt_name) { 
+	       char *opt_name=NULL) : IO_bi_directional_pu(opt_name) { 
 
     usart = _usart;
 
@@ -748,7 +748,7 @@ public:
   USART_IO(void) {
     cout << "USART_IO constructor - do nothing\n";
   }
-  USART_IO (unsigned int b, char *opt_name=NULL) : IOPIN(0,b,opt_name) { };
+  USART_IO (unsigned int b, char *opt_name=NULL) : IOPIN(opt_name) { };
 
 };
 

@@ -762,6 +762,7 @@ void source_stimulus::show()
 }
 //========================================================================
 //
+#if defined(OLD_IOPORT_DESIGN)
 
 IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   : stimulus()
@@ -828,6 +829,10 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 
 }
 
+#endif 
+
+
+
 IOPIN::IOPIN(const char *_name,
 	     double _Vth, 
 	     double _Zth,
@@ -841,9 +846,11 @@ IOPIN::IOPIN(const char *_name,
   if(verbose)
     cout << "IOPIN default constructor\n";
 
+#if defined(OLD_IOPORT_DESIGN)
   iop = 0;
   iopp = 0;
   iobit=0;
+#endif
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
   bDrivenState = false;
@@ -858,6 +865,9 @@ void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
   if (!m_monitor && new_pinMonitor)
     m_monitor = new_pinMonitor;
 }
+
+
+#if defined(OLD_IOPORT_DESIGN)
 
 void IOPIN::attach_to_port(IOPORT *i, unsigned int b)
 {
@@ -877,6 +887,8 @@ void IOPIN::disconnect_from_port()
 
   iobit = 0;
 }
+#endif
+
 
 IOPIN::~IOPIN()
 {
@@ -898,15 +910,19 @@ void IOPIN::show()
 // through which the ioport is selected. The breakpoint
 // engine is cabable of intercepting this indirect access.
 //
+#if defined(OLD_IOPORT_DESIGN)
 Register *IOPIN::get_iop(void)
 {
+  
   if(iopp)
     return *iopp;
   else if(iop)
     return iop;
   else
     return 0;
+  return iopp ? *iopp : 0;
 }
+#endif
 
 //--------------------
 // set_nodeVoltage()
@@ -961,11 +977,13 @@ void IOPIN::putState(bool new_state)
 
     if(snode)
       snode->update();
+#if defined(OLD_IOPORT_DESIGN)
     else {
       Register *port = get_iop();
       if(port)
 	port->setbit(iobit, new_state);
     }
+#endif
   }
   if(m_monitor)
     m_monitor->putState(new_state?'1':'0');
@@ -1001,11 +1019,12 @@ void IOPIN::setDrivingState(char new3State)
 
 bool IOPIN::getDrivingState(void)
 {
+#if defined(OLD_IOPORT_DESIGN)
   Register *port = get_iop();
 
   if(port)
     bDrivingState = port->get_bit(iobit);
-
+#endif
   return bDrivingState;
 }
 
@@ -1030,9 +1049,11 @@ void IOPIN::setDrivenState(bool new_state)
     cout << name()<< " setDrivenState= " 
 	 << (new_state ? "high" : "low") << endl;
 
+#if defined(OLD_IOPORT_DESIGN)
   Register *port = get_iop();
   if(port)
     port->setbit(iobit, new_state);
+#endif
 
   // Propagate the new state to those things monitoring this pin.
   // (note that the 3-state value is what's propagated).
@@ -1088,9 +1109,10 @@ void IOPIN::toggle()
  */
 double IOPIN::get_Vth()
 {
+#if defined(OLD_IOPORT_DESIGN)
   if(!snode && iop)
     return ( (iop->value.get() & (1<<iobit)) ? Vth : 0.0);
-
+#endif
   return Vth;
 
 }
@@ -1112,6 +1134,8 @@ char IOPIN::getBitChar()
 
 //========================================================================
 //
+#if defined(OLD_IOPORT_DESIGN)
+
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   : IOPIN(i,b,opt_name,_iopp)
 {
@@ -1125,6 +1149,7 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_n
   ZthIn = 1e8;
 
 }
+#endif
 
 IO_bi_directional::IO_bi_directional(const char *_name,
 				     double _Vth, 
@@ -1222,10 +1247,16 @@ void IO_bi_directional::update_direction(unsigned int new_direction, bool refres
 
   // If this pin is not associated with an IO Port, but it's tied
   // to a stimulus, then we need to update the stimulus.
+#if defined(OLD_IOPORT_DESIGN)
   if(refresh && !iop && snode)
     snode->update();
+#else
+  if(refresh && snode)
+    snode->update();
+#endif
 }
 
+#if defined(OLD_IOPORT_DESIGN)
 
 IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
 					   const char *opt_name, Register **_iopp)
@@ -1235,7 +1266,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
   Zpullup = 20e3;
   bPullUp = false;
 }
-
+#endif
 IO_bi_directional_pu::IO_bi_directional_pu(const char *_name,
 					   double _Vth, 
 					   double _Zth,
@@ -1350,11 +1381,13 @@ char IO_bi_directional_pu::getBitChar()
   return getDrivenState() ? '1' : '0';
 }
 
+#if defined(OLD_IOPORT_DESIGN)
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
 				     const char *opt_name, Register **_iopp)
   : IO_bi_directional_pu(i,b,opt_name,_iopp)
 {
 }
+#endif
 IO_open_collector::IO_open_collector(const char *_name)
   : IO_bi_directional_pu(_name)
 {

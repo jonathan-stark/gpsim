@@ -50,13 +50,14 @@ class Logic_Input : public IOPIN
 {
 private:
   LogicGate *LGParent;
+  unsigned int m_iobit;
 
 public:
 
   virtual void setDrivenState( bool new_state);
 
   Logic_Input (LogicGate *parent, unsigned int b, const char *opt_name=0) 
-    : IOPIN(0,b,opt_name), LGParent(parent)
+    : IOPIN(opt_name), LGParent(parent), m_iobit(b)
     { 
     }
 
@@ -66,11 +67,11 @@ class Logic_Output : public IO_bi_directional
 {
 private:
   LogicGate *LGParent;
-
+  unsigned int m_iobit;
 public:
 
   Logic_Output (LogicGate *parent, unsigned int b,const char *opt_name=0) 
-    : IO_bi_directional(0,b,opt_name), LGParent(parent)
+    : IO_bi_directional(opt_name), LGParent(parent), m_iobit(b)
     { 
     }
 

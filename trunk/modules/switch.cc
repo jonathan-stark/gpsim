@@ -83,7 +83,7 @@ private:
 
 
 SwitchPin::SwitchPin(Switch *parent, const char *_name)
-  : IO_bi_directional(0, 0, _name), m_pParent(parent), bRefreshing(false),
+  : IO_bi_directional(_name), m_pParent(parent), bRefreshing(false),
     m_Zth(1e12), m_Zclosed(10), m_Zopen(1e12)
 {
   assert(m_pParent);

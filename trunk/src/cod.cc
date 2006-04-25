@@ -446,7 +446,7 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 	      (address <= cpu->program_memory_size()) &&
 	      (smod == 0x80) )
 
-	    cpu->attach_src_line(address,file_id,sline,-1);
+	    cpu->attach_src_line(address,file_id,sline,0);
 	  
 	}
       }
