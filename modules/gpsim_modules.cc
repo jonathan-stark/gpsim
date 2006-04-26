@@ -96,7 +96,7 @@ Module_Types available_modules[] =
 #endif
 
   // Switch
-  { {"switch",         "sw"}, Switch::construct},
+  { {"switch",         "sw"}, Switches::Switch::construct},
 
   // Logic
   { {"and2", "and2"}, AND2Gate::construct},
