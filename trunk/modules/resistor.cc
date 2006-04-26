@@ -67,7 +67,7 @@ public:
   }
 
 
-  void set(double r) {
+  virtual void set(double r) {
 
     Float::set(r);
 
@@ -78,7 +78,7 @@ public:
 
 
   void set(int r) {
-    set(double(r));
+    Float::set((double)r);
   };
 };
 
@@ -319,6 +319,9 @@ PullupResistor::PullupResistor(const char *init_name)
   // set the module name
   if(init_name)
     new_name(init_name);
+
+  // Default module attributes.
+  initializeAttributes();
 
   set_description("\
 pullup resistor or generic voltage source\n\

@@ -26,6 +26,7 @@ temp2		RES	1
   GLOBAL done
 
 
+
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
 ;----------------------------------------------------------------------
@@ -39,6 +40,47 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 ;   ******************* MAIN CODE START LOCATION  ******************
 ;----------------------------------------------------------------------
 MAIN    CODE
+
+
+;----------------------------------------------------------------------
+; gpsim configuration script
+
+   ;# Module libraries:
+   .sim "module library libgpsim_modules"
+   .sim "p16f877.xpos = 48.0"
+   .sim "p16f877.ypos = 36.0"
+
+   .sim "module load switch SW1"
+   .sim "SW1.state=false"
+   .sim "SW1.xpos = 216.0"
+   .sim "SW1.ypos = 156.0"
+
+   .sim "module load pullup PU1"
+   .sim "PU1.resistance=10000."
+   .sim "PU1.capacitance=1.00e-07"
+   .sim "PU1.xpos = 204.0"
+   .sim "PU1.ypos = 36.0"
+
+   .sim "module load pulldown PD1"
+   .sim "PD1.resistance=10000."
+   .sim "PD1.capacitance=2.00e-06"
+   .sim "PD1.xpos = 204.0"
+   .sim "PD1.ypos = 96.0"
+
+    ;# Connections:
+   .sim "node nb0"
+   .sim "attach nb0 SW1.A portb0 porta0"
+
+   .sim "node nc0"
+   .sim "attach nc0 SW1.B PD1.pin porta1"
+
+   .sim "frequency 10e6"
+
+;# End of configuration
+;
+;------------------------------------------------------------------------
+
+
 start
 
 	BSF	STATUS,RP0

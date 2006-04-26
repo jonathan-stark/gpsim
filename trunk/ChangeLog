@@ -1,3 +1,17 @@
+2006-04-26 Scott Dattalo <scott@dattalo.com>
+	* modules/switch.cc, modules/switch.h, modules/gpsim_modules.cc:
+	- Added On-resistance and Off-resistance attributes to the switch
+	module. (They're called Ropen and Rclosed). 
+	- The switch module code now resides in the 'Switches' namespace.
+	* modules/resistor.cc:
+	- The resistor module now initializes itself with the gpsim
+	default attributes (which for now are only xpos and ypos).
+
+	* regression/switch_test/switch_test.asm,
+	regression/switch_test/switch_test.stc: 
+	Moved the switch regression test configuration script into the
+	switch_test.asm source
+
 2006-04-24 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h: Fully deprecated the IOPORT
 	class. The old IOPORT class is still present, but conditionally
