@@ -41,8 +41,7 @@ modules_OBJECTS =		\
 	resistor.o		\
 	switch.o		\
 	ttl.o			\
-	usart.o			\
-	video.o
+	usart.o
 
 ../config.h : ../config_win32.h.in
 	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
