@@ -52,7 +52,7 @@ libgpsim_lcd_OBJECTS =		\
 	lcdgui.o		\
 	module_manager.o	\
 	lcd.o			\
-	lcdengine.o
+	hd44780.o
 
 ################ The modules DLL
 

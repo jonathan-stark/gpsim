@@ -14,12 +14,8 @@ EXPORTS
     ??0Float@@QAE@PBDN0@Z
     ??0IIndexedCollection@@QAE@H@Z
     ??0IOPIN@@QAE@PBDNNNN@Z
-    ??0IOPIN@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
-    ??0IOPORT@@QAE@I@Z
     ??0IO_bi_directional@@QAE@PBDNNNNNN@Z
-    ??0IO_bi_directional@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0IO_bi_directional_pu@@QAE@PBDNNNNNNN@Z
-    ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0IO_open_collector@@QAE@PBD@Z
     ??0IndexedSymbol@@QAE@PAVValue@@PAV?$list@PAVExpression@@V?$allocator@PAVExpression@@@std@@@std@@@Z
     ??0Integer@@QAE@_J@Z
@@ -98,7 +94,6 @@ EXPORTS
     ??1Error@@UAE@XZ
     ??1Float@@UAE@XZ
     ??1IOPIN@@UAE@XZ
-    ??1IOPORT@@UAE@XZ
     ??1IO_bi_directional_pu@@UAE@XZ
     ??1IndexedSymbol@@UAE@XZ
     ??1Integer@@UAE@XZ
@@ -203,7 +198,6 @@ EXPORTS
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
     ?add_xref@AliasedInstruction@@UAEXPAX@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
-    ?addPin@IOPORT@@QAEPAVIOPIN@@PAV2@I@Z
     ?address_has_break@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
     ?address_has_notify@ProgramMemoryAccess@@UAEHI@Z
     ?address_has_profile_start@ProgramMemoryAccess@@UAEHI@Z
@@ -217,7 +211,6 @@ EXPORTS
     ?assign_pin@Package@@QAEXIPAVIOPIN@@@Z
     ?assign_xref@ProgramMemoryAccess@@QAEXIPAX@Z
     ?attach@IOPIN@@UAEXPAVStimulus_Node@@@Z
-    ?attach_to_port@IOPIN@@QAEXPAVIOPORT@@I@Z
     ?attach_src_line@Processor@@QAEXIIII@Z
     ?attach_stimulus@Stimulus_Node@@QAEXPAVstimulus@@@Z
     ?bIsValid@Breakpoints@@QAE_NI@Z
@@ -234,7 +227,6 @@ EXPORTS
     ?callback@RealTimeBreakPoint@@UAEXXZ
     ?callback_print@TriggerObject@@UAEXXZ
     ?callback_print@source_stimulus@@UAEXXZ
-    ?change_pin_direction@IOPORT@@MAEXI_N@Z
     ?clear@Breakpoint_Instruction@@UAEXXZ
     ?clear@Breakpoints@@QAEXI@Z
     ?clear@TriggerObject@@UAEXXZ
@@ -333,7 +325,6 @@ EXPORTS
     ?get@Float@@UAEXAAVPacket@@@Z
     ?get@Float@@UAEXAA_J@Z
     ?get@Float@@UAEXPADH@Z
-    ?get@IOPORT@@UAEIXZ
     ?get@Integer@@UAEXAAN@Z
     ?get@Integer@@UAEXAAVPacket@@@Z
     ?get@Integer@@UAEXAA_J@Z
@@ -361,7 +352,6 @@ EXPORTS
     ?getForcedDrivenState@IOPIN@@UAEDXZ
     ?getFromIndex@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getFromAddress@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
-    ?getIO@IOPORT@@QAEPAVIOPIN@@I@Z
     ?getPinGeometry@Package@@QAEPAUPinGeometry@@I@Z
     ?getReg@register_symbol@@QAEPAVRegister@@XZ
     ?getReplaced@AliasedInstruction@@UAEPAVinstruction@@XZ
@@ -380,12 +370,9 @@ EXPORTS
     ?get_Zth@IO_bi_directional@@UAENXZ
     ?get_Zth@IO_bi_directional_pu@@UAENXZ
     ?get_Zth@IO_open_collector@@UAENXZ
-    ??0IO_open_collector@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVValue@@PAD_N@Z    
     ?get_base_instruction@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
-    ?get_bit@IOPORT@@UAE_NI@Z
-    ?get_bit_voltage@IOPORT@@MAENI@Z
     ?get_bit_voltage@Register@@UAENI@Z
     ?get_bp@@YAAAVBreakpoints@@XZ
     ?get_cpu@Breakpoint_Instruction@@UAEPAVProcessor@@XZ
@@ -404,7 +391,6 @@ EXPORTS
     ?init_program_memory_at_index@Processor@@UAEXIPBEH@Z
     ?initialize@AliasedInstruction@@UAEX_N@Z
     ?get_interface@@YAAAVgpsimInterface@@XZ
-    ?get_iop@IOPIN@@UAEPAVRegister@@XZ
     ?get_lst_line@AliasedInstruction@@UAEHXZ
     ?get_opcode@AliasedInstruction@@UAEIXZ
     ?get_opcode@ProgramMemoryAccess@@QAEII@Z
@@ -418,7 +404,6 @@ EXPORTS
     ?get_trace@@YAAAVTrace@@XZ
     ?get_update_rate@gpsimInterface@@QAE_KXZ
     ?get_value@AliasedInstruction@@UAEIXZ
-    ?get_value@IOPORT@@UAEIXZ
     ?get_value@PortRegister@@UAEIXZ
     ?get_xref@Value@@UAEPAV1@XZ
     ?gets@FileContext@@QAEPADPADI@Z
@@ -473,7 +458,6 @@ EXPORTS
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
     ?printExpression@TriggerObject@@UAEXXZ
     ?profile_keeper@@3VProfileKeeper@@A
-    ?put@IOPORT@@UAEXI@Z
     ?put@PortRegister@@UAEXI@Z
     ?putDrive@PortRegister@@UAEXI@Z
     ?putState@IOPIN@@UAEX_N@Z
@@ -482,7 +466,6 @@ EXPORTS
     ?putToIndex@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?put_opcode@ProgramMemoryAccess@@QAEXII@Z
     ?put_value@AliasedInstruction@@UAEXI@Z
-    ?put_value@IOPORT@@UAEXI@Z
     ?put_value@PortRegister@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ
@@ -597,7 +580,6 @@ EXPORTS
     ?setDefaultSource@PinModule@@QAEXPAVSignalControl@@@Z
     ?setDefaultPullupControl@PinModule@@QAEXPAVSignalControl@@@Z
     ?setEnableMask@PortRegister@@UAEXI@Z
-    ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?show@BinaryOperator@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?show@IOPIN@@UAEXXZ
@@ -669,7 +651,6 @@ EXPORTS
     ?update_line_number@instruction@@UAEXHHHHH@Z
     ?update_pullup@IO_bi_directional_pu@@UAEXD_N@Z
     ?update_state@TraceFrame@@UAEXXZ
-    ?update_stimuli@IOPORT@@MAEHXZ
     ?updatePin@PortModule@@UAEXI@Z
     ?updatePort@PortModule@@UAEXXZ
     ?updateUI@PinModule@@UAEXXZ
