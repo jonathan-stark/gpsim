@@ -82,7 +82,7 @@ Processor::Processor(void)
   pc = 0;
 
   mFrequency = new Float("frequency",20e6, " oscillator frequency.");
-  set_ClockCycles_per_Instruction(1);
+  set_ClockCycles_per_Instruction(4);
   get_cycles().set_cycles_per_second((guint64)(get_frequency()/clocks_per_inst));
   set_Vdd(5.0);
   setWarnMode(true);
