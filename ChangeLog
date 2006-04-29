@@ -1,3 +1,13 @@
+2006-04-29 Roy Rankin <rrankin@ihug.com.au>
+	* src/gpsim_object.h src/gpsim_object.cc src/stimuli.cc
+          src/stimuli.h gui/gui_breadboard.h gui/gui_breadboard.cc:
+	- GUI pin rename code - rewritten and moved into IOPIN class
+        * src/comparator.h src/comparator.cc p16f62x.cc: 
+	- Do dynamic GUI pin renaming
+        * gui/Makefile.am: remove unused and incorrect defines
+        * src/processor.cc: Set 4 clock cycles per instruction cycle
+        * regression/comparator/compar_628.asm: Start by turning off comparators
+
 2006-04-28 Borut Razem <borut.razem@siol.net>
 	* modules/makefile.migw, modules/modules.vcproj,
 	  plat/win32/libgpsim.def, extras/lcd/makefile.mingw,
