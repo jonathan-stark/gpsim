@@ -74,6 +74,8 @@ exit_int:
 ;----------------------------------------------------------------------
 MAIN    CODE
 start
+	movlw	0x07
+	movwf	CMCON		; turn off Comparator
 ;
 ; test bits 5, 6 and 7 work
 ;
