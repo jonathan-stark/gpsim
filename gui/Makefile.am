@@ -21,6 +21,6 @@ libgpsimgui_la_LDFLAGS = @X_LDFLAGS@ @Y_LDFLAGS@
 
 pixmapdir = $(datadir)/gpsim
 
-AM_CFLAGS = -D DATADIR=\"~/.gpsim/\"
-AM_CXXFLAGS = -D DATADIR=\"~/.gpsim/\"
-AM_CPPFLAGS = -D DATADIR=\"~/.gpsim/\"
+AM_CFLAGS = -DDATADIR=\"~/.gpsim/\"
+AM_CXXFLAGS = -DDATADIR=\"~/.gpsim/\"
+AM_CPPFLAGS = -DDATADIR=\"~/.gpsim/\"
