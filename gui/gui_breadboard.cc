@@ -1980,7 +1980,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     ModuleLibrary::File *t = *mi;
 	  cout << t->name() << '\n';
     Module_Types * pFileTypes;
-	  if(pFileTypes = t->get_mod_list()) {
+	  if((pFileTypes = t->get_mod_list())) {
       // Loop through the list and display all of the modules.
       int i=0;
     
@@ -2689,14 +2689,41 @@ void GuiPin::SetLabelPosition(int x, int y)
 // GuiPin::DrawLabel() - draw the label for a single pin 
 //
 // 
-int GuiPin::DrawLabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
+void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
+{
+  const char *name;
+
+
+  name = iopin ? iopin->name().c_str() : "";
+  if(*name && m_bbw ) {
+
+    gdk_draw_text(module_pixmap,
+#if GTK_MAJOR_VERSION >= 2
+		  gdk_font_from_description(m_bbw->pinnamefont),
+#else
+		  m_bbw->pinnamefont,
+#endif
+		  m_bbw->pinname_gc,
+		  m_label_x,
+		  m_label_y,
+		  name,strlen(name));
+
+
+  }
+}
+//------------------------------------------------------------------------
+// GuiPin::DrawGUIlabel() - Erase label and change to that set by newGUIname
+//
+// 
+int GuiPin::DrawGUIlabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
 {
   const char *name;
   int orient;
 
-  name = iopin ? iopin->name().c_str() : "";
-  if(*name && m_bbw && iopin->get_name_updated()) {
-    iopin->clr_name_updated();
+
+  name = iopin ? iopin->GUIname().c_str() : "";
+  if(*name && m_bbw && iopin->is_newGUIname()) {
+    iopin->clr_is_newGUIname();
 
     orient = (m_label_x <= LABELPAD+CASELINEWIDTH)?0:2; // Left or Right label?
 
@@ -2719,6 +2746,8 @@ int GuiPin::DrawLabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
 		  m_label_x,
 		  m_label_y,
 		  name,strlen(name));
+
+
     return 1;
   }
   return 0;
@@ -2832,35 +2861,19 @@ void GuiModule::UpdatePins()
   pin_iter=m_pins;
   while(pin_iter!=0) {
     GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
+    change = pin->DrawGUIlabel(m_module_pixmap, pinnameWidths)?1:change;
     pin->Update();
-    change = pin->DrawLabel(m_module_pixmap, pinnameWidths)?1:change;
     pin_iter = pin_iter->next;
   }
-  if (change)	// Pin label changed redo pin list
+  if (change && m_pinLabel_widget->window)  // Pin label changed, Draw Labels
   {
-      GtkWidget *hackSubtree = gtk_tree_new();
-      GtkWidget *sub_tree_item;
 
-      gtk_tree_item_remove_subtree(GTK_TREE_ITEM(m_tree_item));
-      gtk_widget_show(hackSubtree);
-      gtk_tree_item_set_subtree(GTK_TREE_ITEM(m_tree_item), hackSubtree);
-      pin_iter=m_pins;
-      while(pin_iter!=0) {
-    	GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
-    	const char *name=pin->pinName();
-    	if(name) {
-      	    sub_tree_item = gtk_tree_item_new_with_label (name);
-
-      	    gtk_signal_connect(GTK_OBJECT(sub_tree_item),
-			 "select",
-			 (GtkSignalFunc) treeselect_stimulus,
-			 pin);
-      	    gtk_widget_show(sub_tree_item);
-      	    gtk_tree_append(GTK_TREE(hackSubtree), sub_tree_item);
-    	}
-
-        pin_iter = pin_iter->next;
-     }
+      gdk_draw_pixmap(m_pinLabel_widget->window,
+          m_pinLabel_widget->style->fg_gc[GTK_WIDGET_STATE (m_pinLabel_widget)],
+          m_module_pixmap,
+          0, 0,
+          0, 0,
+          m_width, m_height);
   }
 
 }
@@ -3356,7 +3369,7 @@ void GuiModule::Build()
   while(pin_iter!=0) {
     GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
     AddPinGeometry(pin);
-    pin->DrawLabel(m_module_pixmap, pinnameWidths);
+    pin->DrawLabel(m_module_pixmap);
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout),pin->m_pinDrawingArea,0,0);
 
     // Add pin to tree
