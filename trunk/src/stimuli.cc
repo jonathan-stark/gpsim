@@ -1131,7 +1131,19 @@ char IOPIN::getBitChar()
 
   return getDrivenState() ? '1' : '0';
 }
-
+void IOPIN::newGUIname(const char *s)
+{
+                                                                                
+  if(s)
+  {
+    gui_name_updated = true;
+    gui_name = string(s);
+  }
+}
+string &IOPIN::GUIname(void) const
+{
+  return (string &)gui_name;
+}
 //========================================================================
 //
 #if defined(OLD_IOPORT_DESIGN)

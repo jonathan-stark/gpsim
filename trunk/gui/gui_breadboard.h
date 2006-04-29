@@ -109,7 +109,8 @@ public:
   void SetLabelPosition(int x, int y);
   int label_x() { return m_label_x; }
   int label_y() { return m_label_y; }
-  int DrawLabel(GdkPixmap *pix_map,  int pinnameWidths[]);
+  int DrawGUIlabel(GdkPixmap *pix_map,  int pinnameWidths[]);
+  void DrawLabel(GdkPixmap *pix_map);
 
   void SetOrientation(eOrientation o) { orientation = o; }
 

@@ -416,7 +416,16 @@ class IOPIN : public stimulus
 
   virtual char getBitChar();
   virtual void show();
+ /// Change object name without affecting stimulus
+  virtual void newGUIname(const char *);
+  virtual string &GUIname(void) const;
+  virtual bool is_newGUIname(void) { return gui_name_updated; }
+  virtual void clr_is_newGUIname(void) { gui_name_updated = false; }
+
 protected:
+  bool    gui_name_updated;       // True if object name has changed
+  string  gui_name;               //
+
   bool bDrivenState;       // binary state we're being driven to
   char cForcedDrivenState; // forced state when no snode is attached.
 

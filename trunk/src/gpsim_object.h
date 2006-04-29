@@ -54,6 +54,7 @@ class gpsimObject {
   virtual void new_name(const char *);
   virtual void new_name(string &);
 
+
   /// description - get a description of this object. If the object has 
   /// a name, then 'help value_name' at the command line will display
   /// the description.
@@ -87,12 +88,8 @@ class gpsimObject {
   virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
   virtual int clear_break();
 
-  virtual bool get_name_updated(void) { return name_updated; }
-  virtual void clr_name_updated(void) { name_updated = false; }
 
 protected:
-
-  bool name_updated;         // True if object name has changed
 
   string  name_str;               // A unique name to describe the object
   const char *cpDescription;      // A desciption of the object
