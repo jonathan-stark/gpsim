@@ -176,18 +176,18 @@ bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
     case 0:  // LP oscillator: low power crystal is on RA6 and RA7
     case 1:     // XT oscillator: crystal/resonator is on RA6 and RA7
     case 2:     // HS oscillator: crystal/resonator is on RA6 and RA7
-	(m_porta->getPin(6))->new_name("OSC2");
-	(m_porta->getPin(7))->new_name("OSC1");
+	(m_porta->getPin(6))->newGUIname("OSC2");
+	(m_porta->getPin(7))->newGUIname("OSC1");
 	break;
 
     case 0x13:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
-	(m_porta->getPin(6))->new_name("CLKOUT");
-	(m_porta->getPin(7))->new_name("OSC1");
+	(m_porta->getPin(6))->newGUIname("CLKOUT");
+	(m_porta->getPin(7))->newGUIname("OSC1");
 	break;
 
     case 3:     // EC:  RA6 is an I/O, RA7 is a CLKIN
     case 0x12:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
-        (m_porta->getPin(7))->new_name("CLKIN");
+        (m_porta->getPin(7))->newGUIname("CLKIN");
         valid_pins =  (valid_pins & 0x7f)|0x40;
         break;
 
@@ -209,7 +209,7 @@ bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
     }
     else
     {
-	(m_porta->getPin(5))->new_name("MCLR");
+	(m_porta->getPin(5))->newGUIname("MCLR");
     }
 
     //cout << " porta valid_iopins " << porta->valid_iopins << 

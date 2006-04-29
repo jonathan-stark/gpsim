@@ -48,6 +48,7 @@ void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
     vrcon.setIOpin(pin_vr0);
     cmcon->_vrcon = &vrcon;
     vrcon._cmcon = cmcon;
+    cmcon->rename_pins(0);
 }
 
 void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
@@ -66,6 +67,7 @@ void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
     vrcon.setIOpin(pin_vr0);
     cmcon->_vrcon = &vrcon;
     vrcon._cmcon = cmcon;
+    cmcon->rename_pins(7);
 }
 
 //--------------------------------------------------
@@ -116,10 +118,12 @@ CMCON::CMCON(void)
 void CMCON::setINpin(int i, PinModule *newPinModule)
 {
     cm_input[i] = newPinModule;
+    cm_input_pin[i] = strdup(newPinModule->getPin().name().c_str());
 }
 void CMCON::setOUTpin(int i, PinModule *newPinModule)
 {
     cm_output[i] = newPinModule;
+    cm_output_pin[i] = strdup(newPinModule->getPin().name().c_str());
 }
 void CMCON::assign_pir_set(PIR_SET *new_pir_set)
 {
@@ -392,6 +396,8 @@ void CMCON_1::put(unsigned int new_value)
                                                                                 
   trace.raw(write_trace.get() | value.get());
                                                                                 
+  if (mode ^ (value.get() & 0x7))
+      rename_pins(mode);
 
   if (mode != 6)
   {
@@ -479,6 +485,9 @@ void CMCON_2::put(unsigned int new_value)
                                                                                 
   trace.raw(write_trace.get() | value.get());
                                                                                 
+  if (mode ^ (value.get() & 0x7))
+      rename_pins(mode);	
+
   // Turn off outputs not being used
 
   switch(mode)
@@ -582,6 +591,121 @@ void CMCON_2::put(unsigned int new_value)
   get();	// update comparator values
 }
 
+void CMCON_1::rename_pins(unsigned int new_value)
+{
+   if (verbose)
+	cout << "CMCON_1::rename_pins new_value=" << new_value << endl;
+    switch(new_value & 7)
+    {
+      case 7:
+	cm_input[0]->getPin().newGUIname(cm_input_pin[0]);
+	cm_input[1]->getPin().newGUIname(cm_input_pin[1]);
+	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
+	cm_input[3]->getPin().newGUIname(cm_input_pin[3]);
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 0:
+      case 1:
+      case 2:
+      case 4:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname("an2");
+	cm_input[3]->getPin().newGUIname("an3");
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 3:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname("an2");
+	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 5:
+	cm_input[0]->getPin().newGUIname(cm_input_pin[0]);
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname("an2");
+	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 6:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname("an2");
+	cm_output[0]->getPin().newGUIname("cmp1");
+	cm_output[1]->getPin().newGUIname("cmp2");
+	break;
+
+    }
+}
+void CMCON_2::rename_pins(unsigned int new_value)
+{
+   if (verbose)
+	cout << "CMCON_2::rename_pins new_value=" << new_value << endl;
+    switch(new_value & 7)
+    {
+      case 7:
+	cm_input[0]->getPin().newGUIname(cm_input_pin[0]);
+	cm_input[1]->getPin().newGUIname(cm_input_pin[1]);
+	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
+	cm_input[3]->getPin().newGUIname(cm_input_pin[3]);
+	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 0:
+      case 2:
+      case 6:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname("an2");
+	cm_input[3]->getPin().newGUIname("an3");
+	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 1:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname(cm_input_pin[1]);
+	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
+	cm_input[3]->getPin().newGUIname("an3");
+	cm_output[0]->getPin().newGUIname("c1out");
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 3:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname("an2");
+	cm_input[3]->getPin().newGUIname("an3");
+	cm_output[0]->getPin().newGUIname("c1out");
+	cm_output[1]->getPin().newGUIname("c2out");
+	break;
+
+      case 4:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
+	cm_input[3]->getPin().newGUIname("an3");
+	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
+	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
+	break;
+
+      case 5:
+	cm_input[0]->getPin().newGUIname("an0");
+	cm_input[1]->getPin().newGUIname("an1");
+	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
+	cm_input[3]->getPin().newGUIname("an3");
+	cm_output[0]->getPin().newGUIname("c1out");
+	cm_output[1]->getPin().newGUIname("c2out");
+	break;
+
+    }
+}
 //--------------------------------------------------
 //	Voltage reference
 //--------------------------------------------------
@@ -593,6 +717,7 @@ VRCON::VRCON(void)
 void VRCON::setIOpin(PinModule *newPinModule)
 {
     vr_PinModule = newPinModule;
+    pin_name = strdup(newPinModule->getPin().name().c_str());
 }
 
 void VRCON::put(unsigned int new_value)
@@ -628,10 +753,14 @@ void VRCON::put(unsigned int new_value)
 	{
 
 	    if (! vr_pu)
+	    {
 		vr_pu = new stimulus("vref_pu", VDD, vr_Rhigh);
+	    }
 
 	    if (! vr_pd)
 		vr_pd = new stimulus("vref_pd", 0.0, vr_Rlow);
+	    if (strcmp("Vref", vr_PinModule->getPin().name().c_str()))
+ 	    	vr_PinModule->getPin().newGUIname("Vref");
 
 	    if (vr_PinModule->getPin().snode)
 	    {
@@ -644,6 +773,8 @@ void VRCON::put(unsigned int new_value)
 	}
 	else 	// not outputing voltage to pin
 	{
+	    if (!strcmp("Vref", vr_PinModule->getPin().name().c_str()))
+ 	    	vr_PinModule->getPin().newGUIname(pin_name);
 	    if (diff & 0x0f)	// did value of vreference change ?
 		_cmcon->get();
 	    if(vr_PinModule && vr_PinModule->getPin().snode)
@@ -656,6 +787,9 @@ void VRCON::put(unsigned int new_value)
   }
   else	// vref disable
   {
+    if (vr_PinModule && !strcmp("Vref", vr_PinModule->getPin().name().c_str()))
+ 	  vr_PinModule->getPin().newGUIname(pin_name);
+
     if(vr_PinModule && vr_PinModule->getPin().snode)
     {
           vr_PinModule->getPin().snode->detach_stimulus(vr_pu);

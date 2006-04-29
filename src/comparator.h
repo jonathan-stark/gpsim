@@ -66,6 +66,7 @@ protected:
   stimulus		*vr_pd;
   double		vr_Rhigh;
   double		vr_Rlow;
+  char			*pin_name;	// original name of pin
 
 };
 
@@ -105,6 +106,7 @@ class CMCON : public sfr_register
   virtual void setOUTpin(int i, PinModule *);
   virtual void assign_pir_set(PIR_SET *new_pir_set);
   virtual unsigned int get();
+  virtual void rename_pins(unsigned int) { cout << "CMCON::rename_pins() should not be called\n";}
   virtual void put(unsigned int);
 
 
@@ -113,6 +115,8 @@ class CMCON : public sfr_register
 protected:
   PinModule *cm_input[4];
   PinModule *cm_output[2];
+  const char *cm_input_pin[4];
+  const char *cm_output_pin[2];
   CMSignalSource *cm_source[2];
   unsigned int m_CMval[2];
   PIR_SET_1 *pir_set;
@@ -124,6 +128,7 @@ class CMCON_1 : public CMCON	// Type 1 Comparator used by 16F62x
  public:
   virtual unsigned int get();
   virtual void put(unsigned int);
+  virtual void rename_pins(unsigned int);
   CMCON_1(void);
 };
 class CMCON_2 : public CMCON	// Type 2 Comparator used by 16F87xA
@@ -131,6 +136,7 @@ class CMCON_2 : public CMCON	// Type 2 Comparator used by 16F87xA
  public:
   virtual unsigned int get();
   virtual void put(unsigned int);
+  virtual void rename_pins(unsigned int);
   CMCON_2(void);
 };
 class COMPARATOR_MODULE
