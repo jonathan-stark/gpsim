@@ -1052,7 +1052,7 @@ char *Float::toString(char *return_str, int len)
 
 Float* Float::typeCheck(Value* val, string valDesc)
 {
-  if (typeid((Float*)val) != typeid(Float*)) {
+  if (typeid(*val) != typeid(Float)) {
     throw new TypeMismatch(valDesc, "Float", val->showType());
   }
 
