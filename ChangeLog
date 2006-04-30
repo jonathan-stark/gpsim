@@ -1,3 +1,11 @@
+2006-04-29 Scott Dattalo <scott@dattalo.com>
+	* modules/switch.cc, modules/switch.h,
+	regression/switch_test/switch_test.asm:  Moved pin functionality
+	from the Switch class into the Switch_Pin class.
+
+2006-04-29 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/value.cc: Fixed Float type check error.
+
 2006-04-29 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_object.h src/gpsim_object.cc src/stimuli.cc
           src/stimuli.h gui/gui_breadboard.h gui/gui_breadboard.cc:
