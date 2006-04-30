@@ -749,9 +749,15 @@ static void update_board_matrix(Breadboard_Window *bbw)
 	width=p->width();
 	height=p->height();
  
-	for(; y<p->y()+height && y/ROUTE_RES < YSIZE; y+=ROUTE_RES)
-	  for(x=p->x(); x<p->x()+width && x/ROUTE_RES<XSIZE;x+=ROUTE_RES)
-	    board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+	for(y = p->y() - ROUTE_RES; 
+	    y < p->y() + height + ROUTE_RES && y/ROUTE_RES < YSIZE; 
+	    y += ROUTE_RES)
+	{
+	  for(x = p->x(); 
+	      x < p->x() + width && x/ROUTE_RES<XSIZE;
+	      x += ROUTE_RES)
+	    	board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+	}
 
 	// Draw barriers around pins so the tracker can only get in
         // straigt to the pin and not from the side.
@@ -766,27 +772,29 @@ static void update_board_matrix(Breadboard_Window *bbw)
 	  switch(gp->orientation)
 	    {
 	    case LEFT:
-	      y=p->y()+gp->y();
-	      for(x=p->x()+gp->x()-PINLENGTH;
-		  x<p->x()+gp->x()+gp->width();
-		  x+=ROUTE_RES)
+	      y = gp->y() - gp->height() / 2;
+	      for(x = gp->x() -  PINLENGTH;
+		  x < gp->x() + gp->width();
+		  x += ROUTE_RES)
 		board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
-	      y=p->y()+gp->y()+gp->height();
-	      for(x=p->x()+gp->x()-PINLENGTH;
-		  x<p->x()+gp->x()+gp->width();
-		  x+=ROUTE_RES)
+
+	      y = gp->y() + gp->height() / 2;
+	      for(x = gp->x() -  PINLENGTH;
+		  x < gp->x() + gp->width();
+		  x += ROUTE_RES)
 		board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
 	      break;
+
 	    case RIGHT:
-	      y=p->y()+gp->y();
-	      for(x=p->x()+gp->x();
-		  x<p->x()+gp->x()+gp->width()+PINLENGTH;
-		  x+=ROUTE_RES)
+	      y = gp->y() - gp->height() / 2;
+	      for(x = gp->x() - PINLENGTH;
+		  x < gp->x() + gp->width();
+		  x += ROUTE_RES)
 		board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
-	      y=p->y()+gp->y()+gp->height();
-	      for(x=p->x()+gp->x();
-		  x<p->x()+gp->x()+gp->width()+PINLENGTH;
-		  x+=ROUTE_RES)
+	      y = gp->y() + gp->height() / 2;
+	      for(x = gp->x() - PINLENGTH;
+		  x < gp->x() + gp->width();
+		  x += ROUTE_RES)
 		board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
 	      break;
 	    default:
@@ -1011,10 +1019,7 @@ static void trace_node(struct gui_node *gn)
     }
 
     // Allocate an array of shortest_paths, indexed with 2x glist position.
-//FIXME    shortest_path = (path***) malloc(nr_of_nodes*nr_of_nodes*sizeof(path*));
-
-    printf("Tracing node %s:",gn->node->name().c_str());
-    fflush(stdout);
+//FIXME   shortest_path = (path***) malloc(nr_of_nodes*nr_of_nodes*sizeof(path*));
 
     permutations = (int*)malloc(sizeof(int)*nr_of_nodes);
     shortest_permutation = (int*)malloc(sizeof(int)*nr_of_nodes);
@@ -1100,7 +1105,7 @@ static void trace_node(struct gui_node *gn)
         // Fixme, I'd rather use next_combination().
     } while ( next_permutation( permutations, permutations+nr_of_nodes ) );
 
-    printf(" : Length %d\n", minlen);
+//    printf(" : Length %d\n", minlen);
 //    for(i=0;i<nr_of_nodes;i++)
 //    {
 //	printf("%d ",shortest_permutation[i]);
@@ -1445,9 +1450,9 @@ void GuiModule::SetPosition(int nx, int ny)
       GuiPin *pin = static_cast<GuiPin *>(piniter->data);
 
       if(pin->orientation==RIGHT)
-	pin->SetPosition(m_x + pin->module_x()+PINLENGTH,pin->module_y() + pin->height()/2);
+	pin->SetPosition(m_x + pin->module_x()+PINLENGTH,m_y + pin->module_y() + pin->height()/2);
       else
-	pin->SetPosition(m_x + pin->module_x(),pin->module_y() + pin->height()/2);
+	pin->SetPosition(m_x + pin->module_x(), m_y + pin->module_y() + pin->height()/2);
 
       gtk_layout_move(GTK_LAYOUT(m_bbw->layout),
 		      pin->m_pinDrawingArea,m_x+pin->module_x(),m_y+pin->module_y());
@@ -2445,7 +2450,8 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
 
     draw_nodes(bbw);
 
-    puts("Trace all is done.");
+    if (verbose)
+        puts("Trace all is done.");
 }
 
 //========================================================================
@@ -3668,7 +3674,7 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
     yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(bbw->layout));
     xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
     yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
-#if 0
+
     gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
 		    bbw->window->style->white_gc,
 		    bbw->layout_pixmap,
@@ -3680,7 +3686,6 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 #endif
 		    bbw->layout->allocation.width,
 		    bbw->layout->allocation.height);
-#endif
 }
 
 static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
