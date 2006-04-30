@@ -1,4 +1,10 @@
-2006-04-29 Scott Dattalo <scott@dattalo.com>
+2006-04-30 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_src.h gui/gui_src_asm.cc: fix ungisgned - signed compile 
+	  warnings
+	* gui/gui_breadboard.cc: get trace working again
+	* gui/Makefile.am: remove unused and incorrect defines
+
+2 06-04-29 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h,
 	regression/switch_test/switch_test.asm:  Moved pin functionality
 	from the Switch class into the Switch_Pin class.
