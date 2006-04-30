@@ -60,8 +60,6 @@ namespace Switches {
     void buttonToggled();
 
     virtual double do_voltage(SwitchPin *pin);
-    virtual void sum_Thevenin(SwitchPin *pin, double &current, 
-			      double &conductance, double &Cth);
     virtual void callback(void);
     virtual double get_nodeVoltage() { return voltage; }
     virtual bool switch_closed() { return m_bCurrentState; }

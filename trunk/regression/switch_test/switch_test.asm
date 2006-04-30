@@ -44,6 +44,18 @@ MAIN    CODE
 
 ;----------------------------------------------------------------------
 ; gpsim configuration script
+;
+; The configuration environment consists of a switch connecting
+; portb0 to portc1. Resistors on either side of the switch
+; ensure that the nodes are never floating.
+;
+;               PU1
+;                |   \
+;  portb0 <>--+--+--O \O--+-- portc1
+;  portc0  <--|           |
+;                        PD1
+;
+;
 
    ;# Module libraries:
    .sim "module library libgpsim_modules"
@@ -54,9 +66,11 @@ MAIN    CODE
    .sim "SW1.state=false"
    .sim "SW1.xpos = 216.0"
    .sim "SW1.ypos = 156.0"
+   .sim "SW1.Rclosed = 100.0"
+   .sim "SW1.Ropen = 1.0e8"
 
    .sim "module load pullup PU1"
-   .sim "PU1.resistance=10000."
+   .sim "PU1.resistance=1.0e8"
    .sim "PU1.capacitance=1.00e-07"
    .sim "PU1.xpos = 204.0"
    .sim "PU1.ypos = 36.0"
@@ -69,12 +83,12 @@ MAIN    CODE
 
     ;# Connections:
    .sim "node nb0"
-   .sim "attach nb0 SW1.A portb0 porta0"
+   .sim "attach nb0 SW1.A portb0 portc0 PU1"
 
    .sim "node nc0"
-   .sim "attach nc0 SW1.B PD1.pin porta1"
+   .sim "attach nc0 SW1.B PD1.pin portc1"
 
-   .sim "frequency 10e6"
+   .sim "frequency 10.0e6"
 
 ;# End of configuration
 ;
@@ -85,8 +99,8 @@ start
 
 	BSF	STATUS,RP0
 
-	movlw	0x07		; RA2-RA0 are inputs
-	movwf	TRISA
+	movlw	0x03		; RC1,RC0 are inputs
+	movwf	TRISC
 	CLRF	TRISB^0x80	;Port B is an output
 
 	BCF 	STATUS,RP0
@@ -97,13 +111,13 @@ start
 
 	BCF	PORTB,0
 
-   .assert "(porta & 3) == 0"	; both sides of switch whould be 0
+   .assert "(portc & 3) == 0"	; both sides of switch should be 0
 
 	nop
 
 	BSF	PORTB,0
 
-   .assert "(porta & 3) == 1"	; drive side only high
+   .assert "(portc & 3) == 1"	; drive side only high
 
 	nop
 
@@ -111,12 +125,12 @@ start
    .command "SW1.state=true"
 	nop
 
-   .assert "(porta & 3) == 1"	; drive side only high because of capacitance
+   .assert "(portc & 3) == 1"	; drive side only high because of capacitance
  	nop
 
        call    delay
 
-   .assert "(porta & 3) == 3"	
+   .assert "(portc & 3) == 3"	
 	nop
 
 	BCF	PORTB,0		; change drive voltage
@@ -125,57 +139,57 @@ start
 
        call    delay
 
-   .assert "(porta & 3) == 0"   ; both sides now low
+   .assert "(portc & 3) == 0"   ; both sides now low
 	nop
-	movf	PORTA,W
+	movf	PORTC,W
 
 	BSF	PORTB,0		; drive high again
 	call	delay
 
-   .assert "(porta & 3) == 3"	; make sure both sides are high
+   .assert "(portc & 3) == 3"	; make sure both sides are high
 	nop
 
    ; Open the switch:	
    .command "SW1.state=false"
 	nop
 
-;   .assert "(porta & 3) == 3"	; capacitance should hold both sides high
+;   .assert "(portc & 3) == 3"	; capacitance should hold both sides high
 ;				; for a while
 ;	nop
 ;
 ;	call delay
 
-   .assert "(porta & 3) == 1"   ; only one side high
+   .assert "(portc & 3) == 1"   ; only one side high
 	nop
 
 	BCF	PORTB,0
 
-   .assert "(porta & 3) == 0"
+   .assert "(portc & 3) == 0"
 	nop
 
 ;	Turn off Capacitance to test DC behaviour
 ;
-   .command "PD1.capacitance=0"
+   .command "PD1.capacitance=0.0"
 	nop
-   .command "PU1.capacitance=0"
+;   .command "PU1.capacitance=0"
 	nop
 
-   .assert "(porta & 3) == 0"
+   .assert "(portc & 3) == 0"
 	nop
 
 	BSF	PORTB,0		; Drive one side of switch high
-   .assert "(porta & 3) == 1"
+   .assert "(portc & 3) == 1"
 	nop
 
    ; Close the switch:	
    .command "SW1.state=true"
 	nop
 
-   .assert "(porta & 3) == 3"	; Both side should now be high
+   .assert "(portc & 3) == 3"	; Both side should now be high
 	nop
 
 	BCF	PORTB,0
-   .assert "(porta & 3) == 0"	; Both side should now be low
+   .assert "(portc & 3) == 0"	; Both side should now be low
 	nop
 done:
 
