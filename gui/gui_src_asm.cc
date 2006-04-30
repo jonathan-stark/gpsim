@@ -1723,7 +1723,7 @@ void SourceWindow::SetPC(int address)
     pages[currPage]->setSource();
 
   // Get the file id associated with the program counter address
-  int sbawFileId  = pma->get_file_id(address);
+  unsigned int sbawFileId  = pma->get_file_id(address);
   if(sbawFileId == 0xffffffff)
     return;
 

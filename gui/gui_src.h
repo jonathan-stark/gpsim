@@ -228,7 +228,7 @@ private:
   StatusBar_Window *status_bar;  // display's PC, status, etc.
   SIMULATION_MODES last_simulation_mode;
   string sLastPmaName;
-  int m_currentPage;          // Notebook page currently displayed.
+  unsigned int m_currentPage;          // Notebook page currently displayed.
 
   struct _PC {
     bool bIsActive;
