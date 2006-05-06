@@ -44,6 +44,7 @@ class RxBaudRateAttribute;
 class TxBaudRateAttribute;
 class TxBuffer;
 class RxBuffer;
+class Boolean;
 
 class USARTModule : public Module
 {
@@ -51,7 +52,6 @@ class USARTModule : public Module
 
 #ifdef HAVE_GUI
   GtkWidget *window, *text;
- 
 #endif // HAVE_GUI
  
   void CreateGraphics(void);
@@ -74,7 +74,7 @@ class USARTModule : public Module
 private:
   RxBaudRateAttribute *m_RxBaud;
   TxBaudRateAttribute *m_TxBaud;
-
+  Boolean  *m_CRLF;
   TxBuffer *m_TxBuffer;
   RxBuffer *m_RxBuffer;
 

@@ -1,3 +1,9 @@
+2006-04-29 Scott Dattalo <scott@dattalo.com>
+	* modules/usart.h, modules/usart.cc:
+	 - Added the boolean attribute 'crlf'. If this is set true, then
+	 carriage returns and line feeds will generate new lines in the
+	 gui terminal window.
+
 2006-05-06 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* modules/usart.h, modules/usart.cc: 
 	 - Usart GUI now displays non-printable characters as <%02X>.
@@ -10,7 +16,7 @@
 	* gui/gui_breadboard.cc: get trace working again
 	* gui/Makefile.am: remove unused and incorrect defines
 
-2 06-04-29 Scott Dattalo <scott@dattalo.com>
+2006-04-29 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h,
 	regression/switch_test/switch_test.asm:  Moved pin functionality
 	from the Switch class into the Switch_Pin class.
