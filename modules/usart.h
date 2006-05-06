@@ -81,6 +81,10 @@ private:
   RCREG *m_rcreg;
   TXREG *m_txreg;
 
+  unsigned char * m_TxFIFO;
+  int m_FifoLen;
+  int m_FifoHead;
+  int m_FifoTail;
 
 };
 #endif //  __USART_MODULE_H__

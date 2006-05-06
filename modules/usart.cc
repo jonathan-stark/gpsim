@@ -74,6 +74,7 @@ Boston, MA 02111-1307, USA.  */
 #define Dprintf(arg) {}
 #endif
 
+#define HAVE_TXFIFO
 
 static bool bIsLow(char state)
 {
@@ -243,8 +244,8 @@ private:
   USARTModule *usart;
 
   virtual bool is_empty() { return empty_flag;};
-  virtual void empty() {empty_flag = 0;};
-  virtual void full()  {empty_flag = 1;};
+  virtual void empty() {empty_flag = 1;};
+  virtual void full()  {empty_flag = 0;};
   virtual void assign_pir_set(PIR_SET *new_pir_set){};
 
   TXREG(void) {
@@ -260,6 +261,7 @@ private:
 
     update_packet_time();
 
+    empty();
   }
 
 
@@ -338,8 +340,8 @@ private:
       get_cycles().set_break(future_time, this);
     } else {
       // We've sent the whole byte. 
-    /*	output data sent from GUI if configured */
-#ifndef HAVE_GUI
+      /* output data from buffer if configured */
+#ifdef HAVE_TXFIFO
       if(usart && usart->mGetTxByte(tx_byte))
 	mSendByte(tx_byte);
       else
@@ -363,6 +365,7 @@ private:
     last_time = get_cycles().get();
     future_time = last_time + time_per_bit;
     get_cycles().set_break(future_time, this);
+    full();
   }
 
 private:
@@ -740,16 +743,45 @@ void RCREG::new_rx_edge(bool bit)
 
 
 //------------------------------------------------------------------------
-class USART_IO : public IOPIN
+class USART_IO : public IO_bi_directional_pu
 {
 public:
 
+  USARTModule *usart;
 
   USART_IO(void) {
     cout << "USART_IO constructor - do nothing\n";
   }
-  USART_IO (unsigned int b, char *opt_name=NULL) : IOPIN(opt_name) { };
 
+  USART_IO ( USARTModule *_usart,
+	     unsigned int b,
+             char *opt_name ) : IO_bi_directional_pu(opt_name) {
+    usart = _usart;
+
+    string n(usart->name());
+    n = n + "." + opt_name;
+    new_name(n.c_str());
+
+    bDrivenState = true;
+    update_direction(0,true);   // Make the RX pin an input.
+
+    bPullUp = true;
+    Zpullup = 10e3;
+  }
+
+  void setDrivenState(bool new_dstate) { 
+    bool diff = new_dstate ^ bDrivenState;
+
+//    Dprintf((" usart module %s new state=%d\n",name(),new_dstate));
+
+    if( usart && diff ) {
+
+      bDrivenState = new_dstate;
+      IOPIN::setDrivenState(new_dstate);
+
+    }
+
+  }
 };
 
 
@@ -834,10 +866,10 @@ public:
 
 class TxBuffer : public Integer
 {
-  TXREG *txreg;
+  USARTModule *usart;
 public:
-  TxBuffer(TXREG *_txreg)
-    : Integer("tx",0,"UART Transmit Register"),txreg(_txreg)
+  TxBuffer(USARTModule *_usart)
+    : Integer("tx",0,"UART Transmit Register"),usart(_usart)
   {
   }
   virtual void set(gint64 i)
@@ -846,8 +878,8 @@ public:
 
     cout << name() << " sending byte 0x" << hex << i << endl;
 
-    if(txreg)
-      txreg->mSendByte(i);
+    if(usart)
+      usart->SendByte(i);
 
     Integer::set(i);
   }
@@ -896,6 +928,7 @@ void USARTModule::newRxByte(unsigned int aByte)
 }
 
 //--------------------------------------------------------------
+#ifndef HAVE_TXFIFO
 static unsigned int _tx_index=0;
 static unsigned char Test_Hello[] = {
   0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L', 'O', 0x17, 0x55
@@ -909,6 +942,20 @@ bool USARTModule::mGetTxByte(unsigned int &aByte)
   return true;
 
 }
+#else
+bool USARTModule::mGetTxByte(unsigned int &aByte)
+{
+    if ( m_FifoHead == m_FifoTail )
+        return false;
+    aByte = m_TxFIFO[m_FifoTail];
+    if ( m_FifoTail < m_FifoLen-1 )
+        m_FifoTail++;
+    else
+        m_FifoTail = 0;
+    return true;
+}
+#endif
+
 //--------------------------------------------------------------
 // create_iopin_map 
 //
@@ -950,8 +997,8 @@ void USARTModule::create_iopin_map(void)
 
   assign_pin(1, txpin);
   assign_pin(2, rxpin);
-  assign_pin(3, new USART_IO(2,"CTS"));
-  assign_pin(4, new USART_IO(3,"RTS"));
+  assign_pin(3, new USART_IO(this, 2, "CTS"));
+  assign_pin(4, new USART_IO(this, 3, "RTS"));
 
   // Complete the usart initialization
 
@@ -985,6 +1032,12 @@ USARTModule::USARTModule(const char *_name)
   assert(_name);
   new_name(_name);
 
+#ifdef HAVE_TXFIFO
+  m_TxFIFO = new unsigned char[64];
+  m_FifoLen = 64;
+  m_FifoHead = m_FifoTail = 0;
+#endif
+
   m_rcreg = new RCREG(this);
   m_txreg = new TXREG;
 
@@ -997,7 +1050,7 @@ USARTModule::USARTModule(const char *_name)
   m_RxBuffer = new RxBuffer(m_rcreg);
   add_attribute(m_RxBuffer);
 
-  m_TxBuffer = new TxBuffer(m_txreg);
+  m_TxBuffer = new TxBuffer(this);
   add_attribute(m_TxBuffer);
 
 
@@ -1021,6 +1074,42 @@ USARTModule::~USARTModule()
 //--------------------------------------------------------------
 void USARTModule::SendByte(unsigned tx_byte)
 {
+#ifdef HAVE_TXFIFO
+    Dprintf (( "SendByte <%02X> : head=%d, tail=%d, txreg=%p\n",
+               tx_byte, m_FifoHead, m_FifoTail, m_txreg ))
+    if ( m_FifoHead != m_FifoTail || !m_txreg || !m_txreg->is_empty() )
+    {
+        int newHead;
+
+        m_TxFIFO[m_FifoHead] = tx_byte;
+        newHead = m_FifoHead+1;
+        if ( newHead >= m_FifoLen )
+            newHead = 0;
+        if ( newHead == m_FifoTail )
+        {
+            int newLen = m_FifoLen + 32;
+            unsigned char * newFIFO;
+            newFIFO = new unsigned char[newLen];
+            int oldTail = m_FifoTail;
+            int dIdx = 0;
+            int sIdx;
+            for ( sIdx = oldTail; sIdx < m_FifoLen; )
+                newFIFO[dIdx++] = m_TxFIFO[sIdx++];
+            for ( sIdx = 0; sIdx < newHead; )
+                newFIFO[dIdx++] = m_TxFIFO[sIdx++];
+            unsigned char * oldFIFO = m_TxFIFO;
+            m_TxFIFO = newFIFO;
+            m_FifoTail -= oldTail;
+            m_FifoHead = dIdx;
+            m_FifoLen = newLen;
+            delete oldFIFO;
+        }
+        else
+            m_FifoHead = newHead;
+        cout << "Byte added to queue\n";
+    }
+    else
+#endif
         if (m_txreg)
             m_txreg->mSendByte(tx_byte);
 };
@@ -1081,7 +1170,13 @@ void USARTModule::show_tx(unsigned int data)
       GtkTextBuffer *buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
       GtkTextIter iter;
       gtk_text_buffer_get_end_iter(buff, &iter);
-      gtk_text_buffer_insert(buff,&iter,(char *)&data, 1);
+      if ( data >= 0x20 && data < 0x80 )
+        gtk_text_buffer_insert(buff,&iter,(char *)&data, 1);
+      else {
+        char hex[5];
+        sprintf ( hex, "<%02X>", data );
+        gtk_text_buffer_insert(buff,&iter,hex,4);  
+      }
       gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0.0, 1.0);
     }
   }
