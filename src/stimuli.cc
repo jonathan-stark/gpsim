@@ -760,6 +760,32 @@ void source_stimulus::show()
 {
   stimulus::show();
 }
+void source_stimulus::put_period(Value *pValue)
+{
+  if (pValue)
+    pValue->get(period);
+}
+void source_stimulus::put_duty(Value *pValue)
+{
+  if (pValue)
+    pValue->get(duty);
+}
+void source_stimulus::put_phase(Value *pValue)
+{
+  if (pValue)
+    pValue->get(phase);
+}
+void source_stimulus::put_initial_state(Value *pValue)
+{
+  if (pValue)
+    pValue->get(initial_state);
+}
+void source_stimulus::put_start_cycle(Value *pValue)
+{
+  if (pValue)
+    pValue->get(start_cycle);
+}
+
 //========================================================================
 //
 #if defined(OLD_IOPORT_DESIGN)
@@ -785,39 +811,6 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 
   if(iop) {
 
-#if 0
-    iop->attach_iopin(this,b);
-
-    // assign the name to the I/O pin.
-    // If one was passed to us (opt_name), then use it
-    // otherwise, derive the name from the I/O port to 
-    // which this pin is attached.
-
-    char name_str[100];
-    if(opt_name) {
-      snprintf(name_str,sizeof(name_str),"%s.%s",
-	       iop->name().c_str(),
-	       opt_name);
-
-    } else {
-
-      char bs[3];
-
-      strncpy(name_str, iop->name().c_str(),sizeof(name_str) - sizeof(bs));
-      if(iobit < 10) {
-        bs[0] = iobit+'0';
-        bs[1] = 0;
-      } else {
-        bs[0] = (iobit / 10) + '0';
-        bs[1] = (iobit % 10) + '0';
-        bs[2] = 0;
-      }
-
-      strcat(name_str,bs);
-    }
-
-    new_name(name_str);
-#endif
     printf("WARNING:%s:%d deprecated usage of IOPINs\n",__FILE__,__LINE__);
   } else {
     // there's no IO port associated with this pin.
@@ -1480,7 +1473,8 @@ char IO_open_collector::getBitChar()
 ValueStimulus::ValueStimulus(const char *n)
   : source_stimulus() 
 {
-  initial = 0;
+  initial.time = 0;
+  initial.v = 0;
   current = 0;
 
   if(n)
@@ -1497,7 +1491,7 @@ ValueStimulus::ValueStimulus(const char *n)
 
 ValueStimulus::~ValueStimulus()
 {
-  delete initial;
+  delete initial.v;
   delete current;
 
   for(sample_iterator = samples.begin();
@@ -1522,16 +1516,18 @@ void ValueStimulus::show()
       si != samples.end();
       ++si) {
 
-    double d;
-    (*si).v->get(d);
+    //double d;
+    //(*si).v->get(d);
     cout << "    t=" << dec << (*si).time
-	 <<  ",v="  << d
+	 <<  ",v=" << (*si).v->toString()
 	 << '\n';
 
   }
 
+  if (initial.v)
+    cout << "  initial=" << initial.v->toString() << '\n';
+
   cout
-    << "  initial=" << initial << '\n'
     << "  period=" << period << '\n'
     << "  start_cycle=" << start_cycle << '\n'
     << "  Next break cycle=" << future_cycle << '\n';
@@ -1583,19 +1579,23 @@ void ValueStimulus::callback()
     cout <<"  next transition = " << future_cycle << '\n';
 }
 
-/*
-void ValueStimulus::put_initial(ValueStimulusData &data_point)
+void ValueStimulus::put_initial_state(Value *pValue)
 {
-  samples.push_front(data_point);
-  initial = data_point.v;
+  if (pValue && !initial.v) {
+    initial.time = 0;
+    initial.v = pValue->copy();
+  }
 }
-*/
 
 void ValueStimulus::put_data(ValueStimulusData &data_point)
 {
-  samples.push_back(data_point);
+  ValueStimulusData *sample = new ValueStimulusData;
+  sample->time = data_point.time;
+  sample->v = data_point.v;
+  samples.push_back(*sample);
 
 }
+
 double ValueStimulus::get_Vth()
 {
   double v=initial_state;
@@ -1625,11 +1625,16 @@ void ValueStimulus::start()
     cout << "Starting asynchronous stimulus\n";
 
   if(period) {
+
     // Create a data point for the rollover condition.
-    ValueStimulusData *vRestart = new ValueStimulusData();
-    vRestart->v = new Float(initial_state);
-    vRestart->time = period;
-    put_data(*vRestart);
+    // If an initial value was supplied when the stimulus was created, then
+    // that's what we'll use for the rollover. Otherwise, we'll create 
+    // a rollover based on 'initial_state' (which should be a default value).
+
+    ValueStimulusData vSample;
+    vSample.time = period;
+    vSample.v = initial.v ? initial.v : new Float(initial_state);
+    put_data(vSample);
   }
 
   sample_iterator = samples.begin();
@@ -1640,7 +1645,7 @@ void ValueStimulus::start()
     if(digital)
       initial_state = (initial_state > 0.0) ? Vth : 0.0;
 
-    current       = initial;
+    current       = initial.v;
     next_sample   = *sample_iterator;
     future_cycle  = next_sample.time;// + start_cycle;
 
@@ -1697,7 +1702,9 @@ AttributeStimulus::~AttributeStimulus()
 */
 void AttributeStimulus::show()
 {
-
+  if (attr)
+    cout << "\nDriving Attribute:" << attr->name() << endl;
+  ValueStimulus::show();
 }
 
 void AttributeStimulus::callback()
