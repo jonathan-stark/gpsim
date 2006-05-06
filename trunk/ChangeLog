@@ -1,3 +1,9 @@
+2006-05-06 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* modules/usart.h, modules/usart.cc: 
+	 - Usart GUI now displays non-printable characters as <%02X>.
+	 - The usart module now supports a transmit FIFO. This allows
+	 transmit data to be queued while the simulation is stopped.
+
 2006-04-30 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src.h gui/gui_src_asm.cc: fix ungisgned - signed compile 
 	  warnings
