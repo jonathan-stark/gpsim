@@ -256,12 +256,18 @@ void cmd_stimulus::stimulus(int bit_flag)
 
 void cmd_stimulus::stimulus(cmd_options_expr *coe)
 {
+  /*
   double dvalue = 0.0;
-
   if(coe->expr)
     dvalue = evaluate(coe->expr);
 
   int value = (int) dvalue;
+  */
+
+  if (!coe || !coe->expr)
+    return;
+
+  Value *value = toValue(coe->expr);
 
   switch(coe->co->value)
     {
@@ -316,6 +322,8 @@ void cmd_stimulus::stimulus(cmd_options_expr *coe)
     }
 
   options_entered |= coe->co->value;
+  delete coe->expr;
+  delete value;
 
 }
 

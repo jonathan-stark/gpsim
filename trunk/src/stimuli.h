@@ -294,12 +294,11 @@ enum SOURCE_TYPE
   virtual void callback(void);
   virtual void callback_print(void);
 
-  void put_period(guint64 new_period) { period = new_period; };
-  void put_duty(guint64 new_duty) { duty = new_duty; };
-  void put_phase(guint64 new_phase) { phase = new_phase; };
-  void put_initial_state(double new_initial_state) { initial_state = new_initial_state; };
-  void put_start_cycle(guint64 new_start_cycle) { 
-    phase = start_cycle = new_start_cycle; };
+  virtual void put_period(Value *);
+  virtual void put_duty(Value *);
+  virtual void put_phase(Value *);
+  virtual void put_initial_state(Value *);
+  virtual void put_start_cycle(Value *);
   virtual void set_digital(void) { digital = true;}
   virtual void set_analog(void) { digital = false;}
   virtual void start(void) { };
@@ -568,7 +567,7 @@ public:
 class ValueStimulus : public source_stimulus
 {
 protected:
-  Value             *initial;
+  ValueStimulusData  initial;
   Value             *current;
   guint64            future_cycle;
   ValueStimulusData  next_sample;
@@ -580,6 +579,8 @@ public:
 
   virtual void callback();
   virtual void put_data(ValueStimulusData &data_point);
+  virtual void put_initial_state(Value *);
+
   virtual double get_Vth();
   virtual void start();
 
