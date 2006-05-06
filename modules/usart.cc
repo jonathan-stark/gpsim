@@ -1053,6 +1053,8 @@ USARTModule::USARTModule(const char *_name)
   m_TxBuffer = new TxBuffer(this);
   add_attribute(m_TxBuffer);
 
+  m_CRLF = new Boolean("crlf", true, "if true, Carriage return and linefeeds generate new lines in the terminal");
+  add_attribute(m_CRLF);
 
   CreateGraphics();
 
@@ -1160,7 +1162,7 @@ key_release(GtkWidget *widget,
 	return(1);
 }
 
-// Display charater from usart on GUI text window
+// Display character from usart on GUI text window
 void USARTModule::show_tx(unsigned int data)
 {
   if(get_interface().bUsingGUI()) {
@@ -1170,7 +1172,8 @@ void USARTModule::show_tx(unsigned int data)
       GtkTextBuffer *buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
       GtkTextIter iter;
       gtk_text_buffer_get_end_iter(buff, &iter);
-      if ( data >= 0x20 && data < 0x80 )
+      if ( ( data >= 0x20 && data < 0x80 ) || 
+	   (m_CRLF->getVal() && (data==0x0d || data==0x0a)))
         gtk_text_buffer_insert(buff,&iter,(char *)&data, 1);
       else {
         char hex[5];
