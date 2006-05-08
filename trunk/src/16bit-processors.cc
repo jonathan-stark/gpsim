@@ -286,7 +286,7 @@ void _16bit_processor :: create_sfr_map()
   adcon0.setA2DBits(10);
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3);
+			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
 
   adcon1.setNumberOfChannels(8);
   adcon1.setIOPin(0, &(*m_porta)[0]);
