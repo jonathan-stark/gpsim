@@ -75,7 +75,6 @@ Boston, MA 02111-1307, USA.  */
 #define Dprintf(arg) {}
 #endif
 
-
 static bool bIsLow(char state)
 {
   return state=='0' || state=='w';
@@ -118,8 +117,7 @@ public:
   USARTModule *usart;
 
   USART_RXPIN (USARTModule *_usart,
-               unsigned int b, 
-               char *opt_name=NULL) : IO_bi_directional_pu(0,b,opt_name) { 
+               char *opt_name=NULL) : IO_bi_directional_pu(opt_name) { 
 
     usart = _usart;
 
@@ -294,7 +292,7 @@ private:
 //------------------------------------------------------------------------
 
 RCREG::RCREG(USARTModule *pUsart)
-  : m_usart(pUsart), rcpin(0), start_bit_event(0), m_cLastRXState('?')
+  : m_usart(pUsart), m_cLastRXState('?'), start_bit_event(0), rcpin(0)
 {
   assert(m_usart);
 
@@ -510,16 +508,42 @@ void RCREG::new_rx_edge(bool bit)
 
 
 //------------------------------------------------------------------------
-class USART_IO : public IOPIN
+class USART_IO : public IO_bi_directional_pu
 {
 public:
 
+  USARTModule *usart;
 
   USART_IO(void) {
     cout << "USART_IO constructor - do nothing\n";
   }
-  USART_IO (unsigned int b, char *opt_name=NULL) : IOPIN(0,b,opt_name) { };
 
+  USART_IO ( USARTModule *_usart,
+             char *opt_name ) : IO_bi_directional_pu(opt_name)
+  {
+    usart = _usart;
+
+    string n(usart->name());
+    n = n + "." + opt_name;
+    new_name(n.c_str());
+
+    bDrivenState = true;
+    update_direction(0,true);   // Make the RX pin an input.
+
+    bPullUp = true;
+    Zpullup = 10e3;
+  }
+
+  void setDrivenState(bool new_dstate) { 
+    bool diff = new_dstate ^ bDrivenState;
+
+//    Dprintf((" usart module %s new state=%d\n",name(),new_dstate));
+
+    if( usart && diff ) {
+      bDrivenState = new_dstate;
+      IOPIN::setDrivenState(new_dstate);
+    }
+  }
 };
 
 
@@ -616,9 +640,6 @@ void USARTModule::newRxByte(unsigned int aByte)
 //  This is where the information for the Module's package is defined.
 // Specifically, the I/O pins of the module are created.
 
-#define USART_PKG_RXPIN        1
-#define USART_PKG_CTSPIN       2
-
 void USARTModule::create_iopin_map(void)
 {
 
@@ -629,7 +650,7 @@ void USARTModule::create_iopin_map(void)
   //   USART I/O pins:
   //
   //    1 - Rx - Receive
-  //    2 - CTS - Clear To Send
+  //    2 - RTS - Request To Send
 
   create_pkg(2);
 
@@ -641,12 +662,11 @@ void USARTModule::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  USART_RXPIN *rxpin = new USART_RXPIN(this, 0,"RX");
+  USART_RXPIN *rxpin = new USART_RXPIN(this, "RXPIN");
 
 
   assign_pin(1, rxpin);
-  assign_pin(2, new USART_IO(2,"CTS"));
-
+  assign_pin(2, new USART_IO(this, "RTS"));
   // Complete the usart initialization
 
   m_rcreg->rxpin = rxpin;

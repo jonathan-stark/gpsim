@@ -1,3 +1,7 @@
+2006-05-08 Borut Razem <borut.razem@siol.net>
+
+	* extras/usart_con.cc: sync with modules/usart.cc
+
 2006-05-08 Roy Rankin <rrankin@ihug.com.au>
 	* src/comparator.h, src/comparator.cc, src/p16f62x.cc:
 	- rewritten so comparator processor differences in processor class
@@ -50,7 +54,7 @@
         * regression/comparator/compar_628.asm: Start by turning off comparators
 
 2006-04-28 Borut Razem <borut.razem@siol.net>
-	* modules/makefile.migw, modules/modules.vcproj,
+	* modules/makefile.mingw, modules/modules.vcproj,
 	  plat/win32/libgpsim.def, extras/lcd/makefile.mingw,
 	  plat/win32/gpsim.nsi: WIN32 sync
 
