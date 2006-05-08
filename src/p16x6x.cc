@@ -234,8 +234,6 @@ void P16X6X_processor::create_sfr_map()
   add_file_registers(0x20, 0x7f, 0);
   add_file_registers(0xa0, 0xbf, 0);
 
-  add_sfr_register(m_portc, 0x07);
-  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
 
   add_sfr_register(get_pir1(),   0x0c, RegisterValue(0,0),"pir1");
   add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
@@ -345,6 +343,9 @@ void P16C62::create_sfr_map()
     cout << "creating c62 registers\n";
 
   P16X6X_processor::create_sfr_map();
+
+  add_sfr_register(m_portc, 0x07);
+  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
 
   //1((PORTC*)portc)->ccp1con = &ccp1con;
 
