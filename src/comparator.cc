@@ -1,4 +1,5 @@
 /*
+	out = output
    Copyright (C) 1998 T. Scott Dattalo
    Copyright (C) 2006 Roy R. Rankin
 
@@ -32,31 +33,13 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "comparator.h"
 
-void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
-	PinModule *pin_vr0, PinModule *pin_cm0, 
-	PinModule *pin_cm1, PinModule *pin_cm2, PinModule *pin_cm3, 
-	PinModule *pin_cm4)
-{
-    cmcon = new CMCON_1;
-    cmcon->assign_pir_set(pir_set);
-    cmcon->setINpin(0, pin_cm0);
-    cmcon->setINpin(1, pin_cm1);
-    cmcon->setINpin(2, pin_cm2);
-    cmcon->setINpin(3, pin_cm3);
-    cmcon->setOUTpin(0, pin_cm3);
-    cmcon->setOUTpin(1, pin_cm4);
-    vrcon.setIOpin(pin_vr0);
-    cmcon->_vrcon = &vrcon;
-    vrcon._cmcon = cmcon;
-    cmcon->rename_pins(0);
-}
 
 void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
 	PinModule *pin_vr0, PinModule *pin_cm0, 
 	PinModule *pin_cm1, PinModule *pin_cm2, PinModule *pin_cm3, 
 	PinModule *pin_cm4, PinModule *pin_cm5)
 {
-    cmcon = new CMCON_2;
+    cmcon = new CMCON;
     cmcon->assign_pir_set(pir_set);
     cmcon->setINpin(0, pin_cm0);
     cmcon->setINpin(1, pin_cm1);
@@ -67,7 +50,6 @@ void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
     vrcon.setIOpin(pin_vr0);
     cmcon->_vrcon = &vrcon;
     vrcon._cmcon = cmcon;
-    cmcon->rename_pins(7);
 }
 
 //--------------------------------------------------
@@ -105,12 +87,36 @@ void   CM_stimulus::set_nodeVoltage(double v)
 }
 
 
-CMCON_1::CMCON_1(void)
+/*
+    Setup the configuration for the comparators. Must be called
+    for each comparator and each mode(CN2:CM0) that can be used.
+	il1 = input Vin- when CIS == 0
+	ih1 = input Vin+ when CIS == 0
+	il2 = input Vin- when CIS == 1
+	ih2 = input Vin+ when CIS == 1
+	out = output
+
+	if input == VREF, reference voltage is used.
+*/
+
+void CMCON::set_configuration(int comp, int mode, int il1, int ih1, int il2,
+int ih2, int out)
 {
-}
-CMCON_2::CMCON_2(void)
-{
-}
+    if (comp > cMaxComparators || comp < 1 )
+    {
+	cout << "CMCON::set_configuration comp=" << comp << " out of range\n";
+	return;
+    }
+    if (mode > cMaxConfigurations)
+    {
+	cout << "CMCON::set_configuration mode too large\n";
+	return;
+    }
+    m_configuration_bits[comp-1][mode] = (il1 << CFG_SHIFT*4) | 
+	(ih1 << CFG_SHIFT*3) |
+	(il2 << CFG_SHIFT*2) | (ih2 << CFG_SHIFT) | out;
+} 
+
 CMCON::CMCON(void)
 {
   value.put(0);
@@ -129,251 +135,83 @@ void CMCON::assign_pir_set(PIR_SET *new_pir_set)
 {
     pir_set = (PIR_SET_1 *)new_pir_set;
 }
+
+double CMCON::comp_voltage(int ind, int invert)
+{
+    double Voltage;
+
+    switch(ind)
+    {
+    case VREF:
+	Voltage = _vrcon->get_Vref();
+	break;
+
+    case NO_IN:
+	Voltage = invert ? 5. : 0.;
+	break;
+
+    default:
+	Voltage = cm_input[ind]->getPin().get_nodeVoltage();
+	break;
+    }
+    return Voltage;
+}
 /*
 **	get()
 **		read the comparator inputs and set C2OUT and C1OUT
 **		as required. Also drive output pins if required.
-**		(CMCON version dummy, real function type dependant)
 */
 unsigned int CMCON::get() 
 { 
-	cout << "CMCON:: get() should not be called\n";
-	return 0;
-}
-/*
-**	Type 1 as used in P16F62x
-*/
-unsigned int CMCON_1::get()
-{
     unsigned int cmcon_val = value.get();
-    bool out1_true;
-    bool out2_true;
+    int mode = cmcon_val & 0x07;
     int i;
-    double Vhigh1, Vlow1;
-    double Vhigh2, Vlow2;
-
-    Vhigh1 = Vhigh2 = 5.0;	// just to avoid compiler warning
-    Vlow1 = Vlow2 = 0.0;	// just to avoid compiler warning
-    switch (cmcon_val & 0x07)
+                                                                                
+    for (i = 0; i < 2; i++)
     {
-    case 0:	// Comparitor reset 
-    case 7:	// Comparators off
-	if (cmcon_val & (C1OUT|C2OUT) && pir_set)	// change output
-	    pir_set->set_cmif();
-	cmcon_val &= ~(C1OUT|C2OUT);
-   	value.put(cmcon_val);
-   	return(cmcon_val);
-	break;
+	double Vhigh;
+	double Vlow;
+	bool out_true;
+	int out;
+	int invert_bit = (i == 0) ? C1INV : C2INV;
+	int output_bit = (i == 0) ? C1OUT : C2OUT;
+	int shift = (cmcon_val & CIS) ? CFG_SHIFT : CFG_SHIFT*3;
 
-    case 1:	// 3 imputs muxed 2 comparitors
-	Vhigh1 = Vhigh2 = cm_input[2]->getPin().get_nodeVoltage();
-	i = (cmcon_val & CIS)?3:0;
-	Vlow1 = cm_input[i]->getPin().get_nodeVoltage();
-	Vlow2 = cm_input[1]->getPin().get_nodeVoltage();
+	if ((m_configuration_bits[i][mode] & CFG_MASK) != ZERO)
+        {
+	    Vhigh = comp_voltage( 
+		(m_configuration_bits[i][mode] >> shift) & CFG_MASK,
+		cmcon_val & invert_bit);
+	    Vlow = comp_voltage( 
+		(m_configuration_bits[i][mode] >> shift+CFG_SHIFT) & CFG_MASK,
+		(cmcon_val & invert_bit) == 0);
+		
+	    if (Vhigh > Vlow)
+	    	out_true = (cmcon_val & invert_bit)?false:true;
+            else
+	    	out_true = (cmcon_val & invert_bit)?true:false;
 
-	break;
+   	    if (out_true)  
+	    	cmcon_val |= output_bit;
+   	    else
+	    	cmcon_val &= ~output_bit;
 
-    case 2:	// 4 inputs muxed vs Vref
-	Vhigh1 = Vhigh2 = _vrcon->get_Vref();
-	i = (cmcon_val & CIS)?3:0;
-	Vlow1 = cm_input[i]->getPin().get_nodeVoltage();
-	i = (cmcon_val & CIS)?2:1;
-	Vlow2 = cm_input[i]->getPin().get_nodeVoltage();
-	    
-	break;
-
-    case 3:	// Two Common Reference Comparators
-    case 6:	// Two common reference Comparitors with output
-	Vhigh1 = Vhigh2 = cm_input[2]->getPin().get_nodeVoltage();
-	Vlow1 = cm_input[0]->getPin().get_nodeVoltage();
-	Vlow2 = cm_input[1]->getPin().get_nodeVoltage();
-
-	break;
-   case 4:	// two independant comparators
-	Vhigh1 = cm_input[3]->getPin().get_nodeVoltage();
-	Vhigh2 = cm_input[2]->getPin().get_nodeVoltage();
-	Vlow1 = cm_input[0]->getPin().get_nodeVoltage();
-	Vlow2 = cm_input[1]->getPin().get_nodeVoltage();
-	break;
-
-   case 5:	// One independant comparator
-	if (cmcon_val & C1INV)
-	{
- 	    Vhigh1 = 5.;
-	    Vlow1 = 0.;
+	    if ( (out = m_configuration_bits[i][mode] & CFG_MASK) < 2)
+	    {
+	    	cm_source[out]->putState(out_true);
+	    	cm_output[out]->updatePinModule();
+	    	update();
+	    }
 	}
-	else
-	{
- 	    Vhigh1 = 0.;
-	    Vlow1 = 5.;
-	}
-	Vhigh2 = cm_input[2]->getPin().get_nodeVoltage();
-	Vlow2 = cm_input[1]->getPin().get_nodeVoltage();
-	break;
-
+	else			// Don't care about inputs, register value 0
+	    cmcon_val &= ~output_bit;
    }
-    if (Vhigh1 > Vlow1)
-	out1_true = (cmcon_val & C1INV)?false:true;
-     else
-	out1_true = (cmcon_val & C1INV)?true:false;
-
-    if (Vhigh2 > Vlow2)
-	out2_true = (cmcon_val & C2INV)?false:true;
-    else
-	out2_true = (cmcon_val & C2INV)?true:false;
-
-   if (out1_true)  
-	cmcon_val |= C1OUT;
-   else
-	cmcon_val &= ~C1OUT;
-   if (out2_true)
-	cmcon_val |= C2OUT;
-   else
-	cmcon_val &= ~C2OUT;
 
    if (value.get() ^ cmcon_val) // change of state
    {
-   	if ((cmcon_val & 0x07) == 6)	// drive 2 outputs
-   	{
-	    cm_source[0]->putState(out1_true);
-	    cm_source[1]->putState(out2_true);
-	    cm_output[0]->updatePinModule();
-	    cm_output[1]->updatePinModule();
-	    update();
-   	}
 	// Generate interupt ?
 	if (pir_set)
 		pir_set->set_cmif();
-   }
-
-   if (verbose)
-   {
-	cout << "CMCON_1::get() Vhigh1=" << Vhigh1 << " Vlow1=" << Vlow1 
-     	    << " out1_true=" << out1_true << endl;
-	cout << "               Vhigh2=" << Vhigh2 << " Vlow2=" << Vlow2 
-     	    << " out2_true=" << out2_true << endl;
-	cout <<"               cmcon =0x" << hex << cmcon_val <<endl;
-   }
-   value.put(cmcon_val);
-   return(cmcon_val);
-}
-/*
-**	Type 2 as used in P16F87xA
-*/
-unsigned int CMCON_2::get()
-{
-    unsigned int cmcon_val = value.get();
-    bool out1_true;
-    bool out2_true;
-    int i;
-    double Vhigh1, Vlow1;
-    double Vhigh2, Vlow2;
-
-    Vhigh1 = Vhigh2 = 5.0;	// just to avoid compiler warning
-    Vlow1 = Vlow2 = 0.0;	// just to avoid compiler warning
-    switch (cmcon_val & 0x07)
-    {
-    case 0:	// Comparitor reset 
-    case 7:	// Comparators off
-	if (cmcon_val & (C1OUT|C2OUT) && pir_set)	// change output
-	    pir_set->set_cmif();
-	cmcon_val &= ~(C1OUT|C2OUT);
-   	value.put(cmcon_val);
-   	return(cmcon_val);
-	break;
-
-
-    case 6:	// 4 inputs muxed vs Vref
-	Vhigh1 = Vhigh2 = _vrcon->get_Vref();
-	i = (cmcon_val & CIS)?3:0;
-	Vlow1 = cm_input[i]->getPin().get_nodeVoltage();
-	i = (cmcon_val & CIS)?2:1;
-	Vlow2 = cm_input[i]->getPin().get_nodeVoltage();
-	    
-	break;
-
-    case 4:	// Two Common Reference Comparators
-    case 5:	// Two common reference Comparitors with output
-	Vhigh1 = Vhigh2 = cm_input[3]->getPin().get_nodeVoltage();
-	Vlow1 = cm_input[0]->getPin().get_nodeVoltage();
-	Vlow2 = cm_input[1]->getPin().get_nodeVoltage();
-
-	break;
-
-   case 2:	// two independant comparators
-   case 3:	// two independant comparators with output
-	Vhigh1 = cm_input[3]->getPin().get_nodeVoltage();
-	Vhigh2 = cm_input[2]->getPin().get_nodeVoltage();
-	Vlow1 = cm_input[0]->getPin().get_nodeVoltage();
-	Vlow2 = cm_input[1]->getPin().get_nodeVoltage();
-	break;
-
-   case 1:	// One independant comparator with output
-	if (cmcon_val & C2INV)
-	{
- 	    Vhigh2 = 5.;
-	    Vlow2 = 0.;
-	}
-	else
-	{
- 	    Vhigh2 = 0.;
-	    Vlow2 = 5.;
-	}
-	Vhigh1 = cm_input[3]->getPin().get_nodeVoltage();
-	Vlow1 = cm_input[0]->getPin().get_nodeVoltage();
-	break;
-
-   }
-    if (Vhigh1 > Vlow1)
-	out1_true = (cmcon_val & C1INV)?false:true;
-     else
-	out1_true = (cmcon_val & C1INV)?true:false;
-
-    if (Vhigh2 > Vlow2)
-	out2_true = (cmcon_val & C2INV)?false:true;
-    else
-	out2_true = (cmcon_val & C2INV)?true:false;
-
-   if (out1_true)  
-	cmcon_val |= C1OUT;
-   else
-	cmcon_val &= ~C1OUT;
-   if (out2_true)
-	cmcon_val |= C2OUT;
-   else
-	cmcon_val &= ~C2OUT;
-
-   if (value.get() ^ cmcon_val) // change of state
-   {
-   	switch ((cmcon_val & 0x07) )	// drive  outputs
-   	{
-	case 3:
-	case 5:
-	    cm_source[0]->putState(out1_true);
-	    cm_source[1]->putState(out2_true);
-	    cm_output[0]->updatePinModule();
-	    cm_output[1]->updatePinModule();
-	    update();
-	    break;
-
-	case 1:
-	    cm_source[0]->putState(out1_true);
-	    cm_output[0]->updatePinModule();
-	    update();
-	    break;
-   	}
-	// Generate interupt ?
-	if (pir_set)
-		pir_set->set_cmif();
-   } 
-
-   if (verbose)
-   {
-	cout << "CMCON_2::get() Vhigh1=" << Vhigh1 << " Vlow1=" << Vlow1 
-     	    << " out1_true=" << out1_true << endl;
-	cout << "             Vhigh2=" << Vhigh2 << " Vlow2=" << Vlow2 
-     	    << " out2_true=" << out2_true << endl;
-	cout <<"             cmcon =0x" << hex << cmcon_val <<endl;
    }
    value.put(cmcon_val);
    return(cmcon_val);
@@ -381,31 +219,35 @@ unsigned int CMCON_2::get()
 
 void CMCON::put(unsigned int new_value)
 {
-	cout << "CMCON::put should not be called\n";
-}
-/*
-**	CMCON::put()
-**		attach stimuli to appropriate pins so when an input changes,
-**		the comparator value can be updated. Also if mode is 6 setup 
-**		driving of output pins.
-*/
-void CMCON_1::put(unsigned int new_value)
-{
-                                                                                
   unsigned int mode = new_value & 0x7;
+  unsigned int in_mask = 0;
+  unsigned int out_mask = 0;
+  unsigned int configuration;
+  int i;
                                                                                 
-  trace.raw(write_trace.get() | value.get());
-                                                                                
-  if (mode ^ (value.get() & 0x7))
-      rename_pins(mode);
+  if (verbose)
+      cout << "CMCON::put(new_value) =" << hex << new_value << endl;
 
-  if (mode != 6)
+  trace.raw(write_trace.get() | value.get());
+
+
+  // Determine used input and output pins
+  for(i = 0; i < 2; i++)
   {
-	if ( cm_source[0])
-	    cm_output[0]->setSource(0);
-	if ( cm_source[1])
-	    cm_output[1]->setSource(0);
+     configuration = m_configuration_bits[i][mode];
+     if ((configuration & CFG_MASK) < 2)
+	out_mask |= (1 << (configuration & CFG_MASK));
+     for(int j = 0; j < 4; j++)
+     {
+	configuration >>= CFG_SHIFT;
+	if ((configuration & CFG_MASK) < 4)
+		in_mask |= (1 << (configuration & CFG_MASK));
+     }
   }
+
+  if (verbose)
+      cout << "CMCON::put in_mask=" << in_mask << " out_mask=" << out_mask << endl;
+
   if ((mode != 0) && (mode != 7) && ! cm_stimulus[0])	// initialize stimulus
   {
 	cm_stimulus[0] = new CM_stimulus(this, "cm_stimulus_1", 0, 1e12);
@@ -413,298 +255,59 @@ void CMCON_1::put(unsigned int new_value)
 	cm_stimulus[2] = new CM_stimulus(this, "cm_stimulus_3", 0, 1e12);
 	cm_stimulus[3] = new CM_stimulus(this, "cm_stimulus_4", 0, 1e12);
   }
-
-  switch(mode)
+  //
+  // setup outputs
+  //
+  for( i = 0; i < 2; i++)
   {
-    case 6:			// Start outputs
-	if (! cm_source[0])
-		cm_source[0] = new CMSignalSource();
-	if (! cm_source[1])
-		cm_source[1] = new CMSignalSource();
-	cm_output[0]->setSource(cm_source[0]);
-	cm_output[1]->setSource(cm_source[1]);
-
-   case 3:			// ports 0, 1 and 2
-	if (cm_input[0]->getPin().snode)
-	    cm_input[0]->getPin().snode->attach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode)
-	    cm_input[1]->getPin().snode->attach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode)
-	    cm_input[2]->getPin().snode->attach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode)
-	    cm_input[3]->getPin().snode->detach_stimulus(cm_stimulus[3]);
-	break;
-
-    case 1:
-    case 2:
-    case 4:	// stimulus ports 0, 1, 2, and 3
-	if (cm_input[0]->getPin().snode)
-	    cm_input[0]->getPin().snode->attach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode)
-	    cm_input[1]->getPin().snode->attach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode)
-	    cm_input[2]->getPin().snode->attach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode)
-	    cm_input[3]->getPin().snode->attach_stimulus(cm_stimulus[3]);
-	break;
-
-    case 5:	// Stimulus ports 1 and 2
-	if (cm_input[0]->getPin().snode)
-	    cm_input[0]->getPin().snode->detach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode)
-	    cm_input[1]->getPin().snode->attach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode)
-	    cm_input[2]->getPin().snode->attach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode)
-	    cm_input[3]->getPin().snode->detach_stimulus(cm_stimulus[3]);
-	break;
-
-    case 0:
-    case 7:		// detach stimulus
-	if (cm_input[0]->getPin().snode && cm_stimulus[0])
-	    cm_input[0]->getPin().snode->detach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode && cm_stimulus[1])
-	    cm_input[1]->getPin().snode->detach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode && cm_stimulus[2])
-	    cm_input[2]->getPin().snode->detach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode && cm_stimulus[3])
-	    cm_input[3]->getPin().snode->detach_stimulus(cm_stimulus[3]);
-	break;
-
+      if (out_mask & (1<<i))
+      {
+          if ( ! cm_source[i])
+		cm_source[i] = new CMSignalSource();
+	  cm_output[i]->setSource(cm_source[i]);
+      }
+      else if (cm_source[i])
+      {
+	    cm_output[i]->setSource(0);
+      }
   }
+  //
+  // setup inputs
+  for(i = 0; i < 4; i++)
+  {
+	const char *name = cm_input[i]->getPin().GUIname().c_str();
+
+	if (cm_input[i]->getPin().snode)
+        {
+	    if (in_mask & (1 << i))
+		(cm_input[i]->getPin().snode)->attach_stimulus(cm_stimulus[i]);
+	    else
+		(cm_input[i]->getPin().snode)->detach_stimulus(cm_stimulus[i]);
+	}
+	// rewrite GUI name as required
+	if (in_mask & (1 << i) ) 
+	{
+	    char newname[20];
+
+	    if (strncmp(name, "an", 2))
+	    {
+	    	sprintf(newname, "an%d", i);
+	    	cm_input[i]->getPin().newGUIname(newname);
+	    }
+	}
+	else
+	{
+	    if (!strncmp(name, "an", 2))
+		cm_input[i]->getPin().newGUIname(cm_input[i]->getPin().name().c_str());
+	}
+	 
+   }
 
   value.put(new_value);
   if (verbose)
       cout << "CMCON_1::put() val=0x" << hex << new_value <<endl;
   get();	// update comparator values
-}
-void CMCON_2::put(unsigned int new_value)
-{
-                                                                                
-  unsigned int mode = new_value & 0x7;
-                                                                                
-  trace.raw(write_trace.get() | value.get());
-                                                                                
-  if (mode ^ (value.get() & 0x7))
-      rename_pins(mode);	
-
-  // Turn off outputs not being used
-
-  switch(mode)
-  {
-  case 1:
-	if (! cm_source[0])
-		cm_source[0] = new CMSignalSource();
-	if ( cm_source[1])
-	    	cm_output[1]->setSource(0);
-	cm_output[0]->setSource(cm_source[0]);
-	break;
-
-  case 3:
-  case 5:
-	if (! cm_source[0])
-		cm_source[0] = new CMSignalSource();
-	if (! cm_source[1])
-		cm_source[1] = new CMSignalSource();
-	cm_output[0]->setSource(cm_source[0]);
-	cm_output[1]->setSource(cm_source[1]);
-	break;
-
-  default:
-	if ( cm_source[0])
-	    cm_output[0]->setSource(0);
-	if ( cm_source[1])
-	    cm_output[1]->setSource(0);
-	break;
-  }
-  if ((mode != 0) && (mode != 7) && ! cm_stimulus[0])	// initialize stimulus
-  {
-	cm_stimulus[0] = new CM_stimulus(this, "cm_stimulus_1", 0, 1e12);
-	cm_stimulus[1] = new CM_stimulus(this, "cm_stimulus_2", 0, 1e12);
-	cm_stimulus[2] = new CM_stimulus(this, "cm_stimulus_3", 0, 1e12);
-	cm_stimulus[3] = new CM_stimulus(this, "cm_stimulus_4", 0, 1e12);
-  }
-
-  switch(mode)
-  {
-    case 3:			// Start outputs
-	cm_output[0]->setSource(cm_source[0]);
-	cm_output[1]->setSource(cm_source[1]);
-	// Fall Through
-    case 6:
-    case 2:	// stimulus ports 0, 1, 2, and 3
-	if (cm_input[0]->getPin().snode)
-	    cm_input[0]->getPin().snode->attach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode)
-	    cm_input[1]->getPin().snode->attach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode)
-	    cm_input[2]->getPin().snode->attach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode)
-	    cm_input[3]->getPin().snode->attach_stimulus(cm_stimulus[3]);
-	break;
-
-    case 5:	
-	cm_output[0]->setSource(cm_source[0]);
-	cm_output[1]->setSource(cm_source[1]);
-	// Fall Through
-    case 4:	// Stimulus ports 0, 1 and 3
-	if (cm_input[0]->getPin().snode)
-	    cm_input[0]->getPin().snode->attach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode)
-	    cm_input[1]->getPin().snode->attach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode)
-	    cm_input[2]->getPin().snode->detach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode)
-	    cm_input[3]->getPin().snode->attach_stimulus(cm_stimulus[3]);
-	break;
-
-    case 1:	// stimulus ports 0 and 3 only
-	cm_output[0]->setSource(cm_source[0]);
-	cm_output[1]->setSource(0);
-	if (cm_input[0]->getPin().snode)
-	    cm_input[0]->getPin().snode->attach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode)
-	    cm_input[1]->getPin().snode->detach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode)
-	    cm_input[2]->getPin().snode->detach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode)
-	    cm_input[3]->getPin().snode->attach_stimulus(cm_stimulus[3]);
-	break;
-
-    case 0:
-    case 7:		// detach stimulus
-	if (cm_input[0]->getPin().snode && cm_stimulus[0])
-	    cm_input[0]->getPin().snode->detach_stimulus(cm_stimulus[0]);
-	if (cm_input[1]->getPin().snode && cm_stimulus[1])
-	    cm_input[1]->getPin().snode->detach_stimulus(cm_stimulus[1]);
-	if (cm_input[2]->getPin().snode && cm_stimulus[2])
-	    cm_input[2]->getPin().snode->detach_stimulus(cm_stimulus[2]);
-	if (cm_input[3]->getPin().snode && cm_stimulus[3])
-	    cm_input[3]->getPin().snode->detach_stimulus(cm_stimulus[3]);
-	break;
-
-  }
-
-  value.put(new_value);
-  if (verbose)
-  	cout << "CMCON_2::put() val=0x" << hex << new_value <<endl;
-  get();	// update comparator values
-}
-
-void CMCON_1::rename_pins(unsigned int new_value)
-{
-   if (verbose)
-	cout << "CMCON_1::rename_pins new_value=" << new_value << endl;
-    switch(new_value & 7)
-    {
-      case 7:
-	cm_input[0]->getPin().newGUIname(cm_input_pin[0]);
-	cm_input[1]->getPin().newGUIname(cm_input_pin[1]);
-	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
-	cm_input[3]->getPin().newGUIname(cm_input_pin[3]);
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 0:
-      case 1:
-      case 2:
-      case 4:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname("an2");
-	cm_input[3]->getPin().newGUIname("an3");
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 3:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname("an2");
-	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 5:
-	cm_input[0]->getPin().newGUIname(cm_input_pin[0]);
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname("an2");
-	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 6:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname("an2");
-	cm_output[0]->getPin().newGUIname("cmp1");
-	cm_output[1]->getPin().newGUIname("cmp2");
-	break;
-
-    }
-}
-void CMCON_2::rename_pins(unsigned int new_value)
-{
-   if (verbose)
-	cout << "CMCON_2::rename_pins new_value=" << new_value << endl;
-    switch(new_value & 7)
-    {
-      case 7:
-	cm_input[0]->getPin().newGUIname(cm_input_pin[0]);
-	cm_input[1]->getPin().newGUIname(cm_input_pin[1]);
-	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
-	cm_input[3]->getPin().newGUIname(cm_input_pin[3]);
-	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 0:
-      case 2:
-      case 6:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname("an2");
-	cm_input[3]->getPin().newGUIname("an3");
-	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 1:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname(cm_input_pin[1]);
-	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
-	cm_input[3]->getPin().newGUIname("an3");
-	cm_output[0]->getPin().newGUIname("c1out");
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 3:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname("an2");
-	cm_input[3]->getPin().newGUIname("an3");
-	cm_output[0]->getPin().newGUIname("c1out");
-	cm_output[1]->getPin().newGUIname("c2out");
-	break;
-
-      case 4:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
-	cm_input[3]->getPin().newGUIname("an3");
-	cm_output[0]->getPin().newGUIname(cm_output_pin[0]);
-	cm_output[1]->getPin().newGUIname(cm_output_pin[1]);
-	break;
-
-      case 5:
-	cm_input[0]->getPin().newGUIname("an0");
-	cm_input[1]->getPin().newGUIname("an1");
-	cm_input[2]->getPin().newGUIname(cm_input_pin[2]);
-	cm_input[3]->getPin().newGUIname("an3");
-	cm_output[0]->getPin().newGUIname("c1out");
-	cm_output[1]->getPin().newGUIname("c2out");
-	break;
-
-    }
+      
 }
 //--------------------------------------------------
 //	Voltage reference

@@ -30,10 +30,29 @@ Boston, MA 02111-1307, USA.  */
  *
  ***************************************************************************/
 
+#define CFG_MASK 0x7
+#define CFG_SHIFT 3
 
 class CMSignalSource;
 class VRSignalSource;
 class CMCON;
+
+  enum compare_inputs
+   {
+	AN0 = 0,
+	AN1,
+	AN2,
+	AN3,
+	VREF = 6,	// use reference voltage
+	NO_IN = 7	// no input port
+   };
+  enum compare_outputs
+   {
+	OUT0 = 0,
+	OUT1,
+	ZERO = 6,	// register value == 0
+	NO_OUT = 7	// no ouput port
+   };
 
 class VRCON : public sfr_register
 {
@@ -108,6 +127,9 @@ class CMCON : public sfr_register
   virtual unsigned int get();
   virtual void rename_pins(unsigned int) { cout << "CMCON::rename_pins() should not be called\n";}
   virtual void put(unsigned int);
+  virtual void set_configuration(int comp, int mode, int il1, int ih1, int il2, int ih2, int out);
+  virtual double comp_voltage(int ind, int invert);
+
 
 
   CMCON(void);
@@ -121,24 +143,14 @@ protected:
   unsigned int m_CMval[2];
   PIR_SET_1 *pir_set;
   CM_stimulus *cm_stimulus[4];
+
+  static const int cMaxConfigurations=8;
+  static const int cMaxComparators=2;
+
+  unsigned int m_configuration_bits[cMaxComparators][cMaxConfigurations];
+
 };
 
-class CMCON_1 : public CMCON	// Type 1 Comparator used by 16F62x
-{
- public:
-  virtual unsigned int get();
-  virtual void put(unsigned int);
-  virtual void rename_pins(unsigned int);
-  CMCON_1(void);
-};
-class CMCON_2 : public CMCON	// Type 2 Comparator used by 16F87xA
-{
- public:
-  virtual unsigned int get();
-  virtual void put(unsigned int);
-  virtual void rename_pins(unsigned int);
-  CMCON_2(void);
-};
 class COMPARATOR_MODULE
 {
  public:
