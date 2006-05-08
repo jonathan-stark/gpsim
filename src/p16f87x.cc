@@ -41,7 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-ioports.h"
 #include "stimuli.h"
 
-
+//-------------------------------------------------------------------
 
 void P16F871::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
@@ -70,12 +70,6 @@ void P16F871::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
-  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
-
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
-  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -94,9 +88,15 @@ void P16F871::create_sfr_map(void)
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0xf0,0xff,0x100);
 
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+
+  adres.new_name("adresh");
+  adresl.new_name("adresl");
+
+  adcon0.setAdresLow(&adresl);
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3);
+			 ADCON1::PCFG2 | ADCON1::PCFG3, 0);
 
   adcon1.setChannelConfiguration(8, 0xff);
   adcon1.setChannelConfiguration(9, 0x3f);
@@ -183,6 +183,8 @@ P16F871::P16F871(void)
 {
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
+
+
 }
 
 
@@ -221,13 +223,8 @@ void P16F873::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
-  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
 
                                                                                 
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
-  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -245,17 +242,55 @@ void P16F873::create_sfr_map(void)
   alias_file_registers(0xa0,0xff,0x100);
 
 
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3);
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+  add_sfr_register(&adresh,  0x1e, RegisterValue(0,0));
 
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
+
+
+
+
+  adres.new_name("adresh");
+  adresl.new_name("adresl");
+
+  adcon0.setAdresLow(&adresl);
+  adcon0.setAdres(&adresh);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(10);
+  adcon0.pir_set = &pir_set_2_def;
+
+  adcon1.setNumberOfChannels(5);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3 , 0);
+
+  adcon1.setChannelConfiguration(0, 0x1f);
+  adcon1.setChannelConfiguration(1, 0x1f);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
   adcon1.setChannelConfiguration(8, 0x1f);
   adcon1.setChannelConfiguration(9, 0x1f);
   adcon1.setChannelConfiguration(10, 0x1f);
   adcon1.setChannelConfiguration(11, 0x1f);
   adcon1.setChannelConfiguration(12, 0x1f);
-  adcon1.setChannelConfiguration(13, 0x0f);
+  adcon1.setChannelConfiguration(13, 0x1f);
   adcon1.setChannelConfiguration(14, 0x01);
   adcon1.setChannelConfiguration(15, 0x0d);
+
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
   adcon1.setVrefHiConfiguration(8, 3);
   adcon1.setVrefHiConfiguration(10, 3);
   adcon1.setVrefHiConfiguration(11, 3);
@@ -268,6 +303,10 @@ void P16F873::create_sfr_map(void)
   adcon1.setVrefLoConfiguration(12, 2);
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
+
+  intcon = &intcon_reg;
+                                                                                
+
 }
 
 void P16F873::create(void)
@@ -339,19 +378,7 @@ void P16F873A::create(void)
   if(verbose)
     cout << " f873A create \n";
 
-  P16C73::create();
-
-  EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
-  e->set_cpu(this);
-  e->initialize(128);
-  e->set_pir_set(get_pir_set());
-  e->set_intcon(&intcon_reg);
-  set_eeprom_wide(e);
-
-  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
-  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
-  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
+  P16F873::create();
 
   P16F873A::create_sfr_map();
 
@@ -363,20 +390,6 @@ void P16F873A::create_sfr_map(void)
   if(verbose)
     cout << "creating f873A registers \n";
 
-  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
-
-  // Enable program memory reads and writes.
-  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
-
-  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
-  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
-
-  add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
-  add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
-
-  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
-
                                                                                 
   // Link the comparator and voltage ref to porta
   comparator.initialize(get_pir_set(), 
@@ -384,53 +397,27 @@ void P16F873A::create_sfr_map(void)
         &(*m_porta)[1], &(*m_porta)[2], 
 	&(*m_porta)[3], &(*m_porta)[4], &(*m_porta)[5]);
 
+  comparator.cmcon->set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon->set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon->set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon->set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon->set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon->set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon->set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon->set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon->set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon->set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
+  comparator.cmcon->set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon->set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
+  comparator.cmcon->set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon->set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon->set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon->set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  
+
   add_sfr_register(comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"vrcon");
 
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
-  adcon0.setAdresLow(&adresl);
-
-  alias_file_registers(0x80,0x80,0x80);
-  alias_file_registers(0x01,0x01,0x100);
-  alias_file_registers(0x82,0x84,0x80);
-  alias_file_registers(0x06,0x06,0x100);
-  alias_file_registers(0x8a,0x8b,0x80);
-  alias_file_registers(0x100,0x100,0x80);
-  alias_file_registers(0x81,0x81,0x100);
-  alias_file_registers(0x102,0x104,0x80);
-  alias_file_registers(0x86,0x86,0x100);
-  alias_file_registers(0x10a,0x10b,0x80);
-
-
-  alias_file_registers(0x20,0x7f,0x100);
-  alias_file_registers(0xa0,0xff,0x100);
-
-
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3);
-
-  adcon1.setChannelConfiguration(8, 0x1f);
-  adcon1.setChannelConfiguration(9, 0x1f);
-  adcon1.setChannelConfiguration(10, 0x1f);
-  adcon1.setChannelConfiguration(11, 0x1f);
-  adcon1.setChannelConfiguration(12, 0x1f);
-  adcon1.setChannelConfiguration(13, 0x0f);
-  adcon1.setChannelConfiguration(14, 0x01);
-  adcon1.setChannelConfiguration(15, 0x0d);
-  adcon1.setVrefHiConfiguration(8, 3);
-  adcon1.setVrefHiConfiguration(10, 3);
-  adcon1.setVrefHiConfiguration(11, 3);
-  adcon1.setVrefHiConfiguration(12, 3);
-  adcon1.setVrefHiConfiguration(13, 3);
-  adcon1.setVrefHiConfiguration(15, 3);
-
-  adcon1.setVrefLoConfiguration(8, 2);
-  adcon1.setVrefLoConfiguration(11, 2);
-  adcon1.setVrefLoConfiguration(12, 2);
-  adcon1.setVrefLoConfiguration(13, 2);
-  adcon1.setVrefLoConfiguration(15, 2);
 }
 Processor * P16F873A::construct(void)
 {
@@ -603,10 +590,6 @@ void P16F874::create_sfr_map(void)
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
                                                                                 
 
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
-  adcon0.setAdresLow(&adresl);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -623,17 +606,51 @@ void P16F874::create_sfr_map(void)
   alias_file_registers(0x20,0x7f,0x100);
   alias_file_registers(0xa0,0xff,0x100);
 
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3);
+  adres.new_name("adresh");
+  adresl.new_name("adresl");
 
+  adcon0.setAdresLow(&adresl);
+
+  adcon0.setAdres(&adres);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(10);
+  adcon0.pir_set = &pir_set_2_def;
+
+  adcon1.setNumberOfChannels(8);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  adcon1.setIOPin(5, &(*m_porte)[0]);
+  adcon1.setIOPin(6, &(*m_porte)[1]);
+  adcon1.setIOPin(7, &(*m_porte)[2]);
+
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3, 0);
+
+
+  adcon1.setChannelConfiguration(0, 0xff);
+  adcon1.setChannelConfiguration(1, 0xff);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
   adcon1.setChannelConfiguration(8, 0xff);
   adcon1.setChannelConfiguration(9, 0x3f);
   adcon1.setChannelConfiguration(10, 0x3f);
   adcon1.setChannelConfiguration(11, 0x3f);
-  adcon1.setChannelConfiguration(12, 0x1f);
-  adcon1.setChannelConfiguration(13, 0x0f);
+  adcon1.setChannelConfiguration(12, 0x3f);
+  adcon1.setChannelConfiguration(13, 0x1f);
   adcon1.setChannelConfiguration(14, 0x01);
   adcon1.setChannelConfiguration(15, 0x0d);
+
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
   adcon1.setVrefHiConfiguration(8, 3);
   adcon1.setVrefHiConfiguration(10, 3);
   adcon1.setVrefHiConfiguration(11, 3);
@@ -647,6 +664,8 @@ void P16F874::create_sfr_map(void)
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
 
+
+  intcon = &intcon_reg;
 
 }
 
@@ -728,20 +747,6 @@ void P16F874A::create_sfr_map(void)
   if(verbose)
     cout << "creating f874A registers \n";
 
-  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
-
-  // Enable program memory reads and writes.
-  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
-
-  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
-  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
-
-  add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
-  add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
-
-  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
-                                                                                
 
   // Link the comparator and voltage ref to porta
   comparator.initialize(get_pir_set(), 
@@ -749,54 +754,25 @@ void P16F874A::create_sfr_map(void)
         &(*m_porta)[1], &(*m_porta)[2], 
 	&(*m_porta)[3], &(*m_porta)[4], &(*m_porta)[5]);
 
+  comparator.cmcon->set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon->set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon->set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon->set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon->set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon->set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon->set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon->set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon->set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon->set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
+  comparator.cmcon->set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon->set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
+  comparator.cmcon->set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon->set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon->set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon->set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+
   add_sfr_register(comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"vrcon");
-
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
-  adcon0.setAdresLow(&adresl);
-
-  alias_file_registers(0x80,0x80,0x80);
-  alias_file_registers(0x01,0x01,0x100);
-  alias_file_registers(0x82,0x84,0x80);
-  alias_file_registers(0x06,0x06,0x100);
-  alias_file_registers(0x8a,0x8b,0x80);
-  alias_file_registers(0x100,0x100,0x80);
-  alias_file_registers(0x81,0x81,0x100);
-  alias_file_registers(0x102,0x104,0x80);
-  alias_file_registers(0x86,0x86,0x100);
-  alias_file_registers(0x10a,0x10b,0x80);
-
-
-  alias_file_registers(0x20,0x7f,0x100);
-  alias_file_registers(0xa0,0xff,0x100);
-
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3);
-
-  adcon1.setChannelConfiguration(8, 0xff);
-  adcon1.setChannelConfiguration(9, 0x3f);
-  adcon1.setChannelConfiguration(10, 0x3f);
-  adcon1.setChannelConfiguration(11, 0x3f);
-  adcon1.setChannelConfiguration(12, 0x1f);
-  adcon1.setChannelConfiguration(13, 0x0f);
-  adcon1.setChannelConfiguration(14, 0x01);
-  adcon1.setChannelConfiguration(15, 0x0d);
-  adcon1.setVrefHiConfiguration(8, 3);
-  adcon1.setVrefHiConfiguration(10, 3);
-  adcon1.setVrefHiConfiguration(11, 3);
-  adcon1.setVrefHiConfiguration(12, 3);
-  adcon1.setVrefHiConfiguration(13, 3);
-  adcon1.setVrefHiConfiguration(15, 3);
-
-  adcon1.setVrefLoConfiguration(8, 2);
-  adcon1.setVrefLoConfiguration(11, 2);
-  adcon1.setVrefLoConfiguration(12, 2);
-  adcon1.setVrefLoConfiguration(13, 2);
-  adcon1.setVrefLoConfiguration(15, 2);
-
-
 }
 
 void P16F874A::create(void)
@@ -804,19 +780,7 @@ void P16F874A::create(void)
   if(verbose)
     cout << " f874A create \n";
 
-  P16C74::create();
-
-  EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
-  e->set_cpu(this);
-  e->initialize(128);
-  e->set_pir_set(get_pir_set());
-  e->set_intcon(&intcon_reg);
-  set_eeprom_wide(e);
-
-  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
-  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
-  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
+  P16F874::create();
 
   P16F874A::create_sfr_map();
 
