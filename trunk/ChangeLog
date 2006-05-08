@@ -1,3 +1,14 @@
+2006-05-08 Roy Rankin <rrankin@ihug.com.au>
+	* src/comparator.h, src/comparator.cc, src/p16f62x.cc:
+	- rewritten so comparator processor differences in processor class
+	* src/p16x6x.cc: portc register removed from p16f62x
+	* src/p16f87x.cc, src/p16f87x.h: a2d added, comparator change
+	* src/16bit-processors.cc, src/p16x7x.cc src/a2dconverter.h,
+	  src/a2dconverter.cc: code change for pending p16f88
+	* regression/a2d/Makefile, regression/run_regression.sh,
+	  regression/a2d/16f873a.lkr, regression/a2d/p16f873a.asm:
+	- add a2d regression for p16f873a
+
 2006-05-06 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/stimuli.h, cli/cmd_stimulus.cc: Stimuli
 	parameters are now initialized with Values instead of doubles.
