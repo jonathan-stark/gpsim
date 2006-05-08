@@ -29,11 +29,15 @@ Boston, MA 02111-1307, USA.  */
 class IOPORT;
 
 
-
 class P16F871 : public P16C74
 {
  public:
+
+  ADCON0_withccp adcon0;
+  ADCON1 adcon1;
+  ADRES  adresh;
   ADRES  adresl;
+
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -50,6 +54,7 @@ class P16F871 : public P16C74
   virtual void set_eeprom(EEPROM *ep) {
     // use set_eeprom_wide as P16F871 expect a wide EEPROM
     assert(0);
+
   }
   virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
     eeprom = ep;
@@ -57,7 +62,12 @@ class P16F871 : public P16C74
   virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
 
   virtual bool hasSSP() { return false;}
+
+private:
+
 };
+
+
 
 
 class P16F873 : public P16C73
@@ -65,7 +75,10 @@ class P16F873 : public P16C73
 
  public:
 
- ADRES  adresl;
+  ADCON0_withccp adcon0;
+  ADCON1 adcon1;
+  ADRES  adresh;
+  ADRES  adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -88,7 +101,10 @@ class P16F873 : public P16C73
   virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
   static Processor *construct(void);
 
+private:
+
 };
+
 
 class P16F873A : public P16F873
 {
@@ -138,6 +154,9 @@ class P16F874 : public P16C74
 {
  public:
  COMPARATOR_MODULE comparator;
+
+  ADCON0_withccp adcon0;
+  ADCON1 adcon1;
   ADRES  adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
@@ -175,11 +194,10 @@ class P16F877 : public P16F874
   static Processor *construct(void);
 };
 
-class P16F874A : public P16C74
+class P16F874A : public P16F874
 {
  public:
  COMPARATOR_MODULE comparator;
-  ADRES  adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -193,14 +211,6 @@ class P16F874A : public P16C74
   P16F874A(void);
   static Processor *construct(void);
 
-  virtual void set_eeprom(EEPROM *ep) {
-    // use set_eeprom_wide as P16F873 expect a wide EEPROM
-    assert(0);
-  }
-  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
-    eeprom = ep;
-  }
-  virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
 };
 
 class P16F877A : public P16F874A
