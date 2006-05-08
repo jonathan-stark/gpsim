@@ -81,7 +81,7 @@ void P16C71::create_sfr_map()
   add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
 
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1);
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1,0);
   adcon1.setNumberOfChannels(4);
   adcon1.setIOPin(0, &(*m_porta)[0]);
   adcon1.setIOPin(1, &(*m_porta)[1]);
@@ -165,7 +165,7 @@ void P16C712::create_sfr_map()
   //adcon0.channel_mask = 3;
   intcon = &intcon_reg;
 
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2);
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2,0);
   adcon1.setNumberOfChannels(4);
   adcon1.setIOPin(0, &(*m_porta)[0]);
   adcon1.setIOPin(1, &(*m_porta)[1]);
@@ -285,7 +285,7 @@ void P16C72::create_sfr_map()
 
   intcon = &intcon_reg;
 
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2);
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2, 0);
   adcon1.setNumberOfChannels(5);
   adcon1.setIOPin(0, &(*m_porta)[0]);
   adcon1.setIOPin(1, &(*m_porta)[1]);
@@ -389,7 +389,7 @@ void P16C73::create_sfr_map()
   intcon = &intcon_reg;
 
   //1adcon1.analog_port = porta;
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2);
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2, 0);
 
   adcon1.setNumberOfChannels(5);
   adcon1.setIOPin(0, &(*m_porta)[0]);
@@ -497,7 +497,7 @@ void P16C74::create_sfr_map()
   intcon = &intcon_reg;
 
 
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2);
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2, 0);
   adcon1.setNumberOfChannels(8);
   adcon1.setIOPin(0, &(*m_porta)[0]);
   adcon1.setIOPin(1, &(*m_porta)[1]);

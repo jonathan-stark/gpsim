@@ -18,16 +18,18 @@ along with gpasm; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include "a2dconverter.h"
 #include "ioports.h"
 #include "trace.h"
 #include "gpsim_time.h"
 #include "ui.h"
-#include "processor.h"
+#include "pic-processor.h"
+#include "a2dconverter.h"
+
+#define p_cpu ((Processor *)cpu)
 
 static PinModule AnInvalidAnalogInput;
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #include "../config.h"
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
@@ -57,7 +59,8 @@ void ADRES::put(int new_value)
 // ADCON0
 //
 ADCON0::ADCON0()
-  : adres(0), adresl(0), adcon1(0), intcon(0), ad_state(AD_IDLE)
+  : adres(0), adresl(0), adcon1(0), intcon(0), ad_state(AD_IDLE),
+	channel_mask(7)
 {
 }
 
@@ -81,6 +84,7 @@ void ADCON0::setIntcon(INTCON *new_intcon)
 void ADCON0::setA2DBits(unsigned int nBits)
 {
   m_A2DScale = (1<<nBits) - 1;
+  m_nBits = nBits;
 }
 
 void ADCON0::start_conversion(void)
@@ -94,7 +98,8 @@ void ADCON0::start_conversion(void)
     return;
   }
 
-  guint64 fc = get_cycles().value + Tad_2;
+  guint64 fc = get_cycles().value + (2 * Tad) /
+		p_cpu->get_ClockCycles_per_Instruction();
 
   if(ad_state != AD_IDLE)
     {
@@ -131,28 +136,34 @@ void ADCON0::put(unsigned int new_value)
   // Get the A/D Conversion Clock Select bits
   // 
   // This switch case will get the ADCS bits and set the Tad, or The A/D
-  // converter clock period. The A/D clock period is faster than the instruction
-  // cycle period when the two ADCS bits are zero. However, this is handled by
-  // dealing with twice the Tad, or Tad_2. Now if the ADCS bits are zero, Tad_2
-  // will equal Tinst. It turns out that the A/D converter takes an even number
-  // of Tad periods to make a conversion.
+  // converter clock period. Tad is the number of the oscillator periods
+  //  rather instruction cycle periods. ADCS2 only exists on some processors,
+  // but should be 0 where it is not used.
 
   switch(new_value & (ADCS0 | ADCS1))
     {
 
     case 0:
-      Tad_2 = 1;
+      Tad =  (adcon1->value.get() & ADCON1::ADCS2) ? 4 : 2;
       break;
 
     case ADCS0:
-      Tad_2 = 2;
+      Tad =  (adcon1->value.get() & ADCON1::ADCS2) ? 16 : 8;
       break;
 
     case ADCS1:
-      Tad_2 = 32;
+      Tad =  (adcon1->value.get() & ADCON1::ADCS2) ? 64 : 32;
+      break;
 
-    case (ADCS0|ADCS1):
-      Tad_2 = 3;   // %%% FIX ME %%% I really need to implement 'absolute time'
+    case (ADCS0|ADCS1):	// typical 4 usec, convert to osc cycles
+      if (cpu)
+      {
+         Tad = (unsigned int)(4.e-6  * p_cpu->get_frequency());
+	 Tad = Tad < 2? 2 : Tad;
+      }
+      else
+	 Tad = 6;
+      break;
 
     }
     
@@ -183,7 +194,7 @@ void ADCON0::put_conversion(void)
     (m_dSampledVoltage - m_dSampledVrefLo)/dRefSep : 0.0;
   dNormalizedVoltage = dNormalizedVoltage>1.0 ? 1.0 : dNormalizedVoltage;
 
-  unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage);
+  unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage + 0.5);
 
   Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
 	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
@@ -240,7 +251,7 @@ void ADCON0::callback(void)
       Dprintf(("Acquiring channel:%d V=%g reflo=%g refhi=%g\n",
 	       channel,m_dSampledVoltage,m_dSampledVrefLo,m_dSampledVrefHi));
 
-      future_cycle = get_cycles().value + 5*Tad_2;
+      future_cycle = get_cycles().value + (m_nBits * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
       
       ad_state = AD_CONVERTING;
@@ -284,9 +295,9 @@ void ADCON0_withccp::set_interrupt(void)
 //
 ADCON1::ADCON1()
   : m_AnalogPins(0), m_nAnalogChannels(0),
-    mValidCfgBits(0)
+    mValidCfgBits(0), mCfgBitShift(0)
 {
-  for (int i=0; i<cMaxConfigurations; i++) {
+  for (int i=0; i<(int)cMaxConfigurations; i++) {
     setChannelConfiguration(i, 0);
     setVrefLoConfiguration(i, 0xffff);
     setVrefHiConfiguration(i, 0xffff);
@@ -297,6 +308,19 @@ void ADCON1::setChannelConfiguration(unsigned int cfg, unsigned int bitMask)
 {
   if (cfg < cMaxConfigurations) 
     m_configuration_bits[cfg] = bitMask;
+}
+
+unsigned int ADCON1::getVrefLoChannel(unsigned int cfg)
+{
+  if (cfg < cMaxConfigurations)
+    return(Vreflo_position[cfg]);
+  return(0xffff);
+}
+unsigned int ADCON1::getVrefHiChannel(unsigned int cfg)
+{
+  if (cfg < cMaxConfigurations)
+    return(Vrefhi_position[cfg]);
+  return(0xffff);
 }
 
 void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
@@ -321,6 +345,18 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
 
   for (unsigned int i=0; i<m_nAnalogChannels; i++)
     m_AnalogPins[i] = &AnInvalidAnalogInput;
+
+}
+
+void ADCON1::setValidCfgBits(unsigned int mask, unsigned int shift)
+{
+    mValidCfgBits = mask;
+    mCfgBitShift = shift;
+}
+
+int ADCON1::get_cfg(unsigned int reg)
+{
+    return((reg & mValidCfgBits) >> mCfgBitShift);
 }
 
 void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
@@ -339,7 +375,7 @@ double ADCON1::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
   if(channel <= m_nAnalogChannels) {
-    if ( (1<<channel) & m_configuration_bits[value.data & mValidCfgBits]) {
+    if ( (1<<channel) & m_configuration_bits[get_cfg(value.data)]) {
       PinModule *pm = m_AnalogPins[channel];
       voltage = (pm != &AnInvalidAnalogInput) ? 
 	pm->getPin().get_nodeVoltage() : 0.0;
@@ -351,17 +387,44 @@ double ADCON1::getChannelVoltage(unsigned int channel)
 
 double ADCON1::getVrefHi()
 {
-  if (Vrefhi_position[value.data & mValidCfgBits] < m_nAnalogChannels)
-    return getChannelVoltage(Vrefhi_position[value.data & mValidCfgBits]);
+  if (Vrefhi_position[get_cfg(value.data)] < m_nAnalogChannels)
+    return getChannelVoltage(Vrefhi_position[get_cfg(value.data)]);
 
   return ((Processor *)cpu)->get_Vdd();
 }
 
 double ADCON1::getVrefLo()
 {
-  if (Vreflo_position[value.data & mValidCfgBits] < m_nAnalogChannels)
-    return getChannelVoltage(Vreflo_position[value.data & mValidCfgBits]);
+  if (Vreflo_position[get_cfg(value.data)] < m_nAnalogChannels)
+    return getChannelVoltage(Vreflo_position[get_cfg(value.data)]);
 
   return 0.0;
+}
+
+void ANSEL::setAdcon1(ADCON1 *new_adcon1)
+{
+  adcon1 = new_adcon1;
+}
+
+void ANSEL::put(unsigned int new_value)
+{
+  unsigned int cfgmax = adcon1->get_cfg(0xff)+1;
+  unsigned int i;
+  unsigned int mask;
+  trace.raw(write_trace.get() | value.get());
+  /*
+	Generate ChannelConfiguration from ansel register
+  */
+  for(i=0; i < cfgmax; i++)
+  {
+	mask = new_value;
+	if (adcon1->getVrefHiChannel(i) < 16)
+		mask |= 1 << adcon1->getVrefHiChannel(i);
+	if (adcon1->getVrefLoChannel(i) < 16)
+		mask |= 1 << adcon1->getVrefLoChannel(i);
+
+	adcon1->setChannelConfiguration(i, mask);
+  }
+  value.put(new_value);
 }
 
