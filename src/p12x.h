@@ -23,7 +23,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "12bit-processors.h"
 #include "pic-ioports.h"
-#include "i2c-ee.h"
+
+class P12_I2C_EE;
 
 class GPIO : public PicPortRegister
 {
@@ -111,16 +112,15 @@ class P12CE518 : public P12C508
 {
   public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P12CE518_;};
+  virtual PROCESSOR_TYPE isa(){return _P12CE518_;};
   virtual void tris_instruction(unsigned int tris_register);
-  virtual void set_eeprom(I2C_EE *e);
 
-  P12CE518(void);
-  static Processor *construct(void);
-  void create(void);
-  virtual void create_iopin_map(void);
-
-  I2C_EE * eeprom;
+  P12CE518();
+  static Processor *construct();
+  void create();
+  virtual void create_iopin_map();
+private:
+  P12_I2C_EE *m_eeprom;
   
 };
 
