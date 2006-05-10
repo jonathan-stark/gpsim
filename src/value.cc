@@ -640,8 +640,11 @@ void Integer::set(int i)
 }
 void Integer::set(Value *v)
 {
-  Integer *iv = typeCheck(v,string("set "));
-  set(iv->getVal());
+  gint64 iv = 0;
+  if (v)
+    v->get(iv);
+
+  set(iv);
 }
 
 void Integer::set(Packet &p)

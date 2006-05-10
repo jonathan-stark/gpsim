@@ -1,3 +1,18 @@
+2006-05-10 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-hexdecode.cc, src/p16x6x.h, src/i2c-ee.h,
+	src/p16x6x.cc, src/p16f87x.cc, src/16bit-processors.cc,
+	src/i2c-ee.cc, src/eeprom.cc, src/pir.cc, src/p16f62x.cc,
+	src/pie.cc, src/pir.h, src/p16x7x.cc, src/p18x.cc, src/value.cc,
+	src/eeprom.h, src/16bit-registers.cc:
+	- Redesigning PIR logic. The existing design requires numerous
+	manuel configurations that are subject to error. The new design
+	attempts to encapsulate the PIR configuration within the PIR
+	classes. 
+
+2006-05-10 Scott Dattalo <scott@dattalo.com>
+	* modules/i2c-eeprom.h, modules/i2c-eeprom.h, Makefile.am,
+	src/p12x.h, src/p12x.cc: Began designing a gpsim I2C module.
+
 2006-05-08 Borut Razem <borut.razem@siol.net>
 
 	* extras/usart_con.cc: sync with modules/usart.cc

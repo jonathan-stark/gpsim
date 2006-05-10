@@ -56,9 +56,9 @@ public:
   PicTrisRegister  *m_trisc;
 
   T1CON   t1con;
-  PIR1v1  pir1_reg;
+  PIR    *pir1;
   PIE     pie1;
-  PIR2v1  pir2_reg;
+  PIR    *pir2;
   PIE     pie2;
   T2CON   t2con;
   PR2     pr2;
@@ -78,8 +78,8 @@ public:
   virtual unsigned int program_memory_size() const { return 0x800; };
   virtual void create_symbols();
   virtual void create_sfr_map();
-  virtual PIR *get_pir2() { return (&pir2_reg); }
-  virtual PIR *get_pir1() { return (&pir1_reg); }
+  virtual PIR *get_pir2() { return (pir2); }
+  virtual PIR *get_pir1() { return (pir1); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_def); }
 
   P16X6X_processor();

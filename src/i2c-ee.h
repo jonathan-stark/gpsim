@@ -22,17 +22,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef I2C_EE_H
 #define I2C_EE_H
 
-#include <assert.h>
-
+#include "trigger.h"
 #include "gpsim_classes.h"
-#include "registers.h"
-#include "breakpoints.h"
 
+class Register;
 class pic_processor;
 class I2C_EE;
 class I2C_EE_SCL;
 class I2C_EE_SDA;
-
+class Stimulus_Node;
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
@@ -43,55 +41,40 @@ class I2C_EE :  public TriggerObject
 {
 public:
 
-  I2C_EE(void);
+  I2C_EE(unsigned int _rom_size);
+  virtual ~I2C_EE();
   void reset(RESET_TYPE);
   void debug();
 
-  virtual void set_cpu(pic_processor *p) { cpu = p; }
   virtual void callback();
   virtual void callback_print();
   virtual void start_write();
   virtual void write_is_complete();
 
-  virtual void initialize(unsigned int new_rom_size);
   virtual Register *get_register(unsigned int address);
 
   virtual void new_scl_edge ( bool direction );
   virtual void new_sda_edge ( bool direction );
   virtual void attach ( Stimulus_Node *_scl, Stimulus_Node *_sda );
 
-  inline virtual void change_rom(unsigned int offset, unsigned int val) {
-    assert(offset < rom_size);
-    rom[offset]->value.put(val);
-  }
+  void dump();
 
-  inline virtual unsigned int get_rom_size(void) { return (rom_size); }
-  // XXX might want to make get_rom a friend only to cli_dump
-  inline virtual Register **get_rom(void) { return (rom); }
-
-  void dump(void);
-
-  //protected:
+protected:
   bool shift_read_bit ( bool x );
-  bool shift_write_bit ( void );
+  bool shift_write_bit ();
+  virtual bool processCommand(unsigned int cmd);
 
-  char *name_str;
-
-  Register **rom;          //  and the data area.
-  RegisterCollection *m_UiAccessOfRom; // User access to the rom.
-
+  Register **rom;          //  The data area.
   unsigned int rom_size;
   unsigned int xfr_addr,xfr_data;  // latched adr and data from I2C.
-  unsigned int bit_count;
-  unsigned int abp;             // break point number that's set during eewrites
-  bool ee_busy;
+  unsigned int bit_count;  // Current bit number for either Tx or Rx
+  unsigned int m_command;  // Most recent command received from I2C host
+  bool ee_busy;            // true if a write is in progress.
   bool nxtbit;
 
-  I2C_EE_SCL * scl;
-  I2C_EE_SDA * sda;
+  I2C_EE_SCL * scl;        // I2C clock
+  I2C_EE_SDA * sda;        // I2C data
 
-  pic_processor * cpu;
-  
   enum {
     IDLE=0,
     START,
@@ -105,6 +88,15 @@ public:
     ACK_RD,
     TX_DATA
   } bus_state;
+
+private:
+  // Is this even used?
+  virtual void change_rom(unsigned int offset, unsigned int val);
+  inline virtual unsigned int get_rom_size() { return (rom_size); }
+  // XXX might want to make get_rom a friend only to cli_dump
+  inline virtual Register **get_rom() { return (rom); }
+
+
 };
 
 

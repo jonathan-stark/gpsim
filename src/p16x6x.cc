@@ -235,7 +235,7 @@ void P16X6X_processor::create_sfr_map()
   add_file_registers(0xa0, 0xbf, 0);
 
 
-  add_sfr_register(get_pir1(),   0x0c, RegisterValue(0,0),"pir1");
+  add_sfr_register(pir1,   0x0c, RegisterValue(0,0),"pir1");
   add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
 
   add_sfr_register(&tmr1l,  0x0e, RegisterValue(0,0),"tmr1l");
@@ -260,7 +260,7 @@ void P16X6X_processor::create_sfr_map()
   add_sfr_register(&ccp1con, 0x17, RegisterValue(0,0));
 
   // get_pir_set()->set_pir1(get_pir1());
-  pir_set_def.set_pir1(&pir1_reg);
+  pir_set_def.set_pir1(pir1);
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
@@ -270,7 +270,7 @@ void P16X6X_processor::create_sfr_map()
 
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con;
-  tmr1l.setInterruptSource(new InterruptSource(&pir1_reg, PIR1v1::TMR1IF));
+  tmr1l.setInterruptSource(new InterruptSource(pir1, PIR1v1::TMR1IF));
   tmr1l.ccpcon = &ccp1con;
 
   tmr1h.tmrl  = &tmr1l;
@@ -298,9 +298,11 @@ void P16X6X_processor::create_sfr_map()
   ccpr1h.new_name("ccpr1h");
   ccp1con.new_name("ccp1con");
 
-  get_pir1()->intcon = &intcon_reg;
-  get_pir1()->pie    = &pie1;
-  pie1.pir    = get_pir1();
+  if (pir1) {
+    pir1->set_intcon(&intcon_reg);
+    pir1->set_pie(&pie1);
+  }
+  pie1.pir    = pir1;
   pie1.new_name("pie1");
 
 
@@ -318,6 +320,9 @@ P16X6X_processor::P16X6X_processor(void)
 
   m_portc = new PicPortRegister("portc",8,0xff);
   m_trisc = new PicTrisRegister("trisc",m_portc);
+
+  pir1 = new PIR1v1(&intcon_reg, &pie1);
+  pir2 = new PIR2v1(&intcon_reg, &pie2);
 
 }
 
@@ -410,7 +415,7 @@ void P16C63::create_sfr_map(void)
 
   add_file_registers(0xc0, 0xff, 0);
 
-  add_sfr_register(get_pir2(),   0x0d, RegisterValue(0,0),"pir2");
+  add_sfr_register(pir2,    0x0d, RegisterValue(0,0),"pir2");
   add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
 
   add_sfr_register(&ccpr2l, 0x1b, RegisterValue(0,0));
@@ -418,7 +423,7 @@ void P16C63::create_sfr_map(void)
   add_sfr_register(&ccp2con, 0x1d, RegisterValue(0,0));
 
   // get_pir_set()->set_pir2(get_pir2());
-  pir_set_def.set_pir2(&pir2_reg);
+  pir_set_def.set_pir2(pir2);
 
   ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
 
@@ -439,8 +444,11 @@ void P16C63::create_sfr_map(void)
   ccpr2h.new_name("ccpr2h");
   ccp2con.new_name("ccp2con");
 
-  get_pir2()->intcon = &intcon_reg;
-  get_pir2()->pie    = &pie2;
+  if (pir2) {
+    pir2->set_intcon(&intcon_reg);
+    pir2->set_pie(&pie2);
+  }
+
   pie2.pir    = get_pir2();
   pie2.new_name("pie2");
 
@@ -609,11 +617,11 @@ void P16C65::create_sfr_map(void)
   if(verbose)
     cout << "creating c65 registers\n";
 
-  P16C64::create_sfr_map();
+  //P16C64::create_sfr_map();
 
   add_file_registers(0xc0, 0xff, 0);
 
-  add_sfr_register(get_pir2(),   0x0d, RegisterValue(0,0),"pir2");
+  add_sfr_register(pir2,    0x0d, RegisterValue(0,0),"pir2");
   add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
 
   add_sfr_register(&ccpr2l, 0x1b, RegisterValue(0,0));
@@ -621,7 +629,7 @@ void P16C65::create_sfr_map(void)
   add_sfr_register(&ccp2con, 0x1d, RegisterValue(0,0));
 
   // get_pir_set()->set_pir2(&get_pir2());
-  pir_set_def.set_pir2(&pir2_reg);
+  pir_set_def.set_pir2(pir2);
 
   ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
 
@@ -642,8 +650,11 @@ void P16C65::create_sfr_map(void)
   ccpr2h.new_name("ccpr2h");
   ccp2con.new_name("ccp2con");
 
-  get_pir2()->intcon = &intcon_reg;
-  get_pir2()->pie    = &pie2;
+  if (pir2) {
+    pir2->set_intcon(&intcon_reg);
+    pir2->set_pie(&pie2);
+  }
+
   pie2.pir    = get_pir2();
   pie2.new_name("pie2");
 
