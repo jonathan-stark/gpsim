@@ -40,7 +40,37 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 
 
+//========================================================================
+// The P12 devices with an EEPROM contain two die. One is the 12C core and
+// the other is an I2C EEPROM (Actually, it is not know if there are two
+// physical die. However, it is known that there are two functional layouts
+// in the same package.) These two devices are connected internally.
+class P12_I2C_EE : public I2C_EE
+{
+public:
+  P12_I2C_EE(pic_processor *, unsigned int _rom_size);
+  
+protected:
+  RegisterCollection *m_UiAccessOfRom; // User access to the rom.
+};
 
+
+P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
+  : I2C_EE(_rom_size)
+{
+
+  if(pcpu) {
+    pcpu->ema.set_cpu(pcpu);
+    pcpu->ema.set_Registers(rom, rom_size);
+    m_UiAccessOfRom = new RegisterCollection(pcpu,
+					     "eeData",
+					     rom,
+					     rom_size);
+  }
+
+}
+
+//========================================================================
 void P12C508::create_iopin_map(void)
 {
 
@@ -295,10 +325,8 @@ void P12CE518::create(void)
   if(verbose)
     cout << "  adding serial EE\n";
 
-  e = new I2C_EE();
-  e->set_cpu(this);
-  e->initialize ( 0x10 );
-  e->debug();
+  m_eeprom = new P12_I2C_EE(this, 0x10);
+  m_eeprom->debug();
 
   // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
   // to the internal I2C device.
@@ -334,40 +362,12 @@ void P12CE518::create(void)
     sda->update();
   }
 
-#if defined OLD_GPIO
-    // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
-    // to the internal I2C device.
-    gpio.valid_iopins |= 0xc0;
-    gpio.num_iopins = 8;
 
-    RegisterValue por_value(0xc0,0x00);
-    gpio.value       = por_value;
-    gpio.por_value   = por_value;
-    gpio.wdtr_value  = por_value;
-    gpio.put(0xc0);
-
-    if(verbose)
-      cout << " ... create additional (internal) I/O\n";
-    scl = new Stimulus_Node ( "EE_SCL" );
-
-    scl->attach_stimulus ( new IO_bi_directional(&gpio,7) );
-
-    sda = new Stimulus_Node ( "EE_SDA" );
-
-    IO_open_collector *io_sda = new IO_open_collector(&gpio,6);
-
-    // enable the pullup resistor.
-    if(io_sda)
-      io_sda->update_pullup('1',true);
-
-    sda->attach_stimulus (io_sda);
-#endif
-
-
-  e->attach ( scl, sda );
-
-  set_eeprom(e);
-
+  m_eeprom->attach ( scl, sda );
+  /*
+  ema.set_cpu(this);
+  ema.set_Registers(m_eeprom->rom, m_eeprom->rom_size);
+  */
 
 }
 
@@ -390,15 +390,6 @@ void P12CE518::tris_instruction(unsigned int tris_register)
   trace.write_TRIS(w_val);
 }
 
-void P12CE518::set_eeprom(I2C_EE *e)
-{
-  eeprom = e; 
-
-  ema.set_cpu(this);
-  ema.set_Registers(e->rom, e->rom_size);
-
-}
-  
 
 //--------------------------------------------------------
 
