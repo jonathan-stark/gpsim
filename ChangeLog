@@ -1,4 +1,9 @@
 2006-05-10 Scott Dattalo <scott@dattalo.com>
+	* src/pir.h, src/pir.cc: Applied patch (with modifications) from
+	Robert Pearce that adds the concept of 'writable' PIR register
+	bits versus 'valid' ones.
+	
+2006-05-10 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-hexdecode.cc, src/p16x6x.h, src/i2c-ee.h,
 	src/p16x6x.cc, src/p16f87x.cc, src/16bit-processors.cc,
 	src/i2c-ee.cc, src/eeprom.cc, src/pir.cc, src/p16f62x.cc,

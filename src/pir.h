@@ -38,6 +38,7 @@ protected:
   PIE     *pie;
 public:
   int valid_bits;
+  int writable_bits;
  
   PIR(INTCON *, PIE *, int _valid_bits);
   // The PIR base class supports no PIR bits directly
