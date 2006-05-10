@@ -33,16 +33,13 @@ class INTCON;
 
 class PIR : public sfr_register
 {
-public:
+protected:
   INTCON  *intcon;
   PIE     *pie;
+public:
   int valid_bits;
  
-  PIR() :
-    intcon(0),pie(0),valid_bits(0)
-  {
-  }
-
+  PIR(INTCON *, PIE *, int _valid_bits);
   // The PIR base class supports no PIR bits directly
   virtual void clear_sspif(){}
   virtual void clear_rcif(){}
@@ -70,18 +67,18 @@ public:
   virtual void set_txif(){}
   virtual void set_wakif(){}
 
+  virtual unsigned int get_txif() { return 0;}
+  virtual unsigned int get_rcif() { return 0;}
+  virtual unsigned int get_sspif() { return 0;}
 
-  virtual bool interrupt_status()
-    {
-      if( value.get() & valid_bits & pie->value.get())
-	return true;
-
-      return false;
-    }
-
+  virtual bool interrupt_status();
   virtual void put(unsigned int new_value);
 
   virtual void setInterrupt(unsigned int bitMask);
+  virtual void setPeripheralInterrupt();
+
+  void set_intcon(INTCON *);
+  void set_pie(PIE *);
 
 };
 //---------------------------------------------------------
@@ -168,13 +165,7 @@ public:
   virtual void clear_rcif();
  
 
-  PIR1v1()
-  {
-    // Even though TXIF is a valid bit, it can't be written by the PIC
-    // source code.  Its state reflects whether the usart txreg is full
-    // or not.
-    valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
-  }
+  PIR1v1(INTCON *, PIE *);
 };
 
 
@@ -252,13 +243,7 @@ public:
   }
   virtual void clear_rcif();
  
-  PIR1v2()
-  {
-    // Even though TXIF is a valid bit, it can't be written by the PIC
-    // source code.  Its state reflects whether the usart txreg is full
-    // or not.
-    valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
-  }
+  PIR1v2(INTCON *, PIE *);
 };
 
 
@@ -282,10 +267,7 @@ enum
       put(get() | CCP2IF);
     }
 
-  PIR2v1()
-    {
-      valid_bits = CCP2IF;
-    }
+  PIR2v1(INTCON *, PIE *);
 };
 
 //---------------------------------------------------------
@@ -333,10 +315,7 @@ enum
       put(get() | EEIF);
     }
 
-  PIR2v2()
-    {
-      valid_bits = ECCP1IF | TMR3IF | LVDIF | BCLIF | EEIF | CMIF;
-    }
+  PIR2v2(INTCON *, PIE *);
 };
 
 
@@ -402,11 +381,7 @@ enum
       put(get() | IRXIF);
     }
 
-  PIR3v2()
-    {
-      valid_bits = RXB0IF | RXB1IF | TXB0IF | TXB1IF | TXB2IF | ERRIF |
-                   WAKIF | IRXIF;
-    }
+  PIR3v2(INTCON *, PIE *);
 };
 
 
@@ -479,8 +454,8 @@ class PIR_SET_1 : public PIR_SET
 {
  public:
   PIR_SET_1() { pir1 = 0; pir2 = 0; }
-  void set_pir1(PIR1v1 *p1) { pir1 = p1; }
-  void set_pir2(PIR2v1 *p2) { pir2 = p2; }
+  void set_pir1(PIR *p1) { pir1 = p1; }
+  void set_pir2(PIR *p2) { pir2 = p2; }
 
   virtual bool interrupt_status() {
     assert(pir1 != 0);
@@ -560,8 +535,8 @@ class PIR_SET_1 : public PIR_SET
   }
 
 private:
-  PIR1v1	*pir1;
-  PIR2v1	*pir2;
+  PIR	*pir1;
+  PIR	*pir2;
 };
 
 
@@ -571,9 +546,9 @@ class PIR_SET_2 : public PIR_SET
  public:
   PIR_SET_2() { pir1 = 0; pir2 = 0; pir3 = 0; }
 
-  void set_pir1(PIR1v2 *p1) { pir1 = p1; }
-  void set_pir2(PIR2v2 *p2) { pir2 = p2; }
-  void set_pir3(PIR3v2 *p3) { pir3 = p3; }
+  void set_pir1(PIR *p1) { pir1 = p1; }
+  void set_pir2(PIR *p2) { pir2 = p2; }
+  void set_pir3(PIR *p3) { pir3 = p3; }
 
   virtual bool interrupt_status() {
     assert(pir1 != 0);
@@ -651,9 +626,9 @@ class PIR_SET_2 : public PIR_SET
   }
 
 private:
-  PIR1v2	*pir1;
-  PIR2v2	*pir2;
-  PIR3v2	*pir3;
+  PIR	*pir1;
+  PIR	*pir2;
+  PIR	*pir3;
 };
 
 

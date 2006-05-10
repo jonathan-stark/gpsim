@@ -214,6 +214,12 @@ EEADR::EEADR(void)
 }
 
 
+//------------------------------------------------------------------------
+EEPROM_PIR::EEPROM_PIR(PIR *pPir)
+  : m_pir(pPir)
+{
+  
+}
 
 //------------------------------------------------------------------------
 // Set the EEIF and clear the WR bits. 
@@ -221,19 +227,12 @@ EEADR::EEADR(void)
 void EEPROM_PIR::write_is_complete(void) 
 {
 
-  assert(pir_set != 0);
+  assert(m_pir != 0);
 
   eecon1.value.put( eecon1.value.get()  & (~eecon1.WR));
 
-  pir_set->set_eeif();
+  m_pir->set_eeif();
 }
-
-
-void EEPROM_PIR::set_pir_set(PIR_SET *p)
-{ 
-  pir_set = p;
-}
-
 
 
 //----------------------------------------------------------
@@ -478,6 +477,10 @@ void EEPROM::dump(void)
 
 
 //------------------------------------------------------------------------
+EEPROM_WIDE::EEPROM_WIDE(PIR *pPir)
+  : EEPROM_PIR(pPir)
+{
+}
 
 void EEPROM_WIDE::start_write(void)
 {

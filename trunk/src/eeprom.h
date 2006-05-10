@@ -32,6 +32,7 @@ class pic_processor;
 class EEPROM;
 class PIR_SET;
 class INTCON;
+class PIR;
 
 //---------------------------------------------------------
 // EECON1 - EE control register 1
@@ -216,17 +217,18 @@ class EEPROM_PIR : public EEPROM
 {
 public:
 
-  virtual void set_pir_set(PIR_SET *p);
+  EEPROM_PIR(PIR *);
+  //  virtual void set_pir_set(PIR_SET *p);
 
   // the 16f628 eeprom is identical to the 16f84 eeprom except
   // for the size and the location of EEIF. The size is taken
   // care of when the '628 is constructed, the EEIF is taken
   // care of here:
 
-  virtual void write_is_complete(void);
+  virtual void write_is_complete();
 
-  //protected:
-  PIR_SET *pir_set;
+protected:
+  PIR *m_pir;
 
 
 };
@@ -235,6 +237,7 @@ public:
 class EEPROM_WIDE : public EEPROM_PIR
 {
 public:
+  EEPROM_WIDE(PIR *);
 
   virtual void start_write(void);
   virtual void callback(void);

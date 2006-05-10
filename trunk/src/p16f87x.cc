@@ -129,10 +129,10 @@ void P16F871::create(void)
   P16C74::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
+  e = new EEPROM_WIDE(pir2);
   e->set_cpu(this);
   e->initialize(128);
-  e->set_pir_set(get_pir_set());
+  //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -318,10 +318,10 @@ void P16F873::create(void)
   P16C73::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
+  e = new EEPROM_WIDE(pir2);
   e->set_cpu(this);
   e->initialize(128);
-  e->set_pir_set(get_pir_set());
+  //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -677,10 +677,10 @@ void P16F874::create(void)
   P16C74::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE;
+  e = new EEPROM_WIDE(pir2);
   e->set_cpu(this);
   e->initialize(128);
-  e->set_pir_set(get_pir_set());
+  //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 

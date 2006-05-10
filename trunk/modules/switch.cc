@@ -385,7 +385,7 @@ namespace Switches {
   {
 
     Switch *switchP = new Switch(_new_name);
-    switchP->new_name(_new_name);
+    //switchP->new_name(_new_name);
     switchP->create_iopin_map();
 
     if(get_interface().bUsingGUI()) 

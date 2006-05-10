@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include "eeprom.h"
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor()
+  : pir1(0,0), pir2(0,0)
 {
 
   package = 0;
@@ -263,15 +264,15 @@ void _16bit_processor :: create_sfr_map()
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
-  pir1.intcon = &intcon; //get_pir1()->intcon = &intcon;
-  pir1.pie = &pie1; //get_pir1()->pie    = &pie1;
-  pie1.pir    = &pir1; //get_pir1();
+  pir1.set_intcon(&intcon);
+  pir1.set_pie(&pie1);
+  pie1.pir = &pir1;
   pie1.new_name("pie1");
 
-  pir2.intcon = &intcon; //get_pir2()->intcon = &intcon;
-  pir2.pie = &pie2; //get_pir2()->pie    = &pie2;
+  pir2.set_intcon(&intcon);
+  pir2.set_pie(&pie2);
   
-  pie2.pir    = &pir2; //get_pir2();
+  pie2.pir    = &pir2;
   pie2.new_name("pie2");
 
   // All of the status bits on the 16bit core are writable

@@ -988,7 +988,7 @@ unsigned int TMR0H::get_value(void)
 // TMR0_16 member functions
 //
 TMR0_16::TMR0_16()
-  : t0con(0), intcon(0), tmr0h(0), value16(0)
+  : TMR0(), t0con(0), intcon(0), tmr0h(0), value16(0)
 {
 }
 //--------------------------------------------------

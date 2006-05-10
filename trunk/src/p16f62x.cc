@@ -257,10 +257,10 @@ void  P16F62x::create(int ram_top, unsigned int eeprom_size)
 
   _14bit_processor::create();
 
-  e = new EEPROM_PIR;
+  e = new EEPROM_PIR(pir1);
   e->set_cpu(this);
   e->initialize(eeprom_size);
-  e->set_pir_set(get_pir_set());
+  //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
 
   // assign this eeprom to the processor

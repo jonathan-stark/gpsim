@@ -13,8 +13,8 @@ void PIE::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   value.put(new_value);
 
-  if( pir->interrupt_status())
-    {
-      pir->intcon->peripheral_interrupt();
-    }
+  assert(pir);
+
+  if(pir->interrupt_status())
+    pir->setPeripheralInterrupt();
 }

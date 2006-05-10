@@ -352,9 +352,13 @@ Processor * P16C72::construct()
 
 
 P16C72::P16C72()
+  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "c72 constructor, type = " << isa() << '\n';
+
+  pir1 = &pir1_2_reg;
+  pir2 = &pir2_2_reg;
 
 }
 
@@ -457,9 +461,13 @@ Processor * P16C73::construct()
 
 
 P16C73::P16C73()
+  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "c73 constructor, type = " << isa() << '\n';
+
+  pir1 = &pir1_2_reg;
+  pir2 = &pir2_2_reg;
 
 
 }
@@ -567,8 +575,13 @@ Processor * P16C74::construct()
 
 
 P16C74::P16C74()
+  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';
+
+  pir1 = &pir1_2_reg;
+  pir2 = &pir2_2_reg;
+
 }
 
