@@ -26,20 +26,20 @@ Boston, MA 02111-1307, USA.  */
 #include "intcon.h"
 
 PIR::PIR(INTCON *_intcon, PIE *_pie, int _valid_bits)
-  : intcon(_intcon),pie(_pie),valid_bits(_valid_bits)
+  : intcon(_intcon),pie(_pie),valid_bits(_valid_bits)  ,writable_bits(0)
 {
 }
 
 
 void PIR::put(unsigned int new_value)
 {
-  // Only the "valid bits" can be written with put.
-  // The "invalid" ones (such as TXIF) are written
+  // Only the "writable bits" can be written with put.
+  // The "read-only" ones (such as TXIF) are written
   // through the set_/clear_ member functions.
 
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-  value.put(new_value & valid_bits | value.get() & ~valid_bits);
+  value.put(new_value & writable_bits | value.get() & ~writable_bits);
 
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
@@ -103,8 +103,9 @@ PIR1v1::PIR1v1(INTCON *_intcon, PIE *_pie)
 {
   // Even though TXIF is a valid bit, it can't be written by the PIC
   // source code.  Its state reflects whether the usart txreg is full
-  // or not.
-  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
+  // or not. Similarly for RCIF
+  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | TXIF | RCIF | CMIF | EEIF;
+  writable_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | CMIF | EEIF;
 }
 
 
@@ -149,7 +150,8 @@ PIR1v2::PIR1v2(INTCON *_intcon, PIE *_pie)
   // Even though TXIF is a valid bit, it can't be written by the PIC
   // source code.  Its state reflects whether the usart txreg is full
   // or not.
-  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
+  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | TXIF | RCIF | ADIF | PSPIF;
+  writable_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
 }
 
 void PIR1v2::clear_sspif(void)
@@ -183,12 +185,14 @@ PIR2v1::PIR2v1(INTCON *_intcon, PIE *_pie)
   : PIR(_intcon, _pie,0)
 {
   valid_bits = CCP2IF;
+  writable_bits = valid_bits;
 }
 //------------------------------------------------------------------------
 PIR2v2::PIR2v2(INTCON *_intcon, PIE *_pie)
   : PIR(_intcon, _pie,0)
 {
   valid_bits = ECCP1IF | TMR3IF | LVDIF | BCLIF | EEIF | CMIF;
+  writable_bits = valid_bits;
 }
 
 //------------------------------------------------------------------------
@@ -197,4 +201,5 @@ PIR3v2::PIR3v2(INTCON *_intcon, PIE *_pie)
 {
   valid_bits = RXB0IF | RXB1IF | TXB0IF | TXB1IF | TXB2IF | ERRIF |
     WAKIF | IRXIF;
+  writable_bits = valid_bits;
 }
