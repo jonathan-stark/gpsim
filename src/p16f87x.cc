@@ -58,6 +58,12 @@ void P16F871::create_sfr_map(void)
   if(verbose)
     cout << "creating f871 registers \n";
 
+#ifndef DERIVE_FROM_74
+  // Parent classes just set PIR version 1
+  pir_set_2_def.set_pir1(&pir1_2_reg);
+  pir_set_2_def.set_pir2(&pir2_2_reg);
+#endif
+
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
 
@@ -88,16 +94,47 @@ void P16F871::create_sfr_map(void)
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0xf0,0xff,0x100);
 
+
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+  add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
+
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
+
 
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
   adcon0.setAdresLow(&adresl);
 
+  adcon0.setAdres(&adres);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(10);
+  adcon0.pir_set = &pir_set_2_def;
+
+  adcon1.setNumberOfChannels(8);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  adcon1.setIOPin(5, &(*m_porte)[0]);
+  adcon1.setIOPin(6, &(*m_porte)[1]);
+  adcon1.setIOPin(7, &(*m_porte)[2]);
+
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
 			 ADCON1::PCFG2 | ADCON1::PCFG3, 0);
 
+  
+  adcon1.setChannelConfiguration(0, 0xff);
+  adcon1.setChannelConfiguration(1, 0xff);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
   adcon1.setChannelConfiguration(8, 0xff);
   adcon1.setChannelConfiguration(9, 0x3f);
   adcon1.setChannelConfiguration(10, 0x3f);
@@ -106,6 +143,10 @@ void P16F871::create_sfr_map(void)
   adcon1.setChannelConfiguration(13, 0x0f);
   adcon1.setChannelConfiguration(14, 0x01);
   adcon1.setChannelConfiguration(15, 0x0d);
+
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
   adcon1.setVrefHiConfiguration(8, 3);
   adcon1.setVrefHiConfiguration(10, 3);
   adcon1.setVrefHiConfiguration(11, 3);
@@ -119,6 +160,16 @@ void P16F871::create_sfr_map(void)
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
 
+#ifndef DERIVE_FROM_74
+  intcon = &intcon_reg;
+  adcon0.new_name("adcon0");
+  adcon1.new_name("adcon1");
+  adres.new_name("adres");
+
+  // Link the A/D converter to the Capture Compare Module
+  ccp2con.setADCON(&adcon0);
+#endif
+
 }
 
 void P16F871::create(void)
@@ -126,7 +177,8 @@ void P16F871::create(void)
   if(verbose)
     cout << " f871 create \n";
 
-  P16C74::create();
+  //P16C74::create();
+  P16C65::create();
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(pir2);

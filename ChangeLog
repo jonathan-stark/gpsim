@@ -1,3 +1,6 @@
+2006-05-11 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/p16f87x.cc: A2D converter fixes for the 16f871.
+
 2006-05-10 Scott Dattalo <scott@dattalo.com>
 	* src/pir.h, src/pir.cc: Applied patch (with modifications) from
 	Robert Pearce that adds the concept of 'writable' PIR register
