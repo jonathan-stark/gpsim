@@ -1,3 +1,7 @@
+2006-05-12 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* regression/run_regression.sh, regression/txisr_test/...:
+        Added a test for the correct behaviour of usart transmit interrupts
+
 2006-05-11 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/p16f87x.cc: A2D converter fixes for the 16f871.
 

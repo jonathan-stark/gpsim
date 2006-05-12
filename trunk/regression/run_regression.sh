@@ -60,6 +60,8 @@ ${RT} resistor sim
 
 ${RT} usart_test sim
 
+${RT} txisr_test sim
+
 ${RT} tmr0_16bit sim
 
 #${RT} ccp ccp
