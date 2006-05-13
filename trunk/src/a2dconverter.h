@@ -66,8 +66,8 @@ public:
   void setChannelConfiguration(unsigned int cfg, unsigned int bitMask);
   void setVrefLoConfiguration(unsigned int cfg, unsigned int channel);
   void setVrefHiConfiguration(unsigned int cfg, unsigned int channel);
-  unsigned int ADCON1::getVrefHiChannel(unsigned int cfg);
-  unsigned int ADCON1::getVrefLoChannel(unsigned int cfg);
+  unsigned int getVrefHiChannel(unsigned int cfg);
+  unsigned int getVrefLoChannel(unsigned int cfg);
 
   double getChannelVoltage(unsigned int channel);
   double getVrefHi();
@@ -199,8 +199,8 @@ public:
 	ANS5 = 1 << 5,
 	ANS6 = 1 << 6
    };
-void ANSEL::setAdcon1(ADCON1 *new_adcon1);
-void ANSEL::put(unsigned int new_val);
+void setAdcon1(ADCON1 *new_adcon1);
+void put(unsigned int new_val);
 
 private:
     ADCON1 *adcon1;
