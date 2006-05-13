@@ -1,3 +1,15 @@
+2006-05-13 Scott Dattalo <scott@dattalo.com>
+	* src/a2dconvert.h: removed redundant class qualifiers in member
+	function declarations.
+	
+2006-05-13 Scott Dattalo <scott@dattalo.com>
+	* src/processor.h, src/processor.cc, gui/gui_src_opcode.cc: Added
+	romData[] accessor (analogous to ramData) to provide a way of
+	querying and modifying the program memory. So now you can change
+	program memory from the command line:
+	gpsim> romData[address] = value
+	Address and value can be symbols.
+
 2006-05-12 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* regression/run_regression.sh, regression/txisr_test/...:
         Added a test for the correct behaviour of usart transmit interrupts

@@ -1443,13 +1443,142 @@ void MemoryAccess::set_cpu(Processor *p)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-//
+// Program memory interface used by the command line
+class ProgramMemoryCollection : public IIndexedCollection 
+{
+public:
+  ProgramMemoryCollection(Processor *pProcessor, 
+			  const char *collection_name,
+			  ProgramMemoryAccess *pPma);
 
+  virtual unsigned int GetSize();
+  virtual Value &GetAt(unsigned int uAddress, Value *pValue=0);
+  virtual void SetAt(unsigned int uAddress, Value *pValue);
+  virtual void ConsolidateValues(int &iColumnWidth,
+                                 vector<string> &aList,
+                                 vector<string> &aValue);
+  virtual unsigned int GetLowerBound();
+  virtual unsigned int GetUpperBound();
+private:
+  Processor *   m_pProcessor;
+  ProgramMemoryAccess   *m_pPma;
+  Integer       m_ReturnValue;
+};
+
+
+ProgramMemoryCollection::ProgramMemoryCollection (Processor   *pProcessor, 
+						  const char  *pC_collection_name,
+						  ProgramMemoryAccess *pPma) :
+  IIndexedCollection(16), m_ReturnValue(0) 
+{
+  m_pProcessor = pProcessor;
+  Value::new_name(pC_collection_name);
+  m_pPma = pPma;
+  get_symbol_table().add(this);
+}
+
+unsigned int ProgramMemoryCollection::GetSize()
+{
+  return m_pProcessor->map_pm_address2index(m_pProcessor->program_memory_size());
+}
+
+Value &ProgramMemoryCollection::GetAt(unsigned int uAddress, Value *) 
+{
+  /*
+  if(uAddress > m_uSize) {
+    throw Error("index is out of range");
+  }
+  */
+  m_ReturnValue.set((int)m_pPma->get_opcode(uAddress));
+  m_ReturnValue.setBitmask( (1<<(m_pProcessor->opcode_size()*8)) - 1);
+  ostringstream sIndex;
+  sIndex << Value::name() << "[" << hex << m_szPrefix << uAddress << "]" << '\000';
+  m_ReturnValue.new_name(sIndex.str().c_str());
+  return m_ReturnValue;
+}
+
+void ProgramMemoryCollection::SetAt(unsigned int uAddress, Value *pValue)
+{
+  /*
+  if(uIndex > m_uSize) {
+    throw Error("index is out of range");
+  }
+  */
+  Integer *pInt = dynamic_cast<Integer*>(pValue);
+  if(pInt == NULL) {
+    throw Error("rValue is not an Integer");
+  }
+  else {
+    m_pPma->put_opcode(uAddress, (unsigned int)(int)*pInt);
+  }
+}
+
+void ProgramMemoryCollection::ConsolidateValues(int &iColumnWidth,
+                                           vector<string> &aList,
+                                           vector<string> &aValue) 
+{
+  unsigned int  uFirstAddress = 0;
+  unsigned int  uAddress;
+  //Register *    pReg = m_ppRegisters[0];
+  //Integer       uLastValue(pReg->getRV_notrace().data);
+  Integer uLastValue(m_pPma->get_opcode(0));
+  uLastValue.setBitmask((1<<(m_pProcessor->opcode_size()*8)) - 1);
+
+  unsigned int uSize = GetSize();
+
+  for(uAddress = 0; uAddress < uSize; uAddress++) {
+    ostringstream sIndex;
+
+    unsigned int ui_opcode = m_pPma->get_opcode(uAddress);
+
+    if((unsigned int)uLastValue != ui_opcode) {
+      PushValue(uFirstAddress, uAddress,
+                &uLastValue, aList, aValue);
+      iColumnWidth = max(iColumnWidth, (int)aList.back().size());
+      uFirstAddress = uAddress;
+      uLastValue = ui_opcode;
+    }
+  }
+  uAddress--;
+  // Record the last set of elements
+  if(uFirstAddress <= uAddress) {
+    PushValue(uFirstAddress, uAddress,
+              &uLastValue, aList, aValue);
+    iColumnWidth = max(iColumnWidth, (int)aList.back().size());
+  }
+}
+
+//void RegisterCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
+//  throw Error("RegisterCollection::SetAt() not implemented");
+//}
+
+unsigned int ProgramMemoryCollection::GetLowerBound()
+{
+  return 0;
+}
+
+unsigned int ProgramMemoryCollection::GetUpperBound() 
+{
+  return GetSize() - 1;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+//
+// ProgramMemoryAccess
+//
+// The ProgramMemoryAccess class provides an interface to the processor's
+// program memory. On Pic processors, this is the memory where instructions
+// are stored. 
+//
 
 ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu) :
   MemoryAccess(new_cpu)
 {
   init(new_cpu);
+  m_pRomCollection = new ProgramMemoryCollection(new_cpu,
+						 "romData",
+						 this);
 }
 
 void ProgramMemoryAccess::init(Processor *new_cpu)
