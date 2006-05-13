@@ -38,6 +38,7 @@ class ProcessorConstructor;
 class ProgramFileType;
 class FileContext;
 class FileContextList;
+class ProgramMemoryCollection;
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
@@ -171,8 +172,8 @@ class ProgramMemoryAccess :  public MemoryAccess
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
   bool isHLLmode(void) {return get_hll_mode() == HLL_MODE;}
 
- private:
-
+private:
+  ProgramMemoryCollection *m_pRomCollection;
   unsigned int
     _address,
     _opcode, 
@@ -351,7 +352,7 @@ public:
   /// Processor RAM
 
   Register **registers;
-  RegisterCollection *m_UiAccessOfRegisters;
+  RegisterCollection *m_UiAccessOfRegisters; // should this be in rma class?
 
   /// Currently selected RAM bank
   Register **register_bank;
