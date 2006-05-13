@@ -44,6 +44,7 @@ libgpsim_la_SOURCES = \
 	p12x.cc \
 	p16f62x.cc \
 	p16x8x.cc \
+	p16f8x.cc \
 	p16f87x.cc \
 	p16x7x.cc \
 	p16x5x.cc \
@@ -120,6 +121,7 @@ gpsiminclude_HEADERS = \
 	p16x6x.h \
 	p16x7x.h \
 	p16x8x.h \
+	p16f8x.h \
 	p16f87x.h \
 	p17c75x.h \
 	p18x.h \

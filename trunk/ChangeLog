@@ -1,3 +1,11 @@
+2006-05-14 Roy Rankin <rrankin@ihug.com.au>
+	* src/16bit-registers.h, src/14bit-registers.h, src/pic-processor.cc,
+	  src/Makefile.am, src/pic-processor.h, src/14bit-registers.cc,
+	  src/p16f8x.h, src/p16f8x.cc,
+	  regression/a2d/Makefile, regression/run_regression.sh,
+	  regression/a2d/16f88.lkr, regression/a2d/p16f88.asm:
+	- Add 16f87 and 16f88 processors
+
 2006-05-13 Scott Dattalo <scott@dattalo.com>
 	* src/a2dconvert.h: removed redundant class qualifiers in member
 	function declarations.

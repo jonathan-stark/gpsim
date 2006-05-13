@@ -95,6 +95,107 @@ void file_register::put_value(unsigned int new_value)
 
 #endif
 
+void  OSCTUNE::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+  osccon->set_rc_frequency();
+}
+// Clock is stable
+void OSCCON::callback()
+{
+    value.put(value.get() | IOFS);
+}
+bool OSCCON::set_rc_frequency()
+{
+  unsigned int cfg_word = cpu_pic->get_config_word();
+  double base_frequency = 31.25e3;
+  enum {
+    CFG_FOSC0 = 1<<0,
+    CFG_FOSC1 = 1<<1,
+    CFG_FOSC2 = 1<<4,
+    CFG_MCLRE = 1<<5
+  };
+
+  if(   !((cfg_word & ( CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) == 0x10) && 
+	!((cfg_word & ( CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) == 0x11))
+     return false;
+
+    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+    switch (new_IRCF)
+    {
+    case 0:
+	base_frequency = 31.25e3;
+	break;
+	
+    case 1:
+	base_frequency = 125e3;
+	break;
+	
+    case 2:
+	base_frequency = 250e3;
+	break;
+	
+    case 3:
+	base_frequency = 500e3;
+	break;
+	
+    case 4:
+	base_frequency = 1e6;
+	break;
+	
+    case 5:
+	base_frequency = 2e6;
+	break;
+	
+    case 6:
+	base_frequency = 4e6;
+	break;
+	
+    case 7:
+	base_frequency = 8e6;
+	break;
+   }
+   if (osctune)
+   {
+       int tune;
+       unsigned int osctune_value = osctune->value.get();
+       tune = osctune_value & (OSCTUNE::TUN5-1);
+       tune = (OSCTUNE::TUN5 & osctune_value) ? -tune : tune;
+       base_frequency *= 1. + 0.125 * tune / 31.;
+   }
+   cpu_pic->set_frequency(base_frequency);
+   if ((bool)verbose)
+   {
+	cout << "set_rc_frequency() : osccon=" << hex << value.get();
+	if (osctune)
+	    cout << " osctune=" << osctune->value.get();
+	cout << " new frequency=" << base_frequency << endl;
+   }
+   return true;
+}
+void  OSCCON::put(unsigned int new_value)
+{
+  
+  unsigned int new_IRCF = (new_value & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+  unsigned int old_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+
+  if (set_rc_frequency())  // using internal RC Oscillator
+  {
+	if (old_IRCF == 0 && new_IRCF != 0) // Allow 4 ms to stabalise
+	{
+	    guint64 settle;
+
+	    settle = (guint64) (get_cycles().cycles_per_second() * 4e-3);
+	    get_cycles().set_break(get_cycles().value + settle, this);
+	    new_value &= ~ IOFS;
+	}
+	else
+	    new_value |= IOFS;
+  }
+}
 //
 //--------------------------------------------------
 // member functions for the FSR class

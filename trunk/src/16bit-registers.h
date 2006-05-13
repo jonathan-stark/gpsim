@@ -647,19 +647,6 @@ class TBL_MODULE
 //////////////////////////////////////////
 //////////////////////////////////////////
 
-class OSCCON : public  sfr_register
-{
- public:
-  unsigned int valid_bits;
-
-  enum {
-    SCS = 1<<0
-  };
-
-  OSCCON(void) {
-    valid_bits = 1;
-  }
-};
 
 class LVDCON : public  sfr_register
 {
@@ -680,21 +667,6 @@ class LVDCON : public  sfr_register
   }
 };
 
-class WDTCON : public  sfr_register
-{
- public:
-
-  unsigned int valid_bits;
-
-  enum {
-    SWDTEN = 1<<0
-  };
-
-  WDTCON(void) {
-    valid_bits = 1;
-  }
-
-};
 
 class SSPCON1 : public sfr_register
 {

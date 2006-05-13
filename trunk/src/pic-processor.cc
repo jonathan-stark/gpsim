@@ -43,6 +43,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "p16x5x.h"
 #include "p16f62x.h"
+#include "p16f8x.h"
 #include "p16x8x.h"
 #include "p16f87x.h"
 #include "p16x6x.h"
@@ -135,6 +136,10 @@ ProcessorConstructor pP16F627(P16F627::construct ,
 			      "__16F627", "pic16f627",  "p16f627", "16f627");
 ProcessorConstructor pP16F628(P16F628::construct ,
 			      "__16F628", "pic16f628",  "p16f628", "16f628");
+ProcessorConstructor pP16F87(P16F87::construct ,
+			      "__16F87", "pic16f87",  "p16f87", "16f87");
+ProcessorConstructor pP16F88(P16F88::construct ,
+			      "__16F88", "pic16f88",  "p16f88", "16f88");
 ProcessorConstructor pP16F871(P16F871::construct ,
 			      "__16F871", "pic16f871",  "p16f871", "16f871");
 ProcessorConstructor pP16F873(P16F873::construct ,
@@ -880,7 +885,6 @@ bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
   // reset each of them based on the config bits in cfg_word:
   //config_modes &= ~(CM_WDTE);
   //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
-  //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
 
   if((address == config_word_address()) && config_modes) {
 

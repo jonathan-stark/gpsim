@@ -467,4 +467,70 @@ public:
 };
 
 
+class OSCCON;
+class OSCTUNE : public  sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  virtual void set_osccon(OSCCON *new_osccon) { osccon = new_osccon;}
+  unsigned int valid_bits;
+                                                                                
+  enum {
+    TUN0 = 1<<0,
+    TUN1 = 1<<1,
+    TUN2 = 1<<2,
+    TUN3 = 1<<3,
+    TUN4 = 1<<4,
+    TUN5 = 1<<5,
+  };
+  OSCCON *osccon;
+                                                                                
+  OSCTUNE(void) {
+    valid_bits = 6;
+  }
+};
+
+class OSCCON : public  sfr_register,  public TriggerObject
+{
+ public:
+  void put(unsigned int new_value);
+  virtual void callback();
+  virtual bool set_rc_frequency();
+  virtual void set_osctune(OSCTUNE *new_osctune) { osctune = new_osctune;}
+  unsigned int valid_bits;
+  OSCTUNE *osctune;
+                                                                                
+  enum {
+    SCS0 = 1<<0,
+    SCS1 = 1<<1,
+    IOFS = 1<<2,
+    OSTS = 1<<3,
+    IRCF0 = 1<<4,
+    IRCF1 = 1<<5,
+    IRCF2 = 1<<6
+  };
+                                                                                
+  OSCCON(void) {
+    valid_bits = 7;
+  }
+};
+
+class WDTCON : public  sfr_register
+{
+ public:
+                                                                                
+  unsigned int valid_bits;
+                                                                                
+  enum {
+    SWDTEN = 1<<0
+  };
+                                                                                
+  WDTCON(void) {
+    valid_bits = 1;
+  }
+                                                                                
+};
+
+
 #endif
