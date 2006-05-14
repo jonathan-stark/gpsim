@@ -313,9 +313,9 @@ bool I2C_EE::processCommand(unsigned int command)
 {
   if ((command & 0xf0) == 0xa0) {
     m_command = command;
-//    return true;
+    return true;
   }
-//  return false;
+  return false;
 }
 
 void I2C_EE::new_scl_edge ( bool direction )
