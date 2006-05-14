@@ -1,3 +1,8 @@
+2006-05-14 Scott Dattalo <scott@dattalo.com>
+	* src/value.h, src/value.cc, src/expr.cc: Expressions derived from
+	the base gpsim types (like Integer, Float) were not getting
+	evaluated properly.
+
 2006-05-14 Borut Razem <borut.razem@siol.net>
 
 	* src/makefile.mingw: added 16f87 and 16f88 processors
