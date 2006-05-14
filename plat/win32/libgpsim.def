@@ -151,6 +151,7 @@ EXPORTS
     ?GetManager@CCommandManager@@SAAAV1@XZ
     ?GetSymbol@LiteralSymbol@@QAEPAVValue@@XZ
     ?GetSymbolTable@CSimulationContext@@QAEAAVSymbol_Table@@XZ
+    ?GUIname@IOPIN@@UBEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?Initialize@CSimulationContext@@QAEXXZ
     ?Initialize@Token@gpsim@@QAEXP6APAXPAX@Z0@Z
     ?ListToConsole@CCommandManager@@QAEXXZ
@@ -442,6 +443,7 @@ EXPORTS
     ?name@AliasedInstruction@@UAEPADPADH@Z
     ?name@gpsimObject@@UBEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
+    ?newGUIname@IOPIN@@UAEXPBD@Z
     ?new_address@Program_Counter@@UAEXI@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPBD@Z

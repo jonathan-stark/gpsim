@@ -313,8 +313,9 @@ bool I2C_EE::processCommand(unsigned int command)
 {
   if ((command & 0xf0) == 0xa0) {
     m_command = command;
-
+//    return true;
   }
+//  return false;
 }
 
 void I2C_EE::new_scl_edge ( bool direction )
@@ -457,7 +458,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
         }
     }
-    if (verbose && bus_state != curBusState) {
+    if ((bool)verbose && bus_state != curBusState) {
       Vprintf(("I2C_EE::new_scl_edge() new bus state = %d\n",bus_state));
       debug();
     }
@@ -503,7 +504,7 @@ void I2C_EE::new_sda_edge ( bool direction )
             }
         }
 
-	if (verbose && bus_state != curBusState) {
+	if ((bool)verbose && bus_state != curBusState) {
 	  Vprintf(("I2C_EE::new_sda_edge() new bus state = %d\n",bus_state));
 	  debug();
 	}
