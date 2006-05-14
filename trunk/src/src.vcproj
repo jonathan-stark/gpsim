@@ -357,6 +357,9 @@
 				RelativePath=".\p16f87x.cc">
 			</File>
 			<File
+				RelativePath=".\p16f8x.cc">
+			</File>
+			<File
 				RelativePath=".\p16x5x.cc">
 			</File>
 			<File
@@ -618,6 +621,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\p16f87x.h">
+			</File>
+			<File
+				RelativePath=".\p16f8x.h">
 			</File>
 			<File
 				RelativePath=".\p16x5x.h">
