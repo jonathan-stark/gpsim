@@ -1,3 +1,9 @@
+2006-05-14 Borut Razem <borut.razem@siol.net>
+
+	* src/makefile.mingw: added 16f87 and 16f88 processors
+	* modules/makefile.mingw: added i2c-eeprom
+	* src/p12x.cc: removed unused variable
+
 2006-05-14 Roy Rankin <rrankin@ihug.com.au>
 	* regression/a2d/p16f874a.asm, regression/a2d/p16c71.asm,
 	  regression/a2d/16f871.lkr, regression/a2d/16f874a.lkr,

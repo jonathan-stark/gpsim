@@ -315,7 +315,6 @@ void P12CE518::create_iopin_map(void)
 void P12CE518::create(void)
 {
   Stimulus_Node *scl, *sda;
-  I2C_EE * e;
 
   if(verbose)
     cout << " 12ce518 create \n";

@@ -75,6 +75,7 @@ src_OBJECTS =			\
 	p16x6x.o		\
 	p16x7x.o		\
 	p16x8x.o		\
+	p16f8x.o		\
 	p17c75x.o		\
 	p18x.o			\
 	packages.o		\
