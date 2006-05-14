@@ -284,18 +284,13 @@ void _16bit_processor :: create_sfr_map()
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon);
   adcon0.setPir(&pir1);
+  adcon0.setChannel_Mask(7); // Greater than 4 channels
   adcon0.setA2DBits(10);
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
 			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
 
-  adcon1.setNumberOfChannels(8);
-  adcon1.setIOPin(0, &(*m_porta)[0]);
-  adcon1.setIOPin(1, &(*m_porta)[1]);
-  adcon1.setIOPin(2, &(*m_porta)[2]);
-  adcon1.setIOPin(3, &(*m_porta)[3]);
-  adcon1.setIOPin(4, &(*m_porta)[5]);
-  // AN5,AN6 and AN7 exist only on devices with a PORTE.
+  adcon1.setNumberOfChannels(8);	// Allow 8 channel configuration
   adcon1.setChannelConfiguration(0, 0xff);
   adcon1.setChannelConfiguration(1, 0xff);
   adcon1.setChannelConfiguration(2, 0x1f);
@@ -329,6 +324,13 @@ void _16bit_processor :: create_sfr_map()
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
 
+  adcon1.setNumberOfChannels(5);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  // AN5,AN6 and AN7 exist only on devices with a PORTE.
 }
 
 //-------------------------------------------------------------------

@@ -1,6 +1,6 @@
 
-	list	p=16c71
-        include <p16c71.inc>
+	list	p=16f871
+        include <p16f871.inc>
         include <coff.inc>
 
   __CONFIG _WDT_OFF
@@ -17,7 +17,7 @@
 
 ;----------------------------------------------------------------------
 ;----------------------------------------------------------------------
-GPR_DATA                UDATA
+GPR_DATA                UDATA_SHR
 
 x  RES  1
 t1 RES  1
@@ -46,17 +46,19 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 	bcf	STATUS,RP0	;adcon0 is in bank 0
 
 	btfsc	INTCON,ADIE
-	 btfsc	ADCON0,ADIF
-	goto	a2dint
+	 btfsc	PIR1,ADIF
+	goto	inta2d
 
-   .assert "\"p16c71 FAIL unexpected interrupt\""
+  .assert "\"FAILED 16F871 unexpected interupt\""
 	nop
-
+	goto	check
 ;;	An A/D interrupt has occurred
-a2dint:
+inta2d:
 	bsf	t1,0		;Set a flag to indicate we got the int.
-	bcf	ADCON0,ADIF	;Clear the a/d interrupt
+	bcf	PIR1,ADIF	;Clear the a/d interrupt
 
+
+check:
 	swapf	status_temp,w
 	movwf	STATUS
 	swapf	w_temp,F
@@ -75,34 +77,47 @@ start:
    ; Use a pullup resistor as a voltage source
    .sim "module load pullup V1"
    .sim "V1.resistance = 100.0"
-   .sim "module load pullup V2"
-   .sim "V2.voltage=2.0"
-   .sim "V2.resistance = 100.0"
 
    .sim "node na0"
    .sim "attach na0 V1.pin porta0"
+
+   .sim "module load pullup V2"
+   .sim "V2.resistance = 100.0"
+
    .sim "node na1"
    .sim "attach na1 V2.pin porta3"
 
 	;; Let's use the ADC's interrupt
+    ; RA0 is an Analog Input.
+    ; RA1 - RA5 are all configured as outputs.
+    ;
+    ; Use VDD and VSS for Voltage references.
+    ;
+    ; PCFG = 1110  == AN0 is the only analog input
+    ; ADCS = 110   == FOSC/64
+    ; ADFM = 0     == 6 LSB of ADRESL are 0.
+    ;
+                                                                                
+
+	bsf	STATUS,RP0	;adcon1 is in bank 1
+        movlw   1
+        movwf   TRISA
 	
-	clrf	INTCON
+                                                                                
+        movlw   (1<<PCFG1) | (1<<PCFG2) | (1<<PCFG3)
+        movwf   ADCON1
+        movlw   (1<<ADCS1) | (1<<ADON)
+        bsf     PIE1,ADIE       ;A2D interrupts
+	bcf	STATUS,RP0	;adcon0 is in bank 0
+        movwf   ADCON0
+                                                                                
+        bsf     INTCON,GIE      ;Global interrupts
+        bsf     INTCON,PEIE     ;Peripheral interrupts
+
 	
-#define FAST_CONVERSION		((1<<ADCS1) | (1<<ADCS0))
-	movlw	FAST_CONVERSION | (1<<ADON)
-	movwf	ADCON0
-
-#define ENABLE_INTS		((1<<GIE) | (1<<ADIE))
-	movlw	ENABLE_INTS
-	movwf	INTCON
-
-	;; Upon power up, porta is configured for analog inputs.
-	;; (how many times have I been burnt by this???).	
-	;; So let's test this out to see if it's true:
-
 	call	Convert
 
-   .assert "adres == 0xff, \"FAILED 16C71 power-on result\""
+  .assert "adresh == 0xff, \"Failed 16F871 initial test\""
 	nop
 
 	;; The next test consists of misusing the A/D converter.
@@ -114,11 +129,11 @@ start:
 	;; level in the event that there's an external reference connected to
 	;; an3?]
 	
-
   .command "V1.resistance=1e6"
+
 	movlw   0
 	bsf	STATUS,RP0
-	movwf	PORTA		;Make the I/O's digital outputs
+	movwf	TRISA		;Make the I/O's digital outputs
 	movwf	ADCON1		;Configure porta to be completely analog
 				;(note that this is unnecessary since that's
 				;the condition they're in at power up.)
@@ -133,8 +148,9 @@ start:
 	
 	call	Convert
 
-   .assert "adres == 0x00, \"FAILED 16C71 Digital low\""
+  .assert "adresh == 0x00, \"Failed 16F871 Digital low\""
 	nop
+
 	;;
 	;; Now do some with the digital output high
 	;;
@@ -144,7 +160,7 @@ start:
 	
 	call	Convert
 
-   .assert "adres == 0xff, \"FAILED 16C71 Digital high\""
+  .assert "adresh == 0xff, \"Failed 16F871 Digital high\""
 	nop
 	;;
 	;; Now make the inputs analog (like they normally would be)
@@ -159,14 +175,16 @@ start:
 
 	call	Convert
 
-   .assert "adres == 0xff, \"FAILED 16C71 AN0=5V\""
+  .assert "adresh == 0xff, \"Failed 16F871 AN0=5V\""
 	nop
+
+
   .command "V1.voltage=1.0"
 
 	call	Convert
-   .assert "adres == 0x33, \"FAILED 16C71 AN0=1V\""
-	nop
 
+  .assert "adresh == 0x33, \"Failed 16F871 AN0=1V\""
+	nop
 	;;
 	;; Now let's use the external analog signal connected to AN3
 	;; as the voltage reference
@@ -176,11 +194,13 @@ start:
 	movwf	ADCON1 ^ 0x80
 	bcf	STATUS,RP0
 
+  .command "V2.voltage=2.0"
+
 	call	Convert
-   .assert "adres == 0x80, \"FAILED 16C71 AN0=1V Vref+=2V\""
+  .assert "adresh == 0x80, \"Failed 16F871 AN0=1V Vref+=2V\""
 	nop
 
-  .assert  "\"*** PASSED 16C71 a2d test\""
+  .assert  "\"*** PASSED 16F871 a2d test\""
 	
 	goto	$-1
 
@@ -195,7 +215,8 @@ Convert:
 	btfss	t1,0		;Wait for the interrupt to set the flag
 	 goto	$-1
 
-	movf	ADRES,W		;Read the result
+        movf    ADRESH,W                ;Read the high 8-bits of the result
+
 
 	return
 

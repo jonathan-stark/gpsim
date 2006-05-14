@@ -183,11 +183,11 @@ bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
   };
 
   // Let the base class do most of the work:
-  cout << "RRR p16f628 setting config word 0x" << hex << cfg_word << '\n';
 
   if (pic_processor::set_config_word(address, cfg_word)) {
 
-    cout << "p16f628 setting config word 0x" << hex << cfg_word << '\n';
+    if (verbose)
+        cout << "p16f628 setting config word 0x" << hex << cfg_word << '\n';
 
 
     unsigned int valid_pins = m_porta->getEnableMask();

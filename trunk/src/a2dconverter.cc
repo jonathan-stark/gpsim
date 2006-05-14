@@ -199,10 +199,12 @@ void ADCON0::put_conversion(void)
   Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
 	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
 
-  if(adresl) {   // non-null for 16f877
+  if (verbose)
+	printf ("result=0x%02x\n", converted);
 
+  Dprintf(("%d-bit result 0x%x\n", m_nBits, converted));
 
-    Dprintf(("10-bit result 0x%x\n",converted &0x3ff));
+  if(adresl) {   // non-null for more than 8 bit conversion
 
     if(adcon1->value.get() & ADCON1::ADFM) {
       adresl->put(converted & 0xff);
@@ -213,8 +215,6 @@ void ADCON0::put_conversion(void)
     }
 
   } else {
-
-    Dprintf(("8-bit result 0x%x\n",converted & 0xff));
 
     adres->put((converted ) & 0xff);
 
@@ -253,6 +253,9 @@ void ADCON0::callback(void)
 
       future_cycle = get_cycles().value + (m_nBits * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
+      if (verbose)
+	printf("A/D %d bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
+	    channel,m_dSampledVoltage,m_dSampledVrefHi,m_dSampledVrefLo);
       
       ad_state = AD_CONVERTING;
 
@@ -377,8 +380,19 @@ double ADCON1::getChannelVoltage(unsigned int channel)
   if(channel <= m_nAnalogChannels) {
     if ( (1<<channel) & m_configuration_bits[get_cfg(value.data)]) {
       PinModule *pm = m_AnalogPins[channel];
-      voltage = (pm != &AnInvalidAnalogInput) ? 
-	pm->getPin().get_nodeVoltage() : 0.0;
+      if (pm != &AnInvalidAnalogInput)
+          voltage = pm->getPin().get_nodeVoltage();
+      else
+      {
+	cout << "ADCON1::getChannelVoltage channel " << channel << 
+		" not valid analog input\n";
+	voltage = 0.;
+      }
+    }
+    else
+    {
+	cout << "ADCON1::getChannelVoltage channel " << channel <<
+                " not a configured input\n";
     }
   }
 
