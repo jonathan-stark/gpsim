@@ -287,7 +287,7 @@ public:
   static Boolean* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  virtual Value *copy() { return new Boolean(value); }
+  virtual Value *copy();
 
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
@@ -359,7 +359,7 @@ public:
 
   virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
 
-  virtual Value *copy() { return new Integer(value); }
+  virtual Value *copy();
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
   virtual char *toBitStr(char *, int len);
@@ -608,7 +608,7 @@ public:
 
   virtual void set(Value *);
 
-  virtual Value *copy() { return new AbstractRange(left,right); }
+  virtual Value *copy();
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
 

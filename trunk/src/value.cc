@@ -362,6 +362,12 @@ bool AbstractRange::compare(ComparisonOperator *compOp, Value *rvalue)
   throw new Error(compOp->showOp() + 
 		  " comparison is not defined for " + showType());
 }
+
+Value *AbstractRange::copy()
+{
+  return new AbstractRange(get_leftVal(),get_rightVal());
+}
+
 void AbstractRange::set(Value *v)
 {
   AbstractRange *ar=typeCheck(v, string(""));
@@ -487,6 +493,13 @@ bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
   return false; // keep the compiler happy.
 }
 
+
+Value *Boolean::copy()
+{
+  bool b;
+  get(b);
+  return new Boolean(b);
+}
 
 // get(bool&) - primary method for accessing the value.
 void Boolean::get(bool &b)
@@ -619,6 +632,13 @@ Integer::~Integer()
 
 void Integer::setDefaultBitmask(gint64 bitmask) {
   def_bitmask = bitmask;
+}
+
+Value *Integer::copy()
+{ 
+  gint64 i;
+  get(i);
+  return new Integer(i); 
 }
 
 void Integer::set(double d)

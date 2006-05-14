@@ -45,7 +45,9 @@ LiteralBoolean::~LiteralBoolean()
 
 Value* LiteralBoolean::evaluate()
 {
-  return new Boolean(value->getVal());
+  bool b;
+  value->get(b);
+  return new Boolean(b);
 }
 
 string LiteralBoolean::toString()
@@ -71,7 +73,9 @@ LiteralInteger::LiteralInteger(Integer* newValue)
 
 Value* LiteralInteger::evaluate()
 {
-  return new Integer(value->getVal());
+  gint64 i;
+  value->get(i);
+  return new Integer(i);
 }
 
 string LiteralInteger::toString()
@@ -103,7 +107,9 @@ LiteralFloat::~LiteralFloat()
 
 Value* LiteralFloat::evaluate()
 {
-  return new Float(value->getVal());
+  double d;
+  value->get(d);
+  return new Float(d);
 }
 
 string LiteralFloat::toString()
