@@ -81,6 +81,9 @@ void P16C71::create_sfr_map()
   add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
 
+
+  adres.new_name("adres");
+
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1,0);
   adcon1.setNumberOfChannels(4);
   adcon1.setIOPin(0, &(*m_porta)[0]);
@@ -162,7 +165,8 @@ void P16C712::create_sfr_map()
   adcon0.setAdresLow(0);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
-  //adcon0.channel_mask = 3;
+  adcon0.setChannel_Mask(3);
+  adcon0.setA2DBits(8);
   intcon = &intcon_reg;
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2,0);
@@ -281,7 +285,8 @@ void P16C72::create_sfr_map()
   adcon0.setIntcon(&intcon_reg);
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
-  //adcon0.channel_mask = 7;  // even though there are only 5 inputs...
+  adcon0.setChannel_Mask(7); // even though there are only 5 inputs...
+  adcon0.setA2DBits(8);
 
   intcon = &intcon_reg;
 
@@ -388,7 +393,8 @@ void P16C73::create_sfr_map()
   adcon0.setIntcon(&intcon_reg);
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
-  //adcon0.channel_mask = 7;  // even though there are only 5 inputs...
+  adcon0.setChannel_Mask(7); // even though there are only 5 inputs...
+  adcon0.setA2DBits(8);
 
   intcon = &intcon_reg;
 
@@ -494,13 +500,14 @@ void P16C74::create_sfr_map()
 
   //1adcon0.analog_port = porta;
   //1adcon0.analog_port2 = porte;
+
   adcon0.setAdres(&adres);
   adcon0.setAdresLow(0);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
-  // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
-  //adcon0.channel_mask = 7;
+  adcon0.setChannel_Mask(7);
+  adcon0.setA2DBits(8);
 
   intcon = &intcon_reg;
 
@@ -515,6 +522,7 @@ void P16C74::create_sfr_map()
   adcon1.setIOPin(5, &(*m_porte)[0]);
   adcon1.setIOPin(6, &(*m_porte)[1]);
   adcon1.setIOPin(7, &(*m_porte)[2]);
+
   adcon1.setChannelConfiguration(0, 0xff);
   adcon1.setChannelConfiguration(1, 0xff);
   adcon1.setChannelConfiguration(2, 0x1f);
@@ -523,6 +531,7 @@ void P16C74::create_sfr_map()
   adcon1.setChannelConfiguration(5, 0x0b);
   adcon1.setChannelConfiguration(6, 0x00);
   adcon1.setChannelConfiguration(7, 0x00);
+
   adcon1.setVrefHiConfiguration(1, 3);
   adcon1.setVrefHiConfiguration(3, 3);
   adcon1.setVrefHiConfiguration(5, 3);

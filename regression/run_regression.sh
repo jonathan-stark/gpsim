@@ -76,8 +76,14 @@ ${RT} comparator sim_877a
 
 ${RT} a2d sim_71
 
+${RT} a2d sim_871
+
 ${RT} a2d sim_873a
 
+${RT} a2d sim_874a
+
 ${RT} a2d sim_88
+
+${RT} a2d sim_452
 
 ${RT} ttl sim_377

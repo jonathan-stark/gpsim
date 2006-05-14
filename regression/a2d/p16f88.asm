@@ -47,14 +47,16 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 	bcf	STATUS,RP0	;adcon0 is in bank 0
 
 	btfsc	INTCON,ADIE
-	 btfss	PIR1,ADIF
+	 btfsc	PIR1,ADIF
 	  goto	check
+   .assert "\"FAILED 16F88 unexpected interrupt\""
+	nop
 
 ;;	An A/D interrupt has occurred
+check:
 	bsf	t1,0		;Set a flag to indicate we got the int.
 	bcf	PIR1,ADIF	;Clear the a/d interrupt
 
-check:
 	swapf	status_temp,w
 	movwf	STATUS
 	swapf	w_temp,F
@@ -73,15 +75,22 @@ start:
    ; Use a pullup resistor as a voltage source
    .sim "module load pullup V1"
    .sim "V1.resistance = 100.0"
-
    .sim "module load pullup V2"
    .sim "V2.resistance = 100.0"
 
-   .sim "node na0"
-   .sim "attach na0 V1.pin porta1"
+   ; V3 and node na0 required for A/D to see pin voltage
+   ; this may be a bug RRR 5/06
 
+   .sim "module load pullup V3"	
+   .sim "V3.resistance = 10e6"
+
+   .sim "node na0"
+   .sim "attach na0 V3.pin porta0"
    .sim "node na1"
-   .sim "attach na1 V2.pin porta3"
+   .sim "attach na1 V1.pin porta1"
+
+   .sim "node na3"
+   .sim "attach na3 V2.pin porta3"
 
 
 	;; Let's use the ADC's interrupt
@@ -96,15 +105,15 @@ start:
     ;
                                                                                 
 	bsf	STATUS,RP0	;adcon1 is in bank 1
-        movlw   2
-	movwf	ANSEL		; select AN1
+        movlw   3
+	movwf	ANSEL		; select AN0, AN1
         movwf   TRISA
 	
-        movlw   (1<<ADCS2) 	; A/D clock deivded by 2
+        movlw   (1<<ADCS2) 	; A/D clock divided by 2
         movwf   ADCON1
         bsf     PIE1,ADIE       ;A2D interrupts
 	bcf	STATUS,RP0	;adcon0 is in bank 0
-        movlw   (1<<ADCS1) | (1<<ADON) | (1<<CHS0); Fosc/64, A2D on, Channel 0
+        movlw   (1<<ADCS1) | (1<<ADON) | (1<<CHS0); Fosc/64, A2D on, Channel 1
         movwf   ADCON0
                                                                                 
         bsf     INTCON,GIE      ;Global interrupts
@@ -112,7 +121,7 @@ start:
 
 	
 	call	Convert
-   .assert "adresh == 0xff"
+   .assert "adresh == 0xff, \"FAILED 16F88 inital test\""
 	nop
 
 	;; The next test consists of misusing the A/D converter.
@@ -127,12 +136,10 @@ start:
 
 	movlw   0
 	bsf	STATUS,RP0
-	movwf	PORTA		;Make the I/O's digital outputs
+	movwf	TRISA		;Make the I/O's digital outputs
 	movwf	ADCON1		;Configure porta to be completely analog
-				;(note that this is unnecessary since that's
-				;the condition they're in at power up.)
 	bcf	STATUS,RP0
-
+	bcf	ADCON0,CHS0	;select AN0
 	movwf	PORTA		;Drive the digital I/O's low
 
 	;;
@@ -141,6 +148,9 @@ start:
 	;;
 	
 	call	Convert
+
+  .assert "adresh == 0x00, \"FAILED 16F88 Digital low\""
+	nop
 
 	;;
 	;; Now do some with the digital output high
@@ -151,21 +161,29 @@ start:
 	
 	call	Convert
 
+  .assert "adresh == 0xff, \"FAILED 16F88 Digital high\""
+	nop
 	;;
 	;; Now make the inputs analog (like they normally would be)
 	;;
 
+
+	bsf	ADCON0,CHS0	;select AN1
 	bsf	STATUS,RP0
 	movlw	0xff
-	movwf	PORTA
+	movwf	TRISA
 	bcf	STATUS,RP0
 
 	call	Convert
 
+  .assert "adresh == 0xff, \"FAILED 16F88 AN1=5V\""
+	nop
+
   .command "V1.voltage=1.0"
 
 	call	Convert
-   .assert "adresh == 0x33"
+
+   .assert "adresh == 0x33, \"FAILED 16F88 AN1=1V\""
 	nop
 
 	;;
@@ -176,10 +194,12 @@ start:
 	bsf	ADCON1,VCFG1
 	bcf	STATUS,RP0
 
-  .command "V1.voltage=2.0"
-  .command "V2.voltage=4.0"
+  .command "V2.voltage=2.0"
 
 	call	Convert
+
+   .assert "adresh == 0x80, \"FAILED 16F88 AN1=1V Vref+=2V\""
+	nop
 
   .assert  "\"*** PASSED 16F88 a2d test\""
 	
@@ -197,9 +217,6 @@ Convert:
 	 goto	$-1
 
         movf    ADRESH,W                ;Read the high 8-bits of the result
-
-;  .assert "\"RRR \""
-	nop
 
 	return
 

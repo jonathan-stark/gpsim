@@ -33,9 +33,6 @@ class P16F871 : public P16C74
 {
  public:
 
-  ADCON0_withccp adcon0;
-  ADCON1 adcon1;
-  ADRES  adresh;
   ADRES  adresl;
 
 
@@ -75,9 +72,6 @@ class P16F873 : public P16C73
 
  public:
 
-  ADCON0_withccp adcon0;
-  ADCON1 adcon1;
-  ADRES  adresh;
   ADRES  adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
@@ -155,8 +149,6 @@ class P16F874 : public P16C74
  public:
  COMPARATOR_MODULE comparator;
 
-  ADCON0_withccp adcon0;
-  ADCON1 adcon1;
   ADRES  adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);

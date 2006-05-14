@@ -1,4 +1,14 @@
 2006-05-14 Roy Rankin <rrankin@ihug.com.au>
+	* regression/a2d/p16f874a.asm, regression/a2d/p16c71.asm,
+	  regression/a2d/16f871.lkr, regression/a2d/16f874a.lkr,
+	  regression/a2d/p18f452.asm, regression/a2d/p16f88.asm,
+	  regression/a2d/p16f871.asm, regression/a2d/Makefile,
+	  regression/a2d/p16f873a.asm, regression/run_regression.sh,
+	  src/p16f87x.cc, src/p16f87x.h, src/16bit-processors.cc,
+	  src/p16f62x.cc, src/p16x7x.cc, src/p18x.cc, src/a2dconverter.cc:
+	- tests and correction to a2d for various processors
+
+2006-05-14 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-registers.h, src/14bit-registers.h, src/pic-processor.cc,
 	  src/Makefile.am, src/pic-processor.h, src/14bit-registers.cc,
 	  src/p16f8x.h, src/p16f8x.cc,

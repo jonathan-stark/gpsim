@@ -46,14 +46,16 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 	bcf	STATUS,RP0	;adcon0 is in bank 0
 
 	btfsc	INTCON,ADIE
-	 btfss	PIR1,ADIF
+	 btfsc	PIR1,ADIF
 	  goto	check
+  .assert "\"FAILED 16F873a unexpected interrupt\""
+	nop
 
 ;;	An A/D interrupt has occurred
+check:
 	bsf	t1,0		;Set a flag to indicate we got the int.
 	bcf	PIR1,ADIF	;Clear the a/d interrupt
 
-check:
 	swapf	status_temp,w
 	movwf	STATUS
 	swapf	w_temp,F
@@ -111,6 +113,9 @@ start:
 	
 	call	Convert
 
+  .assert "adresh == 0xff, \"FAILED 16F873a initial test\""
+	nop
+
 	;; The next test consists of misusing the A/D converter.
 	;; TRISA is configured such that the I/O pins are digital outputs.
 	;; Normally you want them to be configued as inputs. According to
@@ -120,6 +125,8 @@ start:
 	;; level in the event that there's an external reference connected to
 	;; an3?]
 	
+
+  .command "V1.resistance=1e6"
 
 	movlw   0
 	bsf	STATUS,RP0
@@ -138,6 +145,8 @@ start:
 	
 	call	Convert
 
+  .assert "adresh == 0x00, \"FAILED 16F873a digital low\""
+	nop
 	;;
 	;; Now do some with the digital output high
 	;;
@@ -147,9 +156,13 @@ start:
 	
 	call	Convert
 
+  .assert "adresh == 0xff, \"FAILED 16F873a digital high\""
+	nop
 	;;
 	;; Now make the inputs analog (like they normally would be)
 	;;
+
+  .command "V1.resistance=100.0"
 
 	bsf	STATUS,RP0
 	movlw	0xff
@@ -158,9 +171,14 @@ start:
 
 	call	Convert
 
+  .assert "adresh == 0xff, \"FAILED 16F873a AN0=5V\""
+	nop
+
   .command "V1.voltage=1.0"
 
 	call	Convert
+  .assert "adresh == 0x33, \"FAILED 16F873a AN0=1V\""
+	nop
 
 	;;
 	;; Now let's use the external analog signal connected to AN3
@@ -175,6 +193,8 @@ start:
 
 	call	Convert
 
+  .assert "adresh == 0x80, \"FAILED 16F873a AN0=1V Vref+=2V\""
+	nop
   .assert  "\"*** PASSED 16F873a a2d test\""
 	
 	goto	$-1
