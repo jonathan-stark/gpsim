@@ -426,7 +426,7 @@ void P16C63::create_sfr_map(void)
   pir_set_def.set_pir2(pir2);
 
   ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
-
+  ccp2con.setIOpin(&((*m_portc)[1]));
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
@@ -632,6 +632,7 @@ void P16C65::create_sfr_map(void)
   pir_set_def.set_pir2(pir2);
 
   ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
+  ccp2con.setIOpin(&((*m_portc)[1]));
 
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
