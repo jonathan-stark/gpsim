@@ -207,7 +207,8 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     CFG_FOSC0 = 1<<0,
     CFG_FOSC1 = 1<<1,
     CFG_FOSC2 = 1<<4,
-    CFG_MCLRE = 1<<5
+    CFG_MCLRE = 1<<5,
+    CFG_CCPMX = 1<<12
   };
 
   // Let the base class do most of the work:
@@ -254,13 +255,19 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
     // a general purpose I/O pin.
 
-    if (! (cfg_word & CFG_MCLRE)) {   
+    if (! (cfg_word & CFG_MCLRE)) 
+    {
       valid_pins |= ( 1<< 5); 		// porta5 IO port
     }
     else
     {
 	(m_porta->getPin(5))->newGUIname("MCLR");
     }
+    if (cfg_word & CFG_CCPMX)
+	ccp1con.setIOpin(&((*m_portb)[0]));
+    else
+	ccp1con.setIOpin(&((*m_portb)[3]));
+
 
     //cout << " porta valid_iopins " << porta->valid_iopins << 
     //   "  tris valid io " << trisa.valid_iopins << '\n';
