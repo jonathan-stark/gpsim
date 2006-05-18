@@ -1,3 +1,11 @@
+2006-05-17 Scott Dattalo <scott@dattalo.com>
+	* regression/run_regression.sh: added regression test for ccp
+	peripheral. This test only tests capture modes for the CMCON
+	settings of 4,5,6, and 7.
+	* regression/16f877a.lkr, regression/ccp_877a.asm,
+	regression/ccp_877a.stc, regression/Makefile: new files for the
+	ccp regression test.
+
 2006-05-14 Borut Razem <borut.razem@siol.net>
 
 	* src/makefile.mingw, src/vcproj: added 16f87 and 16f88 processors
