@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 //#define DEBUG
 
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
@@ -1107,10 +1107,20 @@ void TMR2::update(int ut)
       // Assume that we are not in pwm mode (and hence the next break will
       // be due to tmr2 matching pr2)
 
-      break_value = (1 + pr2->value.get()) << 2;
-      unsigned int pwm_break_value = break_value;
+      break_value = 1 + pr2->value.get();
+      guint64 fc = get_cycles().value + (break_value - value.get()) * prescale;
 
       last_update = TMR2_PR2_UPDATE;
+
+      if (pwm_mode)
+      {
+          break_value <<= 2;    // now pwm value
+          fc = last_cycle + break_value * prescale;
+      }
+
+cout << "\tRRR break_value=" << hex << break_value << " TMR2=" <<value.get()
+        << " prescale=" << prescale << endl;
+
 
       if(pwm_mode & ut & TMR2_PWM1_UPDATE) {
 
@@ -1119,9 +1129,9 @@ void TMR2::update(int ut)
 
 	if( (duty_cycle1 > (value.get()*4*prescale) ) && (duty_cycle1 < break_value))
 	  {
-	    pwm_break_value = duty_cycle1;
-	    last_update = TMR2_PWM1_UPDATE;
 	    //cout << "TMR2:PWM1 update\n";
+	    last_update = TMR2_PWM1_UPDATE;
+            fc = last_cycle + duty_cycle1 * prescale;
 	  }
       }
 
@@ -1131,37 +1141,37 @@ void TMR2::update(int ut)
 	  // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
 	  if( (duty_cycle2 > (value.get()*4*prescale) ) && (duty_cycle2 < break_value))
-	    {
-	      pwm_break_value = duty_cycle2;
-	      last_update = TMR2_PWM2_UPDATE;
+	  {
 	      //cout << "TMR2:PWM2 update\n";
-	    }
+                                                                                
+            if (last_update == TMR2_PWM1_UPDATE)
+            {
+                // set break for first duty cycle change
+                if (duty_cycle2 < duty_cycle1)
+                {
+                    fc = last_cycle + duty_cycle2 * prescale;
+                    last_update = TMR2_PWM2_UPDATE;
+                }
+                else if (duty_cycle2 == duty_cycle1)
+                    last_update |= TMR2_PWM2_UPDATE;
+            }
+            else
+            {
+                last_update = TMR2_PWM2_UPDATE;
+                fc = last_cycle + duty_cycle2 * prescale;
+            }
+                                                                                
 	}
-
-
-      // If TMR2 is configured for pwm'ing,
-      // make sure that the new break cycle is beyond the current one (this
-      // is necessary because the 'duty_cycle' may be larger than the 'period'.)
-      //cout << "TMR2: break_value " <<hex<<break_value << " pwm_break_value " << pwm_break_value <<'\n';
-      if(pwm_break_value >= break_value) {
-	last_update = TMR2_PR2_UPDATE;
-	update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
-	last_cycle = get_cycles().value;
       }
-      else
-	break_value = pwm_break_value;
-
-      guint64 fc = last_cycle + ((break_value>>2) - value.get())  * prescale;
 
       if(fc <= future_cycle)
-	cout << "TMR2: update BUG! future_cycle is screwed\n";
-
+        cout << "TMR2: update BUG! future_cycle " << hex << future_cycle
+            << " <= new breakpoint " << fc << endl;
 
       //cout << "TMR2: update new break at cycle "<<hex<<fc<<'\n';
       get_cycles().reassign_break(future_cycle, fc, this);
 
       future_cycle = fc;
-
 
     }
     else
@@ -1344,7 +1354,12 @@ void TMR2::new_pr2()
 
 void TMR2::current_value()
 {
-  value.put((unsigned int)((future_cycle - get_cycles().value)/ prescale ));
+  unsigned int tmr2_val = (get_cycles().value - last_cycle)/ prescale;
+
+  if (pwm_mode)
+       tmr2_val >>= 2;
+
+  value.put(tmr2_val);
 
   if(value.get()>0xff)
     cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";
@@ -1366,21 +1381,24 @@ void TMR2::callback()
 
       // What caused the callback: PR2 match or duty cyle match ?
 
-      //if((pwm_mode) && (break_value == duty_cycle1))
-      if(last_update == TMR2_PWM1_UPDATE)
+      if( last_update & (TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE))
+      {
+
+        if(last_update & TMR2_PWM1_UPDATE)
 	{
 	  // duty cycle match
 	  //cout << "TMR2: duty cycle match for pwm1 \n";
 	  update_state &= (~TMR2_PWM1_UPDATE);
 	  ccp1con->pwm_match(0);
 	}
-      else if(last_update == TMR2_PWM2_UPDATE)
+        if(last_update == TMR2_PWM2_UPDATE)
 	{
 	  // duty cycle match
 	  //cout << "TMR2: duty cycle match for pwm2 \n";
 	  update_state &= (~TMR2_PWM2_UPDATE);
 	  ccp2con->pwm_match(0);
 	}
+      }
       else
 	{
 	  // matches PR2
