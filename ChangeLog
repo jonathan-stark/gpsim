@@ -1,3 +1,9 @@
+2006-05-19 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.cc: TMR2 counts down not up, period wrong,
+	  fix 2 PWM with same duty cycle
+	* src/p16f8x.cc: CCP1 pin determined by confguration word
+	* src/p16x6x.cc: fix core dump for CCP2
+
 2006-05-17 Scott Dattalo <scott@dattalo.com>
 	* regression/run_regression.sh: added regression test for ccp
 	peripheral. This test only tests capture modes for the CMCON
