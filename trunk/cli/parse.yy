@@ -66,8 +66,9 @@ using namespace std;
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
 
-extern void lexer_setMacroBodyMode(void);
+extern void lexer_setMacroBodyMode();
 extern void lexer_InvokeMacro(Macro *m);
+extern void lexer_setDeclarationMode();
 
 
 #define YYERROR_VERBOSE
@@ -129,7 +130,6 @@ void yyerror(char *message)
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
-//  SymbolList_t             *SymbolList_P;
   PinList_t                *PinList_P;
 
   Macro                    *Macro_P;
@@ -211,6 +211,7 @@ extern int yylex(YYSTYPE* lvalP);
 %token <Boolean_P>   LITERAL_BOOL_T
 %token <Float_P>     LITERAL_FLOAT_T
 %token <String_P>    LITERAL_STRING_T
+%token <ExprList_P>  LITERAL_ARRAY_T
 %token <Symbol_P>    SYMBOL_T
 %token <Pin_P>       PIN_T
 %token <Port_P>      PORT_T
@@ -234,6 +235,13 @@ extern int yylex(YYSTYPE* lvalP);
 %token INDEXERLEFT_T
 %token INDEXERRIGHT_T
 
+%token <i> DECLARE_TYPE
+%token <i> DECLARE_INT_T
+%token <i> DECLARE_FLOAT_T
+%token <i> DECLARE_BOOL_T
+%token <i> DECLARE_CHAR_T
+
+%type  <i>  opt_declaration_type
 
 //%type  <li>   _register
 %type  <co>  bit_flag
@@ -291,6 +299,7 @@ cmd:
      | break_cmd
      | bus_cmd
      | clear_cmd
+     | declaration_cmd
      | disassemble_cmd
      | dump_cmd
      | eval_cmd
@@ -728,6 +737,46 @@ mdef_end
         | LITERAL_STRING_T ENDM         {c_macro.end_define($1->getVal()); delete $1; }
         ;
 
+// Declarations
+// A declaration begins with the backslash delimeter: \
+// and has the syntax:
+//
+//  \ [type] name [= value]
+//
+// Where the optional type is
+//
+//  bool, int, float, or char
+//
+// The name is of the form of a gpsim identifier and can be anything as long as a name
+// of the same type does not already exist. Also, if the name is suffixed with brackets []
+// then this will designate an array.
+//
+// The optional assignment allows the newly declared type to be initialized.
+
+declaration_cmd:
+	'\\' 
+                     {
+		       cout << "declaration\n";
+		       lexer_setDeclarationMode();
+		     }
+        opt_declaration_type
+                     {
+		       cout << " type:" << $3 << endl;
+		     }
+        LITERAL_STRING_T
+                     {
+		       cout << "identifier: " << $5->getVal() << endl;  delete $5;
+		     }
+
+        ;
+
+opt_declaration_type
+        : /* default type */ { $$=0; }
+        | DECLARE_INT_T   { $$ = 1; cout <<"int type\n";}
+        | DECLARE_FLOAT_T { $$ = 2; cout <<"float type\n";}
+        | DECLARE_BOOL_T  { $$ = 3; cout <<"bool type\n";}
+        | DECLARE_CHAR_T  { $$ = 4; cout <<"char type\n";}
+;
 
 // Indirect addressing is supported with the indirect
 // operator '*'. E.g. If register 0x20 contains 0x2e
@@ -875,6 +924,7 @@ literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}
         | LITERAL_FLOAT_T               {$$ = new LiteralFloat($1);}
         | SYMBOL_T                      {$$ = new LiteralSymbol($1);}
         | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T   {$$ = new IndexedSymbol($1,$3);} 
+        | LITERAL_ARRAY_T               {$$ = new LiteralArray($1); }
         ;
 
 %%

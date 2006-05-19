@@ -233,6 +233,7 @@ QUOTEDTOKEN (("\"".*\")|("\'".*'))
 /* Lexer States */
 %}
 %x MACROBODY
+%x DECLARATION
 
 %{
 //************************************************************************
@@ -368,7 +369,16 @@ abort_gpsim_now {
 
 
 
-
+%{
+//========================================================================
+// Declaration Processing
+%}
+<DECLARATION>\n {SetMode(INITIAL); return(recognize(EOLN_T, "end of declaration")); }
+<DECLARATION>"int"   {return recognize(DECLARE_INT_T,  "int type");   }
+<DECLARATION>"float" {return recognize(DECLARE_FLOAT_T,"float type"); }
+<DECLARATION>"bool"  {return recognize(DECLARE_BOOL_T, "bool type");  }
+<DECLARATION>"char"  {return recognize(DECLARE_FLOAT_T,"char type");  }
+<DECLARATION>{IDENTIFIER}  { return process_stringLiteral(yylvalP, yytext); }
 %{
 
 // The 'echo' command is handled by the lexer instead of the
@@ -986,6 +996,15 @@ void lexer_setMacroBodyMode(void)
   if(verbose&4)
     cout << "setting lexer MACROBODY mode\n";
   SetMode(MACROBODY);
+}
+
+//----------------------------------------
+//
+void lexer_setDeclarationMode()
+{
+  if(verbose&4)
+    cout << "setting lexer DECLARATION mode\n";
+  SetMode(DECLARATION);
 }
 
 //----------------------------------------

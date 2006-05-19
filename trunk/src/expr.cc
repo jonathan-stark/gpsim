@@ -28,6 +28,28 @@ Expression:: ~Expression(void)
 }
 
 /*****************************************************************
+ * The LiteralArray class.
+ */
+LiteralArray::LiteralArray(ExprList_t *pExprList)
+{
+  m_pExprList = pExprList;
+}
+
+LiteralArray::~LiteralArray()
+{
+}
+
+Value *LiteralArray::evaluate()
+{
+  return new Boolean(true);
+}
+
+string LiteralArray::toString()
+{
+  return string("FixMe");
+}
+
+/*****************************************************************
  * The LiteralBoolean class.
  */
 LiteralBoolean::LiteralBoolean(Boolean* value_)
