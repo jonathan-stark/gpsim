@@ -1617,13 +1617,13 @@ void ProgramMemoryAccess::putToIndex(unsigned int uIndex, instruction *new_instr
   if(!new_instruction)
     return;
 
- 
-  if(hasValid_opcode_at_index(uIndex)) {
+  //??? TSD 15MAY06 why would you care if the instruction you're replacing is valid or not?
+  //???  if(hasValid_opcode_at_index(uIndex)) {
 
     cpu->program_memory[uIndex] = new_instruction;
 
     new_instruction->update();
-  }
+  //???}
 
 }
 
