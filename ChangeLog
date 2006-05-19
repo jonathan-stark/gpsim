@@ -1,3 +1,12 @@
+2006-05-19 Scott Dattalo <scott@dattalo.com>
+	* src/expr.h, src/expr.cc: Added LiteralArray class for (better)
+	  handling array types.
+	* cli/parse.yy, cli/scan.ll: experimenting with user-created typed
+	  symbols.
+	* src/processor.cc: Removed bogus check that prevented users from
+	  over-writing the Rom contents. If the user wants to over write
+	  ROM then they should be allow to!
+
 2006-05-19 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc: TMR2 counts down not up, period wrong,
 	  fix 2 PWM with same duty cycle

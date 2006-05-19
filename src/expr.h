@@ -87,6 +87,20 @@ public:
 };
 
 //-----------------------------------------------------------------
+class LiteralArray : public Expression {
+
+public:
+
+  LiteralArray(ExprList_t*);
+  virtual ~LiteralArray();
+  virtual Value* evaluate();
+  string toString();
+private:
+  ExprList_t *  m_pExprList;
+
+};
+
+//-----------------------------------------------------------------
 class LiteralBoolean : public Expression {
 
 public:
