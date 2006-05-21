@@ -1,3 +1,8 @@
+2006-05-21 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/p16f87x.h, src/p16f87x.cc: Re-worked 16F871 to be derived from
+	  16C64 rather than 74, because that's the easiest way I could find to
+	  fix the RAM size (it had way too much) and the stray CCP2
+
 2006-05-19 Scott Dattalo <scott@dattalo.com>
 	* src/expr.h, src/expr.cc: Added LiteralArray class for (better)
 	  handling array types.

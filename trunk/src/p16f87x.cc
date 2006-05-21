@@ -58,6 +58,31 @@ void P16F871::create_sfr_map(void)
   if(verbose)
     cout << "creating f871 registers \n";
 
+  add_sfr_register(pir2,    0x0d, RegisterValue(0,0),"pir2");
+  add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
+
+  // Parent classes just set PIR version 1
+  pir_set_2_def.set_pir1(&pir1_2_reg);
+  pir_set_2_def.set_pir2(&pir2_2_reg);
+
+  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+		   new _TXREG(), new _RCREG());
+
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
+
+  intcon = &intcon_reg;
+
+  if (pir2) {
+    pir2->set_intcon(&intcon_reg);
+    pir2->set_pie(&pie2);
+  }
+
+  pie2.pir    = get_pir2();
+  pie2.new_name("pie2");
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
@@ -91,7 +116,23 @@ void P16F871::create_sfr_map(void)
 
 
   // The rest of the A/D definition in 16C74
-  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
+
+  add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
+  add_sfr_register(&adresl, 0x9e, RegisterValue(0,0));
+
+  //1adcon0.analog_port = porta;
+  //1adcon0.analog_port2 = porte;
+
+  adcon0.setAdres(&adres);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setChannel_Mask(7);
+
+  adcon0.new_name("adcon0");
+  adcon1.new_name("adcon1");
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
@@ -102,6 +143,15 @@ void P16F871::create_sfr_map(void)
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
 			 ADCON1::PCFG2 | ADCON1::PCFG3, 0);
+  adcon1.setNumberOfChannels(8);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  adcon1.setIOPin(5, &(*m_porte)[0]);
+  adcon1.setIOPin(6, &(*m_porte)[1]);
+  adcon1.setIOPin(7, &(*m_porte)[2]);
 
   
   adcon1.setChannelConfiguration(0, 0xff);
@@ -144,12 +194,12 @@ void P16F871::create(void)
   if(verbose)
     cout << " f871 create \n";
 
-  P16C74::create();
+  P16C64::create();
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(pir2);
   e->set_cpu(this);
-  e->initialize(128);
+  e->initialize(64);
   //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
@@ -198,10 +248,13 @@ void P16F871::create_symbols(void)
 }
 
 P16F871::P16F871(void)
+  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
 
+  pir1 = &pir1_2_reg;
+  pir2 = &pir2_2_reg;
 
 }
 
