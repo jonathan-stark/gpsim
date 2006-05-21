@@ -29,13 +29,32 @@ Boston, MA 02111-1307, USA.  */
 class IOPORT;
 
 
-class P16F871 : public P16C74
+class P16F871 : public P16C64   // The 74 has too much RAM and too many CCPs
 {
  public:
+  // XXX
+  // This pir1_2, pir2_2 stuff is not particularly pretty.  It would be
+  // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
+  // PIR2v2, but C++ only supports covariance in member function return
+  // values.
+  PIR1v2 pir1_2_reg;
+  PIR2v2 pir2_2_reg;
+  PIR_SET_2 pir_set_2_def;
 
+  virtual PIR *get_pir1() { return (&pir1_2_reg); }
+  virtual PIR *get_pir2() { return (&pir2_2_reg); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
+
+  ADCON0_withccp adcon0;
+  ADCON1 adcon1;
+  ADRES  adres;
   ADRES  adresl;
 
+  USART_MODULE14 usart;
 
+  // That now brings us up to spec with the 74 as far as we need to be
+
+  
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16F871_;};
