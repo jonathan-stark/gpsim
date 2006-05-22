@@ -1,3 +1,20 @@
+2006-05-21 Scott Dattalo <scott@dattalo.com>
+	* modules/stimuli.h, modules/stimuli.cc: New files for 'extended'
+	stimuli. Currently only an asynchronous stimulus replacement
+	called 'pulsegen' has been created.
+	* modules/Makefile.am, modules/gpsim_modules.cc: Added pulsegen to
+	the default list of modules.
+	* regression/run_regression.sh, regression/wavegen/16f877a.lkr,
+	regression/wavegen/Makefile, regression/wavegen/pulsegen.asm,
+	regression/wavegen/pulsegen.stc: New regression test to test the
+	pulsegen module. (This test is really just a copy of the ccp
+	regression test except that the asynchronous stimulus has been
+	replaced with a pulsegen module).
+	* src/symbol.cc: Module symbol descriptions were not getting
+	printed 
+	* cli/cmd_break.cc: removed bogus warning about cycle break points
+	not getting set.
+	
 2006-05-21 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/p16f87x.h, src/p16f87x.cc: Re-worked 16F871 to be derived from
 	  16C64 rather than 74, because that's the easiest way I could find to

@@ -64,8 +64,6 @@ ${RT} txisr_test sim
 
 ${RT} tmr0_16bit sim
 
-#${RT} ccp ccp
-
 ${RT} switch_test sim
 
 ${RT} p18f sim
@@ -89,3 +87,6 @@ ${RT} a2d sim_452
 ${RT} ttl sim_377
 
 ${RT} ccp sim_877a
+
+${RT} wavegen sim
+
