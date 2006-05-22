@@ -194,7 +194,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
   // See if the expression supports break points. If it does, the break points
   // will get set and the expressions deleted.
   int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), pSecond) : -1;
-  if (bpn == -1) {
+  if (bpn == -1 && co->value!=CYCLE) {
     GetUserInterface().DisplayMessage("break cannot be set on %s\n",
       pFirst->toString().c_str());
   }
