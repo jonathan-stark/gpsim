@@ -1252,6 +1252,12 @@ string module_symbol::description()
   return module ? module->description() : string("no description");
 }
 
+string module_symbol::toString()
+{
+  return module ? module->toString() : name();
+}
+
+
 //------------------------------------------------------------------------
 
 attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
@@ -1386,11 +1392,6 @@ void attribute_symbol::get(Value **v)
     *v = attribute;
 }
 
-
-string module_symbol::toString()
-{
-  return name();
-}
 
 void attribute_symbol::set_xref(Value *v)
 {
