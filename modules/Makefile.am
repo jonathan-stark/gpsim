@@ -14,6 +14,7 @@ libgpsim_modules_la_SOURCES = \
 	push_button.cc push_button.h \
 	encoder.cc encoder.h \
 	i2c-eeprom.cc i2c-eeprom.h \
+	stimuli.h stimuli.cc \
 	ttl.cc ttl.h
 
 ##	paraface.cc paraface.h \  # TSD - removed 16APR06

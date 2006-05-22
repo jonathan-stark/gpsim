@@ -50,10 +50,10 @@ support:
 #include "../config.h"    // get the definition for HAVE_GUI
 
 #include "../src/modules.h"
+
+//#ifdef HAVE_GUI
 #include "resistor.h"
 #include "usart.h"
-
-#ifdef HAVE_GUI
 #ifndef _WIN32
 //#include "paraface.h"
 #endif
@@ -63,8 +63,9 @@ support:
 #include "push_button.h"
 //#include "video.h"
 #include "encoder.h"
+#include "stimuli.h"
 #include "ttl.h"
-#endif
+//#endif
 
 /*
 class Module_Types
@@ -78,14 +79,7 @@ public:
 Module_Types available_modules[] =
 {
 
-  { {"pullup",           "pu"},   PullupResistor::pu_construct },
-  { {"pulldown",         "pd"},   PullupResistor::pd_construct },
-  { {"pushbutton",       "pb"},   PushButton::construct },
-
-  // USART
-  { {"usart",            "usart"}, USARTModule::USART_construct},
-
-#ifdef HAVE_GUI
+  //#ifdef HAVE_GUI
 #ifndef _WIN32
   // Parallel port interface
   /*
@@ -108,6 +102,12 @@ Module_Types available_modules[] =
   { {"led_7segments", "led7s"}, Leds::Led_7Segments::construct},
   { {"led", "led"}, Leds::Led::construct},
 
+  { {"pullup",           "pu"},   PullupResistor::pu_construct },
+  { {"pulldown",         "pd"},   PullupResistor::pd_construct },
+  { {"pushbutton",       "pb"},   PushButton::construct },
+
+  { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },
+
   /*
     TSD Removed 17APR06
   // Video
@@ -116,9 +116,12 @@ Module_Types available_modules[] =
   // Encoder
   { {"Encoder", "encoder"}, Encoder::construct},
 
+  // USART
+  { {"usart",            "usart"}, USARTModule::USART_construct},
+
   // TTL devices
   { {"TTL377", "ttl377"}, TTL::TTL377::construct},
-#endif
+  //#endif
 
   // No more modules
   { {0,0},0}
