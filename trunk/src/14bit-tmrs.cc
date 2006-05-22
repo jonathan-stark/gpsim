@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2006 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -112,8 +113,12 @@ void CCPRL::start_pwm_mode()
   //cout << "CCPRL: starting pwm mode\n";
 
   ccprh->pwm_mode = 1;
+}
+void CCPRL::stop_pwm_mode()
+{
+  //cout << "CCPRL: stopping pwm mode\n"; 
 
-
+  ccprh->pwm_mode = 0;
 }
 
 //--------------------------------------------------
@@ -144,6 +149,14 @@ CCPRH::CCPRH()
   pwm_value = 0;
 }
 
+// put_value allows PWM code to put data
+void CCPRH::put_value(unsigned int new_value)
+{
+      trace.raw(write_trace.get() | value.get());
+      //trace.register_write(address,value.get());
+
+      value.put(new_value);
+}
 void CCPRH::put(unsigned int new_value)
 {
 
@@ -151,10 +164,7 @@ void CCPRH::put(unsigned int new_value)
 
   if(pwm_mode == 0)   // In pwm_mode, CCPRH is a read-only register.
     {
-      trace.raw(write_trace.get() | value.get());
-      //trace.register_write(address,value.get());
-
-      value.put(new_value);
+      put_value(new_value);
 
       if(ccprl && ccprl->tmrl && ccprl->tmrl->compare_mode)
 	ccprl->start_compare_mode();   // Actually, re-start with new capture value.
@@ -166,11 +176,9 @@ unsigned int CCPRH::get()
 {
   //cout << "CCPRH get\n";
 
-  unsigned int read_value =  (pwm_mode) ? (pwm_value >>2) : value.get();
-
   trace.raw(read_trace.get() | value.get());
   //trace.register_read(address, read_value);
-  return read_value;
+  return value.get();
 }
 
 //--------------------------------------------------
@@ -387,7 +395,6 @@ void CCPCON::pwm_match(int level)
   if( (value.get() & PWM0) == PWM0) {
 
     m_cOutputState = level ? '1' : '0';
-    m_PinModule->updatePinModule();
 
     // if the level is 'high', then tmr2 == pr2 and the pwm cycle
     // is starting over. In which case, we need to update the duty
@@ -397,7 +404,11 @@ void CCPCON::pwm_match(int level)
     if(level) {
       ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
       tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
+      ccprl->ccprh->put_value(ccprl->value.get());
+      if (!ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
+	m_cOutputState = '0';
     }
+    m_PinModule->updatePinModule();
 
     //cout << "iopin should change\n";
   }  else
@@ -424,7 +435,10 @@ void CCPCON::put(unsigned int new_value)
     case ALL_OFF2:
     case ALL_OFF3:
       if (ccprl)
+      {
 	ccprl->stop_compare_mode();
+	ccprl->stop_pwm_mode();
+      }
       if (tmr2)
 	tmr2->stop_pwm(address);
       m_bInputEnabled = false;
@@ -434,6 +448,7 @@ void CCPCON::put(unsigned int new_value)
     case CAP_RISING_EDGE:
       edges = 0;
       ccprl->stop_compare_mode();
+      ccprl->stop_pwm_mode();
       tmr2->stop_pwm(address);
       m_bInputEnabled = true;
       m_bOutputEnabled = false;
@@ -442,6 +457,7 @@ void CCPCON::put(unsigned int new_value)
     case CAP_RISING_EDGE4:
       edges &= 3;
       ccprl->stop_compare_mode();
+      ccprl->stop_pwm_mode();
       tmr2->stop_pwm(address);
       m_bInputEnabled = true;
       m_bOutputEnabled = false;
@@ -449,6 +465,7 @@ void CCPCON::put(unsigned int new_value)
 
     case CAP_RISING_EDGE16:
       ccprl->stop_compare_mode();
+      ccprl->stop_pwm_mode();
       tmr2->stop_pwm(address);
       m_bInputEnabled = true;
       m_bOutputEnabled = false;
@@ -460,6 +477,7 @@ void CCPCON::put(unsigned int new_value)
     case COM_TRIGGER:
       ccprl->tmrl->ccpcon = this;
       ccprl->start_compare_mode();
+      ccprl->stop_pwm_mode();
       tmr2->stop_pwm(address);
 
       if(adcon0)
@@ -475,8 +493,10 @@ void CCPCON::put(unsigned int new_value)
     case PWM2:
     case PWM3:
       ccprl->stop_compare_mode();
+/* do this when TMR2 == PR2
       ccprl->start_pwm_mode();
       tmr2->pwm_dc( ccprl->ccprh->pwm_value, address);
+*/
       m_bInputEnabled = false;
       m_bOutputEnabled = true;
       m_cOutputState = '0';
@@ -947,9 +967,9 @@ void PR2::put(unsigned int new_value)
 
   if(value.get() != new_value)
     {
-      value.put(new_value);
       if (tmr2)
-	tmr2->new_pr2();
+	tmr2->new_pr2(new_value);
+      value.put(new_value);
     }
   else
     value.put(new_value);
@@ -989,7 +1009,6 @@ TMR2::TMR2()
   update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
   pwm_mode = 0;
   value.put(0);
-  synchronized_cycle=0;
   future_cycle = 0;
   prescale=1;
   new_name("TMR2");
@@ -1025,11 +1044,11 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
 
       duty_cycle1 = dc;
 
-      // Update the cycle break iff this is the first time to go into pwm mode
+      // Update the cycle break if this is the first time to go into pwm mode
       if( (pwm_mode & TMR2_PWM1_UPDATE) == 0)
 	{
 	  pwm_mode |= TMR2_PWM1_UPDATE;
-	  update();
+//wait for next TMR2 update	  update();	
 	}
     }
   else if(ccp_address == ccp2con->address)
@@ -1038,12 +1057,12 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
 
       duty_cycle2 = dc;
 
-      // Update the cycle break iff this is the first time to go into pwm mode
+      // Update the cycle break if this is the first time to go into pwm mode
       if( (pwm_mode & TMR2_PWM2_UPDATE) == 0)
 	{
 	  pwm_mode |= TMR2_PWM2_UPDATE;
 
-	  update();
+//wait for next TMR2 update	  update();	
 	}
     }
   else
@@ -1068,15 +1087,20 @@ void TMR2::stop_pwm(unsigned int ccp_address)
     {
       // cout << "TMR2:  stopping pwm mode with ccp1.\n";
       pwm_mode &= ~TMR2_PWM1_UPDATE;
+      if(last_update & TMR2_PWM1_UPDATE)
+         update_state &= (~TMR2_PWM1_UPDATE);
+
     }
   else if(ccp_address == ccp2con->address)
     {
       // cout << "TMR2:  stopping pwm mode with ccp2.\n";
       pwm_mode &= ~TMR2_PWM2_UPDATE;
+      if(last_update & TMR2_PWM2_UPDATE)
+         update_state &= (~TMR2_PWM2_UPDATE);
     }
 
-  if(pwm_mode ^ old_pwm)
-    update();
+  if((pwm_mode ^ old_pwm) && future_cycle && t2con->get_tmr2on())
+    update(update_state);
 
 }
 
@@ -1092,7 +1116,7 @@ void TMR2::stop_pwm(unsigned int ccp_address)
 void TMR2::update(int ut)
 {
 
-  //cout << "TMR2 update. cpu cycle " << cycles.value <<'\n';
+  //cout << "TMR2 update. cpu cycle " << hex << cycles.value <<'\n';
 
   if(t2con->get_tmr2on()) {
 
@@ -1118,16 +1142,12 @@ void TMR2::update(int ut)
           fc = last_cycle + break_value * prescale;
       }
 
-cout << "\tRRR break_value=" << hex << break_value << " TMR2=" <<value.get()
-        << " prescale=" << prescale << endl;
-
-
       if(pwm_mode & ut & TMR2_PWM1_UPDATE) {
 
 	// We are in pwm mode... So let's see what happens first: a pr2 compare
 	// or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	if( (duty_cycle1 > (value.get()*4*prescale) ) && (duty_cycle1 < break_value))
+	if( (duty_cycle1 > (value.get()*4) ) && (duty_cycle1 < break_value))
 	  {
 	    //cout << "TMR2:PWM1 update\n";
 	    last_update = TMR2_PWM1_UPDATE;
@@ -1140,7 +1160,7 @@ cout << "\tRRR break_value=" << hex << break_value << " TMR2=" <<value.get()
 	  // We are in pwm mode... So let's see what happens first: a pr2 compare
 	  // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	  if( (duty_cycle2 > (value.get()*4*prescale) ) && (duty_cycle2 < break_value))
+	  if( (duty_cycle2 > (value.get()*4) ) && (duty_cycle2 < break_value))
 	  {
 	      //cout << "TMR2:PWM2 update\n";
                                                                                 
@@ -1164,14 +1184,16 @@ cout << "\tRRR break_value=" << hex << break_value << " TMR2=" <<value.get()
 	}
       }
 
-      if(fc <= future_cycle)
-        cout << "TMR2: update BUG! future_cycle " << hex << future_cycle
-            << " <= new breakpoint " << fc << endl;
+      if(fc < future_cycle)
+        cout << "TMR2: update note: new breakpoint=" << hex << fc <<
+           " before old breakpoint " << future_cycle << endl;
 
-      //cout << "TMR2: update new break at cycle "<<hex<<fc<<'\n';
-      get_cycles().reassign_break(future_cycle, fc, this);
-
-      future_cycle = fc;
+      if (fc != future_cycle)
+      {
+          // cout << "TMR2: update new break at cycle "<<hex<<fc<<'\n';
+          get_cycles().reassign_break(future_cycle, fc, this);
+          future_cycle = fc;
+      }
 
     }
     else
@@ -1188,6 +1210,9 @@ cout << "\tRRR break_value=" << hex << break_value << " TMR2=" <<value.get()
 }
 void TMR2::put(unsigned int new_value)
 {
+  current_value();
+
+  unsigned int old_value = value.get();
 
 
   trace.raw(write_trace.get() | value.get());
@@ -1201,15 +1226,62 @@ void TMR2::put(unsigned int new_value)
       // which means there's a cycle break point set on TMR2 that needs to
       // be moved to a new cycle.
 
-      last_cycle = get_cycles().value;
-      guint64 fc = last_cycle + ((pr2->value.get() - value.get()) & 0xff) * prescale;
+      guint64 current_cycle = get_cycles().value;
+      unsigned int delta = (future_cycle - last_cycle);
+      int shift = (new_value - old_value) * prescale;
 
-      get_cycles().reassign_break(future_cycle, fc, this);
+      if (pwm_mode)
+	shift <<= 2;
+  
+      // set cycle when tmr2 would have been zero
 
-      future_cycle = fc;
+      last_cycle = current_cycle - shift;
+      unsigned int now = (current_cycle - last_cycle);
+      
 
-      // 'clear' the post scale counter. (I've actually implemented the post scale counter
-      // as a count-down counter, so 'clearing it' means resetting it to the starting point.
+      guint64 fc;
+
+      /*
+	Three possible cases
+	   1> TMR2 is still before the next break point.
+		Adjust the breakpoint to ocurr at correct TMR2 value
+	   2> TMR2 is now greater the PR2
+		Assume TMR2 must count up to 0xff, roll-over and then
+		we are back in business. High CCP outputs stay high.
+	   3> TMR2 is now less than PR2 but greater than a CCP duty cycle point.
+		The CCP output stays as the duty cycle comparator does not 
+		match on this cycle.
+      */
+
+      if (now < delta) // easy case, just shift break.
+      {
+          fc = last_cycle + delta;
+          get_cycles().reassign_break(future_cycle, fc, this);
+          future_cycle = fc;
+      }
+      else if (now >= break_value * prescale)  // TMR2 now greater than PR2
+      {
+        // set break to when TMR2 will overflow
+	last_update |= TMR2_WRAP;
+	if (pwm_mode)
+	    fc = last_cycle + (0x100 * prescale << 2);
+	else
+	    fc = last_cycle + 0x100 * prescale;
+        get_cycles().reassign_break(future_cycle, fc, this);
+        future_cycle = fc;
+      }
+      else	// new break < PR2 but > duty cycle break
+      {
+          update(update_state);
+      }
+
+
+
+     /* 
+	'clear' the post scale counter. (I've actually implemented the 
+	post scale counter as a count-down counter, so 'clearing it' 
+	means resetting it to the starting point.
+     */
       if (t2con)
 	post_scale = t2con->get_post_scale();
     }
@@ -1220,10 +1292,6 @@ unsigned int TMR2::get()
 
   if(t2con->get_tmr2on())
     {
-      ///int new_value = (cycles.value - last_cycle)/ prescale;
-
-      ///value = new_value;
-
       current_value();
     }
 
@@ -1238,10 +1306,6 @@ unsigned int TMR2::get_value()
 
   if(t2con->get_tmr2on())
     {
-      ///int new_value = (cycles.value - last_cycle)/ prescale;
-
-      ///value = new_value;
-
       current_value();
     }
 
@@ -1251,7 +1315,7 @@ unsigned int TMR2::get_value()
 void TMR2::new_pre_post_scale()
 {
 
-  //cout << "T2CON was written to, so update TMR2\n";
+  //cout << "T2CON was written to, so update TMR2 " << t2con->get_tmr2on() << "\n";
 
   if(!t2con->get_tmr2on()) {
     // TMR2 is not on. If has just been turned off, clear the callback breakpoint.
@@ -1259,9 +1323,13 @@ void TMR2::new_pre_post_scale()
     if(future_cycle) {
       get_cycles().clear_break(this);
       future_cycle = 0;
-      return;
     }
+    return;
   }
+
+  unsigned int old_prescale = prescale;
+  prescale = t2con->get_pre_scale();
+  post_scale = t2con->get_post_scale();
 
   if(future_cycle)
     {
@@ -1271,85 +1339,103 @@ void TMR2::new_pre_post_scale()
 
       // Get the current value of TMR2
       ///value = (cycles.value - last_cycle)/prescale;
+
       current_value();
 
       //cout << "cycles " << cycles.value.lo  << " old prescale " << prescale;
 
-      prescale = t2con->get_pre_scale();
 
       //cout << " prescale " << prescale;
 
-      // Now compute the 'last_cycle' as though if TMR2 had been running on the 
-      // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
-      // cycle counter when TMR2 last rolled over.
 
-      last_cycle = get_cycles().value - value.get() * prescale;
-      //cout << " effective last_cycle " << last_cycle << '\n';
+      if (prescale != old_prescale)	// prescaler value change
+      {
+	// togo is number of cycles to next callback based on new prescaler.
+	guint64 togo = (future_cycle - get_cycles().value) * prescale / old_prescale;
 
-      //cout << "tmr2's current value " << value << '\n';
+	if (!togo)	// I am not sure this can happen RRR
+	    callback();
+	else
+	{
+	   guint64 fc = togo + get_cycles().value;
 
-      guint64 fc = get_cycles().value;
-
-      if(pr2->value.get() == value.get())
-	fc += 0x100 * prescale;
-      else
-	fc +=  ((pr2->value.get() - value.get()) & 0xff) * prescale;
-
-      //cout << "moving break from " << future_cycle << " to " << fc << '\n';
-
-      get_cycles().reassign_break(future_cycle, fc, this);
-
-      future_cycle = fc;
+          get_cycles().reassign_break(future_cycle, fc, this);
+          future_cycle = fc;
+	}
+      }
     }
   else
     {
       //cout << "TMR2 was off, but now it's on.\n";
 
-      prescale = t2con->get_pre_scale();
-      if(pr2->value.get() == value.get())
-	future_cycle = 0x100 * prescale;
+      if (value.get() == pr2->value.get()) // TMR2 == PR2
+      {
+        future_cycle = get_cycles().value;
+        get_cycles().set_break(future_cycle, this);
+	callback();
+      }
+      else if (value.get() > pr2->value.get()) // TMR2 > PR2
+      {
+	cout << "Warning TMR2 turned on with TMR2 greater than PR2\n";
+	// this will cause TMR2 to wrap
+        future_cycle  = get_cycles().value + 
+		(1 + pr2->value.get() + (0x100 -  value.get())) * prescale;
+        get_cycles().set_break(future_cycle, this);
+      }
       else
-	future_cycle =  ((pr2->value.get() - value.get()) & 0xff) * prescale;
-
-      last_cycle = get_cycles().value;
-      future_cycle += get_cycles().value;
-      get_cycles().set_break(future_cycle, this);
-    }
-
-  post_scale = t2con->get_post_scale();
+      {
+          future_cycle = get_cycles().value + 1;
+          get_cycles().set_break(future_cycle, this);
+          update(update_state);
+      }
+  }
 
 }
 
-void TMR2::new_pr2()
+void TMR2::new_pr2(unsigned int new_value)
 {
 
   if(t2con->get_tmr2on())
     {
-      //update the tmr2 break point...
-      ///      value = (cycles.value - last_cycle)/ prescale;
-      current_value();
 
-      // Get the current value of the prescale counter (because
-      // writing to pr2 doesn't affect the pre/post scale counters).
+      unsigned int cur_break = (future_cycle - last_cycle)/prescale;
+      unsigned int new_break = (pwm_mode)? (1 + new_value) << 2 : 1 + new_value;
+      unsigned int now_cycle = (get_cycles().value - last_cycle) / prescale;
 
-      guint64 curr_prescale = value.get() * prescale - (get_cycles().value - last_cycle);
+      guint64 fc = last_cycle;
 
-      guint64 fc = get_cycles().value + curr_prescale;
+      /*
+	PR2 change casses
 
-      if(pr2->value.get() == value.get())
-	{  // May wanta ignore the == case and instead allow the cycle break handle it...
-	  fc += 0x100 * prescale;
-	  last_cycle += 0x100 * prescale;
-	}
-      else
-	fc +=  ((pr2->value.get() - value.get()) & 0xff) * prescale;
+	1> TMR2 greater than new PR2
+		TMR2 wraps through 0xff
+	2> New PR2 breakpoint less than current breakpoint or
+	   current break point due to PR2
+		Change breakpoint to new value based on PR2
+	3> Other breakpoint < PR2 breakpoint
+		No need to do anything.
+     */
 
-      get_cycles().reassign_break(future_cycle, fc, this);
 
-      future_cycle = fc;
+      if (now_cycle > new_break)	// TMR2 > PR2 do wrap
+      {
+        // set break to when TMR2 will overflow
+	last_update |= TMR2_WRAP;
+	if (pwm_mode)
+	    fc += (0x100 * prescale << 2);
+	else
+	    fc += 0x100 * prescale;
+        get_cycles().reassign_break(future_cycle, fc, this);
+        future_cycle = fc;
+      }
+      else if (cur_break == break_value ||	// breakpoint due to pr2
+	       new_break < cur_break)		// new break less than current
+      {
+	fc += new_break * prescale;
+        get_cycles().reassign_break(future_cycle, fc, this);
+        future_cycle = fc;
+      }
     }
-
-
 }
 
 void TMR2::current_value()
@@ -1359,10 +1445,10 @@ void TMR2::current_value()
   if (pwm_mode)
        tmr2_val >>= 2;
 
-  value.put(tmr2_val);
+  value.put(tmr2_val & 0xff);
 
-  if(value.get()>0xff)
-    cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";
+  if(tmr2_val > 0x100)	// Can get to 0x100 during transition
+   cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";
 }
 
 // TMR2 callback is called when the cycle counter hits the break point that
@@ -1381,7 +1467,13 @@ void TMR2::callback()
 
       // What caused the callback: PR2 match or duty cyle match ?
 
-      if( last_update & (TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE))
+      if (last_update & TMR2_WRAP) // TMR2 > PR2 
+      {
+	last_update &= ~TMR2_WRAP;
+	// This (implicitly) resets the timer to zero:
+	last_cycle = get_cycles().value;
+      }
+      else if( last_update & (TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE))
       {
 
         if(last_update & TMR2_PWM1_UPDATE)
@@ -1391,7 +1483,7 @@ void TMR2::callback()
 	  update_state &= (~TMR2_PWM1_UPDATE);
 	  ccp1con->pwm_match(0);
 	}
-        if(last_update == TMR2_PWM2_UPDATE)
+        if(last_update & TMR2_PWM2_UPDATE)
 	{
 	  // duty cycle match
 	  //cout << "TMR2: duty cycle match for pwm2 \n";
@@ -1408,11 +1500,11 @@ void TMR2::callback()
 	  // This (implicitly) resets the timer to zero:
 	  last_cycle = get_cycles().value;
 
-	  if(pwm_mode & TMR2_PWM1_UPDATE)
-	    ccp1con->pwm_match(1);
+          if ((ccp1con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
+               ccp1con->pwm_match(1);
 
-	  if(pwm_mode & TMR2_PWM2_UPDATE)
-	    ccp2con->pwm_match(1);
+          if ((ccp2con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
+               ccp2con->pwm_match(1);
 
 	  if(--post_scale < 0)
 	    {
