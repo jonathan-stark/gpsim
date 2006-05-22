@@ -57,6 +57,7 @@ public:
 
   CCPRH();
   void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
   unsigned int get();
 
 };
@@ -74,6 +75,7 @@ public:
   void start_compare_mode();
   void stop_compare_mode();
   void start_pwm_mode();
+  void stop_pwm_mode();
   void assign_tmr(TMRL *ptmr);
   CCPRL();
 };
@@ -349,7 +351,8 @@ public:
     TMR2_PWM1_UPDATE = 1<<0,       // wrt ccp1
     TMR2_PWM2_UPDATE = 1<<1,       // wrt ccp2
     TMR2_PR2_UPDATE  = 1<<2,       // update pr2 match
-    TMR2_DONTCARE_UPDATE = 7       // whatever comes next
+    TMR2_WRAP        = 1<<3,	   // wrap TMR2
+    TMR2_DONTCARE_UPDATE = 0xf     // whatever comes next
   };
 
   int pwm_mode;
@@ -365,7 +368,6 @@ public:
   int
     post_scale;
   guint64
-    synchronized_cycle,
     last_cycle,
     future_cycle;
 
@@ -383,7 +385,7 @@ public:
   unsigned int get();
   void start();
   void new_pre_post_scale();
-  void new_pr2();
+  void new_pr2(unsigned int new_value);
   void current_value();
   void update(int ut = TMR2_DONTCARE_UPDATE);
   void pwm_dc(unsigned int dc, unsigned int ccp_address);

@@ -88,5 +88,7 @@ ${RT} ttl sim_377
 
 ${RT} ccp sim_877a
 
+${RT} ccp sim_pwm877a
+
 ${RT} wavegen sim
 
