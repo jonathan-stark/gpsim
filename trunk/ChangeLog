@@ -1,3 +1,6 @@
+2006-05-23 Borut Razem <borut.razem@siol.net>
+	* doc/gpsimWin32.html: CVS replaced with Subversion
+
 2006-05-22 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.h, src/14bit-tmrs.cc:
 	- PWM fixes CCP high if duty cycle 0, CCPRnH loaded on TMR2
@@ -5,6 +8,7 @@
 	  and PR2::put rewrite
 	* regression/ccp/pwm_877a.asm, regression/ccp/Makefile,
 	  regression/run_regression.sh: PWM regression
+
 2006-05-21 Scott Dattalo <scott@dattalo.com>
 	* modules/stimuli.h, modules/stimuli.cc: New files for 'extended'
 	stimuli. Currently only an asynchronous stimulus replacement
