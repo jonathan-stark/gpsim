@@ -22,6 +22,7 @@ EXPORTS
     ??0Integer@@QAE@ABV0@@Z
     ??0Integer@@QAE@PBD_J0@Z
     ??0Interface@@QAE@PAX@Z
+    ??0LiteralArray@@QAE@PAV?$list@PAVExpression@@V?$allocator@PAVExpression@@@std@@@std@@@Z
     ??0LiteralBoolean@@QAE@PAVBoolean@@@Z
     ??0LiteralFloat@@QAE@PAVFloat@@@Z
     ??0LiteralInteger@@QAE@PAVInteger@@@Z
@@ -248,6 +249,7 @@ EXPORTS
     ?computed_goto@Program_Counter@@UAEXI@Z
     ?construct@Stimulus_Node@@SAPAV1@PBD@Z
     ?convertToNew@PinGeometry@@QAEXXZ
+    ?copy@Boolean@@UAEPAVValue@@XZ
     ?copy@Float@@UAEPAVValue@@XZ
     ?copy@Integer@@UAEPAVValue@@XZ
     ?copy@String@@UAEPAVValue@@XZ
