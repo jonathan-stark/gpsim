@@ -1,3 +1,7 @@
+2006-05-24 Borut Razem <borut.razem@siol.net>
+	* modules/makefile.mingw, modules/modules.vcproj: added stimuli.*
+	* plat/win32/libgpsim: MSVC sync
+
 2006-05-23 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html: CVS replaced with Subversion
 

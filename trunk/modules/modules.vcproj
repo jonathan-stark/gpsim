@@ -212,25 +212,6 @@
 				RelativePath="..\plat\win32\modules.def">
 			</File>
 			<File
-				RelativePath=".\paraface.cc">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HAVE_GUI"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HAVE_GUI"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\push_button.cc">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -249,6 +230,23 @@
 			</File>
 			<File
 				RelativePath=".\resistor.cc">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="HAVE_GUI"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="HAVE_GUI"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\stimuli.cc">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -330,21 +328,6 @@
 				RelativePath=".\logic.h">
 			</File>
 			<File
-				RelativePath=".\paraface.h">
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="TRUE">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\push_button.h">
 			</File>
 			<File
@@ -354,6 +337,9 @@
 					<Tool
 						Name="VCCustomBuildTool"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\stimuli.h">
 			</File>
 			<File
 				RelativePath=".\switch.h">
