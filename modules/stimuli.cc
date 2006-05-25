@@ -136,6 +136,46 @@ namespace ExtendedStimuli {
   }
 
   //----------------------------------------------------------------------
+  // StimulusBase
+  //----------------------------------------------------------------------
+  StimulusBase::StimulusBase(const char *_name, const char *_desc)
+    : Module(_name,_desc)
+  {
+    // Default module attributes.
+    initializeAttributes();
+
+    // The I/O pin
+    m_pin = new IO_bi_directional((name() + ".pin").c_str());
+    m_pin->update_direction(IOPIN::DIR_OUTPUT,true);
+
+
+  }
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+
+  void StimulusBase::callback_print()
+  {
+    printf("ExtendedStimulus:%s CallBack ID %d\n",name().c_str(),CallBackID);
+  }
+
+
+  void StimulusBase::create_iopin_map()
+  {
+    create_pkg(1);
+    assign_pin(1, m_pin);
+  }
+
+
+
+  //----------------------------------------------------------------------
+  // FileGen Module
+  //----------------------------------------------------------------------
+  //FileGen::FileGen
+
+
+  //----------------------------------------------------------------------
+  // PulseGen Module
   //----------------------------------------------------------------------
 
   Module *PulseGen::construct(const char *new_name)
@@ -149,7 +189,7 @@ namespace ExtendedStimuli {
   //----------------------------------------------------------------------
 
   PulseGen::PulseGen(const char *_name=0)
-    : Module(_name, "\
+    : StimulusBase(_name, "\
 Pulse Generator\n\
  Attributes:\n\
  .set - time when the pulse will drive high\n\
@@ -157,13 +197,6 @@ Pulse Generator\n\
  .period - time the pulse stream is repeated\n\
 "), m_future_cycle(0), m_start_cycle(0)
   {
-    // Default module attributes.
-    initializeAttributes();
-
-    // The I/O pin
-    m_pin = new IO_bi_directional((name() + ".pin").c_str());
-    m_pin->update_direction(IOPIN::DIR_OUTPUT,true);
-
     // Attributes for the pulse generator.
     m_set = new PulseAttribute(this, "set","r/w cycle time when ouput will be driven high", 5.0);
     m_clear = new PulseAttribute(this, "clear","r/w cycle time when ouput will be driven low",0.0);
@@ -187,21 +220,6 @@ Pulse Generator\n\
 
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
-  void PulseGen::create_iopin_map()
-  {
-    create_pkg(1);
-    assign_pin(1, m_pin);
-  }
-
-  //----------------------------------------------------------------------
-  //----------------------------------------------------------------------
-
-  void PulseGen::callback_print()
-  {
-    printf("PulseGen:%s CallBack ID %d\n",name().c_str(),CallBackID);
-  }
-
-
   void PulseGen::callback()
   {
     guint64 currCycle = get_cycles().get();
@@ -384,5 +402,64 @@ Pulse Generator\n\
     sOut << ends;
     return sOut.str();
   }
+
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  class FileNameAttribute : public String
+  {
+  public:
+    FileNameAttribute(FileStimulus *, const char *_name, const char * desc);
+  private:
+    FileStimulus *m_Parent;
+  };
+
+  FileNameAttribute::FileNameAttribute(FileStimulus *pParent, 
+				       const char *_name,
+				       const char * _desc)
+    : String(_name,"",_desc), m_Parent(pParent)
+  {
+
+  }
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  FileStimulus::FileStimulus(const char *_name)
+    : StimulusBase(_name, "\
+File Stimulus\n\
+ Attributes:\n\
+ .file - file name\n\
+"), m_future_cycle(0)
+  {
+    // Attributes for the pulse generator.
+    m_fileName = new FileNameAttribute(this, "file","name of file or pipe supplying data");
+
+    add_attribute(m_fileName);
+
+  }
+
+
+  FileStimulus::~FileStimulus()
+  {
+
+  }
+
+  void FileStimulus::callback()
+  {
+  }
+
+
+  string FileStimulus::toString()
+  {
+
+    ostringstream sOut;
+    
+    sOut << "fileStimulus toString method" << endl;
+
+    sOut << ends;
+    return sOut.str();
+
+  }
+
 
 } // end of namespace PulseGenerator

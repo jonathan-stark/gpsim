@@ -28,7 +28,11 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 #include "../src/modules.h"
 
+#ifdef HAVE_GUI
 #include <gtk/gtk.h>
+#else
+struct GtkToggleButton;
+#endif
 
 namespace Switches {
   class SwitchPin;       // defined and implemented in switch.cc
