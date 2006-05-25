@@ -191,11 +191,14 @@ static char * not_pixmap[] = {
 "   .............................",
 " ..............................."};
 
+#include <gtk/gtk.h>
+
+#endif
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
 
-#include <gtk/gtk.h>
 
 #include "logic.h"
 #include "../src/packages.h"
@@ -236,8 +239,9 @@ void Logic_Input::setDrivenState( bool new_state)
 
 LogicGate::LogicGate(void)
 {
+#ifdef HAVE_GUI
   pixmap=0;
-
+#endif
 }
 
 LogicGate::~LogicGate(void)
@@ -329,6 +333,7 @@ void LogicGate::create_iopin_map(void)
 
 }
 
+#ifdef HAVE_GUI
 static gboolean expose(GtkWidget *widget,
 		GdkEventExpose *event,
 		LogicGate *lg)
@@ -374,6 +379,7 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
     		(GtkSignalFunc) expose,this);
     return da;
 }
+#endif
 
 //--------------------------------------------------------------
 // construct
@@ -394,8 +400,10 @@ Module * AND2Gate::construct(const char *_new_name)
 
 AND2Gate::AND2Gate(void)
 {
+#ifdef HAVE_GUI
   if(get_interface().bUsingGUI())
     set_widget(create_pixmap(and2_pixmap));
+#endif
 
 }
 AND2Gate::~AND2Gate(void)
@@ -416,9 +424,11 @@ void ANDGate::update_state(void)
 
 OR2Gate::OR2Gate(void)
 {
+#ifdef HAVE_GUI
+
   if(get_interface().bUsingGUI())
     set_widget(create_pixmap(or2_pixmap));
-
+#endif
 }
 OR2Gate::~OR2Gate(void)
 {
@@ -463,9 +473,11 @@ Module * NOTGate::construct(const char *_new_name)
 
 NOTGate::NOTGate(void)
 {
+#ifdef HAVE_GUI
+
   if(get_interface().bUsingGUI())
     set_widget(create_pixmap(not_pixmap));
-
+#endif
 }
 NOTGate::~NOTGate(void)
 {
@@ -484,9 +496,11 @@ void NOTGate::update_state(void)
 
 XOR2Gate::XOR2Gate(void)
 {
+#ifdef HAVE_GUI
+
   if(get_interface().bUsingGUI())
     set_widget(create_pixmap(xor2_pixmap));
-
+#endif
 }
 XOR2Gate::~XOR2Gate(void)
 {
@@ -519,4 +533,3 @@ void XORGate::update_state(void)
   pOutputPin->putState(bNewOutputState);
 }
 
-#endif // HAVE_GUI

@@ -1,4 +1,8 @@
 2006-05-25 Scott Dattalo <scott@dattalo.com>
+	* modules/logic.h, modules/logic.cc, modules/gpsim_modules.cc:
+	Only use if the gui is enabled
+
+2006-05-25 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.h, modules/switch.cc, modules/gpsim_modules.cc:
 	  Only use gui if enabled. 
 	* modules/stimuli.h, modules/stimuli.cc: Began adding support for

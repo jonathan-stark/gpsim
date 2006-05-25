@@ -30,7 +30,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/symbol.h"
 #include "../src/modules.h"
 
+#ifdef HAVE_GUI
 #include <gtk/gtk.h>
+#endif
 
 class LogicGate;
 class ANDGate;
@@ -107,9 +109,9 @@ public:
   unsigned int input_state;
   IOPIN  **pInputPins;
   Logic_Output *pOutputPin;
-
+#ifdef HAVE_GUI
   GdkPixmap *pixmap;
-
+#endif
   LogicGate(void);
   ~LogicGate(void);
 
@@ -121,7 +123,9 @@ public:
   void update_input_pin(unsigned int pin, bool bValue);
   virtual int get_num_of_pins(void) {return number_of_pins;};
   void set_number_of_pins(int npins){number_of_pins=npins;};
+#ifdef HAVE_GUI
   GtkWidget *create_pixmap(char **pixmap_data);
+#endif
 };
 
 // 2 input and gate

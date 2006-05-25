@@ -51,7 +51,6 @@ support:
 
 #include "../src/modules.h"
 
-//#ifdef HAVE_GUI
 #include "resistor.h"
 #include "usart.h"
 #ifndef _WIN32
@@ -59,13 +58,14 @@ support:
 #endif
 #include "switch.h"
 #include "logic.h"
+#ifdef HAVE_GUI
 #include "led.h"
 #include "push_button.h"
 //#include "video.h"
 #include "encoder.h"
+#endif
 #include "stimuli.h"
 #include "ttl.h"
-//#endif
 
 /*
 class Module_Types
@@ -92,21 +92,22 @@ Module_Types available_modules[] =
   // Switch
   { {"switch",         "sw"}, Switches::Switch::construct},
 
-#ifdef HAVE_GUI
   // Logic
   { {"and2", "and2"}, AND2Gate::construct},
   { {"or2",  "or2"},  OR2Gate::construct},
   { {"xor2", "xor2"}, XOR2Gate::construct},
   { {"not",  "not"},  NOTGate::construct},
 
+#ifdef HAVE_GUI
   // Leds
   { {"led_7segments", "led7s"}, Leds::Led_7Segments::construct},
   { {"led", "led"}, Leds::Led::construct},
 #endif
   { {"pullup",           "pu"},   PullupResistor::pu_construct },
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
+#ifdef HAVE_GUI
   { {"pushbutton",       "pb"},   PushButton::construct },
-
+#endif
   { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },
 
   /*
@@ -114,9 +115,10 @@ Module_Types available_modules[] =
   // Video
   { {"PAL_video", "video"}, Video::construct},
   */
+#ifdef HAVE_GUI
   // Encoder
   { {"Encoder", "encoder"}, Encoder::construct},
-
+#endif
   // USART
   { {"usart",            "usart"}, USARTModule::USART_construct},
 
