@@ -46,9 +46,11 @@ Boston, MA 02111-1307, USA.  */
 #include <math.h>
 
 #include "../config.h"    // get the definition for HAVE_GUI
-#ifdef HAVE_GUI
 
+#ifdef HAVE_GUI
 #include <gtk/gtk.h>
+#endif
+
 #include "../src/packages.h"
 #include "../src/stimuli.h"
 #include "../src/symbol.h"
@@ -266,6 +268,7 @@ namespace Switches {
 
   //--------------------------------------------------------------
   // GUI
+#ifdef HAVE_GUI
   static void toggle_cb (GtkToggleButton *button, Switch *sw)
   {
     if (sw)
@@ -286,13 +289,16 @@ namespace Switches {
 
     //update();
   }
+#endif
 
   //------------------------------------------------------------------------
   //
   void Switch::setState(bool bNewState)
   {
+#ifdef HAVE_GUI
     if (m_button)
       gtk_toggle_button_set_active(m_button, bNewState ? TRUE : FALSE);
+#endif
     if ( switch_closed() != bNewState) {
       m_bCurrentState = bNewState;
       update();
@@ -361,7 +367,7 @@ namespace Switches {
   //------------------------------------------------------------------------
   void Switch::create_widget(Switch *sw)
   {
-
+#ifdef HAVE_GUI
     GtkWidget *box1;
 
     box1 = gtk_vbox_new (FALSE, 0);
@@ -375,8 +381,7 @@ namespace Switches {
 
     // Tell gpsim which widget to use in breadboard.
     sw->set_widget(box1);
-
-    //sw->setState(false);
+#endif
   }
 
   //--------------------------------------------------------------
@@ -551,6 +556,5 @@ Two port switch\n\
     update();
   }
 
-#endif // HAVE_GUI
 
 }

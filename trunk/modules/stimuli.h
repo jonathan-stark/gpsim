@@ -30,9 +30,9 @@ Boston, MA 02111-1307, USA.  */
 
 namespace ExtendedStimuli {
 
-  class PulsePin;
   class PulseAttribute;
   class PulsePeriodAttribute;
+  class FileNameAttribute;
 
   class ValueStimulusData {
   public:
@@ -47,7 +47,19 @@ namespace ExtendedStimuli {
     }
   };
 
-  class PulseGen : public Module, public TriggerObject
+  class StimulusBase : public Module, public TriggerObject
+  {
+  public:
+    StimulusBase(const char *_name, const char *_desc);
+    virtual void callback_print();
+    void create_iopin_map();
+    
+  protected:
+    IO_bi_directional *m_pin;
+  };
+
+  //----------------------------------------------------------------------
+  class PulseGen : public StimulusBase
   {
   public:
     static Module *construct(const char *new_name);
@@ -55,16 +67,13 @@ namespace ExtendedStimuli {
     ~PulseGen();
 
     virtual void callback();
-    virtual void callback_print();
     virtual void put_data(ValueStimulusData &data_point);
     virtual string toString();
 
-    void create_iopin_map();
     void update();
     void update_period();
 
   private:
-    IO_bi_directional *m_pin;
     PulseAttribute *m_set;
     PulseAttribute *m_clear;
     PulsePeriodAttribute *m_period;
@@ -77,6 +86,21 @@ namespace ExtendedStimuli {
     void setBreak(guint64 next_cycle, list<ValueStimulusData>::iterator );
   };
 
+
+  class FileStimulus : public StimulusBase
+  {
+  public:
+    static Module *construct(const char *new_name);
+    FileStimulus(const char *_name);
+    ~FileStimulus();
+
+    virtual void callback();
+    virtual string toString();
+
+  private:
+    FileNameAttribute *m_fileName;
+    guint64 m_future_cycle;
+  };
 }
 
 #endif // __MOD_STIMULI_H__
