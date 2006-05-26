@@ -225,10 +225,12 @@ Module *gLCD_100X32_SED1520::construct(const char *_new_name=0)
 
 //------------------------------------------------------------------------
 gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
-  : Module(),
-    m_nColumns(100), m_nRows(32)
+  : Module(_new_name,"SED1520 100X32 Graphics LCD module"),
+    window(0),darea(0),m_plcd(0),m_nColumns(100), m_nRows(32)
 {
-  new_name(_new_name);
+
+  // Default module attributes.
+  initializeAttributes();
 
   m_dataBus = new PortRegister(8, 0);
   m_dataBus->new_name( (name() + ".data").c_str());
@@ -252,6 +254,8 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
 
   //if(get_interface().bUsingGUI()) 
   create_widget();
+
+  m_plcd = new gLCD((GdkDrawable*)darea->window, m_nColumns, m_nRows, 3, 3);
 
 }
 
@@ -311,18 +315,16 @@ static gboolean lcd_expose_event(GtkWidget *widget,
 				 gLCD_100X32_SED1520 *pLCD)
 {
   pLCD->Update(widget);
+  return true;
 }
 
 //------------------------------------------------------------------------
 void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 {
 
-  if (!m_plcd)
-    m_plcd = new gLCD(widget->window, m_nColumns, m_nRows, 3, 3);
-
-
   printf("LCD update\n");
 
+  assert (m_plcd !=0);
 
   m_plcd->clear();
 
