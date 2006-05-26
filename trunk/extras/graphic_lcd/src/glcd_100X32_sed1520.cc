@@ -255,7 +255,6 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
   //if(get_interface().bUsingGUI()) 
   create_widget();
 
-  m_plcd = new gLCD((GdkDrawable*)darea->window, m_nColumns, m_nRows, 3, 3);
 
 }
 
@@ -323,6 +322,13 @@ void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 {
 
   printf("LCD update\n");
+
+  if (!m_plcd) {
+    if (!darea || !darea->window)
+      return;
+
+    m_plcd = new gLCD((GdkDrawable*)darea->window, m_nColumns, m_nRows, 3, 3);
+  }
 
   assert (m_plcd !=0);
 
