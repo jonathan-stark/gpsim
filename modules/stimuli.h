@@ -94,11 +94,13 @@ namespace ExtendedStimuli {
     FileStimulus(const char *_name);
     ~FileStimulus();
 
+    void parse(const char *);
+    void newFile();
     virtual void callback();
     virtual string toString();
 
   private:
-    FileNameAttribute *m_fileName;
+    FileNameAttribute *m_file;
     guint64 m_future_cycle;
   };
 }

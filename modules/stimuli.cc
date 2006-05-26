@@ -73,7 +73,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/gpsim_time.h"
 #include "stimuli.h"
-
+#include "../config.h"
 
 namespace ExtendedStimuli {
 
@@ -405,23 +405,54 @@ Pulse Generator\n\
 
 
   //----------------------------------------------------------------------
+  // File Stimulus
   //----------------------------------------------------------------------
   class FileNameAttribute : public String
   {
   public:
     FileNameAttribute(FileStimulus *, const char *_name, const char * desc);
+
+    virtual void set(Value *);
+
+    const char *getLine();
+    const FILE *fp() { return m_pFile; }
   private:
     FileStimulus *m_Parent;
+    FILE *m_pFile;
+    enum  {
+      eBuffSize = 1024
+    };
+    char m_buff[eBuffSize];
   };
-
+  //=1024;
   FileNameAttribute::FileNameAttribute(FileStimulus *pParent, 
 				       const char *_name,
 				       const char * _desc)
-    : String(_name,"",_desc), m_Parent(pParent)
+    : String(_name,"",_desc), m_Parent(pParent), m_pFile(0)
   {
 
   }
 
+  void FileNameAttribute::set(Value *pV)
+  {
+    if (m_pFile)
+      return;
+
+    String::set(pV);
+
+    m_pFile = fopen( getVal(), "r");
+
+    m_Parent->newFile();
+  }
+
+  const char *FileNameAttribute::getLine()
+  {
+
+    m_buff[0]=0;
+    if (m_pFile)
+      fgets(m_buff, eBuffSize, m_pFile);
+    return m_buff;
+  }
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
   FileStimulus::FileStimulus(const char *_name)
@@ -432,15 +463,40 @@ File Stimulus\n\
 "), m_future_cycle(0)
   {
     // Attributes for the pulse generator.
-    m_fileName = new FileNameAttribute(this, "file","name of file or pipe supplying data");
+    m_file = new FileNameAttribute(this, "file","name of file or pipe supplying data");
 
-    add_attribute(m_fileName);
+    add_attribute(m_file);
 
   }
 
 
   FileStimulus::~FileStimulus()
   {
+
+  }
+
+  void FileStimulus::newFile()
+  {
+    if (m_future_cycle) {
+      get_cycles().clear_break(this);
+      m_future_cycle = 0;
+    }
+
+    parse(m_file->getLine());
+    
+  }
+
+  void FileStimulus::parse(const char *cP)
+  {
+    if (!cP)
+      return;
+    guint64 t;
+    float v;
+
+    //fscanf(m_file,"%" PRINTF_INT64_MODIFIER "i %g",&t, &v);
+    sscanf(cP,"%" PRINTF_INT64_MODIFIER "i %g",&t, &v);
+
+    cout << "  read 0x" << hex << t << "," << v << endl;
 
   }
 
