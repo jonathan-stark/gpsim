@@ -77,7 +77,7 @@ namespace dspic {
 
 
     // Configuration control
-    virtual unsigned int get_config_word();
+    virtual unsigned int get_config_word(unsigned int);
 
     // Reset control
     // por = Power On Reset

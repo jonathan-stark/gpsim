@@ -97,6 +97,7 @@ public:
     {return;}
 
   virtual unsigned int program_memory_size(void) const = 0;
+  virtual unsigned int get_program_memory_at_address(unsigned int address);
 
   static pic_processor *construct(void);
   _14bit_processor(void);

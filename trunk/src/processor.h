@@ -88,6 +88,8 @@ class ProgramMemoryAccess :  public MemoryAccess
   instruction *getFromIndex(unsigned int uIndex);
   instruction *get_base_instruction(unsigned int addr);
   unsigned int get_opcode(unsigned int addr);
+  unsigned int get_rom(unsigned int addr);
+  void put_rom(unsigned int addr,unsigned int value);
   char *get_opcode_name(unsigned int addr, char *buffer, unsigned int size);
   virtual unsigned int get_PC(void);
   virtual void set_PC(unsigned int);
@@ -432,6 +434,7 @@ public:
   virtual void init_program_memory_at_index(unsigned int address, 
 					    const unsigned char *, int nBytes);
   virtual unsigned int program_memory_size(void) const {return 0;};
+  virtual unsigned int get_program_memory_at_address(unsigned int address);
   void build_program_memory(unsigned int *memory,
 			    unsigned int minaddr, 
 			    unsigned int maxaddr);
@@ -558,7 +561,7 @@ public:
 
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word)
     {return false;} // fixme - make this a pure virtual function...
-  virtual unsigned int get_config_word(void) = 0;
+  virtual unsigned int get_config_word(unsigned int address) = 0;
   virtual unsigned int config_word_address(void) {return 0;}
 
   //

@@ -31,10 +31,13 @@ Boston, MA 02111-1307, USA.  */
 #include "pir.h"
 #include "uart.h"
 #include "a2dconverter.h"
+#include "value.h"
 
 // forward references
 
 extern instruction *disasm16 (pic_processor *cpu, unsigned int address, unsigned int inst);
+
+class ConfigMemory;
 
 
 class PicLatchRegister : public sfr_register
@@ -67,14 +70,20 @@ class _16bit_processor : public pic_processor
 
 public:
 
-  // Configuration memory addresses. Again, like the interrupt vectors, the '>>1'
-  // is because of gpsim's representation of the addresses
-#define CONFIG1   (0x300000 >> 1)
-#define CONFIG2   (0x300002 >> 1)
-#define CONFIG3   (0x300004 >> 1)
-#define CONFIG4   (0x300006 >> 1)
-#define DEVID     (0x3ffffe >> 1)
-
+  static const int CONFIG1L = 0x300000;
+  static const int CONFIG1H = 0x300001;
+  static const int CONFIG2L = 0x300002;
+  static const int CONFIG2H = 0x300003;
+  static const int CONFIG3L = 0x300004;
+  static const int CONFIG3H = 0x300005;
+  static const int CONFIG4L = 0x300006;
+  static const int CONFIG4H = 0x300007;
+  static const int CONFIG5L = 0x300008;
+  static const int CONFIG5H = 0x300009;
+  static const int CONFIG6L = 0x30000A;
+  static const int CONFIG6H = 0x30000B;
+  static const int CONFIG7L = 0x30000C;
+  static const int CONFIG7H = 0x30000D;
 
   // So far, all 18xxx parts contain ports A,B,C
   PicPortRegister  *m_porta;
@@ -157,22 +166,8 @@ public:
     {
       return disasm16(this, address, inst);
     }
-  /*
-    There's a flaw with this approach. While this code compiles
-    just fine, the callee's have trouble with it. The reason is
-    that most of the callees think they're dealing with either
-    a "Processor" or "pic_processor". However, as Scott Meyers
-    (author of "More Effective C++") writes, we lie to the compiler.
-    In most cases, we'll type cast a pic_processor object to a
-    _16bit_processor when the fact of the matter is that we have
-    a P18F452 or whatever. The vtables for these different classes
-    pretty much gurantees that an offset into them are different.
-
-  virtual PIR1v2 *get_pir1(void) { return (&pir1); }
-  virtual PIR2v2 *get_pir2(void) { return (&pir2); }
-  virtual PIR_SET_2 *get_pir_set(void) { return (&pir_set_def); }
-  */
   virtual void create_sfr_map(void);
+  virtual void create_config_memory();
 
   virtual void create_stack(void) {stack = &stack16;};
 
@@ -196,12 +191,17 @@ public:
   // -- the derived classes must define their parameters appropriately.
 
   virtual unsigned int register_memory_size () const { return 0x1000;};
-  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+  //virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual void create_iopin_map(void);
 
   virtual int  map_pm_address2index(int address) {return address/2;};
   virtual int  map_pm_index2address(int index) {return index*2;};
+  virtual unsigned int get_program_memory_at_address(unsigned int address);
+  virtual unsigned int get_config_word(unsigned int address);
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual unsigned int configMemorySize() { return CONFIG7H-CONFIG1L+1; }
+
 
   static pic_processor *construct(void);
   _16bit_processor(void);
@@ -211,9 +211,24 @@ public:
   void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
-
+  ConfigMemory **m_configMemory;
 };
 
 #define cpu16 ( (_16bit_processor *)cpu)
+
+//------------------------------------------------------------------------
+class ConfigMemory : public Integer
+{
+public:
+  ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
+	       _16bit_processor *pCpu, unsigned int addr);
+  //unsigned int get();
+  //virtual void set(unsigned int);
+
+private:
+  _16bit_processor *m_pCpu;
+  unsigned int m_addr;
+  //unsigned int m_value;
+};
 
 #endif

@@ -96,6 +96,20 @@ void _14bit_processor::option_new_bits_6_7(unsigned int bits)
   cout << "14bit, option bits 6 and/or 7 changed\n";
 }
 
+
+//------------------------------------------------------------------
+// Fetch the rom contents at a particular address.
+unsigned int _14bit_processor::get_program_memory_at_address(unsigned int address)
+{
+  unsigned int uIndex = map_pm_address2index(address);
+
+  
+  if (uIndex < program_memory_size())
+    return  program_memory[uIndex] ? program_memory[uIndex]->get_opcode() : 0xffffffff;
+
+  return get_config_word(address);
+}
+
 #if 0
 //-------------------------------------------------------------------
 class PortBSink;

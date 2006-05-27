@@ -140,8 +140,7 @@ string IIndexedCollection::toString(ExprList_t* pIndexerExprs) {
         }
         if(pInt) {
           unsigned int uIndex = (unsigned int)pInt->getVal();
-          if(uIndex >= GetLowerBound() &&
-              uIndex <= GetUpperBound() ) {
+          if(bIsIndexInRange(uIndex)) {
             Value &Value = GetAt(uIndex);
             sOut << Value.name() << " = " << Value.toString() << endl;
           }

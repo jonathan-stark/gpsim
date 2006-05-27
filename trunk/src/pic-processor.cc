@@ -903,6 +903,11 @@ bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 }
 
 
+unsigned int pic_processor::get_config_word(unsigned int address)
+{
+  return address == config_word_address() ? config_word : 0xffffffff;
+}
+
 
 
 //-------------------------------------------------------------------

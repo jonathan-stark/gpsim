@@ -108,7 +108,7 @@ void OSCCON::callback()
 }
 bool OSCCON::set_rc_frequency()
 {
-  unsigned int cfg_word = cpu_pic->get_config_word();
+  unsigned int cfg_word = cpu_pic->get_config_word(cpu_pic->config_word_address());
   double base_frequency = 31.25e3;
   enum {
     CFG_FOSC0 = 1<<0,
