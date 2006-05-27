@@ -1,3 +1,34 @@
+2006-05-27 Scott Dattalo <scott@dattalo.com>
+	* src/ValueCollections.cc, src/ValueCollections.h,
+	src/14bit-registers.cc: An indexed collection can now accommodate
+	a disjoint set.
+	* src/16bit-processors.h, src/16bit-processors.cc,
+	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h,
+	src/processor.h, src/processor.cc, src/pic-processor.h,
+	src/14bit-processors.h,src/14bit-processors.cc,
+	src/pic-processor.cc: The ProgramMemoryClass now uses the newly 
+	added "disjoint set" feature of an IndexedCollection to provide
+	access to configuration memory. E.g. 
+	
+	  romData[0x300000] = 0x1234
+
+	will write 0x1234 to the configuration word at address 0x300000. 
+	In addition, infrastructure has been added to symbolically deal
+	with configuration memory. E.g. 
+	
+	  gpsim> .CONFIG1H
+	  $00000027
+
+	  gpsim> help .CONFIG2H
+	  $0000000f
+	  WatchDog configuration
+
+	Currently the configuration memory does not control any
+	thing. I.e., if you write to config memory, the data changes, but
+	the processor configuration is not actually changed.
+
+	* src/hexutils.cc: removed printf debugging.
+
 2006-05-25 Scott Dattalo <scott@dattalo.com>
 	* modules/stimuli.h, modules/stimuli.cc: More support for
 	  file stimulus.

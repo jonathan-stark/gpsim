@@ -98,10 +98,6 @@ int IntelHexProgramFileType::LoadProgramFile(Processor **pProcessor,
   int iReturn;
   if ((iReturn = readihex16 (pProcessor, inputfile)) != SUCCESS) {
     // No errors were found in the hex file.
-    if(verbose)
-      cout << "Configuration word = 0x"  
-	   << setw(4) << setfill('0') << (*pProcessor)->get_config_word() << '\n';
-
     (*pProcessor)->set_frequency(10e6);
     (*pProcessor)->reset(POR_RESET);
     (*pProcessor)->simulation_mode = eSM_STOPPED;

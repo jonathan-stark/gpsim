@@ -56,7 +56,7 @@ This file originated by J.R. Heisey
     IIndexedCollection and define implementations for all the pure
     virutal functions. 
     
-    I have provided an example of an array implementation as an example.
+    I (JR) have provided an example of an array implementation as an example.
     The class RegisterCollection is declared in register.h and is 
     an example of how to expose data values that are not based on
     the Value class. The RegisterCollection exposes a gpsim command
@@ -86,6 +86,9 @@ public:
   virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr);
   virtual unsigned int GetLowerBound() = 0;
   virtual unsigned int GetUpperBound() = 0;
+  virtual bool bIsIndexInRange(unsigned int uIndex) {
+    return uIndex >= GetLowerBound() &&  uIndex <= GetUpperBound();
+  }
   void          SetAddressRadix(int iRadix);
 
   virtual string toString(ExprList_t* pIndexerExprs);

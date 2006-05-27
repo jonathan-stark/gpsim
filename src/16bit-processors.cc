@@ -31,6 +31,128 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "symbol.h"
 #include "eeprom.h"
+
+
+//------------------------------------------------------------------------
+// Configuration bits
+//
+// The 16bit-core PIC devices contain configuration memory starting at 
+// address 0x300000.
+//
+
+
+//------------------------------------------------------------------------
+// ConfigMemory - Base class
+ConfigMemory::ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
+			   _16bit_processor *pCpu, unsigned int addr)
+  : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr)
+{
+  if (m_pCpu)
+    m_pCpu->add_attribute(this);
+}
+/*
+unsigned int ConfigMemory::get()
+{
+  return m_value;
+}
+
+void ConfigMemory::set(unsigned int new_value)
+{
+  m_value = new_value;
+
+  //  if (pCpu)
+}
+*/
+
+
+class Config1H : public ConfigMemory 
+{
+#define FOSC0   (1<<0)
+#define FOSC1   (1<<1)
+#define FOSC2   (1<<2)
+#define OSCEN   (1<<5)
+
+#define CONFIG1H_default (OSCEN | FOSC2 | FOSC1 | FOSC0)
+public:
+  Config1H(_16bit_processor *pCpu, unsigned int addr)
+    : ConfigMemory("CONFIG1H", CONFIG1H_default, "Oscillator configuration", pCpu, addr)
+  {
+  }
+};
+
+class Config2H : public ConfigMemory 
+{
+#define WDTEN   (1<<0)
+#define WDTPS0  (1<<1)
+#define WDTPS1  (1<<2)
+#define WDTPS2  (1<<3)
+
+#define CONFIG2H_default (WDTEN | WDTPS0 | WDTPS1 | WDTPS2)
+public:
+  Config2H(_16bit_processor *pCpu, unsigned int addr)
+    : ConfigMemory("CONFIG2H", CONFIG2H_default, "WatchDog configuration", pCpu, addr)
+  {
+  }
+};
+
+
+
+#define PWRTEN  1<<0
+#define BOREN   1<<1
+#define BORV0   1<<2
+#define BORV1   1<<2
+
+#define CCP2MX  1<<0
+
+#define STVREN  1<<0
+//-------------------------------------------------------------------
+#if 0
+void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int value)
+{
+  cout << hex << "16bit proc setting config address 0x" <<(address<<1) << " to 0x"<<value<<'\n';
+  switch (address) {
+  case CONFIG1L:
+  case CONFIG2:
+    if(config_modes) {
+      if(value & WDTEN) {
+	//if(verbose)
+	  cout << "config Enabling WDT\n";
+
+	config_modes->enable_wdt();
+      } else {
+	cout << "config disabling WDT\n";
+	config_modes->disable_wdt();
+      }
+    }
+
+    break;
+
+  case CONFIG1:
+    if(((value>>8) & (OSCEN | FOSC0 | FOSC1 | FOSC2)) != (OSCEN | FOSC0 | FOSC1 | FOSC2))
+      cout << "FOSC bits in CONFIG1H are not supported\n";
+
+    cout << "18cxxx config address 0x" << hex << (address<<1) << " Copy protection " <<
+      (value&0xff) << '\n';
+
+    break;
+
+  case CONFIG3:
+  case CONFIG4:
+    cout << "18cxxx config address 0x" << hex << (address<<1) << " is not supported\n";
+    break;
+
+  case DEVID:
+
+    cout << "18cxxx device id address 0x" << hex << (address<<1) << " is not supported\n";
+    break;
+
+  default:
+    cout << "WARNING: 18cxxx is ignoring code at address 0x" << hex <<(address<<1) << '\n';
+  }
+}
+#endif
+
+
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor()
   : pir1(0,0), pir2(0,0)
@@ -355,6 +477,7 @@ void _16bit_processor :: create ()
 
   pic_processor::create();
   create_sfr_map();
+  create_config_memory();
 
   tmr0l.initialize();
 
@@ -370,6 +493,8 @@ void _16bit_processor :: create ()
     pma->SpecialRegisters.push_back(&bsr);
     rma.SpecialRegisters.push_back(&bsr);
   }
+
+
 }
 
 //
@@ -430,69 +555,74 @@ void _16bit_processor::option_new_bits_6_7(unsigned int bits)
 
 }
 
-#define FOSC0   1<<0
-#define FOSC1   1<<1
-#define FOSC2   1<<2
-#define OSCEN   1<<5
 
-#define WDTEN   ((1<<0) << 8)
-#define WDTPS0  ((1<<1) << 8)
-#define WDTPS1  ((1<<2) << 8)
-#define WDTPS2  ((1<<3) << 8)
-
-
-#define PWRTEN  1<<0
-#define BOREN   1<<1
-#define BORV0   1<<2
-#define BORV1   1<<2
-
-#define CCP2MX  1<<0
-
-#define STVREN  1<<0
 //-------------------------------------------------------------------
-void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int value)
+// Fetch the rom contents at a particular address.
+unsigned int _16bit_processor::get_program_memory_at_address(unsigned int address)
 {
-  cout << hex << "16bit proc setting config address 0x" <<(address<<1) << " to 0x"<<value<<'\n';
-  switch (address) {
-  case CONFIG2:
-    if(config_modes) {
-      if(value & WDTEN) {
-	//if(verbose)
-	  cout << "config Enabling WDT\n";
+  unsigned int uIndex = map_pm_address2index(address);
 
-	config_modes->enable_wdt();
-      } else {
-	cout << "config disabling WDT\n";
-	config_modes->disable_wdt();
-      }
+  
+  if (uIndex < program_memory_size())
+    return  program_memory[uIndex] ? program_memory[uIndex]->get_opcode() : 0xffffffff;
+
+  if (address >= CONFIG1L && address <= 0x30000D)
+    return get_config_word(address);
+
+  static const int DEVID1 = 0x3ffffe;
+  static const int DEVID2 = 0x3fffff;
+  if (address == DEVID1)
+    return 0;
+  if (address == DEVID2)
+    return 0;
+
+  return 0xffffffff;
+}
+
+unsigned int _16bit_processor::get_config_word(unsigned int address)
+{
+
+  if (!(address >= CONFIG1L && address <= 0x30000D))
+    return 0xffffffff;
+
+  address -= CONFIG1L;
+
+  if (m_configMemory && m_configMemory[address])
+    return (unsigned int )(m_configMemory[address]->getVal());
+
+  return 0xffffffff;
+}
+
+bool  _16bit_processor::set_config_word(unsigned int address, unsigned int cfg_word)
+{
+  if (address >= CONFIG1L && address <= 0x30000D) {
+
+    cout << "Setting config word 0x"<<hex<<address<< " = 0x"<<cfg_word<< endl;
+    address -= CONFIG1L;
+
+    if (m_configMemory && m_configMemory[address]) {
+
+      m_configMemory[address]->set((int)cfg_word);
+      return true;
     }
-
-    break;
-
-  case CONFIG1:
-    if(((value>>8) & (OSCEN | FOSC0 | FOSC1 | FOSC2)) != (OSCEN | FOSC0 | FOSC1 | FOSC2))
-      cout << "FOSC bits in CONFIG1H are not supported\n";
-
-    cout << "18cxxx config address 0x" << hex << (address<<1) << " Copy protection " <<
-      (value&0xff) << '\n';
-
-    break;
-
-  case CONFIG3:
-  case CONFIG4:
-    cout << "18cxxx config address 0x" << hex << (address<<1) << " is not supported\n";
-    break;
-
-  case DEVID:
-
-    cout << "18cxxx device id address 0x" << hex << (address<<1) << " is not supported\n";
-    break;
-
-  default:
-    cout << "WARNING: 18cxxx is ignoring code at address 0x" << hex <<(address<<1) << '\n';
   }
 
+  return false;
 }
+
+//-------------------------------------------------------------------
+void _16bit_processor::create_config_memory()
+{
+  m_configMemory = new ConfigMemory *[configMemorySize()];
+
+  for (int i=0; i<configMemorySize(); i++)
+    m_configMemory[i] = 0;
+
+  m_configMemory[CONFIG1H-CONFIG1L] = new Config1H(this, CONFIG1H);
+  m_configMemory[CONFIG2H-CONFIG1L] = new Config2H(this, CONFIG2H);
+
+}
+
 //-------------------------------------------------------------------
 //
 // Package stuff
@@ -537,3 +667,4 @@ void PicLatchRegister::setEnableMask(unsigned int nEnableMask)
 {
   m_EnableMask = nEnableMask;
 }
+

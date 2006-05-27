@@ -454,12 +454,8 @@ void Processor::destroyProgramMemoryAccess(ProgramMemoryAccess *pma) {
 
 void Processor::init_program_memory(unsigned int address, unsigned int value)
 {
-  init_program_memory_at_index(map_pm_address2index(address), value);
-}
+  unsigned int uIndex = map_pm_address2index(address);
 
-void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int value)
-{
-  unsigned int address = map_pm_index2address(uIndex);
   if (!program_memory) {
     printf("ERROR: internal bug %s:%d",__FILE__,__LINE__);
     exit(1);
@@ -481,6 +477,12 @@ void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int v
   else
     set_out_of_range_pm(address,value);  // could be e2prom
 
+
+}
+
+void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int value)
+{
+  init_program_memory(map_pm_index2address(uIndex), value);
 }
 
 void Processor::init_program_memory_at_index(unsigned int uIndex, 
@@ -492,6 +494,18 @@ void Processor::init_program_memory_at_index(unsigned int uIndex,
 
 }
 
+//------------------------------------------------------------------
+// Fetch the rom contents at a particular address.
+unsigned int Processor::get_program_memory_at_address(unsigned int address)
+{
+  unsigned int uIndex = map_pm_address2index(address);
+
+  
+  return (uIndex < program_memory_size() && program_memory[uIndex])
+    ? program_memory[uIndex]->get_opcode() 
+    : 0xffffffff;
+
+}
 
 //-------------------------------------------------------------------
 // build_program_memory - given an array of opcodes this function
@@ -1459,6 +1473,7 @@ public:
                                  vector<string> &aValue);
   virtual unsigned int GetLowerBound();
   virtual unsigned int GetUpperBound();
+  virtual bool bIsIndexInRange(unsigned int uIndex);
 private:
   Processor *   m_pProcessor;
   ProgramMemoryAccess   *m_pPma;
@@ -1484,12 +1499,8 @@ unsigned int ProgramMemoryCollection::GetSize()
 
 Value &ProgramMemoryCollection::GetAt(unsigned int uAddress, Value *) 
 {
-  /*
-  if(uAddress > m_uSize) {
-    throw Error("index is out of range");
-  }
-  */
-  m_ReturnValue.set((int)m_pPma->get_opcode(uAddress));
+  //m_pProcessor->map_pm_address2index
+  m_ReturnValue.set((int)m_pPma->get_rom(uAddress));
   m_ReturnValue.setBitmask( (1<<(m_pProcessor->opcode_size()*8)) - 1);
   ostringstream sIndex;
   sIndex << Value::name() << "[" << hex << m_szPrefix << uAddress << "]" << '\000';
@@ -1499,17 +1510,12 @@ Value &ProgramMemoryCollection::GetAt(unsigned int uAddress, Value *)
 
 void ProgramMemoryCollection::SetAt(unsigned int uAddress, Value *pValue)
 {
-  /*
-  if(uIndex > m_uSize) {
-    throw Error("index is out of range");
-  }
-  */
   Integer *pInt = dynamic_cast<Integer*>(pValue);
   if(pInt == NULL) {
     throw Error("rValue is not an Integer");
   }
   else {
-    m_pPma->put_opcode(uAddress, (unsigned int)(int)*pInt);
+    m_pPma->put_rom(uAddress, (unsigned int)(int)*pInt);
   }
 }
 
@@ -1561,7 +1567,12 @@ unsigned int ProgramMemoryCollection::GetUpperBound()
 {
   return GetSize() - 1;
 }
+bool ProgramMemoryCollection::bIsIndexInRange(unsigned int uAddress) 
+{
+  return m_pPma->get_rom(uAddress) != 0xffffffff;
+  // (uIndex >= GetLowerBound() &&  uIndex <= GetUpperBound()) || 
 
+}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 //
@@ -1706,6 +1717,30 @@ instruction *ProgramMemoryAccess::get_base_instruction(unsigned int uIndex)
 
     }
     return 0;
+}
+
+//----------------------------------------
+// get_rom - return the rom contents from program memory
+//           If the address is normal program memory, then the opcode
+//           of the instruction at that address is returned.
+//           If the address is some other special memory (like configuration
+//           memory in a PIC) then that data is returned instead.
+
+unsigned int ProgramMemoryAccess::get_rom(unsigned int addr)
+{
+  return cpu->get_program_memory_at_address(addr);
+}
+
+//----------------------------------------
+// put_rom - write new data to the program memory.
+//           If the address is in normal program memory, then a new instruction
+//           will be generated (if possible). If the address is some other 
+//           special memory (like configuration memory), then that area will
+//           be updated.
+//
+void ProgramMemoryAccess::put_rom(unsigned int addr,unsigned int value)
+{
+  return cpu->init_program_memory(addr,value);
 }
 
 //----------------------------------------

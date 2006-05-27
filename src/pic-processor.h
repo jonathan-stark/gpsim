@@ -263,7 +263,7 @@ public:
   void pm_write(void);
 
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
-  unsigned int get_config_word(void) {return config_word;};
+  virtual unsigned int get_config_word(unsigned int address);
   virtual unsigned int config_word_address(void) const {return 0x2007;};
   virtual ConfigMode *create_ConfigMode(void) { return new ConfigMode; };
   virtual void reset(RESET_TYPE r);

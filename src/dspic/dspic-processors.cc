@@ -187,8 +187,9 @@ namespace dspic {
   void dsPicProcessor::interrupt()
   {
   }
-  unsigned int dsPicProcessor::get_config_word()
+  unsigned int dsPicProcessor::get_config_word(unsigned int)
   {
+    return 0xffffffff;
   }
   void dsPicProcessor::por()
   {
