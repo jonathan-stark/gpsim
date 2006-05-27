@@ -1,4 +1,10 @@
 
+2006-05-27 Scott Dattalo <scott@dattalo.com>
+	* examples/glcd_test.asm: Added config settings.
+
+2006-05-25 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.cc: Fixed segv, maybe?
+
 2006-05-25 Scott Dattalo <scott@dattalo.com>
 	* src/glcd_100X32_sed1520.cc: There is segv lurking...
 

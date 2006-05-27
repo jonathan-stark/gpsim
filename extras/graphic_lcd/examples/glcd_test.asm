@@ -8,6 +8,16 @@
         include "processor.inc"
         include <coff.inc>              ; Grab some useful macros
 
+  __CONFIG	_CONFIG1H, _HSPLL_OSC_1H & _OSCS_ON_1H
+  __CONFIG	_CONFIG2H, _WDT_ON_2H
+
+  __CONFIG	_CONFIG3L, _LVP_OFF_4L
+
+
+  __CONFIG	_CONFIG4L, _LVP_OFF_4L
+  __CONFIG	_CONFIG5L, _CP0_ON_5L & _CP1_ON_5L
+  __CONFIG	_CONFIG5H, _CPB_ON_5H
+
 	include "sed1520.inc"
 	include "lcd100X32.inc"
 	include "portdef.inc"
