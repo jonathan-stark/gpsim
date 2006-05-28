@@ -37,7 +37,9 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 !define GPSIM_ROOT "..\.."
+!ifnedf SETUP_DIR
 !define SETUP_DIR "..\..\..\..\gpsim_snapshots"
+!endif
 !define PKG_ROOT "${SETUP_DIR}\gpsim_pkg"
 
 SetCompressor /SOLID lzma
@@ -126,7 +128,6 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\src\libgpsim.dll"
   File "${GPSIM_ROOT}\modules\libgpsim_modules.dll"
   File "${GPSIM_ROOT}\plat\win32\modules.def"
-  File "${PKG_ROOT}\bin\asprintf.dll"
   File "${PKG_ROOT}\bin\charset.dll"
   File "${PKG_ROOT}\bin\gtkextra-win32-2.1.dll"
   File "${PKG_ROOT}\bin\iconv.dll"
@@ -195,14 +196,14 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\loaders\libpixbufloader-bmp.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.4.0\loaders\libpixbufloader-ani.dll"
 
-  SetOutPath "$INSTDIR\lib\pango\1.4.0\modules"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-thai-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-indic-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-hebrew-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-hangul-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-basic-win32.dll"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-basic-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-arabic-fc.dll"
+  SetOutPath "$INSTDIR\lib\pango\1.5.0\modules"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-thai-fc.dll"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-indic-fc.dll"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-hebrew-fc.dll"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-hangul-fc.dll"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-basic-win32.dll"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-basic-fc.dll"
+  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-arabic-fc.dll"
 
   SetOutPath "$INSTDIR"
   File /r "${PKG_ROOT}\share"
@@ -485,13 +486,13 @@ Section Uninstall
   Delete "$INSTDIR\lib\gpsim\libgpsim.a"
   Delete "$INSTDIR\lib\gpsim\modules.def"
 
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-arabic-fc.dll"
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-basic-fc.dll"
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-basic-win32.dll"
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-hangul-fc.dll"
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-hebrew-fc.dll"
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-indic-fc.dll"
-  Delete "$INSTDIR\lib\pango\1.4.0\modules\pango-thai-fc.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-arabic-fc.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-basic-fc.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-basic-win32.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-hangul-fc.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-hebrew-fc.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-indic-fc.dll"
+  Delete "$INSTDIR\lib\pango\1.5.0\modules\pango-thai-fc.dll"
   Delete "$INSTDIR\lib\gtk-2.0\2.4.0\loaders\cygpixbufloader-ani.dll"
   Delete "$INSTDIR\lib\gtk-2.0\2.4.0\loaders\cygpixbufloader-bmp.dll"
   Delete "$INSTDIR\lib\gtk-2.0\2.4.0\loaders\cygpixbufloader-gif.dll"
@@ -539,7 +540,6 @@ Section Uninstall
   Delete "$INSTDIR\doc\gpsimWin32.html"
   Delete "$INSTDIR\doc\gpsim_cvs.html"
 
-  Delete "$INSTDIR\bin\asprintf.dll"
   Delete "$INSTDIR\bin\charset.dll"
   Delete "$INSTDIR\bin\gpsim.exe"
   Delete "$INSTDIR\bin\gtkextra-win32-2.1.dll"
