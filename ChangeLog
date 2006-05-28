@@ -4,6 +4,13 @@
 	  the NSIS command line
 	* doc/gpsimWin32.html: glib-2.8.6, gtk+-2.8.17, pango-1.12.1,
 	  cairo-1.0.4
+	* extras/graphic_lcd/src/gpsim_modules.cc,
+	  extras/graphic_lcd/src/sed1520.cc,
+	  extras/lcd/hd44780.cc: removed unneeded inclusion of config.h
+	* extras/graphic_lcd/makefile.mingw: added, thanks to Xiaofan Chen
+	* extras/lcd/makefile.mingw: corrected, thanks to Xiaofan Chen  
+	* makefile.mingw: added rules doc and setup
+	* plat/win32/fd2raw.cpp: report error messages
 
 2006-05-28 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_object.cc: Improve GNU demangling

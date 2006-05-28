@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2004 Borut Razem
+   Copyright (C) 2004-2006 Borut Razem
 
 This file is part of gpsim.
 
@@ -43,7 +43,11 @@ static int win32_setmode(int fd, int mode)
 
   /* if the handle is valid, try to get the function address */
   if (NULL == hinst)
-    g_win32_error_message(GetLastError());
+    {
+      gchar *emsg = g_win32_error_message(GetLastError());
+      g_error("Error loading library MSVCRT.DLL: %s", emsg);
+      g_free(emsg);
+    }
   else
     {
       int (*proc_add)(int, int);
@@ -51,13 +55,21 @@ static int win32_setmode(int fd, int mode)
 
       /* if the function address is valid, call the function */
       if (NULL == proc_add)
-        g_win32_error_message(GetLastError());
+        {
+          gchar *emsg = g_win32_error_message(GetLastError());
+          g_error("Error retriving address of function _setmode: %s", emsg);
+          g_free(emsg);
+        }
       else
         ret = (proc_add) (fd, mode);
 
       /* free the DLL module */
       if (0 == FreeLibrary(hinst))
-        g_win32_error_message(GetLastError());
+        {
+          gchar *emsg = g_win32_error_message(GetLastError());
+          g_error("Error freeing the DLL module: %s", emsg);
+          g_free(emsg);
+        }
     }
 
   return ret;

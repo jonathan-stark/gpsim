@@ -3,12 +3,20 @@
 
 ## Use: make -f makefile.mingw
 
-PARTS=cli src src/dspic gui gpsim modules doc plat/win32
+PARTS=cli src src/dspic gui gpsim modules
 CLEAN_PARTS=$(PARTS)
 
-all :
-	for D in $(PARTS); do (cd $$D && $(MAKE) -f makefile.mingw all); done
+.PHONY: all doc setup clean
 
-clean :
+all:
+	for D in $(PARTS); do $(MAKE) -C $$D -f makefile.mingw all; done
+
+doc:
+	$(MAKE) -C doc -f makefile.mingw all
+
+setup: all doc
+	$(MAKE) -C plat/win32 -f makefile.mingw all
+
+clean:
 	rm -f config.h
-	for D in $(CLEAN_PARTS); do (cd $$D && $(MAKE) -f makefile.mingw clean); done
+	for D in $(CLEAN_PARTS); do $(MAKE) -C $$D -f makefile.mingw clean; done

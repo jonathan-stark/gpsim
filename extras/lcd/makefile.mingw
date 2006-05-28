@@ -22,10 +22,13 @@ endif
 ifndef ATK_PATH
   ATK_PATH = ../../../atk
 endif
+ifndef CAIRO_PATH
+  CAIRO_PATH = ../../../cairo
+endif
 
 CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) -Wall
 
-CXX = c++ -mno-cygwin -mcpu=pentium -mms-bitfields
+CXX = c++ -mno-cygwin -mtune=pentium -mms-bitfields
 
 .cc.o:
 	$(CXX) $(CFLAGS) -c $< -o $@
@@ -36,12 +39,14 @@ CXX = c++ -mno-cygwin -mcpu=pentium -mms-bitfields
 
 LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
 	$(GTK_PATH)/lib/gdk-win32-2.0.lib $(GTK_PATH)/lib/gtk-win32-2.0.lib \
-	../../lib/gpsim/gpsim.lib
+	$(CAIRO_PATH)/lib/cairo.lib \
+	../../lib/gpsim/libgpsim.a
 
 INCLUDES = -I ../../include \
 	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
 	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
-	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0
+	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
+	-I $(CAIRO_PATH)/include/cairo
 
 DEFINES += -DHAVE_GUI
 
