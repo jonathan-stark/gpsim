@@ -27,8 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <stdio.h>
 
-#include "../config.h"    // get the definition for HAVE_GUI
-
 #include "glcd_100X32_sed1520.h"
 
 /*
