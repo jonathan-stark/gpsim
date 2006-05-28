@@ -56,8 +56,30 @@ string gpsimObject::showType()
 #if defined __GNUC__
   /* GNU C++ puts the length of the class name in front of the
      actual class name.  We will skip over it for clarity. */
-  while (isdigit(*name)) {
+  if (*name == 'N') // Class names with format N nn name nn name E
+  {
+    char buf[256];
+    int cnt;
+    int i = 0;
+
     name++;
+    buf[0] = 0;
+
+    while (isdigit(*name))
+    {
+      for(cnt = 0; isdigit(*name); name++)
+        cnt = cnt * 10 + *name - '0';
+      strncat(buf, name, cnt);
+      name += cnt;
+      if (isdigit(*name))
+        strcat(buf, "::");
+    }
+    name = buf;
+  }
+  else	// just nn name
+  {
+      while (isdigit(*name)) 
+        name++;
   }
 #elif defined _MSC_VER
   /*
