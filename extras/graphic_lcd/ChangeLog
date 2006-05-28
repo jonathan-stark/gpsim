@@ -1,3 +1,8 @@
+2006-05-28 Borut Razem <borut.razem@siol.net>
+	* src/gpsim_modules.cc, src/sed1520.cc:
+	  removed unneeded inclusion of config.h
+	* src/makefile.mingw: added, thanks to Xiaofan Chen
+	* INSTALL: CVS replaced with Subversion
 
 2006-05-27 Scott Dattalo <scott@dattalo.com>
 	* examples/glcd_test.asm: Added config settings.

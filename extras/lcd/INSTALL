@@ -33,10 +33,10 @@ not automatically updated, so you'll have to force a manual refresh
 by partially hiding the LCD window and then re-exposing it.
 
 
-CVS
----
+Subversion
+----------
 
-If you're getting the code from CVS, you'll need to generate files
+If you're getting the code from Subversion, you'll need to generate files
 that are unique to your system. This is done with the script:
 
 $ ./autogen.sh --enable-shared
