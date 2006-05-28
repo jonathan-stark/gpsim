@@ -66,21 +66,33 @@ namespace Switches {
   class SwitchPin : public IO_bi_directional
   {
   public:
+
+                                                                                
+                                                                                
     SwitchPin(Switch *parent, const char *_name);
 
     virtual void getThevenin(double &v, double &z, double &c);
     virtual void sumThevenin(double &current, double &conductance, double &Cth);
+    virtual void Build_List(stimulus * st);
 
     virtual void set_nodeVoltage(double v);
 
     void PropagateVoltage(double v);
     double get_Zclosed() { return  m_pParent->getZclosed(); }
     double get_Zopen()   { return  m_pParent->getZopen(); }
+    bool switch_closed() { return  m_pParent->switch_closed(); }
+    SwitchPin * other_pin(SwitchPin *pin) { return m_pParent->other_pin(pin);}
+
   private:
     Switch *m_pParent;
     bool bRefreshing;
 
     double m_Zth;
+
+    stimulus  **st_list;        // List of stimuli
+    int         st_cnt;         // Size of list
+    SwitchPin **sp_list;        // List of Switch pins we have seen
+    int         sp_cnt;         // size of list
   };
 
 
@@ -89,6 +101,11 @@ namespace Switches {
       m_Zth(1e12)
   {
     assert(m_pParent);
+    sp_cnt = 5;
+    sp_list = (SwitchPin **)calloc(sp_cnt, sizeof(SwitchPin *));
+    st_cnt = 10;
+    st_list = (stimulus **)calloc(st_cnt, sizeof(stimulus *));
+
   }
 
   void SwitchPin::getThevenin(double &v, double &z, double &c)
@@ -98,6 +115,7 @@ namespace Switches {
       cout << "SwitchPin::getThevenin :" << name() << " v=" << v 
            << " z=" << z << endl;
   }
+
 
   void SwitchPin::set_nodeVoltage(double v)
   {
@@ -120,6 +138,92 @@ namespace Switches {
       }
   }
 
+
+
+  /*
+	Build_list, given the first stimuli from a node with a connected
+	switch, builds a list of all the stimuli of the node except for the
+	switch itself. If it encounters other switches on the node, it will
+	do one of two things. If the switch is open, the switch stimuli will 
+	be ignored.  However, if the switch is closed and the switch pin has
+	not already been seen (to stop recursion),  Build_List will look 
+	through the switch and add all the stimuli connected to it's other 
+	pin.  Stimuli may be encountered more than once, but will only be 
+	added to the list the first time.
+
+	The resulting stimulus list is used by sumThevenin.
+  */
+  void SwitchPin::Build_List(stimulus *st)
+  {
+    for(; st; st = st->next) 
+    {
+      if (name() != st->name()) 
+      {
+	if (typeid(*st) == typeid(*this))  // This is a SwitchPin stimulus
+	{
+	    SwitchPin *sp_ptr = (SwitchPin *)st;
+
+	    if (sp_ptr->switch_closed())	// Switch is closed
+	    {
+		int i;
+		SwitchPin **sp_pt = sp_list;
+
+		for(i = 0; 
+			(i < sp_cnt) && *sp_pt && (*sp_pt != sp_ptr); 
+			i++, sp_pt++)
+		{}
+		if (i+1 >= st_cnt)  // need to grow list
+	    	{
+		  sp_cnt += 5;
+		  if (verbose)
+		    cout << name() << "increasing switch pin list size to " 
+			<< sp_cnt << endl;
+		  sp_cnt += 5;
+	      	  sp_list = (SwitchPin **)realloc(sp_list, sp_cnt * sizeof(SwitchPin *));
+	      	  sp_pt = sp_list + i;
+	    	}
+		if (*sp_pt != sp_ptr)	// have not seen this switch pin, add
+		{
+		   *sp_pt++ = sp_ptr;
+		   *sp_pt = NULL;
+		   if (verbose)
+			cout << name() << " adding switch pin " <<
+			  sp_ptr->name() << " to list\n";
+		   if (sp_ptr->other_pin(sp_ptr)->snode)
+		     Build_List(sp_ptr->other_pin(sp_ptr)->snode->stimuli);
+		}
+		else if (verbose)
+		{
+		    cout << name() << " We have already seen " << st->name() << endl;
+		}
+	    }
+	}
+	else	// other stimuli
+	{
+	  int i;
+	  stimulus **st_pt = st_list;
+	  for(i = 0; (i < st_cnt) && *st_pt && (*st_pt != st); i++, st_pt++)
+		{}
+	  if (i+1 >= st_cnt)  // need to grow list
+	  {
+	    st_cnt += 5;
+	    if (verbose)
+	      cout << name() << "increasing stimuli list size to " 
+		  << st_cnt << endl;
+	    st_list = (stimulus **)realloc(st_list, st_cnt * sizeof(stimulus *));
+	    st_pt = st_list + i;
+	  }
+	  if (*st_pt != st) // Add stimulus to list
+	  {
+	    if (verbose)
+	      cout << name() << " adding stimulus " << st->name() << endl;
+	    *st_pt++ = st;
+	    *st_pt = NULL;
+	  }
+	}
+      }
+    }
+  }
   /* sumThevenin
   ** Sum the Thevenin parameters for all stimuli connected to pin except for the 
   ** pin stimulus itself. This is a helper function for do_voltage().
@@ -142,19 +246,25 @@ namespace Switches {
   void SwitchPin::sumThevenin(double &current, double &conductance,
                               double &Cth)
   {
-    stimulus *sptr;
+    stimulus **sptr;
 
     if (!snode) return;
-    for(sptr =  snode->stimuli; sptr; sptr = sptr->next) {
+
+    *sp_list = NULL;
+    *st_list = NULL;
+                                                                                
+    Build_List(snode->stimuli);
+    
+    for(sptr = st_list; *sptr ; sptr++)
+    {
 
       double V1,Z1,C1;
-      if (name() != sptr->name()) {
 
         // Get the thevenin parameters of the stimulus connected to the switch pin
 
-        sptr->getThevenin(V1,Z1,C1);
+        (*sptr)->getThevenin(V1,Z1,C1);
         if (verbose)
-          cout << " N: " <<sptr->name() << " V=" << V1
+          cout << " N: " <<(*sptr)->name() << " V=" << V1
                << " Z=" << Z1 << " C=" << C1 << endl;
                                                                                 
         double Cs = 1 / Z1;
@@ -163,7 +273,6 @@ namespace Switches {
         current += V1 * Cs;
         conductance += Cs;
         Cth += C1;
-      }
     }
   }
 
@@ -350,6 +459,11 @@ namespace Switches {
     }
 
   }
+  SwitchPin * Switch::other_pin(SwitchPin *pin)
+  {
+        return( (pin == m_pinA)? m_pinB: m_pinA);
+  }
+
   //------------------------------------------------------------------------
   void Switch::set_nodeVoltage(SwitchPin *pin, double v)
   {
@@ -357,10 +471,8 @@ namespace Switches {
 
       // The switch is closed.
 
-      if (pin == m_pinA)
-        m_pinB->PropagateVoltage(v);
-      else if (pin == m_pinB)
-        m_pinA->PropagateVoltage(v);
+      other_pin(pin)->PropagateVoltage(v);
+
     }
   }
 
@@ -406,7 +518,7 @@ Two port switch\n\
  .state - true if switch is pressed\n\
 "), 
       m_pinA(0), m_pinB(0), m_aState(0),
-      m_button(0)
+      m_button(0), m_bCurrentState(false)
   {
 
     // Default module attributes.

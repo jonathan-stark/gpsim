@@ -45,15 +45,22 @@ MAIN    CODE
 ;----------------------------------------------------------------------
 ; gpsim configuration script
 ;
-; The configuration environment consists of a switch connecting
-; portb0 to portc1. Resistors on either side of the switch
-; ensure that the nodes are never floating.
+; The configuration environment consists of a switch SW1 connecting
+; portb0 and portc0 to portc1. Resistors on either side of the switch
+; ensure that the nodes are never floating and allow the switch voltage
+; to be checked.
+;
+; SW2.A is connected to the same node as SW1.A and SW2.B is connected to
+; portc2. This allows checking of 2 switch infinite regression bug.
+;
+; Portb0 is used to drive the switch while portc 0-2 monitor the results
 ;
 ;               PU1
 ;                |   \
-;  portb0 <>--+--+--O \O--+-- portc1
+;  portb0  >--+--+--O \O--+--> portc1
 ;  portc0  <--|           |
-;                        PD1
+;             |      \   PD1
+;             |-----O \O-----> portc2
 ;
 ;
 
@@ -61,6 +68,7 @@ MAIN    CODE
    .sim "module library libgpsim_modules"
    .sim "p16f877.xpos = 48.0"
    .sim "p16f877.ypos = 36.0"
+
 
    .sim "module load switch SW1"
    .sim "SW1.state=false"
@@ -81,12 +89,22 @@ MAIN    CODE
    .sim "PD1.xpos = 204.0"
    .sim "PD1.ypos = 96.0"
 
+   .sim "module load switch SW2"
+   .sim "SW2.state=false"
+   .sim "SW2.xpos = 216.0"
+   .sim "SW2.ypos = 228.0"
+   .sim "SW2.Rclosed = 100.0"
+   .sim "SW2.Ropen = 1.0e6"
+
     ;# Connections:
    .sim "node nb0"
-   .sim "attach nb0 SW1.A portb0 portc0 PU1"
+   .sim "attach nb0 SW1.A portb0 portc0 PU1.pin SW2.A"
 
    .sim "node nc0"
    .sim "attach nc0 SW1.B PD1.pin portc1"
+
+   .sim "node nc1"
+   .sim "attach nc1 SW2.B portc2"
 
    .sim "frequency 10.0e6"
 
@@ -99,15 +117,15 @@ start
 
 	BSF	STATUS,RP0
 
-	movlw	0x03		; RC1,RC0 are inputs
+	movlw	0x07		; RC2,RC1 and RC0 are inputs
 	movwf	TRISC
 	CLRF	TRISB^0x80	;Port B is an output
 
 	BCF 	STATUS,RP0
 
-   ; The switch is open and portb0 is driving one side of it.
-   ; The other side goes to portc0 and is pulled up by the pullup resistor
-   ; Toggling portb0 should have no effect on portc0
+   ; The switch is open and portb0 is driving one side of it and portc0.
+   ; The other side goes to portc1 and is pulled up by the pullup resistor
+   ; Toggling portb0 should have no effect on portc1
 
 	BCF	PORTB,0
 
@@ -121,18 +139,20 @@ start
 
 	nop
 
-   ; Close the switch:	
+   ; Close the switch because of capacitance portc1 will go high after a delay:	
    .command "SW1.state=true"
 	nop
 
    .assert "(portc & 3) == 1"	; drive side only high because of capacitance
  	nop
 
-       call    delay
+      call    delay
 
    .assert "(portc & 3) == 3"	
 	nop
 
+;  drive portb low, portc1 should be low after a delay
+;
 	BCF	PORTB,0		; change drive voltage
 
 
@@ -143,21 +163,20 @@ start
 	nop
 	movf	PORTC,W
 
+;
+;	test capacitance delay on drive transition
+;
 	BSF	PORTB,0		; drive high again
 	call	delay
 
    .assert "(portc & 3) == 3"	; make sure both sides are high
 	nop
 
-   ; Open the switch:	
+   ; Open the switch, because of small capacitance, floating side low
+   ; immediately
+   ;
    .command "SW1.state=false"
 	nop
-
-;   .assert "(portc & 3) == 3"	; capacitance should hold both sides high
-;				; for a while
-;	nop
-;
-;	call delay
 
    .assert "(portc & 3) == 1"   ; only one side high
 	nop
@@ -190,6 +209,20 @@ start
 
 	BCF	PORTB,0
    .assert "(portc & 3) == 0"	; Both side should now be low
+	nop
+
+   ; Close the SW2 switch, portc2 should be same as portc0 and portc1
+
+	BSF	PORTB,0		; Drive one side of switch high
+
+   .command "SW2.state=true"
+	nop
+
+   .assert "(portc & 7) == 7"	; All inputs should now be high
+	nop
+
+	BCF	PORTB,0
+   .assert "(portc & 7) == 0"	; All inputs should now be low
 	nop
 done:
 

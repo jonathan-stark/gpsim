@@ -67,6 +67,8 @@ namespace Switches {
     virtual void callback(void);
     virtual double get_nodeVoltage() { return voltage; }
     virtual bool switch_closed() { return m_bCurrentState; }
+    virtual SwitchPin * other_pin(SwitchPin *pin);
+
 
     // Attributes call back into the switch through here:
     double getZopen();
