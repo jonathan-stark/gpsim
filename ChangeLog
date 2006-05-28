@@ -1,8 +1,16 @@
+2006-05-28 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: removed unneeded asprintf.dll from
+	  the package, added possibility to define the SETUP_DIR from
+	  the NSIS command line
+	* doc/gpsimWin32.html: glib-2.8.6, gtk+-2.8.17, pango-1.12.1,
+	  cairo-1.0.4
+
 2006-05-28 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_object.cc: Improve GNU demangling
 	* modules/switch.cc, modules/switch.h,
 	  regression/switch_test/switch_test.asm:
 	- Fix infinite regression bug.
+
 2006-05-27 Scott Dattalo <scott@dattalo.com>
 	* src/ValueCollections.cc, src/ValueCollections.h,
 	src/14bit-registers.cc: An indexed collection can now accommodate
