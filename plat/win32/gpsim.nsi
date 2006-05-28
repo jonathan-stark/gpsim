@@ -37,7 +37,7 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 !define GPSIM_ROOT "..\.."
-!ifnedf SETUP_DIR
+!ifndef SETUP_DIR
 !define SETUP_DIR "..\..\..\..\gpsim_snapshots"
 !endif
 !define PKG_ROOT "${SETUP_DIR}\gpsim_pkg"
