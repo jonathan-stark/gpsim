@@ -28,10 +28,10 @@ number of pixels will be on. As you single step through the code, you
 can see some of the test patterns written to the display.
 
 
-CVS
----
+Subversion
+----------
 
-If you're getting the code from CVS, you'll need to generate files
+If you're getting the code from Subversion, you'll need to generate files
 that are unique to your system. This is done with the script:
 
 $ libtoolize
