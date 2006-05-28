@@ -1,3 +1,8 @@
+2006-05-28 Roy Rankin <rrankin@ihug.com.au>
+	* src/gpsim_object.cc: Improve GNU demangling
+	* modules/switch.cc, modules/switch.h,
+	  regression/switch_test/switch_test.asm:
+	- Fix infinite regression bug.
 2006-05-27 Scott Dattalo <scott@dattalo.com>
 	* src/ValueCollections.cc, src/ValueCollections.h,
 	src/14bit-registers.cc: An indexed collection can now accommodate
@@ -50,7 +55,6 @@
 2006-05-23 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html: CVS replaced with Subversion
 
-2006-05-22 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.h, src/14bit-tmrs.cc:
 	- PWM fixes CCP high if duty cycle 0, CCPRnH loaded on TMR2
 	  compare, PWM starts after first TMR2 compare, PMR2::put 
