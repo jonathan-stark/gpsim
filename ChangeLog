@@ -1,3 +1,11 @@
+2006-05-29 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* regression/resistor/resistor.asm: improved failure reporting
+	  and added tests for the output pin not being swamped
+	* src/stimuli.cc, src/stimuli.h: Adjusted default Zth values to
+	  be more sensible (ZthWeak now > ZthPullUp). Also some debug
+	  messages on wht looks like a dodgy condition. Need to follow up.
+	* doc/gpsim.lyx: corrected some formatting.
+
 2006-05-28 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: removed unneeded asprintf.dll from
 	  the package, added possibility to define the SETUP_DIR from

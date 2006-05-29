@@ -803,8 +803,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 
   Zth = 1e8;
   Vth = 5.0;
-  ZthWeak = 1e3;
-  ZthFloating = 1e6;
+  ZthWeak = 1e6;
+  ZthFloating = 1e7;
 
   snode = 0;
   m_monitor=0;
@@ -844,7 +844,7 @@ IOPIN::IOPIN(const char *_name,
   iopp = 0;
   iobit=0;
 #endif
-  l2h_threshold = 2.0;
+  l2h_threshold = 2.0;      // PICs are CMOS and use CMOS-like thresholds
   h2l_threshold = 1.0;
   bDrivenState = false;
   cForcedDrivenState = 'Z';
@@ -1208,13 +1208,19 @@ char IO_bi_directional::getBitChar()
     // There's at least one strong driver tied to the node
     if(!getDriving()) {
       if(getDrivenState()) {
-	if(nodeVoltage < 4.5)
+	if(nodeVoltage < 4.5) {
+          if ( verbose )
+            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
 	  return 'X';
+        }
 	else
 	  return '1';
       } else {
-	if(nodeVoltage > 0.5)
+	if(nodeVoltage > 0.5) {
+          if ( verbose )
+            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
 	  return 'X';
+        }
 	else
 	  return '0';
       }
@@ -1223,13 +1229,19 @@ char IO_bi_directional::getBitChar()
 
   if(getDriving()) {
     if(getDrivingState()) {
-      if(nodeVoltage < 4.5)
+      if(nodeVoltage < 4.5) {
+        if ( verbose )
+            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
 	return 'X';
+      }
       else
 	return '1';
     } else {
-      if(nodeVoltage > 0.5)
+      if(nodeVoltage > 0.5) {
+        if ( verbose )
+            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
 	return 'X';
+      }
       else
 	return '0';
     }
@@ -1357,13 +1369,19 @@ char IO_bi_directional_pu::getBitChar()
     // There's at least one strong driver tied to the node
     if(!getDriving()) {
       if(getDrivenState()) {
-        if(nodeVoltage < 4.5)
-          return 'X';
+        if(nodeVoltage < 4.5) {
+          if ( verbose )
+              cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
+	  return 'X';
+        }
         else
           return '1';
       } else {
-        if(nodeVoltage > 0.9)
-          return 'X';
+        if(nodeVoltage > 0.9) {
+          if ( verbose )
+              cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
+	  return 'X';
+        }
         else
           return '0';
       }
@@ -1372,13 +1390,19 @@ char IO_bi_directional_pu::getBitChar()
 
   if(getDriving()) {
     if(getDrivingState()) {
-      if(nodeVoltage < 4.5)
-        return 'X';
+      if(nodeVoltage < 4.5) {
+        if ( verbose )
+            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
+	return 'X';
+      }
       else
         return '1';
     } else {
-      if(nodeVoltage > 0.5)
-        return 'X';
+      if(nodeVoltage > 0.5) {
+        if ( verbose )
+            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
+	return 'X';
+      }
       else
         return '0';
     }

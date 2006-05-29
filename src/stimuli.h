@@ -360,9 +360,9 @@ class IOPIN : public stimulus
 
   IOPIN(const char *n=0,
 	double _Vth=5.0, 
-	double _Zth=1e6,
-	double _ZthWeak = 1e3,
-	double _ZthFloating = 1e6
+	double _Zth=1e8,
+	double _ZthWeak = 1e6,
+	double _ZthFloating = 1e7
 	);
 
 #if defined(OLD_IOPORT_DESIGN)
@@ -448,9 +448,9 @@ public:
 
   IO_bi_directional(const char *n=0,
 		    double _Vth=5.0, 
-		    double _Zth=250,
-		    double _ZthWeak = 1e3,
-		    double _ZthFloating = 1e6,
+		    double _Zth=150,
+		    double _ZthWeak = 1e6,
+		    double _ZthFloating = 1e7,
 		    double _VthIn = 0.3,
 		    double _ZthIn = 1e8);
 #if defined(OLD_IOPORT_DESIGN)
@@ -484,9 +484,9 @@ class IO_bi_directional_pu : public IO_bi_directional
 public:
   IO_bi_directional_pu(const char *n=0,
 		       double _Vth=5.0, 
-		       double _Zth=250,
-		       double _ZthWeak = 1e3,
-		       double _ZthFloating = 1e6,
+		       double _Zth=150,
+		       double _ZthWeak = 1e6,
+		       double _ZthFloating = 1e7,
 		       double _VthIn = 0.3,
 		       double _ZthIn = 1e8,
 		       double _Zpullup = 20e3
