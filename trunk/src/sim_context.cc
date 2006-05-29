@@ -50,8 +50,6 @@ Boston, MA 02111-1307, USA.  */
 #include "breakpoints.h"
 #include "trace.h"
 
-const char * get_error_message();
-
 //================================================================================
 // Global Declarations
 //  FIXME -  move these global references somewhere else
@@ -184,14 +182,9 @@ int CSimulationContext::LoadProgram(const char *filename,
   FILE * pFile = fopen_path (filename, "rb");
   if(pFile == NULL) {
     char cw[_MAX_PATH];
-//    GetCurrentDirectory(_MAX_PATH, cw);
-    getcwd(cw, _MAX_PATH);
-    //fprintf(stderr, "%s in module_load_library(%s)\n", pszError, library_name);
-    cerr << "failed to open program file ";
-    cerr << filename;
-    cerr << ": ";
-    cerr << get_error_message();
-    cerr << endl;
+
+    perror((string("failed to open program file ") + filename).c_str());
+    getcwd(cw, sizeof(cw));
     cerr << "current working directory is ";
     cerr << cw;
     cerr << endl;

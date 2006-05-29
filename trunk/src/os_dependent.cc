@@ -68,7 +68,6 @@ using namespace std;
 #define PATHDELIMITER ":"
 #endif
 
-const char * get_error_message();
 unsigned long get_error(const char *);
 
 #ifdef _WIN32
@@ -297,7 +296,23 @@ void GetFileNameBase(string &sPath, string &sName) {
   }
 }
 
-void * load_library(const char *library_name, const char **pszError)
+char * get_error_message()
+{
+#ifdef _WIN32
+  return g_win32_error_message(GetLastError());
+#else
+  return dlerror();
+#endif
+}
+
+void free_error_message(char * pszError)
+{
+#ifdef _WIN32
+  g_free(pszError);
+#endif
+}
+
+void * load_library(const char *library_name, char **pszError)
 {
   void *handle;
 
@@ -317,6 +332,8 @@ void * load_library(const char *library_name, const char **pszError)
   if (uError == OS_E_FILENOTFOUND) {
     // Failed to find the library in the system paths, so try to load
     // from one of our paths.
+
+    free_error_message(*pszError);
 
     CFileSearchPath::iterator itSearchPath;
     for (itSearchPath = asDllSearchPath.begin();
@@ -363,22 +380,7 @@ unsigned long get_error(const char *err_str) {
 #endif
 }
 
-const char * get_error_message() {
-#ifdef _WIN32
-  return g_win32_error_message(GetLastError());
-#else
-  return dlerror();
-#endif
-}
-
-void free_error_message(const char * pszError)
-{
-#ifdef _WIN32
-  g_free((gpointer)pszError);
-#endif
-}
-
-void * get_library_export(const char *name, void *library_handle, const char ** pszError)
+void * get_library_export(const char *name, void *library_handle, char ** pszError)
 {
   void * pExport;
 #ifdef _WIN32

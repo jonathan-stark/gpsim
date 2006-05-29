@@ -1,3 +1,8 @@
+2006-05-28 Borut Razem <borut.razem@siol.net>
+	* src/os_dependent.c, src/modules.h, src/modules.cc,
+	  src/sim_context.cc:
+	  fixed [ 1488107 ] const violation in get_error_message()
+
 2006-05-29 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* regression/resistor/resistor.asm: improved failure reporting
 	  and added tests for the output pin not being swamped
