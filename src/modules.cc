@@ -69,7 +69,7 @@ ModuleLibrary::ModuleList ModuleLibrary::m_ModuleList;
 void          ModuleLibrary::LoadFile(const char *pFilename) 
 {
   void *handle;
-  const char *pszError;
+  char *pszError;
   bool bReturn = false;
 
   string sPath(pFilename);
@@ -81,15 +81,14 @@ void          ModuleLibrary::LoadFile(const char *pFilename)
 #ifdef THROW
       ostringstream stream;
 
-      char cw[_MAX_PATH];
-  //    GetCurrentDirectory(_MAX_PATH, cw);
-      getcwd(cw, _MAX_PATH);
-      //fprintf(stderr, "%s in module_load_library(%s)\n", pszError, library_name);
       stream << "failed to open library module ";
       stream << sPath;
       stream << ": ";
       stream << pszError;
       stream << endl;
+
+      char cw[_MAX_PATH];
+      getcwd(cw, sizeof(cw));
       stream << "current working directory is ";
       stream << cw;
       stream << endl << ends;
@@ -104,6 +103,7 @@ void          ModuleLibrary::LoadFile(const char *pFilename)
       }
     }
   }
+
   if(verbose)
     DisplayFileList();
   return;
@@ -268,7 +268,7 @@ void          ModuleLibrary::DeleteProcessor(Processor *) {
 
 bool ModuleLibrary::AddFile(const char *library_name, void *library_handle)
 {
-  const char * error;
+  char * error;
   if(library_name) {
     string sName(library_name);
     MakeCanonicalName(sName, sName);
@@ -282,6 +282,7 @@ bool ModuleLibrary::AddFile(const char *library_name, void *library_handle)
            << "  gpsim libraries should have the get_mod_list() function defined\n";
       fputs(error, stderr);
       fputs ("\n", stderr);
+      free_error_message(error);
     } else {
 
       // Get a pointer to the list of modules that this library file supports.
