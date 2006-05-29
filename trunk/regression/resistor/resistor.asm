@@ -35,6 +35,7 @@ start
    .sim "module library libgpsim_modules"
    .sim "module load pu pu1"
    .sim "module load pd pd1"
+;   .sim "pu1.resistance=1000."
    .sim "pd1.resistance=3900."
    .sim "node A"
    .sim "attach A porta0 porta1 pu1.pin"
@@ -50,14 +51,14 @@ start
         nop
 ;
 ;	pull-up should set input ports high
-    .assert "(porta&1) == 1"
+    .assert "(porta&1) == 1, \"*** FAILED - Pullup doesn't give high state\""
 ;
 
         bsf     STATUS,RP0
 	bcf	OPTION_REG,NOT_RBPU	; turn on portb pullups
 ;
 ;	 the pull-down resistor should pull down the weak B port pull-up
-    .assert "(portb&1) == 0"
+    .assert "(portb&1) == 0, \"*** FAILED weak pull-up vs. pull down\""
 ;
         movlw   0x81		;Port A 0 in others out
 	movwf	TRISA
@@ -71,27 +72,43 @@ start
 
         bcf     STATUS,RP0
 
+	clrf	PORTA
 ;
 ;	low output porta1 should drive pull-up resistor low
-    .assert "(porta&1) == 0"
+    .assert "(porta&3) == 0, \"*** FAILED low output driving pull-up\""
 ;
 
 ;
 ;	low output porta2 should drive portb0 and pull-down resistor low
-    .assert "(portb&1) == 0"
+    .assert "(portb&1) == 0, \"*** FAILED low output propagation\""
 ;
 
 	bsf	PORTA,1
 ;
 ;	high output porta1 high should drive porta0 and pull-up high
-    .assert "(porta&1) == 1"
+    .assert "(porta&1) == 1, \"*** FAILED high output with pull-up\""
 ;
 	bsf	PORTA,2
 ;
 ;	high output porta2 should drive portb0 and pull-down resistor high
-    .assert "(portb&1) == 1"
+    .assert "(portb&1) == 1, \"*** FAILED high output driving pull-down\""
 ;
 
+	bcf	PORTA,1
+;
+;	low output porta1 should drive porta0 and pull-up low
+    .assert "(porta&3) == 0, \"*** FAILED low output driving pull-up\""
+;
+	bcf	PORTA,2
+;
+;	low output porta2 should drive portb0 and pull-down resistor low
+    .assert "(portb&1) == 0, \"*** FAILED low output propagation\""
+;
+	nop
+;	bit operation on porta should not change porta1
+    .assert "(porta&3) == 0,   \"*** FAILED - PIC output drive too weak\""
+
+	nop
 
 
 passed:

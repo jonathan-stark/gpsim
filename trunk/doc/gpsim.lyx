@@ -1315,8 +1315,6 @@ disassemble
 disassemble [[begin:end] | [length]]
 \layout LyX-Code
 
-\layout LyX-Code
-
 \layout Standard
 
 The disassemble command decodes the program memory opcodes into their standard
@@ -1372,19 +1370,12 @@ dump
 dump [r | e]
 \layout LyX-Code
 
- 
-\layout LyX-Code
+\layout Standard
 
-  dump r or dump with no options will display all of the file
-\layout LyX-Code
-
-  registers and special function registers.
-\layout LyX-Code
-
-  dump e will display the contents of the eeprom (if the pic
-\layout LyX-Code
-
-  being simulated contains any)
+dump r or dump with no options will display all of the file registers and
+ special function registers.
+ dump e will display the contents of the eeprom (if the pic being simulated
+ contains any).
 \layout Standard
 
 See the 'x' command for examining and modifying individual registers.
@@ -1740,8 +1731,7 @@ The
 lib
 \emph default 
  option is used to load a module library.
- Module libraries are system dependent shared libraries.
- I.e.
+ Module libraries are system dependent shared libraries, i.e.
  on Windows they're DLL's and UNIX they're shared libraries.
  This means that either the libraries should reside in a path where the
  OS knows libraries exist or that the full path name must be specified along
@@ -1857,35 +1847,37 @@ node
 \layout LyX-Code
 
 node [new_node1 new_node2 ...]
+\layout Standard
+
+The 
+\shape italic 
+node
+\shape default 
+ command defines or queries 
+\begin_inset Quotes eld
+\end_inset 
+
+nodes
+\begin_inset Quotes erd
+\end_inset 
+
+, used to connect external signals to the simulated PIC.
+ If no new_node is specified then all of the nodes that have been defined
+ are displayed.
+ If a new_node is specified then it will be added to the node list.
+ See the "attach" and "stimulus" commands to see how stimuli are added to
+ the nodes.
 \layout LyX-Code
 
-     If no new_node is specified then all of the nodes that have been
+examples:
 \layout LyX-Code
 
-    defined are displayed.
- If a new_node is specified then it will be
 \layout LyX-Code
 
-    added to the node list.
- See the "attach" and "stimulus" commands
+node           // display the node list
 \layout LyX-Code
 
-    to see how stimuli are added to the nodes.
-\layout LyX-Code
-
- 
-\layout LyX-Code
-
-    examples:
-\layout LyX-Code
-
- 
-\layout LyX-Code
-
-    node           // display the node list
-\layout LyX-Code
-
-    node n1 n2 n3  // create and add 3 new nodes to the list 
+node n1 n2 n3  // create and add 3 new nodes to the list 
 \layout Section
 
 processor
@@ -2011,7 +2003,11 @@ symbol
 symbol [symbol_name [symbol_type value]] 
 \layout Standard
 
-The symbol command is used to query and define symbols.
+The 
+\emph on 
+symbol
+\emph default 
+ command is used to query and define symbols.
  If no options are specified, the whole symbol table is displayed.
  The creation of user defined symbols is limited at this time (see the online
  help for the current state of this command).
@@ -2288,15 +2284,14 @@ trace
 \layout LyX-Code
 
 trace [dump_amount]
-\layout LyX-Code
+\layout Standard
 
-      trace will print out the most recent "dump_amount" traces.
-\layout LyX-Code
 
-      If no dump_amount is specified, then the entire trace buffer
-\layout LyX-Code
-
-      will be displayed.
+\emph on 
+trace
+\emph default 
+ will print out the most recent "dump_amount" traces.
+ If no dump_amount is specified, then the entire trace buffer will be displayed.
 \layout Section
 
 version
@@ -2931,7 +2926,7 @@ When you are done, you can save by clicking the "save configuration" button.
  You can then load this file from the command line like this (assuming the
  .cod file with your source is called "mycode.cod", and the file you just
  saved was called "mynets.stc":
-\layout Standard
+\layout LyX-Code
 
 gpsim -s mycode.cod -c mynets.stc
 \layout Standard
@@ -3635,7 +3630,7 @@ Stimuli are extremely useful, if not necessary, for simulations.
 
 The gpsim stimuli capability is designed to be accurate, efficient and flexible.
  The models for the PIC's I/O pins mimic the real devices.
- For example, the open collector output on port A of an PIC16C84 can only
+ For example, the open collector output on port A of a PIC16C84 can only
  drive low.
  Multiple I/O pins may tied to one another so that the open collector on
  port A can get a pull up resistor from port B.
