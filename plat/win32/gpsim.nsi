@@ -56,6 +56,8 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_PAGE_WELCOME
 ; License page
 !insertmacro MUI_PAGE_LICENSE "${GPSIM_ROOT}\COPYING"
+; Components page
+!insertmacro MUI_PAGE_COMPONENTS
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
@@ -120,14 +122,16 @@ inst:
 done:
 FunctionEnd
 
-Section "MainSection" SEC01
+InstType "gpsim + extras modules"
+InstType "gpsim"
 
+Section "gpim" SEC01
+  SectionIn 1 2 RO
   SetOutPath "$INSTDIR\bin"
   SetOverwrite ifnewer
   File "${GPSIM_ROOT}\gpsim\gpsim.exe"
   File "${GPSIM_ROOT}\src\libgpsim.dll"
   File "${GPSIM_ROOT}\modules\libgpsim_modules.dll"
-  File "${GPSIM_ROOT}\plat\win32\modules.def"
   File "${PKG_ROOT}\bin\charset.dll"
   File "${PKG_ROOT}\bin\gtkextra-win32-2.1.dll"
   File "${PKG_ROOT}\bin\iconv.dll"
@@ -401,8 +405,30 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\extras\usart_con\README"
   File "${GPSIM_ROOT}\extras\usart_con\usart_con.cc"
   File "${GPSIM_ROOT}\extras\usart_con\usart_con.h"
-
 SectionEnd
+
+Section "extras modules" SEC02
+  SectionIn 1
+  SetOutPath "$INSTDIR\bin"
+  SetOverwrite ifnewer
+  File "${GPSIM_ROOT}\extras\usart_con\libgpsim_usart_con.dll"
+  File "${GPSIM_ROOT}\extras\graphic_lcd\src\glcd.dll"
+  File "${GPSIM_ROOT}\extras\lcd\libgpsim_lcd.dll"
+SectionEnd
+
+;--------------------------------
+;Descriptions
+
+  ;Language strings
+  LangString DESC_SEC01 ${LANG_ENGLISH} "gpim"
+  LangString DESC_SEC02 ${LANG_ENGLISH} "extras modules"
+
+  ;Assign language strings to sections
+  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} $(DESC_SEC01)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} $(DESC_SEC02)
+  !insertmacro MUI_FUNCTION_DESCRIPTION_END
+;--------------------------------
 
 Section -Icons
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
@@ -454,7 +480,11 @@ Section Uninstall
   Delete "$INSTDIR\ChangeLog.txt"
 
   Delete "$INSTDIR\bin\libgpsim_modules.dll"
-  Delete "$INSTDIR\bin\modules.def"
+
+; extras modules
+  Delete "$INSTDIR\bin\libgpsim_usart_con.dll"
+  Delete "$INSTDIR\bin\glcd.dll"
+  Delete "$INSTDIR\bin\libgpsim_lcd.dll"
 
   Delete "$INSTDIR\examples\12bit\*.*"
   Delete "$INSTDIR\examples\14bit\*.*"
@@ -577,8 +607,8 @@ Section Uninstall
   RMDir "$SMPROGRAMS\gpsim"
 
   RMDir "$INSTDIR\lib\gpsim"
-  RMDir "$INSTDIR\lib\pango\1.4.0\modules"
-  RMDir "$INSTDIR\lib\pango\1.4.0"
+  RMDir "$INSTDIR\lib\pango\1.5.0\modules"
+  RMDir "$INSTDIR\lib\pango\1.5.0"
   RMDir "$INSTDIR\lib\pango"
   RMDir "$INSTDIR\lib\gtk-2.0\2.4.0\loaders"
   RMDir "$INSTDIR\lib\gtk-2.0\2.4.0\immodules"
