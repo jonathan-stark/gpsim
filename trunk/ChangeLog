@@ -1,3 +1,12 @@
+2006-05-31 Borut Razem <borut.razem@siol.net>
+	* Implemented enhancement request
+	  [ 1496325 ] To bundle the extra modules with gpsim-win32 snapshot
+	  makefile.mingw: added targets extras, clean_extras
+	  extras/graphic_lcd/makefile.mingw, extras/lcd/makefile.mingw,
+	  extras/usart_com/makefile.mingw: introduced GPSIM_LIB_PATH,
+	  GPSIM_INCLUDE_PATH, GPSIM_DEF_PATH variables
+	  plat/win32/gpsim.nsi: added potion to install extras modules
+
 2006-05-28 Borut Razem <borut.razem@siol.net>
 	* src/os_dependent.c, src/modules.h, src/modules.cc,
 	  src/sim_context.cc:
