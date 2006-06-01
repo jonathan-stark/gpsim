@@ -675,8 +675,7 @@ void pic_processor::reset (RESET_TYPE r)
       cout << "POR\n";
       if(config_modes) config_modes->print();
     }
-    if(config_modes)
-      wdt.initialize( config_modes->get_wdt() , nominal_wdt_timeout);
+    wdt.reset();
 
     bHaltSimulation = false;
     break;
@@ -700,8 +699,7 @@ void pic_processor::reset (RESET_TYPE r)
 
 void pic_processor::por(void)
 {
-  if(config_modes)
-    wdt.initialize( config_modes->get_wdt(), nominal_wdt_timeout);
+  wdt.reset();
 
 }
 
@@ -710,7 +708,8 @@ void pic_processor::por(void)
 // pic_processor -- constructor
 //
 
-pic_processor::pic_processor(void)
+pic_processor::pic_processor()
+  : wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0)
 {
   m_Capabilities = eSTACK | eWATCHDOGTIMER;
 
@@ -748,8 +747,6 @@ void pic_processor::create (void)
 
   // Now, initialize the core stuff:
   pc->set_cpu(this);
-  //  cycles.cpu = this;
-  wdt.cpu = this;
 
   W = new WREG(this);
   //  W->set_cpu(this);
@@ -765,8 +762,6 @@ void pic_processor::create (void)
 
   register_bank = &registers[0];  // Define the active register bank 
   W->value.put(0);
-
-  nominal_wdt_timeout = 18e-3;    // 18ms according to the data sheet (no prescale)
 
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
@@ -1005,3 +1000,164 @@ void ProgramMemoryAccess::callback(void)
     }
 
 }
+
+//--------------------------------------------------
+WDT::WDT(pic_processor *p_cpu, double _timeout)
+  : cpu(p_cpu), breakpoint(0), future_cycle(0), timeout(_timeout), wdte(false)
+{
+}
+
+//--------------------------------------------------
+void WDT::update()
+{
+  if(wdte){
+
+    value = (unsigned int )(cpu->get_frequency()*timeout);
+    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+
+    if(future_cycle) {
+
+      guint64 fc = get_cycles().value + value * (1<<prescale);
+
+      //cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
+
+      get_cycles().reassign_break(future_cycle, fc, this);
+      future_cycle = fc;
+
+    } else {
+    
+      future_cycle = get_cycles().value + value * (1<<prescale);
+
+      get_cycles().set_break(future_cycle, this);
+    }
+  }
+
+}
+
+//--------------------------------------------------
+// WDT::put - shouldn't be called?
+//
+
+void WDT::put(unsigned int new_value)
+{
+  value = new_value;
+
+  update();
+
+}
+void WDT::set_timeout( double _timeout)
+{
+  timeout = _timeout;
+  update();
+}
+void WDT::initialize(bool enable)
+{
+  wdte = enable;
+  warned = 0;
+
+  if(verbose)
+    cout << " WDT init called "<< ( (enable) ? "enabling\n" :", but disabling WDT\n");
+
+  if(wdte) {
+    cout << "Enabling WDT " << " timeout = " << timeout << " seconds\n";
+    value = (unsigned int) (cpu->get_frequency()*timeout);
+    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+
+    future_cycle = get_cycles().value + value * (1<<prescale);
+
+    get_cycles().set_break(future_cycle, this);
+
+  } else {
+
+    if (future_cycle) {
+      cout << "Disabling WDT\n";
+      get_cycles().clear_break(this);
+      future_cycle = 0;
+    }
+  }
+
+}
+
+void WDT::reset()
+{
+  update();
+}
+void WDT::set_breakpoint(unsigned int bpn)
+{
+  breakpoint = bpn;
+}
+
+void WDT::callback(void)
+{
+
+
+  if(wdte) {
+    cout<<"WDT timeout: " << hex << get_cycles().value << '\n';
+
+    //future_cycle = 0;
+    update();
+
+    // The TO bit gets cleared when the WDT times out.
+    cpu->status->put_TO(0);
+
+    if(breakpoint)
+      bp.halt();
+    else 
+    {
+      bp.clear_sleep();
+      cpu->reset(WDT_RESET);
+    }
+    /*    else if(bp.have_sleep()) {
+      bp.clear_sleep();
+    }else
+      cpu->reset(WDT_RESET);
+    */
+  }
+
+}
+
+void WDT::clear(void)
+{
+  if(wdte)
+    update();
+  else
+    {
+      if(!warned)
+	{
+	  warned = 1;
+	  cout << "The WDT is not enabled - clrwdt has no effect!\n";
+	}
+    }
+
+}
+
+void WDT::start_sleep(void)
+{
+
+  if(wdte) {
+    prescale = 0;
+
+    guint64 fc = get_cycles().value + value * (1<<prescale);
+
+    //cout << "WDT::start_sleep:  moving break from " << future_cycle << " to " << fc << '\n';
+
+    get_cycles().reassign_break(future_cycle, fc, this);
+
+    future_cycle = fc;
+  }
+}
+
+void WDT::new_prescale(void)
+{
+
+  update();
+
+}
+
+void WDT::callback_print(void)
+{
+
+  cout << "WDT\n";
+}
+
+

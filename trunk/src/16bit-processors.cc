@@ -80,6 +80,9 @@ public:
   }
 };
 
+//------------------------------------------------------------------------
+// Config2H - default 
+//  The default Config2H register controls the 18F series WDT. 
 class Config2H : public ConfigMemory 
 {
 #define WDTEN   (1<<0)
@@ -92,6 +95,12 @@ public:
   Config2H(_16bit_processor *pCpu, unsigned int addr)
     : ConfigMemory("CONFIG2H", CONFIG2H_default, "WatchDog configuration", pCpu, addr)
   {
+  }
+  virtual void set(gint64 v)
+  {
+    Integer::set(v);
+    if (m_pCpu)
+      m_pCpu->wdt.initialize(v&WDTEN == WDTEN);
   }
 };
 

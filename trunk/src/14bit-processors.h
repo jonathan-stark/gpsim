@@ -141,7 +141,6 @@ public:
 
   PicPortBRegister *m_portb;
   PicTrisRegister  *m_trisb;
-  PortBSink        *m_portbSink;
 
   virtual PROCESSOR_TYPE isa(void){return _14BIT_PROCESSOR_;};
   virtual void create_symbols(void);

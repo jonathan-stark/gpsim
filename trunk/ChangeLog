@@ -1,3 +1,15 @@
+
+2006-05-31 Scott Dattalo <scott@dattalo.com>
+	* src/p16x6x.h, src/16bit-processors.cc, src/14bit-registers.h,
+	  src/processor.h, src/pic-registers.h, src/pic-processor.cc,
+	  src/pic-processor.h, src/p16x8x.h, src/pic-registers.cc,
+	  src/breakpoints.cc, src/12bit-processors.h,
+	  src/14bit-processors.cc, src/14bit-processors.h:
+
+	Accesses to CONFIG2H now can control the WDT. A couple of new
+	members were added to the WDT class to support the new reading and
+	writing. Also, some minor class clean up was also performed.
+
 2006-05-31 Borut Razem <borut.razem@siol.net>
 	* Implemented enhancement request
 	  [ 1496325 ] To bundle the extra modules with gpsim-win32 snapshot

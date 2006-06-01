@@ -146,7 +146,7 @@ int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
         // pic_processor should not be referenced here
         // Should have a GetStack() virtual function in Processor class.
         // Of course then the Stack class needs to be a virtual class.
-        ((_14bit_processor *)cpu)->wdt.break_point = BREAK_ON_WDT_TIMEOUT | breakpoint_number;
+        ((_14bit_processor *)cpu)->wdt.set_breakpoint(BREAK_ON_WDT_TIMEOUT | breakpoint_number);
         return(breakpoint_number);
       }
       else {
@@ -469,7 +469,7 @@ int  Breakpoints::set_wdt_break(Processor *cpu)
   if ((cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
     == Processor::eBREAKONWATCHDOGTIMER) {
     // Set a wdt break only if one is not already set.
-    if(cpu14->wdt.break_point == 0)
+    if(!cpu14->wdt.hasBreak())
       return(set_breakpoint (Breakpoints::BREAK_ON_WDT_TIMEOUT, cpu, 0, 0));
   }
   else {
@@ -735,7 +735,7 @@ void Breakpoints::clear(unsigned int b)
     if ((bs.cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
         == Processor::eBREAKONWATCHDOGTIMER) {
       cout << "Cleared wdt timeout breakpoint number " << b << '\n';
-      ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
+      ((_14bit_processor *)bs.cpu)->wdt.set_breakpoint(0);
     }
     break;
 

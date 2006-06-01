@@ -53,18 +53,12 @@ enum _12BIT_DEFINITIONS
   unsigned int pa_bits;   /* a CPU dependent bit-mask defining which of the program
                            * page bits in the status register are significant. */
 
-  //  const int MAXPICSIZE = 0x2000;
-
-  //  PCLATH       pclath;
-
-  //  OPTION_REG   option_reg;
-
   virtual void reset(RESET_TYPE r);
 
   virtual void create_symbols(void);
-//  virtual void load_hex(char *hex_file);
   virtual void por(void);
-  unsigned int register_memory_size () const { return FILE_REGISTERS;};
+  #define FILE_REGISTERS  0x100
+  virtual unsigned int register_memory_size () const { return FILE_REGISTERS;};
   virtual void dump_registers(void);
   virtual void tris_instruction(unsigned int tris_register){return;};
   virtual void create(void);

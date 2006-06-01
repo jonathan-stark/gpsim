@@ -436,37 +436,6 @@ class PCON : public sfr_register
   PCON(void);
 };
 
-//---------------------------------------------------------
-// Watch Dog Timer
-//
-
-class WDT : public TriggerObject
-{
-public:
-  pic_processor *cpu;           // The cpu to which this wdt belongs.
-
-  unsigned int
-    value,
-    prescale,
-    break_point;
-  guint64
-    future_cycle;
-
-  double timeout;   // When no prescaler is assigned
-  bool   wdte;
-  bool   warned;
-
-  void put(unsigned int new_value);
-  virtual void initialize(bool enable, double _timeout);
-  void clear(void);
-  virtual void callback(void);
-  virtual void start_sleep(void);
-  virtual void new_prescale(void);
-  virtual void update(void);
-  virtual void callback_print(void);
-};
-
-
 class OSCCON;
 class OSCTUNE : public  sfr_register
 {

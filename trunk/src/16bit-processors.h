@@ -225,7 +225,7 @@ public:
   //unsigned int get();
   //virtual void set(unsigned int);
 
-private:
+protected:
   _16bit_processor *m_pCpu;
   unsigned int m_addr;
   //unsigned int m_value;

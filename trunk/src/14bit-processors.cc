@@ -44,6 +44,7 @@ pic_processor * _14bit_processor::construct(void)
 }
 //-------------------------------------------------------------------
 _14bit_processor::_14bit_processor(void)
+  : intcon(0)
 {
   pc = new Program_Counter();
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
@@ -185,7 +186,6 @@ Pic14Bit::Pic14Bit()
 
   m_portb = new PicPortBRegister("portb",8,0xff);
   m_trisb = new PicTrisRegister("trisb",m_portb);
-
 }
 
 //-------------------------------------------------------------------
