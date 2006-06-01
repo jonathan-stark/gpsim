@@ -417,7 +417,7 @@ public:
   virtual int  map_rm_address2index(int address) {return address;};
   virtual int  map_rm_index2address(int index) {return index;};
   virtual void init_register_memory(unsigned int memory_size);
-  virtual unsigned int register_memory_size () const { return 0;}
+  virtual unsigned int register_memory_size () const = 0;
   virtual unsigned int CalcJumpAbsoluteAddress(unsigned int uInstAddr,
     unsigned int uDestAddr) { return uDestAddr; }
   virtual unsigned int CalcCallAbsoluteAddress(unsigned int uInstAddr,

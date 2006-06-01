@@ -52,5 +52,4 @@ public:
   ProgramMemoryAccess *pma;
 };
 
-
 #endif

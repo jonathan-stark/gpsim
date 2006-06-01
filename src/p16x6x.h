@@ -76,6 +76,8 @@ public:
   SSP_MODULE14   ssp;
 
   virtual unsigned int program_memory_size() const { return 0x800; };
+  virtual unsigned int register_memory_size () const { return 0x100; }
+
   virtual void create_symbols();
   virtual void create_sfr_map();
   virtual PIR *get_pir2() { return (pir2); }

@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "program_files.h"
 
 #include "14bit-registers.h"
+#include "trigger.h"
 
 class EEPROM;
 class instruction;
@@ -170,6 +171,45 @@ class ConfigMode {
 
 };
 
+
+//---------------------------------------------------------
+// Watch Dog Timer
+//
+
+class WDT : public TriggerObject
+{
+public:
+  WDT(pic_processor *, double _timeout);
+  void put(unsigned int new_value);
+  virtual void initialize(bool enable);
+  void set_timeout(double);
+  virtual void reset();
+  void clear();
+  virtual void callback();
+  virtual void start_sleep();
+  virtual void new_prescale();
+  virtual void update();
+  virtual void callback_print();
+  void set_breakpoint(unsigned int bpn);
+  bool hasBreak() { return breakpoint != 0;}
+
+protected:
+  pic_processor *cpu;           // The cpu to which this wdt belongs.
+
+  unsigned int
+    value,
+    breakpoint,
+    prescale;
+  guint64
+    future_cycle;
+
+  double timeout;   // When no prescaler is assigned
+  bool   wdte;
+  bool   warned;
+
+
+};
+
 /*==================================================================
  * FIXME - move these global references somewhere else
  */
@@ -203,7 +243,6 @@ class pic_processor : public Processor
 {
 public:
 
-  #define FILE_REGISTERS  0x100
 
 
   unsigned int config_word;      // as read from hex or cod file
@@ -211,8 +250,6 @@ public:
 
   unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds 
                                  // to the instruction execution rate.
-
-  double nominal_wdt_timeout;
 
   WDT          wdt;
 
@@ -273,8 +310,6 @@ public:
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};
-
-  virtual unsigned int register_memory_size () const { return FILE_REGISTERS;};
 
   /* The program_counter class calls these two functions to get the upper bits of the PC
    * for branching (e.g. goto) or modify PCL instructions (e.g. addwf pcl,f) */

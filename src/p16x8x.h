@@ -31,6 +31,7 @@ public:
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void create_iopin_map(void);
   virtual void create(int ram_top);
+  virtual unsigned int register_memory_size () const { return 0x100; }
 };
 
 class P16C84 : public P16X8X
@@ -40,8 +41,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(void){return _P16C84_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
-
+  virtual unsigned int program_memory_size(void) const { return 0x400; }
   P16C84(void);
   static Processor *construct(void);
 };
