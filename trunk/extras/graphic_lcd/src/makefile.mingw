@@ -61,18 +61,18 @@ INCLUDES = -I $(GPSIM_INCLUDE_PATH) \
 
 DEFINES += -DHAVE_GUI
 
-all :				\
-	glcd.dll 
+all:				\
+	libgpsim_graphicLCD.dll 
 
-glcd_OBJECTS =			\
+libgpsim_graphicLCD_OBJECTS =	\
 	gpsim_modules.o		\
 	sed1520.o		\
 	glcd_100X32_sed1520.o
 
 ################ The modules DLL
 
-glcd.dll : $(glcd_OBJECTS)
-	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o glcd.dll $(GPSIM_DEF_PATH)/modules.def $(glcd_OBJECTS) $(LIBS)
+libgpsim_graphicLCD.dll : $(libgpsim_graphicLCD_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_graphicLCD.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_graphicLCD_OBJECTS) $(LIBS)
 
-clean :
+clean:
 	-rm -f *.o *.dll
