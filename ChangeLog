@@ -1,3 +1,8 @@
+2006-03-02 Borut Razem <borut.razem@siol.net>
+	* extras/graphic_lcd/makefile.mingw, plat/win32/gpsim.nsi:
+	  graphic_lcd.dll renamed to libgpsim_graphicLCD.dll
+	* extras/lcd/examples/lcd_mod.stc:
+	  libgpsim_lcd.so changed to libgpsim_lcd
 
 2006-05-31 Scott Dattalo <scott@dattalo.com>
 	* src/p16x6x.h, src/16bit-processors.cc, src/14bit-registers.h,

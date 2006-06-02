@@ -412,7 +412,7 @@ Section "extras modules" SEC02
   SetOutPath "$INSTDIR\bin"
   SetOverwrite ifnewer
   File "${GPSIM_ROOT}\extras\usart_con\libgpsim_usart_con.dll"
-  File "${GPSIM_ROOT}\extras\graphic_lcd\src\glcd.dll"
+  File "${GPSIM_ROOT}\extras\graphic_lcd\src\libgpsim_graphicLCD.dll"
   File "${GPSIM_ROOT}\extras\lcd\libgpsim_lcd.dll"
 SectionEnd
 
@@ -483,7 +483,7 @@ Section Uninstall
 
 ; extras modules
   Delete "$INSTDIR\bin\libgpsim_usart_con.dll"
-  Delete "$INSTDIR\bin\glcd.dll"
+  Delete "$INSTDIR\bin\libgpsim_graphicLCD.dll"
   Delete "$INSTDIR\bin\libgpsim_lcd.dll"
 
   Delete "$INSTDIR\examples\12bit\*.*"

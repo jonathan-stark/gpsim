@@ -13,7 +13,7 @@ set verbose 0
 # gpsim) 2) or the path to library is not available (see the documentation
 # on modules). 
 
-module library libgpsim_lcd.so
+module library libgpsim_lcd
 
 # display all of the modules that are in the library:
 # module list
