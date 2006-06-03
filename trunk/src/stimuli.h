@@ -127,10 +127,14 @@ public:
 
   double current_time_constant; // The most recent time constant for the attached stimuli.
   double delta_voltage;     // Amplitude of initial change
+  double  minThreshold;	    // Use DC value when voltage this close
+  guint64 cap_start_cycle;  // cycles when RC value last calculated
+  guint64 future_cycle;     // cycles when next callback expected
+
   double initial_voltage;   // node voltage at the instant of change
   double finalVoltage;      // Target voltage when settling
 
-  double min_time_constant; // time constants longer than this induce settling
+  unsigned int min_time_constant;   // time constant(in cycles) longer than this induce settling
   bool bSettling;           // true when the voltage is settling 
   stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
   int nStimuli;             // number of stimuli attached to this node.
@@ -139,7 +143,7 @@ public:
   virtual ~Stimulus_Node();
 
   void   set_nodeVoltage(double v);
-  double get_nodeVoltage() { return voltage; }
+  double get_nodeVoltage();
   double get_nodeZth() { return Zth;}
   double get_nodeCth() { return Cth; }
 
