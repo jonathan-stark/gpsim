@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2006 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -97,6 +98,12 @@ void Stimulus_Node::new_name(string &rName)
   new_name(rName.c_str());
 }
 
+double Stimulus_Node::get_nodeVoltage()
+{
+  if (future_cycle) // RC calculation in progress, get current value
+    callback();
+  return(voltage);
+}
 
 void dump_node_list(void)
 {
@@ -172,7 +179,10 @@ Stimulus_Node::Stimulus_Node(const char *n)
   warned  = 0;
   current_time_constant = 0.0;
   delta_voltage = 0.0;
-  min_time_constant = 1e6; // by making this large, most stimuli will update instantly.
+  cap_start_cycle = 0;
+  future_cycle = 0;
+  minThreshold = 0.1; // volts
+  min_time_constant = 1000; // in cycles
   bSettling = false;  
   if(n)
     {
@@ -401,7 +411,7 @@ void Stimulus_Node::refresh()
         cout << " N: " <<sptr->name() 
         << " V=" << V1
         << " Z=" << Z1
-        << " C=" << C1 << endl
+        << " C=" << C1 << endl;
         */
 
         double Cs = 1 / Z1;
@@ -416,19 +426,48 @@ void Stimulus_Node::refresh()
     }
 
     current_time_constant = Cth * Zth;
+    if(((guint64)(current_time_constant*get_cycles().cycles_per_second()) 
+      < min_time_constant) 
+      ||
+      (fabs(finalVoltage - voltage) < minThreshold))
+    {
+      if (verbose)
+        cout << "Stimulus_Node::refresh " << name() << " use DC " <<
+		finalVoltage << " as current_time_constant=" <<
+          current_time_constant << endl;
 
-    if(current_time_constant < min_time_constant) {
+      if (future_cycle)	// callback is active
+      {
+	get_cycles().clear_break(this);
+      }
+
       voltage = finalVoltage;
-      settlingTimeStep = 0;
+      future_cycle = 0;
+
     } else {
+	settlingTimeStep = (guint64) (0.11 * 
+	  get_cycles().cycles_per_second() * current_time_constant);
+	voltage = initial_voltage;
 
-      // Capacitive loading must be relatively large.
-      delta_voltage = (finalVoltage - initial_voltage) / current_time_constant;
-      settlingTimeStep = (guint64) (get_cycles().cycles_per_second() * current_time_constant);
+        if (verbose)
+	  cout << "Stimulus_Node::refresh " << name() << " settlingTimeStep=" 
+	    << settlingTimeStep << " voltage=" << voltage << " Finalvoltage=" 
+	    << finalVoltage << endl;
+  /*
+	If future_cycle is not 0 we are in the middle of an RC
+	calculation, but an input condition has changed.
+  */
 
-      voltage = initial_voltage + delta_voltage;
-
-      get_cycles().set_break(get_cycles().value + settlingTimeStep,this);
+      if (future_cycle)
+      {
+	callback();
+      }
+      else
+      {
+	cap_start_cycle = get_cycles().value; 
+        future_cycle = cap_start_cycle + settlingTimeStep;
+        get_cycles().set_break(future_cycle,this);
+      }
     }
 
   }
@@ -470,19 +509,61 @@ void Stimulus_Node::set_nodeVoltage(double v)
 //------------------------------------------------------------------------
 void Stimulus_Node::callback()
 {
-  callback_print();
-  cout << " - updating voltage from " 
-       << initial_voltage << "V to "
-       << voltage << "V\n";
 
+    if (verbose)
+	callback_print();
 
-  const double minThreshold = 0.1; // volts
-  if (fabs(finalVoltage - voltage) < minThreshold) {
-    voltage = finalVoltage;
-  } else {
-    voltage += delta_voltage;
-    get_cycles().set_break(get_cycles().value + settlingTimeStep,this);
-  }
+    initial_voltage = voltage;
+    double Time_Step;
+    double expz;
+      //
+      // increase time step as capacitor charges more slowly as final
+      // voltage is approached.
+      //
+                                                                            
+      //
+      // The following is an exact calculation, assuming no circuit
+      // changes,  regardless of time step.
+      //
+      Time_Step = (get_cycles().value - cap_start_cycle)/
+        (get_cycles().cycles_per_second()*current_time_constant);
+      expz = exp(-Time_Step);
+      voltage = finalVoltage* (1.-expz) + voltage * expz;
+
+      if (verbose)
+  	cout << "\tVoltage was " << initial_voltage << "V now "
+          << voltage << "V\n";
+
+      if (fabs(finalVoltage - voltage) < minThreshold) {
+    	voltage = finalVoltage;
+        future_cycle = 0;
+	if (verbose)
+          cout << "\t" << name() << 
+	    " Final voltage " << finalVoltage << " reached at " 
+	    << get_cycles().value << " cycles\n";
+      } 
+      else if(get_cycles().value >= future_cycle) // got here via break
+      {
+        settlingTimeStep  = (guint64) (1.5 * settlingTimeStep);
+        cap_start_cycle = get_cycles().value;
+	future_cycle = cap_start_cycle + settlingTimeStep;
+    	get_cycles().set_break(future_cycle, this);
+        if (verbose)
+	  cout << "\tBreak reached at " << cap_start_cycle << 
+	    " cycles, next break set for " 
+	    << future_cycle << " delta=" << settlingTimeStep << endl;
+      }
+      else	// updating value before break don't increase step size
+      {
+        cap_start_cycle = get_cycles().value;
+        get_cycles().reassign_break(future_cycle, 
+		cap_start_cycle + settlingTimeStep, this);
+	future_cycle = get_cycles().value + settlingTimeStep;
+        if (verbose)
+	  cout << "\tcallback called at " << cap_start_cycle << 
+	    " cycles, next break set for " << future_cycle << " delta=" 
+	    << settlingTimeStep << endl;
+      }
 
   updateStimuli();
 }
@@ -496,7 +577,7 @@ void Stimulus_Node::callback_print()
 //------------------------------------------------------------------------
 void Stimulus_Node::time_constant(double new_tc)
 {
-  min_time_constant = new_tc;
+  min_time_constant = (unsigned int)(new_tc*get_cycles().cycles_per_second());
 }
 
 //------------------------------------------------------------------------
@@ -1192,60 +1273,41 @@ double IO_bi_directional::get_Zth()
 
 }
 
+/*
+   getBitChar() returns bit status as follows
+     Input pin
+	1> Pin considered floating, 
+	   return 'Z'
+	2> Weak Impedance on pin, 
+	   return 'W" if high or 'w' if low
+	3> Pin being driven externally
+	   return '1' node voltage high '0' if low
+     Output pin
+	1> Node voltage opposite driven value
+	   return 'X' if node voltage high or 'x' if inode voltage low
+	2> Node voltage same as driven value
+	   return '1' node voltage high '0' if low
+*/
+
 char IO_bi_directional::getBitChar()
 {
   if(!snode && !getDriving() )
     return getForcedDrivenState();
 
   if(snode) {
-
-    if(snode->get_nodeZth() > ZthFloating)
-      return 'Z';
-
-    if(snode->get_nodeZth() > ZthWeak)
-      return getDrivenState() ? 'W' : 'w';
-
-    // There's at least one strong driver tied to the node
-    if(!getDriving()) {
-      if(getDrivenState()) {
-	if(nodeVoltage < 4.5) {
-          if ( verbose )
-            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	  return 'X';
-        }
-	else
-	  return '1';
-      } else {
-	if(nodeVoltage > 0.5) {
-          if ( verbose )
-            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	  return 'X';
-        }
-	else
-	  return '0';
-      }
-    }
+                                                                                
+    if (!getDriving())		// input pin
+    {
+      if(snode->get_nodeZth() > ZthFloating)
+        return 'Z';
+                                                                                
+      if(snode->get_nodeZth() > ZthWeak)
+        return getDrivenState() ? 'W' : 'w';
+     }
+    else if(getDrivenState() != getDrivingState())
+        return getDrivenState() ? 'X' : 'x';
   }
 
-  if(getDriving()) {
-    if(getDrivingState()) {
-      if(nodeVoltage < 4.5) {
-        if ( verbose )
-            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	return 'X';
-      }
-      else
-	return '1';
-    } else {
-      if(nodeVoltage > 0.5) {
-        if ( verbose )
-            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	return 'X';
-      }
-      else
-	return '0';
-    }
-  }
 
   return getDrivenState() ? '1' : '0';
 }
@@ -1351,6 +1413,22 @@ double IO_bi_directional_pu::get_Vth()
 
 }
 
+/*
+   getBitChar() returns bit status as follows
+     Input pin
+	1> Pin considered floating, 
+	   return 'Z'
+	2> Weak Impedance on pin, 
+	   return 'W" if high or 'w' if low
+	3> Pin being driven externally
+	   return '1' node voltage high '0' if low
+     Output pin
+	1> Node voltage opposite driven value
+	   return 'X' if node voltage high or 'x' if inode voltage low
+	2> Node voltage same as driven value
+	   return '1' node voltage high '0' if low
+*/
+
 char IO_bi_directional_pu::getBitChar()
 {
   if(!snode && !getDriving() ) {
@@ -1359,54 +1437,20 @@ char IO_bi_directional_pu::getBitChar()
   }
 
   if(snode) {
-
-    if(snode->get_nodeZth() > ZthFloating)
-      return 'Z';
-
-    if(snode->get_nodeZth() > ZthWeak)
-      return getDrivenState() ? 'W' : 'w';
-
-    // There's at least one strong driver tied to the node
-    if(!getDriving()) {
-      if(getDrivenState()) {
-        if(nodeVoltage < 4.5) {
-          if ( verbose )
-              cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	  return 'X';
-        }
-        else
-          return '1';
-      } else {
-        if(nodeVoltage > 0.9) {
-          if ( verbose )
-              cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	  return 'X';
-        }
-        else
-          return '0';
-      }
-    }
+                                                                                
+    if (!getDriving())		// input pin
+    {
+      if(snode->get_nodeZth() > ZthFloating)
+        return 'Z';
+                                                                                
+      if(snode->get_nodeZth() > ZthWeak)
+        return getDrivenState() ? 'W' : 'w';
+     }
+    else if(getDrivenState() != getDrivingState())
+        return getDrivenState() ? 'X' : 'x';
   }
 
-  if(getDriving()) {
-    if(getDrivingState()) {
-      if(nodeVoltage < 4.5) {
-        if ( verbose )
-            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	return 'X';
-      }
-      else
-        return '1';
-    } else {
-      if(nodeVoltage > 0.5) {
-        if ( verbose )
-            cout << "***DBG*** " << name() << " at " << nodeVoltage << "V\n";
-	return 'X';
-      }
-      else
-        return '0';
-    }
-  }
+
   return getDrivenState() ? '1' : '0';
 }
 
