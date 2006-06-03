@@ -1,3 +1,11 @@
+2006-06-03 Roy Rankin <rrankin@ihug.com.au>
+	* src/stimuli.cc, src/stimuli.h: New resistor-capacitor transient 
+	  voltage calculation implemented and activated, getBitChar function
+	  re-written.
+	* modules/switch.cc, modules/switch.h, 
+	  regression/switch_test/switch_test.asm:
+        - Switch module model changed eliminating Rclosed parameter
+
 2006-03-02 Borut Razem <borut.razem@siol.net>
 	* extras/graphic_lcd/makefile.mingw, plat/win32/gpsim.nsi:
 	  graphic_lcd.dll renamed to libgpsim_graphicLCD.dll
