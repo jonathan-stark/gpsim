@@ -74,18 +74,17 @@ MAIN    CODE
    .sim "SW1.state=false"
    .sim "SW1.xpos = 216.0"
    .sim "SW1.ypos = 156.0"
-   .sim "SW1.Rclosed = 100.0"
    .sim "SW1.Ropen = 1.0e8"
 
    .sim "module load pullup PU1"
    .sim "PU1.resistance=1.0e8"
-   .sim "PU1.capacitance=1.00e-07"
+   .sim "PU1.capacitance=2.00e-07"
    .sim "PU1.xpos = 204.0"
    .sim "PU1.ypos = 36.0"
 
    .sim "module load pulldown PD1"
-   .sim "PD1.resistance=10000."
-   .sim "PD1.capacitance=2.00e-06"
+   .sim "PD1.resistance=5000."
+   .sim "PD1.capacitance=4.00e-06"
    .sim "PD1.xpos = 204.0"
    .sim "PD1.ypos = 96.0"
 
@@ -93,7 +92,6 @@ MAIN    CODE
    .sim "SW2.state=false"
    .sim "SW2.xpos = 216.0"
    .sim "SW2.ypos = 228.0"
-   .sim "SW2.Rclosed = 100.0"
    .sim "SW2.Ropen = 1.0e6"
 
     ;# Connections:
@@ -129,86 +127,121 @@ start
 
 	BCF	PORTB,0
 
-   .assert "(portc & 3) == 0"	; both sides of switch should be 0
-
+	; both sides of switch should be 0
+   .assert "(portc & 3) == 0, \"SW open, both sides 0\"" 
 	nop
 
 	BSF	PORTB,0
 
-   .assert "(portc & 3) == 1"	; drive side only high
-
+   .assert "(portc & 3) == 1, \"SW open, drive high\""	; drive side only high
 	nop
 
    ; Close the switch because of capacitance portc1 will go high after a delay:	
+   ; R=145, C=4.2e-6 TC=6.11e-4 or 1527 cycles 0-2 volts requires 0.51 Tc
    .command "SW1.state=true"
 	nop
 
-   .assert "(portc & 3) == 1"	; drive side only high because of capacitance
+	; portc0 should be same as portc1
+   .assert "(portc & 3) == 0, \"SW1 closed, cap holds low\""	
+ 	nop
  	nop
 
-      call    delay
-
-   .assert "(portc & 3) == 3"	
+       movlw   1	; wait 1280 cycles
+       call    delay
 	nop
 
-;  drive portb low, portc1 should be low after a delay
-;
+   .assert "(portc & 3) == 3, \"Sw1 closed, after < 1TC\""	
+	nop
+
+       movlw   8	; let voltage go all the way high
+       call    delay
+
+;  drive portb low, voltages should from ~5 to 1 volts in 1.6 TC
+;  or 2443 cycles, but because of RC step need 3 delay loops
 	BCF	PORTB,0		; change drive voltage
 
 
 
+       movlw   3
        call    delay
 
-   .assert "(portc & 3) == 0"   ; both sides now low
+   .assert "(portc & 3) == 0, \"drive low 1.6TC\""   ; both sides now low
 	nop
-	movf	PORTC,W
+
+       movlw   6	; let voltages go to 0
+       call    delay
+
 
 ;
 ;	test capacitance delay on drive transition
 ;
 	BSF	PORTB,0		; drive high again
+        movlw	9
 	call	delay
 
-   .assert "(portc & 3) == 3"	; make sure both sides are high
+   .assert "(portc & 3) == 3, \"prepare switch open\""	; make sure both sides are high
 	nop
 
-   ; Open the switch, because of small capacitance, floating side low
-   ; immediately
+   ; Open the switch, the time constant for the floating side is 0.02 sec.
+   ; At 10 MHz oscillator frequency the time constant is 50,000 instruction
+   ; cycles. To go from 5 to 0.5 volts requires 2.3 time constants or
+   ; 1.15e5 cycles. As delay loop is 1277 want to delay 90 loops (5A hex).
+   ; Note, although 1 Volt is the h2l transition voltage at 1.6 time constants,
+   ; we miss this.
+   ;
+   ; The drive side time constant is 150 * 2e-7 = 3e-5 sec or 75 cycles
+   ; so drive side goes low as soon as drive does.
    ;
    .command "SW1.state=false"
 	nop
 
-   .assert "(portc & 3) == 1"   ; only one side high
+	; driven side still driven, floating side
+	; held by capacitance.
+
+   .assert "(portc & 3) == 3, \"SW1 open driving high\""   
 	nop
 
 	BCF	PORTB,0
 
-   .assert "(portc & 3) == 0"
+   .assert "(portc & 3) == 2, \" SW1 open driving low\""
+	nop
+
+        movlw   0x29	; delay 52,480 cycles
+	call	delay
+
+   .assert "(portc & 3) == 2, \"SW1 open float still high\""
+	nop
+
+	movlw   0x31	; delay another 62,720 cycles
+	call	delay
+	nop
+
+   .assert "(portc & 3) == 0, \"SW1 open float low after 115215 cycles\""
 	nop
 
 ;	Turn off Capacitance to test DC behaviour
 ;
    .command "PD1.capacitance=0.0"
 	nop
-;   .command "PU1.capacitance=0"
+   .command "PU1.capacitance=0."
 	nop
 
    .assert "(portc & 3) == 0"
 	nop
 
 	BSF	PORTB,0		; Drive one side of switch high
-   .assert "(portc & 3) == 1"
+   .assert "(portc & 3) == 1, \"Drive side high C=0\""
 	nop
 
    ; Close the switch:	
    .command "SW1.state=true"
 	nop
 
-   .assert "(portc & 3) == 3"	; Both side should now be high
+   .assert "(portc & 3) == 3, \"Both sides high C=0\"" 
 	nop
 
 	BCF	PORTB,0
-   .assert "(portc & 3) == 0"	; Both side should now be low
+   .assert "(portc & 3) == 0, \"Both sides low C=0\""
 	nop
 
    ; Close the SW2 switch, portc2 should be same as portc0 and portc1
@@ -218,11 +251,11 @@ start
    .command "SW2.state=true"
 	nop
 
-   .assert "(portc & 7) == 7"	; All inputs should now be high
+   .assert "(portc & 7) == 7, \"2 Switch drive high\""
 	nop
 
 	BCF	PORTB,0
-   .assert "(portc & 7) == 0"	; All inputs should now be low
+   .assert "(portc & 7) == 0, \"2 switch drive low\""
 	nop
 done:
 
@@ -234,8 +267,7 @@ FAILED:
 	goto	$
 
 
-delay		; delay about 11,500 cycles or  1.2 ms at 10 Mhz
-       movlw   9
+delay		; W=9 = delay about 11,500 cycles or  1.2 ms at 10 Mhz
        movwf	temp2
        clrf    temp1
 delay_loop
