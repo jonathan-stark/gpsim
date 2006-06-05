@@ -32,9 +32,9 @@ class P18C2x2 : public _16bit_processor
 {
  public:
 
-  P18C2x2(void);
+  P18C2x2(const char *_name=0, const char *desc=0);
 
-  void create(void);
+  void create();
 
   virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
   virtual void create_symbols();
@@ -49,8 +49,8 @@ class P18C242 : public P18C2x2
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18C242_;};
-  P18C242();
-  static Processor *construct();
+  P18C242(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
@@ -62,8 +62,8 @@ class P18C252 : public P18C242
  public:
 
   virtual PROCESSOR_TYPE isa(){return _P18C252_;};
-  P18C252();
-  static Processor *construct();
+  P18C252(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
@@ -88,7 +88,7 @@ class P18C4x2 : public _16bit_processor
   PicTrisRegister  *m_trise;
   PicLatchRegister *m_late;
 
-  P18C4x2();
+  P18C4x2(const char *_name=0, const char *desc=0);
 
   void create();
 
@@ -107,8 +107,8 @@ class P18C442 : public P18C4x2
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18C442_;};
-  P18C442();
-  static Processor *construct();
+  P18C442(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
 
@@ -119,8 +119,8 @@ class P18C452 : public P18C442
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18C452_;};
-  P18C452();
-  static Processor *construct();
+  P18C452(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x4000; };
 
@@ -130,8 +130,8 @@ class P18F242 : public P18C242
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F242_;};
-  P18F242();
-  static Processor *construct();
+  P18F242(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
 
@@ -149,8 +149,8 @@ class P18F252 : public P18F242
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F252_;};
-  P18F252();
-  static Processor *construct();
+  P18F252(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x4000; };
 
@@ -160,8 +160,8 @@ class P18F442 : public P18C442
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F442_;};
-  P18F442();
-  static Processor *construct();
+  P18F442(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
 
@@ -182,8 +182,8 @@ class P18F248 : public P18F442
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F248_;};
-  P18F248();
-  static Processor *construct();
+  P18F248(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
 };
  
@@ -192,8 +192,8 @@ class P18F452 : public P18F442
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F452_;};
-  P18F452();
-  static Processor *construct();
+  P18F452(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
@@ -202,14 +202,16 @@ class P18F452 : public P18F442
 
 class P18Fxx20 : public _16bit_processor
 {
+public:
+  P18Fxx20(const char *_name=0, const char *desc=0);
 };
 
 class P18F1220 : public P18Fxx20
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F1220_;};
-  P18F1220();
-  static Processor *construct();
+  P18F1220(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual void create_iopin_map();
   virtual unsigned int program_memory_size() const { return 0x1000; };
@@ -221,8 +223,8 @@ class P18F1320 : public P18F1220
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F1320_;};
-  P18F1320();
-  static Processor *construct();
+  P18F1320(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x2000; };

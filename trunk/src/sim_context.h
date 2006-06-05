@@ -45,13 +45,15 @@ public:
 
   Processor * add_processor(            const char * processor_type,
                                         const char * processor_new_name = NULL);
-  Processor * add_processor(            ProcessorConstructor *pc);
+  Processor * add_processor(            ProcessorConstructor *pc,
+					const char * processor_new_name = NULL);
   Processor * SetProcessorByType(       const char * processor_type,
                                         const char * processor_new_name);
   Processor * add_processor(            Processor  * p);
   int         LoadProgram(              const char *filename,
                                         const char *pProcessorType = NULL,
-                                        Processor **ppProcessor = NULL);
+                                        Processor **ppProcessor = NULL,
+					const char * processor_new_name=NULL);
   void        dump_processor_list(void);
   bool        SetDefaultProcessor(      const char * processor_type,
                                         const char * processor_new_name); 

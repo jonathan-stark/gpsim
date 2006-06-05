@@ -54,23 +54,24 @@ public:
   OSCTUNE      osctune;
 
 
-  P16F8x(void);
+  P16F8x(const char *_name=0, const char *desc=0);
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F87_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P16F87_;};
+  virtual void create_symbols();
   virtual unsigned int register_memory_size () const { return 0x200;};
 
-  virtual unsigned int program_memory_size(void) { return 0; };
+  virtual unsigned int program_memory_size() { return 0; };
 
-  virtual void create_sfr_map(void);
+  virtual void create_sfr_map();
 
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
 
 
-  virtual void create(void);
-  virtual void create_iopin_map(void);
+  virtual void create();
+  virtual void create_iopin_map();
+  virtual void create_config_memory();
 
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
@@ -80,7 +81,7 @@ public:
   virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
     eeprom = ep;
   }
-  virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
 
   virtual bool hasSSP() { return true;}
 
@@ -93,12 +94,12 @@ class P16F87 : public P16F8x
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F87_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F87_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual unsigned int program_memory_size() const { return 0x1000; };
 
-  P16F87(void);
-  static Processor *construct(void);
+  P16F87(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 class P16F88 : public P16F87
@@ -112,16 +113,16 @@ public:
   ADRES  adresh;
   ADRES  adresl;
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F88_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F88_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual unsigned int program_memory_size() const { return 0x1000; };
 
-  virtual void create(void);
-  virtual void create_sfr_map(void);
+  virtual void create();
+  virtual void create_sfr_map();
 
 
-  P16F88(void);
-  static Processor *construct(void);
+  P16F88(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 

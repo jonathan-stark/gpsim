@@ -1,14 +1,14 @@
 
 
-load compar_628.cod
+load compar_628.cod U1
 
 # Module libraries:
 module library libgpsim_modules
 
 
 # Modules:
-p16f628.xpos=84.
-p16f628.ypos=24.
+U1.xpos=84.
+U1.ypos=24.
 
 
 module load pullup PU1

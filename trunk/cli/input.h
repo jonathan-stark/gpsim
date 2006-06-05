@@ -35,6 +35,7 @@ extern char *gnu_readline (char *s, unsigned int force_readline);
 #endif
 
 class Processor;
-int gpsim_open(Processor *cpu, const char *file, const char *pProcessorType);
+int gpsim_open(Processor *cpu, const char *file, 
+	       const char *pProcessorType, const char *pProcessorName);
 
 #endif

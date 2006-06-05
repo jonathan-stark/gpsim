@@ -66,8 +66,9 @@ MAIN    CODE
 
    ;# Module libraries:
    .sim "module library libgpsim_modules"
-   .sim "p16f877.xpos = 48.0"
-   .sim "p16f877.ypos = 36.0"
+   ;# The processor's reference designator is U1
+   .sim "U1.xpos = 48.0"
+   .sim "U1.ypos = 36.0"
 
 
    .sim "module load switch SW1"

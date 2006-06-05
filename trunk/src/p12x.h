@@ -47,27 +47,28 @@ class P12C508 : public  _12bit_processor
   PicTrisRegister *m_tris;
   sfr_register osccal;  // %%% FIX ME %%% Nothing's done with this.
 
-  virtual PROCESSOR_TYPE isa(void){return _P12C508_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P12C508_;};
+  virtual void create_symbols();
 
   virtual void enter_sleep();
-  virtual unsigned int program_memory_size(void) const { return 0x200; };
-  virtual void create_sfr_map(void);
-  virtual void dump_registers(void);
+  virtual unsigned int program_memory_size() const { return 0x200; };
+  virtual void create_sfr_map();
+  virtual void dump_registers();
   virtual void tris_instruction(unsigned int tris_register);
   virtual void reset(RESET_TYPE r);
 
-  P12C508(void);
-  static Processor *construct(void);
-  void create(void);
-  virtual void create_iopin_map(void);
+  P12C508(const char *_name=0, const char *desc=0);
+  virtual ~P12C508();
+  static Processor *construct(const char *name);
+  void create();
+  virtual void create_iopin_map();
 
-  virtual unsigned int fsr_valid_bits(void)
+  virtual unsigned int fsr_valid_bits()
     {
       return 0x1f;  // Assume only 32 register addresses 
     }
 
-  virtual unsigned int fsr_register_page_bits(void)
+  virtual unsigned int fsr_register_page_bits()
     {
       return 0;     // Assume only one register page.
     }
@@ -83,25 +84,25 @@ class P12C509 : public P12C508
 {
   public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P12C509_;};
+  virtual PROCESSOR_TYPE isa(){return _P12C509_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
-  virtual void create_sfr_map(void);
+  virtual void create_sfr_map();
 
-  virtual unsigned int fsr_valid_bits(void)
+  virtual unsigned int fsr_valid_bits()
     {
       return 0x3f;  // 64 registers in all (some are actually aliased)
     }
 
-  virtual unsigned int fsr_register_page_bits(void)
+  virtual unsigned int fsr_register_page_bits()
     {
       return 0x20;  // 509 has 2 register banks
     }
 
-  P12C509(void);
-  static Processor *construct(void);
-  void create(void);
+  P12C509(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
 
 
 };
@@ -115,8 +116,8 @@ class P12CE518 : public P12C508
   virtual PROCESSOR_TYPE isa(){return _P12CE518_;};
   virtual void tris_instruction(unsigned int tris_register);
 
-  P12CE518();
-  static Processor *construct();
+  P12CE518(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   virtual void create_iopin_map();
 private:
@@ -130,25 +131,25 @@ class P12CE519 : public P12CE518
 {
   public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P12CE519_;};
+  virtual PROCESSOR_TYPE isa(){return _P12CE519_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
-  virtual void create_sfr_map(void);
+  virtual void create_sfr_map();
 
-  virtual unsigned int fsr_valid_bits(void)
+  virtual unsigned int fsr_valid_bits()
     {
       return 0x3f;  // 64 registers in all (some are actually aliased)
     }
 
-  virtual unsigned int fsr_register_page_bits(void)
+  virtual unsigned int fsr_register_page_bits()
     {
       return 0x20;  // 519 has 2 register banks
     }
 
-  P12CE519(void);
-  static Processor *construct(void);
-  void create(void);
+  P12CE519(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
 
 
 };
@@ -160,13 +161,15 @@ class P10F200 : public P12C508
 {
   public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P10F200_;};
-  virtual unsigned int program_memory_size(void) const { return 0x100; };
+  virtual PROCESSOR_TYPE isa(){return _P10F200_;};
+  virtual unsigned int program_memory_size() const { return 0x100; };
 
-  P10F200(void);
-  static Processor *construct(void);
-  void create(void);
-  virtual void create_iopin_map(void);
+  P10F200(const char *_name=0, const char *desc=0);
+  virtual ~P10F200();
+
+  static Processor *construct(const char *name);
+  void create();
+  virtual void create_iopin_map();
 
 };
 
@@ -176,12 +179,12 @@ class P10F202 : public P10F200
 {
   public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P10F202_;};
-  virtual unsigned int program_memory_size(void) const { return 0x200; };
+  virtual PROCESSOR_TYPE isa(){return _P10F202_;};
+  virtual unsigned int program_memory_size() const { return 0x200; };
 
-  P10F202(void);
-  static Processor *construct(void);
-  void create(void);
+  P10F202(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
 
 };
 

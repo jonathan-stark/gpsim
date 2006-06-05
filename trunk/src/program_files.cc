@@ -88,7 +88,8 @@ ProgramFileTypeList::~ProgramFileTypeList() {
 
 bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
                                           const char *pFilename,
-                                          FILE *pFile) {
+                                          FILE *pFile, const char *pProcessorName) 
+{
   iterator it;
   iterator itLast;
   iterator itEnd = end();
@@ -97,7 +98,7 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
     itLast = it;
     fseek(pFile, 0, SEEK_SET);
     get_symbol_table().clear();
-    if((iReturn = (*it)->LoadProgramFile(pProcessor, pFilename, pFile))
+    if((iReturn = (*it)->LoadProgramFile(pProcessor, pFilename, pFile, pProcessorName))
       == ProgramFileType::SUCCESS) {
       return true;
     }

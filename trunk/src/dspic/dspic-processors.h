@@ -35,7 +35,7 @@ namespace dspic {
   {
   public:
 
-    dsPicProcessor();
+    dsPicProcessor(const char *_name=0, const char *desc=0);
 
     // create - build the dsPic
     virtual void create ();
@@ -63,7 +63,7 @@ namespace dspic {
     virtual int opcode_size() { return 4;}
 
     // Load a hex file:
-    bool LoadProgramFile(const char *pFilename, FILE *pFile);
+    bool LoadProgramFile(const char *pFilename, FILE *pFile, const char *pProcessorName);
     virtual void init_program_memory_at_index(unsigned int address, 
 					      const unsigned char *, int nBytes);
 
@@ -98,8 +98,8 @@ namespace dspic {
   class dsPic30F6010 : public dsPicProcessor
   {
   public:
-
-    static Processor *construct();
+    dsPic30F6010(const char *_name=0, const char *desc=0);
+    static Processor *construct(const char *name);
     virtual void create ();
     void create_iopin_map();
 

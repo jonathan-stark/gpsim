@@ -40,32 +40,33 @@ Boston, MA 02111-1307, USA.  */
 class P16F62x : public P16X6X_processor
 {
 public:
+  P16F62x(const char *_name=0, const char *desc=0);
 
   USART_MODULE14 usart;
   COMPARATOR_MODULE comparator;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F627_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P16F627_;};
+  virtual void create_symbols();
   virtual unsigned int register_memory_size () const { return 0x200;};
 
-  virtual unsigned int program_memory_size(void) { return 0; };
+  virtual unsigned int program_memory_size() { return 0; };
 
-  virtual void create_sfr_map(void);
+  virtual void create_sfr_map();
 
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
 
   /*
-  virtual int get_pin_count(void){return Package::get_pin_count();};
+  virtual int get_pin_count(){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
   */
 
   virtual void create(int ram_top, unsigned int eeprom_size);
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
 
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F62x expects to have a PIR capable EEPROM
@@ -74,44 +75,44 @@ public:
   virtual void set_eeprom_pir(EEPROM_PIR *ep) {
     eeprom = ep;
   }
-  virtual EEPROM_PIR *get_eeprom(void) { return ((EEPROM_PIR *)eeprom); }
+  virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
 };
 
 class P16F627 : public P16F62x
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F627_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F627_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual unsigned int program_memory_size() const { return 0x1000; };
 
-  P16F627(void);
-  static Processor *construct(void);
+  P16F627(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 class P16F628 : public P16F627
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F628_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F628_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 
-  P16F628(void);
-  static Processor *construct(void);
+  P16F628(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 class P16F648 : public P16F628
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F648_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F648_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
-  virtual void create_sfr_map(void);
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual void create_sfr_map();
 
-  P16F648(void);
-  static pic_processor *construct(void);
+  P16F648(const char *_name=0, const char *desc=0);
+  static pic_processor *construct(const char *name);
 };
 
 #endif

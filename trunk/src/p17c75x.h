@@ -31,15 +31,15 @@ public:
 
   CPUSTA cpusta;
   
-  P17C7xx(void);
+  P17C7xx();
 
-  static Processor *construct(void);
-  virtual PROCESSOR_TYPE isa(void){return _P17C7xx_;};
-  virtual void create_symbols(void);
+  static Processor *construct(const char *name);
+  virtual PROCESSOR_TYPE isa(){return _P17C7xx_;};
+  virtual void create_symbols();
   virtual void create(int ram_top);
 
-  virtual void create_sfr_map(void);
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual void create_sfr_map();
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
 };
 
@@ -47,31 +47,31 @@ class P17C75x : public P17C7xx
 {
  public:
 
-  P17C75x(void);
-  static Processor *construct(void);
+  P17C75x();
+  static Processor *construct(const char *name);
   virtual void create(int ram_top);
-  virtual void create_sfr_map(void);
+  virtual void create_sfr_map();
   
-  virtual PROCESSOR_TYPE isa(void){return _P17C75x_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P17C75x_;};
+  virtual void create_symbols();
   
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
 
 };
 
 class P17C752 : public P17C75x
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P17C752_;};
-  P17C752(void);
-  static Processor *construct(void);
-  void create(void);
-  //  void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _P17C752_;};
+  P17C752();
+  static Processor *construct(const char *name);
+  void create();
+  //  void create_sfr_map();
 
-  void create_sfr_map(void);
-  void create_symbols(void);
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
-  virtual unsigned int register_memory_size(void) const { return 0x800; };
+  void create_sfr_map();
+  void create_symbols();
+  virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int register_memory_size() const { return 0x800; };
 
 };
 
@@ -79,16 +79,16 @@ class P17C756 : public P17C75x
 {
  public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P17C756_;};
-  void create_sfr_map(void);
-  void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P17C756_;};
+  void create_sfr_map();
+  void create_symbols();
 
-  P17C756(void);
-  static Processor *construct(void);
-  void create(void);
+  P17C756();
+  static Processor *construct(const char *name);
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
-  virtual unsigned int register_memory_size(void) const { return 0x800; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int register_memory_size() const { return 0x800; };
 
 
 };
@@ -97,16 +97,16 @@ class P17C756A : public P17C75x
 {
  public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P17C756A_;};
-  void create_sfr_map(void);
-  void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P17C756A_;};
+  void create_sfr_map();
+  void create_symbols();
 
-  P17C756A(void);
-  static Processor *construct(void);
-  void create(void);
+  P17C756A();
+  static Processor *construct(const char *name);
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
-  virtual unsigned int register_memory_size(void) const { return 0x800; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int register_memory_size() const { return 0x800; };
 
 
 };
@@ -115,16 +115,16 @@ class P17C762 : public P17C75x
 {
  public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P17C762_;};
-  void create_sfr_map(void);
-  void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P17C762_;};
+  void create_sfr_map();
+  void create_symbols();
 
-  P17C762(void);
-  static Processor *construct(void);
-  void create(void);
+  P17C762();
+  static Processor *construct(const char *name);
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
-  virtual unsigned int register_memory_size(void) const { return 0x800; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int register_memory_size() const { return 0x800; };
 
 
 };
@@ -133,16 +133,16 @@ class P17C766 : public P17C75x
 {
  public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P17C766_;};
-  void create_sfr_map(void);
-  void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P17C766_;};
+  void create_sfr_map();
+  void create_symbols();
 
-  P17C766(void);
-  static Processor *construct(void);
-  void create(void);
+  P17C766();
+  static Processor *construct(const char *name);
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
-  virtual unsigned int register_memory_size(void) const { return 0x800; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int register_memory_size() const { return 0x800; };
 
 
 };

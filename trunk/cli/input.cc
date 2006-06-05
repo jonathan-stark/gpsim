@@ -552,32 +552,33 @@ void process_command_file(const char * file_name)
 /*********************************************
   Function: gpsim_open()
 
-  JRH - gpsim_open() was returning different values
-  to indicate a success. I have  made this function return
-  1 for success and 0 for failure.
-
   Returns:  1   - success
             0   - failure
 */
 
-int gpsim_open(Processor *cpu, const char *file, const char * pProcessorType)
+int gpsim_open(Processor *cpu, const char *pFileName, 
+	       const char * pProcessorType, const char *pProcessorName)
 {
-  if(!file)
+  if(!pFileName)
     return 0;
 
+  printf (" gpsim_open file:%s proc name:%s\n", pFileName, (pProcessorName ? pProcessorName : "nil"));
   // Check for the command file, file extension.
-  if(IsFileExtension(file,"stc") || IsFileExtension(file,"STC")) {
-    process_command_file(file);
+  if(IsFileExtension(pFileName,"stc") || IsFileExtension(pFileName,"STC")) {
+    process_command_file(pFileName);
     // A stc file could have any sequence of commands.
     // Just ignore the return value of parse_string().
     parse_string("\n");
     return 1;
   } else {
+
     // Assume a Program file
-    return CSimulationContext::GetContext()->LoadProgram(
-      file, pProcessorType);
+    return 
+      CSimulationContext::GetContext()->LoadProgram(pFileName, pProcessorType, 0, pProcessorName);
+
   }
   return 0;
+
 }
 
 

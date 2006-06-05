@@ -32,7 +32,8 @@ extern unsigned int config_word;
 
 
 //-------------------------------------------------------------------
-_12bit_processor::_12bit_processor(void)
+_12bit_processor::_12bit_processor(const char *_name, const char *desc)
+  : pic_processor(_name, desc)
 {
   pc = new Program_Counter();
 
@@ -40,14 +41,18 @@ _12bit_processor::_12bit_processor(void)
 
 }
 
-void _12bit_processor::create_symbols(void)
+_12bit_processor::~_12bit_processor()
+{
+}
+
+void _12bit_processor::create_symbols()
 {
   pic_processor::create_symbols();
   // add a special symbol for W
   symbol_table.add_w(W);
 }
 
-void _12bit_processor::por(void)
+void _12bit_processor::por()
 {
   pic_processor::por();
 }
@@ -84,7 +89,7 @@ bool _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
   return false;
 }
 
-void _12bit_processor::create(void)
+void _12bit_processor::create()
 {
 
   if(verbose)
@@ -109,6 +114,12 @@ void _12bit_processor::create(void)
   //1 tmr0.start(0);
 
 }
+//-------------------------------------------------------------------
+void _12bit_processor::create_config_memory()
+{
+  m_configMemory = new ConfigMemory *[1];
+  *m_configMemory = new ConfigMemory("CONFIG", 0,"Configuration Word",this,0xfff);
+}
 
 //-------------------------------------------------------------------
 void _12bit_processor::option_new_bits_6_7(unsigned int bits)
@@ -121,7 +132,7 @@ void _12bit_processor::option_new_bits_6_7(unsigned int bits)
 }
 
 //-------------------------------------------------------------------
-void _12bit_processor::dump_registers (void)
+void _12bit_processor::dump_registers ()
 {
 
 

@@ -1014,7 +1014,9 @@ int open_cod_file(Processor **pcpu, const char *filename)
 
 int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
                                            const char *filename,
-                                           FILE *pFile) {
+                                           FILE *pFile,
+					   const char *pProcessorName)
+{
   int error_code= SUCCESS;
   Processor *ccpu = 0;
 
@@ -1042,44 +1044,44 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
   }
 
   // If we get here, then the .cod file is good.
-  if(*pcpu == 0) 
-    {
-      char processor_name[16];
+  if(*pcpu == 0) {
+    
+    char processor_type[16];
+    if (!pProcessorName)
+      pProcessorName = processor_type;
+    if(verbose)
+      cout << "ascertaining cpu from the .cod file\n";
+
+    if(SUCCESS == get_string(processor_type,
+			     &main_dir.dir.block[COD_DIR_PROCESSOR - 1],
+			     sizeof processor_type)) {
+
       if(verbose)
-        cout << "ascertaining cpu from the .cod file\n";
+	cout << "found a " << processor_type << " in the .cod file\n";
 
-      if(SUCCESS == get_string(processor_name,
-                               &main_dir.dir.block[COD_DIR_PROCESSOR - 1],
-                               sizeof processor_name)) {
+      *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_type,
+									   pProcessorName);
+      if(*pcpu == 0) {
+	if(!ignore_case_in_cod)
+	  return(ERR_UNRECOGNIZED_PROCESSOR);
 
-        if(verbose)
-          cout << "found a " << processor_name << " in the .cod file\n";
+	// Could be that there's a case sensitivity issue:
+	strtolower(processor_type);
+	*pcpu = (Processor *)CSimulationContext::GetContext()->
+	  add_processor(processor_type,pProcessorName);
 
-        *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
-        if(*pcpu == 0) {
-          if(!ignore_case_in_cod)
-            return(ERR_UNRECOGNIZED_PROCESSOR);
-
-          // Could be that there's a case sensitivity issue:
-          strtolower(processor_name);
-          *pcpu = (Processor *)CSimulationContext::GetContext()->
-            add_processor(processor_name,processor_name);
-
-          if(*pcpu == 0)
-            return(ERR_UNRECOGNIZED_PROCESSOR);
-        }
-      }
-      else {
-          return(ERR_UNRECOGNIZED_PROCESSOR);
+	if(*pcpu == 0)
+	  return(ERR_UNRECOGNIZED_PROCESSOR);
       }
     }
+    else {
+      return(ERR_UNRECOGNIZED_PROCESSOR);
+    }
+  }
   else
     cout << "cpu is non NULL\n";
 
   ccpu = *pcpu;
-
-  // assume no configuration word is in the cod file.
-  ccpu->set_config_word(ccpu->config_word_address(),0xffff);
 
   read_hex_from_cod(ccpu);
 

@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/sim_context.h"
 #include "../src/processor.h"
+#include "../src/fopen-path.h"
 
 extern int parser_warnings;
 extern void redisplay_prompt(void);  // in input.cc
@@ -134,22 +135,36 @@ int cmd_load::load(int bit_flag,const char *filename)
   return iReturn;
 }
 
+//------------------------------------------------------------------------
+//
+// load 
+
+static int load1(const char *s1, const char *s2)
+{
+  FILE *fp = fopen_path(s1,"rb");
+  if (fp) {
+    fclose (fp);
+    return gpsim_open(get_active_cpu(), s1, s2, 0);
+  }
+
+  return s2 ? gpsim_open(get_active_cpu(), s2, 0, s1) : 0;
+
+}
+
 int cmd_load::load(Value *file, Value *pProcessorType)
 {
   cout << endl;
-  string sFile;
-  string sProcType;
-  const char * psProcessorType = 0;
-  sFile = file->toString();
-  if (pProcessorType) {
-    sProcType = pProcessorType->toString();
-    psProcessorType = sProcType.c_str();
-  }
 
-  return gpsim_open(get_active_cpu(), sFile.c_str(), psProcessorType);
+  const char *psFileName = file->toString().c_str();
+  const char *psProcessorType = 0;
+
+  if (pProcessorType)
+    psProcessorType = pProcessorType->toString().c_str();
+
+  return load1(psFileName, psProcessorType);
 }
 
 int cmd_load::load(const char *file, const char *pProcessorType)
 {
-  return gpsim_open(get_active_cpu(), file, pProcessorType);
+  return load1 (file, pProcessorType);
 }

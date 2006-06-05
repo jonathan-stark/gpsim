@@ -41,7 +41,12 @@ Boston, MA 02111-1307, USA.  */
 #include "packages.h"
 #include "symbol.h"
 
-void P16F62x::create_iopin_map(void)
+P16F62x::P16F62x(const char *_name, const char *desc)
+  : P16X6X_processor(_name,desc)
+{
+}
+
+void P16F62x::create_iopin_map()
 {
   package = new Package(18);
   if(!package)
@@ -71,7 +76,7 @@ void P16F62x::create_iopin_map(void)
 
 }
 
-void P16F62x::create_sfr_map(void)
+void P16F62x::create_sfr_map()
 {
  
 
@@ -155,7 +160,7 @@ void P16F62x::create_sfr_map(void)
   //1((PORTB_62x*)portb)->ccp1con = &ccp1con;
 }
 
-void P16F62x::create_symbols(void)
+void P16F62x::create_symbols()
 {
   if(verbose)
     cout << "62x create symbols\n";
@@ -283,22 +288,22 @@ void  P16F62x::create(int ram_top, unsigned int eeprom_size)
 // Pic 16F627 
 //
 
-Processor * P16F627::construct(void)
+Processor * P16F627::construct(const char *name)
 {
 
-  P16F627 *p = new P16F627;
+  P16F627 *p = new P16F627(name);
 
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->create_symbols();
-  p->new_name("p16f627");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16F627::P16F627(void)
+P16F627::P16F627(const char *_name, const char *desc)
+  : P16F62x(_name,desc)
 {
   if(verbose)
     cout << "f627 constructor, type = " << isa() << '\n';
@@ -310,22 +315,22 @@ P16F627::P16F627(void)
 // Pic 16F628 
 //
 
-Processor * P16F628::construct(void)
+Processor * P16F628::construct(const char *name)
 {
 
-  P16F628 *p = new P16F628;
+  P16F628 *p = new P16F628(name);
 
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->create_symbols();
-  p->new_name("p16f628");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16F628::P16F628(void)
+P16F628::P16F628(const char *_name, const char *desc)
+  : P16F627(_name,desc)
 {
   if(verbose)
     cout << "f628 constructor, type = " << isa() << '\n';
@@ -338,30 +343,30 @@ P16F628::P16F628(void)
 // Pic 16F648 
 //
 
-pic_processor * P16F648::construct(void)
+pic_processor * P16F648::construct(const char *name)
 {
 
-  P16F648 *p = new P16F648;
+  P16F648 *p = new P16F648(name);
 
   p->P16F62x::create(0x2f, 256);
   p->create_sfr_map();
   p->create_invalid_registers ();
   p->create_symbols();
-  p->new_name("p16f648");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16F648::P16F648(void)
+P16F648::P16F648(const char *_name, const char *desc)
+  : P16F628(_name,desc)
 {
   if(verbose)
     cout << "f648 constructor, type = " << isa() << '\n';
 
 }
 
-void P16F648::create_sfr_map(void)
+void P16F648::create_sfr_map()
 {
  
   add_file_registers(0x150,0x16f,0);

@@ -41,11 +41,6 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-ioports.h"
 #include "intcon.h"
 
-void P16X6X_processor::create_symbols()
-{
-  Pic14Bit::create_symbols();
-}
-
 void P16C61::create(void)
 {
 
@@ -58,10 +53,10 @@ void P16C61::create(void)
 
 }
 
-Processor * P16C61::construct(void)
+Processor * P16C61::construct(const char *name)
 {
 
-  P16C61 *p = new P16C61;
+  P16C61 *p = new P16C61(name);
 
   if(verbose)
     cout << " c61 construct\n";
@@ -70,14 +65,14 @@ Processor * P16C61::construct(void)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c61");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16C61::P16C61(void)
+P16C61::P16C61(const char *_name, const char *desc)
+  
 {
 }
 
@@ -307,10 +302,18 @@ void P16X6X_processor::create_sfr_map()
 
 
 }
+//--------------------------------------------------
+
+void P16X6X_processor::create_symbols()
+{
+  Pic14Bit::create_symbols();
+}
+
 
 //--------------------------------------------------
 
-P16X6X_processor::P16X6X_processor(void)
+P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
+  : Pic14Bit(_name,_desc)
 {
   
 
@@ -326,6 +329,10 @@ P16X6X_processor::P16X6X_processor(void)
 
 }
 
+P16X6X_processor::~P16X6X_processor()
+{
+  
+}
 /*******************************************************************
  *
  *        Definitions for the various P16x6x processors
@@ -333,7 +340,8 @@ P16X6X_processor::P16X6X_processor(void)
  */
 
 
-P16C62::P16C62(void)
+P16C62::P16C62(const char *_name, const char *desc)
+  : P16X6X_processor(_name,desc)
 {
   if(verbose)
     cout << "c62 constructor, type = " << isa() << '\n';
@@ -383,10 +391,10 @@ void  P16C62::create(void)
 
 }
 
-Processor * P16C62::construct(void)
+Processor * P16C62::construct(const char *name)
 {
 
-  P16C62 *p = new P16C62;
+  P16C62 *p = new P16C62(name);
 
   cout << " c62 construct\n";
 
@@ -394,7 +402,6 @@ Processor * P16C62::construct(void)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c62");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -475,7 +482,8 @@ void P16C63::create_symbols(void)
 // is called, the C62 constructor will be called. Most of the initialization
 // is done within the 'C62 constructor.
 
-P16C63::P16C63(void)
+P16C63::P16C63(const char *_name, const char *desc)
+  : P16C62(_name,desc)
 {
 
   if(verbose)
@@ -497,10 +505,10 @@ void P16C63::create(void)
 
 }
 
-Processor * P16C63::construct(void)
+Processor * P16C63::construct(const char *name)
 {
 
-  P16C63 *p = new P16C63;
+  P16C63 *p = new P16C63(name);
 
   if(verbose)
     cout << " c63 construct\n";
@@ -510,7 +518,6 @@ Processor * P16C63::construct(void)
 
   p->create_symbols();
 
-  p->new_name("p16c63");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -578,23 +585,23 @@ void  P16C64::create(void)
 
 }
 
-Processor * P16C64::construct(void)
+Processor * P16C64::construct(const char *name)
 {
 
-  P16C64 *p = new P16C64;
+  P16C64 *p = new P16C64(name);
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c64");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16C64::P16C64(void)
+P16C64::P16C64(const char *_name, const char *desc)
+  : P16X6X_processor(_name,desc)
 {
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
@@ -606,7 +613,9 @@ P16C64::P16C64(void)
   m_trise = new PicTrisRegister("trise",m_porte);
 
 }
-
+P16C64::~P16C64()
+{
+}
 //------------------------------------------------------------------------
 //
 //
@@ -682,7 +691,8 @@ void P16C65::create_symbols(void)
 // is called, the C64 constructor will be called. Most of the initialization
 // is done within the 'C64 constructor.
 
-P16C65::P16C65(void)
+P16C65::P16C65(const char *_name, const char *desc)
+  : P16C64(_name,desc)
 {
 
   if(verbose)
@@ -704,10 +714,10 @@ void P16C65::create(void)
 
 }
 
-Processor * P16C65::construct(void)
+Processor * P16C65::construct(const char *name)
 {
 
-  P16C65 *p = new P16C65;
+  P16C65 *p = new P16C65(name);
 
   if(verbose)
     cout << " c65 construct\n";
@@ -717,7 +727,6 @@ Processor * P16C65::construct(void)
 
   p->create_symbols();
 
-  p->new_name("p16c65");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;

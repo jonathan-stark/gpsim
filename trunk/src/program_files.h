@@ -31,7 +31,8 @@ public:
    *  
    */
   virtual int  LoadProgramFile(Processor **ppProcessor, 
-    const char *pFilename, FILE *pFile) = 0;
+			       const char *pFilename, FILE *pFile,
+			       const char *pProcessorName) = 0;
   virtual void DisplayError(int iError, const char *pProgFilename,
     const char *pLstFile);
 };
@@ -45,7 +46,8 @@ public:
 
   static ProgramFileTypeList *s_ProgramFileTypeList;
   virtual bool LoadProgramFile(Processor **pProcessor,
-    const char *pFilename, FILE *pFile);
+			       const char *pFilename, FILE *pFile, 
+			       const char *pProcessorName=0);
   bool IsErrorDisplayableInLoop(int iError);
 };
 

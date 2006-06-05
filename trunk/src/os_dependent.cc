@@ -104,32 +104,14 @@ void EnsureTrailingFolderDelimiter(string &sPath)
 }
 
 //------------------------------------------------------------------------
-int FileExtCompare(const char *pExt1, const char *pExt2)
-{
-  if(*pExt1 == '.')
-    pExt1++;
-  if(*pExt2 == '.')
-    pExt2++;
-#ifdef _WIN32
-  return stricmp(pExt1, pExt2);
-#else
-  return strcmp(pExt1, pExt2);
-#endif
-}
-//------------------------------------------------------------------------
 bool LIBGPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt)
 {
   string s(pszFile);
-  translatePath(s);
-  string::size_type pos = s.find_last_of('.');
-  if(pos == string::npos) {
-    if(*pFileExt == '.')
-      pFileExt++;
-    return *pFileExt == 0;
-  }
-  else {
-    return FileExtCompare(pFileExt, s.substr(pos + 1).c_str()) == 0;
-  }
+
+  int i = s.rfind(pFileExt) ;
+  
+  return i>=0;
+
 }
 
 //------------------------------------------------------------------------

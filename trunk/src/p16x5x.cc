@@ -177,15 +177,13 @@ void P16C54::create()
 
 }
 
-Processor * P16C54::construct()
+Processor * P16C54::construct(const char *name)
 {
 
-  P16C54 *p = new P16C54;
+  P16C54 *p = new P16C54(name);
 
   if(verbose)
     cout << " c54 construct\n";
-
-  p->new_name("p16c54");
 
   p->pc->set_reset_address(0x1ff);
 
@@ -200,7 +198,8 @@ Processor * P16C54::construct()
 
 }
 
-P16C54::P16C54()
+P16C54::P16C54(const char *_name, const char *desc)
+  : _12bit_processor(_name,desc)
 {
   if(verbose)
     cout << "c54 constructor, type = " << isa() << '\n';
@@ -224,6 +223,10 @@ P16C54::P16C54()
 #endif
   tmr0.start(0);
 
+}
+
+P16C54::~P16C54()
+{
 }
 
 void P16C54::tris_instruction(unsigned int tris_register)
@@ -273,12 +276,10 @@ void P16C55::create()
   P16C54::create();
 }
 
-Processor * P16C55::construct()
+Processor * P16C55::construct(const char *name)
 {
 
-  P16C55 *p = new P16C55;
-
-  p->new_name("p16c55");
+  P16C55 *p = new P16C55(name);
 
   if(verbose)
     cout << " c55 construct\n";
@@ -296,7 +297,8 @@ Processor * P16C55::construct()
 
 }
 
-P16C55::P16C55()
+P16C55::P16C55(const char *_name, const char *desc)
+  : P16C54(_name,desc)
 {
   if(verbose)
     cout << "c55 constructor, type = " << isa() << '\n';
@@ -304,6 +306,9 @@ P16C55::P16C55()
   m_portc = new PicPortRegister("portc",8,0xff);
   m_trisc = new PicTrisRegister("trisc", m_portc);
 
+}
+P16C55::~P16C55()
+{
 }
 
 void P16C55::tris_instruction(unsigned int tris_register)
@@ -331,12 +336,10 @@ void P16C55::tris_instruction(unsigned int tris_register)
 
 
 
-Processor * P16C56::construct()
+Processor * P16C56::construct(const char *name)
 {
 
-  P16C56 *p = new P16C56;
-
-  p->new_name("p16c56");
+  P16C56 *p = new P16C56(name);
 
   if(verbose)
     cout << " c56 construct\n";
@@ -354,7 +357,8 @@ Processor * P16C56::construct()
 }
 
 
-P16C56::P16C56()
+P16C56::P16C56(const char *_name, const char *desc)
+  : P16C54(_name,desc)
 {
   if(verbose)
     cout << "c56 constructor, type = " << isa() << '\n';

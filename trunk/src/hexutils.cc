@@ -84,7 +84,8 @@ IntelHexProgramFileType::getword(FILE *file)
 
 int IntelHexProgramFileType::LoadProgramFile(Processor **pProcessor,
                                            const char *pFilename,
-                                           FILE *inputfile) {
+                                           FILE *inputfile, const char *pProcessorName) 
+{
   if(verbose)
     cout << "load hex\n";
 

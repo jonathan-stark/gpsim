@@ -106,7 +106,8 @@ void P18C2x2::create_symbols()
   _16bit_processor::create_symbols();
 }
 
-P18C2x2::P18C2x2()
+P18C2x2::P18C2x2(const char *_name, const char *desc)
+  : _16bit_processor(_name,desc)
 {
 
   if(verbose)
@@ -121,7 +122,8 @@ P18C2x2::P18C2x2()
 // P18C242
 // 
 
-P18C242::P18C242()
+P18C242::P18C242(const char *_name, const char *desc)
+  : P18C2x2(_name,desc)
 {
 
   if(verbose)
@@ -139,15 +141,14 @@ void P18C242::create()
 
 }
 
-Processor * P18C242::construct()
+Processor * P18C242::construct(const char *name)
 {
 
-  P18C242 *p = new P18C242;
+  P18C242 *p = new P18C242(name);
 
   if(verbose)
     cout << " 18c242 construct\n";
 
-  p->new_name("p18c242");
   p->create();
   p->create_invalid_registers();
   p->create_symbols();
@@ -164,7 +165,8 @@ Processor * P18C242::construct()
 // P18C252
 // 
 
-P18C252::P18C252()
+P18C252::P18C252(const char *_name, const char *desc)
+  : P18C242(_name,desc)
 {
 
   if(verbose)
@@ -184,10 +186,10 @@ void P18C252::create()
 }
 
 
-Processor * P18C252::construct()
+Processor * P18C252::construct(const char *name)
 {
 
-  P18C252 *p = new P18C252;
+  P18C252 *p = new P18C252(name);;
 
   if(verbose)
     cout << " 18c252 construct\n";
@@ -196,7 +198,6 @@ Processor * P18C252::construct()
   p->create_invalid_registers();
   p->create_symbols();
 
-  p->new_name("p18c252");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -299,7 +300,8 @@ void P18C4x2::create_symbols()
 
 }
 
-P18C4x2::P18C4x2()
+P18C4x2::P18C4x2(const char *_name, const char *desc)
+  : _16bit_processor(_name,desc)
 {
 
   if(verbose)
@@ -352,7 +354,8 @@ void P18C4x2::create_sfr_map()
 // P18C442
 // 
 
-P18C442::P18C442()
+P18C442::P18C442(const char *_name, const char *desc)
+  : P18C4x2(_name,desc)
 {
 
   if(verbose)
@@ -370,10 +373,10 @@ void P18C442::create()
 
 }
 
-Processor * P18C442::construct()
+Processor * P18C442::construct(const char *name)
 {
 
-  P18C442 *p = new P18C442;
+  P18C442 *p = new P18C442(name);
 
   if(verbose)
     cout << " 18c442 construct\n";
@@ -382,7 +385,6 @@ Processor * P18C442::construct()
   p->create_invalid_registers();
   p->create_symbols();
 
-  p->new_name("p18c442");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -397,7 +399,8 @@ Processor * P18C442::construct()
 // P18C452
 // 
 
-P18C452::P18C452()
+P18C452::P18C452(const char *_name, const char *desc)
+  : P18C442(_name,desc)
 {
 
   if(verbose)
@@ -414,11 +417,10 @@ void P18C452::create()
   P18C442::create();
 }
 
-Processor * P18C452::construct()
+Processor * P18C452::construct(const char *name)
 {
 
-  P18C452 *p = new P18C452;
-  p->new_name("p18c452");
+  P18C452 *p = new P18C452(name);
 
   if(verbose)
     cout << " 18c452 construct\n";
@@ -440,7 +442,8 @@ Processor * P18C452::construct()
 // P18F242
 // 
 
-P18F242::P18F242()
+P18F242::P18F242(const char *_name, const char *desc)
+  : P18C242(_name,desc)
 {
 
   if(verbose)
@@ -491,11 +494,10 @@ void P18F242::set_out_of_range_pm(unsigned int address, unsigned int value)
     }
 }
 
-Processor * P18F242::construct()
+Processor * P18F242::construct(const char *name)
 {
 
-  P18F242 *p = new P18F242;
-  p->new_name("p18f242");
+  P18F242 *p = new P18F242(name);
 
   if(verbose)
     cout << " 18F242 construct\n";
@@ -518,7 +520,9 @@ Processor * P18F242::construct()
 // P18F252
 // 
 
-P18F252::P18F252()
+P18F252::P18F252(const char *_name, const char *desc)
+  : P18F242(_name,desc)
+
 {
 
   if(verbose)
@@ -534,11 +538,10 @@ void P18F252::create()
   P18F242::create();
 
 }
-Processor * P18F252::construct()
+Processor * P18F252::construct(const char *name)
 {
 
-  P18F252 *p = new P18F252;
-  p->new_name("p18f252");
+  P18F252 *p = new P18F252(name);
 
   if(verbose)
     cout << " 18F252 construct\n";
@@ -559,7 +562,9 @@ Processor * P18F252::construct()
 // P18F442
 // 
 
-P18F442::P18F442()
+P18F442::P18F442(const char *_name, const char *desc)
+  : P18C442(_name,desc)
+
 {
 
   if(verbose)
@@ -609,11 +614,10 @@ void P18F442::set_out_of_range_pm(unsigned int address, unsigned int value)
     }
 }
 
-Processor * P18F442::construct()
+Processor * P18F442::construct(const char *name)
 {
 
-  P18F442 *p = new P18F442;
-  p->new_name("p18f442");
+  P18F442 *p = new P18F442(name);
 
   if(verbose)
     cout << " 18F442 construct\n";
@@ -635,7 +639,8 @@ Processor * P18F442::construct()
 // P18F258
 // 
 
-P18F248::P18F248()
+P18F248::P18F248(const char *_name, const char *desc)
+  : P18F442(_name,desc)
 {
 
   if(verbose)
@@ -652,11 +657,10 @@ void P18F248::create()
   P18F442::create();
 }
 
-Processor * P18F248::construct()
+Processor * P18F248::construct(const char *name)
 {
 
-  P18F248 *p = new P18F248;
-  p->new_name("p18f248");
+  P18F248 *p = new P18F248(name);
 
   if(verbose)
     cout << " 18F248 construct\n";
@@ -678,7 +682,8 @@ Processor * P18F248::construct()
 // P18F452
 // 
 
-P18F452::P18F452()
+P18F452::P18F452(const char *_name, const char *desc)
+  : P18F442(_name,desc)
 {
 
   if(verbose)
@@ -695,11 +700,10 @@ void P18F452::create()
   P18F442::create();
 }
 
-Processor * P18F452::construct()
+Processor * P18F452::construct(const char *name)
 {
 
-  P18F452 *p = new P18F452;
-  p->new_name("p18f452");
+  P18F452 *p = new P18F452(name);
 
   if(verbose)
     cout << " 18F452 construct\n";
@@ -715,17 +719,22 @@ Processor * P18F452::construct()
 
 }
 
+//------------------------------------------------------------------------
+
+P18Fxx20::P18Fxx20(const char *_name, const char *desc)
+  : _16bit_processor(_name,desc)
+{
+}
 
 //------------------------------------------------------------------------
 //
 // P18F1220
 // 
 
-Processor * P18F1220::construct()
+Processor * P18F1220::construct(const char *name)
 {
 
-  P18F1220 *p = new P18F1220;
-  p->new_name("p18f1220");
+  P18F1220 *p = new P18F1220(name);
 
   if(verbose)
     cout << " 18F1220 construct\n";
@@ -781,7 +790,8 @@ void P18F1220::create_iopin_map()
 
 }
 
-P18F1220::P18F1220()
+P18F1220::P18F1220(const char *_name, const char *desc)
+  : P18Fxx20(_name,desc)
 {
 
   if(verbose)
@@ -796,7 +806,8 @@ P18F1220::P18F1220()
 // P18Fx320
 // 
 
-P18F1320::P18F1320()
+P18F1320::P18F1320(const char *_name, const char *desc)
+  : P18F1220(_name,desc)
 {
 
   if(verbose)
@@ -815,15 +826,14 @@ void P18F1320::create()
 
 }
 
-Processor * P18F1320::construct()
+Processor * P18F1320::construct(const char *name)
 {
 
-  P18F1320 *p = new P18F1320;
+  P18F1320 *p = new P18F1320(name);
 
   if(verbose)
     cout << " 18F1320 construct\n";
 
-  p->new_name("p18f1320");
   p->create();
   p->create_invalid_registers();
   p->create_symbols();

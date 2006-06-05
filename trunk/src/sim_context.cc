@@ -88,15 +88,21 @@ CSimulationContext *CSimulationContext::GetContext() {
 bool CSimulationContext::SetDefaultProcessor(const char * processor_type,
                                              const char * processor_new_name) 
 {
-  ProcessorConstructor *pc = ProcessorConstructorList::GetList()->findByType(processor_type);
+  if (processor_type) {
+    ProcessorConstructor *pc = ProcessorConstructorList::GetList()->findByType(processor_type);
 
-  if (pc) {
-    m_DefProcessorName    = processor_type;
-    if(processor_new_name == NULL)
-      m_DefProcessorNameNew.clear();
-    else
-      m_DefProcessorNameNew = processor_new_name;
-    return true;
+    if (pc) {
+      m_DefProcessorName    = processor_type;
+      if(processor_new_name == NULL)
+	m_DefProcessorNameNew.clear();
+      else
+	m_DefProcessorNameNew = processor_new_name;
+      return true;
+    }
+  } else {
+
+    m_DefProcessorNameNew = processor_new_name;
+
   }
 
   return false;
@@ -132,16 +138,17 @@ Processor * CSimulationContext::add_processor(const char * processor_type,
 
   ProcessorConstructor *pc = ProcessorConstructorList::GetList()->findByType(processor_type);
   if(pc) {
-    return add_processor(pc);
+    return add_processor(pc,processor_new_name ? processor_new_name : m_DefProcessorNameNew.c_str());
   } else
     cout << processor_type << " is not a valid processor.\n"
       "(try 'processor list' to see a list of valid processors.\n";
   return 0;
 }
 
-Processor * CSimulationContext::add_processor(ProcessorConstructor *pc)
+Processor * CSimulationContext::add_processor(ProcessorConstructor *pc,
+					      const char * processor_new_name)
 {
-  Processor *  p = pc->ConstructProcessor();
+  Processor *  p = pc->ConstructProcessor(processor_new_name);
   if(p) {
     add_processor(p);
     p->m_pConstructorObject = pc;
@@ -176,7 +183,9 @@ Processor * CSimulationContext::add_processor(Processor *p)
 
 int CSimulationContext::LoadProgram(const char *filename,
                                     const char *pProcessorType,
-                                    Processor **ppProcessor) {
+                                    Processor **ppProcessor,
+				    const char *pProcessorName)
+{
   bool bReturn = false;
   Processor *pProcessor;
   FILE * pFile = fopen_path (filename, "rb");
@@ -193,29 +202,27 @@ int CSimulationContext::LoadProgram(const char *filename,
   if(pProcessorType != NULL) {
     pProcessor = SetProcessorByType(pProcessorType, NULL);
     if(pProcessor != NULL) {
-      bReturn  = pProcessor->LoadProgramFile(filename, pFile);
+      bReturn  = pProcessor->LoadProgramFile(filename, pFile, pProcessorName);
     }
   }
   else if(!m_DefProcessorName.empty()) {
     pProcessor = SetProcessorByType(m_DefProcessorName.c_str(), NULL);
     if(pProcessor != NULL) {
-      bReturn  = pProcessor->LoadProgramFile(filename, pFile);
+      bReturn  = pProcessor->LoadProgramFile(filename, pFile, pProcessorName);
     }
   }
   else {
     pProcessor = NULL;
+    if (pProcessorName)
+      m_DefProcessorName = pProcessorName;
+    else if (!m_DefProcessorNameNew.empty())
+      pProcessorName = m_DefProcessorNameNew.c_str();
     // use processor defined in program file
     bReturn  = ProgramFileTypeList::GetList().LoadProgramFile(
-      &pProcessor, filename, pFile);
-    // JRH - I would prefer that CSimulationContext add the processor
-    // but since LoadProgramFile() can create a processor based on the
-    // the processor definition in the program file, then it also adds
-    // it to the processor list.
-//    if(bReturn) {
-      // set processor into the simulation context
-//      add_processor(pProcessor);
-//    }
+			   &pProcessor, filename, pFile, pProcessorName);
+
   }
+
   fclose(pFile);
   if(bReturn) {
     // Tell all of the interfaces that a new program exists.

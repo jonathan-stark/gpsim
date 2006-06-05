@@ -32,13 +32,13 @@ class P16C61 : public P16X8X
 {
 public:
 
-  P16C61();
+  P16C61(const char *_name=0, const char *desc=0);
 
   virtual PROCESSOR_TYPE isa(){return _P16C61_;};
   virtual unsigned int program_memory_size() const { return 0x400; };
   virtual void create();
 
-  static Processor *construct();
+  static Processor *construct(const char *name);
 
 };
 
@@ -84,7 +84,8 @@ public:
   virtual PIR *get_pir1() { return (pir1); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_def); }
 
-  P16X6X_processor();
+  P16X6X_processor(const char *_name=0, const char *desc=0);
+  virtual ~P16X6X_processor();
 
 };
 
@@ -97,8 +98,8 @@ class P16C62 : public  P16X6X_processor
 {
   public:
 
-  P16C62();
-  static Processor *construct();
+  P16C62(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 
   TMR2_MODULE tmr2_module;
   virtual PROCESSOR_TYPE isa(){return _P16C62_;};
@@ -126,8 +127,8 @@ class P16C63 : public  P16C62
   virtual unsigned int program_memory_size() const { return 0x1000; };
 
 
-  P16C63();
-  static Processor *construct();
+  P16C63(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   void create_sfr_map();
 };
@@ -143,8 +144,10 @@ class P16C64 : public  P16X6X_processor
   PicPortRegister  *m_porte;
   PicTrisRegister  *m_trise;
 
-  P16C64();
-  static Processor *construct();
+  P16C64(const char *_name=0, const char *desc=0);
+  virtual ~P16C64();
+
+  static Processor *construct(const char *name);
 
   TMR2_MODULE tmr2_module;
   virtual PROCESSOR_TYPE isa(){return _P16C64_;};
@@ -171,8 +174,8 @@ class P16C65 : public  P16C64
   virtual unsigned int program_memory_size() const { return 0x1000; };
 
 
-  P16C65();
-  static Processor *construct();
+  P16C65(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
   void create();
   void create_sfr_map();
 };

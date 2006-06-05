@@ -159,7 +159,7 @@ int SymbolCompare(const char *pLeft, const char *pRight) {
 bool Symbol_Table::add(Value *s) {
   if(s) {
     if(s->name().empty()) {
-      printf("Symbol_Table::add() attempt to add a symbol with no name: %s",
+      printf("Symbol_Table::add() attempt to add a symbol with no name: %s\n",
         s->toString().c_str());
     }
     else {

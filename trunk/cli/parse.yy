@@ -501,7 +501,9 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
             }
           }
           | LOAD LITERAL_STRING_T LITERAL_STRING_T
-          // load processor filename
+	    // load processor filename
+	    //      - OR -
+	    // load filename ReferenceDesignator_for_processor
           {
             //                        filename,   processor
             quit_parse = c_load.load($3, $2) == 0;

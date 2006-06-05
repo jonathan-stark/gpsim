@@ -1,3 +1,6 @@
+
+processor p16f84 P1
+
 load p16f84.cod
 
 # Node Test

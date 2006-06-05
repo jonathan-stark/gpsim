@@ -19,6 +19,6 @@ $(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
 	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
 
 sim_377: $(COD)
-	$(GPSIM) -i -c $(STARTUP_STC) -D STC="ttl377.cod"
+	$(GPSIM) -i -c $(STARTUP_STC) -D STC="ttl377.stc"
 
 
