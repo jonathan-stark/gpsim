@@ -72,6 +72,8 @@ public:
   virtual void option_new_bits_6_7(unsigned int)=0;
   virtual void create_symbols(void)=0;
 
+  virtual void create_config_memory();
+
   // Return the portion of pclath that is used during branching instructions
   virtual unsigned int get_pclath_branching_jump(void)
     {
@@ -99,8 +101,8 @@ public:
   virtual unsigned int program_memory_size(void) const = 0;
   virtual unsigned int get_program_memory_at_address(unsigned int address);
 
-  static pic_processor *construct(void);
-  _14bit_processor(void);
+  _14bit_processor(const char *_name=0, const char *desc=0);
+  virtual ~_14bit_processor();
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)
@@ -131,7 +133,8 @@ class Pic14Bit : public  _14bit_processor
 {
 public:
 
-  Pic14Bit();
+  Pic14Bit(const char *_name=0, const char *desc=0);
+  virtual ~Pic14Bit();
 
 
   INTCON_14_PIR    intcon_reg;

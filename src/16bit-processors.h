@@ -45,7 +45,7 @@ class PicLatchRegister : public sfr_register
 public:
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
+  virtual unsigned int get();
   virtual void setbit(unsigned int bit_number, char new_value);
 
   virtual void setEnableMask(unsigned int nEnableMask);
@@ -155,30 +155,30 @@ public:
 
 
 
-  virtual void create_symbols(void);
+  virtual void create_symbols();
 
-  void interrupt(void);
-  virtual void por(void);
-  virtual void create(void);// {return;};
-  virtual PROCESSOR_TYPE isa(void){return _16BIT_PROCESSOR_;};
-  virtual PROCESSOR_TYPE base_isa(void){return _16BIT_PROCESSOR_;};
+  void interrupt();
+  virtual void por();
+  virtual void create();// {return;};
+  virtual PROCESSOR_TYPE isa(){return _16BIT_PROCESSOR_;};
+  virtual PROCESSOR_TYPE base_isa(){return _16BIT_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)
     {
       return disasm16(this, address, inst);
     }
-  virtual void create_sfr_map(void);
+  virtual void create_sfr_map();
   virtual void create_config_memory();
 
-  virtual void create_stack(void) {stack = &stack16;};
+  virtual void create_stack() {stack = &stack16;};
 
   // Return the portion of pclath that is used during branching instructions
-  virtual unsigned int get_pclath_branching_jump(void)
+  virtual unsigned int get_pclath_branching_jump()
   {
     return ((pclatu.value.get()<<16) | ((pclath->value.get() & 0xf8)<<8));
   }
 
   // Return the portion of pclath that is used during modify PCL instructions
-  virtual unsigned int get_pclath_branching_modpcl(void)
+  virtual unsigned int get_pclath_branching_modpcl()
   {
     return ((pclatu.value.get()<<16) | ((pclath->value.get() & 0xff)<<8));
   }
@@ -193,7 +193,7 @@ public:
   virtual unsigned int register_memory_size () const { return 0x1000;};
   //virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
 
   virtual int  map_pm_address2index(int address) {return address/2;};
   virtual int  map_pm_index2address(int index) {return index*2;};
@@ -203,32 +203,17 @@ public:
   virtual unsigned int configMemorySize() { return CONFIG7H-CONFIG1L+1; }
 
 
-  static pic_processor *construct(void);
-  _16bit_processor(void);
+  static pic_processor *construct();
+  _16bit_processor(const char *_name=0, const char *desc=0);
+  virtual ~_16bit_processor();
 
   unsigned int getCurrentDisasmAddress() { return m_current_disasm_address;}
   unsigned int getCurrentDisasmIndex()   { return m_current_disasm_address/2;}
   void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
-  ConfigMemory **m_configMemory;
 };
 
 #define cpu16 ( (_16bit_processor *)cpu)
-
-//------------------------------------------------------------------------
-class ConfigMemory : public Integer
-{
-public:
-  ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
-	       _16bit_processor *pCpu, unsigned int addr);
-  //unsigned int get();
-  //virtual void set(unsigned int);
-
-protected:
-  _16bit_processor *m_pCpu;
-  unsigned int m_addr;
-  //unsigned int m_value;
-};
 
 #endif

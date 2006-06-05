@@ -45,7 +45,12 @@ Boston, MA 02111-1307, USA.  */
 
 #include "packages.h"
 
-void P16X8X::create_sfr_map(void)
+P16X8X::P16X8X(const char *_name, const char *desc)
+  : Pic14Bit(_name,desc)
+{
+}
+
+void P16X8X::create_sfr_map()
 {
   Pic14Bit::create_sfr_map();
 
@@ -66,7 +71,7 @@ void P16X8X::set_out_of_range_pm(unsigned int address, unsigned int value)
       get_eeprom()->change_rom(address - 0x2100, value);
 }
 
-void P16X8X::create_iopin_map(void)
+void P16X8X::create_iopin_map()
 {
 
   package = new Package(18);
@@ -81,11 +86,6 @@ void P16X8X::create_iopin_map(void)
   package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta3"),3));
   package->assign_pin( 3, m_porta->addPin(new IO_open_collector("porta4"),4));
 
-  //package->assign_pin(17, new IO_bi_directional(porta, 0));
-  //package->assign_pin(18, new IO_bi_directional(porta, 1));
-  //package->assign_pin(1, new IO_bi_directional(porta, 2));
-  //package->assign_pin(2, new IO_bi_directional(porta, 3));
-  //package->assign_pin(3, new IO_open_collector(porta, 4));
   package->assign_pin( 4, 0);
   package->assign_pin( 5, 0);
   package->assign_pin( 6, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
@@ -129,22 +129,22 @@ void  P16X8X::create(int ram_top)
 // Pic 16C84 
 //
 
-Processor * P16C84::construct(void)
+Processor * P16C84::construct(const char *name)
 {
 
-  P16C84 *p = new P16C84;
+  P16C84 *p = new P16C84(name);
 
   p->P16X8X::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->new_name("p16c84");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16C84::P16C84(void)
+P16C84::P16C84(const char *_name, const char *desc)
+  : P16X8X(_name,desc)
 {
 }
 
@@ -156,22 +156,22 @@ P16C84::P16C84(void)
 //
 
 
-Processor * P16F84::construct(void)
+Processor * P16F84::construct(const char *name)
 {
 
-  P16F84 *p = new P16F84;
+  P16F84 *p = new P16F84(name);
 
   p->P16X8X::create(0x4f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->new_name("p16f84");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16F84::P16F84(void)
+P16F84::P16F84(const char *_name, const char *desc)
+  : P16X8X(_name,desc)
 {
 }
 
@@ -180,33 +180,44 @@ P16F84::P16F84(void)
 // Pic 16F83
 //
 
-P16F83::P16F83(void)
+P16F83::P16F83(const char *_name, const char *desc)
+  : P16X8X(_name,desc)
 {
-  name_str = "p16f83";
 }
 
-Processor * P16F83::construct(void)
+Processor * P16F83::construct(const char *name)
 {
 
-  P16F83 *p = new P16F83;
+  P16F83 *p = new P16F83(name);;
 
   p->P16X8X::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->new_name("p16f83");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-Processor * P16CR83::construct(void)
+//========================================================================
+P16CR83::P16CR83(const char *_name, const char *desc)
+  : P16F83(_name,desc)
+{
+}
+
+Processor * P16CR83::construct(const char *name)
 {
   return 0;
 
 }
 
-Processor * P16CR84::construct(void)
+//========================================================================
+P16CR84::P16CR84(const char *_name, const char *desc)
+  : P16F84(_name,desc)
+{
+}
+
+Processor * P16CR84::construct(const char *name)
 {
   return 0;
 }

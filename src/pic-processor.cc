@@ -151,13 +151,13 @@ ProcessorConstructor pP16F876(P16F876::construct ,
 ProcessorConstructor pP16F877(P16F877::construct ,
 			      "__16F877", "pic16f877",  "p16f877", "16f877");
 ProcessorConstructor pP16F873A(P16F873A::construct ,
-			      "__16F873a", "pic16f873a", "p16f873a", "16f873a");
+			      "__16F873a", "pic16f873a", "p16f873A", "16f873a");
 ProcessorConstructor pP16F874A(P16F874A::construct ,
-			      "__16F874a", "pic16f874a", "p16f874a", "16f874a");
+			      "__16F874a", "pic16f874a", "p16F874A", "16f874a");
 ProcessorConstructor pP16F876A(P16F876A::construct ,
-			      "__16F876a", "pic16f876a", "p16f876a", "16f876a");
+			      "__16F876a", "pic16f876a", "p16f876A", "16f876a");
 ProcessorConstructor pP16F877A(P16F877A::construct ,
-			      "__16F877a", "pic16f877a", "p16f877a", "16f877a");
+			      "__16F877a", "pic16f877a", "p16f877A", "16f877a");
 ProcessorConstructor pP17C7xx(P17C7xx::construct ,
 			      "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx");
 ProcessorConstructor pP17C75x(P17C75x::construct ,
@@ -196,17 +196,6 @@ ProcessorConstructor pP18F1320(P18F1320::construct,
 			      "__18F1320", "pic18f1320",  "p18f1320", "18f1320");
 
 
-//-------------------------------------------------------------------
-//
-Processor * pic_processor::construct(void)
-{
-
-  cout << " Can't create a generic pic processor\n";
-
-  return 0;
-
-}
-
 void pic_processor::set_eeprom(EEPROM *e)
 { 
   eeprom = e; 
@@ -220,7 +209,7 @@ void pic_processor::set_eeprom(EEPROM *e)
 // sleep - Begin sleeping and stay asleep until something causes a wake
 //
 
-void pic_processor::sleep (void)
+void pic_processor::sleep ()
 {
   simulation_mode = eSM_SLEEPING;
 
@@ -254,7 +243,7 @@ void pic_processor::enter_sleep()
 // pm_write - program memory write
 //
 
-void pic_processor::pm_write (void)
+void pic_processor::pm_write ()
 {
   //  simulation_mode = PM_WRITE;
 
@@ -278,7 +267,7 @@ void EnableRealTimeModeWithGui(bool bEnable) {
   realtime_mode_with_gui = bEnable;
 }
 
-extern void update_gui(void);
+extern void update_gui();
 
 class RealTimeBreakPoint : public TriggerObject
 {
@@ -290,7 +279,7 @@ public:
   int warntimer;
   guint64 period;
 
-  RealTimeBreakPoint(void)
+  RealTimeBreakPoint()
   {
     cpu = 0;
     warntimer = 1;
@@ -326,7 +315,7 @@ public:
 
   }
 
-  void stop(void)
+  void stop()
   {
 
     // Clear any pending break point.
@@ -340,7 +329,7 @@ public:
       
   }
 
-  void callback(void)
+  void callback()
   {
     gint64 system_time;
     double diff;
@@ -619,7 +608,7 @@ void pic_processor::step_over (bool refresh)
 //
 // this method really only applies to processors with stacks.
 
-void pic_processor::finish(void)
+void pic_processor::finish()
 {
   if(!stack)
     return;
@@ -697,7 +686,7 @@ void pic_processor::reset (RESET_TYPE r)
 // por - power on reset %%% FIX ME %%% needs lots of work...
 //
 
-void pic_processor::por(void)
+void pic_processor::por()
 {
   wdt.reset();
 
@@ -708,8 +697,9 @@ void pic_processor::por(void)
 // pic_processor -- constructor
 //
 
-pic_processor::pic_processor()
-  : wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0)
+pic_processor::pic_processor(const char *_name, const char *_desc)
+  : Processor(_name,_desc),
+    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0)
 {
   m_Capabilities = eSTACK | eWATCHDOGTIMER;
 
@@ -724,7 +714,11 @@ pic_processor::pic_processor()
   // Test code for logging to disk:
   GetTraceLog().switch_cpus(this);
 }
+//-------------------------------------------------------------------
+pic_processor::~pic_processor()
+{
 
+}
 //-------------------------------------------------------------------
 //
 // 
@@ -734,22 +728,19 @@ pic_processor::pic_processor()
 // Since this is a base class member function, only those things that
 // are common to all pics are created.
 
-void pic_processor::create (void)
+void pic_processor::create ()
 {
 
   init_program_memory (program_memory_size());
 
   init_register_memory (register_memory_size());
 
-  //  create_invalid_registers ();
-  //  create_symbols();
   create_stack();
 
   // Now, initialize the core stuff:
   pc->set_cpu(this);
 
   W = new WREG(this);
-  //  W->set_cpu(this);
 
   pcl = new PCL;
   pclath = new PCLATH;
@@ -776,6 +767,8 @@ void pic_processor::create (void)
     pma->SpecialRegisters.push_back(W);
 
   }
+
+  create_config_memory();
 
 }
 
@@ -846,7 +839,7 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 // Add a symbol table entry for each one of the sfr's
 //
 
-void pic_processor::create_symbols (void)
+void pic_processor::create_symbols ()
 {
 
   if(verbose)
@@ -910,7 +903,8 @@ unsigned int pic_processor::get_config_word(unsigned int address)
 // load_hex
 //
 
-bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile)
+bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile,
+				    const char *pProcessorName)
 {
   Processor * pProcessor = this;
   // Tries the file type based on the file extension first.
@@ -926,10 +920,10 @@ bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile)
     // If 'cod' file extension, try PicCodProgramFileType first
     swap(aFileTypes[0], aFileTypes[1]);
   }
-  int iReturn  = aFileTypes[0]->LoadProgramFile(&pProcessor, pFilename, pFile);
+  int iReturn  = aFileTypes[0]->LoadProgramFile(&pProcessor, pFilename, pFile, pProcessorName);
   if (iReturn != ProgramFileType::SUCCESS) {
     fseek(pFile, 0, SEEK_SET);
-    iReturn = aFileTypes[1]->LoadProgramFile(&pProcessor, pFilename, pFile);
+    iReturn = aFileTypes[1]->LoadProgramFile(&pProcessor, pFilename, pFile, pProcessorName);
   }
   return iReturn == ProgramFileType::SUCCESS;
 }
@@ -938,7 +932,7 @@ bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile)
 //-------------------------------------------------------------------
 //  ConfigMode
 //
-void ConfigMode::print(void)
+void ConfigMode::print()
 {
 
 
@@ -986,7 +980,7 @@ void ConfigMode::print(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::callback(void)
+void ProgramMemoryAccess::callback()
 {
 
   if(_state)
@@ -1087,7 +1081,7 @@ void WDT::set_breakpoint(unsigned int bpn)
   breakpoint = bpn;
 }
 
-void WDT::callback(void)
+void WDT::callback()
 {
 
 
@@ -1116,7 +1110,7 @@ void WDT::callback(void)
 
 }
 
-void WDT::clear(void)
+void WDT::clear()
 {
   if(wdte)
     update();
@@ -1131,7 +1125,7 @@ void WDT::clear(void)
 
 }
 
-void WDT::start_sleep(void)
+void WDT::start_sleep()
 {
 
   if(wdte) {
@@ -1147,17 +1141,27 @@ void WDT::start_sleep(void)
   }
 }
 
-void WDT::new_prescale(void)
+void WDT::new_prescale()
 {
 
   update();
 
 }
 
-void WDT::callback_print(void)
+void WDT::callback_print()
 {
 
   cout << "WDT\n";
 }
 
+
+//------------------------------------------------------------------------
+// ConfigMemory - Base class
+ConfigMemory::ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
+			   pic_processor *pCpu, unsigned int addr)
+  : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr)
+{
+  if (m_pCpu)
+    m_pCpu->add_attribute(this);
+}
 

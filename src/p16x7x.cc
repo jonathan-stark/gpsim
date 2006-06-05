@@ -60,7 +60,8 @@ private:
 
 //------------------------------------------------------------------------
 //
-P16C71::P16C71()
+P16C71::P16C71(const char *_name, const char *desc)
+  : P16C61(_name, desc)
 {
   if(verbose)
     cout << "c71 constructor, type = " << isa() << '\n';
@@ -123,18 +124,18 @@ void P16C71::create()
 
 }
 
-Processor * P16C71::construct()
+Processor * P16C71::construct(const char *name)
 {
 
-  P16C71 *p = new P16C71;
+  P16C71 *p = new P16C71(name);
 
-  cout << " c71 construct\n";
+  if(verbose)
+    cout << " c71 construct\n";
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c71");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -206,18 +207,18 @@ void P16C712::create()
 
 }
 
-Processor * P16C712::construct()
+Processor * P16C712::construct(const char *name)
 {
 
-  P16C712 *p = new P16C712;
+  P16C712 *p = new P16C712(name);
 
-  cout << " c712 construct\n";
+  if(verbose)
+    cout << " c712 construct\n";
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c712");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -225,7 +226,8 @@ Processor * P16C712::construct()
 }
 
 
-P16C712::P16C712()
+P16C712::P16C712(const char *_name, const char *desc)
+  : P16C62(_name, desc)
 {
   if(verbose)
     cout << "c712 constructor, type = " << isa() << '\n';
@@ -235,18 +237,18 @@ P16C712::P16C712()
 
 //--------------------------------------
 
-Processor * P16C716::construct()
+Processor * P16C716::construct(const char *name)
 {
 
-  P16C716 *p = new P16C716;
+  P16C716 *p = new P16C716(name);
 
-  cout << " c716 construct\n";
+  if(verbose)
+    cout << " c716 construct\n";
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c716");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -254,7 +256,8 @@ Processor * P16C716::construct()
 }
 
 
-P16C716::P16C716()
+P16C716::P16C716(const char *_name, const char *desc)
+  : P16C712(_name, desc)
 {
   if(verbose)
     cout << "c716 constructor, type = " << isa() << '\n';
@@ -336,19 +339,19 @@ void P16C72::create()
 
 }
 
-Processor * P16C72::construct()
+Processor * P16C72::construct(const char *name)
 {
 
-  P16C72 *p = new P16C72;
+  P16C72 *p = new P16C72(name);
 
-  cout << " c72 construct\n";
+  if(verbose)
+    cout << " c72 construct\n";
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
 
-  p->new_name("p16c72");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -356,8 +359,9 @@ Processor * P16C72::construct()
 }
 
 
-P16C72::P16C72()
-  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+P16C72::P16C72(const char *_name, const char *desc)
+  : P16C62(_name, desc),
+    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "c72 constructor, type = " << isa() << '\n';
@@ -447,18 +451,18 @@ void P16C73::create()
 
 }
 
-Processor * P16C73::construct()
+Processor * P16C73::construct(const char *name)
 {
 
-  P16C73 *p = new P16C73;
+  P16C73 *p = new P16C73(name);
 
-  cout << " c73 construct\n";
+  if(verbose)
+    cout << " c73 construct\n";
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c73");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -466,8 +470,9 @@ Processor * P16C73::construct()
 }
 
 
-P16C73::P16C73()
-  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+P16C73::P16C73(const char *_name, const char *desc)
+  : P16C63(_name, desc),
+    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "c73 constructor, type = " << isa() << '\n';
@@ -564,18 +569,18 @@ void P16C74::create()
 
 }
 
-Processor * P16C74::construct()
+Processor * P16C74::construct(const char *name)
 {
 
-  P16C74 *p = new P16C74;
+  P16C74 *p = new P16C74(name);;
 
-  cout << " c74 construct\n";
+  if(verbose)
+    cout << " c74 construct\n";
 
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
 
-  p->new_name("p16c74");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -583,8 +588,9 @@ Processor * P16C74::construct()
 }
 
 
-P16C74::P16C74()
-  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+P16C74::P16C74(const char *_name, const char *desc)
+  : P16C65(_name, desc) ,
+    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';

@@ -330,7 +330,12 @@ class Processor : public Module
 {
 public:
   typedef bool (*LPFNISPROGRAMFILE)(const char *, FILE *);
-  virtual bool LoadProgramFile(const char *hex_file, FILE *pFile) = 0;
+
+  /// Load the source code for this processor. The pProcessorName
+  /// is an optional name that a user can assign to the processor.
+  virtual bool LoadProgramFile(const char *hex_file, 
+			       FILE *pFile, 
+			       const char *pProcessorName) = 0;
   /// The source files for this processor.
   FileContextList files;
 
@@ -588,7 +593,7 @@ public:
   static Processor *construct(void);
   ProcessorConstructor  *m_pConstructorObject;
 
-  Processor();
+  Processor(const char *_name=0, const char *desc=0);
   virtual ~Processor();
 
 private:
@@ -633,14 +638,14 @@ class ProcessorConstructor
 {
 public:
 
-  typedef Processor * (*tCpuContructor) (void);
+  typedef Processor * (*tCpuContructor) (const char *_name);
 
 protected:
   // A pointer to a function that when called will construct a processor
   tCpuContructor cpu_constructor;
 
 public:
-  virtual Processor * ConstructProcessor();
+  virtual Processor * ConstructProcessor(const char *opt_name=0);
 
   // The processor name (plus upto three aliases).
   #define nProcessorNames 4

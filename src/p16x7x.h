@@ -43,9 +43,9 @@ class P16C71 :  public P16C61
   virtual void create_sfr_map();
 
 
-  P16C71();
+  P16C71(const char *_name=0, const char *desc=0);
   void create();
-  static Processor *construct();
+  static Processor *construct(const char *name);
 private:
   // This is not a real PIR register, but only one that allows the A2D Interrupt
   // flag be processed in manner similar to other processors.
@@ -66,9 +66,9 @@ class P16C712 :  public P16C62
   virtual void create_sfr_map();
 
 
-  P16C712();
+  P16C712(const char *_name=0, const char *desc=0);
   void create();
-  static Processor *construct();
+  static Processor *construct(const char *name);
 
   virtual bool hasSSP() { return false; }
 };
@@ -81,8 +81,8 @@ class P16C716 :  public P16C712
 
   virtual unsigned int program_memory_size() const { return 0x800; };
 
-  P16C716();
-  static Processor *construct();
+  P16C716(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 
 };
 
@@ -109,9 +109,9 @@ class P16C72 : public P16C62
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
 
-  P16C72();
+  P16C72(const char *_name=0, const char *desc=0);
   void create();
-  static Processor *construct();
+  static Processor *construct(const char *name);
 
 };
 
@@ -137,9 +137,9 @@ class P16C73 : public P16C63
   virtual PIR *get_pir2() { return (&pir2_2_reg); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
-  P16C73();
+  P16C73(const char *_name=0, const char *desc=0);
   void create();
-  static Processor *construct();
+  static Processor *construct(const char *name);
 
 };
 
@@ -170,9 +170,9 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   virtual unsigned int program_memory_size() const { return 0x1000; };
 
 
-  P16C74();
+  P16C74(const char *_name=0, const char *desc=0);
   void create();
-  static Processor *construct();
+  static Processor *construct(const char *name);
 
 };
 

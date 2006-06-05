@@ -27,9 +27,10 @@ Boston, MA 02111-1307, USA.  */
 class P16X8X : public Pic14Bit
 {
 public:
-  virtual void create_sfr_map(void);
+  P16X8X(const char *_name=0, const char *desc=0);
+  virtual void create_sfr_map();
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
   virtual void create(int ram_top);
   virtual unsigned int register_memory_size () const { return 0x100; }
 };
@@ -38,34 +39,34 @@ class P16C84 : public P16X8X
 {
 public:
 
+  P16C84(const char *_name=0, const char *desc=0);
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C84_;};
+  virtual PROCESSOR_TYPE isa(){return _P16C84_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; }
-  P16C84(void);
-  static Processor *construct(void);
+  virtual unsigned int program_memory_size() const { return 0x400; }
+  static Processor *construct(const char *name);
 };
 
 class P16F84 : public P16X8X
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F84_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F84_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
-  P16F84(void);
-  static Processor *construct(void);
+  P16F84(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 class P16CR84 : public P16F84
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16CR84_;};
+  virtual PROCESSOR_TYPE isa(){return _P16CR84_;};
 
-  P16CR84(void) {  name_str = "p16cr84"; };
-  static Processor *construct(void);
+  P16CR84(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 
@@ -74,22 +75,22 @@ class P16F83 : public P16X8X
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F83_;};
+  virtual PROCESSOR_TYPE isa(){return _P16F83_;};
 
-  virtual unsigned int program_memory_size(void) const { return 0x200; };
+  virtual unsigned int program_memory_size() const { return 0x200; };
 
-  P16F83(void);
-  static Processor *construct(void);
+  P16F83(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 class P16CR83 : public P16F83
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16CR83_;};
+  virtual PROCESSOR_TYPE isa(){return _P16CR83_;};
 
-  P16CR83(void) {  name_str = "p16cr83"; };
-  static Processor *construct(void);
+  P16CR83(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
 };
 
 

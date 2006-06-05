@@ -36,6 +36,7 @@ class instruction;
 class Register;
 class sfr_register;
 class pic_register;
+class ConfigMemory;
 
 enum PROCESSOR_TYPE
 {
@@ -132,42 +133,42 @@ class ConfigMode {
 
   int config_mode;
   int valid_bits;
-  ConfigMode(void) { 
+  ConfigMode() { 
     config_mode = 0xffff; 
     valid_bits = CM_FOSC0 | CM_FOSC1 | CM_WDTE;
   };
 
   virtual void set_config_mode(int new_value) { config_mode = new_value & valid_bits;};
   virtual void set_valid_bits(int new_value) { valid_bits = new_value;};
-  void set_fosc0(void){config_mode |= CM_FOSC0;};
-  void clear_fosc0(void){config_mode &= ~CM_FOSC0;};
-  bool get_fosc0(void){return (config_mode & CM_FOSC0);};
-  void set_fosc1(void){config_mode |= CM_FOSC1;};
-  void clear_fosc1(void){config_mode &= ~CM_FOSC1;};
-  bool get_fosc1(void){return (0 != (config_mode & CM_FOSC1));};
-  bool get_fosc1x(void){return (0 != (config_mode & CM_FOSC1x));};
+  void set_fosc0(){config_mode |= CM_FOSC0;};
+  void clear_fosc0(){config_mode &= ~CM_FOSC0;};
+  bool get_fosc0(){return (config_mode & CM_FOSC0);};
+  void set_fosc1(){config_mode |= CM_FOSC1;};
+  void clear_fosc1(){config_mode &= ~CM_FOSC1;};
+  bool get_fosc1(){return (0 != (config_mode & CM_FOSC1));};
+  bool get_fosc1x(){return (0 != (config_mode & CM_FOSC1x));};
 
-  void set_cp0(void)  {config_mode |= CM_CP0;  valid_bits |= CM_CP0;};
-  void clear_cp0(void){config_mode &= ~CM_CP0; valid_bits |= CM_CP0;};
-  bool get_cp0(void)  {return (0 != (config_mode & CM_CP0));};
-  void set_cp1(void)  {config_mode |= CM_CP1;  valid_bits |= CM_CP1;};
-  void clear_cp1(void){config_mode &= ~CM_CP1; valid_bits |= CM_CP1;};
-  bool get_cp1(void)  {return (0 != (config_mode & CM_CP1));};
+  void set_cp0()  {config_mode |= CM_CP0;  valid_bits |= CM_CP0;};
+  void clear_cp0(){config_mode &= ~CM_CP0; valid_bits |= CM_CP0;};
+  bool get_cp0()  {return (0 != (config_mode & CM_CP0));};
+  void set_cp1()  {config_mode |= CM_CP1;  valid_bits |= CM_CP1;};
+  void clear_cp1(){config_mode &= ~CM_CP1; valid_bits |= CM_CP1;};
+  bool get_cp1()  {return (0 != (config_mode & CM_CP1));};
 
-  void enable_wdt(void)  {config_mode |= CM_WDTE;};
-  void disable_wdt(void) {config_mode &= ~CM_WDTE;};
-  bool get_wdt(void)     {return (0 != (config_mode & CM_WDTE));};
+  void enable_wdt()  {config_mode |= CM_WDTE;};
+  void disable_wdt() {config_mode &= ~CM_WDTE;};
+  bool get_wdt()     {return (0 != (config_mode & CM_WDTE));};
 
-  void enable_mclre(void)  {config_mode |= CM_MCLRE;};
-  void disable_mclre(void) {config_mode &= ~CM_MCLRE;};
-  bool get_mclre(void)     {return (0 != (config_mode & CM_MCLRE));};
+  void enable_mclre()  {config_mode |= CM_MCLRE;};
+  void disable_mclre() {config_mode &= ~CM_MCLRE;};
+  bool get_mclre()     {return (0 != (config_mode & CM_MCLRE));};
 
-  void enable_pwrte(void)   {config_mode |= CM_PWRTE;  valid_bits |= CM_PWRTE;};
-  void disable_pwrte(void)  {config_mode &= ~CM_PWRTE; valid_bits |= CM_PWRTE;};
-  bool get_pwrte(void)      {return (0 != (config_mode & CM_PWRTE));};
-  bool is_valid_pwrte(void) {return (0 != (valid_bits & CM_PWRTE));};
+  void enable_pwrte()   {config_mode |= CM_PWRTE;  valid_bits |= CM_PWRTE;};
+  void disable_pwrte()  {config_mode &= ~CM_PWRTE; valid_bits |= CM_PWRTE;};
+  bool get_pwrte()      {return (0 != (config_mode & CM_PWRTE));};
+  bool is_valid_pwrte() {return (0 != (valid_bits & CM_PWRTE));};
 
-  virtual void print(void);
+  virtual void print();
 
 };
 
@@ -268,7 +269,10 @@ public:
 
   EEPROM      *eeprom;       // set to NULL for PIC's that don't have a data EEPROM
 
-  bool LoadProgramFile(const char *pFilename, FILE *pFile);
+  bool LoadProgramFile(const char *pFilename,
+		       FILE *pFile,
+		       const char *pProcessorName
+		       );
 
   void add_sfr_register(Register *reg, unsigned int addr,
 			RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
@@ -277,14 +281,14 @@ public:
   void build_program_memory(int *memory,int minaddr, int maxaddr);
 
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
-
+  virtual void create_config_memory() = 0;
   virtual void tris_instruction(unsigned int tris_register) {return;};
-  virtual void create_symbols(void);
-  virtual void create_stack(void) {stack = new Stack;};
+  virtual void create_symbols();
+  virtual void create_stack() {stack = new Stack;};
   virtual void run(bool refresh=true);
-  virtual void finish(void);
+  virtual void finish();
 
-  void sleep(void);
+  void sleep();
   virtual void enter_sleep();
   void step(unsigned int steps,bool refresh=true);
   void step_over(bool refresh=true);
@@ -296,36 +300,60 @@ public:
   // Take a snap shot of the internal state.
   virtual void save_state();
 
-  virtual void interrupt(void) { return; };
-  void pm_write(void);
+  virtual void interrupt() { return; };
+  void pm_write();
 
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual unsigned int get_config_word(unsigned int address);
-  virtual unsigned int config_word_address(void) const {return 0x2007;};
-  virtual ConfigMode *create_ConfigMode(void) { return new ConfigMode; };
+  virtual unsigned int config_word_address() const {return 0x2007;};
+  virtual ConfigMode *create_ConfigMode() { return new ConfigMode; };
   virtual void reset(RESET_TYPE r);
 
-  virtual void por(void);
-  virtual void create(void);
+  virtual void por();
+  virtual void create();
 
-  virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
-  virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};
+  virtual PROCESSOR_TYPE isa(){return _PIC_PROCESSOR_;};
+  virtual PROCESSOR_TYPE base_isa(){return _PIC_PROCESSOR_;};
 
   /* The program_counter class calls these two functions to get the upper bits of the PC
    * for branching (e.g. goto) or modify PCL instructions (e.g. addwf pcl,f) */
-  virtual unsigned int get_pclath_branching_jump(void)=0;
-  virtual unsigned int get_pclath_branching_modpcl(void)=0;
+  virtual unsigned int get_pclath_branching_jump()=0;
+  virtual unsigned int get_pclath_branching_modpcl()=0;
 
   virtual void option_new_bits_6_7(unsigned int)=0;
 
   virtual void set_eeprom(EEPROM *e);
-  virtual EEPROM *get_eeprom(void) { return (eeprom); }
+  virtual EEPROM *get_eeprom() { return (eeprom); }
 
-  static Processor *construct(void);
-  pic_processor(void);
+  pic_processor(const char *_name=0, const char *desc=0);
+  virtual ~pic_processor();
+
+protected:
+  ConfigMemory **m_configMemory;
+private:
+  pic_processor();
 };
 
 
 #define cpu_pic ( (pic_processor *)cpu)
+
+//------------------------------------------------------------------------
+// Base Class for configuration memory
+//
+// The configuration memory is only a tiny portion of the overall processor
+// program memory space (only 1-word on the mid range devices). So, explicit
+// attributes are created for each memory configuration word. Since the meaning
+// of configuration memory varies from processor to processor, it is up to 
+// each process to derive from this class.
+
+class ConfigMemory : public Integer
+{
+public:
+  ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
+	       pic_processor *pCpu, unsigned int addr);
+protected:
+  pic_processor *m_pCpu;
+  unsigned int m_addr;
+};
 
 #endif

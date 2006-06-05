@@ -66,11 +66,12 @@ public:
 
   virtual void option_new_bits_6_7(unsigned int bits) {}
 
-  P16C54();
+  P16C54(const char *_name=0, const char *desc=0);
+  virtual ~P16C54();
   void create();
   virtual void create_iopin_map();
 
-  static Processor *construct();
+  static Processor *construct(const char *name);
   virtual void tris_instruction(unsigned int tris_register);
 
   virtual unsigned int fsr_valid_bits()
@@ -102,11 +103,12 @@ public:
 
   virtual void create_sfr_map();
 
-  P16C55();
+  P16C55(const char *_name=0, const char *desc=0);
+  virtual ~P16C55();
   virtual void create();
   virtual void create_iopin_map();
 
-  static Processor *construct();
+  static Processor *construct(const char *name);
   virtual void tris_instruction(unsigned int tris_register);
 
 };
@@ -121,9 +123,9 @@ public:
   virtual unsigned int register_memory_size() const { return 0x20; };
   virtual unsigned int config_word_address() const {return 0xFFF;};
 
-  P16C56();
+  P16C56(const char *_name=0, const char *desc=0);
 
-  static Processor *construct();
+  static Processor *construct(const char *name);
 
 };
 

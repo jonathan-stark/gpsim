@@ -41,13 +41,69 @@ Boston, MA 02111-1307, USA.  */
 #include "packages.h"
 #include "symbol.h"
 
-P16F8x::P16F8x(void)
-: pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+
+//========================================================================
+//
+// Configuration Memory for the 16F8X devices.
+
+class Config1 : public ConfigMemory 
+{
+public:
+  Config1(P16F8x *pCpu)
+    : ConfigMemory("CONFIG1", 0x3fff, "Configuration Word", pCpu, 0x2007)
+  {
+  }
+
+  enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    WDTEN  = 1<<2,
+    PWRTEN = 1<<3,
+
+    FOSC2  = 1<<4,
+    MCLRE  = 1<<5,
+    BOREN  = 1<<6,
+    LVP    = 1<<7,
+
+    CPD    = 1<<8,
+    WRT0   = 1<<9,
+    WRT1   = 1<<10,
+    DEBUG  = 1<<11,
+
+    CCPMX  = 1<<12,
+    CP     = 1<<13
+  };
+
+  virtual void set(gint64 v)
+  {
+    gint64 oldV = getVal();
+
+    Integer::set(v);
+    if (m_pCpu) {
+
+      gint64 diff = oldV ^ v;
+
+      if (diff & WDTEN)
+	m_pCpu->wdt.initialize(v&WDTEN == WDTEN);
+
+    }
+
+  }
+
+};
+
+
+//========================================================================
+
+P16F8x::P16F8x(const char *_name, const char *desc)
+  : P16X6X_processor(_name,desc),
+    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
    pir1 = &pir1_2_reg;
    pir2 = &pir2_2_reg;
 }
-void P16F8x::create_iopin_map(void)
+
+void P16F8x::create_iopin_map()
 {
   package = new Package(18);
   if(!package)
@@ -85,7 +141,7 @@ void P16F8x::create_iopin_map(void)
 
 }
 
-void P16F8x::create_sfr_map(void)
+void P16F8x::create_sfr_map()
 {
   pir_set_2_def.set_pir1(pir1);
   pir_set_2_def.set_pir2(pir2);
@@ -183,7 +239,7 @@ void P16F8x::create_sfr_map(void)
   osctune.set_osccon(&osccon);
 }
 
-void P16F8x::create_symbols(void)
+void P16F8x::create_symbols()
 {
   if(verbose)
     cout << "8x create symbols\n";
@@ -288,6 +344,16 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 }
 
 //========================================================================
+
+void P16F8x::create_config_memory()
+{
+  m_configMemory = new ConfigMemory *[2];
+  m_configMemory[0] = new Config1(this);
+  m_configMemory[1] = new ConfigMemory("CONFIG2", 0,"Configuration Word",this,0x2008);
+}
+
+
+//========================================================================
 void  P16F8x::create()
 {
 
@@ -318,22 +384,22 @@ void  P16F8x::create()
 // Pic 16F87 
 //
 
-Processor * P16F87::construct(void)
+Processor * P16F87::construct(const char *name)
 {
 
-  P16F87 *p = new P16F87;
+  P16F87 *p = new P16F87(name);
 
   p->P16F8x::create();
   p->create_invalid_registers ();
   p->create_symbols();
-  p->new_name("p16f87");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16F87::P16F87(void)
+P16F87::P16F87(const char *_name, const char *desc)
+  : P16F8x(_name,desc)
 {
   if(verbose)
     cout << "f87 constructor, type = " << isa() << '\n';
@@ -345,22 +411,22 @@ P16F87::P16F87(void)
 // Pic 16F88 
 //
 
-Processor * P16F88::construct(void)
+Processor * P16F88::construct(const char *name)
 {
 
-  P16F88 *p = new P16F88;
+  P16F88 *p = new P16F88(name);
 
   p->P16F88::create();
   p->create_invalid_registers ();
   p->create_symbols();
-  p->new_name("p16f88");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-P16F88::P16F88(void) 
+P16F88::P16F88(const char *_name, const char *desc)
+  : P16F87(_name,desc)
 {
   if(verbose)
     cout << "f88 constructor, type = " << isa() << '\n';

@@ -31,25 +31,57 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include "stimuli.h"
 
+//========================================================================
+// Generic Configuration word for the midrange family.
 
-//-------------------------------------------------------------------
-//
-pic_processor * _14bit_processor::construct(void)
+class Generic14bitConfigWord : public ConfigMemory 
 {
+public:
+  Generic14bitConfigWord(_14bit_processor *pCpu)
+    : ConfigMemory("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
+  {
+  }
 
-  cout << " Can't create a generic 14bit processor\n";
+  enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    WDTEN  = 1<<2,
+    PWRTEN = 1<<3
+  };
 
-  return 0;
+  virtual void set(gint64 v)
+  {
+    gint64 oldV = getVal();
 
-}
+    Integer::set(v);
+    if (m_pCpu) {
+
+      gint64 diff = oldV ^ v;
+
+      if (diff & WDTEN)
+	m_pCpu->wdt.initialize(v&WDTEN == WDTEN);
+
+    }
+
+  }
+
+};
+
+
 //-------------------------------------------------------------------
-_14bit_processor::_14bit_processor(void)
-  : intcon(0)
+_14bit_processor::_14bit_processor(const char *_name, const char *_desc)
+  : pic_processor(_name,_desc), intcon(0)
 {
   pc = new Program_Counter();
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
 
 }
+
+_14bit_processor::~_14bit_processor()
+{
+  //  delete pc;
+}
+
 //-------------------------------------------------------------------
 //
 // 
@@ -109,6 +141,13 @@ unsigned int _14bit_processor::get_program_memory_at_address(unsigned int addres
     return  program_memory[uIndex] ? program_memory[uIndex]->get_opcode() : 0xffffffff;
 
   return get_config_word(address);
+}
+
+//-------------------------------------------------------------------
+void _14bit_processor::create_config_memory()
+{
+  m_configMemory = new ConfigMemory *[1];
+  *m_configMemory = new Generic14bitConfigWord(this);
 }
 
 #if 0
@@ -176,7 +215,8 @@ void PortBSink::setPullups(bool new_pullupState)
 #endif
 
 //-------------------------------------------------------------------
-Pic14Bit::Pic14Bit()
+Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
+  : _14bit_processor(_name,_desc)
 {
   m_porta = new PicPortRegister("porta",8,0x1f);
   m_trisa = new PicTrisRegister("trisa",m_porta);
@@ -188,6 +228,11 @@ Pic14Bit::Pic14Bit()
   m_trisb = new PicTrisRegister("trisb",m_portb);
 }
 
+//-------------------------------------------------------------------
+Pic14Bit::~Pic14Bit()
+{
+
+}
 //-------------------------------------------------------------------
 void Pic14Bit::create_symbols(void)
 {

@@ -53,7 +53,7 @@ void P16F871::set_out_of_range_pm(unsigned int address, unsigned int value)
 }
 
 
-void P16F871::create_sfr_map(void)
+void P16F871::create_sfr_map()
 {
   if(verbose)
     cout << "creating f871 registers \n";
@@ -189,7 +189,7 @@ void P16F871::create_sfr_map(void)
 
 }
 
-void P16F871::create(void)
+void P16F871::create()
 {
   if(verbose)
     cout << " f871 create \n";
@@ -219,10 +219,10 @@ void P16F871::create(void)
 
 
 
-Processor * P16F871::construct(void)
+Processor * P16F871::construct(const char *name)
 {
 
-  P16F871 *p = new P16F871;
+  P16F871 *p = new P16F871(name);
 
   if(verbose)
     cout << " f871 construct\n";
@@ -230,14 +230,14 @@ Processor * P16F871::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
-  p->new_name("p16f871");
+
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
 }
 
-void P16F871::create_symbols(void)
+void P16F871::create_symbols()
 {
 
   if(verbose)
@@ -247,8 +247,10 @@ void P16F871::create_symbols(void)
 
 }
 
-P16F871::P16F871(void)
-  : pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+//========================================================================
+P16F871::P16F871(const char *_name, const char *desc)
+  : P16C64(_name,desc) ,
+    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
@@ -276,7 +278,7 @@ void P16F873::set_out_of_range_pm(unsigned int address, unsigned int value)
 }
 
 
-void P16F873::create_sfr_map(void)
+void P16F873::create_sfr_map()
 {
 
   if(verbose)
@@ -358,7 +360,7 @@ void P16F873::create_sfr_map(void)
 
 }
 
-void P16F873::create(void)
+void P16F873::create()
 {
 
   if(verbose)
@@ -385,16 +387,15 @@ void P16F873::create(void)
 
 
 
-
-Processor * P16F873::construct(void)
+//========================================================================
+Processor * P16F873::construct(const char *name)
 {
 
-  P16F873 *p = new P16F873;
+  P16F873 *p = new P16F873(name);
 
   if(verbose)
     cout << " f873 construct\n";
 
-  p->new_name("p16f873");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -405,7 +406,7 @@ Processor * P16F873::construct(void)
 
 }
 
-void P16F873::create_symbols(void)
+void P16F873::create_symbols()
 {
 
   if(verbose)
@@ -415,14 +416,15 @@ void P16F873::create_symbols(void)
 
 }
 
-P16F873::P16F873(void)
+P16F873::P16F873(const char *_name, const char *desc)
+  : P16C73(_name,desc)
 {
   if(verbose)
     cout << "f873 constructor, type = " << isa() << '\n';
 
 }
 
-void P16F873A::create(void)
+void P16F873A::create()
 {
   if(verbose)
     cout << " f873A create \n";
@@ -433,7 +435,7 @@ void P16F873A::create(void)
 
 }
 
-void P16F873A::create_sfr_map(void)
+void P16F873A::create_sfr_map()
 {
 
   if(verbose)
@@ -468,15 +470,14 @@ void P16F873A::create_sfr_map(void)
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"vrcon");
 
 }
-Processor * P16F873A::construct(void)
+Processor * P16F873A::construct(const char *name)
 {
 
-  P16F873A *p = new P16F873A;
+  P16F873A *p = new P16F873A(name);
 
   if(verbose)
     cout << " f873A construct\n";
 
-  p->new_name("p16f873A");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -485,7 +486,8 @@ Processor * P16F873A::construct(void)
   return p;
 
 }
-P16F873A::P16F873A(void)
+P16F873A::P16F873A(const char *_name, const char *desc)
+  : P16F873(_name,desc)
 {
   if(verbose)
     cout << "f873A constructor, type = " << isa() << '\n';
@@ -494,15 +496,14 @@ P16F873A::P16F873A(void)
 
 
 
-Processor * P16F876::construct(void)
+Processor * P16F876::construct(const char *name)
 {
 
-  P16F876 *p = new P16F876;
+  P16F876 *p = new P16F876(name);
 
   if(verbose)
     cout << " f876 construct\n";
 
-  p->new_name("p16f876");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -513,7 +514,7 @@ Processor * P16F876::construct(void)
 }
 
 
-void P16F876::create_sfr_map(void)
+void P16F876::create_sfr_map()
 {
 
   if(verbose)
@@ -521,7 +522,7 @@ void P16F876::create_sfr_map(void)
 
 }
 
-void P16F876::create(void)
+void P16F876::create()
 {
 
   if(verbose)
@@ -540,7 +541,7 @@ void P16F876::create(void)
   P16F876::create_sfr_map();
 
 }
-void P16F876::create_symbols(void)
+void P16F876::create_symbols()
 {
 
   if(verbose)
@@ -548,21 +549,21 @@ void P16F876::create_symbols(void)
   Pic14Bit::create_symbols();
 }
 
-P16F876::P16F876(void)
+P16F876::P16F876(const char *_name, const char *desc)
+  : P16F873(_name,desc)
 {
   if(verbose)
     cout << "f876 constructor, type = " << isa() << '\n';
 }
 
-Processor * P16F876A::construct(void)
+Processor * P16F876A::construct(const char *name)
 {
 
-  P16F876A *p = new P16F876A;
+  P16F876A *p = new P16F876A(name);
 
   if(verbose)
     cout << " f876A construct\n";
 
-  p->new_name("p16f876A");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -573,7 +574,7 @@ Processor * P16F876A::construct(void)
 }
 
 
-void P16F876A::create_sfr_map(void)
+void P16F876A::create_sfr_map()
 {
 
   if(verbose)
@@ -581,7 +582,7 @@ void P16F876A::create_sfr_map(void)
 
 }
 
-void P16F876A::create(void)
+void P16F876A::create()
 {
 
   if(verbose)
@@ -600,7 +601,8 @@ void P16F876A::create(void)
 
 }
 
-P16F876A::P16F876A(void)
+P16F876A::P16F876A(const char *_name, const char *desc)
+  : P16F873A(_name,desc)
 {
   if(verbose)
     cout << "f876A constructor, type = " << isa() << '\n';
@@ -619,7 +621,7 @@ void P16F874::set_out_of_range_pm(unsigned int address, unsigned int value)
 }
 
 
-void P16F874::create_sfr_map(void)
+void P16F874::create_sfr_map()
 {
   if(verbose)
     cout << "creating f874 registers \n";
@@ -701,7 +703,7 @@ void P16F874::create_sfr_map(void)
   adcon1.setVrefLoConfiguration(15, 2);
 }
 
-void P16F874::create(void)
+void P16F874::create()
 {
   if(verbose)
     cout << " f874 create \n";
@@ -727,15 +729,14 @@ void P16F874::create(void)
 
 
 
-Processor * P16F874::construct(void)
+Processor * P16F874::construct(const char *name)
 {
 
-  P16F874 *p = new P16F874;
+  P16F874 *p = new P16F874(name);
 
   if(verbose)
     cout << " f874 construct\n";
 
-  p->new_name("p16f874");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -745,7 +746,7 @@ Processor * P16F874::construct(void)
 
 }
 
-void P16F874::create_symbols(void)
+void P16F874::create_symbols()
 {
 
   if(verbose)
@@ -754,7 +755,8 @@ void P16F874::create_symbols(void)
 
 }
 
-P16F874::P16F874(void)
+P16F874::P16F874(const char *_name, const char *desc)
+  : P16C74(_name,desc)
 {
   if(verbose)
     cout << "f874 constructor, type = " << isa() << '\n';
@@ -774,7 +776,7 @@ void P16F874A::set_out_of_range_pm(unsigned int address, unsigned int value)
 }
 
 
-void P16F874A::create_sfr_map(void)
+void P16F874A::create_sfr_map()
 {
   if(verbose)
     cout << "creating f874A registers \n";
@@ -807,7 +809,7 @@ void P16F874A::create_sfr_map(void)
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"vrcon");
 }
 
-void P16F874A::create(void)
+void P16F874A::create()
 {
   if(verbose)
     cout << " f874A create \n";
@@ -821,15 +823,14 @@ void P16F874A::create(void)
 
 
 
-Processor * P16F874A::construct(void)
+Processor * P16F874A::construct(const char *name)
 {
 
-  P16F874A *p = new P16F874A;
+  P16F874A *p = new P16F874A(name);
 
   if(verbose)
     cout << " f874A construct\n";
 
-  p->new_name("p16f874A");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -839,7 +840,7 @@ Processor * P16F874A::construct(void)
 
 }
 
-void P16F874A::create_symbols(void)
+void P16F874A::create_symbols()
 {
 
   if(verbose)
@@ -848,14 +849,15 @@ void P16F874A::create_symbols(void)
 
 }
 
-P16F874A::P16F874A(void)
+P16F874A::P16F874A(const char *_name, const char *desc)
+  : P16F874(_name,desc)
 {
   if(verbose)
     cout << "f874A constructor, type = " << isa() << '\n';
 
 }
 
-void P16F877::create_sfr_map(void)
+void P16F877::create_sfr_map()
 {
 
   if(verbose)
@@ -863,7 +865,7 @@ void P16F877::create_sfr_map(void)
 
 }
 
-void P16F877::create(void)
+void P16F877::create()
 {
 
   if(verbose)
@@ -885,15 +887,14 @@ void P16F877::create(void)
 
 
 
-Processor * P16F877::construct(void)
+Processor * P16F877::construct(const char *name)
 {
 
-  P16F877 *p = new P16F877;
+  P16F877 *p = new P16F877(name);
 
   if(verbose)
     cout << " f877 construct\n";
 
-  p->new_name("p16f877");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -903,7 +904,7 @@ Processor * P16F877::construct(void)
 
 }
 
-void P16F877::create_symbols(void)
+void P16F877::create_symbols()
 {
 
   if(verbose)
@@ -912,13 +913,14 @@ void P16F877::create_symbols(void)
 
 }
 
-P16F877::P16F877(void)
+P16F877::P16F877(const char *_name, const char *desc)
+  : P16F874(_name,desc)
 {
   if(verbose)
     cout << "f877 constructor, type = " << isa() << '\n';
 }
 
-void P16F877A::create_sfr_map(void)
+void P16F877A::create_sfr_map()
 {
 
   if(verbose)
@@ -926,7 +928,7 @@ void P16F877A::create_sfr_map(void)
 
 }
 
-void P16F877A::create(void)
+void P16F877A::create()
 {
 
   if(verbose)
@@ -948,15 +950,14 @@ void P16F877A::create(void)
 
 
 
-Processor * P16F877A::construct(void)
+Processor * P16F877A::construct(const char *name)
 {
 
-  P16F877A *p = new P16F877A;
+  P16F877A *p = new P16F877A(name);
 
   if(verbose)
     cout << " f877A construct\n";
 
-  p->new_name("p16f877A");
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -966,7 +967,7 @@ Processor * P16F877A::construct(void)
 
 }
 
-void P16F877A::create_symbols(void)
+void P16F877A::create_symbols()
 {
 
   if(verbose)
@@ -975,7 +976,8 @@ void P16F877A::create_symbols(void)
 
 }
 
-P16F877A::P16F877A(void)
+P16F877A::P16F877A(const char *_name, const char *desc)
+  : P16F874A(_name,desc)
 {
   if(verbose)
     cout << "f877A constructor, type = " << isa() << '\n';

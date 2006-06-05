@@ -1,15 +1,15 @@
 
 
 #set verbose 1
-load compar_873a.cod
+load compar_873a.cod U1
 
 # Module libraries:
 module library libgpsim_modules
 
 
 # Modules:
-#p16f873A.xpos=84.
-#p16f873A.ypos=24.
+U1.xpos=84.
+U1.ypos=24.
 
 
 module load pullup PU1

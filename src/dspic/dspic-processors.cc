@@ -50,7 +50,8 @@ namespace dspic {
   //
   // dsPicProcessor -- constructor.
 
-  dsPicProcessor::dsPicProcessor()
+  dsPicProcessor::dsPicProcessor(const char *_name, const char *desc)
+    : Processor(_name, desc)
   {
     gTrace = &get_trace();
     gCycles = &get_cycles();
@@ -115,14 +116,14 @@ namespace dspic {
   // load_hex
   //
 
-  bool dsPicProcessor::LoadProgramFile(const char *pFilename, FILE *pFile)
+  bool dsPicProcessor::LoadProgramFile(const char *pFilename, FILE *pFile, const char *pProcessorName)
   {
     Processor * pProcessor = this;
 
     ProgramFileType *pPFT = ProgramFileTypeList::GetList()[0];  // IntelHexProgramFileType
 
     if (pPFT)
-      return pPFT->LoadProgramFile(&pProcessor, pFilename, pFile);
+      return pPFT->LoadProgramFile(&pProcessor, pFilename, pFile, pProcessorName);
 
     return false;
   }
@@ -201,14 +202,16 @@ namespace dspic {
   //------------------------------------------------------------------------
   // dsPIC30F6010
   //------------------------------------------------------------------------
-
-  Processor * dsPic30F6010::construct()
+  dsPic30F6010::dsPic30F6010(const char *_name, const char *desc)
   {
-    dsPic30F6010 *p = new dsPic30F6010();
+  }
+
+  Processor * dsPic30F6010::construct(const char *name)
+  {
+    dsPic30F6010 *p = new dsPic30F6010(name);
 
     printf ("Constructing a dspic 6010\n");
 
-    p->new_name("dsPIC30F6010");
     get_symbol_table().add_module(p,p->name().c_str());
 
     p->create();

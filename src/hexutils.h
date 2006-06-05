@@ -44,7 +44,7 @@ public:
 
   // ProgramFileType overrides
   virtual int  LoadProgramFile(Processor **pProcessor, const char *pFilename,
-                               FILE *pFile);
+                               FILE *pFile, const char *pProcessorName);
 };
 
 

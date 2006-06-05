@@ -182,7 +182,7 @@ void _68pins::create_iopin_map(void)
 //
 
 
-Processor * P17C7xx::construct(void)
+Processor * P17C7xx::construct(const char *name)
 {
 
   P17C7xx *p = new P17C7xx;
@@ -200,7 +200,7 @@ Processor * P17C7xx::construct(void)
 
 }
 
-P17C7xx::P17C7xx(void)
+P17C7xx::P17C7xx()
 {
   if(verbose)
     cout << "17c7xx constructor, type = " << isa() << '\n';
@@ -251,11 +251,11 @@ void  P17C7xx::create(int ram_top)
 
 
 
-void P17C7xx::create_symbols(void)
+void P17C7xx::create_symbols()
 {
 }
 
-void P17C7xx::create_sfr_map(void)
+void P17C7xx::create_sfr_map()
 {  
   if(verbose)
     cout << "creating 17c7xx common registers\n";
@@ -269,7 +269,7 @@ void P17C7xx::create_sfr_map(void)
 // Pic 17C75x
 //
 
-Processor * P17C75x::construct(void)
+Processor * P17C75x::construct(const char *name)
 {
 
   cout << " 17c75x construct\n";
@@ -306,13 +306,13 @@ void P17C75x::create(int ram_top)
 
 }
 
-P17C75x::P17C75x(void)
+P17C75x::P17C75x()
 {
   //if(verbose)
     cout << "17c75x constructor, type = " << isa() << '\n';
 }
 
-void P17C75x::create_symbols(void)
+void P17C75x::create_symbols()
 {
   if(verbose)
     cout << "p17c75x create symbols\n";
@@ -330,7 +330,7 @@ void P17C75x::create_symbols(void)
 */
 }
 
-void P17C75x::create_sfr_map(void)
+void P17C75x::create_sfr_map()
 {
 #if 0 
   if (verbose) 
@@ -480,7 +480,7 @@ void P17C75x::create_sfr_map(void)
 // Pic 17C756
 //
 
-Processor * P17C756::construct(void)
+Processor * P17C756::construct(const char *name)
 {
 
   P17C756 *p = new P17C756;
@@ -498,7 +498,7 @@ Processor * P17C756::construct(void)
 
 }
 
-void P17C756::create(void)
+void P17C756::create()
 {
 
   create_iopin_map();
@@ -513,19 +513,19 @@ void P17C756::create(void)
 
 }
 
-void P17C756::create_sfr_map(void)
+void P17C756::create_sfr_map()
 {
 
   cout << "create_sfr_map P17C756\n";
 }
 
-void P17C756::create_symbols(void)
+void P17C756::create_symbols()
 {
   cout << "P17C756 create symbols\n";
 
 }
 
-P17C756::P17C756(void)
+P17C756::P17C756()
 {
 
   if(verbose)
@@ -539,7 +539,7 @@ P17C756::P17C756(void)
 // P17C756A
 // 
 
-Processor * P17C756A::construct(void)
+Processor * P17C756A::construct(const char *name)
 {
 
   P17C756A *p = new P17C756A;
@@ -557,7 +557,7 @@ Processor * P17C756A::construct(void)
 
 }
 
-P17C756A::P17C756A(void)
+P17C756A::P17C756A()
 {
 
   if(verbose)
@@ -565,7 +565,7 @@ P17C756A::P17C756A(void)
 
 }
 
-void P17C756A::create(void)
+void P17C756A::create()
 {
 
   create_iopin_map();
@@ -583,13 +583,13 @@ void P17C756A::create(void)
 }
 
 
-void P17C756A::create_sfr_map(void)
+void P17C756A::create_sfr_map()
 {
 
   cout << "create_sfr_map P17C756A\n";
 }
 
-void P17C756A::create_symbols(void)
+void P17C756A::create_symbols()
 {
   cout << "P17C756A create symbols\n";
 
@@ -601,7 +601,7 @@ void P17C756A::create_symbols(void)
 // Pic 17C752
 //
 
-Processor * P17C752::construct(void)
+Processor * P17C752::construct(const char *name)
 {
 
   P17C752 *p = new P17C752;
@@ -619,7 +619,7 @@ Processor * P17C752::construct(void)
 
 }
 
-void P17C752::create(void)
+void P17C752::create()
 {
 
   create_iopin_map();
@@ -634,19 +634,19 @@ void P17C752::create(void)
 
 }
 
-void P17C752::create_sfr_map(void)
+void P17C752::create_sfr_map()
 {
 
   cout << "create_sfr_map P17C752\n";
 }
 
-void P17C752::create_symbols(void)
+void P17C752::create_symbols()
 {
   cout << "P17C752 create symbols\n";
 
 }
 
-P17C752::P17C752(void)
+P17C752::P17C752()
 {
 
   if(verbose)
@@ -659,7 +659,7 @@ P17C752::P17C752(void)
 // Pic 17C762
 //
 
-Processor * P17C762::construct(void)
+Processor * P17C762::construct(const char *name)
 {
 
   P17C762 *p = new P17C762;
@@ -677,7 +677,7 @@ Processor * P17C762::construct(void)
 
 }
 
-void P17C762::create(void)
+void P17C762::create()
 {
 
   create_iopin_map();
@@ -692,19 +692,19 @@ void P17C762::create(void)
 
 }
 
-void P17C762::create_sfr_map(void)
+void P17C762::create_sfr_map()
 {
 
   cout << "create_sfr_map P17C762\n";
 }
 
-void P17C762::create_symbols(void)
+void P17C762::create_symbols()
 {
   cout << "P17C762 create symbols\n";
 
 }
 
-P17C762::P17C762(void)
+P17C762::P17C762()
 {
 
   if(verbose)
@@ -717,7 +717,7 @@ P17C762::P17C762(void)
 // Pic 17C766
 //
 
-Processor * P17C766::construct(void)
+Processor * P17C766::construct(const char *name)
 {
 
   P17C766 *p = new P17C766;
@@ -735,7 +735,7 @@ Processor * P17C766::construct(void)
 
 }
 
-void P17C766::create(void)
+void P17C766::create()
 {
 
   create_iopin_map();
@@ -750,19 +750,19 @@ void P17C766::create(void)
 
 }
 
-void P17C766::create_sfr_map(void)
+void P17C766::create_sfr_map()
 {
 
   cout << "create_sfr_map P17C766\n";
 }
 
-void P17C766::create_symbols(void)
+void P17C766::create_symbols()
 {
   cout << "P17C766 create symbols\n";
 
 }
 
-P17C766::P17C766(void)
+P17C766::P17C766()
 {
 
   if(verbose)

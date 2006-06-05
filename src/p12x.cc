@@ -71,7 +71,7 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
 }
 
 //========================================================================
-void P12C508::create_iopin_map(void)
+void P12C508::create_iopin_map()
 {
 
   package = new Package(8);
@@ -127,7 +127,7 @@ void  P12C508::option_new_bits_6_7(unsigned int bits)
   m_gpio->setPullUp ( (bits & (1<<6)) == (1<<6) );
 }
 
-void P12C508::create_sfr_map(void)
+void P12C508::create_sfr_map()
 {
 
   RegisterValue porVal(0,0);
@@ -147,7 +147,7 @@ void P12C508::create_sfr_map(void)
 
 }
 
-void P12C508::create_symbols(void)
+void P12C508::create_symbols()
 {
   _12bit_processor::create_symbols();
 
@@ -156,7 +156,7 @@ void P12C508::create_symbols(void)
 }
 
 
-void P12C508::dump_registers (void)
+void P12C508::dump_registers ()
 {
 
 
@@ -174,7 +174,7 @@ void P12C508::tris_instruction(unsigned int tris_register)
   trace.write_TRIS(m_tris->value.get());
 }
   
-void P12C508::create(void)
+void P12C508::create()
 {
 
   create_iopin_map();
@@ -192,17 +192,16 @@ void P12C508::create(void)
 }
 
 
-Processor * P12C508::construct(void)
+Processor * P12C508::construct(const char *name)
 {
 
-  P12C508 *p = new P12C508;
+  P12C508 *p = new P12C508(name);
 
   p->pc->set_reset_address(0x1ff);
 
   p->create();
   p->create_symbols();
 
-  p->name_str = "p12c508";
   symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
@@ -210,7 +209,8 @@ Processor * P12C508::construct(void)
 }
 
 
-P12C508::P12C508(void)
+P12C508::P12C508(const char *_name, const char *desc)
+  : _12bit_processor(_name,desc)
 {
   if(verbose)
     cout << "12c508 constructor, type = " << isa() << '\n';
@@ -224,28 +224,31 @@ P12C508::P12C508(void)
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
 }
 
+P12C508::~P12C508()
+{
+}
 
 
 //--------------------------------------------------------
 
-void P12C509::create_sfr_map(void)
+void P12C509::create_sfr_map()
 {
 
 }
 
-Processor * P12C509::construct(void)
+Processor * P12C509::construct(const char *name)
 {
 
-  P12C509 *p = new P12C509;
+  P12C509 *p = new P12C509(name);
 
-  cout << " 12c508 construct\n";
+  if (verbose)
+    cout << " 12c508 construct\n";
 
   p->pc->set_reset_address(0x3ff);
 
   p->create();
   p->create_symbols();
 
-  p->name_str = "p12c509";
   symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
@@ -253,7 +256,7 @@ Processor * P12C509::construct(void)
 }
 
 
-void P12C509::create(void)
+void P12C509::create()
 {
 
   if ( verbose )
@@ -269,7 +272,8 @@ void P12C509::create(void)
 
 }
 
-P12C509::P12C509(void)
+P12C509::P12C509(const char *_name, const char *desc)
+  : P12C508(_name,desc)
 {
   if(verbose)
     cout << "12c509 constructor, type = " << isa() << '\n';
@@ -279,10 +283,10 @@ P12C509::P12C509(void)
 //--------------------------------------------------------
 
 // construct function is identical to 12C508 version ??
-Processor * P12CE518::construct(void)
+Processor * P12CE518::construct(const char *name)
 {
 
-  P12CE518 *p = new P12CE518;
+  P12CE518 *p = new P12CE518(name);
 
   if(verbose)
     cout << " 12ce518 construct\n";
@@ -295,7 +299,6 @@ Processor * P12CE518::construct(void)
     cout << " ... create symbols\n";
   p->create_symbols();
 
-  p->name_str = "p12ce518";
   symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
@@ -303,7 +306,7 @@ Processor * P12CE518::construct(void)
 }
 
 
-void P12CE518::create_iopin_map(void)
+void P12CE518::create_iopin_map()
 {
   P12C508::create_iopin_map();
 
@@ -312,7 +315,7 @@ void P12CE518::create_iopin_map(void)
   //gpio.valid_iopins = 0xff;
 }
 
-void P12CE518::create(void)
+void P12CE518::create()
 {
   Stimulus_Node *scl, *sda;
 
@@ -370,7 +373,8 @@ void P12CE518::create(void)
 
 }
 
-P12CE518::P12CE518(void)
+P12CE518::P12CE518(const char *_name, const char *desc)
+  : P12C508(_name,desc)
 {
   if(verbose)
     cout << "12CE518 constructor, type = " << isa() << '\n';
@@ -392,15 +396,15 @@ void P12CE518::tris_instruction(unsigned int tris_register)
 
 //--------------------------------------------------------
 
-void P12CE519::create_sfr_map(void)
+void P12CE519::create_sfr_map()
 {
 
 }
 
-Processor * P12CE519::construct(void)
+Processor * P12CE519::construct(const char *name)
 {
 
-  P12CE519 *p = new P12CE519;
+  P12CE519 *p = new P12CE519(name);
 
   cout << " 12ce519 construct\n";
 
@@ -409,7 +413,6 @@ Processor * P12CE519::construct(void)
   p->create();
   p->create_symbols();
 
-  p->name_str = "p12ce519";
   symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
@@ -417,7 +420,7 @@ Processor * P12CE519::construct(void)
 }
 
 
-void P12CE519::create(void)
+void P12CE519::create()
 {
   if ( verbose )
     cout << " 12ce519 create \n";
@@ -433,7 +436,8 @@ void P12CE519::create(void)
 }
 
 
-P12CE519::P12CE519(void)
+P12CE519::P12CE519(const char *_name, const char *desc)
+  : P12CE518(_name,desc)
 {
   if(verbose)
     cout << "12ce519 constructor, type = " << isa() << '\n';
@@ -498,7 +502,7 @@ void GPIO::setPullUp ( bool bNewPU )
 //------------------------------------------------------------------------
 
 
-void P10F200::create_iopin_map(void)
+void P10F200::create_iopin_map()
 {
 
   package = new Package(6);
@@ -516,7 +520,7 @@ void P10F200::create_iopin_map(void)
 }
 
 /*
-void P10F200::create_sfr_map(void)
+void P10F200::create_sfr_map()
 {
 
   RegisterValue porVal(0,0);
@@ -538,7 +542,7 @@ void P10F200::create_sfr_map(void)
 */
 
   
-void P10F200::create(void)
+void P10F200::create()
 {
 
   create_iopin_map();
@@ -556,17 +560,16 @@ void P10F200::create(void)
 }
 
 
-Processor * P10F200::construct(void)
+Processor * P10F200::construct(const char *name)
 {
 
-  P10F200 *p = new P10F200;
+  P10F200 *p = new P10F200(name);
 
   p->pc->set_reset_address(0x0ff);
 
   p->create();
   p->create_symbols();
 
-  p->name_str = "p10f200";
   symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
@@ -574,7 +577,8 @@ Processor * P10F200::construct(void)
 }
 
 
-P10F200::P10F200(void)
+P10F200::P10F200(const char *_name, const char *desc)
+  : P12C508(_name,desc)
 {
   if(verbose)
     cout << "10f200 constructor, type = " << isa() << '\n';
@@ -587,10 +591,13 @@ P10F200::P10F200(void)
     config_modes->valid_bits = config_modes->CM_WDTE | config_modes->CM_MCLRE;
 }
 
+P10F200::~P10F200()
+{
 
+}
 //------------------------------------------------------------------------
 
-void P10F202::create(void)
+void P10F202::create()
 {
 
   create_iopin_map();
@@ -608,17 +615,16 @@ void P10F202::create(void)
 }
 
 
-Processor * P10F202::construct(void)
+Processor * P10F202::construct(const char *name)
 {
 
-  P10F202 *p = new P10F202;
+  P10F202 *p = new P10F202(name);
 
   p->pc->set_reset_address(0x1ff);
 
   p->create();
   p->create_symbols();
 
-  p->name_str = "p10f202";
   symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
@@ -626,7 +632,8 @@ Processor * P10F202::construct(void)
 }
 
 
-P10F202::P10F202(void)
+P10F202::P10F202(const char *_name, const char *desc)
+  : P10F200(_name,desc)
 {
   if(verbose)
     cout << "10f202 constructor, type = " << isa() << '\n';

@@ -42,28 +42,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 //------------------------------------------------------------------------
-// ConfigMemory - Base class
-ConfigMemory::ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
-			   _16bit_processor *pCpu, unsigned int addr)
-  : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr)
-{
-  if (m_pCpu)
-    m_pCpu->add_attribute(this);
-}
-/*
-unsigned int ConfigMemory::get()
-{
-  return m_value;
-}
-
-void ConfigMemory::set(unsigned int new_value)
-{
-  m_value = new_value;
-
-  //  if (pCpu)
-}
-*/
-
+// Config1H - default 
 
 class Config1H : public ConfigMemory 
 {
@@ -79,6 +58,7 @@ public:
   {
   }
 };
+
 
 //------------------------------------------------------------------------
 // Config2H - default 
@@ -115,56 +95,9 @@ public:
 
 #define STVREN  1<<0
 //-------------------------------------------------------------------
-#if 0
-void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int value)
-{
-  cout << hex << "16bit proc setting config address 0x" <<(address<<1) << " to 0x"<<value<<'\n';
-  switch (address) {
-  case CONFIG1L:
-  case CONFIG2:
-    if(config_modes) {
-      if(value & WDTEN) {
-	//if(verbose)
-	  cout << "config Enabling WDT\n";
-
-	config_modes->enable_wdt();
-      } else {
-	cout << "config disabling WDT\n";
-	config_modes->disable_wdt();
-      }
-    }
-
-    break;
-
-  case CONFIG1:
-    if(((value>>8) & (OSCEN | FOSC0 | FOSC1 | FOSC2)) != (OSCEN | FOSC0 | FOSC1 | FOSC2))
-      cout << "FOSC bits in CONFIG1H are not supported\n";
-
-    cout << "18cxxx config address 0x" << hex << (address<<1) << " Copy protection " <<
-      (value&0xff) << '\n';
-
-    break;
-
-  case CONFIG3:
-  case CONFIG4:
-    cout << "18cxxx config address 0x" << hex << (address<<1) << " is not supported\n";
-    break;
-
-  case DEVID:
-
-    cout << "18cxxx device id address 0x" << hex << (address<<1) << " is not supported\n";
-    break;
-
-  default:
-    cout << "WARNING: 18cxxx is ignoring code at address 0x" << hex <<(address<<1) << '\n';
-  }
-}
-#endif
-
-
-//-------------------------------------------------------------------
-_16bit_processor::_16bit_processor()
-  : pir1(0,0), pir2(0,0)
+_16bit_processor::_16bit_processor(const char *_name, const char *desc)
+  : pic_processor(_name,desc),
+    pir1(0,0), pir2(0,0)
 {
 
   package = 0;
@@ -188,6 +121,13 @@ _16bit_processor::_16bit_processor()
   m_latc  = new PicLatchRegister("latc", m_portc);
 
 }
+
+//-------------------------------------------------------------------
+_16bit_processor::~_16bit_processor()
+{
+
+}
+
 //-------------------------------------------------------------------
 pic_processor *_16bit_processor::construct()
 {
@@ -486,7 +426,6 @@ void _16bit_processor :: create ()
 
   pic_processor::create();
   create_sfr_map();
-  create_config_memory();
 
   tmr0l.initialize();
 

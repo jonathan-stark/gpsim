@@ -70,7 +70,8 @@ static char pkg_version[] = PACKAGE_VERSION;
 // Processor - Constructor
 //
 
-Processor::Processor(void)
+Processor::Processor(const char *_name, const char *_desc)
+  : Module(_name, _desc)
 {
   registers = 0;
   pma = 0;
@@ -2111,13 +2112,22 @@ ProcessorConstructor::ProcessorConstructor(tCpuContructor _cpu_constructor,
   GetList()->push_back(this);
 }
 
-Processor * ProcessorConstructor::ConstructProcessor() {
-  return cpu_constructor();
+//------------------------------------------------------------
+Processor * ProcessorConstructor::ConstructProcessor(const char *opt_name)
+{
+  // Instantiate a specific processor. If a name is provided, then that
+  // will be used. Otherwise, the third name in the list of aliases for
+  // this processor will be used instead. (Why 3rd?... Before optional
+  // processor names were allowed, the default name matched what is now
+  // the third alias; this maintains a backward compatibility).
+
+  return cpu_constructor(opt_name ? opt_name : names[2]);
 }
 
 ProcessorConstructorList * ProcessorConstructor::processor_list;
 
-ProcessorConstructorList * ProcessorConstructor::GetList() {
+ProcessorConstructorList * ProcessorConstructor::GetList() 
+{
   if(processor_list == NULL) {
     processor_list = new ProcessorConstructorList();
   }

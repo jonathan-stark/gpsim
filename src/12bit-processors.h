@@ -55,64 +55,67 @@ enum _12BIT_DEFINITIONS
 
   virtual void reset(RESET_TYPE r);
 
-  virtual void create_symbols(void);
-  virtual void por(void);
+  virtual void create_symbols();
+  virtual void por();
   #define FILE_REGISTERS  0x100
   virtual unsigned int register_memory_size () const { return FILE_REGISTERS;};
-  virtual void dump_registers(void);
+  virtual void dump_registers();
   virtual void tris_instruction(unsigned int tris_register){return;};
-  virtual void create(void);
-  virtual PROCESSOR_TYPE isa(void){return _12BIT_PROCESSOR_;};
-  virtual PROCESSOR_TYPE base_isa(void){return _12BIT_PROCESSOR_;};
+  virtual void create();
+  virtual void create_config_memory();
+  virtual PROCESSOR_TYPE isa(){return _12BIT_PROCESSOR_;};
+  virtual PROCESSOR_TYPE base_isa(){return _12BIT_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)
     {
       return disasm12(this, inst);
     }
-  void interrupt(void) { return; };
+  void interrupt() { return; };
 
   // Declare a set of functions that will allow the base class to
   // get information about the derived classes. NOTE, the values returned here
   // will cause errors if they are used -- the derived classes must define their
   // parameters appropriately.
-  virtual unsigned int program_memory_size(void){ return 3; }; // A bogus value that will cause errors if used
+  virtual unsigned int program_memory_size(){ return 3; }; // A bogus value that will cause errors if used
   // The size of a program memory bank is 2^11 bytes for the 12-bit core
-  virtual void create_sfr_map(void) { return;};
+  virtual void create_sfr_map() { return;};
 
   // Return the portion of pclath that is used during branching instructions
   // Actually, the 12bit core has no pclath. However, the program counter class doesn't need
   // to know that. Thus this virtual function really just returns the code page for the
   // 12bit cores.
 
-  virtual unsigned int get_pclath_branching_jump(void)
+  virtual unsigned int get_pclath_branching_jump()
     {
       return ((status->value.get() & pa_bits) << 4);
     }
 
   // The modify pcl type instructions execute exactly like call instructions
 
-  virtual unsigned int get_pclath_branching_modpcl(void)
+  virtual unsigned int get_pclath_branching_modpcl()
     {
       return ((status->value.get() & pa_bits) << 4);
     }
 
   // The valid bits in the FSR register vary across the various 12-bit devices
 
-  virtual unsigned int fsr_valid_bits(void)
+  virtual unsigned int fsr_valid_bits()
     {
       return 0x1f;  // Assume only 32 register addresses 
     }
 
-  virtual unsigned int fsr_register_page_bits(void)
+  virtual unsigned int fsr_register_page_bits()
     {
       return 0;     // Assume only one register page.
     }
 
   virtual void option_new_bits_6_7(unsigned int);
 
-  virtual unsigned int config_word_address(void) const {return 0xfff;};
+  virtual unsigned int config_word_address() const {return 0xfff;};
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
 
-  _12bit_processor(void);
+  _12bit_processor(const char *_name=0, const char *desc=0);
+  virtual ~_12bit_processor();
+
 };
 
 #define cpu12 ( (_12bit_processor *)cpu)

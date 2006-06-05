@@ -1,3 +1,48 @@
+2006-06-03 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/input.cc, cli/input.h, cli/cmd_load.cc:
+	  Added an option to the load command to allow processors to be
+	  named. Eg:
+
+	  gpsim> load test.cod U1   # Assign U1 ref. des. to processor
+
+	* src/processor.h, processor.cc,
+	  src/p16x6x.h, src/p16x6x.cc,
+	  src/p16f87x.h, src/p16f87x.cc,
+	  src/16bit-processors.h, src/16bit-processors.cc,
+	  src/pic-processor.h, src/pic-processor.cc,
+	  src/p16f62x.h, src/p16f62x.cc,
+	  src/p16x5x.h, src/p16x5x.cc,
+	  src/p16x7x.h, src/p16x7x.cc,
+	  src/12bit-processors.h, src/12bit-processors.cc,
+	  src/p12x.h, src/p12x.cc,
+	  src/p18x.h, src/p18x.cc,
+	  src/processor.h, src/processor.cc,
+	  src/p16x8x.h, src/p16x8x.cc,
+	  src/p16f8x.h, src/p16f8x.cc,
+	  src/14bit-processors.h,src/14bit-processors.cc,
+	  src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h:
+
+	Pic processors now can be named when instantiated.
+
+	* gui/gui_menu.cc: Adhere to the new calling convention for gpsim_open. 
+
+	* src/hextutils.h, src/hexutils.cc, src/program_files.cc, src/program_files.h,
+	  src/sim_context.h, src/sim_context.cc, src/cod.cc: New
+	calling convention for LoadProgramFile
+	
+	* src/os_dependent.cc: There appeared to be a compiler bug
+	IsFileExtension() (a const pointer in the callee's stack space was
+	getting modified). But, there is a built in STL function that does
+	the same thing IsFileExtension() was doing, so that's now used.
+
+	* regression/ttl/ttl377.stc: added
+	* regression/ttl/Makefile, regression/comparator/compar_877a.stc,
+	  regression/comparator/compar_628.stc,
+	  regression/comparator/compar_873a.stc,
+	  regression/p16f84/p16f84.stc,
+	  regression/switch_test/switch_test.stc,
+	  regression/switch_test/switch_test.asm, 
+
 2006-06-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/stimuli.cc, src/stimuli.h: New resistor-capacitor transient 
 	  voltage calculation implemented and activated, getBitChar function
