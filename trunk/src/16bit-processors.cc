@@ -535,9 +535,20 @@ unsigned int _16bit_processor::get_config_word(unsigned int address)
 
   address -= CONFIG1L;
 
-  if (m_configMemory && m_configMemory[address])
-    return (unsigned int )(m_configMemory[address]->getVal());
+  if (m_configMemory) {
+    address &= 0xfffe; // Clear LSB
+    unsigned int ret = 0xffff;
 
+    if (m_configMemory[address])
+      ret = (ret & 0xff00) |  (((unsigned int )(m_configMemory[address]->getVal())) & 0x00ff);
+
+    address++;
+
+    if (m_configMemory[address])
+      ret = (ret & 0x00ff) |  ((((unsigned int )(m_configMemory[address]->getVal()))<<8) & 0xff00);
+
+    return ret;
+  }
   return 0xffffffff;
 }
 
@@ -548,9 +559,18 @@ bool  _16bit_processor::set_config_word(unsigned int address, unsigned int cfg_w
     cout << "Setting config word 0x"<<hex<<address<< " = 0x"<<cfg_word<< endl;
     address -= CONFIG1L;
 
-    if (m_configMemory && m_configMemory[address]) {
+    if (m_configMemory) {
 
-      m_configMemory[address]->set((int)cfg_word);
+      address &= 0xfffe;
+
+      if(m_configMemory[address])
+	m_configMemory[address]->set((int)(cfg_word&0xff));
+
+      address++;
+
+      if(m_configMemory[address])
+	m_configMemory[address]->set((int)((cfg_word>>8)&0xff));
+
       return true;
     }
   }

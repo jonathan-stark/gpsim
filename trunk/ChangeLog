@@ -1,4 +1,11 @@
 2006-06-03 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc: The newly added config words were
+	  placed at word addresses instead of byte addresses.
+	* src/pic-instructions.cc: Removed warning in CLRWDT instruction
+	  that said 16bit wdt timer is not implemented.
+	* src/hexutils.cc: removed ifdef'd out code
+
+2006-06-03 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/input.cc, cli/input.h, cli/cmd_load.cc:
 	  Added an option to the load command to allow processors to be
 	  named. Eg:
