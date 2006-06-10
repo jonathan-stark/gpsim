@@ -27,6 +27,9 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
 
+#define p_cpu ((Processor *)cpu)
+
+
 //#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
@@ -803,19 +806,21 @@ void _RCREG::assign_pir_set(PIR_SET *new_pir_set)
 
 void _SPBRG::get_next_cycle_break()
 {
+  unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
+
 
   if(txsta && (txsta->value.get() & _TXSTA::SYNC))
     {
       // Synchronous mode
-      future_cycle = last_cycle + (value.get() + 1)*4;
+      future_cycle = last_cycle + (value.get() + 1)*4/cpi;
     }
   else
     {
       // Asynchronous mode
       if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-	future_cycle = last_cycle + (value.get() + 1)*16;
+	future_cycle = last_cycle + (value.get() + 1)*16/cpi;
       else
-	future_cycle = last_cycle + (value.get() + 1)*64;
+	future_cycle = last_cycle + (value.get() + 1)*64/cpi;
     }
 
   if(cpu)
@@ -877,50 +882,24 @@ guint64 _SPBRG::get_last_cycle()
 guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 {
 
+  unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
+
   // There's a chance that a SPBRG break point exists on the current
   // cpu cycle, but has not yet been serviced. 
   guint64 cycle = (get_cycles().value == future_cycle) ? future_cycle : last_cycle;
 
   if(txsta && (txsta->value.get() & _TXSTA::SYNC))
     // Synchronous mode
-    return ( edges_from_now * (value.get() + 1)*4 + cycle);
+    return ( edges_from_now * (value.get() + 1)*4/cpi + cycle);
 
   else  {
       // Asynchronous mode
     if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-      return ( edges_from_now * (value.get() + 1)*16 + cycle);
+      return ( edges_from_now * (value.get() + 1)*16/cpi + cycle);
     else
-      return ( edges_from_now * (value.get() + 1)*64 + cycle);
+      return ( edges_from_now * (value.get() + 1)*64/cpi + cycle);
   }
 
-
-#if 0
-
-const guint64 SPBRG_SYNC_MASK = ~((guint64) 3);
-const guint64 SPBRG_ASYNC_LO  = ~((guint64) 63);
-const guint64 SPBRG_ASYNC_HI = ~((guint64) 15);
-  
-  guint64 cycle;
-
-  // Get the number of cycles the sprbg has been active
-  cycle = (cycles.value - start_cycle);
-
-  if(txsta->value.get() & _TXSTA::SYNC)
-    {
-      // Synchronous mode
-      cycle = (cycle & SPBRG_SYNC_MASK) + edges_from_now * (value.get() + 1)*4 + start_cycle;
-    }
-  else
-    {
-      // Asynchronous mode
-      if(txsta->value & _TXSTA::BRGH)
-	cycle = (cycle & SPBRG_ASYNC_HI) + edges_from_now * (value.get() + 1)*16 + start_cycle;
-      else
-	cycle = (cycle & SPBRG_ASYNC_LO) + edges_from_now * (value.get() + 1)*64 + start_cycle;
-    }
-
-  return cycle;
-#endif
 }
 void _SPBRG::callback()
 {
