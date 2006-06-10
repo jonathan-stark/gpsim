@@ -426,7 +426,7 @@ void Stimulus_Node::refresh()
     }
 
     current_time_constant = Cth * Zth;
-    if(((guint64)(current_time_constant*get_cycles().cycles_per_second()) 
+    if(((guint64)(current_time_constant*get_cycles().instruction_cps()) 
       < min_time_constant) 
       ||
       (fabs(finalVoltage - voltage) < minThreshold))
@@ -446,7 +446,7 @@ void Stimulus_Node::refresh()
 
     } else {
 	settlingTimeStep = (guint64) (0.11 * 
-	  get_cycles().cycles_per_second() * current_time_constant);
+	  get_cycles().instruction_cps() * current_time_constant);
 	voltage = initial_voltage;
 
         if (verbose)
@@ -526,7 +526,7 @@ void Stimulus_Node::callback()
       // changes,  regardless of time step.
       //
       Time_Step = (get_cycles().value - cap_start_cycle)/
-        (get_cycles().cycles_per_second()*current_time_constant);
+        (get_cycles().instruction_cps()*current_time_constant);
       expz = exp(-Time_Step);
       voltage = finalVoltage* (1.-expz) + voltage * expz;
 
@@ -577,7 +577,7 @@ void Stimulus_Node::callback_print()
 //------------------------------------------------------------------------
 void Stimulus_Node::time_constant(double new_tc)
 {
-  min_time_constant = (unsigned int)(new_tc*get_cycles().cycles_per_second());
+  min_time_constant = (unsigned int)(new_tc*get_cycles().instruction_cps());
 }
 
 //------------------------------------------------------------------------

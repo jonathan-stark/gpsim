@@ -110,8 +110,8 @@ public:
 
 private:
 
- // The number of cycles that correspond to one second
-  double m_cycles_per_second;
+ // The number of instruction cycles that correspond to one second
+  double m_instruction_cps;
   double m_seconds_per_cycle;
 
   /*
@@ -203,8 +203,8 @@ public:
 
   void clear_break(guint64 at_cycle);
   void clear_break(TriggerObject *f);
-  void set_cycles_per_second(guint64 cps);
-  double cycles_per_second() { return m_cycles_per_second; }
+  void set_instruction_cps(guint64 cps);
+  double instruction_cps() { return m_instruction_cps; }
   double seconds_per_cycle() { return m_seconds_per_cycle; }
 
 };
