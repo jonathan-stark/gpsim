@@ -633,10 +633,16 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           symbol_table.add(rs);
           }
           break;
+
         case COD_ST_ADDRESS:
           iReturn = get_string(b, s, sizeof b);
           symbol_table.add_address(b, value);
           break;
+
+	case COD_ST_CONSTANT: 	// Ignore as no useful purpose and may
+				// conflict with other symbols - RRR
+	  break;
+
         default:
           iReturn = get_string(b,s,sizeof b);
           symbol_table.add_constant(b,value);
