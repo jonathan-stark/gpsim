@@ -75,6 +75,7 @@ void StopWatch_Window::Update(void)
     offset%=rollover;
 
   double frequency = gp->cpu->get_frequency();
+  unsigned int cycle_per_inst = gp->cpu->get_ClockCycles_per_Instruction();
 
   _cyclecounter=cyclecounter;
 
@@ -96,9 +97,9 @@ void StopWatch_Window::Update(void)
   _cyclecounter=(_cyclecounter-offset)%rollover;
   ////////////////////////
 
-  timevalue = (_cyclecounter*4000000)/frequency;
+  timevalue = (_cyclecounter*1000000*cycle_per_inst)/frequency;
 
-  sprintf(frequencystring, "%f Hz", frequency);
+  sprintf(frequencystring, "%.0f Hz", frequency);
   sprintf(cyclestring, "%Ld", _cyclecounter);
   if(timevalue<1000)
     sprintf(timestring, "%.2f us", timevalue/1.0);
