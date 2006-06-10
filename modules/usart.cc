@@ -181,13 +181,14 @@ public:
 
   USART_TXPIN (USARTModule *_usart,
 	       unsigned int b, 
-	       char *opt_name=NULL) : IO_bi_directional(0,b,0) 
+	       char *opt_name=NULL) 
   { 
 
     usart = _usart;
 
     string n(usart->name());
     n = n + ".TXPIN";
+    IO_bi_directional(n.c_str());
     new_name(n.c_str());
     bDrivingState = true;
     update_direction(1,true);   // Make the TX pin an output.
@@ -452,13 +453,13 @@ class RCREG : public TriggerObject
 
     if(get_active_cpu()) {
       time_per_packet = 
-	(guint64)(get_active_cpu()->get_frequency() * (1.0 +     // start bit
-						       bits_per_byte +   // data bits
-						       stop_bits  +      // stop bit(s)
-						       use_parity)       //
-		  /baud);
+	(guint64)(get_cycles().instruction_cps() * (1.0 +     // start bit
+			       bits_per_byte +   // data bits
+			       stop_bits  +      // stop bit(s)
+			       use_parity)       //
+		  	       /baud);
 
-      time_per_bit = (guint64)(get_active_cpu()->get_frequency() / baud);
+      time_per_bit = (guint64)(get_cycles().instruction_cps() / baud);
     } else
       time_per_packet = time_per_bit = 0;
 
