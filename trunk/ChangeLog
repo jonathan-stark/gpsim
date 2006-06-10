@@ -1,3 +1,12 @@
+2006-06-10 Roy Rankin <rrankin@ihug.com.au>
+	* src/gpsim_time.h src/stimuli.cc src/gpsim_time.cc src/processor.cc
+	  src/14bit-registers.cc: cycles_per_second changed to instruction_cps
+	* src/cod.cc: prevent duplicate symbol messages from static .cod file
+	  by not loading constants
+	* gui/gui_stopwatch.cc: remove magic number, Frequency format change
+	* src/pir.cc src/pir.h: RCIF not being set by uart
+	* src/uart.cc modules/usart.cc: fix baud rate error
+
 2006-06-03 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc: The newly added config words were
 	  placed at word addresses instead of byte addresses.
