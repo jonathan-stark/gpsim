@@ -129,6 +129,14 @@ void PIR1v1::clear_txif(void)
   value.put(value.get() & ~TXIF);
 }
 
+void PIR1v1::set_rcif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | RCIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
+
 void PIR1v1::clear_rcif(void)
 {
   trace.raw(write_trace.get() | value.get());
@@ -149,9 +157,9 @@ PIR1v2::PIR1v2(INTCON *_intcon, PIE *_pie)
 {
   // Even though TXIF is a valid bit, it can't be written by the PIC
   // source code.  Its state reflects whether the usart txreg is full
-  // or not.
+  // or not. Similarly for RCIF
   valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | TXIF | RCIF | ADIF | PSPIF;
-  writable_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
+  writable_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF |  ADIF | PSPIF;
 }
 
 void PIR1v2::clear_sspif(void)
@@ -172,6 +180,14 @@ void PIR1v2::clear_txif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TXIF);
+}
+
+void PIR1v2::set_rcif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | RCIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
 }
 
 void PIR1v2::clear_rcif(void)
