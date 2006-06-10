@@ -84,7 +84,7 @@ Processor::Processor(const char *_name, const char *_desc)
 
   mFrequency = new Float("frequency",20e6, " oscillator frequency.");
   set_ClockCycles_per_Instruction(4);
-  get_cycles().set_cycles_per_second((guint64)(get_frequency()/clocks_per_inst));
+  get_cycles().set_instruction_cps((guint64)(get_frequency()/clocks_per_inst));
   set_Vdd(5.0);
   setWarnMode(true);
   setSafeMode(true);
@@ -169,7 +169,7 @@ void Processor::set_frequency(double f)
 {
   if(mFrequency)
     mFrequency->set(f);
-  get_cycles().set_cycles_per_second((guint64)(f/clocks_per_inst));
+  get_cycles().set_instruction_cps((guint64)(f/clocks_per_inst));
 }
 double Processor::get_frequency()
 {
