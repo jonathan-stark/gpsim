@@ -1,3 +1,7 @@
+2006-06-10 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* doc/gpsim.lyx: Some hacked notes on creating new modules, and a few
+         other tweaks
+
 2006-06-10 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_time.h src/stimuli.cc src/gpsim_time.cc src/processor.cc
 	  src/14bit-registers.cc: cycles_per_second changed to instruction_cps
