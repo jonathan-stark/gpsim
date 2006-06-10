@@ -135,10 +135,7 @@ public:
   }
 
   virtual void set_txif();
-  virtual void set_rcif()
-  {
-    put(get() | RCIF);
-  }
+  virtual void set_rcif();
 
   virtual void set_cmif();
 
@@ -218,10 +215,7 @@ public:
   virtual void clear_sspif();
 
   virtual void set_txif();
-  virtual void set_rcif()
-  {
-    put(get() | RCIF);
-  }
+  virtual void set_rcif();
 
   virtual void set_adif()
   {
