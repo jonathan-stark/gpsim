@@ -58,7 +58,9 @@ ${RT} logic_test sim
 
 ${RT} resistor sim
 
-${RT} usart_test sim
+${RT} usart_test sim_pir1v1
+
+${RT} usart_test sim_pir1v2
 
 ${RT} txisr_test sim
 
