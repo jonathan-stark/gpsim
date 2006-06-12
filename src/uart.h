@@ -157,13 +157,13 @@ class _RCSTA : public sfr_register, public TriggerObject
   // produces a sample based on majority averaging. 
   // 
 
-#define BRGH_FIRST_MID_SAMPLE  7
+#define BRGH_FIRST_MID_SAMPLE  4
 #define BRGH_SECOND_MID_SAMPLE 8
-#define BRGH_THIRD_MID_SAMPLE  9
+#define BRGH_THIRD_MID_SAMPLE  12
 
-#define BRGL_FIRST_MID_SAMPLE  30
+#define BRGL_FIRST_MID_SAMPLE  28
 #define BRGL_SECOND_MID_SAMPLE 32
-#define BRGL_THIRD_MID_SAMPLE  34
+#define BRGL_THIRD_MID_SAMPLE  36
 
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
