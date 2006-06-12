@@ -14,12 +14,20 @@ COD = $(PROJECT).cod
 STC = $(PROJECT).stc
 STARTUP_STC=startup.stc
 
-all : $(OUTPUT)
+all : usart_pir1v1.cod usart_pir1v2.cod
 
-$(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
-	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
 
-$(PROJECT).o : $(PROJECT).asm
+sim: sim_pir1v1 sim_pir1v2
+ 
+sim_pir1v1: usart_pir1v1.cod
+	$(GPSIM) -i -c $(STARTUP_STC) -D STC=$<
 
-sim: $(COD)
-	$(GPSIM) -i -c $(STARTUP_STC) -D STC=$(STC)
+sim_pir1v2: usart_pir1v2.cod
+	$(GPSIM) -i -c $(STARTUP_STC) -D STC=$<
+
+usart_pir1v1.cod : usart_pir1v1.o
+	gplink --map -s 16f628.lkr -o $@  $<
+
+usart_pir1v2.cod : usart_pir1v2.o
+	gplink --map -s 16f877.lkr -o $@  $<
+
