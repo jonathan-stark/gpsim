@@ -64,8 +64,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/trace.h"
 #include "../src/uart.h"
 
-#include "../src/bitlog.h"
-
 
 //#define DEBUG
 #if defined(DEBUG)
@@ -277,12 +275,13 @@ private:
 
     if(get_active_cpu()) {
       time_per_packet = 
-	(guint64)( get_active_cpu()->get_frequency() * ( (1.0 +             // start bit
-							  bits_per_byte +   // data bits
-							  stop_bits  +      // stop bit(s)
-							  use_parity)       //
-							 /baud));
-      time_per_bit = (guint64)(get_active_cpu()->get_frequency() / baud);
+	(guint64)( get_cycles().instruction_cps() * ( 
+			  (1.0 +             // start bit
+			  bits_per_byte +   // data bits
+			  stop_bits  +      // stop bit(s)
+			  use_parity)       //
+			 /baud));
+      time_per_bit = (guint64)(get_cycles().instruction_cps() / baud);
     } else
       time_per_packet = time_per_bit = 0;
 
@@ -397,7 +396,6 @@ private:
 // Create a receive register 
 // 
 //
-char *RXError_str[] = {"OK", "NoStartBit", "NoStopBit", "BadParity", NULL };
 
 class RCREG : public TriggerObject
 {
@@ -413,23 +411,11 @@ class RCREG : public TriggerObject
 
   enum RX_STATES {
     RS_WAITING_FOR_START,
-    RS_0,
-    RS_1,
-    RS_2,
-    RS_3,
-    RS_4,
     RS_RECEIVING,
     RS_STOPPED,
-    RS_OVERRUN
+    RS_OVERRUN,
+    RS_START_BIT
   } receive_state;
-
-  enum RXErrors {
-    eNoError,
-    eNoStartBit,
-    eNoStopBit,
-    eBadParity
-    
-  };
 
   /**************************/
   // RCREG constructor
@@ -489,12 +475,10 @@ class RCREG : public TriggerObject
   virtual void callback();
 
   void start();
-  RXErrors decode_byte(unsigned sindex, unsigned int &aByte);
   void new_rx_edge(bool bit);
 
 private:
   USARTModule *m_usart;
-  ThreeStateEventLogger *rx_event;
 
   char m_cLastRXState;
   unsigned int start_bit_event;
@@ -513,6 +497,8 @@ private:
   bool    use_parity;
   bool    parity;         // 0 = even, 1 = odd
   double  baud;
+  unsigned int rx_byte;
+  int	  rx_count;
 
   guint64 time_per_packet;
 
@@ -532,7 +518,6 @@ RCREG::RCREG(USARTModule *pUsart)
 {
   assert(m_usart);
 
-  rx_event = new ThreeStateEventLogger(1024);
 
   receive_state = RS_WAITING_FOR_START;
 
@@ -555,33 +540,46 @@ void RCREG::callback()
   case RS_WAITING_FOR_START:
     Dprintf(("waiting for start\n"));
     break;
+
+  case RS_START_BIT:	// should now be in middle of start bit
+     if (bIsLow(m_cLastRXState))
+     {
+	receive_state = RS_RECEIVING;
+	rx_count = bits_per_byte + use_parity;
+	rx_byte = 0;
+  	future_time = get_cycles().get() + time_per_bit;
+
+  	if(!autobaud) 
+    	  get_cycles().set_break(future_time, this);
+       
+     }
+     else // Not valid start bit
+     {
+       receive_state = RS_WAITING_FOR_START;
+     }
+     break;
+
   case RS_RECEIVING:
 
-    if (bIsHigh(m_cLastRXState)) {
+    if (rx_count--)
+    {
+	rx_byte = (rx_byte >> 1) | (bIsHigh(m_cLastRXState) ?  
+		1<<(bits_per_byte-1) : 0);
+  	future_time = get_cycles().get() + time_per_bit;
 
-      receive_state = RS_WAITING_FOR_START;
-
-      Dprintf((" received a byte\n"));
-      unsigned int rx_byte=0;
-      RXErrors re = decode_byte(start_bit_event,rx_byte);
-      if (re == eNoError) {
-	Dprintf((" Successfully recieved 0x%02x\n",rx_byte));
+  	if(!autobaud) 
+    	  get_cycles().set_break(future_time, this);
+    }
+    else if (bIsHigh(m_cLastRXState)) // on stop bit
+    {
 	m_usart->newRxByte(rx_byte);
 	m_usart->show_tx(rx_byte);
-      } else {
-        printf("RCREG::callback Failed to decode byte %s \n", 
-		RXError_str[re]);
-      }
-
-    } else {
-      receive_state = RS_WAITING_FOR_START;
-      cout << "Looks like we've overrun\n";
-#if defined(DEBUG)
-      cout << "Baud:" << baud << " = " << time_per_bit << " cycles\n";
-      cout << "Log of received data:\n";
-      rx_event->dump(rx_event->get_index(get_cycles().get() - 2000));
-      rx_event->dump_ASCII_art(1,get_cycles().get() - 2000);
-#endif
+        receive_state = RS_WAITING_FOR_START;
+    }
+    else
+    {
+	cout << "USART module RX overrun error\n";
+        receive_state = RS_WAITING_FOR_START;
     }
 
     break;
@@ -600,11 +598,10 @@ void RCREG::callback()
 void RCREG::start() 
 {
 
-  receive_state = RS_RECEIVING;
+  receive_state = RS_START_BIT;
 
-  start_bit_event = rx_event->get_index();
 
-  future_time = rx_event->get_time(start_bit_event) + time_per_packet;
+  future_time = get_cycles().get() + time_per_bit/2;
 
   if(!autobaud) {
     get_cycles().set_break(future_time, this);
@@ -612,59 +609,6 @@ void RCREG::start()
 
   Dprintf((" usart module RCREG current cycle=%lld future_cycle=%lld\n", get_cycles().value,future_time));
 }
-
-//------------------------------------------------------------------------
-// decode_byte
-// 
-// decode_byte will examine the data logged from the receiver's I/O 
-// pin and attempt to decipher it.
-//
-//    +---------------------------------------------  Edge of start bit
-//    | +-------------------------------------------  Middle of start bit
-//  __v v  ___ ___ ___ ___ ___ ___ ___ ___ ____
-//    \___/___X___X___X___X___X___X___X___/    
-//          ^   ^   ^   ^   ^   ^   ^   ^   ^
-//          |   |   |   |   |   |   |   |   +-------  Middle of stop bit
-//          +---+---+---+---+---+---+---+-----------  Middle of data bits
-//
-// The input to decode_byte is the index into the event log holding
-// the captured waveform. The baud rate for the receiver is used to
-// compute the bit time and this in turn is used to compute the times
-// at which the data samples should be taken.
-//
-
-RCREG::RXErrors RCREG::decode_byte(unsigned int sindex, unsigned int &rx_byte)
-{
-
-  Dprintf((" decode_byte start_bit_index=%d \n", sindex));
-
-  rx_byte = 0;
-
-  if (!bIsLow(rx_event->get_state(sindex)))
-    return eNoStartBit;
-
-  guint64 sample_time = rx_event->get_time(sindex) + time_per_bit/2;
-
-  Dprintf((" decode_byte sample_time=%lld start_bit_time=%lld time_per_bit=%d\n", sample_time,
-	   rx_event->get_time(sindex), time_per_bit));
-
-  if (!bIsLow(rx_event->get_state(sample_time)))
-    return eNoStartBit;
-
-  sample_time += time_per_bit;
-
-  unsigned int msb = 1<<(bits_per_byte-1);
-  for (int i=0; i<bits_per_byte; i++, sample_time+=time_per_bit)
-    rx_byte = (rx_byte>>1) | (bIsHigh(rx_event->get_state(sample_time))?msb:0);
-
-  if (!bIsHigh(rx_event->get_state(sample_time)))
-    return eNoStopBit;
-
-  Dprintf((" decoded %d=%x=%c \n", rx_byte,rx_byte,rx_byte));
-
-  return eNoError;
-}
-
 
 //------------------------------------------------------------------------
 //  new_rx_edge(bool bit)
@@ -676,43 +620,9 @@ RCREG::RXErrors RCREG::decode_byte(unsigned int sindex, unsigned int &rx_byte)
 
 void RCREG::new_rx_edge(bool bit) 
 {
-#if defined(DEBUG)
-  cout << "USART MODULE RCREG::" << __FUNCTION__ << "\n";
-  switch(receive_state) {
-  case RS_WAITING_FOR_START:
-    cout << "state = WAITING_FOR_START\n";
-    break;
-  case RS_RECEIVING:
-    cout << "state = RECEIVING\n";
-    break;
-  case RS_STOPPED:
-    cout << "state = STOPPED\n";
-    break;
-  case RS_OVERRUN:
-    cout << "state = OVERRUN\n";
-    break;
-  case RS_0:
-    cout << "state = RS_0\n";
-    break;
-  case RS_1:
-    cout << "state = RS_1\n";
-    break;
-  case RS_2:
-    cout << "state = RS_2\n";
-    break;
-  case RS_3:
-    cout << "state = RS_3\n";
-    break;
-  case RS_4:
-    cout << "state = RS_4\n";
-    break;
-
-  }
-#endif
 
   // Save the event state
   char currentRXState = rxpin->getBitChar();
-  rx_event->event(currentRXState);
 
   if (currentRXState != m_cLastRXState) {
 
@@ -722,7 +632,7 @@ void RCREG::new_rx_edge(bool bit)
     case RS_WAITING_FOR_START:
       if(bIsLow(currentRXState)) {
 	start();
-	Dprintf(("Start bit at t=0x%llx\n",rx_event->get_time(start_bit_event)));
+	Dprintf(("Start bit at t=0x%llx\n",get_cycles().get()));
       }
 
       break;
@@ -877,7 +787,7 @@ public:
   {
     i &= 0xff;
 
-    cout << name() << " sending byte 0x" << hex << i << endl;
+    //cout << name() << " sending byte 0x" << hex << i << endl;
 
     if(usart)
       usart->SendByte(i);
@@ -926,6 +836,10 @@ void USARTModule::new_rx_edge(unsigned int bit)
 void USARTModule::newRxByte(unsigned int aByte)
 {
   m_RxBuffer->newByte(aByte);
+  if(m_loop->getVal())
+  {
+	SendByte(aByte);
+  }
 }
 
 //--------------------------------------------------------------
@@ -1057,6 +971,9 @@ USARTModule::USARTModule(const char *_name)
   m_CRLF = new Boolean("crlf", true, "if true, Carriage return and linefeeds generate new lines in the terminal");
   add_attribute(m_CRLF);
 
+  m_loop = new Boolean("loop", false, "if true, received characters looped back to transmit");
+  add_attribute(m_loop);
+
   CreateGraphics();
 
 
@@ -1109,7 +1026,7 @@ void USARTModule::SendByte(unsigned tx_byte)
         }
         else
             m_FifoHead = newHead;
-        cout << "Byte added to queue\n";
+        //cout << "Byte added to queue\n";
     }
     else
 #endif
