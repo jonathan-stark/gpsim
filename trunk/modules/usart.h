@@ -75,6 +75,7 @@ private:
   RxBaudRateAttribute *m_RxBaud;
   TxBaudRateAttribute *m_TxBaud;
   Boolean  *m_CRLF;
+  Boolean  *m_loop;
   TxBuffer *m_TxBuffer;
   RxBuffer *m_RxBuffer;
 
