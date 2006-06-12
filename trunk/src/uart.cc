@@ -285,10 +285,21 @@ void _TXSTA::start_transmitting()
   //  the transmit logic. The second stop bit doesn't
   //  actually get transmitted - it merely causes the first
   //  stop bit to get transmitted before the TRMT bit is set.
+  //
+  //  RRR I believe the above paragraph is a mis-understanding
+  //  The tsr register becomes empty, and the TRMT flag goes high,
+  //  when we start to transmit the stop bit. Note that transmision
+  //  is synchronous with the baud clock, so the start of transmision
+  //  of a new character waits for the next callback. This delay maybe,
+  //  in fact, the stop bit of the previous transmision,
+  //
   //  [Recall that the TRMT bit indicates when the tsr 
   //  {transmit shift register} is empty. It's not tied to
   //  an interrupt pin, so the pic application software
-  //  most poll this bit. This bit is set after the STOP
+  //  most poll this bit. 
+  //
+  //  RRR Also The following is wrong:
+  //  This bit is set after the STOP
   //  bit is transmitted.] This is a cheap trick that saves
   //  one comparison in the callback code.)
 
@@ -306,16 +317,16 @@ void _TXSTA::start_transmitting()
       // (See note above for the reason why two stop bits 
       // are appended to the packet.)
 
-      tsr |= ( (value.get() & TX9D) ? (7<<9) : (6<<9));
-      bit_count = 12;  // 1 start, 9 data, 1 stop , 1 delay
+      tsr |= ( (value.get() & TX9D) ? (3<<9) : (2<<9));
+      bit_count = 11;  // 1 start, 9 data, 1 stop 
     }
   else
     {
       // The stop bit is always high. (See note above
       // for the reason why two stop bits are appended to
       // the packet.)
-      tsr |= (3<<9);
-      bit_count = 11;  // 1 start, 8 data, 1 stop , 1 delay
+      tsr |= (1<<9);
+      bit_count = 10;  // 1 start, 8 data, 1 stop 
     }
 
 
@@ -642,10 +653,11 @@ void _RCSTA::overrun()
 
 void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 {
+  unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
   //  last_cycle = cycles.value;
 
   if(cpu && spbrg)
-    get_cycles().set_break(get_cycles().value + (spbrg->value.get() + 1) * spbrg_edge, this);
+    get_cycles().set_break(get_cycles().value + (spbrg->value.get() + 1) * spbrg_edge/cpi, this);
 
 }
 void _RCSTA::receive_start_bit()
@@ -818,9 +830,13 @@ void _SPBRG::get_next_cycle_break()
     {
       // Asynchronous mode
       if(txsta && (txsta->value.get() & _TXSTA::BRGH))
+      {
 	future_cycle = last_cycle + (value.get() + 1)*16/cpi;
+      }
       else
+      {
 	future_cycle = last_cycle + (value.get() + 1)*64/cpi;
+      }
     }
 
   if(cpu)
