@@ -1,3 +1,15 @@
+2006-06-12 Roy Rankin <rrankin@ihug.com.au>
+	* regression/usart_test/usart_pir1v1.asm 
+	  regression/usart_test/16f628.lkr 
+	  regression/usart_test/usart_pir1v2.asm
+	  regression/usart_test/Makefile regression/run_regression.sh:
+	- Improve USART regression tests
+	* regression/usart_test/usart_test.stc
+	  regression/usart_test/usart_test.asm: removed as redundant
+	* src/uart.cc src/uart.h: receive baud rate fix
+	* modules/usart.cc modules/usart.h: Transmit baudrate fix, 
+	  loop attribute added, receiver rewritten to remove event logger.
+
 2006-06-10 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* doc/gpsim.lyx: Some hacked notes on creating new modules, and a few
          other tweaks
