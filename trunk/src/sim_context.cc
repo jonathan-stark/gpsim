@@ -213,9 +213,7 @@ int CSimulationContext::LoadProgram(const char *filename,
   }
   else {
     pProcessor = NULL;
-    if (pProcessorName)
-      m_DefProcessorName = pProcessorName;
-    else if (!m_DefProcessorNameNew.empty())
+    if (!m_DefProcessorNameNew.empty())
       pProcessorName = m_DefProcessorNameNew.c_str();
     // use processor defined in program file
     bReturn  = ProgramFileTypeList::GetList().LoadProgramFile(
