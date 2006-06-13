@@ -68,8 +68,6 @@ using namespace std;
 #define PATHDELIMITER ":"
 #endif
 
-unsigned long get_error(const char *);
-
 #ifdef _WIN32
 #define OS_E_FILENOTFOUND 0x0000007E
 #define OS_E_MEMORYACCESS 0x000003E6
@@ -278,7 +276,7 @@ void GetFileNameBase(string &sPath, string &sName) {
   }
 }
 
-char * get_error_message()
+const char * get_error_message()
 {
 #ifdef _WIN32
   return g_win32_error_message(GetLastError());
@@ -287,14 +285,30 @@ char * get_error_message()
 #endif
 }
 
-void free_error_message(char * pszError)
+void free_error_message(const char * pszError)
 {
 #ifdef _WIN32
-  g_free(pszError);
+  g_free((char *) pszError);
 #endif
 }
 
-void * load_library(const char *library_name, char **pszError)
+unsigned long get_error(const char *err_str) {
+#ifdef _WIN32
+  return GetLastError();
+#else
+  /*
+  ** In Linux and likely all Unix like OSs, dlopen leaves errno as 0
+  ** even after failure, If so, look in error string returned by dlerror 
+  ** to try to determine if file was not found. RRR
+  */ 
+  unsigned long ret = errno;	// in Linux errno is 0 
+  if (! ret && err_str && strstr(err_str, "No such file"))
+	ret = OS_E_FILENOTFOUND;
+  return ret;
+#endif
+}
+
+void * load_library(const char *library_name, const char **pszError)
 {
   void *handle;
 
@@ -346,23 +360,7 @@ void free_library(void *handle)
 #endif
 }
 
-unsigned long get_error(const char *err_str) {
-#ifdef _WIN32
-  return GetLastError();
-#else
-  /*
-  ** In Linux and likely all Unix like OSs, dlopen leaves errno as 0
-  ** even after failure, If so, look in error string returned by dlerror 
-  ** to try to determine if file was not found. RRR
-  */ 
-  unsigned long ret = errno;	// in Linux errno is 0 
-  if (! ret && err_str && strstr(err_str, "No such file"))
-	ret = OS_E_FILENOTFOUND;
-  return ret;
-#endif
-}
-
-void * get_library_export(const char *name, void *library_handle, char ** pszError)
+void * get_library_export(const char *name, void *library_handle, const char ** pszError)
 {
   void * pExport;
 #ifdef _WIN32
@@ -376,5 +374,3 @@ void * get_library_export(const char *name, void *library_handle, char ** pszErr
   }
   return pExport;
 }
-
-

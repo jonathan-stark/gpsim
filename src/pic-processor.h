@@ -330,8 +330,6 @@ public:
 
 protected:
   ConfigMemory **m_configMemory;
-private:
-  pic_processor();
 };
 
 
