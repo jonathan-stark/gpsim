@@ -59,8 +59,6 @@ EXPORTS
     ??0Packet@@QAE@II@Z
     ??0PinModule@@QAE@PAVPortModule@@IPAVIOPIN@@@Z
     ??0PortRegister@@QAE@II@Z
-    ??0Processor@@QAE@XZ
-    ??0ProcessorConstructor@@QAE@P6APAVProcessor@@XZPBD111@Z
     ??0ProgramMemoryAccess@@QAE@PAVProcessor@@@Z
     ??0Program_Counter@@QAE@XZ
     ??0ProgramFileBuf@@QAE@PAU_iobuf@@@Z
@@ -157,7 +155,7 @@ EXPORTS
     ?Initialize@Token@gpsim@@QAEXP6APAXPAX@Z0@Z
     ?ListToConsole@CCommandManager@@QAEXXZ
     ?LoadFile@ModuleLibrary@@SAXPBD@Z
-    ?LoadProgram@CSimulationContext@@QAEHPBD0PAPAVProcessor@@@Z
+    ?LoadProgram@CSimulationContext@@QAEHPBD0PAPAVProcessor@@0@Z
     ?NewObject@Float@@SAPAV1@PBD00@Z
     ?NewObject@Integer@@SAPAV1@PBD00@Z
     ?NewObject@ModuleLibrary@@SAPAVModule@@PBD0@Z

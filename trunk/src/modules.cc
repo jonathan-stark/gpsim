@@ -69,7 +69,7 @@ ModuleLibrary::ModuleList ModuleLibrary::m_ModuleList;
 void          ModuleLibrary::LoadFile(const char *pFilename) 
 {
   void *handle;
-  char *pszError;
+  const char *pszError;
   bool bReturn = false;
 
   string sPath(pFilename);
@@ -268,7 +268,7 @@ void          ModuleLibrary::DeleteProcessor(Processor *) {
 
 bool ModuleLibrary::AddFile(const char *library_name, void *library_handle)
 {
-  char * error;
+  const char * error;
   if(library_name) {
     string sName(library_name);
     MakeCanonicalName(sName, sName);
@@ -630,5 +630,3 @@ void Module::ModuleScript::concatenate(ModuleScript *pOtherScript)
        ++command_iterator)
     m_commands.push_back(*command_iterator);
 }
-
-

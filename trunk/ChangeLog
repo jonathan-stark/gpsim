@@ -1,3 +1,13 @@
+2006-06-13 Borut Razem <borut.razem@siol.net>
+	* src/os_dependent.c, src/modules.h, src/modules.cc:
+	  reverted cahanges for fix:
+	  [ 1488107 ] const violation in get_error_message()
+	  since dlerror() returns const char * on FreeBSD
+	* pic_processor.h: fixed warning
+	  multiple default constructors specified
+	* plat/win32/libgpsim.def: MSVC sync
+	* doc/gpsimWin32.html: patched gtk+extra-2.1.1-src-20060611.zip
+
 2006-06-12 Roy Rankin <rrankin@ihug.com.au>
 	* regression/usart_test/usart_pir1v1.asm 
 	  regression/usart_test/16f628.lkr 
