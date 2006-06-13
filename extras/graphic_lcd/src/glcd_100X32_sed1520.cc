@@ -26,7 +26,6 @@ Boston, MA 02111-1307, USA.  */
 #include <gpsim/ioports.h>
 #include <gpsim/packages.h>
 #include <gpsim/symbol.h>
-#include <gtk/gtk.h>
 
 
 #define DEBUG
@@ -56,6 +55,8 @@ gLCD::gLCD(GdkDrawable *parent,
     m_xPixel(pixel_size_x), m_yPixel(pixel_size_y)
 {
 
+  printf("gLCD constructor %p, m_nColumns:%d, m_nRows:%d\n",this,m_nColumns,m_nRows);
+
   g_assert(m_parent != NULL);
 
   m_gc = gdk_gc_new(m_parent);
@@ -73,7 +74,7 @@ gLCD::gLCD(GdkDrawable *parent,
   gdk_colormap_alloc_colors (gdk_colormap_get_system(),
 			     m_aColors, sizeof(m_aColors)/sizeof(m_aColors[0]),
 			     TRUE, TRUE, &gbSuccess);
-
+  
   gdk_gc_set_foreground (m_gc, &m_aColors[cFG]);
 
 
@@ -82,6 +83,7 @@ gLCD::gLCD(GdkDrawable *parent,
 			    (m_nRows+m_border*2)*m_yPixel,
 			    -1);
 
+  printf("m_pixmap %p  gbSuccess:%d\n",m_pixmap,gbSuccess);
 
 }
 
@@ -211,7 +213,6 @@ private:
 //------------------------------------------------------------------------
 bool gLCD_100X32_SED1520::dataBusDirection()
 {
-
   // FIXME, if both sed's are driving the data bus, then they'll be in
   // contention.
   return m_sed1->dataBusDirection() || m_sed2->dataBusDirection();
@@ -220,6 +221,7 @@ bool gLCD_100X32_SED1520::dataBusDirection()
 Module *gLCD_100X32_SED1520::construct(const char *_new_name=0)
 {
   gLCD_100X32_SED1520 *gLCD = new gLCD_100X32_SED1520(_new_name);
+
   return gLCD;
 }
 
@@ -252,10 +254,10 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
 
   m_plcd = 0;
 
-  //if(get_interface().bUsingGUI()) 
   create_widget();
 
 
+  printf ("gLCD_100X32_SED1520 constructor this=%p\n",this);
 }
 
 gLCD_100X32_SED1520::~gLCD_100X32_SED1520()
@@ -313,21 +315,27 @@ static gboolean lcd_expose_event(GtkWidget *widget,
 				 GdkEventExpose *event,
 				 gLCD_100X32_SED1520 *pLCD)
 {
+  //printf ("Expose event widget %p pLCD  %p\n",widget,pLCD);
   pLCD->Update(widget);
-  return true;
+  return TRUE;
 }
 
 //------------------------------------------------------------------------
 void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 {
 
-  printf("LCD update\n");
+  //printf("LCD update -- m_plcd=%p\n",m_plcd);
 
   if (!m_plcd) {
     if (!darea || !darea->window)
       return;
 
-    m_plcd = new gLCD((GdkDrawable*)darea->window, m_nColumns, m_nRows, 3, 3);
+    //printf("%p %p %p\n",widget, darea, darea->window);
+
+    m_plcd = new gLCD(GDK_DRAWABLE(darea->window), m_nColumns, m_nRows, 3, 3);
+    //m_plcd = new gLCD(GDK_DRAWABLE(widget), m_nColumns, m_nRows, 3, 3);
+
+    printf("m_plcd %p\n",m_plcd);
   }
 
   assert (m_plcd !=0);
@@ -380,7 +388,7 @@ void gLCD_100X32_SED1520::create_widget()
 			"expose_event",
 			GTK_SIGNAL_FUNC (lcd_expose_event),
 			this);
-    
+
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
 
     /*
