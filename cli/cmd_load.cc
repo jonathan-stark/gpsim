@@ -139,6 +139,9 @@ int cmd_load::load(int bit_flag,const char *filename)
 //
 // load 
 
+const char *s1 = 0;
+const char *s2 = 0;
+
 static int load1(const char *s1, const char *s2)
 {
   FILE *fp = fopen_path(s1,"rb");
@@ -150,18 +153,29 @@ static int load1(const char *s1, const char *s2)
   return s2 ? gpsim_open(get_active_cpu(), s2, 0, s1) : 0;
 
 }
-
 int cmd_load::load(Value *file, Value *pProcessorType)
 {
   cout << endl;
 
-  const char *psFileName = file->toString().c_str();
-  const char *psProcessorType = 0;
+  // This version fails with gcc 3.2.2 on an x86 
+  //  ECX register is getting clobbered.
+  //
+  //const char *psFileName = file->toString().c_str();
+  //const char *psProcessorType = 0;
+  //if (pProcessorType)
+  //  psProcessorType = pProcessorType->toString().c_str();
 
-  if (pProcessorType)
-    psProcessorType = pProcessorType->toString().c_str();
+  //return load1(psFileName, psProcessorType);
 
-  return load1(psFileName, psProcessorType);
+  string sa = file->toString();
+  s1 = sa.c_str();
+  s2 = 0;
+  if (pProcessorType) {
+    string sb;
+    sb = pProcessorType->toString();
+    s2 = sb.c_str();
+  }
+  return load1(s1,s2);
 }
 
 int cmd_load::load(const char *file, const char *pProcessorType)

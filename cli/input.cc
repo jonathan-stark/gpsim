@@ -562,7 +562,8 @@ int gpsim_open(Processor *cpu, const char *pFileName,
   if(!pFileName)
     return 0;
 
-  printf (" gpsim_open file:%s proc name:%s\n", pFileName, (pProcessorName ? pProcessorName : "nil"));
+  if (verbose)
+    printf (" gpsim_open file:%s proc name:%s\n", pFileName, (pProcessorName ? pProcessorName : "nil"));
   // Check for the command file, file extension.
   if(IsFileExtension(pFileName,"stc") || IsFileExtension(pFileName,"STC")) {
     process_command_file(pFileName);
