@@ -329,8 +329,11 @@ void RCREG::callback()
       unsigned int rx_byte=0;
       RXErrors re = decode_byte(start_bit_event,rx_byte);
       if (re == eNoError) {
-//      Dprintf((" Successfully recieved 0x%02x\n",rx_byte));
-        putchar(rx_byte);
+        if (isascii(rx_byte) && (isprint(rx_byte) || '\n' == rx_byte || '\r' == rx_byte))
+          putchar(rx_byte);
+        else
+          printf("<%02X>", rx_byte);
+
         m_usart->newRxByte(rx_byte);
       } else {
         printf("RCREG::callback Failed to decode byte %s \n", 
