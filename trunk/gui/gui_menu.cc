@@ -330,7 +330,7 @@ ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
   GtkWidget *hbox        = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
 
-  GtkWidget *colorButton = gtk_color_button_new_with_color (&pStyle->mFG.mCurrentColor);
+  GtkWidget *colorButton = gtk_color_button_new_with_color (pStyle->mFG.CurrentColor());
   gtk_color_button_set_title (GTK_COLOR_BUTTON(colorButton), colorName);
   gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
   gtk_widget_show(colorButton);

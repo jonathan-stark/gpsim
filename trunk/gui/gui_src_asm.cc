@@ -70,6 +70,23 @@ static void find_char_and_skip(char **str, char c)
     *str = ++res;
   }
 }
+//------------------------------------------------------------------------
+//
+static char *strReverse(const char *start, char *dest, int nChars)
+{
+  *dest-- = 0;
+  while (nChars--)
+    *dest-- = *start++;
+  dest++;
+  return dest;
+}
+static int strFindSubString(const char *cPsrc, const char *cPpattern)
+{
+
+  const char *found = strstr(cPsrc, cPpattern);
+
+  return found ? (found - cPsrc) : - 1;
+}
 
 //========================================================================
 
@@ -554,11 +571,179 @@ static gboolean TagEvent (GtkTextTag *texttag,
 }
 
 //------------------------------------------------------------------------
+class SearchDialog
+{
+public:
+  SearchDialog();
+  void Build();
+  void Show(SourceWindow *);
+  bool bDirection();
+  bool bCase();
+protected:
+  bool m_bIsBuilt;
+  bool m_bFound;
+  bool m_bLooped;
+  int  m_iStart;
+  int  m_iLast;
+  int  m_iLastID;
+
+  GtkWidget   *m_Window;           // The Search Dialog Window
+  GtkWidget   *m_Entry;            // Widget that holds the search text.
+  GtkWidget   *m_BackButton;       //
+  GtkWidget   *m_CaseButton;       //
+  GList       *m_comboStrings;     //
+
+
+  SourceWindow *m_pSourceWindow; // The last source window that requested a search.
+
+  static void find_cb(GtkWidget *w, SearchDialog *);
+  void find(const char *);
+  static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data);
+};
+
+static SearchDialog *stPSearchDialog=0;
+//------------------------------------------------------------------------
+SearchDialog::SearchDialog()
+  : m_bIsBuilt(false), m_bFound(false),
+    m_bLooped(false),m_iStart(0),m_iLast(0),m_iLastID(0),
+    m_pSourceWindow(0)
+{
+
+}
+
+gint SearchDialog::configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
+{
+static int dlg_x=200, dlg_y=200;
+
+  if(widget->window==0)
+    return 0;
+    
+  gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
+  return 0;
+}
+bool SearchDialog::bDirection()
+{
+  return GTK_TOGGLE_BUTTON(m_BackButton)->active == TRUE;
+}
+bool SearchDialog::bCase()
+{
+  return GTK_TOGGLE_BUTTON(m_CaseButton)->active == TRUE;
+}
+
+void SearchDialog::find_cb(GtkWidget *w, SearchDialog *pSearchDialog)
+{
+
+  const char *p=gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pSearchDialog->m_Entry)->entry));
+  pSearchDialog->find(p);
+}
+void SearchDialog::find(const char *cpPattern)
+{
+  if (m_pSourceWindow)
+    m_iStart = m_pSourceWindow->findText(cpPattern,m_iStart,!bDirection(), bCase());
+}
+
+
+
+static void find_clear_cb(GtkWidget *w, SearchDialog *pSearchDialog)
+{
+  //gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
+  printf("find_clear_cb\n");
+}
+
+//------------------------------------------------------------------------
+void SearchDialog::Build()
+{
+  GtkWidget *hbox;
+  GtkWidget *button;
+  GtkWidget *label;
+
+  if (m_bIsBuilt)
+    return;
+
+  m_iLastID=-1;  // will reset search
+
+  m_Window = gtk_dialog_new();
+
+  gtk_signal_connect(GTK_OBJECT(m_Window),
+		     "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+  gtk_signal_connect_object(GTK_OBJECT(m_Window),
+			    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),
+			    GTK_OBJECT(m_Window));
+
+  gtk_window_set_title(GTK_WINDOW(m_Window),"Find");
+    
+  hbox = gtk_hbox_new(FALSE,15);
+  gtk_widget_show(hbox);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(m_Window)->vbox),hbox,
+		     FALSE,TRUE,5);
+  label = gtk_label_new("Find:");
+  gtk_widget_show(label);
+  gtk_box_pack_start(GTK_BOX(hbox),label,
+		     FALSE,FALSE,5);
+  m_Entry = gtk_combo_new();
+  gtk_widget_show(m_Entry);
+  gtk_box_pack_start(GTK_BOX(hbox),m_Entry,
+		     TRUE,TRUE,5);
+  gtk_combo_disable_activate(GTK_COMBO(m_Entry));
+  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(m_Entry)->entry),"activate",
+		     GTK_SIGNAL_FUNC(find_cb),this);
+    
+  hbox = gtk_hbox_new(FALSE,15);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(m_Window)->vbox),hbox,
+		     FALSE,TRUE,5);
+  gtk_widget_show(hbox);
+  m_CaseButton = gtk_check_button_new_with_label("Case Sensitive");
+  gtk_widget_show(m_CaseButton);
+  gtk_box_pack_start(GTK_BOX(hbox),m_CaseButton,
+		     FALSE,FALSE,5);
+  m_BackButton = gtk_check_button_new_with_label("Find Backwards");
+  gtk_widget_show(m_BackButton);
+  gtk_box_pack_start(GTK_BOX(hbox),m_BackButton,
+		     FALSE,FALSE,5);
+    
+  button = gtk_button_new_with_label("Find");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
+  gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		     GTK_SIGNAL_FUNC(find_cb),this);
+  GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
+  gtk_widget_grab_default(button);
+    
+  button = gtk_button_new_with_label("Clear");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
+  gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		     GTK_SIGNAL_FUNC(find_clear_cb),this);
+    
+  button = gtk_button_new_with_label("Close");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
+  gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
+			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(m_Window));
+
+  m_bIsBuilt = true;
+}
+
+void SearchDialog::Show(SourceWindow *pSourceWindow)
+{
+  if (!m_bIsBuilt)
+    Build();
+
+  m_pSourceWindow = pSourceWindow;
+  m_iStart = 0;
+
+  if (m_Window)
+    gtk_widget_show(m_Window);
+}
+
+//------------------------------------------------------------------------
 ColorHolder::ColorHolder (const char *pcColor)
 /*  : m_cpCurr(0), m_cpTemp(0) */
 {
-  gdk_color_parse(pcColor, &mCurrentColor);
-  mSaveColor  = mCurrentColor;
+  if (pcColor) {
+    gdk_color_parse(pcColor, &mCurrentColor);
+    mSaveColor  = mCurrentColor;
+  }
   
 }
 bool ColorHolder::set(GdkColor *pNewColor, bool saveOld)
@@ -589,6 +774,10 @@ bool ColorHolder::revert()
 {
   return set(&mSaveColor,true);
 }
+GdkColor *ColorHolder::CurrentColor()
+{
+  return &mCurrentColor;
+}
 
 //------------------------------------------------------------------------
 TextStyle::TextStyle (const char *cpName,
@@ -600,8 +789,8 @@ TextStyle::TextStyle (const char *cpName,
   m_pTag = gtk_text_tag_new(cpName);
 
   g_object_set(G_OBJECT (m_pTag),
-	       "foreground-gdk", &mFG.mCurrentColor,
-	       "background-gdk", &mBG.mCurrentColor,NULL);
+	       "foreground-gdk", mFG.CurrentColor(),
+	       "background-gdk", mBG.CurrentColor(),NULL);
 
   g_signal_connect (G_OBJECT (m_pTag), "event",
 		    GTK_SIGNAL_FUNC(TagEvent),
@@ -612,7 +801,7 @@ void TextStyle::setFG(GdkColor *pNewColor)
 {
   if (mFG.set(pNewColor,true)) {
     g_object_set(G_OBJECT (m_pTag),
-		 "foreground-gdk", &mFG.mCurrentColor,NULL);
+		 "foreground-gdk", mFG.CurrentColor(),NULL);
   }
 }
 //------------------------------------------------------------------------
@@ -629,11 +818,11 @@ void TextStyle::revert()
 {
   if (mBG.revert())
     g_object_set(G_OBJECT (m_pTag),
-		 "background-gdk", &mBG.mCurrentColor,NULL);
+		 "background-gdk", mBG.CurrentColor(),NULL);
 
   if (mFG.revert())
     g_object_set(G_OBJECT (m_pTag),
-		 "foreground-gdk", &mFG.mCurrentColor,NULL);
+		 "foreground-gdk", mFG.CurrentColor(),NULL);
     
 }
 
@@ -678,7 +867,7 @@ void SourceBuffer::setSrcType(eSourceFileType new_SrcType)
 // using a given text style (i.e. the style contains a gtkTextTag)
 
 void SourceBuffer::addTagRange(TextStyle *pStyle,
-				  int start_index, int end_index)
+			       int start_index, int end_index)
 {
 
   if (!pStyle)
@@ -897,6 +1086,156 @@ void SourceWindow::movePC(int line)
 }
 
 //------------------------------------------------------------------------
+void SourceWindow::findText()
+{
+  if (!stPSearchDialog)
+    stPSearchDialog = new SearchDialog();
+
+  stPSearchDialog->Show(this);
+}
+
+//------------------------------------------------------------------------
+// findText
+//
+//  Search for the pattern 'pText' in the source window.
+//  if bDirection is true then search forward.
+int SourceWindow::findText(const char *pText, int start, bool bDirection, bool bCase)
+{
+  if (!pText)
+    return 0;
+
+  int patternLen = strlen(pText);
+  char buff[1024];
+  patternLen = (patternLen < sizeof(buff)) ? patternLen : sizeof(buff);
+  const char *pattern = bDirection ? pText : 
+    strReverse(pText, &buff[patternLen], patternLen);
+
+  //printf("findText %s view:%p\n",pattern,pViewContainingPopup);
+
+  NSourcePage *pPage = PageMap[pViewContainingPopup];
+
+  if (!pPage)
+    return 0;
+
+  GtkTextIter iStart;
+  GtkTextIter iEnd;
+  int line = 0;
+  int offset = 0;
+
+  int totalLines = gtk_text_buffer_get_line_count(pPage->buffer());
+  if (!start) {
+    if (bDirection) {
+      gtk_text_buffer_get_start_iter(pPage->buffer(),
+				     &iStart);
+      gtk_text_buffer_get_iter_at_line(pPage->buffer(),
+				       &iEnd,
+				       line+1);
+    } else {
+
+      gtk_text_buffer_get_end_iter(pPage->buffer(),
+				   &iEnd);
+      gtk_text_buffer_get_end_iter(pPage->buffer(),
+				   &iStart);
+      gtk_text_iter_backward_line (&iStart);
+      line = totalLines-2;
+    }
+
+  } else {
+    gtk_text_buffer_get_iter_at_offset(pPage->buffer(),
+				       &iStart,
+				       start);
+    line = gtk_text_iter_get_line (&iStart);
+
+    if (bDirection) {
+      if (line >= totalLines) {
+	line = 0;
+	gtk_text_buffer_get_iter_at_offset(pPage->buffer(),
+					   &iStart,
+					   0);
+      }
+    } else {
+      if (line <= 0) {
+	line = totalLines-1;
+	gtk_text_buffer_get_iter_at_line(pPage->buffer(),
+					 &iStart,
+					 line--);
+      }
+    }
+
+    gtk_text_buffer_get_iter_at_line(pPage->buffer(),
+				     &iEnd,
+				     line);
+
+    offset = start - gtk_text_iter_get_offset (&iEnd);
+
+    gtk_text_buffer_get_iter_at_line(pPage->buffer(),
+				     &iEnd,
+				     line+1);
+  }
+
+
+  while (totalLines--) {
+
+    const char *str = gtk_text_buffer_get_text(pPage->buffer(),
+					       &iStart, &iEnd, FALSE);
+    int srcLen = strlen(str);
+
+    const char *cpSource = str;
+    char buffer2[1024];
+    if (!bDirection) {
+      srcLen = (srcLen < sizeof(buffer2)) ? srcLen : sizeof(buffer2);
+      cpSource = strReverse(cpSource, &buffer2[srcLen], srcLen);
+    }
+
+    const char *pFound = bCase ? strstr(cpSource, pattern) : strcasestr(cpSource, pattern);
+
+    if (pFound) {
+      int pos = bDirection ? (pFound - cpSource) : (srcLen - (pFound - cpSource));
+      pos += offset;
+      //printf("Found %s in %s starting at %s, pos=%d\n",pattern, str, pFound,pos);
+
+      gtk_text_view_scroll_to_iter (pViewContainingPopup,
+				    &iStart,
+				    0.0,
+				    TRUE,
+				    0.0, 0.3);
+
+      gtk_text_buffer_get_iter_at_line_offset(pPage->buffer(),
+					      &iStart,
+					      line, pos);
+      gtk_text_buffer_get_iter_at_line_offset(pPage->buffer(),
+					      &iEnd,
+					      line, 
+					      pos+ (bDirection ? patternLen : -patternLen));
+
+      gtk_text_buffer_select_range (pPage->buffer(),
+				    &iStart,
+				    &iEnd);
+      return gtk_text_iter_get_offset(bDirection ? &iEnd : &iStart);
+    }
+
+    // Now we'll search whole lines. 
+    offset = 0;
+
+    if (bDirection) {
+      if (gtk_text_iter_forward_line (&iStart)==FALSE)
+	return 0;
+      gtk_text_iter_forward_line (&iEnd);
+      line++;
+    } else {
+      if (gtk_text_iter_backward_line (&iStart)==FALSE)
+	return gtk_text_buffer_get_char_count(pPage->buffer()) - 1;
+
+      gtk_text_iter_backward_line (&iEnd);
+      line--;
+    }
+  } 
+
+  printf("Did not find %s\n",pattern);
+
+  return 0;
+}
+//------------------------------------------------------------------------
 static gint cb_notebook_switchpage (GtkNotebook     *notebook,
 				    GtkNotebookPage *page,
 				    guint            page_num,
@@ -948,12 +1287,22 @@ _popup_activated(GtkWidget *widget, gpointer data)
   menu_item *item;
 
   SourceWindow *pSW = 0;
+
+  // pViewContainingPopup is initialized when the view_button_press()
+  // event handler is called. That function also initiates the event
+  // that invokes this callback.
+
   if (!pViewContainingPopup) {
     printf("Warning popup without a textview\n");
   } else {
 
     NSourcePage *pPage = PageMap[pViewContainingPopup];
     pSW = pPage ? pPage->getParent() : 0;
+  }
+
+  if (!pSW) {
+    printf ("Warning (bug?): popup cannot be associate with any source\n");
+    return;
   }
 
   item = (menu_item *)data;
@@ -969,6 +1318,7 @@ _popup_activated(GtkWidget *widget, gpointer data)
     //gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
     //gtk_widget_show(searchdlg.window);
 
+    pSW->findText();
     printf(" menu find text\n");
     break;
   case MENU_FIND_PC:
@@ -1122,8 +1472,6 @@ _popup_activated(GtkWidget *widget, gpointer data)
     puts("Unhandled menuitem?");
     break;
   }
-
-  pViewContainingPopup=0;
 
 }
 
@@ -4186,10 +4534,12 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
     }
 }
 
+#if !defined(NEW_SOURCE_BROWSER)
 static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 {
     gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
 }
+#endif
 
 static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
 {
@@ -4204,6 +4554,7 @@ static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyl
 
 }
 
+#if !defined(NEW_SOURCE_BROWSER)
 static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
 {
   GtkWidget *hbox;
@@ -4271,7 +4622,7 @@ static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
 			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
 }
-
+#endif
 void SourceBrowserAsm_Window::Build(void)
 {
   if(bIsBuilt)
@@ -4350,7 +4701,9 @@ void SourceBrowserAsm_Window::Build(void)
   default_font      = gtk_style_get_font(default_text_style);
 
   if(!bSearchdlgInitialized) {
+#if !defined(NEW_SOURCE_BROWSER)
     BuildSearchDlg(this);
+#endif
     bSearchdlgInitialized = true;
   }
 
