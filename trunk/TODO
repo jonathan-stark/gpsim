@@ -3,20 +3,57 @@
 
 TODO - In no particular order:
 
-  o 23may01 - Provide option to disable the nop portion of two-word 18cxxx instructions in assembly dumps.
-  o Capacitive stimuli
+  o Provide option to disable the nop portion of two-word
+    18cxxx instructions in assembly dumps. 
   o Parallel stimuli
-  o High frequency stimuli (currently, the cpu frequency is the maximum stimulation frequency)
+  o High frequency stimuli (currently, the cpu frequency is the
+    maximum stimulation frequency) 
   o Support different clock types like variable frequency oscillators.
   o Gui support
     - Add an 'architecture' command for querying a pic's architecture
-    - Make the displayed data more consistant (e.g. all hex numbers prefaced with 0x)
-    - Provide a means for obtaining the current simulation state, saving the current simulation state, and finding the difference between two simulation states.
-  o Breakpoint ranges. E.g. break if pc is within a range of addresses.
-  o Boolean Breakpoints
-    - This allows multiple conditions to initiate a break. For example, you might want to set a break point such that if register 0x20 is cleared while the program counter is between 0x04 and 0x100.
-  o Enhance internal gpsim diagnostics/debugging. Right now there are numerous print statements embedded within gpsim that provide useful diagnostic information on gpsim's internals. These usually get commented out just before each release. So what I'd like to do is:
-    - Documentation. What can I say?
-    - Memory management. gpsim is very cavalier with memory. In a few instances, I check for insufficient memory, however I need to be more thorough. Fortunately, gpsim very seldom deletes instantiated objects. So I suspect there are no leaks...
+    - Provide a means for obtaining the current simulation state,
+    saving the current simulation state, and finding the difference
+    between two simulation states.  
 
-  o Support more symbolic types like bit fields and floating point.
+    - Memory management. gpsim is very cavalier with memory. In a few
+      instances, I check for insufficient memory, however I need to be
+      more thorough. Fortunately, gpsim very seldom deletes
+      instantiated objects. So I suspect there are no leaks... 
+
+  o I2C Peripheral Support
+  o I2C EEPROM Modules
+  o Module call support - Other than attributes, there is no real good
+    way to interface with modules. So the idea is to create
+  infrastructure that defines how a module can expose an API that the
+  simulation call.
+  o dsPic support
+  o High Level source (C and Jal)
+
+  o Extended Stimuli
+    - These are stimuli that are implemented as modules. Currently
+  the PulseGen stimulus can replace most of what an asynchronous
+  stimulus does. This needs to be finished.
+    - Add a PWL 
+    - Add a File Stimulus
+
+
+GUI
+---
+
+  o Source Browser:
+    - Provide a way of selecting which break to clear if multiple
+    - Provide a find dialog
+  breaks are set at one address
+  o Breakpoint Window - Add this to manage breakpoints.
+  o Symbol Window - It's pretty much useless at the moment.
+  o Program Memory - This is still using the GTK-1.x api. 
+  o Breadboard window
+    -- Needs a major overhaul
+    -- Create addition package types (like TQFP). Cairo allows text to
+       be drawn in any direction.
+    -- Allow pins to be queried.
+  o Waveform viewer - add.
+    -- The waveform viewer should allow the users to view I/O pin
+       state and Attribute states.
+
+ 
