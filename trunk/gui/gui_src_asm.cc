@@ -23,8 +23,6 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <errno.h>
 
-//#define DEBUG
-
 #include "../config.h"
 #ifdef HAVE_GUI
 
@@ -1093,6 +1091,39 @@ void SourceWindow::findText()
 
   stPSearchDialog->Show(this);
 }
+
+
+//------------------------------------------------------------------------
+// strcasestr is a non standard function
+//
+#if defined _MSC_VER || defined __MINGW32__ || defined __CYGWIN__
+char *strcasestr(const char *searchee, const char *lookfor)
+{
+  if (*searchee == '\0')
+    {
+      if (*lookfor)
+	return NULL;
+      return (char *) searchee;
+    }
+
+  while (*searchee != '\0')
+    {
+      size_t i;
+
+      for (i = 0; ; ++i)
+	{
+	  if (lookfor[i] == '\0')
+	      return (char *) searchee;
+
+	  if (tolower(lookfor[i]) != tolower(searchee[i]))
+	      break;
+	}
+      searchee++;
+    }
+
+  return NULL;
+}
+#endif
 
 //------------------------------------------------------------------------
 // findText
