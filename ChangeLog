@@ -1,3 +1,13 @@
+2006-06-16 Scott Dattalo <scott@dattalo.com>
+	* TODO: Cleaned up the TODO list.
+	* gui/gui_src_asm.cc, gui/gui_src.h: Implemented the Source
+	Browser "Find" dialog box. When the new source browser had been
+	re-written, this feature was ommitted. The dialog supports forward
+	and backward searches and case sensitivity. The search history
+	feature is not currently working (was it ever?). Also, it'd be
+	useful to have a "search all files" feature.
+	* gui/gui_menu.cc: Minor change to TextStyle API.
+	
 2006-06-13 Scott Dattalo <scott@dattalo.com>
 	* src/sim_context.cc, cli/input.cc, cli/cmd_load.cc: Rewrote code
 	to get around a gcc 3.2.2 x86 bug regarding the mis-handling of

@@ -51,12 +51,14 @@ class ColorHolder
 public:
   ColorHolder (const char *pcColor);
 
-  GdkColor   mCurrentColor, mSaveColor;
 
   bool set(GdkColor *pNewColor, bool saveOld);
   char *get(char *, int );
   void apply();
   bool revert();
+  GdkColor *CurrentColor();
+protected:
+  GdkColor mCurrentColor, mSaveColor;
 };
 //========================================================================
 // TextStyle
@@ -215,6 +217,8 @@ public:
   void toggleBreak(NSourcePage *pPage, int line);
   void movePC(int line);
   bool bSourceLoaded() { return m_bSourceLoaded; }
+  void findText();
+  int  findText(const char *, int, bool bDir, bool bCase);
 
   GtkTextTagTable *getTagTable();
 
