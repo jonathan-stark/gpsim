@@ -42,8 +42,7 @@ GUI
 
   o Source Browser:
     - Provide a way of selecting which break to clear if multiple
-    - Provide a find dialog
-  breaks are set at one address
+      breaks are set at one address
   o Breakpoint Window - Add this to manage breakpoints.
   o Symbol Window - It's pretty much useless at the moment.
   o Program Memory - This is still using the GTK-1.x api. 
