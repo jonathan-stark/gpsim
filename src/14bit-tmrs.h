@@ -383,6 +383,7 @@ public:
 
   void put(unsigned int new_value);
   unsigned int get();
+  void on_or_off(int new_state);
   void start();
   void new_pre_post_scale();
   void new_pr2(unsigned int new_value);
