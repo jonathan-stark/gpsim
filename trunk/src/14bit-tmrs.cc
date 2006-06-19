@@ -991,11 +991,19 @@ T2CON::T2CON()
 void T2CON::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
+
+  unsigned int diff = value.get() ^ new_value;
   value.put(new_value);
-  if (tmr2)
+
+
+  if (tmr2) {
+    
+    if( diff & TMR2ON)
+      tmr2->on_or_off(value.get() & TMR2ON);
+
     tmr2->new_pre_post_scale();
 
+  }
 }
 
 
@@ -1026,6 +1034,33 @@ void TMR2::start()
   prescale = 0;
   last_cycle = 0;
   future_cycle = 0;
+
+}
+
+
+void TMR2::on_or_off(int new_state)
+{
+
+  if(new_state) {
+
+    Dprintf(("TMR2 is being turned on\n"));
+
+    // turn on the timer
+
+    // Effective last cycle
+    // Compute the "effective last cycle", i.e. the cycle
+    // at which TMR2 was last 0 had it always been counting.
+
+    last_cycle = get_cycles().value - value.get()*prescale;
+    update();
+  }
+  else {
+
+    Dprintf(("TMR2 is being turned off\n"));
+
+    // turn off the timer and save the current value
+    current_value();
+  }
 
 }
 
