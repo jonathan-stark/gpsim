@@ -282,8 +282,11 @@ void TMR0::new_prescale(void)
       // External clock
       if(verbose)
 	cout << "external clock\n";
-      get_cycles().clear_break(future_cycle);
-      future_cycle = 0;
+      if (future_cycle)
+      {
+        future_cycle = 0;
+        get_cycles().clear_break(this);
+      }
     } else {
       // Internal Clock
       if(verbose)
