@@ -146,7 +146,7 @@ start
 	movwf   SPBRG ^0x80
 
 	bcf	STATUS,RP0
-	bsf	PORTB,2         ;Make sure the TX line drives high when 
+  .assert "(portb & 0x04) == 0x04, \"FAILED: TX bit initilized as high\""
 
 	clrf	tx_ptr
 			
