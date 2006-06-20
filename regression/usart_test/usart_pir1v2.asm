@@ -154,7 +154,7 @@ start
 	;;clrf	SPBRG		;Highest possible baud rate.
 
 	bcf	STATUS,RP0
-
+  .assert "(portc & 0x40) == 0x40, \"FAILED: TX bit initilized as high\""
 	clrf	tx_ptr
 			
 	;; Turn on the serial port
