@@ -1,3 +1,11 @@
+2006-06-21 Roy Rankin <rrankin@ihug.com.au>
+	* regression/usart_test/usart_pir1v1.asm,
+	  regression/usart_test/usart_pir1v2.asm:
+	- Check PIC TX pin is high when first set to output.
+	* src/pic-ioports.cc: Portb, allow driving state to be set 
+	  even when bit is set.
+	* src/tmr0.cc: Fix call of clear_break.
+
 2006-06-16 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-tmrs.h, src/14bit-tmrs.cc: TMR2 wasn't getting
 	properly initialized when the TMR2ON bit in T2CON was getting set.
