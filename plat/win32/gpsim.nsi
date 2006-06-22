@@ -390,28 +390,12 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\rs232-gen\Makefile"
   File "${GPSIM_ROOT}\extras\rs232-gen\README"
   File "${GPSIM_ROOT}\extras\rs232-gen\rs232-gen.c"
-
-  SetOutPath "$INSTDIR\extras\usart_con"
-  File "${GPSIM_ROOT}\extras\usart_con\AUTHORS"
-  File "${GPSIM_ROOT}\extras\usart_con\autogen.sh"
-  File "${GPSIM_ROOT}\extras\usart_con\ChangeLog"
-  File "${GPSIM_ROOT}\extras\usart_con\configure.in"
-  File "${GPSIM_ROOT}\extras\usart_con\COPYING"
-  File "${GPSIM_ROOT}\extras\usart_con\INSTALL"
-  File "${GPSIM_ROOT}\extras\usart_con\Makefile.am"
-  File "${GPSIM_ROOT}\extras\usart_con\makefile.mingw"
-  File "${GPSIM_ROOT}\extras\usart_con\module_manager.cc"
-  File "${GPSIM_ROOT}\extras\usart_con\NEWS"
-  File "${GPSIM_ROOT}\extras\usart_con\README"
-  File "${GPSIM_ROOT}\extras\usart_con\usart_con.cc"
-  File "${GPSIM_ROOT}\extras\usart_con\usart_con.h"
 SectionEnd
 
 Section "extras modules" SEC02
   SectionIn 1
   SetOutPath "$INSTDIR\bin"
   SetOverwrite ifnewer
-  File "${GPSIM_ROOT}\extras\usart_con\libgpsim_usart_con.dll"
   File "${GPSIM_ROOT}\extras\graphic_lcd\src\libgpsim_graphicLCD.dll"
   File "${GPSIM_ROOT}\extras\lcd\libgpsim_lcd.dll"
 SectionEnd
@@ -482,7 +466,6 @@ Section Uninstall
   Delete "$INSTDIR\bin\libgpsim_modules.dll"
 
 ; extras modules
-  Delete "$INSTDIR\bin\libgpsim_usart_con.dll"
   Delete "$INSTDIR\bin\libgpsim_graphicLCD.dll"
   Delete "$INSTDIR\bin\libgpsim_lcd.dll"
 
@@ -642,7 +625,6 @@ Section Uninstall
   RMDir "$INSTDIR\examples"
   
   RMDir /r "$INSTDIR\extras\graphic_lcd"
-  RMDir /r "$INSTDIR\extras\usart_con"
   RMDir "$INSTDIR\extras\lcd\examples"
   RMDir "$INSTDIR\extras\lcd"
   RMDir "$INSTDIR\extras\rs232-gen\example"

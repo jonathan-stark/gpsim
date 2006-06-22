@@ -118,7 +118,6 @@ public:
   USARTModule *usart;
 
   USART_RXPIN (USARTModule *_usart,
-	       unsigned int b, 
 	       char *opt_name=NULL) : IO_bi_directional_pu(opt_name) { 
 
     usart = _usart;
@@ -178,7 +177,6 @@ public:
   USARTModule *usart;
 
   USART_TXPIN (USARTModule *_usart,
-	       unsigned int b, 
 	       char *opt_name=NULL) 
   { 
 
@@ -906,8 +904,8 @@ void USARTModule::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  USART_TXPIN *txpin = new USART_TXPIN(this, 0,"TXPIN");
-  USART_RXPIN *rxpin = new USART_RXPIN(this, 1,"RXPIN");
+  USART_TXPIN *txpin = new USART_TXPIN(this, "TXPIN");
+  USART_RXPIN *rxpin = new USART_RXPIN(this, "RXPIN");
 
 
   assign_pin(1, txpin);
@@ -968,11 +966,14 @@ USARTModule::USARTModule(const char *_name)
   m_TxBuffer = new TxBuffer(this);
   add_attribute(m_TxBuffer);
 
-  m_CRLF = new Boolean("crlf", true, "if true, Carriage return and linefeeds generate new lines in the terminal");
+  m_CRLF = new Boolean("crlf", true, "if true, carriage return and linefeeds generate new lines in the terminal");
   add_attribute(m_CRLF);
 
   m_loop = new Boolean("loop", false, "if true, received characters looped back to transmit");
   add_attribute(m_loop);
+
+  m_console = new Boolean("console", false, "if true, display received character to the terminal window");
+  add_attribute(m_console);
 
   CreateGraphics();
 
@@ -1079,34 +1080,44 @@ key_release(GtkWidget *widget,
 	}
 	return(1);
 }
+#endif //HAVE_GUI
 
 // Display character from usart on GUI text window
 void USARTModule::show_tx(unsigned int data)
 {
-  if(get_interface().bUsingGUI()) {
+  data &= 0xff;
 
-    data &= 0xff;
-    if (data != 0x0a) {
+  if(m_console->getVal()) {
+    if (isascii(data) && (isprint(data) || '\n' == data || '\r' == data))
+      putchar(data);
+    else
+      printf("<%02X>", data);
+  }
+
+#ifdef HAVE_GUI
+  if(get_interface().bUsingGUI()) {
       GtkTextBuffer *buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
       GtkTextIter iter;
       gtk_text_buffer_get_end_iter(buff, &iter);
-      if ( ( data >= 0x20 && data < 0x80 ) || 
-	   (m_CRLF->getVal() && (data==0x0d || data==0x0a)))
-        gtk_text_buffer_insert(buff,&iter,(char *)&data, 1);
+      if ((isascii(data) && isprint(data)) || 
+	  (m_CRLF->getVal() && ('\n' == data || '\r' == data))) {
+        char ch = data;
+        gtk_text_buffer_insert(buff, &iter, &ch, 1);
+      }
       else {
         char hex[5];
-        sprintf ( hex, "<%02X>", data );
-        gtk_text_buffer_insert(buff,&iter,hex,4);  
+        sprintf (hex, "<%02X>", data);
+        gtk_text_buffer_insert(buff, &iter, hex, 4);  
       }
       gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0.0, 1.0);
-    }
   }
-
+#endif //HAVE_GUI
 }
+
 // Create a GUI text window 
 void USARTModule::CreateGraphics()
 {
-
+#ifdef HAVE_GUI
   if(get_interface().bUsingGUI()) {
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "USART");
@@ -1146,16 +1157,5 @@ void USARTModule::CreateGraphics()
     window = 0;
     text = 0;
   }
-
+#endif
 }
-
-#else //HAVE_GUI
-void USARTModule::show_tx(unsigned int data)
-{
-	data &= 0xff;
-	printf("%s byte=0x%x\n", __FUNCTION__, data);
-}
-void USARTModule::CreateGraphics()
-{
-}
-#endif //HAVE_GUI
