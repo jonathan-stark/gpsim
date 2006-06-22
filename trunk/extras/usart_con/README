@@ -1,3 +1,0 @@
-gpsim's universal synchronous/asynchronous receiver,
-derived from gpsim usart.cc module by Borut Razem,
-used for sdcc pic regression tests.

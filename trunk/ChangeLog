@@ -1,3 +1,11 @@
+2006-06-22 Borut Razem <borut.razem@siol.net>
+	* extras/usart_con/*: removed from svn
+	* makefile.mingw, plat/win32/gpsim.nsi: removed usart_con
+	* modules/usart.cc, modules/usart.cc: added possibility to write to
+	  the console using the boolean attribute "console = true | false"
+	* examples/modules/usart_gui/usart_gui.asm: send only '\n' for the
+	  newline, introduced putchar procedure, ...
+
 2006-06-21 Roy Rankin <rrankin@ihug.com.au>
 	* regression/usart_test/usart_pir1v1.asm,
 	  regression/usart_test/usart_pir1v2.asm:
