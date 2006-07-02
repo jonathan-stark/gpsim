@@ -76,7 +76,7 @@ GUI_Processor::GUI_Processor(void)
   trace_window = new  Trace_Window(this);
   profile_window = new  Profile_Window(this);
   stopwatch_window = new  StopWatch_Window(this);
-  //scope_window = new  Scope_Window(this);
+  scope_window = new  Scope_Window(this);
 }
 
 void GUI_Processor::SetCPU(Processor *new_cpu) {

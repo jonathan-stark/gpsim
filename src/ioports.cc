@@ -489,12 +489,6 @@ void PinModule::setPullupControl(SignalControl *newPullupControl)
   m_activePullupControl = newPullupControl ? newPullupControl : m_defaultPullupControl;
 }
 
-void PinModule::addSink(SignalSink *new_sink)
-{
-  if(new_sink)
-    sinks.push_back(new_sink);
-}
-
 char PinModule::getControlState()
 {
   return m_activeControl ? m_activeControl->getState() : '?';

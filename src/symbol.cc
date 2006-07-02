@@ -156,7 +156,10 @@ int SymbolCompare(const char *pLeft, const char *pRight) {
 #endif
 }
 
-bool Symbol_Table::add(Value *s) {
+//------------------------------------------------------------------------
+// add(Value *) - add a symbol to the symbol table
+bool Symbol_Table::add(Value *s)
+{
   if(s) {
     if(s->name().empty()) {
       printf("Symbol_Table::add() attempt to add a symbol with no name: %s\n",
@@ -173,6 +176,8 @@ bool Symbol_Table::add(Value *s) {
             s->name().c_str(), s->showType().c_str());
         return false;
       }
+      if(verbose)
+	cout << "Adding '" << s->name() << "' to the symbol table\n";
       insert(it, s);
 
       return true;

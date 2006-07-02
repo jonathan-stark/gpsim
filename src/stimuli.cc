@@ -679,6 +679,21 @@ void   stimulus::getThevenin(double &v, double &z, double &c)
   z = get_Zth();
   c = get_Cth();
 }
+
+//========================================================================
+// 
+void PinMonitor::addSink(SignalSink *new_sink)
+{
+  if(new_sink)
+    sinks.push_back(new_sink);
+}
+
+void PinMonitor::removeSink(SignalSink *pSink)
+{
+  if(pSink)
+    sinks.remove(pSink);
+}
+
 //========================================================================
 
 
@@ -869,44 +884,6 @@ void source_stimulus::put_start_cycle(Value *pValue)
 
 //========================================================================
 //
-#if defined(OLD_IOPORT_DESIGN)
-
-IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
-  : stimulus()
-{
-  iop = i;
-  iopp = _iopp;
-  iobit=b;
-  l2h_threshold = 2.0;
-  h2l_threshold = 1.0;
-  bDrivenState = false;
-  cForcedDrivenState = 'Z';
-
-  Zth = 1e8;
-  Vth = 5.0;
-  ZthWeak = 1e6;
-  ZthFloating = 1e7;
-
-  snode = 0;
-  m_monitor=0;
-
-  if(iop) {
-
-    printf("WARNING:%s:%d deprecated usage of IOPINs\n",__FILE__,__LINE__);
-  } else {
-    // there's no IO port associated with this pin.
-
-    // If a name was provided, use it:
-    if(opt_name)
-      new_name(opt_name);
-  }
-
-}
-
-#endif 
-
-
-
 IOPIN::IOPIN(const char *_name,
 	     double _Vth, 
 	     double _Zth,
@@ -920,11 +897,6 @@ IOPIN::IOPIN(const char *_name,
   if(verbose)
     cout << "IOPIN default constructor\n";
 
-#if defined(OLD_IOPORT_DESIGN)
-  iop = 0;
-  iopp = 0;
-  iobit=0;
-#endif
   l2h_threshold = 2.0;      // PICs are CMOS and use CMOS-like thresholds
   h2l_threshold = 1.0;
   bDrivenState = false;
@@ -941,29 +913,6 @@ void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
 }
 
 
-#if defined(OLD_IOPORT_DESIGN)
-
-void IOPIN::attach_to_port(IOPORT *i, unsigned int b)
-{
-  iobit=b;
-
-  iop = i; 
-  if(iop)
-    iop->addPin(this,b);
-
-  printf("WARNING:%s:%d Deprecated usage of IOPINs\n",__FILE__,__LINE__);
-}
-
-void IOPIN::disconnect_from_port()
-{
-  if(iop) 
-    iop = 0;
-
-  iobit = 0;
-}
-#endif
-
-
 IOPIN::~IOPIN()
 {
 }
@@ -978,25 +927,6 @@ void IOPIN::show()
 {
   stimulus::show();
 }
-
-//
-// Accomodate breakpoints by providing an indirect way
-// through which the ioport is selected. The breakpoint
-// engine is cabable of intercepting this indirect access.
-//
-#if defined(OLD_IOPORT_DESIGN)
-Register *IOPIN::get_iop(void)
-{
-  
-  if(iopp)
-    return *iopp;
-  else if(iop)
-    return iop;
-  else
-    return 0;
-  return iopp ? *iopp : 0;
-}
-#endif
 
 //--------------------
 // set_nodeVoltage()
@@ -1051,13 +981,6 @@ void IOPIN::putState(bool new_state)
 
     if(snode)
       snode->update();
-#if defined(OLD_IOPORT_DESIGN)
-    else {
-      Register *port = get_iop();
-      if(port)
-	port->setbit(iobit, new_state);
-    }
-#endif
   }
   if(m_monitor)
     m_monitor->putState(new_state?'1':'0');
@@ -1093,12 +1016,6 @@ void IOPIN::setDrivingState(char new3State)
 
 bool IOPIN::getDrivingState(void)
 {
-#if defined(OLD_IOPORT_DESIGN)
-  Register *port = get_iop();
-
-  if(port)
-    bDrivingState = port->get_bit(iobit);
-#endif
   return bDrivingState;
 }
 
@@ -1122,12 +1039,6 @@ void IOPIN::setDrivenState(bool new_state)
   if(verbose & 1)
     cout << name()<< " setDrivenState= " 
 	 << (new_state ? "high" : "low") << endl;
-
-#if defined(OLD_IOPORT_DESIGN)
-  Register *port = get_iop();
-  if(port)
-    port->setbit(iobit, new_state);
-#endif
 
   // Propagate the new state to those things monitoring this pin.
   // (note that the 3-state value is what's propagated).
@@ -1183,10 +1094,6 @@ void IOPIN::toggle()
  */
 double IOPIN::get_Vth()
 {
-#if defined(OLD_IOPORT_DESIGN)
-  if(!snode && iop)
-    return ( (iop->value.get() & (1<<iobit)) ? Vth : 0.0);
-#endif
   return Vth;
 
 }
@@ -1220,23 +1127,6 @@ string &IOPIN::GUIname(void) const
 }
 //========================================================================
 //
-#if defined(OLD_IOPORT_DESIGN)
-
-IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
-  : IOPIN(i,b,opt_name,_iopp)
-{
-
-  // Thevenin equivalent while configured as an output 
-  Vth = 5.0;
-  Zth = 250;
-
-  // Thevenin equivalent while configured as an input 
-  VthIn = 0.3;
-  ZthIn = 1e8;
-
-}
-#endif
-
 IO_bi_directional::IO_bi_directional(const char *_name,
 				     double _Vth, 
 				     double _Zth,
@@ -1326,26 +1216,10 @@ void IO_bi_directional::update_direction(unsigned int new_direction, bool refres
 
   // If this pin is not associated with an IO Port, but it's tied
   // to a stimulus, then we need to update the stimulus.
-#if defined(OLD_IOPORT_DESIGN)
-  if(refresh && !iop && snode)
-    snode->update();
-#else
   if(refresh && snode)
     snode->update();
-#endif
 }
 
-#if defined(OLD_IOPORT_DESIGN)
-
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
-					   const char *opt_name, Register **_iopp)
-  : IO_bi_directional(i, b,opt_name,_iopp)
-{
-  Vpullup = Vth;
-  Zpullup = 20e3;
-  bPullUp = false;
-}
-#endif
 IO_bi_directional_pu::IO_bi_directional_pu(const char *_name,
 					   double _Vth, 
 					   double _Zth,
@@ -1454,13 +1328,6 @@ char IO_bi_directional_pu::getBitChar()
   return getDrivenState() ? '1' : '0';
 }
 
-#if defined(OLD_IOPORT_DESIGN)
-IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
-				     const char *opt_name, Register **_iopp)
-  : IO_bi_directional_pu(i,b,opt_name,_iopp)
-{
-}
-#endif
 IO_open_collector::IO_open_collector(const char *_name)
   : IO_bi_directional_pu(_name)
 {

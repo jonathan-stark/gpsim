@@ -161,7 +161,7 @@ GUI_Interface::~GUI_Interface()
     gp->trace_window->set_config();
     gp->profile_window->set_config();
     gp->stopwatch_window->set_config();
-    //gp->scope_window->set_config();
+    gp->scope_window->set_config();
   }
 }
 

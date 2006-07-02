@@ -134,7 +134,7 @@ private:
   guint64       *pTimeBuffer;       // Where the time is stored
   char          *pEventBuffer;      // Where the events are stored
   unsigned int   max_events;        // Size of the event buffer
-
+  bool           bHaveEvents;       // True if any events have been acquired
 public:
 
   ThreeStateEventLogger(unsigned int _max_events = 4096);

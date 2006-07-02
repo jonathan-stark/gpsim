@@ -40,6 +40,8 @@ gpsim_la - plug in.
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
 
+#include "../src/bitlog.h"
+
 #include "gui.h"
 #include "gui_scope.h"
 
@@ -66,8 +68,49 @@ static GtkObject *bit_adjust; // ,*delay_adjust;
 static GdkColor signal_line_color,grid_line_color,grid_v_line_color;
 //static int bit_left,bit_right,bit_points,update_delay;
 
+class WaveformSink;
+class Waveform;
+/***********************************************************************
+  timeMap - a structure that's used to map horizontal screen coordinates 
+  into simulation time.
+*/
+struct timeMap 
+{
+  // simulation time
+  guint64 time;
 
-/*
+  // pixel x-coordinate
+  int     pos;
+
+  // index into array holding event (fixme - exposes Logger implementation)
+  unsigned int eventIndex;
+
+  // The event
+  int event;
+};
+
+/***********************************************************************
+  WaveSource
+
+  This is an attribute that provides the interface between the WaveForm 
+  class (below) and the names of nodes or stimuli that source information.
+
+*/
+class WaveformSource : public String
+{
+public:
+  WaveformSource(Waveform *pParent, const char *_name);
+
+  // Override the String::set method so that name assignments can
+  // be intercepted.
+  virtual void set(const char *cp, int len=0);
+
+private:
+  Waveform *m_pParent;
+  bool m_bHaveSource;
+};
+
+/***********************************************************************
   Waveform class
 
   This holds the gui information related with a gpsim waveform
@@ -81,28 +124,83 @@ public:
   int width, height;         // Pixmap size
   GdkGC *drawing_gc;         // Line styles, etc.
   Scope_Window *sw;          // Parent
-  char *name;                // Name of the waveform. (FIXME)
   bool isBuilt;              // True after the gui has been built.
   bool isUpToDate;           // False when the waveform needs updating.
 
   GtkWidget *parent_table;
   int row;
 
-  Waveform(Scope_Window *parent);
+  Waveform(Scope_Window *parent, const char *name);
 
   void Build(GtkWidget *_parent_table, int _row);
-  void Update(void);
+  void Update(guint64 start=0, guint64 stop=0);
   void Expose(void);
   void Resize(int width, int height);
+  void SearchAndPlot(timeMap &left, timeMap &right);
+  void Dump(); // debug
+  void setData(char c);
+protected:
+  void PlotTo(timeMap &left, timeMap &right);
+  WaveformSink *m_pSink;
+  ThreeStateEventLogger *m_logger;
+  timeMap m_last;
+  WaveformSource *m_pSourceName;
+};
 
+/***********************************************************************
+  WaveformSink - A "sink" is an object that receives data from a
+  "source". In the context of waveform viewer, a source is a stimulus
+  and the viewer is the sink.
+*/
+class WaveformSink : public SignalSink
+{
+public:
+  WaveformSink(Waveform *pParent);
+  virtual void setSinkState(char);
+protected:
+  Waveform *m_pWaveform;
 };
 
 
-Waveform::Waveform(Scope_Window *parent)
+//========================================================================
+// WaveformSource
+
+WaveformSource::WaveformSource(Waveform *pParent, const char *_name)
+  : String(_name, "", "view or set gui scope waveforms"),
+    m_pParent(pParent), m_bHaveSource(false)
+{
+  assert(m_pParent);
+  // Prevent removal from the symbol table (all clearable symbols are
+  // removed from the symbol table when a new processor is loaded).
+  m_bClearableSymbol = false;
+}
+
+void WaveformSource::set(const char *cp, int len)
+{
+  if (!m_bHaveSource) {
+    String::set(cp,len);
+    m_bHaveSource = true;
+  }
+
+}
+
+
+//========================================================================
+WaveformSink::WaveformSink(Waveform *pParent)
+  : SignalSink(), m_pWaveform(pParent)
+{
+  assert(m_pWaveform);
+}
+
+void WaveformSink::setSinkState(char c)
+{
+  m_pWaveform->setData(c);
+}
+
+Waveform::Waveform(Scope_Window *parent, const char *name)
 {
   isBuilt = false;
   isUpToDate = false;
-  name = 0;
   drawing_area = 0;
   pixmap =0;
   drawing_gc =0;
@@ -113,8 +211,20 @@ Waveform::Waveform(Scope_Window *parent)
   height = 25;
 
   sw = parent;
+
+  m_pSink = new WaveformSink(this);
+  m_logger = new ThreeStateEventLogger();
+  m_pSourceName = new WaveformSource(this,name);
+  get_symbol_table().add(m_pSourceName);
+
+ // Test!!!
+  m_logger->event('0');
 }
 
+void Waveform::setData(char c)
+{
+  m_logger->event(c);
+}
 
 static gint Waveform_expose_event (GtkWidget *widget,
 				   GdkEventExpose  *event,
@@ -195,12 +305,10 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
   gdk_gc_set_line_attributes(drawing_gc,1,GDK_LINE_SOLID,
 			     GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
-  name = strdup("test");
-
   isBuilt = true;
   isUpToDate = false;
 
-  Update();
+  Update(0,0);
 }
 
 //----------------------------------------
@@ -233,22 +341,103 @@ void Waveform::Resize(int w, int h)
   Update();
 
 }
+
+//----------------------------------------
+//
+void Waveform::PlotTo(timeMap &left, timeMap &right)
+{
+  // Event(s) has(have) been found.
+  // The plotting region has been subdivided as finely as possible
+  // and there are one or more events. 
+  // First draw a horizontal line from the last known event to here:
+
+
+  gdk_draw_line(pixmap,drawing_gc,
+		m_last.pos, m_last.event,   // last point drawn
+		right.pos,  m_last.event);  // right most point of this region.
+
+  // Now draw a vertical line for the event
+
+  int nextEvent = (m_logger->get_state(right.eventIndex) == '1') ? (height-3) : 1;
+
+  gdk_draw_line(pixmap,drawing_gc,
+		right.pos, m_last.event,    // last point drawn
+		right.pos, nextEvent); // next event
+
+  // Draw a thicker line if there more than one event.
+    
+  if (right.eventIndex+1 > left.eventIndex)
+    gdk_draw_line(pixmap,drawing_gc,
+		  left.pos, m_last.event,
+		  left.pos, nextEvent);
+  m_last = right;
+  m_last.event = nextEvent;
+
+}
+//----------------------------------------
+//
+// Waveform SearchAndPlot
+//
+//  Recursively divide the plotting area into smaller and smaller
+// regions until either only one event exists or the region can 
+// be divided no smaller.
+//
+
+void Waveform::SearchAndPlot(timeMap &left, timeMap &right)
+{
+  if (right.eventIndex == left.eventIndex)
+    // The region cannot be divided any smaller.
+    // If there are no events in this subdivided region 
+    // So just return.
+    // m_last = left;
+    ; 
+  else if (left.pos+1 >= right.pos)
+    PlotTo(left,right);
+
+  else {
+    // the subdivided region is larger than 1-pixel wide
+    // and there is at least one event. So subdivide even smaller
+    // and recursively call 
+
+    timeMap mid;
+
+    mid.time = (left.time + right.time) / 2;
+    mid.pos  = (left.pos  + right.pos)  / 2;
+    mid.eventIndex = m_logger->get_index (mid.time);
+
+    SearchAndPlot(left, mid);
+    SearchAndPlot(mid, right);
+
+  }
+
+}
+
 //----------------------------------------
 //
 // Waveform Update
 //
 
-void Waveform::Update(void)
+void Waveform::Dump()
+{
+  m_logger->dump(0);
+}
+//----------------------------------------
+//
+// Waveform Update
+//
+
+void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 {
   int x,y;
   GdkRectangle update_rect;
-#if 0
 
   int line_separation,pin_number;
   int point,y_text,y_0,y_1;
   float x_scale,y_scale;
   int max_str,new_str,br_length;
   char *s,ss[10];
+
+  isUpToDate = false;
 
   if(!isBuilt || isUpToDate)
     return;
@@ -258,8 +447,13 @@ void Waveform::Update(void)
     return;
   }
 
-  cout << "Waveform::" << __FUNCTION__ << endl;
+  //cout << "Waveform::" << __FUNCTION__ << endl;
 
+  if (uiStart == 0) //fixme - boundary condition at t=0 is broken.
+    uiStart = 1;
+
+  if (uiEnd == 0) 
+    uiEnd = get_cycles().value;
 
   gdk_draw_rectangle (pixmap,
 		      drawing_area->style->black_gc,
@@ -267,6 +461,8 @@ void Waveform::Update(void)
 		      0, 0,
 		      width,
 		      height);
+
+#if 0
   y_scale = (float)height / (float)(NUM_PORTS);
     
 
@@ -304,6 +500,8 @@ void Waveform::Update(void)
   gdk_gc_set_foreground(drawing_gc,&grid_line_color);    
   gdk_draw_line(pixmap,drawing_gc,0,height-1,width,height-1);
   
+  if (uiEnd == 0)
+    return; 
 
 #if 0
   // Draw Vertical Grid Lines:
@@ -327,51 +525,40 @@ void Waveform::Update(void)
 
 #endif
 
+  // TEST!!!
 
-  // Draw Signals:
-  gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
-
-  x = 0;
-  y = 0;
-  int nextx;
-  int nexty;
-
-  int h = height-1;
-
-  while(x <width) {
-    nextx = x + (rand() % 10);
-    if(nextx >= width)
-      nextx = width;
-
-    gdk_draw_line(pixmap,drawing_gc,x,h-y*10,nextx,h-y*10);
-
-    x = nextx;
-    nexty = y ^ 1;
-    gdk_draw_line(pixmap,drawing_gc,x,h-y*10,x,h-nexty*10);
-    y = nexty;
-
-  }
-
-#if 0
-  // Draw Signals:
-  gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
-  for (pin_number=1;pin_number<=NUM_PORTS;pin_number++)
-    {
-      y_0 = (int)(y_scale*(float)(pin_number)-y_scale/4.0);
-      y_1 = (int)(y_scale*(float)(pin_number)-y_scale*3.0/4.0);
-      //        cout << "Name:" << Package::get_pin_name(pin_number) << "\n";
-      for (point=0;point<bit_points;point++)
-        {
-	  x = (int)((float)point*x_scale+max_str);
-	  ///if (port->get_pin_bit_value(bit_left+point,pin_number)==0)
-	  if(y & 1)
-	    y = y_0;
-	  else
-	    y = y_1;
-	  gdk_draw_line(pixmap,drawing_gc,x,y,(int)(x+(float)x_scale),y);
-        }
+  {
+    unsigned int index = m_logger->get_index();
+    if ( m_logger->get_time(index)+10 < uiEnd) {
+      char nextEvent = (m_logger->get_state(index)=='0') ? '1' :'0';
+      m_logger->event(nextEvent);
+      cout << "added event " << nextEvent << " @ time 0x"<<hex<<uiEnd <<endl;
     }
-#endif
+  }
+  // Draw Signals:
+  gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
+
+  timeMap left;
+  timeMap right;
+
+  left.pos = 0;
+  left.time = uiStart;
+  left.eventIndex = m_logger->get_index(uiStart);
+  left.event = (m_logger->get_state(left.eventIndex) == '1') ? (height-3) : 1;
+
+  m_last = left;
+
+  right.pos = width;
+  right.time = uiEnd;
+  right.eventIndex = m_logger->get_index(uiEnd);
+
+
+  SearchAndPlot(left,right);
+  if (right.pos > m_last.pos)
+    gdk_draw_line(pixmap,drawing_gc,
+		  m_last.pos, m_last.event,   // last point drawn
+		  right.pos,  m_last.event);  // right most point
+
 
 #if 0
   // Draw bit positions:
@@ -412,7 +599,7 @@ void Waveform::Expose(void)
   if(!isUpToDate)
     Update();
 
-  cout <<  "function:" << __FUNCTION__ << "\n";    
+  //cout <<  "function:" << __FUNCTION__ << "\n";    
 
 
   gdk_draw_pixmap(drawing_area->window,
@@ -483,7 +670,7 @@ static gint Scope_Window_expose_event (GtkWidget *widget,
 				   GdkEventExpose  *event,
 				   gpointer   user_data)
 {
-  cout <<  "function:" << __FUNCTION__ << "\n";    
+  //cout <<  "function:" << __FUNCTION__ << "\n";    
 
   g_return_val_if_fail (widget != NULL, TRUE);
   //  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
@@ -494,12 +681,37 @@ static gint Scope_Window_expose_event (GtkWidget *widget,
 
   return TRUE;
 }
+
+//------------------------------------------------------------------------
+class TimeMarker : public Integer
+{
+public:
+  TimeMarker(Scope_Window *parent, const char *_name, const char *desc);
+  virtual void set(gint64 i);
+private:
+  Scope_Window *m_pParent;
+};
+
+TimeMarker::TimeMarker(Scope_Window *parent, const char *_name, const char *desc)
+  : Integer(_name,0,desc),
+    m_pParent(parent)
+{
+  assert(m_pParent);
+  m_bClearableSymbol = false;
+}
+void TimeMarker::set(gint64 i)
+{
+  Integer::set(i);
+  m_pParent->Update();
+}
 //------------------------------------------------------------------------
 //
 // Scope_Window member functions
 //
 //
 
+TimeMarker *tStart=0;
+TimeMarker *tStop=0;
 
 Waveform *signals[8];   // hack
 int aw=0;
@@ -626,9 +838,17 @@ void Scope_Window::Build(void)
   // Create the signals for the scope window.
   //
 
+  signals[0] = new Waveform(this,"scope.ch0");
+  signals[1] = new Waveform(this,"scope.ch1");
+  signals[2] = new Waveform(this,"scope.ch2");
+  signals[3] = new Waveform(this,"scope.ch3");
+  signals[4] = new Waveform(this,"scope.ch4");
+  signals[5] = new Waveform(this,"scope.ch5");
+  signals[6] = new Waveform(this,"scope.ch6");
+  signals[7] = new Waveform(this,"scope.ch7");
+
   for(int i=0; i<8; i++) {
 
-    signals[i] = new Waveform(this);
     signals[i]->Build(table, i);
   }
 
@@ -651,7 +871,7 @@ void Scope_Window::Update(void)
   int i;
   if(!bIsBuilt)
     Build();
-
+  /*
   cout << "function:" << __FUNCTION__ << "\n";
   cout << " a  x "  << window->allocation.x
        << " a y "  << window->allocation.y
@@ -661,7 +881,7 @@ void Scope_Window::Update(void)
   cout << " r  width "  << window->requisition.width
        << " r height "  << window->requisition.height
        << endl;
-
+  */
   if(aw != window->allocation.width ||
      ah != window->allocation.height) {
     
@@ -675,12 +895,17 @@ void Scope_Window::Update(void)
 
   }
 
+  guint64 start = tStart->getVal();
+  guint64 stop  = tStop->getVal();
+
   for(i=0; i<8; i++) {
 
     if(signals[i])
-      signals[i]->Update();
+      signals[i]->Update(start,stop);
 
   }
+  // Debug
+  signals[0]->Dump();
 
   gtk_widget_show_all(window);
 
@@ -699,6 +924,12 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
   set_name("scope");
 
   get_config();
+
+  tStart = new TimeMarker(this, "scope.start", "Scope window start time");
+  tStop  = new TimeMarker(this, "scope.stop",  "Scope window stop time");
+
+  get_symbol_table().add(tStart);
+  get_symbol_table().add(tStop);
 
   if(enabled)
     Build();

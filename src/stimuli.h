@@ -33,9 +33,6 @@ using namespace std;
 /* forward references: */
 class Stimulus_Node;
 class stimulus;
-#if defined(OLD_IOPORT_DESIGN)
-class IOPORT;
-#endif
 class IOPIN;
 class symbol;
 
@@ -323,20 +320,44 @@ protected:
     initial_state;
 };
 
-// The PinMonitor class allows other objects to be notified whenever
-// a Pin changes states.
-// (Note: In older versions of gpsim, iopins notified the Port registers 
-// in which they were contained by direcly calling the register setbit() 
-// method. This is deprecated - and eventually will cause compile time errors.)
+
+///------------------------------------------------------------
+///
+/// SignalSink - A pure virtual class that allows signals driven by external
+/// stimuli be routed to one or more objects monitoring them (e.g. one
+/// sink may be the register associated with the port while another
+/// may be a peripheral)
+
+class SignalSink
+{
+public:
+  virtual void setSinkState(char)=0;
+};
+
+
+///------------------------------------------------------------
+/// The PinMonitor class allows other objects to be notified whenever
+/// a Pin changes states.
+/// (Note: In older versions of gpsim, iopins notified the Port registers 
+/// in which they were contained by direcly calling the register setbit() 
+/// method. This is deprecated - and eventually will cause compile time errors.)
 class PinMonitor
 {
 public:
+  void addSink(SignalSink *);
+  void removeSink(SignalSink *);
+
   virtual void setDrivenState(char)=0;
   virtual void setDrivingState(char)=0;
   virtual void set_nodeVoltage(double)=0;
   virtual void putState(char)=0;
   virtual void setDirection()=0;
   virtual void updateUI() {}  // FIXME  - make this pure virtual too.
+
+protected:
+  /// The SignalSink list is a list of all sinks that can receive data
+  list <SignalSink *> sinks;
+
 };
 
 class IOPIN : public stimulus
@@ -356,11 +377,7 @@ class IOPIN : public stimulus
       DIR_INPUT,
       DIR_OUTPUT
     };
-#if defined(OLD_IOPORT_DESIGN)
-  IOPORT *iop;         // Two ways to access parent port
-  Register **iopp;     // this second one is used to set break points.
-  unsigned int iobit;  // 
-#endif
+
 
   IOPIN(const char *n=0,
 	double _Vth=5.0, 
@@ -369,19 +386,10 @@ class IOPIN : public stimulus
 	double _ZthFloating = 1e7
 	);
 
-#if defined(OLD_IOPORT_DESIGN)
-  IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
-#endif
   ~IOPIN();
 
   virtual void setMonitor(PinMonitor *);
   virtual PinMonitor *getMonitor() { return m_monitor; }
-
-#if defined(OLD_IOPORT_DESIGN)
-  void attach_to_port(IOPORT *i, unsigned int b);
-  IOPORT *getIOPort();
-  void disconnect_from_port();
-#endif
   virtual void set_nodeVoltage(double v);
   virtual bool getDrivingState(void);
   virtual void setDrivingState(bool new_dstate);
@@ -403,9 +411,6 @@ class IOPIN : public stimulus
   virtual void set_h2l_threshold(double V) {h2l_threshold=V;}
   virtual double get_h2l_threshold() { return h2l_threshold;}
 
-#if defined(OLD_IOPORT_DESIGN)
-  virtual Register *get_iop(void);
-#endif
   virtual void toggle(void);
   virtual void attach(Stimulus_Node *s);
 
@@ -457,9 +462,6 @@ public:
 		    double _ZthFloating = 1e7,
 		    double _VthIn = 0.3,
 		    double _ZthIn = 1e8);
-#if defined(OLD_IOPORT_DESIGN)
-  IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
-#endif
   virtual double get_Zth();
   virtual double get_Vth();
   virtual char getBitChar();
@@ -496,9 +498,6 @@ public:
 		       double _Zpullup = 20e3
 		       );
 
-#if defined(OLD_IOPORT_DESIGN)
-  IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
-#endif
   ~IO_bi_directional_pu();
   virtual double get_Vth();
   virtual double get_Zth();
@@ -521,9 +520,6 @@ class IO_open_collector : public IO_bi_directional_pu
 {
 public:
   IO_open_collector(const char *n=0);
-#if defined(OLD_IOPORT_DESIGN)
-  IO_open_collector(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
-#endif
   virtual double get_Vth();
   virtual double get_Zth();
   virtual char getBitChar();

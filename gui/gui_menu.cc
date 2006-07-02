@@ -928,8 +928,8 @@ toggle_window (gpointer             callback_data,
       gpGuiProcessor->stopwatch_window->ChangeView(view_state);
       break;
     case WT_scope_window:
-      //gpGuiProcessor->scope_window->ChangeView(view_state);
-      cout << " The Scope is disabled right now\n";
+      gpGuiProcessor->scope_window->ChangeView(view_state);
+      //cout << " The Scope is disabled right now\n";
       break;
     default:
       puts("unknown menu action");
