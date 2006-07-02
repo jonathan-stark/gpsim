@@ -1,4 +1,30 @@
-2006-06-22 Scott Dattalo <scott@dattalo.com>
+2006-07-01 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc, gui/gui_scope.cc, gui/gui_processor.cc,
+	  gui/gui_main.cc:
+	  - resurrected the scope window.
+	  - ThreeStateEventLogger logs traced states.
+	  - Implemented an efficient bisecting algorithm for mapping
+	    events states onto the plotting window.
+	  - Created attributes:
+	    scope.ch0 - scope.ch7 specify nodes that are to be monitored
+	    scope.start and scope.stop specify the range of time to be
+	    viewed.
+	  Currently, the scope window cannot display real data. Instead,
+	  it will synthesize test data. The scope.start and scope.stop
+	  attributes do work.
+	* src/ioports.h, src/stimuli.h, src/stimuli.cc, src/ioports.cc:
+	  - Moved the SignalSink class to stimuli.h
+	  - Introduced addSink and removeSink methods to the PinMonitor
+	    class. 
+	  - Removed references to 'OLD_IOPORT_DESIGN'
+	* src/bitlog.cc, src/bitlog.h: The ThreeStateEventLogger class now
+	  has a flag to indicate when the event buffer is
+	  empty. Previously, a "bogus" time was placed at position 0,
+	  however this broke the logic that searches for events at
+	  particular times.
+	* src/symbol.cc: Added a debug message.
+
+2006-07-01 Scott Dattalo <scott@dattalo.com>
 	* cli/Makefile.am: Applied patch 1470810 which adds the readline
 	library to list of libraries linked with the cli library.
 

@@ -241,19 +241,23 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
   pTimeBuffer  = new guint64[max_events];
   pEventBuffer = new char[max_events];
 
-  // Initialize the first event to something bogus.
-  *pEventBuffer = -1;
-  *pTimeBuffer  = Cycle_Counter::END_OF_TIME;
+  // Initialize the time buffer
+  for (int i=0; i<max_events; i++)
+    pTimeBuffer[i] = 0;
+
   gcycles = &get_cycles();
 
   max_events--;  // make the max_events a mask
 
-  index = 0;
-
+  index = max_events;
+  bHaveEvents = false;
 }
 
 unsigned int ThreeStateEventLogger::get_index(guint64 event_time)
 {
+  if (!bHaveEvents)
+    return 0;
+
   unsigned long start_index, end_index, search_index, bstep;
 
   end_index = index;
@@ -274,7 +278,11 @@ unsigned int ThreeStateEventLogger::get_index(guint64 event_time)
 
   } while(bstep);
 
-  if(event_time < pTimeBuffer[search_index])
+  if(event_time == pTimeBuffer[search_index])
+    return search_index;
+
+  if(event_time < pTimeBuffer[search_index] && 
+     pTimeBuffer[search_index] != Cycle_Counter::END_OF_TIME)
     search_index = (--search_index & max_events);
 
   return search_index;
@@ -291,6 +299,7 @@ void ThreeStateEventLogger::event(char state)
     index = (index + 1) & max_events;
     pTimeBuffer[index] = gcycles->get();
     pEventBuffer[index] = state;
+    bHaveEvents = true;
   }
 
 }
@@ -299,6 +308,9 @@ void ThreeStateEventLogger::event(char state)
 void ThreeStateEventLogger::dump(int start_index, int end_index)
 {
     
+  if (!bHaveEvents)
+    return;
+
   if((start_index > (int)max_events) || (start_index <= 0 ))
     start_index = 0;
 

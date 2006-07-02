@@ -117,19 +117,6 @@ public:
 };
 
 ///------------------------------------------------------------
-///
-/// SignalSink - A pure virtual class that allows signals driven by external
-/// stimuli be route to one or more objects monitoring them (e.g. one
-/// sink may be the register associtated with the port while another
-/// may be a peripheral)
-
-class SignalSink
-{
-public:
-  virtual void setSinkState(char)=0;
-};
-
-///------------------------------------------------------------
 /// SinkRecipient
 /// Interface class that redirects a driven I/O pin change
 /// to the appropriate peripheral register that wants the
@@ -278,7 +265,6 @@ public:
   void setControl(SignalControl *);
   void setPullupControl(SignalControl *);
   void setDefaultPullupControl(SignalControl *);
-  void addSink(SignalSink *);
 
   char getControlState();
   char getSourceState();
@@ -294,10 +280,6 @@ public:
   virtual void setDirection();
   virtual void updateUI();
 
-
-protected:
-  /// The SignalSink list is a list of all sinks that can receive data
-  list <SignalSink *> sinks;
 
 private:
   char          m_cLastControlState;
