@@ -98,11 +98,11 @@ src_OBJECTS =			\
 	trigger.o		\
 	ttoken.o		\
 	uart.o			\
-	value.o			\
-	xref.o			\
-	ValueCollections.o	\
 	ui.o			\
-	uxtime.o
+	uxsleep.o		\
+	ValueCollections.o	\
+	value.o			\
+	xref.o
 
 ../config.h : ../config_win32.h.in
 	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
@@ -110,7 +110,7 @@ src_OBJECTS =			\
 icd.o : ../plat/win32/icd.cc
 	$(CXX) -I . $(CFLAGS) -c $< -o $@
 
-uxtime.o : ../plat/win32/uxtime.cc
+uxsleep.o : ../plat/win32/uxsleep.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 ################ The libgpsim_dspic LIB
