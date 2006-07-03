@@ -386,6 +386,9 @@ ren $(InputName).hpp $(InputName).h
 				RelativePath=".\ui_gpsim.cc">
 			</File>
 			<File
+				RelativePath="..\plat\win32\uxsleep.cc">
+			</File>
+			<File
 				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
 		</Filter>

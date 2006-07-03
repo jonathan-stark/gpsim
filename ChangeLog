@@ -1,3 +1,9 @@
+2006-07-03 Borut Razem <borut.razem@siol.net>
+	* cli/cli.vcproj, src/src.vcproj, src/makefile.mingw,
+	  plat/uxtime.cc, plat/uxsleep.cc, plat/uxtime.h: uxtime.cc splitted
+	  to uxtime.cc and uxsleep.cc, since gettimeofday() is now declared
+	  in mingw
+
 2006-07-01 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_scope.cc, gui/gui_processor.cc,
 	  gui/gui_main.cc:
@@ -94,7 +100,7 @@
 
 2006-06-10 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* doc/gpsim.lyx: Some hacked notes on creating new modules, and a few
-         other tweaks
+	 other tweaks
 
 2006-06-10 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_time.h src/stimuli.cc src/gpsim_time.cc src/processor.cc
@@ -163,7 +169,7 @@
 	  re-written.
 	* modules/switch.cc, modules/switch.h, 
 	  regression/switch_test/switch_test.asm:
-        - Switch module model changed eliminating Rclosed parameter
+	- Switch module model changed eliminating Rclosed parameter
 
 2006-03-02 Borut Razem <borut.razem@siol.net>
 	* extras/graphic_lcd/makefile.mingw, plat/win32/gpsim.nsi:
@@ -376,7 +382,7 @@
 
 2006-05-12 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* regression/run_regression.sh, regression/txisr_test/...:
-        Added a test for the correct behaviour of usart transmit interrupts
+	 Added a test for the correct behaviour of usart transmit interrupts
 
 2006-05-11 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/p16f87x.cc: A2D converter fixes for the 16f871.
@@ -448,13 +454,13 @@
 
 2006-04-29 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_object.h src/gpsim_object.cc src/stimuli.cc
-          src/stimuli.h gui/gui_breadboard.h gui/gui_breadboard.cc:
+	  src/stimuli.h gui/gui_breadboard.h gui/gui_breadboard.cc:
 	- GUI pin rename code - rewritten and moved into IOPIN class
-        * src/comparator.h src/comparator.cc p16f62x.cc: 
+	* src/comparator.h src/comparator.cc p16f62x.cc: 
 	- Do dynamic GUI pin renaming
-        * gui/Makefile.am: remove unused and incorrect defines
-        * src/processor.cc: Set 4 clock cycles per instruction cycle
-        * regression/comparator/compar_628.asm: Start by turning off comparators
+	* gui/Makefile.am: remove unused and incorrect defines
+	* src/processor.cc: Set 4 clock cycles per instruction cycle
+	* regression/comparator/compar_628.asm: Start by turning off comparators
 
 2006-04-28 Borut Razem <borut.razem@siol.net>
 	* modules/makefile.mingw, modules/modules.vcproj,
@@ -489,10 +495,10 @@
 	definitions.
 
 2006-04-23 Roy Rankin <rrankin@ihug.com.au>
-      * src/gpsim_object.h src/gpsim_object.cc gui/gui_breadboard.h
-        gui/gui_breadboard.cc: Allow pin names to be changed after breadboard
-	is started.
-      * src/stimuli.cc: minor output format change and new debuging output
+	* src/gpsim_object.h src/gpsim_object.cc gui/gui_breadboard.h
+	  gui/gui_breadboard.cc: Allow pin names to be changed after breadboard
+	  is started.
+	* src/stimuli.cc: minor output format change and new debuging output
 
 2006-04-22 Roy Rankin <rrankin@ihug.com.au>
 	* modules/switch.cc modules/switch.h: fix windows regression problem

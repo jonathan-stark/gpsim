@@ -441,6 +441,9 @@
 				RelativePath=".\ui.cc">
 			</File>
 			<File
+				RelativePath="..\plat\win32\uxsleep.cc">
+			</File>
+			<File
 				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
 			<File

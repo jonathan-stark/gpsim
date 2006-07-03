@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003 Borut Razem
+   Copyright (C) 2003-2006 Borut Razem
 
 This file is part of gpsim.
 
@@ -36,7 +36,8 @@ extern "C" {
  * Structure returned by gettimeofday(2) system call
  */
 
-#if defined _MSC_VER && !defined _WINSOCKAPI_
+#ifdef _MSC_VER
+#ifndef _WINSOCKAPI_
 struct timeval {
   unsigned long tv_sec; /* seconds */
   long tv_usec;         /* and microseconds */
@@ -48,12 +49,14 @@ struct timezone {
 };
 #endif
 
+int gettimeofday(struct timeval *tv, struct timezone *tz);
+#endif
+
 struct timespec {
   time_t  tv_sec;   /* Seconds */
   long    tv_nsec;  /* Nanoseconds */
 };
 
-int gettimeofday(struct timeval *tv, struct timezone *tz);
 int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 
 #ifdef __cplusplus
