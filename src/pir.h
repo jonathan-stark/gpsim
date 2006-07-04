@@ -139,10 +139,7 @@ public:
 
   virtual void set_cmif();
 
-  virtual void set_eeif()
-  {
-    put(get() | EEIF);
-  }
+  virtual void set_eeif();
 
   virtual unsigned int get_sspif()
   {
@@ -222,10 +219,7 @@ public:
     put(get() | ADIF);
   }
 
-  virtual void set_pspif()
-  {
-    put(get() | PSPIF);
-  }
+  virtual void set_pspif();
 
   virtual unsigned int get_txif()
   {
@@ -282,7 +276,7 @@ enum
     LVDIF   = 1<<2,
     BCLIF   = 1<<3,
     EEIF    = 1<<4,
-    CMIF    = 1<<6		/* only on the PIC18F4xx devices */
+    CMIF    = 1<<6		/* PIC16F87xA, PIC18F4xx devices */
 };
 
   virtual void set_eccp1if()
@@ -305,10 +299,8 @@ enum
       put(get() | BCLIF);
     }
 
-  virtual void set_eeif()
-    {
-      put(get() | EEIF);
-    }
+  virtual void set_eeif();
+  virtual void set_cmif();
 
   PIR2v2(INTCON *, PIE *);
 };
@@ -404,46 +396,41 @@ public:
   {
     return false;
   }
-  virtual void set_txif()
-  {}
-  virtual void clear_txif()
-  {}
+  virtual void set_txif() {}
+  virtual void clear_txif() {}
   virtual bool get_rcif()
   {
     return false;
   }
-  virtual void set_rcif()
-  {}
-  virtual void clear_rcif()
-  {}
+  virtual void set_rcif() {}
+  virtual void clear_rcif() {}
 	
   // ssp stuff
   virtual bool get_sspif()
   {
     return false;
   }
-  virtual void set_sspif()
-  {}
-  virtual void clear_sspif()
-  {}
+  virtual void set_sspif() {}
+  virtual void clear_sspif() {}
+
+  virtual void set_pspif() {}
+  virtual void set_cmif() {}
 
   // eeprom stuff
-  virtual void set_eeif()
-  {}
+  virtual void set_eeif() {}
 
   // CCP stuff
-  virtual void set_ccpif()
-  {}
+  virtual void set_ccpif() {}
 
   // Timer stuff
-  virtual void set_tmr1if()
-  {}
-  virtual void set_tmr2if()
-  {}
+  virtual void set_tmr1if() {}
+  virtual void set_tmr2if() {}
+  virtual void set_adif() {}
 };
 
 
 //----------------------------------------
+// Supports 1 or 2 Pir version 1 registers
 
 class PIR_SET_1 : public PIR_SET
 {
@@ -523,6 +510,11 @@ class PIR_SET_1 : public PIR_SET
     pir1->set_tmr2if();
   }
 
+  // A/D stuff - not part of base PIR_SET class
+  virtual void set_adif() {
+    assert(pir1 != 0);
+    pir1->set_adif();
+  }
   // Comparator
   virtual void set_cmif() {
     assert(pir1 != 0);
@@ -535,6 +527,7 @@ private:
 };
 
 
+// Supports 1, 2 or 3 version 2 Pir registers
 
 class PIR_SET_2 : public PIR_SET
 {
@@ -547,8 +540,13 @@ class PIR_SET_2 : public PIR_SET
 
   virtual bool interrupt_status() {
     assert(pir1 != 0);
-    assert(pir2 != 0);
-    return (pir1->interrupt_status() || pir2->interrupt_status());
+    if (pir1 != 0 && pir1->interrupt_status())
+	return(true);
+    else if (pir2 != 0 && pir2->interrupt_status())
+	return(true);
+    else if (pir3 != 0 && pir3->interrupt_status())
+	return(true);
+    return(false);   
   }
 
   // uart stuff
@@ -618,6 +616,17 @@ class PIR_SET_2 : public PIR_SET
   virtual void set_adif() {
     assert(pir1 != 0);
     pir1->set_adif();
+  }
+  // Comparator
+  virtual void set_cmif() {
+    assert(pir2 != 0);
+    pir2->set_cmif();
+  }
+
+  // Parallel Slave Port
+  virtual void set_pspif() {
+    assert(pir1 != 0);
+    pir1->set_pspif();
   }
 
 private:

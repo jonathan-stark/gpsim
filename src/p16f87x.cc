@@ -61,8 +61,7 @@ void P16F871::create_sfr_map()
   add_sfr_register(pir2,    0x0d, RegisterValue(0,0),"pir2");
   add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
 
-  // Parent classes just set PIR version 1
-  pir_set_2_def.set_pir1(&pir1_2_reg);
+  // Parent classes just set PIR1
   pir_set_2_def.set_pir2(&pir2_2_reg);
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
@@ -250,12 +249,11 @@ void P16F871::create_symbols()
 //========================================================================
 P16F871::P16F871(const char *_name, const char *desc)
   : P16C64(_name,desc) ,
-    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+    pir2_2_reg(&intcon_reg,&pie2)
 {
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
 
-  pir1 = &pir1_2_reg;
   pir2 = &pir2_2_reg;
 
 }

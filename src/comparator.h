@@ -141,7 +141,7 @@ protected:
   const char *cm_output_pin[2];
   CMSignalSource *cm_source[2];
   unsigned int m_CMval[2];
-  PIR_SET_1 *pir_set;
+  PIR_SET *pir_set;
   CM_stimulus *cm_stimulus[4];
 
   static const int cMaxConfigurations=8;

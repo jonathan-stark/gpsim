@@ -37,13 +37,9 @@ class P16F871 : public P16C64   // The 74 has too much RAM and too many CCPs
   // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
   // PIR2v2, but C++ only supports covariance in member function return
   // values.
-  PIR1v2 pir1_2_reg;
   PIR2v2 pir2_2_reg;
-  PIR_SET_2 pir_set_2_def;
 
-  virtual PIR *get_pir1() { return (&pir1_2_reg); }
   virtual PIR *get_pir2() { return (&pir2_2_reg); }
-  virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
   ADCON0_withccp adcon0;
   ADCON1 adcon1;

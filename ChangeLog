@@ -1,3 +1,9 @@
+2006-07-04 Roy Rankin <rrankin@ihug.com.au>
+	* src/p16x6x.h src/p16x6x.cc src/p16f87x.cc src/p16f87x.h 
+	  src/pir.cc src/pir.h src/comparator.h src/a2dconverter.h
+	  src/comparator.cc regression/comparator/compar_877a.asm:
+	- Fixes involving PIR_SET
+
 2006-07-03 Borut Razem <borut.razem@siol.net>
 	* cli/cli.vcproj, src/src.vcproj, src/makefile.mingw,
 	  plat/uxtime.cc, plat/uxsleep.cc, plat/uxtime.h: uxtime.cc splitted

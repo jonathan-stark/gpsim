@@ -150,6 +150,14 @@ void PIR1v1::set_cmif(void)
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 }
+
+void PIR1v1::set_eeif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | EEIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
 //------------------------------------------------------------------------
 //
 PIR1v2::PIR1v2(INTCON *_intcon, PIE *_pie)
@@ -172,6 +180,14 @@ void PIR1v2::set_txif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | TXIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
+
+void PIR1v2::set_pspif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | PSPIF);
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 }
@@ -211,6 +227,20 @@ PIR2v2::PIR2v2(INTCON *_intcon, PIE *_pie)
   writable_bits = valid_bits;
 }
 
+void PIR2v2::set_cmif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | CMIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
+void PIR2v2::set_eeif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | EEIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
 //------------------------------------------------------------------------
 PIR3v2::PIR3v2(INTCON *_intcon, PIE *_pie)
   : PIR(_intcon, _pie,0)

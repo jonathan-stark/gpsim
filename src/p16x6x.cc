@@ -534,6 +534,8 @@ void P16C64::create_sfr_map(void)
    if(verbose)
     cout << "creating c64 registers\n";
 
+  pir_set_2_def.set_pir1(&pir1_2_reg);
+
 
   P16X6X_processor::create_sfr_map();
 
@@ -601,10 +603,13 @@ Processor * P16C64::construct(const char *name)
 }
 
 P16C64::P16C64(const char *_name, const char *desc)
-  : P16X6X_processor(_name,desc)
+  : P16X6X_processor(_name,desc), 
+  pir1_2_reg(&intcon_reg,&pie1)
 {
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
+
+  pir1 = &pir1_2_reg;
 
   m_portd = new PicPortRegister("portd",8,0xff);
   m_trisd = new PicTrisRegister("trisd",m_portd);
