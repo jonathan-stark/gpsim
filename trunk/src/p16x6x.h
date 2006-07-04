@@ -137,6 +137,17 @@ class P16C63 : public  P16C62
 class P16C64 : public  P16X6X_processor
 {
   public:
+  // XXX
+  // This pir1_2, pir2_2 stuff is not particularly pretty.  It would be
+  // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
+  // PIR2v2, but C++ only supports covariance in member function return
+  // values.
+  PIR1v2 pir1_2_reg;
+  PIR_SET_2 pir_set_2_def;
+  virtual PIR *get_pir1() { return (&pir1_2_reg); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
+
+
 
   PicPortRegister  *m_portd;
   PicTrisRegister  *m_trisd;

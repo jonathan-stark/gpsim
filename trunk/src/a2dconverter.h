@@ -176,7 +176,7 @@ class ADCON0_withccp : public ADCON0
 {
 public:
 
-  PIR_SET_2   *pir_set;
+  PIR_SET   *pir_set;
   virtual void set_interrupt();
 
 };

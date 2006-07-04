@@ -133,7 +133,7 @@ void CMCON::setOUTpin(int i, PinModule *newPinModule)
 }
 void CMCON::assign_pir_set(PIR_SET *new_pir_set)
 {
-    pir_set = (PIR_SET_1 *)new_pir_set;
+    pir_set = new_pir_set;
 }
 
 double CMCON::comp_voltage(int ind, int invert)
