@@ -7,6 +7,9 @@ if not exist %TargetDir%\bin\*.*                 md %TargetDir%\bin
 if not exist %TargetDir%\etc\*.*                 md %TargetDir%\etc
 if not exist %TargetDir%\lib\*.*                 md %TargetDir%\lib
 if not exist %TargetDir%\popt1.dll               copy ..\..\popt\bin\popt1.dll %TargetDir%
+if not exist %TargetDir%\libcairo-2.dll          copy ..\..\cairo\bin\libcairo-2.dll %TargetDir%
+if not exist %TargetDir%\libpng13.dll            copy ..\..\png\bin\libpng13.dll %TargetDir%
+if not exist %TargetDir%\zlib1.dll               copy ..\..\png\bin\zlib1.dll %TargetDir%
 if not exist %TargetDir%\libintl-2.dll           copy ..\..\intl\bin\libintl-2.dll %TargetDir%
 if not exist %TargetDir%\libiconv-2.dll          copy ..\..\iconv\bin\libiconv-2.dll %TargetDir%
 if not exist %TargetDir%\libglib-2.0-0.dll       copy ..\..\glib\bin\libglib-2.0-0.dll %TargetDir%
@@ -27,7 +30,9 @@ if not exist %TargetDir%\lib\gtk-2.0\2.4.0\*.*   xcopy /s "..\..\gtk+\lib\gtk-2.
 if not exist %TargetDir%\gtkextra-win32-2.1.dll  copy "..\..\gtkextra-2\bin\gtkextra-win32-2.1.dll" %TargetDir%
 
 if not exist %TargetDir%\libpango-1.0-0.dll      copy ..\..\pango\bin\libpango-1.0-0.dll %TargetDir%
+if not exist %TargetDir%\libpangocairo-1.0-0.dll copy ..\..\pango\bin\libpangocairo-1.0-0.dll %TargetDir%
 if not exist %TargetDir%\libpangowin32-1.0-0.dll copy ..\..\pango\bin\libpangowin32-1.0-0.dll %TargetDir%
+if not exist %TargetDir%\libpangoft2-1.0-0.dll   copy ..\..\pango\bin\libpangoft2-1.0-0.dll %TargetDir%
 if not exist %TargetDir%\etc\pango\*.*           md %TargetDir%\etc\pango
 if not exist %TargetDir%\lib\pango\*.*           md %TargetDir%\lib\pango
 if not exist %TargetDir%\etc\pango\pango.*       xcopy /s ..\..\pango\etc\pango\*.* %TargetDir%\etc\pango

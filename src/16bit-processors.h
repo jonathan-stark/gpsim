@@ -70,20 +70,20 @@ class _16bit_processor : public pic_processor
 
 public:
 
-  static const int CONFIG1L = 0x300000;
-  static const int CONFIG1H = 0x300001;
-  static const int CONFIG2L = 0x300002;
-  static const int CONFIG2H = 0x300003;
-  static const int CONFIG3L = 0x300004;
-  static const int CONFIG3H = 0x300005;
-  static const int CONFIG4L = 0x300006;
-  static const int CONFIG4H = 0x300007;
-  static const int CONFIG5L = 0x300008;
-  static const int CONFIG5H = 0x300009;
-  static const int CONFIG6L = 0x30000A;
-  static const int CONFIG6H = 0x30000B;
-  static const int CONFIG7L = 0x30000C;
-  static const int CONFIG7H = 0x30000D;
+  static const unsigned int CONFIG1L = 0x300000;
+  static const unsigned int CONFIG1H = 0x300001;
+  static const unsigned int CONFIG2L = 0x300002;
+  static const unsigned int CONFIG2H = 0x300003;
+  static const unsigned int CONFIG3L = 0x300004;
+  static const unsigned int CONFIG3H = 0x300005;
+  static const unsigned int CONFIG4L = 0x300006;
+  static const unsigned int CONFIG4H = 0x300007;
+  static const unsigned int CONFIG5L = 0x300008;
+  static const unsigned int CONFIG5H = 0x300009;
+  static const unsigned int CONFIG6L = 0x30000A;
+  static const unsigned int CONFIG6H = 0x30000B;
+  static const unsigned int CONFIG7L = 0x30000C;
+  static const unsigned int CONFIG7H = 0x30000D;
 
   // So far, all 18xxx parts contain ports A,B,C
   PicPortRegister  *m_porta;

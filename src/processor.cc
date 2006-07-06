@@ -677,7 +677,7 @@ void Processor::list(unsigned int file_id,
 
   start_line = (start_line < 0) ? 0 : start_line;
   end_line   = (end_line <= start_line) ? (start_line + 5) : end_line;
-  end_line   = (end_line > fc->max_line()) ? fc->max_line() : end_line;
+  end_line   = (end_line > (int)fc->max_line()) ? fc->max_line() : end_line;
   cout << " listing " << fc->name() << " Starting line " << start_line
        << " Ending line " << end_line << '\n';
 
@@ -685,7 +685,7 @@ void Processor::list(unsigned int file_id,
     return;
 
 
-  for(unsigned int i=start_line; i<=end_line; i++)
+  for(unsigned int i=start_line; i<=(unsigned int)end_line; i++)
   {
 
     char buf[256];
