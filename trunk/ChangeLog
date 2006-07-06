@@ -1,4 +1,16 @@
 2006-07-05 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_scope.cc: IOPINs can now be attached to scope
+	channels. The attachment can only be made at the command line:
+	 gpsim> scope.ch0="porta0"
+	Everytime the state of porta0 is changed, the event will also be
+	sent to the scope window where it will get logged and
+	displayed. (Note, the quotes are necessary to prevent gpsim from
+	evaluating the pin name.)
+	* regression/logic_test/logic_test.asm: The logic OR gates
+	connected to porta0,porta1,porta2,portc0 are now displayed in the
+	scope window.
+	
+2006-07-05 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added a virtual destructor to the
 	PinMonitor class.
 	* src/16bit-processors.h, src/16bit-processors.cc,
