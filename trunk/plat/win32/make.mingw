@@ -47,10 +47,15 @@ PTHREAD_PATH = $(TOP)/pthreads
 # produced libraries are also callable from MSVC-compiled code. Only
 # gcc 2.95 or later for mingw (distributed by Mumit Khan) have the
 # -fnative-struct switch.
+#
+# ccache - Cache for gcc - saves time re-compiling
+# The ccache modifier is normally an empty string. However, if you
+# have ccache.exe install, then define 
+# $ export CCACHE=ccache
 
-CCOMPILER = gcc
+CCOMPILER = $(CCACHE) gcc
 CC = $(CCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
-CXXCOMPILER = c++
+CXXCOMPILER = $(CCACHE) c++
 CXX = $(CXXCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 
 ################
