@@ -41,6 +41,7 @@ gpsim_la - plug in.
 #include <glib.h>
 
 #include "../src/bitlog.h"
+#include "../src/symbol.h"
 
 #include "gui.h"
 #include "gui_scope.h"
@@ -139,6 +140,7 @@ public:
   void SearchAndPlot(timeMap &left, timeMap &right);
   void Dump(); // debug
   void setData(char c);
+  void setSource(const char *);
 protected:
   void PlotTo(timeMap &left, timeMap &right);
   WaveformSink *m_pSink;
@@ -179,6 +181,7 @@ void WaveformSource::set(const char *cp, int len)
 {
   if (!m_bHaveSource) {
     String::set(cp,len);
+    m_pParent->setSource(cp);
     m_bHaveSource = true;
   }
 
@@ -224,6 +227,19 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
 void Waveform::setData(char c)
 {
   m_logger->event(c);
+}
+
+void Waveform::setSource(const char *sourceName)
+{
+  IOPIN *ppin = dynamic_cast<IOPIN*>(get_symbol_table().findStimulus(sourceName));
+  if (ppin) {
+    printf("%s is a valid source\n",sourceName);
+
+    PinMonitor *ppm = ppin->getMonitor();
+    if (ppm)
+      ppm->addSink(new WaveformSink(this));
+  }
+
 }
 
 static gint Waveform_expose_event (GtkWidget *widget,
@@ -358,7 +374,7 @@ void Waveform::PlotTo(timeMap &left, timeMap &right)
 
   // Now draw a vertical line for the event
 
-  int nextEvent = (m_logger->get_state(right.eventIndex) == '1') ? (height-3) : 1;
+  int nextEvent = (m_logger->get_state(right.eventIndex) == '1') ? 1 : (height-3);
 
   gdk_draw_line(pixmap,drawing_gc,
 		right.pos, m_last.event,    // last point drawn
@@ -544,7 +560,7 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
   left.pos = 0;
   left.time = uiStart;
   left.eventIndex = m_logger->get_index(uiStart);
-  left.event = (m_logger->get_state(left.eventIndex) == '1') ? (height-3) : 1;
+  left.event = (m_logger->get_state(left.eventIndex) == '1') ? 1 : (height-3);
 
   m_last = left;
 
