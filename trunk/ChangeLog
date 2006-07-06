@@ -1,4 +1,13 @@
 2006-07-05 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.h, src/stimuli.cc: Added a virtual destructor to the
+	PinMonitor class.
+	* src/16bit-processors.h, src/16bit-processors.cc,
+	src/pic-ioports.cc, src/processor.cc, src/gpsim_object.cc: minor
+	changes to remove compiler warnings.
+	* gpsim/CopyDlls.bat: This bat file copies the DLLs for the win32
+	builds to the gpsim/gpsim. A few more DLLs were added to the list.
+	
+2006-07-05 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/make.mingw: Added an option to use ccache for mingw
 	builds. Unfortunately, for this to work well the makefile
 	dependencies also need to be implemented correctly. 

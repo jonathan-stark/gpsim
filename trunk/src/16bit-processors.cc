@@ -517,8 +517,8 @@ unsigned int _16bit_processor::get_program_memory_at_address(unsigned int addres
   if (address >= CONFIG1L && address <= 0x30000D)
     return get_config_word(address);
 
-  static const int DEVID1 = 0x3ffffe;
-  static const int DEVID2 = 0x3fffff;
+  static const unsigned int DEVID1 = 0x3ffffe;
+  static const unsigned int DEVID2 = 0x3fffff;
   if (address == DEVID1)
     return 0;
   if (address == DEVID2)
@@ -583,7 +583,7 @@ void _16bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory *[configMemorySize()];
 
-  for (int i=0; i<configMemorySize(); i++)
+  for (unsigned int i=0; i<configMemorySize(); i++)
     m_configMemory[i] = 0;
 
   m_configMemory[CONFIG1H-CONFIG1L] = new Config1H(this, CONFIG1H);

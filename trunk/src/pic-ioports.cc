@@ -163,7 +163,7 @@ void PicPortBRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
 
-  unsigned int diff = mEnableMask & (new_value ^ value.data);
+//  unsigned int diff = mEnableMask & (new_value ^ value.data);
 //RRR  if(diff) {
     drivingValue = new_value & mEnableMask;
     value.data = drivingValue;

@@ -32,6 +32,7 @@ include/gpsim:
 
 extras: include/gpsim extras-graphic-lcd extras-lcd
 
+
 extras-graphic-lcd:
 	export GPSIM_DEF_PATH=../../../plat/win32; \
 	export GPSIM_LIB_PATH=../../../src; \

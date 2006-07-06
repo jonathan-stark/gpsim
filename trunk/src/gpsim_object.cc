@@ -60,7 +60,6 @@ string gpsimObject::showType()
   {
     char buf[256];
     int cnt;
-    int i = 0;
 
     name++;
     buf[0] = 0;
