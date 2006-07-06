@@ -682,6 +682,14 @@ void   stimulus::getThevenin(double &v, double &z, double &c)
 
 //========================================================================
 // 
+PinMonitor::PinMonitor()
+{
+}
+
+PinMonitor::~PinMonitor()
+{
+}
+
 void PinMonitor::addSink(SignalSink *new_sink)
 {
   if(new_sink)

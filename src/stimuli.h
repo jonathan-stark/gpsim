@@ -344,6 +344,9 @@ public:
 class PinMonitor
 {
 public:
+  PinMonitor();
+  virtual ~PinMonitor();
+
   void addSink(SignalSink *);
   void removeSink(SignalSink *);
 
