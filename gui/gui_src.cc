@@ -43,11 +43,6 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 #include <map>
 
-class KeyEvent
-{
-public:
-  virtual void action(gpointer data = 0) = 0;
-};
 
 class StepEvent : public KeyEvent
 {
@@ -115,7 +110,7 @@ public:
   }
 };
 
-map<guint, KeyEvent *> KeyMap;
+static map<guint, KeyEvent *> KeyMap;
 
 
 static gint
