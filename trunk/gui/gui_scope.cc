@@ -43,7 +43,6 @@ gpsim_la - plug in.
 #include "../src/bitlog.h"
 #include "../src/symbol.h"
 
-#include "gui.h"
 #include "gui_scope.h"
 
 // Number of Input Ports:
@@ -711,16 +710,20 @@ void TimeMarker::set(gint64 i)
 }
 //------------------------------------------------------------------------
 //
-// Scope_Window member functions
+// Scope_Window data items that need to go into the Scope_Window class.
+// The reason they're here now is simply for development convenience.
 //
 //
-
-TimeMarker *tStart=0;
-TimeMarker *tStop=0;
 
 Waveform *signals[8];   // hack
 int aw=0;
 int ah=0;
+static map<guint, KeyEvent *> KeyMap;
+
+//------------------------------------------------------------------------
+//
+// Scope_Window member functions
+//
 
 //------------------------------------------------------------------------
 
@@ -900,8 +903,8 @@ void Scope_Window::Update(void)
 
   }
 
-  guint64 start = tStart->getVal();
-  guint64 stop  = tStop->getVal();
+  guint64 start = m_tStart->getVal();
+  guint64 stop  = m_tStop->getVal();
 
   for(i=0; i<8; i++) {
 
@@ -930,11 +933,11 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
 
   get_config();
 
-  tStart = new TimeMarker(this, "scope.start", "Scope window start time");
-  tStop  = new TimeMarker(this, "scope.stop",  "Scope window stop time");
+  m_tStart = new TimeMarker(this, "scope.start", "Scope window start time");
+  m_tStop  = new TimeMarker(this, "scope.stop",  "Scope window stop time");
 
-  get_symbol_table().add(tStart);
-  get_symbol_table().add(tStop);
+  get_symbol_table().add(m_tStart);
+  get_symbol_table().add(m_tStop);
 
   if(enabled)
     Build();
