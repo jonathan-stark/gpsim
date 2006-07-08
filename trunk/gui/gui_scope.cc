@@ -147,6 +147,8 @@ protected:
   ThreeStateEventLogger *m_logger;
   timeMap m_last;
   WaveformSource *m_pSourceName;
+
+  GtkEntry  *m_pEntry;
 };
 
 /***********************************************************************
@@ -163,6 +165,24 @@ protected:
   Waveform *m_pWaveform;
 };
 
+
+//========================================================================
+// Signals
+
+static int WaveformEntryActivate(GtkEntry *pEntry,
+				 Waveform *pWaveform)
+{
+  if (pEntry) {
+
+    if (pWaveform) {
+
+      pWaveform->setSource(gtk_entry_get_text(pEntry));
+    }
+
+  }
+
+  return TRUE;
+}
 
 //========================================================================
 // WaveformSource
@@ -215,6 +235,7 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
 
   sw = parent;
 
+  m_pEntry = 0;
   m_pSink = new WaveformSink(this);
   m_logger = new ThreeStateEventLogger();
   m_pSourceName = new WaveformSource(this,name);
@@ -233,13 +254,14 @@ void Waveform::setSource(const char *sourceName)
 {
   IOPIN *ppin = dynamic_cast<IOPIN*>(get_symbol_table().findStimulus(sourceName));
   if (ppin) {
-    printf("%s is a valid source\n",sourceName);
-
     PinMonitor *ppm = ppin->getMonitor();
     if (ppm)
       ppm->addSink(new WaveformSink(this));
-  }
 
+    if (m_pEntry)
+      gtk_entry_set_text(m_pEntry,sourceName);
+  } else if(sourceName)
+     printf("%s is not a valid source for the scope\n",sourceName);
 }
 
 static gint Waveform_expose_event (GtkWidget *widget,
@@ -288,16 +310,18 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
   parent_table = _parent_table;
   row = _row;
 
-  cout << "Waveform::" << __FUNCTION__ << "  row " << row << endl;
-
   drawing_area = gtk_drawing_area_new ();
   gtk_widget_set_usize (drawing_area,width,height);    
   gtk_widget_set_events (drawing_area, GDK_EXPOSURE_MASK );    
-  gtk_table_attach_defaults (GTK_TABLE(parent_table),drawing_area,0,10,row,row+1);
+  gtk_table_attach_defaults (GTK_TABLE(parent_table),drawing_area,1,10,row,row+1);
 
-  cout <<  "Waveform::" << __FUNCTION__ 
-       << "  width " << width
-       << "  height " << height << endl;
+  m_pEntry = GTK_ENTRY(gtk_entry_new());
+  gtk_table_attach_defaults (GTK_TABLE(parent_table),
+			     GTK_WIDGET(m_pEntry),0,1,row,row+1);
+  gtk_signal_connect (GTK_OBJECT (m_pEntry),
+		      "activate",
+		      GTK_SIGNAL_FUNC (WaveformEntryActivate),
+		      this);
 
   if (pixmap)
     gdk_pixmap_unref(pixmap);
@@ -444,15 +468,15 @@ void Waveform::Dump()
 
 void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 {
-  int x,y;
+  int x;
   GdkRectangle update_rect;
-
+#if 0
   int line_separation,pin_number;
   int point,y_text,y_0,y_1;
   float x_scale,y_scale;
   int max_str,new_str,br_length;
   char *s,ss[10];
-
+#endif
   isUpToDate = false;
 
   if(!isBuilt || isUpToDate)
@@ -519,38 +543,6 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
   if (uiEnd == 0)
     return; 
 
-#if 0
-  // Draw Vertical Grid Lines:
-  gdk_gc_set_foreground(drawing_gc,&grid_v_line_color);
-  x_scale = (float)(width-max_str)/(float)bit_points;
-  //    cout << "x_scale:" << x_scale << "\n";
-  //    cout << "y_scale:" << y_scale << "\n";    
-    
-  for (point=0;point<bit_points;point++)
-    {
-      x = (int)(((float)point)*x_scale+max_str);
-      gdk_draw_line(pixmap,drawing_gc,x,0,x,height);
-    }
-  // Draw Horizontal Grid Lines:
-  gdk_gc_set_foreground(drawing_gc,&grid_line_color);    
-  for (pin_number=0;pin_number<(NUM_PORTS-1);pin_number++)
-    {
-      y = (int)(y_scale*(float)(pin_number+1));
-      gdk_draw_line(pixmap,drawing_gc,0,y,width,y;)
-    }
-
-#endif
-
-  // TEST!!!
-
-  {
-    unsigned int index = m_logger->get_index();
-    if ( m_logger->get_time(index)+10 < uiEnd) {
-      char nextEvent = (m_logger->get_state(index)=='0') ? '1' :'0';
-      m_logger->event(nextEvent);
-      cout << "added event " << nextEvent << " @ time 0x"<<hex<<uiEnd <<endl;
-    }
-  }
   // Draw Signals:
   gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
 
@@ -614,9 +606,6 @@ void Waveform::Expose(void)
 
   if(!isUpToDate)
     Update();
-
-  //cout <<  "function:" << __FUNCTION__ << "\n";    
-
 
   gdk_draw_pixmap(drawing_area->window,
 		  drawing_area->style->fg_gc[GTK_WIDGET_STATE (drawing_area)],
@@ -759,7 +748,7 @@ void Scope_Window::Build(void)
   // The Scope window is built on top of a 10X10 packing table
   //
 
-  table = gtk_table_new (10,10,TRUE);
+  table = gtk_table_new (10,10,FALSE);
   gtk_table_set_col_spacings(GTK_TABLE(table),5);
 
   //
@@ -921,7 +910,7 @@ void Scope_Window::Update(void)
 
   }
   // Debug
-  signals[0]->Dump();
+  //  signals[0]->Dump();
 
   gtk_widget_show_all(window);
 
