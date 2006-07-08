@@ -22,17 +22,26 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SCOPE_H__
 #define __GUI_SCOPE_H__
 
+#include "gui.h"
+
+class TimeMarker;
+
 //
 // The Scope Window
 //
 
 class Scope_Window : public GUI_Object
 {
- public:
+public:
 
   Scope_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
+
+private:
+  TimeMarker *m_tStart;
+  TimeMarker *m_tStop;
+
 
 };
 

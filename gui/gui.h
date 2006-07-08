@@ -193,6 +193,16 @@ public:
 
 };
 
+//------------------------------------------------------------------------
+// The KeyEvent class is used for key mapping (e.g. mapping the 's' 
+// key to step)
+
+class KeyEvent
+{
+public:
+  virtual void action(gpointer data = 0) = 0;
+};
+
 //
 // External references and function prototypes
 //

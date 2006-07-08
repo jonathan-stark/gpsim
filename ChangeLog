@@ -1,9 +1,14 @@
-2006-07-05 Scott Dattalo <scott@dattalo.com>
+2006-07-08 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_scope.cc, gui/gui_scope.h, gui/gui.h, gui/gui_src.cc:
+	- Moved the KeyEvent class definition to gui.h.
+	- Moved gui_scope local declarations to Scope_Window class.
+
+2006-07-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc: Added a GtkEntry widget to hold scope signal
 	names. Now signals can be specified either through the GtkEntry or
 	by the command line attributes.
 	
-2006-07-05 Scott Dattalo <scott@dattalo.com>
+2006-07-06 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc: IOPINs can now be attached to scope
 	channels. The attachment can only be made at the command line:
 	 gpsim> scope.ch0="porta0"
