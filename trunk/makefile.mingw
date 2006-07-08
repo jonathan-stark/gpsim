@@ -21,6 +21,20 @@ clean:
 	rm -f config.h
 	for D in $(CLEAN_PARTS); do $(MAKE) -C $$D -f makefile.mingw clean; done
 
+################
+# The mingw makefiles don't handle dependencies well. However this little
+# hack can  work around this:
+#
+# $ make -f makefile.mingw depend
+# $ make -f mf
+
+MF=mf
+depend:
+	for D in $(PARTS); do $(MAKE) -C $$D -f makefile.mingw depend; done
+	@echo "# Automatically generated makefile" > ${MF}
+	@echo "include makefile.mingw"  >> ${MF}
+
+
 ################ The extras modules
 
 .PHONY: extras extras-usart-con extras-graphic-lcd extras-lcd
