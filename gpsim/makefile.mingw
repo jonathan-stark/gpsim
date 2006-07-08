@@ -57,3 +57,4 @@ gpsim.exe : $(gpsim_OBJECTS) $(gpsim_LIBS)
 	$(CXX) $(CFLAGS) $(CLDFLAGS) \
 	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib \
 	-o gpsim.exe $(gpsim_OBJECTS) -Wl,--whole-archive $(gpsim_LIBS) -Wl,--no-whole-archive $(libgpsim_LIBS) $(LIBS)
+

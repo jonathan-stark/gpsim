@@ -61,3 +61,5 @@ settings_reg.o : ../plat/win32/settings_reg.cpp
 libgui.a : $(gui_OBJECTS)
 	$(RM) -f $@
 	$(AR) $(ARFLAGS) $@ $(gui_OBJECTS)
+
+
