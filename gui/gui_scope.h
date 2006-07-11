@@ -25,6 +25,8 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 
 class TimeMarker;
+class ZoomAttribute;
+class PanAttribute;
 
 //
 // The Scope Window
@@ -38,11 +40,19 @@ public:
   virtual void Build(void);
   virtual void Update(void);
 
+  /// zoom - positive values mean zoom in, negative values mean zoom out
+  void zoom(int);
+
+  /// pan - positive values mean pan right, negative values mean pan left.
+  void pan(int);
+
 private:
   TimeMarker *m_tStart;
   TimeMarker *m_tStop;
+  ZoomAttribute *m_zoom;
+  PanAttribute  *m_pan;
 
-
+  bool m_bFrozen;
 };
 
 

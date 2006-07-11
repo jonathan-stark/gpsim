@@ -111,6 +111,32 @@ private:
 };
 
 /***********************************************************************
+ zoom
+ */
+class ZoomAttribute : public Integer
+{
+public:
+  ZoomAttribute(Scope_Window *);
+  virtual void set(gint64 i);
+
+private:
+  Scope_Window *m_pSW;
+};
+
+/***********************************************************************
+ pan
+ */
+class PanAttribute : public Integer
+{
+public:
+  PanAttribute(Scope_Window *);
+  virtual void set(gint64 i);
+
+private:
+  Scope_Window *m_pSW;
+};
+
+/***********************************************************************
   Waveform class
 
   This holds the gui information related with a gpsim waveform
@@ -166,6 +192,20 @@ protected:
 
 
 //========================================================================
+class ZoomInEvent : public KeyEvent
+{
+public:
+  void action(gpointer data)
+  {
+    //Scope_Window *sw = dynamic_cast<Scope_Window *>(data);
+    //Scope_Window *sw = (Scope_Window *)(data);
+    /*if (sw)
+      sw->zoomIn();
+    */
+    cout << "ZoomIn\n";
+  }
+};
+//========================================================================
 // Signals
 
 static int WaveformEntryActivate(GtkEntry *pEntry,
@@ -181,6 +221,25 @@ static int WaveformEntryActivate(GtkEntry *pEntry,
   }
 
   return TRUE;
+}
+//========================================================================
+
+static map<guint, KeyEvent *> KeyMap;
+
+static gint
+key_press(GtkWidget *widget,
+	  GdkEventKey *key, 
+	  gpointer data)
+{
+
+  KeyEvent *pKE = KeyMap[key->keyval];
+  if(pKE) 
+    {
+      pKE->action(data);
+      return TRUE;
+    }
+
+  return FALSE;
 }
 
 //========================================================================
@@ -206,6 +265,37 @@ void WaveformSource::set(const char *cp, int len)
 
 }
 
+//========================================================================
+
+ZoomAttribute::ZoomAttribute(Scope_Window *pSW)
+  : Integer("scope.zoom",0,"Scope Zoom; positive values zoom in, negative values zoom out"), 
+    m_pSW(pSW)
+{
+  assert(m_pSW);
+  m_bClearableSymbol = false;
+
+}
+void ZoomAttribute::set(gint64 i)
+{
+  Integer::set(i);
+  m_pSW->zoom(i);
+}
+
+//========================================================================
+
+PanAttribute::PanAttribute(Scope_Window *pSW)
+  : Integer("scope.pan",0,"Scope Pan; positive values pan right, negative values pan left"), 
+    m_pSW(pSW)
+{
+  assert(m_pSW);
+  m_bClearableSymbol = false;
+
+}
+void PanAttribute::set(gint64 i)
+{
+  Integer::set(i);
+  m_pSW->pan(i);
+}
 
 //========================================================================
 WaveformSink::WaveformSink(Waveform *pParent)
@@ -329,7 +419,7 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
 			  width,
 			  height,
 			  -1);
-
+  g_object_set(GTK_OBJECT (drawing_area), "can-focus", TRUE, NULL);
   gtk_signal_connect (GTK_OBJECT (drawing_area),
 		      "expose_event",
 		      GTK_SIGNAL_FUNC (Waveform_expose_event),
@@ -338,6 +428,19 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
   gtk_signal_connect (GTK_OBJECT(drawing_area),"configure_event",
 		      (GtkSignalFunc) Waveform_configure_event,
 		      this);
+
+  KeyMap['z'] = new ZoomInEvent();
+  KeyMap['Z'] = KeyMap['z'];
+  //KeyMap['l'] = new PanLeftEvent();
+  //KeyMap['r'] = new PanRightEvent();
+
+
+  /* Add a signal handler for key press events. This will capture
+   * key commands for single stepping, running, etc.
+   */
+  gtk_signal_connect(GTK_OBJECT(drawing_area),"key_press_event",
+		     (GtkSignalFunc) key_press,
+		     (gpointer) this);
 
   // Graphics Context:
   drawing_gc = gdk_gc_new(drawing_area->window);
@@ -718,7 +821,6 @@ void TimeMarker::set(gint64 i)
 Waveform *signals[8];   // hack
 int aw=0;
 int ah=0;
-static map<guint, KeyEvent *> KeyMap;
 
 //------------------------------------------------------------------------
 //
@@ -879,6 +981,9 @@ void Scope_Window::Update(void)
   int i;
   if(!bIsBuilt)
     Build();
+
+  if(m_bFrozen)
+    return;
   /*
   cout << "function:" << __FUNCTION__ << "\n";
   cout << " a  x "  << window->allocation.x
@@ -936,12 +1041,68 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
   m_tStart = new TimeMarker(this, "scope.start", "Scope window start time");
   m_tStop  = new TimeMarker(this, "scope.stop",  "Scope window stop time");
 
+  m_zoom = new ZoomAttribute(this);
+  m_pan  = new PanAttribute(this);
+
   get_symbol_table().add(m_tStart);
   get_symbol_table().add(m_tStop);
+  get_symbol_table().add(m_zoom);
+  get_symbol_table().add(m_pan);
+
+  m_bFrozen = false;
 
   if(enabled)
     Build();
 
 }
 
+void Scope_Window::zoom(int i)
+{
+  cout << "zoom " << i << endl;
+
+  m_bFrozen = true;
+  gint64 start = (gint64) m_tStart->getVal();
+  gint64 stop  = (gint64) m_tStop->getVal();
+
+  gint64 mid  = (start + stop)/2;
+  gint64 span = (stop - start)/2;
+  if (i>0)
+    span /= i;
+  else
+    span *= -i;
+  start = mid - span;
+  stop  = mid + span;
+
+  gint64 now  = (gint64) get_cycles().value;
+
+  if (start > stop) {
+    start = mid - 1;
+    stop = mid + 1;
+  }
+  
+  start = (start < 0) ? 0 : start;
+  stop  = (stop > now) ? now : stop;
+
+  m_tStart->set(start);
+  m_bFrozen = false;
+  m_tStop->set(stop);
+
+}
+
+void Scope_Window::pan(int i)
+{
+  cout << "pan " << i << endl;
+  m_bFrozen = true;
+  gint64 start = i+(gint64) m_tStart->getVal();
+  gint64 stop  = i+(gint64) m_tStop->getVal();
+  gint64 now  = (gint64) get_cycles().value;
+
+  start = (start < 0) ? 0 : start;
+  stop  = (stop > now) ? now : stop;
+
+  m_tStart->set(start);
+  m_bFrozen = false;
+  m_tStop->set(stop);
+
+}
 #endif //HAVE_GUI

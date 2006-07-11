@@ -1,3 +1,9 @@
+2006-07-11 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_scope.h, gui/gui_scope.cc: Added scope.zoom and
+	scope.pan attributes that allow the image in the scope window to
+	be panned and zoomed.
+	* src/makefile.mingw: added the new psp.cc file.
+
 2006-07-11 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16x6x.h src/p18x.h src/p16x6x.cc src/pic-ioports.h
 	  src/Makefile.am src/psp.cc src/p18x.cc src/psp.h src/pic-ioports.cc
@@ -6,6 +12,16 @@
 	  regression/psp/Makefile regression/run_regression.sh:
 	- Add PSP functionality to 40 pin processors based on P16C64 & P18C4x2
 
+2006-07-08 Scott Dattalo <scott@dattalo.com>
+	* makefile.mingw, plat/win32/make.mingw: Created a 'make depend'
+	rule for the win32 makefiles. Here's how it works; first create
+	the dependency file:
+	$ make -f makefile.mingw depend
+	This will create a file named 'mf' in each directory. Now gpsim
+	can be built by:
+	$ make -f mf
+	(Note: There is a bug with make depend in the modules directory).
+	
 2006-07-08 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc, gui/gui_scope.h, gui/gui.h, gui/gui_src.cc:
 	- Moved the KeyEvent class definition to gui.h.
