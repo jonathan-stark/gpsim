@@ -88,6 +88,7 @@ src_OBJECTS =			\
 	pir.o			\
 	program_files.o		\
 	processor.o		\
+	psp.o			\
 	registers.o		\
 	sim_context.o		\
 	ssp.o			\
