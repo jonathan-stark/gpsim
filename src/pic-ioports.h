@@ -48,6 +48,7 @@ protected:
   PicPortRegister *m_port;
 };
 
+
 class PicPortBRegister : public PicPortRegister
 {
 public:
@@ -68,4 +69,33 @@ private:
 
 };
 
+class PSP;
+
+class PicPSP_PortRegister : public PortRegister
+{
+public:
+  PicPSP_PortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get();
+  void setPSP(PSP *pspReg) { m_psp = pspReg;}
+  void setTris(PicTrisRegister *new_tris);
+  Register *getTris();
+protected:
+  PicTrisRegister *m_tris;
+  PSP           *m_psp;
+};
+
+class PicPSP_TrisRegister : public sfr_register
+{
+
+public:
+
+  PicPSP_TrisRegister(const char *tris_name, PicPortRegister *);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get();
+  
+protected:
+  PicPortRegister *m_port;
+};
 #endif  // __PIC_IOPORTS_H__

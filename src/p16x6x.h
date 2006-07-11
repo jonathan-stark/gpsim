@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "intcon.h"
 #include "pir.h"
 #include "ssp.h"
+#include "psp.h"
 
 class P16C61 : public P16X8X
 {
@@ -148,12 +149,13 @@ class P16C64 : public  P16X6X_processor
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
 
+  PicPSP_PortRegister  *m_portd;
 
-  PicPortRegister  *m_portd;
   PicTrisRegister  *m_trisd;
 
   PicPortRegister  *m_porte;
-  PicTrisRegister  *m_trise;
+  PicPSP_TrisRegister  *m_trise;
+  PSP		    psp;
 
   P16C64(const char *_name=0, const char *desc=0);
   virtual ~P16C64();
@@ -170,6 +172,7 @@ class P16C64 : public  P16X6X_processor
   virtual void create_iopin_map();
 
   virtual bool hasSSP() {return true;}
+  virtual bool hasSPS() {return false;}
 
 };
 

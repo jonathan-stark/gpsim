@@ -202,6 +202,13 @@ void P16C64::create_iopin_map(void)
 		   &(*m_portc)[5],   // SDI
 		   &(*m_porta)[5]);  // SS
   }
+  psp.initialize(get_pir_set(),    // PIR
+		m_portd,	   // Parallel port
+		m_trisd,	   // Parallel tris
+		m_trise,	   // Control tris
+		&(*m_porte)[0],	   // NOT RD
+		&(*m_porte)[1],	   // NOT WR
+		&(*m_porte)[2]);   // NOT CS
 
   tmr1l.setIOpin(&(*m_portc)[0]);
 }
@@ -256,6 +263,7 @@ void P16X6X_processor::create_sfr_map()
 
   // get_pir_set()->set_pir1(get_pir1());
   pir_set_def.set_pir1(pir1);
+  cout << "RRR P16X6X_processor pir1=" << hex << pir1 <<endl;
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
@@ -611,11 +619,12 @@ P16C64::P16C64(const char *_name, const char *desc)
 
   pir1 = &pir1_2_reg;
 
-  m_portd = new PicPortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister("trisd",m_portd);
+
+  m_portd = new PicPSP_PortRegister("portd",8,0xff);
+  m_trisd = new PicTrisRegister("trisd",(PicPortRegister *)m_portd);
 
   m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise = new PicTrisRegister("trise",m_porte);
+  m_trise =  new PicPSP_TrisRegister("trise",m_porte);
 
 }
 P16C64::~P16C64()
@@ -644,6 +653,7 @@ void P16C65::create_sfr_map(void)
 
   // get_pir_set()->set_pir2(&get_pir2());
   pir_set_def.set_pir2(pir2);
+
 
   ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));

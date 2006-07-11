@@ -149,6 +149,52 @@ unsigned int PicTrisRegister::get(void)
   return value.data;
 }
 
+//------------------------------------------------------------------------
+
+PicPSP_TrisRegister::PicPSP_TrisRegister(const char *tris_name, PicPortRegister *_port)
+  : sfr_register(),m_port(_port)
+{
+  new_name(tris_name);
+  if (m_port)
+    m_port->setTris((PicTrisRegister *)this);
+}
+// If not in PSPMODE, OBF and IBF are always clear
+// When in PSPMODE, OBF and IBF can only be cleared by reading and writing
+// to the PSP parallel port and are set by bus transfers.
+//
+void PicPSP_TrisRegister::put(unsigned int new_value)
+{
+  unsigned int mask = (PSP::OBF | PSP::IBF);
+  unsigned int fixed;
+
+  trace.raw(write_trace.get() | value.data);
+  if (! (new_value & PSP::PSPMODE))
+	fixed = 0;
+   else
+	fixed = value.data & mask;
+
+  value.data = (new_value & ~mask) | fixed;
+  if (m_port)
+    m_port->updatePort();
+}
+// used by gpsim to change register value
+void PicPSP_TrisRegister::put_value(unsigned int new_value)
+{
+
+  trace.raw(write_trace.get() | value.data);
+
+  value.data = new_value;
+  if (m_port)
+    m_port->updatePort();
+}
+
+unsigned int PicPSP_TrisRegister::get(void)
+{
+  return value.data;
+}
+
+
+//------------------------------------------------------------------------
 
 
 
@@ -225,5 +271,58 @@ void PicPortBRegister::setRBPU(bool bNewRBPU)
 void PicPortBRegister::setIntEdge(bool bNewIntEdge)
 {
   m_bIntEdge = bNewIntEdge;
+}
+
+
+PicPSP_PortRegister::PicPSP_PortRegister(const char *port_name,
+                                 unsigned int numIopins,
+                                 unsigned int enableMask)
+  : PortRegister(numIopins, false), m_tris(0), m_psp(0)
+{
+  new_name(port_name);
+  PortRegister::setEnableMask(enableMask);
+}
+
+void PicPSP_PortRegister::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.data);
+  unsigned int diff = mEnableMask & (new_value ^ value.data);
+
+  if (m_psp && m_psp->pspmode())
+  {
+	m_psp->psp_put(new_value);
+  }
+  else if(diff) {
+    drivingValue = new_value & mEnableMask;
+    value.data = drivingValue;
+    // If no stimuli are connected to the Port pins, then the driving
+    // value and the driven value are the same. If there are external
+    // stimuli (or perhaps internal peripherals) overdriving or overriding
+    // this port, then the call to updatePort() will update 'drivenValue'
+    // to its proper value.
+    updatePort();
+  }
+
+}
+unsigned int PicPSP_PortRegister::get()
+{
+
+  if (m_psp && m_psp->pspmode())
+	return(m_psp->psp_get());
+
+  return rvDrivenValue.data;
+}
+
+
+void PicPSP_PortRegister::setTris(PicTrisRegister *new_tris)
+{
+  if (!m_tris)
+    m_tris = new_tris;
+
+    unsigned int mask = getEnableMask();
+    for (unsigned int i=0, m = 1; i<mNumIopins; i++, m <<= 1) {
+      if (mask & m)
+          operator[](i).setDefaultControl(new PicSignalControl(m_tris, i));
+    }
 }
 
