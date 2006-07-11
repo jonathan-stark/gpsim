@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "16bit-processors.h"
 #include "eeprom.h"
+#include "psp.h"
 
 class PicPortRegister;
 class PicTrisRegister;
@@ -80,13 +81,15 @@ class P18C4x2 : public _16bit_processor
  public:
 
 
-  PicPortRegister  *m_portd;
+  PicPSP_PortRegister  *m_portd;
   PicTrisRegister  *m_trisd;
   PicLatchRegister *m_latd;
 
   PicPortRegister  *m_porte;
-  PicTrisRegister  *m_trise;
+  PicPSP_TrisRegister  *m_trise;
   PicLatchRegister *m_late;
+
+  PSP               psp;
 
   P18C4x2(const char *_name=0, const char *desc=0);
 

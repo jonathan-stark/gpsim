@@ -71,6 +71,7 @@ libgpsim_la_SOURCES = \
 	ttoken.cc \
 	uart.cc \
 	ssp.cc \
+	psp.cc \
 	xref.cc \
 	icd.cc \
 	expr.cc	\
@@ -153,6 +154,7 @@ gpsiminclude_HEADERS = \
 	xref.h \
 	icd.h \
 	ssp.h \
+	psp.h \
 	errors.h \
 	expr.h \
 	ui.h \

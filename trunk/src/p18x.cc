@@ -283,6 +283,13 @@ void P18C4x2::create_iopin_map()
   package->assign_pin(39, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
+  psp.initialize(&pir_set_def,    // PIR
+                m_portd,           // Parallel port
+                m_trisd,           // Parallel tris
+                m_trise,           // Control tris
+                &(*m_porte)[0],    // NOT RD
+                &(*m_porte)[1],    // NOT WR
+                &(*m_porte)[2]);   // NOT CS
 
   tmr1l.setIOpin(&(*m_portc)[0]);
 
@@ -307,12 +314,12 @@ P18C4x2::P18C4x2(const char *_name, const char *desc)
   if(verbose)
     cout << "18c4x2 constructor, type = " << isa() << '\n';
 
-  m_portd = new PicPortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister("trisd", m_portd);
+  m_portd = new PicPSP_PortRegister("portd",8,0xff);
+  m_trisd = new PicTrisRegister("trisd", (PicPortRegister *)m_portd);
   m_latd  = new PicLatchRegister("latd", m_portd);
 
   m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise = new PicTrisRegister("trise", m_porte);
+  m_trise = new PicPSP_TrisRegister("trise", m_porte);
   m_late  = new PicLatchRegister("late", m_porte);
 
 }

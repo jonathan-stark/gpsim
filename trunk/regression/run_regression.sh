@@ -86,6 +86,10 @@ ${RT} a2d sim_88
 
 ${RT} a2d sim_452
 
+${RT} psp sim_452
+
+${RT} psp sim_871
+
 ${RT} ttl sim_377
 
 ${RT} ccp sim_877a
