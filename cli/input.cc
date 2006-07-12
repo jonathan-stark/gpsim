@@ -173,6 +173,7 @@ class LLStack
 {
 public:
   LLStack();
+  ~LLStack();
 
   void Push();
   void Pop();
@@ -180,12 +181,15 @@ public:
   LLInput *GetNext();
 
   void print();
+  int  level() { return msi_StackDepth; }
 
   LLInput *LLdata;
   LLStack *next_stack;
+private:
+  static int msi_StackDepth;
 };
 
-
+int LLStack::msi_StackDepth=0;
 
 //------------------------------------------------------------------------
 // LLInput - linked list input for commands.
@@ -214,9 +218,14 @@ LLStack::LLStack()
   : LLdata(0), next_stack(0)
   
 {
-
+  msi_StackDepth++;
+  //  cout << "Stack depth: " << level() << endl;
 }
 
+LLStack::~LLStack()
+{
+  msi_StackDepth--;
+}
 static LLStack *Stack=0;
 
 //========================================================================
