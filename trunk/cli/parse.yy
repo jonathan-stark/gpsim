@@ -78,6 +78,7 @@ int quit_parse=0;
 int abort_gpsim=0;
 int parser_warnings;
 int parser_spanning_lines=0;
+int gAbortParserOnSyntaxError=0;
 extern int use_gui;
 extern int quit_state;
 
@@ -335,10 +336,14 @@ cmd:
        YYABORT;
      }
      | error {
+
        init_cmd_state();
        yyclearin;
-       //yyerrok;
-       YYABORT;
+       // FIXME
+       // In some cases we may wish to abort parsing while in others not.
+       if (gAbortParserOnSyntaxError) {
+         YYABORT;
+       }
      }
 
    ;

@@ -1,3 +1,8 @@
+2006-07-12 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/input.cc: Previously, the parser would abort
+	parsing upon detection of syntax errors. Now the parser will only
+	ignore the erroneous lines. The difference mainly applies to scripts. 
+	
 2006-07-11 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.h, gui/gui_scope.cc: Added scope.zoom and
 	scope.pan attributes that allow the image in the scope window to
