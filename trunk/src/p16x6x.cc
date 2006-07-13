@@ -263,7 +263,6 @@ void P16X6X_processor::create_sfr_map()
 
   // get_pir_set()->set_pir1(get_pir1());
   pir_set_def.set_pir1(pir1);
-  cout << "RRR P16X6X_processor pir1=" << hex << pir1 <<endl;
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
