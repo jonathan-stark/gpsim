@@ -647,7 +647,7 @@ Processor * P18F442::construct(const char *name)
 // 
 
 P18F248::P18F248(const char *_name, const char *desc)
-  : P18F442(_name,desc)
+  : P18F242(_name,desc)
 {
 
   if(verbose)
@@ -661,7 +661,7 @@ void P18F248::create()
   if(verbose)
     cout << " 18f248 create \n";
 
-  P18F442::create();
+  P18F242::create();
 }
 
 Processor * P18F248::construct(const char *name)
@@ -671,6 +671,49 @@ Processor * P18F248::construct(const char *name)
 
   if(verbose)
     cout << " 18F248 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+
+
+}
+
+
+//------------------------------------------------------------------------
+//
+// P18F458
+// 
+
+P18F448::P18F448(const char *_name, const char *desc)
+  : P18F442(_name,desc)
+{
+
+  if(verbose)
+    cout << "18f448 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F448::create()
+{
+
+  if(verbose)
+    cout << " 18f448 create \n";
+
+  P18F442::create();
+}
+
+Processor * P18F448::construct(const char *name)
+{
+
+  P18F448 *p = new P18F448(name);
+
+  if(verbose)
+    cout << " 18F448 construct\n";
 
   p->create();
   p->create_invalid_registers();

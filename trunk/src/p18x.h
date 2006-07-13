@@ -179,13 +179,25 @@ class P18F442 : public P18C442
 };
 
 //
-// The P18F248 is the same as the P18F442 except it has CAN, one fewer
+// The P18F248 is the same as the P18F242 except it has CAN, one fewer
 // CCP module and a 5/10 ADC.  For now just assume it is identical.
-class P18F248 : public P18F442
+class P18F248 : public P18F242
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F248_;};
   P18F248(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+};
+ 
+//
+// The P18F448 is the same as the P18F442 except it has CAN, one fewer
+// CCP module and a 5/10 ADC.  For now just assume it is identical.
+class P18F448 : public P18F442
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F448_;};
+  P18F448(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
   void create();
 };

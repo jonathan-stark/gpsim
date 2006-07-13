@@ -1,3 +1,9 @@
+2006-07-14 Roy Rankin <rrankin@ihug.com.au>
+	* src/p18x.h src/p18x.cc src/pic-instructions.cc
+	  src/pic-processor.cc src/pic-processor.h:
+	- P18F248 now based on P18F242, P18F448 added based on P18F424
+	* src/p16x6x.cc: remove debug output
+
 2006-07-12 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/input.cc: Previously, the parser would abort
 	parsing upon detection of syntax errors. Now the parser will only
