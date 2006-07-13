@@ -293,6 +293,7 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
 	case  _P18F252_:
 	case  _P18F442_:
 	case  _P18F248_:
+	case  _P18F448_:
 	case  _P18F452_:
 	case  _P18F1220_:
 	case  _P18F1320_:
