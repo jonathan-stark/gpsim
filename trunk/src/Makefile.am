@@ -91,6 +91,7 @@ gpsiminclude_HEADERS = \
 	16bit-processors.h \
 	16bit-registers.h \
 	16bit-tmrs.h \
+	a2dconverter.h \
 	attributes.h \
 	bit.h \
 	bitlog.h \
