@@ -182,6 +182,7 @@ EXPORTS
     ?addFrame@Trace@@QAEXPAVTraceFrame@@@Z
     ?addPin@PortModule@@QAEPAVIOPIN@@PAV2@I@Z
     ?addPinModule@PortModule@@QAEXPAVPinModule@@I@Z
+    ?addSink@PinMonitor@@QAEXPAVSignalSink@@@Z
     ?addToCurrentFrame@Trace@@QAEXPAVTraceObject@@@Z
     ?add_address@Symbol_Table@@QAEXPBDH@Z
     ?add_attribute@Module@@QAEXPAVValue@@@Z
@@ -202,7 +203,6 @@ EXPORTS
     ?address_has_notify@ProgramMemoryAccess@@UAEHI@Z
     ?address_has_profile_start@ProgramMemoryAccess@@UAEHI@Z
     ?address_has_profile_stop@ProgramMemoryAccess@@UAEHI@Z
-    ?addSink@PinModule@@QAEXPAVSignalSink@@@Z
     ?advanceIndex@PacketBuffer@@QAEXI@Z
     ?allocateTraceType@Trace@@QAEIPAVTraceType@@H@Z
     ?assertValid@Integer@@SAPAV1@PAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_J@Z
@@ -297,6 +297,7 @@ EXPORTS
     ?evaluate@symbol@@UAEPAVValue@@XZ
     ?event@BoolEventLogger@@QAEX_N@Z
     ?execute@AliasedInstruction@@UAEXXZ
+    ?findStimulus@Symbol_Table@@QAEPAVstimulus@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@PBD@Z
