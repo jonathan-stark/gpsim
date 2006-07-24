@@ -1,3 +1,9 @@
+2006-07-24 Borut Razem <borut.razem@siol.net>
+	* cli/makefile.mingw, cli/cli.vcproj: define HAVE_SOCKETS -
+	  sockets are enabled on WIN32
+	* plat/win32/libgpsim.def, src/src.vcproj: WIN32 sync
+	* doc/gpsimWin32: glib-2.10.3, gtk+-2.8.18, pango-1.12.3
+
 2006-07-23 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: Re-enabled the socket interface.
 	* examples/scripts/makefile: Hmm, for some reason pango is now

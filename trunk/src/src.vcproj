@@ -408,6 +408,9 @@
 				RelativePath=".\protocol.cc">
 			</File>
 			<File
+				RelativePath=".\psp.cc">
+			</File>
+			<File
 				RelativePath=".\registers.cc">
 			</File>
 			<File
@@ -681,6 +684,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\protocol.h">
+			</File>
+			<File
+				RelativePath=".\psp.h">
 			</File>
 			<File
 				RelativePath=".\pthread-wrap.h">
