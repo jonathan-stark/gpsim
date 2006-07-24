@@ -153,6 +153,11 @@ public:
   bool isBuilt;              // True after the gui has been built.
   bool isUpToDate;           // False when the waveform needs updating.
 
+  GtkWidget *signalDrawingArea;
+  GdkPixmap *signalPixmap;
+  PangoLayout *layout;
+
+
   GtkWidget *parent_table;
   int row;
 
@@ -174,6 +179,7 @@ protected:
   WaveformSource *m_pSourceName;
 
   GtkEntry  *m_pEntry;
+  GtkLabel  *m_pLabel;
 };
 
 /***********************************************************************
@@ -231,6 +237,7 @@ key_press(GtkWidget *widget,
 	  GdkEventKey *key, 
 	  gpointer data)
 {
+  printf ("press\n");
 
   KeyEvent *pKE = KeyMap[key->keyval];
   if(pKE) 
@@ -242,6 +249,23 @@ key_press(GtkWidget *widget,
   return FALSE;
 }
 
+static gint
+key_release(GtkWidget *widget,
+	  GdkEventKey *key, 
+	  gpointer data)
+{
+  printf ("release\n");
+  return TRUE;
+}
+
+static gint
+button_press(GtkWidget *widget,
+	  GdkEventKey *key, 
+	  gpointer data)
+{
+  printf ("button\n");
+  return TRUE;
+}
 //========================================================================
 // WaveformSource
 
@@ -315,6 +339,8 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
   isUpToDate = false;
   drawing_area = 0;
   pixmap =0;
+  signalDrawingArea = 0;
+  signalPixmap = 0;
   drawing_gc =0;
   parent_table = 0;
 
@@ -325,6 +351,7 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
   sw = parent;
 
   m_pEntry = 0;
+  m_pLabel = 0;
   m_pSink = new WaveformSink(this);
   m_logger = new ThreeStateEventLogger();
   m_pSourceName = new WaveformSource(this,name);
@@ -349,6 +376,11 @@ void Waveform::setSource(const char *sourceName)
 
     if (m_pEntry)
       gtk_entry_set_text(m_pEntry,sourceName);
+    if (m_pLabel) {
+      cout << "Set label to " << sourceName << endl;
+      gtk_label_set_text(m_pLabel,sourceName);
+      gtk_widget_show(GTK_WIDGET(m_pLabel));
+    }
   } else if(sourceName)
      printf("%s is not a valid source for the scope\n",sourceName);
 }
@@ -401,17 +433,33 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
 
   drawing_area = gtk_drawing_area_new ();
   gtk_widget_set_usize (drawing_area,width,height);    
-  gtk_widget_set_events (drawing_area, GDK_EXPOSURE_MASK );    
-  gtk_table_attach_defaults (GTK_TABLE(parent_table),drawing_area,1,10,row,row+1);
+  gtk_widget_set_events (drawing_area, 
+			 GDK_EXPOSURE_MASK | 
+			 GDK_BUTTON_PRESS_MASK | 
+			 GDK_KEY_PRESS_MASK | 
+			 GDK_KEY_RELEASE_MASK  );    
+  gtk_table_attach_defaults (GTK_TABLE(parent_table),drawing_area,2,10,row,row+1);
 
-  m_pEntry = GTK_ENTRY(gtk_entry_new());
+  
+  signalDrawingArea = gtk_drawing_area_new ();
+  gtk_widget_set_usize (signalDrawingArea,100,height);    
+  gtk_table_attach_defaults (GTK_TABLE(parent_table),signalDrawingArea,0,1,row,row+1);
+
+
+  //m_pEntry = GTK_ENTRY(gtk_entry_new());
+  /*
   gtk_table_attach_defaults (GTK_TABLE(parent_table),
 			     GTK_WIDGET(m_pEntry),0,1,row,row+1);
   gtk_signal_connect (GTK_OBJECT (m_pEntry),
 		      "activate",
 		      GTK_SIGNAL_FUNC (WaveformEntryActivate),
 		      this);
+  */
 
+  //m_pLabel = GTK_LABEL(gtk_label_new("test"));
+  //gtk_table_attach_defaults (GTK_TABLE(parent_table),
+  //			     GTK_WIDGET(m_pLabel),0,1,row,row+1);
+  
   if (pixmap)
     gdk_pixmap_unref(pixmap);
     
@@ -419,6 +467,13 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
 			  width,
 			  height,
 			  -1);
+  if(signalPixmap)
+    gdk_pixmap_unref(signalPixmap);
+    
+  signalPixmap = gdk_pixmap_new(signalDrawingArea->window,
+				100,
+				height,
+				-1);
   g_object_set(GTK_OBJECT (drawing_area), "can-focus", TRUE, NULL);
   gtk_signal_connect (GTK_OBJECT (drawing_area),
 		      "expose_event",
@@ -442,11 +497,26 @@ void Waveform::Build(GtkWidget *_parent_table, int _row)
 		     (GtkSignalFunc) key_press,
 		     (gpointer) this);
 
+  gtk_signal_connect(GTK_OBJECT(drawing_area),"button_press_event",
+		     (GtkSignalFunc) button_press,
+		     (gpointer) this);
+
+  gtk_signal_connect(GTK_OBJECT(drawing_area),"key_release_event",
+		     (GtkSignalFunc) key_release,
+		     (gpointer) this);
+  GTK_WIDGET_SET_FLAGS( drawing_area, GTK_CAN_FOCUS );
+
   // Graphics Context:
   drawing_gc = gdk_gc_new(drawing_area->window);
   gdk_gc_set_line_attributes(drawing_gc,1,GDK_LINE_SOLID,
 			     GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
+  layout = gtk_widget_create_pango_layout (GTK_WIDGET (parent_table), "test");
+  gdk_draw_layout (GDK_DRAWABLE(signalPixmap),
+		   drawing_gc,
+		   0,
+		   10,
+		   layout);
   isBuilt = true;
   isUpToDate = false;
 
@@ -476,6 +546,20 @@ void Waveform::Resize(int w, int h)
 			  width,
 			  height,
 			  -1);
+
+  if (signalPixmap)
+    gdk_pixmap_unref(signalPixmap);
+  signalPixmap = gdk_pixmap_new(drawing_area->window,
+				100,
+				height,
+				-1);
+
+  gdk_draw_layout (GDK_DRAWABLE(signalPixmap),
+		   drawing_gc,
+		   0,
+		   10,
+		   layout);
+
   //Build(row);
 
   isUpToDate = false;
@@ -604,6 +688,19 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 		      width,
 		      height);
 
+  gdk_draw_rectangle (signalPixmap,
+		      drawing_area->style->black_gc,
+		      TRUE,
+		      0, 0,
+		      100,
+		      height);
+  gdk_draw_layout (GDK_DRAWABLE(signalPixmap),
+		   drawing_gc,
+		   0,
+		   10,
+		   layout);
+
+
 #if 0
   y_scale = (float)height / (float)(NUM_PORTS);
     
@@ -717,6 +814,14 @@ void Waveform::Expose(void)
 		  width,height);
 
   gtk_widget_show(drawing_area);
+
+  gdk_draw_pixmap(signalDrawingArea->window,
+		  signalDrawingArea->style->fg_gc[GTK_WIDGET_STATE (signalDrawingArea)],
+		  signalPixmap,
+		  0,0,   // x,y
+		  0,0,
+		  100,height);
+  gtk_widget_show(signalDrawingArea);
 
 }
 
@@ -856,16 +961,18 @@ void Scope_Window::Build(void)
   table = gtk_table_new (10,10,FALSE);
   gtk_table_set_col_spacings(GTK_TABLE(table),5);
 
+  gtk_container_add (GTK_CONTAINER (window),table);
+
   //
   // Control buttons
   // (this is changing...)
 
-  gtk_container_add (GTK_CONTAINER (window),table);
+#if 0
   button = gtk_button_new_with_label ("Clear");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (analyzer_clear_callback),this);
   gtk_table_attach_defaults (GTK_TABLE(table),button,0,2,9,10);
-
+#endif
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), this);
@@ -894,6 +1001,7 @@ void Scope_Window::Build(void)
 
 #define port_get_max_bit_points 200
 
+#if 0
   //
   // Horizontal Scroll Bar
   //
@@ -903,7 +1011,7 @@ void Scope_Window::Build(void)
 		      GTK_SIGNAL_FUNC (analyzer_update_scale), this);
   scroll_bar = gtk_hscrollbar_new(GTK_ADJUSTMENT(bit_adjust));
   gtk_table_attach_defaults (GTK_TABLE(table),scroll_bar,0,10,8,9);
-
+#endif
 
 #if 0
 

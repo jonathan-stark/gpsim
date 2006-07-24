@@ -1,3 +1,8 @@
+2006-07-23 Scott Dattalo <scott@dattalo.com>
+	* cli/socket.cc: Re-enabled the socket interface.
+	* examples/scripts/makefile: Hmm, for some reason pango is now
+	required to build the examples.
+
 2006-07-22 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/Makefile.am
 	  Added a2dconverter.h to the headers list, so that it's included
