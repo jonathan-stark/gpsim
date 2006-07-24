@@ -1,8 +1,8 @@
 #makefile for socket test.
 
 GCC      = g++
-CFLAGS   = `pkg-config --cflags glib-2.0`
-LIBS     =  -lstdc++  `pkg-config --libs glib-2.0` -lgpsim
+CFLAGS   = `pkg-config --cflags glib-2.0 gtk+-2.0`
+LIBS     =  -lstdc++  `pkg-config --libs glib-2.0 gtk+-2.0` -lgpsim
 
 ASM      = gpasm
 PICSRC   = gensquares
