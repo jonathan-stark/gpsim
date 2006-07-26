@@ -1,6 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2004 Rob Pearce
+		 2006	Roy R Rankin
 
 This file is part of gpsim.
 
@@ -146,11 +147,20 @@ public:
 //    3) what happens if 
 //       > the simulator 
 
-I2C_EE::I2C_EE(unsigned int _rom_size)
-  : rom(0), rom_size(_rom_size),
+I2C_EE::I2C_EE(unsigned int _rom_size, unsigned int _write_page_size,
+	unsigned int _addr_bytes, unsigned int _CSmask,
+	unsigned int _BSmask, unsigned int _BSshift)
+  : rom(0), 
+	rom_size(_rom_size), 	// size of eeprom in bytes
+	write_page_size(_write_page_size), // Page size for writes
+    	m_addr_bytes(_addr_bytes), 	// number of address bytes
+	m_CSmask(_CSmask), 		// mask for chip select in command
+	m_BSmask(_BSmask),		// mask for bank select in command
+    	m_BSshift(_BSshift),		// right shift bank select to bit 0
     xfr_addr(0), xfr_data(0),
     bit_count(0), m_command(0),
-    ee_busy(false), bus_state(IDLE)
+    ee_busy(false), bus_state(IDLE),
+    m_chipselect(0), m_write_protect(false) 
 {
 
   // Create the rom
@@ -182,6 +192,12 @@ I2C_EE::~I2C_EE()
   delete rom;
 }
 
+// Bit 0 is write protect, 1-3 is A0 - A2
+void I2C_EE::set_chipselect(unsigned int _cs)
+{
+    m_write_protect = (_cs & 1) == 1;
+    m_chipselect = (_cs & m_CSmask);
+}
 
 void I2C_EE::debug()
 {
@@ -246,7 +262,6 @@ void I2C_EE::debug()
 }
 Register * I2C_EE::get_register(unsigned int address)
 {
-
   if ( address < rom_size )
     return rom[address];
   return 0;
@@ -259,13 +274,31 @@ void I2C_EE::change_rom(unsigned int offset, unsigned int val)
   rom[offset]->value.put(val);
 }
 
+// write data to eeprom unles write protect is active
 void I2C_EE::start_write()
 {
+    unsigned int addr = xfr_addr + write_page_off;
+    if (! m_write_protect)
+    {
+    	rom[addr]->put ( xfr_data );
+    }
+     else
+	cout << "I2c_EE start_write- write protect\n";
+}
 
-    get_cycles().set_break(get_cycles().value + I2C_EE_WRITE_TIME, this);
+// allow 5 msec after last write 
+void I2C_EE::write_busy()
+{
+    guint64 fc;
 
-    rom[xfr_addr]->put ( xfr_data );
-    ee_busy = true;
+
+    if (! ee_busy && ! m_write_protect)
+    {
+        fc = (guint64)(get_cycles().instruction_cps() * 0.005);
+        get_cycles().set_break(get_cycles().value + fc, this);
+        ee_busy = true;
+    }
+
 
 }
 
@@ -311,7 +344,7 @@ bool I2C_EE::shift_write_bit ()
 
 bool I2C_EE::processCommand(unsigned int command)
 {
-  if ((command & 0xf0) == 0xa0) {
+  if ((command & 0xf0) == 0xa0 && ((command & m_CSmask) == m_chipselect)) {
     m_command = command;
     return true;
   }
@@ -337,23 +370,23 @@ void I2C_EE::new_scl_edge ( bool direction )
         //cout << "I2C_EE SCL : Falling edge\n";
         switch ( bus_state )
         {
-            case I2C_EE::IDLE :
+            case IDLE :
                 sda->setDrivingState ( true );
                 break;
 
-            case I2C_EE::START :
+            case START :
                 sda->setDrivingState ( true );
-                bus_state = I2C_EE::RX_CMD;
+                bus_state = RX_CMD;
                 break;
 
-            case I2C_EE::RX_CMD :
+            case RX_CMD :
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
 		    Vprintf(("I2C_EE : got command:0x%x\n", xfr_data));
                     //if ( ( xfr_data & 0xf0 ) == 0xA0 )
 		    if (processCommand(xfr_data))
                     {
-                        bus_state = I2C_EE::ACK_CMD;
+                        bus_state = ACK_CMD;
 			Vprintf((" - OK\n"));
 			// Acknowledge the command by pulling SDA low.
                         sda->setDrivingState ( false );
@@ -361,79 +394,96 @@ void I2C_EE::new_scl_edge ( bool direction )
                     else
                     {
                         // not for us
-                        bus_state = I2C_EE::IDLE;
+                        bus_state = IDLE;
 			Vprintf((" - not for us\n"));
                     }
                 }
                 break;
                 
-            case I2C_EE::ACK_CMD :
+            case ACK_CMD :
                 sda->setDrivingState ( true );
 		// Check the R/W bit of the command
                 if ( m_command & 0x01 )
                 {
                     // it's a read command
-                    bus_state = I2C_EE::TX_DATA;
+                    bus_state = TX_DATA;
                     bit_count = 8;
+		    xfr_addr += write_page_off;
+		    write_page_off = 0;
                     xfr_data = rom[xfr_addr]->get();
                     sda->setDrivingState ( shift_write_bit() );
                 }
                 else
                 {
                     // it's a write command
-                    bus_state = I2C_EE::RX_ADDR;
+                    bus_state = RX_ADDR;
                     bit_count = 0;
                     xfr_data = 0;
+		    xfr_addr = (m_command & m_BSmask) >> m_BSshift;
+		    m_addr_cnt = m_addr_bytes;
                 }
                 break;
 
-            case I2C_EE::RX_ADDR :
+            case RX_ADDR :
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
                     sda->setDrivingState ( false );
-                    bus_state = I2C_EE::ACK_ADDR;
-                    xfr_addr = xfr_data % rom_size;
+		    // convert xfr_data to base and page offset to allow
+		    // sequencel writes to wrap around page
+                    xfr_addr = ((xfr_addr << 8) | xfr_data ) % rom_size;
+                    bus_state = ACK_ADDR;
 		    Vprintf(("I2C_EE : address set to 0x%x data:0x%x\n", xfr_addr,xfr_data));
                 }
                 break;
 
-            case I2C_EE::ACK_ADDR :
+            case ACK_ADDR :
                 sda->setDrivingState ( true );
-                bus_state = I2C_EE::RX_DATA;
+		if (--m_addr_cnt)
+                    bus_state = RX_ADDR;
+		else
+		{
+		    write_page_off = xfr_addr % write_page_size;
+		    xfr_addr -= write_page_off;
+		    Vprintf(("I2C_EE : address set to 0x%x page offset 0x%x data:0x%x\n", 
+			xfr_addr, write_page_off ,xfr_data));
+                    bus_state = RX_DATA;
+		}
                 bit_count = 0;
                 xfr_data = 0;
                 break;
 
-            case I2C_EE::RX_DATA :
+            case RX_DATA :
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
+		    start_write();
 		    Vprintf(("I2C_EE : data set to 0x%x\n", xfr_data));
                     sda->setDrivingState ( false );
-                    bus_state = I2C_EE::ACK_WR;
+                    bus_state = ACK_WR;
+		    write_page_off = ++write_page_off % write_page_size;
                 }
                 break;
 
-            case I2C_EE::ACK_WR :
+            case ACK_WR :
                 sda->setDrivingState ( true );
-                bus_state = I2C_EE::WRPEND;
+                bus_state = WRPEND;
                 break;
 
-            case I2C_EE::WRPEND :
+            case WRPEND :
                 // We were about to do the write but got more data instead
                 // of the expected stop bit
                 xfr_data = sda->getDrivenState();
                 bit_count = 1;
-                bus_state = I2C_EE::RX_DATA;
+                bus_state = RX_DATA;
                 Vprintf(("I2C_EE : write postponed by extra data\n"));
                 break;
 
-            case I2C_EE::TX_DATA :
+            case TX_DATA :
                 if ( bit_count == 0 )
                 {
                     sda->setDrivingState ( true );     // Release the bus
                     xfr_addr++;
                     xfr_addr %= rom_size;
-                    bus_state = I2C_EE::ACK_RD;
+                    bus_state = ACK_RD;
                 }
                 else
                 {
@@ -441,16 +491,19 @@ void I2C_EE::new_scl_edge ( bool direction )
                 }
                 break;
 
-            case I2C_EE::ACK_RD :
+            case ACK_RD :
                 if ( sda->getDrivenState() == false )
                 {
                     // The master has asserted ACK, so we send another byte
-                    bus_state = I2C_EE::TX_DATA;
-                    bit_count = 0;
+                    bus_state = TX_DATA;
+                    bit_count = 8;
                     xfr_data = rom[xfr_addr]->get();
+                    sda->setDrivingState ( shift_write_bit() );
                 }
                 else
-                    bus_state = I2C_EE::IDLE;   // Actually a limbo state
+		{
+                    bus_state = IDLE;   // Actually a limbo state
+		}
                 break;
 
             default :
@@ -479,14 +532,14 @@ void I2C_EE::new_sda_edge ( bool direction )
         {
             // stop bit
 	    Vprintf(("I2C_EE SDA : Rising edge in SCL high => stop bit\n"));
-            if ( bus_state == I2C_EE::WRPEND )
+            if ( bus_state == WRPEND )
             {
 	        Vprintf(("I2C_EE : write is pending - commence...\n"));
-                start_write();
-                bus_state = I2C_EE::IDLE;   // Should be busy
+		write_busy();
+                bus_state = IDLE;   // Should be busy
             }
             else
-                bus_state = I2C_EE::IDLE;
+                bus_state = IDLE;
         }
         else
         {
@@ -498,7 +551,7 @@ void I2C_EE::new_sda_edge ( bool direction )
 	    }
             else
             {
-                bus_state = I2C_EE::START;
+                bus_state = START;
                 bit_count = 0;
                 xfr_data = 0;
             }

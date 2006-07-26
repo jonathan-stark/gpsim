@@ -1,5 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
+   Copyright (C) 2006 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -26,23 +27,35 @@ Boston, MA 02111-1307, USA.  */
 #define IN_MODULE
 
 #include "../src/modules.h"
+#include "../src/ioports.h"
+#include "../src/stimuli.h"
+
 class I2C_EE;
 
 namespace I2C_EEPROM_Modules {
 
+class I2C_ENABLE;
 
   class I2C_EE_Module : public Module
   {
   public:
     I2C_EE_Module(const char *_name);
     ~I2C_EE_Module();
-    static Module *construct(const char *new_name);
+    static Module *construct_2k(const char *new_name);
+    static Module *construct_16k(const char *new_name);
+    static Module *construct_256k(const char *new_name);
 
     virtual void create_iopin_map();
+    virtual void setEnable(bool bNewState, unsigned int m_bit);
 
   protected:
 
     I2C_EE *m_eeprom;
+    I2C_ENABLE *m_A[3];
+    I2C_ENABLE *m_wp;
+    unsigned int chip_select;	// Write Protect and A0 - A2 state
+    
+
   };
   
 
