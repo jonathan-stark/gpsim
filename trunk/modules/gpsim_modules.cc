@@ -66,6 +66,7 @@ support:
 #endif
 #include "stimuli.h"
 #include "ttl.h"
+#include "i2c-eeprom.h"
 
 /*
 class Module_Types
@@ -124,6 +125,11 @@ Module_Types available_modules[] =
 
   // TTL devices
   { {"TTL377", "ttl377"}, TTL::TTL377::construct},
+
+  // I2c EEPROM
+  { {"I2C-EEPROM2k", "e24xx024"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_2k},
+  { {"I2C-EEPROM16k", "e24xx16b"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_16k},
+  { {"I2C-EEPROM256k", "e24xx256"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_256k},
   //#endif
 
   // No more modules

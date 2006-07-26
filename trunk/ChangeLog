@@ -1,3 +1,8 @@
+2006-07-26 Roy Rankin <rrankin@ihug.com.au>
+	*  src/i2c-ee.h src/i2c-ee.cc modules/i2c-eeprom.cc
+	   modules/i2c-eeprom.h modules/gpsim_modules.cc:
+	- Added I2C EEprom modules for 24xx024, 24xx16b, 24xx256
+
 2006-07-24 Borut Razem <borut.razem@siol.net>
 	* cli/makefile.mingw, cli/cli.vcproj: define HAVE_SOCKETS -
 	  sockets are enabled on WIN32
