@@ -150,17 +150,19 @@ public:
 I2C_EE::I2C_EE(unsigned int _rom_size, unsigned int _write_page_size,
 	unsigned int _addr_bytes, unsigned int _CSmask,
 	unsigned int _BSmask, unsigned int _BSshift)
-  : rom(0), 
-	rom_size(_rom_size), 	// size of eeprom in bytes
-	write_page_size(_write_page_size), // Page size for writes
-    	m_addr_bytes(_addr_bytes), 	// number of address bytes
-	m_CSmask(_CSmask), 		// mask for chip select in command
-	m_BSmask(_BSmask),		// mask for bank select in command
-    	m_BSshift(_BSshift),		// right shift bank select to bit 0
+  : rom(0),
+    rom_size(_rom_size),                // size of eeprom in bytes
     xfr_addr(0), xfr_data(0),
+    write_page_size(_write_page_size),  // Page size for writes
     bit_count(0), m_command(0),
-    ee_busy(false), bus_state(IDLE),
-    m_chipselect(0), m_write_protect(false) 
+    m_chipselect(0),
+    m_CSmask(_CSmask),                  // mask for chip select in command
+    m_BSmask(_BSmask),                  // mask for bank select in command
+    m_BSshift(_BSshift),                // right shift bank select to bit 0
+    m_addr_bytes(_addr_bytes),          // number of address bytes
+     m_write_protect(false),
+    ee_busy(false),
+    bus_state(IDLE)
 {
 
   // Create the rom
@@ -635,5 +637,3 @@ void I2C_EE::dump()
 
     }
 }
-
-
