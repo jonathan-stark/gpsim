@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;;../../cairo/include/cairo"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib"
+				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../cairo/lib/cairo.lib"
 				OutputFile="$(OutDir)/libgpsim_modules.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile="../plat/win32/modules.def"
@@ -71,7 +71,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;;../../cairo/include/cairo"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -83,7 +83,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib"
+				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../cairo/lib/cairo.lib"
 				OutputFile="$(OutDir)/libgpsim_modules.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="../plat/win32/modules.def"
@@ -173,6 +173,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions="HAVE_GUI"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\i2c-eeprom.cc">
 			</File>
 			<File
 				RelativePath=".\led.cc">
@@ -320,6 +323,9 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\encoder.h">
+			</File>
+			<File
+				RelativePath=".\i2c-eeprom.h">
 			</File>
 			<File
 				RelativePath=".\led.h">

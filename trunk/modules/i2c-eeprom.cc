@@ -50,8 +50,8 @@ private:
 };
 
 I2C_ENABLE::I2C_ENABLE(const char *name, unsigned int bit, 
-	I2C_EE_Module *pParent) : IOPIN(name), m_bit(bit), 
-	m_pParent(pParent)
+	I2C_EE_Module *pParent) : IOPIN(name), m_pParent(pParent),
+	m_bit(bit)
 {
 }
 void I2C_ENABLE::setDrivenState(bool bNewState)
@@ -120,7 +120,7 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
   void I2C_EE_Module::create_iopin_map()
   {
         string pinName;
-	
+
 	pinName = name() + ".WP";
 	m_wp  =  new I2C_ENABLE(pinName.c_str(), 0, this);
 	pinName = name() + ".A0";

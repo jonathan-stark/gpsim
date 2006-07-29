@@ -12,6 +12,7 @@ EXPORTS
     ??0Error@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ??0Float@@QAE@N@Z
     ??0Float@@QAE@PBDN0@Z
+    ??0I2C_EE@@QAE@IIIIII@Z
     ??0IIndexedCollection@@QAE@H@Z
     ??0IOPIN@@QAE@PBDNNNN@Z
     ??0IO_bi_directional@@QAE@PBDNNNNNN@Z

@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../perl;&quot;$(GPSIMINCLUDE)&quot;;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../popt/include;../../pthreads/include;C:\Perl\lib\CORE"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../popt/include;../../pthreads/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;IN_MODULE;HAVE_GUI"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -40,7 +40,7 @@
 				Outputs="libgpsim.dll"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib &quot;..\src\Debug GUI\libgpsim.lib&quot; ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gdk_pixbuf-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ..\..\gtkextra-2\lib\libgtkextra-win32-2.1_dll.lib ../../readline/lib/readline.lib ../eXdbm/Debug/eXdbm.lib"
+				AdditionalDependencies="wsock32.lib &quot;../src/Debug GUI/libgpsim.lib&quot; ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gdk_pixbuf-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../cairo/lib/cairo.lib ../../gtkextra-2/lib/libgtkextra-win32-2.1_dll.lib ../../readline/lib/readline-staticD.lib ../eXdbm/Debug/eXdbm.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
@@ -100,7 +100,7 @@
 				Outputs="libgpsim.dll"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gdk_pixbuf-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.1_dll.lib ../../readline/lib/readline-static.lib ../eXdbm/Release/eXdbm.lib"
+				AdditionalDependencies="wsock32.lib &quot;../src/Release GUI/libgpsim.lib&quot; ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gdk_pixbuf-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../cairo/lib/cairo.lib ../../gtkextra-2/lib/libgtkextra-win32-2.1_dll.lib ../../readline/lib/readline-static.lib ../eXdbm/Release/eXdbm.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="../plat/win32/gpsim.def"

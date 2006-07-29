@@ -1,3 +1,9 @@
+2006-07-29 Borut Razem <borut.razem@siol.net>
+	* cli/cli.vcproj, gpsim/gpsim.vcproj, gui/gui.vcproj,
+	  modules/modules.vcproj: added cairo dependency, clening
+	* plat/win32/libgpsim.def: MSVC sync
+	* src/i2c-ee.c, modules/i2c-eeprom.c: removed compiler warnings
+
 2006-07-26 Roy Rankin <rrankin@ihug.com.au>
 	*  src/i2c-ee.h src/i2c-ee.cc modules/i2c-eeprom.cc
 	   modules/i2c-eeprom.h modules/gpsim_modules.cc:
@@ -6,7 +12,7 @@
 2006-07-24 Borut Razem <borut.razem@siol.net>
 	* cli/makefile.mingw, cli/cli.vcproj: define HAVE_SOCKETS -
 	  sockets are enabled on WIN32
-	* plat/win32/libgpsim.def, src/src.vcproj: WIN32 sync
+	* plat/win32/libgpsim.def, src/src.vcproj: MSVC sync
 	* doc/gpsimWin32: glib-2.10.3, gtk+-2.8.18, pango-1.12.3
 
 2006-07-23 Scott Dattalo <scott@dattalo.com>
