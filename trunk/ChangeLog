@@ -1,4 +1,7 @@
 2006-07-30 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_log.cc: Cleaned up help description.
+	
+2006-07-30 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/cmd_log.h, cli/cmd_break.cc, cli/cmd_break.h,
 	  cli/cmd_log.cc, src/gpsim_object.cc, src/value.h, src/value.cc,
 	  src/expr.h, src/expr.cc, src/trace.h, src/trace.cc,

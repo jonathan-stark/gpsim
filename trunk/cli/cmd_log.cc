@@ -57,17 +57,23 @@ cmd_log::cmd_log()
 
     brief_doc = string("Log/record events to a file");
 
-    long_doc = string ("\nlog [[on [file_name]]|[off]] | [w|r reg] [wv|rv reg val]\n\
-\tLog will record simulation history in a file. It's similar to the\n\
-\tbreak command\n\
-\tExamples:\n\
-\t\tlog               - Display log status\n\
-\t\tlog on            - Begin logging in file gpsim.log\n\
-\t\tlog on file.log   - Begin logging in file file.log\n\
-\t\tlog lxt           - Begin lxt logging in file gpsim.lxt\n\
-\t\tlog lxt file.lxt  - Begin lxt logging in file file.lxt\n\
-\t\tlog off           - Stop logging\n\
-\t\tlog w temp_hi     - Log all writes to reg temp_hi\n\
+    long_doc = string ("\n\
+The log command will record simulation history in a file. It's similar to the\n\
+break command\n\
+  log [[on|lxt [file_name]]|[off]]\n\
+    Enables or disables logging. Specify no options to see log status.\n\
+    The lxt option encodes the log file so that an external viewer\n\
+    like gtkwave can be used to view the file.\n\
+  log w|r reg [, expr]\n\
+    Specify a register to log. See the break command for expression syntax\n\
+\n  Examples:\n\
+\tlog               - Display log status\n\
+\tlog on            - Begin logging in file gpsim.log\n\
+\tlog on file.log   - Begin logging in file file.log\n\
+\tlog lxt           - Begin lxt logging in file gpsim.lxt\n\
+\tlog lxt file.lxt  - Begin lxt logging in file file.lxt\n\
+\tlog off           - Stop logging\n\
+\tlog w temp_hi     - Log all writes to reg temp_hi\n\
 ");
 
   op = cmd_trace_options; 
