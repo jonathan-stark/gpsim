@@ -116,9 +116,9 @@ public:
   virtual bool isFrameBoundary() { return false;}
   // Returns true if the trace record starting at index 'tbi' is of the same
   // type as this TraceType
-  virtual bool isValid(unsigned int tbi);
-  virtual int bitsTraced(void) { return 24; }
-  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+  virtual bool isValid(Trace *, unsigned int tbi);
+  virtual int bitsTraced() { return 24; }
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 };
 
 class ProcessorTraceType : public TraceType
@@ -143,7 +143,7 @@ public:
   PCTraceType(Processor *_cpu, unsigned int t, unsigned int s);
   virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary() { return true; }
-  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 };
 
 class RegisterWriteTraceType : public ProcessorTraceType
@@ -153,7 +153,7 @@ public:
   RegisterWriteTraceType(Processor *_cpu, unsigned int t, unsigned int s);
 
   virtual TraceObject *decode(unsigned int tbi);
-  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 
 };
 
@@ -164,7 +164,7 @@ public:
   RegisterReadTraceType(Processor *_cpu, unsigned int t, unsigned int s);
 
   virtual TraceObject *decode(unsigned int tbi);
-  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 
 };
 
@@ -294,8 +294,6 @@ class Trace
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
     trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-    if(bLogging && near_full()) 
-      logger.log();
   }
   inline void breakpoint (unsigned int bp)
   {
@@ -442,10 +440,10 @@ public:
 
   void lxt_trace(unsigned int address, unsigned int value, guint64 cc);
 
-  void register_read(unsigned int address, unsigned int value, guint64 cc);
-  void register_write(unsigned int address, unsigned int value, guint64 cc);
-  void register_read_value(unsigned int address, unsigned int value, guint64 cc);
-  void register_write_value(unsigned int address, unsigned int value, guint64 cc);
+  void register_read(Register *, guint64 cc);
+  void register_write(Register *, guint64 cc);
+  void register_read_value(Register *, guint64 cc);
+  void register_write_value(Register *, guint64 cc);
 
 };
 

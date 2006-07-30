@@ -428,7 +428,7 @@ protected:
 
   unsigned int SetMaskedValue(unsigned int uValue);
   /// breakpoints
-  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, ObjectActionTypes at=eActionHalt, Expression *expr=0);
   virtual int clear_break();
 
 public:
@@ -540,7 +540,7 @@ public:
   virtual string toString();
   virtual Value* evaluate();
   /// breakpoints
-  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, ObjectActionTypes at=eActionHalt, Expression *expr=0);
 };
 
 class line_number_symbol : public address_symbol

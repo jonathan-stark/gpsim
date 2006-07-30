@@ -189,10 +189,10 @@ public:
   guint64 write_access_count;
 
 
-
-  Register(void);
+public:
+  Register();
   Register(Processor *);
-  virtual ~Register(void);
+  virtual ~Register();
 
 
   /// get - method for accessing the register's contents.
@@ -347,6 +347,11 @@ public:
   virtual string &baseName()
   {
     return name_str;
+  }
+
+  virtual unsigned int getAddress()
+  {
+    return address;
   }
 };
 

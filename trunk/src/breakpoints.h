@@ -58,18 +58,18 @@ public:
 
   unsigned int address;
 
-  virtual bool set_break(void);
-  virtual Processor* get_cpu(void);
-  virtual void print(void);
-  virtual void clear(void);
+  virtual bool set_break();
+  virtual Processor* get_cpu();
+  virtual void print();
+  virtual void clear();
   virtual char const * bpName() { return "Execution"; }
 
   Breakpoint_Instruction(Processor *new_cpu, 
 			 unsigned int new_address, 
 			 unsigned int bp);
 
-  virtual enum INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
-  virtual void execute(void);
+  virtual enum INSTRUCTION_TYPES isa() {return BREAKPOINT_INSTRUCTION;};
+  virtual void execute();
   virtual bool isBase() { return false;}
   virtual bool eval_Expression();
 };
@@ -83,8 +83,8 @@ class Notify_Instruction : public Breakpoint_Instruction
 		     unsigned int address, 
 		     unsigned int bp, 
 		     TriggerObject *cb);
-  virtual enum INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
-  virtual void execute(void);
+  virtual enum INSTRUCTION_TYPES isa() {return NOTIFY_INSTRUCTION;};
+  virtual void execute();
   virtual char const * bpName() { return "Notify Execution"; }
 
 };
@@ -96,7 +96,7 @@ class Profile_Start_Instruction : public Notify_Instruction
 			    unsigned int address, 
 			    unsigned int bp, 
 			    TriggerObject *cb);
-  virtual enum INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa() {return PROFILE_START_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Start"; }
 };
 
@@ -107,7 +107,7 @@ class Profile_Stop_Instruction : public Notify_Instruction
 			   unsigned int address, 
 			   unsigned int bp, 
 			   TriggerObject *cb);
-  virtual enum INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
+  virtual enum INSTRUCTION_TYPES isa() {return PROFILE_STOP_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Stop"; }
 };
 
@@ -170,8 +170,8 @@ class RegisterAssertion : public Breakpoint_Instruction
 		    bool bPostAssertion=false
 		    );
 
-  virtual void execute(void);
-  virtual void print(void);
+  virtual void execute();
+  virtual void print();
   virtual char const * bpName() { return "Register Assertion"; }
 
 
@@ -181,13 +181,13 @@ class Breakpoints;
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access the Breakpoints object directly!
-LIBGPSIM_EXPORT Breakpoints & get_bp(void);
+LIBGPSIM_EXPORT Breakpoints & get_bp();
 #else
 // we are in gpsim: use of get_bp() is recommended,
 // even if the bp object can be accessed directly.
 extern Breakpoints bp;
 
-inline Breakpoints &get_bp(void)
+inline Breakpoints &get_bp()
 {
   return bp;
 }
@@ -272,7 +272,7 @@ public:
   int breakpoint_number,last_breakpoint;
 
 
-  Breakpoints(void);
+  Breakpoints();
   int set_breakpoint(BREAKPOINT_TYPES,Processor *,
 		     unsigned int, 
 		     unsigned int,
@@ -309,7 +309,10 @@ public:
             unsigned int op,
             unsigned int value,
             unsigned int mask=0xff);
-  int set_break(gpsimObject::ObjectBreakTypes bt, Register *, Expression *pExpr=0);
+  int set_break(gpsimObject::ObjectBreakTypes bt,
+		gpsimObject::ObjectActionTypes at,
+		Register *,
+		Expression *pExpr=0);
 
   int set_cycle_break(Processor *cpu,
 			       guint64 cycle,
@@ -331,49 +334,49 @@ public:
 				      unsigned int mask=0xff);
   bool set_expression(unsigned bp_number, Expression *pExpr);
 
-  inline void clear_global(void) {global_break = GLOBAL_CLEAR;};
-  void halt(void);
-  inline bool have_halt(void) 
+  inline void clear_global() {global_break = GLOBAL_CLEAR;};
+  void halt();
+  inline bool have_halt() 
     { 
       return( (global_break & GLOBAL_STOP_RUNNING) != 0 );
     }
-  inline void clear_halt(void) 
+  inline void clear_halt() 
     {
       global_break &= ~GLOBAL_STOP_RUNNING;
     }
-  inline bool have_interrupt(void) 
+  inline bool have_interrupt() 
     { 
       return( (global_break & GLOBAL_INTERRUPT) != 0 );
     }
-  inline void clear_interrupt(void) 
+  inline void clear_interrupt() 
     {
       global_break &= ~GLOBAL_INTERRUPT;
     }
-  inline void set_interrupt(void) 
+  inline void set_interrupt() 
     {
       global_break |= GLOBAL_INTERRUPT;
     }
-  inline bool have_sleep(void) 
+  inline bool have_sleep() 
     { 
       return( (global_break & GLOBAL_SLEEP) != 0 );
     }
-  inline void clear_sleep(void) 
+  inline void clear_sleep() 
     {
       global_break &= ~GLOBAL_SLEEP;
     }
-  inline void set_sleep(void) 
+  inline void set_sleep() 
     {
       global_break |= GLOBAL_SLEEP;
     }
-  inline bool have_pm_write(void) 
+  inline bool have_pm_write() 
     { 
       return( (global_break & GLOBAL_PM_WRITE) != 0 );
     }
-  inline void clear_pm_write(void) 
+  inline void clear_pm_write() 
     {
       global_break &= ~GLOBAL_PM_WRITE;
     }
-  inline void set_pm_write(void) 
+  inline void set_pm_write() 
     {
       global_break |= GLOBAL_PM_WRITE;
     }
@@ -405,7 +408,7 @@ public:
   instruction *find_previous(Processor *cpu, 
 			     unsigned int address, 
 			     instruction *_this);
-  int find_free(void);
+  int find_free();
 };
 
 //
@@ -430,28 +433,28 @@ public:
   BreakpointRegister(Processor *, int, int );
   BreakpointRegister(Processor *, TriggerAction *, int, int );
 
-  virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
-  virtual string &name(void) const;
+  virtual REGISTER_TYPES isa() {return BP_REGISTER;};
+  virtual string &name() const;
   virtual void put_value(unsigned int new_value);
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
-  virtual unsigned int get_value(void);
-  virtual RegisterValue getRV(void);
-  virtual RegisterValue getRVN(void);
-  virtual unsigned int get(void);
-  virtual Register *getReg(void);
+  virtual unsigned int get_value();
+  virtual RegisterValue getRV();
+  virtual RegisterValue getRVN();
+  virtual unsigned int get();
+  virtual Register *getReg();
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
-  virtual bool hasBreak(void);
-  virtual void update(void);
+  virtual bool hasBreak();
+  virtual void update();
   virtual void add_xref(void *an_xref);
   virtual void remove_xref(void *an_xref);
   void replace(Processor *_cpu, unsigned int reg);
-  virtual bool set_break(void);
+  virtual bool set_break();
   unsigned int clear(unsigned int bp_num);
-  virtual void print(void);
-  virtual void clear(void);
+  virtual void print();
+  virtual void clear();
 
 protected:
   BreakpointRegister();
@@ -467,7 +470,7 @@ public:
   unsigned int m_uDefRegMask;
   string m_sOperator;
 
-  BreakpointRegister_Value(void)
+  BreakpointRegister_Value()
     { 
       m_replaced = 0;
       break_value = 0;
@@ -521,7 +524,7 @@ public:
   static bool IsLessThenEqualsBreakCondition(unsigned int uRegValue,
       unsigned int uRegMask, unsigned int uRegTestValue);
 
-  virtual void print(void);
+  virtual void print();
 
 };
 
@@ -535,15 +538,15 @@ public:
     set_action(this);
   }
 
-  virtual unsigned int get(void);
-  virtual RegisterValue getRV(void);
-  virtual RegisterValue getRVN(void);
+  virtual unsigned int get();
+  virtual RegisterValue getRV();
+  virtual RegisterValue getRVN();
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read"; }
 
   // TriggerAction overrides
-  virtual void action(void);
+  virtual void action();
 };
 
 class Break_register_write : public BreakpointRegister, TriggerAction
@@ -559,13 +562,13 @@ public:
   virtual char const * bpName() { return "register write"; }
 
   // TriggerAction overrides
-  virtual void action(void);
+  virtual void action();
 };
 
 class Break_register_read_value : public BreakpointRegister_Value, TriggerAction
 {
 public:
-//  Break_register_read_value(void){ };
+//  Break_register_read_value(){ };
   Break_register_read_value(Processor *_cpu, 
 			    int _repl, 
 			    int bp, 
@@ -579,15 +582,15 @@ public:
           unsigned int _operator,
 			    unsigned int bm );
 
-  virtual unsigned int get(void);
-  virtual RegisterValue getRV(void);
-  virtual RegisterValue getRVN(void);
+  virtual unsigned int get();
+  virtual RegisterValue getRV();
+  virtual RegisterValue getRVN();
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read value"; }
 
   // TriggerAction overrides
-  virtual void action(void);
+  virtual void action();
 };
 
 class Break_register_write_value : public BreakpointRegister_Value, TriggerAction
@@ -603,7 +606,7 @@ public:
 			     int _repl, 
 			     int bp, 
 			     unsigned int bv, 
-           unsigned int _operator,
+			     unsigned int _operator,
 			     unsigned int bm );
 
   virtual void put(unsigned int new_value);
@@ -612,7 +615,7 @@ public:
   virtual char const * bpName() { return "register write value"; }
 
   // TriggerAction overrides
-  virtual void action(void);
+  virtual void action();
 };
 
 class CommandAssertion : public Breakpoint_Instruction
@@ -627,8 +630,8 @@ public:
                    bool bPostAssertion
                    );
 
-  virtual void execute(void);
-  virtual void print(void);
+  virtual void execute();
+  virtual void print();
   virtual char const * bpName() { return "Register Assertion"; }
 private:
   char *command;
@@ -638,66 +641,65 @@ class Log_Register_Write : public Break_register_write
 {
  public:
 
-//  Log_Register_Write(void){ };
   Log_Register_Write(Processor *_cpu, int _repl, int bp ):
     Break_register_write(_cpu,_repl,bp ) { };
-  virtual void put(unsigned int new_value);
-  virtual void putRV(RegisterValue rv);
-  virtual void setbit(unsigned int bit_number, bool new_value);
+  //virtual void put(unsigned int new_value);
+  //virtual void putRV(RegisterValue rv);
+  //virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "log register write"; }
-
+  virtual void action();
 };
 
 class Log_Register_Read : public Break_register_read
 {
 public:
-
-
-//  Log_Register_Read(void){ };
   Log_Register_Read(Processor *_cpu, int _repl, int bp ):
     Break_register_read(_cpu,_repl,bp ) { };
-  virtual unsigned int get(void);
-  virtual RegisterValue getRV(void);
-  virtual RegisterValue getRVN(void);
-  virtual bool get_bit(unsigned int bit_number);
-  virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "log register read"; }
-
+  virtual void action();
 };
 
-class Log_Register_Read_value : public BreakpointRegister_Value
+class Log_Register_Read_value : public  Break_register_read_value
 {
 public:
 
-  Log_Register_Read_value(void){ };
   Log_Register_Read_value(Processor *_cpu, 
 			  int _repl, 
 			  int bp, 
 			  unsigned int bv, 
 			  unsigned int bm ) :
-    BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
-  virtual unsigned int get(void);
-  virtual RegisterValue getRV(void);
-  virtual bool get_bit(unsigned int bit_number);
-  virtual double get_bit_voltage(unsigned int bit_number);
+    Break_register_read_value(_cpu,  _repl, bp, bv, bm ) { };
+  Log_Register_Read_value(Processor *_cpu, 
+			  int _repl, 
+			  int bp, 
+			  unsigned int bv,
+			  unsigned int _operator,
+			  unsigned int bm ) :
+    Break_register_read_value(_cpu,  _repl, bp, bv, _operator, bm ) { };
+
   virtual char const * bpName() { return "log register read value"; }
+  virtual void action();
 };
 
-class Log_Register_Write_value : public BreakpointRegister_Value
+class Log_Register_Write_value : public Break_register_write_value
 {
 public:
 
-  Log_Register_Write_value(void){ };
   Log_Register_Write_value(Processor *_cpu, 
 			   int _repl, 
 			   int bp, 
 			   unsigned int bv, 
 			   unsigned int bm ) :
-    BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
+    Break_register_write_value(_cpu,  _repl, bp, bv, bm ) { };
 
-  virtual void put(unsigned int new_value);
-  virtual void putRV(RegisterValue rv);
-  virtual char const * bpName() { return "log register write value"; }
+  Log_Register_Write_value(Processor *_cpu, 
+			     int _repl, 
+			     int bp, 
+			     unsigned int bv, 
+			     unsigned int _operator,
+			     unsigned int bm ) :
+    Break_register_write_value(_cpu,  _repl, bp, bv, _operator,bm ) { };
+  virtual void action();
 
 };
 
@@ -705,7 +707,7 @@ public:
 class GuiCallBack: public TriggerObject
 {
 public:
-  virtual void callback(void);
+  virtual void callback();
 
   gpointer gui_callback_data;  // Data to be passed back to the gui
 
@@ -713,7 +715,7 @@ public:
   void  (*gui_callback) (gpointer gui_callback_data);
   void set_break(int, void (*)(gpointer),gpointer );
 
-  GuiCallBack(void);
+  GuiCallBack();
 };
 #endif // HAVE_GUI
 

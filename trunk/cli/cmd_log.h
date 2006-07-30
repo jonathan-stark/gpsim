@@ -28,16 +28,10 @@ class cmd_log : public command
 {
 public:
 
-  cmd_log(void);
-  void log(void);
-  void log(cmd_options *opt, ExprList_t *el);
-  void log(cmd_options *opt, const char *, ExprList_t *el);
-
-private:
+  cmd_log();
+  void log();
   void log(cmd_options *opt);
-  void log(cmd_options *opt, const char *str,guint64,guint64);
-  void log(cmd_options *opt, guint64,guint64,guint64);
-
+  void log(cmd_options *opt, ExprList_t *el);
 };
 
 extern cmd_log c_log;

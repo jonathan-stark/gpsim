@@ -105,9 +105,9 @@ string LiteralInteger::toString()
   return value->toString();
 }
 
-int LiteralInteger::set_break(ObjectBreakTypes bt, Expression *expr)
+int LiteralInteger::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *expr)
 {
-  return value ? value->set_break(bt,expr) : -1;
+  return value ? value->set_break(bt,at,expr) : -1;
 }
 
 /*****************************************************************
@@ -203,9 +203,9 @@ string LiteralSymbol::toString()
   return string("");
 }
 
-int LiteralSymbol::set_break(ObjectBreakTypes bt, Expression *expr)
+int LiteralSymbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *expr)
 {
-  return sym ? sym->set_break(bt,expr) : -1;
+  return sym ? sym->set_break(bt,at,expr) : -1;
 }
 
 int LiteralSymbol::clear_break()

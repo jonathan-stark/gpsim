@@ -1150,10 +1150,10 @@ Value* register_symbol::evaluate() {
   return new Integer(v);
 }
 
-int register_symbol::set_break(ObjectBreakTypes bt, 
+int register_symbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at,
 			       Expression *pExpr)
 {
-  return get_bp().set_break(bt,reg,pExpr);
+  return get_bp().set_break(bt,at, reg,pExpr);
 }
 
 int register_symbol::clear_break()
@@ -1209,7 +1209,7 @@ Value* address_symbol::evaluate()
 {
   return copy();
 }
-int address_symbol::set_break(ObjectBreakTypes bt, 
+int address_symbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at,
 			      Expression *pExpr)
 {
   if (bt == gpsimObject::eBreakExecute)
