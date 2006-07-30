@@ -380,6 +380,13 @@ break_cmd
           | break_set                         {  }
           ;
 
+log_cmd
+          : LOG                         {c_log.log();}
+          | LOG bit_flag                {c_log.log($2);}
+          | LOG bit_flag expr_list      {c_log.log($2,$3);}
+          ;
+
+
 break_set 
           : BREAK bit_flag expr_list          {$$=c_break.set_break($2,$3);}
           | BREAK bit_flag                    {$$=c_break.set_break($2);}
@@ -521,14 +528,6 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
               YYABORT;
             }
           }
-          ;
-
-log_cmd
-          : LOG                         {c_log.log();}
-          | LOG bit_flag                {c_log.log($2,0,0);}
-//          | LOG bit_flag LITERAL_STRING_T         {c_log.log($2,$3->getVal(),0);}
-//          | LOG bit_flag LITERAL_STRING_T expr_list {c_log.log($2,$3->getVal(),$4);}
-          | LOG bit_flag expr_list      {c_log.log($2,0,$3);}
           ;
 
 

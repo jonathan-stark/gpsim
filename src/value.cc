@@ -754,7 +754,7 @@ void Integer::get(Packet &pb)
   pb.EncodeUInt32(j);
 }
 
-int Integer::set_break(ObjectBreakTypes bt, Expression *expr)
+int Integer::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *expr)
 {
   Processor *pCpu = get_active_cpu();
   if (pCpu) {
@@ -766,7 +766,7 @@ int Integer::set_break(ObjectBreakTypes bt, Expression *expr)
       // Cast the integer into a register and set a register break point
       unsigned int iRegAddress = (unsigned int) value;
       Register *pReg = &pCpu->rma[iRegAddress];
-      return get_bp().set_break(bt, pReg, expr);
+      return get_bp().set_break(bt, at, pReg, expr);
     } else if ( bt == eBreakExecute) {
 
       unsigned int iProgAddress = (unsigned int) value;

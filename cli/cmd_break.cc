@@ -135,7 +135,7 @@ static gpsimObject::ObjectBreakTypes MapBreakActions(int co_value)
 }
 
 //------------------------------------------------------------------------
-unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
+unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
 {
   if (!co) {
     list();
@@ -189,11 +189,13 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
   }
 
   if (!pFirst)
-    return set_break(co->value);
+    return set_break(co->value,bLog);
 
   // See if the expression supports break points. If it does, the break points
   // will get set and the expressions deleted.
-  int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), pSecond) : -1;
+  int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), 
+				       (bLog ? gpsimObject::eActionLog : gpsimObject::eActionHalt),
+				       pSecond) : -1;
   if (bpn == -1 && co->value!=CYCLE) {
     GetUserInterface().DisplayMessage("break cannot be set on %s\n",
       pFirst->toString().c_str());
@@ -238,7 +240,8 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL)
 
 unsigned int cmd_break::set_break(cmd_options *co, 
 				  Expression *pExpr1,
-				  Expression *pExpr2)
+				  Expression *pExpr2,
+				  bool bLog)
 
 {
 
@@ -249,11 +252,12 @@ unsigned int cmd_break::set_break(cmd_options *co,
 
   unsigned int bit_flag = co->value;
   if (!pExpr1)
-    return set_break(bit_flag);
+    return set_break(bit_flag,bLog);
 
   // See if the expression supports break points. If it does, the break points
   // will get set and the expressions deleted.
-  int i = pExpr1 ? pExpr1->set_break(MapBreakActions(co->value), pExpr2) : -1;
+  int i = pExpr1 ? pExpr1->set_break(MapBreakActions(co->value), 
+				     (bLog ? gpsimObject::eActionLog : gpsimObject::eActionHalt), pExpr2) : -1;
   if (i>=0) {
     get_bp().dump1(i);
     return i;
@@ -268,7 +272,7 @@ unsigned int cmd_break::set_break(cmd_options *co,
 }
 
 
-unsigned int cmd_break::set_break(cmd_options *co)
+unsigned int cmd_break::set_break(cmd_options *co, bool bLog)
 {
 
   if (!co) {
@@ -277,10 +281,10 @@ unsigned int cmd_break::set_break(cmd_options *co)
   }
 
   int bit_flag = co->value;
-  return set_break(bit_flag);
+  return set_break(bit_flag, bLog);
 }
 
-unsigned int cmd_break::set_break(int bit_flag)
+unsigned int cmd_break::set_break(int bit_flag, bool bLog)
 {
   unsigned int b = MAX_BREAKPOINTS;
 

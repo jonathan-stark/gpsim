@@ -1,4 +1,19 @@
 2006-07-30 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/cmd_log.h, cli/cmd_break.cc, cli/cmd_break.h,
+	  cli/cmd_log.cc, src/gpsim_object.cc, src/value.h, src/value.cc,
+	  src/expr.h, src/expr.cc, src/trace.h, src/trace.cc,
+	  src/registers.h, src/breakpoints.h, src/breakpoints.cc,
+	  src/symbol.h, src/gpsim_object.h, src/operator.cc, src/operator.h,
+	  src/symbol.cc:
+	- Fixed logging. The logging feature has been broken for a long
+	  time. The old code that performed logging has been mostly
+	  removed. The new logging code is similar to the breakpoint
+	  code. It  utilizes TriggerActions.to perform the logging
+	  operations.
+	- (The profiling feature is currently broken too. However, it
+	  should be possible to utilize TriggerActions for profiling).
+	
+2006-07-30 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc, gui/gui_scope.h: development snap - still not
 	complete
 

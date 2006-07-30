@@ -31,15 +31,15 @@ class cmd_break : public command
 {
 public:
 
-  cmd_break(void);
+  cmd_break();
   void list(guint64 value=CMDBREAK_BAD_BREAK_NUMBER);
 
-  unsigned int set_break(cmd_options *co);
-  unsigned int set_break(cmd_options *co, ExprList_t *pEL);
+  unsigned int set_break(cmd_options *co, bool bLog=false);
+  unsigned int set_break(cmd_options *co, ExprList_t *pEL, bool bLog=false);
 
 private:
-  unsigned int set_break(cmd_options *co, Expression *pExpr1, Expression *pExpr2=0);
-  unsigned int set_break(int bit_flag);
+  unsigned int set_break(cmd_options *co, Expression *pExpr1, Expression *pExpr2=0, bool bLog=false);
+  unsigned int set_break(int bit_flag, bool bLog);
 };
 
 extern cmd_break c_break;

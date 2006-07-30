@@ -30,14 +30,15 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/symbol_orb.h"
 #include "../src/trace.h"
 
+#include "cmd_break.h"
+
 cmd_log c_log;
 
-#define LOG_ON		1
-#define LOG_OFF		2
+#define LOG_ON	    1
+#define LOG_OFF	    2
 #define WRITE       3
 #define READ        4
-#define WRITE_VALUE 5
-#define READ_VALUE  6
+#define LOG_LXT     5
 
 
 static cmd_options cmd_trace_options[] =
@@ -46,12 +47,11 @@ static cmd_options cmd_trace_options[] =
   {"off", LOG_OFF,     OPT_TT_BITFLAG},
   {"w",   WRITE,       OPT_TT_BITFLAG},
   {"r",   READ,        OPT_TT_BITFLAG},
-  {"wv",  WRITE_VALUE, OPT_TT_BITFLAG},
-  {"rv",  READ_VALUE,  OPT_TT_BITFLAG},
+  {"lxt", LOG_LXT,     OPT_TT_BITFLAG},
   { 0,0,0}
 };
 
-cmd_log::cmd_log(void)
+cmd_log::cmd_log()
 { 
   name = "log";
 
@@ -63,7 +63,9 @@ cmd_log::cmd_log(void)
 \tExamples:\n\
 \t\tlog               - Display log status\n\
 \t\tlog on            - Begin logging in file gpsim.log\n\
-\t\tlog on file.log   - Begin logging in file.log\n\
+\t\tlog on file.log   - Begin logging in file file.log\n\
+\t\tlog lxt           - Begin lxt logging in file gpsim.lxt\n\
+\t\tlog lxt file.lxt  - Begin lxt logging in file file.lxt\n\
 \t\tlog off           - Stop logging\n\
 \t\tlog w temp_hi     - Log all writes to reg temp_hi\n\
 ");
@@ -71,7 +73,7 @@ cmd_log::cmd_log(void)
   op = cmd_trace_options; 
 }
 
-void cmd_log::log(void)
+void cmd_log::log()
 {
   GetTraceLog().status();
 }
@@ -79,7 +81,7 @@ void cmd_log::log(void)
 
 
 
-void cmd_log::log(cmd_options *opt, const char *str, ExprList_t *eList)
+void cmd_log::log(cmd_options *opt, ExprList_t *eList)
 {
 
   if (!opt) {
@@ -87,34 +89,42 @@ void cmd_log::log(cmd_options *opt, const char *str, ExprList_t *eList)
     return;
   }
 
-  if (!eList) {
-    if(str)
-      log(opt,str,0,0);
-    else
-      log(opt);
-
-    return;
+  switch(opt->value) {
+  case LOG_ON:
+  case LOG_LXT:
+    {
+      int fmt = opt->value==LOG_ON ? TRACE_FILE_FORMAT_ASCII : TRACE_FILE_FORMAT_LXT;
+      const char *fn=0;
+      if (eList) {
+	ExprList_itor ei = eList->begin();
+	Expression *pFirst = *ei;
+	LiteralString *pString=0;
+	string m;
+	if (pFirst) {
+	  pString = dynamic_cast<LiteralString*>(pFirst);
+	  if (pString) {
+	    String *pS = (String *)pString->evaluate();
+	    GetTraceLog().enable_logging(pS->getVal(),fmt);
+	    delete pFirst;
+	    delete pS;
+	  }
+	}
+      } else
+	GetTraceLog().enable_logging(0,fmt);
+    }
+    break;
+  case LOG_OFF:
+    GetTraceLog().disable_logging();
+    break;
+  default:
+    c_break.set_break(opt,eList,true);
   }
-
-  const int cMAX_PARAMETERS=3;
-  int nParameters=cMAX_PARAMETERS;
-  guint64 parameters[cMAX_PARAMETERS] = {0,0,0};
-
-  evaluate(eList, parameters, &nParameters);
-
-  if(str) 
-    log(opt, str, parameters[0], parameters[1]);
-  else
-    log(opt, parameters[0], parameters[1], parameters[2]);
 
 }
 
 
 void cmd_log::log(cmd_options *opt)
 {
-
-  if(!GetActiveCPU())
-    cout << "warning, no GetActiveCPU()\n";
 
   switch(opt->value) {
   case LOG_ON:
@@ -123,122 +133,11 @@ void cmd_log::log(cmd_options *opt)
   case LOG_OFF:
     GetTraceLog().disable_logging();
     break;
+  case LOG_LXT:
+    GetTraceLog().enable_logging(0,TRACE_FILE_FORMAT_LXT);
+    break;
   default:
     cout << " Invalid log option\n";
   }
 
 }
-
-void cmd_log::log(cmd_options *opt, const char *str, guint64 val, guint64 mask)
-{
-
-  //int sym_value;
-
-  if(!GetActiveCPU())
-    cout << "warning, no GetActiveCPU()\n";
-
-  switch(opt->value) {
-  case LOG_ON:
-    GetTraceLog().enable_logging(str);
-    break;
-  case LOG_OFF:
-    GetTraceLog().disable_logging();
-    break;
-  case WRITE:
-  case READ:
-  case WRITE_VALUE:
-  case READ_VALUE:
-
-    cout << "this command is temporarily disabled\n";
-    /*
-      if(!get_symbol_value(str,&sym_value)) {
-	cout << '`' << str << '\'' << " was not found in the symbol table\n";
-	return;
-      }
-
-      log(opt, sym_value, val, mask);
-    */
-    break;
-
-  default:
-    cout << "Error, Unknown option\n";
-  }
-
-
-}
-
-void cmd_log::log(cmd_options *opt, guint64 r, guint64 v, guint64 m)
-{
-  int b=MAX_BREAKPOINTS;
-  char *str=0;
-  unsigned int reg = (unsigned int)r;
-  unsigned int value = (unsigned int)v;
-  unsigned int mask = (unsigned int)m;
-
-  if(!GetActiveCPU())
-    cout << "warning, no GetActiveCPU()\n";
-
-  switch(opt->value) {
-  case LOG_ON:
-    cout << "logging on file int,int,int (ignoring)"  << endl;
-    break;
-  case LOG_OFF:
-    GetTraceLog().disable_logging();
-    break;
-  case WRITE:
-    b = get_bp().set_notify_write(GetActiveCPU(), reg);
-    if(b < MAX_BREAKPOINTS)
-      cout << "log register " << reg << " when it is written. bp#: " << b << '\n';
-
-    break;
-  case READ:
-    b = get_bp().set_notify_read(GetActiveCPU(), reg);
-    if(b < MAX_BREAKPOINTS)
-      cout << "log register " << reg << " when it is read.\n" << 
-	"bp#: " << b << '\n';
-
-
-    break;
-  case WRITE_VALUE:
-  case READ_VALUE:
-
-    if(opt->value == READ_VALUE) {
-      b = get_bp().set_notify_read_value(GetActiveCPU(), reg,value,mask);
-      str = "read from";
-    } else {
-
-      b = get_bp().set_notify_write_value(GetActiveCPU(), reg,value,mask);
-      str = "written to";
-    }
-
-    if(b<MAX_BREAKPOINTS) {
-
-      cout << "log when ";
-      if(mask == 0 || mask == 0xff)
-	cout << "0x" << hex << (value&0xff);
-      else {
-	cout << "bit pattern ";
-	for(unsigned int ui=0x80; ui; ui>>=1) 
-	  if(ui & mask) {
-	    if(ui & value)
-	      cout << '1';
-	    else
-	      cout << '0';
-	  }
-	  else
-	    cout << 'X';
-      }
-      
-      cout << " is " << str <<" register " << reg << '\n' << 
-	"bp#: " << b << '\n';
-    }
-    break;
-
-  default:
-    cout << "Error, Unknown option\n";
-  }
-
-
-}
-
-

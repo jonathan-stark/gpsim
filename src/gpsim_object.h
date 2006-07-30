@@ -27,11 +27,10 @@ Boston, MA 02111-1307, USA.  */
 using namespace std;
 
 class BreakType;
+class Expression;
 
 /// gpsimObject - base class for most of gpsim's objects
 /// 
-
-class Expression;
 
 class gpsimObject {
  public:
@@ -76,6 +75,12 @@ class gpsimObject {
     eBreakExecute
   };
 
+  // Breakpoint types supported by Value
+  enum ObjectActionTypes {
+    eActionHalt,
+    eActionLog,
+  };
+
   /// breakpoints
   /// set a break point on a gpsim object. The BreakType specifies the
   /// the condition for which the break will trigger when this value
@@ -84,10 +89,10 @@ class gpsimObject {
   /// evaluate to true for the break to trigger. If the break is successfully
   /// set then a non-negative number (the break point number) will be returned.
   /// If the break fails, then -1 is returned.
+  /// The ActionType specifies the action to take when the break is triggered.
 
-  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0);
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, ObjectActionTypes at=eActionHalt, Expression *expr=0);
   virtual int clear_break();
-
 
 protected:
 

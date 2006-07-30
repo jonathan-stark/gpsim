@@ -429,8 +429,11 @@ TraceType::TraceType(unsigned int t, unsigned int s)
 // If the trace record starting at the trace buffer index 'tbi' is of the
 // same type as this trace object, then return true.
 //
-bool TraceType::isValid(unsigned int tbi)
+bool TraceType::isValid(Trace *pTrace, unsigned int tbi)
 {
+  if (!pTrace)
+    return false;
+
   unsigned int i;
 
   // The upper 8-bits of the 'type' specify the trace type for this object.
@@ -438,7 +441,7 @@ bool TraceType::isValid(unsigned int tbi)
   // sized trace records occupy consecutive types.
   for(i=0; i<size; i++) {
 
-    if(trace.type(tbi + i) != (type + (i<<24))) 
+    if(pTrace->type(tbi + i) != (type + (i<<24))) 
       return false;
   }
 
@@ -446,15 +449,16 @@ bool TraceType::isValid(unsigned int tbi)
 
 }
 
-int TraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 {
   int total_chars=0;
-  if(isValid(tbi)) {
+  
+  if(pTrace && isValid(pTrace, tbi)) {
     unsigned int i=0;
 
     for(i=0; i< size; i++) {
 
-      int n = snprintf(buf,bufsize,"%08X:", trace.get(tbi+i));
+      int n = snprintf(buf,bufsize,"%08X:", pTrace->get(tbi+i));
       if(n < 0)
 	break;
 
@@ -491,16 +495,24 @@ TraceObject *RegisterWriteTraceType::decode(unsigned int tbi)
   return rto;
 }
 
-int RegisterWriteTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 {
-  int n = TraceType::dump_raw(tbi,buf,bufsize);
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
 
   buf += n;
   bufsize -= n;
 
-  unsigned int tv = trace.get(tbi);
+  unsigned int tv = pTrace->get(tbi);
+  unsigned int address = (tv >> 8) & 0xfff;
   
-  int m = snprintf(buf, bufsize," Register 0x%02x was 0x%02x",(tv>>8)&0xfff, tv&0xff);
+  Register *reg = cpu->rma.get_register(address);
+  int m = snprintf(buf, bufsize,
+		   "  Wrote: 0x%x to %s(0x%04X)",
+		   tv & 0xff,
+		   (reg ? reg->name().c_str() : ""), address);
   if(m>0)
     n += m;
 
@@ -531,16 +543,25 @@ TraceObject *RegisterReadTraceType::decode(unsigned int tbi)
   return rto;
 }
 
-int RegisterReadTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+int RegisterReadTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsize)
 {
-  int n = TraceType::dump_raw(tbi,buf,bufsize);
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
 
   buf += n;
   bufsize -= n;
 
-  unsigned int tv = trace.get(tbi);
-  
-  int m = snprintf(buf, bufsize," Read 0x%02x from Register 0x%02x", tv&0xff,(tv>>8)&0xfff);
+  unsigned int tv = pTrace->get(tbi);
+  unsigned int address = (tv >> 8) & 0xfff;
+
+  Register *reg = cpu->rma.get_register(address);
+  int m = snprintf(buf, bufsize,
+		   "  Read: 0x%0X from %s(0x%04X)",
+		   tv & 0xff,
+		   (reg ? reg->name().c_str() : ""), address);
+
   if(m>0)
     n += m;
 
@@ -576,14 +597,17 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
   return pcto;
 }
 
-int PCTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+int PCTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsize)
 {
-  int n = TraceType::dump_raw(tbi,buf,bufsize);
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace,tbi,buf,bufsize);
 
   buf += n;
   bufsize -= n;
 
-  int m = snprintf(buf, bufsize," PC: %04X",trace.get(tbi) & 0xffff);
+  int m = snprintf(buf, bufsize," PC: %04X",pTrace->get(tbi) & 0xffff);
   if(m>0)
     n += m;
 
@@ -812,7 +836,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	  TraceType *tt = (*tti).second;
 
 	  if(tt) {
-	    tt->dump_raw(index,buffer,bufsize);
+	    tt->dump_raw(this,index,buffer,bufsize);
 	    return_value = tt->size;
 	  }
 	  break;
@@ -841,7 +865,7 @@ void Trace::disableLogging()
 }
 
 //------------------------------------------------------------------
-// int Trace::dump(unsigned int n=0)
+// int Trace::dump(int n, FILE *out_stream)
 //
 
 int Trace::dump(int n, FILE *out_stream)
@@ -1140,8 +1164,10 @@ void TraceLog::write_logfile(void)
 
   unsigned int i,j;
   char buf[256];
+  guint64 cycle=0;
 
   if(log_file) {
+
 
     buffer.trace_flag = TRACE_ALL;
 
@@ -1150,14 +1176,15 @@ void TraceLog::write_logfile(void)
 
     for(i=0,j=0; i<buffer.trace_index && j<buffer.trace_index; j++) {
       buf[0] = 0;
+
+      if(buffer.is_cycle_trace(i,&cycle))
+	fprintf(log_file,"Cycle 0x%016" PRINTF_INT64_MODIFIER "X\n",cycle);
+
       i = (i + buffer.dump1(i,buf, sizeof(buf))) & TRACE_BUFFER_MASK;
 
       if(buf[0]) {
 	items_logged++;
 	fprintf(log_file,"%s\n", buf);
-      } else {
-	cout << " write_logfile: ERROR, couldn't decode trace buffer\n";
-	return;
       }
     }
 
@@ -1208,11 +1235,11 @@ void TraceLog::status(void)
       switch(file_format)
       {
       case TRACE_FILE_FORMAT_LXT:
-	  cout << "in LXT mode" << endl;
+	  cout << " in LXT mode" << endl;
 	  break;
       case TRACE_FILE_FORMAT_ASCII:
       default:
-	  cout << "in ASCII mode" << endl;
+	  cout << " in ASCII mode" << endl;
 	  break;
       }
 
@@ -1279,61 +1306,79 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
     lt_emit_value_int(lxtp, symp, 0, value);
 }
 
-void TraceLog::register_read(unsigned int address, unsigned int value, guint64 cc)
+void TraceLog::register_read(Register *pReg, guint64 cc)
 {
-    switch(file_format)
+  if (!pReg)
+    return;
+
+  switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-	buffer.cycle_counter(cc);
-	//buffer.register_read(address, value);
-	break;
+      buffer.cycle_counter(cc);
+      buffer.raw(pReg->read_trace.get() | pReg->get_value());
+      if(buffer.near_full())
+	write_logfile();
+      break;
     case TRACE_FILE_FORMAT_LXT:
-	lxt_trace(address, value, cc);
-	break;
+      lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
+      break;
     }
 }
 
-void TraceLog::register_write(unsigned int address, unsigned int value, guint64 cc)
+void TraceLog::register_write(Register *pReg, guint64 cc)
 {
-    switch(file_format)
+  if (!pReg)
+    return;
+
+  switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-	buffer.cycle_counter(cc);
-	//buffer.register_write(address, value);
-	if(buffer.near_full())
-	    write_logfile();
-	break;
+      buffer.cycle_counter(cc);
+      buffer.raw(pReg->write_trace.get() | pReg->get_value());
+      if(buffer.near_full())
+	write_logfile();
+      break;
     case TRACE_FILE_FORMAT_LXT:
-	lxt_trace(address, value, cc);
-	break;
+      lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
+      break;
     }
 }
 
-void TraceLog::register_read_value(unsigned int address, unsigned int value, guint64 cc)
+void TraceLog::register_read_value(Register *pReg, guint64 cc)
 {
-    switch(file_format)
+  if (!pReg)
+    return;
+
+  switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-	buffer.cycle_counter(cc);
-	//buffer.register_read_value(address, value);
-        break;
+      buffer.cycle_counter(cc);
+      buffer.raw(pReg->read_trace.get() | pReg->get_value());
+      if(buffer.near_full())
+	write_logfile();
+      break;
     case TRACE_FILE_FORMAT_LXT:
-	lxt_trace(address, value, cc);
-	break;
+      lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
+      break;
     }
 }
 
-void TraceLog::register_write_value(unsigned int address, unsigned int value, guint64 cc)
+void TraceLog::register_write_value(Register *pReg, guint64 cc)
 {
-    switch(file_format)
+  if (!pReg)
+    return;
+
+  switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-	buffer.cycle_counter(cc);
-	//buffer.register_write_value(address, value);
-        break;
+      buffer.cycle_counter(cc);
+      buffer.raw(pReg->write_trace.get() | pReg->get_value());
+      if(buffer.near_full())
+	write_logfile();
+      break;
     case TRACE_FILE_FORMAT_LXT:
-	lxt_trace(address, value, cc);
-	break;
+      lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
+      break;
     }
 }
 
