@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 class TimeMarker;
 class ZoomAttribute;
 class PanAttribute;
+class Waveform;
 
 //
 // The Scope Window
@@ -39,6 +40,10 @@ public:
   Scope_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
+
+
+  void Expose();
+  void Expose(Waveform *);
 
   /// zoom - positive values mean zoom in, negative values mean zoom out
   void zoom(int);
