@@ -1,3 +1,10 @@
+2006-07-31 Scott Dattalo <scott@dattalo.com>
+	* src/pic-ioports.cc: RBIF was not handled correctly when the
+	change on interrupt was due to a write to PORTB.
+	* regression/interrupts_14bit.asm: Add a check for the RBIF flag
+	getting set correctly.
+	* arc/p16x8x.cc: W was not getting added to the symbol table.
+
 2006-07-30 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_log.cc: Cleaned up help description.
 	
