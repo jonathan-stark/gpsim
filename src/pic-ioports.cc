@@ -209,6 +209,8 @@ void PicPortBRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
 
+  cpu14->intcon->set_rbif(false);
+
 //  unsigned int diff = mEnableMask & (new_value ^ value.data);
 //RRR  if(diff) {
     drivingValue = new_value & mEnableMask;
@@ -221,7 +223,6 @@ void PicPortBRegister::put(unsigned int new_value)
     updatePort();
 //RRR  }
 
-  cpu14->intcon->set_rbif(false);
 }
 
 unsigned int PicPortBRegister::get()

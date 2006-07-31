@@ -28,6 +28,7 @@ failures        RES     1
 w_temp          RES     1
 status_temp     RES     1
 
+ GLOBAL temp,temp1,temp2,temp3,temp4,temp5
 
  GLOBAL start
 ;----------------------------------------------------------------------
@@ -310,6 +311,8 @@ rbif_l1:
 
         btfsc   temp5,1
          iorwf  temp1,f
+
+   .assert "(temp5 & 2) == 2"
 
         clrc
         rlf     temp2,f
