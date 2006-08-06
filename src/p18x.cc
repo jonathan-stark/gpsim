@@ -94,6 +94,14 @@ void P18C2x2::create_iopin_map()
   package->assign_pin(28, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
   tmr1l.setIOpin(&(*m_portc)[0]);
+  ssp.initialize(&pir_set_def,    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+		SSP_TYPE_MSSP
+       );
+
 
   //1portc.usart = &usart16;
 
@@ -293,6 +301,13 @@ void P18C4x2::create_iopin_map()
 
   tmr1l.setIOpin(&(*m_portc)[0]);
 
+  ssp.initialize(&pir_set_def,    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+		SSP_TYPE_MSSP
+       );
   //1portc.ccp1con = &ccp1con;
   //1portc.usart = &usart16;
 

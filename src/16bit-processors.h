@@ -151,7 +151,7 @@ public:
   TBL_MODULE           tbl;
   TMR2_MODULE          tmr2_module;
   TMR3_MODULE          tmr3_module;
-  SSPMODULE            ssp;
+  SSP_MODULE           ssp;
 
 
 

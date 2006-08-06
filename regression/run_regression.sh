@@ -98,3 +98,8 @@ ${RT} ccp sim_pwm877a
 
 ${RT} wavegen sim
 
+${RT} spi sim_88
+
+${RT} spi sim_242
+
+${RT} spi sim_c62

@@ -74,7 +74,7 @@ public:
   CCPRH   ccpr2h;
   PCON    pcon;
   PIR_SET_1 pir_set_def;
-  SSP_MODULE14   ssp;
+  SSP_MODULE   ssp;
 
   virtual unsigned int program_memory_size() const { return 0x800; };
   virtual unsigned int register_memory_size () const { return 0x100; }
@@ -120,7 +120,7 @@ class P16C63 : public  P16C62
   public:
 
   USART_MODULE14 usart;
-  SSP_MODULE14   ssp;
+  SSP_MODULE   ssp;
 
   virtual PROCESSOR_TYPE isa(){return _P16C63_;};
   virtual void create_symbols();

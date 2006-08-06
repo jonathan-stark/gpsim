@@ -34,6 +34,7 @@ class InvalidRegister;   // Forward reference
 #include "pir.h"
 #include "uart.h"
 #include "a2dconverter.h"
+#include "ssp.h"
 #define _16BIT_REGISTER_MASK   0xfff
 
 class _16bit_processor;
@@ -668,56 +669,4 @@ class LVDCON : public  sfr_register
 };
 
 
-class SSPCON1 : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  SSPCON1(void);
-};
-
-class SSPCON2 : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  SSPCON2(void);
-};
-
-class SSPSTAT : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  SSPSTAT(void);
-};
-
-class SSPBUF : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  SSPBUF(void);
-};
-
-class SSPADD : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  SSPADD(void);
-};
-
-class SSPMODULE
-{
- public:
-
-  SSPCON1  sspcon1;
-  SSPCON2  sspcon2;
-  SSPSTAT  sspstat;
-  SSPADD   sspadd;
-  SSPBUF   sspbuf;
-
-  SSPMODULE(void);
-};
 #endif

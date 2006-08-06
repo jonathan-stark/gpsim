@@ -998,10 +998,10 @@ void T2CON::put(unsigned int new_value)
 
   if (tmr2) {
     
+    tmr2->new_pre_post_scale();
+
     if( diff & TMR2ON)
       tmr2->on_or_off(value.get() & TMR2ON);
-
-    tmr2->new_pre_post_scale();
 
   }
 }
@@ -1421,6 +1421,7 @@ void TMR2::new_pre_post_scale()
       {
           future_cycle = get_cycles().value + 1;
           get_cycles().set_break(future_cycle, this);
+	  last_cycle = get_cycles().value - value.get();
           update(update_state);
       }
   }
@@ -1534,6 +1535,9 @@ void TMR2::callback()
 
 	  // This (implicitly) resets the timer to zero:
 	  last_cycle = get_cycles().value;
+
+         if (ssp_module)
+               ssp_module->tmr2_clock();
 
           if ((ccp1con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
                ccp1con->pwm_match(1);
