@@ -356,6 +356,16 @@ void P16F873::create_sfr_map()
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
 
+  ssp.initialize(
+		get_pir_set(),    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[4],   // SDO
+                &(*m_portc)[5],   // SDI
+		SSP_TYPE_MSSP
+        );
+
+
 }
 
 void P16F873::create()
@@ -699,6 +709,14 @@ void P16F874::create_sfr_map()
   adcon1.setVrefLoConfiguration(12, 2);
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
+  ssp.initialize(
+		get_pir_set(),    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[4],   // SDO
+                &(*m_portc)[5],   // SDI
+		SSP_TYPE_MSSP
+        );
 }
 
 void P16F874::create()

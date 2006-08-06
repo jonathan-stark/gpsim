@@ -205,11 +205,11 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&adresl,	  0xfc3,porv,"adresl");
   add_sfr_register(&adresh,	  0xfc4,porv,"adresh");
 
-  add_sfr_register(&ssp.sspcon1,  0xfc5,porv,"sspcon1");
-  add_sfr_register(&ssp.sspcon2,  0xfc6,porv,"sspcon2");
+  add_sfr_register(&ssp.sspcon2,  0xfc5,porv,"sspcon2");
+  add_sfr_register(&ssp.sspcon,   0xfc6,porv,"sspcon1");
   add_sfr_register(&ssp.sspstat,  0xfc7,porv,"sspstat");
   add_sfr_register(&ssp.sspadd,   0xfc8,porv,"sspadd");
-  //add_sfr_register(&ssp.sspbuf,   0xfc9,porv,"sspbuf");
+  add_sfr_register(&ssp.sspbuf,   0xfc9,porv,"sspbuf");
 
   add_sfr_register(&t2con,	  0xfca,porv,"t2con");
   add_sfr_register(&pr2,	  0xfcb,RegisterValue(0xff,0),"pr2");
@@ -298,6 +298,8 @@ void _16bit_processor :: create_sfr_map()
   // Initialize all of the register cross linkages
   pir_set_def.set_pir1(&pir1);
   pir_set_def.set_pir2(&pir2);
+
+  tmr2.ssp_module = &ssp;
 
   tmr1l.tmrh   = &tmr1h;
   tmr1l.t1con  = &t1con;

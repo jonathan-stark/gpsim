@@ -122,11 +122,14 @@ void P16C62::create_iopin_map(void)
   package->assign_pin(28, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
   if (hasSSP()) {
-    ssp.initialize(get_pir_set(),    // PIR
-		   &(*m_portc)[3],   // SCK
-		   &(*m_portc)[4],   // SDO
-		   &(*m_portc)[5],   // SDI
-		   &(*m_porta)[5]);  // SS
+    ssp.initialize(
+		get_pir_set(),    // PIR
+	 	&(*m_portc)[3],   // SCK
+		&(*m_porta)[5],   // SS
+		&(*m_portc)[5],   // SDO
+		&(*m_portc)[4],   // SDI
+		SSP_TYPE_BSSP
+  	);  
   }
 
   tmr1l.setIOpin(&(*m_portc)[0]);
@@ -196,11 +199,14 @@ void P16C64::create_iopin_map(void)
   package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
   if (hasSSP()) {
-    ssp.initialize(get_pir_set(),    // PIR
-		   &(*m_portc)[3],   // SCK
-		   &(*m_portc)[4],   // SDO
-		   &(*m_portc)[5],   // SDI
-		   &(*m_porta)[5]);  // SS
+    ssp.initialize(
+		get_pir_set(),    // PIR
+		&(*m_portc)[3],   // SCK
+		&(*m_porta)[5],   // SS
+		&(*m_portc)[5],   // SDO
+		&(*m_portc)[4],   // SDI
+		SSP_TYPE_BSSP
+		   ); 
   }
   psp.initialize(get_pir_set(),    // PIR
 		m_portd,	   // Parallel port
@@ -255,6 +261,7 @@ void P16X6X_processor::create_sfr_map()
     add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
     add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
     add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
+    tmr2.ssp_module = &ssp;
   }
 
   add_sfr_register(&ccpr1l,  0x15, RegisterValue(0,0));

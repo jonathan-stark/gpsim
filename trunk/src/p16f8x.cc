@@ -132,11 +132,14 @@ void P16F8x::create_iopin_map()
   package->assign_pin(14, 0);  // Vdd
 
   if (hasSSP()) {
-    ssp.initialize(get_pir_set(),    // PIR
-                   &(*m_portb)[4],   // SCK
-                   &(*m_portb)[2],   // SDO
-                   &(*m_portb)[1],   // SDI
-                   &(*m_portb)[5]);  // SS
+    ssp.initialize(
+		get_pir_set(),    // PIR
+                &(*m_portb)[4],   // SCK
+                &(*m_portb)[5],   // SS
+                &(*m_portb)[2],   // SDO
+                &(*m_portb)[1],    // SDI
+		SSP_TYPE_SSP
+	);
   }
 
 }

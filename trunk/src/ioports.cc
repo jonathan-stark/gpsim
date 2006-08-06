@@ -76,7 +76,7 @@ void PeripheralSignalSource::toggle()
     break;
   case '0':
   case 'w':
-    putState('0');
+    putState('1');
     break;
   }
 }

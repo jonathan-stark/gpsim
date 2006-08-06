@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "registers.h"
 #include "breakpoints.h"
 #include "ioports.h"
+#include "ssp.h"
 
 class TMRL;
 class TMRH;
@@ -376,6 +377,7 @@ public:
   T2CON *t2con;
   CCPCON *ccp1con;
   CCPCON *ccp2con;
+  SSP_MODULE *ssp_module;
 
   virtual void callback();
   virtual void callback_print();
