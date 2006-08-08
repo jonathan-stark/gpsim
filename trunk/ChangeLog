@@ -1,3 +1,11 @@
+2006-08-08 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc: Now scope window is updated when simulation
+	stops.
+	* gui/gui_src_asm.cc: Refresh gui menu when src window changes
+	hidden state.
+	* gui/gui_scope.cc: Redesigned scope window layout. Adding
+	scrolling. 
+
 2006-08-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/spi regression/spi/p16c62.asm regression/spi/16f88.lkr
 	  regression/spi/p18f242.asm regression/spi/16c62.lkr
