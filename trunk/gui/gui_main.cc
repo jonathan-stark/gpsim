@@ -234,6 +234,7 @@ static void *SimulationHasStopped( void *ptr )
       lgp->trace_window->Update();
       lgp->profile_window->Update();
       lgp->stopwatch_window->Update();
+      lgp->scope_window->Update();
 
 
       
