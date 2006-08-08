@@ -1615,6 +1615,7 @@ void SourceWindow::Build()
   aPopupMenu = _build_menu(this);
 
   bIsBuilt = true;
+
   if(m_bLoadSource) {
     Dprintf((" \n"));
 
@@ -4928,6 +4929,9 @@ void SourceBrowserParent_Window::Build(void)
        sbaw_iterator != children.end(); 
        sbaw_iterator++)
     (*sbaw_iterator)->Build();
+
+  UpdateMenuItem();
+
 }
 
 void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
