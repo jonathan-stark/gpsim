@@ -288,6 +288,18 @@ unsigned int ThreeStateEventLogger::get_index(guint64 event_time)
   return search_index;
 }
 
+unsigned int ThreeStateEventLogger::get_nEvents(unsigned int start_index, unsigned int stop_index)
+{
+  return (stop_index >= start_index) ? (stop_index-start_index) : (max_events-stop_index+start_index);
+}
+
+unsigned int ThreeStateEventLogger::get_nEvents(guint64 start_time, guint64 stop_time)
+{
+  unsigned int start_index = get_index(start_time);
+  unsigned int stop_index  = get_index(stop_time);
+
+  return get_nEvents(start_index,stop_index);
+}
 
 void ThreeStateEventLogger::event(char state)
 {

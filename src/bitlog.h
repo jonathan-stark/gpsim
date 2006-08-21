@@ -147,6 +147,8 @@ public:
   }
 
   unsigned int get_index(guint64 event_time);
+  unsigned int get_nEvents(guint64 start_time,guint64 stop_time);
+  unsigned int get_nEvents(unsigned int start_index, unsigned int stop_index);
   char get_state(unsigned int index)
   {
     return pEventBuffer[index & max_events];
