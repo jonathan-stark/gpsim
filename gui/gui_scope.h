@@ -29,6 +29,7 @@ class ZoomAttribute;
 class PanAttribute;
 class Waveform;
 
+  
 //
 // The Scope Window
 //
@@ -40,9 +41,8 @@ public:
   Scope_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
+  void UpdateMarker(gdouble x, gdouble y, guint button, guint state);
 
-
-  void Expose();
   void Expose(Waveform *);
 
   /// zoom - positive values mean zoom in, negative values mean zoom out
@@ -51,12 +51,36 @@ public:
   /// pan - positive values mean pan right, negative values mean pan left.
   void pan(int);
 
+  /// getSpan - returns time span currently cached (essentially tStop-tStart).
+  gdouble getSpan();
+
 private:
-  TimeMarker *m_tStart;
-  TimeMarker *m_tStop;
+  /// mapPixelToTime - convert a pixel horizontal offset to time
+  guint64 mapPixelToTime(int pixel);
+
+  /// mapTimeToPixel - convert time to a pixel horizontal offset.
+  int mapTimeToPixel(guint64 time);
+
+  ///
+  int waveXoffset();
+
+  enum {
+    eStart=0,
+    eStop,
+    eLeftButton,
+    eRightButton,
+    eNumMarkers
+  } MarkerLabels;
+
+  TimeMarker *m_Markers[eNumMarkers];
   ZoomAttribute *m_zoom;
   PanAttribute  *m_pan;
 
+  GtkWidget *m_pHpaned;     /* The signal names and waves are rendered 
+			       in a horizontal pane */
+  GtkWidget *m_phScrollBar; // scroll bar for the waves
+
+  unsigned int m_PixmapWidth; // Width of waveform pixmaps.
   bool m_bFrozen;
 };
 

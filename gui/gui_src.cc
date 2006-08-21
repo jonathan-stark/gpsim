@@ -47,67 +47,62 @@ Boston, MA 02111-1307, USA.  */
 class StepEvent : public KeyEvent
 {
 public:
-  void action(gpointer data)
+  void press(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
-      {
 	sbw->pma->step(1);
-      }
   }
+  void release(gpointer data) {}
 };
 
 class StepOverEvent : public KeyEvent
 {
 public:
-  void action(gpointer data)
+  void press(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
-      {
-	// Step Over Next instruction, or hll statement
-	sbw->pma->step_over();
-      }
+      // Step Over Next instruction, or hll statement
+      sbw->pma->step_over();
   }
+  void release(gpointer data) {}
 };
 
 class RunEvent : public KeyEvent
 {
 public:
-  void action(gpointer data)
+  void press(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
-      {
-	sbw->pma->run();
-      }
+      sbw->pma->run();
   }
+  void release(gpointer data) {}
 };
 
 class StopEvent : public KeyEvent
 {
 public:
-  void action(gpointer data)
+  void press(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
-      {
-	sbw->pma->stop();
-      }
+      sbw->pma->stop();
   }
+  void release(gpointer data) {}
 };
 
 class FinishEvent : public KeyEvent
 {
 public:
-  void action(gpointer data)
+  void press(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
-      {
-	sbw->pma->finish();
-      }
+      sbw->pma->finish();
   }
+  void release(gpointer data) {}
 };
 
 static map<guint, KeyEvent *> KeyMap;
@@ -140,7 +135,7 @@ key_press(GtkWidget *widget,
   KeyEvent *pKE = KeyMap[key->keyval];
   if(pKE) 
     {
-      pKE->action(data);
+      pKE->press(data);
       return TRUE;
     }
 
