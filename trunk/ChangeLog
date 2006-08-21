@@ -1,4 +1,30 @@
 2006-08-08 Scott Dattalo <scott@dattalo.com>
+	* gui/gui.h: KeyEvent now differentiates presses and releases.
+	* gui/gui_src.cc: Update KeyEvent objects.
+	* gui/gui_scope.cc, gui/gui_scope.h: Numerous enhancements:
+	  - Added support for markers
+	  - Wave pixmaps are now 1024 pixels wide. This primarily fixes a
+	  round off error in the binary search routine
+	  - Scroll thumb now adjust size based on amount of waveform
+	  plotted
+	  - Hot key functionality:
+	    z -- Zoom in
+	    Z -- Zoom out
+	    r -- pan right
+	    l -- (lowercase ell) pan left
+	  - Glitches are now plotted
+	  - High frequency events (i.e. events for which there is
+	  inadequate monitor resolution to completely show) are plotted in
+	  a different color.
+	  - Reomved the Pane widget - it was holding the waveforms and
+	  just eating up space.
+	  - Added WaveBase in anticipation of different types of
+	  waveforms.
+	* src/bitlog.h, src/bitlog.cc: The ThreeStateLogger can now return
+	the number of events occurring between two time intervals or
+	between two event indices. (Used for high frequency measuring).
+
+2006-08-08 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc: Now scope window is updated when simulation
 	stops.
 	* gui/gui_src_asm.cc: Refresh gui menu when src window changes
