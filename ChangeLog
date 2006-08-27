@@ -1,4 +1,9 @@
-2006-08-08 Scott Dattalo <scott@dattalo.com>
+2006-08-27 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_scope.cc, gui/gui_scope.h:
+	- Time axis is now shown. Major and Minor tick marks and the
+	corresponding grid lines are drawn.
+
+2006-08-21 Scott Dattalo <scott@dattalo.com>
 	* gui/gui.h: KeyEvent now differentiates presses and releases.
 	* gui/gui_src.cc: Update KeyEvent objects.
 	* gui/gui_scope.cc, gui/gui_scope.h: Numerous enhancements:
