@@ -38,6 +38,7 @@ TODO:
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <math.h>
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -189,7 +190,11 @@ public:
   WaveBase(Scope_Window *parent, const char *name);
 
   virtual void Update(guint64 start=0, guint64 stop=0)=0;
-  void Build(PixMap *pWavePixmap, PixMap *pSignalPixmap);
+  virtual void Build(PixMap *pWavePixmap, PixMap *pSignalPixmap);
+
+  void setPixmaps(GdkPixmap *, GdkPixmap *);
+  PixMap *wavePixmap() { return m_wavePixmap; }
+  PixMap *signalPixmap() { return m_signalPixmap;}
 
 protected:
 
@@ -201,6 +206,22 @@ protected:
   PixMap *m_signalPixmap;    // The signal name is rendered in this pixmap.
   PangoLayout *m_layout;     // Pango layout for rendering signal name
 };
+
+/***********************************************************************
+  TimeAxis - A special 'Waveform' for plotting the time 
+ */
+class TimeAxis : public WaveBase
+{
+public:
+  TimeAxis(Scope_Window *parent, const char *name);
+  virtual void Build(PixMap *pWavePixmap, PixMap *pSignalPixmap);
+  virtual void Update(guint64 start=0, guint64 stop=0);
+
+protected:
+  PangoLayout *m_TicText;
+};
+
+TimeAxis *m_TimeAxis;
 
 /***********************************************************************
   Waveform class
@@ -220,9 +241,6 @@ public:
   void Dump(); // debug
   void setData(char c);
   void setSource(const char *);
-  void setPixmaps(GdkPixmap *, GdkPixmap *);
-  PixMap *wavePixmap() { return m_wavePixmap; }
-  PixMap *signalPixmap() { return m_signalPixmap;}
 protected:
   void PlotTo(timeMap &left, timeMap &right);
 
@@ -448,10 +466,6 @@ void WaveBase::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
   m_signalPixmap = pSignalPixmap;
 
   m_layout = gtk_widget_create_pango_layout (GTK_WIDGET (signalDrawingArea), "");
-  //char buff[100];
-  //m_pSourceName->get(buff,sizeof(buff));
-  //pango_layout_set_text(m_layout, buff, -1);
-  pango_layout_set_text(m_layout, "", -1);
 
   isBuilt = true;
   Update(0,0);
@@ -624,15 +638,6 @@ void Waveform::Dump()
 
 void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 {
-  int x;
-#if 0
-  int line_separation,pin_number;
-  int point,y_text,y_0,y_1;
-  float x_scale,y_scale;
-  int max_str,new_str,br_length;
-  char *s,ss[10];
-#endif
-
   if(!isBuilt)
     return;
 
@@ -681,8 +686,15 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
   // Draw Vertical Grid Lines:
   //
 
-  for(x=0; x<m_wavePixmap->width; x+= m_wavePixmap->width/20)
-    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,x,1,x,m_wavePixmap->height-1);
+  int i;
+  for (i=0; i<sw->MajorTicks().sze(); i++) {
+
+    int x = sw->MajorTicks().pixel(i);
+
+    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
+		  x,1,
+		  x,m_wavePixmap->height-1);
+  }
 
   //
   // Draw Horizontal Grid Lines:
@@ -719,6 +731,139 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 
 
 }
+
+
+//========================================================================
+TimeAxis::TimeAxis(Scope_Window *parent, const char *name)
+  : WaveBase(parent,name),
+    m_TicText(0)
+{
+
+}
+//----------------------------------------
+//
+// TimeAxis Update
+//
+
+void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
+{
+  int x;
+
+  if(!isBuilt)
+    return;
+
+  if(!m_wavePixmap) {
+    cout << __FUNCTION__ << " pixmap is NULL\n";
+    return;
+  }
+
+  if (uiEnd == 0) 
+    uiEnd = get_cycles().value;
+
+  if (m_start == uiStart && m_stop == uiEnd)
+    return;
+
+  m_start = uiStart;
+  m_stop  = uiEnd;
+
+  gdk_draw_rectangle (m_wavePixmap->pixmap(),
+		      waveDrawingArea->style->bg_gc[GTK_STATE_NORMAL],
+		      TRUE,
+		      0, 0,
+		      m_wavePixmap->width,
+		      m_wavePixmap->height);
+
+  gdk_draw_rectangle (m_signalPixmap->pixmap(),
+		      waveDrawingArea->style->black_gc,
+		      TRUE,
+		      0, 0,
+		      m_signalPixmap->width,
+		      m_signalPixmap->height);
+
+  int text_height=0;
+  if (m_layout) {
+    pango_layout_get_pixel_size(m_layout,
+				NULL,
+				&text_height);
+    
+    gdk_draw_layout (GDK_DRAWABLE(m_signalPixmap->pixmap()),
+		     text_gc,
+		     0,
+		     (m_signalPixmap->height-text_height)/2,
+		     m_layout);
+  }
+
+  //
+  // Draw Major Ticks:
+  //
+  int i;
+  for (i=0; i<sw->MajorTicks().sze(); i++) {
+
+    int x = sw->MajorTicks().pixel(i);
+
+    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
+		  x,m_wavePixmap->height-3,
+		  x,m_wavePixmap->height-1);
+
+    if (m_TicText) {
+      char buff[100];
+      snprintf(buff, sizeof(buff),"%" PRINTF_INT64_MODIFIER "d", sw->MajorTicks().cycle(i));
+      pango_layout_set_text(m_TicText, buff, -1);
+
+      int text_height=0;
+      int text_width=0;
+
+      pango_layout_get_pixel_size(m_TicText,
+				  &text_width,
+				  &text_height);
+      text_width /= 2;
+      x = ((x-text_width) < 0) ? 0 : (x-text_width);
+      x = ((x+text_width) > m_wavePixmap->width) ? (x-text_width) : x;
+      
+      gdk_draw_layout (GDK_DRAWABLE(m_wavePixmap->pixmap()),
+		       waveDrawingArea->style->fg_gc[GTK_STATE_NORMAL],
+		       x,
+		       (m_wavePixmap->height-text_height)/2,
+		       m_TicText);
+
+      }
+
+  }
+
+  //
+  // Draw Minor Ticks:
+  //
+  for (i=0; i<sw->MinorTicks().sze(); i++) {
+
+    int x = sw->MinorTicks().pixel(i);
+
+    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
+		  x,m_wavePixmap->height-3,
+		  x,m_wavePixmap->height-1);
+  }
+  //
+  // Draw Horizontal Grid Lines:
+  //
+  gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
+		0,m_wavePixmap->height-1,
+		m_wavePixmap->width,m_wavePixmap->height-1);
+
+}
+
+
+
+void TimeAxis::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
+{
+  WaveBase::Build(pWavePixmap, pSignalPixmap);
+  /*
+  if (m_layout)
+    pango_layout_set_text(m_layout,"Time", -1);
+  */
+  m_TicText = gtk_widget_create_pango_layout (GTK_WIDGET (waveDrawingArea), "");
+
+}
+
+
 //------------------------------------------------------------------------
 // Signals
 
@@ -746,7 +891,9 @@ static gint Scope_Window_expose_event (GtkWidget *widget,
   g_return_val_if_fail (widget != NULL, TRUE);
   //  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
 
+  
   if(sw) {
+    sw->Expose(m_TimeAxis);
 
     for (int i=0; i<8; i++)
       sw->Expose(signals[i]);
@@ -792,6 +939,79 @@ void TimeMarker::set(gint64 i)
   m_pParent->Update();
 }
 
+//========================================================================
+GridPointMapping::GridPointMapping(int nPointsToMap)
+  : m_pointsAllocated(nPointsToMap), m_nPoints(0)
+{
+  m_pixel = new int[m_pointsAllocated];
+  m_cycle = new guint64[m_pointsAllocated];
+
+}
+//========================================================================
+void Scope_Window::gridPoints(guint64 uiStart, guint64 uiEnd)
+{
+  //
+  // Draw Vertical Grid Lines:
+  //
+
+  double t1 = (double) uiStart;
+  double t2 = (double) uiEnd;
+  double dt = t2-t1;
+
+  int iMajor=0;
+  int iMinor=0;
+  m_MajorTicks.m_nPoints = 0;
+  m_MinorTicks.m_nPoints = 0;
+
+  if (dt > 1.0) {
+
+    double exp1 = floor(log10(dt));
+    double dt_tic = pow(10.0,exp1);
+
+    double nTics = floor(dt/dt_tic);
+    if (nTics < 5.0  && exp1>0.0)
+      dt_tic /= 2.0;
+
+    const int nMinorTics=5;
+    const double dt_minor= dt_tic/nMinorTics;
+
+    double ta = ceil(t1/dt_tic);
+    double tb = floor(t2/dt_tic);
+
+    for (double t=ta; t<=tb; t+=1.0) {
+      double ttic=t*dt_tic;
+      guint64 uiTime = (guint64)(floor(ttic));
+
+      m_MajorTicks.m_pixel[iMajor] = mapTimeToPixel(uiTime);
+      m_MajorTicks.m_cycle[iMajor] = uiTime;
+
+      /*
+      printf ("t=%g dt_tic=%g tmajor=%g %d %lld\n",
+	      t,dt_tic,ttic,m_MajorTicks.m_pixel[iMajor],uiTime);
+      */
+      iMajor++;
+
+      ttic+=dt_minor;
+
+      for (int it=1; it<nMinorTics; it++,ttic+=dt_minor) {
+	uiTime = (guint64)(ttic);
+	m_MinorTicks.m_pixel[iMinor] = mapTimeToPixel(uiTime);
+	m_MinorTicks.m_cycle[iMinor] = uiTime;
+	/*
+	printf ("     tminor=%g %d %lld\n",
+		ttic,m_MinorTicks.m_pixel[iMinor],uiTime);
+	*/
+	iMinor++;
+
+      }
+    }
+  }
+
+  m_MajorTicks.m_nPoints = iMajor;
+  m_MinorTicks.m_nPoints = iMinor;
+
+}
+
 static gdouble gNormalizedHorizontalPosition=0.0;
 static GtkWidget *pvbox=0;
 GtkObject *m_hAdj=0;
@@ -804,7 +1024,7 @@ int Scope_Window::waveXoffset()
 	       *gNormalizedHorizontalPosition);
 }
 
-void Scope_Window::Expose(Waveform *wf)
+void Scope_Window::Expose(WaveBase *wf)
 {
   if(!wf || !waveDrawingArea)
     return;
@@ -1042,9 +1262,13 @@ void Scope_Window::Build(void)
   gdk_gc_set_function(leftMarker_gc,GDK_XOR);
   text_gc = waveDrawingArea->style->white_gc;
 
+  int timeHeight = 15;
+  m_TimeAxis->Build(new PixMap(waveDrawingArea->window, m_PixmapWidth, timeHeight, 0),
+		    new PixMap(waveDrawingArea->window, 100, timeHeight, 0));
+
   for(int i=0; i<8; i++) {
     int waveHeight=20;
-    int yoffset = 10 +i*waveHeight;
+    int yoffset = timeHeight +i*waveHeight;
     signals[i]->Build(new PixMap(waveDrawingArea->window, m_PixmapWidth, waveHeight, yoffset),
 		      new PixMap(waveDrawingArea->window, 100, waveHeight, yoffset));
   }
@@ -1133,7 +1357,6 @@ void Scope_Window::Update()
   // the thumb position is the current view into the cache. 
   // the page-size property is 20% of the span
 
-  //m_pHpaned->allocation.width
 
   double dspan = stop-start;
   dspan = (dspan<m_PixmapWidth) ? m_PixmapWidth : dspan;
@@ -1141,6 +1364,11 @@ void Scope_Window::Update()
 	       "page-size", m_PixmapWidth * 200.0/dspan,
 	       NULL);
   gtk_widget_queue_draw (m_phScrollBar);
+
+  // Compute the grid points
+  gridPoints(start,stop);
+  m_TimeAxis->Update(start,stop);
+  Expose(m_TimeAxis);
 
   for(i=0; i<8; i++) {
     //plotDebug = i==0;
@@ -1180,7 +1408,8 @@ void Scope_Window::UpdateMarker(gdouble x, gdouble y, guint button, guint state)
 }
 
 Scope_Window::Scope_Window(GUI_Processor *_gp)
-  : m_pHpaned(0), m_phScrollBar(0), m_PixmapWidth(1024)
+  : m_pHpaned(0), m_phScrollBar(0), m_PixmapWidth(1024),
+    m_MajorTicks(32), m_MinorTicks(256)
 {
 
   gp = _gp;
@@ -1222,6 +1451,8 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
   signals[5] = new Waveform(this,"scope.ch5");
   signals[6] = new Waveform(this,"scope.ch6");
   signals[7] = new Waveform(this,"scope.ch7");
+
+  m_TimeAxis = new TimeAxis(this,"scope.time");
 
   if(enabled)
     Build();
@@ -1314,7 +1545,7 @@ int Scope_Window::mapTimeToPixel(guint64 time)
   gdouble span = getSpan();
   guint64 start = m_Markers[eStart]->getVal();
 
-  return (int) ((time>start && time<(start+span)) ? ((time-start)*m_PixmapWidth)/span : 0);
+  return (int) ((time>start && time<=(start+span)) ? ((time-start)*m_PixmapWidth)/span : 0);
 }
 
 #endif //HAVE_GUI

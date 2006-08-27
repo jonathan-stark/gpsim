@@ -27,9 +27,22 @@ Boston, MA 02111-1307, USA.  */
 class TimeMarker;
 class ZoomAttribute;
 class PanAttribute;
-class Waveform;
+class WaveBase;
 
+class GridPointMapping
+{
+public:
+  GridPointMapping(int nPointsToMap);
+  int     pixel(int index) { return (index<m_nPoints)? m_pixel[index] : 0;}
+  guint64 cycle(int index) { return (index<m_nPoints)? m_cycle[index] : 0;}
+  int sze() { return m_nPoints; }
+
+  int      m_pointsAllocated;
+  int      m_nPoints;
+  int     *m_pixel;
+  guint64 *m_cycle;
   
+};
 //
 // The Scope Window
 //
@@ -43,7 +56,7 @@ public:
   virtual void Update(void);
   void UpdateMarker(gdouble x, gdouble y, guint button, guint state);
 
-  void Expose(Waveform *);
+  void Expose(WaveBase *);
 
   /// zoom - positive values mean zoom in, negative values mean zoom out
   void zoom(int);
@@ -54,15 +67,23 @@ public:
   /// getSpan - returns time span currently cached (essentially tStop-tStart).
   gdouble getSpan();
 
-private:
   /// mapPixelToTime - convert a pixel horizontal offset to time
   guint64 mapPixelToTime(int pixel);
 
   /// mapTimeToPixel - convert time to a pixel horizontal offset.
   int mapTimeToPixel(guint64 time);
 
+  GridPointMapping &MajorTicks() { return m_MajorTicks; }
+  GridPointMapping &MinorTicks() { return m_MinorTicks; }
+private:
+
   ///
   int waveXoffset();
+
+  /// gridPoints - Fill the major and minor axis grid point arrays
+  ///   These arrays map time values into pixel coordinates.
+  void gridPoints(guint64 start, guint64 stop);
+
 
   enum {
     eStart=0,
@@ -81,6 +102,10 @@ private:
   GtkWidget *m_phScrollBar; // scroll bar for the waves
 
   unsigned int m_PixmapWidth; // Width of waveform pixmaps.
+
+  GridPointMapping m_MajorTicks;
+  GridPointMapping m_MinorTicks;
+
   bool m_bFrozen;
 };
 
