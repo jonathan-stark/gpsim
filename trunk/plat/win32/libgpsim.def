@@ -282,9 +282,7 @@ EXPORTS
     ?dump_node_list@@YAXXZ
     ?dump_one@Symbol_Table@@QAEXPBD@Z
     ?dump_processor_list@CSimulationContext@@QAEXXZ
-    ?dump_raw@PCTraceType@@UAEHIPADH@Z
     ?dump_raw@Trace@@QAEXH@Z
-    ?dump_raw@TraceType@@UAEHIPADH@Z
     ?dump_registers@Processor@@UAEXXZ
     ?dump_stimulus_list@@YAXXZ
     ?enableLogging@Trace@@QAEXPAD@Z
@@ -391,6 +389,7 @@ EXPORTS
     ?get_hll_src_line@AliasedInstruction@@UAEHXZ
     ?get_index@BoolEventLogger@@QAEI_K@Z
     ?get_index@ThreeStateEventLogger@@QAEI_K@Z
+    ?get_nEvents@ThreeStateEventLogger@@QAEIII@Z
     ?init_program_memory_at_index@Processor@@UAEXIPBEH@Z
     ?initialize@AliasedInstruction@@UAEX_N@Z
     ?get_interface@@YAAAVgpsimInterface@@XZ
@@ -437,7 +436,6 @@ EXPORTS
     ?isBase@AliasedInstruction@@UAE_NXZ
     ?isClearable@Value@@UAE_NXZ
     ?isModified@ProgramMemoryAccess@@QAE_NI@Z
-    ?isValid@TraceType@@UAE_NI@Z
     ?list@Processor@@UAEXIIHH@Z
     ?list_id@FileContextList@@QAEXH@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
@@ -536,8 +534,8 @@ EXPORTS
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
     ?set_break@Breakpoint_Instruction@@UAE_NXZ
     ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
-    ?set_break@Integer@@UAEHW4ObjectBreakTypes@gpsimObject@@PAVExpression@@@Z
-    ?set_break@gpsimObject@@UAEHW4ObjectBreakTypes@1@PAVExpression@@@Z
+    ?set_break@Integer@@UAEHW4ObjectBreakTypes@gpsimObject@@W4ObjectActionTypes@3@PAVExpression@@@Z
+    ?set_break@gpsimObject@@UAEHW4ObjectBreakTypes@1@W4ObjectActionTypes@1@PAVExpression@@@Z
     ?set_break_at_address@ProgramMemoryAccess@@UAEII@Z
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
