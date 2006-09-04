@@ -1,3 +1,7 @@
+2006-09-03 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_scope.cc, gui/gui_scope.h: Signal name editing now works.
+	Screen updates for signal names have been fixed.
+
 2006-09-03 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32: glib-2.12.1, gtk+-2.8.20, cairo-1.2.2
 

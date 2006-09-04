@@ -28,6 +28,9 @@ class TimeMarker;
 class ZoomAttribute;
 class PanAttribute;
 class WaveBase;
+class Waveform;
+class Signal;
+class SignalNameEntry;
 
 class GridPointMapping
 {
@@ -75,14 +78,27 @@ public:
 
   GridPointMapping &MajorTicks() { return m_MajorTicks; }
   GridPointMapping &MinorTicks() { return m_MinorTicks; }
+
+  void refreshSignalNameGraphics();
+  void refreshWaveFormGraphics();
 private:
+  /// Signals for the scope window
+  static gint signalButtonPress(GtkWidget *,GdkEventButton *, Scope_Window *sw);
+  static gint signalEntryKeyPress(GtkEntry *, GdkEventKey *, Scope_Window *sw);
+
+  /// selectSignalName - begin the signal name editing mode
+  /// returns true if selection state has changed.
+  bool selectSignalName(int y);
+
+  /// endSignalNameSelection - end the signal name editing mode.
+  bool endSignalNameSelection(bool bAccept);
 
   ///
   int waveXoffset();
 
   /// gridPoints - Fill the major and minor axis grid point arrays
   ///   These arrays map time values into pixel coordinates.
-  void gridPoints(guint64 start, guint64 stop);
+  void gridPoints(guint64 *start, guint64 *stop);
 
 
   enum {
@@ -107,6 +123,8 @@ private:
   GridPointMapping m_MinorTicks;
 
   bool m_bFrozen;
+
+  SignalNameEntry *m_entry;
 };
 
 
