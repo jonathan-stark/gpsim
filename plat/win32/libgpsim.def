@@ -60,6 +60,8 @@ EXPORTS
     ??0Packet@@QAE@II@Z
     ??0PinModule@@QAE@PAVPortModule@@IPAVIOPIN@@@Z
     ??0PortRegister@@QAE@II@Z
+    ??0Processor@@QAE@PBD0@Z
+    ??0ProcessorConstructor@@QAE@P6APAVProcessor@@PBD@Z0000@Z
     ??0ProgramMemoryAccess@@QAE@PAVProcessor@@@Z
     ??0Program_Counter@@QAE@XZ
     ??0ProgramFileBuf@@QAE@PAU_iobuf@@@Z
@@ -99,6 +101,7 @@ EXPORTS
     ??1Integer@@UAE@XZ
     ??1Module@@UAE@XZ
     ??1OpNe@@UAE@XZ
+    ??1PinMonitor@@UAE@XZ
     ??1PortModule@@UAE@XZ
     ??1Processor@@UAE@XZ
     ??1Register@@UAE@XZ
@@ -282,7 +285,9 @@ EXPORTS
     ?dump_node_list@@YAXXZ
     ?dump_one@Symbol_Table@@QAEXPBD@Z
     ?dump_processor_list@CSimulationContext@@QAEXXZ
+    ?dump_raw@PCTraceType@@UAEHPAVTrace@@IPADH@Z
     ?dump_raw@Trace@@QAEXH@Z
+    ?dump_raw@TraceType@@UAEHPAVTrace@@IPADH@Z
     ?dump_registers@Processor@@UAEXXZ
     ?dump_stimulus_list@@YAXXZ
     ?enableLogging@Trace@@QAEXPAD@Z
@@ -401,6 +406,7 @@ EXPORTS
     ?get_pin_count@Module@@UAEHXZ
     ?get_pin_name@Module@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@Z
     ?get_pin_state@Module@@UAEHI@Z
+    ?get_program_memory_at_address@Processor@@UAEII@Z
     ?get_src_line@AliasedInstruction@@UAEHXZ
     ?get_src_line@ProgramMemoryAccess@@QAEII@Z
     ?get_trace@@YAAAVTrace@@XZ
@@ -436,6 +442,7 @@ EXPORTS
     ?isBase@AliasedInstruction@@UAE_NXZ
     ?isClearable@Value@@UAE_NXZ
     ?isModified@ProgramMemoryAccess@@QAE_NI@Z
+    ?isValid@TraceType@@UAE_NPAVTrace@@I@Z
     ?list@Processor@@UAEXIIHH@Z
     ?list_id@FileContextList@@QAEXH@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
@@ -450,7 +457,7 @@ EXPORTS
     ?new_name@stimulus@@UAEXPBD@Z
     ?new_name@stimulus@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_message@TriggerObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ?new_message@TriggerObject@@UAEXPAD@Z
+    ?new_message@TriggerObject@@UAEXPBD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
     ?open@FileContext@@QAEXPBD@Z
     ?passToChild@Token@gpsim@@QAEXXZ
@@ -478,6 +485,7 @@ EXPORTS
     ?remove_interface@gpsimInterface@@QAEXI@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
     ?remove_xref@AliasedInstruction@@UAEXPAX@Z
+    ?removeSink@PinMonitor@@QAEXPAVSignalSink@@@Z
     ?reset@gpsimInterface@@QAEXXZ
     ?reset@sfr_register@@UAEXW4RESET_TYPE@@@Z
     ?reset@Module@@UAEXW4RESET_TYPE@@@Z
