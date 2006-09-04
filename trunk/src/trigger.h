@@ -134,7 +134,7 @@ class TriggerObject
 
   // Messages can be associatated with triggers
   string &message(void) {return m_sMessage;}
-  virtual void new_message(char *);
+  virtual void new_message(const char *);
   virtual void new_message(string &);
 
   TriggerObject();

@@ -180,7 +180,7 @@ bool TriggerObject::eval_Expression()
 }
 
 //-------------------------------------------------------------------
-void TriggerObject::new_message(char *s)
+void TriggerObject::new_message(const char *s)
 {
   m_sMessage = string(s);
 }
