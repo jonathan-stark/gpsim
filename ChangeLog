@@ -1,3 +1,19 @@
+2006-09-10 J.R. Heisey <jrheisey@sourceforge.com>
+  * gui/gui_src_asm.cc, gui/gui_src.h:
+  - Rescoped several functions into classes to help me keep track
+  of their context. Especially the callbacks.
+  - Implemented the popup menu items: Settings, Find PC, Move PC here,
+  Run here, Breakpoint here, Profile start here, Profile stop here,
+  and most importantly Add to Watch.
+  - Note that the Font selection dialog doesn't seems to actually
+  change the font. It appears to be the same with the old
+  GUI. I haven't checked into it.
+  - Changed the font selection dialog and the settings dialog
+  to use the gtk_dialog_run() function. This fixed an issue
+  when the close (upper right X) button was used the underlying
+  window would be deallocated. This caused the window to never
+  appear again requiring restarting gpsim.
+
 2006-09-03 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc, gui/gui_scope.h: Signal name editing now works.
 	Screen updates for signal names have been fixed.
