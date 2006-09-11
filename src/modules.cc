@@ -178,6 +178,24 @@ ICommandHandler * ModuleLibrary::GetCommandHandler(const char *pName) {
   return NULL;
 }
 
+void * ModuleLibrary::GetLibraryFileHandle(const char *pName) {
+  File *pFile = m_FileList.Get(pName);
+  if(pFile != NULL) {
+    return pFile->m_pHandle;
+  }
+  return NULL;
+}
+
+void * ModuleLibrary::GetLibraryFunction(const char *pLibraryName,
+                                         const char *pFunctionName) {
+  File *pFile = m_FileList.Get(pLibraryName);
+  if(pFile != NULL) {
+    const char * error;
+    return get_library_export(pFunctionName, pFile->m_pHandle, &error);
+  }
+  return NULL;
+}
+
 string        ModuleLibrary::DisplayFileList() {
   ostringstream stream;
   FileList::iterator  it;
