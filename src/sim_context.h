@@ -64,6 +64,7 @@ public:
   Symbol_Table &  GetSymbolTable();
   Breakpoints &   GetBreakpoints();
   Processor *     GetActiveCPU();
+  Cycle_Counter * GetCycleCounter();
   bool            IsSourceEnabled() { return m_bEnableLoadSource; }
   void            NotifyUserCanceled();
   void            SetUserCanceledFlag(bool *pbUserCanceled) {

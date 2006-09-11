@@ -310,6 +310,10 @@ Processor * CSimulationContext::GetActiveCPU() {
   return get_active_cpu();
 }
 
+Cycle_Counter * CSimulationContext::GetCycleCounter() {
+  return &cycles;
+}
+
 CSimulationContext::CProcessorList::iterator
 CSimulationContext::CProcessorList::findByType(const key_type& _Keyval) {
   // First find a ProcessorConstructor that matches the
