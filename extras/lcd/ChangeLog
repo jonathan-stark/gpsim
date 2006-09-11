@@ -1,3 +1,6 @@
+2006-09-11 Scott Dattalo  <scott@dattalo.com>
+	* lcd.cc: Fixed API call to gpsim core (Trace::dump_all() ).
+
 2006-05-28 Borut Razem <borut.razem@siol.net>
 	* hd44780.cc: removed unneeded inclusion of config.h
 	* extras/lcd/makefile.mingw: corrected, thanks to Xiaofan Chen  
