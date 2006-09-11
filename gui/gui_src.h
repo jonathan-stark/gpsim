@@ -30,7 +30,7 @@ class StatusBar_Window;
 class Value;
 class SourceBrowserParent_Window;
 
-#if defined(NEW_SOURCE_BROWSER)
+// #if defined(NEW_SOURCE_BROWSER)
 
 class SourceWindow;
 
@@ -171,6 +171,18 @@ public:
   
   FileContext *getFC();
 
+  // callbacks
+  static gint KeyPressHandler(GtkTextView *pView,
+                GdkEventKey *key, 
+                SourceWindow *pSW);
+  static gint ButtonPressHandler(GtkTextView *pView,
+                  GdkEventButton *pButton, 
+                  SourceWindow *pSW);
+  static gint ViewExposeEventHandler(GtkTextView *pView,
+                GdkEventExpose *pEvent, 
+                SourceWindow *pSW);
+
+
   unsigned int   m_fileid;
   SourceBuffer  *m_pBuffer;
   int            m_marginWidth;
@@ -180,6 +192,8 @@ private:
   GtkWidget     *m_pContainer;
   GtkTextView   *m_view;
 };
+
+class SearchDialog;
 
 class SourceWindow : public GUI_Object
 {
@@ -225,6 +239,30 @@ public:
   SourcePageMargin &margin();
   const char *getFont();
   gint switch_page_cb(guint newPage);
+
+  // Font strings
+  char commentfont_string[256];
+  char sourcefont_string[256];
+
+  GtkStyle *symbol_text_style;       // for symbols in .asm display
+  GtkStyle *label_text_style;        // for label in .asm display
+  GtkStyle *instruction_text_style;  // for instruction in .asm display
+  GtkStyle *number_text_style;       // for numbers in .asm display
+  GtkStyle *comment_text_style;      // for comments in .asm display
+  GtkStyle *default_text_style;      // the rest
+    
+  GdkFont  *symbol_font;             // for symbols in .asm display
+  GdkFont  *label_font;              // for label in .asm display
+  GdkFont  *instruction_font;        // for instruction in .asm display
+  GdkFont  *number_font;             // for numbers in .asm display
+  GdkFont  *comment_font;            // for comments in .asm display
+  GdkFont  *default_font;            // the rest
+
+  // do we need this:
+  bool m_bLoadSource;
+  bool m_bSourceLoaded;
+  int  m_LineAtButtonClick;
+
 private:
   int AddPage(SourceBuffer *pSourceBuffer);
 
@@ -243,6 +281,24 @@ private:
     GtkTextIter   iEnd;       // End of highlight 
   } mProgramCounter;
 
+  // Popup Menu
+  SearchDialog *stPSearchDialog;
+  GtkWidget * BuildPopupMenu();
+  static void PopupMenuHandler(GtkWidget *widget,
+                               gpointer data);
+
+  // Callbacks
+  static gint KeyPressHandler(GtkWidget *widget,
+                GdkEventKey *key, 
+                SourceWindow *pSW);
+  static int DeleteEventHandler(GtkWidget *widget,
+                GdkEvent  *event,
+                SourceWindow *sw);
+  static gint cb_notebook_switchpage (GtkNotebook     *notebook,
+                                    GtkNotebookPage *page,
+                                    guint            page_num,
+                                    SourceWindow     *pSW);
+
 
 protected:
   void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
@@ -258,13 +314,10 @@ protected:
 
   SourceBrowserParent_Window *m_pParent;
 
-  // do we need this:
-  bool m_bLoadSource;
-  bool m_bSourceLoaded;
 
 };
 
-#endif
+// #endif
 
 
 
@@ -394,10 +447,15 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 
   // Where the source is stored:
 
+  int add_page(SourceBrowserAsm_Window *sbaw, int file_id);
   SourcePage pages[SBAW_NRFILES];
   static bool bGlobalInitialized;
   static GList *s_global_sa_xlate_list[SBAW_NRFILES];
   GList *sa_xlate_list[SBAW_NRFILES];
+  static gint sigh_button_event(
+    GtkWidget *widget,
+    GdkEventButton *event,
+    SourceBrowserAsm_Window *sbaw);
 
   int layout_offset;
 
@@ -440,15 +498,17 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   PixmapObject canbreak;
   static int s_totallinesheight[SBAW_NRFILES];
 
-  int source_loaded;
+  int m_bSourceLoaded;
 
-  int load_source;
+  int m_bLoadSource;
   unsigned int current_page;        //Shadows the notebook->current_page;
 
   SourceBrowserParent_Window *parent;
 
   SourceBrowserAsm_Window(GUI_Processor *gp,char* new_name);
+#if ! defined(NEW_SOURCE_BROWSER)
   virtual void Build(void);
+#endif
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
   virtual void SetPC(int address);
@@ -475,6 +535,20 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   BreakPointInfo *getBPatLine(int id, unsigned int line);
   BreakPointInfo *getBPatPixel(int id, int pixel);
   BreakPointInfo *getBPatIndex(int id, unsigned int index);
+
+  static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw);
+  static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw);
+
+  // Popup Menu
+  GtkWidget *     BuildPopupMenu(GtkWidget *sheet,
+                                 SourceBrowserAsm_Window *sbaw);
+  static void     PopupMenuHandler(GtkWidget *widget, gpointer data);
+  static gint switch_page_cb(GtkNotebook     *notebook,
+                           GtkNotebookPage *page,
+                           guint            page_num,
+                           SourceBrowserAsm_Window *sbaw);
+  static void remove_all_points(SourceBrowserAsm_Window *sbaw);
+
 
 };
 
@@ -568,7 +642,7 @@ class SourceBrowserParent_Window : public GUI_Object
   SOURCE_WINDOW *getChild(int);
   list<SOURCE_WINDOW *> children;
 
-#if defined(NEW_SOURCE_BROWSER)
+// #if defined(NEW_SOURCE_BROWSER)
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
 
@@ -603,7 +677,7 @@ class SourceBrowserParent_Window : public GUI_Object
 
   // FIXME - change these items to list objects
   SourceBuffer **ppSourceBuffers;
-#endif
+// #endif
 };
 
 

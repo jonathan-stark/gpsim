@@ -1,6 +1,6 @@
 /*
-   Copyright (C) 1998,1999,2000,2001
-   T. Scott Dattalo and Ralf Forsberg
+Copyright (C) 1998,1999,2000,2001
+T. Scott Dattalo and Ralf Forsberg
 
 This file is part of gpsim.
 
@@ -24,6 +24,8 @@ Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 
 #include "../config.h"
+
+
 #ifdef HAVE_GUI
 
 
@@ -60,6 +62,11 @@ Boston, MA 02111-1307, USA.  */
 
 #define PAGE_BORDER 3
 #define PIXMAP_SIZE 14
+
+extern int gui_question(char *question, char *a, char *b);
+
+static int load_fonts(SOURCE_WINDOW *sbaw);
+
 
 static void find_char_and_skip(char **str, char c)
 {
@@ -100,7 +107,7 @@ public:
     if(sbaw->bSourceLoaded())
       sbaw->SetPC(new_value);
 #else
-    if(sbaw->source_loaded)
+    if(sbaw->m_bSourceLoaded)
       sbaw->SetPC(new_value);
 #endif
   }
@@ -109,7 +116,6 @@ public:
 };
 
 
-#if defined(NEW_SOURCE_BROWSER)
 
 #define BP_PIXEL_SIZE        10
 #define PC_PIXEL_SIZE        10
@@ -126,63 +132,63 @@ static map<GtkTextView*, NSourcePage *> PageMap;
 /* This function is taken from gtk+/tests/testtext.c */
 static void
 gtk_source_view_get_lines (GtkTextView  *text_view,
-			   gint          first_y,
-			   gint          last_y,
-			   GArray       *buffer_coords,
-			   GArray       *numbers,
-			   gint         *countp)
+                           gint          first_y,
+                           gint          last_y,
+                           GArray       *buffer_coords,
+                           GArray       *numbers,
+                           gint         *countp)
 {
   GtkTextIter iter;
   gint count;
   gint size;
-  gint last_line_num = -1;	
+  gint last_line_num = -1;  
 
   g_array_set_size (buffer_coords, 0);
   g_array_set_size (numbers, 0);
-  
+
   /* Get iter at first y */
   gtk_text_view_get_line_at_y (text_view, &iter, first_y, NULL);
 
   /* For each iter, get its location and add it to the arrays.
-   * Stop when we pass last_y
-   */
+  * Stop when we pass last_y
+  */
   count = 0;
   size = 0;
 
   while (!gtk_text_iter_is_end (&iter))
-    {
-      gint y, height;
-      
-      gtk_text_view_get_line_yrange (text_view, &iter, &y, &height);
+  {
+    gint y, height;
 
-      g_array_append_val (buffer_coords, y);
-      last_line_num = gtk_text_iter_get_line (&iter);
-      g_array_append_val (numbers, last_line_num);
-      	
-      ++count;
+    gtk_text_view_get_line_yrange (text_view, &iter, &y, &height);
 
-      if ((y + height) >= last_y)
-	break;
-      
-      gtk_text_iter_forward_line (&iter);
-    }
+    g_array_append_val (buffer_coords, y);
+    last_line_num = gtk_text_iter_get_line (&iter);
+    g_array_append_val (numbers, last_line_num);
+
+    ++count;
+
+    if ((y + height) >= last_y)
+      break;
+
+    gtk_text_iter_forward_line (&iter);
+  }
 
   if (gtk_text_iter_is_end (&iter))
+  {
+    gint y, height;
+    gint line_num;
+
+    gtk_text_view_get_line_yrange (text_view, &iter, &y, &height);
+
+    line_num = gtk_text_iter_get_line (&iter);
+
+    if (line_num != last_line_num)
     {
-      gint y, height;
-      gint line_num;
-      
-      gtk_text_view_get_line_yrange (text_view, &iter, &y, &height);
-
-      line_num = gtk_text_iter_get_line (&iter);
-
-      if (line_num != last_line_num)
-	{
-	  g_array_append_val (buffer_coords, y);
-	  g_array_append_val (numbers, line_num);
-	  ++count;
-	}
+      g_array_append_val (buffer_coords, y);
+      g_array_append_val (numbers, line_num);
+      ++count;
     }
+  }
 
   *countp = count;
 }
@@ -190,10 +196,10 @@ gtk_source_view_get_lines (GtkTextView  *text_view,
 
 //------------------------------------------------------------------------
 // 
-static gint
-view_key_press(GtkTextView *pView,
-	       GdkEventKey *key, 
-	       SourceWindow *pSW)
+gint
+NSourcePage::KeyPressHandler(GtkTextView *pView,
+               GdkEventKey *key, 
+               SourceWindow *pSW)
 {
   GtkTextBuffer *pBuffer = gtk_text_view_get_buffer(pView);
   GtkTextMark *pMark = gtk_text_buffer_get_insert(pBuffer);
@@ -202,7 +208,7 @@ view_key_press(GtkTextView *pView,
   int line = gtk_text_iter_get_line (&iter);
 
   NSourcePage *page = PageMap[pView];
- 
+
   Dprintf(("Received key press for view. line=%d page%p\n",line,page));
 
   switch (key->keyval) {
@@ -217,14 +223,14 @@ view_key_press(GtkTextView *pView,
   return TRUE;
 }
 
-static gint
-view_expose(GtkTextView *pView,
-	    GdkEventExpose *pEvent, 
-	    SourceWindow *pSW)
+gint
+NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
+            GdkEventExpose *pEvent, 
+            SourceWindow *pSW)
 {
 
   if (pEvent->window == gtk_text_view_get_window (pView,
-						  GTK_TEXT_WINDOW_LEFT)) 
+    GTK_TEXT_WINDOW_LEFT)) 
   {
     //gtk_source_view_paint_margin (view, event);
     //event_handled = TRUE;
@@ -238,18 +244,18 @@ view_expose(GtkTextView *pView,
 
 
     gtk_text_view_window_to_buffer_coords (pView,
-					   GTK_TEXT_WINDOW_LEFT,
-					   0,
-					   y1,
-					   NULL,
-					   &y1);
+      GTK_TEXT_WINDOW_LEFT,
+      0,
+      y1,
+      NULL,
+      &y1);
 
     gtk_text_view_window_to_buffer_coords (pView,
-					   GTK_TEXT_WINDOW_LEFT,
-					   0,
-					   y2,
-					   NULL,
-					   &y2);
+      GTK_TEXT_WINDOW_LEFT,
+      0,
+      y2,
+      NULL,
+      &y2);
 
     pPage->updateMargin(y1,y2);
 
@@ -261,10 +267,10 @@ view_expose(GtkTextView *pView,
 }
 //------------------------------------------------------------------------
 // 
-static gint
-key_press(GtkWidget *widget,
-	  GdkEventKey *key, 
-	  SourceWindow *pSW)
+gint
+SourceWindow::KeyPressHandler(GtkWidget *widget,
+          GdkEventKey *key, 
+          SourceWindow *pSW)
 {
   if (!pSW || !key) 
     return FALSE;
@@ -332,66 +338,63 @@ static GtkTextView *pViewContainingPopup=0;
 
 
 typedef enum {
-    MENU_FIND_TEXT,
-    MENU_FIND_PC,
-    MENU_MOVE_PC,
-    MENU_RUN_HERE,
-    MENU_BP_HERE,
-    MENU_SELECT_SYMBOL,
-    MENU_STEP,
-    MENU_STEP_OVER,
-    MENU_RUN,
-    MENU_STOP,
-    MENU_FINISH,
-    MENU_RESET,
-    MENU_SETTINGS,
-    MENU_PROFILE_START_HERE,
-    MENU_PROFILE_STOP_HERE,
-    MENU_ADD_TO_WATCH,
+  MENU_FIND_TEXT,
+  MENU_FIND_PC,
+  MENU_MOVE_PC,
+  MENU_RUN_HERE,
+  MENU_BP_HERE,
+  MENU_SELECT_SYMBOL,
+  MENU_STEP,
+  MENU_STEP_OVER,
+  MENU_RUN,
+  MENU_STOP,
+  MENU_FINISH,
+  MENU_RESET,
+  MENU_SETTINGS,
+  MENU_PROFILE_START_HERE,
+  MENU_PROFILE_STOP_HERE,
+  MENU_ADD_TO_WATCH,
 } menu_id;
 
 
 typedef struct _menu_item {
-    char *name;
-    menu_id id;
-    GtkWidget *item;
+  char *name;
+  menu_id id;
+  GtkWidget *item;
 } menu_item;
 
 static menu_item menu_items[] = {
-    {"Find PC",         MENU_FIND_PC,0},
-    {"Run here",        MENU_RUN_HERE,0},
-    {"Move PC here",    MENU_MOVE_PC,0},
-    {"Breakpoint here", MENU_BP_HERE,0},
-    {"Profile start here", MENU_PROFILE_START_HERE,0},
-    {"Profile stop here", MENU_PROFILE_STOP_HERE,0},
-    {"Add to watch",    MENU_ADD_TO_WATCH,0},
-    {"Find text...",    MENU_FIND_TEXT,0},
-    {"Settings...",     MENU_SETTINGS,0},
+  {"Find PC",         MENU_FIND_PC,0},
+  {"Run here",        MENU_RUN_HERE,0},
+  {"Move PC here",    MENU_MOVE_PC,0},
+  {"Breakpoint here", MENU_BP_HERE,0},
+  {"Profile start here", MENU_PROFILE_START_HERE,0},
+  {"Profile stop here", MENU_PROFILE_STOP_HERE,0},
+  {"Add to watch",    MENU_ADD_TO_WATCH,0},
+  {"Find text...",    MENU_FIND_TEXT,0},
+  {"Settings...",     MENU_SETTINGS,0},
 };
 
 static menu_item submenu_items[] = {
-    {"Step",            MENU_STEP,0},
-    {"Step Over",       MENU_STEP_OVER,0},
-    {"Run",             MENU_RUN,0},
-    {"Stop",            MENU_STOP,0},
-    {"Reset",           MENU_RESET,0},
-    {"Finish",          MENU_FINISH,0},
+  {"Step",            MENU_STEP,0},
+  {"Step Over",       MENU_STEP_OVER,0},
+  {"Run",             MENU_RUN,0},
+  {"Stop",            MENU_STOP,0},
+  {"Reset",           MENU_RESET,0},
+  {"Finish",          MENU_FINISH,0},
 };
 
 
 //------------------------------------------------------------------------
-// view_button_press
+// ButtonPressHandler
 // Event handler for text view mouse clicks.
-static gint
-view_button_press(GtkTextView *pView,
-		  GdkEventButton *pButton, 
-		  SourceWindow *pSW)
+gint
+NSourcePage::ButtonPressHandler(GtkTextView *pView,
+                  GdkEventButton *pButton, 
+                  SourceWindow *pSW)
 {
-  printf("Received button press for view %p\n",pSW);
-  printf(" type=%d x=%g,y=%g\n",pButton->type, pButton->x, pButton->y);
-
   if (pButton->window == gtk_text_view_get_window (pView,
-						  GTK_TEXT_WINDOW_LEFT)) 
+    GTK_TEXT_WINDOW_LEFT)) 
   {
     // Margin 
     NSourcePage *pPage = PageMap[pView];
@@ -399,11 +402,11 @@ view_button_press(GtkTextView *pView,
     gint y = (gint) pButton->y;
 
     gtk_text_view_window_to_buffer_coords (pView,
-					   GTK_TEXT_WINDOW_LEFT,
-					   x,
-					   y,
-					   &x,
-					   &y);
+      GTK_TEXT_WINDOW_LEFT,
+      x,
+      y,
+      &x,
+      &y);
     GtkTextIter iter;
     gint line;
     gtk_text_view_get_line_at_y (pView, &iter, y, NULL);
@@ -415,28 +418,28 @@ view_button_press(GtkTextView *pView,
     if (pButton->button == 3) {
 
       if (aPopupMenu) {
-	if (GTK_IS_TEXT_VIEW(pView))
-	  pViewContainingPopup = pView;
+        if (GTK_IS_TEXT_VIEW(pView))
+          pViewContainingPopup = pView;
 
-	gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
-		       3, pButton->time);
+        gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
+          3, pButton->time);
       }
 
       return TRUE;
     }
-   
+
   }
 
   return FALSE;
 }
 
 //========================================================================
-static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+int SourceWindow::DeleteEventHandler(GtkWidget *widget,
+                        GdkEvent  *event,
                         SourceWindow *sw)
 {
-    sw->ChangeView(VIEW_HIDE);
-    return TRUE;
+  sw->ChangeView(VIEW_HIDE);
+  return TRUE;
 }
 
 
@@ -465,13 +468,13 @@ static int isHexNumber(const char *cP)
 {
   int i=0;
   if ((*cP == '0' && toupper(cP[1])=='X') ||
-      (*cP == '$')) {
-    i = (*cP=='0') ? 2 : 1;
+    (*cP == '$')) {
+      i = (*cP=='0') ? 2 : 1;
 
-    while (isxdigit(cP[i]))
-      i++;
-  }
-  return i;
+      while (isxdigit(cP[i]))
+        i++;
+    }
+    return i;
 }
 static int isNumber(const char *cP)
 {
@@ -509,15 +512,15 @@ static bool isButtonEvent (GdkEventType type)
 
 //------------------------------------------------------------------------
 static gboolean TagEvent (GtkTextTag *texttag,
-			  GObject *arg1,
-			  GdkEvent *event,
-			  GtkTextIter *arg2,
-			  TextStyle *pTextStyle)
+                          GObject *arg1,
+                          GdkEvent *event,
+                          GtkTextIter *arg2,
+                          TextStyle *pTextStyle)
 {
   /*
   static int seq=0;
   printf("Received tag event signal Tag:%p arg1:%p seq %d Event:%p iter:%p user:%p %08X Line:%d\n",
-	 texttag, arg1,seq++,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
+  texttag, arg1,seq++,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
   */
   if (isButtonEvent(event->type)) {
     GdkEventButton *evtButton = (GdkEventButton *) event;
@@ -525,39 +528,54 @@ static gboolean TagEvent (GtkTextTag *texttag,
     if (event->type == GDK_2BUTTON_PRESS  && evtButton->button == 1) {
       Dprintf (("Double click left mouse\n"));
       if (pTextStyle)
-	pTextStyle->doubleClickEvent(arg2);
+        pTextStyle->doubleClickEvent(arg2);
 
       gint signal_id =  g_signal_lookup ("button_press_event", 
-					 G_TYPE_FROM_INSTANCE(arg1));
+        G_TYPE_FROM_INSTANCE(arg1));
 
       GSignalQuery query;
       g_signal_query (signal_id, &query);
 
       Dprintf (("Signal id=%d name=%s n_params=%d\n",signal_id,query.signal_name,
-		query.n_params));
+        query.n_params));
 
       GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (arg1));
       gboolean b=FALSE;
       if (GTK_WIDGET_TOPLEVEL (toplevel)) {
-	//g_signal_emit_by_name (toplevel, "button_press_event",evtButton,&b);
-	g_signal_emit_by_name (GTK_WIDGET (arg1), "button_press_event",evtButton,&b);
+        //g_signal_emit_by_name (toplevel, "button_press_event",evtButton,&b);
+        g_signal_emit_by_name (GTK_WIDGET (arg1), "button_press_event",evtButton,&b);
       } else 
-	printf("TagEvent: arg1 is not toplevel\n");
+        printf("TagEvent: arg1 is not toplevel\n");
 
     }
     /*
     printf("Button Event: button:%d  modifier:%d coords(%g,%g)\n",
-	   evtButton->button, evtButton->state, evtButton->x,evtButton->y);
+    evtButton->button, evtButton->state, evtButton->x,evtButton->y);
     */
     // If the right mouse button is pressed then suppress the GTK pop up menu.
     if (evtButton->button == 3) {
 
       if (aPopupMenu) {
-	if (GTK_IS_TEXT_VIEW(arg1))
-	  pViewContainingPopup = GTK_TEXT_VIEW(arg1);
+        if (GTK_IS_TEXT_VIEW(arg1)) {
+          pViewContainingPopup = GTK_TEXT_VIEW(arg1);
+          NSourcePage *pPage = PageMap[pViewContainingPopup];
+          gint x = (gint) evtButton->x;
+          gint y = (gint) evtButton->y;
 
-	gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
-		       3, evtButton->time);
+          gtk_text_view_window_to_buffer_coords (pViewContainingPopup,
+            GTK_TEXT_WINDOW_LEFT,
+            x,
+            y,
+            &x,
+            &y);
+          GtkTextIter iter;
+          gtk_text_view_get_line_at_y (pViewContainingPopup, &iter, y, NULL);
+          pPage->getParent()->m_LineAtButtonClick =
+            gtk_text_iter_get_line (&iter);
+
+        }
+        gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
+          3, evtButton->time);
       }
 
       return TRUE;
@@ -595,27 +613,27 @@ protected:
   SourceWindow *m_pSourceWindow; // The last source window that requested a search.
 
   static void find_cb(GtkWidget *w, SearchDialog *);
+  static void find_clear_cb(GtkWidget *w, SearchDialog *pSearchDialog);
   void find(const char *);
   static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data);
 };
 
-static SearchDialog *stPSearchDialog=0;
 //------------------------------------------------------------------------
 SearchDialog::SearchDialog()
-  : m_bIsBuilt(false), m_bFound(false),
-    m_bLooped(false),m_iStart(0),m_iLast(0),m_iLastID(0),
-    m_pSourceWindow(0)
+: m_bIsBuilt(false), m_bFound(false),
+m_bLooped(false),m_iStart(0),m_iLast(0),m_iLastID(0),
+m_pSourceWindow(0)
 {
 
 }
 
 gint SearchDialog::configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
-static int dlg_x=200, dlg_y=200;
+  static int dlg_x=200, dlg_y=200;
 
   if(widget->window==0)
     return 0;
-    
+
   gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
   return 0;
 }
@@ -642,7 +660,7 @@ void SearchDialog::find(const char *cpPattern)
 
 
 
-static void find_clear_cb(GtkWidget *w, SearchDialog *pSearchDialog)
+void SearchDialog::find_clear_cb(GtkWidget *w, SearchDialog *pSearchDialog)
 {
   //gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
   printf("find_clear_cb\n");
@@ -663,61 +681,61 @@ void SearchDialog::Build()
   m_Window = gtk_dialog_new();
 
   gtk_signal_connect(GTK_OBJECT(m_Window),
-		     "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
   gtk_signal_connect_object(GTK_OBJECT(m_Window),
-			    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),
-			    GTK_OBJECT(m_Window));
+    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),
+    GTK_OBJECT(m_Window));
 
   gtk_window_set_title(GTK_WINDOW(m_Window),"Find");
-    
+
   hbox = gtk_hbox_new(FALSE,15);
   gtk_widget_show(hbox);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(m_Window)->vbox),hbox,
-		     FALSE,TRUE,5);
+    FALSE,TRUE,5);
   label = gtk_label_new("Find:");
   gtk_widget_show(label);
   gtk_box_pack_start(GTK_BOX(hbox),label,
-		     FALSE,FALSE,5);
+    FALSE,FALSE,5);
   m_Entry = gtk_combo_new();
   gtk_widget_show(m_Entry);
   gtk_box_pack_start(GTK_BOX(hbox),m_Entry,
-		     TRUE,TRUE,5);
+    TRUE,TRUE,5);
   gtk_combo_disable_activate(GTK_COMBO(m_Entry));
   gtk_signal_connect(GTK_OBJECT(GTK_COMBO(m_Entry)->entry),"activate",
-		     GTK_SIGNAL_FUNC(find_cb),this);
-    
+    GTK_SIGNAL_FUNC(find_cb),this);
+
   hbox = gtk_hbox_new(FALSE,15);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(m_Window)->vbox),hbox,
-		     FALSE,TRUE,5);
+    FALSE,TRUE,5);
   gtk_widget_show(hbox);
   m_CaseButton = gtk_check_button_new_with_label("Case Sensitive");
   gtk_widget_show(m_CaseButton);
   gtk_box_pack_start(GTK_BOX(hbox),m_CaseButton,
-		     FALSE,FALSE,5);
+    FALSE,FALSE,5);
   m_BackButton = gtk_check_button_new_with_label("Find Backwards");
   gtk_widget_show(m_BackButton);
   gtk_box_pack_start(GTK_BOX(hbox),m_BackButton,
-		     FALSE,FALSE,5);
-    
+    FALSE,FALSE,5);
+
   button = gtk_button_new_with_label("Find");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
   gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(find_cb),this);
+    GTK_SIGNAL_FUNC(find_cb),this);
   GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
   gtk_widget_grab_default(button);
-    
+
   button = gtk_button_new_with_label("Clear");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
   gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(find_clear_cb),this);
-    
+    GTK_SIGNAL_FUNC(find_clear_cb),this);
+
   button = gtk_button_new_with_label("Close");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
   gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(m_Window));
+    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(m_Window));
 
   m_bIsBuilt = true;
 }
@@ -742,7 +760,7 @@ ColorHolder::ColorHolder (const char *pcColor)
     gdk_color_parse(pcColor, &mCurrentColor);
     mSaveColor  = mCurrentColor;
   }
-  
+
 }
 bool ColorHolder::set(GdkColor *pNewColor, bool saveOld)
 {
@@ -760,7 +778,7 @@ char *ColorHolder::get(char *cParr, int size)
 {
   if (cParr)
     snprintf(cParr,size,"#%04X%04X%04X",
-	     mCurrentColor.red,mCurrentColor.green,mCurrentColor.blue);
+    mCurrentColor.red,mCurrentColor.green,mCurrentColor.blue);
   return cParr;
 }
 
@@ -779,27 +797,27 @@ GdkColor *ColorHolder::CurrentColor()
 
 //------------------------------------------------------------------------
 TextStyle::TextStyle (const char *cpName,
-		      const char *pFGColor,
-		      const char *pBGColor)
-  : mFG(pFGColor), mBG(pBGColor)
+                      const char *pFGColor,
+                      const char *pBGColor)
+                      : mFG(pFGColor), mBG(pBGColor)
 {
 
   m_pTag = gtk_text_tag_new(cpName);
 
   g_object_set(G_OBJECT (m_pTag),
-	       "foreground-gdk", mFG.CurrentColor(),
-	       "background-gdk", mBG.CurrentColor(),NULL);
+    "foreground-gdk", mFG.CurrentColor(),
+    "background-gdk", mBG.CurrentColor(),NULL);
 
   g_signal_connect (G_OBJECT (m_pTag), "event",
-		    GTK_SIGNAL_FUNC(TagEvent),
-		    this);
+    GTK_SIGNAL_FUNC(TagEvent),
+    this);
 }
 
 void TextStyle::setFG(GdkColor *pNewColor)
 {
   if (mFG.set(pNewColor,true)) {
     g_object_set(G_OBJECT (m_pTag),
-		 "foreground-gdk", mFG.CurrentColor(),NULL);
+      "foreground-gdk", mFG.CurrentColor(),NULL);
   }
 }
 //------------------------------------------------------------------------
@@ -816,27 +834,27 @@ void TextStyle::revert()
 {
   if (mBG.revert())
     g_object_set(G_OBJECT (m_pTag),
-		 "background-gdk", mBG.CurrentColor(),NULL);
+    "background-gdk", mBG.CurrentColor(),NULL);
 
   if (mFG.revert())
     g_object_set(G_OBJECT (m_pTag),
-		 "foreground-gdk", mFG.CurrentColor(),NULL);
-    
+    "foreground-gdk", mFG.CurrentColor(),NULL);
+
 }
 
 //========================================================================
 //========================================================================
 SourcePageMargin::SourcePageMargin()
-  : m_bShowLineNumbers(true), m_bShowAddresses(false), m_bShowOpcodes(true)
+: m_bShowLineNumbers(true), m_bShowAddresses(false), m_bShowOpcodes(true)
 {
 }
 //========================================================================
 //========================================================================
 SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
-			   SourceBrowserParent_Window *pParent)
+                           SourceBrowserParent_Window *pParent)
 
-  :  m_pParent(pParent), m_pFC(pFC), m_SourceFile_t(eUnknownSource),
-     m_bParsed(false)
+                           :  m_pParent(pParent), m_pFC(pFC), m_SourceFile_t(eUnknownSource),
+                           m_bParsed(false)
 {
 
   assert(pTagTable);
@@ -865,7 +883,7 @@ void SourceBuffer::setSrcType(eSourceFileType new_SrcType)
 // using a given text style (i.e. the style contains a gtkTextTag)
 
 void SourceBuffer::addTagRange(TextStyle *pStyle,
-			       int start_index, int end_index)
+                               int start_index, int end_index)
 {
 
   if (!pStyle)
@@ -907,24 +925,24 @@ GtkTextBuffer *SourceBuffer::getBuffer()
 /*
 void SourceBuffer::setBreak(int line)
 {
-  Dprintf ((" setBreak line %d\n",line));
+Dprintf ((" setBreak line %d\n",line));
 
-  GtkTextIter iBegin, iEnd;
-  gtk_text_buffer_get_iter_at_line_offset
-    (m_buffer,
-     &iBegin,
-     line,
-     STROFFSET_OF_OPCODE);
-  gtk_text_buffer_get_iter_at_line_offset
-    (m_buffer,
-     &iEnd,
-     line,
-     STROFFSET_OF_OPCODE+STRLEN_OF_OPCODE);
+GtkTextIter iBegin, iEnd;
+gtk_text_buffer_get_iter_at_line_offset
+(m_buffer,
+&iBegin,
+line,
+STROFFSET_OF_OPCODE);
+gtk_text_buffer_get_iter_at_line_offset
+(m_buffer,
+&iEnd,
+line,
+STROFFSET_OF_OPCODE+STRLEN_OF_OPCODE);
 
-  gtk_text_buffer_apply_tag (m_buffer,
-			     m_pParent->mBreakpointTag->tag(),
-			     &iBegin,
-			     &iEnd);
+gtk_text_buffer_apply_tag (m_buffer,
+m_pParent->mBreakpointTag->tag(),
+&iBegin,
+&iEnd);
 
 }
 */
@@ -932,33 +950,40 @@ void SourceBuffer::setBreak(int line)
 /*
 void SourceBuffer::clearBreak(int line)
 {
-  Dprintf ((" clearBreak line %d\n",line));
+Dprintf ((" clearBreak line %d\n",line));
 
-  GtkTextIter iBegin, iEnd;
-  gtk_text_buffer_get_iter_at_line_offset
-    (m_buffer,
-     &iBegin,
-     line,
-     STROFFSET_OF_OPCODE);
-  gtk_text_buffer_get_iter_at_line_offset
-    (m_buffer,
-     &iEnd,
-     line,
-     STROFFSET_OF_OPCODE+STRLEN_OF_OPCODE);
+GtkTextIter iBegin, iEnd;
+gtk_text_buffer_get_iter_at_line_offset
+(m_buffer,
+&iBegin,
+line,
+STROFFSET_OF_OPCODE);
+gtk_text_buffer_get_iter_at_line_offset
+(m_buffer,
+&iEnd,
+line,
+STROFFSET_OF_OPCODE+STRLEN_OF_OPCODE);
 
-  gtk_text_buffer_remove_tag (m_buffer,
-			      m_pParent->mBreakpointTag->tag(),
-			      &iBegin,
-			      &iEnd);
+gtk_text_buffer_remove_tag (m_buffer,
+m_pParent->mBreakpointTag->tag(),
+&iBegin,
+&iEnd);
 }
 */
 
 
 //========================================================================
-NSourcePage::NSourcePage(SourceWindow *pParent, SourceBuffer *pBuffer, 
-			 int file_id, GtkWidget *pContainer)
-  : m_fileid(file_id), m_pBuffer(pBuffer), m_marginWidth(0),
-    m_Parent(pParent), m_cpFont(0), m_pContainer(pContainer), m_view(0)
+NSourcePage::NSourcePage(SourceWindow *pParent,
+                         SourceBuffer *pBuffer, 
+                         int file_id,
+                         GtkWidget *pContainer)
+                         : m_fileid(file_id),
+                         m_pBuffer(pBuffer),
+                         m_marginWidth(0),
+                         m_Parent(pParent),
+                         m_cpFont(0),
+                         m_pContainer(pContainer),
+                         m_view(0)
 {
 }
 
@@ -969,21 +994,23 @@ GtkTextBuffer *NSourcePage::buffer()
 }
 //------------------------------------------------------------------------
 SourceWindow::SourceWindow(GUI_Processor *pgp, 
-			   SourceBrowserParent_Window *pParent,
-			   bool bUseConfig,
-			   const char *newName)
-  : GUI_Object (),
-    pma(0),
-    status_bar(0),
-    last_simulation_mode(eSM_INITIAL),
-    m_pParent(pParent)
+                           SourceBrowserParent_Window *pParent,
+                           bool bUseConfig,
+                           const char *newName)
+                           : GUI_Object (),
+                           pma(0),
+                           status_bar(0),
+                           last_simulation_mode(eSM_INITIAL),
+                           m_pParent(pParent)
 {
   Dprintf(("Constructor \n"));
 
   gp = pgp;
 
+  stPSearchDialog=0;
   m_bLoadSource = false;
   m_bSourceLoaded = false;
+  m_LineAtButtonClick = -1;
 
   if (newName)
     set_name(newName);
@@ -1100,26 +1127,26 @@ void SourceWindow::findText()
 char *strcasestr(const char *searchee, const char *lookfor)
 {
   if (*searchee == '\0')
-    {
-      if (*lookfor)
-	return NULL;
-      return (char *) searchee;
-    }
+  {
+    if (*lookfor)
+      return NULL;
+    return (char *) searchee;
+  }
 
   while (*searchee != '\0')
+  {
+    size_t i;
+
+    for (i = 0; ; ++i)
     {
-      size_t i;
+      if (lookfor[i] == '\0')
+        return (char *) searchee;
 
-      for (i = 0; ; ++i)
-	{
-	  if (lookfor[i] == '\0')
-	      return (char *) searchee;
-
-	  if (tolower(lookfor[i]) != tolower(searchee[i]))
-	      break;
-	}
-      searchee++;
+      if (tolower(lookfor[i]) != tolower(searchee[i]))
+        break;
     }
+    searchee++;
+  }
 
   return NULL;
 }
@@ -1139,7 +1166,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
   char buff[1024];
   patternLen = (patternLen < sizeof(buff)) ? patternLen : sizeof(buff);
   const char *pattern = bDirection ? pText : 
-    strReverse(pText, &buff[patternLen], patternLen);
+  strReverse(pText, &buff[patternLen], patternLen);
 
   //printf("findText %s view:%p\n",pattern,pViewContainingPopup);
 
@@ -1157,58 +1184,58 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
   if (!start) {
     if (bDirection) {
       gtk_text_buffer_get_start_iter(pPage->buffer(),
-				     &iStart);
+        &iStart);
       gtk_text_buffer_get_iter_at_line(pPage->buffer(),
-				       &iEnd,
-				       line+1);
+        &iEnd,
+        line+1);
     } else {
 
       gtk_text_buffer_get_end_iter(pPage->buffer(),
-				   &iEnd);
+        &iEnd);
       gtk_text_buffer_get_end_iter(pPage->buffer(),
-				   &iStart);
+        &iStart);
       gtk_text_iter_backward_line (&iStart);
       line = totalLines-2;
     }
 
   } else {
     gtk_text_buffer_get_iter_at_offset(pPage->buffer(),
-				       &iStart,
-				       start);
+      &iStart,
+      start);
     line = gtk_text_iter_get_line (&iStart);
 
     if (bDirection) {
       if (line >= totalLines) {
-	line = 0;
-	gtk_text_buffer_get_iter_at_offset(pPage->buffer(),
-					   &iStart,
-					   0);
+        line = 0;
+        gtk_text_buffer_get_iter_at_offset(pPage->buffer(),
+          &iStart,
+          0);
       }
     } else {
       if (line <= 0) {
-	line = totalLines-1;
-	gtk_text_buffer_get_iter_at_line(pPage->buffer(),
-					 &iStart,
-					 line--);
+        line = totalLines-1;
+        gtk_text_buffer_get_iter_at_line(pPage->buffer(),
+          &iStart,
+          line--);
       }
     }
 
     gtk_text_buffer_get_iter_at_line(pPage->buffer(),
-				     &iEnd,
-				     line);
+      &iEnd,
+      line);
 
     offset = start - gtk_text_iter_get_offset (&iEnd);
 
     gtk_text_buffer_get_iter_at_line(pPage->buffer(),
-				     &iEnd,
-				     line+1);
+      &iEnd,
+      line+1);
   }
 
 
   while (totalLines--) {
 
     const char *str = gtk_text_buffer_get_text(pPage->buffer(),
-					       &iStart, &iEnd, FALSE);
+      &iStart, &iEnd, FALSE);
     int srcLen = strlen(str);
 
     const char *cpSource = str;
@@ -1226,22 +1253,22 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
       //printf("Found %s in %s starting at %s, pos=%d\n",pattern, str, pFound,pos);
 
       gtk_text_view_scroll_to_iter (pViewContainingPopup,
-				    &iStart,
-				    0.0,
-				    TRUE,
-				    0.0, 0.3);
+        &iStart,
+        0.0,
+        TRUE,
+        0.0, 0.3);
 
       gtk_text_buffer_get_iter_at_line_offset(pPage->buffer(),
-					      &iStart,
-					      line, pos);
+        &iStart,
+        line, pos);
       gtk_text_buffer_get_iter_at_line_offset(pPage->buffer(),
-					      &iEnd,
-					      line, 
-					      pos+ (bDirection ? patternLen : -patternLen));
+        &iEnd,
+        line, 
+        pos+ (bDirection ? patternLen : -patternLen));
 
       gtk_text_buffer_select_range (pPage->buffer(),
-				    &iStart,
-				    &iEnd);
+        &iStart,
+        &iEnd);
       return gtk_text_iter_get_offset(bDirection ? &iEnd : &iStart);
     }
 
@@ -1250,12 +1277,12 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
 
     if (bDirection) {
       if (gtk_text_iter_forward_line (&iStart)==FALSE)
-	return 0;
+        return 0;
       gtk_text_iter_forward_line (&iEnd);
       line++;
     } else {
       if (gtk_text_iter_backward_line (&iStart)==FALSE)
-	return gtk_text_buffer_get_char_count(pPage->buffer()) - 1;
+        return gtk_text_buffer_get_char_count(pPage->buffer()) - 1;
 
       gtk_text_iter_backward_line (&iEnd);
       line--;
@@ -1267,13 +1294,14 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
   return 0;
 }
 //------------------------------------------------------------------------
-static gint cb_notebook_switchpage (GtkNotebook     *notebook,
-				    GtkNotebookPage *page,
-				    guint            page_num,
-				    SourceWindow     *pSW)
+gint SourceWindow::cb_notebook_switchpage (GtkNotebook     *notebook,
+                                    GtkNotebookPage *page,
+                                    guint            page_num,
+                                    SourceWindow     *pSW)
 {
   return pSW->switch_page_cb(page_num);
 }
+
 gint SourceWindow::switch_page_cb(guint newPage)
 {
   Dprintf((" Switch page call back-- page=%d\n",newPage));
@@ -1297,27 +1325,32 @@ void NSourcePage::invalidateView()
 {
   if (m_view) {
     GdkRectangle vRect;
-	  
+
     vRect.x=0;
     vRect.y=0;
     vRect.width=100;
     vRect.height=100;
     gdk_window_invalidate_rect
       (gtk_text_view_get_window (m_view, 
-				 GTK_TEXT_WINDOW_LEFT), &vRect, TRUE);
+                                 GTK_TEXT_WINDOW_LEFT),
+                                 &vRect,
+                                 TRUE);
   }
 
 }
 
-//------------------------------------------------------------------------
-SourceWindow *_popup_sbaw;
+static int settings_dialog(SOURCE_WINDOW *sbaw);
 
-static void
-_popup_activated(GtkWidget *widget, gpointer data)
+//------------------------------------------------------------------------
+
+void
+SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
 {
+  int address;
   menu_item *item;
 
   SourceWindow *pSW = 0;
+  NSourcePage *pPage = 0;
 
   // pViewContainingPopup is initialized when the view_button_press()
   // event handler is called. That function also initiates the event
@@ -1327,7 +1360,7 @@ _popup_activated(GtkWidget *widget, gpointer data)
     printf("Warning popup without a textview\n");
   } else {
 
-    NSourcePage *pPage = PageMap[pViewContainingPopup];
+    pPage = PageMap[pViewContainingPopup];
     pSW = pPage ? pPage->getParent() : 0;
   }
 
@@ -1341,98 +1374,68 @@ _popup_activated(GtkWidget *widget, gpointer data)
   switch(item->id) {
 
   case MENU_SETTINGS:
-    //settings_dialog(popup_sbaw);
-
-    printf(" menu settings\n");
+#if defined(NEW_SOURCE_BROWSER)
+    settings_dialog(pSW);
+#endif
     break;
   case MENU_FIND_TEXT:
-    //gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
-    //gtk_widget_show(searchdlg.window);
-
     pSW->findText();
-    printf(" menu find text\n");
     break;
   case MENU_FIND_PC:
-    //address=popup_sbaw->pma->get_PC();
-    //popup_sbaw->SetPC(address);
-
-    printf(" menu find pc\n");
+    address=pSW->pma->get_PC();
+    pSW->SetPC(address);
     break;
   case MENU_MOVE_PC:
-    //line = popup_sbaw->menu_data->getLine();
-    //address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
-    //if(address!=INVALID_VALUE)
-    //  popup_sbaw->pma->set_PC(address);
-
-    printf(" menu move pc\n");
+    if(-1 != pSW->m_LineAtButtonClick) {
+      address = pSW->pma->find_closest_address_to_line(
+        pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
+      if(address!=INVALID_VALUE) {
+        pSW->SetPC(address);
+      }
+    }
     break;
 
   case MENU_RUN_HERE:
-    //line = popup_sbaw->menu_data->getLine()+1;
-    //address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
-    //if(address!=INVALID_VALUE)
-    //  popup_sbaw->gp->cpu->run_to_address(address);
-
-    printf(" menu run here\n");
+    if(-1 != pSW->m_LineAtButtonClick) {
+      address = pSW->pma->find_closest_address_to_line(
+          pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
+      if(address!=INVALID_VALUE) {
+        pSW->gp->cpu->run_to_address(address);
+      }
+    }
     break;
 
   case MENU_BP_HERE:
-    //line = popup_sbaw->menu_data->getLine() + 1;
-    //popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
-
-    printf(" menu bp here\n");
+    if(-1 != pSW->m_LineAtButtonClick) {
+      pSW->toggleBreak(pPage, pSW->m_LineAtButtonClick);
+    }
     break;
   case MENU_PROFILE_START_HERE:
-    /*
-      line = popup_sbaw->menu_data->line;
-      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+    if(-1 != pSW->m_LineAtButtonClick) {
+      address = pSW->pma->find_closest_address_to_line(
+        pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
 
-      popup_sbaw->gp->profile_window->StartExe(address);
-    */
-    printf(" menu profile start\n");
+      pSW->gp->profile_window->StartExe(address);
+    }
     break;
 
   case MENU_PROFILE_STOP_HERE:
-    /*
-      line = popup_sbaw->menu_data->line;
+    if(-1 != pSW->m_LineAtButtonClick) {
+      address = pSW->pma->find_closest_address_to_line(
+        pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
 
-      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
-
-      popup_sbaw->gp->profile_window->StopExe(address);
-    */
-    printf(" menu profile stop\n");
+      pSW->gp->profile_window->StopExe(address);
+    }
     break;
 
   case MENU_SELECT_SYMBOL:
-  case MENU_ADD_TO_WATCH:
-    /* {
-      gint i, temp;
-      gint start, end;
-
-
-#if GTK_MAJOR_VERSION >= 2
-      if (!gtk_editable_get_selection_bounds(
-					     GTK_EDITABLE(popup_sbaw->pages[id].source_text),
-					     &start, &end))
-        break;
-#else
-      start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
-      end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
-#endif
-      if(start != end) {
-        if(start>end)
-	  {
-	    temp=start;
-	    start=end;
-	    end=temp;
-	  }
-        if((end-start+2)>256) // FIXME bounds?
-          end=start+256-2;
-        for(i=start;i<end;i++)
-          text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
-
-        unsigned int uLastCharIndex = i-start;
-        text[uLastCharIndex]=0;
+  case MENU_ADD_TO_WATCH: {
+    GtkTextBuffer *pBuffer = pPage->buffer();
+    GtkTextIter itBegin, itEnd;
+    if(gtk_text_buffer_get_selection_bounds(
+         pBuffer, &itBegin, &itEnd) ) {
+      gchar *text = gtk_text_buffer_get_text(pBuffer, &itBegin, &itEnd, FALSE);
+      if(text != 0) {
         TrimWhiteSpaceFromString(text);
 
         if(text[0] != 0) {
@@ -1456,24 +1459,23 @@ _popup_activated(GtkWidget *widget, gpointer data)
           }
 
           if(pReg == NULL) {
-            GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
-							GTK_DIALOG_MODAL,
-							GTK_MESSAGE_WARNING,
-							GTK_BUTTONS_OK,
-							"The symbol '%s' does not exist as a register symbol.\n"
-							"Only register based symbols may be added to the Watch window.",
-							text);
+            GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(pSW->window),
+            GTK_DIALOG_MODAL,
+            GTK_MESSAGE_WARNING,
+            GTK_BUTTONS_OK,
+            "The symbol '%s' does not exist as a register symbol.\n"
+            "Only register based symbols may be added to the Watch window.",
+            text);
             gtk_dialog_run (GTK_DIALOG (dialog));
             gtk_widget_destroy (dialog);
           }
           else {
-            popup_sbaw->gp->watch_window->Add(pReg);
+            pSW->gp->watch_window->Add(pReg);
           }
         }
       }
     }
-    */
-    printf(" men add to watch \n");
+    }
     break;
   case MENU_STEP:
     if (pSW)
@@ -1508,23 +1510,21 @@ _popup_activated(GtkWidget *widget, gpointer data)
 
 
 //------------------------------------------------------------------------
-static GtkWidget *
-_build_menu(SourceWindow *sbaw)
+GtkWidget *
+SourceWindow::BuildPopupMenu()
 {
   GtkWidget *menu;
   GtkWidget *submenu;
   GtkWidget *item;
   unsigned int i;
 
-  _popup_sbaw=sbaw;
-
   menu=gtk_menu_new();
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
     item=gtk_menu_item_new_with_label(menu_items[i].name);
     menu_items[i].item=item;
     gtk_signal_connect(GTK_OBJECT(item),"activate",
-		       (GtkSignalFunc) _popup_activated,
-		       &menu_items[i]);
+      (GtkSignalFunc) PopupMenuHandler,
+      &menu_items[i]);
 
     gtk_widget_show(item);
     gtk_menu_append(GTK_MENU(menu),item);
@@ -1538,8 +1538,8 @@ _build_menu(SourceWindow *sbaw)
     item=gtk_menu_item_new_with_label(submenu_items[i].name);
     submenu_items[i].item=item;
     gtk_signal_connect(GTK_OBJECT(item),"activate",
-		       (GtkSignalFunc) _popup_activated,
-		       &submenu_items[i]);
+      (GtkSignalFunc) PopupMenuHandler,
+      &submenu_items[i]);
 
     GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
@@ -1560,6 +1560,8 @@ _build_menu(SourceWindow *sbaw)
 // 
 void SourceWindow::Build()
 {
+  char *fontstring;
+
   Dprintf((" \n"));
 
   if(bIsBuilt)
@@ -1575,12 +1577,12 @@ void SourceWindow::Build()
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   g_signal_connect(GTK_OBJECT(window),"key_press_event",
-		   (GtkSignalFunc) key_press,
-		   (gpointer) this);
+    (GtkSignalFunc) KeyPressHandler,
+    (gpointer) this);
 
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-		      GTK_SIGNAL_FUNC(delete_event),
-		      (gpointer) this);
+    GTK_SIGNAL_FUNC(DeleteEventHandler),
+    (gpointer) this);
 
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
@@ -1593,8 +1595,8 @@ void SourceWindow::Build()
   m_Notebook = gtk_notebook_new();
   m_currentPage = 0;
   gtk_signal_connect (GTK_OBJECT (m_Notebook), "switch-page",
-		      GTK_SIGNAL_FUNC(cb_notebook_switchpage),
-		      (gpointer) this);
+    GTK_SIGNAL_FUNC(cb_notebook_switchpage),
+    (gpointer) this);
 
   gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
   gtk_notebook_set_scrollable ((GtkNotebook*)m_Notebook, TRUE);
@@ -1612,7 +1614,50 @@ void SourceWindow::Build()
   gtk_widget_show_all(m_Notebook);
 
 
-  aPopupMenu = _build_menu(this);
+  aPopupMenu = BuildPopupMenu();
+
+  set_style_colors("black", "white", &default_text_style);
+  set_style_colors("dark green", "white", &symbol_text_style);
+  set_style_colors("orange", "white", &label_text_style);
+  set_style_colors("red", "white", &instruction_text_style);
+  set_style_colors("blue", "white", &number_text_style);
+  set_style_colors("dim gray", "white", &comment_text_style);
+
+#define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
+#define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
+
+  if(config_get_string(name(),"commentfont",&fontstring))
+    strcpy(commentfont_string,fontstring);
+  else 
+    strcpy(commentfont_string,DEFAULT_COMMENTFONT);
+
+  if(config_get_string(name(),"sourcefont",&fontstring))
+    strcpy(sourcefont_string,fontstring);
+  else
+    strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
+
+#if defined(NEW_SOURCE_BROWSER)
+  while(!load_fonts(this)) {
+
+    if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
+    {
+      strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
+      strcpy(commentfont_string,DEFAULT_COMMENTFONT);
+      config_set_string(name(),"sourcefont",sourcefont_string);
+      config_set_string(name(),"commentfont",commentfont_string);
+    }
+    else
+    {
+      settings_dialog(this);
+    }
+  }
+#endif
+  symbol_font       = gtk_style_get_font(symbol_text_style);
+  label_font        = gtk_style_get_font(label_text_style);
+  instruction_font  = gtk_style_get_font(instruction_text_style);
+  number_font       = gtk_style_get_font(number_text_style);
+  comment_font      = gtk_style_get_font(comment_text_style);
+  default_font      = gtk_style_get_font(default_text_style);
 
   bIsBuilt = true;
 
@@ -1631,8 +1676,8 @@ void SourceWindow::SetTitle()
 
   if (!gp || !gp->cpu || !pma)
     return;
-    
-  
+
+
   if (last_simulation_mode != eSM_INITIAL &&
     ((last_simulation_mode == eSM_RUNNING &&
     gp->cpu->simulation_mode == eSM_RUNNING) ||
@@ -1640,19 +1685,19 @@ void SourceWindow::SetTitle()
     gp->cpu->simulation_mode != eSM_RUNNING)) &&
     sLastPmaName == pma->name()) {
       return;
-  }
+    }
 
-  last_simulation_mode = gp->cpu->simulation_mode;
-  char * sStatus;
-  if (gp->cpu->simulation_mode == eSM_RUNNING)
-    sStatus = "Run";
-  else // if (gp->cpu->simulation_mode == eSM_STOPPED)
-    sStatus = "Stopped";
-  char buffer[256];
-  snprintf(buffer,sizeof(buffer), "Source Browser: [%s] %s", sStatus, pma != NULL ?
-    pma->name().c_str() : "" );
-  sLastPmaName = pma->name();
-  gtk_window_set_title (GTK_WINDOW (window), buffer);
+    last_simulation_mode = gp->cpu->simulation_mode;
+    char * sStatus;
+    if (gp->cpu->simulation_mode == eSM_RUNNING)
+      sStatus = "Run";
+    else // if (gp->cpu->simulation_mode == eSM_STOPPED)
+      sStatus = "Stopped";
+    char buffer[256];
+    snprintf(buffer,sizeof(buffer), "Source Browser: [%s] %s", sStatus, pma != NULL ?
+      pma->name().c_str() : "" );
+    sLastPmaName = pma->name();
+    gtk_window_set_title (GTK_WINDOW (window), buffer);
 
 }
 
@@ -1697,34 +1742,34 @@ void SourceWindow::Update()
     return;
 
   if (m_Notebook && 
-      ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==FALSE
-	&& m_pParent->getTabPosition()<0) ||
-       (m_pParent->getTabPosition() != gtk_notebook_get_tab_pos(GTK_NOTEBOOK(m_Notebook))))) {
+    ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==FALSE
+    && m_pParent->getTabPosition()<0) ||
+    (m_pParent->getTabPosition() != gtk_notebook_get_tab_pos(GTK_NOTEBOOK(m_Notebook))))) {
 
-    if (m_pParent->getTabPosition()<0) {
-      gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),FALSE);
-    } else {
-      gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),TRUE);
-      gtk_notebook_set_tab_pos(GTK_NOTEBOOK(m_Notebook), (GtkPositionType) m_pParent->getTabPosition());
+      if (m_pParent->getTabPosition()<0) {
+        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),FALSE);
+      } else {
+        gtk_notebook_set_show_tabs(GTK_NOTEBOOK(m_Notebook),TRUE);
+        gtk_notebook_set_tab_pos(GTK_NOTEBOOK(m_Notebook), (GtkPositionType) m_pParent->getTabPosition());
+      }
     }
-  }
 
-  if (m_Notebook) {
-    gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
+    if (m_Notebook) {
+      gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
 
-    if (currPage>=0 && currPage < SBAW_NRFILES) {
-      pages[currPage]->setSource();
-      pages[currPage]->setFont(m_pParent->getFont());
+      if (currPage>=0 && currPage < SBAW_NRFILES) {
+        pages[currPage]->setSource();
+        pages[currPage]->setFont(m_pParent->getFont());
+      }
     }
-  }
 
-  if(!gp || !pma || ! window)
-    return;
+    if(!gp || !pma || ! window)
+      return;
 
-  SetTitle();
-  SetPC(pma->get_PC());
-  if(status_bar)
-    status_bar->Update();
+    SetTitle();
+    SetPC(pma->get_PC());
+    if(status_bar)
+      status_bar->Update();
 
 
 }
@@ -1744,10 +1789,10 @@ void SourceWindow::UpdateLine(int address)
 
   pPage->setSource();
 
-  
+
   int line = (pPage->getFC()->IsList()) ?
     pma->getFromAddress(address)->get_lst_line() :
-    pma->get_src_line(address);
+  pma->get_src_line(address);
 
   //int line  = pma->get_src_line(address) - 1;
 
@@ -1756,26 +1801,26 @@ void SourceWindow::UpdateLine(int address)
   GtkTextIter iBegin;
   gtk_text_buffer_get_iter_at_line
     (gtk_text_view_get_buffer(pPage->getView()),
-     &iBegin,
-     line);
+    &iBegin,
+    line);
 
   int y, h;
 
   gtk_text_view_get_line_yrange (pPage->getView(),
-				 &iBegin,
-				 &y,
-				 &h);
+    &iBegin,
+    &y,
+    &h);
   if (pPage->m_marginWidth) {
 
     GdkRectangle vRect;
 
     gtk_text_view_buffer_to_window_coords
       (pPage->getView(),
-       GTK_TEXT_WINDOW_LEFT,
-       0,
-       y,
-       NULL,
-       &y);
+      GTK_TEXT_WINDOW_LEFT,
+      0,
+      y,
+      NULL,
+      &y);
 
     vRect.x=0;
     vRect.y=y;
@@ -1802,7 +1847,7 @@ int SourceWindow::getPCLine(int page)
 
   return (pPage->getFC()->IsList()) ?
     pma->getFromAddress(pma->get_PC())->get_lst_line() :
-    pma->get_src_line(pma->get_PC());
+  pma->get_src_line(pma->get_PC());
 }
 int SourceWindow::getAddress(NSourcePage *pPage, int line)
 {
@@ -1838,7 +1883,7 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
     pos += npos;
     len -= npos;
 
-    
+
     npos = (m_bShowOpcodes && opcode >= 0) ? 
       g_snprintf(&str[pos], len, "%c%04X", m_bShowAddresses?':':' ', opcode) 
       : 0;
@@ -1892,27 +1937,27 @@ void NSourcePage::setSource()
   m_pBuffer->parse();
 
   m_view = (GtkTextView *)gtk_text_view_new_with_buffer(m_pBuffer->getBuffer());
-  printf("NSourcePage::setSource() - view=%p\n",m_view);
+  Dprintf(("NSourcePage::setSource() - view=%p\n",m_view));
   gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (m_view),
-					GTK_TEXT_WINDOW_LEFT,
-					MARGIN_WIDTH);
+    GTK_TEXT_WINDOW_LEFT,
+    MARGIN_WIDTH);
 
   PageMap[m_view] = this;
 
   g_signal_connect(GTK_OBJECT(m_view),"key_press_event",
-		   (GtkSignalFunc) view_key_press,
-		   (gpointer) m_Parent);
+    (GtkSignalFunc) KeyPressHandler,
+    (gpointer) m_Parent);
   g_signal_connect(GTK_OBJECT(m_view),"button_press_event",
-		   (GtkSignalFunc) view_button_press,
-		   (gpointer) m_Parent);
+    (GtkSignalFunc) ButtonPressHandler,
+    (gpointer) m_Parent);
   g_signal_connect(GTK_OBJECT(m_view),"expose_event",
-		   (GtkSignalFunc) view_expose,
-		   (gpointer) m_Parent);
+    (GtkSignalFunc) ViewExposeEventHandler,
+    (gpointer) m_Parent);
 
   GtkWidget *pSW = gtk_scrolled_window_new (0,0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
-				  GTK_POLICY_AUTOMATIC,
-				  GTK_POLICY_AUTOMATIC);
+    GTK_POLICY_AUTOMATIC,
+    GTK_POLICY_AUTOMATIC);
 
   gtk_container_add (GTK_CONTAINER (m_pContainer), pSW);
   gtk_container_add (GTK_CONTAINER (pSW), GTK_WIDGET(m_view));
@@ -1953,11 +1998,11 @@ void NSourcePage::updateMargin(int y1, int y2)
 
   /* get the line numbers and y coordinates. */
   gtk_source_view_get_lines (text_view,
-			     y1,
-			     y2,
-			     pixels,
-			     numbers,
-			     &count);
+    y1,
+    y2,
+    pixels,
+    numbers,
+    &count);
 
 
 
@@ -1968,98 +2013,98 @@ void NSourcePage::updateMargin(int y1, int y2)
   FileContext *pFC = getFC();
   gint addr_opcode = (pFC && !pFC->IsList()) ? 0x9999 : -1;
   if ( m_Parent->margin().formatMargin(str, sizeof(str),
-				       MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
-				       addr_opcode, addr_opcode,false) ) {
+    MAX (99, gtk_text_buffer_get_line_count (text_view->buffer)),
+    addr_opcode, addr_opcode,false) ) {
 
-    layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
+      layout = gtk_widget_create_pango_layout (GTK_WIDGET (text_view), str);
 
-    pango_layout_get_pixel_size (layout, &text_width, NULL);
-    text_width+=2;
-  }
+      pango_layout_get_pixel_size (layout, &text_width, NULL);
+      text_width+=2;
+    }
 
-  m_marginWidth = text_width + MARGIN_WIDTH;
-  gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (text_view),
-					GTK_TEXT_WINDOW_LEFT,
-					m_marginWidth);
+    m_marginWidth = text_width + MARGIN_WIDTH;
+    gtk_text_view_set_border_window_size (GTK_TEXT_VIEW (text_view),
+      GTK_TEXT_WINDOW_LEFT,
+      m_marginWidth);
 
-  int i=0;
-  while (i < count) {
-    
-    gint pos;
-    gint line = g_array_index (numbers, gint, i) + 1;
+    int i=0;
+    while (i < count) {
 
-    gtk_text_view_buffer_to_window_coords (text_view,
-					   GTK_TEXT_WINDOW_LEFT,
-					   0,
-					   g_array_index (pixels, gint, i),
-					   NULL,
-					   &pos);
+      gint pos;
+      gint line = g_array_index (numbers, gint, i) + 1;
 
-    int address    = pFC && !pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
-    int opcode     = pFC && !pFC->IsList() ? m_Parent->getOpcode(address) : -1;
-    bool bHasBreak = m_Parent->bAddressHasBreak(m_Parent->getAddress(this,line));
+      gtk_text_view_buffer_to_window_coords (text_view,
+        GTK_TEXT_WINDOW_LEFT,
+        0,
+        g_array_index (pixels, gint, i),
+        NULL,
+        &pos);
+
+      int address    = pFC && !pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
+      int opcode     = pFC && !pFC->IsList() ? m_Parent->getOpcode(address) : -1;
+      bool bHasBreak = m_Parent->bAddressHasBreak(m_Parent->getAddress(this,line));
 
 
-    if (layout) {
+      if (layout) {
 
-      if ( m_Parent->margin().formatMargin(str, sizeof(str),
-					   line, address,opcode,bHasBreak)) {
+        if ( m_Parent->margin().formatMargin(str, sizeof(str),
+          line, address,opcode,bHasBreak)) {
 
-	pango_layout_set_markup (layout, str, -1);
+            pango_layout_set_markup (layout, str, -1);
 
-	gtk_paint_layout (GTK_WIDGET (text_view)->style,
-			  win,
-			  GTK_STATE_NORMAL,
-			  FALSE,
-			  NULL,
-			  GTK_WIDGET (text_view),
-			  NULL,
-			  2, //text_width + 2, 
-			  pos,
-			  layout);
+            gtk_paint_layout (GTK_WIDGET (text_view)->style,
+              win,
+              GTK_STATE_NORMAL,
+              FALSE,
+              NULL,
+              GTK_WIDGET (text_view),
+              NULL,
+              2, //text_width + 2, 
+              pos,
+              layout);
+
+          }
 
       }
 
+
+      if (line == PCline) {
+        gtk_paint_arrow 
+          (GTK_WIDGET (text_view)->style,
+          win,
+          GTK_STATE_NORMAL,
+          GTK_SHADOW_OUT,    // GtkShadowType shadow_type,
+          NULL, 
+          GTK_WIDGET (text_view),
+          NULL,
+          GTK_ARROW_RIGHT,   //GtkArrowType arrow_type,
+          TRUE,              //gboolean fill,
+          text_width+PC_START,pos, PC_PIXEL_SIZE,15);
+        Dprintf((" updating PC at line %d\n", line));
+      }
+
+      if (m_Parent->getAddress(this,line) >= 0) {
+        // There is code associated with this line.
+
+        gtk_paint_diamond
+          (GTK_WIDGET (text_view)->style,
+          win,
+          GTK_STATE_NORMAL,
+          bHasBreak ? GTK_SHADOW_IN : GTK_SHADOW_OUT,
+          NULL, 
+          GTK_WIDGET (text_view),
+          NULL,
+          text_width+BP_START,
+          pos,
+          BP_PIXEL_SIZE,
+          BP_PIXEL_SIZE);
+      }
+      ++i;
+
     }
 
-
-    if (line == PCline) {
-      gtk_paint_arrow 
-	(GTK_WIDGET (text_view)->style,
-	 win,
-	 GTK_STATE_NORMAL,
-	 GTK_SHADOW_OUT,    // GtkShadowType shadow_type,
-	 NULL, 
-	 GTK_WIDGET (text_view),
-	 NULL,
-	 GTK_ARROW_RIGHT,   //GtkArrowType arrow_type,
-	 TRUE,              //gboolean fill,
-	 text_width+PC_START,pos, PC_PIXEL_SIZE,15);
-      Dprintf((" updating PC at line %d\n", line));
-    }
-
-    if (m_Parent->getAddress(this,line) >= 0) {
-      // There is code associated with this line.
-
-      gtk_paint_diamond
-	(GTK_WIDGET (text_view)->style,
-	 win,
-	 GTK_STATE_NORMAL,
-	 bHasBreak ? GTK_SHADOW_IN : GTK_SHADOW_OUT,
-	 NULL, 
-	 GTK_WIDGET (text_view),
-	 NULL,
-	 text_width+BP_START,
-	 pos,
-	 BP_PIXEL_SIZE,
-	 BP_PIXEL_SIZE);
-    }
-    ++i;
-
-  }
-
-  g_array_free (pixels, TRUE);
-  g_array_free (numbers, TRUE);
+    g_array_free (pixels, TRUE);
+    g_array_free (numbers, TRUE);
 
 }
 //------------------------------------------------------------------------
@@ -2097,7 +2142,7 @@ void SourceWindow::SetPC(int address)
 
   int currPage = m_Notebook ? 
     gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook)) :
-    -1;
+  -1;
 
   if (currPage>=0 && currPage < SBAW_NRFILES)
     pages[currPage]->setSource();
@@ -2117,7 +2162,7 @@ void SourceWindow::SetPC(int address)
   } else {
     for (id=0; id<SBAW_NRFILES; id++)
       if(pages[id]->m_fileid == sbawFileId)
-	break;
+        break;
 
     if (id >= SBAW_NRFILES)
       return;   // page was not found.
@@ -2151,19 +2196,19 @@ void SourceWindow::SetPC(int address)
   mProgramCounter.bIsActive = true;
   mProgramCounter.pBuffer = pages[id]->buffer();
   gtk_text_buffer_get_iter_at_line(mProgramCounter.pBuffer,
-				   &mProgramCounter.iBegin,
-				   PCline);
+    &mProgramCounter.iBegin,
+    PCline);
 
   // Now we're going to check if the program counter is in view or not.
 
   // Get the program counter location
   gtk_text_view_get_iter_location (pages[id]->getView(),
-				   &mProgramCounter.iBegin,
-				   &PCloc);
+    &mProgramCounter.iBegin,
+    &PCloc);
   // Get the viewable region of the text buffer. The region is in buffer coordinates.
   GdkRectangle vRect;
   gtk_text_view_get_visible_rect  (pages[id]->getView(),
-				   &vRect);
+    &vRect);
 
   // Now normalize the program counter's location. If yloc is between
   // 0 and 1.0 then the program counter is viewable. If not, then we
@@ -2173,12 +2218,12 @@ void SourceWindow::SetPC(int address)
 
   if ( yloc < 0.05  || yloc > 0.95 || bFirstUpdate) {
     gtk_text_view_scroll_to_iter (pages[id]->getView(),
-				  &mProgramCounter.iBegin,
-				  0.0,
-				  TRUE,
-				  0.0, 0.3);
+      &mProgramCounter.iBegin,
+      0.0,
+      TRUE,
+      0.0, 0.3);
     gtk_text_view_get_visible_rect  (pages[id]->getView(),
-				     &vRect);
+      &vRect);
 
   }
 
@@ -2226,7 +2271,7 @@ void SourceWindow::NewSource(GUI_Processor *gp)
     return;
   }
   Dprintf((" \n"));
-  
+
   if(!pma)
     pma = pProc->pma;
 
@@ -2239,15 +2284,15 @@ void SourceWindow::NewSource(GUI_Processor *gp)
   Dprintf(("NewSource\n"));
 
   /* Now create a cross-reference link that the
-   * simulator can use to send information back to the gui
-   */
+  * simulator can use to send information back to the gui
+  */
   if(pProc->pc) {
     SourceXREF *cross_reference = new SourceXREF();
 
     cross_reference->parent_window_type =   WT_asm_source_window;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) 0;
-  
+
     pProc->pc->add_xref((gpointer) cross_reference);
     if(pProc->pc != pma->GetProgramCounter()) {
       pma->GetProgramCounter()->add_xref((gpointer) cross_reference);
@@ -2275,9 +2320,9 @@ void SourceWindow::NewSource(GUI_Processor *gp)
 
   address=pProc->pma->get_PC();
   if(address==INVALID_VALUE)
-      puts("Warning, PC is invalid?");
+    puts("Warning, PC is invalid?");
   else
-      SetPC(address);
+    SetPC(address);
 
   Dprintf((" Source is loaded\n"));
 
@@ -2321,7 +2366,7 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
   gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),pFrame,label);
 
   int id = gtk_notebook_page_num(GTK_NOTEBOOK(m_Notebook),pFrame);
-    
+
   assert(id<SBAW_NRFILES && id >=0);
 
   NSourcePage *page = new NSourcePage(this, pSourceBuffer, id,pFrame);
@@ -2333,10 +2378,8 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
   gtk_widget_show_all(pFrame);
 
   return id;
-    
-}
 
-#endif
+}
 
 
 
@@ -2348,24 +2391,22 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
 
 //#define PIXMAP_POS(sbaw,e) ((e)->pixel+(sbaw)->layout_offset+-PIXMAP_SIZE/2-(e)->font_center)
 
-extern int gui_question(char *question, char *a, char *b);
-
 static int file_id_to_source_mode[100];
 
 // this should be in SourceBrowserAsm struct FIXME
 static struct {
-    int found;                   //
-    int looped;                  // if search hit start or end of text
-    int start;                   //
-    int lastfound;               // index into text for start of last found string
-    int i;                       //
-    int lastid;                  //
-    GtkWidget *window;           // the window for find dialog
-    GtkWidget *entry;            // string GtkCombo
-    GtkWidget *backwards_button; // togglebutton for direction
-    GtkWidget *case_button;      // togglebutton for case sensitivity
-    GList *combo_strings;        // list of strings for combo
-    char *string;                // current string, extracted from entry
+  int found;                   //
+  int looped;                  // if search hit start or end of text
+  int start;                   //
+  int lastfound;               // index into text for start of last found string
+  int i;                       //
+  int lastid;                  //
+  GtkWidget *window;           // the window for find dialog
+  GtkWidget *entry;            // string GtkCombo
+  GtkWidget *backwards_button; // togglebutton for direction
+  GtkWidget *case_button;      // togglebutton for case sensitivity
+  GList *combo_strings;        // list of strings for combo
+  char *string;                // current string, extracted from entry
 } searchdlg = {0,0,-1,0,0,0,0,0,0,0};
 static bool bSearchdlgInitialized = false;
 
@@ -2374,21 +2415,21 @@ static int dlg_x=200, dlg_y=200;
 
 //========================================================================
 void PixmapObject::CreateFromXPM(GdkWindow *window,
-				 GdkColor *transparent_color,
-				 gchar **xpm)
+                                 GdkColor *transparent_color,
+                                 gchar **xpm)
 {
   pixmap = gdk_pixmap_create_from_xpm_d(window,
-					&mask,
-					transparent_color,
-					(gchar**)xpm);
+    &mask,
+    transparent_color,
+    (gchar**)xpm);
   widget = gtk_pixmap_new(pixmap,mask);
 
 }
 
 //========================================================================
 BreakPointInfo::BreakPointInfo(int _address, int _line, int _index, int _pos)
-  : address(_address), pos(_pos), index(_index), line(_line),
-    break_widget(0), canbreak_widget(0)
+: address(_address), pos(_pos), index(_index), line(_line),
+break_widget(0), canbreak_widget(0)
 {
 }
 
@@ -2408,7 +2449,7 @@ BreakPointInfo::~BreakPointInfo()
     gtk_widget_destroy (break_widget);
   if (canbreak_widget)
     gtk_widget_destroy (canbreak_widget);
- 
+
 }
 void BreakPointInfo::Set(GtkWidget *layout, GdkPixmap *pixmap_break, GdkBitmap *bp_mask)
 {
@@ -2416,10 +2457,10 @@ void BreakPointInfo::Set(GtkWidget *layout, GdkPixmap *pixmap_break, GdkBitmap *
     break_widget = gtk_pixmap_new(pixmap_break,bp_mask);
 
     gtk_layout_put(GTK_LAYOUT(layout),
-		   break_widget,
-		   PIXMAP_SIZE*0,
-		   pos
-		   );
+      break_widget,
+      PIXMAP_SIZE*0,
+      pos
+      );
   }
   if(canbreak_widget) {
     gtk_widget_hide(canbreak_widget);
@@ -2439,10 +2480,10 @@ void BreakPointInfo::Clear(GtkWidget *layout, GdkPixmap *pixmap_canbreak, GdkBit
     canbreak_widget = gtk_pixmap_new(pixmap_canbreak,bp_mask);
 
     gtk_layout_put(GTK_LAYOUT(layout),
-		   canbreak_widget,
-		   PIXMAP_SIZE*0,
-		   pos
-		   );
+      canbreak_widget,
+      PIXMAP_SIZE*0,
+      pos
+      );
   }
 
   gtk_widget_show(canbreak_widget);
@@ -2461,8 +2502,6 @@ void BreakPointInfo::setCanBreakWidget(GtkWidget *pCanBreak)
 }
 //========================================================================
 
-static int settings_dialog(SourceBrowserAsm_Window *sbaw);
-
 // all of these gui_xxxx_to_entry() do linear search.
 // Binary search is possible, the list is sorted. 
 // pixel is 0 -> maxfont-1 for line zero.
@@ -2479,18 +2518,18 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatPixel(int id, int pixel)
 
   if(pixel<0)
     return (BreakPointInfo*)sa_xlate_list[id]->data;
-    
+
   p=sa_xlate_list[id];
 
   // find listentry with address larger than argument
   while(p->next!=0) {
-    
+
     e = (BreakPointInfo*)p->data;
     if(e->pos+12 > pixel)
       break;
     p=p->next;
   }
-    
+
   e=(BreakPointInfo*)p->data;
 
   return e;
@@ -2510,21 +2549,21 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatLine(int id, unsigned int line)
   p=sa_xlate_list[id];
 
   /*
-    locate listentry with index larger than argument
+  locate listentry with index larger than argument
   */
 
   while(p->next!=0)
-    {
-      e = (BreakPointInfo*)p->data;
-	      
-      if(e->getLine() > (int)line)
-        break;
-      p=p->next;
-    }
+  {
+    e = (BreakPointInfo*)p->data;
+
+    if(e->getLine() > (int)line)
+      break;
+    p=p->next;
+  }
 
   assert(p->prev); // FIXME, happens if only one line of source
   p=p->prev;
-    
+
   e=(BreakPointInfo*)p->data;
   return e;
 }
@@ -2533,28 +2572,28 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatIndex(int id, unsigned int index
 {
   BreakPointInfo *e;
   GList *p;
-    
+
   if(!sa_xlate_list[id] || index<0)
     return 0;
 
   p=sa_xlate_list[id];
-    
+
   /*
-    locate listentry with index larger than argument
+  locate listentry with index larger than argument
   */
   while(p->next!=0)
-    {
-      e = (BreakPointInfo*)p->data;
-	      
-      if(e->index > index)
-        break;
-      p=p->next;
-    }
-    
+  {
+    e = (BreakPointInfo*)p->data;
+
+    if(e->index > index)
+      break;
+    p=p->next;
+  }
+
   assert(p->prev); // FIXME, could happen
-    
+
   p=p->prev;
-    
+
   e=(BreakPointInfo*)p->data;
   return e;
 }
@@ -2584,7 +2623,8 @@ int  CFormattedTextFragment::s_linedescent = -1;
 CFormattedTextFragment::CFormattedTextFragment(
   const char *pFragment, int length,
   GtkStyle *pStyle, GdkFont *font)
-  : m_Fragment(name_str) {
+  : m_Fragment(name_str)
+{
   s_TotalLength = 0;
   m_text_style  = pStyle;
   m_font = font;
@@ -2602,25 +2642,26 @@ CFormattedTextFragment::CFormattedTextFragment(
 }
 
 void CFormattedTextFragment::SetText(
-			GtkText *source_text)
+                                     GtkText *source_text)
 {
   gtk_text_insert(source_text,
-		  m_font,
-		  &m_text_style->fg[GTK_STATE_NORMAL],
-		  &m_text_style->base[GTK_STATE_NORMAL],
-		  m_Fragment.c_str(),
-		  m_length);
+    m_font,
+    &m_text_style->fg[GTK_STATE_NORMAL],
+    &m_text_style->base[GTK_STATE_NORMAL],
+    m_Fragment.c_str(),
+    m_length);
 }
 
-void SourceBrowserAsm_Window::DetermineBreakinfos(int id) {
+void SourceBrowserAsm_Window::DetermineBreakinfos(int id)
+{
   GList *iter;
   for(iter=sa_xlate_list[id];iter!=0;)
-    {
-      GList *next=iter->next;
-      free( (BreakPointInfo*)iter->data );
-      g_list_remove(iter,iter->data);
-      iter=next;
-    }
+  {
+    GList *next=iter->next;
+    free( (BreakPointInfo*)iter->data );
+    g_list_remove(iter,iter->data);
+    iter=next;
+  }
   sa_xlate_list[id]=0;
   for(iter=s_global_sa_xlate_list[id];iter!=0;) {
     GList *next=iter->next;
@@ -2642,7 +2683,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   GtkWidget *new_pcw;
   int id=-1;
 
-  if(!source_loaded)
+  if(!m_bSourceLoaded)
     return;
   if(!pma)
     return;
@@ -2658,10 +2699,10 @@ void SourceBrowserAsm_Window::SetPC(int address)
       id=i;
     else {
       if( pages[i].source_pcwidget!=0 &&
-	  GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
-	//cout << " SetPC: " << name() << "  hiding page "  << i << endl;
-	gtk_widget_hide(pages[i].source_pcwidget);
-      }
+        GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
+          //cout << " SetPC: " << name() << "  hiding page "  << i << endl;
+          gtk_widget_hide(pages[i].source_pcwidget);
+        }
     }
   }
 
@@ -2683,21 +2724,21 @@ void SourceBrowserAsm_Window::SetPC(int address)
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
   if(layout_offset<0)
-    {   // can it normally be less than zero?
-	// FIXME, this should be done whenever windows are reconfigured.
-      int xtext,ytext;
-      int xfixed, yfixed;
+  {   // can it normally be less than zero?
+    // FIXME, this should be done whenever windows are reconfigured.
+    int xtext,ytext;
+    int xfixed, yfixed;
 
-      if(GTK_TEXT(pages[id].source_text)->text_area!=0 &&
-	        pages[id].source_layout->window!=0)
-        {
-          gdk_window_get_origin(GTK_TEXT(pages[id].source_text)->text_area,&xtext,&ytext);
-          gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
+    if(GTK_TEXT(pages[id].source_text)->text_area!=0 &&
+      pages[id].source_layout->window!=0)
+    {
+      gdk_window_get_origin(GTK_TEXT(pages[id].source_text)->text_area,&xtext,&ytext);
+      gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
 
-          layout_offset = ytext-yfixed;
-          //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
-        }
+      layout_offset = ytext-yfixed;
+      //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
     }
+  }
   e = getBPatLine(id, row);
   if(e==0)
     return;
@@ -2705,24 +2746,24 @@ void SourceBrowserAsm_Window::SetPC(int address)
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
   if( (unsigned int)e->pos< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      (unsigned int)e->pos> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+    (unsigned int)e->pos> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
 
-    GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
+      GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
-    gdouble nvalue = e->pos - inc/2;
-    //printf("%d: setting adjustment to %g old value = %g\n",__LINE__,nvalue,adj->value);
-    gtk_adjustment_set_value(adj, nvalue);
+      gdouble nvalue = e->pos - inc/2;
+      //printf("%d: setting adjustment to %g old value = %g\n",__LINE__,nvalue,adj->value);
+      gtk_adjustment_set_value(adj, nvalue);
 
-  }
-  
-  if(!GTK_WIDGET_VISIBLE(new_pcw)) {
-    gtk_widget_show(new_pcw);
-  }
-  gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
-		  new_pcw,
-		  PIXMAP_SIZE,
-		  e->pos+1
-		  );
+    }
+
+    if(!GTK_WIDGET_VISIBLE(new_pcw)) {
+      gtk_widget_show(new_pcw);
+    }
+    gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
+      new_pcw,
+      PIXMAP_SIZE,
+      e->pos+1
+      );
 
 }
 
@@ -2732,8 +2773,8 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   int id=-1, i;
   gdouble inc;
   unsigned int line;
-    
-  if(!source_loaded)
+
+  if(!m_bSourceLoaded)
     return;
   if(!pma)
     return;
@@ -2744,10 +2785,10 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   }
 
   if(id==-1)
-    {
-      puts("SourceBrowserAsm_select_address(): could not find notebook page");
-      return;
-    }
+  {
+    puts("SourceBrowserAsm_select_address(): could not find notebook page");
+    return;
+  }
 
   gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
@@ -2755,7 +2796,7 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 
   if(line==INVALID_VALUE)
     return;
-    
+
   e = getBPatLine(id, line);
   if(e==0)
     return;
@@ -2763,10 +2804,10 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
   if( (unsigned int)e->pos <= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      (unsigned int)e->pos >= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
-    gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( pages[id].source_text)->vadj),
-			     e->pos-inc/2);
-  }
+    (unsigned int)e->pos >= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( pages[id].source_text)->vadj),
+        e->pos-inc/2);
+    }
 }
 
 void SourceBrowserAsm_Window::SelectAddress(Value *addrSym)
@@ -2781,8 +2822,8 @@ void SourceBrowserAsm_Window::Update(void)
 
   SetTitle();
   //animate didn't work if (gp->cpu->simulation_mode == eSM_RUNNING ||
-    //gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
-    //return;
+  //gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
+  //return;
 
   SetPC(pma->get_PC());
 
@@ -2792,19 +2833,19 @@ void SourceBrowserAsm_Window::Update(void)
 }
 
 /*
- this happens when breakpoint is set or unset
- ( Can it happen for another reason? )
- */
+this happens when breakpoint is set or unset
+( Can it happen for another reason? )
+*/
 void SourceBrowserAsm_Window::UpdateLine(int address)
 {
   unsigned int row;
 
   int i,id=-1;
   BreakPointInfo *e;
-  
+
   assert(address>=0);
 
-  if(!source_loaded || !pma)
+  if(!m_bSourceLoaded || !pma)
     return;
 
   for(i=0;i<SBAW_NRFILES && id<0;i++) {
@@ -2827,7 +2868,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   row = pma->get_src_line(address);
 
   if(row==INVALID_VALUE)
-      return;
+    return;
   row--;
 
 
@@ -2837,7 +2878,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     return;
   /*
   printf("SrcBrowserAsm_Window::UpdateLine - address=%d line=%d\n",
-	 address,e->getLine());
+  address,e->getLine());
   */
   breakpoints.Remove(address);
   notify_start_list.Remove(address);
@@ -2846,22 +2887,22 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   if(pma->address_has_profile_start(address))
     notify_start_list.Add(address, 
-			  gtk_pixmap_new(pixmap_profile_start,startp_mask), 
-			  pages[id].source_layout,
-			  e->pos);
+    gtk_pixmap_new(pixmap_profile_start,startp_mask), 
+    pages[id].source_layout,
+    e->pos);
 
   else if(pma->address_has_profile_stop(address))
     notify_stop_list.Add(address, 
-			 gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
-			 pages[id].source_layout,
-			 e->pos);
+    gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
+    pages[id].source_layout,
+    e->pos);
 
   else if(pma->address_has_break(address)) {
     e->Set(pages[id].source_layout,pixmap_break, bp_mask);
     breakpoints.Add(address,
-    	gtk_pixmap_new(pixmap_break,bp_mask),
-                     pages[id].source_layout,
-                     e->pos);
+      gtk_pixmap_new(pixmap_break,bp_mask),
+      pages[id].source_layout,
+      e->pos);
   } else {
     e->Clear(pages[id].source_layout, pixmap_canbreak, canbp_mask);
   }
@@ -2869,89 +2910,91 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
 SourceBrowserAsm_Window *popup_sbaw;
 
-static void
-popup_activated(GtkWidget *widget, gpointer data)
+void
+SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
 {
-    menu_item *item;
-    unsigned int id, address, line;
-    char text[256];
-    if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu || !popup_sbaw->pma)
-      return;
+  menu_item *item;
+  unsigned int id, address, line;
+  char text[256];
+  if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu || !popup_sbaw->pma)
+    return;
 
-    item = (menu_item *)data;
-    id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
+  item = (menu_item *)data;
+  id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
 
-    switch(item->id) {
+  switch(item->id) {
 
-    case MENU_SETTINGS:
-      settings_dialog(popup_sbaw);
-      break;
-    case MENU_FIND_TEXT:
-      gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
-      gtk_widget_show(searchdlg.window);
-      break;
-    case MENU_FIND_PC:
-      address=popup_sbaw->pma->get_PC();
-      popup_sbaw->SetPC(address);
-      break;
-    case MENU_MOVE_PC:
-      line = popup_sbaw->menu_data->getLine();
+  case MENU_SETTINGS:
+#if ! defined(NEW_SOURCE_BROWSER)
+    settings_dialog(popup_sbaw);
+#endif
+    break;
+  case MENU_FIND_TEXT:
+    gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
+    gtk_widget_show(searchdlg.window);
+    break;
+  case MENU_FIND_PC:
+    address=popup_sbaw->pma->get_PC();
+    popup_sbaw->SetPC(address);
+    break;
+  case MENU_MOVE_PC:
+    line = popup_sbaw->menu_data->getLine();
 
-      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
-      if(address!=INVALID_VALUE)
-        popup_sbaw->pma->set_PC(address);
-      break;
+    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+    if(address!=INVALID_VALUE)
+      popup_sbaw->pma->set_PC(address);
+    break;
 
-    case MENU_RUN_HERE:
-      line = popup_sbaw->menu_data->getLine()+1;
+  case MENU_RUN_HERE:
+    line = popup_sbaw->menu_data->getLine()+1;
 
-      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
+    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
 
-      if(address!=INVALID_VALUE)
-        popup_sbaw->gp->cpu->run_to_address(address);
-      break;
+    if(address!=INVALID_VALUE)
+      popup_sbaw->gp->cpu->run_to_address(address);
+    break;
 
-    case MENU_BP_HERE:
-      line = popup_sbaw->menu_data->getLine() + 1;
+  case MENU_BP_HERE:
+    line = popup_sbaw->menu_data->getLine() + 1;
 
-      popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
+    popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
 
-      break;
-    case MENU_PROFILE_START_HERE:
-      /*
-      line = popup_sbaw->menu_data->line;
-      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+    break;
+  case MENU_PROFILE_START_HERE:
+    /*
+    line = popup_sbaw->menu_data->line;
+    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
 
-      popup_sbaw->gp->profile_window->StartExe(address);
-      */
-      break;
+    popup_sbaw->gp->profile_window->StartExe(address);
+    */
+    break;
 
-    case MENU_PROFILE_STOP_HERE:
-      /*
-      line = popup_sbaw->menu_data->line;
+  case MENU_PROFILE_STOP_HERE:
+    /*
+    line = popup_sbaw->menu_data->line;
 
-      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
 
-      popup_sbaw->gp->profile_window->StopExe(address);
-      */
-      break;
+    popup_sbaw->gp->profile_window->StopExe(address);
+    */
+    break;
 
-    case MENU_SELECT_SYMBOL:
-    case MENU_ADD_TO_WATCH:
-      {
+  case MENU_SELECT_SYMBOL:
+  case MENU_ADD_TO_WATCH:
+    {
       gint i, temp;
       gint start, end;
 
 
-    #if GTK_MAJOR_VERSION >= 2
+  #if GTK_MAJOR_VERSION >= 2
       if (!gtk_editable_get_selection_bounds(
-                    GTK_EDITABLE(popup_sbaw->pages[id].source_text),
-                    &start, &end))
+        GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+        &start, &end))
         break;
-    #else
+  #else
       start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
       end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
-    #endif
+  #endif
       if(start != end) {
         if(start>end)
         {
@@ -2990,12 +3033,12 @@ popup_activated(GtkWidget *widget, gpointer data)
 
           if(pReg == NULL) {
             GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
-                                    GTK_DIALOG_MODAL,
-                                    GTK_MESSAGE_WARNING,
-                                    GTK_BUTTONS_OK,
-                                    "The symbol '%s' does not exist as a register symbol.\n"
-                                    "Only register based symbols may be added to the Watch window.",
-                                    text);
+              GTK_DIALOG_MODAL,
+              GTK_MESSAGE_WARNING,
+              GTK_BUTTONS_OK,
+              "The symbol '%s' does not exist as a register symbol.\n"
+              "Only register based symbols may be added to the Watch window.",
+              text);
             gtk_dialog_run (GTK_DIALOG (dialog));
             gtk_widget_destroy (dialog);
           }
@@ -3004,35 +3047,35 @@ popup_activated(GtkWidget *widget, gpointer data)
           }
         }
       }
-//      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
-      }
-      break;
-    case MENU_STEP:
-      popup_sbaw->pma->step(1);
-      break;
-    case MENU_STEP_OVER:
-      popup_sbaw->pma->step_over();
-      break;
-    case MENU_RUN:
-      popup_sbaw->gp->cpu->run();
-      break;
-    case MENU_STOP:
-      popup_sbaw->pma->stop();
-      break;
-    case MENU_RESET:
-      popup_sbaw->gp->cpu->reset(POR_RESET);
-      break;
-    case MENU_FINISH:
-      popup_sbaw->pma->finish();
-      break;
-    default:
-      puts("Unhandled menuitem?");
-      break;
+      //      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
     }
+    break;
+  case MENU_STEP:
+    popup_sbaw->pma->step(1);
+    break;
+  case MENU_STEP_OVER:
+    popup_sbaw->pma->step_over();
+    break;
+  case MENU_RUN:
+    popup_sbaw->gp->cpu->run();
+    break;
+  case MENU_STOP:
+    popup_sbaw->pma->stop();
+    break;
+  case MENU_RESET:
+    popup_sbaw->gp->cpu->reset(POR_RESET);
+    break;
+  case MENU_FINISH:
+    popup_sbaw->pma->finish();
+    break;
+  default:
+    puts("Unhandled menuitem?");
+    break;
+  }
 }
 
-static GtkWidget *
-build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
+GtkWidget *
+SourceBrowserAsm_Window::BuildPopupMenu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
 {
   GtkWidget *menu;
   GtkWidget *submenu;
@@ -3048,8 +3091,8 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
     item=gtk_menu_item_new_with_label(menu_items[i].name);
     menu_items[i].item=item;
     gtk_signal_connect(GTK_OBJECT(item),"activate",
-		       (GtkSignalFunc) popup_activated,
-		       &menu_items[i]);
+      (GtkSignalFunc) PopupMenuHandler,
+      &menu_items[i]);
 
     gtk_widget_show(item);
     gtk_menu_append(GTK_MENU(menu),item);
@@ -3063,8 +3106,8 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
     item=gtk_menu_item_new_with_label(submenu_items[i].name);
     submenu_items[i].item=item;
     gtk_signal_connect(GTK_OBJECT(item),"activate",
-		       (GtkSignalFunc) popup_activated,
-		       &submenu_items[i]);
+      (GtkSignalFunc) PopupMenuHandler,
+      &submenu_items[i]);
 
     GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
@@ -3102,12 +3145,12 @@ void BreakPointList::Remove(int address = -1)
     GList *next = li->next;
 
     BreakPointInfo *bpi = (BreakPointInfo*)li->data;
-      
+
     // remove the breakpoint
     if(address<0 || bpi->address==address) {
       iter = g_list_remove(li,li->data);
       if(bpi)
-	delete bpi;
+        delete bpi;
     }
 
     li = next;
@@ -3126,32 +3169,34 @@ void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int
   //printf("Add: address:%d, pos:%d\n",address,pos);
   bpi->setBreakWidget(pwidget);
   gtk_layout_put(GTK_LAYOUT(layout),
-		 pwidget,
-		 PIXMAP_SIZE*0,
-		 pos
-		 );
+    pwidget,
+    PIXMAP_SIZE*0,
+    pos
+    );
   gtk_widget_show(pwidget);
   iter=g_list_append(iter,bpi);
 }
 
-void remove_all_points(SourceBrowserAsm_Window *sbaw)
+void SourceBrowserAsm_Window::remove_all_points(
+  SourceBrowserAsm_Window *sbaw)
 {
   sbaw->breakpoints.Remove();
   sbaw->notify_start_list.Remove();
   sbaw->notify_stop_list.Remove();
 }  
 
-static gint switch_page_cb(GtkNotebook     *notebook,
-			   GtkNotebookPage *page,
-			   guint            page_num,
-			   SourceBrowserAsm_Window *sbaw)
+gint SourceBrowserAsm_Window::switch_page_cb(
+                            GtkNotebook     *notebook,
+                            GtkNotebookPage *page,
+                            guint            page_num,
+                            SourceBrowserAsm_Window *sbaw)
 {
   if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
     return 1;
 
 
   if(sbaw->current_page!=page_num) {
-    
+
     //printf("switch_page_cb: %s, from:%d to%d\n",sbaw->name(),sbaw->current_page,page_num);
     int id;
     unsigned int address;
@@ -3177,48 +3222,49 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 }
 
 /*
- button event handler for sbaw->pages[id].source_text.
- If we get button1 doubleclick event then we toggle breakpoint
- If we get button3 buttonpress then we popup menu.
- */
-static gint sigh_button_event(GtkWidget *widget,
-		       GdkEventButton *event,
-		       SourceBrowserAsm_Window *sbaw)
+button event handler for sbaw->pages[id].source_text.
+If we get button1 doubleclick event then we toggle breakpoint
+If we get button3 buttonpress then we popup menu.
+*/
+gint SourceBrowserAsm_Window::sigh_button_event(
+  GtkWidget *widget,
+  GdkEventButton *event,
+  SourceBrowserAsm_Window *sbaw)
 {
-    int id;
-    unsigned int i;
-    GtkWidget *item;
-    int vadj_value=0;
+  int id;
+  unsigned int i;
+  GtkWidget *item;
+  int vadj_value=0;
 
-    assert(event&&sbaw);
+  assert(event&&sbaw);
 
-    assert(sbaw->notebook != 0);
-    id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
+  assert(sbaw->notebook != 0);
+  id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    assert(id >= 0 && id < SBAW_NRFILES);
-    assert(sbaw->pages[id].source_text != 0);
-    assert(GTK_TEXT(sbaw->pages[id].source_text)->vadj != 0);
-    vadj_value=(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+  assert(id >= 0 && id < SBAW_NRFILES);
+  assert(sbaw->pages[id].source_text != 0);
+  assert(GTK_TEXT(sbaw->pages[id].source_text)->vadj != 0);
+  vadj_value=(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
 
-    if(event->type==GDK_BUTTON_PRESS &&
-       event->button==3)
-    {
-      popup_sbaw=sbaw;
+  if(event->type==GDK_BUTTON_PRESS &&
+    event->button==3)
+  {
+    popup_sbaw=sbaw;
 
-      sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y+vadj_value));
+    sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y+vadj_value));
 
-      for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++) {
-        item=menu_items[i].item;
-	    
-        switch(menu_items[i].id){
-        case MENU_SELECT_SYMBOL:
+    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++) {
+      item=menu_items[i].item;
+
+      switch(menu_items[i].id){
+      case MENU_SELECT_SYMBOL:
 #if GTK_MAJOR_VERSION >= 2
         {
           gint start, end;
 
           if (!gtk_editable_get_selection_bounds(
-                      GTK_EDITABLE(popup_sbaw->pages[id].source_text),
-                      &start, &end))
+            GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+            &start, &end))
           {
             gtk_widget_set_sensitive (item, FALSE);
           }
@@ -3229,77 +3275,77 @@ static gint sigh_button_event(GtkWidget *widget,
           break;
         }
 #else
-          // Why does "if(editable->has_selection)" not work? FIXME
-          assert(GTK_EDITABLE(popup_sbaw->pages[id].source_text));
-          if(GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos
-            == GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos)
-          {
-            gtk_widget_set_sensitive (item, FALSE);
-          }
-          else
-          {
-            gtk_widget_set_sensitive (item, TRUE);
-          }
-          break;
-#endif
-        default:
-          break;
+        // Why does "if(editable->has_selection)" not work? FIXME
+        assert(GTK_EDITABLE(popup_sbaw->pages[id].source_text));
+        if(GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos
+          == GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos)
+        {
+          gtk_widget_set_sensitive (item, FALSE);
         }
-	    }
+        else
+        {
+          gtk_widget_set_sensitive (item, TRUE);
+        }
+        break;
+#endif
+      default:
+        break;
+      }
+    }
 
-      assert(GTK_MENU(sbaw->popup_menu));
-      gtk_menu_popup(GTK_MENU(sbaw->popup_menu), 0, 0, 0, 0,
-                     3, event->time);
+    assert(GTK_MENU(sbaw->popup_menu));
+    gtk_menu_popup(GTK_MENU(sbaw->popup_menu), 0, 0, 0, 0,
+      3, event->time);
 
 #if GTK_MAJOR_VERSION < 2
-      // override pages[id].source_text's handler
-      // is there a better way? FIXME
-      gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
+    // override pages[id].source_text's handler
+    // is there a better way? FIXME
+    gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
 #endif
-      return 1;
-    }
+    return 1;
+  }
 
-    // FIXME, doesn't get button4/5 in gtk2???
-    //printf("event->type %d, event->button %d\n",event->type,event->button);
-    if(event->type==GDK_BUTTON_PRESS && event->button==4)
-    { // wheel scroll up
-      printf("scroll up\n");
-      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
-      if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
-         GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
-      gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-      return 1;
-    }
-    if(event->type==GDK_BUTTON_PRESS && event->button==5)
-    { // wheel scroll down
-      printf("scroll down\n");
-      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
-      if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
-        GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
-      gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-      return 1;
-    }
-    return 0;
+  // FIXME, doesn't get button4/5 in gtk2???
+  //printf("event->type %d, event->button %d\n",event->type,event->button);
+  if(event->type==GDK_BUTTON_PRESS && event->button==4)
+  { // wheel scroll up
+    printf("scroll up\n");
+    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
+    if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
+      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
+    gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+    return 1;
+  }
+  if(event->type==GDK_BUTTON_PRESS && event->button==5)
+  { // wheel scroll down
+    printf("scroll down\n");
+    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
+    if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
+      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
+    gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+    return 1;
+  }
+  return 0;
 }
 
 static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
 {
-    // when sbaw->pages[id].source_text adjustment changes, we update the layout adj.
-    
-    // I assume that both adjustments count pixels
-    
-    assert(adj_to_update&&adj);
+  // when sbaw->pages[id].source_text adjustment changes, we update the layout adj.
 
-    if(adj_to_update && adj )
+  // I assume that both adjustments count pixels
+
+  assert(adj_to_update&&adj);
+
+  if(adj_to_update && adj )
+  {
+    if (adj_to_update->upper >= adj->value )
     {
-      if (adj_to_update->upper >= adj->value )
-      {
-        //printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
-        gtk_adjustment_set_value(adj_to_update, adj->value);
-      }
+      //printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
+      gtk_adjustment_set_value(adj_to_update, adj->value);
     }
+  }
 
-    return 0;
+  return 0;
 }
 
 
@@ -3307,47 +3353,47 @@ static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
 static float drag_scroll_speed;
 static gint drag_scroll_cb(gpointer data)
 {
-    SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)data;
-	
-    int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
-  
+  SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)data;
+
+  int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
+
   puts("scroll");
-  
-    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=
-	GTK_TEXT(sbaw->pages[id].source_text)->vadj->step_increment*drag_scroll_speed;
-    
-    if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower ||
-       GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
-    {
-	if(drag_scroll_speed > 0)
-	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
-	else
-	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
-    }
-    
-    gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-    
-    return TRUE; // refresh timer
+
+  GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=
+    GTK_TEXT(sbaw->pages[id].source_text)->vadj->step_increment*drag_scroll_speed;
+
+  if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower ||
+    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
+  {
+    if(drag_scroll_speed > 0)
+      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
+    else
+      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
+  }
+
+  gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+
+  return TRUE; // refresh timer
 }
 #endif
 
 /*
- This is handler for motion, button press and release for source_layout.
- The GdkEventMotion and GdkEventButton are very similar so I (Ralf) use
- the same for both!
- This function is too complex, FIXME.
- */
+This is handler for motion, button press and release for source_layout.
+The GdkEventMotion and GdkEventButton are very similar so I (Ralf) use
+the same for both!
+This function is too complex, FIXME.
+*/
 
 
 static gint marker_cb(GtkWidget *w1,
-		      GdkEventButton *event,
-		     SourceBrowserAsm_Window *sbaw)
+                      GdkEventButton *event,
+                      SourceBrowserAsm_Window *sbaw)
 {
   static int button_pressed;
   static int button_pressed_y;
   static int button_pressed_x;
   static gdouble vadj_value=0.0;
-    
+
   static int timeout_tag=-1;
 
   if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
@@ -3360,7 +3406,7 @@ static gint marker_cb(GtkWidget *w1,
 #endif
 
   switch(event->type) {
-    
+
   case GDK_MOTION_NOTIFY:
     break;
   case GDK_BUTTON_PRESS:
@@ -3372,7 +3418,7 @@ static gint marker_cb(GtkWidget *w1,
     break;
   case GDK_2BUTTON_PRESS:
     if(event->button == 1) {
-      int pos = (int)event->y -	sbaw->layout_offset;
+      int pos = (int)event->y - sbaw->layout_offset;
       BreakPointInfo *e = sbaw->getBPatPixel(id, pos);
       int line = e->getLine();
       sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
@@ -3381,10 +3427,10 @@ static gint marker_cb(GtkWidget *w1,
   case GDK_BUTTON_RELEASE:
     button_pressed=0;
     if(timeout_tag!=-1)
-      {
+    {
       gtk_timeout_remove(timeout_tag);
       timeout_tag=-1;
-      }
+    }
 
     break;
   default:
@@ -3396,96 +3442,97 @@ static gint marker_cb(GtkWidget *w1,
 }
 
 /*
- Adds a page to the notebook, and returns notebook-id for that page.
- */
-static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
+Adds a page to the notebook, and returns notebook-id for that page.
+*/
+int SourceBrowserAsm_Window::add_page(
+  SourceBrowserAsm_Window *sbaw, int file_id)
 {
-    char str[256], *label_string;
-    GtkWidget *hbox, *label, *vscrollbar;
-    GtkStyle *style=0;
+  char str[256], *label_string;
+  GtkWidget *hbox, *label, *vscrollbar;
+  GtkStyle *style=0;
 
-    int id;
+  int id;
 
-    hbox = gtk_hbox_new(0,0);
-    gtk_container_set_border_width (GTK_CONTAINER (hbox), PAGE_BORDER);
+  hbox = gtk_hbox_new(0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), PAGE_BORDER);
 
-    FileContext *fc = sbaw->gp->cpu->files[file_id];
-    
-    strncpy(str,fc->name().c_str(),sizeof(str));
+  FileContext *fc = sbaw->gp->cpu->files[file_id];
 
-    label_string=str;
+  strncpy(str,fc->name().c_str(),sizeof(str));
 
-    find_char_and_skip(&label_string,'/');
-    find_char_and_skip(&label_string,'\\');
+  label_string=str;
 
-    label=gtk_label_new(label_string);
+  find_char_and_skip(&label_string,'/');
+  find_char_and_skip(&label_string,'\\');
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(sbaw->notebook),hbox,label);
+  label=gtk_label_new(label_string);
 
-    id=gtk_notebook_page_num(GTK_NOTEBOOK(sbaw->notebook),hbox);
-    
-    assert(id<SBAW_NRFILES && id >=0);
-    sbaw->pages[id].pageindex_to_fileid = file_id;
-    sbaw->pages[id].notebook_child=hbox;
-    
-    gtk_widget_show(hbox);
+  gtk_notebook_append_page(GTK_NOTEBOOK(sbaw->notebook),hbox,label);
 
-    // Create the Gray column to the left of the Source text.
+  id=gtk_notebook_page_num(GTK_NOTEBOOK(sbaw->notebook),hbox);
 
-    sbaw->pages[id].source_layout_adj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
-    sbaw->pages[id].source_layout = gtk_layout_new(0,sbaw->pages[id].source_layout_adj);
-    
-    gtk_widget_set_events(sbaw->pages[id].source_layout,
-			  gtk_widget_get_events(sbaw->pages[id].source_layout)|
-			  GDK_BUTTON_PRESS_MASK |
-			  GDK_BUTTON_MOTION_MASK |
-			  GDK_BUTTON_RELEASE_MASK);
-    gtk_widget_show(sbaw->pages[id].source_layout);
+  assert(id<SBAW_NRFILES && id >=0);
+  sbaw->pages[id].pageindex_to_fileid = file_id;
+  sbaw->pages[id].notebook_child=hbox;
 
-    gtk_widget_set_usize(GTK_WIDGET(sbaw->pages[id].source_layout),PIXMAP_SIZE*2,0);
-    gtk_box_pack_start(GTK_BOX(hbox), sbaw->pages[id].source_layout,
-		       FALSE,FALSE, 0);
-    
-    // Create the Scroll bar.
+  gtk_widget_show(hbox);
 
-    vscrollbar = gtk_vscrollbar_new(0);
-    
-    gtk_widget_show(vscrollbar);
+  // Create the Gray column to the left of the Source text.
 
-    // Create the text object for holding the Source text
+  sbaw->pages[id].source_layout_adj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+  sbaw->pages[id].source_layout = gtk_layout_new(0,sbaw->pages[id].source_layout_adj);
 
-    sbaw->pages[id].source_text = gtk_text_new(0,GTK_RANGE(vscrollbar)->adjustment);
+  gtk_widget_set_events(sbaw->pages[id].source_layout,
+    gtk_widget_get_events(sbaw->pages[id].source_layout)|
+    GDK_BUTTON_PRESS_MASK |
+    GDK_BUTTON_MOTION_MASK |
+    GDK_BUTTON_RELEASE_MASK);
+  gtk_widget_show(sbaw->pages[id].source_layout);
 
-    gtk_text_set_word_wrap(GTK_TEXT(sbaw->pages[id].source_text),0);
-    gtk_text_set_line_wrap(GTK_TEXT(sbaw->pages[id].source_text),0);
-    gtk_widget_show(sbaw->pages[id].source_text);
+  gtk_widget_set_usize(GTK_WIDGET(sbaw->pages[id].source_layout),PIXMAP_SIZE*2,0);
+  gtk_box_pack_start(GTK_BOX(hbox), sbaw->pages[id].source_layout,
+    FALSE,FALSE, 0);
 
-    
-    style=gtk_style_new();
-    style->base[GTK_STATE_NORMAL].red=65535;
-    style->base[GTK_STATE_NORMAL].green=65535;
-    style->base[GTK_STATE_NORMAL].blue=65535;
-    
-    gtk_widget_set_style(GTK_WIDGET(sbaw->pages[id].source_text),style);
+  // Create the Scroll bar.
 
-    gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_text), "button_press_event",
-		       GTK_SIGNAL_FUNC(sigh_button_event), sbaw);
-    gtk_box_pack_start_defaults(GTK_BOX(hbox), sbaw->pages[id].source_text);
-    
-    gtk_box_pack_start(GTK_BOX(hbox), vscrollbar,
-		       FALSE,FALSE, 0);
-    gtk_signal_connect(GTK_OBJECT(GTK_TEXT(sbaw->pages[id].source_text)->vadj),
-		       "value_changed",GTK_SIGNAL_FUNC(text_adj_cb),sbaw->pages[id].source_layout_adj);
+  vscrollbar = gtk_vscrollbar_new(0);
 
-    gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"motion-notify-event",
-		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
-    gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_press_event",
-		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
-    gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
-		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
+  gtk_widget_show(vscrollbar);
 
-    // display everything, so that gtk_notebook_get_current_page() works
-    GTKWAIT;
+  // Create the text object for holding the Source text
+
+  sbaw->pages[id].source_text = gtk_text_new(0,GTK_RANGE(vscrollbar)->adjustment);
+
+  gtk_text_set_word_wrap(GTK_TEXT(sbaw->pages[id].source_text),0);
+  gtk_text_set_line_wrap(GTK_TEXT(sbaw->pages[id].source_text),0);
+  gtk_widget_show(sbaw->pages[id].source_text);
+
+
+  style=gtk_style_new();
+  style->base[GTK_STATE_NORMAL].red=65535;
+  style->base[GTK_STATE_NORMAL].green=65535;
+  style->base[GTK_STATE_NORMAL].blue=65535;
+
+  gtk_widget_set_style(GTK_WIDGET(sbaw->pages[id].source_text),style);
+
+  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_text), "button_press_event",
+    GTK_SIGNAL_FUNC(sigh_button_event), sbaw);
+  gtk_box_pack_start_defaults(GTK_BOX(hbox), sbaw->pages[id].source_text);
+
+  gtk_box_pack_start(GTK_BOX(hbox), vscrollbar,
+    FALSE,FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(GTK_TEXT(sbaw->pages[id].source_text)->vadj),
+    "value_changed",GTK_SIGNAL_FUNC(text_adj_cb),sbaw->pages[id].source_layout_adj);
+
+  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"motion-notify-event",
+    GTK_SIGNAL_FUNC(marker_cb),sbaw);
+  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_press_event",
+    GTK_SIGNAL_FUNC(marker_cb),sbaw);
+  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
+    GTK_SIGNAL_FUNC(marker_cb),sbaw);
+
+  // display everything, so that gtk_notebook_get_current_page() works
+  GTKWAIT;
 
   // We create pixmaps here, where the gtk_widget_get_style() call will
   // succeed. I tried putting this code in CreateSourceBrowserAsmWindow()
@@ -3494,53 +3541,53 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
   // Was that a bug in gtk? (gtk version 1.2.3)
   if(sbaw->pixmap_pc==0)
   {
-      style = gtk_style_new();
-      sbaw->pc_mask = 0;
-      sbaw->bp_mask = 0;
-      sbaw->canbp_mask = 0;
-      sbaw->startp_mask = 0;
-      sbaw->stopp_mask = 0;
-      sbaw->pixmap_pc = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
-						     &sbaw->pc_mask,
-						     &style->bg[GTK_STATE_NORMAL],
-						     (gchar**)pc_xpm);
-      sbaw->pixmap_break = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
-							&sbaw->bp_mask,
-							&style->bg[GTK_STATE_NORMAL],
-							(gchar**)break_xpm);
-      
-      sbaw->pixmap_canbreak = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
-							   &sbaw->canbp_mask,
-							   &style->bg[GTK_STATE_NORMAL],
-							   (gchar**)canbreak_xpm);
+    style = gtk_style_new();
+    sbaw->pc_mask = 0;
+    sbaw->bp_mask = 0;
+    sbaw->canbp_mask = 0;
+    sbaw->startp_mask = 0;
+    sbaw->stopp_mask = 0;
+    sbaw->pixmap_pc = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
+      &sbaw->pc_mask,
+      &style->bg[GTK_STATE_NORMAL],
+      (gchar**)pc_xpm);
+    sbaw->pixmap_break = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
+      &sbaw->bp_mask,
+      &style->bg[GTK_STATE_NORMAL],
+      (gchar**)break_xpm);
 
-      sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
-							       &sbaw->startp_mask,
-							       &style->bg[GTK_STATE_NORMAL],
-							       (gchar**)startp_xpm);
-      sbaw->pixmap_profile_stop = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
-							       &sbaw->stopp_mask,
-							       &style->bg[GTK_STATE_NORMAL],
-							       (gchar**)stopp_xpm);
+    sbaw->pixmap_canbreak = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
+      &sbaw->canbp_mask,
+      &style->bg[GTK_STATE_NORMAL],
+      (gchar**)canbreak_xpm);
+
+    sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
+      &sbaw->startp_mask,
+      &style->bg[GTK_STATE_NORMAL],
+      (gchar**)startp_xpm);
+    sbaw->pixmap_profile_stop = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
+      &sbaw->stopp_mask,
+      &style->bg[GTK_STATE_NORMAL],
+      (gchar**)stopp_xpm);
   }
   sbaw->pages[id].source_pcwidget = gtk_pixmap_new(sbaw->pixmap_pc,sbaw->pc_mask);
   gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
-		 sbaw->pages[id].source_pcwidget,PIXMAP_SIZE,0);
+    sbaw->pages[id].source_pcwidget,PIXMAP_SIZE,0);
   gtk_widget_show(sbaw->pages[id].source_pcwidget);
 
   return id;
-    
+
 }
 
 // Return true of there are instructions corresponding to the source line
 int source_line_represents_code(Processor *cpu,
-				FileContext *fc,
-				unsigned int line)
+                                FileContext *fc,
+                                unsigned int line)
 {
-    int address;
-    address = cpu->pma->find_address_from_line(fc,line);
+  int address;
+  address = cpu->pma->find_address_from_line(fc,line);
 
-    return address>=0;
+  return address>=0;
 }
 
 #if GTK_MAJOR_VERSION < 2
@@ -3559,7 +3606,7 @@ static void InitCache(FileContext::Cache &FileCache) {
 }
 
 static void AddCache(FileContext::Cache &FileCache, const char *pFragment, 
-		     int length,
+                     int length,
                      GtkStyle *pStyle, GdkFont *font) 
 {
   if(s_pLast && s_pLast->m_text_style == pStyle) {
@@ -3583,9 +3630,9 @@ static void AddCache(FileContext::Cache &FileCache, const char *pFragment,
 }
 
 /*
- Fills sbaw->pages[id].source_text with text from
- file pointer sbaw->sbw.gui_obj.gp->p->files[file_id].file_ptr
- */
+Fills sbaw->pages[id].source_text with text from
+file pointer sbaw->sbw.gui_obj.gp->p->files[file_id].file_ptr
+*/
 void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
 {
   bool instruction_done;
@@ -3638,8 +3685,8 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
   DetermineBreakinfos(id);
 
   gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
-		      2*PIXMAP_SIZE,
-		      s_totallinesheight[id]+5*PIXMAP_SIZE);
+    2*PIXMAP_SIZE,
+    s_totallinesheight[id]+5*PIXMAP_SIZE);
   gtk_text_thaw(GTK_TEXT(pSourceWindow));
 
 }
@@ -3656,16 +3703,17 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
   Processor *cpu,
   GtkWidget *pSourceWindow,
   FileContext *fc,
-  int file_id  ) {
+  int file_id  )
+{
   GList *iter;
 
   for(iter=s_global_sa_xlate_list[id];iter!=0;)
-    {
-      GList *next=iter->next;
-      free( (BreakPointInfo*)iter->data );
-      g_list_remove(iter,iter->data);
-      iter=next;
-    }
+  {
+    GList *next=iter->next;
+    free( (BreakPointInfo*)iter->data );
+    g_list_remove(iter,iter->data);
+    iter=next;
+  }
   s_global_sa_xlate_list[id]=0;
   BreakPointInfo *entry;
   char *p;
@@ -3683,7 +3731,7 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
     p=text_buffer;
 
     if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::ASM_MODE) {
-	
+
       if(*p=='#' || !strncmp(p,"include",7))
       { // not a label
         q=p;
@@ -3724,7 +3772,7 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
       if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::HLL_MODE)
       {
         AddCache(FileCache, p, -1,
-		 default_text_style, default_font);
+          default_text_style, default_font);
         break;
 
       } else {
@@ -3735,7 +3783,7 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
           AddCache(FileCache, p, -1,
             comment_text_style, comment_font);
           break;
-	      }
+        }
         else if(isalpha(*p) || *p=='_')
         { // instruction, symbol or cblock
           q=p;
@@ -3770,9 +3818,9 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
           AddCache(FileCache, p, q-p,
             number_text_style, number_font);
           p=q;
-	      }
+        }
         else
-	      { // default
+        { // default
           // FIXME, add a 'whitespace_text_style'
           // There is a small annoyance here. If the source
           // initially on a line have whitespace, followed by
@@ -3795,7 +3843,7 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
     // 'line' and index 'index' into text
     int     pos = totallinesheight -
       (CFormattedTextFragment::s_lineascent - 
-       CFormattedTextFragment::s_linedescent) - 
+      CFormattedTextFragment::s_linedescent) - 
       PIXMAP_SIZE/2 + PAGE_BORDER;
 
     entry= new BreakPointInfo(0, line,index,pos);
@@ -3811,28 +3859,28 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
 void SourcePage::Close(void)
 {
   if(notebook != NULL && notebook_child != NULL)
-    {
-      int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child);
-      gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
-      // JRH - looks like gtk_notebook_remove_page() is also
-      //       deallocating notebook_chile.
-      // gtk_widget_destroy(notebook_child);
-      // this is all that is needed to destroy all child widgets
-      // of notebook_child.
-      notebook_child=0;
-      source_layout_adj = 0;
-      source_layout = 0;
-      source_text = 0;
-      pageindex_to_fileid = INVALID_VALUE;
-      source_pcwidget = 0;
-    }
+  {
+    int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child);
+    gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
+    // JRH - looks like gtk_notebook_remove_page() is also
+    //       deallocating notebook_chile.
+    // gtk_widget_destroy(notebook_child);
+    // this is all that is needed to destroy all child widgets
+    // of notebook_child.
+    notebook_child=0;
+    source_layout_adj = 0;
+    source_layout = 0;
+    source_text = 0;
+    pageindex_to_fileid = INVALID_VALUE;
+    source_pcwidget = 0;
+  }
 }
 
 void SourceBrowserAsm_Window::CloseSource(void)
 {
-    
-  load_source=0;
-  source_loaded = 0;
+
+  m_bLoadSource=0;
+  m_bSourceLoaded = 0;
   if(!enabled)
     return;
 
@@ -3853,7 +3901,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   int i;
   int id;
-  
+
   const char *file_name;
   int file_id;
 
@@ -3865,10 +3913,10 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   Processor * pProc = gp->cpu;
   if(!enabled)
   {
-      load_source=1;
-      return;
+    m_bLoadSource=1;
+    return;
   }
-  
+
   if(!pma)
     pma = pProc->pma;
 
@@ -3876,20 +3924,20 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   CloseSource();
 
-  load_source=1;
+  m_bLoadSource=1;
 
   Dprintf(("NewSource\n"));
 
   /* Now create a cross-reference link that the
-   * simulator can use to send information back to the gui
-   */
+  * simulator can use to send information back to the gui
+  */
   if(pProc->pc) {
     SourceXREF *cross_reference = new SourceXREF();
 
     cross_reference->parent_window_type =   WT_asm_source_window;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) 0;
-  
+
     pProc->pc->add_xref((gpointer) cross_reference);
     if(pProc->pc != pma->GetProgramCounter()) {
       pma->GetProgramCounter()->add_xref((gpointer) cross_reference);
@@ -3927,16 +3975,16 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
         id = add_page(this,file_id);
 
-	SetText(id,file_id, fc);
+        SetText(id,file_id, fc);
 
-       } else {
+      } else {
         if(verbose)
           printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
-                  file_name);
+          file_name);
       }
     }
 
-    source_loaded = 1;
+    m_bSourceLoaded = 1;
 
   }
 
@@ -3947,9 +3995,9 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   address=pProc->pma->get_PC();
   if(address==INVALID_VALUE)
-      puts("Warning, PC is invalid?");
+    puts("Warning, PC is invalid?");
   else
-      SetPC(address);
+    SetPC(address);
 
   // update breakpoint widgets
   unsigned uPMMaxIndex = pProc->program_memory_size();
@@ -3964,436 +4012,423 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
-    if(widget->window==0)
-        return 0;
-    
-    gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
+  if(widget->window==0)
     return 0;
+
+  gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
+  return 0;
 }
 
-static int load_fonts(SourceBrowserAsm_Window *sbaw)
+static int load_fonts(SOURCE_WINDOW *sbaw)
 {
 #if GTK_MAJOR_VERSION >= 2
-    gtk_style_set_font(sbaw->comment_text_style,
-      gdk_font_from_description(pango_font_description_from_string(sbaw->commentfont_string)));
+  gtk_style_set_font(sbaw->comment_text_style,
+    gdk_font_from_description(pango_font_description_from_string(sbaw->commentfont_string)));
 
-    GdkFont *font = gdk_font_from_description(pango_font_description_from_string(sbaw->sourcefont_string));
-    gtk_style_set_font(sbaw->default_text_style, font);
-    gtk_style_set_font(sbaw->label_text_style, font);
-    gtk_style_set_font(sbaw->symbol_text_style, font);
-    gtk_style_set_font(sbaw->instruction_text_style, font);
-    gtk_style_set_font(sbaw->number_text_style, font);
+  GdkFont *font = gdk_font_from_description(pango_font_description_from_string(sbaw->sourcefont_string));
+  gtk_style_set_font(sbaw->default_text_style, font);
+  gtk_style_set_font(sbaw->label_text_style, font);
+  gtk_style_set_font(sbaw->symbol_text_style, font);
+  gtk_style_set_font(sbaw->instruction_text_style, font);
+  gtk_style_set_font(sbaw->number_text_style, font);
 
-    if (gtk_style_get_font(sbaw->comment_text_style) == 0)
-        return 0;
-    if (gtk_style_get_font(sbaw->default_text_style) == 0)
-	return 0;
+  if (gtk_style_get_font(sbaw->comment_text_style) == 0)
+    return 0;
+  if (gtk_style_get_font(sbaw->default_text_style) == 0)
+    return 0;
 #else
-    sbaw->comment_text_style->font=
-        gdk_fontset_load(sbaw->commentfont_string);
+  sbaw->comment_text_style->font=
+    gdk_fontset_load(sbaw->commentfont_string);
 
-    sbaw->default_text_style->font=
-        sbaw->label_text_style->font=
-        sbaw->symbol_text_style->font=
-        sbaw->instruction_text_style->font=
-        sbaw->number_text_style->font=
-        gdk_fontset_load(sbaw->sourcefont_string);
+  sbaw->default_text_style->font=
+    sbaw->label_text_style->font=
+    sbaw->symbol_text_style->font=
+    sbaw->instruction_text_style->font=
+    sbaw->number_text_style->font=
+    gdk_fontset_load(sbaw->sourcefont_string);
 
-    if(sbaw->comment_text_style->font==0)
-        return 0;
-    if(sbaw->default_text_style->font==0)
-        return 0;
+  if(sbaw->comment_text_style->font==0)
+    return 0;
+  if(sbaw->default_text_style->font==0)
+    return 0;
 #endif
-    return 1;
+  return 1;
 }
 
 /*************** Font selection dialog *********************/
-static void fontselok_cb(GtkWidget *w, gpointer user_data)
+class DialogFontSelect {
+public:
+  static gint  DialogRun(GtkWidget *w, gpointer user_data);
+
+  static GtkWidget *m_pFontSelDialog;
+};
+
+GtkWidget * DialogFontSelect::m_pFontSelDialog = NULL;
+
+gint DialogFontSelect::DialogRun(GtkWidget *w, gpointer user_data)
 {
-    *(int*)user_data=FALSE; // cancel=FALSE;
-}
-static void fontselcancel_cb(GtkWidget *w, gpointer user_data)
-{
-    *(int*)user_data=TRUE; // cancel=TRUE;
-}
-int font_dialog_browse(GtkWidget *w, gpointer user_data)
-{
-    static GtkWidget *fontsel;
-    GtkEntry *entry=GTK_ENTRY(user_data);
-    const char *fontstring;
-    gchar *fontname;
-    static int cancel;
+  GtkEntry *entry=GTK_ENTRY(user_data);
+  const char *fontstring;
+  gchar *fontname;
 
-    cancel=-1;
+  if(m_pFontSelDialog==0)
+  {
 
-    if(fontsel==0)
-    {
+    m_pFontSelDialog=gtk_font_selection_dialog_new("Select font");
 
-	fontsel=gtk_font_selection_dialog_new("Select font");
-
-	fontstring=gtk_entry_get_text(entry);
-	gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontsel),fontstring);
+    fontstring=gtk_entry_get_text(entry);
 #if GTK_MAJOR_VERSION < 2
-	gchar *spacings[] = { "c", "m", 0 };
-        gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (fontsel),
-					      GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
-					      0, 0, 0, 0, spacings, 0);
+    gchar *spacings[] = { "c", "m", 0 };
+    gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (m_pFontSelDialog),
+      GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
+      0, 0, 0, 0, spacings, 0);
 #endif
-
-	gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->ok_button),"clicked",
-			   GTK_SIGNAL_FUNC(fontselok_cb),(gpointer)&cancel);
-	gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->cancel_button),"clicked",
-			   GTK_SIGNAL_FUNC(fontselcancel_cb),(gpointer)&cancel);
-    }
-
-    gtk_widget_show(fontsel);
-
-    gtk_grab_add(fontsel);
-    while(cancel==-1 && GTK_WIDGET_VISIBLE(fontsel))
-	gtk_main_iteration();
-    gtk_grab_remove(fontsel);
-
-
-    if(cancel)
-    {
-	gtk_widget_hide(fontsel);
-	return 0;
-    }
-
-    fontname=gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(fontsel));
-    gtk_widget_hide(fontsel);
+  }
+  gint result = gtk_dialog_run (GTK_DIALOG (m_pFontSelDialog));
+  switch (result) {
+  case GTK_RESPONSE_OK:
+    fontname=gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(m_pFontSelDialog));
+    gtk_widget_hide(m_pFontSelDialog);
     gtk_entry_set_text(entry,fontname);
     g_free(fontname);
-    return 1;
+    break;
+  default:
+      break;
+  }
+  gtk_widget_hide(m_pFontSelDialog);
+  return result;
+}
+
+// To give access to reg and opcode windows
+int font_dialog_browse(GtkWidget *w, gpointer user_data) {
+  return DialogFontSelect::DialogRun(w, user_data);
 }
 
 /********************** Settings dialog ***************************/
 static int settings_active;
 static void settingsok_cb(GtkWidget *w, gpointer user_data)
 {
-    if(settings_active)
-    {
-        settings_active=0;
-//	gtk_main_quit();
-    }
+  if(settings_active)
+  {
+    settings_active=0;
+    //  gtk_main_quit();
+  }
 }
-static int settings_dialog(SourceBrowserAsm_Window *sbaw)
+
+static int settings_dialog(SOURCE_WINDOW *sbaw)
 {
-    static GtkWidget *dialog=0;
-    GtkWidget *button;
-    static int retval;
-    GtkWidget *hbox;
-    static GtkWidget *commentfontstringentry;
-    static GtkWidget *sourcefontstringentry;
-    GtkWidget *label;
-    int fonts_ok=0;
-    
-    if(dialog==0)
+  static GtkWidget *dialog=0;
+  GtkWidget *button;
+  static int retval;
+  GtkWidget *hbox;
+  static GtkWidget *commentfontstringentry;
+  static GtkWidget *sourcefontstringentry;
+  GtkWidget *label;
+  int fonts_ok=0;
+
+  if(dialog==0)
+  {
+    dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (dialog), "Source browser settings");
+    gtk_signal_connect(GTK_OBJECT(dialog),
+      "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    gtk_signal_connect_object(GTK_OBJECT(dialog),
+      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+
+
+    // Source font
+    hbox = gtk_hbox_new(0,0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+    gtk_widget_show(hbox);
+    label=gtk_label_new("Font for source:");
+    gtk_box_pack_start(GTK_BOX(hbox), label,
+      FALSE,FALSE, 20);
+    gtk_widget_show(label);
+    sourcefontstringentry=gtk_entry_new();
+    gtk_widget_set_size_request(sourcefontstringentry,
+                                200, -1);
+    gtk_box_pack_start(GTK_BOX(hbox), sourcefontstringentry,
+      TRUE, TRUE, 0);
+    gtk_widget_show(sourcefontstringentry);
+    button = gtk_button_new_with_label("Browse...");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(hbox), button,
+      FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(button),"clicked",
+      GTK_SIGNAL_FUNC(DialogFontSelect::DialogRun),
+      (gpointer)sourcefontstringentry);
+
+
+    // Comment font
+    hbox = gtk_hbox_new(0,0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),
+      hbox,FALSE,FALSE,20);
+    gtk_widget_show(hbox);
+    label=gtk_label_new("Font for comments:");
+    gtk_box_pack_start(GTK_BOX(hbox), label,
+      FALSE,FALSE, 20);
+    gtk_widget_show(label);
+    commentfontstringentry=gtk_entry_new();
+    gtk_box_pack_start(GTK_BOX(hbox), commentfontstringentry,
+      TRUE, TRUE, 0);
+    gtk_widget_show(commentfontstringentry);
+    button = gtk_button_new_with_label("Browse...");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(hbox), button,
+      FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(button),"clicked",
+      GTK_SIGNAL_FUNC(DialogFontSelect::DialogRun),
+      (gpointer)commentfontstringentry);
+
+
+    // OK button
+    gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", GTK_RESPONSE_OK);
+  }
+
+  gtk_entry_set_text(GTK_ENTRY(sourcefontstringentry), sbaw->sourcefont_string);
+  gtk_entry_set_text(GTK_ENTRY(commentfontstringentry), sbaw->commentfont_string);
+
+  gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+  gtk_widget_show_now(dialog);
+
+
+
+  while(fonts_ok!=2)
+  {
+    char fontname[256];
+#if GTK_MAJOR_VERSION >= 2
+    PangoFontDescription *font;
+#else
+    GdkFont *font;
+#endif
+
+    gtk_dialog_run (GTK_DIALOG (dialog));
+    fonts_ok=0;
+
+    strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+    if((font=pango_font_description_from_string(fontname))==0)
+#else
+    if((font=gdk_fontset_load(fontname))==0)
+#endif
     {
-	dialog = gtk_dialog_new();
-	gtk_window_set_title (GTK_WINDOW (dialog), "Source browser settings");
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
-
-
-	// Source font
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-	gtk_widget_show(hbox);
-	label=gtk_label_new("Font for source:");
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
-	gtk_widget_show(label);
-	sourcefontstringentry=gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), sourcefontstringentry,
-			   TRUE, TRUE, 0);
-	gtk_widget_show(sourcefontstringentry);
-	button = gtk_button_new_with_label("Browse...");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(hbox), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)sourcefontstringentry);
-
-
-	// Comment font
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-	gtk_widget_show(hbox);
-	label=gtk_label_new("Font for comments:");
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
-	gtk_widget_show(label);
-	commentfontstringentry=gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), commentfontstringentry,
-			   TRUE, TRUE, 0);
-	gtk_widget_show(commentfontstringentry);
-	button = gtk_button_new_with_label("Browse...");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(hbox), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)commentfontstringentry);
-
-
-	// OK button
-	button = gtk_button_new_with_label("OK");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+      if(gui_question("Sourcefont did not load!","Try again","Ignore/Cancel")==FALSE)
+        break;
     }
-    
-    gtk_entry_set_text(GTK_ENTRY(sourcefontstringentry), sbaw->sourcefont_string);
-    gtk_entry_set_text(GTK_ENTRY(commentfontstringentry), sbaw->commentfont_string);
-
-    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
-
-
-
-    while(fonts_ok!=2)
+    else
     {
-	char fontname[256];
-#if GTK_MAJOR_VERSION >= 2
-        PangoFontDescription *font;
-#else
-        GdkFont *font;
-#endif
-
-        settings_active=1;
-	while(settings_active)
-	    gtk_main_iteration();
-
-	fonts_ok=0;
-
-	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-#if GTK_MAJOR_VERSION >= 2
-	if((font=pango_font_description_from_string(fontname))==0)
-#else
-	if((font=gdk_fontset_load(fontname))==0)
-#endif
-	{
-	    if(gui_question("Sourcefont did not load!","Try again","Ignore/Cancel")==FALSE)
-		break;
-	}
-	else
-	{
 #if GTK_MAJOR_VERSION >= 2
 #else
-            gdk_font_unref(font);
+      gdk_font_unref(font);
 #endif
-	    strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-	    config_set_string(sbaw->name(),"sourcefont",sbaw->sourcefont_string);
-            fonts_ok++;
-	}
-
-	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-#if GTK_MAJOR_VERSION >= 2
-	if((font=pango_font_description_from_string(fontname))==0)
-#else
-	if((font=gdk_fontset_load(fontname))==0)
-#endif
-	{
-	    if(gui_question("Commentfont did not load!","Try again","Ignore/Cancel")==FALSE)
-		break;
-	}
-        else
-	{
-#if GTK_MAJOR_VERSION >= 2
-#else
-            gdk_font_unref(font);
-#endif
-	    strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-	    config_set_string(sbaw->name(),"commentfont",sbaw->commentfont_string);
-            fonts_ok++;
-	}
+      strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
+      config_set_string(sbaw->name(),"sourcefont",sbaw->sourcefont_string);
+      fonts_ok++;
     }
 
-    load_fonts(sbaw);
-    if(sbaw->load_source)
-      sbaw->NewSource(sbaw->gp);
+    strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+    if((font=pango_font_description_from_string(fontname))==0)
+#else
+    if((font=gdk_fontset_load(fontname))==0)
+#endif
+    {
+      if(gui_question("Commentfont did not load!","Try again","Ignore/Cancel")==FALSE)
+        break;
+    }
+    else
+    {
+#if GTK_MAJOR_VERSION >= 2
+#else
+      gdk_font_unref(font);
+#endif
+      strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
+      config_set_string(sbaw->name(),"commentfont",sbaw->commentfont_string);
+      fonts_ok++;
+    }
+  }
 
-    gtk_widget_hide(dialog);
+  load_fonts(sbaw);
+  if(sbaw->m_bLoadSource)
+    sbaw->NewSource(sbaw->gp);
 
-    return retval;
+  gtk_widget_hide(dialog);
+
+  return retval;
 }
 
 /*********************** gui message dialog *************************/
 static gboolean
 message_close_cb(GtkWidget *widget, gpointer d)
 {
-    gtk_widget_hide(GTK_WIDGET(d));
-    
-    return FALSE;
+  gtk_widget_hide(GTK_WIDGET(d));
+
+  return FALSE;
 }
 
 int gui_message(char *message)
 {
-    static GtkWidget *dialog=0;
-    static GtkWidget *label;
-    GtkWidget *button;
-    GtkWidget *hbox;
+  static GtkWidget *dialog=0;
+  static GtkWidget *label;
+  GtkWidget *button;
+  GtkWidget *hbox;
 
-    assert(message);
-    
-    if(dialog==0)
-    {
-	dialog = gtk_dialog_new();
-	
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+  assert(message);
 
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+  if(dialog==0)
+  {
+    dialog = gtk_dialog_new();
 
-	button = gtk_button_new_with_label("OK");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(message_close_cb),(gpointer)dialog);
-	GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
-	gtk_widget_grab_default(button);
+    gtk_signal_connect(GTK_OBJECT(dialog),
+      "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    gtk_signal_connect_object(GTK_OBJECT(dialog),
+      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
-	label=gtk_label_new(message);
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
+    hbox = gtk_hbox_new(0,0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
 
-	gtk_widget_show(hbox);
-	gtk_widget_show(label);
-    }
-    else
-    {
-	gtk_label_set_text(GTK_LABEL(label),message);
-    }
-    
-    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
+    button = gtk_button_new_with_label("OK");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+      FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(button),"clicked",
+      GTK_SIGNAL_FUNC(message_close_cb),(gpointer)dialog);
+    GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
+    gtk_widget_grab_default(button);
 
-    return 0;
+    label=gtk_label_new(message);
+    gtk_box_pack_start(GTK_BOX(hbox), label,
+      FALSE,FALSE, 20);
+
+    gtk_widget_show(hbox);
+    gtk_widget_show(label);
+  }
+  else
+  {
+    gtk_label_set_text(GTK_LABEL(label),message);
+  }
+
+  gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+  gtk_widget_show_now(dialog);
+
+  return 0;
 }
 
 /****************** gui question dialog **************************/
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
-    *(int*)user_data=TRUE;
+  *(int*)user_data=TRUE;
 }
 
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
-    *(int*)user_data=FALSE;
+  *(int*)user_data=FALSE;
 }
 
 // modal dialog, asking a yes/no question
 int gui_question(char *question, char *a, char *b)
 {
-    static GtkWidget *dialog=0;
-    static GtkWidget *label;
-    static GtkWidget *abutton;
-    static GtkWidget *bbutton;
-    GtkWidget *hbox;
-    static int retval=-1;
-    
-    if(dialog==0)
-    {
-	dialog = gtk_dialog_new();
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
-	
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+  static GtkWidget *dialog=0;
+  static GtkWidget *label;
+  static GtkWidget *abutton;
+  static GtkWidget *bbutton;
+  GtkWidget *hbox;
+  static int retval=-1;
 
-	abutton = gtk_button_new_with_label(a);
-	gtk_widget_show(abutton);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), abutton,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(abutton),"clicked",
-			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-	GTK_WIDGET_SET_FLAGS (abutton, GTK_CAN_DEFAULT);
-	gtk_widget_grab_default(abutton);
-	
-	bbutton = gtk_button_new_with_label(b);
-	gtk_widget_show(bbutton);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), bbutton,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(bbutton),"clicked",
-			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+  if(dialog==0)
+  {
+    dialog = gtk_dialog_new();
+    gtk_signal_connect(GTK_OBJECT(dialog),
+      "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    gtk_signal_connect_object(GTK_OBJECT(dialog),
+      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
-	label=gtk_label_new(question);
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
+    hbox = gtk_hbox_new(0,0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
 
-	gtk_widget_show(hbox);
-	gtk_widget_show(label);
-    }
-    else
-    {
-	gtk_label_set_text(GTK_LABEL(label),question);
-        gtk_label_set_text(GTK_LABEL(GTK_BIN(abutton)->child),a);
-        gtk_label_set_text(GTK_LABEL(GTK_BIN(bbutton)->child),b);
-    }
-    
-    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
+    abutton = gtk_button_new_with_label(a);
+    gtk_widget_show(abutton);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), abutton,
+      FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(abutton),"clicked",
+      GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+    GTK_WIDGET_SET_FLAGS (abutton, GTK_CAN_DEFAULT);
+    gtk_widget_grab_default(abutton);
 
-    gtk_grab_add(dialog);
-    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-	gtk_main_iteration();
-    gtk_grab_remove(dialog);
-    
-    gtk_widget_hide(dialog);
+    bbutton = gtk_button_new_with_label(b);
+    gtk_widget_show(bbutton);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), bbutton,
+      FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(bbutton),"clicked",
+      GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
 
-//    puts(retval==1?"Yes":"No");
-    
-    return retval;
+    label=gtk_label_new(question);
+    gtk_box_pack_start(GTK_BOX(hbox), label,
+      FALSE,FALSE, 20);
+
+    gtk_widget_show(hbox);
+    gtk_widget_show(label);
+  }
+  else
+  {
+    gtk_label_set_text(GTK_LABEL(label),question);
+    gtk_label_set_text(GTK_LABEL(GTK_BIN(abutton)->child),a);
+    gtk_label_set_text(GTK_LABEL(GTK_BIN(bbutton)->child),b);
+  }
+
+  gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+  gtk_widget_show_now(dialog);
+
+  gtk_grab_add(dialog);
+  while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
+    gtk_main_iteration();
+  gtk_grab_remove(dialog);
+
+  gtk_widget_hide(dialog);
+
+  //    puts(retval==1?"Yes":"No");
+
+  return retval;
 }
 
 
 /*
- A rather long function, simplify main loop. FIXME.
- */
-static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
+A rather long function, simplify main loop. FIXME.
+*/
+void SourceBrowserAsm_Window::find_cb(
+  GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 {
 
-    
   const char *p;
   GList *l;
-    
+
   int casesensitive;
   int direction;
-    
+
   int last_matched=0;
   int k=0;
-    
+
   int char1, char2;
   int j;  // index into search string
   int tlen;
   int id;
 
   SourceBrowserAsm_Window * pSrcWindow = popup_sbaw;
-  if(!pSrcWindow->source_loaded) return;
-    
+  if(!pSrcWindow->m_bSourceLoaded) return;
+
   id = gtk_notebook_get_current_page(GTK_NOTEBOOK(pSrcWindow->notebook));
   SourcePage & SrcPage = pSrcWindow->pages[id];
 
   if(id != searchdlg.lastid)
-    { //  Changed notebook tab since last search reset search.
-      searchdlg.lastid=id;
-      searchdlg.found=0;
-      searchdlg.looped=0;
-      searchdlg.start=0;
-      searchdlg.lastfound=0;
-      searchdlg.i=0;
-    }
-    
+  { //  Changed notebook tab since last search reset search.
+    searchdlg.lastid=id;
+    searchdlg.found=0;
+    searchdlg.looped=0;
+    searchdlg.start=0;
+    searchdlg.lastfound=0;
+    searchdlg.i=0;
+  }
+
   if(GTK_TOGGLE_BUTTON(searchdlg.case_button)->active)
     casesensitive=TRUE;
   else
@@ -4410,168 +4445,167 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
     return;
 
   if(searchdlg.string==0 || strcmp(searchdlg.string,p))
-    {  // not same string as last time
-      // search list to prevent duplicates
-      l=searchdlg.combo_strings;
-      while(l)
+  {  // not same string as last time
+    // search list to prevent duplicates
+    l=searchdlg.combo_strings;
+    while(l)
+    {
+      if(!strcmp((char*)l->data,p))
       {
-        if(!strcmp((char*)l->data,p))
-        {
-          // the string p already is in list
-          // move it first?, FIXME
+        // the string p already is in list
+        // move it first?, FIXME
 
-          searchdlg.string = (char*)l->data;
-          break;
-        }
-        l=l->next;
+        searchdlg.string = (char*)l->data;
+        break;
       }
-      if(l == 0)
-      { // we didn't find string in history, create a new one
-        searchdlg.string=(char*)malloc(strlen(p)+1);
-        strcpy(searchdlg.string,p);
-        searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
-        gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
-      }
-
-      // initialize variables for a new search
-      searchdlg.found=0;
-      searchdlg.looped=0;
-      searchdlg.i = pSrcWindow->getBPatPixel(id,0)->index;
-      searchdlg.start = searchdlg.i; // remember where we started searching
+      l=l->next;
+    }
+    if(l == 0)
+    { // we didn't find string in history, create a new one
+      searchdlg.string=(char*)malloc(strlen(p)+1);
+      strcpy(searchdlg.string,p);
+      searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
+      gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
     }
 
-    tlen =gtk_text_get_length(GTK_TEXT(SrcPage.source_text));
-    j=0;
-    for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
-    {
-      if(searchdlg.string[j]=='\0')
-      {  // match! We found the string in text.
-        int start_i, end_i;
-	    
-        searchdlg.found++;
+    // initialize variables for a new search
+    searchdlg.found=0;
+    searchdlg.looped=0;
+    searchdlg.i = pSrcWindow->getBPatPixel(id,0)->index;
+    searchdlg.start = searchdlg.i; // remember where we started searching
+  }
 
-        start_i = k+ (direction==-1);      // comparing backwards means
-        end_i = searchdlg.i+ (direction==-1); // we have to add 1
+  tlen =gtk_text_get_length(GTK_TEXT(SrcPage.source_text));
+  j=0;
+  for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
+  {
+    if(searchdlg.string[j]=='\0')
+    {  // match! We found the string in text.
+      int start_i, end_i;
 
-        if(start_i>end_i)
-        {
-          int temp=end_i;  // swap, so that k is the smaller
-          end_i=start_i;
-          start_i=temp;
-        }
-        assert(start_i<end_i);
-        if(start_i==searchdlg.lastfound)
-        { // we found the same position as last time
-          // happens when searching backwards
-          j=0;
-          if(direction==1)
-            searchdlg.i++; // skip this match
-          else
-            searchdlg.i--; // skip this match
-          last_matched=0;
-        }
+      searchdlg.found++;
+
+      start_i = k+ (direction==-1);      // comparing backwards means
+      end_i = searchdlg.i+ (direction==-1); // we have to add 1
+
+      if(start_i>end_i)
+      {
+        int temp=end_i;  // swap, so that k is the smaller
+        end_i=start_i;
+        start_i=temp;
+      }
+      assert(start_i<end_i);
+      if(start_i==searchdlg.lastfound)
+      { // we found the same position as last time
+        // happens when searching backwards
+        j=0;
+        if(direction==1)
+          searchdlg.i++; // skip this match
         else
-        {
-          int pixel;
-          float inc;
-
-          searchdlg.lastfound=start_i;
-
-          pixel = pSrcWindow->getBPatPixel(id,start_i)->pos + 12;
-          inc = (float)GTK_ADJUSTMENT(GTK_TEXT(SrcPage.source_text)->vadj)->page_increment;
-          gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( SrcPage.source_text)->vadj),
-				          pixel-inc/2);
-          //printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
-
-          gtk_editable_select_region(GTK_EDITABLE(SrcPage.source_text),start_i,end_i);
-          return;
-        }
-      }
-      if(searchdlg.looped && (searchdlg.start == searchdlg.i))
-      {
-        if(searchdlg.found==0)
-        {
-          gui_message("Not found");
-          return;
-        }
-        else if(searchdlg.found==1)
-        {
-          gui_message("Just a single occurance in text");
-
-          // so that the next next call marks text too, we do:
-          searchdlg.found=0;
-          searchdlg.looped=0;
-          searchdlg.lastfound=-1;
-          return;
-        }
-      }
-
-      // get another character
-      char1=GTK_TEXT_INDEX(GTK_TEXT(SrcPage.source_text),(unsigned)searchdlg.i);
-      if(direction==1)
-        char2=searchdlg.string[j];
-      else
-        char2=searchdlg.string[strlen(searchdlg.string)-1-j];
-      //FIXME, many calls to strlen
-
-      if(casesensitive==FALSE)
-      {
-        char1=toupper(char1); // FIXME, what about native letters?
-        char2=toupper(char2);
-      }
-
-      if(char1!=char2)
-      {                   // if these characters don't match
-        j=0;            // set search index for string back to zero
-        last_matched=0; // char in this loop didn't match
+          searchdlg.i--; // skip this match
+        last_matched=0;
       }
       else
       {
-        if(!last_matched)
-        {
-          k=searchdlg.i;     // remember first matching index for later
-          last_matched=1; // char in this loop matched
-        }
-        j++;  // forward string index to compare next char
-      }
-	
-    }
-    // the string was not found in text between index 'search start' and
-    // one end of text (index '0' or index 'tlen')
+        int pixel;
+        float inc;
 
-    // We ask user it he want to search from other end of file
-    if(direction==1)
-    {
-      if(gui_question("End of file\ncontinue from start?","Yes","No")==(int)TRUE)
-      {
-        searchdlg.i=0;
-        searchdlg.looped=1;
-        find_cb(w,pSrcWindow);  // tail recursive, FIXME
+        searchdlg.lastfound=start_i;
+
+        pixel = pSrcWindow->getBPatPixel(id,start_i)->pos + 12;
+        inc = (float)GTK_ADJUSTMENT(GTK_TEXT(SrcPage.source_text)->vadj)->page_increment;
+        gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( SrcPage.source_text)->vadj),
+          pixel-inc/2);
+        //printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
+
+        gtk_editable_select_region(GTK_EDITABLE(SrcPage.source_text),start_i,end_i);
         return;
       }
-      else
-        searchdlg.i=tlen-1;
+    }
+    if(searchdlg.looped && (searchdlg.start == searchdlg.i))
+    {
+      if(searchdlg.found==0)
+      {
+        gui_message("Not found");
+        return;
+      }
+      else if(searchdlg.found==1)
+      {
+        gui_message("Just a single occurance in text");
+
+        // so that the next next call marks text too, we do:
+        searchdlg.found=0;
+        searchdlg.looped=0;
+        searchdlg.lastfound=-1;
+        return;
+      }
+    }
+
+    // get another character
+    char1=GTK_TEXT_INDEX(GTK_TEXT(SrcPage.source_text),(unsigned)searchdlg.i);
+    if(direction==1)
+      char2=searchdlg.string[j];
+    else
+      char2=searchdlg.string[strlen(searchdlg.string)-1-j];
+    //FIXME, many calls to strlen
+
+    if(casesensitive==FALSE)
+    {
+      char1=toupper(char1); // FIXME, what about native letters?
+      char2=toupper(char2);
+    }
+
+    if(char1!=char2)
+    {                   // if these characters don't match
+      j=0;            // set search index for string back to zero
+      last_matched=0; // char in this loop didn't match
     }
     else
     {
-      if(gui_question("Top of file\ncontinue from end?","Yes", "No")==(int)TRUE)
+      if(!last_matched)
       {
-        searchdlg.i=tlen-1;
-        searchdlg.looped=1;
-        find_cb(w,pSrcWindow);  // tail recursive, FIXME
-        return;
+        k=searchdlg.i;     // remember first matching index for later
+        last_matched=1; // char in this loop matched
       }
-      else
-        searchdlg.i=0;
+      j++;  // forward string index to compare next char
     }
+
+  }
+  // the string was not found in text between index 'search start' and
+  // one end of text (index '0' or index 'tlen')
+
+  // We ask user it he want to search from other end of file
+  if(direction==1)
+  {
+    if(gui_question("End of file\ncontinue from start?","Yes","No")==(int)TRUE)
+    {
+      searchdlg.i=0;
+      searchdlg.looped=1;
+      find_cb(w,pSrcWindow);  // tail recursive, FIXME
+      return;
+    }
+    else
+      searchdlg.i=tlen-1;
+  }
+  else
+  {
+    if(gui_question("Top of file\ncontinue from end?","Yes", "No")==(int)TRUE)
+    {
+      searchdlg.i=tlen-1;
+      searchdlg.looped=1;
+      find_cb(w,pSrcWindow);  // tail recursive, FIXME
+      return;
+    }
+    else
+      searchdlg.i=0;
+  }
 }
 
-#if !defined(NEW_SOURCE_BROWSER)
-static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
+void SourceBrowserAsm_Window::find_clear_cb(
+  GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 {
-    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
+  gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
 }
-#endif
 
 static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
 {
@@ -4598,63 +4632,64 @@ static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
   searchdlg.window = gtk_dialog_new();
 
   gtk_signal_connect(GTK_OBJECT(searchdlg.window),
-		     "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
   gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
-			    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
   gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
-    
+
   hbox = gtk_hbox_new(FALSE,15);
   gtk_widget_show(hbox);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-		     FALSE,TRUE,5);
+    FALSE,TRUE,5);
   label = gtk_label_new("Find:");
   gtk_widget_show(label);
   gtk_box_pack_start(GTK_BOX(hbox),label,
-		     FALSE,FALSE,5);
+    FALSE,FALSE,5);
   searchdlg.entry = gtk_combo_new();
   gtk_widget_show(searchdlg.entry);
   gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
-		     TRUE,TRUE,5);
+    TRUE,TRUE,5);
   gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
-  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),"activate",
-		     GTK_SIGNAL_FUNC(find_cb),sbaw);
-    
+  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),
+    "activate",
+    GTK_SIGNAL_FUNC(SourceBrowserAsm_Window::find_cb),sbaw);
+
   hbox = gtk_hbox_new(FALSE,15);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-		     FALSE,TRUE,5);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),
+    hbox,FALSE,TRUE,5);
   gtk_widget_show(hbox);
   searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
   gtk_widget_show(searchdlg.case_button);
   gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
-		     FALSE,FALSE,5);
+    FALSE,FALSE,5);
   searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
   gtk_widget_show(searchdlg.backwards_button);
   gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
-		     FALSE,FALSE,5);
-    
+    FALSE,FALSE,5);
+
   button = gtk_button_new_with_label("Find");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
   gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(find_cb),sbaw);
+    GTK_SIGNAL_FUNC(SourceBrowserAsm_Window::find_cb),sbaw);
   GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
   gtk_widget_grab_default(button);
-    
+
   button = gtk_button_new_with_label("Clear");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
   gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(find_clear_cb),0);
-    
+    GTK_SIGNAL_FUNC(SourceBrowserAsm_Window::find_clear_cb),0);
+
   button = gtk_button_new_with_label("Close");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
   gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
 }
-#endif
+
 void SourceBrowserAsm_Window::Build(void)
 {
   if(bIsBuilt)
@@ -4678,10 +4713,10 @@ void SourceBrowserAsm_Window::Build(void)
     pages[i].notebook = notebook;
   }
   gtk_signal_connect(GTK_OBJECT(notebook),
-		     "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),this);
+    "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),this);
   gtk_widget_show(notebook);
 
-  popup_menu=build_menu(notebook,this);
+  popup_menu=BuildPopupMenu(notebook,this);
 
   gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
 
@@ -4696,8 +4731,6 @@ void SourceBrowserAsm_Window::Build(void)
   //#define DEFAULT_COMMENTFONT "Courier Bold Oblique 12"
   //#define DEFAULT_SOURCEFONT "Courier Bold 12"
   //#else
-#define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
-#define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
   //#endif
 
   if(config_get_string(name(),"commentfont",&fontstring))
@@ -4733,25 +4766,24 @@ void SourceBrowserAsm_Window::Build(void)
   default_font      = gtk_style_get_font(default_text_style);
 
   if(!bSearchdlgInitialized) {
-#if !defined(NEW_SOURCE_BROWSER)
     BuildSearchDlg(this);
-#endif
     bSearchdlgInitialized = true;
   }
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+    GTK_SIGNAL_FUNC(gui_object_configure_event),this);
   if(status_bar)
     status_bar->Create(vbox);
 
   gtk_widget_show(window);
 
   bIsBuilt = true;;
-  if(load_source)
+  if(m_bLoadSource)
     NewSource(gp);
   UpdateMenuItem();
 
 }
+#endif
 
 
 void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
@@ -4790,19 +4822,19 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
   breakpoints.iter=0;
   notify_start_list.iter=0;
   notify_stop_list.iter=0;
-  
+
   layout_offset=-1;
-    
-    
+
+
   pixmap_pc = 0; // these are created somewhere else
   pixmap_break=0;
   pixmap_profile_start=0;
   pixmap_profile_stop=0;
-    
 
-  source_loaded = 0;
-    
-  load_source=0;
+
+  m_bSourceLoaded = 0;
+
+  m_bLoadSource=0;
 
   get_config();
   current_page = 0xffffffff;
@@ -4823,7 +4855,7 @@ bool    SourceBrowserAsm_Window::bGlobalInitialized = false;
 GList * SourceBrowserAsm_Window::s_global_sa_xlate_list[SBAW_NRFILES];
 int     SourceBrowserAsm_Window::s_totallinesheight[SBAW_NRFILES];
 int SourceBrowserAsm_Window::m_SourceWindowCount = 0;
-  
+
 //========================================================================
 //
 // SourceBrowserParent_Window
@@ -4832,7 +4864,7 @@ int SourceBrowserAsm_Window::m_SourceWindowCount = 0;
 // windows.
 
 SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
-  : GUI_Object()
+: GUI_Object()
 {
 
   gp = _gp;
@@ -4847,29 +4879,29 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   char *fg=0;
 
   mLabel    = new TextStyle("Label",
-			    config_get_string(sName, "label_fg", &fg) ? fg : "orange",
-			    "white");
+    config_get_string(sName, "label_fg", &fg) ? fg : "orange",
+    "white");
 
   fg=0;
   mMnemonic = new TextStyle("Mnemonic",
-			    config_get_string(sName, "mnemonic_fg", &fg) ? fg : "red",
-			    "white");
+    config_get_string(sName, "mnemonic_fg", &fg) ? fg : "red",
+    "white");
   fg=0;
   mSymbol   = new TextStyle("Symbols",
-			    config_get_string(sName, "symbol_fg", &fg) ? fg : "dark green",
-			    "white");
+    config_get_string(sName, "symbol_fg", &fg) ? fg : "dark green",
+    "white");
   fg=0;
   mComment  = new TextStyle("Comments",
-			    config_get_string(sName, "comment_fg", &fg) ? fg : "dim gray",
-			    "white");
+    config_get_string(sName, "comment_fg", &fg) ? fg : "dim gray",
+    "white");
   fg=0;
   mConstant = new TextStyle("Constants",
-			    config_get_string(sName, "constant_fg", &fg) ? fg : "blue",
-			    "white");
+    config_get_string(sName, "constant_fg", &fg) ? fg : "blue",
+    "white");
   fg=0;
   mDefault  = new TextStyle("Default",
-			    "black",
-			    "white");
+    "black",
+    "white");
 
   if (!config_get_variable(sName, "tab_position", &m_TabType))
     m_TabType = GTK_POS_LEFT;
@@ -4926,8 +4958,8 @@ void SourceBrowserParent_Window::Build(void)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->Build();
 
   UpdateMenuItem();
@@ -4949,7 +4981,7 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
   int child = 1;
   SOURCE_WINDOW *sbaw=0;
   while( (sbaw_iterator != children.end()) ||
-        (pma_iterator != gp->cpu->pma_context.end()))
+    (pma_iterator != gp->cpu->pma_context.end()))
   {
     char child_name[64];
     if(sbaw_iterator == children.end())
@@ -4984,8 +5016,8 @@ void SourceBrowserParent_Window::SelectAddress(int address)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->SelectAddress(address);
 }
 
@@ -4994,8 +5026,8 @@ void SourceBrowserParent_Window::SelectAddress(Value *addrSym)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->SelectAddress(addrSym);
 }
 
@@ -5004,8 +5036,8 @@ void SourceBrowserParent_Window::Update(void)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->Update();
 }
 
@@ -5014,8 +5046,8 @@ void SourceBrowserParent_Window::UpdateLine(int address)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->UpdateLine(address);
 }
 
@@ -5024,8 +5056,8 @@ void SourceBrowserParent_Window::SetPC(int address)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->SetPC(address);
 }
 
@@ -5034,8 +5066,8 @@ void SourceBrowserParent_Window::CloseSource(void)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
     (*sbaw_iterator)->CloseSource();
 }
 
@@ -5047,9 +5079,9 @@ void SourceBrowserParent_Window::NewSource(GUI_Processor *gp)
   CreateSourceBuffers(gp);
 #endif
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
-   (*sbaw_iterator)->NewSource(gp);
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
+    (*sbaw_iterator)->NewSource(gp);
 }
 
 void SourceBrowserParent_Window::ChangeView(int view_state)
@@ -5057,9 +5089,9 @@ void SourceBrowserParent_Window::ChangeView(int view_state)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
-   (*sbaw_iterator)->ChangeView(view_state);
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
+    (*sbaw_iterator)->ChangeView(view_state);
 }
 
 int SourceBrowserParent_Window::set_config()
@@ -5067,9 +5099,9 @@ int SourceBrowserParent_Window::set_config()
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
-   (*sbaw_iterator)->set_config();
+    sbaw_iterator != children.end(); 
+    sbaw_iterator++)
+    (*sbaw_iterator)->set_config();
 
 #if defined(NEW_SOURCE_BROWSER)
   const char *sName = "source_config";
@@ -5092,15 +5124,14 @@ int SourceBrowserParent_Window::set_config()
   return 0;
 }
 
-#if defined(NEW_SOURCE_BROWSER)
 //------------------------------------------------------------------------
 // parseLine
 //
 // Added a line of text to the source buffer. Apply syntax highlighting.
 //
- 
+
 void SourceBuffer::parseLine(const char *cP,
-			     int parseStyle)
+                             int parseStyle)
 {
 
   GtkTextIter iEnd;
@@ -5131,9 +5162,9 @@ void SourceBuffer::parseLine(const char *cP,
       i += j;
     } else if ( (j=isString(&cP[i])) != 0) {
       if (bHaveMnemonic)
-	addTagRange(m_pParent->mSymbol,i+offset,i+j+offset);
+        addTagRange(m_pParent->mSymbol,i+offset,i+j+offset);
       else
-	addTagRange(m_pParent->mMnemonic,i+offset,i+j+offset);
+        addTagRange(m_pParent->mMnemonic,i+offset,i+j+offset);
       bHaveMnemonic = true;
       i += j;
     } else if ( (j=isNumber(&cP[i])) != 0) {
@@ -5147,7 +5178,6 @@ void SourceBuffer::parseLine(const char *cP,
       i++;
   }
 }
-
 
 //------------------------------------------------------------------------
 SourcePageMargin &SourceBrowserParent_Window::margin()
@@ -5204,7 +5234,7 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
   Dprintf((" \n"));
 
   int i;
-  
+
   const char *file_name;
 
   if(!gp || !gp->cpu || !gp->cpu->pma)
@@ -5227,14 +5257,14 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
       int iNameLength = strlen(file_name);
 
       if(strcmp(file_name+iNameLength-4,".cod")
-	 && strcmp(file_name+iNameLength-4,".COD")
-	 && (i < SBAW_NRFILES) ) 
-	ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
+        && strcmp(file_name+iNameLength-4,".COD")
+        && (i < SBAW_NRFILES) ) 
+        ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
 
       else {
         if(verbose)
           printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
-                  file_name);
+          file_name);
       }
     }
 
@@ -5244,7 +5274,6 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
   Dprintf((" Source is loaded\n"));
 
 }
-#endif
 
 
 #endif // HAVE_GUI
