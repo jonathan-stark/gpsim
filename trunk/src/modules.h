@@ -124,6 +124,9 @@ public:
   static void         Delete(Module *);
 
   static ICommandHandler * GetCommandHandler(const char *pName);
+  static void *       GetLibraryFileHandle(const char *pName);
+  static void *       GetLibraryFunction(const char *pLibraryName,
+                                         const char *pFunctionName);
 
   static string       DisplayFileList();
   static string       DisplayModuleTypeList();
