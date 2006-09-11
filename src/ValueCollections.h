@@ -95,6 +95,11 @@ public:
   virtual char * toString(char *pBuffer, int len);
   virtual string toString();
 
+  inline Value & operator[](unsigned int uIndex) {
+    return GetAt(uIndex);
+  }
+
+
 protected:
   virtual void ConsolidateValues(int &iColumnWidth,
                                  vector<string> &aList,
