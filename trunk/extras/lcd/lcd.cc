@@ -197,7 +197,7 @@ TraceObject *LcdWriteTT::decode(unsigned int tbi)
 }
 int LcdWriteTT::dump_raw(unsigned tbi, char *buf, int bufsize)
 {
-  int n = TraceType::dump_raw(tbi,buf,bufsize);
+  int n = TraceType::dump_raw(gTrace,tbi,buf,bufsize);
 
   buf += n;
   bufsize -= n;
@@ -230,7 +230,7 @@ TraceObject *LcdReadTT::decode(unsigned int tbi)
 }
 int LcdReadTT::dump_raw(unsigned tbi, char *buf, int bufsize)
 {
-  int n = TraceType::dump_raw(tbi,buf,bufsize);
+  int n = TraceType::dump_raw(gTrace, tbi,buf,bufsize);
 
   buf += n;
   bufsize -= n;
