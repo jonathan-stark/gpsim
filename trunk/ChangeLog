@@ -1,4 +1,10 @@
 2006-09-10 J.R. Heisey <jrheisey@sourceforge.com>
+  * src/ValueCollections.h: Added indexing operator to class
+  IIndexedCollection.
+  * src/sim_context.cc,h: Added function CSimulationContext::
+  GetCycleCounter().
+  * src/modules.cc,h : Added functions to class ModuleLibrary:
+  GetLibraryFileHandle() and GetLibraryFunction().
   * gui/gui_src_asm.cc, gui/gui_src.h:
   - Rescoped several functions into classes to help me keep track
   of their context. Especially the callbacks.
