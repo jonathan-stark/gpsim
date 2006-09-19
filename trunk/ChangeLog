@@ -1,4 +1,8 @@
 2006-09-19 Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.cc, src/p16f62x.cc, src/p16f62x.h: Added the
+	p16f624 and the p16f624a
+
+2006-09-19 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, regression/p16f628/p16f628.asm: Added the
 	p16f627a and p16f628a processors. Note that these are identical to
 	the non-A versions.

@@ -343,7 +343,7 @@ P16F628::P16F628(const char *_name, const char *desc)
 // Pic 16F648 
 //
 
-pic_processor * P16F648::construct(const char *name)
+Processor * P16F648::construct(const char *name)
 {
 
   P16F648 *p = new P16F648(name);
