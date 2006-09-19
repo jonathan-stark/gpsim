@@ -9,9 +9,9 @@
    ;;     PORTA can work as a digital I/O port.
 
 
-   list p=16f628
+   list p=16f628a
 
-include "p16f628.inc"
+include "p16f628a.inc"
 
 CONFIG_WORD	EQU	_CP_OFF & _WDT_OFF & _INTRC_OSC_NOCLKOUT & _MCLRE_OFF
 
