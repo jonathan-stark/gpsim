@@ -24,6 +24,11 @@ Boston, MA 02111-1307, USA.  */
 //
 //  This file supports:
 //    P16C71
+//    P16C712
+//    P16C716
+//    P16C72
+//    P16C73
+//    P16C74
 
 
 #include <stdio.h>
@@ -36,6 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x7x.h"
 #include "pic-ioports.h"
 #include "stimuli.h"
+#include "pm_rd.h"
 
 
 //#define DEBUG_AD
@@ -484,6 +490,89 @@ P16C73::P16C73(const char *_name, const char *desc)
 }
 
 //------------------------------------------------------------
+
+void P16F73::create_sfr_map()
+{
+
+  if(verbose)
+    cout << "creating f73 registers \n";
+
+  add_sfr_register(pm_rd.get_reg_pmadr(),  0x10d);
+  add_sfr_register(pm_rd.get_reg_pmadrh(), 0x10f);
+  add_sfr_register(pm_rd.get_reg_pmdata(), 0x10c);
+  add_sfr_register(pm_rd.get_reg_pmdath(), 0x10e);
+  add_sfr_register(pm_rd.get_reg_pmcon1(), 0x18c);
+
+  alias_file_registers(0x80,0x80,0x80);
+  alias_file_registers(0x01,0x01,0x100);
+  alias_file_registers(0x82,0x84,0x80);
+  alias_file_registers(0x06,0x06,0x100);
+  alias_file_registers(0x8a,0x8b,0x80);
+  alias_file_registers(0x100,0x100,0x80);
+  alias_file_registers(0x81,0x81,0x100);
+  alias_file_registers(0x102,0x104,0x80);
+  alias_file_registers(0x86,0x86,0x100);
+  alias_file_registers(0x10a,0x10b,0x80);
+
+
+  alias_file_registers(0x20,0x7f,0x100);
+  alias_file_registers(0xa0,0xff,0x100);
+
+}
+
+
+void P16F73::create_symbols()
+{
+
+  if(verbose)
+    cout << "f73 create symbols\n";
+  pic_processor::create_symbols();
+}
+
+
+void P16F73::create()
+{
+
+  P16C73::create();
+
+  pm_rd.set_cpu(this);
+
+  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
+  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
+
+  P16F73::create_sfr_map();
+
+}
+
+Processor * P16F73::construct(const char *name)
+{
+
+  P16F73 *p = new P16F73(name);
+
+  if(verbose)
+    cout << " f73 construct\n";
+
+  p->create();
+  p->create_invalid_registers ();
+  p->create_symbols();
+
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+
+}
+
+
+P16F73::P16F73(const char *_name, const char *desc)
+  : P16C73(_name, desc)
+{
+  if(verbose)
+    cout << "f73 constructor, type = " << isa() << '\n';
+
+}
+
+//------------------------------------------------------------
 //
 //           16C74
 //
@@ -599,4 +688,88 @@ P16C74::P16C74(const char *_name, const char *desc)
   pir2 = &pir2_2_reg;
 
 }
+
+//------------------------------------------------------------
+
+void P16F74::create_sfr_map()
+{
+
+  if(verbose)
+    cout << "creating f74 registers \n";
+
+  add_sfr_register(pm_rd.get_reg_pmadr(),  0x10d);
+  add_sfr_register(pm_rd.get_reg_pmadrh(), 0x10f);
+  add_sfr_register(pm_rd.get_reg_pmdata(), 0x10c);
+  add_sfr_register(pm_rd.get_reg_pmdath(), 0x10e);
+  add_sfr_register(pm_rd.get_reg_pmcon1(), 0x18c);
+
+  alias_file_registers(0x80,0x80,0x80);
+  alias_file_registers(0x01,0x01,0x100);
+  alias_file_registers(0x82,0x84,0x80);
+  alias_file_registers(0x06,0x06,0x100);
+  alias_file_registers(0x8a,0x8b,0x80);
+  alias_file_registers(0x100,0x100,0x80);
+  alias_file_registers(0x81,0x81,0x100);
+  alias_file_registers(0x102,0x104,0x80);
+  alias_file_registers(0x86,0x86,0x100);
+  alias_file_registers(0x10a,0x10b,0x80);
+
+
+  alias_file_registers(0x20,0x7f,0x100);
+  alias_file_registers(0xa0,0xff,0x100);
+
+}
+
+
+void P16F74::create_symbols()
+{
+
+  if(verbose)
+    cout << "f74 create symbols\n";
+  pic_processor::create_symbols();
+}
+
+
+void P16F74::create()
+{
+
+  P16C74::create();
+
+  pm_rd.set_cpu(this);
+
+  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
+  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
+
+  P16F74::create_sfr_map();
+
+}
+
+Processor * P16F74::construct(const char *name)
+{
+
+  P16F74 *p = new P16F74(name);
+
+  if(verbose)
+    cout << " f74 construct\n";
+
+  p->create();
+  p->create_invalid_registers ();
+  p->create_symbols();
+
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+
+}
+
+
+P16F74::P16F74(const char *_name, const char *desc)
+  : P16C74(_name, desc)
+{
+  if(verbose)
+    cout << "f74 constructor, type = " << isa() << '\n';
+
+}
+
 

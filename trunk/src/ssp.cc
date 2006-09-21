@@ -273,7 +273,7 @@ unsigned int _SSPBUF::get_value()
 
 void _SSPADD::put(unsigned int new_value)
 {
-  cout << "SSPADD in unimplemented, as is all of I2C." << endl;
+  cout << "SSPADD is unimplemented, as is all of I2C." << endl;
 
   value.put(new_value & 0xff);
 
@@ -281,7 +281,7 @@ void _SSPADD::put(unsigned int new_value)
 
 void _SSPADD::put_value(unsigned int new_value)
 {
-  cout << "SSPADD in unimplemented, as is all of I2C." << endl;
+  cout << "SSPADD is unimplemented, as is all of I2C." << endl;
 
   trace.raw(write_trace.get() | value.get());
   put(new_value);
