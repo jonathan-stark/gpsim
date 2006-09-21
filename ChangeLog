@@ -1,3 +1,11 @@
+2006-09-21 Dave Barnett <dbarnett@edt.biz>
+	* src/pm_rd.cc, src/pm_rd.h: Support for midrange device's program
+	memory read feature.
+	* p16x7x.cc, src/p16x7x.h, src/pic-processor.cc,
+	src/pic-processor.h, src/Makefile.am: 
+	Added support for the P16F73 and P16F74
+	* src/ssp.cc: Fixed typo in printf statement
+
 2006-09-19 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/p16f62x.cc, src/p16f62x.h: Added the
 	p16f624 and the p16f624a

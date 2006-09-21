@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"    /* The '7x stuff is like '6x stuff with a/d converters */
 #include "pir.h"
 #include "a2dconverter.h"
+#include "pm_rd.h"
 
 //---------------------------------------------------------
 
@@ -143,6 +144,22 @@ class P16C73 : public P16C63
 
 };
 
+class P16F73 : public P16C73
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F73_;};
+  virtual unsigned int register_memory_size () const { return 0x200;};
+  virtual void create_symbols();
+  void create_sfr_map();
+  P16F73(const char *_name=0, const char *desc=0);
+  void create();
+  static Processor *construct(const char *name);
+
+protected:
+  PM_RD pm_rd;
+};
+
 //---------------------------------------------------------
 
 class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c64!
@@ -174,6 +191,22 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   void create();
   static Processor *construct(const char *name);
 
+};
+
+class P16F74 : public P16C74
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F74_;};
+  virtual unsigned int register_memory_size () const { return 0x200;};
+  virtual void create_symbols();
+  void create_sfr_map();
+  P16F74(const char *_name=0, const char *desc=0);
+  void create();
+  static Processor *construct(const char *name);
+
+protected:
+  PM_RD pm_rd;
 };
 
 

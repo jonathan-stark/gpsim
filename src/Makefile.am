@@ -58,6 +58,7 @@ libgpsim_la_SOURCES = \
 	pic-ioports.cc \
 	pie.cc \
 	pir.cc \
+	pm_rd.cc \
 	processor.cc \
 	program_files.cc \
 	protocol.cc \
@@ -136,6 +137,7 @@ gpsiminclude_HEADERS = \
 	picdis.h \
 	pie.h \
 	pir.h \
+	pm_rd.h \
 	processor.h \
 	program_files.h \
 	protocol.h \
