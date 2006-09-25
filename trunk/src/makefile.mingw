@@ -24,7 +24,7 @@ DLL_LDLIBS = -L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0 \
 
 all :				\
 	../config.h		\
-	libgpsim.dll 
+	libgpsim.dll
 
 libgpsim_LIBS =			\
 	libsrc.a		\
@@ -86,6 +86,7 @@ src_OBJECTS =			\
 	pie.o			\
 	protocol.o		\
 	pir.o			\
+	pm_rd.o			\
 	program_files.o		\
 	processor.o		\
 	psp.o			\
