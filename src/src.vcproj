@@ -399,6 +399,9 @@
 				RelativePath=".\pir.cc">
 			</File>
 			<File
+				RelativePath=".\pm_rd.cc">
+			</File>
+			<File
 				RelativePath=".\processor.cc">
 			</File>
 			<File
@@ -675,6 +678,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\pir.h">
+			</File>
+			<File
+				RelativePath=".\pm_rd.h">
 			</File>
 			<File
 				RelativePath=".\processor.h">

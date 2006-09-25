@@ -1,8 +1,11 @@
+2006-09-25 Borut Razem <borut.razem@siol.net>
+	* src/sdc.vcproj, src/makefile.mingw: added pm_rd.* to the project
+
 2006-09-21 Dave Barnett <dbarnett@edt.biz>
 	* src/pm_rd.cc, src/pm_rd.h: Support for midrange device's program
 	memory read feature.
 	* p16x7x.cc, src/p16x7x.h, src/pic-processor.cc,
-	src/pic-processor.h, src/Makefile.am: 
+	src/pic-processor.h, src/Makefile.am:
 	Added support for the P16F73 and P16F74
 	* src/ssp.cc: Fixed typo in printf statement
 
@@ -17,26 +20,26 @@
 
 
 2006-09-10 J.R. Heisey <jrheisey@sourceforge.com>
-  * src/ValueCollections.h: Added indexing operator to class
-  IIndexedCollection.
-  * src/sim_context.cc,h: Added function CSimulationContext::
-  GetCycleCounter().
-  * src/modules.cc,h : Added functions to class ModuleLibrary:
-  GetLibraryFileHandle() and GetLibraryFunction().
-  * gui/gui_src_asm.cc, gui/gui_src.h:
-  - Rescoped several functions into classes to help me keep track
-  of their context. Especially the callbacks.
-  - Implemented the popup menu items: Settings, Find PC, Move PC here,
-  Run here, Breakpoint here, Profile start here, Profile stop here,
-  and most importantly Add to Watch.
-  - Note that the Font selection dialog doesn't seems to actually
-  change the font. It appears to be the same with the old
-  GUI. I haven't checked into it.
-  - Changed the font selection dialog and the settings dialog
-  to use the gtk_dialog_run() function. This fixed an issue
-  when the close (upper right X) button was used the underlying
-  window would be deallocated. This caused the window to never
-  appear again requiring restarting gpsim.
+	* src/ValueCollections.h: Added indexing operator to class
+	IIndexedCollection.
+	* src/sim_context.cc,h: Added function CSimulationContext::
+	GetCycleCounter().
+	* src/modules.cc,h : Added functions to class ModuleLibrary:
+	GetLibraryFileHandle() and GetLibraryFunction().
+	* gui/gui_src_asm.cc, gui/gui_src.h:
+	- Rescoped several functions into classes to help me keep track
+	of their context. Especially the callbacks.
+	- Implemented the popup menu items: Settings, Find PC, Move PC here,
+	Run here, Breakpoint here, Profile start here, Profile stop here,
+	and most importantly Add to Watch.
+	- Note that the Font selection dialog doesn't seems to actually
+	change the font. It appears to be the same with the old
+	GUI. I haven't checked into it.
+	- Changed the font selection dialog and the settings dialog
+	to use the gtk_dialog_run() function. This fixed an issue
+	when the close (upper right X) button was used the underlying
+	window would be deallocated. This caused the window to never
+	appear again requiring restarting gpsim.
 
 2006-09-03 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc, gui/gui_scope.h: Signal name editing now works.
@@ -82,7 +85,7 @@
 	* gui/gui_src_asm.cc: Refresh gui menu when src window changes
 	hidden state.
 	* gui/gui_scope.cc: Redesigned scope window layout. Adding
-	scrolling. 
+	scrolling.
 
 2006-08-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/spi regression/spi/p16c62.asm regression/spi/16f88.lkr
@@ -90,8 +93,8 @@
 	  regression/spi/p16f88.asm regression/spi/Makefile
 	  regression/spi/18f242.lkr regression/run_regression.sh
 	  src/16bit-registers.h src/p16x6x.h src/p16x6x.cc
-	  src/p16f87x.cc src/16bit-processors.cc src/ssp.h src/14bit-tmrs.h 
-	  src/ssp.cc src/ioports.cc src/14bit-tmrs.cc src/p18x.cc 
+	  src/p16f87x.cc src/16bit-processors.cc src/ssp.h src/14bit-tmrs.h
+	  src/ssp.cc src/ioports.cc src/14bit-tmrs.cc src/p18x.cc
 	  src/16bit-registers.cc src/p16f8x.cc src/16bit-processors.h:
 	- Serial Peripheral Interface (SPI)
 
@@ -160,8 +163,8 @@
 2006-07-12 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/input.cc: Previously, the parser would abort
 	parsing upon detection of syntax errors. Now the parser will only
-	ignore the erroneous lines. The difference mainly applies to scripts. 
-	
+	ignore the erroneous lines. The difference mainly applies to scripts.
+
 2006-07-11 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.h, gui/gui_scope.cc: Added scope.zoom and
 	scope.pan attributes that allow the image in the scope window to
@@ -185,7 +188,7 @@
 	can be built by:
 	$ make -f mf
 	(Note: There is a bug with make depend in the modules directory).
-	
+
 2006-07-08 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc, gui/gui_scope.h, gui/gui.h, gui/gui_src.cc:
 	- Moved the KeyEvent class definition to gui.h.
@@ -195,7 +198,7 @@
 	* gui/gui_scope.cc: Added a GtkEntry widget to hold scope signal
 	names. Now signals can be specified either through the GtkEntry or
 	by the command line attributes.
-	
+
 2006-07-06 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_scope.cc: IOPINs can now be attached to scope
 	channels. The attachment can only be made at the command line:
@@ -207,7 +210,7 @@
 	* regression/logic_test/logic_test.asm: The logic OR gates
 	connected to porta0,porta1,porta2,portc0 are now displayed in the
 	scope window.
-	
+
 2006-07-05 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added a virtual destructor to the
 	PinMonitor class.
@@ -216,14 +219,14 @@
 	changes to remove compiler warnings.
 	* gpsim/CopyDlls.bat: This bat file copies the DLLs for the win32
 	builds to the gpsim/gpsim. A few more DLLs were added to the list.
-	
+
 2006-07-05 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/make.mingw: Added an option to use ccache for mingw
 	builds. Unfortunately, for this to work well the makefile
-	dependencies also need to be implemented correctly. 
+	dependencies also need to be implemented correctly.
 
 2006-07-04 Roy Rankin <rrankin@ihug.com.au>
-	* src/p16x6x.h src/p16x6x.cc src/p16f87x.cc src/p16f87x.h 
+	* src/p16x6x.h src/p16x6x.cc src/p16f87x.cc src/p16f87x.h
 	  src/pir.cc src/pir.h src/comparator.h src/a2dconverter.h
 	  src/comparator.cc regression/comparator/compar_877a.asm:
 	- Fixes involving PIR_SET
@@ -251,7 +254,7 @@
 	* src/ioports.h, src/stimuli.h, src/stimuli.cc, src/ioports.cc:
 	  - Moved the SignalSink class to stimuli.h
 	  - Introduced addSink and removeSink methods to the PinMonitor
-	    class. 
+	    class.
 	  - Removed references to 'OLD_IOPORT_DESIGN'
 	* src/bitlog.cc, src/bitlog.h: The ThreeStateEventLogger class now
 	  has a flag to indicate when the event buffer is
@@ -276,7 +279,7 @@
 	* regression/usart_test/usart_pir1v1.asm,
 	  regression/usart_test/usart_pir1v2.asm:
 	- Check PIC TX pin is high when first set to output.
-	* src/pic-ioports.cc: Portb, allow driving state to be set 
+	* src/pic-ioports.cc: Portb, allow driving state to be set
 	  even when bit is set.
 	* src/tmr0.cc: Fix call of clear_break.
 
@@ -300,7 +303,7 @@
 	feature is not currently working (was it ever?). Also, it'd be
 	useful to have a "search all files" feature.
 	* gui/gui_menu.cc: Minor change to TextStyle API.
-	
+
 2006-06-13 Scott Dattalo <scott@dattalo.com>
 	* src/sim_context.cc, cli/input.cc, cli/cmd_load.cc: Rewrote code
 	to get around a gcc 3.2.2 x86 bug regarding the mis-handling of
@@ -317,15 +320,15 @@
 	* doc/gpsimWin32.html: patched gtk+extra-2.1.1-src-20060611.zip
 
 2006-06-12 Roy Rankin <rrankin@ihug.com.au>
-	* regression/usart_test/usart_pir1v1.asm 
-	  regression/usart_test/16f628.lkr 
+	* regression/usart_test/usart_pir1v1.asm
+	  regression/usart_test/16f628.lkr
 	  regression/usart_test/usart_pir1v2.asm
 	  regression/usart_test/Makefile regression/run_regression.sh:
 	- Improve USART regression tests
 	* regression/usart_test/usart_test.stc
 	  regression/usart_test/usart_test.asm: removed as redundant
 	* src/uart.cc src/uart.h: receive baud rate fix
-	* modules/usart.cc modules/usart.h: Transmit baudrate fix, 
+	* modules/usart.cc modules/usart.h: Transmit baudrate fix,
 	  loop attribute added, receiver rewritten to remove event logger.
 
 2006-06-10 Robert Pearce <rob@bdt-home.demon.co.uk>
@@ -374,12 +377,12 @@
 
 	Pic processors now can be named when instantiated.
 
-	* gui/gui_menu.cc: Adhere to the new calling convention for gpsim_open. 
+	* gui/gui_menu.cc: Adhere to the new calling convention for gpsim_open.
 
 	* src/hextutils.h, src/hexutils.cc, src/program_files.cc, src/program_files.h,
 	  src/sim_context.h, src/sim_context.cc, src/cod.cc: New
 	calling convention for LoadProgramFile
-	
+
 	* src/os_dependent.cc: There appeared to be a compiler bug
 	IsFileExtension() (a const pointer in the callee's stack space was
 	getting modified). But, there is a built in STL function that does
@@ -391,13 +394,13 @@
 	  regression/comparator/compar_873a.stc,
 	  regression/p16f84/p16f84.stc,
 	  regression/switch_test/switch_test.stc,
-	  regression/switch_test/switch_test.asm, 
+	  regression/switch_test/switch_test.asm,
 
 2006-06-03 Roy Rankin <rrankin@ihug.com.au>
-	* src/stimuli.cc, src/stimuli.h: New resistor-capacitor transient 
+	* src/stimuli.cc, src/stimuli.h: New resistor-capacitor transient
 	  voltage calculation implemented and activated, getBitChar function
 	  re-written.
-	* modules/switch.cc, modules/switch.h, 
+	* modules/switch.cc, modules/switch.h,
 	  regression/switch_test/switch_test.asm:
 	- Switch module model changed eliminating Rclosed parameter
 
@@ -450,7 +453,7 @@
 	  extras/graphic_lcd/src/sed1520.cc,
 	  extras/lcd/hd44780.cc: removed unneeded inclusion of config.h
 	* extras/graphic_lcd/makefile.mingw: added, thanks to Xiaofan Chen
-	* extras/lcd/makefile.mingw: corrected, thanks to Xiaofan Chen  
+	* extras/lcd/makefile.mingw: corrected, thanks to Xiaofan Chen
 	* makefile.mingw: added rules doc and setup
 	* plat/win32/fd2raw.cpp: report error messages
 
@@ -468,16 +471,16 @@
 	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h,
 	src/processor.h, src/processor.cc, src/pic-processor.h,
 	src/14bit-processors.h,src/14bit-processors.cc,
-	src/pic-processor.cc: The ProgramMemoryClass now uses the newly 
+	src/pic-processor.cc: The ProgramMemoryClass now uses the newly
 	added "disjoint set" feature of an IndexedCollection to provide
-	access to configuration memory. E.g. 
-	
+	access to configuration memory. E.g.
+
 	  romData[0x300000] = 0x1234
 
-	will write 0x1234 to the configuration word at address 0x300000. 
+	will write 0x1234 to the configuration word at address 0x300000.
 	In addition, infrastructure has been added to symbolically deal
-	with configuration memory. E.g. 
-	
+	with configuration memory. E.g.
+
 	  gpsim> .CONFIG1H
 	  $00000027
 
@@ -501,7 +504,7 @@
 
 2006-05-25 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.h, modules/switch.cc, modules/gpsim_modules.cc:
-	  Only use gui if enabled. 
+	  Only use gui if enabled.
 	* modules/stimuli.h, modules/stimuli.cc: Began adding support for
 	  file stimulus.
 
@@ -514,7 +517,7 @@
 
 	* src/14bit-tmrs.h, src/14bit-tmrs.cc:
 	- PWM fixes CCP high if duty cycle 0, CCPRnH loaded on TMR2
-	  compare, PWM starts after first TMR2 compare, PMR2::put 
+	  compare, PWM starts after first TMR2 compare, PMR2::put
 	  and PR2::put rewrite
 	* regression/ccp/pwm_877a.asm, regression/ccp/Makefile,
 	  regression/run_regression.sh: PWM regression
@@ -532,10 +535,10 @@
 	regression test except that the asynchronous stimulus has been
 	replaced with a pulsegen module).
 	* src/symbol.cc: Module symbol descriptions were not getting
-	printed 
+	printed
 	* cli/cmd_break.cc: removed bogus warning about cycle break points
 	not getting set.
-	
+
 2006-05-21 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/p16f87x.h, src/p16f87x.cc: Re-worked 16F871 to be derived from
 	  16C64 rather than 74, because that's the easiest way I could find to
@@ -601,7 +604,7 @@
 2006-05-13 Scott Dattalo <scott@dattalo.com>
 	* src/a2dconvert.h: removed redundant class qualifiers in member
 	function declarations.
-	
+
 2006-05-13 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/processor.cc, gui/gui_src_opcode.cc: Added
 	romData[] accessor (analogous to ramData) to provide a way of
@@ -621,7 +624,7 @@
 	* src/pir.h, src/pir.cc: Applied patch (with modifications) from
 	Robert Pearce that adds the concept of 'writable' PIR register
 	bits versus 'valid' ones.
-	
+
 2006-05-10 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-hexdecode.cc, src/p16x6x.h, src/i2c-ee.h,
 	src/p16x6x.cc, src/p16f87x.cc, src/16bit-processors.cc,
@@ -631,7 +634,7 @@
 	- Redesigning PIR logic. The existing design requires numerous
 	manuel configurations that are subject to error. The new design
 	attempts to encapsulate the PIR configuration within the PIR
-	classes. 
+	classes.
 
 2006-05-10 Scott Dattalo <scott@dattalo.com>
 	* modules/i2c-eeprom.h, modules/i2c-eeprom.h, Makefile.am,
@@ -663,13 +666,13 @@
 	 gui terminal window.
 
 2006-05-06 Robert Pearce <rob@bdt-home.demon.co.uk>
-	* modules/usart.h, modules/usart.cc: 
+	* modules/usart.h, modules/usart.cc:
 	 - Usart GUI now displays non-printable characters as <%02X>.
 	 - The usart module now supports a transmit FIFO. This allows
 	 transmit data to be queued while the simulation is stopped.
 
 2006-04-30 Roy Rankin <rrankin@ihug.com.au>
-	* gui/gui_src.h gui/gui_src_asm.cc: fix ungisgned - signed compile 
+	* gui/gui_src.h gui/gui_src_asm.cc: fix ungisgned - signed compile
 	  warnings
 	* gui/gui_breadboard.cc: get trace working again
 	* gui/Makefile.am: remove unused and incorrect defines
@@ -686,7 +689,7 @@
 	* src/gpsim_object.h src/gpsim_object.cc src/stimuli.cc
 	  src/stimuli.h gui/gui_breadboard.h gui/gui_breadboard.cc:
 	- GUI pin rename code - rewritten and moved into IOPIN class
-	* src/comparator.h src/comparator.cc p16f62x.cc: 
+	* src/comparator.h src/comparator.cc p16f62x.cc:
 	- Do dynamic GUI pin renaming
 	* gui/Makefile.am: remove unused and incorrect defines
 	* src/processor.cc: Set 4 clock cycles per instruction cycle
@@ -700,14 +703,14 @@
 2006-04-26 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h, modules/gpsim_modules.cc:
 	- Added On-resistance and Off-resistance attributes to the switch
-	module. (They're called Ropen and Rclosed). 
+	module. (They're called Ropen and Rclosed).
 	- The switch module code now resides in the 'Switches' namespace.
 	* modules/resistor.cc:
 	- The resistor module now initializes itself with the gpsim
 	default attributes (which for now are only xpos and ypos).
 
 	* regression/switch_test/switch_test.asm,
-	regression/switch_test/switch_test.stc: 
+	regression/switch_test/switch_test.stc:
 	Moved the switch regression test configuration script into the
 	switch_test.asm source
 
@@ -741,7 +744,7 @@
 	* modules/gpsim_modules.cc, modules/push_button.cc,
 	modules/resistor.cc, modules/push_button.h, modules/resistor.h,
 	modules/encoder.cc, modules/encoder.h, modules/Makefile.am:
-	- Removed references to the deprecated IOPORT class. 
+	- Removed references to the deprecated IOPORT class.
 	- Temporarily removed the video and the parallel_port modules (I
 	  don't have a way to test them).
 	- The push button module can now be used again.
@@ -782,7 +785,7 @@
 	test for the newly added '377 module in the ttl library.
 	* src/modules.h, src/modules.cc, gpsim_object.cc: Modules can now
 	be constructed with a name and a description.
-	
+
 2006-04-15 Scott Dattalo <scott@dattalo.com>
 	* regression/switch_test/switch_test.asm: corrected 'capacitance'
 
@@ -842,7 +845,7 @@
 	those peripherals that implement their own PIR functionality (this
 	is currently only the P16C71 A2D module).
 	* src/pir.h: The PIR_SET used to be a pure virtual base
-	class. This class needs to be redesigned... 
+	class. This class needs to be redesigned...
 	* src/pir.h: Made class members private.
 	* src/gpsim_object.h, src/gpsim_object.cc, src/value.h,
 	src/value.cc: Moved Value descriptions into the parent gpsimObject
@@ -861,7 +864,7 @@
 2006-04-11 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc: Right-button mouse clicks now
 	bring up a menu. Currently, not all of the menu items are
-	supported. Furthermore, only GtkTextTag'd text responds. 
+	supported. Furthermore, only GtkTextTag'd text responds.
 
 2006-04-11 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f87x.cc: if code read with breadboard closed, breadboard
@@ -869,12 +872,12 @@
 	* src/pic-ioports.cc: fix portb does not show high inputs if register
 	  bits cleared from assembler code.
 	* regression/rt.sh: allow multiple tests in one directory
-	* regression/run_regression.sh: run comparator tests seperatly  
+	* regression/run_regression.sh: run comparator tests seperatly
 	* src/comparator.cc: cleanup compiler warnings
 
 2006-04-08 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.cc: removed from SVN. This autogenerated by flex from
-	scan.ll. 
+	scan.ll.
 
 2006-04-09 Borut Razem <borut.razem@siol.net>
 	* extras/graphic_lcd/utils/custom.png,
@@ -909,44 +912,44 @@
 	  2006-04-05 patch until better method can be found.
 	* gui/gui_regwin.cc: fix core dump of ram window and ascii part of
 	  register windows not showing all characters.
-	* src/p16f87x.cc: fix eeprom being initialized twice for most 
+	* src/p16f87x.cc: fix eeprom being initialized twice for most
 	  p16f87x processors.
 
 2006-04-08 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.h src/pic-processor.cc src/p16f87x.h
 	  p16f87x.cc: Add support for p16f87xA which are p16f87x
 	  with 2 comparators and vref.
-	* src/p16f62x.h src/p16f62x.cc src/Makefile.am src/pir.cc src/pir.h: 
-	  new files src/comparator.h src/comparator.cc 
+	* src/p16f62x.h src/p16f62x.cc src/Makefile.am src/pir.cc src/pir.h:
+	  new files src/comparator.h src/comparator.cc
 	  to add comparator and vref functions.
-	* new directory regression/comparator with new files 
-	  compar_628.asm compar_628.stc compar_877a.asm 
+	* new directory regression/comparator with new files
+	  compar_628.asm compar_628.stc compar_877a.asm
 	  compar_877a.stc compar_873a.asm compar_873a.stc
-	  Makefile 16f628.lkr 16f877a.lkr 16f873.lkr 
+	  Makefile 16f628.lkr 16f877a.lkr 16f873.lkr
 	  for comparator regression tests.
 	* regression/run_regression.sh: invoke comparator regression tests
 
 2006-04-05 Roy Rankin <rrankin@ihug.com.au>
-	* src/ioports.h src/ioports.cc : Fix setEnableMask() so it works 
+	* src/ioports.h src/ioports.cc : Fix setEnableMask() so it works
 	  when pin is already added. Stop memory leak in newDefaultControl().
 	* src/pic-ioports.cc: setTris() can be run multiple times.
-	* src/p16f62x.cc src/cod.cc: Correct error in Oscillator configuration 
-	  bit processing. Pins 5, 6 and 7 of port A may be I/O depending on 
-	  configuration bits. Pin names changed depending on configuration 
+	* src/p16f62x.cc src/cod.cc: Correct error in Oscillator configuration
+	  bit processing. Pins 5, 6 and 7 of port A may be I/O depending on
+	  configuration bits. Pin names changed depending on configuration
 	  bits.
-	* src/p16x6x.cc: Bit 5 of port A is I/O for all of 16X6x family 
+	* src/p16x6x.cc: Bit 5 of port A is I/O for all of 16X6x family
 	  p16x63 and higher.
-	* src/eeprom.h src/eeprom.cc src/p16f87x.cc: fix bugs in writing to 
+	* src/eeprom.h src/eeprom.cc src/p16f87x.cc: fix bugs in writing to
 	  EEPROM and added FLASH program writing using wide mode (p16f87x).
 	* regression/run_regression.sh: add directory regression/eeprom_wide
 	  with files Makefile, 16f873.lkr, eedate_wide.asm and eeprom_wide.stc
-	  for regression testing of EEPROM and FLASH single byte wide 
+	  for regression testing of EEPROM and FLASH single byte wide
 	  read-write operations.
 
 2006-03-30 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.cc: In 03-27 changes, a variable initialization
 	got commented out and caused a segv on some systems
-	
+
 2006-03-30 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-registers.h, src/14bit-registers.cc: Resetting the
 	program counter low register (PCL) was causing the cycle counter
@@ -957,12 +960,12 @@
 	Source files are now only parsed whenever they're brought into
 	view. (The previous commit parsed the source, but only placed it
 	into a gtk_text_view whenever the source was brought into view).
-	
+
 	* src/processor.cc: Config addresses in the .lst file were causing
 	a segv when the list file was processed.
 
 2006-03-28 Scott Dattalo <scott@dattalo.com>
-	* gui/gui_src_asm.cc, gui/gui_src.h: 
+	* gui/gui_src_asm.cc, gui/gui_src.h:
 	- If there are many source files, the notebook will now allow the
 	tabs to be scrolled.
 	- Source files are now only rendered whenever the page in which
@@ -999,7 +1002,7 @@
 2006-03-22 J.R. Heisey <jrheisey@sourceforge.com
 	* config_win32.h.in, plat/win32/fd2raw.cpp: Removed strndup()
 	for Visual Studio. Using g_strndup() from glib instead
-	* src/os_dependent.cc, src/modules.h: Change parameter of 
+	* src/os_dependent.cc, src/modules.h: Change parameter of
 	free_error_message() from char * to const char * to go along with the change to
 	get_error_message().
 	* gpsim/gpsim.vcproj: Changed library from readline-static.lib to
@@ -1023,9 +1026,9 @@
 
 2006-03-22 Scott Dattalo <scott@dattalo.com>
 	* src/cod.cc, src/pic-instructions.cc, src/processor.cc,
-	src/processor.h: 
+	src/processor.h:
 	Fixed list file processing. Now the file context class knows if it
-	owns a .lst file versus a .asm or .inc file. 
+	owns a .lst file versus a .asm or .inc file.
 	* gui/gui_src.h, gui/gui_src_asm.cc:
 	List files are now displayed in the source browser. The program
 	counter indicator tracks correctly. Breakpoints can not be
@@ -1038,12 +1041,12 @@
 	* gui/gui_object.cc: removed debug printf
 	* gui/gui_src_asm.cc: Added a delete_event handler for the source
 	browser; killing the source browser window was causing gpsim to
-	crash otherwise. 
+	crash otherwise.
 	The source browser name has been updated to match the old
 	browser's name (this is mainly for registry and .gpsim settings).
 	Added GTK_WAIT's for slower machines. Apparently gtk's event queue
 	is getting overwhelmed while the source browser is being created.
-	
+
 2006-03-21 Borut Razem <borut.razem@siol.net>
 	* src/cod.cc: fixed bug "[ 1448454 ] usart_test - ERROR: == comparison
 	  is not defined for String" by merging "assertions" and "assertions"
@@ -1051,12 +1054,12 @@
 
 2006-03-20 Scott Dattalo <scott@dattalo.com>
 	* regression/breakpoints.asm: Embedded script error was causing
-	regression test to fail. 
+	regression test to fail.
 	* regression/rt.sh: Minor fix to Borut's regression test
 	enhancement; the 'tee' command was appending multiple regression
 	tests to the same log file. Also, on Athlon 64's, the tee command
 	was causing pipe errors for some reason.
-	
+
 2006-03-19 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc:
 	The preferences window now configures the source browser tabs,
@@ -1086,7 +1089,7 @@
 2006-03-15 Alain Portal <aportal@univ-montp2.fr>
 	* src/p12.h: Remove redundant class scoping (causes errors with
 	gcc-4.1)
-	
+
 2006-03-14 Borut Razem <borut.razem@siol.net>
 	* src/dspic/makefile.mingw: added
 	* plat/win32/gpsim.nsi: fixed typo
@@ -1128,16 +1131,16 @@
 	queue wait.
 	* src/gui_processor.h: The default is to now enable the new source
 	browser.
-	
+
 2006-03-06 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: The stimulus command without any options now
 	shows more information. In particular, value stimuli (the ones
 	that allow you to specify an array of data) are now shown.
-	
+
 2006-03-06 Scott Dattalo <scott@dattalo.com>
 	* doc/gpsim.lyx, doc/gpsim.pdf: Updated the documentation to
 	reflect the deprecation of the X command
-	
+
 2006-03-06 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: Moved the
 	gtk text tag table to the source browser parent class. Added a
@@ -1146,7 +1149,7 @@
 
 2006-03-06 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_x.cc: The x command has been deprecated.
-	
+
 2006-03-05 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h: The default Thevenin resistance for an IOPIN was
 	too low. This caused an INPUT only pin to appear as though if it
@@ -1170,7 +1173,7 @@
 	2006-02-27. Removed the line numbers from the source
 	browser. Changed the current PC and breakpoint indicator. Also,
 	now clicking on a break indicator toggles a break point.
-	
+
 2006-03-04 Scott Dattalo <scott@dattalo.com>
 	* src/modules.h, src/modules.cc, src/os_dependent.cc: Changed
 	references from char * to const char * for error strings
@@ -1180,7 +1183,7 @@
 2006-03-04 Scott Dattalo <scott@dattalo.com>
 	* cli/ui_gpsim.cc: GlobalVerbosityAccessor verbose was declared
 	twice! (Thanks to Alex Holden for pointing this out).
-	
+
 2006-02-27 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: FileContext put_address and get_address
 	methods were ignoring the last line of files.
@@ -1234,13 +1237,13 @@
 	extended instructions.
 	* src/16bit-processors.cc, src/16bit-processors.cc,
 	src/16bit-registers.cc:
-	added the pclatu register. 
+	added the pclatu register.
 	* src/pic-instructions.cc: the instruction class constructor now
 	initializes most of it's data members directly.
 
 	* regression/make.regression: .cod files are now removed for the
 	'make clean rule'
-	* regression/run_regression.sh, 
+	* regression/run_regression.sh,
 	regression/p18f/18f452.lkr, p18f/Makefile,
 	p18f/extended_instructions.asm, p18f/instructions.asm,
 	p18f/startup.stc:
@@ -1281,7 +1284,7 @@
 
 2006-02-04 Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-instructions.cc, src/dspic/dspic-instructions.h,
-	src/dspic/dspic-processors.cc: 
+	src/dspic/dspic-processors.cc:
 	Added support for the Literal, Register Direct,  and Register
 	Indirect addressing modes.
 
@@ -1291,9 +1294,9 @@
 	cycles_per_instruction value in the processor class
 	* modules/switch.cc, modules/switch.h, modules/resistor.cc,
 	regression/switch_test/switch_test.stc,
-	regression/switch_test/switch_test.asm: 
+	regression/switch_test/switch_test.asm:
 	Switch modules now handle analog inputs and RC loads.
-	
+
 2006-01-30 J.R. Heisey <jrheisey@sourceforge.com
 	* Changed the implementation of Float::copy() to use the get()
 	function to retrieve the value.
@@ -1359,7 +1362,7 @@
 	src/dspic/dspic-instructions.h, src/dspic/gpsim_modules.cc,
 	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h:
 	Initial infrastructure for dspic port.
-	* src/hexutils.h: New file. 
+	* src/hexutils.h: New file.
 	* src/hexutils.cc, src/program_files.cc: Hex files generated by
 	gpasm and mpasm are really Intel hex files. The hex files
 	generated by the gcc-pic30 tool chain also generate Intel hex
@@ -1434,7 +1437,7 @@
 	there is a qualifying expression. For example:
 	   break w MyVariable, ((PC > IntVector) && (PC<IntVectorEnd))
 	In other words, this break occurs if the interrupt routine is
-	executing when ever 'MyVariable' is written to. 
+	executing when ever 'MyVariable' is written to.
 	 One of the refinements was to turn the 'break condition' into an
 	expression. Eg. 'break w ((MyVar &0xf)==4)'. Here, the condition
 	is an expression. This condition can have an additional qualifying
@@ -1486,7 +1489,7 @@
 	Linux, a failed module library load command from the command
 	window repeats the error message already printed.  Even worse, if
 	the failure occurs fromthe breadboard GUI "Add libs" function,
-	gpsim crashes. 
+	gpsim crashes.
 
 	* src/os_dependent.cc: Fix up error handling on library loads for
 	Linux. Also for readability changed #ifndef _WIN32 to #ifdef
@@ -1552,7 +1555,7 @@
 	register_mask methods from the processor class to the module
 	class. (Modules can have regsiters too!).
 	* src/p16x7x.cc, src/p16x6x.cc, src/p16x5x.cc, src/p16f87x.cc,
-	src/p16f62x.cc, src/16bit-processors.cc, src/14bit-processors.cc: 
+	src/p16f62x.cc, src/16bit-processors.cc, src/14bit-processors.cc:
 	W was not getting added to the symbol table.
 	* src/gpsim_time.cc: stopwatch changes to conform to value class api.
 	* src/breakpoints.cc, src/breakpoints.h: cleaned up/fixed printout of
@@ -1563,7 +1566,7 @@
 	getting parsed properly.
 	* cli/scan.ll: echo command was failing to be recognized.
 	* cli/cmd_break.cc: moved most of the expression parsing into the
-	simulation engine. 
+	simulation engine.
 	* src/expr.h, src/expr.cc: LiteralSymbols are cast into either
 	registers or program memory address when breaks are set on them.
 	* src/cod.cc: pruned some dead code.
@@ -1585,7 +1588,7 @@
 	methods to the ThreeStateEventLogger class. These are debug
 	functions used to examine event logs.
 	* modules/usart.cc: Utilize new event logger utilities.
-	
+
 
 2005-12-28 Scott Dattalo <scott@dattalo.com>
 	* regression/breakpoints, regression/breakpoints/breakpoints.asm,
@@ -1597,7 +1600,7 @@
 2005-12-28 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, src/breakpoints.cc: gpsim would crash if a
 	break point was set on a register that did not have a symbol table
-	entry. 
+	entry.
 
 2005-12-28 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc, modules/usart.h: Fixed bugs in
@@ -1608,7 +1611,7 @@
 	* examples/modules/usart_gui/README: New
 	* examples/modules/usart_gui/usart_gui.asm: New
 	* examples/modules/usart_gui/usart_gui.stc: New. The usart_gui
-	example illustrates the new Usart GUI interface. 
+	example illustrates the new Usart GUI interface.
 
 2005-12-23 J.R. Heisey <jrheisey@sourceforge.com
 	* src/breakpoints.cc, src/cmd_gpsim.h, cli/cmd_module.cc,
@@ -1643,7 +1646,7 @@
 	* src/ioports.h, src/ioports.cc, src/pic-ioports.h,
 	src/pic-ioports.cc: moved some of the functionality in the
 	PicPort classes upto the generic Port classes. Also added
-	comments. 
+	comments.
 
 2005-12-12 J.R. Heisey <jrheisey@sourceforge.com
 	* cli\cmd_symbol.cc, cli\cmd_symbol.h, src\operator.cc,
@@ -1733,9 +1736,9 @@
 	Extended the RegisterCollection class to support an arbitrary
 	array of Registers. Added CLI access to the EEPROM.
 	Usage:
-	   eeData 
+	   eeData
 	shows all eeprom registers.
-	   eeData[expression] 
+	   eeData[expression]
 	shows one or several eeprom registers.
 	* packages.cc, packages.h: Added better support for module pin
 	placement.
@@ -1785,7 +1788,7 @@
 	src\ttoken.cc, src\ttoken.h, cli\ui_gpsim.cc, cli\cli.vcproj,
 	gui\gui.vcproj, src\src.vcproj, gpsim\gpsim.vcproj:
 	These changes are for building the files in the src folder
-	as the library libgpsim.dll under Windows. There were a couple 
+	as the library libgpsim.dll under Windows. There were a couple
 	of global variables that needed to be decoupled with accessor
 	functions for access from gpsim.exe and other modules.
 	I found that putting global variables in the gpsim.def file
@@ -1804,8 +1807,8 @@
 	library file.
 	Created a new file libgpsim.def and moved all the symbols from
 	gpsim.def into it. Emptied gpsim.def of all symbols.
-	References to bp now call get_bp(). 
-	References to ui now call 
+	References to bp now call get_bp().
+	References to ui now call
 
 2005-11-13 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: The experimental Preferences window caused a
@@ -1825,7 +1828,7 @@
 	modules/push_button.cc: Calls to Stimulus_Node->update() method
 	unnecessarily passed the current simulation time.
 	* modules/resistor.cc, modules/resistor.h: The pullup resistor
-	module was completely broken. 
+	module was completely broken.
 	* modules/switch.cc, modules/switch.h: The switch module never did
 	work, but now it does! This is now truly a two-port device.
 	* src/gpsim_time.cc, src/gpsim_time.h: Added methods to control
@@ -1877,7 +1880,7 @@
 	* src/sim_context.cc: In CSimulationContext::Clear() now clear
 	the symbol table after I delete the processors in the processor
 	list. This provents the symbol table from deleting a symbol
-	that is actually owned by the processor. 
+	that is actually owned by the processor.
 
 2005-11-02 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/tmr0.cc, src/stimuli.cc: Fix TMR0 external clocking
@@ -1927,7 +1930,7 @@
 	* gpsim/main.cc, cli/cmd_load.cc, cli/cmd_macro.cc, cli/input.cc,
 	cli/socket.cc: command assertions were not getting processed immediately.
 	* regression/tmr0_16bit/tmr0_16bit.asm: Started interrupt test.
-	
+
 2005-10-12 Borut Razem <borut.razem@siol.net>
 	* regression/make.regression, regression/run_regression.sh,
 	  regression/*/Makefile: added possibility to define gpism path
@@ -2036,7 +2039,7 @@
 
 2005-09-30 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: Source
-	browser clean up. 
+	browser clean up.
 
 2005-09-29 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: More
@@ -2115,7 +2118,7 @@
 	* src/12bit-instructions.h, src/14bit-instructions.h,
 	src/16bit-instructions.h, src/breakpoints.h, src/hexutils.cc,
 	src/pic-instructions.cc, src/pic-instructions.h, src/processor.cc:
-	Fixed disassembly output for shadowed instructions. 
+	Fixed disassembly output for shadowed instructions.
 
 2005-09-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui.h, gui/gui_main.cc, gui/gui_regwin.cc, gui/gui_regwin.h,
@@ -2137,11 +2140,11 @@
 	browser. The 'Drag Break' feature has been disabled since it
 	really doesn't work too well for assertions (or at least doesn't
 	apply). Fixed a bug that prevented toggling breaks that occur at
-	the current PC. 
+	the current PC.
 	A new class was added to better handle the breakpoint
 	classes. This new class, AliasedInstruction, is a base for the
 	breakpoint class and basically will provide an API to handle
-	aliased or replace instructions. 
+	aliased or replace instructions.
 
 2005-09-11 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def: updated for API changes.
@@ -2225,12 +2228,12 @@
 	* src/14bit-tmrs.cc: TMR2:current_value() would return the
 	contents of PR2 even when configured for normal operation.
 	* src/p18x.cc: typo in porte names.
-	
+
 2005-09-01 Manuel Bouyer <bouyer@antioche.eu.org>
 	* src/p18x.cc: Fix crash when an 18F252	is instantiated.
 	* src/gpsim_time.cc: Disabled unnecessary debug printing
 	* src/uart.cc: Fixed spurious uart transmit. Add io sink for
-	Receiver. 
+	Receiver.
 
 2005-08-31 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc: Fixed a crashing bug when the --source=disable
@@ -2243,7 +2246,7 @@
 	Modified LLStack::GetNext() and LLStack::Pop() to not remove
 	the last LLStack object.
 	Fixed memory leak in LLStack::Pop().
-	
+
 	* cli/ui_gpsim.cc: Added EOL to injected abort_gpsim_now
 	command.
 
@@ -2255,7 +2258,7 @@
 2005-08-30 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/processor.cc, src/pic_processor.cc: Fixed
 	step-over feature for the 18F family.
-	
+
 2005-08-30 Scott Dattalo <scott@dattalo.com>
 	* regression/rt.sh: The new version of the regression test script
 	was not checked in yesterday. This new version creates a simple
@@ -2293,7 +2296,7 @@
 	init_program_memory_at_index() - it was not setting the
 	configuration word if the address was in configuration memory.
 	* src/bitlog.cc: Added a 'ThreeStateEventLogger' that's analogous
-	to the bit and byte logger. 
+	to the bit and byte logger.
 	* src/intcon.cc: Turned off some debugging code.
 	* src/registers.h: fixed typo in comment
 	* src/stimuli.cc, src/stimuli.h: Iopin's were checking Z state
@@ -2337,10 +2340,10 @@
 	* p18f452_ports/18f452.lkr, p18f452_ports/Makefile: added
 	* register_stim/16f84.lkr, register_stim/Makefile: added
 
-	
+
 2005-08-22 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc: Fixed typo in pullup in setDefaultPullupControl
-	method. 
+	method.
 
 2005-08-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/input.cc, cli/input.h, gpsim/main.cc: Added two
@@ -2354,7 +2357,7 @@
 	prevent source code from being loaded. Usefule for
 	automated regression testing. '-S enable' will enable
 	source code loading. See online help.
-	
+
 	* src/p16x7x.cc: Fixed an sign/unsigned warning.
 
 	* src/processor.h: Test function for whether source file
@@ -2391,7 +2394,7 @@
 	exit when the simulation halts.
 
 2005-08-11 Scott Dattalo <scott@dattalo.com>
-	* src/breakpoints.cc, src/breakpoints.h: Allowed breakpoint 
+	* src/breakpoints.cc, src/breakpoints.h: Allowed breakpoint
 	expressions for breakpoint instructions to act like assertions.
 	* src/cmd_manager.h, src/cod.cc, src/gpsim_interface.h,
 	  src/modules.cc, src/modules.h, cli/input.cc:
@@ -2417,7 +2420,7 @@
 	* src/p16x7x.h, src/p16x7x.cc, src/p16f87x.cc: The Analog to
 	Digital convertor peripheral now connects to I/O pins again. Also,
 	the A2D module was redesigned so that less of the internal
-	implementation is exposed. 
+	implementation is exposed.
 	* src/14bit-tmrs.h, src/14bit-tmrs.cc, src/ssp.h, src/ssp.cc,
 	src/p16x6x.cc: Updated the peripheral connections with the new
 	PeripheralSignalSource class.
@@ -2480,7 +2483,7 @@
 	* gui/gui_breadboard.cc, src/symbol.h, src/symbol.cc, src/stimuli.cc:
 	Backed out some of the symbol changes made by JR because the code
 	doesn't compile on Linux (gcc 3.4.2). At the moment, this means
-	that stimuli and node dumps do not work. 
+	that stimuli and node dumps do not work.
 
 2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_node.cc, plat/win32/gpsim.def, gui/gui_breadboard.cc,
@@ -2553,11 +2556,11 @@
 	src/16bit-registers.h, src/p18x.cc, src/p18x.h:
 	Completed converting the 16-bit core I/O ports to the new I/O
 	redesign (note - the peripheral-to-I/O mapping still needs to be
-	completed). 
+	completed).
 
 	* src/ioports.h, src/ioports.cc: deprecated the old PIC_IOPORT
 	class and all of its children.
-	
+
 2005-08-01 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-processors.cc, src/14bit-processors.h,
 	src/14bit-tmrs.cc, src/14bit-tmrs.h, src/intcon.cc, src/intcon.h,
@@ -2567,10 +2570,10 @@
 	-- The intcon and pir registers were not getting set up correctly for
 	   the midrange devices.
 	-- Added 'sinks' and 'sources' for the CCP module.
-	
+
 	* src/16bit-processors.cc, src/16bit-processors.h, src/p18x.cc,
 	src/p18x.h: Began porting the new I/O port design to the 16bit
-	core devices. 
+	core devices.
 
 	* src/symbol.cc: Added a diagnostic message that is printed
 	whenever a register symbol with a null cpu is added to the symbol
@@ -2592,7 +2595,7 @@
 
 	* src/attributes.cc, src/sim_context.cc, src/sim_context.h:
 	Changed or added calls to the symbol table.
-	
+
 	* cli/ui_gpsim.cc, src/cmd_gpsim.h: Added functions to render
 	integer values to strings based on a system level defined
 	radix. The radix will be exposed as a global attribute.
@@ -2662,22 +2665,22 @@
 2005-07-26 Scott Dattalo <scott@dattalo.com>
 	* src/bit.h, src/bit.cc, src/Makefile.am: Added new files to
 	handle a 'Bit' object. This code was formerly tucked away in
-	registers.cc. 
+	registers.cc.
 	* src/stimuli.h, src/ioports.h, src/ioports.cc: Added a control
 	object for the PinModule to handle I/O pin pullups. Also, added an
 	option to prohibit certain stimulus updates whenever I/O pin state
 	information changes.
-	
+
 2005-07-26 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-instructions.cc,
 	regression/instructions_16bit/instructions_16bit.asm: Fixed bug
 	with 16bit processors Table Read (more index vs address). Thanks
 	to Peter Onion for pointing this (and other 16bit stuff out).
-	
+
 2005-07-26 Scott Dattalo <scott@dattalo.com>
 	* src/i2c-ee.cc, src/i2c-ee.h, src/ioports.cc, src/ioports.h,
 	src/p12x.cc, src/stimuli.cc, src/stimuli.h: Fixed 12CE51x internal
-	eeprom peripheral. 
+	eeprom peripheral.
 	* gui/gui_menu.cc, gui/gui_regwin.cc: Removed dependency on gtk
 	win32 port.
 
@@ -2713,7 +2716,7 @@
 2005-07-21 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.h, src/ioports.cc: classes derived from PortRegister
 	can now specify the type of PinModule class.
-	
+
 2005-07-15 Scott Dattalo <scott@dattalo.com>
 	* src/12bit-processors.cc, src/14bit-processors.cc,
 	src/14bit-processors.h, src/16bit-registers.cc,
@@ -2741,7 +2744,7 @@
 	it with custom functionality.
 
 	* cli/cmd_break.cc: documentation clean up
-	* modules/usart.cc, modules/usart.h: tinkering - 
+	* modules/usart.cc, modules/usart.h: tinkering -
 	* regression/logic_test/Makefile,
 	regression/logic_test/logic_test.asm: Incorporates an un-released
 	gpasm feature of the .direct macro. This feature allows multiple
@@ -2755,15 +2758,15 @@
 	window. Introduced this	bug when I made the bit mask feature
 	in register symbols.
 
-	* gui/gui_regwin.cc:  Fixed problem with register symbol 
-	names not displaying in the RAM window. Introduced this 
+	* gui/gui_regwin.cc:  Fixed problem with register symbol
+	names not displaying in the RAM window. Introduced this
 	bug when I made the bit mask feature in register symbols.
 
 2005-07-11 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, h, src/cmd_gpsim.h, src/symbol.cc,
 	plat/win32/gpsim.def, gpsim/main.cc, cli/ui_gpsim.cc,
 	cli/ui_gpsim.h: Made changes so that when hitting a
-	break will display program and register address symbols. 
+	break will display program and register address symbols.
 
 	* src/breakpoint.cc: Removed calls to eval_Expression()
 	where it is not necessary. Enhanced the break on value
@@ -2904,7 +2907,7 @@
 	src/modules.h, src/processor.cc:
 	Added methods to the gpsim_interface class that manage the state
 	of gui. This is done so that gui-based modules can query the gui
-	state and conditionally build their graphical portions. 
+	state and conditionally build their graphical portions.
 	* modules/led.cc, modules/logic.cc:
 	The Logic and LED modules now will not build any graphics if the
 	gui is not initialized.
@@ -2918,10 +2921,10 @@
 	gui breadboard where the state of I/O pins is queried.
 	* gui/gui_breadboard.cc, gui/gui_breadboard.h, modules/usart.cc,
 	modules/video.cc, modules/video.h, src/14bit-tmrs.cc,
-	src/i2c-ee.cc, src/ssp.cc, 
+	src/i2c-ee.cc, src/ssp.cc,
 	src/uart.cc: Updated calls to new stimulus class API.
 	* modules/logic.cc, modules/logic.h: The logic gate modules had
-	bit rotted. 
+	bit rotted.
 
 2005-06-26 J.R. Heisey <jrheisey@sourceforge.com>
 	* plat/win32/gpsim.def, src/processor.cc, src/processor.h:
@@ -2940,7 +2943,7 @@
 	* src/symbol.cc, regression/simulate: The new 'BITS' indicator for
 	register symbol queries broke the regression test. Now, the BITS
 	indicator is only displayed if only a portion of the register
-	applies to a register symbol. 
+	applies to a register symbol.
 
 2005-06-24 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/modules.cc: Fixed a bug in Module::get() where
@@ -2958,9 +2961,9 @@
 	associated with the symbol after retrieving the value
 	from the register. Masked bit values are right shifted such
 	that if the 16th bit is high in the register and
-	m_uMask = 0x80, then the symbol value returned	
-	or displayed will be one.	
-	Likewise to set the 16th bit of our example register_symbol 
+	m_uMask = 0x80, then the symbol value returned
+	or displayed will be one.
+	Likewise to set the 16th bit of our example register_symbol
 	you would set the register_symbol value to 0x01 and
 	not 0x80. No other bits in the register are changed.
 	It works as if this symbol is its own register. The encoding
@@ -2981,7 +2984,7 @@
 	gui/gui_src_asm.cc:
 	There was significant ambiguity for some functions
 	that appear to accept an simulation address but acted upon
-	it as a ProgramMemoryAccess index. The ProgramMemoryAccess 
+	it as a ProgramMemoryAccess index. The ProgramMemoryAccess
 	indexing operator was a prime example. I have eliminated
 	the indexing operator and added the functions getFromAddress()
 	and getFromIndex() to make things more explicitly clear.
@@ -2990,23 +2993,23 @@
 	hasValid_opcode_at_address() and hasValid_opcode_at_index().
 	This mostly effected gui code so the simulation itself
 	should have no impact.
-	The original intent of this change was to fix bugs in the 
+	The original intent of this change was to fix bugs in the
 	gui where double clicking on a breakpoint icon in the
 	source window would not toggle the breakpoint.
 
 2005-06-17 J.R. Heisey <jrheisey@sourceforge.com>
-	* cli/cmd_dump.cc: dump register for special registers 
-	broken when pReg->isa() and Register::SFR_REGISTER were 
-	not being used. Now we dump the registers listed in 
+	* cli/cmd_dump.cc: dump register for special registers
+	broken when pReg->isa() and Register::SFR_REGISTER were
+	not being used. Now we dump the registers listed in
 	MemoryAccess::SpecialRegisters.
 
-	* cli/input.cc: Implemented the	ability to break running 
+	* cli/input.cc: Implemented the	ability to break running
 	firmware using Ctrl->C key when running under Windows.
 	It would previously exit gpsim.
 
 	* gpsim/main.cc: Changed logic so the -i on the gpsim
 	command line will not attempt to start the gui interface.
-	
+
 	* cli/cmd_break.cc, cli/cmd_clear.cc, cli/cmd_disasm.cc,
 	cli/cmd_dump.cc, cli/cmd_frequency.cc, cli/cmd_help.cc,
 	cli/cmd_load.cc, cli/cmd_module.cc, cli/cmd_processor.cc,
@@ -3034,7 +3037,7 @@
 	* src/attributes.cc: Cycle counter attribute now prints correctly again.
 	* src/processor.cc, src/processor.h: fixed bug in
 	IsAddressInRange()  method, also reversed return value to match
-	meaning of name (now returns true if the address is in range). 
+	meaning of name (now returns true if the address is in range).
 	* src/symbol.cc: Symbol table dump was not showing symbol values.
 	* src/registers.cc: fixed warning message for when invalid
 	registers are accessed.
@@ -3104,8 +3107,8 @@
 
 2005-06-04 Scott Dattalo <scott@dattalo.com>
 	* configure.ac, gpsim/Makefile.am: remove the explicit checks for
-	the pthread library. 
-	
+	the pthread library.
+
 2005-06-04 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc: Allow filenames whose first character is a
 	number.
@@ -3116,7 +3119,7 @@
 	* src/eeprom.cc, src/eeprom.h: Added a new state to the eeprom
 	state machine to fix ??
 	* src/ioports.cc: fix to the 628 porta comparator.
-	
+
 2005-06-03 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc: Added a call to g_main_iteration() to allow GTK
 	events to get processed. (This replaces the GTKWAIT macro that was
@@ -3157,7 +3160,7 @@
 	src/breakpoints.cc, src/pic-processor.cc, src/hexutils.cc,
 	gui/gui_src.cc, gui/gui_src_asm.cc, cli/scan.ll,
 	src/cmd_manager.h, cli/cmd_dump.cc:
-	
+
 	-- renamed the enum's for the SIMULATION_MODE(s) (the
 	enum 'INITIAL' collides with a macro in flex)
 	-- added support for module scripts
@@ -3180,7 +3183,7 @@
 	* regression/assertions/Makefile,
 	regression/assertions/assertions.asm: Use the coff.inc include
 	file supplied with gputils and specifically the macros for
-	assertions. 
+	assertions.
 
 2005-05-21 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.h, cli/cmd_break.cc, cli/input.cc, cli/parse.yy,
@@ -3200,8 +3203,8 @@
 2005-05-20 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_profile.cc: ifdef'd out code that a) is seldom (never?)
 	used and b) incompatible with the latest official release of
-	gtkextra. 
-	
+	gtkextra.
+
 2005-05-19 Scott Dattalo <scott@dattalo.com>
 	* src/ttoken.h, src/ttoken.cc, src/bytelog.cc, src/bytelog.h,
 	src/pthread-wrap.h: Create a gpsim namespace and place the objects
@@ -3215,7 +3218,7 @@
 	* regression/macro_test/macro_test.asm,
 	regression/macro_test/macro_test.stc: Added new regression test
 	for macros.
-	
+
 2005-05-18 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll: Fixed end-of-line scan bug introduced on 5-16.
 
@@ -3225,7 +3228,7 @@
 	build locations for shared libraries.
 	* src/program_files.cc: Fixed bug caused by symbol table not
 	being cleared when Program files are loaded.
-	* src/modules.cc: Fixed bug when a module library failed to 
+	* src/modules.cc: Fixed bug when a module library failed to
 	load it was still being added to the installed library list.
 	* configure.ac: bumped build number to 0.21.5
 
@@ -3254,7 +3257,7 @@
 	Removed calls to GTKWAIT because they sometimes block in the newer
 	version (2.6.7) of GTK. Thanks to Micah Carrick for pin-pointing
 	this one.
-	
+
 2005-05-11 Scott Dattalo <scott@dattalo.com>
 	* src/sim_context.cc: The included file "direct.h" does not exist
 	on FC3.
@@ -3264,7 +3267,7 @@
 	* gui/gui_src_asm.cc: Removed a call to gtk_widget_destory()
 	in SourcePage::Close() where it was causing a crash in Windows.
 	* cli/scan.ll: Defined literal string values to be quoted. This
-	was done so that quoted Windows paths in the load command to 
+	was done so that quoted Windows paths in the load command to
 	accommodate colons for drive designation and backslashes for
 	folder delimiters.
 	* gpsim/main.cc: Added the gpsim.exe startup folder to the
@@ -3316,31 +3319,31 @@
 
 2005-04-29 Scott Dattalo <scott@dattalo.com>
 	* HISTORY, README, INSTALL, configure.ac, gpsim.spec.in: Updates
-	for the 0.21.4 
+	for the 0.21.4
 	* extras/lcd/ChangeLog, Makefile.am, configure.in: bumped the Rev
 	of the LCD module to 0.2.4
 
 2005-04-29 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: Register assertions were not halting
 	simulation when assertion was true.
-	
+
 2005-04-26 Scott Dattalo <scott@dattalo.com>
 	* cli/Makefile.am, examples/14bit/Makefile.am: Updated so that
 	'make dist' would work again.
 	* src/attributes.cc, src/init.cc: Moved attribute initialization
-	from init.cc to attributes.cc 
+	from init.cc to attributes.cc
 	* src/breakpoints.cc, src/symbol.cc, src/symbol.h, src/trigger.cc:
 	Complex expressions are now fully supported. Updated the help info
 	for the break command to reflect the new syntax (more work
 	needed).
-	
+
 2005-04-26 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/breakpoints.h, cli/parse.yy,
 	cli/cmd_break.cc, cli/cmd_break.h: continuing with complex break
-	expressions. 
+	expressions.
 
 2005-04-25 Scott Dattalo <scott@dattalo.com>
-	* src/trigger.h, src/trigger.cc, src/breakpoints.cc: Added complex 
+	* src/trigger.h, src/trigger.cc, src/breakpoints.cc: Added complex
 	expressions to the TriggerObject class. (not complete)
 
 2005-04-23 Borut Razem <borut.razem@siol.net>
@@ -3367,7 +3370,7 @@
 2005-04-19 Scott Dattalo <scott@dattalo.com>
 	* src/os_dependent.cc: Added 'errno.h' to the list of include
 	files. (without this, os_dependent.cc wouldn't compile on
-	FC3-64bit). 
+	FC3-64bit).
 
 2005-04-19 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc, src/symbol.h: Fixed reference to symbol table
@@ -3424,7 +3427,7 @@
 	* cli/cmd_disasm.cc: Cleaned up a buglet in printing.
 	* src/attributes.cc, src/attributes.h, src/pic-processor.cc,
 	src/processor.cc, src/processor.h: Added an attribute that
-	controls the behavior of simulator when a reset is encountered. 
+	controls the behavior of simulator when a reset is encountered.
 
 2005-04-15 Scott Dattalo <scott@dattalo.com>
 	* src/cod.cc, cli/cmd_run.cc, cli/cmd_run.h, cli/input.cc,
@@ -3463,8 +3466,8 @@
 
 2005-04-08 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/cmd_break.h: Added support for a break command
-	like: 
-	    break r|w reg(N) 
+	like:
+	    break r|w reg(N)
 	Where N is an integer and 'reg' is the new reg operator.
 
 2005-04-08 Scott Dattalo <scott@dattalo.com>
@@ -3527,7 +3530,7 @@
 	because it breaks the gui for the 18F family of PICs. We'll need
 	to come up with another way of solving the initial PC value
 	problem.
-	
+
 2005-03-31 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cpp: Changed call ProgramCounter->get_PC() to
 	ProgramCounter->get_value() to fix a problem where the initial
@@ -3546,7 +3549,7 @@
 2005-03-24 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/processor.cc, h, cli/cmd_clear.cc:
 	Fixed crash in Breakpoints::clear() that I reintroduced in my last checkin.
-	Also Fixed the original memory leak by properly removing chained 
+	Also Fixed the original memory leak by properly removing chained
 	Breakpoint_Instruction objects from the instruction chain when clearing a
 	break object. When the chain is properly maintained the object may be
 	deleted. Perhaps this should be a temporary fix until a base class
@@ -3558,11 +3561,11 @@
 2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* src/value.cc: Fixed write to a null pointer in String::get(char
 	*buf, int len).
-	* src/symbol.cc: Fixed infinite loop in 
+	* src/symbol.cc: Fixed infinite loop in
 	char *register_symbol::name (char *buf, int len).
 	* regression/ccp/ccp.asm: added more features to the ccp
 	regression test.
-	
+
 2005-03-22 J.R. Heisey <jrheisey@sourceforge.com>
 	* gui/gui_watch.cc: Fixed problem with register values > 127 causing pango runtime warnings
 
@@ -3647,7 +3650,7 @@
 	The external references demarcated by 'IN_MODULE' were not getting
 	resolved in FC3. Since these were introduced to resolve a linking
 	problem with WIN32 DLL's, I made the demarcation dependent on only
-	Windows. 
+	Windows.
 
 2005-02-25 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added methods to the IOPIN class
@@ -3732,7 +3735,7 @@
 	  src/gpsim_object.h, src/symbol.cc, src/symbol.h,
 	  src/value.cc, src/value.h: Added the 'toBitStr' method
 	to gpsim_object and propopogated the change through the
-	derived classes. Also, the register class now calls get() to 
+	derived classes. Also, the register class now calls get() to
 	obtain the value printed with toString and toBitStr instead
 	of directly using its value object.
 
@@ -3766,7 +3769,7 @@
 2005-01-13 Scott Dattalo <scott@dattalo.com>
 	* cli/sockect.cc, src/value.cc: Added support for 'Socket Sinks'
 	and 'Socket Sources'. These essentially are two ways in which a
-	client can choose to communicate with gpsim. 
+	client can choose to communicate with gpsim.
 
 2005-01-10 Scott Dattalo <scott@dattalo.com>
 	* cli/sockect.cc, src/protocol.cc, src/protocol.h,
@@ -3914,7 +3917,7 @@
 	examples/scripts/makefile:  added  new files to illustrate
 	scripting.
 	* examples/scripts/gensquares.asm: minor tweak to simplify example
-	regression test. 
+	regression test.
 
 2004-12-14 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, cli/socket.cc, src/protocol.cc, src/protocol.h,
@@ -3928,7 +3931,7 @@
 	* src/gpsim_time.cc: Added a "cycles" attribute for interfacing
 	with the cycle counter class.
 	* src/protocol.cc, src/protocol.h, src/symbol.cc, src/symbol.h,
-	src/value.cc, src/value.h, cli/socket.cc: 
+	src/value.cc, src/value.h, cli/socket.cc:
 	More improvements to the protocol stuff.
 
 2004-12-09 Scott Dattalo <scott@dattalo.com>
@@ -3976,7 +3979,7 @@
 2004-12-01 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: Fixed the socket interface for issues related
 	to gtk 2.x. Began adding the SockeLink class. This class will
-	sit on top of the socket interface and will hide it from the 
+	sit on top of the socket interface and will hide it from the
 	clients. The clients will be able to open SocketLinks and connect
 	directly to gpsim internal objects.
 
@@ -3994,7 +3997,7 @@
 	cli/cmd_processor.cc,, cli/cmd_processor.h, cli/cmd_symbol.cc,
 	cli/cmd_symbol.h, cli/command.cc, cli/misc.h, cli/parse.yy, cli/scan.ll:
 	Changed the parser token STRING to LITERAL_STRING_T. The reason for
-	this is to allow string type attributes to be treated like numeric 
+	this is to allow string type attributes to be treated like numeric
 	attributes.
 	* src/pic-processor.cc, src/pic-processor.h, src/processor.cc,
 	src/processor.h, src/symbol.cc, src/symbol.h, src/value.cc,
@@ -4009,15 +4012,15 @@
 	src/trace.cc, src/value.cc, src/value.h: Change Integer,
 	Boolean, and Float classes back to hold values of native types
 	(as opposed to holding pointers to the native types).
-	* modules/video.cc: changed reference to cpu->frequency to 
+	* modules/video.cc: changed reference to cpu->frequency to
 	cpu->set_frequency
 
 2004-11-29 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_stimulus.cc: register stim were not getting started.
-	* regression/register_stim/register_stim.[asm|stc], 
+	* regression/register_stim/register_stim.[asm|stc],
 	regression/run_regression.sh:
 	Added a regression test for register stimuli.
-	
+
 2004-11-29 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc, src/value.cc, src/value.h: Redesigned
 	the 'asynchronous_stimulus' to be a 'ValueStimulus'.
@@ -4044,8 +4047,8 @@
 	is an attempt to remove a warning message regarding IO_input that
 	is generated while building under CygWin.
 	* modules/makefile.mingw, plat/win32/gpsim.nsi: Renamed modules.dll
-	to a slightly more descriptive gpsim_modules.dll 
-	* src/i2c-ee.cc, src/p12.cc, src/p16f62x.cc, src/p17c75x.cc, 
+	to a slightly more descriptive gpsim_modules.dll
+	* src/i2c-ee.cc, src/p12.cc, src/p16f62x.cc, src/p17c75x.cc,
 	src/stimuli.h: exchanged references to IO_input to IOPIN.
 
 2004-11-23 Scott Dattalo <scott@dattalo.com>
@@ -4062,11 +4065,11 @@
 2004-11-23 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: The tab completion fix for window's now causes
 	a crash on Linux. Sigh. Now both oses are supported (without crashes)
-	
+
 2004-11-23 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: Fixed tab completion related window's crash
 	* gui/gui_symbols.cc: Windows doesn't support strndup()
-	
+
 2004-11-22 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: buffer overflow in command_generator().
 	* src/ioports.cc, src/pic-registers.cc, src/registers.cc,
@@ -4075,20 +4078,20 @@
 	src/symbol.h, gui/gui_profile.cc, gui/gui_regwin.cc, gui/gui_regwin.h,
 	gui/gui_src.cc, gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_stack.cc,
 	gui/gui_symbols.cc, gui/gui_watch.cc, gui/gui_watch.h:
-	The gui was accessing the symbol table improperly. A new 
-	Symbol_Table_Iterator class was created to abstract accesses to the 
+	The gui was accessing the symbol table improperly. A new
+	Symbol_Table_Iterator class was created to abstract accesses to the
 	symbol table. In addition, get() and set() methods were added to
 	the symbol classes that will allow reading/writing symbol values
 	using strings.
-	
+
 2004-11-19 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, gui/gui_regwin.cc, cli/parse.yy: valgrind
 	check - fixed some uninitialized memory.
-	
+
 2004-11-19 Scott Dattalo <scott@dattalo.com>
-	* gui/gui_breadboard.cc: Don't let modules open a closed breadboard 
+	* gui/gui_breadboard.cc: Don't let modules open a closed breadboard
 	window.
-	
+
 2004-11-18 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: disallow TAB characters under windows since it
 	causes a crash most of the time.
@@ -4097,13 +4100,13 @@
 	* plat/win32/gpsim.nsi: added pthreadVC.dll to gpsim's windows binary
 	distribution.
 	* doc/gpsimWin32.html: Updated documentation for pthreads.
-	
+
 2004-11-17 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/value.cc, src/value.h: made Integer,Float
 	and Boolean values get() and set() their values through just one
 	member function. This allows derived attributes to trap reads and
 	writes to the values.
-	
+
 2004-11-16 Scott Dattalo <scott@dattalo.com>
 	* src/value.h, src/value.cc, src/processor.h, src/processor.cc,
 	src/pic-processor.cc, src/symbol.h, src/symbol.cc: Added 3 new
@@ -4112,7 +4115,7 @@
 	handling has also been enhanced.
 	* cli/parse.yy, cli/cmd_help.cc, cli/cmd_help.h: Help command
 	will display information about attributes.
-	
+
 2004-11-15 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.h, src/ioports.cc, src/16bit-registers.cc: Beginning
 	to redesign I/O ports.
@@ -4128,7 +4131,7 @@
 	modules/bytelog.h: Bit and Byte event loggers. bitlog was originally
 	part of the uart module.
 	* modules/usart.cc, modules/usart.h: removed the bit logger class and
-	am now making an attempt to resurrect this code. 
+	am now making an attempt to resurrect this code.
 
 2004-11-10 Scott Dattalo <scott@dattalo.com>
 	* cmd/cmd_break.cc: updated the help description for 'break'
@@ -4144,7 +4147,7 @@
 	- added a module load capability that uses attributes.
 
 2004-11-08 Scott Dattalo <scott@dattalo.com>
-	* cli/cmd_attach.h, cli/cmd_load.cc, cli/cmd_symbol.cc, 
+	* cli/cmd_attach.h, cli/cmd_load.cc, cli/cmd_symbol.cc,
 	cli/cmd_symbol.h, cli/command.cc, cli/parse.yy, cli/scan.ll
 	cli/socket.cc: More attibute updates
 	* gui/gui_breadboard.cc, gui/gui_menu.cc, gui/gui_object.cc,
@@ -4158,7 +4161,7 @@
 	src/tmr0.cc, src/value.cc, src/value.h:
 	- Removed debugging statements
 	- Added the attribute_symbol class.
-	- Added more methods to the derived symbol classes to handle type 
+	- Added more methods to the derived symbol classes to handle type
 	casting.
 
 2004-11-07 Borut Razem <borut.razem@siol.net>
@@ -4167,21 +4170,21 @@
 	* doc/gpsimWin32.html: updated glib version to 2.4.7, gtk+ version to 2.4.13
 
 2004-11-06 Scott Dattalo <scott@dattalo.com>
-	* cli/socket.cc, gui/gui_profile.cc, gui/gui_stack.cc, 
+	* cli/socket.cc, gui/gui_profile.cc, gui/gui_stack.cc,
 	gui/gui_symbol.cc, src/symbol.cc, src/symbol.h, src/value.cc
 	src/value.h:
 	gpsim symbols now support more of the methods of the Value class.
-	
+
 2004-11-05 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_clear.cc, cli/cmd_disasm.cc, cli/cmd_set.cc
 	cli/command.cc, cli/scan.ll, gui/gui_breadboard.cc, src/errors.cc
 	src/expr.cc, src/operator.cc, src/value.cc, src/value.h:
-	Cleaned up the Value class. 
+	Cleaned up the Value class.
 
 2004-11-05 Scott Dattalo <scott@dattalo.com>
 	* src/attribute.h, src/attribute.cc, Makefile.am: Removed attribute.*
 	from gpsim. The class 'Value' has replaced it.
-	
+
 2004-11-04 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, cli/cmd_log.cc, cli/cmd_symbol.cc, cli/cmd_x.cc,
 	src/attribute.cc, src/cod.cc, src/expr.cc, src/gpsim_classes.h,
@@ -4194,7 +4197,7 @@
 	gpsimObject instead of Value.
 	- Substitued the Value class for those places where the Attribute
 	class is used.
-	* modules/encoder.cc, modules/led.cc, modules/logic.cc, 
+	* modules/encoder.cc, modules/led.cc, modules/logic.cc,
 	modules/push_button.cc, modules/resistor.cc, modules/switch.cc,
 	modules/usart.cc, modules/video.cc
 
@@ -4207,7 +4210,7 @@
 	* cli/parse.yy, cli/scan.ll, src/14bit-registers.cc, src/16bit-instructions.cc,
 	src/16bit-registers.cc, src/breakpoints.cc, src/breakpoints.h, src/expr.cc,
 	src/expr.h, src/icd.cc, src/modules.cc, src/operator.cc, src/operator.h,
-	src/p16x7x.cc, src/pic-instructions.cc, src/pic-instructions.h, 
+	src/p16x7x.cc, src/pic-instructions.cc, src/pic-instructions.h,
 	src/pic-registers.cc, src/registers.cc, src/symbol.cc, src/symbol.h,
 	src/value.cc, src/value.h:
 	Added command line assignments. Now you can write stuff like:
@@ -4221,9 +4224,9 @@
 2004-11-02 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.cc, src/gpsim_time.h: Fixed a bug with clearing
 	cycle counter break points.
-	
+
 2004-11-01 Scott Dattalo <scott@dattalo.com>
-	* src/gpsim_time.cc, src/gpsim_time.h, src/breakpoints.cc, src/ioports.h, 
+	* src/gpsim_time.cc, src/gpsim_time.h, src/breakpoints.cc, src/ioports.h,
 	src/ioports.cc, src/stimuli.cc, src/tmr0.cc: Interrupts, tmr0 and
 	I/O pins were all broken in some way.
 	* regression/interrupts_14bit.asm, regression/interrupts_14bit.stc:
@@ -4231,18 +4234,18 @@
 
 2004-10-29 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.cc, src/gpsim_time.h: Cycle counter debugging.
-	
+
 2004-10-20 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-instructions.cc: Fixed bug in DECF instruction.
 	* regression/instructions_16bit/instructions_16bit.asm: Added
 	decf instruction to the regression test.
-	
+
 2004-10-20 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h, src/stimuli.cc, src/stimuli.h:
-	PORTB pullups updated. 
+	PORTB pullups updated.
 	Added an overloaded update() member to Stimulus_Node that doesn't
 	require time as an input (we never used it anyway).
-	
+
 2004-10-19 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc, src/ioports.cc, src/i2c-ee.cc:
 	Optimized I/O port stimulus updates.
@@ -4254,7 +4257,7 @@
 2004-10-18 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_classes.h, src/registers.h: Added EXTERNAL_RESET and
 	BOD_RESET types.
-	
+
 2004-10-17 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 	* src/symbol.cc: fixed gpsim crash on WIN32 in remove_module()
@@ -4276,16 +4279,16 @@
 2004-10-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, gui/gui_breadboard.h, gui/gui_menu.cc:
 	Cleaned up the gui breadboard code a little by making the gui_module
-	structure a GuiModule class. In addition, new modules are queued 
+	structure a GuiModule class. In addition, new modules are queued
 	into the breadboard and realized only after the breadboard has
 	been built.
-	
+
 2004-10-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_opcode.cc: window was being built before cpu had been
 	initialized.
 	* cli/cmd_disasm.cc, src/processor.cc, src/trace.cc: Disassembling
 	and tracing had wrong addresses for the 18F family (again...)
-	
+
 2004-10-06 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_src_opcode.cc,
 	gui/gui_statusbar.cc, src/breakpoints.cc: Fixed breakpoint
@@ -4294,24 +4297,24 @@
 
 2004-10-05 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Moved the creation of the Search Dialog
-	window out of Build() and into its own function. Changed the behavior 
+	window out of Build() and into its own function. Changed the behavior
 	of the signal callbacks to conform to GTK+ 2.X
 
 2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* README, INSTALL: Cleaned up stale documentation.
-	
+
 2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: Send an extra CR to the parser when loading a
 	command file. Turns out that when the gui loads a file, the
 	parser doesn't process it until another CR is seen.
-	
+
 2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_regwin.cc, gui/gui_breadboard.cc:
 	Removed some debugging printfs.
 	* gui/gui_object.cc:
 	With GTK+ 2.2.1 under linux, the gtk_widget_show() was losing
 	the (x,y) position of the window.
-	
+
 2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, gui/gui_breadboard.h:
 	The breadboard expose events invalidated drawing areas which in
@@ -4346,7 +4349,7 @@
 	the gtk event queue.
 
 2004-09-29 Scott Dattalo <scott@dattalo.com>
-	* cli/input.cc, gui/gui_menu.cc, gui/gui_src_asm.cc, 
+	* cli/input.cc, gui/gui_menu.cc, gui/gui_src_asm.cc,
 	src/modules.h, src/modules.cc, src/processor.cc,
 	src/pic-processor.cc, src/pic-processor.h, src/trace.h
 	plat/win32/gpsim.def: Clean ups to get the Windows
@@ -4364,14 +4367,14 @@
 	command line interface still does not support this).
 
 2004-09-28 Scott Dattalo <scott@dattalo.com>
-	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_object.cc, 
+	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_object.cc,
 	gui/gui_object.h, gui/gui_regwin.cc, gui/gui_src.h,
 	gui/gui_src_asm.cc, src/gpsim_interface.h, M src/interface.cc:
 	- Fixed a few bugs caused by upgrading to GTK+ 2.x:
 	  -- Window state was not being saved
 	  -- Register window font was fouled up
 	  -- Source browser pixel position calculations are different
-	  There are still some other bugs that need to be fixed: 
+	  There are still some other bugs that need to be fixed:
 	  -- The breadboard window somehow prevents the Source browser
 	     window from opening
 	  -- <control>Q no longer quits
@@ -4418,7 +4421,7 @@
 	* src/stimuli.cc, src/i2c-ee.cc, src/ioports.cc, src/stimuli.h,
 	src/14bit-registers.cc:
 	Fixed stimuli so that the 12CE518 internal EEPROM would work.
-	
+
 2004-09-13 Scott Dattalo <scott@dattalo.com>
 	* src/i2c-ee.cc, src/i2c-ee.h, src/ioports.cc, src/p12x.cc,
 	src/stimuli.cc, src/stimuli.h: Partially check in for work
@@ -4448,15 +4451,15 @@
 	  - It turns out that gpsim's symbols are essentially identical
 	to the value objects that were recently added to support
 	expression parsing. Since expressions need to handle symbols
-	too, I decided to make the Value class a base class for 
-	gpsimValue. Now, much of what has been written for 
+	too, I decided to make the Value class a base class for
+	gpsimValue. Now, much of what has been written for
 	expressions will naturally handle many of gpsim fundamental
 	types.
 	* src/pic-processor.cc, src/pic-processor.h, src/eeprom.cc,
 	src/eeprom.h, src/14bit-registers.cc: The W register, eeprom,
 	and option register states were not saved during a processor
 	'save_state()' call.
-	* src/p12x.cc: internal 12ce518 i2c module was not connected 
+	* src/p12x.cc: internal 12ce518 i2c module was not connected
 	correctly.
 	* cli/cmd_clear.cc, cli/cmd_disasm.cc, cli/cmd_frequency.cc,
 	cli/cmd_log.h, cli/cmd_macro.cc, cli/cmd_module.h,
@@ -4487,13 +4490,13 @@
 	gui/gui_profile.cc, modules/encoder.h, modules/paraface.h
 	modules/usart.cc:
 	Started adding Triggers and Actions.
-	* regression/run_regression.sh: Added the digital_stim 
+	* regression/run_regression.sh: Added the digital_stim
 	regression test to the list of tests to run.
 
 2004-09-07 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/stimuli.h, cmd_x.cc, cmd_stimulus.cc:
 	Digital asynchronous stimuli were not getting the proper voltage
-	data values. 
+	data values.
 	Enhanced the asynchronous stimulus by making the data array an
 	array of C++ objects instead of a type casted structured.
 
@@ -4517,9 +4520,9 @@
 2004-09-02 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_macro.cc:
 	Clarified the help description for the macro command.
-	
+
 2004-09-02 Scott Dattalo <scott@dattalo.com>
-	* cli/cmd_macro.cc, cli/cmd_macro.h, cli/scan.h, cli/scan.ll: 
+	* cli/cmd_macro.cc, cli/cmd_macro.h, cli/scan.h, cli/scan.ll:
 	Completed support for parameterized macros
 
 2004-09-02 Scott Dattalo <scott@dattalo.com>
@@ -4536,7 +4539,7 @@
 2004-09-01 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy: Fixed a bug that caused old versions of bison
 	to choke.
-	
+
 2004-09-01 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_macro.cc, cli/input.cc:
 	Converted the LLInput struct into a class. Now, the macro
@@ -4546,9 +4549,9 @@
 	Added the ProcessorTraceObject to the TraceObject heirarchy.
 	Now, TraceObjects no longer store info about a processor.
 	(Thus modules can be processor agnostic.)
-	
+
 2004-09-01 Scott Dattalo <scott@dattalo.com>
-	* src/p16x5x.cc: The 16C55 processor was only declaring a 
+	* src/p16x5x.cc: The 16C55 processor was only declaring a
 	package of 18 pins (instead of 28).
 
 2004-08-31 Scott Dattalo <scott@dattalo.com>
@@ -4556,12 +4559,12 @@
 	Added the 'macro' command.
 	* cli/Makefile.am, cli/parse.yy, cli/command.cc, cli/scan.ll:
 	Parser now calls the gpsim command cmd_macro.
-	
+
 2004-08-31 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, cli/parse.yy:
 	Added language support for macro definitions. (although,
 	macros are not yet supported).
-	
+
 2004-08-29 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gsim.def, cli/makefile.migw, src/makefile.migw,
 	  cli/cli.vcproj, src/src.vcproj: updated
@@ -4574,21 +4577,21 @@
 	  src/modules.cc, src/modules.h, src/pic-processor.cc,
 	  gui/gui_src_asm.cc, gui/gui_statusbar.cc:
 	The Module class was overriding functionality provided in the
-	gpsimObject class. This caused problems for external processors 
+	gpsimObject class. This caused problems for external processors
 	(That is, processors not a part of gpsim).
 
 2004-08-26 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_object.cc, src/gpsim_object.h: New files that
-	support the gpsimObject class. This is a base class for 
+	support the gpsimObject class. This is a base class for
 	almost all gpsim objects.
 	* cli/viewable.cc, cli/viewable.h: Removed. The functionality
 	that was provide by these was moved to gpsimObject.
 	* src/Makefile.am, src/modules.h, src/registers.cc,
-	  src/registers.h, src/symbol.cc, src/value.cc, src/value.h, 
+	  src/registers.h, src/symbol.cc, src/value.cc, src/value.h,
 	  cli/Makefile.am, cli/cmd_x.cc, cli/command.cc, cli/command.h,
 	  cli/expr.cc, cli/expr.h, cli/parse.yy:
 	Added the gpsimObject Meta class.
-	Added support for symbolically viewing registers with the 'x' 
+	Added support for symbolically viewing registers with the 'x'
 	command.
 	Added support for viewing a range of registers.
 
@@ -4619,7 +4622,7 @@
 	one node caused gpsim to hang.
 
 2004-08-24 Manuel Bouyer <bouyer@antioche.eu.org>
-	* src/stimuli.cc: Fixed iopin stimulus update. 
+	* src/stimuli.cc: Fixed iopin stimulus update.
 
 2004-08-24 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_attach.cc, cli/cmd_attach.h, cli/cmd_symbol.cc,
@@ -4662,14 +4665,14 @@
 	src/pic-registers.cc, src/pie.cc, src/pir.cc, src/processor.cc,
 	src/processor.h, src/registers.cc, src/registers.h, src/ssp.cc,
 	src/tmr0.cc, src/trace.cc, src/trace.h, src/uart.cc:
-	More Tracing. 
+	More Tracing.
 
 2004-08-11 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h, src/processor.cc, src/pic-processors.cc
-	src/value.h, src/value.cc, src/registers.h, src/registers.cc, 
+	src/value.h, src/value.cc, src/registers.h, src/registers.cc,
 	14bit-registers.cc:
 	More trace stuff.
-	
+
 2004-08-10 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: packaging of examples, extras, ...
 	* plat/win32/gpsim.def: updated exports
@@ -4693,7 +4696,7 @@
 	* src/attribute.cc, src/attribute.h, gui/gui_breadboard.cc: Some annoying
 	bug with attributes that I can't figure out. Problem appears when shared
 	libraries are disabled.
-	
+
 2004-08-06 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/registers.h, src/trace.cc:
 	Partial implementation of trace reconstruction.
@@ -4701,7 +4704,7 @@
 2004-08-04 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-registers.cc, src/16bit-processors.cc, src/16bit-registers.cc
 	  src/p12x.cc, src/p16f62x.cc, src/p16f87x.cc, src/p16x5x.cc, src/p16x6x.cc
-	  src/p16x7x.cc, src/p16x8x.cc, src/p18x.cc, src/pic-processor.cc, 
+	  src/p16x7x.cc, src/p16x8x.cc, src/p18x.cc, src/pic-processor.cc,
 	  src/pic-processor.h, src/processor.cc, src/processor.h, src/registers.cc
 	  src/registers.h, src/tmr0.cc, src/trace.cc, src/trace.h, gui/gui_regwin.cc
 	  cli/cmd_trace.cc:
@@ -4763,9 +4766,9 @@
 2004-07-22 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, modules/resistor.cc, modules/resistor.h:
 	Bug fixes to the recent I/O pin redesign
-	
+
 2004-07-22 Scott Dattalo <scott@dattalo.com>
-	* src/14bit-tmrs.cc, src/breakpoints.cc, src/breakpoints.h, 
+	* src/14bit-tmrs.cc, src/breakpoints.cc, src/breakpoints.h,
 	src/i2c-ee.cc, src/ioports.cc, src/ioports.h, src/p16x7x.cc,
 	src/p16x7x.h, src/packages.cc, src/pic-processor.h, src/processor.cc,
 	src/processor.h, src/registers.cc, src/registers.h, src/ssp.cc,
@@ -4779,14 +4782,14 @@
 	an stimulus. Now, two parameters are used. Currently, these
 	parameters are designated as the voltage and impedance. Before,
 	the single parameter was somewhat similar to a current.
-	
+
 2004-07-20 Scott Dattalo <scott@dattalo.com>
-	* src/stimuli.h, src/stimuli.cc: added input leakage modelling 
+	* src/stimuli.h, src/stimuli.cc: added input leakage modelling
 	to I/O pins.
-	
+
 2004-07-19 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/pic-processor.h, src/pic-registers.cc,
-	src/processor.h, src/processor.cc, gui/gui_statusbar.cc, 
+	src/processor.h, src/processor.cc, gui/gui_statusbar.cc,
 	gui/gui_stopwatch.cc, modules/usart.cc, cli/cmd_frequency.cc:
 	Added new member functions to the Processor class to simplify
 	handling time.
@@ -4802,21 +4805,21 @@
 	of registers viewable in the status bar.
 	* cli/cmd_trace.cc, cli/cmd_trace.h, cli/parse.yy, src/trace.cc: The
 	trace raw option was broken.
-	
+
 2004-07-15 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, cli/socket.cc, gui/gui_main.cc: The newly created
 	gpsim socket interface now uses GLib GIOChannels instead of Pthreads.
-	
+
 2004-07-14 Scott Dattalo <scott@dattalo.com>
 	* gui_break.cc, gui_main.cc, gui_processor.cc, gui_processor.h,
-	gui_regwin.cc gui_regwin.h, gui_src.h, gui_src_asm.cc, 
+	gui_regwin.cc gui_regwin.h, gui_src.h, gui_src_asm.cc,
 	gui_src_opcode.cc, gui_statusbar.cc, gui_statusbar.h:
 	Finished abstracting the gui status bar. Added a status bar to
 	the source viewer.
-	* 14bit-registers.cc, 14bit-registers.h, 14bit-tmrs.h, 
+	* 14bit-registers.cc, 14bit-registers.h, 14bit-tmrs.h,
 	16bit-processors.cc, Makefile.am, eeprom.h, intcon.h, ioports.cc,
-	ioports.h, p12x.cc, p12x.h, p16f62x.cc, p16x5x.cc, p16x6x.cc, 
-	p16x8x.cc, pic-processor.cc, pic-processor.h, pic-registers.cc, 
+	ioports.h, p12x.cc, p12x.h, p16f62x.cc, p16x5x.cc, p16x6x.cc,
+	p16x8x.cc, pic-processor.cc, pic-processor.h, pic-registers.cc,
 	pic-registers.h, pie.h, pir.h, processor.cc, processor.h, registers.h:
 	Cleaned up some stale code.
 	Added a MemoryAccess class and made it the base class to the
@@ -4828,22 +4831,22 @@
 	* src/p12x.cc, src/p12x.h, src/pic-processor.h, src/pic-processor.cc:
 	Added the 12CE518 and 12CE519 processors.
 	* src/ioport.cc: Fixed an ambiguity in the ioport trace logic.
-	
+
 2004-07-13 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_statusbar.cc: abstracting the status bar boxes.
 	* src/pic-registers.cc: cross reference to Program Counter was broken.
-	* src/processor.h, src/processor.cc: Added a set_PC method to the pma 
+	* src/processor.h, src/processor.cc: Added a set_PC method to the pma
 	class
-	
+
 2004-07-12 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_statusbar.cc: abstracting the status bar boxes.
 	* examples/scripts/gensquares.asm, examples/scripts/testgensquares.py,
 	examples/scripts/testgensquares.py: Script testing
-	
+
 2004-07-12 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: dinking around...
 	* examples/scripts/testsocket.py:
-	
+
 2004-07-09 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: Added a very thin object layer to the socket interface
 	* examples/scripts/testsocket.py: added to the repository. This is
@@ -4883,7 +4886,7 @@
 	loaded through the menu interface (File/Open)
 	* cli/parse.yy, cli/scan.ll, cli/operator.cc, cli/operator.h:
 	Added new binary operators: -,*,/,&,^,<<,>>
-	
+
 2004-07-02 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc: Emit warning if a user specifies both
 	a .hex file and a .cod file at the command line.
@@ -4891,16 +4894,16 @@
 2004-06-30 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def: Added additional export definitions.
 	* cli/cmd_clear.cc: type casting fixes.
-	* src/breakpoints.h: added get_bp accessor function for the 
+	* src/breakpoints.h: added get_bp accessor function for the
 	global bp (breakpoint) object
 	* src/gpsim_time.h: now uses the bp accessor function.
 	* src/processor.cc: If the listing file is not present,
 	gpsim will not crash now...
-	
+
 2004-06-30 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, cli/input.cc:
 	Starting gpsim in cli only mode would cause a crash.
-	
+
 2004-06-30 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: small fix for MSVC compilation
 
@@ -4909,7 +4912,7 @@
 	Removed 'NUMBER' and 'FLOATING_NUMBER' types from the CLI parser. Now
 	all numbers are represented by expressions. All commands that used to
 	numbers have been converted over to use expressions.
-	
+
 2004-06-28 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_module.cc, src/modules.h, src/modules.cc, gui/gui_breadboard.cc:
 	Module positioning now works again.
@@ -4927,10 +4930,10 @@
 
 2004-06-24 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, cli/cmd_break.h, cli/cmd_log.cc,
-	cli/cmd_log.h, cli/cmd_stimulus.h, cli/command.cc, 
+	cli/cmd_log.h, cli/cmd_stimulus.h, cli/command.cc,
 	cli/command.h, cli/expr.cc, cli/expr.h, cli/parse.yy,cli/scan.ll:
 	The 'break' and 'log' commands now accept expressions
-	
+
 2004-06-24 Borut Razem <borut.razem@siol.net>
 	* plat/win32/fd2raw.cpp, plat/win32/fd2raw.h: functions to set the WIN32
 	  console to raw mode.
@@ -4940,18 +4943,18 @@
 
 2004-06-23 Scott Dattalo <scott@dattalo.com>
 	* cli/Makefile.am, cli/cmd_attach.cc, cli/cmd_attach.h, cli/cmd_bus.cc, cli/cmd_bus.h
-	* cli/cmd_clear.cc, cli/cmd_clear.h, cli/cmd_disasm.cc, cli/cmd_disasm.h, 
+	* cli/cmd_clear.cc, cli/cmd_clear.h, cli/cmd_disasm.cc, cli/cmd_disasm.h,
 	* cli/cmd_frequency.cc, cli/cmd_frequency.h, cli/cmd_node.cc, cli/cmd_node.h,
-	* cli/cmd_set.cc, cli/cmd_set.h, cli/cmd_step.cc, cli/cmd_step.h, 
+	* cli/cmd_set.cc, cli/cmd_set.h, cli/cmd_step.cc, cli/cmd_step.h,
 	* cli/cmd_stimulus.cc, cli/cmd_stimulus.h, cli/cmd_trace.cc, cli/cmd_trace.h,
-	* cli/cmd_x.cc, cli/command.cc, cli/command.h, cli/expr.cc, cli/expr.h, 
-	* cli/input.cc, cli/misc.h, cli/operator.cc, cli/operator.h, cli/parse.h, 
+	* cli/cmd_x.cc, cli/command.cc, cli/command.h, cli/expr.cc, cli/expr.h,
+	* cli/input.cc, cli/misc.h, cli/operator.cc, cli/operator.h, cli/parse.h,
 	* cli/parse.yy, cli/scan.ll
 	* gpsim/main.cc, gui/gui_breadboard.cc, src/processor.cc,
 	* src/processor.h, src/stimuli.cc
 	Rewrote the command parser and added expression parsing.
 	* cli/errors.cc, cli/expr.cc, cli/operator.cc, cli/viewable.cc,
-	  cli/errors.h, cli/expr.h, cli/operator.h, cli/viewable.h: 
+	  cli/errors.h, cli/expr.h, cli/operator.h, cli/viewable.h:
 	New files for expression parsing.
 
 2004-06-16 Borut Razem <borut.razem@siol.net>
@@ -4959,21 +4962,21 @@
 	  small fixes to enable compilation on MSVC
 
 2004-06-15 Scott Dattalo <scott@dattalo.com>
-	* more pedantic fixes 
+	* more pedantic fixes
 
 2004-06-14 Scott Dattalo <scott@dattalo.com>
 	* more pedantic fixes (mostly in cli)
 
 2004-06-14 Scott Dattalo <scott@dattalo.com>
 	* tons of pedantic fixes (and there are many more needed).
-	
+
 2004-06-14 Scott Dattalo <scott@dattalo.com>
 	* aclocal.m4, configure.in
 	The AC_DEFINE macro was incompletely defined.
 	* acconfig.h: removed from CVS
 	* INSTALL: updated installation instructions for CVS checkouts
 	* doc/gpsim_cvs.html: Added to the CVS
-	
+
 2004-06-12 Borut Razem <borut.razem@siol.net>
 	* cli/viewable.cc: #warning not recognised by MSVC
 	* eXdbm/eXdbm.vcproj, gui/gui.vcproj, modules.vcproj:
@@ -4987,7 +4990,7 @@
 	  defined HAVE_GUI
 
 2004-06-09 Scott Dattalo <scott@dattalo.com>
-	* cli/expr.cc, cli/expr.h, cli/viewable.h, cli/viewable.cc, 
+	* cli/expr.cc, cli/expr.h, cli/viewable.h, cli/viewable.cc,
 	cli/operator.h, cli/operator.cc: New files to support parsing
 	* cli/parse.yy, cli/scan.ll: added new parsing and lexing rules
 	for expression parsing.
@@ -4998,28 +5001,28 @@
 	* cli/parse.yy, cli/scan.ll, cli/misc.h, cli/cmd_stimulus.cc, cli/command.h
 	Cleaned up the parser by removing the explicit YYABORT and YYACCEPT macros.
 	Also, redesigned the parser implementation of the stimulus command.
-	
+
 2004-06-03 Scott Dattalo <scott@dattalo.com>
 	* examples/12bit/it_12bit.asm: removed
 	* regressions/instructions_12bit/instructions_12bit.asm: added
 	* regressions/instructions_12bit/instructions_12bit.stc: added
 	Now the 12bit core has a regression test.
-	
+
 2004-06-05 Scott Dattalo <scott@dattalo.com>
 	* src/eeprom.cc: The eeprom memory access object was not getting
 	initialized.
 	* src/stimuli.cc: applied patch from Manuel Boyer. The IO_open_collector
 	was duplicating the base class' job of setting the pin name.
-	
+
 2004-06-02 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, src/processor.cc: 18fxxx addressing was broken.
 	(the divide by 2 issue for the 18f addressess was not being handled
 	correctly.)
-	
+
 2004-06-01 Scott Dattalo <scott@dattalo.com>
-	* src/value.h: Made the string &name() member function in the 
+	* src/value.h: Made the string &name() member function in the
 	gpsimValue class virtual.
-	
+
 2004-05-31 Scott Dattalo <scott@dattalo.com>
 	* almost all files: Since the Register class and the Instruction class
 	are now derived from gpsimValue, all objects that use registers
@@ -5028,7 +5031,7 @@
 	abstractness that this change introduces.
 	* src/16bit-instructions.cc, src/14bit-instructions.h: Manuel Boyer
 	reported two bugs with the 16bit subwf instruction. He fixed one
-	(N-bit was ignored) with a patch and I fixed the other (OV bit was 
+	(N-bit was ignored) with a patch and I fixed the other (OV bit was
 	ignored).
 
 2004-05-27 Scott Dattalo <scott@dattalo.com>
@@ -5050,7 +5053,7 @@
 2004-05-21 Scott Dattalo <scott@dattalo.com>
 	* src/register.h: Added new accessor member functions to the Register
 	class to manipulate the new way register values are represented.
-	
+
 2004-05-20 Scott Dattalo <scott@dattalo.com>
 	* Tons of files... Changed the Register class' 'unsigned int value'
 	field to an object. The get() and put() accessor functions now provide
@@ -5059,17 +5062,17 @@
 2004-05-20 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Syntax highlighting now is only applied to lines
 	that are associated with generated code.
-	
+
 2004-05-16 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/processor.cc:
 	Added mapping between program memory and source file line numbers
-	
+
 2004-05-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, src/gui_src_asm.cc: Fixed memory leak with 'canbreak' XPM.
 	Added 'SourcePage' class to hold information about a source browser notebook
 	page. Corresponding info in 'SourceBrowserAsm_Window'.
 	Added a new member to the sa_entry structure to keep track of pixmaps.
-	
+
 2004-05-15 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor: If the simulation is started from an address that has
 	an execution break, now gpsim will ignore that break.
@@ -5084,7 +5087,7 @@
 	 src/pic-processor.cc, src/pic-processor.h: Fix usart problems in 18x devices.
 	* src/pir.cc, src/pir.h, src/uart.cc, src/uart.h: Fix usart bugs.
 	(Changes were submitted as a patch and applied by Scott).
-	
+
 2004-05-15 Scott Dattalo <scott@dattalo.com>
 	* src/xref.h, xref.cc: added get_value() member function to XrefObject class
 	* gui/gui.h, gui/gui_break.cc, gui/gui_main.cc, gui/gui_processor.cc,
@@ -5148,7 +5151,7 @@
 	* gui/gui_break.cc, gui/gui_menu.cc, gui/gui_profile.cc,
 	gui/gui_src_asm.cc, gui/gui_src_opcode.cc, gui/gui_stack.cc,
 	src/16bit-registers.cc, src/breakpoints.cc,
-	src/cod.cc, src/eeprom.cc, src/ioports.cc, src/ioports.h, 
+	src/cod.cc, src/eeprom.cc, src/ioports.cc, src/ioports.h,
 	src/pic-processor.cc, src/processor.cc, src/processor.h,
 	src/trace.cc:
 	Made the processor's ProgramMemoryAccess class dynamically allocated.
@@ -5158,15 +5161,15 @@
 	* src/14bit-tmrs.cc: The TMR2 peripheral failed to properly clear
 	its breakpoint whenever it was being turned off.
 	*src/modules.h: string.h was not getting included.
-	
+
 2004-04-13 Scott Dattalo <scott@dattalo.com>
-	* src/breakpoints.cc, src/breakpoints.h: 
+	* src/breakpoints.cc, src/breakpoints.h:
 	Redesigned breakpoints so that a) they're more object oriented and b) more
 	easily extensible.
 	* src/interface.cc, src/gpsim_interface.h: Removed the CyclicBreakPoint class
 	and moved the functionality it was providing into the gpsimInterface class
 	* src/14bit-registers.h, src/14bit-tmrs.h, modules/usart.cc, cli/cmd_set.cc,
-	src/eeprom.h, src/gpsim_time.cc, src/gpsim_time.h, 
+	src/eeprom.h, src/gpsim_time.cc, src/gpsim_time.h,
 	src/p16x7x.h, src/pic-processor.cc, src/processor.cc,
 	src/processor.h, src/ssp.h, src/stimuli.cc, src/stimuli.h, src/tmr0.h,
 	src/trace.h, src/uart.h, gui/gui_profile.cc, modules/encoder.h, modules/paraface.h,:
@@ -5180,7 +5183,7 @@
 2004-04-07 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.h, src/breakpoints: Adding assertion type breakpoints
 	and redesigning the whole Breakpoint class.
-	
+
 2004-04-07  Bert Driehuis <driehuis@playbeing.org>
 	* extras/lcd/lcd.cc:  reference was made to a no-longer existing API
 	* extras/lcd/module_manager.cc: contained comments
@@ -5199,7 +5202,7 @@
 	conditions exist. By changing to RTLD_NOW, a bad dynamic module will
 	be detected at load time rather than at run time. *** this will break
 	broken modules out there that until now appeared to have worked ***
-                                                                                
+
 2004-04-04  Arthur Peters <amp@singingwizard.org>
 	* src/Makefile.am, src/ssp.cc, src/ssp.h:
 	Added SSP support to gpsim.
@@ -5207,7 +5210,7 @@
 	src/p16f87x.cc, src/p16x6x.cc, src/p16x6x.h, src/p16x7x.cc,
 	src/p16x8x.cc, src/pir.cc, src/14bit-processors.h, src/pir.h:
 	Added SSP support to gpsim.
-	
+
 2004-04-04  Borut Razem  <borut.razem@siol.net>
 	* modules/encoder.cc, modules/gpsim_modules.cc, modules/paraface.cc,
 	modules/push_button.cc, modules/switch.cc, modules/video.cc:
@@ -5225,9 +5228,9 @@
 	adding assertions to the simulator.
 	* src/processor.cc, src/processor.h, gui/gui_src_asm.cc: Source
 	browser windows can now get a unique name.
-	
+
 2004-03-30 Scott Dattalo  <scott@dattalo.com>
-	* numeous files throughout gpsim: The Module class now uses 
+	* numeous files throughout gpsim: The Module class now uses
 	a string type instead of a 'char *' for the module name. Also,
 	the gui x and y coordinate were removed from the module class (I
 	still want to remove the 'widget' member too).
@@ -5256,11 +5259,11 @@
 	gui/gui_main.cc, gui/gui_profile.cc, gui/gui_regwin.cc,
 	gui/gui_scope.cc, gui/gui_src.cc, gui/gui_src_opcode.cc,
 	gui/gui_stack.cc, gui/gui_stopwatch.cc, gui/gui_symbols.cc,
-	gui/gui_trace.cc, gui/gui_watch.cc: 
+	gui/gui_trace.cc, gui/gui_watch.cc:
 	The GUI_Object 'name' member has been changed from a char * to a
 	private string and is now no longer directly accessed by the derived
 	classes. New methods set_name() and and name() control the access.
-	
+
 2004-03-24 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_src.h: Added BreakPointList class to handle
 	the 3 lists of breakpoints. Removed duplicate code too.
@@ -5272,13 +5275,13 @@
 2004-03-22 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_src.cc: Changed the event key processing from a case statement to
 	a C++ map object.
-	
+
 2004-03-22 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui.h, gui/gui_breadboard.h, gui/gui_object.h, gui/gui_processor.h,
 	* gui/gui_profile.h, gui/gui_register.h, gui/gui_regwin.h, gui/gui_scope.h,
 	* gui/gui_src.h, gui/gui_stack.h, gui/gui_stopwatch.h, gui/gui_symbols.h,
 	* gui/gui_trace.h, gui/gui_watch.h:
-	Finished the gui split started on 03-16. 
+	Finished the gui split started on 03-16.
 	Added support for multiple source browsers (to be used with context debugging).
 
 2004-03-22 Chris Emerson <gpsim@mail.nosreme.org>
@@ -5304,13 +5307,13 @@
 	* modules/binary_indicator.cc, modules/gpsim_modules.cc,
 	modules/led.cc, modules/logic.cc, modules/paraface.cc,
 	modules/push_button.cc, modules/resistor.cc, modules/switch.cc,
-	modules/usart.cc, modules/video.cc, extras/lcd/lcd.h, 
+	modules/usart.cc, modules/video.cc, extras/lcd/lcd.h,
 	extras/lcd/lcd.cc
 	Now the modules are no longer "external".
 
 2004-03-14  Bert Driehuis <driehuis@playbeing.org>
 	* extras/lcd/lcdengine.cc, extras/lcd/lcd.h, extras/lcd/examples/lcd.asm:
-	Fixed the LCD modules "E" logic. 
+	Fixed the LCD modules "E" logic.
 
 2004-03-13 Robert Pearce
 	* src/16f87x.cc, src/16f87x.h, src/pic-processor.cc, src/pic-processor.h:
@@ -5323,10 +5326,10 @@
 2004-03-09 Scott Dattalo  <scott@dattalo.com>
 	* src/14bit-processor.cc:
 	PCL (low byte of program counter) was one count too large.
-	
+
 2004-03-09 Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/pic-processor.h:
-	Moved the implementations of the disasm() and list() methods from the 
+	Moved the implementations of the disasm() and list() methods from the
 	pic_processor class to the processor class.
 
 2004-03-09 Scott Dattalo  <scott@dattalo.com>
@@ -5363,11 +5366,11 @@
 2004-03-01  Bert Driehuis <driehuis@playbeing.org>
 	* extras/lcd/lcd.cc:
 	Bring the LCD module up-to-date with recent gpsim changes
-	
+
 2004-03-01  Bert Driehuis <driehuis@playbeing.org>
 	* acinclude.m4, cli/input.cc:
 	Fix readline support for BSD 4.9
-	
+
 2004-03-02 Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.cc: fixed a memory allocation bug in the
 	FileContext class; an array was one element too small.
@@ -5375,18 +5378,18 @@
 	Added the LED test code to CVS.
 	* modules/gpsim_modules.cc, modules/led.cc:
 	LED module now works.
-	
+
 2004-03-01  Bert Driehuis <driehuis@playbeing.org>
-	* src/icd.cc: include time.h for BSD 
+	* src/icd.cc: include time.h for BSD
 
 2004-03-01 Scott Dattalo  <scott@dattalo.com>
-	* modules/* - 
+	* modules/* -
 	Updated the (internal) modules to comply with the new gpsim interface standard
 	* dozens of files:
 	  -- removed all references to 'pic_id'
 	  -- changed pic_processor references to Processor references
-	
-	
+
+
 2004-02-29  Borut Razem  <borut.razem@siol.net>
 	* src/eeprom.cc: initialization of variable eestate in EECON2::EECON2(void)
 	by calling ee_reset()
@@ -5404,32 +5407,32 @@
 2004-02-28 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_processor.cc:
 	Inhibit the half-baked gui_scope.
-	
+
 2004-02-27 Scott Dattalo  <scott@dattalo.com>
-	* src/pic-processor.cc, src/interface.cc, src/interface.h, 
+	* src/pic-processor.cc, src/interface.cc, src/interface.h,
 	src/init.cc, src/icd.cc, src/cod.cc, src/breakpoints.cc,
 	gui/gui_main.cc, gpsim/main.cc, cli/input.h, cli/input.cc,
 	cli/cmd_x.cc, cli/cmd_run.cc, cli/cmd_dump.h, cli/cmd_dump.cc:
 	The gpsim library, which is the code comprised of everything
 	in the src/ subdirectory, now has no dependencies on the gui
 	or cli code base. This makes it possible to link against
-	just libgpsim. 
+	just libgpsim.
 
 2004-02-25 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_stopwatch.cc, extras/rs232-gen/rs232-gen.c:
 	changed all references of atoll to strtoll. bug 820326
-	
+
 2004-02-25 Hans-Juergen Dorn <hans.dorn@apl-landau.de>
 	* src/16bit-registers.cc: gpsim was pushing onto
 	the stack before decrementing the stack pointer. Also,
 	the gpsim internally formatted address was being pushed.
-	
+
 2004-02-17  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_scope.cc: expose and resizing kind of work.
 
 2004-02-17  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_scope.cc: taking off the rough edges.
-	
+
 2004-02-16  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_scope.cc: - new file that will support a simple waveform viewer.
 	* gui/Makefile.am: add the gui_scope.cc to the list
@@ -5441,52 +5444,52 @@
 	Added FSR_12 - a new class for the 12-bit core. I also redesigned the
 	way FSR and INDF interact.
 	* src/p18x.cc - the 18f252 package pins weren't defined.
-	
+
 2004-02-13  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/cod.cc:
 	Support for new file context
 	* gui/gui_src_asm.cc, gui/gui_profile.cc:
 	Use the new file context code.
-	
+
 2004-02-12  Scott Dattalo  <scott@dattalo.com>
 	* src/interface.cc, src/interface.h:
 	Finally, the C-style interface is gone (or nearly gone).
 	* src/processor.cc, src/processor.h, src/cod.cc
 	Redesigning the "file_context" object.
-	* gui/gui_watch.cc, gui/gui_profile.cc: 
+	* gui/gui_watch.cc, gui/gui_profile.cc:
 	Removed final traces of the old C-style interface.
 
 2004-02-11  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_symbols.cc: - changed strndup to a strcpy (plus malloc...):
-	
+
 2004-02-11  Scott Dattalo  <scott@dattalo.com>
 	* gui/* changed calls to gpsim_* to the C++ interface.
 	* src/interface.cc - removed many of the gpsim_* functions
 	* src/stimuli.cc, cli/cmd_set.cc - changed calls to gpsim_* to
 	the C++ interface.
-	
+
 2004-02-10  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/pic-processor.h:
 	Added step, run, and finish members to the ProgramMemoryAccess class
 	* src/interface.cc, gui/gui*
 	removed more gpsim_* functions from interface.cc
-	
+
 2004-02-10  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_symbol.cc, src/symbol.h, src/symbol.cc
 	Cleaned up symbol api.
-	
+
 2004-02-09  Scott Dattalo  <scott@dattalo.com>
 	* all files!
 	'NULL' has been replaced with '0' throughout all of gpsim.
 	The reason is two-fold: 1) MAC users were having trouble compiling
 	2) Stroustrup says NULL shouldn't be used in C++ :).
-	
+
 2004-02-08  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, gui/gui_src.cc, gui/gui_src_asm.cc,
 	gui/gui_break.cc: Fixed 'ProgramMemoryAccess' class for the 18f devices
 	* src/16bit-processors, src/p18x.cc: Removed some debug stuff
 	* extras/lcd/*: Changed the LCD module from version 0.2.0 to 0.2.1
-	
+
 2004-02-06  Scott Dattalo  <scott@dattalo.com>
 	* tons of files changed...
 	Removed 'break_point' member from the Register class
@@ -5495,7 +5498,7 @@
 	* gui/gui.h, gui/gui_watch.cc, gui/gui_regwin.cc: modified GUIRegister
 	class to adopt to changes made in the break point stuff. Also
 	add rma member for getting access to processor registers.
-	
+
 2004-02-05  Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.h
 	Fixed a nasty, nasty bug. The "GP_Processor" pointer in the
@@ -5526,13 +5529,13 @@
 	in C++.
 
 2004-01-30  Scott Dattalo  <scott@dattalo.com>
-	* almost all source files - still trying to sort out include 
+	* almost all source files - still trying to sort out include
 	dependencies. There's a weird bug where gcc is adding an extra
 	4-byte offset to pointers in some instances. I have no clue why...
-	
+
 2004-01-29  Scott Dattalo  <scott@dattalo.com>
 	* almost all source files - trying to sort out include dependencies
-	
+
 2004-01-28  Scott Dattalo  <scott@dattalo.com>
 	* src/pir.h moved all of the PIR*::put()'s to the PIR base class
 	* src/intcon.h, src/intcon.cc moved inline functions that called
@@ -5540,32 +5543,32 @@
 	* src/pir.cc new file - added so that inline functions that called
 	bp and trace objects could be removed from the header file.
 	* src/Makefile.am added pir.cc to the list of src files.
-	
+
 2004-01-26  Scott Dattalo  <scott@dattalo.com>
 	* src/* gui/*
 	  Replaced references to 'file_register' with 'Register'.
-	  Removed many gpsim_*() calls. 
+	  Removed many gpsim_*() calls.
 	  Renamed the program_memory_access class to ProgramMemoryAccess.
 	  Moved processor member functions associated with code breakpoints
 	  into the ProgramMemoryAccess class.
-	
+
 2004-01-26  Scott Dattalo  <scott@dattalo.com>
 	* src/register.h, src/register.cc, src/pic-register.h, src/pic-processor.h,
 	  src/14bit-registers.cc
 	cleaned up some include file dependencies.
 	moved the program counter class.
-	
+
 2004-01-23  Scott Dattalo  <scott@dattalo.com>
 	* src/trace.cc, src/trace.h: added boolean event logger
 	* src/intcon.cc, src/16bit-*: Debugging an interrupt problem
 	with the 16-bit core
-	
+
 2004-01-22  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui*.cc: converted the cross_reference_to_gui structure
 	into the CrossReferenceToGUI class.
 	* src/pir.h: fixed default names of the PIR registers
 	* regression/p16f873/p16f873.asm: added
-	
+
 2004-01-20  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_regwin.cc, gui/gui_src_asm.cc, gui_watch.cc:
 	  Changed gpsim_* api calls to their direct counterparts
@@ -5623,7 +5626,7 @@
 
 2004-01-03  Scott Dattalo  <scott@dattalo.com>
 	* Applied patch from Borut Razem - adds new files to Visual Studio project files.
-	
+
 2004-01-03  Scott Dattalo  <scott@dattalo.com>
 	* Applied patch from Bradley McLean mailto:bradlist@bradm.net that adds support
 	for the 18f1320.
@@ -5636,13 +5639,13 @@
 	* src/eeprom.cc - new file to consolidate eeprom related stuff
 	* src/intcon.cc - new file to consolidate variations in intcon registers
 	* src/pie.cc - new file for pie register
-	* src/intcon.h 
-	* src/pir.h 
+	* src/intcon.h
+	* src/pir.h
 	* src/pic-instructions - fixed bug in 18f banking
 	* src/16x5x.h - 16c54 register memory size was wrong
 	* gui/gui_stopwatch.cc - added a check to make sure there's a processor
 	* gui/gui_src*.cc - removed reference to cpu->pc->get_value()
-	
+
 2003-12-28  Scott Dattalo  <scott@dattalo.com>
 	* another patch from Borut Razem:
 	* cli/input.cc:
@@ -5673,7 +5676,7 @@
 
 2003-12-27  Scott Dattalo  <scott@dattalo.com>
 	* patch from Borut Razem for Visual Studio projects
-	
+
 2003-11-29  Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.cc - rewrote the way gpsim groups together all of
 	the processors it supports. Now the ProcessorConstructor class will
@@ -5682,34 +5685,34 @@
 
 2003-11-29  Scott Dattalo  <scott@dattalo.com>
 	* src/16bit-registers.cc - Access to PLUSWx are now signed.
-	
+
 2003-11-28  Scott Dattalo  <scott@dattalo.com>
 	* gui/* - More C to C++ conversions
 	* gui/gui_menu.cc - Patch from Alex Holden to enable compilation on a MAC
 	* src/icd.cc
 	* INSTALL - added instructions for MAC OS
-	
+
 2003-11-24  Scott Dattalo  <scott@dattalo.com>
 	* gui/* First round of struct to class conversion is now completed
 
 2003-11-20  Scott Dattalo  <scott@dattalo.com>
-	* src/ioports.cc - PORT B pullups were not working 
+	* src/ioports.cc - PORT B pullups were not working
 	* regression/* - Added some more regression tests
-	
+
 2003-11-16  Scott Dattalo  <scott@dattalo.com>
 	* gui/* More conversions to C++
 
 2003-11-15  Scott Dattalo  <scott@dattalo.com>
-	* gui/* started converting gui struct's into C++ classes. Started with 
+	* gui/* started converting gui struct's into C++ classes. Started with
 	Register Window.
-	
+
 2003-10-26  Scott Dattalo  <scott@dattalo.com>
 	* src/gpsim-time.cc linked-list bug fixes.
 
 2003-10-26  Scott Dattalo  <scott@dattalo.com>
 	* eXdbm/* applied patch from  Borut Razem mailto:borut.razem@siol.net to
 	fix an uninitialized pointer bug.
-	
+
 2003-10-26  Scott Dattalo  <scott@dattalo.com>
 	* modules/* removed all references to gui if not building with the gui
 
@@ -5717,28 +5720,28 @@
 	* modules/paraface.h - Solaris patch for bogus device
 	* src/cod.cc - Endian bug
 	* gui/gui_processor.cc - use memset instead of bzero.
-	
+
 2003-09-14  Scott Dattalo  <scott@dattalo.com>
  	* src/gpsim_time.h - changed cycle counter break point from a Singly linked
 	list to a doubly linked list. This is in preparation for separating module
-	time from pic processor time so that when the PIC goes to sleep, time 
+	time from pic processor time so that when the PIC goes to sleep, time
 	doesn't stop.
-	
+
 2003-09-07  Scott Dattalo  <scott@dattalo.com>
 	* src/p16f62x.h - duplicate declaration of intcon register
-	
+
 2003-09-07  Scott Dattalo  <scott@dattalo.com>
 	* src/breakpoints.cc - this time the 'Too many cycle counter breakpoints' was
 	fixed. BTW the problem was that 'clear_break' was not putting the cleared
 	breakpoint back into the 'inactive' list
-	
+
 2003-09-07  Scott Dattalo  <scott@dattalo.com>
 	* src/pic_processor.cc -- Fixed the "Too many cycle counter breakpoints" bug
-	* src/interface.cc        It turns out that the "realtime" stuff was 
+	* src/interface.cc        It turns out that the "realtime" stuff was
 	* src/breakpoints.cc      1) duplicating a class declaration. 2) not clearing
 	* src/breakpoints.h       cycle counter break points.
 	* gpsim.sln - added for win32 port.
-	
+
 2003-08-30  Scott Dattalo  <scott@dattalo.com>
 	* src/p12x.cc -- The 12c5xx will reset if an I/O is toggled and the processor
 	is sleeping.
@@ -5748,13 +5751,13 @@
 
 2003-08-25  Scott Dattalo  <scott@dattalo.com>
 	* src/ioports.cc - more 16f628 Port A fixes
-	
+
 2003-08-19  Scott Dattalo  <scott@dattalo.com>
 	* eXdbm/parse.c - "char" is used to store result of fgetc, but
 			EOF doesn't fit in the default unsigned chars.
 	* src/cod.cc - an endian issue which made symbol values come out wrong.
 		- note these fixes came from a patch attached to an anonymous  bug report
-	
+
 2003-08-18  Scott Dattalo  <scott@dattalo.com>
 	* src/ioports.cc - Port A on the F62x devices was named "ioport"
 	* src/p16f62x.cc - intcon was not declared at 0x8b (bug 566165)
@@ -5765,24 +5768,24 @@
 	* regression/* started the regression test directory. Only two
 	tests are performed: instruction validation for the midrange
 	family and a simple node test.
-	
+
 2003-08-17  Scott Dattalo  <scott@dattalo.com>
 	* Huge patch from Borut Razem mailto:borut.razem@siol.net that enables
 	gpsim to be compiled with MS Visual C under Windows.
 
-	
+
 2003-06-19  Scott Dattalo  <scott@dattalo.com>
 
 	* src/gpsim_time.h Multiple breaks at one Cycle were getting clobbered.
 	* src/gpsim_time.cc
 	* src/16bit-registers.cc Added support for TMR3
 	* src/pic-processor.h add pll_scale for the 18f devices.
-	
+
 2003-05-25  Scott Dattalo  <scott@dattalo.com>
 
 	* src/breakpoints.cc program memory break points were not working.
 	* Started formatting the Changelog properly
-	
+
 gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 
 T. Scott Dattalo
@@ -5804,7 +5807,7 @@ gpsim-0.21.0
 	* Source level debugging of C files
 	* Added 16c55,16c62,16c63,16c72,16c73 processors
 	* Added 18c442,18c452 processor
-	* Added module attibutes (attribute.cc) 
+	* Added module attibutes (attribute.cc)
 	* breadboard updates when either a tris or port is changed in the register viewer
 	* Enhanced module interface - now LCD module works with gpsim
 	* Patch from Rudy Moore to fix TMR0 bug
@@ -5813,7 +5816,7 @@ gpsim-0.21.0
 	* Added break mask to wv/rv type break points. Now you can specify
 	  which bits are significant.
 	* Added "abort_gpsim_now" command. This will unconditionally abort gpsim.
-	* Added "--cli" command line option. Invokes gpsim in command line 
+	* Added "--cli" command line option. Invokes gpsim in command line
 	  mode even if it has been configured to use the gui.
 	* Program viewer can now display ASCII encode text in "dt" tables
 	* Symbolic setting of execution breaks was not working.
@@ -5822,7 +5825,7 @@ gpsim-0.21.0
 	* USART baud rates were generated incorrectly and have been fixed.
 	* TXIF was handled improperly (reported by Wojciech Zabolotny <wzab@ise.pw.edu.pl>)
 	* TMR1 was incrementing even when disabled (Reported by Wojciech)
-	* Patch from JG for Suse 7.1. 
+	* Patch from JG for Suse 7.1.
 	* Patch from Robert Pearce to add 16C55
 	* Sleep now works for 12c5xx.
 	* Config word now works for 12c5xx
@@ -5837,7 +5840,7 @@ gpsim-0.21.0
 	  * Modified: In gpsim/main.cc put a cast in poptGetContext call, but perhaps
 	    is a fault in the version I use of popt, double check it.
 	  * Added: gtk_window_set_wmclass calls to help Enlightenment to remmember the
-	   positions of the windows.     
+	   positions of the windows.
 	  * Added: In gui/gui_main.c a couple of #undef to avoid redefinitions in
 	    eXdbm.h. Also check if that's OK for the eXdbm you are using.
 	  * Modified: Moved the INTCON register from _14bit_18pins class to child
@@ -5853,7 +5856,7 @@ gpsim-0.21.0
 	    TRISCCP registers, I don't know how they work, but I think they control the
 	    use of some I/O pins (normal or CCP function).
 
-	
+
 28JUL00 gpsim-0.20.0
   o Modules - gpsim now supports dynamically loaded modules
     -- module command
@@ -5907,7 +5910,7 @@ gpsim-0.21.0
    -- This means that you'll have to install gtk+-extra, the
       package that supports gtk-sheet (see INSTALL)
  o .cod file format bug fixes (you'll need the latest gpasm)
- o __config word for 18cxxx family is now supported 
+ o __config word for 18cxxx family is now supported
 
 16NOV99 gpsim-0.17.0
  o gui - Major overhaul of Register Window
@@ -5926,7 +5929,7 @@ gpsim-0.21.0
 
 gpsim-0.0.16
  o 18Cxxx core has been added
- o Ralf Forsberg has joined me in development. His major contributions 
+ o Ralf Forsberg has joined me in development. His major contributions
    have been in the gui code. Some of what he's done:
    - Wrote a new source browser with these features:
      -- Syntax highlighting (e.g. opcodes and comments are colored differently)
@@ -5982,7 +5985,7 @@ gpsim-0.0.16
      - DC bit wasn't updated correctly in add's and sub's (if W was the destination)
      - stack was rolling over after 7 pushes
      - goto's and call's were limited to 10 bits
-  o Added the command line option '-v' and the command version. Both echo 
+  o Added the command line option '-v' and the command version. Both echo
     gpsim's version.
   o Enhanced 'it.asm' and added 'it_12bit.asm' - two routines that exercise
     gpsim's ability to simulate the pic instructions.
@@ -6012,7 +6015,7 @@ gpsim-0.0.16
   o added support for the PIC16C61
   o began support for the PIC16C64
   o Changed the command line invocation: -p now selects a processor and not a core (e.g. -p14 used to be the way gp
-sim liked to select a device within the midrange, 14-bit family; now you must specify the specific device you wish 
+sim liked to select a device within the midrange, 14-bit family; now you must specify the specific device you wish
 to simulate: -pp16c61 .)
   o Generally overhauled everything in anticipation of supporting the 12-bit core
 
