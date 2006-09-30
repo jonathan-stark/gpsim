@@ -80,7 +80,7 @@ public:
 Module_Types available_modules[] =
 {
 
-  //#ifdef HAVE_GUI
+
 #ifndef _WIN32
   // Parallel port interface
   /*
@@ -106,9 +106,7 @@ Module_Types available_modules[] =
 #endif
   { {"pullup",           "pu"},   PullupResistor::pu_construct },
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
-#ifdef HAVE_GUI
   { {"pushbutton",       "pb"},   PushButton::construct },
-#endif
   { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },
 
   /*
@@ -130,7 +128,6 @@ Module_Types available_modules[] =
   { {"I2C-EEPROM2k", "e24xx024"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_2k},
   { {"I2C-EEPROM16k", "e24xx16b"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_16k},
   { {"I2C-EEPROM256k", "e24xx256"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_256k},
-  //#endif
 
   // No more modules
   { {0,0},0}

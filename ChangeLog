@@ -1,3 +1,11 @@
+2006-09-29 Scott Dattalo <scott@dattalo.com>
+	* modules/switch.cc, modules/switch.h: Trying to reintroduce
+	switch on resistance.
+	* modules/gpsim_modules.cc, modules/resistor.cc,
+	modules/resistor.h: minor clean ups
+	* regression/switch_test/switch_test.asm: Additional
+	comments. Tried to add a test to test switch on resistance...
+
 2006-09-25 Borut Razem <borut.razem@siol.net>
 	* src/sdc.vcproj, src/makefile.mingw: added pm_rd.* to the project
 

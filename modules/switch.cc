@@ -79,14 +79,13 @@ namespace Switches {
 
 
     double get_Zopen()   { return  m_pParent->getZopen(); }
+    double get_Zclosed() { return  m_pParent->getZclosed(); }
     bool switch_closed() { return  m_pParent->switch_closed(); }
     SwitchPin * other_pin(SwitchPin *pin) { return m_pParent->other_pin(pin);}
 
   private:
     Switch *m_pParent;
     bool bRefreshing;
-
-    double m_Zth;
 
     stimulus  **st_list;        // List of stimuli
     int         st_cnt;         // Size of list
@@ -96,8 +95,7 @@ namespace Switches {
 
 
   SwitchPin::SwitchPin(Switch *parent, const char *_name)
-    : IOPIN(_name), m_pParent(parent), bRefreshing(false),
-      m_Zth(1e12)
+    : IOPIN(_name), m_pParent(parent), bRefreshing(false)
   {
     assert(m_pParent);
     sp_cnt = 5;
@@ -119,11 +117,13 @@ namespace Switches {
       double conductance = 0.;
       double Cth = 0.;
 
+      //conductance =  get_Zclosed() ? (1/get_Zclosed()) : 0.0;
+
       op->sumThevenin(current, conductance, Cth);
       z = 1./conductance;
       v = current * z;
       c = Cth;
-      if (!bRefreshing && op->snode)	// Not call from other pin
+      if (!bRefreshing && op->snode)	// Not called from other pin
       {
 	op->set_Refreshing();
 	op->snode->update();	// update other pin node
@@ -441,7 +441,7 @@ namespace Switches {
   */
   void Switch::update()
   {
-    if (switch_closed()) // equilise voltage if capacitance involved
+    if (switch_closed()) // equalise voltage if capacitance involved
       do_voltage();
     if (m_pinA->snode)
       m_pinA->snode->update();
@@ -454,6 +454,11 @@ namespace Switches {
   double Switch::getZopen()
   {
     return m_Zopen ? m_Zopen->getVal() : 1e8;
+  }
+
+  double Switch::getZclosed()
+  {
+    return m_Zclosed ? m_Zclosed->getVal() : 10;
   }
 
   SwitchPin * Switch::other_pin(SwitchPin *pin)
@@ -515,14 +520,19 @@ Two port switch\n\
     m_Zopen   = new ResistanceAttribute(this, 1e8,
                                         "Ropen",
                                         "Resistance of opened switch");
+    m_Zclosed = new ResistanceAttribute(this, 10, 	 
+					"Rclosed", 	 
+					"Resistance of closed switch");
     m_aState = new SwitchAttribute(this);
 
     add_attribute(m_aState);
     add_attribute(m_Zopen);
+    add_attribute(m_Zclosed);
   }
 
   Switch::~Switch(void)
   {
+    delete m_Zclosed;
     delete m_Zopen;
     delete m_aState;
   }
@@ -542,9 +552,6 @@ Two port switch\n\
     double C1, C2;
     double V1, V2;
     double Vth;
-                                                                                
-    if (verbose)
-      cout << "\nSwitch::do_voltage " << name() << endl;
 
     V1 = m_pinA->get_nodeVoltage();
     m_pinA->sumThevenin(current, conductance, Cth);
@@ -553,6 +560,12 @@ Two port switch\n\
     V2 = m_pinB->get_nodeVoltage();
     m_pinB->sumThevenin(current, conductance, Cth);
     C2 = Cth - C1;
+
+    if (verbose)
+      cout << "\nSwitch::do_voltage " << name() 
+	   << " V.A=" << V1
+	   << " V.B=" << V2
+	   << endl;
 
     if (Cth)
     {

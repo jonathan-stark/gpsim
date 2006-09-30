@@ -55,13 +55,33 @@ MAIN    CODE
 ;
 ; Portb0 is used to drive the switch while portc 0-2 monitor the results
 ;
-;               PU1
-;                |   \
-;  portb0  >--+--+--O \O--+--> portc1
-;  portc0  <--|           |
-;             |      \   PD1
-;             |-----O \O-----> portc2
+;               PU1   SW1
+;                |   A \  B
+;  portb0  >--+--+----O \O-----+--> portc1
+;             |                |
+;  portc0  <--+                |
+;             |    A \  B     PD1
+;             |-----O \O----------> portc2
+;                   SW2
 ;
+; The pull up and pull down resistors are modelled as parallel RC networks:
+;
+;
+;           5V
+;            ^                 x
+;            |                 |
+;         +--+--+           +--+--+
+;         |     |           |     |
+;      R  \    === C     R  \    === C
+;         /     |           /     |
+;         |     |           |     |
+;         +--+--+           +--+--+
+;            |                 |
+;            x                ///
+;
+;        Pull up            Pull Down
+;
+; The 'x' is connection point.
 ;
 
    ;# Module libraries:
@@ -106,6 +126,12 @@ MAIN    CODE
    .sim "attach nc1 SW2.B portc2"
 
    .sim "frequency 10.0e6"
+
+    ;# Scope monitoring
+   .sim "scope.ch0=\"portb0\""
+   .sim "scope.ch1=\"portc0\""
+   .sim "scope.ch2=\"portc1\""
+   .sim "scope.ch3=\"portc2\""
 
 ;# End of configuration
 ;
@@ -258,6 +284,31 @@ start
 	BCF	PORTB,0
    .assert "(portc & 7) == 0, \"2 switch drive low\""
 	nop
+
+   ; Now test very large switch resistance
+   .command "SW1.state=false"
+        nop
+   .command "SW2.state=false"
+        nop
+	BCF	PORTB,0
+
+   .assert "(portc & 3) == 0, \"Both sides low C=0 Starting Large Ron\""
+	nop
+
+   .command "SW1.Rclosed=1e4"
+	nop
+   .command "PD1.capacitance=4.00e-06"
+	nop
+
+   .assert "(portc & 3) == 0, \"SW1.Rclosed = 10k\""
+	nop
+
+   .command "SW1.state=true"
+
+	BSF	PORTB,0		; Drive one side of switch high
+	movlw   9
+	call    delay
+
 done:
 
   .assert  "\"*** PASSED Switch Test on 16f877\""
