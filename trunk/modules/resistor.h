@@ -33,42 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 
 #include "../src/modules.h"
-#include "../src/packages.h"
 #include "../src/stimuli.h"
-#include "../src/symbol.h"
-#include "../src/trace.h"
-#include "../src/ioports.h"
-
-# if 0
-class Resistor;
-class Resistor_IOPORT : public IOPORT
-{
-public:
-
-  virtual void trace_register_write(void);
-
-  Resistor_IOPORT (unsigned int _num_iopins=2) : IOPORT(_num_iopins) {}
-
-};
-
-
-
-class Resistor : public Module 
-{
-public:
-
-  Resistor_IOPORT  *port;
-
-  Resistor(void);
-  ~Resistor(void);
-
-  // Inheritances from the Package class
-  virtual void create_iopin_map(void);
-
-  static Module *construct(const char *new_name=NULL);
-
-};
-#endif
 
 class PullupResistor : public Module 
 {

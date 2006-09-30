@@ -68,6 +68,8 @@ namespace Switches {
 
     // Attributes call back into the switch through here:
     double getZopen();
+    double getZclosed();
+
   protected:
     SwitchPin *m_pinA;
     SwitchPin *m_pinB;
@@ -76,11 +78,10 @@ namespace Switches {
     bool m_bCurrentState;
     SwitchAttribute *m_aState;
 
-//    double voltage;
 
-    // Switch open resistance.
-    // Fix me:
+    // Switch resistance.
     Float *m_Zopen;
+    Float *m_Zclosed;
 
     // The switch's graphical representation.
     GtkToggleButton *m_button;
