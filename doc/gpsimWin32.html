@@ -111,8 +111,10 @@ section:</p>
 library provides a set of functions for use by applications that allow
 users to edit command lines as they are typed in.
     <ul>
-      <li> <a href="#readline_mswin32">readline-*-mswin32.zip</a>:
-sources</li>
+      <li> <a href="#readline_dev">readline-5.1-*-dev.zip</a>:
+required for gpsim development</li>
+      <li> <a href="#readline_bin">readline-5.1-*-bin.zip</a>:
+required by gpsim GUI run timet</li>
     </ul>
     <br />
   </li>
@@ -211,7 +213,7 @@ download the latest gpsim version from <a href="http://sourceforge.net/svn/?grou
 </ul>
 <h3>CLI (supported only by VS .NET compilation):</h3>
 <ul>
-  <li>Create the readline subdirectory and extract <a href="#readline_mswin32">readline-*-mswin32.zip</a>
+  <li>Create the readline subdirectory and extract <a href="#readline_dev">readline-5.1-*-dev.zip</a>
 into it</li>
   <li>Create the popt subdirectory and extract <a href="#popt_lib">popt-*-lib.zip</a> into it</li>
   <li>Create the glib subdirectory and extract <a href="#glib_dev">glib-dev-*.zip</a> into it
@@ -265,10 +267,6 @@ of&nbsp; the Pre-built directory to pthreads.</li>
   <li> Compile gpsim native WIN32 port:
     <ul>
       <li>
-        <p>For MinGW compilation, you have to compile the radline
-DLL. Run the shell, go to the readline/win32/shlib subdirectory and
-execute:</p>
-        <pre>make -f GNUmakefile</pre>
         <p>Go to the gpsim subdirectory and execute:</p>
         <pre>make -f makefile.mingw</pre>
       </li>
@@ -288,6 +286,9 @@ package, bin directory to the same directory where gpsim.exe resides.</li>
 package, bin
 directory to the same directory where gpsim.exe resides.</li>
   <li>Extract libiconv-2.dll from <a href="#libiconv_bin">libiconv-*-bin.zip</a>
+package,
+bin directory to the same directory where gpsim.exe resides.</li>
+  <li>Extract readline5.dll from <a href="#readline_bin">readline-5.1-*-bin.zip</a>
 package,
 bin directory to the same directory where gpsim.exe resides.</li>
 </ul>
@@ -357,7 +358,7 @@ GIMP) for Windows</a> project:</p>
   <li> <a href="ftp://ftp.gtk.org/pub/gtk/v2.8/win32/gtk+-dev-2.8.20.zip" name="gtk_dev">gtk+-dev-2.8.20.zip</a></li>
   <li> <a href="ftp://ftp.gtk.org/pub/gtk/v2.8/win32/gtk+-2.8.20.zip" name="gtk">gtk+-2.8.20.zip</a></li>
   <li> <a href="ftp://ftp.gtk.org/pub/pango/1.12/win32/pango-dev-1.12.3.zip" name="pango_dev">pango-dev-1.12.3.zip</a></li>
-  <li> <a href=ftp://ftp.gtk.org/pub/pango/1.12/win32/pango-1.12.3.zip name="pango">pango-1.12.3.zip</a></li>
+  <li> <a href="ftp://ftp.gtk.org/pub/pango/1.12/win32/pango-1.12.3.zip" name="pango">pango-1.12.3.zip</a></li>
   <li><a href="ftp://ftp.gtk.org/pub/gtk/v2.8/win32/cairo-dev-1.2.2.zip" name="cairo_dev">cairo-dev-1.2.2.zip</a></li>
   <li><a href="ftp://ftp.gtk.org/pub/gtk/v2.8/win32/cairo-1.2.2.zip" name="cairo">cairo-1.2.2.zip</a></li>
   <li><a href="ftp://ftp.gtk.org/pub/gtk/v2.8/win32/atk-dev-1.10.3.zip" name="atk_dev">atk-dev-1.10.3.zip</a></li>
@@ -368,13 +369,15 @@ GIMP) for Windows</a> project:</p>
 </ul>
 <p>Other packages:</p>
 <ul>
-  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-4.3-5-mswin32.zip" name="readline_mswin32">readline-4.3-5-mswin32.zip</a></li>
+  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-src.zip" name="readline_src">readline-5.1-20061001-src.zip</a></li>
+  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-lib.zip" name="readline_lib">readline-5.1-20061001-lib.zip</a></li>
+  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-bin.zip" name="readline_bin">readline-5.1-20061001-bin.zip</a></li>
   <li> <a href="ftp://sources.redhat.com/pub/pthreads-win32/pthreads-w32-2-7-0-release.exe" name="pthreads"> pthreads-w32-2-7-0-release.exe</a></li>
   <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-dev-20060611.zip" name="gtk_extra_dev">gtk+extra-2.1.1-dev-20060611.zip</a></li>
   <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-src-20060611.zip" name="gtk_extra_src">gtk+extra-2.1.1-src-20060611.zip</a></li>
 </ul>
 <hr />
-<p>Last update: June 11, 2006 by Borut Ražem</p>
+<p>Last update: October 2, 2006 by Borut Ražem</p>
 <table>
   <tbody>
     <tr>
@@ -390,4 +393,3 @@ GIMP) for Windows</a> project:</p>
 </table>
 </body>
 </html>
- 

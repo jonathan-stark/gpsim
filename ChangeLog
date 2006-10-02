@@ -5,6 +5,7 @@
 	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-src.zip,
 	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-lib.zip,
 	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-bin.zip
+	* doc/gpsimwin32.html: readline 5.1
 
 2006-09-29 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h: Trying to reintroduce
