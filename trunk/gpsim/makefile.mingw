@@ -12,7 +12,7 @@ include ../plat/win32/make.mingw
 # Nothing much configurable below
 
 LIBS = -l wsock32 \
-     -L $(READLINE_PATH)/win32/shlib -l readline \
+     -L $(READLINE_PATH)/lib -l readline.dll \
      -L $(POPT_PATH)/lib -l popt \
      -L $(PANGO_PATH)/lib -l pango-1.0 \
      -L $(CAIRO_PATH)/lib -l cairo \
@@ -32,7 +32,7 @@ DEFINES += -DHAVE_GUI
 
 all :				\
 	../config.h		\
-	gpsim.exe 
+	gpsim.exe
 
 gpsim_OBJECTS =			\
 	main.o

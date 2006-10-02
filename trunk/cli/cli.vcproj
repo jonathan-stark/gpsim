@@ -20,8 +20,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;../../cairo/include/cairo;../.."
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;IN_MODULE;HAVE_GUI;HAVE_READLINE;HAVE_NSCLEAN_READLINE;READLINE_STATIC;HAVE_SOCKETS"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;../../cairo/include/cairo;../../readline/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;IN_MODULE;HAVE_GUI;HAVE_READLINE;HAVE_NSCLEAN_READLINE;USE_READLINE_DLL;HAVE_SOCKETS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -63,8 +63,8 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;../../cairo/include/cairo;../.."
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;IN_MODULE;HAVE_GUI;HAVE_READLINE;HAVE_NSCLEAN_READLINE;READLINE_STATIC;HAVE_SOCKETS"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;../../cairo/include/cairo;../../readline/include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;IN_MODULE;HAVE_GUI;HAVE_READLINE;HAVE_NSCLEAN_READLINE;USE_READLINE_DLL;HAVE_SOCKETS"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;IN_MODULE;HAVE_NSCLEAN_READLINE;HAVE_SOCKETS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;IN_MODULE;HAVE_NSCLEAN_READLINE;USE_READLINE_DLL;HAVE_SOCKETS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -148,7 +148,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;IN_MODULE;YYDEBUG=1;HAVE_NSCLEAN_READLINE;HAVE_SOCKETS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;IN_MODULE;YYDEBUG=1;HAVE_NSCLEAN_READLINE;USE_READLINE_DLL;HAVE_SOCKETS"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"

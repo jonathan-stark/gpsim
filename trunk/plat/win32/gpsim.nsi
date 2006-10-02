@@ -154,7 +154,7 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\libpng13.dll"
   File "${PKG_ROOT}\bin\popt1.dll"
   File "${PKG_ROOT}\bin\pthreadGC2.dll"
-  File "${PKG_ROOT}\bin\readline.dll"
+  File "${PKG_ROOT}\bin\readline5.dll"
   File "${PKG_ROOT}\bin\zlib1.dll"
 
   SetOutPath "$INSTDIR\doc"
@@ -577,7 +577,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libpng13.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\pthreadGC2.dll"
-  Delete "$INSTDIR\bin\readline.dll"
+  Delete "$INSTDIR\bin\readline5.dll"
   Delete "$INSTDIR\bin\zlib1.dll"
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"

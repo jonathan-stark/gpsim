@@ -10,7 +10,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "src", "src\src.vcproj", "{6
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cli", "cli\cli.vcproj", "{770FEBE4-6F1A-4837-833C-33602556896F}"
 	ProjectSection(ProjectDependencies) = postProject
-		{AF81F599-C97C-406A-B87B-490046F3BDB3} = {AF81F599-C97C-406A-B87B-490046F3BDB3}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui", "gui\gui.vcproj", "{1234584B-F8A2-473D-A101-14839CCD4CE3}"
@@ -26,11 +25,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "modules", "modules\modules.
 		{6747B599-55D9-4224-A04E-AE6D8C33BFEF} = {6747B599-55D9-4224-A04E-AE6D8C33BFEF}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "readline", "..\readline\win32\readline.vcproj", "{AF81F599-C97C-406A-B87B-490046F3BDB3}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Install", "plat\win32\Install.vcproj", "{9D6358AA-3A6D-4835-8F34-7950A2A6C351}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GpsimDevInstall", "plat\win32\Install.vcproj", "{9D6358AA-3A6D-4835-8F34-7950A2A6C351}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -84,14 +79,6 @@ Global
 		{58EA680C-0625-4A75-9C71-B959D919BEAD}.Release.ActiveCfg = Release|Win32
 		{58EA680C-0625-4A75-9C71-B959D919BEAD}.Release GUI.ActiveCfg = Release|Win32
 		{58EA680C-0625-4A75-9C71-B959D919BEAD}.Release GUI.Build.0 = Release|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Debug.ActiveCfg = Debug|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Debug.Build.0 = Debug|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Debug GUI.ActiveCfg = Debug|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Debug GUI.Build.0 = Debug|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release.ActiveCfg = Release|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release.Build.0 = Release|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release GUI.ActiveCfg = Release|Win32
-		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release GUI.Build.0 = Release|Win32
 		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug.ActiveCfg = Debug|Win32
 		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug.Build.0 = Debug|Win32
 		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug GUI.ActiveCfg = Debug|Win32
