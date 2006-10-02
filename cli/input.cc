@@ -96,7 +96,7 @@ extern const char *get_dir_delim(const char *path);
 int parse_string(const char * str);
 
 //------------------------------------------------------------------------
-// 
+//
 LIBGPSIM_EXPORT bool gUsingThreads(); // in ../src/interface.cc
 
 void initialize_readline (void);
@@ -216,7 +216,7 @@ LLInput::~LLInput()
 
 LLStack::LLStack()
   : LLdata(0), next_stack(0)
-  
+
 {
   msi_StackDepth++;
   //  cout << "Stack depth: " << level() << endl;
@@ -232,7 +232,7 @@ static LLStack *Stack=0;
 //
 // catch_control_c
 //
-//  
+//
 void catch_control_c(int sig)
 {
 #ifdef _WIN32
@@ -295,12 +295,12 @@ void initialize_signals(void)
 }
 void initialize_CLI()
 {
-  CCommandManager::GetManager().Register(&sCliCommandHandler);  
+  CCommandManager::GetManager().Register(&sCliCommandHandler);
 }
 //==============================================================
-// initialize_gpsim 
+// initialize_gpsim
 //
-// Not much initialization is needed now. 
+// Not much initialization is needed now.
 //
 
 void initialize_gpsim(void)
@@ -308,7 +308,7 @@ void initialize_gpsim(void)
   s_bSTCEcho.setClearableSymbol(false);
   get_symbol_table().add(&s_bSTCEcho);
   initialize_CLI();
-  if(gUsingThreads()) 
+  if(gUsingThreads())
     initialize_threads();
   initialize_signals();
 #ifdef HAVE_SOCKETS
@@ -328,7 +328,7 @@ void LLStack::print(void)
       LLInput *h = s->LLdata;
       int depth =0;
       while(h) {
-      
+
 	cout << "   " <<stack_number <<':'<<depth << "  "<<  h->data;
 	depth++;
 	h = h->next_input;
@@ -346,7 +346,7 @@ void LLStack::Push()
 
   s->next_stack = Stack;
   Stack = s;
-    
+
   print();
 }
 
@@ -363,7 +363,7 @@ void LLStack::Pop()
 
 void LLStack::Append(const char *s, Macro *m)
 {
-  
+
   LLInput *d = new LLInput(s,m);
 
   LLInput *h = LLdata;
@@ -377,7 +377,7 @@ void LLStack::Append(const char *s, Macro *m)
     /* add d to the end */
 
     h->next_input = d;
-    
+
   } else
     LLdata = d;
 
@@ -392,7 +392,7 @@ LLInput *LLStack::GetNext()
     if (Stack->LLdata) {
       LLInput *d = Stack->LLdata;
 
-      // remove this item from the list  
+      // remove this item from the list
       if(d)
         Stack->LLdata = d->next_input;
 
@@ -424,7 +424,7 @@ void start_new_input_stream()
 {
   if(!Stack)
     Stack = new LLStack();
-  else 
+  else
     Stack->Push();
 }
 
@@ -440,7 +440,7 @@ void clear_input_buffer(void)
 
 /*******************************************************
  * start_parse
- * 
+ *
  * This routine will run a string through the command parser
  *this is useful if you want to execute a command but do not
  *wish to go through the readline stuff.
@@ -516,9 +516,9 @@ void process_command_file(const char * file_name)
       char *s;
       char str[256];
 
-      while( (s = fgets(str, 256, cmd_file)) != 0) 
+      while( (s = fgets(str, 256, cmd_file)) != 0)
       {
-          if(str[0] == 0 || 
+          if(str[0] == 0 ||
              str[0] == '\n' ||
              ((str[1] == '\n' && str[0] == '\r'))) {
               // skip the blank lines
@@ -565,7 +565,7 @@ void process_command_file(const char * file_name)
             0   - failure
 */
 
-int gpsim_open(Processor *cpu, const char *pFileName, 
+int gpsim_open(Processor *cpu, const char *pFileName,
 	       const char * pProcessorType, const char *pProcessorName)
 {
   if(!pFileName)
@@ -583,7 +583,7 @@ int gpsim_open(Processor *cpu, const char *pFileName,
   } else {
 
     // Assume a Program file
-    return 
+    return
       CSimulationContext::GetContext()->LoadProgram(pFileName, pProcessorType, 0, pProcessorName);
 
   }
@@ -709,7 +709,7 @@ command_generator (const char *text, int state)
 
   // If no names matched, and this is the first item on a line (i.e. state==0)
   // then return a copy of the input text. (Note, it was emperically determined
-  // that 'something' must be returned if there are no matches at all - 
+  // that 'something' must be returned if there are no matches at all -
   // otherwise readline crashes on windows.)
 #ifdef _WIN32
   if(state == 0)
@@ -756,7 +756,7 @@ gpsim_completion (const char *text, int start, int end)
 
 //#ifdef HAVE_GUI
 
-//============================================================================ 
+//============================================================================
 //
 // keypressed().
 //
@@ -807,7 +807,11 @@ void have_line(char *s)
 
   start_parse();
 
+#if defined (_WIN32) || defined (HAS_RL_FREE)
+  rl_free(s);
+#else
   free(s);
+#endif
 }
 
 /**********************************************************************
@@ -816,7 +820,7 @@ void exit_gpsim(void)
 {
   if(get_use_icd())
     icd_disconnect();
-  
+
 #ifdef HAVE_GUI
   quit_gui();
 #endif
@@ -884,7 +888,7 @@ void initialize_readline (void)
 //  rl_terminal_name = "gpsim";
 
 #ifdef _WIN32
-  /* set console to raw mode */ 
+  /* set console to raw mode */
   win32_fd_to_raw(fileno(stdin));
 #endif
 
@@ -895,7 +899,7 @@ void initialize_readline (void)
 
 #ifdef _WIN32
 #if GLIB_MAJOR_VERSION < 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 6)
-  /* set console to raw mode */ 
+  /* set console to raw mode */
   win32_set_is_readable(channel);
 #endif
 
@@ -939,7 +943,7 @@ void EnableKeypressHook(bool bEnable) {
 // This means that clients interested in gpsim's cli can look up this
 // registered handler and get access to the command line. This is primarily
 // used by symbol files that embed gpsim scripts. See src/modules.cc.
-// 
+//
 
 char *CCliCommandHandler::GetName()
 {
@@ -977,7 +981,7 @@ int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
   list <string *> :: iterator command_iterator;
 
   for (command_iterator = script.begin();
-       command_iterator != script.end(); 
+       command_iterator != script.end();
        ++command_iterator) {
 
     string *cmd = *command_iterator;
@@ -993,5 +997,3 @@ int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
 
   return CMD_ERR_OK;
 }
-
-

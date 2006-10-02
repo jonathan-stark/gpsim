@@ -1,3 +1,11 @@
+2006-10-02 Borut Razem <borut.razem@siol.net>
+	* gpsim.sln, cli/input.cc, cli/cli.vcproj, cli/makefile.mingw,
+	  gpsim/gpsim.vcproj, gpsim/makefile.mingw, plat/win32/gpsim.nsi:
+	  use readline 5.1. Packages are available at
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-src.zip,
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-lib.zip,
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.1-20061001-bin.zip
+
 2006-09-29 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h: Trying to reintroduce
 	switch on resistance.
@@ -25,7 +33,6 @@
 	* src/pic-processor.cc, regression/p16f628/p16f628.asm: Added the
 	p16f627a and p16f628a processors. Note that these are identical to
 	the non-A versions.
-
 
 2006-09-10 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/ValueCollections.h: Added indexing operator to class
