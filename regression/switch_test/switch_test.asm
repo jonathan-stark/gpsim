@@ -297,17 +297,54 @@ start
 
    .command "SW1.Rclosed=1e4"
 	nop
-   .command "PD1.capacitance=4.00e-06"
+   .command "PD1.capacitance=0.50e-06"
 	nop
-
    .assert "(portc & 3) == 0, \"SW1.Rclosed = 10k\""
 	nop
 
    .command "SW1.state=true"
 
+   ; Now with the switch closed, the switch resistance and 
+   ; the pull down resistance form a voltage divider:	
+   ;
+   ;                10k
+   ;  portb0 -----/\/\/\---+----+------ portc0
+   ;                       \    |
+   ;                       /    |
+   ;                   5k  \   === 4uF
+   ;                       /    |
+   ;                       |    |
+   ;                      ///  ///
+   ;
+   ;  When portb0 is driven to 5.0V, portc0 will rise to 5/3=1.66V
+
 	BSF	PORTB,0		; Drive one side of switch high
+
+	movlw   30
+	call    delay
+
+	BCF	PORTB,0		; Drive the switch low again
+
+	movlw   30
+	call    delay
+
+   ; Remove the pull down resistor by making its value very large
+   ; Now when we drive portb0 high, the other side can rise to 5.0V
+
+   .command "PD1.resistance=1.0e8"
+	nop
+
+	BSF	PORTB,0		; Drive one side of switch high
+
 	movlw   9
 	call    delay
+
+	BCF	PORTB,0		; Drive the switch low again
+
+	movlw   9
+	call    delay
+
+	nop
 
 done:
 
