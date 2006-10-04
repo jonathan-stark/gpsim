@@ -1,3 +1,10 @@
+2006-10-04 Scott Dattalo <scott@dattalo.com>
+	* modules/switch.cc: Switch resistance has successfully been reintroduced
+	* regression/switch_test/switch_test.asm: Added a test to test the
+	switch resistance. Note, there are no assertions set on the test
+	because currently there is no way to query the node voltage
+	directly. 
+
 2006-10-02 Borut Razem <borut.razem@siol.net>
 	* gpsim.sln, cli/input.cc, cli/cli.vcproj, cli/makefile.mingw,
 	  gpsim/gpsim.vcproj, gpsim/makefile.mingw, plat/win32/gpsim.nsi:

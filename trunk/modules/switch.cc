@@ -117,11 +117,10 @@ namespace Switches {
       double conductance = 0.;
       double Cth = 0.;
 
-      //conductance =  get_Zclosed() ? (1/get_Zclosed()) : 0.0;
-
       op->sumThevenin(current, conductance, Cth);
       z = 1./conductance;
       v = current * z;
+      z += (get_Zclosed() ? get_Zclosed() : 0.0);
       c = Cth;
       if (!bRefreshing && op->snode)	// Not called from other pin
       {
