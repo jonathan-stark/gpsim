@@ -69,7 +69,7 @@ namespace Switches {
 
                                                                                 
                                                                                 
-    SwitchPin(Switch *parent, const char *_name);
+    SwitchPin(SwitchBase *parent, const char *_name);
 
     virtual void getThevenin(double &v, double &z, double &c);
     virtual void sumThevenin(double &current, double &conductance, double &Cth);
@@ -84,7 +84,7 @@ namespace Switches {
     SwitchPin * other_pin(SwitchPin *pin) { return m_pParent->other_pin(pin);}
 
   private:
-    Switch *m_pParent;
+    SwitchBase *m_pParent;
     bool bRefreshing;
 
     stimulus  **st_list;        // List of stimuli
@@ -94,7 +94,7 @@ namespace Switches {
   };
 
 
-  SwitchPin::SwitchPin(Switch *parent, const char *_name)
+  SwitchPin::SwitchPin(SwitchBase *parent, const char *_name)
     : IOPIN(_name), m_pParent(parent), bRefreshing(false)
   {
     assert(m_pParent);
@@ -302,10 +302,10 @@ namespace Switches {
   class ResistanceAttribute : public Float {
 
   public:
-    Switch *m_sw;
+    SwitchBase *m_sw;
 
 
-    ResistanceAttribute(Switch *psw,
+    ResistanceAttribute(SwitchBase *psw,
                          double resistance,
                          const char *_name, 
                          const char *_desc)
@@ -330,7 +330,7 @@ namespace Switches {
 
   public:
 
-    SwitchAttribute(Switch *_parent)
+    SwitchAttribute(SwitchBase *_parent)
       : Boolean("state",false,"Query or Change the switch"), m_pParent(_parent)
     {
       assert(m_pParent);
@@ -339,7 +339,7 @@ namespace Switches {
     virtual void set(bool  b);
     void setFromButton(bool  b);
   private:
-    Switch *m_pParent;
+    SwitchBase *m_pParent;
   };
 
   void SwitchAttribute::set(bool b)
@@ -360,7 +360,7 @@ namespace Switches {
   //  This is where the information for the Module's package is defined.
   // Specifically, the I/O pins of the module are created.
 
-  void Switch::create_iopin_map(void)
+  void SwitchBase::create_iopin_map(void)
   {
 
     // Define the physical package.
@@ -394,38 +394,10 @@ namespace Switches {
 
   }
 
-  //--------------------------------------------------------------
-  // GUI
-#ifdef HAVE_GUI
-  static void toggle_cb (GtkToggleButton *button, Switch *sw)
-  {
-    if (sw)
-      sw->buttonToggled();
-  }
-
-  void Switch::buttonToggled ()
-  {
-    bool b = (gtk_toggle_button_get_active(m_button)==TRUE) ? true : false;
-
-    if (! m_pinA->snode || ! m_pinB->snode)
-      {
-        cout << "\n WARNING both pins of " << name() 
-             << " must be connected to nodes\n";
-        return;
-      }
-    m_aState->set(b); 
-
-  }
-#endif
-
   //------------------------------------------------------------------------
   //
-  void Switch::setState(bool bNewState)
+  void SwitchBase::setState(bool bNewState)
   {
-#ifdef HAVE_GUI
-    if (m_button)
-      gtk_toggle_button_set_active(m_button, bNewState ? TRUE : FALSE);
-#endif
     if ( switch_closed() != bNewState) {
       m_bCurrentState = bNewState;
       update();
@@ -438,7 +410,7 @@ namespace Switches {
      SwitchPin::getThevenin will send it to the other pin.
      If the switch is open, then update both sides
   */
-  void Switch::update()
+  void SwitchBase::update()
   {
     if (switch_closed()) // equalise voltage if capacitance involved
       do_voltage();
@@ -450,68 +422,27 @@ namespace Switches {
   }
 
   //------------------------------------------------------------------------
-  double Switch::getZopen()
+  double SwitchBase::getZopen()
   {
     return m_Zopen ? m_Zopen->getVal() : 1e8;
   }
 
-  double Switch::getZclosed()
+  double SwitchBase::getZclosed()
   {
     return m_Zclosed ? m_Zclosed->getVal() : 10;
   }
 
-  SwitchPin * Switch::other_pin(SwitchPin *pin)
+  SwitchPin * SwitchBase::other_pin(SwitchPin *pin)
   {
 	return( (pin == m_pinA)? m_pinB: m_pinA);
   }
 
   //------------------------------------------------------------------------
 
-  //------------------------------------------------------------------------
-  void Switch::create_widget(Switch *sw)
-  {
-#ifdef HAVE_GUI
-    GtkWidget *box1;
-
-
-    box1 = gtk_vbox_new (FALSE, 0);
-
-    m_button = GTK_TOGGLE_BUTTON(gtk_toggle_button_new_with_label ((char*)sw->name().c_str()));
-    gtk_container_set_border_width (GTK_CONTAINER (m_button), 1);
-    gtk_signal_connect (GTK_OBJECT (m_button), "toggled",
-                        GTK_SIGNAL_FUNC (toggle_cb), (gpointer)sw);
-    gtk_widget_show(GTK_WIDGET(m_button));
-    gtk_box_pack_start (GTK_BOX (box1), GTK_WIDGET(m_button), FALSE, FALSE, 0);
-
-    gtk_widget_show_all (box1);
-    // Tell gpsim which widget to use in breadboard.
-   sw->set_widget(box1);
-#endif
-  }
-
-  //--------------------------------------------------------------
-  // construct
-  Module * Switch::construct(const char *_new_name=0)
-  {
-
-    Switch *switchP = new Switch(_new_name);
-    //switchP->new_name(_new_name);
-    switchP->create_iopin_map();
-
-    if(get_interface().bUsingGUI()) 
-      switchP->create_widget(switchP);
-
-    return switchP;
-  }
-
-  Switch::Switch(const char *_new_name=0)
-    : Module(_new_name, "\
-Two port switch\n\
- Attributes:\n\
- .state - true if switch is pressed\n\
-"), 
+  SwitchBase::SwitchBase(const char *_new_name, const char *_desc)
+    : Module(_new_name,_desc), 
       m_pinA(0), m_pinB(0), m_aState(0),
-      m_button(0), m_bCurrentState(false)
+      m_bCurrentState(false)
   {
 
     // Default module attributes.
@@ -529,7 +460,7 @@ Two port switch\n\
     add_attribute(m_Zclosed);
   }
 
-  Switch::~Switch(void)
+  SwitchBase::~SwitchBase(void)
   {
     delete m_Zclosed;
     delete m_Zopen;
@@ -542,7 +473,7 @@ Two port switch\n\
   ** charge will instantaneously be exchanged between the capacitors until 
   ** they have the same voltage.
   */
-  void Switch::do_voltage()
+  void SwitchBase::do_voltage()
   {
 
     double conductance=0.0;   // Thevenin conductance.
@@ -580,4 +511,94 @@ Two port switch\n\
         m_pinB->snode->set_nodeVoltage(Vth);
     }
   }
+
+  //========================================================================
+
+  Switch::Switch(const char *_new_name=0)
+    : SwitchBase(_new_name, "\
+Two port switch\n\
+ Attributes:\n\
+ .state - true if switch is pressed\n\
+"), 
+      m_button(0)
+  {
+
+  }
+
+  Switch::~Switch()
+  {
+  }
+
+  //--------------------------------------------------------------
+  // construct
+  Module * Switch::construct(const char *_new_name=0)
+  {
+
+    Switch *switchP = new Switch(_new_name);
+    //switchP->new_name(_new_name);
+    switchP->create_iopin_map();
+
+    if(get_interface().bUsingGUI()) 
+      switchP->create_widget(switchP);
+
+    return switchP;
+  }
+
+  //--------------------------------------------------------------
+  // GUI
+#ifdef HAVE_GUI
+  static void toggle_cb (GtkToggleButton *button, Switch *sw)
+  {
+    if (sw)
+      sw->buttonToggled();
+  }
+
+  void Switch::buttonToggled ()
+  {
+    bool b = (gtk_toggle_button_get_active(m_button)==TRUE) ? true : false;
+
+    if (! m_pinA->snode || ! m_pinB->snode)
+      {
+        cout << "\n WARNING both pins of " << name() 
+             << " must be connected to nodes\n";
+        return;
+      }
+    m_aState->set(b); 
+
+  }
+#endif
+
+  //------------------------------------------------------------------------
+  //
+  void Switch::setState(bool bNewState)
+  {
+#ifdef HAVE_GUI
+    if (m_button)
+      gtk_toggle_button_set_active(m_button, bNewState ? TRUE : FALSE);
+#endif
+    SwitchBase::setState(bNewState);
+  }
+  //------------------------------------------------------------------------
+  void Switch::create_widget(Switch *sw)
+  {
+#ifdef HAVE_GUI
+    GtkWidget *box1;
+
+
+    box1 = gtk_vbox_new (FALSE, 0);
+
+    m_button = GTK_TOGGLE_BUTTON(gtk_toggle_button_new_with_label ((char*)sw->name().c_str()));
+    gtk_container_set_border_width (GTK_CONTAINER (m_button), 1);
+    gtk_signal_connect (GTK_OBJECT (m_button), "toggled",
+                        GTK_SIGNAL_FUNC (toggle_cb), (gpointer)sw);
+    gtk_widget_show(GTK_WIDGET(m_button));
+    gtk_box_pack_start (GTK_BOX (box1), GTK_WIDGET(m_button), FALSE, FALSE, 0);
+
+    gtk_widget_show_all (box1);
+    // Tell gpsim which widget to use in breadboard.
+   sw->set_widget(box1);
+#endif
+  }
+
 }
+
