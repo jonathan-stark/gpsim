@@ -38,18 +38,17 @@ namespace Switches {
   class SwitchPin;       // defined and implemented in switch.cc
   class SwitchAttribute; //    "            "
 
-  class Switch : public Module, public TriggerObject
+  class SwitchBase : public Module, public TriggerObject
 
   {
-    void create_widget(Switch *sw);
   public:
 
-    Switch(const char *_name);
-    ~Switch();
+    SwitchBase(const char *_name, const char *_desc);
+    ~SwitchBase();
 
 
     void update();
-    void setState(bool);
+    virtual void setState(bool);
 
 
     // Inheritances from the Package class
@@ -57,9 +56,7 @@ namespace Switches {
 
     // Inheritance from Module class
     const virtual char *type() { return ("switch"); };
-    static Module *construct(const char *new_name);
 
-    void buttonToggled();
 
     virtual void do_voltage();
     virtual bool switch_closed() { return m_bCurrentState; }
@@ -83,11 +80,27 @@ namespace Switches {
     Float *m_Zopen;
     Float *m_Zclosed;
 
+  };
+
+
+  class Switch : public SwitchBase
+  {
+  public:
+    Switch(const char *_name);
+    ~Switch();
+
+    virtual void setState(bool);
+    void buttonToggled();
+
+    static Module *construct(const char *new_name);
+
+  protected:
     // The switch's graphical representation.
     GtkToggleButton *m_button;
 
   private:
-    static void cb_buttonToggle(GtkToggleButton *button, Switch *This);
+    void create_widget(Switch *sw);
+    static void cb_buttonToggle(GtkToggleButton *button, SwitchBase *This);
   };
 
 }

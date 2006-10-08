@@ -1,3 +1,7 @@
+2006-10-08 Scott Dattalo <scott@dattalo.com>
+	* modules/switch.cc, modules/switch.h: separated out the gui
+	specific portions of the switch into another class.
+	
 2006-10-04 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc: Switch resistance has successfully been reintroduced
 	* regression/switch_test/switch_test.asm: Added a test to test the
