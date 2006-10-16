@@ -1,3 +1,10 @@
+2006-10-15 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.cc: Port writes are now traced in
+	gpsim's trace buffer.
+	* extras/graphic_lcd/examples/lcd100X32.asm: fixed typo
+	* extras/graphic_lcd/examples/glcd_test.asm: Position the
+	LCD screen in the breadboard.
+
 2006-05-28 Borut Razem <borut.razem@siol.net>
 	* src/gpsim_modules.cc, src/sed1520.cc:
 	  removed unneeded inclusion of config.h

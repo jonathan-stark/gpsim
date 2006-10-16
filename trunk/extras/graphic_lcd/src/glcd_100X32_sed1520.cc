@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gpsim/ioports.h>
 #include <gpsim/packages.h>
 #include <gpsim/symbol.h>
+#include <gpsim/trace.h>
 
 
 #define DEBUG
@@ -204,10 +205,26 @@ private:
 class LcdPortRegister : public PortRegister
 {
 public:
-  LcdPortRegister(gLCD_100X32_SED1520 *);
+  LcdPortRegister(const char * _name, gLCD_100X32_SED1520 *plcd)
+    : PortRegister(8, 0), m_pLCD(plcd)
+  {
+    new_name(_name);
+    mMTT = new ModuleTraceType(plcd,0,1," Graphic LCD");
+    trace.allocateTraceType(mMTT);
 
+    RegisterValue rv(mMTT->type(), mMTT->type() + (1<<22));
+    set_write_trace(rv);
+    rv = RegisterValue(mMTT->type()+(2<<22), mMTT->type() + (3<<22));
+    set_read_trace(rv);
+  }
+
+  virtual ~LcdPortRegister()
+  {
+    delete mMTT;
+  }
 private:
   gLCD_100X32_SED1520 *m_pLCD;
+  ModuleTraceType *mMTT;
 };
 
 //------------------------------------------------------------------------
@@ -234,7 +251,7 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
   // Default module attributes.
   initializeAttributes();
 
-  m_dataBus = new PortRegister(8, 0);
+  m_dataBus = new LcdPortRegister((name() + ".data").c_str(),this); //PortRegister(8, 0);
   m_dataBus->new_name( (name() + ".data").c_str());
   get_symbol_table().add_register(m_dataBus);
   m_dataBus->setEnableMask(0xff);

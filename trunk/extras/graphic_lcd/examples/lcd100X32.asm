@@ -250,7 +250,7 @@ LCD_ASCII_L1
 ;------------------------------------------------------------------------
 ; LCD_PutByte - write a byte of data to the LCD display buffer
 ;
-; Write the byte contained in W to the disaply buffer. The byte is written
+; Write the byte contained in W to the display buffer. The byte is written
 ; at the current cursor position. Also, the cursor position is incremented 
 ; after the write.
 ;
