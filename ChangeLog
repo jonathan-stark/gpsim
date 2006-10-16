@@ -1,3 +1,7 @@
+2006-10-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc: Renamed the popup menu item function 'Run
+	here' to 'Run to here'.
+	
 2006-10-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: The popup menu item function 'Move PC here'
 	was not updating the program counter.

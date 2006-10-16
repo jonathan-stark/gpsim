@@ -517,5 +517,30 @@ File Stimulus\n\
 
   }
 
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
 
-} // end of namespace PulseGenerator
+  PortStimulus::PortStimulus(const char *_name, const char *_desc)
+    : Module(_name, "\
+File Stimulus\n\
+ Attributes:\n\
+ .file - file name\n\
+")
+  {
+
+  }
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+
+  void PortStimulus::callback_print()
+  {
+    printf("PortStimulus:%s CallBack ID %d\n",name().c_str(),CallBackID);
+  }
+
+
+  void PortStimulus::create_iopin_map()
+  {
+  }
+
+
+} // end of namespace ExtendedStimuli
