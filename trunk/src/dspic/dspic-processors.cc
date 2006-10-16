@@ -105,8 +105,10 @@ namespace dspic {
 	pReg->value = *rv;
 	pReg->por_value = *rv;
       }
-      pReg->set_write_trace(getWriteTT(addr));
-      pReg->set_read_trace(getReadTT(addr));
+      RegisterValue rv = getWriteTT(addr);
+      pReg->set_write_trace(rv);
+      rv = getReadTT(addr);
+      pReg->set_read_trace(rv);
     }
 
   }
@@ -144,8 +146,10 @@ namespace dspic {
       registers[j] = new dsPicRegister;
       registers[j]->alias_mask = 0;
       registers[j]->address = j;
-      registers[j]->set_write_trace(getWriteTT(j));
-      registers[j]->set_read_trace(getReadTT(j));
+      RegisterValue rv = getWriteTT(j);
+      registers[j]->set_write_trace(rv);
+      rv = getReadTT(j);
+      registers[j]->set_read_trace(rv);
 
       //The default register name is simply its address
       sprintf (str, "R%03X", j);

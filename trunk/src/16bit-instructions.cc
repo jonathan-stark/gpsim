@@ -324,8 +324,6 @@ void ADDLW16::execute(void)
 {
   unsigned int old_value,new_value;
 
-  // trace.instruction(opcode);
-
   new_value = (old_value = cpu16->W->value.get()) + L;
 
   cpu16->W->put(new_value & 0xff);
@@ -339,8 +337,6 @@ void ADDLW16::execute(void)
 void ADDWF16::execute(void)
 {
   unsigned int new_value,src_value,w_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -380,8 +376,6 @@ void ADDWFC::execute(void)
 {
   unsigned int new_value,src_value,w_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -410,8 +404,6 @@ void ANDLW16::execute(void)
 {
   unsigned int new_value;
 
-  // trace.instruction(opcode);
-
   new_value = cpu16->W->value.get() & L;
 
   cpu16->W->put(new_value);
@@ -426,8 +418,6 @@ void ANDLW16::execute(void)
 void ANDWF16::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -460,8 +450,6 @@ BC::BC (Processor *new_cpu, unsigned int new_opcode)
 
 void BC::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_C)
     cpu16->pc->jump(absolute_destination_index);
   else
@@ -482,8 +470,6 @@ BN::BN (Processor *new_cpu, unsigned int new_opcode)
 
 void BN::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_N)
     cpu16->pc->jump(absolute_destination_index);
   else
@@ -504,8 +490,6 @@ BNC::BNC (Processor *new_cpu, unsigned int new_opcode)
 
 void BNC::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_C)
     cpu16->pc->increment();
   else
@@ -526,8 +510,6 @@ BNN::BNN (Processor *new_cpu, unsigned int new_opcode)
 
 void BNN::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_N)
     cpu16->pc->increment();
   else
@@ -548,8 +530,6 @@ BNOV::BNOV (Processor *new_cpu, unsigned int new_opcode)
 
 void BNOV::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_OV)
     cpu16->pc->increment();
   else
@@ -570,8 +550,6 @@ BNZ::BNZ (Processor *new_cpu, unsigned int new_opcode)
 
 void BNZ::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_Z)
     cpu16->pc->increment();
   else
@@ -592,8 +570,6 @@ BOV::BOV (Processor *new_cpu, unsigned int new_opcode)
 
 void BOV::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_OV)
     cpu16->pc->jump(absolute_destination_index);
   else
@@ -621,8 +597,6 @@ BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
 
 void BRA::execute(void)
 {
-  // trace.instruction(opcode);
-
   cpu16->pc->jump(absolute_destination_index);
 
 }
@@ -654,8 +628,6 @@ BTG::BTG (Processor *new_cpu, unsigned int new_opcode)
 
 void BTG::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(!access)
     reg = cpu_pic->registers[register_address];
   else
@@ -679,8 +651,6 @@ BZ::BZ (Processor *new_cpu, unsigned int new_opcode)
 
 void BZ::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(cpu16->status->value.get() & STATUS_Z)
     cpu16->pc->jump(absolute_destination_index);
   else
@@ -704,8 +674,6 @@ CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
 
 void CALL16::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(!initialized)
     runtime_initialize();
 
@@ -734,8 +702,6 @@ char *CALL16::name(char  *return_str,int len)
 void COMF16::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -770,8 +736,6 @@ CPFSEQ::CPFSEQ (Processor *new_cpu, unsigned int new_opcode)
 
 void CPFSEQ::execute(void)
 {
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -797,8 +761,6 @@ CPFSGT::CPFSGT (Processor *new_cpu, unsigned int new_opcode)
 
 void CPFSGT::execute(void)
 {
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -824,8 +786,6 @@ CPFSLT::CPFSLT (Processor *new_cpu, unsigned int new_opcode)
 
 void CPFSLT::execute(void)
 {
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -852,8 +812,6 @@ DAW::DAW (Processor *new_cpu, unsigned int new_opcode)
 void DAW::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   new_value = cpu16->W->value.get();
   if(((new_value & 0x0f) > 0x9) || (cpu16->status->value.get() & STATUS_DC))
@@ -900,8 +858,6 @@ void DECFSZ16::execute(void)
 {
   unsigned int new_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -935,8 +891,6 @@ DCFSNZ::DCFSNZ (Processor *new_cpu, unsigned int new_opcode)
 void DCFSNZ::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -1073,8 +1027,6 @@ void IORLW16::execute(void)
 {
   unsigned int new_value;
 
-  // trace.instruction(opcode);
-
   new_value = cpu16->W->value.get() | L;
 
   cpu16->W->put(new_value);
@@ -1123,7 +1075,6 @@ LCALL16::LCALL16 (Processor *new_cpu, unsigned int new_opcode)
 
 void LCALL16::execute(void)
 {
-//    // trace.instruction(opcode);
 
 //    if(!initialized)
 //      runtime_initialize();
@@ -1235,8 +1186,6 @@ void MOVF16::execute(void)
 {
   unsigned int source_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -1310,8 +1259,6 @@ char *MOVFF::name(char *return_str,int len)
 
 void MOVFF::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(!initialized)
     runtime_initialize();
 
@@ -1375,7 +1322,6 @@ char *MOVFP::name(char *return_str, int len)
 
 void MOVFP::execute(void)
 {
-//    // trace.instruction(opcode);
 
 //    if(!initialized)
 //      runtime_initialize();
@@ -1402,8 +1348,6 @@ MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode)
 
 void MOVLB::execute(void)
 {
-  // trace.instruction(opcode);
-
   cpu16->bsr.put(L);
 
   cpu16->pc->increment();
@@ -1424,8 +1368,6 @@ MOVLR::MOVLR (Processor *new_cpu, unsigned int new_opcode)
 void MOVLR::execute(void)
 {
 //    unsigned int source_value;
-
-//    // trace.instruction(opcode);
 
 //    cpu16->bsr.put(L);
 
@@ -1484,8 +1426,6 @@ char *MOVPF::name(char *return_str,int len)
 
 void MOVPF::execute(void)
 {
-//    // trace.instruction(opcode);
-
 //    if(!initialized)
 //      runtime_initialize();
 
@@ -1509,8 +1449,6 @@ MOVWF16::MOVWF16(Processor *new_cpu, unsigned int new_opcode)
 
 void MOVWF16::execute(void)
 {
-  // trace.instruction(opcode);
-
 //   source = ((!access) ?
 // 	    cpu_pic->registers[register_address] 
 // 	    :
@@ -1531,13 +1469,6 @@ MOVWF16a::MOVWF16a(Processor *new_cpu, unsigned int new_opcode) : MOVWF(new_cpu,
 
 void MOVWF16a::execute(void)
 {
-  // trace.instruction(opcode);
-
-//   source = ((!access) ?
-// 	    cpu_pic->registers[register_address] 
-// 	    :
-// 	    cpu_pic->register_bank[register_address] );
-
   source = cpu_pic->registers[register_address];
   source->put(cpu16->W->get());
 
@@ -1558,8 +1489,6 @@ MULLW::MULLW (Processor *new_cpu, unsigned int new_opcode)
 void MULLW::execute(void)
 {
   unsigned int value;
-
-  // trace.instruction(opcode);
 
   value = (0xff & cpu16->W->get()) * L;
 
@@ -1585,8 +1514,6 @@ MULWF::MULWF (Processor *new_cpu, unsigned int new_opcode)
 void MULWF::execute(void)
 {
   unsigned int value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -1618,8 +1545,6 @@ NEGF::NEGF (Processor *new_cpu, unsigned int new_opcode)
 void NEGF::execute(void)
 {
   unsigned int new_value,src_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -1669,8 +1594,6 @@ POP::POP (Processor *new_cpu, unsigned int new_opcode)
 void POP::execute(void)
 {
 
-  // trace.instruction(opcode);
-
   cpu16->stack->pop();  // discard TOS
 
   cpu16->pc->increment();
@@ -1690,8 +1613,6 @@ PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode)
 
 void PUSH::execute(void)
 {
-
-  // trace.instruction(opcode);
 
   cpu16->stack->push(cpu16->pc->get_next());
 
@@ -1716,8 +1637,6 @@ RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
 
 void RCALL::execute(void)
 {
-  // trace.instruction(opcode);
-
   cpu16->stack->push(cpu16->pc->get_next());
 
   cpu16->pc->jump(absolute_destination_index);
@@ -1751,19 +1670,12 @@ RESET::RESET (Processor *new_cpu, unsigned int new_opcode)
 
 void RESET::execute(void)
 {
-
-  // trace.instruction(opcode);
-
   cpu16->reset(SOFT_RESET);
-
 }
 
 //--------------------------------------------------
 void RETFIE16::execute(void)
 {
-
-  // trace.instruction(opcode);
-
   cpu16->pc->new_address(cpu16->stack->pop());
   if(fast)
     cpu16->fast_stack.pop();
@@ -1817,8 +1729,6 @@ void RLCF::execute(void)
 {
   unsigned int new_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -1852,8 +1762,6 @@ RLNCF::RLNCF (Processor *new_cpu, unsigned int new_opcode)
 void RLNCF::execute(void)
 {
   unsigned int new_value,src_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -1891,8 +1799,6 @@ void RRCF::execute(void)
 {
   unsigned int new_value,src_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -1928,8 +1834,6 @@ void RRNCF::execute(void)
 {
   unsigned int new_value,src_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -1963,9 +1867,6 @@ SETF::SETF (Processor *new_cpu, unsigned int new_opcode)
 
 void SETF::execute(void)
 {
-
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -1983,8 +1884,6 @@ void SETF::execute(void)
 void SLEEP16::execute(void)
 {
 
-  // trace.instruction(opcode);
-
   //cpu_pic->status->put_TO(1);
   //cpu_pic->status->put_PD(0);
 
@@ -1999,8 +1898,6 @@ void SLEEP16::execute(void)
 void SUBLW16::execute(void)
 {
   unsigned int new_value,old_value;
-
-  // trace.instruction(opcode);
 
   new_value = L - (old_value = cpu16->W->value.get());
 
@@ -2028,8 +1925,6 @@ void SUBFWB::execute(void)
 {
   unsigned int new_value,src_value,w_value;
 
-  // trace.instruction(opcode);
-
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
 	    :
@@ -2055,8 +1950,6 @@ void SUBFWB::execute(void)
 void SUBWF16::execute(void)
 {
   unsigned int new_value,src_value,w_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -2090,8 +1983,6 @@ SUBWFB::SUBWFB (Processor *new_cpu, unsigned int new_opcode)
 void SUBWFB::execute(void)
 {
   unsigned int new_value,src_value,w_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -2138,8 +2029,6 @@ char *TBLRD::name(char *return_str,int len)
 
 void TBLRD::execute(void)
 {
-  // trace.instruction(opcode);
-
   if((opcode & 3)==3)
     cpu16->tbl.increment();
 
@@ -2179,8 +2068,6 @@ char *TBLWT::name(char *return_str,int len)
 
 void TBLWT::execute(void)
 {
-  // trace.instruction(opcode);
-
   if((opcode & 3)==3)
     cpu16->tbl.increment();
 
@@ -2223,8 +2110,6 @@ void TLRD::execute(void)
 {
 //    unsigned int pm_opcode;
 
-//    // trace.instruction(opcode);
-
 //    if((opcode & 3)==3)
 //      cpu16->tbl.increment();
 
@@ -2266,8 +2151,6 @@ void TLWT::execute(void)
 {
 //    unsigned int pm_opcode;
 
-//    // trace.instruction(opcode);
-
 //    if((opcode & 3)==3)
 //      cpu16->tbl.increment();
 
@@ -2296,8 +2179,6 @@ TSTFSZ::TSTFSZ (Processor *new_cpu, unsigned int new_opcode)
 void TSTFSZ::execute(void)
 {
 
-  // trace.instruction(opcode);
-
   if(!access)
     source = cpu_pic->registers[register_address];
   else
@@ -2317,8 +2198,6 @@ void XORLW16::execute(void)
 {
   unsigned int new_value;
 
-  // trace.instruction(opcode);
-
   new_value = cpu16->W->value.get() ^ L;
 
   cpu16->W->put(new_value);
@@ -2333,8 +2212,6 @@ void XORLW16::execute(void)
 void XORWF16::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 

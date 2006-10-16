@@ -531,8 +531,8 @@ public:
 
   virtual void trace_dump(int type, int amount);
   virtual int trace_dump1(int type, char *buffer, int bufsize);
-  virtual unsigned int getWriteTT(unsigned int addr);
-  virtual unsigned int getReadTT(unsigned int addr);
+  virtual RegisterValue getWriteTT(unsigned int addr);
+  virtual RegisterValue getReadTT(unsigned int addr);
 
   //
   // Processor Clock control

@@ -812,8 +812,10 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
       if(new_name)
         registers[addr]->new_name(new_name);
 
-      registers[addr]->set_write_trace(getWriteTT(addr));
-      registers[addr]->set_read_trace(getReadTT(addr));
+      RegisterValue rv = getWriteTT(addr);
+      registers[addr]->set_write_trace(rv);
+      rv = getReadTT(addr);
+      registers[addr]->set_read_trace(rv);
     }
 
   reg->value       = por_value;

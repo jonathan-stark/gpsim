@@ -1,3 +1,17 @@
+2006-10-15 Scott Dattalo <scott@dattalo.com>
+	* src/trace.h, src/trace.cc:
+	  - Added classes for tracing module events.
+	  - Fixed a couple of bugs with invalid trace objects being
+	  created. Also, invalid trace entries were causing the trace dump
+	  to be aborted.
+	* src/16bit-instructions.cc: Removed commented out code
+	* src/dspic/dspic-processors.cc, src/processor.h,
+	  src/pic-processor.cc, src/registers.cc, src/ioports.cc,
+	  src/processor.cc, src/14bit-registers.cc, src/registers.h:
+	  The interface to the trace buffer changed slightly. Also,
+	  registers were improperly allocating trace objects.
+	* doc/gpsim.lyx: Added some more documentation.
+
 2006-10-08 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h: separated out the gui
 	specific portions of the switch into another class.

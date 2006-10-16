@@ -312,9 +312,10 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
       registers[j]->alias_mask = 0;
 
     registers[j]->address = j;
-
-    registers[j]->set_write_trace(getWriteTT(j));
-    registers[j]->set_read_trace(getReadTT(j));
+    RegisterValue rv = getWriteTT(j);
+    registers[j]->set_write_trace(rv);
+    rv = getReadTT(j);
+    registers[j]->set_read_trace(rv);
 
     //The default register name is simply its address
     sprintf (str, "0x%02x", j);
@@ -1222,33 +1223,34 @@ int Processor::trace_dump1(int type, char *buffer, int bufsize)
 // at the moment), we can enhance this function to return different Trace
 // type objects base on the upper address bits.
 
-unsigned int Processor::getWriteTT(unsigned int j)
+RegisterValue Processor::getWriteTT(unsigned int j)
 {
   if(!writeTT) {
-    writeTT = new RegisterWriteTraceType(this,0,1);
+    writeTT = new RegisterWriteTraceType(this,0,2);
     trace.allocateTraceType(writeTT);
   }
 
   // The upper 8-bits define the dynamically allocated trace type
   // The lower 8-bits will record the register value that is written.
   // The middle 16-bits are the register address
-  
-  return writeTT->type = (writeTT->type & 0xff000000) | ((j & 0xffff) << 8);
+  unsigned int tt = (writeTT->type() & 0xff000000) | ((j & 0xffff) << 8);
 
+  return RegisterValue(tt, tt + (1<<24) );
 }
 
-unsigned int Processor::getReadTT(unsigned int j)
+RegisterValue Processor::getReadTT(unsigned int j)
 {
   if(!readTT) {
-    readTT = new RegisterReadTraceType(this,0,1);
+    readTT = new RegisterReadTraceType(this,0,2);
     trace.allocateTraceType(readTT);
   }
 
   // The upper 8-bits define the dynamically allocated trace type
   // The lower 8-bits will record the register value that is written.
   // The middle 16-bits are the register address
+  unsigned int tt = (readTT->type() & 0xff000000) | ((j & 0xffff) << 8);
 
-  return (readTT->type & 0xff000000) | ((j & 0xffff) << 8);
+  return RegisterValue(tt, tt + (1<<24) );
 }
 
 //-------------------------------------------------------------------
