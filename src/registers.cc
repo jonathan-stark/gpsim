@@ -425,13 +425,13 @@ unsigned int Register::register_size () const
 // These functions initialize the trace type to be used for 
 // register reads and writes.
 //
-void Register::set_write_trace(unsigned int wt)
+void Register::set_write_trace(RegisterValue &rv)
 {
-  write_trace.put(wt, wt + (1<<24)); //(Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
+  write_trace = rv;
 }
-void Register::set_read_trace(unsigned int rt)
+void Register::set_read_trace(RegisterValue &rv)
 {
-  read_trace.put(rt, rt + (1<<24));  //(Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
+  read_trace = rv;
 }
 
 //------------------------------------------------------------

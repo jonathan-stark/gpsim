@@ -60,7 +60,7 @@ cmd_trace::cmd_trace(void)
 		       "\ttrace will print out the most recent \"dump_amount\" traces.\n"
 		       "\tIf no dump_amount is specified, then only the lat few trace\n"
 		       "\tevents will be displayed.\n\n"
-		       "\ttrace raw  -- display the trace contents in a minimally decoded manner\n"
+		       "\ttrace raw expr -- display the trace contents in a minimally decoded manner\n"
 		       "\ttrace log fname -- log all raw trace events to a file\n"
 		       "\ttrace save fname -- save the decode trace buffer to a file\n"
 		       "\ttrace disable_log -- stop all file logging\n"

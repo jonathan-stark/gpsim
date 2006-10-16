@@ -327,8 +327,8 @@ public:
     When the register is accessed, this action is recorded in the trace buffer.
     Here we can specify the exact trace command to use.
    */
-  virtual void set_write_trace(unsigned int wt);
-  virtual void set_read_trace(unsigned int rt);
+  virtual void set_write_trace(RegisterValue &rv);
+  virtual void set_read_trace(RegisterValue &rv);
   virtual void put_trace_state(RegisterValue rv)
   {
     trace_state = rv;

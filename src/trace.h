@@ -42,6 +42,10 @@ class Trace;
 
 class TraceFrame;
 //========================================================================
+// A 'TraceObject' is created when the contents of the Trace buffer are
+// displayed. The TraceObjects are placed into TraceFrames, and eventually
+// the entire frame is displayed.
+
 class TraceObject
 {
 public:
@@ -52,6 +56,16 @@ public:
   virtual void getState(TraceFrame *);
 
 };
+
+class InvalidTraceObject : public TraceObject
+{
+public:
+  InvalidTraceObject(int type);
+  virtual void print(FILE *);
+protected:
+  int mType;
+};
+
 class ProcessorTraceObject : public TraceObject
 {
 public:
@@ -62,6 +76,27 @@ public:
   }
 
   virtual void print(FILE *)=0;
+};
+
+class ModuleTraceType;
+class ModuleTraceObject : public TraceObject
+{
+public:
+  Module *pModule;
+  ModuleTraceType *pModuleTraceType;
+  unsigned int mTracedData;
+
+  ModuleTraceObject(Module *_module, 
+		    ModuleTraceType *pmtt,
+		    unsigned int d)
+    : TraceObject() , 
+      pModule(_module),
+      pModuleTraceType(pmtt),
+      mTracedData(d)
+  {
+  }
+
+  virtual void print(FILE *);
 };
 
 class RegisterWriteTraceObject : public ProcessorTraceObject
@@ -96,16 +131,25 @@ public:
 };
 
 //========================================================================
+// The TraceType class is the base class for the various trace types that
+// are supported by gpsim. In general, when a trace type is created, 
+// a 32 bit identifier is created. The upper byte of this identifier is
+// the "type" of the trace and is dynamically allocated. The lower 24 
+// bits of this identifer are 0. When a TraceType is traced, the lower
+// 24 bits are filled with the information that is to be recorded in
+// the trace buffer. The whole 32 bits are then written to the trace buffer
+// array.
+
 class TraceType
 {
 public:
 
-  unsigned int type;		// The integer type is dynamically
-				// assigned by the Trace class.
-  unsigned int size;		// The number of positions this
-				// type occupies
 
   TraceType(unsigned int t, unsigned int s);
+
+  void setType(unsigned int t) { mType = t;}
+  unsigned int type() { return mType; }
+  unsigned int size() { return mSize; }
 
   // Given an index into the trace buffer, decode()
   // will fetch traced items at that trace buffer index
@@ -119,6 +163,30 @@ public:
   virtual bool isValid(Trace *, unsigned int tbi);
   virtual int bitsTraced() { return 24; }
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
+private:
+  unsigned int mType;		// The integer type is dynamically
+				// assigned by the Trace class.
+  unsigned int mSize;		// The number of positions this
+				// type occupies
+
+};
+
+class ModuleTraceType : public TraceType
+{
+public:
+  Module *pModule;
+  const char *pDescription;
+  ModuleTraceType(Module *_pModule, 
+		  unsigned int t,
+		  unsigned int s,
+		  const char *desc)
+    : TraceType(t,s), pModule(_pModule), pDescription(desc)
+  {
+  }
+
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
+
 };
 
 class ProcessorTraceType : public TraceType

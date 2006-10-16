@@ -324,6 +324,31 @@ void TraceObject::getState(TraceFrame *tf)
 }
 
 //========================================================================
+// InvalidTraceObject
+//
+InvalidTraceObject::InvalidTraceObject(int type)
+  : mType(type)
+{
+}
+void InvalidTraceObject::print(FILE *fp)
+{
+  fprintf(fp, "  Invalid Trace entry: 0x%x\n",mType);
+}
+
+//========================================================================
+// ModuleTraceObject
+
+void ModuleTraceObject::print(FILE *fp)
+{
+  fprintf(fp, " Module Trace: ");
+  if (pModule)
+    fprintf(fp, "%s ", pModule->name().c_str());
+  if (pModuleTraceType && pModuleTraceType->pDescription)
+    fprintf(fp, "%s ", pModuleTraceType->pDescription);
+  fprintf (fp, "0x%x\n", mTracedData & 0xffffff);
+}
+
+//========================================================================
 // RegisterTraceObject
 //
 RegisterWriteTraceObject::RegisterWriteTraceObject(Processor *_cpu,
@@ -417,9 +442,8 @@ void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 //========================================================================
 
 TraceType::TraceType(unsigned int t, unsigned int s)
-  : type(t), size(s)
+  : mType(t), mSize(s)
 {
-
 }
 
 //----------------------------------------
@@ -439,9 +463,9 @@ bool TraceType::isValid(Trace *pTrace, unsigned int tbi)
   // The upper 8-bits of the 'type' specify the trace type for this object.
   // This is assigned whenever Trace::allocateTraceType() is called. Multi-
   // sized trace records occupy consecutive types.
-  for(i=0; i<size; i++) {
+  for(i=0; i<size(); i++) {
 
-    if(pTrace->type(tbi + i) != (type + (i<<24))) 
+    if(pTrace->type(tbi + i) != (type() + (i<<24))) 
       return false;
   }
 
@@ -456,7 +480,7 @@ int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
   if(pTrace && isValid(pTrace, tbi)) {
     unsigned int i=0;
 
-    for(i=0; i< size; i++) {
+    for(i=0; i< size(); i++) {
 
       int n = snprintf(buf,bufsize,"%08X:", pTrace->get(tbi+i));
       if(n < 0)
@@ -470,6 +494,35 @@ int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 
   return total_chars;
     
+}
+
+//========================================================================
+TraceObject *ModuleTraceType::decode(unsigned int tbi)
+{
+  ModuleTraceObject *mto = new ModuleTraceObject(pModule, this, trace.get(tbi)&0xffffff);
+  trace.addToCurrentFrame(mto);
+
+  return mto;
+}
+
+int ModuleTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
+{
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int tv = pTrace->get(tbi);
+
+    int m = snprintf(buf, bufsize,
+		   " Module: %s 0x%x",
+		   (pModule ? pModule->name().c_str() : "no name"),
+		   (tv & 0xffffff));
+
+    return m > 0 ? (m+n) : n;
 }
 
 //========================================================================
@@ -607,7 +660,8 @@ int PCTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsiz
   buf += n;
   bufsize -= n;
 
-  int m = snprintf(buf, bufsize," PC: %04X",pTrace->get(tbi) & 0xffff);
+  int m = snprintf(buf, bufsize," PC: %04X",
+		   cpu->map_pm_index2address(pTrace->get(tbi) & 0xffff));
   if(m>0)
     n += m;
 
@@ -789,7 +843,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
   switch (type(index))
     {
     case NOTHING:
-      snprintf(buffer, bufsize,"  empty trace cycle\n");
+      snprintf(buffer, bufsize,"  empty trace cycle");
       break;
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
@@ -837,14 +891,14 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
 	  if(tt) {
 	    tt->dump_raw(this,index,buffer,bufsize);
-	    return_value = tt->size;
+	    return_value = tt->size();
 	  }
 	  break;
 	} 
 
 
 	if(cpu)
-	  return_value = cpu->trace_dump1(index,buffer,bufsize);
+	  return_value = cpu->trace_dump1(get(index),buffer,bufsize);
       }
     }
 
@@ -876,7 +930,7 @@ int Trace::dump(int n, FILE *out_stream)
     return 0;
 
   if(n<0)
-    n = TRACE_BUFFER_SIZE;
+    n = TRACE_BUFFER_SIZE-1;
 
   if(!n)
     n = 5;
@@ -902,7 +956,6 @@ int Trace::dump(int n, FILE *out_stream)
 
   // Save the state of the CPU here. 
   cpu->save_state();
-
 
   //
   // Decode the trace buffer
@@ -930,16 +983,16 @@ int Trace::dump(int n, FILE *out_stream)
 
     } else if(is_cycle_trace(k,&cycle) == 2) {
 
+      // cycle traces take two trace entries. If this particular
+      // entry is the first half of those two entries, then we
+      // have a cycle trace. 
+
       current_cycle_time = cycle;
-    } else {
 
-      if(type(k) == 0)
-	break;
+    } else if(!is_cycle_trace(k,&cycle)) {
 
-      /*
-      if(is_cycle_trace(tbi(k-1),0) != 2)
-	fprintf(out_stream," could not decode 0x%x\n",get(k));
-      */
+      cout << " could not decode trace type: 0x" << hex << get(k) << endl;
+      trace.addToCurrentFrame(new InvalidTraceObject(get(k)));
     }
 
     k = tbi(k-1);
@@ -975,14 +1028,14 @@ unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
       n = 1<<16;
     }
 
-    tt->type = *ltt;;
+    tt->setType(*ltt);;
 
     for(i=0; i<nSlots; i++) {
       trace_map[*ltt] = tt;
       *ltt += n;
     }
 
-    return tt->type;
+    return tt->type();
   }
   return 0;
 }
