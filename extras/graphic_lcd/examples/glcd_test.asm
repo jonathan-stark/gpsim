@@ -107,7 +107,14 @@ start
    .sim "attach nd6 portb6 LCD.d6"
    .sim "attach nd7 portb7 LCD.d7"
 
+   ;; Now position the modules in the BreadBoard viewer
 
+   .sim "LCD.xpos=192.0"
+   .sim "LCD.ypos=24.0"
+   .sim "R1.xpos=216.0"
+   .sim "R1.ypos=264.0"
+   .sim "R2.xpos=312.0"
+   .sim "R2.ypos=264.0"
 
    ;; Initialize the SED1520 LCD graphics controller.
 
