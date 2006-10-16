@@ -144,8 +144,9 @@ void PicTrisRegister::put(unsigned int new_value)
     m_port->updatePort();
 }
 
-unsigned int PicTrisRegister::get(void)
+unsigned int PicTrisRegister::get()
 {
+  trace.raw(read_trace.get() | value.data);
   return value.data;
 }
 

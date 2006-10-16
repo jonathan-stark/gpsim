@@ -28,6 +28,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/value.h"
 #include <list>
 
+class Register;
+class PortRegister;
+
 namespace ExtendedStimuli {
 
   class PulseAttribute;
@@ -103,6 +106,20 @@ namespace ExtendedStimuli {
     FileNameAttribute *m_file;
     guint64 m_future_cycle;
   };
+
+  class PortStimulus : public Module, public TriggerObject
+  {
+  public:
+    PortStimulus(const char *_name, const char *_desc);
+    virtual void callback_print();
+    void create_iopin_map();
+    
+  protected:
+    PortRegister *mPort;
+    Register *mLatch;
+    Register *mTris;
+  };
+
 }
 
 #endif // __MOD_STIMULI_H__

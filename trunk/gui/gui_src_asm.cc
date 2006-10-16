@@ -365,7 +365,7 @@ typedef struct _menu_item {
 
 static menu_item menu_items[] = {
   {"Find PC",         MENU_FIND_PC,0},
-  {"Run here",        MENU_RUN_HERE,0},
+  {"Run to here",     MENU_RUN_HERE,0},
   {"Move PC here",    MENU_MOVE_PC,0},
   {"Breakpoint here", MENU_BP_HERE,0},
   {"Profile start here", MENU_PROFILE_START_HERE,0},
