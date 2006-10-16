@@ -1,4 +1,4 @@
-#LyX 1.4.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -2670,6 +2670,76 @@ stopwatch
 \end_inset
 
 
+\begin_inset Foot
+status collapsed
+
+\begin_layout Standard
+The stopwatch is really a collection of attributes and not a command.
+ But the behavior is so similar to a command that it has been included here.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+A timer for monitoring and controlling the simulation.
+  
+\end_layout
+
+\begin_layout LyX-Code
+The units are in simulation cycles.
+\end_layout
+
+\begin_layout LyX-Code
+  stopwatch.rollover - specifies rollover value.
+\end_layout
+
+\begin_layout LyX-Code
+  stopwatch.direction - specifies count direction.
+\end_layout
+
+\begin_layout LyX-Code
+  stopwatch.enable - enables counting if true.
+ 
+\end_layout
+
+\begin_layout Standard
+Without any options, 
+\emph on
+stopwatch
+\emph default
+ will display the contents of the stopwatch timer.
+ 
+\emph on
+stopwatch
+\emph default
+ is writable, so you may initialize it to whatever value you like.
+ The
+\emph on
+ 
+\emph default
+behavior of the timer may be manipulated via the three attributes.
+ The 
+\emph on
+.rollover
+\emph default
+ attribute is the number of cycles at which the stopwatch timer rolls over.
+ The 
+\emph on
+.direction
+\emph default
+ and 
+\emph on
+.enable
+\emph default
+ attributes are boolean types.
+ When true, the 
+\emph on
+.direction
+\emph default
+ attribute will instruction the stopwatch to count up.
 \end_layout
 
 \begin_layout Section
@@ -3725,12 +3795,58 @@ When the simulation encounters the break, execution halts and the message
  is printed.
 \end_layout
 
-\begin_layout Subsection*
-Assertions
+\begin_layout Section
+Assertions and Embedded Simulation commands
 \end_layout
 
 \begin_layout Standard
-discuss how simulation assertions are embedded in .asm source.
+gpsim's breakpoint design is a powerful tool that can catch many problems.
+ The assertion design extends this power even further.
+ An assertion is like a breakpoint that is associated with a particular
+ instruction.
+ For example, you may have a routine that requires BANK 0 be selected.
+ A gpsim assertion can be placed at the entry of the routine to verify that
+ this is the case.
+\end_layout
+
+\begin_layout LyX-Code
+    .assert  
+\begin_inset Quotes eld
+\end_inset
+
+(status & 0x60) == 0, 
+\backslash
+
+\begin_inset Quotes erd
+\end_inset
+
+Bank 0 must be selected!
+\backslash
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The syntax is identical to the extended breakpoint command.
+ The expression is the condition that is checked.
+ If the expression evaluates to false, then the code halts and prints the
+ message.
+ The 
+\emph on
+.assert
+\emph default
+ is a macro that is part of gputils.
+ It requires a string as its input argument.
+ Notice that the assertion message is embedded in the argument.
+ gpasm and MPASM copy C's method of placing a backslash in front of quotations
+ that are part of a string.
 \end_layout
 
 \begin_layout Subsection*
@@ -3738,9 +3854,30 @@ Command Assertions
 \end_layout
 
 \begin_layout Standard
-discuss how a gpsim command can be embedded in the .asm source.
- Explain how the command executes everytime the instruction it's associated
- with is executed.
+A command assertion is a gpsim associated with a particular instruction
+ in your PIC source code.
+ These are useful for changing the behavior of the simulation based on where
+ the code executes.
+ Almost any gpsim command can be placed in a command assertion.
+ However, the most useful ones are assignment commands.
+ For example:
+\end_layout
+
+\begin_layout LyX-Code
+.command 
+\begin_inset Quotes eld
+\end_inset
+
+SW1.state = false
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This assignment writes to the state attribute of a switch module named SW1.
+ 
 \end_layout
 
 \begin_layout Subsection*
@@ -5517,6 +5654,10 @@ Macros
 
 \begin_layout Standard
 <write me>
+\end_layout
+
+\begin_layout Standard
+
 \end_layout
 
 \begin_layout Chapter
