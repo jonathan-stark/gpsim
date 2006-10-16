@@ -1390,7 +1390,8 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
       address = pSW->pma->find_closest_address_to_line(
         pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
       if(address!=INVALID_VALUE) {
-        pSW->SetPC(address);
+	pSW->pma->set_PC(address);
+        pSW->SetPC(pSW->pma->get_PC());
       }
     }
     break;
