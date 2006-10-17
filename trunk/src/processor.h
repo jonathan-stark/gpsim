@@ -210,6 +210,10 @@ class RegisterMemoryAccess : public MemoryAccess
   unsigned int get_size(void) { return nRegisters; }
   void set_Registers(Register **_registers, int _nRegisters);
 
+  // The insertRegister and removeRegister methods are used primarily
+  // to set and clear breakpoints.
+  void insertRegister(int address, Register *);
+  void removeRegister(int address, Register *);
   bool hasBreak(unsigned int address);
 
   Register &operator [] (unsigned int address);

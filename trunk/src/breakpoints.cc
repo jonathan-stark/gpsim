@@ -1185,19 +1185,16 @@ void RegisterAssertion::print(void)
 }
 //------------------------------------------------------------------------------
 BreakpointRegister::BreakpointRegister()
-  : TriggerObject(0), m_replaced(0)
+  : TriggerObject(0)
 {
 }
 
 BreakpointRegister::BreakpointRegister(Processor *_cpu, 
 				       TriggerAction *pTA,
 				       Register *pRepl)
-  : TriggerObject(pTA), m_replaced(pRepl)
+  : TriggerObject(pTA)
 {
-  if (_cpu) {
-
-  }
-
+  setReplaced(pRepl);
 }
 
 BreakpointRegister::BreakpointRegister(Processor *_cpu, TriggerAction *ta,
@@ -1223,13 +1220,18 @@ BreakpointRegister::BreakpointRegister(Processor *_cpu, int _repl, int bp)
 
 void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
 {
+  /*
   Register *fr = _cpu->registers[reg];
 
   cpu = _cpu;
   _cpu->registers[reg] = this;
-  m_replaced = fr;
+  setReplaced(fr);
   address=fr->address;
-  
+  */
+  if (_cpu) {
+    cpu = _cpu;
+    _cpu->rma.insertRegister(reg,this);
+  }
   update();
 }
 
@@ -1249,30 +1251,14 @@ unsigned int BreakpointRegister::clear(unsigned int bp_num)
 // would then be an array of RegisterChains.
 void BreakpointRegister::clear() 
 {
-  BreakpointRegister *br = dynamic_cast<BreakpointRegister *>(get_cpu()->registers[address]);
-  if (br == this) {
-    // at the head of the chain
-    get_cpu()->registers[address] = m_replaced;
+  // FIXME, we don't know if this breakpoint register is actually associated
+  // with the active cpu or not. It looks like we need a way for either the
+  // registers to know in which array they're stored OR the Module class needs
+  // to provide a 'removeRegister()' method.
+  if (get_cpu()) {
+    get_cpu()->rma.removeRegister(address,this);
+    get_cpu()->registers[address]->update();
   }
-  else {
-    BreakpointRegister *pLast = br;
-    // Find myself in the chain
-    while(br != NULL) {
-      if (br == this) {
-        // found
-        pLast->m_replaced = m_replaced;
-        // for good measure
-        m_replaced = NULL;
-        break;
-      }
-      else {
-        pLast = br;
-        br = dynamic_cast<BreakpointRegister *>(br->m_replaced);
-      }
-    }
-  }
-  get_cpu()->registers[address]->update();
-  return;
 }
 
 bool BreakpointRegister::set_break()
@@ -1303,53 +1289,53 @@ string &BreakpointRegister::name(void) const
 
 void BreakpointRegister::put_value(unsigned int new_value)
 {
-  m_replaced->put_value(new_value);
+  getReplaced()->put_value(new_value);
 }
 void BreakpointRegister::put(unsigned int new_value)
 {
-  m_replaced->put(new_value);
+  getReplaced()->put(new_value);
 }
 
 void BreakpointRegister::putRV(RegisterValue rv)
 {
-  m_replaced->putRV(rv);
+  getReplaced()->putRV(rv);
 }
 
 unsigned int BreakpointRegister::get_value(void)
 {
-  return(m_replaced->get_value());
+  return(getReplaced()->get_value());
 }
 RegisterValue BreakpointRegister::getRV(void)
 {
-  return m_replaced->getRV();
+  return getReplaced()->getRV();
 }
 RegisterValue BreakpointRegister::getRVN(void)
 {
-  return m_replaced->getRVN();
+  return getReplaced()->getRVN();
 }
 unsigned int BreakpointRegister::get(void)
 {
-  return(m_replaced->get());
+  return(getReplaced()->get());
 }
 
 Register *BreakpointRegister::getReg(void)
 {
-  return m_replaced ? m_replaced->getReg() : this; 
+  return getReplaced() ? getReplaced()->getReg() : this; 
 }
 
 void BreakpointRegister::setbit(unsigned int bit_number, bool new_value)
 {
-  m_replaced->setbit(bit_number, new_value);
+  getReplaced()->setbit(bit_number, new_value);
 }
 
 bool BreakpointRegister::get_bit(unsigned int bit_number)
 {
-  return(m_replaced->get_bit(bit_number));
+  return(getReplaced()->get_bit(bit_number));
 }
 
 double BreakpointRegister::get_bit_voltage(unsigned int bit_number)
 {
-  return(m_replaced->get_bit_voltage(bit_number));
+  return(getReplaced()->get_bit_voltage(bit_number));
 }
 
 bool BreakpointRegister::hasBreak(void)
@@ -1359,19 +1345,19 @@ bool BreakpointRegister::hasBreak(void)
 
 void BreakpointRegister::update(void)
 {
-  if(m_replaced)
-    m_replaced->update();
+  if(getReplaced())
+    getReplaced()->update();
 }
 
 void BreakpointRegister::add_xref(void *an_xref)
 {
-  if(m_replaced)
-    m_replaced->add_xref(an_xref);
+  if(getReplaced())
+    getReplaced()->add_xref(an_xref);
 }
 void BreakpointRegister::remove_xref(void *an_xref)
 {
-  if(m_replaced)
-    m_replaced->remove_xref(an_xref);
+  if(getReplaced())
+    getReplaced()->remove_xref(an_xref);
 }
 
 
@@ -1546,7 +1532,7 @@ void Break_register_write::action(void)
   }
   bp.halt();
   trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-		    | (m_replaced->address)  );
+		    | (getReplaced()->address)  );
 
 }
 
@@ -1629,7 +1615,7 @@ unsigned int Break_register_read::get(void)
 
   if(eval_Expression())
     TriggerObject::action->action();
-  return(m_replaced->get());
+  return(getReplaced()->get());
 
 }
 
@@ -1637,47 +1623,47 @@ RegisterValue  Break_register_read::getRV(void)
 {
   if(eval_Expression())
     TriggerObject::action->action();
-  return(m_replaced->getRV());
+  return(getReplaced()->getRV());
 }
 
 RegisterValue  Break_register_read::getRVN(void)
 {
   if(eval_Expression())
     TriggerObject::action->action();
-  return(m_replaced->getRVN());
+  return(getReplaced()->getRVN());
 }
 
 bool Break_register_read::get_bit(unsigned int bit_number)
 {
   if(eval_Expression())
     TriggerObject::action->action();
-  return(m_replaced->get_bit(bit_number));
+  return(getReplaced()->get_bit(bit_number));
 }
 
 double Break_register_read::get_bit_voltage(unsigned int bit_number)
 {
-  return m_replaced->get_bit_voltage(bit_number);
+  return getReplaced()->get_bit_voltage(bit_number);
 }
 
 
 
 void Break_register_write::put(unsigned int new_value)
 {
-  m_replaced->put(new_value);
+  getReplaced()->put(new_value);
   if(eval_Expression())
     TriggerObject::action->action();
 }
 
 void Break_register_write::putRV(RegisterValue rv)
 {
-  m_replaced->putRV(rv);
+  getReplaced()->putRV(rv);
   if(eval_Expression())
     TriggerObject::action->action();
 }
 
 void Break_register_write::setbit(unsigned int bit_number, bool new_value)
 {
-  m_replaced->setbit(bit_number,new_value);
+  getReplaced()->setbit(bit_number,new_value);
   if(eval_Expression())
     TriggerObject::action->action();
 }
@@ -1704,7 +1690,7 @@ Break_register_read_value::Break_register_read_value(Processor *_cpu,
 
 unsigned int Break_register_read_value::get(void)
 {
-  unsigned int v = m_replaced->get();
+  unsigned int v = getReplaced()->get();
 
   if(m_pfnIsBreak(v, break_mask, break_value))
     TriggerObject::action->action();
@@ -1713,7 +1699,7 @@ unsigned int Break_register_read_value::get(void)
 
 RegisterValue  Break_register_read_value::getRV(void)
 {
-  RegisterValue v = m_replaced->getRV();
+  RegisterValue v = getReplaced()->getRV();
 
   if(m_pfnIsBreak(v.data, break_mask, break_value))
     TriggerObject::action->action();
@@ -1722,7 +1708,7 @@ RegisterValue  Break_register_read_value::getRV(void)
 
 RegisterValue  Break_register_read_value::getRVN(void)
 {
-  RegisterValue v = m_replaced->getRVN();
+  RegisterValue v = getReplaced()->getRVN();
 
   if(m_pfnIsBreak(v.data, break_mask, break_value))
     TriggerObject::action->action();
@@ -1731,31 +1717,31 @@ RegisterValue  Break_register_read_value::getRVN(void)
 
 bool Break_register_read_value::get_bit(unsigned int bit_number)
 {
-  unsigned int v = m_replaced->get();
+  unsigned int v = getReplaced()->get();
   unsigned int mask = 1<<(bit_number & 7);
 
   if( (break_mask & mask) && (v & mask) == (break_value&mask))
     TriggerObject::action->action();
-  return m_replaced->get_bit(bit_number);
+  return getReplaced()->get_bit(bit_number);
 }
 
 double Break_register_read_value::get_bit_voltage(unsigned int bit_number)
 {
-  return m_replaced->get_bit_voltage(bit_number);
+  return getReplaced()->get_bit_voltage(bit_number);
 }
 
 
 
 void Break_register_write_value::put(unsigned int new_value)
 {
-  m_replaced->put(new_value);
+  getReplaced()->put(new_value);
   if(m_pfnIsBreak(new_value, break_mask, break_value))
     TriggerObject::action->action();
 }
 
 void Break_register_write_value::putRV(RegisterValue rv)
 {
-    m_replaced->putRV(rv);
+    getReplaced()->putRV(rv);
   if(m_pfnIsBreak(rv.data, break_mask, break_value))
     TriggerObject::action->action();
 }
@@ -1766,10 +1752,10 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
   int val_mask = 1 << bit_number;
   int new_value = ((int)new_bit) << bit_number;
 
-  m_replaced->setbit(bit_number,new_value ? true  : false);
+  getReplaced()->setbit(bit_number,new_value ? true  : false);
 
   if( (val_mask & break_mask) &&
-      ( ( (m_replaced->value.get() & ~val_mask)  // clear the old bit
+      ( ( (getReplaced()->value.get() & ~val_mask)  // clear the old bit
           | new_value)                   // set the new bit
         & break_mask) == break_value)
     TriggerObject::action->action();
@@ -1800,8 +1786,8 @@ CommandAssertion::CommandAssertion(Processor *new_cpu,
 
 void CommandAssertion::execute()
 {
-  if(bPostAssertion && m_replaced)
-    m_replaced->execute();
+  if(bPostAssertion && getReplaced())
+    getReplaced()->execute();
 
   //printf("execute command: %s -- post = %s\n",command,(bPostAssertion?"true":"false"));
 
@@ -1809,8 +1795,8 @@ void CommandAssertion::execute()
   if(pCli) {
     pCli->Execute(command, 0);
   }
-  if(!bPostAssertion && m_replaced)
-    m_replaced->execute();
+  if(!bPostAssertion && getReplaced())
+    getReplaced()->execute();
 }
 
 //------------------------------------------------------------------------------

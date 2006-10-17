@@ -2067,6 +2067,38 @@ void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
   nRegisters = _nRegisters; 
   registers = _registers;
 }
+//------------------------------------------------------------------------
+void RegisterMemoryAccess::insertRegister(int address, Register *pReg)
+{
+
+  if(!cpu || !registers || nRegisters<=address ||!pReg)
+    return;
+
+  Register *ptop = registers[address];
+  pReg->setReplaced(ptop);
+  registers[address] = pReg;
+
+}
+void RegisterMemoryAccess::removeRegister(int address, Register *pReg)
+{
+  if(!cpu || !registers || nRegisters<=address ||!pReg)
+    return;
+
+  Register *ptop = registers[address];
+
+  if (ptop == pReg  &&  pReg->getReplaced())
+    registers[address] = pReg->getReplaced();
+  else 
+    while (ptop) {
+      Register *pNext = ptop->getReplaced();
+      if (pNext == pReg) {
+	ptop->setReplaced(pNext->getReplaced());
+	return;
+      }
+      ptop = pNext;
+    }
+}
+
 //-------------------------------------------------------------------
 bool RegisterMemoryAccess::hasBreak(unsigned int address)
 {
