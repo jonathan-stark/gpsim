@@ -42,7 +42,7 @@ void _SSPSTAT::put(unsigned int new_value)
   // For BSSP register is read only otherwise
   // only CKE and SMP are writable
 
-  if (m_sspmod->ssp_type() == SSP_TYPE_BSSP)
+  if (!m_sspmod || m_sspmod->ssp_type() == SSP_TYPE_BSSP)
 	return;
 
   put_value(old6 | (new_value & (CKE|SMP)));
@@ -343,6 +343,9 @@ void SPI::clock( bool ClockState )
 
   }
  
+  if (!m_sspmod)
+    return;
+
   if( onbeat ) {
     // on beat: data is read in if SMP = 0
     if( !(sspstat_val & _SSPSTAT::SMP) ) {
@@ -414,7 +417,9 @@ void SPI::set_halfclock_break()
 }
 void SPI::callback()
 {
-  
+  if (!m_sspmod)
+    return;
+
   switch( m_state ) {
   case eIDLE:
     break;
@@ -447,7 +452,19 @@ void SPI::startSPI()
     bits_transfered = 0;
 }
 
-SSP_MODULE::SSP_MODULE() : m_sink_set(false)
+SSP_MODULE::SSP_MODULE()
+  : m_pirset(0),
+    m_spi(0),
+    m_sck(0),
+    m_ss(0),
+    m_sdo(0),
+    m_sdi(0),
+    m_SckSource(0),
+    m_SdoSource(0),
+    m_SDI_Sink(0),
+    m_SCL_Sink(0),
+    m_SS_Sink(0),
+    m_sink_set(false)
 {
   sspbuf.setSSPMODULE(this);
   sspcon.setSSPMODULE(this);
@@ -470,6 +487,9 @@ void SPI::newSSPBUF(unsigned int newTxByte)
 }
 void SPI::start_transfer()
 {
+  if (!m_sspcon || !m_sspstat)
+    return;
+
   // load the shift register
   m_state = eACTIVE;
   bits_transfered = 0;
@@ -504,7 +524,7 @@ void SPI::start_transfer()
 }
 void SPI::stop_transfer()
 {
-  if (!m_sspcon)
+  if (!m_sspcon  || !m_sspstat)
 	return;
   unsigned int sspstat_val = m_sspstat->value.get();
 
@@ -512,8 +532,8 @@ void SPI::stop_transfer()
     if( bits_transfered == 8 && !m_sspbuf->isFull() ) {
       if (verbose)
       	cout << "SPI: Stoping transfer. Normal finish. Setting sspif and BF" << endl;
-      m_sspbuf->putFromSSPSR(m_SSPsr & 0xff);
-      m_sspmod->set_sspif();
+      if (m_sspbuf) m_sspbuf->putFromSSPSR(m_SSPsr & 0xff);
+      if (m_sspmod) m_sspmod->set_sspif();
 
       m_sspstat->put_value(sspstat_val | _SSPSTAT::BF);
 
@@ -562,14 +582,14 @@ void SSP_MODULE::initialize(
 }
 void SSP_MODULE::ckpSPI(unsigned int value)
 {
-    if( !m_spi->isIdle())
+    if(m_spi && !m_spi->isIdle())
       cout << "SPI: You just changed CKP in the middle of a transfer." << endl;
 	
     switch( value & _SSPCON::SSPM_mask ) {
     case _SSPCON::SSPM_SPImaster4:
     case _SSPCON::SSPM_SPImaster16:
     case _SSPCON::SSPM_SPImaster64:
-      m_SckSource->putState( (value & _SSPCON::CKP) ? '1' : '0' );
+      if (m_SckSource) m_SckSource->putState( (value & _SSPCON::CKP) ? '1' : '0' );
       break;
     case _SSPCON::SSPM_SPImasterTMR2:
       break;
@@ -578,9 +598,9 @@ void SSP_MODULE::ckpSPI(unsigned int value)
 
 void SSP_MODULE::stopSPI(unsigned int value)
 {
-    m_spi->stop_transfer();
-    m_sck->setSource(0);
-    m_sdo->setSource(0);
+    if (m_spi) m_spi->stop_transfer();
+    if (m_sck) m_sck->setSource(0);
+    if (m_sdo) m_sdo->setSource(0);
     if (verbose)
       cout << "SSP: SPI turned off" << endl;
 }
@@ -591,9 +611,9 @@ void SSP_MODULE::startSPI(unsigned int value)
     sspbuf.setFullFlag(false);
     if (! m_sink_set)
     {
-	m_sdi->addSink(m_SDI_Sink);
-	m_sck->addSink(m_SCL_Sink);
-	m_ss->addSink(m_SS_Sink);
+	if (m_sdi) m_sdi->addSink(m_SDI_Sink);
+	if (m_sck) m_sck->addSink(m_SCL_Sink);
+	if (m_ss) m_ss->addSink(m_SS_Sink);
 	m_sink_set = true;
     }
     switch( value & _SSPCON::SSPM_mask ) {
@@ -601,16 +621,16 @@ void SSP_MODULE::startSPI(unsigned int value)
     case _SSPCON::SSPM_SPImaster4:
     case _SSPCON::SSPM_SPImaster16:
     case _SSPCON::SSPM_SPImaster64:
-  	m_sck->setSource(m_SckSource);
-  	m_sdo->setSource(m_SdoSource);
-        m_SckSource->putState( (value & _SSPCON::CKP) ? '1' : '0' );
-	m_SdoSource->putState('0'); // BUG, required to put SDO in know state
+  	if (m_sck) m_sck->setSource(m_SckSource);
+  	if (m_sdo) m_sdo->setSource(m_SdoSource);
+        if (m_SckSource) m_SckSource->putState( (value & _SSPCON::CKP) ? '1' : '0' );
+	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
 	break;
 
     case _SSPCON::SSPM_SPIslave:
     case _SSPCON::SSPM_SPIslaveSS:
-  	m_sdo->setSource(m_SdoSource);
-	m_SdoSource->putState('0'); // BUG, required to put SDO in know state
+  	if (m_sdo) m_sdo->setSource(m_SdoSource);
+	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
 	break;
 
     default:
@@ -648,7 +668,7 @@ void SSP_MODULE::SCL_SinkState(char new3State)
 	    return;	// suspend transfer 
 			// Fall through
       case _SSPCON::SSPM_SPIslave:
-	m_spi->clock(m_SCL_State);
+	if (m_spi) m_spi->clock(m_SCL_State);
 	break;
   }
 
@@ -656,7 +676,8 @@ void SSP_MODULE::SCL_SinkState(char new3State)
 }
 void SSP_MODULE::newSSPBUF(unsigned int value)
 {
-   m_spi->newSSPBUF(value);
+  if(m_spi) m_spi->newSSPBUF(value);
+  else cout << "Warning bug, SPI initialization error " << __FILE__ << ":" << __LINE__<<endl;
 }
 // clear BF flag
 
@@ -687,11 +708,11 @@ void SSP_MODULE::tmr2_clock()
   unsigned int sspcon_val = sspcon.value.get();
   if (! (sspcon_val & _SSPCON::SSPEN) || 
      ((sspcon_val & _SSPCON::SSPM_mask) != _SSPCON::SSPM_SPImasterTMR2) ||
-     m_spi->isIdle())
+     (m_spi && m_spi->isIdle()))
 	return;
 
     Sck_toggle();
-    m_spi->clock( get_SCL_State() );
+    if (m_spi) m_spi->clock( get_SCL_State() );
 }
 //-----------------------------------------------------------
 //-------------------------------------------------------------------

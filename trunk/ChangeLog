@@ -1,4 +1,7 @@
 2006-10-17 Scott Dattalo <scott@dattalo.com>
+	* src/ssp.cc: Fixed uninitialized class data.
+
+2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.h, src/breakpoints.cc, src/processor.h,
 	src/processor.cc, src/registers.cc, src/registers.h:
 	Moved the register breakpoint clearing and setting functionality
