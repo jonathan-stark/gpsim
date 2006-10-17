@@ -991,6 +991,9 @@ int Trace::dump(int n, FILE *out_stream)
 
     } else if(!is_cycle_trace(k,&cycle)) {
 
+      if (get(k) == NOTHING)
+	break;
+
       cout << " could not decode trace type: 0x" << hex << get(k) << endl;
       trace.addToCurrentFrame(new InvalidTraceObject(get(k)));
     }
