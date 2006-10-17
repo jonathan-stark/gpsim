@@ -288,7 +288,7 @@ class Trace
   public:
 
   enum eTraceTypes {
-    NOTHING =  0,
+    NOTHING =  0x3fffffff,
     //INSTRUCTION        = (1<<24),
     BREAKPOINT         = (2<<24),
     INTERRUPT          = (3<<24),
