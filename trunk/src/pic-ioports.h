@@ -98,4 +98,24 @@ public:
 protected:
   PicPortRegister *m_port;
 };
+
+//------------------------------------------------------------------------
+// PicLatchRegister - 16bit-core devices
+class PicLatchRegister : public sfr_register
+{
+public:
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get();
+  virtual void setbit(unsigned int bit_number, char new_value);
+
+  virtual void setEnableMask(unsigned int nEnableMask);
+
+  PicLatchRegister(const char *, PortRegister *);
+
+protected:
+  PortRegister *m_port;
+  unsigned int m_EnableMask;
+};
+
 #endif  // __PIC_IOPORTS_H__

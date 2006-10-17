@@ -328,3 +328,39 @@ void PicPSP_PortRegister::setTris(PicTrisRegister *new_tris)
     }
 }
 
+//------------------------------------------------------------------------
+// Latch Register
+
+PicLatchRegister::PicLatchRegister(const char *_name, PortRegister *_port)
+  : m_port(_port), m_EnableMask(0xff)
+{
+  new_name(_name);
+}
+
+void PicLatchRegister::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.data);
+  value.data = new_value & m_EnableMask;
+  m_port->put_value(value.data);
+}
+void PicLatchRegister::put_value(unsigned int new_value)
+{
+  value.data = new_value & m_EnableMask;
+  m_port->put_value(value.data);
+}
+unsigned int PicLatchRegister::get()
+{
+  trace.raw(read_trace.get()  | value.data);
+  trace.raw(read_trace.geti() | value.init);
+
+  return value.data;
+}
+void PicLatchRegister::setbit(unsigned int bit_number, char new_value)
+{
+  printf("PicLatchRegister::setbit() -- shouldn't be called\n");
+}
+void PicLatchRegister::setEnableMask(unsigned int nEnableMask)
+{
+  m_EnableMask = nEnableMask;
+}
+
