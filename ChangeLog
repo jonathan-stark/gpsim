@@ -1,3 +1,33 @@
+2006-10-17 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.h, src/breakpoints.cc, src/processor.h,
+	src/processor.cc, src/registers.cc, src/registers.h:
+	Moved the register breakpoint clearing and setting functionality
+	from the register breakpoint classes to the
+	RegisterMemoryAccess. The purpose of this is to allow other types
+	of register objects (besides break points) to replace registers.
+	* modules/gpsim_modules.cc, modules/stimuli.cc, modules/stimuli.h:
+	Added the parallel port stimulus. This stimulus is identical to a
+	PIC port register in that it has a PORT, TRIS, and LATCH
+	register. Users can control the state of the parallel port
+	stimulus in one of two ways. First, there are user accessible
+	attributes (eg port.latch can be assigned a value). Second, (and
+	this is not completed yet) the user can embed the parallel
+	stimulus into the register memory map. This allows the parallel
+	stimulus to be accessed programmatically (that is from within the
+	PIC assembly code). This allows an assembly program to directly
+	control the simulation environment. 
+
+
+2006-10-17 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc, src/trace.h: Changed an empty trace entry from 0
+	to 0x3fffffff. This provides away to differentiate between an
+	empty trace entry and an uninitialized trace type.
+	
+2006-10-17 Scott Dattalo <scott@dattalo.com>
+	* src/pic-ioports.h, src/pic-ioports.cc, src/16bit-processors.cc,
+	src/16bit-processors.h: Moved the PicLatchRegister class from the
+	16bit-processor definitions to the pic-ioport definitions.
+	
 2006-10-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Renamed the popup menu item function 'Run
 	here' to 'Run to here'.

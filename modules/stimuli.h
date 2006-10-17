@@ -29,7 +29,9 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 
 class Register;
-class PortRegister;
+class PicPortRegister;
+class PicTrisRegister;
+class PicLatchRegister;
 
 namespace ExtendedStimuli {
 
@@ -110,14 +112,15 @@ namespace ExtendedStimuli {
   class PortStimulus : public Module, public TriggerObject
   {
   public:
-    PortStimulus(const char *_name, const char *_desc);
+    static Module *construct(const char *new_name);
+    PortStimulus(const char *_name);
     virtual void callback_print();
     void create_iopin_map();
     
   protected:
-    PortRegister *mPort;
-    Register *mLatch;
-    Register *mTris;
+    PicPortRegister  *mPort;
+    PicTrisRegister  *mTris;
+    PicLatchRegister *mLatch;
   };
 
 }

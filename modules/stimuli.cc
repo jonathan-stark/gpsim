@@ -74,6 +74,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/gpsim_time.h"
 #include "stimuli.h"
 #include "../config.h"
+#include "../src/pic-ioports.h"
+#include "../src/symbol.h"
+#include "../src/trace.h"
 
 namespace ExtendedStimuli {
 
@@ -520,13 +523,97 @@ File Stimulus\n\
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
 
-  PortStimulus::PortStimulus(const char *_name, const char *_desc)
+  class RegisterAddressAttribute : public Integer
+  {
+  public:
+    RegisterAddressAttribute(PortStimulus *pParent, const char *_name, const char * desc);
+    virtual void set(gint64);
+  private:
+    PulseGen *m_pParent;
+    Register *m_replaced;
+  };
+
+  RegisterAddressAttribute::RegisterAddressAttribute(PortStimulus *pParent, const char *_name, const char * desc)
+    : Integer(_name,0,desc),
+      m_replaced(0)
+  {
+
+  }
+
+  void RegisterAddressAttribute::set(gint64 i)
+  {
+    /*
+    Processor *pcpu = get_active_cpu();
+    if (pcpu) {
+
+      if (m_replaced) {
+	getAddress
+      }
+
+      Register *fr = pcpu->registers[reg];
+
+    cpu = _cpu;
+    _cpu->registers[reg] = this;
+    m_replaced = fr;
+    address=fr->address;
+    */
+  }
+
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  static void buildTraceType(Register *pReg, unsigned int baseType)
+  {
+    RegisterValue rv;
+
+    rv = RegisterValue(baseType + (0<<8), baseType + (1<<8));
+    pReg->set_write_trace(rv);
+    rv = RegisterValue(baseType + (2<<8), baseType + (3<<8));
+    pReg->set_read_trace(rv);
+
+  }
+
+  
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+
+  Module *PortStimulus::construct(const char *new_name)
+  {
+    PortStimulus *pPortStimulus = new PortStimulus(new_name);
+    pPortStimulus->create_iopin_map();
+    return pPortStimulus;
+  }
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+
+  PortStimulus::PortStimulus(const char *_name)
     : Module(_name, "\
-File Stimulus\n\
+Port Stimulus\n\
  Attributes:\n\
- .file - file name\n\
+ .port - port name\n\
+ .tris - tris name\n\
+ .lat  - latch name\n\
 ")
   {
+    mPort  = new PicPortRegister((name()+".port").c_str(),8,0xff);
+    mTris  = new PicTrisRegister((name()+".tris").c_str(),mPort);
+    mLatch = new PicLatchRegister((name()+".lat").c_str(),mPort);
+    mLatch->setEnableMask(0xff);
+
+    get_symbol_table().add_register(mPort);
+    get_symbol_table().add_register(mTris);
+    get_symbol_table().add_register(mLatch);
+
+    // FIXME - probably want something better than the generic module trace
+
+    ModuleTraceType *mMTT = new ModuleTraceType(this,0,1," Port Stimulus");
+    trace.allocateTraceType(mMTT);
+
+    buildTraceType(mPort, mMTT->type());
+    buildTraceType(mTris, mMTT->type() + (4<<8));
+    buildTraceType(mLatch, mMTT->type() + (8<<8));
 
   }
   //----------------------------------------------------------------------
@@ -540,6 +627,17 @@ File Stimulus\n\
 
   void PortStimulus::create_iopin_map()
   {
+
+    create_pkg(8);
+
+    for (int i=0; i<8; i++) {
+      char pinNumber = '1'+i;
+      IO_bi_directional *ppin;
+
+      ppin = new IO_bi_directional((name() + ".p" + pinNumber).c_str());
+      ppin->update_direction(IOPIN::DIR_OUTPUT,true);
+      assign_pin(i+1, mPort->addPin(ppin,i));
+    }
   }
 
 
