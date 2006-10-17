@@ -236,7 +236,7 @@ Register::Register(void)
 
   value = RegisterValue(0,0);
   por_value = RegisterValue(0,0);
-  putRV(por_value);
+  //putRV_notrace(por_value);   /// Why is this here? 
   _xref.assign_data(this);
   read_access_count=0;
   write_access_count=0;
@@ -255,7 +255,7 @@ Register::Register(Processor *_cpu)
 
   value = RegisterValue(0,0);
   por_value = RegisterValue(0,0);
-  putRV(por_value);
+  //putRV_notrace(por_value);
   _xref.assign_data(this);
   read_access_count=0;
   write_access_count=0;

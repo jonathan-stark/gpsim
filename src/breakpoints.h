@@ -458,7 +458,6 @@ public:
 
 protected:
   BreakpointRegister();
-  Register *m_replaced;       // A pointer to the register that this break replaces
 
 };
 
@@ -471,11 +470,10 @@ public:
   string m_sOperator;
 
   BreakpointRegister_Value()
-    { 
-      m_replaced = 0;
-      break_value = 0;
-      break_mask = 0;
-    }
+  { 
+    break_value = 0;
+    break_mask = 0;
+  }
 
   BreakpointRegister_Value(Processor *_cpu, 
         int _repl, 

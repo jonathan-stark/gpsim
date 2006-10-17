@@ -353,6 +353,13 @@ public:
   {
     return address;
   }
+  Register *getReplaced() { return m_replaced; }
+  void setReplaced(Register *preg) { m_replaced = preg; }
+protected:
+  // A pointer to the register that this register replaces.
+  // This is used primarily by the breakpoint code. 
+  Register *m_replaced;
+
 };
 
 
