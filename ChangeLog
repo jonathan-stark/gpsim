@@ -1,3 +1,20 @@
+2006-10-18 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/processor.h:
+	 - insertRegister() and removeRegister() methods of the
+	 RegisterMemoryAccess class now return bool.
+	* src/breakpoints.cc: deleted commented out code.
+	* modules/stimuli.cc, modules/stimuli.h: Implemented the register
+	 mapping functionality.
+	* cli/parse.yy: improved the reg() operator syntax. It used to be
+	 that only integer operands were accepted. Now, expressions are
+	 accepted.
+	* regression/port_stim/18f452.lkr: added
+	* regression/port_stim/Makefile: added
+	* regression/port_stim/port_stim.stc: added
+	* regression/port_stim/port_stim.asm: added
+	* regression/run_regression.sh: Added a regression test for the
+	 port_stimulus module.
+
 2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* examples/projects/stack_test/stack_test.asm,
 	examples/projects/stack_test/stack_test.stc,
