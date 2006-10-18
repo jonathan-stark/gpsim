@@ -1220,14 +1220,6 @@ BreakpointRegister::BreakpointRegister(Processor *_cpu, int _repl, int bp)
 
 void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
 {
-  /*
-  Register *fr = _cpu->registers[reg];
-
-  cpu = _cpu;
-  _cpu->registers[reg] = this;
-  setReplaced(fr);
-  address=fr->address;
-  */
   if (_cpu) {
     cpu = _cpu;
     _cpu->rma.insertRegister(reg,this);

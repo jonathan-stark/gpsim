@@ -103,6 +103,31 @@ void yyerror(char *message)
 }
 
 
+int toInt(Expression *expr)
+{
+
+  try {
+    if(expr) {
+
+      Value *v = expr->evaluate();
+      if (v) {
+	int i;
+	v->get(i);
+	return i;
+      }
+    }
+
+  }
+
+  catch (Error *err) {
+    if(err)
+      cout << "ERROR:" << err->toString() << endl;
+    delete err;
+  }
+
+  return -1;
+}
+
 %}
 
 /* The pure-parser mode is used to enable reentrancy */
@@ -412,6 +437,13 @@ dump_cmd:
 
 eval_cmd:
 	        SYMBOL_T                      {c_symbol.dump_one($1);}
+/*
+ // This would really be a nice feature to have, but unfortunately there's bison conflict.
+          | expr                        {
+                                          c_symbol.EvaluateAndDisplay($1);
+                                          delete $1;
+					  }
+*/
           | '(' expr ')'                {
                                           c_symbol.EvaluateAndDisplay($2);
                                           delete $2;
@@ -432,14 +464,19 @@ eval_cmd:
                                           $3->clear();
                                           delete $3;
                                           delete $6;
-                                        } 
-          | REG_T '(' LITERAL_INT_T ')' {
-                                          c_x.x($3->getVal());
+                                        }
+          | REG_T '(' expr ')'
+                                        {
+					  int i=toInt($3);
+					  if (i>=0)
+					    c_x.x(toInt($3));
                                           delete $3;
                                         }
-          | REG_T '(' LITERAL_INT_T ')' EQU_T expr
+          | REG_T '(' expr ')' EQU_T expr
                                         {
-                                          c_x.x($3->getVal(), $6);
+					  int i=toInt($3);
+					  if (i>=0)
+					    c_x.x(toInt($3), $6);
                                           delete $3;
                                         }
           ;
@@ -864,8 +901,8 @@ string_list
 
 expr    : binary_expr                   {$$=$1;}
         | unary_expr                    {$$=$1;}
-        | REG_T '(' LITERAL_INT_T ')'   { $$=new RegisterExpression((unsigned int)$3->getVal());
-                                          delete $3; }
+        | REG_T '(' expr ')'                            {$$=new RegisterExpression(toInt($3));
+                                                         delete $3; }
         ;
 
 array   : '{' expr_list '}'             {$$=$2;}

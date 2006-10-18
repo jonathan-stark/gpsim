@@ -109,6 +109,7 @@ namespace ExtendedStimuli {
     guint64 m_future_cycle;
   };
 
+  class RegisterAddressAttribute;
   class PortStimulus : public Module, public TriggerObject
   {
   public:
@@ -121,6 +122,9 @@ namespace ExtendedStimuli {
     PicPortRegister  *mPort;
     PicTrisRegister  *mTris;
     PicLatchRegister *mLatch;
+    RegisterAddressAttribute *mPortAddress;
+    RegisterAddressAttribute *mTrisAddress;
+    RegisterAddressAttribute *mLatchAddress;
   };
 
 }

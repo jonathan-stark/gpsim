@@ -103,3 +103,6 @@ ${RT} spi sim_88
 ${RT} spi sim_242
 
 ${RT} spi sim_c62
+
+${RT} port_stim sim
+

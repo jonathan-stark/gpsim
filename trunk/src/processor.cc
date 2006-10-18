@@ -2068,21 +2068,37 @@ void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
   registers = _registers;
 }
 //------------------------------------------------------------------------
-void RegisterMemoryAccess::insertRegister(int address, Register *pReg)
+// insertRegister - Each register address may contain a linked list of registers.
+// The top most register is the one that is referenced whenever a processor
+// accesses the register memory. The primary purpose of the linked list is to
+// support register breakpoints. For example, a write breakpoint is implemented
+// with a breakpoint class derived from the register class. Setting a write
+// breakpoint involves creating the write breakpoint object and placing it
+// at the top of the register linked list. Then, when a processor attempts
+// to write to this register, the breakpoint object will capture this and
+// halt the simulation.
+
+bool RegisterMemoryAccess::insertRegister(int address, Register *pReg)
 {
 
   if(!cpu || !registers || nRegisters<=address ||!pReg)
-    return;
+    return false;
 
   Register *ptop = registers[address];
   pReg->setReplaced(ptop);
   registers[address] = pReg;
 
+  return true;
 }
-void RegisterMemoryAccess::removeRegister(int address, Register *pReg)
+
+//------------------------------------------------------------------------
+// removeRegister - see comment on insertRegister. This method removes
+// a register object from the breakpoint linked list.
+
+bool RegisterMemoryAccess::removeRegister(int address, Register *pReg)
 {
   if(!cpu || !registers || nRegisters<=address ||!pReg)
-    return;
+    return false;
 
   Register *ptop = registers[address];
 
@@ -2093,10 +2109,12 @@ void RegisterMemoryAccess::removeRegister(int address, Register *pReg)
       Register *pNext = ptop->getReplaced();
       if (pNext == pReg) {
 	ptop->setReplaced(pNext->getReplaced());
-	return;
+	return true;
       }
       ptop = pNext;
     }
+
+  return false;
 }
 
 //-------------------------------------------------------------------

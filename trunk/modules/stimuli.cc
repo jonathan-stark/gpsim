@@ -77,6 +77,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-ioports.h"
 #include "../src/symbol.h"
 #include "../src/trace.h"
+#include "../src/processor.h"
 
 namespace ExtendedStimuli {
 
@@ -526,37 +527,40 @@ File Stimulus\n\
   class RegisterAddressAttribute : public Integer
   {
   public:
-    RegisterAddressAttribute(PortStimulus *pParent, const char *_name, const char * desc);
+    RegisterAddressAttribute(Register *pReg, const char *_name, const char * desc);
     virtual void set(gint64);
   private:
-    PulseGen *m_pParent;
     Register *m_replaced;
+    const int InvalidAddress;
   };
 
-  RegisterAddressAttribute::RegisterAddressAttribute(PortStimulus *pParent, const char *_name, const char * desc)
-    : Integer(_name,0,desc),
-      m_replaced(0)
+  RegisterAddressAttribute::RegisterAddressAttribute(Register *pReg,const char *_name, const char * desc)
+    : Integer(_name,0xffffffff,desc),
+      m_replaced(pReg),
+      InvalidAddress(0xffffffff)
   {
-
+    m_replaced->address = InvalidAddress;
   }
 
   void RegisterAddressAttribute::set(gint64 i)
   {
-    /*
+
     Processor *pcpu = get_active_cpu();
-    if (pcpu) {
+    if (pcpu && m_replaced) {
 
-      if (m_replaced) {
-	getAddress
-      }
+      if (m_replaced->address != InvalidAddress)
+	pcpu->rma.removeRegister(m_replaced->address,m_replaced);
 
-      Register *fr = pcpu->registers[reg];
+      m_replaced->set_cpu(pcpu);
 
-    cpu = _cpu;
-    _cpu->registers[reg] = this;
-    m_replaced = fr;
-    address=fr->address;
-    */
+      m_replaced->address = i & 0xffffffff;
+      if (!pcpu->rma.insertRegister(m_replaced->address,m_replaced))
+	  m_replaced->address = InvalidAddress;
+
+      gint64 insertAddress = m_replaced->address;
+
+      Integer::set(insertAddress);
+    }
   }
 
 
@@ -602,9 +606,17 @@ Port Stimulus\n\
     mLatch = new PicLatchRegister((name()+".lat").c_str(),mPort);
     mLatch->setEnableMask(0xff);
 
+    mPortAddress = new RegisterAddressAttribute(mPort, "portAdr","Port register address");
+    mTrisAddress = new RegisterAddressAttribute(mTris, "trisAdr","Tris register address");
+    mLatchAddress = new RegisterAddressAttribute(mLatch, "latAdr","Latch register address");
+
     get_symbol_table().add_register(mPort);
     get_symbol_table().add_register(mTris);
     get_symbol_table().add_register(mLatch);
+
+    add_attribute(mPortAddress);
+    add_attribute(mTrisAddress);
+    add_attribute(mLatchAddress);
 
     // FIXME - probably want something better than the generic module trace
 
