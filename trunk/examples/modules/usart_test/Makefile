@@ -8,9 +8,9 @@ PROJECT = usart_test
 OBJECTS =  $(PROJECT).o
 OUTPUT = $(PROJECT).hex
 COD = $(PROJECT).cod
-GPSIM = ../../gpsim/gpsim
+GPSIM = gpsim
 STC = $(PROJECT).stc
-STARTUP_STC=startup.stc
+STARTUP_STC=usart_test.stc
 
 all : $(OUTPUT)
 
@@ -29,5 +29,5 @@ clean:
 $(PROJECT).o : $(PROJECT).asm
 
 sim: $(COD)
-	$(GPSIM) -i -c $(STARTUP_STC) -D STC=$(STC)
+	$(GPSIM) -c $(STARTUP_STC)
 
