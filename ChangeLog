@@ -1,4 +1,19 @@
 2006-10-17 Scott Dattalo <scott@dattalo.com>
+	* examples/projects/stack_test/stack_test.asm,
+	examples/projects/stack_test/stack_test.stc,
+	examples/projects/stack_test/Makefile,
+	examples/projects/digital_stim/digital_stim.stc,
+	examples/projects/digital_stim/digital_stim.asm,
+	examples/projects/digital_stim/Makefile,
+	examples/projects/p16f628_test/f628.asm,
+	examples/projects/p16f628_test/Makefile,
+	examples/projects/p16f628_test/f628.stc:
+	 - Clean up examples.
+	* configure.ac: Removed the 12bit, 14bit, and 16bit subdirectories
+	from the list of packaged directories. The example code there is old and
+	needs a whole lot of work to get working.
+
+2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* examples/modules/Makefile.am,
 	examples/modules/usart_test/usart_test.asm,
 	examples/modules/mod_test/mod_test.stc,

@@ -16,7 +16,7 @@
 	;;
 	;;    OR
 	;;
-	;;   invoke the simualtion from the Makefile:
+	;;   invoke the simulation from the Makefile:
 	;;   make sim
 
 	;; In all cases, the stimulus file will load the simulation
@@ -48,7 +48,7 @@ begin
 
 	;; Count the rising edges on portb bit 0
 	
-	movf	portb,w
+	movf	PORTB,w
 	xorwf	temp2,w
 	xorwf	temp2,f
 	andwf	temp2,w
