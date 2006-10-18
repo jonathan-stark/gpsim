@@ -123,6 +123,8 @@ start
 
    .sim "U1.txbaud = 9600"
    .sim "U1.rxbaud = 9600"
+   .sim "U1.xpos = 216.0"
+   .sim "U1.ypos = 48.0"
 
 	;; USART Initialization
 	;;

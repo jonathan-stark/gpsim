@@ -1,4 +1,18 @@
 2006-10-17 Scott Dattalo <scott@dattalo.com>
+	* examples/modules/Makefile.am,
+	examples/modules/usart_test/usart_test.asm,
+	examples/modules/mod_test/mod_test.stc,
+	examples/modules/usart_test/Makefile:
+	 - updated examples
+	* examples/modules/led_test/README: added
+	* examples/modules/led_test/Makefile: added
+	* examples/modules/logic_test/README: added
+	* examples/modules/usart_test/README: added
+	* examples/modules/mod_test/README: added
+	* examples/modules/usart_test/usart.asm: removed 
+
+
+2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* src/ssp.cc: Fixed uninitialized class data.
 
 2006-10-17 Scott Dattalo <scott@dattalo.com>
