@@ -41,13 +41,14 @@ period 5000
 # In this example, the stimulus will go high at cycle 100
 # and then go low at cycle 200, high at 300, and so on
 
-203 0
-300 1
-400 0
-600 1
-1000 0
-3000 1
-
+{
+203, 0,
+300, 1,
+400, 0,
+600, 1,
+1000, 0,
+3000, 1
+}
 # specify the ioport that this stimulus drives
 
 #                  starting with 0.0.5
@@ -76,14 +77,5 @@ node test_node
 
 attach test_node  asy_test portb0
 
-# Just for the heck of it, let's set a break point
-# after we've counted the stimulus going high ten times:
-
-break wv 0x20 0x10
-
-# In case there's a bug in the program, let's halt simulation
-# after a million cycles.
-
-break c 1000000
 
 set verbose 0

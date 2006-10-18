@@ -9,8 +9,8 @@ GZIP            = gzip
 ZIP		= zip
 
 # gpasm programs
-ASM             = gpasm -c
-DIASM           = gpdasm
+ASM             = gpasm
+DISASM          = gpdasm
 CODVIEWER       = gpvc -d 
 
 # simulator

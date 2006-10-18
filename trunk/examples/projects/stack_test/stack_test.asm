@@ -54,7 +54,7 @@ begin
 
 	;; Count the rising edges on portb bit 0
 	
-	movf	portb,w
+	movf	PORTB,w
 	xorwf	temp2,w
 	xorwf	temp2,f
 	andwf	temp2,w
@@ -74,7 +74,7 @@ Task_1_init:
 	call	Task_2_init
 Task_1:
 
-	btfsc	portb,0
+	btfsc	PORTB,0
 	goto	t1b
 	call	$+1
 t1a

@@ -174,9 +174,6 @@ AC_CONFIG_FILES([Makefile
                  cli/Makefile
                  doc/Makefile
                  examples/Makefile
-                 examples/12bit/Makefile
-                 examples/14bit/Makefile
-                 examples/16bit/Makefile
                  examples/modules/Makefile
                  examples/projects/Makefile
                  eXdbm/Makefile

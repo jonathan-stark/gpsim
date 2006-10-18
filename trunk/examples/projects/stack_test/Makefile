@@ -9,7 +9,7 @@ GZIP            = gzip
 ZIP		= zip
 
 # gpasm programs
-ASM             = gpasm -c
+ASM             = gpasm
 DIASM           = gpdasm
 CODVIEWER       = gpvc -d 
 
