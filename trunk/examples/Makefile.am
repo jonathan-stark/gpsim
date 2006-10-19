@@ -1,4 +1,4 @@
-SUBDIRS =  modules projects 12bit 14bit 16bit
+SUBDIRS =  modules projects
 
 MOSTLYCLEANFILES = *.hex *.cod *.lst *~
 CLEANFILES = *.hex *.cod *.lst *~
