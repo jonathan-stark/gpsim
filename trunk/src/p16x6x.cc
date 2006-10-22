@@ -128,6 +128,7 @@ void P16C62::create_iopin_map(void)
 		&(*m_porta)[5],   // SS
 		&(*m_portc)[5],   // SDO
 		&(*m_portc)[4],   // SDI
+		m_trisc,         // I2C port
 		SSP_TYPE_BSSP
   	);  
   }
@@ -205,6 +206,7 @@ void P16C64::create_iopin_map(void)
 		&(*m_porta)[5],   // SS
 		&(*m_portc)[5],   // SDO
 		&(*m_portc)[4],   // SDI
+		m_trisc,         // I2C port
 		SSP_TYPE_BSSP
 		   ); 
   }

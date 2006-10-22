@@ -99,6 +99,7 @@ void P18C2x2::create_iopin_map()
                 &(*m_porta)[5],   // SS
                 &(*m_portc)[5],   // SDO
                 &(*m_portc)[4],   // SDI
+                m_trisc,         // i2c tris port
 		SSP_TYPE_MSSP
        );
 
@@ -306,6 +307,7 @@ void P18C4x2::create_iopin_map()
                 &(*m_porta)[5],   // SS
                 &(*m_portc)[5],   // SDO
                 &(*m_portc)[4],   // SDI
+                m_trisc,         // i2c tris port
 		SSP_TYPE_MSSP
        );
   //1portc.ccp1con = &ccp1con;

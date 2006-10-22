@@ -191,6 +191,13 @@ void PIR1v2::set_pspif(void)
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 }
+void PIR1v2::set_sspif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | SSPIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
 
 void PIR1v2::clear_txif(void)
 {
@@ -238,6 +245,13 @@ void PIR2v2::set_eeif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | EEIF);
+  if( value.get() & pie->value.get() )
+    intcon->peripheral_interrupt();
+}
+void PIR2v2::set_bclif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | BCLIF);
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 }

@@ -138,6 +138,7 @@ void P16F8x::create_iopin_map()
                 &(*m_portb)[5],   // SS
                 &(*m_portb)[2],   // SDO
                 &(*m_portb)[1],    // SDI
+                m_trisb,          // i2c tris port
 		SSP_TYPE_SSP
 	);
   }
