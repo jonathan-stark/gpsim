@@ -239,15 +239,19 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\examples\16bit\*.inc"
 
   SetOutPath "$INSTDIR\examples\modules\led_test"
+  File "${GPSIM_ROOT}\examples\modules\led_test\README"
+  File "${GPSIM_ROOT}\examples\modules\led_test\Makefile"
   File "${GPSIM_ROOT}\examples\modules\led_test\*.asm"
   File "${GPSIM_ROOT}\examples\modules\led_test\*.stc"
 
   SetOutPath "$INSTDIR\examples\modules\logic_test"
+  File "${GPSIM_ROOT}\examples\modules\logic_test\README"
   File "${GPSIM_ROOT}\examples\modules\logic_test\Makefile"
   File "${GPSIM_ROOT}\examples\modules\logic_test\*.asm"
   File "${GPSIM_ROOT}\examples\modules\logic_test\*.stc"
 
   SetOutPath "$INSTDIR\examples\modules\mod_test"
+  File "${GPSIM_ROOT}\examples\modules\mod_test\README"
   File "${GPSIM_ROOT}\examples\modules\mod_test\Makefile"
   File "${GPSIM_ROOT}\examples\modules\mod_test\*.asm"
   File "${GPSIM_ROOT}\examples\modules\mod_test\*.stc"
@@ -264,6 +268,7 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\examples\modules\usart_gui\*.stc"
 
   SetOutPath "$INSTDIR\examples\modules\usart_test"
+  File "${GPSIM_ROOT}\examples\modules\usart_test\README"
   File "${GPSIM_ROOT}\examples\modules\usart_test\Makefile"
   File "${GPSIM_ROOT}\examples\modules\usart_test\*.asm"
   File "${GPSIM_ROOT}\examples\modules\usart_test\*.stc"
