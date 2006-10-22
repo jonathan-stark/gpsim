@@ -1,3 +1,12 @@
+2006-10-23 Roy Rankin <rrankin@ihug.com.au>
+	* src/p16x6x.h src/ioports.h src/p16x6x.cc src/p16f87x.cc
+	  src/i2c-ee.cc src/ssp.h src/pir.cc src/pir.h src/ssp.cc
+	  src/p18x.cc src/p16f8x.cc regression/run_regression.sh
+	  regression/i2c/p16f876a.asm regression/i2c/16f88.lkr
+	  regression/i2c/i2c_low.inc regression/i2c/16f876a.lkr
+	  regression/i2c/p16f88.asm regression/i2c/Makefile
+	- Add I2C functionality
+
 2006-10-22 Borut Razem <borut.razem@siol.net>
 	* */.cvsignore: removed CVS leftovers
 	* modules/stimuli.cc: trace.* replaced with get_trace().*

@@ -269,6 +269,7 @@ public:
   char getControlState();
   char getSourceState();
   char getPullupControlState();
+  unsigned int getPinNumber() { return m_pinNumber;}
 
   IOPIN &getPin() { return *m_pin;}
 

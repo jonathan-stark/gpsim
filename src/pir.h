@@ -200,10 +200,7 @@ public:
     put(get() | CCP1IF);
   }
 
-  virtual void set_sspif()
-  {
-    put(get() | SSPIF);
-  }
+  virtual void set_sspif();
 
   unsigned int get_sspif()
   {
@@ -294,11 +291,7 @@ enum
       put(get() | LVDIF);
     }
 
-  virtual void set_bclif()
-    {
-      put(get() | BCLIF);
-    }
-
+  virtual void set_bclif();
   virtual void set_eeif();
   virtual void set_cmif();
 
@@ -410,8 +403,10 @@ public:
   {
     return false;
   }
-  virtual void set_sspif() {}
   virtual void clear_sspif() {}
+  virtual void set_sspif() {}
+  virtual void set_bclif() {}
+ 
 
   virtual void set_pspif() {}
   virtual void set_cmif() {}
@@ -621,6 +616,12 @@ class PIR_SET_2 : public PIR_SET
   virtual void set_cmif() {
     assert(pir2 != 0);
     pir2->set_cmif();
+  }
+
+  // I2C master
+  virtual void set_bclif() {
+    assert(pir2 != 0);
+    pir2->set_bclif();
   }
 
   // Parallel Slave Port

@@ -38,6 +38,7 @@ class PinModule;
 class PIR1;
 class PIR_SET;
 class  _14bit_processor;
+class PicTrisRegister;
 
 class _SSPBUF;
 class _SSPSTAT;
@@ -70,14 +71,14 @@ public:
     SSPM_I2Cslave_7bitaddr = 0x6,
     SSPM_I2Cslave_10bitaddr = 0x7,
     SSPM_MSSPI2Cmaster = 0x8,
-	
     SSPM_I2Cfirmwaremaster = 0xb,
+    SSPM_I2Cslave_7bitaddr_ints = 0xe,
+    SSPM_I2Cslave_10bitaddr_ints = 0xf,
+
+    /* None of the documentation I have seen show these, but Scott? thought
+	they were the good name RRR
     SSPM_I2Cfirmwaremultimaster_7bitaddr_ints = 0xe,
     SSPM_I2Cfirmwaremaster_10bitaddr_ints = 0xf,
-
-    /* These are listed in the BSSP section of the midrange ref. manual. I didn't test it but I suspect them of being lies.
-       SSPM_I2Cslave_7bitaddr_ints = 0xe,
-       SSPM_I2Cslave_10bitaddr_ints = 0xf,
     */
   };
 
@@ -105,23 +106,45 @@ public:
   virtual void put_value(unsigned int);
 
   bool isSSPEnabled() { return (value.get() & SSPEN) == SSPEN; }
-  bool isI2CEnabled(); 
+  bool isI2CActive(unsigned int); 
+  bool isI2CSlave(unsigned int); 
+  bool isI2CMaster(unsigned int); 
   bool isSPIActive(unsigned int);
 	
   bool isSPIMaster() {
     return isSSPEnabled() && ((value.get() & SSPM_mask) <= SSPM_SPImasterTMR2);
   }
   void setWCOL();
-  void setSSPOV();
+  void setSSPOV() { put_value(value.get() | SSPOV);}
   void setSSPMODULE(SSP_MODULE *);
 
 
 private:
   SSP_MODULE *m_sspmod;
 
+};
+class _SSPCON2 : public sfr_register
+{
+ public:
 
-  
+  enum {
+    SEN  = 1<<0,	// Start or Stretch enable
+    RSEN  = 1<<1,	// Repeated Start
+    PEN  = 1<<2,	// Stop condition enable
+    RCEN = 1<<3,	// Receive enable bit
+    ACKEN = 1<<4,	// Acknowledge Sequence enable bit
+    ACKDT = 1<<5,	// Acknowledge Data bit
+    ACKSTAT = 1<<6,	// Acknowledge status bit
+    GCEN = 1<<7		// General call enable
+  };
 
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  _SSPCON2(void);
+  void setSSPMODULE(SSP_MODULE *);
+
+private:
+  SSP_MODULE   *m_sspmod;
 };
 
 class _SSPSTAT : public sfr_register
@@ -166,7 +189,6 @@ public:
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  void putFromSSPSR(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
 
@@ -183,17 +205,13 @@ class _SSPADD : public sfr_register
 {
  public: 
 
+  void setSSPMODULE(SSP_MODULE *);
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+private:
+  SSP_MODULE   *m_sspmod;
 };
 
-class _SSPCON2 : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  _SSPCON2(void);
-};
 
 class SPI: public  TriggerObject
 {
@@ -226,6 +244,60 @@ private:
   int bits_transfered;
 };
 
+class I2C: public  TriggerObject
+{
+ public:
+  SSP_MODULE *m_sspmod;
+  _SSPBUF   *m_sspbuf;
+  _SSPCON   *m_sspcon;
+  _SSPSTAT  *m_sspstat;
+  _SSPCON2  *m_sspcon2;
+  _SSPADD   *m_sspadd;
+
+  I2C(SSP_MODULE *, _SSPCON *, _SSPSTAT *, _SSPBUF *, _SSPCON2 *, _SSPADD *);
+  virtual void clock(bool);
+  virtual void sda(bool);
+  virtual void callback();
+  virtual void set_idle();
+  virtual void newSSPBUF(unsigned int value);
+  virtual void newSSPADD(unsigned int value);
+  virtual void start_bit();
+  virtual void rstart_bit();
+  virtual void stop_bit();
+  virtual void master_rx();
+  virtual void ack_bit();
+  virtual bool isIdle(); 
+  virtual void setBRG();
+  virtual void clrBRG();
+  virtual bool rx_byte();
+  virtual void bus_collide();
+  virtual void slave_command();
+  virtual bool end_ack();
+
+
+private:
+  unsigned int m_SSPsr;  // internal Shift Register
+
+  enum I2CStateMachine {
+    eIDLE,
+    RX_CMD,
+    RX_CMD2,
+    RX_DATA,
+    TX_DATA,
+    CLK_TX_BYTE,
+    CLK_RX_BYTE,
+    CLK_ACKEN,
+    CLK_RSTART,
+    CLK_STOP,
+    CLK_START
+  } i2c_state;
+
+
+  int 	bits_transfered;
+  int   phase;
+  guint64 future_cycle;
+};
+
 class SSP_MODULE 
 {
  public:
@@ -245,11 +317,10 @@ class SSP_MODULE
 		  PinModule *_SdiPin,
 		  PinModule *_SdoPin,
 		  PinModule *_SsPin,
+        	  PicTrisRegister *_i2ctris, 
 		  SSP_TYPE ssptype = SSP_TYPE_BSSP);
 
-  bool m_SDI_State;
-  bool m_SCL_State;
-  bool m_SS_State;
+
 
   virtual void SDI_SinkState(char);
   virtual void SS_SinkState(char);
@@ -261,28 +332,42 @@ class SSP_MODULE
   virtual void putStateSDO(char _state) {m_SdoSource->putState(_state);}
   virtual void putStateSCK(char _state) {m_SckSource->putState(_state);}
   virtual void set_sspif() { m_pirset->set_sspif();}
-  virtual void startSPI(unsigned int value);
-  virtual void stopSPI(unsigned int value);
+  virtual void set_bclif() { m_pirset->set_bclif();}
+  virtual void startSSP(unsigned int value);
+  virtual void stopSSP(unsigned int value);
+  virtual void changeSSP(unsigned int new_value, unsigned int old_value);
   virtual void ckpSPI(unsigned int value);
   virtual void newSSPBUF(unsigned int value);
+  virtual void newSSPADD(unsigned int value);
+  virtual void newSSPCON2(unsigned int value);
   virtual void rdSSPBUF();
   virtual void tmr2_clock();
   virtual SSP_TYPE ssp_type() { return m_ssptype; }
+  virtual void setSCL(bool);
+  virtual void setSDA(bool);
+  virtual bool SaveSSPsr(unsigned int value);
 
 private:
   PIR_SET   *m_pirset;
-  SPI *m_spi;
+  SPI 	    *m_spi;
+  I2C 	    *m_i2c;
   PinModule *m_sck;
   PinModule *m_ss;
   PinModule *m_sdo; 
   PinModule *m_sdi;
+  PicTrisRegister *m_i2c_tris;
   SSP_TYPE  m_ssptype;
+
+  bool m_SDI_State;
+  bool m_SCL_State;
+  bool m_SS_State;
 
   PeripheralSignalSource *m_SckSource;
   PeripheralSignalSource *m_SdoSource;
-  SDI_SignalSink *m_SDI_Sink;
-  SCL_SignalSink *m_SCL_Sink;
-  SS_SignalSink *m_SS_Sink;
+  PeripheralSignalSource *m_SdiSource;
+  SDI_SignalSink 	*m_SDI_Sink;
+  SCL_SignalSink 	*m_SCL_Sink;
+  SS_SignalSink 	*m_SS_Sink;
   bool m_sink_set;
 };
 

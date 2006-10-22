@@ -209,11 +209,6 @@ void P16F871::create()
 
   P16F871::create_sfr_map();
 
-  /*
-  ((PORTC*)portc)->ssp = 0;
-  ((PORTA*)porta)->ssp = 0;
-  */
-
 }
 
 
@@ -355,13 +350,15 @@ void P16F873::create_sfr_map()
   adcon1.setVrefLoConfiguration(12, 2);
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
+  add_sfr_register(&ssp.sspcon2,  0x91, RegisterValue(0,0) ,"sspcon2");
 
   ssp.initialize(
 		get_pir_set(),    // PIR
                 &(*m_portc)[3],   // SCK
                 &(*m_porta)[5],   // SS
-                &(*m_portc)[4],   // SDO
-                &(*m_portc)[5],   // SDI
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+                m_trisc,    	  // i2c tris port
 		SSP_TYPE_MSSP
         );
 
@@ -709,12 +706,14 @@ void P16F874::create_sfr_map()
   adcon1.setVrefLoConfiguration(12, 2);
   adcon1.setVrefLoConfiguration(13, 2);
   adcon1.setVrefLoConfiguration(15, 2);
+  add_sfr_register(&ssp.sspcon2,  0x91, RegisterValue(0,0) ,"sspcon2");
   ssp.initialize(
 		get_pir_set(),    // PIR
                 &(*m_portc)[3],   // SCK
                 &(*m_porta)[5],   // SS
-                &(*m_portc)[4],   // SDO
-                &(*m_portc)[5],   // SDI
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+                m_trisc,    	  // i2c tris port
 		SSP_TYPE_MSSP
         );
 }
