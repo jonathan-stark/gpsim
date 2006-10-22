@@ -1,8 +1,14 @@
+2006-10-22 Borut Razem <borut.razem@siol.net>
+	* */.cvsignore: removed CVS leftovers
+	* modules/stimuli.cc: trace.* replaced with get_trace().*
+	  the getter function instead of direct object access should
+	  be used in modules
+
 2006-10-19 Scott Dattalo <scott@dattalo.com>
-	* regression/Makefile.am: Added 
+	* regression/Makefile.am: Added
 	* configure.ac, extras/graphic_lcd/configure.ac, Makefile.am,
 	examples/Makefile.am: Changed revision from 0.21.12-pre to
-	0.22.0-RC1. 
+	0.22.0-RC1.
 
 2006-10-18 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/processor.h:
@@ -47,7 +53,7 @@
 	* examples/modules/logic_test/README: added
 	* examples/modules/usart_test/README: added
 	* examples/modules/mod_test/README: added
-	* examples/modules/usart_test/usart.asm: removed 
+	* examples/modules/usart_test/usart.asm: removed
 
 
 2006-10-17 Scott Dattalo <scott@dattalo.com>
@@ -70,27 +76,27 @@
 	stimulus into the register memory map. This allows the parallel
 	stimulus to be accessed programmatically (that is from within the
 	PIC assembly code). This allows an assembly program to directly
-	control the simulation environment. 
+	control the simulation environment.
 
 
 2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h: Changed an empty trace entry from 0
 	to 0x3fffffff. This provides away to differentiate between an
 	empty trace entry and an uninitialized trace type.
-	
+
 2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* src/pic-ioports.h, src/pic-ioports.cc, src/16bit-processors.cc,
 	src/16bit-processors.h: Moved the PicLatchRegister class from the
 	16bit-processor definitions to the pic-ioport definitions.
-	
+
 2006-10-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Renamed the popup menu item function 'Run
 	here' to 'Run to here'.
-	
+
 2006-10-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: The popup menu item function 'Move PC here'
 	was not updating the program counter.
-	
+
 2006-10-15 Scott Dattalo <scott@dattalo.com>
 	* src/trace.h, src/trace.cc:
 	  - Added classes for tracing module events.
@@ -108,13 +114,13 @@
 2006-10-08 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc, modules/switch.h: separated out the gui
 	specific portions of the switch into another class.
-	
+
 2006-10-04 Scott Dattalo <scott@dattalo.com>
 	* modules/switch.cc: Switch resistance has successfully been reintroduced
 	* regression/switch_test/switch_test.asm: Added a test to test the
 	switch resistance. Note, there are no assertions set on the test
 	because currently there is no way to query the node voltage
-	directly. 
+	directly.
 
 2006-10-02 Borut Razem <borut.razem@siol.net>
 	* gpsim.sln, cli/input.cc, cli/cli.vcproj, cli/makefile.mingw,
