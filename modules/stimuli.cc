@@ -33,21 +33,21 @@ Boston, MA 02111-1307, USA.  */
     .delete
     .period
 
-    The set and clear attributes generate the edge states. 
-    For example if the module is instantiated as PG, then 
+    The set and clear attributes generate the edge states.
+    For example if the module is instantiated as PG, then
 
     gpsim> PG.set = 0x1000
     gpsim> PG.clear = 0x2000
 
     generate a rising edge at cycle 0x1000 and a falling edge at
-    cycle 0x2000. Any number of edges can be specified and they 
+    cycle 0x2000. Any number of edges can be specified and they
     may be in any order. The delete attribute removes an edge:
 
     gpsim> PG.delete = 0x2000  # remove the edge at cycle 0x2000
 
     The period attribute tells how many cycles there are in a
     rollover. If period is 0, then the pulsegen is not periodic.
-    If there are edges beyond the period time, then those will be 
+    If there are edges beyond the period time, then those will be
     ignored.
 
     To be added:
@@ -86,7 +86,7 @@ namespace ExtendedStimuli {
   // Attributes
 
 
-  // 
+  //
   class PulseAttribute : public Integer
   {
   public:
@@ -204,7 +204,7 @@ Pulse Generator\n\
     // Attributes for the pulse generator.
     m_set = new PulseAttribute(this, "set","r/w cycle time when ouput will be driven high", 5.0);
     m_clear = new PulseAttribute(this, "clear","r/w cycle time when ouput will be driven low",0.0);
-    m_period = new PulsePeriodAttribute(this, 
+    m_period = new PulsePeriodAttribute(this,
 					"period","r/w cycle time to specify pulse stream repeat rate");
 
     add_attribute(m_set);
@@ -246,7 +246,7 @@ Pulse Generator\n\
       // If this is a periodic pulse stream and either
       //     a) we reached the end of the sequence
       //     b) we have more data but it exceeds the period
-      // then 
+      // then
       //   start the stream over.
       if (m_period->getVal() && ((sample_iterator == samples.end()  ||
 				  (*sample_iterator).time > m_period->getVal()))) {
@@ -268,12 +268,12 @@ Pulse Generator\n\
   void  PulseGen::setBreak(guint64 next_cycle,list<ValueStimulusData>::iterator si)
   {
 
-    if (m_future_cycle) { 
+    if (m_future_cycle) {
       get_cycles().clear_break(this);
       m_future_cycle = 0;
       sample_iterator = samples.end();
     }
-	
+
     if (next_cycle > get_cycles().get()) {
       get_cycles().set_break(next_cycle, this);
       m_future_cycle = next_cycle;
@@ -312,7 +312,7 @@ Pulse Generator\n\
 
   void PulseGen::update()
   {
-    
+
     if (samples.empty())
       return;  // There are no samples
 
@@ -383,7 +383,7 @@ Pulse Generator\n\
   string PulseGen::toString()
   {
     ostringstream sOut;
-    
+
     sOut << "pulsegen toString method" << hex;
 
     list<ValueStimulusData>::iterator si;
@@ -395,7 +395,7 @@ Pulse Generator\n\
     si = samples.begin();
     while (si != samples.end()) {
       sOut << endl;
-    
+
       double d;
       (*si).v->get(d);
       sOut << "  {0x" << (*si).time << ',' << d << '}';
@@ -429,7 +429,7 @@ Pulse Generator\n\
     char m_buff[eBuffSize];
   };
   //=1024;
-  FileNameAttribute::FileNameAttribute(FileStimulus *pParent, 
+  FileNameAttribute::FileNameAttribute(FileStimulus *pParent,
 				       const char *_name,
 				       const char * _desc)
     : String(_name,"",_desc), m_Parent(pParent), m_pFile(0)
@@ -487,7 +487,7 @@ File Stimulus\n\
     }
 
     parse(m_file->getLine());
-    
+
   }
 
   void FileStimulus::parse(const char *cP)
@@ -513,7 +513,7 @@ File Stimulus\n\
   {
 
     ostringstream sOut;
-    
+
     sOut << "fileStimulus toString method" << endl;
 
     sOut << ends;
@@ -577,7 +577,7 @@ File Stimulus\n\
 
   }
 
-  
+
 
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
@@ -621,7 +621,7 @@ Port Stimulus\n\
     // FIXME - probably want something better than the generic module trace
 
     ModuleTraceType *mMTT = new ModuleTraceType(this,0,1," Port Stimulus");
-    trace.allocateTraceType(mMTT);
+    get_trace().allocateTraceType(mMTT);
 
     buildTraceType(mPort, mMTT->type());
     buildTraceType(mTris, mMTT->type() + (4<<8));
