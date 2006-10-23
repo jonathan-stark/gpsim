@@ -64,7 +64,7 @@ public:
   {
   }
 
-  TraceObject *OptionTraceType::decode(unsigned int tbi)
+  TraceObject *decode(unsigned int tbi)
   {
 
     unsigned int tv = trace.get(tbi);
