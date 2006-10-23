@@ -2864,6 +2864,10 @@ Graphical User Interface
 \end_layout
 
 \begin_layout Standard
+FIXME: We could use a few illustrations here!
+\end_layout
+
+\begin_layout Standard
 gpsim also provides a graphical user interface that simplifies some of the
  drudgery associated with the cli.
  It's possible to open windows to view all the details about your debug
@@ -3694,6 +3698,20 @@ The rollover value specifies the range the cycle counter can be in (a modulo
  large.
 \end_layout
 
+\begin_layout Section
+Scope Window
+\end_layout
+
+\begin_layout Standard
+FIXME: The scope window still needs some work...
+\end_layout
+
+\begin_layout Standard
+The Scope Window graphs I/O pin states.
+ It is similar to an oscilloscope or logic analyzer.
+ It can be controlled either from the command line or from 
+\end_layout
+
 \begin_layout Chapter
 \begin_inset LatexCommand \label{cha:Assertions-and-Extended}
 
@@ -3895,7 +3913,7 @@ refer to the section on gpsim configuration scripts.
 \end_layout
 
 \begin_layout Chapter
-Trace: What has happen?
+Trace and Log: What has happen?
 \begin_inset LatexCommand \label{trace}
 
 \end_inset
@@ -4413,6 +4431,55 @@ Other events that occur during the trace frame are indented.
  The read traces show the value read.
  Write traces show the value written and the value that was previously in
  the register.
+\end_layout
+
+\begin_layout Section*
+Saving Trace to a file
+\end_layout
+
+\begin_layout Standard
+The trace buffer may contain thousands of entries making it difficult to
+ search.
+ The trace save feature will allow the trace buffer to be written to a file.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+gpsim> trace save mytrace.log
+\end_layout
+
+\begin_layout Standard
+The entire contents of the trace buffer are decoded and written to the file.
+ The format of the trace is the same as it is when displayed at the command
+ line.
+\end_layout
+
+\begin_layout Section*
+Raw Traces
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+raw
+\emph default
+ trace buffer is the trace buffer displayed in a minimally decoded form.
+ This is primarily used for gpsim development.
+ When saved to a file, the raw trace is not decoded at all.
+ In addition, the processor's state is written to the file.
+ Thus third party tools can be written to create custom trace reports
+\begin_inset Foot
+status collapsed
+
+\begin_layout Standard
+FIXME - The dynamically created trace type information needs to be written
+ to this file too.
+ Without it, it is difficult to tell what each traced item is.
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Chapter
@@ -5024,6 +5091,29 @@ Analog Asynchronous Stimuli
 Analog Asynchronous Stimuli are identical to Synchronous Stimuli except
  the data points are floating point numbers.
  
+\end_layout
+
+\begin_layout Section
+Extended Stimuli
+\end_layout
+
+\begin_layout Standard
+Discuss the extended stimuli in the modules/ directory.
+ In particular, describe the 
+\emph on
+PulseGen
+\emph default
+ module and how it can complete replace the asynchronous stimuli.
+ Also describe the
+\emph on
+ PullUp
+\emph default
+ and 
+\emph on
+PullDown
+\emph default
+ modules and how they can be manipulated into being general purpose DC voltage
+ sources (FIXME, would it make sense to rename these modules?).
 \end_layout
 
 \begin_layout Chapter
