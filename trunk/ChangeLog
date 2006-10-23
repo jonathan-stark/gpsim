@@ -1,3 +1,7 @@
+2006-10-23 David Barnett <dbarnett@edt.biz>
+	* src/12bit-processors.cc: Fixed extra qualifier bug in the
+	OptionTraceType class.
+
 2006-10-23 Scott Dattalo <scott@dattalo.com>
 	* AUTHORS: Added Roy to the list :)
 	* regression/Makefile.am: added the i2c regression tests to the
