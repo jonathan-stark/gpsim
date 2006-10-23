@@ -9,4 +9,5 @@ EXTRA_DIST = \
 	examples/sed1520.asm  examples/sed1520.inc \
 	utils/custom.png utils/fontimage.png utils/gpsim1.png \
 	utils/konqueror16X16.png utils/konqueror3.png \
-	utils/konqueror.png utils/pngtopic.c utils/README 
+	utils/konqueror.png utils/pngtopic.c utils/README \
+	doc/mgls10032a.pdf doc/sed1520.pdf

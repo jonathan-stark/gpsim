@@ -1,4 +1,7 @@
 2006-10-23 Scott Dattalo <scott@dattalo.com>
+	* Makefile.am: doc/ directory is now part of the distribution.
+	
+2006-10-23 Scott Dattalo <scott@dattalo.com>
 	* doc/sed1520.pdf, doc/mgls10032a.pdf: Added manufacturer data
 	sheets. 
 	* configure.ac: Release candidate 0.3.0-RC1
