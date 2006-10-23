@@ -1,4 +1,13 @@
 2006-10-23 Scott Dattalo <scott@dattalo.com>
+	* AUTHORS: Added Roy to the list :)
+	* regression/Makefile.am: added the i2c regression tests to the
+	distribution
+	* configure.ac: RC2 - release candidate 2
+	* README.EXAMPLES: this was totally out of date and still needs to
+	be cleaned up.
+	* README: changed revision info, made minor changes.
+
+2006-10-23 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-processors.cc, src/12bit-processors.cc,
 	src/12bit-processors.h, src/trace.h, src/trace.cc:
 	The OPTION register now has its own trace object

@@ -1,6 +1,6 @@
 .
 gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
-http://www.dattalo.com/gnupic/gpsim.html
+http://gpsim.sourceforge.net/
 
 
 Please see the INSTALL file to get instructions on how to install gpsim.
@@ -161,6 +161,7 @@ Major Features:
 
 Standard simulator stuff:
   o Breakpoints - execution, read and write memory, wdt, <ctrl C>
+  o Assertions
   o single stepping
   o step over
   o run until break
@@ -179,7 +180,7 @@ Gui stuff:
   o Watch window
   o Pinout/breadboard window
   o Stack Viewer
-
+  o Scope Viewer
 
 gpsim specific
   o Simulate multiple processors (not fully supported)
@@ -209,6 +210,5 @@ Finally, see the file Contributions for people who have submitted suggestions an
 
 NOTES:
 -----
-eXdbm and gtk+extra are needed by gpsim.
-With version gpsim-0.21.4 you'll need to upgrade to gtk+extra2
+gtk+extra2 is needed by gpsim.
 Please see the gpsim web page for more info
