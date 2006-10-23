@@ -51,6 +51,7 @@ EXTRA_DIST = \
 	wavegen/Makefile wavegen/16f877a.lkr wavegen/pulsegen.asm wavegen/pulsegen.stc \
 	spi/Makefile spi/16c62.lkr spi/16f88.lkr spi/18f242.lkr spi/p16c62.asm \
 	spi/p16f88.asm spi/p18f242.asm \
+	i2c/16f876a.lkr i2c/16f88.lkr i2c/i2c_low.inc i2c/Makefile i2c/p16f876a.asm i2c/p16f88.asm \
 	port_stim/Makefile port_stim/18f452.lkr port_stim/Makefile port_stim/port_stim.asm \
 	port_stim/port_stim.stc
 
