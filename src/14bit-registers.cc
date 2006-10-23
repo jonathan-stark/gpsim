@@ -455,11 +455,7 @@ void OPTION_REG::put(unsigned int new_value)
 {
 
   //FIXME trace OPTION for 12bit processors is broken.
-  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-    trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,old_value);
-  else
-    trace.write_OPTION(value.get());
+  trace.raw(write_trace.get() | value.get());
 
   unsigned int old_value = value.get();
   value.put(new_value);

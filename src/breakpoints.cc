@@ -570,17 +570,7 @@ bool Breakpoints::dump(TriggerObject *pTO)
   if (!pTO)
     return false;
 
-
   pTO->print();
-  /*
-  if (pTO->bHasExpression()) {
-    cout << "    Expression:";
-    pTO->printExpression();
-  }
-  if(pTO->message().size())
-    GetUserInterface().DisplayMessage("    Message:%s\n", pTO->message().c_str());
-  */
-
   return true;
 }
 bool Breakpoints::dump1(unsigned int bp_num, int dump_type)

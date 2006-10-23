@@ -289,12 +289,10 @@ class Trace
 
   enum eTraceTypes {
     NOTHING =  0x3fffffff,
-    //INSTRUCTION        = (1<<24),
     BREAKPOINT         = (2<<24),
     INTERRUPT          = (3<<24),
     _RESET             = (4<<24),
     WRITE_TRIS         = (5<<24),
-    WRITE_OPTION       = (6<<24),
     OPCODE_WRITE       = (7<<24),
     LAST_TRACE_TYPE       = (8<<24),
 
@@ -383,12 +381,6 @@ class Trace
   inline void write_TRIS (unsigned int value)
   {
     trace_buffer[trace_index] = WRITE_TRIS | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void write_OPTION (unsigned int value)
-  {
-    trace_buffer[trace_index] = WRITE_OPTION | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 

@@ -1,3 +1,15 @@
+2006-10-23 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-processors.cc, src/12bit-processors.cc,
+	src/12bit-processors.h, src/trace.h, src/trace.cc:
+	The OPTION register now has its own trace object
+	* doc/gpsim.lyx: Minor documentation updates
+	* doc/gpsim.html: Placing gpsim web page under CVS control.
+	* doc/screenshots/breadboard.png: added
+	* doc/screenshots/registerview.png: added
+	* doc/screenshots/scope1.png: added
+	* doc/screenshots/scope2.png: added
+	* doc/screenshots/source_browser.png: added
+	
 2006-10-23 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16x6x.h src/ioports.h src/p16x6x.cc src/p16f87x.cc
 	  src/i2c-ee.cc src/ssp.h src/pir.cc src/pir.h src/ssp.cc

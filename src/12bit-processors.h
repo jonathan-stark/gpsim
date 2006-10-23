@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
      // forward references
 class _12bit_processor;
 class IOPIN;
+class OptionTraceType;
 
 extern instruction *disasm12 (pic_processor *cpu,unsigned int inst);
 
@@ -116,6 +117,8 @@ enum _12BIT_DEFINITIONS
   _12bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_12bit_processor();
 
+protected:
+  OptionTraceType *mOptionTT;  
 };
 
 #define cpu12 ( (_12bit_processor *)cpu)

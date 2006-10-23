@@ -849,10 +849,6 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
 	       get(index)&0xff);
       break;
-    case WRITE_OPTION:
-      snprintf(buffer, bufsize,"  wrote: 0x%02x to OPTION",
-	       get(index)&0xff);
-      break;
     case BREAKPOINT:
       snprintf(buffer, bufsize,"BREAK: ");
       bp.dump_traced(get(index) & 0xffffff);
