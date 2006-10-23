@@ -3,9 +3,9 @@ Installation instructions
 
 You'll need at least gpsim-0.21.11 for this to work.
 
-un tar the graphiclcd-X.Y.Z.tar.gz tarball and then:
+un tar the graphic_lcd-X.Y.Z.tar.gz tarball and then:
 
-$ cd lcd-X.Y.Z
+$ cd graphic_lcd-X.Y.Z
 $ ./configure
 $ make
 $ su
@@ -16,7 +16,7 @@ At this point, the Graphic LCD module has been compiled and installed
 as a shared library that can be loaded by gpsim. If you want to
 see if it works, then run the example:
 
-$ cd graphiclcd-X.Y.Z/examples
+$ cd graphic_lcd-X.Y.Z/examples
 $ make
 $ gpsim -s glcd_test.cod
 
