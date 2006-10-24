@@ -1,3 +1,7 @@
+2006-10-24 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc: Added detailed comments on TraceFrames,
+	TraceTypes, and TraceObjects.
+
 2006-10-23 David Barnett <dbarnett@edt.biz>
 	* src/12bit-processors.cc: Fixed extra qualifier bug in the
 	OptionTraceType class.

@@ -54,13 +54,6 @@ TraceLog &GetTraceLog(void) {
 }
 #endif
 
-/*Trace trace_log_buffer;   * The trace_log_buffer is a special trace
-			    * buffer intended for logging events that will
-			    * ultimately be written to a file. Each logged
-			    * event is individually time tagged making it
-			    * easy to post process.
-			    */
-
 //========================================================================
 traceValue::traceValue(void)
 {
@@ -126,10 +119,60 @@ unsigned int traceValue::get_value(void)
    centuries!) The trace member function is_cycle_trace() describes
    the cycle counter encoding in detail.
 
-   Trace frames.
+   Trace Types.
 
-   A trace frame is defined to be the contents of the trace buffer
-   corresponding to a single time quantum. 
+   gpsim differentiates individually traced items by the TT field
+   (upper 8 bits of the 32-bit trace word). Except for the cycle
+   counter trace, these trace types are dynamically allocated whenever
+   a TraceType class is instantiated. As described above, the other
+   gpsim classes use this dynamically allocated 32-bit trace word as a
+   handle for efficiently storing information into the trace
+   buffer. In addition to allocating the 32-bit word for tracing, the
+   TraceType class will use it as a hash index into the
+   'trace_map'. The trace_map is a locally (to trace.cc) instantiated
+   STL map that cross references the 32-bit trace types to the
+   instantiated TraceType class that create them.
+
+   When the trace buffer is decoded, the trace type (upper 8-bits) of
+   the 32-bit trace word is extracted and used to look up the
+   TraceType object in the trace_map map. The lower 24-bits of the
+   trace word are then passed to the TraceType object's decode()
+   method. Continuing with the example from above, 
+
+       TTAAAAVV
+
+      TT - Used to look up the TraceType object in the trace_map
+      AAAAVV - Passed to the decode() method of the object.
+
+   The TraceType decode() method will usually create a TraceObject and
+   place it on a TraceFrame.
+
+
+   Trace Frames and Trace Objects
+
+   A trace frame is defined to be the decoded contents of the trace
+   buffer corresponding to a single time quantum (i.e. single
+   simulation cycle). Each frame has an STL list to hold the
+   TraceObjects. The TraceObjects are created by the TraceType
+   classes. This happens when the 32-bit trace word is decoded by the
+   TraceType class. The TraceObject has several purposes. First,
+   unique TraceObjects are created for the variety of things gpsim
+   traces. For example, when the simulated processor writes to a
+   register, a corresponding RegisterWriteTraceObject will get created
+   when the trace buffer is decoded. Another purpose of the
+   TraceObject is to record the system state. Take for example the
+   register write trace. When a register write occurs, the register
+   has a value before the write and a value after the write. When the
+   register write is traced, only the value *before* the write is
+   recorded. When the trace buffer is decoded, the simulation is
+   effectively run backwards. The current state is known before trace
+   decoding commences. Then as the decoding steps backwards through
+   the trace history, the state change at each trace event is recorded
+   in the trace object. So the register write trace event gets decoded
+   into a TraceObject. This trace object knows the current state of
+   the register; that's simply the register's current contents. The
+   trace object knows the contents of the register prior to the
+   register write operation; that's stored in the trace buffer. 
 
 
 ****************************************************************************/
@@ -213,10 +256,13 @@ void TraceRawLog::disable(void)
 
 
 //========================================================================
-// Experimental trace code
-
-//========================================================================
 // TraceFrame
+//
+// A TraceFrame is a collection of traced items that belong to a single
+// simulation cycle. The TraceFrame is only built up whenever the user
+// requests trace history. Each frame contains a list of traceObjects
+// that describe the specific information that the simulation has traced.
+
 TraceFrame::TraceFrame( ) 
 {
   cycle_time = 0;
@@ -242,7 +288,6 @@ void TraceFrame::print(FILE *fp)
 {
   list <TraceObject *> :: iterator toIter;
 
-  //  fprintf(fp,"=== Trace Frame 0x%016LX\n",cycle_time);
   for(toIter = traceObjects.begin();
       toIter != traceObjects.end();
       ++toIter) 
@@ -259,6 +304,12 @@ void TraceFrame::update_state()
     (*toIter)->getState(this);
 }
 
+//============================================================
+// Trace::addFrame
+//
+// The Trace class maintains a list of traceFrames. Here is where
+// a new one gets added. Note that traceFrames are created only
+// when a user requests to see the trace history.
 
 void Trace::addFrame(TraceFrame *newFrame)
 {
@@ -305,7 +356,8 @@ void Trace::printTraceFrame(FILE *fp)
 //========================================================================
 // TraceObject
 //
-// Base class for decode traces.
+// A TraceObject is a base class for decoded traces. TraceObjects are only
+// created when the user requests to see the TraceHistory.
 //
 TraceObject::TraceObject()
 {
