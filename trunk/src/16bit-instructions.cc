@@ -35,6 +35,13 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 
 //--------------------------------------------------
+Branching::Branching(Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu,  new_opcode,0),
+    destination_index(0),
+    absolute_destination_index(0)
+
+{
+}
 void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
@@ -94,6 +101,20 @@ char *Branching::name(char *return_str, int len)
 }
 
 //--------------------------------------------------
+multi_word_instruction::multi_word_instruction(Processor *new_cpu, 
+					       unsigned int new_opcode)
+  : instruction(new_cpu,  new_opcode,0),
+    word2_opcode(0),
+    PMaddress(0),
+    PMindex(0),
+    initialized(false)
+{
+}
+multi_word_branch::multi_word_branch(Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_instruction(new_cpu,  new_opcode),
+    destination_index(0)
+{
+}
 void multi_word_branch::runtime_initialize(void)
 {
   if(cpu16->program_memory[PMindex+1] != &bad_instruction)
@@ -243,6 +264,7 @@ void PUSHL::execute()
 //--------------------------------------------------
 
 MOVSF::MOVSF (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_instruction(new_cpu, new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
@@ -365,11 +387,10 @@ void ADDWF16::execute(void)
 //--------------------------------------------------
 
 ADDWFC::ADDWFC (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
   new_name("addwfc");
-
 }
 
 void ADDWFC::execute(void)
@@ -440,12 +461,10 @@ void ANDWF16::execute(void)
 //--------------------------------------------------
 
 BC::BC (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bc");
-
 }
 
 void BC::execute(void)
@@ -460,12 +479,10 @@ void BC::execute(void)
 //--------------------------------------------------
 
 BN::BN (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bn");
-
 }
 
 void BN::execute(void)
@@ -480,12 +497,10 @@ void BN::execute(void)
 //--------------------------------------------------
 
 BNC::BNC (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bnc");
-
 }
 
 void BNC::execute(void)
@@ -500,12 +515,10 @@ void BNC::execute(void)
 //--------------------------------------------------
 
 BNN::BNN (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bnn");
-
 }
 
 void BNN::execute(void)
@@ -520,12 +533,10 @@ void BNN::execute(void)
 //--------------------------------------------------
 
 BNOV::BNOV (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bnov");
-
 }
 
 void BNOV::execute(void)
@@ -540,12 +551,10 @@ void BNOV::execute(void)
 //--------------------------------------------------
 
 BNZ::BNZ (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bnz");
-
 }
 
 void BNZ::execute(void)
@@ -560,12 +569,10 @@ void BNZ::execute(void)
 //--------------------------------------------------
 
 BOV::BOV (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bov");
-
 }
 
 void BOV::execute(void)
@@ -579,10 +586,8 @@ void BOV::execute(void)
 
 //--------------------------------------------------
 BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-  opcode = new_opcode;
-  cpu = new_cpu;
-
   destination_index = (new_opcode & 0x7ff)+1;
   absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
 
@@ -618,12 +623,10 @@ char * BRA::name(char *return_str,int len)
 //--------------------------------------------------
 
 BTG::BTG (Processor *new_cpu, unsigned int new_opcode)
+  : Bit_op(new_cpu, new_opcode,0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("btg");
-
 }
 
 void BTG::execute(void)
@@ -641,12 +644,10 @@ void BTG::execute(void)
 //--------------------------------------------------
 
 BZ::BZ (Processor *new_cpu, unsigned int new_opcode)
+  : Branching(new_cpu, new_opcode)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bz");
-
 }
 
 void BZ::execute(void)
@@ -660,8 +661,9 @@ void BZ::execute(void)
 
 //--------------------------------------------------
 CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_branch(new_cpu, new_opcode)
 {
-  opcode = new_opcode;
+
   fast = (new_opcode & 0x100) ? true : false;
   cpu = new_cpu;
   PMaddress = cpu16->getCurrentDisasmAddress();
@@ -726,12 +728,10 @@ void COMF16::execute(void)
 //--------------------------------------------------
 
 CPFSEQ::CPFSEQ (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("cpfseq");
-
 }
 
 void CPFSEQ::execute(void)
@@ -751,12 +751,10 @@ void CPFSEQ::execute(void)
 //--------------------------------------------------
 
 CPFSGT::CPFSGT (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("cpfsgt");
-
 }
 
 void CPFSGT::execute(void)
@@ -776,12 +774,10 @@ void CPFSGT::execute(void)
 //--------------------------------------------------
 
 CPFSLT::CPFSLT (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("cpfslt");
-
 }
 
 void CPFSLT::execute(void)
@@ -801,12 +797,10 @@ void CPFSLT::execute(void)
 //--------------------------------------------------
 
 DAW::DAW (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("daw");
-
 }
 
 void DAW::execute(void)
@@ -880,12 +874,10 @@ void DECFSZ16::execute(void)
 //--------------------------------------------------
 
 DCFSNZ::DCFSNZ (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("dcfsnz");
-
 }
 
 void DCFSNZ::execute(void)
@@ -914,9 +906,8 @@ void DCFSNZ::execute(void)
 
 //--------------------------------------------------
 GOTO16::GOTO16 (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_branch(new_cpu, new_opcode)
 {
-  opcode = new_opcode;
-  cpu = new_cpu;
   PMaddress = cpu16->getCurrentDisasmAddress();
   PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
@@ -990,12 +981,10 @@ void INCFSZ16::execute(void)
 //--------------------------------------------------
 
 INFSNZ::INFSNZ (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("infsnz");
-
 }
 
 void INFSNZ::execute(void)
@@ -1062,6 +1051,7 @@ void IORWF16::execute(void)
 
 //--------------------------------------------------
 LCALL16::LCALL16 (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_branch(new_cpu, new_opcode)
 {
 //    opcode = new_opcode;
 //    fast = new_opcode & 0x100;
@@ -1103,10 +1093,9 @@ char *LCALL16::name(char  *return_str,int len)
 //--------------------------------------------------
 
 LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_instruction(new_cpu, new_opcode)
 {
   
-  opcode = new_opcode;
-  cpu = new_cpu;
   PMaddress = cpu16->getCurrentDisasmAddress();
   PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
@@ -1210,9 +1199,8 @@ void MOVF16::execute(void)
 //--------------------------------------------------
 
 MOVFF::MOVFF (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_instruction(new_cpu, new_opcode)
 {
-  opcode = new_opcode;
-  cpu = new_cpu;
   PMaddress = cpu16->getCurrentDisasmAddress();
   PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
@@ -1274,6 +1262,7 @@ void MOVFF::execute(void)
 //--------------------------------------------------
 
 MOVFP::MOVFP (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_instruction(new_cpu, new_opcode)
 {
 //    opcode = new_opcode;
 //    cpu = new_cpu;
@@ -1338,12 +1327,10 @@ void MOVFP::execute(void)
 //--------------------------------------------------
 
 MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("movlb");
-
 }
 
 void MOVLB::execute(void)
@@ -1357,6 +1344,7 @@ void MOVLB::execute(void)
 //--------------------------------------------------
 
 MOVLR::MOVLR (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
 
 //    decode(new_cpu, new_opcode);
@@ -1378,6 +1366,7 @@ void MOVLR::execute(void)
 //--------------------------------------------------
 
 MOVPF::MOVPF (Processor *new_cpu, unsigned int new_opcode)
+  : multi_word_instruction(new_cpu, new_opcode)
 {
 //    opcode = new_opcode;
 //    cpu = new_cpu;
@@ -1478,6 +1467,7 @@ void MOVWF16a::execute(void)
 //--------------------------------------------------
 
 MULLW::MULLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode,0)
 {
 
   decode(new_cpu, new_opcode);
@@ -1503,12 +1493,10 @@ void MULLW::execute(void)
 //--------------------------------------------------
 
 MULWF::MULWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("mulwf");
-
 }
 
 void MULWF::execute(void)
@@ -1534,12 +1522,10 @@ void MULWF::execute(void)
 //--------------------------------------------------
 
 NEGF::NEGF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("negf");
-
 }
 
 void NEGF::execute(void)
@@ -1566,6 +1552,7 @@ void NEGF::execute(void)
 //--------------------------------------------------
 
 NEGW::NEGW (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode,0)
 {
 
 //    decode(new_cpu, new_opcode);
@@ -1583,12 +1570,10 @@ void NEGW::execute(void)
 //--------------------------------------------------
 
 POP::POP (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("pop");
-
 }
 
 void POP::execute(void)
@@ -1603,12 +1588,10 @@ void POP::execute(void)
 //--------------------------------------------------
 
 PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("push");
-
 }
 
 void PUSH::execute(void)
@@ -1622,9 +1605,8 @@ void PUSH::execute(void)
 
 //--------------------------------------------------
 RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-  opcode = new_opcode;
-  cpu = new_cpu;
 
   destination_index = (new_opcode & 0x7ff)+1;
   if(new_opcode & 0x400)
@@ -1660,12 +1642,10 @@ char * RCALL::name(char *return_str,int len)
 //--------------------------------------------------
 
 RESET::RESET (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("reset");
-
 }
 
 void RESET::execute(void)
@@ -1717,12 +1697,10 @@ char *RETURN16::name(char  *return_str,int len)
 //--------------------------------------------------
 
 RLCF::RLCF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("rlcf");
-
 }
 
 void RLCF::execute(void)
@@ -1751,12 +1729,10 @@ void RLCF::execute(void)
 //--------------------------------------------------
 
 RLNCF::RLNCF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("rlncf");
-
 }
 
 void RLNCF::execute(void)
@@ -1787,12 +1763,10 @@ void RLNCF::execute(void)
 //--------------------------------------------------
 
 RRCF::RRCF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("rrcf");
-
 }
 
 void RRCF::execute(void)
@@ -1822,12 +1796,10 @@ void RRCF::execute(void)
 //--------------------------------------------------
 
 RRNCF::RRNCF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("rrncf");
-
 }
 
 void RRNCF::execute(void)
@@ -1857,12 +1829,10 @@ void RRNCF::execute(void)
 //--------------------------------------------------
 
 SETF::SETF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("setf");
-
 }
 
 void SETF::execute(void)
@@ -1913,12 +1883,10 @@ void SUBLW16::execute(void)
 //--------------------------------------------------
 
 SUBFWB::SUBFWB (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("subfwb");
-
 }
 
 void SUBFWB::execute(void)
@@ -1972,12 +1940,10 @@ void SUBWF16::execute(void)
 //--------------------------------------------------
 
 SUBWFB::SUBWFB (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("subwfb");
-
 }
 
 void SUBWFB::execute(void)
@@ -2007,12 +1973,10 @@ void SUBWFB::execute(void)
 //--------------------------------------------------
 
 TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("tblrd");
-
 }
 
 char *TBLRD::name(char *return_str,int len)
@@ -2046,12 +2010,10 @@ void TBLRD::execute(void)
 //--------------------------------------------------
 
 TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("tblwt");
-
 }
 
 char *TBLWT::name(char *return_str,int len)
@@ -2086,6 +2048,7 @@ void TBLWT::execute(void)
 //--------------------------------------------------
 
 TLRD::TLRD (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
 
 //    decode(new_cpu, new_opcode);
@@ -2127,12 +2090,10 @@ void TLRD::execute(void)
 //--------------------------------------------------
 
 TLWT::TLWT (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("tlwt");
-
 }
 
 char *TLWT::name(char *return_str,int len)
@@ -2168,6 +2129,7 @@ void TLWT::execute(void)
 //--------------------------------------------------
 
 TSTFSZ::TSTFSZ (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
 
   decode(new_cpu, new_opcode);

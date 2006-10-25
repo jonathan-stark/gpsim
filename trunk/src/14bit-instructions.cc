@@ -30,18 +30,15 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 
 ADDLW::ADDLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
   new_name("addlw");
-
 }
 
 void ADDLW::execute(void)
 {
   unsigned int old_value,new_value;
-
-  // trace.instruction(opcode);
 
   new_value = (old_value = cpu14->W->value.get()) + L;
 
@@ -57,19 +54,14 @@ void ADDLW::execute(void)
 //--------------------------------------------------
 
 RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("retfie");
-
 }
 
 void RETFIE::execute(void)
 {
-
-  // trace.instruction(opcode);
-
   cpu14->pc->new_address(cpu14->stack->pop());
 
   cpu14->intcon->set_gie();
@@ -78,39 +70,29 @@ void RETFIE::execute(void)
 //--------------------------------------------------
 
 RETURN::RETURN (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("return");
-
 }
 
 void RETURN::execute(void)
 {
-
-  // trace.instruction(opcode);
-
   cpu14->pc->new_address(cpu14->stack->pop());
-
 }
 
 //--------------------------------------------------
 
 SUBLW::SUBLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("sublw");
-
 }
 
 void SUBLW::execute(void)
 {
   unsigned int old_value,new_value;
-
-  // trace.instruction(opcode);
 
   new_value = L - (old_value = cpu14->W->value.get());
 

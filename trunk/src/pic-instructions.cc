@@ -31,13 +31,11 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 
 
-instruction::instruction()
-{
-  Initialize(0, 0, 0);
-}
-
-instruction::instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr)
-  : m_bIsModified(false),
+instruction::instruction(Processor *pProcessor,
+			 unsigned int uOpCode, 
+			 unsigned int uAddrOfInstr)
+  : gpsimValue(pProcessor),
+    m_bIsModified(false),
     cycle_count(0),
     opcode(uOpCode), 
     m_uAddrOfInstr(uAddrOfInstr),
@@ -47,27 +45,7 @@ instruction::instruction(Processor *pProcessor, unsigned int uOpCode, unsigned i
     lst_line(-1),
     hll_src_line(-1)
 {
-  cpu = pProcessor;
 }
-
-void instruction::Initialize(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr)
-{
-  cpu = pProcessor;
-  opcode = uOpCode;
-
-  m_uAddrOfInstr = uAddrOfInstr;
-
-  m_bIsModified = false;
-  cycle_count = 0;
-
-  file_id = -1;
-  hll_file_id = -1;
-  src_line = -1;
-  lst_line = -1;
-  hll_src_line = -1;
-
-}
-
 
 void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
 {
@@ -155,12 +133,12 @@ char *instruction::ReadLstLine(char *buf, int nBytes)
 
 //------------------------------------------------------------------------
 AliasedInstruction::AliasedInstruction(instruction *_replaced)
-  : instruction(), m_replaced(_replaced)
+  : instruction(0,0,0), m_replaced(_replaced)
 {
 }
 
 AliasedInstruction::AliasedInstruction()
-  : instruction(), m_replaced(0)
+  : instruction(0,0,0), m_replaced(0)
 {
 }
 
@@ -258,6 +236,13 @@ bool AliasedInstruction::isBase()
 
 
 //------------------------------------------------------------------------
+Literal_op::Literal_op(Processor *pProcessor, 
+		       unsigned int uOpCode, 
+		       unsigned int uAddrOfInstr)
+  : instruction(pProcessor, uOpCode, uAddrOfInstr),
+    L(uOpCode&0xff)
+{
+}
 char *Literal_op::name(char *return_str,int len)
 {
 
@@ -272,6 +257,16 @@ void Literal_op::decode(Processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   cpu = new_cpu;
   L = opcode & 0xff;
+}
+
+Bit_op::Bit_op(Processor *pProcessor, 
+		       unsigned int uOpCode, 
+		       unsigned int uAddrOfInstr)
+  : instruction(pProcessor, uOpCode, uAddrOfInstr),
+    mask(0),register_address(0),
+    access(false),
+    reg(0)
+{
 }
 
 void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
@@ -383,6 +378,16 @@ char * Bit_op::name(char *return_str,int len)
 
 
 //----------------------------------------------------------------
+Register_op::Register_op(Processor *pProcessor, 
+		       unsigned int uOpCode, 
+		       unsigned int uAddrOfInstr)
+  : instruction(pProcessor, uOpCode, uAddrOfInstr),
+    register_address(0),
+    destination(false), access(false)
+{
+}
+
+//----------------------------------------------------------------
 //
 // Register_op::name
 //
@@ -459,6 +464,7 @@ Register * Register_op::source = 0;
 //--------------------------------------------------
 
 ADDWF::ADDWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
 
   decode(new_cpu, new_opcode);
@@ -493,11 +499,10 @@ void ADDWF::execute(void)
 //--------------------------------------------------
 
 ANDLW::ANDLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
   new_name("andlw");
-
 }
 
 void ANDLW::execute(void)
@@ -516,6 +521,7 @@ void ANDLW::execute(void)
 //--------------------------------------------------
 
 ANDWF::ANDWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
 
   decode(new_cpu, new_opcode);
@@ -549,14 +555,11 @@ void ANDWF::execute(void)
 //--------------------------------------------------
 
 BCF::BCF (Processor *new_cpu, unsigned int new_opcode)
+  : Bit_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   mask ^= 0xff;        // decode initializes the mask to 1<<bit
-
   new_name("bcf");
-
 }
 
 void BCF::execute(void)
@@ -576,12 +579,10 @@ void BCF::execute(void)
 //--------------------------------------------------
 
 BSF::BSF (Processor *new_cpu, unsigned int new_opcode)
+  : Bit_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("bsf");
-
 }
 
 void BSF::execute(void)
@@ -602,12 +603,10 @@ void BSF::execute(void)
 //--------------------------------------------------
 
 BTFSC::BTFSC (Processor *new_cpu, unsigned int new_opcode)
+  : Bit_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("btfsc");
-
 }
 
 void BTFSC::execute(void)
@@ -630,12 +629,10 @@ void BTFSC::execute(void)
 //--------------------------------------------------
 
 BTFSS::BTFSS (Processor *new_cpu, unsigned int new_opcode)
+  : Bit_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("btfss");
-
 }
 
 void BTFSS::execute(void)
@@ -657,9 +654,8 @@ void BTFSS::execute(void)
 
 //--------------------------------------------------
 CALL::CALL (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-  opcode = new_opcode;
-  cpu = new_cpu;
 
   switch(cpu_pic->base_isa())
     {
@@ -699,6 +695,7 @@ char * CALL::name(char *return_str,int len)
 
 //--------------------------------------------------
 CLRF::CLRF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
   decode(new_cpu, new_opcode);
 
@@ -732,12 +729,10 @@ char * CLRF::name(char *return_str,int len)
 //--------------------------------------------------
 
 CLRW::CLRW (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("clrw");
-
 }
 
 void CLRW::execute(void)
@@ -753,12 +748,10 @@ void CLRW::execute(void)
 //--------------------------------------------------
 
 CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("clrwdt");
-
 }
 
 void CLRWDT::execute(void)
@@ -776,12 +769,10 @@ void CLRWDT::execute(void)
 //--------------------------------------------------
 
 COMF::COMF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("comf");
-
 }
 
 void COMF::execute(void)
@@ -809,12 +800,10 @@ void COMF::execute(void)
 //--------------------------------------------------
 
 DECF::DECF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("decf");
-
 }
 
 void DECF::execute(void)
@@ -842,12 +831,10 @@ void DECF::execute(void)
 //--------------------------------------------------
 
 DECFSZ::DECFSZ (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("decfsz");
-
 }
 
 void DECFSZ::execute(void)
@@ -875,9 +862,8 @@ void DECFSZ::execute(void)
 
 //--------------------------------------------------
 GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu, new_opcode, 0)
 {
-  opcode = new_opcode;
-  cpu = new_cpu;
 
   switch(cpu_pic->base_isa())
     {
@@ -915,12 +901,10 @@ char * GOTO::name(char *return_str,int len)
 //--------------------------------------------------
 
 INCF::INCF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("incf");
-
 }
 
 void INCF::execute(void)
@@ -951,12 +935,10 @@ void INCF::execute(void)
 //--------------------------------------------------
 
 INCFSZ::INCFSZ (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("incfsz");
-
 }
 
 void INCFSZ::execute(void)
@@ -985,12 +967,10 @@ void INCFSZ::execute(void)
 //--------------------------------------------------
 
 IORLW::IORLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("iorlw");
-
 }
 
 void IORLW::execute(void)
@@ -1009,12 +989,10 @@ void IORLW::execute(void)
 //--------------------------------------------------
 
 IORWF::IORWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("iorwf");
-
 }
 
 void IORWF::execute(void)
@@ -1042,12 +1020,10 @@ void IORWF::execute(void)
 //--------------------------------------------------
 
 MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("movlw");
-
 }
 
 void MOVLW::execute(void)
@@ -1062,12 +1038,10 @@ void MOVLW::execute(void)
 //--------------------------------------------------
 
 MOVF::MOVF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("movf");
-
 }
 
 void MOVF::execute(void)
@@ -1105,10 +1079,9 @@ void MOVF::debug(void)
 
 //--------------------------------------------------
 MOVWF::MOVWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("movwf");
 }
 
@@ -1137,6 +1110,7 @@ char * MOVWF::name(char *return_str, int len)
 //--------------------------------------------------
 
 NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,0)
 {
 
   decode(new_cpu,new_opcode);
@@ -1148,29 +1122,25 @@ NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
   // (Subsequent initialization code will overwrite this,
   // but there is a chance that this info will be accessed
   // before that occurs).
-
+  /*
   file_id = 0;
   src_line = 0;
   lst_line = 0;
-
+  */
 }
 
 void NOP::execute(void)
 {
-
   cpu_pic->pc->increment();
-
 }
 
 //--------------------------------------------------
 
 OPTION::OPTION (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("option");
-
 }
 
 void OPTION::execute(void)
@@ -1185,12 +1155,10 @@ void OPTION::execute(void)
 //--------------------------------------------------
 
 RETLW::RETLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("retlw");
-
 }
 
 void RETLW::execute(void)
@@ -1205,12 +1173,10 @@ void RETLW::execute(void)
 //--------------------------------------------------
 
 RLF::RLF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("rlf");
-
 }
 
 void RLF::execute(void)
@@ -1238,12 +1204,10 @@ void RLF::execute(void)
 //--------------------------------------------------
 
 RRF::RRF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("rrf");
-
 }
 
 void RRF::execute(void)
@@ -1272,12 +1236,10 @@ void RRF::execute(void)
 //--------------------------------------------------
 
 SLEEP::SLEEP (Processor *new_cpu, unsigned int new_opcode)
+  : instruction(new_cpu,new_opcode,0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("sleep");
-
 }
 
 void SLEEP::execute(void)
@@ -1290,12 +1252,10 @@ void SLEEP::execute(void)
 //--------------------------------------------------
 
 SUBWF::SUBWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("subwf");
-
 }
 
 void SUBWF::execute(void)
@@ -1326,12 +1286,10 @@ void SUBWF::execute(void)
 //--------------------------------------------------
 
 SWAPF::SWAPF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("swapf");
-
 }
 
 void SWAPF::execute(void)
@@ -1357,8 +1315,8 @@ void SWAPF::execute(void)
 
 //--------------------------------------------------
 TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
 
   // The TRIS instruction only uses the lower three bits to determine
@@ -1412,12 +1370,10 @@ char * TRIS::name(char *return_str,int len)
 //--------------------------------------------------
 
 XORLW::XORLW (Processor *new_cpu, unsigned int new_opcode)
+  : Literal_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("xorlw");
-
 }
 
 void XORLW::execute(void)
@@ -1436,12 +1392,10 @@ void XORLW::execute(void)
 //--------------------------------------------------
 
 XORWF::XORWF (Processor *new_cpu, unsigned int new_opcode)
+  : Register_op(new_cpu, new_opcode, 0)
 {
-
   decode(new_cpu, new_opcode);
-
   new_name("xorwf");
-
 }
 
 void XORWF::execute(void)
