@@ -48,7 +48,7 @@ Boston, MA 02111-1307, USA.  */
 #include <linux/ppdev.h>
 #endif // linux
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
 #include <dev/ppbus/ppi.h>
 #include <dev/ppbus/ppbconf.h>
 #endif
@@ -427,7 +427,7 @@ int Paraface::read_parallel_status(void)
 #ifdef linux
     unsigned int ppstatus;
 #endif // linux
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
     u_int8_t ppstatus;
 #endif // __FreeBSD__
 
@@ -460,7 +460,7 @@ int Paraface::read_parallel_status(void)
 	status&=~0x10;
 #endif // linux
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
     if (ioctl (fd, PPIGSTATUS, &ppstatus) == -1) {
       perror("ioctl");
     }
@@ -506,7 +506,7 @@ int Paraface::write_parallel_data(int newdata)
         perror("ioctl");
 #endif // linux
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
     if(ioctl (fd, PPISDATA, &data)==-1)
         perror("ioctl");
 #endif // __FreeBSD__
