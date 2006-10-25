@@ -1,3 +1,19 @@
+2006-10-25 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc: Source browser page ptr is not ignored when
+	symbolic debugging is unavailable.
+	* cli/parse.yy: Assigning a non-quoted value to one of the scope
+	channel attributes was causing an abort.
+	* src/pic-instructions.h, src/14bit-instructions.cc,
+	src/pic-instructions.cc, src/16bit-instructions.h,
+	src/16bit-instructions.cc: 
+	  -  Instruction class constructors now initialize all of their
+	  data memmbers.
+	* doc/gpsim.html: Fixed some missing links.
+
+2006-10-25 Steffen Joeris <Steffen.Joeris@skolelinux.de>
+	* modules/paraface.cc: Patch from Debian Etch release that enables
+	certain Free BSD builds.
+	
 2006-10-24 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc: Added detailed comments on TraceFrames,
 	TraceTypes, and TraceObjects.
