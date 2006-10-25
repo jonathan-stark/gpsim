@@ -46,6 +46,8 @@ public:
   int destination_index;
   unsigned int absolute_destination_index;
 
+  Branching(Processor *new_cpu, unsigned int new_opcode);
+
   virtual void execute(void){ };
   virtual void debug(void){ };
   virtual char *name(char *,int);
@@ -64,6 +66,8 @@ class multi_word_instruction : public instruction
   unsigned int PMindex;
   bool initialized;
 
+  multi_word_instruction(Processor *new_cpu, unsigned int new_opcode);
+
   virtual int instruction_size(void) { return 2;}
   virtual enum INSTRUCTION_TYPES isa(void) {return MULTIWORD_INSTRUCTION;};
   virtual bool isBase() { return true;}
@@ -76,6 +80,8 @@ class multi_word_branch : public multi_word_instruction
 {
  public:
   unsigned int destination_index;
+
+  multi_word_branch(Processor *new_cpu, unsigned int new_opcode);
 
   void runtime_initialize(void);
   virtual void execute(void){};

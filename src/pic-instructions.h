@@ -68,9 +68,7 @@ public:
   };
 
 
-  instruction();
   instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
-  void Initialize(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
 
   virtual void execute() = 0;
   virtual void debug(){ }
@@ -191,6 +189,8 @@ public:
 class Literal_op : public instruction
 {
 public:
+  Literal_op(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
+
   unsigned int L;
 
   virtual void debug(){ };
@@ -205,6 +205,8 @@ public:
 class Bit_op : public instruction
 {
 public:
+  Bit_op(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
+
   unsigned int mask,register_address;
   bool access;
   Register *reg;
@@ -222,6 +224,8 @@ public:
 class Register_op : public instruction
 {
 public:
+
+  Register_op(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
 
   static Register *source;
   unsigned int register_address;
