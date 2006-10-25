@@ -449,7 +449,12 @@ eval_cmd:
                                           delete $2;
                                         }
           | SYMBOL_T EQU_T expr         {
-                                          $1->set($3);
+	                                  try {
+                                            $1->set($3);
+					  }
+					  catch(Error Message)  {
+					    GetUserInterface().DisplayMessage("%s (maybe missing quotes?)\n", Message.toString().c_str());
+					  }
                                           $1->update();
                                         }
           | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T
