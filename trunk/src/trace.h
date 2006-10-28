@@ -49,12 +49,19 @@ class TraceFrame;
 class TraceObject
 {
 public:
-
   TraceObject();
   virtual void print(FILE *)=0;
   virtual void print_frame(TraceFrame *,FILE *);
-  virtual void getState(TraceFrame *);
+  virtual void getState(TraceFrame *);   // FIXME Is this even used?
+};
 
+class CycleTraceObject : public TraceObject
+{
+public:
+  CycleTraceObject();
+  virtual void print(FILE *);
+  virtual void print_frame(TraceFrame *,FILE *);
+  virtual void getState(TraceFrame *);
 };
 
 class InvalidTraceObject : public TraceObject
@@ -106,7 +113,6 @@ public:
   RegisterValue from;
   RegisterValue to;
 
-  //RegisterTraceObject();
   RegisterWriteTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
   virtual void print(FILE *);
   virtual void getState(TraceFrame *);
@@ -153,7 +159,10 @@ public:
 
   // Given an index into the trace buffer, decode()
   // will fetch traced items at that trace buffer index
-  // and attempt to decode them.
+  // and attempt to decode them. In addition, the index is
+  // incremented by the number of trace entries this type
+  // used in the trace buffer (note, that this may not equal
+  // to the allocated mSize). 
 
   virtual TraceObject *decode(unsigned int tbi) = 0;
 
@@ -169,6 +178,15 @@ private:
   unsigned int mSize;		// The number of positions this
 				// type occupies
 
+};
+
+class CycleTraceType : public TraceType
+{
+public:
+  CycleTraceType(unsigned int t, unsigned int s);
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual bool isFrameBoundary();
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 };
 
 class ModuleTraceType : public TraceType
@@ -288,14 +306,15 @@ class Trace
   public:
 
   enum eTraceTypes {
-    NOTHING =  0x3fffffff,
+    NOTHING            =  0x3fffffff,
     BREAKPOINT         = (2<<24),
     INTERRUPT          = (3<<24),
     _RESET             = (4<<24),
     WRITE_TRIS         = (5<<24),
     OPCODE_WRITE       = (7<<24),
-    LAST_TRACE_TYPE       = (8<<24),
+    LAST_TRACE_TYPE    = (8<<24),
 
+    TYPE_MASK          = (0xff<<24),
     CYCLE_COUNTER_LO   = (0x80<<24),
     CYCLE_COUNTER_HI   = (0x40<<24)
   };
@@ -427,10 +446,7 @@ class Trace
   }
 
   // type() - return the trace type at 'index'
-  unsigned int type(unsigned int index)
-  {
-    return operator[](index) & 0xff000000;
-  }
+  unsigned int type(unsigned int index);
 
   // A gpsim clock cycle takes two consecutive trace buffer entries.
   // The is_cycle_trace() member function will examine the trace

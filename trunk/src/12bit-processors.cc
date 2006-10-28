@@ -70,7 +70,6 @@ public:
     unsigned int tv = trace.get(tbi);
     RegisterValue rv = RegisterValue(tv&0xff,0);
     OptionTraceObject *oto = new OptionTraceObject(m_cpu, m_pOptionReg, rv);
-    trace.addToCurrentFrame(oto);
 
     return oto;
   }

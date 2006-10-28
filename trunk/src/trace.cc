@@ -319,13 +319,15 @@ void Trace::addFrame(TraceFrame *newFrame)
 
 void Trace::addToCurrentFrame(TraceObject *to)
 {
-
+  
   if(current_frame)
     current_frame->add(to);
 
 }
 void Trace::deleteTraceFrame(void)
 {
+  if (!current_frame)
+    return;
   list <TraceFrame *> :: iterator tfIter;
 
   for(tfIter = traceFrames.begin();
@@ -552,7 +554,6 @@ int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 TraceObject *ModuleTraceType::decode(unsigned int tbi)
 {
   ModuleTraceObject *mto = new ModuleTraceObject(pModule, this, trace.get(tbi)&0xffffff);
-  trace.addToCurrentFrame(mto);
 
   return mto;
 }
@@ -578,6 +579,26 @@ int ModuleTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int buf
 }
 
 //========================================================================
+CycleTraceType::CycleTraceType(unsigned int t, unsigned int s)
+  : TraceType(t,s)
+{
+}
+TraceObject *CycleTraceType::decode(unsigned int tbi)
+{
+  return 0;
+}
+bool CycleTraceType::isFrameBoundary()
+{
+  return false;
+}
+int CycleTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+  return n;
+}
+
+
+//========================================================================
 
 RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu, 
 				     unsigned int t,
@@ -595,7 +616,6 @@ TraceObject *RegisterWriteTraceType::decode(unsigned int tbi)
   unsigned int address = (tv >> 8) & 0xfff;
 
   RegisterWriteTraceObject *rto = new RegisterWriteTraceObject(cpu, cpu->rma.get_register(address), rv);
-  trace.addToCurrentFrame(rto);
 
   return rto;
 }
@@ -643,7 +663,6 @@ TraceObject *RegisterReadTraceType::decode(unsigned int tbi)
   unsigned int address = (tv >> 8) & 0xfff;
 
   RegisterReadTraceObject *rto = new RegisterReadTraceObject(cpu, cpu->rma.get_register(address), rv);
-  trace.addToCurrentFrame(rto);
 
   return rto;
 }
@@ -690,7 +709,6 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
   trace.addFrame(new TraceFrame( ));
 
   PCTraceObject *pcto = new PCTraceObject(cpu, tv);
-  trace.addToCurrentFrame(pcto);
 
   if((tv & (3<<22)) == (1<<22))
     trace.current_cycle_time -= 2;
@@ -742,8 +760,14 @@ int PCTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsiz
 // type for tracing 8-bit register writes. 
 //
 map <unsigned int, TraceType *> trace_map;
+CycleTraceType *pCycleTrace=0;
 
-Trace::Trace(void)
+
+Trace::Trace()
+  : cpu(0),
+    current_frame(0),
+    lastTraceType(LAST_TRACE_TYPE),
+    lastSubTraceType(1<<16)
 {
 
   for(trace_index = 0; trace_index < TRACE_BUFFER_SIZE; trace_index++)
@@ -752,8 +776,7 @@ Trace::Trace(void)
   trace_index = 0;
   string_cycle = 0;
 
-  lastTraceType = LAST_TRACE_TYPE;
-  lastSubTraceType = 1<<16;
+  traceFrames.clear();
 
   xref = new XrefObject(&trace_value);
 
@@ -766,6 +789,16 @@ Trace::~Trace(void)
 
 }
 
+//--------------------------------------------------------------
+//
+unsigned int Trace::type(unsigned int index)
+{
+  unsigned int traceType = operator[](index) & TYPE_MASK;
+  unsigned int cycleType = traceType & (CYCLE_COUNTER_LO | CYCLE_COUNTER_HI);
+
+  return cycleType ? cycleType : traceType;
+
+}
 //--------------------------------------------------------------
 // is_cycle_trace(unsigned int index)
 //
@@ -987,6 +1020,14 @@ int Trace::dump(int n, FILE *out_stream)
   if(!out_stream)
     return 0;
 
+  if (!pCycleTrace) {
+    // ugh
+    // the trace_map needs to be a member of Trace, other wise
+    // there's a global constructor initialization race condition.
+    pCycleTrace = new CycleTraceType(0,0);
+    trace_map[CYCLE_COUNTER_LO] = pCycleTrace;
+    trace_map[CYCLE_COUNTER_HI] = pCycleTrace;
+  }
 
   unsigned int frames = n;
 
@@ -1026,24 +1067,19 @@ int Trace::dump(int n, FILE *out_stream)
 
       TraceType *tt = (*tti).second;
 
-      if(tt)
-	tt->decode(k);
+      if(tt) {
+	TraceObject *pTO = tt->decode(k);
+	if (pTO)
+	  addToCurrentFrame(pTO);
+      }
 
-    } else if(is_cycle_trace(k,&cycle) == 2) {
-
-      // cycle traces take two trace entries. If this particular
-      // entry is the first half of those two entries, then we
-      // have a cycle trace. 
-
-      current_cycle_time = cycle;
-
-    } else if(!is_cycle_trace(k,&cycle)) {
-
-      if (get(k) == NOTHING)
-	break;
+      if(is_cycle_trace(k,&cycle) == 2)
+	current_cycle_time = cycle;
+	
+    } else if (get(k) != NOTHING) {
 
       cout << " could not decode trace type: 0x" << hex << get(k) << endl;
-      trace.addToCurrentFrame(new InvalidTraceObject(get(k)));
+      addToCurrentFrame(new InvalidTraceObject(get(k)));
     }
 
     k = tbi(k-1);

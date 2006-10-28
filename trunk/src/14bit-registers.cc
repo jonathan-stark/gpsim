@@ -790,8 +790,6 @@ TraceObject * WTraceType::decode(unsigned int tbi)
   else
     wto = new WWriteTraceObject(cpu, rv);
 
-  trace.addToCurrentFrame(wto);
-
   return wto;
 }
 
