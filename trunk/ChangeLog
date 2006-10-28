@@ -1,10 +1,13 @@
 2006-10-28 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_load.cc: used a different version of the toString()
+	method in the load command
+	
+2006-10-28 Scott Dattalo <scott@dattalo.com>
 	* src/trace.h, src/trace.cc, src/12bit-processors.cc,
 	src/14bit-registers.cc:
 	 - Added a CycleTraceType
 	 - Now trace type classes do not add themselves to the current
 	 trace frame whenever their decode() methods are called. 
-
 
 2006-10-25 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Source browser page ptr is not ignored when
