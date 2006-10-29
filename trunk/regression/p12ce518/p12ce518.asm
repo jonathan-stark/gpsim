@@ -65,17 +65,24 @@ FillLoop:
         movwf   INDF
 
         call    write_byte
+  .assert "W == 0x01, \"*** FAILED Write_byte returned error\""
+	nop
 
 FillWaitForWrite:
         call    read_current
         btfss   ee_state,ee_ok
         goto    FillWaitForWrite
+  .assert "W == 0x01, \"*** FAILED read_current error\""
+	nop
 
         movf    INDF,W
         xorwf   eedata,W
-        skpz
+        skpnz
+	goto loop_ok
+    .assert "\"*** FAILED data mis-match\""
          incf   failures,f      ; failed 
 
+loop_ok:
         incf    FSR,F
         incf    temp,F
         btfss   temp,4

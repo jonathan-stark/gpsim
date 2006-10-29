@@ -630,7 +630,7 @@ bool I2C::isIdle()
 }
 bool I2C::rx_byte()
 {
-    m_SSPsr = ( m_SSPsr << 1 ) |  m_sspmod->get_SDI_State();
+    m_SSPsr = ( m_SSPsr << 1 ) |  (m_sspmod->get_SDI_State()?1:0);
     bits_transfered++;
     if (bits_transfered == 8)
     {
@@ -846,7 +846,7 @@ void I2C::clock(bool clock_state)
 	  case RX_DATA:
 		if (bits_transfered < 8)
 		{
-	  	    m_SSPsr = (m_SSPsr << 1) | m_sspmod->get_SDI_State();
+	  	    m_SSPsr = (m_SSPsr << 1) | (m_sspmod->get_SDI_State()?1:0);
 		    bits_transfered++;
 		}
 	    break;
