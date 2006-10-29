@@ -195,7 +195,29 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
+				RelativePath="..\config.h">
+			</File>
+			<File
 				RelativePath="..\plat\win32\config_reg.h">
+			</File>
+			<File
+				RelativePath="..\config_win32.h.in">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+						Outputs="../config.h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+						Outputs="../config.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\plat\win32\fd2raw.h">

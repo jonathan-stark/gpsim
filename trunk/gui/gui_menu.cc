@@ -402,7 +402,7 @@ void MarginButton::toggle_cb(GtkToggleButton *widget,
 }
 void MarginButton::set_active()
 {
-  bool bNewState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_button)) == TRUE;
+  bool bNewState = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_button)) ? true : false;
   switch (m_id) {
   case eLineNumbers:
     m_prefs->margin().enableLineNumbers(bNewState);
@@ -439,7 +439,7 @@ void TabButton::toggle_cb(GtkToggleButton *widget,
 }
 void TabButton::set_active()
 {
-  if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_button)) == TRUE)
+  if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_button)))
     m_prefs->setTabPosition(m_id);
 }
 

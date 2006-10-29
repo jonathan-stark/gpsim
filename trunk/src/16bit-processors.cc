@@ -80,7 +80,7 @@ public:
   {
     Integer::set(v);
     if (m_pCpu)
-      m_pCpu->wdt.initialize(v&WDTEN == WDTEN);
+      m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
   }
 };
 

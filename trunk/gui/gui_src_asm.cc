@@ -85,6 +85,8 @@ static char *strReverse(const char *start, char *dest, int nChars)
   dest++;
   return dest;
 }
+
+#if 0 // defined but not used
 static int strFindSubString(const char *cPsrc, const char *cPpattern)
 {
 
@@ -92,6 +94,7 @@ static int strFindSubString(const char *cPsrc, const char *cPpattern)
 
   return found ? (found - cPsrc) : - 1;
 }
+#endif
 
 //========================================================================
 
@@ -2412,7 +2415,10 @@ static struct {
   GList *combo_strings;        // list of strings for combo
   char *string;                // current string, extracted from entry
 } searchdlg = {0,0,-1,0,0,0,0,0,0,0};
+
+#if !defined(NEW_SOURCE_BROWSER)
 static bool bSearchdlgInitialized = false;
+#endif
 
 
 static int dlg_x=200, dlg_y=200;
@@ -4109,6 +4115,7 @@ int font_dialog_browse(GtkWidget *w, gpointer user_data) {
 }
 
 /********************** Settings dialog ***************************/
+#if 0 // defined but not used
 static int settings_active;
 static void settingsok_cb(GtkWidget *w, gpointer user_data)
 {
@@ -4118,6 +4125,7 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
     //  gtk_main_quit();
   }
 }
+#endif
 
 static int settings_dialog(SOURCE_WINDOW *sbaw)
 {
@@ -4611,6 +4619,7 @@ void SourceBrowserAsm_Window::find_clear_cb(
   gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
 }
 
+#if 0 // defined but not used
 static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
 {
   GdkColor text_fg;
@@ -4623,6 +4632,7 @@ static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyl
   (*style)->fg[GTK_STATE_NORMAL] = text_fg;
 
 }
+#endif
 
 #if !defined(NEW_SOURCE_BROWSER)
 static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
