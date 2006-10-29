@@ -84,7 +84,7 @@ public:
       gint64 diff = oldV ^ v;
 
       if (diff & WDTEN)
-	m_pCpu->wdt.initialize(v&WDTEN == WDTEN);
+	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
 
     }
 

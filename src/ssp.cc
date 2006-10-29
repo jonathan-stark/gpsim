@@ -1335,7 +1335,7 @@ void I2C::ack_bit()
     {
         phase++;
 	setBRG();
-        m_sspmod->setSDA(m_sspcon2->value.get() & _SSPCON2::ACKDT);
+        m_sspmod->setSDA((m_sspcon2->value.get() & _SSPCON2::ACKDT) ? true : false);
     }
     else
 	bus_collide();

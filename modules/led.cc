@@ -596,7 +596,8 @@ namespace Leds {
 
     m_pins[0] = new Led_Input( (name() + ".cc").c_str(), this);
     int i;
-    for (char ch='0',i = 1; i<8; i++,ch++)
+    char ch;
+    for (ch='0',i = 1; i<8; i++,ch++)
       m_pins[i] = new Led_Input((name() + ".seg"+ch).c_str(), this);
 
     for (i=0; i<8; i++)

@@ -59,7 +59,7 @@ TODO:
 
 
 
-static GtkObject *bit_adjust; // ,*delay_adjust;
+//static GtkObject *bit_adjust; // ,*delay_adjust;
 static GdkColor signal_line_color,grid_line_color,grid_v_line_color;
 static GdkColor highDensity_line_color;
 //static int bit_left,bit_right,bit_points,update_delay;
@@ -781,8 +781,6 @@ TimeAxis::TimeAxis(Scope_Window *parent, const char *name)
 
 void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
 {
-  int x;
-
   if(!isBuilt)
     return;
 
@@ -971,7 +969,7 @@ GridPointMapping::GridPointMapping(int nPointsToMap)
 //========================================================================
 // SignalNameEntry
 SignalNameEntry::SignalNameEntry(Scope_Window *parent,GtkEntry *entry)
-  : m_parent(parent), m_entry(entry), m_selectedWave(0)
+  : m_entry(entry), m_parent(parent), m_selectedWave(0)
 {
   gtk_widget_hide (GTK_WIDGET(m_entry));
 }
@@ -1145,6 +1143,7 @@ void Scope_Window::Expose(WaveBase *wf)
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#if 0 // defined but not used
 static void ScrollAdjustments(GtkViewport   *viewport,
 				GtkAdjustment *arg1,
 				GtkAdjustment *arg2,
@@ -1152,6 +1151,7 @@ static void ScrollAdjustments(GtkViewport   *viewport,
 {
   printf("%s\n",__FUNCTION__);
 }
+
 static void ScrollChildren(GtkScrolledWindow *scrolledwindow,
 			    GtkScrollType     *arg1,
 			    gboolean           arg2,
@@ -1159,6 +1159,7 @@ static void ScrollChildren(GtkScrolledWindow *scrolledwindow,
 {
   printf("%s\n",__FUNCTION__);
 }
+#endif
 
 static void hAdjVChange(GtkAdjustment *pAdj,
 			gpointer       user_data)
@@ -1300,7 +1301,6 @@ gint Scope_Window::signalButtonPress(GtkWidget *widget,
 void Scope_Window::Build()
 {
 
-  GtkWidget *scroll_bar,*button;
   GtkTooltips *tooltips;    
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);

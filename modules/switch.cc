@@ -441,8 +441,7 @@ namespace Switches {
 
   SwitchBase::SwitchBase(const char *_new_name, const char *_desc)
     : Module(_new_name,_desc), 
-      m_pinA(0), m_pinB(0), m_aState(0),
-      m_bCurrentState(false)
+      m_pinA(0), m_pinB(0), m_bCurrentState(false), m_aState(0)
   {
 
     // Default module attributes.
@@ -555,7 +554,7 @@ Two port switch\n\
 
   void Switch::buttonToggled ()
   {
-    bool b = (gtk_toggle_button_get_active(m_button)==TRUE) ? true : false;
+    bool b = gtk_toggle_button_get_active(m_button) ? true : false;
 
     if (! m_pinA->snode || ! m_pinB->snode)
       {

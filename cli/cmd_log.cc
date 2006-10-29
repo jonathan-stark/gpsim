@@ -100,7 +100,7 @@ void cmd_log::log(cmd_options *opt, ExprList_t *eList)
   case LOG_LXT:
     {
       int fmt = opt->value==LOG_ON ? TRACE_FILE_FORMAT_ASCII : TRACE_FILE_FORMAT_LXT;
-      const char *fn=0;
+      //const char *fn=0;
       if (eList) {
 	ExprList_itor ei = eList->begin();
 	Expression *pFirst = *ei;

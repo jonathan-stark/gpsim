@@ -226,7 +226,7 @@ Pulse Generator\n\
   //----------------------------------------------------------------------
   void PulseGen::callback()
   {
-    guint64 currCycle = get_cycles().get();
+    //guint64 currCycle = get_cycles().get();
 
     if (sample_iterator != samples.end()) {
 

@@ -1,4 +1,3 @@
-
 /*
    Copyright (C) 2004 T. Scott Dattalo
 
@@ -615,7 +614,7 @@ void SocketBase::ParseObject()
 	if(packet->DecodeUInt32(i) && i) 
 	  sl->setBlocking(true);
 
-	NotifyLink *nl = new NotifyLink(sl);
+	//NotifyLink *nl = new NotifyLink(sl);
 
 	links[handle&0x0f] = sl;
 	packet->EncodeHeader();
@@ -635,7 +634,7 @@ void SocketBase::ParseObject()
 
 	std::cout << "Creating callback link interval=" << interval << endl;
 
-	CyclicCallBackLink *cl = new CyclicCallBackLink(interval,this);
+	//CyclicCallBackLink *cl = new CyclicCallBackLink(interval,this);
 
 	//links[handle&0x0f] = sl;
 	packet->EncodeHeader();
@@ -1050,6 +1049,7 @@ static void debugPrintChannelStatus(GIOStatus stat)
   }
 }
 
+#if 0 // defined but not used
 static void debugPrintCondition(GIOCondition cond)
 {
   if(cond & G_IO_IN)
@@ -1065,6 +1065,7 @@ static void debugPrintCondition(GIOCondition cond)
   if(cond & G_IO_NVAL)
     std::cout << "  G_IO_NVAL\n";
 }
+#endif
 #endif
 
 /*========================================================================

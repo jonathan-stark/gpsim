@@ -87,7 +87,7 @@ public:
     bufsize -= n;
 
     unsigned int tv = pTrace->get(tbi);
-    unsigned int subtype = (tv >> 8) & 0xfff;
+    //unsigned int subtype = (tv >> 8) & 0xfff;
 
     int  m = snprintf(buf, bufsize,
 		      "  Option Reg: was 0x%0X ", tv & 0xff);

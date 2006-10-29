@@ -158,9 +158,12 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\zlib1.dll"
 
   SetOutPath "$INSTDIR\doc"
-  File "${GPSIM_ROOT}\doc\gpsim_cvs.html"
-  File "${GPSIM_ROOT}\doc\gpsimWin32.html"
+  File "${GPSIM_ROOT}\doc\gpsim.lyx"
+  File "${GPSIM_ROOT}\doc\gpsim.ps"
   File "${GPSIM_ROOT}\doc\gpsim.pdf"
+
+  SetOutPath "$INSTDIR\doc\screenshots"
+  File "${GPSIM_ROOT}\doc\screenshots\*.png"
 
   SetOutPath "$INSTDIR\etc\gtk-2.0"
   File "${PKG_ROOT}\etc\gtk-2.0\gdk-pixbuf.loaders"
@@ -361,6 +364,9 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\graphic_lcd\utils\konqueror3.png"
   File "${GPSIM_ROOT}\extras\graphic_lcd\utils\pngtopic.c"
 
+  SetOutPath "$INSTDIR\extras\graphic_lcd\doc"
+  File "${GPSIM_ROOT}\extras\graphic_lcd\doc\*.pdf"
+
   SetOutPath "$INSTDIR\extras\lcd"
   File "${GPSIM_ROOT}\extras\lcd\AUTHORS"
   File "${GPSIM_ROOT}\extras\lcd\COPYING"
@@ -491,6 +497,7 @@ Section Uninstall
   Delete "$INSTDIR\examples\projects\*.*"
   Delete "$INSTDIR\examples\scripts\*.*"
 
+  Delete "$INSTDIR\extras\graphics_lcd\doc\*.*"
   Delete "$INSTDIR\extras\graphics_lcd\utils\*.*"
   Delete "$INSTDIR\extras\graphics_lcd\src\*.*"
   Delete "$INSTDIR\extras\graphics_lcd\examples\*.*"
@@ -554,9 +561,10 @@ Section Uninstall
   Delete "$INSTDIR\etc\gtk-2.0\gtkrc"
   Delete "$INSTDIR\etc\gtk-2.0\gdk-pixbuf.loaders"
 
+  Delete "$INSTDIR\doc\gpsim.lyx"
+  Delete "$INSTDIR\doc\gpsim.ps"
   Delete "$INSTDIR\doc\gpsim.pdf"
-  Delete "$INSTDIR\doc\gpsimWin32.html"
-  Delete "$INSTDIR\doc\gpsim_cvs.html"
+  Delete "$INSTDIR\doc\screenshots\*.png"
 
   Delete "$INSTDIR\bin\charset.dll"
   Delete "$INSTDIR\bin\gpsim.exe"
@@ -608,6 +616,7 @@ Section Uninstall
   RMDir "$INSTDIR\etc\pango"
   RMDir "$INSTDIR\etc\gtk-2.0"
   RMDir "$INSTDIR\etc"
+  RMDir "$INSTDIR\doc\screenshots"
   RMDir "$INSTDIR\doc"
   RMDir "$INSTDIR\bin"
   RMDir "$INSTDIR\modules"

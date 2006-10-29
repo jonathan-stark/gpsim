@@ -183,7 +183,7 @@ unsigned int CMCON::get()
 		(m_configuration_bits[i][mode] >> shift) & CFG_MASK,
 		cmcon_val & invert_bit);
 	    Vlow = comp_voltage( 
-		(m_configuration_bits[i][mode] >> shift+CFG_SHIFT) & CFG_MASK,
+		(m_configuration_bits[i][mode] >> (shift + CFG_SHIFT)) & CFG_MASK,
 		(cmcon_val & invert_bit) == 0);
 		
 	    if (Vhigh > Vlow)
