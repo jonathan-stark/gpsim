@@ -45,7 +45,63 @@ extern guint64 simulation_start_cycle;
 Breakpoints &(*dummy_bp)(void) = get_bp;
 Breakpoints bp;
 
+//------------------------------------------------------------------------
+class BreakTraceObject : public TraceObject
+{
+public:
+  BreakTraceObject(unsigned int bpn);
+  virtual void print(FILE *);
+private:
+  unsigned int m_bpn;
+};
 
+//------------------------------------------------------------------------
+//
+class BreakTraceType : public TraceType
+{
+public:
+
+  BreakTraceType(unsigned int t,
+		 unsigned int s)
+    : TraceType(t,s)
+  {
+  }
+
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
+};
+
+//------------------------------------------------------------------------
+BreakTraceObject::BreakTraceObject(unsigned int bpn)
+  : TraceObject(), m_bpn(bpn)
+{
+}
+
+void BreakTraceObject::print(FILE *fp)
+{
+  fprintf(fp, "  BREAK: #%d\n",m_bpn);
+}
+
+
+//------------------------------------------------------------------------
+TraceObject *BreakTraceType::decode(unsigned int tbi)
+{
+  return new BreakTraceObject(get_trace().get(tbi) & 0xffffff);
+}
+int BreakTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int bpn = trace.get(tbi) & 0xffffff;
+
+  int m = snprintf(buf, bufsize,
+		   "  BREAK: #%d",bpn);
+
+  return m > 0 ? (m+n) : n;
+}
 //------------------------------------------------------------------------
 // find_free - search the array that holds the break points for a free slot
 // 
@@ -160,6 +216,8 @@ int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
   return(MAX_BREAKPOINTS);
 }
 
+//------------------------------------------------------------------------
+BreakTraceType *m_brt=0;
 
 int Breakpoints::set_breakpoint(TriggerObject *bpo, Expression *pExpr)
 {
@@ -169,6 +227,11 @@ int Breakpoints::set_breakpoint(TriggerObject *bpo, Expression *pExpr)
     delete bpo;
     return MAX_BREAKPOINTS;
   }
+  if (!m_brt) {
+    m_brt = new BreakTraceType(0,0);
+    get_trace().allocateTraceType(m_brt);
+  }
+
   BreakStatus &bs = break_status[bpn];
   bs.bpo = bpo;
   bs.type = BREAK_MASK;   // place holder for now...
@@ -906,7 +969,8 @@ void Breakpoint_Instruction::execute(void)
       eval_Expression()) {
 
     action->action();
-    trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
+    //trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
+    trace.raw(m_brt->type() | bpn);
   }
   else
     m_replaced->execute();
