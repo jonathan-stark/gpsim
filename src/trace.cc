@@ -529,27 +529,42 @@ bool TraceType::isValid(Trace *pTrace, unsigned int tbi)
 
 int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 {
+  if (!pTrace || !buf)
+    return 0;
+
   int total_chars=0;
-  
-  if(pTrace && isValid(pTrace, tbi)) {
-    unsigned int i=0;
+  int iUsed = entriesUsed(pTrace,tbi);
 
-    for(i=0; i< size(); i++) {
+  for(unsigned int i=0; i<iUsed; i++) {
 
-      int n = snprintf(buf,bufsize,"%08X:", pTrace->get(tbi+i));
-      if(n < 0)
-	break;
+    int n = snprintf(buf,bufsize,"%08X:", pTrace->get(tbi+i));
+    if(n < 0)
+      break;
 
-      total_chars += n;
-      buf += n;
-      bufsize -= n;
-    }      
-  }
+    total_chars += n;
+    buf += n;
+    bufsize -= n;
+  }      
 
   return total_chars;
-    
 }
 
+//============================================================
+//
+// entriesUsed
+//
+// given a trace buffer and an index into it, return the number
+// of trace buffer entries at that point that match the type of
+// this trace.
+
+int TraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
+{
+  int iUsed=0;
+  if (pTrace)
+    while (pTrace->type(tbi+(iUsed<<24)) == (mType + (iUsed<<24)))
+      iUsed++;
+  return iUsed;
+}
 //========================================================================
 TraceObject *ModuleTraceType::decode(unsigned int tbi)
 {
@@ -570,12 +585,12 @@ int ModuleTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int buf
 
   unsigned int tv = pTrace->get(tbi);
 
-    int m = snprintf(buf, bufsize,
+  int m = snprintf(buf, bufsize,
 		   " Module: %s 0x%x",
 		   (pModule ? pModule->name().c_str() : "no name"),
 		   (tv & 0xffffff));
 
-    return m > 0 ? (m+n) : n;
+  return m > 0 ? (m+n) : n;
 }
 
 //========================================================================
@@ -594,10 +609,22 @@ bool CycleTraceType::isFrameBoundary()
 int CycleTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
 {
   int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
-  return n;
+  buf += n;
+  bufsize -= n;
+
+  int m=0;
+  if (pTrace) {
+    guint64 cycle;
+    if (pTrace->is_cycle_trace(tbi,&cycle) == 2)
+      m = snprintf(buf,bufsize,"  Cycle 0x%016" PRINTF_INT64_MODIFIER "X",cycle);
+  }
+
+  return m > 0 ? (m+n) : n;
 }
-
-
+int CycleTraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
+{
+  return pTrace ? pTrace->is_cycle_trace(tbi,0) : 0;
+}
 //========================================================================
 
 RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu, 
@@ -635,9 +662,9 @@ int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, 
   
   Register *reg = cpu->rma.get_register(address);
   int m = snprintf(buf, bufsize,
-		   "  Wrote: 0x%x to %s(0x%04X)",
-		   tv & 0xff,
-		   (reg ? reg->name().c_str() : ""), address);
+		   "  Reg Write: %s(0x%04X) was 0x%x ",
+		   (reg ? reg->name().c_str() : ""), address,
+		   tv & 0xff);
   if(m>0)
     n += m;
 
@@ -682,9 +709,9 @@ int RegisterReadTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, 
 
   Register *reg = cpu->rma.get_register(address);
   int m = snprintf(buf, bufsize,
-		   "  Read: 0x%0X from %s(0x%04X)",
-		   tv & 0xff,
-		   (reg ? reg->name().c_str() : ""), address);
+		   "  Reg Read:  %s(0x%04X) was 0x%0X",
+		   (reg ? reg->name().c_str() : ""), address,
+		   tv & 0xff);
 
   if(m>0)
     n += m;
@@ -730,7 +757,7 @@ int PCTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsiz
   buf += n;
   bufsize -= n;
 
-  int m = snprintf(buf, bufsize," PC: %04X",
+  int m = snprintf(buf, bufsize,"FRAME ==============  PC: %04X",
 		   cpu->map_pm_index2address(pTrace->get(tbi) & 0xffff));
   if(m>0)
     n += m;
@@ -1136,7 +1163,7 @@ void Trace::dump_raw(int n)
 
   FILE *out_stream = stdout;
 
-  const int BUFFER_SIZE = 50;
+  const int BUFFER_SIZE = 256;
 
   char buffer[BUFFER_SIZE];
 
@@ -1145,16 +1172,28 @@ void Trace::dump_raw(int n)
   trace_flag = TRACE_ALL;
 
   do {
-    printf("%04X: ",i);
-    if(is_cycle_trace(i,0))
-      fprintf(out_stream, "%08X:%08X",trace_buffer[i], trace_buffer[(i+1) & TRACE_BUFFER_MASK]);
-    else
-      printf("%08X         ",trace_buffer[i]);
+    fprintf(out_stream,"%04X:",i);
 
-    i = (i + dump1(i,buffer,BUFFER_SIZE)) & TRACE_BUFFER_MASK;
+    map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(i));
+    unsigned int tSize = 1;
+    if(tti != trace_map.end()) {
+      TraceType *tt = (*tti).second;
 
-    if(buffer[0]) 
-      fprintf(out_stream,"%s",buffer);
+      if(tt) {
+	tSize = tt->entriesUsed(this,i);
+	// fprintf(out_stream, "%02X:",tSize);
+
+	buffer[0]=0;
+	tt->dump_raw(this,i,buffer,sizeof(buffer));
+	if(buffer[0]) 
+	  fprintf(out_stream,"%s",buffer);
+      }
+    } else
+      fprintf(out_stream, "%08X:  ??",get(i));
+    
+
+    tSize = tSize ? tSize : 1;
+    i = (i + tSize) & TRACE_BUFFER_MASK;
     putc('\n',out_stream);
 
   } while((i!=trace_index) && (i!=((trace_index+1)&TRACE_BUFFER_MASK)));

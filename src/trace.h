@@ -166,6 +166,13 @@ public:
 
   virtual TraceObject *decode(unsigned int tbi) = 0;
 
+  // Given an index into the trace buffer, entriesUsed()
+  // will return the number of trace buffer entries that
+  // were used to record this TraceType event. The default
+  // is the size allocated for this type.
+  
+  virtual int entriesUsed(Trace *,unsigned int tbi);
+
   virtual bool isFrameBoundary() { return false;}
   // Returns true if the trace record starting at index 'tbi' is of the same
   // type as this TraceType
@@ -187,6 +194,7 @@ public:
   virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary();
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
+  virtual int entriesUsed(Trace *,unsigned int tbi);
 };
 
 class ModuleTraceType : public TraceType
@@ -240,7 +248,6 @@ public:
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
-
 };
 
 class RegisterReadTraceType : public ProcessorTraceType
@@ -251,7 +258,6 @@ public:
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
-
 };
 
 //========================================================================
