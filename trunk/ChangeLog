@@ -1,3 +1,10 @@
+2006-10-28 Scott Dattalo <scott@dattalo.com>
+	* src/trace.h, src/trace.cc: Raw trace dumps were cleaned up
+	more. The cycle trace is now decoded in a fashion similar to other
+	trace types.
+	* src/breakpoints.cc: Began design for BreakTraceType and
+	BreakTraceObject. 
+
 2006-10-30 Roy Rankin <rrankin@ihug.com.au>
 	* src/ssp.cc : fixed improper use of type bool
 	* regression/p12ce518/p12ce518.asm : correct error in test
