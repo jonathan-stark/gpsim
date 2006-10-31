@@ -26,7 +26,7 @@ using namespace std;
 
 class TriggerObject;
 class Expression;
-
+class Trace;
 //========================================================================
 //
 // Triggers
@@ -118,6 +118,12 @@ class TriggerObject
   // Display the breakpoint - Probably should tie into a stream...
   virtual void print(void);
   virtual void printExpression();
+
+  // Display traced information. Given an index into a Trace buffer,
+  // printTraced() will extract the traced information and decode it
+  // into a readable form.
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
 
   // Clear the breakpoint
   virtual void clear(void);

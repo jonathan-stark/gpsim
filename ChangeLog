@@ -1,3 +1,10 @@
+2006-10-31 Scott Dattalo <scott@dattalo.com>
+	* src/trace.h, src/trace.cc: TraceType type() now takes an argument
+	that allows a user to select a particular subtype.
+	* src/trigger.h, src/trigger.cc, src/breakpoints.cc, src/breakpoints.h:
+	More breakpoint tracing changes. Execution break points are now
+	displayed in the raw trace buffer.
+	
 2006-10-28 Scott Dattalo <scott@dattalo.com>
 	* src/trace.h, src/trace.cc: Raw trace dumps were cleaned up
 	more. The cycle trace is now decoded in a fashion similar to other

@@ -154,7 +154,13 @@ public:
   TraceType(unsigned int t, unsigned int s);
 
   void setType(unsigned int t) { mType = t;}
-  unsigned int type() { return mType; }
+  // The actual type of the TraceType is an 8-bit field in the
+  // upper 32-bits of an unsigned integer. A TraceType can have
+  // more than one type, although the types are consecutive.
+  unsigned int type(unsigned int iType=0)
+  { 
+    return (iType<mSize) ? (mType + (iType<<24)) : mType;
+  }
   unsigned int size() { return mSize; }
 
   // Given an index into the trace buffer, decode()
