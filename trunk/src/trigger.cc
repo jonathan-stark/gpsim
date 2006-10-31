@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "errors.h"
 #include "breakpoints.h"
 #include "ui.h"
+//#include "trace.h"
 #include <iostream>
 #include <iomanip>
 
@@ -43,18 +44,18 @@ TriggerAction::TriggerAction()
 {
 }
 
-bool TriggerAction::evaluate(void)
+bool TriggerAction::evaluate()
 {
   action();
   return true;
 }
 
-bool TriggerAction::getTriggerState(void)
+bool TriggerAction::getTriggerState()
 {
   return false;
 }
 
-void TriggerAction::action(void)
+void TriggerAction::action()
 {
   if(verbosity && verbosity->getVal())
     cout << "Hit a Breakpoint!\n";
@@ -73,7 +74,7 @@ SimpleTriggerAction::SimpleTriggerAction(TriggerObject *_to)
 {
 }
 
-void SimpleTriggerAction::action(void)
+void SimpleTriggerAction::action()
 {
   TriggerAction::action();
   if(to && verbosity && verbosity->getVal())
@@ -100,17 +101,17 @@ TriggerObject::TriggerObject(TriggerAction *ta)
     set_action(&DefaultTrigger);
 }
 
-void TriggerObject::callback(void)
+void TriggerObject::callback()
 {
   cout << "generic callback\n";
 }
 
-void TriggerObject::callback_print(void)
+void TriggerObject::callback_print()
 {
   cout << " has callback, ID =  " << CallBackID << '\n';
 }
 
-int TriggerObject::find_free(void)
+int TriggerObject::find_free()
 {
   bpn = bp.find_free();
 
@@ -127,7 +128,7 @@ int TriggerObject::find_free(void)
 
 }
 
-void TriggerObject::print(void)
+void TriggerObject::print()
 {
   printExpression();
 
@@ -143,7 +144,14 @@ void TriggerObject::printExpression()
 
 }
 
-void TriggerObject::clear(void)
+int TriggerObject::printTraced(Trace *pTrace, unsigned int tbi,
+			       char *pBuf, int szBuf)
+			       
+{
+  return 0;
+}
+
+void TriggerObject::clear()
 {
   cout << "clear Generic breakpoint " << bpn << endl;
 }

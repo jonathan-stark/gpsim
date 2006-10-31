@@ -61,6 +61,9 @@ public:
   virtual bool set_break();
   virtual Processor* get_cpu();
   virtual void print();
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
+			   
   virtual void clear();
   virtual char const * bpName() { return "Execution"; }
 
@@ -172,6 +175,8 @@ class RegisterAssertion : public Breakpoint_Instruction
 
   virtual void execute();
   virtual void print();
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   virtual char const * bpName() { return "Register Assertion"; }
 
 
@@ -263,6 +268,10 @@ public:
     return iterator(m_iMaxAllocated);
   }
 
+  BreakStatus *get(int index)
+  {
+    return (index>=0 && index<MAX_BREAKPOINTS) ? &break_status[index] : 0;
+  }
   int  global_break;
   bool m_bExitOnBreak;   // enabled from command line option
   void EnableExitOnBreak(bool bExitOnBreak) {
@@ -454,6 +463,8 @@ public:
   virtual bool set_break();
   unsigned int clear(unsigned int bp_num);
   virtual void print();
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   virtual void clear();
 
 protected:
@@ -523,7 +534,8 @@ public:
       unsigned int uRegMask, unsigned int uRegTestValue);
 
   virtual void print();
-
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
 };
 
 
@@ -630,6 +642,8 @@ public:
 
   virtual void execute();
   virtual void print();
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   virtual char const * bpName() { return "Register Assertion"; }
 private:
   char *command;
