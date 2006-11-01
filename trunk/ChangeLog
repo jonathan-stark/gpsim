@@ -1,3 +1,7 @@
+2006-11-01 Ralph Neider <rneider@web.de>
+	* modules/gpsim_modules.cc: push_buttons are now ignored when
+	gpsim is built without the gui.
+
 2006-11-01 Scott Dattalo <scott@dattalo.com>
 	* acinclude.m4: Patch from sf user iggie that fixes check for readline 5.2
 
