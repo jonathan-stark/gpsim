@@ -51,7 +51,7 @@ done
 # Now try it again, to be sure it is recent enough.
 # rl_function_of_keyseq appeared in version 2.0
 #
-dnl AC_CHECK_FUNC(rl_function_of_keyseq, [wi_cv_lib_readline=yes],[
+dnl AC_CHECK_FUNC(rl_completion_append_character, [wi_cv_lib_readline=yes],[
 dnl 	wi_cv_lib_readline=no;wi_cv_lib_readline_result="no (it is present but too old to use)"
 dnl ])
 	AC_TRY_LINK([
@@ -59,7 +59,7 @@ dnl ])
 	],[
 		/* function-body */
 		readline(0);
-		rl_function_of_keyseq(0);
+		rl_completion_append_character(0);
 	],[
 		wi_cv_lib_readline=yes
 	],[

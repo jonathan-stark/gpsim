@@ -1,3 +1,6 @@
+2006-11-01 Scott Dattalo <scott@dattalo.com>
+	* acinclude.m4: Patch from sf user iggie that fixes check for readline 5.2
+
 2006-11-01 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 
