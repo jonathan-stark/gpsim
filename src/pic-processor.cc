@@ -49,7 +49,9 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"
 #include "p16x7x.h"
 #include "p12x.h"
+#ifdef P17C7XX	// code no longer works
 #include "p17c75x.h"
+#endif
 #include "p18x.h"
 #include "icd.h"
 
@@ -170,6 +172,7 @@ ProcessorConstructor pP16F876A(P16F876A::construct ,
 			      "__16F876a", "pic16f876a", "p16f876A", "16f876a");
 ProcessorConstructor pP16F877A(P16F877A::construct ,
 			      "__16F877a", "pic16f877a", "p16f877A", "16f877a");
+#ifdef P17C7XX	// code no longer works
 ProcessorConstructor pP17C7xx(P17C7xx::construct ,
 			      "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx");
 ProcessorConstructor pP17C75x(P17C75x::construct ,
@@ -184,6 +187,7 @@ ProcessorConstructor pP17C762(P17C762::construct ,
 			      "__17C762", "pic17c762",  "p17c762", "17c762");
 ProcessorConstructor pP17C766(P17C766::construct ,
 			      "__17C766", "pic17c766",  "p17c766", "17c766");
+#endif // P17C7XX
 ProcessorConstructor pP18C242(P18C242::construct ,
 			      "__18C242", "pic18c242",  "p18c242", "18c242");
 ProcessorConstructor pP18C252(P18C252::construct ,

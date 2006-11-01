@@ -1,3 +1,7 @@
+2006-11-01 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc: Removed p17c7xx processor family from
+	  processor list as code does not work
+
 2006-10-31 Scott Dattalo <scott@dattalo.com>
 	* src/trace.h, src/trace.cc: TraceType type() now takes an argument
 	that allows a user to select a particular subtype.
