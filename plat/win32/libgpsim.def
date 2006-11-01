@@ -300,6 +300,7 @@ EXPORTS
     ?enable_profiling@ProfileKeeper@@QAEXXZ
     ?endModuleSymbol@Symbol_Table@@QAE?AVmodule_symbol_iterator@1@XZ
     ?endNodeSymbol@Symbol_Table@@QAE?AV?$symbol_iterator_t@Vnode_symbol@@@1@XZ
+    ?entriesUsed@TraceType@@UAEHPAVTrace@@I@Z
     ?event@ThreeStateEventLogger@@QAEXD@Z
     ?eval_Expression@TriggerObject@@UAE_NXZ
     ?eval_Expression@Breakpoint_Instruction@@UAE_NXZ
@@ -472,6 +473,7 @@ EXPORTS
     ?print@TriggerObject@@UAEXXZ
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
     ?printExpression@TriggerObject@@UAEXXZ
+    ?printTraced@TriggerObject@@UAEHPAVTrace@@IPADH@Z
     ?profile_keeper@@3VProfileKeeper@@A
     ?put@PortRegister@@UAEXI@Z
     ?putDrive@PortRegister@@UAEXI@Z

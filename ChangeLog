@@ -1,3 +1,6 @@
+2006-11-01 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+
 2006-11-01 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.cc: Removed p17c7xx processor family from
 	  processor list as code does not work
@@ -8,13 +11,13 @@
 	* src/trigger.h, src/trigger.cc, src/breakpoints.cc, src/breakpoints.h:
 	More breakpoint tracing changes. Execution break points are now
 	displayed in the raw trace buffer.
-	
+
 2006-10-28 Scott Dattalo <scott@dattalo.com>
 	* src/trace.h, src/trace.cc: Raw trace dumps were cleaned up
 	more. The cycle trace is now decoded in a fashion similar to other
 	trace types.
 	* src/breakpoints.cc: Began design for BreakTraceType and
-	BreakTraceObject. 
+	BreakTraceObject.
 
 2006-10-30 Roy Rankin <rrankin@ihug.com.au>
 	* src/ssp.cc : fixed improper use of type bool
