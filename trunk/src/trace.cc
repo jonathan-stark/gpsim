@@ -519,7 +519,8 @@ bool TraceType::isValid(Trace *pTrace, unsigned int tbi)
   // sized trace records occupy consecutive types.
   for(i=0; i<size(); i++) {
 
-    if(pTrace->type(tbi + i) != (type() + (i<<24))) 
+    //if(pTrace->type(tbi + i) != (type() + (i<<24))) 
+    if(!isValid(pTrace->get(tbi+i)))
       return false;
   }
 
