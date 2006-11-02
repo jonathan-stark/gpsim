@@ -1,3 +1,7 @@
+2006-11-01 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc: Fixed core dump for breakpoint expressions
+	that are entered improperly.
+
 2006-11-01 Ralph Neider <rneider@web.de>
 	* modules/gpsim_modules.cc: push_buttons are now ignored when
 	gpsim is built without the gui.
