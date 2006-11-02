@@ -729,6 +729,8 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 
   pll_factor = 0;
 
+  Integer::setDefaultBitmask(0xff);
+
   // Test code for logging to disk:
   GetTraceLog().switch_cpus(this);
 }

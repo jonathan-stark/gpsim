@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "errors.h"
 #include "breakpoints.h"
 #include "ui.h"
-//#include "trace.h"
+#include "trace.h"
 #include <iostream>
 #include <iomanip>
 
@@ -36,6 +36,74 @@ using namespace std;
 
 static TriggerAction DefaultTrigger;
 
+
+
+//------------------------------------------------------------------------
+//
+class BreakTraceType : public TraceType
+{
+public:
+
+  BreakTraceType(unsigned int t,
+		 unsigned int s)
+    : TraceType(t,s)
+  {
+  }
+
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
+};
+
+TraceType *TriggerObject::m_brt=0;
+
+//------------------------------------------------------------------------
+class BreakTraceObject : public TraceObject
+{
+public:
+  BreakTraceObject(unsigned int bpn);
+  virtual void print(FILE *);
+private:
+  unsigned int m_bpn;
+};
+
+
+//------------------------------------------------------------------------
+BreakTraceObject::BreakTraceObject(unsigned int bpn)
+  : TraceObject(), m_bpn(bpn)
+{
+}
+
+void BreakTraceObject::print(FILE *fp)
+{
+  fprintf(fp, "  BREAK: #%d\n",m_bpn);
+}
+
+
+
+//------------------------------------------------------------------------
+TraceObject *BreakTraceType::decode(unsigned int tbi)
+{
+  return new BreakTraceObject(get_trace().get(tbi) & 0xffffff);
+}
+int BreakTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int bpn = trace.get(tbi) & 0xffffff;
+  Breakpoints::BreakStatus *bs = bp.get(bpn);
+
+  TriggerObject *bpo = bs ? bs->bpo : 0;
+  int m = snprintf(buf, bufsize, "  BREAK: #%d %s",
+	       bpn, (bpo ? bpo->bpName() : ""));
+  m = m>0 ? m : 0;
+  buf += m;
+  bufsize -= m;
+
+  return (m+n+ ((bs && bs->bpo)?bs->bpo->printTraced(pTrace,tbi, buf, bufsize):0));
+}
 
 //------------------------------------------------------------------------
 // TriggerAction
@@ -93,6 +161,12 @@ TriggerObject::TriggerObject()
 
 TriggerObject::TriggerObject(TriggerAction *ta)
 {
+  // If a trace type has not been allocated yet, then allocate:
+  if (!m_brt) {
+    m_brt = new BreakTraceType(0,0);
+    get_trace().allocateTraceType(m_brt,2);
+  }
+
   m_PExpr = 0;
 
   if(ta)
@@ -130,18 +204,25 @@ int TriggerObject::find_free()
 
 void TriggerObject::print()
 {
-  printExpression();
+  char buf[256];
+  buf[0]=0;
+  printExpression(buf, sizeof(buf));
+  if (buf[0]) {
+    GetUserInterface().DisplayMessage("    Expr:%s\n", buf);
 
+  }
   if (message().size())
     GetUserInterface().DisplayMessage("    Message:%s\n", message().c_str());
 
 }
 
-void TriggerObject::printExpression()
+int TriggerObject::printExpression(char *pBuf, int szBuf)
 {
-  if (m_PExpr)
-    cout << m_PExpr->toString() << endl;
-
+  if (!m_PExpr || !pBuf)
+    return 0;
+  *pBuf = 0;
+  m_PExpr->toString(pBuf,szBuf);
+  return strlen(pBuf);
 }
 
 int TriggerObject::printTraced(Trace *pTrace, unsigned int tbi,
@@ -185,6 +266,12 @@ bool TriggerObject::eval_Expression()
   }
 
   return true;
+}
+//------------------------------------------------------------------------
+void TriggerObject::invokeAction()
+{
+  m_action->action();
+  trace.raw(m_brt->type() | bpn);
 }
 
 //-------------------------------------------------------------------

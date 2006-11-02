@@ -555,6 +555,8 @@ public:
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read"; }
 
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   // TriggerAction overrides
   virtual void action();
 };
@@ -571,6 +573,8 @@ public:
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write"; }
 
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   // TriggerAction overrides
   virtual void action();
 };
@@ -599,6 +603,8 @@ public:
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read value"; }
 
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   // TriggerAction overrides
   virtual void action();
 };
@@ -624,6 +630,8 @@ public:
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write value"; }
 
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
   // TriggerAction overrides
   virtual void action();
 };

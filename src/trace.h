@@ -183,6 +183,12 @@ public:
   // Returns true if the trace record starting at index 'tbi' is of the same
   // type as this TraceType
   virtual bool isValid(Trace *, unsigned int tbi);
+  // Returns true if the type of 'aType' is the same type as this TraceType
+  bool isValid(unsigned int aType)
+  {
+    unsigned int tMask=0xff<<24;
+    return ((aType&tMask) >= (mType&tMask))  && ((aType&tMask) <= ((mType&tMask) + (mSize<<24)));
+  }
   virtual int bitsTraced() { return 24; }
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 private:

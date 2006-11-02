@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 using namespace std;
 
 class TriggerObject;
+class TraceType;
 class Expression;
 class Trace;
 //========================================================================
@@ -54,16 +55,16 @@ class TriggerAction
 public:
   TriggerAction();
   virtual ~TriggerAction() {}
-  virtual bool evaluate(void);
-  virtual bool getTriggerState(void);
-  virtual void action(void);
+  virtual bool evaluate();
+  virtual bool getTriggerState();
+  virtual void action();
 };
 
 class SimpleTriggerAction : public TriggerAction
 {
 public:
   SimpleTriggerAction(TriggerObject *_to);
-  virtual void action(void);
+  virtual void action();
 protected:
   TriggerObject *to;
 
@@ -83,41 +84,33 @@ class TriggerObject
 
   unsigned int bpn;
 
-  // When the TriggerObject becomes true, then the TriggerAction is 
-  // evaluated. E.g. If the trigger object is an execution breakpoint,
-  // then whenever the PC == break address, the Breakpoint_Instruction
-  // class (which is derived from this class) will invoke action->evaluate()
-  // which will in turn halt the execution.
-
-  TriggerAction *action;
-
   // Enable the breakpoint and return true if successful
-  virtual bool set_break(void) {return false;}
+  virtual bool set_break() {return false;}
 
   // A unique number assigned when the break point is armed.
   int CallBackID;
 
   // When the breakpoint associated with this object is encountered,
   // then 'callback' is invoked.
-  virtual void callback(void);
+  virtual void callback();
 
   // Invoked to display info about the breakpoint.
-  virtual void callback_print(void);
+  virtual void callback_print();
 
   // clear_trigger is invoked when the breakpoint associated with
   // this object is cleared. 
-  virtual void clear_trigger(void) {};
+  virtual void clear_trigger() {};
 
   // Will search for a place to store this break point.
-  virtual int find_free(void);
+  virtual int find_free();
 
   // This object has no cpu associated with it. However, derived
   // types may and can choose to provide access to it through here:
-  //virtual Processor *get_cpu(void) { return 0; }
+  //virtual Processor *get_cpu() { return 0; }
 
   // Display the breakpoint - Probably should tie into a stream...
-  virtual void print(void);
-  virtual void printExpression();
+  virtual void print();
+  virtual int printExpression(char *pBuf, int szBuf);
 
   // Display traced information. Given an index into a Trace buffer,
   // printTraced() will extract the traced information and decode it
@@ -126,7 +119,7 @@ class TriggerObject
 			   char *pBuf, int szBuf);
 
   // Clear the breakpoint
-  virtual void clear(void);
+  virtual void clear();
 
   // set_Expr - associates an expression with the trigger
   virtual void set_Expression(Expression *);
@@ -135,11 +128,12 @@ class TriggerObject
 
   virtual char const * bpName() { return "Generic"; }
 
-  virtual void set_action(TriggerAction *ta) { action = ta; }
-  virtual TriggerAction *get_action(void) { return action;}
+  virtual void set_action(TriggerAction *ta) { m_action = ta; }
+  virtual TriggerAction *get_action() { return m_action;}
+  virtual void invokeAction();
 
   // Messages can be associatated with triggers
-  string &message(void) {return m_sMessage;}
+  string &message() {return m_sMessage;}
   virtual void new_message(const char *);
   virtual void new_message(string &);
 
@@ -147,9 +141,21 @@ class TriggerObject
   TriggerObject(TriggerAction *);
   // Virtual destructor place holder
   virtual ~TriggerObject() { }
+protected:
+  // A block of trace types are reserved by the trigger class:
+  static TraceType *m_brt;
+
 private:
   Expression *m_PExpr;
   string m_sMessage;
+
+  // When the TriggerObject becomes true, then the TriggerAction is 
+  // evaluated. E.g. If the trigger object is an execution breakpoint,
+  // then whenever the PC == break address, the Breakpoint_Instruction
+  // class (which is derived from this class) will invoke action->evaluate()
+  // which will in turn halt the execution.
+
+  TriggerAction *m_action;
 };
 
 

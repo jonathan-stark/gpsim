@@ -1,4 +1,17 @@
 2006-11-01 Scott Dattalo <scott@dattalo.com>
+	* src/trigger.cc, src/trigger.h, src/breakpoints.h,
+	src/breakpoints.cc, src/trace.h, src/trace.cc:
+	 - Cleaned up breakpoint tracing.
+	 - Added TriggerObject::invokeAction() method to handle the
+	 default behavior of invoking a trigger object action and handling
+	 the tracing.
+	 - Moved the BreakTraceType and BreakTraceObject classes from
+	 breakpoints.cc to trigger.cc (probably should rename these?)
+	* src/pic-processor.cc: Change the default Integer type output
+	width to 2 characters. (At 8 characters, there were a lot of 0's.)
+	* src/gpsim_object.cc: toString(char*,int) now returns something.
+
+2006-11-01 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: Fixed core dump for breakpoint expressions
 	that are entered improperly.
 

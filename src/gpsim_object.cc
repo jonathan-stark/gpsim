@@ -126,7 +126,7 @@ char *gpsimObject::name(char *return_str, int len)
 char *gpsimObject::toString(char *return_str, int len)
 {
   if(return_str)
-    *return_str = 0;
+    snprintf(return_str,len,"%s",toString().c_str());
 
   return return_str;
 }
