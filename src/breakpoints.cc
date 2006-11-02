@@ -302,66 +302,73 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt, gpsimObject::Object
      *             ComparisonOperator
      *                 /          \
      *       register_symbol     LiteralInteger
+     *
+     *   --- OR ---
+     *
+     *                  OpAnd      (not implemented)
+     *                 /     \
+     *      register_symbol   LiteralInteger
+     *
      */
 
     ComparisonOperator *pCompareExpr = dynamic_cast<ComparisonOperator *>(pExpr);
 
     op  =  MapComparisonOperatorToBreakOperator(pCompareExpr);
+    if (op != BreakpointRegister_Value::eBRInvalid) {
 
-    OpAnd* pLeftOp = pCompareExpr ? 
-      dynamic_cast<OpAnd*>(pCompareExpr->getLeft()) : 0;
+      OpAnd* pLeftOp = dynamic_cast<OpAnd*>(pCompareExpr->getLeft());
 
-    LiteralSymbol *pLeftSymbol = pLeftOp ? 
-      dynamic_cast<LiteralSymbol*>(pLeftOp->getLeft()) : 
-      dynamic_cast<LiteralSymbol*>(pCompareExpr->getLeft()) ;
+      LiteralSymbol *pLeftSymbol = pLeftOp ? 
+	dynamic_cast<LiteralSymbol*>(pLeftOp->getLeft()) : 
+	dynamic_cast<LiteralSymbol*>(pCompareExpr->getLeft());
 
-    register_symbol *pRegSym = pLeftSymbol ? 
-      dynamic_cast<register_symbol*>(pLeftSymbol->GetSymbol()) : 0;
+      register_symbol *pRegSym = pLeftSymbol ? 
+	dynamic_cast<register_symbol*>(pLeftSymbol->GetSymbol()) : 0;
 
-    pRegInExpr = pRegSym ? pRegSym->getReg() : 0;
+      pRegInExpr = pRegSym ? pRegSym->getReg() : 0;
 
-    if (!pRegInExpr) {
-      // Legacy code... try to cast the left most integer into a register.
-      LiteralInteger *pLeftRegAsInteger = pLeftOp ? 
-	dynamic_cast<LiteralInteger*>(pLeftOp->getLeft()) : 
-	dynamic_cast<LiteralInteger*>(pCompareExpr->getLeft()) ;
+      if (!pRegInExpr) {
+	// Legacy code... try to cast the left most integer into a register.
+	LiteralInteger *pLeftRegAsInteger = pLeftOp ? 
+	  dynamic_cast<LiteralInteger*>(pLeftOp->getLeft()) : 
+	  dynamic_cast<LiteralInteger*>(pCompareExpr->getLeft());
 
-      Integer *pRegAddress = pLeftRegAsInteger ?
-	dynamic_cast<Integer*>(pLeftRegAsInteger->evaluate()) : 0;
+	Integer *pRegAddress = pLeftRegAsInteger ?
+	  dynamic_cast<Integer*>(pLeftRegAsInteger->evaluate()) : 0;
 
-      pRegInExpr = (pRegAddress && pCpu) ? &pCpu->rma[(int)pRegAddress->getVal()] : 0;
+	pRegInExpr = (pRegAddress && pCpu) ? &pCpu->rma[(int)pRegAddress->getVal()] : 0;
 
-      delete pRegAddress;
+	delete pRegAddress;
+      }
+
+      LiteralInteger* pRightSymbol = pLeftOp ?
+	dynamic_cast<LiteralInteger*>(pLeftOp->getRight()) : 0;
+      Integer *pMask = pRightSymbol ?
+	dynamic_cast<Integer*>(pRightSymbol->evaluate()) : 0;
+
+      iMask = pCpu ? pCpu->register_mask() : iMask;
+
+      gint64 i64=0;
+      if (pMask) {
+	pMask->get(i64);
+	iMask = (int)i64;
+      }
+
+
+      LiteralInteger* pRightValue = dynamic_cast<LiteralInteger*>(pCompareExpr->getRight());
+      Integer *pValue = pRightValue ?
+	dynamic_cast<Integer*>(pRightValue->evaluate()) : 0;
+
+      // Now check if this parsing was successful
+      if (pReg == pRegInExpr && pValue) {
+	bCompiledExpression = true;
+	pValue->get(i64);
+	iValue = (int)i64;
+      }
+
+      delete pMask;
+      delete pValue;
     }
-
-    LiteralInteger* pRightSymbol = pLeftOp ?
-      dynamic_cast<LiteralInteger*>(pLeftOp->getRight()) : 0;
-    Integer *pMask = pRightSymbol ?
-      dynamic_cast<Integer*>(pRightSymbol->evaluate()) : 0;
-
-    iMask = pCpu ? pCpu->register_mask() : iMask;
-
-    gint64 i64=0;
-    if (pMask) {
-      pMask->get(i64);
-      iMask = (int)i64;
-    }
-
-
-    LiteralInteger* pRightValue = pCompareExpr ?
-      dynamic_cast<LiteralInteger*>(pCompareExpr->getRight()) : 0;
-    Integer *pValue = pRightValue ?
-      dynamic_cast<Integer*>(pRightValue->evaluate()) : 0;
-
-    // Now check if this parsing was successful
-    if (pReg == pRegInExpr && pValue) {
-      bCompiledExpression = true;
-      pValue->get(i64);
-      iValue = (int)i64;
-    }
-
-    delete pMask;
-    delete pValue;
   }
 
   // If there was no register passed in as an input and we failed to compile
