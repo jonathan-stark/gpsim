@@ -533,6 +533,7 @@ public:
   static bool IsLessThenEqualsBreakCondition(unsigned int uRegValue,
       unsigned int uRegMask, unsigned int uRegTestValue);
 
+  virtual void invokeAction();
   virtual void print();
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
@@ -557,6 +558,7 @@ public:
 
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
+  virtual void invokeAction();
   // TriggerAction overrides
   virtual void action();
 };
@@ -575,6 +577,7 @@ public:
 
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
+  virtual void invokeAction();
   // TriggerAction overrides
   virtual void action();
 };

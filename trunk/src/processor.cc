@@ -1226,7 +1226,7 @@ int Processor::trace_dump1(int type, char *buffer, int bufsize)
 RegisterValue Processor::getWriteTT(unsigned int j)
 {
   if(!writeTT) {
-    writeTT = new RegisterWriteTraceType(this,0,2);
+    writeTT = new RegisterWriteTraceType(this,2);
     trace.allocateTraceType(writeTT);
   }
 
@@ -1241,7 +1241,7 @@ RegisterValue Processor::getWriteTT(unsigned int j)
 RegisterValue Processor::getReadTT(unsigned int j)
 {
   if(!readTT) {
-    readTT = new RegisterReadTraceType(this,0,2);
+    readTT = new RegisterReadTraceType(this,2);
     trace.allocateTraceType(readTT);
   }
 

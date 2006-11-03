@@ -44,9 +44,8 @@ class BreakTraceType : public TraceType
 {
 public:
 
-  BreakTraceType(unsigned int t,
-		 unsigned int s)
-    : TraceType(t,s)
+  BreakTraceType()
+    : TraceType(2)
   {
   }
 
@@ -163,8 +162,8 @@ TriggerObject::TriggerObject(TriggerAction *ta)
 {
   // If a trace type has not been allocated yet, then allocate:
   if (!m_brt) {
-    m_brt = new BreakTraceType(0,0);
-    get_trace().allocateTraceType(m_brt,2);
+    m_brt = new BreakTraceType();
+    get_trace().allocateTraceType(m_brt);
   }
 
   m_PExpr = 0;
@@ -270,8 +269,8 @@ bool TriggerObject::eval_Expression()
 //------------------------------------------------------------------------
 void TriggerObject::invokeAction()
 {
-  m_action->action();
   trace.raw(m_brt->type() | bpn);
+  m_action->action();
 }
 
 //-------------------------------------------------------------------

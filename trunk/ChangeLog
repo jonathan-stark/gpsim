@@ -1,3 +1,16 @@
+2006-11-03 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc, src/trace.h, src/dspic/dspic-registers.cc,
+	src/12bit-processors.cc, src/processor.cc,
+	src/14bit-processors.cc, src/14bit-registers.cc,
+	src/16bit-processors.cc, modules/stimuli.cc
+	 - TraceType constructors are only initialized with size (and not
+	   with type).
+	 - Trace entry allocation now gets size request from TraceType
+	 class.
+	* src/trigger.cc, src/breakpoints.h, src/breakpoints.cc: Trigger
+	action implementation for special breakpoints has been enhanced to
+	take advantage of multiple trace entries.
+
 2006-11-01 Scott Dattalo <scott@dattalo.com>
 	* src/trigger.cc, src/trigger.h, src/breakpoints.h,
 	src/breakpoints.cc, src/trace.h, src/trace.cc:

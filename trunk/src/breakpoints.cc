@@ -1515,6 +1515,12 @@ bool BreakpointRegister_Value::IsLessThenEqualsBreakCondition(unsigned int uRegV
   return (uRegValue & uRegMask) <= uRegTestValue;
 }
 
+void BreakpointRegister_Value::invokeAction()
+{
+  TriggerObject::invokeAction();
+  trace.raw(m_brt->type(1) | 0); // FIXME
+}
+
 /// BreakpointRegister_Value::print() - base class function
 /// would be unusual to not be over ridden.
 void BreakpointRegister_Value::print()
@@ -1540,65 +1546,6 @@ int BreakpointRegister_Value::printTraced(Trace *pTrace, unsigned int tbi,
 
 //-------------------------------------------------------------------
 //
-void Break_register_read::action()
-{
-  if(verbosity && verbosity->getVal()) {
-
-    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
-
-    string sFormattedRegAddress;
-    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(getReg());
-    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG,
-				      sFormattedRegAddress.c_str());
-  }
-  bp.halt();
-  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | address);
-  trace.raw(m_brt->type() | bpn);
-
-}
-
-void Break_register_write::action() 
-{
-  if(verbosity && verbosity->getVal()) {
-    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
-    string sFormattedRegAddress;
-    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
-      address, 0);
-    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG,
-      sFormattedRegAddress.c_str());
-  }
-  bp.halt();
-  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (getReplaced()->address)  );
-  trace.raw(m_brt->type() | bpn);
-
-}
-
-void Break_register_read_value::action()
-{
-  if(verbosity && verbosity->getVal()) {
-
-    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
-
-    string sFormattedRegAddress;
-    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(getReg());
-
-    if(break_mask != m_uDefRegMask) {
-      sFormattedRegAddress += " & ";
-      sFormattedRegAddress += GetUserInterface().FormatLabeledValue("",
-        break_mask);
-    }
-
-    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG_OP_VALUE,
-				      sFormattedRegAddress.c_str(), 
-				      m_sOperator.c_str(),
-				      break_value);
-  }
-  bp.halt();
-  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | address);
-  trace.raw(m_brt->type() | bpn);
-
-}
-
 Break_register_write_value::Break_register_write_value(Processor *_cpu, 
                               int _repl, 
                               int bp, 
@@ -1646,34 +1593,53 @@ void Break_register_write_value::action()
 }
 //========================================================================
 // 
+void Break_register_read::action()
+{
+  trace.raw(m_brt->type(1) | (address & 0xffffff));
+  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | address);
+  if(verbosity && verbosity->getVal()) {
+
+    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
+
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(getReg());
+    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG,
+				      sFormattedRegAddress.c_str());
+  }
+  bp.halt();
+}
+
+
+void Break_register_read::invokeAction()
+{
+  if(eval_Expression())
+    TriggerObject::invokeAction();
+}
+
 unsigned int Break_register_read::get()
 {
-
-  if(eval_Expression()) {
-    invokeAction();
-  }
-  return(getReplaced()->get());
-
+  unsigned int v = getReplaced()->get();
+  invokeAction();
+  return v;
 }
 
 RegisterValue  Break_register_read::getRV()
 {
-  if(eval_Expression())
-    invokeAction();
-  return(getReplaced()->getRV());
+  RegisterValue rv = getReplaced()->getRV();
+  invokeAction();
+  return rv;
 }
 
 RegisterValue  Break_register_read::getRVN()
 {
-  if(eval_Expression())
-    invokeAction();
-  return(getReplaced()->getRVN());
+  RegisterValue rv = getReplaced()->getRVN();
+  invokeAction();
+  return rv;
 }
 
 bool Break_register_read::get_bit(unsigned int bit_number)
 {
-  if(eval_Expression())
-    invokeAction();
+  invokeAction();
   return(getReplaced()->get_bit(bit_number));
 }
 
@@ -1696,25 +1662,44 @@ int Break_register_read::printTraced(Trace *pTrace, unsigned int tbi,
 
 //========================================================================
 //
+void Break_register_write::action() 
+{
+  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (getReplaced()->address)  );
+  trace.raw(m_brt->type(1) | (address&0xffffff));
+  if(verbosity && verbosity->getVal()) {
+    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
+      address, 0);
+    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG,
+      sFormattedRegAddress.c_str());
+  }
+  bp.halt();
+
+}
+
+
+void Break_register_write::invokeAction()
+{
+  if(eval_Expression())
+    TriggerObject::invokeAction();
+}
 void Break_register_write::put(unsigned int new_value)
 {
   getReplaced()->put(new_value);
-  if(eval_Expression())
-    invokeAction();
+  invokeAction();
 }
 
 void Break_register_write::putRV(RegisterValue rv)
 {
   getReplaced()->putRV(rv);
-  if(eval_Expression())
-    invokeAction();
+  invokeAction();
 }
 
 void Break_register_write::setbit(unsigned int bit_number, bool new_value)
 {
   getReplaced()->setbit(bit_number,new_value);
-  if(eval_Expression())
-    invokeAction();
+  invokeAction();
 }
 
 int Break_register_write::printTraced(Trace *pTrace, unsigned int tbi,
@@ -1742,6 +1727,32 @@ Break_register_read_value::Break_register_read_value(Processor *_cpu,
 			    unsigned int bm ) :
     BreakpointRegister_Value(_cpu, _repl, bp, bv, _operator, bm ) {
   set_action(this);
+}
+
+void Break_register_read_value::action()
+{
+  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | address);
+  trace.raw(m_brt->type(1) | (address & 0xffffff));
+
+  if(verbosity && verbosity->getVal()) {
+
+    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
+
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(getReg());
+
+    if(break_mask != m_uDefRegMask) {
+      sFormattedRegAddress += " & ";
+      sFormattedRegAddress += GetUserInterface().FormatLabeledValue("",
+        break_mask);
+    }
+
+    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG_OP_VALUE,
+				      sFormattedRegAddress.c_str(), 
+				      m_sOperator.c_str(),
+				      break_value);
+  }
+  bp.halt();
 }
 
 unsigned int Break_register_read_value::get()
@@ -1804,7 +1815,7 @@ void Break_register_write_value::put(unsigned int new_value)
 
 void Break_register_write_value::putRV(RegisterValue rv)
 {
-    getReplaced()->putRV(rv);
+  getReplaced()->putRV(rv);
   if(m_pfnIsBreak(rv.data, break_mask, break_value))
     invokeAction();
 }

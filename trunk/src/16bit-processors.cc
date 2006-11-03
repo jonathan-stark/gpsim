@@ -105,7 +105,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   pll_factor = 2;
 
   pc = new Program_Counter16();
-  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
+  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
   m_porta = new PicPortRegister("porta",8,0x7f);
   m_trisa = new PicTrisRegister("trisa", m_porta);

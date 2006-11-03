@@ -73,7 +73,7 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
   : pic_processor(_name,_desc), intcon(0)
 {
   pc = new Program_Counter();
-  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
+  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
 }
 

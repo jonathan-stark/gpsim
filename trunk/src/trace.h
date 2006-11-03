@@ -151,7 +151,7 @@ class TraceType
 public:
 
 
-  TraceType(unsigned int t, unsigned int s);
+  TraceType(unsigned int nTraceEntries);
 
   void setType(unsigned int t) { mType = t;}
   // The actual type of the TraceType is an 8-bit field in the
@@ -202,7 +202,7 @@ private:
 class CycleTraceType : public TraceType
 {
 public:
-  CycleTraceType(unsigned int t, unsigned int s);
+  CycleTraceType(unsigned int nTraceEntries);
   virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary();
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -215,10 +215,9 @@ public:
   Module *pModule;
   const char *pDescription;
   ModuleTraceType(Module *_pModule, 
-		  unsigned int t,
-		  unsigned int s,
+		  unsigned int nTraceEntries,
 		  const char *desc)
-    : TraceType(t,s), pModule(_pModule), pDescription(desc)
+    : TraceType(nTraceEntries), pModule(_pModule), pDescription(desc)
   {
   }
 
@@ -233,9 +232,8 @@ public:
   Processor *cpu;
 
   ProcessorTraceType(Processor *_cpu, 
-		     unsigned int t,
-		     unsigned int s)
-    : TraceType(t,s), cpu(_cpu)
+		     unsigned int nTraceEntries)
+    : TraceType(nTraceEntries), cpu(_cpu)
   {
   }
 
@@ -246,7 +244,7 @@ public:
 class PCTraceType : public ProcessorTraceType
 {
 public:
-  PCTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+  PCTraceType(Processor *_cpu, unsigned int nTraceEntries);
   virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary() { return true; }
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -256,7 +254,7 @@ class RegisterWriteTraceType : public ProcessorTraceType
 {
 public:
 
-  RegisterWriteTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+  RegisterWriteTraceType(Processor *_cpu, unsigned int nTraceEntries);
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -266,7 +264,7 @@ class RegisterReadTraceType : public ProcessorTraceType
 {
 public:
 
-  RegisterReadTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+  RegisterReadTraceType(Processor *_cpu, unsigned int nTraceEntries);
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -476,7 +474,7 @@ class Trace
   void enableLogging(char *fname);
   void disableLogging();
 
-  unsigned int allocateTraceType(TraceType *,int nSlots=1);
+  unsigned int allocateTraceType(TraceType *);
 
   // Trace frame manipulation
   void addFrame(TraceFrame *newFrame);

@@ -495,8 +495,8 @@ void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 
 //========================================================================
 
-TraceType::TraceType(unsigned int t, unsigned int s)
-  : mType(t), mSize(s)
+TraceType::TraceType(unsigned int nTraceEntries)
+  : mType(0), mSize(nTraceEntries)
 {
 }
 
@@ -595,8 +595,8 @@ int ModuleTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int buf
 }
 
 //========================================================================
-CycleTraceType::CycleTraceType(unsigned int t, unsigned int s)
-  : TraceType(t,s)
+CycleTraceType::CycleTraceType(unsigned int s)
+  : TraceType(s)
 {
 }
 TraceObject *CycleTraceType::decode(unsigned int tbi)
@@ -629,9 +629,8 @@ int CycleTraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
 //========================================================================
 
 RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu, 
-				     unsigned int t,
-				     unsigned int s)
-  : ProcessorTraceType(_cpu,t,s)
+					       unsigned int s)
+  : ProcessorTraceType(_cpu,s)
 {
     
 }
@@ -676,9 +675,8 @@ int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, 
 //========================================================================
 
 RegisterReadTraceType::RegisterReadTraceType(Processor *_cpu, 
-				     unsigned int t,
-				     unsigned int s)
-  : ProcessorTraceType(_cpu,t,s)
+					     unsigned int s)
+  : ProcessorTraceType(_cpu,s)
 {
     
 }
@@ -723,9 +721,8 @@ int RegisterReadTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, 
 
 //========================================================================
 PCTraceType::PCTraceType(Processor *_cpu, 
-			 unsigned int t,
 			 unsigned int s)
-  : ProcessorTraceType(_cpu,t,s)
+  : ProcessorTraceType(_cpu,s)
 {
 }
 
@@ -1052,7 +1049,7 @@ int Trace::dump(int n, FILE *out_stream)
     // ugh
     // the trace_map needs to be a member of Trace, other wise
     // there's a global constructor initialization race condition.
-    pCycleTrace = new CycleTraceType(0,0);
+    pCycleTrace = new CycleTraceType(2);
     trace_map[CYCLE_COUNTER_LO] = pCycleTrace;
     trace_map[CYCLE_COUNTER_HI] = pCycleTrace;
   }
@@ -1124,7 +1121,7 @@ int Trace::dump(int n, FILE *out_stream)
 // allocateTraceType - allocate one or more trace commands
 //
 //
-unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
+unsigned int Trace::allocateTraceType(TraceType *tt)
 {
   
   if(tt) {
@@ -1145,7 +1142,7 @@ unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
 
     tt->setType(*ltt);;
 
-    for(i=0; i<nSlots; i++) {
+    for(i=0; i<tt->size(); i++) {
       trace_map[*ltt] = tt;
       *ltt += n;
     }
