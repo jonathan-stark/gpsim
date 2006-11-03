@@ -620,7 +620,7 @@ Port Stimulus\n\
 
     // FIXME - probably want something better than the generic module trace
 
-    ModuleTraceType *mMTT = new ModuleTraceType(this,0,1," Port Stimulus");
+    ModuleTraceType *mMTT = new ModuleTraceType(this,1," Port Stimulus");
     get_trace().allocateTraceType(mMTT);
 
     buildTraceType(mPort, mMTT->type());

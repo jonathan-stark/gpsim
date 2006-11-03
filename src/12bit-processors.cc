@@ -60,7 +60,7 @@ class OptionTraceType : public TraceType
 {
 public:
   OptionTraceType(Processor *_cpu, OPTION_REG *pOptionReg)
-    : TraceType(0, 1), m_cpu(_cpu),m_pOptionReg(pOptionReg)
+    : TraceType(1), m_cpu(_cpu),m_pOptionReg(pOptionReg)
   {
   }
 
@@ -106,7 +106,7 @@ _12bit_processor::_12bit_processor(const char *_name, const char *desc)
 {
   pc = new Program_Counter();
 
-  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
+  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
   mOptionTT = new OptionTraceType(this,&option_reg);
   trace.allocateTraceType(mOptionTT);

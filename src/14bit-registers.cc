@@ -720,9 +720,8 @@ class WTraceType : public ProcessorTraceType
 {
 public:
   WTraceType(Processor *_cpu, 
-		    unsigned int t,
-		    unsigned int s)
-    : ProcessorTraceType(_cpu,t,s)
+	     unsigned int s)
+    : ProcessorTraceType(_cpu,s)
   {}
 
   TraceObject *decode(unsigned int tbi);
@@ -804,7 +803,7 @@ WREG::WREG(Processor *_cpu)
 {
   new_name("W");
   if(cpu) {
-    unsigned int trace_command = trace.allocateTraceType(new WTraceType(get_cpu(),0,1));
+    unsigned int trace_command = trace.allocateTraceType(new WTraceType(get_cpu(),1));
     RegisterValue rv(trace_command+(0<<22), trace_command+(2<<22));
     set_write_trace(rv);
     rv = RegisterValue(trace_command+(1<<22), trace_command+(3<<22));
