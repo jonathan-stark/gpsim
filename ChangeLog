@@ -1,4 +1,8 @@
 2006-11-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc: Patch from Ralf that fixes coordinates of
+	components selected in the breadboard.
+
+2006-11-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.cc: gpsim was aborting if eeprom window was
 	opened while a processor without an eeprom was loaded.
 	David Barnett <dbarnett@edt.biz> reported this bug.

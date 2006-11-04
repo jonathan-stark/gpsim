@@ -3210,6 +3210,8 @@ void GuiModule::Build()
 
 
   int i;
+  int nx, ny;
+
   BreadBoardXREF *cross_reference;
 
   m_width=50;
@@ -3227,8 +3229,8 @@ void GuiModule::Build()
 
   Value *xpos = m_module->get_attribute("xpos", false);
   Value *ypos = m_module->get_attribute("ypos", false);
-  xpos->get(m_x);
-  ypos->get(m_y);
+  xpos->get(nx);
+  ypos->get(ny);
 
   m_tree_item = gtk_tree_item_new_with_label (m_module->name().c_str());
   gtk_signal_connect(GTK_OBJECT(m_tree_item),
@@ -3401,7 +3403,7 @@ void GuiModule::Build()
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_module_widget, 0, 0);
   gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_name_widget, 0,0);
 
-  SetPosition(m_x, m_y);
+  SetPosition(nx, ny);
   xpos->set(m_x);
   ypos->set(m_y);
 
