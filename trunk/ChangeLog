@@ -1,9 +1,12 @@
+2006-11-04 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+
 2006-11-04 Scott Dattalo <scott@dattalo.com>
 	* src/cod.cc, src/pic-processor.cc: Applied variation of patch
 	submitted by David Barnett <dbarnett@edt.biz> that prepends
 	processor name with a 'p' if the name begins with a digit in the
 	.cod file
-	
+
 2006-11-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc: Patch from Ralf that fixes coordinates of
 	components selected in the breadboard.
@@ -18,7 +21,7 @@
 	while applying a patch from the Gentoo distro. (The patch had
 	already independently been applied, yet the typo hadn't been
 	noticed until this new patch had been submitted.)
-	
+
 2006-11-03 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h, src/dspic/dspic-registers.cc,
 	src/12bit-processors.cc, src/processor.cc,
