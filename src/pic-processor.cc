@@ -165,13 +165,13 @@ ProcessorConstructor pP16F876(P16F876::construct ,
 ProcessorConstructor pP16F877(P16F877::construct ,
 			      "__16F877", "pic16f877",  "p16f877", "16f877");
 ProcessorConstructor pP16F873A(P16F873A::construct ,
-			      "__16F873a", "pic16f873a", "p16f873A", "16f873a");
+			      "__16F873a", "pic16f873a", "p16f873a", "16f873a");
 ProcessorConstructor pP16F874A(P16F874A::construct ,
-			      "__16F874a", "pic16f874a", "p16F874A", "16f874a");
+			      "__16F874a", "pic16f874a", "p16f874a", "16f874a");
 ProcessorConstructor pP16F876A(P16F876A::construct ,
-			      "__16F876a", "pic16f876a", "p16f876A", "16f876a");
+			      "__16F876a", "pic16f876a", "p16f876a", "16f876a");
 ProcessorConstructor pP16F877A(P16F877A::construct ,
-			      "__16F877a", "pic16f877a", "p16f877A", "16f877a");
+			      "__16F877a", "pic16f877a", "p16f877a", "16f877a");
 #ifdef P17C7XX	// code no longer works
 ProcessorConstructor pP17C7xx(P17C7xx::construct ,
 			      "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx");

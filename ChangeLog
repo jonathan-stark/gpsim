@@ -1,4 +1,10 @@
 2006-11-04 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc, src/pic-processor.cc: Applied variation of patch
+	submitted by David Barnett <dbarnett@edt.biz> that prepends
+	processor name with a 'p' if the name begins with a digit in the
+	.cod file
+	
+2006-11-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc: Patch from Ralf that fixes coordinates of
 	components selected in the breadboard.
 
