@@ -270,7 +270,7 @@ void initialize_threads(void)
   if( !g_thread_supported() )
   {
     g_thread_init(NULL);
-#ifdef HAVEGUI
+#ifdef HAVE_GUI
     gdk_threads_init();
 #endif
   }
