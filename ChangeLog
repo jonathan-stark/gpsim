@@ -1,4 +1,9 @@
 2006-11-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_regwin.cc: gpsim was aborting if eeprom window was
+	opened while a processor without an eeprom was loaded.
+	David Barnett <dbarnett@edt.biz> reported this bug.
+
+2006-11-04 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: Typo in preprocessor ifdef. This was discovered
 	while applying a patch from the Gentoo distro. (The patch had
 	already independently been applied, yet the typo hadn't been
