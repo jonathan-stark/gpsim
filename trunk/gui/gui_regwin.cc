@@ -347,6 +347,8 @@ public:
       puts("Warning reg->row > maxrow in xref_update_cell");
       return;
       }
+    if (!GTK_SHEET(rw->register_sheet)->maxrow)
+      return;
 
     address = rw->row_to_address[reg->row]+reg->col;
 
@@ -964,29 +966,29 @@ static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 {
 
-    GtkWidget *popup;
-//	GdkModifierType mods;
-    GtkSheet *sheet;
+  GtkWidget *popup;
+  //	GdkModifierType mods;
+  GtkSheet *sheet;
 
-    popup=rw->popup_menu;
+  popup=rw->popup_menu;
     
   if(widget==0 || event==0 || rw==0)
-  {
+    {
       printf("Warning do_popup(%p,%p,%p)\n",widget,event,rw);
       return 0;
-  }
+    }
   
-    sheet=GTK_SHEET(widget);
+  sheet=GTK_SHEET(widget);
 
-    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
 
-	popup_rw = rw;
+      popup_rw = rw;
   
-	gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-			   3, event->time);
+      gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
+		     3, event->time);
     }
-    return FALSE;
+  return FALSE;
 }
 
 // The following routine will convert the first number it finds in
@@ -1570,12 +1572,12 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 static gint
 activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw) 
 {
-  Dprintf((" activate_sheet_cell\n"));
+  Dprintf((" activate_sheet_cell rma=%p\n",(rw? rw->rma :0)));
 
-  GtkSheet *sheet=0;
-    
-  if(rw)
-    sheet=rw->register_sheet;
+  GtkSheet *sheet = rw ? rw->register_sheet : 0;
+
+  if(!sheet || !sheet->maxrow)
+    return 0;
 
   if(widget==0 || row>sheet->maxrow || row<0||
      column>sheet->maxcol || column<0 || rw==0)
@@ -1585,6 +1587,8 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
     }
 
   GUIRegister *reg = rw->getRegister(row,column);
+
+  Dprintf((" activate_sheet_cell reg=%p row=%d,col=%d\n",reg,row,column));
 
   if(reg && reg->bIsValid() )
     // enable editing valid cells
@@ -1748,6 +1752,9 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   
   GUIRegister *guiReg = registers->Get(reg_number);
 
+  if (!guiReg || !guiReg->rma)
+    return 0;
+
   if(reg_number >= guiReg->rma->get_size())
     return 0;
 
@@ -1880,6 +1887,8 @@ void Register_Window::Update()
     return;
   }
 
+  if (!GTK_SHEET(register_sheet)->maxrow)
+    return;
 
   gtk_sheet_freeze(register_sheet);
   for(j = 0; j<=GTK_SHEET(register_sheet)->maxrow; j++) {
@@ -2003,6 +2012,11 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   }
       
   row_created=FALSE;
+  unsigned int nRegs;
+  nRegs = (rma->get_size() < MAX_REGISTERS) ? (rma->get_size()) : MAX_REGISTERS;
+
+  if (!nRegs)
+    return;
 
   gtk_sheet_freeze(register_sheet);
     
@@ -2013,8 +2027,6 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   SetRegisterSize();
 
-  unsigned int nRegs;
-  nRegs = (rma->get_size() < MAX_REGISTERS) ? (rma->get_size()) : MAX_REGISTERS;
 
   for(reg_number=0;reg_number<nRegs;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
@@ -2104,7 +2116,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 }
 
 static int show_event(GtkWidget *widget,
-                        Register_Window *rw)
+		      Register_Window *rw)
 {
   Dprintf((" show_event\n"));
 
@@ -2132,6 +2144,7 @@ void Register_Window::Build()
   if(bIsBuilt)
     return;
 
+  Dprintf((" Register_Window::Build()\n"));
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
 
@@ -2336,6 +2349,7 @@ void RAM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
 
   rma = &_gp->cpu->rma;
   registers = _gp->m_pGUIRamRegisters;
+  Dprintf((" RAM_RegisterWindow::NewProcessor rma=%p\n",rma));
 
   Register_Window::NewProcessor(_gp);
   if(sbw)
@@ -2374,6 +2388,7 @@ void EEPROM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
   rma = &_gp->cpu->ema;
   registers = _gp->m_pGUIEEPromRegisters;
 
+  Dprintf((" EEPROM_RegisterWindow::NewProcessor rma=%p\n",rma));
 
   Register_Window::NewProcessor(_gp);
 }
