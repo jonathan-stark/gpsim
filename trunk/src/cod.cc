@@ -1053,14 +1053,20 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
   if(*pcpu == 0) {
     
     char processor_type[16];
-    if (!pProcessorName)
-      pProcessorName = processor_type;
+    processor_type[0] = 'p';  // Hack to get around processors whose name begin with a digit.
+
     if(verbose)
       cout << "ascertaining cpu from the .cod file\n";
 
-    if(SUCCESS == get_string(processor_type,
+    if(SUCCESS == get_string(&processor_type[1],
 			     &main_dir.dir.block[COD_DIR_PROCESSOR - 1],
-			     sizeof processor_type)) {
+			     sizeof (processor_type)-1)) {
+
+      char *pProcessorTypeOffset = isdigit(processor_type[1]) ? 
+	&processor_type[0] : &processor_type[1];
+
+      if (!pProcessorName)
+	pProcessorName = pProcessorTypeOffset;
 
       if(verbose)
 	cout << "found a " << processor_type << " in the .cod file\n";
