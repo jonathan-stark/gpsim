@@ -55,7 +55,6 @@ EXPORTS
     ??0OpSub@@QAE@PAVExpression@@0@Z
     ??0OpXor@@QAE@PAVExpression@@0@Z
     ??0PCTraceObject@@QAE@PAVProcessor@@I@Z
-    ??0PCTraceType@@QAE@PAVProcessor@@II@Z
     ??0Package@@QAE@I@Z
     ??0Packet@@QAE@II@Z
 	??0PicLatchRegister@@QAE@PBDPAVPortRegister@@@Z
@@ -74,15 +73,13 @@ EXPORTS
     ??0RegisterCollection@@QAE@PAVProcessor@@PBDPAPAVRegister@@I@Z
     ??0RegisterExpression@@QAE@I@Z
     ??0RegisterReadTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
-    ??0RegisterReadTraceType@@QAE@PAVProcessor@@II@Z
     ??0RegisterWriteTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
-    ??0RegisterWriteTraceType@@QAE@PAVProcessor@@II@Z
     ??0Stimulus_Node@@QAE@PBD@Z
     ??0String@@QAE@PBD@Z
     ??0String@@QAE@PBD00@Z
     ??0ThreeStateEventLogger@@QAE@I@Z
     ??0TraceFrame@@QAE@XZ
-    ??0TraceType@@QAE@II@Z
+    ??0TraceType@@QAE@I@Z
     ??0TriggerObject@@QAE@XZ
     ??0Token@gpsim@@QAE@XZ
     ??0TypeMismatch@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@00@Z
@@ -211,7 +208,7 @@ EXPORTS
     ?address_has_profile_start@ProgramMemoryAccess@@UAEHI@Z
     ?address_has_profile_stop@ProgramMemoryAccess@@UAEHI@Z
     ?advanceIndex@PacketBuffer@@QAEXI@Z
-    ?allocateTraceType@Trace@@QAEIPAVTraceType@@H@Z
+    ?allocateTraceType@Trace@@QAEIPAVTraceType@@@Z
     ?assertValid@Integer@@SAPAV1@PAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_J@Z
     ?assertValid@Integer@@SAPAV1@PAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_J2@Z
     ?assign_pin@Module@@UAEXIPAVIOPIN@@@Z
@@ -403,6 +400,7 @@ EXPORTS
     ?get_nEvents@ThreeStateEventLogger@@QAEIII@Z
     ?init_program_memory_at_index@Processor@@UAEXIPBEH@Z
     ?initialize@AliasedInstruction@@UAEX_N@Z
+    ?invokeAction@TriggerObject@@UAEXXZ
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_lst_line@AliasedInstruction@@UAEHXZ
     ?get_opcode@AliasedInstruction@@UAEIXZ
@@ -472,7 +470,7 @@ EXPORTS
     ?print@Breakpoint_Instruction@@UAEXXZ
     ?print@TriggerObject@@UAEXXZ
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
-    ?printExpression@TriggerObject@@UAEXXZ
+    ?printExpression@TriggerObject@@UAEHPADH@Z
     ?printTraced@TriggerObject@@UAEHPAVTrace@@IPADH@Z
     ?profile_keeper@@3VProfileKeeper@@A
     ?put@PortRegister@@UAEXI@Z
