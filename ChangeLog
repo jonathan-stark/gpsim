@@ -1,3 +1,7 @@
+2006-11-06 Scott Dattalo <scott@dattalo.com>
+	* doc/gpsim.html, doc/gpsim_cvs.html: Fixed links. Changed CVS
+	references to SVN.
+	
 2006-11-05 Scott Dattalo <scott@dattalo.com>
 	* src/uart.cc, src/uart.h: TXIF is now only gets set if both TXEN
 	and SPEN are set. The USART_MODULE class interface was redesigned
