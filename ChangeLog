@@ -1,4 +1,19 @@
 2006-11-05 Scott Dattalo <scott@dattalo.com>
+	* src/uart.cc, src/uart.h: TXIF is now only gets set if both TXEN
+	and SPEN are set. The USART_MODULE class interface was redesigned
+	slightly to simplify accesses to the various registers associated
+	with the USART.
+	* src/p16f62x.cc, src/16bit-registers.cc, src/p16f8x.cc,
+	src/16bit-registers.h, src/p16x6x.cc, src/p16f87x.cc,
+	src/16bit-processors.cc:
+	- Adapted new USART_MODULE interface.
+	* regression/usart_test/usart_pir1v1.asm,
+	regression/usart_test/usart_pir1v2.asm:
+	- The usart regression test noew makes sure that TXIF is not set
+	before TXEN and SPEN are set.
+	
+
+2006-11-05 Scott Dattalo <scott@dattalo.com>
 	* src/trigger.cc, src/trace.cc, src/breakpoints.cc: Cleaned up
 	trace printing of traced breakpoints.
 

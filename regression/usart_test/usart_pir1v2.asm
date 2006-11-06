@@ -176,12 +176,14 @@ start
 
 	clrf	PIR1
 	bsf	PIR1,RCIF
-  .assert "pir1 == 0x10, \"TXIF, RCIF not writable\""
+	bsf	PIR1,TXIF
+  .assert "pir1 == 0x00, \"TXIF, RCIF not writable\""
 	nop
 
 	;; Enable the transmitter
 	bsf	STATUS,RP0
 	bsf	TXSTA^0x80,TXEN
+  .assert "pir1 == 0x10, \"*** FAILED TXIF should now be set\""
 	bsf	PIE1^0x80,RCIE	; Enable Rx interrupts
 	bcf	STATUS,RP0
 

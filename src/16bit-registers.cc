@@ -1212,7 +1212,7 @@ void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 }
 
 //--------------------------------------------------
-
+/*
 TXREG_16::TXREG_16(void)
   : pir_set(0)
 {
@@ -1243,8 +1243,8 @@ void TXREG_16::assign_pir_set(PIR_SET *new_pir_set)
   pir_set = new_pir_set;
 
 }
-
-
+*/
+/*
 RCREG_16::RCREG_16(void)
   : pir_set(0)
 {
@@ -1274,7 +1274,7 @@ void RCREG_16::pop(void)
     pir_set->clear_rcif();
 
 }
-
+*/
 
 //--------------------------------------------------
 // member functions for the USART

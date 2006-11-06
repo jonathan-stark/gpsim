@@ -181,7 +181,7 @@ void _16bit_processor :: create_sfr_map()
 
 
   usart16.initialize(&pir_set_def,&(*m_portc)[6], &(*m_portc)[7],
-		     new TXREG_16(), new RCREG_16());
+		     new _TXREG(&usart16), new _RCREG(&usart16));
 
   add_sfr_register(&usart16.rcsta,    0xfab,porv,"rcsta");
   add_sfr_register(&usart16.txsta,    0xfac,RegisterValue(0x02,0),"txsta");

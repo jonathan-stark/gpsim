@@ -39,6 +39,7 @@ class  _14bit_processor;
 
 class RXSignalSink;
 class TXSignalSource;
+class USART_MODULE;
 
 #define TOTAL_BRGH_STATES      16
 #define TOTAL_BRGL_STATES      64
@@ -49,18 +50,13 @@ class _TXREG : public sfr_register
  public:
 
 
-  _TXREG();
+  _TXREG(USART_MODULE *);
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
-  virtual bool is_empty();
-  virtual void empty();
-  virtual void full();
-  virtual void assign_pir_set(PIR_SET *new_pir_set);
   virtual void assign_txsta(_TXSTA *new_txsta) { m_txsta = new_txsta; };
 private:
   _TXSTA  *m_txsta;
-  PIR_SET *pir_set;
-
+  USART_MODULE *mUSART;
 };
 
 class _TXSTA : public sfr_register, public TriggerObject
@@ -82,7 +78,7 @@ public:
     CSRC = 1<<7
   };
 
-  _TXSTA();
+  _TXSTA(USART_MODULE *);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -96,7 +92,10 @@ public:
 
   virtual void setIOpin(PinModule *);
   virtual void putTXState(char newTXState);
+
+  bool bTXEN() { return (value.get() & TXEN) != 0; }
 protected:
+  USART_MODULE *mUSART;
   PinModule *m_PinModule;
   TXSignalSource *m_source;
   char m_cTxState;
@@ -112,20 +111,17 @@ class _RCREG : public sfr_register
 
   unsigned int fifo_sp;       /* fifo stack pointer */
 
-  _RCREG();
+  _RCREG(USART_MODULE *);
   virtual unsigned int get();
   virtual unsigned int get_value();
   virtual void push(unsigned int);
   virtual void pop();
 
-  virtual void assign_pir_set(PIR_SET *new_pir_set);
   virtual void assign_rcsta(_RCSTA *new_rcsta) { m_rcsta = new_rcsta; };
 
 private:
+  USART_MODULE *mUSART;
   _RCSTA  *m_rcsta;
-  PIR_SET *pir_set;
-
-
 };
 
 class _RCSTA : public sfr_register, public TriggerObject
@@ -175,7 +171,7 @@ class _RCSTA : public sfr_register, public TriggerObject
   unsigned int sample,state, sample_state;
   guint64 future_cycle, last_cycle;
 
-  _RCSTA();
+  _RCSTA(USART_MODULE *);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -188,10 +184,11 @@ class _RCSTA : public sfr_register, public TriggerObject
   virtual void callback();
   virtual void callback_print();
   void setState(char new_RxState);
-
+  bool bSPEN() { return (value.get() & SPEN) != 0; }
   virtual void setIOpin(PinModule *);
 
 protected:
+  USART_MODULE *mUSART;
   PinModule *m_PinModule;
   RXSignalSink *m_sink;
   char m_cRxState;
@@ -233,12 +230,19 @@ public:
 
   _TXREG      *txreg;
   _RCREG      *rcreg;
+  PIR_SET     *pir_set;
 
   USART_MODULE();
 
   void initialize(PIR_SET *, 
 		  PinModule *tx_pin, PinModule *rx_pin,
 		  _TXREG *, _RCREG *);
+
+  virtual bool bIsTXempty();
+  virtual void emptyTX();
+  virtual void full();
+  virtual void set_rcif();
+  virtual void clear_rcif();
 };
 
 class USART_MODULE14 : public USART_MODULE
