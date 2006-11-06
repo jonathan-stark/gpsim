@@ -1308,9 +1308,15 @@ void BreakpointRegister::print()
   TriggerObject::print();
 }
 int BreakpointRegister::printTraced(Trace *pTrace, unsigned int tbi,
-				   char *pBuf, int szBuf)
+				    char *pBuf, int szBuf)
 {
-  return 0;
+  if (!pBuf || pTrace)
+    return 0;
+
+  int m = snprintf(pBuf, szBuf,
+		   " Breakpoint register ");
+  return m>0 ? m : 0;
+
 }
 
 string &BreakpointRegister::name() const
@@ -1515,10 +1521,9 @@ bool BreakpointRegister_Value::IsLessThenEqualsBreakCondition(unsigned int uRegV
   return (uRegValue & uRegMask) <= uRegTestValue;
 }
 
-void BreakpointRegister_Value::invokeAction()
+void BreakpointRegister_Value::invokeAction() // remove this....
 {
   TriggerObject::invokeAction();
-  trace.raw(m_brt->type(1) | 0); // FIXME
 }
 
 /// BreakpointRegister_Value::print() - base class function
@@ -1540,6 +1545,12 @@ int BreakpointRegister_Value::printTraced(Trace *pTrace, unsigned int tbi,
 					  char *pBuf, int szBuf)
 					  
 {
+  if (pBuf && pTrace) {
+    unsigned int valueRead = pTrace->get(tbi+1) & 0xffff;
+    int m = snprintf(pBuf,szBuf," read 0x%x from reg 0x%x", valueRead, address);
+    return m>0 ? m : 0;
+  }
+
   return 0;
 }
 
@@ -1569,6 +1580,8 @@ Break_register_write_value::Break_register_write_value(Processor *_cpu,
 
 void Break_register_write_value::action() 
 {
+  trace.raw(m_brt->type(1) | (getReplaced()->get_value() & 0xffffff));
+
   if(verbosity && verbosity->getVal()) {
 
     GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
@@ -1595,8 +1608,7 @@ void Break_register_write_value::action()
 // 
 void Break_register_read::action()
 {
-  trace.raw(m_brt->type(1) | (address & 0xffffff));
-  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | address);
+  trace.raw(m_brt->type(1) | (getReplaced()->get_value() & 0xffffff));
   if(verbosity && verbosity->getVal()) {
 
     GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
@@ -1665,7 +1677,7 @@ int Break_register_read::printTraced(Trace *pTrace, unsigned int tbi,
 void Break_register_write::action() 
 {
   //trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (getReplaced()->address)  );
-  trace.raw(m_brt->type(1) | (address&0xffffff));
+  trace.raw(m_brt->type(1) | (getReplaced()->get_value() & 0xffffff));
   if(verbosity && verbosity->getVal()) {
     GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
     string sFormattedRegAddress;
@@ -1706,6 +1718,11 @@ int Break_register_write::printTraced(Trace *pTrace, unsigned int tbi,
 				      char *pBuf, int szBuf)
 				  
 {
+  if (pBuf && pTrace) {
+    unsigned int valueRead = pTrace->get(tbi+1) & 0xffff;
+    int m = snprintf(pBuf,szBuf," wrote 0x%x to reg 0x%x", valueRead, address);
+    return m>0 ? m : 0;
+  }
   return 0;
 }
 //========================================================================
@@ -1731,8 +1748,7 @@ Break_register_read_value::Break_register_read_value(Processor *_cpu,
 
 void Break_register_read_value::action()
 {
-  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | address);
-  trace.raw(m_brt->type(1) | (address & 0xffffff));
+  trace.raw(m_brt->type(1) | (getReplaced()->get_value() & 0xffffff));
 
   if(verbosity && verbosity->getVal()) {
 
@@ -1801,7 +1817,11 @@ int Break_register_read_value::printTraced(Trace *pTrace, unsigned int tbi,
 					   char *pBuf, int szBuf)
 				  
 {
-  return 0;
+  if (pBuf && pTrace) {
+    unsigned int valueRead = pTrace->get(tbi+1) & 0xffff;
+    int m = snprintf(pBuf,szBuf," read 0x%x from reg 0x%x", valueRead, address);
+    return m>0 ? m : 0;
+  }
 }
 //========================================================================
 
@@ -1839,6 +1859,12 @@ int Break_register_write_value::printTraced(Trace *pTrace, unsigned int tbi,
 					   char *pBuf, int szBuf)
 				  
 {
+  if (pBuf && pTrace) {
+    unsigned int valueRead = pTrace->get(tbi+1) & 0xffff;
+    int m = snprintf(pBuf,szBuf," wrote 0x%x to reg 0x%x", valueRead, address);
+    return m>0 ? m : 0;
+  }
+
   return 0;
 }
 //========================================================================
