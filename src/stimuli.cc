@@ -358,7 +358,7 @@ void Stimulus_Node::refresh()
 
     case 1:
       // Only one stimulus is attached.
-      voltage = sptr->get_Vth();
+      finalVoltage = sptr->get_Vth();   // RP - was just voltage
       Zth =  sptr->get_Zth();
       break;
 

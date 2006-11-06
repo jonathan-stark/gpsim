@@ -1,3 +1,8 @@
+2006-11-06 Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/stimuli.cc: Fixed the p12ce51x I2C-EE bug - it was due to a
+        stimulus initialisation error caused by bit rot in the node summing
+        function for the single stimulus connected case!
+
 2006-11-06 David Barnett <dbarnett@edt.biz>
 	* modules/gpsim_modules.cc: The push_button is named as
 	"push_button" in push_button.h, but "pushbutton" in
