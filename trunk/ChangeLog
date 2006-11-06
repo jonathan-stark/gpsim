@@ -1,3 +1,7 @@
+2006-11-05 Scott Dattalo <scott@dattalo.com>
+	* src/trigger.cc, src/trace.cc, src/breakpoints.cc: Cleaned up
+	trace printing of traced breakpoints.
+
 2006-11-04 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 

@@ -74,7 +74,13 @@ BreakTraceObject::BreakTraceObject(unsigned int bpn)
 
 void BreakTraceObject::print(FILE *fp)
 {
-  fprintf(fp, "  BREAK: #%d\n",m_bpn);
+  fprintf(fp, "  BREAK: #");
+  Breakpoints::BreakStatus *bs = bp.get(m_bpn);
+  TriggerObject *bpo = bs ? bs->bpo : 0;
+  if (bpo)
+    bpo->print();
+  else
+    fprintf(fp,"%d\n", m_bpn);
 }
 
 
@@ -82,7 +88,9 @@ void BreakTraceObject::print(FILE *fp)
 //------------------------------------------------------------------------
 TraceObject *BreakTraceType::decode(unsigned int tbi)
 {
-  return new BreakTraceObject(get_trace().get(tbi) & 0xffffff);
+  return (get_trace().type(tbi) == type()) ?
+    new BreakTraceObject(get_trace().get(tbi) & 0xffffff)  :
+    0;
 }
 int BreakTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
 {

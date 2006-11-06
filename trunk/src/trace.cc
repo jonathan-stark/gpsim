@@ -562,7 +562,7 @@ int TraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
 {
   int iUsed=0;
   if (pTrace)
-    while (pTrace->type(tbi+(iUsed<<24)) == (mType + (iUsed<<24)))
+    while (pTrace->type(tbi+iUsed) == (mType + (iUsed<<24)))
       iUsed++;
   return iUsed;
 }
@@ -1174,21 +1174,25 @@ void Trace::dump_raw(int n)
 
     map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(i));
     unsigned int tSize = 1;
-    if(tti != trace_map.end()) {
-      TraceType *tt = (*tti).second;
+    TraceType *tt = tti != trace_map.end() ? (*tti).second : 0;
 
-      if(tt) {
-	tSize = tt->entriesUsed(this,i);
-	// fprintf(out_stream, "%02X:",tSize);
+    buffer[0]=0;
+    tSize = 0;
+    if(tt) {
+      tSize = tt->entriesUsed(this,i);
+      /*
+	fprintf(out_stream, "%02X:",tSize);
+	for (unsigned int ii=0; ii<tSize; ii++)
+	  fprintf(out_stream, "%08X:",get(i+ii));
+      */
 
-	buffer[0]=0;
-	tt->dump_raw(this,i,buffer,sizeof(buffer));
-	if(buffer[0]) 
-	  fprintf(out_stream,"%s",buffer);
-      }
-    } else
-      fprintf(out_stream, "%08X:  ??",get(i));
+      tt->dump_raw(this,i,buffer,sizeof(buffer));
+    }
     
+    if(!tSize)
+      fprintf(out_stream, "%08X:  ??",get(i));
+    if(buffer[0]) 
+      fprintf(out_stream,"%s",buffer);
 
     tSize = tSize ? tSize : 1;
     i = (i + tSize) & TRACE_BUFFER_MASK;
