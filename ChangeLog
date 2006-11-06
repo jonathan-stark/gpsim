@@ -1,3 +1,10 @@
+2006-11-06 David Barnett <dbarnett@edt.biz>
+	* modules/gpsim_modules.cc: The push_button is named as
+	"push_button" in push_button.h, but "pushbutton" in
+	gpsim_modules.cc.  This had the effect that "module load
+	push_button was saved into the netlist file, but "module type
+	push_button not created" would display when loading the netlist.
+	
 2006-11-06 Scott Dattalo <scott@dattalo.com>
 	* doc/gpsim.html, doc/gpsim_cvs.html: Fixed links. Changed CVS
 	references to SVN.
