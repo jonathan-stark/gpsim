@@ -107,8 +107,8 @@ class INDF16 : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -119,8 +119,8 @@ class PREINC : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -131,8 +131,8 @@ class POSTINC : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -143,8 +143,8 @@ class POSTDEC : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -155,8 +155,8 @@ class PLUSW : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -192,15 +192,15 @@ public:
 
   void init(_16bit_processor *new_cpu);
   void put(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
   void put_fsr(unsigned int new_fsr);
-  unsigned int get_fsr_value(void){return (fsr_value & 0xfff);};
-  void update_fsr_value(void);
-  void preinc_fsr_value(void);
-  void postinc_fsr_value(void);
-  void postdec_fsr_value(void);
-  int  plusw_fsr_value(void);
+  unsigned int get_fsr_value(){return (fsr_value & 0xfff);};
+  void update_fsr_value();
+  void preinc_fsr_value();
+  void postinc_fsr_value();
+  void postdec_fsr_value();
+  int  plusw_fsr_value();
 
   /* bool is_indirect_register(unsigned int reg_address)
    *
@@ -251,8 +251,8 @@ class Fast_Stack
   _16bit_processor *cpu;
 
   void init(_16bit_processor *new_cpu);
-  void push(void);
-  void pop(void);
+  void push();
+  void pop();
 
 };
 
@@ -261,10 +261,10 @@ class PCL16 : public PCL
 {
 public:
 
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
 
-  PCL16(void);
+  PCL16();
 };
 
 //---------------------------------------------------------
@@ -274,17 +274,17 @@ public:
 class Program_Counter16 : public Program_Counter
 {
 public:
-  //virtual void increment(void);
-  //virtual void skip(void);
+  //virtual void increment();
+  //virtual void skip();
   //virtual void jump(unsigned int new_value);
   //virtual void interrupt(unsigned int new_value);
   virtual void computed_goto(unsigned int new_value);
   //virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_value(void);
-  //virtual unsigned int get_next(void);
+  virtual unsigned int get_value();
+  //virtual unsigned int get_next();
 
-  Program_Counter16(void);
+  Program_Counter16();
 };
 
 
@@ -301,8 +301,8 @@ class STKPTR : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
     
 };
 
@@ -313,8 +313,8 @@ class TOSL : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -325,8 +325,8 @@ class TOSH : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -337,8 +337,8 @@ class TOSU : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
       
 };
 
@@ -351,11 +351,11 @@ public:
   TOSH   tosh;
   TOSU   tosu;
 
-  Stack16(void);
+  Stack16();
   virtual void push(unsigned int);
-  virtual unsigned int pop(void);
-  virtual void reset(void);
-  virtual unsigned int get_tos(void);
+  virtual unsigned int pop();
+  virtual void reset();
+  virtual unsigned int get_tos();
   virtual void put_tos(unsigned int);
 
 };
@@ -408,7 +408,7 @@ class T0CON : public OPTION_REG
     TMR0ON = 1<<7
   };
 
-  T0CON(void);
+  T0CON();
   void put(unsigned int new_value);
 };
 
@@ -427,8 +427,8 @@ class TMR0H : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
 
 };
 
@@ -443,18 +443,18 @@ public:
   TMR0H  *tmr0h;
   unsigned int value16;
 
-  virtual void callback(void);
-  virtual void callback_print(void);
+  virtual void callback();
+  virtual void callback_print();
 
-  virtual void increment(void);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  virtual void increment();
+  virtual unsigned int get();
+  virtual unsigned int get_value();
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_prescale(void);
-  virtual unsigned int max_counts(void);
-  virtual void set_t0if(void);
-  virtual bool get_t0cs(void);
-  virtual void initialize(void);
+  virtual unsigned int get_prescale();
+  virtual unsigned int max_counts();
+  virtual void set_t0if();
+  virtual bool get_t0cs();
+  virtual void initialize();
   virtual void start(int new_value,int sync=0);
 };
 
@@ -506,22 +506,23 @@ public:
   T3CON *t3con;
   PIR_SET  *pir_set;
 
-  TMR3_MODULE(void);
+  TMR3_MODULE();
   void initialize(T3CON *t1con, PIR_SET *pir_set);
 
 };
 
 //---------------------------------------------------------
 // uart 
+/*
 class TXREG_16 : public _TXREG
 {
  public:
   PIR_SET *pir_set;
 
-  TXREG_16(void);
-  virtual bool is_empty(void);
-  virtual void empty(void);
-  virtual void full(void);
+  TXREG_16();
+  virtual bool is_empty();
+  virtual void empty();
+  virtual void full();
   virtual void assign_pir_set(PIR_SET *new_pir_set);
 
 };
@@ -530,13 +531,13 @@ class RCREG_16 : public _RCREG
 {
  public:
   PIR_SET *pir_set;
-  RCREG_16(void);
+  RCREG_16();
   virtual void push(unsigned int);
-  virtual void pop(void);
+  virtual void pop();
   virtual void assign_pir_set(PIR_SET *new_pir_set);
 
 };
-
+*/
 //---------------------------------------------------------
 
 class USART_MODULE16  : public USART_MODULE
@@ -545,7 +546,7 @@ class USART_MODULE16  : public USART_MODULE
 
   _16bit_processor *_cpu16;
 
-  USART_MODULE16(void);
+  USART_MODULE16();
 
 };
 
@@ -572,8 +573,8 @@ class TABLAT : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
 
 };
 
@@ -583,8 +584,8 @@ class TABPTRL : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
 
 };
 
@@ -594,8 +595,8 @@ class TABPTRH : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
 
 };
 
@@ -605,8 +606,8 @@ class TABPTRU : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
+  unsigned int get();
+  unsigned int get_value();
 
 };
 
@@ -631,10 +632,10 @@ class TBL_MODULE
                  tabptrh,
                  tabptru;
 
-  void increment(void);
-  void decrement(void);
-  void read(void);
-  void write(void);
+  void increment();
+  void decrement();
+  void read();
+  void write();
   void initialize(_16bit_processor *);
 
 };
@@ -663,7 +664,7 @@ class LVDCON : public  sfr_register
     IRVST = 1<<5,
   };
 
-  LVDCON(void) {
+  LVDCON() {
     valid_bits = 0x3f;;
   }
 };

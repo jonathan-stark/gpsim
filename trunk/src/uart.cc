@@ -78,26 +78,30 @@ private:
 };
 
 //-----------------------------------------------------------
-_RCSTA::_RCSTA()
-  : rcreg(0), spbrg(0), txsta(0), m_PinModule(0), m_sink(0), m_cRxState('?')
+_RCSTA::_RCSTA(USART_MODULE *pUSART)
+  : rcreg(0), spbrg(0), txsta(0), mUSART(pUSART), m_PinModule(0), m_sink(0), m_cRxState('?')
 {
+  assert(mUSART);
 }
 
 //-----------------------------------------------------------
-_TXSTA::_TXSTA()
-  : txreg(0), spbrg(0), m_PinModule(0),  m_source(0), m_cTxState('?')
+_TXSTA::_TXSTA(USART_MODULE *pUSART)
+  : txreg(0), spbrg(0), mUSART(pUSART), m_PinModule(0),  m_source(0), m_cTxState('?')
 {
+  assert(mUSART);
 }
 
 //-----------------------------------------------------------
-_RCREG::_RCREG()
- : m_rcsta(0), pir_set(0)
+_RCREG::_RCREG(USART_MODULE *pUSART)
+  : mUSART(pUSART), m_rcsta(0)
 {
+  assert(mUSART);
 }
 
-_TXREG::_TXREG()
- : m_txsta(0), pir_set(0)
+_TXREG::_TXREG(USART_MODULE *pUSART)
+  : m_txsta(0), mUSART(pUSART)
 {
+  assert(mUSART);
 }
 
 
@@ -121,7 +125,7 @@ void _TXREG::put(unsigned int new_value)
   // The transmit register has data,
   // so clear the TXIF flag
 
-  full();
+  mUSART->full();
 
   if(m_txsta &&
      ( (m_txsta->value.get() & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN)))
@@ -210,17 +214,7 @@ void _TXSTA::put(unsigned int new_value)
       Dprintf(("TXSTA - enabling transmitter\n"));
       if (m_PinModule)
 	m_PinModule->setSource(m_source);
-      if(txreg) {
-	txreg->empty();
-#if 0
-	if(txreg->is_empty()) {
-	  txreg->empty();
-	} else {
-          Dprintf(("start_transmitting\n"));
-	  start_transmitting();
-	}
-#endif
-      }
+      mUSART->emptyTX();
     } else {
       stop_transmitting();
       if (m_PinModule)
@@ -343,7 +337,7 @@ void _TXSTA::start_transmitting()
 
   // Tell the TXREG that its data has been consumed.
 
-  txreg->empty();
+  mUSART->emptyTX();
 
 }
 
@@ -380,7 +374,7 @@ void _TXSTA::callback()
     // (See the note above about the 'extra' stop bit that was stuffed
     // into the tsr register. 
 
-    if(txreg && txreg->is_empty())
+    if(mUSART->bIsTXempty())
       value.put(value.get() | TRMT);
     else
       start_transmitting();
@@ -399,30 +393,6 @@ void _TXSTA::callback()
 void _TXSTA::callback_print()
 {
   cout << "TXSTA " << name() << " CallBack ID " << CallBackID << '\n';
-}
-
-bool _TXREG::is_empty()
-{
-  if (pir_set)
-    return(pir_set->get_txif());
-  return true;
-}
-void _TXREG::empty()
-{
-  Dprintf(("txreg::empty - setting TXIF\n"));
-  if (pir_set)
-    pir_set->set_txif();
-
-}
-void _TXREG::full()
-{
-  Dprintf(("txreg::full - clearing TXIF\n"));
-  if(pir_set)
-    pir_set->clear_txif();
-}
-void _TXREG::assign_pir_set(PIR_SET *new_pir_set)
-{
-  pir_set = new_pir_set;
 }
 
 //-----------------------------------------------------------
@@ -469,13 +439,13 @@ void _RCSTA::put(unsigned int new_value)
       spbrg->start();
       // Make the tx line high when the serial port is enabled.
       txsta->putTXState('1');
-      txsta->txreg->empty();
+      mUSART->emptyTX();
     } else {
 
       // Completely disable the usart:
 
       txsta->stop_transmitting();
-      txsta->txreg->full();         // Turn off TXIF
+      mUSART->full();         // Turn off TXIF
       stop_receiving();
 
       return;
@@ -546,6 +516,8 @@ void _RCSTA::setIOpin(PinModule *newPinModule)
 
 void _RCSTA::setState(char new_RxState)
 {
+  Dprintf((" setState:%c\n",new_RxState));
+
   m_cRxState = new_RxState;
 
   if( (state == RCSTA_WAITING_FOR_START) && (m_cRxState =='0' || m_cRxState=='w'))
@@ -628,20 +600,13 @@ void _RCSTA::stop_receiving()
 
 void _RCSTA::start_receiving()
 {
-  //cout << "The USART is starting to receive data\n";
+  Dprintf(("The USART is starting to receive data\n"));
 
   rsr = 0;
   sample = 0;
 
   // Is this a 9-bit data reception?
-  if(value.get() & RX9)
-    {
-      bit_count = 9;
-    }
-  else
-    {
-      bit_count = 8;
-    }
+  bit_count = (value.get() & RX9) ? 9 : 8;
 
   state = RCSTA_WAITING_FOR_START;
 
@@ -769,8 +734,7 @@ void _RCREG::push(unsigned int new_value)
     value.put(new_value);
   }
 
-  if(pir_set)
-    pir_set->set_rcif();
+  mUSART->set_rcif();
 
 }
 
@@ -783,8 +747,8 @@ void _RCREG::pop()
   if(--fifo_sp == 1)
     value.put(oldest_value);
 
-  if(fifo_sp == 0 && pir_set)
-    pir_set->clear_rcif();
+  if(fifo_sp == 0)
+    mUSART->clear_rcif();
 
 }
 
@@ -802,11 +766,6 @@ unsigned int _RCREG::get()
   trace.raw(read_trace.get() | value.get());
   return value.get();
 }
-void _RCREG::assign_pir_set(PIR_SET *new_pir_set)
-{
-  pir_set = new_pir_set;
-}
-
 
 //-----------------------------------------------------------
 // SPBRG - Serial Port Baud Rate Generator
@@ -842,7 +801,7 @@ void _SPBRG::get_next_cycle_break()
   if(cpu)
     get_cycles().set_break(future_cycle, this);
 
-  Dprintf(("SPBRG::callback next break at 0x%llx\n",future_cycle));
+  //Dprintf(("SPBRG::callback next break at 0x%llx\n",future_cycle));
   
 }
 
@@ -922,7 +881,7 @@ void _SPBRG::callback()
 
   last_cycle = get_cycles().value;
 
-  Dprintf(("SPBRG rollover at cycle:0x%llx\n",last_cycle));
+  //Dprintf(("SPBRG rollover at cycle:0x%llx\n",last_cycle));
 
   if(rcsta && (rcsta->value.get() & _RCSTA::SPEN))
     {
@@ -933,63 +892,25 @@ void _SPBRG::callback()
 
     }
 }
-//--------------------------------------------------
-/*
-bool TXREG_14::is_empty()
-{
-  return(pir_set->get_txif());
-}
-
-void TXREG_14::empty()
-{
-  Dprintf(("txreg::empty - setting TXIF\n"));
-  pir_set->set_txif();
-}
-
-void TXREG_14::full()
-{
-  Dprintf(("txreg::full - clearing TXIF\n"));
-  if(pir_set)
-    pir_set->clear_txif();
-}
-
-void RCREG_14::push(unsigned int new_value)
-{
-
-  _RCREG::push(new_value);
-
-  pir_set->set_rcif();
-
-}
-
-void RCREG_14::pop()
-{
-
-  _RCREG::pop();
-  if(fifo_sp == 0)
-    pir_set->clear_rcif();
-
-}
-*/
 
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
-void USART_MODULE::initialize(PIR_SET *pir_set,
+void USART_MODULE::initialize(PIR_SET *_pir_set,
 			      PinModule *tx_pin, PinModule *rx_pin,
 			      _TXREG *_txreg, _RCREG *_rcreg)
 {
   assert(_txreg && _rcreg);
 
+  pir_set = _pir_set;
+
   spbrg.txsta = &txsta;
   spbrg.rcsta = &rcsta;
 
   txreg = _txreg;
-  txreg->assign_pir_set(pir_set);
   txreg->assign_txsta(&txsta);
 
   rcreg = _rcreg;
-  rcreg->assign_pir_set(pir_set);
   rcreg->assign_rcsta(&rcsta);
 
   txsta.txreg = txreg;
@@ -1004,9 +925,42 @@ void USART_MODULE::initialize(PIR_SET *pir_set,
 
 }
 
+bool USART_MODULE::bIsTXempty()
+{
+  return pir_set ? pir_set->get_txif() : true;
+}
+void USART_MODULE::emptyTX()
+{
+  Dprintf(("usart::empty - setting TXIF\n"));
+  if (rcsta.bSPEN() && txsta.bTXEN() && pir_set)
+    pir_set->set_txif();
+
+}
+
+void USART_MODULE::full()
+{
+  Dprintf(("txreg::full - clearing TXIF\n"));
+  if(pir_set)
+    pir_set->clear_txif();
+}
+
+void USART_MODULE::set_rcif()
+{
+  Dprintf((" - setting RCIF\n"));
+  if(pir_set)
+    pir_set->set_rcif();
+}
+
+void USART_MODULE::clear_rcif()
+{
+  Dprintf((" - clearing RCIF\n"));
+  if(pir_set)
+    pir_set->clear_rcif();
+}
+
 //--------------------------------------------------
 USART_MODULE::USART_MODULE()
-  : txreg(0), rcreg(0)
+  : txsta(this), rcsta(this)
 {
 }
 

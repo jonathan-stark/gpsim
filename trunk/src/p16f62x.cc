@@ -116,7 +116,7 @@ void P16F62x::create_sfr_map()
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
-		   new _TXREG(), new _RCREG());
+		   new _TXREG(&usart), new _RCREG(&usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
