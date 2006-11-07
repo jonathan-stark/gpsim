@@ -123,7 +123,6 @@ void P16F62x::create_sfr_map()
   add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
   add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
-  //1usart.initialize_14(this,get_pir_set(),portb,1);
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());

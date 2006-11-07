@@ -180,14 +180,14 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ipr2,	  0xfa2,porv,"ipr2");
 
 
-  usart16.initialize(&pir_set_def,&(*m_portc)[6], &(*m_portc)[7],
-		     new _TXREG(&usart16), new _RCREG(&usart16));
+  usart.initialize(&pir_set_def,&(*m_portc)[6], &(*m_portc)[7],
+		   new _TXREG(&usart), new _RCREG(&usart));
 
-  add_sfr_register(&usart16.rcsta,    0xfab,porv,"rcsta");
-  add_sfr_register(&usart16.txsta,    0xfac,RegisterValue(0x02,0),"txsta");
-  add_sfr_register(usart16.txreg,     0xfad,porv,"txreg");
-  add_sfr_register(usart16.rcreg,     0xfae,porv,"rcreg");
-  add_sfr_register(&usart16.spbrg,    0xfaf,porv,"spbrg");
+  add_sfr_register(&usart.rcsta,    0xfab,porv,"rcsta");
+  add_sfr_register(&usart.txsta,    0xfac,RegisterValue(0x02,0),"txsta");
+  add_sfr_register(usart.txreg,     0xfad,porv,"txreg");
+  add_sfr_register(usart.rcreg,     0xfae,porv,"rcreg");
+  add_sfr_register(&usart.spbrg,    0xfaf,porv,"spbrg");
 
   add_sfr_register(&t3con,	  0xfb1,porv,"t3con");
   add_sfr_register(&tmr3l,	  0xfb2,porv,"tmr3l");
@@ -424,7 +424,6 @@ void _16bit_processor :: create ()
   ind0.init(this);
   ind1.init(this);
   ind2.init(this);
-  //usart16 = new USART_MODULE16();
 
   pic_processor::create();
   create_sfr_map();

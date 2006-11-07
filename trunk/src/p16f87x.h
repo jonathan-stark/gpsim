@@ -46,7 +46,7 @@ class P16F871 : public P16C64   // The 74 has too much RAM and too many CCPs
   ADRES  adres;
   ADRES  adresl;
 
-  USART_MODULE14 usart;
+  USART_MODULE usart;
 
   // That now brings us up to spec with the 74 as far as we need to be
 
