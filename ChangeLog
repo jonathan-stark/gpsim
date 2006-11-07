@@ -1,4 +1,11 @@
 2006-11-07 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_regwin.cc: EEPROM window abort bug fixed on 2006-11-04
+	had a flaw. Hopefully that's been fixed now. (The problem was that
+	the fix assumed if the maxrow member of the register_sheet was 0
+	that there were no cells in the sheet. However, in the gtksheet
+	widget, maxrow can be 0 if there's only 1 row!)
+	
+2006-11-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_symbols.cc, gui/gui_src_asm.cc: Changed the way glib
 	lists were deallocated. This removes a glib compile warning.
 
