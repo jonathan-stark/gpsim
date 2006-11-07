@@ -1,4 +1,8 @@
 2006-11-07 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_symbols.cc, gui/gui_src_asm.cc: Changed the way glib
+	lists were deallocated. This removes a glib compile warning.
+
+2006-11-07 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-registers.h, src/16bit-registers.cc, src/p16x6x.h,
 	src/p16x6x.cc, src/p16f87x.h, src/p16f8x.h,
 	src/16bit-processors.h, src/16bit-processors.cc, src/p16f62x.h,

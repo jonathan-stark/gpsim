@@ -2651,8 +2651,7 @@ CFormattedTextFragment::CFormattedTextFragment(
   m_length      = length;
 }
 
-void CFormattedTextFragment::SetText(
-                                     GtkText *source_text)
+void CFormattedTextFragment::SetText(GtkText *source_text)
 {
   gtk_text_insert(source_text,
     m_font,
@@ -2664,13 +2663,19 @@ void CFormattedTextFragment::SetText(
 
 void SourceBrowserAsm_Window::DetermineBreakinfos(int id)
 {
-  GList *iter;
+  GList *iter = sa_xlate_list[id];
+  /*
   for(iter=sa_xlate_list[id];iter!=0;)
   {
     GList *next=iter->next;
     free( (BreakPointInfo*)iter->data );
     g_list_remove(iter,iter->data);
     iter=next;
+  }
+  */
+  while (iter) {
+    free( (BreakPointInfo*)iter->data );
+    iter = g_list_remove(iter,iter->data);
   }
   sa_xlate_list[id]=0;
   for(iter=s_global_sa_xlate_list[id];iter!=0;) {
@@ -3715,8 +3720,9 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
   FileContext *fc,
   int file_id  )
 {
-  GList *iter;
+  GList *iter = s_global_sa_xlate_list[id];
 
+  /*
   for(iter=s_global_sa_xlate_list[id];iter!=0;)
   {
     GList *next=iter->next;
@@ -3724,6 +3730,12 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
     g_list_remove(iter,iter->data);
     iter=next;
   }
+  */
+  while (iter) {
+    free( (BreakPointInfo*)iter->data );
+    iter = g_list_remove(iter,iter->data);
+  }
+
   s_global_sa_xlate_list[id]=0;
   BreakPointInfo *entry;
   char *p;
