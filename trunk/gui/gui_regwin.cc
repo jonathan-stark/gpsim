@@ -347,8 +347,6 @@ public:
       puts("Warning reg->row > maxrow in xref_update_cell");
       return;
       }
-    if (!GTK_SHEET(rw->register_sheet)->maxrow)
-      return;
 
     address = rw->row_to_address[reg->row]+reg->col;
 
@@ -1124,8 +1122,6 @@ void Register_Window::UpdateLabel()
 {
   int row = -1, col = -1;
 
-  //row=register_sheet->active_cell.row;
-  //col=register_sheet->active_cell.col;
   if(register_sheet != 0) {
     gtk_sheet_get_active_cell(register_sheet, &row, &col);
 
@@ -1186,8 +1182,6 @@ void Register_Window::UpdateLabelEntry()
 
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
-
-  Dprintf((" configure_event\n"));
 
   if(widget->window==0)
     return 0;
@@ -1576,7 +1570,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
 
   GtkSheet *sheet = rw ? rw->register_sheet : 0;
 
-  if(!sheet || !sheet->maxrow)
+  if(!sheet)
     return 0;
 
   if(widget==0 || row>sheet->maxrow || row<0||
@@ -1587,8 +1581,6 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
     }
 
   GUIRegister *reg = rw->getRegister(row,column);
-
-  Dprintf((" activate_sheet_cell reg=%p row=%d,col=%d\n",reg,row,column));
 
   if(reg && reg->bIsValid() )
     // enable editing valid cells
@@ -1649,12 +1641,13 @@ void Register_Window::SelectRegister(int regnumber)
   col=registers->Get(regnumber)->col;
   range.row0=range.rowi=row;
   range.col0=range.coli=col;
+
   gtk_sheet_select_range(GTK_SHEET(register_sheet),&range);
   if(register_sheet != NULL &&
      (GTK_SHEET(register_sheet)->view.col0>range.col0 ||
      GTK_SHEET(register_sheet)->view.coli<range.coli ||
      GTK_SHEET(register_sheet)->view.row0>range.row0 ||
-     GTK_SHEET(register_sheet)->view.rowi<range.rowi))
+      GTK_SHEET(register_sheet)->view.rowi<range.rowi))
     gtk_sheet_moveto(GTK_SHEET(register_sheet),row,col,0.5,0.5);
 
   UpdateLabelEntry();
@@ -1887,9 +1880,6 @@ void Register_Window::Update()
     return;
   }
 
-  if (!GTK_SHEET(register_sheet)->maxrow)
-    return;
-
   gtk_sheet_freeze(register_sheet);
   for(j = 0; j<=GTK_SHEET(register_sheet)->maxrow; j++) {
 
@@ -2109,10 +2099,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   // set values in the sheet
   Update();
-
-    
   SelectRegister(0);
-
 }
 
 static int show_event(GtkWidget *widget,
