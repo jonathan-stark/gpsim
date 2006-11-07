@@ -211,7 +211,6 @@ void Symbol_Window::Update(void)
 {
 
 
-  GList *iter;
 
   load_symbols=1;
     
@@ -224,13 +223,17 @@ void Symbol_Window::Update(void)
   gtk_clist_clear(GTK_CLIST(symbol_clist));
 
   // free all old allocations
+  /*
+  GList *iter;
   for(iter=symbols;iter!=0;)
     {
       GList *next=iter->next;
       g_list_remove(iter,iter->data);
       iter=next;
     }
-  symbols=0;
+  */
+  while (symbols)
+    symbols = g_list_remove(symbols,symbols->data);
 
   Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
   Symbol_Table::iterator symIt;
