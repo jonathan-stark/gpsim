@@ -511,46 +511,6 @@ public:
 
 };
 
-//---------------------------------------------------------
-// uart 
-/*
-class TXREG_16 : public _TXREG
-{
- public:
-  PIR_SET *pir_set;
-
-  TXREG_16();
-  virtual bool is_empty();
-  virtual void empty();
-  virtual void full();
-  virtual void assign_pir_set(PIR_SET *new_pir_set);
-
-};
-
-class RCREG_16 : public _RCREG
-{
- public:
-  PIR_SET *pir_set;
-  RCREG_16();
-  virtual void push(unsigned int);
-  virtual void pop();
-  virtual void assign_pir_set(PIR_SET *new_pir_set);
-
-};
-*/
-//---------------------------------------------------------
-
-class USART_MODULE16  : public USART_MODULE
-{
- public:
-
-  _16bit_processor *_cpu16;
-
-  USART_MODULE16();
-
-};
-
-
 //-------------------------------------------------------------------
 
 class ADCON0_16 : public ADCON0

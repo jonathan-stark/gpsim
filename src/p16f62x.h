@@ -42,7 +42,7 @@ class P16F62x : public P16X6X_processor
 public:
   P16F62x(const char *_name=0, const char *desc=0);
 
-  USART_MODULE14 usart;
+  USART_MODULE usart;
   COMPARATOR_MODULE comparator;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);

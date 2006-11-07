@@ -238,20 +238,11 @@ public:
 		  PinModule *tx_pin, PinModule *rx_pin,
 		  _TXREG *, _RCREG *);
 
-  virtual bool bIsTXempty();
-  virtual void emptyTX();
-  virtual void full();
-  virtual void set_rcif();
-  virtual void clear_rcif();
-};
-
-class USART_MODULE14 : public USART_MODULE
-{
- public:
-
-  _14bit_processor *_cpu14;
-
-  USART_MODULE14();
+  bool bIsTXempty();
+  void emptyTX();
+  void full();
+  void set_rcif();
+  void clear_rcif();
 };
 
 #endif

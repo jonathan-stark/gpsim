@@ -964,7 +964,3 @@ USART_MODULE::USART_MODULE()
 {
 }
 
-//--------------------------------------------------
-USART_MODULE14::USART_MODULE14()
-{
-}

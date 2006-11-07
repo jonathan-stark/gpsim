@@ -1,3 +1,13 @@
+2006-11-07 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-registers.h, src/16bit-registers.cc, src/p16x6x.h,
+	src/p16x6x.cc, src/p16f87x.h, src/p16f8x.h,
+	src/16bit-processors.h, src/16bit-processors.cc, src/p16f62x.h,
+	src/p16f62x.cc, src/uart.h, src/uart.cc:
+	- Removed USART_MODULE14 and USART_MODULE16 classes. All they were
+	doing was declaring a 'cpu' pointer, but they weren't even using
+	it.
+	- All member functions of the USART_MODULE class are now non-virtual.
+
 2006-11-06 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/stimuli.cc: Fixed the p12ce51x I2C-EE bug - it was due to a
         stimulus initialisation error caused by bit rot in the node summing

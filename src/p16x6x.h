@@ -119,7 +119,7 @@ class P16C63 : public  P16C62
 {
   public:
 
-  USART_MODULE14 usart;
+  USART_MODULE usart;
 
   virtual PROCESSOR_TYPE isa(){return _P16C63_;};
   virtual void create_symbols();
@@ -179,7 +179,7 @@ class P16C65 : public  P16C64
 {
   public:
 
-  USART_MODULE14 usart;
+  USART_MODULE usart;
 
   virtual PROCESSOR_TYPE isa(){return _P16C65_;};
   virtual void create_symbols();

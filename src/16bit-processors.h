@@ -129,7 +129,7 @@ public:
   Indirect_Addressing  ind0;
   Indirect_Addressing  ind1;
   Indirect_Addressing  ind2;
-  USART_MODULE16       usart16;
+  USART_MODULE         usart;
   Stack16              stack16;
   TBL_MODULE           tbl;
   TMR2_MODULE          tmr2_module;

@@ -47,7 +47,7 @@ public:
   PIR2v2 pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
 
-  USART_MODULE14 usart;
+  USART_MODULE usart;
   COMPARATOR_MODULE comparator;
   WDTCON       wdtcon;
   OSCCON       osccon;

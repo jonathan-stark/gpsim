@@ -476,7 +476,6 @@ void P16C63::create_sfr_map(void)
   pie2.new_name("pie2");
 
 
-  //1((PORTC*)portc)->usart = &usart;
 }
 
 void P16C63::create_symbols(void)
@@ -691,8 +690,6 @@ void P16C65::create_sfr_map(void)
   pie2.pir    = get_pir2();
   pie2.new_name("pie2");
 
-
-  //1((PORTC*)portc)->usart = &usart;
 }
 
 void P16C65::create_symbols(void)
