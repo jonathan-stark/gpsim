@@ -45,13 +45,13 @@ Boston, MA 02111-1307, USA.  */
 
 //------------------------------------------------------------------------
 
-gLCD::gLCD(GdkDrawable *parent, 
+gLCD::gLCD(GdkDrawable *parent,
 	   unsigned int cols,
-	   unsigned int rows, 
+	   unsigned int rows,
 	   unsigned int pixel_size_x,
 	   unsigned int pixel_size_y
 	   )
-  : m_parent(parent), 
+  : m_parent(parent),
     m_nColumns(cols), m_nRows(rows), m_border(3),
     m_xPixel(pixel_size_x), m_yPixel(pixel_size_y)
 {
@@ -75,7 +75,7 @@ gLCD::gLCD(GdkDrawable *parent,
   gdk_colormap_alloc_colors (gdk_colormap_get_system(),
 			     m_aColors, sizeof(m_aColors)/sizeof(m_aColors[0]),
 			     TRUE, TRUE, &gbSuccess);
-  
+
   gdk_gc_set_foreground (m_gc, &m_aColors[cFG]);
 
 
@@ -151,7 +151,7 @@ private:
   // this will never change.
 
   virtual void update_direction(unsigned int,bool refresh)
-  { 
+  {
     // Disallow pin direction changes.
   }
 
@@ -162,7 +162,7 @@ private:
 
 
 //------------------------------------------------------------------------
-// 
+//
 LCD_InputPin::LCD_InputPin (gLCD_100X32_SED1520 *pLCD , const char *pinName, ePins pin)
   : IO_bi_directional(pinName), m_pLCD(pLCD), m_pin(pin), m_cDrivenState('Z')
 {
@@ -310,7 +310,7 @@ void gLCD_100X32_SED1520::create_iopin_map()
   // Provide a SignalControl object that the dataBus port can query
   // to determine which direction to drive the data bus.
   // (See <gpsim/ioports.h> for more documentation on port behavior.
-  //  But in summary, when an I/O port updates its I/O pins, it will 
+  //  But in summary, when an I/O port updates its I/O pins, it will
   //  query the pin drive direction via the SignalControl object. )
 
   SignalControl *pPortDirectionControl = new LCDSignalControl(this);
@@ -371,7 +371,7 @@ void gLCD_100X32_SED1520::Update(GtkWidget *widget)
       unsigned displayByte = (*sed)[sedIndex + ((j&3)*80)];
 
       for (unsigned int b=0; b < 8; b++ , displayByte>>=1)
-	if (displayByte & 1) 
+	if (displayByte & 1)
 	  m_plcd->setPixel(i,row+b);
     }
 
@@ -383,17 +383,13 @@ void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 void gLCD_100X32_SED1520::create_widget()
 {
 
-  GtkStyle  *style;
-  gint i,j,q='A';
-  char buf[48];
-
   window = gtk_vbox_new (FALSE, 0);
 
   if(window) {
 
     GtkWidget *frame = gtk_frame_new ("gLCD_100X32");
     gtk_container_add (GTK_CONTAINER (window), frame);
-    
+
     darea = gtk_drawing_area_new ();
 
     gtk_widget_set_usize (darea,

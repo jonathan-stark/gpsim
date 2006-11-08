@@ -73,7 +73,7 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
 
     k = 5 + lcdP->pixels.y*j;
 
-    
+
     for(i=0; i<lcdP->dots.x; i++) {
       pc = (ch[0][j][i] == '.') ? 'B' : ' ';
       bc = (ch[0][j][i] == '.') ? 'G' : ' ';
@@ -92,10 +92,10 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
     }
 
     //if we want to have the right edge a different color...
-    //for(jj=k; jj<k+3; jj++) 
+    //for(jj=k; jj<k+3; jj++)
     //  xpm_template[jj][5*3] = ' ';
 
-    
+
   }
 
   return xpm_template;
@@ -104,7 +104,7 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
 
 /***************************************************************
  * CreateFont
- *   Here we read the lcdfont.h file and build LCD character 
+ *   Here we read the lcdfont.h file and build LCD character
  * pixmaps.
  *
  */
@@ -311,8 +311,6 @@ void LcdDisplay::CreateGraphics (void)
   GtkWidget *main_vbox;
   GtkWidget *frame;
   GtkWidget *vbox;
-  GtkStyle  *style;
-  gint i,j,q='A';
   char buf[48];
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -335,7 +333,7 @@ void LcdDisplay::CreateGraphics (void)
 
 //    gtk_signal_connect (GTK_OBJECT (window), "destroy",
 //			GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
-      
+
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
     gtk_container_add (GTK_CONTAINER (window), main_vbox);
@@ -410,9 +408,6 @@ void LcdDisplay::move_cursor(unsigned int new_row, unsigned int new_column)
 
 void LcdDisplay::clear_display(void)
 {
-  int i,j;
-
   m_hd44780->clearDisplay();
   m_hd44780->moveCursor(0,0);
 }
-

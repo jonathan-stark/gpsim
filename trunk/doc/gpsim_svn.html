@@ -1,5 +1,6 @@
 <HTML>
 <HEAD>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type">
 <TITLE>gpsim svn</TITLE>
 </HEAD>
 <BODY>
@@ -9,10 +10,10 @@
 <P></P>
 <P></P>
 <P></P>
-<P>If you need to be on the bleeding edge, you can get the code straight from 
+<P>If you need to be on the bleeding edge, you can get the code straight from
 
 <a href="http://gpsim.svn.sourceforge.net/viewvc/gpsim/trunk/">gpsim's SVN repository</A>
-on 
+on
  <A HREF="http://sourceforge.net/projects/gpsim/">gpsim's SourceForge Page</A>
  ,
  which is of course hosted by
@@ -69,9 +70,9 @@ And you should be ready to go!
 </P>
 <h2>Extra Build Details</h2>
 <p>The instructions given above are suitable for building gpsim. However, it's
-possible to embed gpsim into a custom simulation environment (see 
-<a href="http://ktechlab.org/">KTechLab</a>). These simulation environments 
-may have special requirements for building or configuring gpsim. For example, if 
+possible to embed gpsim into a custom simulation environment (see
+<a href="http://ktechlab.org/">KTechLab</a>). These simulation environments
+may have special requirements for building or configuring gpsim. For example, if
 shared libraries required:
 </p>
 <p>
@@ -94,10 +95,10 @@ Or if the socket interface is required:
 
 <p>
   The main gpsim source contains several simple library modules. When you build
-and install gpsim these are installed too. These modules are placed into a shared library 
-(or DLL under windows). Thus gpsim will use your OS' library loading mechanism to find 
+and install gpsim these are installed too. These modules are placed into a shared library
+(or DLL under windows). Thus gpsim will use your OS' library loading mechanism to find
 them. A common mistake here is that the modules get installed into a directory for which
-the OS has no path. On Linux, the modules are installed by default into /usr/local/lib/. 
+the OS has no path. On Linux, the modules are installed by default into /usr/local/lib/.
 If you choose to keep this default location (there's nothing wrong with that), you'll need to
 add a path to it. This is done by placing adding the path to the file /etc/ld.so.conf
 
@@ -144,7 +145,7 @@ everything.
 
 <hr>
 <ADDRESS>This page is maintained by <A HREF="http://www.dattalo.com">Scott
-Dattalo</A>. You can reach me at home: <A HREF="mailto:scott@dattalo.com">scott@dattalo.com 
+Dattalo</A>. You can reach me at home: <A HREF="mailto:scott@dattalo.com">scott@dattalo.com
 </A>
 </ADDRESS>
 <ADDRESS>Last modified on 06NOV06.</ADDRESS>

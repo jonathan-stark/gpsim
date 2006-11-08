@@ -81,7 +81,7 @@ static const int LCD_MASK_SET_CGRAM = 0xc0;
  */
 
 static const int LCD_CMD_FUNC_SET  = 0x20;    // LCD Command "Function Set"
-static const int LCD_MASK_FUNC_SET = 0xe0;    // 
+static const int LCD_MASK_FUNC_SET = 0xe0;    //
 static const int LCD_4bit_MODE     = 0x00;    // d=0
 static const int LCD_8bit_MODE     = 0x10;    // d=1
 static const int LCD_1_LINE        = 0x00;    // n=0
@@ -96,7 +96,7 @@ static const int LCD_LARGE_FONT    = 0x04;    // f=1
  */
 
 static const int LCD_CMD_CURSOR_DISPLAY   = 0x10;   // LCD Command "Cursor Display"
-static const int LCD_MASK_CURSOR_DISPLAY  = 0xf0;   // 
+static const int LCD_MASK_CURSOR_DISPLAY  = 0xf0;   //
 
 /*
  * LCD Command Display Control = 00001dcb
@@ -106,7 +106,7 @@ static const int LCD_MASK_CURSOR_DISPLAY  = 0xf0;   //
  */
 
 static const int LCD_CMD_DISPLAY_CTRL  = 0x08;    // LCD Command "Display Control"
-static const int LCD_MASK_DISPLAY_CTRL = 0xf8;    // 
+static const int LCD_MASK_DISPLAY_CTRL = 0xf8;    //
 static const int LCD_DISPLAY_OFF       = 0x00;    // d=0
 static const int LCD_DISPLAY_ON        = 0x04;    // d=1
 static const int LCD_CURSOR_OFF        = 0x00;    // c=0
@@ -123,7 +123,7 @@ static const int LCD_BLINK_ON          = 0x01;    // b=1
  */
 
 static const int LCD_CMD_ENTRY_MODE  = 0x04;    // LCD Command "Entry Mode"
-static const int LCD_MASK_ENTRY_MODE = 0xfc;    // 
+static const int LCD_MASK_ENTRY_MODE = 0xfc;    //
 static const int LCD_DEC_CURSOR_POS  = 0x00;    // i=0
 static const int LCD_INC_CURSOR_POS  = 0x02;    // i=1
 static const int LCD_NO_SCROLL       = 0x00;    // s=0
@@ -134,7 +134,7 @@ static const int LCD_SCROLL          = 0x01;    // s=1
  */
 
 static const int LCD_CMD_CURSOR_HOME   = 0x02;   // LCD Command "Cursor Home"
-static const int LCD_MASK_CURSOR_HOME  = 0xfe;   // 
+static const int LCD_MASK_CURSOR_HOME  = 0xfe;   //
 
 // LCD Command Clear Display = 00000001
 static const int LCD_CMD_CLEAR_DISPLAY  = 0x01;
@@ -185,17 +185,17 @@ void HD44780Busy::callback()
 
 //------------------------------------------------------------------------
 HD44780::HD44780()
-  : m_bE(true), 
+  : m_bE(true),
     m_controlState(0),
     m_chipState(ePowerON),
     m_dataBus(0),
-    m_busyTimer(new HD44780Busy()),
     m_bBitMode(true),    // 8-bit mode
     m_bLineMode(false),  // 1-line mode
     m_bFontMode(false),  // small font
     m_bDisplayOn(false), // display is off
     m_bCursorBlink(false),// no cursor blink
     m_bCursorOn(false),   // cursor is off
+    m_busyTimer(new HD44780Busy()),
     m_CGRamCursor(0),
     m_bInCGRam(false)
 {
@@ -260,7 +260,7 @@ void HD44780::setE(bool newE)
 //------------------------------------------------------------------------
 // driveDataBus - place an 8-bit value on the data bus.
 // Note that this routine doesn't directly affect the I/O pins of an LCD module.
-// The Pin control code resides elsewhere (lcd.cc) and will read the HD44780 
+// The Pin control code resides elsewhere (lcd.cc) and will read the HD44780
 // data bus to determine how the pins should be driven
 void HD44780::driveDataBus(unsigned int d)
 {
@@ -268,7 +268,7 @@ void HD44780::driveDataBus(unsigned int d)
 }
 
 //------------------------------------------------------------------------
-// advanceColumnAddress() - A read or write from the DDRAM increments 
+// advanceColumnAddress() - A read or write from the DDRAM increments
 // the column address. If we're in 4-bit mode, then only increment after
 // the 2nd read or write.
 void HD44780::advanceColumnAddress()
@@ -279,7 +279,7 @@ void HD44780::advanceColumnAddress()
 //------------------------------------------------------------------------
 // phasedDataWrite - returns true if a write operation complements. The data
 // written is returned by reference.
-// Write operations always complete in 8-bit mode, but take two phases in 
+// Write operations always complete in 8-bit mode, but take two phases in
 // 4-bit mode.
 bool HD44780::phasedDataWrite(unsigned int &data)
 {
@@ -298,8 +298,8 @@ bool HD44780::phasedDataWrite(unsigned int &data)
   data = m_phasedData;
 
   // Toggle the phase.
-  // FIXME - The phase logic needs more attention. There should be a method for 
-  // setting the phase. 
+  // FIXME - The phase logic needs more attention. There should be a method for
+  // setting the phase.
   m_bDataBusPhase = !m_bDataBusPhase;
 
   return m_bDataBusPhase;
@@ -307,7 +307,7 @@ bool HD44780::phasedDataWrite(unsigned int &data)
 
 //------------------------------------------------------------------------
 // storeData - write a byte to the DDRAM
-// 
+//
 void HD44780::storeData()
 {
   unsigned int d;
@@ -329,7 +329,7 @@ unsigned int HD44780::getData()
 void HD44780::executeCommand()
 {
   unsigned int command;
-  if (!phasedDataWrite(command)) 
+  if (!phasedDataWrite(command))
     return;
 
   //
@@ -466,7 +466,7 @@ void HD44780::writeDDRamAddress(int data)
   // The first 0x40 memory locations are mapped to
   // row 0 and the second 0x40 to row 1. Now only
   // the first 40 (decimal not hex) locations are
-  // valid RAM. And of course, only the first 20 
+  // valid RAM. And of course, only the first 20
   //of these can be displayed in a 2x20 display.
   //
 
@@ -534,28 +534,23 @@ static void printTestResult(bool b, const char * testName)
 //------------------------------------------------------------------------
 void HD44780::test()
 {
-  const unsigned int EWC=4;
-  const unsigned int eWC=0;
-  const unsigned int EWD=5;
-  const unsigned int eWD=0;
-
   printf("HD44780 self test\n");
   set8bitMode();
 
   setRW(false);
   setDC(false);
- 
+
   driveDataBus(LCD_CMD_FUNC_SET | LCD_8bit_MODE);
   setE(true);
   setE(false);
-  
+
   printTestResult(b8BitMode(),"setting 8-bit mode");
 
 
   driveDataBus(LCD_CMD_FUNC_SET | LCD_4bit_MODE);
   setE(true);
   setE(false);
-  
+
   printTestResult(b4BitMode(),"setting 4-bit mode");
 
 
@@ -566,7 +561,7 @@ void HD44780::test()
   driveDataBus((LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT)<<4);
   setE(true);
   setE(false);
-  
+
   printTestResult(b2LineMode(),"setting small font & 2-line modes");
 
 

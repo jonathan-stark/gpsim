@@ -1,3 +1,10 @@
+2006-11-08 Borut Razem <borut.razem@siol.net>
+	* extras/graphic_lcd/src/glcd_100X32_sed1520.cc,
+	  extras/lcd/hd44780.cc, extras/lcd/hd44780.h, extras/lcd/lcd.cc,
+	  extras/lcd/lcdgui.cc, extras/lcd/module_manager.cc:
+	  removed compiler warnings
+	* doc/gpsim.html, doc/gpsim_svn.html: changed encoding to UTF-8
+
 2006-11-08 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: Fixed compiler warning.
 
