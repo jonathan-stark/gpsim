@@ -37,13 +37,8 @@
 gpsim
 \end_layout
 
-\begin_layout Author
-T.
- Scott Dattalo
-\end_layout
-
 \begin_layout Date
-11 OCTOBER 2005
+$date$
 \end_layout
 
 \begin_layout Standard
@@ -5136,6 +5131,126 @@ system
  templates for creating new modules.
 \end_layout
 
+\begin_layout Standard
+Modules reside in a library and are dynamically loaded with the 
+\emph on
+module
+\emph default
+ command.
+ All modules have I/O pins which can connect to other modules or processors.
+ Most modules provide 
+\emph on
+attributes
+\emph default
+ that allow the user to control a module's behavior or query its internal
+ state.
+ For example, the USART module has transmit and receive baud rate attributes
+ that may be configured:
+\end_layout
+
+\begin_layout LyX-Code
+gpsim> U1.txbaud = 9600   # set the transmit rate
+\end_layout
+
+\begin_layout LyX-Code
+gpsim> U1.rxbaud          # query the receiver rate
+\end_layout
+
+\begin_layout LyX-Code
+9600
+\end_layout
+
+\begin_layout Standard
+The symbol command can be used to query all attributes of a module.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+gpsim> symbol U1.
+     # note the period
+\end_layout
+
+\begin_layout LyX-Code
+U1 = USARTModule
+\end_layout
+
+\begin_layout LyX-Code
+U1.console = false
+\end_layout
+
+\begin_layout LyX-Code
+U1.crlf = true
+\end_layout
+
+\begin_layout LyX-Code
+U1.loop = true
+\end_layout
+
+\begin_layout LyX-Code
+U1.rx = 0
+\end_layout
+
+\begin_layout LyX-Code
+U1.rxbaud = 9600
+\end_layout
+
+\begin_layout LyX-Code
+U1.tx = 0
+\end_layout
+
+\begin_layout LyX-Code
+U1.txbaud = 9600
+\end_layout
+
+\begin_layout LyX-Code
+U1.xpos = 72.00000000000000
+\end_layout
+
+\begin_layout LyX-Code
+U1.ypos = 276.0000000000000
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+Modules may provide only help which can be accessed using the help command:
+\end_layout
+
+\begin_layout LyX-Code
+gpsim> help U1
+\end_layout
+
+\begin_layout LyX-Code
+USARTModule
+\end_layout
+
+\begin_layout LyX-Code
+no description
+\end_layout
+
+\begin_layout Standard
+Well, the USART module isn't the best example here! However, a better example
+ is one of the USART attributes.
+\end_layout
+
+\begin_layout LyX-Code
+gpsim> help U1.txbaud
+\end_layout
+
+\begin_layout LyX-Code
+9600
+\end_layout
+
+\begin_layout LyX-Code
+USART Module Transmitter baud rate
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
 \begin_layout Section
 gpsim Modules
 \end_layout
@@ -5147,7 +5262,7 @@ gpsim provides a library of useful modules for simulation.
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="15" columns="2">
+<lyxtabular version="3" rows="16" columns="2">
 <features>
 <column alignment="center" valignment="top" leftline="true" width="0">
 <column alignment="center" valignment="top" leftline="true" rightline="true" width="0">
@@ -5262,6 +5377,26 @@ pulsegen
 \end_inset
 </cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+I2C eeprom
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Standard
@@ -5456,6 +5591,147 @@ Encoder
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+USART
+\end_layout
+
+\begin_layout Standard
+The USART module is a full duplex configurable USART.
+ In graphics mode, the USART will display its output in a console.
+ In addition, the console will accept keyboard input.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+.tx - The 
+\emph on
+.tx
+\emph default
+ attribute is the USART transmit register.
+ Data written to this attribute will initiate a transmission.
+ The USART does not support a transmit FIFO.
+\end_layout
+
+\begin_layout Standard
+.rx - The 
+\emph on
+.rx
+\emph default
+ attribute is the USART receiver register.
+ Data received by the USART is available for querying through here.
+\end_layout
+
+\begin_layout Standard
+.txbaud - The 
+\emph on
+.txbaud
+\emph default
+ attribute specifies the transmitter baud rate.
+ 
+\end_layout
+
+\begin_layout Standard
+.rxbaud - The .rxbaud attribute specifies the receiver baud rate.
+\end_layout
+
+\begin_layout Standard
+.console - When set to 
+\emph on
+true
+\emph default
+, the console window will display received data and will accept keyboard
+ entries for the transmitter.
+\end_layout
+
+\begin_layout Standard
+.crlf - When set to 
+\emph on
+true
+\emph default
+, carraige returns and line feeds generate new lines in the console window.
+ 
+\end_layout
+
+\begin_layout Standard
+.loop - When set to true, received characters are looped back to the transmitter.
+\end_layout
+
+\begin_layout Standard
+.xpos - horizontal position in breadboard window.
+\end_layout
+
+\begin_layout Standard
+.ypos - vertical position in breadboard window.
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.TXPIN - transmit pin
+\end_layout
+
+\begin_layout Standard
+.RXPIN - receiver pin
+\end_layout
+
+\begin_layout Standard
+.CTS - Clear to send pin.
+ This can be left unconnect
+\end_layout
+
+\begin_layout Standard
+.RTS - Request to send pin.
+\end_layout
+
+\begin_layout Subsection
+Logic
+\end_layout
+
+\begin_layout Subsection
+I2C EEPROM
+\end_layout
+
+\begin_layout Subsection
+Switches
+\end_layout
+
+\begin_layout Subsection
+Resistors & Voltage Sources
+\end_layout
+
+\begin_layout Section
+Third Party Modules
+\end_layout
+
+\begin_layout Standard
+In addition to the standard modules, third are separately distribute gpsim
+ modules.
+ 
+\end_layout
+
+\begin_layout Subsection
+Character LCD - HD44780
+\end_layout
+
+\begin_layout Standard
+This module emulates the ubiquitous HD44780 character LCDs.
+\end_layout
+
+\begin_layout Subsection
+Graphic LCD - SED1530
+\end_layout
+
+\begin_layout Standard
+This module emulates a 100X32 pixel graphics LCD based on dual SED1350 controlle
+rs.
 \end_layout
 
 \begin_layout Section
