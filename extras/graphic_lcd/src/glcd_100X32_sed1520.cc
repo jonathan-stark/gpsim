@@ -209,7 +209,7 @@ public:
     : PortRegister(8, 0), m_pLCD(plcd)
   {
     new_name(_name);
-    mMTT = new ModuleTraceType(plcd,0,1," Graphic LCD");
+    mMTT = new ModuleTraceType(plcd,1," Graphic LCD");
     trace.allocateTraceType(mMTT);
 
     RegisterValue rv(mMTT->type(), mMTT->type() + (1<<22));
