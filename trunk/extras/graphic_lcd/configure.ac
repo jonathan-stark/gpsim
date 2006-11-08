@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([graphicLCD], [0.3.0-RC1], [<URL:http://www.dattalo.com/gnupic/gpsim.html>])
+AC_INIT([graphicLCD], [0.3.0-RC2], [<URL:http://www.dattalo.com/gnupic/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
