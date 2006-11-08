@@ -1,4 +1,10 @@
 2006-11-08 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: Fixed -p<procname> command line
+	option. (actually, there is still an issue with gpsim using the -p
+	option to find the processor, but then naming the processor
+	something else.)
+
+2006-11-08 Scott Dattalo <scott@dattalo.com>
 	* configure.ac: 0.22.0-RC4 - release candidate 4
 	* doc/gpsim.html: fix broken links.
 	* README, INSTALL: Minor documentation changes pertaining to 0.22.0

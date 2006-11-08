@@ -2173,7 +2173,9 @@ Processor * ProcessorConstructor::ConstructProcessor(const char *opt_name)
   // processor names were allowed, the default name matched what is now
   // the third alias; this maintains a backward compatibility).
 
-  return cpu_constructor(opt_name ? opt_name : names[2]);
+  if (opt_name && strlen(opt_name))
+    return cpu_constructor(opt_name);
+  return cpu_constructor(names[2]);
 }
 
 ProcessorConstructorList * ProcessorConstructor::processor_list;
