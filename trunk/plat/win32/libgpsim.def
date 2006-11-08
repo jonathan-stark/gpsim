@@ -55,9 +55,10 @@ EXPORTS
     ??0OpSub@@QAE@PAVExpression@@0@Z
     ??0OpXor@@QAE@PAVExpression@@0@Z
     ??0PCTraceObject@@QAE@PAVProcessor@@I@Z
+    ??0PCTraceType@@QAE@PAVProcessor@@I@Z
     ??0Package@@QAE@I@Z
     ??0Packet@@QAE@II@Z
-	??0PicLatchRegister@@QAE@PBDPAVPortRegister@@@Z
+    ??0PicLatchRegister@@QAE@PBDPAVPortRegister@@@Z
     ??0PinModule@@QAE@PAVPortModule@@IPAVIOPIN@@@Z
     ??0PicPortRegister@@QAE@PBDII@Z
     ??0PicTrisRegister@@QAE@PBDPAVPicPortRegister@@@Z
@@ -73,7 +74,9 @@ EXPORTS
     ??0RegisterCollection@@QAE@PAVProcessor@@PBDPAPAVRegister@@I@Z
     ??0RegisterExpression@@QAE@I@Z
     ??0RegisterReadTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
+    ??0RegisterReadTraceType@@QAE@PAVProcessor@@I@Z
     ??0RegisterWriteTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
+    ??0RegisterWriteTraceType@@QAE@PAVProcessor@@I@Z
     ??0Stimulus_Node@@QAE@PBD@Z
     ??0String@@QAE@PBD@Z
     ??0String@@QAE@PBD00@Z
@@ -86,6 +89,7 @@ EXPORTS
     ??0Value@@QAE@XZ
     ??0ValueStimulus@@QAE@PBD@Z
     ??0gpsimObject@@QAE@XZ
+    ??0instruction@@QAE@PAVProcessor@@II@Z
     ??0invalid_instruction@@QAE@PAVProcessor@@I@Z
     ??0invalid_instruction@@QAE@PAVProcessor@@II@Z
     ??0register_symbol@@QAE@PAVRegister@@@Z
@@ -305,6 +309,7 @@ EXPORTS
     ?event@BoolEventLogger@@QAEX_N@Z
     ?execute@AliasedInstruction@@UAEXXZ
     ?findStimulus@Symbol_Table@@QAEPAVstimulus@@PBD@Z
+    ?find@CCommandManager@@QAEPAVICommandHandler@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@PBD@Z
@@ -471,6 +476,7 @@ EXPORTS
     ?print@TriggerObject@@UAEXXZ
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
     ?printExpression@TriggerObject@@UAEHPADH@Z
+    ?printTraced@Breakpoint_Instruction@@UAEHPAVTrace@@IPADH@Z
     ?printTraced@TriggerObject@@UAEHPAVTrace@@IPADH@Z
     ?profile_keeper@@3VProfileKeeper@@A
     ?put@PortRegister@@UAEXI@Z
@@ -578,6 +584,7 @@ EXPORTS
     ?set_profile_start_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
     ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
     ?set_read_break@Breakpoints@@QAEHPAVProcessor@@I@Z
+    ?set_read_trace@Register@@UAEXAAVRegisterValue@@@Z
     ?set_read_value_break@Breakpoints@@QAEHPAVProcessor@@III@Z
     ?set_read_value_break@Breakpoints@@QAEHPAVProcessor@@IIII@Z
     ?set_stk_overflow_break@Breakpoints@@QAEHPAVProcessor@@@Z
@@ -586,6 +593,7 @@ EXPORTS
     ?set_update_rate@gpsimInterface@@QAEX_K@Z
     ?set_wdt_break@Breakpoints@@QAEHPAVProcessor@@@Z
     ?set_write_break@Breakpoints@@QAEHPAVProcessor@@I@Z
+    ?set_write_trace@Register@@UAEXAAVRegisterValue@@@Z
     ?set_write_value_break@Breakpoints@@QAEHPAVProcessor@@III@Z
     ?set_write_value_break@Breakpoints@@QAEHPAVProcessor@@IIII@Z
     ?set_xref@Value@@UAEXPAV1@@Z
@@ -651,6 +659,7 @@ EXPORTS
     ?toString@stimulus@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@symbol@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toggle@IOPIN@@UAEXXZ
+    ?toggleDrivingState@IOPIN@@UAE_NXZ
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?toupper@@YAAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AAV12@@Z
