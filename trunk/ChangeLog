@@ -1,3 +1,9 @@
+2006-11-08 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_macro.cc:
+	- Made some of the macro command console output	conditional
+        on the verbose variable to clean up the console output.
+	- Enhanced the console output of the cmd_macro::end_define().
+
 2006-11-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.cc: EEPROM window abort bug fixed on 2006-11-04
 	had a flaw. Hopefully that's been fixed now. (The problem was that
