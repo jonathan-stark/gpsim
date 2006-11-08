@@ -44,7 +44,7 @@ Boston, MA 02111-1307, USA.  */
   This software uses an event driven behavior model to simulate
   the LCD display. This means that when one of the I/O lines toggle
   the module will be notified and will respond to the event. A state
-  machine is used to control the behavior. 
+  machine is used to control the behavior.
 
 */
 
@@ -99,7 +99,7 @@ private:
   // this will never change.
 
   virtual void update_direction(unsigned int,bool refresh)
-  { 
+  {
     // Disallow pin direction changes.
   }
 
@@ -187,8 +187,6 @@ LcdWriteTT::LcdWriteTT(LcdDisplay *_lcd, unsigned int s)
 TraceObject *LcdWriteTT::decode(unsigned int tbi)
 {
 
-  unsigned int tv = gTrace->get(tbi);
-
   LcdWriteTO *lto = new LcdWriteTO(lcd);
   gTrace->addToCurrentFrame(lto);
 
@@ -203,7 +201,7 @@ int LcdWriteTT::dump_raw(unsigned tbi, char *buf, int bufsize)
   bufsize -= n;
 
   unsigned int tv = gTrace->get(tbi);
-  
+
   int m = snprintf(buf, bufsize," LCD Write 0x%08x", tv);
   if(m>0)
     n += m;
@@ -220,8 +218,6 @@ LcdReadTT::LcdReadTT(LcdDisplay *_lcd, unsigned int s)
 TraceObject *LcdReadTT::decode(unsigned int tbi)
 {
 
-  unsigned int tv = gTrace->get(tbi);
-
   LcdReadTO *lto = new LcdReadTO(lcd);
   gTrace->addToCurrentFrame(lto);
 
@@ -236,7 +232,7 @@ int LcdReadTT::dump_raw(unsigned tbi, char *buf, int bufsize)
   bufsize -= n;
 
   unsigned int tv = gTrace->get(tbi);
-  
+
   int m = snprintf(buf, bufsize," LCD Read 0x%08x", tv);
   if(m>0)
     n += m;
@@ -283,7 +279,7 @@ void LcdDisplay::update(void)
 }
 
 
-
+#if 0   // defined but not used
 static gint
 cursor_event (GtkWidget          *widget,
 	      GdkEvent           *event,
@@ -298,10 +294,11 @@ cursor_event (GtkWidget          *widget,
 
   return FALSE;
 }
+#endif
 
 
 //--------------------------------------------------------------
-// create_iopin_map 
+// create_iopin_map
 //
 //  This is where the information for the Module's package is defined.
 // Specifically, the I/O pins of the module are created.
@@ -315,7 +312,7 @@ void LcdDisplay::create_iopin_map(void)
   //   the pic I/O pins. Each pin has a unique pin number that
   //   describes it's position on the physical package. This
   //   pin can then be logically grouped with other pins to define
-  //   an I/O port. 
+  //   an I/O port.
 
   /*
   control_port = new ControlPort(this,8);
@@ -351,7 +348,7 @@ void LcdDisplay::create_iopin_map(void)
 
   // Define the I/O pins and assign them to the package.
   //   There are two things happening here. First, there is
-  //   a new I/O pin that is being created. For the binary 
+  //   a new I/O pin that is being created. For the binary
   //   indicator, both pins are inputs. The second thing is
   //   that the pins are "assigned" to the package. If we
   //   need to reference these newly created I/O pins (like
@@ -378,7 +375,7 @@ void LcdDisplay::create_iopin_map(void)
   // Provide a SignalControl object that the dataBus port can query
   // to determine which direction to drive the data bus.
   // (See <gpsim/ioports.h> for more documentation on port behavior.
-  //  But in summary, when an I/O port updates its I/O pins, it will 
+  //  But in summary, when an I/O port updates its I/O pins, it will
   //  query the pin drive direction via the SignalControl object. )
 
   SignalControl *pPortDirectionControl = new LCDSignalControl(this);
@@ -525,7 +522,7 @@ void LcdDisplay::UpdatePinState(ePins pin, char cState)
 
   // One of the control lines has changed states. So refresh the
   // hd44780 with the most current data bus value.
-  // If the data bus I/O's are inputs, then copy the I/O pin 
+  // If the data bus I/O's are inputs, then copy the I/O pin
   // data bus state to the chip data bus:
 
   if (m_hd44780->dataBusDirection())

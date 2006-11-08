@@ -62,11 +62,11 @@ public:
 */
 Module_Types available_modules[] =
 {
-  { "lcd_display", "lcd_2X20", LcdDisplay::construct},
-  { "lcd_dt161A",  "lcd_2X8",  LcdDisplayDisplaytech161A::construct},
+  { {"lcd_display", "lcd_2X20"}, LcdDisplay::construct},
+  { {"lcd_dt161A",  "lcd_2X8"},  LcdDisplayDisplaytech161A::construct},
 
   // No more modules
-  { NULL,NULL,NULL}
+  { {NULL, NULL}, NULL}
 };
 
 #ifdef __cplusplus
