@@ -6,6 +6,7 @@ TOC
 ---
 
  1.0  Install instructions
+  1.1 Dependencies
  2.0  How to Build gpsim without the gui
  3.0  How to Build gpsim without root privileges
  4.0  How to create your own gpsim distribution
@@ -13,26 +14,11 @@ TOC
  6.0  How to install gpsim from RPM's
  7.0  MAC OS
  8.0  Windows
- 9.0  Debian
-10.0  CVS 
+ 9.0  CVS & SVN
 
 1.0 Installation instructions
     -------------------------
 
-
-Starting with gpsim-0.18.0, two probably not so common packages:
-
-gtk+-extra
-
-are going to be needed. Please see the end of this file for instructions 
-on their installation.
-
-************* NOTE ****************
-
-for gpsim-0.20.0, gtk+-extra.0.99.9 is needed. See the gpsim web page on 
-how to get it.
-
-***********************************
 
 
 INSTALLATION (the most common way)
@@ -62,19 +48,6 @@ here.
 This will check your system for the proper tools necessary to build
 gpsim and then it will create Makefiles.
 
-***NOTE TO HACKERS***
-
-As of version gpsim-0.17.0, gpsim use the GNU Libtool for making
-shared libraries. This is good in that it helps make gpsim usable on
-more platforms. It's bad in that it does not create an executable
-until the 'make install' step. (It instead creates a script after the
-make step. This script may be invoked the same way gpsim was invoked
-prior to 0.17.0 .) Consequently, this makes gpsim difficult to
-debug. If you want to debug gpsim without having to install it, then
-you can disable the shared libraries feature:
-
-./configure  --disable-shared
-
 5) make all
 
 This will create the executable.
@@ -88,6 +61,15 @@ This will create the executable.
 This copies the executable into the /usr/local/bin subdirectory. 
 
 
+1.1 Dependencies
+
+The most significant non-common gpsim dependency is on the gtkextra
+package: http://gtkextra.sourceforge.net/
+
+Other dependencies include gtk-2.0, readline, popt. These packages
+should be installed on most distributions. However, it should be noted
+that the "developer" version are required if you're building gpsim
+from the source.
 
 
 2.0 HOW TO BUILD gpsim WITHOUT THE GUI
@@ -255,42 +237,12 @@ http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html
 for details on how to build and install gpsim Under Windows.
 
 
-9.0 Debian
-    ------
+9.0 CVS & SVN
+     ---------
 
-From Bas Wijnen <shevek@fmf.nl>:
+CVS is no longer supported. 
 
-To start, I couldn't use autoreconf.  My system has automake version
-1.4, 1.7 and 1.9 installed and 1.4 is used by default.  I think the
-program can specify a minimum version it needs, but don't know how.  It
-would be a good idea, because automake 1.4 doesn't work.  So I ran by hand:
-$ aclocal-1.9
-$ automake-1.9
-$ autoconf
-$ ./configure --prefix=/tmp --enable-gtk1
-
-The prefix is just so I don't have to be root to do make install.
-
-Then "make" gave me beforementioned errors, which can probably be
-fixed by upgrading flex, but for now I'm using the workaround patch I
-posted before. (This involves down grading to flex 2.5.4)
-
-After that it compiled, but failed linking because libreadline was not
-compiled in.  When checking, I didn't have the -dev package installed.
-Configure had noticed this, but continued anyway.  I think it should
-have aborted.
-
-After installing the package and recompiling, it didn't run, aborting
-with a missing symbol "bUseGUI" in libgpsimcli.so.  Probably the lib
-shouldn't be accessing symbols in the package, the symbols should be
-defined in the lib and used by the package instead.  However, I added
-the -rdynamic flag to the Makefile(.am), which is a workaround also
-"solving" the problem.
-
-10.0 CVS
-    ---
-
-See http://www.dattalo.com/gnupic/gpsim_cvs.html for instructions on
-how to retrieve gpsim from CVS.
+See http://gpsim.sourceforge.net/gpsim_cvs.html for instructions on
+how to retrieve gpsim from SVN.
 
 

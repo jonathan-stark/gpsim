@@ -1,3 +1,8 @@
+2006-11-08 Scott Dattalo <scott@dattalo.com>
+	* configure.ac: 0.22.0-RC4 - release candidate 4
+	* doc/gpsim.html: fix broken links.
+	* README, INSTALL: Minor documentation changes pertaining to 0.22.0
+
 2006-11-08 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_macro.cc:
 	- Made some of the macro command console output	conditional
