@@ -1,3 +1,6 @@
+2006-11-08 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc: Fixed compiler warning.
+
 2006-11-08 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 	* doc/gpsim_svn.html, doc/gpsim.html: doc/gpsim_cvs.html renamed to

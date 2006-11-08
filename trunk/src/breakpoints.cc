@@ -1826,6 +1826,7 @@ int Break_register_read_value::printTraced(Trace *pTrace, unsigned int tbi,
     int m = snprintf(pBuf,szBuf," read 0x%x from reg 0x%x", valueRead, address);
     return m>0 ? m : 0;
   }
+  return 0;
 }
 //========================================================================
 
