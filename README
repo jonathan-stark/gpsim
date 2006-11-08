@@ -44,7 +44,7 @@ Run gpsim by typing:
 $ gpsim --help
 
 gpsim - the GNUPIC simulator
-version: 0.21.11
+version: 0.22.0
  
  
 type help for help
@@ -181,6 +181,7 @@ Gui stuff:
   o Pinout/breadboard window
   o Stack Viewer
   o Scope Viewer
+  o Oscilloscope Viewer
 
 gpsim specific
   o Simulate multiple processors (not fully supported)
@@ -197,6 +198,7 @@ Peripherals supported:
   o PWM
   o A/D
   o UART 
+  o I2C
 
 BUGS:
 ----
