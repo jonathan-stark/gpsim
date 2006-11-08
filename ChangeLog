@@ -1,3 +1,8 @@
+2006-11-08 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+	* doc/gpsim_svn.html, doc/gpsim.html: doc/gpsim_cvs.html renamed to
+	  doc/gpsim_svn.html
+
 2006-11-08 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: Fixed -p<procname> command line
 	option. (actually, there is still an issue with gpsim using the -p
@@ -24,7 +29,7 @@
 	the fix assumed if the maxrow member of the register_sheet was 0
 	that there were no cells in the sheet. However, in the gtksheet
 	widget, maxrow can be 0 if there's only 1 row!)
-	
+
 2006-11-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_symbols.cc, gui/gui_src_asm.cc: Changed the way glib
 	lists were deallocated. This removes a glib compile warning.
@@ -50,11 +55,11 @@
 	gpsim_modules.cc.  This had the effect that "module load
 	push_button was saved into the netlist file, but "module type
 	push_button not created" would display when loading the netlist.
-	
+
 2006-11-06 Scott Dattalo <scott@dattalo.com>
 	* doc/gpsim.html, doc/gpsim_cvs.html: Fixed links. Changed CVS
 	references to SVN.
-	
+
 2006-11-05 Scott Dattalo <scott@dattalo.com>
 	* src/uart.cc, src/uart.h: TXIF is now only gets set if both TXEN
 	and SPEN are set. The USART_MODULE class interface was redesigned
@@ -68,7 +73,6 @@
 	regression/usart_test/usart_pir1v2.asm:
 	- The usart regression test noew makes sure that TXIF is not set
 	before TXEN and SPEN are set.
-	
 
 2006-11-05 Scott Dattalo <scott@dattalo.com>
 	* src/trigger.cc, src/trace.cc, src/breakpoints.cc: Cleaned up
