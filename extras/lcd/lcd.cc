@@ -178,8 +178,8 @@ void LcdReadTO::print(FILE *fp)
 }
 
 //----------------------------------------
-LcdWriteTT::LcdWriteTT(LcdDisplay *_lcd, unsigned int t, unsigned int s)
-  : LcdTraceType(_lcd,t,s)
+LcdWriteTT::LcdWriteTT(LcdDisplay *_lcd, unsigned int s)
+  : LcdTraceType(_lcd,s)
 {
 }
 
@@ -211,8 +211,8 @@ int LcdWriteTT::dump_raw(unsigned tbi, char *buf, int bufsize)
   return n;
 }
 //----------------------------------------
-LcdReadTT::LcdReadTT(LcdDisplay *_lcd, unsigned int t, unsigned int s)
-  : LcdTraceType(_lcd,t,s)
+LcdReadTT::LcdReadTT(LcdDisplay *_lcd, unsigned int s)
+  : LcdTraceType(_lcd,s)
 {
 }
 
@@ -401,7 +401,7 @@ void LcdDisplay::create_iopin_map(void)
 TraceType *LcdDisplay::getWriteTT()
 {
   if(!writeTT) {
-    writeTT = new LcdWriteTT(this,0,1);
+    writeTT = new LcdWriteTT(this,1);
     gTrace->allocateTraceType(writeTT);
   }
 
@@ -412,7 +412,7 @@ TraceType *LcdDisplay::getWriteTT()
 TraceType *LcdDisplay::getReadTT()
 {
   if(!readTT) {
-    readTT = new LcdReadTT(this,0,1);
+    readTT = new LcdReadTT(this,1);
     gTrace->allocateTraceType(readTT);
   }
   return readTT;
@@ -476,8 +476,8 @@ LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
     debug = atoi(getenv("GPSIM_LCD_DEBUG"));
 
   gTrace = &get_trace();
-  writeTT = new LcdWriteTT(this,0,1);
-  readTT = new LcdReadTT(this,0,1);
+  writeTT = new LcdWriteTT(this,1);
+  readTT = new LcdReadTT(this,1);
 
   interface = new LCD_Interface(this);
   get_interface().add_interface(interface);

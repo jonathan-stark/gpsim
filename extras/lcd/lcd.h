@@ -85,9 +85,8 @@ public:
   LcdDisplay *lcd;
 
   LcdTraceType(LcdDisplay *_lcd, 
-	       unsigned int t,
 	       unsigned int s)
-    : TraceType(t,s), lcd(_lcd)
+    : TraceType(s), lcd(_lcd)
   {
   }
 
@@ -96,7 +95,7 @@ public:
 
 class LcdWriteTT : public LcdTraceType {
 public:
-  LcdWriteTT(LcdDisplay *lcd, unsigned int t, unsigned int s);
+  LcdWriteTT(LcdDisplay *lcd, unsigned int s);
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
@@ -105,7 +104,7 @@ public:
 
 class LcdReadTT : public LcdTraceType {
 public:
-  LcdReadTT(LcdDisplay *lcd, unsigned int t, unsigned int s);
+  LcdReadTT(LcdDisplay *lcd, unsigned int s);
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(unsigned tbi, char *buf, int bufsize);

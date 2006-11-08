@@ -1,3 +1,6 @@
+2006-11-08 Scott Dattalo  <scott@dattalo.com>
+	* lcd.h, lcd.cc: Updated to newer Trace API.
+	
 2006-09-11 Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc: Fixed API call to gpsim core (Trace::dump_all() ).
 
