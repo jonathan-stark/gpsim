@@ -56,8 +56,9 @@ void Macro::add_argument(const char *new_arg)
     arguments.push_back(string(new_arg));
 
 
-  cout << "defining a paramter named: " << new_arg << endl;
-
+  if(verbose & 4) {
+    cout << "defining a paramter named: " << new_arg << endl;
+  }
 }
 
 //----------------------------------------
@@ -75,8 +76,9 @@ void Macro::add_body(const char *new_line)
 
   body.push_back(string(new_line));
 
-  cout << "macro body: " << new_line << endl;
-
+  if(verbose & 4) {
+    cout << "macro body: " << new_line << endl;
+  }
 }
 
 //----------------------------------------
@@ -303,5 +305,9 @@ void cmd_macro::add_body(const char *line)
 
 void cmd_macro::end_define(const char *opt_name)
 {
-  cout << "ending macro definition\n";
+  if(verbose & 4) {
+    GetUserInterface().GetConsole().Printf(
+      "ending macro definition of '%s'\n", theMacro->name().c_str());
+  }
+  theMacro = 0;
 }
