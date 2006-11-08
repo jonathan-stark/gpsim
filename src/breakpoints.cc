@@ -100,8 +100,12 @@ int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
       cyc = (cyc<<32) | arg1;
 
       // The cycle counter does its own break points.
-      if(get_cycles().set_break(cyc, f1, breakpoint_number))
+      if(get_cycles().set_break(cyc, f1, breakpoint_number)) {
+        if(cpu != NULL) {
+          cpu->NotifyBreakpointSet(bs, f1);
+        }
 	      return(breakpoint_number);
+      }
       else
 	      bs.type = BREAK_CLEAR;
       }
