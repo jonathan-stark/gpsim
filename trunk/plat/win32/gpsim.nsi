@@ -28,10 +28,10 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "gpsim"
 !ifndef PRODUCT_VERSION
-!define PRODUCT_VERSION "0.21.12-pre"
+!define PRODUCT_VERSION "0.22.0"
 !endif
 !define PRODUCT_PUBLISHER "www.dattalo.com"
-!define PRODUCT_WEB_SITE "http://www.dattalo.com/gnupic/gpsim.html"
+!define PRODUCT_WEB_SITE "http://gpsim.sourceforge.net/gpsim.html"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"

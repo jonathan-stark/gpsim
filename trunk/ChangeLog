@@ -4,6 +4,8 @@
 	  extras/lcd/lcdgui.cc, extras/lcd/module_manager.cc:
 	  removed compiler warnings
 	* doc/gpsim.html, doc/gpsim_svn.html: changed encoding to UTF-8
+	* plat/win32/gpsim.nsi: changed PRODUCT_WEB_SITE URL and
+	  PRODUCT_VERSION
 
 2006-11-08 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: Fixed compiler warning.
