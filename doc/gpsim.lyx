@@ -5695,8 +5695,136 @@ I/O Pins
 Logic
 \end_layout
 
+\begin_layout Standard
+The only attributes supported be the logic devices are the standard 
+\emph on
+.xpos
+\emph default
+ and 
+\emph on
+.ypos
+\emph default
+ breadboard positions.
+ 
+\begin_inset Note Greyedout
+status collapsed
+
+\begin_layout Standard
+FIXME There should be attributes to specify the switching characteristics.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+and2 - Two input AND gate
+\end_layout
+
+\begin_layout Subsubsection*
+I/O pins
+\end_layout
+
+\begin_layout Standard
+.in0 - First input
+\end_layout
+
+\begin_layout Standard
+.in1 - First input
+\end_layout
+
+\begin_layout Standard
+.out - Output
+\end_layout
+
+\begin_layout Subsection*
+or2 - Two input OR gate
+\end_layout
+
+\begin_layout Standard
+.in0 - First input
+\end_layout
+
+\begin_layout Standard
+.in1 - First input
+\end_layout
+
+\begin_layout Standard
+.out - Output
+\end_layout
+
+\begin_layout Subsection*
+xor2 - Two input XOR gate
+\end_layout
+
+\begin_layout Standard
+.in0 - First input
+\end_layout
+
+\begin_layout Standard
+.in1 - First input
+\end_layout
+
+\begin_layout Standard
+.out - Output
+\end_layout
+
+\begin_layout Subsection*
+not - Inverter
+\end_layout
+
+\begin_layout Standard
+.in0 - Input
+\end_layout
+
+\begin_layout Standard
+.out - Output
+\end_layout
+
 \begin_layout Subsection
 I2C EEPROM
+\end_layout
+
+\begin_layout Standard
+There are currently three I2C EEPROMs supported: I2C-EEPROM2k, I2C-EEPROM16k,
+ and I2C-EEPROM256K.
+\begin_inset Note Greyedout
+status open
+
+\begin_layout Standard
+FIXME.
+ Probably should have attributes for configuring the prom size.
+ Also, there's currently no way to query or modify the prom contents.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.A0 - 
+\end_layout
+
+\begin_layout Standard
+.A1 -
+\end_layout
+
+\begin_layout Standard
+.SCL -
+\end_layout
+
+\begin_layout Standard
+.SDA -
+\end_layout
+
+\begin_layout Standard
+.WP
 \end_layout
 
 \begin_layout Subsection
