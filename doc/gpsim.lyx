@@ -1973,7 +1973,12 @@ The
 \emph on
 module
 \emph default
- command is used to load and query external modules.
+ command is used to load and query external modules (see section 
+\begin_inset LatexCommand \ref{cha:Modules}
+
+\end_inset
+
+ for more information about gpsim modules).
  A module is a special piece of software that can extend gpsim in some manner.
  LED's and switches are examples of modules.
  A module library is collection of modules.
@@ -3704,7 +3709,274 @@ FIXME: The scope window still needs some work...
 \begin_layout Standard
 The Scope Window graphs I/O pin states.
  It is similar to an oscilloscope or logic analyzer.
- It can be controlled either from the command line or from 
+ It can be controlled either from the command line or from the gui.
+ Currently only the digital state of I/O pins are supported.
+\end_layout
+
+\begin_layout Chapter
+Scripting and Configuring
+\end_layout
+
+\begin_layout Standard
+gpsim does not have a native scripting language per se.
+ However it is possible to place gpsim commands into a file and load them
+ later.
+ This is useful for loading modules and stimuli and connecting various devices
+ together.
+ By convention, gpsim's configuration files have the extension 
+\emph on
+.stc
+\emph default
+, for 
+\emph on
+st
+\emph default
+artup 
+\emph on
+c
+\emph default
+onfiguration.
+ 
+\end_layout
+
+\begin_layout Section
+Embedded Commands
+\end_layout
+
+\begin_layout Standard
+If you're using gputils, it is possible to embed configuration commands
+ directly into your PIC assembly source.
+ The gputils supplied include file 
+\emph on
+coff.inc
+\emph default
+ contains several macros that embed simulation command into a COFF and COD
+ files.
+\end_layout
+
+\begin_layout Subsection
+.sim macro
+\end_layout
+
+\begin_layout LyX-Code
+; Simulator Command
+\end_layout
+
+\begin_layout LyX-Code
+.sim macro x
+\end_layout
+
+\begin_layout LyX-Code
+  .direct "e", x
+\end_layout
+
+\begin_layout LyX-Code
+  endm
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+\emph on
+.sim
+\emph default
+ macro allows gpsim configuration commands to be embedded in the PIC source.
+ While gpsim loads a .cod file, the commands in the 
+\emph on
+.sim
+\emph default
+ macros are collected.
+ After the .cod file is loaded, the commands are redirected to gpsim's command
+ line interpreter in the order they were received.
+\end_layout
+
+\begin_layout Standard
+Here's an example of switch module being loaded and configured:
+\end_layout
+
+\begin_layout LyX-Code
+ ;# Module libraries:
+\end_layout
+
+\begin_layout LyX-Code
+ .sim "module library libgpsim_modules"
+\end_layout
+
+\begin_layout LyX-Code
+ .sim "module load switch SW1"
+\end_layout
+
+\begin_layout LyX-Code
+ .sim "SW1.state=false"
+\end_layout
+
+\begin_layout LyX-Code
+ .sim "SW1.xpos = 216.0"
+\end_layout
+
+\begin_layout LyX-Code
+ .sim "SW1.ypos = 156.0"
+\end_layout
+
+\begin_layout LyX-Code
+ .sim "SW1.Ropen = 1.0e8"
+\end_layout
+
+\begin_layout Standard
+This loads gpsim's module library, instantiates a switch module, and configures
+ the switch's attributes.
+\end_layout
+
+\begin_layout Subsection
+.command macro
+\end_layout
+
+\begin_layout LyX-Code
+.command macro x
+\end_layout
+
+\begin_layout LyX-Code
+  .direct "c", x
+\end_layout
+
+\begin_layout LyX-Code
+  endm
+\end_layout
+
+\begin_layout Standard
+The 
+\family typewriter
+\emph on
+.command
+\emph default
+ macro is similar to a 
+\emph on
+.sim
+\emph default
+ macro except that it associates a gpsim command with a particular instruction.
+ This is useful for changing attribute values at different points of the
+ program.
+\end_layout
+
+\begin_layout Subsection
+.assert macro
+\end_layout
+
+\begin_layout LyX-Code
+; Assertion
+\end_layout
+
+\begin_layout LyX-Code
+.assert macro x
+\end_layout
+
+\begin_layout LyX-Code
+ .direct "a", x
+\end_layout
+
+\begin_layout LyX-Code
+ endm
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+.assert
+\emph default
+ macro provides a source code mechanism for setting breakpoints (see chapter
+ 
+\begin_inset LatexCommand \ref{cha:Assertions-and-Extended}
+
+\end_inset
+
+).
+ An assertion is an expression associated with a specific instruction.
+ It essential means, 
+\begin_inset Quotes eld
+\end_inset
+
+If the expression at this instruction evaluates to false, then halt the
+ simulation.
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout LyX-Code
+   ; Close the switch because of capacitance portc1 will go high after a
+ delay:
+\end_layout
+
+\begin_layout LyX-Code
+   ; R=145, C=4.2e-6 TC=6.11e-4 or 1527 cycles 0-2 volts requires 0.51 Tc
+\end_layout
+
+\begin_layout LyX-Code
+   .command "SW1.state=true"
+\end_layout
+
+\begin_layout LyX-Code
+        nop
+\end_layout
+
+\begin_layout LyX-Code
+        ; portc0 should be same as portc1
+\end_layout
+
+\begin_layout LyX-Code
+   .assert "(portc & 3) == 0, 
+\backslash
+"SW1 closed, cap holds low
+\backslash
+""
+\end_layout
+
+\begin_layout LyX-Code
+        nop
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout Standard
+In this example, the 
+\emph on
+.command
+\emph default
+ macro writes to the switch module's 
+\emph on
+.state
+\emph default
+ attribute (see section 
+\begin_inset LatexCommand \ref{sub:Switches-&-Resistors}
+
+\end_inset
+
+).
+ Just prior to executing the first nop instruction, the switch will be closed.
+ The 
+\emph on
+.assert
+\emph default
+ macro at the very next instruction makes sure that the expected state is
+ seen on PORTC.
+\end_layout
+
+\begin_layout Section
+Sockets
+\end_layout
+
+\begin_layout Standard
+gpsim supports a socket interface.
+ This is inhibited by default.
+ Advanced users may wish to study code in the 
+\emph on
+examples/scripts
+\emph default
+ subdirectory.
+ This code not distributed and is only available in the subversion repository.
 \end_layout
 
 \begin_layout Chapter
@@ -3891,20 +4163,6 @@ SW1.state = false
 \begin_layout Standard
 This assignment writes to the state attribute of a switch module named SW1.
  
-\end_layout
-
-\begin_layout Subsection*
-Embedded Simulation Scripts
-\end_layout
-
-\begin_layout Standard
-refer to the section on gpsim configuration scripts.
- Explain how a script can be embedded in the asm source code.
- Explain how this is different from a command assertion; in other words
- the embedded scripts are extracted from the source whenever the source
- is loaded.
- This collection of commands is then invoked all at once - just before control
- is given over to the user.
 \end_layout
 
 \begin_layout Chapter
@@ -5113,6 +5371,16 @@ PullDown
 
 \begin_layout Chapter
 Modules
+\begin_inset LatexCommand \index{Modules}
+
+\end_inset
+
+
+\begin_inset LatexCommand \label{cha:Modules}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5595,6 +5863,11 @@ Encoder
 
 \begin_layout Subsection
 USART
+\begin_inset LatexCommand \index{USART module}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5693,6 +5966,11 @@ I/O Pins
 
 \begin_layout Subsection
 Logic
+\begin_inset LatexCommand \index{Logic}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5719,7 +5997,12 @@ FIXME There should be attributes to specify the switching characteristics.
 \end_layout
 
 \begin_layout Subsection*
-and2 - Two input AND gate
+and2
+\begin_inset LatexCommand \index{and2}
+
+\end_inset
+
+ - Two input AND gate
 \end_layout
 
 \begin_layout Subsubsection*
@@ -5739,7 +6022,12 @@ I/O pins
 \end_layout
 
 \begin_layout Subsection*
-or2 - Two input OR gate
+or2
+\begin_inset LatexCommand \index{or2}
+
+\end_inset
+
+ - Two input OR gate
 \end_layout
 
 \begin_layout Standard
@@ -5755,7 +6043,12 @@ or2 - Two input OR gate
 \end_layout
 
 \begin_layout Subsection*
-xor2 - Two input XOR gate
+xor2
+\begin_inset LatexCommand \index{xor2}
+
+\end_inset
+
+ - Two input XOR gate
 \end_layout
 
 \begin_layout Standard
@@ -5771,7 +6064,12 @@ xor2 - Two input XOR gate
 \end_layout
 
 \begin_layout Subsection*
-not - Inverter
+not
+\begin_inset LatexCommand \index{not}
+
+\end_inset
+
+ - Inverter
 \end_layout
 
 \begin_layout Standard
@@ -5784,6 +6082,11 @@ not - Inverter
 
 \begin_layout Subsection
 I2C EEPROM
+\begin_inset LatexCommand \index{I2C EEPROM}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5828,11 +6131,132 @@ I/O Pins
 \end_layout
 
 \begin_layout Subsection
+\begin_inset LatexCommand \label{sub:Switches-&-Resistors}
+
+\end_inset
+
 Switches
+\begin_inset LatexCommand \index{Switches}
+
+\end_inset
+
+ & Resistors
+\begin_inset LatexCommand \index{Resistors}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+switch
+\emph default
+ module is a model of a simple two terminal switch.
+ It may be controlled either from the command line or the breadboard gui.
+ The 
+\emph on
+switch
+\emph default
+ module's open and closed resistance are controlled by attributes.
+ Thus a two terminal resistor can be modeled as a switch that is always
+ closed (or open).
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+.Ropen - Switch resistance in ohms when the switch is opened.
+\end_layout
+
+\begin_layout Standard
+.Rclosed - Switch resistance in ohms when the switch is closed.
+\end_layout
+
+\begin_layout Standard
+.state - Switch state.
+ When 
+\emph on
+false
+\emph default
+ the switch is open.
+ The 
+\emph on
+.state
+\emph default
+ attribute is writable.
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.A - One side
+\end_layout
+
+\begin_layout Standard
+.B - The other side
 \end_layout
 
 \begin_layout Subsection
-Resistors & Voltage Sources
+Voltage Sources
+\begin_inset LatexCommand \index{Voltage Sources}
+
+\end_inset
+
+, Resistors
+\begin_inset LatexCommand \index{Resistors}
+
+\end_inset
+
+, and Capacitors
+\begin_inset LatexCommand \index{Capacitors}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+pullup
+\emph default
+ and 
+\emph on
+pulldown
+\emph default
+ modules are two terminal devices with one terminal tied to a voltage source.
+ Their voltage, resistance, and pin capacitance are controllable via attributes.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+.voltage - DC voltage
+\end_layout
+
+\begin_layout Standard
+.resistance - resistance in ohms between the I/O pin and the voltage source.
+\end_layout
+
+\begin_layout Standard
+.capacitance - capacitance in farads between the I/O pin and ground.
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.pin - the only pin exposed.
 \end_layout
 
 \begin_layout Section
@@ -5847,6 +6271,11 @@ In addition to the standard modules, third are separately distribute gpsim
 
 \begin_layout Subsection
 Character LCD - HD44780
+\begin_inset LatexCommand \index{HD44780}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -5855,6 +6284,11 @@ This module emulates the ubiquitous HD44780 character LCDs.
 
 \begin_layout Subsection
 Graphic LCD - SED1530
+\begin_inset LatexCommand \index{SED1530}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -6171,7 +6605,7 @@ The target code simulated by gpsim can be supplied by a hex file, or more
 \end_layout
 
 \begin_layout Chapter
-The ICD
+The ICD- Not Supported in versions 0.21.0 and later
 \end_layout
 
 \begin_layout Standard
@@ -6444,6 +6878,149 @@ Fix the UI to give more feedback about what's happening during long delays.
 \begin_layout Itemize
 Better error detection.
  gpsim doesn't always see that the target is not functional.
+\end_layout
+
+\begin_layout Chapter
+Examples
+\end_layout
+
+\begin_layout Standard
+The 
+\emph on
+examples/
+\emph default
+ subdirectory contains several examples.
+ The 
+\emph on
+examples/projects/
+\emph default
+ subdirectory demonstrate sample projects that can serve as templates for
+ new projects.
+ In addition, the 
+\emph on
+examples/modules
+\emph default
+ subdirectory contains several examples illustrating how to use gpsim's
+ various modules.
+ Finally, as described in chapter 
+\begin_inset LatexCommand \ref{cha:Regression-Tests}
+
+\end_inset
+
+, gpsim's regression tests illustrate many powerful debugging techniques
+ that have not been fully documented.
+\end_layout
+
+\begin_layout Subsubsection*
+usart_gui example
+\end_layout
+
+\begin_layout Standard
+Each example contains a brief 
+\emph on
+README
+\emph default
+ explaning its purpose.
+ For example, the 
+\emph on
+README
+\emph default
+ for the 
+\emph on
+usart_gui
+\emph default
+ example in the 
+\emph on
+examples/modules
+\emph default
+ directory contains
+\end_layout
+
+\begin_layout LyX-Code
+The tests the USART module with the GUI fix.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+The code for a 16f628 PIC is used.
+ The code first transmits a string of
+\end_layout
+
+\begin_layout LyX-Code
+characters, which are instructions to the user, to the USART module which
+\end_layout
+
+\begin_layout LyX-Code
+will then be displayed on its GUI.
+ This verifies that the USART can receive
+\end_layout
+
+\begin_layout LyX-Code
+serial data.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+When the focus is on the USART GUI window, characters typed on the keyboard
+\end_layout
+
+\begin_layout LyX-Code
+are sent from the USART to the PIC and then retransmitted from the PIC back
+\end_layout
+
+\begin_layout LyX-Code
+to the USART.
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+If all works, the typed characters will be displayed in the GUI text window
+\end_layout
+
+\begin_layout LyX-Code
+of the USART.
+ Both transmit and receive must be functioning for this to
+\end_layout
+
+\begin_layout LyX-Code
+happen.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Fixme
+\emph default
+ - we really need to document all of the examples!
+\end_layout
+
+\begin_layout Chapter
+Regression Tests
+\begin_inset LatexCommand \label{cha:Regression-Tests}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Starting with version 0.22.0, gpsim distributes regression tests.
+ The purpose of a regression test is to validate correctness.
+ The tests are designed to exercise many of the aspects of gpsim and gpsim's
+ modules.
+ While designed primarily for developers though, the regression tests also
+ serve as a rich source of examples.
+ There are many features gpsim's developers will tuck away into a regression
+ test and fail to document!
 \end_layout
 
 \begin_layout Chapter
