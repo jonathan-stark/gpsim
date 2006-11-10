@@ -1,3 +1,16 @@
+2006-11-10 Borut Razem <borut.razem@siol.net>
+	* configure.ac, doc/gpsimWin32.html, extra/graphic_lcd/configure.ac,
+	  gpsim.spec.in, gui/gui_menu.c, modules/README: corrected all url-s
+	  from http://www.dattalo.com/gnupic/gpsim.html to
+	  http://gpsim.sourceforge.net/gpsim.html
+	* regression/*.lkr, regression/*.asm, regression/Makefile,
+	  src/p16f8x.*, src/pm_rd.*, src/psp.*: added svn properties
+	  svn:eol-style native, svn:keywords "Author Date Id Revision"
+	* plat/win32/gpsim.nsi, plat/win32/makefile.mingw:
+	  extract PRODUCT_WEB_SITE from ../../configure.ac
+	* doc/gpsim.html, doc/gpsim_svn.html, doc/gpsim.ico:
+	  added favicon
+
 2006-11-09 Scott Dattalo <scott@dattalo.com>
 	* configure.ac, extras/graphic_lcd/configure.ac: 0.22.0 Release
 
@@ -322,7 +335,6 @@
 	* examples/modules/mod_test/README: added
 	* examples/modules/usart_test/usart.asm: removed
 
-
 2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* src/ssp.cc: Fixed uninitialized class data.
 
@@ -344,7 +356,6 @@
 	stimulus to be accessed programmatically (that is from within the
 	PIC assembly code). This allows an assembly program to directly
 	control the simulation environment.
-
 
 2006-10-17 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h: Changed an empty trace entry from 0

@@ -6,9 +6,10 @@
 MAKENSYS = "/cygdrive/c/Program Files/NSIS/makensis"
 
 DATE = $(shell date +%Y%m%d)
-VERSION = $(shell awk '/^AC_INIT\(\[[^]]*\], \[[^]]*\].*\).*/ {print(gensub("^AC_INIT\\(\\[[^]]*\\], \\[([^]]*)\\].*\\).*", "\\1", "1"))}' ../../configure.ac)
+VERSION =  $(shell awk '/^AC_INIT\(\[[^]]*\], \[[^]]*\].*\).*/ {print(gensub("^AC_INIT\\(\\[[^]]*\\], \\[([^]]*)\\].*\\).*", "\\1", "1"))}' ../../configure.ac)
+WEB_SITE = $(shell awk '/^AC_INIT\(\[[^]]*\], \[[^]]*\], \[<[^>]*>\].*\).*/ {print(gensub("^AC_INIT\\(\\[[^]]*\\], \\[[^]]*\\], \\[<([^>]*)>\\].*\\).*", "\\1", "1"))}' ../../configure.ac)
 
 all:
-	$(MAKENSYS) /DDATE=$(DATE) /DPRODUCT_VERSION=$(VERSION) gpsim.nsi
+	$(MAKENSYS) /DDATE=$(DATE) /DPRODUCT_VERSION=$(VERSION) /DPRODUCT_WEB_SITE=$(WEB_SITE) gpsim.nsi
 
 clean:
