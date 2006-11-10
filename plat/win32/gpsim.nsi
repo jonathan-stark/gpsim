@@ -30,8 +30,10 @@
 !ifndef PRODUCT_VERSION
 !define PRODUCT_VERSION "0.22.0"
 !endif
-!define PRODUCT_PUBLISHER "www.dattalo.com"
+!ifndef PRODUCT_WEB_SITE
 !define PRODUCT_WEB_SITE "http://gpsim.sourceforge.net/gpsim.html"
+!endif
+!define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -637,7 +639,7 @@ Section Uninstall
   RMDir "$INSTDIR\examples\projects"
   RMDir "$INSTDIR\examples\scripts"
   RMDir "$INSTDIR\examples"
-  
+
   RMDir /r "$INSTDIR\extras\graphic_lcd"
   RMDir "$INSTDIR\extras\lcd\examples"
   RMDir "$INSTDIR\extras\lcd"

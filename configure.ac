@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([gpsim], [0.22.0], [<URL:http://www.dattalo.com/gnupic/gpsim.html>])
+AC_INIT([gpsim], [0.22.1], [<URL:http://gpsim.sourceforge.net/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
@@ -13,7 +13,7 @@ AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
 dnl --disable-gui : turn off gui support (cli only)
-dnl    The default is to have the gui. 
+dnl    The default is to have the gui.
 
 AC_ARG_ENABLE(gui,
      [  --disable-gui           Only use the cli and not the gui],
@@ -156,7 +156,7 @@ esac
 # Host filesystem options
 case "${host}" in
   *mingw* | *-pc-os2_emx | *-pc-os2-emx | *djgpp* )
-    AC_DEFINE(HAVE_DOS_BASED_FILE_SYSTEM, 1, 
+    AC_DEFINE(HAVE_DOS_BASED_FILE_SYSTEM, 1,
       [Define if your host uses a DOS based file system. ])
     ;;
 esac

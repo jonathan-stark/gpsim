@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([graphicLCD], [0.3.0], [<URL:http://www.dattalo.com/gnupic/gpsim.html>])
+AC_INIT([graphicLCD], [0.3.0], [<URL:http://gpsim.sourceforge.net/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
@@ -81,7 +81,7 @@ esac
 # Host filesystem options
 case "${host}" in
   *mingw* | *-pc-os2_emx | *-pc-os2-emx | *djgpp* )
-    AC_DEFINE(HAVE_DOS_BASED_FILE_SYSTEM, 1, 
+    AC_DEFINE(HAVE_DOS_BASED_FILE_SYSTEM, 1,
       [Define if your host uses a DOS based file system. ])
     ;;
 esac

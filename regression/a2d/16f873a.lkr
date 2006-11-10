@@ -1,5 +1,5 @@
 // Sample linker command file for 16F873
-// $Id: 16f873a.lkr 1522 2006-04-08 01:45:56Z roy_r_rankin $
+// $Id$
 
 LIBPATH  .
 

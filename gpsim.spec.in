@@ -8,7 +8,7 @@ Source: http://www.dattalo.com/gnupic/gpsim-@VERSION@.tar.gz
 Packager: Scott Dattalo <scott@dattalo.com>
 Vendor: Scott Dattalo <scott@dattalo.com>
 Distribution: Red Hat Linux
-URL: http://www.dattalo.com/gnupic/gpsim.html
+URL: http://gpsim.sourceforge.net/gpsim.html
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 
 %description
@@ -44,7 +44,7 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 %defattr(-, root, root)
 %{_bindir}/gpsim
 %{_libdir}/libgpsim*.so*
-%doc AUTHORS COPYING ChangeLog INSTALL NEWS README 
+%doc AUTHORS COPYING ChangeLog INSTALL NEWS README
 %doc doc/gpsim.lyx doc/gpsim.pdf
 
 %files devel

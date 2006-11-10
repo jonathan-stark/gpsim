@@ -67,8 +67,8 @@ GtkItemFactory *item_factory=0;
 
 extern GUI_Processor *gpGuiProcessor;
 
-static void 
-do_quit_app(GtkWidget *widget) 
+static void
+do_quit_app(GtkWidget *widget)
 {
 	exit_gpsim();
 }
@@ -109,7 +109,7 @@ show_message (char *title, char *message)
 
 }
 //========================================================================
-static void 
+static void
 about_cb (gpointer             callback_data,
 	  guint                callback_action,
 	  GtkWidget           *widget)
@@ -119,7 +119,7 @@ about_cb (gpointer             callback_data,
 		 "by T. Scott Dattalo - mailto:scott@dattalo.com\n"
 		 "   Ralf Forsberg - mailto:rfg@home.se\n"
 		 "   Borut Ra" "\xc5\xbe" "em - mailto:borut.razem@siol.net\n\n"
-		 "gpsim homepage: http://www.dattalo.com/gnupic/gpsim.html\n"
+		 "gpsim homepage: http://gpsim.sourceforge.net/gpsim.html\n"
 		 "gpsimWin32: http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html\n");
 
 }
@@ -139,13 +139,13 @@ about_cb (gpointer             callback_data,
 //
 // Creates a GtkColorButton and places it into a parent widget.
 // When the color button is clicked and changed, the signal will
-// call back into this class and keep track of the selected 
+// call back into this class and keep track of the selected
 // color state.
 class SourceBrowserPreferences;
 class ColorButton
 {
 public:
-  ColorButton (GtkWidget *pParent, 
+  ColorButton (GtkWidget *pParent,
 	       TextStyle *pStyle,
 	       const char *label,
 	       SourceBrowserPreferences *
@@ -220,7 +220,7 @@ private:
 class FontSelection
 {
 public:
-  FontSelection (GtkWidget *pParent, 
+  FontSelection (GtkWidget *pParent,
 		 SourceBrowserPreferences *
 		 );
   static void setFont_cb(GtkFontButton *widget,
@@ -335,8 +335,8 @@ ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
   gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
   gtk_widget_show(colorButton);
 
-  gtk_signal_connect (GTK_OBJECT(colorButton), 
-		      "color-set", 
+  gtk_signal_connect (GTK_OBJECT(colorButton),
+		      "color-set",
 		      GTK_SIGNAL_FUNC(setColor_cb),
 		      this);
   const int cBORDER = 10; // pixels
@@ -389,7 +389,7 @@ MarginButton::MarginButton(GtkWidget *pParent, const char *pName,
   gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 10);
 
   gtk_signal_connect (GTK_OBJECT(m_button),
-		      "toggled", 
+		      "toggled",
 		      GTK_SIGNAL_FUNC(toggle_cb),
 		      this);
 }
@@ -426,7 +426,7 @@ TabButton::TabButton(GtkWidget *pParent, GtkWidget *pButton,
   gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 5);
 
   gtk_signal_connect (GTK_OBJECT(m_button),
-		      "toggled", 
+		      "toggled",
 		      GTK_SIGNAL_FUNC(toggle_cb),
 		      this);
 }
@@ -460,8 +460,8 @@ FontSelection::FontSelection (GtkWidget *pParent,
   gtk_box_pack_start (GTK_BOX(hbox),m_fontButton,FALSE, FALSE, 0);
   gtk_widget_show(m_fontButton);
 
-  gtk_signal_connect (GTK_OBJECT(m_fontButton), 
-		      "font-set", 
+  gtk_signal_connect (GTK_OBJECT(m_fontButton),
+		      "font-set",
 		      GTK_SIGNAL_FUNC(setFont_cb),
 		      this);
 
@@ -488,7 +488,7 @@ void FontSelection::setFont()
 #if 0 // defined but not used
 static bool isButtonEvent (GdkEventType type)
 {
-  return 
+  return
     type == GDK_BUTTON_PRESS ||
     type == GDK_2BUTTON_PRESS ||
     type == GDK_3BUTTON_PRESS ||
@@ -563,13 +563,13 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *colorVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
-    m_LabelColor    = new ColorButton(colorVbox, 
+    m_LabelColor    = new ColorButton(colorVbox,
 				      m_pParent->mLabel,
 				      "Label", this);
-    m_MnemonicColor = new ColorButton(colorVbox, 
+    m_MnemonicColor = new ColorButton(colorVbox,
 				      m_pParent->mMnemonic,
 				      "Mnemonic", this);
-    m_SymbolColor   = new ColorButton(colorVbox, 
+    m_SymbolColor   = new ColorButton(colorVbox,
 				      m_pParent->mSymbol,
 				      "Symbols", this);
     m_ConstantColor = new ColorButton(colorVbox,
@@ -616,17 +616,17 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 			   -1, this);
 
 
-    // Source browser margin 
+    // Source browser margin
     GtkWidget *marginFrame = gtk_frame_new ("Margin");
     gtk_box_pack_start (GTK_BOX (hbox), marginFrame, FALSE, TRUE, 0);
     GtkWidget *marginVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (marginFrame), marginVbox);
 
-    m_LineNumbers = new MarginButton(marginVbox, "Line Numbers", 
+    m_LineNumbers = new MarginButton(marginVbox, "Line Numbers",
 				     MarginButton::eLineNumbers, this);
-    m_Addresses   = new MarginButton(marginVbox, "Addresses", 
+    m_Addresses   = new MarginButton(marginVbox, "Addresses",
 				     MarginButton::eAddresses, this);
-    m_Opcodes     = new MarginButton(marginVbox, "Opcodes", 
+    m_Opcodes     = new MarginButton(marginVbox, "Opcodes",
 				     MarginButton::eOpcodes, this);
 
     label = gtk_label_new("Margins");
@@ -640,7 +640,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     GtkWidget *frame = gtk_frame_new ("Sample");
     gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
-    
+
     m_Notebook = gtk_notebook_new();
     //m_currentTabPosition = m_pParent->getTabPosition();
     //gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
@@ -832,7 +832,7 @@ file_selection_ok (GtkWidget        *w,
 
 extern int gui_question(char *question, char *a, char *b);
 
-static GtkItemFactoryCallback 
+static GtkItemFactoryCallback
 fileopen_dialog(gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
@@ -855,12 +855,12 @@ fileopen_dialog(gpointer             callback_data,
     gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
 			       "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
 			       GTK_OBJECT (window));
-      
+
     button = gtk_button_new_with_label ("Hide Fileops");
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
-			(GtkSignalFunc) file_selection_hide_fileops, 
+			(GtkSignalFunc) file_selection_hide_fileops,
 			(gpointer) window);
-    gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area), 
+    gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area),
 			button, FALSE, FALSE, 0);
     gtk_widget_show (button);
 
@@ -868,7 +868,7 @@ fileopen_dialog(gpointer             callback_data,
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
 			(GtkSignalFunc) gtk_file_selection_show_fileop_buttons,
 			(gpointer) window);
-    gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area), 
+    gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area),
 			button, FALSE, FALSE, 0);
     gtk_widget_show (button);
   }
@@ -880,7 +880,7 @@ fileopen_dialog(gpointer             callback_data,
 
 
 // Menuhandler for Windows menu buttons
-static GtkItemFactoryCallback 
+static GtkItemFactoryCallback
 toggle_window (gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
@@ -890,9 +890,9 @@ toggle_window (gpointer             callback_data,
   menu_item = gtk_item_factory_get_item (item_factory,
 					 gtk_item_factory_path_from_widget (widget));
   if(gpGuiProcessor && menu_item) {
-    
+
     int view_state =  GTK_CHECK_MENU_ITEM(menu_item)->active ? VIEW_SHOW : VIEW_HIDE;
-			
+
     switch(callback_action) {
     case WT_opcode_source_window:
       gpGuiProcessor->program_memory->ChangeView(view_state);
@@ -941,43 +941,43 @@ toggle_window (gpointer             callback_data,
 
 //========================================================================
 // Button callbacks
-static void 
+static void
 runbutton_cb(GtkWidget *widget)
 {
   if(gpGuiProcessor && gpGuiProcessor->cpu)
     gpGuiProcessor->cpu->pma->run();
 }
 
-static void 
+static void
 stopbutton_cb(GtkWidget *widget)
 {
   if(gpGuiProcessor && gpGuiProcessor->cpu)
     gpGuiProcessor->cpu->pma->stop();
 }
-    
-static void 
+
+static void
 stepbutton_cb(GtkWidget *widget)
 {
-  if(gpGuiProcessor && gpGuiProcessor->cpu) 
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
     gpGuiProcessor->cpu->pma->step(1);
 }
-    
-static void 
+
+static void
 overbutton_cb(GtkWidget *widget)
 {
-  if(gpGuiProcessor && gpGuiProcessor->cpu) 
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
     gpGuiProcessor->cpu->pma->step_over();
 
 }
-    
-static void 
+
+static void
 finishbutton_cb(GtkWidget *widget)
 {
-  if(gpGuiProcessor && gpGuiProcessor->cpu) 
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
     gpGuiProcessor->cpu->pma->finish();
 }
 
-static void 
+static void
 resetbutton_cb(GtkWidget *widget)
 {
   if(gpGuiProcessor && gpGuiProcessor->cpu)
@@ -1033,12 +1033,12 @@ gui_update_cb(GtkWidget *widget, gpointer data)
   UpdateRateMenuItem *umi = UpdateRateMenuItemIndexed[index];
   if (umi)
     umi->Select();
-  else 
+  else
     cout << "Error UpdateRateMenuItem bad index:" << index << endl;
 }
 
 UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
-				       char _id, 
+				       char _id,
 				       const char *label,
 				       int _update_rate,
 				       bool _bRealTime,
@@ -1084,7 +1084,7 @@ void UpdateRateMenuItem::Select()
   config_set_variable("dispatcher", "SimulationMode", id);
 
   if (0)
-    cout << "Update gui refresh: " << hex << update_rate 
+    cout << "Update gui refresh: " << hex << update_rate
 	 << " ID:" << id << "Seq no:" << menu_index
 	 << endl;
 }
@@ -1133,7 +1133,7 @@ public:
 class TimeMicroSeconds : public TimeFormatter
 {
 public:
-  TimeMicroSeconds(TimeWidget *tw, GtkWidget *menu) 
+  TimeMicroSeconds(TimeWidget *tw, GtkWidget *menu)
     : TimeFormatter(tw,menu,"MicroSeconds") {}
   void Format(char *buf, int size)
   {
@@ -1145,7 +1145,7 @@ public:
 class TimeMilliSeconds : public TimeFormatter
 {
 public:
-  TimeMilliSeconds(TimeWidget *tw, GtkWidget *menu) 
+  TimeMilliSeconds(TimeWidget *tw, GtkWidget *menu)
     : TimeFormatter(tw,menu,"MilliSeconds") {}
   void Format(char *buf, int size)
   {
@@ -1157,7 +1157,7 @@ public:
 class TimeSeconds : public TimeFormatter
 {
 public:
-  TimeSeconds(TimeWidget *tw, GtkWidget *menu) 
+  TimeSeconds(TimeWidget *tw, GtkWidget *menu)
     : TimeFormatter(tw,menu,"Seconds") {}
   void Format(char *buf, int size)
   {
@@ -1169,7 +1169,7 @@ public:
 class TimeHHMMSS : public TimeFormatter
 {
 public:
-  TimeHHMMSS(TimeWidget *tw, GtkWidget *menu) 
+  TimeHHMMSS(TimeWidget *tw, GtkWidget *menu)
     : TimeFormatter(tw,menu,"HH:MM:SS.mmm") {}
   void Format(char *buf, int size)
   {
@@ -1188,7 +1188,7 @@ public:
 class TimeCyclesHex : public TimeFormatter
 {
 public:
-  TimeCyclesHex(TimeWidget *tw, GtkWidget *menu) 
+  TimeCyclesHex(TimeWidget *tw, GtkWidget *menu)
     : TimeFormatter(tw,menu,"Cycles (Hex)") {}
   void Format(char *buf, int size)
   {
@@ -1199,7 +1199,7 @@ public:
 class TimeCyclesDec : public TimeFormatter
 {
 public:
-  TimeCyclesDec(TimeWidget *tw, GtkWidget *menu) 
+  TimeCyclesDec(TimeWidget *tw, GtkWidget *menu)
     : TimeFormatter(tw,menu,"Cycles (Dec)") {}
   void Format(char *buf, int size)
   {
@@ -1214,7 +1214,7 @@ cbTimeFormatActivated(GtkWidget *widget, gpointer data)
 {
   if(!widget || !data)
     return;
-    
+
   TimeFormatter *tf = static_cast<TimeFormatter *>(data);
   tf->ChangeFormat();
 }
@@ -1224,7 +1224,7 @@ cbTimeFormatPopup(GtkWidget *widget, GdkEventButton *event, TimeWidget *tw)
 {
   if(!widget || !event || !tw)
     return 0;
-  
+
   if( (event->type == GDK_BUTTON_PRESS) ) {// &&  (event->button == 3) ) {
 
     gtk_menu_popup(GTK_MENU(tw->menu), 0, 0, 0, 0,
@@ -1243,7 +1243,7 @@ void TimeFormatter::ChangeFormat()
     tw->NewFormat(this);
 }
 
-void TimeFormatter::AddToMenu(GtkWidget *menu, 
+void TimeFormatter::AddToMenu(GtkWidget *menu,
 			      const char*menu_text)
 {
   GtkWidget *item = gtk_menu_item_new_with_label(menu_text);
@@ -1388,7 +1388,7 @@ GtkWidget *dispatcher_window = 0;
 //========================================================================
 //========================================================================
 
-class MainWindow 
+class MainWindow
 {
 public:
 
@@ -1442,13 +1442,13 @@ void MainWindow::Create ()
   GtkWidget *button;
   GtkWidget *frame;
   GtkAccelGroup *accel_group;
-      
+
   int x,y,width,height;
 
   GtkWidget *update_rate_menu;
 
   int SimulationMode;
-      
+
   dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
   if(!config_get_variable("dispatcher", "x", &x))
@@ -1461,12 +1461,12 @@ void MainWindow::Create ()
     height=1;
   gtk_window_set_default_size(GTK_WINDOW(dispatcher_window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
-      
-      
+
+
   gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
 		      GTK_SIGNAL_FUNC (dispatcher_delete_event),
 		      0);
-      
+
 #if GTK_MAJOR_VERSION >= 2
   accel_group = gtk_accel_group_new();
 #else
@@ -1479,31 +1479,31 @@ void MainWindow::Create ()
 			    (GtkDestroyNotify) gtk_object_unref);
   //      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
   gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, 0);
-  gtk_window_set_title (GTK_WINDOW (dispatcher_window), 
+  gtk_window_set_title (GTK_WINDOW (dispatcher_window),
 			VERSION);
   gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
-      
+
   box1 = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (dispatcher_window), box1);
-      
+
   gtk_box_pack_start (GTK_BOX (box1),
 		      gtk_item_factory_get_widget (item_factory, "<main>"),
 		      FALSE, FALSE, 0);
 
 
-      
+
   buttonbox = gtk_hbox_new(FALSE,0);
   gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
   gtk_box_pack_start (GTK_BOX (box1), buttonbox, TRUE, TRUE, 0);
 
-      
-      
+
+
   // Buttons
   button = gtk_button_new_with_label ("step");
   gtk_signal_connect(GTK_OBJECT(button), "clicked",
 		     (GtkSignalFunc) stepbutton_cb, 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-      
+
   button = gtk_button_new_with_label ("over");
   gtk_signal_connect(GTK_OBJECT(button), "clicked",
 		     (GtkSignalFunc) overbutton_cb, 0);
@@ -1595,7 +1595,7 @@ void MainWindow::Create ()
 
   gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
   gtk_widget_show_all (dispatcher_window);
-      
+
 
 }
 
