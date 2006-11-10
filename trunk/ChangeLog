@@ -10,6 +10,9 @@
 	  extract PRODUCT_WEB_SITE from ../../configure.ac
 	* doc/gpsim.html, doc/gpsim_svn.html, doc/gpsim.ico:
 	  added favicon
+	* doc/gpsim.html: applied patch from David Barnett:
+	  "I added the F73 and F74, removed the PIC17's,
+	  fixed a typo and changed the modified date"
 
 2006-11-09 Scott Dattalo <scott@dattalo.com>
 	* configure.ac, extras/graphic_lcd/configure.ac: 0.22.0 Release
