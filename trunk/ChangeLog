@@ -1,4 +1,7 @@
 2006-11-09 Scott Dattalo <scott@dattalo.com>
+	* configure.ac, extras/graphic_lcd/configure.ac: 0.22.0 Release
+
+2006-11-09 Scott Dattalo <scott@dattalo.com>
 	* doc/gpsim.lyx: Added module documentation, macro documentation,
 	scripting documentation, and examples documentation
 
