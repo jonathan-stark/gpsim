@@ -1,0 +1,24 @@
+# Top-level make file included by all of the regression test makefiles
+
+ifdef GPSIM_PATH
+  PATH := $(GPSIM_PATH):$(PATH)
+else
+  PATH := ../../gpsim:$(PATH)
+endif
+
+ifdef EXTENDED_INSTRUCTIONS
+  ASM_FLAGS = -c --extended
+else
+  ASM_FLAGS = -c
+endif
+
+GPSIM = gpsim
+
+%.o : %.asm
+	gpasm $(ASM_FLAGS) $<
+
+# Each regression test has a target 'all'
+top: all
+
+clean:
+	rm -f *~ *.o *.lst *.map *.hex *.cod

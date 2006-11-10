@@ -1,0 +1,37 @@
+2006-11-08 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.cc: Trace type API update
+	* configure.ac: 0.3.0-RC2 release candidate 2
+	
+2006-10-23 Scott Dattalo <scott@dattalo.com>
+	* Makefile.am: doc/ directory is now part of the distribution.
+	
+2006-10-23 Scott Dattalo <scott@dattalo.com>
+	* doc/sed1520.pdf, doc/mgls10032a.pdf: Added manufacturer data
+	sheets. 
+	* configure.ac: Release candidate 0.3.0-RC1
+	* README: Added more details about the LCD hardware.
+
+2006-10-15 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.cc: Port writes are now traced in
+	gpsim's trace buffer.
+	* extras/graphic_lcd/examples/lcd100X32.asm: fixed typo
+	* extras/graphic_lcd/examples/glcd_test.asm: Position the
+	LCD screen in the breadboard.
+
+2006-05-28 Borut Razem <borut.razem@siol.net>
+	* src/gpsim_modules.cc, src/sed1520.cc:
+	  removed unneeded inclusion of config.h
+	* src/makefile.mingw: added, thanks to Xiaofan Chen
+	* INSTALL: CVS replaced with Subversion
+
+2006-05-27 Scott Dattalo <scott@dattalo.com>
+	* examples/glcd_test.asm: Added config settings.
+
+2006-05-25 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.cc: Fixed segv, maybe?
+
+2006-05-25 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.cc: There is segv lurking...
+
+2005-12-29 Scott Dattalo <scott@dattalo.com>
+	* commit'd code to CVS
