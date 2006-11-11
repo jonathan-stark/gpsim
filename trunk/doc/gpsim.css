@@ -20,3 +20,7 @@
     width: 100%;
     }
 
+  .dir_list { padding: 2px;
+    text-align: left;
+    left: 1px;
+    }
