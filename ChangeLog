@@ -1,3 +1,8 @@
+2006-11-11 Borut Razem <borut.razem@siol.net>
+	* doc/gpsim.css, doc/spsimWin32.html: renamed from gpsimWin32.css
+	* doc/index.html, doc/snap_header.html, doc/snap_footer.html,
+	  doc/snap.php: added
+
 2006-11-10 Scott Dattalo <scott@dattalo.com>
 	* ANNOUNCE: Updated for 0.22.0 release. Note that Borut created an
 	0.22.0 SVN tag that corresponds to revision 1827.
