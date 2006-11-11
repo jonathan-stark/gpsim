@@ -39,6 +39,7 @@ class ProgramFileType;
 class FileContext;
 class FileContextList;
 class ProgramMemoryCollection;
+class CPU_Freq;
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
@@ -552,6 +553,8 @@ public:
     return clocks_per_inst;
   }
 
+  void update_cps(void);
+
   virtual double get_OSCperiod();
 
   virtual double get_InstPeriod()
@@ -602,7 +605,7 @@ public:
 
 private:
 
-  Float *mFrequency;
+  CPU_Freq *mFrequency;
 
   // Simulation modes
   bool bSafeMode;

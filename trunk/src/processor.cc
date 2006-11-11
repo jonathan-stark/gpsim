@@ -65,6 +65,33 @@ void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
 
 static char pkg_version[] = PACKAGE_VERSION;
 
+class CPU_Freq : public Float
+{
+public:
+  CPU_Freq(const char *_name, double newValue, const char *desc);
+
+  virtual void set(double d);
+  
+  void SetCPU ( Processor * _cpu ) { cpu = _cpu; };
+
+private:
+  Processor * cpu;  
+};
+
+CPU_Freq::CPU_Freq(const char *_name, double newValue, const char *desc=0)
+    : Float(_name,newValue,desc)
+{
+    cpu = 0;
+}
+
+void CPU_Freq::set(double d)
+{
+    Float::set ( d );
+    if ( cpu )
+        cpu->update_cps();
+}
+  
+
 //------------------------------------------------------------------------
 //
 // Processor - Constructor
@@ -82,9 +109,10 @@ Processor::Processor(const char *_name, const char *_desc)
 
   pc = 0;
 
-  mFrequency = new Float("frequency",20e6, " oscillator frequency.");
+  mFrequency = new CPU_Freq("frequency",20e6, " oscillator frequency.");
+  mFrequency->SetCPU(this);
   set_ClockCycles_per_Instruction(4);
-  get_cycles().set_instruction_cps((guint64)(get_frequency()/clocks_per_inst));
+  update_cps();
   set_Vdd(5.0);
   setWarnMode(true);
   setSafeMode(true);
@@ -169,7 +197,7 @@ void Processor::set_frequency(double f)
 {
   if(mFrequency)
     mFrequency->set(f);
-  get_cycles().set_instruction_cps((guint64)(f/clocks_per_inst));
+  update_cps();
 }
 double Processor::get_frequency()
 {
@@ -179,6 +207,11 @@ double Processor::get_frequency()
     mFrequency->get(d);
 
   return d;
+}
+
+void Processor::update_cps(void)
+{
+  get_cycles().set_instruction_cps((guint64)(get_frequency()/clocks_per_inst));
 }
 
 double  Processor::get_OSCperiod()

@@ -61,6 +61,7 @@ check_rbi:
 
         bsf     temp5,1         ;Set a flag to indicate rb4-7 int occured
         bcf     INTCON,RBIF
+	movf	PORTB,w
         
 check_int:
         btfsc   INTCON,INTF
@@ -290,6 +291,9 @@ test_rbif
         movlw   0x10
         movwf   temp2
 
+	movlw	6
+	movwf	PORTB
+
 rbif_l1:
         
         bcf     INTCON,RBIE
@@ -297,7 +301,7 @@ rbif_l1:
         movf    temp2,w
         tris    PORTB
 
-        clrf    PORTB
+;        clrf    PORTB
         movf    PORTB,W
 
         clrf    temp5                   ;Interrupt flag
@@ -307,7 +311,7 @@ rbif_l1:
 
 
         swapf   temp2,w
-        movwf   PORTB
+        xorwf   PORTB,f
 
         btfsc   temp5,1
          iorwf  temp1,f

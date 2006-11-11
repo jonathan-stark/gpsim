@@ -101,7 +101,7 @@ int_done:
 MAIN    CODE
 start	
 
-   .sim ".frequency=20e6"
+   .sim ".frequency=10e6"
    .sim "module library libgpsim_modules"
    .sim "module load usart U1"
  ;  .sim "U1.xpos = 250.0"
@@ -116,8 +116,8 @@ start
 
    ;; Set the USART module's Baud Rate
 
-   .sim "U1.txbaud = 9600"
-   .sim "U1.rxbaud = 9600"
+   .sim "U1.txbaud = 4800"
+   .sim "U1.rxbaud = 4800"
    .sim "U1.loop = true"
 
 	;; USART Initialization
@@ -148,7 +148,7 @@ start
 	movlw	(1<<BRGH)
 	movwf	TXSTA ^ 0x80
 
-	movlw   129		;9600 baud.
+	movlw   129		;4800 baud at 10MHz clock.
 	movwf   SPBRG ^0x80
 
 	;;clrf	SPBRG		;Highest possible baud rate.

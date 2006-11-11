@@ -1,3 +1,10 @@
+2006-11-11 Rob Pearce <rob@bdt-home.demon.co.uk>
+	* regression/interrupts_14bit: modified PORTB change on state test to
+	  check for interrupts on both edges
+	* src/processor.cc, src/processor.h, regression/usart_test: change of
+	  cpu frequency now propagates to other timings. Second USART test
+	  modified to set lower CPU clock to validate this
+
 2006-11-11 Borut Razem <borut.razem@siol.net>
 	* doc/gpsim.css, doc/spsimWin32.html: renamed from gpsimWin32.css
 	* doc/index.html, doc/snap_header.html, doc/snap_footer.html,
