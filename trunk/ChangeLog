@@ -1,3 +1,7 @@
+2006-11-10 Scott Dattalo <scott@dattalo.com>
+	* ANNOUNCE: Updated for 0.22.0 release. Note that Borut created an
+	0.22.0 SVN tag that corresponds to revision 1827.
+
 2006-11-10 Borut Razem <borut.razem@siol.net>
 	* configure.ac, doc/gpsimWin32.html, extra/graphic_lcd/configure.ac,
 	  gpsim.spec.in, gui/gui_menu.c, modules/README: corrected all url-s
