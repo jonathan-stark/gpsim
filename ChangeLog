@@ -2,6 +2,9 @@
 	* doc/gpsim.css, doc/spsimWin32.html: renamed from gpsimWin32.css
 	* doc/index.html, doc/snap_header.html, doc/snap_footer.html,
 	  doc/snap.php: added
+	* doc/gpsim.css, doc/spsimWin32.html, doc/gpsim.html,
+	  doc/gpsim_svn.html: XHTML1 compatible
+	* makefile.mingw: claen performs also clean-extras
 
 2006-11-10 Scott Dattalo <scott@dattalo.com>
 	* ANNOUNCE: Updated for 0.22.0 release. Note that Borut created an
