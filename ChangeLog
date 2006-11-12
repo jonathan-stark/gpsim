@@ -2,7 +2,8 @@
 	* doc/gpsimWin32.html: use readline 5.1. Packages are available at
 	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-src.zip,
 	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-lib.zip,
-	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-bin.zip
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-bin.zip,
+	  cairo-1.2.6, glib-2.12.4, pango-1.14.5, NSIS v2.21
 
 2006-11-11 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* regression/interrupts_14bit: modified PORTB change on state test to
