@@ -1,3 +1,9 @@
+2006-11-12 Borut Razem <borut.razem@siol.net>
+	* doc/gpsimWin32.html: use readline 5.1. Packages are available at
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-src.zip,
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-lib.zip,
+	  http://gpsim.sourceforge.net/gpsimWin32/packages/readline-5.2-20061112-bin.zip
+
 2006-11-11 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* regression/interrupts_14bit: modified PORTB change on state test to
 	  check for interrupts on both edges
@@ -9,7 +15,7 @@
 	* doc/gpsim.css, doc/spsimWin32.html: renamed from gpsimWin32.css
 	* doc/index.html, doc/snap_header.html, doc/snap_footer.html,
 	  doc/snap.php: added
-	* doc/gpsim.css, doc/spsimWin32.html, doc/gpsim.html,
+	* doc/gpsim.css, doc/gpsimWin32.html, doc/gpsim.html,
 	  doc/gpsim_svn.html: XHTML1 compatible
 	* makefile.mingw: claen performs also clean-extras
 
