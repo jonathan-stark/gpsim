@@ -347,7 +347,7 @@ void _TXSTA::transmit_a_bit()
 
   if(bit_count) {
 
-    Dprintf(("Transmit bit #%x: bit val:%d time:0x%llx\n",bit_count, (tsr&1),get_cycles().value));
+    Dprintf(("Transmit bit #%x: bit val:%d time:0x%llx\n",bit_count, (tsr&1),get_cycles().get()));
 
     putTXState(tsr&1 ? '1' : '0');
 
@@ -361,7 +361,7 @@ void _TXSTA::transmit_a_bit()
 
 void _TXSTA::callback()
 {
-  Dprintf(("TXSTA callback - time:%llx\n",get_cycles().value));
+  Dprintf(("TXSTA callback - time:%llx\n",get_cycles().get()));
 
   transmit_a_bit();
 
@@ -539,7 +539,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  Dprintf(("receive_a_bit state:%d bit:%d time:0x%llx\n",state,bit,get_cycles().value));
+  Dprintf(("receive_a_bit state:%d bit:%d time:0x%llx\n",state,bit,get_cycles().get()));
 
   if( state == RCSTA_MAYBE_START) {
     if (bit)
@@ -622,7 +622,7 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
   //  last_cycle = cycles.value;
 
   if(cpu && spbrg)
-    get_cycles().set_break(get_cycles().value + (spbrg->value.get() + 1) * spbrg_edge/cpi, this);
+    get_cycles().set_break(get_cycles().get() + (spbrg->value.get() + 1) * spbrg_edge/cpi, this);
 
 }
 void _RCSTA::receive_start_bit()
@@ -809,7 +809,7 @@ void _SPBRG::start()
 {
 
   if(cpu)
-    last_cycle = get_cycles().value;
+    last_cycle = get_cycles().get();
   start_cycle = last_cycle;
 
   get_next_cycle_break();
@@ -831,7 +831,7 @@ guint64 _SPBRG::get_last_cycle()
   // There's a chance that a SPBRG break point exists on the current
   // cpu cycle, but has not yet been serviced.
   if(cpu)
-    return( (get_cycles().value == future_cycle) ? future_cycle : last_cycle);
+    return( (get_cycles().get() == future_cycle) ? future_cycle : last_cycle);
   else
     return 0;
 }
@@ -861,7 +861,7 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 
   // There's a chance that a SPBRG break point exists on the current
   // cpu cycle, but has not yet been serviced. 
-  guint64 cycle = (get_cycles().value == future_cycle) ? future_cycle : last_cycle;
+  guint64 cycle = (get_cycles().get() == future_cycle) ? future_cycle : last_cycle;
 
   if(txsta && (txsta->value.get() & _TXSTA::SYNC))
     // Synchronous mode
@@ -879,7 +879,7 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 void _SPBRG::callback()
 {
 
-  last_cycle = get_cycles().value;
+  last_cycle = get_cycles().get();
 
   //Dprintf(("SPBRG rollover at cycle:0x%llx\n",last_cycle));
 

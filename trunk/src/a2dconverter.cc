@@ -98,7 +98,7 @@ void ADCON0::start_conversion(void)
     return;
   }
 
-  guint64 fc = get_cycles().value + (2 * Tad) /
+  guint64 fc = get_cycles().get() + (2 * Tad) /
 		p_cpu->get_ClockCycles_per_Instruction();
 
   if(ad_state != AD_IDLE)
@@ -251,7 +251,7 @@ void ADCON0::callback(void)
       Dprintf(("Acquiring channel:%d V=%g reflo=%g refhi=%g\n",
 	       channel,m_dSampledVoltage,m_dSampledVrefLo,m_dSampledVrefHi));
 
-      future_cycle = get_cycles().value + (m_nBits * Tad)/p_cpu->get_ClockCycles_per_Instruction();
+      future_cycle = get_cycles().get() + (m_nBits * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
       if (verbose)
 	printf("A/D %d bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,

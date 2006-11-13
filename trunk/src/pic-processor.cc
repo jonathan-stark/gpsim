@@ -318,7 +318,7 @@ public:
 
     gettimeofday(&tv_start,0);
 
-    cycle_start=get_cycles().value;
+    cycle_start=get_cycles().get();
 
     guint64 fc = cycle_start+100;
 
@@ -365,7 +365,7 @@ public:
 
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
-    diff = system_time - ((get_cycles().value-cycle_start)*4.0e6*cpu->get_OSCperiod());
+    diff = system_time - ((get_cycles().get()-cycle_start)*4.0e6*cpu->get_OSCperiod());
 
     guint64  idiff;
     if( diff < 0 )
@@ -418,7 +418,7 @@ public:
     }
 
 
-    guint64 fc = get_cycles().value + delta_cycles;
+    guint64 fc = get_cycles().get() + delta_cycles;
 
     if(future_cycle)
       get_cycles().reassign_break(future_cycle, fc, this);
@@ -487,7 +487,7 @@ void pic_processor::run (bool refresh)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  simulation_start_cycle = get_cycles().value;
+  simulation_start_cycle = get_cycles().get();
 
   do {
 
@@ -523,7 +523,7 @@ void pic_processor::run (bool refresh)
     realtime_cbp.stop();
 
   bp.clear_global();
-  trace.cycle_counter(get_cycles().value);
+  trace.cycle_counter(get_cycles().get());
 
   simulation_mode = eSM_STOPPED;
 
@@ -1033,7 +1033,7 @@ void WDT::update()
 
     if(future_cycle) {
 
-      guint64 fc = get_cycles().value + value * (1<<prescale);
+      guint64 fc = get_cycles().get() + value * (1<<prescale);
 
       //cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
 
@@ -1042,7 +1042,7 @@ void WDT::update()
 
     } else {
     
-      future_cycle = get_cycles().value + value * (1<<prescale);
+      future_cycle = get_cycles().get() + value * (1<<prescale);
 
       get_cycles().set_break(future_cycle, this);
     }
@@ -1079,7 +1079,7 @@ void WDT::initialize(bool enable)
     value = (unsigned int) (cpu->get_frequency()*timeout);
     prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
-    future_cycle = get_cycles().value + value * (1<<prescale);
+    future_cycle = get_cycles().get() + value * (1<<prescale);
 
     get_cycles().set_break(future_cycle, this);
 
@@ -1108,7 +1108,7 @@ void WDT::callback()
 
 
   if(wdte) {
-    cout<<"WDT timeout: " << hex << get_cycles().value << '\n';
+    cout<<"WDT timeout: " << hex << get_cycles().get() << '\n';
 
     //future_cycle = 0;
     update();
@@ -1153,7 +1153,7 @@ void WDT::start_sleep()
   if(wdte) {
     prescale = 0;
 
-    guint64 fc = get_cycles().value + value * (1<<prescale);
+    guint64 fc = get_cycles().get() + value * (1<<prescale);
 
     //cout << "WDT::start_sleep:  moving break from " << future_cycle << " to " << fc << '\n';
 

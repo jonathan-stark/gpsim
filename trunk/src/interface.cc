@@ -183,7 +183,7 @@ void gpsimInterface::update  (void)
 void gpsimInterface::callback(void)
 {
   if(update_rate) {
-    future_cycle = get_cycles().value + update_rate;
+    future_cycle = get_cycles().get() + update_rate;
     get_cycles().set_break(future_cycle, this);
   }
 
@@ -530,7 +530,7 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
 void  gpsimInterface::set_update_rate  (guint64 _update_rate)
 {
 
-  guint64 fc = get_cycles().value + _update_rate;
+  guint64 fc = get_cycles().get() + _update_rate;
 
   update_rate = _update_rate;
 

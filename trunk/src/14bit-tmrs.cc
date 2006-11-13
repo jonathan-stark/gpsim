@@ -581,7 +581,7 @@ void TMRH::put(unsigned int new_value)
   value.put(new_value & 0xff);
   if(!tmrl)
     return;
-  tmrl->synchronized_cycle = get_cycles().value;
+  tmrl->synchronized_cycle = get_cycles().get();
   tmrl->last_cycle = tmrl->synchronized_cycle - (tmrl->value.get() + (value.get()<<8))*tmrl->prescale;
 
   if(tmrl->t1con->get_tmr1on())
@@ -602,7 +602,7 @@ unsigned int TMRH::get_value()
   // If the TMR1 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
 
-  if(get_cycles().value <= tmrl->synchronized_cycle)
+  if(get_cycles().get() <= tmrl->synchronized_cycle)
     return value.get();
 
   // If he TMR is not running then return.
@@ -708,7 +708,7 @@ void TMRL::on_or_off(int new_state)
     // Compute the "effective last cycle", i.e. the cycle
     // at which TMR1 was last 0 had it always been counting.
 
-    last_cycle = get_cycles().value - value_16bit*prescale;
+    last_cycle = get_cycles().get() - value_16bit*prescale;
     update();
   }
   else {
@@ -731,7 +731,7 @@ void TMRL::on_or_off(int new_state)
 void TMRL::update()
 {
 
-  Dprintf(("TMR1 update 0x%llx\n",get_cycles().value));
+  Dprintf(("TMR1 update 0x%llx\n",get_cycles().get()));
 
   if(t1con->get_tmr1on()) {
 
@@ -752,8 +752,8 @@ void TMRL::update()
       prescale_counter = prescale;
 
       //cout << "TMRL: Current prescale " << prescale << '\n';
-      //  synchronized_cycle = cycles.value + 2;
-      synchronized_cycle = get_cycles().value;
+      //  synchronized_cycle = cycles.get() + 2;
+      synchronized_cycle = get_cycles().get();
 
       last_cycle = synchronized_cycle - value_16bit * prescale;
 
@@ -770,7 +770,7 @@ void TMRL::update()
 	    }
 	}
 
-      guint64 fc = get_cycles().value + (break_value - value_16bit) * prescale;
+      guint64 fc = get_cycles().get() + (break_value - value_16bit) * prescale;
 
       if(future_cycle)
 	get_cycles().reassign_break(future_cycle, fc, this);
@@ -797,7 +797,7 @@ void TMRL::put(unsigned int new_value)
   if (!tmrh || !t1con)
     return;
 
-  synchronized_cycle = get_cycles().value;
+  synchronized_cycle = get_cycles().get();
   last_cycle = synchronized_cycle - ( value.get() + (tmrh->value.get()<<8)) * prescale;
 
   if(t1con->get_tmr1on())
@@ -816,7 +816,7 @@ unsigned int TMRL::get_value()
 {
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
-  if(get_cycles().value <= synchronized_cycle)
+  if(get_cycles().get() <= synchronized_cycle)
     return value.get();
 
   // If TMRL is not on, then return the current value
@@ -836,7 +836,7 @@ void TMRL::current_value()
   if(t1con->get_tmr1cs())
     value_16bit = tmrh->value.get() * 256 + value.get();
   else
-    value_16bit = (unsigned int)((get_cycles().value - last_cycle)/ prescale) & 0xffff;
+    value_16bit = (unsigned int)((get_cycles().get() - last_cycle)/ prescale) & 0xffff;
 }
 
 unsigned int TMRL::get_low_and_high()
@@ -844,10 +844,10 @@ unsigned int TMRL::get_low_and_high()
 
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
-  if(get_cycles().value <= synchronized_cycle)
+  if(get_cycles().get() <= synchronized_cycle)
     return value.get();
 
-  //  value_16bit = (cycles.value.lo - last_cycle)/ prescale;
+  //  value_16bit = (cycles.get().lo - last_cycle)/ prescale;
 
   current_value();
 
@@ -883,7 +883,7 @@ void TMRL::new_clock_source()
 void TMRL::clear_timer()
 {
 
-  last_cycle = get_cycles().value;
+  last_cycle = get_cycles().get();
   //cout << "TMR1 has been cleared\n";
 }
 
@@ -914,7 +914,7 @@ void TMRL::callback()
 
       // The break was due to a "compare"
 
-      //cout << "TMR1 break due to compare "  << hex << cycles.value.lo << '\n';
+      //cout << "TMR1 break due to compare "  << hex << cycles.get().lo << '\n';
       ccpcon->compare_match();
 
     }
@@ -923,13 +923,13 @@ void TMRL::callback()
 
       // The break was due to a roll-over
 
-      //cout<<"TMRL rollover: " << hex << cycles.value.lo << '\n';
+      //cout<<"TMRL rollover: " << hex << cycles.get() << '\n';
       if (m_Interrupt)
 	m_Interrupt->Trigger();
 
       // Reset the timer to 0.
 
-      synchronized_cycle = get_cycles().value;
+      synchronized_cycle = get_cycles().get();
       last_cycle = synchronized_cycle;
 
     }
@@ -1051,7 +1051,7 @@ void TMR2::on_or_off(int new_state)
     // Compute the "effective last cycle", i.e. the cycle
     // at which TMR2 was last 0 had it always been counting.
 
-    last_cycle = get_cycles().value - value.get()*prescale;
+    last_cycle = get_cycles().get() - value.get()*prescale;
     update();
   }
   else {
@@ -1151,7 +1151,7 @@ void TMR2::stop_pwm(unsigned int ccp_address)
 void TMR2::update(int ut)
 {
 
-  //cout << "TMR2 update. cpu cycle " << hex << cycles.value <<'\n';
+  //cout << "TMR2 update. cpu cycle " << hex << cycles.get() <<'\n';
 
   if(t2con->get_tmr2on()) {
 
@@ -1167,7 +1167,7 @@ void TMR2::update(int ut)
       // be due to tmr2 matching pr2)
 
       break_value = 1 + pr2->value.get();
-      guint64 fc = get_cycles().value + (break_value - value.get()) * prescale;
+      guint64 fc = get_cycles().get() + (break_value - value.get()) * prescale;
 
       last_update = TMR2_PR2_UPDATE;
 
@@ -1261,7 +1261,7 @@ void TMR2::put(unsigned int new_value)
       // which means there's a cycle break point set on TMR2 that needs to
       // be moved to a new cycle.
 
-      guint64 current_cycle = get_cycles().value;
+      guint64 current_cycle = get_cycles().get();
       unsigned int delta = (future_cycle - last_cycle);
       int shift = (new_value - old_value) * prescale;
 
@@ -1386,13 +1386,13 @@ void TMR2::new_pre_post_scale()
       if (prescale != old_prescale)	// prescaler value change
       {
 	// togo is number of cycles to next callback based on new prescaler.
-	guint64 togo = (future_cycle - get_cycles().value) * prescale / old_prescale;
+	guint64 togo = (future_cycle - get_cycles().get()) * prescale / old_prescale;
 
 	if (!togo)	// I am not sure this can happen RRR
 	    callback();
 	else
 	{
-	   guint64 fc = togo + get_cycles().value;
+	  guint64 fc = togo + get_cycles().get();
 
           get_cycles().reassign_break(future_cycle, fc, this);
           future_cycle = fc;
@@ -1405,7 +1405,7 @@ void TMR2::new_pre_post_scale()
 
       if (value.get() == pr2->value.get()) // TMR2 == PR2
       {
-        future_cycle = get_cycles().value;
+        future_cycle = get_cycles().get();
         get_cycles().set_break(future_cycle, this);
 	callback();
       }
@@ -1413,15 +1413,15 @@ void TMR2::new_pre_post_scale()
       {
 	cout << "Warning TMR2 turned on with TMR2 greater than PR2\n";
 	// this will cause TMR2 to wrap
-        future_cycle  = get_cycles().value + 
+        future_cycle  = get_cycles().get() + 
 		(1 + pr2->value.get() + (0x100 -  value.get())) * prescale;
         get_cycles().set_break(future_cycle, this);
       }
       else
       {
-          future_cycle = get_cycles().value + 1;
+	future_cycle = get_cycles().get() + 1;
           get_cycles().set_break(future_cycle, this);
-	  last_cycle = get_cycles().value - value.get();
+	  last_cycle = get_cycles().get() - value.get();
           update(update_state);
       }
   }
@@ -1436,7 +1436,7 @@ void TMR2::new_pr2(unsigned int new_value)
 
       unsigned int cur_break = (future_cycle - last_cycle)/prescale;
       unsigned int new_break = (pwm_mode)? (1 + new_value) << 2 : 1 + new_value;
-      unsigned int now_cycle = (get_cycles().value - last_cycle) / prescale;
+      unsigned int now_cycle = (get_cycles().get() - last_cycle) / prescale;
 
       guint64 fc = last_cycle;
 
@@ -1476,7 +1476,7 @@ void TMR2::new_pr2(unsigned int new_value)
 
 void TMR2::current_value()
 {
-  unsigned int tmr2_val = (get_cycles().value - last_cycle)/ prescale;
+  unsigned int tmr2_val = (get_cycles().get() - last_cycle)/ prescale;
 
   if (pwm_mode)
        tmr2_val >>= 2;
@@ -1507,7 +1507,7 @@ void TMR2::callback()
       {
 	last_update &= ~TMR2_WRAP;
 	// This (implicitly) resets the timer to zero:
-	last_cycle = get_cycles().value;
+	last_cycle = get_cycles().get();
       }
       else if( last_update & (TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE))
       {
@@ -1534,7 +1534,7 @@ void TMR2::callback()
 	  //cout << "TMR2: PR2 match. pwm_mode is " << pwm_mode <<'\n';
 
 	  // This (implicitly) resets the timer to zero:
-	  last_cycle = get_cycles().value;
+	  last_cycle = get_cycles().get();
 
          if (ssp_module)
                ssp_module->tmr2_clock();

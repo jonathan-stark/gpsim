@@ -94,9 +94,6 @@ public:
   static const guint64  END_OF_TIME=0xFFFFFFFFFFFFFFFFULL;
 
 
-  guint64 value;          // Current value of the cycle counter.
-  guint64 break_on_this;  // If there's a pending cycle break point, then it'll be this
-
   bool reassigned;        // Set true when a break point is reassigned (or deleted)
 
   Cycle_Counter_breakpoint_list
@@ -105,24 +102,9 @@ public:
 
   bool bSynchronous; // a flag that's true when the time per counter tick is constant
 
-  Cycle_Counter(void);
+  Cycle_Counter();
   void preset(guint64 new_value);     // not used currently.
 
-private:
-
- // The number of instruction cycles that correspond to one second
-  double m_instruction_cps;
-  double m_seconds_per_cycle;
-
-  /*
-    breakpoint
-    when the member function "increment()" encounters a break point, 
-    breakpoint() is called.
-  */
-
-  void breakpoint(void);
-
-public:
   /*
     increment - This inline member function is called once or 
     twice for every simulated instruction. Its purpose is to
@@ -133,7 +115,7 @@ public:
     cleared.
   */
 						
-  inline void increment(void)
+  inline void increment()
   {
  
     // Increment the current cycle then check if
@@ -158,26 +140,10 @@ public:
   inline void advance(guint64 step)
   {
 
-    value += step;
-      
-    if(value >= break_on_this) {
-      // There's a break point set on this cycle. If there's a callback function, then call
-      // it other wise halt execution by setting the global break flag.
+    while (step--) {
 
-      while(value >= break_on_this) {  // Loop in case there are multiple breaks
-	
-	// Remember which breakpoint this is, because
-	// it's possible that the callback function may
-	// change the current breakpoint
-	TriggerObject *lastBreak = active.next->f;
-
-	if(lastBreak)
-	  active.next->f->callback();
-	else
-	  get_bp().check_cycle_break(active.next->breakpoint_number);
-
-	clear_current_break(lastBreak);
-      }
+      if (++value == break_on_this)
+	breakpoint();
     }
 
   }
@@ -185,7 +151,7 @@ public:
 
 
   // Return the current cycle counter value
-  guint64 get(void) 
+  guint64 get() 
   {
     return value;
   }
@@ -199,7 +165,7 @@ public:
 		       TriggerObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
   bool reassign_break(guint64 old_cycle,guint64 future_cycle, TriggerObject *f=0);
   void clear_current_break(TriggerObject *f=0);
-  void dump_breakpoints(void);
+  void dump_breakpoints();
 
   void clear_break(guint64 at_cycle);
   void clear_break(TriggerObject *f);
@@ -207,17 +173,35 @@ public:
   double instruction_cps() { return m_instruction_cps; }
   double seconds_per_cycle() { return m_seconds_per_cycle; }
 
+private:
+
+  // The number of instruction cycles that correspond to one second
+  double m_instruction_cps;
+  double m_seconds_per_cycle;
+
+  guint64 value;          // Current value of the cycle counter.
+  guint64 break_on_this;  // If there's a pending cycle break point, then it'll be this
+
+  /*
+    breakpoint
+    when the member function "increment()" encounters a break point, 
+    breakpoint() is called.
+  */
+
+  void breakpoint();
+
+
 };
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access cycles object directly!
-LIBGPSIM_EXPORT Cycle_Counter &get_cycles(void);
+LIBGPSIM_EXPORT Cycle_Counter &get_cycles();
 #else
 // we are in gpsim: use of get_cycles() is recommended,
 // even if cycles object can be accessed directly.
 extern Cycle_Counter cycles;
 
-inline Cycle_Counter &get_cycles(void)
+inline Cycle_Counter &get_cycles()
 {
   return cycles;
 }
@@ -235,8 +219,8 @@ class StopWatch : public TriggerObject
   StopWatch();
   void init();
 
-  guint64 get(void);
-  double get_time(void);
+  guint64 get();
+  double get_time();
 
   void set_enable(bool);
   void set_direction(bool);
@@ -247,8 +231,8 @@ class StopWatch : public TriggerObject
 
   void update();
 
-  virtual void callback(void);
-  virtual void callback_print(void);
+  virtual void callback();
+  virtual void callback_print();
 
 private:
   Integer *value;

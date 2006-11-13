@@ -605,7 +605,7 @@ void RCREG::start()
     get_cycles().set_break(future_time, this);
   }
 
-  Dprintf((" usart module RCREG current cycle=%lld future_cycle=%lld\n", get_cycles().value,future_time));
+  Dprintf((" usart module RCREG current cycle=%lld future_cycle=%lld\n", get_cycles().get(),future_time));
 }
 
 //------------------------------------------------------------------------

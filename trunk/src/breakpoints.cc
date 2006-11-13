@@ -561,7 +561,8 @@ int Breakpoints::set_notify_write_value(Processor *cpu,
 int Breakpoints::check_cycle_break(unsigned int bpn)
 {
 
-  cout << "cycle break: 0x" << hex << cycles.value << dec << " = " << cycles.value << endl;
+  cout << "cycle break: 0x" << hex << get_cycles().get() 
+       << dec << " = " << get_cycles().get() << endl;
 
   halt();
   if( bpn < MAX_BREAKPOINTS)
@@ -916,7 +917,7 @@ void Breakpoint_Instruction::execute()
 {
 
   if( (cpu->simulation_mode == eSM_RUNNING) && 
-      (simulation_start_cycle != get_cycles().value) &&
+      (simulation_start_cycle != get_cycles().get()) &&
       eval_Expression()) {
 
     invokeAction();
@@ -1175,7 +1176,7 @@ void RegisterAssertion::execute()
     PCPU->Debug();
 
     if( (PCPU->simulation_mode == eSM_RUNNING) && 
-        (simulation_start_cycle != get_cycles().value)) {
+        (simulation_start_cycle != get_cycles().get())) {
 
       eval_Expression();
       invokeAction();
@@ -1929,23 +1930,23 @@ int CommandAssertion::printTraced(Trace *pTrace, unsigned int tbi,
 void Log_Register_Write::action()
 {
   GetTraceLog().register_write(getReg(),
-			       get_cycles().value);
+			       get_cycles().get());
 }
 void Log_Register_Write_value::action()
 {
   GetTraceLog().register_write_value(getReg(),
-				     get_cycles().value);
+				     get_cycles().get());
 }
 
 void Log_Register_Read::action()
 {
   GetTraceLog().register_read(getReg(),
-			      get_cycles().value);
+			      get_cycles().get());
 }
 
 
 void Log_Register_Read_value::action()
 {
   GetTraceLog().register_read(getReg(),
-			      get_cycles().value);
+			      get_cycles().get());
 }
