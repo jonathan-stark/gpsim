@@ -679,7 +679,7 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
   }
 
   if (uiEnd == 0) 
-    uiEnd = get_cycles().value;
+    uiEnd = get_cycles().get();
 
   if (m_start == uiStart && m_stop == uiEnd)
     return;
@@ -790,7 +790,7 @@ void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
   }
 
   if (uiEnd == 0) 
-    uiEnd = get_cycles().value;
+    uiEnd = get_cycles().get();
 
   if (m_start == uiStart && m_stop == uiEnd)
     return;
@@ -1027,7 +1027,7 @@ void Scope_Window::gridPoints(guint64 *uiStart, guint64 *uiEnd)
   guint64 start = m_Markers[eStart]->getVal();
   guint64 stop  = m_Markers[eStop]->getVal();
   if (!stop)
-    stop = get_cycles().value;
+    stop = get_cycles().get();
 
   if (uiStart)
     *uiStart = start;
@@ -1666,7 +1666,7 @@ void Scope_Window::zoom(int i)
   m_bFrozen = true;
   gint64 start = (gint64) m_Markers[eStart]->getVal();
   gint64 stop  = (gint64) m_Markers[eStop]->getVal();
-  gint64 now  = (gint64) get_cycles().value;
+  gint64 now  = (gint64) get_cycles().get();
 
   if (!stop)
     stop = now;
@@ -1706,7 +1706,7 @@ void Scope_Window::pan(int i)
 
   gint64 start = i+(gint64) m_Markers[eStart]->getVal();
   gint64 stop  = (gint64) m_Markers[eStop]->getVal();
-  gint64 now  = (gint64) get_cycles().value;
+  gint64 now  = (gint64) get_cycles().get();
 
   if (start < 0)
     return;
@@ -1726,7 +1726,7 @@ gdouble Scope_Window::getSpan()
 {
   guint64 start = m_Markers[eStart]->getVal();
   guint64 stop  = m_Markers[eStop]->getVal();
-  stop = stop ? stop : get_cycles().value;
+  stop = stop ? stop : get_cycles().get();
   return start > stop ? 0.0 : ((gdouble)(stop-start));
 }
 

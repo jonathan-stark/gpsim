@@ -905,7 +905,7 @@ guint64 StopWatch::get(void)
 {
 
   if(enable->getVal()) {
-    gint64 v = (cycles.value - offset) % rollover->getVal();
+    gint64 v = (cycles.get() - offset) % rollover->getVal();
     if(!direction->getVal())
       v = rollover->getVal() - v;
     return v;
@@ -947,7 +947,7 @@ void StopWatch::set_direction(bool b)
   direction->set(b);
 
   offset = 
-    cycles.value - 
+    cycles.get() - 
     ((rollover->getVal() - value->getVal()) % rollover->getVal());
 
 
@@ -974,9 +974,9 @@ void StopWatch::update()
 {
   if(enable->getVal()) {
     if(direction->getVal())
-      offset = cycles.value - value->getVal();
+      offset = cycles.get() - value->getVal();
     else
-      offset = cycles.value - (rollover->getVal() - value->getVal());
+      offset = cycles.get() - (rollover->getVal() - value->getVal());
 
     if(break_cycle)
       set_break(true);
@@ -995,9 +995,9 @@ void StopWatch::set_break(bool b)
   guint64 old_break_cycle = break_cycle;
 
   if(direction->getVal())
-    break_cycle = cycles.value + rollover->getVal()  - get();
+    break_cycle = cycles.get() + rollover->getVal()  - get();
   else
-    break_cycle = cycles.value + get();
+    break_cycle = cycles.get() + get();
 
   if(old_break_cycle == break_cycle)
     return;
@@ -1011,7 +1011,7 @@ void StopWatch::set_break(bool b)
 
 void StopWatch::callback()
 {
-  break_cycle = cycles.value + rollover->getVal();
+  break_cycle = cycles.get() + rollover->getVal();
   cycles.set_break(break_cycle,this);
   cout << " stopwatch break\n";
   get_bp().halt();

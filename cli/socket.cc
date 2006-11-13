@@ -851,7 +851,7 @@ bool SocketLink::Send(bool bTimeStamp)
     parent->packet->EncodeHeader();
     get(*parent->packet);
     if(bTimeStamp)
-      parent->packet->EncodeUInt64(get_cycles().value);
+      parent->packet->EncodeUInt64(get_cycles().get());
     parent->packet->txTerminate();
 
     /*
@@ -942,7 +942,7 @@ CyclicCallBackLink::CyclicCallBackLink(guint64 i, SocketBase *_sb)
   : interval(i), sb(_sb)
 {
   std::cout << " cyclic callback object\n ";
-  get_cycles().set_break(get_cycles().value + interval, this);
+  get_cycles().set_break(get_cycles().get() + interval, this);
 }
 
 void CyclicCallBackLink::callback(void)
@@ -965,7 +965,7 @@ void CyclicCallBackLink::callback(void)
       st[3] = '0';
 
     if(sb->Send(st))
-      get_cycles().set_break(get_cycles().value + interval, this);
+      get_cycles().set_break(get_cycles().get() + interval, this);
     else
       std::cout << "socket callback failed seq:" << seq++ << endl;
   }

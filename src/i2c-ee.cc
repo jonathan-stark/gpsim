@@ -246,7 +246,7 @@ void I2C_EE::debug()
   }
 
   cout << "I2C EEPROM: current state="<<cPBusState<<endl;
-  cout << " t=0x"<< hex <<get_cycles().value << endl;
+  cout << " t=0x"<< hex <<get_cycles().get() << endl;
   cout << "  scl drivenState="  << scl->getDrivenState()
        << " drivingState=" << scl->getDrivingState()
        << " direction=" << ((scl->get_direction()==IOPIN::DIR_INPUT) ?"IN":"OUT") 
@@ -298,7 +298,7 @@ void I2C_EE::write_busy()
     if (! ee_busy && ! m_write_protect)
     {
         fc = (guint64)(get_cycles().instruction_cps() * 0.005);
-        get_cycles().set_break(get_cycles().value + fc, this);
+        get_cycles().set_break(get_cycles().get() + fc, this);
         ee_busy = true;
     }
 

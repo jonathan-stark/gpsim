@@ -464,7 +464,7 @@ void Stimulus_Node::refresh()
       }
       else
       {
-	cap_start_cycle = get_cycles().value; 
+	cap_start_cycle = get_cycles().get(); 
         future_cycle = cap_start_cycle + settlingTimeStep;
         get_cycles().set_break(future_cycle,this);
       }
@@ -525,7 +525,7 @@ void Stimulus_Node::callback()
       // The following is an exact calculation, assuming no circuit
       // changes,  regardless of time step.
       //
-      Time_Step = (get_cycles().value - cap_start_cycle)/
+      Time_Step = (get_cycles().get() - cap_start_cycle)/
         (get_cycles().instruction_cps()*current_time_constant);
       expz = exp(-Time_Step);
       voltage = finalVoltage* (1.-expz) + voltage * expz;
@@ -540,12 +540,12 @@ void Stimulus_Node::callback()
 	if (verbose)
           cout << "\t" << name() << 
 	    " Final voltage " << finalVoltage << " reached at " 
-	    << get_cycles().value << " cycles\n";
+	    << get_cycles().get() << " cycles\n";
       } 
-      else if(get_cycles().value >= future_cycle) // got here via break
+      else if(get_cycles().get() >= future_cycle) // got here via break
       {
         settlingTimeStep  = (guint64) (1.5 * settlingTimeStep);
-        cap_start_cycle = get_cycles().value;
+        cap_start_cycle = get_cycles().get();
 	future_cycle = cap_start_cycle + settlingTimeStep;
     	get_cycles().set_break(future_cycle, this);
         if (verbose)
@@ -555,10 +555,10 @@ void Stimulus_Node::callback()
       }
       else	// updating value before break don't increase step size
       {
-        cap_start_cycle = get_cycles().value;
+        cap_start_cycle = get_cycles().get();
         get_cycles().reassign_break(future_cycle, 
 		cap_start_cycle + settlingTimeStep, this);
-	future_cycle = get_cycles().value + settlingTimeStep;
+	future_cycle = get_cycles().get() + settlingTimeStep;
         if (verbose)
 	  cout << "\tcallback called at " << cap_start_cycle << 
 	    " cycles, next break set for " << future_cycle << " delta=" 
@@ -732,7 +732,7 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, const
 
 double square_wave::get_Vth()
 {
-  guint64 current_time = get_cycles().value;
+  guint64 current_time = get_cycles().get();
 
   if(verbose & 1)
     cout << "Getting new state of the square wave.\n";
@@ -800,7 +800,7 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
 
 double triangle_wave::get_Vth()
 {
-  guint64 current_time = get_cycles().value;
+  guint64 current_time = get_cycles().get();
 
   //cout << "Getting new state of the triangle wave.\n";
 

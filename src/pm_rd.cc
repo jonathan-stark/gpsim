@@ -115,7 +115,7 @@ void PM_RD::start_read(void)
 {
   rd_adr = pmadr.value.get() | (pmadrh.value.get() << 8);
 
-  get_cycles().set_break(get_cycles().value + READ_CYCLES, this);
+  get_cycles().set_break(get_cycles().get() + READ_CYCLES, this);
 }
 
 void PM_RD::callback(void)

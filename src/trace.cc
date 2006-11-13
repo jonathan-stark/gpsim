@@ -1242,7 +1242,7 @@ void TraceLog::callback(void)
 {
   /*
   int n = 0;
-  get_trace().cycle_counter(get_cycles().value);
+  get_trace().cycle_counter(get_cycles().get());
 
   if((log_file||lxtp) && logging) {
     if(last_trace_index < get_trace().trace_index) { 
@@ -1263,7 +1263,7 @@ void TraceLog::callback(void)
 	trace.dump(n, log_file);
 
     last_trace_index = trace.trace_index;
-    get_cycles().set_break(get_cycles().value + 1000,this);
+    get_cycles().set_break(get_cycles().get() + 1000,this);
   }
   */
 }
@@ -1470,7 +1470,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
 
     name = (char *)cpu->registers[address]->name().c_str();
 
-    lt_set_time(lxtp, (int)(get_cycles().value*4.0e8*cpu->get_OSCperiod()));
+    lt_set_time(lxtp, (int)(get_cycles().get()*4.0e8*cpu->get_OSCperiod()));
 
     symp=lt_symbol_find(lxtp, name);
     if(symp==0)
@@ -1632,7 +1632,7 @@ void ProfileKeeper::callback(void)
     if(enabled)
     {
         catchup();
-	get_cycles().set_break(get_cycles().value + 1000,this);
+	get_cycles().set_break(get_cycles().get() + 1000,this);
     }
 }
 
@@ -1650,7 +1650,7 @@ void ProfileKeeper::enable_profiling(void)
     }
 
     last_trace_index = trace.trace_index;
-    get_cycles().set_break(get_cycles().value + 1000,this);
+    get_cycles().set_break(get_cycles().get() + 1000,this);
     enabled = 1;
 }
 
@@ -1722,7 +1722,7 @@ inline bool BoolEventBuffer::event(bool state)
   if(state ^ (index & 1) ^ !bInitialState)  {
 
     if(index < max_events) {
-      buffer[index++] = get_cycles().value - start_time;
+      buffer[index++] = get_cycles().get() - start_time;
       return true;
     }
 
@@ -1793,7 +1793,7 @@ void BoolEventBuffer::activate(bool _initial_state)
     return;
 
   // Save the time for this initial event
-  start_time = get_cycles().value;
+  start_time = get_cycles().get();
   bInitialState = _initial_state;
 
   index = 0;  // next state gets stored at the first position in the buffer.

@@ -131,7 +131,7 @@ Processor::Processor(const char *_name, const char *_desc)
   // let the processor version number simply be gpsim's version number.
   version = &pkg_version[0];
 
-  get_trace().cycle_counter(get_cycles().value);
+  get_trace().cycle_counter(get_cycles().get());
 
 }
 
@@ -1335,7 +1335,7 @@ void Processor::step (unsigned int steps, bool refresh)
 	{
 
 	  step_one(refresh);
-	  get_trace().cycle_counter(get_cycles().value);
+	  get_trace().cycle_counter(get_cycles().get());
 	  if(refresh)
 	    trace_dump(0,1);
 

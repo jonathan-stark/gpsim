@@ -1137,7 +1137,7 @@ public:
     : TimeFormatter(tw,menu,"MicroSeconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value * 1e6;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e6;
     snprintf(buf,size, "%19.2f us",time_db);
   }
 };
@@ -1149,7 +1149,7 @@ public:
     : TimeFormatter(tw,menu,"MilliSeconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value * 1e3;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e3;
     snprintf(buf,size, "%19.3f ms",time_db);
   }
 };
@@ -1161,7 +1161,7 @@ public:
     : TimeFormatter(tw,menu,"Seconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
     snprintf(buf,size, "%19.3f Sec",time_db);
   }
 };
@@ -1173,7 +1173,7 @@ public:
     : TimeFormatter(tw,menu,"HH:MM:SS.mmm") {}
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().value;
+    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
     double v=time_db;
     int hh=(int)(v/3600),mm,ss,cc;
     v-=hh*3600.0;
@@ -1192,7 +1192,7 @@ public:
     : TimeFormatter(tw,menu,"Cycles (Hex)") {}
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().value);
+    snprintf(buf,size,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().get());
   }
 };
 
@@ -1203,7 +1203,7 @@ public:
     : TimeFormatter(tw,menu,"Cycles (Dec)") {}
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"%016" PRINTF_INT64_MODIFIER "d",get_cycles().value);
+    snprintf(buf,size,"%016" PRINTF_INT64_MODIFIER "d",get_cycles().get());
   }
 };
 

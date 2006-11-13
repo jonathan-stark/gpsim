@@ -189,7 +189,7 @@ void  OSCCON::put(unsigned int new_value)
 	    guint64 settle;
 
 	    settle = (guint64) (get_cycles().instruction_cps() * 4e-3);
-	    get_cycles().set_break(get_cycles().value + settle, this);
+	    get_cycles().set_break(get_cycles().get() + settle, this);
 	    new_value &= ~ IOFS;
 	}
 	else

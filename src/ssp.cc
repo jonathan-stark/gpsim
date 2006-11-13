@@ -450,7 +450,7 @@ void SPI::set_halfclock_break()
     break;
   }
   
-  get_cycles().set_break(get_cycles().value + clock_in_cycles, this);
+  get_cycles().set_break(get_cycles().get() + clock_in_cycles, this);
 }
 void SPI::callback()
 {
@@ -650,10 +650,10 @@ void I2C::callback()
 
     if (verbose & 2)
         cout << "I2C::callback i2c_state " << i2c_state << " phase=" << phase <<endl;
-    if (future_cycle != get_cycles().value)
+    if (future_cycle != get_cycles().get())
     {
 	cout << "I2C program error future_cycle=" << future_cycle << " now=" 
-		<< get_cycles().value << " i2c_state=" << i2c_state << endl;
+		<< get_cycles().get() << " i2c_state=" << i2c_state << endl;
     }
 
     future_cycle = 0;
@@ -760,7 +760,7 @@ void I2C::callback()
 		if (verbose & 2)
 		{
 		    cout << "I2C::callback CLK_TX_BYTE _ACK=" << n_ack <<
-		        " clock=" << get_cycles().value << endl;
+		        " clock=" << get_cycles().get() << endl;
 		}
 		if (n_ack)
 		    m_sspcon2->put_value(m_sspcon2->value.get() | _SSPCON2::ACKSTAT);
@@ -1096,7 +1096,7 @@ void I2C::setBRG()
 {
     if (future_cycle)
 	cout << "ERROR I2C::setBRG called with future_cycle=" << future_cycle << endl;
-      future_cycle = get_cycles().value + 
+      future_cycle = get_cycles().get() + 
 	  	((m_sspadd->value.get() &0x7f)/ 2) + 1;
       get_cycles().set_break(future_cycle, this);
 }
@@ -1188,7 +1188,7 @@ void I2C::sda(bool data_val)
 	    case CLK_START:
 		if (phase == 0)
 		{	
-		    guint64 fc = get_cycles().value + 
+		    guint64 fc = get_cycles().get() + 
 			((m_sspadd->value.get() &0x7f)/ 2) + 1;
 
 		    if (future_cycle)

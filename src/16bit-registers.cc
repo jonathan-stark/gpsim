@@ -403,7 +403,7 @@ void Indirect_Addressing::put_fsr(unsigned int new_fsr)
 void Indirect_Addressing::update_fsr_value(void)
 {
 
-  if(current_cycle != get_cycles().value)
+  if(current_cycle != get_cycles().get())
     {
       fsr_value = (fsrh.value.get() << 8) |  fsrl.value.get();
       fsr_delta = 0;
@@ -420,11 +420,11 @@ void Indirect_Addressing::update_fsr_value(void)
 void Indirect_Addressing::preinc_fsr_value(void)
 {
 
-  if(current_cycle != get_cycles().value)
+  if(current_cycle != get_cycles().get())
     {
       fsr_value += (fsr_delta+1);
       fsr_delta = 0;
-      current_cycle = get_cycles().value;
+      current_cycle = get_cycles().get();
       put_fsr(fsr_value);
     }
 
@@ -433,11 +433,11 @@ void Indirect_Addressing::preinc_fsr_value(void)
 void Indirect_Addressing::postinc_fsr_value(void)
 {
 
-  if(current_cycle != get_cycles().value)
+  if(current_cycle != get_cycles().get())
     {
       fsr_value += fsr_delta;
       fsr_delta = 1;
-      current_cycle = get_cycles().value;
+      current_cycle = get_cycles().get();
       put_fsr(fsr_value+1);
       
     }
@@ -446,11 +446,11 @@ void Indirect_Addressing::postinc_fsr_value(void)
 void Indirect_Addressing::postdec_fsr_value(void)
 {
 
-  if(current_cycle != get_cycles().value)
+  if(current_cycle != get_cycles().get())
     {
       fsr_value += fsr_delta;
       fsr_delta = -1;
-      current_cycle = get_cycles().value;
+      current_cycle = get_cycles().get();
       put_fsr(fsr_value-1);
       
     }
@@ -1112,7 +1112,7 @@ unsigned int TMR0_16::get_value(void)
       return(TMR0::get_value());
 
     }
-    value16 = (int) ((get_cycles().value - last_cycle)/ prescale);
+    value16 = (int) ((get_cycles().get() - last_cycle)/ prescale);
 
     value.put(value16 & 0xff);
   }
@@ -1492,7 +1492,7 @@ void PORTC16::update_pin_directions(unsigned int new_tris)
 	  }
       // Now, update the nodes to which the(se) pin(s) may be attached
 
-      guint64 time = get_cycles().value;
+      guint64 time = get_cycles().get();
       for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
           if(pins[i]->snode!=0)
