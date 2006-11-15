@@ -36,6 +36,7 @@ public:
 
   unsigned int set_break(cmd_options *co, bool bLog=false);
   unsigned int set_break(cmd_options *co, ExprList_t *pEL, bool bLog=false);
+  unsigned int set_break(Value *v);
 
 private:
   unsigned int set_break(cmd_options *co, Expression *pExpr1, Expression *pExpr2=0, bool bLog=false);

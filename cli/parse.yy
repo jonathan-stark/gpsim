@@ -415,6 +415,7 @@ log_cmd
 break_set 
           : BREAK bit_flag expr_list          {$$=c_break.set_break($2,$3);}
           | BREAK bit_flag                    {$$=c_break.set_break($2);}
+          | BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
           ;
 
 bus_cmd

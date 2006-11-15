@@ -1,3 +1,10 @@
+2006-11-14 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h,
+	src/gpsim_time.cc: 2006-01-02 I disabled the ability to set
+	attribute breakpoints. That feature.has now been re-enabled.
+	* regression/breakpoints/breakpoints.asm: Added a regression test
+	for the stopwatch attribute breakpoint
+
 2006-11-13 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_trace.cc, gui/gui_profile.cc, gui/gui_menu.cc,
 	  gui/gui_scope.cc, gui/gui_stopwatch.cc, cli/socket.cc,
