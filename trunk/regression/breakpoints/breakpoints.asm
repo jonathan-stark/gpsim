@@ -53,6 +53,13 @@ start
    .assert "var1==4"
 	movf	var1,W
 
+        movlw   50
+        movwf   var3
+L_StopWatchDelayTest:
+        call    delay
+        decfsz  var3,F
+         goto   L_StopWatchDelayTest
+
 passed:
 	clrf	failures
 
@@ -80,8 +87,10 @@ delay:
    .sim "echo stepping over breakpoint"
    .sim "step"
    .sim "trace 5"
-   .sim "run"
-
-
+   .sim "stopwatch.enable = true"
+   .sim "stopwatch.rollover = 300"
+   .sim "break stopwatch" ;, \"Hit stopwatch breakpoint\""
+   .sim "run"  ; This run will take us to the stopwatch break
+   .sim "run"  ; This run will take us to the done label
 
   end

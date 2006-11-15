@@ -340,3 +340,11 @@ unsigned int cmd_break::set_break(int bit_flag, bool bLog)
 
   return b;
 }
+ // attribute breakpoints 	 
+unsigned int cmd_break::set_break(Value *v)
+{
+  if (v)
+    v->set_break();
+
+  return MAX_BREAKPOINTS;
+}

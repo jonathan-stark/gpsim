@@ -791,7 +791,9 @@ public:
     i = (sw) ? sw->get() : 0;
     Integer::set(i);
   }
-  virtual int set_break(ObjectBreakTypes bt=eBreakAny, Expression *expr=0)
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, 
+			ObjectActionTypes at=eActionHalt, 
+			Expression *expr=0)
   {
     if(sw) sw->set_break(true);
     return -1;  // FIXME
