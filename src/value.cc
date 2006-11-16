@@ -140,7 +140,8 @@ void Value::set(Expression *expr)
 
     if(!expr)
       throw new Error(" null expression ");
-
+    if (verbose)
+      cout << toString() << " is being assigned expression " << expr->toString() << endl;
     v = expr->evaluate();
     if(!v)
       throw new Error(" cannot evaluate expression ");
