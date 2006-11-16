@@ -1,3 +1,8 @@
+2006-11-16 Scott Dattalo <scott@dattalo.com>
+	* src/pic-instructions.cc, src/pic-instructions.h: .lst line
+	numbers were not getting set properly for instructions containing
+	assertions.
+	
 2006-11-15 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: post assertions are now displayed as such
 	when they're triggered. Still need to have the breakpoint messages

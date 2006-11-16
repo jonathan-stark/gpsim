@@ -147,6 +147,7 @@ public:
   virtual int get_lst_line();
   virtual int get_file_id();
   virtual int get_hll_file_id();
+  virtual void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
   virtual enum INSTRUCTION_TYPES isa();
   virtual void initialize(bool init_state);
   virtual char *name(char *,int len);

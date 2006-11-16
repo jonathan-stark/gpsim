@@ -193,6 +193,12 @@ int AliasedInstruction::get_hll_src_line()
 {
   return getReplaced()->get_hll_src_line();
 }
+void AliasedInstruction::update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
+{
+  if (m_replaced)
+    m_replaced->update_line_number(file, sline, lline, hllfile, hllsline);
+}
+
 int AliasedInstruction::get_lst_line()
 {
   return getReplaced()->get_lst_line();
