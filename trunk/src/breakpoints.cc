@@ -1156,8 +1156,10 @@ void RegisterAssertion::execute()
       (PCPU->pc->get_phase() == 0) )
   {
 
-    cout  << "Caught Register assertion ";
-    cout  << "while excuting at address " << address << endl;
+    cout  << "Caught Register "
+	  << (bPostAssertion ? "post " : "")
+	  << "assertion "
+	  << "while excuting at address 0x" << hex << address << endl;
 
     cout  << "register 0x" 
           << hex 
