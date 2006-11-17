@@ -261,6 +261,9 @@
 				RelativePath=".\bytelog.cc">
 			</File>
 			<File
+				RelativePath=".\clock_phase.cc">
+			</File>
+			<File
 				RelativePath=".\cmd_manager.cc">
 			</File>
 			<File
@@ -513,6 +516,9 @@
 			</File>
 			<File
 				RelativePath=".\bytelog.h">
+			</File>
+			<File
+				RelativePath=".\clock_phase.h">
 			</File>
 			<File
 				RelativePath=".\cmd_gpsim.h">

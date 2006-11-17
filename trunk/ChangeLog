@@ -1,3 +1,6 @@
+2006-11-17 Borut Razem <borut.razem@siol.net>
+	* src/makefile.mingw, src/src.vcproj: MSVC sync
+
 2006-11-17 Scott Dattalo <scott@dattalo.com>
 	* src/clock_phase.h, src/clock_phase.cc: Added. Defines the
 	ClockPhase class, which is a base class for supporting external
@@ -9,19 +12,19 @@
 	  src/processor.cc, src/16bit-registers.cc, src/pic-registers.cc,
 	  src/16bit-instructions.cc:
 	  - Support for external processor clocks. This is partially
-	  implemented and currently inhibited. 
-	
+	  implemented and currently inhibited.
+
 2006-11-16 Scott Dattalo <scott@dattalo.com>
 	* src/pic-instructions.cc, src/pic-instructions.h: .lst line
 	numbers were not getting set properly for instructions containing
 	assertions.
-	
+
 2006-11-15 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: post assertions are now displayed as such
 	when they're triggered. Still need to have the breakpoint messages
 	to display the postAssertion modifer.
 	* src/value.cc: Added a diagnostic message.
-	
+
 2006-11-14 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h,
 	src/gpsim_time.cc: 2006-01-02 I disabled the ability to set

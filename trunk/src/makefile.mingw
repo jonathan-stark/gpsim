@@ -48,6 +48,7 @@ src_OBJECTS =			\
 	bitlog.o		\
 	breakpoints.o		\
 	bytelog.o		\
+	clock_phase.o		\
 	cmd_manager.o		\
 	cod.o			\
 	comparator.o		\
