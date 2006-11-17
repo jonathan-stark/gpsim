@@ -337,7 +337,7 @@ void MOVSF::execute()
     destination;
   cpu_pic->registers[destination_addr]->put(r);
 
-  cpu16->pc->increment();
+  //cpu16->pc->increment();
 
 }
 
@@ -743,8 +743,8 @@ void CPFSEQ::execute(void)
 
   if(source->get() == cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -766,8 +766,8 @@ void CPFSGT::execute(void)
 
   if(source->get() > cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -789,8 +789,8 @@ void CPFSLT::execute(void)
 
   if(source->get() < cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -866,8 +866,8 @@ void DECFSZ16::execute(void)
 
   if(0==new_value)
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -898,8 +898,8 @@ void DCFSNZ::execute(void)
 
   if(0!=new_value)
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -973,8 +973,8 @@ void INCFSZ16::execute(void)
 
   if(0==new_value)
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -1005,8 +1005,8 @@ void INFSNZ::execute(void)
 
   if(0!=new_value)
     cpu16->pc->skip();                  // Skip next instruction
-
-  cpu16->pc->increment();
+  else
+    cpu16->pc->increment();
 
 }
 
@@ -1166,7 +1166,7 @@ void LFSR::execute(void)
   ia->put_fsr(k);
 
   cpu16->pc->skip();
-  cpu16->pc->increment();
+  //cpu16->pc->increment();
 
 }
 //--------------------------------------------------
@@ -1251,11 +1251,11 @@ void MOVFF::execute(void)
     runtime_initialize();
 
   unsigned int r =  cpu_pic->registers[source]->get();
-  cpu16->pc->skip();
 
   cpu_pic->registers[destination]->put(r);
 
-  cpu16->pc->increment();
+  cpu16->pc->skip();
+  //cpu16->pc->increment();
 
 }
 
@@ -2147,11 +2147,9 @@ void TSTFSZ::execute(void)
     source = cpu_pic->register_bank[register_address];
 
   if( 0 == (source->get() & 0xff) )
-    {
-      cpu16->pc->skip();                  // Skip next instruction
-    }
-
-  cpu16->pc->increment();
+    cpu16->pc->skip();                  // Skip next instruction
+  else
+    cpu16->pc->increment();
 
 }
 //--------------------------------------------------

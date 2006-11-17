@@ -24,6 +24,7 @@ libgpsim_la_SOURCES = \
 	bit.cc \
 	bytelog.cc \
 	breakpoints.cc \
+	clock_phase.cc \
 	cod.cc \
 	comparator.cc \
 	cmd_manager.cc \
@@ -98,6 +99,7 @@ gpsiminclude_HEADERS = \
 	bitlog.h \
 	breakpoints.h \
 	bytelog.h \
+	clock_phase.h \
 	cmd_gpsim.h \
 	cmd_manager.h \
 	cod.h \

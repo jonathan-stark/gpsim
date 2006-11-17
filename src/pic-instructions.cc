@@ -627,8 +627,8 @@ void BTFSC::execute(void)
 
   if(!result)
     cpu_pic->pc->skip();                  // Skip next instruction
-
-  cpu_pic->pc->increment();
+  else
+    cpu_pic->pc->increment();
 
 }
 
@@ -653,8 +653,8 @@ void BTFSS::execute(void)
 
   if(result)
     cpu_pic->pc->skip();                  // Skip next instruction
-
-  cpu_pic->pc->increment();
+  else
+    cpu_pic->pc->increment();
 
 }
 
@@ -861,8 +861,8 @@ void DECFSZ::execute(void)
 
   if(0==new_value)
     cpu_pic->pc->skip();                  // Skip next instruction
-
-  cpu_pic->pc->increment();
+  else 
+    cpu_pic->pc->increment();
 
 }
 
@@ -965,8 +965,8 @@ void INCFSZ::execute(void)
 
   if(0==new_value)
     cpu_pic->pc->skip();                  // Skip next instruction
-
-  cpu_pic->pc->increment();
+  else
+    cpu_pic->pc->increment();
 
 }
 

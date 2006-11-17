@@ -62,11 +62,16 @@ guint64 simulation_start_cycle;
 #include "cod.h"
 
 
+#include "clock_phase.h"
+#ifdef CLOCK_EXPERIMENTS
+ClockPhase *mCurrentPhase=0;
+phaseExecute1Cycle *mExecute1Cycle=0;
+phaseExecute2ndHalf *mExecute2ndHalf=0;
+#endif
+
 //================================================================================
 // Global Declarations
 //  FIXME -  move these global references somewhere else
-
-// don't print out a bunch of garbage while initializing
 
 
 //================================================================================
@@ -492,13 +497,22 @@ void pic_processor::run (bool refresh)
   do {
 
     // Take one step to get past any break point.
+#if defined(CLOCK_EXPERIMENTS)
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+      
+    mCurrentPhase->advance();
+
+    do {
+      mCurrentPhase->advance();
+    } while(!bp.global_break);
+#else
     step(1,false);
 
     do {
-
       program_memory[pc->value]->execute();
-
     } while(!bp.global_break);
+#endif
+
 
     if(bp.have_interrupt())
       interrupt();
@@ -719,6 +733,13 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
   : Processor(_name,_desc),
     wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0)
 {
+
+#ifdef CLOCK_EXPERIMENTS
+   mExecute1Cycle  = new phaseExecute1Cycle(this);
+   mExecute2ndHalf = new phaseExecute2ndHalf(this);
+   mCurrentPhase   = mExecute1Cycle;
+#endif
+
   m_Capabilities = eSTACK | eWATCHDOGTIMER;
 
   if(verbose)
