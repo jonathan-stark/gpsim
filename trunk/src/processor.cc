@@ -51,6 +51,8 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_gpsim.h"
 #include "sim_context.h"
 
+#include "clock_phase.h"
+
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 
 // 'active' means that it's the one currently being simulated or the one
@@ -1314,35 +1316,62 @@ void Processor::step (unsigned int steps, bool refresh)
   }
 
   simulation_mode = eSM_SINGLE_STEPPING;
-  do
-    {
+#ifdef CLOCK_EXPERIMENTS
+  do {
 
-      if(bp.have_sleep() || bp.have_pm_write())
-	{
-	  // If we are sleeping or writing to the program memory (18cxxx only)
-	  // then step one cycle - but don't execute any code  
+    if(bp.have_sleep() || bp.have_pm_write()) {
 
-	  get_cycles().increment();
-	  if(refresh)
-	    trace_dump(0,1);
+      // If we are sleeping or writing to the program memory (18cxxx only)
+      // then step one cycle - but don't execute any code  
 
-	}
-      else if(bp.have_interrupt())
-	{
-	  interrupt();
-	}
-      else
-	{
-
-	  step_one(refresh);
-	  get_trace().cycle_counter(get_cycles().get());
-	  if(refresh)
-	    trace_dump(0,1);
-
-	} 
+      get_cycles().increment();
+      if(refresh)
+	trace_dump(0,1);
 
     }
-  while(!bp.have_halt() && --steps>0);
+    else if(bp.have_interrupt())
+      interrupt();
+    else {
+
+      if (mCurrentPhase) {
+	//cout<<"advancing the phase!\n";
+	mCurrentPhase->advance();
+      } else
+	step_one(refresh);
+
+      get_trace().cycle_counter(get_cycles().get());
+      if(refresh)
+	trace_dump(0,1);
+    } 
+
+  }  while(!bp.have_halt() && --steps>0);
+#else
+  do {
+
+
+    if(bp.have_sleep() || bp.have_pm_write()) {
+
+      // If we are sleeping or writing to the program memory (18cxxx only)
+      // then step one cycle - but don't execute any code  
+
+      get_cycles().increment();
+      if(refresh)
+	trace_dump(0,1);
+
+    }
+    else if(bp.have_interrupt())
+      interrupt();
+    else {
+
+      step_one(refresh);
+      get_trace().cycle_counter(get_cycles().get());
+      if(refresh)
+	trace_dump(0,1);
+
+    } 
+
+  }  while(!bp.have_halt() && --steps>0);
+#endif // CLOCK_EXPERIMENTS
 
   bp.clear_halt();
   simulation_mode = eSM_STOPPED;

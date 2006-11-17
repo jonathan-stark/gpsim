@@ -29,6 +29,12 @@ Boston, MA 02111-1307, USA.  */
 #include "interface.h"
 #include "pic-registers.h"
 
+#include "clock_phase.h"
+
+static void debugP(const char *pC, unsigned int v)
+{
+  // cout << hex << "0x" << cycles.get() << "  " << pC << ":0x"<<v<< endl;
+}
 //------------------------------------------------------------------------
 // member functions for the Program_Counter base class
 //------------------------------------------------------------------------
@@ -71,7 +77,7 @@ void Program_Counter::set_trace_command(unsigned int new_command)
 
 void Program_Counter::increment(void)
 {
-
+  debugP(__FUNCTION__,value);
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_increment | value);
   value = (value + 1) & memory_size_mask;
@@ -82,7 +88,12 @@ void Program_Counter::increment(void)
   // counter).
 
   cpu_pic->pcl->value.put(value & 0xff);
+
+#ifdef CLOCK_EXPERIMENTS
+  mCurrentPhase = mExecute1Cycle;
+#else
   get_cycles().increment();
+#endif
 }
 
 //--------------------------------------------------
@@ -92,19 +103,30 @@ void Program_Counter::increment(void)
 
 void Program_Counter::skip(void)
 {
+  debugP(__FUNCTION__,value);
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_skip | value);
 
+
+#ifdef CLOCK_EXPERIMENTS
+  mExecute2ndHalf->firstHalf((value + 2) & memory_size_mask);
+#else
+  //value = (value + 1) & memory_size_mask;
+  //cpu_pic->pcl->value.put(value & 0xff);
+  //get_cycles().increment();
+
   value = (value + 1) & memory_size_mask;
-
-  // Update pcl. Note that we don't want to pcl.put() because that 
-  // will trigger a break point if there's one set on pcl. (A read/write
-  // break point on pcl should not be triggered by advancing the program
-  // counter).
-
-  cpu_pic->pcl->value.put( value & 0xff);
+  cpu_pic->pcl->value.put(value & 0xff);
   get_cycles().increment();
+
+  trace.raw(trace_increment | value);
+
+  value = (value + 1) & memory_size_mask;
+  cpu_pic->pcl->value.put(value & 0xff);
+  get_cycles().increment();
+#endif
+
 }
 
 //--------------------------------------------------
@@ -116,12 +138,44 @@ void Program_Counter::start_skip(void)
 
 }
 
+//========================================================================
+#if defined(CLOCK_EXPERIMENTS)
+
+phaseExecute2ndHalf::phaseExecute2ndHalf(Processor *pcpu)
+  : ProcessorPhase(pcpu), m_uiPC(0)
+{
+}
+phaseExecute2ndHalf::~phaseExecute2ndHalf()
+{
+}
+
+ClockPhase *phaseExecute2ndHalf::firstHalf(unsigned int uiPC)
+{
+  m_uiPC = uiPC;
+  //cout << "first half of 2 cycle instruction\n";
+  mCurrentPhase = this;
+  return this;
+}
+
+ClockPhase *phaseExecute2ndHalf::advance()
+{
+  //cout << "second half of 2 cycle instruction\n";
+  ((pic_processor *)m_pcpu)->pc->value = m_uiPC;
+  ((pic_processor *)m_pcpu)->pcl->value.put(m_uiPC&0xff);
+  mCurrentPhase = mExecute1Cycle;
+  get_cycles().increment();
+  return this;
+}
+
+#endif // defined(CLOCK_EXPERIMENTS)
+
 //--------------------------------------------------
 // jump - update the program counter. All branching instructions except computed gotos
 //        and returns go through here.
 
 void Program_Counter::jump(unsigned int new_address)
 {
+  debugP(__FUNCTION__,value);
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
@@ -129,14 +183,17 @@ void Program_Counter::jump(unsigned int new_address)
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  value = new_address & memory_size_mask;
 
   // see Update pcl comment in Program_Counter::increment()
-
-  cpu_pic->pcl->value.put(value & 0xff);
   
+#ifdef CLOCK_EXPERIMENTS
+  mExecute2ndHalf->firstHalf(new_address & memory_size_mask);
+#else
+  value = new_address & memory_size_mask;
+  cpu_pic->pcl->value.put(value & 0xff);
   get_cycles().increment();
   get_cycles().increment();
+#endif
 
 }
 
@@ -146,10 +203,14 @@ void Program_Counter::jump(unsigned int new_address)
 
 void Program_Counter::interrupt(unsigned int new_address)
 {
+  debugP(__FUNCTION__,value);
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
 
+#ifdef CLOCK_EXPERIMENTS
+  mExecute2ndHalf->firstHalf(new_address & memory_size_mask);
+#else
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
@@ -159,6 +220,7 @@ void Program_Counter::interrupt(unsigned int new_address)
   
   get_cycles().increment();
   get_cycles().increment();
+#endif
 
 }
 
@@ -170,6 +232,7 @@ void Program_Counter::interrupt(unsigned int new_address)
 void Program_Counter::computed_goto(unsigned int new_address)
 {
 
+  debugP(__FUNCTION__,value);
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_other | value);
 
@@ -178,8 +241,6 @@ void Program_Counter::computed_goto(unsigned int new_address)
 
   value = (new_address | cpu_pic->get_pclath_branching_modpcl() ) & memory_size_mask;
 
-  //trace.cycle_increment();
-
   // see Update pcl comment in Program_Counter::increment()
 
   cpu_pic->pcl->value.put(value & 0xff);
@@ -187,25 +248,40 @@ void Program_Counter::computed_goto(unsigned int new_address)
   // The instruction modifying the PCL will also increment the program counter.
   // So, pre-compensate the increment with a decrement:
   value--;
+
+  // The computed goto is a 2-cycle operation. The first cycle occurs within 
+  // the instruction (i.e. via the ::increment() method). The second cycle occurs
+  // here:
+
+#ifdef CLOCK_EXPERIMENTS
+  mCurrentPhase = mExecute1Cycle;
+#else
   get_cycles().increment();
+#endif
 }
 
 //--------------------------------------------------
 // new_address - write a new value to the program counter. All returns pass through here.
 //
 
-void Program_Counter::new_address(unsigned int new_value)
+void Program_Counter::new_address(unsigned int new_address)
 {
+  debugP(__FUNCTION__,value);
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
 
-  value = new_value & memory_size_mask;
+#ifdef CLOCK_EXPERIMENTS
+  mExecute2ndHalf->firstHalf(new_address & memory_size_mask);
+#else
+  value = new_address & memory_size_mask;
 
   // see Update pcl comment in Program_Counter::increment()
 
   cpu_pic->pcl->value.put(value & 0xff);
+
   get_cycles().increment();
   get_cycles().increment();
+#endif
 }
 
 //--------------------------------------------------

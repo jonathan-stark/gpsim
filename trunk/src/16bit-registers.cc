@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "interface.h"
 #include "stimuli.h"
 
+#include "clock_phase.h"
 
 //--------------------------------------------------
 // member functions for the BSR class
@@ -517,7 +518,9 @@ unsigned int PCL16::get_value(void)
 
 
 //--------------------------------------------------
-
+// Program_Counter16
+// The Program_Counter16 is almost identical to Program_Counter.
+// The major difference is that the PC counts by 2 in the 16bit core.
 Program_Counter16::Program_Counter16(void)
 {
   if(verbose)
@@ -526,103 +529,18 @@ Program_Counter16::Program_Counter16(void)
 
 
 //--------------------------------------------------
-// increment - update the program counter. All non-branching instructions pass through here.
-//   
-/*
-void Program_Counter16::increment(void)
-{
-
-  trace.program_counter(value);
-  value = (value + 1) & memory_size_mask;
-  // Update pcl. Note that we don't want to pcl.put() because that 
-  // will trigger a break point if there's one set on pcl. (A read/write
-  // break point on pcl should not be triggered by advancing the program
-  // counter).
-
-  cpu_pic->pcl->value.put(value & 0xff);
-  cycles.increment();
-}
-*/
-
-//--------------------------------------------------
-// skip - Does the same thing that increment does, except that it records the operation
-// in the trace buffer as a 'skip' instead of a 'pc update'.
-//   
-/*
-void Program_Counter16::skip(void)
-{
-
-  trace.cycle_increment();
-  value = (value + 1) & memory_size_mask;
-  trace.pc_skip(value);
-
-
-  // Update pcl. Note that we don't want to pcl.put() because that 
-  // will trigger a break point if there's one set on pcl. (A read/write
-  // break point on pcl should not be triggered by advancing the program
-  // counter).
-
-  cpu_pic->pcl->value.put(value & 0xff);
-  cycles.increment();
-}
-*/
-//--------------------------------------------------
-// jump - update the program counter. All branching instructions except computed gotos
-//        and returns go through here.
-/*
-void Program_Counter16::jump(unsigned int new_address)
-{
-
-  trace.program_counter(value);
-  // Unlike the 12 and 14 bit cores, the 18fxxx parts do not use
-  // PCLATH for jumps
-
-  //value = (new_address | cpu_pic->get_pclath_branching_jump() ) & memory_size_mask;
-  value = new_address & memory_size_mask;
-
-  cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
-  
-  cycles.increment();
-  cycles.increment();
-
-}
-*/
-//--------------------------------------------------
-// interrupt - update the program counter. Like a jump, except pclath is ignored.
-//
-/*
-void Program_Counter16::interrupt(unsigned int new_address)
-{
-
-  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
-  // to generate the destination address:
-
-  value = new_address & memory_size_mask;
-
-  cpu_pic->pcl->value.put(value & 0xff);  // see Update pcl comment in Program_Counter::increment()
-  
-  cycles.increment();
-  
-  trace.cycle_increment(); 
-  trace.program_counter(value);
-
-  cycles.increment();
-
-}
-*/
-//--------------------------------------------------
 // computed_goto - update the program counter. Anytime the pcl register is written to
 //                 by the source code we'll pass through here.
+//
 //
 
 void Program_Counter16::computed_goto(unsigned int new_address)
 {
+  cout << "Program_Counter16::computed_goto \n";
 
-  //trace.program_counter(value<<1);
   trace.raw(trace_other | (value<<1));
 
-  //cout << "Program_Counter16::put_value 0x" << hex << new_address << '\n';
-  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
+  // Use the new_address and the cached pclath
   // to generate the destination address:
 
   value = ( (new_address | cpu_pic->get_pclath_branching_modpcl() )>>1) & memory_size_mask;
@@ -630,37 +548,20 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // see Update pcl comment in Program_Counter::increment()
   cpu_pic->pcl->value.put((value<<1) & 0xff);
 
-  // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
-  // the increment with a decrement:
+  // The instruction modifying the PCL will also increment the program counter.
+  // So, pre-compensate the increment with a decrement:
   value--;
+
+  // The computed goto is a 2-cycle operation. The first cycle occurs within 
+  // the instruction (i.e. via the ::increment() method). The second cycle occurs
+  // here:
+
+#ifdef CLOCK_EXPERIMENTS
+  mCurrentPhase = mExecute1Cycle;
+#else
   get_cycles().increment();
+#endif
 }
-
-//--------------------------------------------------
-// new_address - write a new value to the program counter. All returns pass through here.
-//
-/*
-void Program_Counter16::new_address(unsigned int new_value)
-{
-  trace.program_counter(value);
-  value = new_value & memory_size_mask;
-    // see Update pcl comment in Program_Counter::increment()
-  cpu_pic->pcl->value.put(value & 0xff);
-  cycles.increment();
-  cycles.increment();
-}
-*/
-//--------------------------------------------------
-// get_next - get the next address that is just pass the current one
-//            (used by 'call' to obtain the return address)
-/*
-unsigned int Program_Counter16::get_next(void)
-{
-
-  return( (value + cpu_pic->program_memory[value]->instruction_size()) & memory_size_mask);
-
-}
-*/
 
 //--------------------------------------------------
 // put_value - Change the program counter without affecting the cycle counter
