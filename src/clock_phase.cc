@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 
 //========================================================================
 ClockPhase::ClockPhase()
+  : m_pNextPhase(this)
 {
 }
 
@@ -58,9 +59,10 @@ phaseExecute1Cycle::~phaseExecute1Cycle()
 
 ClockPhase *phaseExecute1Cycle::advance()
 {
+  setNextPhase(this);
   m_pcpu->step_one(false);
   get_cycles().increment();
-  return this;
+  return m_pNextPhase;
 }
 
 #endif // defined(CLOCK_EXPERIMENTS)

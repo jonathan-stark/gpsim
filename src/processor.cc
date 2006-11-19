@@ -1335,7 +1335,7 @@ void Processor::step (unsigned int steps, bool refresh)
 
       if (mCurrentPhase) {
 	//cout<<"advancing the phase!\n";
-	mCurrentPhase->advance();
+	mCurrentPhase = mCurrentPhase->advance();
       } else
 	step_one(refresh);
 

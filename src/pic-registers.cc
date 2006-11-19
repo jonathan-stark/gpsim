@@ -31,10 +31,13 @@ Boston, MA 02111-1307, USA.  */
 
 #include "clock_phase.h"
 
-static void debugP(const char *pC, unsigned int v)
-{
-  // cout << hex << "0x" << cycles.get() << "  " << pC << ":0x"<<v<< endl;
-}
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("0x%06X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 //------------------------------------------------------------------------
 // member functions for the Program_Counter base class
 //------------------------------------------------------------------------
@@ -77,7 +80,8 @@ void Program_Counter::set_trace_command(unsigned int new_command)
 
 void Program_Counter::increment(void)
 {
-  debugP(__FUNCTION__,value);
+  Dprintf(("%d\n",value));
+
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_increment | value);
   value = (value + 1) & memory_size_mask;
@@ -90,7 +94,7 @@ void Program_Counter::increment(void)
   cpu_pic->pcl->value.put(value & 0xff);
 
 #ifdef CLOCK_EXPERIMENTS
-  mCurrentPhase = mExecute1Cycle;
+  mCurrentPhase->setNextPhase(mExecute1Cycle);
 #else
   get_cycles().increment();
 #endif
@@ -103,7 +107,7 @@ void Program_Counter::increment(void)
 
 void Program_Counter::skip(void)
 {
-  debugP(__FUNCTION__,value);
+  Dprintf(("%d\n",value));
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_skip | value);
@@ -152,21 +156,65 @@ phaseExecute2ndHalf::~phaseExecute2ndHalf()
 ClockPhase *phaseExecute2ndHalf::firstHalf(unsigned int uiPC)
 {
   m_uiPC = uiPC;
-  //cout << "first half of 2 cycle instruction\n";
-  mCurrentPhase = this;
+  Dprintf(("first half of 2 cycle instruction\n"));
+  mCurrentPhase->setNextPhase(this);
   return this;
 }
 
 ClockPhase *phaseExecute2ndHalf::advance()
 {
-  //cout << "second half of 2 cycle instruction\n";
+  Dprintf(("second half of 2 cycle instruction\n"));
   ((pic_processor *)m_pcpu)->pc->value = m_uiPC;
   ((pic_processor *)m_pcpu)->pcl->value.put(m_uiPC&0xff);
-  mCurrentPhase = mExecute1Cycle;
+  mCurrentPhase->setNextPhase(mExecute1Cycle);
   get_cycles().increment();
+  return m_pNextPhase;
+}
+
+
+phaseExecuteInterrupt::phaseExecuteInterrupt(Processor *pcpu)
+  : ProcessorPhase(pcpu), m_pPreviousPhase(this), m_uiPC(0)
+{
+}
+phaseExecuteInterrupt::~phaseExecuteInterrupt()
+{
+}
+ClockPhase *phaseExecuteInterrupt::firstHalf(unsigned int uiPC)
+{
+  m_uiPC = uiPC;
+  Dprintf(("first half of Interrupt\n"));
+  //mCurrentPhase->setNextPhase(this);
+  mCurrentPhase = this;
   return this;
 }
 
+ClockPhase *phaseExecuteInterrupt::advance()
+{
+  Dprintf(("second half of Interrupt\n"));
+
+  ((pic_processor *)m_pcpu)->pc->value = m_uiPC;
+  ((pic_processor *)m_pcpu)->pcl->value.put(m_uiPC&0xff);
+  mCurrentPhase->setNextPhase(mExecute1Cycle);
+  get_cycles().increment();
+  return m_pNextPhase;
+  /*
+  if (m_pPreviousPhase == mExecute1Cycle) {
+
+    ((pic_processor *)m_pcpu)->pc->value = m_uiPC;
+    ((pic_processor *)m_pcpu)->pcl->value.put(m_uiPC&0xff);
+    mCurrentPhase->setNextPhase(mExecute1Cycle);
+    get_cycles().increment();
+    return m_pNextPhase;
+  }
+  // else...
+  return (m_pPreviousPhase != this) ?  m_pPreviousPhase->advance() : mExecute1Cycle;
+  */
+}
+void phaseExecuteInterrupt::setNextPhase(ClockPhase *pNextPhase)
+{ 
+  Dprintf(("Interrupt setting phase\n"));
+  m_pNextPhase = pNextPhase;
+}
 #endif // defined(CLOCK_EXPERIMENTS)
 
 //--------------------------------------------------
@@ -175,7 +223,7 @@ ClockPhase *phaseExecute2ndHalf::advance()
 
 void Program_Counter::jump(unsigned int new_address)
 {
-  debugP(__FUNCTION__,value);
+  Dprintf(("%d\n",value));
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
@@ -203,14 +251,24 @@ void Program_Counter::jump(unsigned int new_address)
 
 void Program_Counter::interrupt(unsigned int new_address)
 {
-  debugP(__FUNCTION__,value);
+  Dprintf(("%d\n",value));
+
+#ifdef CLOCK_EXPERIMENTS
+  if (mCurrentPhase != mExecute1Cycle) {
+
+    Dprintf((" Ignoring this interrupt\n"));
+    return;
+  }
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
 
-#ifdef CLOCK_EXPERIMENTS
-  mExecute2ndHalf->firstHalf(new_address & memory_size_mask);
+  mExecuteInterrupt->firstHalf(new_address & memory_size_mask);
 #else
+
+  // Trace the value of the program counter before it gets changed.
+  trace.raw(trace_branch | value);
+
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
@@ -232,7 +290,8 @@ void Program_Counter::interrupt(unsigned int new_address)
 void Program_Counter::computed_goto(unsigned int new_address)
 {
 
-  debugP(__FUNCTION__,value);
+  Dprintf(("%d\n",value));
+
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_other | value);
 
@@ -266,7 +325,8 @@ void Program_Counter::computed_goto(unsigned int new_address)
 
 void Program_Counter::new_address(unsigned int new_address)
 {
-  debugP(__FUNCTION__,value);
+  Dprintf(("%d\n",value));
+
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
 
