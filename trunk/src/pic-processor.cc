@@ -67,6 +67,7 @@ guint64 simulation_start_cycle;
 ClockPhase *mCurrentPhase=0;
 phaseExecute1Cycle *mExecute1Cycle=0;
 phaseExecute2ndHalf *mExecute2ndHalf=0;
+phaseExecuteInterrupt *mExecuteInterrupt=0;
 #endif
 
 //================================================================================
@@ -500,22 +501,30 @@ void pic_processor::run (bool refresh)
 #if defined(CLOCK_EXPERIMENTS)
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
       
-    mCurrentPhase->advance();
+    mCurrentPhase = mCurrentPhase->advance();
 
     do {
-      mCurrentPhase->advance();
-    } while(!bp.global_break);
+      do {
+	mCurrentPhase = mCurrentPhase->advance();
+      } while(!bp.global_break);
+
+      if(bp.have_interrupt() && (mCurrentPhase == mExecute1Cycle)) {
+	//cout << "<-- Handling an interrupt\n";
+	interrupt();
+      }
+    } while(bp.global_break && bp.have_interrupt());
 #else
     step(1,false);
 
     do {
       program_memory[pc->value]->execute();
     } while(!bp.global_break);
-#endif
-
 
     if(bp.have_interrupt())
       interrupt();
+
+#endif
+
 
     if(bp.have_sleep())
       sleep();
@@ -735,8 +744,9 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 {
 
 #ifdef CLOCK_EXPERIMENTS
-   mExecute1Cycle  = new phaseExecute1Cycle(this);
-   mExecute2ndHalf = new phaseExecute2ndHalf(this);
+   mExecute1Cycle    = new phaseExecute1Cycle(this);
+   mExecute2ndHalf   = new phaseExecute2ndHalf(this);
+   mExecuteInterrupt = new phaseExecuteInterrupt(this);
    mCurrentPhase   = mExecute1Cycle;
 #endif
 

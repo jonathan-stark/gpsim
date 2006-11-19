@@ -44,6 +44,9 @@ public:
   ClockPhase();
   virtual ~ClockPhase();
   virtual ClockPhase *advance()=0;
+  virtual void setNextPhase(ClockPhase *pNextPhase) { m_pNextPhase = pNextPhase; }
+protected:
+  ClockPhase *m_pNextPhase;
 };
 
 
@@ -85,11 +88,26 @@ protected:
   unsigned int m_uiPC;
 };
 
+class phaseExecuteInterrupt : public ProcessorPhase
+{
+public:
+  phaseExecuteInterrupt(Processor *pcpu);
+  virtual ~phaseExecuteInterrupt();
+  virtual ClockPhase *advance();
+  virtual void setNextPhase(ClockPhase *pNextPhase);
+
+  ClockPhase *firstHalf(unsigned int uiPC);
+protected:
+  ClockPhase *m_pPreviousPhase;
+  unsigned int m_uiPC;
+};
+
 ////// TEMPORARY ////////
 // These will be moved into the Processor class.
 extern ClockPhase *mCurrentPhase;
 extern phaseExecute1Cycle *mExecute1Cycle;
 extern phaseExecute2ndHalf *mExecute2ndHalf;
+extern phaseExecuteInterrupt *mExecuteInterrupt;
 
 
 #endif // defined(CLOCK_EXPERIMENTS)
