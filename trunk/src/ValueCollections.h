@@ -212,16 +212,20 @@ public:
     }
   }
 
-  void SetAt(unsigned int uIndex, _CT *pValue) {
-    if((uIndex + 1 - m_uLower) < m_Array.size() && uIndex <= m_uLower) {
+  void SetAt(unsigned int uIndex, _CT *pValue)
+  {
+    if((uIndex + 1 - m_uLower) < m_Array.size() && uIndex >= m_uLower) {
+
       _ST stValue;
       pValue->get(stValue);
+
       _CT * pElement = static_cast<_CT*>(m_Array.at(uIndex - m_uLower));
-      pElement->set(stValue);
-    }
-    else {
+      if (pElement)
+	pElement->set(stValue);
+
+    } else {
+
       char szIndex[10];
-      // throw something?
       sprintf(szIndex, "%d", uIndex);
       string sMsg("invalid array index of ");
       sMsg.append(szIndex);

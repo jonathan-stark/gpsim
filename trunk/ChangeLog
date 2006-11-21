@@ -1,3 +1,8 @@
+2006-11-20 Scott Dattalo <scott@dattalo.com>
+	* src/ValueCollections.h: SetAt method in the IndexedCollection
+	template was using a '<=' where a '>=' should have been used
+	instead.
+	
 2006-11-19 Scott Dattalo <scott@dattalo.com>
 	* src/clock_phase.cc, src/clock_phase.h, src/16bit-processors.cc,
 	src/pic-processor.cc, src/processor.cc, src/pic-registers.cc:
