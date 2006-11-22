@@ -21,6 +21,14 @@ Boston, MA 02111-1307, USA.  */
 #include "ValueCollections.h"
 #include "symbol.h"
 
+IIndexedCollection::IIndexedCollection(const char *pName, 
+				       const char *pDesc,
+				       int iAddressRadix) 
+  : Value(pName, pDesc)
+{
+  SetAddressRadix(iAddressRadix);
+}
+
 IIndexedCollection::IIndexedCollection(int iAddressRadix) {
   SetAddressRadix(iAddressRadix);
 }
