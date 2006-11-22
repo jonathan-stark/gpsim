@@ -78,6 +78,7 @@ This file originated by J.R. Heisey
 */
 class IIndexedCollection : public Value {
 public:
+  IIndexedCollection(const char *pName, const char *pDesc, int iAddressRadix = 10);
   IIndexedCollection(int iAddressRadix = 10);
   virtual unsigned int GetSize() = 0;
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0) = 0;
@@ -179,6 +180,7 @@ public:
       sName = pName;
       sprintf(szIndex, "[%d]", uIndex + m_uLower);
       sName.append(szIndex);
+      // Hmm... Do we really want to create new object for every array entry?
       m_Array.push_back(new _CT(sName.c_str(), stDefValue, pDesc));
     }
   }
@@ -273,7 +275,7 @@ public:
     // This loop examines every element's value and records
     // the value in aValue. aList is used to record an
     // appropriate label for one or more elements.
-    for(it = itLastEqualed = m_Array.begin(); it != itEnd; it++) {
+    for(it = itLastEqualed = m_Array.begin(); it != itEnd; ++it) {
       ostringstream sIndex;
       if(*(_CT*)(*itLastEqualed) != *(_CT*)(*it)) {
         PushValue(iFirstIndex, iCurrentIndex - 1,
@@ -300,7 +302,7 @@ public:
   unsigned int GetUpperBound() {
      return (unsigned int)m_Array.size();
   }
-
+  /* --- This isn't used and I (Scott) don't understand the intent...
   void SetLowerBound(unsigned int uIndex) {
     m_uLower = uIndex;
     // Now iterate through the elements and change
@@ -320,6 +322,7 @@ public:
     }
     free(pNameBuffer);
   }
+  */
 
 protected:
   void push_back(_CT *p) {
