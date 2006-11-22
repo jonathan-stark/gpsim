@@ -457,6 +457,68 @@ void pic_processor::save_state()
 //
 // run  -- Begin simulating and don't stop until there is a break.
 //
+#if defined(CLOCK_EXPERIMENTS)
+
+void pic_processor::run (bool refresh)
+{
+  if(simulation_mode != eSM_STOPPED) {
+    if(verbose)
+      cout << "Ignoring run request because simulation is not stopped\n";
+    return;
+  }
+
+  simulation_mode = eSM_RUNNING;
+
+  // If the first instruction we're simulating is a break point, 
+  // then ignore it.
+
+  simulation_start_cycle = get_cycles().get();
+
+  do {
+
+    // Take one step to get past any break point.
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+      
+    mCurrentPhase = mCurrentPhase->advance();
+
+    do {
+      do {
+	mCurrentPhase = mCurrentPhase->advance();
+      } while(!bp.global_break);
+
+      if(bp.have_interrupt() && (mCurrentPhase == mExecute1Cycle)) {
+	interrupt();
+      }
+    } while(bp.global_break && bp.have_interrupt());
+
+
+    if(bp.have_sleep())
+      sleep();
+
+    if(bp.have_pm_write()) {
+      pm_write();
+    }
+    if(bp.have_socket_break()) {
+      cout << " socket break point \n";
+      Interface *i = gi.get_socket_interface();
+      if (i)
+	i->Update(0);
+      bp.clear_socket_break();
+    }
+
+  } while(!bp.global_break);
+
+
+  bp.clear_global();
+  trace.cycle_counter(get_cycles().get());
+
+  simulation_mode = eSM_STOPPED;
+
+
+}
+
+#else
+
 void pic_processor::run (bool refresh)
 {
   if(get_use_icd())
@@ -498,22 +560,6 @@ void pic_processor::run (bool refresh)
   do {
 
     // Take one step to get past any break point.
-#if defined(CLOCK_EXPERIMENTS)
-    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
-      
-    mCurrentPhase = mCurrentPhase->advance();
-
-    do {
-      do {
-	mCurrentPhase = mCurrentPhase->advance();
-      } while(!bp.global_break);
-
-      if(bp.have_interrupt() && (mCurrentPhase == mExecute1Cycle)) {
-	//cout << "<-- Handling an interrupt\n";
-	interrupt();
-      }
-    } while(bp.global_break && bp.have_interrupt());
-#else
     step(1,false);
 
     do {
@@ -522,9 +568,6 @@ void pic_processor::run (bool refresh)
 
     if(bp.have_interrupt())
       interrupt();
-
-#endif
-
 
     if(bp.have_sleep())
       sleep();
@@ -542,6 +585,7 @@ void pic_processor::run (bool refresh)
 
   } while(!bp.global_break);
 
+
   if(realtime_mode)
     realtime_cbp.stop();
 
@@ -555,9 +599,8 @@ void pic_processor::run (bool refresh)
     gi.simulation_has_stopped();
   }
 
-
 }
-
+#endif
 
 //-------------------------------------------------------------------
 //

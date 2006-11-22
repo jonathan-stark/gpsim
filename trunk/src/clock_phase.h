@@ -44,7 +44,7 @@ public:
   ClockPhase();
   virtual ~ClockPhase();
   virtual ClockPhase *advance()=0;
-  virtual void setNextPhase(ClockPhase *pNextPhase) { m_pNextPhase = pNextPhase; }
+  void setNextPhase(ClockPhase *pNextPhase) { m_pNextPhase = pNextPhase; }
 protected:
   ClockPhase *m_pNextPhase;
 };
@@ -94,11 +94,9 @@ public:
   phaseExecuteInterrupt(Processor *pcpu);
   virtual ~phaseExecuteInterrupt();
   virtual ClockPhase *advance();
-  virtual void setNextPhase(ClockPhase *pNextPhase);
 
   ClockPhase *firstHalf(unsigned int uiPC);
 protected:
-  ClockPhase *m_pPreviousPhase;
   unsigned int m_uiPC;
 };
 

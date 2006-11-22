@@ -1061,8 +1061,9 @@ void SourceWindow::stop()
 //------------------------------------------------------------------------
 void SourceWindow::run()
 {
-  if (pma)
-    pma->run();
+  // if (pma)
+  //  pma->run();
+  get_interface().start_simulation();
 }
 //------------------------------------------------------------------------
 void SourceWindow::finish()
@@ -2836,9 +2837,6 @@ void SourceBrowserAsm_Window::Update(void)
     return;
 
   SetTitle();
-  //animate didn't work if (gp->cpu->simulation_mode == eSM_RUNNING ||
-  //gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
-  //return;
 
   SetPC(pma->get_PC());
 
