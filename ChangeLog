@@ -1,3 +1,16 @@
+2006-11-22 Scott Dattalo <scott@dattalo.com>
+	* src/interface.cc: start_simulation() is now incorporating
+	functionality previously implemented in Processor::run().
+	* gui/gui_src.cc, gui/gui_src_asm.cc, gui/gui_menu.cc: The gui now
+	starts a simulation by calling gpsim_interface::start_simulation()
+	instead of active_cpu->run()
+	* src/pic-processor.cc, src/clock_phase.cc, src/clock_phase.h,
+	src/pic-registers.cc: The ClockPhase::setNextPhase() method is no
+	longer virtual.
+	
+2006-11-21 Scott Dattalo <scott@dattalo.com>
+	* regression/TODO: Added. 
+
 2006-11-21 Scott Dattalo <scott@dattalo.com>
 	* src/ValueCollections.h, src/ValueCollections.cc: Added a new
 	constructor for IIndexedCollection objects that allow for named

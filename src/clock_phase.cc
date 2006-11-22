@@ -57,6 +57,11 @@ phaseExecute1Cycle::~phaseExecute1Cycle()
 {
 }
 
+/*
+  phaseExecute1Cycle::advance() - advances a processor's time one clock cycle.
+
+ */
+
 ClockPhase *phaseExecute1Cycle::advance()
 {
   setNextPhase(this);

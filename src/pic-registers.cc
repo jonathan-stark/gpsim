@@ -173,7 +173,7 @@ ClockPhase *phaseExecute2ndHalf::advance()
 
 
 phaseExecuteInterrupt::phaseExecuteInterrupt(Processor *pcpu)
-  : ProcessorPhase(pcpu), m_pPreviousPhase(this), m_uiPC(0)
+  : ProcessorPhase(pcpu), m_uiPC(0)
 {
 }
 phaseExecuteInterrupt::~phaseExecuteInterrupt()
@@ -183,7 +183,6 @@ ClockPhase *phaseExecuteInterrupt::firstHalf(unsigned int uiPC)
 {
   m_uiPC = uiPC;
   Dprintf(("first half of Interrupt\n"));
-  //mCurrentPhase->setNextPhase(this);
   mCurrentPhase = this;
   return this;
 }
@@ -197,23 +196,6 @@ ClockPhase *phaseExecuteInterrupt::advance()
   mCurrentPhase->setNextPhase(mExecute1Cycle);
   get_cycles().increment();
   return m_pNextPhase;
-  /*
-  if (m_pPreviousPhase == mExecute1Cycle) {
-
-    ((pic_processor *)m_pcpu)->pc->value = m_uiPC;
-    ((pic_processor *)m_pcpu)->pcl->value.put(m_uiPC&0xff);
-    mCurrentPhase->setNextPhase(mExecute1Cycle);
-    get_cycles().increment();
-    return m_pNextPhase;
-  }
-  // else...
-  return (m_pPreviousPhase != this) ?  m_pPreviousPhase->advance() : mExecute1Cycle;
-  */
-}
-void phaseExecuteInterrupt::setNextPhase(ClockPhase *pNextPhase)
-{ 
-  Dprintf(("Interrupt setting phase\n"));
-  m_pNextPhase = pNextPhase;
 }
 #endif // defined(CLOCK_EXPERIMENTS)
 

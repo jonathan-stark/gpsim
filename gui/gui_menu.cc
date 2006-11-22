@@ -944,8 +944,7 @@ toggle_window (gpointer             callback_data,
 static void
 runbutton_cb(GtkWidget *widget)
 {
-  if(gpGuiProcessor && gpGuiProcessor->cpu)
-    gpGuiProcessor->cpu->pma->run();
+  get_interface().start_simulation();
 }
 
 static void

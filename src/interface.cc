@@ -45,7 +45,7 @@ Boston, MA 02111-1307, USA.  */
 #include "icd.h"
 
 #include "cmd_manager.h"
-
+#include "clock_phase.h"
 
 extern Integer *verbosity;  // in ../src/init.cc
 
@@ -352,6 +352,20 @@ void start_run_thread(void)
 
 void gpsimInterface::start_simulation (void)
 {
+
+#if defined(CLOCK_EXPERIMENTS)
+
+  Processor *cpu = get_active_cpu();
+  if (cpu) {
+    mbSimulating = true;
+    cout << "running...\n";
+    cpu->run(true);
+    mbSimulating = false;
+    trace.dump_last_instruction(); 
+    simulation_has_stopped();
+  }
+
+#else
   Processor *cpu = get_active_cpu();
 
   mbSimulating = true;
@@ -388,6 +402,7 @@ void gpsimInterface::start_simulation (void)
   }
 
   mbSimulating = false;
+#endif
 }
 
 void gpsimInterface::reset (void)

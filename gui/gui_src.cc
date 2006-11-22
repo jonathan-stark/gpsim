@@ -74,9 +74,12 @@ class RunEvent : public KeyEvent
 public:
   void press(gpointer data)
   {
+    /*
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
       sbw->pma->run();
+    */
+    get_interface().start_simulation();
   }
   void release(gpointer data) {}
 };
