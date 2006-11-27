@@ -9,8 +9,8 @@
    ;;     are mapped into the 18F452's RAM address space. 
 
 
-	list    p=18f452                ; list directive to define processor
-	include <p18f452.inc>           ; processor specific variable definitions
+        list    p=18f452                ; list directive to define processor
+        include <p18f452.inc>           ; processor specific variable definitions
         include <coff.inc>              ; Grab some useful macros
 
 .command macro x
@@ -27,14 +27,16 @@ P1_DATA   UDATA  0x10
 P1_Port RES 1
 P1_Tris RES 1
 P1_Lat  RES 1
+P1_Pullup  RES 1
 
 ;; Alternate addresses to map the port stimulus.
 P1_AltPort RES 1
 P1_AltTris RES 1
 P1_AltLat  RES 1
+P1_AltPullup  RES 1
 
-  GLOBAL P1_Port, P1_Tris, P1_Lat
-  GLOBAL P1_AltPort, P1_AltTris, P1_AltLat
+  GLOBAL P1_Port, P1_Tris, P1_Lat, P1_Pullup
+  GLOBAL P1_AltPort, P1_AltTris, P1_AltLat, P1_AltPullup
 
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
@@ -76,39 +78,61 @@ MAIN    CODE  0x000
    .sim "P1.portAdr = &P1_Port"
    .sim "P1.trisAdr = &P1_Tris"
    .sim "P1.latAdr  = &P1_Lat"
+   .sim "P1.pullupAdr  = &P1_Pullup"
 
-	CLRF	failures	;Assume success
+        CLRF    failures        ;Assume success
 
-	CLRF	BSR
+        CLRF    BSR
 
-	MOVLW	0xff
-	MOVWF	TRISB		;Port B is an input
+        MOVLW   0xff
+        MOVWF   TRISB           ;Port B is an input
 
+        CLRF    P1_Pullup       ;Turn off the pullups (should already be off).
         CLRF    P1_Tris         ;Stimulus port is an output
         CLRF    P1_Lat
 
 a_to_b_loop:
-	MOVWF	P1_Lat		;PortStimulus and Port B are externally
-	XORWF	PORTB,W		;connected. So we should see the
-	bnz	FAILED		;same thing on each port.
+        MOVWF   P1_Lat          ;PortStimulus and Port B are externally
+        XORWF   PORTB,W         ;connected. So we should see the
+        bnz     FAILED          ;same thing on each port.
 
-	DECFSZ	PORTB,W
-	 goto	a_to_b_loop
+        DECFSZ  PORTB,W
+         goto   a_to_b_loop
+
+   ; Now let the P1's Pullups drive the bus. We'll simulate an 
+   ; open collector with a pullup resistor. The TRIS register 
+   ; will switch the driver direction. When configured as an output,
+   ; the port module will drive low. When configured as an input, 
+   ; the pull up resistors will drive high.
+
+        COMF    P1_Pullup,F     ;Turn on all of the pullups 
+        COMF    P1_Tris,F       ;Port Stimulus is now an input port
+        CLRF    P1_Lat          ;make all of the drivers low
+
+        MOVLW   0xff
+a_to_b_loop_pullups:
+        MOVWF   P1_Tris         ;PortStimulus and Port B are externally
+        XORWF   PORTB,W         ;connected. So we should see the
+        bnz     FAILED          ;same thing on each port.
+
+        DECFSZ  PORTB,W
+         goto   a_to_b_loop_pullups
 
    ; Now let's write from PORTB to the PortStimulus.
 
-	COMF	P1_Tris,F       ;Port Stimulus is now an input port
-	COMF	TRISB,F		;Port B is now an output port
+        MOVLW   0xff            ;Make the PortStimulus an input
+        MOVWF   P1_Tris
+        COMF    TRISB,F         ;Port B is now an output port
 
-	CLRW
+        CLRW
 
 b_to_a_loop:
-	MOVWF	LATB		;Port A and Port B are externally
-	XORWF	P1_Port,W	;connected. So we should see the
-	bnz	FAILED		;same thing on each port.
+        MOVWF   LATB            ;Drive to Pic's Port B
+        XORWF   P1_Port,W       ;Read the result on the PortStimulus.
+        bnz     FAILED          ;Should be the same thing on each port.
 
-	DECFSZ	PORTB,W
-	 bra	b_to_a_loop
+        DECFSZ  PORTB,W
+         bra    b_to_a_loop
 
   ; Now lets remap the port stimulus.
         CLRF    P1_AltLat
@@ -142,10 +166,10 @@ b_to_a_loop:
         nop
 
   .assert  "\"*** PASSED 18F452 port test\""
-	bra	$
+        bra     $
 
 FAILED:
   .assert  "\"*** FAILED 18F452 port test\""
-	bra	$
+        bra     $
 
   end

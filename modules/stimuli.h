@@ -109,22 +109,28 @@ namespace ExtendedStimuli {
     guint64 m_future_cycle;
   };
 
-  class RegisterAddressAttribute;
+  class RegisterAddressAttribute; // used for mapping registers into a processor memory
+  class PortPullupRegister;     
   class PortStimulus : public Module, public TriggerObject
   {
   public:
-    static Module *construct(const char *new_name);
-    PortStimulus(const char *_name);
+    static Module *construct8(const char *new_name);
+    static Module *construct16(const char *new_name);
+    static Module *construct32(const char *new_name);
+    PortStimulus(const char *_name, int nPins);
     virtual void callback_print();
     void create_iopin_map();
     
   protected:
+    int m_nPins;
     PicPortRegister  *mPort;
     PicTrisRegister  *mTris;
     PicLatchRegister *mLatch;
+    PortPullupRegister *mPullup;
     RegisterAddressAttribute *mPortAddress;
     RegisterAddressAttribute *mTrisAddress;
     RegisterAddressAttribute *mLatchAddress;
+    RegisterAddressAttribute *mPullupAddress;
   };
 
 }

@@ -581,42 +581,92 @@ File Stimulus\n\
 
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
-
-  Module *PortStimulus::construct(const char *new_name)
+  class PortPullupRegister : public sfr_register
   {
-    PortStimulus *pPortStimulus = new PortStimulus(new_name);
-    pPortStimulus->create_iopin_map();
-    return pPortStimulus;
+  public:
+    PortPullupRegister(const char *_name,
+                       PicPortRegister *_port,
+                       unsigned int enableMask);
+    ~PortPullupRegister() {}
+    virtual void put(unsigned int new_value);
+  private:
+    PicPortRegister *m_port;
+    unsigned int m_EnableMask;
+  };
+
+  PortPullupRegister::PortPullupRegister(const char *_name,
+                                         PicPortRegister *_port,
+                                         unsigned int enableMask)
+    : sfr_register(),m_port(_port),m_EnableMask(enableMask)
+  {
+    new_name(_name);
+    value = RegisterValue(0,~enableMask);
+  }
+
+  void PortPullupRegister::put(unsigned int new_value)
+  {
+    trace.raw(write_trace.get() | value.data);
+    unsigned int diff = (value.data ^ new_value) & m_EnableMask;
+    value.data = new_value;
+    if (diff && m_port) {
+
+      for (unsigned int i=1,j=0; diff && i; i<<=1, j++)
+        if (diff & i)
+          m_port->getPin(j)->update_pullup((value.data & i !=0) ? '1':'0',true);
+
+      m_port->updatePort();
+    }
   }
 
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
 
-  PortStimulus::PortStimulus(const char *_name)
+  Module *PortStimulus::construct8(const char *new_name)
+  {
+    return new PortStimulus(new_name,8);
+  }
+  Module *PortStimulus::construct16(const char *new_name)
+  {
+    return new PortStimulus(new_name,16);
+  }
+  Module *PortStimulus::construct32(const char *new_name)
+  {
+    return new PortStimulus(new_name,32);
+  }
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+
+  PortStimulus::PortStimulus(const char *_name, int nPins)
     : Module(_name, "\
 Port Stimulus\n\
  Attributes:\n\
  .port - port name\n\
  .tris - tris name\n\
  .lat  - latch name\n\
-")
+ .pullup  - pullup name\n\
+"),
+      m_nPins(nPins)
   {
-    mPort  = new PicPortRegister((name()+".port").c_str(),8,0xff);
-    mTris  = new PicTrisRegister((name()+".tris").c_str(),mPort);
-    mLatch = new PicLatchRegister((name()+".lat").c_str(),mPort);
-    mLatch->setEnableMask(0xff);
+    mPort   = new PicPortRegister((name()+".port").c_str(),m_nPins,(1<<m_nPins)-1);
+    mTris   = new PicTrisRegister((name()+".tris").c_str(),mPort,(1<<m_nPins)-1);
+    mLatch  = new PicLatchRegister((name()+".lat").c_str(),mPort,(1<<m_nPins)-1);
+    mPullup = new PortPullupRegister((name()+".pullup").c_str(),mPort,(1<<m_nPins)-1);
 
     mPortAddress = new RegisterAddressAttribute(mPort, "portAdr","Port register address");
     mTrisAddress = new RegisterAddressAttribute(mTris, "trisAdr","Tris register address");
     mLatchAddress = new RegisterAddressAttribute(mLatch, "latAdr","Latch register address");
+    mPullupAddress = new RegisterAddressAttribute(mPullup, "pullupAdr","Pullup register address");
 
     get_symbol_table().add_register(mPort);
     get_symbol_table().add_register(mTris);
     get_symbol_table().add_register(mLatch);
+    get_symbol_table().add_register(mPullup);
 
     add_attribute(mPortAddress);
     add_attribute(mTrisAddress);
     add_attribute(mLatchAddress);
+    add_attribute(mPullupAddress);
 
     // FIXME - probably want something better than the generic module trace
 
@@ -624,8 +674,11 @@ Port Stimulus\n\
     get_trace().allocateTraceType(mMTT);
 
     buildTraceType(mPort, mMTT->type());
-    buildTraceType(mTris, mMTT->type() + (4<<8));
-    buildTraceType(mLatch, mMTT->type() + (8<<8));
+    buildTraceType(mTris, mMTT->type() + (4<<16));
+    buildTraceType(mLatch, mMTT->type() + (8<<16));
+    buildTraceType(mPullup, mMTT->type() + (12<<16));
+
+    create_iopin_map();
 
   }
   //----------------------------------------------------------------------
@@ -640,13 +693,23 @@ Port Stimulus\n\
   void PortStimulus::create_iopin_map()
   {
 
-    create_pkg(8);
+    create_pkg(m_nPins);
+    char pinNumber[3];
 
-    for (int i=0; i<8; i++) {
-      char pinNumber = '1'+i;
+    for (int i=0; i<m_nPins; i++) {
+      int p = i+1;
+      if (p<10) {
+	pinNumber[0] = p+'0';
+	pinNumber[1] = 0;
+      } else {
+	pinNumber[0] = (p/10)+'0';
+	pinNumber[1] = (p%10)+'0';
+	pinNumber[2] = 0;
+      }
+
       IO_bi_directional *ppin;
 
-      ppin = new IO_bi_directional((name() + ".p" + pinNumber).c_str());
+      ppin = new IO_bi_directional_pu((name() + ".p" + pinNumber).c_str());
       ppin->update_direction(IOPIN::DIR_OUTPUT,true);
       assign_pin(i+1, mPort->addPin(ppin,i));
     }
