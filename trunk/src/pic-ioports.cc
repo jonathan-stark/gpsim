@@ -129,8 +129,10 @@ void PicPortRegister::setTris(PicTrisRegister *new_tris)
 }
 //------------------------------------------------------------------------
 
-PicTrisRegister::PicTrisRegister(const char *tris_name, PicPortRegister *_port)
-  : sfr_register(),m_port(_port)
+PicTrisRegister::PicTrisRegister(const char *tris_name,
+				 PicPortRegister *_port,
+				 unsigned int enableMask)
+  : sfr_register(),m_port(_port),m_EnableMask(enableMask)
 {
   new_name(tris_name);
   if (m_port)
@@ -170,9 +172,9 @@ void PicPSP_TrisRegister::put(unsigned int new_value)
 
   trace.raw(write_trace.get() | value.data);
   if (! (new_value & PSP::PSPMODE))
-	fixed = 0;
-   else
-	fixed = value.data & mask;
+    fixed = 0;
+  else
+    fixed = value.data & mask;
 
   value.data = (new_value & ~mask) | fixed;
   if (m_port)
@@ -199,7 +201,9 @@ unsigned int PicPSP_TrisRegister::get(void)
 
 
 
-PicPortBRegister::PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask)
+PicPortBRegister::PicPortBRegister(const char *port_name,
+				   unsigned int numIopins, 
+				   unsigned int enableMask)
   : PicPortRegister(port_name, numIopins, enableMask),
     m_bRBPU(false),
     m_bIntEdge(false)
@@ -331,8 +335,10 @@ void PicPSP_PortRegister::setTris(PicTrisRegister *new_tris)
 //------------------------------------------------------------------------
 // Latch Register
 
-PicLatchRegister::PicLatchRegister(const char *_name, PortRegister *_port)
-  : m_port(_port), m_EnableMask(0xff)
+PicLatchRegister::PicLatchRegister(const char *_name, 
+				   PortRegister *_port,
+				   unsigned int enableMask)
+  : m_port(_port), m_EnableMask(enableMask)
 {
   new_name(_name);
 }

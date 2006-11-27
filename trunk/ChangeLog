@@ -1,3 +1,15 @@
+2006-11-27 Scott Dattalo <scott@dattalo.com>
+	* src/pic-ioports.h, src/ioports.cc, src/pic-ioports.cc:
+	- Improved class member initialization. Specifically, the pin enable
+	mask was not getting set properly.
+	* modules/gpsim_modules.cc, modules/stimuli.cc, modules/stimuli.h:
+	- Added 16-bit and 32-bit versions of the parallel port stimulus
+	- Added a 'pullup' register to the port stimulus.
+	- Changed the parallel port stimulus I/O pins to IO_bi_directional_pu
+	* regression/port_stim/port_stim.asm
+	- The parallel port stimulus regression test now tests the
+	module's pullup resistors.
+
 2006-11-22 Scott Dattalo <scott@dattalo.com>
 	* src/interface.cc: start_simulation() is now incorporating
 	functionality previously implemented in Processor::run().

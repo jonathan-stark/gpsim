@@ -105,7 +105,9 @@ Module_Types available_modules[] =
   { {"led", "led"}, Leds::Led::construct},
   { {"push_button",      "pb"},   PushButton::construct },
 #endif
-  { {"PortStimulus",     "ps"},   ExtendedStimuli::PortStimulus::construct },
+  { {"PortStimulus",     "ps"},   ExtendedStimuli::PortStimulus::construct8 },
+  { {"PortStimulus16",   "ps"},   ExtendedStimuli::PortStimulus::construct16 },
+  { {"PortStimulus32",   "ps"},   ExtendedStimuli::PortStimulus::construct32 },
   { {"pullup",           "pu"},   PullupResistor::pu_construct },
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
   { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },

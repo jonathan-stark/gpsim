@@ -28,7 +28,7 @@ class PicTrisRegister;
 class PicPortRegister : public PortRegister
 {
 public:
-  PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
+  PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask=0xff);
   void setTris(PicTrisRegister *new_tris);
   Register *getTris();
 protected:
@@ -40,19 +40,20 @@ class PicTrisRegister : public sfr_register
 
 public:
 
-  PicTrisRegister(const char *tris_name, PicPortRegister *);
+  PicTrisRegister(const char *tris_name, PicPortRegister *,unsigned int nEnableMask=0xff);
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
   
 protected:
   PicPortRegister *m_port;
+  unsigned int m_EnableMask;
 };
 
 
 class PicPortBRegister : public PicPortRegister
 {
 public:
-  PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
+  PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask=0xff);
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
@@ -111,7 +112,7 @@ public:
 
   virtual void setEnableMask(unsigned int nEnableMask);
 
-  PicLatchRegister(const char *, PortRegister *);
+  PicLatchRegister(const char *, PortRegister *,unsigned int nEnableMask=0xff);
 
 protected:
   PortRegister *m_port;

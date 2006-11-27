@@ -148,7 +148,7 @@ PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
     drivingValue(0), rvDrivenValue(0,0)
 
 {
-
+  bit_mask = numIopins-1; // ugh.
 }
 
 void PortRegister::setEnableMask(unsigned int newEnableMask)
@@ -242,6 +242,10 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
       rvDrivenValue.init |= (1<<bit_number);
 
     value = rvDrivenValue;
+  } else {
+    Dprintf(("PortRegister::::setbit() %s INVALID BIT bit=%d mask=0x%x\n",
+	     name().c_str(), bit_number, bit_mask));
+
   }
 
 }
@@ -276,13 +280,13 @@ PortModule::PortModule(unsigned int numIopins)
   iopins = new PinModule *[mNumIopins];
   for (unsigned int i=0; i<mNumIopins; i++)
     iopins[i] = &AnInvalidPinModule;
-  //iopins[i] = new PinModule(this,i);
-
 }
+
 PortModule::~PortModule()
 {
   for (unsigned int i=0; i<mNumIopins; i++)
-    delete iopins[i];
+    if (iopins[i] != &AnInvalidPinModule) 
+      delete iopins[i];
 
   delete iopins;
 }
