@@ -1,3 +1,8 @@
+2006-12-01 Borut Razem <borut.razem@siol.net>
+	* modules/stimuli.cc: access trace object directly indirectly by using
+	  get_trace()
+	* plat/win32/libgpsim.def: MSVC sync
+
 2006-11-27 Scott Dattalo <scott@dattalo.com>
 	* src/pic-ioports.h, src/ioports.cc, src/pic-ioports.cc:
 	- Improved class member initialization. Specifically, the pin enable
@@ -19,9 +24,9 @@
 	* src/pic-processor.cc, src/clock_phase.cc, src/clock_phase.h,
 	src/pic-registers.cc: The ClockPhase::setNextPhase() method is no
 	longer virtual.
-	
+
 2006-11-21 Scott Dattalo <scott@dattalo.com>
-	* regression/TODO: Added. 
+	* regression/TODO: Added.
 
 2006-11-21 Scott Dattalo <scott@dattalo.com>
 	* src/ValueCollections.h, src/ValueCollections.cc: Added a new
@@ -32,7 +37,7 @@
 	* src/ValueCollections.h: SetAt method in the IndexedCollection
 	template was using a '<=' where a '>=' should have been used
 	instead.
-	
+
 2006-11-19 Scott Dattalo <scott@dattalo.com>
 	* src/clock_phase.cc, src/clock_phase.h, src/16bit-processors.cc,
 	src/pic-processor.cc, src/processor.cc, src/pic-registers.cc:
@@ -40,7 +45,7 @@
 	 feature. More work is still needed and still,
 	   //#define CLOCK_EXPERIMENTS
 	Is commented out. - So this new code is inhibited by default.
-	
+
 2006-11-17 Borut Razem <borut.razem@siol.net>
 	* src/makefile.mingw, src/src.vcproj: MSVC sync
 
