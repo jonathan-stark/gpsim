@@ -605,7 +605,7 @@ File Stimulus\n\
 
   void PortPullupRegister::put(unsigned int new_value)
   {
-    trace.raw(write_trace.get() | value.data);
+    get_trace().raw(write_trace.get() | value.data);
     unsigned int diff = (value.data ^ new_value) & m_EnableMask;
     value.data = new_value;
     if (diff && m_port) {

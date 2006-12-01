@@ -58,9 +58,9 @@ EXPORTS
     ??0PCTraceType@@QAE@PAVProcessor@@I@Z
     ??0Package@@QAE@I@Z
     ??0Packet@@QAE@II@Z
-    ??0PicLatchRegister@@QAE@PBDPAVPortRegister@@@Z
+    ??0PicLatchRegister@@QAE@PBDPAVPortRegister@@I@Z
     ??0PicPortRegister@@QAE@PBDII@Z
-    ??0PicTrisRegister@@QAE@PBDPAVPicPortRegister@@@Z
+    ??0PicTrisRegister@@QAE@PBDPAVPicPortRegister@@I@Z
     ??0PinModule@@QAE@PAVPortModule@@IPAVIOPIN@@@Z
     ??0PortRegister@@QAE@II@Z
     ??0Processor@@QAE@PBD0@Z
@@ -94,6 +94,7 @@ EXPORTS
     ??0invalid_instruction@@QAE@PAVProcessor@@II@Z
     ??0register_symbol@@QAE@PAVRegister@@@Z
     ??0register_symbol@@QAE@PBDPAVRegister@@@Z
+    ??0sfr_register@@QAE@XZ
     ??0symbol@@QAE@PBD@Z
     ??1AnError@@UAE@XZ
     ??1Boolean@@UAE@XZ
@@ -348,6 +349,7 @@ EXPORTS
     ?get@Integer@@UAEXPADH@Z
     ?get@PortRegister@@UAEIXZ
     ?get@Processor@@UAEXPADH@Z
+    ?get@Register@@UAEIXZ
     ?get@String@@UAEXAAVPacket@@@Z
     ?get@String@@UAEXPADH@Z
     ?get@Value@@UAEXAAH@Z
@@ -370,6 +372,7 @@ EXPORTS
     ?getFromAddress@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getFromIndex@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getPinGeometry@Package@@QAEPAUPinGeometry@@I@Z
+    ?getPin@PortModule@@QAEPAVIOPIN@@I@Z
     ?getReg@register_symbol@@QAEPAVRegister@@XZ
     ?getReplaced@AliasedInstruction@@UAEPAVinstruction@@XZ
     ?getState@IOPIN@@UAE_NXZ
@@ -390,6 +393,7 @@ EXPORTS
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVValue@@PAD_N@Z    
     ?get_base_instruction@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
+    ?get_bit@Register@@UAE_NI@Z
     ?get_bit_voltage@Register@@UAENI@Z
     ?get_bp@@YAAAVBreakpoints@@XZ
     ?get_cpu@Breakpoint_Instruction@@UAEPAVProcessor@@XZ
