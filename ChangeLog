@@ -1,3 +1,8 @@
+2006-12-14 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.h, src/ioports.cc: Added an 'updatePins()' method to
+	the PortModule class. This provides a way of updating just a
+	subset of the port pins.
+
 2006-12-01 Borut Razem <borut.razem@siol.net>
 	* modules/stimuli.cc: access trace object directly indirectly by using
 	  get_trace()
