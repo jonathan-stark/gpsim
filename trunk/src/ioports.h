@@ -172,6 +172,10 @@ public:
 
   virtual void updatePin(unsigned int iPinNumber);
 
+  /// updatePins -- Update several I/O pins
+
+  virtual void updatePins(unsigned int iPinBitMask);
+
   /// updateUI -- convey pin state info to a User Interface (e.g. the gui).
 
   virtual void   updateUI();

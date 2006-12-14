@@ -328,6 +328,13 @@ void PortModule::updatePin(unsigned int iPinNumber)
     iopins[iPinNumber]->updatePinModule();
 }
 
+void PortModule::updatePins(unsigned int iPinBitMask)
+{
+  for (unsigned int i=0,j=1; i<mNumIopins; i++, j<<=1)
+    if (j&iPinBitMask && iopins[i])
+      iopins[i]->updatePinModule();
+}
+
 SignalSink *PortModule::addSink(SignalSink *new_sink, unsigned int iPinNumber)
 {
   if (iPinNumber < mNumIopins)
@@ -462,7 +469,7 @@ void PinModule::setDefaultControl(SignalControl *newDefaultControl)
     setControl(m_defaultControl);
   }
   else
-	delete newDefaultControl;
+    delete newDefaultControl;   //// YIKES!!! -- wouldn't it be better to return an error code?
 }
 void PinModule::setControl(SignalControl *newControl)
 {
