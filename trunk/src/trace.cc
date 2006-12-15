@@ -462,7 +462,7 @@ PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address)
 
 void PCTraceObject::print(FILE *fp)
 {
-  char a_string[50];
+  char a_string[200];
 
   unsigned addr = cpu->map_pm_index2address(address &0xffff);
 
@@ -470,6 +470,15 @@ void PCTraceObject::print(FILE *fp)
 	  addr,
 	  (cpu->pma->getFromAddress(addr))->get_opcode(),
 	  (cpu->pma->getFromAddress(addr))->name(a_string,sizeof(a_string)));
+
+  instruction * pInstr = cpu->pma->getFromAddress(addr);
+  int srcLine = pInstr->get_src_line();
+  if (srcLine >=0)
+    fprintf(fp,"%d: %s",
+            srcLine, 
+            cpu->files.ReadLine(pInstr->get_file_id(),
+                                pInstr->get_src_line(),
+                                a_string,sizeof(a_string)));
 }
 
 void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
@@ -1040,7 +1049,6 @@ int Trace::dump(int n, FILE *out_stream)
 
   if(!n)
     n = 5;
-  n++;
 
   if(!out_stream)
     return 0;
@@ -1054,18 +1062,15 @@ int Trace::dump(int n, FILE *out_stream)
     trace_map[CYCLE_COUNTER_HI] = pCycleTrace;
   }
 
-  unsigned int frames = n;
-
-  unsigned int i = tbi(trace_index-2);
-  unsigned int k = tbi(trace_index-1);
+  unsigned int frames = n+1;
+  unsigned int frame_start = tbi(trace_index-2);
   guint64 cycle=0;
 
-  if(trace.is_cycle_trace(i,&cycle) !=  2)
+  if(trace.is_cycle_trace(frame_start,&cycle) !=  2)
     return 0;
 
-  unsigned int frame_start = tbi(trace_index-2);
   unsigned int frame_end = trace_index;
-  k = frame_start;
+  unsigned int k = frame_start;
 
 
   // Save the state of the CPU here. 
@@ -1075,7 +1080,13 @@ int Trace::dump(int n, FILE *out_stream)
   // Decode the trace buffer
   //
   // Starting at the end of the trace buffer, step backwards
-  // and count 'n' trace frames.
+  // and count 'n' trace frames. A trace frame describes a 
+  // boundary. All of the traced information between frames 
+  // describe what happened at the boundary. For example, 
+  // when a movf temp,W executes, the Program counter creates
+  // the frame boundary and the write to temp and read from W
+  // are stored in it. The frame boundary is recorded at the
+  // end of the frame. 
 
   current_frame = 0;
 
@@ -1089,10 +1100,15 @@ int Trace::dump(int n, FILE *out_stream)
       // Now decode it. Note that this is where things
       // like trace frames are created (e.g. for PCTraceType
       // decode() creates a new trace frame).
+      // If we're on the last frame, and this trace type is a
+      // new frame, then we're done.
 
       TraceType *tt = (*tti).second;
 
       if(tt) {
+        if (tt->isFrameBoundary() && traceFrames.size()==frames-1)
+          break; // We're done!
+
 	TraceObject *pTO = tt->decode(k);
 	if (pTO)
 	  addToCurrentFrame(pTO);
