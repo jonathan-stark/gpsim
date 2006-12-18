@@ -18,6 +18,7 @@ EXPORTS
     ??0IO_bi_directional@@QAE@PBDNNNNNN@Z
     ??0IO_bi_directional_pu@@QAE@PBDNNNNNNN@Z
     ??0IO_open_collector@@QAE@PBD@Z
+    ??0IIndexedCollection@@QAE@PBD0H@Z
     ??0IndexedSymbol@@QAE@PAVValue@@PAV?$list@PAVExpression@@V?$allocator@PAVExpression@@@std@@@std@@@Z
     ??0Integer@@QAE@ABV0@@Z
     ??0Integer@@QAE@PBD_J0@Z
@@ -175,6 +176,7 @@ EXPORTS
     ?Parse@Integer@@SA_NPBDAA_J@Z
     ?PushValue@IIndexedCollection@@IAEXHHPAVValue@@AAV?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@std@@1@Z
     ?ReadHLLLine@instruction@@UAEPADPADH@Z
+    ?ReadLine@FileContextList@@QAEPADHHPADH@Z
     ?ReadLstLine@instruction@@UAEPADPADH@Z
     ?ReadSrcLine@instruction@@UAEPADPADH@Z
     ?Register@CCommandManager@@QAEHPAVICommandHandler@@@Z
@@ -242,6 +244,7 @@ EXPORTS
     ?callback_print@source_stimulus@@UAEXXZ
     ?clear@Breakpoint_Instruction@@UAEXXZ
     ?clear@Breakpoints@@QAEXI@Z
+    ?clear@Symbol_Table@@QAEXXZ
     ?clear@TriggerObject@@UAEXXZ
     ?clear_all@Breakpoints@@QAEXPAVProcessor@@@Z
     ?clear_all_register@Breakpoints@@QAEXPAVProcessor@@I@Z
@@ -479,6 +482,7 @@ EXPORTS
     ?open@FileContext@@QAEXPBD@Z
     ?passToChild@Token@gpsim@@QAEXXZ
     ?passToParent@Token@gpsim@@QAEXXZ
+    ?preset@Cycle_Counter@@QAEX_K@Z
     ?print@Breakpoint_Instruction@@UAEXXZ
     ?print@TriggerObject@@UAEXXZ
     ?printExpression@TriggerObject@@UAEHPADH@Z
@@ -547,6 +551,7 @@ EXPORTS
     ?set@Value@@UAEX_N@Z
     ?setBreakOnReset@Processor@@UAEX_N@Z
     ?setClearableSymbol@Value@@UAEX_N@Z
+    ?setControl@PinModule@@QAEXPAVSignalControl@@@Z
     ?setDefaultBitmask@Integer@@SAX_J@Z
     ?setDefaultControl@PinModule@@QAEXPAVSignalControl@@@Z
     ?setDefaultPullupControl@PinModule@@QAEXPAVSignalControl@@@Z
@@ -663,6 +668,7 @@ EXPORTS
     ?toString@stimulus@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@symbol@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toggle@IOPIN@@UAEXXZ
+    ?toggleDrivingState@IOPIN@@UAE_NXZ
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?toupper@@YAAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AAV12@@Z
@@ -675,10 +681,12 @@ EXPORTS
     ?update@Stimulus_Node@@QAEXXZ
     ?update@gpsimValue@@UAEXXZ
     ?updatePin@PortModule@@UAEXI@Z
+    ?updatePins@PortModule@@UAEXI@Z
     ?updatePort@PortModule@@UAEXXZ
     ?updateUI@PinModule@@UAEXXZ
     ?updateUI@PortRegister@@UAEXXZ
     ?update_direction@IO_bi_directional@@UAEXI_N@Z
+    ?update_line_number@AliasedInstruction@@UAEXHHHHH@Z
     ?update_line_number@instruction@@UAEXHHHHH@Z
     ?update_pullup@IO_bi_directional_pu@@UAEXD_N@Z
     ?update_state@TraceFrame@@UAEXXZ
