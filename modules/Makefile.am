@@ -15,7 +15,8 @@ libgpsim_modules_la_SOURCES = \
 	encoder.cc encoder.h \
 	i2c-eeprom.cc i2c-eeprom.h \
 	stimuli.h stimuli.cc \
-	ttl.cc ttl.h
+	ttl.cc ttl.h \
+	i2c.cc i2c.h
 
 ##	paraface.cc paraface.h \  # TSD - removed 16APR06
 ##	video.cc video.h \ # TSD - removed 17APR06
