@@ -318,6 +318,7 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     if (! (cfg_word & CFG_MCLRE)) 
     {
       valid_pins |= ( 1<< 5); 		// porta5 IO port
+      //m_trisa->setEnableMask(m_trisa->getEnableMask() & ~(1<<5));
     }
     else
     {
@@ -328,9 +329,6 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     else
 	ccp1con.setIOpin(&((*m_portb)[3]));
 
-
-    //cout << " porta valid_iopins " << porta->valid_iopins << 
-    //   "  tris valid io " << trisa.valid_iopins << '\n';
 
     if (valid_pins != m_porta->getEnableMask()) // enable new pins for IO
     {
@@ -407,6 +405,11 @@ P16F87::P16F87(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "f87 constructor, type = " << isa() << '\n';
+
+  m_porta->setEnableMask(0xff);
+
+  // trisa5 is an input only pin
+  m_trisa->setEnableMask(0xdf);
 
 }
 

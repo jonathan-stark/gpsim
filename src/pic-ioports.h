@@ -43,7 +43,12 @@ public:
   PicTrisRegister(const char *tris_name, PicPortRegister *,unsigned int nEnableMask=0xff);
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
-  
+  virtual char get3StateBit(unsigned int bitMask);
+  void setEnableMask(unsigned int);
+  unsigned int getEnableMask()
+  {
+    return m_EnableMask;
+  }
 protected:
   PicPortRegister *m_port;
   unsigned int m_EnableMask;
