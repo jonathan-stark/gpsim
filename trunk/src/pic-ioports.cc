@@ -72,8 +72,7 @@ public:
   }
   char getState()
   {
-    // return m_register ? 
-    //  (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
+
     char r = m_register ? (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
     /**/
     Dprintf(("PicSignalSource::getState() %s  bitmask:0x%x state:%c\n",
@@ -103,7 +102,7 @@ PicPortRegister::PicPortRegister(const char *port_name,
 class PicSignalControl : public SignalControl
 {
 public:
-  PicSignalControl(Register *_reg, unsigned int bitPosition)
+  PicSignalControl(PicTrisRegister *_reg, unsigned int bitPosition)
     : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
@@ -112,7 +111,7 @@ public:
     return m_register ? m_register->get3StateBit(m_bitMask) : '?';
   }
 private:
-  Register *m_register;
+  PicTrisRegister *m_register;
   unsigned int m_bitMask;
 };
 
@@ -151,6 +150,23 @@ unsigned int PicTrisRegister::get()
   trace.raw(read_trace.get() | value.data);
   return value.data;
 }
+
+void PicTrisRegister::setEnableMask(unsigned int enableMask)
+{
+  m_EnableMask = enableMask;
+}
+
+char PicTrisRegister::get3StateBit(unsigned int bitMask)
+{
+  RegisterValue rv = getRV_notrace();
+  unsigned int enabled = bitMask & m_EnableMask;
+  if (!enabled)
+    return '1';
+
+  return (rv.init&enabled) ? '?' : (rv.data&enabled ? '1': '0');
+
+}
+
 
 //------------------------------------------------------------------------
 
