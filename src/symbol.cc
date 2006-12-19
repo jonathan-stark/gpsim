@@ -771,6 +771,11 @@ void Symbol_Table::clear_all()
 {
   iterator it;
 
+  // There's a design flaw here. A symbol may have been created
+  // either globally or as a member of a class. In other words,
+  // symbols don't have to be created via 'new'. Thus it's not
+  // safe to assume that a symbol can be deleted with delete!
+
   for(it = begin(); it != end(); ++it)
     delete *it;
 
