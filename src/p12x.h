@@ -62,6 +62,7 @@ class P12C508 : public  _12bit_processor
   static Processor *construct(const char *name);
   void create();
   virtual void create_iopin_map();
+  virtual void create_config_memory();
 
   virtual unsigned int fsr_valid_bits()
     {

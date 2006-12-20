@@ -41,6 +41,45 @@ Boston, MA 02111-1307, USA.  */
 
 
 //========================================================================
+// Generic Configuration word for the midrange family.
+
+class Generic12bitConfigWord : public ConfigMemory 
+{
+public:
+  Generic12bitConfigWord(_12bit_processor *pCpu)
+    : ConfigMemory("CONFIG", 0xfff, "Configuration Word", pCpu, 0xfff)
+  {
+    assert(pCpu);
+    pCpu->wdt.initialize(true);
+  }
+
+  enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    WDTEN  = 1<<2,
+    CP     = 1<<3,
+    MCLRE  = 1<<4
+  };
+
+  virtual void set(gint64 v)
+  {
+    gint64 oldV = getVal();
+
+    Integer::set(v);
+    if (m_pCpu) {
+
+      gint64 diff = oldV ^ v;
+
+      if (diff & WDTEN)
+	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
+
+    }
+
+  }
+
+};
+
+//========================================================================
 // The P12 devices with an EEPROM contain two die. One is the 12C core and
 // the other is an I2C EEPROM (Actually, it is not know if there are two
 // physical die. However, it is known that there are two functional layouts
@@ -69,6 +108,13 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
   }
 
 }
+//-------------------------------------------------------------------
+void P12C508::create_config_memory()
+{
+  m_configMemory = new ConfigMemory *[1];
+  *m_configMemory = new Generic12bitConfigWord(this);
+}
+
 
 //========================================================================
 void P12C508::create_iopin_map()

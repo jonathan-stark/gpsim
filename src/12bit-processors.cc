@@ -192,7 +192,7 @@ void _12bit_processor::create()
 void _12bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory *[1];
-  *m_configMemory = new ConfigMemory("CONFIG", 0,"Configuration Word",this,0xfff);
+  *m_configMemory = new ConfigMemory("CONFIG", 0xfff,"Configuration Word",this,0xfff);
 }
 
 //-------------------------------------------------------------------
