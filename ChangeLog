@@ -1,3 +1,11 @@
+2006-12-20  Scott Dattalo <scott@dattalo.com>
+	* src/12bit-processors.cc, src/p12x.cc, src/p12x.h:
+	Config word stuff was broken. 
+	* regression/p12c509/tmr0.asm: Converted into relative mode code.
+	* regression/p12c509/Makefile, regression/p12c509/12c509.lkr:
+	Added. This is in preparation for testing SLEEP and WDT for the
+	12bit cores.
+	
 2006-12-19 Scott Dattalo <scott@dattalo.com>
 	* modules/i2c.h, modules/i2c.cc, modules/Makefile.am: Added an i2c
 	master module. Currently can only be driven with attributes. 
