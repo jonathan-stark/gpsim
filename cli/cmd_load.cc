@@ -42,6 +42,7 @@ cmd_load c_load;
 #define CMD_LOAD_HEXFILE 1
 #define CMD_LOAD_CMDFILE 2
 #define CMD_LOAD_CODFILE 3 // s for Symbol file
+#define CMD_LOAD_INCLUDE_CMDFILE 4  // like load, but don't change directories.
 
 
 static cmd_options cmd_load_options[] =
@@ -49,6 +50,7 @@ static cmd_options cmd_load_options[] =
   {"h",CMD_LOAD_HEXFILE,    OPT_TT_BITFLAG},
   {"c",CMD_LOAD_CMDFILE,    OPT_TT_BITFLAG},
   {"s",CMD_LOAD_CODFILE,    OPT_TT_BITFLAG},
+  {"i",CMD_LOAD_INCLUDE_CMDFILE,    OPT_TT_BITFLAG},
  { 0,0,0}
 };
 
@@ -60,7 +62,7 @@ cmd_load::cmd_load(void)
 
   brief_doc = string("Load either a program or command file");
 
-  long_doc = string ("load [processortype] programfile \
+  long_doc = string ("load [processortype] [i] programfile \
 \nload cmdfile.stc\
 \n\n\tLoad either a program or command file. Program files may be in\
 \n\thex or cod (symbol) file format.\
@@ -75,6 +77,9 @@ cmd_load::cmd_load(void)
 \n\t                  a symbol file.\
 \n\t  cmdfile.stc   - a gpsim command file. Must have an .stc extension.\
 \n\
+\n\t By default, .stc files residing in other directories will change
+\n\t the working directory. The 'i' option overides that behavior. 
+\n\t
 \n\tdeprecated:\
 \n\t  load  h | c | s  file_name\
 \n\t  load s perfect_program.cod\
@@ -89,7 +94,7 @@ cmd_load::cmd_load(void)
 //
 //
 #define MAX_LINE_LENGTH 256  
-extern void process_command_file(const char * file_name);
+extern void process_command_file(const char * file_name, bool bCanChangeDirectory);
 
 /**
   * cmd_load.load()
@@ -98,34 +103,40 @@ extern void process_command_file(const char * file_name);
 int cmd_load::load(int bit_flag,const char *filename)
 {
   int iReturn = (int)TRUE;
-  switch(bit_flag)
-    {
-    case CMD_LOAD_HEXFILE:
-    case CMD_LOAD_CODFILE:
-      if(verbose) {
-        switch(bit_flag) {
-          case CMD_LOAD_HEXFILE:
-  	        cout << "cmd_load::load hex file " << filename << '\n';
-            break;
-          case CMD_LOAD_CODFILE:
-            cout << " cmd_load::load cod file "  << filename << '\n';
-            break;
-        }
-      }
-      iReturn = CSimulationContext::GetContext()->LoadProgram(
-        filename);
-      break;
+  bool bCanChangeDirectories=true;
+  switch(bit_flag){
 
-    case CMD_LOAD_CMDFILE:
-      /* Don't display parser warnings will processing the command file */
-      parser_warnings = 0;
-      process_command_file(filename);
-      parser_warnings = 1;
-      break;
-    default:
-      cout << "Unknown option flag" << endl;
-      iReturn = (int)FALSE; // as a boolean
+  case CMD_LOAD_HEXFILE:
+  case CMD_LOAD_CODFILE:
+    if(verbose) {
+      switch(bit_flag) {
+      case CMD_LOAD_HEXFILE:
+	cout << "cmd_load::load hex file " << filename << '\n';
+	break;
+      case CMD_LOAD_CODFILE:
+	cout << " cmd_load::load cod file "  << filename << '\n';
+	break;
+      }
     }
+    iReturn = CSimulationContext::GetContext()->LoadProgram(
+							    filename);
+    break;
+
+  case CMD_LOAD_INCLUDE_CMDFILE:
+    bCanChangeDirectories = false;
+    // ... fall through
+
+  case CMD_LOAD_CMDFILE:
+    /* Don't display parser warnings will processing the command file */
+    parser_warnings = 0;
+    process_command_file(filename,bCanChangeDirectories);
+    parser_warnings = 1;
+    break;
+
+  default:
+    cout << "Unknown option flag" << endl;
+    iReturn = (int)FALSE; // as a boolean
+  }
 
   // Most of the time diagnostic info will get printed while a processor
   // is being loaded.
