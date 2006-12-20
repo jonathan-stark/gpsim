@@ -481,7 +481,7 @@ int parse_string_only(const char * str) {
   return iRet;
 }
 
-void process_command_file(const char * file_name)
+void process_command_file(const char * file_name, bool bCanChangeDirectory)
 {
 
   FILE *cmd_file;
@@ -492,7 +492,7 @@ void process_command_file(const char * file_name)
     cout << __FUNCTION__ <<"()\n";
 
   dir_path_end = get_dir_delim(file_name);
-  if(dir_path_end)
+  if(dir_path_end && bCanChangeDirectory)
   {
       strncpy(directory,file_name,dir_path_end-file_name);
       directory[dir_path_end-file_name]=0;
@@ -575,7 +575,7 @@ int gpsim_open(Processor *cpu, const char *pFileName,
     printf (" gpsim_open file:%s proc name:%s\n", pFileName, (pProcessorName ? pProcessorName : "nil"));
   // Check for the command file, file extension.
   if(IsFileExtension(pFileName,"stc") || IsFileExtension(pFileName,"STC")) {
-    process_command_file(pFileName);
+    process_command_file(pFileName,true);
     // A stc file could have any sequence of commands.
     // Just ignore the return value of parse_string().
     parse_string("\n");

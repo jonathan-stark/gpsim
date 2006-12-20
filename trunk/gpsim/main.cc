@@ -87,6 +87,7 @@ void initialize_ConsoleUI();
 // library) will assign values to:
 
 static char *startup_name = "";
+static char *include_startup_name = "";
 static char *processor_name = "";
 static char *cod_name     = "";
 static char *hex_name     = "";
@@ -127,6 +128,8 @@ struct poptOption optionsTable[] = {
     ".cod symbol file",0 } ,
   { "sourcepath", 'L',POPT_ARG_STRING, &search_path, 'L',
     "colon separated list of directories to search.", 0},
+  { "include", 'I',POPT_ARG_STRING, &include_startup_name, 0,
+    "startup command file - does not change directories", 0},
   { "version",'v',0,0,'v',
     "gpsim version",0},
   { "echo",'E',POPT_ARG_NONE,0,'E',
@@ -361,6 +364,12 @@ main (int argc, char *argv[])
   if(*startup_name) {
       snprintf(command_str, sizeof(command_str),
 	       "load c \"%s\"\n",startup_name);
+      parse_string(command_str);
+  }
+
+  if(*include_startup_name) {
+      snprintf(command_str, sizeof(command_str),
+	       "load i \"%s\"\n",include_startup_name);
       parse_string(command_str);
   }
 
