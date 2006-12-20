@@ -10,21 +10,21 @@
 	; 4) Wakeup on PIN change.
 
 	list	p=12c509
-        radix   dec
-
-	nolist
-include "p12c509.inc"
-
-	list
-
-
+        include <p12c509.inc>
+        include <coff.inc>
 
   __CONFIG _WDT_ON
 
-  cblock  0x07
+        radix   dec
 
-	ResetSequence
-  endc
+; Printf Command
+.command macro x
+  .direct "C", x
+  endm
+
+GPR_DATA  UDATA
+ResetSequence RES 1
+failures      RES 1
 
 
     ; Define the reset conditions to be checked.
@@ -35,11 +35,12 @@ eRSTSequence_AwakeWDT		equ	3
 eRSTSequence_AwakeIO		equ	4
 eRSTSequence_WDTTimeOut		equ	5
 
-	org 0
+;----------------------------------------------------------------------
+;   ********************* STARTUP LOCATION  ***************************
+;----------------------------------------------------------------------
+START  CODE    0x000                    ; 
 
-;************************************************************************
-;
-START:
+bSWITCH equ 0
 
         MOVWF   OSCCAL          ; put calibration into oscillator cal reg
 
@@ -161,7 +162,11 @@ failure:
 	INCF	failures,F
 	goto	done
 
-	ORG	0x3ff
+;----------------------------------------------------------------------
+;   ********************* RESET VECTOR LOCATION  ********************
+;----------------------------------------------------------------------
+RESET_VECTOR  CODE    0x3ff              ; processor reset vector
+
 OSC_CAL_VALUE	EQU	0x80
 
 	MOVLW	OSC_CAL_VALUE
