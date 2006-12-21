@@ -1,4 +1,7 @@
 2006-12-20  Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_load.cc: Fixed missing end-of-line string continuation
+	
+2006-12-20  Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc: added a -I option to the gpsim invocation. This
 	is identical to the '-c' option except that it will not change the
 	current working directory. The '-c' option automatically changes
