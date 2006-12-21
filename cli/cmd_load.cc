@@ -77,9 +77,9 @@ cmd_load::cmd_load(void)
 \n\t                  a symbol file.\
 \n\t  cmdfile.stc   - a gpsim command file. Must have an .stc extension.\
 \n\
-\n\t By default, .stc files residing in other directories will change
-\n\t the working directory. The 'i' option overides that behavior. 
-\n\t
+\n\t By default, .stc files residing in other directories will change\
+\n\t the working directory. The 'i' option overides that behavior. \
+\n\
 \n\tdeprecated:\
 \n\t  load  h | c | s  file_name\
 \n\t  load s perfect_program.cod\
