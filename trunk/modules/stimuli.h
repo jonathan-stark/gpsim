@@ -36,6 +36,7 @@ class PicLatchRegister;
 namespace ExtendedStimuli {
 
   class PulseAttribute;
+  class PulseInitial;
   class PulsePeriodAttribute;
   class FileNameAttribute;
 
@@ -81,6 +82,7 @@ namespace ExtendedStimuli {
   private:
     PulseAttribute *m_set;
     PulseAttribute *m_clear;
+    PulseInitial   *m_init;
     PulsePeriodAttribute *m_period;
     guint64 m_future_cycle;
     guint64 m_start_cycle;
