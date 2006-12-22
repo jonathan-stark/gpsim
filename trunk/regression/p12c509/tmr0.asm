@@ -13,7 +13,7 @@
         include <p12c509.inc>
         include <coff.inc>
 
-  __CONFIG _WDT_ON
+  __CONFIG _WDT_ON & _MCLRE_ON
 
         radix   dec
 
@@ -25,6 +25,9 @@
 GPR_DATA  UDATA
 ResetSequence RES 1
 failures      RES 1
+optionShadow  RES 1
+
+  GLOBAL optionShadow
 
 
     ; Define the reset conditions to be checked.
@@ -40,21 +43,67 @@ eRSTSequence_WDTTimeOut		equ	5
 ;----------------------------------------------------------------------
 START  CODE    0x000                    ; 
 
-bSWITCH equ 0
 
-        MOVWF   OSCCAL          ; put calibration into oscillator cal reg
+;############################################################
+;# Create a stimulus to simulate a switch
+;
 
+   .sim "module lib libgpsim_modules"
+   .sim "module load pulsegen PG1"
+   .sim "module load pulsegen MCLR"
 
-   ; OPTION register setup
-   ;
+   .sim "MCLR.initial = 5.0"
+
+   .sim "PG1.clear = 0"
+   .sim "PG1.set = 1"
+;   .sim "PG1.clear = 0x200"
+;   .sim "PG1.period = 0x400"
+
+  ;############################################################
+
+  .sim "node nSwitch"
+  .sim "attach nSwitch gpio0 PG1.pin"
+
+  .sim "node nMCLR"
+  .sim "attach nMCLR gpio3 MCLR.pin"
+
+  ;############################################################
+  .sim "symbol resetCounter=1"
+
    ;  NOT_GPWU = 0  - Enable wakeup if I/O pins 0,1, or 3 change states
    ;  NOT_GPPU = 1  - Disable weak pullups on I/O pins 0,1, and 3 
    ;  TOCS = 0 - Let the clock source for TMR0 be the internal fosc/4
    ;  TOSE = 0 - don't care - TMR0 source edge.
    ;  PSA = 1 - assign Prescale to the WDT
-   ;  PS2:0 = 111 - prescale = 128
+   ;  PS2:0 = 000 - prescale = 2^0=1
 
-	MOVLW	(1<<NOT_GPPU) | (1<<PSA) | (1<<PS2) | (1<<PS1) | (1<<PS0)
+  .sim "optionShadow=8"      ; PSA=1
+
+  .sim ".BreakOnReset = false"
+;break e START
+;break e Activate
+;break e AbortActivate
+;break e SendIsComplete
+;break e SwitchWasJustPressed
+
+
+
+
+
+
+
+
+
+bSWITCH equ 0
+
+  .assert "option==0xff"
+  .assert "(tris&0x3f)==0x3f"
+        MOVWF   OSCCAL          ; put calibration into oscillator cal reg
+
+
+   ; OPTION register setup
+
+        MOVF    optionShadow,W
         OPTION
 
    ; GPIO setup
@@ -109,9 +158,10 @@ AwakeIO:
 ;========================================================================
 PowerOnReset:
 
+  .assert "resetCounter==1,\"*** FAILED Power On Reset\""
 	MOVLW	eRSTSequence_PowerOnReset
 	MOVWF	ResetSequence
-
+  .command "resetCounter = resetCounter+1"
 	CLRWDT
 	SLEEP
 
@@ -122,11 +172,16 @@ PowerOnReset:
 ;========================================================================
 AwakeWDT:
 
+  .assert "resetCounter==2,\"*** FAILED WDT Reset\""
 	MOVLW	eRSTSequence_AwakeWDT
 	MOVWF	ResetSequence
 
+  .command "resetCounter = resetCounter+1"
 	CLRWDT
-	SLEEP
+
+    ; loop until WDT times out
+here:   goto    here
+
 
 ;========================================================================
 ;
@@ -148,6 +203,7 @@ AwakeMCLR:
 ;========================================================================
 WDTTimeOut:
 
+  .assert "resetCounter==3,\"*** FAILED WDT timeout\""
 	MOVLW	eRSTSequence_WDTTimeOut
 	MOVWF	ResetSequence
 
