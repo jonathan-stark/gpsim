@@ -338,7 +338,7 @@ P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
 
 
   m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister("trisc",m_portc);
+  m_trisc = new PicTrisRegister("trisc",m_portc, false);
 
   pir1 = new PIR1v1(&intcon_reg, &pie1);
   pir2 = new PIR2v1(&intcon_reg, &pie2);
@@ -628,10 +628,10 @@ P16C64::P16C64(const char *_name, const char *desc)
 
 
   m_portd = new PicPSP_PortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister("trisd",(PicPortRegister *)m_portd);
+  m_trisd = new PicTrisRegister("trisd",(PicPortRegister *)m_portd, false);
 
   m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise =  new PicPSP_TrisRegister("trise",m_porte);
+  m_trise =  new PicPSP_TrisRegister("trise",m_porte, false);
 
 }
 P16C64::~P16C64()

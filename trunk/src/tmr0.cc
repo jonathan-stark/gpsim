@@ -44,7 +44,8 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 // member functions for the TMR0 base class
 //--------------------------------------------------
-TMR0::TMR0(void)
+TMR0::TMR0()
+  : m_pOptionReg(0)
 {
   value.put(0);
   synchronized_cycle=0;
@@ -74,23 +75,25 @@ void TMR0::setSinkState(char new3State)
   }
 }
 
-void TMR0::set_cpu(Processor *new_cpu, PortRegister *reg, unsigned int pin)
+void TMR0::set_cpu(Processor *new_cpu, PortRegister *reg, unsigned int pin, OPTION_REG *pOption)
 {
   cpu = new_cpu;
+  m_pOptionReg = pOption;
   reg->addSink(this,pin);
 }
 
 // RCP - add an alternate way to connect to a CPU
-void TMR0::set_cpu(Processor *new_cpu, PinModule *pin)
+void TMR0::set_cpu(Processor *new_cpu, PinModule *pin,OPTION_REG *pOption)
 {
   cpu = new_cpu;
+  m_pOptionReg = pOption;
   pin->addSink(this);
 }
 
 //------------------------------------------------------------
 // Stop the tmr.
 //
-void TMR0::stop(void)
+void TMR0::stop()
 {
 
   Dprintf(("\n"));
@@ -116,7 +119,8 @@ void TMR0::start(int restart_value, int sync)
 
   value.put(restart_value&0xff);
 
-  old_option = cpu_pic->option_reg.value.get();
+  //old_option = cpu_pic->option_reg.value.get();
+  old_option = m_pOptionReg->get_value();
 
   prescale = 1 << get_prescale();
   prescale_counter = prescale;
@@ -161,14 +165,15 @@ void TMR0::clear_trigger()
 
 }
 
-unsigned int TMR0::get_prescale(void)
+unsigned int TMR0::get_prescale()
 {
   Dprintf(("\n"));
 
-  return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
+  //return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
+  return (m_pOptionReg->get_psa()  ? 0 : (1+m_pOptionReg->get_prescale()));
 }
 
-void TMR0::increment(void)
+void TMR0::increment()
 {
   Dprintf(("\n"));
 
@@ -212,7 +217,7 @@ void TMR0::put(unsigned int new_value)
   put_value(new_value);
 }
 
-unsigned int TMR0::get_value(void)
+unsigned int TMR0::get_value()
 {
   // If the TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
@@ -257,19 +262,20 @@ unsigned int TMR0::get_value(void)
   
 }
 
-unsigned int TMR0::get(void)
+unsigned int TMR0::get()
 {
   value.put(get_value());
   trace.raw(read_trace.get() | value.get());
   return value.get();
 }
-void TMR0::new_prescale(void)
+void TMR0::new_prescale()
 {
   Dprintf(("\n"));
 
   unsigned int new_value;
 
-  int option_diff = old_option ^ cpu_pic->option_reg.value.get();
+  //int option_diff = old_option ^ cpu_pic->option_reg.value.get();
+  int option_diff = old_option ^ m_pOptionReg->get_value();
 
   old_option ^= option_diff;   // save old option value. ( (a^b) ^b = a)
 
@@ -278,7 +284,8 @@ void TMR0::new_prescale(void)
     if(verbose)
       cout << "T0CS has changed to ";
 
-    if(cpu_pic->option_reg.get_t0cs()) {
+    //if(cpu_pic->option_reg.get_t0cs()) {
+    if(m_pOptionReg->get_t0cs()) {
       // External clock
       if(verbose)
 	cout << "external clock\n";
@@ -349,16 +356,19 @@ void TMR0::new_prescale(void)
   }
 }
 
-bool TMR0::get_t0cs(void)
+bool TMR0::get_t0cs()
 {
-  return cpu_pic->option_reg.get_t0cs() != 0;
+
+  //return cpu_pic->option_reg.get_t0cs() != 0;
+  return m_pOptionReg->get_t0cs() != 0;
 }
-bool TMR0::get_t0se(void)
+bool TMR0::get_t0se()
 {
-  return cpu_pic->option_reg.get_t0se() != 0;
+  //return cpu_pic->option_reg.get_t0se() != 0;
+  return m_pOptionReg->get_t0se() != 0;
 }
 
-void TMR0::set_t0if(void)
+void TMR0::set_t0if()
 {
   if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
     {
@@ -366,7 +376,7 @@ void TMR0::set_t0if(void)
     }
 }
 
-void TMR0::new_clock_source(void)
+void TMR0::new_clock_source()
 {
   // This is handled in the new_prescale() function now
 #if 0
@@ -388,7 +398,7 @@ void TMR0::new_clock_source(void)
 // was set in TMR0::put. The cycle counter will clear the break point, so
 // we don't need to worry about it. At this point, TMR0 is rolling over.
 
-void TMR0::callback(void)
+void TMR0::callback()
 {
 
   Dprintf(("0x%llx\n",cycles.value));
@@ -429,7 +439,7 @@ void  TMR0::reset(RESET_TYPE r)
 
 }
 
-void TMR0::callback_print(void)
+void TMR0::callback_print()
 {
 
   cout << "TMR0\n";

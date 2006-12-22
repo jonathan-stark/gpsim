@@ -43,7 +43,7 @@ public:
 
   PCHelper(ProgramMemoryAccess *);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get_value();
   virtual unsigned int register_size () const
   { 
     return 2;
@@ -51,5 +51,55 @@ public:
 
   ProgramMemoryAccess *pma;
 };
+
+//---------------------------------------------------------
+// OPTION_REG - 
+
+class OPTION_REG : public sfr_register
+{
+public:
+
+enum
+  {
+    PS0    = 1<<0,
+    PS1    = 1<<1,
+    PS2    = 1<<2,
+    PSA    = 1<<3,
+    T0SE   = 1<<4,
+    T0CS   = 1<<5,
+    BIT6   = 1<<6,
+    BIT7   = 1<<7
+  };
+
+  unsigned int prescale;
+
+
+  OPTION_REG();
+
+  inline unsigned int get_prescale()
+  {
+      return value.get() & (PS0 | PS1 | PS2);
+  }
+
+  inline unsigned int get_psa()
+  {
+      return value.get() & PSA;
+  }
+
+  inline unsigned int get_t0cs()
+  {
+      return value.get() & T0CS;
+  }
+
+  inline unsigned int get_t0se()
+  {
+      return value.get() & T0SE;
+  }
+
+  virtual void put(unsigned int new_value);
+  virtual void reset(RESET_TYPE r);
+
+};
+
 
 #endif

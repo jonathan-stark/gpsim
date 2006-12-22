@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "processor.h"
 #include "program_files.h"
 
+#include "pic-registers.h"
 #include "14bit-registers.h"
 #include "trigger.h"
 
@@ -187,11 +188,11 @@ public:
   void put(unsigned int new_value);
   virtual void initialize(bool enable);
   void set_timeout(double);
+  virtual void set_prescale(unsigned int);
   virtual void reset();
   void clear();
   virtual void callback();
   virtual void start_sleep();
-  virtual void new_prescale();
   virtual void update();
   virtual void callback_print();
   void set_breakpoint(unsigned int bpn);
@@ -263,7 +264,6 @@ public:
 
   Status_register *status;
   WREG          *W;
-  OPTION_REG   option_reg;
   PCL          *pcl;
   PCLATH       *pclath;
 
@@ -324,6 +324,7 @@ public:
   virtual unsigned int get_pclath_branching_modpcl()=0;
 
   virtual void option_new_bits_6_7(unsigned int)=0;
+  virtual void put_option_reg(unsigned int) {}
 
   virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom() { return (eeprom); }

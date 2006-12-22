@@ -108,11 +108,13 @@ _12bit_processor::_12bit_processor(const char *_name, const char *desc)
 
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
-  mOptionTT = new OptionTraceType(this,&option_reg);
+  option_reg = new OPTION_REG();
+
+  mOptionTT = new OptionTraceType(this,option_reg);
   trace.allocateTraceType(mOptionTT);
   RegisterValue rv( (mOptionTT->type() & 0xff000000) | 0, 0);
-  option_reg.set_write_trace(rv);
-  option_reg.set_read_trace(rv);
+  option_reg->set_write_trace(rv);
+  option_reg->set_read_trace(rv);
 }
 
 _12bit_processor::~_12bit_processor()
@@ -122,6 +124,7 @@ _12bit_processor::~_12bit_processor()
 void _12bit_processor::create_symbols()
 {
   pic_processor::create_symbols();
+  symbol_table.add_register(option_reg);
   // add a special symbol for W
   symbol_table.add_w(W);
 }
@@ -133,11 +136,19 @@ void _12bit_processor::por()
 
 void _12bit_processor::reset(RESET_TYPE r)
 {
-  option_reg.reset(r);
+  option_reg->reset(r);
 
   pic_processor::reset(r);
   
 }
+//-------------------------------------------------------------------
+void _12bit_processor::save_state()
+{
+  pic_processor::save_state();
+
+  option_reg->put_trace_state(option_reg->value);
+}
+
 //-------------------------------------------------------------------
 
 bool _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_word)
@@ -204,6 +215,11 @@ void _12bit_processor::option_new_bits_6_7(unsigned int bits)
   cout << "12bit, option bits 6 and/or 7 changed\n";
 
 }
+//-------------------------------------------------------------------
+void _12bit_processor::put_option_reg(unsigned int val)
+{
+  option_reg->put(val);
+}
 
 //-------------------------------------------------------------------
 void _12bit_processor::dump_registers ()
@@ -212,7 +228,7 @@ void _12bit_processor::dump_registers ()
 
   pic_processor::dump_registers();
 
-  cout << "option = " << option_reg.value.get() << '\n';
+  cout << "option = " << option_reg->value.get() << '\n';
 
 }
 

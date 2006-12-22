@@ -440,48 +440,6 @@ unsigned int INDF::get_value(void)
     return(0);   // avoid infinite loop if fsr points to the indf
 }
 
-//--------------------------------------------------
-// member functions for the OPTION base class
-//--------------------------------------------------
-OPTION_REG::OPTION_REG(void)
-{
-  por_value = RegisterValue(0xff,0);
-  wdtr_value = RegisterValue(0xff,0);
-  value = por_value;
-  new_name("option");
-}
-
-void OPTION_REG::put(unsigned int new_value)
-{
-
-  //FIXME trace OPTION for 12bit processors is broken.
-  trace.raw(write_trace.get() | value.get());
-
-  unsigned int old_value = value.get();
-  value.put(new_value);
-
-  // First, check the tmr0 clock source bit to see if we are  changing from
-  // internal to external (or vice versa) clocks.
-  //if( (value ^ old_value) & T0CS)
-  //    cpu_pic->tmr0.new_clock_source();
-
-  // %%%FIX ME%%% - can changing the state of TOSE cause the timer to
-  // increment if tmr0 is being clocked by an external clock?
-
-  // Now check the rest of the tmr0 bits.
-  if( (value.get() ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
-    cpu_pic->tmr0.new_prescale();
-
-  if( (value.get() ^ old_value) & (PSA | PS2 | PS1 | PS0))
-    cpu_pic->wdt.new_prescale();
-
-  if( (value.get() ^ old_value) & (BIT6 | BIT7))
-    cpu_pic->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
-
-
-}
-
-
 
 
 //--------------------------------------------------

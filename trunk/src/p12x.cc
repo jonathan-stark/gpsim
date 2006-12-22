@@ -187,7 +187,7 @@ void P12C508::create_sfr_map()
   add_sfr_register(m_gpio, 6, porVal);
   add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
   add_sfr_register(W, 0xffffffff, porVal);
-  add_sfr_register(&option_reg, 0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(option_reg, 0xffffffff, RegisterValue(0xff,0));
   osccal.new_name("osccal");
 
 
@@ -231,7 +231,7 @@ void P12C508::create()
   P12C508::create_sfr_map();
   create_invalid_registers ();
 
-  tmr0.set_cpu(this,m_gpio,2);
+  tmr0.set_cpu(this,m_gpio,2,option_reg);
   tmr0.start(0);
 
   pc->reset();
@@ -262,7 +262,7 @@ P12C508::P12C508(const char *_name, const char *desc)
     cout << "12c508 constructor, type = " << isa() << '\n';
 
   m_gpio = new GPIO("gpio",8,0x3f);
-  m_tris = new PicTrisRegister("tris",m_gpio);
+  m_tris = new PicTrisRegister("tris", m_gpio, false);
   m_tris->wdtr_value=RegisterValue(0x3f,0);
 
   if(config_modes)
@@ -513,7 +513,7 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
   //    Then wake 
 
   if ((lastDrivenValue ^ rvDrivenValue.data) & 0x0b) {
-    if( ((cpu12->option_reg.value.get() & 0x80) == 0) && bp.have_sleep()) {
+    if( ((cpu12->option_reg->value.get() & 0x80) == 0) && bp.have_sleep()) {
 
       if(verbose)
 	cout << "IO bit changed while the processor was sleeping,\n\
@@ -599,7 +599,7 @@ void P10F200::create()
   P12C508::create_sfr_map();
   create_invalid_registers ();
 
-  tmr0.set_cpu(this,m_gpio,2);
+  tmr0.set_cpu(this,m_gpio,2,option_reg);
   tmr0.start(0);
 
   pc->reset();
@@ -630,7 +630,7 @@ P10F200::P10F200(const char *_name, const char *desc)
     cout << "10f200 constructor, type = " << isa() << '\n';
 
   m_gpio = new GPIO("gpio",8,0x0f);
-  m_tris = new PicTrisRegister("tris",m_gpio);
+  m_tris = new PicTrisRegister("tris", m_gpio, false);
   m_tris->wdtr_value=RegisterValue(0x3f,0);
 
   if(config_modes)
@@ -654,7 +654,7 @@ void P10F202::create()
   P12C508::create_sfr_map();
   create_invalid_registers ();
 
-  tmr0.set_cpu(this,m_gpio,2);
+  tmr0.set_cpu(this,m_gpio,2,option_reg);
   tmr0.start(0);
 
   pc->reset();

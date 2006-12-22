@@ -40,7 +40,7 @@ class PicTrisRegister : public sfr_register
 
 public:
 
-  PicTrisRegister(const char *tris_name, PicPortRegister *,unsigned int nEnableMask=0xff);
+  PicTrisRegister(const char *tris_name, PicPortRegister *,bool bIgnoreWDTResets, unsigned int nEnableMask=0xff);
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
   virtual char get3StateBit(unsigned int bitMask);
@@ -49,9 +49,11 @@ public:
   {
     return m_EnableMask;
   }
+  void reset(RESET_TYPE r);
 protected:
   PicPortRegister *m_port;
   unsigned int m_EnableMask;
+  bool m_bIgnoreWDTResets;
 };
 
 
@@ -91,18 +93,15 @@ protected:
   PSP           *m_psp;
 };
 
-class PicPSP_TrisRegister : public sfr_register
+class PicPSP_TrisRegister : public PicTrisRegister
 {
 
 public:
 
-  PicPSP_TrisRegister(const char *tris_name, PicPortRegister *);
+  PicPSP_TrisRegister(const char *tris_name, PicPortRegister *,bool bIgnoreWDTResets);
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
-  
-protected:
-  PicPortRegister *m_port;
 };
 
 //------------------------------------------------------------------------
