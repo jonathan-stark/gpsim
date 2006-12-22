@@ -1,3 +1,33 @@
+2006-12-22  Scott Dattalo <scott@dattalo.com>
+	* src/p16x6x.cc, src/16bit-processors.cc, src/14bit-registers.h,
+	  src/pic-ioports.h, src/pic-instructions.cc, src/pic-registers.h,
+	  src/pic-processor.cc, src/tmr0.cc, src/tmr0.h, src/p16x5x.cc,
+	  src/12bit-processors.cc, src/p12x.cc, src/pic-processor.h,
+	  src/p18x.cc, src/14bit-registers.cc, src/16bit-registers.cc,
+	  src/pic-ioports.cc, src/pic-registers.cc, src/12bit-processors.h,
+	  src/14bit-processors.cc, src/14bit-processors.h:
+	- Option register is no longer a member of the pic_processor base
+	  class. The 12-bit and 14-bit separately declare an option
+	  register member and dynamically construct it.
+	- Moved OPTION_REG from 14bit-registers to pic-registers
+	- TMR0 now has a pointer to the option register (as opposed to
+	  directly referencing the option register in the cpu class).
+	- TMR0 for 16-bit cores was using the option register instead of
+	  the T0CON during initialization
+	- The TRIS register resets to all 1's for the 12-bit and 14-bit
+	  cores during WDT resets. However, it remains unchanged for the
+	  16-bit cores. A flag was added to the PicTrisRegister base class
+	  to describe what action should be taken during WDT resets
+
+2006-12-22  Scott Dattalo <scott@dattalo.com>
+	* regression/12c509/tmr0.asm: (This file is going to change
+	names!). Testing various reset modes.
+	
+2006-12-22  Scott Dattalo <scott@dattalo.com>
+	* modules/stimuli.h, modules/stimuli.cc: Added an 'initial'
+	attribute to the pulsegen module that allows the initial pin
+	voltage to be specified.
+	
 2006-12-20  Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_load.cc: Fixed missing end-of-line string continuation
 	

@@ -108,16 +108,16 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
   m_porta = new PicPortRegister("porta",8,0x7f);
-  m_trisa = new PicTrisRegister("trisa", m_porta);
+  m_trisa = new PicTrisRegister("trisa", m_porta, true);
   m_lata  = new PicLatchRegister("lata", m_porta);
   m_lata->setEnableMask(0x7f);
 
   m_portb = new PicPortRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister("trisb", m_portb);
+  m_trisb = new PicTrisRegister("trisb", m_portb, true);
   m_latb  = new PicLatchRegister("latb", m_portb);
 
   m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister("trisc", m_portc);
+  m_trisc = new PicTrisRegister("trisc", m_portc, true);
   m_latc  = new PicLatchRegister("latc", m_portc);
 
 }

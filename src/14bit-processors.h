@@ -36,6 +36,7 @@ class PicPortBRegister;
 class PicTrisRegister;
 class PortBSink;
 class IOPIN;
+//class OPTION_REG14;
 
 extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst);
 
@@ -54,11 +55,12 @@ public:
 
   INTCON       *intcon;
 
-  void interrupt(void);
-  virtual void por(void);
-  virtual void create(void);
-  virtual PROCESSOR_TYPE isa(void){return _14BIT_PROCESSOR_;};
-  virtual PROCESSOR_TYPE base_isa(void){return _14BIT_PROCESSOR_;};
+  void interrupt();
+  virtual void por();
+  virtual void save_state();
+  virtual void create();
+  virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
+  virtual PROCESSOR_TYPE base_isa(){return _14BIT_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)
     {
       return disasm14(this, inst);
@@ -68,20 +70,21 @@ public:
   // get information about the derived classes. NOTE, the values returned here
   // will cause errors if they are used -- the derived classes must define their
   // parameters appropriately.
-  virtual void create_sfr_map(void)=0;
+  virtual void create_sfr_map()=0;
   virtual void option_new_bits_6_7(unsigned int)=0;
-  virtual void create_symbols(void)=0;
+  virtual void put_option_reg(unsigned int);
+  virtual void create_symbols()=0;
 
   virtual void create_config_memory();
 
   // Return the portion of pclath that is used during branching instructions
-  virtual unsigned int get_pclath_branching_jump(void)
+  virtual unsigned int get_pclath_branching_jump()
     {
       return ((pclath->value.get() & 0x18)<<8);
     }
 
   // Return the portion of pclath that is used during modify PCL instructions
-  virtual unsigned int get_pclath_branching_modpcl(void)
+  virtual unsigned int get_pclath_branching_modpcl()
     {
       return((pclath->value.get() & 0x1f)<<8);
     }
@@ -92,17 +95,21 @@ public:
     }
 
 
-  virtual unsigned int eeprom_get_size(void) {return 0;};
+  virtual unsigned int eeprom_get_size() {return 0;};
   virtual unsigned int eeprom_get_value(unsigned int address) {return 0;};
   virtual void eeprom_put_value(unsigned int value,
 				unsigned int address)
     {return;}
 
-  virtual unsigned int program_memory_size(void) const = 0;
+  virtual unsigned int program_memory_size() const = 0;
   virtual unsigned int get_program_memory_at_address(unsigned int address);
 
   _14bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_14bit_processor();
+
+protected:
+  //OPTION_REG14   *option_reg;
+  OPTION_REG   *option_reg;
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)
@@ -145,9 +152,9 @@ public:
   PicPortBRegister *m_portb;
   PicTrisRegister  *m_trisb;
 
-  virtual PROCESSOR_TYPE isa(void){return _14BIT_PROCESSOR_;};
-  virtual void create_symbols(void);
-  virtual void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
+  virtual void create_symbols();
+  virtual void create_sfr_map();
   virtual void option_new_bits_6_7(unsigned int bits);
   virtual bool hasSSP() {return false;}
 };

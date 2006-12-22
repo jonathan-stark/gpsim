@@ -1152,7 +1152,7 @@ OPTION::OPTION (Processor *new_cpu, unsigned int new_opcode)
 void OPTION::execute(void)
 {
 
-  cpu_pic->option_reg.put(cpu_pic->W->get());
+  cpu_pic->put_option_reg(cpu_pic->W->get());
 
   cpu_pic->pc->increment();
 

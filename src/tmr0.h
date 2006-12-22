@@ -39,6 +39,8 @@ public:
   gint64
     last_cycle;   // can be negative ...
 
+  OPTION_REG *m_pOptionReg;
+
 
   virtual void callback(void);
 
@@ -62,8 +64,8 @@ public:
   virtual void callback_print(void);
   virtual void clear_trigger();
 
-  virtual void set_cpu(Processor *, PortRegister *, unsigned int pin);
-  virtual void set_cpu(Processor *new_cpu, PinModule *pin);
+  virtual void set_cpu(Processor *, PortRegister *, unsigned int pin,OPTION_REG *);
+  virtual void set_cpu(Processor *new_cpu, PinModule *pin,OPTION_REG *);
   virtual void setSinkState(char);
 
 private:

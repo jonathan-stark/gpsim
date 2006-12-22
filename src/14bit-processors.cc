@@ -23,11 +23,9 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 
 #include "../config.h"
-//#include "14bit-registers.h"
-//#include "14bit-instructions.h"
 #include "14bit-processors.h"
 #include "pic-ioports.h"
-
+#include "pic-registers.h"
 #include <string>
 #include "stimuli.h"
 
@@ -74,7 +72,7 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
 {
   pc = new Program_Counter();
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
-
+  option_reg = new OPTION_REG();
 }
 
 _14bit_processor::~_14bit_processor()
@@ -90,7 +88,7 @@ _14bit_processor::~_14bit_processor()
 //  The purpose of this member function is to 'create' those things
 // that are unique to the 14-bit core processors.
 
-void _14bit_processor :: create (void)
+void _14bit_processor :: create ()
 {
 
   if(verbose)
@@ -105,7 +103,7 @@ void _14bit_processor :: create (void)
 
 
 //-------------------------------------------------------------------
-void _14bit_processor::interrupt (void)
+void _14bit_processor::interrupt ()
 {
   
   bp.clear_interrupt();
@@ -118,15 +116,28 @@ void _14bit_processor::interrupt (void)
 }
 
 //-------------------------------------------------------------------
-void _14bit_processor::por(void)
+void _14bit_processor::por()
 {
   pic_processor::por();
+}
+
+//-------------------------------------------------------------------
+void _14bit_processor::save_state()
+{
+  pic_processor::save_state();
+
+  option_reg->put_trace_state(option_reg->value);
 }
 
 //-------------------------------------------------------------------
 void _14bit_processor::option_new_bits_6_7(unsigned int bits)
 {
   cout << "14bit, option bits 6 and/or 7 changed\n";
+}
+//-------------------------------------------------------------------
+void _14bit_processor::put_option_reg(unsigned int val)
+{
+  option_reg->put(val);
 }
 
 
@@ -219,13 +230,13 @@ Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
   : _14bit_processor(_name,_desc)
 {
   m_porta = new PicPortRegister("porta",8,0x1f);
-  m_trisa = new PicTrisRegister("trisa",m_porta);
+  m_trisa = new PicTrisRegister("trisa", m_porta, false);
 
-  tmr0.set_cpu(this, m_porta, 4);
+  tmr0.set_cpu(this, m_porta, 4, option_reg);
   tmr0.start(0);
 
   m_portb = new PicPortBRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister("trisb",m_portb);
+  m_trisb = new PicTrisRegister("trisb", m_portb, false);
 }
 
 //-------------------------------------------------------------------
@@ -234,7 +245,7 @@ Pic14Bit::~Pic14Bit()
 
 }
 //-------------------------------------------------------------------
-void Pic14Bit::create_symbols(void)
+void Pic14Bit::create_symbols()
 {
   pic_processor::create_symbols();
 
@@ -244,14 +255,14 @@ void Pic14Bit::create_symbols(void)
 }
 
 //-------------------------------------------------------------------
-void Pic14Bit::create_sfr_map(void)
+void Pic14Bit::create_sfr_map()
 {
  
   add_sfr_register(indf,    0x80);
   add_sfr_register(indf,    0x00);
 
   add_sfr_register(&tmr0,   0x01);
-  add_sfr_register(&option_reg,  0x81, RegisterValue(0xff,0));
+  add_sfr_register(option_reg,  0x81, RegisterValue(0xff,0));
 
   add_sfr_register(pcl,     0x02, RegisterValue(0,0));
   add_sfr_register(status,  0x03, RegisterValue(0x18,0));

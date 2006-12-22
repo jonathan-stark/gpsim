@@ -332,11 +332,11 @@ P18C4x2::P18C4x2(const char *_name, const char *desc)
     cout << "18c4x2 constructor, type = " << isa() << '\n';
 
   m_portd = new PicPSP_PortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister("trisd", (PicPortRegister *)m_portd);
+  m_trisd = new PicTrisRegister("trisd", (PicPortRegister *)m_portd, true);
   m_latd  = new PicLatchRegister("latd", m_portd);
 
   m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise = new PicPSP_TrisRegister("trise", m_porte);
+  m_trise = new PicPSP_TrisRegister("trise", m_porte, true);
   m_late  = new PicLatchRegister("late", m_porte);
 
 }

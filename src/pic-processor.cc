@@ -449,8 +449,6 @@ void pic_processor::save_state()
 
   if(eeprom)
     eeprom->save_state();
-
-  option_reg.put_trace_state(option_reg.value);
 }
 
 //-------------------------------------------------------------------
@@ -709,7 +707,7 @@ void pic_processor::finish()
 
 void pic_processor::reset (RESET_TYPE r)
 {
-  bool bHaltSimulation = true;
+  bool bHaltSimulation = getBreakOnReset();
 
   if(get_use_icd())
   {
@@ -1093,17 +1091,17 @@ void ProgramMemoryAccess::callback()
 
 //--------------------------------------------------
 WDT::WDT(pic_processor *p_cpu, double _timeout)
-  : cpu(p_cpu), breakpoint(0), future_cycle(0), timeout(_timeout), wdte(false)
+  : cpu(p_cpu), breakpoint(0),prescale(1), future_cycle(0), timeout(_timeout), wdte(false)
 {
 }
 
 //--------------------------------------------------
 void WDT::update()
 {
-  if(wdte){
+  if(wdte) {
 
     value = (unsigned int )(cpu->get_frequency()*timeout);
-    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+    //prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
     if(future_cycle) {
 
@@ -1140,6 +1138,13 @@ void WDT::set_timeout( double _timeout)
   timeout = _timeout;
   update();
 }
+void WDT::set_prescale(unsigned int newPrescale)
+{
+  if (newPrescale != prescale) {
+    prescale = newPrescale;
+    update();
+  }
+}
 void WDT::initialize(bool enable)
 {
   wdte = enable;
@@ -1149,11 +1154,13 @@ void WDT::initialize(bool enable)
     cout << " WDT init called "<< ( (enable) ? "enabling\n" :", but disabling WDT\n");
 
   if(wdte) {
-    cout << "Enabling WDT " << " timeout = " << timeout << " seconds\n";
     value = (unsigned int) (cpu->get_frequency()*timeout);
-    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+    //prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
     future_cycle = get_cycles().get() + value * (1<<prescale);
+    //if (verbose)
+      cout << "Enabling WDT timeout = " << (timeout*(1<<prescale)) << " seconds = " 
+           << hex << (value *(1<<prescale)) << " cycles\n";
 
     get_cycles().set_break(future_cycle, this);
 
@@ -1210,15 +1217,10 @@ void WDT::clear()
 {
   if(wdte)
     update();
-  else
-    {
-      if(!warned)
-	{
-	  warned = 1;
-	  cout << "The WDT is not enabled - clrwdt has no effect!\n";
-	}
-    }
-
+  else if(!warned) {
+    warned = 1;
+    cout << "The WDT is not enabled - clrwdt has no effect!\n";
+  }
 }
 
 void WDT::start_sleep()
@@ -1235,13 +1237,6 @@ void WDT::start_sleep()
 
     future_cycle = fc;
   }
-}
-
-void WDT::new_prescale()
-{
-
-  update();
-
 }
 
 void WDT::callback_print()

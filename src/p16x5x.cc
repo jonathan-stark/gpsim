@@ -151,7 +151,7 @@ void P16C54::create_sfr_map()
   add_sfr_register(m_porta, 0x05);
   add_sfr_register(m_portb, 0x06);
 
-  add_sfr_register(&option_reg,  0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(option_reg,  0xffffffff, RegisterValue(0xff,0));
   add_sfr_register(m_trisa,  0xffffffff, RegisterValue(0x1f,0));
   add_sfr_register(m_trisb,  0xffffffff, RegisterValue(0xff,0));
 #ifndef USE_PIN_MODULE_FOR_TOCKI
@@ -205,10 +205,10 @@ P16C54::P16C54(const char *_name, const char *desc)
     cout << "c54 constructor, type = " << isa() << '\n';
 
   m_porta = new PicPortRegister("porta",8,0x1f);
-  m_trisa = new PicTrisRegister("trisa", m_porta);
+  m_trisa = new PicTrisRegister("trisa", m_porta, false);
 
   m_portb = new PicPortRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister("trisb", m_portb);
+  m_trisb = new PicTrisRegister("trisb", m_portb, false);
 
 #ifdef USE_PIN_MODULE_FOR_TOCKI
 //  RCP - Attempt to assign TOCKI without a port register
@@ -217,9 +217,9 @@ P16C54::P16C54(const char *_name, const char *desc)
   tmr0.set_cpu(this, m_tocki);
 #else
   m_tocki = new PicPortRegister("tockiport",8,0x01);
-  m_trist0 = new PicTrisRegister("trist0", m_tocki);
+  m_trist0 = new PicTrisRegister("trist0", m_tocki, false);
 //  cout << "c54 contructor assigning tmr0 to tocki register\n";
-  tmr0.set_cpu(this, m_tocki, 0);
+  tmr0.set_cpu(this, m_tocki, 0,option_reg);
 #endif
   tmr0.start(0);
 
@@ -304,7 +304,7 @@ P16C55::P16C55(const char *_name, const char *desc)
     cout << "c55 constructor, type = " << isa() << '\n';
 
   m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister("trisc", m_portc);
+  m_trisc = new PicTrisRegister("trisc", m_portc, false);
 
 }
 P16C55::~P16C55()

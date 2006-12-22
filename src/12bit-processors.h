@@ -53,8 +53,11 @@ enum _12BIT_DEFINITIONS
 
   unsigned int pa_bits;   /* a CPU dependent bit-mask defining which of the program
                            * page bits in the status register are significant. */
+  OPTION_REG   *option_reg;
+
 
   virtual void reset(RESET_TYPE r);
+  virtual void save_state();
 
   virtual void create_symbols();
   virtual void por();
@@ -109,6 +112,7 @@ enum _12BIT_DEFINITIONS
       return 0;     // Assume only one register page.
     }
 
+  virtual void put_option_reg(unsigned int);
   virtual void option_new_bits_6_7(unsigned int);
 
   virtual unsigned int config_word_address() const {return 0xfff;};
@@ -118,7 +122,7 @@ enum _12BIT_DEFINITIONS
   virtual ~_12bit_processor();
 
 protected:
-  OptionTraceType *mOptionTT;  
+  OptionTraceType *mOptionTT;
 };
 
 #define cpu12 ( (_12bit_processor *)cpu)

@@ -130,8 +130,9 @@ void PicPortRegister::setTris(PicTrisRegister *new_tris)
 
 PicTrisRegister::PicTrisRegister(const char *tris_name,
 				 PicPortRegister *_port,
+                                 bool bIgnoreWDTResets,
 				 unsigned int enableMask)
-  : sfr_register(),m_port(_port),m_EnableMask(enableMask)
+  : sfr_register(),m_port(_port),m_bIgnoreWDTResets(bIgnoreWDTResets),m_EnableMask(enableMask)
 {
   new_name(tris_name);
   if (m_port)
@@ -166,16 +167,18 @@ char PicTrisRegister::get3StateBit(unsigned int bitMask)
   return (rv.init&enabled) ? '?' : (rv.data&enabled ? '1': '0');
 
 }
+void PicTrisRegister::reset(RESET_TYPE r)
+{
+  if (!(m_bIgnoreWDTResets && r==WDT_RESET))
+    putRV(por_value);
+}
 
 
 //------------------------------------------------------------------------
 
-PicPSP_TrisRegister::PicPSP_TrisRegister(const char *tris_name, PicPortRegister *_port)
-  : sfr_register(),m_port(_port)
+PicPSP_TrisRegister::PicPSP_TrisRegister(const char *tris_name, PicPortRegister *_port, bool bIgnoreWDTResets)
+  : PicTrisRegister(tris_name,_port,bIgnoreWDTResets)
 {
-  new_name(tris_name);
-  if (m_port)
-    m_port->setTris((PicTrisRegister *)this);
 }
 // If not in PSPMODE, OBF and IBF are always clear
 // When in PSPMODE, OBF and IBF can only be cleared by reading and writing

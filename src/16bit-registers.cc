@@ -937,6 +937,7 @@ unsigned int TMR0_16::max_counts(void)
 }
 void TMR0_16::start(int restart_value, int sync)
 {
+  m_pOptionReg = t0con;
   TMR0::start(restart_value, sync);
 }
 
