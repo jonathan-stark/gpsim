@@ -107,6 +107,16 @@ namespace ExtendedStimuli {
   };
 
 
+  class PulseInitial : public Float
+  {
+  public:
+    PulseInitial(PulseGen *pParent, const char *_name, const char * desc, double voltage);
+    virtual void set(double);
+  private:
+    PulseGen *m_pParent;
+    double    m_voltage;
+  };
+
 
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
@@ -137,6 +147,21 @@ namespace ExtendedStimuli {
   {
     Integer::set(i);
     m_pParent->update_period();
+  }
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  PulseInitial::PulseInitial(PulseGen *pParent,
+                             const char *_name, const char * desc,
+                             double voltage)
+    : Float(_name,0,desc), m_pParent(pParent), m_voltage(voltage)
+  {
+  }
+
+  void PulseInitial::set(double d)
+  {
+    Float::set(d);
+    m_pParent->update();
   }
 
   //----------------------------------------------------------------------
@@ -199,6 +224,7 @@ Pulse Generator\n\
  .set - time when the pulse will drive high\n\
  .clear - time when the pulse will drive low\n\
  .period - time the pulse stream is repeated\n\
+ .initial - initial pin voltage\n\
 "), m_future_cycle(0), m_start_cycle(0)
   {
     // Attributes for the pulse generator.
@@ -206,10 +232,12 @@ Pulse Generator\n\
     m_clear = new PulseAttribute(this, "clear","r/w cycle time when ouput will be driven low",0.0);
     m_period = new PulsePeriodAttribute(this,
 					"period","r/w cycle time to specify pulse stream repeat rate");
+    m_init = new PulseInitial(this, "initial","initial I/O pin voltage", 5.0);
 
     add_attribute(m_set);
     add_attribute(m_clear);
     add_attribute(m_period);
+    add_attribute(m_init);
 
     sample_iterator = samples.end();
   }
@@ -313,8 +341,12 @@ Pulse Generator\n\
   void PulseGen::update()
   {
 
-    if (samples.empty())
+    if (samples.empty()) {
+      double d;
+      m_init->get(d);
+      m_pin->putState(d > 2.5);
       return;  // There are no samples
+    }
 
     current_cycle = get_cycles().get();
 
@@ -649,7 +681,7 @@ Port Stimulus\n\
       m_nPins(nPins)
   {
     mPort   = new PicPortRegister((name()+".port").c_str(),m_nPins,(1<<m_nPins)-1);
-    mTris   = new PicTrisRegister((name()+".tris").c_str(),mPort,(1<<m_nPins)-1);
+    mTris   = new PicTrisRegister((name()+".tris").c_str(),mPort,true,(1<<m_nPins)-1);
     mLatch  = new PicLatchRegister((name()+".lat").c_str(),mPort,(1<<m_nPins)-1);
     mPullup = new PortPullupRegister((name()+".pullup").c_str(),mPort,(1<<m_nPins)-1);
 
