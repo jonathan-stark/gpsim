@@ -30,11 +30,12 @@ DEFINES += -DHAVE_GUI
 
 all :				\
 	../config.h		\
-	libgpsim_modules.dll 
+	libgpsim_modules.dll
 
 modules_OBJECTS =		\
 	gpsim_modules.o		\
 	encoder.o		\
+	i2c.o			\
 	i2c-eeprom.o		\
 	led.o			\
 	logic.o			\

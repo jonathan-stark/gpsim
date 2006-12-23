@@ -1,3 +1,10 @@
+2006-12-23 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+	* modules/i2c.cc, modules/i2c.h, modules/makefile.mingw,
+	  modules/vcproj: added i2c.cc, i2c.h to the project, removed warnings
+	* doc/gpsimWin32, plat/win32/gpsim.nsi : atk-1.12.3, glib-2.12.6,
+	  gtk+-2.10.6, pango-1.14.8, NSIS v2.22
+
 2006-12-22  Scott Dattalo <scott@dattalo.com>
 	* src/p16x6x.cc, src/16bit-processors.cc, src/14bit-registers.h,
 	  src/pic-ioports.h, src/pic-instructions.cc, src/pic-registers.h,
@@ -22,15 +29,15 @@
 2006-12-22  Scott Dattalo <scott@dattalo.com>
 	* regression/12c509/tmr0.asm: (This file is going to change
 	names!). Testing various reset modes.
-	
+
 2006-12-22  Scott Dattalo <scott@dattalo.com>
 	* modules/stimuli.h, modules/stimuli.cc: Added an 'initial'
 	attribute to the pulsegen module that allows the initial pin
 	voltage to be specified.
-	
+
 2006-12-20  Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_load.cc: Fixed missing end-of-line string continuation
-	
+
 2006-12-20  Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc: added a -I option to the gpsim invocation. This
 	is identical to the '-c' option except that it will not change the
@@ -39,23 +46,23 @@
 	* src/input.cc, src/cmd_load.cc: now scripts residing in other
 	directories can be loaded in such a way as to not cause a
 	directory change. From gpsim's command line, the 'load' command
-	now supports a 'i' option. 
-	
+	now supports a 'i' option.
+
 2006-12-20  Scott Dattalo <scott@dattalo.com>
 	* src/12bit-processors.cc, src/p12x.cc, src/p12x.h:
-	Config word stuff was broken. 
+	Config word stuff was broken.
 	* regression/p12c509/tmr0.asm: Converted into relative mode code.
 	* regression/p12c509/Makefile, regression/p12c509/12c509.lkr:
 	Added. This is in preparation for testing SLEEP and WDT for the
 	12bit cores.
-	
+
 2006-12-19 Scott Dattalo <scott@dattalo.com>
 	* modules/i2c.h, modules/i2c.cc, modules/Makefile.am: Added an i2c
-	master module. Currently can only be driven with attributes. 
-	
+	master module. Currently can only be driven with attributes.
+
 2006-12-18 Scott Dattalo <scott@dattalo.com>
 	* src/pic-ioports.cc, src/p16f8x.cc, src/ioports.cc,
-	src/pic-ioports.h:  
+	src/pic-ioports.h:
 
 2006-12-14 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc: command line tracing now 1) only display the last
@@ -67,7 +74,7 @@
 	subset of the port pins.
 
 2006-12-01 Borut Razem <borut.razem@siol.net>
-	* modules/stimuli.cc: access trace object directly indirectly by using
+	* modules/stimuli.cc: access trace object indirectly by using
 	  get_trace()
 	* plat/win32/libgpsim.def: MSVC sync
 
