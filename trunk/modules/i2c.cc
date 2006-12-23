@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 /*
-  i2c.cc 
+  i2c.cc
 
   I2C Module for gpsim
 
@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
   Application Layer
   -----------------
 
-  The application layer is responsible for interpreting and generating 
+  The application layer is responsible for interpreting and generating
   packets.
 
   Physical Layer:
@@ -127,7 +127,7 @@ Boston, MA 02111-1307, USA.  */
 //     ____________________
 // SDA                     \_____________
 //     __________________________________
-// SCL                       
+// SCL
 //     idle | sendingStart | Start
 //
 // The host controller is notified 1uS after SDA goes low.
@@ -186,11 +186,11 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <math.h>
 
-#include <gpsim/stimuli.h>
-#include <gpsim/modules.h>
-#include <gpsim/gpsim_time.h>
+#include "../src/stimuli.h"
+#include "../src/modules.h"
+#include "../src/gpsim_time.h"
 
-#include <gpsim/ui.h>
+#include "../src/ui.h"
 
 #include "i2c.h"
 
@@ -220,13 +220,14 @@ namespace I2C_Module {
 
   // A pointer to the simulator's global defined cycle counter class:
   // (there's an issue with DLL's directly accessing globally declared
-  // objects, so we'll use an accessor function to get a pointer to them 
+  // objects, so we'll use an accessor function to get a pointer to them
   // [or in this case, it])
 
   Cycle_Counter *gcycles = 0;
 
   //----------------------------------------
 
+#if 0 // defined but not used
   static double get_time()
   {
     double t = (double) gcycles->get();
@@ -236,6 +237,7 @@ namespace I2C_Module {
     t -= r*1e6;
     return t;
   }
+#endif
 
 
   //------------------------------------------------------------------------
@@ -249,19 +251,19 @@ namespace I2C_Module {
   // I2CPin
   //
   // An I2C I/O pin is a bidirectional I/O pin that has a strong driver
-  // for a low state, but a weak driver for the high state. There are 
+  // for a low state, but a weak driver for the high state. There are
   // several ways to model that behavior in gpsim. The way chosen here
   // is to derive from the IO_open_collector class and to modify the
   // high and low drive output impedances.
   //
   //
- 
+
   class I2C_PIN : public IO_open_collector
   {
   public:
 
 
-    I2C_PIN(I2CMaster *pMaster, const char *_name) 
+    I2C_PIN(I2CMaster *pMaster, const char *_name)
       : IO_open_collector(_name), m_pI2Cmaster(pMaster)
     {
       bDrivingState = true;
@@ -270,15 +272,15 @@ namespace I2C_Module {
 
       // Set the pullup resistance to 10k ohms:
       set_Zpullup(10e3);
-    
-    
+
+
       update_pullup('1',    // Turn on the pullup resistor.
                     false); // Don't update the node. (none is attached).
     }
 
     void debug() {
 
-      cout << name() 
+      cout << name()
            << " digital_state=" << (getDrivingState() ? "high" : "low")
            << " Vth=" << get_Vth()
            << " Zth=" << get_Zth()
@@ -310,12 +312,12 @@ namespace I2C_Module {
   {
   public:
 
-    I2C_SDA_PIN (I2CMaster *pMaster, const char *_name) 
+    I2C_SDA_PIN (I2CMaster *pMaster, const char *_name)
       : I2C_PIN (pMaster,_name)
     {
     }
 
-    virtual void setDrivenState(bool new_dstate) 
+    virtual void setDrivenState(bool new_dstate)
     {
 
       bool diff = new_dstate ^ bDrivenState;
@@ -335,7 +337,7 @@ namespace I2C_Module {
   {
   public:
 
-    I2C_SCL_PIN (I2CMaster *pMaster, const char *_name) 
+    I2C_SCL_PIN (I2CMaster *pMaster, const char *_name)
       : I2C_PIN (pMaster,_name)
     {
     }
@@ -462,13 +464,13 @@ namespace I2C_Module {
   //------------------------------------------------------------------------
   //
   I2CMaster::I2CMaster(const char *_name)
-    : Module (_name), TriggerObject(),
+    : TriggerObject(), Module (_name),
       m_bitCount(0), m_command(0),
+      m_xfr_data(0),
+      future_cycle(0),
       m_uState(eI2CIdle),
       m_mState(eI2CIdleBus),
-      m_MSBmask(1<<8),
-      m_xfr_data(0),
-      future_cycle(0)
+      m_MSBmask(1<<8)
   {
 
     m_uState = eI2CIdle;
@@ -485,7 +487,7 @@ namespace I2C_Module {
     sName = _name;
     sName += ".scl";
     m_pSCL = new I2C_SCL_PIN(this, sName.c_str());
-  
+
     sName = _name;
     sName += ".sda";
     m_pSDA = new I2C_SDA_PIN(this, sName.c_str());
@@ -528,7 +530,7 @@ namespace I2C_Module {
 
   bool I2CMaster::checkSDA_SCL(bool bSDA, bool bSCL)
   {
-    Dprintf((" SDA %d--%d  SCL %d--%d\n", 
+    Dprintf((" SDA %d--%d  SCL %d--%d\n",
              m_pSDA->getDrivenState(),bSDA,
              m_pSCL->getDrivenState(),bSCL));
 
@@ -571,7 +573,7 @@ namespace I2C_Module {
     case eI2CTransferB:
       // First half of bit transfer where we're driving the clock
       // If SCL high, then there's something clamping it high (that's a
-      // bus error). 
+      // bus error).
       // If SCL is low then we'll drive out the new data bit and wait
       // a few uSec before driving SCL high again
 
@@ -687,8 +689,8 @@ namespace I2C_Module {
   void I2CMaster::debug()
   {
 #if defined(DEBUG)
-    cout << 
-      " SDA:" << m_pSDA->getDrivenState() << 
+    cout <<
+      " SDA:" << m_pSDA->getDrivenState() <<
       " SCL:" << m_pSCL->getDrivenState() <<
       " microstate:" << microStateName(m_uState) <<
       " macrostate:" << macroStateName(m_mState) <<
@@ -724,14 +726,14 @@ namespace I2C_Module {
       case eI2CTransferD:
         if (readBit())
           setNextMicroState(eI2CTransferE, 5);
-        else if (m_mState == eI2CTransfer) 
+        else if (m_mState == eI2CTransfer)
           transferCompleted();
         else if (m_mState == eI2CStop)
           setNextMicroState(eI2CStopA, 5);
         break;
 
       case eI2CStopB:
-        // Stop is complete. 
+        // Stop is complete.
         if (m_mState == eI2CStop) {
           setNextMacroState(eI2CIdleBus);
           stopCompleted();
@@ -803,7 +805,6 @@ namespace I2C_Module {
       // If SDA just went low, then we caught a start
       // If SDA just went high, then we caught a stop.
 
-      int curBusState = m_uState;
       if ( direction ) {
 
         // stop bit
@@ -814,7 +815,7 @@ namespace I2C_Module {
 
         // start bit
         Dprintf(("I2CMaster SDA : Falling edge in SCL high => start bit\n"));
-                
+
         if ( m_uState != eI2CStartA ) {
           Dprintf(("             Another Master has started a transaction\n"));
 
@@ -892,11 +893,11 @@ namespace I2C_Module {
   //------------------------------------------------------------------------
   // sendStop() - unconditionally initiate the 'stop' state machine
   //
-  // Depending on the current state of the I2C bus, the stop state 
+  // Depending on the current state of the I2C bus, the stop state
   // machine will transition the I2C bus so that a stop bit can be
   // sent. In all cases, the bus needs to be in the state where SCL is
   // high and SDA is low. The stop bit occurs when SDA is then driven
-  // high. 
+  // high.
   //
   // There are 4 possibilities:
   // SCL=0 SDA=0 - need to drive SCL high
@@ -918,7 +919,7 @@ namespace I2C_Module {
     if (isSCLhigh()) { // && m_pSCL->getDrivingState()) {
 
       if (isSDAhigh()) {
-        // SCL is high, SDA high. 
+        // SCL is high, SDA high.
         m_bitCount = 0;
         m_xfr_data = 0;
         m_nextBit = false;
@@ -928,7 +929,7 @@ namespace I2C_Module {
 
         // SCL is high, SDA low -- perfect.
         // Now we only need to drive SDA high and we're done.
-      
+
         setNextMicroState(eI2CStopA, 5);
 
       }
@@ -1002,7 +1003,7 @@ namespace I2C_Module {
   }
 
   //------------------------------------------------------------------------
-  // 
+  //
   void I2CMaster::setNextMicroState(eI2CMicroState nextState, unsigned int waitTime)
   {
     Dprintf((" curr:%s next:%s\n",microStateName(m_uState), microStateName(nextState)));
@@ -1012,7 +1013,7 @@ namespace I2C_Module {
   }
 
   //------------------------------------------------------------------------
-  // 
+  //
   void I2CMaster::setNextMacroState(eI2CMacroState nextState)
   {
     Dprintf((" curr:%s next:%s\n",macroStateName(m_mState), macroStateName(nextState)));
@@ -1069,7 +1070,7 @@ namespace I2C_Module {
   }
 
   //--------------------------------------------------------------
-  // create_iopin_map 
+  // create_iopin_map
   //
   //  This is where the information for the I2C Master's package is defined.
   // Specifically, the I/O pins of the module are created.
@@ -1178,7 +1179,7 @@ namespace I2C_Module {
   }
   void I2C_Stop::set(bool b)
   {
-  
+
     if (b) {
       Boolean::set(b);
       i2c->sendStop();

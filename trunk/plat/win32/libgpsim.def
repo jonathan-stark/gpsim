@@ -61,7 +61,7 @@ EXPORTS
     ??0Packet@@QAE@II@Z
     ??0PicLatchRegister@@QAE@PBDPAVPortRegister@@I@Z
     ??0PicPortRegister@@QAE@PBDII@Z
-    ??0PicTrisRegister@@QAE@PBDPAVPicPortRegister@@I@Z
+    ??0PicTrisRegister@@QAE@PBDPAVPicPortRegister@@_NI@Z
     ??0PinModule@@QAE@PAVPortModule@@IPAVIOPIN@@@Z
     ??0PortRegister@@QAE@II@Z
     ??0Processor@@QAE@PBD0@Z
@@ -668,7 +668,6 @@ EXPORTS
     ?toString@stimulus@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@symbol@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toggle@IOPIN@@UAEXXZ
-    ?toggleDrivingState@IOPIN@@UAE_NXZ
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?toupper@@YAAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AAV12@@Z
