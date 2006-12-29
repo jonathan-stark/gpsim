@@ -471,6 +471,10 @@ void _RCSTA::put(unsigned int new_value)
 	  receive_start_bit();
       }
 
+      // Clear overrun error on CREN enabling
+      if ( diff & CREN )
+         value.put( value.get() & (~OERR) );
+ 
     } else {
       // The serial port is not enabled.
 
@@ -559,6 +563,9 @@ void _RCSTA::receive_a_bit(unsigned int bit)
       if((value.get() & RX9) == 0)
         rsr >>= 1;
 
+      // Clear any framing error
+       value.put(value.get() & (~FERR) );
+
       // copy the rsr to the fifo
       if(rcreg)
         rcreg->push( rsr & 0xff);
@@ -566,7 +573,12 @@ void _RCSTA::receive_a_bit(unsigned int bit)
       Dprintf(("_RCSTA::receive_a_bit received 0x%02X\n",rsr & 0xff));
 
     } else {
-      //not stop bit; discard the data and go back receiving
+      //no stop bit; framing error
+       value.put(value.get() | FERR);
+
+      // copy the rsr to the fifo
+      if(rcreg)
+        rcreg->push( rsr & 0xff);
     }
     // If we're continuously receiving, then set up for the next byte.
     // FIXME -- may want to set a half bit delay before re-starting...
