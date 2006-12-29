@@ -17,7 +17,7 @@ libgpsimgui_la_SOURCES =  gui_break.cc gui_callbacks.cc gui_dialog.cc gui_init.c
 	preferences.cc preferences.h \
 	settings.h settings_exdbm.h
 
-libgpsimgui_la_LDFLAGS = @X_LDFLAGS@ @Y_LDFLAGS@
+libgpsimgui_la_LIBADD = @X_LDFLAGS@ @Y_LDFLAGS@ @GTK@ @GDK@ @GLIB@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../src/libgpsim.la ../cli/libgpsimcli.la
 
 pixmapdir = $(datadir)/gpsim
 

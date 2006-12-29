@@ -47,11 +47,9 @@ libgpsimcli_la_SOURCES = \
 	cmd_stimulus.h cmd_x.h symbol_t.h cmd_frequency.h cmd_icd.h \
 	cmd_macro.h ui_gpsim.h
 
-libgpsimcli_la_LIBADD = $(LIBREADLINE)
-
 AM_YFLAGS = -dvt
 
-libgpsimcli_la_LDFLAGS = @X_LDFLAGS@
+libgpsimcli_la_LIBADD = @X_LDFLAGS@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../src/libgpsim.la
 
 
 EXTRA_DIST = scan.h parse.h
