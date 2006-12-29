@@ -21,5 +21,6 @@ libgpsim_modules_la_SOURCES = \
 ##	paraface.cc paraface.h \  # TSD - removed 16APR06
 ##	video.cc video.h \ # TSD - removed 17APR06
 
-libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@
+libgpsim_modules_la_LIBADD = ../eXdbm/libgpsim_eXdbm.la -lstdc++ -lpopt \
+  @X_LDFLAGS@ @Y_LDFLAGS@ @LIBREADLINE@ ../src/libgpsim.la
 

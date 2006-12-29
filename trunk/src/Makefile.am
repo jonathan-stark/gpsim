@@ -169,6 +169,7 @@ gpsiminclude_HEADERS = \
 
 
 #libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
-libgpsim_la_LDFLAGS =  @X_LDFLAGS@ 
+libgpsim_la_LIBADD =  @X_LDFLAGS@
+libgpsim_la_LDFLAGS = -lpthread
 
 SUBDIRS = dspic
