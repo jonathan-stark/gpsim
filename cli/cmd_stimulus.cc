@@ -237,13 +237,13 @@ void cmd_stimulus::stimulus(int bit_flag)
       return;
 
     case STIM_DIGITAL:
-      //if(last_stimulus)
-      //  last_stimulus->set_digital();
+      if(last_stimulus)
+        last_stimulus->set_digital();
       return;
 
     case STIM_ANALOG:
-      //if(last_stimulus)
-      //  last_stimulus->set_analog();
+      if(last_stimulus)
+        last_stimulus->set_analog();
       return;
 
     default:
