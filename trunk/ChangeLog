@@ -1,3 +1,11 @@
+2006-12-27  Scott Dattalo <scott@dattalo.com>
+	* regression/analog_stim/p18f452.asm,
+	regression/analog_stim/18f452.lkr,
+	regression/analog_stim/Makefile, regression/run_regression.sh:
+	- Added a regression test for analog stimuli.
+	* cli/cmd_stimulus.cc: the 'analog' modifier for asynchronous
+	stimuli was being ignored. Bug [1621698]
+
 2006-12-23 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 	* modules/i2c.cc, modules/i2c.h, modules/makefile.mingw,

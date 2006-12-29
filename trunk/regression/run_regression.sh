@@ -44,6 +44,8 @@ ${RT} p18f452_ports sim
 
 ${RT} digital_stim sim
 
+${RT} analog_stim sim
+
 ${RT} register_stim sim
 
 ${RT} p12ce518 sim
