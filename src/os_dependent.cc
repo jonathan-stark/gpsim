@@ -62,7 +62,11 @@ using namespace std;
 #define FOLDERDELIMITERALTERNATIVE '/'
 #define PATHDELIMITER ";"
 #else
+#ifdef __APPLE__
+#define MODULE_EXT ".dylib"
+#else
 #define MODULE_EXT ".so"
+#endif
 #define FOLDERDELIMITER '/'
 #define FOLDERDELIMITERALTERNATIVE '\\'
 #define PATHDELIMITER ":"
