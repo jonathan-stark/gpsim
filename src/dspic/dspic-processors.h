@@ -81,7 +81,7 @@ namespace dspic {
 
     // Reset control
     // por = Power On Reset
-    virtual void por();
+    virtual void reset(RESET_TYPE r);
 
     // Public Data members:
     dspic_registers::dsPicRegister W[16];

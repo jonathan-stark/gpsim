@@ -52,8 +52,8 @@ public:
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
 
 };
 
@@ -72,8 +72,8 @@ public:
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
 
 };
 
@@ -113,11 +113,12 @@ public:
   unsigned int rp_mask;
   unsigned int write_mask;    // Bits that instructions can modify
 
-  Status_register(void);
+  Status_register();
+  void reset(RESET_TYPE r);
 
   virtual void put(unsigned int new_value);
 
-  inline unsigned int get(void)
+  inline unsigned int get()
   {
     get_trace().raw(read_trace.get() | value.get());
     return(value.get());
@@ -131,7 +132,7 @@ public:
     value.put((value.get() & ~STATUS_Z) | ((new_z) ? STATUS_Z : 0));
   }
 
-  inline unsigned int get_Z(void)
+  inline unsigned int get_Z()
   {
     get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_Z) == 0) ? 0 : 1);
@@ -145,7 +146,7 @@ public:
     value.put((value.get() & ~STATUS_C) | ((new_c) ? STATUS_C : 0));
   }
 
-  unsigned int get_C(void)
+  unsigned int get_C()
   {
     get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_C) == 0) ? 0 : 1);
@@ -183,7 +184,7 @@ public:
     value.put((value.get() & ~STATUS_PD) | ((new_pd) ? STATUS_PD : 0));
   }
 
-  inline unsigned int get_PD(void)
+  inline unsigned int get_PD()
   {
 
     get_trace().raw(read_trace.get() | value.get());
@@ -196,7 +197,7 @@ public:
     value.put((value.get() & ~STATUS_TO) | ((new_to) ? STATUS_TO : 0));
   }
 
-  inline unsigned int get_TO(void)
+  inline unsigned int get_TO()
   {
     get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_TO) == 0) ? 0 : 1);
@@ -292,11 +293,11 @@ public:
   bool break_on_overflow;          /* Should over flow cause a break? */
   bool break_on_underflow;         /* Should under flow cause a break? */
 
-  Stack(void);
+  Stack();
   virtual ~Stack() {}
   virtual void push(unsigned int);
-  virtual unsigned int pop(void);
-  virtual void reset(void) {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
+  virtual unsigned int pop();
+  virtual void reset() {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
   // because I'm not sure how the stack is affected by a reset.
   virtual bool set_break_on_overflow(bool clear_or_set);
   virtual bool set_break_on_underflow(bool clear_or_set);
@@ -312,8 +313,8 @@ class WREG : public sfr_register
 public:
 
   //void put(unsigned int new_value);
-  //unsigned int get(void);
-  WREG(void);
+  //unsigned int get();
+  WREG();
   WREG(Processor *);
 };
 
@@ -329,12 +330,12 @@ public:
   unsigned int base_address_mask1;
   unsigned int base_address_mask2;
 
-  INDF(void);
+  INDF();
   void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  unsigned int get(void);
-  unsigned int get_value(void);
-  virtual void initialize(void);
+  unsigned int get();
+  unsigned int get_value();
+  virtual void initialize();
 };
 
 
@@ -349,11 +350,11 @@ public:
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
   virtual void reset(RESET_TYPE r);
 
-  PCL(void);
+  PCL();
 };
 
 //---------------------------------------------------------
@@ -365,9 +366,9 @@ class PCLATH : public sfr_register
 public:
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 
-  PCLATH(void);
+  PCLATH();
 };
 
 //---------------------------------------------------------
@@ -386,7 +387,7 @@ class PCON : public sfr_register
 
   void put(unsigned int new_value);
 
-  PCON(void);
+  PCON();
 };
 
 class OSCCON;
@@ -408,7 +409,7 @@ class OSCTUNE : public  sfr_register
   };
   OSCCON *osccon;
                                                                                 
-  OSCTUNE(void) {
+  OSCTUNE() {
     valid_bits = 6;
   }
 };
@@ -433,7 +434,7 @@ class OSCCON : public  sfr_register,  public TriggerObject
     IRCF2 = 1<<6
   };
                                                                                 
-  OSCCON(void) {
+  OSCCON() {
     valid_bits = 7;
   }
 };
@@ -448,7 +449,7 @@ class WDTCON : public  sfr_register
     SWDTEN = 1<<0
   };
                                                                                 
-  WDTCON(void) {
+  WDTCON() {
     valid_bits = 1;
   }
                                                                                 

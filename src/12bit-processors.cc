@@ -129,11 +129,6 @@ void _12bit_processor::create_symbols()
   symbol_table.add_w(W);
 }
 
-void _12bit_processor::por()
-{
-  pic_processor::por();
-}
-
 void _12bit_processor::reset(RESET_TYPE r)
 {
   option_reg->reset(r);

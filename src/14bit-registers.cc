@@ -301,6 +301,28 @@ Status_register::Status_register(void)
   write_mask = 0xff & ~STATUS_TO & ~STATUS_PD;
   new_name("status");
 }
+
+//--------------------------------------------------
+void Status_register::reset(RESET_TYPE r)
+{
+  switch (r) {
+
+  case POR_RESET:
+    putRV(por_value);
+    put_TO(1);
+    put_PD(1);
+    break;
+
+  case WDT_RESET:
+    put_TO(0);
+    break;
+
+  default:
+    break;
+  }
+
+}
+
 //--------------------------------------------------
 // put
 

@@ -494,11 +494,6 @@ interrupt ()
 #endif
 
 }
-//-------------------------------------------------------------------
-void _16bit_processor::por()
-{
-  pic_processor::por();
-}
 
 //-------------------------------------------------------------------
 void _16bit_processor::option_new_bits_6_7(unsigned int bits)

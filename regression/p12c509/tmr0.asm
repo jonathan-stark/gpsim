@@ -54,7 +54,7 @@ START  CODE    0x000                    ;
 
    .sim "MCLR.initial = 5.0"
 
-   .sim "PG1.clear = 0"
+   .sim "PG1.clear = 0"   ; At cycle 0, 
    .sim "PG1.set = 1"
 ;   .sim "PG1.clear = 0x200"
 ;   .sim "PG1.period = 0x400"
@@ -80,6 +80,10 @@ START  CODE    0x000                    ;
   .sim "optionShadow=8"      ; PSA=1
 
   .sim ".BreakOnReset = false"
+
+  ; Set a cycle break point far in the future in case the resets fail.
+  .sim "break c 0x1000000"
+
 ;break e START
 ;break e Activate
 ;break e AbortActivate
@@ -103,7 +107,7 @@ bSWITCH equ 0
 
    ; OPTION register setup
 
-        MOVF    optionShadow,W
+        MOVF    optionShadow,W  ;optionShadow is initialized by the gpsim script
         OPTION
 
    ; GPIO setup
@@ -145,10 +149,19 @@ TO_is_low
 ;
 ;========================================================================
 AwakeIO:
+  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change\""
 	MOVLW	eRSTSequence_AwakeIO
 	MOVWF	ResetSequence
 
+  .command "resetCounter = resetCounter+1"
+
 	CLRWDT
+
+    ; reset the processor by driving /MCLR low for a few cycles 
+  .command "MCLR.clear = cycles+100"
+  .command "MCLR.set = cycles+110"
+        nop
+
 	SLEEP
 
 ;========================================================================
@@ -189,12 +202,20 @@ here:   goto    here
 ;
 ;========================================================================
 AwakeMCLR:
+  .assert "resetCounter==5,\"*** FAILED /MCLR Reset\""
 
 	MOVLW	eRSTSequence_AwakeMCLR
 	MOVWF	ResetSequence
 
+  .command "resetCounter = resetCounter+1"
 	CLRWDT
-	SLEEP
+
+    ; reset the processor by driving /MCLR low for a few cycles 
+  .command "MCLR.clear = cycles+100"
+  .command "MCLR.set = cycles+110"
+        nop
+
+waitForMCLR:    goto waitForMCLR
 
 ;========================================================================
 ;
@@ -207,9 +228,16 @@ WDTTimeOut:
 	MOVLW	eRSTSequence_WDTTimeOut
 	MOVWF	ResetSequence
 
+  .command "resetCounter = resetCounter+1"
 	CLRWDT
+
+  .command "PG1.clear = cycles+100"
+        nop
+    
 	SLEEP
 
+
+  .assert  "\"*** PASSED 12c509 Sleep and Reset test\""
 
 done:
 	goto	done

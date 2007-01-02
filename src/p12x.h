@@ -32,7 +32,7 @@ public:
   GPIO(const char *port_name, 
        unsigned int numIopins, 
        unsigned int enableMask);
-  void setbit(unsigned int bit_number, bool new_value);
+  void setbit(unsigned int bit_number, char new_value);
   void setPullUp ( bool bNewPU );
 
 private:

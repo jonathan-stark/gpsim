@@ -216,6 +216,7 @@ class RegisterMemoryAccess : public MemoryAccess
   bool insertRegister(int address, Register *);
   bool removeRegister(int address, Register *);
   bool hasBreak(unsigned int address);
+  void reset(RESET_TYPE r);
 
   Register &operator [] (unsigned int address);
 
@@ -408,8 +409,9 @@ public:
   TraceType *readTT, *writeTT;
   map <unsigned int, TraceType *> mTrace;
 
-  virtual void set(const char *cP,int len=0);
-  virtual void get(char *, int len);
+  // --- TSD removed 01JAN07 These don't appear to be used anywhere
+  //virtual void set(const char *cP,int len=0);
+  //virtual void get(char *, int len);
 
   //
   // Creation and manipulation of registers
@@ -504,11 +506,11 @@ public:
   // Simulation modes
 
   /// setWarnMode - when true, gpsim will issue warnings whenever
-  /// suspicious is occuring.
+  /// something suspicious is occuring.
   virtual void setWarnMode(bool);
   virtual bool getWarnMode() { return bWarnMode; }
 
-  /// setSafeMode - when true, model will model the 'official'
+  /// setSafeMode - when true, gpsim will model the 'official'
   /// behavior of the chip. When false, the simulator behaves the same
   /// as the hardware.
   virtual void setSafeMode(bool);
@@ -580,8 +582,7 @@ public:
   // Processor reset
   // 
   
-  virtual void reset(RESET_TYPE r) {};
-  virtual void por(void) = 0;            // por = Power On Reset
+  virtual void reset(RESET_TYPE r) = 0;
 
   virtual double get_Vdd() { return Vdd; }
   virtual void set_Vdd(double v) { Vdd = v; }

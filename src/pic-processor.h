@@ -189,7 +189,7 @@ public:
   virtual void initialize(bool enable);
   void set_timeout(double);
   virtual void set_prescale(unsigned int);
-  virtual void reset();
+  virtual void reset(RESET_TYPE r);
   void clear();
   virtual void callback();
   virtual void start_sleep();
@@ -312,7 +312,16 @@ public:
   virtual ConfigMode *create_ConfigMode() { return new ConfigMode; };
   virtual void reset(RESET_TYPE r);
 
-  virtual void por();
+  /// MCLRE - master clear enable a.k.a.Reset pin enable.
+  /// Most PICs have a pin that can be used to reset the processor.
+  /// On some, the CONFIG word may inhibit this feature.
+  /// externalResetEnable() mirrors the config word MCLRE bit 
+  ///   setting it true enables the Reset feature.
+  ///   setting it false means the I/O pin can not reset the processor.
+  void externalResetEnable(bool);
+  /// haveExternalReset - return the state of MCLRE
+  bool haveExternalReset();
+
   virtual void create();
 
   virtual PROCESSOR_TYPE isa(){return _PIC_PROCESSOR_;};
@@ -334,6 +343,7 @@ public:
 
 protected:
   ConfigMemory **m_configMemory;
+  bool m_bMCLRE;
 };
 
 

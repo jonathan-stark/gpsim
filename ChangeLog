@@ -1,3 +1,35 @@
+2007-01-02  Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc, src/16bit-processors.h,
+	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h, 
+	src/12bit-processors.cc, src/12bit-processors.h,
+	src/14bit-processors.cc, src/14bit-processors.h:
+	- removed 'por()' method from Processor class
+	* src/processor.h, src/processor.cc
+	 - removed 'por()' method from Processor class.
+	 - removed unused set() and get() methods
+	 - RegisterMemoryAccess now has a reset() method.
+	* src/14bit-registers.h, src/14bit-registers.cc
+	 - The Status_register now has a 'reset()' method.
+	* src/pic-processor.h, src/pic-processor.cc:
+	 - Added a 'phaseIdle' to handle idle processor states. (like when
+	 reset is being held low).
+	 - added support for MCLRE
+	 - ::reset() now handles MCLR resets
+	 - WDT handles MCLR resets
+	* src/p12x.h, src/p12x.cc:
+	 - Added support for MCLRE. Now, when GPIO3 is held low on the
+	 12c50x processors, the CPU is held in reset.
+	* src/clock_phase.cc, src/clock_phase.h:
+	 - Added phaseIdle class.
+	* src/pic-registers.cc: 
+	 - The program counter class now handles resets.
+	* src/16bit-instructions.cc: removed a comment.
+        * src/gpsim_classes.h:
+	 - Added an 'EXIT_RESET' type to the RESET_TYPE enumeration.
+	 - Removed 'PROCESSOR_STATES' enumeration.
+	* regression/p12c509/tmr0.asm:
+	MCLR resets are now working.
+
 2006-12-31  Scott Dattalo <scott@dattalo.com>
 	* src/os_dependent.cc: Applied patch [1625380] from Jean-Etienne
 	Lamiaud that fixes dynamic module loading on OS X.

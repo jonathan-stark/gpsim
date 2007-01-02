@@ -1859,8 +1859,6 @@ void SLEEP16::execute(void)
 
   cout << "16BIT-SLEEP is not implemented\n";
 
-  //  bp.set_sleep();
-
 }
 
 //--------------------------------------------------

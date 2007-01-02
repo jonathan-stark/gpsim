@@ -100,13 +100,25 @@ protected:
   unsigned int m_uiPC;
 };
 
+// phaseIdle - when a processor is idle, the current
+// clock source can be handled by this class.
+
+class phaseIdle : public ProcessorPhase
+{
+public:
+  phaseIdle(Processor *pcpu);
+  virtual ~phaseIdle();
+  virtual ClockPhase *advance();
+protected:
+};
+
 ////// TEMPORARY ////////
 // These will be moved into the Processor class.
 extern ClockPhase *mCurrentPhase;
 extern phaseExecute1Cycle *mExecute1Cycle;
 extern phaseExecute2ndHalf *mExecute2ndHalf;
 extern phaseExecuteInterrupt *mExecuteInterrupt;
-
+extern phaseIdle *mIdle;
 
 #endif // defined(CLOCK_EXPERIMENTS)
 

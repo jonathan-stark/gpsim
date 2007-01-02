@@ -60,7 +60,6 @@ enum _12BIT_DEFINITIONS
   virtual void save_state();
 
   virtual void create_symbols();
-  virtual void por();
   #define FILE_REGISTERS  0x100
   virtual unsigned int register_memory_size () const { return FILE_REGISTERS;};
   virtual void dump_registers();
