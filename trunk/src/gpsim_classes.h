@@ -48,17 +48,8 @@ enum RESET_TYPE
   SOFT_RESET,         // Software initiated reset
   BOD_RESET,          // Brown out detection reset
   SIM_RESET,          // Simulation Reset
+  EXIT_RESET,         // Leaving Reset, resuming normal execution.
   OTHER_RESET         //
-};
-
-
-
-enum PROCESSOR_STATES
-{
-
-  POR_,
-  IDLE
-
 };
 
 #endif //  __GPSIM_CLASSES_H__

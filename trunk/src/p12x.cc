@@ -77,6 +77,28 @@ public:
 
   }
 
+  virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+
+    snprintf(buff,sizeof(buff),
+             "$%3x\n"
+             " FOSC=%d - Clk source = %s\n"
+             " WDTEN=%d - WDT is %s\n"
+             " CP=%d - Code protect is %s\n"
+             " MCLRE=%d - /MCLR is %s",
+             i,
+             i&(FOSC0|FOSC1), (i&FOSC0 ? (i&FOSC1 ? "EXTRC":"XT"):(i&FOSC1 ? "INTRC":"LP")),
+             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
+             (i&CP?1:0), ((i&CP) ? "enabled" : "disabled"),
+             (i&MCLRE?1:0), ((i&MCLRE) ? "enabled" : "disabled"));
+    return string(buff);
+  }
+
 };
 
 //========================================================================
@@ -501,7 +523,7 @@ GPIO::GPIO(const char *port_name, unsigned int numIopins,
 {
 }
 
-void GPIO::setbit(unsigned int bit_number, bool new_value)
+void GPIO::setbit(unsigned int bit_number, char new_value)
 {
   unsigned int lastDrivenValue = rvDrivenValue.data;
 
@@ -512,7 +534,14 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
   // the processor is sleeping.
   //    Then wake 
 
-  if ((lastDrivenValue ^ rvDrivenValue.data) & 0x0b) {
+  unsigned int diff = lastDrivenValue ^ rvDrivenValue.data;
+  if ((diff & (1<<3)) && cpu_pic->haveExternalReset()) { // GP3 is the reset pin 
+
+    cpu->reset( (rvDrivenValue.data & (1<<3)) ? EXIT_RESET : MCLR_RESET);
+    return;
+  }
+
+  if (diff & 0x0b) {
     if( ((cpu12->option_reg->value.get() & 0x80) == 0) && bp.have_sleep()) {
 
       if(verbose)

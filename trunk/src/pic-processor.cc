@@ -68,6 +68,7 @@ ClockPhase *mCurrentPhase=0;
 phaseExecute1Cycle *mExecute1Cycle=0;
 phaseExecute2ndHalf *mExecute2ndHalf=0;
 phaseExecuteInterrupt *mExecuteInterrupt=0;
+phaseIdle *mIdle=0;
 #endif
 
 //================================================================================
@@ -718,62 +719,70 @@ void pic_processor::reset (RESET_TYPE r)
       return;
   }
 
-  if(r == SOFT_RESET)
-    {
-      trace.reset(r);
-      pc->reset();
-      gi.simulation_has_stopped();
-      cout << " --- Soft Reset (not fully implemented)\n";
-      return;
-    }
+  if(r == SOFT_RESET) {
 
-  for(unsigned int i=0; i<register_memory_size(); i++)
-    if (registers[i])
-      registers[i]->reset(r);
+    trace.reset(r);
+    pc->reset();
+    gi.simulation_has_stopped();
+    cout << " --- Soft Reset (not fully implemented)\n";
+    return;
+  }
 
-
+  rma.reset(r);
   trace.reset(r);
   pc->reset();
   stack->reset();
+  wdt.reset(r);
+
   bp.clear_global();
 
   switch (r) {
   case POR_RESET:
-    status->put_TO(1);
-    status->put_PD(1);
-
     if(verbose) {
       cout << "POR\n";
       if(config_modes) config_modes->print();
     }
-    wdt.reset();
-
     bHaltSimulation = false;
+#ifdef CLOCK_EXPERIMENTS
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+#endif
     break;
-  case WDT_RESET:
-    status->put_TO(0);
+
+  case MCLR_RESET:
+#ifdef CLOCK_EXPERIMENTS
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
+    mCurrentPhase->setNextPhase(mIdle);
+#endif
     break;
+
+  case EXIT_RESET:
+#ifdef CLOCK_EXPERIMENTS
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+    mCurrentPhase->setNextPhase(mExecute1Cycle);
+#endif
+    break;
+
   default:
     break;
   }
 
-  if(bHaltSimulation || getBreakOnReset())
+  if(bHaltSimulation || getBreakOnReset()) {
     bp.halt();
-
-  gi.simulation_has_stopped();
+    gi.simulation_has_stopped();
+  }
 }
 
 //-------------------------------------------------------------------
-//
-// por - power on reset %%% FIX ME %%% needs lots of work...
-//
 
-void pic_processor::por()
+void pic_processor::externalResetEnable(bool bMCLRE)
 {
-  wdt.reset();
-
+  m_bMCLRE = bMCLRE;
 }
 
+bool pic_processor::haveExternalReset()
+{
+  return m_bMCLRE;
+}
 //-------------------------------------------------------------------
 //
 // pic_processor -- constructor
@@ -781,13 +790,14 @@ void pic_processor::por()
 
 pic_processor::pic_processor(const char *_name, const char *_desc)
   : Processor(_name,_desc),
-    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0)
+    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0), m_bMCLRE(true)
 {
 
 #ifdef CLOCK_EXPERIMENTS
    mExecute1Cycle    = new phaseExecute1Cycle(this);
    mExecute2ndHalf   = new phaseExecute2ndHalf(this);
    mExecuteInterrupt = new phaseExecuteInterrupt(this);
+   mIdle             = new phaseIdle(this);
    mCurrentPhase   = mExecute1Cycle;
 #endif
 
@@ -1175,9 +1185,22 @@ void WDT::initialize(bool enable)
 
 }
 
-void WDT::reset()
+void WDT::reset(RESET_TYPE r)
 {
-  update();
+  switch (r) {
+  case POR_RESET:
+  case EXIT_RESET:
+    update();
+    break;
+  case MCLR_RESET:
+    if (future_cycle)
+      get_cycles().clear_break(this);
+    future_cycle = 0;
+    break;
+  default:
+    ;
+  }
+
 }
 void WDT::set_breakpoint(unsigned int bpn)
 {
@@ -1189,9 +1212,9 @@ void WDT::callback()
 
 
   if(wdte) {
-    cout<<"WDT timeout: " << hex << get_cycles().get() << '\n';
+    if(verbose)
+      cout<<"WDT timeout: " << hex << get_cycles().get() << '\n';
 
-    //future_cycle = 0;
     update();
 
     // The TO bit gets cleared when the WDT times out.
@@ -1201,14 +1224,8 @@ void WDT::callback()
       bp.halt();
     else 
     {
-      bp.clear_sleep();
       cpu->reset(WDT_RESET);
     }
-    /*    else if(bp.have_sleep()) {
-      bp.clear_sleep();
-    }else
-      cpu->reset(WDT_RESET);
-    */
   }
 
 }

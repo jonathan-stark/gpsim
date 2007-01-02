@@ -358,10 +358,13 @@ void Program_Counter::put_value(unsigned int new_value)
   update();
 }
 
-void Program_Counter::reset(void)
+void Program_Counter::reset()
 { 
   //trace.program_counter(value);  //FIXME
   value = reset_address;
+#ifdef CLOCK_EXPERIMENTS
+  mExecute2ndHalf->firstHalf(reset_address & memory_size_mask);
+#endif
 }
 
 

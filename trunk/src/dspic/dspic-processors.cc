@@ -196,7 +196,7 @@ namespace dspic {
   {
     return 0xffffffff;
   }
-  void dsPicProcessor::por()
+  void dsPicProcessor::reset(RESET_TYPE r)
   {
   }
 

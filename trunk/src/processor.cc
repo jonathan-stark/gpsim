@@ -225,7 +225,7 @@ double  Processor::get_OSCperiod()
   else
     return 0.0;
 }
-
+/*
 void Processor::set(const char *cP,int len)
 {
 
@@ -235,7 +235,7 @@ void Processor::get(char *cP, int len)
 {
   cP[0] = 0;
 }
-
+*/
 //-------------------------------------------------------------------
 //
 // init_register_memory (unsigned int memory_size)
@@ -2200,6 +2200,12 @@ Register &RegisterMemoryAccess::operator [] (unsigned int address)
     return AnInvalidRegister;
 
   return *registers[address];
+}
+
+void RegisterMemoryAccess::reset (RESET_TYPE r)
+{
+  for(unsigned int i=0; i<nRegisters; i++)
+    operator[](i).reset(r);
 }
 
 //========================================================================

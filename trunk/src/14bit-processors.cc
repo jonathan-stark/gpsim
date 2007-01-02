@@ -116,12 +116,6 @@ void _14bit_processor::interrupt ()
 }
 
 //-------------------------------------------------------------------
-void _14bit_processor::por()
-{
-  pic_processor::por();
-}
-
-//-------------------------------------------------------------------
 void _14bit_processor::save_state()
 {
   pic_processor::save_state();

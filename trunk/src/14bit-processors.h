@@ -56,7 +56,6 @@ public:
   INTCON       *intcon;
 
   void interrupt();
-  virtual void por();
   virtual void save_state();
   virtual void create();
   virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};

@@ -70,4 +70,25 @@ ClockPhase *phaseExecute1Cycle::advance()
   return m_pNextPhase;
 }
 
+//========================================================================
+
+phaseIdle::phaseIdle(Processor *pcpu)
+  : ProcessorPhase(pcpu)
+{
+}
+phaseIdle::~phaseIdle()
+{
+}
+
+/*
+  phaseIdle::advance() - advances a processor's time one clock cycle,
+  but does not execute code.
+ */
+
+ClockPhase *phaseIdle::advance()
+{
+  setNextPhase(this);
+  get_cycles().increment();
+  return m_pNextPhase;
+}
 #endif // defined(CLOCK_EXPERIMENTS)

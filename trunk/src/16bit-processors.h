@@ -141,7 +141,6 @@ public:
   virtual void create_symbols();
 
   void interrupt();
-  virtual void por();
   virtual void create();// {return;};
   virtual PROCESSOR_TYPE isa(){return _16BIT_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _16BIT_PROCESSOR_;};
