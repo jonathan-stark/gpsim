@@ -11,7 +11,6 @@ OBJECTS =  $(PROJECT).o
 OUTPUT = $(PROJECT).hex
 COD = $(PROJECT).cod
 STC = $(PROJECT).stc
-STARTUP_STC=startup.stc
 
 all : sim
 
@@ -23,11 +22,11 @@ extended_instructions.cod: extended_instructions.o $(SCRIPT)
 
 
 test1: instructions.cod
-	$(GPSIM) -i -c $(STARTUP_STC) -D STC=instructions.cod
+	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<
 
 
 test2: extended_instructions.cod
-	$(GPSIM) -i -c $(STARTUP_STC) -D STC=extended_instructions.cod
+	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<
 
 
 sim: test1 test2
