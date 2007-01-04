@@ -1,3 +1,21 @@
+2007-01-04  Scott Dattalo <scott@dattalo.com>
+	* port_stim/Makefile, tmr0_16bit/Makefile, spi/Makefile,
+	logic_test/Makefile, make.regression, wavegen/Makefile, rt.sh,
+	p12c509/Makefile, ttl/Makefile, ccp/Makefile, comparator/Makefile,
+	txisr_test/Makefile, digital_stim/Makefile, resistor/Makefile,
+	breakpoints/Makefile, interrupts_14bit/Makefile,
+	node_test/Makefile, p16f84/Makefile, usart_test/Makefile,
+	analog_stim/Makefile, eeprom_wide/Makefile, switch_test/Makefile,
+	p18f452_ports/Makefile, macro_test/Makefile, psp/Makefile,
+	instructions_12bit/Makefile, a2d/Makefile,
+	instructions_14bit/Makefile, p12ce518/Makefile,
+	instructions_16bit/Makefile, run_regression.sh, i2c/Makefile,
+	p18f/Makefile:
+	- Added make clean option to 'run_regression.sh'
+	- Cleaned up the make rules
+	* p18f/startup.stc: removed
+	* regression/startup.stc: added
+
 2007-01-02  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc, src/16bit-processors.h,
 	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h, 
