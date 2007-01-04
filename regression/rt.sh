@@ -27,12 +27,12 @@ cd $1
 # the defined STC.
 
 
-STARTUP_STC='startup.stc'
+#STARTUP_STC='startup.stc'
 
-echo "load STC" > $STARTUP_STC
-echo "run" >> $STARTUP_STC
-echo "quit" >> $STARTUP_STC
-echo "" >> $STARTUP_STC
+#echo "load STC" > $STARTUP_STC
+#echo "run" >> $STARTUP_STC
+#echo "quit" >> $STARTUP_STC
+#echo "" >> $STARTUP_STC
 
 LOGFILE="$2results.log"
 touch $LOGFILE

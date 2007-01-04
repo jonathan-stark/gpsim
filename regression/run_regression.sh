@@ -9,11 +9,33 @@ then
   exit 0
 fi
 
-if [ $# -gt 0 ]
-then
-  GPSIM_PATH=$1
-  export GPSIM_PATH
-fi
+case "$1" in
+    *clean)
+        DIRS='breakpoints instructions_12bit instructions_14bit instructions_16bit 
+node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_wide 
+interrupts_14bit macro_test logic_test resistor usart_test txisr_test tmr0_16bit 
+switch_test p18f comparator a2d psp ttl ccp wavegen spi i2c port_stim 
+p12c509'
+
+        echo ${DIRS}
+        for i in ${DIRS} ; do
+            echo $i
+            cd $i
+            make clean
+            cd ..
+        done
+
+        exit 0
+        ;;
+
+    *)
+        if [ $# -gt 0 ]
+            then
+            GPSIM_PATH=$1
+            export GPSIM_PATH
+        fi
+        ;;
+esac
 
 RT=./rt.sh
 
@@ -70,45 +92,51 @@ ${RT} tmr0_16bit sim
 
 ${RT} switch_test sim
 
-${RT} p18f sim
+${RT} p18f test1
+
+${RT} p18f test2
 
 ${RT} comparator sim_628
 
 ${RT} comparator sim_877a
 
-${RT} a2d sim_71
+${RT} a2d sim_p16c71
 
-${RT} a2d sim_871
+${RT} a2d sim_p16f871
 
-${RT} a2d sim_873a
+${RT} a2d sim_p16f873a
 
-${RT} a2d sim_874a
+${RT} a2d sim_p16f874a
 
-${RT} a2d sim_88
+${RT} a2d sim_p16f88
 
-${RT} a2d sim_452
+${RT} a2d sim_p18f452
 
-${RT} psp sim_452
+${RT} psp sim_p18f452
 
-${RT} psp sim_871
+${RT} psp sim_p16f871
 
 ${RT} ttl sim_377
 
-${RT} ccp sim_877a
+${RT} ccp sim_ccp_877a
 
-${RT} ccp sim_pwm877a
+${RT} ccp sim_pwm_877a
 
 ${RT} wavegen sim
 
-${RT} spi sim_88
+${RT} spi sim_p16f88
 
-${RT} spi sim_242
+${RT} spi sim_p18f242
 
-${RT} spi sim_c62
+${RT} spi sim_p16c62
 
-${RT} i2c sim_88
+${RT} i2c sim_p16f88
 
-${RT} i2c sim_876
+${RT} i2c sim_p16f876a
 
-${RT} port_stim sim
+${RT} port_stim sim_port_stim
+
+echo "12c509 reset test only passes if CLOCK_EXPERIMENTS"
+echo "(in src/clock_phase.cc) is defined."
+${RT} p12c509 sim_p12c509_reset
 
