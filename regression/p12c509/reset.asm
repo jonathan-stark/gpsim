@@ -24,10 +24,9 @@
 
 GPR_DATA  UDATA
 ResetSequence RES 1
-failures      RES 1
 optionShadow  RES 1
 
-  GLOBAL optionShadow
+  GLOBAL optionShadow, ResetSequence
 
 
     ; Define the reset conditions to be checked.
@@ -78,6 +77,8 @@ START  CODE    0x000                    ;
    ;  PS2:0 = 000 - prescale = 2^0=1
 
   .sim "optionShadow=8"      ; PSA=1
+
+  .sim "ResetSequence=0"
 
   .sim ".BreakOnReset = false"
 
@@ -145,31 +146,15 @@ TO_is_low
 
 ;========================================================================
 ;
-;  AwakeIO - an I/O pin changed states to awaken us from sleep.
-;
-;========================================================================
-AwakeIO:
-  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change\""
-	MOVLW	eRSTSequence_AwakeIO
-	MOVWF	ResetSequence
-
-  .command "resetCounter = resetCounter+1"
-
-	CLRWDT
-
-    ; reset the processor by driving /MCLR low for a few cycles 
-  .command "MCLR.clear = cycles+100"
-  .command "MCLR.set = cycles+110"
-        nop
-
-	SLEEP
-
-;========================================================================
-;
 ;  PowerOnReset
 ;
 ;========================================================================
 PowerOnReset:
+
+        movf    ResetSequence,W
+        XORLW   eRSTSequence_AwakeMCLR
+        skpnz
+         goto   done
 
   .assert "resetCounter==1,\"*** FAILED Power On Reset\""
 	MOVLW	eRSTSequence_PowerOnReset
@@ -198,6 +183,47 @@ here:   goto    here
 
 ;========================================================================
 ;
+;  WDTTimeOut - WatchDog timer timed out while we were awake.
+;
+;========================================================================
+WDTTimeOut:
+
+  .assert "resetCounter==3,\"*** FAILED WDT timeout\""
+	MOVLW	eRSTSequence_WDTTimeOut
+	MOVWF	ResetSequence
+
+  .command "resetCounter = resetCounter+1"
+	CLRWDT
+
+  .command "PG1.clear = cycles+100"
+        nop
+    
+	SLEEP
+
+
+;========================================================================
+;
+;  AwakeIO - an I/O pin changed states to awaken us from sleep.
+;
+;========================================================================
+AwakeIO:
+  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change\""
+	MOVLW	eRSTSequence_AwakeIO
+	MOVWF	ResetSequence
+
+  .command "resetCounter = resetCounter+1"
+
+	CLRWDT
+
+    ; reset the processor by driving /MCLR low for a few cycles 
+  .command "MCLR.clear = cycles+100"
+  .command "MCLR.set = cycles+110"
+        nop
+
+	SLEEP
+
+;========================================================================
+;
 ;  AwakeMCLR - MCLR went low while we were sleeping.
 ;
 ;========================================================================
@@ -217,33 +243,10 @@ AwakeMCLR:
 
 waitForMCLR:    goto waitForMCLR
 
-;========================================================================
-;
-;  WDTTimeOut - WatchDog timer timed out while we were awake.
-;
-;========================================================================
-WDTTimeOut:
-
-  .assert "resetCounter==3,\"*** FAILED WDT timeout\""
-	MOVLW	eRSTSequence_WDTTimeOut
-	MOVWF	ResetSequence
-
-  .command "resetCounter = resetCounter+1"
-	CLRWDT
-
-  .command "PG1.clear = cycles+100"
-        nop
-    
-	SLEEP
-
 
   .assert  "\"*** PASSED 12c509 Sleep and Reset test\""
 
 done:
-	goto	done
-
-failure:
-	INCF	failures,F
 	goto	done
 
 ;----------------------------------------------------------------------
