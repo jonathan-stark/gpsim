@@ -1,3 +1,6 @@
+2007-01-05 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+
 2007-01-04  Scott Dattalo <scott@dattalo.com>
 	* port_stim/Makefile, tmr0_16bit/Makefile, spi/Makefile,
 	logic_test/Makefile, make.regression, wavegen/Makefile, rt.sh,
@@ -42,7 +45,7 @@
 	* src/pic-registers.cc: 
 	 - The program counter class now handles resets.
 	* src/16bit-instructions.cc: removed a comment.
-        * src/gpsim_classes.h:
+	* src/gpsim_classes.h:
 	 - Added an 'EXIT_RESET' type to the RESET_TYPE enumeration.
 	 - Removed 'PROCESSOR_STATES' enumeration.
 	* regression/p12c509/tmr0.asm:
@@ -51,7 +54,7 @@
 2006-12-31  Scott Dattalo <scott@dattalo.com>
 	* src/os_dependent.cc: Applied patch [1625380] from Jean-Etienne
 	Lamiaud that fixes dynamic module loading on OS X.
-	
+
 2006-12-27  Scott Dattalo <scott@dattalo.com>
 	* src/Makefile.am, modules/Makefile.am, eXdbm/Makefile.am,
 	cli/Makefile.am, Makefile.am:
