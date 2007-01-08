@@ -42,6 +42,7 @@ public:
   P16C84(const char *_name=0, const char *desc=0);
 
   virtual PROCESSOR_TYPE isa(){return _P16C84_;};
+  virtual void create(int ram_top);
 
   virtual unsigned int program_memory_size() const { return 0x400; }
   static Processor *construct(const char *name);
@@ -53,6 +54,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P16F84_;};
 
+  virtual void create(int ram_top);
   virtual unsigned int program_memory_size() const { return 0x400; };
 
   P16F84(const char *_name=0, const char *desc=0);
@@ -78,6 +80,7 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P16F83_;};
 
   virtual unsigned int program_memory_size() const { return 0x200; };
+  virtual void create(int ram_top);
 
   P16F83(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);

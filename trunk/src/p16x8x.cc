@@ -48,6 +48,10 @@ Boston, MA 02111-1307, USA.  */
 P16X8X::P16X8X(const char *_name, const char *desc)
   : Pic14Bit(_name,desc)
 {
+  if(config_modes)
+    config_modes->valid_bits = ConfigMode::CM_FOSC0 | ConfigMode::CM_FOSC1 | 
+      ConfigMode::CM_FOSC1x | ConfigMode::CM_WDTE | ConfigMode::CM_PWRTE;
+
 }
 
 void P16X8X::create_sfr_map()
@@ -134,7 +138,7 @@ Processor * P16C84::construct(const char *name)
 
   P16C84 *p = new P16C84(name);
 
-  p->P16X8X::create(0x2f);
+  p->create(0x2f);
   p->create_invalid_registers ();
   p->create_symbols();
   symbol_table.add_module(p,p->name().c_str());
@@ -148,6 +152,11 @@ P16C84::P16C84(const char *_name, const char *desc)
 {
 }
 
+void  P16C84::create(int ram_top)
+{
+  P16X8X::create(0x2f);
+  createMCLRPin(4);
+}
 
 
 //========================================================================
@@ -161,7 +170,7 @@ Processor * P16F84::construct(const char *name)
 
   P16F84 *p = new P16F84(name);
 
-  p->P16X8X::create(0x4f);
+  p->create(0x4f);
   p->create_invalid_registers ();
   p->create_symbols();
   symbol_table.add_module(p,p->name().c_str());
@@ -173,6 +182,12 @@ Processor * P16F84::construct(const char *name)
 P16F84::P16F84(const char *_name, const char *desc)
   : P16X8X(_name,desc)
 {
+}
+
+void  P16F84::create(int ram_top)
+{
+  P16X8X::create(0x4f);
+  createMCLRPin(4);
 }
 
 //========================================================================
@@ -190,13 +205,19 @@ Processor * P16F83::construct(const char *name)
 
   P16F83 *p = new P16F83(name);;
 
-  p->P16X8X::create(0x2f);
+  p->create(0x2f);
   p->create_invalid_registers ();
   p->create_symbols();
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
+}
+
+void  P16F83::create(int ram_top)
+{
+  P16X8X::create(0x2f);
+  createMCLRPin(4);
 }
 
 //========================================================================

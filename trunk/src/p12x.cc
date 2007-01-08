@@ -73,6 +73,9 @@ public:
       if (diff & WDTEN)
 	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
 
+      if (diff & MCLRE)
+        m_pCpu->config_modes->set_mclre((v&MCLRE)==MCLRE);
+
     }
 
   }
@@ -535,7 +538,7 @@ void GPIO::setbit(unsigned int bit_number, char new_value)
   //    Then wake 
 
   unsigned int diff = lastDrivenValue ^ rvDrivenValue.data;
-  if ((diff & (1<<3)) && cpu_pic->haveExternalReset()) { // GP3 is the reset pin 
+  if ((diff & (1<<3)) && cpu_pic->config_modes->get_mclre()) { // GP3 is the reset pin 
 
     cpu->reset( (rvDrivenValue.data & (1<<3)) ? EXIT_RESET : MCLR_RESET);
     return;

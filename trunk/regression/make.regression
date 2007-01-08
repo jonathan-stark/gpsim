@@ -31,6 +31,9 @@ GPSIM = gpsim
 sim_%: %.cod
 	$(GPSIM) -i -I $(STARTUP_STC) -D STC="$<"
 
+%.-: %.cod
+	$(GPSIM) -s $<
+
 # Each regression test has a target 'all'
 top: all
 

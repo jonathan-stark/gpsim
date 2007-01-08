@@ -132,7 +132,7 @@ class ConfigMode {
     CM_CPD =   1<<7,
     CM_MCLRE = 1<<8,    // MCLR enable
 
-    CM_FOSC1x = 1<<9,   // Hack for internal oscillators
+    CM_FOSC1x = 1<<31,   // Hack for internal oscillators
   };
 
   int config_mode;
@@ -151,6 +151,11 @@ class ConfigMode {
   void clear_fosc1(){config_mode &= ~CM_FOSC1;};
   bool get_fosc1(){return (0 != (config_mode & CM_FOSC1));};
   bool get_fosc1x(){return (0 != (config_mode & CM_FOSC1x));};
+  void set_fosc01(int v) 
+  { 
+    config_mode = (config_mode & ~(CM_FOSC0 | CM_FOSC1)) |
+      (v & (CM_FOSC0 | CM_FOSC1));
+  }
 
   void set_cp0()  {config_mode |= CM_CP0;  valid_bits |= CM_CP0;};
   void clear_cp0(){config_mode &= ~CM_CP0; valid_bits |= CM_CP0;};
@@ -161,14 +166,15 @@ class ConfigMode {
 
   void enable_wdt()  {config_mode |= CM_WDTE;};
   void disable_wdt() {config_mode &= ~CM_WDTE;};
+  void set_wdte(bool b) { config_mode = b ? (config_mode | CM_WDTE) : (config_mode & ~CM_WDTE); }
   bool get_wdt()     {return (0 != (config_mode & CM_WDTE));};
 
-  void enable_mclre()  {config_mode |= CM_MCLRE;};
-  void disable_mclre() {config_mode &= ~CM_MCLRE;};
+  void set_mclre(bool b) { config_mode = b ? (config_mode | CM_MCLRE) : (config_mode & ~CM_MCLRE); }
   bool get_mclre()     {return (0 != (config_mode & CM_MCLRE));};
 
   void enable_pwrte()   {config_mode |= CM_PWRTE;  valid_bits |= CM_PWRTE;};
   void disable_pwrte()  {config_mode &= ~CM_PWRTE; valid_bits |= CM_PWRTE;};
+  void set_pwrte(bool b) { config_mode = b ? (config_mode | CM_PWRTE) : (config_mode & ~CM_PWRTE); }
   bool get_pwrte()      {return (0 != (config_mode & CM_PWRTE));};
   bool is_valid_pwrte() {return (0 != (valid_bits & CM_PWRTE));};
 
@@ -192,7 +198,6 @@ public:
   virtual void reset(RESET_TYPE r);
   void clear();
   virtual void callback();
-  virtual void start_sleep();
   virtual void update();
   virtual void callback_print();
   void set_breakpoint(unsigned int bpn);
@@ -293,6 +298,7 @@ public:
 
   void sleep();
   virtual void enter_sleep();
+  virtual void exit_sleep();
   void step(unsigned int steps,bool refresh=true);
   void step_over(bool refresh=true);
 
@@ -311,16 +317,6 @@ public:
   virtual unsigned int config_word_address() const {return 0x2007;};
   virtual ConfigMode *create_ConfigMode() { return new ConfigMode; };
   virtual void reset(RESET_TYPE r);
-
-  /// MCLRE - master clear enable a.k.a.Reset pin enable.
-  /// Most PICs have a pin that can be used to reset the processor.
-  /// On some, the CONFIG word may inhibit this feature.
-  /// externalResetEnable() mirrors the config word MCLRE bit 
-  ///   setting it true enables the Reset feature.
-  ///   setting it false means the I/O pin can not reset the processor.
-  void externalResetEnable(bool);
-  /// haveExternalReset - return the state of MCLRE
-  bool haveExternalReset();
 
   virtual void create();
 
@@ -343,7 +339,6 @@ public:
 
 protected:
   ConfigMemory **m_configMemory;
-  bool m_bMCLRE;
 };
 
 
