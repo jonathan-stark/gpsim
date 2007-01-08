@@ -261,6 +261,25 @@ void pic_processor::enter_sleep()
 {
   status->put_TO(1);
   status->put_PD(0);
+
+  wdt.update();
+
+  bp.set_sleep();
+
+}
+
+//-------------------------------------------------------------------
+//
+// exit_sleep 
+
+void pic_processor::exit_sleep()
+{
+
+#if defined(CLOCK_EXPERIMENTS)
+  mCurrentPhase = (mCurrentPhase==mIdle) ? mExecute1Cycle : mCurrentPhase;
+#else
+  bp.clear_sleep();
+#endif
 }
 
 //-------------------------------------------------------------------
@@ -472,6 +491,7 @@ void pic_processor::run (bool refresh)
   // then ignore it.
 
   simulation_start_cycle = get_cycles().get();
+  bp.clear_global();
 
   do {
 
@@ -755,6 +775,7 @@ void pic_processor::reset (RESET_TYPE r)
 #endif
     break;
 
+  case WDT_RESET:
   case EXIT_RESET:
 #ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
@@ -773,24 +794,13 @@ void pic_processor::reset (RESET_TYPE r)
 }
 
 //-------------------------------------------------------------------
-
-void pic_processor::externalResetEnable(bool bMCLRE)
-{
-  m_bMCLRE = bMCLRE;
-}
-
-bool pic_processor::haveExternalReset()
-{
-  return m_bMCLRE;
-}
-//-------------------------------------------------------------------
 //
 // pic_processor -- constructor
 //
 
 pic_processor::pic_processor(const char *_name, const char *_desc)
   : Processor(_name,_desc),
-    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0), m_bMCLRE(true)
+    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0)
 {
 
 #ifdef CLOCK_EXPERIMENTS
@@ -1237,22 +1247,6 @@ void WDT::clear()
   else if(!warned) {
     warned = 1;
     cout << "The WDT is not enabled - clrwdt has no effect!\n";
-  }
-}
-
-void WDT::start_sleep()
-{
-
-  if(wdte) {
-    prescale = 0;
-
-    guint64 fc = get_cycles().get() + value * (1<<prescale);
-
-    //cout << "WDT::start_sleep:  moving break from " << future_cycle << " to " << fc << '\n';
-
-    get_cycles().reassign_break(future_cycle, fc, this);
-
-    future_cycle = fc;
   }
 }
 

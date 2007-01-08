@@ -96,7 +96,7 @@ PicPortRegister::PicPortRegister(const char *port_name,
   : PortRegister(numIopins, false), m_tris(0)
 {
   new_name(port_name);
-  PortRegister::setEnableMask(enableMask);
+  setEnableMask(enableMask);
 }
 
 class PicSignalControl : public SignalControl
@@ -274,8 +274,10 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 
   unsigned int bitMask = (1<<bit_number) & 0xF0;
 
-  if ( (drivingValue ^ rvDrivenValue.data) & m_tris->get() & bitMask )
+  if ( (drivingValue ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
+    cpu_pic->exit_sleep();
     cpu14->intcon->set_rbif(true);
+  }
 }
 
 void PicPortBRegister::setRBPU(bool bNewRBPU)
@@ -305,7 +307,7 @@ PicPSP_PortRegister::PicPSP_PortRegister(const char *port_name,
   : PortRegister(numIopins, false), m_tris(0), m_psp(0)
 {
   new_name(port_name);
-  PortRegister::setEnableMask(enableMask);
+  setEnableMask(enableMask);
 }
 
 void PicPSP_PortRegister::put(unsigned int new_value)

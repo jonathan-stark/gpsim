@@ -1250,9 +1250,7 @@ SLEEP::SLEEP (Processor *new_cpu, unsigned int new_opcode)
 
 void SLEEP::execute(void)
 {
-
   cpu_pic->enter_sleep();
-  bp.set_sleep();
 }
 
 //--------------------------------------------------

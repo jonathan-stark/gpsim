@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-registers.h"
 #include <string>
 #include "stimuli.h"
+#include "packages.h"
 
 //========================================================================
 // Generic Configuration word for the midrange family.
@@ -38,6 +39,8 @@ public:
   Generic14bitConfigWord(_14bit_processor *pCpu)
     : ConfigMemory("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
+    assert(pCpu);
+    pCpu->wdt.initialize(true);
   }
 
   enum {
@@ -59,8 +62,33 @@ public:
       if (diff & WDTEN)
 	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
 
+      m_pCpu->config_modes->set_fosc01(v & (FOSC0 | FOSC1));
+      m_pCpu->config_modes->set_wdte((v&WDTEN)==WDTEN);
+      m_pCpu->config_modes->set_pwrte((v&PWRTEN)==PWRTEN);
+
     }
 
+  }
+
+  virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+
+    snprintf(buff,sizeof(buff),
+             "$%3x\n"
+             " FOSC=%d - Clk source = %s\n"
+             " WDTEN=%d - WDT is %s\n"
+             " PWRTEN=%d - Power up timer is %s\n",
+             i,
+             i&(FOSC0|FOSC1), (i&FOSC0 ? (i&FOSC1 ? "EXTRC":"XT"):(i&FOSC1 ? "INTRC":"LP")),
+             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
+             (i&PWRTEN?1:0), ((i&PWRTEN) ? "disabled" : "enabled"));
+
+    return string(buff);
   }
 
 };
@@ -155,6 +183,25 @@ void _14bit_processor::create_config_memory()
   *m_configMemory = new Generic14bitConfigWord(this);
 }
 
+//-------------------------------------------------------------------
+
+bool _14bit_processor::set_config_word(unsigned int address,unsigned int cfg_word)
+{
+
+  if((address == config_word_address()) && config_modes) {
+
+    config_word = cfg_word;
+
+    if (m_configMemory && *m_configMemory)
+      (*m_configMemory)->set((int)cfg_word);
+
+    return true;
+  }
+
+  return false;
+
+}
+
 #if 0
 //-------------------------------------------------------------------
 class PortBSink;
@@ -221,7 +268,7 @@ void PortBSink::setPullups(bool new_pullupState)
 
 //-------------------------------------------------------------------
 Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
-  : _14bit_processor(_name,_desc)
+  : _14bit_processor(_name,_desc), m_MCLR(0)
 {
   m_porta = new PicPortRegister("porta",8,0x1f);
   m_trisa = new PicTrisRegister("trisa", m_porta, false);
@@ -236,7 +283,8 @@ Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 Pic14Bit::~Pic14Bit()
 {
-
+  delete m_MCLR;
+  delete m_MCLRMonitor;
 }
 //-------------------------------------------------------------------
 void Pic14Bit::create_symbols()
@@ -285,4 +333,58 @@ void Pic14Bit::option_new_bits_6_7(unsigned int bits)
   //1 ((PORTB *)portb)->rbpu_intedg_update(bits);
   m_portb->setRBPU( (bits & (1<<7)) == (1<<7));
   m_portb->setIntEdge((bits & (1<<6)) == (1<<6));
+}
+
+//-------------------------------------------------------------------
+class MCLRPinMonitor : public PinMonitor
+{
+public:
+  MCLRPinMonitor(pic_processor *pCpu);
+  ~MCLRPinMonitor() {}
+
+  virtual void setDrivenState(char);
+  virtual void setDrivingState(char) {}
+  virtual void set_nodeVoltage(double) {}
+  virtual void putState(char) {}
+  virtual void setDirection() {}
+private:
+  pic_processor *m_pCpu;
+  char m_cLastResetState;
+};
+
+MCLRPinMonitor::MCLRPinMonitor(pic_processor *pCpu)
+  : m_pCpu(pCpu),
+    m_cLastResetState('I')  // I is not a valid state. It's used here for 'I'nitialization
+{
+}
+
+
+void MCLRPinMonitor::setDrivenState(char newState)
+{
+  if (newState =='0' || newState =='w') {
+    m_cLastResetState = '0';
+    m_pCpu->reset(MCLR_RESET);
+  }
+
+  if (newState =='1' || newState =='W') {
+    if (m_cLastResetState == '0')
+      m_pCpu->reset(EXIT_RESET);
+
+    m_cLastResetState = 1;
+  }
+
+}
+//-------------------------------------------------------------------
+void Pic14Bit::createMCLRPin(int pkgPinNumber)
+{
+  if (m_MCLR) {
+    cout << "BUG?: assigning multiple MCLR pins: " << __FILE__ << __LINE__ << endl;
+  }
+  if(package) {
+    m_MCLR = new IO_open_collector("MCLR");
+    package->assign_pin(pkgPinNumber,m_MCLR);
+
+    m_MCLRMonitor = new MCLRPinMonitor(this);
+    m_MCLR->setMonitor(m_MCLRMonitor);
+  }
 }

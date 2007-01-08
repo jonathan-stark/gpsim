@@ -33,6 +33,29 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
         goto   start                     ; go to beginning of program
 
 
+   ;    Node Test
+   ;  This script will tie Port A and Port B together
+
+   ;"# First, create 8 nodes:
+   .sim "node  loop_back0"
+   .sim "node  loop_back1"
+   .sim "node  loop_back2"
+   .sim "node  loop_back3"
+
+   .sim "node  loop_back4"
+   .sim "node  loop_back5"
+   .sim "node  loop_back6"
+   .sim "node  loop_back7"
+
+   ;# Now tie the ports together:
+
+   .sim "attach loop_back0 portb0 porta0"
+   .sim "attach loop_back1 portb1 porta1"
+   .sim "attach loop_back2 portb2 porta2"
+   .sim "attach loop_back3 portb3 porta3"
+
+   .sim "attach loop_back4 portb4 porta4"
+
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
 ;----------------------------------------------------------------------

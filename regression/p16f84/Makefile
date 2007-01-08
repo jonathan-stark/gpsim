@@ -3,17 +3,11 @@ include ../make.regression
 
 SCRIPT = 16f84.lkr
 
-PROJECT = p16f84
-OBJECTS =  $(PROJECT).o
-OUTPUT = $(PROJECT).hex
-COD = $(PROJECT).cod
-STC = $(PROJECT).stc
+all : p16f84.cod reset.cod
 
-all : $(OUTPUT)
-
-$(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
-	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
+%.cod : %.o
+	gplink --map -s $(SCRIPT) -o $@ $<
 
 
-sim: $(COD)
-	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$(STC)
+sim: sim_p16f84 sim_reset
+

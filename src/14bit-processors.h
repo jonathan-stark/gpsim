@@ -36,7 +36,8 @@ class PicPortBRegister;
 class PicTrisRegister;
 class PortBSink;
 class IOPIN;
-//class OPTION_REG14;
+class IO_open_collector;
+class PinMonitor;
 
 extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst);
 
@@ -74,6 +75,7 @@ public:
   virtual void put_option_reg(unsigned int);
   virtual void create_symbols()=0;
 
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual void create_config_memory();
 
   // Return the portion of pclath that is used during branching instructions
@@ -156,6 +158,12 @@ public:
   virtual void create_sfr_map();
   virtual void option_new_bits_6_7(unsigned int bits);
   virtual bool hasSSP() {return false;}
+protected:
+  // Most midrange PIC's have a dedicated MCLR pin.
+  // For the ones that don't, m_MCLR will be null.
+  IO_open_collector *m_MCLR;
+  PinMonitor *m_MCLRMonitor;
+  void createMCLRPin(int pkgPinNumber);
 };
 
 

@@ -1,3 +1,29 @@
+2007-01-08  Scott Dattalo <scott@dattalo.com>
+	* regression/make.regression:
+	 - Added a rule to run a regression test interactively. Suppose
+	 you have a file named 'mytest.asm'. Then the rule 'mytest.-' can
+	 be invoke like this:
+	   $ make mytest.-
+	* regression/p16f84/p16f84.asm, regression/p16f84/Makefile: Placed
+	 the configuration script into the .asm file.
+	* src/p16x8x.cc, src/p16x8x.h:
+	 - Added the MCLR pin to the '83 and the '84
+	* src/pic-instructions.cc
+	 - clock phase change - the SLEEP instruction no longer sets a
+	 breakpoint
+	* src/pic-processor.cc, src/pic-processor.h:
+	 - Added an exit_sleep method.
+	 - Removed the external reset controls added in previous commit
+	 - Removed the WDT 'start_sleep' method. It was not being called.
+	* src/p12x.cc:
+	 - Use the already existing config_modes structure to record
+	 whether the MCLR pin is enabled or not.
+	* src/pic-ioports.cc:
+	 - RBIF changes now cause the processor to exit sleep.
+	* src/14bit-processors.cc, src/14bit-processors.h:
+	 - Added MCLR support for the mid range processors.
+	 - Cleaned up config word management.
+
 2007-01-05 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 
