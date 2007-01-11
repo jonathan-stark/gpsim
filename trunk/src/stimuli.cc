@@ -65,7 +65,7 @@ extern Processor *active_cpu;
 
 //------------------------------------------------------------------
 
-void Stimulus_Node::new_name(const char *cPname)
+void Stimulus_Node::new_name(const char *cPname, bool bClearableSymbol)
 {
   // JRH - Perhaps this could be migrated into gpsimObject
   const char *cPoldName = name().c_str();
@@ -73,7 +73,7 @@ void Stimulus_Node::new_name(const char *cPname)
     // Assume never in symbol table.
     // Every named stimulus goes into the symbol table.
     gpsimObject::new_name(cPname);
-    symbol_table.add_stimulus_node(this);
+    symbol_table.add_stimulus_node(this, bClearableSymbol);
     return;
   }
   if(symbol_table.Exist(cPoldName)) {
@@ -93,9 +93,9 @@ void Stimulus_Node::new_name(const char *cPname)
   }
 
 }
-void Stimulus_Node::new_name(string &rName)
+void Stimulus_Node::new_name(string &rName, bool bClearableSymbol)
 {
-  new_name(rName.c_str());
+  new_name(rName.c_str(), bClearableSymbol);
 }
 
 double Stimulus_Node::get_nodeVoltage()
@@ -185,16 +185,13 @@ Stimulus_Node::Stimulus_Node(const char *n)
   min_time_constant = 1000; // in cycles
   bSettling = false;  
   if(n)
-    {
-      new_name(n);
-    }
-  else
-    {
-      char name_str[100];
-      snprintf(name_str,sizeof(name_str),"node%d",num_nodes);
-      num_nodes++;    // %%% FIX ME %%%
-      new_name(name_str);
-    }
+    new_name(n,false);
+  else {
+    char name_str[100];
+    snprintf(name_str,sizeof(name_str),"node%d",num_nodes);
+    num_nodes++;    // %%% FIX ME %%%
+    new_name(name_str,false);
+  }
 
   gi.node_configuration_changed(this);
 }
@@ -223,9 +220,8 @@ Stimulus_Node * Stimulus_Node::construct(const char * psName)
             "(You can't have duplicate nodes in the node list.)\n";
     return NULL;
   }
-  else {
+  else
     sn = new Stimulus_Node(psName);
-  }
   return sn;
 }
 
@@ -585,7 +581,7 @@ stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
   : snode(NULL), next(NULL), Vth(_Vth), Zth(_Zth)
 {
   if(cPname && *cPname)
-    new_name(cPname);
+    new_name(cPname,false);
 
   snode = 0;
   bDrivingState = false;
@@ -595,14 +591,14 @@ stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
   Cth = 0;     // Farads
   nodeVoltage = 0.0; // Volts
 }
-void stimulus::new_name(const char *cPname)
+void stimulus::new_name(const char *cPname, bool bClearableSymbol)
 {
   const char *cPoldName = name().c_str();
   if(name_str.empty() && cPname != NULL && *cPname != 0) {
     // Assume never in symbol table.
     // Every named stimulus goes into the symbol table.
     gpsimObject::new_name(cPname);
-    symbol_table.add_stimulus(this);
+    symbol_table.add_stimulus(this,bClearableSymbol);
     return;
   }
   if(symbol_table.Exist(cPoldName)) {
@@ -622,9 +618,9 @@ void stimulus::new_name(const char *cPname)
   }
 
 }
-void stimulus::new_name(string &rName)
+void stimulus::new_name(string &rName, bool bClearableSymbol)
 {
-  new_name(rName.c_str());
+  new_name(rName.c_str(),bClearableSymbol);
 }
 
 stimulus::~stimulus(void)
@@ -711,13 +707,13 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, const
   //cout << "creating sqw stimulus\n";
 
   if(n)
-    new_name(n);
+    new_name(n,false);
   else
     {
       char name_str[100];
       snprintf(name_str,sizeof(name_str),"s%d_square_wave",num_stimuli);
       num_stimuli++;
-      new_name(name_str);
+      new_name(name_str, false);
     }
 
 
@@ -754,13 +750,13 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   //cout << "creating sqw stimulus\n";
 
   if(n)
-    new_name(n);
+    new_name(n,false);
   else
     {
       char name_str[100];
       snprintf(name_str,sizeof(name_str),"s%d_triangle_wave",num_stimuli);
       num_stimuli++;
-      new_name(name_str);
+      new_name(name_str,false);
     }
 
   if(p==0)  //error
@@ -1421,13 +1417,13 @@ ValueStimulus::ValueStimulus(const char *n)
   current = 0;
 
   if(n)
-    new_name(n);
+    new_name(n,false);
   else
     {
       char name_str[100];
       snprintf(name_str,sizeof(name_str),"s%d_asynchronous_stimulus",num_stimuli);
       num_stimuli++;
-      new_name(name_str);
+      new_name(name_str,false);
     }
 
 }

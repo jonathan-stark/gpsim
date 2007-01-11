@@ -91,8 +91,8 @@ public:
   bool add(Value*);
 
   void add_ioport(PortRegister *ioport);
-  void add_stimulus_node(Stimulus_Node *stimulus_node);
-  void add_stimulus(stimulus *s);
+  void add_stimulus_node(Stimulus_Node *stimulus_node, bool bClearable = true);
+  void add_stimulus(stimulus *s, bool bClearable = true);
   void add_line_number(int address, const char *symbol_name=0);
   void add_constant(const char *, int, bool bClearable = true);
   register_symbol* add_register(Register *reg, const char *symbol_name=0);
@@ -187,7 +187,7 @@ public:
   }
 
   bool  Exist(const char *);
-  void clear();
+  void clear(const char *cpBelongsTo);
   void clear_all();
   void Initialize();
   void Reinitialize();

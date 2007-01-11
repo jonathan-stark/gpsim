@@ -151,8 +151,11 @@ public:
 
   void time_constant(double new_tc);
 
-  virtual void new_name(const char *);
-  virtual void new_name(string &);
+  // When a node is given a name, it is also added to the symbol
+  // table. If bClearableSymbol is true, then the symbol can be
+  // automatically removed when the symbol table is cleared.
+  virtual void new_name(const char *, bool bClearableSymbol=false);
+  virtual void new_name(string &, bool bClearableSymbol=false);
 
   // When the node is settling (due to RC charging/discharging)
   // it's voltage is periodically updated by invoking callback()
@@ -198,8 +201,11 @@ public:
 	   );
   virtual ~stimulus();
 
-  virtual void new_name(const char *);
-  virtual void new_name(string &);
+  // When a stimulus is given a name, it is also added to the symbol
+  // table. If bClearableSymbol is true, then the symbol can be
+  // automatically removed when the symbol table is cleared.
+  virtual void new_name(const char *, bool bClearableSymbol=true);
+  virtual void new_name(string &, bool bClearableSymbol=true);
 
   // Functions for accessing/manipulating the thevenin voltage and impedance.
   virtual void   getThevenin(double &v, double &z, double &c);
