@@ -22,7 +22,7 @@ else
 endif
 
 ifndef WARNINGS
-WARNINGS = -Wall
+WARNINGS = -Wall -Wno-format
 endif
 
 ifndef TOP
