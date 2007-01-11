@@ -1,3 +1,21 @@
+2007-01-10  Scott Dattalo <scott@dattalo.com>
+	* src/symbol.cc, src/symbol.h, src/stimuli.cc, src/stimuli.h: 
+	 - stimulus and node symbols can now be added to the symbol table
+	 with the 'Clearable' flag turned off.
+
+	* src/p16x6x.cc, src/p17c75x.cc, src/p16x8x.cc, src/p16f87x.cc,
+	src/p16f62x.cc, src/p16x5x.cc, src/p12x.cc, src/p18x.cc,
+	src/modules.cc, src/p16f8x.cc:
+	 - All processors were individually adding a module symbol to the
+	 symbol table. Now this is done in one place down in the Module
+	 class constructor.
+	 - The symbol table is now no longer automatically cleared
+	 whenever a processor is loaded. Previously, if you loaded a
+	 module (e.g. the usart) and then load the processor, the module's
+	 clearable symbols would be removed! There's still some work that
+	 needs to be done here. However, to do things correctly will take
+	 some time...
+
 2007-01-08  Scott Dattalo <scott@dattalo.com>
 	* regression/make.regression:
 	 - Added a rule to run a regression test interactively. Suppose

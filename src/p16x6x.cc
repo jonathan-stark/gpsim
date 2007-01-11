@@ -64,9 +64,6 @@ Processor * P16C61::construct(const char *name)
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -417,9 +414,6 @@ Processor * P16C62::construct(const char *name)
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -532,9 +526,6 @@ Processor * P16C63::construct(const char *name)
   p->create_invalid_registers ();
 
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -610,9 +601,6 @@ Processor * P16C64::construct(const char *name)
   p->create();
   p->create_invalid_registers ();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -746,9 +734,6 @@ Processor * P16C65::construct(const char *name)
   p->create_invalid_registers ();
 
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }

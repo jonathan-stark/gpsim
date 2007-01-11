@@ -97,7 +97,7 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
   for(it = begin(); it != itEnd; it++) {
     itLast = it;
     fseek(pFile, 0, SEEK_SET);
-    get_symbol_table().clear();
+    //get_symbol_table().clear();
     if((iReturn = (*it)->LoadProgramFile(pProcessor, pFilename, pFile, pProcessorName))
       == ProgramFileType::SUCCESS) {
       return true;

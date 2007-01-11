@@ -656,7 +656,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     pages[id]->m_pBuffer->parseLine( "; Comment only",1);
     pages[id]->m_pBuffer->parseLine( "Label:  ADDWF  Variable,F  ; Comment",1);
 
-#if 0
+    gtk_widget_show_all(frame);
+#if 1
     label = gtk_label_new("file2.asm");
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),emptyBox,label);
