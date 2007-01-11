@@ -211,7 +211,7 @@ EXPORTS
     ?add_processor@CSimulationContext@@QAEPAVProcessor@@PBD0@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBD@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBDI@Z
-    ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
+    ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@_N@Z
     ?add_xref@AliasedInstruction@@UAEXPAX@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
     ?address_has_break@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
@@ -244,7 +244,6 @@ EXPORTS
     ?callback_print@source_stimulus@@UAEXXZ
     ?clear@Breakpoint_Instruction@@UAEXXZ
     ?clear@Breakpoints@@QAEXI@Z
-    ?clear@Symbol_Table@@QAEXXZ
     ?clear@TriggerObject@@UAEXXZ
     ?clear_all@Breakpoints@@QAEXPAVProcessor@@@Z
     ?clear_all_register@Breakpoints@@QAEXPAVProcessor@@I@Z
@@ -475,8 +474,8 @@ EXPORTS
     ?new_message@TriggerObject@@UAEXPBD@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPBD@Z
-    ?new_name@stimulus@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ?new_name@stimulus@@UAEXPBD@Z
+    ?new_name@stimulus@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z
+    ?new_name@stimulus@@UAEXPBD_N@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
     ?open@FileContext@@QAEXPBD@Z
     ?passToChild@Token@gpsim@@QAEXXZ

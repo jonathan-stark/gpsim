@@ -1,3 +1,12 @@
+2007-01-11 Borut Razem <borut.razem@siol.net>
+	* plat/win32/make.mingw: added -Wno-format to prevent warnings
+	  warning: unknown conversion type character `I' in format
+	  warning: int format, different type arg (arg X)
+	  warning: `I' flag used with `%x' printf format
+	* acinclude.m4: check for the presence of the readline library.
+	  This version works also in cross-compilation environment.
+	* plat/win32/libgpsim.def: MSVC sync
+
 2007-01-10  Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc, src/symbol.h, src/stimuli.cc, src/stimuli.h: 
 	 - stimulus and node symbols can now be added to the symbol table
