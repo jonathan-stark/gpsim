@@ -295,8 +295,6 @@ Processor * P16F627::construct(const char *name)
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->create_symbols();
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -322,8 +320,6 @@ Processor * P16F628::construct(const char *name)
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->create_symbols();
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -351,8 +347,6 @@ Processor * P16F648::construct(const char *name)
   p->create_sfr_map();
   p->create_invalid_registers ();
   p->create_symbols();
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }

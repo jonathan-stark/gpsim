@@ -141,8 +141,6 @@ Processor * P16C84::construct(const char *name)
   p->create(0x2f);
   p->create_invalid_registers ();
   p->create_symbols();
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -173,8 +171,6 @@ Processor * P16F84::construct(const char *name)
   p->create(0x4f);
   p->create_invalid_registers ();
   p->create_symbols();
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -208,8 +204,6 @@ Processor * P16F83::construct(const char *name)
   p->create(0x2f);
   p->create_invalid_registers ();
   p->create_symbols();
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }

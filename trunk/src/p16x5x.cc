@@ -191,9 +191,6 @@ Processor * P16C54::construct(const char *name)
   p->create_invalid_registers();
   p->create_sfr_map();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -290,9 +287,6 @@ Processor * P16C55::construct(const char *name)
   p->create_invalid_registers();
   p->create_sfr_map();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -350,9 +344,6 @@ Processor * P16C56::construct(const char *name)
   p->create_invalid_registers();
   p->create_sfr_map();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 }
 

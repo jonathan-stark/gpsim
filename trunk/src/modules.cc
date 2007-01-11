@@ -409,6 +409,20 @@ Module::Module(const char *_name, const char *desc)
 
   simulation_mode = eSM_STOPPED;
   widget = 0;
+
+  if (_name) {
+    // If there is a module symbol already with this
+    // name, then print a warning before deleting.
+
+    module_symbol *pOldModule = get_symbol_table().findModuleSymbol(_name);
+    if (pOldModule) {
+      cout << "Warning: There already is a module in the symbol table named " << _name << endl;
+      cout << "         The old module's symbols have been removed." << endl;
+      get_symbol_table().clear(_name);
+    }
+    get_symbol_table().add_module(this,_name);
+  }
+
 }
 
 Module::~Module(void)

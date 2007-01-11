@@ -194,8 +194,6 @@ Processor * P17C7xx::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c7xx");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -281,8 +279,6 @@ Processor * P17C75x::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c75x");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -492,8 +488,6 @@ Processor * P17C756::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c756");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -551,8 +545,6 @@ Processor * P17C756A::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c756a");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -613,8 +605,6 @@ Processor * P17C752::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c752");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -671,8 +661,6 @@ Processor * P17C762::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c762");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -729,8 +717,6 @@ Processor * P17C766::construct(const char *name)
   p->pic_processor::create_symbols();
 
   p->new_name("p17c766");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }

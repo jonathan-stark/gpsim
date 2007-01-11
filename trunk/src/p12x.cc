@@ -272,9 +272,6 @@ Processor * P12C508::construct(const char *name)
 
   p->create();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name_str.c_str());
-
   return p;
 
 }
@@ -319,9 +316,6 @@ Processor * P12C509::construct(const char *name)
 
   p->create();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name_str.c_str());
-
   return p;
 
 }
@@ -369,9 +363,6 @@ Processor * P12CE518::construct(const char *name)
   if(verbose)
     cout << " ... create symbols\n";
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name_str.c_str());
-
   return p;
 
 }
@@ -483,9 +474,6 @@ Processor * P12CE519::construct(const char *name)
 
   p->create();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name_str.c_str());
-
   return p;
 
 }
@@ -647,9 +635,6 @@ Processor * P10F200::construct(const char *name)
 
   p->create();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name_str.c_str());
-
   return p;
 
 }
@@ -702,9 +687,6 @@ Processor * P10F202::construct(const char *name)
 
   p->create();
   p->create_symbols();
-
-  symbol_table.add_module(p,p->name_str.c_str());
-
   return p;
 
 }
