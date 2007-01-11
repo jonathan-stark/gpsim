@@ -84,7 +84,7 @@ void Symbol_Table::add_ioport(PortRegister *_ioport)
   }
 }
 
-void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
+void Symbol_Table::add_stimulus_node(Stimulus_Node *s, bool bClearable)
 {
   node_symbol *sym = findNodeSymbol(s->name());
   // New paradigm is for the named stimulus objects
@@ -95,6 +95,7 @@ void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
   // same name.
   if(sym == NULL) {
     node_symbol *ns = new node_symbol(s);
+    ns->setClearableSymbol(bClearable);
     if(!add(ns)) {
       delete ns;
     }
@@ -110,7 +111,7 @@ void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
   }
 }
 
-void Symbol_Table::add_stimulus(stimulus *s)
+void Symbol_Table::add_stimulus(stimulus *s, bool bClearable)
 {
   stimulus_symbol *sym = findStimulusSymbol(s->name());
   // New paradigm is for the named stimulus objects
@@ -121,6 +122,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
   // same name.
   if(sym == NULL) {
     stimulus_symbol *ss = new stimulus_symbol(s);
+    ss->setClearableSymbol(bClearable);
     if(!add(ss)) {
       delete ss;
     }
@@ -736,14 +738,23 @@ bool IsClearable(Value* value)
   return value->isClearable();
 }
 
-void Symbol_Table::clear()
+//------------------------------------------------------------------------
+//
+// 
+void Symbol_Table::clear(const char *cpBelongsTo)
 {
   iterator it;
+
+  Value *pParent = find(cpBelongsTo);
 
   for(it = begin(); it != end();) {
     Value *value = *it;
 
-    if(value && value->isClearable()) {
+    if(value && value->isClearable()
+       // The following test needs to be implemented.
+       // TSD & JRH 10JAN07 are discussing some design issues here.
+       /* && (!pParent || value->belongsTo(pParent)) */
+       ) {
 
       delete value;
       erase(it);
@@ -764,7 +775,7 @@ void Symbol_Table::Initialize()
 
 void Symbol_Table::Reinitialize()
 {
-  clear();
+  clear(0);
 }
 
 void Symbol_Table::clear_all() 
