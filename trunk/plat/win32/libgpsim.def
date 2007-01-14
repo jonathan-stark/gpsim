@@ -620,7 +620,6 @@ EXPORTS
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
     ?simulation_start_cycle@@3_KA
     ?start@ByteLogger@gpsim@@QAEX_K@Z
-    ?start@RealTimeBreakPoint@@QAEXPAVProcessor@@@Z
     ?start_simulation@gpsimInterface@@QAEXXZ
     ?status@TraceLog@@QAEXXZ
     ?step@Processor@@UAEXI_N@Z
