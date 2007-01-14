@@ -1,3 +1,6 @@
+2007-01-14 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+
 2007-01-13  Scott Dattalo <scott@dattalo.com>
 	* regression/p16f84/p16f84.stc: removed. The configuration file is
 	now part of p16f84.asm
@@ -40,7 +43,8 @@
 	of call or return statements.
 	
 2007-01-11 Borut Razem <borut.razem@siol.net>
-	* plat/win32/make.mingw: added -Wno-format to prevent warnings
+	* plat/win32/make.mingw: added -Wno-format to prevent mingw build
+	  warnings:
 	  warning: unknown conversion type character `I' in format
 	  warning: int format, different type arg (arg X)
 	  warning: `I' flag used with `%x' printf format
