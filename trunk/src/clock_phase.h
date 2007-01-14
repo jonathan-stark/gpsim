@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #if !defined(__CLOCK_PHASE_H__)
 #define __CLOCK_PHASE_H__
 
-//#define CLOCK_EXPERIMENTS
+#define CLOCK_EXPERIMENTS
 
 
 #if defined(CLOCK_EXPERIMENTS)
@@ -45,6 +45,7 @@ public:
   virtual ~ClockPhase();
   virtual ClockPhase *advance()=0;
   void setNextPhase(ClockPhase *pNextPhase) { m_pNextPhase = pNextPhase; }
+  ClockPhase *getNextPhase() { return m_pNextPhase; }
 protected:
   ClockPhase *m_pNextPhase;
 };

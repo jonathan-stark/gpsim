@@ -64,12 +64,92 @@ guint64 simulation_start_cycle;
 
 #include "clock_phase.h"
 #ifdef CLOCK_EXPERIMENTS
+
+class phaseCaptureInterrupt : public ProcessorPhase
+{
+public:
+  phaseCaptureInterrupt(Processor *pcpu);
+  ~phaseCaptureInterrupt();
+  virtual ClockPhase *advance();
+  void firstHalf();
+protected:
+  ClockPhase *m_pCurrentPhase;
+  ClockPhase *m_pNextNextPhase;
+};
+
+
 ClockPhase *mCurrentPhase=0;
 phaseExecute1Cycle *mExecute1Cycle=0;
-phaseExecute2ndHalf *mExecute2ndHalf=0;
+phaseExecute2ndHalf *mExecute2ndHalf=0;     // misnomer - should be 2-cycle
 phaseExecuteInterrupt *mExecuteInterrupt=0;
+phaseCaptureInterrupt *mCaptureInterrupt=0;
 phaseIdle *mIdle=0;
+
+void setCurrentPhase(ClockPhase *pPhase)
+{
+  mCurrentPhase = pPhase;
+}
+
+const char* phaseDesc(ClockPhase *pPhase)
+{
+  if (pPhase == mExecute1Cycle)
+    return ("mExecute1Cycle");
+  if (pPhase == mExecute2ndHalf)
+    return ("mExecute2ndHalf");
+  if (pPhase == mExecuteInterrupt)
+    return ("mExecuteInterrupt");
+  if (pPhase == mCaptureInterrupt)
+    return ("mCaptureInterrupt");
+}
+
+phaseCaptureInterrupt::phaseCaptureInterrupt(Processor *pcpu)
+  :  ProcessorPhase(pcpu)
+{
+}
+phaseCaptureInterrupt::~phaseCaptureInterrupt()
+{}
+#define Rprintf(arg) {printf("0x%06X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+ClockPhase *phaseCaptureInterrupt::advance()
+{
+
+  Rprintf (("phaseCaptureInterrupt\n"));
+  if (m_pNextPhase == mExecute2ndHalf) {
+    //Rprintf(("phaseCaptureInterrupt -- advancing 2cycle instruction\n"));
+    //mCurrentPhase = m_pCurrentPhase; 
+    m_pNextPhase->advance();
+    //mCurrentPhase = this;
+  } 
+
+
+  m_pcpu->interrupt();
+
+  return m_pNextPhase;
+}
+void phaseCaptureInterrupt::firstHalf()
+{
+  m_pCurrentPhase = mCurrentPhase;
+
+  m_pNextPhase = this;
+  m_pNextNextPhase = mCurrentPhase->getNextPhase();
+  mCurrentPhase->setNextPhase(this);
+  mCurrentPhase = this;
+}
+
 #endif
+
+void pic_processor::BP_set_interrupt()
+{
+  trace.interrupt();
+#ifdef CLOCK_EXPERIMENTS
+  printf("BP_set_interrupt current %s next %s\n",
+         phaseDesc(mCurrentPhase), phaseDesc(mCurrentPhase->getNextPhase()));
+
+  mCaptureInterrupt->firstHalf();
+
+#else
+  bp.set_interrupt();
+#endif
+}
 
 //================================================================================
 // Global Declarations
@@ -236,6 +316,7 @@ void pic_processor::set_eeprom(EEPROM *e)
 
 void pic_processor::sleep ()
 {
+#if !defined(CLOCK_EXPERIMENTS)
   simulation_mode = eSM_SLEEPING;
 
   if(!bp.have_sleep())
@@ -250,7 +331,7 @@ void pic_processor::sleep ()
     pc->increment();
 
   simulation_mode = eSM_RUNNING;
-
+#endif
 }
 //-------------------------------------------------------------------
 //
@@ -263,8 +344,15 @@ void pic_processor::enter_sleep()
   status->put_PD(0);
 
   wdt.update();
-
+#ifdef CLOCK_EXPERIMENTS
+  pc->increment();
+  mCurrentPhase->setNextPhase(mIdle);
+  mCurrentPhase = mIdle;
+  mCurrentPhase->setNextPhase(mIdle);
+  m_ActivityState = ePASleeping;
+#else
   bp.set_sleep();
+#endif
 
 }
 
@@ -276,7 +364,7 @@ void pic_processor::exit_sleep()
 {
 
 #if defined(CLOCK_EXPERIMENTS)
-  mCurrentPhase = (mCurrentPhase==mIdle) ? mExecute1Cycle : mCurrentPhase;
+  mCurrentPhase->setNextPhase(mExecute1Cycle);
 #else
   bp.clear_sleep();
 #endif
@@ -289,12 +377,11 @@ void pic_processor::exit_sleep()
 
 void pic_processor::pm_write ()
 {
-  //  simulation_mode = PM_WRITE;
+  m_ActivityState = ePAPMWrite;
 
   do
-    {
-      get_cycles().increment();     // burn cycles until we're through writing
-    } while(bp.have_pm_write());
+    get_cycles().increment();     // burn cycles until we're through writing
+  while(bp.have_pm_write());
 
   simulation_mode = eSM_RUNNING;
 
@@ -493,30 +580,23 @@ void pic_processor::run (bool refresh)
   simulation_start_cycle = get_cycles().get();
   bp.clear_global();
 
-  do {
-
-    // Take one step to get past any break point.
-    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+  // Take one step to get past any break point.
+  mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
       
+  //  do {
+
     mCurrentPhase = mCurrentPhase->advance();
 
-    do {
-      do {
-	mCurrentPhase = mCurrentPhase->advance();
-      } while(!bp.global_break);
+    do
+      mCurrentPhase = mCurrentPhase->advance();
+    while(!bp.global_break);
 
-      if(bp.have_interrupt() && (mCurrentPhase == mExecute1Cycle)) {
-	interrupt();
-      }
-    } while(bp.global_break && bp.have_interrupt());
-
-
-    if(bp.have_sleep())
-      sleep();
-
-    if(bp.have_pm_write()) {
+    /* FIXME
+    if(bp.have_pm_write())
       pm_write();
-    }
+    */
+
+    /*
     if(bp.have_socket_break()) {
       cout << " socket break point \n";
       Interface *i = gi.get_socket_interface();
@@ -524,8 +604,9 @@ void pic_processor::run (bool refresh)
 	i->Update(0);
       bp.clear_socket_break();
     }
+    */
 
-  } while(!bp.global_break);
+    //} while(!bp.global_break);
 
 
   bp.clear_global();
@@ -765,6 +846,7 @@ void pic_processor::reset (RESET_TYPE r)
     bHaltSimulation = false;
 #ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+    m_ActivityState = ePAActive;
 #endif
     break;
 
@@ -772,6 +854,7 @@ void pic_processor::reset (RESET_TYPE r)
 #ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
     mCurrentPhase->setNextPhase(mIdle);
+    m_ActivityState = ePAIdle;
 #endif
     break;
 
@@ -780,10 +863,12 @@ void pic_processor::reset (RESET_TYPE r)
 #ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
     mCurrentPhase->setNextPhase(mExecute1Cycle);
+    m_ActivityState = ePAActive;
 #endif
     break;
 
   default:
+    m_ActivityState = ePAActive;
     break;
   }
 
@@ -807,6 +892,7 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
    mExecute1Cycle    = new phaseExecute1Cycle(this);
    mExecute2ndHalf   = new phaseExecute2ndHalf(this);
    mExecuteInterrupt = new phaseExecuteInterrupt(this);
+   mCaptureInterrupt = new phaseCaptureInterrupt(this);
    mIdle             = new phaseIdle(this);
    mCurrentPhase   = mExecute1Cycle;
 #endif

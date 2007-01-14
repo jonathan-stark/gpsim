@@ -310,6 +310,8 @@ public:
   virtual void save_state();
 
   virtual void interrupt() { return; };
+  //// TEMPORARY - consolidate the various bp.set_interrupt() calls to one function:
+  void BP_set_interrupt();
   void pm_write();
 
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
@@ -334,11 +336,23 @@ public:
   virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom() { return (eeprom); }
 
+  // Activity States reflect what the processor is currently doing
+  // (The breakpoint class formally implemented this functionality).
+  enum eProcessorActivityStates {
+    ePAActive,      // Normal state
+    ePAIdle,        // Processor is held in reset
+    ePASleeping,    // Processor is sleeping
+    ePAInterrupt,   // do we need this?
+    ePAPMWrite      // Processor is busy performing a program memory write
+  };
+  eProcessorActivityStates getActivityState() { return m_ActivityState; }
+
   pic_processor(const char *_name=0, const char *desc=0);
   virtual ~pic_processor();
 
 protected:
   ConfigMemory **m_configMemory;
+  eProcessorActivityStates m_ActivityState;
 };
 
 

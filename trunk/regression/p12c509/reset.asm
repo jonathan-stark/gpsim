@@ -170,8 +170,8 @@ PowerOnReset:
 ;========================================================================
 AwakeWDT:
 
-  .assert "resetCounter==2,\"*** FAILED WDT Reset\""
 	MOVLW	eRSTSequence_AwakeWDT
+  .assert "resetCounter==2,\"*** FAILED WDT Reset\""
 	MOVWF	ResetSequence
 
   .command "resetCounter = resetCounter+1"
@@ -207,8 +207,8 @@ WDTTimeOut:
 ;
 ;========================================================================
 AwakeIO:
-  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change\""
 	MOVLW	eRSTSequence_AwakeIO
+  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change\""
 	MOVWF	ResetSequence
 
   .command "resetCounter = resetCounter+1"
@@ -228,9 +228,9 @@ AwakeIO:
 ;
 ;========================================================================
 AwakeMCLR:
-  .assert "resetCounter==5,\"*** FAILED /MCLR Reset\""
 
 	MOVLW	eRSTSequence_AwakeMCLR
+  .assert "resetCounter==5,\"*** FAILED /MCLR Reset\""
 	MOVWF	ResetSequence
 
   .command "resetCounter = resetCounter+1"

@@ -34,6 +34,12 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 #define PCLATH_MASK              0x1f
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("0x%06X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
 
 pic_processor *temp_cpu;
 // FIXME file_register::put_value has a useful feature...
@@ -582,7 +588,7 @@ Stack::Stack(void)
 
 void Stack::push(unsigned int address)
 {
-
+  Dprintf(("pointer=%d address0x%x\n",pointer,address));
   // Write the address at the current point location. Note that the '& stack_mask'
   // implicitly handles the stack wrap around.
 
@@ -618,7 +624,8 @@ unsigned int Stack::pop(void)
   }
 
 
-  
+  Dprintf(("pointer=%d address0x%x\n",pointer,contents[pointer & stack_mask]));
+
   return(contents[pointer & stack_mask]);
 }
 
@@ -655,29 +662,6 @@ bool Stack::set_break_on_underflow(bool clear_or_set)
   return 1;
 
 }
-
-
-
-//--------------------------------------------------
-// WREG
-//
-/*
-unsigned int WREG::get(void)
-{
-  //  trace.read_W(value.get());
-  trace.raw(read_trace.get() | value.get());
-
-  return(value.get());
-}
-
-void WREG::put(unsigned int new_value)
-{
-
-  trace.raw(write_trace.get() | value.get());
-  value.put(new_value);
-
-}
-*/
 
 
 //========================================================================

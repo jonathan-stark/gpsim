@@ -1,18 +1,8 @@
 include ../make.regression
 
 
-SCRIPT = 16f628.lkr
+all : instructions_14bit.cod branching.cod
 
-PROJECT = instructions_14bit
-OBJECTS =  $(PROJECT).o
-OUTPUT = $(PROJECT).hex
-COD = $(PROJECT).cod
-STC = $(PROJECT).stc
+%.cod: %.o
+	gplink --map -s 16f628.lkr -o $@ $^
 
-all : $(OUTPUT)
-
-$(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
-	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
-
-sim: $(COD)
-	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$(STC)

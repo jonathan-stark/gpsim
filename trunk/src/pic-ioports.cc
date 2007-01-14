@@ -270,11 +270,12 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
     cpu14->intcon->set_intf(true);
 
 
+  RegisterValue lastDrivenValue = rvDrivenValue;
   PortRegister::setbit(bit_number, new3State);
 
   unsigned int bitMask = (1<<bit_number) & 0xF0;
 
-  if ( (drivingValue ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
+  if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
     cpu_pic->exit_sleep();
     cpu14->intcon->set_rbif(true);
   }

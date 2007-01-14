@@ -43,7 +43,8 @@ RT=./rt.sh
 ${RT} breakpoints sim
 
 # Instruction set simulation of the mid-range devices
-${RT} instructions_14bit sim
+${RT} instructions_14bit sim_instructions_14bit
+${RT} instructions_14bit sim_branching
 
 #instruction set simulation for the 16bit cores:
 ${RT} instructions_16bit sim
@@ -136,7 +137,9 @@ ${RT} i2c sim_p16f876a
 
 ${RT} port_stim sim_port_stim
 
-echo "12c509 reset test only passes if CLOCK_EXPERIMENTS"
+echo "The following tests only pass if CLOCK_EXPERIMENTS"
 echo "(in src/clock_phase.cc) is defined."
 ${RT} p12c509 sim_p12c509_reset
+
+${RT} p16f84 sim_reset
 
