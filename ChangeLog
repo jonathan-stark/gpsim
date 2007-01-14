@@ -1,3 +1,44 @@
+2007-01-13  Scott Dattalo <scott@dattalo.com>
+	* regression/p16f84/p16f84.stc: removed. The configuration file is
+	now part of p16f84.asm
+	* regression/p16f84/reset.asm: added. Tests resets and sleep.
+	* regression/p16f509/reset.asm: cosmetic changes.
+	* regression/ccp/ccp_877a.asm: made some local variables global so
+	that I could more easily debug the clock phase changes.
+	* regression/txisr_test/txisr_test.asm: Now captures unexpected
+	resets.
+	* regression/instructions_14bit/Makefile: Added branching.asm
+	regression test
+	* regression/instructions_14bit/branching.asm: Added. tests
+	branching instructions. This was mainly created to debug the clock
+	phase code for interrupts interrupting 2-cycle instructions.
+	* regression/run_regression.sh: Added branching and reset
+	regression tests.
+	* src/14bit-instructions.cc: Cosmetic...
+	* src/intcon.cc: Now interrupts are signified by calling
+	cpu_pic->BP_set_interrupt() is called instead of
+	bp.set_interrupt(). The purpose is to (eventually) separate
+	interrupts from breakpoints.
+	* src/clock_phase.h, src/clock_phase.cc: Added class
+	'phaseCaptureInterrupt'. As its name implies, this is part of the
+	clock phase stuff and it's designed to handle interrupts.
+	* src/pic-processor.cc:
+	 - Sleep is now handled by the clock phase code. 
+	 - Interrupts are now handled by the clock phase code.
+	 - The run() method now only looks at the global break point
+	 flag. (Before, the sleep and interrupt states were handled with
+	 breakpoint flags.)
+	 - Added an 'ActivityState' to reflect what the processor is
+	 currently doing. This is primarily used by the 12-bit core to
+	 determine if the processor is sleeping.
+	* src/14bit-registers.cc: cosmetic. Added debug code. 
+	* src/pic-ioports.cc: Port B wakeup on change feature was not
+	working. 
+	* src/pic-registers.cc: Numerous clock phase related changes. Now
+	interrupts are properly handled. Also, there was a nasty design
+	error that prevent proper handling of interrupts during the middle
+	of call or return statements.
+	
 2007-01-11 Borut Razem <borut.razem@siol.net>
 	* plat/win32/make.mingw: added -Wno-format to prevent warnings
 	  warning: unknown conversion type character `I' in format

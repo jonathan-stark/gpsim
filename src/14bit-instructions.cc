@@ -63,7 +63,6 @@ RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode)
 void RETFIE::execute(void)
 {
   cpu14->pc->new_address(cpu14->stack->pop());
-
   cpu14->intcon->set_gie();
 }
 

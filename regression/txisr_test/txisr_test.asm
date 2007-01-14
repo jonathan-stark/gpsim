@@ -39,12 +39,15 @@ tx_ptr		RES	1
 rxLastByte	RES	1
 rxFlag		RES	1
 
+  GLOBAL tx_ptr
+
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
 ;----------------------------------------------------------------------
 RESET_VECTOR  CODE    0x000              ; processor reset vector
         movlw  high  start               ; load upper byte of 'start' label
         movwf  PCLATH                    ; initialize PCLATH
+  .assert "tx_ptr==0, \"*** FAILED unexpected reset\""
         goto   start                     ; go to beginning of program
 
 
@@ -117,6 +120,8 @@ start
    .sim "U1.txbaud = 9600"
    .sim "U1.rxbaud = 9600"
 
+   .sim "tx_ptr=0"
+
 	;; USART Initialization
 	;;
 	;; Turn on the high baud rate (BRGH), disable the transmitter,
@@ -152,7 +157,7 @@ start
 
 	bcf	STATUS,RP0
 
-	clrf	tx_ptr
+;	clrf	tx_ptr
 			
 	;; Turn on the serial port
 	movlw	(1<<SPEN) | (1<<CREN)

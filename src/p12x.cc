@@ -533,7 +533,10 @@ void GPIO::setbit(unsigned int bit_number, char new_value)
   }
 
   if (diff & 0x0b) {
-    if( ((cpu12->option_reg->value.get() & 0x80) == 0) && bp.have_sleep()) {
+    // If /GPWU is 0 (i.e. enabled) and the processor is currently sleeping
+    // then wake up the processor by resetting it. 
+    if( ((cpu12->option_reg->value.get() & 0x80) == 0) && 
+        cpu12->getActivityState() == pic_processor::ePASleeping) {
 
       if(verbose)
 	cout << "IO bit changed while the processor was sleeping,\n\

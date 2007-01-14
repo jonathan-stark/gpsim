@@ -89,23 +89,10 @@ void INTCON::put(unsigned int new_value)
   // note: bit6 is not handled here because it is processor
   // dependent (e.g. EEIE for x84 and ADIE for x7x).
 
-  if(value.get() & GIE)
-    {
-
-      if( (((value.get()>>3)&value.get()) & (T0IF | INTF | RBIF)) )
-	{
-	  trace.interrupt();
-	  bp.set_interrupt();
-	}
-      else if(value.get() & XXIE)
-	{
-	  if(check_peripheral_interrupt())
-	    {
-	      trace.interrupt();
-	      bp.set_interrupt();
-	    }
-	}
-    }
+  if(value.get() & GIE  &&
+     ( ((value.get()>>3)&value.get() & (T0IF | INTF | RBIF)) ||
+       ( value.get() & XXIE && check_peripheral_interrupt() )))
+      cpu_pic->BP_set_interrupt();
 }
 
 void INTCON::peripheral_interrupt(void)
@@ -113,7 +100,7 @@ void INTCON::peripheral_interrupt(void)
   Dprintf((" INTCON::%s\n",__FUNCTION__));
 
   if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
-    bp.set_interrupt();
+    cpu_pic->BP_set_interrupt();
 }
 
 
@@ -268,10 +255,8 @@ void INTCON_16::put(unsigned int new_value)
 
       if(i1 & ( (intcon2->value.get() & (T0IF | RBIF)) | INTF))
 	{
-	  //cout << " selecting high priority vector\n";
 	  set_interrupt_vector(INTERRUPT_VECTOR_HI);
-	  trace.interrupt();
-	  bp.set_interrupt();
+          cpu_pic->BP_set_interrupt();
 	  return;
 	}
 
@@ -284,8 +269,7 @@ void INTCON_16::put(unsigned int new_value)
 	{
 	  //cout << " selecting low priority vector\n";
 	  set_interrupt_vector(INTERRUPT_VECTOR_LO);
-	  trace.interrupt();
-	  bp.set_interrupt();
+          cpu_pic->BP_set_interrupt();
 	  return;
 	}
 
@@ -300,17 +284,11 @@ void INTCON_16::put(unsigned int new_value)
       if(value.get() & GIE) 
 	{
 	  if( ( (value.get()>>3)&value.get()) & (T0IF | INTF | RBIF) )
-	    {
-	      trace.interrupt();
-	      bp.set_interrupt();
-	    }
+            cpu_pic->BP_set_interrupt();
 	  else if(value.get() & XXIE)
 	    {
 	      if(check_peripheral_interrupt())
-		{
-		  trace.interrupt();
-		  bp.set_interrupt();
-		}
+                cpu_pic->BP_set_interrupt();
 	    }
 
 	}
