@@ -612,7 +612,7 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
       pLexerState->cmd = search_commands(s);
       if(pLexerState->cmd) {
         if(verbose&2)
-          cout << "\n  *******\nprocessing command " << (pLexerState->cmd->name) << "\n  token value " <<
+          cout << "\n  *******\nprocessing command " << (pLexerState->cmd->name()) << "\n  token value " <<
             (pLexerState->cmd->get_token()) << "\n *******\n";
 	
         *op = pLexerState->cmd->get_op();
@@ -640,7 +640,7 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 
     if(verbose&2)
       cout << "search options for command '" 
-	   << (pLexerState->cmd ? pLexerState->cmd->name : "?") 
+	   << (pLexerState->cmd ? pLexerState->cmd->name() : "?") 
 	   << "'\n";
 
     if (bTryMacroParameterExpansion(s))

@@ -96,21 +96,20 @@ command *command_list[] =
 };
 
 
-command::command(void)
+command::command(const char *_name, const char *_abbr)
+  : m_pName(_name), m_pAbbreviation(_abbr)
 {
   op = 0;
-  name = 0;
-  abbreviation = 0;
   token_value = 0;
 }
-
+/*
 command::command(struct cmd_options *options,int tv) 
 { 
   abbreviation = 0;
   op = options; 
   token_value = tv;
 }
-
+*/
 
 int number_of_commands = sizeof(command_list) / sizeof(command  *);
 
@@ -122,8 +121,8 @@ command *search_commands(const string &s)
 
   while(i<number_of_commands) {
     command * cmd = command_list[i];
-    if(strcmp(cmd->name, s.c_str()) == 0 ||
-      (cmd->abbreviation != 0 && strcmp(cmd->abbreviation, s.c_str()) == 0 )) {
+    if(strcmp(cmd->name(), s.c_str()) == 0 ||
+       (cmd->abbreviation() != 0 && strcmp(cmd->abbreviation(), s.c_str()) == 0 )) {
       return cmd;
     }
 

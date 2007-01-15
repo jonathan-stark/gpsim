@@ -49,22 +49,21 @@ static cmd_options cmd_trace_options[] =
  {0,0,0}
 };
 
-cmd_trace::cmd_trace(void)
+cmd_trace::cmd_trace()
+  : command("trace", "tr")
 { 
-  name = "trace";
-  abbreviation = "tr";
 
-    brief_doc = string("Dump the trace history");
+  brief_doc = string("Dump the trace history");
 
-    long_doc = string ("\ntrace [dump_amount | raw | log fname | disable_log]\n"
-		       "\ttrace will print out the most recent \"dump_amount\" traces.\n"
-		       "\tIf no dump_amount is specified, then only the lat few trace\n"
-		       "\tevents will be displayed.\n\n"
-		       "\ttrace raw expr -- display the trace contents in a minimally decoded manner\n"
-		       "\ttrace log fname -- log all raw trace events to a file\n"
-		       "\ttrace save fname -- save the decode trace buffer to a file\n"
-		       "\ttrace disable_log -- stop all file logging\n"
-);
+  long_doc = string ("\ntrace [dump_amount | raw | log fname | disable_log]\n"
+                     "\ttrace will print out the most recent \"dump_amount\" traces.\n"
+                     "\tIf no dump_amount is specified, then only the lat few trace\n"
+                     "\tevents will be displayed.\n\n"
+                     "\ttrace raw expr -- display the trace contents in a minimally decoded manner\n"
+                     "\ttrace log fname -- log all raw trace events to a file\n"
+                     "\ttrace save fname -- save the decode trace buffer to a file\n"
+                     "\ttrace disable_log -- stop all file logging\n"
+                     );
 
   op = cmd_trace_options; 
 }

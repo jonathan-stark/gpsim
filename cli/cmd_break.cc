@@ -56,11 +56,9 @@ static cmd_options cmd_break_options[] =
 };
 
 
-cmd_break::cmd_break(void)
+cmd_break::cmd_break()
+  : command("break", "br")
 { 
-  name = "break";
-  abbreviation = "br";
-
   brief_doc = string("Set a break point");
 
   long_doc = string ("The 'break' command can be used to examine or set breakpoints.\n"

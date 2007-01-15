@@ -38,10 +38,9 @@ static cmd_options cmd_run_options[] =
 };
 
 
-cmd_run::cmd_run(void)
+cmd_run::cmd_run()
+  : command("run",0)
 { 
-  name = "run";
-
   brief_doc = string("Initiate the simulation");
 
   long_doc = string ("run\n\

@@ -37,10 +37,9 @@ static cmd_options cmd_node_options[] =
 };
 
 
-cmd_node::cmd_node(void)
+cmd_node::cmd_node()
+  : command("node",0)
 { 
-  name = "node";
-
   brief_doc = string("Add or display stimulus nodes");
 
   long_doc = string ("node [new_node1 new_node2 ...]\n"
@@ -58,7 +57,7 @@ cmd_node::cmd_node(void)
 }
 
 
-void cmd_node::list_nodes(void)
+void cmd_node::list_nodes()
 {
 
   dump_node_list();

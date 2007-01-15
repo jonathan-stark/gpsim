@@ -37,10 +37,9 @@ static cmd_options cmd_bus_options[] =
 };
 
 
-cmd_bus::cmd_bus(void)
+cmd_bus::cmd_bus()
+  : command("bus",0)
 { 
-  name = "bus";
-
   brief_doc = string("Add or display node busses");
 
   long_doc = string ("bus [new_bus1 new_bus2 ...]\n"

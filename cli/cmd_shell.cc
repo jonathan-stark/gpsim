@@ -14,9 +14,10 @@ static cmd_options cmd_shell_options[] =
 };
 
 
-cmd_shell::cmd_shell(void)
+cmd_shell::cmd_shell()
+  : command("!",0)
 { 
-  name = "!";
+  
 
   brief_doc = string("Shell out to another program or module's command line interface");
 

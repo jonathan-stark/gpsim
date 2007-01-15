@@ -701,8 +701,8 @@ command_generator (const char *text, int state)
   while( i<number_of_commands)
     {
 
-      if(strstr(command_list[i]->name, text) == command_list[i]->name)
-	return(g_strndup(command_list[i++]->name, cMaxStringLen));
+      if(strstr(command_list[i]->name(), text) == command_list[i]->name())
+	return(g_strndup(command_list[i++]->name(), cMaxStringLen));
 
       i++;
     }

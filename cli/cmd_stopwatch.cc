@@ -42,10 +42,9 @@ static cmd_options cmd_stopwatch_options[] =
   {0,0,0}
 };
 
-cmd_stopwatch::cmd_stopwatch(void)
+cmd_stopwatch::cmd_stopwatch()
+  : command("stopwatch",0)
 { 
-  name = "stopwatch";
-
   brief_doc = string("Measure time between events");
 
   long_doc = string ("\nstopwatch [clear]\n"
@@ -59,7 +58,7 @@ cmd_stopwatch::cmd_stopwatch(void)
 
 
 
-void cmd_stopwatch::set(void)
+void cmd_stopwatch::set()
 {
   cout << "start stop watch \n";
 }

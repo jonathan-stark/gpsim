@@ -36,10 +36,9 @@ static cmd_options cmd_echo_options[] =
 };
 
 
-cmd_echo::cmd_echo(void)
+cmd_echo::cmd_echo()
+  : command("echo",0)
 { 
-  name = "echo";
-
   brief_doc = string("echo \"text\"");
 
   long_doc = string ("echo \"text\" - useful for command files\n");

@@ -36,14 +36,12 @@ static cmd_options cmd_clear_options[] =
 };
 
 
-cmd_clear::cmd_clear(void)
+cmd_clear::cmd_clear()
+  : command("clear", "cl")
 { 
-  name = "clear";
-  abbreviation = "cl";
+  brief_doc = string("Remove a break point");
 
-    brief_doc = string("Remove a break point");
-
-    long_doc = string ("clear bp_number\n\
+  long_doc = string ("clear bp_number\n\
 where bp_number is the number assigned to the break point\n\
 when it was created. (type \"break\" without any arguments to\n\
 display the currently set break points.\n\

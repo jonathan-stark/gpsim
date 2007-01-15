@@ -45,10 +45,9 @@ static cmd_options cmd_dump_options[] =
 };
 
 
-cmd_dump::cmd_dump(void)
-{ 
-  name = "dump";
-  abbreviation = "du";
+cmd_dump::cmd_dump()
+  : command("dump","du")
+{
 
   brief_doc = string("Display either the RAM or EEPROM");
 

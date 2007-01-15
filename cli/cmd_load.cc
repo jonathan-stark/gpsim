@@ -55,10 +55,9 @@ static cmd_options cmd_load_options[] =
 };
 
 
-cmd_load::cmd_load(void)
+cmd_load::cmd_load()
+  : command("load","ld")
 { 
-  name = "load";
-  abbreviation = "ld";
 
   brief_doc = string("Load either a program or command file");
 

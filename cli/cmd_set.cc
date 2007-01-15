@@ -49,10 +49,9 @@ static cmd_options cmd_set_options[] =
 };
 
 
-cmd_set::cmd_set(void)
+cmd_set::cmd_set()
+  : command("set",0)
 { 
-  name = "set";
-
   brief_doc = string("display and control gpsim behavior flags");
 
   long_doc = string ("set\n"

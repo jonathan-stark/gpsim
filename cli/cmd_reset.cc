@@ -36,10 +36,9 @@ static cmd_options cmd_reset_options[] =
 };
 
 
-cmd_reset::cmd_reset(void)
+cmd_reset::cmd_reset()
+  : command("reset",0)
 { 
-  name = "reset";
-
   brief_doc = string("Reset all or parts of the simulation");
 
   long_doc = string ("Reset all or parts of the simulation\n");
