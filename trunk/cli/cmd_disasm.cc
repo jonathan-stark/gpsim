@@ -36,14 +36,12 @@ static cmd_options cmd_disassemble_options[] =
 };
 
 
-cmd_disassemble::cmd_disassemble(void)
+cmd_disassemble::cmd_disassemble()
+  : command("disassemble", "da")
 { 
-  name = "disassemble";
-  abbreviation = "da";
+  brief_doc = string("Disassemble the current cpu");
 
-    brief_doc = string("Disassemble the current cpu");
-
-    long_doc = string ("\ndisassemble [startCount : endCount] | [count]]\n\n\
+  long_doc = string ("\ndisassemble [startCount : endCount] | [count]]\n\n\
 \t startCount, endCount and count may all be expressions that evaluate\n\
 \t to an integer value. The colon is used to indicate a range.\n\n\
 \t startCount   - Start list with the instruction startCount from the \n\

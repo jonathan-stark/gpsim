@@ -1,4 +1,18 @@
 2007-01-14  Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_stopwatch.cc, cli/cmd_quit.cc, cli/scan.ll,
+	cli/cmd_symbol.cc, cli/cmd_shell.cc, cli/cmd_version.cc,
+	cli/cmd_help.cc, cli/cmd_bus.cc, cli/cmd_set.cc,
+	cli/cmd_frequency.cc, cli/cmd_attach.cc, cli/cmd_dump.cc,
+	cli/cmd_x.cc, cli/cmd_list.cc, cli/cmd_echo.cc,
+	cli/cmd_processor.cc, cli/cmd_disasm.cc, cli/cmd_reset.cc,
+	cli/cmd_break.cc, cli/cmd_node.cc, cli/cmd_module.cc,
+	cli/cmd_clear.cc, cli/command.cc, cli/cmd_trace.cc,
+	cli/cmd_icd.cc, cli/cmd_run.cc, cli/cmd_step.cc, cli/input.cc,
+	cli/cmd_load.cc, cli/cmd_log.cc, cli/cmd_stimulus.cc,
+	cli/command.h, cli/cmd_macro.cc:
+	- gcc-4.2 doesn't like const char * types being assigned to char *
+
+2007-01-14  Scott Dattalo <scott@dattalo.com>
 	* regression/register_stim/Makefile: Regression test wasn't running.
 
 2007-01-14 Borut Razem <borut.razem@siol.net>

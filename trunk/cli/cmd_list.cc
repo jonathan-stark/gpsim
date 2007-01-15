@@ -38,9 +38,9 @@ static cmd_options cmd_list_options[] =
 };
 
 
-cmd_list::cmd_list(void)
+cmd_list::cmd_list()
+  : command("list",0)
 { 
-  name = "list";
 
   brief_doc = string("Display source and list files");
 

@@ -35,10 +35,9 @@ static cmd_options cmd_help_options[] =
 cmd_help help;
 
 
-cmd_help::cmd_help(void)
+cmd_help::cmd_help()
+  : command("help",0)
 { 
-  name = "help";
-
   brief_doc = string("Type help \"command\" for more help on a command");
 
   long_doc = string ("\n\tgpsim is a software simulator for the Microchip PIC microcontrollers\n\
@@ -59,11 +58,11 @@ void cmd_help::help(void)
   for(int i=0; i<number_of_commands; i++)
     {
       command * pCmd = command_list[i];
-      cout << pCmd->name;
-      int l = 16 - strlen(pCmd->name);
-      if(pCmd->abbreviation != 0) {
-        cout << ":" << pCmd->abbreviation;
-        l -= strlen(pCmd->abbreviation) + 1;
+      cout << pCmd->name();
+      int l = 16 - strlen(pCmd->name());
+      if(pCmd->abbreviation() != 0) {
+        cout << ":" << pCmd->abbreviation();
+        l -= strlen(pCmd->abbreviation()) + 1;
       }
 
       for(int k=0; k<l; k++)

@@ -35,9 +35,8 @@ static cmd_options cmd_frequency_options[] =
 };
 
 cmd_frequency::cmd_frequency(void)
+  : command("frequency", "freq")
 { 
-  name = "frequency";
-  abbreviation = "freq";
 
   brief_doc = string("Set the clock frequency");
 

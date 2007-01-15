@@ -35,9 +35,9 @@ static struct cmd_options cmd_quit_options[] =
 };
 
 
-cmd_quit::cmd_quit(void) 
+cmd_quit::cmd_quit() 
+  : command("quit",0)
 { 
-  name = "quit";
 
   brief_doc = string("Quit gpsim");
 

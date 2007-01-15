@@ -36,10 +36,9 @@ static cmd_options cmd_version_options[] =
 };
 
 
-cmd_version::cmd_version(void)
+cmd_version::cmd_version()
+  : command("version", "ver")
 { 
-  name = "version";
-  abbreviation = "ver";
 
   brief_doc = string("Display the gpsim's version");
 
@@ -49,7 +48,7 @@ cmd_version::cmd_version(void)
 }
 
 
-void cmd_version::version(void)
+void cmd_version::version()
 {
   gpsim_version();
 }

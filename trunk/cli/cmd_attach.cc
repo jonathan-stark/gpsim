@@ -38,10 +38,9 @@ static cmd_options cmd_attach_options[] =
 };
 
 
-cmd_attach::cmd_attach(void)
+cmd_attach::cmd_attach()
+  : command("attach", 0)
 { 
-  name = "attach";
-
   brief_doc = string("Attach stimuli to nodes");
 
   long_doc = string ("attach node1 stimulus_1 [stimulus_2 stimulu_N]\n"

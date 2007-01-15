@@ -41,9 +41,9 @@ static cmd_options cmd_x_options[] =
 };
 
 
-cmd_x::cmd_x(void)
+cmd_x::cmd_x()
+  : command("x",0)
 { 
-  name = "x";
 
   brief_doc = string("[deprecated] examine and/or modify memory");
 

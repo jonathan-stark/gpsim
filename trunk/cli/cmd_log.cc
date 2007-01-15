@@ -52,12 +52,11 @@ static cmd_options cmd_trace_options[] =
 };
 
 cmd_log::cmd_log()
+  : command("log",0)
 { 
-  name = "log";
+  brief_doc = string("Log/record events to a file");
 
-    brief_doc = string("Log/record events to a file");
-
-    long_doc = string ("\n\
+  long_doc = string ("\n\
 The log command will record simulation history in a file. It's similar to the\n\
 break command\n\
   log [[on|lxt [file_name]]|[off]]\n\

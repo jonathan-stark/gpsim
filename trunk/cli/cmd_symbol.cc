@@ -38,9 +38,9 @@ static cmd_options cmd_symbol_options[] =
 };
 
 
-cmd_symbol::cmd_symbol(void)
+cmd_symbol::cmd_symbol()
+  : command("symbol",0)
 { 
-  name = "symbol";
 
   brief_doc = string("Add or display symbols");
 

@@ -56,35 +56,37 @@ class command
 
 public:
   struct cmd_options *op;
-  char   *name;
-  char   *abbreviation;
   string brief_doc;
   string long_doc;
 
   int  token_value;
 
-  virtual bool can_span_lines(void) {return 0;};
+  virtual bool can_span_lines() {return 0;};
 
-  command(void);
-  command(struct cmd_options *options,int tv);
+  command(const char *_name, const char *_abbr);
   virtual ~command() {}
 
-  struct cmd_options *get_op(void)
+  struct cmd_options *get_op()
     {
       return op;
     };
 
+  const char *name() { return m_pName; }
+  const char *abbreviation() { return m_pAbbreviation; }
   static Processor * GetActiveCPU();
 
-  int get_token(void) {return token_value;};
+  int get_token() {return token_value;};
 
   bool have_cpu(bool display_warning);
 
   // Assume command is not repeatable
-  virtual int is_repeatable(void) { return 0; };
+  virtual int is_repeatable() { return 0; };
   virtual double evaluate(Expression *);
   virtual void evaluate(ExprList_t *eList,guint64 *, int *);
   virtual Value *toValue(Expression *expr);
+private:
+  const char   *m_pName;
+  const char   *m_pAbbreviation;
 
 };
 

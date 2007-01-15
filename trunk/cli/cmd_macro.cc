@@ -228,13 +228,13 @@ static cmd_options cmd_macro_options[] =
  {0,0,0}
 };
 
-cmd_macro::cmd_macro(void)
+cmd_macro::cmd_macro()
+  : command("macro",0)
 { 
-  name = "macro";
 
-    brief_doc = string("macro definition and listing");
+  brief_doc = string("macro definition and listing");
 
-    long_doc = string ("\nListing Macros:\n\n"
+  long_doc = string ("\nListing Macros:\n\n"
 		       "\tmacro -- display the names of the currently defined macros\n"
 		       "\t         (use the symbol command to see a particular macro definition)\n"
 		       "\nDefining Macros:\n"
@@ -256,7 +256,7 @@ cmd_macro::cmd_macro(void)
 }
 
 
-void cmd_macro::list(void)
+void cmd_macro::list()
 {
   if(macro_map.size()) {
     map<const string, Macro *>::iterator mi;

@@ -37,14 +37,12 @@ static cmd_options cmd_step_options[] =
 };
 
 
-cmd_step::cmd_step(void)
+cmd_step::cmd_step()
+  : command("step","s")
 { 
-  name = "step";
-  abbreviation = "s";
+  brief_doc = string("Execute one or more instructions.");
 
-    brief_doc = string("Execute one or more instructions.");
-
-    long_doc = string ("\nstep [over | n]\n\n\
+  long_doc = string ("\nstep [over | n]\n\n\
 \t    no arguments:  step one instruction.\n\
 \tnumeric argument:  step a number of instructions\n\
 \t \"over\" argument:  step over the next instruction\n\
