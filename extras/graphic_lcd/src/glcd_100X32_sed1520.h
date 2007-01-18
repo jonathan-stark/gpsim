@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 class SED1520;
 class LCD_InputPin;
 class PortRegister;
+class LCD_Interface;
 
 class gLCD
 {
@@ -85,7 +86,7 @@ public:
 
   static Module *construct(const char *new_name);
   bool dataBusDirection();
-  void Update(_GtkWidget *);
+  void Update(GtkWidget *pw =0);
   void UpdatePinState(ePins, char);
   void create_iopin_map();
   void create_widget();
@@ -106,6 +107,7 @@ private:
   gLCD         *m_plcd;
   unsigned int  m_nColumns;
   unsigned int  m_nRows;
+  LCD_Interface *interface;
 };
 
 #endif //__GLCD_100X32_SED1520_H__
