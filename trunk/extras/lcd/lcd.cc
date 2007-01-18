@@ -306,37 +306,6 @@ cursor_event (GtkWidget          *widget,
 void LcdDisplay::create_iopin_map(void)
 {
 
-
-  // Create an I/O port to which the I/O pins can interface
-  //   The module I/O pins are treated in a similar manner to
-  //   the pic I/O pins. Each pin has a unique pin number that
-  //   describes it's position on the physical package. This
-  //   pin can then be logically grouped with other pins to define
-  //   an I/O port.
-
-  /*
-  control_port = new ControlPort(this,8);
-  control_port->value.put(0);
-
-  get_cycles().set_break_delta(1000, control_port);
-
-  data_port = new DataPort(this, 8);
-  data_port->value.put(0);
-  */
-
-  // Here, we name the port `pin'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the logic gate (which is assigned by the user and
-  //   obtained with the name() member function call).
-  /*
-  char *pin_name = (char*)name().c_str();   // Get the name of this LCD
-  if(pin_name) {
-    data_port->new_name(pin_name);
-    control_port->new_name(pin_name);
-  }
-  */
-
-
   // Define the physical package.
   //   The Package class, which is a parent of all of the modules,
   //   is responsible for allocating memory for the I/O pins.
@@ -382,16 +351,6 @@ void LcdDisplay::create_iopin_map(void)
   for (int i=0; i<8; i++)
     (*m_dataBus)[i].setControl(pPortDirectionControl);
 
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-  /*
-  for(int i =1; i<get_pin_count(); i++) {
-    IOPIN *p = get_pin(i);
-    if(p)
-      get_symbol_table().add_stimulus(p);
-  }
-  */
 }
 
 //--------------------------------------------------------------
@@ -422,7 +381,7 @@ Module * LcdDisplay::construct(const char *new_name=NULL)
 {
 
   LcdDisplay *lcdP = new LcdDisplay(new_name,2,20);
-  //lcdP->new_name((char*)new_name);
+
   lcdP->create_iopin_map();
 
 
@@ -568,9 +527,6 @@ Module * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
   LcdDisplayDisplaytech161A *lcdP = new LcdDisplayDisplaytech161A(new_name,2,8,TWO_ROWS_IN_ONE);
   lcdP->new_name((char*)new_name);
   lcdP->create_iopin_map();
-
-  //  lcdP->InitStateMachine();
-
   return lcdP;
 
 }
