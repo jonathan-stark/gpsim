@@ -229,8 +229,16 @@ Value* IndexedSymbol::evaluate() {
     // Could return an AbstractRange
     throw Error("Indexed variable evaluates to more than one value");
   }
+
+  IIndexedCollection *pIndexedCollection =
+    dynamic_cast<IIndexedCollection *>(m_pSymbol);
+  if (!pIndexedCollection)
+    throw Error("Cannot index this variable");
   else {
-    return m_pExprList->front()->evaluate();
+    Value *pV=m_pExprList->front()->evaluate();
+    unsigned int ui = *pV;
+
+    return pIndexedCollection->GetAt(ui).copy();
   }
 }
 
