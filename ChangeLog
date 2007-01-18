@@ -1,3 +1,8 @@
+2007-01-17  Scott Dattalo <scott@dattalo.com>
+	* src/expr.cc: Bug [1638250]. ramData[] references in expressions
+	were evaluating to the index of the ramData and not to the ramData
+	contents. 
+
 2007-01-14  Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_stopwatch.cc, cli/cmd_quit.cc, cli/scan.ll,
 	cli/cmd_symbol.cc, cli/cmd_shell.cc, cli/cmd_version.cc,
