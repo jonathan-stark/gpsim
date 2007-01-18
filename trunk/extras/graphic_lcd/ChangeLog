@@ -1,3 +1,9 @@
+2007-01-17 Scott Dattalo <scott@dattalo.com>
+	* src/glcd_100X32_sed1520.h, src/glcd_100X32_sed1520.cc: Provided
+	a compile time definition  (IN_BREADBOARD) to select whether the
+	graphic LCD is rendered in the breadboard or rendered in its own
+	window. 
+
 2006-11-08 Scott Dattalo <scott@dattalo.com>
 	* src/glcd_100X32_sed1520.cc: Trace type API update
 	* configure.ac: 0.3.0-RC2 release candidate 2

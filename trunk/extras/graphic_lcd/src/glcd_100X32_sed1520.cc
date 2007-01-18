@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gpsim/packages.h>
 #include <gpsim/symbol.h>
 #include <gpsim/trace.h>
+#include <gpsim/gpsim_interface.h>
 
 
 #define DEBUG
@@ -36,12 +37,60 @@ Boston, MA 02111-1307, USA.  */
 #define Dprintf(arg) {}
 #endif
 
+#define IN_BREADBOARD 0
+
 //========================================================================
 //
 // Describe the intent.....
 //
 //========================================================================
 
+
+class LCD_Interface : public Interface
+{
+private:
+  gLCD_100X32_SED1520 *plcd;
+
+public:
+
+  //virtual void UpdateObject (gpointer xref,int new_value);
+  //virtual void RemoveObject (gpointer xref);
+  virtual void SimulationHasStopped (gpointer object);
+  //virtual void NewProcessor (unsigned int processor_id);
+  //virtual void NewModule (Module *module);
+  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
+  //virtual void NewProgram  (unsigned int processor_id);
+  virtual void Update  (gpointer object);
+
+  LCD_Interface(gLCD_100X32_SED1520 *_gp);
+};
+
+//------------------------------------------------------------------------
+//
+// LCD interface to the simulator
+//
+LCD_Interface::LCD_Interface(gLCD_100X32_SED1520 *_lcd) 
+  : Interface ( (gpointer *) _lcd), plcd(_lcd)
+{
+}
+
+//--------------------------------------------------
+// SimulationHasStopped (gpointer)
+//
+// gpsim will call this function when the simulation
+// has halt (e.g. a break point was hit.)
+
+void LCD_Interface::SimulationHasStopped (gpointer)
+{
+  if(plcd)
+    plcd->Update();
+}
+
+void LCD_Interface::Update (gpointer)
+{
+  if(plcd)
+    plcd->Update();
+}
 
 //------------------------------------------------------------------------
 
@@ -271,8 +320,12 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
 
   m_plcd = 0;
 
-  create_widget();
+#if IN_BREADBOARD==0
+  interface = new LCD_Interface(this);
+  get_interface().add_interface(interface);
+#endif
 
+  create_widget();
 
   printf ("gLCD_100X32_SED1520 constructor this=%p\n",this);
 }
@@ -322,9 +375,11 @@ void gLCD_100X32_SED1520::create_iopin_map()
   assign_pin( 6, m_E1);
   assign_pin( 7, m_E2);
 
+#if IN_BREADBOARD==1
   // Place pins along the left side of the package
   for (int i=1; i<=18; i++)
     package->setPinGeometry(i, 0.0, i*12.0, 0, true);
+#endif
 
 }
 
@@ -383,7 +438,17 @@ void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 void gLCD_100X32_SED1520::create_widget()
 {
 
+#if IN_BREADBOARD==1
   window = gtk_vbox_new (FALSE, 0);
+#else
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  if(window) {
+    //gtk_window_set_wmclass(GTK_WINDOW(window),type(),"Gpsim");
+    gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
+    gtk_widget_realize (window);
+    gtk_window_set_title(GTK_WINDOW(window), "LCD");
+  }
+#endif
 
   if(window) {
 
@@ -416,10 +481,10 @@ void gLCD_100X32_SED1520::create_widget()
 
     gtk_widget_show (window);
 
+#if IN_BREADBOARD==1
     set_widget(window);
-
+#endif
   }
-
 
 }
 
