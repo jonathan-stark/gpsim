@@ -780,7 +780,6 @@ gpsimGuiPreferences::gpsimGuiPreferences()
 
 
   gtk_widget_show (window);
-  gtk_grab_add (window);
 
 }
 
