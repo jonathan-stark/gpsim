@@ -38,6 +38,8 @@ class Register;
 class sfr_register;
 class pic_register;
 class ConfigMemory;
+class ResetTraceType;
+class InterruptTraceType;
 
 enum PROCESSOR_TYPE
 {
@@ -353,6 +355,8 @@ public:
 protected:
   ConfigMemory **m_configMemory;
   eProcessorActivityStates m_ActivityState;
+  ResetTraceType *m_pResetTT;
+  InterruptTraceType *m_pInterruptTT;
 };
 
 

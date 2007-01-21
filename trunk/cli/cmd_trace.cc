@@ -37,6 +37,7 @@ cmd_trace c_trace;
 #define TRACE_SAVE_CMD          3
 #define TRACE_LOGON_CMD		4
 #define TRACE_LOGOFF_CMD	5
+#define TRACE_INFO_CMD  	6
 
 static cmd_options cmd_trace_options[] =
 {
@@ -45,6 +46,7 @@ static cmd_options cmd_trace_options[] =
   {"mask",	 TRACE_MASK_CMD,	OPT_TT_NUMERIC},
   {"log",        TRACE_LOGON_CMD,	OPT_TT_STRING},
   {"save",       TRACE_SAVE_CMD,	OPT_TT_STRING},
+  {"info",       TRACE_INFO_CMD,	OPT_TT_BITFLAG},
   {"disable_log",TRACE_LOGOFF_CMD,	OPT_TT_BITFLAG},
  {0,0,0}
 };
@@ -87,6 +89,9 @@ void cmd_trace::trace(cmd_options *opt)
   case TRACE_LOGOFF_CMD:
     get_trace().disableLogging();
     cout << "Logging to file disabled" << endl;
+    break;
+  case TRACE_INFO_CMD:
+    get_trace().showInfo();
     break;
   default:
     cout << " Invalid set option\n";

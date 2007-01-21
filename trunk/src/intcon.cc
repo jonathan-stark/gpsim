@@ -54,10 +54,6 @@ void INTCON::set_T0IF(void)
 
   value.put(value.get() | T0IF);
 
-  if (value.get() & (GIE | T0IE))
-  {
-    trace.interrupt();
-  }
 }
 
 void INTCON::set_cpu(Processor *new_cpu)

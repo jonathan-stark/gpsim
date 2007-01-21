@@ -233,11 +233,11 @@ void P16C54::tris_instruction(unsigned int tris_register)
    {
       case 5:
         m_trisa->put(W->value.get());
-        trace.write_TRIS(m_trisa->value.get());
+        //trace.write_TRIS(m_trisa->value.get());
         break;
       case 6:
         m_trisb->put(W->value.get());
-        trace.write_TRIS(m_trisb->value.get());
+        //trace.write_TRIS(m_trisb->value.get());
         break;
       default:
         cout << __FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;
@@ -312,15 +312,15 @@ void P16C55::tris_instruction(unsigned int tris_register)
    {
       case 5:
         m_trisa->put(W->value.get());
-        trace.write_TRIS(m_trisa->value.get());
+        //trace.write_TRIS(m_trisa->value.get());
         break;
       case 6:
         m_trisb->put(W->value.get());
-        trace.write_TRIS(m_trisb->value.get());
+        //trace.write_TRIS(m_trisb->value.get());
         break;
       case 7:
         m_trisc->put(W->value.get());
-        trace.write_TRIS(m_trisc->value.get());
+        //trace.write_TRIS(m_trisc->value.get());
         break;
       default:
         cout << __FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;

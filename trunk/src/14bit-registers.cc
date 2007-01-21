@@ -685,7 +685,7 @@ class WTraceType : public ProcessorTraceType
 public:
   WTraceType(Processor *_cpu, 
 	     unsigned int s)
-    : ProcessorTraceType(_cpu,s)
+    : ProcessorTraceType(_cpu,s,"W reg")
   {}
 
   TraceObject *decode(unsigned int tbi);

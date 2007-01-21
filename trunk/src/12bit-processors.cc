@@ -60,7 +60,7 @@ class OptionTraceType : public TraceType
 {
 public:
   OptionTraceType(Processor *_cpu, OPTION_REG *pOptionReg)
-    : TraceType(1), m_cpu(_cpu),m_pOptionReg(pOptionReg)
+    : TraceType(1,"Option reg"), m_cpu(_cpu),m_pOptionReg(pOptionReg)
   {
   }
 
