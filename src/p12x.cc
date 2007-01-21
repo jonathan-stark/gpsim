@@ -242,7 +242,9 @@ void P12C508::dump_registers ()
 void P12C508::tris_instruction(unsigned int tris_register)
 {
   m_tris->put(W->value.get());
-  trace.write_TRIS(m_tris->value.get());
+
+
+  //trace.write_TRIS(m_tris->value.get());
 }
   
 void P12C508::create()
@@ -452,7 +454,8 @@ void P12CE518::tris_instruction(unsigned int tris_register)
 
   w_val = W->value.get();
   m_tris->put ( w_val & 0x3F );     // top two bits always output
-  trace.write_TRIS(w_val);
+
+  //  trace.write_TRIS(w_val);
 }
 
 

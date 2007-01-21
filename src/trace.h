@@ -151,7 +151,7 @@ class TraceType
 public:
 
 
-  TraceType(unsigned int nTraceEntries);
+  TraceType(unsigned int nTraceEntries, const char *desc);
 
   void setType(unsigned int t) { mType = t;}
   // The actual type of the TraceType is an 8-bit field in the
@@ -191,11 +191,17 @@ public:
   }
   virtual int bitsTraced() { return 24; }
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
+
+  // Debugging - provide a way to see the TraceTypes that have been allocated.
+  virtual void showInfo();
+  const char *cpDescription();
 private:
   unsigned int mType;		// The integer type is dynamically
 				// assigned by the Trace class.
   unsigned int mSize;		// The number of positions this
 				// type occupies
+protected:
+  const char *mpDescription;    // 
 
 };
 
@@ -213,14 +219,9 @@ class ModuleTraceType : public TraceType
 {
 public:
   Module *pModule;
-  const char *pDescription;
   ModuleTraceType(Module *_pModule, 
 		  unsigned int nTraceEntries,
-		  const char *desc)
-    : TraceType(nTraceEntries), pModule(_pModule), pDescription(desc)
-  {
-  }
-
+		  const char *desc);
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 
@@ -232,11 +233,8 @@ public:
   Processor *cpu;
 
   ProcessorTraceType(Processor *_cpu, 
-		     unsigned int nTraceEntries)
-    : TraceType(nTraceEntries), cpu(_cpu)
-  {
-  }
-
+		     unsigned int nTraceEntries,
+                     const char *pDesc);
   virtual TraceObject *decode(unsigned int tbi) = 0;
 
 };
@@ -323,12 +321,7 @@ class Trace
 
   enum eTraceTypes {
     NOTHING            =  0x3fffffff,
-    BREAKPOINT         = (2<<24),
-    INTERRUPT          = (3<<24),
-    _RESET             = (4<<24),
-    WRITE_TRIS         = (5<<24),
-    OPCODE_WRITE       = (7<<24),
-    LAST_TRACE_TYPE    = (8<<24),
+    LAST_TRACE_TYPE    = (1<<24),
 
     TYPE_MASK          = (0xff<<24),
     CYCLE_COUNTER_LO   = (0x80<<24),
@@ -378,7 +371,7 @@ class Trace
     trace_buffer[trace_index] = ui;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  /*
   inline void opcode_write (unsigned int address, unsigned int opcode)
   {
     trace_buffer[trace_index] = OPCODE_WRITE | (address & 0xffffff);
@@ -386,7 +379,7 @@ class Trace
     trace_buffer[trace_index] = OPCODE_WRITE | (opcode & 0xffff);
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  */
 
   inline void cycle_counter (guint64 cc)
   {
@@ -396,29 +389,13 @@ class Trace
     trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  inline void breakpoint (unsigned int bp)
-  {
-    trace_buffer[trace_index] = BREAKPOINT | bp;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
+  /*
   void interrupt (void)
   {
     trace_buffer[trace_index] = INTERRUPT;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  inline void reset (RESET_TYPE r)
-    {
-      trace_buffer[trace_index] = _RESET | ( (int) r);
-      trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-    }
-
-  inline void write_TRIS (unsigned int value)
-  {
-    trace_buffer[trace_index] = WRITE_TRIS | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
+  */
   inline bool near_full(void) {
     return (trace_index > TRACE_BUFFER_NEAR_FULL);
   }
@@ -482,6 +459,8 @@ class Trace
   void deleteTraceFrame(void);
   void printTraceFrame(FILE *);
 
+  // Display information about allocated traces.
+  void showInfo();
 
 };
 

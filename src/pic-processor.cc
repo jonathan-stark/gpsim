@@ -112,14 +112,9 @@ phaseCaptureInterrupt::~phaseCaptureInterrupt()
 ClockPhase *phaseCaptureInterrupt::advance()
 {
 
-  Rprintf (("phaseCaptureInterrupt\n"));
-  if (m_pNextPhase == mExecute2ndHalf) {
-    //Rprintf(("phaseCaptureInterrupt -- advancing 2cycle instruction\n"));
-    //mCurrentPhase = m_pCurrentPhase; 
+  //Rprintf (("phaseCaptureInterrupt\n"));
+  if (m_pNextPhase == mExecute2ndHalf)
     m_pNextPhase->advance();
-    //mCurrentPhase = this;
-  } 
-
 
   m_pcpu->interrupt();
 
@@ -136,20 +131,6 @@ void phaseCaptureInterrupt::firstHalf()
 }
 
 #endif
-
-void pic_processor::BP_set_interrupt()
-{
-  trace.interrupt();
-#ifdef CLOCK_EXPERIMENTS
-  printf("BP_set_interrupt current %s next %s\n",
-         phaseDesc(mCurrentPhase), phaseDesc(mCurrentPhase->getNextPhase()));
-
-  mCaptureInterrupt->firstHalf();
-
-#else
-  bp.set_interrupt();
-#endif
-}
 
 //================================================================================
 // Global Declarations
@@ -300,7 +281,159 @@ ProcessorConstructor pP18F1220(P18F1220::construct,
 ProcessorConstructor pP18F1320(P18F1320::construct,
 			      "__18F1320", "pic18f1320",  "p18f1320", "18f1320");
 
+//========================================================================
+// Trace Type for Resets
 
+class ResetTraceObject : public ProcessorTraceObject
+{
+public:
+  ResetTraceObject(Processor *_cpu, RESET_TYPE r);
+  virtual void print(FILE *fp);
+protected:
+  RESET_TYPE m_reset;
+};
+
+class ResetTraceType : public ProcessorTraceType
+{
+public:
+  ResetTraceType(Processor *_cpu);
+  TraceObject *decode(unsigned int tbi);
+  void record(RESET_TYPE r);
+  int dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize);
+
+  unsigned int m_uiTT;
+};
+
+//------------------------------------------------------------------------
+const char * resetName(RESET_TYPE r)
+{
+  switch (r) {
+  case POR_RESET:  return "POR_RESET";
+  case WDT_RESET:  return "WDT_RESET";
+  case IO_RESET:   return "IO_RESET";
+  case MCLR_RESET: return "MCLR_RESET";
+  case SOFT_RESET: return "SOFT_RESET";
+  case BOD_RESET:  return "BOD_RESET";
+  case SIM_RESET:  return "SIM_RESET";
+  case EXIT_RESET: return "EXIT_RESET";
+  case OTHER_RESET: return "OTHER_RESET";
+  }
+  return "unknown reset";
+}
+//------------------------------------------------------------
+ResetTraceObject::ResetTraceObject(Processor *_cpu, RESET_TYPE r)
+  : ProcessorTraceObject(_cpu), m_reset(r)
+{
+}
+void ResetTraceObject::print(FILE *fp)
+{
+  fprintf(fp, "  Reset: %s\n", resetName(m_reset));
+}
+
+//------------------------------------------------------------
+ResetTraceType::ResetTraceType(Processor *_cpu)
+  : ProcessorTraceType(_cpu,1,"Reset")
+{
+  m_uiTT = trace.allocateTraceType(this);
+}
+
+TraceObject *ResetTraceType::decode(unsigned int tbi)
+{
+  unsigned int tv = trace.get(tbi);
+  return new ResetTraceObject(cpu, (RESET_TYPE) (tv&0xff));
+}
+
+void ResetTraceType::record(RESET_TYPE r)
+{
+  trace.raw(m_uiTT | r);
+}
+
+int ResetTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
+{
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  RESET_TYPE r = (RESET_TYPE) (pTrace->get(tbi) & 0xff);
+
+  int m = snprintf(buf, bufsize,
+		   " %s Reset: %s",
+		   (cpu ? cpu->name().c_str() : ""),
+		   resetName(r));
+
+  return m > 0 ? (m+n) : n;
+}
+
+//========================================================================
+// Trace Type for Resets
+
+class InterruptTraceObject : public ProcessorTraceObject
+{
+public:
+  InterruptTraceObject(Processor *_cpu);
+  virtual void print(FILE *fp);
+};
+
+class InterruptTraceType : public ProcessorTraceType
+{
+public:
+  InterruptTraceType(Processor *_cpu);
+  TraceObject *decode(unsigned int tbi);
+  void record();
+  int dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize);
+
+  unsigned int m_uiTT;
+};
+
+//------------------------------------------------------------
+InterruptTraceObject::InterruptTraceObject(Processor *_cpu)
+  : ProcessorTraceObject(_cpu)
+{
+}
+void InterruptTraceObject::print(FILE *fp)
+{
+  fprintf(fp, "  %s *** Interrupt ***\n",
+		   (cpu ? cpu->name().c_str() : ""));
+}
+
+//------------------------------------------------------------
+InterruptTraceType::InterruptTraceType(Processor *_cpu)
+  : ProcessorTraceType(_cpu,1,"Interrupt")
+{
+  m_uiTT = trace.allocateTraceType(this);
+}
+
+TraceObject *InterruptTraceType::decode(unsigned int tbi)
+{
+  //unsigned int tv = trace.get(tbi);
+  return new InterruptTraceObject(cpu);
+}
+
+void InterruptTraceType::record()
+{
+  trace.raw(m_uiTT);
+}
+
+int InterruptTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
+{
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  int m = snprintf(buf, bufsize,
+		   " %s *** Interrupt ***",
+		   (cpu ? cpu->name().c_str() : ""));
+  return m > 0 ? (m+n) : n;
+}
+//-------------------------------------------------------------------
 void pic_processor::set_eeprom(EEPROM *e)
 { 
   eeprom = e; 
@@ -309,6 +442,19 @@ void pic_processor::set_eeprom(EEPROM *e)
   ema.set_Registers(e->rom, e->rom_size);
 
 }
+
+//-------------------------------------------------------------------
+void pic_processor::BP_set_interrupt()
+{
+
+  m_pInterruptTT->record();
+#ifdef CLOCK_EXPERIMENTS
+  mCaptureInterrupt->firstHalf();
+#else
+  bp.set_interrupt();
+#endif
+}
+
 //-------------------------------------------------------------------
 //
 // sleep - Begin sleeping and stay asleep until something causes a wake
@@ -820,9 +966,9 @@ void pic_processor::reset (RESET_TYPE r)
       return;
   }
 
+  m_pResetTT->record(r);
   if(r == SOFT_RESET) {
 
-    trace.reset(r);
     pc->reset();
     gi.simulation_has_stopped();
     cout << " --- Soft Reset (not fully implemented)\n";
@@ -830,7 +976,6 @@ void pic_processor::reset (RESET_TYPE r)
   }
 
   rma.reset(r);
-  trace.reset(r);
   pc->reset();
   stack->reset();
   wdt.reset(r);
@@ -911,11 +1056,15 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 
   // Test code for logging to disk:
   GetTraceLog().switch_cpus(this);
+  m_pResetTT = new ResetTraceType(this);
+  m_pInterruptTT = new InterruptTraceType(this);
+
 }
 //-------------------------------------------------------------------
 pic_processor::~pic_processor()
 {
-
+  delete m_pResetTT;
+  delete m_pInterruptTT;
 }
 //-------------------------------------------------------------------
 //
@@ -1189,7 +1338,7 @@ void ProgramMemoryAccess::callback()
       //cout << __FUNCTION__ << " address= " << address << ", opcode= " << opcode << '\n';
       //cpu->program_memory[address]->opcode = opcode;
       put_opcode(_address,_opcode);
-      trace.opcode_write(_address,_opcode);
+      // FIXME trace.opcode_write(_address,_opcode);
       bp.clear_pm_write();
     }
 

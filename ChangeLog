@@ -1,4 +1,18 @@
 2007-01-20  Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.cc, src/trace.h, src/p16x5x.cc,
+	src/12bit-processors.cc, src/p12x.cc, src/pic-processor.h,
+	src/processor.cc, src/14bit-registers.cc, src/trace.cc,
+	src/trigger.cc, src/intcon.cc:
+	- Added a Trace Type for Resets and Interrupts.
+	- Removed some deprecated trace types (e.g. TRIS and Option).
+	- Single stepping uses the clock phase code. 
+	* regression/rt.sh: Removed outdated comment.
+
+	* cli/cmd_trace.cc: added an 'info' option to the trace
+	command. This is for displaying information about allocated trace
+	types. It is used primarily for debugging.
+	
+2007-01-20  Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: Bug [1631921]. Preferences dialog box was
 	grabbing the gtk focus and preventing child dialog boxes from
 	having focus.

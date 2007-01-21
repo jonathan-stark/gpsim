@@ -1304,6 +1304,8 @@ void Processor::run (bool refresh)
 // at the current PC-> 'step' will go right through it. (That's supposed
 // to be a feature.)
 //
+extern phaseExecute1Cycle *mExecute1Cycle;
+extern phaseExecute2ndHalf *mExecute2ndHalf;
 void Processor::step (unsigned int steps, bool refresh)
 {
   if(!steps)
@@ -1317,34 +1319,22 @@ void Processor::step (unsigned int steps, bool refresh)
 
   simulation_mode = eSM_SINGLE_STEPPING;
 #ifdef CLOCK_EXPERIMENTS
-  do {
 
-    if(bp.have_sleep() || bp.have_pm_write()) {
+  mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
 
-      // If we are sleeping or writing to the program memory (18cxxx only)
-      // then step one cycle - but don't execute any code  
+  do
+    mCurrentPhase = mCurrentPhase->advance();
+  while(!bp.have_halt() && --steps>0);
 
-      get_cycles().increment();
-      if(refresh)
-	trace_dump(0,1);
+  // complete the step if this is a multi-cycle instruction.
 
-    }
-    else if(bp.have_interrupt())
-      interrupt();
-    else {
+  if (mCurrentPhase == mExecute2ndHalf)
+    while (mCurrentPhase != mExecute1Cycle)
+      mCurrentPhase = mCurrentPhase->advance();
 
-      if (mCurrentPhase) {
-	//cout<<"advancing the phase!\n";
-	mCurrentPhase = mCurrentPhase->advance();
-      } else
-	step_one(refresh);
-
-      get_trace().cycle_counter(get_cycles().get());
-      if(refresh)
-	trace_dump(0,1);
-    } 
-
-  }  while(!bp.have_halt() && --steps>0);
+  get_trace().cycle_counter(get_cycles().get());
+  if(refresh)
+    trace_dump(0,1);
 #else
   do {
 

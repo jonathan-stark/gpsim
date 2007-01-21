@@ -45,7 +45,7 @@ class BreakTraceType : public TraceType
 public:
 
   BreakTraceType()
-    : TraceType(2)
+    : TraceType(2, "Break")
   {
   }
 

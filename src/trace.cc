@@ -397,8 +397,8 @@ void ModuleTraceObject::print(FILE *fp)
   fprintf(fp, " Module Trace: ");
   if (pModule)
     fprintf(fp, "%s ", pModule->name().c_str());
-  if (pModuleTraceType && pModuleTraceType->pDescription)
-    fprintf(fp, "%s ", pModuleTraceType->pDescription);
+  if (pModuleTraceType && pModuleTraceType->cpDescription())
+    fprintf(fp, "%s ", pModuleTraceType->cpDescription());
   fprintf (fp, "0x%x\n", mTracedData & 0xffffff);
 }
 
@@ -504,11 +504,21 @@ void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 
 //========================================================================
 
-TraceType::TraceType(unsigned int nTraceEntries)
-  : mType(0), mSize(nTraceEntries)
+TraceType::TraceType(unsigned int nTraceEntries, const char *desc)
+  : mType(0), mSize(nTraceEntries), mpDescription(desc)
 {
 }
+void TraceType::showInfo()
+{
+  cout << cpDescription() << endl;
+  cout << "  Type: 0x" << hex << mType << endl
+       << "  Size: " << mSize << endl;
 
+}
+const char *TraceType::cpDescription()
+{
+  return mpDescription ? mpDescription : "No Description";
+}
 //----------------------------------------
 //
 // isValid
@@ -576,6 +586,12 @@ int TraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
   return iUsed;
 }
 //========================================================================
+ModuleTraceType::ModuleTraceType(Module *_pModule, 
+                                 unsigned int nTraceEntries,
+                                 const char *desc)
+  : TraceType(nTraceEntries,desc), pModule(_pModule)
+{
+}
 TraceObject *ModuleTraceType::decode(unsigned int tbi)
 {
   ModuleTraceObject *mto = new ModuleTraceObject(pModule, this, trace.get(tbi)&0xffffff);
@@ -605,7 +621,7 @@ int ModuleTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int buf
 
 //========================================================================
 CycleTraceType::CycleTraceType(unsigned int s)
-  : TraceType(s)
+  : TraceType(s, "Cycle")
 {
 }
 TraceObject *CycleTraceType::decode(unsigned int tbi)
@@ -636,10 +652,18 @@ int CycleTraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
   return pTrace ? pTrace->is_cycle_trace(tbi,0) : 0;
 }
 //========================================================================
+ProcessorTraceType::ProcessorTraceType(Processor *_cpu, 
+                                       unsigned int nTraceEntries,
+                                       const char *pDesc)
+  : TraceType(nTraceEntries,pDesc), cpu(_cpu)
+{
+}
+
+//========================================================================
 
 RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu, 
 					       unsigned int s)
-  : ProcessorTraceType(_cpu,s)
+  : ProcessorTraceType(_cpu,s,"Reg Write")
 {
     
 }
@@ -685,7 +709,7 @@ int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, 
 
 RegisterReadTraceType::RegisterReadTraceType(Processor *_cpu, 
 					     unsigned int s)
-  : ProcessorTraceType(_cpu,s)
+  : ProcessorTraceType(_cpu,s,"Reg Read")
 {
     
 }
@@ -731,7 +755,7 @@ int RegisterReadTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, 
 //========================================================================
 PCTraceType::PCTraceType(Processor *_cpu, 
 			 unsigned int s)
-  : ProcessorTraceType(_cpu,s)
+  : ProcessorTraceType(_cpu,s,"PC")
 {
 }
 
@@ -820,6 +844,23 @@ Trace::~Trace(void)
 {
   if(xref)
     delete xref;
+
+}
+
+//--------------------------------------------------------------
+//
+void Trace::showInfo()
+{
+  map<unsigned int, TraceType *>::iterator tti;
+
+  for (unsigned int index=0; index<0x3f000000; index+=0x1000000) {
+    tti = trace_map.find(index);
+
+    if(tti != trace_map.end()) {
+      TraceType *tt = (*tti).second;
+      tt->showInfo();
+    }
+  }
 
 }
 
@@ -964,6 +1005,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
     case NOTHING:
       snprintf(buffer, bufsize,"  empty trace cycle");
       break;
+      /*
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
 	       get(index)&0xff);
@@ -996,7 +1038,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	       get(index - 1) & 0xffffff);
 
       break;
-
+      */
     default:
       if(type(index) != CYCLE_COUNTER_HI) {
 	map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(index));
