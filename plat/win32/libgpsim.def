@@ -31,6 +31,7 @@ EXPORTS
     ??0LiteralString@@QAE@PAVString@@@Z
     ??0LiteralSymbol@@QAE@PAVValue@@@Z
     ??0Module@@QAE@PBD0@Z
+    ??0ModuleTraceType@@QAE@PAVModule@@IPBD@Z
     ??0OpAbstractRange@@QAE@PAVExpression@@0@Z
     ??0OpAdd@@QAE@PAVExpression@@0@Z
     ??0OpAddressOf@@QAE@PAVExpression@@@Z
@@ -84,7 +85,6 @@ EXPORTS
     ??0ThreeStateEventLogger@@QAE@I@Z
     ??0Token@gpsim@@QAE@XZ
     ??0TraceFrame@@QAE@XZ
-    ??0TraceType@@QAE@I@Z
     ??0TriggerObject@@QAE@XZ
     ??0TypeMismatch@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@00@Z
     ??0Value@@QAE@XZ
@@ -612,6 +612,7 @@ EXPORTS
     ?set_write_value_break@Breakpoints@@QAEHPAVProcessor@@IIII@Z
     ?set_xref@Value@@UAEXPAV1@@Z
     ?setbit@Register@@UAEXI_N@Z
+    ?showInfo@Trace@@QAEXXZ
     ?show@BinaryOperator@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?show@IOPIN@@UAEXXZ
     ?show@gpsimObject@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
