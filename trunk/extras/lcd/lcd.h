@@ -86,7 +86,7 @@ public:
 
   LcdTraceType(LcdDisplay *_lcd, 
 	       unsigned int s)
-    : TraceType(s), lcd(_lcd)
+    : TraceType(s, "LCD"), lcd(_lcd)
   {
   }
 
