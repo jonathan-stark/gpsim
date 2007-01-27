@@ -1,5 +1,6 @@
 2007-01-27 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32, plat/win32/libgpsim.def: MSVC sync
+	* extras/lcd/lcd.h: synced with Scott's changes
 
 2007-01-20  Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/trace.h, src/p16x5x.cc,
