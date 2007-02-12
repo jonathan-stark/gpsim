@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include "command.h"
 
-class Value;
+class gpsimObject;
 #define CMDBREAK_BAD_BREAK_NUMBER 0xffff
 class cmd_break : public command
 {
@@ -36,7 +36,7 @@ public:
 
   unsigned int set_break(cmd_options *co, bool bLog=false);
   unsigned int set_break(cmd_options *co, ExprList_t *pEL, bool bLog=false);
-  unsigned int set_break(Value *v);
+  unsigned int set_break(gpsimObject *v);
 
 private:
   unsigned int set_break(cmd_options *co, Expression *pExpr1, Expression *pExpr2=0, bool bLog=false);

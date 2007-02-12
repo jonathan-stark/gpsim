@@ -763,6 +763,7 @@ Value* OpAddressOf::applyOp(Value* operand)
 {
   Value* rVal=0;
 
+  /*
   register_symbol *pReg =dynamic_cast<register_symbol*>(operand);
   if (pReg) {
     rVal = new Integer(pReg->getAddress());
@@ -776,6 +777,9 @@ Value* OpAddressOf::applyOp(Value* operand)
       }
     }
   }
+  */
+  Register *pReg = dynamic_cast<Register*>(operand);
+  rVal = pReg ? new Integer(pReg->getAddress()) : 0;
   if(rVal==0) {
     throw new TypeMismatch(showOp(), operand->showType());
   }

@@ -29,8 +29,8 @@ Boston, MA 02111-1307, USA.  */
 
 //--------------------------------------------------
 
-ADDLW::ADDLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+ADDLW::ADDLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("addlw");
@@ -53,8 +53,8 @@ void ADDLW::execute(void)
 
 //--------------------------------------------------
 
-RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu,new_opcode,0)
+RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu,new_opcode,address)
 {
   decode(new_cpu, new_opcode);
   new_name("retfie");
@@ -68,8 +68,8 @@ void RETFIE::execute(void)
 
 //--------------------------------------------------
 
-RETURN::RETURN (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu,new_opcode,0)
+RETURN::RETURN (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu,new_opcode,address)
 {
   decode(new_cpu, new_opcode);
   new_name("return");
@@ -82,8 +82,8 @@ void RETURN::execute(void)
 
 //--------------------------------------------------
 
-SUBLW::SUBLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+SUBLW::SUBLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("sublw");

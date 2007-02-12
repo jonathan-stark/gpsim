@@ -286,6 +286,7 @@ public:
 
   void add_sfr_register(Register *reg, unsigned int addr,
 			RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
+  void delete_sfr_register(Register **ppReg, unsigned int addr);
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
@@ -301,8 +302,9 @@ public:
   void sleep();
   virtual void enter_sleep();
   virtual void exit_sleep();
-  void step(unsigned int steps,bool refresh=true);
-  void step_over(bool refresh=true);
+  virtual void step(unsigned int steps,bool refresh=true);
+  virtual void step_over(bool refresh=true);
+  virtual void step_cycle();
 
   virtual void step_one(bool refresh=true) {
     program_memory[pc->value]->execute();

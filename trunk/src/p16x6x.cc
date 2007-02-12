@@ -69,10 +69,12 @@ Processor * P16C61::construct(const char *name)
 }
 
 P16C61::P16C61(const char *_name, const char *desc)
-  
 {
 }
-
+P16C61::~P16C61()
+{
+  cout << __FUNCTION__ << endl;
+}
 
 //------------------------------------------------------------------------
 //
@@ -278,6 +280,7 @@ void P16X6X_processor::create_sfr_map()
 
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con;
+  // FIXME -- can't delete this new'd item
   tmr1l.setInterruptSource(new InterruptSource(pir1, PIR1v1::TMR1IF));
   tmr1l.ccpcon = &ccp1con;
 
@@ -310,8 +313,7 @@ void P16X6X_processor::create_sfr_map()
     pir1->set_intcon(&intcon_reg);
     pir1->set_pie(&pie1);
   }
-  pie1.pir    = pir1;
-  pie1.new_name("pie1");
+  pie1.setPir(pir1);
 
 
 }
@@ -326,7 +328,23 @@ void P16X6X_processor::create_symbols()
 //--------------------------------------------------
 
 P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
-  : Pic14Bit(_name,_desc)
+  : Pic14Bit(_name,_desc),
+    t1con(this, "t1con", "TMR1 Control"),
+    pie1(this,"PIE1", "Peripheral Interrupt Enable"),
+    pie2(this,"PIE2", "Peripheral Interrupt Enable"),
+    t2con(this, "t2con", "TMR2 Control"),
+    pr2(this, "pr2", "TMR2 Period Register"),
+    tmr2(this, "tmr2", "TMR2 Register"),
+    tmr1l(this, "tmr1l", "TMR1 Low"),
+    tmr1h(this, "tmr1h", "TMR1 High"),
+    ccp1con(this, "ccp1con", "Capture Compare Control"),
+    ccpr1l(this, "ccpr1l", "Capture Compare 1 Low"),
+    ccpr1h(this, "ccpr1h", "Capture Compare 1 High"),
+    ccp2con(this, "ccp2con", "Capture Compare Control"),
+    ccpr2l(this, "ccpr2l", "Capture Compare 2 Low"),
+    ccpr2h(this, "ccpr2h", "Capture Compare 2 High"),
+    pcon(this, "pcon", "pcon"),
+    ssp(this)
 {
   
 
@@ -334,17 +352,26 @@ P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
     cout << "generic 16X6X constructor, type = " << isa() << '\n';
 
 
-  m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister("trisc",m_portc, false);
+  m_portc = new PicPortRegister(this,"portc","",8,0xff);
+  m_trisc = new PicTrisRegister(this,"trisc","",m_portc, false);
 
-  pir1 = new PIR1v1(&intcon_reg, &pie1);
-  pir2 = new PIR2v1(&intcon_reg, &pie2);
+  pir1 = new PIR1v1(this,"pir1","Peripheral Interrupt Register",&intcon_reg, &pie1);
+  pir2 = new PIR2v1(this,"pir2","Peripheral Interrupt Register",&intcon_reg, &pie2);
 
 }
 
 P16X6X_processor::~P16X6X_processor()
 {
-  
+  cout << __FUNCTION__ << endl;
+
+  delete_file_registers(0x20,0x7f);
+  delete_file_registers(0xa0,0xbf);
+  delete m_portc;
+  delete m_trisc;
+
+  //delete_sfr_register((Register**)&pir1,0x0c);
+  //delete pir2;
+
 }
 /*******************************************************************
  *
@@ -358,9 +385,15 @@ P16C62::P16C62(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "c62 constructor, type = " << isa() << '\n';
-  
 }
 
+P16C62::~P16C62()
+{
+  cout << __FUNCTION__ << endl;
+
+  delete_sfr_register((Register**)&m_portc,0x07);
+  delete_sfr_register((Register**)&m_trisc,0x87);
+}
 
 
 void P16C62::create_sfr_map()
@@ -449,7 +482,8 @@ void P16C63::create_sfr_map(void)
   ccpr2h.ccprl  = &ccpr2l;
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(&usart), new _RCREG(&usart));
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
@@ -457,18 +491,12 @@ void P16C63::create_sfr_map(void)
   add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
 
-  ccpr2l.new_name("ccpr2l");
-  ccpr2h.new_name("ccpr2h");
-  ccp2con.new_name("ccp2con");
-
   if (pir2) {
     pir2->set_intcon(&intcon_reg);
     pir2->set_pie(&pie2);
   }
 
-  pie2.pir    = get_pir2();
-  pie2.new_name("pie2");
-
+  pie2.setPir(get_pir2());
 
 }
 
@@ -492,12 +520,21 @@ void P16C63::create_symbols(void)
 // is done within the 'C62 constructor.
 
 P16C63::P16C63(const char *_name, const char *desc)
-  : P16C62(_name,desc)
+  : P16C62(_name,desc),
+    usart(this)
 {
-
   if(verbose)
     cout << "c63 constructor, type = " << isa() << '\n';
+}
 
+P16C63::~P16C63()
+{
+  cout << __FUNCTION__ << endl;
+
+  delete_file_registers(0xc0, 0xff);
+  delete_file_registers(0x19, 0x1a);  // usart tx and rx registers.
+
+  //delete_sfr_register((Register**)&pir2,0x0d);
 }
 
 void P16C63::create(void)
@@ -566,11 +603,11 @@ void P16C64::create_symbols(void)
 
   P16X6X_processor::create_symbols();
 
-  symbol_table.add_register(m_portd);
-  symbol_table.add_register(m_porte);
+  addSymbol(m_portd);
+  addSymbol(m_porte);
 
-  symbol_table.add_register(m_trisd);
-  symbol_table.add_register(m_trise);
+  addSymbol(m_trisd);
+  addSymbol(m_trise);
 
 }
 
@@ -607,7 +644,7 @@ Processor * P16C64::construct(const char *name)
 
 P16C64::P16C64(const char *_name, const char *desc)
   : P16X6X_processor(_name,desc), 
-  pir1_2_reg(&intcon_reg,&pie1)
+    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1)
 {
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
@@ -615,15 +652,20 @@ P16C64::P16C64(const char *_name, const char *desc)
   pir1 = &pir1_2_reg;
 
 
-  m_portd = new PicPSP_PortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister("trisd",(PicPortRegister *)m_portd, false);
+  m_portd = new PicPSP_PortRegister(this,"portd","",8,0xff);
+  m_trisd = new PicTrisRegister(this,"trisd","",(PicPortRegister *)m_portd, false);
 
-  m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise =  new PicPSP_TrisRegister("trise",m_porte, false);
+  m_porte = new PicPortRegister(this,"porte","",8,0x07);
+  m_trise =  new PicPSP_TrisRegister(this,"trise","",m_porte, false);
 
 }
 P16C64::~P16C64()
 {
+  cout << __FUNCTION__ << endl;
+
+  delete_sfr_register((Register**)&m_portc,0x07);
+  delete_sfr_register((Register**)&m_trisc,0x87);
+
 }
 //------------------------------------------------------------------------
 //
@@ -658,7 +700,8 @@ void P16C65::create_sfr_map(void)
   ccpr2h.ccprl  = &ccpr2l;
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(&usart), new _RCREG(&usart));
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
@@ -666,18 +709,12 @@ void P16C65::create_sfr_map(void)
   add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
 
-  ccpr2l.new_name("ccpr2l");
-  ccpr2h.new_name("ccpr2h");
-  ccp2con.new_name("ccp2con");
-
   if (pir2) {
     pir2->set_intcon(&intcon_reg);
     pir2->set_pie(&pie2);
   }
 
-  pie2.pir    = get_pir2();
-  pie2.new_name("pie2");
-
+  pie2.setPir(get_pir2());
 }
 
 void P16C65::create_symbols(void)
@@ -700,11 +737,18 @@ void P16C65::create_symbols(void)
 // is done within the 'C64 constructor.
 
 P16C65::P16C65(const char *_name, const char *desc)
-  : P16C64(_name,desc)
+  : P16C64(_name,desc),
+    usart(this)
 {
 
   if(verbose)
     cout << "c65 constructor, type = " << isa() << '\n';
+}
+P16C65::~P16C65()
+{
+  cout << __FUNCTION__ << endl;
+
+  delete_file_registers(0xc0, 0xff);
 }
 
 void P16C65::create(void)

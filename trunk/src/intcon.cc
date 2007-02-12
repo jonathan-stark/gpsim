@@ -41,13 +41,13 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 // member functions for the INTCON base class
 //--------------------------------------------------
-INTCON::INTCON(void)
-  : interrupt_trace(0)
+INTCON::INTCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    interrupt_trace(0)
 {
-  new_name("intcon");
 }
 
-void INTCON::set_T0IF(void)
+void INTCON::set_T0IF()
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
   trace.raw(write_trace.get() | value.get());
@@ -91,7 +91,7 @@ void INTCON::put(unsigned int new_value)
       cpu_pic->BP_set_interrupt();
 }
 
-void INTCON::peripheral_interrupt(void)
+void INTCON::peripheral_interrupt()
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
 
@@ -99,6 +99,24 @@ void INTCON::peripheral_interrupt(void)
     cpu_pic->BP_set_interrupt();
 }
 
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+INTCON2::INTCON2(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+INTCON3::INTCON3(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+INTCON_14_PIR::INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDesc)
+  : INTCON(pCpu, pName, pDesc),
+    pir_set(0)
+{}
 
 bool INTCON_14_PIR::check_peripheral_interrupt()
 {
@@ -115,16 +133,16 @@ bool INTCON_14_PIR::check_peripheral_interrupt()
 // intcon for the 16-bit processor cores.
 //
 //----------------------------------------------------------------------
-INTCON_16::INTCON_16()
-  : interrupt_vector(0), rcon(0), intcon2(0)
+INTCON_16::INTCON_16(Processor *pCpu, const char *pName, const char *pDesc)
+  : INTCON(pCpu, pName, pDesc),
+    interrupt_vector(0), rcon(0), intcon2(0)
 {
-
 }
 
 
 
 //----------------------------------------------------------------------
-// void INTCON_16::clear_gies(void)
+// void INTCON_16::clear_gies()
 //
 //  This routine clears the global interrupt enable bit(s). If priority
 // interrupts are used (IPEN in RCON is set) then the appropriate gie
@@ -134,7 +152,7 @@ INTCON_16::INTCON_16()
 //
 //----------------------------------------------------------------------
 
-void INTCON_16::clear_gies(void)
+void INTCON_16::clear_gies()
 {
 
   assert(cpu != 0);
@@ -149,11 +167,11 @@ void INTCON_16::clear_gies(void)
 
 
 //----------------------------------------------------------------------
-// void INTCON_16::clear_gies(void)
+// void INTCON_16::clear_gies()
 //
 //----------------------------------------------------------------------
 
-void INTCON_16::set_gies(void)
+void INTCON_16::set_gies()
 {
 
   assert(rcon != 0);

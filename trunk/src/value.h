@@ -49,8 +49,7 @@ class Value : public gpsimObject
 {
 public:
   Value();
-  Value(const char *name, const char *desc);
-
+  Value(const char *name, const char *desc, Module *pM=0);
   virtual ~Value();
 
   virtual unsigned int get_leftVal() {return 0;}
@@ -123,129 +122,71 @@ public:
   /// xrefs - a cross reference allows a Value to notify another
   /// Value when it is changed.
 
-  virtual void set_xref(Value *);
-  virtual Value *get_xref();
+  //**  virtual void set_xref(Value *);
+  //**  virtual Value *get_xref();
 
-  virtual void setClearableSymbol(bool bClear);
-  virtual bool isClearable();
   // Some Value types that are used for symbol classes
   // contain a gpsimValue type that have update listeners.
-  virtual void update(void) {}
+  virtual void update(); // {}
   virtual Value* evaluate() { return copy(); }
 
-private:
-  Value *xref;
-protected:
-  bool m_bClearableSymbol;
-};
-
-//========================================================================
-//
-/// gpsimValue is a Value object that is unique to the simulator.
-/// All value objects of the behavioral models are derived from gpsimValue.
-/// A gpsimValue object 'belongs to' a Module.
-
-class gpsimValue : public gpsimObject 
-{
-public:
-
-  gpsimValue(void);
-  gpsimValue(Module *);
-  virtual ~gpsimValue();
-
-
-  /// Access functions
-  /// \deprecated Use SimulatedGet()
-  virtual unsigned int get(void)
-  {
-    return get_value();
-  }
-
-  /// \deprecated Use SimulatedSet()
-  virtual void put(unsigned int new_value)
-  {
-    put_value(new_value);
-  }
-
-  /// put_value is the same as put(), but some extra stuff like
-  /// interfacing to the gui is done. (It's more efficient than
-  /// burdening the run time performance with (unnecessary) gui
-  /// calls.)
-  ///
-  /// \deprecated Use ShuntedSet() where appropriate. If ShuntedSet()
-  /// does not meet the procise needs consider defining a new
-  /// pair of access functions.
-
-  virtual void put_value(unsigned int new_value) = 0;
-
-  /// A variation of get(). (for register values, get_value returns
-  /// just the value whereas get() returns the value and does other
-  /// register specific things like tracing.
-
-  virtual unsigned int get_value(void) = 0;
-
-  /// SimulatedGet() invokes the full simulation of getting a
-  /// a value from a simulated object.
-  virtual unsigned int  SimulatedGet(void) {
-    return ShuntedGet();
-  }
-
-  /// SimulatedSet() invokes the full simulation of setting a
-  /// a value of a simulated object.
-  virtual void          SimulatedSet(unsigned int new_value) {
-    ShuntedSet(new_value);
-  }
-
-  /// ShuntedGet() bypasses all simulated effects of a SimulatedSet().
-  /// \return Returns an identical value as a SimulatedGet()
-  virtual unsigned int  ShuntedGet(void) {
-    // for now use old API
-    return get_value();
-  }
-
-  /// ShuntedSet() bypasses all simulated effects of a SimulatedSet().
-  virtual void          ShuntedSet(unsigned int new_value){
-    // for now use old API
-    put_value(new_value);
-  }
-
-  virtual void set_module(Module *new_cpu)
-  {
-    cpu = new_cpu;
-  }
-
-  Module *get_module(void)
-  {
-    return cpu;
-  }
-
-  virtual void set_cpu(Processor *new_cpu);
-
-  Processor *get_cpu(void) const;
-
-  // When the value changes, then update() is called 
-  // to update all things that are watching this value.
-  virtual void update(void);
   virtual void add_xref(void *xref);
   virtual void remove_xref(void *xref);
+  XrefObject xref() { return _xref; }
 
-  XrefObject xref(void) { return _xref; }
 
-  virtual string toString();
+  virtual void set_module(Module *new_cpu);
+  Module *get_module();
+  virtual void set_cpu(Processor *new_cpu);
+  Processor *get_cpu() const;
+  //virtual string toString();
 
-protected:
-  // If we are linking with a gui, then here are a
-  // few declarations that are used to send data to it.
-  // This is essentially a singly-linked list of pointers
-  // to structures. The structures provide information
-  // such as where the data is located, the type of window
-  // it's in, and also the way in which the data is presented
-  
+  void addName(string &r_sAliasedName);
+
+private:
   XrefObject _xref;
 
+protected:
   // A pointer to the module that owns this value.
   Module *cpu;
+  // Aliased names for this Value
+  list<string> *m_aka;
+};
 
+
+/*****************************************************************
+ ValueWrapper
+ */
+class ValueWrapper : public Value
+{
+public:
+  ValueWrapper(Value *pCopy);
+  virtual ~ValueWrapper();
+
+  virtual unsigned int get_leftVal();
+  virtual unsigned int get_rightVal();
+  virtual void set(const char *cP,int len=0);
+  virtual void set(double);
+  virtual void set(gint64);
+  virtual void set(int);
+  virtual void set(bool);
+  virtual void set(Value *);
+  virtual void set(Expression *);
+  virtual void set(Packet &);
+
+  virtual void get(bool &b);
+  virtual void get(int &);
+  virtual void get(guint64 &);
+  virtual void get(gint64 &);
+  virtual void get(double &);
+  virtual void get(char *, int len);
+  virtual void get(Packet &);
+  virtual Value *copy();
+  virtual void update();
+  virtual Value* evaluate();
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
+private:
+  Value *m_pVal;
 };
 
 /*****************************************************************

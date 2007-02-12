@@ -68,7 +68,7 @@ start
 
 
   ; Create a script to define the schematic
-  ; Note, the .sim directives are only "executed" once.
+  ; Note, the .sim directives are "executed" only once.
 
   ; First, instantiate the gates:
 
@@ -83,7 +83,36 @@ start
    .sim "module load not  U8_not"
    .sim "module load not  U9_not"
 
- 
+   .sim ".xpos=36.0"
+   .sim ".ypos=24.0"
+
+   .sim "U3_and.xpos=216.0"
+   .sim "U3_and.ypos=24.0"
+
+   .sim "U4_and.xpos=288.0"
+   .sim "U4_and.ypos=36.0"
+
+   .sim "U5_or.xpos=216.0"
+   .sim "U5_or.ypos=84.0"
+
+   .sim "U6_or.xpos=288.0"
+   .sim "U6_or.ypos=96.0"
+
+   .sim "U1_xor.xpos=216.0"
+   .sim "U1_xor.ypos=144.0"
+
+   .sim "U2_xor.xpos=288.0"
+   .sim "U2_xor.ypos=156.0"
+
+   .sim "U7_not.xpos=228.0"
+   .sim "U7_not.ypos=204.0"
+
+   .sim "U8_not.xpos=228.0"
+   .sim "U8_not.ypos=264.0"
+
+   .sim "U9_not.xpos=288.0"
+   .sim "U9_not.ypos=264.0"
+
   ; Or Gate check. 
   ;            U5_or
   ; porta0  ---)-\     U6_or

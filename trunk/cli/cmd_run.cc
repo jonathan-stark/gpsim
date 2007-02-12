@@ -54,7 +54,7 @@ cmd_run::cmd_run()
 void cmd_run::run()
 {
 
-  Integer &verbosity = *get_symbol_table().findInteger("sim.verbosity");
+  Integer &verbosity = *globalSymbolTable().findInteger("sim.verbosity");
 
   get_interface().start_simulation();
 

@@ -87,8 +87,10 @@ public:
 
   Package(void);
   Package(unsigned int number_of_pins);
+  virtual ~Package();
 
   void assign_pin(unsigned int pin_number, IOPIN *pin);
+  void destroy_pin(unsigned int pin_number, IOPIN *pin=0);
   void create_pkg(unsigned int _number_of_pins);
 
   unsigned int isa(void){return _NO_PACKAGE_;};

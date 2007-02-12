@@ -147,9 +147,7 @@ gpsiminclude_HEADERS = \
 	registers.h \
 	sim_context.h \
 	stimuli.h \
-	stimulus_orb.h \
 	symbol.h \
-	symbol_orb.h \
 	tmr0.h \
 	trace.h \
 	trigger.h \

@@ -417,7 +417,8 @@ public:
   // Creation and manipulation of registers
   //
 
-  void create_invalid_registers (void);
+  void create_invalid_registers ();
+  void delete_invalid_registers ();
   void add_file_registers(unsigned int start_address, 
 			  unsigned int end_address, 
 			  unsigned int alias_offset);
@@ -477,7 +478,8 @@ public:
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
-  virtual void initializeAttributes();
+  //virtual void initializeAttributes();
+
   //
   // Processor State 
   //
@@ -493,14 +495,15 @@ public:
   // Execution control
   //
 
-  virtual void run(bool refresh=true);
+  virtual void run(bool refresh=true) = 0;
   virtual void run_to_address(unsigned int destination);
-  virtual void finish(void);
+  virtual void finish(void) = 0;
 
   virtual void sleep(void) {};
-  virtual void step(unsigned int steps,bool refresh=true);
+  virtual void step(unsigned int steps,bool refresh=true) = 0;
   virtual void step_over(bool refresh=true);
   virtual void step_one(bool refresh=true) = 0;
+  virtual void step_cycle() = 0;
   virtual void interrupt(void) = 0 ;
 
   // Simulation modes

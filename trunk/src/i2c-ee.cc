@@ -147,7 +147,7 @@ public:
 //    3) what happens if 
 //       > the simulator 
 
-I2C_EE::I2C_EE(unsigned int _rom_size, unsigned int _write_page_size,
+I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page_size,
 	unsigned int _addr_bytes, unsigned int _CSmask,
 	unsigned int _BSmask, unsigned int _BSshift)
   : rom(0),
@@ -175,15 +175,11 @@ I2C_EE::I2C_EE(unsigned int _rom_size, unsigned int _write_page_size,
 
   char str[100];
   for (unsigned int i = 0; i < rom_size; i++) {
-
-    rom[i] = new Register;
+    snprintf (str,sizeof(str),"ee0x%02x", i);
+    rom[i] = new Register(pCpu,str,"");
     rom[i]->address = i;
     rom[i]->value.put(0);
     rom[i]->alias_mask = 0;
-
-    sprintf (str, "ee0x%02x", i);
-    rom[i]->new_name(str);
-
   }
 
   scl = new I2C_EE_SCL ( this, "SCL" );

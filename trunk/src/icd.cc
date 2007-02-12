@@ -80,7 +80,7 @@ public:
   Register *replaced;
   int is_stale;
 
-  icd_Register();
+  icd_Register(Processor *);
 
   virtual REGISTER_TYPES isa(void) {return replaced->isa();};
   virtual string &name(void)
@@ -88,7 +88,7 @@ public:
     if(replaced)
       return replaced->name();
     else
-      return gpsimValue::name();
+      return gpsimObject::name();
   };
 
   virtual void put_value(unsigned int new_value);
@@ -103,7 +103,7 @@ public:
   Status_register *replaced;
   int is_stale;
 
-  icd_StatusReg();
+  icd_StatusReg(Processor *);
 
   virtual REGISTER_TYPES isa(void) {return replaced->isa();};
   virtual string &name(void)
@@ -111,7 +111,7 @@ public:
     if(replaced)
       return replaced->name();
     else
-      return gpsimValue::name();
+      return gpsimObject::name();
   }
 
   virtual void put_value(unsigned int new_value);
@@ -126,7 +126,7 @@ public:
   WREG *replaced;  
   int is_stale;
 
-  icd_WREG();
+  icd_WREG(Processor *);
 
   virtual REGISTER_TYPES isa(void) {return replaced->isa();};
   virtual string &name(void)
@@ -134,7 +134,7 @@ public:
     if(replaced)
       return replaced->name();
     else
-      return gpsimValue::name();
+      return gpsimObject::name();
   }
 
   virtual void put_value(unsigned int new_value);
@@ -149,7 +149,7 @@ public:
   PCLATH *replaced;
   int is_stale;
 
-  icd_PCLATH();
+  icd_PCLATH(Processor *);
 
   virtual REGISTER_TYPES isa(void) {return replaced->isa();};
   virtual string &name(void)
@@ -157,7 +157,7 @@ public:
     if(replaced)
       return replaced->name();
     else
-      return gpsimValue::name();
+      return gpsimObject::name();
   }
 
   virtual void put_value(unsigned int new_value);
@@ -171,7 +171,7 @@ public:
   FSR *replaced;   
   int is_stale;
 
-  icd_FSR();
+  icd_FSR(Processor *);
 
   virtual REGISTER_TYPES isa(void) {return replaced->isa();};
   virtual string &name(void)
@@ -179,7 +179,7 @@ public:
     if(replaced)
       return replaced->name();
     else
-      return gpsimValue::name();
+      return gpsimObject::name();
   }
 
   virtual void put_value(unsigned int new_value);
@@ -432,8 +432,8 @@ struct termios oldtio, newtio;
 void put_dumb_register(Register **frp, int address)
 {
     Register *fr = *frp;
-    icd_Register *ir = new icd_Register;
-    ir->set_cpu(fr->get_cpu());
+    icd_Register *ir = new icd_Register(fr->get_cpu());
+    //ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
     ir->address = address;
@@ -441,8 +441,8 @@ void put_dumb_register(Register **frp, int address)
 void put_dumb_status_register(Status_register **frp)
 {
     Status_register *fr = *frp;
-    icd_StatusReg *ir = new icd_StatusReg;
-    ir->set_cpu(fr->get_cpu());
+    icd_StatusReg *ir = new icd_StatusReg(fr->get_cpu());
+    //ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
     ir->address = fr->address;
@@ -450,7 +450,7 @@ void put_dumb_status_register(Status_register **frp)
 void put_dumb_pc_register(Program_Counter **frp)
 {
     Program_Counter *fr = *frp;
-    icd_PC *ir = new icd_PC;
+    icd_PC *ir = new icd_PC();
     ir->set_cpu(fr->get_cpu());
     ir->memory_size_mask = fr->memory_size_mask;
     *frp = ir;
@@ -459,24 +459,24 @@ void put_dumb_pc_register(Program_Counter **frp)
 void put_dumb_pclath_register(PCLATH **frp)
 {
     PCLATH *fr = *frp;
-    icd_PCLATH *ir = new icd_PCLATH;
-    ir->set_cpu(fr->get_cpu());
+    icd_PCLATH *ir = new icd_PCLATH(fr->get_cpu());
+    //ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
 }
 void put_dumb_w_register(WREG **frp)
 {
     WREG *fr = *frp;
-    icd_WREG *ir = new icd_WREG;
-    ir->set_cpu(fr->get_cpu());
+    icd_WREG *ir = new icd_WREG(fr->get_cpu());
+    //ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
 }
 void put_dumb_fsr_register(FSR **frp)
 {
     FSR *fr = *frp;
-    icd_FSR *ir = new icd_FSR;
-    ir->set_cpu(fr->get_cpu());
+    icd_FSR *ir = new icd_FSR(fr->get_cpu());
+    //ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
 }
@@ -913,7 +913,8 @@ int icd_get_state()
 }
 */
 
-icd_Register::icd_Register()
+icd_Register::icd_Register(Processor *pCpu)
+  : Register(pCpu,"","")
 {
     replaced=0;
     value.put(0x42);
@@ -1059,7 +1060,8 @@ unsigned int icd_Register::get(void)
     return(value.get());
 }
 
-icd_WREG::icd_WREG()
+icd_WREG::icd_WREG(Processor *pCpu)
+  : WREG(pCpu,"","")
 {
     replaced=0;
     value.put(0x42);
@@ -1090,7 +1092,8 @@ unsigned int icd_WREG::get(void)
     return(value.get());
 }
 
-icd_StatusReg::icd_StatusReg()
+icd_StatusReg::icd_StatusReg(Processor *pCpu)
+  : Status_register(pCpu,"","")
 {
     replaced=0;
     value.put(0x42);
@@ -1124,7 +1127,8 @@ unsigned int icd_StatusReg::get(void)
 }
 
 
-icd_FSR::icd_FSR()
+icd_FSR::icd_FSR(Processor *pCpu)
+  : FSR(pCpu,"","")
 {
     replaced=0;
     value.put(0x42);
@@ -1154,7 +1158,8 @@ unsigned int icd_FSR::get_value(void)
     }
     return(value.get());
 }
-icd_PCLATH::icd_PCLATH()
+icd_PCLATH::icd_PCLATH(Processor *pCpu)
+  : PCLATH(pCpu,"","")
 {
     replaced=0;
     value.put(0x42);

@@ -32,14 +32,14 @@ class pic_processor;
 //---------------------------------------------------------
 // ADRES
 //
-
+/*
 class ADRES : public sfr_register
 {
 public:
 
   void put(int new_value);
 };
-
+*/
 
 //---------------------------------------------------------
 // ADCON1
@@ -61,7 +61,7 @@ public:
       ADFM  = 1<<7    // Format Result select bit 
     };
 
-  ADCON1();
+  ADCON1(Processor *pCpu, const char *pName, const char *pDesc);
 
   void setChannelConfiguration(unsigned int cfg, unsigned int bitMask);
   void setVrefLoConfiguration(unsigned int cfg, unsigned int channel);
@@ -132,7 +132,7 @@ public:
       AD_CONVERTING
     };
 
-  ADCON0();
+  ADCON0(Processor *pCpu, const char *pName, const char *pDesc);
 
   void start_conversion();
   void stop_conversion();
@@ -142,8 +142,8 @@ public:
   void put_conversion();
 
   bool getADIF() { return (value.get() & ADIF) != 0; }
-  void setAdres(ADRES *);
-  void setAdresLow(ADRES *);
+  void setAdres(sfr_register *);
+  void setAdresLow(sfr_register *);
   void setAdcon1(ADCON1 *);
   void setIntcon(INTCON *);
   void setA2DBits(unsigned int);
@@ -151,8 +151,8 @@ public:
 
 private:
 
-  ADRES *adres;
-  ADRES *adresl;
+  sfr_register *adres;
+  sfr_register *adresl;
   ADCON1 *adcon1;
   INTCON *intcon;
 
@@ -175,7 +175,7 @@ private:
 class ADCON0_withccp : public ADCON0
 {
 public:
-
+  ADCON0_withccp(Processor *pCpu, const char *pName, const char *pDesc);
   PIR_SET   *pir_set;
   virtual void set_interrupt();
 
@@ -190,17 +190,20 @@ class ANSEL : public sfr_register
 {
 public:
   enum
-    {
-	ANS0 = 1 << 0,
-	ANS1 = 1 << 1,
-	ANS2 = 1 << 2,
-	ANS3 = 1 << 3,
-	ANS4 = 1 << 4,
-	ANS5 = 1 << 5,
-	ANS6 = 1 << 6
-   };
-void setAdcon1(ADCON1 *new_adcon1);
-void put(unsigned int new_val);
+  {
+    ANS0 = 1 << 0,
+    ANS1 = 1 << 1,
+    ANS2 = 1 << 2,
+    ANS3 = 1 << 3,
+    ANS4 = 1 << 4,
+    ANS5 = 1 << 5,
+    ANS6 = 1 << 6
+  };
+
+  ANSEL(Processor *pCpu, const char *pName, const char *pDesc);
+
+  void setAdcon1(ADCON1 *new_adcon1);
+  void put(unsigned int new_val);
 
 private:
     ADCON1 *adcon1;

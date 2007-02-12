@@ -603,7 +603,7 @@ namespace Leds {
     for (i=0; i<8; i++)
       assign_pin(i+1,m_pins[i]);
 
-    initializeAttributes();
+    //initializeAttributes();
 
   }
 
@@ -801,7 +801,7 @@ namespace Leds {
 
     m_pin = new Led_Input((name() + ".in").c_str(), this);
     assign_pin(1, m_pin);
-    initializeAttributes();
+    //initializeAttributes();
   }
 
   //--------------------------------------------------------------

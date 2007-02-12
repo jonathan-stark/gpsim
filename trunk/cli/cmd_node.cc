@@ -26,10 +26,10 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_node.h"
 #include "../src/stimuli.h"
+#include "../src/symbol.h"
 
 cmd_node c_node;
 
-extern void dump_node_list(void);
 
 static cmd_options cmd_node_options[] =
 {
@@ -56,13 +56,33 @@ cmd_node::cmd_node()
   op = cmd_node_options; 
 }
 
+void dumpOneNode(const SymbolEntry_t &sym)
+{
+  Stimulus_Node *psn = dynamic_cast<Stimulus_Node *>(sym.second);
+
+  if (psn) {
+    cout << psn->name() << " voltage = " << psn->get_nodeVoltage() << "V\n";
+    if (psn->stimuli) {
+      stimulus *s = psn->stimuli;
+      while (s) {
+        cout << '\t' << s->name() << '\n';
+        s=s->next;
+      }
+    }
+  }
+}
+
+void dumpNodes(const SymbolTableEntry_t &st)
+{
+  cout << " Node Table: " << st.first << endl;
+  (st.second)->ForEachSymbolTable(dumpOneNode);
+}
+
 
 void cmd_node::list_nodes()
 {
-
-  dump_node_list();
+  globalSymbolTable().ForEachModule(dumpNodes);
 }
-
 
 void cmd_node::add_nodes(list <string> * nodes)
 {

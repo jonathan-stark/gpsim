@@ -37,10 +37,10 @@ class ADDLW : public Literal_op
 {
 
 public:
-  ADDLW(Processor *new_cpu, unsigned int new_opcode);
+  ADDLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new ADDLW(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new ADDLW(new_cpu,new_opcode, address);}
 
 };
 
@@ -51,11 +51,11 @@ class RETFIE : public instruction
 {
 public:
 
-  RETFIE(Processor *new_cpu, unsigned int new_opcode);
+  RETFIE(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute(void);
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new RETFIE(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new RETFIE(new_cpu,new_opcode,address);}
 
 };
 
@@ -65,11 +65,11 @@ class RETURN : public instruction
 {
 public:
 
-  RETURN(Processor *new_cpu, unsigned int new_opcode);
+  RETURN(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute(void);
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new RETURN(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new RETURN(new_cpu,new_opcode,address);}
 
 };
 
@@ -80,10 +80,10 @@ class SUBLW : public Literal_op
 
 public:
 
-  SUBLW(Processor *new_cpu, unsigned int new_opcode);
+  SUBLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new SUBLW(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new SUBLW(new_cpu,new_opcode,address);}
 
 };
 

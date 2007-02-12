@@ -264,6 +264,7 @@ void HD44780::setE(bool newE)
 // data bus to determine how the pins should be driven
 void HD44780::driveDataBus(unsigned int d)
 {
+  Dprintf(("driveDataBus 0x%02x\n",d));
   m_dataBus = d;
 }
 

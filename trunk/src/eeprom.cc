@@ -112,7 +112,7 @@ void EECON1::put(unsigned int new_value)
   
 }
 
-unsigned int EECON1::get(void)
+unsigned int EECON1::get()
 {
 
   trace.raw(read_trace.get() | value.get());
@@ -121,9 +121,9 @@ unsigned int EECON1::get(void)
   return(value.get());
 }
 
-EECON1::EECON1(void)
+EECON1::EECON1(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
 {
-  new_name("eecon1");
   valid_bits = EECON1_VALID_BITS;
 }
 
@@ -150,7 +150,7 @@ void EECON2::put(unsigned int new_value)
 
 }
 
-unsigned int EECON2::get(void)
+unsigned int EECON2::get()
 {
 
   trace.raw(read_trace.get() | value.get());
@@ -158,17 +158,13 @@ unsigned int EECON2::get(void)
   return(0);
 }
 
-EECON2::EECON2(void)
+EECON2::EECON2(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
 {
-  new_name("eecon2");
   ee_reset();
 }
 
-
-
-
-
-unsigned int EEDATA::get(void)
+unsigned int EEDATA::get()
 {
   trace.raw(read_trace.get() | value.get());
   return(value.get());
@@ -182,15 +178,12 @@ void EEDATA::put(unsigned int new_value)
 
 }
 
-EEDATA::EEDATA(void)
+EEDATA::EEDATA(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
 {
-  new_name("eedata");
 }
 
-
-
-
-unsigned int EEADR::get(void)
+unsigned int EEADR::get()
 {
 
   trace.raw(read_trace.get() | value.get());
@@ -208,23 +201,22 @@ void EEADR::put(unsigned int new_value)
 }
 
 
-EEADR::EEADR(void)
+EEADR::EEADR(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
 {
-  new_name("eeadr");
 }
 
 
 //------------------------------------------------------------------------
-EEPROM_PIR::EEPROM_PIR(PIR *pPir)
-  : m_pir(pPir)
+EEPROM_PIR::EEPROM_PIR(Processor *pCpu, PIR *pPir)
+  : EEPROM(pCpu),m_pir(pPir)
 {
-  
 }
 
 //------------------------------------------------------------------------
 // Set the EEIF and clear the WR bits. 
 
-void EEPROM_PIR::write_is_complete(void) 
+void EEPROM_PIR::write_is_complete() 
 {
 
   assert(m_pir != 0);
@@ -255,13 +247,18 @@ void EEPROM_PIR::write_is_complete(void)
 //    6) what happens if WREN goes low while a write is happening?
 //       > The simulator will complete the write and WREN will be cleared.
 
-EEPROM::EEPROM(void)
+EEPROM::EEPROM(Processor *pCpu)
+  : name_str(0),
+    cpu(pCpu),
+    intcon(0),
+    rom(0),
+    m_UiAccessOfRom(0),
+    rom_size(0),
+    eecon1(pCpu,"eecon1","EE Control 1"),
+    eecon2(pCpu,"eecon2","EE Control 2"),
+    eedata(pCpu,"eedata","EE Data"),
+    eeadr(pCpu,"eeadr", "EE Address")
 {
-
-  rom_size = 0;
-  name_str = 0;
-  cpu = 0;
-  intcon = 0;
 }
 
 Register *EEPROM::get_register(unsigned int address)
@@ -274,7 +271,7 @@ Register *EEPROM::get_register(unsigned int address)
 }
 
 
-void EEPROM::start_write(void)
+void EEPROM::start_write()
 {
 
   get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
@@ -287,7 +284,7 @@ void EEPROM::start_write(void)
 
 // Set the EEIF and clear the WR bits. 
 
-void EEPROM::write_is_complete(void) 
+void EEPROM::write_is_complete() 
 {
 
   assert(intcon != 0);
@@ -299,7 +296,7 @@ void EEPROM::write_is_complete(void)
 
 }
 
-void EEPROM::start_program_memory_read(void)
+void EEPROM::start_program_memory_read()
 {
 
   cout << "ERROR: program memory flash should not be accessible\n";
@@ -309,7 +306,7 @@ void EEPROM::start_program_memory_read(void)
 }
 
 
-void EEPROM::callback(void)
+void EEPROM::callback()
 {
 
   switch(eecon2.get_eestate()) {
@@ -380,18 +377,14 @@ void EEPROM::initialize(unsigned int new_rom_size)
   // Initialize the rom
 
   char str[100];
-  for (unsigned int i = 0; i < rom_size; i++)
-    {
+  for (unsigned int i = 0; i < rom_size; i++) {
 
-      rom[i] = new Register;
-      rom[i]->address = i;
-      rom[i]->value.put(0);
-      rom[i]->alias_mask = 0;
-
-      sprintf (str, "eereg0x%02x", i);
-      rom[i]->new_name(str);
-
-    }
+    snprintf (str, sizeof(str), "eereg0x%02x", i);
+    rom[i] = new Register(cpu,str);
+    rom[i]->address = i;
+    rom[i]->value.put(0);
+    rom[i]->alias_mask = 0;
+  }
 
   if(cpu) {
     cpu->ema.set_cpu(cpu);
@@ -400,7 +393,6 @@ void EEPROM::initialize(unsigned int new_rom_size)
 					     "eeData",
 					     rom,
 					     rom_size);
-
   }
 
 }
@@ -426,7 +418,7 @@ void EEPROM::set_intcon(INTCON *ic)
   intcon = ic; 
 }
 
-void EEPROM::dump(void)
+void EEPROM::dump()
 {
   unsigned int i, j, reg_num,v;
 
@@ -477,12 +469,14 @@ void EEPROM::dump(void)
 
 
 //------------------------------------------------------------------------
-EEPROM_WIDE::EEPROM_WIDE(PIR *pPir)
-  : EEPROM_PIR(pPir)
+EEPROM_WIDE::EEPROM_WIDE(Processor *pCpu, PIR *pPir)
+  : EEPROM_PIR(pCpu,pPir),
+    eedatah(pCpu,"eedatah", "EE Data High byte"),
+    eeadrh(pCpu, "eeadr", "EE Address High byte")
 {
 }
 
-void EEPROM_WIDE::start_write(void)
+void EEPROM_WIDE::start_write()
 {
 
   get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
@@ -493,7 +487,7 @@ void EEPROM_WIDE::start_write(void)
   eecon2.start_write();
 }
 
-void EEPROM_WIDE::start_program_memory_read(void)
+void EEPROM_WIDE::start_program_memory_read()
 {
 
   rd_adr = eeadr.value.get() | (eeadrh.value.get() << 8);
@@ -502,7 +496,7 @@ void EEPROM_WIDE::start_program_memory_read(void)
 
 }
 
-void EEPROM_WIDE::callback(void)
+void EEPROM_WIDE::callback()
 {
   //cout << "eeprom call back\n";
   

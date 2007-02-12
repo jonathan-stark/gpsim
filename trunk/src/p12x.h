@@ -29,7 +29,7 @@ class P12_I2C_EE;
 class GPIO : public PicPortRegister
 {
 public:
-  GPIO(const char *port_name, 
+  GPIO(Processor *pCpu, const char *pName, const char *pDesc,
        unsigned int numIopins, 
        unsigned int enableMask);
   void setbit(unsigned int bit_number, char new_value);

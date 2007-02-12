@@ -26,22 +26,22 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 using namespace std;
 
-class gpsimValue;
+class gpsimObject;
 
 class XrefObject {
  private:
-  gpsimValue *data;
+  gpsimObject *data;
   list<void*> xrefs;
  public:
   XrefObject();
-  XrefObject(gpsimValue *value);
+  XrefObject(gpsimObject *value);
   virtual ~XrefObject();
     
   virtual void _add(void *xref);
   virtual void clear(void *xref);
   virtual void _update();
   virtual int get_val(void);
-  virtual void assign_data(gpsimValue *);
+  virtual void assign_data(gpsimObject *);
 };
 
 #endif

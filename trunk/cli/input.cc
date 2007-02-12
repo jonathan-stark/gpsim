@@ -305,8 +305,8 @@ void initialize_CLI()
 
 void initialize_gpsim(void)
 {
-  s_bSTCEcho.setClearableSymbol(false);
-  get_symbol_table().add(&s_bSTCEcho);
+  //s_bSTCEcho.setClearableSymbol(false);
+  globalSymbolTable().addSymbol(&s_bSTCEcho);
   initialize_CLI();
   if(gUsingThreads())
     initialize_threads();

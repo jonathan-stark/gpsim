@@ -161,6 +161,7 @@ class GuiModule : public GuiBreadBoardObject
 public:
   GuiModule(Module *, Breadboard_Window *);
   void SetPosition(int x, int y);
+  void GetPosition(int &x, int &y);
   double Distance(int x, int y);
 
   virtual void Update();

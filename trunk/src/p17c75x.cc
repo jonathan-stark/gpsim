@@ -199,6 +199,7 @@ Processor * P17C7xx::construct(const char *name)
 }
 
 P17C7xx::P17C7xx()
+  : cpusta(this,"cpusta","")
 {
   if(verbose)
     cout << "17c7xx constructor, type = " << isa() << '\n';
@@ -227,15 +228,17 @@ void  P17C7xx::create(int ram_top)
   pic_processor::create();
 
   fast_stack.init(this);
+  /*
   ind0.init(this);
   ind1.init(this);
   ind2.init(this);
+  */
   tmr0l.initialize();
   intcon.initialize();
 
   
   //usart.initialize(this);
-  tbl.initialize(this);
+  //tbl.initialize(this);
   //tmr0l.start(0);
 
   //  create_iopin_map();

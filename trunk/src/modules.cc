@@ -51,7 +51,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "pic-processor.h"
 #include "stimuli.h"
-#include "stimulus_orb.h"
 #include "symbol.h"
 #include "xref.h"
 #include "value.h"
@@ -150,10 +149,10 @@ Module *      ModuleLibrary::NewObject(const char *pTypeName, const char *pName)
     if(pModule) {
       pModule->SetType(pType);
       m_ModuleList.push_back(pModule);
-      symbol_table.add_module(pModule, pName);
-	    // Tell the gui or any modules that are interfaced to gpsim
-	    // that a new module has been added.
-	    gi.new_module(pModule);
+      globalSymbolTable().addModule(pModule);
+      // Tell the gui or any modules that are interfaced to gpsim
+      // that a new module has been added.
+      gi.new_module(pModule);
       return pModule;
     }
   }
@@ -231,13 +230,16 @@ string        ModuleLibrary::DisplayModuleTypeList() {
   return string(stream.str());
 }
 
-string        ModuleLibrary::DisplayModuleList() {
-  return symbol_table.DisplayType(typeid(module_symbol));
+string  ModuleLibrary::DisplayModuleList()
+{
+  //  return globalSymbolTable().listModules();
+  return string ("FIXME -- modules.cc - DisplayModuleList");
 }
 
-string ModuleLibrary::DisplayModulePins(char *pName) {
+string ModuleLibrary::DisplayModulePins(char *pName)
+{
   ostringstream stream;
-  Module * pMod = symbol_table.findModule(pName);
+  Module * pMod = globalSymbolTable().findModule(pName);
   if(pMod == NULL) {
     stream << "module `" << pName << "' wasn't found" << endl;
   }
@@ -414,21 +416,35 @@ Module::Module(const char *_name, const char *desc)
     // If there is a module symbol already with this
     // name, then print a warning before deleting.
 
-    module_symbol *pOldModule = get_symbol_table().findModuleSymbol(_name);
+    gpsimObject *pOldModule = globalSymbolTable().find(name());
     if (pOldModule) {
-      cout << "Warning: There already is a module in the symbol table named " << _name << endl;
-      cout << "         The old module's symbols have been removed." << endl;
-      get_symbol_table().clear(_name);
+      cout << "Warning: There already is a symbol in the symbol table named " << _name << endl;
+      return;
     }
-    get_symbol_table().add_module(this,_name);
+  }
+  globalSymbolTable().addModule(this);
+
+  // Create position attribute place holders if we're not using the gui
+  if(!get_interface().bUsingGUI()) {
+    addSymbol(new Float("xpos",80.0));
+    addSymbol(new Float("ypos",80.0));
   }
 
 }
 
 Module::~Module(void)
 {
+  map<string ,ModuleScript *>::iterator si;
 
-  symbol_table.remove_module(this);
+  for (si = m_scripts.begin();
+       si != m_scripts.end();
+       ++si) {
+    ModuleScript *pMS = (*si).second;
+    delete pMS;
+  }
+  m_scripts.clear();
+
+  globalSymbolTable().removeModule(this);
 
 //  instantiated_modules_list.remove(this);
 
@@ -441,79 +457,17 @@ void Module::reset(RESET_TYPE r)
   cout << " resetting module " << name() << endl;
 }
 
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-string  Module::DisplayAttributes(bool show_values)
+int Module::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
 {
-  ostringstream stream;
-  list <Value *> :: iterator attribute_iterator;
-
-  for (attribute_iterator = attributes.begin();  
-       attribute_iterator != attributes.end(); 
-       attribute_iterator++) {
-
-    Value *locattr = *attribute_iterator;
-
-    stream << locattr->name();
-    if(show_values)
-      stream << " = " << locattr->toString();
-    stream << endl;
-  }
-  stream << ends;
-  return string(stream.str());
+  return mSymbolTable.addSymbol(pSym, ps_AliasedName);
 }
-
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-Value *Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
+int Module::removeSymbol(gpsimObject *pSym, bool bDeleteObject)
 {
-  if(!attribute_name)
-    return 0;
-
-  string full_name = name() + "." + attribute_name;
-  list <Value *> :: iterator attribute_iterator;
-
-  for (attribute_iterator = attributes.begin();  
-       attribute_iterator != attributes.end(); 
-       attribute_iterator++) {
-
-    Value *locattr = *attribute_iterator;
-
-    if (locattr->name() == full_name)
-      return locattr;
-  }
-
-  if (bWarnIfNotFound)
-    cout << "Could not find attribute named " << attribute_name  << '\n';
-
-  return 0;
+  return mSymbolTable.removeSymbol(pSym, bDeleteObject);
 }
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void Module::initializeAttributes()
+gpsimObject *Module::findSymbol(const string &searchString)
 {
-  // Create position attribute place holders if we're not using the gui
-  if(!get_interface().bUsingGUI()) {
-    add_attribute(new Float("xpos",80.0));
-    add_attribute(new Float("ypos",80.0));
-  }
-}
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void Module::add_attribute(Value *new_attribute)
-{
-
-  attributes.push_back(new_attribute);
-
-  symbol_table.add(new attribute_symbol(this,new_attribute));
-
-  if(verbose)
-    cout << "add_attribute  name = " << new_attribute->name() << '\n';
-
+  return mSymbolTable.findSymbol(searchString);
 }
 
 //-------------------------------------------------------------------
@@ -629,6 +583,14 @@ Module::ModuleScript::ModuleScript(string &name_)
 //-------------------------------------------------------------------
 Module::ModuleScript::~ModuleScript()
 {
+  list <string *> :: iterator command_iterator;
+
+  for (command_iterator = m_commands.begin();
+       command_iterator != m_commands.end(); 
+       ++command_iterator)
+    delete *command_iterator;
+
+  m_commands.clear();
 }
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------

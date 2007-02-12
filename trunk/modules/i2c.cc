@@ -503,15 +503,15 @@ namespace I2C_Module {
     mAddress = new I2C_Address(this);
     mDebug = new I2C_Debug(this);
 
-    initializeAttributes();
-    add_attribute(mTxByte);
-    add_attribute(mTxReady);
-    add_attribute(mRxByte);
-    add_attribute(mRxSequence);
-    add_attribute(mSend7BitAddress);
-    add_attribute(mStop);
-    add_attribute(mAddress);
-    add_attribute(mDebug);
+    //initializeAttributes();
+    addSymbol(mTxByte);
+    addSymbol(mTxReady);
+    addSymbol(mRxByte);
+    addSymbol(mRxSequence);
+    addSymbol(mSend7BitAddress);
+    addSymbol(mStop);
+    addSymbol(mAddress);
+    addSymbol(mDebug);
     // We may also want a logging function...
   }
 

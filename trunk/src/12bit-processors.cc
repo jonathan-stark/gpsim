@@ -108,7 +108,7 @@ _12bit_processor::_12bit_processor(const char *_name, const char *desc)
 
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
-  option_reg = new OPTION_REG();
+  option_reg = new OPTION_REG(this, "option_reg");
 
   mOptionTT = new OptionTraceType(this,option_reg);
   trace.allocateTraceType(mOptionTT);
@@ -124,9 +124,8 @@ _12bit_processor::~_12bit_processor()
 void _12bit_processor::create_symbols()
 {
   pic_processor::create_symbols();
-  symbol_table.add_register(option_reg);
-  // add a special symbol for W
-  symbol_table.add_w(W);
+  addSymbol(option_reg);
+  addSymbol(W);
 }
 
 void _12bit_processor::reset(RESET_TYPE r)
@@ -179,9 +178,7 @@ void _12bit_processor::create()
 
   pic_processor::create();
 
-  fsr = new FSR_12(fsr_register_page_bits(), fsr_valid_bits());
-  fsr->new_name("fsr");
-
+  fsr = new FSR_12(this,"fsr",fsr_register_page_bits(), fsr_valid_bits());
 
   // Sigh. Hack, hack,... manually assign indf bits
   indf->fsr_mask = 0x1f;
@@ -199,6 +196,7 @@ void _12bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory *[1];
   *m_configMemory = new ConfigMemory("CONFIG", 0xfff,"Configuration Word",this,0xfff);
+  addSymbol(*m_configMemory);
 }
 
 //-------------------------------------------------------------------

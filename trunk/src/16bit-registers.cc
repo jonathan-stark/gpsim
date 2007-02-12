@@ -35,10 +35,15 @@ Boston, MA 02111-1307, USA.  */
 // member functions for the BSR class
 //--------------------------------------------------
 //
+BSR::BSR(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc),
+    register_page_bits(0)
+{
+}
+
 void  BSR::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   value.put(new_value & 0x0f);
   cpu_pic->register_bank = &cpu_pic->registers[ value.get() << 8 ];
@@ -48,12 +53,10 @@ void  BSR::put(unsigned int new_value)
 
 void  BSR::put_value(unsigned int new_value)
 {
-
   put(new_value);
 
   update();
   cpu16->indf->update();
-
 }
 
 
@@ -61,6 +64,12 @@ void  BSR::put_value(unsigned int new_value)
 // member functions for the FSR class
 //--------------------------------------------------
 //
+FSRL::FSRL(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
 void  FSRL::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
@@ -80,13 +89,17 @@ void  FSRL::put_value(unsigned int new_value)
 
 }
 
+FSRH::FSRH(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
 void  FSRH::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   value.put(new_value & 0x0f);
 
-  //  iam->fsr_delta = 0;
   iam->update_fsr_value();
 
 }
@@ -100,10 +113,15 @@ void  FSRH::put_value(unsigned int new_value)
   cpu16->indf->update();
 }
 
-void  INDF16::put(unsigned int new_value)
+INDF16::INDF16(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+void INDF16::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
 
   iam->fsr_value += iam->fsr_delta;
   iam->fsr_delta = 0;
@@ -115,32 +133,33 @@ void  INDF16::put(unsigned int new_value)
 void INDF16::put_value(unsigned int new_value)
 {
   put(new_value);
-
   update();
-
-
 }
 
-unsigned int INDF16::get(void)
+unsigned int INDF16::get()
 {
 
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
-
   iam->fsr_value += iam->fsr_delta;
   iam->fsr_delta = 0;
 
   return(iam->get());
 }
 
-unsigned int INDF16::get_value(void)
+unsigned int INDF16::get_value()
 {
   return(iam->get_value());
 }
 
 //------------------------------------------------
 // PREINC
-unsigned int PREINC::get(void)
+PREINC::PREINC(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+unsigned int PREINC::get()
 {
 
   trace.raw(read_trace.get() | value.get());
@@ -150,7 +169,7 @@ unsigned int PREINC::get(void)
   return(iam->get());
 }
 
-unsigned int PREINC::get_value(void)
+unsigned int PREINC::get_value()
 {
   return(iam->get_value());
 }
@@ -174,17 +193,22 @@ void PREINC::put_value(unsigned int new_value)
 
 //------------------------------------------------
 // POSTINC
-unsigned int POSTINC::get(void)
+POSTINC::POSTINC(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+unsigned int POSTINC::get()
 {
 
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   iam->postinc_fsr_value();
 
   return(iam->get());
 }
 
-unsigned int POSTINC::get_value(void)
+unsigned int POSTINC::get_value()
 {
   return(iam->get_value());
 }
@@ -192,7 +216,6 @@ unsigned int POSTINC::get_value(void)
 void POSTINC::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
 
   iam->postinc_fsr_value();
   iam->put(new_value);
@@ -210,17 +233,20 @@ void POSTINC::put_value(unsigned int new_value)
 
 //------------------------------------------------
 // POSTDEC
-unsigned int POSTDEC::get(void)
+POSTDEC::POSTDEC(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
 {
-
+}
+unsigned int POSTDEC::get()
+{
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   iam->postdec_fsr_value();
 
   return(iam->get());
 }
 
-unsigned int POSTDEC::get_value(void)
+unsigned int POSTDEC::get_value()
 {
   return(iam->get_value());
 }
@@ -228,7 +254,6 @@ unsigned int POSTDEC::get_value(void)
 void POSTDEC::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
 
   iam->postdec_fsr_value();
   iam->put(new_value);
@@ -239,17 +264,21 @@ void POSTDEC::put_value(unsigned int new_value)
   put(new_value);
 
   update();
-
 }
 
 
 //------------------------------------------------
 // PLUSW
-unsigned int PLUSW::get(void)
+PLUSW::PLUSW(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+unsigned int PLUSW::get()
 {
 
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
@@ -259,7 +288,7 @@ unsigned int PLUSW::get(void)
 
 }
 
-unsigned int PLUSW::get_value(void)
+unsigned int PLUSW::get_value()
 {
 
   int destination = iam->plusw_fsr_value();
@@ -295,9 +324,16 @@ void PLUSW::put_value(unsigned int new_value)
 
 //------------------------------------------------
 
-void Indirect_Addressing::init(_16bit_processor *new_cpu)
+Indirect_Addressing::Indirect_Addressing(_16bit_processor *pCpu, const string &n)
+  : fsrl(pCpu, (string("fsrl")+n).c_str(), "FSR Low", this),
+    fsrh(pCpu, (string("fsrh")+n).c_str(), "FSR High", this),
+    indf(pCpu, (string("indf")+n).c_str(), "Indirect Register", this),
+    preinc(pCpu, (string("preinc")+n).c_str(), "Pre Increment Indirect", this),
+    postinc(pCpu, (string("postinc")+n).c_str(), "Post Increment Indirect", this),
+    postdec(pCpu, (string("postdec")+n).c_str(), "Post Decrement Indirect", this),
+    plusw(pCpu, (string("plusw")+n).c_str(), "Literal Offset Indirect", this)
 {
-
+  /*
   fsrl.iam = this;
   fsrh.iam = this;
   indf.iam = this;
@@ -305,8 +341,8 @@ void Indirect_Addressing::init(_16bit_processor *new_cpu)
   postinc.iam = this;
   postdec.iam = this;
   plusw.iam = this;
-
-  cpu = new_cpu;
+  */
+  cpu = pCpu;
 
 }
 
@@ -338,7 +374,7 @@ void Indirect_Addressing::put(unsigned int new_value)
  * indirect addressing class will call this routine to indirectly
  * retrieve data.
  */
-unsigned int Indirect_Addressing::get(void)
+unsigned int Indirect_Addressing::get()
 {
   //  unsigned int midbits;
 
@@ -364,7 +400,7 @@ unsigned int Indirect_Addressing::get(void)
  * indirect addressing class will call this routine to indirectly
  * retrieve data.
  */
-unsigned int Indirect_Addressing::get_value(void)
+unsigned int Indirect_Addressing::get_value()
 {
   /*
   unsigned int midbits;
@@ -401,7 +437,7 @@ void Indirect_Addressing::put_fsr(unsigned int new_fsr)
  *
  */
 
-void Indirect_Addressing::update_fsr_value(void)
+void Indirect_Addressing::update_fsr_value()
 {
 
   if(current_cycle != get_cycles().get())
@@ -418,7 +454,7 @@ void Indirect_Addressing::update_fsr_value(void)
  * only once. 
  */
 
-void Indirect_Addressing::preinc_fsr_value(void)
+void Indirect_Addressing::preinc_fsr_value()
 {
 
   if(current_cycle != get_cycles().get())
@@ -431,7 +467,7 @@ void Indirect_Addressing::preinc_fsr_value(void)
 
 }
 
-void Indirect_Addressing::postinc_fsr_value(void)
+void Indirect_Addressing::postinc_fsr_value()
 {
 
   if(current_cycle != get_cycles().get())
@@ -444,7 +480,7 @@ void Indirect_Addressing::postinc_fsr_value(void)
     }
 }
 
-void Indirect_Addressing::postdec_fsr_value(void)
+void Indirect_Addressing::postdec_fsr_value()
 {
 
   if(current_cycle != get_cycles().get())
@@ -458,7 +494,7 @@ void Indirect_Addressing::postdec_fsr_value(void)
 
 }
 
-int Indirect_Addressing::plusw_fsr_value(void)
+int Indirect_Addressing::plusw_fsr_value()
 {
 
   fsr_value += fsr_delta;
@@ -478,7 +514,7 @@ void Fast_Stack::init(_16bit_processor *new_cpu)
   cpu = new_cpu;
 }
 
-void Fast_Stack::push(void)
+void Fast_Stack::push()
 {
   w = cpu->W->value.get();
   status = cpu->status->value.get();
@@ -486,7 +522,7 @@ void Fast_Stack::push(void)
 
 }
 
-void Fast_Stack::pop(void)
+void Fast_Stack::pop()
 {
   //cout << "popping fast stack\n";
   cpu->W->put(w);
@@ -497,19 +533,19 @@ void Fast_Stack::pop(void)
 //--------------------------------------------------
 // member functions for the PCL base class
 //--------------------------------------------------
-PCL16::PCL16(void) : PCL()
+PCL16::PCL16(Processor *pCpu, const char *pName, const char *pDesc)
+  : PCL(pCpu,pName,pDesc)
 {
-  new_name("pcl");
 }
 
 
-unsigned int PCL16::get(void)
+unsigned int PCL16::get()
 {
   value.put(cpu_pic->pc->get_value() & 0xff);
   return((value.get()+2) & 0xff);
 }
 
-unsigned int PCL16::get_value(void)
+unsigned int PCL16::get_value()
 {
   value.put(cpu_pic->pc->get_value() & 0xff);
   return((value.get()) & 0xff);
@@ -521,7 +557,7 @@ unsigned int PCL16::get_value(void)
 // Program_Counter16
 // The Program_Counter16 is almost identical to Program_Counter.
 // The major difference is that the PC counts by 2 in the 16bit core.
-Program_Counter16::Program_Counter16(void)
+Program_Counter16::Program_Counter16()
 {
   if(verbose)
     cout << "pc constructor 16\n";
@@ -587,60 +623,58 @@ void Program_Counter16::put_value(unsigned int new_value)
 // get_value()
 //
 
-unsigned int Program_Counter16::get_value(void)
+unsigned int Program_Counter16::get_value()
 {
   return value << 1;
 }
 
 //------------------------------------------------
 // TOSL
-unsigned int TOSL::get(void)
+TOSL::TOSL(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
+
+unsigned int TOSL::get()
 {
   value.put(stack->get_tos() & 0xff);
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   return(value.get());
-
 }
 
-unsigned int TOSL::get_value(void)
+unsigned int TOSL::get_value()
 {
-
   value.put(stack->get_tos() & 0xff);
   return(value.get());
-
 }
 
 void TOSL::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
-
   stack->put_tos( stack->get_tos() & 0xffffff00 | new_value & 0xff);
 }
 
 void TOSL::put_value(unsigned int new_value)
 {
-
   stack->put_tos( stack->get_tos() & 0xffffff00 | new_value & 0xff);
-
   update();
-
 }
 
 
 //------------------------------------------------
 // TOSH
-unsigned int TOSH::get(void)
+TOSH::TOSH(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
+
+unsigned int TOSH::get()
 {
   value.put((stack->get_tos() >> 8) & 0xff);
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   return(value.get());
 
 }
 
-unsigned int TOSH::get_value(void)
+unsigned int TOSH::get_value()
 {
 
   value.put((stack->get_tos() >> 8) & 0xff);
@@ -651,8 +685,6 @@ unsigned int TOSH::get_value(void)
 void TOSH::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
-
   stack->put_tos( stack->get_tos() & 0xffff00ff | ( (new_value & 0xff) << 8));
 }
 
@@ -668,16 +700,18 @@ void TOSH::put_value(unsigned int new_value)
 
 //------------------------------------------------
 // TOSU
-unsigned int TOSU::get(void)
+TOSU::TOSU(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
+unsigned int TOSU::get()
 {
   value.put((stack->get_tos() >> 16) & 0x1f);
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   return(value.get());
 
 }
 
-unsigned int TOSU::get_value(void)
+unsigned int TOSU::get_value()
 {
 
   value.put((stack->get_tos() >> 16) & 0x1f);
@@ -688,61 +722,35 @@ unsigned int TOSU::get_value(void)
 void TOSU::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
-
   stack->put_tos( stack->get_tos() & 0xffe0ffff | ( (new_value & 0x1f) << 16));
-
 }
 
 void TOSU::put_value(unsigned int new_value)
 {
-
   stack->put_tos( stack->get_tos() & 0xffe0ffff | ( (new_value & 0x1f) << 16));
-
   update();
-
 }
 
 
 //------------------------------------------------
 // STKPTR
-unsigned int STKPTR::get(void)
-{
-
-  trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
-  return(value.get());
-
-}
-
-unsigned int STKPTR::get_value(void)
-{
-
-  return(value.get());
-
-}
-
-void STKPTR::put(unsigned int new_value)
-{
-  trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
-
-  value.put(new_value);
-}
-
+STKPTR::STKPTR(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
 void STKPTR::put_value(unsigned int new_value)
 {
-
   value.put(new_value);
-
   update();
-
 }
 
 
 //--------------------------------------------------
 //
-Stack16::Stack16(void)
+Stack16::Stack16(Processor *pCpu)
+  : stkptr(pCpu, "stkptr"),
+    tosl(pCpu, "tosl", "Top of Stack low byte"),
+    tosh(pCpu, "tosh", "Top of Stack high byte"),
+    tosu(pCpu, "tosu", "Top of Stack upper byte")
 {
   stkptr.stack = this;
   tosl.stack = this;
@@ -771,7 +779,7 @@ void Stack16::push(unsigned int address)
 
 }
 
-unsigned int Stack16::pop(void)
+unsigned int Stack16::pop()
 {
   if(stkptr.value.get() & Stack16_MASK)
     {
@@ -792,12 +800,12 @@ unsigned int Stack16::pop(void)
     }
 }
 
-void Stack16::reset(void)
+void Stack16::reset()
 {
   stkptr.value.put( 0);
 }
 
-unsigned int Stack16::get_tos(void)
+unsigned int Stack16::get_tos()
 {
 
   return (contents[stkptr.value.get() & Stack16_MASK]);
@@ -812,13 +820,27 @@ void Stack16::put_tos(unsigned int new_tos)
 }
 
 //--------------------------------------------------
+// member functions for the RCON base class
+//--------------------------------------------------
+RCON::RCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{
+}
+//--------------------------------------------------
+// member functions for the CPUSTA base class
+//--------------------------------------------------
+CPUSTA::CPUSTA(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{
+}
+//--------------------------------------------------
 // member functions for the T0CON base class
 //--------------------------------------------------
-T0CON::T0CON(void)
+T0CON::T0CON(Processor *pCpu, const char *pName, const char *pDesc)
+  : OPTION_REG(pCpu,pName,pDesc)
 {
   por_value = RegisterValue(0xff,0);
   wdtr_value = RegisterValue(0xff,0);
-  new_name("t0con");
 }
 
 void T0CON::put(unsigned int new_value)
@@ -859,6 +881,10 @@ void T0CON::put(unsigned int new_value)
 
 //--------------------------------------------------
 
+TMR0H::TMR0H(Processor *pCpu, const char *pName, const char *pDesc)
+  :sfr_register(pCpu,pName,pDesc)
+{
+}
 
 //--------------------------------------------------
 void TMR0H::put(unsigned int new_value)
@@ -873,14 +899,14 @@ void TMR0H::put_value(unsigned int new_value)
   value.put(new_value & 0xff);
 }
 
-unsigned int TMR0H::get(void)
+unsigned int TMR0H::get()
 {
   trace.raw(read_trace.get() | value.get());
   //trace.register_read(address,value.get());
   return(value.get());
 }
 
-unsigned int TMR0H::get_value(void)
+unsigned int TMR0H::get_value()
 {
   return(value.get());
 }
@@ -888,8 +914,9 @@ unsigned int TMR0H::get_value(void)
 //--------------------------------------------------
 // TMR0_16 member functions
 //
-TMR0_16::TMR0_16()
-  : TMR0(), t0con(0), intcon(0), tmr0h(0), value16(0)
+TMR0_16::TMR0_16(Processor *pCpu, const char *pName, const char *pDesc)
+  : TMR0(pCpu,pName,pDesc),
+    t0con(0), intcon(0), tmr0h(0), value16(0)
 {
 }
 //--------------------------------------------------
@@ -900,7 +927,7 @@ TMR0_16::TMR0_16()
 //  other wise
 //    then return the Prescale select bits (plus 1)
 //
-unsigned int TMR0_16::get_prescale(void)
+unsigned int TMR0_16::get_prescale()
 {
   if(t0con->value.get() & 0x8)
     return 0;
@@ -909,24 +936,24 @@ unsigned int TMR0_16::get_prescale(void)
 
 }
 
-void TMR0_16::set_t0if(void)
+void TMR0_16::set_t0if()
 {
   intcon->set_t0if();
 }
 
-bool TMR0_16::get_t0cs(void)
+bool TMR0_16::get_t0cs()
 {
  return (t0con->value.get() & 0x20) != 0;
 }
 
-void TMR0_16::initialize(void)
+void TMR0_16::initialize()
 {
   t0con = &cpu16->t0con;
   intcon = &cpu16->intcon;
   tmr0h  = &cpu16->tmr0h;
 }
 
-unsigned int TMR0_16::max_counts(void)
+unsigned int TMR0_16::max_counts()
 {
 
   if(t0con->value.get() & T0CON::T08BIT)
@@ -957,7 +984,7 @@ void TMR0_16::put_value(unsigned int new_value)
 
 
 // %%%FIX ME%%% 
-void TMR0_16::increment(void)
+void TMR0_16::increment()
 {
   //  cout << "_TMR0 increment because of external clock ";
   trace.raw(write_trace.get() | value.get());
@@ -1002,7 +1029,7 @@ void TMR0_16::increment(void)
 }
 
 
-unsigned int TMR0_16::get_value(void)
+unsigned int TMR0_16::get_value()
 {
   if(t0con->value.get() & T0CON::TMR0ON) {
 
@@ -1037,7 +1064,7 @@ unsigned int TMR0_16::get()
   return value.get();
 }
 
-void TMR0_16::callback(void)
+void TMR0_16::callback()
 {
 
   //cout<<"_TMR0 rollover: " << hex << cycles.value << '\n';
@@ -1060,13 +1087,18 @@ void TMR0_16::callback(void)
 
 }
 
-void TMR0_16::callback_print(void)
+void TMR0_16::callback_print()
 {
   cout << "TMR0_16 " << name() << " CallBack ID " << CallBackID << '\n';
 }
 
 //--------------------------------------------------
 // T3CON
+T3CON::T3CON(Processor *pCpu, const char *pName, const char *pDesc)
+  : T1CON(pCpu,pName,pDesc),
+    ccpr1l(0),ccpr2l(0),tmr1l(0)
+{}
+
 void T3CON::put(unsigned int new_value)
 {
   int diff = (value.get() ^ new_value);
@@ -1097,7 +1129,7 @@ void T3CON::put(unsigned int new_value)
 //
 // 
 
-TMR3_MODULE::TMR3_MODULE(void)
+TMR3_MODULE::TMR3_MODULE()
 {
 
   t3con = 0;
@@ -1114,8 +1146,8 @@ void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 }
 
 //-------------------------------------------------------------------
-ADCON0_16::ADCON0_16()
-  : m_pPir(0)
+ADCON0_16::ADCON0_16(Processor *pCpu, const char *pName, const char *pDesc)
+  : ADCON0(pCpu,pName,pDesc), m_pPir(0)
 {
 }
 
@@ -1139,22 +1171,22 @@ void ADCON0_16::set_interrupt()
 //
 //-------------------------------------------------------------------
 
-void TBL_MODULE::initialize(_16bit_processor *new_cpu)
+TBL_MODULE::TBL_MODULE(_16bit_processor *pCpu)
+  : cpu(pCpu),
+    tablat(pCpu,"tablat"),
+    tabptrl(pCpu,"tabptrl"),
+    tabptrh(pCpu,"tabptrh"),
+    tabptru(pCpu,"tabptru")
 {
-  cpu = new_cpu;
-
-  /*
-  tablat;
-  tabptrl;
-  tabptrh;
-  tabptru;
-  */
-
-
 }
 
+//void TBL_MODULE::initialize(_16bit_processor *new_cpu)
+//{
+//  cpu = new_cpu;
+//}
+
 //-------------------------------------------------------------------
-//  void TBL_MODULE::increment(void)
+//  void TBL_MODULE::increment()
 //
 //  This function increments the 24-bit ptr that is formed by the
 // concatenation of tabptrl,tabptrh, and tabptru. It is called by
@@ -1166,7 +1198,7 @@ void TBL_MODULE::initialize(_16bit_processor *new_cpu)
 // Outputs: none
 //
 //-------------------------------------------------------------------
-void TBL_MODULE::increment(void)
+void TBL_MODULE::increment()
 {
 
   if(tabptrl.value.get() >= 0xff) {
@@ -1185,7 +1217,7 @@ void TBL_MODULE::increment(void)
 }
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void TBL_MODULE::decrement(void)
+void TBL_MODULE::decrement()
 {
 
   if(tabptrl.value.get() == 0) {
@@ -1201,7 +1233,7 @@ void TBL_MODULE::decrement(void)
 }
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void TBL_MODULE::read(void)
+void TBL_MODULE::read()
 {
   unsigned int tabptr,opcode;
 
@@ -1211,8 +1243,6 @@ void TBL_MODULE::read(void)
     ( (tabptrl.value.get() & 0xff) << 0 );
 
   opcode = cpu_pic->pma->get_opcode(tabptr & 0xfffffe);
-
-  //  cout << __FUNCTION__ << "() tabptr: 0x" << hex << tabptr << " opcode: 0x" << opcode << '\n';
 
   if(tabptr & 1)
     {
@@ -1228,7 +1258,7 @@ void TBL_MODULE::read(void)
 }
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void TBL_MODULE::write(void)
+void TBL_MODULE::write()
 {
 
   unsigned int tabptr;
@@ -1254,6 +1284,13 @@ void TBL_MODULE::write(void)
 }
 
 //-------------------------------------------------------------------
+//-------------------------------------------------------------------
+LVDCON::LVDCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName,pDesc),
+    valid_bits(0x3f)
+{
+}
+
 
 #if 0
 //-------------------------------------------------------------------
@@ -1262,7 +1299,7 @@ void TBL_MODULE::write(void)
 //-------------------------------------------------------------------
 
 
-PORTC16::PORTC16(void)
+PORTC16::PORTC16()
 {
   usart = 0;
   ccp1con = 0;
@@ -1270,7 +1307,7 @@ PORTC16::PORTC16(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-unsigned int PORTC16::get(void)
+unsigned int PORTC16::get()
 {
   unsigned int old_value;
 

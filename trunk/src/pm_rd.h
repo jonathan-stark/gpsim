@@ -45,14 +45,14 @@ enum
 };
 
 
-  PMCON1(void);
+  PMCON1(Processor *p, PM_RD *);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 
   inline void set_pm(PM_RD *pm) {pm_rd = pm;}
   inline void set_valid_bits(unsigned int vb) { valid_bits = vb; }
-  inline unsigned int get_valid_bits(void) { return (valid_bits); }
+  inline unsigned int get_valid_bits() { return (valid_bits); }
   inline void set_bits(unsigned int b) { valid_bits |= b; }
   inline void clear_bits(unsigned int b) { valid_bits &= ~b; }
 
@@ -70,10 +70,10 @@ class PMDATA : public sfr_register
 {
 public:
 
-  PMDATA(void);
+  PMDATA(Processor *p, const char *pName);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 
 };
 
@@ -85,10 +85,10 @@ class PMADR : public sfr_register
 {
 public:
 
-  PMADR(void);
+  PMADR(Processor *p, const char *pName);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 };
 
 
@@ -101,17 +101,17 @@ class PM_RD :  public TriggerObject
 public:
   static const unsigned int READ_CYCLES = 2;
 
-  PM_RD(void);
-  virtual void set_cpu(pic_processor *p) { cpu = p; }
+  PM_RD(pic_processor *p);
+  //virtual void set_cpu(pic_processor *p) { cpu = p; }
 
-  virtual void callback(void);
-  virtual void start_read(void);  
+  virtual void callback();
+  virtual void start_read();  
 
-  inline virtual PMCON1 *get_reg_pmcon1(void) { return (&pmcon1); }
-  inline virtual PMDATA *get_reg_pmdata(void) { return (&pmdata); }
-  inline virtual PMDATA *get_reg_pmdath(void) { return (&pmdath); }
-  inline virtual PMADR *get_reg_pmadr(void) { return (&pmadr); }
-  inline virtual PMADR *get_reg_pmadrh(void) { return (&pmadrh); }
+  inline virtual PMCON1 *get_reg_pmcon1() { return (&pmcon1); }
+  inline virtual PMDATA *get_reg_pmdata() { return (&pmdata); }
+  inline virtual PMDATA *get_reg_pmdath() { return (&pmdath); }
+  inline virtual PMADR *get_reg_pmadr() { return (&pmadr); }
+  inline virtual PMADR *get_reg_pmadrh() { return (&pmadrh); }
 
   //protected:
   pic_processor *cpu;

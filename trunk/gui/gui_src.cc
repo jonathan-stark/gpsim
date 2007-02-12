@@ -266,8 +266,8 @@ void SourceBrowser_Window::SelectAddress(int address)
 void SourceBrowser_Window::SelectAddress(Value *addrSym)
 {
 
-  if(typeid(*addrSym) == typeid(line_number_symbol) ||
-     typeid(*addrSym) == typeid(address_symbol)) {
+  if(typeid(*addrSym) == typeid(LineNumberSymbol) ||
+     typeid(*addrSym) == typeid(AddressSymbol)) {
 
     int i;
     addrSym->get(i);

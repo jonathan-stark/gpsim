@@ -67,7 +67,7 @@ Boston, MA 02111-1307, USA.  */
 Trace *gTrace=0;                // Points to gpsim's global trace object.
 
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
 #else
@@ -145,7 +145,7 @@ void LCD_InputPin::setDrivenState(bool new_dstate)
   IO_bi_directional::setDrivenState(new_dstate);
   char cState = getBitChar();
 
-  //  Dprintf(("LCD_InputPin setDrivenState:%d, cState:%c\n",new_dstate,cState));
+  Dprintf(("LCD_InputPin setDrivenState:%d, cState:%c\n",new_dstate,cState));
 
   if (m_cDrivenState != cState) {
     m_cDrivenState = cState;
@@ -438,9 +438,8 @@ LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
   interface = new LCD_Interface(this);
   get_interface().add_interface(interface);
 
-  m_dataBus = new PortRegister(8, 0);
-  m_dataBus->new_name( (name() + ".data").c_str());
-  get_symbol_table().add_register(m_dataBus);
+  m_dataBus = new PortRegister(this, "data", "LCD Data Port", 8, 0);
+  addSymbol(m_dataBus);
   m_dataBus->setEnableMask(0xff);
 
 
@@ -506,6 +505,7 @@ void LcdDisplay::UpdatePinState(ePins pin, char cState)
     m_dataBus->put(m_hd44780->getDataBus());
 
   m_dataBus->updatePort();
+  Dprintf(("Control pin:%d is %c and Databus is 0x%02X\n",pin, cState,m_dataBus->get_value()));
 
 }
 //------------------------------------------------------------------------

@@ -325,13 +325,13 @@ P18C4x2::P18C4x2(const char *_name, const char *desc)
   if(verbose)
     cout << "18c4x2 constructor, type = " << isa() << '\n';
 
-  m_portd = new PicPSP_PortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister("trisd", (PicPortRegister *)m_portd, true);
-  m_latd  = new PicLatchRegister("latd", m_portd);
+  m_portd = new PicPSP_PortRegister(this,"portd","",8,0xff);
+  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
+  m_latd  = new PicLatchRegister(this,"latd","",m_portd);
 
-  m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise = new PicPSP_TrisRegister("trise", m_porte, true);
-  m_late  = new PicLatchRegister("late", m_porte);
+  m_porte = new PicPortRegister(this,"porte","",8,0x07);
+  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
+  m_late  = new PicLatchRegister(this,"late","",m_porte);
 
 }
 
@@ -470,8 +470,8 @@ void P18F242::create()
   if(verbose)
     cout << " 18f242 create \n";
 
-  e = new EEPROM_PIR(&pir2);
-  e->set_cpu(this);
+  e = new EEPROM_PIR(this,&pir2);
+
   // We might want to pass this value in for larger eeproms
   e->initialize(256);
   //e->set_pir_set(&pir_set_def);
@@ -585,8 +585,8 @@ void P18F442::create()
   if(verbose)
     cout << " 18f442 create \n";
 
-  e = new EEPROM_PIR(&pir2);
-  e->set_cpu(this);
+  e = new EEPROM_PIR(this,&pir2);
+
   // We might want to pass this value in for larger eeproms
   e->initialize(256);
   //e->set_pir_set(get_pir_set());

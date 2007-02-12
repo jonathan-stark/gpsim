@@ -120,7 +120,7 @@ protected:
 
 
 P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
-  : I2C_EE(_rom_size)
+  : I2C_EE(pcpu,_rom_size)
 {
 
   if(pcpu) {
@@ -138,6 +138,8 @@ void P12C508::create_config_memory()
 {
   m_configMemory = new ConfigMemory *[1];
   *m_configMemory = new Generic12bitConfigWord(this);
+
+  addSymbol(*m_configMemory);
 }
 
 
@@ -223,7 +225,7 @@ void P12C508::create_symbols()
   _12bit_processor::create_symbols();
 
   //symbol_table.add_register(m_gpio);
-  symbol_table.add_register(m_tris);
+  addSymbol(m_tris);
 }
 
 
@@ -280,13 +282,14 @@ Processor * P12C508::construct(const char *name)
 
 
 P12C508::P12C508(const char *_name, const char *desc)
-  : _12bit_processor(_name,desc)
+  : _12bit_processor(_name,desc),
+    osccal(this,"osccal","Oscillator Calibration")
 {
   if(verbose)
     cout << "12c508 constructor, type = " << isa() << '\n';
 
-  m_gpio = new GPIO("gpio",8,0x3f);
-  m_tris = new PicTrisRegister("tris", m_gpio, false);
+  m_gpio = new GPIO(this,"gpio","I/O port",8,0x3f);
+  m_tris = new PicTrisRegister(this,"tris","Port Direction Control", m_gpio, false);
   m_tris->wdtr_value=RegisterValue(0x3f,0);
 
   if(config_modes)
@@ -511,9 +514,10 @@ P12CE519::P12CE519(const char *_name, const char *desc)
 //
 // GPIO Port
 
-GPIO::GPIO(const char *port_name, unsigned int numIopins, 
+GPIO::GPIO(Processor *pCpu, const char *pName, const char *pDesc, 
+           unsigned int numIopins, 
 	   unsigned int enableMask)
-  : PicPortRegister (port_name, numIopins, enableMask)
+  : PicPortRegister (pCpu,pName,pDesc, numIopins, enableMask)
 {
 }
 
@@ -652,8 +656,8 @@ P10F200::P10F200(const char *_name, const char *desc)
   if(verbose)
     cout << "10f200 constructor, type = " << isa() << '\n';
 
-  m_gpio = new GPIO("gpio",8,0x0f);
-  m_tris = new PicTrisRegister("tris", m_gpio, false);
+  m_gpio = new GPIO(this,"gpio","I/O port",8,0x0f);
+  m_tris = new PicTrisRegister(this, "tris", "Port Direction Control",m_gpio, false);
   m_tris->wdtr_value=RegisterValue(0x3f,0);
 
   if(config_modes)

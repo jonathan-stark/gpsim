@@ -748,7 +748,7 @@ static void update_board_matrix(Breadboard_Window *bbw)
 	y=p->y();
 	width=p->width();
 	height=p->height();
- 
+
 	for(y = p->y() - ROUTE_RES; 
 	    y < p->y() + height + ROUTE_RES && y/ROUTE_RES < YSIZE; 
 	    y += ROUTE_RES)
@@ -1323,7 +1323,7 @@ static void settings_set_cb(GtkWidget *button,
 	
 	// Change the Attribute
 	//attr = bbw->selected_module->module->get_attribute(attribute_name);
-	attr = get_symbol_table().find(attribute_name);
+	attr = globalSymbolTable().findValue(attribute_name);
 	if(attr)
 	{
 	  try {
@@ -1364,7 +1364,7 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
   // read attributes and add to clist
   char attribute_string[STRING_SIZE];
   char *text[1]={attribute_string};
-
+  /*
   list <Value *>::iterator attribute_iterator;
   int row;
 
@@ -1397,6 +1397,7 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
 
 				    
   }
+  */
 
   gtk_entry_set_text(GTK_ENTRY(p->bbw()->attribute_entry), "");
 
@@ -1430,6 +1431,13 @@ void GuiModule::SetPosition(int nx, int ny)
     m_x=nx;
     m_y=ny;
 
+    Value *xpos = dynamic_cast<Value *> (m_module->findSymbol("xpos"));
+    Value *ypos = dynamic_cast<Value *> (m_module->findSymbol("ypos"));
+    if(xpos)
+      xpos->set(m_x);
+    if(ypos)
+      ypos->set(m_y);
+
     // Position module_widget
     if (m_pinLabel_widget)
       gtk_layout_move(GTK_LAYOUT(m_bbw->layout), m_pinLabel_widget,
@@ -1459,7 +1467,18 @@ void GuiModule::SetPosition(int nx, int ny)
 
       piniter = piniter->next;
     }
+
   }
+}
+
+void GuiModule::GetPosition(int &x, int &y)
+{
+  Value *xpos = dynamic_cast<Value *> (m_module->findSymbol("xpos"));
+  Value *ypos = dynamic_cast<Value *> (m_module->findSymbol("ypos"));
+
+  x = xpos ? (gint64)*xpos : m_x; 
+  y = ypos ? (gint64)*ypos : m_y;
+
 }
 
 /* FIXME: calculate distance to the edges instead of the corners. */
@@ -1563,12 +1582,6 @@ static void pointer_cb(GtkWidget *w,
 	if(dragging && 0 != dragged_module)
 	{
             dragged_module->SetPosition(x+pinspacing, y+pinspacing);
-	    Value *xpos = dragged_module->module()->get_attribute("xpos", false);
-	    Value *ypos = dragged_module->module()->get_attribute("ypos", false);
-	    if(xpos)
-	      xpos->set(dragged_module->x());
-	    if(ypos)
-	      ypos->set(dragged_module->y());
 	}
 	break;
     case GDK_BUTTON_PRESS:
@@ -2370,6 +2383,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
         m->name().c_str());
       }
 
+      /*
       for(attribute_iterator = m->attributes.begin();
           attribute_iterator != m->attributes.end();
           attribute_iterator++) {
@@ -2380,14 +2394,17 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
                 locattr->name().c_str(),
                 locattr->toString().c_str());
       }
+      */
+
       fprintf(fo, "\n");
       module_iterator=module_iterator->next;
     }
 
     // Save nodes and connections
     fprintf(fo, "\n\n# Connections:\n");
+    fprintf(fo," FIXME gui_breadboard.cc save_stc\n");
+    /*
     list <Stimulus_Node *> :: iterator node_iterator;
-
     Symbol_Table &ST = get_symbol_table();
     Symbol_Table::node_symbol_iterator it;
     Symbol_Table::node_symbol_iterator itEnd = ST.endNodeSymbol();
@@ -2414,6 +2431,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
         fprintf(fo, "\n\n");
       }
     }
+    */
 
     fprintf(fo, "\n\n# End.\n");
     fclose(fo);
@@ -3227,10 +3245,13 @@ void GuiModule::Build()
   m_pins=0;
   m_pin_count=m_module->get_pin_count();
 
+  /*
   Value *xpos = m_module->get_attribute("xpos", false);
   Value *ypos = m_module->get_attribute("ypos", false);
   xpos->get(nx);
   ypos->get(ny);
+  */
+  GetPosition(nx,ny);
 
   m_tree_item = gtk_tree_item_new_with_label (m_module->name().c_str());
   gtk_signal_connect(GTK_OBJECT(m_tree_item),
@@ -3404,8 +3425,6 @@ void GuiModule::Build()
   gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_name_widget, 0,0);
 
   SetPosition(nx, ny);
-  xpos->set(m_x);
-  ypos->set(m_y);
 
   m_bIsBuilt = true;
 
@@ -3439,8 +3458,20 @@ GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   pinnameWidths[2] = 0;
   pinnameWidths[3] = 0;
 
-  if(m_bbw)
+  if(m_bbw) {
     m_bbw->modules=g_list_append(m_bbw->modules, this);
+
+    if (m_module) {
+      Value *xpos = dynamic_cast<Value*> (m_module->findSymbol("xpos"));
+      Value *ypos = dynamic_cast<Value*> (m_module->findSymbol("xpos"));
+      if(!xpos || !ypos) {
+        xpos = new PositionAttribute(m_bbw,"xpos",(double)80);
+        ypos = new PositionAttribute(m_bbw,"ypos",(double)80);
+        m_module->addSymbol(xpos);
+        m_module->addSymbol(ypos);
+      }
+    }
+  }
 }
 //========================================================================
 GuiDipModule::GuiDipModule(Module *_module, Breadboard_Window *_bbw)
@@ -3534,17 +3565,12 @@ void Breadboard_Window::Update(void)
 	p->Update();
 
       // Check if module has changed its position
-      Value *xpos = p->module()->get_attribute("xpos", false);
-      Value *ypos = p->module()->get_attribute("ypos", false);
-      if(xpos && ypos) {
-	xpos->get(x);
-	ypos->get(y);
+      p->GetPosition(x,y);
 
-	if(p->x()!=x || p->y()!=y) {
-	  // If so, move the module
-	  p->SetPosition(x, y);
-	  update_board_matrix(p->bbw());
-	}
+      if(p->x()!=x || p->y()!=y) {
+        // If so, move the module
+        p->SetPosition(x, y);
+        update_board_matrix(p->bbw());
       }
 
       // Check if pins have changed state
@@ -3568,7 +3594,7 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
   // Create a Gui representation (note that this memory is
   // placed onto the 'modules' list.
-  
+  /*
   Value *xpos = gp->cpu->get_attribute("xpos", false);
   Value *ypos = gp->cpu->get_attribute("ypos", false);
   if(!xpos || !ypos) {
@@ -3577,7 +3603,7 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
     gp->cpu->add_attribute(xpos);
     gp->cpu->add_attribute(ypos);
   }
-
+  */
   if(!enabled)
     return;
 
@@ -3596,7 +3622,7 @@ void Breadboard_Window::NewModule(Module *module)
   // If the xpos and ypos attributes does not exist, then create them.
   static int sx=80;
   static int sy=280;
-
+  /*
   Value *xpos = module->get_attribute("xpos", false);
   Value *ypos = module->get_attribute("ypos", false);
   if(!xpos || !ypos) {
@@ -3605,6 +3631,7 @@ void Breadboard_Window::NewModule(Module *module)
     module->add_attribute(xpos);
     module->add_attribute(ypos);
   }
+  */
   sy+=100;
   if(sy>LAYOUTSIZE_Y)
   {
@@ -4166,8 +4193,9 @@ void Breadboard_Window::Build(void)
   UpdateMenuItem();
 
   draw_nodes(this);
-
-  // Look module list
+  cout << "FIXME gui_breadboard.cc " << __FUNCTION__ << endl;
+  /*
+  // Loop module list
   Symbol_Table::module_symbol_iterator mi = get_symbol_table().beginModuleSymbol();
   Symbol_Table::module_symbol_iterator itModEnd = get_symbol_table().endModuleSymbol();
   for(mi = get_symbol_table().beginModuleSymbol();
@@ -4188,6 +4216,7 @@ void Breadboard_Window::Build(void)
     	NodeConfigurationChanged(node);
     }
   }
+  */
   gtk_widget_show(window);
 
   Update();

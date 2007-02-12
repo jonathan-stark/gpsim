@@ -1346,6 +1346,20 @@ void NSourcePage::invalidateView()
 static int settings_dialog(SOURCE_WINDOW *sbaw);
 
 //------------------------------------------------------------------------
+static Register *findRegister(string text)
+{
+  Register *pReg = dynamic_cast<Register *>(globalSymbolTable().find(text));
+  if (!pReg)
+    pReg = dynamic_cast<Register *>(globalSymbolTable().find(text+string("_")));
+  if (!pReg) {
+    toupper(text);
+    pReg = dynamic_cast<Register *>(globalSymbolTable().find(text));
+  }
+  if (!pReg)
+    pReg = dynamic_cast<Register *>(globalSymbolTable().find(text+string("_")));
+  return pReg;
+}
+//------------------------------------------------------------------------
 
 void
 SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
@@ -1444,9 +1458,10 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
         TrimWhiteSpaceFromString(text);
 
         if(text[0] != 0) {
-          register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
+          //register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
+          /*
           if(pReg == NULL) {
-            // We also try upper cased.
+            // We also try upper case.
             string sName(text);
             toupper(sName);
             pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
@@ -1457,13 +1472,15 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
             sName.append(text);
             pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
             if(pReg == NULL) {
-              // We also try upper cased.
+              // We also try upper case.
               toupper(sName);
               pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
             }
           }
+          */
+          Register *pReg = findRegister(string(text));
 
-          if(pReg == NULL) {
+          if(!pReg) {
             GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(pSW->window),
             GTK_DIALOG_MODAL,
             GTK_MESSAGE_WARNING,
@@ -2995,6 +3012,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_SELECT_SYMBOL:
   case MENU_ADD_TO_WATCH:
     {
+      //FIXME replicated code...
       gint i, temp;
       gint start, end;
 
@@ -3025,6 +3043,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
         TrimWhiteSpaceFromString(text);
 
         if(text[0] != 0) {
+          /*
           register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
           if(pReg == NULL) {
             // We also try upper cased.
@@ -3043,7 +3062,8 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
               pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
             }
           }
-
+          */
+          Register *pReg = findRegister(string(text));
           if(pReg == NULL) {
             GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
               GTK_DIALOG_MODAL,

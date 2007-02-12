@@ -36,6 +36,12 @@ Boston, MA 02111-1307, USA.  */
 // SSPSTAT - Synchronous Serial Port Status register.
 
 
+_SSPSTAT::_SSPSTAT(Processor *pCpu, SSP_MODULE *pSSP)
+  : sfr_register(pCpu, "sspstat","Synchronous Serial Port Status"),
+    m_sspmod(pSSP)
+{
+}
+
 /*
 	only CKE and SMP is writable
 */
@@ -61,14 +67,6 @@ void _SSPSTAT::put_value(unsigned int new_value)
   value.put(new_value);
 
 }
-/*
-	register pointer to SSPMOD
-*/
-void _SSPSTAT::setSSPMODULE(SSP_MODULE *sspmod)
-{
-  m_sspmod = sspmod;
-}
-
 class SDI_SignalSink : public SignalSink
 {
 public:
@@ -127,20 +125,11 @@ private:
 // SSPCON - Synchronous Serial Port Control register.
 //-----------------------------------------------------------
 
-_SSPCON::_SSPCON()
+_SSPCON::_SSPCON(Processor *pCpu, SSP_MODULE *pSSP)
+  : sfr_register(pCpu, "sspcon","Synchronous Serial Port Control"),
+    m_sspmod(pSSP)
 {
 }
-/*
-	register pointer to SSPMOD
-*/
-void _SSPCON::setSSPMODULE(SSP_MODULE *sspmod)
-{
-  m_sspmod = sspmod;
-}
-
-/*
-	return true if an SPI mode is enabled
-*/
 bool _SSPCON::isSPIActive(unsigned int value)
 {
     if (value & SSPEN)
@@ -253,8 +242,9 @@ bool _SSPCON::isI2CSlave(unsigned int val)
 // SSPBUF - Synchronous Serial Port Control register.
 //-----------------------------------------------------------
 
-_SSPBUF::_SSPBUF()
-  :  m_sspmod(0), m_bIsFull(false)
+_SSPBUF::_SSPBUF(Processor *pCpu, SSP_MODULE *pSSP)
+  : sfr_register(pCpu, "sspbuf","Synchronous Serial Port Buffer"),
+    m_sspmod(pSSP), m_bIsFull(false)
 {
 }
 
@@ -276,12 +266,12 @@ void _SSPBUF::put_value(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   value.put(new_value & 0xff);
 }
-
+/*
 void _SSPBUF::setSSPMODULE( SSP_MODULE *_sspmod)
 {
   m_sspmod = _sspmod;
 }
-
+*/
 unsigned int _SSPBUF::get()
 {
   if( m_sspmod )
@@ -302,12 +292,12 @@ unsigned int _SSPBUF::get_value()
 //-----------------------------------------------------------
 // SSPADD - Synchronous Serial Port Address (for I2C)
 //-----------------------------------------------------------
-
-
-void _SSPADD::setSSPMODULE( SSP_MODULE *_sspmod)
+_SSPADD::_SSPADD(Processor *pCpu, SSP_MODULE *pSSP)
+  : sfr_register(pCpu, "sspadd","Synchronous Serial Port Address (I2C)"),
+    m_sspmod(pSSP)
 {
-  m_sspmod = _sspmod;
 }
+
 void _SSPADD::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
@@ -491,8 +481,13 @@ void SPI::startSPI()
     bits_transfered = 0;
 }
 
-SSP_MODULE::SSP_MODULE()
-  : m_pirset(0),
+SSP_MODULE::SSP_MODULE(Processor *pCpu)
+  : sspbuf(pCpu,this),
+    sspcon(pCpu,this),
+    sspstat(pCpu,this),
+    sspcon2(pCpu,this),
+    sspadd(pCpu,this),
+    m_pirset(0),
     m_spi(0),
     m_i2c(0),
     m_sck(0),
@@ -508,14 +503,10 @@ SSP_MODULE::SSP_MODULE()
     m_SS_Sink(0),
     m_sink_set(false)
 {
-  sspbuf.setSSPMODULE(this);
-  sspcon.setSSPMODULE(this);
-  sspcon2.setSSPMODULE(this);
-  sspstat.setSSPMODULE(this);
-  sspadd.setSSPMODULE(this);
-
 }
-SSP_MODULE::~SSP_MODULE(){}
+SSP_MODULE::~SSP_MODULE()
+{
+}
 
 void SPI::newSSPBUF(unsigned int newTxByte)
 {
@@ -1697,14 +1688,12 @@ bool SSP_MODULE::SaveSSPsr(unsigned int value)
 }
 //-----------------------------------------------------------
 //-------------------------------------------------------------------
-
-/*
-	register pointer to SSPMOD
-*/
-void _SSPCON2::setSSPMODULE(SSP_MODULE *sspmod)
+_SSPCON2::_SSPCON2(Processor *pCpu, SSP_MODULE *pSSP)
+  : sfr_register(pCpu, "sspcon2","Synchronous Serial Port Control"),
+    m_sspmod(pSSP)
 {
-  m_sspmod = sspmod;
 }
+
 /*
 	write to SSPCON2 without processing data
 */
@@ -1755,7 +1744,3 @@ void _SSPCON2::put(unsigned int new_value)
 	
 }
 
-_SSPCON2::_SSPCON2(void)
-{
-}
- 

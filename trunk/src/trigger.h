@@ -54,7 +54,7 @@ class TriggerAction
 {
 public:
   TriggerAction();
-  virtual ~TriggerAction() {}
+  virtual ~TriggerAction();
   virtual bool evaluate();
   virtual bool getTriggerState();
   virtual void action();
@@ -99,7 +99,7 @@ class TriggerObject
 
   // clear_trigger is invoked when the breakpoint associated with
   // this object is cleared. 
-  virtual void clear_trigger() {};
+  virtual void clear_trigger();
 
   // Will search for a place to store this break point.
   virtual int find_free();
@@ -140,7 +140,7 @@ class TriggerObject
   TriggerObject();
   TriggerObject(TriggerAction *);
   // Virtual destructor place holder
-  virtual ~TriggerObject() { }
+  virtual ~TriggerObject();
 protected:
   // A block of trace types are reserved by the trigger class:
   static TraceType *m_brt;

@@ -72,11 +72,11 @@ class VRCON : public sfr_register
       VREN = 1<<7
     };
 
-  VRCON(void);
+  VRCON(Processor *pCpu, const char *pName, const char *pDesc);
 
   virtual void put(unsigned int new_value);
   virtual void setIOpin(PinModule *);
-  virtual double get_Vref(void) { return(vr_Vref); };
+  virtual double get_Vref() { return(vr_Vref); };
                                                                                 
 protected:
   PinModule 		*vr_PinModule;
@@ -132,7 +132,7 @@ class CMCON : public sfr_register
 
 
 
-  CMCON(void);
+  CMCON(Processor *pCpu, const char *pName, const char *pDesc);
 
 protected:
   PinModule *cm_input[4];
@@ -151,20 +151,22 @@ protected:
 
 };
 
-class COMPARATOR_MODULE
+class ComparatorModule
 {
  public:
 
-  CMCON *cmcon;
-  VRCON vrcon;
-
+  ComparatorModule(Processor *);
+  /*
   void initialize( PIR_SET *pir_set, PinModule *pin_vr0, PinModule *pin_cm0, 
 	PinModule *pin_cm1, PinModule *pin_cm2,
 	PinModule *pin_cm3, PinModule *pin_cm4);
-
+  */
   void initialize( PIR_SET *pir_set, PinModule *pin_vr0, PinModule *pin_cm0, 
 	PinModule *pin_cm1, PinModule *pin_cm2,
 	PinModule *pin_cm3, PinModule *pin_cm4, PinModule *pin_cm5);
+  //protected:
+  CMCON cmcon;
+  VRCON vrcon;
 
 };
 #endif // __COMPARATOR_H__

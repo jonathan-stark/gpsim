@@ -39,10 +39,12 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
+#include "symbol.h"
 
 class Module;
 class Module_Types;
 class ModuleInterface;
+class Processor;
 class IOPIN;
 class XrefObject;
 class Value;
@@ -51,6 +53,7 @@ class ICommandHandler;
 
 typedef  Module * (*Module_FPTR)();
 typedef  Module_Types * (*Module_Types_FPTR)();
+
 
 enum SIMULATION_MODES
 {
@@ -63,8 +66,6 @@ enum SIMULATION_MODES
   eSM_RUNNING_OVER
 };
 
-class Module;
-class Processor;
 
 template<class _Type>
 class OrderedVector : public vector<_Type*> {
@@ -220,7 +221,7 @@ class Module : public gpsimObject {
 public:
   friend class ModuleLibrary;
 
-  list<Value *> attributes;         // A list of attributes that pertain to the Module
+  //list<Value *> attributes;         // A list of attributes that pertain to the Module
   Package  *package;                // A package for the module
   ModuleInterface *interface;       // An interface to the module.
   SIMULATION_MODES simulation_mode; // describes the simulation state for this module
@@ -228,10 +229,7 @@ public:
   XrefObject *xref;                 // Updated when the module changes
   
 
-  //! I/O pin specific
-  /*
-    
-  */
+  /// I/O pin specific
 
   virtual int get_pin_count();
   virtual string &get_pin_name(unsigned int pin_number);
@@ -241,12 +239,21 @@ public:
   virtual void create_pkg(unsigned int number_of_pins);
 
   /// Attributes:
-
+  /*
   void add_attribute(Value *);
 
   virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
   virtual string  DisplayAttributes(bool show_values=true);
   virtual void initializeAttributes();
+  */
+
+  /// Symbols
+  /// Each module has its own symbol table. The global symbol
+  /// table can access this table too. 
+  SymbolTable_t & getSymbolTable() { return mSymbolTable;}
+  int addSymbol(gpsimObject *, string *AliasedName=0);
+  gpsimObject *findSymbol(const string &);
+  int removeSymbol(gpsimObject *, bool bDeleteObject);
 
   /// Registers - mostly processors, but can apply to complex modules
   virtual unsigned int register_mask () const { return 0xff;}
@@ -308,6 +315,8 @@ private:
 protected:
   char *version;
   ModuleLibrary::Type *m_pType;
+  SymbolTable_t mSymbolTable;
+
 };
 
 class Module_Types

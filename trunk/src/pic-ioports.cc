@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-ioports.h"
 #include "interface.h"
 #include "p16x6x.h"
-#include "p16f62x.h"
+//#include "p16f62x.h"
 
 #include "xref.h"
 //#define DEBUG
@@ -90,12 +90,12 @@ private:
 
 //------------------------------------------------------------------------
 
-PicPortRegister::PicPortRegister(const char *port_name,
+PicPortRegister::PicPortRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                                 /*const char *port_name,*/
 				 unsigned int numIopins, 
 				 unsigned int enableMask)
-  : PortRegister(numIopins, false), m_tris(0)
+  : PortRegister(pCpu, pName, pDesc,numIopins, false), m_tris(0)
 {
-  new_name(port_name);
   setEnableMask(enableMask);
 }
 
@@ -128,13 +128,14 @@ void PicPortRegister::setTris(PicTrisRegister *new_tris)
 }
 //------------------------------------------------------------------------
 
-PicTrisRegister::PicTrisRegister(const char *tris_name,
+PicTrisRegister::PicTrisRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                                 /*const char *tris_name,*/
 				 PicPortRegister *_port,
                                  bool bIgnoreWDTResets,
 				 unsigned int enableMask)
-  : sfr_register(),m_port(_port),m_bIgnoreWDTResets(bIgnoreWDTResets),m_EnableMask(enableMask)
+  : sfr_register(pCpu, pName, pDesc),
+    m_port(_port),m_bIgnoreWDTResets(bIgnoreWDTResets),m_EnableMask(enableMask)
 {
-  new_name(tris_name);
   if (m_port)
     m_port->setTris(this);
 }
@@ -176,8 +177,10 @@ void PicTrisRegister::reset(RESET_TYPE r)
 
 //------------------------------------------------------------------------
 
-PicPSP_TrisRegister::PicPSP_TrisRegister(const char *tris_name, PicPortRegister *_port, bool bIgnoreWDTResets)
-  : PicTrisRegister(tris_name,_port,bIgnoreWDTResets)
+PicPSP_TrisRegister::PicPSP_TrisRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                                         /*const char *tris_name, */
+                                         PicPortRegister *_port, bool bIgnoreWDTResets)
+  : PicTrisRegister(pCpu, pName, pDesc,_port,bIgnoreWDTResets)
 {
 }
 // If not in PSPMODE, OBF and IBF are always clear
@@ -220,10 +223,11 @@ unsigned int PicPSP_TrisRegister::get(void)
 
 
 
-PicPortBRegister::PicPortBRegister(const char *port_name,
+PicPortBRegister::PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                                   /*const char *port_name, */
 				   unsigned int numIopins, 
 				   unsigned int enableMask)
-  : PicPortRegister(port_name, numIopins, enableMask),
+  : PicPortRegister(pCpu, pName, pDesc, numIopins, enableMask),
     m_bRBPU(false),
     m_bIntEdge(false)
 {
@@ -302,12 +306,12 @@ void PicPortBRegister::setIntEdge(bool bNewIntEdge)
 }
 
 
-PicPSP_PortRegister::PicPSP_PortRegister(const char *port_name,
-                                 unsigned int numIopins,
-                                 unsigned int enableMask)
-  : PortRegister(numIopins, false), m_tris(0), m_psp(0)
+PicPSP_PortRegister::PicPSP_PortRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                                         /*const char *port_name,*/
+                                         unsigned int numIopins,
+                                         unsigned int enableMask)
+  : PortRegister(pCpu, pName, pDesc,numIopins, false), m_tris(0), m_psp(0)
 {
-  new_name(port_name);
   setEnableMask(enableMask);
 }
 
@@ -357,12 +361,13 @@ void PicPSP_PortRegister::setTris(PicTrisRegister *new_tris)
 //------------------------------------------------------------------------
 // Latch Register
 
-PicLatchRegister::PicLatchRegister(const char *_name, 
+PicLatchRegister::PicLatchRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                                   /*const char *_name, */
 				   PortRegister *_port,
 				   unsigned int enableMask)
-  : m_port(_port), m_EnableMask(enableMask)
+  : sfr_register(pCpu, pName, pDesc),
+    m_port(_port), m_EnableMask(enableMask)
 {
-  new_name(_name);
 }
 
 void PicLatchRegister::put(unsigned int new_value)

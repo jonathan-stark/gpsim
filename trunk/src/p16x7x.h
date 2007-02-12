@@ -35,7 +35,7 @@ class P16C71 :  public P16C61
 
   ADCON0 adcon0;
   ADCON1 adcon1;
-  ADRES  adres;
+  sfr_register  adres;
 
   virtual PROCESSOR_TYPE isa(){return _P16C71_;};
   virtual void create_symbols();
@@ -60,7 +60,7 @@ class P16C712 :  public P16C62
 
   ADCON0 adcon0;
   ADCON1 adcon1;
-  ADRES  adres;
+  sfr_register  adres;
 
   virtual PROCESSOR_TYPE isa(){return _P16C712_;};
 
@@ -100,7 +100,7 @@ class P16C72 : public P16C62
   PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
-  ADRES  adres;
+  sfr_register  adres;
 
   virtual PROCESSOR_TYPE isa(){return _P16C72_;};
   virtual void create_symbols();
@@ -129,7 +129,7 @@ class P16C73 : public P16C63
   PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
-  ADRES  adres;
+  sfr_register  adres;
 
   virtual PROCESSOR_TYPE isa(){return _P16C73_;};
   virtual void create_symbols();
@@ -175,7 +175,7 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
-  ADRES  adres;
+  sfr_register  adres;
 
   virtual PROCESSOR_TYPE isa(){return _P16C74_;};
   virtual void create_symbols();

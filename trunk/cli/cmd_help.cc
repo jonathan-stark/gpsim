@@ -85,7 +85,7 @@ void cmd_help::help(const char *cmd)
   help();
 }
 
-void cmd_help::help(Value *s)
+void cmd_help::help(gpsimObject *s)
 {
   if(s) {
     cout << s->toString() << endl;

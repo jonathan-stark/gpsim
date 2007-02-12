@@ -65,11 +65,11 @@ using namespace std;
 
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
+#include "../src/processor.h"
 
 extern void lexer_setMacroBodyMode();
 extern void lexer_InvokeMacro(Macro *m);
 extern void lexer_setDeclarationMode();
-
 
 #define YYERROR_VERBOSE
 
@@ -113,6 +113,7 @@ int toInt(Expression *expr)
       if (v) {
 	int i;
 	v->get(i);
+        delete v;
 	return i;
       }
     }
@@ -151,12 +152,14 @@ int toInt(Expression *expr)
   Float*                    Float_P;
   Integer*                  Integer_P;
   String*                   String_P;
-  Value*                    Symbol_P;
-  Pin_t*                    Pin_P;
+  //Value*                    Symbol_P;
+  gpsimObject*              Symbol_P;
+  gpsimObject*              gpsimObject_P;
+  //stimulus*                 Stimulus_P;
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
-  PinList_t                *PinList_P;
+  gpsimObjectList_t        *gpsimObjectList_P;
 
   Macro                    *Macro_P;
 }
@@ -229,8 +232,8 @@ extern int yylex(YYSTYPE* lvalP);
 %type <ExprList_P>              expr_list
 %type <ExprList_P>              array
 
-%type  <PinList_P>              pin_list
-%type  <Pin_P>                  pin
+%type  <gpsimObjectList_P>      gpsimObject_list
+%type  <gpsimObject_P>          gpsimObject
 
 
 %token <Integer_P>   LITERAL_INT_T
@@ -239,7 +242,7 @@ extern int yylex(YYSTYPE* lvalP);
 %token <String_P>    LITERAL_STRING_T
 %token <ExprList_P>  LITERAL_ARRAY_T
 %token <Symbol_P>    SYMBOL_T
-%token <Pin_P>       PIN_T
+%token <gpsimObject_P>  GPSIMOBJECT_T
 %token <Port_P>      PORT_T
 
 
@@ -300,7 +303,7 @@ extern int yylex(YYSTYPE* lvalP);
 %right    POW_T
 
 %left     REG_T
-%left     PIN_T
+%left     GPSIMOBJECT_T
 %left     PORT_T
 
 %%
@@ -396,7 +399,10 @@ aborting: ABORT
           ;
             
 attach_cmd
-          : ATTACH SYMBOL_T pin_list {attach.attach($2,$3); delete $3;}
+          : ATTACH SYMBOL_T gpsimObject_list 
+          {
+            attach.attach($2,$3);
+          }
           ;
 
 break_cmd
@@ -450,14 +456,19 @@ eval_cmd:
                                           delete $2;
                                         }
           | SYMBOL_T EQU_T expr         {
-	                                  try {
-                                            $1->set($3);
-					  }
-					  catch(Error Message)  {
-					    GetUserInterface().DisplayMessage("%s (maybe missing quotes?)\n", Message.toString().c_str());
-					  }
-                                          $1->update();
-                                        }
+
+            Value *pValue = dynamic_cast<Value *>($1);
+            if (pValue) {
+              try {
+                pValue->set($3);
+              }
+              catch(Error Message)  {
+                GetUserInterface().DisplayMessage("%s (maybe missing quotes?)\n", Message.toString().c_str());
+              }
+              pValue->update();
+            }
+          }
+
           | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T
                                         {
                                           c_symbol.dump($1,$3);
@@ -599,10 +610,13 @@ processor_cmd: PROCESSOR
           | PROCESSOR LITERAL_STRING_T
           {
             c_processor.processor($2->getVal(),0);
+            delete $2;
           }
           | PROCESSOR LITERAL_STRING_T LITERAL_STRING_T
           { 
             c_processor.processor($2->getVal(),$3->getVal());
+            delete $2;
+            delete $3;
           }
           ;
 
@@ -695,8 +709,12 @@ stimulus_opt:
 symbol_cmd
           : SYMBOL                      {c_symbol.dump_all();}
           | SYMBOL LITERAL_STRING_T EQU_T literal
-                                        {c_symbol.add_one($2->getVal(), $4); delete $4;}
-          | SYMBOL LITERAL_STRING_T     {c_symbol.dump_one($2->getVal());}
+          {
+            c_symbol.add_one($2->getVal(), $4); 
+            delete $2; 
+            delete $4;
+          }
+          | SYMBOL LITERAL_STRING_T     {c_symbol.dump_one($2->getVal()); delete $2;}
           | SYMBOL SYMBOL_T             {c_symbol.dump_one($2);}
           ;
 
@@ -878,6 +896,7 @@ string_option:
           $$->co  = $1;
           if(verbose&2)
             cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
+          delete $2;
         }
         | STRING_OPTION SYMBOL_T
         { 
@@ -898,8 +917,8 @@ string_option:
 	      ;
 
 string_list
-        : LITERAL_STRING_T                        {$$ = new StringList_t(); $$->push_back($1->getVal());}
-        | string_list LITERAL_STRING_T            {$1->push_back($2->getVal());}
+        : LITERAL_STRING_T                        {$$ = new StringList_t(); $$->push_back($1->getVal()); delete $1;}
+        | string_list LITERAL_STRING_T            {$1->push_back($2->getVal()); delete $2;}
         ;
 
 //----------------------------------------
@@ -914,20 +933,43 @@ expr    : binary_expr                   {$$=$1;}
 array   : '{' expr_list '}'             {$$=$2;}
         ;
 
-pin     : PIN_T '(' SYMBOL_T ')'                    {$$=new Pin_t(Pin_t::ePackageBased | Pin_t::eActiveProc, $3);}
+gpsimObject : GPSIMOBJECT_T '(' SYMBOL_T ')' 
+          {
+            // Ex: pin(MyVariable)  -- where MyVariable is the name of a symbol 
+            //  This allows one to programmatically select a particular pin number.
+            $$ = toStimulus($3);
+
+            //$$=new Pin_t(Pin_t::ePackageBased | Pin_t::eActiveProc, $3);
+          }
+        | GPSIMOBJECT_T '(' LITERAL_INT_T ')'
+          {
+            // Ex: pin(8)  -- select a particular pin in the package
+            $$ = toStimulus($3->getVal());
+            delete $3;
+          }
+        | SYMBOL_T
+          {
+            // The symbol should be a stimulus. This is for the attach command.
+            // Ex:  attach Node1 portb0
+            // The scanner will find portb0 and return it to us here as a SYMBOL_T
+            $$ = $1; //dynamic_cast<stimulus *>($1);
+          }
+
+/*
         | PIN_T '(' LITERAL_INT_T ')'               {$$=new Pin_t(Pin_t::ePackageBased | Pin_t::eActiveProc, $3);}
         | PIN_T '(' SYMBOL_T ',' SYMBOL_T  ')'      {$$=new Pin_t(Pin_t::ePackageBased, $3,$5);}
         | PIN_T '(' SYMBOL_T ',' LITERAL_INT_T ')'  {$$=new Pin_t(Pin_t::ePackageBased, $3,$5);}
-        | PORT_T '(' SYMBOL_T ',' SYMBOL_T ')'                   {$$=new Pin_t(Pin_t::ePortBased | Pin_t::eActiveProc, NULL, $3, $5);}
-        | PORT_T '(' SYMBOL_T ',' LITERAL_INT_T ')'              {$$=new Pin_t(Pin_t::ePortBased | Pin_t::eActiveProc, NULL, $3, $5);}
+        | PORT_T '(' SYMBOL_T ',' SYMBOL_T ')'      {$$=new Pin_t(Pin_t::ePortBased | Pin_t::eActiveProc, NULL, $3, $5);}
+        | PORT_T '(' SYMBOL_T ',' LITERAL_INT_T ')' {$$=new Pin_t(Pin_t::ePortBased | Pin_t::eActiveProc, NULL, $3, $5);}
         | PORT_T '(' SYMBOL_T ',' SYMBOL_T ',' SYMBOL_T  ')'     {$$=new Pin_t(Pin_t::ePortBased, $3,$5,$7);}
         | PORT_T '(' SYMBOL_T ',' SYMBOL_T ',' LITERAL_INT_T ')' {$$=new Pin_t(Pin_t::ePortBased, $3,$5,$7);}
         | SYMBOL_T                                  {$$=new Pin_t(Pin_t::ePortBased, $1);}
+*/
         ;
 
-pin_list
-        : pin                           {$$ = new PinList_t(); $$->push_back($1);}
-        | pin_list pin                  {$1->push_back($2);}
+gpsimObject_list
+        : gpsimObject                      {$$ = new gpsimObjectList_t(); $$->push_back($1);}
+        | gpsimObject_list gpsimObject     {if ($2) $1->push_back($2);}
         ;
 
 expr_list

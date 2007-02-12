@@ -50,8 +50,12 @@ class gpsimObject {
   virtual char *toBitStr(char *, int len);
 
   /// Assign a new name to the object
+  /// FIXME why have two ways of naming ???
   virtual void new_name(const char *);
   virtual void new_name(string &);
+
+  /// TEMPORARY -- remove after gpsimValue and Value have been merged.
+  virtual unsigned int get_value();
 
 
   /// description - get a description of this object. If the object has 

@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "12bit-processors.h"
 #include "12bit-instructions.h"
 
-instruction * disasm12 (pic_processor *cpu, unsigned int inst)
+instruction * disasm12 (pic_processor *cpu, unsigned int address, unsigned int inst)
 {
 
   unsigned char topnibble;
@@ -52,30 +52,30 @@ instruction * disasm12 (pic_processor *cpu, unsigned int inst)
 	switch(lownibble)
 	  {
 	  case 0x00:
-	    return(new NOP(cpu,inst));
+	    return(new NOP(cpu,inst,address));
 	  case 0x02:
-	    return(new OPTION(cpu,inst));
+	    return(new OPTION(cpu,inst,address));
 	  case 0x03:
-	    return(new SLEEP(cpu,inst));
+	    return(new SLEEP(cpu,inst,address));
 	  case 0x04:
-	    return(new CLRWDT(cpu,inst));
+	    return(new CLRWDT(cpu,inst,address));
 	  default:
-	    return(new TRIS(cpu,inst));
+	    return(new TRIS(cpu,inst,address));
 	  }
       else
 	switch(bits6and7)
 	  {
 	  case 0x00:
-	    return(new MOVWF(cpu,inst));
+	    return(new MOVWF(cpu,inst,address));
 	  case 0x01:
 	    if(midnibble & 0x02)
-	      return(new CLRF(cpu,inst));
+	      return(new CLRF(cpu,inst,address));
 	    else
-	      return(new CLRW(cpu,inst));
+	      return(new CLRW(cpu,inst,address));
 	  case 0x02:
-	    return(new SUBWF(cpu,inst));
+	    return(new SUBWF(cpu,inst,address));
 	  case 0x03:
-	    return(new DECF(cpu,inst));
+	    return(new DECF(cpu,inst,address));
 
 	  }
 
@@ -84,67 +84,67 @@ instruction * disasm12 (pic_processor *cpu, unsigned int inst)
     case 0x01:	switch(bits6and7)
       {
       case 0x00:
-	return(new IORWF(cpu,inst));
+	return(new IORWF(cpu,inst,address));
       case 0x01:
-	return(new ANDWF(cpu,inst));
+	return(new ANDWF(cpu,inst,address));
       case 0x02:
-	return(new XORWF(cpu,inst));
+	return(new XORWF(cpu,inst,address));
       case 0x03:
-	return(new ADDWF(cpu,inst));
+	return(new ADDWF(cpu,inst,address));
       }
     break;
 
     case 0x02:	switch(bits6and7)
       {
       case 0x00:
-	return(new MOVF(cpu,inst));
+	return(new MOVF(cpu,inst,address));
       case 0x01:
-	return(new COMF(cpu,inst));
+	return(new COMF(cpu,inst,address));
       case 0x02:
-	return(new INCF(cpu,inst));
+	return(new INCF(cpu,inst,address));
       case 0x03:
-	return(new DECFSZ(cpu,inst));
+	return(new DECFSZ(cpu,inst,address));
       }
     break;
 
     case 0x03:	switch(bits6and7)
       {
       case 0x00:
-	return(new RRF(cpu,inst));
+	return(new RRF(cpu,inst,address));
       case 0x01:
-	return(new RLF(cpu,inst));
+	return(new RLF(cpu,inst,address));
       case 0x02:
-	return(new SWAPF(cpu,inst));
+	return(new SWAPF(cpu,inst,address));
       case 0x03:
-	return(new INCFSZ(cpu,inst));
+	return(new INCFSZ(cpu,inst,address));
       }
 
     break;
 
     case 0x04:
-      return(new BCF(cpu,inst));
+      return(new BCF(cpu,inst,address));
     case 0x05:
-      return(new BSF(cpu,inst));
+      return(new BSF(cpu,inst,address));
     case 0x06:
-      return(new BTFSC(cpu,inst));
+      return(new BTFSC(cpu,inst,address));
     case 0x07:
-      return(new BTFSS(cpu,inst));
+      return(new BTFSS(cpu,inst,address));
 
     case 0x08:
-      return(new RETLW(cpu,inst));
+      return(new RETLW(cpu,inst,address));
     case 0x09:
-      return(new CALL(cpu,inst));
+      return(new CALL(cpu,inst,address));
     case 0x0a:
     case 0x0b:
-      return(new GOTO(cpu,inst));
+      return(new GOTO(cpu,inst,address));
     case 0x0c:
-      return(new MOVLW(cpu,inst));
+      return(new MOVLW(cpu,inst,address));
     case 0x0d:
-      return(new IORLW(cpu,inst));
+      return(new IORLW(cpu,inst,address));
     case 0x0e:
-      return(new ANDLW(cpu,inst));
+      return(new ANDLW(cpu,inst,address));
     case 0x0f:
-      return(new XORLW(cpu,inst));
+      return(new XORLW(cpu,inst,address));
     }
     // shouldn't get here
 	return 0;

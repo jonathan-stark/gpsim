@@ -28,7 +28,9 @@ class PicTrisRegister;
 class PicPortRegister : public PortRegister
 {
 public:
-  PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask=0xff);
+  PicPortRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                  /*const char *port_name, */
+                  unsigned int numIopins, unsigned int enableMask=0xff);
   void setTris(PicTrisRegister *new_tris);
   Register *getTris();
 protected:
@@ -40,7 +42,9 @@ class PicTrisRegister : public sfr_register
 
 public:
 
-  PicTrisRegister(const char *tris_name, PicPortRegister *,bool bIgnoreWDTResets, unsigned int nEnableMask=0xff);
+  PicTrisRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                  /*const char *tris_name, */
+                  PicPortRegister *,bool bIgnoreWDTResets, unsigned int nEnableMask=0xff);
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
   virtual char get3StateBit(unsigned int bitMask);
@@ -60,7 +64,9 @@ protected:
 class PicPortBRegister : public PicPortRegister
 {
 public:
-  PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask=0xff);
+  PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                   /*const char *port_name, */
+                   unsigned int numIopins, unsigned int enableMask=0xff);
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
@@ -82,7 +88,9 @@ class PSP;
 class PicPSP_PortRegister : public PortRegister
 {
 public:
-  PicPSP_PortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
+  PicPSP_PortRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                      /*const char *port_name, */
+                      unsigned int numIopins, unsigned int enableMask);
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
   void setPSP(PSP *pspReg) { m_psp = pspReg;}
@@ -98,7 +106,9 @@ class PicPSP_TrisRegister : public PicTrisRegister
 
 public:
 
-  PicPSP_TrisRegister(const char *tris_name, PicPortRegister *,bool bIgnoreWDTResets);
+  PicPSP_TrisRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                      /*const char *tris_name, */
+                      PicPortRegister *,bool bIgnoreWDTResets);
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
@@ -116,7 +126,9 @@ public:
 
   virtual void setEnableMask(unsigned int nEnableMask);
 
-  PicLatchRegister(const char *, PortRegister *,unsigned int nEnableMask=0xff);
+  PicLatchRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                   /*const char *, */
+                   PortRegister *,unsigned int nEnableMask=0xff);
 
 protected:
   PortRegister *m_port;

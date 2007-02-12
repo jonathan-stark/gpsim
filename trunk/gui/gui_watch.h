@@ -29,7 +29,8 @@ public:
 
   Processor *cpu;
   REGISTER_TYPE type;
-  register_symbol *pRegSymbol;
+  //register_symbol *pRegSymbol;
+  Register *pRegister;
   WatchEntry();
 };
 
@@ -56,8 +57,9 @@ class Watch_Window : public  GUI_Object
   virtual void ClearWatches(void);
   virtual void ClearWatch(WatchEntry *entry);
   virtual void UpdateWatch(WatchEntry *entry);
-  virtual void Add(REGISTER_TYPE type,GUIRegister *reg);
-  virtual void Add(REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym);
+  //virtual void Add(REGISTER_TYPE type,GUIRegister *reg);
+  //virtual void Add(REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym);
+  virtual void Add(REGISTER_TYPE type, GUIRegister *reg, Register * pReg=0);
   virtual void Add(Value *);
   virtual void Update();
   virtual void UpdateMenus();

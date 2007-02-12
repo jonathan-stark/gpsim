@@ -254,10 +254,9 @@ private:
 class LcdPortRegister : public PortRegister
 {
 public:
-  LcdPortRegister(const char * _name, gLCD_100X32_SED1520 *plcd)
-    : PortRegister(8, 0), m_pLCD(plcd)
+  LcdPortRegister(gLCD_100X32_SED1520 *plcd, const char * _name, const char *_desc)
+    : PortRegister(plcd, _name,_desc,8, 0), m_pLCD(plcd)
   {
-    new_name(_name);
     mMTT = new ModuleTraceType(plcd,1," Graphic LCD");
     trace.allocateTraceType(mMTT);
 
@@ -298,11 +297,11 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
 {
 
   // Default module attributes.
-  initializeAttributes();
+  //initializeAttributes();
 
-  m_dataBus = new LcdPortRegister((name() + ".data").c_str(),this); //PortRegister(8, 0);
-  m_dataBus->new_name( (name() + ".data").c_str());
-  get_symbol_table().add_register(m_dataBus);
+  m_dataBus = new LcdPortRegister(this,".data","LCD Data Port");
+  //m_dataBus->new_name( (name() + ".data").c_str());
+  addSymbol(m_dataBus);
   m_dataBus->setEnableMask(0xff);
 
   m_A0      = new LCD_InputPin(this,(name() + ".a0").c_str(),eA0);

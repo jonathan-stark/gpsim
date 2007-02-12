@@ -40,7 +40,8 @@ public:
   int valid_bits;
   int writable_bits;
  
-  PIR(INTCON *, PIE *, int _valid_bits);
+  PIR(Processor *pCpu, const char *pName, const char *pDesc,
+      INTCON *, PIE *, int _valid_bits);
   // The PIR base class supports no PIR bits directly
   virtual void clear_sspif(){}
   virtual void clear_rcif(){}
@@ -160,7 +161,8 @@ public:
   virtual void clear_rcif();
  
 
-  PIR1v1(INTCON *, PIE *);
+  PIR1v1(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
 };
 
 
@@ -229,7 +231,8 @@ public:
   }
   virtual void clear_rcif();
  
-  PIR1v2(INTCON *, PIE *);
+  PIR1v2(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
 };
 
 
@@ -253,7 +256,8 @@ enum
       put(get() | CCP2IF);
     }
 
-  PIR2v1(INTCON *, PIE *);
+  PIR2v1(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
 };
 
 //---------------------------------------------------------
@@ -295,7 +299,8 @@ enum
   virtual void set_eeif();
   virtual void set_cmif();
 
-  PIR2v2(INTCON *, PIE *);
+  PIR2v2(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
 };
 
 
@@ -361,7 +366,8 @@ enum
       put(get() | IRXIF);
     }
 
-  PIR3v2(INTCON *, PIE *);
+  PIR3v2(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
 };
 
 

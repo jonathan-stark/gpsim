@@ -46,20 +46,16 @@ Boston, MA 02111-1307, USA.  */
 // CCPRL
 //--------------------------------------------------
 
-CCPRL::CCPRL()
+CCPRL::CCPRL(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    ccprh(0), tmrl(0)
 {
-
-  ccprh = 0;
-  tmrl = 0;
-
 }
 
 void CCPRL::put(unsigned int new_value)
 {
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
-
   value.put(new_value);
 
   if(tmrl && tmrl->compare_mode)
@@ -141,22 +137,19 @@ void CCPRL::assign_tmr(TMRL *ptmr)
 // CCPRH
 //--------------------------------------------------
 
-CCPRH::CCPRH()
+CCPRH::CCPRH(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    ccprl(0),pwm_mode(0),pwm_value(0)
 {
-
-  ccprl = 0;
-  pwm_mode = 0;
-  pwm_value = 0;
 }
 
 // put_value allows PWM code to put data
 void CCPRH::put_value(unsigned int new_value)
 {
-      trace.raw(write_trace.get() | value.get());
-      //trace.register_write(address,value.get());
-
-      value.put(new_value);
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
 }
+
 void CCPRH::put(unsigned int new_value)
 {
 
@@ -224,15 +217,15 @@ private:
 //--------------------------------------------------
 // CCPCON
 //--------------------------------------------------
-CCPCON::CCPCON()
-  : m_PinModule(0),
+CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    m_PinModule(0),
     m_source(0),
     m_bInputEnabled(false),
     m_bOutputEnabled(false),
     m_cOutputState('?'),
     edges(0),
     ccprl(0), pir_set(0), tmr2(0), adcon0(0)
-
 {
 }
 void CCPCON::setIOpin(PinModule *new_PinModule)
@@ -517,8 +510,9 @@ void CCPCON::put(unsigned int new_value)
 //--------------------------------------------------
 // T1CON
 //--------------------------------------------------
-T1CON::T1CON()
-  : tmrl(0)
+T1CON::T1CON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    tmrl(0)
 {
 
   new_name("T1CON");
@@ -564,8 +558,9 @@ unsigned int T1CON::get_prescale()
 //--------------------------------------------------
 // member functions for the TMRH base class
 //--------------------------------------------------
-TMRH::TMRH()
-  : tmrl(0)
+TMRH::TMRH(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    tmrl(0)
 {
 
   value.put(0);
@@ -621,8 +616,9 @@ unsigned int TMRH::get_value()
 //--------------------------------------------------
 // member functions for the TMRL base class
 //--------------------------------------------------
-TMRL::TMRL()
-  : m_cState('?'), m_bExtClkEnabled(false), m_Interrupt(0)
+TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    m_cState('?'), m_bExtClkEnabled(false), m_Interrupt(0)
 {
 
   value.put(0);
@@ -636,8 +632,6 @@ TMRL::TMRL()
   tmrh    = 0;
   t1con   = 0;
   ccpcon  = 0;
-  new_name("TMRL");
-
 }
 
 void TMRL::setIOpin(PinModule *extClkSource)
@@ -951,12 +945,10 @@ void TMRL::callback_print()
 // member functions for the PR2 base class
 //--------------------------------------------------
 
-PR2::PR2()
-  :  tmr2(0)
+PR2::PR2(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    tmr2(0)
 {
-
-  new_name("PR2");
-
 }
 
 void PR2::put(unsigned int new_value)
@@ -980,12 +972,10 @@ void PR2::put(unsigned int new_value)
 // member functions for the T2CON base class
 //--------------------------------------------------
 
-T2CON::T2CON()
-  : tmr2(0)
+T2CON::T2CON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    tmr2(0)
 {
-
-  new_name("T2CON");
-
 }
 
 void T2CON::put(unsigned int new_value)
@@ -994,7 +984,6 @@ void T2CON::put(unsigned int new_value)
 
   unsigned int diff = value.get() ^ new_value;
   value.put(new_value);
-
 
   if (tmr2) {
     
@@ -1011,15 +1000,18 @@ void T2CON::put(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the TMR2 base class
 //--------------------------------------------------
-TMR2::TMR2()
-  : pr2(0), pir_set(0), t2con(0), ccp1con(0), ccp2con(0)
+TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    pwm_mode(0),
+    update_state(TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE),
+    last_update(0),
+    prescale(1),
+    prescale_counter(0),
+    pr2(0), pir_set(0), t2con(0), ccp1con(0), ccp2con(0),
+    last_cycle(0)
 {
-  update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
-  pwm_mode = 0;
   value.put(0);
   future_cycle = 0;
-  prescale=1;
-  new_name("TMR2");
 }
 
 void TMR2::callback_print() 

@@ -42,7 +42,9 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 
 P16F62x::P16F62x(const char *_name, const char *desc)
-  : P16X6X_processor(_name,desc)
+  : P16X6X_processor(_name,desc),
+    usart(this),
+    comparator(this)
 {
 }
 
@@ -116,7 +118,8 @@ void P16F62x::create_sfr_map()
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
-		   new _TXREG(&usart), new _RCREG(&usart));
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
@@ -132,28 +135,28 @@ void P16F62x::create_sfr_map()
 	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
 	&(*m_porta)[4]);
 
-  comparator.cmcon->set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
-  comparator.cmcon->set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
-  comparator.cmcon->set_configuration(1, 1, AN0, AN2, AN3, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(2, 1, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 2, AN0, VREF, AN3, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(2, 2, AN1, VREF, AN2, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(1, 3, AN0, AN2, AN0, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(2, 3, AN1, AN2, AN1, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(2, 4, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(2, 5, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 6, AN0, AN2, AN0, AN2, OUT0);
-  comparator.cmcon->set_configuration(2, 6, AN1, AN2, AN1, AN2, OUT1);
-  comparator.cmcon->set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN2, AN3, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(2, 1, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 2, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(2, 2, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN0, AN2, AN0, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 5, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 6, AN0, AN2, AN0, AN2, OUT0);
+  comparator.cmcon.set_configuration(2, 6, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   
 
-  add_sfr_register(comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
+  add_sfr_register(&comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9f, RegisterValue(0,0),"vrcon");
 
-  comparator.cmcon->put(0);
+  comparator.cmcon.put(0);
 
   // Link ccp1 and portb
   //1((PORTB_62x*)portb)->ccp1con = &ccp1con;
@@ -261,8 +264,7 @@ void  P16F62x::create(int ram_top, unsigned int eeprom_size)
 
   _14bit_processor::create();
 
-  e = new EEPROM_PIR(pir1);
-  e->set_cpu(this);
+  e = new EEPROM_PIR(this,pir1);
   e->initialize(eeprom_size);
   //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);

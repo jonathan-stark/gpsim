@@ -97,7 +97,55 @@ public:
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   : pic_processor(_name,desc),
-    pir1(0,0), pir2(0,0)
+    adcon0(this, "adcon0", "A2D control register"),
+    adcon1(this, "adcon1", "A2D control register"),
+    adresl(this, "adresl", "A2D result low"),
+    adresh(this, "adresh", "A2D result high"),
+    intcon(this, "intcon", "Interrupt control"),
+    intcon2(this, "intcon2", "Interrupt control"),
+    intcon3(this, "intcon3", "Interrupt control"),
+    bsr(this, "bsr", "Bank Select Register"),
+    tmr0l(this, "tmr0l", "TMR0 Low"),
+    tmr0h(this, "tmr0h", "TMR0 High"),
+    t0con(this, "t0con", "TMR0 Control"),
+    rcon(this, "rcon", ""),
+    ipr1(this, "ipr1", "Interrupt Priorities"),
+    ipr2(this, "ipr2", "Interrupt Priorities"),
+    t1con(this, "t1con", "TMR1 Control"),
+    pie1(this, "pie1", "Peripheral Interrupt Enable"),
+    pie2(this, "pie2", "Peripheral Interrupt Enable"),
+    pr2(this, "pr2", "TMR2 Period Register"),
+    t2con(this, "t2con", "TMR2 Control"),
+    tmr2(this, "tmr2", "TMR2 Register"),
+    tmr1l(this, "tmr1l", "TMR1 Low"),
+    tmr1h(this, "tmr1h", "TMR1 High"),
+    ccp1con(this, "ccp1con", "Capture Compare Control"),
+    ccpr1l(this, "ccpr1l", "Capture Compare 1 Low"),
+    ccpr1h(this, "ccpr1h", "Capture Compare 1 High"),
+    ccp2con(this, "ccp2con", "Capture Compare Control"),
+    ccpr2l(this, "ccpr2l", "Capture Compare 2 Low"),
+    ccpr2h(this, "ccpr2h", "Capture Compare 2 High"),
+    tmr3l(this, "tmr3l", "TMR3 Low"),
+    tmr3h(this, "tmr3h", "TMR3 High"),
+    t3con(this, "t3con", "TMR3 Control"),
+    
+    osccon(this, "osccon", "OSC Control"),
+    lvdcon(this, "lvdcon", "LVD Control"),
+    wdtcon(this, "wdtcon", "WDT Control"),
+    prodh(this, "prodh", "Product High"),
+    prodl(this, "prodl", "Product Low"),
+    pclatu(this, "pclatu", "Program Counter Latch upper byte"),
+
+    ind0(this,string("0")),
+    ind1(this,string("1")),
+    ind2(this,string("2")),
+    usart(this),
+    stack16(this),
+    pir1(this,"pir1","Peripheral Interrupt Register",0,0),
+    pir2(this,"pir2","Peripheral Interrupt Register",0,0),
+
+    tbl(this),
+    ssp(this)
 {
 
   package = 0;
@@ -107,18 +155,18 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   pc = new Program_Counter16();
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
-  m_porta = new PicPortRegister("porta",8,0x7f);
-  m_trisa = new PicTrisRegister("trisa", m_porta, true);
-  m_lata  = new PicLatchRegister("lata", m_porta);
+  m_porta = new PicPortRegister(this,"porta","",8,0x7f);
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, true);
+  m_lata  = new PicLatchRegister(this,"lata","", m_porta);
   m_lata->setEnableMask(0x7f);
 
-  m_portb = new PicPortRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister("trisb", m_portb, true);
-  m_latb  = new PicLatchRegister("latb", m_portb);
+  m_portb = new PicPortRegister(this,"portb","",8,0xff);
+  m_trisb = new PicTrisRegister(this,"trisb","", m_portb, true);
+  m_latb  = new PicLatchRegister(this,"latb","", m_portb);
 
-  m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister("trisc", m_portc, true);
-  m_latc  = new PicLatchRegister("latc", m_portc);
+  m_portc = new PicPortRegister(this,"portc","",8,0xff);
+  m_trisc = new PicTrisRegister(this,"trisc","", m_portc, true);
+  m_latc  = new PicLatchRegister(this,"latc","", m_portc);
 
 }
 
@@ -142,7 +190,7 @@ pic_processor *_16bit_processor::construct()
   p->create_invalid_registers();
   p->create_symbols();
   p->name_str = "generic 16bit processor";
-  symbol_table.add_module(p,p->name_str.c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -181,7 +229,8 @@ void _16bit_processor :: create_sfr_map()
 
 
   usart.initialize(&pir_set_def,&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(&usart), new _RCREG(&usart));
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta,    0xfab,porv,"rcsta");
   add_sfr_register(&usart.txsta,    0xfac,RegisterValue(0x02,0),"txsta");
@@ -273,7 +322,7 @@ void _16bit_processor :: create_sfr_map()
 
   if(pcl)
     delete pcl;
-  pcl = new PCL16();
+  pcl = new PCL16(this,"pcl", "Program Counter Low byte");
 
   add_sfr_register(pcl,     0xff9);
   add_sfr_register(pclath,  0xffa);
@@ -339,14 +388,14 @@ void _16bit_processor :: create_sfr_map()
 
   pir1.set_intcon(&intcon);
   pir1.set_pie(&pie1);
-  pie1.pir = &pir1;
-  pie1.new_name("pie1");
+  pie1.setPir(&pir1);
+  //pie1.new_name("pie1");
 
   pir2.set_intcon(&intcon);
   pir2.set_pie(&pie2);
   
-  pie2.pir    = &pir2;
-  pie2.new_name("pie2");
+  pie2.setPir(&pir2);
+  //pie2.new_name("pie2");
 
   // All of the status bits on the 16bit core are writable
   status->write_mask = 0xff;
@@ -421,10 +470,11 @@ void _16bit_processor :: create ()
     cout << " _16bit_processor :: create\n" ;
 
   fast_stack.init(this);
+  /*
   ind0.init(this);
   ind1.init(this);
   ind2.init(this);
-
+  */
   pic_processor::create();
   create_sfr_map();
 
@@ -434,7 +484,7 @@ void _16bit_processor :: create ()
   intcon.set_intcon2(&intcon2);
   intcon.set_cpu(this);
 
-  tbl.initialize(this);
+  //tbl.initialize(this);
   tmr0l.start(0);
 
   if(pma) {
@@ -589,6 +639,8 @@ void _16bit_processor::create_config_memory()
 
   m_configMemory[CONFIG1H-CONFIG1L] = new Config1H(this, CONFIG1H);
   m_configMemory[CONFIG2H-CONFIG1L] = new Config2H(this, CONFIG2H);
+  addSymbol(m_configMemory[CONFIG1H-CONFIG1L]);
+  addSymbol(m_configMemory[CONFIG2H-CONFIG1L]);
 
 }
 

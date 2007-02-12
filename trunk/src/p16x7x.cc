@@ -67,7 +67,11 @@ private:
 //------------------------------------------------------------------------
 //
 P16C71::P16C71(const char *_name, const char *desc)
-  : P16C61(_name, desc)
+  : P16C61(_name, desc),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result")
+
 {
   if(verbose)
     cout << "c71 constructor, type = " << isa() << '\n';
@@ -88,8 +92,6 @@ void P16C71::create_sfr_map()
   add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
 
-
-  adres.new_name("adres");
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1,0);
   adcon1.setNumberOfChannels(4);
@@ -142,7 +144,7 @@ Processor * P16C71::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -194,9 +196,6 @@ void P16C712::create_sfr_map()
   adcon1.setVrefHiConfiguration(3, 3);
   adcon1.setVrefHiConfiguration(5, 3);
 
-  adcon0.new_name("adcon0");
-  adcon1.new_name("adcon1");
-  adres.new_name("adres");
 }
 
 
@@ -225,7 +224,7 @@ Processor * P16C712::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -233,11 +232,13 @@ Processor * P16C712::construct(const char *name)
 
 
 P16C712::P16C712(const char *_name, const char *desc)
-  : P16C62(_name, desc)
+  : P16C62(_name, desc),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result")
 {
   if(verbose)
     cout << "c712 constructor, type = " << isa() << '\n';
-
 }
 
 
@@ -255,7 +256,7 @@ Processor * P16C716::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -318,10 +319,6 @@ void P16C72::create_sfr_map()
   adcon1.setVrefHiConfiguration(3, 3);
   adcon1.setVrefHiConfiguration(5, 3);
 
-  adcon0.new_name("adcon0");
-  adcon1.new_name("adcon1");
-  adres.new_name("adres");
-
   // Link the A/D converter to the Capture Compare Module
   ccp2con.setADCON(&adcon0);
 }
@@ -358,7 +355,7 @@ Processor * P16C72::construct(const char *name)
   p->create_symbols();
 
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -367,7 +364,11 @@ Processor * P16C72::construct(const char *name)
 
 P16C72::P16C72(const char *_name, const char *desc)
   : P16C62(_name, desc),
-    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
+    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result")
 {
   if(verbose)
     cout << "c72 constructor, type = " << isa() << '\n';
@@ -429,11 +430,6 @@ void P16C73::create_sfr_map()
   adcon1.setVrefHiConfiguration(3, 3);
   adcon1.setVrefHiConfiguration(5, 3);
 
-
-  adcon0.new_name("adcon0");
-  adcon1.new_name("adcon1");
-  adres.new_name("adres");
-
   // Link the A/D converter to the Capture Compare Module
   ccp2con.setADCON(&adcon0);
 }
@@ -469,7 +465,7 @@ Processor * P16C73::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -478,7 +474,11 @@ Processor * P16C73::construct(const char *name)
 
 P16C73::P16C73(const char *_name, const char *desc)
   : P16C63(_name, desc),
-    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
+    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result")
 {
   if(verbose)
     cout << "c73 constructor, type = " << isa() << '\n';
@@ -535,8 +535,6 @@ void P16F73::create()
 
   P16C73::create();
 
-  pm_rd.set_cpu(this);
-
   status->rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
   indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
@@ -557,7 +555,7 @@ Processor * P16F73::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -565,7 +563,8 @@ Processor * P16F73::construct(const char *name)
 
 
 P16F73::P16F73(const char *_name, const char *desc)
-  : P16C73(_name, desc)
+  : P16C73(_name, desc),
+    pm_rd(this)
 {
   if(verbose)
     cout << "f73 constructor, type = " << isa() << '\n';
@@ -630,11 +629,6 @@ void P16C74::create_sfr_map()
   adcon1.setVrefHiConfiguration(3, 3);
   adcon1.setVrefHiConfiguration(5, 3);
 
-
-  adcon0.new_name("adcon0");
-  adcon1.new_name("adcon1");
-  adres.new_name("adres");
-
   // Link the A/D converter to the Capture Compare Module
   ccp2con.setADCON(&adcon0);
 }
@@ -670,7 +664,7 @@ Processor * P16C74::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -679,7 +673,11 @@ Processor * P16C74::construct(const char *name)
 
 P16C74::P16C74(const char *_name, const char *desc)
   : P16C65(_name, desc) ,
-    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
+    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result")
 {
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';
@@ -735,8 +733,6 @@ void P16F74::create()
 
   P16C74::create();
 
-  pm_rd.set_cpu(this);
-
   status->rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
   indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
@@ -757,7 +753,7 @@ Processor * P16F74::construct(const char *name)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  symbol_table.add_module(p,p->name().c_str());
+  globalSymbolTable().addModule(p);
 
   return p;
 
@@ -765,11 +761,11 @@ Processor * P16F74::construct(const char *name)
 
 
 P16F74::P16F74(const char *_name, const char *desc)
-  : P16C74(_name, desc)
+  : P16C74(_name, desc),
+    pm_rd(this)
 {
   if(verbose)
     cout << "f74 constructor, type = " << isa() << '\n';
-
 }
 
 

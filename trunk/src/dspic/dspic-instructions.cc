@@ -280,10 +280,10 @@ instruction * dsPicProcessor::disasm (unsigned int address, unsigned int inst)
   pi = 0;
   for(int i =0; i<NUM_OP_DSPIC; i++)
     if((op_dsPic[i].inst_mask & inst) == op_dsPic[i].opcode)
-      pi = op_dsPic[i].inst_constructor(this, inst,address);
+      pi = op_dsPic[i].inst_constructor(this, inst, address);
 
   if(pi == 0)
-    pi = invalid_instruction::construct(this, inst);
+    pi = invalid_instruction::construct(this, inst, address);
 
   return (pi);
 
@@ -532,7 +532,7 @@ namespace dspic_instructions
       runtime_initialize();
 
     snprintf(return_str,len,"%s\t0x%05x",
-	     gpsimValue::name().c_str(),
+	     gpsimObject::name().c_str(),
 	     destination_index<<1);
 
     return(return_str);

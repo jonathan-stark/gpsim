@@ -22,21 +22,21 @@ Boston, MA 02111-1307, USA.  */
 #define __CMD_SYMBOL_H__
 
 class Expression;
-class Value;
+class gpsimObject;
 
 class cmd_symbol : public command
 {
 public:
 
-  cmd_symbol(void);
+  cmd_symbol();
 
-  void dump_all(void);
+  void dump_all();
   void dump_one(const char *sym_name);
-  void dump_one(Value *);
-  void dump(Value *, ExprList_t*);
+  void dump_one(gpsimObject *);
+  void dump(gpsimObject *, ExprList_t*);
   void EvaluateAndDisplay(Expression *pExpr);
 
-  void Set(Value *s, ExprList_t*e, Expression *pExpr);
+  void Set(gpsimObject *s, ExprList_t*e, Expression *pExpr);
 
   void add_one(const char *sym_name, Expression *);
 };

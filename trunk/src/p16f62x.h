@@ -43,7 +43,7 @@ public:
   P16F62x(const char *_name=0, const char *desc=0);
 
   USART_MODULE usart;
-  COMPARATOR_MODULE comparator;
+  ComparatorModule comparator;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -57,13 +57,6 @@ public:
 
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
-
-  /*
-  virtual int get_pin_count(){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-  */
 
   virtual void create(int ram_top, unsigned int eeprom_size);
   virtual void create_iopin_map();

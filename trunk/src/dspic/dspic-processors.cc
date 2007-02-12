@@ -51,16 +51,16 @@ namespace dspic {
   // dsPicProcessor -- constructor.
 
   dsPicProcessor::dsPicProcessor(const char *_name, const char *desc)
-    : Processor(_name, desc)
+    : Processor(_name, desc),
+      m_stack(this),
+      m_status(this, "status")
   {
     gTrace = &get_trace();
     gCycles = &get_cycles();
 
-    pcl = new PCL();
+    pcl = new PCL(this, "PCL");
 
     pc = new dsPicProgramCounter(this,pcl);
-
-    m_stack.init(this);
   }
 
   //-------------------------------------------------------------------
@@ -100,7 +100,7 @@ namespace dspic {
 	pReg->new_name(pName);
       pReg->address = addr;
       pReg->alias_mask = 0;
-      get_symbol_table().add_register(pReg);
+      addSymbol(pReg);
       if (rv) {
 	pReg->value = *rv;
 	pReg->por_value = *rv;
@@ -143,18 +143,16 @@ namespace dspic {
     char str[100];
     for  (j = start_address; j <= end_address; j++) {
 
-      registers[j] = new dsPicRegister;
-      registers[j]->alias_mask = 0;
+      //The default register name is simply its address
+      snprintf (str, sizeof(str), "R%03X", j);
+
+      registers[j] = new dsPicRegister(this,str);
+
       registers[j]->address = j;
       RegisterValue rv = getWriteTT(j);
       registers[j]->set_write_trace(rv);
       rv = getReadTT(j);
       registers[j]->set_read_trace(rv);
-
-      //The default register name is simply its address
-      sprintf (str, "R%03X", j);
-      registers[j]->new_name(str);
-      registers[j]->set_cpu(this);
     }
 
     RegisterValue porv(0,0);
@@ -162,7 +160,7 @@ namespace dspic {
     for (j=0; j<16; j++) {
       char buff[16];
       snprintf(buff, 16, "W%d",j);
-      add_sfr_register(&W[j], j*2, buff,&porv);
+      // add_sfr_register(&W[j], j*2, buff,&porv);
     }
 
     add_sfr_register(pcl,   0x02e);
@@ -188,6 +186,19 @@ namespace dspic {
   void dsPicProcessor::step_one(bool refresh)
   {
     program_memory[pc->value]->execute();
+  }
+  void dsPicProcessor::step(unsigned int, bool refresh)
+  {
+    program_memory[pc->value]->execute();
+  }
+  void dsPicProcessor::run(bool refresh)
+  {
+  }
+  void dsPicProcessor::finish()
+  {
+  }
+  void dsPicProcessor::step_cycle()
+  {
   }
   void dsPicProcessor::interrupt()
   {
@@ -216,9 +227,9 @@ namespace dspic {
 
     printf ("Constructing a dspic 6010\n");
 
-    get_symbol_table().add_module(p,p->name().c_str());
-
     p->create();
+    globalSymbolTable().addModule(p);
+
     return p;
   }
 

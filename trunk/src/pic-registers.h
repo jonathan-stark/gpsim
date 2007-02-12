@@ -41,7 +41,7 @@ class PCHelper : public Register
 {
 public:
 
-  PCHelper(ProgramMemoryAccess *);
+  PCHelper(Processor *pCpu, ProgramMemoryAccess *);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get_value();
   virtual unsigned int register_size () const
@@ -74,7 +74,7 @@ enum
   unsigned int prescale;
 
 
-  OPTION_REG();
+  OPTION_REG(Processor *pCpu, const char *pName, const char *pDesc=0);
 
   inline unsigned int get_prescale()
   {

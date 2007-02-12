@@ -71,12 +71,13 @@ CSimulationContext::CSimulationContext() :
     "Enables and disables loading of source code")) {
   active_cpu_id = 0;
   cpu_ids = 0;
-  m_bEnableLoadSource.setClearableSymbol(false);
   m_pbUserCanceled = NULL;
 }
 
-void CSimulationContext::Initialize() {
-  get_symbol_table().add(&m_bEnableLoadSource);
+void CSimulationContext::Initialize()
+{
+  cout << "CSimulationContext::Initialize() -- FIXME\n";
+  //  get_symbol_table().add(&m_bEnableLoadSource);
 }
 
 CSimulationContext *CSimulationContext::s_SimulationContext = new CSimulationContext();
@@ -115,7 +116,10 @@ Processor * CSimulationContext::SetProcessorByType(const char * processor_type,
   Processor *p;
   CProcessorList::iterator it = processor_list.findByType(string(processor_type));
   GetBreakpoints().clear_all(GetActiveCPU());
-  GetSymbolTable().Reinitialize();
+
+  cout << __FUNCTION__ << " FIXME \n";
+  // GetSymbolTable().Reinitialize();
+
   if(processor_list.end() == it) {
     p = add_processor(processor_type,processor_new_name);
   }
@@ -161,7 +165,7 @@ Processor * CSimulationContext::add_processor(ProcessorConstructor *pc,
 Processor * CSimulationContext::add_processor(Processor *p)
 {
     processor_list.insert(CProcessorList::value_type(p->name(), p));
-    p->initializeAttributes();
+    //p->initializeAttributes();
     active_cpu = p;
     //p->processor_id = 
     active_cpu_id = ++cpu_ids;
@@ -257,21 +261,25 @@ void CSimulationContext::dump_processor_list(void)
 
 }
 
-void CSimulationContext::Clear() {
+void CSimulationContext::Clear() 
+{
   GetBreakpoints().clear_all(GetActiveCPU());
   CProcessorList::iterator processor_iterator; 
   for (processor_iterator = processor_list.begin();
        processor_iterator != processor_list.end(); 
        processor_iterator++) {
-      CProcessorList::value_type vt = *processor_iterator;
-      Processor *p = vt.second;
-      delete p;
-    }
-  GetSymbolTable().clear_all();
+    CProcessorList::value_type vt = *processor_iterator;
+    Processor *p = vt.second;
+    delete p;
+  }
+  cout << __FUNCTION__ << " FIXME \n";
+  //GetSymbolTable().clear_all();
   processor_list.clear();
 }
 
-void CSimulationContext::Reset(RESET_TYPE r) {
+void CSimulationContext::Reset(RESET_TYPE r)
+{
+  /*
   Symbol_Table &ST = get_symbol_table();
   Symbol_Table::module_symbol_iterator it;
   Symbol_Table::module_symbol_iterator itEnd = ST.endModuleSymbol();
@@ -281,6 +289,8 @@ void CSimulationContext::Reset(RESET_TYPE r) {
         m->reset(r);
       }
   }
+  */
+  cout << __FUNCTION__ << " FIXME \n";
 }
 
 void CSimulationContext::NotifyUserCanceled() {
@@ -297,9 +307,10 @@ void CSimulationContext::NotifyUserCanceled() {
   }
 }
 
-extern Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
-Symbol_Table & CSimulationContext::GetSymbolTable() {
-  return symbol_table;
+extern SymbolTable gSymbolTable;  // There's only one instance of "the" symbol table
+SymbolTable & CSimulationContext::GetSymbolTable() 
+{
+  return gSymbolTable;
 }
 
 Breakpoints & CSimulationContext::GetBreakpoints() {

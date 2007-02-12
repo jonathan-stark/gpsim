@@ -27,7 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_symbol.h"
 #include "../src/cmd_gpsim.h"
 #include "../src/symbol.h"
-#include "../src/symbol_orb.h"
 #include "../src/ValueCollections.h"
 
 cmd_symbol c_symbol;
@@ -66,19 +65,32 @@ cmd_symbol::cmd_symbol()
   op = cmd_symbol_options; 
 }
 
-
-void cmd_symbol::dump_all(void)
+void dumpOneSymbol(const SymbolEntry_t &sym)
 {
-  get_symbol_table().dump_all();
+  cout << "  " << sym.second->name() 
+       << " stored as " << sym.first
+       << endl;
+}
+
+void dumpSymbolTables(const SymbolTableEntry_t &st)
+{
+  cout << " Symbol Table: " << st.first << endl;
+  (st.second)->ForEachSymbolTable(dumpOneSymbol);
+}
+
+void cmd_symbol::dump_all()
+{
+  cout << "\nSymbol table\n";
+  globalSymbolTable().ForEachModule(dumpSymbolTables);
 }
 
 void cmd_symbol::dump_one(const char *sym_name)
 {
   string sName(sym_name);
-  get_symbol_table().dump_filtered(sName);
+  dump_one(globalSymbolTable().find(sName));
+  //get_symbol_table().dump_filtered(sName);
 }
-
-void cmd_symbol::dump_one(Value *s)
+void cmd_symbol::dump_one(gpsimObject *s)
 {
   if(s)
     cout << s->toString() << endl;
@@ -89,9 +101,9 @@ void cmd_symbol::add_one(const char *sym_name, Expression *expr)
   Value * pVal = expr->evaluate();
   if (pVal) {
     pVal->new_name(sym_name);
-    pVal->setClearableSymbol(false);
+    //pVal->setClearableSymbol(false);
     pVal->set_description("Derived from the command line.");
-    if (!get_symbol_table().add(pVal))
+    if (!globalSymbolTable().addSymbol(pVal))
       delete pVal;
   }
 }
@@ -106,23 +118,31 @@ void cmd_symbol::EvaluateAndDisplay(Expression *pExpr) {
   }
 }
 
-void cmd_symbol::dump(Value *s, ExprList_t*e) {
-  IndexedSymbol sym(s, e);
-  cout << sym.toString() << endl;
+void cmd_symbol::dump(gpsimObject *s, ExprList_t*e) 
+{
+  Value *pValue = dynamic_cast<Value *>(s);
+  if (pValue) {
+    IndexedSymbol sym(pValue, e);
+    cout << sym.toString() << endl;
+  }
 }
 
-void cmd_symbol::Set(Value *s, ExprList_t*e, Expression *pExpr) {
-  try {
-    IIndexedCollection *pCollection = dynamic_cast<IIndexedCollection*>(s);
-    if(pCollection == NULL) {
-      GetUserInterface().DisplayMessage("%s is not an indexed symbol\n",
-        s->name().c_str());
+void cmd_symbol::Set(gpsimObject *s, ExprList_t*e, Expression *pExpr)
+{
+  Value *pValue = dynamic_cast<Value *>(s);
+  if (pValue) {
+    try {
+      IIndexedCollection *pCollection = dynamic_cast<IIndexedCollection*>(s);
+      if(pCollection == NULL) {
+        GetUserInterface().DisplayMessage("%s is not an indexed symbol\n",
+                                          s->name().c_str());
+      }
+      else {
+        pCollection->SetAt(e, pExpr);
+      }
     }
-    else {
-      pCollection->SetAt(e, pExpr);
+    catch(Error Message)  {
+      GetUserInterface().DisplayMessage("%s\n", Message.toString().c_str());
     }
-  }
-  catch(Error Message)  {
-    GetUserInterface().DisplayMessage("%s\n", Message.toString().c_str());
   }
 }

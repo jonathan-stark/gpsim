@@ -30,7 +30,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/cmd_gpsim.h"
 #include "../src/pic-processor.h"
-#include "../src/symbol_orb.h"
 #include "../src/operator.h"
 
 cmd_break c_break;
@@ -339,7 +338,7 @@ unsigned int cmd_break::set_break(int bit_flag, bool bLog)
   return b;
 }
  // attribute breakpoints 	 
-unsigned int cmd_break::set_break(Value *v)
+unsigned int cmd_break::set_break(gpsimObject *v)
 {
   if (v)
     v->set_break();

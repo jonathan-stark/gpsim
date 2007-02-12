@@ -175,10 +175,10 @@ string LiteralString::toString()
  * encounters a symbol. 
  */
 
-LiteralSymbol::LiteralSymbol(Value *_sym)
-  : sym(_sym)
+LiteralSymbol::LiteralSymbol(gpsimObject *_sym)
 {
-  assert(_sym != 0);
+  sym = dynamic_cast<Value *>(_sym);
+  assert(sym != 0);
 }
 
 LiteralSymbol::~LiteralSymbol()
@@ -212,17 +212,23 @@ int LiteralSymbol::clear_break()
 {
   return sym ? sym->clear_break() : -1;
 }
-
-IndexedSymbol::IndexedSymbol(Value *pSymbol, ExprList_t*pExprList)
-: m_pSymbol(pSymbol), m_pExprList(pExprList) {
-  assert(pSymbol != 0);
+/*****************************************************************
+ * The LiteralSymbol class
+ */
+IndexedSymbol::IndexedSymbol(gpsimObject *pSymbol, ExprList_t*pExprList)
+  : m_pExprList(pExprList)
+{
+  m_pSymbol = dynamic_cast<Value *>(pSymbol);
+  assert(m_pSymbol != 0);
   assert(pExprList != 0);
 }
 
-IndexedSymbol::~IndexedSymbol() {
+IndexedSymbol::~IndexedSymbol()
+{
 }
 
-Value* IndexedSymbol::evaluate() {
+Value* IndexedSymbol::evaluate()
+{
   // Indexed symbols with more than one index expression
   // cannot be evaluated
   if(m_pExprList->size() > 1) {

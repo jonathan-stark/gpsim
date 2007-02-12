@@ -49,7 +49,7 @@ class pic_processor;
 class FSR : public sfr_register
 {
 public:
-
+  FSR(Processor *, const char *pName, const char *pDesc=0);
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
@@ -68,7 +68,8 @@ public:
   unsigned int valid_bits;
   unsigned int register_page_bits;   /* Only used by the 12-bit core to define
                                         the valid paging bits in the FSR. */
-  FSR_12(unsigned int _register_page_bits, unsigned int _valid_bits);
+  FSR_12(Processor *, const char *pName, 
+         unsigned int _register_page_bits, unsigned int _valid_bits);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -113,7 +114,7 @@ public:
   unsigned int rp_mask;
   unsigned int write_mask;    // Bits that instructions can modify
 
-  Status_register();
+  Status_register(Processor *, const char *pName, const char *pDesc=0);
   void reset(RESET_TYPE r);
 
   virtual void put(unsigned int new_value);
@@ -314,8 +315,8 @@ public:
 
   //void put(unsigned int new_value);
   //unsigned int get();
-  WREG();
-  WREG(Processor *);
+  WREG(Processor *, const char *pName, const char *pDesc=0);
+  //WREG(Processor *);
 };
 
 #include "tmr0.h"
@@ -330,7 +331,7 @@ public:
   unsigned int base_address_mask1;
   unsigned int base_address_mask2;
 
-  INDF();
+  INDF(Processor *, const char *pName, const char *pDesc=0);
   void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   unsigned int get();
@@ -354,7 +355,7 @@ public:
   virtual unsigned int get_value();
   virtual void reset(RESET_TYPE r);
 
-  PCL();
+  PCL(Processor *, const char *pName, const char *pDesc=0);
 };
 
 //---------------------------------------------------------
@@ -368,7 +369,7 @@ public:
   void put_value(unsigned int new_value);
   unsigned int get();
 
-  PCLATH();
+  PCLATH(Processor *, const char *pName, const char *pDesc=0);
 };
 
 //---------------------------------------------------------
@@ -387,7 +388,7 @@ class PCON : public sfr_register
 
   void put(unsigned int new_value);
 
-  PCON();
+  PCON(Processor *, const char *pName, const char *pDesc=0);
 };
 
 class OSCCON;
@@ -409,8 +410,9 @@ class OSCTUNE : public  sfr_register
   };
   OSCCON *osccon;
                                                                                 
-  OSCTUNE() {
-    valid_bits = 6;
+  OSCTUNE(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(6)
+  {
   }
 };
 
@@ -434,8 +436,9 @@ class OSCCON : public  sfr_register,  public TriggerObject
     IRCF2 = 1<<6
   };
                                                                                 
-  OSCCON() {
-    valid_bits = 7;
+  OSCCON(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(7)
+  {
   }
 };
 
@@ -449,8 +452,9 @@ class WDTCON : public  sfr_register
     SWDTEN = 1<<0
   };
                                                                                 
-  WDTCON() {
-    valid_bits = 1;
+  WDTCON(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(1)
+  {
   }
                                                                                 
 };

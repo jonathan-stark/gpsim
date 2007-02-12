@@ -33,23 +33,27 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "comparator.h"
 
-
-void COMPARATOR_MODULE::initialize( PIR_SET *pir_set,
+ComparatorModule::ComparatorModule(Processor *pCpu)
+  : cmcon(pCpu,"cmcon", "Comparator Module Control"),
+    vrcon(pCpu,"vrcon", "Voltage Reference Control")
+{
+}
+void ComparatorModule::initialize( PIR_SET *pir_set,
 	PinModule *pin_vr0, PinModule *pin_cm0, 
 	PinModule *pin_cm1, PinModule *pin_cm2, PinModule *pin_cm3, 
 	PinModule *pin_cm4, PinModule *pin_cm5)
 {
-    cmcon = new CMCON;
-    cmcon->assign_pir_set(pir_set);
-    cmcon->setINpin(0, pin_cm0);
-    cmcon->setINpin(1, pin_cm1);
-    cmcon->setINpin(2, pin_cm2);
-    cmcon->setINpin(3, pin_cm3);
-    cmcon->setOUTpin(0, pin_cm4);
-    cmcon->setOUTpin(1, pin_cm5);
-    vrcon.setIOpin(pin_vr0);
-    cmcon->_vrcon = &vrcon;
-    vrcon._cmcon = cmcon;
+  //  cmcon = new CMCON;
+  cmcon.assign_pir_set(pir_set);
+  cmcon.setINpin(0, pin_cm0);
+  cmcon.setINpin(1, pin_cm1);
+  cmcon.setINpin(2, pin_cm2);
+  cmcon.setINpin(3, pin_cm3);
+  cmcon.setOUTpin(0, pin_cm4);
+  cmcon.setOUTpin(1, pin_cm5);
+  vrcon.setIOpin(pin_vr0);
+  cmcon._vrcon = &vrcon;
+  vrcon._cmcon = &cmcon;
 }
 
 //--------------------------------------------------
@@ -117,7 +121,8 @@ int ih2, int out)
 	(il2 << CFG_SHIFT*2) | (ih2 << CFG_SHIFT) | out;
 } 
 
-CMCON::CMCON(void)
+CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   value.put(0);
 }
@@ -313,7 +318,8 @@ void CMCON::put(unsigned int new_value)
 //	Voltage reference
 //--------------------------------------------------
 
-VRCON::VRCON(void)
+VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   value.put(0);
 }

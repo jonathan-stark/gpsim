@@ -26,9 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "../src/stimuli.h"
+#include "../src/processor.h"
 #include "cmd_attach.h"
-
-//#include "../src/stimulus_orb.h"
 
 cmd_attach attach;
 
@@ -78,19 +77,35 @@ cmd_attach::cmd_attach()
 
   op = cmd_attach_options; 
 }
+extern void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList);
 
-
-void cmd_attach::attach(list <string> * strings)
-{
-  stimuli_attach(strings);
-}
-
-void cmd_attach::attach(SymbolList_t *symbols)
-{
-  stimuli_attach(symbols);
-}
-
-void cmd_attach::attach(Value *pNode, PinList_t *pPinList)
+void cmd_attach::attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
 {
   stimuli_attach(pNode, pPinList);
+
+  cout <<"deleting stimulus list\n";
+  pPinList->clear(); 
+  delete pPinList;
+
 }
+
+stimulus *toStimulus(int pinNumber)
+{
+  Processor *pMod = attach.GetActiveCPU();
+  stimulus *pStim = pMod ? pMod->get_pin(pinNumber) : 0;
+  if (!pStim)
+    GetUserInterface().DisplayMessage("unable to select pin\n");
+  return pStim;
+}
+
+stimulus *toStimulus(gpsimObject *pObj)
+{
+  Value *pVal = dynamic_cast<Value *>(pObj);
+  if (!pVal) {
+    cout << (pObj?pObj->name():"") << " cannot be converted to a pin number\n";
+    return 0;
+  }
+
+  return toStimulus((gint64)pVal);
+}
+

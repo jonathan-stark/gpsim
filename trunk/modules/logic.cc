@@ -215,7 +215,7 @@ static char * not_pixmap[] = {
 void Logic_Input::setDrivenState( bool new_state)
 {
 
-  if(0)
+  if(1)
     cout << name()<< " setDrivenState= " 
 	 << (new_state ? "high" : "low") << endl;
 
@@ -237,14 +237,19 @@ void Logic_Input::setDrivenState( bool new_state)
 *  LogicGate class
 */
 
-LogicGate::LogicGate(void)
+LogicGate::LogicGate()
+  : number_of_pins(0),
+    input_bit_mask(0),
+    input_state(0),
+    pInputPins(0),
+    pOutputPin(0)
 {
 #ifdef HAVE_GUI
   pixmap=0;
 #endif
 }
 
-LogicGate::~LogicGate(void)
+LogicGate::~LogicGate()
 {
 }
 
@@ -262,7 +267,7 @@ void LogicGate::update_input_pin(unsigned int pin, bool bValue)
 //  This is where the information for the Module's package is defined.
 // Specifically, the I/O pins of the module are created.
 
-void LogicGate::create_iopin_map(void)
+void LogicGate::create_iopin_map()
 {
   int i;
 
@@ -329,7 +334,7 @@ void LogicGate::create_iopin_map(void)
   // Form the logic gate bit masks
   input_bit_mask = (1<< (number_of_pins-1)) - 1;
 
-  initializeAttributes();
+  //initializeAttributes();
 
 }
 
@@ -398,7 +403,7 @@ Module * AND2Gate::construct(const char *_new_name)
 
 }
 
-AND2Gate::AND2Gate(void)
+AND2Gate::AND2Gate()
 {
 #ifdef HAVE_GUI
   if(get_interface().bUsingGUI())
@@ -406,12 +411,12 @@ AND2Gate::AND2Gate(void)
 #endif
 
 }
-AND2Gate::~AND2Gate(void)
+AND2Gate::~AND2Gate()
 {
 }
 
 
-void ANDGate::update_state(void)
+void ANDGate::update_state()
 {
   pOutputPin->putState((input_state & input_bit_mask) == input_bit_mask);
   if (pOutputPin->snode)
@@ -422,7 +427,7 @@ void ANDGate::update_state(void)
 // construct
 
 
-OR2Gate::OR2Gate(void)
+OR2Gate::OR2Gate()
 {
 #ifdef HAVE_GUI
 
@@ -430,7 +435,7 @@ OR2Gate::OR2Gate(void)
     set_widget(create_pixmap(or2_pixmap));
 #endif
 }
-OR2Gate::~OR2Gate(void)
+OR2Gate::~OR2Gate()
 {
 
 }
@@ -449,7 +454,7 @@ Module * OR2Gate::construct(const char *_new_name)
 
 }
 
-void ORGate::update_state(void)
+void ORGate::update_state()
 {
   pOutputPin->putState((input_state & input_bit_mask) != 0);
 
@@ -466,12 +471,13 @@ Module * NOTGate::construct(const char *_new_name)
   a2gP->new_name(_new_name);
   a2gP->set_number_of_pins(2);
   a2gP->create_iopin_map();
+  a2gP->update_state();
 
   return a2gP;
 
 }
 
-NOTGate::NOTGate(void)
+NOTGate::NOTGate()
 {
 #ifdef HAVE_GUI
 
@@ -479,22 +485,22 @@ NOTGate::NOTGate(void)
     set_widget(create_pixmap(not_pixmap));
 #endif
 }
-NOTGate::~NOTGate(void)
+NOTGate::~NOTGate()
 {
 
 }
 
-void NOTGate::update_state(void)
+void NOTGate::update_state()
 {
+  cout << name() << " update_state\n";
   pOutputPin->putState((input_state & input_bit_mask) == 0);
-
 }
 
 //--------------------------------------------------------------
 // construct
 
 
-XOR2Gate::XOR2Gate(void)
+XOR2Gate::XOR2Gate()
 {
 #ifdef HAVE_GUI
 
@@ -502,7 +508,7 @@ XOR2Gate::XOR2Gate(void)
     set_widget(create_pixmap(xor2_pixmap));
 #endif
 }
-XOR2Gate::~XOR2Gate(void)
+XOR2Gate::~XOR2Gate()
 {
 }
 
@@ -519,7 +525,7 @@ Module * XOR2Gate::construct(const char *_new_name)
 
 }
 
-void XORGate::update_state(void)
+void XORGate::update_state()
 {
   bool bNewOutputState=false;
 

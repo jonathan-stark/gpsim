@@ -78,35 +78,42 @@ private:
 };
 
 //-----------------------------------------------------------
-_RCSTA::_RCSTA(USART_MODULE *pUSART)
-  : rcreg(0), spbrg(0), txsta(0), mUSART(pUSART), m_PinModule(0), m_sink(0), m_cRxState('?')
+_RCSTA::_RCSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
+  : sfr_register(pCpu, pName, pDesc), rcreg(0), spbrg(0),
+    txsta(0),
+    mUSART(pUSART),
+    m_PinModule(0), m_sink(0), m_cRxState('?')
 {
   assert(mUSART);
 }
 
 //-----------------------------------------------------------
-_TXSTA::_TXSTA(USART_MODULE *pUSART)
-  : txreg(0), spbrg(0), mUSART(pUSART), m_PinModule(0),  m_source(0), m_cTxState('?')
+_TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
+  : sfr_register(pCpu, pName, pDesc), txreg(0), spbrg(0),
+    mUSART(pUSART), 
+    m_PinModule(0),  
+    m_source(0), m_cTxState('?')
 {
   assert(mUSART);
 }
 
 //-----------------------------------------------------------
-_RCREG::_RCREG(USART_MODULE *pUSART)
-  : mUSART(pUSART), m_rcsta(0)
+_RCREG::_RCREG(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
+  : sfr_register(pCpu, pName, pDesc), mUSART(pUSART), m_rcsta(0)
 {
   assert(mUSART);
 }
 
-_TXREG::_TXREG(USART_MODULE *pUSART)
-  : m_txsta(0), mUSART(pUSART)
+_TXREG::_TXREG(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
+  : sfr_register(pCpu, pName, pDesc), m_txsta(0), mUSART(pUSART)
 {
   assert(mUSART);
 }
 
 
-_SPBRG::_SPBRG()
-  : txsta(0), rcsta(0)
+_SPBRG::_SPBRG(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    txsta(0), rcsta(0)
 {
 }
 
@@ -971,8 +978,10 @@ void USART_MODULE::clear_rcif()
 }
 
 //--------------------------------------------------
-USART_MODULE::USART_MODULE()
-  : txsta(this), rcsta(this)
+USART_MODULE::USART_MODULE(Processor *pCpu)
+  : txsta(pCpu,"txsta","USART Transmit Status",this),
+    rcsta(pCpu,"rcsta","USART Receive Status",this),
+    spbrg(pCpu,"spbrg","Serial Port Baud Rate Generator")
 {
 }
 

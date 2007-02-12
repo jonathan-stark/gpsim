@@ -35,32 +35,224 @@ Boston, MA 02111-1307, USA.  */
 #include <vector>
 #include <algorithm>
 
-#include "../config.h"
-#include "14bit-processors.h"
-#include "stimuli.h"
-#include "symbol_orb.h"
-#include "expr.h"
-#include "ValueCollections.h"
-#include "operator.h"
-#include "errors.h"
-#include "protocol.h"
-#include "cmd_gpsim.h"
-#include "sim_context.h"
+#include "value.h"
+#include "modules.h"
 
-class IIndexedCollection;
+SymbolTable   gSymbolTable;
+SymbolTable_t globalSymbols;
+static SymbolTable_t *currentSymbolTable=0;
 
+
+#if defined(_WIN32)
+SymbolTable &globalSymbolTable()
+{
+  return gSymbolTable;
+}
+#endif
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+SymbolTable_t::~SymbolTable_t()
+{
+}
+
+int SymbolTable_t::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
+{
+  if (pSym) {
+    ps_AliasedName = (ps_AliasedName && !ps_AliasedName->empty()) ? ps_AliasedName : &pSym->name();
+    SymbolTable_t::iterator sti = find(*ps_AliasedName);
+    if (sti == end()) {
+      operator[](*ps_AliasedName) = pSym;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int SymbolTable_t::removeSymbol(gpsimObject *pSym, bool bDeleteObject)
+{
+  if (pSym) {
+    SymbolTable_t::iterator sti = find(pSym->name());
+    if (sti != end()) {
+      if (bDeleteObject)
+        delete (*sti).second;
+      erase(sti);
+      return 1;
+    }
+  }
+  return -1;
+}
+
+gpsimObject *SymbolTable_t::findSymbol(const string &searchString)
+{
+  SymbolTable_t::iterator sti = find(searchString);
+
+  return sti != end() ? sti->second : 0;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+
+SymbolTable::SymbolTable()
+{
+  MSymbolTables[string("__global__")] = &globalSymbols;
+  currentSymbolTable = &globalSymbols;
+}
+
+SymbolTable::~SymbolTable()
+{
+}
+
+int SymbolTable::addSymbol(gpsimObject *pSym)
+{
+  if (pSym)
+    cout << "Adding " << pSym->name() << " to the global symbol table\n";
+  return globalSymbols.addSymbol(pSym);
+
+}
+int SymbolTable::removeSymbol(gpsimObject *pSym, bool bDeleteObject)
+{
+  if (pSym) 
+    cout << "Removing " << pSym->name() << " from the global symbol table\n";
+  return globalSymbols.removeSymbol(pSym, bDeleteObject);
+}
+
+
+void SymbolTable::addModule(Module *pModule)
+{
+  if (pModule)
+    MSymbolTables[pModule->name()] = &pModule->getSymbolTable();
+}
+void SymbolTable::removeModule(Module *pModule)
+{
+  /*
+  if (pModule) {
+    ModuleList_t::iterator mi = gModuleList.find(pModule->name().c_str());
+    if (mi->second == pModule)
+      gModuleList.erase(mi);
+  }
+  */
+}
+
+void SymbolTable::listModules()
+{
+  cout << "list modules -- implement\n";
+}
+
+
+/*
+class SymbolFinder
+{
+  string searchString;
+public:
+  gpsimObject *pFound;
+  SymbolFinder(string s)
+    : searchString(s)
+  {}
+
+  bool tpred(const pair<const string, SymbolTable_t *> &st)
+  {
+    cout << "searching " << st.first << endl;
+    SymbolTable_t::iterator sti = st.second->find(searchString);
+    pFound = sti != st.second->end() ? sti->second : 0;
+    
+    return pFound != 0;
+  }
+};
+*/
+
+static  string searchString;
+static  gpsimObject *pFound=0;
+bool tpred(const pair<const string, SymbolTable_t *> &st)
+{
+  cout << "searching " << st.first << endl;
+  pFound = st.second->findSymbol(searchString);
+  return pFound != 0;
+}
+
+gpsimObject *SymbolTable::find(string s)
+{
+  // First check scoping
+  //
+  //   SymbolTableName.SymbolName
+  //                  ^
+  //                  |
+  //                  +---  scoping operator
+  //
+  // If the search string contains the scoping operator (i.e. '.') 
+  // then the symbol table specified by the scope. In other words,
+  // if the search string begins with a period, then search the
+  // current symbol table.
+  // If the search string contains a period, then search for the
+  // symbol table named with the string to the left of the period
+  // and if that table is found search in it for the string to 
+  // the right of the period.
+
+  const char scopeOperator = '.';
+  int scopeOperatorPosition = s.find_first_of(scopeOperator);
+  if (scopeOperatorPosition != string::npos) {
+    SymbolTable_t *searchTable = &globalSymbols;
+    if (scopeOperatorPosition == 0) {   // Select the current symbol table
+      searchTable = currentSymbolTable;
+      scopeOperatorPosition++;
+    }
+    else {
+      // Find the symbol table with the scoped name:
+      string moduleName = s.substr(0, scopeOperatorPosition); //,string::npos);
+      MSymbolTable_t::iterator mti = MSymbolTables.find(moduleName);
+      if (mti != MSymbolTables.end()) {
+        searchTable = mti->second;
+        scopeOperatorPosition++;
+      }
+    }
+    SymbolTable_t::iterator sti = searchTable->find(s.substr(scopeOperatorPosition,string::npos));
+    if (sti != searchTable->end())
+      return sti->second;
+  }
+
+  pFound = 0;  // assume the symbol is not found.
+  searchString = s;
+  find_if (MSymbolTables.begin(), MSymbolTables.end(), tpred);
+
+  return pFound;
+}
+
+//------------------------------------------------------------------------
+// Convenience find functions
+// All these do is call SymbolTable::find and cast the found symbol into 
+// another type
+
+gpsimObject *SymbolTable::findObject(gpsimObject *pObj)
+{
+  return pObj ? find(pObj->name()) : 0;
+}
+
+Integer *SymbolTable::findInteger(string s)
+{
+  return dynamic_cast<Integer *>(find(s));
+}
+Value *SymbolTable::findValue(string s)
+{
+  return dynamic_cast<Value *>(find(s));
+}
+Module *SymbolTable::findModule(string s)
+{
+  return dynamic_cast<Module *>(find(s));
+}
+
+void SymbolTable::ForEachModule(PFN_ForEachModule forEach)
+{
+  
+  for_each(MSymbolTables.begin(), MSymbolTables.end(),  forEach);
+}
+
+//    End of new symbol table design.
 //
-// ***NOTE*** Ideally, I would like to use a the std container 'map' 
-// to implement symbol tables. Unfortunately, iterators do not work
-// correctly with maps in libg++ (?version 1.27?)
+//************************************************************************
 
-// Create a map for the symbol table. Note that the scope of the
-// symbol table is only within symbol.cc. The symbol table is
-// indexed by the symbol's name (a string). If a symbol is found
-// in the table then a pointer to it is returned.
-
-//map <string, symbol *, less<string> > st;
-//map <string, symbol *, less<string> >::iterator sti;
+#if defined(USE_OLD_SYMBOL_TABLE)
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
@@ -74,16 +266,7 @@ Symbol_Table::Symbol_Table() {
     reserve(500);
 }
 
-void Symbol_Table::add_ioport(PortRegister *_ioport)
-{
-
-  ioport_symbol *is = new ioport_symbol(_ioport);
-
-  if(!add(is)) {
-    delete is;
-  }
-}
-
+/*
 void Symbol_Table::add_stimulus_node(Stimulus_Node *s, bool bClearable)
 {
   node_symbol *sym = findNodeSymbol(s->name());
@@ -137,6 +320,7 @@ void Symbol_Table::add_stimulus(stimulus *s, bool bClearable)
       s->name().c_str());
   }
 }
+*/
 
 // This is an experiment to have the symbol table ordered
 // case insensitive unless their is a match for a case insensitive
@@ -241,24 +425,17 @@ void Symbol_Table::add_constant(const char *_name, int value, bool bClearable)
   i->setClearableSymbol(bClearable);
   add(i);
 }
-
-void Symbol_Table::add_address(const char *new_name, int value)
+/*
+void Symbol_Table::add_address(Processor *pCpu, const char *new_name, int value)
 {
-
-  address_symbol *as = new address_symbol(new_name,value);
-
-  add(as);
-
+  add(new AddressSymbol(pCpu, new_name,value));
 }
 
-void Symbol_Table::add_line_number(int address, const char *symbol_name)
+void Symbol_Table::add_line_number(Processor *pCpu, int address, const char *symbol_name)
 {
-
-  line_number_symbol *lns = new line_number_symbol(symbol_name,  address);
-
-  add(lns);
+  add(new LineNumberSymbol(pCpu, symbol_name,  address));
 }
-
+*/
 void Symbol_Table::add_module(Module * m, const char *cPname)
 {
   module_symbol *ms = new module_symbol(m,cPname);
@@ -438,7 +615,7 @@ const char * Symbol_Table::findProgramAddressLabel(unsigned int address) {
   iterator sti = begin();
   while( sti != end()) {
     Value *val = *sti;
-    address_symbol * pAddSym = dynamic_cast<address_symbol*>(val);
+    AddressSymbol * pAddSym = dynamic_cast<AddressSymbol*>(val);
     if(pAddSym != NULL) {
       gint64 iSymbolAddress;
       pAddSym->get(iSymbolAddress);
@@ -494,7 +671,7 @@ Module * Symbol_Table::findModule(const char *s)
   }
   return ((Module *)0);
 }
-
+/*
 node_symbol * Symbol_Table::findNodeSymbol(const char *s)
 {
   return findSymbol(s, (node_symbol*)NULL);
@@ -508,7 +685,7 @@ Stimulus_Node * Symbol_Table::findNode(const char *s)
   }
   return ((Stimulus_Node *)0);
 }
-
+*/
 String * Symbol_Table::findString(const char *s)
 {
   return findSymbol(s, (String *)NULL);
@@ -541,7 +718,7 @@ Symbol_Table::node_symbol_iterator Symbol_Table::endNodeSymbol()
 {
     return endSymbol((node_symbol_iterator*) 0, (node_symbol*)0);
 }
-
+/*
 stimulus_symbol * Symbol_Table::findStimulusSymbol(const char *s)
 {
   return findSymbol(s, (stimulus_symbol*)NULL);
@@ -561,7 +738,7 @@ stimulus * Symbol_Table::findStimulus(const char *s)
   }
   return ((stimulus *)0);
 }
-
+*/
 attribute_symbol * Symbol_Table::findAttributeSymbol(const char *s)
 {
   return findSymbol(s, (attribute_symbol*)NULL);
@@ -641,7 +818,7 @@ void Symbol_Table::dump_all(void)
   iterator last;
   while( sti != end()) {
     Value *val = *sti;
-    if(val && (typeid(*val) != typeid(line_number_symbol))) {
+    if(val && (typeid(*val) != typeid(LineNumberSymbol))) {
       if(dynamic_cast<IIndexedCollection*>(val) == NULL) {
         cout << val->name() << " = " ;
       }
@@ -658,6 +835,8 @@ void Symbol_Table::dump_all(void)
     }
   }
   CSimulationContext::GetContext()->SetUserCanceledFlag(NULL);
+
+
 }
 
 bool beginsWith(string &sTarget, string &sBeginsWith) {
@@ -688,7 +867,7 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
   iterator last;
   while( sti != end()) {
     Value *val = *sti;
-    if(val && (typeid(*val) != typeid(line_number_symbol)) &&
+    if(val && (typeid(*val) != typeid(LineNumberSymbol)) &&
       beginsWith(val->name(), sBeginsWith)) {
       if(dynamic_cast<IIndexedCollection*>(val) == NULL) {
         cout << val->name() << " = " ;
@@ -786,10 +965,10 @@ void Symbol_Table::clear_all()
   // either globally or as a member of a class. In other words,
   // symbols don't have to be created via 'new'. Thus it's not
   // safe to assume that a symbol can be deleted with delete!
-
+  /*
   for(it = begin(); it != end(); ++it)
     delete *it;
-
+  */
   _Myt::clear();
 }
 
@@ -811,9 +990,16 @@ Value * Symbol_Table::find(const string &s)
           cout << "Found duplicate:" << val->show()<<endl;
       }
 
-      sti++;
+      ++sti;
     }
 
+  //// --- Search the New Symbol Table
+  if (!ret) {
+    ret = gSymbolTable.findValue(s);
+    if (ret) {
+      cout << "Found " << ret->name() << " in new symbol table\n";
+    }
+  }
   return ret;
 
 }
@@ -1205,14 +1391,15 @@ ioport_symbol::ioport_symbol(PortRegister *_ioport)
 }
 
 //------------------------------------------------------------------------
-address_symbol::address_symbol(const char *_name, unsigned int _val)
+AddressSymbol::AddressSymbol(Processor *pCpu, const char *_name, unsigned int _val)
   :  Integer(_val)
 
 {
   new_name(_name);
+  cpu = pCpu;
 }
 
-string address_symbol::toString()
+string AddressSymbol::toString()
 {
   char buf[256];
   int i = (int)getVal();
@@ -1221,21 +1408,23 @@ string address_symbol::toString()
   return string(buf);
 }
 
-Value* address_symbol::evaluate()
+Value* AddressSymbol::evaluate()
 {
   return copy();
 }
-int address_symbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at,
-			      Expression *pExpr)
+int AddressSymbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at,
+                             Expression *pExpr)
 {
-  if (bt == gpsimObject::eBreakExecute)
-    return get_bp().set_execution_break(get_active_cpu(),getVal(),pExpr);
+  if (bt == gpsimObject::eBreakExecute && cpu)
+    return get_bp().set_execution_break((Processor*)cpu,getVal(),pExpr);
 
   return -1;
 }
 
-line_number_symbol::line_number_symbol(const char *_name, unsigned int _val)
-  :  address_symbol(_name,_val)
+LineNumberSymbol::LineNumberSymbol(Processor *pCpu,
+                                   const char *_name, 
+                                   unsigned int _val)
+  :  AddressSymbol(pCpu,_name,_val)
 {
   if(!_name) {
     char buf[64];
@@ -1416,20 +1605,19 @@ void attribute_symbol::get(Value **v)
 
 void attribute_symbol::set_xref(Value *v)
 {
-  if(attribute) {
-    attribute->set_xref(v);
-  } 
-
-  Value::set_xref(v);
+  cout << "Warning function:" << __FUNCTION__ << " no longer exists\n";
+  //if(attribute)
+  //  attribute->set_xref(v);
+  //Value::set_xref(v);
 }
 
 Value *attribute_symbol::get_xref()
 {
-
-  if(attribute)
-    return attribute->get_xref();
-
-  return Value::get_xref();
+  cout << "Warning function:" << __FUNCTION__ << " no longer exists\n";
+  //if(attribute)
+  //  return attribute->get_xref();
+  //return Value::get_xref();
+  return 0;
 }
 
 //------------------------------------------------------------------------
@@ -1477,6 +1665,7 @@ string stimulus_symbol::toString()
 }
 
 //------------------------------------------------------------------------
+/*
 val_symbol::val_symbol(gpsimValue *v)
   : symbol((char*)0)
 {
@@ -1541,3 +1730,6 @@ bool val_symbol::compare(ComparisonOperator *compOp, Value *rvalue)
 
   return compOp->equal();
 }
+*/
+
+#endif

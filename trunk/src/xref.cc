@@ -28,7 +28,7 @@ XrefObject::XrefObject()
 {
     data=0;
 }
-XrefObject::XrefObject(gpsimValue *value)
+XrefObject::XrefObject(gpsimObject *value)
 {
     data=value;
 }
@@ -80,7 +80,7 @@ int XrefObject::get_val(void)
   return 0;
 }
 
-void XrefObject::assign_data(gpsimValue *new_data)
+void XrefObject::assign_data(gpsimObject *new_data)
 {
 
   data = new_data;

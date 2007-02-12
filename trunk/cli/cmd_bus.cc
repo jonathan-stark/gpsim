@@ -28,8 +28,8 @@ Boston, MA 02111-1307, USA.  */
 
 cmd_bus c_bus;
 
-extern void dump_bus_list(void);
-extern void add_bus(char *node_name);
+//extern void dump_bus_list(void);
+//extern void add_bus(char *node_name);
 
 static cmd_options cmd_bus_options[] =
 {
@@ -59,14 +59,13 @@ cmd_bus::cmd_bus()
 
 void cmd_bus::list_busses(void)
 {
-
-  dump_bus_list();
+  //  dump_bus_list();
 }
 
 
 void cmd_bus::add_busses(list <string> * busses)
 {
-
+  /*
   if(busses) {
 
     list <string> :: iterator si;
@@ -80,4 +79,5 @@ void cmd_bus::add_busses(list <string> * busses)
     }
 
   }
+  */
 }

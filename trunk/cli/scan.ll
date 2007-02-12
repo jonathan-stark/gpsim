@@ -335,7 +335,7 @@ abort_gpsim_now {
 "true"              {return(process_booleanLiteral(yylvalP,true));}
 "false"             {return(process_booleanLiteral(yylvalP,false));}
 "reg"               {return(recognize(REG_T,"reg"));}
-"pin"               {return(recognize(PIN_T, "pin"));}
+"pin"               {return(recognize(GPSIMOBJECT_T, "pin")); /*return(recognize(STIMULUS_T, "pin"));*/}
 "port"              {return(recognize(PORT_T, "port"));}
 
 "endm"              {scanPopMacroState();}
@@ -673,12 +673,13 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
     s.insert(0,cpu->name());
 
   string s1(s);
-  Value *sym = get_symbol_table().find(s1);
-  if(sym) {
-    yylvalP->Symbol_P = sym;
+
+  gpsimObject *obj = globalSymbolTable().find(s1);
+  if(obj) {
+    yylvalP->Symbol_P = obj;
 
     if(verbose&2)
-      cout << "found symbol '" << sym->name() << "'\n";
+      cout << "found symbol '" << obj->name() << "'\n";
 
     return recognize(SYMBOL_T,"symbol");
   }

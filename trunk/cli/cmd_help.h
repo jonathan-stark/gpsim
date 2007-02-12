@@ -21,19 +21,19 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_HELP_H__
 #define __CMD_HELP_H__
 
-class Value;
+class gpsimObject;
 
 class cmd_help : public command
 {
 public:
 
-  cmd_help(void);
+  cmd_help();
 
-  void help(void);
+  void help();
   void help(const char *cmd);
-  void help(Value *);
+  void help(gpsimObject *);
 
-  virtual int is_repeatable(void) { return 1; };
+  virtual int is_repeatable() { return 1; };
 
 };
 

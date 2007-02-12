@@ -171,7 +171,7 @@ namespace ExtendedStimuli {
     : Module(_name,_desc)
   {
     // Default module attributes.
-    initializeAttributes();
+    //initializeAttributes();
 
     // The I/O pin
     m_pin = new IO_bi_directional((name() + ".pin").c_str());
@@ -234,10 +234,10 @@ Pulse Generator\n\
 					"period","r/w cycle time to specify pulse stream repeat rate");
     m_init = new PulseInitial(this, "initial","initial I/O pin voltage", 5.0);
 
-    add_attribute(m_set);
-    add_attribute(m_clear);
-    add_attribute(m_period);
-    add_attribute(m_init);
+    addSymbol(m_set);
+    addSymbol(m_clear);
+    addSymbol(m_period);
+    addSymbol(m_init);
 
     sample_iterator = samples.end();
   }
@@ -501,7 +501,7 @@ File Stimulus\n\
     // Attributes for the pulse generator.
     m_file = new FileNameAttribute(this, "file","name of file or pipe supplying data");
 
-    add_attribute(m_file);
+    addSymbol(m_file);
 
   }
 
@@ -629,7 +629,7 @@ File Stimulus\n\
   PortPullupRegister::PortPullupRegister(const char *_name,
                                          PicPortRegister *_port,
                                          unsigned int enableMask)
-    : sfr_register(),m_port(_port),m_EnableMask(enableMask)
+    : sfr_register(0,_name,"Port Pullup"),m_port(_port),m_EnableMask(enableMask)
   {
     new_name(_name);
     value = RegisterValue(0,~enableMask);
@@ -680,9 +680,9 @@ Port Stimulus\n\
 "),
       m_nPins(nPins)
   {
-    mPort   = new PicPortRegister((name()+".port").c_str(),m_nPins,(1<<m_nPins)-1);
-    mTris   = new PicTrisRegister((name()+".tris").c_str(),mPort,true,(1<<m_nPins)-1);
-    mLatch  = new PicLatchRegister((name()+".lat").c_str(),mPort,(1<<m_nPins)-1);
+    mPort   = new PicPortRegister(0,(name()+".port").c_str(),"",m_nPins,(1<<m_nPins)-1);
+    mTris   = new PicTrisRegister(0,(name()+".tris").c_str(),"",mPort,true,(1<<m_nPins)-1);
+    mLatch  = new PicLatchRegister(0,(name()+".lat").c_str(),"",mPort,(1<<m_nPins)-1);
     mPullup = new PortPullupRegister((name()+".pullup").c_str(),mPort,(1<<m_nPins)-1);
 
     mPortAddress = new RegisterAddressAttribute(mPort, "portAdr","Port register address");
@@ -690,15 +690,15 @@ Port Stimulus\n\
     mLatchAddress = new RegisterAddressAttribute(mLatch, "latAdr","Latch register address");
     mPullupAddress = new RegisterAddressAttribute(mPullup, "pullupAdr","Pullup register address");
 
-    get_symbol_table().add_register(mPort);
-    get_symbol_table().add_register(mTris);
-    get_symbol_table().add_register(mLatch);
-    get_symbol_table().add_register(mPullup);
+    addSymbol(mPort);
+    addSymbol(mTris);
+    addSymbol(mLatch);
+    addSymbol(mPullup);
 
-    add_attribute(mPortAddress);
-    add_attribute(mTrisAddress);
-    add_attribute(mLatchAddress);
-    add_attribute(mPullupAddress);
+    addSymbol(mPortAddress);
+    addSymbol(mTrisAddress);
+    addSymbol(mLatchAddress);
+    addSymbol(mPullupAddress);
 
     // FIXME - probably want something better than the generic module trace
 

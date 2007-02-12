@@ -25,9 +25,9 @@ class cmd_load : public command
 {
 public:
 
-  cmd_load(void);
+  cmd_load();
   int load(int bit_flag,const char *filename);
-  int load(Value *file, Value * pProcessorType = NULL);
+  int load(gpsimObject *file, gpsimObject * pProcessorType = NULL);
   int load(const char *file, const char *pProcessorType);
 };
 

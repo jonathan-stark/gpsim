@@ -119,6 +119,10 @@ TriggerAction::TriggerAction()
 {
 }
 
+TriggerAction::~TriggerAction()
+{
+}
+
 bool TriggerAction::evaluate()
 {
   action();
@@ -182,6 +186,14 @@ TriggerObject::TriggerObject(TriggerAction *ta)
     set_action(&DefaultTrigger);
 }
 
+TriggerObject::~TriggerObject()
+{
+  //cout << "Trigger Object destructor\n";
+  delete m_PExpr;
+  if (m_action != &DefaultTrigger)
+    delete m_action;
+}
+
 void TriggerObject::callback()
 {
   cout << "generic callback\n";
@@ -190,6 +202,10 @@ void TriggerObject::callback()
 void TriggerObject::callback_print()
 {
   cout << " has callback, ID =  " << CallBackID << '\n';
+}
+
+void  TriggerObject::clear_trigger()
+{
 }
 
 int TriggerObject::find_free()

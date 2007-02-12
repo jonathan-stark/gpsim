@@ -50,11 +50,11 @@ enum
 
 
 
-  INTCON(void);
+  INTCON(Processor *pCpu, const char *pName, const char *pDesc);
 
   virtual void set_cpu(Processor *new_cpu);
 
-  void set_T0IF(void);
+  void set_T0IF();
 
   /*
   // Bit 6 of intcon depends on the processor that's being simulated, 
@@ -62,9 +62,9 @@ enum
   // which bit 6 enables becomes true. (e.g. for the c84, this
   // routine is called when EEIF goes high.)
   */
-  void peripheral_interrupt(void);
+  void peripheral_interrupt();
 
-  inline void set_gie(void)
+  inline void set_gie()
     {
       value.put(value.get() | GIE);
       put(value.get());
@@ -86,27 +86,27 @@ enum
       put(get() & ~INTF);
  }
 
-  inline void set_t0if(void)
+  inline void set_t0if()
     {
       put(get() | T0IF);
     }
 
-  inline void set_rbie(void)
+  inline void set_rbie()
     {
       put(get() | RBIE);
     }
 
-  inline void set_inte(void)
+  inline void set_inte()
     {
       put(get() | INTE);
     }
 
-  inline void set_t0ie(void)
+  inline void set_t0ie()
     {
       put(get() | T0IE);
     }
 
-  inline void clear_gie(void)
+  inline void clear_gie()
     {
       put(get() & ~GIE);
     }
@@ -121,33 +121,32 @@ enum
 class INTCON2 :  public sfr_register
 {
 public:
-
-enum
-{
-  RBIP    = 1<<0,
-  TMR0IP  = 1<<2,
-  INTEDG2 = 1<<4,
-  INTEDG1 = 1<<5,
-  INTEDG0 = 1<<6,
-  RBPU    = 1<<7
-};
+  INTCON2(Processor *pCpu, const char *pName, const char *pDesc);
+  enum
+  {
+    RBIP    = 1<<0,
+    TMR0IP  = 1<<2,
+    INTEDG2 = 1<<4,
+    INTEDG1 = 1<<5,
+    INTEDG0 = 1<<6,
+    RBPU    = 1<<7
+  };
 };
 
 
 class INTCON3 :  public sfr_register
 {
 public:
-
-enum
-{
-  INT1IF  = 1<<0,
-  INT2IF  = 1<<1,
-  INT1IE  = 1<<3,
-  INT2IE  = 1<<4,
-  INT1IP  = 1<<6,
-  INT2IP  = 1<<7
-};
-
+  INTCON3(Processor *pCpu, const char *pName, const char *pDesc);
+  enum
+  {
+    INT1IF  = 1<<0,
+    INT2IF  = 1<<1,
+    INT1IE  = 1<<3,
+    INT2IE  = 1<<4,
+    INT1IP  = 1<<6,
+    INT2IP  = 1<<7
+  };
 };
 
 
@@ -158,10 +157,7 @@ class INTCON_14_PIR : public INTCON
 {
 public:
 
-  INTCON_14_PIR()
-    {
-      pir_set = 0;
-    }
+  INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDesc);
 
   inline void set_pir_set(PIR_SET *p) { pir_set = p; }
 
@@ -188,21 +184,21 @@ public:
 #define INTERRUPT_VECTOR_LO       (0x18 >> 1)
 #define INTERRUPT_VECTOR_HI       (0x08 >> 1)
 
-  INTCON_16();
+  INTCON_16(Processor *pCpu, const char *pName, const char *pDesc);
 
   inline void set_rcon(RCON *r) { rcon = r; }
   inline void set_intcon2(INTCON2 *ic) { intcon2 = ic; }
 
   virtual void put(unsigned int new_value);
 
-  void clear_gies(void);
-  void set_gies(void);
+  void clear_gies();
+  void set_gies();
   virtual bool check_peripheral_interrupt() {return false;} // Is this right?
   unsigned int get_interrupt_vector() 
   {
     return interrupt_vector;
   }
-  bool haveHighPriorityInterrupt(void) 
+  bool haveHighPriorityInterrupt() 
   { 
     return  true;
   }

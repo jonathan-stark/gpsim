@@ -44,16 +44,26 @@ namespace dspic_registers {
     return( ((value.get() >>  (bit_number & 0x0f)) & 1 ) ? true : false);
   }
 
+  dsPicRegister::dsPicRegister(Processor *pCpu, const char *pName, const char *pDesc)
+    : Register(pCpu, pName, pDesc)
+  {
+    value.data = 0;
+    value.init = 0xffff;
+    por_value.data = 0;
+    por_value.init = 0xffff;
+  }
+
 
   //--------------------------------------------------
   // PCL - low word of program counter.
   //--------------------------------------------------
 
-  PCL::PCL()
+  PCL::PCL(Processor *pCpu, const char *pName, const char *pDesc)
+    : dsPicRegister(pCpu,pName,pDesc)
+
   {
     value = RegisterValue(0,0);
     por_value = value;
-    new_name("pcl");
   }
 
   void PCL::put(unsigned int new_value)
@@ -177,14 +187,11 @@ namespace dspic_registers {
   //----------------------------------------------------------------------
   // Stack 
   //----------------------------------------------------------------------
-  Stack::Stack()
-    : m_cpu(0)
+  Stack::Stack(dspic::dsPicProcessor *pCpu)
+    : m_cpu(pCpu)
   {
   }
-  void Stack::init(dspic::dsPicProcessor *pCpu)
-  {
-    m_cpu = pCpu;
-  }
+
   void Stack::push()
   {
     unsigned int pc = m_cpu->pc->get_value();
@@ -199,6 +206,14 @@ namespace dspic_registers {
 
   }
   void Stack::pop()
+  {
+  }
+
+  //----------------------------------------------------------------------
+  // WRegister 
+  //----------------------------------------------------------------------
+  WRegister::WRegister()
+    : dsPicRegister(0, 0, 0)
   {
   }
 }
