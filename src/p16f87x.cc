@@ -65,7 +65,8 @@ void P16F871::create_sfr_map()
   pir_set_2_def.set_pir2(&pir2_2_reg);
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(&usart), new _RCREG(&usart));
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
@@ -80,8 +81,7 @@ void P16F871::create_sfr_map()
     pir2->set_pie(&pie2);
   }
 
-  pie2.pir    = get_pir2();
-  pie2.new_name("pie2");
+  pie2.setPir(get_pir2());
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
@@ -129,11 +129,6 @@ void P16F871::create_sfr_map()
   adcon0.setIntcon(&intcon_reg);
   adcon0.pir_set = &pir_set_2_def;
   adcon0.setChannel_Mask(7);
-
-  adcon0.new_name("adcon0");
-  adcon1.new_name("adcon1");
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
 
   adcon0.setAdresLow(&adresl);
 
@@ -196,10 +191,8 @@ void P16F871::create()
   P16C64::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE(pir2);
-  e->set_cpu(this);
+  e = new EEPROM_WIDE(this,pir2);
   e->initialize(64);
-  //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -241,7 +234,12 @@ void P16F871::create_symbols()
 //========================================================================
 P16F871::P16F871(const char *_name, const char *desc)
   : P16C64(_name,desc) ,
-    pir2_2_reg(&intcon_reg,&pie2)
+    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result"),
+    adresl(this,"adresl", "A2D Result Low"),
+    usart(this)
 {
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
@@ -307,9 +305,6 @@ void P16F873::create_sfr_map()
 
   // The rest of the A/D definition in 16C73
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
   adcon0.setAdresLow(&adresl);
   adcon0.setA2DBits(10);
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
@@ -371,10 +366,8 @@ void P16F873::create()
   P16C73::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE(pir2);
-  e->set_cpu(this);
+  e = new EEPROM_WIDE(this,pir2);
   e->initialize(128);
-  //e->set_pir_set(get_pir_set());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -416,7 +409,8 @@ void P16F873::create_symbols()
 }
 
 P16F873::P16F873(const char *_name, const char *desc)
-  : P16C73(_name,desc)
+  : P16C73(_name,desc),
+    adresl(this,"adresl", "A2D Result Low")
 {
   if(verbose)
     cout << "f873 constructor, type = " << isa() << '\n';
@@ -447,25 +441,25 @@ void P16F873A::create_sfr_map()
         &(*m_porta)[1], &(*m_porta)[2], 
 	&(*m_porta)[3], &(*m_porta)[4], &(*m_porta)[5]);
 
-  comparator.cmcon->set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
-  comparator.cmcon->set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
-  comparator.cmcon->set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon->set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon->set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
-  comparator.cmcon->set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon->set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
-  comparator.cmcon->set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
+  comparator.cmcon.set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   
 
-  add_sfr_register(comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
+  add_sfr_register(&comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"vrcon");
 
 }
@@ -484,7 +478,8 @@ Processor * P16F873A::construct(const char *name)
 
 }
 P16F873A::P16F873A(const char *_name, const char *desc)
-  : P16F873(_name,desc)
+  : P16F873(_name,desc),
+    comparator(this)
 {
   if(verbose)
     cout << "f873A constructor, type = " << isa() << '\n';
@@ -595,7 +590,8 @@ void P16F876A::create()
 }
 
 P16F876A::P16F876A(const char *_name, const char *desc)
-  : P16F873A(_name,desc)
+  : P16F873A(_name,desc),
+    comparator(this)
 {
   if(verbose)
     cout << "f876A constructor, type = " << isa() << '\n';
@@ -651,9 +647,6 @@ void P16F874::create_sfr_map()
 
   // The rest of the A/D definition in 16C74
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
-  adres.new_name("adresh");
-  adresl.new_name("adresl");
-
   adcon0.setA2DBits(10);
   adcon0.setAdresLow(&adresl);
 
@@ -714,10 +707,9 @@ void P16F874::create()
   P16C74::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE(pir2);
-  e->set_cpu(this);
+  e = new EEPROM_WIDE(this,pir2);
   e->initialize(128);
-  //e->set_pir_set(get_pir_set());
+
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -757,7 +749,9 @@ void P16F874::create_symbols()
 }
 
 P16F874::P16F874(const char *_name, const char *desc)
-  : P16C74(_name,desc)
+  : P16C74(_name,desc),
+    comparator(this),
+    adresl(this,"adresl", "A2D Result Low")
 {
   if(verbose)
     cout << "f874 constructor, type = " << isa() << '\n';
@@ -789,24 +783,24 @@ void P16F874A::create_sfr_map()
         &(*m_porta)[1], &(*m_porta)[2], 
 	&(*m_porta)[3], &(*m_porta)[4], &(*m_porta)[5]);
 
-  comparator.cmcon->set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
-  comparator.cmcon->set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
-  comparator.cmcon->set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon->set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon->set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
-  comparator.cmcon->set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon->set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
-  comparator.cmcon->set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
+  comparator.cmcon.set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
 
-  add_sfr_register(comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
+  add_sfr_register(&comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"vrcon");
 }
 
@@ -849,7 +843,8 @@ void P16F874A::create_symbols()
 }
 
 P16F874A::P16F874A(const char *_name, const char *desc)
-  : P16F874(_name,desc)
+  : P16F874(_name,desc),
+    comparator(this)
 {
   if(verbose)
     cout << "f874A constructor, type = " << isa() << '\n';
@@ -972,7 +967,8 @@ void P16F877A::create_symbols()
 }
 
 P16F877A::P16F877A(const char *_name, const char *desc)
-  : P16F874A(_name,desc)
+  : P16F874A(_name,desc),
+    comparator(this)
 {
   if(verbose)
     cout << "f877A constructor, type = " << isa() << '\n';

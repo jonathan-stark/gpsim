@@ -209,8 +209,8 @@ void Watch_Window::WriteSymbolList()
     snprintf(cwv, sizeof(cwv), "WV%d",i);
     vname = 0;
     entry = (WatchEntry*) g_list_nth_data(watches, i);
-    if (entry && entry->pRegSymbol)
-      config_set_string(name(), cwv, entry->pRegSymbol->name().c_str());
+    if (entry && entry->pRegister)
+      config_set_string(name(), cwv, entry->pRegister->name().c_str());
   }
   
 }
@@ -236,10 +236,9 @@ void Watch_Window::ReadSymbolList()
     snprintf(cwv, sizeof(cwv), "WV%d",i++);
     vname = 0;
     if (config_get_string(name(), cwv, &vname) ) {
-      Value *val = get_symbol_table().find(vname);
-      if(val != 0) {
+      Value *val = globalSymbolTable().findValue(vname);
+      if(val)
         Add(val);
-      }
     }
     else
       break;
@@ -572,9 +571,9 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 
   entry->put_shadow(rvNewValue);
 
-  if(entry->pRegSymbol) {
-    rvMaskedNewValue = *(entry->pRegSymbol);
-    uBitmask = entry->pRegSymbol->getBitmask();
+  if(entry->pRegister) {
+    rvMaskedNewValue = entry->pRegister->getRV_notrace();
+    uBitmask = entry->pRegister->bit_mask; //getBitmask();
   }
   else {
     rvMaskedNewValue = entry->getRV();
@@ -638,6 +637,7 @@ void Watch_Window::Update()
     gtk_clist_thaw(GTK_CLIST(watch_clist));
 }
 //------------------------------------------------------------------------
+/*
 void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 {
   if(!gp || !gp->cpu || !reg || !reg->bIsValid())
@@ -647,8 +647,9 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
     cpu_reg->address);
   Add(type, reg, pRegSym);
 }
+*/
 
-void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym)
+void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
 {
   char vname[50], addressstring[50];
   char *entry[COLUMNS]={vname, addressstring, "", "","",""};
@@ -664,8 +665,12 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
     Build();
 
 
-  Register *cpu_reg;
+  pReg = pReg ? pReg : reg->get_register();
+  if (!pReg)
+    return;
+  strncpy(vname,pReg?pReg->name().c_str():"NULLREG",sizeof(vname));
 
+  /*
   if(pRegSym == 0) {
     cpu_reg = reg->get_register();
     strncpy(vname,cpu_reg->name().c_str(),sizeof(vname));
@@ -674,6 +679,8 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
     cpu_reg = pRegSym->getReg();
     strncpy(vname,pRegSym->name().c_str(),sizeof(vname));
   }
+  */
+
   unsigned int uAddrMask = 0;
   unsigned int uLastAddr = gp->cpu->register_memory_size() - 1;
   while(uLastAddr) {
@@ -681,15 +688,16 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
     uAddrMask<<=4;
     uAddrMask |= 0xf;
   }
-  strcpy(addressstring, GetUserInterface().FormatProgramAddress(
-    cpu_reg->address, uAddrMask, IUserInterface::eHex));
+  strcpy(addressstring, 
+         GetUserInterface().FormatProgramAddress(pReg->getAddress(),
+                                                 uAddrMask, IUserInterface::eHex));
 
   gtk_clist_freeze(GTK_CLIST(watch_clist));
   row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
 
   watch_entry = new WatchEntry();
   watch_entry->address=reg->address;
-  watch_entry->pRegSymbol = pRegSym;
+  watch_entry->pRegister = pReg;
   watch_entry->cpu = gp->cpu;
   watch_entry->type=type;
   watch_entry->rma = reg->rma;
@@ -721,18 +729,13 @@ void Watch_Window::Add( Value *regSym)
 {
   if(regSym && gp) {
 
-    register_symbol *rs = dynamic_cast<register_symbol *>(regSym);
+    Register *reg = dynamic_cast<Register *>(regSym);
 
-    if(rs != 0) {
-      Register *reg = rs->getReg();
-      
-      if(reg) {
-        GUIRegister *greg = gp->m_pGUIRamRegisters->Get(reg->address);
-        Add(REGISTER_RAM, greg, rs);
-      }
+    if(reg) {
+      GUIRegister *greg = gp->m_pGUIRamRegisters->Get(reg->getAddress());
+      Add(REGISTER_RAM, greg, reg);
     }
   }
-
 }
 //------------------------------------------------------------------------
 // NewSymbols

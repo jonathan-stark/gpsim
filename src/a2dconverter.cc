@@ -40,7 +40,7 @@ static PinModule AnInvalidAnalogInput;
 //------------------------------------------------------
 // ADRES
 //
-
+/*
 void ADRES::put(int new_value)
 {
 
@@ -54,21 +54,22 @@ void ADRES::put(int new_value)
     value.put(new_value);
 }
 
-
+*/
 //------------------------------------------------------
 // ADCON0
 //
-ADCON0::ADCON0()
-  : adres(0), adresl(0), adcon1(0), intcon(0), ad_state(AD_IDLE),
-	channel_mask(7)
+ADCON0::ADCON0(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    adres(0), adresl(0), adcon1(0), intcon(0), ad_state(AD_IDLE),
+    channel_mask(7)
 {
 }
 
-void ADCON0::setAdres(ADRES *new_adres)
+void ADCON0::setAdres(sfr_register *new_adres)
 {
   adres = new_adres;
 }
-void ADCON0::setAdresLow(ADRES *new_adresl)
+void ADCON0::setAdresLow(sfr_register *new_adresl)
 {
   adresl = new_adresl;
 }
@@ -285,6 +286,11 @@ void ADCON0::set_interrupt(void)
 
 //------------------------------------------------------
 //
+ADCON0_withccp::ADCON0_withccp(Processor *pCpu, const char *pName, const char *pDesc)
+  : ADCON0(pCpu, pName, pDesc)
+{
+}
+
 void ADCON0_withccp::set_interrupt(void)
 {
 
@@ -296,8 +302,9 @@ void ADCON0_withccp::set_interrupt(void)
 //------------------------------------------------------
 // ADCON1
 //
-ADCON1::ADCON1()
-  : m_AnalogPins(0), m_nAnalogChannels(0),
+ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    m_AnalogPins(0), m_nAnalogChannels(0),
     mValidCfgBits(0), mCfgBitShift(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
@@ -413,6 +420,12 @@ double ADCON1::getVrefLo()
     return getChannelVoltage(Vreflo_position[get_cfg(value.data)]);
 
   return 0.0;
+}
+
+ANSEL::ANSEL(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    adcon1(0)
+{
 }
 
 void ANSEL::setAdcon1(ADCON1 *new_adcon1)

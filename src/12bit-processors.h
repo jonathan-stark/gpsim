@@ -30,7 +30,7 @@ class _12bit_processor;
 class IOPIN;
 class OptionTraceType;
 
-extern instruction *disasm12 (pic_processor *cpu,unsigned int inst);
+extern instruction *disasm12 (pic_processor *cpu,unsigned int address,unsigned int inst);
 
 
 class _12bit_processor : public pic_processor
@@ -70,7 +70,7 @@ enum _12BIT_DEFINITIONS
   virtual PROCESSOR_TYPE base_isa(){return _12BIT_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)
     {
-      return disasm12(this, inst);
+      return disasm12(this, address, inst);
     }
   void interrupt() { return; };
 

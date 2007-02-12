@@ -43,8 +43,8 @@ class P16F871 : public P16C64   // The 74 has too much RAM and too many CCPs
 
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
-  ADRES  adres;
-  ADRES  adresl;
+  sfr_register  adres;
+  sfr_register  adresl;
 
   USART_MODULE usart;
 
@@ -87,7 +87,7 @@ class P16F873 : public P16C73
 
  public:
 
-  ADRES  adresl;
+  sfr_register adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -117,10 +117,10 @@ private:
 
 class P16F873A : public P16F873
 {
- public:
- COMPARATOR_MODULE comparator;
+public:
+  ComparatorModule comparator;
   virtual PROCESSOR_TYPE isa(){return _P16F873A_;};
-//  virtual void create_symbols();
+
   void create_sfr_map();
   void create();
 
@@ -146,10 +146,10 @@ class P16F876 : public P16F873
 class P16F876A : public P16F873A
 {
  public:
- COMPARATOR_MODULE comparator;
+  ComparatorModule comparator;
   virtual PROCESSOR_TYPE isa(){return _P16F876A_;};
   virtual unsigned int program_memory_size() const { return 0x2000; };
-//  virtual void create_symbols();
+
   void create_sfr_map();
   void create();
   virtual unsigned int register_memory_size () const { return 0x200;};
@@ -161,10 +161,10 @@ class P16F876A : public P16F873A
 
 class P16F874 : public P16C74
 {
- public:
- COMPARATOR_MODULE comparator;
+public:
+  ComparatorModule comparator;
 
-  ADRES  adresl;
+  sfr_register adresl;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -190,7 +190,7 @@ class P16F874 : public P16C74
 
 class P16F877 : public P16F874
 {
- public:
+public:
   virtual PROCESSOR_TYPE isa(){return _P16F877_;};
   virtual unsigned int program_memory_size() const { return 0x2000; };
   virtual void create_symbols();
@@ -203,8 +203,8 @@ class P16F877 : public P16F874
 
 class P16F874A : public P16F874
 {
- public:
- COMPARATOR_MODULE comparator;
+public:
+  ComparatorModule comparator;
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
@@ -222,8 +222,8 @@ class P16F874A : public P16F874
 
 class P16F877A : public P16F874A
 {
- public:
- COMPARATOR_MODULE comparator;
+public:
+  ComparatorModule comparator;
   virtual PROCESSOR_TYPE isa(){return _P16F877A_;};
   virtual unsigned int program_memory_size() const { return 0x2000; };
   virtual void create_symbols();

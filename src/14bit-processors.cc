@@ -100,12 +100,11 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
 {
   pc = new Program_Counter();
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
-  option_reg = new OPTION_REG();
+  option_reg = new OPTION_REG(this,"option_reg");
 }
 
 _14bit_processor::~_14bit_processor()
 {
-  //  delete pc;
 }
 
 //-------------------------------------------------------------------
@@ -123,9 +122,7 @@ void _14bit_processor :: create ()
     cout << "_14bit_processor create, type = " << isa() << '\n';
 
   pic_processor::create();
-  fsr = new FSR;
-  fsr->new_name("fsr");
-
+  fsr = new FSR(this, "fsr", "File Select Register for indirect addressing");
 }
 
 
@@ -181,6 +178,7 @@ void _14bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory *[1];
   *m_configMemory = new Generic14bitConfigWord(this);
+  addSymbol(*m_configMemory);
 }
 
 //-------------------------------------------------------------------
@@ -268,16 +266,18 @@ void PortBSink::setPullups(bool new_pullupState)
 
 //-------------------------------------------------------------------
 Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
-  : _14bit_processor(_name,_desc), m_MCLR(0)
+  : _14bit_processor(_name,_desc), 
+    intcon_reg(this,"intcon","Interrupt Control"),
+    m_MCLR(0), m_MCLRMonitor(0)
 {
-  m_porta = new PicPortRegister("porta",8,0x1f);
-  m_trisa = new PicTrisRegister("trisa", m_porta, false);
+  m_porta = new PicPortRegister(this,"porta","", 8,0x1f);
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
 
   tmr0.set_cpu(this, m_porta, 4, option_reg);
   tmr0.start(0);
 
-  m_portb = new PicPortBRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister("trisb", m_portb, false);
+  m_portb = new PicPortBRegister(this,"portb","",8,0xff);
+  m_trisb = new PicTrisRegister(this,"trisb","", m_portb, false);
 }
 
 //-------------------------------------------------------------------
@@ -291,8 +291,7 @@ void Pic14Bit::create_symbols()
 {
   pic_processor::create_symbols();
 
-  // add a special symbol for W
-  symbol_table.add_w(W);
+  addSymbol(W);
 
 }
 

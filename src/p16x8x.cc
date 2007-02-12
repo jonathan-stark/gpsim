@@ -115,8 +115,7 @@ void  P16X8X::create(int ram_top)
 
   _14bit_processor::create();
 
-  e = new EEPROM;
-  e->set_cpu(this);
+  e = new EEPROM(this);
   e->initialize(EEPROM_SIZE);
 
   e->set_intcon(&intcon_reg);

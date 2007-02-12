@@ -31,11 +31,42 @@ Boston, MA 02111-1307, USA.  */
 
 class Register;
 
+
+// FIXME get rid of AddressSymbol and LineNumberSymbol classes
+
+class AddressSymbol : public Integer
+{
+public:
+
+  AddressSymbol(Processor *pCpu, const char *, unsigned int);
+  virtual string toString();
+  virtual Value* evaluate();
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny,
+                        ObjectActionTypes at=eActionHalt, 
+                        Expression *expr=0);
+};
+
+class LineNumberSymbol : public AddressSymbol
+{
+protected:
+  int src_id,src_line,lst_id,lst_line,lst_page;
+ public:
+
+  LineNumberSymbol(Processor *pCpu, const char *, unsigned int);
+  void put_address(int new_address) {set(new_address);}
+  void put_src_line(int new_src_line) {src_line = new_src_line;}
+  void put_lst_line(int new_lst_line) {lst_line = new_lst_line;}
+  void put_lst_page(int new_lst_page) {lst_page = new_lst_page;}
+};
+
+
+
+
 /*
  *  base class for an instruction
  */
 
-class instruction : public gpsimValue
+class instruction : public Value
 {
 public:
 
@@ -69,6 +100,7 @@ public:
 
 
   instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
+  virtual ~instruction();
 
   virtual void execute() = 0;
   virtual void debug(){ }
@@ -87,12 +119,14 @@ public:
   virtual guint64 getCyclesUsed() { return cycle_count;}
   virtual bool isBase() = 0;
   void decode(Processor *new_cpu, unsigned int new_opcode);
-  void add_line_number_symbol(int address);
   virtual void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
   virtual char *ReadSrcLine(char *buf, int nBytes);
   virtual char *ReadLstLine(char *buf, int nBytes);
   virtual char *ReadHLLLine(char *buf, int nBytes);
+
+  virtual int set_break(ObjectBreakTypes bt=eBreakAny, ObjectActionTypes at=eActionHalt, Expression *expr=0);
+  virtual void addLabel(string &rLabel);
 
   // Some instructions require special initialization after they've
   // been instantiated. For those that do, the instruction base class
@@ -102,6 +136,7 @@ public:
 
   bool bIsModified() { return m_bIsModified; }
   void setModified(bool b) { m_bIsModified=b; }
+  gpsimObject *getLineSymbol() { return pLineSymbol; }
 protected:
   bool m_bIsModified; // flag indicating if this instruction has
                       // changed since start.
@@ -109,15 +144,13 @@ protected:
 
   unsigned int opcode;
   unsigned int m_uAddrOfInstr;
+  gpsimObject *pLineSymbol;
   int file_id;            /* The source file that declared this instruction
 			   * (The file_id is an index into an array of files) */
   int hll_file_id;        /* The hll source file that declared this instruction */
   int src_line;           /* The line number within the source file */
   int lst_line;           /* The line number within the list file */
   int hll_src_line;       /* The line number within the HLL source file */
-
-
-
 };
 
 
@@ -133,6 +166,7 @@ public:
   AliasedInstruction(Processor *pProcessor, 
 		     unsigned int uOpCode, 
 		     unsigned int uAddrOfInstr);
+  ~AliasedInstruction();
   void setReplaced(instruction *);
   virtual instruction *getReplaced();
 
@@ -174,13 +208,14 @@ public:
     //cout << "*** INVALID INSTRUCTION ***\n";
   };
 
-  invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
-  invalid_instruction(Processor *new_cpu,unsigned int address, 
-    unsigned int new_opcode);
+  //invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
+  invalid_instruction(Processor *new_cpu,
+                      unsigned int new_opcode,
+                      unsigned int address);
   virtual enum INSTRUCTION_TYPES isa() {return INVALID_INSTRUCTION;};
   //virtual char *name(char *str){return("INVALID");};
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new invalid_instruction(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode,unsigned int address)
+  {return new invalid_instruction(new_cpu,new_opcode,address);}
 
   virtual bool isBase() { return true; }
 
@@ -272,7 +307,7 @@ extern invalid_instruction bad_instruction;
 struct instruction_constructor {
   unsigned int inst_mask;
   unsigned int opcode;
-  instruction * (*inst_constructor) (Processor *cpu, unsigned int inst);
+  instruction * (*inst_constructor) (Processor *cpu, unsigned int inst, unsigned int address);
 };
 
 

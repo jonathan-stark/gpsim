@@ -53,14 +53,14 @@ enum
 };
 
 
-  EECON1(void);
+  EECON1(Processor *pCpu, const char *pName, const char *pDesc);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 
   inline void set_eeprom(EEPROM *ee) { eeprom = ee; }
   inline void set_valid_bits(unsigned int vb) { valid_bits = valid_bits; }
-  inline unsigned int get_valid_bits(void) { return (valid_bits); }
+  inline unsigned int get_valid_bits() { return (valid_bits); }
   inline void set_bits(unsigned int b) { valid_bits |= b; }
   inline void clear_bits(unsigned int b) { valid_bits &= ~b; }
 
@@ -91,25 +91,25 @@ enum EE_STATES
   EEREAD
 };
 
-  EECON2(void);
+  EECON2(Processor *pCpu, const char *pName, const char *pDesc);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
-  void ee_reset(void) { eestate = EENOT_READY;};
+  unsigned int get();
+  void ee_reset() { eestate = EENOT_READY;};
 
   inline virtual void set_eeprom(EEPROM *ee) { eeprom = ee; }
-  inline enum EE_STATES get_eestate(void) { return (eestate); }
-  inline void unarm(void) { eestate = EEUNARMED; }
-  inline void unready(void) { eestate = EENOT_READY; }
-  inline void read(void) { eestate = EEREAD; }
-  inline void start_write(void) { eestate = EEWRITE_IN_PROGRESS; }
+  inline enum EE_STATES get_eestate() { return (eestate); }
+  inline void unarm() { eestate = EEUNARMED; }
+  inline void unready() { eestate = EENOT_READY; }
+  inline void read() { eestate = EEREAD; }
+  inline void start_write() { eestate = EEWRITE_IN_PROGRESS; }
 
-  inline bool is_unarmed(void) { return (eestate == EEUNARMED); }
-  inline bool is_not_ready(void) { return (eestate == EENOT_READY); }
-  inline bool is_ready_for_write(void) {
+  inline bool is_unarmed() { return (eestate == EEUNARMED); }
+  inline bool is_not_ready() { return (eestate == EENOT_READY); }
+  inline bool is_ready_for_write() {
     return (eestate == EEREADY_FOR_WRITE);
   }
-  inline bool is_writing(void) { return (eestate == EEWRITE_IN_PROGRESS); }
+  inline bool is_writing() { return (eestate == EEWRITE_IN_PROGRESS); }
 
   //private:
   EEPROM *eeprom;
@@ -124,10 +124,10 @@ class EEDATA : public sfr_register
 {
 public:
 
-  EEDATA(void);
+  EEDATA(Processor *pCpu, const char *pName, const char *pDesc);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
   virtual void set_eeprom(EEPROM *ee) { eeprom = ee; }
 
   //private:
@@ -143,10 +143,10 @@ class EEADR : public sfr_register
 {
 public:
 
-  EEADR(void);
+  EEADR(Processor *pCpu, const char *pName, const char *pDesc);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 
   virtual void set_eeprom(EEPROM *ee) { eeprom = ee; }
 
@@ -164,15 +164,14 @@ class EEPROM :  public TriggerObject
 {
 public:
 
-  EEPROM(void);
+  EEPROM(Processor *pCpu);
   void reset(RESET_TYPE);
-  virtual void set_cpu(pic_processor *p) { cpu = p; }
   virtual void set_intcon(INTCON *ic);
 
-  virtual void callback(void);
-  virtual void start_write(void);
-  virtual void write_is_complete(void);
-  virtual void start_program_memory_read(void);  
+  virtual void callback();
+  virtual void start_write();
+  virtual void write_is_complete();
+  virtual void start_program_memory_read();  
   virtual void initialize(unsigned int new_rom_size);
   virtual Register *get_register(unsigned int address);
   virtual void save_state();
@@ -182,20 +181,20 @@ public:
     rom[offset]->value.put(val);
   }
 
-  inline virtual unsigned int get_rom_size(void) { return (rom_size); }
+  inline virtual unsigned int get_rom_size() { return (rom_size); }
   // XXX might want to make get_rom a friend only to cli_dump
-  inline virtual Register **get_rom(void) { return (rom); }
+  inline virtual Register **get_rom() { return (rom); }
 
-  inline virtual EECON1 *get_reg_eecon1(void) { return (&eecon1); }
-  inline virtual EECON2 *get_reg_eecon2(void) { return (&eecon2); }
-  inline virtual EEDATA *get_reg_eedata(void) { return (&eedata); }
-  inline virtual EEADR *get_reg_eeadr(void) { return (&eeadr); }
+  inline virtual EECON1 *get_reg_eecon1() { return (&eecon1); }
+  inline virtual EECON2 *get_reg_eecon2() { return (&eecon2); }
+  inline virtual EEDATA *get_reg_eedata() { return (&eedata); }
+  inline virtual EEADR *get_reg_eeadr() { return (&eeadr); }
 
-  void dump(void);
+  void dump();
 
   //protected:
   char *name_str;
-  pic_processor *cpu;
+  Processor *cpu;
   INTCON *intcon;
 
   EECON1 eecon1;            // The EEPROM consists of 4 control registers
@@ -217,7 +216,7 @@ class EEPROM_PIR : public EEPROM
 {
 public:
 
-  EEPROM_PIR(PIR *);
+  EEPROM_PIR(Processor *pCpu, PIR *);
   //  virtual void set_pir_set(PIR_SET *p);
 
   // the 16f628 eeprom is identical to the 16f84 eeprom except
@@ -237,15 +236,15 @@ protected:
 class EEPROM_WIDE : public EEPROM_PIR
 {
 public:
-  EEPROM_WIDE(PIR *);
+  EEPROM_WIDE(Processor *pCpu, PIR *);
 
-  virtual void start_write(void);
-  virtual void callback(void);
-  virtual void start_program_memory_read(void);
+  virtual void start_write();
+  virtual void callback();
+  virtual void start_program_memory_read();
   virtual void initialize(unsigned int new_rom_size);
 
-  inline virtual EEDATA *get_reg_eedatah(void) { return (&eedatah); }
-  inline virtual EEADR *get_reg_eeadrh(void) { return (&eeadrh); }
+  inline virtual EEDATA *get_reg_eedatah() { return (&eedatah); }
+  inline virtual EEADR *get_reg_eeadrh() { return (&eeadrh); }
 
   //protected:
   EEDATA eedatah;

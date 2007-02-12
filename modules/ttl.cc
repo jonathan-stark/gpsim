@@ -46,7 +46,6 @@ namespace TTL
 TTLbase::TTLbase(const char *_name, const char *desc)
   : Module(_name,desc), m_dVdd(0)
 {
-  initializeAttributes();
 }
 
 TTLbase::~TTLbase()

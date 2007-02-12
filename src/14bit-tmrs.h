@@ -56,7 +56,7 @@ public:
   bool  pwm_mode;
   unsigned int pwm_value;
 
-  CCPRH();
+  CCPRH(Processor *pCpu, const char *pName, const char *pDesc=0);
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
@@ -78,7 +78,7 @@ public:
   void start_pwm_mode();
   void stop_pwm_mode();
   void assign_tmr(TMRL *ptmr);
-  CCPRL();
+  CCPRL(Processor *pCpu, const char *pName, const char *pDesc=0);
 };
 
 
@@ -131,7 +131,7 @@ public:
 
   void setCrosslinks(CCPRL *, PIR_SET *, TMR2 *);
   void setADCON(ADCON0 *);
-  CCPCON();
+  CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
 
   void setIOpin(PinModule *);
 private:
@@ -171,7 +171,7 @@ enum
 
   TMRL  *tmrl;
 
-  T1CON();
+  T1CON(Processor *pCpu, const char *pName, const char *pDesc=0);
 
   unsigned int get();
 
@@ -209,7 +209,7 @@ public:
   unsigned int get();
   virtual unsigned int get_value();
 
-  TMRH();
+  TMRH(Processor *pCpu, const char *pName, const char *pDesc=0);
 
 };
 
@@ -238,7 +238,7 @@ public:
   virtual void callback();
   virtual void callback_print();
 
-  TMRL();
+  TMRL(Processor *pCpu, const char *pName, const char *pDesc=0);
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
@@ -271,7 +271,7 @@ public:
 
   TMR2 *tmr2;
 
-  PR2();
+  PR2(Processor *pCpu, const char *pName, const char *pDesc=0);
   void put(unsigned int new_value);
 
 };
@@ -296,7 +296,7 @@ enum
 
   TMR2 *tmr2;
 
-  T2CON();
+  T2CON(Processor *pCpu, const char *pName, const char *pDesc=0);
 
   inline unsigned int get_t2ckps0()
     {
@@ -381,7 +381,7 @@ public:
 
   virtual void callback();
   virtual void callback_print();
-  TMR2();
+  TMR2(Processor *pCpu, const char *pName, const char *pDesc=0);
 
   void put(unsigned int new_value);
   unsigned int get();

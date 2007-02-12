@@ -58,7 +58,7 @@ class IndexedSymbol : public Expression {
 
 public:
 
-  IndexedSymbol(Value *, ExprList_t*);
+  IndexedSymbol(gpsimObject *, ExprList_t*);
   virtual ~IndexedSymbol();
   virtual Value* evaluate();
   string toString();
@@ -73,8 +73,8 @@ class LiteralSymbol : public Expression {
 
 public:
 
-  LiteralSymbol(Value *);
-  LiteralSymbol(Value *, ExprList_t*);
+  LiteralSymbol(gpsimObject *);
+  //LiteralSymbol(gpsimObject *, ExprList_t*);
   virtual ~LiteralSymbol();
   virtual Value* evaluate();
   virtual int set_break(ObjectBreakTypes bt=eBreakAny, ObjectActionTypes at=eActionHalt, Expression *expr=0);

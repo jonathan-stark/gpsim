@@ -135,42 +135,42 @@ Processor::Processor(const char *_name, const char *_desc)
 
   get_trace().cycle_counter(get_cycles().get());
 
+  addSymbol(new WarnModeAttribute(this));
+  addSymbol(new SafeModeAttribute(this));
+  addSymbol(new UnknownModeAttribute(this));
+  addSymbol(new BreakOnResetAttribute(this));
+
+  m_pbBreakOnInvalidRegisterRead = new Boolean("BreakOnInvalidRegisterRead",
+    true, "Halt simulation when an invalid register is read from.");
+  addSymbol(m_pbBreakOnInvalidRegisterRead);
+
+  m_pbBreakOnInvalidRegisterWrite = new Boolean("BreakOnInvalidRegisterWrite",
+    true, "Halt simulation when an invalid register is written to.");
+  addSymbol(m_pbBreakOnInvalidRegisterWrite);
+
+  addSymbol(mFrequency);
+
+
 }
 
 
 //-------------------------------------------------------------------
 Processor::~Processor()
 {
-  // register_bank points to current active bank
-  // pc is allocated by the derived class
+  // delete the attributes....
+
+  get_bp().clear_all(this);
   delete []program_memory;
-  delete registers;
+
+  delete_invalid_registers();
+  delete m_UiAccessOfRegisters;
+  delete []registers;
   destroyProgramMemoryAccess(pma);
+
 }
 
 unsigned long Processor::GetCapabilities() {
   return m_Capabilities;
-}
-
-
-void Processor::initializeAttributes()
-{
-  Module::initializeAttributes();
-  add_attribute(new WarnModeAttribute(this));
-  add_attribute(new SafeModeAttribute(this));
-  add_attribute(new UnknownModeAttribute(this));
-  add_attribute(new BreakOnResetAttribute(this));
-
-  m_pbBreakOnInvalidRegisterRead = new Boolean("BreakOnInvalidRegisterRead",
-    true, "Halt simulation when an invalid register is read from.");
-  m_pbBreakOnInvalidRegisterRead->setClearableSymbol(false);
-  add_attribute(m_pbBreakOnInvalidRegisterRead);
-  m_pbBreakOnInvalidRegisterWrite = new Boolean("BreakOnInvalidRegisterWrite",
-    true, "Halt simulation when an invalid register is written to.");
-  m_pbBreakOnInvalidRegisterWrite->setClearableSymbol(false);
-  add_attribute(m_pbBreakOnInvalidRegisterWrite);
-
-  add_attribute(mFrequency);
 }
 
 //-------------------------------------------------------------------
@@ -310,17 +310,33 @@ void Processor::create_invalid_registers ()
 
     unsigned int index = map_rm_address2index(addr);
 
-    if (0 == registers[index]) {
+    if (!registers[index]) {
+      char nameBuff[100];
+      snprintf(nameBuff,sizeof(nameBuff), "INVREG_%X",addr);
 
-      registers[index] = new InvalidRegister(addr);
-      registers[index]->alias_mask = 0;
-      registers[index]->set_cpu(this);
-
+      registers[index] = new InvalidRegister(this, nameBuff);
+      registers[index]->setAddress(addr);
     }
   }
 
 }
 
+//-------------------------------------------------------------------
+//
+// Delete invalid registers
+//
+void Processor::delete_invalid_registers ()
+{
+  unsigned int i=0;
+
+  for (i = 0; i < rma.get_size(); i++) {
+    InvalidRegister *pReg = dynamic_cast<InvalidRegister *> (registers[i]);
+    if (pReg) {
+      delete registers[i];
+      registers[i]= 0;
+    }
+  }
+}
 
 //-------------------------------------------------------------------
 //    add_file_registers
@@ -339,25 +355,21 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
   char str[100];
   for  (j = start_address; j <= end_address; j++) {
 
-    registers[j] = new Register;
+    //The default register name is simply its address
+    snprintf (str, sizeof(str), "REG%03X", j);
+    registers[j] = new Register(this, str);
+
     if (alias_offset) {
       registers[j + alias_offset] = registers[j];
       registers[j]->alias_mask = alias_offset;
     } else
       registers[j]->alias_mask = 0;
 
-    registers[j]->address = j;
+    registers[j]->setAddress(j);
     RegisterValue rv = getWriteTT(j);
     registers[j]->set_write_trace(rv);
     rv = getReadTT(j);
     registers[j]->set_read_trace(rv);
-
-    //The default register name is simply its address
-    sprintf (str, "0x%02x", j);
-    registers[j]->new_name(str);
-
-    registers[j]->set_cpu(this);
-
   }
 
 }
@@ -370,32 +382,36 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 
 void Processor::delete_file_registers(unsigned int start_address, unsigned int end_address)
 {
-
+  cout << __FUNCTION__ 
+       << "  start:" << hex << start_address
+       << "  end:" << hex << end_address
+       << endl;
 
   //  FIXME - this function is bogus.
   // The aliased registers do not need to be searched for - the alias mask
   // can tell at what addresses a register is aliased.
 
 #define SMALLEST_ALIAS_DISTANCE  32
+#define ALIAS_MASK (SMALLEST_ALIAS_DISTANCE-1)
   unsigned int i,j;
 
 
   for (j = start_address; j <= end_address; j++) {
     if(registers[j]) {
 
-      if(registers[j]->alias_mask) {
-	// This registers appears in more than one place. Let's find all
+      Register *thisReg = registers[j];
+      if(thisReg->alias_mask) {
+	// This register appears in more than one place. Let's find all
 	// of its aliases.
-	for(i=SMALLEST_ALIAS_DISTANCE; i<register_memory_size(); i+=SMALLEST_ALIAS_DISTANCE)
-	  if(registers[j] == registers[i])
+	for(i=j&ALIAS_MASK; i<rma.get_size(); i+=SMALLEST_ALIAS_DISTANCE)
+	  if(thisReg == registers[i])
 	    registers[i] = 0;
       }
-
-      delete registers[j];
+      //cout << " deleting: " << hex << j << endl;
+      delete thisReg;
       registers[j] = 0;
     }
   }
-
 }
 
 //-------------------------------------------------------------------
@@ -507,7 +523,7 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
     program_memory[uIndex] = disasm(address,value);
     if(program_memory[uIndex] == 0)
       program_memory[uIndex] = &bad_instruction;
-    program_memory[uIndex]->add_line_number_symbol(address);
+    //program_memory[uIndex]->add_line_number_symbol();
   } 
   else if (set_config_word(address, value))
     ;
@@ -834,9 +850,12 @@ void Processor::disassemble (signed int s, signed int e)
     else
       fc = 0;
 
-    const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
-    if(*pLabel != 0)
-      cout << pLabel << ":" << endl;
+    //const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+    //if(*pLabel != 0)
+    //  cout << pLabel << ":" << endl;
+    AddressSymbol *pAddr = dynamic_cast<AddressSymbol *>(inst->getLineSymbol());
+    if (pAddr)
+      cout << pAddr->name() << ':' << endl;
 
     if(files.nsrc_files() && use_src_to_disasm) {
       char buf[256];
@@ -1123,13 +1142,14 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
   if (br == pInstruction) {
     // at the head of the chain
     *ppAddressLocation = br->getReplaced();
+    br->setReplaced(0);
   }
   else {
     Breakpoint_Instruction *pLast = br;
     // Find myself in the chain
     while(br != NULL) {
       if (br == pInstruction) {
-        // found
+        // found -- remove from the chain
         pLast->setReplaced(br->getReplaced());
         br->setReplaced(0);
         return 1;
@@ -1292,18 +1312,20 @@ RegisterValue Processor::getReadTT(unsigned int j)
 //
 // run  -- Begin simulating and don't stop until there is a break.
 // FIXME - shouldn't this be a pure virtual function?
+#if 0
 void Processor::run (bool refresh)
 {
 
   cout << __FUNCTION__ << endl;
 }
-
+#endif
 //-------------------------------------------------------------------
 //
 // step - Simulate one (or more) instructions. If a breakpoint is set
 // at the current PC-> 'step' will go right through it. (That's supposed
 // to be a feature.)
 //
+#if 0
 extern phaseExecute1Cycle *mExecute1Cycle;
 extern phaseExecute2ndHalf *mExecute2ndHalf;
 void Processor::step (unsigned int steps, bool refresh)
@@ -1369,6 +1391,7 @@ void Processor::step (unsigned int steps, bool refresh)
   if(refresh)
     get_interface().simulation_has_stopped();
 }
+#endif
 
 //-------------------------------------------------------------------
 //
@@ -1381,19 +1404,6 @@ void Processor::step (unsigned int steps, bool refresh)
 void Processor::step_over (bool refresh)
 {
   step(1,refresh); // Try one step
-}
-
-
-
-//-------------------------------------------------------------------
-//
-// finish
-//
-// this method really only applies to processors with stacks.
-
-void Processor::finish(void)
-{
-
 }
 
 //-------------------------------------------------------------------
@@ -1544,7 +1554,7 @@ ProgramMemoryCollection::ProgramMemoryCollection (Processor   *pProcessor,
   m_pProcessor = pProcessor;
   Value::new_name(pC_collection_name);
   m_pPma = pPma;
-  get_symbol_table().add(this);
+  pProcessor->addSymbol(this);
 }
 
 unsigned int ProgramMemoryCollection::GetSize()
@@ -2094,7 +2104,7 @@ RegisterMemoryAccess::RegisterMemoryAccess(Processor *new_cpu) :
 
 RegisterMemoryAccess::~RegisterMemoryAccess()
 {
-  // registers memory is owned by the Processor class
+
 }
 
 //--------------------------------------------------------------------------
@@ -2180,7 +2190,7 @@ bool RegisterMemoryAccess::hasBreak(unsigned int address)
 
 }
 
-static InvalidRegister AnInvalidRegister;
+static InvalidRegister AnInvalidRegister(0,"AnInvalidRegister");
 
 //-------------------------------------------------------------------
 Register &RegisterMemoryAccess::operator [] (unsigned int address)

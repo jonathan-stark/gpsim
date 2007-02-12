@@ -199,10 +199,10 @@ instruction * disasm16 (pic_processor *cpu, unsigned int address, unsigned int i
   pi = 0;
   for(int i =0; i<NUM_OP_18CXX; i++)
     if((op_18cxx[i].inst_mask & inst) == op_18cxx[i].opcode)
-      pi = op_18cxx[i].inst_constructor(cpu, inst);
+      pi = op_18cxx[i].inst_constructor(cpu, inst,address);
 
   if(pi == 0)
-    pi = invalid_instruction::construct(cpu, inst);
+    pi = invalid_instruction::construct(cpu, inst, address);
 
   return (pi);
 }

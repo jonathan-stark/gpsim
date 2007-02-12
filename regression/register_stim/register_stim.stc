@@ -76,5 +76,5 @@ end
 
 
 # attach the stimuli to registers
-attach bit_shifter shift_in
-attach flag_stim   flag_reg
+attach bit_shifter .shift_in
+attach flag_stim   .flag_reg

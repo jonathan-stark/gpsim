@@ -44,8 +44,9 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 // member functions for the TMR0 base class
 //--------------------------------------------------
-TMR0::TMR0()
-  : m_pOptionReg(0)
+TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc),
+    m_pOptionReg(0)
 {
   value.put(0);
   synchronized_cycle=0;

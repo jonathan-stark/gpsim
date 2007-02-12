@@ -47,7 +47,8 @@ namespace dspic_registers {
 
     static unsigned int iMask;
 
-
+    dsPicRegister(Processor *, const char *pName, const char *pDesc=0);
+    /*
     dsPicRegister()
     {
       value.data = 0;
@@ -60,7 +61,7 @@ namespace dspic_registers {
     {
       value = rv;
     }
-
+    */
     virtual bool get_bit(unsigned int bit_number);
 
     virtual void put(unsigned int new_value)
@@ -168,6 +169,8 @@ namespace dspic_registers {
       eOA   = 1<<15
     };
 
+    Status(Processor *, const char *pName, const char *pDesc=0);
+
     inline void traceWrite()
     {
       dspic::gTrace->raw(write_trace.get() | value.get());
@@ -187,6 +190,13 @@ namespace dspic_registers {
   };
   //------------------------------------------------------------
   //
+  class WRegister : public dsPicRegister
+  {
+  public:
+    WRegister();
+  };
+  //------------------------------------------------------------
+  //
   class PCL : public dsPicRegister
   {
   public:
@@ -195,7 +205,7 @@ namespace dspic_registers {
     virtual unsigned int get();
     virtual unsigned int get_value();
 
-    PCL();
+    PCL(Processor *, const char *pName, const char *pDesc=0);
   };
 
   //------------------------------------------------------------
@@ -228,10 +238,9 @@ namespace dspic_registers {
   class Stack
   {
   public:
-    Stack();
+    Stack(dspic::dsPicProcessor *pCpu);
     void push();
     void pop();
-    void init(dspic::dsPicProcessor *);
   protected:
     dspic::dsPicProcessor *m_cpu;
   };

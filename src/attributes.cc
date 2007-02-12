@@ -143,7 +143,7 @@ public:
   CycleCounterAttribute() :
     Integer(0) 
   {
-    m_bClearableSymbol = false;
+    //m_bClearableSymbol = false;
     new_name("cycles");
     set_description(" Simulation time in terms of cycles.");
   }
@@ -185,7 +185,7 @@ public:
   GUIUpdateRateAttribute() :
     Integer(0) 
   {
-    m_bClearableSymbol = false;
+    //m_bClearableSymbol = false;
     new_name("sim.gui_update_rate");
     set_description(" Specifies the number of cycles between gui updates");
   }
@@ -212,21 +212,21 @@ void init_attributes()
   
   // Define internal simulator attributes .
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
-  verbosity->setClearableSymbol(false);
-  get_symbol_table().Initialize();
-  get_symbol_table().add(verbosity);
-  get_symbol_table().add(new CycleCounterAttribute());
+  //verbosity->setClearableSymbol(false);
+
+  globalSymbolTable().addSymbol(verbosity);
+  globalSymbolTable().addSymbol(new CycleCounterAttribute());
   stop_watch.init();
 #ifdef HAVE_GUI
-  get_symbol_table().add(new GUIUpdateRateAttribute());
+  globalSymbolTable().addSymbol(new GUIUpdateRateAttribute());
 #endif
 
-  get_symbol_table().add_constant("POR_RESET",  POR_RESET, false);    // Power-on reset
-  get_symbol_table().add_constant("WDT_RESET",  WDT_RESET, false);    // Watch Dog timer timeout reset
-  get_symbol_table().add_constant("IO_RESET",   IO_RESET, false);     // I/O pin reset
-  get_symbol_table().add_constant("SOFT_RESET", SOFT_RESET, false);   // Software initiated reset
-  get_symbol_table().add_constant("BOD_RESET",  BOD_RESET, false);    // Brown out detection reset
-  get_symbol_table().add_constant("SIM_RESET",  SIM_RESET, false);    // Simulation Reset
-  get_symbol_table().add_constant("MCLR_RESET", MCLR_RESET, false);   // MCLR (Master Clear) Reset
+  globalSymbolTable().addSymbol(new Integer("POR_RESET",  POR_RESET));    // Power-on reset
+  globalSymbolTable().addSymbol(new Integer("WDT_RESET",  WDT_RESET));    // Watch Dog timer timeout reset
+  globalSymbolTable().addSymbol(new Integer("IO_RESET",   IO_RESET));     // I/O pin reset
+  globalSymbolTable().addSymbol(new Integer("SOFT_RESET", SOFT_RESET));   // Software initiated reset
+  globalSymbolTable().addSymbol(new Integer("BOD_RESET",  BOD_RESET));    // Brown out detection reset
+  globalSymbolTable().addSymbol(new Integer("SIM_RESET",  SIM_RESET));    // Simulation Reset
+  globalSymbolTable().addSymbol(new Integer("MCLR_RESET", MCLR_RESET));   // MCLR (Master Clear) Reset
 
 }

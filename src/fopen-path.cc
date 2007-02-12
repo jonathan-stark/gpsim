@@ -41,11 +41,12 @@ Boston, MA 02111-1307, USA.  */
 static char **searchPath = 0;
 static int searchPathCount = 0;
 
-class CSourceSearchPath : public String {
+class CSourceSearchPath : public String 
+{
 public:
-  CSourceSearchPath() : String("SourcePath", NULL, "Search path for source files") {
-    setClearableSymbol(false);
-  }
+        CSourceSearchPath() : String("SourcePath", NULL, "Search path for source files") 
+        {
+        }
   virtual void set(const char *cP,int len=0) {
     set_search_path(cP);
   }
@@ -93,7 +94,7 @@ public:
 /// object so CSourceSearchPath cannot be static.
 void InitSourceSearchAsSymbol() {
   // The symbol table will delete the CSourceSearchPath object
-  get_symbol_table().add(new CSourceSearchPath());
+  globalSymbolTable().addSymbol(new CSourceSearchPath());
 }
 
 

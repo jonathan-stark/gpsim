@@ -3,9 +3,7 @@
 
 class PIR;
 
-#include "gpsim_classes.h"
 #include "registers.h"
-#include "breakpoints.h"
 
 //---------------------------------------------------------
 // PIE Peripheral Interrupt Enable register base class 
@@ -14,10 +12,12 @@ class PIR;
 class PIE : public sfr_register
 {
 public:
-  PIR *pir;
+  PIE(Processor *pCpu, const char *pName, const char *pDesc);
 
   void put(unsigned int new_value);
-
+  void setPir(PIR *pPir);
+protected:
+  PIR *pir;
 };
 
 #endif /* PIE_H */

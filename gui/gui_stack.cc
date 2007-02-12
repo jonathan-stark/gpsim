@@ -153,6 +153,7 @@ static int get_closest_label(Stack_Window *sw,
   int minimum_delta=0x2000000;
   int delta;
 
+#if 0
   Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
   Symbol_Table::iterator symIt;
   Symbol_Table::iterator symItEnd = st.end();
@@ -161,7 +162,7 @@ static int get_closest_label(Stack_Window *sw,
 
     Value *s = *symIt;
 
-    if(  (typeid(*s) == typeid(address_symbol)) /*||
+    if(  (typeid(*s) == typeid(AddressSymbol)) /*||
 	 (typeid(*s) == typeid(line_number_symbol))*/) {
       int i;
       s->get(i);
@@ -172,7 +173,8 @@ static int get_closest_label(Stack_Window *sw,
       }
     }
   }
-
+#endif
+  cout << "FIXME gui_stack.cc get closest label\n";
   if(closest_symbol) {
     strcpy(name,closest_symbol->name().data());
     int i;

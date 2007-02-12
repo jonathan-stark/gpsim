@@ -278,16 +278,18 @@ char *GUIRegister::name()
     return buffer;
   }
 
-  register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(
-    reg->address);
+  //register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(reg->address);
 
   if(!reg || reg->isa()==Register::INVALID_REGISTER)
     return 0;
 
-  if(bIsAliased) {
+  // FIXME -- potential buffer overflow...
+  if(bIsAliased)
     sprintf(buffer,"alias (%s)", reg->name().c_str());
-  }
-  else {
+  else
+    sprintf(buffer,"%s", reg->name().c_str());
+    
+  /*  else {
     if(pRegSym == 0) {
       strcpy(buffer,reg->name().c_str());
     }
@@ -295,6 +297,7 @@ char *GUIRegister::name()
       strcpy(buffer,pRegSym->name().c_str());
     }
   }
+  */
   return buffer;
 }
 
@@ -1655,12 +1658,16 @@ void Register_Window::SelectRegister(int regnumber)
 }
 void Register_Window::SelectRegister(Value *regSym)
 {
+  Register *pReg = dynamic_cast<Register *>(regSym);
+  if (pReg && register_sheet)
+    SelectRegister(pReg->getAddress());
+  /*
   if(regSym  && typeid(*regSym) == typeid(register_symbol) &&
       register_sheet != NULL) {
     Register* pReg = (Register*)((register_symbol*)regSym)->getReg();
     SelectRegister(pReg->address);
   }
-
+  */
 }
 static void
 build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)

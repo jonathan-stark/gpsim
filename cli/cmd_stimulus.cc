@@ -27,8 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_stimulus.h"
 #include "../src/pic-processor.h"
-#include "../src/stimulus_orb.h"
 #include "../src/stimuli.h"
+#include "../src/symbol.h"
 
 
 static ValueStimulus *last_stimulus=0;
@@ -159,9 +159,28 @@ cmd_stimulus::cmd_stimulus()
 
 }
 
-void cmd_stimulus::stimulus(void)
+
+void dumpStimulus(const SymbolEntry_t &sym)
 {
-  dump_stimulus_list();
+  stimulus *ps = dynamic_cast<stimulus *>(sym.second);
+
+  if (ps) {
+    cout << ps->name();
+    ps->show();
+    cout << endl;
+  }
+}
+
+void dumpStimuli(const SymbolTableEntry_t &st)
+{
+  cout << " Symbol Table: " << st.first << endl;
+  (st.second)->ForEachSymbolTable(dumpStimulus);
+}
+
+void cmd_stimulus::stimulus()
+{
+  cout << "\nSymbol table\n";
+  globalSymbolTable().ForEachModule(dumpStimuli);
 }
 
 //------------------------------------------------------------------
@@ -400,7 +419,7 @@ void cmd_stimulus::stimulus(ExprList_t *eList)
 // All of the stimulus' options have been entered. Now it's time
 // to create the stimulus.
 
-void cmd_stimulus::end(void)
+void cmd_stimulus::end()
 {
   if(!last_stimulus) {
     cout << "warning: Ignoring stimulus (string) option because there's no stimulus defined.";

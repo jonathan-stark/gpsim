@@ -50,14 +50,12 @@ Boston, MA 02111-1307, USA.  */
 // Here is an experimental attribute for testing the socket interface.
 // The purpose is to isolate socket testing from the rest of the simulator.
 //
-class TestInt32Array : public symbol
+class TestInt32Array : public Value
 {
 public:
   TestInt32Array(const char *_name, int _sz)
-    : symbol(_name)
+    : Value(_name, " test array for testing sockets")
   {
-    set_description(" test array for testing sockets");
-
     size = _sz;
     array = new int[size];
   }
@@ -687,7 +685,7 @@ void SocketBase::ParseObject()
 
       if(packet->DecodeString(tmp,256)) {
 
-	Value *sym = get_symbol_table().find(tmp);
+	Value *sym = globalSymbolTable().findValue(tmp);
 	if(sym) {
 	  packet->EncodeHeader();
 	  sym->get(*packet);
@@ -714,7 +712,7 @@ void SocketBase::ParseObject()
 
       if(packet->DecodeString(tmp,256)) {
 
-	Value *sym = get_symbol_table().find(tmp);
+	Value *sym = globalSymbolTable().findValue(tmp);
 
 	if(sym) {
 
@@ -925,7 +923,7 @@ NotifyLink::NotifyLink(AttributeLink *_sl)
   if(sl && sl->getValue()) {
     Value *v = sl->getValue();
     std::cout<< "Creating a notify link and asoc with "<< v->name()<<endl;
-    sl->getValue()->set_xref(this);
+    //FIXME: removed 27JAN06 sl->getValue()->set_xref(this);
   }
 }
 void NotifyLink::set(gint64 i)
@@ -986,7 +984,7 @@ AttributeLink *gCreateSocketLink(unsigned int handle, Packet &p, SocketBase *sb)
 
   if(p.DecodeString(tmp,256)) {
 
-    Value *sym = get_symbol_table().find(tmp);
+    Value *sym = globalSymbolTable().findValue(tmp);
     if(sym)
       return new AttributeLink(handle,sb,sym);
   }

@@ -27,7 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_log.h"
 #include "../src/trace_orb.h"
 #include "../src/pic-processor.h"
-#include "../src/symbol_orb.h"
 #include "../src/trace.h"
 
 #include "cmd_break.h"

@@ -236,7 +236,7 @@ PullupResistor::PullupResistor(const char *init_name)
     new_name(init_name);
 
   // Default module attributes.
-  initializeAttributes();
+  //initializeAttributes();
 
   set_description("\
 pullup resistor or generic voltage source\n\
@@ -254,9 +254,9 @@ pullup resistor or generic voltage source\n\
   CapacitanceAttribute *cattr = new CapacitanceAttribute(this);
   VoltageAttribute *vattr = new VoltageAttribute(this);
 
-  add_attribute(attr);
-  add_attribute(cattr);
-  add_attribute(vattr);
+  addSymbol(attr);
+  addSymbol(cattr);
+  addSymbol(vattr);
 
   attr->set(10e3);
   cattr->set(0.);

@@ -41,7 +41,8 @@ class I2C_EE :  public TriggerObject
 {
 public:
 
-  I2C_EE(unsigned int _rom_size, unsigned int _write_page_size = 1,
+  I2C_EE(Processor *pCpu,
+         unsigned int _rom_size, unsigned int _write_page_size = 1,
 	 unsigned int _addr_bytes = 1, unsigned int _CSmask = 0,
 	 unsigned int _BSmask = 0, unsigned int _BSshift = 0
 	);
@@ -111,8 +112,6 @@ private:
   inline virtual unsigned int get_rom_size() { return (rom_size); }
   // XXX might want to make get_rom a friend only to cli_dump
   inline virtual Register **get_rom() { return (rom); }
-
-
 };
 
 

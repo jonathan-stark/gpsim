@@ -84,8 +84,8 @@ public:
 
   ADCON0_16    adcon0;
   ADCON1       adcon1;
-  ADRES        adresl;
-  ADRES        adresh;
+  sfr_register adresl;
+  sfr_register adresh;
   INTCON_16    intcon;
   INTCON2      intcon2;
   INTCON3      intcon3;
@@ -112,8 +112,8 @@ public:
   CCPCON       ccp2con;
   CCPRL        ccpr2l;
   CCPRH        ccpr2h;
-  TMR3L        tmr3l;
-  TMR3H        tmr3h;
+  TMRL         tmr3l;
+  TMRH         tmr3h;
   T3CON        t3con;
   PIR_SET_2    pir_set_def;
 

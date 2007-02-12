@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "ValueCollections.h"
 #include "symbol.h"
+#include "registers.h"
 
 IIndexedCollection::IIndexedCollection(const char *pName, 
 				       const char *pDesc,
@@ -71,6 +72,7 @@ void IIndexedCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
           }
         }
         else {
+          /*
           register_symbol *pReg = dynamic_cast<register_symbol*>(pIndex);
           if(pReg) {
             SetAt(pReg->getReg()->address, pValue);
@@ -78,6 +80,12 @@ void IIndexedCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
           else {
             throw Error("indexer not valid");
           }
+          */
+          Register *pReg = dynamic_cast<Register*>(pIndex);
+          if (pReg) 
+            SetAt(pReg->getAddress(), pValue);
+          else
+            throw Error("indexer not valid");
         }
       }
       if(pIndex != NULL) {
@@ -124,24 +132,30 @@ string IIndexedCollection::toString(ExprList_t* pIndexerExprs) {
           }
           continue;
         }
-        Integer *pInt;
         String *pName = dynamic_cast<String*>(pIndex);
-        if(pName) {
-          pInt = get_symbol_table().findInteger(pName->getVal());
-        }
-        else {
-          pInt = dynamic_cast<Integer*>(pIndex);
-        }
+        Integer *pInt = pName ? 
+          globalSymbolTable().findInteger(pName->getVal()) :
+          dynamic_cast<Integer*>(pIndex);
+
         Integer temp(0);
         if(pInt == NULL) {
-          // This is a temp workaround. I would expect a register symbol
+          // This is a temp workaround. I (JR) would expect a register symbol
           // evaluate to an Integer object containing the value of the
           // register. It currently returns an object that is a copy 
           // of the register_symbol object.
+          /*
           register_symbol *pReg = dynamic_cast<register_symbol*>(pIndex);
           if(pReg) {
             gint64 i;
             pReg->get(i);
+            temp.set(i);
+            pInt = &temp;
+          }
+          */
+
+          Register *pReg = dynamic_cast<Register*>(pIndex);
+          if(pReg) {
+            gint64 i = pReg->get_value();
             temp.set(i);
             pInt = &temp;
           }
@@ -221,7 +235,8 @@ string IIndexedCollection::toString(int iColumnWidth, vector<string> &asIndexes,
   return sOut.str();
 }
 
-Integer * IIndexedCollection::FindInteger(const char *s) {
-  return get_symbol_table().findInteger(s);
+Integer * IIndexedCollection::FindInteger(const char *s)
+{
+  return globalSymbolTable().findInteger(s);
 }
 

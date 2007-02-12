@@ -23,22 +23,31 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 using namespace std;
 
-class symbol;
-class Pin_t;
-typedef list<Pin_t*> PinList_t;
+class Stimulus_Node;
+class stimulus;
+class gpsimObject;
+class LiteralInteger;
+typedef list<gpsimObject *> gpsimObjectList_t;
 
 class cmd_attach : public command
 {
 public:
 
-  cmd_attach(void);
-  void attach(list <string> *);
-  void attach(list <Value*> *);
-  void attach(Value*, PinList_t *);
+  cmd_attach();
+  void attach(gpsimObject*, gpsimObjectList_t *);
 
 };
 
 extern cmd_attach attach;
+
+
+// Here are some helper functions for the parser.
+// These convert the pin() and port() operators into stimuli.
+// The attach command is the only one that uses them, thus
+// the code goes here.
+
+stimulus *toStimulus(gpsimObject *);
+stimulus *toStimulus(int);
 
 
 #endif

@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 class symbol;
 class XrefObject;
 class Processor;
+class Module;
 
 #include "gpsim_classes.h"
 #include "value.h"
@@ -50,7 +51,7 @@ public:
   unsigned int data;  // The actual numeric value of the register.
   unsigned int init;  // bit mask of initialized bits.
 
-  RegisterValue(void)
+  RegisterValue()
   {
     data = 0;
     init = 0xff;  // assume 8-bit wide, uninitialized registers
@@ -66,12 +67,12 @@ public:
   {
   }
 
-  inline bool initialized(void)
+  inline bool initialized()
   {
     return init == 0;
   }
 
-  inline unsigned int get(void)
+  inline unsigned int get()
   {
     return data;
   }
@@ -87,7 +88,7 @@ public:
     init = i;
   }
 
-  inline unsigned int geti(void)
+  inline unsigned int geti()
   {
     return init;
   }
@@ -141,7 +142,7 @@ public:
 /// to create memory maps and special function registers.
 /// 
 
-class Register : public gpsimValue
+class Register : public Value
 {
 public:
 
@@ -190,14 +191,13 @@ public:
 
 
 public:
-  Register();
-  Register(Processor *);
+  Register(Module *, const char *pName, const char *pDesc=0);
   virtual ~Register();
 
 
   /// get - method for accessing the register's contents.
 
-  virtual unsigned int get(void);
+  virtual unsigned int get();
 
   /// put - method for writing a new value to the register.
   
@@ -214,12 +214,12 @@ public:
 
   /// get_value - same as get(), but no trace is performed
 
-  virtual unsigned int get_value(void) { return(value.get()); }
+  virtual unsigned int get_value() { return(value.get()); }
 
   /// getRV - get the whole register value - including the info
   /// of the three-state bits.
 
-  virtual RegisterValue getRV(void) 
+  virtual RegisterValue getRV() 
   {
     value.data = get();
     return value;
@@ -241,7 +241,7 @@ public:
   /// refresh it's windows without having the side effect of filling
   /// up the trace buffer
 
-  virtual RegisterValue getRV_notrace(void)
+  virtual RegisterValue getRV_notrace()
   { 
     value.data = get_value();
     return value;
@@ -252,14 +252,26 @@ public:
     put_value(rv.data);
   }
 
-  virtual RegisterValue getRVN(void)
+  virtual RegisterValue getRVN()
   {
     return getRVN_notrace();
   }
-  virtual RegisterValue getRVN_notrace(void)
+  virtual RegisterValue getRVN_notrace()
   {
     return getRV_notrace();
   }
+
+  /// set --- cast another Value object type into a register type
+  /// this is used primarily by expression and stimuli processing
+  /// (the put() methods are used by the processors).
+  /// FIXME -- consolidate the get, set, and put methods
+  virtual void set(Value *);
+
+  /// copy --- This is used during expression parsing.
+  virtual Value *copy();
+
+  /// get(gint64 &i) --- ugh.
+  virtual void get(gint64 &i);
 
   virtual void initialize()
   {
@@ -281,19 +293,12 @@ public:
   /// else (e.g. a break point may be pointing to the register
   /// it replaced and will return that instead).
 
-  virtual Register *getReg(void)
+  virtual Register *getReg()
   {
     return this;
   }
   
-  /// simulatedGet() invokes the full simulation of getting a
-  /// a value from a simulated object.
-  virtual unsigned int  SimulatedGet(void);
-  /// simulatedSet() invokes the full simulation of getting a
-  /// a value from a simulated object.
-  virtual void          SimulatedSet(unsigned int new_value);
-
-  virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
+  virtual REGISTER_TYPES isa() {return GENERIC_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
 
    
@@ -312,7 +317,7 @@ public:
 
   ///  Breakpoint objects will overload this function and return true.
 
-  virtual bool hasBreak(void)
+  virtual bool hasBreak()
   { 
     return false;
   }
@@ -353,8 +358,16 @@ public:
   {
     return address;
   }
+  virtual void setAddress(unsigned int addr)
+  {
+    address = addr;
+  }
   Register *getReplaced() { return m_replaced; }
   void setReplaced(Register *preg) { m_replaced = preg; }
+
+  virtual void new_name(string &);
+  virtual void new_name(const char *);
+
 protected:
   // A pointer to the register that this register replaces.
   // This is used primarily by the breakpoint code. 
@@ -371,18 +384,12 @@ class InvalidRegister : public Register
 {
 public:
 
-  InvalidRegister(void);
-  InvalidRegister(unsigned int at_address);
+  InvalidRegister(Processor *, const char *pName, const char *pDesc=0);
 
   void put(unsigned int new_value);
-  unsigned int get(void);
-  virtual REGISTER_TYPES isa(void) {return INVALID_REGISTER;};
-  virtual Register *getReg(void)
-    {
-      return 0;
-    }
-  
-
+  unsigned int get();
+  virtual REGISTER_TYPES isa() {return INVALID_REGISTER;};
+  virtual Register *getReg()   {return 0; }
 };
 
 
@@ -391,12 +398,12 @@ public:
 class sfr_register : public Register
 {
 public:
-  sfr_register();
-  sfr_register(Processor *);
+  sfr_register(Module *, const char *pName, const char *pDesc=0);
+
   RegisterValue wdtr_value; // wdt or mclr reset value
 
-  virtual REGISTER_TYPES isa(void) {return SFR_REGISTER;};
-  virtual void initialize(void) {return;};
+  virtual REGISTER_TYPES isa() {return SFR_REGISTER;};
+  virtual void initialize() {};
 
   virtual void reset(RESET_TYPE r);
 };
@@ -407,7 +414,7 @@ public:
 // Program Counter
 //
 
-class Program_Counter : public gpsimValue
+class Program_Counter : public Value
 {
 public:
   unsigned int value;              /* pc's current value */

@@ -87,19 +87,32 @@ string &toupper(string & sStr) {
 
 //------------------------------------------------------------------------
 Value::Value()
-  : xref(0), m_bClearableSymbol(true)
+  : cpu(0), m_aka(0)
 {
 }
 
-Value::Value(const char *_name, const char *desc)
-  : gpsimObject(_name,desc), xref(0), m_bClearableSymbol(true)
+Value::Value(const char *_name, const char *desc, Module *pMod)
+  : gpsimObject(_name,desc), cpu(pMod)
 {
-  
 }
 
 Value::~Value()
 {
-  delete xref;
+  //delete xref;
+}
+void Value::update()
+{
+  _xref._update();
+}
+
+void Value::add_xref(void *an_xref)
+{
+  _xref._add(an_xref);
+}
+
+void Value::remove_xref(void *an_xref)
+{
+  _xref.clear(an_xref);
 }
 
 void Value::set(const char *cP,int i)
@@ -227,29 +240,156 @@ Value *Value::copy()
 
 }
 
+/*
 void Value::set_xref(Value *v)
 {
   delete xref;
   xref = v;
 }
-void Value::setClearableSymbol(bool bClear) {
-  m_bClearableSymbol = bClear;
-}
-
-bool Value::isClearable() {
-  return m_bClearableSymbol;
-}
-
 Value *Value::get_xref()
 {
-
   return xref;
+}
+*/
+
+Processor *Value::get_cpu() const
+{
+  return static_cast<Processor *>(cpu);
+}
+
+void Value::set_cpu(Processor *new_cpu)
+{
+  cpu = new_cpu;
+}
+void Value::set_module(Module *new_cpu)
+{
+  cpu = new_cpu;
+}
+Module *Value::get_module()
+{
+  return cpu;
+}
+
+void Value::addName(string &r_sAliasedName)
+{
+  if (!m_aka)
+    m_aka = new list<string>();
+
+  m_aka->push_back(r_sAliasedName);
+}
+
+//------------------------------------------------------------------------
+ValueWrapper::ValueWrapper(Value *pCopy)
+  : m_pVal(pCopy)
+{
+}
+ValueWrapper::~ValueWrapper()
+{
+}
+unsigned int ValueWrapper::get_leftVal()
+{
+  return m_pVal->get_leftVal();
+}
+unsigned int ValueWrapper::get_rightVal()
+{
+  return m_pVal->get_rightVal();
+}
+void ValueWrapper::set(const char *cP,int len)
+{
+  m_pVal->set(cP,len);
+}
+void ValueWrapper::set(double d)
+{
+  m_pVal->set(d);
+}
+void ValueWrapper::set(gint64 i)
+{
+  m_pVal->set(i);
+}
+void ValueWrapper::set(int i)
+{
+  m_pVal->set(i);
+}
+void ValueWrapper::set(bool b)
+{
+  m_pVal->set(b);
+}
+void ValueWrapper::set(Value *v)
+{
+  m_pVal->set(v);
+}
+void ValueWrapper::set(Expression *e)
+{
+  m_pVal->set(e);
+}
+void ValueWrapper::set(Packet &p)
+{
+  m_pVal->set(p);
+}
+void ValueWrapper::get(bool &b)
+{
+  m_pVal->get(b);
+}
+void ValueWrapper::get(int &i)
+{
+  m_pVal->get(i);
+}
+void ValueWrapper::get(guint64 &i)
+{
+  m_pVal->get(i);
+}
+void ValueWrapper::get(gint64 &i)
+{
+  m_pVal->get(i);
+}
+void ValueWrapper::get(double &d)
+{
+  m_pVal->get(d);
+}
+void ValueWrapper::get(char *pC, int len)
+{
+  m_pVal->get(pC,len);
+}
+void ValueWrapper::get(Packet &p)
+{
+  m_pVal->get(p);
+}
+Value *ValueWrapper::copy()
+{
+  return m_pVal->copy();
+}
+void ValueWrapper::update()
+{
+  m_pVal->update();
+}
+Value *ValueWrapper::evaluate()
+{
+  return m_pVal->evaluate();
+}
+
+bool ValueWrapper::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  if(!compOp || !rvalue)
+    return false;
+
+  gint64 i,r;
+
+  m_pVal->get(i);
+  rvalue->get(r);
+
+  if(i < r)
+    return compOp->less();
+
+  if(i > r)
+    return compOp->greater();
+
+  return compOp->equal();
 }
 
 //------------------------------------------------------------------------
 // gpsimValue
-
-gpsimValue::gpsimValue(void)
+#if 0
+gpsimValue::gpsimValue()
   : cpu(0)
 {
 }
@@ -259,11 +399,11 @@ gpsimValue::gpsimValue(Module *_cpu)
 {
 }
 
-gpsimValue::~gpsimValue(void)
+gpsimValue::~gpsimValue()
 {
 }
 
-void gpsimValue::update(void)
+void gpsimValue::update()
 {
   _xref._update();
 }
@@ -296,6 +436,7 @@ void gpsimValue::set_cpu(Processor *new_cpu)
   cpu = new_cpu;
 }
 
+#endif
 
 /*****************************************************************
  * The AbstractRange class.
@@ -556,8 +697,8 @@ void Boolean::set(Value *v)
 void Boolean::set(bool v)
 {
   value = v;
-  if(get_xref())
-    get_xref()->set(v);
+  //if(get_xref())
+  //  get_xref()->set(v);
 }
 
 void Boolean::set(const char *buffer, int buf_size)
@@ -651,8 +792,8 @@ void Integer::set(double d)
 void Integer::set(gint64 i)
 {
   value = i;
-  if(get_xref())
-    get_xref()->set(i);
+  //if(get_xref())
+  //  get_xref()->set(i);
 }
 void Integer::set(int i)
 {
@@ -971,8 +1112,8 @@ Float::~Float()
 void Float::set(double d)
 {
   value = d;
-  if(get_xref())
-    get_xref()->set(d);
+  //if(get_xref())
+  //  get_xref()->set(d);
 }
 
 void Float::set(gint64 i)

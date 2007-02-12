@@ -52,20 +52,21 @@ void PMCON1::put(unsigned int new_value)
     pm_rd->start_read();
 }
 
-unsigned int PMCON1::get(void)
+unsigned int PMCON1::get()
 {
   trace.raw(read_trace.get() | value.get());
 
   return(value.get());
 }
 
-PMCON1::PMCON1(void)
+PMCON1::PMCON1(Processor *pCpu, PM_RD *pRd)
+  : sfr_register(pCpu, "pmcon1", "Program Memory Read Write Control"),
+    pm_rd(pRd)
 {
-  new_name("pmcon1");
   valid_bits = PMCON1_VALID_BITS;
 }
 
-unsigned int PMDATA::get(void)
+unsigned int PMDATA::get()
 {
   trace.raw(read_trace.get() | value.get());
   return(value.get());
@@ -77,10 +78,12 @@ void PMDATA::put(unsigned int new_value)
   value.put(new_value);
 }
 
-PMDATA::PMDATA(void) {}
+PMDATA::PMDATA(Processor *pCpu, const char *pName)
+  : sfr_register(pCpu, pName, "Program Memory Data")
+{}
 
 
-unsigned int PMADR::get(void)
+unsigned int PMADR::get()
 {
   trace.raw(read_trace.get() | value.get());
 
@@ -96,29 +99,30 @@ void PMADR::put(unsigned int new_value)
 }
 
 
-PMADR::PMADR(void) {}
+PMADR::PMADR(Processor *pCpu, const char *pName)
+  : sfr_register(pCpu, pName, "Program Memory Address")
+{}
 
 // ----------------------------------------------------------
 
-PM_RD::PM_RD(void)
+PM_RD::PM_RD(pic_processor *pCpu)
+  : cpu(pCpu),
+    pmcon1(pCpu,this),
+    pmdata(pCpu,"pmdata"),
+    pmdath(pCpu,"pmdath"),
+    pmadr(pCpu,"pmadr"),
+    pmadrh(pCpu,"pmadrh")
 {
-  cpu = NULL;
-  pmcon1.set_pm(this);
-
-  pmadr.new_name("pmadr");
-  pmadrh.new_name("pmadrh");
-  pmdata.new_name("pmdata");
-  pmdath.new_name("pmdath");
 }
 
-void PM_RD::start_read(void)
+void PM_RD::start_read()
 {
   rd_adr = pmadr.value.get() | (pmadrh.value.get() << 8);
 
   get_cycles().set_break(get_cycles().get() + READ_CYCLES, this);
 }
 
-void PM_RD::callback(void)
+void PM_RD::callback()
 {
   // read program memory
   if(pmcon1.value.get() & PMCON1::RD) {

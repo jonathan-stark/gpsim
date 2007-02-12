@@ -395,7 +395,6 @@ WaveformSource::WaveformSource(Waveform *pParent, const char *_name)
   assert(m_pParent);
   // Prevent removal from the symbol table (all clearable symbols are
   // removed from the symbol table when a new processor is loaded).
-  m_bClearableSymbol = false;
 }
 
 void WaveformSource::set(const char *cp, int len)
@@ -415,8 +414,6 @@ ZoomAttribute::ZoomAttribute(Scope_Window *pSW)
     m_pSW(pSW)
 {
   assert(m_pSW);
-  m_bClearableSymbol = false;
-
 }
 void ZoomAttribute::set(gint64 i)
 {
@@ -431,8 +428,6 @@ PanAttribute::PanAttribute(Scope_Window *pSW)
     m_pSW(pSW)
 {
   assert(m_pSW);
-  m_bClearableSymbol = false;
-
 }
 void PanAttribute::set(gint64 i)
 {
@@ -496,7 +491,7 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
   m_pSink = new WaveformSink(this);
   m_logger = new ThreeStateEventLogger();
   m_pSourceName = new WaveformSource(this,name);
-  get_symbol_table().add(m_pSourceName);
+  globalSymbolTable().addSymbol(m_pSourceName);
 
   m_logger->event('0');
 }
@@ -522,7 +517,8 @@ void Waveform::updateLayout()
 
 void Waveform::setSource(const char *sourceName)
 {
-  IOPIN *ppin = dynamic_cast<IOPIN*>(get_symbol_table().findStimulus(sourceName));
+  //IOPIN *ppin = dynamic_cast<IOPIN*>(get_symbol_table().findStimulus(sourceName));
+  IOPIN *ppin = dynamic_cast<IOPIN*>(globalSymbolTable().find(string(sourceName)));
   if (ppin) {
     if (m_ppm)
       m_ppm->removeSink(m_pSink);
@@ -949,7 +945,6 @@ TimeMarker::TimeMarker(Scope_Window *parent, const char *_name, const char *desc
     m_pParent(parent)
 {
   assert(m_pParent);
-  m_bClearableSymbol = false;
 }
 void TimeMarker::set(gint64 i)
 {
@@ -1629,12 +1624,12 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
   m_zoom = new ZoomAttribute(this);
   m_pan  = new PanAttribute(this);
 
-  get_symbol_table().add(m_Markers[eStart]);
-  get_symbol_table().add(m_Markers[eStop]);
-  get_symbol_table().add(m_Markers[eLeftButton]);
-  get_symbol_table().add(m_Markers[eRightButton]);
-  get_symbol_table().add(m_zoom);
-  get_symbol_table().add(m_pan);
+  globalSymbolTable().addSymbol(m_Markers[eStart]);
+  globalSymbolTable().addSymbol(m_Markers[eStop]);
+  globalSymbolTable().addSymbol(m_Markers[eLeftButton]);
+  globalSymbolTable().addSymbol(m_Markers[eRightButton]);
+  globalSymbolTable().addSymbol(m_zoom);
+  globalSymbolTable().addSymbol(m_pan);
 
   m_bFrozen = false;
 

@@ -858,6 +858,9 @@ void pic_processor::run (bool refresh)
 void pic_processor::step (unsigned int steps, bool refresh)
 {
 
+  if(!steps)
+    return;
+
   if(get_use_icd())
   {
       if(steps!=1)
@@ -873,9 +876,78 @@ void pic_processor::step (unsigned int steps, bool refresh)
   }
 
 
-  Processor::step(steps,refresh);
+  if(simulation_mode != eSM_STOPPED) {
+    if(verbose)
+      cout << "Ignoring step request because simulation is not stopped\n";
+    return;
+  }
+
+  simulation_mode = eSM_SINGLE_STEPPING;
+
+#ifdef CLOCK_EXPERIMENTS
+
+  mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+
+  do
+    mCurrentPhase = mCurrentPhase->advance();
+  while(!bp.have_halt() && --steps>0);
+
+  // complete the step if this is a multi-cycle instruction.
+
+  if (mCurrentPhase == mExecute2ndHalf)
+    while (mCurrentPhase != mExecute1Cycle)
+      mCurrentPhase = mCurrentPhase->advance();
+
+  get_trace().cycle_counter(get_cycles().get());
+  if(refresh)
+    trace_dump(0,1);
+#else
+  do {
+
+
+    if(bp.have_sleep() || bp.have_pm_write()) {
+
+      // If we are sleeping or writing to the program memory (18cxxx only)
+      // then step one cycle - but don't execute any code  
+
+      get_cycles().increment();
+      if(refresh)
+	trace_dump(0,1);
+
+    }
+    else if(bp.have_interrupt())
+      interrupt();
+    else {
+
+      step_one(refresh);
+      get_trace().cycle_counter(get_cycles().get());
+      if(refresh)
+	trace_dump(0,1);
+
+    } 
+
+  }  while(!bp.have_halt() && --steps>0);
+#endif // CLOCK_EXPERIMENTS
+
+  bp.clear_halt();
+  simulation_mode = eSM_STOPPED;
+
+  if(refresh)
+    get_interface().simulation_has_stopped();
+
 }
 
+//-------------------------------------------------------------------
+void pic_processor::step_cycle()
+{
+#ifdef CLOCK_EXPERIMENTS
+  mCurrentPhase = mCurrentPhase->advance();
+#else
+  step(1,false);
+#endif
+}
+
+//
 //-------------------------------------------------------------------
 //
 // step_over - In most cases, step_over will simulate just one instruction.
@@ -1030,7 +1102,10 @@ void pic_processor::reset (RESET_TYPE r)
 
 pic_processor::pic_processor(const char *_name, const char *_desc)
   : Processor(_name,_desc),
-    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0), W(0), pcl(0), pclath(0), m_configMemory(0)
+    wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0),
+    W(0), pcl(0), pclath(0),
+    tmr0(this,"tmr0","Timer 0"),
+    m_configMemory(0)
 {
 
 #ifdef CLOCK_EXPERIMENTS
@@ -1087,29 +1162,24 @@ void pic_processor::create ()
   // Now, initialize the core stuff:
   pc->set_cpu(this);
 
-  W = new WREG(this);
+  W = new WREG(this,"W","Working Register");
 
-  pcl = new PCL;
-  pclath = new PCLATH;
-  status = new Status_register;
-  //FIXME more
-  
-  W->new_name("W");
-  
-  indf = new INDF;
+  pcl = new PCL(this,"pcl", "Program Counter Low");
+  pclath = new PCLATH(this,"pclath", "Program Counter Latch High");
+  status = new Status_register(this,"status", "Processor status");
+  indf = new INDF(this,"indf","Indirect register");
 
   register_bank = &registers[0];  // Define the active register bank 
-  W->value.put(0);
 
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
   if(pma) {
     
-    rma.SpecialRegisters.push_back(new PCHelper(pma));
+    rma.SpecialRegisters.push_back(new PCHelper(this,pma));
     rma.SpecialRegisters.push_back(status);
     rma.SpecialRegisters.push_back(W);
 
-    pma->SpecialRegisters.push_back(new PCHelper(pma));
+    pma->SpecialRegisters.push_back(new PCHelper(this,pma));
     pma->SpecialRegisters.push_back(status);
     pma->SpecialRegisters.push_back(W);
 
@@ -1158,6 +1228,19 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
 
 //-------------------------------------------------------------------
 //
+// delete_sfr_register
+//
+void pic_processor::delete_sfr_register(Register **ppReg, unsigned int addr)
+{
+
+  if (ppReg && *ppReg && registers[addr] == *ppReg) {
+    delete *ppReg;
+    registers[addr] = *ppReg = 0;
+  }
+
+}
+//-------------------------------------------------------------------
+//
 // init_program_memory
 //
 // The purpose of this member function is to allocate memory for the
@@ -1183,32 +1266,27 @@ void pic_processor::init_program_memory (unsigned int memory_size)
   Processor::init_program_memory(memory_size);
 }
 
-//-------------------------------------------------------------------
-//
-// Add a symbol table entry for each one of the sfr's
-//
-
 void pic_processor::create_symbols ()
 {
 
   if(verbose)
     cout << __FUNCTION__ << " register memory size = " << register_memory_size() << '\n';
 
-  for(unsigned int i = 0; i<register_memory_size(); i++)
-    {
-      switch (registers[i]->isa()) {
-      case Register::SFR_REGISTER:
-	if(!symbol_table.find((char *)registers[i]->name().c_str()))
-	  symbol_table.add_register(registers[i]);
-	break;
-      default:
-	break;
-      }
-    }
+  for(unsigned int i = 0; i<register_memory_size(); i++) {
 
-  val_symbol *vpc = new val_symbol(pc);
-  vpc->set_description("Program Counter");
-  symbol_table.add(vpc);
+    switch (registers[i]->isa()) {
+    case Register::SFR_REGISTER:
+      //if(!symbol_table.find((char *)registers[i]->name().c_str()))
+      //  symbol_table.add_register(registers[i]);
+      addSymbol(registers[i]);
+      break;
+    default:
+      break;
+    }
+  }
+
+  pc->set_description("Program Counter");  // Fixme put this in the pc constructor.
+  addSymbol(pc);
 
 }
 
@@ -1498,7 +1576,9 @@ ConfigMemory::ConfigMemory(const char *_name, unsigned int default_val, const ch
 			   pic_processor *pCpu, unsigned int addr)
   : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr)
 {
+  /*
   if (m_pCpu)
-    m_pCpu->add_attribute(this);
+    m_pCpu->addSymbol(this);
+  */
 }
 

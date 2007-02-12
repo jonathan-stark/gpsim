@@ -42,6 +42,13 @@ Package::Package(unsigned int _number_of_pins)
   create_pkg(_number_of_pins);
 }
 
+Package::~Package()
+{
+  if (pins)
+    destroy_pin(0); // delete all of the pins
+  delete [] pins;
+  delete [] m_pinGeometry;
+}
 void Package::create_pkg(unsigned int _number_of_pins)
 {
   if(number_of_pins)
@@ -171,6 +178,25 @@ void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
 
   }
 
+
+}
+
+//-------------------------------------------------------------------
+void Package::destroy_pin(unsigned int pin_number, IOPIN *pin)
+{
+  if (pin_number) {
+    IOPIN *pPin = get_pin(pin_number);
+    if (!pin || (pin == pPin)) {
+      delete pPin;
+      if(pin_number <= number_of_pins)
+        pins[pin_number] = 0;
+    }
+  } else {
+    // Delete all pins
+    for (pin_number=1; pin_number <= number_of_pins; pin_number++)
+      destroy_pin(pin_number);
+    number_of_pins = 0;
+  }
 
 }
 void Package::create_iopin_map(void)

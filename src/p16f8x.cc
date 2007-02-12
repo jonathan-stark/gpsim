@@ -97,7 +97,13 @@ public:
 
 P16F8x::P16F8x(const char *_name, const char *desc)
   : P16X6X_processor(_name,desc),
-    pir1_2_reg(&intcon_reg,&pie1), pir2_2_reg(&intcon_reg,&pie2)
+    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
+    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
+    usart(this),
+    comparator(this),
+    wdtcon(this, "wdtcon", "WDT Control"),
+    osccon(this, "osccon", "OSC Control"),
+    osctune(this, "osctune", "OSC Tune")
 {
    pir1 = &pir1_2_reg;
    pir2 = &pir2_2_reg;
@@ -163,10 +169,7 @@ void P16F8x::create_sfr_map()
                                                                                 
   pir_set_def.set_pir2(pir2);
                                                                                 
-  pie2.pir    = get_pir2();
-  pie2.new_name("pie2");
-
-
+  pie2.setPir(get_pir2());
 
   add_sfr_register(indf,   0x180);
   add_sfr_register(indf,   0x100);
@@ -199,7 +202,8 @@ void P16F8x::create_sfr_map()
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
-		   new _TXREG(&usart), new _RCREG(&usart));
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
@@ -215,24 +219,24 @@ void P16F8x::create_sfr_map()
 	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
 	&(*m_porta)[4]);
 
-  comparator.cmcon->set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
-  comparator.cmcon->set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
-  comparator.cmcon->set_configuration(1, 1, AN0, AN2, AN3, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(2, 1, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 2, AN0, VREF, AN3, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(2, 2, AN1, VREF, AN2, VREF, NO_OUT);
-  comparator.cmcon->set_configuration(1, 3, AN0, AN2, AN0, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(2, 3, AN1, AN2, AN1, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon->set_configuration(2, 4, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(2, 5, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon->set_configuration(1, 6, AN0, AN2, AN0, AN2, OUT0);
-  comparator.cmcon->set_configuration(2, 6, AN1, AN2, AN1, AN2, OUT1);
-  comparator.cmcon->set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon->set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN2, AN3, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(2, 1, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 2, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(2, 2, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN0, AN2, AN0, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 5, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 6, AN0, AN2, AN0, AN2, OUT0);
+  comparator.cmcon.set_configuration(2, 6, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
 
-  add_sfr_register(comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
+  add_sfr_register(&comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"cvrcon");
 
   add_sfr_register(&wdtcon, 0x105, RegisterValue(0,0),"wdtcon");
@@ -352,6 +356,9 @@ void P16F8x::create_config_memory()
   m_configMemory = new ConfigMemory *[2];
   m_configMemory[0] = new Config1(this);
   m_configMemory[1] = new ConfigMemory("CONFIG2", 0,"Configuration Word",this,0x2008);
+
+  addSymbol(m_configMemory[0]);
+  addSymbol(m_configMemory[1]);
 }
 
 
@@ -364,8 +371,7 @@ void  P16F8x::create()
   _14bit_processor::create();
 
   EEPROM_WIDE *e;
-  e = new EEPROM_WIDE(pir2);
-  e->set_cpu(this);
+  e = new EEPROM_WIDE(this,pir2);
   e->initialize(128);
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
@@ -429,7 +435,12 @@ Processor * P16F88::construct(const char *name)
 }
 
 P16F88::P16F88(const char *_name, const char *desc)
-  : P16F87(_name,desc)
+  : P16F87(_name,desc),
+    ansel(this,"ansel", "Analog Select"),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adresh(this,"adresh", "A2D Result High"),
+    adresl(this,"adresl", "A2D Result Low")
 {
   if(verbose)
     cout << "f88 constructor, type = " << isa() << '\n';
@@ -452,9 +463,6 @@ void P16F88::create_sfr_map()
   add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
   add_sfr_register(&ansel, 0x9b, RegisterValue(0,0));
-                                                                                
-  adresh.new_name("adresh");
-  adresl.new_name("adresl");
                                                                                 
   ansel.setAdcon1(&adcon1);
   adcon0.setAdresLow(&adresl);

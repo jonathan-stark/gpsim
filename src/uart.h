@@ -50,7 +50,7 @@ class _TXREG : public sfr_register
  public:
 
 
-  _TXREG(USART_MODULE *);
+  _TXREG(Processor *pCpu, const char *pName, const char *pDesc,USART_MODULE *);
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
   virtual void assign_txsta(_TXSTA *new_txsta) { m_txsta = new_txsta; };
@@ -78,7 +78,7 @@ public:
     CSRC = 1<<7
   };
 
-  _TXSTA(USART_MODULE *);
+  _TXSTA(Processor *pCpu, const char *pName, const char *pDesc,USART_MODULE *);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -111,7 +111,7 @@ class _RCREG : public sfr_register
 
   unsigned int fifo_sp;       /* fifo stack pointer */
 
-  _RCREG(USART_MODULE *);
+  _RCREG(Processor *pCpu, const char *pName, const char *pDesc,USART_MODULE *);
   virtual unsigned int get();
   virtual unsigned int get_value();
   virtual void push(unsigned int);
@@ -171,7 +171,7 @@ class _RCSTA : public sfr_register, public TriggerObject
   unsigned int sample,state, sample_state;
   guint64 future_cycle, last_cycle;
 
-  _RCSTA(USART_MODULE *);
+  _RCSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -206,7 +206,7 @@ class _SPBRG : public sfr_register, public TriggerObject
     last_cycle,    // The cycle when the spbrg clock last changed
     future_cycle;  // The next cycle spbrg is predicted to change
 
-  _SPBRG();
+  _SPBRG(Processor *pCpu, const char *pName, const char *pDesc);
 
   virtual void callback();
   virtual void callback_print() {
@@ -232,7 +232,7 @@ public:
   _RCREG      *rcreg;
   PIR_SET     *pir_set;
 
-  USART_MODULE();
+  USART_MODULE(Processor *pCpu);
 
   void initialize(PIR_SET *, 
 		  PinModule *tx_pin, PinModule *rx_pin,

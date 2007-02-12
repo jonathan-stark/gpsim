@@ -42,26 +42,26 @@ public:
   OPTION_REG *m_pOptionReg;
 
 
-  virtual void callback(void);
+  virtual void callback();
 
-  TMR0(void);
+  TMR0(Processor *, const char *pName, const char *pDesc=0);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
   virtual void start(int new_value,int sync=0);
-  virtual void stop(void);
-  virtual void increment(void);   // Used when tmr0 is attached to an external clock
-  virtual void new_prescale(void);
-  virtual unsigned int get_prescale(void);
-  virtual unsigned int max_counts(void) {return 256;};
-  void new_clock_source(void);
+  virtual void stop();
+  virtual void increment();   // Used when tmr0 is attached to an external clock
+  virtual void new_prescale();
+  virtual unsigned int get_prescale();
+  virtual unsigned int max_counts() {return 256;};
+  void new_clock_source();
   virtual bool get_t0cs();
   virtual bool get_t0se();
-  virtual void set_t0if(void);
+  virtual void set_t0if();
   virtual void reset(RESET_TYPE r);
-  virtual void callback_print(void);
+  virtual void callback_print();
   virtual void clear_trigger();
 
   virtual void set_cpu(Processor *, PortRegister *, unsigned int pin,OPTION_REG *);

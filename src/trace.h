@@ -305,12 +305,12 @@ public:
 
 };
 //------------------------------------------------------------
-class traceValue : public gpsimValue
+class traceValue : public gpsimObject
 {
  public:
-  traceValue(void);
+  traceValue();
   virtual void put_value(unsigned int new_value) {};
-  virtual unsigned int get_value(void);
+  virtual unsigned int get_value();
 };
 //---------------------------------------------------------
 // Class for trace buffer

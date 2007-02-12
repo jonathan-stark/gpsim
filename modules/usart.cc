@@ -955,25 +955,25 @@ USARTModule::USARTModule(const char *_name)
   m_txreg = new TXREG;
 
   m_RxBaud = new RxBaudRateAttribute(m_rcreg);
-  add_attribute(m_RxBaud);
+  addSymbol(m_RxBaud);
 
   m_TxBaud = new TxBaudRateAttribute(m_txreg);
-  add_attribute(m_TxBaud);
+  addSymbol(m_TxBaud);
 
   m_RxBuffer = new RxBuffer(m_rcreg);
-  add_attribute(m_RxBuffer);
+  addSymbol(m_RxBuffer);
 
   m_TxBuffer = new TxBuffer(this);
-  add_attribute(m_TxBuffer);
+  addSymbol(m_TxBuffer);
 
   m_CRLF = new Boolean("crlf", true, "if true, carriage return and linefeeds generate new lines in the terminal");
-  add_attribute(m_CRLF);
+  addSymbol(m_CRLF);
 
   m_loop = new Boolean("loop", false, "if true, received characters looped back to transmit");
-  add_attribute(m_loop);
+  addSymbol(m_loop);
 
   m_console = new Boolean("console", false, "if true, display received character to the terminal window");
-  add_attribute(m_console);
+  addSymbol(m_console);
 
   CreateGraphics();
 

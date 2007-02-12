@@ -48,7 +48,7 @@ public:
   PIR_SET_2 pir_set_2_def;
 
   USART_MODULE usart;
-  COMPARATOR_MODULE comparator;
+  ComparatorModule comparator;
   WDTCON       wdtcon;
   OSCCON       osccon;
   OSCTUNE      osctune;
@@ -110,8 +110,8 @@ public:
   ANSEL  ansel;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
-  ADRES  adresh;
-  ADRES  adresl;
+  sfr_register  adresh;
+  sfr_register  adresl;
 
   virtual PROCESSOR_TYPE isa(){return _P16F88_;};
 

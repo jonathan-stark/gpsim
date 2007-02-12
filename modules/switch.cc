@@ -445,7 +445,7 @@ namespace Switches {
   {
 
     // Default module attributes.
-    initializeAttributes();
+    //initializeAttributes();
     m_Zopen   = new ResistanceAttribute(this, 1e8,
                                         "Ropen",
                                         "Resistance of opened switch");
@@ -454,9 +454,9 @@ namespace Switches {
 					"Resistance of closed switch");
     m_aState = new SwitchAttribute(this);
 
-    add_attribute(m_aState);
-    add_attribute(m_Zopen);
-    add_attribute(m_Zclosed);
+    addSymbol(m_aState);
+    addSymbol(m_Zopen);
+    addSymbol(m_Zclosed);
   }
 
   SwitchBase::~SwitchBase(void)

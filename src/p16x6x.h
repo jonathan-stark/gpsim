@@ -34,6 +34,7 @@ class P16C61 : public P16X8X
 public:
 
   P16C61(const char *_name=0, const char *desc=0);
+  virtual ~P16C61();
 
   virtual PROCESSOR_TYPE isa(){return _P16C61_;};
   virtual unsigned int program_memory_size() const { return 0x400; };
@@ -100,6 +101,7 @@ class P16C62 : public  P16X6X_processor
   public:
 
   P16C62(const char *_name=0, const char *desc=0);
+  virtual ~P16C62();
   static Processor *construct(const char *name);
 
   TMR2_MODULE tmr2_module;
@@ -128,6 +130,8 @@ class P16C63 : public  P16C62
 
 
   P16C63(const char *_name=0, const char *desc=0);
+  virtual ~P16C63();
+
   static Processor *construct(const char *name);
   void create();
   void create_sfr_map();
@@ -188,6 +192,7 @@ class P16C65 : public  P16C64
 
 
   P16C65(const char *_name=0, const char *desc=0);
+  virtual ~P16C65();
   static Processor *construct(const char *name);
   void create();
   void create_sfr_map();

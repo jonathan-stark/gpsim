@@ -43,23 +43,22 @@ Trace trace;               /* Instantiate the trace buffer class.
 			    */
 
 // create an instance of inline get_trace() method by taking its address
-Trace &(*dummy_trace)(void) = get_trace;
+Trace &(*dummy_trace)() = get_trace;
 
 TraceLog trace_log;
 ProfileKeeper profile_keeper;
 
 #if defined(_WIN32)
-TraceLog &GetTraceLog(void) {
+TraceLog &GetTraceLog() {
   return trace_log;
 }
 #endif
 
 //========================================================================
-traceValue::traceValue(void)
+traceValue::traceValue()
 {
-  
 }
-unsigned int traceValue::get_value(void)
+unsigned int traceValue::get_value()
 {
   return trace.trace_index;
 }
@@ -189,13 +188,13 @@ unsigned int traceValue::get_value(void)
 */
 
 
-TraceRawLog::TraceRawLog(void)
+TraceRawLog::TraceRawLog()
 {
   log_filename = 0;
   log_file = 0;
 }
 
-TraceRawLog::~TraceRawLog(void)
+TraceRawLog::~TraceRawLog()
 {
   if(log_file) {
     log();
@@ -204,7 +203,7 @@ TraceRawLog::~TraceRawLog(void)
 
 }
 
-void TraceRawLog::log(void)
+void TraceRawLog::log()
 {
   if(log_file) {
     unsigned int i;
@@ -234,7 +233,7 @@ void TraceRawLog::enable(char *fname)
 
 }
 
-void TraceRawLog::disable(void)
+void TraceRawLog::disable()
 {
   log();
 
@@ -324,7 +323,7 @@ void Trace::addToCurrentFrame(TraceObject *to)
     current_frame->add(to);
 
 }
-void Trace::deleteTraceFrame(void)
+void Trace::deleteTraceFrame()
 {
   if (!current_frame)
     return;
@@ -840,7 +839,7 @@ Trace::Trace()
 
 }
 
-Trace::~Trace(void)
+Trace::~Trace()
 {
   if(xref)
     delete xref;
@@ -1262,9 +1261,9 @@ void Trace::dump_raw(int n)
 }
 
 //
-// dump_last_instruction(void)
+// dump_last_instruction()
 
-void Trace::dump_last_instruction(void)
+void Trace::dump_last_instruction()
 {
   dump(1,stdout);
 }
@@ -1274,7 +1273,7 @@ void Trace::dump_last_instruction(void)
  *
  *         Logging
  */
-TraceLog::TraceLog(void)
+TraceLog::TraceLog()
 {
   logging = 0;
   log_filename = 0;
@@ -1287,7 +1286,7 @@ TraceLog::TraceLog(void)
 
 }
 
-TraceLog::~TraceLog(void)
+TraceLog::~TraceLog()
 {
 
   disable_logging();
@@ -1296,7 +1295,7 @@ TraceLog::~TraceLog(void)
 
 }
 
-void TraceLog::callback(void)
+void TraceLog::callback()
 {
   /*
   int n = 0;
@@ -1377,7 +1376,7 @@ void TraceLog::open_logfile(const char *new_fname, int format)
   items_logged = 0;
 }
 
-void TraceLog::close_logfile(void)
+void TraceLog::close_logfile()
 {
 
   if(log_filename) {
@@ -1398,7 +1397,7 @@ void TraceLog::close_logfile(void)
   }
 }
 
-void TraceLog::write_logfile(void)
+void TraceLog::write_logfile()
 {
 
   unsigned int i,j;
@@ -1454,7 +1453,7 @@ void TraceLog::enable_logging(const char *new_fname, int format)
 
 }
 
-void TraceLog::disable_logging(void)
+void TraceLog::disable_logging()
 {
 
   if(!logging)
@@ -1466,7 +1465,7 @@ void TraceLog::disable_logging(void)
 
 }
 
-void TraceLog::status(void)
+void TraceLog::status()
 {
 
   if(logging) {
@@ -1627,20 +1626,20 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
  *
  *         Profiling
  */
-ProfileKeeper::ProfileKeeper(void)
+ProfileKeeper::ProfileKeeper()
 {
   enabled = 0;
   cpu = 0;
   last_trace_index = 0;
 }
 
-ProfileKeeper::~ProfileKeeper(void)
+ProfileKeeper::~ProfileKeeper()
 {
 
   disable_profiling();
 }
 
-void ProfileKeeper::catchup(void)
+void ProfileKeeper::catchup()
 {
   //Register *r;
     if(!enabled)
@@ -1685,7 +1684,7 @@ void ProfileKeeper::catchup(void)
     last_trace_index = trace.trace_index;
 }
 
-void ProfileKeeper::callback(void)
+void ProfileKeeper::callback()
 {
     if(enabled)
     {
@@ -1694,7 +1693,7 @@ void ProfileKeeper::callback(void)
     }
 }
 
-void ProfileKeeper::enable_profiling(void)
+void ProfileKeeper::enable_profiling()
 {
 
     if(enabled)
@@ -1712,7 +1711,7 @@ void ProfileKeeper::enable_profiling(void)
     enabled = 1;
 }
 
-void ProfileKeeper::disable_profiling(void)
+void ProfileKeeper::disable_profiling()
 {
 
     if(!enabled)
@@ -1732,7 +1731,7 @@ void ProfileKeeper::switch_cpus(Processor *pcpu)
 //  
 
 //--------------------------------------------
-void trace_dump_all(void)
+void trace_dump_all()
 {
   trace.dump(0, stdout);
 
@@ -1863,7 +1862,7 @@ void BoolEventBuffer::activate(bool _initial_state)
 
 }
 //--------------------------------------------------
-void BoolEventBuffer::deactivate(void)
+void BoolEventBuffer::deactivate()
 {
 
   bActive = false;
@@ -1875,14 +1874,14 @@ void BoolEventBuffer::deactivate(void)
 
 }
 //--------------------------------------------------
-void BoolEventBuffer::callback(void)
+void BoolEventBuffer::callback()
 {
   future_cycle = 0;
 
   if(isActive())
     deactivate();
 }
-void BoolEventBuffer::callback_print(void)
+void BoolEventBuffer::callback_print()
 {
   cout << "BoolEventBuffer\n";
 }
@@ -1915,7 +1914,7 @@ BoolEventBuffer::BoolEventBuffer(bool _initial_state, guint32 _max_events)
   activate(_initial_state);
 }
 
-BoolEventBuffer::~BoolEventBuffer(void)
+BoolEventBuffer::~BoolEventBuffer()
 {
 
   delete [] buffer;

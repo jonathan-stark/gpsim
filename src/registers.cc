@@ -225,44 +225,24 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 // Member functions for the file_register base class
 //--------------------------------------------------
 //
-
-Register::Register(void)
-  : gpsimValue(0), alias_mask(0)
+Register::Register(Module *_cpu, const char *pName, const char *pDesc)
+  : Value(pName,pDesc,_cpu),
+    alias_mask(0)
 {
-  new_name("file_register");
 
   // For now, initialize the register with valid data and set that data equal to 0.
   // Eventually, the initial value will be marked as 'uninitialized.
 
   value = RegisterValue(0,0);
   por_value = RegisterValue(0,0);
-  //putRV_notrace(por_value);   /// Why is this here? 
-  _xref.assign_data(this);
+
+  xref().assign_data(this);
   read_access_count=0;
   write_access_count=0;
   bit_mask = 7;
 
 }
-//ugh duplication in constructors...
-Register::Register(Processor *_cpu)
-  : gpsimValue(_cpu)
-{
-
-  new_name("file_register");
-
-  // For now, initialize the register with valid data and set that data equal to 0.
-  // Eventually, the initial value will be marked as 'uninitialized.
-
-  value = RegisterValue(0,0);
-  por_value = RegisterValue(0,0);
-  //putRV_notrace(por_value);
-  _xref.assign_data(this);
-  read_access_count=0;
-  write_access_count=0;
-  bit_mask = 7;
-
-}
-Register::~Register(void)
+Register::~Register()
 {
 
 }
@@ -280,7 +260,7 @@ Register::~Register(void)
 //  on the type of break point, this get() may
 //  or may not get called).
 
-unsigned int Register::get(void)
+unsigned int Register::get()
 {
   trace.raw(read_trace.get() | value.get());
   return(value.get());
@@ -379,41 +359,9 @@ void Register::put_value(unsigned int new_value)
 /// New accessor functions
 //////////////////////////////////////////////////////////////
 
-//------------------------------------------------------------
-
-///  SimulatedGet()
-///  Return the contents of the file register.
-///  (note - breakpoints on file register reads
-///  are not checked here. Instead, a breakpoint
-///  object replaces those instances of file 
-///  registers for which we wish to monitor.
-///  So a file_register::SimulatedGet call will invoke
-///  the breakpoint::get member function. Depending
-///  on the type of break point, this SimulatedGet() may
-///  or may not get called).
-
-unsigned int Register::SimulatedGet(void)
-{
-  // for now call the old API
-  return get();
-}
-
-//------------------------------------------------------------
-///  SimulatedSet()
-///  Update the contents of the register.
-///  See the comment above in Register::SimulatedGet()
-///  with respect to break points
-//
-
-void Register::SimulatedSet(unsigned int new_value)
-{
-  // for now call the old API
-  put(new_value);
-}
-
 unsigned int Register::register_size () const
 { 
-  Processor *pProc = gpsimValue::get_cpu();
+  Processor *pProc = Value::get_cpu();
   return pProc == 0 ? 1 : pProc->register_size();
 }
 
@@ -448,18 +396,75 @@ char * Register::toBitStr(char *s, int len)
   return getRV_notrace().toBitStr(s,len,bits);
 }
 
+//-----------------------------------------------------------
 
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-sfr_register::sfr_register() 
-  : Register(), wdtr_value(0,0)
-{}
-
-sfr_register::sfr_register(Processor *_cpu)
-  : Register(_cpu), wdtr_value(0,0)
+void Register::new_name(const char *s)
 {
+
+  if(s) {
+    string str(s);
+    new_name(str);
+  }
 }
+
+void Register::new_name(string &new_name)
+{
+  if (name_str != new_name) {
+    if (name_str.empty()) {
+      name_str = new_name;
+      return;
+    }
+
+    if (cpu) {
+      addName(new_name);
+      cpu->addSymbol(this, &new_name);
+    }
+    
+  }
+}
+//------------------------------------------------------------------------
+// set -- assgin the value of some other object to this Register
+//
+// This is used (primarily) during Register stimuli processing. If 
+// a register stimulus is attached to this register, then it will
+// call ::set() and supply a Value pointer.
+
+void Register::set(Value * pVal)
+{
+  Register *pReg = dynamic_cast<Register *>(pVal);
+  if (pReg) {
+    putRV(pReg->getRV());
+    return;
+  }
+
+  if (pVal) {
+    put( (unsigned int)*pVal);
+  }
+}
+
+//------------------------------------------------------------------------
+// copy - create a new Value object that's a 'copy' of this object
+//
+// We really don't perform a true copy. Instead, an Integer object 
+// is created containing the same numeric value of this object. 
+// This code is called during expression parsing. *NOTE* this copied
+// object can be assigned a new value, however that value will not
+// propagate to the Register! 
+
+Value *Register::copy()
+{
+  return new ValueWrapper(this);
+}
+void Register::get(gint64 &i)
+{
+  i = get_value();
+}
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+sfr_register::sfr_register(Module *pCpu, const char *pName, const char *pDesc) 
+  : Register(pCpu,pName,pDesc), wdtr_value(0,0)
+{}
 
 void sfr_register::reset(RESET_TYPE r)
 {
@@ -502,7 +507,7 @@ void InvalidRegister::put(unsigned int new_value)
   return;
 }
 
-unsigned int InvalidRegister::get(void)
+unsigned int InvalidRegister::get()
 {
   cout << "attempt read from invalid file register\n";
   if (address != AN_INVALID_ADDRESS)
@@ -517,21 +522,9 @@ unsigned int InvalidRegister::get(void)
 }
 
 
-InvalidRegister::InvalidRegister(unsigned int at_address)
-  : Register()
-{
-
-  char name_str[100];
-  sprintf (name_str, "INVREG_%X", at_address);
-  new_name(name_str);
-  address = at_address;
-}
-
-InvalidRegister::InvalidRegister(void)
-{
-  new_name("INVALID_REGISTER");
-  address = AN_INVALID_ADDRESS;
-}
+InvalidRegister::InvalidRegister(Processor *pCpu, const char *pName, const char *pDesc) 
+  : Register(pCpu,pName,pDesc)
+{}
 
 RegisterCollection::RegisterCollection (Processor   *pProcessor, 
 					const char  *pC_collection_name,
@@ -540,10 +533,10 @@ RegisterCollection::RegisterCollection (Processor   *pProcessor,
   IIndexedCollection(16), m_ReturnValue(0) 
 {
   m_pProcessor = pProcessor;
-  Value::new_name(pC_collection_name);
+  gpsimObject::new_name(pC_collection_name);
   m_ppRegisters = ppRegisters;
   m_uSize = uiSize;
-  get_symbol_table().add(this);
+  pProcessor->addSymbol(this);
 }
 
 unsigned int RegisterCollection::GetSize() {

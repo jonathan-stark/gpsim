@@ -205,7 +205,43 @@ static void unselect_row(GtkCList *clist,
 {
     update_menus(sw);
 }
+#if 1
+static Symbol_Window *lpSW=0;
+void updateOneSymbol(const SymbolEntry_t &sym)
+{
 
+  Value *pVal = dynamic_cast<Value *>(sym.second);
+  if (lpSW && pVal) {
+
+    char **entry = (char**)malloc(3*sizeof(char*));
+    const int cMaxLength = 32;
+
+    entry[0] = g_strndup(pVal->name().c_str(), cMaxLength);
+    entry[1] = g_strndup(pVal->showType().c_str(), cMaxLength);
+    entry[2] = (char*)malloc(cMaxLength);
+    Register *pReg = dynamic_cast<Register *>(pVal);
+    if (pReg)
+      snprintf(entry[2], cMaxLength, "%02x / %d (0x%02x)", pReg->getAddress(), pReg->get_value(), pReg->get_value());
+    else
+      pVal->get(entry[2],cMaxLength);
+
+    char *pLF = strchr(entry[2], '\n');
+    if(pLF)
+      *pLF = 0;
+
+    lpSW->symbols=g_list_append(lpSW->symbols, pVal);
+
+    int row = gtk_clist_append(GTK_CLIST(lpSW->symbol_clist),entry);
+    gtk_clist_set_row_data(GTK_CLIST(lpSW->symbol_clist),row,pVal);
+  }
+}
+
+static void updateSymbolTables(const SymbolTableEntry_t &st)
+{
+  cout << " gui Symbol Window: " << st.first << endl;
+  (st.second)->ForEachSymbolTable(updateOneSymbol);
+}
+#endif
 
 void Symbol_Window::Update(void)
 {
@@ -222,19 +258,14 @@ void Symbol_Window::Update(void)
     
   gtk_clist_clear(GTK_CLIST(symbol_clist));
 
-  // free all old allocations
-  /*
-  GList *iter;
-  for(iter=symbols;iter!=0;)
-    {
-      GList *next=iter->next;
-      g_list_remove(iter,iter->data);
-      iter=next;
-    }
-  */
   while (symbols)
     symbols = g_list_remove(symbols,symbols->data);
+#if 1
 
+  lpSW = this;
+  globalSymbolTable().ForEachModule(updateSymbolTables);
+  lpSW = 0;
+  /*
   Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
   Symbol_Table::iterator symIt;
   Symbol_Table::iterator symItEnd = st.end();
@@ -242,8 +273,8 @@ void Symbol_Window::Update(void)
   for(symIt=st.begin(); symIt != symItEnd; symIt++) {
     Value *sym = *symIt;
     // ignore line numbers
-    if((typeid(*sym) == typeid(line_number_symbol) )            ||
-       (filter_addresses && (typeid(*sym) == typeid(address_symbol)))  ||
+    if((typeid(*sym) == typeid(LineNumberSymbol) )            ||
+       (filter_addresses && (typeid(*sym) == typeid(AddressSymbol)))  ||
        (filter_constants && (typeid(*sym) == typeid(Integer))) ||
        (filter_registers && (typeid(*sym) == typeid(register_symbol)))) {
 
@@ -277,7 +308,8 @@ void Symbol_Window::Update(void)
     gtk_clist_set_row_data(GTK_CLIST(symbol_clist),row,sym);
 
   }
-
+  */
+#endif
   gtk_clist_thaw(GTK_CLIST(symbol_clist));
 
 }
@@ -291,14 +323,14 @@ static void do_symbol_select(Symbol_Window *sw, Value *e)
   // Do what is to be done when a symbol is selected.
   // Except for selecting the symbol row in the symbol_clist
 
-  if(typeid(*e) == typeid(line_number_symbol) ||
-     typeid(*e) == typeid(address_symbol)) {
+  if(typeid(*e) == typeid(LineNumberSymbol) ||
+     typeid(*e) == typeid(AddressSymbol)) {
     if(sw->gp->source_browser)
       sw->gp->source_browser->SelectAddress(e);
     if(sw->gp->program_memory)
       sw->gp->program_memory->SelectAddress(e);
   } else 
-    if(typeid(*e) == typeid(register_symbol))
+    if(typeid(*e) == typeid(Register))
       if(sw->gp->regwin_ram)
 	sw->gp->regwin_ram->SelectRegister(e);
 }
@@ -331,7 +363,7 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
     {
       Value *e = (Value*)p->data;
 
-      if(typeid(*e) == typeid(register_symbol)) {
+      if(typeid(*e) == typeid(Register)) {
 
 	int i;
 

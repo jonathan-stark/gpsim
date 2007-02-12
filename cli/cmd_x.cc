@@ -140,8 +140,9 @@ void cmd_x::x(int reg, Expression *pExpr)
 
 void cmd_x::x(char *reg_name)
 {
-
-  get_symbol_table().dump_one(reg_name);
+  cout << "this command is deprecated. "
+       << "Type '" << reg_name << "' at the command line to display the contents of a register.\n";
+  // get_symbol_table().dump_one(reg_name);
 }
 
 void cmd_x::x(char *reg_name, int val)
@@ -152,6 +153,7 @@ void cmd_x::x(char *reg_name, int val)
 
 void cmd_x::x(Expression *expr)
 {
+  /*
   try {
 
     Value *v = toValue(expr);
@@ -185,5 +187,7 @@ void cmd_x::x(Expression *expr)
       cout << "ERROR:" << err->toString() << endl;
     delete err;
   }
+  */
 
+  delete expr;
 }

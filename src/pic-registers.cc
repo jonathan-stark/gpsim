@@ -56,7 +56,7 @@ Program_Counter::Program_Counter()
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
   instruction_phase = 0;
 
-  _xref.assign_data(this);
+  xref().assign_data(this);
 
   trace_state = 0;
   trace_increment = 0;
@@ -365,36 +365,37 @@ void Program_Counter::reset()
 // Helper registers
 //
  
-PCHelper::PCHelper(ProgramMemoryAccess *new_pma)
+PCHelper::PCHelper(Processor *pCpu,ProgramMemoryAccess *new_pma)
+  : Register(pCpu, "PC", "Program Counter"),
+    pma(new_pma)
 {
-  pma = new_pma;
-  new_name("PC");
+  assert(pma);
 }
 
 void PCHelper::put_value(unsigned int new_value)
 {
-  if(pma)
-    pma->set_PC(new_value);
+  //  if(pma)
+  pma->set_PC(new_value);
 }
 
 unsigned int PCHelper::get_value()
 {
- if(pma)
-    return pma->get_PC();
+  // if(pma)
+  return pma->get_PC();
 
- return 0;
+  //return 0;
 }
 
 
 //--------------------------------------------------
 // member functions for the OPTION base class
 //--------------------------------------------------
-OPTION_REG::OPTION_REG()
+OPTION_REG::OPTION_REG(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   por_value = RegisterValue(0xff,0);
   wdtr_value = RegisterValue(0xff,0);
   value = por_value;
-  new_name("option");
 }
 
 void OPTION_REG::put(unsigned int new_value)

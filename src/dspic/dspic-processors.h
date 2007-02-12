@@ -73,8 +73,11 @@ namespace dspic {
 
     // Execution control
     virtual void step_one(bool refresh=true);
+    virtual void step(unsigned int steps,bool refresh=true);
+    virtual void step_cycle();
     virtual void interrupt();
-
+    virtual void run(bool refresh=true);
+    virtual void finish();
 
     // Configuration control
     virtual unsigned int get_config_word(unsigned int);
@@ -84,7 +87,7 @@ namespace dspic {
     virtual void reset(RESET_TYPE r);
 
     // Public Data members:
-    dspic_registers::dsPicRegister W[16];
+    dspic_registers::WRegister W[16];
     dspic_registers::Stack  m_stack;
     dspic_registers::Status m_status;
 

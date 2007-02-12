@@ -41,6 +41,8 @@ gpsimObject::gpsimObject(const char *_name, const char *desc)
 
 gpsimObject::~gpsimObject()
 {
+  name_str.clear();
+  cpDescription = 0;
 }
 
 // The 'type' of any Viewable object is equivalent to the class name.
@@ -123,6 +125,12 @@ char *gpsimObject::name(char *return_str, int len)
   return return_str;
 }
 
+/// TEMPORARY -- remove after gpsimValue and Value have been merged.
+unsigned int gpsimObject::get_value()
+{
+  return 0;
+}
+
 char *gpsimObject::toString(char *return_str, int len)
 {
   if(return_str)
@@ -145,7 +153,13 @@ string &gpsimObject::name(void) const
 
 string gpsimObject::toString()
 {
-  return showType();
+  //return showType();
+
+  char buff[64];
+  snprintf(buff,sizeof(buff), " = 0x%x",get_value());
+  string s = name() + string(buff);
+  return s;
+
 }
 
 // If derived classes don't redefine set_break and clear_break then

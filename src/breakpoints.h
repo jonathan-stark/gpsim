@@ -70,6 +70,7 @@ public:
   Breakpoint_Instruction(Processor *new_cpu, 
 			 unsigned int new_address, 
 			 unsigned int bp);
+  virtual ~Breakpoint_Instruction();
 
   virtual enum INSTRUCTION_TYPES isa() {return BREAKPOINT_INSTRUCTION;};
   virtual void execute();
@@ -86,6 +87,7 @@ class Notify_Instruction : public Breakpoint_Instruction
 		     unsigned int address, 
 		     unsigned int bp, 
 		     TriggerObject *cb);
+  virtual ~Notify_Instruction();
   virtual enum INSTRUCTION_TYPES isa() {return NOTIFY_INSTRUCTION;};
   virtual void execute();
   virtual char const * bpName() { return "Notify Execution"; }
@@ -172,6 +174,7 @@ class RegisterAssertion : public Breakpoint_Instruction
 		    unsigned int _regValue,
 		    bool bPostAssertion=false
 		    );
+  virtual ~RegisterAssertion();
 
   virtual void execute();
   virtual void print();
@@ -286,7 +289,8 @@ public:
 		     unsigned int, 
 		     unsigned int,
 		     TriggerObject *f = 0);
-  int set_breakpoint(TriggerObject *,Expression *pExpr=0);
+
+  int set_breakpoint(TriggerObject *,Processor *, Expression *pExpr=0);
 
   int set_execution_break(Processor *cpu, unsigned int address, Expression *pExpr=0);
   int set_notify_break(Processor *cpu, 
@@ -438,9 +442,9 @@ public:
 
 
   BreakpointRegister(Processor *, TriggerAction *, Register *);
-
-  BreakpointRegister(Processor *, int, int );
+  //BreakpointRegister(Processor *, int, int );
   BreakpointRegister(Processor *, TriggerAction *, int, int );
+  virtual ~BreakpointRegister();
 
   virtual REGISTER_TYPES isa() {return BP_REGISTER;};
   virtual string &name() const;
@@ -465,10 +469,11 @@ public:
   virtual void print();
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
+  virtual void invokeAction();
   virtual void clear();
-
+  virtual void takeAction();
 protected:
-  BreakpointRegister();
+  // BreakpointRegister();
 
 };
 
@@ -480,20 +485,9 @@ public:
   unsigned int m_uDefRegMask;
   string m_sOperator;
 
-  BreakpointRegister_Value()
-  { 
-    break_value = 0;
-    break_mask = 0;
-  }
-
+  // FIXME why do we have 3 different constructors???
+  //BreakpointRegister_Value();
   BreakpointRegister_Value(Processor *_cpu, 
-        int _repl, 
-        int bp, 
-        unsigned int bv, 
-        unsigned int bm );
-
-  BreakpointRegister_Value(Processor *_cpu, 
-         TriggerAction *pTA,
         int _repl, 
         int bp, 
         unsigned int bv, 
@@ -505,6 +499,8 @@ public:
         unsigned int bv, 
         unsigned int _operator,
         unsigned int bm );
+
+  virtual ~BreakpointRegister_Value();
 
   typedef bool (*PFNISBREAKCONDITION)(unsigned int uRegValue,
       unsigned int uRegMask, unsigned int uRegTestValue);
@@ -533,21 +529,18 @@ public:
   static bool IsLessThenEqualsBreakCondition(unsigned int uRegValue,
       unsigned int uRegMask, unsigned int uRegTestValue);
 
-  virtual void invokeAction();
   virtual void print();
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
 };
 
 
-class Break_register_read : public BreakpointRegister, TriggerAction
+class Break_register_read : public BreakpointRegister//, TriggerAction
 {
 public:
 
-  Break_register_read(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu, _repl,bp ) { 
-    set_action(this);
-  }
+  Break_register_read(Processor *_cpu, int _repl, int bp );
+  virtual ~Break_register_read();
 
   virtual unsigned int get();
   virtual RegisterValue getRV();
@@ -558,18 +551,18 @@ public:
 
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
-  virtual void invokeAction();
+  virtual void takeAction();
+  //virtual void invokeAction();
   // TriggerAction overrides
-  virtual void action();
+  //virtual void action();
 };
 
-class Break_register_write : public BreakpointRegister, TriggerAction
+class Break_register_write : public BreakpointRegister//, TriggerAction
 {
 public:
-  Break_register_write(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,_repl,bp ) { 
-    set_action(this);
-  }
+  Break_register_write(Processor *_cpu, int _repl, int bp );
+  virtual ~Break_register_write();
+
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
@@ -577,15 +570,15 @@ public:
 
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
-  virtual void invokeAction();
+  virtual void takeAction();
+  //virtual void invokeAction();
   // TriggerAction overrides
-  virtual void action();
+  //virtual void action();
 };
 
-class Break_register_read_value : public BreakpointRegister_Value, TriggerAction
+class Break_register_read_value : public BreakpointRegister_Value//, TriggerAction
 {
 public:
-//  Break_register_read_value(){ };
   Break_register_read_value(Processor *_cpu, 
 			    int _repl, 
 			    int bp, 
@@ -596,8 +589,9 @@ public:
 			    int _repl, 
 			    int bp, 
 			    unsigned int bv,
-          unsigned int _operator,
+                            unsigned int _operator,
 			    unsigned int bm );
+  virtual ~Break_register_read_value();
 
   virtual unsigned int get();
   virtual RegisterValue getRV();
@@ -608,11 +602,12 @@ public:
 
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
+  virtual void takeAction();
   // TriggerAction overrides
-  virtual void action();
+  //virtual void action();
 };
 
-class Break_register_write_value : public BreakpointRegister_Value, TriggerAction
+class Break_register_write_value : public BreakpointRegister_Value//, TriggerAction
 {
 public:
   Break_register_write_value(Processor *_cpu, 
@@ -627,6 +622,7 @@ public:
 			     unsigned int bv, 
 			     unsigned int _operator,
 			     unsigned int bm );
+  virtual ~Break_register_write_value();
 
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
@@ -635,8 +631,9 @@ public:
 
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
+  virtual void takeAction();
   // TriggerAction overrides
-  virtual void action();
+  //virtual void action();
 };
 
 class CommandAssertion : public Breakpoint_Instruction
@@ -670,7 +667,7 @@ class Log_Register_Write : public Break_register_write
   //virtual void putRV(RegisterValue rv);
   //virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "log register write"; }
-  virtual void action();
+  virtual void takeAction();
 };
 
 class Log_Register_Read : public Break_register_read
@@ -679,7 +676,7 @@ public:
   Log_Register_Read(Processor *_cpu, int _repl, int bp ):
     Break_register_read(_cpu,_repl,bp ) { };
   virtual char const * bpName() { return "log register read"; }
-  virtual void action();
+  virtual void takeAction();
 };
 
 class Log_Register_Read_value : public  Break_register_read_value
@@ -701,7 +698,7 @@ public:
     Break_register_read_value(_cpu,  _repl, bp, bv, _operator, bm ) { };
 
   virtual char const * bpName() { return "log register read value"; }
-  virtual void action();
+  virtual void takeAction();
 };
 
 class Log_Register_Write_value : public Break_register_write_value
@@ -722,7 +719,7 @@ public:
 			     unsigned int _operator,
 			     unsigned int bm ) :
     Break_register_write_value(_cpu,  _repl, bp, bv, _operator,bm ) { };
-  virtual void action();
+  virtual void takeAction();
 
 };
 

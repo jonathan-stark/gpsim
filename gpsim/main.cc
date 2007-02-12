@@ -298,8 +298,9 @@ main (int argc, char *argv[])
   initialize_readline();
 
   // must be done after initialize_gpsim_core()
-  Boolean &bEnableSourceLoad = *get_symbol_table().findBoolean("EnableSourceLoad");
-  bEnableSourceLoad = bSourceEnabled;
+  Boolean *bEnableSourceLoad = dynamic_cast<Boolean*>( globalSymbolTable().find("EnableSourceLoad"));
+  if (bEnableSourceLoad)
+    *bEnableSourceLoad = bSourceEnabled;
 
   // initialize the gui
   

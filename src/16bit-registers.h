@@ -53,6 +53,7 @@ class PORTB;
 class BSR : public sfr_register
 {
 public:
+  BSR(Processor *, const char *pName, const char *pDesc=0);
 
   unsigned int register_page_bits;
 
@@ -82,87 +83,102 @@ class Indirect_Addressing;   // Forward reference
 
 class FSRL : public sfr_register
 {
- public:
-  Indirect_Addressing  *iam;  // The IA module to which FSRL belongs
-
+public:
+  FSRL(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-      
+
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class FSRH : public sfr_register
 {
  public:
-  Indirect_Addressing  *iam;  // The IA module to which FSRH belongs
+  FSRH(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
       
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class INDF16 : public sfr_register
 {
  public:
-  Indirect_Addressing  *iam;  // The IA module to which INDF belongs
+  INDF16(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
       
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class PREINC : public sfr_register
 {
- public:
-  Indirect_Addressing  *iam;  // The IA module to which PREINC belongs
+public:
+  PREINC(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
       
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class POSTINC : public sfr_register
 {
- public:
-  Indirect_Addressing  *iam;  // The IA module to which POSTINC belongs
+public:
+  POSTINC(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
       
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class POSTDEC : public sfr_register
 {
- public:
-  Indirect_Addressing  *iam;  // The IA module to which POSTDEC belongs
+public:
+  POSTDEC(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
       
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class PLUSW : public sfr_register
 {
- public:
-  Indirect_Addressing  *iam;  // The IA module to which PLUSW belongs
+public:
+  PLUSW(Processor *, const char *pName, const char *pDesc, Indirect_Addressing *pIAM);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
       
+protected:
+  Indirect_Addressing  *iam;
 };
 
 class Indirect_Addressing
 {
 public:
+  Indirect_Addressing(_16bit_processor *cpu, const string &n);
+
   _16bit_processor *cpu;
 
   unsigned int fsr_value;     // 16bit concatenation of fsrl and fsrh
@@ -190,7 +206,7 @@ public:
   POSTDEC postdec;
   PLUSW   plusw;
 
-  void init(_16bit_processor *new_cpu);
+  //void init(_16bit_processor *new_cpu);
   void put(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
@@ -264,7 +280,7 @@ public:
   virtual unsigned int get();
   virtual unsigned int get_value();
 
-  PCL16();
+  PCL16(Processor *, const char *pName, const char *pDesc=0);
 };
 
 //---------------------------------------------------------
@@ -296,19 +312,18 @@ class Stack16;
 
 class STKPTR : public sfr_register
 {
- public:
-  Stack16 *stack;
+public:
+  STKPTR(Processor *, const char *pName, const char *pDesc=0);
 
-  void put(unsigned int new_value);
+  Stack16 *stack;
   void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-    
 };
 
 class TOSL : public sfr_register
 {
- public:
+public:
+  TOSL(Processor *, const char *pName, const char *pDesc=0);
+
   Stack16 *stack;
 
   void put(unsigned int new_value);
@@ -320,7 +335,9 @@ class TOSL : public sfr_register
 
 class TOSH : public sfr_register
 {
- public:
+public:
+  TOSH(Processor *, const char *pName, const char *pDesc=0);
+
   Stack16 *stack;
 
   void put(unsigned int new_value);
@@ -332,7 +349,9 @@ class TOSH : public sfr_register
 
 class TOSU : public sfr_register
 {
- public:
+public:
+  TOSU(Processor *, const char *pName, const char *pDesc=0);
+
   Stack16 *stack;
 
   void put(unsigned int new_value);
@@ -351,7 +370,7 @@ public:
   TOSH   tosh;
   TOSU   tosu;
 
-  Stack16();
+  Stack16(Processor *);
   virtual void push(unsigned int);
   virtual unsigned int pop();
   virtual void reset();
@@ -368,16 +387,18 @@ class RCON :  public sfr_register
 {
 public:
 
-enum
-{
-  BOR  = 1<<0,
-  POR  = 1<<1,
-  PD   = 1<<2,
-  TO   = 1<<3,
-  RI   = 1<<4,
-  LWRT = 1<<6,
-  IPEN = 1<<7
-};
+  enum
+  {
+    BOR  = 1<<0,
+    POR  = 1<<1,
+    PD   = 1<<2,
+    TO   = 1<<3,
+    RI   = 1<<4,
+    LWRT = 1<<6,
+    IPEN = 1<<7
+  };
+  RCON(Processor *, const char *pName, const char *pDesc=0);
+
 };
 
 //---------------------------------------------------------
@@ -385,15 +406,16 @@ class CPUSTA :  public sfr_register
 {
 public:
 
-enum
-{
-  BOR      = 1<<0,
-  POR      = 1<<1,
-  PD       = 1<<2,
-  TO       = 1<<3,
-  GLINTD   = 1<<4,
-  STKAV    = 1<<5,
-};
+  enum
+  {
+    BOR      = 1<<0,
+    POR      = 1<<1,
+    PD       = 1<<2,
+    TO       = 1<<3,
+    GLINTD   = 1<<4,
+    STKAV    = 1<<5,
+  };
+  CPUSTA(Processor *, const char *pName, const char *pDesc=0);
 };
 
 
@@ -401,14 +423,14 @@ enum
 // T0CON - Timer 0 control register
 class T0CON : public OPTION_REG
 {
- public:
+public:
 
   enum {
     T08BIT = 1<<6,
     TMR0ON = 1<<7
   };
 
-  T0CON();
+  T0CON(Processor *, const char *pName, const char *pDesc=0);
   void put(unsigned int new_value);
 };
 
@@ -423,7 +445,9 @@ class T0CON : public OPTION_REG
 
 class TMR0H : public sfr_register
 {
- public:
+public:
+
+  TMR0H(Processor *, const char *pName, const char *pDesc=0);
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
@@ -436,7 +460,7 @@ class TMR0_16 : public TMR0
 {
 public:
 
-  TMR0_16();
+  TMR0_16(Processor *, const char *pName, const char *pDesc=0);
 
   T0CON  *t0con;
   INTCON *intcon;
@@ -460,6 +484,7 @@ public:
 
 
 //---------------------------------------------------------
+/*
 class TMR3H : public TMRH
 {
 public:
@@ -471,21 +496,21 @@ class TMR3L : public TMRL
 public:
 
 };
-
+*/
 class T3CON : public T1CON
 {
 public:
-enum
-{
-  T3CCP1 = 1<<3,
-  T3CCP2 = 1<<6,
-};
+  enum
+  {
+    T3CCP1 = 1<<3,
+    T3CCP2 = 1<<6,
+  };
 
   CCPRL *ccpr1l;
   CCPRL *ccpr2l;
   TMRL  *tmr1l; 
 
-
+  T3CON(Processor *pCpu, const char *pName, const char *pDesc=0);
   virtual void put(unsigned int new_value);
 
 };
@@ -516,7 +541,7 @@ public:
 class ADCON0_16 : public ADCON0
 {
 public:
-  ADCON0_16();
+  ADCON0_16(Processor *, const char *pName, const char *pDesc=0);
   virtual void set_interrupt();
 
   virtual void setPir(PIR *);
@@ -575,7 +600,9 @@ class TABPTRU : public sfr_register
 
 class TBL_MODULE
 {
- public:
+public:
+  TBL_MODULE(_16bit_processor *pCpu);
+
   unsigned int state;
   unsigned int internal_latch;
 
@@ -596,8 +623,7 @@ class TBL_MODULE
   void decrement();
   void read();
   void write();
-  void initialize(_16bit_processor *);
-
+  //void initialize(_16bit_processor *);
 };
 
 
@@ -612,7 +638,7 @@ class TBL_MODULE
 
 class LVDCON : public  sfr_register
 {
- public:
+public:
   unsigned int valid_bits;
 
   enum {
@@ -624,9 +650,7 @@ class LVDCON : public  sfr_register
     IRVST = 1<<5,
   };
 
-  LVDCON() {
-    valid_bits = 0x3f;;
-  }
+  LVDCON(Processor *, const char *pName, const char *pDesc=0);
 };
 
 

@@ -288,8 +288,10 @@ void CGpsimUserInterface::NotifyExitOnBreak(int iExitCode) {
 
 
 const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress,
-    unsigned int uMask) {
-  const char * pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+    unsigned int uMask)
+{
+  //const char * pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+  const char *pLabel = "FIXME-ui.cc";
   return FormatLabeledValue(pLabel, uAddress, uMask,
     s_iProgAddrRadix, s_sProgAddrHexPrefix);
 }
@@ -310,9 +312,11 @@ const char * CGpsimUserInterface::FormatRegisterAddress(Register *pReg)
 }
 
 const char * CGpsimUserInterface::FormatRegisterAddress(unsigned int uAddress,
-                                                        unsigned int uMask) {
-  register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(uAddress, uMask);
-  const char * pLabel = pRegSym == NULL ? "" : pRegSym->name().c_str();
+                                                        unsigned int uMask) 
+{
+  //register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(uAddress, uMask);
+  //const char * pLabel = pRegSym == NULL ? "" : pRegSym->name().c_str();
+  const char *pLabel = "FIXME-ui.cc";
   return FormatLabeledValue(pLabel, uAddress, s_iRAMAddrMask, s_iRAMAddrRadix, s_sRAMAddrHexPrefix);
 }
 

@@ -308,7 +308,8 @@ private:
 class PortRegister : public sfr_register, public PortModule
 {
 public:
-  PortRegister(unsigned int numIopins, unsigned int enableMask);
+  PortRegister(Module *pCpu, const char *pName, const char *pDesc,
+               unsigned int numIopins, unsigned int enableMask);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);

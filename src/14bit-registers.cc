@@ -207,34 +207,33 @@ void  OSCCON::put(unsigned int new_value)
 // member functions for the FSR class
 //--------------------------------------------------
 //
+FSR::FSR(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{}
+
 void  FSR::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
+
   value.put(new_value);
 }
 
 void  FSR::put_value(unsigned int new_value)
 {
-
   put(new_value);
 
   update();
   cpu_pic->indf->update();
-
-
 }
 
 
-unsigned int FSR::get(void)
+unsigned int FSR::get()
 {
-
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   return(value.get());
 }
 
-unsigned int FSR::get_value(void)
+unsigned int FSR::get_value()
 {
   return(value.get());
 }
@@ -245,16 +244,15 @@ unsigned int FSR::get_value(void)
 // member functions for the FSR_12 class
 //--------------------------------------------------
 //
-FSR_12::FSR_12(unsigned int _rpb, unsigned int _valid_bits)
-{
-  register_page_bits = _rpb;
-  valid_bits = _valid_bits;
-}
+FSR_12::FSR_12(Processor *pCpu, const char *pName, unsigned int _rpb, unsigned int _valid_bits)
+  : FSR(pCpu, pName, ""),
+    register_page_bits(_rpb),
+    valid_bits(_valid_bits)
+{}
 
 void  FSR_12::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   value.put(new_value);
 
   /* The 12-bit core selects the register page using the fsr */
@@ -272,15 +270,14 @@ void  FSR_12::put_value(unsigned int new_value)
 }
 
 
-unsigned int FSR_12::get(void)
+unsigned int FSR_12::get()
 {
   unsigned int v = get_value();
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,v);
   return(v);
 }
 
-unsigned int FSR_12::get_value(void)
+unsigned int FSR_12::get_value()
 {
   // adjust for missing bits
   //cout << "FSR_12:get_value - valid_bits 0x" << hex << valid_bits << endl;
@@ -297,7 +294,8 @@ unsigned int FSR_12::get_value(void)
 
 //--------------------------------------------------
 
-Status_register::Status_register(void)
+Status_register::Status_register(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   break_point = 0;
   break_on_z =0;
@@ -349,7 +347,7 @@ void Status_register::put(unsigned int new_value)
 
 //--------------------------------------------------
 // get
-//unsigned int Status_register::get(void)
+//unsigned int Status_register::get()
 
 //--------------------------------------------------
 // put_Z
@@ -358,7 +356,7 @@ void Status_register::put(unsigned int new_value)
 
 //--------------------------------------------------
 // get_Z
-//unsigned int Status_register::get_Z(void)
+//unsigned int Status_register::get_Z()
 //--------------------------------------------------
 // put_C
 
@@ -366,7 +364,7 @@ void Status_register::put(unsigned int new_value)
 
 //--------------------------------------------------
 // get_C
-//unsigned int Status_register::get_C(void)
+//unsigned int Status_register::get_C()
 
 //--------------------------------------------------
 // put_Z_C_DC
@@ -374,15 +372,15 @@ void Status_register::put(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the INDF class
 //--------------------------------------------------
-INDF::INDF(void)
+INDF::INDF(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   fsr_mask = 0x7f;           // assume a 14bit core
   base_address_mask1 = 0;    //   "          "
   base_address_mask2 = 0xff; //   "          "
-  new_name("indf");
 }
 
-void INDF::initialize(void)
+void INDF::initialize()
 {
 
   switch(cpu_pic->base_isa()) {
@@ -445,7 +443,7 @@ void INDF::put_value(unsigned int new_value)
 }
 
 
-unsigned int INDF::get(void)
+unsigned int INDF::get()
 {
 
   trace.raw(read_trace.get() | value.get());
@@ -458,7 +456,7 @@ unsigned int INDF::get(void)
     return(0);   // avoid infinite loop if fsr points to the indf
 }
 
-unsigned int INDF::get_value(void)
+unsigned int INDF::get_value()
 {
   int reg = (cpu_pic->fsr->get_value() +
 	       ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
@@ -473,10 +471,10 @@ unsigned int INDF::get_value(void)
 //--------------------------------------------------
 // member functions for the PCL base class
 //--------------------------------------------------
-PCL::PCL() 
+PCL::PCL(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   por_value = RegisterValue(0,0);
-  new_name("pcl");
 }
 
 // %%% FIX ME %%% breaks are different
@@ -497,12 +495,12 @@ void PCL::put_value(unsigned int new_value)
   // The gui (if present) will be updated in the pc->put_value call.
 }
 
-unsigned int PCL::get(void)
+unsigned int PCL::get()
 {
   return((value.get()+1) & 0xff);
 }
 
-unsigned int PCL::get_value(void)
+unsigned int PCL::get_value()
 {
   value.put(cpu_pic->pc->get_value() & 0xff);
   return(value.get());
@@ -520,9 +518,9 @@ void PCL::reset(RESET_TYPE r)
 // member functions for the PCLATH base class
 //--------------------------------------------------
 
-PCLATH::PCLATH(void)
+PCLATH::PCLATH(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
-  new_name("pclath");
 }
 
 void PCLATH::put(unsigned int new_value)
@@ -541,7 +539,7 @@ void PCLATH::put_value(unsigned int new_value)
   // The gui (if present) will be updated in the pc->put_value call.
 }
 
-unsigned int PCLATH::get(void)
+unsigned int PCLATH::get()
 {
   trace.raw(read_trace.get() | value.get());
   //trace.register_read(address,value.get());
@@ -552,7 +550,8 @@ unsigned int PCLATH::get(void)
 // member functions for the PCON base class
 //--------------------------------------------------
 //
-PCON::PCON(void)
+PCON::PCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
   valid_bits = BOR | POR;
 }
@@ -566,7 +565,7 @@ void PCON::put(unsigned int new_value)
 
 
 //--------------------------------------------------
-Stack::Stack(void)
+Stack::Stack()
 {
 
   stack_warnings_flag = 0;   // Do not display over/under flow stack warnings
@@ -611,7 +610,7 @@ void Stack::push(unsigned int address)
 // Stack::pop
 //
 
-unsigned int Stack::pop(void)
+unsigned int Stack::pop()
 {
 
   // First decrement the stack pointer.
@@ -757,15 +756,9 @@ TraceObject * WTraceType::decode(unsigned int tbi)
 }
 
 
-WREG::WREG(void)
+WREG::WREG(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
 {
-  new_name("W");
-}
-
-WREG::WREG(Processor *_cpu) 
-  : sfr_register(_cpu)
-{
-  new_name("W");
   if(cpu) {
     unsigned int trace_command = trace.allocateTraceType(new WTraceType(get_cpu(),1));
     RegisterValue rv(trace_command+(0<<22), trace_command+(2<<22));

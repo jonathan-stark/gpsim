@@ -29,10 +29,10 @@ class ADDWF : public Register_op
 {
 public:
 
-  ADDWF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new ADDWF(new_cpu,new_opcode);}
+  ADDWF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new ADDWF(new_cpu,new_opcode,address);}
 };
 
 //---------------------------------------------------------
@@ -41,10 +41,10 @@ class ANDLW : public Literal_op
 {
 
 public:
-  ANDLW(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new ANDLW(new_cpu,new_opcode);}
+  ANDLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new ANDLW(new_cpu,new_opcode,address);}
 
 };
 
@@ -53,10 +53,10 @@ class ANDWF : public Register_op
 {
 public:
 
-  ANDWF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new ANDWF(new_cpu,new_opcode);}
+  ANDWF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new ANDWF(new_cpu,new_opcode,address);}
 
 };
 
@@ -65,11 +65,11 @@ class BCF : public Bit_op
 {
 public:
 
-  BCF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  BCF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
 
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new BCF(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode,unsigned int address)
+    {return new BCF(new_cpu,new_opcode,address);}
 
 };
 
@@ -78,11 +78,11 @@ class BSF : public Bit_op
 {
 public:
 
-  BSF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  BSF(Processor *new_cpu, unsigned int new_opcode,unsigned int address);
+  virtual void execute();
 
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new BSF(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode,unsigned int address)
+    {return new BSF(new_cpu,new_opcode,address);}
 
 };
 
@@ -91,11 +91,11 @@ class BTFSC : public Bit_op
 {
 public:
 
-  BTFSC(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  BTFSC(Processor *new_cpu, unsigned int new_opcode,unsigned int address);
+  virtual void execute();
 
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new BTFSC(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode,unsigned int address)
+    {return new BTFSC(new_cpu,new_opcode,address);}
 
 };
 
@@ -104,11 +104,11 @@ class BTFSS : public Bit_op
 {
 public:
 
-  BTFSS(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  BTFSS(Processor *new_cpu, unsigned int new_opcode,unsigned int address);
+  virtual void execute();
 
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new BTFSS(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode,unsigned int address)
+    {return new BTFSS(new_cpu,new_opcode,address);}
 
 };
 
@@ -118,13 +118,13 @@ class CALL : public instruction
 public:
   unsigned int destination;
 
-  CALL(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  CALL(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual char *name(char *str,int len);
   virtual bool isBase() { return true;}
 
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new CALL(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new CALL(new_cpu,new_opcode,address);}
 };
 
 //---------------------------------------------------------
@@ -132,11 +132,11 @@ class CLRF : public Register_op
 {
 public:
 
-  CLRF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  CLRF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual char *name(char *str,int len);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new CLRF(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new CLRF(new_cpu,new_opcode,address);}
 };
 
 //---------------------------------------------------------
@@ -144,11 +144,11 @@ class CLRW : public instruction
 {
 public:
 
-  CLRW(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  CLRW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new CLRW(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new CLRW(new_cpu,new_opcode,address);}
 
 };
 
@@ -157,11 +157,11 @@ class CLRWDT : public instruction
 {
 public:
 
-  CLRWDT(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  CLRWDT(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new CLRWDT(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new CLRWDT(new_cpu,new_opcode,address);}
 
 };
 
@@ -170,10 +170,10 @@ class COMF : public Register_op
 {
 public:
 
-  COMF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new COMF(new_cpu,new_opcode);}
+  COMF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new COMF(new_cpu,new_opcode,address);}
 
 };
 
@@ -182,10 +182,10 @@ class DECF : public Register_op
 {
 public:
 
-  DECF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new DECF(new_cpu,new_opcode);}
+  DECF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new DECF(new_cpu,new_opcode,address);}
 
 };
 
@@ -194,10 +194,10 @@ class DECFSZ : public Register_op
 {
 public:
 
-  DECFSZ(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new DECFSZ(new_cpu,new_opcode);}
+  DECFSZ(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new DECFSZ(new_cpu,new_opcode,address);}
 
 };
 
@@ -207,12 +207,12 @@ class GOTO : public instruction
 public:
   unsigned int destination;
 
-  GOTO(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  GOTO(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual bool isBase() { return true;}
   virtual char *name(char *str,int len);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new GOTO(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new GOTO(new_cpu,new_opcode,address);}
 
 };
 
@@ -221,10 +221,10 @@ class INCF : public Register_op
 {
 public:
 
-  INCF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new INCF(new_cpu,new_opcode);}
+  INCF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new INCF(new_cpu,new_opcode,address);}
 
 };
 
@@ -233,10 +233,10 @@ class INCFSZ : public Register_op
 {
 public:
 
-  INCFSZ(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new INCFSZ(new_cpu,new_opcode);}
+  INCFSZ(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new INCFSZ(new_cpu,new_opcode,address);}
 
 };
 
@@ -246,10 +246,10 @@ class IORLW : public Literal_op
 {
 
 public:
-  IORLW(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new IORLW(new_cpu,new_opcode);}
+  IORLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new IORLW(new_cpu,new_opcode,address);}
 
 };
 
@@ -258,10 +258,10 @@ class IORWF : public Register_op
 {
 public:
 
-  IORWF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new IORWF(new_cpu,new_opcode);}
+  IORWF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new IORWF(new_cpu,new_opcode,address);}
 
 };
 
@@ -270,11 +270,11 @@ class MOVF : public Register_op
 {
 public:
 
-  MOVF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  virtual void debug(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new MOVF(new_cpu,new_opcode);}
+  MOVF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  virtual void debug();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new MOVF(new_cpu,new_opcode,address);}
 
 };
 
@@ -283,10 +283,10 @@ public:
 class MOVLW : public Literal_op
 {
 public:
-  MOVLW(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new MOVLW(new_cpu,new_opcode);}
+  MOVLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new MOVLW(new_cpu,new_opcode,address);}
 
 };
 
@@ -295,11 +295,11 @@ class MOVWF : public Register_op
 {
 public:
 
-  MOVWF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  MOVWF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual char *name(char *str,int len);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new MOVWF(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new MOVWF(new_cpu,new_opcode,address);}
 
 };
 
@@ -308,11 +308,11 @@ class NOP : public instruction
 {
 public:
 
-  NOP(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  NOP(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new NOP(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new NOP(new_cpu,new_opcode,address);}
 
 };
 
@@ -321,11 +321,11 @@ class OPTION : public instruction
 {
 public:
 
-  OPTION(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  OPTION(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new OPTION(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new OPTION(new_cpu,new_opcode,address);}
 
 };
 
@@ -335,10 +335,10 @@ class RETLW : public Literal_op
 {
 public:
 
-  RETLW(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new RETLW(new_cpu,new_opcode);}
+  RETLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new RETLW(new_cpu,new_opcode,address);}
 
 };
 
@@ -347,10 +347,10 @@ class RLF : public Register_op
 {
 public:
 
-  RLF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new RLF(new_cpu,new_opcode);}
+  RLF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new RLF(new_cpu,new_opcode,address);}
 
 };
 
@@ -359,10 +359,10 @@ class RRF : public Register_op
 {
 public:
 
-  RRF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new RRF(new_cpu,new_opcode);}
+  RRF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new RRF(new_cpu,new_opcode,address);}
 
 };
 
@@ -372,11 +372,11 @@ class SLEEP : public instruction
 {
 public:
 
-  SLEEP(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  SLEEP(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new SLEEP(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new SLEEP(new_cpu,new_opcode,address);}
 
 };
 
@@ -385,10 +385,10 @@ class SUBWF : public Register_op
 {
 public:
 
-  SUBWF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new SUBWF(new_cpu,new_opcode);}
+  SUBWF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new SUBWF(new_cpu,new_opcode,address);}
 
 };
 
@@ -398,11 +398,11 @@ class SWAPF : public Register_op
 {
 public:
 
-  SWAPF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  SWAPF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
 
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new SWAPF(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new SWAPF(new_cpu,new_opcode,address);}
 
 };
 
@@ -413,11 +413,11 @@ class TRIS : public Register_op
 public:
   Register *reg;
 
-  TRIS(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
+  TRIS(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
   virtual char *name(char *str,int len);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new TRIS(new_cpu,new_opcode);}
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new TRIS(new_cpu,new_opcode,address);}
 
 };
 
@@ -428,10 +428,10 @@ class XORLW : public Literal_op
 
 public:
 
-  XORLW(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new XORLW(new_cpu,new_opcode);}
+  XORLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new XORLW(new_cpu,new_opcode,address);}
 
 };
 
@@ -440,10 +440,10 @@ class XORWF : public Register_op
 {
 public:
 
-  XORWF(Processor *new_cpu, unsigned int new_opcode);
-  virtual void execute(void);
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
-    {return new XORWF(new_cpu,new_opcode);}
+  XORWF(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    {return new XORWF(new_cpu,new_opcode,address);}
 
 };
 

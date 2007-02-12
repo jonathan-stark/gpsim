@@ -39,51 +39,11 @@ class symbol;
 /* typedefs */
 typedef list<Value*> SymbolList_t;
 typedef list<string> StringList_t;
-
-class Pin_t {
-public:
-  enum {
-    ePackageBased = 0x0001,
-    ePortBased    = 0x0002,
-    eActiveProc   = 0x0004,
-  };
-  Pin_t(int iFlags, Value * pPin) {
-    m_iFlags = iFlags;
-    m_sModuleName = NULL;
-    m_sPin = pPin;
-    m_sPort = NULL;
-  }
-  Pin_t(int iFlags, Value * pModuleName, Value * pPin) {
-    m_iFlags = iFlags;
-    m_sModuleName = pModuleName;
-    m_sPin = pPin;
-    m_sPort = NULL;
-  }
-  Pin_t(int iFlags, Value * pModuleName, Value *pPort, Value * pPin) {
-    m_iFlags = iFlags;
-    m_sModuleName = pModuleName;
-    m_sPin = pPin;
-    m_sPort = pPort;
-  }
-  stimulus *GetStimulus();
-  IOPIN * GetIOPin();
-  Value * GetValue();
-  Value * m_sModuleName;
-  Value * m_sPin;
-  Value * m_sPort;
-  int     m_iFlags;
-};
-
-typedef list<Pin_t*> PinList_t;
-
+typedef list<stimulus *> StimulusList_t;
+typedef list<gpsimObject *> gpsimObjectList_t;
 
 /* Support functions */
-extern void dump_node_list(void);
 extern void dump_stimulus_list(void);
-
-extern void stimuli_attach(StringList_t *);
-extern void stimuli_attach(SymbolList_t *);
-extern void stimuli_attach(Value *pNode, PinList_t *pPinList);
 
 /****************************************************************************
  *
@@ -188,7 +148,7 @@ protected:
 // opamps are not modeled. In fact, even simple devices like capacitors and
 // inductors are not modeled.
 //
-class stimulus : public gpsimValue
+class stimulus : public Value
 {
 public:
 

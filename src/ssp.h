@@ -84,7 +84,7 @@ public:
 
 
 
-  _SSPCON();
+  _SSPCON(Processor *pCpu, SSP_MODULE *);
 
   // Register bit definitions
 
@@ -140,8 +140,7 @@ class _SSPCON2 : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  _SSPCON2(void);
-  void setSSPMODULE(SSP_MODULE *);
+  _SSPCON2(Processor *pCpu, SSP_MODULE *);
 
 private:
   SSP_MODULE   *m_sspmod;
@@ -168,7 +167,7 @@ class _SSPSTAT : public sfr_register
     SMP = 1<<7   // SPI data input sample phase
   };
 
-  void setSSPMODULE(SSP_MODULE *);
+  _SSPSTAT(Processor *pCpu, SSP_MODULE *);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -184,15 +183,13 @@ public:
   
   SSP_TYPE ssptype;
 
-  _SSPBUF();
+  _SSPBUF(Processor *pCpu, SSP_MODULE *);
 
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
-
-  void setSSPMODULE(SSP_MODULE *);
 
   bool isFull() { return m_bIsFull; }
   void setFullFlag(bool bNewFull) { m_bIsFull = bNewFull; }
@@ -204,8 +201,8 @@ private:
 class _SSPADD : public sfr_register
 {
  public: 
+  _SSPADD(Processor *pCpu, SSP_MODULE *);
 
-  void setSSPMODULE(SSP_MODULE *);
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
 private:
@@ -304,12 +301,12 @@ class SSP_MODULE
   _SSPBUF   sspbuf;
   _SSPCON   sspcon;
   _SSPSTAT  sspstat;
-  _SSPCON2 sspcon2;	// MSSP
+  _SSPCON2  sspcon2;	// MSSP
 
   // set to NULL for BSSP (It doesn't have this register)
   _SSPADD   sspadd;
 
-  SSP_MODULE();
+  SSP_MODULE(Processor *);
   virtual ~SSP_MODULE();
 
   void initialize(PIR_SET *ps,

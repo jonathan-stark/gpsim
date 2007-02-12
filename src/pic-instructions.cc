@@ -30,21 +30,81 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 #include "xref.h"
 
+//------------------------------------------------------------------------
+AddressSymbol::AddressSymbol(Processor *pCpu, const char *_name, unsigned int _val)
+  :  Integer(_val)
+
+{
+  new_name(_name);
+  cpu = pCpu;
+}
+
+string AddressSymbol::toString()
+{
+  char buf[256];
+  int i = (int)getVal();
+  snprintf(buf,sizeof(buf), " at address %d = 0x%X",i,i);
+  
+  return string(buf);
+}
+
+Value* AddressSymbol::evaluate()
+{
+  return copy();
+}
+int AddressSymbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at,
+                             Expression *pExpr)
+{
+  if (bt == gpsimObject::eBreakExecute && cpu)
+    return get_bp().set_execution_break((Processor*)cpu,getVal(),pExpr);
+
+  return -1;
+}
+
+LineNumberSymbol::LineNumberSymbol(Processor *pCpu,
+                                   const char *_name, 
+                                   unsigned int _val)
+  :  AddressSymbol(pCpu,_name,_val)
+{
+  if(!_name) {
+    char buf[64];
+    snprintf(buf,sizeof(buf), "line_%04x",_val);
+    new_name(buf);
+  }
+
+}
+
+
+
 
 instruction::instruction(Processor *pProcessor,
 			 unsigned int uOpCode, 
 			 unsigned int uAddrOfInstr)
-  : gpsimValue(pProcessor),
+  : Value("","",pProcessor),
     m_bIsModified(false),
     cycle_count(0),
     opcode(uOpCode), 
     m_uAddrOfInstr(uAddrOfInstr),
+    pLineSymbol(0),
     file_id(-1),
     hll_file_id(-1),
     src_line(-1),
     lst_line(-1),
     hll_src_line(-1)
 {
+  if (cpu) {
+    pLineSymbol = new LineNumberSymbol((Processor*)cpu,0, m_uAddrOfInstr);
+    if (!cpu->addSymbol(pLineSymbol)) {
+      delete pLineSymbol;
+      pLineSymbol = 0;
+    }
+  }
+}
+instruction::~instruction()
+{
+  if (cpu)
+    cpu->removeSymbol(pLineSymbol,true);
+  pLineSymbol = 0;
 }
 
 void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
@@ -53,7 +113,22 @@ void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
 }
 
-void invalid_instruction::execute(void)  
+int instruction::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *pExpr)
+{
+  if (bt == gpsimObject::eBreakExecute)
+    return get_bp().set_execution_break(get_cpu(),m_uAddrOfInstr,pExpr);
+
+  return -1;
+}
+
+void instruction::addLabel(string &rLabel)
+{
+  if (cpu) {
+    addName(rLabel);
+    cpu->addSymbol(this, &rLabel);
+  }
+}
+void invalid_instruction::execute()  
 { 
   //cout << "*** INVALID INSTRUCTION ***\n";
 #ifdef __DEBUG_VERBOSE__
@@ -66,31 +141,16 @@ void invalid_instruction::execute(void)
 
 };
 
-invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opcode)
-  : instruction(new_cpu,new_opcode,0)
-{
-  new_name("INVALID");
-}
-
-invalid_instruction::invalid_instruction(Processor *new_cpu,
-                                         unsigned int address, 
-                                         unsigned int new_opcode)
+invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opcode, unsigned int address)
   : instruction(new_cpu,new_opcode,address)
 {
   new_name("INVALID");
 }
 
 // Instantiate an invalid instruction
-invalid_instruction bad_instruction;
+invalid_instruction bad_instruction(0,0,0);
 
 
-//------------------------------------------------------------------------
-void instruction::add_line_number_symbol(int address)
-{
-
-  symbol_table.add_line_number(address);
-
-}
 //------------------------------------------------------------------------
 // update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
 // 
@@ -150,9 +210,13 @@ AliasedInstruction::AliasedInstruction(Processor *pProcessor,
 {
 }
 
+AliasedInstruction::~AliasedInstruction()
+{
+}
+
 void AliasedInstruction::setReplaced(instruction *_replaced)
 {
-  if (!m_replaced)
+  //if (!m_replaced)
     m_replaced = _replaced;
 }
 
@@ -223,7 +287,7 @@ char *AliasedInstruction::name(char *cPtr,int len)
 {
   return getReplaced()->name(cPtr,len);
 }
-void AliasedInstruction::update(void)
+void AliasedInstruction::update()
 {
   getReplaced()->update();
 }
@@ -253,7 +317,7 @@ char *Literal_op::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%02x",
-	   gpsimValue::name().c_str(),L);
+	   gpsimObject::name().c_str(),L);
 
   return(return_str);
 }
@@ -354,7 +418,7 @@ char * Bit_op::name(char *return_str,int len)
     case _16BIT_PROCESSOR_:
       bit = ((opcode >> 9) & 7);
       snprintf(return_str,len,"%s\t%s,%d,%c",
-	       gpsimValue::name().c_str(),
+	       gpsimObject::name().c_str(),
 	       reg->name().c_str(), 
 	       bit,
 	       access ? '1' : '0');
@@ -375,7 +439,7 @@ char * Bit_op::name(char *return_str,int len)
 
 
   snprintf(return_str,len,"%s\t%s,%d",
-	   gpsimValue::name().c_str(),
+	   gpsimObject::name().c_str(),
 	   reg->name().c_str(),
 	   bit);
 
@@ -407,12 +471,12 @@ char * Register_op::name(char *return_str,int len)
 
   if(cpu_pic->base_isa() != _16BIT_PROCESSOR_)
     snprintf(return_str,len,"%s\t%s,%c",
-	     gpsimValue::name().c_str(),
+	     gpsimObject::name().c_str(),
 	     source->name().c_str(),
 	     destination ? 'f' : 'w');
   else
     snprintf(return_str,len,"%s\t%s,%c,%c",
-	     gpsimValue::name().c_str(),
+	     gpsimObject::name().c_str(),
 	     source->name().c_str(), 
 	     destination ? 'f' : 'w',
 	     access ? '1' : '0');
@@ -469,8 +533,8 @@ Register * Register_op::source = 0;
 
 //--------------------------------------------------
 
-ADDWF::ADDWF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+ADDWF::ADDWF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
 
   decode(new_cpu, new_opcode);
@@ -478,7 +542,7 @@ ADDWF::ADDWF (Processor *new_cpu, unsigned int new_opcode)
 
 }
 
-void ADDWF::execute(void)
+void ADDWF::execute()
 {
   unsigned int new_value,src_value,w_value;
 
@@ -504,14 +568,14 @@ void ADDWF::execute(void)
 
 //--------------------------------------------------
 
-ANDLW::ANDLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+ANDLW::ANDLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("andlw");
 }
 
-void ANDLW::execute(void)
+void ANDLW::execute()
 {
   unsigned int new_value;
 
@@ -526,8 +590,8 @@ void ANDLW::execute(void)
 
 //--------------------------------------------------
 
-ANDWF::ANDWF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+ANDWF::ANDWF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
 
   decode(new_cpu, new_opcode);
@@ -535,7 +599,7 @@ ANDWF::ANDWF (Processor *new_cpu, unsigned int new_opcode)
 
 }
 
-void ANDWF::execute(void)
+void ANDWF::execute()
 {
   unsigned int new_value;
 
@@ -560,15 +624,15 @@ void ANDWF::execute(void)
 
 //--------------------------------------------------
 
-BCF::BCF (Processor *new_cpu, unsigned int new_opcode)
-  : Bit_op(new_cpu, new_opcode, 0)
+BCF::BCF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Bit_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   mask ^= 0xff;        // decode initializes the mask to 1<<bit
   new_name("bcf");
 }
 
-void BCF::execute(void)
+void BCF::execute()
 {
 
   if(!access)
@@ -584,14 +648,14 @@ void BCF::execute(void)
 
 //--------------------------------------------------
 
-BSF::BSF (Processor *new_cpu, unsigned int new_opcode)
-  : Bit_op(new_cpu, new_opcode, 0)
+BSF::BSF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Bit_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("bsf");
 }
 
-void BSF::execute(void)
+void BSF::execute()
 {
 
   if(!access)
@@ -608,14 +672,14 @@ void BSF::execute(void)
 
 //--------------------------------------------------
 
-BTFSC::BTFSC (Processor *new_cpu, unsigned int new_opcode)
-  : Bit_op(new_cpu, new_opcode, 0)
+BTFSC::BTFSC (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Bit_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("btfsc");
 }
 
-void BTFSC::execute(void)
+void BTFSC::execute()
 {
 
   if(!access)
@@ -634,14 +698,14 @@ void BTFSC::execute(void)
 
 //--------------------------------------------------
 
-BTFSS::BTFSS (Processor *new_cpu, unsigned int new_opcode)
-  : Bit_op(new_cpu, new_opcode, 0)
+BTFSS::BTFSS (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Bit_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("btfss");
 }
 
-void BTFSS::execute(void)
+void BTFSS::execute()
 {
 
   if(!access)
@@ -659,8 +723,8 @@ void BTFSS::execute(void)
 }
 
 //--------------------------------------------------
-CALL::CALL (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu, new_opcode, 0)
+CALL::CALL (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
 {
 
   switch(cpu_pic->base_isa())
@@ -679,7 +743,7 @@ CALL::CALL (Processor *new_cpu, unsigned int new_opcode)
   new_name("call");
 }
 
-void CALL::execute(void)
+void CALL::execute()
 {
 
   cpu_pic->stack->push(cpu_pic->pc->get_next());
@@ -692,7 +756,7 @@ char * CALL::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%04x",
-	   gpsimValue::name().c_str(),
+	   gpsimObject::name().c_str(),
 	   destination);
 
   return(return_str);
@@ -700,15 +764,15 @@ char * CALL::name(char *return_str,int len)
 
 
 //--------------------------------------------------
-CLRF::CLRF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+CLRF::CLRF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
 
   new_name("clrf");
 }
 
-void CLRF::execute(void)
+void CLRF::execute()
 {
 
   if(!access)
@@ -725,7 +789,7 @@ char * CLRF::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t%s",
-	   gpsimValue::name().c_str(),
+	   gpsimObject::name().c_str(),
 	   get_cpu()->registers[register_address]->name().c_str());
 
   return(return_str);
@@ -734,14 +798,14 @@ char * CLRF::name(char *return_str,int len)
 
 //--------------------------------------------------
 
-CLRW::CLRW (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu, new_opcode, 0)
+CLRW::CLRW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("clrw");
 }
 
-void CLRW::execute(void)
+void CLRW::execute()
 {
 
   cpu_pic->W->put(0);
@@ -753,14 +817,14 @@ void CLRW::execute(void)
 
 //--------------------------------------------------
 
-CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu, new_opcode, 0)
+CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("clrwdt");
 }
 
-void CLRWDT::execute(void)
+void CLRWDT::execute()
 {
 
 
@@ -774,14 +838,14 @@ void CLRWDT::execute(void)
 
 //--------------------------------------------------
 
-COMF::COMF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+COMF::COMF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("comf");
 }
 
-void COMF::execute(void)
+void COMF::execute()
 {
   unsigned int new_value;
 
@@ -805,14 +869,14 @@ void COMF::execute(void)
 
 //--------------------------------------------------
 
-DECF::DECF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+DECF::DECF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("decf");
 }
 
-void DECF::execute(void)
+void DECF::execute()
 {
   unsigned int new_value;
 
@@ -836,14 +900,14 @@ void DECF::execute(void)
 
 //--------------------------------------------------
 
-DECFSZ::DECFSZ (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+DECFSZ::DECFSZ (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("decfsz");
 }
 
-void DECFSZ::execute(void)
+void DECFSZ::execute()
 {
   unsigned int new_value;
 
@@ -867,8 +931,8 @@ void DECFSZ::execute(void)
 }
 
 //--------------------------------------------------
-GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu, new_opcode, 0)
+GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
 {
 
   switch(cpu_pic->base_isa())
@@ -887,7 +951,7 @@ GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode)
   new_name("goto");
 }
 
-void GOTO::execute(void)
+void GOTO::execute()
 {
 
   cpu_pic->pc->jump(cpu_pic->get_pclath_branching_jump() | destination);
@@ -898,7 +962,7 @@ char * GOTO::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%04x",
-	  gpsimValue::name().c_str(),destination);
+	  gpsimObject::name().c_str(),destination);
 
   return(return_str);
 }
@@ -906,14 +970,14 @@ char * GOTO::name(char *return_str,int len)
 
 //--------------------------------------------------
 
-INCF::INCF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+INCF::INCF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("incf");
 }
 
-void INCF::execute(void)
+void INCF::execute()
 {
   unsigned int new_value;
 
@@ -940,14 +1004,14 @@ void INCF::execute(void)
 
 //--------------------------------------------------
 
-INCFSZ::INCFSZ (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+INCFSZ::INCFSZ (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("incfsz");
 }
 
-void INCFSZ::execute(void)
+void INCFSZ::execute()
 {
   unsigned int new_value;
 
@@ -972,14 +1036,14 @@ void INCFSZ::execute(void)
 
 //--------------------------------------------------
 
-IORLW::IORLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+IORLW::IORLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("iorlw");
 }
 
-void IORLW::execute(void)
+void IORLW::execute()
 {
   unsigned int new_value;
 
@@ -994,14 +1058,14 @@ void IORLW::execute(void)
 
 //--------------------------------------------------
 
-IORWF::IORWF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+IORWF::IORWF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("iorwf");
 }
 
-void IORWF::execute(void)
+void IORWF::execute()
 {
   unsigned int new_value;
 
@@ -1025,14 +1089,14 @@ void IORWF::execute(void)
 
 //--------------------------------------------------
 
-MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("movlw");
 }
 
-void MOVLW::execute(void)
+void MOVLW::execute()
 {
 
   cpu_pic->W->put(L);
@@ -1043,14 +1107,14 @@ void MOVLW::execute(void)
 
 //--------------------------------------------------
 
-MOVF::MOVF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+MOVF::MOVF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("movf");
 }
 
-void MOVF::execute(void)
+void MOVF::execute()
 {
   unsigned int source_value;
 
@@ -1076,7 +1140,7 @@ void MOVF::execute(void)
 }
 
 
-void MOVF::debug(void)
+void MOVF::debug()
 {
 
    cout << "MOVF:  ";
@@ -1084,14 +1148,14 @@ void MOVF::debug(void)
 }
 
 //--------------------------------------------------
-MOVWF::MOVWF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+MOVWF::MOVWF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("movwf");
 }
 
-void MOVWF::execute(void)
+void MOVWF::execute()
 {
 
   if(!access)
@@ -1106,7 +1170,7 @@ char * MOVWF::name(char *return_str, int len)
 {
 
   snprintf(return_str,len,"%s\t%s",
-	   gpsimValue::name().c_str(),
+	   gpsimObject::name().c_str(),
 	   get_cpu()->registers[register_address]->name().c_str());
 
   return(return_str);
@@ -1115,8 +1179,8 @@ char * MOVWF::name(char *return_str, int len)
 
 //--------------------------------------------------
 
-NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu,new_opcode,0)
+NOP::NOP (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu,new_opcode,address)
 {
 
   decode(new_cpu,new_opcode);
@@ -1135,21 +1199,21 @@ NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
   */
 }
 
-void NOP::execute(void)
+void NOP::execute()
 {
   cpu_pic->pc->increment();
 }
 
 //--------------------------------------------------
 
-OPTION::OPTION (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu,new_opcode,0)
+OPTION::OPTION (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu,new_opcode,address)
 {
   decode(new_cpu, new_opcode);
   new_name("option");
 }
 
-void OPTION::execute(void)
+void OPTION::execute()
 {
 
   cpu_pic->put_option_reg(cpu_pic->W->get());
@@ -1160,14 +1224,14 @@ void OPTION::execute(void)
 
 //--------------------------------------------------
 
-RETLW::RETLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+RETLW::RETLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("retlw");
 }
 
-void RETLW::execute(void)
+void RETLW::execute()
 {
 
   cpu_pic->W->put(L);
@@ -1178,14 +1242,14 @@ void RETLW::execute(void)
 
 //--------------------------------------------------
 
-RLF::RLF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+RLF::RLF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("rlf");
 }
 
-void RLF::execute(void)
+void RLF::execute()
 {
   unsigned int new_value;
 
@@ -1209,14 +1273,14 @@ void RLF::execute(void)
 
 //--------------------------------------------------
 
-RRF::RRF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+RRF::RRF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("rrf");
 }
 
-void RRF::execute(void)
+void RRF::execute()
 {
   unsigned int new_value,old_value;
 
@@ -1241,28 +1305,28 @@ void RRF::execute(void)
 
 //--------------------------------------------------
 
-SLEEP::SLEEP (Processor *new_cpu, unsigned int new_opcode)
-  : instruction(new_cpu,new_opcode,0)
+SLEEP::SLEEP (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu,new_opcode,address)
 {
   decode(new_cpu, new_opcode);
   new_name("sleep");
 }
 
-void SLEEP::execute(void)
+void SLEEP::execute()
 {
   cpu_pic->enter_sleep();
 }
 
 //--------------------------------------------------
 
-SUBWF::SUBWF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+SUBWF::SUBWF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("subwf");
 }
 
-void SUBWF::execute(void)
+void SUBWF::execute()
 {
   unsigned int new_value,src_value,w_value;
 
@@ -1289,14 +1353,14 @@ void SUBWF::execute(void)
 
 //--------------------------------------------------
 
-SWAPF::SWAPF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+SWAPF::SWAPF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("swapf");
 }
 
-void SWAPF::execute(void)
+void SWAPF::execute()
 {
   unsigned int src_value;
 
@@ -1318,8 +1382,8 @@ void SWAPF::execute(void)
 
 
 //--------------------------------------------------
-TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
 
@@ -1346,7 +1410,7 @@ TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode)
   new_name("tris");
 }
 
-void TRIS::execute(void)
+void TRIS::execute()
 {
   if(register_address)
     {
@@ -1364,7 +1428,7 @@ char * TRIS::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t%s",
-	   gpsimValue::name().c_str(),
+	   gpsimObject::name().c_str(),
 	   cpu_pic->registers[register_address]->name().c_str());
 
   return(return_str);
@@ -1373,14 +1437,14 @@ char * TRIS::name(char *return_str,int len)
 
 //--------------------------------------------------
 
-XORLW::XORLW (Processor *new_cpu, unsigned int new_opcode)
-  : Literal_op(new_cpu, new_opcode, 0)
+XORLW::XORLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("xorlw");
 }
 
-void XORLW::execute(void)
+void XORLW::execute()
 {
   unsigned int new_value;
 
@@ -1395,14 +1459,14 @@ void XORLW::execute(void)
 
 //--------------------------------------------------
 
-XORWF::XORWF (Processor *new_cpu, unsigned int new_opcode)
-  : Register_op(new_cpu, new_opcode, 0)
+XORWF::XORWF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("xorwf");
 }
 
-void XORWF::execute(void)
+void XORWF::execute()
 {
   unsigned int new_value;
 

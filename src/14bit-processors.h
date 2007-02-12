@@ -39,7 +39,7 @@ class IOPIN;
 class IO_open_collector;
 class PinMonitor;
 
-extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst);
+extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst, unsigned int address);
 
 
 
@@ -62,9 +62,9 @@ public:
   virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _14BIT_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)
-    {
-      return disasm14(this, inst);
-    }
+  {
+    return disasm14(this, address, inst);
+  }
 
   // Declare a set of functions that will allow the base class to
   // get information about the derived classes. NOTE, the values returned here
@@ -109,7 +109,6 @@ public:
   virtual ~_14bit_processor();
 
 protected:
-  //OPTION_REG14   *option_reg;
   OPTION_REG   *option_reg;
 };
 

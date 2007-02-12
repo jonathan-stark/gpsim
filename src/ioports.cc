@@ -141,8 +141,9 @@ void PortSink::setSinkState(char cNewSinkState)
   m_PortRegister->setbit(m_iobit,cNewSinkState);
 }
 //------------------------------------------------------------------------
-PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
-  : sfr_register(),
+PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
+                           unsigned int numIopins, unsigned int _mask)
+  : sfr_register(pCpu, pName, pDesc),
     PortModule(numIopins),
     mEnableMask(_mask),  
     drivingValue(0), rvDrivenValue(0,0)

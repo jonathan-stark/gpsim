@@ -570,7 +570,7 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 	    bool bPost = DebugType == 'c';
 	    CommandAssertion *pCA = new CommandAssertion(cpu,laddress,0,
 							DebugMessage,bPost);
-	    get_bp().set_breakpoint(pCA);
+	    get_bp().set_breakpoint(pCA,cpu);
 	  }
         case 'f':
         case 'F':
@@ -629,14 +629,22 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           // Change the register name to its symbolic name
           iReturn = get_string(b, s, sizeof b);
           cpu->registers[value]->new_name(b);
-          register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
-          symbol_table.add(rs);
+          //register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
+          //symbol_table.add(rs);
+          //cpu->addSymbol(cpu->registers[value]); 
           }
           break;
 
-        case COD_ST_ADDRESS:
+        case COD_ST_ADDRESS: {
           iReturn = get_string(b, s, sizeof b);
-          symbol_table.add_address(b, value);
+          instruction *pI = cpu->pma->getFromAddress(value);
+          if (pI) {
+            string s(b);
+            pI->addLabel(s);
+          }
+          //cpu->addSymbol(new AddressSymbol(cpu, b, value));
+          //symbol_table.add_address(cpu,b, value);
+          }
           break;
 
 	case COD_ST_CONSTANT: 	// Ignore as no useful purpose and may
@@ -645,7 +653,7 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
 
         default:
           iReturn = get_string(b,s,sizeof b);
-          symbol_table.add_constant(b,value);
+          cpu->addSymbol(new Integer(b,value));
           break;
         }
         i += (length + 7);
@@ -894,54 +902,53 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
       line_number=atoi(ptr);
 
       // Locate filename in hll_source_files[]
-      for(hll_files_index=0;hll_files_index<nr_of_hll_files;hll_files_index++)
-	{
-	  if(!strcmp(filename,hll_source_files[hll_files_index].filename))
-	    {
+      for(hll_files_index=0;hll_files_index<nr_of_hll_files;hll_files_index++) {
+
+        if(!strcmp(filename,hll_source_files[hll_files_index].filename)) {
+
 	      // Found it!
 	      file_index=hll_files_index+cpu->number_of_source_files;
 	      break;
-	    }
-	}
-      if(nr_of_hll_files==MAX_HLL_FILES)
-	{
-	  printf("Too many hll files, increase MAX_HLL_FILES\n");
-	}
-      else if(hll_files_index==nr_of_hll_files)
-	{
-	  // Add new file
+        }
+      }
 
-	  int maxline;
+      if(nr_of_hll_files==MAX_HLL_FILES) {
 
-	  file_index=hll_files_index+cpu->number_of_source_files;
-	  strcpy(hll_source_files[hll_files_index].filename,filename);
-	  hll_source_files[hll_files_index].file=0;
-	  nr_of_hll_files++;
+        printf("Too many hll files, increase MAX_HLL_FILES\n");
 
-	  cpu->files[file_index].name=strdup(filename);
-	  file=fopen(cpu->files[file_index].name,"r");
-	  if(file==0)
-	    {
-	      puts("file is not found\n");
-	      assert(0);
-	    }
-	  cpu->files[file_index].file_ptr=file;
+      } else if(hll_files_index==nr_of_hll_files) {
 
-	  rewind(cpu->files[file_index].file_ptr);
-	  maxline=0;
-	  while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=0)
-	    maxline++;
+        // Add new file
 
-	  // Make a new file context
-	  cpu->files[file_index].line_seek=0;//new int[maxline+1];
-	  cpu->files[file_index].max_line=maxline;
+        int maxline;
 
-	  cpu->files[file_index+1].file_ptr=0; // End of list
+        file_index=hll_files_index+cpu->number_of_source_files;
+        strcpy(hll_source_files[hll_files_index].filename,filename);
+        hll_source_files[hll_files_index].file=0;
+        nr_of_hll_files++;
 
-	  line_nr=0;
-	  //	    cpu->files[file_index].line_seek[line_nr++]=0;
+        cpu->files[file_index].name=strdup(filename);
+        file=fopen(cpu->files[file_index].name,"r");
+        if(file==0)
+          {
+            puts("file is not found\n");
+            assert(0);
+          }
+        cpu->files[file_index].file_ptr=file;
 
-	}
+        rewind(cpu->files[file_index].file_ptr);
+        maxline=0;
+        while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=0)
+          maxline++;
+
+        // Make a new file context
+        cpu->files[file_index].line_seek=0;//new int[maxline+1];
+        cpu->files[file_index].max_line=maxline;
+
+        cpu->files[file_index+1].file_ptr=0; // End of list
+
+        line_nr=0;
+      }
 
 
       address=cpu->pma->find_closest_address_to_line(asmfile_id, asmsrc_line);

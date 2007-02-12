@@ -61,7 +61,7 @@ public:
   void        Reset(RESET_TYPE r);
 
   void            Initialize();
-  Symbol_Table &  GetSymbolTable();
+  SymbolTable &   GetSymbolTable();
   Breakpoints &   GetBreakpoints();
   Processor *     GetActiveCPU();
   Cycle_Counter * GetCycleCounter();
