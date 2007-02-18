@@ -102,7 +102,9 @@ public:
   ~SymbolTable_t();
 
   int addSymbol(gpsimObject *, string *AliasedName=0);
-  int removeSymbol(gpsimObject *, bool bDeleteObject);
+  int removeSymbol(gpsimObject *);
+  int removeSymbol(const string &);
+  int deleteSymbol(const string &);
   gpsimObject *findSymbol(const string &);
 
   /// ForEachModuleSymbolTable -- thin wrapper around map<>'s for_each() algorithm.
@@ -115,7 +117,9 @@ public:
   {
     for_each(begin(), end(),  forEach);
   }
-
+protected:
+  // stiFound an iterator that points to the most recently found symbol.
+  SymbolTable_t::iterator stiFound;
 };
 
 
@@ -130,7 +134,9 @@ public:
 
   /// Globally scoped symbols are added and removed here
   int addSymbol(gpsimObject *);
-  int removeSymbol(gpsimObject *, bool bDeleteObject);
+  int removeSymbol(gpsimObject *);
+  int removeSymbol(const string &);
+  int deleteSymbol(const string &);
 
   /// Each Module maintains its own symbol table. If the module wants
   /// its symbols to be accessed at the global scope, then the module
