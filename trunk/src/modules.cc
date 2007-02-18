@@ -58,24 +58,111 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_manager.h"
 
 
-int ModuleLibrary::m_iSequenceNumber = 0;
-// ModuleLibrary *ModuleLibrary::m_pLibrary = new ModuleLibrary();
-ModuleLibrary::FileList   ModuleLibrary::m_FileList;
-ModuleLibrary::TypeList   ModuleLibrary::m_TypeList;
-ModuleLibrary::ModuleList ModuleLibrary::m_ModuleList;
+// When a new library is loaded, all of the module types
+// it supports are placed into the ModuleTypes map. This 
+// object is private to this file.
+
+typedef map<string, Module_Types *> ModuleTypeInfo_t;
+ModuleTypeInfo_t ModuleTypes;
 
 
-void          ModuleLibrary::LoadFile(const char *pFilename) 
+//------------------------------------------------------------------------
+// Add a new type to the ModuleTypes map if the name for that type 
+// does not exist already.
+
+static void AddModuleType(char *pName, Module_Types *pType)
+{
+  string sName(pName);
+  ModuleTypeInfo_t::iterator mti = ModuleTypes.find(sName);
+  if (mti == ModuleTypes.end())
+    ModuleTypes[sName] = pType;
+}
+
+
+class DynamicModuleLibraryInfo
+{
+public:
+  DynamicModuleLibraryInfo(string &sCanonicalName,
+                           string &sUserSuppliedName,
+                           void   *pHandle)
+    : m_sCanonicalName(sCanonicalName),
+      m_sUserSuppliedName(sUserSuppliedName),
+      m_pHandle(pHandle),
+      get_mod_list(0)
+  {
+    const char * error;
+    if (m_pHandle)
+      get_mod_list = (Module_Types_FPTR)get_library_export("get_mod_list", m_pHandle, &error);
+
+    if (!get_mod_list) {
+      cout << "WARNING: non-conforming module library\n"
+           << "  gpsim libraries should have the get_mod_list() function defined\n";
+      fprintf(stderr, "%s\n",error);
+      free_error_message(error);
+    } else {
+
+      // Get a pointer to the list of modules that this library file supports.
+      Module_Types *pLibModList = get_mod_list();
+
+      // Loop through the list of modules supported by the library and an entry
+      // ModuleTypes map for each one.
+
+      if(pLibModList)
+        for(Module_Types *pModTypes = pLibModList;  pModTypes->names[0]; pModTypes++) {
+          AddModuleType(pModTypes->names[0], pModTypes);
+          AddModuleType(pModTypes->names[1], pModTypes);
+        }
+
+      // If the module has an "initialize" function, then call it now.
+      typedef  void * (*void_FPTR)(void);
+      void * (*initialize)(void) = (void_FPTR)get_library_export("initialize", m_pHandle, NULL);
+      if(initialize)
+        initialize();
+
+      /*
+      ICommandHandler * pCliHandler = ml->GetCli();
+      if (pCliHandler != NULL)
+        CCommandManager::GetManager().Register(pCliHandler);
+      */
+    }
+
+  }
+
+protected: 
+  string m_sCanonicalName;
+  string m_sUserSuppliedName;
+  void *m_pHandle;
+  Module_Types * (*get_mod_list)(void);
+
+};
+
+typedef map<string, DynamicModuleLibraryInfo *> ModuleLibraries_t;
+ModuleLibraries_t ModuleLibraries;
+
+
+//========================================================================
+
+void MakeCanonicalName(string &sPath, string &sName) {
+#ifdef _WIN32
+  sName = sPath;
+#else
+  GetFileName(sPath, sName);
+#endif
+}
+
+int ModuleLibrary::LoadFile(string &fName)
 {
   void *handle;
   const char *pszError;
   bool bReturn = false;
 
-  string sPath(pFilename);
+  string sPath= fName;//(pFilename);
   FixupLibraryName(sPath);
   string sName;
   MakeCanonicalName(sPath, sName);
-  if(!FileExists(sName)) {
+  ModuleLibraries_t::iterator mli = ModuleLibraries.find(sName);
+
+  if (mli == ModuleLibraries.end()) {
     if ((handle = ::load_library(sPath.c_str(), &pszError)) == NULL) {
 #ifdef THROW
       ostringstream stream;
@@ -97,292 +184,34 @@ void          ModuleLibrary::LoadFile(const char *pFilename)
     }
     else {
 
-      if(AddFile(sPath.c_str(),handle)) {
-        bReturn = true;
-      }
+      ModuleLibraries[sName] = new DynamicModuleLibraryInfo(fName, sName, handle);
+      bReturn = true;
     }
   }
-
+  /*
   if(verbose)
     DisplayFileList();
-  return;
+  */
+  return bReturn;
+
 }
-
-void          ModuleLibrary::FreeFile(const char *pFilename) {
-  FileList::iterator  it;
-  FileList::iterator  itEnd(m_FileList.end());
-  for( it = m_FileList.begin(); it != itEnd; it++) {
-    Module_Types *pLibModList = (*it)->get_mod_list();
-
-    // Remove the library file's types
-    for(int iIndex = 0; iIndex < Module_Types_Name_Count; iIndex++) {
-      TypeList::iterator itTypeEnd = m_TypeList.end();
-      TypeList::iterator itType = m_TypeList.FindIt(pLibModList->names[iIndex]);
-
-      if(itType != itTypeEnd) {
-        // Remove all instanciated objects of this type
-        ModuleList::iterator  itObject;
-        ModuleList::iterator  itObjectEnd(m_ModuleList.end());
-        for( itObject = m_ModuleList.begin(); itObject != itObjectEnd; itObject++) {
-          if( strcmp((*itObject)->m_pType->m_pName, (*itType)->m_pName) ) {
-            m_ModuleList.erase(itObject);
-            delete *itObject;
-          }
-        }
-        // Remove the module type
-        m_TypeList.erase(itType);
-        delete *itType;
-      }
-    }
-  }
-}
-
-Module *      ModuleLibrary::NewObject(const char *pTypeName, const char *pName) {
-  Type *pType;
-  ostringstream stream;
-  if( pType = m_TypeList.Get(pTypeName)) {
-    if(pName == NULL) {
-      stream << pTypeName << m_iSequenceNumber << ends;
-      pName = stream.str().c_str();
-    }
-    Module * pModule = pType->m_pConstructor(pName);
-    if(pModule) {
-      pModule->SetType(pType);
-      m_ModuleList.push_back(pModule);
-      globalSymbolTable().addModule(pModule);
-      // Tell the gui or any modules that are interfaced to gpsim
-      // that a new module has been added.
-      gi.new_module(pModule);
-      return pModule;
-    }
-  }
-  return NULL;
-}
-
-void          ModuleLibrary::Delete(Module *pObject) {
-  ModuleList::iterator it;
-  if( (it = ::find(m_ModuleList.begin(), m_ModuleList.end(), pObject))
-      != m_ModuleList.end()) {
-    m_ModuleList.erase(it);
-    // JRH - there should be a module_type->delete() to call
-    delete *it;
-  }
-}
-
-ICommandHandler * ModuleLibrary::GetCommandHandler(const char *pName) {
-  File *pFile = m_FileList.Get(pName);
-  if(pFile != NULL) {
-    return pFile->GetCli();
-  }
-  return NULL;
-}
-
-void * ModuleLibrary::GetLibraryFileHandle(const char *pName) {
-  File *pFile = m_FileList.Get(pName);
-  if(pFile != NULL) {
-    return pFile->m_pHandle;
-  }
-  return NULL;
-}
-
-void * ModuleLibrary::GetLibraryFunction(const char *pLibraryName,
-                                         const char *pFunctionName) {
-  File *pFile = m_FileList.Get(pLibraryName);
-  if(pFile != NULL) {
-    const char * error;
-    return get_library_export(pFunctionName, pFile->m_pHandle, &error);
-  }
-  return NULL;
-}
-
-string        ModuleLibrary::DisplayFileList() {
-  ostringstream stream;
-  FileList::iterator  it;
-  FileList::iterator  itEnd(m_FileList.end());
-  stream << "Module Library Files\n";
-  
-  for( it = m_FileList.begin(); it != itEnd; it++) {
-    stream << (*it)->m_pName << endl;
-    Module_Types *pLibModList = (*it)->get_mod_list();
-    if(pLibModList) {
-      // Loop through the list and display all of the module types.
-      for(Module_Types *pModTypes = pLibModList;
-            pModTypes->names[0] != NULL;
-            pModTypes++) {
-        stream << "   " << pModTypes->names[0] << endl;
-      }
-    }
-  }
-  stream << ends;
-  return string(stream.str());
-}
-
-string        ModuleLibrary::DisplayModuleTypeList() {
-  ostringstream stream;
-  string sDisplay;
-  TypeList::iterator  it;
-  TypeList::iterator  itEnd(m_TypeList.end());
-  stream << "Module Types\n";
-  for( it = m_TypeList.begin(); it != itEnd; it++) {
-    stream << (*it)->m_pName << endl;
-  }
-  stream << ends;
-  return string(stream.str());
-}
-
-string  ModuleLibrary::DisplayModuleList()
+int ModuleLibrary::InstantiateObject(string &sObjectName, string &sInstantiatedName)
 {
-  //  return globalSymbolTable().listModules();
-  return string ("FIXME -- modules.cc - DisplayModuleList");
-}
 
-string ModuleLibrary::DisplayModulePins(char *pName)
-{
-  ostringstream stream;
-  Module * pMod = globalSymbolTable().findModule(pName);
-  if(pMod == NULL) {
-    stream << "module `" << pName << "' wasn't found" << endl;
+  ModuleTypeInfo_t::iterator mti = ModuleTypes.find(sObjectName);
+  if (mti != ModuleTypes.end()) {
+
+    Module *pModule = mti->second->module_constructor(sInstantiatedName.c_str());
+    globalSymbolTable().addModule(pModule);
+
+    // Tell the gui or any modules that are interfaced to gpsim
+    // that a new module has been added.
+    gi.new_module(pModule);
+    return pModule!=0;
   }
-  else {
-    for(int i=1; i<=pMod->get_pin_count(); i++) {
-      stream << " Pin number " << i
-            << " named " << pMod->get_pin_name(i) 
-	          << " is " << ( (pMod->get_pin_state(i)>0) ? "high" : "low");
-      stream << endl;
-    }
-  }
-  stream << ends;
-  return string(stream.str());
+  return 0;
+
 }
-
-string        ModuleLibrary::DisplayProcessorTypeList() {
-  // I'm thinking of moving the processor constructor list
-  // into the ModuleLibrary since ProcessorConstructors 
-  // come from module library files.
-  return ProcessorConstructorList::GetList()->DisplayString();
-}
-
-ModuleLibrary::FileList & ModuleLibrary::GetFileList() {
-  return m_FileList;
-}
-
-ModuleLibrary::TypeList & ModuleLibrary::GetTypeList() {
-  return m_TypeList;
-}
-
-#if 0
-Processor *   ModuleLibrary::NewProcessorFromFile(const char *pName) {
-  iReturn = CSimulationContext::GetContext()->LoadProgram(
-                pName);
-  return NULL;
-}
-
-Processor *   ModuleLibrary::NewProcessorFromType(const char *pType,
-                                                  const char *pName) {
-  return NULL;
-}
-
-void          ModuleLibrary::DeleteProcessor(Processor *) {
-}
-#endif
-
-bool ModuleLibrary::AddFile(const char *library_name, void *library_handle)
-{
-  const char * error;
-  if(library_name) {
-    string sName(library_name);
-    MakeCanonicalName(sName, sName);
-    File *ml = new File(sName.c_str(), library_handle);
-    m_FileList.push_back(ml);
-    ml->get_mod_list = (Module_Types_FPTR)get_library_export(
-      "get_mod_list", ml->m_pHandle, &error);
-
-    if (NULL == ml->get_mod_list) {
-      cout << "WARNING: non-conforming module library\n"
-           << "  gpsim libraries should have the get_mod_list() function defined\n";
-      fputs(error, stderr);
-      fputs ("\n", stderr);
-      free_error_message(error);
-    } else {
-
-      // Get a pointer to the list of modules that this library file supports.
-      Module_Types *pLibModList = ml->get_mod_list();
-
-      if(pLibModList) {
-        // Loop through the list and display all of the module types.
-        for(Module_Types *pModTypes = pLibModList;
-              pModTypes->names[0] != NULL;
-              pModTypes++) {
-          for(int iIndex = 0; iIndex < Module_Types_Name_Count; iIndex++) {
-            char *pModName = pModTypes->names[iIndex];
-            if(pModName != NULL && ! m_TypeList.Exists(pModName)) {
-              m_TypeList.Add(
-                new Type(pModName, pModTypes->module_constructor));
-            }          
-          }
-        }
-      }
-        // If the module has an "initialize" function, then call it now.
-      typedef  void * (*void_FPTR)(void);
-      void * (*initialize)(void) = (void_FPTR)get_library_export(
-        "initialize", ml->m_pHandle, NULL);
-      if(initialize)
-        initialize();
-
-      ICommandHandler * pCliHandler = ml->GetCli();
-      if (pCliHandler != NULL)
-        CCommandManager::GetManager().Register(pCliHandler);
-    }
-    return true;
-  } else {
-    string sMsg("AddLibrary() called with null pointer");
-    throw new Error(sMsg);
-  }
-  return false;
-}
-
-void ModuleLibrary::MakeCanonicalName(string &sPath, string &sName) {
-#ifdef _WIN32
-  sName = sPath;
-#else
-  GetFileName(sPath, sName);
-#endif
-}
-
-bool ModuleLibrary::FileExists(const string &sName) {
-  return m_FileList.Exists(sName.c_str());
-#if 0
-  FileList::iterator it;
-  FileList::iterator itEnd = m_FileList.end();
-  for(it = m_FileList.begin(); it != itEnd; it++) {
-    if(sName.compare((*it)->pName) == 0) {
-      return true;
-    }
-  }
-  return false;
-#endif
-}
-
-
-ICommandHandler *ModuleLibrary::File::GetCli() {
-
-  PFNGETCOMMANDHANDLER pGetCli = (PFNGETCOMMANDHANDLER)get_library_export(
-    GPSIM_GETCOMMANDHANDLER, m_pHandle, NULL);
-  if (pGetCli != NULL)
-    return pGetCli();
-  return NULL;
-}
-
-Module *ModuleLibrary::TypeList::NewObject(const char *pName) {
-  Type *pType = Get(pName);
-  if(pType != NULL) {
-    return pType->m_pConstructor(pName);
-  }
-  return NULL;
-}
-
-
-
 
 
 /*****************************************************************************
@@ -432,6 +261,15 @@ Module::Module(const char *_name, const char *desc)
 
 }
 
+static void dumpOneSymbol(const SymbolEntry_t &sym)
+{
+  cout << "  " << sym.second
+       << " stored as " << sym.first
+       << endl;
+}
+
+
+
 Module::~Module(void)
 {
   map<string ,ModuleScript *>::iterator si;
@@ -444,12 +282,17 @@ Module::~Module(void)
   }
   m_scripts.clear();
 
-  globalSymbolTable().removeModule(this);
+  deleteSymbol("xpos");
+  deleteSymbol("ypos");
 
-//  instantiated_modules_list.remove(this);
+  cout << "Stuff still in the symbol table:\n";
+  mSymbolTable.ForEachSymbolTable(dumpOneSymbol);
 
   delete package;
   delete xref;
+
+  globalSymbolTable().removeModule(this);
+
 }
 
 void Module::reset(RESET_TYPE r)
@@ -457,14 +300,51 @@ void Module::reset(RESET_TYPE r)
   cout << " resetting module " << name() << endl;
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 int Module::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
 {
   return mSymbolTable.addSymbol(pSym, ps_AliasedName);
 }
-int Module::removeSymbol(gpsimObject *pSym, bool bDeleteObject)
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int Module::removeSymbol(gpsimObject *pSym)
 {
-  return mSymbolTable.removeSymbol(pSym, bDeleteObject);
+  return mSymbolTable.removeSymbol(pSym);
 }
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int Module::removeSymbol(const string &s)
+{
+  return mSymbolTable.removeSymbol(s);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int Module::deleteSymbol(const string &s)
+{
+  return mSymbolTable.deleteSymbol(s);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int Module::deleteSymbol(gpsimObject **ppSym)
+{
+  if (!ppSym && !*ppSym)
+    return 0;
+
+  if (!removeSymbol(*ppSym))
+    return 0;
+
+  delete *ppSym;
+  *ppSym = 0;
+  return 1;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 gpsimObject *Module::findSymbol(const string &searchString)
 {
   return mSymbolTable.findSymbol(searchString);
@@ -479,10 +359,6 @@ void Module::create_pkg(unsigned int number_of_pins)
 
   package = new Package(number_of_pins);
 
-}
-
-void Module::SetType(ModuleLibrary::Type *pType) {
-  m_pType = pType;
 }
 
 //-------------------------------------------------------------------

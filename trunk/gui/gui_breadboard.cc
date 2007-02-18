@@ -1986,43 +1986,45 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     }
 
     gtk_clist_clear(GTK_CLIST(module_clist));
+#ifdef OLD_MODULE_LIBRARY
+    ModuleLibrary::FileList::iterator  mi;
+    ModuleLibrary::FileList::iterator  itFileListEnd(ModuleLibrary::GetFileList().end());
+    // Add all modules
+    for (mi = ModuleLibrary::GetFileList().begin();
+         mi != itFileListEnd;
+         mi++)
+    {
 
-  ModuleLibrary::FileList::iterator  mi;
-  ModuleLibrary::FileList::iterator  itFileListEnd(ModuleLibrary::GetFileList().end());
-        // Add all modules
-  for (mi = ModuleLibrary::GetFileList().begin();
-	     mi != itFileListEnd;
-	     mi++)
-	{
-
-    ModuleLibrary::File *t = *mi;
-	  cout << t->name() << '\n';
-    Module_Types * pFileTypes;
-	  if((pFileTypes = t->get_mod_list())) {
-      // Loop through the list and display all of the modules.
-      int i=0;
+      ModuleLibrary::File *t = *mi;
+      cout << t->name() << '\n';
+      Module_Types * pFileTypes;
+      if((pFileTypes = t->get_mod_list())) 
+      {
+        // Loop through the list and display all of the modules.
+        int i=0;
     
-      while(pFileTypes[i].names[0])
-      {   
-        char name[STRING_SIZE];
-        char library[STRING_SIZE];
-        char *text[2]={name, library};
-        int row;
+        while(pFileTypes[i].names[0])
+        {   
+          char name[STRING_SIZE];
+          char library[STRING_SIZE];
+          char *text[2]={name, library};
+          int row;
 
-        strncpy(name,pFileTypes[i].names[0], STRING_SIZE);
-        strncpy(library,t->name(), STRING_SIZE);
+          strncpy(name,pFileTypes[i].names[0], STRING_SIZE);
+          strncpy(library,t->name(), STRING_SIZE);
 
-        row = gtk_clist_append(GTK_CLIST(module_clist),
-                               text);
+          row = gtk_clist_append(GTK_CLIST(module_clist),
+                                 text);
 
-        gtk_clist_set_row_data (GTK_CLIST(module_clist),
-                                row,
-                                (gpointer)pFileTypes[i].names[0]);
+          gtk_clist_set_row_data (GTK_CLIST(module_clist),
+                                  row,
+                                  (gpointer)pFileTypes[i].names[0]);
 
-        i++;
+          i++;
+        }
       }
     }
-  }
+#endif
 
   gtk_widget_show(dialog);
 
@@ -2129,14 +2131,18 @@ static void add_library(GtkWidget *button, Breadboard_Window *bbw)
     const char *library_name;
 
     library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
-
+#ifdef OLD_MODULE_LIBRARY
     if(library_name)
       ModuleLibrary::LoadFile(library_name);
+#else
+    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+#endif
 }
 
 static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 {
 
+#ifdef OLD_MODULE_LIBRARY
     char *module_type;
     const char *module_name;
 
@@ -2149,6 +2155,9 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
         if(module_name != 0)
           ModuleLibrary::NewObject(module_type, module_name);
     }
+#else
+    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+#endif
 }
 
 static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
@@ -2347,7 +2356,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 		m->name(),
 		xpos->nGet(),
 		ypos->nGet());*/
-    
+#ifdef OLD_MODULE_LIBRARY
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
     ModuleLibrary::FileList::iterator  mi;
@@ -2361,6 +2370,9 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       fprintf(fo, "module library %s\n",
       t->name());
     }
+#else
+    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+#endif
 
     // Save modules
     fprintf(fo, "\n\n# Modules:\n");
@@ -2374,6 +2386,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       list <Value *> :: iterator attribute_iterator;
       m = p->module();
 
+#ifdef OLD_MODULE_LIBRARY
       Processor *cpu;
       cpu=dynamic_cast<Processor*>(m);
       if(cpu==0)
@@ -2382,6 +2395,9 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
         m->type(),
         m->name().c_str());
       }
+#else
+    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+#endif
 
       /*
       for(attribute_iterator = m->attributes.begin();

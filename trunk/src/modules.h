@@ -67,149 +67,20 @@ enum SIMULATION_MODES
 };
 
 
-template<class _Type>
-class OrderedVector : public vector<_Type*> {
+//------------------------------------------------------------------------
+//
+// ModuleLibrary
+//
+// A module library is an OS dependent dynamically loadable library of
+// gpsim Modules. A Module (see below) can range from anything as simple
+// as a resistor to as complicated as microcontroller. However, the interface
+// to loading libraries and instantiating modules is kept simple:
 
-  struct NameLessThan : binary_function<_Type*, _Type*, bool> {
-    bool operator()(const _Type* left, const _Type* right) const {
-      return strcmp(left->m_pName, right->m_pName) < 0;
-    }
-  };
-
+class ModuleLibrary
+{
 public:
-  typedef typename vector<_Type*>::iterator iterator;
-
-  OrderedVector() {
-  }
-  bool  Exists(const char *pName) {
-    return Get(pName) != NULL;
-  }
-  iterator FindIt(const char *pName) {
-    _Type KeyValue(pName);
-    iterator sti = lower_bound(vector<_Type*>::begin( ), vector<_Type*>::end( ),
-      &KeyValue, NameLessThan());
-    if( sti != vector<_Type*>::end() && strcmp((*sti)->m_pName, pName) == 0) {
-      return sti;
-    }
-    return vector<_Type*>::end();
-  }
-  _Type *Get(const char *pName) {
-    _Type KeyValue(pName);
-    iterator sti = lower_bound(vector<_Type*>::begin( ), vector<_Type*>::end( ),
-      &KeyValue, NameLessThan());
-    if( sti != vector<_Type*>::end() && strcmp((*sti)->m_pName, pName) == 0) {
-      return *sti;
-    }
-    return NULL;
-  }
-  bool Add(_Type *pObject) {
-    iterator it = lower_bound(vector<_Type*>::begin( ), vector<_Type*>::end( ),
-      pObject, NameLessThan());
-    if(it == vector<_Type*>::end() || strcmp((*it)->m_pName, pObject->m_pName) != 0) {
-      insert(it, pObject);
-      return true;
-    }
-    return false;
-  }
-};
-
-typedef Module * (*FNMODULECONSTRUCTOR) (const char *);
-
-class ModuleLibrary {
-public:
-//  static ModuleLibrary & GetSingleton() { return *m_pLibrary;};
-
-  static void         LoadFile(const char *pFilename);
-  static void         FreeFile(const char *pFilename);
-  static Module *     NewObject(const char *pTypeName, const char *pName = NULL);
-  static void         Delete(Module *);
-
-  static ICommandHandler * GetCommandHandler(const char *pName);
-  static void *       GetLibraryFileHandle(const char *pName);
-  static void *       GetLibraryFunction(const char *pLibraryName,
-                                         const char *pFunctionName);
-
-  static string       DisplayFileList();
-  static string       DisplayModuleTypeList();
-  static string       DisplayModuleList();
-  static string       DisplayProcessorTypeList();
-  static string       DisplayModulePins(char *pName);
-#if 0
-  static Processor *  NewProcessorFromFile(const char *pName);
-  static Processor *  NewProcessorFromType(const char *pType,
-                                           const char *pName);
-  static void         DeleteProcessor(Processor *);
-#endif
-
-private:
-  static void         MakeCanonicalName(string &sPath, string &sName);
-  static bool         FileExists(const string &sName);
-  static bool         AddFile(const char *library_name,
-                              void *library_handle);
-
-public:
-#ifndef SWIG
-  // Module file refers to a dynamically loaded program library. (dll or so)
-  class File {
-  public:
-    File(const char * pName, void * pHandle = NULL) {
-      m_pName = strdup(pName);
-      m_pHandle = pHandle;
-    }
-    ~File() {
-      free((void*)m_pName);
-    }
-
-    ICommandHandler *GetCli();
-    const char *name() {
-      return(m_pName);
-    }
-
-    const char * m_pName;
-    void * m_pHandle;
-    Module_Types * (*get_mod_list)(void);
-  };
-  /*
-    FileList tracks loaded library files. (i.e .dll and .so files)
-  */
-  typedef OrderedVector<File>     FileList;
-  static  FileList &              GetFileList();
-
-  // Module Type refers to each Module_Type exposed a module file.
-  // This includes aliased names.
-  class Type {
-  public:
-    Type(const char * pName, FNMODULECONSTRUCTOR pConstructor = NULL) {
-      m_pName = pName;
-      m_pConstructor = pConstructor;
-    }
-    const char *        m_pName;
-    FNMODULECONSTRUCTOR m_pConstructor;
-  };
-
-  /*
-    TypeList is a consolidated list of all module type names
-    from all loaded library files.
-  */
-  class TypeList : public OrderedVector<Type> {
-      Module *NewObject(const char *pName);
-  };
-  static  TypeList &          GetTypeList();
-#endif
-
-private:
-  static  FileList            m_FileList;
-  static  TypeList            m_TypeList;
-
-  ModuleLibrary() {};
-  ~ModuleLibrary() {};
-  static  int             m_iSequenceNumber;
-  /*
-    ModuleList is a list of all allocated modules.
-    JRH - I'm not convinced that his is needed.
-  */
-  typedef vector<Module*> ModuleList;
-  static  ModuleList      m_ModuleList;
+  static int LoadFile(string &sLibraryName);
+  static int InstantiateObject(string &sObjectName, string &sInstantiatedName);
 };
 
 
@@ -217,11 +88,10 @@ private:
 //
 /// Module - Base class for all gpsim behavior models. 
 
-class Module : public gpsimObject {
+class Module : public gpsimObject
+{
 public:
-  friend class ModuleLibrary;
 
-  //list<Value *> attributes;         // A list of attributes that pertain to the Module
   Package  *package;                // A package for the module
   ModuleInterface *interface;       // An interface to the module.
   SIMULATION_MODES simulation_mode; // describes the simulation state for this module
@@ -238,22 +108,16 @@ public:
   virtual void assign_pin(unsigned int pin_number, IOPIN *pin);
   virtual void create_pkg(unsigned int number_of_pins);
 
-  /// Attributes:
-  /*
-  void add_attribute(Value *);
-
-  virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
-  virtual string  DisplayAttributes(bool show_values=true);
-  virtual void initializeAttributes();
-  */
-
   /// Symbols
   /// Each module has its own symbol table. The global symbol
   /// table can access this table too. 
   SymbolTable_t & getSymbolTable() { return mSymbolTable;}
   int addSymbol(gpsimObject *, string *AliasedName=0);
   gpsimObject *findSymbol(const string &);
-  int removeSymbol(gpsimObject *, bool bDeleteObject);
+  int removeSymbol(gpsimObject *);
+  int removeSymbol(const string &);
+  int deleteSymbol(const string &);
+  int deleteSymbol(gpsimObject **);
 
   /// Registers - mostly processors, but can apply to complex modules
   virtual unsigned int register_mask () const { return 0xff;}
@@ -267,6 +131,10 @@ public:
   virtual char *get_version() { return version;}
 
   /// gui
+  /// The simulation engine doesn't know anything about the gui.
+  /// However, the set_widget and get_widget provide a mechanism
+  /// for the gui to associate a pointer with a module.
+
   virtual void set_widget(void * a_widget) {widget = a_widget;}
   virtual void *get_widget() {return widget;}
 
@@ -280,13 +148,6 @@ public:
   /// that may already be queued).
   void run_script(string &script_name);
 
-
-  void SetType(ModuleLibrary::Type *pType);
-#ifndef SWIG
-  const virtual char *GetTypeName() { return m_pType->m_pName; }
-  // deprecated
-  const virtual char *type() { return m_pType->m_pName; }
-#endif
 
   Module(const char *_name=0, const char *desc=0);
   virtual ~Module();
@@ -314,9 +175,7 @@ private:
 
 protected:
   char *version;
-  ModuleLibrary::Type *m_pType;
   SymbolTable_t mSymbolTable;
-
 };
 
 class Module_Types
