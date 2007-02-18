@@ -48,6 +48,10 @@ P16F62x::P16F62x(const char *_name, const char *desc)
 {
 }
 
+P16F62x::~P16F62x()
+{
+}
+
 void P16F62x::create_iopin_map()
 {
   package = new Package(18);
@@ -89,8 +93,9 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x70,0x7f,0x180);
 
 
-  add_sfr_register(indf,   0x180);
-  add_sfr_register(indf,   0x100);
+  alias_file_registers(0x0,0x0,0x180);
+  //add_sfr_register(indf,   0x180);
+  //add_sfr_register(indf,   0x100);
 
   alias_file_registers(0x01,0x04,0x100);
   alias_file_registers(0x81,0x84,0x100);
@@ -109,13 +114,16 @@ void P16F62x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x9c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x9d);
 
-  add_sfr_register(pclath, 0x18a, RegisterValue(0,0));
-  add_sfr_register(pclath, 0x10a, RegisterValue(0,0));
+  //add_sfr_register(pclath, 0x18a, RegisterValue(0,0));
+  //add_sfr_register(pclath, 0x10a, RegisterValue(0,0));
+  // PCLATH
+  alias_file_registers(0x0a,0x0a,0x180);
 
-  add_sfr_register(&intcon_reg, 0x18b, RegisterValue(0,0));
-  add_sfr_register(&intcon_reg, 0x10b, RegisterValue(0,0));
-  add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x18b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x10b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
+  alias_file_registers(0x0b,0x0b,0x180);
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
@@ -332,6 +340,11 @@ P16F628::P16F628(const char *_name, const char *desc)
   if(verbose)
     cout << "f628 constructor, type = " << isa() << '\n';
 
+}
+
+P16F628::~P16F628()
+{
+  cout << "'628 destructor\n";
 }
 
 

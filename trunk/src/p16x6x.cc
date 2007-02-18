@@ -362,6 +362,7 @@ P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
 
 P16X6X_processor::~P16X6X_processor()
 {
+
   cout << __FUNCTION__ << endl;
 
   delete_file_registers(0x20,0x7f);
@@ -485,7 +486,7 @@ void P16C63::create_sfr_map(void)
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
-  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),0);
   add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
   add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
   add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");

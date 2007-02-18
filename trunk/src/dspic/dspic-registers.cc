@@ -95,7 +95,7 @@ namespace dspic_registers {
   //
 
   dsPicProgramCounter::dsPicProgramCounter(dspic::dsPicProcessor *pcpu, PCL *pPCL)
-    : m_pcl(pPCL), m_cpu(pcpu)
+    : Program_Counter("pc", "Program Counter", pcpu),  m_pcl(pPCL), m_cpu(pcpu)
   {
     printf("dspic program counter.\n");
 

@@ -244,7 +244,10 @@ Register::Register(Module *_cpu, const char *pName, const char *pDesc)
 }
 Register::~Register()
 {
-
+  if (cpu) {
+    //cout << "Removing register from ST:" << name_str <<  " addr "<< this << endl;
+    cpu->removeSymbol(this);
+  }
 }
 
 //------------------------------------------------------------
@@ -537,6 +540,12 @@ RegisterCollection::RegisterCollection (Processor   *pProcessor,
   m_ppRegisters = ppRegisters;
   m_uSize = uiSize;
   pProcessor->addSymbol(this);
+}
+
+RegisterCollection:: ~RegisterCollection()
+{
+  if (m_pProcessor)
+    m_pProcessor->removeSymbol(this);
 }
 
 unsigned int RegisterCollection::GetSize() {

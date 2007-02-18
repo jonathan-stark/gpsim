@@ -770,15 +770,15 @@ class StopWatchValue : public Integer
 private:
   StopWatch *sw;
 public:
-  StopWatchValue(StopWatch *_sw) : Integer(0), sw(_sw) 
+  StopWatchValue(StopWatch *_sw) 
+    : Integer("stopwatch",0,
+              " A timer for monitoring and controlling the simulation.\n"
+              " The units are in simulation cycles.\n"
+              "  stopwatch.rollover - specifies rollover value.\n"
+              "  stopwatch.direction - specifies count direction.\n"
+              "  stopwatch.enable - enables counting if true.\n"), 
+      sw(_sw) 
   {
-    new_name("stopwatch");
-    set_description(" A timer for monitoring and controlling the simulation.\n"
-		    " The units are in simulation cycles.\n"
-		    "  stopwatch.rollover - specifies rollover value.\n"
-		    "  stopwatch.direction - specifies count direction.\n"
-		    "  stopwatch.enable - enables counting if true.\n"
-		    );
   }
   virtual void set(Value *v)
   {
@@ -809,10 +809,12 @@ class StopWatchRollover : public Integer
 private:
   StopWatch *sw;
 public:
-  StopWatchRollover(StopWatch *_sw) : Integer(1000000), sw(_sw) 
+  StopWatchRollover(StopWatch *_sw)
+    : Integer("stopwatch.rollover",
+              1000000,
+              " specifies the stop watch roll over time."), 
+      sw(_sw) 
   {
-    new_name("stopwatch.rollover");
-    set_description(" specifies the stop watch roll over time.");
   }
   virtual void set(Value *v)
   {
@@ -826,10 +828,11 @@ class StopWatchEnable : public Boolean
 private:
   StopWatch *sw;
 public:
-  StopWatchEnable(StopWatch *_sw) : Boolean(true) , sw(_sw)
+  StopWatchEnable(StopWatch *_sw)
+    : Boolean("stopwatch.enable",
+              true," If true, the stop watch is enabled."),
+      sw(_sw)
   {
-    new_name("stopwatch.enable");
-    set_description(" If true, the stop watch is enabled.");
   }
   virtual void set(Value *v)
   {
@@ -844,10 +847,12 @@ class StopWatchDirection : public Boolean
 private:
   StopWatch *sw;
 public:
-  StopWatchDirection(StopWatch *_sw) : Boolean(true) , sw(_sw)
+  StopWatchDirection(StopWatch *_sw) 
+    : Boolean("stopwatch.direction",
+              true,
+              " If true, the stop watch counts up otherwise down."),
+      sw(_sw)
   {
-    new_name("stopwatch.direction");
-    set_description(" If true, the stop watch counts up otherwise down.");
   }
   virtual void set(Value *v)
   {
@@ -881,6 +886,14 @@ StopWatch::StopWatch()
 
 }
 
+StopWatch::~StopWatch()
+{
+
+  globalSymbolTable().deleteSymbol(value->name());
+  globalSymbolTable().deleteSymbol(rollover->name());
+  globalSymbolTable().deleteSymbol(enable->name());
+  globalSymbolTable().deleteSymbol(direction->name());
+}
 void StopWatch::init()
 {
   if(!initialized) {

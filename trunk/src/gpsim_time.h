@@ -217,6 +217,7 @@ class StopWatch : public TriggerObject
  public:
 
   StopWatch();
+  ~StopWatch();
   void init();
 
   guint64 get();

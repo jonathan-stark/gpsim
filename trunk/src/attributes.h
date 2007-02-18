@@ -48,6 +48,7 @@ protected:
   Processor *cpu;
 public:
   SafeModeAttribute(Processor *_cpu);
+  ~SafeModeAttribute();
   virtual void set(Value *v);
   virtual void get(bool &b);
 };

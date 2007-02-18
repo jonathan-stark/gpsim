@@ -760,7 +760,7 @@ WREG::WREG(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc)
 {
   if(cpu) {
-    unsigned int trace_command = trace.allocateTraceType(new WTraceType(get_cpu(),1));
+    unsigned int trace_command = trace.allocateTraceType(m_tt = new WTraceType(get_cpu(),1));
     RegisterValue rv(trace_command+(0<<22), trace_command+(2<<22));
     set_write_trace(rv);
     rv = RegisterValue(trace_command+(1<<22), trace_command+(3<<22));
@@ -769,3 +769,7 @@ WREG::WREG(Processor *pCpu, const char *pName, const char *pDesc)
 
 }
 
+WREG::~WREG()
+{
+  delete m_tt;
+}

@@ -387,7 +387,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
   }
 
   if(cpu) {
-    cpu->ema.set_cpu(cpu);
+    //cpu->ema.set_cpu(cpu);
     cpu->ema.set_Registers(rom, rom_size);
     m_UiAccessOfRom = new RegisterCollection(cpu,
 					     "eeData",

@@ -66,23 +66,39 @@ Boston, MA 02111-1307, USA.  */
 //
 //
 
-CSimulationContext::CSimulationContext() :
-  m_bEnableLoadSource(*new Boolean("EnableSourceLoad", true,
-    "Enables and disables loading of source code")) {
+CSimulationContext::CSimulationContext() 
+  :  m_bEnableLoadSource(*new Boolean("EnableSourceLoad", true,
+                                      "Enables and disables loading of source code")) 
+{
   active_cpu_id = 0;
   cpu_ids = 0;
   m_pbUserCanceled = NULL;
+  globalSymbolTable().addSymbol(&m_bEnableLoadSource);
+}
+
+CSimulationContext::~CSimulationContext() 
+{
+  globalSymbolTable().deleteSymbol("EnableSourceLoad");
 }
 
 void CSimulationContext::Initialize()
 {
-  cout << "CSimulationContext::Initialize() -- FIXME\n";
-  //  get_symbol_table().add(&m_bEnableLoadSource);
 }
 
-CSimulationContext *CSimulationContext::s_SimulationContext = new CSimulationContext();
+//------------------------------------------------------------
+// The static pointer 's_SimulationContext' in CSimulationContext
+// is initialized to 0 here, but initialized to something valid 
+// when GetContext is called.
 
-CSimulationContext *CSimulationContext::GetContext() {
+CSimulationContext *CSimulationContext::s_SimulationContext = 0;
+
+CSimulationContext *CSimulationContext::GetContext()
+{
+  // Declare static CSimulationContext and return a pointer to it.
+  // Note, we could 'new' an object, but there's no way to call the
+  // destructor in that case.
+  static CSimulationContext sContext;
+  s_SimulationContext = &sContext;
   return s_SimulationContext;
 }
 
@@ -263,13 +279,14 @@ void CSimulationContext::dump_processor_list(void)
 
 void CSimulationContext::Clear() 
 {
-  GetBreakpoints().clear_all(GetActiveCPU());
+
   CProcessorList::iterator processor_iterator; 
   for (processor_iterator = processor_list.begin();
        processor_iterator != processor_list.end(); 
-       processor_iterator++) {
+       ++processor_iterator) {
     CProcessorList::value_type vt = *processor_iterator;
     Processor *p = vt.second;
+    GetBreakpoints().clear_all(p);
     delete p;
   }
   cout << __FUNCTION__ << " FIXME \n";

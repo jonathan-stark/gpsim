@@ -51,9 +51,9 @@ class MemoryAccess :  public TriggerObject, public gpsimObject
 public:
 
   MemoryAccess(Processor *new_cpu);
+  ~MemoryAccess();
 
   virtual Processor *get_cpu(void);
-  virtual void set_cpu(Processor *p);
 
   list<Register *> SpecialRegisters;
 
@@ -81,7 +81,8 @@ class ProgramMemoryAccess :  public MemoryAccess
   };
 
 
-  ProgramMemoryAccess(Processor *new_cpu=0);
+  ProgramMemoryAccess(Processor *new_cpu);
+  ~ProgramMemoryAccess();
 
   virtual void putToAddress(unsigned int addr, instruction *new_instruction);
   virtual void putToIndex(unsigned int uIndex, instruction *new_instruction);
@@ -205,7 +206,7 @@ class RegisterMemoryAccess : public MemoryAccess
 {
  public:
   
-  RegisterMemoryAccess(Processor *new_cpu=0);
+  RegisterMemoryAccess(Processor *pCpu);
   virtual ~RegisterMemoryAccess();
   virtual Register *get_register(unsigned int address);
   unsigned int get_size(void) { return nRegisters; }
@@ -618,6 +619,11 @@ private:
   bool bBreakOnReset;
   Boolean *m_pbBreakOnInvalidRegisterRead;
   Boolean *m_pbBreakOnInvalidRegisterWrite;
+  Boolean *m_pWarnMode;
+  Boolean *m_pSafeMode;
+  Boolean *m_pUnknownMode;
+  Boolean *m_pBreakOnReset;
+
 };
 
 

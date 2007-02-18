@@ -467,6 +467,7 @@ eval_cmd:
               }
               pValue->update();
             }
+            delete $3;
           }
 
           | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T
@@ -593,9 +594,17 @@ node_cmd
 module_cmd
           : MODULE                      {c_module.module();}
           | MODULE bit_flag             {c_module.module($2);}
-          | MODULE string_option        {c_module.module($2,(list <string> *)0);}
+          | MODULE string_option
+          { 
+            c_module.module($2,(list <string> *)0);
+            delete $2;
+          }
           | MODULE string_option string_list
-                                        {c_module.module($2, $3);}
+          {
+            c_module.module($2, $3); 
+            delete $2; 
+            delete $3;
+          }
           ;
 
 
@@ -913,8 +922,9 @@ string_option:
                  << "' is not a string"
                  << endl; 
           }
+          //delete $2;
         }
-	      ;
+        ;
 
 string_list
         : LITERAL_STRING_T                        {$$ = new StringList_t(); $$->push_back($1->getVal()); delete $1;}
@@ -974,7 +984,7 @@ gpsimObject_list
 
 expr_list
         : expr                          {$$ = new ExprList_t(); $$->push_back($1);}
-        | expr_list ',' expr            {$1->push_back($3);}
+        | expr_list ',' expr            {$1->push_back($3); }
         ;
 
 binary_expr

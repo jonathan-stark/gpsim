@@ -300,7 +300,7 @@ public:
   virtual unsigned int get_value();
   //virtual unsigned int get_next();
 
-  Program_Counter16();
+  Program_Counter16(Processor *pCpu);
 };
 
 

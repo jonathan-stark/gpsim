@@ -437,10 +437,7 @@ int InterruptTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int 
 void pic_processor::set_eeprom(EEPROM *e)
 { 
   eeprom = e; 
-
-  ema.set_cpu(this);
   ema.set_Registers(e->rom, e->rom_size);
-
 }
 
 //-------------------------------------------------------------------
@@ -1103,7 +1100,7 @@ void pic_processor::reset (RESET_TYPE r)
 pic_processor::pic_processor(const char *_name, const char *_desc)
   : Processor(_name,_desc),
     wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0),
-    W(0), pcl(0), pclath(0),
+    W(0), pcl(0), pclath(0),m_PCHelper(0),
     tmr0(this,"tmr0","Timer 0"),
     m_configMemory(0)
 {
@@ -1138,8 +1135,30 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 pic_processor::~pic_processor()
 {
+
+
   delete m_pResetTT;
   delete m_pInterruptTT;
+
+  delete_sfr_register((Register **)&W,0);
+  delete_sfr_register((Register **)&pcl,0);
+
+  delete_sfr_register((Register **)&pclath,0);
+  delete_sfr_register((Register **)&status,0);
+  delete_sfr_register((Register **)&indf,0);
+  delete m_PCHelper;
+  delete stack;
+
+#ifdef CLOCK_EXPERIMENTS
+  delete mExecute1Cycle;
+  delete mExecute2ndHalf;
+  delete mExecuteInterrupt;
+  delete mCaptureInterrupt;
+  delete mIdle;
+#endif
+
+  delete config_modes;
+
 }
 //-------------------------------------------------------------------
 //
@@ -1157,8 +1176,6 @@ void pic_processor::create ()
 
   init_register_memory (register_memory_size());
 
-  create_stack();
-
   // Now, initialize the core stuff:
   pc->set_cpu(this);
 
@@ -1174,12 +1191,12 @@ void pic_processor::create ()
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
   if(pma) {
-    
-    rma.SpecialRegisters.push_back(new PCHelper(this,pma));
+    m_PCHelper = new PCHelper(this,pma);
+    rma.SpecialRegisters.push_back(m_PCHelper);
     rma.SpecialRegisters.push_back(status);
     rma.SpecialRegisters.push_back(W);
 
-    pma->SpecialRegisters.push_back(new PCHelper(this,pma));
+    pma->SpecialRegisters.push_back(m_PCHelper);
     pma->SpecialRegisters.push_back(status);
     pma->SpecialRegisters.push_back(W);
 
@@ -1233,9 +1250,15 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
 void pic_processor::delete_sfr_register(Register **ppReg, unsigned int addr)
 {
 
-  if (ppReg && *ppReg && registers[addr] == *ppReg) {
-    delete *ppReg;
-    registers[addr] = *ppReg = 0;
+  if (ppReg && *ppReg) {
+
+    unsigned int a = (*ppReg)->getAddress();
+    if (registers[a] == *ppReg)
+      delete_file_registers(a,a);
+    else
+      delete *ppReg;
+
+    *ppReg = 0;
   }
 
 }

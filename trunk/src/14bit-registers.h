@@ -308,15 +308,16 @@ public:
 
 //---------------------------------------------------------
 // W register
+class WTraceType;
 
 class WREG : public sfr_register
 {
 public:
 
-  //void put(unsigned int new_value);
-  //unsigned int get();
   WREG(Processor *, const char *pName, const char *pDesc=0);
-  //WREG(Processor *);
+  ~WREG();
+protected:
+  WTraceType *m_tt;
 };
 
 #include "tmr0.h"

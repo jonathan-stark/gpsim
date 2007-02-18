@@ -61,14 +61,22 @@ void WarnModeAttribute::get(bool &b)
 // SafeModeAttribute
 //========================================================================
 
-SafeModeAttribute::SafeModeAttribute(Processor *_cpu) :
-  Boolean(false) ,cpu(_cpu)
+SafeModeAttribute::SafeModeAttribute(Processor *_cpu) 
+  :
+  Boolean("SafeMode",
+          " Model the processor's specification when true. Model the actual\n"
+          " processor when false (e.g. TRIS instruction for mid range PICs\n"
+          " will emit a warning if SafeMode is true).",
+          false),
+  cpu(_cpu)
 {
-  new_name("SafeMode");
-  set_description(" Model the processor's specification when true. Model the actual\n"
-		  " processor when false (e.g. TRIS instruction for mid range PICs\n"
-		  " will emit a warning if SafeMode is true).");
 }
+
+SafeModeAttribute::~SafeModeAttribute()
+{
+  cout << "deleting Safemode \n";
+}
+
 void SafeModeAttribute::set(Value *v)
 {
   Boolean::set(v);
@@ -212,8 +220,6 @@ void init_attributes()
   
   // Define internal simulator attributes .
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
-  //verbosity->setClearableSymbol(false);
-
   globalSymbolTable().addSymbol(verbosity);
   globalSymbolTable().addSymbol(new CycleCounterAttribute());
   stop_watch.init();
@@ -229,4 +235,22 @@ void init_attributes()
   globalSymbolTable().addSymbol(new Integer("SIM_RESET",  SIM_RESET));    // Simulation Reset
   globalSymbolTable().addSymbol(new Integer("MCLR_RESET", MCLR_RESET));   // MCLR (Master Clear) Reset
 
+}
+
+void destroy_attributes()
+{
+  cout << " destroying attributes\n" ;
+  globalSymbolTable().deleteSymbol("SourcePath");
+  globalSymbolTable().deleteSymbol("sim.verbosity");
+  globalSymbolTable().deleteSymbol("cycles");
+#ifdef HAVE_GUI
+  globalSymbolTable().deleteSymbol("sim.gui_update_rate");
+#endif
+  globalSymbolTable().deleteSymbol("POR_RESET");
+  globalSymbolTable().deleteSymbol("WDT_RESET");
+  globalSymbolTable().deleteSymbol("IO_RESET");
+  globalSymbolTable().deleteSymbol("SOFT_RESET");
+  globalSymbolTable().deleteSymbol("BOD_RESET");
+  globalSymbolTable().deleteSymbol("SIM_RESET");
+  globalSymbolTable().deleteSymbol("MCLR_RESET");
 }

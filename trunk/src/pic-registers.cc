@@ -45,7 +45,8 @@ Boston, MA 02111-1307, USA.  */
 
 //--------------------------------------------------
 
-Program_Counter::Program_Counter()
+Program_Counter::Program_Counter(const char *name, const char *desc, Module *pM)
+  : Value(name,desc,pM)
 {
   if(verbose)
     cout << "pc constructor\n";
@@ -63,7 +64,11 @@ Program_Counter::Program_Counter()
   trace_branch = 0;
   trace_skip = 0;
   trace_other = 0;
-  new_name("pc");
+}
+Program_Counter::~Program_Counter()
+{
+  if (cpu)
+    cpu->removeSymbol(this);
 }
 
 //--------------------------------------------------

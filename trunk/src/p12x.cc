@@ -124,7 +124,6 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
 {
 
   if(pcpu) {
-    pcpu->ema.set_cpu(pcpu);
     pcpu->ema.set_Registers(rom, rom_size);
     m_UiAccessOfRom = new RegisterCollection(pcpu,
 					     "eeData",
@@ -299,6 +298,14 @@ P12C508::P12C508(const char *_name, const char *desc)
 
 P12C508::~P12C508()
 {
+  delete_sfr_register((Register **)&m_gpio,0);
+  delete_sfr_register((Register **)&m_tris,0);
+  delete_file_registers(0x7, 0x1f);
+
+  removeSymbol(*m_configMemory);
+  delete *m_configMemory;
+  delete [] m_configMemory;
+
 }
 
 

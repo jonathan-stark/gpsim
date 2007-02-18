@@ -152,7 +152,7 @@ Stimulus_Node::~Stimulus_Node()
     sptr = sptr->next;
   }
 
-  globalSymbolTable().removeSymbol(this,false);
+  globalSymbolTable().removeSymbol(this);
 
 }
 
@@ -526,18 +526,21 @@ void Stimulus_Node::time_constant(double new_tc)
 
 //------------------------------------------------------------------------
 stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
-  : snode(0), next(0),
+  : Value(cPname, "", 0),snode(0), next(0),
     bDrivingState(false), bDriving(false),
     Vth(_Vth), Zth(_Zth), 
     Cth(0.0), // Farads
     nodeVoltage(0.0) // volts
 {
+  /*
   if(cPname && *cPname)
     new_name(cPname,false);
+  */
+  globalSymbolTable().addSymbol(this);
 }
 void stimulus::new_name(const char *cPname, bool bClearableSymbol)
 {
-  globalSymbolTable().removeSymbol(this,false);
+  globalSymbolTable().removeSymbol(this);
   gpsimObject::new_name(cPname);
   globalSymbolTable().addSymbol(this);
 
@@ -586,7 +589,8 @@ stimulus::~stimulus(void)
   if(snode)
     snode->detach_stimulus(this);
 
-  globalSymbolTable().removeSymbol(this,false);
+  globalSymbolTable().removeSymbol(this);
+  cout << "Removing " << name() << " from ST\n";
   /*
   Value *vpNodeSym = symbol_table.remove(name());
   if(vpNodeSym != NULL)

@@ -557,7 +557,9 @@ unsigned int PCL16::get_value()
 // Program_Counter16
 // The Program_Counter16 is almost identical to Program_Counter.
 // The major difference is that the PC counts by 2 in the 16bit core.
-Program_Counter16::Program_Counter16()
+Program_Counter16::Program_Counter16(Processor *pCpu)
+  : Program_Counter("pc","Program Counter", pCpu)
+
 {
   if(verbose)
     cout << "pc constructor 16\n";

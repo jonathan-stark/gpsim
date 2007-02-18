@@ -79,12 +79,6 @@ public:
   unsigned int number_of_pins;
 
 
-  IOPIN **pins;  /* An array containing all of the package's pins. The index
-		  * into the array is the package's pin #. If pins[i] is NULL
-		  * then there's gpsim does not provide any resources for 
-		  * simulating the pin.
-		  */
-
   Package(void);
   Package(unsigned int number_of_pins);
   virtual ~Package();
@@ -107,11 +101,20 @@ public:
   void setPinGeometry(unsigned int pin_number, float x, float y, int orientation, bool bShowName);
   PinGeometry *getPinGeometry(unsigned int pin_number);
 
+  // Debug
+  void showPins();
+
 protected:
   inline bool bIsValidPinNumber(unsigned int pin_number)
   {
     return (pin_number > 0) && (pin_number<=number_of_pins);
   }
+
+  IOPIN **pins;  /* An array containing all of the package's pins. The index
+		  * into the array is the package's pin #. If pins[i] is NULL
+		  * then there's gpsim does not provide any resources for 
+		  * simulating the pin.
+		  */
 
   // pin_position is used by the breadboard to position the pin
   // Its value can be in the range from 0.0000 to 3.9999.

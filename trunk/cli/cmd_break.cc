@@ -149,15 +149,19 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
   ExprList_itor ei = pEL->begin();
   Expression *pFirst = *ei;
   ++ei;
-  Expression *pSecond;
-  if(ei != pEL->end()) {
-    pSecond = *ei;
-    ++ei;
-  }
-  else {
-    pSecond = NULL;
-  }
+  Expression *pSecond  = (ei != pEL->end()) ? *ei : 0;
+  ++ei;
   Expression *pThird = (ei != pEL->end()) ? *ei : 0;
+
+  if (verbose) {
+    cout << "setting breakpoint:\n";
+    if (pFirst)
+      cout << " first expression" << pFirst->toString() << endl;
+    if (pSecond)
+      cout << " second expression" << pSecond->toString() << endl;
+    if (pThird)
+      cout << " third expression" << pThird->toString() << endl;
+  }
 
   LiteralString *pString=0;
   string m;
@@ -217,6 +221,9 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
     if (pString)
       get_bp().set_message(bpn, m);
     get_bp().dump1(bpn);
+    if (dynamic_cast<LiteralInteger*>(pFirst))
+      delete pFirst;
+
   } else {
 
     delete pFirst;
@@ -224,6 +231,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
       delete pSecond;
   }
 
+  delete pEL;
   return bpn;
 
 }

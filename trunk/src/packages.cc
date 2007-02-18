@@ -172,8 +172,9 @@ void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
   case E_NO_PIN:
     pins[pin_number-1] = pin;
 
-    // Tell the I/O pin its number
-    //pin->new_pin_number(pin_number);
+    if (pin)
+      cout << "assigned pin " << pin->name() << " to package pin number " << dec << pin_number<<endl;
+
     break;
 
   }
@@ -185,12 +186,13 @@ void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
 void Package::destroy_pin(unsigned int pin_number, IOPIN *pin)
 {
   if (pin_number) {
-    IOPIN *pPin = get_pin(pin_number);
-    if (!pin || (pin == pPin)) {
+
+    if(pin_number <= number_of_pins) {
+      IOPIN *pPin = pins[pin_number-1];
       delete pPin;
-      if(pin_number <= number_of_pins)
-        pins[pin_number] = 0;
+      pins[pin_number-1] = 0;
     }
+
   } else {
     // Delete all pins
     for (pin_number=1; pin_number <= number_of_pins; pin_number++)
@@ -245,4 +247,20 @@ void PinGeometry::convertToNew()
     }
     m_bShowPinname = true;
   }
+}
+
+//------------------------------------------------------------------------
+void Package::showPins()
+{
+  int pin_number;
+
+
+  for (pin_number=0; pin_number < number_of_pins; pin_number++) {
+
+    IOPIN *pPin = pins[pin_number];
+    cout << " pin #"<<dec<<pin_number << " ptr "<<pPin<<endl;
+    if (pPin)
+      cout << "pin name:" << pPin->name() << endl;
+  }
+
 }

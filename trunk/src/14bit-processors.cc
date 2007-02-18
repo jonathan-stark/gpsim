@@ -98,9 +98,10 @@ public:
 _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
   : pic_processor(_name,_desc), intcon(0)
 {
-  pc = new Program_Counter();
+  pc = new Program_Counter("pc", "Program Counter", this);
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
   option_reg = new OPTION_REG(this,"option_reg");
+  stack = new Stack();
 }
 
 _14bit_processor::~_14bit_processor()
@@ -283,7 +284,7 @@ Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 Pic14Bit::~Pic14Bit()
 {
-  delete m_MCLR;
+  //delete m_MCLR;
   delete m_MCLRMonitor;
 }
 //-------------------------------------------------------------------
@@ -299,8 +300,9 @@ void Pic14Bit::create_symbols()
 void Pic14Bit::create_sfr_map()
 {
  
-  add_sfr_register(indf,    0x80);
   add_sfr_register(indf,    0x00);
+  alias_file_registers(0x00,0x00,0x80);
+  //add_sfr_register(indf,    0x00);
 
   add_sfr_register(&tmr0,   0x01);
   add_sfr_register(option_reg,  0x81, RegisterValue(0xff,0));
@@ -316,11 +318,12 @@ void Pic14Bit::create_sfr_map()
   add_sfr_register(m_portb, 0x06);
   add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
 
-  add_sfr_register(pclath,  0x8a, RegisterValue(0,0));
   add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
+  //add_sfr_register(pclath,  0x8a, RegisterValue(0,0));
 
-  add_sfr_register(&intcon_reg, 0x8b, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x8b, RegisterValue(0,0));
+  alias_file_registers(0x0a,0x0b,0x80);
 
   intcon = &intcon_reg;
 

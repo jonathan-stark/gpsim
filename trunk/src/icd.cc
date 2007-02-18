@@ -194,7 +194,7 @@ public:
     Program_Counter *replaced;
     int is_stale;
 
-    icd_PC();
+    icd_PC(Processor *);
 
     virtual void put_value(unsigned int new_value);
     virtual unsigned int get_value(void);
@@ -450,8 +450,7 @@ void put_dumb_status_register(Status_register **frp)
 void put_dumb_pc_register(Program_Counter **frp)
 {
     Program_Counter *fr = *frp;
-    icd_PC *ir = new icd_PC();
-    ir->set_cpu(fr->get_cpu());
+    icd_PC *ir = new icd_PC(fr->get_cpu());
     ir->memory_size_mask = fr->memory_size_mask;
     *frp = ir;
     ir->replaced = fr;
@@ -1191,7 +1190,8 @@ unsigned int icd_PCLATH::get_value(void)
     }
     return(value.get());
 }
-icd_PC::icd_PC()
+icd_PC::icd_PC(Processor *pCpu)
+  : Program_Counter("pc", "ICD Program Counter", pCpu)
 {
     replaced=0;
     value=0x42;

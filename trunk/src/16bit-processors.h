@@ -130,7 +130,7 @@ public:
   Indirect_Addressing  ind1;
   Indirect_Addressing  ind2;
   USART_MODULE         usart;
-  Stack16              stack16;
+  //Stack16              stack16;
   TBL_MODULE           tbl;
   TMR2_MODULE          tmr2_module;
   TMR3_MODULE          tmr3_module;
@@ -150,8 +150,6 @@ public:
     }
   virtual void create_sfr_map();
   virtual void create_config_memory();
-
-  virtual void create_stack() {stack = &stack16;};
 
   // Return the portion of pclath that is used during branching instructions
   virtual unsigned int get_pclath_branching_jump()
