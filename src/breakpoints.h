@@ -647,6 +647,7 @@ public:
                    const char *_command,
                    bool bPostAssertion
                    );
+  virtual ~CommandAssertion();
 
   virtual void execute();
   virtual void print();

@@ -105,7 +105,11 @@ void cmd_module::module(void)
 
   if(verbose)
     cout << "cmd_module: display modules\n";
+#ifdef OLD_MODULE_LIBRARY
   cout << ModuleLibrary::DisplayModuleList();
+#else
+  cout << "Fixme -- display module list\n";
+#endif
 
 }
 
@@ -118,7 +122,11 @@ void cmd_module::module(cmd_options *opt)
     {
 
     case CMD_MOD_LIST:
+#ifdef OLD_MODULE_LIBRARY
       cout << ModuleLibrary::DisplayFileList();
+#else
+      cout << "Fixme -- display file list\n";
+#endif
       break;
 
     default:
@@ -189,21 +197,31 @@ void cmd_module::module(cmd_options_str *cos)
     case CMD_MOD_LIB:
       if(verbose)
         cout << "module command got the library " << cos->str << endl;
+
       try {
-        ModuleLibrary::LoadFile(cos->str);
+        string fname(cos->str);
+        ModuleLibrary::LoadFile(fname);
       }
       catch(Error *pError) {
         cout << pError->get_errMsg();
       }
+
       break;
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library and let
       // gpsim assign the name.
       if(verbose)
         cout << "module command got the module " << cos->str << '\n';
+#ifdef OLD_MODULE_LIBRARY
       if(ModuleLibrary::NewObject(cos->str) == NULL) {
         GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
       }
+#else
+      {
+        cout << "Fixme -- module NewObject\n";
+      }
+#endif
+
       break;
 
     case CMD_MOD_DUMP:
@@ -211,14 +229,13 @@ void cmd_module::module(cmd_options_str *cos)
       break;
 
     case CMD_MOD_PINS:
-      ModuleLibrary::DisplayModulePins(cos->str);
+      cout << "Fixme: display module pins is not supported...\n";
+      //ModuleLibrary::DisplayModulePins(cos->str);
       break;
 
     default:
       cout << "cmd_module error\n";
     }
-
-  delete cos;
 
 }
 
@@ -231,9 +248,19 @@ void  cmd_module::module(cmd_options_str *cos, const char *op1)
 
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library 
+#ifdef OLD_MODULE_LIBRARY
       if(ModuleLibrary::NewObject(cos->str,  op1) == NULL) {
         GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
       }
+#else
+      {
+        string mName(cos->str);
+        string refDes(op1);
+        if(!ModuleLibrary::InstantiateObject(mName,refDes))
+          GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
+      }        
+#endif
+
       break;
 
     default:

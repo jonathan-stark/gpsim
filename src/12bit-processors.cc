@@ -104,7 +104,7 @@ protected:
 _12bit_processor::_12bit_processor(const char *_name, const char *desc)
   : pic_processor(_name, desc)
 {
-  pc = new Program_Counter();
+  pc = new Program_Counter("pc", "Program Counter", this);
 
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
@@ -115,10 +115,18 @@ _12bit_processor::_12bit_processor(const char *_name, const char *desc)
   RegisterValue rv( (mOptionTT->type() & 0xff000000) | 0, 0);
   option_reg->set_write_trace(rv);
   option_reg->set_read_trace(rv);
+
+  stack = new Stack();
 }
 
 _12bit_processor::~_12bit_processor()
 {
+  delete pc;
+  delete mOptionTT;
+
+  delete_sfr_register((Register **)&fsr,0);
+  delete_sfr_register((Register **)&option_reg,0);
+
 }
 
 void _12bit_processor::create_symbols()

@@ -90,7 +90,6 @@ LiteralInteger::LiteralInteger(Integer* newValue)
  LiteralInteger::~LiteralInteger()
 {
   delete value;
- 
 }
 
 Value* LiteralInteger::evaluate()

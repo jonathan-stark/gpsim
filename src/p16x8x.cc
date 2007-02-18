@@ -103,6 +103,7 @@ void P16X8X::create_iopin_map()
   package->assign_pin(14, 0);
   package->assign_pin(15, 0);
   package->assign_pin(16, 0);
+
 }
 
 
@@ -182,6 +183,7 @@ P16F84::P16F84(const char *_name, const char *desc)
 void  P16F84::create(int ram_top)
 {
   P16X8X::create(0x4f);
+
   createMCLRPin(4);
 }
 

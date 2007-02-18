@@ -56,8 +56,7 @@ extern void cli_main(void);
 // os_dependent.cc'
 extern void AddModulePathFromFilePath(string &sFolder);
 
-void initialize_gpsim(void);
-
+void initialize_gpsim();
 
 int parse_string(const char *cmd_string);
 extern void initialize_commands();
@@ -320,7 +319,6 @@ main (int argc, char *argv[])
 #endif
 
 
-  string s;
   string sGpsimPath(argv[0]);
   AddModulePathFromFilePath(sGpsimPath);
 
@@ -374,6 +372,8 @@ main (int argc, char *argv[])
       parse_string(command_str);
   }
 
+  poptFreeContext(optCon);
+
   if(abort_gpsim)
     exit_gpsim();
 
@@ -394,8 +394,5 @@ main (int argc, char *argv[])
     }
 
   exit_gpsim();
-
   return 0;
 }
-
-

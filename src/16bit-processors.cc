@@ -140,7 +140,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     ind1(this,string("1")),
     ind2(this,string("2")),
     usart(this),
-    stack16(this),
+    //stack16(this),
     pir1(this,"pir1","Peripheral Interrupt Register",0,0),
     pir2(this,"pir2","Peripheral Interrupt Register",0,0),
 
@@ -152,7 +152,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   cout << "FIXME: 16bit processor is assuming that PLL is on - should check config bits\n";
   pll_factor = 2;
 
-  pc = new Program_Counter16();
+  pc = new Program_Counter16(this);
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
 
   m_porta = new PicPortRegister(this,"porta","",8,0x7f);
@@ -168,6 +168,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, true);
   m_latc  = new PicLatchRegister(this,"latc","", m_portc);
 
+  stack = new Stack16(this);
 }
 
 //-------------------------------------------------------------------
@@ -328,11 +329,11 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(pclath,  0xffa);
   add_sfr_register(&pclatu, 0xffb, porv, "pclatu");
 
-  stack = &stack16;
-  add_sfr_register(&stack16.stkptr,  0xffc,porv,"stkptr");
-  add_sfr_register(&stack16.tosl,    0xffd,porv,"tosl");
-  add_sfr_register(&stack16.tosh,    0xffe,porv,"tosh");
-  add_sfr_register(&stack16.tosu,    0xfff,porv,"tosu");
+  Stack16 *stack16 = static_cast<Stack16 *>(stack);
+  add_sfr_register(&stack16->stkptr,  0xffc,porv,"stkptr");
+  add_sfr_register(&stack16->tosl,    0xffd,porv,"tosl");
+  add_sfr_register(&stack16->tosh,    0xffe,porv,"tosh");
+  add_sfr_register(&stack16->tosu,    0xfff,porv,"tosu");
 
 
   EEPROM *e = get_eeprom();

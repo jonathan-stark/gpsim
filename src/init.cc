@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 // in attribute.cc:
 extern void init_attributes();
+extern void destroy_attributes();
 
 //==============================================================
 // simulation_cleanup()
@@ -38,6 +39,7 @@ void simulation_cleanup(void)
   // Flush the log file (if there is one).
 
   GetTraceLog().close_logfile();
+  destroy_attributes();
 
 }
 

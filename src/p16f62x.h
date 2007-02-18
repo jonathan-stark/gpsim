@@ -41,6 +41,7 @@ class P16F62x : public P16X6X_processor
 {
 public:
   P16F62x(const char *_name=0, const char *desc=0);
+  ~P16F62x();
 
   USART_MODULE usart;
   ComparatorModule comparator;
@@ -92,6 +93,7 @@ public:
   virtual unsigned int program_memory_size() const { return 0x2000; };
 
   P16F628(const char *_name=0, const char *desc=0);
+  ~P16F628();
   static Processor *construct(const char *name);
 };
 

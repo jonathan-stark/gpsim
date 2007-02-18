@@ -92,13 +92,32 @@ Value::Value()
 }
 
 Value::Value(const char *_name, const char *desc, Module *pMod)
-  : gpsimObject(_name,desc), cpu(pMod)
+  : gpsimObject(_name,desc), cpu(pMod),m_aka(0)
 {
 }
 
 Value::~Value()
 {
   //delete xref;
+  // Remove references of this Value from the symbol table:
+  if (cpu) {
+    //cout << "Deleting value named:" << name_str <<  " addr "<< this << endl;
+    //cpu->removeSymbol(this, false);
+
+    if (m_aka) {
+      //cout << "m_aka ==" << m_aka << endl;
+
+      list <string>::iterator it;
+      it = m_aka->begin();
+      while(it != m_aka->end()) {
+        string s(*it);
+        cout << " Value label " << s << endl;
+        cpu->removeSymbol(s);
+        ++it;
+      }
+
+    }
+  }
 }
 void Value::update()
 {
@@ -143,9 +162,6 @@ void Value::set(Value *v)
   throw new Error(" cannot assign a Value to a " + showType());
 }
 
-// JRH - Note: If this function Value::set(Expression) is ever
-//       used anywhere besides yyparse() you may want to move
-//       the delete expr; statement into the calling code.
 void Value::set(Expression *expr)
 {
   try {
@@ -169,9 +185,6 @@ void Value::set(Expression *expr)
       cout << "ERROR:" << err->toString() << endl;
     delete err;
   }
-
-
-  delete expr;
 
 }
 
@@ -275,6 +288,7 @@ void Value::addName(string &r_sAliasedName)
   if (!m_aka)
     m_aka = new list<string>();
 
+  cout << "Adding name " << r_sAliasedName << " to "<< name() << endl;
   m_aka->push_back(r_sAliasedName);
 }
 
@@ -385,58 +399,6 @@ bool ValueWrapper::compare(ComparisonOperator *compOp, Value *rvalue)
 
   return compOp->equal();
 }
-
-//------------------------------------------------------------------------
-// gpsimValue
-#if 0
-gpsimValue::gpsimValue()
-  : cpu(0)
-{
-}
-
-gpsimValue::gpsimValue(Module *_cpu)
-  : cpu(_cpu)
-{
-}
-
-gpsimValue::~gpsimValue()
-{
-}
-
-void gpsimValue::update()
-{
-  _xref._update();
-}
-
-void gpsimValue::add_xref(void *an_xref)
-{
-  _xref._add(an_xref);
-}
-
-void gpsimValue::remove_xref(void *an_xref)
-{
-  _xref.clear(an_xref);
-}
-
-string gpsimValue::toString()
-{
-  char buff[64];
-  snprintf(buff,sizeof(buff), " = 0x%x",get_value());
-  string s = name() + string(buff);
-  return s;
-}
-
-Processor *gpsimValue::get_cpu() const
-{
-  return static_cast<Processor *>(cpu);
-}
-
-void gpsimValue::set_cpu(Processor *new_cpu)
-{
-  cpu = new_cpu;
-}
-
-#endif
 
 /*****************************************************************
  * The AbstractRange class.

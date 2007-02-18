@@ -102,9 +102,9 @@ instruction::instruction(Processor *pProcessor,
 }
 instruction::~instruction()
 {
+  // cout << __FUNCTION__<<endl;
   if (cpu)
-    cpu->removeSymbol(pLineSymbol,true);
-  pLineSymbol = 0;
+    cpu->deleteSymbol(&pLineSymbol);
 }
 
 void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
@@ -216,8 +216,7 @@ AliasedInstruction::~AliasedInstruction()
 
 void AliasedInstruction::setReplaced(instruction *_replaced)
 {
-  //if (!m_replaced)
-    m_replaced = _replaced;
+  m_replaced = _replaced;
 }
 
 instruction * AliasedInstruction::getReplaced()

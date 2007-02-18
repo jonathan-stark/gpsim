@@ -188,10 +188,16 @@ TriggerObject::TriggerObject(TriggerAction *ta)
 
 TriggerObject::~TriggerObject()
 {
-  //cout << "Trigger Object destructor\n";
+  /*
+  cout << "Trigger Object destructor\n";
+  if (m_PExpr)
+    cout << "deleting expression "<< m_PExpr->toString() << endl;
+  */
   delete m_PExpr;
+
   if (m_action != &DefaultTrigger)
     delete m_action;
+
 }
 
 void TriggerObject::callback()

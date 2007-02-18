@@ -125,7 +125,6 @@ start
   ;
 
 
-
    .sim "node na0"
    .sim "attach na0 U5_or.in0 porta0"
    .sim "node na1"
@@ -136,11 +135,13 @@ start
    .sim "attach na2 U6_or.in1 porta2"
    .sim "node nc0"
    .sim "attach nc0 U6_or.out portc0"
+
+  if 0
    .sim "scope.ch0 = \"porta0\""
    .sim "scope.ch1 = \"porta1\""
    .sim "scope.ch2 = \"porta2\""
    .sim "scope.ch3 = \"portc0\""
-
+  endif
 	clrf	PORTA
 	clrf	PORTB
 

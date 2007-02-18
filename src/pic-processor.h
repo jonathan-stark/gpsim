@@ -267,13 +267,13 @@ public:
 
   INDF         *indf;
   FSR          *fsr;
-  Stack         *stack;
+  Stack        *stack;
 
   Status_register *status;
-  WREG          *W;
+  WREG         *W;
   PCL          *pcl;
   PCLATH       *pclath;
-
+  PCHelper     *m_PCHelper;
   TMR0         tmr0;
   int          num_of_gprs;
 
@@ -295,7 +295,6 @@ public:
   virtual void create_config_memory() = 0;
   virtual void tris_instruction(unsigned int tris_register) {return;};
   virtual void create_symbols();
-  virtual void create_stack() {stack = new Stack;};
   virtual void run(bool refresh=true);
   virtual void finish();
 

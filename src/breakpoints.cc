@@ -943,8 +943,20 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
 }
 Breakpoint_Instruction::~Breakpoint_Instruction()
 {
-  cout << __FUNCTION__ << " destructor\n";
 
+  /*
+  if (m_aka) {
+      
+    list <string>::iterator it;
+    it = m_aka->begin();
+    while(it != m_aka->end()) {
+      string s(*it);
+      cout << "  aka :" << s<< endl;
+      ++it;
+    }
+
+  }
+  */
 }
 Processor* Breakpoint_Instruction::get_cpu()
 { 
@@ -1974,6 +1986,12 @@ CommandAssertion::CommandAssertion(Processor *new_cpu,
   command[len]   = '\n';
   command[len+1] = 0;
   command[len+2] = 0;
+}
+
+CommandAssertion::~CommandAssertion()
+{
+  cout << "~CommandAssertion\n";
+  free(command);
 }
 
 void CommandAssertion::execute()

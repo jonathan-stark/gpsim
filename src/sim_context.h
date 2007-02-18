@@ -42,6 +42,7 @@ class CSimulationContext {
 
 public:
   CSimulationContext();
+  ~CSimulationContext();
 
   Processor * add_processor(            const char * processor_type,
                                         const char * processor_new_name = NULL);

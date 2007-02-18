@@ -91,6 +91,7 @@ static GIOChannel *channel;
 
 #endif /* HAVE_READLINE */
 
+void simulation_cleanup();
 
 extern const char *get_dir_delim(const char *path);
 int parse_string(const char * str);
@@ -123,10 +124,10 @@ extern void stop_server(void);
 #endif // HAVE_SOCKETS
 
 
-static Boolean  &s_bSTCEcho = *new Boolean("CliTrace", false,
-  "Enable echoing commands from STC files to the console.");
-void EnableSTCEcho(bool bEnable) {
-  s_bSTCEcho = bEnable;
+static Boolean  *s_bSTCEcho = 0;
+void EnableSTCEcho(bool bEnable)
+{
+  *s_bSTCEcho = bEnable;
 }
 
 //------------------------------------------------------------------------
@@ -305,8 +306,12 @@ void initialize_CLI()
 
 void initialize_gpsim(void)
 {
-  //s_bSTCEcho.setClearableSymbol(false);
-  globalSymbolTable().addSymbol(&s_bSTCEcho);
+  s_bSTCEcho = new Boolean("CliTrace", false,
+                           "Enable echoing commands from STC files to the console.");
+
+
+  globalSymbolTable().addSymbol(s_bSTCEcho);
+
   initialize_CLI();
   if(gUsingThreads())
     initialize_threads();
@@ -623,10 +628,8 @@ gpsim_read (char *buf, unsigned max_size)
   strncpy(buf, cPstr, count);
   buf[count] = 0;
   SetLastFullCommand(buf);
-  if(s_bSTCEcho) {
+  if(*s_bSTCEcho)
     cout << cPstr;
-  }
-
 
   if(verbose&4) {
     cout <<"gpsim_read returning " << count << ":" << cPstr << endl;
@@ -837,7 +840,11 @@ void exit_gpsim(void)
 #ifdef HAVE_SOCKETS
   stop_server();
 #endif
+  globalSymbolTable().deleteSymbol("CliTrace");
+  cout << "Exiting gpsim\n";
+  simulation_cleanup();
 
+  // FIXME - find out why this exit is needed
   exit(0);
 }
 

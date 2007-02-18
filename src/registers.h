@@ -430,7 +430,8 @@ public:
   unsigned int trace_skip;
   unsigned int trace_other;
 
-  Program_Counter();
+  Program_Counter(const char *name, const char *desc, Module *pM);
+  ~Program_Counter();
   virtual void increment();
   virtual void start_skip();
   virtual void skip();
@@ -482,7 +483,6 @@ public:
   }
 
   void reset();
-  // JRH void reset(int reset_address);
 
   virtual unsigned int get_next();
 
@@ -504,6 +504,7 @@ public:
 		     const char *collection_name,
 		     Register   **ppRegisters,
 		     unsigned int uiSize);
+  ~RegisterCollection();
   virtual unsigned int GetSize();
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0);
   virtual void SetAt(unsigned int uIndex, Value *pValue);

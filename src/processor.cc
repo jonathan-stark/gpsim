@@ -70,29 +70,26 @@ static char pkg_version[] = PACKAGE_VERSION;
 class CPU_Freq : public Float
 {
 public:
-  CPU_Freq(const char *_name, double newValue, const char *desc);
+  CPU_Freq(Processor * _cpu, double freq); //const char *_name, double newValue, const char *desc);
 
   virtual void set(double d);
   
-  void SetCPU ( Processor * _cpu ) { cpu = _cpu; };
-
 private:
   Processor * cpu;  
 };
 
-CPU_Freq::CPU_Freq(const char *_name, double newValue, const char *desc=0)
-    : Float(_name,newValue,desc)
+CPU_Freq::CPU_Freq(Processor * _cpu, double freq)
+  : Float("frequency",freq, " oscillator frequency."),
+    cpu(_cpu)
 {
-    cpu = 0;
 }
 
 void CPU_Freq::set(double d)
 {
-    Float::set ( d );
-    if ( cpu )
-        cpu->update_cps();
+  Float::set ( d );
+  if ( cpu )
+    cpu->update_cps();
 }
-  
 
 //------------------------------------------------------------------------
 //
@@ -100,19 +97,21 @@ void CPU_Freq::set(double d)
 //
 
 Processor::Processor(const char *_name, const char *_desc)
-  : Module(_name, _desc)
+  : Module(_name, _desc),
+    pma(0),
+    rma(this),
+    ema(this),
+    pc(0)
 {
   registers = 0;
-  pma = 0;
+
   m_pConstructorObject = 0;
   m_Capabilities = 0;
   if(verbose)
     cout << "processor constructor\n";
 
-  pc = 0;
+  addSymbol(mFrequency = new CPU_Freq(this,20e6));
 
-  mFrequency = new CPU_Freq("frequency",20e6, " oscillator frequency.");
-  mFrequency->SetCPU(this);
   set_ClockCycles_per_Instruction(4);
   update_cps();
   set_Vdd(5.0);
@@ -135,10 +134,10 @@ Processor::Processor(const char *_name, const char *_desc)
 
   get_trace().cycle_counter(get_cycles().get());
 
-  addSymbol(new WarnModeAttribute(this));
-  addSymbol(new SafeModeAttribute(this));
-  addSymbol(new UnknownModeAttribute(this));
-  addSymbol(new BreakOnResetAttribute(this));
+  addSymbol(m_pWarnMode = new WarnModeAttribute(this));
+  addSymbol(m_pSafeMode = new SafeModeAttribute(this));
+  addSymbol(m_pUnknownMode = new UnknownModeAttribute(this));
+  addSymbol(m_pBreakOnReset = new BreakOnResetAttribute(this));
 
   m_pbBreakOnInvalidRegisterRead = new Boolean("BreakOnInvalidRegisterRead",
     true, "Halt simulation when an invalid register is read from.");
@@ -148,24 +147,41 @@ Processor::Processor(const char *_name, const char *_desc)
     true, "Halt simulation when an invalid register is written to.");
   addSymbol(m_pbBreakOnInvalidRegisterWrite);
 
-  addSymbol(mFrequency);
-
 
 }
 
 
+static unsigned int  m_ProgramMemoryAllocationSize = 0;
+
 //-------------------------------------------------------------------
 Processor::~Processor()
 {
-  // delete the attributes....
 
-  get_bp().clear_all(this);
-  delete []program_memory;
+
+  deleteSymbol((gpsimObject**)&m_pbBreakOnInvalidRegisterRead);
+  deleteSymbol((gpsimObject**)&m_pbBreakOnInvalidRegisterWrite);
+  deleteSymbol((gpsimObject**)&m_pWarnMode);
+  deleteSymbol((gpsimObject**)&m_pSafeMode);
+  deleteSymbol((gpsimObject**)&m_pUnknownMode);
+  deleteSymbol((gpsimObject**)&m_pBreakOnReset);
+  deleteSymbol((gpsimObject**)&mFrequency);
+
+  delete interface;
 
   delete_invalid_registers();
+
   delete m_UiAccessOfRegisters;
   delete []registers;
+  delete readTT;
+  delete writeTT;
+
   destroyProgramMemoryAccess(pma);
+
+  for (unsigned int i = 0; i < m_ProgramMemoryAllocationSize; i++)
+    if (program_memory[i] != &bad_instruction)
+      delete program_memory[i];
+
+  delete []program_memory;
 
 }
 
@@ -268,7 +284,6 @@ void Processor::init_register_memory (unsigned int memory_size)
 
   register_bank = registers;
 
-  rma.set_cpu(this);
   rma.set_Registers(registers, memory_size);
   
   // Make all of the file registers 'undefined' (each processor derived from this base
@@ -330,6 +345,7 @@ void Processor::delete_invalid_registers ()
   unsigned int i=0;
 
   for (i = 0; i < rma.get_size(); i++) {
+    //cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" << registers[i] << endl;
     InvalidRegister *pReg = dynamic_cast<InvalidRegister *> (registers[i]);
     if (pReg) {
       delete registers[i];
@@ -404,12 +420,14 @@ void Processor::delete_file_registers(unsigned int start_address, unsigned int e
 	// This register appears in more than one place. Let's find all
 	// of its aliases.
 	for(i=j&ALIAS_MASK; i<rma.get_size(); i+=SMALLEST_ALIAS_DISTANCE)
-	  if(thisReg == registers[i])
+	  if(thisReg == registers[i]) {
+            //cout << "   removing at address:" << hex << i << endl;
 	    registers[i] = 0;
+          }
       }
       //cout << " deleting: " << hex << j << endl;
-      delete thisReg;
       registers[j] = 0;
+      delete thisReg;
     }
   }
 }
@@ -470,17 +488,17 @@ void Processor::init_program_memory (unsigned int memory_size)
   // pointers of type 'instruction'. This is where the simulated instructions
   // are stored.
   program_memory = new instruction *[memory_size];
-  if (program_memory == 0)
-    {
-      cout << "*** ERROR *** Out of memory for program space\n";
-      exit (1);
-    }
+  if (program_memory == 0) {
+    cout << "*** ERROR *** Out of memory for program space\n";
+    exit (1);
+  }
 
+  m_ProgramMemoryAllocationSize = memory_size;
+
+  // FIXME -- each processors needs to own its own bad_instruction object
+  bad_instruction.set_cpu(this);
   for (unsigned int i = 0; i < memory_size; i++)
-    {
-      program_memory[i] = &bad_instruction;
-      program_memory[i]->set_cpu(this);
-    }
+    program_memory[i] = &bad_instruction;
 
   pma = createProgramMemoryAccess(this);
   pma->name();
@@ -1507,17 +1525,14 @@ MemoryAccess::MemoryAccess(Processor *new_cpu)
 {
   cpu = new_cpu;
 }
+MemoryAccess::~MemoryAccess()
+{
+}
 
 Processor *MemoryAccess::get_cpu(void)
 {
   return cpu;
 }
-
-void MemoryAccess::set_cpu(Processor *p)
-{ 
-  cpu = p;
-}
-
 
 
 //-------------------------------------------------------------------
@@ -1529,6 +1544,7 @@ public:
   ProgramMemoryCollection(Processor *pProcessor, 
 			  const char *collection_name,
 			  ProgramMemoryAccess *pPma);
+  ~ProgramMemoryCollection();
 
   virtual unsigned int GetSize();
   virtual Value &GetAt(unsigned int uAddress, Value *pValue=0);
@@ -1555,6 +1571,12 @@ ProgramMemoryCollection::ProgramMemoryCollection (Processor   *pProcessor,
   Value::new_name(pC_collection_name);
   m_pPma = pPma;
   pProcessor->addSymbol(this);
+}
+
+ProgramMemoryCollection::~ProgramMemoryCollection()
+{
+  if (m_pProcessor)
+    m_pProcessor->removeSymbol(this);
 }
 
 unsigned int ProgramMemoryCollection::GetSize()
@@ -1656,11 +1678,13 @@ ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu) :
 						 "romData",
 						 this);
 }
+ProgramMemoryAccess::~ProgramMemoryAccess()
+{
+  delete m_pRomCollection;
+}
 
 void ProgramMemoryAccess::init(Processor *new_cpu)
 {
-
-  set_cpu(new_cpu);
 
   _address = _opcode = _state = 0;
   hll_mode = ASM_MODE;
@@ -1693,13 +1717,9 @@ void ProgramMemoryAccess::putToIndex(unsigned int uIndex, instruction *new_instr
   if(!new_instruction)
     return;
 
-  //??? TSD 15MAY06 why would you care if the instruction you're replacing is valid or not?
-  //???  if(hasValid_opcode_at_index(uIndex)) {
+  cpu->program_memory[uIndex] = new_instruction;
 
-    cpu->program_memory[uIndex] = new_instruction;
-
-    new_instruction->update();
-  //???}
+  new_instruction->update();
 
 }
 
@@ -2097,7 +2117,6 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 RegisterMemoryAccess::RegisterMemoryAccess(Processor *new_cpu) :
   MemoryAccess(new_cpu)
 {
-  cpu = 0;
   registers = 0;
   nRegisters = 0;
 }
@@ -2396,8 +2415,9 @@ void FileContext::ReadSource(void)
     cout << "Unable to open " << str << endl;
     return;
   }
-  if(line_seek)
-    delete line_seek;
+
+  delete line_seek;
+  delete pm_address;
 
   line_seek = new vector<int>(max_line()+1);
   pm_address = new vector<int>(max_line()+1);

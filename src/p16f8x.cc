@@ -170,20 +170,22 @@ void P16F8x::create_sfr_map()
   pir_set_def.set_pir2(pir2);
                                                                                 
   pie2.setPir(get_pir2());
-
+  /*
   add_sfr_register(indf,   0x180);
   add_sfr_register(indf,   0x100);
-
-  alias_file_registers(0x01,0x04,0x100);
-  alias_file_registers(0x81,0x84,0x100);
+  */
+  alias_file_registers(0x00,0x04,0x100);
+  alias_file_registers(0x80,0x84,0x100);
 
   add_sfr_register(m_porta, 0x05);
   add_sfr_register(m_trisa, 0x85, RegisterValue(0xff,0));
 
-  add_sfr_register(m_portb, 0x106);
-  add_sfr_register(m_trisb, 0x186, RegisterValue(0xff,0));
+  //add_sfr_register(m_portb, 0x106);
+  //add_sfr_register(m_trisb, 0x186, RegisterValue(0xff,0));
   add_sfr_register(m_portb, 0x06);
+  alias_file_registers(0x06,0x06,0x100);
   add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
+  alias_file_registers(0x86,0x86,0x100);
 
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
@@ -193,13 +195,18 @@ void P16F8x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
-  add_sfr_register(pclath, 0x18a, RegisterValue(0,0));
-  add_sfr_register(pclath, 0x10a, RegisterValue(0,0));
+  //add_sfr_register(pclath, 0x18a, RegisterValue(0,0));
+  //add_sfr_register(pclath, 0x10a, RegisterValue(0,0));
 
-  add_sfr_register(&intcon_reg, 0x18b, RegisterValue(0,0));
-  add_sfr_register(&intcon_reg, 0x10b, RegisterValue(0,0));
-  add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x18b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x10b, RegisterValue(0,0));
+  //add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
+
+  alias_file_registers(0x0a,0x0b,0x080);
+  alias_file_registers(0x0a,0x0b,0x100);
+  alias_file_registers(0x0a,0x0b,0x180);
+
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
