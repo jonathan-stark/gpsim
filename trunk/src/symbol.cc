@@ -70,25 +70,77 @@ int SymbolTable_t::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
   return 0;
 }
 
-int SymbolTable_t::removeSymbol(gpsimObject *pSym, bool bDeleteObject)
+#define REMOVE_SYMBOLS_BY_NAME
+#if 1 //!defined(REMOVE_SYMBOLS_BY_NAME)
+static gpsimObject *pSearchObject=0;
+static gpsimObject *pFoundObject=0;
+static bool spred(const SymbolEntry_t &se)
+{
+  pFoundObject = se.second == pSearchObject ? pSearchObject : 0;
+  return pFoundObject != 0;
+}
+
+int SymbolTable_t::removeSymbol(gpsimObject *pSym)
+{
+  if (pSym) {
+
+    pSearchObject = pSym;
+    pFoundObject = 0;
+    SymbolTable_t::iterator it = find_if (begin(), end(), spred);
+    if (it != end()) {
+      /*
+      cout << "removing object from st";
+      cout << pSym << " named " << pSym->name() << endl;
+      */
+      erase (it);
+      return 1;
+    }
+  }
+}
+
+int SymbolTable_t::removeSymbol(const string &s)
+{
+  SymbolTable_t::iterator sti = find(s);
+  if (sti != end()) {
+    erase(sti);
+    return 1;
+  }
+
+  return 0;
+}
+
+int SymbolTable_t::deleteSymbol(const string &s)
+{
+  SymbolTable_t::iterator sti = find(s);
+  if (sti != end()) {
+    erase(sti);
+    delete sti->second;
+    return 1;
+  }
+
+  return 0;
+}
+
+#else
+
+int SymbolTable_t::removeSymbol(gpsimObject *pSym)
 {
   if (pSym) {
     SymbolTable_t::iterator sti = find(pSym->name());
     if (sti != end()) {
-      if (bDeleteObject)
-        delete (*sti).second;
       erase(sti);
       return 1;
     }
   }
-  return -1;
+
+  return 0;
 }
+#endif
 
 gpsimObject *SymbolTable_t::findSymbol(const string &searchString)
 {
-  SymbolTable_t::iterator sti = find(searchString);
-
-  return sti != end() ? sti->second : 0;
+  stiFound = find(searchString);
+  return stiFound != end() ? stiFound->second : 0;
 }
 
 //-------------------------------------------------------------------
@@ -101,22 +153,43 @@ SymbolTable::SymbolTable()
   currentSymbolTable = &globalSymbols;
 }
 
+
+static void dumpOneSymbol(const SymbolEntry_t &sym)
+{
+  cout << "  " //<< sym.second->name() 
+       << " stored as " << sym.first
+       << endl;
+}
+
+static void dumpSymbolTables(const SymbolTableEntry_t &st)
+{
+  cout << " Symbol Table: " << st.first << endl;
+  (st.second)->ForEachSymbolTable(dumpOneSymbol);
+}
+
 SymbolTable::~SymbolTable()
 {
+  cout << "Deleting the symbol table, here's what is still left in it:\n";
+
+ForEachModule(dumpSymbolTables);
 }
 
 int SymbolTable::addSymbol(gpsimObject *pSym)
 {
+  /*
   if (pSym)
     cout << "Adding " << pSym->name() << " to the global symbol table\n";
+  */
   return globalSymbols.addSymbol(pSym);
 
 }
-int SymbolTable::removeSymbol(gpsimObject *pSym, bool bDeleteObject)
+int SymbolTable::removeSymbol(gpsimObject *pSym)
 {
+  /*
   if (pSym) 
     cout << "Removing " << pSym->name() << " from the global symbol table\n";
-  return globalSymbols.removeSymbol(pSym, bDeleteObject);
+  */
+  return globalSymbols.removeSymbol(pSym);
 }
 
 
@@ -127,13 +200,14 @@ void SymbolTable::addModule(Module *pModule)
 }
 void SymbolTable::removeModule(Module *pModule)
 {
-  /*
+
   if (pModule) {
-    ModuleList_t::iterator mi = gModuleList.find(pModule->name().c_str());
-    if (mi->second == pModule)
-      gModuleList.erase(mi);
+    // cout << "Removing " << pModule->name() << " from the global symbol table\n";
+    MSymbolTable_t::iterator mi = MSymbolTables.find(pModule->name());
+    if (mi != MSymbolTables.end())
+      MSymbolTables.erase(mi);
   }
-  */
+
 }
 
 void SymbolTable::listModules()
@@ -163,11 +237,14 @@ public:
 };
 */
 
+
+static  SymbolTable_t *searchTable=0;
 static  string searchString;
 static  gpsimObject *pFound=0;
+
 bool tpred(const pair<const string, SymbolTable_t *> &st)
 {
-  cout << "searching " << st.first << endl;
+  //cout << "searching " << st.first << endl;
   pFound = st.second->findSymbol(searchString);
   return pFound != 0;
 }
@@ -193,7 +270,7 @@ gpsimObject *SymbolTable::find(string s)
   const char scopeOperator = '.';
   int scopeOperatorPosition = s.find_first_of(scopeOperator);
   if (scopeOperatorPosition != string::npos) {
-    SymbolTable_t *searchTable = &globalSymbols;
+    searchTable = &globalSymbols;
     if (scopeOperatorPosition == 0) {   // Select the current symbol table
       searchTable = currentSymbolTable;
       scopeOperatorPosition++;
@@ -214,10 +291,51 @@ gpsimObject *SymbolTable::find(string s)
 
   pFound = 0;  // assume the symbol is not found.
   searchString = s;
-  find_if (MSymbolTables.begin(), MSymbolTables.end(), tpred);
-
+  MSymbolTable_t::iterator mti = find_if (MSymbolTables.begin(), MSymbolTables.end(), tpred);
+  if (mti != MSymbolTables.end())
+    searchTable = mti->second;
+  
   return pFound;
 }
+
+int SymbolTable::removeSymbol(const string &s)
+{
+
+  gpsimObject *pObj = find(s);
+  if (pObj && searchTable) {
+    if (searchTable->stiFound != searchTable->end()) {
+      searchTable->erase(searchTable->stiFound);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+int SymbolTable::deleteSymbol(const string &s)
+{
+  gpsimObject *pObj = find(s);
+  if (pObj && searchTable) {
+    if (searchTable->stiFound != searchTable->end()) {
+      searchTable->erase(searchTable->stiFound);
+      delete pObj;
+      return 1;
+    }
+  }
+
+  /*
+  gpsimObject *pObj = find(s);
+  if (pObj && searchTable) {
+    if (*stiFound != searchTable->end()) {
+      searchTable->erase(*stiFound);
+      delete pObj;
+      return 1;
+    }
+  }
+  */
+  return 0;
+
+}
+
 
 //------------------------------------------------------------------------
 // Convenience find functions
