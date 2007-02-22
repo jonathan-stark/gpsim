@@ -1,4 +1,4 @@
-2007-02-18  Scott Dattalo <scott@dattalo.com>
+2007-02-22  Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, regression/instructions_14bit/branching.asm,
 	src/p16x6x.h, src/pic-instructions.h, src/ioports.h,
 	src/comparator.h, src/p16x6x.cc, src/p16f87x.cc, src/p16f87x.h,

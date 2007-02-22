@@ -119,7 +119,10 @@ public:
   {
     assert(m_pLCD);
   }
-  char getState()
+  virtual void release()
+  {
+  }
+  virtual char getState()
   {
     // returning a 1 indicates the data bus is an input (the LCD module
     // is being written to).
