@@ -364,6 +364,8 @@ int  Breakpoints::set_execution_break(Processor *cpu,
 				      unsigned int address,
 				      Expression *pExpr)
 {
+  if (!cpu || !cpu->pma || !cpu->pma->hasValid_opcode_at_address(address))
+    return -1;
 
   Breakpoint_Instruction *bpi = new Breakpoint_Instruction(cpu,address,0);
 
@@ -710,12 +712,12 @@ void Breakpoints::clear(unsigned int b)
 
   BreakStatus &bs = break_status[b];   // 
 
-  cout << "clearing bp:"<<dec<<b<<endl;
+  //cout << "clearing bp:"<<dec<<b<<endl;
   if(bs.bpo) {
     bs.bpo->clear();
     bs.type = BREAK_CLEAR;
     get_active_cpu()->NotifyBreakpointCleared(bs, bs.bpo);
-    delete bs.bpo;  // FIXME - why does this delete cause a segv?
+    delete bs.bpo;
     bs.bpo = 0;
     return;
   }
@@ -1029,10 +1031,12 @@ void Breakpoint_Instruction::clear()
 
   get_cpu()->pma->clear_break_at_address(address, this);
   instruction *pInst = get_cpu()->pma->getFromAddress(address);
+  /*
   cout << "about to update cleared instruction breakpoint:" << pInst 
        << " this:" << this 
        << "  address: 0x" << hex << address
        << endl;
+  */
   pInst->update();
 }
 

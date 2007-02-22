@@ -106,7 +106,7 @@ _12bit_processor::_12bit_processor(const char *_name, const char *desc)
 {
   pc = new Program_Counter("pc", "Program Counter", this);
 
-  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
+  pc->set_trace_command();// trace.allocateTraceType(new PCTraceType(this,1)));
 
   option_reg = new OPTION_REG(this, "option_reg");
 
@@ -202,9 +202,13 @@ void _12bit_processor::create()
 //-------------------------------------------------------------------
 void _12bit_processor::create_config_memory()
 {
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new ConfigWord("CONFIG", 0xfff,"Configuration Word",this,0xfff));
+  /*
   m_configMemory = new ConfigMemory *[1];
   *m_configMemory = new ConfigMemory("CONFIG", 0xfff,"Configuration Word",this,0xfff);
   addSymbol(*m_configMemory);
+  */
 }
 
 //-------------------------------------------------------------------

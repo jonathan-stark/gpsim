@@ -1,4 +1,23 @@
 2007-02-18  Scott Dattalo <scott@dattalo.com>
+	* gpsim/main.cc, regression/instructions_14bit/branching.asm,
+	src/p16x6x.h, src/pic-instructions.h, src/ioports.h,
+	src/comparator.h, src/p16x6x.cc, src/p16f87x.cc, src/p16f87x.h,
+	src/16bit-processors.cc, src/14bit-tmrs.h,
+	src/pic-instructions.cc, src/dspic/dspic-registers.cc,
+	src/processor.h, src/stimuli.cc, src/eeprom.cc,
+	src/pic-processor.cc, src/pir.cc, src/registers.cc, src/uart.cc,
+	src/p16f62x.cc, src/uart.h, src/p16x7x.h, src/tmr0.cc, src/pir.h,
+	src/ssp.cc, src/tmr0.h, src/ioports.cc, src/psp.cc,
+	src/14bit-tmrs.cc, src/comparator.cc, src/p16x7x.cc,
+	src/12bit-processors.cc, src/p12x.cc, src/pic-processor.h,
+	src/sim_context.cc, src/p16f8x.h, src/value.cc, src/processor.cc,
+	src/eeprom.h, src/p16f8x.cc, src/pic-ioports.cc, src/registers.h,
+	src/pic-registers.cc, src/breakpoints.cc, src/14bit-processors.cc,
+	src/stimuli.h, gui/gui_scope.cc:
+	- Memory leak fixes.
+	- The 12C50x and the 16f62x devices leak no memory.
+
+2007-02-18  Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, src/modules.cc, src/modules.h: The Module
 	libraries are now implemented as STL maps.
 	* src/symbol.h, src/symbol.cc: The symbol table now supports a

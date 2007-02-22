@@ -48,9 +48,16 @@ public:
   {
     assert(m_txsta);
   }
+  ~TXSignalSource()
+  {
+  }
   char getState()
   {
     return m_txsta->getState();
+  }
+  void release()
+  {
+    delete this;
   }
 private:
   _TXSTA *m_txsta;
@@ -73,6 +80,10 @@ public:
   {
     m_rcsta->setState(new3State);
   }
+  void release()
+  {
+    delete this;
+  }
 private:
   _RCSTA *m_rcsta;
 };
@@ -81,10 +92,15 @@ private:
 _RCSTA::_RCSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
   : sfr_register(pCpu, pName, pDesc), rcreg(0), spbrg(0),
     txsta(0),
+    state(_RCSTA::RCSTA_DISABLED),
     mUSART(pUSART),
     m_PinModule(0), m_sink(0), m_cRxState('?')
 {
   assert(mUSART);
+}
+
+_RCSTA::~_RCSTA()
+{
 }
 
 //-----------------------------------------------------------
@@ -95,6 +111,10 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
     m_source(0), m_cTxState('?')
 {
   assert(mUSART);
+}
+
+_TXSTA::~_TXSTA()
+{
 }
 
 //-----------------------------------------------------------

@@ -59,6 +59,10 @@ TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
 }
 
 //------------------------------------------------------------------------
+void TMR0::release()
+{
+}
+//------------------------------------------------------------------------
 // setSinkState
 //
 // Called when the I/O pin driving TMR0 changes states.

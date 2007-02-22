@@ -66,7 +66,16 @@ public:
     : m_state('0')
   {
   }
-  char getState()
+  ~CMSignalSource()
+  {
+    cout << "deleting CMsignal source " << this << endl;
+  }
+  virtual void release()
+  {
+    cout << "CMSignalSource:" << this << endl;
+    delete this;
+  }
+  virtual char getState()
   {
     return m_state;
   }
@@ -121,10 +130,27 @@ int ih2, int out)
 	(il2 << CFG_SHIFT*2) | (ih2 << CFG_SHIFT) | out;
 } 
 
+//------------------------------------------------------------------------
 CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    _vrcon(0),
+    pir_set(0)
 {
   value.put(0);
+  cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=0;
+  cm_input_pin[0]=cm_input_pin[1]=cm_input_pin[2]=cm_input_pin[3]=0;
+  cm_output_pin[0]=cm_output_pin[1]=0;
+  cm_source[0]=cm_source[1]=0;
+  cm_stimulus[0]=cm_stimulus[1]=cm_stimulus[2]=cm_stimulus[3]=0;
+}
+
+CMCON::~CMCON()
+{
+  free(cm_input_pin[0]);  free(cm_input_pin[1]);
+  free(cm_input_pin[2]);  free(cm_input_pin[3]);
+  free(cm_output_pin[0]); free(cm_output_pin[1]);
+  free(cm_output_pin[2]); free(cm_output_pin[3]);
+
 }
 void CMCON::setINpin(int i, PinModule *newPinModule)
 {
@@ -319,10 +345,17 @@ void CMCON::put(unsigned int new_value)
 //--------------------------------------------------
 
 VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    pin_name(0)
 {
   value.put(0);
 }
+
+VRCON::~VRCON()
+{
+  delete pin_name;
+}
+
 void VRCON::setIOpin(PinModule *newPinModule)
 {
     vr_PinModule = newPinModule;

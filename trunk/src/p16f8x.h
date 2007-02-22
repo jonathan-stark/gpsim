@@ -43,8 +43,8 @@ class P16F8x : public P16X6X_processor
 {
 public:
 
-  PIR1v2 pir1_2_reg;
-  PIR2v2 pir2_2_reg;
+  PIR1v2 *pir1_2_reg;
+  PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
 
   USART_MODULE usart;
@@ -55,6 +55,7 @@ public:
 
 
   P16F8x(const char *_name=0, const char *desc=0);
+  ~P16F8x();
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(){return _P16F87_;};

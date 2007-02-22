@@ -165,6 +165,7 @@ class EEPROM :  public TriggerObject
 public:
 
   EEPROM(Processor *pCpu);
+  ~EEPROM();
   void reset(RESET_TYPE);
   virtual void set_intcon(INTCON *ic);
 
@@ -217,7 +218,7 @@ class EEPROM_PIR : public EEPROM
 public:
 
   EEPROM_PIR(Processor *pCpu, PIR *);
-  //  virtual void set_pir_set(PIR_SET *p);
+  ~EEPROM_PIR();
 
   // the 16f628 eeprom is identical to the 16f84 eeprom except
   // for the size and the location of EEIF. The size is taken
@@ -237,6 +238,7 @@ class EEPROM_WIDE : public EEPROM_PIR
 {
 public:
   EEPROM_WIDE(Processor *pCpu, PIR *);
+  ~EEPROM_WIDE();
 
   virtual void start_write();
   virtual void callback();

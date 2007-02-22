@@ -289,8 +289,6 @@ void CSimulationContext::Clear()
     GetBreakpoints().clear_all(p);
     delete p;
   }
-  cout << __FUNCTION__ << " FIXME \n";
-  //GetSymbolTable().clear_all();
   processor_list.clear();
 }
 

@@ -291,6 +291,10 @@ class WaveformSink : public SignalSink
 public:
   WaveformSink(Waveform *pParent);
   virtual void setSinkState(char);
+  virtual void release() 
+  {
+    cout << "Fixme - WaveformSink::release need to notify scope\n";
+  }
 protected:
   Waveform *m_pWaveform;
 };

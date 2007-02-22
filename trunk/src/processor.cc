@@ -396,12 +396,16 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 //  The purpose of this member function is to delete file registers
 //
 
-void Processor::delete_file_registers(unsigned int start_address, unsigned int end_address)
+void Processor::delete_file_registers(unsigned int start_address, 
+                                      unsigned int end_address,
+                                      bool bRemoveWithoutDelete)
 {
-  cout << __FUNCTION__ 
-       << "  start:" << hex << start_address
-       << "  end:" << hex << end_address
-       << endl;
+#define DFR_DEBUG 0
+  if (DFR_DEBUG)
+    cout << __FUNCTION__ 
+         << "  start:" << hex << start_address
+         << "  end:" << hex << end_address
+         << endl;
 
   //  FIXME - this function is bogus.
   // The aliased registers do not need to be searched for - the alias mask
@@ -421,13 +425,16 @@ void Processor::delete_file_registers(unsigned int start_address, unsigned int e
 	// of its aliases.
 	for(i=j&ALIAS_MASK; i<rma.get_size(); i+=SMALLEST_ALIAS_DISTANCE)
 	  if(thisReg == registers[i]) {
-            //cout << "   removing at address:" << hex << i << endl;
+            if(DFR_DEBUG)
+              cout << "   removing at address:" << hex << i << endl;
 	    registers[i] = 0;
           }
       }
-      //cout << " deleting: " << hex << j << endl;
+      if(DFR_DEBUG)
+        cout << " deleting: " << hex << j << endl;
       registers[j] = 0;
-      delete thisReg;
+      if (!bRemoveWithoutDelete)
+        delete thisReg;
     }
   }
 }
@@ -451,10 +458,11 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 
   for (j = start_address; j <= end_address; j++)
     {
-      if (alias_offset)
+      if (alias_offset && (j+alias_offset < rma.get_size()))
 	{
 	  registers[j + alias_offset] = registers[j];
-	  registers[j]->alias_mask = alias_offset;
+          if (registers[j])
+            registers[j]->alias_mask = alias_offset;
 	}
     }
 

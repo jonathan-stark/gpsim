@@ -649,12 +649,21 @@ PinMonitor::PinMonitor()
 
 PinMonitor::~PinMonitor()
 {
+  // Release all of the sinks:
+  list <SignalSink *> :: iterator ssi = sinks.begin();
+  while (ssi != sinks.end()) {
+    //cout << "Releasing sink " << *ssi << endl;
+    (*ssi)->release();
+    ++ssi;
+  }
 }
 
 void PinMonitor::addSink(SignalSink *new_sink)
 {
-  if(new_sink)
+  if(new_sink) {
+    //cout << "Adding sink: " << new_sink << endl;
     sinks.push_back(new_sink);
+  }
 }
 
 void PinMonitor::removeSink(SignalSink *pSink)

@@ -99,7 +99,7 @@ namespace dspic_registers {
   {
     printf("dspic program counter.\n");
 
-    set_trace_command(dspic::gTrace->allocateTraceType(new PCTraceType(pcpu,1)));
+    set_trace_command(); //dspic::gTrace->allocateTraceType(new PCTraceType(pcpu,1)));
 
   }
 

@@ -81,6 +81,10 @@ public:
     /**/
     return r;
   }
+  void release()
+  {
+    delete this;
+  }
 private:
   PortRegister *m_register;
   unsigned int  m_bitMask;
@@ -106,9 +110,17 @@ public:
     : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
-  char getState()
+  ~PicSignalControl()
+  {
+  }
+
+  virtual char getState()
   {
     return m_register ? m_register->get3StateBit(m_bitMask) : '?';
+  }
+  virtual void release()
+  {
+    delete this;
   }
 private:
   PicTrisRegister *m_register;

@@ -108,24 +108,16 @@ class PinModule;
 /// via SignalControl. The control is usually used to control the I/O pin 
 /// direction (i.e. whether it's an input or output...), drive value, 
 /// pullup state, etc.
-
+/// When a Pin Module is through with the SignalControl, it will call
+/// the release() method. This is primarily used to delete the SignalControl
+/// objects.
 
 class SignalControl
 {
 public:
+  virtual ~SignalControl();  //// fixme
   virtual char getState()=0;
-};
-
-///------------------------------------------------------------
-/// SinkRecipient
-/// Interface class that redirects a driven I/O pin change
-/// to the appropriate peripheral register that wants the
-/// change.
-
-class SinkRecipient
-{
-public:
-  virtual void setState(const char)=0;
+  virtual void release()=0;
 };
 
 ///------------------------------------------------------------
@@ -136,6 +128,8 @@ class PeripheralSignalSource : public SignalControl
 {
 public:
   PeripheralSignalSource(PinModule *_pin);
+  virtual ~PeripheralSignalSource();
+  virtual void release();
 
   /// getState - called by the PinModule to determine the source state
   virtual char getState();
@@ -249,10 +243,10 @@ class PinModule : public PinMonitor
 public:
   PinModule();
   PinModule(PortModule *, unsigned int _pinNumber, IOPIN *new_pin=0);
-  virtual ~PinModule() {}
+  virtual ~PinModule();
 
   /// updatePinModule -- The low level I/O pin state is resolved here 
-  /// by examined the direction and state of the I/O pin. 
+  /// by examining the direction and state of the I/O pin. 
 
   void updatePinModule();
 
@@ -337,6 +331,7 @@ class PortSink : public SignalSink
 public:
   PortSink(PortRegister *portReg, unsigned int iobit);
   virtual void setSinkState(char);
+  virtual void release();
 private:
   PortRegister *m_PortRegister;
   unsigned int  m_iobit;

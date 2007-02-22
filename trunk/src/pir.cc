@@ -79,7 +79,7 @@ bool PIR::interrupt_status()
   return false;
 }
 
-
+//========================================================================
 InterruptSource::InterruptSource(PIR *_pir, unsigned int bitMask)
   : m_pir(_pir), m_bitMask(bitMask)
 {
@@ -94,7 +94,10 @@ void InterruptSource::Trigger()
 }
 
 
-
+void InterruptSource::release()
+{
+  delete this;
+}
 
 
 

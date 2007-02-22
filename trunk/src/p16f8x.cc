@@ -46,11 +46,11 @@ Boston, MA 02111-1307, USA.  */
 //
 // Configuration Memory for the 16F8X devices.
 
-class Config1 : public ConfigMemory 
+class Config1 : public ConfigWord
 {
 public:
   Config1(P16F8x *pCpu)
-    : ConfigMemory("CONFIG1", 0x3fff, "Configuration Word", pCpu, 0x2007)
+    : ConfigWord("CONFIG1", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
   }
 
@@ -97,16 +97,25 @@ public:
 
 P16F8x::P16F8x(const char *_name, const char *desc)
   : P16X6X_processor(_name,desc),
-    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
-    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
     usart(this),
     comparator(this),
     wdtcon(this, "wdtcon", "WDT Control"),
     osccon(this, "osccon", "OSC Control"),
     osctune(this, "osctune", "OSC Tune")
 {
-   pir1 = &pir1_2_reg;
-   pir2 = &pir2_2_reg;
+  pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  pir1 = pir1_2_reg;
+  pir2 = pir2_2_reg;
+  //pir1 = &pir1_2_reg;
+  //pir2 = &pir2_2_reg;
+}
+
+P16F8x::~P16F8x()
+{
+  delete_file_registers(0xa0, 0xef);
+  delete_file_registers(0x110,0x16f);
+  delete_file_registers(0x190,0x1ef);
 }
 
 void P16F8x::create_iopin_map()
@@ -360,12 +369,18 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 
 void P16F8x::create_config_memory()
 {
+  m_configMemory = new ConfigMemory(this,2);
+  m_configMemory->addConfigWord(0,new Config1(this));
+  m_configMemory->addConfigWord(1,new ConfigWord("CONFIG2", 0,"Configuration Word",this,0x2008));
+
+  /*
   m_configMemory = new ConfigMemory *[2];
   m_configMemory[0] = new Config1(this);
   m_configMemory[1] = new ConfigMemory("CONFIG2", 0,"Configuration Word",this,0x2008);
 
   addSymbol(m_configMemory[0]);
   addSymbol(m_configMemory[1]);
+  */
 }
 
 

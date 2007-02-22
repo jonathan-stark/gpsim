@@ -33,11 +33,11 @@ Boston, MA 02111-1307, USA.  */
 //========================================================================
 // Generic Configuration word for the midrange family.
 
-class Generic14bitConfigWord : public ConfigMemory 
+class Generic14bitConfigWord : public ConfigWord 
 {
 public:
   Generic14bitConfigWord(_14bit_processor *pCpu)
-    : ConfigMemory("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
+    : ConfigWord("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
     assert(pCpu);
     pCpu->wdt.initialize(true);
@@ -99,13 +99,16 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
   : pic_processor(_name,_desc), intcon(0)
 {
   pc = new Program_Counter("pc", "Program Counter", this);
-  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
+  pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
   option_reg = new OPTION_REG(this,"option_reg");
   stack = new Stack();
 }
 
 _14bit_processor::~_14bit_processor()
 {
+  delete_sfr_register((Register **)&fsr,0);
+  delete_sfr_register((Register **)&option_reg,0);
+  delete pc; pc=0;
 }
 
 //-------------------------------------------------------------------
@@ -177,9 +180,8 @@ unsigned int _14bit_processor::get_program_memory_at_address(unsigned int addres
 //-------------------------------------------------------------------
 void _14bit_processor::create_config_memory()
 {
-  m_configMemory = new ConfigMemory *[1];
-  *m_configMemory = new Generic14bitConfigWord(this);
-  addSymbol(*m_configMemory);
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new Generic14bitConfigWord(this));
 }
 
 //-------------------------------------------------------------------
@@ -191,8 +193,8 @@ bool _14bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
 
     config_word = cfg_word;
 
-    if (m_configMemory && *m_configMemory)
-      (*m_configMemory)->set((int)cfg_word);
+    if (m_configMemory && m_configMemory->getConfigWord(0))
+      m_configMemory->getConfigWord(0)->set((int)cfg_word);
 
     return true;
   }
@@ -284,8 +286,14 @@ Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 Pic14Bit::~Pic14Bit()
 {
-  //delete m_MCLR;
+  //delete m_MCLR; <-- this is a package pin
   delete m_MCLRMonitor;
+
+  delete_sfr_register((Register **)&m_portb,0);
+  delete_sfr_register((Register **)&m_trisb,0);
+
+  delete_sfr_register((Register **)&m_porta,0);
+  delete_sfr_register((Register **)&m_trisa,0);
 }
 //-------------------------------------------------------------------
 void Pic14Bit::create_symbols()

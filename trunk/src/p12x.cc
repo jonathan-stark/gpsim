@@ -43,11 +43,11 @@ Boston, MA 02111-1307, USA.  */
 //========================================================================
 // Generic Configuration word for the midrange family.
 
-class Generic12bitConfigWord : public ConfigMemory 
+class Generic12bitConfigWord : public ConfigWord
 {
 public:
   Generic12bitConfigWord(_12bit_processor *pCpu)
-    : ConfigMemory("CONFIG", 0xfff, "Configuration Word", pCpu, 0xfff)
+    : ConfigWord("CONFIG", 0xfff, "Configuration Word", pCpu, 0xfff)
   {
     assert(pCpu);
     pCpu->wdt.initialize(true);
@@ -135,10 +135,13 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
 //-------------------------------------------------------------------
 void P12C508::create_config_memory()
 {
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new Generic12bitConfigWord(this));
+
+  /*
   m_configMemory = new ConfigMemory *[1];
   *m_configMemory = new Generic12bitConfigWord(this);
-
-  addSymbol(*m_configMemory);
+  */
 }
 
 
@@ -301,11 +304,11 @@ P12C508::~P12C508()
   delete_sfr_register((Register **)&m_gpio,0);
   delete_sfr_register((Register **)&m_tris,0);
   delete_file_registers(0x7, 0x1f);
-
+  /*
   removeSymbol(*m_configMemory);
   delete *m_configMemory;
   delete [] m_configMemory;
-
+  */
 }
 
 

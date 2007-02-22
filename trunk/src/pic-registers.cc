@@ -65,15 +65,22 @@ Program_Counter::Program_Counter(const char *name, const char *desc, Module *pM)
   trace_skip = 0;
   trace_other = 0;
 }
+
+
+
 Program_Counter::~Program_Counter()
 {
   if (cpu)
     cpu->removeSymbol(this);
+  delete m_pPCTraceType;
 }
 
 //--------------------------------------------------
-void Program_Counter::set_trace_command(unsigned int new_command)
+void Program_Counter::set_trace_command()
 {
+  m_pPCTraceType = new PCTraceType(get_cpu(),1);
+  unsigned int new_command = trace.allocateTraceType(m_pPCTraceType);
+
   trace_increment = new_command | (0<<16);
   trace_branch    = new_command | (1<<16);
   trace_skip      = new_command | (2<<16);

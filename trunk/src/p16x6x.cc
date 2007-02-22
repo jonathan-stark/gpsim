@@ -367,13 +367,15 @@ P16X6X_processor::~P16X6X_processor()
 
   delete_file_registers(0x20,0x7f);
   delete_file_registers(0xa0,0xbf);
-  delete m_portc;
-  delete m_trisc;
-
-  //delete_sfr_register((Register**)&pir1,0x0c);
-  //delete pir2;
-
+  delete_sfr_register((Register **)&m_portc,0);
+  delete_sfr_register((Register **)&m_trisc,0);
+  cout << "deleting PIR2:\n";
+  delete_sfr_register((Register **)&pir2,0);
+  cout << "deleting PIR1:\n";
+  delete_sfr_register((Register **)&pir1,0);
+  cout << "leaving "<<__FUNCTION__<<endl;
 }
+
 /*******************************************************************
  *
  *        Definitions for the various P16x6x processors
@@ -578,7 +580,7 @@ void P16C64::create_sfr_map(void)
    if(verbose)
     cout << "creating c64 registers\n";
 
-  pir_set_2_def.set_pir1(&pir1_2_reg);
+  pir_set_2_def.set_pir1(pir1_2_reg);
 
 
   P16X6X_processor::create_sfr_map();
@@ -644,13 +646,13 @@ Processor * P16C64::construct(const char *name)
 }
 
 P16C64::P16C64(const char *_name, const char *desc)
-  : P16X6X_processor(_name,desc), 
-    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1)
+  : P16X6X_processor(_name,desc)
 {
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
 
-  pir1 = &pir1_2_reg;
+  pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir1 = pir1_2_reg;
 
 
   m_portd = new PicPSP_PortRegister(this,"portd","",8,0xff);
@@ -664,8 +666,8 @@ P16C64::~P16C64()
 {
   cout << __FUNCTION__ << endl;
 
-  delete_sfr_register((Register**)&m_portc,0x07);
-  delete_sfr_register((Register**)&m_trisc,0x87);
+  //delete_sfr_register((Register**)&m_portc,0x07);
+  //delete_sfr_register((Register**)&m_trisc,0x87);
 
 }
 //------------------------------------------------------------------------

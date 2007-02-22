@@ -50,6 +50,16 @@ P16F62x::P16F62x(const char *_name, const char *desc)
 
 P16F62x::~P16F62x()
 {
+
+  delete_file_registers(0xc0, 0xef);
+  delete_file_registers(0x120,0x14f);
+
+  delete_sfr_register((Register **)&usart.txreg,0);
+  delete_sfr_register((Register **)&usart.rcreg,0);
+
+  delete eeprom;
+  eeprom = 0;
+
 }
 
 void P16F62x::create_iopin_map()
@@ -91,12 +101,7 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0x70,0x7f,0x100);
   alias_file_registers(0x70,0x7f,0x180);
-
-
   alias_file_registers(0x0,0x0,0x180);
-  //add_sfr_register(indf,   0x180);
-  //add_sfr_register(indf,   0x100);
-
   alias_file_registers(0x01,0x04,0x100);
   alias_file_registers(0x81,0x84,0x100);
 
@@ -105,8 +110,8 @@ void P16F62x::create_sfr_map()
 
   add_sfr_register(m_portb, 0x06);
   add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
-  add_sfr_register(m_portb, 0x106);
-  add_sfr_register(m_trisb, 0x186, RegisterValue(0xff,0));
+  alias_file_registers(0x06,0x06,0x100);
+  alias_file_registers(0x86,0x86,0x100);
 
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x9a);
@@ -114,14 +119,9 @@ void P16F62x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x9c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x9d);
 
-  //add_sfr_register(pclath, 0x18a, RegisterValue(0,0));
-  //add_sfr_register(pclath, 0x10a, RegisterValue(0,0));
   // PCLATH
   alias_file_registers(0x0a,0x0a,0x180);
 
-  //add_sfr_register(&intcon_reg, 0x18b, RegisterValue(0,0));
-  //add_sfr_register(&intcon_reg, 0x10b, RegisterValue(0,0));
-  //add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
   alias_file_registers(0x0b,0x0b,0x180);
 

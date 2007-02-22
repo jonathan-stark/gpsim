@@ -76,6 +76,7 @@ public:
     assert(_ssp_mod);
   }
   virtual ~SDI_SignalSink(){}
+  virtual void release(){}
 
   void setSinkState(char new3State)
   {
@@ -94,6 +95,7 @@ public:
     assert(_ssp_mod);
   }
   virtual ~SCL_SignalSink(){}
+  virtual void release(){}
 
   void setSinkState(char new3State)
   {
@@ -111,6 +113,7 @@ public:
     assert(_ssp_mod);
   }
   virtual ~SS_SignalSink(){}
+  virtual void release(){}
 
   void setSinkState(char new3State)
   {

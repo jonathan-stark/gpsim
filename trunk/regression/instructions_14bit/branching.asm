@@ -204,6 +204,6 @@ Test4:
 
 done:
   .assert  "\"*** PASSED Midrange core Branching test\""
-
+        nop
 
   end

@@ -89,8 +89,9 @@ void P16C71::create_sfr_map()
   add_sfr_register(&adcon0, 0x08, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x88, RegisterValue(0,0));
 
-  add_sfr_register(&adres,  0x89, RegisterValue(0,0));
+  //add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
+  alias_file_registers(0x70,0x7f,0x80);
 
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1,0);
@@ -281,8 +282,9 @@ void P16C72::create_sfr_map()
     cout << "creating c72 registers \n";
 
   // Parent classes just set PIR version 1
-  pir_set_2_def.set_pir1(&pir1_2_reg);
-  pir_set_2_def.set_pir2(&pir2_2_reg);
+
+  pir_set_2_def.set_pir1(pir1_2_reg);
+  pir_set_2_def.set_pir2(pir2_2_reg);
 
   add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
@@ -364,8 +366,6 @@ Processor * P16C72::construct(const char *name)
 
 P16C72::P16C72(const char *_name, const char *desc)
   : P16C62(_name, desc),
-    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
-    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
     adres(this,"adres", "A2D Result")
@@ -373,8 +373,10 @@ P16C72::P16C72(const char *_name, const char *desc)
   if(verbose)
     cout << "c72 constructor, type = " << isa() << '\n';
 
-  pir1 = &pir1_2_reg;
-  pir2 = &pir2_2_reg;
+  pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  pir1 = pir1_2_reg;
+  pir2 = pir2_2_reg;
 
 }
 
@@ -388,8 +390,8 @@ void P16C73::create_sfr_map()
     cout << "creating c73 registers \n";
 
   // Parent classes just set PIR version 1
-  pir_set_2_def.set_pir1(&pir1_2_reg);
-  pir_set_2_def.set_pir2(&pir2_2_reg);
+  pir_set_2_def.set_pir1(pir1_2_reg);
+  pir_set_2_def.set_pir2(pir2_2_reg);
 
   add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
@@ -474,8 +476,6 @@ Processor * P16C73::construct(const char *name)
 
 P16C73::P16C73(const char *_name, const char *desc)
   : P16C63(_name, desc),
-    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
-    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
     adres(this,"adres", "A2D Result")
@@ -483,8 +483,11 @@ P16C73::P16C73(const char *_name, const char *desc)
   if(verbose)
     cout << "c73 constructor, type = " << isa() << '\n';
 
-  pir1 = &pir1_2_reg;
-  pir2 = &pir2_2_reg;
+  pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+
+  pir1 = pir1_2_reg;
+  pir2 = pir2_2_reg;
 
 
 }
@@ -583,8 +586,8 @@ void P16C74::create_sfr_map()
     cout << "creating c74 registers \n";
 
   // Parent classes just set PIR version 1
-  pir_set_2_def.set_pir1(&pir1_2_reg);
-  pir_set_2_def.set_pir2(&pir2_2_reg);
+  pir_set_2_def.set_pir1(pir1_2_reg);
+  pir_set_2_def.set_pir2(pir2_2_reg);
 
   add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
@@ -673,8 +676,6 @@ Processor * P16C74::construct(const char *name)
 
 P16C74::P16C74(const char *_name, const char *desc)
   : P16C65(_name, desc) ,
-    pir1_2_reg(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1),
-    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
     adres(this,"adres", "A2D Result")
@@ -682,8 +683,11 @@ P16C74::P16C74(const char *_name, const char *desc)
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';
 
-  pir1 = &pir1_2_reg;
-  pir2 = &pir2_2_reg;
+  pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+
+  pir1 = pir1_2_reg;
+  pir2 = pir2_2_reg;
 
 }
 

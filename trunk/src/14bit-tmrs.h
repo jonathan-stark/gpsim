@@ -132,6 +132,7 @@ public:
   void setCrosslinks(CCPRL *, PIR_SET *, TMR2 *);
   void setADCON(ADCON0 *);
   CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~CCPCON();
 
   void setIOpin(PinModule *);
 private:
@@ -239,6 +240,8 @@ public:
   virtual void callback_print();
 
   TMRL(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~TMRL();
+  virtual void release();
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get();

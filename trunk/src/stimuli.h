@@ -298,6 +298,7 @@ class SignalSink
 {
 public:
   virtual void setSinkState(char)=0;
+  virtual void release()=0;
 };
 
 
