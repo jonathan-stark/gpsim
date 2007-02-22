@@ -276,8 +276,8 @@ main (int argc, char *argv[])
 
       if (usage)
         break;
-    }
 
+    }
   }
 
   if (usage) {
@@ -292,8 +292,10 @@ main (int argc, char *argv[])
     printf("\n");
   }
   if(poptPeekArg(optCon))
-	  hex_name=strdup(poptPeekArg(optCon));
-  
+    hex_name=strdup(poptPeekArg(optCon));
+
+  poptFreeContext(optCon);
+
   initialize_readline();
 
   // must be done after initialize_gpsim_core()
@@ -371,8 +373,6 @@ main (int argc, char *argv[])
 	       "load i \"%s\"\n",include_startup_name);
       parse_string(command_str);
   }
-
-  poptFreeContext(optCon);
 
   if(abort_gpsim)
     exit_gpsim();

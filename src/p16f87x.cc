@@ -62,7 +62,7 @@ void P16F871::create_sfr_map()
   add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
 
   // Parent classes just set PIR1
-  pir_set_2_def.set_pir2(&pir2_2_reg);
+  pir_set_2_def.set_pir2(pir2_2_reg);
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
@@ -96,30 +96,32 @@ void P16F871::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
 
-  alias_file_registers(0x80,0x80,0x80);
-  alias_file_registers(0x01,0x01,0x100);
-  alias_file_registers(0x82,0x84,0x80);
+  alias_file_registers(0x70,0x7f,0x80);
+  alias_file_registers(0x70,0x7f,0x100);
+  alias_file_registers(0x70,0x7f,0x180);
+
+  alias_file_registers(0x00,0x04,0x100);
+  alias_file_registers(0x80,0x84,0x100);
+
   alias_file_registers(0x06,0x06,0x100);
-  alias_file_registers(0x8a,0x8b,0x80);
-  alias_file_registers(0x100,0x100,0x80);
-  alias_file_registers(0x81,0x81,0x100);
-  alias_file_registers(0x102,0x104,0x80);
   alias_file_registers(0x86,0x86,0x100);
-  alias_file_registers(0x10a,0x10b,0x80);
+
+  alias_file_registers(0x0a,0x0b,0x080);
+  alias_file_registers(0x0a,0x0b,0x100);
+  alias_file_registers(0x0a,0x0b,0x180);
 
 
   alias_file_registers(0x20,0x7f,0x100);
   alias_file_registers(0xa0,0xbf,0x100);
-  alias_file_registers(0x70,0x7f,0x80);
-  alias_file_registers(0xf0,0xff,0x100);
 
 
-  // The rest of the A/D definition in 16C74
+
   add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
-
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
   add_sfr_register(&adresl, 0x9e, RegisterValue(0,0));
+
+
 
   //1adcon0.analog_port = porta;
   //1adcon0.analog_port2 = porte;
@@ -234,7 +236,6 @@ void P16F871::create_symbols()
 //========================================================================
 P16F871::P16F871(const char *_name, const char *desc)
   : P16C64(_name,desc) ,
-    pir2_2_reg(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
     adres(this,"adres", "A2D Result"),
@@ -244,8 +245,9 @@ P16F871::P16F871(const char *_name, const char *desc)
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
 
-  pir2 = &pir2_2_reg;
-
+  //pir2 = &pir2_2_reg;
+  pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  pir2 = pir2_2_reg;
 }
 
 

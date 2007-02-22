@@ -95,8 +95,8 @@ class P16C72 : public P16C62
   // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
   // PIR2v2, but C++ only supports covariance in member function return
   // values.
-  PIR1v2 pir1_2_reg;
-  PIR2v2 pir2_2_reg;
+  PIR1v2 *pir1_2_reg;
+  PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
@@ -105,8 +105,8 @@ class P16C72 : public P16C62
   virtual PROCESSOR_TYPE isa(){return _P16C72_;};
   virtual void create_symbols();
   void create_sfr_map();
-  virtual PIR *get_pir1() { return (&pir1_2_reg); }
-  virtual PIR *get_pir2() { return (&pir2_2_reg); }
+  virtual PIR *get_pir1() { return (pir1_2_reg); }
+  virtual PIR *get_pir2() { return (pir2_2_reg); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
 
@@ -124,8 +124,8 @@ class P16C73 : public P16C63
   // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
   // PIR2v2, but C++ only supports covariance in member function return
   // values.
-  PIR1v2 pir1_2_reg;
-  PIR2v2 pir2_2_reg;
+  PIR1v2 *pir1_2_reg;
+  PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
@@ -134,8 +134,8 @@ class P16C73 : public P16C63
   virtual PROCESSOR_TYPE isa(){return _P16C73_;};
   virtual void create_symbols();
   void create_sfr_map();
-  virtual PIR *get_pir1() { return (&pir1_2_reg); }
-  virtual PIR *get_pir2() { return (&pir2_2_reg); }
+  virtual PIR *get_pir1() { return (pir1_2_reg); }
+  virtual PIR *get_pir2() { return (pir2_2_reg); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
   P16C73(const char *_name=0, const char *desc=0);
@@ -170,8 +170,8 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
   // PIR2v2, but C++ only supports covariance in member function return
   // values.
-  PIR1v2 pir1_2_reg;
-  PIR2v2 pir2_2_reg;
+  PIR1v2 *pir1_2_reg;
+  PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
@@ -180,8 +180,8 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   virtual PROCESSOR_TYPE isa(){return _P16C74_;};
   virtual void create_symbols();
   void create_sfr_map();
-  virtual PIR *get_pir1() { return (&pir1_2_reg); }
-  virtual PIR *get_pir2() { return (&pir2_2_reg); }
+  virtual PIR *get_pir1() { return (pir1_2_reg); }
+  virtual PIR *get_pir2() { return (pir2_2_reg); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
   virtual unsigned int program_memory_size() const { return 0x1000; };

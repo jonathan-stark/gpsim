@@ -44,7 +44,7 @@ Boston, MA 02111-1307, USA.  */
 //------------------------------------------------------------------------
 // Config1H - default 
 
-class Config1H : public ConfigMemory 
+class Config1H : public ConfigWord 
 {
 #define FOSC0   (1<<0)
 #define FOSC1   (1<<1)
@@ -54,7 +54,7 @@ class Config1H : public ConfigMemory
 #define CONFIG1H_default (OSCEN | FOSC2 | FOSC1 | FOSC0)
 public:
   Config1H(_16bit_processor *pCpu, unsigned int addr)
-    : ConfigMemory("CONFIG1H", CONFIG1H_default, "Oscillator configuration", pCpu, addr)
+    : ConfigWord("CONFIG1H", CONFIG1H_default, "Oscillator configuration", pCpu, addr)
   {
   }
 };
@@ -63,7 +63,7 @@ public:
 //------------------------------------------------------------------------
 // Config2H - default 
 //  The default Config2H register controls the 18F series WDT. 
-class Config2H : public ConfigMemory 
+class Config2H : public ConfigWord 
 {
 #define WDTEN   (1<<0)
 #define WDTPS0  (1<<1)
@@ -73,7 +73,7 @@ class Config2H : public ConfigMemory
 #define CONFIG2H_default (WDTEN | WDTPS0 | WDTPS1 | WDTPS2)
 public:
   Config2H(_16bit_processor *pCpu, unsigned int addr)
-    : ConfigMemory("CONFIG2H", CONFIG2H_default, "WatchDog configuration", pCpu, addr)
+    : ConfigWord("CONFIG2H", CONFIG2H_default, "WatchDog configuration", pCpu, addr)
   {
   }
   virtual void set(gint64 v)
@@ -153,7 +153,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   pll_factor = 2;
 
   pc = new Program_Counter16(this);
-  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,1)));
+  pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
 
   m_porta = new PicPortRegister(this,"porta","",8,0x7f);
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, true);
@@ -591,13 +591,13 @@ unsigned int _16bit_processor::get_config_word(unsigned int address)
     address &= 0xfffe; // Clear LSB
     unsigned int ret = 0xffff;
 
-    if (m_configMemory[address])
-      ret = (ret & 0xff00) |  (((unsigned int )(m_configMemory[address]->getVal())) & 0x00ff);
+    if (m_configMemory->getConfigWord(address))
+      ret = (ret & 0xff00) |  (((unsigned int )(m_configMemory->getConfigWord(address)->getVal())) & 0x00ff);
 
     address++;
 
-    if (m_configMemory[address])
-      ret = (ret & 0x00ff) |  ((((unsigned int )(m_configMemory[address]->getVal()))<<8) & 0xff00);
+    if (m_configMemory->getConfigWord(address))
+      ret = (ret & 0x00ff) |  ((((unsigned int )(m_configMemory->getConfigWord(address)->getVal()))<<8) & 0xff00);
 
     return ret;
   }
@@ -615,13 +615,13 @@ bool  _16bit_processor::set_config_word(unsigned int address, unsigned int cfg_w
 
       address &= 0xfffe;
 
-      if(m_configMemory[address])
-	m_configMemory[address]->set((int)(cfg_word&0xff));
+      if (m_configMemory->getConfigWord(address))
+	m_configMemory->getConfigWord(address)->set((int)(cfg_word&0xff));
 
       address++;
 
-      if(m_configMemory[address])
-	m_configMemory[address]->set((int)((cfg_word>>8)&0xff));
+      if (m_configMemory->getConfigWord(address))
+	m_configMemory->getConfigWord(address)->set((int)((cfg_word>>8)&0xff));
 
       return true;
     }
@@ -633,6 +633,11 @@ bool  _16bit_processor::set_config_word(unsigned int address, unsigned int cfg_w
 //-------------------------------------------------------------------
 void _16bit_processor::create_config_memory()
 {
+  m_configMemory = new ConfigMemory(this,configMemorySize());
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H(this, CONFIG1H));
+  m_configMemory->addConfigWord(CONFIG2H-CONFIG2L,new Config2H(this, CONFIG2H));
+
+  /*
   m_configMemory = new ConfigMemory *[configMemorySize()];
 
   for (unsigned int i=0; i<configMemorySize(); i++)
@@ -642,7 +647,7 @@ void _16bit_processor::create_config_memory()
   m_configMemory[CONFIG2H-CONFIG1L] = new Config2H(this, CONFIG2H);
   addSymbol(m_configMemory[CONFIG1H-CONFIG1L]);
   addSymbol(m_configMemory[CONFIG2H-CONFIG1L]);
-
+  */
 }
 
 //-------------------------------------------------------------------

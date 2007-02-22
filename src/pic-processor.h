@@ -116,7 +116,7 @@ enum PROCESSOR_TYPE
   _P18F1320_
 };
 
-// Configuration modes.
+// Configuration modes.  DELETE THIS...
 //  The configuration mode bits are the config word bits remapped.
 //  The remapping removes processor dependent bit definitions.
 class ConfigMode {
@@ -287,6 +287,7 @@ public:
   void add_sfr_register(Register *reg, unsigned int addr,
 			RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
   void delete_sfr_register(Register **ppReg, unsigned int addr);
+  void remove_sfr_register(Register *ppReg, unsigned int addr);
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
@@ -354,7 +355,7 @@ public:
   virtual ~pic_processor();
 
 protected:
-  ConfigMemory **m_configMemory;
+  ConfigMemory *m_configMemory;
   eProcessorActivityStates m_ActivityState;
   ResetTraceType *m_pResetTT;
   InterruptTraceType *m_pInterruptTT;
@@ -372,6 +373,31 @@ protected:
 // of configuration memory varies from processor to processor, it is up to 
 // each process to derive from this class.
 
+
+class ConfigWord : public Integer
+{
+public:
+  ConfigWord(const char *_name, unsigned int default_val, const char *desc,
+             pic_processor *pCpu, unsigned int addr);
+protected:
+  pic_processor *m_pCpu;
+  unsigned int m_addr;
+};
+
+class ConfigMemory
+{
+public:
+  ConfigMemory(pic_processor *pCpu, unsigned int nWords);
+  ~ConfigMemory();
+  int addConfigWord(unsigned int addr, ConfigWord *);
+  ConfigWord *getConfigWord(unsigned int addr);
+protected:
+  pic_processor *m_pCpu;
+  ConfigWord **m_ConfigWords;
+  int m_nConfigWords;
+};
+
+/*
 class ConfigMemory : public Integer
 {
 public:
@@ -381,5 +407,5 @@ protected:
   pic_processor *m_pCpu;
   unsigned int m_addr;
 };
-
+*/
 #endif

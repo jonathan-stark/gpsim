@@ -73,6 +73,7 @@ class VRCON : public sfr_register
     };
 
   VRCON(Processor *pCpu, const char *pName, const char *pDesc);
+  ~VRCON();
 
   virtual void put(unsigned int new_value);
   virtual void setIOpin(PinModule *);
@@ -133,12 +134,13 @@ class CMCON : public sfr_register
 
 
   CMCON(Processor *pCpu, const char *pName, const char *pDesc);
+  ~CMCON();
 
 protected:
   PinModule *cm_input[4];
   PinModule *cm_output[2];
-  const char *cm_input_pin[4];
-  const char *cm_output_pin[2];
+  char *cm_input_pin[4];
+  char *cm_output_pin[2];
   CMSignalSource *cm_source[2];
   unsigned int m_CMval[2];
   PIR_SET *pir_set;

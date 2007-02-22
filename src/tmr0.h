@@ -46,6 +46,8 @@ public:
 
   TMR0(Processor *, const char *pName, const char *pDesc=0);
 
+  virtual void release();
+
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();

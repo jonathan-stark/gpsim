@@ -128,6 +128,14 @@ void instruction::addLabel(string &rLabel)
     cpu->addSymbol(this, &rLabel);
   }
 }
+
+//------------------------------------------------------------------------
+invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu,new_opcode,address)
+{
+  new_name("INVALID");
+}
+
 void invalid_instruction::execute()  
 { 
   //cout << "*** INVALID INSTRUCTION ***\n";
@@ -141,10 +149,9 @@ void invalid_instruction::execute()
 
 };
 
-invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opcode, unsigned int address)
-  : instruction(new_cpu,new_opcode,address)
+void invalid_instruction::addLabel(string &rLabel)
 {
-  new_name("INVALID");
+  cout << "*** WARNING: adding label '"<<rLabel << "' to an invalid instruction\n";
 }
 
 // Instantiate an invalid instruction

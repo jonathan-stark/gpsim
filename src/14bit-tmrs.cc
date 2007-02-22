@@ -185,9 +185,17 @@ public:
   {
     assert(m_ccp);
   }
-  char getState()
+  ~CCPSignalSource()
+  {
+  }
+
+  virtual char getState()
   {
     return m_ccp->getState();
+  }
+  virtual void release() 
+  {
+    delete this;
   }
 private:
   CCPCON *m_ccp;
@@ -206,6 +214,10 @@ public:
     assert(_ccp);
   }
 
+  void release() 
+  {
+    delete this;
+  }
   void setSinkState(char new3State)
   {
     m_ccp->new_edge( new3State=='1' || new3State=='W');
@@ -228,6 +240,12 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     ccprl(0), pir_set(0), tmr2(0), adcon0(0)
 {
 }
+CCPCON::~CCPCON()
+{
+  //delete m_sink;
+  //delete m_source;
+}
+
 void CCPCON::setIOpin(PinModule *new_PinModule)
 {
   Dprintf(("CCPCON::setIOpin\n"));
@@ -632,6 +650,17 @@ TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   tmrh    = 0;
   t1con   = 0;
   ccpcon  = 0;
+}
+
+TMRL::~TMRL()
+{
+  if (m_Interrupt)
+    m_Interrupt->release();
+}
+
+void TMRL::release()
+{
+
 }
 
 void TMRL::setIOpin(PinModule *extClkSource)

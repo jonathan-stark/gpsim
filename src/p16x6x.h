@@ -146,9 +146,9 @@ class P16C64 : public  P16X6X_processor
   // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
   // PIR2v2, but C++ only supports covariance in member function return
   // values.
-  PIR1v2 pir1_2_reg;
+  PIR1v2 *pir1_2_reg;
   PIR_SET_2 pir_set_2_def;
-  virtual PIR *get_pir1() { return (&pir1_2_reg); }
+  virtual PIR *get_pir1() { return (pir1_2_reg); }
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
 

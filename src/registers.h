@@ -413,7 +413,7 @@ public:
 //---------------------------------------------------------
 // Program Counter
 //
-
+class PCTraceType;
 class Program_Counter : public Value
 {
 public:
@@ -454,7 +454,7 @@ public:
   }
 
   // initialize the dynamically allocated trace type
-  virtual void set_trace_command(unsigned int);
+  virtual void set_trace_command();
 
   /// get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
   /// whereas get_raw_value isn't. The raw value of the program counter
@@ -493,6 +493,7 @@ public:
 
 protected:
   unsigned int reset_address;      /* Value pc gets at reset */
+  PCTraceType *m_pPCTraceType;
   
 };
 

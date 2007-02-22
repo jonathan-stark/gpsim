@@ -213,6 +213,10 @@ EEPROM_PIR::EEPROM_PIR(Processor *pCpu, PIR *pPir)
 {
 }
 
+EEPROM_PIR::~EEPROM_PIR()
+{
+}
+
 //------------------------------------------------------------------------
 // Set the EEIF and clear the WR bits. 
 
@@ -259,6 +263,23 @@ EEPROM::EEPROM(Processor *pCpu)
     eedata(pCpu,"eedata","EE Data"),
     eeadr(pCpu,"eeadr", "EE Address")
 {
+}
+EEPROM::~EEPROM()
+{
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+  if (pCpu) {
+    pCpu->remove_sfr_register(&eedata,0);
+    pCpu->remove_sfr_register(&eeadr,0);
+    pCpu->remove_sfr_register(&eecon1,0);
+    pCpu->remove_sfr_register(&eecon2,0);
+  }
+
+  for (unsigned int i = 0; i < rom_size; i++)
+    delete rom[i];
+
+  delete [] rom;
+
+  delete m_UiAccessOfRom;
 }
 
 Register *EEPROM::get_register(unsigned int address)
@@ -474,6 +495,15 @@ EEPROM_WIDE::EEPROM_WIDE(Processor *pCpu, PIR *pPir)
     eedatah(pCpu,"eedatah", "EE Data High byte"),
     eeadrh(pCpu, "eeadr", "EE Address High byte")
 {
+}
+
+EEPROM_WIDE::~EEPROM_WIDE()
+{
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+  if (pCpu) {
+    pCpu->remove_sfr_register(&eedatah,0);
+    pCpu->remove_sfr_register(&eeadrh,0);
+  }
 }
 
 void EEPROM_WIDE::start_write()

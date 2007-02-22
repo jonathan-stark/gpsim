@@ -111,12 +111,14 @@ Value::~Value()
       it = m_aka->begin();
       while(it != m_aka->end()) {
         string s(*it);
-        cout << " Value label " << s << endl;
+        //cout << " Value label " << s << endl;
         cpu->removeSymbol(s);
         ++it;
       }
-
+      m_aka->clear();
+      delete m_aka;
     }
+
   }
 }
 void Value::update()

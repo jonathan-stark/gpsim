@@ -1135,8 +1135,6 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 pic_processor::~pic_processor()
 {
-
-
   delete m_pResetTT;
   delete m_pInterruptTT;
 
@@ -1158,7 +1156,7 @@ pic_processor::~pic_processor()
 #endif
 
   delete config_modes;
-
+  delete m_configMemory;
 }
 //-------------------------------------------------------------------
 //
@@ -1253,7 +1251,10 @@ void pic_processor::delete_sfr_register(Register **ppReg, unsigned int addr)
   if (ppReg && *ppReg) {
 
     unsigned int a = (*ppReg)->getAddress();
-    if (registers[a] == *ppReg)
+    if (0) 
+      cout << __FUNCTION__ << " addr = 0x"<<hex<<a
+           <<" reg " << (*ppReg)->name()<<endl;
+    if (a<rma.get_size() && registers[a] == *ppReg)
       delete_file_registers(a,a);
     else
       delete *ppReg;
@@ -1262,6 +1263,23 @@ void pic_processor::delete_sfr_register(Register **ppReg, unsigned int addr)
   }
 
 }
+
+//-------------------------------------------------------------------
+//
+// delete_sfr_register
+//
+void pic_processor::remove_sfr_register(Register *ppReg, unsigned int addr)
+{
+
+  if (ppReg) {
+
+    unsigned int a = ppReg->getAddress();
+    if (registers[a] == ppReg)
+      delete_file_registers(a,a,true);
+  }
+
+}
+
 //-------------------------------------------------------------------
 //
 // init_program_memory
@@ -1595,8 +1613,8 @@ void WDT::callback_print()
 
 //------------------------------------------------------------------------
 // ConfigMemory - Base class
-ConfigMemory::ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
-			   pic_processor *pCpu, unsigned int addr)
+ConfigWord::ConfigWord(const char *_name, unsigned int default_val, const char *desc,
+                       pic_processor *pCpu, unsigned int addr)
   : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr)
 {
   /*
@@ -1605,3 +1623,41 @@ ConfigMemory::ConfigMemory(const char *_name, unsigned int default_val, const ch
   */
 }
 
+//------------------------------------------------------------------------
+ConfigMemory::ConfigMemory(pic_processor *pCpu, unsigned int nWords)
+  : m_pCpu(pCpu), m_nConfigWords(nWords)
+{
+  if (nWords >0 && nWords<100) {
+    
+    m_ConfigWords = new ConfigWord *[nWords];
+    for (int i=0; i<nWords; i++)
+      m_ConfigWords[i]=0;
+  }
+}
+
+ConfigMemory::~ConfigMemory()
+{
+
+  for (int i=0; i<m_nConfigWords; i++)
+    if (m_ConfigWords[i])
+      m_pCpu->deleteSymbol((gpsimObject**)&m_ConfigWords[i]);
+
+  delete [] m_ConfigWords;
+}
+
+int ConfigMemory::addConfigWord(unsigned int addr, ConfigWord *pConfigWord)
+{
+  if (addr < m_nConfigWords) {
+    delete m_ConfigWords[addr];
+    m_ConfigWords[addr] = pConfigWord;
+    m_pCpu->addSymbol(pConfigWord);
+    return 1;
+  }
+  delete pConfigWord;
+  return 0;
+}
+
+ConfigWord *ConfigMemory::getConfigWord(unsigned int addr)
+{
+  return addr < m_nConfigWords ? m_ConfigWords[addr] : 0;
+}

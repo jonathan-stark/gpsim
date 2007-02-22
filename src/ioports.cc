@@ -43,10 +43,21 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 // 
 //--------------------------------------------------
+SignalControl::~SignalControl()
+{
+}
 PeripheralSignalSource::PeripheralSignalSource(PinModule *_pin)
   : m_pin(_pin), m_cState('?')
 {
   assert(m_pin);
+}
+
+PeripheralSignalSource::~PeripheralSignalSource()
+{
+}
+
+void PeripheralSignalSource::release()
+{
 }
 
 // getState is called when the PinModule is attempting to
@@ -110,6 +121,16 @@ public:
     : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
+
+  ~SignalSource()
+  {
+  }
+  virtual void release()
+  {
+    cout << "Deleting SignalSource\n";
+    delete this;
+  }
+
   char getState()
   {
     // return m_register ? 
@@ -128,6 +149,7 @@ private:
 };
 
 
+//------------------------------------------------------------------------
 PortSink::PortSink(PortRegister *portReg, unsigned int iobit)
   : m_PortRegister(portReg), m_iobit(iobit)
 {
@@ -139,6 +161,11 @@ void PortSink::setSinkState(char cNewSinkState)
   Dprintf((" PortSink::setSinkState:bit=%d,val=%c\n",m_iobit,cNewSinkState));
 
   m_PortRegister->setbit(m_iobit,cNewSinkState);
+}
+void PortSink::release()
+{
+  //cout << "PortSink::release() ;" << this << endl;
+  delete this;
 }
 //------------------------------------------------------------------------
 PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
@@ -286,10 +313,11 @@ PortModule::PortModule(unsigned int numIopins)
 PortModule::~PortModule()
 {
   for (unsigned int i=0; i<mNumIopins; i++)
-    if (iopins[i] != &AnInvalidPinModule) 
+    if (iopins[i] != &AnInvalidPinModule) {
+      //cout << __FUNCTION__ << " deleting pin:"<<i<< ':' <<iopins[i] <<endl;
       delete iopins[i];
-
-  delete iopins;
+    }
+  delete [] iopins;
 }
 
 PinModule &PortModule::operator [] (unsigned int iPinNumber)
@@ -395,6 +423,28 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
     m_bForcedUpdate(false)
 {
   setPin(m_pin);
+}
+
+PinModule::~PinModule()
+{
+  if (m_activeSource && (m_activeSource != m_defaultSource)) {
+    //cout << __FUNCTION__ << " deleting active source:"<<m_activeSource<<endl;
+    //cout << "    state:" <<m_activeSource->getState() <<endl;
+    //m_activeSource->release();
+  }
+  if (m_defaultSource)
+    m_defaultSource->release();
+
+  if (m_activeControl && (m_activeControl != m_defaultControl))
+    m_activeControl->release();
+  if (m_defaultControl)
+    m_defaultControl->release();
+
+  if (m_activePullupControl && (m_activePullupControl != m_defaultPullupControl))
+    m_activePullupControl->release();
+  if (m_defaultPullupControl)
+    m_defaultPullupControl->release();
+
 }
 
 void PinModule::setPin(IOPIN *new_pin)

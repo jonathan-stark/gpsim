@@ -79,6 +79,7 @@ public:
   };
 
   _TXSTA(Processor *pCpu, const char *pName, const char *pDesc,USART_MODULE *);
+  ~_TXSTA();
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -172,6 +173,7 @@ class _RCSTA : public sfr_register, public TriggerObject
   guint64 future_cycle, last_cycle;
 
   _RCSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *);
+  ~_RCSTA();
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);

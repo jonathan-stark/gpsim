@@ -216,7 +216,7 @@ public:
   //virtual char *name(char *str){return("INVALID");};
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode,unsigned int address)
   {return new invalid_instruction(new_cpu,new_opcode,address);}
-
+  virtual void addLabel(string &rLabel);
   virtual bool isBase() { return true; }
 
 };
