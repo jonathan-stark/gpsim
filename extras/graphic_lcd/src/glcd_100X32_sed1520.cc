@@ -240,7 +240,10 @@ public:
   {
     assert(m_pLCD);
   }
-  char getState()
+  virtual void release()
+  {
+  }
+  virtual char getState()
   {
     // return the data bus direction (note the negative true logic.
     return m_pLCD->dataBusDirection() ? '0' : '1';
