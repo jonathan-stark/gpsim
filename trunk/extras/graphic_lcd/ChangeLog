@@ -1,4 +1,19 @@
 2007-02-23 Scott Dattalo <scott@dattalo.com>
+	* examples/18f452.lkr, examples/sed1520/18f452.lkr:
+	* examples/bitmaps.asm, examples/sed1520/bitmaps.asm:
+	* examples/glcd_test.asm, examples/sed1520/glcd_test.asm:
+	* examples/globalvars.inc, examples/sed1520/globalvars.inc:
+	* examples/lcd100X32.asm, examples/sed1520/lcd100X32.asm:
+	* examples/lcd100X32.inc, examples/sed1520/lcd100X32.inc:
+	* examples/Makefile, examples/sed1520/Makefile:
+	* examples/portdef.inc, examples/sed1520/portdef.inc:
+	* examples/processor.inc, examples/sed1520/processor.inc:
+	* examples/sed1520.asm, examples/sed1520/sed1520.asm:
+	* examples/sed1520.inc, examples/sed1520/sed1520.inc:
+	- moved the SED1520 examples from the examples/ directory to
+	the examples/sed1520 directory.
+
+2007-02-23 Scott Dattalo <scott@dattalo.com>
 	* src/glcd_100X32_sed1520.cc, src/glcd_100X32_sed1520.h:
 	 - Split out generic graphics LCD code into separate classes.
 	* src/glcd.cc, src/glcd.h: New. generic graphics lcd code.
