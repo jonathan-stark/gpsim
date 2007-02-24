@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "glcd_100X32_sed1520.h"
+#include "glcd.h"
 #include "sed1520.h"
 
 #include <gpsim/stimuli.h>
@@ -37,7 +38,6 @@ Boston, MA 02111-1307, USA.  */
 #define Dprintf(arg) {}
 #endif
 
-#define IN_BREADBOARD 0
 
 //========================================================================
 //
@@ -46,134 +46,6 @@ Boston, MA 02111-1307, USA.  */
 //========================================================================
 
 
-class LCD_Interface : public Interface
-{
-private:
-  gLCD_100X32_SED1520 *plcd;
-
-public:
-
-  //virtual void UpdateObject (gpointer xref,int new_value);
-  //virtual void RemoveObject (gpointer xref);
-  virtual void SimulationHasStopped (gpointer object);
-  //virtual void NewProcessor (unsigned int processor_id);
-  //virtual void NewModule (Module *module);
-  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
-  //virtual void NewProgram  (unsigned int processor_id);
-  virtual void Update  (gpointer object);
-
-  LCD_Interface(gLCD_100X32_SED1520 *_gp);
-};
-
-//------------------------------------------------------------------------
-//
-// LCD interface to the simulator
-//
-LCD_Interface::LCD_Interface(gLCD_100X32_SED1520 *_lcd) 
-  : Interface ( (gpointer *) _lcd), plcd(_lcd)
-{
-}
-
-//--------------------------------------------------
-// SimulationHasStopped (gpointer)
-//
-// gpsim will call this function when the simulation
-// has halt (e.g. a break point was hit.)
-
-void LCD_Interface::SimulationHasStopped (gpointer)
-{
-  if(plcd)
-    plcd->Update();
-}
-
-void LCD_Interface::Update (gpointer)
-{
-  if(plcd)
-    plcd->Update();
-}
-
-//------------------------------------------------------------------------
-
-gLCD::gLCD(GdkDrawable *parent,
-	   unsigned int cols,
-	   unsigned int rows,
-	   unsigned int pixel_size_x,
-	   unsigned int pixel_size_y
-	   )
-  : m_parent(parent),
-    m_nColumns(cols), m_nRows(rows), m_border(3),
-    m_xPixel(pixel_size_x), m_yPixel(pixel_size_y)
-{
-
-  printf("gLCD constructor %p, m_nColumns:%d, m_nRows:%d\n",this,m_nColumns,m_nRows);
-
-  g_assert(m_parent != NULL);
-
-  m_gc = gdk_gc_new(m_parent);
-  g_assert(m_gc!= (GdkGC*)NULL);
-
-  m_aColors[cBG].red   = 0x7800;
-  m_aColors[cBG].green = 0xa800;
-  m_aColors[cBG].blue  = 0x7800;
-
-  m_aColors[cFG].red   = 0x1100;
-  m_aColors[cFG].green = 0x3300;
-  m_aColors[cFG].blue  = 0x1100;
-
-  gboolean gbSuccess=FALSE;
-  gdk_colormap_alloc_colors (gdk_colormap_get_system(),
-			     m_aColors, sizeof(m_aColors)/sizeof(m_aColors[0]),
-			     TRUE, TRUE, &gbSuccess);
-
-  gdk_gc_set_foreground (m_gc, &m_aColors[cFG]);
-
-
-  m_pixmap = gdk_pixmap_new(m_parent,
-			    (m_nColumns+m_border*2)*m_xPixel,
-			    (m_nRows+m_border*2)*m_yPixel,
-			    -1);
-
-  printf("m_pixmap %p  gbSuccess:%d\n",m_pixmap,gbSuccess);
-
-}
-
-void gLCD::clear()
-{
-  gdk_gc_set_foreground (m_gc, &m_aColors[cBG]);
-  gdk_draw_rectangle (m_pixmap,
-		      m_gc,
-		      TRUE,
-		      0,0,
-		      (m_nColumns+m_border*2)*m_xPixel,
-		      (m_nRows+m_border*2)*m_yPixel);
-  gdk_gc_set_foreground (m_gc, &m_aColors[cFG]);
-
-}
-
-void gLCD::refresh()
-{
-  gdk_draw_drawable(m_parent, m_gc, m_pixmap,
-		    0,0, 0,0, -1,-1);
-}
-
-void gLCD::setPixel(unsigned int col, unsigned int row)
-{
-  if (col < m_nColumns && row < m_nRows) {
-    int x = (col + m_border) * m_xPixel;
-    int y = (row + m_border) * m_yPixel;
-
-    gdk_draw_point (m_pixmap,
-		    m_gc, x, y);
-    gdk_draw_point (m_pixmap,
-		    m_gc, x+1, y);
-    gdk_draw_point (m_pixmap,
-		    m_gc, x, y+1);
-    gdk_draw_point (m_pixmap,
-		    m_gc, x+1, y+1);
-
-
-  }
-}
 
 //------------------------------------------------------------------------
 // I/O pins for the graphic LCD
@@ -295,8 +167,7 @@ Module *gLCD_100X32_SED1520::construct(const char *_new_name=0)
 
 //------------------------------------------------------------------------
 gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
-  : Module(_new_name,"SED1520 100X32 Graphics LCD module"),
-    window(0),darea(0),m_plcd(0),m_nColumns(100), m_nRows(32)
+  : gLCD_Module(_new_name,"SED1520 100X32 Graphics LCD module",100,32)
 {
 
   // Default module attributes.
@@ -321,11 +192,6 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
   create_iopin_map();
 
   m_plcd = 0;
-
-#if IN_BREADBOARD==0
-  interface = new LCD_Interface(this);
-  get_interface().add_interface(interface);
-#endif
 
   create_widget();
 
