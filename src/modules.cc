@@ -213,6 +213,16 @@ int ModuleLibrary::InstantiateObject(string &sObjectName, string &sInstantiatedN
 
 }
 
+int ModuleLibrary::ListLoadableModules()
+{
+  ModuleTypeInfo_t::iterator mti = ModuleTypes.begin();
+  while (mti != ModuleTypes.end()) {
+
+    cout << " " << mti->first << endl;
+    ++mti;
+  }
+
+}
 
 /*****************************************************************************
  *

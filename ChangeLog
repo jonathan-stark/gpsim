@@ -1,4 +1,8 @@
 2007-02-25  Scott Dattalo <scott@dattalo.com>
+	* src/modules.h, src/symbol.cc, src/modules.cc, cli/cmd_module.cc:
+	The 'module' and 'module list' commands work again.
+
+2007-02-25  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processor.cc: Bug in config memory construction was
 	causing segv. Also, added more descriptions to the 16bit processor
 	config words.
