@@ -171,7 +171,7 @@ SymbolTable::~SymbolTable()
 {
   cout << "Deleting the symbol table, here's what is still left in it:\n";
 
-ForEachModule(dumpSymbolTables);
+  ForEachModule(dumpSymbolTables);
 }
 
 int SymbolTable::addSymbol(gpsimObject *pSym)
@@ -195,8 +195,10 @@ int SymbolTable::removeSymbol(gpsimObject *pSym)
 
 void SymbolTable::addModule(Module *pModule)
 {
-  if (pModule)
+  if (pModule) {
     MSymbolTables[pModule->name()] = &pModule->getSymbolTable();
+    globalSymbols.addSymbol(pModule);
+  }
 }
 void SymbolTable::removeModule(Module *pModule)
 {
@@ -206,16 +208,10 @@ void SymbolTable::removeModule(Module *pModule)
     MSymbolTable_t::iterator mi = MSymbolTables.find(pModule->name());
     if (mi != MSymbolTables.end())
       MSymbolTables.erase(mi);
+    globalSymbols.removeSymbol(pModule);
   }
 
 }
-
-void SymbolTable::listModules()
-{
-  cout << "list modules -- implement\n";
-}
-
-
 /*
 class SymbolFinder
 {
@@ -359,6 +355,18 @@ Module *SymbolTable::findModule(string s)
 {
   return dynamic_cast<Module *>(find(s));
 }
+
+
+static void dumpModules(const SymbolTableEntry_t &st)
+{
+  cout << " Module: " << st.first << endl;
+}
+
+void SymbolTable::listModules()
+{
+  ForEachModule(dumpModules);
+}
+
 
 void SymbolTable::ForEachModule(PFN_ForEachModule forEach)
 {

@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/pic-processor.h"
 #include "../src/modules.h"
+#include "../src/symbol.h"
 #include "../src/cmd_manager.h"
 
 
@@ -99,6 +100,10 @@ cmd_module::cmd_module()
   op = cmd_module_options; 
 }
 
+static void dumpModules(const SymbolTableEntry_t &st)
+{
+  cout << " Module: " << st.first << endl;
+}
 
 void cmd_module::module(void)
 {
@@ -108,7 +113,7 @@ void cmd_module::module(void)
 #ifdef OLD_MODULE_LIBRARY
   cout << ModuleLibrary::DisplayModuleList();
 #else
-  cout << "Fixme -- display module list\n";
+  globalSymbolTable().ForEachModule(dumpModules);
 #endif
 
 }
@@ -125,7 +130,7 @@ void cmd_module::module(cmd_options *opt)
 #ifdef OLD_MODULE_LIBRARY
       cout << ModuleLibrary::DisplayFileList();
 #else
-      cout << "Fixme -- display file list\n";
+      cout << ModuleLibrary::ListLoadableModules();
 #endif
       break;
 
