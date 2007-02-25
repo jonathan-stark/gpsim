@@ -1,3 +1,8 @@
+2007-02-25  Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processor.cc: Bug in config memory construction was
+	causing segv. Also, added more descriptions to the 16bit processor
+	config words.
+
 2007-02-22  Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, regression/instructions_14bit/branching.asm,
 	src/p16x6x.h, src/pic-instructions.h, src/ioports.h,
