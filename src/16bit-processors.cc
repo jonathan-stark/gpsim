@@ -57,6 +57,36 @@ public:
     : ConfigWord("CONFIG1H", CONFIG1H_default, "Oscillator configuration", pCpu, addr)
   {
   }
+
+  virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+
+    const char *OSCdesc[8] = {
+      "RC oscillator w/ OSC2 configured as RA6",
+      "HS oscillator with PLL enabled/Clock frequency = (4 x FOSC)",
+      "EC oscillator w/ OSC2 configured as RA6",
+      "EC oscillator w/ OSC2 configured as divide-by-4 clock output",
+      "RC oscillator",
+      "HS oscillator",
+      "XT oscillator",
+      "LP oscillator"
+    };
+    snprintf(buff,sizeof(buff),
+             "$%04x\n"
+             " FOSC=%d - Clk source = %s\n"
+             " OSCEN=%d - Oscillator switching is %s\n",
+             i,
+             i&(FOSC0|FOSC1|FOSC2), OSCdesc[i&(FOSC0|FOSC1|FOSC2)],
+             (i&OSCEN?1:0), ((i&OSCEN) ? "disabled" : "enabled"));
+
+    return string(buff);
+  }
+
 };
 
 
@@ -81,6 +111,24 @@ public:
     Integer::set(v);
     if (m_pCpu)
       m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
+  }
+
+  virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+
+    snprintf(buff,sizeof(buff),
+             "$%04x\n"
+             " WDTEN=%d - WDT is %s, prescale=1:\n",
+             i,
+             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
+             1 << (i & (WDTPS0 | WDTPS1 | WDTPS2)>>1));
+
+    return string(buff);
   }
 };
 
@@ -635,19 +683,7 @@ void _16bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory(this,configMemorySize());
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H(this, CONFIG1H));
-  m_configMemory->addConfigWord(CONFIG2H-CONFIG2L,new Config2H(this, CONFIG2H));
-
-  /*
-  m_configMemory = new ConfigMemory *[configMemorySize()];
-
-  for (unsigned int i=0; i<configMemorySize(); i++)
-    m_configMemory[i] = 0;
-
-  m_configMemory[CONFIG1H-CONFIG1L] = new Config1H(this, CONFIG1H);
-  m_configMemory[CONFIG2H-CONFIG1L] = new Config2H(this, CONFIG2H);
-  addSymbol(m_configMemory[CONFIG1H-CONFIG1L]);
-  addSymbol(m_configMemory[CONFIG2H-CONFIG1L]);
-  */
+  m_configMemory->addConfigWord(CONFIG2H-CONFIG1L,new Config2H(this, CONFIG2H));
 }
 
 //-------------------------------------------------------------------
