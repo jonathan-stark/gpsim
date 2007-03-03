@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 
 #include "glcd_100X32_sed1520.h"
+#include "osram.h"
 
 /*
 class Module_Types
@@ -41,6 +42,7 @@ public:
 Module_Types available_modules[] =
 {
   { {"LCD100X32", "LCD100X32"},   gLCD_100X32_SED1520::construct },
+  { {"OSRAM128X64", "OSRAM128X64"},   OSRAM::PK27_Series::construct },
 
   // No more modules
   { {0,0},0}

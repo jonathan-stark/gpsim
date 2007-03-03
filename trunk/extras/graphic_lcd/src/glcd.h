@@ -25,9 +25,14 @@ Boston, MA 02111-1307, USA.  */
 #include <gtk/gtk.h>
 #include <gpsim/modules.h>
 #include <gpsim/gpsim_interface.h>
+#include <gpsim/ioports.h>
 
 #define IN_BREADBOARD 0
 
+struct LCDColor
+{
+  guchar r,g,b;
+};
 //========================================================================
 // gLCD - graphic LCD
 //
@@ -38,24 +43,27 @@ Boston, MA 02111-1307, USA.  */
 class gLCD
 {
 public:
-  gLCD(GdkDrawable *parent, 
+  gLCD(GtkWidget *darea, //GdkDrawable *parent, 
        unsigned int cols, 
        unsigned int rows,
        unsigned int pixel_size_x,
-       unsigned int pixel_size_y
+       unsigned int pixel_size_y,
+       unsigned int pixel_gap,
+       unsigned int nColors=2
        );
+  ~gLCD();
 
-  void       refresh();
-  void       clear();
-  void       setPixel(unsigned int col, unsigned int row);
+  void refresh();
+  void clear();
+  void setPixel(unsigned int col, unsigned int row);
+  void setPixel(unsigned int col, unsigned int row, unsigned int colorIdx);
+  void setColor(unsigned int colorIdx, guchar r, guchar g, guchar b);
 
 protected:
-  GdkDrawable  *m_parent;
-  // Graphic's context for the LCD:
-  GdkGC        *m_gc;
+  GtkWidget    *m_darea;         // Drawable containing the graphic
 
   // LCD graphics are rendered here. 
-  GdkPixmap    *m_pixmap;
+  guchar *rgbbuf;
 
   unsigned int  m_nColumns;
   unsigned int  m_nRows;
@@ -64,13 +72,13 @@ protected:
   // pixel size Mapping between graphical pixmap and LCD.
   unsigned int  m_xPixel;
   unsigned int  m_yPixel;
+  unsigned int  m_pixelGap;
 
-  // LCD foreground and background colors
-  enum {
-    cFG=0,
-    cBG=1
-  };
-  GdkColor m_aColors[2];
+  // Colors
+  LCDColor *m_Colors;
+  unsigned int m_nColors;
+
+  void setPixel(unsigned int col, unsigned int row, guchar r, guchar g, guchar b);
 
 };
 
@@ -117,4 +125,17 @@ protected:
   gLCD_Interface *interface;
 
 };
+
+//------------------------------------------------------------------------
+class ModuleTraceType;
+class LcdPortRegister : public PortRegister
+{
+public:
+  LcdPortRegister(gLCD_Module *plcd, const char * _name, const char *_desc);
+  virtual ~LcdPortRegister();
+private:
+  gLCD_Module *m_pLCD;
+  ModuleTraceType *mMTT;
+};
+
 #endif

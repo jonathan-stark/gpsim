@@ -125,30 +125,6 @@ private:
   gLCD_100X32_SED1520 *m_pLCD;
 };
 
-//------------------------------------------------------------------------
-class LcdPortRegister : public PortRegister
-{
-public:
-  LcdPortRegister(gLCD_100X32_SED1520 *plcd, const char * _name, const char *_desc)
-    : PortRegister(plcd, _name,_desc,8, 0), m_pLCD(plcd)
-  {
-    mMTT = new ModuleTraceType(plcd,1," Graphic LCD");
-    trace.allocateTraceType(mMTT);
-
-    RegisterValue rv(mMTT->type(), mMTT->type() + (1<<22));
-    set_write_trace(rv);
-    rv = RegisterValue(mMTT->type()+(2<<22), mMTT->type() + (3<<22));
-    set_read_trace(rv);
-  }
-
-  virtual ~LcdPortRegister()
-  {
-    delete mMTT;
-  }
-private:
-  gLCD_100X32_SED1520 *m_pLCD;
-  ModuleTraceType *mMTT;
-};
 
 //------------------------------------------------------------------------
 bool gLCD_100X32_SED1520::dataBusDirection()
@@ -170,11 +146,7 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
   : gLCD_Module(_new_name,"SED1520 100X32 Graphics LCD module",100,32)
 {
 
-  // Default module attributes.
-  //initializeAttributes();
-
   m_dataBus = new LcdPortRegister(this,".data","LCD Data Port");
-  //m_dataBus->new_name( (name() + ".data").c_str());
   addSymbol(m_dataBus);
   m_dataBus->setEnableMask(0xff);
 
@@ -264,16 +236,11 @@ static gboolean lcd_expose_event(GtkWidget *widget,
 void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 {
 
-  //printf("LCD update -- m_plcd=%p\n",m_plcd);
-
   if (!m_plcd) {
     if (!darea || !darea->window)
       return;
 
-    //printf("%p %p %p\n",widget, darea, darea->window);
-
-    m_plcd = new gLCD(GDK_DRAWABLE(darea->window), m_nColumns, m_nRows, 3, 3);
-    //m_plcd = new gLCD(GDK_DRAWABLE(widget), m_nColumns, m_nRows, 3, 3);
+    m_plcd = new gLCD(darea, m_nColumns, m_nRows, 3, 3, 1);
 
     printf("m_plcd %p\n",m_plcd);
   }

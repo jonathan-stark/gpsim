@@ -20,90 +20,134 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "glcd.h"
+#include <gpsim/trace.h>
 
 //------------------------------------------------------------------------
-
-gLCD::gLCD(GdkDrawable *parent,
+gLCD::gLCD(GtkWidget *darea,
 	   unsigned int cols,
 	   unsigned int rows,
 	   unsigned int pixel_size_x,
-	   unsigned int pixel_size_y
+	   unsigned int pixel_size_y,
+           unsigned int pixel_gap,
+           unsigned int nColors
 	   )
-  : m_parent(parent),
+  : m_darea(darea), //m_parent(parent),
     m_nColumns(cols), m_nRows(rows), m_border(3),
-    m_xPixel(pixel_size_x), m_yPixel(pixel_size_y)
+    m_xPixel(pixel_size_x), m_yPixel(pixel_size_y),
+    m_pixelGap(pixel_gap),
+    m_nColors(nColors)
 {
 
   printf("gLCD constructor %p, m_nColumns:%d, m_nRows:%d\n",this,m_nColumns,m_nRows);
 
-  g_assert(m_parent != NULL);
+  //g_assert(m_parent != NULL);
+  g_assert(m_darea != NULL);
 
-  m_gc = gdk_gc_new(m_parent);
-  g_assert(m_gc!= (GdkGC*)NULL);
+  // Allocate an RGB buffer for rendering the LCD screen.
+  rgbbuf = new guchar[(m_nColumns+m_border*2)*m_xPixel * 
+                      (m_nRows+m_border*2)*m_yPixel * 
+                      3];
 
-  m_aColors[cBG].red   = 0x7800;
-  m_aColors[cBG].green = 0xa800;
-  m_aColors[cBG].blue  = 0x7800;
+  m_Colors = new LCDColor[m_nColors];
+  memset ((void *)m_Colors, 0, m_nColors*sizeof(LCDColor));
 
-  m_aColors[cFG].red   = 0x1100;
-  m_aColors[cFG].green = 0x3300;
-  m_aColors[cFG].blue  = 0x1100;
+  if (m_nColors > 0)
+    setColor(0, 0x78,0xa8,0x78);
 
-  gboolean gbSuccess=FALSE;
-  gdk_colormap_alloc_colors (gdk_colormap_get_system(),
-			     m_aColors, sizeof(m_aColors)/sizeof(m_aColors[0]),
-			     TRUE, TRUE, &gbSuccess);
+  if (m_nColors > 1)
+    setColor(1, 0x11,0x33,0x11);
+}
 
-  gdk_gc_set_foreground (m_gc, &m_aColors[cFG]);
-
-
-  m_pixmap = gdk_pixmap_new(m_parent,
-			    (m_nColumns+m_border*2)*m_xPixel,
-			    (m_nRows+m_border*2)*m_yPixel,
-			    -1);
-
-  printf("m_pixmap %p  gbSuccess:%d\n",m_pixmap,gbSuccess);
-
+gLCD::~gLCD()
+{
+  delete [] rgbbuf;
 }
 
 void gLCD::clear()
 {
-  gdk_gc_set_foreground (m_gc, &m_aColors[cBG]);
-  gdk_draw_rectangle (m_pixmap,
-		      m_gc,
-		      TRUE,
-		      0,0,
-		      (m_nColumns+m_border*2)*m_xPixel,
-		      (m_nRows+m_border*2)*m_yPixel);
-  gdk_gc_set_foreground (m_gc, &m_aColors[cFG]);
+  unsigned int sz = m_xPixel*(m_nColumns+2*m_border) * m_yPixel*(m_nRows+2*m_border);
+  guchar *pos = rgbbuf;
 
+  guchar r = m_nColors > 0 ? m_Colors[0].r : 0x78;
+  guchar g = m_nColors > 0 ? m_Colors[0].g : 0xa8;
+  guchar b = m_nColors > 0 ? m_Colors[0].b : 0x78;
+
+  for (unsigned int i=0; i<sz; i++) {
+
+    *pos++ = r;
+    *pos++ = g;
+    *pos++ = b;
+    
+  }
+    
 }
 
 void gLCD::refresh()
 {
-  gdk_draw_drawable(m_parent, m_gc, m_pixmap,
-		    0,0, 0,0, -1,-1);
+  gdk_draw_rgb_image (m_darea->window, m_darea->style->fg_gc[GTK_STATE_NORMAL],
+                      0, 0, (m_nColumns+2*m_border)*m_xPixel, (m_nRows+2*m_border)*m_yPixel,
+                      GDK_RGB_DITHER_MAX, rgbbuf, (m_nColumns+2*m_border)*m_xPixel *3);
+
+}
+
+void gLCD::setPixel(unsigned int col, unsigned int row, guchar r, guchar g, guchar b)
+{
+  int x = (col + m_border) * m_xPixel;
+  int y = (row + m_border) * m_yPixel;
+
+  // L = length of a row of pixels
+  int L = (m_nColumns+2*m_border)*m_xPixel;
+  unsigned int px = m_xPixel-m_pixelGap;
+  unsigned int py = m_yPixel-m_pixelGap;
+
+  for (int j=0; j<py; j++) {
+
+    y = (row + m_border) * m_yPixel+j;
+    guchar *pos = &rgbbuf[3* (y*L + x)];
+
+    for (int i=0; i<px; i++) {
+      /*
+      if (*pos != r) 
+        printf ("   x:%d y:%d r:%d g:%d b:%d\n",x,y,r,g,b);
+      */
+      *pos++ = r;
+      *pos++ = g;
+      *pos++ = b;
+    }
+  }
+
 }
 
 void gLCD::setPixel(unsigned int col, unsigned int row)
 {
   if (col < m_nColumns && row < m_nRows) {
-    int x = (col + m_border) * m_xPixel;
-    int y = (row + m_border) * m_yPixel;
 
-    gdk_draw_point (m_pixmap,
-		    m_gc, x, y);
-    gdk_draw_point (m_pixmap,
-		    m_gc, x+1, y);
-    gdk_draw_point (m_pixmap,
-		    m_gc, x, y+1);
-    gdk_draw_point (m_pixmap,
-		    m_gc, x+1, y+1);
+    guchar r = m_nColors > 1 ? m_Colors[1].r : 0x11;
+    guchar g = m_nColors > 1 ? m_Colors[1].g : 0x33;
+    guchar b = m_nColors > 1 ? m_Colors[1].b : 0x11;
 
-
+    setPixel(col, row, r,g,b);
   }
 }
 
+
+void gLCD::setPixel(unsigned int col, unsigned int row, unsigned int colorIdx)
+{
+  if (colorIdx < m_nColors)
+    setPixel(col, row, m_Colors[colorIdx].r,m_Colors[colorIdx].g,m_Colors[colorIdx].b);
+}
+
+void gLCD::setColor(unsigned int colorIdx, guchar r, guchar g, guchar b)
+{
+
+  if (colorIdx < m_nColors) {
+
+    m_Colors[colorIdx].r = r;
+    m_Colors[colorIdx].g = g;
+    m_Colors[colorIdx].b = b;
+
+  }
+}
 
 
 //========================================================================
@@ -153,4 +197,23 @@ gLCD_Module::gLCD_Module(const char *new_name, const char *desc,
 void gLCD_Module::Update(GtkWidget *pw)
 {
 
+}
+
+//========================================================================
+//
+LcdPortRegister::LcdPortRegister(gLCD_Module *plcd, const char * _name, const char *_desc)
+  : PortRegister(plcd, _name,_desc,8, 0), m_pLCD(plcd)
+{
+  mMTT = new ModuleTraceType(plcd,1," Graphic LCD");
+  trace.allocateTraceType(mMTT);
+
+  RegisterValue rv(mMTT->type(), mMTT->type() + (1<<22));
+  set_write_trace(rv);
+  rv = RegisterValue(mMTT->type()+(2<<22), mMTT->type() + (3<<22));
+  set_read_trace(rv);
+}
+
+LcdPortRegister::~LcdPortRegister()
+{
+  delete mMTT;
 }

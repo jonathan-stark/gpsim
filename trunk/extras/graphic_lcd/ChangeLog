@@ -1,3 +1,23 @@
+2007-03-02 Scott Dattalo <scott@dattalo.com>
+	* src/glcd.h, src/osram.cc, src/ssd0323.cc, src/osram.h,
+	src/ssd0323.h, src/gpsim_modules.cc, src/glcd_100X32_sed1520.cc, 
+	src/glcd.cc:
+	- First version of SSD0323 support.
+	- Changed the graphic rendering from PixMaps to RGB maps. The
+	latter allows for arbitrary color definitions. (Used by the 4-bit
+	gray scale of the SSD0323).
+
+
+2007-03-02 Scott Dattalo <scott@dattalo.com>
+	* examples/ssd0323, examples/ssd0323/18f452.lkr:
+	* examples/ssd0323/Makefile, examples/ssd0323/bitmaps.asm:
+	* examples/ssd0323/glcd_test.asm, examples/ssd0323/globalvars.inc,
+	* examples/ssd0323/osram128x64.asm,
+	* examples/ssd0323/osram128x64.inc, examples/ssd0323/portdef.inc,
+	* examples/ssd0323/processor.inc, examples/ssd0323/ssd0323.asm,
+	* examples/ssd0323/ssd0323.inc: 
+	 - Created an example for the SSD0323.
+
 2007-02-23 Scott Dattalo <scott@dattalo.com>
 	* examples/18f452.lkr, examples/sed1520/18f452.lkr:
 	* examples/bitmaps.asm, examples/sed1520/bitmaps.asm:

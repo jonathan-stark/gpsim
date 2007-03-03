@@ -24,29 +24,44 @@ Boston, MA 02111-1307, USA.  */
 #include <gtk/gtk.h>
 
 #include "glcd.h"
+
+class SSD0323;
+
 // gpsim graphics LCD modules for OSRAM Pictivia(tm) OLED Displays
+namespace OSRAM {
 
-class OSRAM_128064PK27_Series : public gLCD_Module
-{
-public:
-  OSRAM_128064PK27_Series(const char *new_name);
-  ~OSRAM_128064PK27_Series();
-  /*
-  static Module *construct(const char *new_name);
-  bool dataBusDirection();
-  void Update(GtkWidget *pw =0);
-  void UpdatePinState(ePins, char);
-  void create_iopin_map();
-  void create_widget();
-  */
-private:
-  /*
-  PortRegister *m_dataBus;
-  LCD_InputPin *m_A0;
-  LCD_InputPin *m_E1;
-  LCD_InputPin *m_E2;
-  LCD_InputPin *m_RW;
-  */
-};
+  class SSD0323_InputPin;
 
+  class PK27_Series : public gLCD_Module
+  {
+  public:
+    PK27_Series(const char *new_name);
+    ~PK27_Series();
+    static Module *construct(const char *new_name);
+    void Update(GtkWidget *pw =0);
+    bool dataBusDirection();
+    /*
+      void UpdatePinState(ePins, char);
+    */
+    void create_iopin_map();
+    void create_widget();
+
+  private:
+    PortRegister *m_dataBus;
+    SSD0323_InputPin *m_CS;
+    SSD0323_InputPin *m_RES;
+    SSD0323_InputPin *m_DC;
+    SSD0323_InputPin *m_E;
+    SSD0323_InputPin *m_RW;
+    SSD0323_InputPin *m_BS1;
+    SSD0323_InputPin *m_BS2;
+
+    SSD0323 *m_pSSD0323;
+
+    /*
+      PortRegister *m_dataBus;
+    */
+  };
+
+} // End of OSRAM namespace
 #endif
