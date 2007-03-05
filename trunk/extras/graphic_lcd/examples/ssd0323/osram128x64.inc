@@ -13,6 +13,12 @@
 LCD_nROWS	EQU	64
 LCD_nCOLS	EQU	128
 
+Mode8080        EQU     1
+Mode6800        EQU     2
+ModeSPI         EQU     3
+
+InterfaceMode   EQU     ModeSPI
+
 ;------------------------------------------------------------------------
 ; External RAM declarations
 

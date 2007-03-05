@@ -88,28 +88,34 @@ start
    .sim "module load OSRAM128X64 LCD"
    .sim "module load pullup R1"
    .sim "module load pullup R2"
-   .sim "module load pullup R3"
-   .sim "module load pullup R4"
 
-   .sim "node nCS"
-   .sim "node nRES"
+  if InterfaceMode == Mode8080
+   .sim "module load pullup RBS1"
+   .sim "module load pullup RBS2"
+  endif
+
+  if InterfaceMode == Mode6800
+   .sim "module load pulldown RBS1"
+   .sim "module load pullup RBS2"
+  endif
+
+  if InterfaceMode == ModeSPI
+   .sim "module load pulldown RBS1"
+   .sim "module load pulldown RBS2"
+  endif
+
+   .sim "attach nBS2 RBS2.pin LCD.bs2"
+   .sim "attach nBS1 RBS1.pin LCD.bs1"
+
+
+  if InterfaceMode == Mode6800 || InterfaceMode == Mode8080
    .sim "node nE"
    .sim "node nRW"
-   .sim "node nDC"
    .sim "node nBS1"
    .sim "node nBS2"
 
    .sim "attach nE  porte0 LCD.e"
    .sim "attach nRW porte1 LCD.rw"
-   .sim "attach nDC porte2 LCD.dc"
-
-   .sim "attach nCS  portd0 LCD.cs R2.pin"
-   .sim "attach nRES portd1 LCD.res"
-
-   .sim "attach nBS2 R3.pin LCD.bs2"
-   .sim "attach nBS1 R4.pin LCD.bs1"
-
-
 
    .sim "node nd0 nd1 nd2 nd3 nd4 nd5 nd6 nd7"
 
@@ -122,6 +128,27 @@ start
    .sim "attach nd6 portb6 LCD.d6"
    .sim "attach nd7 portb7 LCD.d7"
 
+  else
+
+   .sim "module load pulldown Rgnd"
+   .sim "node nGnd"
+
+   .sim "attach nGnd Rgnd.pin LCD.d7 LCD.d6 LCD.d5 LCD.d4 LCD.d3 LCD.d2 LCD.e LCD.rw"
+
+   .sim "node nSDA nSCL"
+   .sim "attach nSDA portc5 LCD.d1"
+   .sim "attach nSCL portc3 LCD.d0"
+
+  endif
+
+
+   .sim "node nCS"
+   .sim "node nRES"
+   .sim "node nDC"
+   .sim "attach nDC porte2 LCD.dc"
+   .sim "attach nCS  portd0 LCD.cs R2.pin"
+   .sim "attach nRES portd1 LCD.res"
+
    ;; Now position the modules in the BreadBoard viewer
 
    .sim "LCD.xpos=220.0"
@@ -132,6 +159,23 @@ start
    .sim "R2.ypos=264.0"
    .sim "R3.xpos=376.0"
    .sim "R3.ypos=264.0"
+
+
+  if InterfaceMode == ModeSPI
+
+   ;; Initialize the SPI port:
+   ;CKP == 1 
+   ;CKE == 0
+
+        BCF     TRISC, RC5
+        BCF     TRISC, RC3
+
+        CLRF    SSPSTAT
+SPIClk_FOSC_64  EQU (1<<SSPM1)
+        MOVLW  (1<<SSPEN)|(1<<CKP)|SPIClk_FOSC_64
+        MOVWF  SSPCON1
+
+  endif
 
    ;; Initialize the SSD0323 LCD graphics controller.
 
@@ -180,6 +224,7 @@ LL
 
 	RCALL	LCD_Line
 	RCALL	LCD_RefreshDisplay
+        CLRWDT
 
 	MOVLW	20
 	MOVWF	PixelX
@@ -190,6 +235,7 @@ LL
 	MOVLW	1
 	RCALL	LCD_putBitMap
 	RCALL	LCD_RefreshDisplay
+        CLRWDT
 
 	RCALL	LCD_ClearScreen
 
@@ -197,8 +243,7 @@ LL
 	MOVLW	0
 	RCALL	LCD_putBitMap
 	RCALL	LCD_RefreshDisplay
-
-
+        CLRWDT
 
 	MOVLW	32
 	MOVWF	PixelX
@@ -206,11 +251,19 @@ LL
 	MOVLW	2
 	RCALL	LCD_putBitMap
 	RCALL	LCD_RefreshDisplay
+        CLRWDT
 
 	MOVLW	32
 	MOVWF	PixelY
         CLRF    PixelX
 
+  if InterfaceMode == ModeSPI
+        ; Delay a little to allow the last data byte to complete.
+        movlw   64
+SpiWait:
+        decfsz  WREG,F
+         bra    SpiWait
+  endif
 
 	MOVLW	LOW(WindowCursor)
 	MOVWF	TBLPTRL
@@ -236,7 +289,7 @@ bars:
         decfsz  Tx,F
          bra bars
 
-
+  .assert "\" Stop test \""
 	bra	loop
 
 

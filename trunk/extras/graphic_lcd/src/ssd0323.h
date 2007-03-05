@@ -49,6 +49,8 @@ public:
   void setE_RD(bool);
   void setRW(bool);
   void setData(unsigned int);
+  void setSCLK(bool);
+  void setSDIN(bool);
 
   void driveDataBus(unsigned int);
   bool dataBusDirection();
