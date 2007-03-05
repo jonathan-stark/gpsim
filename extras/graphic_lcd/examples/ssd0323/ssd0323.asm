@@ -199,6 +199,18 @@ CommandLoop:
 	rcall	SSD0323_WriteCmd
         decfsz  temp0,F
          bra    CommandLoop
+  if InterfaceMode == ModeSPI
+
+        ; In SPI mode, we need to wait for the command completes
+        ; before returning. The reason is that we may send data 
+        ; just after this command. Sending data changes the DC
+        ; bit which in turn will screw up the command transfer.
+
+        MOVF    SSPBUF,W
+CommandWaitForSPI;
+        BTFSS   SSPSTAT,BF
+         bra    CommandWaitForSPI
+  endif
         return
 
 CommandTable:
@@ -231,6 +243,8 @@ CommandSetCursorPositionEnd:
 ; Mem used:  W
 ;
 
+  if InterfaceMode == Mode8080
+
 SSD0323_WriteCmd  ;<--- Entry point to write a command.
 	BCF	LCDDC_LAT, LCDDC_BIT
 
@@ -243,7 +257,49 @@ SSD0323_Write:    ;<--- Entry point to write data.
 	BSF	LCDRW_LAT, LCDRW_BIT    ;Rising edge writes the data
 	BSF	LCDDC_LAT, LCDDC_BIT
 
+        return
+  endif
+
+  if InterfaceMode == Mode6800
+
+SSD0323_WriteCmd  ;<--- Entry point to write a command.
+	BCF	LCDDC_LAT, LCDDC_BIT
+
+SSD0323_Write:    ;<--- Entry point to write data.
+
+	BCF	LCDRW_LAT, LCDRW_BIT    ;SSD0323 R/W line is low for writes
+
+	MOVWF	SSD0323_LAT
+
+	BCF	LCDE_LAT, LCDE_BIT      ;Falling edge of E latches the data.
+        BRA     $+2
+	BSF     LCDE_LAT, LCDE_BIT      ;Turn off the enable
+	BSF	LCDDC_LAT, LCDDC_BIT
+
 	return
+  endif
+
+  if InterfaceMode == ModeSPI
+
+SSD0323_WriteCmd  ;<--- Entry point to write a command.
+	BCF	LCDDC_LAT, LCDDC_BIT
+        BRA     SSD0323_WriteSPI
+SSD0323_Write:    ;<--- Entry point to write data.
+
+	BSF	LCDDC_LAT, LCDDC_BIT
+
+SSD0323_WriteSPI:
+
+        MOVWF   SSPBUF
+        btfss   SSPCON1, WCOL
+         return
+
+        BCF     SSPCON1, WCOL
+        bra     SSD0323_WriteSPI
+
+	return
+  endif
+
 
 d2	rcall d3
 d3	return
@@ -260,6 +316,29 @@ delay:  bra $+2
 ; Inputs:  None
 ; Outputs: None
 ; MemUsed: temp0
+;
+; The display buffer is organized differently than the physical display
+; Here is a graphical mapping:
+;
+;                     columns
+;          0  1  2  3  4  5  6  7  8
+;    -----------------------------------
+;     0 | a0 b0 c0 d0 e0 f0 g0 h0 i0
+;     1 | a1 b1 c1 d1 e1 f1 g1 h1 i1
+;     2 | a2 b2 c2 d2 e2 f2 g2 h2 i2
+;  R  3 | a3 b3 c3 d3 e3 f3 g3 h3 i3
+;  O  4 | a4 b4 c4 d4 e4 f4 g4 h4 i4
+;  W  5 | a5 b5 c5 d5 e5 f5 g5 h5 i5
+;  S  6 | a6 b6 c6 d6 e6 f6 g6 h6 i6
+;     7 | a7 b7 c7 d7 e7 f7 g7 h7 i7
+;     8 | A0 B0 C0 D0 E0 F0 G0 H0 I0
+;     9 | A1 B1 C1 D1 E1 F1 G1 H1 I1
+;
+; The sequence of bytes in the PIC memory is:
+;  a, b, c, and so for the first 8 rows of pixels. The next 8 rows
+; begin with the A, B, C and so bytes.
+;
+; 
 
 LCD_RefreshDisplay:	
 	MOVLW	LOW(CommandSetCursorPosition)
@@ -281,13 +360,12 @@ LCD_RefreshDisplay:
 
         MOVLW   1
         MOVWF   temp2   ; bit mask
-SED_ref1:	
 
+SSD_ref1:	
 
-SED_ref2:
-     ;row counter * 128
+     ;row counter * number of columns
         MOVF    temp0,W
-        MULLW   128
+        MULLW   LCD_nCOLS
 
 	LFSR	0, DisplayBuffer	;Get a pointer to the display
 	MOVF	PRODL,W
@@ -295,38 +373,39 @@ SED_ref2:
 	MOVF	PRODH,W
 	ADDWFC	FSR0H,F
 
-        MOVLW   128/2     ; # of columns
+        MOVLW   LCD_nCOLS/2     ; # of columns - 1 byte covers 2 columns
 	MOVWF	temp1
 
-SED_ref3:
-        movf    temp2,W
+SSD_ref2:
+        movf    temp2,W         ; Check a single pixel in the display
+        andwf   POSTINC0,W      ; buffer
+
+        movlw   0               ;Assume that the pixel is off
+        skpz                    ;
+         movlw  0x0f            ;Pixel was on- assign it the maximum color
+        movwf   temp3           ;We now have the low order pixel.
+
+        movf    temp2,W         ;Check the pixel in the next column
         andwf   POSTINC0,W
 
-        movlw   0
-        skpz
-         movlw  0x0f
-        movwf   temp3
+        movlw   0               ;Again, assume it's zero
+        skpz                    ;
+         movlw  0xf0            ;Pixel is on
+        iorwf   temp3,W         ;We now have the high order pixel
 
-        movf    temp2,W
-        andwf   POSTINC0,W
+	rcall	SSD0323_Write   ;Write both pixels
 
-        movlw   0
-        skpz
-         movlw  0xf0
-        iorwf   temp3,W
+	DECFSZ	temp1,F         ;Have we gone through all of the columns?
+	 bra    SSD_ref2        ;... nope
 
-        
-	rcall	SSD0323_Write
+       ; next row
+        rlncf   temp2,F         ;Rotate the pixel mask
+        btfss   temp2,0         ;Did we wrap around?
+         bra    SSD_ref1        ;Nope,
 
-	DECFSZ	temp1,F
-	 bra    SED_ref3
-
-        rlncf   temp2,F
-        btfss   temp2,0
-         bra    SED_ref2
-        incf    temp0,F
+        incf    temp0,F         ;Display buffer row counter.
         btfss   temp0,3
-         bra    SED_ref2
+         bra    SSD_ref1
 
 	return
 

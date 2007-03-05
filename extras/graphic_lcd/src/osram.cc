@@ -219,6 +219,40 @@ namespace OSRAM
   }
 
   //------------------------------------------------------------------------
+  // SSD BS1, BS2 Pin
+  //------------------------------------------------------------------------
+  class SSD_SPISignalSink : public SignalSink
+  {
+  public:
+    SSD_SPISignalSink(SSD0323 *pSSD, bool bClk_or_Data)
+      : m_pSSD0323(pSSD),
+        m_bClk(bClk_or_Data),
+        m_cState(0)
+    {
+      assert(m_pSSD0323);
+    }
+    virtual void release()
+    {
+    }
+    virtual void setSinkState(char c)
+    {
+      if (m_cState != c) {
+        //cout << __FUNCTION__ << " new state: " << c << endl;
+        if (m_bClk)
+          m_pSSD0323->setSCLK(c=='1' || c=='W');
+        else
+          m_pSSD0323->setSDIN(c=='1' || c=='W');
+
+        m_cState = c;
+      }
+    }
+  private:
+    SSD0323 *m_pSSD0323;
+    bool m_bClk;
+    char m_cState;
+  };
+
+  //------------------------------------------------------------------------
   //
 
   class LCDSignalControl : public SignalControl
@@ -433,15 +467,20 @@ namespace OSRAM
     assign_pin(13,m_E);
 
     // Add the individual io pins to the data bus.
+    IO_bi_directional *pD0;
+    IO_bi_directional *pD1;
 
-    assign_pin(12, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
-    assign_pin(11, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
+    assign_pin(12, m_dataBus->addPin(pD0 = new IO_bi_directional((name() + ".d0").c_str()),0));
+    assign_pin(11, m_dataBus->addPin(pD1 = new IO_bi_directional((name() + ".d1").c_str()),1));
     assign_pin(10, m_dataBus->addPin(new IO_bi_directional((name() + ".d2").c_str()),2));
     assign_pin( 9, m_dataBus->addPin(new IO_bi_directional((name() + ".d3").c_str()),3));
     assign_pin( 8, m_dataBus->addPin(new IO_bi_directional((name() + ".d4").c_str()),4));
     assign_pin( 7, m_dataBus->addPin(new IO_bi_directional((name() + ".d5").c_str()),5));
     assign_pin( 6, m_dataBus->addPin(new IO_bi_directional((name() + ".d6").c_str()),6));
     assign_pin( 5, m_dataBus->addPin(new IO_bi_directional((name() + ".d7").c_str()),7));
+
+    m_dataBus->addSink(new SSD_SPISignalSink(m_pSSD0323, true),0);  // SPI CLK
+    m_dataBus->addSink(new SSD_SPISignalSink(m_pSSD0323, false),1); // SPI Data
 
     // Provide a SignalControl object that the dataBus port can query
     // to determine which direction to drive the data bus.

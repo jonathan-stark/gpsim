@@ -1,3 +1,12 @@
+2007-03-05 Scott Dattalo <scott@dattalo.com>
+	* src/osram.cc, src/ssd0323.cc, src/ssd0323.h:
+	- Added support for '6800' and SPI interfaces. Now all three
+	interfaces of the SSD0323 are supported
+	* examples/ssd0323/ssd0323.asm, examples/ssd0323/osram128x64.inc,
+	examples/ssd0323/glcd_test.asm:
+	- The SSD0323 example code now can interface to an OSRAM display
+	in either the 8080, 6800, or SPI modes.
+
 2007-03-02 Scott Dattalo <scott@dattalo.com>
 	* src/glcd.h, src/osram.cc, src/ssd0323.cc, src/osram.h,
 	src/ssd0323.h, src/gpsim_modules.cc, src/glcd_100X32_sed1520.cc, 

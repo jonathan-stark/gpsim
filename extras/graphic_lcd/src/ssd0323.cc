@@ -171,7 +171,10 @@ void SSD0323::setE_RD(bool newE_RD)
     return;
   m_controlState ^= eE_RD;
 
-  //Dprintf(("state:%d\n",newE_RD));
+  Dprintf(("state:%d\n",newE_RD));
+
+  if (!bEnabled())
+    return;
 
   switch (m_commMode) {
   case e8080Mode:
@@ -187,21 +190,21 @@ void SSD0323::setE_RD(bool newE_RD)
 
     break;
   case e6800Mode:
-    //Dprintf(("6800 mode\n"));
+    Dprintf(("6800 mode\n"));
     // Take action on the falling edge of E#
     if (!newE_RD) {
-      if (bBitState(eRW) && bBitState(eDC))
+      if (bBitState(eRW) && !bBitState(eDC))
         // Read status
         driveDataBus(getStatus());
-      else  if (!bBitState(eRW) && bBitState(eDC))
+      else  if (!bBitState(eRW) && !bBitState(eDC))
         // Write command
         executeCommand();
-      else  if (bBitState(eRW) && !bBitState(eDC)) {
+      else  if (bBitState(eRW) && bBitState(eDC)) {
         // Read Data
         driveDataBus(getData());
         advanceColumnAddress();
       }
-      else  if (!bBitState(eRW) && !bBitState(eDC)) {
+      else  if (!bBitState(eRW) && bBitState(eDC)) {
         // Write Data
         storeData();
       }
@@ -254,17 +257,18 @@ void SSD0323::setRW(bool newRW)
 
 
 
+const int bSCLK = 1;
+const int bSDIN = 2;
 void SSD0323::setData(unsigned int d)
 {
   if (m_dataBus == d)
     return;
 
   if (m_commMode == eSPIMode  && bEnabled()) {
-    const int bSCLK = 1;
-    const int bSDIN = 2;
 
-    if ((m_dataBus ^ d) & bSCLK) {
-      m_SPIData = (m_SPIData >> 1) | (m_dataBus & bSDIN ? 0x80 : 0);
+    if (~m_dataBus & d & bSCLK) {
+      m_SPIData = (m_SPIData << 1) | (m_dataBus & bSDIN ? 1 : 0);
+      Dprintf(("SSD SPI new bit. So far: 0x%02X\n",m_SPIData));
       if (++m_commState >= 8) {
 
         // Place the contents of the SPI receiver onto the 
@@ -278,12 +282,23 @@ void SSD0323::setData(unsigned int d)
           executeCommand();
 
         m_commState = 0;
+        m_SPIData=0;
       }
     }
   }
 
   m_dataBus = d;
 
+}
+
+void SSD0323::setSCLK(bool bSCL)
+{
+  setData((m_dataBus&~bSCLK) | (bSCL ? bSCLK : 0));
+}
+
+void SSD0323::setSDIN(bool bSDA)
+{
+  setData((m_dataBus&~bSDIN) | (bSDA ? bSDIN : 0));
 }
 
 void SSD0323::driveDataBus(unsigned int d)
