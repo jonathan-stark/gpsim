@@ -332,7 +332,7 @@ void SPI::clock( bool ClockState )
   unsigned int sspstat_val = m_sspstat->value.get();
   unsigned int sspcon_val = m_sspcon->value.get();
 
-cout << "SPi clock " << ClockState << " m_state=" << m_state << endl;
+  //cout << "SPi clock " << ClockState << " m_state=" << m_state << endl;
 
   if( ClockState ) // rising edge
   {
@@ -450,7 +450,7 @@ void SPI::callback()
   if (!m_sspmod)
     return;
 
-  cout << "SPI callback m_state=" << m_state << endl;
+  //cout << "SPI callback m_state=" << m_state << endl;
 
   switch( m_state ) {
   case eIDLE:
