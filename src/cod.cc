@@ -407,7 +407,6 @@ _Cleanup:
     for(i=0; i<cpu->files.nsrc_files(); i++) {
       cout << ((cpu->files)[i])->name() << endl;
     }
-    cout << " end of new file stuff\n";
   }
   return iReturn;
 }

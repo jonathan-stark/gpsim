@@ -1,3 +1,14 @@
+2007-03-06  Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.cc, src/trace.cc, src/trace.h:
+	Moved the ResetTraceObject from pic-processor.cc to trace.cc
+	* src/value.cc: Value objects now remove themselves from the
+	symbol table when they're destructed.
+	* src/symbol.cc, src/stimuli.cc, src/packages.cc, src/modules.cc,
+	src/cod.cc, src/breakpoints.cc, src/attributes.cc,
+	modules/stimuli.cc, modules/stimuli.h, gui/gui_breadboard.cc,
+	cli/cmd_attach.cc: 
+	- printf debug clean up.
+
 2007-03-05  Scott Dattalo <scott@dattalo.com>
 	* src/ssp.cc: Removed some printf debug code.
 	

@@ -74,7 +74,6 @@ SafeModeAttribute::SafeModeAttribute(Processor *_cpu)
 
 SafeModeAttribute::~SafeModeAttribute()
 {
-  cout << "deleting Safemode \n";
 }
 
 void SafeModeAttribute::set(Value *v)
@@ -239,7 +238,6 @@ void init_attributes()
 
 void destroy_attributes()
 {
-  cout << " destroying attributes\n" ;
   globalSymbolTable().deleteSymbol("SourcePath");
   globalSymbolTable().deleteSymbol("sim.verbosity");
   globalSymbolTable().deleteSymbol("cycles");

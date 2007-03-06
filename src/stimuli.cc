@@ -108,7 +108,6 @@ void dump_stimulus_list(void)
 Stimulus_Node::Stimulus_Node(const char *n)
   : TriggerObject(0)
 {
-  cout << "stimulus node constructor " << n << endl;
 
   warned  = 0;
   voltage = 0;
@@ -143,7 +142,7 @@ Stimulus_Node::Stimulus_Node(const char *n)
 
 Stimulus_Node::~Stimulus_Node()
 {
-  cout << "~Stimulus_Node\n";
+  //cout << "~Stimulus_Node\n";
   stimulus *sptr;
 
   sptr = stimuli;
@@ -160,7 +159,7 @@ Stimulus_Node * Stimulus_Node::construct(const char * psName)
 {
   gpsimObject *psn = globalSymbolTable().find(psName);
 
-  cout << "constructing stimulus node " << psName << endl;
+  //cout << "constructing stimulus node " << psName << endl;
   if(psn) {
     cout << "Warning ignoring node creation. A symbol with the name `" << psName
          << "' is already in the sybmol table.\n";
@@ -547,7 +546,7 @@ void stimulus::new_name(const char *cPname, bool bClearableSymbol)
   stimulus *psn = dynamic_cast<stimulus *>(globalSymbolTable().find(name()));
   if (psn) {
     if (psn == this)
-      cout << "Successfully added " << name() << " to symbol table\n";
+      ; //cout << "Successfully added " << name() << " to symbol table\n";
     else
       cout << "Successfully added " << name() << " but it's not equal to this node\n";
   } else
@@ -590,12 +589,7 @@ stimulus::~stimulus(void)
     snode->detach_stimulus(this);
 
   globalSymbolTable().removeSymbol(this);
-  cout << "Removing " << name() << " from ST\n";
-  /*
-  Value *vpNodeSym = symbol_table.remove(name());
-  if(vpNodeSym != NULL)
-    delete vpNodeSym;
-  */
+  //cout << "Removing " << name() << " from ST\n";
 }
 
 void stimulus::show()
@@ -1686,14 +1680,14 @@ void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
   if (!pNode || !pPinList)
     return;
 
-  cout << __FUNCTION__ << " pNode " << pNode->name() << "\n";
+  //cout << __FUNCTION__ << " pNode " << pNode->name() << "\n";
 
   gpsimObjectList_t :: iterator si = pPinList->begin();
 
   Stimulus_Node *psn = dynamic_cast<Stimulus_Node *>(pNode);
   if (psn) {
 
-    cout << __FUNCTION__ << " pNode " << pNode->name() << " is a Stimulus_Node\n";
+    //cout << __FUNCTION__ << " pNode " << pNode->name() << " is a Stimulus_Node\n";
 
     while (si != pPinList->end()) {
       stimulus *ps = dynamic_cast<stimulus *> (*si);
@@ -1712,11 +1706,11 @@ void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
     Value *v = dynamic_cast<Value *>(*si);
     if (v)
       ast->setClientAttribute(v);
-
+    /*
     cout << __FUNCTION__ << " pNode " << pNode->name() << " is an attribute stimulus\n";
     if (v)
       cout << __FUNCTION__ << " connecting " << v->name() << endl;
-
+    */
   }
 }
 

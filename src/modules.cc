@@ -295,9 +295,10 @@ Module::~Module(void)
   deleteSymbol("xpos");
   deleteSymbol("ypos");
 
+  /*
   cout << "Stuff still in the symbol table:\n";
   mSymbolTable.ForEachSymbolTable(dumpOneSymbol);
-
+  */
   delete package;
   delete xref;
 
