@@ -98,11 +98,11 @@ Value::Value(const char *_name, const char *desc, Module *pMod)
 
 Value::~Value()
 {
-  //delete xref;
   // Remove references of this Value from the symbol table:
   if (cpu) {
+
     //cout << "Deleting value named:" << name_str <<  " addr "<< this << endl;
-    //cpu->removeSymbol(this, false);
+    cpu->removeSymbol(name_str);
 
     if (m_aka) {
       //cout << "m_aka ==" << m_aka << endl;
@@ -290,7 +290,7 @@ void Value::addName(string &r_sAliasedName)
   if (!m_aka)
     m_aka = new list<string>();
 
-  cout << "Adding name " << r_sAliasedName << " to "<< name() << endl;
+  //cout << "Adding name " << r_sAliasedName << " to "<< name() << endl;
   m_aka->push_back(r_sAliasedName);
 }
 
@@ -526,7 +526,6 @@ Boolean * Boolean::NewObject(const char *_name, const char *pValue, const char *
 
 Boolean::~Boolean()
 {
-
 }
 
 string Boolean::toString()
