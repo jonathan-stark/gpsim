@@ -268,6 +268,29 @@ public:
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 };
 
+// Trace Type for Resets
+
+class ResetTraceObject : public ProcessorTraceObject
+{
+public:
+  ResetTraceObject(Processor *_cpu, RESET_TYPE r);
+  virtual void print(FILE *fp);
+protected:
+  RESET_TYPE m_reset;
+};
+
+class ResetTraceType : public ProcessorTraceType
+{
+public:
+  ResetTraceType(Processor *_cpu);
+  TraceObject *decode(unsigned int tbi);
+  void record(RESET_TYPE r);
+  int dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize);
+
+  unsigned int m_uiTT;
+};
+
+
 //========================================================================
 // TraceFrame
 //

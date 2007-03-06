@@ -282,27 +282,6 @@ ProcessorConstructor pP18F1320(P18F1320::construct,
 			      "__18F1320", "pic18f1320",  "p18f1320", "18f1320");
 
 //========================================================================
-// Trace Type for Resets
-
-class ResetTraceObject : public ProcessorTraceObject
-{
-public:
-  ResetTraceObject(Processor *_cpu, RESET_TYPE r);
-  virtual void print(FILE *fp);
-protected:
-  RESET_TYPE m_reset;
-};
-
-class ResetTraceType : public ProcessorTraceType
-{
-public:
-  ResetTraceType(Processor *_cpu);
-  TraceObject *decode(unsigned int tbi);
-  void record(RESET_TYPE r);
-  int dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize);
-
-  unsigned int m_uiTT;
-};
 
 //------------------------------------------------------------------------
 const char * resetName(RESET_TYPE r)
