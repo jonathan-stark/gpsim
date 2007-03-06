@@ -3305,10 +3305,10 @@ void GuiModule::Build()
     AddPin(i);
     
   }
-
+  /*
   printf("Widths %d %d %d %d\n",
 	 pinnameWidths[0],pinnameWidths[1],pinnameWidths[2],pinnameWidths[3]);
-
+  */
   bool bShowPinNames = true;
 
   if(!m_module_widget) {

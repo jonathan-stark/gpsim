@@ -932,8 +932,6 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
 					       unsigned int bp)
   : TriggerObject(0)
 {
-  cout << __FUNCTION__ << " constructor\n";
-
   cpu = new_cpu;
   address = new_address;
   opcode = 0xffffffff;
@@ -1994,7 +1992,6 @@ CommandAssertion::CommandAssertion(Processor *new_cpu,
 
 CommandAssertion::~CommandAssertion()
 {
-  cout << "~CommandAssertion\n";
   free(command);
 }
 

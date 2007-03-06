@@ -42,6 +42,7 @@ SymbolTable   gSymbolTable;
 SymbolTable_t globalSymbols;
 static SymbolTable_t *currentSymbolTable=0;
 
+#define DEBUG 0
 
 #if defined(_WIN32)
 SymbolTable &globalSymbolTable()
@@ -70,8 +71,7 @@ int SymbolTable_t::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
   return 0;
 }
 
-#define REMOVE_SYMBOLS_BY_NAME
-#if 1 //!defined(REMOVE_SYMBOLS_BY_NAME)
+
 static gpsimObject *pSearchObject=0;
 static gpsimObject *pFoundObject=0;
 static bool spred(const SymbolEntry_t &se)
@@ -88,10 +88,13 @@ int SymbolTable_t::removeSymbol(gpsimObject *pSym)
     pFoundObject = 0;
     SymbolTable_t::iterator it = find_if (begin(), end(), spred);
     if (it != end()) {
-      /*
-      cout << "removing object from st";
-      cout << pSym << " named " << pSym->name() << endl;
-      */
+
+      if (DEBUG) {
+        cout << __FUNCTION__ <<':' << __LINE__ << " removing symbol ";
+
+        if (pSym) 
+          cout << pSym->name() << endl;
+      }
       erase (it);
       return 1;
     }
@@ -102,6 +105,10 @@ int SymbolTable_t::removeSymbol(const string &s)
 {
   SymbolTable_t::iterator sti = find(s);
   if (sti != end()) {
+
+    if (DEBUG)
+      cout << __FUNCTION__ <<':' << __LINE__ << " Removing symbol " << s << endl;
+
     erase(sti);
     return 1;
   }
@@ -114,6 +121,10 @@ int SymbolTable_t::deleteSymbol(const string &s)
   SymbolTable_t::iterator sti = find(s);
   if (sti != end()) {
     erase(sti);
+
+    if (DEBUG)
+      cout << __FUNCTION__ <<':' << __LINE__ << "  Deleting symbol " << s << endl;
+
     delete sti->second;
     return 1;
   }
@@ -121,21 +132,6 @@ int SymbolTable_t::deleteSymbol(const string &s)
   return 0;
 }
 
-#else
-
-int SymbolTable_t::removeSymbol(gpsimObject *pSym)
-{
-  if (pSym) {
-    SymbolTable_t::iterator sti = find(pSym->name());
-    if (sti != end()) {
-      erase(sti);
-      return 1;
-    }
-  }
-
-  return 0;
-}
-#endif
 
 gpsimObject *SymbolTable_t::findSymbol(const string &searchString)
 {
@@ -156,8 +152,9 @@ SymbolTable::SymbolTable()
 
 static void dumpOneSymbol(const SymbolEntry_t &sym)
 {
-  cout << "  " //<< sym.second->name() 
-       << " stored as " << sym.first
+  cout << "  " //<< sym.second->name()  // name may not be valid.
+       << " stored as " << sym.first 
+       << " pointer:" << sym.second
        << endl;
 }
 
@@ -169,9 +166,10 @@ static void dumpSymbolTables(const SymbolTableEntry_t &st)
 
 SymbolTable::~SymbolTable()
 {
-  cout << "Deleting the symbol table, here's what is still left in it:\n";
-
-  ForEachModule(dumpSymbolTables);
+  if (DEBUG) {
+    cout << "Deleting the symbol table, here's what is still left in it:\n";
+    ForEachModule(dumpSymbolTables);
+  }
 }
 
 int SymbolTable::addSymbol(gpsimObject *pSym)
@@ -186,8 +184,9 @@ int SymbolTable::addSymbol(gpsimObject *pSym)
 int SymbolTable::removeSymbol(gpsimObject *pSym)
 {
   /*
+  cout << __FUNCTION__ <<':' << __LINE__ << "  Removing symbol ";
   if (pSym) 
-    cout << "Removing " << pSym->name() << " from the global symbol table\n";
+    cout << " -- " << pSym->name() << " from the global symbol table\n";
   */
   return globalSymbols.removeSymbol(pSym);
 }
@@ -204,7 +203,7 @@ void SymbolTable::removeModule(Module *pModule)
 {
 
   if (pModule) {
-    // cout << "Removing " << pModule->name() << " from the global symbol table\n";
+    //cout << "Removing " << pModule->name() << " from the global symbol table\n";
     MSymbolTable_t::iterator mi = MSymbolTables.find(pModule->name());
     if (mi != MSymbolTables.end())
       MSymbolTables.erase(mi);
@@ -300,6 +299,9 @@ int SymbolTable::removeSymbol(const string &s)
   gpsimObject *pObj = find(s);
   if (pObj && searchTable) {
     if (searchTable->stiFound != searchTable->end()) {
+
+      //cout << "Removing symbol " << s << endl;
+
       searchTable->erase(searchTable->stiFound);
       return 1;
     }
@@ -312,6 +314,9 @@ int SymbolTable::deleteSymbol(const string &s)
   gpsimObject *pObj = find(s);
   if (pObj && searchTable) {
     if (searchTable->stiFound != searchTable->end()) {
+
+      //cout << "Deleting symbol " << s << endl;
+
       searchTable->erase(searchTable->stiFound);
       delete pObj;
       return 1;

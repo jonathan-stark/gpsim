@@ -83,7 +83,7 @@ void cmd_attach::attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
 {
   stimuli_attach(pNode, pPinList);
 
-  cout <<"deleting stimulus list\n";
+  //cout <<"deleting stimulus list\n";
   pPinList->clear(); 
   delete pPinList;
 
