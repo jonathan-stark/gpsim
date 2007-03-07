@@ -1,3 +1,10 @@
+2007-03-07  Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.cc, src/trace.cc:
+	Moved the ResetTraceObject from pic-processor.cc to trace.cc
+	(yesterday's comment on this was not completely true!)
+	* src/stimuli.cc: Resolved an ambiguity with pullup resistors on
+	I/O pins.
+	
 2007-03-06  Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/trace.cc, src/trace.h:
 	Moved the ResetTraceObject from pic-processor.cc to trace.cc

@@ -499,6 +499,33 @@ void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 
 }
 
+//========================================================================
+// Trace Type for Resets
+//------------------------------------------------------------------------
+const char * resetName(RESET_TYPE r)
+{
+  switch (r) {
+  case POR_RESET:  return "POR_RESET";
+  case WDT_RESET:  return "WDT_RESET";
+  case IO_RESET:   return "IO_RESET";
+  case MCLR_RESET: return "MCLR_RESET";
+  case SOFT_RESET: return "SOFT_RESET";
+  case BOD_RESET:  return "BOD_RESET";
+  case SIM_RESET:  return "SIM_RESET";
+  case EXIT_RESET: return "EXIT_RESET";
+  case OTHER_RESET: return "OTHER_RESET";
+  }
+  return "unknown reset";
+}
+//------------------------------------------------------------
+ResetTraceObject::ResetTraceObject(Processor *_cpu, RESET_TYPE r)
+  : ProcessorTraceObject(_cpu), m_reset(r)
+{
+}
+void ResetTraceObject::print(FILE *fp)
+{
+  fprintf(fp, "  Reset: %s\n", resetName(m_reset));
+}
 
 
 //========================================================================
@@ -795,6 +822,45 @@ int PCTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsiz
   return n;
 
 }
+
+//------------------------------------------------------------
+ResetTraceType::ResetTraceType(Processor *_cpu)
+  : ProcessorTraceType(_cpu,1,"Reset")
+{
+  m_uiTT = trace.allocateTraceType(this);
+}
+
+TraceObject *ResetTraceType::decode(unsigned int tbi)
+{
+  unsigned int tv = trace.get(tbi);
+  return new ResetTraceObject(cpu, (RESET_TYPE) (tv&0xff));
+}
+
+void ResetTraceType::record(RESET_TYPE r)
+{
+  trace.raw(m_uiTT | r);
+}
+
+int ResetTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
+{
+  if (!pTrace)
+    return 0;
+
+  int n = TraceType::dump_raw(pTrace, tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  RESET_TYPE r = (RESET_TYPE) (pTrace->get(tbi) & 0xff);
+
+  int m = snprintf(buf, bufsize,
+		   " %s Reset: %s",
+		   (cpu ? cpu->name().c_str() : ""),
+		   resetName(r));
+
+  return m > 0 ? (m+n) : n;
+}
+
 
 //========================================================================
 
