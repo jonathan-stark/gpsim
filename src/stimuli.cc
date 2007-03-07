@@ -1216,10 +1216,14 @@ void IO_bi_directional_pu::update_pullup(char new_state, bool refresh)
   bool bNewPullupState = new_state == '1' || new_state == 'W';
   if (bPullUp != bNewPullupState) {
     bPullUp = bNewPullupState;
-    if (refresh) { 
+    if (refresh) {
+      // If there is a node attached to the pin, then we already 
+      // know the driven state. If there is no node attached and 
+      // this pin is configured as an input, then let the drivenState
+      // be the same as the pullup state.
       if (snode)
 	snode->update();
-      else
+      else if (!getDriving())
 	setDrivenState(bPullUp);
     }
   }
