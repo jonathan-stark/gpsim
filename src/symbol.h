@@ -64,13 +64,14 @@ Boston, MA 02111-1307, USA.  */
 // through all of the symbols.
 
 
-#include <string>
-#include <map>
-
-using namespace std;
-
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
+
+#include <string>
+#include <map>
+#include "exports.h"
+
+using namespace std;
 
 // Forward definitions
 class gpsimObject;

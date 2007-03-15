@@ -1,3 +1,6 @@
+2007-03-15 Borut Razem <borut.razem@siol.net>
+	* src/makefile.mingw: updated with the latest Scott's chages
+
 2007-03-05 Scott Dattalo <scott@dattalo.com>
 	* src/osram.cc, src/ssd0323.cc, src/ssd0323.h:
 	- Added support for '6800' and SPI interfaces. Now all three

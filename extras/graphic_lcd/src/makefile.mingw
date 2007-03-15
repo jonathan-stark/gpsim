@@ -65,9 +65,12 @@ all:				\
 	libgpsim_graphicLCD.dll 
 
 libgpsim_graphicLCD_OBJECTS =	\
+	glcd.o			\
+	glcd_100X32_sed1520.o	\
 	gpsim_modules.o		\
+	osram.o			\
 	sed1520.o		\
-	glcd_100X32_sed1520.o
+	ssd0323.o
 
 ################ The modules DLL
 
