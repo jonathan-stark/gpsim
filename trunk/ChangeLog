@@ -1,3 +1,17 @@
+	
+2007-03-14  Scott Dattalo <scott@dattalo.com>
+	* src/dspic/dspic-registers.cc: There was no implementation
+	defined for the Status register constructor.
+	
+2007-03-14  Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc, src/intcon.cc, src/pic-ioports.h,
+	src/intcon.h, src/pic-ioports.cc, src/registers.h,
+	src/16bit-processors.h: 
+	- Added the concept of a 'bit sink' to the SFR registers. This
+	allows arbitrary clients to associate themselves with arbitrary
+	bits in an SFR. More work needs to be done, but this is used at
+	the moment to control port B pull up resistors on the 16-bit core.
+
 2007-03-07  Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/trace.cc:
 	Moved the ResetTraceObject from pic-processor.cc to trace.cc

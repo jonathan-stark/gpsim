@@ -208,7 +208,8 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_lata  = new PicLatchRegister(this,"lata","", m_porta);
   m_lata->setEnableMask(0x7f);
 
-  m_portb = new PicPortRegister(this,"portb","",8,0xff);
+  m_portb = new PicPortBRegister(this,"portb","",8,0xff);
+  m_portb->assignRBPUSink(7,&intcon2);
   m_trisb = new PicTrisRegister(this,"trisb","", m_portb, true);
   m_latb  = new PicLatchRegister(this,"latb","", m_portb);
 
@@ -255,6 +256,7 @@ void _16bit_processor :: create_sfr_map()
   add_file_registers(0x0, 0xf7f, 0);
 
   RegisterValue porv(0,0);
+  RegisterValue porv2(0,0);
 
   add_sfr_register(m_porta,       0xf80,porv);
   add_sfr_register(m_portb,       0xf81,porv);
@@ -358,7 +360,8 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ind0.indf,    0xfef,porv,"indf0");
 
   add_sfr_register(&intcon3, 0xff0, porv,"intcon3");
-  add_sfr_register(&intcon2, 0xff1, porv,"intcon2");
+  porv2.data = 0xF5;
+  add_sfr_register(&intcon2, 0xff1, porv2,"intcon2");
   add_sfr_register(&intcon,  0xff2, porv,"intcon");
 
   add_sfr_register(&prodl, 0xff3, porv,"prodl");

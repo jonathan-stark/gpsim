@@ -241,9 +241,16 @@ PicPortBRegister::PicPortBRegister(Processor *pCpu, const char *pName, const cha
 				   unsigned int enableMask)
   : PicPortRegister(pCpu, pName, pDesc, numIopins, enableMask),
     m_bRBPU(false),
-    m_bIntEdge(false)
+    m_bIntEdge(false),
+    m_bsRBPU(0)
 {
 }
+
+PicPortBRegister::~PicPortBRegister()
+{
+  delete m_bsRBPU;
+}
+//------------------------------------------------------------------------
 
 void PicPortBRegister::put(unsigned int new_value)
 {
@@ -294,6 +301,32 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
     cpu_pic->exit_sleep();
     cpu14->intcon->set_rbif(true);
+  }
+}
+
+class RBPUBitSink : public BitSink
+{
+  PicPortBRegister *m_pPortB;
+public:
+  RBPUBitSink(PicPortBRegister *pPortB) 
+    : m_pPortB(pPortB) 
+  {}
+    
+  void setSink(bool b)
+  {
+    if (m_pPortB)
+      m_pPortB->setRBPU(b);
+  }
+};
+
+void PicPortBRegister::assignRBPUSink(unsigned int bitPos, sfr_register *pSFR)
+{
+  if (pSFR && !m_bsRBPU) {
+    m_bsRBPU = new RBPUBitSink(this);
+    if (!pSFR->assignBitSink(bitPos, m_bsRBPU)) {
+      delete m_bsRBPU;
+      m_bsRBPU = 0;
+    }
   }
 }
 

@@ -122,6 +122,13 @@ class INTCON2 :  public sfr_register
 {
 public:
   INTCON2(Processor *pCpu, const char *pName, const char *pDesc);
+
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+
+  virtual bool assignBitSink(unsigned int bitPosition, BitSink *);
+  virtual bool releaseBitSink(unsigned int bitPosition, BitSink *);
+
   enum
   {
     RBIP    = 1<<0,
@@ -131,6 +138,9 @@ public:
     INTEDG0 = 1<<6,
     RBPU    = 1<<7
   };
+
+private:
+  BitSink *m_bsRBPU;
 };
 
 

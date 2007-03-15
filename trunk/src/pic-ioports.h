@@ -67,12 +67,14 @@ public:
   PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
                    /*const char *port_name, */
                    unsigned int numIopins, unsigned int enableMask=0xff);
+  ~PicPortBRegister();
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
   virtual void setbit(unsigned int bit_number, char new_value);
   void setRBPU(bool);
   void setIntEdge(bool);
+  void assignRBPUSink(unsigned int bitPos, sfr_register *);
 private:
   enum {
     eIntEdge = 1<<6,
@@ -81,6 +83,7 @@ private:
   bool m_bRBPU;
   bool m_bIntEdge;
 
+  BitSink *m_bsRBPU;
 };
 
 class PSP;

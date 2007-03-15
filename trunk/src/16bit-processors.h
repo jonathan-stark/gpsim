@@ -73,7 +73,7 @@ public:
   PicTrisRegister  *m_trisa;
   PicLatchRegister *m_lata;
 
-  PicPortRegister  *m_portb;
+  PicPortBRegister *m_portb;
   PicTrisRegister  *m_trisb;
   PicLatchRegister *m_latb;
 
