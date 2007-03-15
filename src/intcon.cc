@@ -102,8 +102,43 @@ void INTCON::peripheral_interrupt()
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
 INTCON2::INTCON2(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc), m_bsRBPU(0)
 {}
+
+bool INTCON2::assignBitSink(unsigned int bitPosition, BitSink *pBS)
+{
+  if (bitPosition == 7) 
+    m_bsRBPU = pBS;
+  return true;
+}
+
+bool INTCON2::releaseBitSink(unsigned int bitPosition, BitSink *)
+{
+  if (bitPosition == 7) 
+    m_bsRBPU = 0;
+  return true;
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+void INTCON2::put_value(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  value.put(new_value);
+
+  if ((old_value ^ new_value) & RBPU  && m_bsRBPU)
+    m_bsRBPU->setSink((new_value & RBPU) != 0);
+
+
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+void INTCON2::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
 
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------

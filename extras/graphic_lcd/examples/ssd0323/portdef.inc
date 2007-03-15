@@ -2,7 +2,7 @@
 
 ;------------------------------------------------------------------------
 ;
-; I/O Port definitions for the SED1520 based graphic LCD
+; I/O Port definitions for the SSD0323 based graphic LCD
 ;
 ;
 ; The user of the graphic LCD module should configure this

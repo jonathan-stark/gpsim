@@ -395,6 +395,8 @@ public:
 
 //---------------------------------------------------------
 // Base class for a special function register.
+class BitSink;
+
 class sfr_register : public Register
 {
 public:
@@ -406,6 +408,14 @@ public:
   virtual void initialize() {};
 
   virtual void reset(RESET_TYPE r);
+
+  // The assign and release BitSink methods don't do anything 
+  // unless derived classes redefine them. Their intent is to
+  // provide an interface to the BitSink design - a design that
+  // allows clients to be notified when bits change states.
+
+  virtual bool assignBitSink(unsigned int bitPosition, BitSink *) {return false;}
+  virtual bool releaseBitSink(unsigned int bitPosition, BitSink *) {return false;}
 };
 
 
@@ -522,6 +532,26 @@ private:
   Integer       m_ReturnValue;
 };
 
+
+//------------------------------------------------------------------------
+// BitSink
+//
+// A BitSink is an object that can direct bit changes in an SFR to some
+// place where they're needed. The purpose is to abstract the interface
+// between special bits and the various peripherals.
+//
+// A client wishing to be notified whenever an SFR bit changes states
+// will create a BitSink object and pass its pointer to the SFR. The
+// client will also tell the SFR which bit this applies to. Now, when 
+// the bit changes states in the SFR, the SFR will call the setSink()
+// method.
+
+class BitSink
+{
+public:
+  virtual void setSink(bool) = 0;
+
+};
 
 
 #endif // __REGISTERS__
