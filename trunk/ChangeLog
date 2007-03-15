@@ -1,4 +1,8 @@
-	
+2007-03-15 Borut Razem <borut.razem@siol.net>
+	* src/symbol.h: added #include "exports.h" to make it compile on WIN32
+	* plat/win32/gpsim.nsi: added extras\graphic_lcd\examples\sed1520\*
+	  and extras\graphic_lcd\examples\ssd0323\* to the package
+
 2007-03-14  Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-registers.cc: There was no implementation
 	defined for the Status register constructor.
