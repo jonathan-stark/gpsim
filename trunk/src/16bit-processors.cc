@@ -208,7 +208,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_lata  = new PicLatchRegister(this,"lata","", m_porta);
   m_lata->setEnableMask(0x7f);
 
-  m_portb = new PicPortBRegister(this,"portb","",8,0xff);
+  m_portb = new PicPortBRegister(this,"portb","", &intcon, 8,0xff);
   m_portb->assignRBPUSink(7,&intcon2);
   m_trisb = new PicTrisRegister(this,"trisb","", m_portb, true);
   m_latb  = new PicLatchRegister(this,"latb","", m_portb);
@@ -534,7 +534,6 @@ void _16bit_processor :: create ()
 
   intcon.set_rcon(&rcon);
   intcon.set_intcon2(&intcon2);
-  intcon.set_cpu(this);
 
   //tbl.initialize(this);
   tmr0l.start(0);

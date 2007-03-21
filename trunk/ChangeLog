@@ -1,3 +1,10 @@
+2007-03-20  Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc, src/intcon.cc, src/pic-ioports.h,
+	src/intcon.h, src/pic-ioports.cc, src/14bit-processors.cc:
+	- PortB now writes intcon bits via a ptr to an intcon
+	register. Previously, PortB obtained the intcon pointer from the
+	Processor class
+
 2007-03-15 Borut Razem <borut.razem@siol.net>
 	* src/symbol.h: added #include "exports.h" to make it compile on WIN32
 	* plat/win32/gpsim.nsi: added extras\graphic_lcd\examples\sed1520\*

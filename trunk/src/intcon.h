@@ -51,8 +51,16 @@ enum
 
 
   INTCON(Processor *pCpu, const char *pName, const char *pDesc);
+  inline void set_gie()
+  {
+    value.put(value.get() | GIE);
+    put(value.get());
+  }
 
-  virtual void set_cpu(Processor *new_cpu);
+  inline void clear_gie()
+  {
+    put(get() & ~GIE);
+  }
 
   void set_T0IF();
 
@@ -63,12 +71,6 @@ enum
   // routine is called when EEIF goes high.)
   */
   void peripheral_interrupt();
-
-  inline void set_gie()
-    {
-      value.put(value.get() | GIE);
-      put(value.get());
-    }
 
   inline void set_rbif(bool b)
   {
@@ -104,11 +106,6 @@ enum
   inline void set_t0ie()
     {
       put(get() | T0IE);
-    }
-
-  inline void clear_gie()
-    {
-      put(get() & ~GIE);
     }
 
   virtual bool check_peripheral_interrupt()=0;

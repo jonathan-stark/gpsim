@@ -60,12 +60,12 @@ protected:
   bool m_bIgnoreWDTResets;
 };
 
-
+class INTCON;
 class PicPortBRegister : public PicPortRegister
 {
 public:
   PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
-                   /*const char *port_name, */
+                   INTCON *pIntcon,
                    unsigned int numIopins, unsigned int enableMask=0xff);
   ~PicPortBRegister();
 
@@ -84,6 +84,7 @@ private:
   bool m_bIntEdge;
 
   BitSink *m_bsRBPU;
+  INTCON  *m_pIntcon;
 };
 
 class PSP;
