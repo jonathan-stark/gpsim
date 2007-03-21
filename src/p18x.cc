@@ -748,6 +748,45 @@ Processor * P18F452::construct(const char *name)
   return p;
 }
 
+
+//------------------------------------------------------------------------
+//
+// P18F2455
+// 
+
+P18F2455::P18F2455(const char *_name, const char *desc)
+  : P18F442(_name,desc)
+
+{
+
+  if(verbose)
+    cout << "18f2455 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F2455::create()
+{
+  if(verbose)
+    cout << " 18f2455 create \n";
+
+  P18F442::create();
+}
+
+Processor * P18F2455::construct(const char *name)
+{
+
+  P18F2455 *p = new P18F2455(name);
+
+  if(verbose)
+    cout << " 18F2455 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+  return p;
+}
+
+
 //------------------------------------------------------------------------
 
 P18Fxx20::P18Fxx20(const char *_name, const char *desc)

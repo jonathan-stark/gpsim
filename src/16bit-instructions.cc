@@ -62,6 +62,7 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
     case  _P18F452_:
     case  _P18F1220_:
     case  _P18F1320_:
+    case  _P18F2455_:
       destination_index = (new_opcode & 0xff)+1;
       absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
  
