@@ -236,14 +236,16 @@ unsigned int PicPSP_TrisRegister::get(void)
 
 
 PicPortBRegister::PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
-                                   /*const char *port_name, */
+                                   INTCON *pIntcon,
 				   unsigned int numIopins, 
 				   unsigned int enableMask)
   : PicPortRegister(pCpu, pName, pDesc, numIopins, enableMask),
     m_bRBPU(false),
     m_bIntEdge(false),
-    m_bsRBPU(0)
+    m_bsRBPU(0),
+    m_pIntcon(pIntcon)
 {
+  assert(m_pIntcon);
 }
 
 PicPortBRegister::~PicPortBRegister()
@@ -256,7 +258,7 @@ void PicPortBRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
 
-  cpu14->intcon->set_rbif(false);
+  m_pIntcon->set_rbif(false);
 
 //  unsigned int diff = mEnableMask & (new_value ^ value.data);
 //RRR  if(diff) {
@@ -274,7 +276,7 @@ void PicPortBRegister::put(unsigned int new_value)
 
 unsigned int PicPortBRegister::get()
 {
-  cpu14->intcon->set_rbif(false);
+  m_pIntcon->set_rbif(false);
 
   return rvDrivenValue.data;
 }
@@ -290,7 +292,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   bool bNewValue = new3State=='1' || new3State=='W';
   if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
-    cpu14->intcon->set_intf(true);
+    m_pIntcon->set_intf(true);
 
 
   RegisterValue lastDrivenValue = rvDrivenValue;
@@ -300,7 +302,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 
   if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
     cpu_pic->exit_sleep();
-    cpu14->intcon->set_rbif(true);
+    m_pIntcon->set_rbif(true);
   }
 }
 

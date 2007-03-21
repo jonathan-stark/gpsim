@@ -56,16 +56,6 @@ void INTCON::set_T0IF()
 
 }
 
-void INTCON::set_cpu(Processor *new_cpu)
-{
-  cpu = new_cpu;
-
-  pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
-
-  assert(pcpu);
-
-}
-
 void INTCON::put(unsigned int new_value)
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
