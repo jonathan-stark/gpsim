@@ -1,3 +1,8 @@
+2007-03-25 Martin Habets <errandir_news@mph.eclipse.co.uk>
+	* src/p18x.cc:
+	- Added I2C support to pic18f2455.
+	- Fixed pin 18 on the pic18f2455.
+	
 2007-03-20 Martin Habets <errandir_news@mph.eclipse.co.uk>
 	* src/16bit-instructions.cc, src/p18x.cc, src/p18x.h,
 	src/pic-instructions.cc, src/pic-processor.cc, pic-processor.h:

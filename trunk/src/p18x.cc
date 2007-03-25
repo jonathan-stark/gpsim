@@ -762,14 +762,29 @@ P18F2455::P18F2455(const char *_name, const char *desc)
   if(verbose)
     cout << "18f2455 constructor, type = " << isa() << '\n';
 
+  m_trisc = new PicTrisRegister(this,"trisc","", (PicPortRegister *)m_portc, true);
 }
 
 void P18F2455::create()
 {
+  P18F442::create();
+
   if(verbose)
     cout << " 18f2455 create \n";
 
-  P18F442::create();
+  package->destroy_pin(18);
+  package->assign_pin(18, 0);          // Vusb
+
+  /* The MSSP/I2CC pins are different on this chip. */
+  ssp.initialize(&pir_set_def,         // PIR
+                &(*m_portb)[1],                // SCK
+                &(*m_porta)[5],                // SS
+               &(*m_portc)[7],         // SDO
+                &(*m_portb)[0],                // SDI
+               m_trisb,                // i2c tris port
+               SSP_TYPE_MSSP
+       );
+
 }
 
 Processor * P18F2455::construct(const char *name)
