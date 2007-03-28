@@ -1,3 +1,15 @@
+2007-03-27  Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.cc, src/gpsim_object.h, src/breakpoints.h,
+	src/registers.cc, src/registers.h, src/breakpoints.cc, 
+	gui/gui_regwin.cc
+	- Added break on register change feature. From the command line:
+	gpsim> break ch myvar
+	This sets a breakpoint on the register 'myvar' and will halt
+	execution whenever a write to this register changes the contents
+	of myvar.
+	- Added another menu item to the register window menu to support
+	the break on change breakpoint.
+
 2007-03-25 Martin Habets <errandir_news@mph.eclipse.co.uk>
 	* src/p18x.cc:
 	- Added I2C support to pic18f2455.

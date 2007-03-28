@@ -322,6 +322,7 @@ public:
             unsigned int op,
             unsigned int value,
             unsigned int mask=0xff);
+  int set_change_break(Processor *cpu, unsigned int register_number);
   int set_break(gpsimObject::ObjectBreakTypes bt,
 		gpsimObject::ObjectActionTypes at,
 		Register *,
@@ -440,9 +441,8 @@ class BreakpointRegister : public Register, public TriggerObject
 {
 public:
 
-
+  // FIXME: why 2 constructors?
   BreakpointRegister(Processor *, TriggerAction *, Register *);
-  //BreakpointRegister(Processor *, int, int );
   BreakpointRegister(Processor *, TriggerAction *, int, int );
   virtual ~BreakpointRegister();
 
@@ -473,8 +473,6 @@ public:
   virtual void clear();
   virtual void takeAction();
 protected:
-  // BreakpointRegister();
-
 };
 
 class BreakpointRegister_Value : public BreakpointRegister
@@ -484,14 +482,6 @@ public:
   unsigned int break_value, break_mask;
   unsigned int m_uDefRegMask;
   string m_sOperator;
-
-  // FIXME why do we have 3 different constructors???
-  //BreakpointRegister_Value();
-  BreakpointRegister_Value(Processor *_cpu, 
-        int _repl, 
-        int bp, 
-        unsigned int bv, 
-        unsigned int bm );
 
   BreakpointRegister_Value(Processor *_cpu, 
         int _repl, 
@@ -535,7 +525,7 @@ public:
 };
 
 
-class Break_register_read : public BreakpointRegister//, TriggerAction
+class Break_register_read : public BreakpointRegister
 {
 public:
 
@@ -552,12 +542,9 @@ public:
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
   virtual void takeAction();
-  //virtual void invokeAction();
-  // TriggerAction overrides
-  //virtual void action();
 };
 
-class Break_register_write : public BreakpointRegister//, TriggerAction
+class Break_register_write : public BreakpointRegister
 {
 public:
   Break_register_write(Processor *_cpu, int _repl, int bp );
@@ -571,20 +558,27 @@ public:
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
   virtual void takeAction();
-  //virtual void invokeAction();
-  // TriggerAction overrides
-  //virtual void action();
 };
 
-class Break_register_read_value : public BreakpointRegister_Value//, TriggerAction
+class Break_register_change : public BreakpointRegister
 {
 public:
-  Break_register_read_value(Processor *_cpu, 
-			    int _repl, 
-			    int bp, 
-			    unsigned int bv, 
-			    unsigned int bm );
+  Break_register_change(Processor *_cpu, int _repl, int bp );
+  virtual ~Break_register_change();
 
+  virtual void put(unsigned int new_value);
+  virtual void putRV(RegisterValue rv);
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual char const * bpName() { return "register change"; }
+
+  virtual int  printTraced(Trace *pTrace, unsigned int tbi,
+			   char *pBuf, int szBuf);
+  virtual void takeAction();
+};
+
+class Break_register_read_value : public BreakpointRegister_Value
+{
+public:
   Break_register_read_value(Processor *_cpu, 
 			    int _repl, 
 			    int bp, 
@@ -603,19 +597,11 @@ public:
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
   virtual void takeAction();
-  // TriggerAction overrides
-  //virtual void action();
 };
 
-class Break_register_write_value : public BreakpointRegister_Value//, TriggerAction
+class Break_register_write_value : public BreakpointRegister_Value
 {
 public:
-  Break_register_write_value(Processor *_cpu, 
-			     int _repl, 
-			     int bp, 
-			     unsigned int bv, 
-			     unsigned int bm );
-
   Break_register_write_value(Processor *_cpu, 
 			     int _repl, 
 			     int bp, 
@@ -632,8 +618,6 @@ public:
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
   virtual void takeAction();
-  // TriggerAction overrides
-  //virtual void action();
 };
 
 class CommandAssertion : public Breakpoint_Instruction
@@ -658,15 +642,13 @@ private:
   char *command;
 };
 
+// FIXME -- the log classes need to be deprecated - use the action class to perform logging instead.
 class Log_Register_Write : public Break_register_write
 {
  public:
 
   Log_Register_Write(Processor *_cpu, int _repl, int bp ):
     Break_register_write(_cpu,_repl,bp ) { };
-  //virtual void put(unsigned int new_value);
-  //virtual void putRV(RegisterValue rv);
-  //virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "log register write"; }
   virtual void takeAction();
 };
@@ -683,13 +665,6 @@ public:
 class Log_Register_Read_value : public  Break_register_read_value
 {
 public:
-
-  Log_Register_Read_value(Processor *_cpu, 
-			  int _repl, 
-			  int bp, 
-			  unsigned int bv, 
-			  unsigned int bm ) :
-    Break_register_read_value(_cpu,  _repl, bp, bv, bm ) { };
   Log_Register_Read_value(Processor *_cpu, 
 			  int _repl, 
 			  int bp, 
@@ -705,14 +680,6 @@ public:
 class Log_Register_Write_value : public Break_register_write_value
 {
 public:
-
-  Log_Register_Write_value(Processor *_cpu, 
-			   int _repl, 
-			   int bp, 
-			   unsigned int bv, 
-			   unsigned int bm ) :
-    Break_register_write_value(_cpu,  _repl, bp, bv, bm ) { };
-
   Log_Register_Write_value(Processor *_cpu, 
 			     int _repl, 
 			     int bp, 

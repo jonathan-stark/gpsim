@@ -38,6 +38,7 @@ cmd_break c_break;
 #define EXECUTION   2
 #define WRITE       3
 #define READ        4
+#define REGCHANGE   5
 #define STK_OVERFLOW  7
 #define STK_UNDERFLOW 8
 #define WDT           9
@@ -48,6 +49,7 @@ static cmd_options cmd_break_options[] =
   {"e",   EXECUTION,    OPT_TT_BITFLAG},
   {"w",   WRITE,        OPT_TT_BITFLAG},
   {"r",   READ,         OPT_TT_BITFLAG},
+  {"ch",  REGCHANGE,    OPT_TT_BITFLAG},
   {"so",  STK_OVERFLOW, OPT_TT_BITFLAG},
   {"su",  STK_UNDERFLOW,OPT_TT_BITFLAG},
   {"wdt", WDT,          OPT_TT_BITFLAG},
@@ -68,15 +70,18 @@ cmd_break::cmd_break()
                      "    Halts when the address is executed, read, or written. The ADDRESS can be \n"
                      "    a symbol or a number. If the optional expr is specified, then it must\n"
                      "    evaluate to true before the simulation will halt. The optional message\n"
-		     "    allows a description to be associated with the break."
+		     "    allows a description to be associated with the break.\n"
                      "Register Memory breaks:\n"
-                     "  break r|w REGISTER [,expr] [,\"message\"]\n"
-                     "    Halts when 'REGISTER' is read or written and the optional expression\n"
-                     "    evaluates to true.\n"
-                     "  break r|w boolean_expression\n"
+                     "  break r|w|ch REGISTER [,expr] [,\"message\"]\n"
+                     "    Halts when 'REGISTER' is read, written, or changed\n"
+                     "    and the optional expression evaluates to true\n"
+                     "  break r|w|ch boolean_expression\n"
                      "    The boolean expression can only be of the form:\n"
 		     "       a) reg & mask == value\n"
 		     "       b) reg == value\n"
+                     "  - Note the 'ch' option is similar to the write option.\n"
+                     "    The change option evaluates the expression before and after\n"
+                     "    a register write and halts if the evaluation differs.\n"
                      "Cycle counter breaks:\n"
                      "  break c VALUE  [,\"message\"]\n"
                      "    Halts when the cycle counter reaches 'VALUE'.\n"
@@ -125,6 +130,8 @@ static gpsimObject::ObjectBreakTypes MapBreakActions(int co_value)
     return gpsimObject::eBreakRead;
   case WRITE:
     return gpsimObject::eBreakWrite;
+  case REGCHANGE:
+    return gpsimObject::eBreakChange;
   case EXECUTION:
     return gpsimObject::eBreakExecute;
   }
