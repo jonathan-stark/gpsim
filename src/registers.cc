@@ -252,6 +252,16 @@ Register::~Register()
 }
 
 //------------------------------------------------------------
+int Register::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *expr)
+{
+  return get_bp().set_break(bt, at, this, expr);
+}
+
+int Register::clear_break()
+{
+}
+
+//------------------------------------------------------------
 // get()
 //
 //  Return the contents of the file register.

@@ -342,6 +342,18 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt, gpsimObject::Object
 	set_breakpoint(new Log_Register_Read(pCpu, pReg->address,0), pCpu, pExpr)
 	:
 	set_breakpoint(new Break_register_read(pCpu, pReg->address,0), pCpu, pExpr);
+  } else if (bt == gpsimObject::eBreakChange) {
+    if (bCompiledExpression) {
+      delete pExpr;
+      return (at == gpsimObject::eActionLog) ?
+	set_breakpoint(new Log_Register_Write_value(pCpu, pReg->address, 0,iValue,op,iMask),pCpu)
+	:
+	set_breakpoint(new Break_register_write_value(pCpu, pReg->address, 0,iValue,op,iMask),pCpu);
+    } else
+      return (at == gpsimObject::eActionLog) ?
+	set_breakpoint(new Log_Register_Write(pCpu, pReg->address,0), pCpu, pExpr)
+	:
+	set_breakpoint(new Break_register_change(pCpu, pReg->address,0), pCpu, pExpr);
   }
 
   return -1;
@@ -437,6 +449,7 @@ int  Breakpoints::set_read_value_break(Processor *cpu,
                                                                   register_number,
                                                                   value,
                                                                   op,
+                                                                  BreakpointRegister_Value::eBREquals,
                                                                   mask);
 
 
@@ -469,6 +482,14 @@ int  Breakpoints::set_write_value_break(Processor *cpu,
 
 
 }
+
+int  Breakpoints::set_change_break(Processor *cpu, unsigned int register_number)
+{
+  Break_register_change *brc = new Break_register_change(cpu,register_number,0);
+
+  return bp.set_breakpoint(brc,cpu);
+}
+
 
 int  Breakpoints::set_cycle_break(Processor *cpu,
                                   guint64 future_cycle,
@@ -529,9 +550,9 @@ int Breakpoints::set_notify_write(Processor *cpu,
 
 }
 int Breakpoints::set_notify_read_value(Processor *cpu, 
-						unsigned int register_number, 
-						unsigned int value, 
-						unsigned int mask)
+                                       unsigned int register_number, 
+                                       unsigned int value, 
+                                       unsigned int mask)
 {
   GetTraceLog().enable_logging();
 
@@ -539,15 +560,16 @@ int Breakpoints::set_notify_read_value(Processor *cpu,
 							      register_number,
 							      0,
 							      value,
+                                                              BreakpointRegister_Value::eBREquals,
 							      mask);
   return bp.set_breakpoint(lrrv,cpu);
 
 }
 
 int Breakpoints::set_notify_write_value(Processor *cpu,
-						 unsigned int register_number,
-						 unsigned int value, 
-						 unsigned int mask)
+                                        unsigned int register_number,
+                                        unsigned int value, 
+                                        unsigned int mask)
 {
   GetTraceLog().enable_logging();
 
@@ -555,6 +577,7 @@ int Breakpoints::set_notify_write_value(Processor *cpu,
 								register_number,
 								0,
 								value,
+                                                                BreakpointRegister_Value::eBREquals,
 								mask);
   return bp.set_breakpoint(lrwv,cpu);
 }
@@ -943,21 +966,8 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
 }
 Breakpoint_Instruction::~Breakpoint_Instruction()
 {
-
-  /*
-  if (m_aka) {
-      
-    list <string>::iterator it;
-    it = m_aka->begin();
-    while(it != m_aka->end()) {
-      string s(*it);
-      cout << "  aka :" << s<< endl;
-      ++it;
-    }
-
-  }
-  */
 }
+
 Processor* Breakpoint_Instruction::get_cpu()
 { 
   return dynamic_cast<Processor *>(cpu);
@@ -1255,6 +1265,7 @@ int RegisterAssertion::printTraced(Trace *pTrace, unsigned int tbi,
 }
 
 //------------------------------------------------------------------------------
+#if 0
 class BreakpointRegisterAction : public TriggerAction
 {
 public:
@@ -1277,7 +1288,7 @@ void BreakpointRegisterAction::action()
   if(m_pbpr)
     m_pbpr->takeAction();
 }
-
+#endif
 //------------------------------------------------------------------------------
 /*
 BreakpointRegister::BreakpointRegister()
@@ -1307,17 +1318,7 @@ BreakpointRegister::BreakpointRegister(Processor *_cpu, TriggerAction *ta,
   replace(_cpu,_repl);
   address = _repl;
 }
-/*
-BreakpointRegister::BreakpointRegister(Processor *_cpu, int _repl, int bp)
-  : TriggerObject(0)
 
-{
-
-  bpn = bp;
-  replace(_cpu,_repl);
-  address = _repl;
-}
-*/
 void BreakpointRegister::invokeAction()
 {
   if(eval_Expression())
@@ -1476,36 +1477,6 @@ void BreakpointRegister::remove_xref(void *an_xref)
 
 //------------------------------------------------------------------------
 
-//-------------------------------------------------------------------
-/*
-BreakpointRegister_Value::
-BreakpointRegister_Value()
-{
-  break_value = 0;
-  break_mask = 0;
-}
-*/
-
-BreakpointRegister_Value::
-BreakpointRegister_Value(Processor *_cpu, 
-                         int _repl, 
-                         int bp, 
-                         unsigned int bv, 
-                         unsigned int bm ) 
-  :  BreakpointRegister(_cpu,0,_repl,bp ) 
-{ 
-  m_uDefRegMask = _cpu->register_mask();
-  break_value = bv;
-  break_mask = bm;
-  m_pfnIsBreak = IsEqualsBreakCondition;
-  m_sOperator = "==";
-
-  int regMask = (0x100 << (_cpu->register_size()-1)) - 1;
-
-  if(break_mask == 0)
-    break_mask = regMask;
-}
-
 BreakpointRegister_Value::
 BreakpointRegister_Value(Processor *_cpu, 
                          int _repl, 
@@ -1631,15 +1602,6 @@ Break_register_write_value::Break_register_write_value(Processor *_cpu,
                               int _repl, 
                               int bp, 
                               unsigned int bv, 
-                              unsigned int bm ) :
-    BreakpointRegister_Value(_cpu, _repl, bp, bv, eBREquals, bm )
-{
-}
-
-Break_register_write_value::Break_register_write_value(Processor *_cpu, 
-                              int _repl, 
-                              int bp, 
-                              unsigned int bv, 
                               unsigned int _operator,
                               unsigned int bm ) :
     BreakpointRegister_Value(_cpu, _repl, bp, bv, _operator, bm )
@@ -1648,7 +1610,6 @@ Break_register_write_value::Break_register_write_value(Processor *_cpu,
 
 Break_register_write_value::~Break_register_write_value()
 {
-  cout << __FUNCTION__ << " destructor\n";
 }
 
 
@@ -1687,7 +1648,6 @@ Break_register_read::Break_register_read(Processor *_cpu, int _repl, int bp ):
 
 Break_register_read::~Break_register_read()
 {
-  cout << __FUNCTION__ << " destructor\n";
 }
 
 void Break_register_read::takeAction()
@@ -1705,13 +1665,6 @@ void Break_register_read::takeAction()
   bp.halt();
 }
 
-/*
-void Break_register_read::invokeAction()
-{
-  if(eval_Expression())
-    TriggerObject::invokeAction();
-}
-*/
 unsigned int Break_register_read::get()
 {
   unsigned int v = getReplaced()->get();
@@ -1765,11 +1718,10 @@ Break_register_write::Break_register_write(Processor *_cpu, int _repl, int bp ):
 
 Break_register_write::~Break_register_write()
 {
-  cout << __FUNCTION__ << " destructor\n";
 }
 void Break_register_write::takeAction() 
 {
-  //trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (getReplaced()->address)  );
+
   trace.raw(m_brt->type(1) | (getReplaced()->get_value() & 0xffffff));
   if(verbosity && verbosity->getVal()) {
     GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
@@ -1783,13 +1735,6 @@ void Break_register_write::takeAction()
 
 }
 
-/*
-void Break_register_write::invokeAction()
-{
-  if(eval_Expression())
-    TriggerObject::invokeAction();
-}
-*/
 void Break_register_write::put(unsigned int new_value)
 {
   getReplaced()->put(new_value);
@@ -1821,15 +1766,6 @@ int Break_register_write::printTraced(Trace *pTrace, unsigned int tbi,
 }
 //========================================================================
 Break_register_read_value::Break_register_read_value(Processor *_cpu, 
-                                                     int _repl,
-                                                     int bp, 
-                                                     unsigned int bv, 
-                                                     unsigned int bm ) :
-  BreakpointRegister_Value(_cpu, _repl, bp, bv, eBREquals, bm ) 
-{
-}
-
-Break_register_read_value::Break_register_read_value(Processor *_cpu, 
                                                      int _repl, 
                                                      int bp, 
                                                      unsigned int bv, 
@@ -1841,7 +1777,6 @@ Break_register_read_value::Break_register_read_value(Processor *_cpu,
 
 Break_register_read_value::~Break_register_read_value()
 {
-  cout << __FUNCTION__ << " destructor\n";
 }
 
 void Break_register_read_value::takeAction()
@@ -1964,6 +1899,69 @@ int Break_register_write_value::printTraced(Trace *pTrace, unsigned int tbi,
     return m>0 ? m : 0;
   }
 
+  return 0;
+}
+
+
+//========================================================================
+//
+Break_register_change::Break_register_change(Processor *_cpu, int _repl, int bp ):
+  BreakpointRegister(_cpu,0,_repl,bp )
+{ 
+}
+
+Break_register_change::~Break_register_change()
+{
+}
+void Break_register_change::takeAction() 
+{
+
+  trace.raw(m_brt->type(1) | (getReplaced()->get_value() & 0xffffff));
+  if(verbosity && verbosity->getVal()) {
+    GetUserInterface().DisplayMessage(IDS_HIT_BREAK,bpn);
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
+      address, 0);
+    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG,
+      sFormattedRegAddress.c_str());
+  }
+  bp.halt();
+
+}
+
+void Break_register_change::put(unsigned int new_value)
+{
+  unsigned int before = getReplaced()->get_value();
+  getReplaced()->put(new_value);
+  if (before != getReplaced()->get_value())
+    invokeAction();
+}
+
+void Break_register_change::putRV(RegisterValue rv)
+{
+  RegisterValue before = getReplaced()->getRV_notrace();
+  getReplaced()->putRV(rv);
+  if (before != getReplaced()->getRV_notrace())
+    invokeAction();
+}
+
+void Break_register_change::setbit(unsigned int bit_number, bool new_value)
+{
+  bool before = getReplaced()->get_bit(bit_number);
+  getReplaced()->setbit(bit_number,new_value);
+  if (before != getReplaced()->get_bit(bit_number))
+    invokeAction();
+}
+
+int Break_register_change::printTraced(Trace *pTrace, unsigned int tbi,
+				      char *pBuf, int szBuf)
+				  
+{
+  if (pBuf && pTrace) {
+    unsigned int valueRead = pTrace->get(tbi+1) & 0xffff;
+    int m = snprintf(pBuf,szBuf," wrote 0x%x to reg 0x%x", valueRead, address);
+    return m>0 ? m : 0;
+  }
   return 0;
 }
 //========================================================================

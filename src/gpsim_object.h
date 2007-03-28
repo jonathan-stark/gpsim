@@ -73,10 +73,11 @@ class gpsimObject {
 
   // Breakpoint types supported by Value
   enum ObjectBreakTypes {
-    eBreakAny,
-    eBreakWrite,
-    eBreakRead,
-    eBreakExecute
+    eBreakAny,    // ???
+    eBreakWrite,  // Register write
+    eBreakRead,   // Register read
+    eBreakChange, // Register change
+    eBreakExecute // Program memory execute
   };
 
   // Breakpoint types supported by Value
