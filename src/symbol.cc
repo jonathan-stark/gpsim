@@ -120,12 +120,12 @@ int SymbolTable_t::deleteSymbol(const string &s)
 {
   SymbolTable_t::iterator sti = find(s);
   if (sti != end()) {
-    erase(sti);
 
     if (DEBUG)
       cout << __FUNCTION__ <<':' << __LINE__ << "  Deleting symbol " << s << endl;
 
     delete sti->second;
+    erase(sti);
     return 1;
   }
 

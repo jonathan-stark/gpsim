@@ -49,6 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include "sim_context.h"
 #include "breakpoints.h"
 #include "trace.h"
+#include "symbol.h"
 
 //================================================================================
 // Global Declarations
@@ -322,7 +323,6 @@ void CSimulationContext::NotifyUserCanceled() {
   }
 }
 
-extern SymbolTable gSymbolTable;  // There's only one instance of "the" symbol table
 SymbolTable & CSimulationContext::GetSymbolTable() 
 {
   return gSymbolTable;

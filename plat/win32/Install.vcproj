@@ -1615,57 +1615,7 @@ copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\src\stimulus_orb.h">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Install $(InputFileName)"
-						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
-if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
-copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
-"
-						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Install $(InputFileName)"
-						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
-if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
-copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
-"
-						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\src\symbol.h">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Install $(InputFileName)"
-						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
-if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
-copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
-"
-						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Install $(InputFileName)"
-						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
-if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
-copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
-"
-						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\src\symbol_orb.h">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
