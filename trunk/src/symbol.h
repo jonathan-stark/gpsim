@@ -67,6 +67,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
 
+#include <algorithm>
 #include <string>
 #include <map>
 #include "exports.h"

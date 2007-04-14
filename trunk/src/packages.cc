@@ -172,7 +172,7 @@ void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
   case E_NO_PIN:
     pins[pin_number-1] = pin;
 
-    if (verbose && pin)
+    if ((bool)verbose && pin)
       cout << "assigned pin " << pin->name() << " to package pin number " << dec << pin_number<<endl;
 
     break;

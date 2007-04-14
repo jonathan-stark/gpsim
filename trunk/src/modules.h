@@ -81,7 +81,7 @@ class ModuleLibrary
 public:
   static int LoadFile(string &sLibraryName);
   static int InstantiateObject(string &sObjectName, string &sInstantiatedName);
-  static int ListLoadableModules();
+  static void ListLoadableModules();
 };
 
 

@@ -130,7 +130,7 @@ void cmd_module::module(cmd_options *opt)
 #ifdef OLD_MODULE_LIBRARY
       cout << ModuleLibrary::DisplayFileList();
 #else
-      cout << ModuleLibrary::ListLoadableModules();
+      ModuleLibrary::ListLoadableModules();
 #endif
       break;
 

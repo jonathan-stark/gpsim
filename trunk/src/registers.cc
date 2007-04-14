@@ -259,6 +259,7 @@ int Register::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *e
 
 int Register::clear_break()
 {
+  return -1;
 }
 
 //------------------------------------------------------------
