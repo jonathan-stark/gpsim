@@ -1,3 +1,6 @@
+2007-07-10 Roy Rankin <rrankin@ihug.com.au>
+	* src/a2dconverter.cc: add comments for setup functions
+
 2007-04-14 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def, plat/win32/Install.vcproj: MSVC sync
 	* cli/cmd_module.cc, gui/gui_stack.c, src/modules.cc, src/modules.h,

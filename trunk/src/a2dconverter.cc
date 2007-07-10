@@ -65,23 +65,38 @@ ADCON0::ADCON0(Processor *pCpu, const char *pName, const char *pDesc)
 {
 }
 
+/*
+ * Link PIC register for High Byte A/D result
+ */
 void ADCON0::setAdres(sfr_register *new_adres)
 {
   adres = new_adres;
 }
+/*
+ * Link PIC register for Low Byte A/D result
+ */
 void ADCON0::setAdresLow(sfr_register *new_adresl)
 {
   adresl = new_adresl;
 }
+/*
+ * Link PIC register for ADCON1
+ */
 void ADCON0::setAdcon1(ADCON1 *new_adcon1)
 {
   adcon1 = new_adcon1;
 }
+/*
+ * Link PIC register for INTCON
+ */
 void ADCON0::setIntcon(INTCON *new_intcon)
 {
   intcon = new_intcon;
 }
 
+/*
+ * Set resolution of A2D converter
+ */
 void ADCON0::setA2DBits(unsigned int nBits)
 {
   m_A2DScale = (1<<nBits) - 1;
@@ -314,6 +329,19 @@ ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   }
 }
 
+/*
+ * If A2D uses PCFG, call for each PCFG value (cfg 0 to 15) with
+ * each set bit of bitMask indicating port is an analog port
+ * (either A2D input port or Vref). Processors which use an A2D
+ * method that uses ANSEL register will not call this.
+ *
+ * As an example, for the following Port Configuration Control bit:
+ * PCFG   AN7   AN6   AN5   AN4   AN3   AN2   AN1   AN0
+ * ----   ---- ----- -----  ----- ----- ----- ----- -----
+ * 1100   D    D     D      A     Vref+ Vref- A     A
+ *
+ *  then call setChannelConfiguration with cfg = 12 , bitMask = 0x1f
+ * */
 void ADCON1::setChannelConfiguration(unsigned int cfg, unsigned int bitMask)
 {
   if (cfg < cMaxConfigurations) 
@@ -333,18 +361,29 @@ unsigned int ADCON1::getVrefHiChannel(unsigned int cfg)
   return(0xffff);
 }
 
+/*
+ * Call for each configuration mode that uses an І/O pin as Vref-
+ * to declare which port is being used for this.
+ */
 void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
 {
   if (cfg < cMaxConfigurations) 
     Vreflo_position[cfg] = channel;
 }
 
+/*
+ * Call for each configuration mode that uses an І/O pin as Vref+
+ * to declare which port is being used for this.
+ */
 void ADCON1::setVrefHiConfiguration(unsigned int cfg, unsigned int channel)
 {
   if (cfg < cMaxConfigurations) 
     Vrefhi_position[cfg] = channel;
 }
 
+/*
+ * Number of A2D channels processor supports
+ */
 void ADCON1::setNumberOfChannels(unsigned int nChannels)
 {
   if (m_nAnalogChannels || !nChannels)
@@ -358,6 +397,12 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
 
 }
 
+/*
+ * Configure use of adcon1 register
+ * 	The register is first anded with mask and then shifted
+ * 	right shift bits. The result being either PCFG or VCFG
+ * 	depending on the type of a2d being used.
+ */ 
 void ADCON1::setValidCfgBits(unsigned int mask, unsigned int shift)
 {
     mValidCfgBits = mask;
@@ -369,6 +414,9 @@ int ADCON1::get_cfg(unsigned int reg)
     return((reg & mValidCfgBits) >> mCfgBitShift);
 }
 
+/*
+ * Associate a processor I/O pin with an A2D channel
+ */
 void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
 {
   if (channel < m_nAnalogChannels && 
