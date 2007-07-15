@@ -222,6 +222,10 @@ ProcessorConstructor pP16F87(P16F87::construct ,
 			      "__16F87", "pic16f87",  "p16f87", "16f87");
 ProcessorConstructor pP16F88(P16F88::construct ,
 			      "__16F88", "pic16f88",  "p16f88", "16f88");
+ProcessorConstructor pP16F818(P16F818::construct ,
+			      "__16F818", "pic16f818",  "p16f818", "16f818");
+ProcessorConstructor pP16F819(P16F819::construct ,
+			      "__16F819", "pic16f819",  "p16f819", "16f819");
 ProcessorConstructor pP16F871(P16F871::construct ,
 			      "__16F871", "pic16f871",  "p16f871", "16f871");
 ProcessorConstructor pP16F873(P16F873::construct ,
@@ -1235,6 +1239,7 @@ void pic_processor::create_symbols ()
     case Register::SFR_REGISTER:
       //if(!symbol_table.find((char *)registers[i]->name().c_str()))
       //  symbol_table.add_register(registers[i]);
+      //
       addSymbol(registers[i]);
       break;
     default:
