@@ -1,3 +1,13 @@
+2007-07-15 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc src/pic-processor.h src/p16f8x.h src/p16f8x.cc
+	  regression/ccp/16f819.lkr regression/ccp/ccp_819.asm
+	  regression/ccp/Makefile regression/a2d/16f819.lkr
+	  regression/a2d/p16f819.asm regression/a2d/Makefile
+	  regression/run_regression.sh regression/Makefile.am 
+	  regression/i2c/16f819.lkr regression/i2c/Makefile 
+	  regression/i2c/p16f819.asm: 
+	- Add P16f818 and P16f819 processors
+
 2007-07-10 Roy Rankin <rrankin@ihug.com.au>
 	* src/a2dconverter.cc: add comments for setup functions
 

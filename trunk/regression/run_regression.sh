@@ -111,6 +111,8 @@ ${RT} a2d sim_p16f874a
 
 ${RT} a2d sim_p16f88
 
+${RT} a2d sim_p16f819
+
 ${RT} a2d sim_p18f452
 
 ${RT} psp sim_p18f452
@@ -120,6 +122,8 @@ ${RT} psp sim_p16f871
 ${RT} ttl sim_377
 
 ${RT} ccp sim_ccp_877a
+
+${RT} ccp sim_ccp_819
 
 ${RT} ccp sim_pwm_877a
 
@@ -132,6 +136,8 @@ ${RT} spi sim_p18f242
 ${RT} spi sim_p16c62
 
 ${RT} i2c sim_p16f88
+
+${RT} i2c sim_p16f819
 
 ${RT} i2c sim_p16f876a
 
