@@ -969,6 +969,9 @@ USARTModule::USARTModule(const char *_name)
   m_CRLF = new Boolean("crlf", true, "if true, carriage return and linefeeds generate new lines in the terminal");
   addSymbol(m_CRLF);
 
+  m_ShowHex = new Boolean("hex", false, "if true, display received data in hex - i.e. assume binary");
+  addSymbol(m_ShowHex);
+
   m_loop = new Boolean("loop", false, "if true, received characters looped back to transmit");
   addSymbol(m_loop);
 
@@ -1086,9 +1089,19 @@ key_release(GtkWidget *widget,
 void USARTModule::show_tx(unsigned int data)
 {
   data &= 0xff;
+  bool IsAscii = true;
+
+  if ( m_ShowHex->getVal() )
+    IsAscii = false;
+  else if ( (isascii(data) && isprint(data)) )
+    IsAscii = true;
+  else if (m_CRLF->getVal() && ('\n' == data || '\r' == data))
+    IsAscii = true;
+  else
+    IsAscii = false;
 
   if(m_console->getVal()) {
-    if (isascii(data) && (isprint(data) || '\n' == data || '\r' == data))
+    if ( IsAscii )
       putchar(data);
     else
       printf("<%02X>", data);
@@ -1099,8 +1112,7 @@ void USARTModule::show_tx(unsigned int data)
       GtkTextBuffer *buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
       GtkTextIter iter;
       gtk_text_buffer_get_end_iter(buff, &iter);
-      if ((isascii(data) && isprint(data)) || 
-	  (m_CRLF->getVal() && ('\n' == data || '\r' == data))) {
+      if (IsAscii) {
         char ch = data;
         gtk_text_buffer_insert(buff, &iter, &ch, 1);
       }

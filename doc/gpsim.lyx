@@ -1,4 +1,4 @@
-#LyX 1.4.3 created this file. For more info see http://www.lyx.org/
+#LyX 1.4.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 245
 \begin_document
 \begin_header
@@ -5927,8 +5927,16 @@ true
 \emph on
 true
 \emph default
-, carraige returns and line feeds generate new lines in the console window.
+, carriage returns and line feeds generate new lines in the console window.
  
+\end_layout
+
+\begin_layout Standard
+.hex - When set to 
+\emph on
+true
+\emph default
+, the data is assumed to be binary and all bytes are shown in hex.
 \end_layout
 
 \begin_layout Standard

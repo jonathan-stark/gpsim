@@ -77,6 +77,7 @@ private:
   Boolean  *m_CRLF;
   Boolean  *m_loop;
   Boolean  *m_console;
+  Boolean  *m_ShowHex;
   TxBuffer *m_TxBuffer;
   RxBuffer *m_RxBuffer;
 
