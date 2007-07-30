@@ -152,10 +152,8 @@ int toInt(Expression *expr)
   Float*                    Float_P;
   Integer*                  Integer_P;
   String*                   String_P;
-  //Value*                    Symbol_P;
   gpsimObject*              Symbol_P;
   gpsimObject*              gpsimObject_P;
-  //stimulus*                 Stimulus_P;
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
@@ -327,6 +325,7 @@ cmd:
      | attach_cmd
      | break_cmd
      | bus_cmd
+     | call_cmd
      | clear_cmd
      | declaration_cmd
      | disassemble_cmd
@@ -428,6 +427,13 @@ bus_cmd
           : BUS                         {c_bus.list_busses();}
           | BUS string_list             {c_bus.add_busses($2); delete $2;}
           ;
+
+call_cmd    : SYMBOL_T '(' expr_list ')'
+        {
+          cout << " call\n"; 
+          //$$ = $3;
+        }
+
 
 clear_cmd: CLEAR expr                   {clear.clear($2);}
           ;
