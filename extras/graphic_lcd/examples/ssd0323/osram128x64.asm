@@ -20,6 +20,8 @@
   GLOBAL SSD0323_Test
   GLOBAL LCD_Line
   GLOBAL LCD_putBitMap
+  GLOBAL LCD_ResetCursor
+  GLOBAL LCD_MoveCursor
 
   EXTERN temp0, temp1, temp2, temp3
 
@@ -32,9 +34,13 @@ PixelX	RES 1
 PixelY	RES 1
 TempX	RES 1
 TempY   RES 1
-
   global TempY, PixelX, PixelY
 
+ ; The virtual display (rendered in the PIC's ram) size is defined here:
+DisplaySizeX RES 1
+DisplaySizeY RES 1
+
+  global DisplaySizeX,DisplaySizeY
 
 ;----------------------------------------
 ; Private RAM area for temporary variables.
@@ -68,7 +74,6 @@ LCD_CODE	CODE
 
 SSD0323_Test:
 
-TestBitMap:
 
 	MOVLW	20
 	MOVWF	PixelX
@@ -106,17 +111,21 @@ TestBitMap:
 LCD_ClearScreen:
 
 	LFSR	0, DisplayBuffer	;Get a pointer to the display
-	movlw	128
-	movwf	temp0
-	movlw	64/8
-cs1:
-	CLRF	POSTINC0
+        SWAPF   DisplaySizeY,W          ;Y/16
+        RLNCF   WREG,W                  ;Y/8
+        ANDLW   0x1f
+        MULWF   DisplaySizeX
+        MOVFF   PRODL,temp0
+        MOVF    PRODH,W
+
+cs1     CLRF	POSTINC0
 	decfsz	temp0,F
 	 bra	cs1
+        andlw   0xff
+        BZ      LCS1
 	decfsz	WREG,F
 	 bra	cs1
-	return
-
+LCS1:   return
 
 
 ;------------------------------------------------------------------------
@@ -208,6 +217,7 @@ aret:	RETURN
 ; Mem used: temp0  - used as a counter
 ;
 LCD_putc:
+  global LCD_putc
 
         BTFSC	WREG,7			;The max character is 127
 	 return				;leave if we're beyond this.
@@ -274,6 +284,9 @@ LCD_PutByte:
         CPFSGT  LCD_WritePtrHi		;bytes. If we didn't increment
 	 return 			;then we're okay.
 
+    ;;;  Fall Through...
+
+LCD_ResetCursor:
 	CLRF	LCD_WritePtrHi		;oops - we've rolled over
 	CLRF	LCD_WritePtrLo
 	return
@@ -362,6 +375,10 @@ ret1:
 ;
 ; Inputs: PixelX, PixelY - start coordinates
 ;         LCD_x2, LCD_y2 - end coordinates
+;
+; Outputs: PixelX and PixelY will equal LCD_x2 and LCD_y2
+;
+; Algorithm:
 ;
 ;  int dx = abs(x2-x1);
 ;  int dy = abs(y2-y1);

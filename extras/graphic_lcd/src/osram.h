@@ -31,6 +31,7 @@ class SSD0323;
 namespace OSRAM {
 
   class SSD0323_InputPin;
+  class StateAttribute;
 
   class PK27_Series : public gLCD_Module
   {
@@ -57,6 +58,8 @@ namespace OSRAM {
     SSD0323_InputPin *m_BS2;
 
     SSD0323 *m_pSSD0323;
+
+    StateAttribute *m_state;
 
     /*
       PortRegister *m_dataBus;

@@ -69,6 +69,9 @@ public:
   {
     return (index < 128*80/2) ?  m_ram[index] : prBadRam(index);
   }
+
+  void showState();
+
 private:
 
   void advanceColumnAddress();

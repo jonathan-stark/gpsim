@@ -9,6 +9,9 @@
 
   EXTERN  LCD_Line
   EXTERN  LCD_putBitMap
+  EXTERN  LCD_putc
+  EXTERN  LCD_ResetCursor
+  EXTERN  LCD_MoveCursor
 
 LCD_nROWS	EQU	64
 LCD_nCOLS	EQU	128
@@ -28,4 +31,5 @@ InterfaceMode   EQU     ModeSPI
   EXTERN LCD_x2    ;End point for lines, 
   EXTERN LCD_y2    ;
 
+  EXTERN DisplaySizeX,DisplaySizeY
 

@@ -36,8 +36,10 @@
 	GLOBAL	SSD0323_Init
 	GLOBAL  SSD0323_WriteCmd
 	GLOBAL  SSD0323_Write
-	GLOBAL  LCD_RefreshDisplay	
+	GLOBAL  LCD_RefreshDisplay
+	GLOBAL  LCD_RefreshEntireDisplay
         GLOBAL  CommandLoop
+        GLOBAL CommandWaitForSPI
 
   EXTERN temp0, temp1, temp2, temp3
   EXTERN DisplayBuffer
@@ -106,45 +108,18 @@ SSD0323_CODE	CODE
 
 SSD0323_Init:
 
-  ; Portb is the Data bus
-  ; E - RE0
-  ; RW - RE1
-  ; DC - RE2
-  ; RES - RD0
-  ; CS - RD1
+        mInitLCD_PINS
 
-   ; Reset and CS are outputs
-        BCF     LCDCS_TRIS,LCDCS_BIT
-        BCF     LCDRES_TRIS,LCDRES_BIT
-
-   ; Hold reset low while the ports are being initialized.
-        BCF     LCDRES_LAT,LCDRES_BIT
-        BSF     LCDCS_LAT,LCDCS_BIT
-
-   ; Data bus
-	CLRF	SSD0323_LAT
-	CLRF	SSD0323_TRIS
-
-   ; Control bus
-
-  if LCDE_TRIS == LCDRW_TRIS && LCDE_TRIS == LCDDC_TRIS
-	CLRF	TRISE
-        SETF    LATE
-  else
-	BCF	LCDE_TRIS, LCDE_BIT
-	BCF	LCDDC_TRIS, LCDDC_BIT
-	BCF	LCDRW_TRIS, LCDRW_BIT
-  endif
+   ; de-select the chip
+        mSetLCDCS
 
    ; Bring the chip out of reset:
         RCALL   delay
-        BSF     LCDRES_LAT,LCDRES_BIT
+        mSetLCDRES
         RCALL   delay
 
    ; Select the chip
-
-        BCF     LCDCS_LAT,LCDCS_BIT
-
+        mClrLCDCS
 
 
 CmdSetColumnAddress     EQU 0x15
@@ -205,11 +180,11 @@ CommandLoop:
         ; before returning. The reason is that we may send data 
         ; just after this command. Sending data changes the DC
         ; bit which in turn will screw up the command transfer.
-
+CommandWaitForSPI:
         MOVF    SSPBUF,W
-CommandWaitForSPI;
+CommandSPIBusy:
         BTFSS   SSPSTAT,BF
-         bra    CommandWaitForSPI
+         bra    CommandSPIBusy
   endif
         return
 
@@ -311,6 +286,50 @@ delay:  bra $+2
          bra delay
         return
 ;------------------------------------------------------------------------
+;SSD_SetColumnRange - set the start and columns in the SSD0323
+; In addition, the width of the virtual display (in the PIC's ram)
+; is also initialized.
+; 
+; Inputs: W - start column
+;         temp0 - end column
+; Outputs: DisplaySizeX 
+; MemUsed: None
+;
+SSD_SetColumnRange:
+  GLOBAL SSD_SetColumnRange
+        MOVWF   temp1
+        SUBWF   temp0,W
+        ADDLW   1
+        MOVWF   DisplaySizeX
+
+        CLRC
+        RRCF    temp0,F
+        CLRC
+        RRCF    temp1,F
+
+        MOVLW   CmdSetColumnAddress
+SSD_SetRowCol:
+        RCALL   SSD0323_WriteCmd
+
+        MOVF    temp1,W
+        RCALL   SSD0323_WriteCmd
+
+        MOVF    temp0,W
+        bra     SSD0323_WriteCmd
+        
+
+SSD_SetRowRange:
+  GLOBAL SSD_SetRowRange
+        MOVWF   temp1
+        SUBWF   temp0,W
+        ADDLW   1
+        MOVWF   DisplaySizeY
+
+        MOVLW   CmdSetRowAddress
+
+        bra     SSD_SetRowCol
+
+;------------------------------------------------------------------------
 ;LCD_RefreshDisplay - copy the RAM buffered display to the physical display
 ;
 ; Inputs:  None
@@ -335,12 +354,12 @@ delay:  bra $+2
 ;     9 | A1 B1 C1 D1 E1 F1 G1 H1 I1
 ;
 ; The sequence of bytes in the PIC memory is:
-;  a, b, c, and so for the first 8 rows of pixels. The next 8 rows
-; begin with the A, B, C and so bytes.
+;  a, b, c, and so on for the first 8 rows of pixels. The next 8 rows
+; begin with the A, B, C and so on bytes.
 ;
 ; 
 
-LCD_RefreshDisplay:	
+LCD_RefreshEntireDisplay:
 	MOVLW	LOW(CommandSetCursorPosition)
 	MOVWF	TBLPTRL
 	MOVLW	HIGH(CommandSetCursorPosition)
@@ -351,9 +370,8 @@ LCD_RefreshDisplay:
 
         call    CommandLoop
 
+LCD_RefreshDisplay:	
 	LFSR	0, DisplayBuffer
-
-;	RCALL	SSD0323_Init
 
 	MOVLW	0       ; row counter
 	MOVWF	temp0
@@ -365,7 +383,8 @@ SSD_ref1:
 
      ;row counter * number of columns
         MOVF    temp0,W
-        MULLW   LCD_nCOLS
+        MULWF   DisplaySizeX
+     ;   MULLW   LCD_nCOLS
 
 	LFSR	0, DisplayBuffer	;Get a pointer to the display
 	MOVF	PRODL,W
@@ -373,7 +392,9 @@ SSD_ref1:
 	MOVF	PRODH,W
 	ADDWFC	FSR0H,F
 
-        MOVLW   LCD_nCOLS/2     ; # of columns - 1 byte covers 2 columns
+        ;MOVLW   LCD_nCOLS/2     ; # of columns - 1 byte covers 2 columns
+        RRCF    DisplaySizeX,W
+        ANDLW   0x7f
 	MOVWF	temp1
 
 SSD_ref2:
@@ -382,7 +403,7 @@ SSD_ref2:
 
         movlw   0               ;Assume that the pixel is off
         skpz                    ;
-         movlw  0x0f            ;Pixel was on- assign it the maximum color
+         movlw  0xf0            ;Pixel was on- assign it the maximum color
         movwf   temp3           ;We now have the low order pixel.
 
         movf    temp2,W         ;Check the pixel in the next column
@@ -390,7 +411,7 @@ SSD_ref2:
 
         movlw   0               ;Again, assume it's zero
         skpz                    ;
-         movlw  0xf0            ;Pixel is on
+         movlw  0x0f            ;Pixel is on
         iorwf   temp3,W         ;We now have the high order pixel
 
 	rcall	SSD0323_Write   ;Write both pixels
@@ -404,7 +425,11 @@ SSD_ref2:
          bra    SSD_ref1        ;Nope,
 
         incf    temp0,F         ;Display buffer row counter.
-        btfss   temp0,3
+
+        SWAPF   temp0,W
+        RRNCF   WREG,W
+        ADDLW 1
+        CPFSLT  DisplaySizeY
          bra    SSD_ref1
 
 	return
