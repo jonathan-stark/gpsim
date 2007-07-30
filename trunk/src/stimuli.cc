@@ -646,9 +646,14 @@ PinMonitor::~PinMonitor()
   // Release all of the sinks:
   list <SignalSink *> :: iterator ssi = sinks.begin();
   while (ssi != sinks.end()) {
-    //cout << "Releasing sink " << *ssi << endl;
     (*ssi)->release();
     ++ssi;
+  }
+
+  list <AnalogSink *> :: iterator asi = analogSinks.begin();
+  while (asi != analogSinks.end()) {
+    (*asi)->release();
+    ++asi;
   }
 }
 
@@ -666,6 +671,17 @@ void PinMonitor::removeSink(SignalSink *pSink)
     sinks.remove(pSink);
 }
 
+void PinMonitor::addSink(AnalogSink *new_sink)
+{
+  if(new_sink)
+    analogSinks.push_back(new_sink);
+}
+
+void PinMonitor::removeSink(AnalogSink *pSink)
+{
+  if(pSink)
+    analogSinks.remove(pSink);
+}
 //========================================================================
 
 
