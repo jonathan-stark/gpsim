@@ -68,7 +68,7 @@ cmd_symbol::cmd_symbol()
 void dumpOneSymbol(const SymbolEntry_t &sym)
 {
   cout << "  " << sym.second->name() 
-       << " stored as " << sym.first
+       << " Type " << sym.second->showType()
        << endl;
 }
 
