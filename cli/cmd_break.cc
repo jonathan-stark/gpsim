@@ -156,8 +156,8 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
   ExprList_itor ei = pEL->begin();
   Expression *pFirst = *ei;
   ++ei;
-  Expression *pSecond  = (ei != pEL->end()) ? *ei : 0;
-  ++ei;
+  Expression *pSecond  = (ei != pEL->end()) ? *ei++ : 0;
+
   Expression *pThird = (ei != pEL->end()) ? *ei : 0;
 
   if (verbose) {
@@ -204,10 +204,10 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
   int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), 
 				       (bLog ? gpsimObject::eActionLog : gpsimObject::eActionHalt),
 				       pSecond) : -1;
-  if (bpn == -1 && co->value!=CYCLE) {
-    GetUserInterface().DisplayMessage("break cannot be set on %s\n",
+  if (bpn == -1 && co->value!=CYCLE)
+    GetUserInterface().DisplayMessage("break cannot be set on '%s'\n",
       pFirst->toString().c_str());
-  }
+
   if (bpn<0) {
 
     // We failed to set a break point from the first expression. 
