@@ -279,7 +279,6 @@ void TMR0::new_prescale()
 
   unsigned int new_value;
 
-  //int option_diff = old_option ^ cpu_pic->option_reg.value.get();
   int option_diff = old_option ^ m_pOptionReg->get_value();
 
   old_option ^= option_diff;   // save old option value. ( (a^b) ^b = a)
@@ -308,23 +307,27 @@ void TMR0::new_prescale()
 
   } else {
 
+    // Refresh the current tmr0 value. The current tmr0 value is used
+    // below to recompute the value for 'last_cycle'
+    get_value();
+
     if(get_t0cs() || ((state & 1)==0)) {
       prescale = 1 << get_prescale();
       prescale_counter = prescale;
 
     } else {
 
-    if(last_cycle < (gint64)get_cycles().get())
-	  new_value = (unsigned int)((get_cycles().get() - last_cycle)/prescale);
-    else
-	  new_value = 0;
+      if(last_cycle < (gint64)get_cycles().get())
+        new_value = (unsigned int)((get_cycles().get() - last_cycle)/prescale);
+      else
+        new_value = 0;
 
       if(new_value>=max_counts()) {
-	cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
-	cout << "   last_cycle = 0x" << hex << last_cycle << endl;
-	cout << "   cpu cycle = 0x" << hex << (get_cycles().get()) << endl;
-
-	cout << "   prescale = 0x" << hex << prescale << endl;
+        cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
+        cout << "   last_cycle = 0x" << hex << last_cycle << endl;
+        cout << "   cpu cycle = 0x" << hex << (get_cycles().get()) << endl;
+      
+        cout << "   prescale = 0x" << hex << prescale << endl;
 
       }
 
@@ -342,13 +345,17 @@ void TMR0::new_prescale()
       // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
       // cycle counter when tmr0 last rolled over.
 
+      /*
       last_cycle = value.get() * prescale;
       last_cycle = synchronized_cycle - last_cycle;
 
-      // cout << " effective last_cycle " << last_cycle << '\n';
-
       if(get_cycles().get() <= synchronized_cycle)
 	last_cycle += (synchronized_cycle - get_cycles().get());
+      */
+
+      last_cycle = value.get() * prescale;
+      last_cycle = get_cycles().get() - last_cycle;
+      synchronized_cycle = last_cycle;
 
       guint64 fc = last_cycle + max_counts() * prescale;
 
