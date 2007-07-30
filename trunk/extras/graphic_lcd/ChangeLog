@@ -1,3 +1,15 @@
+2007-07-29 Scott Dattalo <scott@dattalo.com>
+	* src/osram.cc, src/osram.h, 
+	- support all communication modes.
+	- added most of the controller commands
+	* examples/ssd0323/osram128x64.asm, examples/ssd0323/portdef.inc,
+	* examples/ssd0323/ssd0323.inc, examples/ssd0323/18f452.lkr 
+	* examples/ssd0323/ssd0323.asm, examples/ssd0323/osram128x64.inc,
+	* examples/ssd0323/glcd_test.asm, examples/ssd0323/ssd0323.inc 
+	- Tons of changes... 
+	* utils/xpmtopic.c: a utility for converting an XPM formatted file
+	into a PIC include file.
+
 2007-03-15 Borut Razem <borut.razem@siol.net>
 	* src/makefile.mingw: updated with the latest Scott's chages
 

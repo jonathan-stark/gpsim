@@ -42,6 +42,28 @@ namespace OSRAM
 {
 
   //------------------------------------------------------------------------
+  // Debug Stuff
+  //------------------------------------------------------------------------
+
+  class StateAttribute : public Integer
+  {
+  public:
+    StateAttribute (SSD0323 *pSSD)
+      : Integer("state",0,"Display the state of the SSD0323 graphics controller"),
+        m_pSSD(pSSD)
+    {
+      assert(pSSD);
+    }
+    virtual string toString()
+    {
+      m_pSSD->showState();
+      return string("");
+    }
+  private:
+    SSD0323 *m_pSSD;
+  };
+
+  //------------------------------------------------------------------------
   // I/O pins for the SSD 0323 controller
   //------------------------------------------------------------------------
   // The LCD_InputPin is the base class for the E1, E2, RW and A0
@@ -309,6 +331,8 @@ namespace OSRAM
     m_BS1     = new SSD0323_BSPin(m_pSSD0323, m_dataBus, (name() + ".bs1").c_str(),1);
     m_BS2     = new SSD0323_BSPin(m_pSSD0323, m_dataBus, (name() + ".bs2").c_str(),2);
 
+    m_state   = new StateAttribute(m_pSSD0323);
+    addSymbol(m_state);
     /*
       m_sed1->randomizeRAM();
       m_sed2->randomizeRAM();
@@ -380,8 +404,8 @@ namespace OSRAM
       for (unsigned int i=0; i<m_nColumns/2; i++) {
 
         unsigned int displayByte = (*m_pSSD0323)[i + 64*row];
-        for (unsigned int b=0; b < 2; b++ , displayByte>>=4)
-          m_plcd->setPixel(2*i+b,row,displayByte&0xf);
+        for (unsigned int b=0; b < 2; b++ , displayByte<<=4)
+          m_plcd->setPixel(2*i+b,row,(displayByte>>4)&0xf);
       }
 
     }

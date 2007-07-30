@@ -323,7 +323,7 @@ void SSD0323::advanceRowAddress()
 
   m_rowAddr = m_rowStartAddr;
   if (m_colStartAddr != m_colEndAddr)
-    advanceRowAddress();
+    advanceColumnAddress();
 }
 
 void SSD0323::storeData()
@@ -494,9 +494,12 @@ void SSD0323::executeCommand()
       m_ContrastControl = cmdWords[1] & 0x7f;
       break;
 
+    case CmdSetRemap:
+      m_Remap = cmdWords[1] & 0x7f;
+      break;
+
       // 2-word commands
     case CmdGraphicAccleration:
-    case CmdSetRemap:
     case CmdSetDisplayStartLine:
     case CmdSetDisplayOffset:
     case CmdSetMultiplexRatio:
@@ -586,6 +589,25 @@ unsigned int &SSD0323::prBadRam(unsigned int index)
   static unsigned int si;
   printf("WARNING SSD0323 - illegal RAM access index=%d\n",index);
   return si;
+}
+
+
+
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
+void SSD0323::showState()
+{
+  printf("SSD0323 internal state:\n");
+  switch (m_commMode) {
+  case e8080Mode:  printf(" 8080 mode\n"); break;
+  case e6800Mode:  printf(" 6800 mode\n"); break;
+  case eSPIMode:   printf(" SPI mode\n"); break;
+  }
+  printf("remap: 0x%02x\n",m_Remap);
+  printf("column start:0x%02x  end:0x%02x  curr:0x%02x\n",m_colStartAddr,m_colEndAddr,m_colAddr);
+  printf("row start:0x%02x  end:0x%02x  curr:0x%02x\n",m_rowStartAddr,m_rowEndAddr,m_rowAddr);
+
 }
 
 

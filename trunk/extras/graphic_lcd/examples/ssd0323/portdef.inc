@@ -40,3 +40,45 @@ SSD0323_TRIS EQU   TRISB
 SSD0323_LAT  EQU   LATB
 
 
+mInitLCD_PINS macro
+   ; Reset and CS are outputs
+        BCF     LCDCS_TRIS,LCDCS_BIT
+        BCF     LCDRES_TRIS,LCDRES_BIT
+
+
+   ; Hold reset low while the ports are being initialized.
+        BCF     LCDRES_LAT,LCDRES_BIT
+        BSF     LCDCS_LAT,LCDCS_BIT
+
+   ; Data bus
+	CLRF	SSD0323_LAT
+	CLRF	SSD0323_TRIS
+
+   ; Control bus
+
+  if LCDE_TRIS == LCDRW_TRIS && LCDE_TRIS == LCDDC_TRIS
+	CLRF	TRISE
+        SETF    LATE
+  else
+	BCF	LCDE_TRIS, LCDE_BIT
+	BCF	LCDDC_TRIS, LCDDC_BIT
+	BCF	LCDRW_TRIS, LCDRW_BIT
+  endif
+
+ endm
+
+mSetLCDRES      macro
+        BSF     LCDRES_LAT,LCDRES_BIT
+ endm
+
+mClrLCDRES      macro
+        BSF     LCDRES_LAT,LCDRES_BIT
+ endm
+
+mSetLCDCS macro
+        BSF     LCDCS_LAT, LCDCS_BIT
+ endm
+
+mClrLCDCS macro
+        BCF     LCDCS_LAT, LCDCS_BIT
+ endm
