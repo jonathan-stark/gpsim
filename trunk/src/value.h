@@ -561,6 +561,24 @@ private:
   unsigned int right;
 };
 
+//------------------------------------------------------------------------
+// Function -- maybe should go into its own header file.
+//
+
+typedef list<Expression*> ExprList_t;
+namespace gpsim {
+  class Function : public gpsimObject {
+
+  public:
+
+    Function(const char *_name, const char *desc=0);
+    virtual ~Function();
+    virtual string description();
+    virtual string toString();
+
+    void call(ExprList_t *vargs);
+  };
+}
 
 char * TrimWhiteSpaceFromString(char * pBuffer);
 char * UnquoteString(char * pBuffer);

@@ -1346,3 +1346,35 @@ Value *String::copy()
 {
   return new String(value);
 }
+
+//------------------------------------------------------------------------
+namespace gpsim {
+  Function::Function(const char *_name, const char *desc)
+    : gpsimObject(_name,desc)
+  {
+  }
+
+  Function::~Function()
+  {
+    cout << "Function destructor\n";
+  }
+
+  string Function::description()
+  {
+    if(cpDescription)
+      return string(cpDescription);
+    else
+      return string("no description");
+  }
+
+  string Function::toString()
+  {
+    return name();
+  }
+
+  void Function::call(ExprList_t *vargs)
+  {
+    cout << "calling " << name() << endl;
+  }
+
+}
