@@ -290,14 +290,26 @@ protected:
 ///------------------------------------------------------------
 ///
 /// SignalSink - A pure virtual class that allows signals driven by external
-/// stimuli be routed to one or more objects monitoring them (e.g. one
-/// sink may be the register associated with the port while another
-/// may be a peripheral)
+/// stimuli to be routed to one or more objects monitoring them (e.g. one
+/// sink may be a bit in a port register while another may be a peripheral)
 
 class SignalSink
 {
 public:
   virtual void setSinkState(char)=0;
+  virtual void release()=0;
+};
+
+///-------------------------------------------------------------
+///
+/// AnalogSink - An analog sink is similar to a digital sink. The primary
+/// difference is that an analog sink redirects an analog signal to one
+/// or more objects. A signal sink only redirects digital signals.
+
+class AnalogSink
+{
+public:
+  virtual void setSinkState(double)=0;
   virtual void release()=0;
 };
 
@@ -316,6 +328,8 @@ public:
 
   void addSink(SignalSink *);
   void removeSink(SignalSink *);
+  void addSink(AnalogSink *);
+  void removeSink(AnalogSink *);
 
   virtual void setDrivenState(char)=0;
   virtual void setDrivingState(char)=0;
@@ -325,8 +339,11 @@ public:
   virtual void updateUI() {}  // FIXME  - make this pure virtual too.
 
 protected:
-  /// The SignalSink list is a list of all sinks that can receive data
+  /// The SignalSink list is a list of all sinks that can receive digital data
   list <SignalSink *> sinks;
+
+  /// The AnalogSink list is a list of all sinks that can receive analog data
+  list <AnalogSink *> analogSinks;
 
 };
 
