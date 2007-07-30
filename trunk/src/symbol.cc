@@ -155,6 +155,7 @@ static void dumpOneSymbol(const SymbolEntry_t &sym)
   cout << "  " //<< sym.second->name()  // name may not be valid.
        << " stored as " << sym.first 
        << " pointer:" << sym.second
+       << "  Type:" << sym.second->showType()
        << endl;
 }
 
