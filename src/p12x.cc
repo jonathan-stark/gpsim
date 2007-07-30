@@ -133,7 +133,33 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
 
 }
 //-------------------------------------------------------------------
-void P12C508::create_config_memory()
+
+P12bitBase::P12bitBase(const char *_name, const char *desc)
+  : _12bit_processor(_name,desc),
+    m_gpio(0),
+    m_tris(0),
+    osccal(this,"osccal","Oscillator Calibration")
+{
+  if(config_modes)
+    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
+      config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
+}
+
+P12bitBase::~P12bitBase()
+{
+
+  delete_sfr_register((Register **)&m_gpio,0);
+  delete_sfr_register((Register **)&m_tris,0);
+  delete_file_registers(0x7, 0x1f);
+  /*
+  removeSymbol(*m_configMemory);
+  delete *m_configMemory;
+  delete [] m_configMemory;
+  */
+}
+
+
+void P12bitBase::create_config_memory()
 {
   m_configMemory = new ConfigMemory(this,1);
   m_configMemory->addConfigWord(0,new Generic12bitConfigWord(this));
@@ -146,7 +172,7 @@ void P12C508::create_config_memory()
 
 
 //========================================================================
-void P12C508::create_iopin_map()
+void P12bitBase::create_iopin_map()
 {
 
   package = new Package(8);
@@ -166,7 +192,7 @@ void P12C508::create_iopin_map()
 }
 
 //--------------------------------------------------------
-void P12C508::reset(RESET_TYPE r)
+void P12bitBase::reset(RESET_TYPE r)
 {
 
   m_tris->reset(r);
@@ -186,7 +212,7 @@ void P12C508::reset(RESET_TYPE r)
 //------------------------------------------------------------------------
 #define STATUS_GPWUF  0x80
 
-void P12C508::enter_sleep()
+void P12bitBase::enter_sleep()
 {
   pic_processor::enter_sleep();
 
@@ -195,14 +221,14 @@ void P12C508::enter_sleep()
 }
 
 
-void  P12C508::option_new_bits_6_7(unsigned int bits)
+void  P12bitBase::option_new_bits_6_7(unsigned int bits)
 {
   if(verbose)
     cout << "p12c508 option_new_bits_6_7\n";
   m_gpio->setPullUp ( (bits & (1<<6)) == (1<<6) );
 }
 
-void P12C508::create_sfr_map()
+void P12bitBase::create_sfr_map()
 {
 
   RegisterValue porVal(0,0);
@@ -216,13 +242,14 @@ void P12C508::create_sfr_map()
   add_sfr_register(m_gpio, 6, porVal);
   add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
   add_sfr_register(W, 0xffffffff, porVal);
-  add_sfr_register(option_reg, 0xffffffff, RegisterValue(0xff,0));
+  //add_sfr_register(option_reg, 0xffffffff, RegisterValue(0x00,0));
+  option_reg->set_cpu(this);
   osccal.new_name("osccal");
 
 
 }
 
-void P12C508::create_symbols()
+void P12bitBase::create_symbols()
 {
   _12bit_processor::create_symbols();
 
@@ -231,7 +258,7 @@ void P12C508::create_symbols()
 }
 
 
-void P12C508::dump_registers ()
+void P12bitBase::dump_registers ()
 {
 
 
@@ -243,7 +270,7 @@ void P12C508::dump_registers ()
 }
 
 
-void P12C508::tris_instruction(unsigned int tris_register)
+void P12bitBase::tris_instruction(unsigned int tris_register)
 {
   m_tris->put(W->value.get());
 
@@ -259,7 +286,7 @@ void P12C508::create()
   _12bit_processor::create();
 
   add_file_registers(0x07, 0x1f, 0);
-  P12C508::create_sfr_map();
+  P12bitBase::create_sfr_map();
   create_invalid_registers ();
 
   tmr0.set_cpu(this,m_gpio,2,option_reg);
@@ -282,33 +309,16 @@ Processor * P12C508::construct(const char *name)
 
 }
 
-
 P12C508::P12C508(const char *_name, const char *desc)
-  : _12bit_processor(_name,desc),
-    osccal(this,"osccal","Oscillator Calibration")
+  : P12bitBase(_name,desc)
 {
-  if(verbose)
-    cout << "12c508 constructor, type = " << isa() << '\n';
-
   m_gpio = new GPIO(this,"gpio","I/O port",8,0x3f);
   m_tris = new PicTrisRegister(this,"tris","Port Direction Control", m_gpio, false);
   m_tris->wdtr_value=RegisterValue(0x3f,0);
-
-  if(config_modes)
-    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
-      config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
 }
 
 P12C508::~P12C508()
 {
-  delete_sfr_register((Register **)&m_gpio,0);
-  delete_sfr_register((Register **)&m_tris,0);
-  delete_file_registers(0x7, 0x1f);
-  /*
-  removeSymbol(*m_configMemory);
-  delete *m_configMemory;
-  delete [] m_configMemory;
-  */
 }
 
 
@@ -605,27 +615,6 @@ void P10F200::create_iopin_map()
 
 }
 
-/*
-void P10F200::create_sfr_map()
-{
-
-  RegisterValue porVal(0,0);
-
-  add_sfr_register(indf,   0, porVal);
-  add_sfr_register(&tmr0,  1, porVal);
-  add_sfr_register(pcl,    2, porVal);
-  add_sfr_register(status, 3, porVal);
-  add_sfr_register(fsr,    4, porVal);
-  add_sfr_register(&osccal,5, porVal);
-  add_sfr_register(m_gpio, 6, porVal);
-  add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x0f,0));
-  add_sfr_register(W, 0xffffffff, porVal);
-  add_sfr_register(&option_reg, 0xffffffff, RegisterValue(0xff,0));
-  osccal.new_name("osccal");
-
-
-}
-*/
 
   
 void P10F200::create()
@@ -636,7 +625,7 @@ void P10F200::create()
   _12bit_processor::create();
 
   add_file_registers(0x10, 0x1f, 0);    // 10F200 only has 16 bytes RAM
-  P12C508::create_sfr_map();
+  P12bitBase::create_sfr_map();
   create_invalid_registers ();
 
   tmr0.set_cpu(this,m_gpio,2,option_reg);
@@ -661,7 +650,7 @@ Processor * P10F200::construct(const char *name)
 
 
 P10F200::P10F200(const char *_name, const char *desc)
-  : P12C508(_name,desc)
+  : P12bitBase(_name,desc)
 {
   if(verbose)
     cout << "10f200 constructor, type = " << isa() << '\n';
@@ -678,6 +667,18 @@ P10F200::~P10F200()
 {
 
 }
+void P10F200::updateGP2Source()
+{
+  PinModule *pmGP2 = &(*m_gpio)[2];
+
+  // revert to default control, i.e. let TRIS control the output
+  pmGP2->setControl(0);
+  pmGP2->setSource(0);
+
+  cout << "tris is controlling the output\n";
+
+
+}
 //------------------------------------------------------------------------
 
 void P10F202::create()
@@ -688,7 +689,7 @@ void P10F202::create()
   _12bit_processor::create();
 
   add_file_registers(0x08, 0x1f, 0);    // 10F202 has 24 bytes RAM
-  P12C508::create_sfr_map();
+  P12bitBase::create_sfr_map();
   create_invalid_registers ();
 
   tmr0.set_cpu(this,m_gpio,2,option_reg);
@@ -719,4 +720,285 @@ P10F202::P10F202(const char *_name, const char *desc)
     cout << "10f202 constructor, type = " << isa() << '\n';
 }
 
+//========================================================================
+// Comparator module for the 10c204 and 10c206
+// 
+class Comparator10C20x
+{
+public:
+  Comparator10C20x();
+  ~Comparator10C20x();
 
+};
+
+class CMCON0;
+//========================================================================
+// COUT_SignalSource
+//
+// The comparator output is driven on to the GPIO pin if the COUTEN bit in 
+// CMCON0 is cleared ( and if the FOSC/4 logic is not driving).
+// This is implemented via COUT_SignalSource. When COUTEN bit is asserted,
+// then COUT_SignalSource overides the default output driver control for 
+// the GPIO pin.
+
+class COUT_SignalSource : public SignalControl
+{
+public:
+  COUT_SignalSource(CMCON0 *pcmcon0);
+  ~COUT_SignalSource()
+  {
+  }
+  char getState();
+  void release()
+  {
+    delete this;
+  }
+private:
+  CMCON0 *m_cmcon0;
+};
+
+//========================================================================
+// COUT_SignalControl -- controls GPIO2's direction when the comparator is
+// enabled. When the comparator is enabled, GPIO2 is an output. 
+
+class COUT_SignalControl : public SignalControl
+{
+public:
+  COUT_SignalControl(){}
+  ~COUT_SignalControl(){}
+  char getState() { return '0'; }
+  void release()
+  {
+    delete this;
+  }
+};
+
+class CIN_SignalSink;
+class CMCON0 : public sfr_register
+{
+public:
+  enum {
+    CWU    = 1<<0,
+    CPREF  = 1<<1,
+    CNREF  = 1<<2,
+    CMPON  = 1<<3,
+    CMPTOCS = 1<<4,
+    POL    = 1<<5,
+    COUTEN = 1<<6,
+    CMPOUT = 1<<7
+  };
+
+  CMCON0(P10F204 *pCpu, const char *pName, const char *pDesc,
+         PinModule *CInP, PinModule *CInM, PinModule *COut);
+
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  bool isEnabled()
+  {
+    return ((value.get() & COUTEN) == 0);
+  }
+
+  char getState() 
+  {
+    char ret='Z';
+    if ( (value.get() & (COUTEN | CMPON)) == CMPON)
+      ret = (((value.get() & CMPOUT)==CMPOUT) ^ ((value.get() & POL)==POL)) ? '0' : '1';
+    cout <<"CMCON0::getState-->"<<ret << endl;
+    return ret;
+  }
+
+  void refresh();
+
+  SignalControl *getSource()
+  {
+    return m_source;
+  }
+  SignalControl *getGPDirectionControl()
+  {
+    return m_control;
+  }
+
+  void setInputState(char newState, bool bInput);
+private:
+  P10F204 *p_F204;
+  COUT_SignalControl *m_control;
+  COUT_SignalSource *m_source;
+  CIN_SignalSink    *m_PosInput;
+  CIN_SignalSink    *m_NegInput;
+
+  PinModule *m_CInP;
+  PinModule *m_CInM;
+  PinModule *m_COut;
+
+  double m_pV, m_nV;
+
+};
+
+
+COUT_SignalSource::COUT_SignalSource(CMCON0 *pcmcon0)
+  : m_cmcon0(pcmcon0)
+{
+}
+char COUT_SignalSource::getState()
+{
+    return m_cmcon0->getState();
+}
+
+class CIN_SignalSink : public SignalSink
+{
+public:
+  CIN_SignalSink(CMCON0 *pcmcon0, bool binput)
+    : m_cmcon0(pcmcon0),
+      m_binput(binput)  // true==+input
+  {}
+  void setSinkState(char new3State)
+  {
+    cout << "LINE:"<<__LINE__<< "  "<< (m_binput ? "POS ":"NEG ")
+         <<"set sink:"<<new3State << endl;
+
+    m_cmcon0->setInputState(new3State, m_binput);
+  }
+  void release()
+  {
+    delete this;
+  }
+private:
+  CMCON0 *m_cmcon0;
+  bool m_binput;
+};
+
+//-----------------------------------------------------------
+CMCON0::CMCON0(P10F204 *pCpu, const char *pName, const char *pDesc,
+               PinModule *CInP, PinModule *CInM, PinModule *COut)
+  : sfr_register(pCpu, pName, pDesc),
+    p_F204(pCpu),
+    m_CInP(CInP),
+    m_CInM(CInM),
+    m_COut(COut)
+{
+  // assign the I/O pin associated with the
+  // the comparator output.
+
+  m_source = new COUT_SignalSource(this);
+  m_control = new COUT_SignalControl();
+  m_PosInput = new CIN_SignalSink(this,true);
+  m_NegInput = new CIN_SignalSink(this,false);
+
+  CInP->addSink(m_PosInput);
+  CInM->addSink(m_NegInput);
+  //COut->setSource(m_source);
+
+  m_pV = m_nV = 0.0;
+}
+
+void CMCON0::put(unsigned int new_value)
+{
+  unsigned old_value = value.get();
+  trace.raw(write_trace.get() | old_value);
+  value.put((new_value & 0x7f ) | (old_value & CMPOUT) );
+
+  // If any of the control bits that afffect CMPOUT have changed,
+  // then refresh CMPOUT
+  if ((old_value ^ new_value) & (CPREF | CNREF | CMPON | CMPTOCS | POL))
+    refresh();
+
+  // If the output enable changed states.
+  if ((old_value ^ new_value) & COUTEN)
+    p_F204->updateGP2Source();
+
+  // If the comparator output state has changed or the polarity changed:
+  if ((old_value ^ value.get()) & (CMPOUT | POL))
+    m_COut->updatePinModule();
+}
+
+void CMCON0::refresh()
+{
+  if (value.get() & CMPON) {
+    if (value.get() & CPREF) 
+      m_pV = m_CInP->getPin().get_nodeVoltage();
+    else
+      m_pV = m_CInM->getPin().get_nodeVoltage();
+
+    if (value.get() & CNREF)
+      m_nV = m_CInM->getPin().get_nodeVoltage();
+    else
+      m_nV = 0.6;
+
+    value.put( (value.get() & 0x7f) | ((m_pV>m_nV)? CMPOUT : 0));
+  }
+}
+
+void CMCON0::put_value(unsigned int new_value)
+{
+}
+
+void CMCON0::setInputState(char newState, bool bInput)
+{
+
+  if (bInput) {
+    if (value.get() & CPREF) 
+      m_pV = m_CInP->getPin().get_nodeVoltage();
+  }
+  else {
+    if ((value.get() & CPREF) == 0)
+      m_pV = m_CInM->getPin().get_nodeVoltage();
+    if (value.get() & CNREF)
+      m_nV = m_CInM->getPin().get_nodeVoltage();
+    else
+      m_nV = 0.6;
+  }
+
+  cout << " setInputState: pV="<<m_pV<<",nV="<<m_nV << endl;
+
+  unsigned old_value = value.get();
+  trace.raw(write_trace.get() | old_value);
+  value.put( (old_value&0x7f) | ((m_pV>m_nV) ? CMPOUT : 0));
+
+  m_COut->updatePinModule();
+
+}
+
+//========================================================================
+P10F204::P10F204(const char *_name, const char *desc)
+  : P10F200(_name,desc)
+{
+}
+
+void P10F204::create()
+{
+  P10F200::create();
+
+  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control", 
+                        &(*m_gpio)[0], &(*m_gpio)[1], &(*m_gpio)[2]);
+
+  RegisterValue porVal = RegisterValue(0xff,0);
+  add_sfr_register(m_cmcon0, 7, porVal);
+
+}
+
+void P10F204::updateGP2Source()
+{
+  //    m_gpio->getIOpins(2)->setSource(m_cmcon0->getSource());
+  PinModule *pmGP2 = &(*m_gpio)[2];
+
+  if (m_cmcon0->isEnabled()) {
+    pmGP2->setControl(m_cmcon0->getGPDirectionControl());
+    pmGP2->setSource(m_cmcon0->getSource());
+    cout << "comparator is controlling the output\n";
+  } else
+    P10F200::updateGP2Source();
+}
+
+//========================================================================
+Processor * P10F204::construct(const char *name)
+{
+
+  P10F204 *p = new P10F204(name);
+
+  p->pc->set_reset_address(0x1ff);
+
+  p->create();
+  p->create_symbols();
+  return p;
+
+}

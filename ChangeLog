@@ -1,3 +1,26 @@
+2007-07-29  Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.cc: Fixed bug in expression parsing of assertions.
+	* cli/parse.yy, src/value.h, src/value.cc: playing with a 'call' command.
+	* src/symbol.cc: Symbol type is now shown in a symbol dump.
+	* src/stimuli.cc, src/stimuli.h: Added 'analog sinks'. These are
+	like digital sinks except they have the added capability of
+	directing a signal to more than one object.
+	* src/pic-processor.cc, src/pic-processor.h: Added the 10F202 and 10F204
+	* src/tmr0.cc: Fixed bug in computing current TMR0 value.
+	* src/12bit-processors.cc: 
+	  - option register wasn't accessible from command line
+	  - Config word wasn't handled properly.
+	* src/p12x.cc, src/p12x.h
+	  - Added P12bitBase, this made it somewhat easier to add the 10F
+	  series.
+	  - Added the 10F200, 10F202, 10F204 and 10F206 (only '204 was
+	  tested)
+	  - Added comparator support for the 10F204 and 10F206
+	* regression/comparator/compar_10f204.asm,
+	regression/comparator/10f204.lkr,
+	regression/comparator/Makefile, regression/run_regression.sh:
+	- Added a regression test for the 10F204.
+	
 2007-07-22 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* modules/usart.cc modules/usart.h doc/gpsim.lyx: 
           Added a "hex" attribute to the usart module to force the display to

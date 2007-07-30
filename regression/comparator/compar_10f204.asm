@@ -283,7 +283,7 @@ PowerOnReset:
   .command "CMask=1<<2"
         call    toggleGP2
 
-  .assert "\"*** PASSED Power On Reset\""
+  .assert "\"*** PASSED 10F204 Comparator test\""
         nop
 
 ;========================================================================
