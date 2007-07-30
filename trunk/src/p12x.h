@@ -39,10 +39,9 @@ private:
   bool m_bPU;
 };
 
-class P12C508 : public  _12bit_processor
+class P12bitBase : public  _12bit_processor
 {
-  public:
-
+public:
   GPIO            *m_gpio;
   PicTrisRegister *m_tris;
   sfr_register osccal;  // %%% FIX ME %%% Nothing's done with this.
@@ -51,31 +50,42 @@ class P12C508 : public  _12bit_processor
   virtual void create_symbols();
 
   virtual void enter_sleep();
-  virtual unsigned int program_memory_size() const { return 0x200; };
   virtual void create_sfr_map();
   virtual void dump_registers();
   virtual void tris_instruction(unsigned int tris_register);
   virtual void reset(RESET_TYPE r);
 
-  P12C508(const char *_name=0, const char *desc=0);
-  virtual ~P12C508();
+  P12bitBase(const char *_name=0, const char *desc=0);
+  virtual ~P12bitBase();
   static Processor *construct(const char *name);
-  void create();
   virtual void create_iopin_map();
   virtual void create_config_memory();
 
   virtual unsigned int fsr_valid_bits()
-    {
-      return 0x1f;  // Assume only 32 register addresses 
-    }
+  {
+    return 0x1f;  // Assume only 32 register addresses 
+  }
 
   virtual unsigned int fsr_register_page_bits()
-    {
-      return 0;     // Assume only one register page.
-    }
+  {
+    return 0;     // Assume only one register page.
+  }
 
 
   virtual void option_new_bits_6_7(unsigned int);
+
+};
+
+class P12C508 : public  P12bitBase
+{
+public:
+
+  P12C508(const char *_name=0, const char *desc=0);
+  virtual ~P12C508();
+  static Processor *construct(const char *name);
+
+  virtual void create();
+  virtual unsigned int program_memory_size() const { return 0x200; }
 
 };
 
@@ -103,7 +113,7 @@ class P12C509 : public P12C508
 
   P12C509(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
+  virtual void create();
 
 
 };
@@ -119,7 +129,7 @@ class P12CE518 : public P12C508
 
   P12CE518(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
+  virtual void create();
   virtual void create_iopin_map();
 private:
   P12_I2C_EE *m_eeprom;
@@ -150,17 +160,17 @@ class P12CE519 : public P12CE518
 
   P12CE519(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
+  virtual void create();
 
 
 };
 
 
 
-// A 10F200 is like a 12c508
-class P10F200 : public P12C508
+//  10F200
+class P10F200 : public P12bitBase
 {
-  public:
+public:
 
   virtual PROCESSOR_TYPE isa(){return _P10F200_;};
   virtual unsigned int program_memory_size() const { return 0x100; };
@@ -169,25 +179,42 @@ class P10F200 : public P12C508
   virtual ~P10F200();
 
   static Processor *construct(const char *name);
-  void create();
+  virtual void create();
   virtual void create_iopin_map();
-
+  // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
+  virtual void updateGP2Source();
 };
 
 
 // A 10F202 is like a 10f200
 class P10F202 : public P10F200
 {
-  public:
+public:
 
   virtual PROCESSOR_TYPE isa(){return _P10F202_;};
   virtual unsigned int program_memory_size() const { return 0x200; };
 
   P10F202(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
+  virtual void create();
 
 };
 
+class CMCON0;
+// A 10F204 is like a 10f200
+class P10F204 : public P10F200
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P10F204_;};
+
+  P10F204(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  virtual void create();
+  // GP2 can be driven by either FOSC/4, COUT, TMR 0, or the GP I/O driver
+  virtual void updateGP2Source();
+protected:
+  CMCON0 *m_cmcon0;
+};
 
 #endif //  __P12X_H__

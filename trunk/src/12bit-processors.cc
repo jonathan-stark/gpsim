@@ -133,6 +133,8 @@ void _12bit_processor::create_symbols()
 {
   pic_processor::create_symbols();
   addSymbol(option_reg);
+  // Create an alias for the option_reg
+  option_reg->new_name("option");
   addSymbol(W);
 }
 
@@ -163,13 +165,19 @@ bool _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
   //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
 
   if((address == config_word_address()) && config_modes) {
+    config_word = cfg_word;
+
+    if (m_configMemory && m_configMemory->getConfigWord(0))
+      m_configMemory->getConfigWord(0)->set((int)cfg_word);
+
+    /*
     config_modes->config_mode = (config_modes->config_mode & ~7) | (cfg_word & 7);
 
     config_word = cfg_word;
 
     if((bool)verbose && config_modes)
       config_modes->print();
-
+    */
     return true;
   }
 

@@ -407,7 +407,8 @@ OPTION_REG::OPTION_REG(Processor *pCpu, const char *pName, const char *pDesc)
 {
   por_value = RegisterValue(0xff,0);
   wdtr_value = RegisterValue(0xff,0);
-  value = por_value;
+  // The chip reset will place the proper value here.
+  value = RegisterValue(0,0);  // por_value;
 }
 
 void OPTION_REG::put(unsigned int new_value)
