@@ -23,8 +23,10 @@ Boston, MA 02111-1307, USA.  */
 // p12x
 //
 //  This file supports:
-//    PIC12C508
-//    PIC12C509
+//    PIC12C508 PIC12C509
+//    PIC12CE518 PIC12CE519
+//    PIC10F200 PIC10F202 PIC10F204
+//    
 //
 
 #include <stdio.h>
@@ -583,7 +585,8 @@ void GPIO::setPullUp ( bool bNewPU )
   if ( verbose & 16 )
     printf("GPIO::setPullUp() =%d\n",(m_bPU?1:0));
 
-  unsigned int mask = getEnableMask();
+  // In the following do not change pullup state of internal pins
+  unsigned int mask = getEnableMask() & 0x3f; 
   for (unsigned int i=0, m=1; mask; i++, m<<= 1)
     if (mask & m)
     {

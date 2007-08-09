@@ -1,3 +1,6 @@
+2007-08-09 Roy Rankin <rrankin@ihug.com.au>
+	* src/p12x.cc: Fix eeprom regression introduced by last change
+
 2007-07-29  Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc: Fixed bug in expression parsing of assertions.
 	* cli/parse.yy, src/value.h, src/value.cc: playing with a 'call' command.
