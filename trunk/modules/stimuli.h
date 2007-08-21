@@ -22,7 +22,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MOD_STIMULI_H__
 #define __MOD_STIMULI_H__
 
-
+#ifdef HAVE_GUI
+#include <gtk/gtk.h>
+#endif
+#include <glib.h>
 #include "../src/stimuli.h"
 #include "../src/modules.h"
 #include "../src/value.h"

@@ -85,7 +85,7 @@ void Encoder::create_iopin_map(void)
   assign_pin(1, a_pin);
   package->set_pin_position(1,(float)0.0);
   b_pin = new IO_bi_directional((name() + ".b").c_str());
-  assign_pin(1, b_pin);
+  assign_pin(2, b_pin);
   package->set_pin_position(2,(float)0.9999);
 
   // Create an entry in the symbol table for the new I/O pins.
@@ -157,9 +157,7 @@ void Encoder::create_widget(Encoder *enc)
 Module * Encoder::construct(const char *_new_name=NULL)
 {
 
-  Encoder *enc_p = new Encoder ;
-  enc_p->new_name(_new_name);
-  enc_p->create_iopin_map();
+  Encoder *enc_p = new Encoder(_new_name);
 
   enc_p->create_widget(enc_p);
 
@@ -167,16 +165,18 @@ Module * Encoder::construct(const char *_new_name=NULL)
 
 }
 
-Encoder::Encoder(void)
-    : rs(rot_detent)
+Encoder::Encoder(const char * _name)
+    : Module(_name, "Encoder"), rs(rot_detent)
 {
-  name_str = strdup("Encoder");
+  create_iopin_map();
 }
 
 Encoder::~Encoder(void)
 {
+  /* done elsewhere RRR
   delete a_pin;
   delete b_pin;
+  */
 }
 
 void

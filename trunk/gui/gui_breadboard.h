@@ -180,6 +180,7 @@ public:
   GList * pins() { return m_pins; }
   Module *module() { return m_module; }
   GtkWidget *module_widget() { return m_module_widget; }
+  GtkWidget *pinLabel_widget() { return m_pinLabel_widget; }
   GtkWidget *name_widget() { return m_name_widget; }
   GtkWidget *tree_item() { return m_tree_item; }
   GdkPixmap *module_pixmap() { return m_module_pixmap; }

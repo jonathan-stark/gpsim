@@ -94,7 +94,7 @@ public:
     InputPort *input_port;
     OutputPort *output_port;
 
-    Paraface(void);
+    Paraface(const char *);
     ~Paraface(void);
 
 

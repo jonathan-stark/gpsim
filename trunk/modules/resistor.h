@@ -27,7 +27,10 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
+#else
+struct GtkToggleButton;
 #endif
+
 
 
 #include <glib.h>
@@ -35,11 +38,15 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/modules.h"
 #include "../src/stimuli.h"
 
-class PullupResistor : public Module 
+class  ResistanceAttribute;
+class  CapacitanceAttribute;
+class  VoltageAttribute;
+
+class PullupResistor : public Module , public TriggerObject
 {
 public:
 
-  IO_bi_directional_pu res;
+  IO_bi_directional_pu *res;
 
 #ifdef MANAGING_GUI
 
@@ -47,7 +54,7 @@ public:
 
 #endif
 
-  PullupResistor(const char *init_name=NULL);
+  PullupResistor(const char *init_name=NULL, const char *desc=NULL);
   ~PullupResistor();
 
   // Inheritances from the Package class
@@ -59,6 +66,11 @@ public:
 #ifdef MANAGING_GUI
   void build_window(void);
 #endif
+private:
+  ResistanceAttribute *attr;
+  CapacitanceAttribute *cattr;
+  VoltageAttribute *vattr;
+
 
 };
 #endif //  __RESISTOR_H__

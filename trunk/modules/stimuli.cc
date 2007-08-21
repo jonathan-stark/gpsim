@@ -71,9 +71,9 @@ Boston, MA 02111-1307, USA.  */
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
+#include "../config.h"
 #include "../src/gpsim_time.h"
 #include "stimuli.h"
-#include "../config.h"
 #include "../src/pic-ioports.h"
 #include "../src/symbol.h"
 #include "../src/trace.h"
@@ -210,7 +210,6 @@ namespace ExtendedStimuli {
   Module *PulseGen::construct(const char *new_name)
   {
     PulseGen *pPulseGen = new PulseGen(new_name);
-    pPulseGen->create_iopin_map();
     return pPulseGen;
   }
 
@@ -240,14 +239,19 @@ Pulse Generator\n\
     addSymbol(m_init);
 
     sample_iterator = samples.end();
+    create_iopin_map();
   }
 
   PulseGen::~PulseGen()
   {
-    delete m_pin;
+    removeSymbol(m_set);
+    removeSymbol(m_clear);
+    removeSymbol(m_period);
+    removeSymbol(m_init);
     delete m_set;
     delete m_clear;
     delete m_period;
+    delete m_init;
   }
 
   //----------------------------------------------------------------------
@@ -752,6 +756,7 @@ Port Stimulus\n\
       assign_pin(i+1, mPort->addPin(ppin,i));
     }
   }
+
 
 
 } // end of namespace ExtendedStimuli
