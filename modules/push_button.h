@@ -40,7 +40,7 @@ public:
 
     IOPIN *pshb_pin;
 
-    PushButton(void);
+    PushButton(const char *);
     ~PushButton(void);
 
 

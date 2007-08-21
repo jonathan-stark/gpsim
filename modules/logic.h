@@ -112,7 +112,7 @@ public:
 #ifdef HAVE_GUI
   GdkPixmap *pixmap;
 #endif
-  LogicGate(void);
+  LogicGate(const char *name, const char * desc);
   ~LogicGate(void);
 
   // Inheritances from the Package class
@@ -135,6 +135,8 @@ class ANDGate: public LogicGate
 public:
 
   virtual void update_state(void);
+  ANDGate(const char *name, const char * desc);
+  ~ANDGate(void);
 
 };
 
@@ -145,7 +147,7 @@ public:
   static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("and2"); };
   // virtual void update_state(void);
-  AND2Gate(void);
+  AND2Gate(const char *);
   ~AND2Gate(void);
 
 };
@@ -154,6 +156,8 @@ class ORGate: public LogicGate
 {
 public:
 
+  ORGate(const char *name, const char * desc);
+  ~ORGate(void);
   virtual void update_state(void);
 
 };
@@ -167,7 +171,7 @@ public:
   //virtual void update_state(void);
   static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("or2"); };
-  OR2Gate(void);
+  OR2Gate(const char *name);
   ~OR2Gate(void);
   
 };
@@ -176,6 +180,8 @@ class XORGate: public LogicGate
 {
 public:
 
+  XORGate(const char *name, const char * desc);
+  ~XORGate(void);
   virtual void update_state(void);
 
 };
@@ -189,7 +195,7 @@ public:
   //virtual void update_state(void);
   static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("xor2"); };
-  XOR2Gate(void);
+  XOR2Gate(const char *name);
   ~XOR2Gate(void);
   
 };
@@ -202,7 +208,7 @@ public:
   static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("not"); };
   virtual void update_state(void);
-  NOTGate(void);
+  NOTGate(const char *name);
   ~NOTGate(void);
   
 };

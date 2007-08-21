@@ -42,7 +42,7 @@ namespace Leds {
   //------------------------------------------------------------------------
   // LED base class
 
-  class Led_base : public Module
+  class Led_base //: public Module
   {
   public:
 
@@ -51,7 +51,7 @@ namespace Leds {
     virtual void update( GtkWidget *drawable,   
 			 guint max_width,
 			 guint max_height) = 0;
-    LED_Interface *interface;
+    LED_Interface *led_interface;
   };
 
 
@@ -81,7 +81,7 @@ namespace Leds {
 
   typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
 
-  class Led_7Segments : public Led_base, public TriggerObject
+  class Led_7Segments : public Module, public Led_base, public TriggerObject
   {
   public:
 
@@ -116,7 +116,7 @@ namespace Leds {
     GdkColor led_segment_off_color;
     GdkColor led_background_color;
 
-    Led_7Segments();
+    Led_7Segments(const char *);
     ~Led_7Segments();  
 
 
@@ -136,7 +136,6 @@ namespace Leds {
     // Inheritance from Module class
     const virtual char *type() { return ("led_7segments"); };
     static Module *construct(const char *new_name);
-
   private:
     //unsigned int m_segmentStates;
     Led_Input **m_pins;
@@ -148,7 +147,7 @@ namespace Leds {
   // Simple LED
   //
 
-  class Led: public Led_base, public TriggerObject
+  class Led: public Module, public Led_base, public TriggerObject
   {
   public:
 
@@ -160,7 +159,7 @@ namespace Leds {
 
     gpointer cbp;  // cycle break point pointer (need to delete in destructor)
 
-    Led();
+    Led(const char *);
     ~Led();
 
     virtual void callback();

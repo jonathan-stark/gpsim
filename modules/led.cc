@@ -489,7 +489,7 @@ namespace Leds {
 
     gtk_widget_set_usize (darea, 
 			  100, 
-			  100);
+			  110);
     gtk_container_add (GTK_CONTAINER (vbox), darea);
 
     gtk_signal_connect (GTK_OBJECT (darea),
@@ -536,27 +536,27 @@ namespace Leds {
 
   //--------------------------------------------------------------
 
-  Led_7Segments::Led_7Segments()
+  Led_7Segments::Led_7Segments(const char *name) : Module(name, "7 Segment LED")
   {
 
-    //cout << "7-segment led constructor\n";
-    new_name("LED7SEG");
-
     if(get_interface().bUsingGUI()) {
-      build_segments(100, 100);
+      build_segments(100, 110);
       build_window();
     }
 
-    interface = new LED_Interface(this);
-    get_interface().add_interface(interface);
+    led_interface = new LED_Interface(this);
+    get_interface().add_interface(led_interface);
     callback();
+    create_iopin_map();
   }
 
   Led_7Segments::~Led_7Segments()
   {
+    /* Deleted elsewhere RRR
     for (int i=0; i<8; i++)
       delete m_pins[i];
     delete [] m_pins;
+   */
   }
 
   //--------------------------------------------------------------
@@ -577,18 +577,12 @@ namespace Leds {
     create_pkg(8);
     m_pins = new Led_Input *[8];
 
-    // Position pins on left side of package
-    float pos=0.0;
-    const float dp = (float)(0.9999/7.0);
-    package->set_pin_position(1,pos);pos+=dp;
-    package->set_pin_position(2,pos);pos+=dp;
-    package->set_pin_position(3,pos);pos+=dp;
-    package->set_pin_position(4,pos);pos+=dp;
-    package->set_pin_position(5,pos);pos+=dp;
-    package->set_pin_position(6,pos);pos+=dp;
-    package->set_pin_position(7,pos);pos+=dp;
-    package->set_pin_position(8,pos);pos+=dp;
-
+    float ypos = 6.0;
+    for (int i = 1; i <= 8; i++)
+    {
+        package->setPinGeometry(i, 0.0, ypos, 0, false);
+	ypos += 12.;
+    }
 
     // Here, we create and name the I/O pins. In gpsim, we will reference
     //   the bit positions as LED.seg0, LED.seg1, ..., where LED is the
@@ -623,9 +617,7 @@ namespace Leds {
   Module * Led_7Segments::construct(const char *_new_name=0)
   {
 
-    Led_7Segments *l7sP = new Led_7Segments ;
-    l7sP->new_name(_new_name);
-    l7sP->create_iopin_map();
+    Led_7Segments *l7sP = new Led_7Segments(_new_name) ;
 
     return l7sP;
 
@@ -765,21 +757,23 @@ namespace Leds {
 
   //--------------------------------------------------------------
 
-  Led::Led()
+  Led::Led(const char *name) : Module(name, "Simple LED")
   {
-    new_name("LED");
 
+    create_iopin_map();
     if(get_interface().bUsingGUI())
       build_window();
 
-    interface = new LED_Interface(this);
-    get_interface().add_interface(interface);
+    led_interface = new LED_Interface(this);
+    get_interface().add_interface(led_interface);
     callback();
   }
 
   Led::~Led()
   {
+    /* deleted elsewhere RRR
     delete m_pin;
+    */
   }
 
   //--------------------------------------------------------------
@@ -810,9 +804,8 @@ namespace Leds {
   Module * Led::construct(const char *_new_name=0)
   {
 
-    Led *ledP = new Led;
-    ledP->new_name(_new_name);
-    ledP->create_iopin_map();
+    Led *ledP = new Led(_new_name);
+    //ledP->new_name(_new_name);
 
     return ledP;
 

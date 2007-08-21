@@ -1,3 +1,14 @@
+2007-08-21 Roy Rankin <rrankin@ihug.com.au>
+	* modules/usart.cc modules/switch.cc modules/paraface.cc
+	* modules/led.cc modules/i2c-eeprom.h modules/video.cc
+	* modules/resistor.cc modules/push_button.h modules/stimuli.cc
+	* modules/logic.cc modules/logic.h modules/i2c-eeprom.cc
+	* modules/paraface.h modules/led.h modules/video.h 
+	* modules/push_button.cc modules/resistor.h modules/encoder.cc 
+	* modules/encoder.h modules/stimuli.h gui/gui_breadboard.h 
+	* gui/gui_breadboard.cc: fix extra xpos, ypos in symbol table,
+	+ fix issues in deleting modules including core dumps
+
 2007-08-09 Roy Rankin <rrankin@ihug.com.au>
 	* src/p12x.cc: Fix eeprom regression introduced by last change
 

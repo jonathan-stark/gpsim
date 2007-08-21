@@ -81,7 +81,7 @@ public:
 
   GdkColor black_color, grey_color, white_color;
   
-  Video(void);
+  Video(const char *);
   ~Video(void);
 
   // Inheritances from the Package class

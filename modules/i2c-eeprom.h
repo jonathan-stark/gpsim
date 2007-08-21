@@ -47,7 +47,6 @@ class I2C_ENABLE;
 
     virtual void create_iopin_map();
     virtual void setEnable(bool bNewState, unsigned int m_bit);
-
   protected:
 
     I2C_EE *m_eeprom;

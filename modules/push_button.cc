@@ -154,9 +154,7 @@ void PushButton::create_widget(PushButton *pb)
 Module * PushButton::construct(const char *_new_name=0)
 {
 
-  PushButton *pshbP = new PushButton ;
-  pshbP->new_name((char*)_new_name);
-  pshbP->create_iopin_map();
+  PushButton *pshbP = new PushButton(_new_name) ;
 
   pshbP->create_widget(pshbP);
 
@@ -164,9 +162,9 @@ Module * PushButton::construct(const char *_new_name=0)
 
 }
 
-PushButton::PushButton(void)
+PushButton::PushButton(const char * _name) : Module(_name, "PushButton")
 {
-  name_str = strdup("PushButton");
+  create_iopin_map();
 }
 
 PushButton::~PushButton(void)

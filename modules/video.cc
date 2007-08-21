@@ -136,7 +136,7 @@ static void expose(GtkWidget *widget,
 *  Video class
 */
 
-Video::Video(void)
+Video::Video(const char *_name) : Module(_name)
 {
   //cout << "Video base class constructor\n";
   sync_time=0;
@@ -280,9 +280,8 @@ Module * Video::construct(const char *_new_name)
 
   //cout << " AND2Gate  construct\n";
 
-  Video *video = new Video ;
+  Video *video = new Video(_new_name) ;
 
-  video->new_name(_new_name);
   video->create_iopin_map();
 
   //cout << "AND2Gate should be constructed\n";

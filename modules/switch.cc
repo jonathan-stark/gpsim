@@ -461,6 +461,9 @@ namespace Switches {
 
   SwitchBase::~SwitchBase(void)
   {
+    removeSymbol(m_aState);
+    removeSymbol(m_Zopen);
+    removeSymbol(m_Zclosed);
     delete m_Zclosed;
     delete m_Zopen;
     delete m_aState;

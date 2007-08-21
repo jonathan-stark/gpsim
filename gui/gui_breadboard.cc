@@ -2135,7 +2135,7 @@ static void add_library(GtkWidget *button, Breadboard_Window *bbw)
     if(library_name)
       ModuleLibrary::LoadFile(library_name);
 #else
-    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+    cout << __FILE__ << ':' <<  dec << __LINE__ << " module library fixme\n";
 #endif
 }
 
@@ -2156,7 +2156,7 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
           ModuleLibrary::NewObject(module_type, module_name);
     }
 #else
-    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+    cout << __FILE__ << ':' << dec << __LINE__ << " module library fixme\n";
 #endif
 }
 
@@ -2181,8 +2181,12 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     }
 
     // Remove widget
-    gtk_container_remove(GTK_CONTAINER(bbw->layout),
+    if (bbw->selected_module->module_widget())
+        gtk_container_remove(GTK_CONTAINER(bbw->layout),
 			 bbw->selected_module->module_widget());
+    if (bbw->selected_module->pinLabel_widget())
+        gtk_container_remove(GTK_CONTAINER(bbw->layout),
+			 bbw->selected_module->pinLabel_widget());
     gtk_container_remove(GTK_CONTAINER(bbw->layout),
 			 bbw->selected_module->name_widget());
 
@@ -2371,7 +2375,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       t->name());
     }
 #else
-    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+    cout << __FILE__ << ':' << dec << __LINE__ << " module library fixme\n";
 #endif
 
     // Save modules
@@ -2396,7 +2400,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
         m->name().c_str());
       }
 #else
-    cout << __FILE__ << ':' << __LINE__ << "module library fixme\n";
+    cout << __FILE__ << ':' << dec << __LINE__ << " module library fixme\n";
 #endif
 
       /*
@@ -3305,12 +3309,6 @@ void GuiModule::Build()
     AddPin(i);
     
   }
-  /*
-  printf("Widths %d %d %d %d\n",
-	 pinnameWidths[0],pinnameWidths[1],pinnameWidths[2],pinnameWidths[3]);
-  */
-  bool bShowPinNames = true;
-
   if(!m_module_widget) {
 
     // Create a static representation.
@@ -3319,74 +3317,37 @@ void GuiModule::Build()
     m_width += 2*CASELINEWIDTH+2*LABELPAD;
 
     m_height = m_module->get_pin_count()/2*pinspacing; // pin name height
-
     if(m_module->get_pin_count()%2)
       m_height += pinspacing;
 
     m_height+=2*CASELINEWIDTH+2*LABELPAD;
 
-
     m_module_pixmap = gdk_pixmap_new(m_bbw->window->window,
-				     m_width,
-				     m_height,
-				     -1);
-
+                                     m_width,
+                                     m_height,
+                                     -1);
     m_pinLabel_widget = gtk_drawing_area_new();
-
     gtk_drawing_area_size(GTK_DRAWING_AREA(m_pinLabel_widget),m_width,m_height);
-
+    gtk_widget_show_all (m_pinLabel_widget);
     DrawCaseOutline(m_pinLabel_widget);
-
     gtk_signal_connect(GTK_OBJECT(m_pinLabel_widget),
-		       "expose_event",
-		       (GtkSignalFunc) module_expose,
-		       this);
-
+                         "expose_event",
+                         (GtkSignalFunc) module_expose,
+                         this);
     gtk_widget_show(m_pinLabel_widget);
 
 
   } else {
-
     // Get the [from the module] provided widget's size
     GtkRequisition req;
 
     gtk_widget_size_request(m_module_widget, &req);
 
-    bShowPinNames = false;
-
-    m_width=req.width + (bShowPinNames ? (pinnameWidths[0] + pinnameWidths[2]) : 0 );
+    m_width=req.width;
     m_height=req.height;
-    m_module_x = bShowPinNames ? pinnameWidths[0] : 0;
-    printf("module_x %d, module widget size %d, %d\n",m_module_x,m_width,m_height);
-
-    m_module_pixmap = gdk_pixmap_new(m_bbw->window->window,
-				     m_width,
-				     m_height,
-				     -1);
-    gdk_draw_rectangle (m_module_pixmap,
-			m_bbw->window->style->white_gc,
-			TRUE,
-			0,0,
-			m_width,
-			m_height);
-
-    if (bShowPinNames) {
-      m_pinLabel_widget = gtk_drawing_area_new();
-
-      gtk_drawing_area_size(GTK_DRAWING_AREA(m_pinLabel_widget),m_width,m_height);
-
-      DrawCaseOutline(m_pinLabel_widget);
-
-      gtk_signal_connect(GTK_OBJECT(m_pinLabel_widget),
-			 "expose_event",
-			 (GtkSignalFunc) module_expose,
-			 this);
-
-      gtk_widget_show(m_pinLabel_widget);
-    }
-
     gtk_widget_show(m_module_widget);
-  }
+ }
+
 
   // Create xref
   cross_reference = new BreadBoardXREF();
@@ -3401,7 +3362,6 @@ void GuiModule::Build()
   BuildReferenceDesignator();
   gtk_widget_show(m_name_widget);
 
-
   // Create pins
   GtkWidget *hackSubtree = gtk_tree_new();
   GtkWidget *sub_tree_item;
@@ -3414,7 +3374,8 @@ void GuiModule::Build()
   while(pin_iter!=0) {
     GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
     AddPinGeometry(pin);
-    pin->DrawLabel(m_module_pixmap);
+    if (m_module_pixmap)
+        pin->DrawLabel(m_module_pixmap);
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout),pin->m_pinDrawingArea,0,0);
 
     // Add pin to tree
@@ -3447,6 +3408,7 @@ void GuiModule::Build()
   update_board_matrix(m_bbw);
 
 }
+
 
 //========================================================================
 //========================================================================

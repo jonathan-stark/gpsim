@@ -35,6 +35,8 @@ class Processor;
 #include "../src/symbol.h"
 #include "../src/value.h"
 #include "../src/packages.h"
+#include "../src/gpsim_interface.h"
+
 namespace I2C_EEPROM_Modules {
 
 class I2C_ENABLE : public IOPIN
@@ -61,11 +63,8 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
     m_pParent->setEnable(bNewState, m_bit);
 }
 
-  I2C_EE_Module::I2C_EE_Module(const char *_name)
+  I2C_EE_Module::I2C_EE_Module(const char *_name) : Module(_name, "EEProm")
   {
-    // Set module name
-    if (_name)
-	new_name(_name);
     //initializeAttributes();
     chip_select = 0;
   }
@@ -84,8 +83,6 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
     (pEE->m_eeprom) = new I2C_EE((Processor*)0,256, 16, 1, 0xe, 0, 0);
     pEE->create_iopin_map();
 
-    //if(get_interface().bUsingGUI()) 
-    //  pEE->create_widget(pEe);
    return(pEE);
 
   }
@@ -97,8 +94,6 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
     (pEE->m_eeprom) = new I2C_EE(0,2048, 16, 1, 0, 0xe, 1);
     pEE->create_iopin_map();
 
-    //if(get_interface().bUsingGUI()) 
-    //  pEE->create_widget(pEe);
    return(pEE);
 
   }
@@ -110,8 +105,6 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
     (pEE->m_eeprom) = new I2C_EE(0,32768, 64, 2, 0xe, 0, 0);
     pEE->create_iopin_map();
 
-    //if(get_interface().bUsingGUI()) 
-    //  pEE->create_widget(pEe);
    return(pEE);
 
   }

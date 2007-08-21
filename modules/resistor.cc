@@ -49,6 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/ioports.h"
 #include "../src/symbol.h"
 #include "../src/value.h"
+#include "../src/gpsim_interface.h"
 
 //----------------------------------------
 
@@ -63,7 +64,7 @@ public:
       pur(ppur)
   {
     if(pur)
-      Float::set(pur->res.get_Zth());
+      Float::set((pur->res)->get_Zth());
   }
 
 
@@ -72,7 +73,7 @@ public:
     Float::set(r);
 
     if(pur)
-      pur->res.set_Zpullup(r);
+      pur->res->set_Zpullup(r);
 
   };
 
@@ -95,7 +96,7 @@ public:
       pur(ppur)
   {
     if(pur)
-      Float::set(pur->res.get_Cth());
+      Float::set(pur->res->get_Cth());
   }
 
 
@@ -104,7 +105,7 @@ public:
     Float::set(r);
 
     if(pur)
-      pur->res.set_Cth(r);
+      pur->res->set_Cth(r);
 
   };
 
@@ -127,7 +128,7 @@ public:
       pur(ppur)
   {
     if(pur)
-      Float::set(pur->res.get_Vpullup());
+      Float::set(pur->res->get_Vpullup());
   }
 
 
@@ -136,8 +137,8 @@ public:
     Float::set(r);
 
     if(pur) {
-      pur->res.set_Vpullup(r);
-      pur->res.updateNode();
+      pur->res->set_Vpullup(r);
+      pur->res->updateNode();
     }
   };
 
@@ -167,20 +168,7 @@ void PullupResistor::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
 
-  assign_pin(1, &res);
-
-
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-  /*
-  IOPIN *iop = get_pin(1);
-  if(iop) {
-    cout << "pullup resistor pin name: "<<iop->name() << '\n';
-    cout << "voltage " << iop->get_Vth() << '\n';
-  }
-  */
-
+  assign_pin(1, res);
 }
 
 
@@ -190,19 +178,10 @@ void PullupResistor::create_iopin_map(void)
 Module * PullupResistor::pu_construct(const char *_new_name)
 {
 
-  PullupResistor *pur = new PullupResistor(_new_name);
+  PullupResistor *pur = new PullupResistor(_new_name, "Pullup Resistor");
 
-  if(_new_name) {
-    string s;
-    s = _new_name;
-    s.append(".pin");
-    pur->res.new_name(s);
-  }
-
-  pur->create_iopin_map();
-
-  pur->res.set_Vth(5.0);
-  pur->res.set_Vpullup(5.0);
+  pur->res->set_Vth(5.0);
+  pur->res->set_Vpullup(5.0);
   return pur;
 }
 
@@ -210,30 +189,32 @@ Module * PullupResistor::pu_construct(const char *_new_name)
 Module * PullupResistor::pd_construct(const char *_new_name)
 {
 
-  PullupResistor *pur = new PullupResistor(_new_name);
+  PullupResistor *pur = new PullupResistor(_new_name, "PullDown resistor");
 
-  if(_new_name) {
-    string s;
-    s = _new_name;
-    s.append(".pin");
-    pur->res.new_name(s);
-  }
-  pur->create_iopin_map();
-
-  pur->res.set_Vth(0);
-  pur->res.set_Vpullup(0.0);
-
+  pur->res->set_Vth(0);
+  pur->res->set_Vpullup(0.0);
   return pur;
-
 }
 
 //--------------------------------------------------------------
-PullupResistor::PullupResistor(const char *init_name)
+PullupResistor::PullupResistor(const char *init_name, const char * desc) : 
+	Module(init_name, desc)
 {
+  string s;
+  s = init_name;
 
   // set the module name
   if(init_name)
+  {
     new_name(init_name);
+    s.append(".pin");
+  }
+
+  res = new IO_bi_directional_pu(s.c_str());
+
+
+  create_iopin_map();
+
 
   // Default module attributes.
   //initializeAttributes();
@@ -246,13 +227,13 @@ pullup resistor or generic voltage source\n\
  .capacitance - pin capacitance\n\
 ");
 
-  cout << description() << endl;
+  if(verbose)cout << description() << endl;
 
   // Note ResistanceAttribute is designed to give access
   // to res.Zth with a symbol name of "modulename + '.resistance'".
-  ResistanceAttribute *attr = new ResistanceAttribute(this);
-  CapacitanceAttribute *cattr = new CapacitanceAttribute(this);
-  VoltageAttribute *vattr = new VoltageAttribute(this);
+  attr = new ResistanceAttribute(this);
+  cattr = new CapacitanceAttribute(this);
+  vattr = new VoltageAttribute(this);
 
   addSymbol(attr);
   addSymbol(cattr);
@@ -260,9 +241,9 @@ pullup resistor or generic voltage source\n\
 
   attr->set(10e3);
   cattr->set(0.);
-  res.setDriving(false);
-  res.update_pullup('1',true);
-  vattr->set(res.get_Vpullup());
+  res->setDriving(false);
+  res->update_pullup('1',true);
+  vattr->set(res->get_Vpullup());
 
 #ifdef MANAGING_GUI
   pu_window = 0;
@@ -274,6 +255,12 @@ pullup resistor or generic voltage source\n\
 
 PullupResistor::~PullupResistor()
 {
+  removeSymbol(attr);
+  removeSymbol(cattr);
+  removeSymbol(vattr);
+  delete attr;
+  delete cattr;
+  delete vattr;
 
 }
 
@@ -302,7 +289,9 @@ void PullupResistor::build_window(void)
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   gtk_widget_show_all (pu_window);
+  set_widget(pu_window);
 
 }
 
 #endif
+

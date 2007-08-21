@@ -340,7 +340,7 @@ Module * Paraface::construct(const char *_new_name=0)
 
 //    cout << " Parport constructor\n";
 
-    Paraface *parafaceP = new Paraface ;
+    Paraface *parafaceP = new Paraface(_new_name) ;
     parafaceP->open_parallel_port();
     parafaceP->new_name(_new_name);
     parafaceP->create_iopin_map();
@@ -349,7 +349,7 @@ Module * Paraface::construct(const char *_new_name=0)
 
 }
 
-Paraface::Paraface(void)
+Paraface::Paraface(const char *_name) : Module(_name)
 {
 
 //    cout << "Paraface constructor\n";

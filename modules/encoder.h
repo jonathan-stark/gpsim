@@ -42,7 +42,7 @@ public:
     IOPIN *a_pin;
     IOPIN *b_pin;
 
-    Encoder(void);
+    Encoder(const char *);
     ~Encoder(void);
 
 

@@ -232,13 +232,35 @@ void Logic_Input::setDrivenState( bool new_state)
 }
 
 
+ANDGate::ANDGate(const char *name, const char *desc)
+  : LogicGate(name, desc)
+{
+}
+ANDGate::~ANDGate()
+{
+}
+ORGate::ORGate(const char *name, const char *desc)
+  : LogicGate(name, desc)
+{
+}
+ORGate::~ORGate()
+{
+}
+XORGate::XORGate(const char *name, const char *desc)
+  : LogicGate(name, desc)
+{
+}
+XORGate::~XORGate()
+{
+}
 /*************************************************************
 *
 *  LogicGate class
 */
 
-LogicGate::LogicGate()
-  : number_of_pins(0),
+LogicGate::LogicGate(const char *name, const char *desc)
+  : Module(name, desc),
+    number_of_pins(0),
     input_bit_mask(0),
     input_state(0),
     pInputPins(0),
@@ -393,9 +415,8 @@ Module * AND2Gate::construct(const char *_new_name)
 {
 
 
-  AND2Gate *a2gP = new AND2Gate ;
+  AND2Gate *a2gP = new AND2Gate(_new_name) ;
 
-  a2gP->new_name(_new_name);
   a2gP->set_number_of_pins(3);
   a2gP->create_iopin_map();
 
@@ -403,7 +424,7 @@ Module * AND2Gate::construct(const char *_new_name)
 
 }
 
-AND2Gate::AND2Gate()
+AND2Gate::AND2Gate(const char *name) : ANDGate(name, "And2Gate")
 {
 #ifdef HAVE_GUI
   if(get_interface().bUsingGUI())
@@ -427,7 +448,7 @@ void ANDGate::update_state()
 // construct
 
 
-OR2Gate::OR2Gate()
+OR2Gate::OR2Gate(const char *name) : ORGate(name, "OR2Gate")
 {
 #ifdef HAVE_GUI
 
@@ -444,9 +465,8 @@ Module * OR2Gate::construct(const char *_new_name)
 {
 
 
-  OR2Gate *o2gP = new OR2Gate ;
+  OR2Gate *o2gP = new OR2Gate(_new_name) ;
 
-  o2gP->new_name(_new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 
@@ -466,9 +486,8 @@ void ORGate::update_state()
 Module * NOTGate::construct(const char *_new_name)
 {
 
-  NOTGate *a2gP = new NOTGate ;
+  NOTGate *a2gP = new NOTGate(_new_name) ;
 
-  a2gP->new_name(_new_name);
   a2gP->set_number_of_pins(2);
   a2gP->create_iopin_map();
   a2gP->update_state();
@@ -477,7 +496,7 @@ Module * NOTGate::construct(const char *_new_name)
 
 }
 
-NOTGate::NOTGate()
+NOTGate::NOTGate(const char *name) : LogicGate(name, "NOTGate")
 {
 #ifdef HAVE_GUI
 
@@ -500,7 +519,7 @@ void NOTGate::update_state()
 // construct
 
 
-XOR2Gate::XOR2Gate()
+XOR2Gate::XOR2Gate(const char *name) : XORGate(name, "XOR2Gate")
 {
 #ifdef HAVE_GUI
 
@@ -515,9 +534,8 @@ XOR2Gate::~XOR2Gate()
 Module * XOR2Gate::construct(const char *_new_name)
 {
 
-  XOR2Gate *o2gP = new XOR2Gate ;
+  XOR2Gate *o2gP = new XOR2Gate(_new_name);
 
-  o2gP->new_name(_new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 

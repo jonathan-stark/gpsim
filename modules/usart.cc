@@ -940,10 +940,8 @@ Module * USARTModule::USART_construct(const char *_new_name)
 
 }
 
-USARTModule::USARTModule(const char *_name)
+USARTModule::USARTModule(const char *_name) : Module(_name, "USART")
 {
-  assert(_name);
-  new_name(_name);
 
 #ifdef HAVE_TXFIFO
   m_TxFIFO = new unsigned char[64];
@@ -992,7 +990,32 @@ USARTModule::USARTModule(const char *_name)
 
 USARTModule::~USARTModule()
 {
-    // FIXME
+    if(window)
+	gtk_widget_destroy(window);
+    
+#ifdef HAVE_TXFIFO
+    delete m_TxFIFO;
+#endif
+
+    removeSymbol(m_RxBaud);
+    removeSymbol(m_TxBaud);
+    removeSymbol(m_RxBuffer);
+    removeSymbol(m_TxBuffer);
+    removeSymbol(m_CRLF);
+    removeSymbol(m_ShowHex);
+    removeSymbol(m_loop);
+    removeSymbol(m_console);
+
+    delete m_rcreg;
+    delete m_txreg;
+    delete m_RxBaud;
+    delete m_TxBaud;
+    delete m_RxBuffer;
+    delete m_TxBuffer;
+    delete m_CRLF;
+    delete m_ShowHex;
+    delete m_loop;
+    delete m_console;
 }
 
 //--------------------------------------------------------------
@@ -1160,14 +1183,13 @@ void USARTModule::CreateGraphics()
 		       this);
 
     gtk_signal_connect (GTK_OBJECT (window), "destroy",
-                        GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
+                        GTK_SIGNAL_FUNC (gtk_widget_destroy), window);
                                                                                 
-
     gtk_widget_show_all(window);
-
+    
   } else {
     window = 0;
     text = 0;
   }
-#endif
+#endif	// HAVE_GUI
 }
