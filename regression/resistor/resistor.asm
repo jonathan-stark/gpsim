@@ -34,7 +34,11 @@ start
 
    .sim "module library libgpsim_modules"
    .sim "module load pu pu1"
+   .sim "pu1.xpos = 220."
+   .sim "pu1.ypos = 40."
    .sim "module load pd pd1"
+   .sim "pd1.xpos = 72."
+   .sim "pd1.ypos = 300."
 ;   .sim "pu1.resistance=1000."
    .sim "pd1.resistance=3900."
    .sim "node A"

@@ -213,32 +213,42 @@ void updateOneSymbol(const SymbolEntry_t &sym)
   Value *pVal = dynamic_cast<Value *>(sym.second);
   if (lpSW && pVal) {
 
-    char **entry = (char**)malloc(3*sizeof(char*));
-    const int cMaxLength = 32;
-
-    entry[0] = g_strndup(pVal->name().c_str(), cMaxLength);
-    entry[1] = g_strndup(pVal->showType().c_str(), cMaxLength);
-    entry[2] = (char*)malloc(cMaxLength);
     Register *pReg = dynamic_cast<Register *>(pVal);
-    if (pReg)
-      snprintf(entry[2], cMaxLength, "%02x / %d (0x%02x)", pReg->getAddress(), pReg->get_value(), pReg->get_value());
-    else
-      pVal->get(entry[2],cMaxLength);
+    if((typeid(*pVal) == typeid(LineNumberSymbol) ) |
+       (lpSW->filter_addresses && (typeid(*pVal) == typeid(AddressSymbol)))  ||
+       (lpSW->filter_constants && (typeid(*pVal) == typeid(Integer))) ||
+       (lpSW->filter_registers && (pReg)))
+        return;
 
-    char *pLF = strchr(entry[2], '\n');
+#define SYM_LEN 32
+    const char *entry[3];
+    char type[SYM_LEN];
+    char value[SYM_LEN];
+
+    entry[0] = pVal->name().c_str();
+    strncpy(type, pVal->showType().c_str(), sizeof(type));
+    type[SYM_LEN-1] = 0;
+    entry[1] = type;
+    entry[2] = value;
+    if (pReg)
+      snprintf(value, sizeof(value), "%02x / %d (0x%02x)", pReg->getAddress(), pReg->get_value(), pReg->get_value());
+    else
+      pVal->get(value,sizeof(value));
+
+    char *pLF = strchr(value, '\n');
     if(pLF)
       *pLF = 0;
 
     lpSW->symbols=g_list_append(lpSW->symbols, pVal);
 
-    int row = gtk_clist_append(GTK_CLIST(lpSW->symbol_clist),entry);
+    int row = gtk_clist_append(GTK_CLIST(lpSW->symbol_clist),(gchar **)entry);
     gtk_clist_set_row_data(GTK_CLIST(lpSW->symbol_clist),row,pVal);
   }
 }
 
 static void updateSymbolTables(const SymbolTableEntry_t &st)
 {
-  cout << " gui Symbol Window: " << st.first << endl;
+  if(verbose)cout << " gui Symbol Window: " << st.first << endl;
   (st.second)->ForEachSymbolTable(updateOneSymbol);
 }
 #endif

@@ -249,6 +249,7 @@ public:
   GdkGC *case_gc;
 
   GList *modules;
+  GList *nodes;
 
   GtkWidget *tree;
 

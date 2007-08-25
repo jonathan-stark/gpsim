@@ -3554,6 +3554,12 @@ void Breadboard_Window::Update(void)
       // Check if pins have changed state
       p->UpdatePins();
     }
+    else
+    {
+        p->Build();
+        Update();
+
+    }
     iter = iter->next;
   }
 
@@ -3582,10 +3588,12 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
     gp->cpu->add_attribute(ypos);
   }
   */
+
+  m_MainCpuModule = new GuiDipModule(gp->cpu, this);
+
   if(!enabled)
     return;
 
-  m_MainCpuModule = new GuiDipModule(gp->cpu, this);
   m_MainCpuModule->Build();
 
   if(!gp || !gp->cpu)
@@ -3619,10 +3627,11 @@ void Breadboard_Window::NewModule(Module *module)
 		sx=50;
   }
 
+  GuiModule *p=new GuiModule(module, this);
+
   if(!enabled)
     return;
 
-  GuiModule *p=new GuiModule(module, this);
   p->Build();
 
   if(grab_next_module)
@@ -3636,7 +3645,10 @@ void Breadboard_Window::NewModule(Module *module)
 void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 {
 
-  if(!enabled)
+  if(!g_list_find(nodes, node))
+        nodes = g_list_append(nodes, node);
+
+  if(!node_tree)
     return;
 
   struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name().c_str());
@@ -4166,6 +4178,11 @@ void Breadboard_Window::Build(void)
   gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), node_tree);
   gtk_object_set_data(GTK_OBJECT(node_tree), "root_of_nodes", gn);
 
+  // Handle nodes added before breadboard GUI enabled
+  GList *list;
+  for(int i = 0; list = g_list_nth(nodes,i); i++)
+        NodeConfigurationChanged((Stimulus_Node *)(list->data));
+
   bIsBuilt = true;
 
   UpdateMenuItem();
@@ -4218,6 +4235,7 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   node_tree = 0;
 
   modules=0;
+  nodes = 0;
 
   node_clist=0;
 
