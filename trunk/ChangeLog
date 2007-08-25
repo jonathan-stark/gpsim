@@ -1,3 +1,9 @@
+2007-08-26 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_symbols.cc: fix memory leak, re-enable filtering
+	* gui/gui_breadboard.h gui/gui_breadboard.cc: breadboard need not be 
+	+     running on start of gpsim to work
+	* regression/resistor/resistor.asm: position resistors
+
 2007-08-21 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc modules/switch.cc modules/paraface.cc
 	* modules/led.cc modules/i2c-eeprom.h modules/video.cc
