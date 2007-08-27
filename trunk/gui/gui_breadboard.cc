@@ -1348,6 +1348,44 @@ static void settings_set_cb(GtkWidget *button,
 	}
 }
 
+static Breadboard_Window *lpBW;
+static const char *mod_name;
+
+static void clistOneAttribute(const SymbolEntry_t &sym)
+{
+
+  Value *pVal = dynamic_cast<Value *>(sym.second);
+  if (lpBW && pVal) {
+      // read attributes and add to clist
+      char attribute_value[STRING_SIZE];
+      char attribute_string[STRING_SIZE];
+      char *text[1]={attribute_string};
+
+      // Filter out some processor symbols
+      if( (typeid(*pVal) == typeid(LineNumberSymbol) ) ||
+	  (dynamic_cast<Register *>(pVal)))
+	return;
+
+      pVal->get(attribute_value, sizeof(attribute_value));
+      sprintf(attribute_string,"%s = %s",pVal->name().c_str(),attribute_value);
+
+      int row = gtk_clist_append(GTK_CLIST(lpBW->attribute_clist),
+			   text);
+      // add the Attribute* as data for the clist rows.
+      gtk_clist_set_row_data(GTK_CLIST(lpBW->attribute_clist),
+			     row,
+			     (gpointer)pVal);
+  }
+}
+
+static void buildCLISTAttribute(const SymbolTableEntry_t &st)
+{
+  if (strcmp(st.first.c_str(), mod_name) == 0)
+  {
+      if(verbose)cout << " gui Module Attribute Window: " << st.first << endl;
+      (st.second)->ForEachSymbolTable(clistOneAttribute);
+  }
+}
 static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
 {
   char buffer[STRING_SIZE];
@@ -1361,43 +1399,12 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
   // clear clist
   gtk_clist_clear(GTK_CLIST(p->bbw()->attribute_clist));
 
-  // read attributes and add to clist
-  char attribute_string[STRING_SIZE];
-  char *text[1]={attribute_string};
-  /*
-  list <Value *>::iterator attribute_iterator;
-  int row;
+  lpBW = p->bbw();
+  mod_name = p->module()->name().c_str();
+  globalSymbolTable().ForEachModule(buildCLISTAttribute);
+  lpBW = 0;
+  mod_name = 0;
 
-  for (attribute_iterator = p->module()->attributes.begin();
-       attribute_iterator != p->module()->attributes.end();
-       attribute_iterator++) {
-
-    try {
-
-      char attribute_value[STRING_SIZE];
-      Value *locattr = *attribute_iterator;
-      locattr->get(attribute_value, sizeof(attribute_value));
-
-      sprintf(attribute_string,"%s = %s",locattr->name().c_str(),attribute_value);
-
-      row = gtk_clist_append(GTK_CLIST(p->bbw()->attribute_clist),
-			   text);
-      // add the Attribute* as data for the clist rows.
-      gtk_clist_set_row_data(GTK_CLIST(p->bbw()->attribute_clist),
-			     row,
-			     (gpointer)locattr);
-    }
-
-    catch (Error *err) {
-
-      if(err)
-	cout << "UpdateModuleFrame:" << err->toString() << endl;
-      delete err;
-    }
-
-				    
-  }
-  */
 
   gtk_entry_set_text(GTK_ENTRY(p->bbw()->attribute_entry), "");
 

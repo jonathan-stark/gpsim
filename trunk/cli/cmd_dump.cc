@@ -187,7 +187,7 @@ void cmd_dump::dump(int mem_type)
     /* First, see if there are any valid registers on this row */
     all_invalid = true;
     for (j = 0; j < uRegPerRow; j++) {
-      if(fr[i+j]->address) {
+      if(fr[i+j]->isa() != Register::INVALID_REGISTER) {
         all_invalid = false;
         break;
       }
@@ -201,7 +201,10 @@ void cmd_dump::dump(int mem_type)
       {
         reg_num = i  + j;
 
-        if( (reg_num < mem_size) && ( reg_num || fr[reg_num]->address)) {
+        if( (reg_num < mem_size) &&  
+		fr[reg_num] && 
+		fr[reg_num]->isa() != Register::INVALID_REGISTER) 
+	{
 
           v = fr[reg_num]->get_value();
           printf("%0*x ",reg_size * 2, v);

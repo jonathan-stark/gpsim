@@ -1,3 +1,7 @@
+2007-08-28 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.cc: module settings fix for new symbol table
+	* gli/cmd_dump.cc: fix detection of invalid registers in register dump
+
 2007-08-26 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_symbols.cc: fix memory leak, re-enable filtering
 	* gui/gui_breadboard.h gui/gui_breadboard.cc: breadboard need not be 
