@@ -513,7 +513,7 @@ namespace dspic_instructions
 
   void MultiWordBranch::runtime_initialize()
   {
-    if(cpu_dsPic->program_memory[PMindex+1] != &bad_instruction) {
+    if(cpu_dsPic->program_memory[PMindex+1] != &cpu_dsPic->bad_instruction) {
   
       word2_opcode = cpu_dsPic->program_memory[PMindex+1]->get_opcode();
 
