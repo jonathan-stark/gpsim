@@ -5,7 +5,7 @@
 	  creation sequence dependency on the C++ compiler implementation
 	* src/16bit-instructions.cc, src/pic-instructions.cc,
 	  src/pic-instructions.h, src/pic-instructions.h,
-	  src/processor.cc, src/processor.h:
+	  src/processor.cc, src/processor.h, src/dspic/sdpic-instructions.cc:
 	  each processor owns its own 'bad_instruction' object
 	* src/symbol.cc, src/symbol.h: code cleaning
 
@@ -55,7 +55,7 @@
 	regression/comparator/10f204.lkr,
 	regression/comparator/Makefile, regression/run_regression.sh:
 	- Added a regression test for the 10F204.
-	
+
 2007-07-22 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* modules/usart.cc modules/usart.h doc/gpsim.lyx: 
 	  Added a "hex" attribute to the usart module to force the display to
@@ -98,12 +98,12 @@
 	* src/p18x.cc:
 	- Added I2C support to pic18f2455.
 	- Fixed pin 18 on the pic18f2455.
-	
+
 2007-03-20 Martin Habets <errandir_news@mph.eclipse.co.uk>
 	* src/16bit-instructions.cc, src/p18x.cc, src/p18x.h,
 	src/pic-instructions.cc, src/pic-processor.cc, pic-processor.h:
 	Added support for the p18f2455.
-	
+
 2007-03-20  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc, src/intcon.cc, src/pic-ioports.h,
 	src/intcon.h, src/pic-ioports.cc, src/14bit-processors.cc:
@@ -119,7 +119,7 @@
 2007-03-14  Scott Dattalo <scott@dattalo.com>
 	* src/dspic/dspic-registers.cc: There was no implementation
 	defined for the Status register constructor.
-	
+
 2007-03-14  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc, src/intcon.cc, src/pic-ioports.h,
 	src/intcon.h, src/pic-ioports.cc, src/registers.h,
@@ -135,7 +135,7 @@
 	(yesterday's comment on this was not completely true!)
 	* src/stimuli.cc: Resolved an ambiguity with pullup resistors on
 	I/O pins.
-	
+
 2007-03-06  Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/trace.cc, src/trace.h:
 	Moved the ResetTraceObject from pic-processor.cc to trace.cc
@@ -149,7 +149,7 @@
 
 2007-03-05  Scott Dattalo <scott@dattalo.com>
 	* src/ssp.cc: Removed some printf debug code.
-	
+
 2007-02-25  Scott Dattalo <scott@dattalo.com>
 	* src/modules.h, src/symbol.cc, src/modules.cc, cli/cmd_module.cc:
 	The 'module' and 'module list' commands work again.
@@ -201,7 +201,6 @@
 	cli/cmd_break.cc, cli/cmd_module.cc, cli/input.cc:
 	- Memory leak fixes.
 
-	
 2007-02-12  Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc: Deleted #if 0'd code.(the old symbol 
 	table implementation)
@@ -261,9 +260,7 @@
 	cli/cmd_stimulus.h, cli/cmd_run.cc, cli/input.cc, cli/cmd_load.cc,
 	cli/cmd_log.cc, cli/cmd_stimulus.cc, cli/cmd_symbol.h:
 	- Rewrote the symbol table.
-
 	* src/stimulus_orb.h, src/symbol_orb.h: Removed
-
 
 2007-01-27 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32, plat/win32/libgpsim.def: MSVC sync
@@ -282,12 +279,12 @@
 	* cli/cmd_trace.cc: added an 'info' option to the trace
 	command. This is for displaying information about allocated trace
 	types. It is used primarily for debugging.
-	
+
 2007-01-20  Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: Bug [1631921]. Preferences dialog box was
 	grabbing the gtk focus and preventing child dialog boxes from
 	having focus.
-	
+
 2007-01-17  Scott Dattalo <scott@dattalo.com>
 	* src/expr.cc: Bug [1638250]. ramData[] references in expressions
 	were evaluating to the index of the ramData and not to the ramData
@@ -355,7 +352,7 @@
 	interrupts are properly handled. Also, there was a nasty design
 	error that prevent proper handling of interrupts during the middle
 	of call or return statements.
-	
+
 2007-01-11 Borut Razem <borut.razem@siol.net>
 	* plat/win32/make.mingw: added -Wno-format to prevent mingw build
 	  warnings:
@@ -766,8 +763,8 @@
 
 2006-11-06 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/stimuli.cc: Fixed the p12ce51x I2C-EE bug - it was due to a
-        stimulus initialisation error caused by bit rot in the node summing
-        function for the single stimulus connected case!
+	stimulus initialisation error caused by bit rot in the node summing
+	function for the single stimulus connected case!
 
 2006-11-06 David Barnett <dbarnett@edt.biz>
 	* modules/gpsim_modules.cc: The push_button is named as
