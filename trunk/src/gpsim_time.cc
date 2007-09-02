@@ -45,7 +45,7 @@ Cycle_Counter cycles;
 // create an instance of inline get_cycles() method by taking its address
 Cycle_Counter &(*dummy_cycles)(void) = get_cycles;
 
-StopWatch stop_watch;
+StopWatch *stop_watch;
 
 
 //--------------------------------------------------
@@ -875,7 +875,6 @@ StopWatch::StopWatch()
 {
 
   offset      = 0;
-  initialized = false;
   value       = new StopWatchValue(this);
   rollover    = new StopWatchRollover(this);
   enable      = new StopWatchEnable(this);
@@ -884,27 +883,20 @@ StopWatch::StopWatch()
   if(!value || !rollover || !enable || !direction)
     throw Error("StopWatch");
 
+  globalSymbolTable().addSymbol(value);
+  globalSymbolTable().addSymbol(rollover);
+  globalSymbolTable().addSymbol(enable);
+  globalSymbolTable().addSymbol(direction);
+
+  update();
 }
 
 StopWatch::~StopWatch()
 {
-
   globalSymbolTable().deleteSymbol(value->name());
   globalSymbolTable().deleteSymbol(rollover->name());
   globalSymbolTable().deleteSymbol(enable->name());
   globalSymbolTable().deleteSymbol(direction->name());
-}
-void StopWatch::init()
-{
-  if(!initialized) {
-    globalSymbolTable().addSymbol(value);
-    globalSymbolTable().addSymbol(rollover);
-    globalSymbolTable().addSymbol(enable);
-    globalSymbolTable().addSymbol(direction);
-
-    update();
-    initialized = true;
-  }
 }
 
 //----------------------------------------

@@ -118,7 +118,7 @@ multi_word_branch::multi_word_branch(Processor *new_cpu, unsigned int new_opcode
 }
 void multi_word_branch::runtime_initialize()
 {
-  if(cpu16->program_memory[PMindex+1] != &bad_instruction)
+  if(cpu16->program_memory[PMindex+1] != &cpu16->bad_instruction)
     {
       word2_opcode = cpu16->program_memory[PMindex+1]->get_opcode();
 

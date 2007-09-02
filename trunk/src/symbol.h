@@ -101,7 +101,6 @@ class SymbolTable_t : protected map<string, gpsimObject *>
   // The SymbolTable class has access to all map<>'s methods.
   friend class SymbolTable;
 public:
-  ~SymbolTable_t();
 
   int addSymbol(gpsimObject *, string *AliasedName=0);
   int removeSymbol(gpsimObject *);

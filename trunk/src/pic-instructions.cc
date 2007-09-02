@@ -154,9 +154,6 @@ void invalid_instruction::addLabel(string &rLabel)
   cout << "*** WARNING: adding label '"<<rLabel << "' to an invalid instruction\n";
 }
 
-// Instantiate an invalid instruction
-invalid_instruction bad_instruction(0,0,0);
-
 
 //------------------------------------------------------------------------
 // update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
@@ -228,7 +225,7 @@ void AliasedInstruction::setReplaced(instruction *_replaced)
 
 instruction * AliasedInstruction::getReplaced()
 {
-  return m_replaced ? m_replaced : &bad_instruction;
+  return m_replaced ? m_replaced : &dynamic_cast<Processor *>(cpu)->bad_instruction;
 }
 
 void AliasedInstruction::execute()

@@ -216,12 +216,11 @@ Integer *verbosity;
 //########################################################################
 void init_attributes()
 {
-  
   // Define internal simulator attributes .
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
   globalSymbolTable().addSymbol(verbosity);
   globalSymbolTable().addSymbol(new CycleCounterAttribute());
-  stop_watch.init();
+  stop_watch = new StopWatch;
 #ifdef HAVE_GUI
   globalSymbolTable().addSymbol(new GUIUpdateRateAttribute());
 #endif
@@ -251,4 +250,6 @@ void destroy_attributes()
   globalSymbolTable().deleteSymbol("BOD_RESET");
   globalSymbolTable().deleteSymbol("SIM_RESET");
   globalSymbolTable().deleteSymbol("MCLR_RESET");
+
+  delete stop_watch;
 }

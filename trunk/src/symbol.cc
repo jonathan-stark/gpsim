@@ -54,10 +54,6 @@ SymbolTable &globalSymbolTable()
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-SymbolTable_t::~SymbolTable_t()
-{
-}
-
 int SymbolTable_t::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
 {
   if (pSym) {

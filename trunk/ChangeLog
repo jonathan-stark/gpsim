@@ -1,5 +1,13 @@
 2007-09-02 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
+	* src/attributes.cc, src/gpsim_time.cc, src/gpsim_time.h:
+	  create stop_watch object dynamically to overcome the static object
+	  creation sequence dependency on the C++ compiler implementation
+	* src/16bit-instructions.cc, src/pic-instructions.cc,
+	  src/pic-instructions.h, src/pic-instructions.h,
+	  src/processor.cc, src/processor.h:
+	  each processor owns its own 'bad_instruction' object
+	* src/symbol.cc, src/symbol.h: code cleaning
 
 2007-08-28 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc: module settings fix for new symbol table

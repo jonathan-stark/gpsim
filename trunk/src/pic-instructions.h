@@ -280,9 +280,6 @@ public:
 
 
 
-//---------------------------------------------------------
-extern invalid_instruction bad_instruction;
-
 //-----------------------------------------------------------------
 //
 // instruction_constructor - a class used to create the PIC instructions

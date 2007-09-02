@@ -101,7 +101,8 @@ Processor::Processor(const char *_name, const char *_desc)
     pma(0),
     rma(this),
     ema(this),
-    pc(0)
+    pc(0),
+    bad_instruction(0, 0, 0)
 {
   registers = 0;
 
@@ -146,8 +147,6 @@ Processor::Processor(const char *_name, const char *_desc)
   m_pbBreakOnInvalidRegisterWrite = new Boolean("BreakOnInvalidRegisterWrite",
     true, "Halt simulation when an invalid register is written to.");
   addSymbol(m_pbBreakOnInvalidRegisterWrite);
-
-
 }
 
 
@@ -480,7 +479,7 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 //   Once the memory has been allocated, this routine will initialize
 // it with the 'bad_instruction'. The bad_instruction is an instantiation
 // of the instruction class that chokes gpsim if it is executed. Note that
-// there is only one instance of 'bad_instruction'.
+// each processor owns its own 'bad_instruction' object.
 
 void Processor::init_program_memory (unsigned int memory_size)
 {
@@ -503,7 +502,6 @@ void Processor::init_program_memory (unsigned int memory_size)
 
   m_ProgramMemoryAllocationSize = memory_size;
 
-  // FIXME -- each processors needs to own its own bad_instruction object
   bad_instruction.set_cpu(this);
   for (unsigned int i = 0; i < memory_size; i++)
     program_memory[i] = &bad_instruction;
@@ -1768,7 +1766,7 @@ void ProgramMemoryAccess::remove(unsigned int address, instruction *bp_instructi
 instruction *ProgramMemoryAccess::getFromAddress(unsigned int address)
 {
   if(!cpu || !cpu->IsAddressInRange(address))
-      return &bad_instruction;
+      return &cpu->bad_instruction;
   unsigned int uIndex = cpu->map_pm_address2index(address);
   return getFromIndex(uIndex);
 }
