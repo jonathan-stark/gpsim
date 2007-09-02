@@ -1214,7 +1214,7 @@ void pic_processor::remove_sfr_register(Register *ppReg, unsigned int addr)
 //   Once the memory has been allocated, this routine will initialize
 // it with the 'bad_instruction'. The bad_instruction is an instantiation
 // of the instruction class that chokes gpsim if it is executed. Note that
-// there is only one instance of 'bad_instruction'.
+// each processor owns its own 'bad_instruction' object.
 
 void pic_processor::init_program_memory (unsigned int memory_size)
 {

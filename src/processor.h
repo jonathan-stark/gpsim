@@ -410,6 +410,9 @@ public:
   TraceType *readTT, *writeTT;
   map <unsigned int, TraceType *> mTrace;
 
+  // Processor's 'bad_instruction' object
+  invalid_instruction bad_instruction;
+
   // --- TSD removed 01JAN07 These don't appear to be used anywhere
   //virtual void set(const char *cP,int len=0);
   //virtual void get(char *, int len);
