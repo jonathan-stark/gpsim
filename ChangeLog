@@ -8,6 +8,7 @@
 	  src/processor.cc, src/processor.h, src/dspic/sdpic-instructions.cc:
 	  each processor owns its own 'bad_instruction' object
 	* src/symbol.cc, src/symbol.h: code cleaning
+	* doc/snap_header.html: corrected ChangeLog link
 
 2007-08-28 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc: module settings fix for new symbol table
