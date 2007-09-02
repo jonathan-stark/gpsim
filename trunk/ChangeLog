@@ -1,3 +1,6 @@
+2007-09-02 Borut Razem <borut.razem@siol.net>
+	* plat/win32/libgpsim.def: MSVC sync
+
 2007-08-28 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc: module settings fix for new symbol table
 	* gli/cmd_dump.cc: fix detection of invalid registers in register dump
@@ -47,8 +50,8 @@
 	
 2007-07-22 Rob Pearce <rob@bdt-home.demon.co.uk>
 	* modules/usart.cc modules/usart.h doc/gpsim.lyx: 
-          Added a "hex" attribute to the usart module to force the display to
-          show all bytes as hex, for use with pure binary data simulations.
+	  Added a "hex" attribute to the usart module to force the display to
+	  show all bytes as hex, for use with pure binary data simulations.
 
 2007-07-15 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.cc src/pic-processor.h src/p16f8x.h src/p16f8x.cc

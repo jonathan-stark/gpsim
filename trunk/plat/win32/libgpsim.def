@@ -454,6 +454,7 @@ EXPORTS
     ?register_size@Register@@UBEIXZ
     ?removeRegister@RegisterMemoryAccess@@QAE_NHPAVRegister@@@Z
     ?removeSink@PinMonitor@@QAEXPAVSignalSink@@@Z
+    ?removeSymbol@Module@@QAEHPAVgpsimObject@@@Z
     ?remove_interface@gpsimInterface@@QAEXI@Z
     ?remove_xref@AliasedInstruction@@UAEXPAX@Z
     ?remove_xref@Value@@UAEXPAX@Z
@@ -509,6 +510,7 @@ EXPORTS
     ?setEnableMask@PortRegister@@UAEXI@Z
     ?setGUImode@gpsimInterface@@QAEX_N@Z
     ?setMonitor@IOPIN@@UAEXPAVPinMonitor@@@Z
+    ?setPinGeometry@Package@@QAEXIMMH_N@Z
     ?setSafeMode@Processor@@UAEX_N@Z
     ?setUnknownMode@Processor@@UAEX_N@Z
     ?setWarnMode@Processor@@UAEX_N@Z
