@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 
 class I2C_EE;
+class PromAddressAttribute;
 
 namespace I2C_EEPROM_Modules {
 
@@ -53,7 +54,7 @@ class I2C_ENABLE;
     I2C_ENABLE *m_A[3];
     I2C_ENABLE *m_wp;
     unsigned int chip_select;	// Write Protect and A0 - A2 state
-    
+    PromAddressAttribute *att_eeprom;   
 
   };
   

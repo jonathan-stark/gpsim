@@ -21,12 +21,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_LOAD_H__
 #define __CMD_LOAD_H__
 
-class cmd_load : public command
+#include "../src/hexutils.h"
+
+class cmd_load : public command, IntelHexProgramFileType
 {
 public:
 
   cmd_load();
   int load(int bit_flag,const char *filename);
+  int load(int bit_flag, gpsimObject* module, const char *filename);
   int load(gpsimObject *file, gpsimObject * pProcessorType = NULL);
   int load(const char *file, const char *pProcessorType);
 };

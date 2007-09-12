@@ -57,11 +57,17 @@ public:
   virtual void write_is_complete();
 
   virtual Register *get_register(unsigned int address);
+  inline int register_size() {return rom_data_size; }
+  inline void set_register_size(int bytes) { rom_data_size = bytes; }
 
   virtual void new_scl_edge ( bool direction );
   virtual void new_sda_edge ( bool direction );
   virtual void attach ( Stimulus_Node *_scl, Stimulus_Node *_sda );
   virtual void set_chipselect(unsigned int _chipselect); 
+
+  inline virtual unsigned int get_rom_size() { return (rom_size); }
+  // XXX might want to make get_rom a friend only to cli_dump
+  inline virtual Register **get_rom() { return (rom); }
 
   void dump();
 
@@ -75,6 +81,7 @@ protected:
 
   Register **rom;          //  The data area.
   unsigned int rom_size;
+  int	rom_data_size;	   // width of data in bytes
   unsigned int xfr_addr,xfr_data;  // latched adr and data from I2C.
   unsigned int write_page_off;	// offset into current write page
   unsigned int write_page_size; // max number of writes in one block
@@ -109,9 +116,6 @@ protected:
 private:
   // Is this even used?
   virtual void change_rom(unsigned int offset, unsigned int val);
-  inline virtual unsigned int get_rom_size() { return (rom_size); }
-  // XXX might want to make get_rom a friend only to cli_dump
-  inline virtual Register **get_rom() { return (rom); }
 };
 
 

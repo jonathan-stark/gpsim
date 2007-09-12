@@ -21,7 +21,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_DUMP_H__
 #define __CMD_DUMP_H__
 
-class cmd_dump : public command
+#include "../src/hexutils.h"
+
+class cmd_dump : public command, IntelHexProgramFileType
 {
 public:
 
@@ -36,8 +38,12 @@ public:
   //  void dump(void);
 
   void dump(int bit_flag);
+  int dump(int bit_flag, gpsimObject* module, const char * filename);
+
+private:
   void dump_sfrs(void);
-  virtual int is_repeatable(void) { return 1; };
+  void dump_regs(Register **fr, int mem_size, int reg_size, int mem_type);
+
 };
 
 extern cmd_dump dump;

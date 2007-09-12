@@ -446,6 +446,28 @@ disassemble_cmd
 dump_cmd: 
           DUMP                          {dump.dump(2);}
           | DUMP bit_flag               {dump.dump($2->value);}
+          | DUMP bit_flag SYMBOL_T 
+          // dump m module_name 
+          {
+            //                   key,  module_name
+            quit_parse = dump.dump($2->value, $3, NULL) == 0;
+          }
+          | DUMP bit_flag SYMBOL_T LITERAL_STRING_T
+          // dump m module_name filename
+          {
+            //                   key,  module_name, filename
+            quit_parse = dump.dump($2->value, $3, $4->getVal()) == 0;
+            delete $4;
+
+/*
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+*/
+          }
+
           ;
 
 eval_cmd:
@@ -532,6 +554,17 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
               YYABORT;
             }
           }
+          | LOAD bit_flag SYMBOL_T LITERAL_STRING_T
+	  {
+            quit_parse = c_load.load($2->value, $3, $4->getVal()) == 0;
+            delete $4;
+
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+	  }
           | LOAD LITERAL_STRING_T
           // load [programname | cmdfile]
           {

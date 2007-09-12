@@ -182,6 +182,8 @@ public:
     rom[offset]->value.put(val);
   }
 
+  inline int register_size() { return (rom_data_size); }
+  inline void set_resister_size(int bytes) { rom_data_size = bytes; }
   inline virtual unsigned int get_rom_size() { return (rom_size); }
   // XXX might want to make get_rom a friend only to cli_dump
   inline virtual Register **get_rom() { return (rom); }
@@ -206,6 +208,7 @@ public:
   Register **rom;           //  and the data area.
   RegisterCollection *m_UiAccessOfRom; // User access to the rom.
 
+  int rom_data_size;		// data width in bytes
   unsigned int rom_size;
   unsigned int wr_adr,wr_data;  // latched adr and data for eewrites.
   unsigned int rd_adr;          // latched adr for eereads.
