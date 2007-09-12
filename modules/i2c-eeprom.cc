@@ -37,6 +37,19 @@ class Processor;
 #include "../src/packages.h"
 #include "../src/gpsim_interface.h"
 
+  class PromAddressAttribute : public Integer
+  {
+  public:
+    PromAddressAttribute(I2C_EE *m_eeprom, const char *_name, const char * desc);
+    virtual void set(gint64);
+  };
+  PromAddressAttribute::PromAddressAttribute(I2C_EE *m_eeprom,const char *_name, const char * desc)
+    : Integer(_name,(gint64)m_eeprom,desc)
+ {}
+ void PromAddressAttribute::set(gint64 v)
+ {
+    Integer::set(v);
+ }
 namespace I2C_EEPROM_Modules {
 
 class I2C_ENABLE : public IOPIN
@@ -72,16 +85,23 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
 
   I2C_EE_Module::~I2C_EE_Module()
   {
+    delete att_eeprom;
     delete m_eeprom;
   }
 
+
+
   Module *I2C_EE_Module::construct_2k(const char *_new_name)
   {
+     string att_name = _new_name;
 
     I2C_EE_Module *pEE = new I2C_EE_Module(_new_name);
     // I2C_EE size in bytes prom size in bits
     (pEE->m_eeprom) = new I2C_EE((Processor*)0,256, 16, 1, 0xe, 0, 0);
     pEE->create_iopin_map();
+    att_name += ".eeprom";
+    pEE->att_eeprom = new PromAddressAttribute(pEE->m_eeprom, "eeprom", "Address I2C_EE");
+    pEE->addSymbol(pEE->att_eeprom);
 
    return(pEE);
 
@@ -89,10 +109,15 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
   Module *I2C_EE_Module::construct_16k(const char *_new_name)
   {
 
+     string att_name = _new_name;
+
     I2C_EE_Module *pEE = new I2C_EE_Module(_new_name);
     // I2C_EE size in bytes prom size in bits
     (pEE->m_eeprom) = new I2C_EE(0,2048, 16, 1, 0, 0xe, 1);
     pEE->create_iopin_map();
+    att_name += ".eeprom";
+    pEE->att_eeprom = new PromAddressAttribute(pEE->m_eeprom, att_name.c_str(), "Address I2C_EE");
+    pEE->addSymbol(pEE->att_eeprom);
 
    return(pEE);
 
@@ -100,11 +125,16 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
   Module *I2C_EE_Module::construct_256k(const char *_new_name)
   {
 
+     string att_name = _new_name;
+
     I2C_EE_Module *pEE = new I2C_EE_Module(_new_name);
     // I2C_EE size in bytes prom size in bits
     (pEE->m_eeprom) = new I2C_EE(0,32768, 64, 2, 0xe, 0, 0);
     pEE->create_iopin_map();
 
+    att_name += ".eeprom";
+    pEE->att_eeprom = new PromAddressAttribute(pEE->m_eeprom, att_name.c_str(), "Address I2C_EE");
+    pEE->addSymbol(pEE->att_eeprom);
    return(pEE);
 
   }

@@ -1,3 +1,16 @@
+2007-09-13 Roy Rankin <rrankin@ihug.com.au>
+	* src/hexutils.cc src/hexutils.h: read/write Intel hex files from/to 
+	    register arrays. File format not dependant on endian of processor.
+	* src/i2c-ee.h src/i2c-ee.cc src/eeprom.cc src/eeprom.h: EEPROM given
+	    register size. 
+	* modules/i2c-eeprom.h modules/i2c-eeprom.cc: .eeprom symbol added so
+	    dump/load can converse with module
+	* cli/cmd_load.h cli/cmd_load.cc cli/cmd_dump.h cli/cmd_dump.cc
+	  cli/parse.yy: add EEPROM dump/load commands.
+	* doc/gpsim.lyx: spelling corrections, document new load and dump 
+		commands, improve EEPROM documentation.
+	* regression/i2c/p16f876a.asm: Add tests for EEPROM dump/load.
+
 2007-09-02 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
 	* src/attributes.cc, src/gpsim_time.cc, src/gpsim_time.h:

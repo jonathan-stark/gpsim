@@ -152,6 +152,7 @@ I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page
 	unsigned int _BSmask, unsigned int _BSshift)
   : rom(0),
     rom_size(_rom_size),                // size of eeprom in bytes
+    rom_data_size(1),
     xfr_addr(0), xfr_data(0),
     write_page_off(0),
     write_page_size(_write_page_size),  // Page size for writes

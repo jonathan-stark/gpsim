@@ -1,15 +1,17 @@
+;
+; Test reading, writing, dump and load for external i2c EEPROM module
+; 
+; Copyright (c) 2007 Roy Rankin
+; MACROS and some code included the following
 ;************************************************************************
 ;*	Microchip Technology Inc. 2006
-;*	Assembler version: 4.02
-;*	Filename:
-;*		MCP355x_Sensor_EVM_main.asm (main routine)
-;*	Dependents:
-;*		MCP355x_Sensor_EVM_lcd.asm
-;*		MCP355x_Sensor_EVM_math.asm
-;*		16f877A.lkr
 ;*	02/15/06
 ;*	Designed to run at 20MHz
 ;************************************************************************
+; gpsim command
+.command macro x
+  .direct "C", x
+  endm
 
 
 
@@ -56,12 +58,29 @@ start
    .sim "attach n6 porta3 ee.A2"
    .sim "scope.ch0 = \"portc3\""
    .sim "scope.ch1 = \"portc4\""
+   .sim "pu1.xpos = 240."
+   .sim "pu1.ypos = 336."
+   .sim "pu2.xpos = 216."
+   .sim "pu2.ypos = 24."
+   .sim "ee.xpos = 48."
+   .sim "ee.ypos = 180."
+   .sim "p16f876a.xpos = 240."
+   .sim "p16f876a.ypos = 84."
+
 
 
 
 	call	ProgInit		; Get everything running step-by-step
         call	I2CSendResult
 	call	write_eeprom
+	call	is_ready
+	call	read_eeprom
+  .command "dump e ee dump.hex"
+        nop
+	call	is_ready
+	call	clr_eeprom
+  .command "load e ee dump.hex"
+	nop
 	call	is_ready
 	call	read_eeprom
 
@@ -266,6 +285,8 @@ is_ready
 	banksel	SSPCON2		; Generate I2C start
 	btfsc	SSPCON2,ACKSTAT
 	goto	is_ready
+	banksel PIR2
+	bcf	PIR2,BCLIF
 	return
 	
 write_eeprom_address
@@ -300,6 +321,25 @@ write_eeprom
 	banksel PIR1
 	bcf	PIR1,SSPIF
 	movlw	0x81		; write data2
+	call	I2C_send_w
+  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
+	nop
+	nop
+	call I2C_stop
+	return
+
+clr_eeprom
+	call 	write_eeprom_address
+	banksel PIR1
+	bcf	PIR1,SSPIF
+	movlw	0x00		; write data1
+	call	I2C_send_w
+  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data1 to eeprom ACK\""
+	nop
+
+	banksel PIR1
+	bcf	PIR1,SSPIF
+	movlw	0x00		; write data2
 	call	I2C_send_w
   .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
 	nop

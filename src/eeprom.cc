@@ -256,6 +256,7 @@ EEPROM::EEPROM(Processor *pCpu)
     cpu(pCpu),
     intcon(0),
     rom(0),
+    rom_data_size(1),
     m_UiAccessOfRom(0),
     rom_size(0),
     eecon1(pCpu,"eecon1","EE Control 1"),
@@ -400,7 +401,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
   char str[100];
   for (unsigned int i = 0; i < rom_size; i++) {
 
-    snprintf (str, sizeof(str), "eereg0x%02x", i);
+    snprintf (str, sizeof(str), "eereg 0x%02x", i);
     rom[i] = new Register(cpu,str);
     rom[i]->address = i;
     rom[i]->value.put(0);
