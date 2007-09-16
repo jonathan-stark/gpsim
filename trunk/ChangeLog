@@ -1,3 +1,14 @@
+2007-09-17 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_symbol.cc: symbols dumped as module.symbol with better
+	    format, don't dump line number symbols.
+	* gui/gui_symbols.cc: symbols dumped as module.symbol.
+	* src/registers.cc: Add module name in response to query array value.
+	* src/i2c-ee.h, src/i2c-ee.cc, modules/i2c-eeprom.cc: Add 
+	    RegisterCollection to allow command line viewing & change 
+	    of EEPROM cells.
+	* doc/gpsim.lyx:Document new EEPROM functionality, improve scope
+	    window documentation.
+
 2007-09-16 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_break.cc: unless verbose set, do not output assert messages
 	  when loading them to avoid user concusion and masking of error

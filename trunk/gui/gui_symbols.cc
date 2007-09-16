@@ -207,6 +207,8 @@ static void unselect_row(GtkCList *clist,
 }
 #if 1
 static Symbol_Window *lpSW=0;
+static string table;
+
 void updateOneSymbol(const SymbolEntry_t &sym)
 {
 
@@ -217,15 +219,22 @@ void updateOneSymbol(const SymbolEntry_t &sym)
     if((typeid(*pVal) == typeid(LineNumberSymbol) ) |
        (lpSW->filter_addresses && (typeid(*pVal) == typeid(AddressSymbol)))  ||
        (lpSW->filter_constants && (typeid(*pVal) == typeid(Integer))) ||
+       (lpSW->filter_constants && (typeid(*pVal) == typeid(Boolean))) ||
        (lpSW->filter_registers && (pReg)))
         return;
 
 #define SYM_LEN 32
     const char *entry[3];
+    string symbol_name;
     char type[SYM_LEN];
     char value[SYM_LEN];
 
-    entry[0] = pVal->name().c_str();
+    if (table != "__global__")
+	symbol_name = table + "." + pVal->name();
+    else
+	symbol_name = pVal->name();
+
+    entry[0] = symbol_name.c_str();
     strncpy(type, pVal->showType().c_str(), sizeof(type));
     type[SYM_LEN-1] = 0;
     entry[1] = type;
@@ -249,6 +258,7 @@ void updateOneSymbol(const SymbolEntry_t &sym)
 static void updateSymbolTables(const SymbolTableEntry_t &st)
 {
   if(verbose)cout << " gui Symbol Window: " << st.first << endl;
+  table = st.first;
   (st.second)->ForEachSymbolTable(updateOneSymbol);
 }
 #endif
