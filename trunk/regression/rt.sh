@@ -20,16 +20,7 @@ touch $LOGFILE
 # Run the simulation and save the results
 make $2 > $LOGFILE
 
-cat $LOGFILE |\
-sed -n -e '/running\.\.\./,$ {
-/^ *Message:/ {
-s/^ *Message:\(.*\)$/\1/p
-q
-}
-}
-$ a\
-FAILED
-' | grep "PASSED"
+grep "PASSED" $LOGFILE
 
 if [ $? -ne 0 ] ; then
   echo "!!! FAILED $1/make $2"

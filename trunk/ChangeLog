@@ -1,3 +1,9 @@
+2007-09-16 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_break.cc: unless verbose set, do not output assert messages
+	  when loading them to avoid user concusion and masking of error
+	  messages.
+	* regression/rt.sh: simplified due to above change.
+
 2007-09-13 Roy Rankin <rrankin@ihug.com.au>
 	* src/hexutils.cc src/hexutils.h: read/write Intel hex files from/to 
 	    register arrays. File format not dependant on endian of processor.

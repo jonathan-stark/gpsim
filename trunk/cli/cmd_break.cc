@@ -227,7 +227,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
   if (bpn>=0) {
     if (pString)
       get_bp().set_message(bpn, m);
-    get_bp().dump1(bpn);
+    if(verbose)get_bp().dump1(bpn); //RRR
     if (dynamic_cast<LiteralInteger*>(pFirst))
       delete pFirst;
 
