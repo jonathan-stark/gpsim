@@ -571,7 +571,11 @@ Value &RegisterCollection::GetAt(unsigned int uIndex, Value *) {
   m_ReturnValue.set((int)m_ppRegisters[uIndex]->get_value());
   m_ReturnValue.setBitmask(m_pProcessor->register_mask());
   ostringstream sIndex;
-  sIndex << Value::name() << "[" << hex << m_szPrefix << uIndex << "]" << '\000';
+  if (m_pProcessor)
+      sIndex << m_pProcessor->name() << "." ;
+
+  sIndex << Value::name() << "[" 
+	  << hex << m_szPrefix << uIndex << "]" << '\000';
   m_ReturnValue.new_name(sIndex.str().c_str());
   return m_ReturnValue;
 }

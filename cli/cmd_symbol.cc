@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/cmd_gpsim.h"
 #include "../src/symbol.h"
 #include "../src/ValueCollections.h"
+#include "../src/pic-instructions.h"
 
 cmd_symbol c_symbol;
 
@@ -65,16 +66,28 @@ cmd_symbol::cmd_symbol()
   op = cmd_symbol_options; 
 }
 
+static string table;
+
 void dumpOneSymbol(const SymbolEntry_t &sym)
 {
-  cout << "  " << sym.second->name() 
-       << " Type " << sym.second->showType()
-       << endl;
+
+  string out;
+
+  Value *pVal = dynamic_cast<Value *>(sym.second);
+  if (pVal != NULL && typeid(*pVal) == typeid(LineNumberSymbol))
+     return;
+
+  if (table != "__global__")
+      out = table + "." + sym.second->name();
+  else 
+      out = sym.second->name();
+
+  printf("%-25s Type: %s\n", out.c_str(), sym.second->showType().c_str());
 }
 
 void dumpSymbolTables(const SymbolTableEntry_t &st)
 {
-  cout << " Symbol Table: " << st.first << endl;
+  table = st.first;
   (st.second)->ForEachSymbolTable(dumpOneSymbol);
 }
 

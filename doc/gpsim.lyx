@@ -1,17 +1,25 @@
-#LyX 1.4.2 created this file. For more info see http://www.lyx.org/
-\lyxformat 245
+#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 276
 \begin_document
 \begin_header
 \textclass book
 \language english
 \inputencoding default
-\fontscheme times
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
 \graphics default
 \paperfontsize 10
 \spacing single
 \papersize default
 \use_geometry false
 \use_amsmath 1
+\use_esint 0
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
@@ -28,7 +36,9 @@
 \papersides 1
 \paperpagestyle default
 \tracking_changes false
-\output_changes true
+\output_changes false
+\author "" 
+\author "" 
 \end_header
 
 \begin_body
@@ -42,7 +52,7 @@ $Date$
 \end_layout
 
 \begin_layout Standard
-\begin_inset LatexCommand \tableofcontents{}
+\begin_inset LatexCommand tableofcontents
 
 \end_inset
 
@@ -292,8 +302,8 @@ http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html
 \end_layout
 
 \begin_layout Standard
-You can find detailed instructions there for installing gpsim and its 
- dependencies.
+You can find detailed instructions there for installing gpsim and its  dependenc
+ies.
  Snap shots can be found:
 \end_layout
 
@@ -397,8 +407,8 @@ gpsim has been developed under Linux.
  like Fedora, Ubuntu, etc.
  gpsim has also been ported to the MAC, MicroSoft Windows, Solaris, and
  BSD.
- Two packages gpsim requires that may not be available with all Linux 
- distributions are readline and gtk (the gimp tool kit).
+ Two packages gpsim requires that may not be available with all Linux  distribut
+ions are readline and gtk (the gimp tool kit).
  The ./configure script should tell you if these packages are not installed
  on your system or if the revisions that are installed are too old.
  
@@ -492,7 +502,8 @@ summary
 
 \begin_layout Standard
 attach
-\begin_inset LatexCommand \index{attach}
+\begin_inset LatexCommand index
+name "attach"
 
 \end_inset
 
@@ -517,7 +528,8 @@ Attach stimuli to nodes
 
 \begin_layout Standard
 break
-\begin_inset LatexCommand \index{break}
+\begin_inset LatexCommand index
+name "break"
 
 \end_inset
 
@@ -542,7 +554,8 @@ Set a break point
 
 \begin_layout Standard
 bus
-\begin_inset LatexCommand \index{bus}
+\begin_inset LatexCommand index
+name "bus"
 
 \end_inset
 
@@ -567,7 +580,8 @@ Add or display node busses
 
 \begin_layout Standard
 clear
-\begin_inset LatexCommand \index{clear}
+\begin_inset LatexCommand index
+name "clear"
 
 \end_inset
 
@@ -592,7 +606,8 @@ Remove a break point
 
 \begin_layout Standard
 disassemble
-\begin_inset LatexCommand \index{disassemble}
+\begin_inset LatexCommand index
+name "disassemble"
 
 \end_inset
 
@@ -617,7 +632,8 @@ Disassemble the current cpu
 
 \begin_layout Standard
 dump
-\begin_inset LatexCommand \index{dump}
+\begin_inset LatexCommand index
+name "dump"
 
 \end_inset
 
@@ -642,7 +658,8 @@ Display either the RAM or EEPROM
 
 \begin_layout Standard
 frequency
-\begin_inset LatexCommand \index{frequency}
+\begin_inset LatexCommand index
+name "frequency"
 
 \end_inset
 
@@ -667,7 +684,8 @@ Set processor frequency
 
 \begin_layout Standard
 help
-\begin_inset LatexCommand \index{help}
+\begin_inset LatexCommand index
+name "help"
 
 \end_inset
 
@@ -692,7 +710,8 @@ Type help "command" for more help on a command
 
 \begin_layout Standard
 icd
-\begin_inset LatexCommand \index{icd}
+\begin_inset LatexCommand index
+name "icd"
 
 \end_inset
 
@@ -717,7 +736,8 @@ In Circuit Debugger support.
 
 \begin_layout Standard
 list
-\begin_inset LatexCommand \index{list}
+\begin_inset LatexCommand index
+name "list"
 
 \end_inset
 
@@ -742,7 +762,8 @@ Display source and list files
 
 \begin_layout Standard
 load
-\begin_inset LatexCommand \index{load}
+\begin_inset LatexCommand index
+name "load"
 
 \end_inset
 
@@ -767,7 +788,8 @@ Load either a hex or command file
 
 \begin_layout Standard
 log
-\begin_inset LatexCommand \index{log}
+\begin_inset LatexCommand index
+name "log"
 
 \end_inset
 
@@ -792,7 +814,8 @@ Log/record events to a file
 
 \begin_layout Standard
 node
-\begin_inset LatexCommand \index{node}
+\begin_inset LatexCommand index
+name "node"
 
 \end_inset
 
@@ -817,7 +840,8 @@ Add or display stimulus nodes
 
 \begin_layout Standard
 module
-\begin_inset LatexCommand \index{module}
+\begin_inset LatexCommand index
+name "module"
 
 \end_inset
 
@@ -851,7 +875,8 @@ Select & Display modules
 
 \begin_layout Standard
 processor
-\begin_inset LatexCommand \index{processor}
+\begin_inset LatexCommand index
+name "processor"
 
 \end_inset
 
@@ -876,7 +901,8 @@ Add/list processors
 
 \begin_layout Standard
 quit
-\begin_inset LatexCommand \index{quit}
+\begin_inset LatexCommand index
+name "quit"
 
 \end_inset
 
@@ -930,7 +956,8 @@ Reset all or parts of the simulation
 
 \begin_layout Standard
 run
-\begin_inset LatexCommand \index{run}
+\begin_inset LatexCommand index
+name "run"
 
 \end_inset
 
@@ -955,7 +982,8 @@ Execute the pic program
 
 \begin_layout Standard
 set
-\begin_inset LatexCommand \index{set}
+\begin_inset LatexCommand index
+name "set"
 
 \end_inset
 
@@ -989,7 +1017,8 @@ display and control gpsim behavior flags
 
 \begin_layout Standard
 step
-\begin_inset LatexCommand \index{step}
+\begin_inset LatexCommand index
+name "step"
 
 \end_inset
 
@@ -1014,7 +1043,8 @@ Execute one or more instructions
 
 \begin_layout Standard
 stimulus
-\begin_inset LatexCommand \index{stimulus}
+\begin_inset LatexCommand index
+name "stimulus"
 
 \end_inset
 
@@ -1039,7 +1069,8 @@ Create a stimulus
 
 \begin_layout Standard
 stopwatch
-\begin_inset LatexCommand \index{stopwatch}
+\begin_inset LatexCommand index
+name "stopwatch"
 
 \end_inset
 
@@ -1073,7 +1104,8 @@ Measure time between events
 
 \begin_layout Standard
 symbol
-\begin_inset LatexCommand \index{symbol}
+\begin_inset LatexCommand index
+name "symbol"
 
 \end_inset
 
@@ -1098,7 +1130,8 @@ Add/list symbols
 
 \begin_layout Standard
 trace
-\begin_inset LatexCommand \index{trace}
+\begin_inset LatexCommand index
+name "trace"
 
 \end_inset
 
@@ -1123,7 +1156,8 @@ Dump the trace history
 
 \begin_layout Standard
 version
-\begin_inset LatexCommand \index{version}
+\begin_inset LatexCommand index
+name "version"
 
 \end_inset
 
@@ -1148,7 +1182,8 @@ Display gpsim's version
 
 \begin_layout Standard
 x
-\begin_inset LatexCommand \index{x}
+\begin_inset LatexCommand index
+name "x"
 
 \end_inset
 
@@ -1187,7 +1222,8 @@ The built in 'help' command provides additional online information.
 
 \begin_layout Section
 attach
-\begin_inset LatexCommand \index{attach}
+\begin_inset LatexCommand index
+name "attach"
 
 \end_inset
 
@@ -1219,7 +1255,8 @@ gpsim> node                    # Display the new "net list".
 
 \begin_layout Section
 break
-\begin_inset LatexCommand \index{break}
+\begin_inset LatexCommand index
+name "break"
 
 \end_inset
 
@@ -1234,7 +1271,8 @@ The break command is used to set and examine break points.
  is true.
  Break points are ignored during single stepping.
  See chapter 
-\begin_inset LatexCommand \ref{cha:Assertions-and-Extended}
+\begin_inset LatexCommand ref
+reference "cha:Assertions-and-Extended"
 
 \end_inset
 
@@ -1412,9 +1450,9 @@ Attribute Breakpoints
 gpsim also supports a concept of 
 \emph on
 attribute breakpoints.
- 
+
 \emph default
-Attributes are parameters that gpsim and its modules expose to the user
+ Attributes are parameters that gpsim and its modules expose to the user
  interface.
  For example, the simulator stopwatch exposes attributes which support 
  breakpoints.
@@ -1441,7 +1479,8 @@ The cycle counter is gpsim's time keeper.
 
 \begin_layout Section
 clear
-\begin_inset LatexCommand \index{clear}
+\begin_inset LatexCommand index
+name "clear"
 
 \end_inset
 
@@ -1483,7 +1522,8 @@ A break point disable/enable feature has been discussed and may be added
 
 \begin_layout Section
 disassemble
-\begin_inset LatexCommand \index{disassemble}
+\begin_inset LatexCommand index
+name "disassemble"
 
 \end_inset
 
@@ -1554,7 +1594,8 @@ With a single numeric option, the disassemble command will
 
 \begin_layout Section
 dump
-\begin_inset LatexCommand \index{dump}
+\begin_inset LatexCommand index
+name "dump"
 
 \end_inset
 
@@ -1575,19 +1616,22 @@ dump r or dump with no options will display all of the file registers and
 \end_layout
 
 \begin_layout Standard
+
 \end_layout
 
 \begin_layout Standard
-dump e will display the contents of the processor EEPROM (if the pic being simulated
- contains any).
+dump e will display the contents of the processor EEPROM (if the pic being
+ simulated contains any).
 \end_layout
 
 \begin_layout Standard
+
 \end_layout
 
 \begin_layout Standard
-The 'dump e module_name' command will display the contents of an EEPROM where 
- module_name can either be the name of a module or processor which contains an EEPROM.
+The 'dump e module_name' command will display the contents of an EEPROM
+ where  module_name can either be the name of a module or processor which
+ contains an EEPROM.
 \end_layout
 
 \begin_layout Standard
@@ -1597,21 +1641,22 @@ The 'dump e module_name' command will display the contents of an EEPROM where
 \begin_layout Standard
 The 'dump e module_name filename' command dumps the contents of a module's
  EEPROM, in Intel hex format, into the file with the given name.
- The 'load e' command can later be used to read the dumped file thus
- allowing the contents of the EEPROM 
- to be preserved between runs of gpsim.
+ The 'load e' command can later be used to read the dumped file thus allowing
+ the contents of the EEPROM  to be preserved between runs of gpsim.
 \end_layout
 
 \begin_layout Standard
 
 \end_layout
+
 \begin_layout Standard
 See the 'x' command for examining and modifying individual registers.
 \end_layout
 
 \begin_layout Section
 echo
-\begin_inset LatexCommand \index{echo}
+\begin_inset LatexCommand index
+name "echo"
 
 \end_inset
 
@@ -1625,7 +1670,8 @@ The echo command is used like a print statement within configuration files.
 
 \begin_layout Section
 frequency
-\begin_inset LatexCommand \index{frequency}
+\begin_inset LatexCommand index
+name "frequency"
 
 \end_inset
 
@@ -1645,7 +1691,8 @@ This command sets the clock frequency.
 
 \begin_layout Section
 help
-\begin_inset LatexCommand \index{help}
+\begin_inset LatexCommand index
+name "help"
 
 \end_inset
 
@@ -1661,7 +1708,8 @@ By itself, help will display all of the commands along with a brief description
 
 \begin_layout Section
 icd
-\begin_inset LatexCommand \index{icd}
+\begin_inset LatexCommand index
+name "icd"
 
 \end_inset
 
@@ -1685,7 +1733,8 @@ The open command is used to enable ICD mode and specify the serial port
 
 \begin_layout Section
 list 
-\begin_inset LatexCommand \index{list}
+\begin_inset LatexCommand index
+name "list"
 
 \end_inset
 
@@ -1726,7 +1775,8 @@ The list command allows you to view the source code while you are debugging.
 
 \begin_layout Section
 load
-\begin_inset LatexCommand \index{load}
+\begin_inset LatexCommand index
+name "load"
 
 \end_inset
 
@@ -1766,17 +1816,17 @@ load e module_name file
 \end_layout
 
 \begin_layout Standard
-This command loads the contents of either a processor's EEPROM or an
- EEPROM module from a file containing the data in Intel hex format.
+This command loads the contents of either a processor's EEPROM or an EEPROM
+ module from a file containing the data in Intel hex format.
  In either case the address of the first cell of the EEPROM is 0x0000.
- Used in conjunction with the 'dump e module_name filename'  command, 
- the contents of an EEPROM can be carried over from one run of gpsim to 
- another.
+ Used in conjunction with the 'dump e module_name filename'  command,  the
+ contents of an EEPROM can be carried over from one run of gpsim to  another.
 \end_layout
 
 \begin_layout Section
 macros
-\begin_inset LatexCommand \index{macros}
+\begin_inset LatexCommand index
+name "macros"
 
 \end_inset
 
@@ -2003,7 +2053,8 @@ endm
 
 \begin_layout Section
 module
-\begin_inset LatexCommand \index{module}
+\begin_inset LatexCommand index
+name "module"
 
 \end_inset
 
@@ -2016,7 +2067,8 @@ The
 module
 \emph default
  command is used to load and query external modules (see section 
-\begin_inset LatexCommand \ref{cha:Modules}
+\begin_inset LatexCommand ref
+reference "cha:Modules"
 
 \end_inset
 
@@ -2176,7 +2228,8 @@ Querying modules
 
 \begin_layout Section
 node
-\begin_inset LatexCommand \index{node}
+\begin_inset LatexCommand index
+name "node"
 
 \end_inset
 
@@ -2226,7 +2279,8 @@ node n1 n2 n3  // create and add 3 new nodes to the list
 
 \begin_layout Section
 processor
-\begin_inset LatexCommand \index{processor}
+\begin_inset LatexCommand index
+name "processor"
 
 \end_inset
 
@@ -2303,7 +2357,8 @@ processor p16c65         // Create one with no name.
 
 \begin_layout Section
 quit
-\begin_inset LatexCommand \index{quit}
+\begin_inset LatexCommand index
+name "quit"
 
 \end_inset
 
@@ -2316,7 +2371,8 @@ Quit gpsim.
 
 \begin_layout Section
 run
-\begin_inset LatexCommand \index{run}
+\begin_inset LatexCommand index
+name "run"
 
 \end_inset
 
@@ -2330,7 +2386,8 @@ Start (or continue) simulation.
 
 \begin_layout Section
 step
-\begin_inset LatexCommand \index{step}
+\begin_inset LatexCommand index
+name "step"
 
 \end_inset
 
@@ -2366,7 +2423,8 @@ over
 
 \begin_layout Section
 symbol
-\begin_inset LatexCommand \index{symbol}
+\begin_inset LatexCommand index
+name "symbol"
 
 \end_inset
 
@@ -2390,7 +2448,8 @@ symbol
 
 \begin_layout Section
 stimulus
-\begin_inset LatexCommand \index{stimulus}
+\begin_inset LatexCommand index
+name "stimulus"
 
 \end_inset
 
@@ -2698,7 +2757,8 @@ Even though this example uses 1's and 0's for the data, one can use integers,
  Integers are useful for supplying a stimulus to an attribute.
  Expressions are useful for abstracting the data.
  See Chapter 
-\begin_inset LatexCommand \ref{cha:Simulating-the-Real}
+\begin_inset LatexCommand ref
+reference "cha:Simulating-the-Real"
 
 \end_inset
 
@@ -2707,7 +2767,8 @@ Even though this example uses 1's and 0's for the data, one can use integers,
 
 \begin_layout Section
 stopwatch
-\begin_inset LatexCommand \index{stopwatch}
+\begin_inset LatexCommand index
+name "stopwatch"
 
 \end_inset
 
@@ -2758,11 +2819,7 @@ stopwatch
 stopwatch
 \emph default
  is writable, so you may initialize it to whatever value you like.
- The
-\emph on
- 
-\emph default
-behavior of the timer may be manipulated via the three attributes.
+ The behavior of the timer may be manipulated via the three attributes.
  The 
 \emph on
 .rollover
@@ -2786,7 +2843,8 @@ behavior of the timer may be manipulated via the three attributes.
 
 \begin_layout Section
 trace
-\begin_inset LatexCommand \index{trace}
+\begin_inset LatexCommand index
+name "trace"
 
 \end_inset
 
@@ -2822,7 +2880,8 @@ Display gpsim's version.
 
 \begin_layout Section
 x
-\begin_inset LatexCommand \index{x}
+\begin_inset LatexCommand index
+name "x"
 
 \end_inset
 
@@ -2898,7 +2957,8 @@ gpsim> my_variable = (porta ^ portc) & 0x0f
 \end_layout
 
 \begin_layout Chapter
-\begin_inset LatexCommand \label{cha:Graphical-User-Interface}
+\begin_inset LatexCommand label
+name "cha:Graphical-User-Interface"
 
 \end_inset
 
@@ -2985,27 +3045,27 @@ Simulation mode
 \end_layout
 
 \begin_layout Standard
-This controls how gpsim simulates, and how the gui updates.
+This controls how gpsim simulates, and how the GUI updates.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 0000000.00.0000
-Never Don't ever update the gui when simulating.
+Never Don't ever update the GUI when simulating.
  This is the fastest mode.
- You will have to stop simulation by pressing Ctrl-C in the command line 
- interface.
+ You will have to stop simulation by pressing Ctrl-C in the command line
+  interface.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 0000000.00.0000
 x\InsetSpace ~
-cycles Update the gui every x cycles simulated.
+cycles Update the GUI every x cycles simulated.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 0000000.00.0000
 every\InsetSpace ~
-cycle Update the gui every cycle.
+cycle Update the GUI every cycle.
  (you see everything, if you have filled up on coffee :-)
 \end_layout
 
@@ -3034,14 +3094,14 @@ asm'
 \emph default
  and '.
 \emph on
-obj' 
+obj'
 \emph default
-browsers.
+ browsers.
  The '.
 \emph on
-asm' 
+asm'
 \emph default
-browser is a color coded display of your pic source.
+ browser is a color coded display of your pic source.
  
 \end_layout
 
@@ -3215,13 +3275,13 @@ Opcode view - the .obj Browser
 
 \begin_layout Standard
 This window has two tabs.
- One with each memory cell on one line and information about address, 
-hexadecimal value and decoded instruction (i.e.
+ One with each memory cell on one line and information about address, hexadecima
+l value and decoded instruction (i.e.
  disassembly), and one with the program memory
 \end_layout
 
 \begin_layout Standard
-displayed with sixteen memory cells per row and a configurable ascii column.
+displayed with sixteen memory cells per row and a configurable ASCII column.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -3530,8 +3590,8 @@ Here you can create/modify and examine the environment around the pic.
 \end_layout
 
 \begin_layout Standard
-You can't instantiate pic processors from here, you will have to do that from
- the command line, or from a .stc file.
+You can't instantiate pic processors from here, you will have to do that
+ from the command line, or from a .stc file.
 \end_layout
 
 \begin_layout Standard
@@ -3549,8 +3609,8 @@ You can create connections to nodes by clicking on a pin, and then clicking
 \end_layout
 
 \begin_layout Standard
-If you click on a pin that is already connected to a node, then you will see
- the node and its connections in the lower left part of the window.
+If you click on a pin that is already connected to a node, then you will
+ see the node and its connections in the lower left part of the window.
  You can disconnect a stimulus by clicking on it and pressing the "remove
  stimulus" button.
 \end_layout
@@ -3606,7 +3666,8 @@ Trace viewer
 \begin_layout Standard
 This window shows the trace of instructions executed.
  See 
-\begin_inset LatexCommand \ref{trace}
+\begin_inset LatexCommand ref
+reference "trace"
 
 \end_inset
 
@@ -3752,8 +3813,78 @@ FIXME: The scope window still needs some work...
 \begin_layout Standard
 The Scope Window graphs I/O pin states.
  It is similar to an oscilloscope or logic analyzer.
- It can be controlled either from the command line or from the gui.
+ It can be controlled either from the command line or from the GUI.
  Currently only the digital state of I/O pins are supported.
+\end_layout
+
+\begin_layout Standard
+To use the scope window, each scope channel being used must first be connected
+ to the stimulus being tracked.
+ This can only be done on the command line (or via the .sim directive in
+ the .asm file).
+ The following example shows how this is done, but note that in the .sim
+ command the '
+\begin_inset Quotes erd
+\end_inset
+
+'s need to be escaped with a '
+\backslash
+'.
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> scope.ch0 = 
+\begin_inset Quotes eld
+\end_inset
+
+portc3
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> scope.ch1 = 
+\begin_inset Quotes eld
+\end_inset
+
+portc4
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Once the data are caputred, the scope window display may need to be altered
+ to better see the data.
+ In the GUI, the following keys can be used:
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+z Zoom In
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+Z Zoom out
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+l Pan left
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+r Pan right
+\end_layout
+
+\begin_layout Standard
+In the command line, zooming and panning can be achieved by modifiying the
+ scope.start and scope.end variables.
 \end_layout
 
 \begin_layout Chapter
@@ -3822,13 +3953,22 @@ The
 \family typewriter
 \emph on
 .sim
+\family default
 \emph default
- macro allows gpsim configuration commands to be embedded in the PIC source.
- While gpsim loads a .cod file, the commands in the 
+ 
+\family typewriter
+macro allows gpsim configuration commands to be embedded in the PIC source.
+ While gpsim loads a .cod file, the commands in the
+\family default
+ 
+\family typewriter
 \emph on
 .sim
+\family default
 \emph default
- macros are collected.
+ 
+\family typewriter
+macros are collected.
  After the .cod file is loaded, the commands are redirected to gpsim's command
  line interpreter in the order they were received.
 \end_layout
@@ -3891,12 +4031,21 @@ The
 \family typewriter
 \emph on
 .command
+\family default
 \emph default
- macro is similar to a 
+ 
+\family typewriter
+macro is similar to a
+\family default
+ 
+\family typewriter
 \emph on
 .sim
+\family default
 \emph default
- macro except that it associates a gpsim command with a particular instruction.
+ 
+\family typewriter
+macro except that it associates a gpsim command with a particular instruction.
  This is useful for changing attribute values at different points of the
  program.
 \end_layout
@@ -3928,7 +4077,8 @@ The
 \emph default
  macro provides a source code mechanism for setting breakpoints (see chapter
  
-\begin_inset LatexCommand \ref{cha:Assertions-and-Extended}
+\begin_inset LatexCommand ref
+reference "cha:Assertions-and-Extended"
 
 \end_inset
 
@@ -3993,7 +4143,8 @@ In this example, the
 .state
 \emph default
  attribute (see section 
-\begin_inset LatexCommand \ref{sub:Switches-&-Resistors}
+\begin_inset LatexCommand ref
+reference "sub:Switches-&-Resistors"
 
 \end_inset
 
@@ -4023,7 +4174,8 @@ examples/scripts
 \end_layout
 
 \begin_layout Chapter
-\begin_inset LatexCommand \label{cha:Assertions-and-Extended}
+\begin_inset LatexCommand label
+name "cha:Assertions-and-Extended"
 
 \end_inset
 
@@ -4072,8 +4224,8 @@ The conditions are described above in the break command and are the conditions
 \end_layout
 
 \begin_layout Standard
-Breakpoint messages are useful for distinguishing among many different 
-breakpoints.
+Breakpoint messages are useful for distinguishing among many different breakpoin
+ts.
  
 \end_layout
 
@@ -4210,7 +4362,8 @@ This assignment writes to the state attribute of a switch module named SW1.
 
 \begin_layout Chapter
 Trace and Log: What has happen?
-\begin_inset LatexCommand \label{trace}
+\begin_inset LatexCommand label
+name "trace"
 
 \end_inset
 
@@ -4779,12 +4932,14 @@ FIXME - The dynamically created trace type information needs to be written
 \end_layout
 
 \begin_layout Chapter
-\begin_inset LatexCommand \label{cha:Simulating-the-Real}
+\begin_inset LatexCommand label
+name "cha:Simulating-the-Real"
 
 \end_inset
 
 Simulating the Real World: Stimuli
-\begin_inset LatexCommand \index{Stimulus}
+\begin_inset LatexCommand index
+name "Stimulus"
 
 \end_inset
 
@@ -5400,9 +5555,9 @@ Discuss the extended stimuli in the modules/ directory.
 PulseGen
 \emph default
  module and how it can complete replace the asynchronous stimuli.
- Also describe the
+ Also describe the 
 \emph on
- PullUp
+PullUp
 \emph default
  and 
 \emph on
@@ -5414,12 +5569,14 @@ PullDown
 
 \begin_layout Chapter
 Modules
-\begin_inset LatexCommand \index{Modules}
+\begin_inset LatexCommand index
+name "Modules"
 
 \end_inset
 
 
-\begin_inset LatexCommand \label{cha:Modules}
+\begin_inset LatexCommand label
+name "cha:Modules"
 
 \end_inset
 
@@ -5709,8 +5866,8 @@ I2C-EEPROM2K
 </cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
-\begin_layout Standard
 
+\begin_layout Standard
 A 256 byte I2C serial EEPROM like the 24LC024.
 \end_layout
 
@@ -5729,9 +5886,9 @@ I2C-EEPROM16K
 </cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
+
 \begin_layout Standard
 A 2k byte I2C serial EEPROM like the 24LC16B.
-
 \end_layout
 
 \end_inset
@@ -5749,9 +5906,9 @@ I2C-EEPROM256K
 </cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
+
 \begin_layout Standard
 A 32k byte I2C serial EEPROM like the 24LC256.
-
 \end_layout
 
 \end_inset
@@ -5889,8 +6046,10 @@ led
 </cell>
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
+
 \begin_layout Standard
-A single LED with cathode tied to Vss. 
+A single LED with cathode tied to Vss.
+ 
 \end_layout
 
 \end_inset
@@ -5945,7 +6104,8 @@ Encoder
 
 \begin_layout Subsection
 USART
-\begin_inset LatexCommand \index{USART module}
+\begin_inset LatexCommand index
+name "USART module"
 
 \end_inset
 
@@ -6056,7 +6216,8 @@ I/O Pins
 
 \begin_layout Subsection
 Logic
-\begin_inset LatexCommand \index{Logic}
+\begin_inset LatexCommand index
+name "Logic"
 
 \end_inset
 
@@ -6088,7 +6249,8 @@ FIXME There should be attributes to specify the switching characteristics.
 
 \begin_layout Subsection*
 and2
-\begin_inset LatexCommand \index{and2}
+\begin_inset LatexCommand index
+name "and2"
 
 \end_inset
 
@@ -6113,7 +6275,8 @@ I/O pins
 
 \begin_layout Subsection*
 or2
-\begin_inset LatexCommand \index{or2}
+\begin_inset LatexCommand index
+name "or2"
 
 \end_inset
 
@@ -6134,7 +6297,8 @@ or2
 
 \begin_layout Subsection*
 xor2
-\begin_inset LatexCommand \index{xor2}
+\begin_inset LatexCommand index
+name "xor2"
 
 \end_inset
 
@@ -6155,7 +6319,8 @@ xor2
 
 \begin_layout Subsection*
 not
-\begin_inset LatexCommand \index{not}
+\begin_inset LatexCommand index
+name "not"
 
 \end_inset
 
@@ -6172,7 +6337,8 @@ not
 
 \begin_layout Subsection
 I2C EEPROM
-\begin_inset LatexCommand \index{I2C EEPROM}
+\begin_inset LatexCommand index
+name "I2C EEPROM"
 
 \end_inset
 
@@ -6183,22 +6349,47 @@ I2C EEPROM
 There are currently three I2C EEPROMs supported: I2C-EEPROM2k, I2C-EEPROM16k,
  and I2C-EEPROM256K.
 \end_layout
-\begin_layout Standard
-The commands 'dump e module_name filename' and 'load e module_name filename' 
- can be used to save and restore the contents of the EEPROM module.
- This allows the contents of the EEPROM to be preserved between runs of gpsim.
- 
-\begin_inset Note Greyedout
-status open
 
 \begin_layout Standard
-FIXME.
- Probably should have attributes for configuring the prom size.
- Also, there's currently no way to query or modify the prom contents.
+The commands 'dump e module_name filename' and 'load e module_name filename'
+  can be used to save and restore the contents of the EEPROM module.
+ This allows the contents of the EEPROM to be preserved between runs of
+ gpsim.
 \end_layout
 
-\end_inset
+\begin_layout Standard
+The cells of the EEPROM can be examined and modified using the command interface
+ with the commands 'module_name.eeData[index]' and 'module_name.eeData[index]
+ = new_value'.
+ The following example shows loading an EEPROM module, setting cell 16 to
+ '0' (0x30) and checking that the new value was written.
+\end_layout
 
+\begin_layout LyX-Code
+**gpsim> module load I2C-EEPROM16k e2 
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim>  
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> e2.eeData[16] = $30 
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> e2.eeData[16] 
+\end_layout
+
+\begin_layout LyX-Code
+e2.eeData[$10] = $30
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim>  
+\end_layout
+
+\begin_layout Standard
 
 \end_layout
 
@@ -6231,17 +6422,20 @@ I/O Pins
 \end_layout
 
 \begin_layout Subsection
-\begin_inset LatexCommand \label{sub:Switches-&-Resistors}
+\begin_inset LatexCommand label
+name "sub:Switches-&-Resistors"
 
 \end_inset
 
 Switches
-\begin_inset LatexCommand \index{Switches}
+\begin_inset LatexCommand index
+name "Switches"
 
 \end_inset
 
  & Resistors
-\begin_inset LatexCommand \index{Resistors}
+\begin_inset LatexCommand index
+name "Resistors"
 
 \end_inset
 
@@ -6254,7 +6448,7 @@ The
 switch
 \emph default
  module is a model of a simple two terminal switch.
- It may be controlled either from the command line or the breadboard gui.
+ It may be controlled either from the command line or the breadboard GUI.
  The 
 \emph on
 switch
@@ -6304,17 +6498,20 @@ I/O Pins
 
 \begin_layout Subsection
 Voltage Sources
-\begin_inset LatexCommand \index{Voltage Sources}
+\begin_inset LatexCommand index
+name "Voltage Sources"
 
 \end_inset
 
 , Resistors
-\begin_inset LatexCommand \index{Resistors}
+\begin_inset LatexCommand index
+name "Resistors"
 
 \end_inset
 
 , and Capacitors
-\begin_inset LatexCommand \index{Capacitors}
+\begin_inset LatexCommand index
+name "Capacitors"
 
 \end_inset
 
@@ -6371,7 +6568,8 @@ In addition to the standard modules, third are separately distribute gpsim
 
 \begin_layout Subsection
 Character LCD - HD44780
-\begin_inset LatexCommand \index{HD44780}
+\begin_inset LatexCommand index
+name "HD44780"
 
 \end_inset
 
@@ -6384,7 +6582,8 @@ This module emulates the ubiquitous HD44780 character LCDs.
 
 \begin_layout Subsection
 Graphic LCD - SED1530
-\begin_inset LatexCommand \index{SED1530}
+\begin_inset LatexCommand index
+name "SED1530"
 
 \end_inset
 
@@ -6942,7 +7141,7 @@ Debug module is present
 
 \begin_layout Standard
 You can step, reset, run, halt, set the breakpoint and read file registers.
- It works both from the gui and the cli.
+ It works both from the GUI and the cli.
 \end_layout
 
 \begin_layout Subsection*
@@ -6950,7 +7149,7 @@ ICD TODO
 \end_layout
 
 \begin_layout Itemize
-MPLAB has a setting for target cpu frequency, I have only tried with a 20MHz
+MPLAB has a setting for target CPU frequency, I have only tried with a 20MHz
  crystal, so there may be adjustments to be made to the serial port timeout
  settings in gpsim.
 \end_layout
@@ -7003,7 +7202,8 @@ examples/modules
  subdirectory contains several examples illustrating how to use gpsim's
  various modules.
  Finally, as described in chapter 
-\begin_inset LatexCommand \ref{cha:Regression-Tests}
+\begin_inset LatexCommand ref
+reference "cha:Regression-Tests"
 
 \end_inset
 
@@ -7105,7 +7305,8 @@ Fixme
 
 \begin_layout Chapter
 Regression Tests
-\begin_inset LatexCommand \label{cha:Regression-Tests}
+\begin_inset LatexCommand label
+name "cha:Regression-Tests"
 
 \end_inset
 
@@ -7155,7 +7356,8 @@ gpsim is written mostly in C++.
 
 \begin_layout Section
 Instructions
-\begin_inset LatexCommand \index{instructions}
+\begin_inset LatexCommand index
+name "instructions"
 
 \end_inset
 
@@ -7168,9 +7370,8 @@ There's a base class for the 14-bit instructions (I plan to go one step
  derived).
  It primarily serves two purposes: storage that is common for each instruction
  and a means for generically accessing virtual functions.
- The common information consists of a name - or more specifically the 
- instruction mnemonic, the opcode, and a pointer to the processor owning 
- the instruction.
+ The common information consists of a name - or more specifically the  instructi
+on mnemonic, the opcode, and a pointer to the processor owning  the instruction.
  Some of the virtual functions are 'execute' and 'name'.
  As the hex file is decoded, instances of the instructions are created and
  stored in an array called program_memory.
@@ -7193,7 +7394,8 @@ which says, get the instruction at the current program counter (pc.value)
 
 \begin_layout Section
 General File Registers
-\begin_inset LatexCommand \index{registers}
+\begin_inset LatexCommand index
+name "registers"
 
 \end_inset
 
@@ -7458,8 +7660,10 @@ Trace
 Everything that is simulated is traced - 
 \emph on
 all
+\emph default
+ 
 \emph toggle
- of the time.
+of the time.
  The trace buffer is one huge circular buffer of integers.
  Information is or'ed with a trace token and then is stored in the trace
  buffer.
@@ -7574,12 +7778,14 @@ The document is part of gpsim.
 \begin_layout Standard
 gpsim is free software; you can redistribute it and/or modify it under the
  terms of the 
-\begin_inset LatexCommand \index{GNU}
+\begin_inset LatexCommand index
+name "GNU"
 
 \end_inset
 
 GNU General Public 
-\begin_inset LatexCommand \index{License}
+\begin_inset LatexCommand index
+name "License"
 
 \end_inset
 
@@ -7590,7 +7796,8 @@ License as published by the Free Software Foundation; either version 2,
 \begin_layout Standard
 gpsim is distributed in the hope that it will be useful, but WITHOUT ANY
  
-\begin_inset LatexCommand \index{NO WARRANTY}
+\begin_inset LatexCommand index
+name "NO WARRANTY"
 
 \end_inset
 
@@ -7609,7 +7816,7 @@ You should have received a copy of the GNU General Public License along
 
 \begin_layout Standard
 \start_of_appendix
-\begin_inset LatexCommand \printindex{}
+\begin_inset LatexCommand printindex
 
 \end_inset
 

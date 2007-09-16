@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 
 class Register;
+class RegisterCollection;
 class pic_processor;
 class I2C_EE;
 class I2C_EE_SCL;
@@ -80,6 +81,7 @@ protected:
   virtual bool processCommand(unsigned int cmd);
 
   Register **rom;          //  The data area.
+  RegisterCollection *m_UiAccessOfRom; // User access to the rom.
   unsigned int rom_size;
   int	rom_data_size;	   // width of data in bytes
   unsigned int xfr_addr,xfr_data;  // latched adr and data from I2C.

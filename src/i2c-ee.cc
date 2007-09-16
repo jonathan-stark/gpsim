@@ -182,6 +182,17 @@ I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page
     rom[i]->value.put(0);
     rom[i]->alias_mask = 0;
   }
+  
+  if (pCpu)
+  {
+	m_UiAccessOfRom = new RegisterCollection(pCpu,
+                                             "eeData",
+                                             rom,
+                                             rom_size);
+
+  }
+  else
+	m_UiAccessOfRom = NULL;
 
   scl = new I2C_EE_SCL ( this, "SCL" );
   sda = new I2C_EE_SDA ( this, "SDA" );
@@ -189,7 +200,12 @@ I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page
 
 I2C_EE::~I2C_EE()
 {
-  delete rom;
+  for (unsigned int i = 0; i < rom_size; i++)
+	delete rom[i];
+  delete [] rom;
+
+  if (m_UiAccessOfRom)
+	delete m_UiAccessOfRom;
 }
 
 // Bit 0 is write protect, 1-3 is A0 - A2
