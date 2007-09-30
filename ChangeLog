@@ -1,3 +1,8 @@
+2007-09-30 Borut Razem <borut.razem@siol.net>
+	* doc/gpsimWin32.html: glib-2.14.1, atk-1.20.0, pango-1.18.2, cairo-1.4.10,
+	  NSIS v2.31
+	* plat/win32/gpsim.nsi: updated
+  
 2007-09-17 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_symbol.cc: symbols dumped as module.symbol with better
 	    format, don't dump line number symbols.

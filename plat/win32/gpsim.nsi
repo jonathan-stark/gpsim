@@ -182,7 +182,6 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-am-et.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-ti-et.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-ti-er.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-thai-broken.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-ipa.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-inuktitut.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-cyrillic-translit.dll"
@@ -204,15 +203,6 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-gif.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-bmp.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-ani.dll"
-
-  SetOutPath "$INSTDIR\lib\pango\1.5.0\modules"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-thai-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-indic-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-hebrew-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-hangul-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-basic-win32.dll"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-basic-fc.dll"
-  File "${PKG_ROOT}\lib\pango\1.5.0\modules\pango-arabic-fc.dll"
 
   SetOutPath "$INSTDIR"
   File /r "${PKG_ROOT}\share"
