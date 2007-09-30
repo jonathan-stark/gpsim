@@ -23,6 +23,7 @@ EXPORTS
     ??0Integer@@QAE@ABV0@@Z
     ??0Integer@@QAE@PBD_J0@Z
     ??0Integer@@QAE@_J@Z
+    ??0IntelHexProgramFileType@@QAE@XZ
     ??0Interface@@QAE@PAX@Z
     ??0LiteralArray@@QAE@PAV?$list@PAVExpression@@V?$allocator@PAVExpression@@@std@@@std@@@Z
     ??0LiteralBoolean@@QAE@PAVBoolean@@@Z
@@ -98,6 +99,7 @@ EXPORTS
     ??1IO_bi_directional_pu@@UAE@XZ
     ??1IndexedSymbol@@UAE@XZ
     ??1Integer@@UAE@XZ
+    ??1IntelHexProgramFileType@@QAE@XZ
     ??1Module@@UAE@XZ
     ??1OpNe@@UAE@XZ
     ??1PinMonitor@@UAE@XZ
@@ -148,6 +150,7 @@ EXPORTS
     ?ListLoadableModules@ModuleLibrary@@SAXXZ
     ?ListToConsole@CCommandManager@@QAEXXZ
     ?LoadFile@ModuleLibrary@@SAHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?LoadProgramFile@IntelHexProgramFileType@@UAEHPAPAVProcessor@@PBDPAU_iobuf@@1@Z
     ?LoadProgram@CSimulationContext@@QAEHPBD0PAPAVProcessor@@0@Z
     ?NewObject@Float@@SAPAV1@PBD00@Z
     ?NewObject@Integer@@SAPAV1@PBD00@Z
@@ -448,6 +451,8 @@ EXPORTS
     ?put_value@AliasedInstruction@@UAEXI@Z
     ?put_value@PortRegister@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
+    ?readihex16@IntelHexProgramFileType@@QAEHPAVProcessor@@PAU_iobuf@@@Z
+    ?readihexN@IntelHexProgramFileType@@AAEHHPAPAVRegister@@HPAU_iobuf@@H@Z
     ?read_src_files@Processor@@QAEXXZ
     ?reassign_break@Cycle_Counter@@QAE_N_K0PAVTriggerObject@@@Z
     ?refreshPinOnUpdate@PinModule@@QAEX_N@Z
@@ -631,6 +636,7 @@ EXPORTS
     ?update_state@TraceFrame@@UAEXXZ
     ?verbose@@3VGlobalVerbosityAccessor@@A
     ?waitForChild@Token@gpsim@@QAEXXZ
+    ?writeihexN@IntelHexProgramFileType@@AAEXHPAPAVRegister@@HPAU_iobuf@@H@Z
     GetUserInterface
     free_error_message
     free_library
