@@ -357,6 +357,7 @@ FAILED:
 
 
 delay		; W=9 = delay about 11,500 cycles or  1.2 ms at 10 Mhz
+        clrwdt
        movwf	temp2
        clrf    temp1
 delay_loop

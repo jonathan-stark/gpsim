@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_symbol.h"
 #include "../src/cmd_gpsim.h"
+#include "../src/modules.h"
 #include "../src/symbol.h"
 #include "../src/ValueCollections.h"
 #include "../src/pic-instructions.h"
@@ -100,13 +101,23 @@ void cmd_symbol::dump_all()
 void cmd_symbol::dump_one(const char *sym_name)
 {
   string sName(sym_name);
-  dump_one(globalSymbolTable().find(sName));
+  Module *pM = globalSymbolTable().findModule(sName);
+
+  if (pM)
+    pM->getSymbolTable().ForEachSymbolTable(dumpOneSymbol);
+  else
+    dump_one(globalSymbolTable().find(sName));
   //get_symbol_table().dump_filtered(sName);
 }
 void cmd_symbol::dump_one(gpsimObject *s)
 {
-  if(s)
-    cout << s->toString() << endl;
+  if(s) {
+    Module *pM  = dynamic_cast<Module *>(s);
+    if (pM)
+      pM->getSymbolTable().ForEachSymbolTable(dumpOneSymbol);
+    else
+      cout << s->toString() << endl;
+  }
 }
 
 void cmd_symbol::add_one(const char *sym_name, Expression *expr)

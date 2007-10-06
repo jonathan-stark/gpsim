@@ -53,6 +53,9 @@ enum PROCESSOR_TYPE
   _P10F206_,
   _P12C508_,
   _P12C509_,
+  _P12F508_,
+  _P12F509_,
+  _P12F510_,
   _P16C84_,
   _P16CR83_,
   _P16CR84_,
@@ -194,7 +197,7 @@ class ConfigMode {
 // Watch Dog Timer
 //
 
-class WDT : public TriggerObject
+class WDT : public TriggerObject, public gpsimObject
 {
 public:
   WDT(pic_processor *, double _timeout);

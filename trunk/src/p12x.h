@@ -83,12 +83,20 @@ public:
   P12C508(const char *_name=0, const char *desc=0);
   virtual ~P12C508();
   static Processor *construct(const char *name);
-
   virtual void create();
   virtual unsigned int program_memory_size() const { return 0x200; }
 
 };
 
+class P12F508 : public P12C508
+{
+public:
+
+  P12F508(const char *_name=0, const char *desc=0);
+  virtual ~P12F508();
+  static Processor *construct(const char *name);
+  virtual PROCESSOR_TYPE isa(){return _P12F508_;};
+};
 
 // A 12c509 is like a 12c508
 class P12C509 : public P12C508
@@ -118,6 +126,24 @@ class P12C509 : public P12C508
 
 };
 
+class P12F509 : public P12C509
+{
+public:
+  P12F509(const char *_name=0, const char *desc=0);
+  virtual ~P12F509();
+  static Processor *construct(const char *name);
+  virtual PROCESSOR_TYPE isa(){return _P12F509_;}
+};
+
+// 12F510 - like a '509, but has an A2D and a comparator.
+class P12F510 : public P12F509
+{
+public:
+  P12F510(const char *_name=0, const char *desc=0);
+  virtual ~P12F510();
+  static Processor *construct(const char *name);
+  virtual PROCESSOR_TYPE isa(){return _P12F510_;}
+};
 
 // A 12CE518 is like a 12c508
 class P12CE518 : public P12C508

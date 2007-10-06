@@ -219,7 +219,7 @@ void P12bitBase::enter_sleep()
   pic_processor::enter_sleep();
 
   status->put( status->get() & ~STATUS_GPWUF);
-  cout << "enter sleep status="<<hex <<status->get()<<endl;
+  //cout << "enter sleep status="<<hex <<status->get()<<endl;
 }
 
 
@@ -323,7 +323,23 @@ P12C508::~P12C508()
 {
 }
 
+P12F508::P12F508(const char *_name, const char *desc)
+  : P12C508(_name,desc)
+{
+}
+P12F508::~P12F508()
+{
+}
+Processor * P12F508::construct(const char *name)
+{
 
+  P12F508 *p = new P12F508(name);
+  p->pc->set_reset_address(0x1ff);
+  p->create();
+  p->create_symbols();
+  return p;
+
+}
 //--------------------------------------------------------
 
 void P12C509::create_sfr_map()
@@ -367,10 +383,44 @@ void P12C509::create()
 P12C509::P12C509(const char *_name, const char *desc)
   : P12C508(_name,desc)
 {
-  if(verbose)
-    cout << "12c509 constructor, type = " << isa() << '\n';
 }
 
+
+P12F509::P12F509(const char *_name, const char *desc)
+  : P12C509(_name,desc)
+{
+}
+P12F509::~P12F509()
+{
+}
+Processor * P12F509::construct(const char *name)
+{
+
+  P12F509 *p = new P12F509(name);
+  p->pc->set_reset_address(0x3ff);
+  p->create();
+  p->create_symbols();
+  return p;
+
+}
+//
+P12F510::P12F510(const char *_name, const char *desc)
+  : P12F509(_name,desc)
+{
+}
+P12F510::~P12F510()
+{
+}
+Processor * P12F510::construct(const char *name)
+{
+
+  P12F510 *p = new P12F510(name);
+  p->pc->set_reset_address(0x3ff);
+  p->create();
+  p->create_symbols();
+  return p;
+
+}
 
 //--------------------------------------------------------
 
