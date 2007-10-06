@@ -456,16 +456,11 @@ dump_cmd:
           // dump m module_name filename
           {
             //                   key,  module_name, filename
-            quit_parse = dump.dump($2->value, $3, $4->getVal()) == 0;
+            //quit_parse = dump.dump($2->value, $3, $4->getVal()) == 0;
+            if (dump.dump($2->value, $3, $4->getVal()) == 0) 
+              cout << "dump to file failed\n";
             delete $4;
 
-/*
-            if(quit_parse)
-            {
-              quit_parse = 0;
-              YYABORT;
-            }
-*/
           }
 
           ;

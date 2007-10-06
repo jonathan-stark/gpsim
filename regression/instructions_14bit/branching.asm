@@ -113,7 +113,9 @@ start:
         ;; Each prescale value (0-7) is loaded into the timer. The software
         ;; waits until the interrupt due to tmr0 rollover occurs before
         ;; loading the new prescale value.
-        
+
+        clrwdt
+
         bsf     INTCON,T0IE     ;Enable TMR0 overflow interrupts
         
         bsf     INTCON,GIE      ;Global interrupts
@@ -126,6 +128,7 @@ test_tmr0:
         option                  ;Assign new prescale value
 
 test_flag:
+        clrwdt
         call    Test1
         btfss   temp1,0         ;Wait for the interrupt to occur and
          goto   test_flag       ;get serviced

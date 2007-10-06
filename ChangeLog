@@ -1,3 +1,20 @@
+2007-07-29  Scott Dattalo <scott@dattalo.com>
+	* regression/switch_test/switch_test.asm,
+ 	  regression/instructions_14bit/branching.asm:
+	  - WDT was timing out.
+	* src/pic-processor.cc, src/pic-processor.h:
+	  - Added 12f508, 12f509, and 12f510
+	  - Fixed I/O reset bug
+	  - WDT is now placed in the processor's symbol table.
+	* src/p12x.cc, src/p12x.h:
+	  - Added 12f508, 12f509, and 12f510 (although the '510's
+	  comparator and A2D are not supported.)
+	* cli/cmd_symbol.cc:
+	  - Module symbol tables can now be displayed independently of the
+	  global symbol table
+	* cli/parse.yy:
+	  - The parser was quiting gpsim if the dump eeprom command failed.
+
 2007-09-30 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html: glib-2.14.1, atk-1.20.0, pango-1.18.2, cairo-1.4.10,
 	  NSIS v2.31

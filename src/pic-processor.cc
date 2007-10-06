@@ -18,6 +18,7 @@ along with gpasm; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <typeinfo>
 #include <stdio.h>
 #ifdef _WIN32
 #include "uxtime.h"
@@ -160,6 +161,12 @@ ProcessorConstructor pP12CE518(P12CE518::construct ,
 			      "__12ce518", "pic12ce518",  "p12ce518", "12ce518");
 ProcessorConstructor pP12CE519(P12CE519::construct ,
 			      "__12ce519", "pic12ce519",  "p12ce519", "12ce519");
+ProcessorConstructor pP12F508(P12F508::construct ,
+			      "__12F508", "pic12f508",  "p12f508", "12f508");
+ProcessorConstructor pP12F509(P12F509::construct ,
+			      "__12F509", "pic12f509",  "p12f509", "12f509");
+ProcessorConstructor pP12F510(P12F510::construct ,
+			      "__12F510", "pic12f510",  "p12f510", "12f510");
 ProcessorConstructor pP16C84(P16C84::construct ,
 			     "__16C84",  "pic16c84",   "p16c84", "16c84");
 ProcessorConstructor pP16CR83(P16CR83::construct ,
@@ -994,6 +1001,14 @@ void pic_processor::reset (RESET_TYPE r)
 #endif
     break;
 
+  case IO_RESET:
+#ifdef CLOCK_EXPERIMENTS
+    mCurrentPhase = mExecute1Cycle;
+    mCurrentPhase->setNextPhase(mExecute1Cycle);
+    m_ActivityState = ePAActive;
+#endif
+    break;
+
   case WDT_RESET:
   case EXIT_RESET:
 #ifdef CLOCK_EXPERIMENTS
@@ -1251,7 +1266,7 @@ void pic_processor::create_symbols ()
 
   pc->set_description("Program Counter");  // Fixme put this in the pc constructor.
   addSymbol(pc);
-
+  addSymbol(&wdt);
 }
 
 
@@ -1388,7 +1403,8 @@ void ProgramMemoryAccess::callback()
 
 //--------------------------------------------------
 WDT::WDT(pic_processor *p_cpu, double _timeout)
-  : cpu(p_cpu), breakpoint(0),prescale(1), future_cycle(0), timeout(_timeout), wdte(false)
+  : gpsimObject("WDT","Watch Dog Timer"),
+    cpu(p_cpu), breakpoint(0),prescale(1), future_cycle(0), timeout(_timeout), wdte(false)
 {
 }
 
@@ -1396,15 +1412,17 @@ WDT::WDT(pic_processor *p_cpu, double _timeout)
 void WDT::update()
 {
   if(wdte) {
-
-    value = (unsigned int )(cpu->get_frequency()*timeout);
+    // FIXME - the WDT should not be tied to the instruction counter...
+    value = (unsigned int )(timeout/get_cycles().seconds_per_cycle());
+    //value = (unsigned int )(cpu->get_frequency()*timeout);
     //prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
     if(future_cycle) {
 
       guint64 fc = get_cycles().get() + value * (1<<prescale);
 
-      //cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
+      if(verbose)
+        cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
 
       get_cycles().reassign_break(future_cycle, fc, this);
       future_cycle = fc;
@@ -1455,7 +1473,7 @@ void WDT::initialize(bool enable)
     //prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
     future_cycle = get_cycles().get() + value * (1<<prescale);
-    //if (verbose)
+    if (verbose)
       cout << "Enabling WDT timeout = " << (timeout*(1<<prescale)) << " seconds = " 
            << hex << (value *(1<<prescale)) << " cycles\n";
 
