@@ -321,7 +321,7 @@ Pulse Generator\n\
   // job is to compare a list element to a reference value. Stroustrop
   // calls this function a predicate.
 
-  static guint64 current_cycle=0;
+  static gint64 current_cycle=0;
   static bool cycleIsInFuture(ValueStimulusData &data_point)
   {
     return data_point.time > current_cycle;
@@ -567,7 +567,7 @@ File Stimulus\n\
     virtual void set(gint64);
   private:
     Register *m_replaced;
-    const int InvalidAddress;
+    const unsigned int InvalidAddress;
   };
 
   RegisterAddressAttribute::RegisterAddressAttribute(Register *pReg,const char *_name, const char * desc)

@@ -214,8 +214,8 @@ class RegisterMemoryAccess : public MemoryAccess
 
   // The insertRegister and removeRegister methods are used primarily
   // to set and clear breakpoints.
-  bool insertRegister(int address, Register *);
-  bool removeRegister(int address, Register *);
+  bool insertRegister(unsigned int address, Register *);
+  bool removeRegister(unsigned int address, Register *);
   bool hasBreak(unsigned int address);
   void reset(RESET_TYPE r);
 

@@ -271,13 +271,14 @@ Module::Module(const char *_name, const char *desc)
 
 }
 
+#if 0 // warning: 'void dumpOneSymbol(const SymbolEntry_t&)' defined but not used
 static void dumpOneSymbol(const SymbolEntry_t &sym)
 {
   cout << "  " << sym.second
        << " stored as " << sym.first
        << endl;
 }
-
+#endif
 
 
 Module::~Module(void)

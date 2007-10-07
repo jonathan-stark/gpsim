@@ -42,7 +42,7 @@ public:
 
 private:
   void dump_sfrs(void);
-  void dump_regs(Register **fr, int mem_size, int reg_size, int mem_type);
+  void dump_regs(Register **fr, unsigned int mem_size, int reg_size, int mem_type);
 
 };
 

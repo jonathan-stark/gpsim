@@ -255,14 +255,14 @@ EEPROM::EEPROM(Processor *pCpu)
   : name_str(0),
     cpu(pCpu),
     intcon(0),
-    rom(0),
-    rom_data_size(1),
-    m_UiAccessOfRom(0),
-    rom_size(0),
     eecon1(pCpu,"eecon1","EE Control 1"),
     eecon2(pCpu,"eecon2","EE Control 2"),
     eedata(pCpu,"eedata","EE Data"),
-    eeadr(pCpu,"eeadr", "EE Address")
+    eeadr(pCpu,"eeadr", "EE Address"),
+    rom(0),
+    m_UiAccessOfRom(0),
+    rom_data_size(1),
+    rom_size(0)
 {
 }
 EEPROM::~EEPROM()

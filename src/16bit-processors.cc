@@ -157,13 +157,15 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     tmr0h(this, "tmr0h", "TMR0 High"),
     t0con(this, "t0con", "TMR0 Control"),
     rcon(this, "rcon", ""),
+    pir1(this,"pir1","Peripheral Interrupt Register",0,0),
     ipr1(this, "ipr1", "Interrupt Priorities"),
     ipr2(this, "ipr2", "Interrupt Priorities"),
     t1con(this, "t1con", "TMR1 Control"),
     pie1(this, "pie1", "Peripheral Interrupt Enable"),
+    pir2(this,"pir2","Peripheral Interrupt Register",0,0),
     pie2(this, "pie2", "Peripheral Interrupt Enable"),
-    pr2(this, "pr2", "TMR2 Period Register"),
     t2con(this, "t2con", "TMR2 Control"),
+    pr2(this, "pr2", "TMR2 Period Register"),
     tmr2(this, "tmr2", "TMR2 Register"),
     tmr1l(this, "tmr1l", "TMR1 Low"),
     tmr1h(this, "tmr1h", "TMR1 High"),
@@ -176,7 +178,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     tmr3l(this, "tmr3l", "TMR3 Low"),
     tmr3h(this, "tmr3h", "TMR3 High"),
     t3con(this, "t3con", "TMR3 Control"),
-    
+
     osccon(this, "osccon", "OSC Control"),
     lvdcon(this, "lvdcon", "LVD Control"),
     wdtcon(this, "wdtcon", "WDT Control"),
@@ -188,9 +190,6 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     ind1(this,string("1")),
     ind2(this,string("2")),
     usart(this),
-    //stack16(this),
-    pir1(this,"pir1","Peripheral Interrupt Register",0,0),
-    pir2(this,"pir2","Peripheral Interrupt Register",0,0),
 
     tbl(this),
     ssp(this)

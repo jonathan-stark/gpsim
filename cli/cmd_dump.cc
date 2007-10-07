@@ -272,7 +272,7 @@ void cmd_dump::dump(int mem_type)
   gpsim_set_bulk_mode(0);
 
 }
-void cmd_dump::dump_regs(Register **fr, int mem_size, int reg_size, int mem_type)
+void cmd_dump::dump_regs(Register **fr, unsigned int mem_size, int reg_size, int mem_type)
 {
   unsigned int i, j, reg_num;
   unsigned int uRegPerRow = reg_size == 1 ? REGISTERS_PER_ROW : 8;
@@ -316,7 +316,7 @@ void cmd_dump::dump_regs(Register **fr, int mem_size, int reg_size, int mem_type
           v = fr[reg_num]->get_value();
           printf("%0*x ",reg_size * 2, v);
         } else {
-          for (unsigned int i = 0; i < reg_size; i++)
+          for (int i = 0; i < reg_size; i++)
             printf("--");
           putchar(' ');
         }

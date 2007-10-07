@@ -242,7 +242,7 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
   pEventBuffer = new char[max_events];
 
   // Initialize the time buffer
-  for (int i=0; i<max_events; i++)
+  for (unsigned int i = 0; i < max_events; i++)
     pTimeBuffer[i] = 0;
 
   gcycles = &get_cycles();

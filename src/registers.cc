@@ -227,8 +227,8 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 //
 Register::Register(Module *_cpu, const char *pName, const char *pDesc)
   : Value(pName,pDesc,_cpu),
-    alias_mask(0),
-    address(0xffffffff)
+    address(0xffffffff),
+    alias_mask(0)
 {
 
   // For now, initialize the register with valid data and set that data equal to 0.

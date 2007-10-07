@@ -1695,8 +1695,6 @@ void AttributeStimulus::setClientAttribute(Value *v)
 
 void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
 {
-  bool bSuccess = true;
-
   if (!pNode || !pPinList)
     return;
 
@@ -1733,4 +1731,3 @@ void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
     */
   }
 }
-

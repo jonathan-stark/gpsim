@@ -1568,18 +1568,18 @@ ConfigWord::ConfigWord(const char *_name, unsigned int default_val, const char *
 ConfigMemory::ConfigMemory(pic_processor *pCpu, unsigned int nWords)
   : m_pCpu(pCpu), m_nConfigWords(nWords)
 {
-  if (nWords >0 && nWords<100) {
+  if (nWords > 0 && nWords < 100) {
     
     m_ConfigWords = new ConfigWord *[nWords];
-    for (int i=0; i<nWords; i++)
-      m_ConfigWords[i]=0;
+    for (unsigned int i = 0; i < nWords; i++)
+      m_ConfigWords[i] = 0;
   }
 }
 
 ConfigMemory::~ConfigMemory()
 {
 
-  for (int i=0; i<m_nConfigWords; i++)
+  for (unsigned int i = 0; i < m_nConfigWords; i++)
     if (m_ConfigWords[i])
       m_pCpu->deleteSymbol((gpsimObject**)&m_ConfigWords[i]);
 

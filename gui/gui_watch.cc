@@ -334,7 +334,7 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 {
     GtkWidget *dialog=0;
     GtkWidget *button;
-    int i;
+    unsigned int i;
 
     dialog = gtk_dialog_new();
 
@@ -859,7 +859,7 @@ void Watch_Window::Build(void)
 
 Watch_Window::Watch_Window(GUI_Processor *_gp)
 {
-  int i;
+  unsigned int i;
     
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)

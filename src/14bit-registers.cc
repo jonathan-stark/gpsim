@@ -246,8 +246,8 @@ unsigned int FSR::get_value()
 //
 FSR_12::FSR_12(Processor *pCpu, const char *pName, unsigned int _rpb, unsigned int _valid_bits)
   : FSR(pCpu, pName, ""),
-    register_page_bits(_rpb),
-    valid_bits(_valid_bits)
+    valid_bits(_valid_bits),
+    register_page_bits(_rpb)
 {}
 
 void  FSR_12::put(unsigned int new_value)
