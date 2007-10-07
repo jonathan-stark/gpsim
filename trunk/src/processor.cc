@@ -2165,10 +2165,10 @@ void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
 // to write to this register, the breakpoint object will capture this and
 // halt the simulation.
 
-bool RegisterMemoryAccess::insertRegister(int address, Register *pReg)
+bool RegisterMemoryAccess::insertRegister(unsigned int address, Register *pReg)
 {
 
-  if(!cpu || !registers || nRegisters<=address ||!pReg)
+  if(!cpu || !registers || nRegisters <= address ||!pReg)
     return false;
 
   Register *ptop = registers[address];
@@ -2182,9 +2182,9 @@ bool RegisterMemoryAccess::insertRegister(int address, Register *pReg)
 // removeRegister - see comment on insertRegister. This method removes
 // a register object from the breakpoint linked list.
 
-bool RegisterMemoryAccess::removeRegister(int address, Register *pReg)
+bool RegisterMemoryAccess::removeRegister(unsigned int address, Register *pReg)
 {
-  if(!cpu || !registers || nRegisters<=address ||!pReg)
+  if(!cpu || !registers || nRegisters <= address ||!pReg)
     return false;
 
   Register *ptop = registers[address];
@@ -2208,7 +2208,7 @@ bool RegisterMemoryAccess::removeRegister(int address, Register *pReg)
 bool RegisterMemoryAccess::hasBreak(unsigned int address)
 {
 
-  if(!cpu || !registers || nRegisters<=address)
+  if(!cpu || !registers || nRegisters <= address)
     return false;
 
   return registers[address]->isa() == Register::BP_REGISTER;
@@ -2221,7 +2221,7 @@ static InvalidRegister AnInvalidRegister(0,"AnInvalidRegister");
 Register &RegisterMemoryAccess::operator [] (unsigned int address)
 {
 
-  if(!registers || get_size()<=address)
+  if(!registers || get_size() <= address)
     return AnInvalidRegister;
 
   return *registers[address];

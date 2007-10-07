@@ -33,7 +33,6 @@ Boston, MA 02111-1307, USA.  */
 class IntelHexProgramFileType : public ProgramFileType {
 public:
   IntelHexProgramFileType();
-  ~IntelHexProgramFileType();
   int readihex16 (Processor *pProcessor, FILE * file);
   inline void writeihex16(Register **fr, gint32 size, FILE *file, gint32 offset)
 	{ writeihexN(2, fr, size, file, offset); }

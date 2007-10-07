@@ -101,11 +101,11 @@ public:
 
 P16F8x::P16F8x(const char *_name, const char *desc)
   : P16X6X_processor(_name,desc),
-    usart(this),
-    comparator(this),
     wdtcon(this, "wdtcon", "WDT Control"),
     osccon(this, "osccon", "OSC Control"),
-    osctune(this, "osctune", "OSC Tune")
+    osctune(this, "osctune", "OSC Tune"),
+    usart(this),
+    comparator(this)
 {
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);

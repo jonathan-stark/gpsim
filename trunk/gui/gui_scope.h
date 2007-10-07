@@ -71,7 +71,7 @@ public:
   gdouble getSpan();
 
   /// mapPixelToTime - convert a pixel horizontal offset to time
-  guint64 mapPixelToTime(int pixel);
+  guint64 mapPixelToTime(unsigned int pixel);
 
   /// mapTimeToPixel - convert time to a pixel horizontal offset.
   int mapTimeToPixel(guint64 time);

@@ -166,7 +166,7 @@ namespace I2C_Module {
     
     } m_mState;
 
-    const int m_MSBmask;   // MSB of transfer mask. Used in data transfers
+    const unsigned int m_MSBmask;   // MSB of transfer mask. Used in data transfers
     bool readBit();
     void setNextMicroState(eI2CMicroState nextState, unsigned int waitTime);
     void setNextMacroState(eI2CMacroState nextState);

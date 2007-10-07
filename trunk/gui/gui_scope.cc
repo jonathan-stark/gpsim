@@ -1729,7 +1729,7 @@ gdouble Scope_Window::getSpan()
   return start > stop ? 0.0 : ((gdouble)(stop-start));
 }
 
-guint64 Scope_Window::mapPixelToTime(int pixel)
+guint64 Scope_Window::mapPixelToTime(unsigned int pixel)
 {
   gdouble x = (pixel>=0 && pixel<m_PixmapWidth) ? pixel : 0;
 

@@ -146,7 +146,9 @@ PicTrisRegister::PicTrisRegister(Processor *pCpu, const char *pName, const char 
                                  bool bIgnoreWDTResets,
 				 unsigned int enableMask)
   : sfr_register(pCpu, pName, pDesc),
-    m_port(_port),m_bIgnoreWDTResets(bIgnoreWDTResets),m_EnableMask(enableMask)
+    m_port(_port),
+    m_EnableMask(enableMask),
+    m_bIgnoreWDTResets(bIgnoreWDTResets)
 {
   if (m_port)
     m_port->setTris(this);

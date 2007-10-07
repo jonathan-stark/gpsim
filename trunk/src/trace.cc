@@ -581,7 +581,7 @@ int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
   int total_chars=0;
   int iUsed = entriesUsed(pTrace,tbi);
 
-  for(unsigned int i=0; i<iUsed; i++) {
+  for(int i = 0; i < iUsed; i++) {
 
     int n = snprintf(buf,bufsize,"%08X:", pTrace->get(tbi+i));
     if(n < 0)
@@ -1248,7 +1248,7 @@ unsigned int Trace::allocateTraceType(TraceType *tt)
 {
   
   if(tt) {
-    int i;
+    unsigned int i;
 
     unsigned int *ltt = &lastTraceType;
     unsigned int n = 1<<24;

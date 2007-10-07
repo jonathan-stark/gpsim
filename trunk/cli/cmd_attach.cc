@@ -106,6 +106,6 @@ stimulus *toStimulus(gpsimObject *pObj)
     return 0;
   }
 
-  return toStimulus((gint64)pVal);
+  return toStimulus((gint64)*pVal);
 }
 

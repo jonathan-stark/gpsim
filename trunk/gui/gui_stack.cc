@@ -150,9 +150,8 @@ static int get_closest_label(Stack_Window *sw,
     
   Value *closest_symbol = 0;
 
-  int minimum_delta=0x2000000;
-
 #if 0
+  int minimum_delta=0x2000000;
   int delta;
 
   Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();

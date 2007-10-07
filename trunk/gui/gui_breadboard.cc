@@ -1833,6 +1833,8 @@ static void node_cb(GtkCList       *clist,
 
     *((Stimulus_Node**) user_data)=snode;
 }
+
+#if 0 // warning: 'void module_cb(GtkCList*, gint, gint, GdkEvent*, void*)' defined but not used
 static void module_cb(GtkCList       *clist,
 		      gint            row,
 		      gint            column,
@@ -1845,6 +1847,8 @@ static void module_cb(GtkCList       *clist,
 
     strncpy((char*) user_data, module_type, STRING_SIZE);
 }
+#endif
+
 static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
 {
     Stimulus_Node *node;
@@ -1940,6 +1944,7 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
     return snode;
 }
 
+#if 0 // gui_breadboard.cc:1944: warning: 'char* select_module_dialog(Breadboard_Window*) ' defined but not used
 static char *select_module_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
@@ -2051,6 +2056,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
   return module_type;
 }
+#endif
 
 #if 0
 // Display a file in a text widget.

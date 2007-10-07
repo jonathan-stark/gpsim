@@ -52,10 +52,6 @@ IntelHexProgramFileType::IntelHexProgramFileType()
    isBigEndian = (*(char *)& word) != 0x21;
 }
 
-IntelHexProgramFileType::~IntelHexProgramFileType()
-{
-}
-
 void
 IntelHexProgramFileType::putachar (FILE * file, unsigned char c)
 {

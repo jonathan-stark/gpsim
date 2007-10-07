@@ -252,8 +252,7 @@ void PinGeometry::convertToNew()
 //------------------------------------------------------------------------
 void Package::showPins()
 {
-  int pin_number;
-
+  unsigned int pin_number;
 
   for (pin_number=0; pin_number < number_of_pins; pin_number++) {
 

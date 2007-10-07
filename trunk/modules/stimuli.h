@@ -45,7 +45,7 @@ namespace ExtendedStimuli {
 
   class ValueStimulusData {
   public:
-    guint64 time;
+    gint64 time;
     Value  *v;
 
     inline bool operator < (ValueStimulusData &rValue) {

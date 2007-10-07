@@ -1166,7 +1166,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
   if (!pText)
     return 0;
 
-  int patternLen = strlen(pText);
+  unsigned int patternLen = strlen(pText);
   char buff[1024];
   patternLen = (patternLen < sizeof(buff)) ? patternLen : sizeof(buff);
   const char *pattern = bDirection ? pText : 
@@ -1240,7 +1240,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
 
     const char *str = gtk_text_buffer_get_text(pPage->buffer(),
       &iStart, &iEnd, FALSE);
-    int srcLen = strlen(str);
+    unsigned int srcLen = strlen(str);
 
     const char *cpSource = str;
     char buffer2[1024];
@@ -1364,7 +1364,7 @@ static Register *findRegister(string text)
 void
 SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
 {
-  int address;
+  unsigned int address;
   menu_item *item;
 
   SourceWindow *pSW = 0;

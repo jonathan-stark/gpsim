@@ -402,7 +402,7 @@ public:
 protected:
   pic_processor *m_pCpu;
   ConfigWord **m_ConfigWords;
-  int m_nConfigWords;
+  unsigned int m_nConfigWords;
 };
 
 /*
