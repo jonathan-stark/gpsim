@@ -260,7 +260,7 @@ gpsimObject *SymbolTable::find(string s)
   // the right of the period.
 
   const char scopeOperator = '.';
-  unsigned int scopeOperatorPosition = s.find_first_of(scopeOperator);
+  size_t scopeOperatorPosition = s.find_first_of(scopeOperator);
   if (scopeOperatorPosition != string::npos) {
     searchTable = &globalSymbols;
     if (scopeOperatorPosition == 0) {   // Select the current symbol table
