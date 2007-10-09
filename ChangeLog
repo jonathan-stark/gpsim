@@ -1,3 +1,6 @@
+2007-10-09 Borut Razem <borut.razem@siol.net>
+	* src/symbol.cc: fixed the fixed warnig ;-)
+
 2007-10-07 Borut Razem <borut.razem@siol.net>
 	* cli/cmd_attach.cc, cli/cmd_dump.cc, cli/cmd_dump.h,
 	  gui/gui_breadboard.cc, gui/gui_scope.cc, gui/gui_scope.h,
