@@ -1,3 +1,8 @@
+2007-10-10  Scott Dattalo <scott@dattalo.com>
+	* modules/i2c-eeprom.cc, cli/cmd_dump.cc, src/pic-processor.cc,
+	src/symbol.cc, src/i2c-ee.cc:
+	Fixed errors that Borut uncovered during the clean up process.
+	
 2007-10-09 Borut Razem <borut.razem@siol.net>
 	* src/symbol.cc: fixed the fixed warnig ;-)
 
@@ -14,7 +19,7 @@
 	  src/trace.cc: fixed trivial gcc warnings
 	* doc/gpsimWin32.html: generic readline
 
-2007-07-29  Scott Dattalo <scott@dattalo.com>
+2007-10-6  Scott Dattalo <scott@dattalo.com>
 	* regression/switch_test/switch_test.asm,
 	  regression/instructions_14bit/branching.asm:
 	  - WDT was timing out.

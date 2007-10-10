@@ -101,6 +101,7 @@ const char* phaseDesc(ClockPhase *pPhase)
     return ("mExecuteInterrupt");
   if (pPhase == mCaptureInterrupt)
     return ("mCaptureInterrupt");
+  return "unknown phase";
 }
 
 phaseCaptureInterrupt::phaseCaptureInterrupt(Processor *pcpu)

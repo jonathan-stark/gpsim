@@ -95,6 +95,7 @@ int SymbolTable_t::removeSymbol(gpsimObject *pSym)
       return 1;
     }
   }
+  return 0;
 }
 
 int SymbolTable_t::removeSymbol(const string &s)
