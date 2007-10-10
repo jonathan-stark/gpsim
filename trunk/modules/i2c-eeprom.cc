@@ -37,19 +37,19 @@ class Processor;
 #include "../src/packages.h"
 #include "../src/gpsim_interface.h"
 
-  class PromAddressAttribute : public Integer
-  {
-  public:
-    PromAddressAttribute(I2C_EE *m_eeprom, const char *_name, const char * desc);
-    virtual void set(gint64);
-  };
-  PromAddressAttribute::PromAddressAttribute(I2C_EE *m_eeprom,const char *_name, const char * desc)
-    : Integer(_name,(gint64)m_eeprom,desc)
- {}
- void PromAddressAttribute::set(gint64 v)
- {
-    Integer::set(v);
- }
+class PromAddressAttribute : public Integer
+{
+public:
+  PromAddressAttribute(I2C_EE *m_eeprom, const char *_name, const char * desc);
+  virtual void set(gint64);
+};
+PromAddressAttribute::PromAddressAttribute(I2C_EE *m_eeprom,const char *_name, const char * desc)
+  : Integer(_name,(gint64)m_eeprom,desc)
+{}
+void PromAddressAttribute::set(gint64 v)
+{
+  Integer::set(v);
+}
 namespace I2C_EEPROM_Modules {
 
 class I2C_ENABLE : public IOPIN

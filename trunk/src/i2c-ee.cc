@@ -238,6 +238,9 @@ void I2C_EE::debug()
   case RX_ADDR:
     cPBusState = "RX_ADDR";
     break;
+  case RX_ADDR2:
+    cPBusState = "RX_ADDR2";
+    break;
   case ACK_ADDR:
     cPBusState = "ACK_ADDR";
     break;

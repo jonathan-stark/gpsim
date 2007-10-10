@@ -144,7 +144,7 @@ int cmd_dump::dump(int bit_flag, gpsimObject* module, const char * filename)
 {
     Register **fr=0;
     unsigned int mem_size = 0;
-    int reg_size;
+    int reg_size=0;
     int address_off = 0x0000;
     char s1[256];
     pic_processor *pic;
