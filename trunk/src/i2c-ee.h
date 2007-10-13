@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "trigger.h"
 #include "gpsim_classes.h"
+#include "value.h"
 
 class Register;
 class RegisterCollection;
@@ -36,6 +37,17 @@ class Stimulus_Node;
 
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
+
+class PromAddress : public Value
+{
+  public:
+    PromAddress(I2C_EE *eeprom, const char *_name, const char * desc);
+    void get(I2C_EE  *&eeprom) { eeprom = m_eeprom;}
+    void get(char *buffer, int buf_size);
+
+  private:
+     I2C_EE *m_eeprom;
+};
 
 
 class I2C_EE :  public TriggerObject
