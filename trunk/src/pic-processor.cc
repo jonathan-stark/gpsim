@@ -1582,7 +1582,7 @@ ConfigMemory::~ConfigMemory()
 
   for (unsigned int i = 0; i < m_nConfigWords; i++)
     if (m_ConfigWords[i])
-      m_pCpu->deleteSymbol((gpsimObject**)&m_ConfigWords[i]);
+      m_pCpu->deleteSymbol(m_ConfigWords[i]);
 
   delete [] m_ConfigWords;
 }

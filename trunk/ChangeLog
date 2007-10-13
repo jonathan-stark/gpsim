@@ -7,8 +7,9 @@
 	  gui/gui_menu.cc, gui/gui_scope.cc, gui/gui.h, cli/socket.cc:
 	  fixed virtual functions but non-virtual destructor warnings
 	* src/modules.h, src/p16x6x.cc, src/pic-processor.cc, src/p16f62x.cc,
-	  src/12bit-processors.cc, src/pic-processor.h, src/p12x.cc,src/modules.cc
-	  src/processor.cc, src/14bit-processors.cc:
+	  src/12bit-processors.cc, src/pic-processor.h, src/p12x.cc, src/modules.cc
+	  src/processor.cc, src/14bit-processors.cc, src/pic-instructions.cc,
+	  src/pic-processor.cc:
 	  fixed gcc warning: dereferencing type-punned pointer will break
 	  strict-aliasing rules
 

@@ -44,7 +44,7 @@ string AddressSymbol::toString()
   char buf[256];
   int i = (int)getVal();
   snprintf(buf,sizeof(buf), " at address %d = 0x%X",i,i);
-  
+
   return string(buf);
 }
 
@@ -62,7 +62,7 @@ int AddressSymbol::set_break(ObjectBreakTypes bt, ObjectActionTypes at,
 }
 
 LineNumberSymbol::LineNumberSymbol(Processor *pCpu,
-                                   const char *_name, 
+                                   const char *_name,
                                    unsigned int _val)
   :  AddressSymbol(pCpu,_name,_val)
 {
@@ -78,12 +78,12 @@ LineNumberSymbol::LineNumberSymbol(Processor *pCpu,
 
 
 instruction::instruction(Processor *pProcessor,
-			 unsigned int uOpCode, 
-			 unsigned int uAddrOfInstr)
+                         unsigned int uOpCode,
+                         unsigned int uAddrOfInstr)
   : Value("","",pProcessor),
     m_bIsModified(false),
     cycle_count(0),
-    opcode(uOpCode), 
+    opcode(uOpCode),
     m_uAddrOfInstr(uAddrOfInstr),
     pLineSymbol(0),
     file_id(-1),
@@ -104,7 +104,7 @@ instruction::~instruction()
 {
   // cout << __FUNCTION__<<endl;
   if (cpu)
-    cpu->deleteSymbol(&pLineSymbol);
+    cpu->deleteSymbol(pLineSymbol);
 }
 
 void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
@@ -136,8 +136,8 @@ invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opc
   new_name("INVALID");
 }
 
-void invalid_instruction::execute()  
-{ 
+void invalid_instruction::execute()
+{
   //cout << "*** INVALID INSTRUCTION ***\n";
 #ifdef __DEBUG_VERBOSE__
   debug();
@@ -157,10 +157,10 @@ void invalid_instruction::addLabel(string &rLabel)
 
 //------------------------------------------------------------------------
 // update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
-// 
+//
 // map the instruction to the source file that generated it.
 // If a line number is less than 0, then this means that the
-// existing mapping should remain unchanged. This allows this 
+// existing mapping should remain unchanged. This allows this
 // method to be called multiple times; once for each type of
 // mapping.
 
@@ -206,10 +206,10 @@ AliasedInstruction::AliasedInstruction()
 {
 }
 
-AliasedInstruction::AliasedInstruction(Processor *pProcessor, 
-		     unsigned int uOpCode, 
-		     unsigned int uAddrOfInstr)
-  : instruction(pProcessor, uOpCode, uAddrOfInstr), 
+AliasedInstruction::AliasedInstruction(Processor *pProcessor,
+                     unsigned int uOpCode,
+                     unsigned int uAddrOfInstr)
+  : instruction(pProcessor, uOpCode, uAddrOfInstr),
     m_replaced(0)
 {
 }
@@ -309,9 +309,9 @@ bool AliasedInstruction::isBase()
 
 
 //------------------------------------------------------------------------
-Literal_op::Literal_op(Processor *pProcessor, 
-		       unsigned int uOpCode, 
-		       unsigned int uAddrOfInstr)
+Literal_op::Literal_op(Processor *pProcessor,
+                       unsigned int uOpCode,
+                       unsigned int uAddrOfInstr)
   : instruction(pProcessor, uOpCode, uAddrOfInstr),
     L(uOpCode&0xff)
 {
@@ -320,7 +320,7 @@ char *Literal_op::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%02x",
-	   gpsimObject::name().c_str(),L);
+           gpsimObject::name().c_str(),L);
 
   return(return_str);
 }
@@ -332,9 +332,9 @@ void Literal_op::decode(Processor *new_cpu, unsigned int new_opcode)
   L = opcode & 0xff;
 }
 
-Bit_op::Bit_op(Processor *pProcessor, 
-		       unsigned int uOpCode, 
-		       unsigned int uAddrOfInstr)
+Bit_op::Bit_op(Processor *pProcessor,
+                       unsigned int uOpCode,
+                       unsigned int uAddrOfInstr)
   : instruction(pProcessor, uOpCode, uAddrOfInstr),
     mask(0),register_address(0),
     access(false),
@@ -352,41 +352,41 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
     case _16BIT_PROCESSOR_:
       switch(cpu_pic->isa()) {
         case  _P18Cxx2_:
-	case  _P18C2x2_:
-	case  _P18C242_:
-	case  _P18C252_:
-	case  _P18C442_:
-	case  _P18C452_:
-	case  _P18F242_:
-	case  _P18F252_:
-	case  _P18F442_:
-	case  _P18F248_:
-	case  _P18F448_:
-	case  _P18F452_:
-	case  _P18F1220_:
-	case  _P18F1320_:
-	case  _P18F2455_:
+        case  _P18C2x2_:
+        case  _P18C242_:
+        case  _P18C252_:
+        case  _P18C442_:
+        case  _P18C452_:
+        case  _P18F242_:
+        case  _P18F252_:
+        case  _P18F442_:
+        case  _P18F248_:
+        case  _P18F448_:
+        case  _P18F452_:
+        case  _P18F1220_:
+        case  _P18F1320_:
+        case  _P18F2455_:
           mask = 1 << ((opcode >> 9) & 7);
           register_address = opcode & REG_MASK_16BIT;
-		  access = (opcode & ACCESS_MASK_16BIT) ? true : false;
+                  access = (opcode & ACCESS_MASK_16BIT) ? true : false;
           if((!access) && (opcode & 0x80))
-	    register_address |= 0xf00;
+            register_address |= 0xf00;
 
           break;
-	case _P17C7xx_:
-	case _P17C75x_:
-	case _P17C756_:
-	case _P17C756A_:
-	case _P17C762_:
-	case _P17C766_:
+        case _P17C7xx_:
+        case _P17C75x_:
+        case _P17C756_:
+        case _P17C756A_:
+        case _P17C762_:
+        case _P17C766_:
           mask = 1 << ((opcode >> 8) & 7);
           register_address = opcode & REG_MASK_16BIT;
           access = 0;
-	  break;
+          break;
 
-	default:
+        default:
           cout << "ERROR: (Bit_op) the processor is not defined\n";
-	  break;
+          break;
       }
       break;
 
@@ -422,10 +422,10 @@ char * Bit_op::name(char *return_str,int len)
     case _16BIT_PROCESSOR_:
       bit = ((opcode >> 9) & 7);
       snprintf(return_str,len,"%s\t%s,%d,%c",
-	       gpsimObject::name().c_str(),
-	       reg->name().c_str(), 
-	       bit,
-	       access ? '1' : '0');
+               gpsimObject::name().c_str(),
+               reg->name().c_str(),
+               bit,
+               access ? '1' : '0');
 
       return(return_str);
       break;
@@ -443,18 +443,18 @@ char * Bit_op::name(char *return_str,int len)
 
 
   snprintf(return_str,len,"%s\t%s,%d",
-	   gpsimObject::name().c_str(),
-	   reg->name().c_str(),
-	   bit);
+           gpsimObject::name().c_str(),
+           reg->name().c_str(),
+           bit);
 
   return(return_str);
 }
 
 
 //----------------------------------------------------------------
-Register_op::Register_op(Processor *pProcessor, 
-		       unsigned int uOpCode, 
-		       unsigned int uAddrOfInstr)
+Register_op::Register_op(Processor *pProcessor,
+                       unsigned int uOpCode,
+                       unsigned int uAddrOfInstr)
   : instruction(pProcessor, uOpCode, uAddrOfInstr),
     register_address(0),
     destination(false), access(false)
@@ -475,15 +475,15 @@ char * Register_op::name(char *return_str,int len)
 
   if(cpu_pic->base_isa() != _16BIT_PROCESSOR_)
     snprintf(return_str,len,"%s\t%s,%c",
-	     gpsimObject::name().c_str(),
-	     source->name().c_str(),
-	     destination ? 'f' : 'w');
+             gpsimObject::name().c_str(),
+             source->name().c_str(),
+             destination ? 'f' : 'w');
   else
     snprintf(return_str,len,"%s\t%s,%c,%c",
-	     gpsimObject::name().c_str(),
-	     source->name().c_str(), 
-	     destination ? 'f' : 'w',
-	     access ? '1' : '0');
+             gpsimObject::name().c_str(),
+             source->name().c_str(),
+             destination ? 'f' : 'w',
+             access ? '1' : '0');
 
   return(return_str);
 }
@@ -498,30 +498,30 @@ char * Register_op::name(char *return_str,int len)
 // is the lower 5 bits while in the 14-bit core it's the lower 7.
 
 void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
-{ 
+{
   opcode = new_opcode;
   cpu = new_cpu;
 
   switch(cpu_pic->base_isa())
     {
     case _16BIT_PROCESSOR_:
-		destination = (opcode & DESTINATION_MASK_16BIT) ? true : false;
-		access = (opcode & ACCESS_MASK_16BIT) ? true : false;
+                destination = (opcode & DESTINATION_MASK_16BIT) ? true : false;
+                access = (opcode & ACCESS_MASK_16BIT) ? true : false;
       register_address = opcode & REG_MASK_16BIT;
       if((!access) && (opcode & 0x80))
-	register_address |= 0xf00;
+        register_address |= 0xf00;
 
       break;
 
     case _14BIT_PROCESSOR_:
       register_address = opcode & REG_MASK_14BIT;
-	  destination = (opcode & DESTINATION_MASK_14BIT) ? true : false;
+          destination = (opcode & DESTINATION_MASK_14BIT) ? true : false;
       access = 1;
       break;
 
     case _12BIT_PROCESSOR_:
       register_address = opcode & REG_MASK_12BIT;
-	  destination = (opcode & DESTINATION_MASK_12BIT) ? true : false;
+          destination = (opcode & DESTINATION_MASK_12BIT) ? true : false;
       access = 1;
       break;
 
@@ -760,8 +760,8 @@ char * CALL::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%04x",
-	   gpsimObject::name().c_str(),
-	   destination);
+           gpsimObject::name().c_str(),
+           destination);
 
   return(return_str);
 }
@@ -793,8 +793,8 @@ char * CLRF::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t%s",
-	   gpsimObject::name().c_str(),
-	   get_cpu()->registers[register_address]->name().c_str());
+           gpsimObject::name().c_str(),
+           get_cpu()->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -929,7 +929,7 @@ void DECFSZ::execute()
 
   if(0==new_value)
     cpu_pic->pc->skip();                  // Skip next instruction
-  else 
+  else
     cpu_pic->pc->increment();
 
 }
@@ -966,7 +966,7 @@ char * GOTO::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%04x",
-	  gpsimObject::name().c_str(),destination);
+          gpsimObject::name().c_str(),destination);
 
   return(return_str);
 }
@@ -1174,8 +1174,8 @@ char * MOVWF::name(char *return_str, int len)
 {
 
   snprintf(return_str,len,"%s\t%s",
-	   gpsimObject::name().c_str(),
-	   get_cpu()->registers[register_address]->name().c_str());
+           gpsimObject::name().c_str(),
+           get_cpu()->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -1402,10 +1402,10 @@ TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
     {
       cout << "Warning: TRIS address '" << register_address << "' is  out of range\n";
 
-	// set the address to a 'bad value' that's
-	// easy to detect at run time:
-	register_address = 0;
-      
+        // set the address to a 'bad value' that's
+        // easy to detect at run time:
+        register_address = 0;
+
     }
   else {
      if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
@@ -1420,9 +1420,9 @@ void TRIS::execute()
     {
       // Execute the instruction only if the register is valid.
       if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-	cpu_pic->registers[register_address]->put(cpu_pic->W->get());
+        cpu_pic->registers[register_address]->put(cpu_pic->W->get());
       else
-	cpu_pic->tris_instruction(register_address);
+        cpu_pic->tris_instruction(register_address);
     }
 
   cpu_pic->pc->increment();
@@ -1432,8 +1432,8 @@ char * TRIS::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t%s",
-	   gpsimObject::name().c_str(),
-	   cpu_pic->registers[register_address]->name().c_str());
+           gpsimObject::name().c_str(),
+           cpu_pic->registers[register_address]->name().c_str());
 
   return(return_str);
 }
