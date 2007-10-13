@@ -144,13 +144,13 @@ int cmd_dump::dump(int bit_flag, gpsimObject* module, const char * filename)
 {
     Register **fr=0;
     unsigned int mem_size = 0;
-    int reg_size=0;
+    int reg_size = 1;
     int address_off = 0x0000;
     char s1[256];
     pic_processor *pic;
     string symName;
     I2C_EE *eeprom; 
-    Integer *sym;
+    PromAddress *sym;
     FILE *fd = NULL;
     int iReturn;
 
@@ -178,10 +178,9 @@ int cmd_dump::dump(int bit_flag, gpsimObject* module, const char * filename)
         address_off = 0x0000;
 
     }
-    else if ((sym = globalSymbolTable().findInteger(symName)))
+    else if ((sym = dynamic_cast<PromAddress *>(globalSymbolTable().find(symName))))
     {
-	gint64 val = *sym;
-	eeprom = (I2C_EE *)val;
+	sym->get(eeprom);
 	fr = eeprom->get_rom();
 	mem_size = eeprom->get_rom_size();
         reg_size = eeprom->register_size();

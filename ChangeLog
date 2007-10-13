@@ -1,3 +1,7 @@
+2007-10-13 Roy Rankin <rrankin@ihug.com.au>
+	* src/i2c-ee.h src/i2c-ee.cc modules/i2c-eeprom.h modules/i2c-eeprom.cc
+	  cli/cmd_dump.cc cli/cmd_load.cc: Fix eeprom address symbols
+
 2007-10-10  Scott Dattalo <scott@dattalo.com>
 	* modules/i2c-eeprom.cc, cli/cmd_dump.cc, src/pic-processor.cc,
 	src/symbol.cc, src/i2c-ee.cc:

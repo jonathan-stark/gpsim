@@ -135,6 +135,16 @@ public:
 
 };
 
+PromAddress::PromAddress(I2C_EE *eeprom,const char *_name, const char * desc)
+    : Value(_name,desc)
+{
+     m_eeprom = eeprom;
+}
+void PromAddress::get(char *buffer, int buf_size)
+{
+        snprintf(buffer, buf_size, "%p", m_eeprom);
+}
+
 //----------------------------------------------------------
 //
 // I2C EE PROM

@@ -190,7 +190,7 @@ int cmd_load::load(int bit_flag, gpsimObject* module, const char *filename)
   pic_processor *pic;
   I2C_EE *eeprom;
   FILE *fd;
-  Integer *sym;
+  PromAddress *sym;
   int iReturn = (int)TRUE;
 
   module->name(s1, sizeof(s1));
@@ -216,10 +216,10 @@ int cmd_load::load(int bit_flag, gpsimObject* module, const char *filename)
         mem_size = pic->eeprom->get_rom_size();
         iReturn = IntelHexProgramFileType::readihex8(fr, mem_size, fd, 0x0) == SUCCESS;
   }
-  else if ((sym = globalSymbolTable().findInteger(symName)))
+  else if ((sym = dynamic_cast<PromAddress *>(globalSymbolTable().find(symName))))
+
   {             
-        gint64 val = *sym;
-        eeprom = (I2C_EE *)val;
+	sym->get(eeprom);
         fr = eeprom->get_rom();
         mem_size = eeprom->get_rom_size();
 
