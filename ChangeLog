@@ -6,6 +6,11 @@
 	  gui/gui_symbols.cc, gui/gui_src.h, gui/gui_regwin.cc,
 	  gui/gui_menu.cc, gui/gui_scope.cc, gui/gui.h, cli/socket.cc:
 	  fixed virtual functions but non-virtual destructor warnings
+	* src/modules.h, src/p16x6x.cc, src/pic-processor.cc, src/p16f62x.cc,
+	  src/12bit-processors.cc, src/pic-processor.h, src/p12x.cc,src/modules.cc
+	  src/processor.cc, src/14bit-processors.cc:
+	  fixed gcc warning: dereferencing type-punned pointer will break
+	  strict-aliasing rules
 
 2007-10-13 Roy Rankin <rrankin@ihug.com.au>
 	* src/i2c-ee.h src/i2c-ee.cc modules/i2c-eeprom.h modules/i2c-eeprom.cc

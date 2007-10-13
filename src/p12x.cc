@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 //    PIC12C508 PIC12C509
 //    PIC12CE518 PIC12CE519
 //    PIC10F200 PIC10F202 PIC10F204
-//    
+//
 //
 
 #include <stdio.h>
@@ -73,7 +73,7 @@ public:
       gint64 diff = oldV ^ v;
 
       if (diff & WDTEN)
-	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
+        m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
 
       if (diff & MCLRE)
         m_pCpu->config_modes->set_mclre((v&MCLRE)==MCLRE);
@@ -115,7 +115,7 @@ class P12_I2C_EE : public I2C_EE
 {
 public:
   P12_I2C_EE(pic_processor *, unsigned int _rom_size);
-  
+
 protected:
   RegisterCollection *m_UiAccessOfRom; // User access to the rom.
 };
@@ -128,9 +128,9 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
   if(pcpu) {
     pcpu->ema.set_Registers(rom, rom_size);
     m_UiAccessOfRom = new RegisterCollection(pcpu,
-					     "eeData",
-					     rom,
-					     rom_size);
+                                             "eeData",
+                                             rom,
+                                             rom_size);
   }
 
 }
@@ -143,15 +143,15 @@ P12bitBase::P12bitBase(const char *_name, const char *desc)
     osccal(this,"osccal","Oscillator Calibration")
 {
   if(config_modes)
-    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
+    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
 }
 
 P12bitBase::~P12bitBase()
 {
 
-  delete_sfr_register((Register **)&m_gpio,0);
-  delete_sfr_register((Register **)&m_tris,0);
+  delete_sfr_register(m_gpio,0);
+  delete_sfr_register(m_tris,0);
   delete_file_registers(0x7, 0x1f);
   /*
   removeSymbol(*m_configMemory);
@@ -279,7 +279,7 @@ void P12bitBase::tris_instruction(unsigned int tris_register)
 
   //trace.write_TRIS(m_tris->value.get());
 }
-  
+
 void P12C508::create()
 {
 
@@ -519,7 +519,7 @@ P12CE518::P12CE518(const char *_name, const char *desc)
     cout << "12CE518 constructor, type = " << isa() << '\n';
 
   if(config_modes)
-    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
+    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
 }
 
@@ -586,9 +586,9 @@ P12CE519::P12CE519(const char *_name, const char *desc)
 //
 // GPIO Port
 
-GPIO::GPIO(Processor *pCpu, const char *pName, const char *pDesc, 
-           unsigned int numIopins, 
-	   unsigned int enableMask)
+GPIO::GPIO(Processor *pCpu, const char *pName, const char *pDesc,
+           unsigned int numIopins,
+           unsigned int enableMask)
   : PicPortRegister (pCpu,pName,pDesc, numIopins, enableMask)
 {
 }
@@ -602,10 +602,10 @@ void GPIO::setbit(unsigned int bit_number, char new_value)
   // If gpio bit 0,1 or 3 changed states AND
   // ~GPWU is low (wake up on change is enabled) AND
   // the processor is sleeping.
-  //    Then wake 
+  //    Then wake
 
   unsigned int diff = lastDrivenValue ^ rvDrivenValue.data;
-  if ((diff & (1<<3)) && cpu_pic->config_modes->get_mclre()) { // GP3 is the reset pin 
+  if ((diff & (1<<3)) && cpu_pic->config_modes->get_mclre()) { // GP3 is the reset pin
 
     cpu->reset( (rvDrivenValue.data & (1<<3)) ? EXIT_RESET : MCLR_RESET);
     return;
@@ -613,12 +613,12 @@ void GPIO::setbit(unsigned int bit_number, char new_value)
 
   if (diff & 0x0b) {
     // If /GPWU is 0 (i.e. enabled) and the processor is currently sleeping
-    // then wake up the processor by resetting it. 
-    if( ((cpu12->option_reg->value.get() & 0x80) == 0) && 
+    // then wake up the processor by resetting it.
+    if( ((cpu12->option_reg->value.get() & 0x80) == 0) &&
         cpu12->getActivityState() == pic_processor::ePASleeping) {
 
       if(verbose)
-	cout << "IO bit changed while the processor was sleeping,\n\
+        cout << "IO bit changed while the processor was sleeping,\n\
 so the processor is waking up\n";
 
       cpu->reset(IO_RESET);
@@ -636,7 +636,7 @@ void GPIO::setPullUp ( bool bNewPU )
     printf("GPIO::setPullUp() =%d\n",(m_bPU?1:0));
 
   // In the following do not change pullup state of internal pins
-  unsigned int mask = getEnableMask() & 0x3f; 
+  unsigned int mask = getEnableMask() & 0x3f;
   for (unsigned int i=0, m=1; mask; i++, m<<= 1)
     if (mask & m)
     {
@@ -669,7 +669,7 @@ void P10F200::create_iopin_map()
 }
 
 
-  
+
 void P10F200::create()
 {
 
@@ -775,7 +775,7 @@ P10F202::P10F202(const char *_name, const char *desc)
 
 //========================================================================
 // Comparator module for the 10c204 and 10c206
-// 
+//
 class Comparator10C20x
 {
 public:
@@ -788,10 +788,10 @@ class CMCON0;
 //========================================================================
 // COUT_SignalSource
 //
-// The comparator output is driven on to the GPIO pin if the COUTEN bit in 
+// The comparator output is driven on to the GPIO pin if the COUTEN bit in
 // CMCON0 is cleared ( and if the FOSC/4 logic is not driving).
 // This is implemented via COUT_SignalSource. When COUTEN bit is asserted,
-// then COUT_SignalSource overides the default output driver control for 
+// then COUT_SignalSource overides the default output driver control for
 // the GPIO pin.
 
 class COUT_SignalSource : public SignalControl
@@ -812,7 +812,7 @@ private:
 
 //========================================================================
 // COUT_SignalControl -- controls GPIO2's direction when the comparator is
-// enabled. When the comparator is enabled, GPIO2 is an output. 
+// enabled. When the comparator is enabled, GPIO2 is an output.
 
 class COUT_SignalControl : public SignalControl
 {
@@ -851,7 +851,7 @@ public:
     return ((value.get() & COUTEN) == 0);
   }
 
-  char getState() 
+  char getState()
   {
     char ret='Z';
     if ( (value.get() & (COUTEN | CMPON)) == CMPON)
@@ -967,7 +967,7 @@ void CMCON0::put(unsigned int new_value)
 void CMCON0::refresh()
 {
   if (value.get() & CMPON) {
-    if (value.get() & CPREF) 
+    if (value.get() & CPREF)
       m_pV = m_CInP->getPin().get_nodeVoltage();
     else
       m_pV = m_CInM->getPin().get_nodeVoltage();
@@ -989,7 +989,7 @@ void CMCON0::setInputState(char newState, bool bInput)
 {
 
   if (bInput) {
-    if (value.get() & CPREF) 
+    if (value.get() & CPREF)
       m_pV = m_CInP->getPin().get_nodeVoltage();
   }
   else {
@@ -1021,7 +1021,7 @@ void P10F204::create()
 {
   P10F200::create();
 
-  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control", 
+  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control",
                         &(*m_gpio)[0], &(*m_gpio)[1], &(*m_gpio)[2]);
 
   RegisterValue porVal = RegisterValue(0xff,0);

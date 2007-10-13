@@ -122,14 +122,14 @@ void P16C62::create_iopin_map(void)
 
   if (hasSSP()) {
     ssp.initialize(
-		get_pir_set(),    // PIR
-	 	&(*m_portc)[3],   // SCK
-		&(*m_porta)[5],   // SS
-		&(*m_portc)[5],   // SDO
-		&(*m_portc)[4],   // SDI
-		m_trisc,         // I2C port
-		SSP_TYPE_BSSP
-  	);  
+                get_pir_set(),    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+                m_trisc,         // I2C port
+                SSP_TYPE_BSSP
+        );
   }
 
   tmr1l.setIOpin(&(*m_portc)[0]);
@@ -200,22 +200,22 @@ void P16C64::create_iopin_map(void)
 
   if (hasSSP()) {
     ssp.initialize(
-		get_pir_set(),    // PIR
-		&(*m_portc)[3],   // SCK
-		&(*m_porta)[5],   // SS
-		&(*m_portc)[5],   // SDO
-		&(*m_portc)[4],   // SDI
-		m_trisc,         // I2C port
-		SSP_TYPE_BSSP
-		   ); 
+                get_pir_set(),    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+                m_trisc,         // I2C port
+                SSP_TYPE_BSSP
+                   );
   }
   psp.initialize(get_pir_set(),    // PIR
-		m_portd,	   // Parallel port
-		m_trisd,	   // Parallel tris
-		m_trise,	   // Control tris
-		&(*m_porte)[0],	   // NOT RD
-		&(*m_porte)[1],	   // NOT WR
-		&(*m_porte)[2]);   // NOT CS
+                m_portd,           // Parallel port
+                m_trisd,           // Parallel tris
+                m_trise,           // Control tris
+                &(*m_porte)[0],    // NOT RD
+                &(*m_porte)[1],    // NOT WR
+                &(*m_porte)[2]);   // NOT CS
 
   tmr1l.setIOpin(&(*m_portc)[0]);
 }
@@ -223,7 +223,7 @@ void P16C64::create_iopin_map(void)
 
 //---------------------------------------------------------
 //
-//  P16x6x::create_sfr_map(void) - Here's where all of the 
+//  P16x6x::create_sfr_map(void) - Here's where all of the
 //  registers are defined for a p16c63 and greater...
 
 void P16X6X_processor::create_sfr_map()
@@ -346,7 +346,7 @@ P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
     pcon(this, "pcon", "pcon"),
     ssp(this)
 {
-  
+
 
   if(verbose)
     cout << "generic 16X6X constructor, type = " << isa() << '\n';
@@ -367,12 +367,12 @@ P16X6X_processor::~P16X6X_processor()
 
   delete_file_registers(0x20,0x7f);
   delete_file_registers(0xa0,0xbf);
-  delete_sfr_register((Register **)&m_portc,0);
-  delete_sfr_register((Register **)&m_trisc,0);
+  delete_sfr_register(m_portc,0);
+  delete_sfr_register(m_trisc,0);
   cout << "deleting PIR2:\n";
-  delete_sfr_register((Register **)&pir2,0);
+  delete_sfr_register(pir2,0);
   cout << "deleting PIR1:\n";
-  delete_sfr_register((Register **)&pir1,0);
+  delete_sfr_register(pir1,0);
   cout << "leaving "<<__FUNCTION__<<endl;
 }
 
@@ -394,8 +394,8 @@ P16C62::~P16C62()
 {
   cout << __FUNCTION__ << endl;
 
-  delete_sfr_register((Register**)&m_portc,0x07);
-  delete_sfr_register((Register**)&m_trisc,0x87);
+  delete_sfr_register(m_portc,0x07);
+  delete_sfr_register(m_trisc,0x87);
 }
 
 
@@ -430,7 +430,7 @@ void  P16C62::create(void)
     cout << " c62 create \n";
 
   create_iopin_map();
-  
+
   _14bit_processor::create();
 
   P16C62::create_sfr_map();
@@ -485,7 +485,7 @@ void P16C63::create_sfr_map(void)
   ccpr2h.ccprl  = &ccpr2l;
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),0);
@@ -517,7 +517,7 @@ void P16C63::create_symbols(void)
 //------------------------------------------------------------------------
 //
 // P16C63 constructor
-// 
+//
 // Note: Since the 'C63 is derived from the 'C62. So before this constructor
 // is called, the C62 constructor will be called. Most of the initialization
 // is done within the 'C62 constructor.
@@ -537,7 +537,7 @@ P16C63::~P16C63()
   delete_file_registers(0xc0, 0xff);
   delete_file_registers(0x19, 0x1a);  // usart tx and rx registers.
 
-  //delete_sfr_register((Register**)&pir2,0x0d);
+  //delete_sfr_register(pir2,0x0d);
 }
 
 void P16C63::create(void)
@@ -622,7 +622,7 @@ void  P16C64::create(void)
     cout << " c64 create \n";
 
   create_iopin_map();
-  
+
   _14bit_processor::create();
 
   //P16X6X_processor::create_sfr_map();
@@ -666,8 +666,8 @@ P16C64::~P16C64()
 {
   cout << __FUNCTION__ << endl;
 
-  //delete_sfr_register((Register**)&m_portc,0x07);
-  //delete_sfr_register((Register**)&m_trisc,0x87);
+  //delete_sfr_register(m_portc,0x07);
+  //delete_sfr_register(m_trisc,0x87);
 
 }
 //------------------------------------------------------------------------
@@ -703,7 +703,7 @@ void P16C65::create_sfr_map(void)
   ccpr2h.ccprl  = &ccpr2l;
 
   usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
@@ -734,7 +734,7 @@ void P16C65::create_symbols(void)
 //------------------------------------------------------------------------
 //
 // P16C65 constructor
-// 
+//
 // Note: Since the 'C65 is derived from the 'C64. So before this constructor
 // is called, the C64 constructor will be called. Most of the initialization
 // is done within the 'C64 constructor.

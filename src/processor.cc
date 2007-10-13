@@ -54,7 +54,7 @@ Boston, MA 02111-1307, USA.  */
 #include "clock_phase.h"
 
 //------------------------------------------------------------------------
-// active_cpu  is a pointer to the pic processor that is currently 'active'. 
+// active_cpu  is a pointer to the pic processor that is currently 'active'.
 // 'active' means that it's the one currently being simulated or the one
 // currently being manipulated by the user (e.g. register dumps, break settings)
 
@@ -73,9 +73,9 @@ public:
   CPU_Freq(Processor * _cpu, double freq); //const char *_name, double newValue, const char *desc);
 
   virtual void set(double d);
-  
+
 private:
-  Processor * cpu;  
+  Processor * cpu;
 };
 
 CPU_Freq::CPU_Freq(Processor * _cpu, double freq)
@@ -157,13 +157,13 @@ Processor::~Processor()
 {
 
 
-  deleteSymbol((gpsimObject**)&m_pbBreakOnInvalidRegisterRead);
-  deleteSymbol((gpsimObject**)&m_pbBreakOnInvalidRegisterWrite);
-  deleteSymbol((gpsimObject**)&m_pWarnMode);
-  deleteSymbol((gpsimObject**)&m_pSafeMode);
-  deleteSymbol((gpsimObject**)&m_pUnknownMode);
-  deleteSymbol((gpsimObject**)&m_pBreakOnReset);
-  deleteSymbol((gpsimObject**)&mFrequency);
+  deleteSymbol(m_pbBreakOnInvalidRegisterRead);
+  deleteSymbol(m_pbBreakOnInvalidRegisterWrite);
+  deleteSymbol(m_pWarnMode);
+  deleteSymbol(m_pSafeMode);
+  deleteSymbol(m_pUnknownMode);
+  deleteSymbol(m_pBreakOnReset);
+  deleteSymbol(mFrequency);
 
   delete interface;
 
@@ -266,9 +266,9 @@ void Processor::init_register_memory (unsigned int memory_size)
 
   registers = new Register *[memory_size];
   m_UiAccessOfRegisters = new RegisterCollection(this,
-						 "ramData",
-						 registers,
-						 memory_size);
+                                                 "ramData",
+                                                 registers,
+                                                 memory_size);
 
   if (registers  == 0)
     {
@@ -284,7 +284,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   register_bank = registers;
 
   rma.set_Registers(registers, memory_size);
-  
+
   // Make all of the file registers 'undefined' (each processor derived from this base
   // class defines its own register mapping).
 
@@ -395,13 +395,13 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 //  The purpose of this member function is to delete file registers
 //
 
-void Processor::delete_file_registers(unsigned int start_address, 
+void Processor::delete_file_registers(unsigned int start_address,
                                       unsigned int end_address,
                                       bool bRemoveWithoutDelete)
 {
 #define DFR_DEBUG 0
   if (DFR_DEBUG)
-    cout << __FUNCTION__ 
+    cout << __FUNCTION__
          << "  start:" << hex << start_address
          << "  end:" << hex << end_address
          << endl;
@@ -420,13 +420,13 @@ void Processor::delete_file_registers(unsigned int start_address,
 
       Register *thisReg = registers[j];
       if(thisReg->alias_mask) {
-	// This register appears in more than one place. Let's find all
-	// of its aliases.
-	for(i=j&ALIAS_MASK; i<rma.get_size(); i+=SMALLEST_ALIAS_DISTANCE)
-	  if(thisReg == registers[i]) {
+        // This register appears in more than one place. Let's find all
+        // of its aliases.
+        for(i=j&ALIAS_MASK; i<rma.get_size(); i+=SMALLEST_ALIAS_DISTANCE)
+          if(thisReg == registers[i]) {
             if(DFR_DEBUG)
               cout << "   removing at address:" << hex << i << endl;
-	    registers[i] = 0;
+            registers[i] = 0;
           }
       }
       if(DFR_DEBUG)
@@ -440,7 +440,7 @@ void Processor::delete_file_registers(unsigned int start_address,
 
 //-------------------------------------------------------------------
 //
-// 
+//
 //    alias_file_registers
 //
 //  The purpose of this member function is to alias the
@@ -458,11 +458,11 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
   for (j = start_address; j <= end_address; j++)
     {
       if (alias_offset && (j+alias_offset < rma.get_size()))
-	{
-	  registers[j + alias_offset] = registers[j];
+        {
+          registers[j + alias_offset] = registers[j];
           if (registers[j])
             registers[j]->alias_mask = alias_offset;
-	}
+        }
     }
 
 }
@@ -473,7 +473,7 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 //
 // The purpose of this member function is to allocate memory for the
 // pic's code space. The 'memory_size' parameter tells how much memory
-// is to be allocated AND it should be an integer of the form of 2^n. 
+// is to be allocated AND it should be an integer of the form of 2^n.
 // If the memory size is not of the form of 2^n, then this routine will
 // round up to the next integer that is of the form 2^n.
 //   Once the memory has been allocated, this routine will initialize
@@ -548,7 +548,7 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
     if(program_memory[uIndex] == 0)
       program_memory[uIndex] = &bad_instruction;
     //program_memory[uIndex]->add_line_number_symbol();
-  } 
+  }
   else if (set_config_word(address, value))
     ;
   else
@@ -562,8 +562,8 @@ void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int v
   init_program_memory(map_pm_index2address(uIndex), value);
 }
 
-void Processor::init_program_memory_at_index(unsigned int uIndex, 
-					     const unsigned char *bytes, int nBytes)
+void Processor::init_program_memory_at_index(unsigned int uIndex,
+                                             const unsigned char *bytes, int nBytes)
 {
 
   for (int i =0; i<nBytes/2; i++)
@@ -577,9 +577,9 @@ unsigned int Processor::get_program_memory_at_address(unsigned int address)
 {
   unsigned int uIndex = map_pm_address2index(address);
 
-  
+
   return (uIndex < program_memory_size() && program_memory[uIndex])
-    ? program_memory[uIndex]->get_opcode() 
+    ? program_memory[uIndex]->get_opcode()
     : 0xffffffff;
 
 }
@@ -591,8 +591,8 @@ unsigned int Processor::get_program_memory_at_address(unsigned int address)
 //
 
 void Processor::build_program_memory(unsigned int *memory,
-				     unsigned int minaddr, 
-				     unsigned int maxaddr)
+                                     unsigned int minaddr,
+                                     unsigned int maxaddr)
 {
 
   for (unsigned int i = minaddr; i <= maxaddr; i++)
@@ -617,9 +617,9 @@ void Processor::set_out_of_range_pm(unsigned int address, unsigned int value)
 // between instructions and the source code that create them.
 
 void Processor::attach_src_line(unsigned int address,
-				unsigned int file_id,
-				unsigned int sline,
-				unsigned int lst_line)
+                                unsigned int file_id,
+                                unsigned int sline,
+                                unsigned int lst_line)
 {
   unsigned int uIndex = map_pm_address2index(address);
   if(uIndex < program_memory_size())
@@ -627,7 +627,7 @@ void Processor::attach_src_line(unsigned int address,
 }
 
 //-------------------------------------------------------------------
-// read_src_files - this routine will open all of the source files 
+// read_src_files - this routine will open all of the source files
 //   associated with the project and associate their line numbers
 //   with the addresses of the opcodes they generated.
 //
@@ -643,10 +643,10 @@ void Processor::read_src_files(void)
 
     // did this src file generate any code?
     if(fc && fc->max_line() > 0) {
-      
+
       // Create an array whose index corresponds to the
       // line number of a source file line and whose data
-      // is the offset (in bytes) from the beginning of the 
+      // is the offset (in bytes) from the beginning of the
       // file. (e.g. files[3].line_seek[20] references the
       // 20th line of the third source file.)
 
@@ -661,7 +661,7 @@ void Processor::read_src_files(void)
     if( (program_memory[addr]->isa() != instruction::INVALID_INSTRUCTION)) {
 
       FileContext *fc = files[program_memory[addr]->get_file_id()];
-      
+
       if(fc)
         fc->put_address(program_memory[addr]->get_src_line(),
                         map_pm_index2address(addr));
@@ -669,7 +669,7 @@ void Processor::read_src_files(void)
     }
   }
 
-  // Associate the list file with 
+  // Associate the list file with
   if (files.list_id() >= 0) {
 
     // Parse the list file.
@@ -691,11 +691,11 @@ void Processor::read_src_files(void)
       int opcode;
 
       if (sscanf(buf,"%x   %x",&address, &opcode) == 2) {
-	unsigned int uIndex = map_pm_address2index(address);
-	if (uIndex < program_memory_size()) {
-	  program_memory[uIndex]->update_line_number(-1,-1,line,-1,-1);
-	  fc->put_address(line,address);
-	}
+        unsigned int uIndex = map_pm_address2index(address);
+        if (uIndex < program_memory_size()) {
+          program_memory[uIndex]->update_line_number(-1,-1,line,-1,-1);
+          fc->put_address(line,address);
+        }
       }
 
       line++;
@@ -711,10 +711,10 @@ void Processor::read_src_files(void)
 //
 // Display the contents of either a source or list file
 //
-void Processor::list(unsigned int file_id, 
-		     unsigned int pc_val, 
-		     int start_line, 
-		     int end_line)
+void Processor::list(unsigned int file_id,
+                     unsigned int pc_val,
+                     int start_line,
+                     int end_line)
 {
 
 
@@ -824,7 +824,7 @@ void Processor::disassemble (signed int s, signed int e)
   if(start_PMindex >= program_memory_size()) {
     if(s <0)
       start_PMindex = 0;
-    else 
+    else
       return;
   }
   if(end_PMindex  >= program_memory_size()) {
@@ -868,7 +868,7 @@ void Processor::disassemble (signed int s, signed int e)
     if(inst->get_file_id() != -1) {
       fc = files[inst->get_file_id()];
       if(iLastFileId != inst->get_file_id())
-	Console.Printf("%s\n", fc->name().c_str());
+        Console.Printf("%s\n", fc->name().c_str());
       iLastFileId = inst->get_file_id();
     }
     else
@@ -885,22 +885,22 @@ void Processor::disassemble (signed int s, signed int e)
       char buf[256];
 
       files.ReadLine(inst->get_file_id(),
-		     inst->get_src_line() - 1,
-		     buf,
-		     sizeof(buf));
+                     inst->get_src_line() - 1,
+                     buf,
+                     sizeof(buf));
       cout << buf;
     }  else {
       if(fc != NULL && inst->get_src_line() != -1) {
-	if(fc->ReadLine(inst->get_src_line(), str2, iConsoleWidth - 33)
-	   != NULL) {
-	  trim(str2);
-	}
-	else {
-	  str2[0] = 0;
-	}
+        if(fc->ReadLine(inst->get_src_line(), str2, iConsoleWidth - 33)
+           != NULL) {
+          trim(str2);
+        }
+        else {
+          str2[0] = 0;
+        }
       }
       else {
-	str2[0] = 0;
+        str2[0] = 0;
       }
       inst->name(str, sizeof(str));
       char *pAfterNumonic = strchr(str, '\t');
@@ -910,9 +910,9 @@ void Processor::disassemble (signed int s, signed int e)
       //        Console.Printf("0.........1.........2.........3.........4.........5.........6.........7.........");
       //        Console.Printf("%d, strlen(str)=%d\n", iNumonicWidth, strlen(str));
       const char *pFormat = (opcode_size() <=2) ?  "% 3s%c%04x  %04x  %s %*s%s\n" :  "% 3s%c%04x  %06x  %s %*s%s\n";
-      Console.Printf(pFormat,		     
-		     pszPC, cBreak, uAddress, inst->get_opcode(), 
-		     str, iSrc, "", str2);
+      Console.Printf(pFormat,
+                     pszPC, cBreak, uAddress, inst->get_opcode(),
+                     str, iSrc, "", str2);
     }
   }
 }
@@ -936,10 +936,10 @@ void Processor::save_state(FILE *fp)
     if(reg && reg->isa() != Register::INVALID_REGISTER) {
 
       fprintf(fp,"R:%X:%s:(%X,%X)\n",
-	      reg->address,
-	      reg->name().c_str(),
-	      reg->value.get(),
-	      reg->value.geti());
+              reg->address,
+              reg->name().c_str(),
+              reg->value.get(),
+              reg->value.geti());
 
     }
   }
@@ -984,7 +984,7 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
     return closest_address;
 
   FileContext *fc = cpu->files[file_id];
-  
+
   if(fc)
   {
     int offset=0;
@@ -1014,15 +1014,15 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 
     // Find the closet instruction to the src file line number
     if( (cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION) &&
-	(cpu->program_memory[i]->get_file_id()==file_id)                    &&
-	(abs(cpu->program_memory[i]->get_src_line() - src_line) < distance))
+        (cpu->program_memory[i]->get_file_id()==file_id)                    &&
+        (abs(cpu->program_memory[i]->get_src_line() - src_line) < distance))
 
       {
-	distance = abs(cpu->program_memory[i]->get_src_line() - src_line);
-	closest_address = i;
+        distance = abs(cpu->program_memory[i]->get_src_line() - src_line);
+        closest_address = i;
 
-	if(distance == 0)
-	  return cpu->map_pm_index2address(closest_address);
+        if(distance == 0)
+          return cpu->map_pm_index2address(closest_address);
       }
   }
 
@@ -1037,7 +1037,7 @@ int ProgramMemoryAccess::find_address_from_line(FileContext *fc, int src_line)
 }
 //--------------------------------------------------------------------------
 //
-// temporary - this could is going to get deleted as soon as file related 
+// temporary - this could is going to get deleted as soon as file related
 // stuff gets put into its own object/class.
 
 void ProgramMemoryAccess::set_hll_mode(unsigned int new_hll_mode)
@@ -1054,7 +1054,7 @@ void ProgramMemoryAccess::set_hll_mode(unsigned int new_hll_mode)
 unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 {
   unsigned int line=0;
-    
+
   if(!cpu || !cpu->IsAddressInRange(address))
     return INVALID_VALUE;
 
@@ -1075,7 +1075,7 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 //--------------------------------------------------------------------------
 unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
 {
-    
+
   if(!cpu)
     return INVALID_VALUE;
 
@@ -1114,11 +1114,11 @@ unsigned int ProgramMemoryAccess::set_notify_at_address(unsigned int address, Tr
 
 //-------------------------------------------------------------------
 unsigned int ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
-						       TriggerObject *cb)
+                                                       TriggerObject *cb)
 {
   unsigned int pm_index = cpu->map_pm_address2index(address);
 
-  if(pm_index<cpu->program_memory_size()) 
+  if(pm_index<cpu->program_memory_size())
     if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       return bp.set_profile_start_break(cpu, address, cb);
 
@@ -1127,7 +1127,7 @@ unsigned int ProgramMemoryAccess::set_profile_start_at_address(unsigned int addr
 
 //-------------------------------------------------------------------
 unsigned int ProgramMemoryAccess::set_profile_stop_at_address(unsigned int address,
-						      TriggerObject *cb)
+                                                      TriggerObject *cb)
 {
   if(hasValid_opcode_at_address(address))
     return bp.set_profile_stop_break(cpu, address, cb);
@@ -1136,9 +1136,9 @@ unsigned int ProgramMemoryAccess::set_profile_stop_at_address(unsigned int addre
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::clear_break_at_address(unsigned int address, 
-						enum instruction::INSTRUCTION_TYPES type = 
-						instruction::BREAKPOINT_INSTRUCTION)
+int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
+                                                enum instruction::INSTRUCTION_TYPES type =
+                                                instruction::BREAKPOINT_INSTRUCTION)
 {
   unsigned int uIndex = cpu->map_pm_address2index(address);
   if( uIndex >= 0  && uIndex<cpu->program_memory_size()) {
@@ -1149,14 +1149,14 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
       // this actually removes the object
       bp.clear( b );
       return 1;
-    } 
+    }
   }
 
   return 0;
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::clear_break_at_address(unsigned int address, 
+int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
                                                 instruction * pInstruction) {
   if(!cpu || !cpu->IsAddressInRange(address))
     return -1;
@@ -1206,8 +1206,8 @@ int ProgramMemoryAccess::clear_profile_stop_at_address(unsigned int address)
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::address_has_break(unsigned int address, 
-					   enum instruction::INSTRUCTION_TYPES type)
+int ProgramMemoryAccess::address_has_break(unsigned int address,
+                                           enum instruction::INSTRUCTION_TYPES type)
 {
   if(find_instruction(address,type)!=0)
     return 1;
@@ -1388,11 +1388,11 @@ void Processor::step (unsigned int steps, bool refresh)
     if(bp.have_sleep() || bp.have_pm_write()) {
 
       // If we are sleeping or writing to the program memory (18cxxx only)
-      // then step one cycle - but don't execute any code  
+      // then step one cycle - but don't execute any code
 
       get_cycles().increment();
       if(refresh)
-	trace_dump(0,1);
+        trace_dump(0,1);
 
     }
     else if(bp.have_interrupt())
@@ -1402,9 +1402,9 @@ void Processor::step (unsigned int steps, bool refresh)
       step_one(refresh);
       get_trace().cycle_counter(get_cycles().get());
       if(refresh)
-	trace_dump(0,1);
+        trace_dump(0,1);
 
-    } 
+    }
 
   }  while(!bp.have_halt() && --steps>0);
 #endif // CLOCK_EXPERIMENTS
@@ -1420,7 +1420,7 @@ void Processor::step (unsigned int steps, bool refresh)
 //-------------------------------------------------------------------
 //
 // step_over - In most cases, step_over will simulate just one instruction.
-// However, if the next instruction is a branching one (e.g. goto, call, 
+// However, if the next instruction is a branching one (e.g. goto, call,
 // return, etc.) then a break point will be set after it and gpsim will
 // begin 'running'. This is useful for stepping over time-consuming calls.
 //
@@ -1433,25 +1433,25 @@ void Processor::step_over (bool refresh)
 //-------------------------------------------------------------------
 
 void Processor::run_to_address (unsigned int destination)
-{ 
-  
-  
+{
+
+
   if(simulation_mode != eSM_STOPPED) {
     if(verbose)
       cout << "Ignoring run-to-address request because simulation is not stopped\n";
     return;
   }
   // Set a temporary break point
-  
+
   unsigned int bp_num = bp.set_execution_break(this, destination);
   run();
   bp.clear(bp_num);
-     
-}    
+
+}
 
 //-------------------------------------------------------------------
 //
-// 
+//
 //    create
 //
 //  The purpose of this member function is to 'create' a pic processor.
@@ -1482,7 +1482,7 @@ void Processor::Debug()
 
 //-------------------------------------------------------------------
 instruction *ProgramMemoryAccess::find_instruction(unsigned int address,
-						   enum instruction::INSTRUCTION_TYPES type)
+                                                   enum instruction::INSTRUCTION_TYPES type)
 {
   unsigned int uIndex = cpu->map_pm_address2index(address);
   if(cpu->program_memory_size()<=uIndex)
@@ -1497,22 +1497,22 @@ instruction *ProgramMemoryAccess::find_instruction(unsigned int address,
   for(;;)
     {
       if(p->isa()==type)
-	return p;
+        return p;
 
       switch(p->isa())
-	{
-	case instruction::MULTIWORD_INSTRUCTION:
-	case instruction::INVALID_INSTRUCTION:
-	case instruction::NORMAL_INSTRUCTION:
-	  return 0;
-	case instruction::BREAKPOINT_INSTRUCTION:
-	case instruction::NOTIFY_INSTRUCTION:
-	case instruction::PROFILE_START_INSTRUCTION:
-	case instruction::PROFILE_STOP_INSTRUCTION:
-	case instruction::ASSERTION_INSTRUCTION:
-	  p=((Breakpoint_Instruction *)p)->getReplaced();
-	  break;
-	}
+        {
+        case instruction::MULTIWORD_INSTRUCTION:
+        case instruction::INVALID_INSTRUCTION:
+        case instruction::NORMAL_INSTRUCTION:
+          return 0;
+        case instruction::BREAKPOINT_INSTRUCTION:
+        case instruction::NOTIFY_INSTRUCTION:
+        case instruction::PROFILE_START_INSTRUCTION:
+        case instruction::PROFILE_STOP_INSTRUCTION:
+        case instruction::ASSERTION_INSTRUCTION:
+          p=((Breakpoint_Instruction *)p)->getReplaced();
+          break;
+        }
 
     }
 
@@ -1544,12 +1544,12 @@ Processor *MemoryAccess::get_cpu(void)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 // Program memory interface used by the command line
-class ProgramMemoryCollection : public IIndexedCollection 
+class ProgramMemoryCollection : public IIndexedCollection
 {
 public:
-  ProgramMemoryCollection(Processor *pProcessor, 
-			  const char *collection_name,
-			  ProgramMemoryAccess *pPma);
+  ProgramMemoryCollection(Processor *pProcessor,
+                          const char *collection_name,
+                          ProgramMemoryAccess *pPma);
   ~ProgramMemoryCollection();
 
   virtual unsigned int GetSize();
@@ -1568,10 +1568,10 @@ private:
 };
 
 
-ProgramMemoryCollection::ProgramMemoryCollection (Processor   *pProcessor, 
-						  const char  *pC_collection_name,
-						  ProgramMemoryAccess *pPma) :
-  IIndexedCollection(16), m_ReturnValue(0) 
+ProgramMemoryCollection::ProgramMemoryCollection (Processor   *pProcessor,
+                                                  const char  *pC_collection_name,
+                                                  ProgramMemoryAccess *pPma) :
+  IIndexedCollection(16), m_ReturnValue(0)
 {
   m_pProcessor = pProcessor;
   Value::new_name(pC_collection_name);
@@ -1590,7 +1590,7 @@ unsigned int ProgramMemoryCollection::GetSize()
   return m_pProcessor->map_pm_address2index(m_pProcessor->program_memory_size());
 }
 
-Value &ProgramMemoryCollection::GetAt(unsigned int uAddress, Value *) 
+Value &ProgramMemoryCollection::GetAt(unsigned int uAddress, Value *)
 {
   //m_pProcessor->map_pm_address2index
   m_ReturnValue.set((int)m_pPma->get_rom(uAddress));
@@ -1614,7 +1614,7 @@ void ProgramMemoryCollection::SetAt(unsigned int uAddress, Value *pValue)
 
 void ProgramMemoryCollection::ConsolidateValues(int &iColumnWidth,
                                            vector<string> &aList,
-                                           vector<string> &aValue) 
+                                           vector<string> &aValue)
 {
   unsigned int  uFirstAddress = 0;
   unsigned int  uAddress;
@@ -1656,14 +1656,14 @@ unsigned int ProgramMemoryCollection::GetLowerBound()
   return 0;
 }
 
-unsigned int ProgramMemoryCollection::GetUpperBound() 
+unsigned int ProgramMemoryCollection::GetUpperBound()
 {
   return GetSize() - 1;
 }
-bool ProgramMemoryCollection::bIsIndexInRange(unsigned int uAddress) 
+bool ProgramMemoryCollection::bIsIndexInRange(unsigned int uAddress)
 {
   return m_pPma->get_rom(uAddress) != 0xffffffff;
-  // (uIndex >= GetLowerBound() &&  uIndex <= GetUpperBound()) || 
+  // (uIndex >= GetLowerBound() &&  uIndex <= GetUpperBound()) ||
 
 }
 //-------------------------------------------------------------------
@@ -1673,7 +1673,7 @@ bool ProgramMemoryCollection::bIsIndexInRange(unsigned int uAddress)
 //
 // The ProgramMemoryAccess class provides an interface to the processor's
 // program memory. On Pic processors, this is the memory where instructions
-// are stored. 
+// are stored.
 //
 
 ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu) :
@@ -1681,8 +1681,8 @@ ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu) :
 {
   init(new_cpu);
   m_pRomCollection = new ProgramMemoryCollection(new_cpu,
-						 "romData",
-						 this);
+                                                 "romData",
+                                                 this);
 }
 ProgramMemoryAccess::~ProgramMemoryAccess()
 {
@@ -1779,7 +1779,7 @@ instruction *ProgramMemoryAccess::getFromIndex(unsigned int uIndex)
     return 0;
 }
 
-// like get, but will ignore instruction break points 
+// like get, but will ignore instruction break points
 instruction *ProgramMemoryAccess::get_base_instruction(unsigned int uIndex)
 {
     instruction *p;
@@ -1802,7 +1802,7 @@ instruction *ProgramMemoryAccess::get_base_instruction(unsigned int uIndex)
         case instruction::PROFILE_START_INSTRUCTION:
         case instruction::PROFILE_STOP_INSTRUCTION:
         case instruction::ASSERTION_INSTRUCTION:
-	          p=((Breakpoint_Instruction *)p)->getReplaced();
+                  p=((Breakpoint_Instruction *)p)->getReplaced();
                   break;
         }
 
@@ -1825,7 +1825,7 @@ unsigned int ProgramMemoryAccess::get_rom(unsigned int addr)
 //----------------------------------------
 // put_rom - write new data to the program memory.
 //           If the address is in normal program memory, then a new instruction
-//           will be generated (if possible). If the address is some other 
+//           will be generated (if possible). If the address is some other
 //           special memory (like configuration memory), then that area will
 //           be updated.
 //
@@ -1919,7 +1919,7 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
       puts("FIXME, in ProgramMemoryAccess::put_opcode");
       return;
   }
-  
+
   if(!old_inst) {
     putToIndex(uIndex,new_inst);
     return;
@@ -1934,7 +1934,7 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
   // not a multi-word instruction. The 12 and 14 bit cores don't have
   // multi-word instructions, but the 16 bit cores do. If we are replacing
   // the second word of a multiword instruction, then we only need to
-  // 'uninitialize' it. 
+  // 'uninitialize' it.
 
   // if there was a breakpoint set at addr, save a pointer to the breakpoint.
   Breakpoint_Instruction *b=bpi;
@@ -1943,24 +1943,24 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
   if(prev)
     prev->initialize(false);
 
-  new_inst->update_line_number(old_inst->get_file_id(), 
-			       old_inst->get_src_line(), 
-			       old_inst->get_lst_line(),
-			       old_inst->get_hll_src_line(),
-			       old_inst->get_hll_file_id());
+  new_inst->update_line_number(old_inst->get_file_id(),
+                               old_inst->get_src_line(),
+                               old_inst->get_lst_line(),
+                               old_inst->get_hll_src_line(),
+                               old_inst->get_hll_file_id());
 
   //new_inst->xref = old_inst->xref;
 
-  if(b) 
+  if(b)
     b->setReplaced(new_inst);
   else
     cpu->program_memory[uIndex] = new_inst;
 
   cpu->program_memory[uIndex]->setModified(true);
-  
+
   //if(cpu->program_memory[addr]->xref)
   cpu->program_memory[uIndex]->update();
-  
+
   delete(old_inst);
 }
 
@@ -1995,14 +1995,14 @@ void ProgramMemoryAccess::step(unsigned int steps,bool refresh)
       unsigned int initial_pc = cpu->pc->get_value();
 
       while(1) {
-	cpu->step(1,false);
+        cpu->step(1,false);
 
-	if(( cpu->pc->get_value() == initial_pc) ||
-	   (get_src_line(cpu->pc->get_value()) != initial_line)) {
-	  if(refresh)
-	    get_interface().simulation_has_stopped();
-	  break;
-	}
+        if(( cpu->pc->get_value() == initial_pc) ||
+           (get_src_line(cpu->pc->get_value()) != initial_line)) {
+          if(refresh)
+            get_interface().simulation_has_stopped();
+          break;
+        }
       }
 
       break;
@@ -2028,36 +2028,36 @@ void ProgramMemoryAccess::step_over(bool refresh)
 
 #if 0
       //
-      // High level language step-overs are only supported for 
+      // High level language step-overs are only supported for
       // pic processors
       //
 
       pic_processor *pic = dynamic_cast<pic_processor *>cpu;
 
       if(!pic) {
-	cout << "step-over is not supported for non-PIC processors\n";
-	return;
+        cout << "step-over is not supported for non-PIC processors\n";
+        return;
       }
       unsigned int initial_line = cpu->pma.get_src_line(cpu->pc->get_value());
       unsigned int initial_pc = cpu->pc->get_value();
       unsigned int initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
 
       while(1)
-	{
-	  step(1);
+        {
+          step(1);
 
-	  if(initial_stack_depth < pic->stack->pointer&pic->stack->stack_mask)
-	    gpsim_finish(processor_id);
+          if(initial_stack_depth < pic->stack->pointer&pic->stack->stack_mask)
+            gpsim_finish(processor_id);
 
-	  if(pic->pc->get_value()==initial_pc)
-	    break;
+          if(pic->pc->get_value()==initial_pc)
+            break;
 
-	  if(get_src_line(initial_pc) != initial_line)
-	    {
-	      if(gpsim_get_file_id(processor_id, pic->pc->get_value()))
-		break;
-	    }
-	}
+          if(get_src_line(initial_pc) != initial_line)
+            {
+              if(gpsim_get_file_id(processor_id, pic->pc->get_value()))
+                break;
+            }
+        }
       break;
 #endif
       cout << "HLL Step is not supported\n";
@@ -2110,7 +2110,7 @@ bool  ProgramMemoryAccess::hasValid_opcode_at_index(unsigned int uIndex)
 bool  ProgramMemoryAccess::isModified(unsigned int address)
 {
 
-  if((address < cpu->program_memory_size()) && 
+  if((address < cpu->program_memory_size()) &&
      cpu->program_memory[address]->bIsModified())
     return true;
 
@@ -2118,7 +2118,7 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 }
 
 //========================================================================
-// Register Memory Access 
+// Register Memory Access
 
 RegisterMemoryAccess::RegisterMemoryAccess(Processor *new_cpu) :
   MemoryAccess(new_cpu)
@@ -2149,9 +2149,9 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
 }
 
 //--------------------------------------------------------------------------
-void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters) 
-{ 
-  nRegisters = _nRegisters; 
+void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
+{
+  nRegisters = _nRegisters;
   registers = _registers;
 }
 //------------------------------------------------------------------------
@@ -2191,12 +2191,12 @@ bool RegisterMemoryAccess::removeRegister(unsigned int address, Register *pReg)
 
   if (ptop == pReg  &&  pReg->getReplaced())
     registers[address] = pReg->getReplaced();
-  else 
+  else
     while (ptop) {
       Register *pNext = ptop->getReplaced();
       if (pNext == pReg) {
-	ptop->setReplaced(pNext->getReplaced());
-	return true;
+        ptop->setReplaced(pNext->getReplaced());
+        return true;
       }
       ptop = pNext;
     }
@@ -2243,10 +2243,10 @@ ProcessorConstructorList * ProcessorConstructorList::GetList() {
 }
 
 ProcessorConstructor::ProcessorConstructor(tCpuContructor _cpu_constructor,
-					   const char *name1, 
-					   const char *name2, 
-					   const char *name3,
-					   const char *name4) 
+                                           const char *name1,
+                                           const char *name2,
+                                           const char *name3,
+                                           const char *name4)
 {
   cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
   names[0] = name1;                    // First name
@@ -2273,7 +2273,7 @@ Processor * ProcessorConstructor::ConstructProcessor(const char *opt_name)
 
 ProcessorConstructorList * ProcessorConstructor::processor_list;
 
-ProcessorConstructorList * ProcessorConstructor::GetList() 
+ProcessorConstructorList * ProcessorConstructor::GetList()
 {
   if(processor_list == NULL) {
     processor_list = new ProcessorConstructorList();
@@ -2292,7 +2292,7 @@ ProcessorConstructor *ProcessorConstructorList::findByType(const char *name)
 {
   ProcessorConstructorList::iterator processor_iterator;
   for (processor_iterator = processor_list->begin();
-       processor_iterator != processor_list->end(); 
+       processor_iterator != processor_list->end();
        ++processor_iterator) {
 
     ProcessorConstructor *p = *processor_iterator;
@@ -2319,13 +2319,13 @@ string ProcessorConstructorList::DisplayString(void)
   ProcessorConstructor *p;
 
 
-  // loop through all of the processors and find the 
+  // loop through all of the processors and find the
   // one with the longest name
 
   longest = 0;
 
-  for (processor_iterator = processor_list->begin();  
-       processor_iterator != processor_list->end(); 
+  for (processor_iterator = processor_list->begin();
+       processor_iterator != processor_list->end();
        processor_iterator++) {
 
     p = *processor_iterator;
@@ -2339,7 +2339,7 @@ string ProcessorConstructorList::DisplayString(void)
 
   // Print the name of each processor.
 
-  for (processor_iterator = processor_list->begin();  
+  for (processor_iterator = processor_list->begin();
        processor_iterator != processor_list->end(); ) {
 
     for(i=0; i<nPerRow && processor_iterator != processor_list->end(); i++) {
@@ -2358,7 +2358,7 @@ string ProcessorConstructorList::DisplayString(void)
       }
     }
     stream << endl;
-  } 
+  }
   stream << ends;
   return string(stream.str());
 }
@@ -2396,7 +2396,7 @@ FileContext::~FileContext(void)
 // ReadSource
 //
 // This will open the file for this FileContext
-// and fill the line_seek vector with the file 
+// and fill the line_seek vector with the file
 // positions corresponding to the start of every
 // source line in the file.
 //
@@ -2445,7 +2445,7 @@ void FileContext::ReadSource(void)
 
 //----------------------------------------
 // ReadLine
-// 
+//
 // Read one line from a source file.
 
 char *FileContext::ReadLine(unsigned int line_number, char *buf, unsigned int nBytes)
@@ -2454,9 +2454,9 @@ char *FileContext::ReadLine(unsigned int line_number, char *buf, unsigned int nB
   if(!fptr)
     return 0;
 
-  fseek(fptr, 
-	(*line_seek)[line_number],
-	SEEK_SET);
+  fseek(fptr,
+        (*line_seek)[line_number],
+        SEEK_SET);
   return fgets(buf, nBytes, fptr);
 
 }
@@ -2568,14 +2568,14 @@ extern bool bHasAbsolutePath(string &fname);
 
 int FileContextList::Add(string &new_name)
 {
-  
+
   string sFull = bHasAbsolutePath(new_name) ? new_name : (sSourcePath + new_name);
   push_back(FileContext(sFull));
   lastFile++;
   if(CSimulationContext::GetContext()->IsSourceEnabled()) {
     back().open("r");
     if(verbose)
-      cout << "Added new file named: " << new_name 
+      cout << "Added new file named: " << new_name
            << "  id = " << lastFile << endl;
   }
 
@@ -2636,7 +2636,7 @@ void FileContextList::SetSourcePath(const char *pPath) {
 }
 
 //----------------------------------------
-// 
+//
 void FileContextList::list_id(int new_list_id)
 {
   FileContext *fc = operator[](list_file_id);

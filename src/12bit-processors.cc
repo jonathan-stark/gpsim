@@ -33,7 +33,7 @@ extern unsigned int config_word;
 
 
 //========================================================================
-// 
+//
 
 class OptionTraceObject : public RegisterWriteTraceObject
 {
@@ -49,8 +49,8 @@ public:
 
     if(reg)
       fprintf(fp, "  Option: from 0x%s to 0x%s\n",
-	      from.toString(sFrom,sizeof(sFrom)),
-	      to.toString(sTo,sizeof(sTo)));
+              from.toString(sFrom,sizeof(sFrom)),
+              to.toString(sTo,sizeof(sTo)));
 
   }
 };
@@ -74,9 +74,9 @@ public:
     return oto;
   }
 
-  int dump_raw(Trace *pTrace, 
-	       unsigned int tbi,
-	       char *buf, int bufsize)
+  int dump_raw(Trace *pTrace,
+               unsigned int tbi,
+               char *buf, int bufsize)
   {
     if (!pTrace)
       return 0;
@@ -90,7 +90,7 @@ public:
     //unsigned int subtype = (tv >> 8) & 0xfff;
 
     int  m = snprintf(buf, bufsize,
-		      "  Option Reg: was 0x%0X ", tv & 0xff);
+                      "  Option Reg: was 0x%0X ", tv & 0xff);
 
     return m>0 ? (m+n) : n;
   }
@@ -124,8 +124,8 @@ _12bit_processor::~_12bit_processor()
   delete pc;
   delete mOptionTT;
 
-  delete_sfr_register((Register **)&fsr,0);
-  delete_sfr_register((Register **)&option_reg,0);
+  delete_sfr_register(fsr,0);
+  delete_sfr_register(option_reg,0);
 
 }
 
@@ -143,7 +143,7 @@ void _12bit_processor::reset(RESET_TYPE r)
   option_reg->reset(r);
 
   pic_processor::reset(r);
-  
+
 }
 //-------------------------------------------------------------------
 void _12bit_processor::save_state()

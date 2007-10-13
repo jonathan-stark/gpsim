@@ -33,7 +33,7 @@ Boston, MA 02111-1307, USA.  */
 //========================================================================
 // Generic Configuration word for the midrange family.
 
-class Generic14bitConfigWord : public ConfigWord 
+class Generic14bitConfigWord : public ConfigWord
 {
 public:
   Generic14bitConfigWord(_14bit_processor *pCpu)
@@ -60,7 +60,7 @@ public:
       gint64 diff = oldV ^ v;
 
       if (diff & WDTEN)
-	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
+        m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
 
       m_pCpu->config_modes->set_fosc01(v & (FOSC0 | FOSC1));
       m_pCpu->config_modes->set_wdte((v&WDTEN)==WDTEN);
@@ -106,14 +106,14 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
 
 _14bit_processor::~_14bit_processor()
 {
-  delete_sfr_register((Register **)&fsr,0);
-  delete_sfr_register((Register **)&option_reg,0);
+  delete_sfr_register(fsr,0);
+  delete_sfr_register(option_reg,0);
   delete pc; pc=0;
 }
 
 //-------------------------------------------------------------------
 //
-// 
+//
 //    create
 //
 //  The purpose of this member function is to 'create' those things
@@ -134,7 +134,7 @@ void _14bit_processor :: create ()
 //-------------------------------------------------------------------
 void _14bit_processor::interrupt ()
 {
-  
+
   bp.clear_interrupt();
 
   stack->push(pc->value);
@@ -170,7 +170,7 @@ unsigned int _14bit_processor::get_program_memory_at_address(unsigned int addres
 {
   unsigned int uIndex = map_pm_address2index(address);
 
-  
+
   if (uIndex < program_memory_size())
     return  program_memory[uIndex] ? program_memory[uIndex]->get_opcode() : 0xffffffff;
 
@@ -269,7 +269,7 @@ void PortBSink::setPullups(bool new_pullupState)
 
 //-------------------------------------------------------------------
 Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
-  : _14bit_processor(_name,_desc), 
+  : _14bit_processor(_name,_desc),
     intcon_reg(this,"intcon","Interrupt Control"),
     m_MCLR(0), m_MCLRMonitor(0)
 {
@@ -289,11 +289,11 @@ Pic14Bit::~Pic14Bit()
   //delete m_MCLR; <-- this is a package pin
   delete m_MCLRMonitor;
 
-  delete_sfr_register((Register **)&m_portb,0);
-  delete_sfr_register((Register **)&m_trisb,0);
+  delete_sfr_register(m_portb,0);
+  delete_sfr_register(m_trisb,0);
 
-  delete_sfr_register((Register **)&m_porta,0);
-  delete_sfr_register((Register **)&m_trisa,0);
+  delete_sfr_register(m_porta,0);
+  delete_sfr_register(m_trisa,0);
 }
 //-------------------------------------------------------------------
 void Pic14Bit::create_symbols()
@@ -307,7 +307,7 @@ void Pic14Bit::create_symbols()
 //-------------------------------------------------------------------
 void Pic14Bit::create_sfr_map()
 {
- 
+
   add_sfr_register(indf,    0x00);
   alias_file_registers(0x00,0x00,0x80);
   //add_sfr_register(indf,    0x00);
