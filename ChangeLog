@@ -1,3 +1,12 @@
+2007-10-13 Borut Razem <borut.razem@siol.net>
+	* src/gpsim_interface.h, src/ioports.h, src/gpsim_object.h,
+	  src/dspic/dspic-instructions.h, src/ui.h, src/processor.h,
+	  src/pir.h, src/trace.h, src/program_files.h, src/pic-processor.h,
+	  src/registers.h, src/stimuli.h, modules/i2c.h, modules/led.h,
+	  gui/gui_symbols.cc, gui/gui_src.h, gui/gui_regwin.cc,
+	  gui/gui_menu.cc, gui/gui_scope.cc, gui/gui.h, cli/socket.cc:
+	  fixed virtual functions but non-virtual destructor warnings
+
 2007-10-13 Roy Rankin <rrankin@ihug.com.au>
 	* src/i2c-ee.h src/i2c-ee.cc modules/i2c-eeprom.h modules/i2c-eeprom.cc
 	  cli/cmd_dump.cc cli/cmd_load.cc: Fix eeprom address symbols

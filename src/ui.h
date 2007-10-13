@@ -15,6 +15,10 @@
 
 class ISimConsole {
 public:
+  virtual ~ISimConsole()
+  {
+  }
+
   virtual void Printf(const char *fmt, ...) = 0;
   virtual void VPrintf(const char *fmt, va_list argptr) = 0;
   virtual void Puts(const char*) = 0;
@@ -29,6 +33,10 @@ public:
     eDec,
     eOct,
   };
+
+  virtual ~IUserInterface()
+  {
+  }
 
   virtual ISimConsole &GetConsole() = 0;
   virtual void SetConsole(ISimConsole *pConsole) = 0;

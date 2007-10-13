@@ -239,6 +239,10 @@ typedef ICommandHandler * (*PFNGETCOMMANDHANDLER)(void);
 
 class ICommandHandler {
 public:
+  virtual ~ICommandHandler()
+  {
+  }
+
   virtual char *GetName(void) = 0;
   // Fixme: should Execute be renamed ExecuteCommand?
   virtual int Execute(const char * commandline, ISimConsole *out) = 0;

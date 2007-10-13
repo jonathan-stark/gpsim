@@ -82,30 +82,37 @@ typedef enum {
 /////
 /////////////////////
 class MenuItem {
-
 private:
   char *name;
   menu_id id;
 
 public:
+  virtual ~MenuItem()
+  {
+  }
 
   virtual void execute()=0;
-
 };
 
 class RegWindowMenuItem : public MenuItem {
+public:
+  virtual ~RegWindowMenuItem()
+  {
+  }
 
 private:
  Register_Window *rw;
-
 };
 
 class Menu_BreakClear : public RegWindowMenuItem {
 public:
+  virtual ~Menu_BreakClear()
+  {
+  }
+
   virtual void execute() {
     printf("BreakClear");
   }
-
 } BreakClear;
 
 MenuItem *__menu_items[] = {
@@ -447,10 +454,10 @@ int gui_get_value(char *prompt)
     if(dialog==0) {
       dialog = gtk_dialog_new();
       gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
-      //	gtk_signal_connect(GTK_OBJECT(dialog),
-      //			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+      //        gtk_signal_connect(GTK_OBJECT(dialog),
+      //                           "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
       gtk_signal_connect_object(GTK_OBJECT(dialog),
-				      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+                                      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
       label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
       gtk_widget_show(label);
@@ -463,21 +470,21 @@ int gui_get_value(char *prompt)
       button = gtk_button_new_with_label("OK");
       gtk_widget_show(button);
       gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			        FALSE,FALSE,10);
+                                FALSE,FALSE,10);
       gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			        GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+                                GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
 
       button = gtk_button_new_with_label("Cancel");
       gtk_widget_show(button);
       gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			        FALSE,FALSE,10);
+                                FALSE,FALSE,10);
       gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			        GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+                                GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
 
       label=gtk_label_new(prompt);
       gtk_widget_show(label);
       gtk_box_pack_start(GTK_BOX(hbox), label,
-			        FALSE,FALSE, 20);
+                                FALSE,FALSE, 20);
 
       entry=gtk_entry_new();
       gtk_widget_show(entry);
@@ -527,64 +534,64 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 
     if(dialog==0)
     {
-	dialog = gtk_dialog_new();
-	gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
-//	gtk_signal_connect(GTK_OBJECT(dialog),
-//			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+        dialog = gtk_dialog_new();
+        gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
+//      gtk_signal_connect(GTK_OBJECT(dialog),
+//                         "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+        gtk_signal_connect_object(GTK_OBJECT(dialog),
+                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
-	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
-	
-	button = gtk_button_new_with_label("OK");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-	
-	button = gtk_button_new_with_label("Cancel");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+        label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
+        gtk_widget_show(label);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+        
+        button = gtk_button_new_with_label("OK");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+        
+        button = gtk_button_new_with_label("Cancel");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
 
         // Value 1
-	hbox1 = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox1);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox1,FALSE,FALSE,20);
+        hbox1 = gtk_hbox_new(0,0);
+        gtk_widget_show(hbox1);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox1,FALSE,FALSE,20);
 
-	label1=gtk_label_new(prompt1);
-	gtk_widget_show(label1);
-	gtk_box_pack_start(GTK_BOX(hbox1), label1,
-			   FALSE,FALSE, 20);
+        label1=gtk_label_new(prompt1);
+        gtk_widget_show(label1);
+        gtk_box_pack_start(GTK_BOX(hbox1), label1,
+                           FALSE,FALSE, 20);
 
-	entry1=gtk_entry_new();
-	gtk_widget_show(entry1);
-	gtk_box_pack_start(GTK_BOX(hbox1), entry1,FALSE,FALSE,20);
+        entry1=gtk_entry_new();
+        gtk_widget_show(entry1);
+        gtk_box_pack_start(GTK_BOX(hbox1), entry1,FALSE,FALSE,20);
 
         // Value 2
-	hbox2 = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox2);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox2,FALSE,FALSE,20);
+        hbox2 = gtk_hbox_new(0,0);
+        gtk_widget_show(hbox2);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox2,FALSE,FALSE,20);
 
-	label2=gtk_label_new(prompt2);
-	gtk_widget_show(label2);
-	gtk_box_pack_start(GTK_BOX(hbox2), label2,
-			   FALSE,FALSE, 20);
+        label2=gtk_label_new(prompt2);
+        gtk_widget_show(label2);
+        gtk_box_pack_start(GTK_BOX(hbox2), label2,
+                           FALSE,FALSE, 20);
 
-	entry2=gtk_entry_new();
-	gtk_widget_show(entry2);
-	gtk_box_pack_start(GTK_BOX(hbox2), entry2,FALSE,FALSE,20);
+        entry2=gtk_entry_new();
+        gtk_widget_show(entry2);
+        gtk_box_pack_start(GTK_BOX(hbox2), entry2,FALSE,FALSE,20);
 
     }
     else
     {
-	gtk_label_set_text(GTK_LABEL(label1),prompt1);
-	gtk_label_set_text(GTK_LABEL(label2),prompt2);
+        gtk_label_set_text(GTK_LABEL(label1),prompt1);
+        gtk_label_set_text(GTK_LABEL(label2),prompt2);
     }
     
 //    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
@@ -640,7 +647,7 @@ static int fs_done;
 
 static void
 file_selection_ok (GtkWidget        *w,
-		   GtkFileSelection *fs)
+                   GtkFileSelection *fs)
 {
     file_selection_name=gtk_file_selection_get_filename (fs);
     fs_done=1;
@@ -648,7 +655,7 @@ file_selection_ok (GtkWidget        *w,
 
 static void
 file_selection_cancel (GtkWidget        *w,
-		       GtkFileSelection *fs)
+                       GtkFileSelection *fs)
 {
     file_selection_name=0;
     fs_done=1;
@@ -666,7 +673,7 @@ modepopup_activated(GtkWidget *widget, gpointer data)
     if(!strcmp(modestring,"ASCII"))
         filemode=TRACE_FILE_FORMAT_ASCII;
     if(!strcmp(modestring,"LXT"))
-	filemode=TRACE_FILE_FORMAT_LXT;
+        filemode=TRACE_FILE_FORMAT_LXT;
 }
 
 static char *gui_get_log_settings(const char **filename, int *mode)
@@ -683,60 +690,60 @@ static char *gui_get_log_settings(const char **filename, int *mode)
     if (!window)
     {
 
-	window = gtk_file_selection_new (prompt);
+        window = gtk_file_selection_new (prompt);
 
-	gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
+        gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
 
-	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
+        gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-	gtk_signal_connect_object(GTK_OBJECT(window),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
-//	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-//				   GTK_OBJECT(window));
+        gtk_signal_connect_object(GTK_OBJECT(window),
+                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
+//      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//                                 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//                                 GTK_OBJECT(window));
 
-	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
-			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
-			    window);
-	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-			    "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
-			    window);
+        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
+                            "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+                            window);
+        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+                            "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
+                            window);
 
-	hbox = gtk_hbox_new(0,0);
+        hbox = gtk_hbox_new(0,0);
         gtk_widget_show(hbox);
 
-	gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION (window)->action_area),
-			 hbox,
-			 FALSE,FALSE,20);
+        gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION (window)->action_area),
+                         hbox,
+                         FALSE,FALSE,20);
 
-	label = gtk_label_new("File format:");
-	gtk_box_pack_start(GTK_BOX(hbox),
-			 label,
-			 FALSE,FALSE,20);
+        label = gtk_label_new("File format:");
+        gtk_box_pack_start(GTK_BOX(hbox),
+                         label,
+                         FALSE,FALSE,20);
         gtk_widget_show(label);
 
-	optionmenu = gtk_option_menu_new();
+        optionmenu = gtk_option_menu_new();
         gtk_widget_show(optionmenu);
-	gtk_box_pack_end(GTK_BOX(hbox),
-			 optionmenu,
-			 FALSE,FALSE,20);
+        gtk_box_pack_end(GTK_BOX(hbox),
+                         optionmenu,
+                         FALSE,FALSE,20);
 
-	menu=gtk_menu_new();
+        menu=gtk_menu_new();
 
-	item=gtk_menu_item_new_with_label("ASCII");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) modepopup_activated,
-			   (gpointer)"ASCII");
+        item=gtk_menu_item_new_with_label("ASCII");
+        gtk_signal_connect(GTK_OBJECT(item),"activate",
+                           (GtkSignalFunc) modepopup_activated,
+                           (gpointer)"ASCII");
 //      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-	item=gtk_menu_item_new_with_label("LXT");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) modepopup_activated,
-			   (gpointer)"LXT");
+        gtk_widget_show(item);
+        gtk_menu_append(GTK_MENU(menu),item);
+        item=gtk_menu_item_new_with_label("LXT");
+        gtk_signal_connect(GTK_OBJECT(item),"activate",
+                           (GtkSignalFunc) modepopup_activated,
+                           (gpointer)"LXT");
 //      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
+        gtk_widget_show(item);
+        gtk_menu_append(GTK_MENU(menu),item);
 
         gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), menu);
 
@@ -749,7 +756,7 @@ static char *gui_get_log_settings(const char **filename, int *mode)
     file_selection_name=0;
     gtk_grab_add(window);
     while(!fs_done && GTK_WIDGET_VISIBLE(window))
-	gtk_main_iteration();
+        gtk_main_iteration();
     gtk_grab_remove(window);
     
     gtk_widget_hide(window);
@@ -757,7 +764,7 @@ static char *gui_get_log_settings(const char **filename, int *mode)
     if(file_selection_name==0)
     {
         *filename=0;
-	return 0;
+        return 0;
     }
 
     *filename=file_selection_name;
@@ -882,57 +889,57 @@ popup_activated(GtkWidget *widget, gpointer data)
     {
     case MENU_BREAK_READ:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().set_read_break(popup_rw->gp->cpu, address);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().set_read_break(popup_rw->gp->cpu, address);
+          }
       break;
     case MENU_BREAK_WRITE:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().set_write_break(popup_rw->gp->cpu, address);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().set_write_break(popup_rw->gp->cpu, address);
+          }
       break;
     case MENU_BREAK_READ_VALUE:
       value = gui_get_value("value to read for breakpoint:");
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().set_read_value_break(popup_rw->gp->cpu,address,value);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().set_read_value_break(popup_rw->gp->cpu,address,value);
+          }
       break;
     case MENU_BREAK_WRITE_VALUE:
       value = gui_get_value("value to write for breakpoint:");
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().set_write_value_break(popup_rw->gp->cpu,address,value);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().set_write_value_break(popup_rw->gp->cpu,address,value);
+          }
       break;
     case MENU_BREAK_CLEAR:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().clear_all_register(popup_rw->gp->cpu,address);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().clear_all_register(popup_rw->gp->cpu,address);
+          }
       break;
     case MENU_ADD_WATCH:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers->Get(address));
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers->Get(address));
+          }
       break;
     case MENU_SETTINGS:
       popup_rw->SettingsDialog();
@@ -957,28 +964,28 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
     case MENU_LOG_WRITE:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().set_notify_write(popup_rw->gp->cpu,address);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().set_notify_write(popup_rw->gp->cpu,address);
+          }
       break;
     case MENU_LOG_READ_VALUE:
       gui_get_2values("Value that the read must match for logging it:", &value,
-		      "Bitmask that specifies the bits to bother about:", &mask);
+                      "Bitmask that specifies the bits to bother about:", &mask);
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    get_bp().set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
+        for(i=range.col0;i<=range.coli;i++)
+          {
+            address=popup_rw->row_to_address[j]+i;
+            get_bp().set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
 
-	  }
+          }
       break;
     case MENU_LOG_WRITE_VALUE:
       gui_get_2values("Value that the write must match for logging it:", &value,
-		      "Bitmask that specifies the bits to bother about:", &mask);
+                      "Bitmask that specifies the bits to bother about:", &mask);
       if(value<0)
         break; // Cancel
       for(j=range.row0;j<=range.rowi;j++)
@@ -1026,16 +1033,16 @@ build_menu(Register_Window *rw)
       item=gtk_menu_item_new_with_label(menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &menu_items[i]);
+                         (GtkSignalFunc) popup_activated,
+                         &menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
       if(rw->type == REGISTER_EEPROM
-	 && menu_items[i].id!=MENU_ADD_WATCH
-	 &&menu_items[i].id!=MENU_SETTINGS)
+         && menu_items[i].id!=MENU_ADD_WATCH
+         &&menu_items[i].id!=MENU_SETTINGS)
       {
-	  GTK_WIDGET_UNSET_FLAGS (item,
-				  GTK_SENSITIVE | GTK_CAN_FOCUS);
+          GTK_WIDGET_UNSET_FLAGS (item,
+                                  GTK_SENSITIVE | GTK_CAN_FOCUS);
       }
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
@@ -1050,7 +1057,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 {
 
   GtkWidget *popup;
-  //	GdkModifierType mods;
+  //    GdkModifierType mods;
   GtkSheet *sheet;
 
   popup=rw->popup_menu;
@@ -1069,7 +1076,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
       popup_rw = rw;
   
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		     3, event->time);
+                     3, event->time);
     }
   return FALSE;
 }
@@ -1370,9 +1377,9 @@ int Register_Window::SettingsDialog()
     dialog = gtk_dialog_new();
     gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
     gtk_signal_connect(GTK_OBJECT(dialog),
-		       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+                       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
     gtk_signal_connect_object(GTK_OBJECT(dialog),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+                              "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 
     // Normal font
@@ -1381,27 +1388,27 @@ int Register_Window::SettingsDialog()
     gtk_widget_show(hbox);
     label=gtk_label_new("Normal font:");
     gtk_box_pack_start(GTK_BOX(hbox), label,
-		       FALSE,FALSE, 20);
+                       FALSE,FALSE, 20);
     gtk_widget_show(label);
     normalfontstringentry=gtk_entry_new();
     gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
-		       TRUE, TRUE, 0);
+                       TRUE, TRUE, 0);
     gtk_widget_show(normalfontstringentry);
     button = gtk_button_new_with_label("Browse...");
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(hbox), button,
-		       FALSE,FALSE,10);
+                       FALSE,FALSE,10);
     gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		       GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
+                       GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
 
 
     // OK button
     button = gtk_button_new_with_label("OK");
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-		       FALSE,FALSE,10);
+                       FALSE,FALSE,10);
     gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		       GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+                       GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
   }
     
   gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), normalfont_string);
@@ -1433,20 +1440,20 @@ int Register_Window::SettingsDialog()
 #else
       if((font=gdk_fontset_load(fontname))==0)
 #endif
-	{
-	  if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
-	    break;
-	}
+        {
+          if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
+            break;
+        }
       else
-	{
+        {
 #if GTK_MAJOR_VERSION >= 2
 #else
-	  gdk_font_unref(font);
+          gdk_font_unref(font);
 #endif
-	  strcpy(normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	  config_set_string(name(),"normalfont",normalfont_string);
-	  fonts_ok++;
-	}
+          strcpy(normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+          config_set_string(name(),"normalfont",normalfont_string);
+          fonts_ok++;
+        }
   }
 
   if(!LoadStyles())
@@ -1519,18 +1526,18 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
   for(j=0;j<ctj;j++)
     {
       for(i=0;i<cti;i++)
-	{
-	  to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	  rw->registers->Get(to)->put_value(rw->registers->Get(from)->get_value());
-	}
+        {
+          to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
+          rw->registers->Get(to)->put_value(rw->registers->Get(from)->get_value());
+        }
     }
 }
 
 static void 
 move_handler(GtkWidget *widget, 
-	     GtkSheetRange *old_range, 
-	     GtkSheetRange *new_range, 
-	     Register_Window *rw)
+             GtkSheetRange *old_range, 
+             GtkSheetRange *new_range, 
+             Register_Window *rw)
 {
   Dprintf((" move_handler\n"));
 
@@ -1546,11 +1553,11 @@ move_handler(GtkWidget *widget,
   for(j=0;j<ctj;j++)
     {
       for(i=0;i<cti;i++)
-	{
-	  from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
-	  to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	  rw->registers->Get(to)->put_value(rw->registers->Get(from)->get_value());
-	}
+        {
+          from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
+          to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
+          rw->registers->Get(to)->put_value(rw->registers->Get(from)->get_value());
+        }
     }
 }
 
@@ -1635,8 +1642,8 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 
     if(widget==0|| rw==0)
     {
-	printf("Warning show_entry(%p,%p)\n",widget,rw);
-	return;
+        printf("Warning show_entry(%p,%p)\n",widget,rw);
+        return;
     }
     
     if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
@@ -1779,7 +1786,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 
   rw->entry=gtk_entry_new();
   gtk_box_pack_start(GTK_BOX(status_box), rw->entry,
-		     TRUE, TRUE, 0); 
+                     TRUE, TRUE, 0); 
   gtk_widget_show(rw->entry);
 
 }
@@ -1830,7 +1837,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   }
   
   if(!enabled) 
-    return 0;	   // Don't read registers when hidden. Esp with ICD.
+    return 0;      // Don't read registers when hidden. Esp with ICD.
   
   GUIRegister *guiReg = registers->Get(reg_number);
 
@@ -1868,9 +1875,9 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
       guiReg->getValueAsString(name,sizeof(name),pCellFormat, new_value);
     
       gtk_sheet_set_cell(GTK_SHEET(register_sheet),
-			 guiReg->row,
-			 guiReg->col,
-			 GTK_JUSTIFY_RIGHT,name);
+                         guiReg->row,
+                         guiReg->col,
+                         GTK_JUSTIFY_RIGHT,name);
     }
     // else the register is invalid and out of the register sheet
  
@@ -1916,9 +1923,9 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     }
 
     gtk_sheet_set_cell(GTK_SHEET(register_sheet),
-		       guiReg->row,
-		       guiReg->col,
-		       GTK_JUSTIFY_RIGHT,name);
+                       guiReg->row,
+                       guiReg->col,
+                       GTK_JUSTIFY_RIGHT,name);
 
     guiReg->bUpdateFull=true;
     if(bTrace)
@@ -2109,12 +2116,12 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   for(reg_number=0;reg_number<nRegs;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
-	
+        
     if(i==0 && row_created) {
       j++;
       row_created=FALSE;
     }
-	
+        
     GUIRegister *pGReg = registers->Get(reg_number);
     pGReg->row = j;
     pGReg->col = i;
@@ -2192,7 +2199,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 }
 
 static int show_event(GtkWidget *widget,
-		      Register_Window *rw)
+                      Register_Window *rw)
 {
   Dprintf((" show_event\n"));
 
@@ -2201,7 +2208,7 @@ static int show_event(GtkWidget *widget,
 }
 
 static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+                        GdkEvent  *event,
                         Register_Window *rw)
 {
   Dprintf((" delete_event\n"));
@@ -2232,7 +2239,7 @@ void Register_Window::Build()
   if(window!=0) {
     gtk_widget_destroy(window);
   }
-	
+        
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   main_vbox=gtk_vbox_new(FALSE,1);
@@ -2290,10 +2297,10 @@ void Register_Window::Build()
   }
   UpdateStyle();
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), this);
+                     GTK_SIGNAL_FUNC(delete_event), this);
 
   gtk_signal_connect(GTK_OBJECT (window), "show",
-		  GTK_SIGNAL_FUNC(show_event), this);
+                  GTK_SIGNAL_FUNC(show_event), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
@@ -2312,47 +2319,47 @@ void Register_Window::Build()
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
 
   gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(register_sheet))),
-		     "changed", (GtkSignalFunc)show_entry, this);
+                     "changed", (GtkSignalFunc)show_entry, this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
-		     "activate", (GtkSignalFunc)activate_sheet_cell,
-		     this);
+                     "activate", (GtkSignalFunc)activate_sheet_cell,
+                     this);
 
   gtk_signal_connect(GTK_OBJECT(entry),
-		     "changed", (GtkSignalFunc)show_sheet_entry, this);
+                     "changed", (GtkSignalFunc)show_sheet_entry, this);
 
   gtk_signal_connect(GTK_OBJECT(entry),
-		     "activate", (GtkSignalFunc)activate_sheet_entry,
-		     this);
+                     "activate", (GtkSignalFunc)activate_sheet_entry,
+                     this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
-		     "key_press_event",
-		     (GtkSignalFunc) clipboard_handler, 
-		     0);
+                     "key_press_event",
+                     (GtkSignalFunc) clipboard_handler, 
+                     0);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
-		     "resize_range",
-		     (GtkSignalFunc) resize_handler, 
-		     this);
+                     "resize_range",
+                     (GtkSignalFunc) resize_handler, 
+                     this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
-		     "move_range",
-		     (GtkSignalFunc) move_handler, 
-		     this);
-	
+                     "move_range",
+                     (GtkSignalFunc) move_handler, 
+                     this);
+        
   gtk_signal_connect(GTK_OBJECT(register_sheet),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup, 
-		     this);
+                     "button_press_event",
+                     (GtkSignalFunc) do_popup, 
+                     this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
-		     "set_cell",
-		     (GtkSignalFunc) set_cell,
-		     this);
+                     "set_cell",
+                     (GtkSignalFunc) set_cell,
+                     this);
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),
-			   this);
+                           GTK_SIGNAL_FUNC(gui_object_configure_event),
+                           this);
 
   SetRegisterSize();
 

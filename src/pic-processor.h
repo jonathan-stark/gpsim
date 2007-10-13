@@ -147,10 +147,15 @@ class ConfigMode {
 
   int config_mode;
   int valid_bits;
+
   ConfigMode() { 
     config_mode = 0xffff; 
     valid_bits = CM_FOSC0 | CM_FOSC1 | CM_WDTE;
   };
+
+  virtual ~ConfigMode()
+  {
+  }
 
   virtual void set_config_mode(int new_value) { config_mode = new_value & valid_bits;};
   virtual void set_valid_bits(int new_value) { valid_bits = new_value;};
@@ -288,12 +293,12 @@ public:
   EEPROM      *eeprom;       // set to NULL for PIC's that don't have a data EEPROM
 
   bool LoadProgramFile(const char *pFilename,
-		       FILE *pFile,
-		       const char *pProcessorName
-		       );
+                       FILE *pFile,
+                       const char *pProcessorName
+                       );
 
   void add_sfr_register(Register *reg, unsigned int addr,
-			RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
+                        RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
   void delete_sfr_register(Register **ppReg, unsigned int addr);
   void remove_sfr_register(Register *ppReg, unsigned int addr);
 
@@ -410,7 +415,7 @@ class ConfigMemory : public Integer
 {
 public:
   ConfigMemory(const char *_name, unsigned int default_val, const char *desc,
-	       pic_processor *pCpu, unsigned int addr);
+               pic_processor *pCpu, unsigned int addr);
 protected:
   pic_processor *m_pCpu;
   unsigned int m_addr;

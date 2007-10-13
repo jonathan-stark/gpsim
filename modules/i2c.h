@@ -51,6 +51,10 @@ namespace I2C_Module {
   class I2CInterface
   {
   public:
+    virtual ~I2CInterface()
+    {
+    }
+
     static  void *master_interface(void *);
     virtual void run_tests()=0;
   };

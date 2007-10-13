@@ -330,6 +330,11 @@ class PortSink : public SignalSink
 {
 public:
   PortSink(PortRegister *portReg, unsigned int iobit);
+
+  virtual ~PortSink()
+  {
+  }
+
   virtual void setSinkState(char);
   virtual void release();
 private:

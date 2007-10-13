@@ -69,10 +69,13 @@ protected:
 class TextStyle
 {
 public:
-
   TextStyle (const char *pName,
-	     const char *pFGColor,
-	     const char *pBGColor);
+             const char *pFGColor,
+             const char *pBGColor);
+
+  virtual ~TextStyle()
+  {
+  }
 
   GtkTextTag *tag() { return m_pTag; }
 
@@ -98,7 +101,7 @@ public:
   void parseLine(const char*, int parseStyle);
 
   void addTagRange(TextStyle *,
-		   int start_index, int end_index);
+                   int start_index, int end_index);
   GtkTextBuffer *getBuffer();
   SourceBrowserParent_Window *m_pParent;
   FileContext   *m_pFC;
@@ -199,9 +202,9 @@ class SourceWindow : public GUI_Object
 {
 public:
   SourceWindow(GUI_Processor *gp, 
-	       SourceBrowserParent_Window *,
-	       bool bUseConfig,
-	       const char *newName=0);
+               SourceBrowserParent_Window *,
+               bool bUseConfig,
+               const char *newName=0);
 
   virtual void Build();
   virtual void SetTitle();
@@ -303,7 +306,7 @@ private:
 protected:
   void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
   void addTagRange(NSourcePage *pPage, TextStyle *,
-		   int start_index, int end_index);
+                   int start_index, int end_index);
 
   // FIXME - change these items to list objects
   NSourcePage **pages;
@@ -391,8 +394,8 @@ public:
    }
 
   void CreateFromXPM(GdkWindow *window,
-		      GdkColor *transparent_color,
-		      gchar **data);
+                      GdkColor *transparent_color,
+                      gchar **data);
 
   GdkBitmap *mask;
   GdkPixmap *pixmap;

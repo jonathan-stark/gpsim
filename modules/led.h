@@ -45,12 +45,15 @@ namespace Leds {
   class Led_base //: public Module
   {
   public:
+    virtual ~Led_base()
+    {
+    }
 
     virtual void build_window() = 0;
     virtual void update() = 0;
     virtual void update( GtkWidget *drawable,   
-			 guint max_width,
-			 guint max_height) = 0;
+                         guint max_width,
+                         guint max_height) = 0;
     LED_Interface *led_interface;
   };
 
@@ -64,19 +67,19 @@ namespace Leds {
     float y;
   } XfPoint;
 
-#define MAX_PTS		6	/* max # of pts per segment polygon */
-#define NUM_SEGS	7	/* number of segments in a digit */
+#define MAX_PTS         6       /* max # of pts per segment polygon */
+#define NUM_SEGS        7       /* number of segments in a digit */
   /*
    * These constants give the bit positions for the segmask[]
    * digit masks.
    */
-#define TOP		0
-#define TOP_RIGHT	1
-#define BOT_RIGHT	2
-#define BOTTOM		3
-#define BOT_LEFT	4
-#define TOP_LEFT	5
-#define MIDDLE		6
+#define TOP             0
+#define TOP_RIGHT       1
+#define BOT_RIGHT       2
+#define BOTTOM          3
+#define BOT_LEFT        4
+#define TOP_LEFT        5
+#define MIDDLE          6
   //#define DECIMAL_POINT   7
 
   typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
@@ -96,12 +99,12 @@ namespace Leds {
 
     float sxw;
 
-    float		angle;		// rise over run 
-    float		width_factor;   // ratio of digit to segment width 
-    float		small_ratio;	// ratio of small to large digits
-    float		sec_gap;	// gap between normal digits and 
+    float               angle;          // rise over run 
+    float               width_factor;   // ratio of digit to segment width 
+    float               small_ratio;    // ratio of small to large digits
+    float               sec_gap;        // gap between normal digits and 
     // seconds, as ratio to digit width 
-    float		space_factor;   /* ratio of digit width to border sp.*/
+    float               space_factor;   /* ratio of digit width to border sp.*/
 
 
     guint w_width;
@@ -126,8 +129,8 @@ namespace Leds {
     virtual void build_window();
     virtual void update();
     virtual void update( GtkWidget *drawable,   
-			 guint max_width,
-			 guint max_height);
+                         guint max_width,
+                         guint max_height);
     unsigned int getPinState();
 
     // Inheritances from the Package class
@@ -166,8 +169,8 @@ namespace Leds {
     virtual void build_window();
     virtual void update();
     virtual void update( GtkWidget *drawable,   
-			 guint max_width,
-			 guint max_height);
+                         guint max_width,
+                         guint max_height);
 
     // Inheritances from the Package class
     virtual void create_iopin_map();

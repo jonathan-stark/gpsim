@@ -197,7 +197,7 @@ bool winsockets_init(void)
 #define SIM_SINK_PORT   0x1234
 #define SIM_SOURCE_PORT 0x1235
 
-#define BUFSIZE 	8192
+#define BUFSIZE         8192
 //------------------------------------------------------------------------
 bool ParseSocketLink(Packet *buffer, SocketLink **);
 
@@ -279,6 +279,10 @@ class SocketLink
 public:
   SocketLink(unsigned int _handle, SocketBase *);
 
+  virtual ~SocketLink()
+  {
+  }
+
   /// Send a response back to the link.
   /// if the bTimeStamp is true, then the cycle counter is sent too.
   bool Send(bool bTimeStamp=false);
@@ -310,6 +314,10 @@ class AttributeLink : public SocketLink
 {
 public:
   AttributeLink(unsigned int _handle, SocketBase *, Value *);
+
+  virtual ~AttributeLink()
+  {
+  }
 
   void set(Packet &);
   void get(Packet &);
@@ -491,14 +499,14 @@ void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition
 
     stat = g_io_channel_set_encoding (channel, NULL, &err);
 #if !defined _WIN32 || defined _DEBUG
-	stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
+        stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
 #endif
 #endif
 
     g_io_add_watch(channel, 
-		   condition,
-		   server_function,
-		   (void*)this);
+                   condition,
+                   server_function,
+                   (void*)this);
   }
  
 }
@@ -592,11 +600,11 @@ void SocketBase::ParseObject()
       AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
 
       if(sl) {
-	links[handle&0x0f] = sl;
-	packet->EncodeHeader();
-	packet->EncodeUInt32(handle);
-	packet->txTerminate();
-	Send(packet->txBuff());
+        links[handle&0x0f] = sl;
+        packet->EncodeHeader();
+        packet->EncodeUInt32(handle);
+        packet->txTerminate();
+        Send(packet->txBuff());
       }
     }
     break;
@@ -607,18 +615,18 @@ void SocketBase::ParseObject()
       AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
 
       if(sl) {
-	unsigned int i=0;
-	
-	if(packet->DecodeUInt32(i) && i) 
-	  sl->setBlocking(true);
+        unsigned int i=0;
+        
+        if(packet->DecodeUInt32(i) && i) 
+          sl->setBlocking(true);
 
-	//NotifyLink *nl = new NotifyLink(sl);
+        //NotifyLink *nl = new NotifyLink(sl);
 
-	links[handle&0x0f] = sl;
-	packet->EncodeHeader();
-	packet->EncodeUInt32(handle);
-	packet->txTerminate();
-      	Send(packet->txBuff());
+        links[handle&0x0f] = sl;
+        packet->EncodeHeader();
+        packet->EncodeUInt32(handle);
+        packet->txTerminate();
+        Send(packet->txBuff());
       }
     }
     break;
@@ -630,15 +638,15 @@ void SocketBase::ParseObject()
       std::cout << "Creating callback link\n";
       if(packet->DecodeUInt64(interval) && interval) {
 
-	std::cout << "Creating callback link interval=" << interval << endl;
+        std::cout << "Creating callback link interval=" << interval << endl;
 
-	//CyclicCallBackLink *cl = new CyclicCallBackLink(interval,this);
+        //CyclicCallBackLink *cl = new CyclicCallBackLink(interval,this);
 
-	//links[handle&0x0f] = sl;
-	packet->EncodeHeader();
-	packet->EncodeUInt32(handle);
-	packet->txTerminate();
-      	Send(packet->txBuff());
+        //links[handle&0x0f] = sl;
+        packet->EncodeHeader();
+        packet->EncodeUInt32(handle);
+        packet->txTerminate();
+        Send(packet->txBuff());
       }
     }
     break;
@@ -650,7 +658,7 @@ void SocketBase::ParseObject()
       ParseSocketLink(packet, &sl);
 
       if(sl)
-	CloseSocketLink(sl);
+        CloseSocketLink(sl);
       Send("$");
     }
     break;
@@ -662,7 +670,7 @@ void SocketBase::ParseObject()
       ParseSocketLink(packet, &sl);
 
       if(sl) 
-	sl->Send();
+        sl->Send();
     }
     break;
 
@@ -672,8 +680,8 @@ void SocketBase::ParseObject()
 
       ParseSocketLink(packet, &sl);
       if(sl) {
-	sl->set(*packet);
-	Send("$");
+        sl->set(*packet);
+        Send("$");
       }
 
     }
@@ -685,15 +693,15 @@ void SocketBase::ParseObject()
 
       if(packet->DecodeString(tmp,256)) {
 
-	Value *sym = globalSymbolTable().findValue(tmp);
-	if(sym) {
-	  packet->EncodeHeader();
-	  sym->get(*packet);
-	  packet->txTerminate();
-	  Send(packet->txBuff());
+        Value *sym = globalSymbolTable().findValue(tmp);
+        if(sym) {
+          packet->EncodeHeader();
+          sym->get(*packet);
+          packet->txTerminate();
+          Send(packet->txBuff());
 
-	} else
-	  Send("-");
+        } else
+          Send("-");
       }
     }
     break;
@@ -712,22 +720,22 @@ void SocketBase::ParseObject()
 
       if(packet->DecodeString(tmp,256)) {
 
-	Value *sym = globalSymbolTable().findValue(tmp);
+        Value *sym = globalSymbolTable().findValue(tmp);
 
-	if(sym) {
+        if(sym) {
 
-	  // We'll define the response header before we decode
-	  // the rest of the packet. The reason for this is that
-	  // some symbols may wish to generate a response.
+          // We'll define the response header before we decode
+          // the rest of the packet. The reason for this is that
+          // some symbols may wish to generate a response.
 
-	  packet->EncodeHeader();
-	  sym->set(*packet);
-	  packet->txTerminate();
+          packet->EncodeHeader();
+          sym->set(*packet);
+          packet->txTerminate();
 
-	  Send(packet->txBuff());
+          Send(packet->txBuff());
 
-	} else
-	  Send("-");
+        } else
+          Send("-");
       }
     }
     break;
@@ -742,10 +750,10 @@ void SocketBase::ParseObject()
       // a cycle breakpoint; otherwise we'll run forever.
 
       if(packet->DecodeUInt64(nCycles)) {
-	guint64 fc = startCycle + nCycles;
-	if(nCycles) {
-	  get_bp().set_cycle_break(0,fc);
-	}
+        guint64 fc = startCycle + nCycles;
+        if(nCycles) {
+          get_bp().set_cycle_break(0,fc);
+        }
 
       }
 
@@ -800,9 +808,9 @@ void SocketBase::Service()
       ParseObject();
     } else {
       if(parse_string(packet->rxBuff()) >= 0)
-	Send("+ACK");
+        Send("+ACK");
       else
-	Send("+BUSY");
+        Send("+BUSY");
     }
   }
 
@@ -854,15 +862,15 @@ bool SocketLink::Send(bool bTimeStamp)
 
     /*
     std::cout << "SocketLink::Send() "
-	      << " socket=" << parent->getSocket()
-	      << " sending " 
-	      << parent->packet->txBuff() << endl;
+              << " socket=" << parent->getSocket()
+              << " sending " 
+              << parent->packet->txBuff() << endl;
     */
 
     if(bWaitForResponse) {
       //std::cout << "SocketLink::Send waiting for response\n";
       if(parent->Send(parent->packet->txBuff()))
-	return Receive();
+        return Receive();
     } else
       return parent->Send(parent->packet->txBuff());
   }
@@ -878,8 +886,8 @@ bool SocketLink::Receive()
     parent->packet->prepare();
 
     int bytes= recv(parent->getSocket(),
-		    parent->packet->rxBuff(), 
-		    parent->packet->rxSize(), 0);
+                    parent->packet->rxBuff(), 
+                    parent->packet->rxSize(), 0);
 
     if (bytes  == -1) {
       perror("recv");
@@ -1083,8 +1091,8 @@ static void debugPrintCondition(GIOCondition cond)
  */
 
 static gboolean server_callback(GIOChannel *channel, 
-				GIOCondition condition, 
-				void *pSocketBase )
+                                GIOCondition condition, 
+                                void *pSocketBase )
 {
 
 
@@ -1120,10 +1128,10 @@ static gboolean server_callback(GIOChannel *channel,
     g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
 #endif
     stat = g_io_channel_read_chars(channel, 
-				   s->packet->rxBuff(), 
-				   s->packet->rxSize(), 
-				   &b, 
-				   &err);
+                                   s->packet->rxBuff(), 
+                                   s->packet->rxSize(), 
+                                   &b, 
+                                   &err);
     bytes_read = b;
     s->packet->rxAdvance(bytes_read);
  
@@ -1138,10 +1146,10 @@ static gboolean server_callback(GIOChannel *channel,
 
     if(bytes_read) {
       if(get_interface().bSimulating()) {
-	std::cout << "setting a socket break point because sim is running \n";
-	get_bp().set_socket_break();
+        std::cout << "setting a socket break point because sim is running \n";
+        get_bp().set_socket_break();
       } else
-	s->Service();
+        s->Service();
     } else
       return FALSE;
 
@@ -1192,9 +1200,9 @@ static gboolean sink_server_accept(GIOChannel *channel, GIOCondition condition, 
 #endif
 
   g_io_add_watch(new_channel, 
-		 new_condition,
-		 server_callback,
-		 (void*)client);
+                 new_condition,
+                 server_callback,
+                 (void*)client);
 
   return TRUE;
 }
@@ -1213,11 +1221,11 @@ static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition
     return FALSE;
 
   int bytes= recv(client->getSocket(), 
-		  client->packet->rxBuff(), 
-		  client->packet->rxSize(), 0);
+                  client->packet->rxBuff(), 
+                  client->packet->rxSize(), 0);
 
   std::cout << " SourceServer received data" << client->packet->rxBuff() 
-	    << endl;
+            << endl;
 
   if (bytes  == -1) {
     perror("recv");

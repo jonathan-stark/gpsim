@@ -21,6 +21,11 @@ public:
     ERR_PROCESSOR_INIT_FAILED     = -7,
     ERR_NEED_PROCESSOR_SPECIFIED  = -8,
   };
+
+  virtual ~ProgramFileType()
+  {
+  }
+
   /*
    *  LoadProgramFile
    *  1) Loads a program into a processor object that is passed in.
@@ -31,8 +36,8 @@ public:
    *  
    */
   virtual int  LoadProgramFile(Processor **ppProcessor, 
-			       const char *pFilename, FILE *pFile,
-			       const char *pProcessorName) = 0;
+                               const char *pFilename, FILE *pFile,
+                               const char *pProcessorName) = 0;
   virtual void DisplayError(int iError, const char *pProgFilename,
     const char *pLstFile);
 };
@@ -46,8 +51,8 @@ public:
 
   static ProgramFileTypeList *s_ProgramFileTypeList;
   virtual bool LoadProgramFile(Processor **pProcessor,
-			       const char *pFilename, FILE *pFile, 
-			       const char *pProcessorName=0);
+                               const char *pFilename, FILE *pFile, 
+                               const char *pProcessorName=0);
   bool IsErrorDisplayableInLoop(int iError);
 };
 
