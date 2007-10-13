@@ -87,7 +87,7 @@ public:
 
 //------------------------------------------------------------------------
 //
-/// Module - Base class for all gpsim behavior models. 
+/// Module - Base class for all gpsim behavior models.
 
 class Module : public gpsimObject
 {
@@ -98,7 +98,7 @@ public:
   SIMULATION_MODES simulation_mode; // describes the simulation state for this module
 
   XrefObject *xref;                 // Updated when the module changes
-  
+
 
   /// I/O pin specific
 
@@ -111,20 +111,20 @@ public:
 
   /// Symbols
   /// Each module has its own symbol table. The global symbol
-  /// table can access this table too. 
+  /// table can access this table too.
   SymbolTable_t & getSymbolTable() { return mSymbolTable;}
   int addSymbol(gpsimObject *, string *AliasedName=0);
   gpsimObject *findSymbol(const string &);
   int removeSymbol(gpsimObject *);
   int removeSymbol(const string &);
   int deleteSymbol(const string &);
-  int deleteSymbol(gpsimObject **);
+  int deleteSymbol(gpsimObject *);
 
   /// Registers - mostly processors, but can apply to complex modules
   virtual unsigned int register_mask () const { return 0xff;}
   virtual unsigned int register_size () const { return 1;}
 
-  /// Reset 
+  /// Reset
 
   virtual void reset(RESET_TYPE r);
 
@@ -140,7 +140,7 @@ public:
   virtual void *get_widget() {return widget;}
 
   /// cli
-  /// Modules can have gpsim CLI scripts associated with them. 
+  /// Modules can have gpsim CLI scripts associated with them.
   /// add_command will add a single CLI command to a script
   void add_command(string &script_name, string &command);
 

@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #if !defined(_MAX_PATH)
   #define _MAX_PATH 1024
 #endif
-#include <unistd.h>  // for getcwd 
+#include <unistd.h>  // for getcwd
 
 #else
 #include <direct.h>
@@ -59,7 +59,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 // When a new library is loaded, all of the module types
-// it supports are placed into the ModuleTypes map. This 
+// it supports are placed into the ModuleTypes map. This
 // object is private to this file.
 
 typedef map<string, Module_Types *> ModuleTypeInfo_t;
@@ -67,7 +67,7 @@ ModuleTypeInfo_t ModuleTypes;
 
 
 //------------------------------------------------------------------------
-// Add a new type to the ModuleTypes map if the name for that type 
+// Add a new type to the ModuleTypes map if the name for that type
 // does not exist already.
 
 static void AddModuleType(char *pName, Module_Types *pType)
@@ -128,7 +128,7 @@ public:
 
   }
 
-protected: 
+protected:
   string m_sCanonicalName;
   string m_sUserSuppliedName;
   void *m_pHandle;
@@ -233,7 +233,7 @@ void ModuleLibrary::ListLoadableModules()
  * A Module is define to be something that gpsim knows how to simulate.
  * When gpsim was originally designed, a module was simple a pic processor.
  * This concept was expanded to accomodate devices like LEDs, switches,
- * LCDs and so on. 
+ * LCDs and so on.
  */
 
 Module::Module(const char *_name, const char *desc)
@@ -342,16 +342,15 @@ int Module::deleteSymbol(const string &s)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-int Module::deleteSymbol(gpsimObject **ppSym)
+int Module::deleteSymbol(gpsimObject *pSym)
 {
-  if (!ppSym && !*ppSym)
+  if (!pSym)
     return 0;
 
-  if (!removeSymbol(*ppSym))
+  if (!removeSymbol(pSym))
     return 0;
 
-  delete *ppSym;
-  *ppSym = 0;
+  delete pSym;
   return 1;
 }
 
@@ -424,11 +423,11 @@ IOPIN *Module::get_pin(unsigned int pin_number)
 //-------------------------------------------------------------------
 // Module Scripts
 //
-// Module command line scripts are named scripts created by symbol 
+// Module command line scripts are named scripts created by symbol
 // files. For example, with PIC cod files, it's possible to
 // create assertions and simulation commands using the '.assert'
 // and '.sim' directives. These commands are ASCII strings that
-// are collected together. 
+// are collected together.
 //
 
 //-------------------------------------------------------------------
@@ -449,7 +448,7 @@ void Module::add_command(string &script_name, string &command)
 
 //-------------------------------------------------------------------
 // Module::run_script - execute a gpsim command line script
-// 
+//
 //-------------------------------------------------------------------
 void Module::run_script(string &script_name)
 {
@@ -474,7 +473,7 @@ Module::ModuleScript::~ModuleScript()
   list <string *> :: iterator command_iterator;
 
   for (command_iterator = m_commands.begin();
-       command_iterator != m_commands.end(); 
+       command_iterator != m_commands.end();
        ++command_iterator)
     delete *command_iterator;
 
@@ -508,7 +507,7 @@ void Module::ModuleScript::concatenate(ModuleScript *pOtherScript)
   list <string *> :: iterator command_iterator;
 
   for (command_iterator = pOtherScript->m_commands.begin();
-       command_iterator != pOtherScript->m_commands.end(); 
+       command_iterator != pOtherScript->m_commands.end();
        ++command_iterator)
     m_commands.push_back(*command_iterator);
 }

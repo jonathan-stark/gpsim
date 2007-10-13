@@ -54,8 +54,8 @@ P16F62x::~P16F62x()
   delete_file_registers(0xc0, 0xef);
   delete_file_registers(0x120,0x14f);
 
-  delete_sfr_register((Register **)&usart.txreg,0);
-  delete_sfr_register((Register **)&usart.rcreg,0);
+  delete_sfr_register(usart.txreg,0);
+  delete_sfr_register(usart.rcreg,0);
 
   delete eeprom;
   eeprom = 0;
@@ -94,7 +94,7 @@ void P16F62x::create_iopin_map()
 
 void P16F62x::create_sfr_map()
 {
- 
+
 
   add_file_registers(0xc0, 0xef, 0);   // 0xa0 - 0xbf are created in the P16X6X_processor class
   add_file_registers(0x120,0x14f,0);
@@ -126,7 +126,7 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x0b,0x0b,0x180);
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
-		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
@@ -139,9 +139,9 @@ void P16F62x::create_sfr_map()
   intcon_reg.set_pir_set(get_pir_set());
 
   // Link the comparator and voltage ref to porta
-  comparator.initialize(get_pir_set(), &(*m_porta)[2], &(*m_porta)[0], 
-	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
-	&(*m_porta)[4]);
+  comparator.initialize(get_pir_set(), &(*m_porta)[2], &(*m_porta)[0],
+        &(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
+        &(*m_porta)[4]);
 
   comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
   comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
@@ -159,7 +159,7 @@ void P16F62x::create_sfr_map()
   comparator.cmcon.set_configuration(2, 6, AN1, AN2, AN1, AN2, OUT1);
   comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  
+
 
   add_sfr_register(&comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9f, RegisterValue(0,0),"vrcon");
@@ -213,14 +213,14 @@ bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
     case 0:  // LP oscillator: low power crystal is on RA6 and RA7
     case 1:     // XT oscillator: crystal/resonator is on RA6 and RA7
     case 2:     // HS oscillator: crystal/resonator is on RA6 and RA7
-	(m_porta->getPin(6))->newGUIname("OSC2");
-	(m_porta->getPin(7))->newGUIname("OSC1");
-	break;
+        (m_porta->getPin(6))->newGUIname("OSC2");
+        (m_porta->getPin(7))->newGUIname("OSC1");
+        break;
 
-    case 0x13:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
-	(m_porta->getPin(6))->newGUIname("CLKOUT");
-	(m_porta->getPin(7))->newGUIname("OSC1");
-	break;
+    case 0x13:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7
+        (m_porta->getPin(6))->newGUIname("CLKOUT");
+        (m_porta->getPin(7))->newGUIname("OSC1");
+        break;
 
     case 3:     // EC:  RA6 is an I/O, RA7 is a CLKIN
     case 0x12:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
@@ -238,18 +238,18 @@ bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     }
 
-    // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
+    // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's
     // a general purpose I/O pin.
 
-    if (! (cfg_word & CFG_MCLRE)) {   
-      valid_pins |= ( 1<< 5); 		// porta5 IO port
+    if (! (cfg_word & CFG_MCLRE)) {
+      valid_pins |= ( 1<< 5);           // porta5 IO port
     }
     else
     {
-	(m_porta->getPin(5))->newGUIname("MCLR");
+        (m_porta->getPin(5))->newGUIname("MCLR");
     }
 
-    //cout << " porta valid_iopins " << porta->valid_iopins << 
+    //cout << " porta valid_iopins " << porta->valid_iopins <<
     //   "  tris valid io " << trisa.valid_iopins << '\n';
 
     if (valid_pins != m_porta->getEnableMask()) // enable new pins for IO
@@ -294,7 +294,7 @@ void  P16F62x::create(int ram_top, unsigned int eeprom_size)
 
 //========================================================================
 //
-// Pic 16F627 
+// Pic 16F627
 //
 
 Processor * P16F627::construct(const char *name)
@@ -319,7 +319,7 @@ P16F627::P16F627(const char *_name, const char *desc)
 
 //========================================================================
 //
-// Pic 16F628 
+// Pic 16F628
 //
 
 Processor * P16F628::construct(const char *name)
@@ -350,7 +350,7 @@ P16F628::~P16F628()
 
 //========================================================================
 //
-// Pic 16F648 
+// Pic 16F648
 //
 
 Processor * P16F648::construct(const char *name)
@@ -376,6 +376,6 @@ P16F648::P16F648(const char *_name, const char *desc)
 
 void P16F648::create_sfr_map()
 {
- 
+
   add_file_registers(0x150,0x16f,0);
 }

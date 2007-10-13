@@ -148,8 +148,8 @@ class ConfigMode {
   int config_mode;
   int valid_bits;
 
-  ConfigMode() { 
-    config_mode = 0xffff; 
+  ConfigMode() {
+    config_mode = 0xffff;
     valid_bits = CM_FOSC0 | CM_FOSC1 | CM_WDTE;
   };
 
@@ -166,8 +166,8 @@ class ConfigMode {
   void clear_fosc1(){config_mode &= ~CM_FOSC1;};
   bool get_fosc1(){return (0 != (config_mode & CM_FOSC1));};
   bool get_fosc1x(){return (0 != (config_mode & CM_FOSC1x));};
-  void set_fosc01(int v) 
-  { 
+  void set_fosc01(int v)
+  {
     config_mode = (config_mode & ~(CM_FOSC0 | CM_FOSC1)) |
       (v & (CM_FOSC0 | CM_FOSC1));
   }
@@ -273,7 +273,7 @@ public:
   unsigned int config_word;      // as read from hex or cod file
   ConfigMode   *config_modes;    // processor dependent configuration bits.
 
-  unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds 
+  unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds
                                  // to the instruction execution rate.
 
   WDT          wdt;
@@ -299,8 +299,8 @@ public:
 
   void add_sfr_register(Register *reg, unsigned int addr,
                         RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
-  void delete_sfr_register(Register **ppReg, unsigned int addr);
-  void remove_sfr_register(Register *ppReg, unsigned int addr);
+  void delete_sfr_register(Register *pReg, unsigned int addr);
+  void remove_sfr_register(Register *pReg, unsigned int addr);
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
@@ -383,7 +383,7 @@ protected:
 // The configuration memory is only a tiny portion of the overall processor
 // program memory space (only 1-word on the mid range devices). So, explicit
 // attributes are created for each memory configuration word. Since the meaning
-// of configuration memory varies from processor to processor, it is up to 
+// of configuration memory varies from processor to processor, it is up to
 // each process to derive from this class.
 
 
