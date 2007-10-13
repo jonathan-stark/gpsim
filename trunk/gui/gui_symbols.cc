@@ -71,6 +71,10 @@ class GUISymbol
 public:
   symbol *s;
 
+  virtual ~GUISymbol()
+  {
+  }
+
   virtual void select(void);
 
 };
@@ -84,20 +88,20 @@ static void update_menus(Symbol_Window *sw)
     unsigned int i;
 
     for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-	item=menu_items[i].item;
-	if(sw)
-	{
+        item=menu_items[i].item;
+        if(sw)
+        {
             Value *entry;
-	    entry = (Value*) gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
-	    if(entry==0)
-		gtk_widget_set_sensitive (item, FALSE);
-	    else
-		gtk_widget_set_sensitive (item, TRUE);
-	}
-	else
-	{
-	    gtk_widget_set_sensitive (item, FALSE);
-	}
+            entry = (Value*) gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
+            if(entry==0)
+                gtk_widget_set_sensitive (item, FALSE);
+            else
+                gtk_widget_set_sensitive (item, TRUE);
+        }
+        else
+        {
+            gtk_widget_set_sensitive (item, FALSE);
+        }
     }
 }
 
@@ -162,8 +166,8 @@ build_menu(GtkWidget *sheet, Symbol_Window *sw)
       menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &menu_items[i]);
+                         (GtkSignalFunc) popup_activated,
+                         &menu_items[i]);
 
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
@@ -180,7 +184,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Symbol_Window *sw)
 {
 
     GtkWidget *popup;
-//	GdkModifierType mods;
+//      GdkModifierType mods;
 
   if(widget==0 || event==0 || sw==0)
   {
@@ -192,16 +196,16 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Symbol_Window *sw)
     {
 
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		     3, event->time);
+                     3, event->time);
     }
     return FALSE;
 }
 
 static void unselect_row(GtkCList *clist,
-			 gint row,
-			 gint column,
-			 GdkEvent *event,
-			 Symbol_Window *sw)
+                         gint row,
+                         gint column,
+                         GdkEvent *event,
+                         Symbol_Window *sw)
 {
     update_menus(sw);
 }
@@ -230,9 +234,9 @@ void updateOneSymbol(const SymbolEntry_t &sym)
     char value[SYM_LEN];
 
     if (table != "__global__")
-	symbol_name = table + "." + pVal->name();
+        symbol_name = table + "." + pVal->name();
     else
-	symbol_name = pVal->name();
+        symbol_name = pVal->name();
 
     entry[0] = symbol_name.c_str();
     strncpy(type, pVal->showType().c_str(), sizeof(type));
@@ -352,7 +356,7 @@ static void do_symbol_select(Symbol_Window *sw, Value *e)
   } else 
     if(typeid(*e) == typeid(Register))
       if(sw->gp->regwin_ram)
-	sw->gp->regwin_ram->SelectRegister(e);
+        sw->gp->regwin_ram->SelectRegister(e);
 }
 
 static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,GdkEvent *event, Symbol_Window *sw)
@@ -376,7 +380,7 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
     if(!sw)
       return;
     if(!sw->enabled)
-	return;
+        return;
     
     p=sw->symbols;
     while(p)
@@ -385,23 +389,23 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
 
       if(typeid(*e) == typeid(Register)) {
 
-	int i;
+        int i;
 
-	e->get(i);
+        e->get(i);
 
-	if(i == regnumber) {
-	  int row;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(sw->symbol_clist),e);
+        if(i == regnumber) {
+          int row;
+          row=gtk_clist_find_row_from_data(GTK_CLIST(sw->symbol_clist),e);
 
-	  if(row!=-1) {
-	    gtk_clist_select_row(GTK_CLIST(sw->symbol_clist),row,0);
-	    gtk_clist_moveto(GTK_CLIST(sw->symbol_clist),row,0,0.5,0.5);
+          if(row!=-1) {
+            gtk_clist_select_row(GTK_CLIST(sw->symbol_clist),row,0);
+            gtk_clist_moveto(GTK_CLIST(sw->symbol_clist),row,0,0.5,0.5);
 
-	    do_symbol_select(sw,e);
-	  }
-	  break;
-	}
-	p=p->next;
+            do_symbol_select(sw,e);
+          }
+          break;
+        }
+        p=p->next;
       }
     }
        
@@ -431,7 +435,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
 
     // ignore line numbers
     if(typeid(*sym) == typeid(line_number_symbol))
-		  continue;
+                  continue;
     
     if(!strcasecmp((*sti)->name().data(),symbol_name)) {
 
@@ -452,30 +456,30 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
     if(!strcasecmp((*sti)->name().data(),symbol_name)) {
 
       switch((*sti)->isa()) {
-	    
+            
       case SYMBOL_ADDRESS:
-	if(filter_addresses) {
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
-	  while(gtk_events_pending()) // FIXME. Not so nice...
-	    gtk_main_iteration();
-	}
-	break;
+        if(filter_addresses) {
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
+          while(gtk_events_pending()) // FIXME. Not so nice...
+            gtk_main_iteration();
+        }
+        break;
       case SYMBOL_CONSTANT:
-	if(filter_constants) {
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
-	  while(gtk_events_pending()) // FIXME. Not so nice...
-	    gtk_main_iteration();
-	}
-	break;
+        if(filter_constants) {
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
+          while(gtk_events_pending()) // FIXME. Not so nice...
+            gtk_main_iteration();
+        }
+        break;
       case SYMBOL_REGISTER:
-	if(filter_registers) {
-	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
-	  while(gtk_events_pending()) // FIXME. Not so nice...
-	    gtk_main_iteration();
-	}
-	break;
+        if(filter_registers) {
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
+          while(gtk_events_pending()) // FIXME. Not so nice...
+            gtk_main_iteration();
+        }
+        break;
       default:
-	break;
+        break;
       }
       break;
     }
@@ -494,11 +498,11 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
       row=gtk_clist_find_row_from_data(GTK_CLIST(symbol_clist),e);
       if(row!=-1) {
         
-				gtk_clist_select_row(GTK_CLIST(symbol_clist),row,0);
+                                gtk_clist_select_row(GTK_CLIST(symbol_clist),row,0);
         gtk_clist_moveto(GTK_CLIST(symbol_clist),row,0,0.5,0.5);
         
-				do_symbol_select(this,e);
-		
+                                do_symbol_select(this,e);
+                
       }
     }
     p=p->next;
@@ -528,39 +532,39 @@ symbol_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
     switch (row1->cell[clist->sort_column].type)
     {
     case GTK_CELL_TEXT:
-	text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
-	break;
+        text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
+        break;
     case GTK_CELL_PIXTEXT:
-	text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
-	break;
+        text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
+        break;
     default:
-	assert(0);
-	break;
+        assert(0);
+        break;
     }
 
     switch (row2->cell[clist->sort_column].type)
     {
     case GTK_CELL_TEXT:
-	text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
-	break;
+        text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
+        break;
     case GTK_CELL_PIXTEXT:
-	text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
-	break;
+        text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
+        break;
     default:
-	assert(0);
-	break;
+        assert(0);
+        break;
     }
 
     if (!text2)
-	assert(0);
+        assert(0);
 
     if (!text1)
-	assert(0);
+        assert(0);
 
     if(1==sscanf(text1,"%li",&val1))
     {
       if(1==sscanf(text2,"%li",&val2))
-	return val1-val2;
+        return val1-val2;
 
     }
     return strcmp(text1,text2);
@@ -572,20 +576,20 @@ static void symbol_click_column(GtkCList *clist, int column)
     static GtkSortType last_sort_type=GTK_SORT_DESCENDING;
     
     if(last_col==-1)
-	last_col=column;
+        last_col=column;
 
     if(last_col == column)
     {
-	if(last_sort_type==GTK_SORT_DESCENDING)
-	{
-	    gtk_clist_set_sort_type(clist,GTK_SORT_ASCENDING);
-	    last_sort_type=GTK_SORT_ASCENDING;
-	}
-	else
-	{
-	    gtk_clist_set_sort_type(clist,GTK_SORT_DESCENDING);
-	    last_sort_type=GTK_SORT_DESCENDING;
-	}
+        if(last_sort_type==GTK_SORT_DESCENDING)
+        {
+            gtk_clist_set_sort_type(clist,GTK_SORT_ASCENDING);
+            last_sort_type=GTK_SORT_ASCENDING;
+        }
+        else
+        {
+            gtk_clist_set_sort_type(clist,GTK_SORT_DESCENDING);
+            last_sort_type=GTK_SORT_DESCENDING;
+        }
     }
 
     gtk_clist_set_sort_column(clist,column);
@@ -594,7 +598,7 @@ static void symbol_click_column(GtkCList *clist, int column)
 }
 
 static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+                        GdkEvent  *event,
                         Symbol_Window *sw)
 {
     sw->ChangeView(VIEW_HIDE);
@@ -649,7 +653,7 @@ void Symbol_Window::Build(void)
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
   
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
+                      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
 
   symbol_clist=gtk_clist_new_with_titles(3,symbol_titles);
   gtk_widget_show(symbol_clist);
@@ -658,18 +662,18 @@ void Symbol_Window::Build(void)
   gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),2,TRUE);
   gtk_clist_set_auto_sort(GTK_CLIST(symbol_clist),TRUE);
   gtk_clist_set_compare_func(GTK_CLIST(symbol_clist),
-			     (GtkCListCompareFunc)symbol_compare_func);
+                             (GtkCListCompareFunc)symbol_compare_func);
 
   gtk_signal_connect(GTK_OBJECT(symbol_clist),"click_column",
-		     (GtkSignalFunc)symbol_click_column,0);
+                     (GtkSignalFunc)symbol_click_column,0);
   gtk_signal_connect(GTK_OBJECT(symbol_clist),"select_row",
-		     (GtkSignalFunc)symbol_list_row_selected,this);
+                     (GtkSignalFunc)symbol_list_row_selected,this);
   gtk_signal_connect(GTK_OBJECT(symbol_clist),"unselect_row",
-		     (GtkSignalFunc)unselect_row,this);
+                     (GtkSignalFunc)unselect_row,this);
   gtk_signal_connect(GTK_OBJECT(symbol_clist),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup,
-		     this);
+                     "button_press_event",
+                     (GtkSignalFunc) do_popup,
+                     this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_window);
@@ -693,7 +697,7 @@ void Symbol_Window::Build(void)
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
   gtk_signal_connect (GTK_OBJECT (addressesbutton), "toggled",
-		      GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)this);
+                      GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)this);
 
   
   constantsbutton = gtk_check_button_new_with_label ("constants");
@@ -703,7 +707,7 @@ void Symbol_Window::Build(void)
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
   gtk_signal_connect (GTK_OBJECT (constantsbutton), "toggled",
-		      GTK_SIGNAL_FUNC (toggle_constants), (gpointer)this);
+                      GTK_SIGNAL_FUNC (toggle_constants), (gpointer)this);
 
   
   registersbutton = gtk_check_button_new_with_label ("registers");
@@ -713,10 +717,10 @@ void Symbol_Window::Build(void)
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
   gtk_signal_connect (GTK_OBJECT (registersbutton), "toggled",
-		      GTK_SIGNAL_FUNC (toggle_registers), (gpointer)this);
+                      GTK_SIGNAL_FUNC (toggle_registers), (gpointer)this);
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
   
   gtk_widget_show_all (window);

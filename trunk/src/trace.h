@@ -50,6 +50,11 @@ class TraceObject
 {
 public:
   TraceObject();
+
+  virtual ~TraceObject()
+  {
+  }
+
   virtual void print(FILE *)=0;
   virtual void print_frame(TraceFrame *,FILE *);
   virtual void getState(TraceFrame *);   // FIXME Is this even used?
@@ -59,6 +64,11 @@ class CycleTraceObject : public TraceObject
 {
 public:
   CycleTraceObject();
+
+  virtual ~CycleTraceObject()
+  {
+  }
+
   virtual void print(FILE *);
   virtual void print_frame(TraceFrame *,FILE *);
   virtual void getState(TraceFrame *);
@@ -68,6 +78,11 @@ class InvalidTraceObject : public TraceObject
 {
 public:
   InvalidTraceObject(int type);
+
+  virtual ~InvalidTraceObject()
+  {
+  }
+
   virtual void print(FILE *);
 protected:
   int mType;
@@ -79,6 +94,10 @@ public:
   Processor *cpu;
 
   ProcessorTraceObject(Processor *_cpu) : TraceObject() , cpu(_cpu)
+  {
+  }
+
+  virtual ~ProcessorTraceObject()
   {
   }
 
@@ -94,12 +113,16 @@ public:
   unsigned int mTracedData;
 
   ModuleTraceObject(Module *_module, 
-		    ModuleTraceType *pmtt,
-		    unsigned int d)
+                    ModuleTraceType *pmtt,
+                    unsigned int d)
     : TraceObject() , 
       pModule(_module),
       pModuleTraceType(pmtt),
       mTracedData(d)
+  {
+  }
+
+  virtual ~ModuleTraceObject()
   {
   }
 
@@ -114,6 +137,11 @@ public:
   RegisterValue to;
 
   RegisterWriteTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
+
+  virtual ~RegisterWriteTraceObject()
+  {
+  }
+
   virtual void print(FILE *);
   virtual void getState(TraceFrame *);
 };
@@ -122,6 +150,11 @@ class RegisterReadTraceObject : public RegisterWriteTraceObject
 {
 public:
   RegisterReadTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
+
+  virtual ~RegisterReadTraceObject()
+  {
+  }
+
   virtual void print(FILE *);
   virtual void getState(TraceFrame *);
 };
@@ -132,6 +165,11 @@ public:
   unsigned int address;
 
   PCTraceObject(Processor *_cpu, unsigned int _address);
+
+  virtual ~PCTraceObject()
+  {
+  }
+
   virtual void print(FILE *);
   virtual void print_frame(TraceFrame *,FILE *);
 };
@@ -152,6 +190,10 @@ public:
 
 
   TraceType(unsigned int nTraceEntries, const char *desc);
+
+  virtual ~TraceType()
+  {
+  }
 
   void setType(unsigned int t) { mType = t;}
   // The actual type of the TraceType is an 8-bit field in the
@@ -196,10 +238,10 @@ public:
   virtual void showInfo();
   const char *cpDescription();
 private:
-  unsigned int mType;		// The integer type is dynamically
-				// assigned by the Trace class.
-  unsigned int mSize;		// The number of positions this
-				// type occupies
+  unsigned int mType;           // The integer type is dynamically
+                                // assigned by the Trace class.
+  unsigned int mSize;           // The number of positions this
+                                // type occupies
 protected:
   const char *mpDescription;    // 
 
@@ -209,6 +251,11 @@ class CycleTraceType : public TraceType
 {
 public:
   CycleTraceType(unsigned int nTraceEntries);
+
+  virtual ~CycleTraceType()
+  {
+  }
+
   virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary();
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -220,8 +267,13 @@ class ModuleTraceType : public TraceType
 public:
   Module *pModule;
   ModuleTraceType(Module *_pModule, 
-		  unsigned int nTraceEntries,
-		  const char *desc);
+                  unsigned int nTraceEntries,
+                  const char *desc);
+
+  virtual ~ModuleTraceType()
+  {
+  }
+
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 
@@ -233,8 +285,13 @@ public:
   Processor *cpu;
 
   ProcessorTraceType(Processor *_cpu, 
-		     unsigned int nTraceEntries,
+                     unsigned int nTraceEntries,
                      const char *pDesc);
+
+  virtual ~ProcessorTraceType()
+  {
+  }
+
   virtual TraceObject *decode(unsigned int tbi) = 0;
 
 };
@@ -243,6 +300,11 @@ class PCTraceType : public ProcessorTraceType
 {
 public:
   PCTraceType(Processor *_cpu, unsigned int nTraceEntries);
+
+  virtual ~PCTraceType()
+  {
+  }
+
   virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary() { return true; }
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -254,6 +316,10 @@ public:
 
   RegisterWriteTraceType(Processor *_cpu, unsigned int nTraceEntries);
 
+  virtual ~RegisterWriteTraceType()
+  {
+  }
+
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
 };
@@ -263,6 +329,10 @@ class RegisterReadTraceType : public ProcessorTraceType
 public:
 
   RegisterReadTraceType(Processor *_cpu, unsigned int nTraceEntries);
+
+  virtual ~RegisterReadTraceType()
+  {
+  }
 
   virtual TraceObject *decode(unsigned int tbi);
   virtual int dump_raw(Trace *,unsigned tbi, char *buf, int bufsize);
@@ -274,6 +344,11 @@ class ResetTraceObject : public ProcessorTraceObject
 {
 public:
   ResetTraceObject(Processor *_cpu, RESET_TYPE r);
+
+  virtual ~ResetTraceObject()
+  {
+  }
+
   virtual void print(FILE *fp);
 protected:
   RESET_TYPE m_reset;
@@ -283,6 +358,11 @@ class ResetTraceType : public ProcessorTraceType
 {
 public:
   ResetTraceType(Processor *_cpu);
+
+  virtual ~ResetTraceType()
+  {
+  }
+
   TraceObject *decode(unsigned int tbi);
   void record(RESET_TYPE r);
   int dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize);

@@ -273,12 +273,12 @@ public:
 
 enum
 {
-    ECCP1IF = 1<<0,		/* only on the PIC18F4xx devices */
+    ECCP1IF = 1<<0,             /* only on the PIC18F4xx devices */
     TMR3IF  = 1<<1,
     LVDIF   = 1<<2,
     BCLIF   = 1<<3,
     EEIF    = 1<<4,
-    CMIF    = 1<<6		/* PIC16F87xA, PIC18F4xx devices */
+    CMIF    = 1<<6              /* PIC16F87xA, PIC18F4xx devices */
 };
 
   virtual void set_eccp1if()
@@ -386,6 +386,10 @@ enum
 class PIR_SET
 {
 public:
+  virtual ~PIR_SET()
+  {
+  }
+
   virtual bool interrupt_status()
   {
     return false;
@@ -404,7 +408,7 @@ public:
   }
   virtual void set_rcif() {}
   virtual void clear_rcif() {}
-	
+        
   // ssp stuff
   virtual bool get_sspif()
   {
@@ -438,6 +442,11 @@ class PIR_SET_1 : public PIR_SET
 {
  public:
   PIR_SET_1() { pir1 = 0; pir2 = 0; }
+
+  virtual ~PIR_SET_1()
+  {
+  }
+
   void set_pir1(PIR *p1) { pir1 = p1; }
   void set_pir2(PIR *p2) { pir2 = p2; }
 
@@ -445,7 +454,7 @@ class PIR_SET_1 : public PIR_SET
     assert(pir1 != 0);
     if (pir2 != 0)
       return (pir1->interrupt_status() ||
-	      pir2->interrupt_status());
+              pir2->interrupt_status());
     else
       return (pir1->interrupt_status());
   }
@@ -475,7 +484,7 @@ class PIR_SET_1 : public PIR_SET
     assert(pir1 != 0);
     pir1->clear_rcif();
   }
-	
+        
   // ssp stuff
   virtual bool get_sspif() {
     assert(pir1 != 0);
@@ -524,8 +533,8 @@ class PIR_SET_1 : public PIR_SET
   }
 
 private:
-  PIR	*pir1;
-  PIR	*pir2;
+  PIR   *pir1;
+  PIR   *pir2;
 };
 
 
@@ -536,6 +545,10 @@ class PIR_SET_2 : public PIR_SET
  public:
   PIR_SET_2() { pir1 = 0; pir2 = 0; pir3 = 0; }
 
+  virtual ~PIR_SET_2()
+  {
+  }
+
   void set_pir1(PIR *p1) { pir1 = p1; }
   void set_pir2(PIR *p2) { pir2 = p2; }
   void set_pir3(PIR *p3) { pir3 = p3; }
@@ -543,11 +556,11 @@ class PIR_SET_2 : public PIR_SET
   virtual bool interrupt_status() {
     assert(pir1 != 0);
     if (pir1 != 0 && pir1->interrupt_status())
-	return(true);
+        return(true);
     else if (pir2 != 0 && pir2->interrupt_status())
-	return(true);
+        return(true);
     else if (pir3 != 0 && pir3->interrupt_status())
-	return(true);
+        return(true);
     return(false);   
   }
 
@@ -576,7 +589,7 @@ class PIR_SET_2 : public PIR_SET
     assert(pir1 != 0);
     pir1->clear_rcif();
   }
-	
+        
   // ssp stuff
   virtual bool get_sspif() {
     assert(pir1 != 0);
@@ -638,9 +651,9 @@ class PIR_SET_2 : public PIR_SET
   }
 
 private:
-  PIR	*pir1;
-  PIR	*pir2;
-  PIR	*pir3;
+  PIR   *pir1;
+  PIR   *pir2;
+  PIR   *pir3;
 };
 
 

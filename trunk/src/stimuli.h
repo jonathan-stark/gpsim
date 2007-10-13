@@ -84,7 +84,7 @@ public:
 
   double current_time_constant; // The most recent time constant for the attached stimuli.
   double delta_voltage;     // Amplitude of initial change
-  double  minThreshold;	    // Use DC value when voltage this close
+  double  minThreshold;     // Use DC value when voltage this close
   guint64 cap_start_cycle;  // cycles when RC value last calculated
   guint64 future_cycle;     // cycles when next callback expected
 
@@ -156,9 +156,9 @@ public:
   stimulus *next;            // next stimulus that's on the snode
 
   stimulus(const char *n=0,
-	   double _Vth=5.0,
-	   double _Zth=1e3
-	   );
+           double _Vth=5.0,
+           double _Zth=1e3
+           );
   virtual ~stimulus();
 
   // When a stimulus is given a name, it is also added to the symbol
@@ -296,6 +296,10 @@ protected:
 class SignalSink
 {
 public:
+  virtual ~SignalSink()
+  {
+  }
+
   virtual void setSinkState(char)=0;
   virtual void release()=0;
 };
@@ -309,6 +313,10 @@ public:
 class AnalogSink
 {
 public:
+  virtual ~AnalogSink()
+  {
+  }
+
   virtual void setSinkState(double)=0;
   virtual void release()=0;
 };
@@ -367,11 +375,11 @@ class IOPIN : public stimulus
 
 
   IOPIN(const char *n=0,
-	double _Vth=5.0, 
-	double _Zth=1e8,
-	double _ZthWeak = 1e6,
-	double _ZthFloating = 1e7
-	);
+        double _Vth=5.0, 
+        double _Zth=1e8,
+        double _ZthWeak = 1e6,
+        double _ZthFloating = 1e7
+        );
 
   ~IOPIN();
 
@@ -443,12 +451,12 @@ class IO_bi_directional : public IOPIN
 public:
 
   IO_bi_directional(const char *n=0,
-		    double _Vth=5.0, 
-		    double _Zth=150,
-		    double _ZthWeak = 1e6,
-		    double _ZthFloating = 1e7,
-		    double _VthIn = 0.3,
-		    double _ZthIn = 1e8);
+                    double _Vth=5.0, 
+                    double _Zth=150,
+                    double _ZthWeak = 1e6,
+                    double _ZthFloating = 1e7,
+                    double _VthIn = 0.3,
+                    double _ZthIn = 1e8);
   virtual double get_Zth();
   virtual double get_Vth();
   virtual char getBitChar();
@@ -476,14 +484,14 @@ class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
   IO_bi_directional_pu(const char *n=0,
-		       double _Vth=5.0, 
-		       double _Zth=150,
-		       double _ZthWeak = 1e6,
-		       double _ZthFloating = 1e7,
-		       double _VthIn = 0.3,
-		       double _ZthIn = 1e8,
-		       double _Zpullup = 20e3
-		       );
+                       double _Vth=5.0, 
+                       double _Zth=150,
+                       double _ZthWeak = 1e6,
+                       double _ZthFloating = 1e7,
+                       double _VthIn = 0.3,
+                       double _ZthIn = 1e8,
+                       double _Zpullup = 20e3
+                       );
 
   ~IO_bi_directional_pu();
   virtual double get_Vth();

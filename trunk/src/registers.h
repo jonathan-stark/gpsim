@@ -128,10 +128,10 @@ public:
   }
   char * toString(char *str, int len, int regsize=2) const;
   char * toBitStr(char *s, int len, unsigned int BitPos, 
-		  const char *ByteSeparator="_",
-		  const char *HiBitNames=0,
-		  const char *LoBitNames=0,
-		  const char *UndefBitNames=0) const;
+                  const char *ByteSeparator="_",
+                  const char *HiBitNames=0,
+                  const char *LoBitNames=0,
+                  const char *UndefBitNames=0) const;
 
 };
 
@@ -515,9 +515,9 @@ class RegisterCollection : public IIndexedCollection
 {
 public:
   RegisterCollection(Processor *pProcessor, 
-		     const char *collection_name,
-		     Register   **ppRegisters,
-		     unsigned int uiSize);
+                     const char *collection_name,
+                     Register   **ppRegisters,
+                     unsigned int uiSize);
   ~RegisterCollection();
   virtual unsigned int GetSize();
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0);
@@ -552,8 +552,11 @@ private:
 class BitSink
 {
 public:
-  virtual void setSink(bool) = 0;
+  virtual ~BitSink()
+  {
+  }
 
+  virtual void setSink(bool) = 0;
 };
 
 

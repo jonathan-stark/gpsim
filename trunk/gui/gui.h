@@ -101,6 +101,11 @@ public:
   enum window_types parent_window_type;
   gpointer     parent_window;
   gpointer     data;
+
+  virtual ~CrossReferenceToGUI()
+  {
+  }
+
   virtual void Update(int new_value);
   virtual void Remove(void);
 };
@@ -114,6 +119,11 @@ class EntryWidget
 {
 public:
   EntryWidget();
+
+  virtual ~EntryWidget()
+  {
+  }
+
   virtual void Update()=0;
   virtual void Create(bool isEditable=true);
   void SetEntryWidth(int string_width);
@@ -135,6 +145,11 @@ public:
   GtkWidget *label;
 
   LabeledEntry(void);
+
+  virtual ~LabeledEntry()
+  {
+  }
+
   void Create(GtkWidget *box,char *clabel, int string_width, bool isEditable);
   void NewLabel(char *clabel);
   virtual void Update(void);
@@ -150,6 +165,10 @@ public:
 
   RegisterLabeledEntry(GtkWidget *,Register *,bool);
 
+  virtual ~RegisterLabeledEntry()
+  {
+  }
+
   virtual void put_value(unsigned int);
   void AssignRegister(Register *new_reg);
   virtual void Update(void);
@@ -160,6 +179,11 @@ class CyclesLabeledEntry : public LabeledEntry {
 public:
 
   CyclesLabeledEntry();
+
+  virtual ~CyclesLabeledEntry()
+  {
+  }
+
   virtual void Update(void);
 };
 
@@ -180,6 +204,11 @@ class TimeLabeledEntry : public LabeledEntry
 {
 public:
   TimeLabeledEntry();
+
+  virtual ~TimeLabeledEntry()
+  {
+  }
+
   virtual void Update(void);
   GtkWidget *build_menu();
 
@@ -200,6 +229,10 @@ public:
 class KeyEvent
 {
 public:
+  virtual ~KeyEvent()
+  {
+  }
+
   virtual void press(gpointer data = 0) = 0;
   virtual void release(gpointer data = 0) = 0;
 };

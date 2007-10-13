@@ -56,8 +56,8 @@ namespace dspic_instructions
   {
   public:
     MultiWordInstruction(Processor *new_cpu, 
-			 unsigned int new_opcode,
-			 unsigned int addr);
+                         unsigned int new_opcode,
+                         unsigned int addr);
     virtual int instruction_size(void) { return 2;}
     virtual enum INSTRUCTION_TYPES isa(void) {return MULTIWORD_INSTRUCTION;};
     virtual bool isBase() { return true;}
@@ -74,8 +74,8 @@ namespace dspic_instructions
   {
   public:
     MultiWordBranch(Processor *new_cpu, 
-		    unsigned int new_opcode,
-		    unsigned int addr);
+                    unsigned int new_opcode,
+                    unsigned int addr);
 
     unsigned int destination_index;
 
@@ -90,9 +90,9 @@ namespace dspic_instructions
   {
   public:
     LiteralBranch(Processor *new_cpu, 
-		  unsigned int new_opcode,
-		  unsigned int addr,
-		  const char *_name);
+                  unsigned int new_opcode,
+                  unsigned int addr,
+                  const char *_name);
 
     virtual bool isBase() { return true;}
     virtual char *name(char *,int);
@@ -106,8 +106,8 @@ namespace dspic_instructions
   {
   public:
     ImmediateInstruction(Processor *new_cpu, 
-			 unsigned int new_opcode,
-			 unsigned int addr);
+                         unsigned int new_opcode,
+                         unsigned int addr);
     virtual char *name(char *,int len);
     virtual bool isBase() { return true;}
   protected:
@@ -119,13 +119,18 @@ namespace dspic_instructions
   {
   public:
     AddressingMode(dspic::dsPicProcessor *cpu, 
-		   unsigned int addr);
+                   unsigned int addr);
+
+    virtual ~AddressingMode()
+    {
+    }
+
     virtual RegisterValue get()=0;
     virtual void put(RegisterValue &)=0;
     virtual char *name(char *buff, int len)=0;
     /**/
     static AddressingMode *construct(dspic::dsPicProcessor *new_cpu, 
-				     unsigned int new_mode, unsigned int addr);
+                                     unsigned int new_mode, unsigned int addr);
     /**/
 
     enum {
@@ -152,7 +157,12 @@ namespace dspic_instructions
   {
   public:
     LiteralAddressingMode(dspic::dsPicProcessor *cpu, 
-			  unsigned int addr);
+                          unsigned int addr);
+
+    virtual ~LiteralAddressingMode()
+    {
+    }
+
     virtual RegisterValue get() {return m_rv;}
     virtual void put(RegisterValue &) {} // maybe we should throw an error?
     virtual char *name(char *buff, int len);
@@ -164,8 +174,13 @@ namespace dspic_instructions
   {
   public:
     RegisterAddressingMode(dspic::dsPicProcessor *cpu, 
-		      unsigned int addr, 
-		      const char *format);
+                      unsigned int addr, 
+                      const char *format);
+
+    virtual ~RegisterAddressingMode()
+    {
+    }
+
     virtual char *name(char *buff, int len);
   protected:
     const char *m_cPformat;
@@ -175,6 +190,11 @@ namespace dspic_instructions
   {
   public:
     RegDirectAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+
+    virtual ~RegDirectAddrMode()
+    {
+    }
+
     virtual RegisterValue get();
     virtual void put(RegisterValue &);
   };
@@ -183,6 +203,11 @@ namespace dspic_instructions
   {
   public:
     RegIndirectAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+
+    virtual ~RegIndirectAddrMode()
+    {
+    }
+
     virtual RegisterValue get();
     virtual void put(RegisterValue &);
   };
@@ -192,6 +217,11 @@ namespace dspic_instructions
   {
   public:
     RegIndirectPostDecAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+
+    virtual ~RegIndirectPostDecAddrMode()
+    {
+    }
+
     virtual RegisterValue get();
     virtual void put(RegisterValue &);
   };
@@ -200,6 +230,11 @@ namespace dspic_instructions
   {
   public:
     RegIndirectPostIncAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+
+    virtual ~RegIndirectPostIncAddrMode()
+    {
+    }
+
     virtual RegisterValue get();
     virtual void put(RegisterValue &);
   };
@@ -208,6 +243,11 @@ namespace dspic_instructions
   {
   public:
     RegIndirectPreDecAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+
+    virtual ~RegIndirectPreDecAddrMode()
+    {
+    }
+
     virtual RegisterValue get();
     virtual void put(RegisterValue &);
   };
@@ -217,6 +257,11 @@ namespace dspic_instructions
   {
   public:
     RegIndirectPreIncAddrMode(dspic::dsPicProcessor *cpu, unsigned int addr);
+
+    virtual ~RegIndirectPreIncAddrMode()
+    {
+    }
+
     virtual RegisterValue get();
     virtual void put(RegisterValue &);
   };
@@ -226,9 +271,9 @@ namespace dspic_instructions
   {
   public:
     RegisterInstruction(Processor *new_cpu, 
-			unsigned int new_opcode,
-			unsigned int addr,
-			const char *_name);
+                        unsigned int new_opcode,
+                        unsigned int addr,
+                        const char *_name);
     virtual bool isBase() { return true;}
   protected:
     bool m_bByteOperation;
@@ -246,10 +291,10 @@ namespace dspic_instructions
   {
   public:
     RegisterToRegisterInstruction(Processor *new_cpu, 
-				  unsigned int new_opcode,
-				  unsigned int addr,
-				  const char *new_name,
-				  eAddressingModes addrMode);
+                                  unsigned int new_opcode,
+                                  unsigned int addr,
+                                  const char *new_name,
+                                  eAddressingModes addrMode);
     virtual char *name(char *,int len);
   protected:
     eAddressingModes m_addrMode;
@@ -261,12 +306,12 @@ namespace dspic_instructions
   {
   public:
     ADDR(Processor *new_cpu, unsigned int new_opcode, 
-	 unsigned int addr, eAddressingModes addrMode);
+         unsigned int addr, eAddressingModes addrMode);
     virtual void execute();
     static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
     {
       if ((new_opcode & 0xf00000) == 0x400000)
-	return new ADDR(new_cpu,new_opcode,addr,eRegisterIndirect);
+        return new ADDR(new_cpu,new_opcode,addr,eRegisterIndirect);
       return new ADDR(new_cpu,new_opcode,addr,eRegisterDirect);
     }
   };
@@ -679,12 +724,12 @@ namespace dspic_instructions
   {
   public:
     MOV(Processor *new_cpu, unsigned int new_opcode, 
-	 unsigned int addr, eAddressingModes addrMode);
+         unsigned int addr, eAddressingModes addrMode);
     virtual void execute();
     static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int addr)
     {
       if ((new_opcode & 0xf78000) == 0xb78000)
-	return new MOV(new_cpu,new_opcode,addr,eRegisterDirect);
+        return new MOV(new_cpu,new_opcode,addr,eRegisterDirect);
       return new MOV(new_cpu,new_opcode,addr,eRegisterIndirect);
     }
   };

@@ -146,31 +146,31 @@ class ProgramMemoryAccess :  public MemoryAccess
   // A couple of functions for manipulating  breakpoints
   virtual unsigned int  set_break_at_address(unsigned int address);
   virtual unsigned int  set_notify_at_address(unsigned int address,
-					      TriggerObject *cb);
+                                              TriggerObject *cb);
   virtual unsigned int  set_profile_start_at_address(unsigned int address,
-					    TriggerObject *cb);
+                                            TriggerObject *cb);
   virtual unsigned int  set_profile_stop_at_address(unsigned int address,
-					   TriggerObject *cb);
+                                           TriggerObject *cb);
   virtual int clear_break_at_address(unsigned int address,
-				     enum instruction::INSTRUCTION_TYPES type);
+                                     enum instruction::INSTRUCTION_TYPES type);
   virtual int clear_break_at_address(unsigned int address,
     instruction * pInstruction);
   virtual int clear_notify_at_address(unsigned int address);
   virtual int clear_profile_start_at_address(unsigned int address);
   virtual int clear_profile_stop_at_address(unsigned int address);
   virtual int address_has_break(unsigned int address,
-				enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
+                                enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
   virtual int address_has_notify(unsigned int address);
   virtual int address_has_profile_start(unsigned int address);
   virtual int address_has_profile_stop(unsigned int address);
   virtual instruction *find_instruction(unsigned int address,
-					enum instruction::INSTRUCTION_TYPES type);
+                                        enum instruction::INSTRUCTION_TYPES type);
   virtual void toggle_break_at_address(unsigned int address);
   virtual void set_break_at_line(unsigned int file_id, unsigned int src_line);
   virtual void clear_break_at_line(unsigned int file_id, 
-				   unsigned int src_line);
+                                   unsigned int src_line);
   virtual void toggle_break_at_line(unsigned int file_id, 
-				    unsigned int src_line);
+                                    unsigned int src_line);
 
   void set_hll_mode(unsigned int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
@@ -341,8 +341,8 @@ public:
   /// Load the source code for this processor. The pProcessorName
   /// is an optional name that a user can assign to the processor.
   virtual bool LoadProgramFile(const char *hex_file, 
-			       FILE *pFile, 
-			       const char *pProcessorName) = 0;
+                               FILE *pFile, 
+                               const char *pProcessorName) = 0;
   /// The source files for this processor.
   FileContextList files;
 
@@ -424,13 +424,13 @@ public:
   void create_invalid_registers ();
   void delete_invalid_registers ();
   void add_file_registers(unsigned int start_address, 
-			  unsigned int end_address, 
-			  unsigned int alias_offset);
+                          unsigned int end_address, 
+                          unsigned int alias_offset);
   void delete_file_registers(unsigned int start_address, 
-			     unsigned int end_address, bool bRemoveWithoutDelete=false);
+                             unsigned int end_address, bool bRemoveWithoutDelete=false);
   void alias_file_registers(unsigned int start_address, 
-			    unsigned int end_address, 
-			    unsigned int alias_offset);
+                            unsigned int end_address, 
+                            unsigned int alias_offset);
   virtual int  map_rm_address2index(int address) {return address;};
   virtual int  map_rm_index2address(int index) {return index;};
   virtual void init_register_memory(unsigned int memory_size);
@@ -449,12 +449,12 @@ public:
   virtual void init_program_memory_at_index(unsigned int address,
     unsigned int value);
   virtual void init_program_memory_at_index(unsigned int address, 
-					    const unsigned char *, int nBytes);
+                                            const unsigned char *, int nBytes);
   virtual unsigned int program_memory_size(void) const {return 0;};
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   void build_program_memory(unsigned int *memory,
-			    unsigned int minaddr, 
-			    unsigned int maxaddr);
+                            unsigned int minaddr, 
+                            unsigned int maxaddr);
 
   virtual int  map_pm_address2index(int address) {return address;};
   virtual int  map_pm_index2address(int index) {return index;};
@@ -473,9 +473,9 @@ public:
   // First the source files:
 
   void attach_src_line(unsigned int address,
-		       unsigned int file_id,
-		       unsigned int sline,
-		       unsigned int lst_line);
+                       unsigned int file_id,
+                       unsigned int sline,
+                       unsigned int lst_line);
   void read_src_files(void);
 
 
@@ -572,11 +572,11 @@ public:
   }
 
   virtual void disassemble (signed int start_address, 
-			    signed int end_address);
+                            signed int end_address);
   virtual void list(unsigned int file_id, 
-		    unsigned int pcval, 
-		    int start_line, 
-		    int end_line);
+                    unsigned int pcval, 
+                    int start_line, 
+                    int end_line);
 
   // Configuration control
 
@@ -677,10 +677,14 @@ public:
   //
   ProcessorConstructor(
        tCpuContructor    _cpu_constructor,
-			 const char *name1, 
-			 const char *name2, 
-			 const char *name3=0,
-			 const char *name4=0);
+                         const char *name1, 
+                         const char *name2, 
+                         const char *name3=0,
+                         const char *name4=0);
+
+  virtual ~ProcessorConstructor()
+  {
+  }
 
   static ProcessorConstructorList * processor_list;
   static ProcessorConstructorList * GetList();
