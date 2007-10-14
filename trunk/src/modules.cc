@@ -78,18 +78,14 @@ static void AddModuleType(char *pName, Module_Types *pType)
     ModuleTypes[sName] = pType;
 }
 
-
-class DynamicModuleLibraryInfo
-{
-public:
-  DynamicModuleLibraryInfo(string &sCanonicalName,
+DynamicModuleLibraryInfo::DynamicModuleLibraryInfo(string &sCanonicalName,
                            string &sUserSuppliedName,
                            void   *pHandle)
     : m_sCanonicalName(sCanonicalName),
       m_sUserSuppliedName(sUserSuppliedName),
       m_pHandle(pHandle),
       get_mod_list(0)
-  {
+{
     const char * error;
     if (m_pHandle)
       get_mod_list = (Module_Types_FPTR)get_library_export("get_mod_list", m_pHandle, &error);
@@ -126,17 +122,8 @@ public:
       */
     }
 
-  }
+}
 
-protected:
-  string m_sCanonicalName;
-  string m_sUserSuppliedName;
-  void *m_pHandle;
-  Module_Types * (*get_mod_list)(void);
-
-};
-
-typedef map<string, DynamicModuleLibraryInfo *> ModuleLibraries_t;
 ModuleLibraries_t ModuleLibraries;
 
 
@@ -202,6 +189,7 @@ int ModuleLibrary::InstantiateObject(string &sObjectName, string &sInstantiatedN
   if (mti != ModuleTypes.end()) {
 
     Module *pModule = mti->second->module_constructor(sInstantiatedName.c_str());
+    pModule->set_module_type(sObjectName);
     globalSymbolTable().addModule(pModule);
 
     // Tell the gui or any modules that are interfaced to gpsim
