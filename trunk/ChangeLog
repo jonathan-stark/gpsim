@@ -4,6 +4,8 @@
 	  src/p12x.cc, src/14bit-processors.cc:
 	  fixed duplicatd sfr deletion, code cleaning
 	* plat/win32/libgpsim.def: MSVC sync
+	* src/icd.cc, src/bitlog.cc, gui/gui_object.cc, eXdbm/eXdbm.c,
+	  cli/cmd_help.cc: fixed trivial gcc 4.1.2 warnings
 
 2007-10-14 Roy Rankin <rrankin@ihug.com.au>
 	* src/value.cc: Allow Float::set to take Value type Integer

@@ -30,14 +30,14 @@ BoolEventLogger::BoolEventLogger(unsigned int _max_events)
     max_events <<= 1;
     while(1) {
       if(max_events && (max_events & (max_events-1)))
-	max_events &= max_events - 1;
+        max_events &= max_events - 1;
       else
-	break;
+        break;
 
     }
   } else if(!max_events)
     max_events = 4096;
-    
+
   buffer = new guint64[max_events];
 
   gcycles = &get_cycles();
@@ -67,7 +67,7 @@ void BoolEventLogger::event(bool state)
 void BoolEventLogger::dump(int start_index, int end_index)
 {
 
-    
+
   if((start_index > (int)max_events) || (start_index <= 0 ))
     start_index = 0;
 
@@ -94,8 +94,8 @@ void BoolEventLogger::dump(int start_index, int end_index)
 }
 
 void BoolEventLogger::dump_ASCII_art(guint64 time_step,
-				     guint64 start_time,
-				     int end_index)
+                                     guint64 start_time,
+                                     int end_index)
 {
 
 
@@ -132,7 +132,7 @@ void BoolEventLogger::dump_ASCII_art(guint64 time_step,
       min_pulse = (buffer[j] - buffer[i]);
 
     i = j;
-    j = ++j & max_events; 
+    j = (j + 1) & max_events;
 
   }while (j != end_index);
 
@@ -158,9 +158,9 @@ void BoolEventLogger::dump_ASCII_art(guint64 time_step,
     case 0:
     case 1:
       if(i&1)
-	cout <<'-';
+        cout <<'-';
       else
-	cout <<'_';
+        cout <<'_';
       break;
     case 2:
       cout << '|';
@@ -230,14 +230,14 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
     max_events <<= 1;
     while(1) {
       if(max_events && (max_events & (max_events-1)))
-	max_events &= max_events - 1;
+        max_events &= max_events - 1;
       else
-	break;
+        break;
 
     }
   } else if(!max_events)
     max_events = 4096;
-    
+
   pTimeBuffer  = new guint64[max_events];
   pEventBuffer = new char[max_events];
 
@@ -281,9 +281,9 @@ unsigned int ThreeStateEventLogger::get_index(guint64 event_time)
   if(event_time == pTimeBuffer[search_index])
     return search_index;
 
-  if(event_time < pTimeBuffer[search_index] && 
+  if(event_time < pTimeBuffer[search_index] &&
      pTimeBuffer[search_index] != Cycle_Counter::END_OF_TIME)
-    search_index = (--search_index & max_events);
+    search_index = (search_index - 1) & max_events;
 
   return search_index;
 }
@@ -319,7 +319,7 @@ void ThreeStateEventLogger::event(char state)
 
 void ThreeStateEventLogger::dump(int start_index, int end_index)
 {
-    
+
   if (!bHaveEvents)
     return;
 
@@ -345,8 +345,8 @@ void ThreeStateEventLogger::dump(int start_index, int end_index)
 }
 
 void ThreeStateEventLogger::dump_ASCII_art(guint64 time_step,
-					   guint64 start_time,
-					   int end_index)
+                                           guint64 start_time,
+                                           int end_index)
 {
 
 
@@ -380,7 +380,7 @@ void ThreeStateEventLogger::dump_ASCII_art(guint64 time_step,
       min_pulse = (pTimeBuffer[j] - pTimeBuffer[i]);
 
     i = j;
-    j = ++j & max_events; 
+    j = (j + 1) & max_events;
 
   }while (j != end_index);
 
@@ -411,9 +411,9 @@ void ThreeStateEventLogger::dump_ASCII_art(guint64 time_step,
     case 0:
     case 1:
       if(i&1)
-	cout <<'-';
+        cout <<'-';
       else
-	cout <<'_';
+        cout <<'_';
       break;
     case 2:
       cout << '|';

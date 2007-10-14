@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 static cmd_options cmd_help_options[] =
 {
-  0,0,0
+  { 0, 0, 0 }
 };
 
 cmd_help help;
@@ -37,7 +37,7 @@ cmd_help help;
 
 cmd_help::cmd_help()
   : command("help",0)
-{ 
+{
   brief_doc = string("Type help \"command\" for more help on a command");
 
   long_doc = string ("\n\tgpsim is a software simulator for the Microchip PIC microcontrollers\n\
@@ -69,7 +69,7 @@ void cmd_help::help(void)
         cout << ' ';
 
       cout << pCmd->brief_doc << '\n';
-	
+
     }
 }
 
@@ -78,9 +78,9 @@ void cmd_help::help(const char *cmd)
 {
   command * pCmd = search_commands(cmd);
   if(pCmd != 0) {
-	  cout << pCmd->long_doc << '\n';
-	  return;
-	}
+          cout << pCmd->long_doc << '\n';
+          return;
+        }
   cout << cmd << " is not a valid gpsim command. Try these instead:\n";
   help();
 }

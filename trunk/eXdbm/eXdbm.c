@@ -8,13 +8,13 @@
 /*****
 * eXdbm.c : eXdbm main source file
 *
-* This file Version	$Revision$
+* This file Version     $Revision$
 *
-* Last modification: 	$Date$
-* By:					$Author$
-* Current State:		$State$
+* Last modification:    $Date$
+* By:                                   $Author$
+* Current State:                $State$
 *
-* Copyright (C) 1997 Fred Pesch 
+* Copyright (C) 1997 Fred Pesch
 * All Rights Reserved
 *
 * This file is part of the eXdbm Library.
@@ -35,7 +35,7 @@
 *
 *****/
 
-/* 	$Id$	 */
+/*      $Id$         */
 
 #ifndef lint
 static char vcid[] = "$Id$";
@@ -90,7 +90,7 @@ int eXdbmInit(void);
 int eXdbmOpenDatabase(char *filename, DB_ID *dbid);
 int eXdbmNewDatabase(char *filename, DB_ID *dbid);
 int eXdbmUpdateDatabase(DB_ID dbid);
-int eXdbmBackupDatabase(DB_ID dbid, char *filename); 
+int eXdbmBackupDatabase(DB_ID dbid, char *filename);
 int eXdbmCloseDatabase(DB_ID dbid, int update);
 int eXdbmReloadDatabase(DB_ID *dbid, int update);
 
@@ -129,7 +129,7 @@ int eXdbmDeleteEntry(DB_ID dbid, DB_LIST list, char *entryname);
 int eXdbmGetLastError(void)
 {
   int temp;
-  
+
   temp = DbmLastErrorCode;
   DbmLastErrorCode = DBM_NO_ERROR;
 
@@ -184,7 +184,7 @@ int eXdbmInit(void)
 int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
 {
   FILE *f;
-  DB_ID temp_id;
+  DB_ID temp_id = 0;
   int ret;
   int i;
   int addarray;
@@ -206,7 +206,7 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
 
   addarray = 1;
 
-  for(i=0;i< DbmDbList->array_size; i++) 
+  for(i=0;i< DbmDbList->array_size; i++)
     if(DbmDbList->dblist[i].root==NULL) {
       temp_id = i;
       addarray = 0;
@@ -221,7 +221,7 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
       fclose(f);
       return -1;
     }
-    
+
     temp_id = DbmDbList->array_size - 1;
   }
 
@@ -234,11 +234,11 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
   }
 
   strcpy(DbmDbList->dblist[temp_id].filename, filename);
-	
-  DbmDbList->nb_db++; 
+
+  DbmDbList->nb_db++;
 
   /* initialize the root list entry */
-  
+
   DbmDbList->dblist[temp_id].root = (TDbmListEntry *) malloc (sizeof(TDbmListEntry));
   if(DbmDbList->dblist[temp_id].root == NULL) {
     RaiseError(DBM_ALLOC);
@@ -265,14 +265,14 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
   DbmDbList->dblist[temp_id].root->current_order = 0;
 
   DbmDbList->dblist[temp_id].root->child = (TDbmListEntry **) malloc( sizeof(TDbmListEntry *) * HASH_MAX_ENTRIES);
-  
+
   if(DbmDbList->dblist[temp_id].root->child == NULL) {
     RaiseError(DBM_ALLOC);
     fclose(f);
     return(-1);
   }
 
-  for (i=0; i < HASH_MAX_ENTRIES ; i++) 
+  for (i=0; i < HASH_MAX_ENTRIES ; i++)
     DbmDbList->dblist[temp_id].root->child[i]=NULL;
 
   /* now, parse the file */
@@ -302,7 +302,7 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
 int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
 {
   /* FILE *f; */
-  DB_ID temp_id;
+  DB_ID temp_id = 0;
   int ret;
   int i;
   int addarray;
@@ -326,7 +326,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
 
   addarray = 1;
 
-  for(i=0;i< DbmDbList->array_size; i++) 
+  for(i=0;i< DbmDbList->array_size; i++)
     if(DbmDbList->dblist[i].root==NULL) {
       temp_id = i;
       addarray = 0;
@@ -341,7 +341,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
       /* fclose(f); */
       return -1;
     }
-    
+
     temp_id = DbmDbList->array_size - 1;
   }
 
@@ -354,11 +354,11 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
   }
 
   strcpy(DbmDbList->dblist[temp_id].filename, filename);
-							
-  DbmDbList->nb_db++; 
+
+  DbmDbList->nb_db++;
 
   /* initialize the root list entry */
-  
+
   DbmDbList->dblist[temp_id].root = (TDbmListEntry *) malloc (sizeof(TDbmListEntry));
   if(DbmDbList->dblist[temp_id].root == NULL) {
     RaiseError(DBM_ALLOC);
@@ -385,14 +385,14 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
   DbmDbList->dblist[temp_id].root->current_order = 0;
 
   DbmDbList->dblist[temp_id].root->child = (TDbmListEntry **) malloc( sizeof(TDbmListEntry *) * HASH_MAX_ENTRIES);
-  
+
   if(DbmDbList->dblist[temp_id].root->child == NULL) {
     RaiseError(DBM_ALLOC);
     /* fclose(f); */
     return(-1);
   }
 
-  for (i=0; i < HASH_MAX_ENTRIES ; i++) 
+  for (i=0; i < HASH_MAX_ENTRIES ; i++)
     DbmDbList->dblist[temp_id].root->child[i]=NULL;
 
   /* termination */
@@ -406,7 +406,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
  * UPDATING A DATABASE                                                       *
  *****************************************************************************/
 
-int eXdbmUpdateDatabase(DB_ID dbid) 
+int eXdbmUpdateDatabase(DB_ID dbid)
 {
   FILE *f;
   int ret;
@@ -431,7 +431,7 @@ int eXdbmUpdateDatabase(DB_ID dbid)
     RaiseError(DBM_UPDATE_FILE);
     return -1;
   }
-  
+
   ret = WriteDatabase(f, DbmDbList->dblist[dbid].root, 0);
 
   if(ret==-1) {
@@ -460,7 +460,7 @@ int eXdbmBackupDatabase(DB_ID dbid, char *filename)
   if( ret == -1) return(-1);
 
   /* check the database identifier */
-  
+
   if(CheckDbIdent(dbid)==-1) {
     RaiseError(DBM_WRONG_ID);
     return(-1);
@@ -473,7 +473,7 @@ int eXdbmBackupDatabase(DB_ID dbid, char *filename)
     RaiseError(DBM_UPDATE_FILE);
     return -1;
   }
-  
+
   ret = WriteDatabase(f, DbmDbList->dblist[dbid].root, 0);
 
   if(ret==-1) {
@@ -501,7 +501,7 @@ int eXdbmCloseDatabase(DB_ID dbid, int update)
   if( ret == -1) return(-1);
 
   /* check the database identifier */
-  
+
   if(CheckDbIdent(dbid)==-1) {
     RaiseError(DBM_WRONG_ID);
     return(-1);
@@ -551,17 +551,17 @@ int eXdbmReloadDatabase(DB_ID *dbid, int update)
   if( ret == -1) return(-1);
 
   /* check the database identifier */
-  
+
   if(CheckDbIdent(*dbid) == -1) {
     RaiseError(DBM_WRONG_ID);
     return(-1);
   }
-  
+
   /* get the database file name */
 
   filename = (char *) malloc(sizeof(char) * (strlen(DbmDbList->dblist[*dbid].filename)+1));
   strcpy(filename, DbmDbList->dblist[*dbid].filename);
-			     
+
   /* first, close the database */
 
   ret = eXdbmCloseDatabase(*dbid, update);
@@ -633,11 +633,11 @@ int eXdbmGetEntryType(DB_ID dbid, DB_LIST list, char *entryname)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -669,11 +669,11 @@ char *eXdbmGetEntryComment(DB_ID dbid, DB_LIST list, char *entryname)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(NULL);
@@ -711,11 +711,11 @@ int eXdbmGetVarInt(DB_ID dbid, DB_LIST list, char *entryname, int *value)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -756,11 +756,11 @@ int eXdbmGetVarReal(DB_ID dbid, DB_LIST list, char *entryname, double *value)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -777,7 +777,7 @@ int eXdbmGetVarReal(DB_ID dbid, DB_LIST list, char *entryname, double *value)
   RaiseError(DBM_WRONG_TYPE);
   return(DBM_ENTRY_NOT_FOUND);
 }
-   
+
 /**************************/
 /*** String value query ***/
 /**************************/
@@ -802,11 +802,11 @@ int eXdbmGetVarString(DB_ID dbid, DB_LIST list, char *entryname, char **value)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -855,11 +855,11 @@ int eXdbmGetVarIdent(DB_ID dbid, DB_LIST list, char *entryname, char **value)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -906,11 +906,11 @@ int eXdbmGetVarBool(DB_ID dbid, DB_LIST list, char *entryname, int *value)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -954,11 +954,11 @@ DB_LIST eXdbmGetList(DB_ID dbid, DB_LIST list, char *listname)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, listname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, listname);
 
   if (search==NULL) return(NULL);
@@ -995,11 +995,11 @@ DB_LIST eXdbmSearchList(DB_ID dbid, DB_LIST list, char *listname)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntryRec(DbmDbList->dblist[dbid].root, listname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntryRec(list, listname);
 
   if (search==NULL) return(NULL);
@@ -1090,11 +1090,11 @@ int eXdbmChangeEntryComment(DB_ID dbid, DB_LIST list, char *entryname, char *com
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -1110,7 +1110,7 @@ int eXdbmChangeEntryComment(DB_ID dbid, DB_LIST list, char *entryname, char *com
   }
 
   strcpy(search->comment, comment);
-   
+
   return(1);
 
 }
@@ -1139,11 +1139,11 @@ int eXdbmChangeVarInt(DB_ID dbid, DB_LIST list, char *entryname, int newvalue)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -1185,11 +1185,11 @@ int eXdbmChangeVarReal(DB_ID dbid, DB_LIST list, char *entryname, double newvalu
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -1206,7 +1206,7 @@ int eXdbmChangeVarReal(DB_ID dbid, DB_LIST list, char *entryname, double newvalu
   RaiseError(DBM_WRONG_TYPE);
   return(DBM_ENTRY_NOT_FOUND);
 }
-   
+
 /***************************/
 /*** change string value ***/
 /***************************/
@@ -1238,11 +1238,11 @@ int eXdbmChangeVarString(DB_ID dbid, DB_LIST list, char *entryname, char *newval
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -1277,7 +1277,7 @@ int eXdbmChangeVarIdent(DB_ID dbid, DB_LIST list, char *entryname, char *newvalu
 {
   TDbmListEntry *search;
   int ret;
-  
+
   /* the database manager must be initialized */
 
   ret = DbmIsInit();
@@ -1300,11 +1300,11 @@ int eXdbmChangeVarIdent(DB_ID dbid, DB_LIST list, char *entryname, char *newvalu
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -1362,11 +1362,11 @@ int eXdbmChangeVarBool(DB_ID dbid, DB_LIST list, char *entryname, int newvalue)
   /* search entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     search = SearchListEntry(DbmDbList->dblist[dbid].root, entryname);
-  
+
   else /* sublist search */
-    
+
     search = SearchListEntry(list, entryname);
 
   if (search==NULL) return(DBM_ENTRY_NOT_FOUND);
@@ -1412,11 +1412,11 @@ int eXdbmCreateList(DB_ID dbid, DB_LIST list, char *entryname, char *comment)
   /* create entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     node = CreateListEntry(DbmDbList->dblist[dbid].root, entryname, comment, DBM_ENTRY_LIST);
-  
+
   else /* sublist search */
-    
+
     node = CreateListEntry(list, entryname, comment, DBM_ENTRY_LIST);
 
   if (node==NULL) return(-1);
@@ -1448,11 +1448,11 @@ int eXdbmCreateVarInt(DB_ID dbid, DB_LIST list, char *entryname, char *comment, 
   /* create entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     node = CreateListEntry(DbmDbList->dblist[dbid].root, entryname, comment, DBM_ENTRY_VAR_INT);
-  
+
   else /* sublist search */
-    
+
     node = CreateListEntry(list, entryname, comment, DBM_ENTRY_VAR_INT);
 
   if (node==NULL) return(-1);
@@ -1487,11 +1487,11 @@ int eXdbmCreateVarReal(DB_ID dbid, DB_LIST list, char *entryname, char *comment,
   /* create entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     node = CreateListEntry(DbmDbList->dblist[dbid].root, entryname, comment, DBM_ENTRY_VAR_REAL);
-  
+
   else /* sublist search */
-    
+
     node = CreateListEntry(list, entryname, comment, DBM_ENTRY_VAR_REAL);
 
   if (node==NULL) return(-1);
@@ -1533,11 +1533,11 @@ int eXdbmCreateVarBool(DB_ID dbid, DB_LIST list, char *entryname, char *comment,
   /* create entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     node = CreateListEntry(DbmDbList->dblist[dbid].root, entryname, comment, DBM_ENTRY_VAR_BOOL);
-  
+
   else /* sublist search */
-    
+
     node = CreateListEntry(list, entryname, comment, DBM_ENTRY_VAR_BOOL);
 
   if (node==NULL) return(-1);
@@ -1578,11 +1578,11 @@ int eXdbmCreateVarString(DB_ID dbid, DB_LIST list, char *entryname, char *commen
   /* create entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     node = CreateListEntry(DbmDbList->dblist[dbid].root, entryname, comment, DBM_ENTRY_VAR_STRING);
-  
+
   else /* sublist search */
-    
+
     node = CreateListEntry(list, entryname, comment, DBM_ENTRY_VAR_STRING);
 
   if (node==NULL) return(-1);
@@ -1594,7 +1594,7 @@ int eXdbmCreateVarString(DB_ID dbid, DB_LIST list, char *entryname, char *commen
   }
 
   strcpy(node->value.str_val, value);
-  
+
   return (1);
 }
 
@@ -1629,11 +1629,11 @@ int eXdbmCreateVarIdent(DB_ID dbid, DB_LIST list, char *entryname, char *comment
   /* create entryname in list */
 
   if(list==NULL)  /* level 0 search */
-    
+
     node = CreateListEntry(DbmDbList->dblist[dbid].root, entryname, comment, DBM_ENTRY_VAR_IDENT);
-  
+
   else /* sublist search */
-    
+
     node = CreateListEntry(list, entryname, comment, DBM_ENTRY_VAR_IDENT);
 
   if (node==NULL) return(-1);
@@ -1645,7 +1645,7 @@ int eXdbmCreateVarIdent(DB_ID dbid, DB_LIST list, char *entryname, char *comment
   }
 
   strcpy(node->value.str_val, value);
-  
+
   return (1);
 }
 
@@ -1672,11 +1672,11 @@ int eXdbmDeleteEntry(DB_ID dbid, DB_LIST list, char *entryname)
   /* search entryname in list */
 
   if(list==NULL) /* level 0 search */
-    
+
     ret = DeleteListEntry(DbmDbList->dblist[dbid].root, entryname);
 
   else /* sublist search */
-    
+
     ret = DeleteListEntry(list, entryname);
 
   if (ret==-1) return(-1);
