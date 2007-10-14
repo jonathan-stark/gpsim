@@ -69,6 +69,7 @@ EXPORTS
     ??0ProcessorConstructor@@QAE@P6APAVProcessor@@PBD@Z0000@Z
     ??0ProgramFileBuf@@QAE@PAU_iobuf@@@Z
     ??0ProgramMemoryAccess@@QAE@PAVProcessor@@@Z
+    ??0PromAddress@@QAE@PAVI2C_EE@@PBD1@Z
     ??0RegisterAssertion@@QAE@PAVProcessor@@IIIIII_N@Z
     ??0RegisterAssertion@@QAE@PAVProcessor@@IIIII_N@Z
     ??0RegisterCollection@@QAE@PAVProcessor@@PBDPAPAVRegister@@I@Z
@@ -99,7 +100,6 @@ EXPORTS
     ??1IO_bi_directional_pu@@UAE@XZ
     ??1IndexedSymbol@@UAE@XZ
     ??1Integer@@UAE@XZ
-    ??1IntelHexProgramFileType@@QAE@XZ
     ??1Module@@UAE@XZ
     ??1OpNe@@UAE@XZ
     ??1PinMonitor@@UAE@XZ
@@ -152,6 +152,7 @@ EXPORTS
     ?LoadFile@ModuleLibrary@@SAHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?LoadProgramFile@IntelHexProgramFileType@@UAEHPAPAVProcessor@@PBDPAU_iobuf@@1@Z
     ?LoadProgram@CSimulationContext@@QAEHPBD0PAPAVProcessor@@0@Z
+    ?ModuleLibraries@@3V?$map@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAVDynamicModuleLibraryInfo@@U?$less@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@V?$allocator@U?$pair@$$CBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAVDynamicModuleLibraryInfo@@@std@@@2@@std@@A
     ?NewObject@Float@@SAPAV1@PBD00@Z
     ?NewObject@Integer@@SAPAV1@PBD00@Z
     ?NotifyUserCanceled@CSimulationContext@@QAEXXZ
@@ -285,6 +286,7 @@ EXPORTS
     ?find@CCommandManager@@QAEPAVICommandHandler@@PBD@Z
     ?find@SymbolTable@@QAEPAVgpsimObject@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?findInteger@SymbolTable@@QAEPAVInteger@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?findModule@SymbolTable@@QAEPAVModule@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?findSymbol@Module@@QAEPAVgpsimObject@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?findValue@SymbolTable@@QAEPAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find_address_from_line@ProgramMemoryAccess@@UAEHPAVFileContext@@H@Z
@@ -404,7 +406,7 @@ EXPORTS
     ?init_program_memory_at_index@Processor@@UAEXIPBEH@Z
     ?init_register_memory@Processor@@UAEXI@Z
     ?initialize@AliasedInstruction@@UAEX_N@Z
-    ?insertRegister@RegisterMemoryAccess@@QAE_NHPAVRegister@@@Z
+    ?insertRegister@RegisterMemoryAccess@@QAE_NIPAVRegister@@@Z
     ?instruction_size@AliasedInstruction@@UAEHXZ
     ?interrupt@Program_Counter@@UAEXI@Z
     ?invokeAction@TriggerObject@@UAEXXZ
@@ -457,7 +459,7 @@ EXPORTS
     ?reassign_break@Cycle_Counter@@QAE_N_K0PAVTriggerObject@@@Z
     ?refreshPinOnUpdate@PinModule@@QAEX_N@Z
     ?register_size@Register@@UBEIXZ
-    ?removeRegister@RegisterMemoryAccess@@QAE_NHPAVRegister@@@Z
+    ?removeRegister@RegisterMemoryAccess@@QAE_NIPAVRegister@@@Z
     ?removeSink@PinMonitor@@QAEXPAVSignalSink@@@Z
     ?removeSymbol@Module@@QAEHPAVgpsimObject@@@Z
     ?remove_interface@gpsimInterface@@QAEXI@Z
