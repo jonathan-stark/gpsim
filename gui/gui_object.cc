@@ -73,10 +73,10 @@ int GUI_Object::Create(GUI_Processor *_gp)
 char *GUI_Object::name(void)
 {
   static char p[128];
-  unsigned int len = string::npos;
+  size_t len = string::npos;
   if(len > (1+sizeof(p)))
     len = sizeof(p)-1;
-  
+
   p[name_str.copy(p,len)] = 0;
 
   return p;
@@ -123,14 +123,14 @@ void GUI_Object::ChangeView (int view_state)
       ((view_state==VIEW_TOGGLE) &&
        !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
       ) {
-    
+
     if(!bIsBuilt) {
-	
+
       if(!get_config()) {
-	printf("warning %s\n",__FUNCTION__);
-	set_default_config();
+        printf("warning %s\n",__FUNCTION__);
+        set_default_config();
       }
-      
+
       enabled=1;
 
       Build();
@@ -140,7 +140,7 @@ void GUI_Object::ChangeView (int view_state)
       // in GTK+ 2.2.1 under Linux that it is.
       gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
       gtk_widget_show(window);
-      
+
       enabled=1;
 
       // Update the config database
@@ -152,7 +152,7 @@ void GUI_Object::ChangeView (int view_state)
   else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(window))) {
 
     enabled=0;
-    
+
     // Update the config database
     set_config();
 
