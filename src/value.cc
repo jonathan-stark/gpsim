@@ -1087,9 +1087,20 @@ void Float::set(gint64 i)
 
 void Float::set(Value *v)
 {
+  /* typeCheck means cannot set integers - RRR
   Float *fv = typeCheck(v,string("set "));
   double d = fv->getVal();
   set(d);
+  */
+   double d;
+
+  if (typeid(*v) != typeid(Float) &&
+      typeid(*v) != typeid(Integer))
+  {
+    throw new TypeMismatch(string("set "), "Float", v->showType());
+  }
+   v->get(d);
+   set(d);
 }
 
 void Float::set(const char *buffer, int buf_size)

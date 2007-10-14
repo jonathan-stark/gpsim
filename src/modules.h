@@ -149,6 +149,10 @@ public:
   /// that may already be queued).
   void run_script(string &script_name);
 
+  const char *type(void) { return module_type.c_str(); }
+  void set_module_type(string type) { module_type = type; }
+
+
 
   Module(const char *_name=0, const char *desc=0);
   virtual ~Module();
@@ -158,6 +162,7 @@ public:
 
 private:
   void *widget;   // GtkWidget * that is put in the breadboard.
+  string module_type;
 
   // Storage for scripts specifically associated with this module.
   class ModuleScript {
@@ -216,5 +221,24 @@ void free_library(void *handle);
 void free_error_message(const char * pszError);
 #endif
 
+class DynamicModuleLibraryInfo
+{
+public:
+  DynamicModuleLibraryInfo(string &sCanonicalName,
+                           string &sUserSuppliedName,
+                           void   *pHandle);
+
+  inline string user_name(void) { return m_sCanonicalName; }
+  inline Module_Types_FPTR mod_list(void) { return get_mod_list; }
+
+protected:
+  string m_sCanonicalName;
+  string m_sUserSuppliedName;
+  void *m_pHandle;
+  Module_Types * (*get_mod_list)(void);
+
+};
+
+typedef map<string, DynamicModuleLibraryInfo *> ModuleLibraries_t;
 
 #endif // __MODULES_H__

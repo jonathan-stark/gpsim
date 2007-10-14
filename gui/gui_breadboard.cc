@@ -1282,6 +1282,8 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     gui_node->bbw->selected_node = gui_node;
 }
 
+static const char *mod_name;
+
 static void settings_clist_cb(GtkCList       *clist,
 		gint            row,
 		gint            column,
@@ -1299,7 +1301,14 @@ static void settings_clist_cb(GtkCList       *clist,
 	//attr->getAsStr(attrstr,50);
 	attr->get(val, sizeof(val));
 
-	sprintf(str,"%s = %s",attr->name().c_str(),val);
+        if (mod_name)
+        {
+	    sprintf(str,"%s.%s = %s",mod_name, attr->name().c_str(),val);
+        }
+        else
+        {
+	    sprintf(str,"%s = %s",attr->name().c_str(),val);
+        }
 	
 	gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
 }
@@ -1348,31 +1357,33 @@ static void settings_set_cb(GtkWidget *button,
 	}
 }
 
-static Breadboard_Window *lpBW;
-static const char *mod_name;
+//static Breadboard_Window *lpBW;
+static GtkWidget *attribute_clist;
 
 static void clistOneAttribute(const SymbolEntry_t &sym)
 {
 
   Value *pVal = dynamic_cast<Value *>(sym.second);
-  if (lpBW && pVal) {
+  if (attribute_clist && pVal) {
       // read attributes and add to clist
       char attribute_value[STRING_SIZE];
       char attribute_string[STRING_SIZE];
       char *text[1]={attribute_string};
 
-      // Filter out some processor symbols
-      if( (typeid(*pVal) == typeid(LineNumberSymbol) ) ||
-	  (dynamic_cast<Register *>(pVal)))
+      // Filter out non-attributes
+      if (  !strstr(typeid(*pVal).name(), "Attribute") )
 	return;
 
       pVal->get(attribute_value, sizeof(attribute_value));
-      sprintf(attribute_string,"%s = %s",pVal->name().c_str(),attribute_value);
 
-      int row = gtk_clist_append(GTK_CLIST(lpBW->attribute_clist),
+      sprintf(attribute_string,"%s = %s",
+		pVal->name().c_str(),attribute_value);
+     
+
+      int row = gtk_clist_append(GTK_CLIST(attribute_clist),
 			   text);
       // add the Attribute* as data for the clist rows.
-      gtk_clist_set_row_data(GTK_CLIST(lpBW->attribute_clist),
+      gtk_clist_set_row_data(GTK_CLIST(attribute_clist),
 			     row,
 			     (gpointer)pVal);
   }
@@ -1399,11 +1410,13 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
   // clear clist
   gtk_clist_clear(GTK_CLIST(p->bbw()->attribute_clist));
 
-  lpBW = p->bbw();
+//  lpBW = p->bbw();
+  attribute_clist = p->bbw()->attribute_clist;
   mod_name = p->module()->name().c_str();
   globalSymbolTable().ForEachModule(buildCLISTAttribute);
-  lpBW = 0;
-  mod_name = 0;
+  attribute_clist = NULL;
+//  lpBW = 0;
+//  mod_name = 0;
 
 
   gtk_entry_set_text(GTK_ENTRY(p->bbw()->attribute_entry), "");
@@ -1834,7 +1847,6 @@ static void node_cb(GtkCList       *clist,
     *((Stimulus_Node**) user_data)=snode;
 }
 
-#if 0 // warning: 'void module_cb(GtkCList*, gint, gint, GdkEvent*, void*)' defined but not used
 static void module_cb(GtkCList       *clist,
 		      gint            row,
 		      gint            column,
@@ -1847,7 +1859,6 @@ static void module_cb(GtkCList       *clist,
 
     strncpy((char*) user_data, module_type, STRING_SIZE);
 }
-#endif
 
 static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
 {
@@ -1944,7 +1955,6 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
     return snode;
 }
 
-#if 0 // gui_breadboard.cc:1944: warning: 'char* select_module_dialog(Breadboard_Window*) ' defined but not used
 static char *select_module_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
@@ -1956,7 +1966,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     GtkWidget *vbox;
     GtkWidget *scrolledwindow;
 
-    char *module_clist_titles[]={"Name","Library"};
+    char *module_clist_titles[]={"Name1","Name2", "Library"};
 
     cancel=-1;
 	
@@ -1974,7 +1984,11 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 	gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
+#ifdef OLD_MODULE_LIBRARY
 	module_clist = gtk_clist_new_with_titles (2, module_clist_titles);
+#else
+	module_clist = gtk_clist_new_with_titles (3, module_clist_titles);
+#endif
 	gtk_clist_set_column_auto_resize(GTK_CLIST(module_clist),0,TRUE);
 	gtk_widget_show (module_clist);
 	gtk_container_add (GTK_CONTAINER(scrolledwindow), module_clist);
@@ -2030,11 +2044,42 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
           gtk_clist_set_row_data (GTK_CLIST(module_clist),
                                   row,
-                                  (gpointer)pFileTypes[i].names[0]);
+                                  (gpointer)pFileTypes[i].names[1]);
 
           i++;
         }
       }
+    }
+#else //OLD_MODULE_LIBRARY
+
+    extern ModuleLibraries_t ModuleLibraries;
+    
+
+
+    for (
+        ModuleLibraries_t::iterator mti = ModuleLibraries.begin();
+        mti != ModuleLibraries.end();
+        ++mti)
+    {
+	  char *text[3];
+	  int row;
+
+	  Module_Types * (*get_mod_list)(void) = mti->second->mod_list();
+	  Module_Types *pLibModList = get_mod_list();
+
+	  text[2] = (char *)(mti->second->user_name().c_str());
+
+	  if(pLibModList)
+              for(Module_Types *pModTypes = pLibModList;  pModTypes->names[0]; pModTypes++) {
+		text[0] = pModTypes->names[0];
+		text[1] = pModTypes->names[1];
+        	row = gtk_clist_append(GTK_CLIST(module_clist),
+                                 text);
+
+        	gtk_clist_set_row_data (GTK_CLIST(module_clist),
+                                  row,
+                                  (gpointer)(text[0]));
+        }
     }
 #endif
 
@@ -2056,7 +2101,6 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
   return module_type;
 }
-#endif
 
 #if 0
 // Display a file in a text widget.
@@ -2141,21 +2185,27 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 {
 
+#ifdef OLD_MODULE_LIBRARY
     const char *library_name;
 
     library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
-#ifdef OLD_MODULE_LIBRARY
     if(library_name)
       ModuleLibrary::LoadFile(library_name);
 #else
-    cout << __FILE__ << ':' <<  dec << __LINE__ << " module library fixme\n";
+    const char *library_name;
+
+    library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
+    if(library_name)
+    {
+	string lib_name = library_name;
+	ModuleLibrary::LoadFile(lib_name);
+    }
 #endif
 }
 
 static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 {
 
-#ifdef OLD_MODULE_LIBRARY
     char *module_type;
     const char *module_name;
 
@@ -2166,11 +2216,19 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
         module_name = gui_get_string("Module name", module_type);
         grab_next_module = 1;
         if(module_name != 0)
+#ifdef OLD_MODULE_LIBRARY
           ModuleLibrary::NewObject(module_type, module_name);
-    }
 #else
-    cout << __FILE__ << ':' << dec << __LINE__ << " module library fixme\n";
+	{
+	    string mName = module_type;
+	    string refDes = module_name;
+
+	    if(!ModuleLibrary::InstantiateObject(mName,refDes))
+		fprintf(stderr, "Module load of %s %s failed\n", 
+			module_type, module_name);
+	}
 #endif
+    }
 }
 
 static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
@@ -2333,19 +2391,45 @@ static const char *gui_get_filename(char *filename)
 
     return file_selection_name;
 }
+
+static FILE *fo;
+
+static void OneAttribute(const SymbolEntry_t &sym)
+{
+    Value *pVal = dynamic_cast<Value *>(sym.second);
+    if (pVal && fo) 
+    {
+          // read attributes and add to clist
+     
+	if (  strstr(typeid(*pVal).name(), "Attribute") )
+        {
+	     char attribute_value[STRING_SIZE];
+		
+	    pVal->get(attribute_value, sizeof(attribute_value));
+            fprintf(fo, "%s.%s = %s\n", mod_name, pVal->name().c_str(),
+		attribute_value);
+	}
+      }
+}
+
+
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
-    FILE *fo;
     GList *module_iterator;
     Module *m;
+    SymbolTable_t *st;
     const char *filename;
 
     filename = gui_get_filename("netlist.stc");
-    if(filename == 0)
+    if(filename == NULL)
         filename="/tmp/foo.stc";
-    fo = fopen(filename, "w");
+    if ((fo = fopen(filename, "w")) == NULL)
+    {
+	perror(filename);
+	return;
+    }
 
     fprintf(fo, "\n# This file was written by gpsim.\n");
     fprintf(fo, "\n# You can use this file for example like this:");
@@ -2365,14 +2449,6 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
     fprintf(fo, "\n\n# Processor position:\n");
 
-    /*m=bbw->gp->cpu;
-    Attribute *xpos = m->get_attribute("xpos", false);
-    Attribute *ypos = m->get_attribute("ypos", false);
-    if(xpos && ypos && xpos->nGet()>=0 && ypos->nGet()>=0)
-      fprintf(fo, "module position %s %d %d\n",
-		m->name(),
-		xpos->nGet(),
-		ypos->nGet());*/
 #ifdef OLD_MODULE_LIBRARY
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
@@ -2388,7 +2464,16 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       t->name());
     }
 #else
-    cout << __FILE__ << ':' << dec << __LINE__ << " module library fixme\n";
+    extern ModuleLibraries_t ModuleLibraries;
+    
+
+    for (
+        ModuleLibraries_t::iterator mti = ModuleLibraries.begin();
+        mti != ModuleLibraries.end();
+	++mti)
+    {
+          fprintf(fo, "module library %s\n", mti->second->user_name().c_str());
+    }
 #endif
 
     // Save modules
@@ -2403,71 +2488,56 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       list <Value *> :: iterator attribute_iterator;
       m = p->module();
 
-#ifdef OLD_MODULE_LIBRARY
+      st = &m->getSymbolTable();
+
       Processor *cpu;
       cpu=dynamic_cast<Processor*>(m);
       if(cpu==0)
       { // Module, not a processor, so add the load command
         fprintf(fo, "module load %s %s\n",
+        	m->type(),
+        	m->name().c_str());
+      }
+/*
+      else
+      {
+	fprintf(fo, "processor %s %s\n",
         m->type(),
         m->name().c_str());
       }
-#else
-    cout << __FILE__ << ':' << dec << __LINE__ << " module library fixme\n";
-#endif
+*/
 
-      /*
-      for(attribute_iterator = m->attributes.begin();
-          attribute_iterator != m->attributes.end();
-          attribute_iterator++) {
-
-        Value *locattr = *attribute_iterator;
-
-        fprintf(fo, "%s=%s\n",
-                locattr->name().c_str(),
-                locattr->toString().c_str());
-      }
-      */
-
+      mod_name = m->name().c_str();
+      st->ForEachSymbolTable(OneAttribute);
       fprintf(fo, "\n");
       module_iterator=module_iterator->next;
     }
 
     // Save nodes and connections
     fprintf(fo, "\n\n# Connections:\n");
-    fprintf(fo," FIXME gui_breadboard.cc save_stc\n");
-    /*
-    list <Stimulus_Node *> :: iterator node_iterator;
-    Symbol_Table &ST = get_symbol_table();
-    Symbol_Table::node_symbol_iterator it;
-    Symbol_Table::node_symbol_iterator itEnd = ST.endNodeSymbol();
-    for(it = ST.beginNodeSymbol(); it != itEnd; it++) {
-      Stimulus_Node *node = (*it)->getNode();
-      assert(node != NULL);
-      stimulus *stimulus;
 
-      fprintf(fo, "node %s\n",node->name().c_str());
+    GList *list;
+    for(int i = 0; (list = g_list_nth(bbw->nodes,i)); i++)
+    {
+	Stimulus_Node *node = (Stimulus_Node *)list->data;
+      	stimulus *stimulus;
 
-      if(node->stimuli!=0)
-      {
-        fprintf(fo, "attach %s",node->name().c_str());
+      	fprintf(fo, "node %s\n",node->name().c_str());
 
-        stimulus = node->stimuli;
+      	if(node->stimuli!=0)
+      	{
+            fprintf(fo, "attach %s",node->name().c_str());
 
-        while(stimulus!=0)
-        {
-          fprintf(fo, " %s",stimulus->name().c_str());
-
-          stimulus = stimulus->next;
+            for (stimulus = node->stimuli; stimulus; stimulus = stimulus->next)
+          	fprintf(fo, " %s",stimulus->name().c_str());
         }
-
         fprintf(fo, "\n\n");
-      }
     }
-    */
+
 
     fprintf(fo, "\n\n# End.\n");
     fclose(fo);
+    fo = NULL;
     //text_dialog(filename);
 
 }
@@ -4193,7 +4263,7 @@ void Breadboard_Window::Build(void)
 
   // Handle nodes added before breadboard GUI enabled
   GList *list;
-  for(int i = 0; list = g_list_nth(nodes,i); i++)
+  for(int i = 0; (list = g_list_nth(nodes,i)); i++)
         NodeConfigurationChanged((Stimulus_Node *)(list->data));
 
   bIsBuilt = true;

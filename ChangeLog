@@ -1,3 +1,9 @@
+2007-10-14 Roy Rankin <rrankin@ihug.com.au>
+	* src/value.cc: Allow Float::set to take Value type Integer
+	* src/modules.h src/modules.cc gui/gui_breadboard.cc:
+	- reinstate operation of breadboard "Add library", "Add module" and 
+	  "Save Configuration" buttons and module attributes.
+
 2007-10-13 Borut Razem <borut.razem@siol.net>
 	* src/gpsim_interface.h, src/ioports.h, src/gpsim_object.h,
 	  src/dspic/dspic-instructions.h, src/ui.h, src/processor.h,
