@@ -46,7 +46,7 @@ public:
 
 
 //
-//   -- Define a class to contain most of the registers/peripherals 
+//   -- Define a class to contain most of the registers/peripherals
 //      of a 16x6x device (where the second `x' is >= 3
 //
 
@@ -101,7 +101,11 @@ class P16C62 : public  P16X6X_processor
   public:
 
   P16C62(const char *_name=0, const char *desc=0);
-  virtual ~P16C62();
+
+  virtual ~P16C62()
+  {
+  }
+
   static Processor *construct(const char *name);
 
   TMR2_MODULE tmr2_module;
@@ -158,7 +162,7 @@ class P16C64 : public  P16X6X_processor
 
   PicPortRegister  *m_porte;
   PicPSP_TrisRegister  *m_trise;
-  PSP		    psp;
+  PSP               psp;
 
   P16C64(const char *_name=0, const char *desc=0);
   virtual ~P16C64();

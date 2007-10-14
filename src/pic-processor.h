@@ -299,8 +299,8 @@ public:
 
   void add_sfr_register(Register *reg, unsigned int addr,
                         RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
-  void delete_sfr_register(Register *pReg, unsigned int addr);
-  void remove_sfr_register(Register *pReg, unsigned int addr);
+  void delete_sfr_register(Register *pReg);
+  void remove_sfr_register(Register *pReg);
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);

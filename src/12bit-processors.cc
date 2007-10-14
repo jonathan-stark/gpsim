@@ -124,8 +124,8 @@ _12bit_processor::~_12bit_processor()
   delete pc;
   delete mOptionTT;
 
-  delete_sfr_register(fsr,0);
-  delete_sfr_register(option_reg,0);
+  delete_sfr_register(fsr);
+  delete_sfr_register(option_reg);
 
 }
 

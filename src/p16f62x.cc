@@ -54,8 +54,8 @@ P16F62x::~P16F62x()
   delete_file_registers(0xc0, 0xef);
   delete_file_registers(0x120,0x14f);
 
-  delete_sfr_register(usart.txreg,0);
-  delete_sfr_register(usart.rcreg,0);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
 
   delete eeprom;
   eeprom = 0;

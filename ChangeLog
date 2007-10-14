@@ -1,3 +1,9 @@
+2007-10-14 Borut Razem <borut.razem@siol.net>
+	* src/p16x6x.h, src/p16x6x.cc, src/eeprom.cc, src/pic-processor.cc,
+	  src/p16f62x.cc, src/12bit-processors.cc, src/pic-processor.h,
+	  src/p12x.cc, src/14bit-processors.cc:
+	  fixed duplicatd sfr deletion, code cleaning
+
 2007-10-14 Roy Rankin <rrankin@ihug.com.au>
 	* src/value.cc: Allow Float::set to take Value type Integer
 	* src/modules.h src/modules.cc gui/gui_breadboard.cc:
