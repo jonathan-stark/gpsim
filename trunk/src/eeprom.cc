@@ -1,7 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
-		 2006 Roy Rankin
+                 2006 Roy Rankin
 
 This file is part of gpsim.
 
@@ -42,7 +42,7 @@ using namespace std;
 //
 //  It's main purpose is to provide a means by which the control
 //  registers may communicate.
-// 
+//
 
 //------------------------------------------------------------------------
 //
@@ -56,16 +56,16 @@ void EECON1::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   new_value &= valid_bits;
-  
+
   //cout << "EECON1::put new_value " << new_value << "  valid_bits " << valid_bits << '\n';
   if(new_value & WREN)
     {
       if(eeprom->get_reg_eecon2()->is_unarmed())
-	{
+        {
           eeprom->get_reg_eecon2()->unready();
-	  value.put(value.get() | WREN);
+          value.put(value.get() | WREN);
 
-	}
+        }
 
       // WREN is true and EECON2 is armed (which means that we've passed through here
       // once before with WREN true). Initiate an eeprom write only if WR is true and
@@ -73,10 +73,10 @@ void EECON1::put(unsigned int new_value)
 
       else if( (new_value & WR) && !(new_value & RD) &&
         (eeprom->get_reg_eecon2()->is_ready_for_write()))
-	{
-	  value.put(value.get() | WR);
-	  eeprom->start_write();
-	}
+        {
+          value.put(value.get() | WR);
+          eeprom->start_write();
+        }
 
       //    else cout << "EECON1: write ignored " << new_value << "  (WREN is probably already set)\n";
 
@@ -99,17 +99,17 @@ void EECON1::put(unsigned int new_value)
     {
       if(value.get() & EEPGD) {
         eeprom->get_reg_eecon2()->read();
-	eeprom->start_program_memory_read();
-	//cout << "eestate " << eeprom->eecon2->eestate << '\n';
-	// read program memory
+        eeprom->start_program_memory_read();
+        //cout << "eestate " << eeprom->eecon2->eestate << '\n';
+        // read program memory
       } else {
-	//eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
+        //eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
         eeprom->get_reg_eecon2()->read();
-	eeprom->callback();
-	value.put(value.get() & ~RD);
+        eeprom->callback();
+        value.put(value.get() & ~RD);
       }
     }
-  
+
 }
 
 unsigned int EECON1::get()
@@ -218,9 +218,9 @@ EEPROM_PIR::~EEPROM_PIR()
 }
 
 //------------------------------------------------------------------------
-// Set the EEIF and clear the WR bits. 
+// Set the EEIF and clear the WR bits.
 
-void EEPROM_PIR::write_is_complete() 
+void EEPROM_PIR::write_is_complete()
 {
 
   assert(m_pir != 0);
@@ -269,10 +269,10 @@ EEPROM::~EEPROM()
 {
   pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
   if (pCpu) {
-    pCpu->remove_sfr_register(&eedata,0);
-    pCpu->remove_sfr_register(&eeadr,0);
-    pCpu->remove_sfr_register(&eecon1,0);
-    pCpu->remove_sfr_register(&eecon2,0);
+    pCpu->remove_sfr_register(&eedata);
+    pCpu->remove_sfr_register(&eeadr);
+    pCpu->remove_sfr_register(&eecon1);
+    pCpu->remove_sfr_register(&eecon2);
   }
 
   for (unsigned int i = 0; i < rom_size; i++)
@@ -304,9 +304,9 @@ void EEPROM::start_write()
   eecon2.start_write();
 }
 
-// Set the EEIF and clear the WR bits. 
+// Set the EEIF and clear the WR bits.
 
-void EEPROM::write_is_complete() 
+void EEPROM::write_is_complete()
 {
 
   assert(intcon != 0);
@@ -395,7 +395,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
 
   rom = (Register **) new char[sizeof (Register *) * rom_size];
   assert(rom != 0);
-  
+
   // Initialize the rom
 
   char str[100];
@@ -412,9 +412,9 @@ void EEPROM::initialize(unsigned int new_rom_size)
     //cpu->ema.set_cpu(cpu);
     cpu->ema.set_Registers(rom, rom_size);
     m_UiAccessOfRom = new RegisterCollection(cpu,
-					     "eeData",
-					     rom,
-					     rom_size);
+                                             "eeData",
+                                             rom,
+                                             rom_size);
   }
 
 }
@@ -436,8 +436,8 @@ void EEPROM::save_state()
 }
 
 void EEPROM::set_intcon(INTCON *ic)
-{ 
-  intcon = ic; 
+{
+  intcon = ic;
 }
 
 void EEPROM::dump()
@@ -457,30 +457,30 @@ void EEPROM::dump()
       cout << setw(2) << setfill('0') <<  i << ":  ";
 
       for (j = 0; j < 16; j++)
-	{
-	  reg_num = i * 16 + j;
-	  if(reg_num < rom_size)
-	    {
-	      v = rom[reg_num]->get_value();
-	      cout << setw(2) << setfill('0') <<  v << ' ';
-	    }
-	  else
-	    cout << "-- ";
-	}
+        {
+          reg_num = i * 16 + j;
+          if(reg_num < rom_size)
+            {
+              v = rom[reg_num]->get_value();
+              cout << setw(2) << setfill('0') <<  v << ' ';
+            }
+          else
+            cout << "-- ";
+        }
       cout << "   ";
 
       for (j = 0; j < 16; j++)
-	{
-	  reg_num = i * 16 + j;
-	  if(reg_num < rom_size)
-	    {
-	      v = rom[reg_num]->get_value();
-	      if( (v >= ' ') && (v <= 'z'))
-		cout.put(v);
-	      else
-		cout.put('.');
-	    }
-	}
+        {
+          reg_num = i * 16 + j;
+          if(reg_num < rom_size)
+            {
+              v = rom[reg_num]->get_value();
+              if( (v >= ' ') && (v <= 'z'))
+                cout.put(v);
+              else
+                cout.put('.');
+            }
+        }
 
       cout << '\n';
 
@@ -502,8 +502,8 @@ EEPROM_WIDE::~EEPROM_WIDE()
 {
   pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
   if (pCpu) {
-    pCpu->remove_sfr_register(&eedatah,0);
-    pCpu->remove_sfr_register(&eeadrh,0);
+    pCpu->remove_sfr_register(&eedatah);
+    pCpu->remove_sfr_register(&eeadrh);
   }
 }
 
@@ -530,7 +530,7 @@ void EEPROM_WIDE::start_program_memory_read()
 void EEPROM_WIDE::callback()
 {
   //cout << "eeprom call back\n";
-  
+
 
   switch(eecon2.get_eestate()) {
   case EECON2::EEREAD:
@@ -539,7 +539,7 @@ void EEPROM_WIDE::callback()
     eecon2.unarm();
     if(eecon1.value.get() & EECON1::EEPGD) {
       // read program memory
-      
+
       int opcode = cpu->pma->get_opcode(rd_adr);
       eedata.value.put(opcode & 0xff);
       eedatah.value.put((opcode>>8) & 0xff);
@@ -556,14 +556,14 @@ void EEPROM_WIDE::callback()
 
     if(eecon1.value.get() & EECON1::EEPGD) // write program memory
     {
-	cpu->init_program_memory_at_index(wr_adr, wr_data);
+        cpu->init_program_memory_at_index(wr_adr, wr_data);
     }
-    else				  // read eeprom memory
+    else                                  // read eeprom memory
     {
         if(wr_adr < rom_size)
-	{
+        {
            rom[wr_adr]->value.put(wr_data);
-	}
+        }
         else
            cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
     }

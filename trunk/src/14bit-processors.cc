@@ -106,8 +106,8 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
 
 _14bit_processor::~_14bit_processor()
 {
-  delete_sfr_register(fsr,0);
-  delete_sfr_register(option_reg,0);
+  delete_sfr_register(fsr);
+  delete_sfr_register(option_reg);
   delete pc; pc=0;
 }
 
@@ -289,11 +289,11 @@ Pic14Bit::~Pic14Bit()
   //delete m_MCLR; <-- this is a package pin
   delete m_MCLRMonitor;
 
-  delete_sfr_register(m_portb,0);
-  delete_sfr_register(m_trisb,0);
+  delete_sfr_register(m_portb);
+  delete_sfr_register(m_trisb);
 
-  delete_sfr_register(m_porta,0);
-  delete_sfr_register(m_trisa,0);
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_trisa);
 }
 //-------------------------------------------------------------------
 void Pic14Bit::create_symbols()

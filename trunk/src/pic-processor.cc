@@ -1076,12 +1076,12 @@ pic_processor::~pic_processor()
   delete m_pResetTT;
   delete m_pInterruptTT;
 
-  delete_sfr_register(W,0);
-  delete_sfr_register(pcl,0);
+  delete_sfr_register(W);
+  delete_sfr_register(pcl);
 
-  delete_sfr_register(pclath,0);
-  delete_sfr_register(status,0);
-  delete_sfr_register(indf,0);
+  delete_sfr_register(pclath);
+  delete_sfr_register(status);
+  delete_sfr_register(indf);
   delete m_PCHelper;
   delete stack;
 
@@ -1183,7 +1183,7 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
 //
 // delete_sfr_register
 //
-void pic_processor::delete_sfr_register(Register *pReg, unsigned int addr)
+void pic_processor::delete_sfr_register(Register *pReg)
 {
 
   if (pReg) {
@@ -1206,7 +1206,7 @@ void pic_processor::delete_sfr_register(Register *pReg, unsigned int addr)
 //
 // delete_sfr_register
 //
-void pic_processor::remove_sfr_register(Register *ppReg, unsigned int addr)
+void pic_processor::remove_sfr_register(Register *ppReg)
 {
 
   if (ppReg) {

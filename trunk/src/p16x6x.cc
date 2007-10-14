@@ -367,12 +367,12 @@ P16X6X_processor::~P16X6X_processor()
 
   delete_file_registers(0x20,0x7f);
   delete_file_registers(0xa0,0xbf);
-  delete_sfr_register(m_portc,0);
-  delete_sfr_register(m_trisc,0);
+  delete_sfr_register(m_portc);
+  delete_sfr_register(m_trisc);
   cout << "deleting PIR2:\n";
-  delete_sfr_register(pir2,0);
+  delete_sfr_register(pir2);
   cout << "deleting PIR1:\n";
-  delete_sfr_register(pir1,0);
+  delete_sfr_register(pir1);
   cout << "leaving "<<__FUNCTION__<<endl;
 }
 
@@ -389,15 +389,6 @@ P16C62::P16C62(const char *_name, const char *desc)
   if(verbose)
     cout << "c62 constructor, type = " << isa() << '\n';
 }
-
-P16C62::~P16C62()
-{
-  cout << __FUNCTION__ << endl;
-
-  delete_sfr_register(m_portc,0x07);
-  delete_sfr_register(m_trisc,0x87);
-}
-
 
 void P16C62::create_sfr_map()
 {

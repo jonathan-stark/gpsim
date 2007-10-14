@@ -150,8 +150,8 @@ P12bitBase::P12bitBase(const char *_name, const char *desc)
 P12bitBase::~P12bitBase()
 {
 
-  delete_sfr_register(m_gpio,0);
-  delete_sfr_register(m_tris,0);
+  delete_sfr_register(m_gpio);
+  delete_sfr_register(m_tris);
   delete_file_registers(0x7, 0x1f);
   /*
   removeSymbol(*m_configMemory);
