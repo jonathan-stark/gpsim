@@ -1,6 +1,7 @@
 2007-10-16 Borut Razem <borut.razem@siol.net>
 	* src/value.cc, src/trace.cc, modules/stimuli.cc, gui/gui_trace.cc,
-	  gui/gui_profile.cc, gui/gui_menu.cc, gui/gui_scope.cc, configure.ac:
+	  gui/gui_profile.cc, gui/gui_menu.cc, gui/gui_scope.cc, configure.ac,
+	  config_win32.h.in:
 	  introduced PRINTF_GINT64_MODIFIER which defines the printf modifier
 	  for gint64 and guint64 types
 
