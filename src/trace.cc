@@ -33,14 +33,14 @@ Boston, MA 02111-1307, USA.  */
 #define MODE "0x" << hex
 
 Trace trace;               /* Instantiate the trace buffer class.
-			    * This is where *everything* including the
-			    * kitchen sink gets stored in a trace buffer.
-			    * Since everything is stored here, it gets
-			    * rather difficult to post process traced info
-			    * efficiently. So this buffer is primarily used
-			    * to record program flow that the user may post
-			    * analyze by dumping its contents.
-			    */
+                            * This is where *everything* including the
+                            * kitchen sink gets stored in a trace buffer.
+                            * Since everything is stored here, it gets
+                            * rather difficult to post process traced info
+                            * efficiently. So this buffer is primarily used
+                            * to record program flow that the user may post
+                            * analyze by dumping its contents.
+                            */
 
 // create an instance of inline get_trace() method by taking its address
 Trace &(*dummy_trace)() = get_trace;
@@ -67,13 +67,13 @@ unsigned int traceValue::get_value()
  *
  *   gpsim Trace
  *
- 
+
    General:
-  
+
    gpsim traces almost everything simulated: instructions executed,
    register reads/writes, clock cycles, special register accesses
    break points, instruction skips, external modules, and a few
-   other miscellaneous things. 
+   other miscellaneous things.
 
    The tracing subsystem is implemented as a C++ class. In theory,
    multiple traces could be instantiated, but (currently) there is
@@ -87,14 +87,14 @@ unsigned int traceValue::get_value()
    is that most of the trace operations are C++ inline functions.
    A third optimization is that the trace operations are efficiently
    encoded into 32-bit words. The one exception is the cycle counter
-   trace, it takes two 32-bit words (see the cycle counter trace 
+   trace, it takes two 32-bit words (see the cycle counter trace
    comment below).
 
    The upper 8-bits of the trace word are reserved for describing
    the trace type. The upper two bits of these 8-bits are reservered
    for encoding the cycle counter. The lower 6-bits allow 64 enumerated
    types to be encoded. Only a small portion of these are currently
-   used. The lower 24-bits of the 32-bit trace word store the 
+   used. The lower 24-bits of the 32-bit trace word store the
    information we wish to trace. For example, for register reads and
    writes, there are 8-bits of data and (upto) 16-bits of address.
 
@@ -110,7 +110,7 @@ unsigned int traceValue::get_value()
    TT - Register write trace type
    AAAA - 4-hexdigit address
    VV - 2-hexdigit (8-bit) value
-  
+
    The cycle counter is treated slightly differently. Since it is a
    64-bit object, it has to be split across at least two trace
    entries. The upper few bits of the cycle counter aren't
@@ -136,7 +136,7 @@ unsigned int traceValue::get_value()
    the 32-bit trace word is extracted and used to look up the
    TraceType object in the trace_map map. The lower 24-bits of the
    trace word are then passed to the TraceType object's decode()
-   method. Continuing with the example from above, 
+   method. Continuing with the example from above,
 
        TTAAAAVV
 
@@ -171,7 +171,7 @@ unsigned int traceValue::get_value()
    into a TraceObject. This trace object knows the current state of
    the register; that's simply the register's current contents. The
    trace object knows the contents of the register prior to the
-   register write operation; that's stored in the trace buffer. 
+   register write operation; that's stored in the trace buffer.
 
 
 ****************************************************************************/
@@ -228,7 +228,7 @@ void TraceRawLog::enable(char *fname)
     trace.bLogging = true;
 
     cout << "Trace logging enabled to file " << fname << endl;
-  } else 
+  } else
     cout << "Trace logging: could not open: " << fname << endl;
 
 }
@@ -262,7 +262,7 @@ void TraceRawLog::disable()
 // requests trace history. Each frame contains a list of traceObjects
 // that describe the specific information that the simulation has traced.
 
-TraceFrame::TraceFrame( ) 
+TraceFrame::TraceFrame( )
 {
   cycle_time = 0;
 }
@@ -283,23 +283,23 @@ void TraceFrame::add(TraceObject *to)
   traceObjects.push_back(to);
 }
 
-void TraceFrame::print(FILE *fp) 
+void TraceFrame::print(FILE *fp)
 {
   list <TraceObject *> :: iterator toIter;
 
   for(toIter = traceObjects.begin();
       toIter != traceObjects.end();
-      ++toIter) 
+      ++toIter)
     (*toIter)->print_frame(this,fp);
 }
 
-void TraceFrame::update_state() 
+void TraceFrame::update_state()
 {
   list <TraceObject *> :: iterator toIter;
 
   for(toIter = traceObjects.begin();
       toIter != traceObjects.end();
-      ++toIter) 
+      ++toIter)
     (*toIter)->getState(this);
 }
 
@@ -318,7 +318,7 @@ void Trace::addFrame(TraceFrame *newFrame)
 
 void Trace::addToCurrentFrame(TraceObject *to)
 {
-  
+
   if(current_frame)
     current_frame->add(to);
 
@@ -405,8 +405,8 @@ void ModuleTraceObject::print(FILE *fp)
 // RegisterTraceObject
 //
 RegisterWriteTraceObject::RegisterWriteTraceObject(Processor *_cpu,
-						   Register *_reg,
-						   RegisterValue trv) 
+                                                   Register *_reg,
+                                                   RegisterValue trv)
   : ProcessorTraceObject(_cpu), reg(_reg), from(trv)
 {
   if(reg) {
@@ -425,15 +425,15 @@ void RegisterWriteTraceObject::print(FILE *fp)
   char sTo[16];
   if(reg)
     fprintf(fp, "  Wrote: 0x%s to %s(0x%04X) was 0x%s\n",
-	    to.toString(sTo,sizeof(sTo)),
-	    reg->name().c_str(), reg->address, 
-	    from.toString(sFrom,sizeof(sFrom)));
+            to.toString(sTo,sizeof(sTo)),
+            reg->name().c_str(), reg->address,
+            from.toString(sFrom,sizeof(sFrom)));
 }
 
 
 RegisterReadTraceObject::RegisterReadTraceObject(Processor *_cpu,
-						 Register *_reg,
-						 RegisterValue trv) 
+                                                 Register *_reg,
+                                                 RegisterValue trv)
   : RegisterWriteTraceObject(_cpu, _reg, trv)
 {
   if(reg) {
@@ -446,7 +446,7 @@ void RegisterReadTraceObject::print(FILE *fp)
 
   if(reg)
     fprintf(fp, "  Read: 0x%s from %s(0x%04X)\n",
-	    from.toString(sFrom,sizeof(sFrom)), reg->name().c_str(), reg->address);
+            from.toString(sFrom,sizeof(sFrom)), reg->name().c_str(), reg->address);
 }
 
 void RegisterReadTraceObject::getState(TraceFrame *tf)
@@ -454,7 +454,7 @@ void RegisterReadTraceObject::getState(TraceFrame *tf)
 }
 
 //========================================================================
-PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address) 
+PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address)
   : ProcessorTraceObject(_cpu), address(_address)
 {
 }
@@ -466,15 +466,15 @@ void PCTraceObject::print(FILE *fp)
   unsigned addr = cpu->map_pm_index2address(address &0xffff);
 
   fprintf(fp,"0x%04X 0x%04X %s\n",
-	  addr,
-	  (cpu->pma->getFromAddress(addr))->get_opcode(),
-	  (cpu->pma->getFromAddress(addr))->name(a_string,sizeof(a_string)));
+          addr,
+          (cpu->pma->getFromAddress(addr))->get_opcode(),
+          (cpu->pma->getFromAddress(addr))->name(a_string,sizeof(a_string)));
 
   instruction * pInstr = cpu->pma->getFromAddress(addr);
   int srcLine = pInstr->get_src_line();
   if (srcLine >=0)
     fprintf(fp,"%d: %s",
-            srcLine, 
+            srcLine,
             cpu->files.ReadLine(pInstr->get_file_id(),
                                 pInstr->get_src_line(),
                                 a_string,sizeof(a_string)));
@@ -487,13 +487,13 @@ void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 
   list <TraceObject *> :: reverse_iterator toIter;
 
-  fprintf(fp,"0x%016" PRINTF_INT64_MODIFIER "X %s ",
+  fprintf(fp,"0x%016" PRINTF_GINT64_MODIFIER "X %s ",
     tf->cycle_time,cpu->name().c_str());
   print(fp);
 
   for(toIter = tf->traceObjects.rbegin();
       toIter != tf->traceObjects.rend();
-      ++toIter) 
+      ++toIter)
     if(*toIter != this)
       (*toIter)->print(fp);
 
@@ -564,7 +564,7 @@ bool TraceType::isValid(Trace *pTrace, unsigned int tbi)
   // sized trace records occupy consecutive types.
   for(i=0; i<size(); i++) {
 
-    //if(pTrace->type(tbi + i) != (type() + (i<<24))) 
+    //if(pTrace->type(tbi + i) != (type() + (i<<24)))
     if(!isValid(pTrace->get(tbi+i)))
       return false;
   }
@@ -590,7 +590,7 @@ int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
     total_chars += n;
     buf += n;
     bufsize -= n;
-  }      
+  }
 
   return total_chars;
 }
@@ -612,7 +612,7 @@ int TraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
   return iUsed;
 }
 //========================================================================
-ModuleTraceType::ModuleTraceType(Module *_pModule, 
+ModuleTraceType::ModuleTraceType(Module *_pModule,
                                  unsigned int nTraceEntries,
                                  const char *desc)
   : TraceType(nTraceEntries,desc), pModule(_pModule)
@@ -638,9 +638,9 @@ int ModuleTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int buf
   unsigned int tv = pTrace->get(tbi);
 
   int m = snprintf(buf, bufsize,
-		   " Module: %s 0x%x",
-		   (pModule ? pModule->name().c_str() : "no name"),
-		   (tv & 0xffffff));
+                   " Module: %s 0x%x",
+                   (pModule ? pModule->name().c_str() : "no name"),
+                   (tv & 0xffffff));
 
   return m > 0 ? (m+n) : n;
 }
@@ -668,7 +668,7 @@ int CycleTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
   if (pTrace) {
     guint64 cycle;
     if (pTrace->is_cycle_trace(tbi,&cycle) == 2)
-      m = snprintf(buf,bufsize,"  Cycle 0x%016" PRINTF_INT64_MODIFIER "X",cycle);
+      m = snprintf(buf,bufsize,"  Cycle 0x%016" PRINTF_GINT64_MODIFIER "X",cycle);
   }
 
   return m > 0 ? (m+n) : n;
@@ -678,7 +678,7 @@ int CycleTraceType::entriesUsed(Trace *pTrace,unsigned int tbi)
   return pTrace ? pTrace->is_cycle_trace(tbi,0) : 0;
 }
 //========================================================================
-ProcessorTraceType::ProcessorTraceType(Processor *_cpu, 
+ProcessorTraceType::ProcessorTraceType(Processor *_cpu,
                                        unsigned int nTraceEntries,
                                        const char *pDesc)
   : TraceType(nTraceEntries,pDesc), cpu(_cpu)
@@ -687,11 +687,11 @@ ProcessorTraceType::ProcessorTraceType(Processor *_cpu,
 
 //========================================================================
 
-RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu, 
-					       unsigned int s)
+RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu,
+                                               unsigned int s)
   : ProcessorTraceType(_cpu,s,"Reg Write")
 {
-    
+
 }
 
 TraceObject *RegisterWriteTraceType::decode(unsigned int tbi)
@@ -718,26 +718,26 @@ int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, 
 
   unsigned int tv = pTrace->get(tbi);
   unsigned int address = (tv >> 8) & 0xfff;
-  
+
   Register *reg = cpu->rma.get_register(address);
   int m = snprintf(buf, bufsize,
-		   "  Reg Write: %s(0x%04X) was 0x%x ",
-		   (reg ? reg->name().c_str() : ""), address,
-		   tv & 0xff);
+                   "  Reg Write: %s(0x%04X) was 0x%x ",
+                   (reg ? reg->name().c_str() : ""), address,
+                   tv & 0xff);
   if(m>0)
     n += m;
 
   return n;
-		   
+
 }
 
 //========================================================================
 
-RegisterReadTraceType::RegisterReadTraceType(Processor *_cpu, 
-					     unsigned int s)
+RegisterReadTraceType::RegisterReadTraceType(Processor *_cpu,
+                                             unsigned int s)
   : ProcessorTraceType(_cpu,s,"Reg Read")
 {
-    
+
 }
 
 TraceObject *RegisterReadTraceType::decode(unsigned int tbi)
@@ -767,20 +767,20 @@ int RegisterReadTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, 
 
   Register *reg = cpu->rma.get_register(address);
   int m = snprintf(buf, bufsize,
-		   "  Reg Read:  %s(0x%04X) was 0x%0X",
-		   (reg ? reg->name().c_str() : ""), address,
-		   tv & 0xff);
+                   "  Reg Read:  %s(0x%04X) was 0x%0X",
+                   (reg ? reg->name().c_str() : ""), address,
+                   tv & 0xff);
 
   if(m>0)
     n += m;
 
   return n;
-		   
+
 }
 
 //========================================================================
-PCTraceType::PCTraceType(Processor *_cpu, 
-			 unsigned int s)
+PCTraceType::PCTraceType(Processor *_cpu,
+                         unsigned int s)
   : ProcessorTraceType(_cpu,s,"PC")
 {
 }
@@ -815,7 +815,7 @@ int PCTraceType::dump_raw(Trace *pTrace, unsigned int tbi, char *buf, int bufsiz
   bufsize -= n;
 
   int m = snprintf(buf, bufsize,"FRAME ==============  PC: %04X",
-		   cpu->map_pm_index2address(pTrace->get(tbi) & 0xffff));
+                   cpu->map_pm_index2address(pTrace->get(tbi) & 0xffff));
   if(m>0)
     n += m;
 
@@ -854,9 +854,9 @@ int ResetTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufs
   RESET_TYPE r = (RESET_TYPE) (pTrace->get(tbi) & 0xff);
 
   int m = snprintf(buf, bufsize,
-		   " %s Reset: %s",
-		   (cpu ? cpu->name().c_str() : ""),
-		   resetName(r));
+                   " %s Reset: %s",
+                   (cpu ? cpu->name().c_str() : ""),
+                   resetName(r));
 
   return m > 0 ? (m+n) : n;
 }
@@ -869,7 +869,7 @@ int ResetTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufs
 //
 // The trace_map is an STL map object that associates dynamically
 // created trace types with a unique number. The simulation engine
-// uses the number as a 'command' for tracing information of a 
+// uses the number as a 'command' for tracing information of a
 // specific type. This number along with information specific to
 // to the trace type is written into the trace buffer. When the
 // simulation is halted and the trace buffer is parsed, the
@@ -880,7 +880,7 @@ int ResetTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufs
 // Here's an example:
 //
 // The pic_processor class during construction will request a trace
-// type for tracing 8-bit register writes. 
+// type for tracing 8-bit register writes.
 //
 map <unsigned int, TraceType *> trace_map;
 CycleTraceType *pCycleTrace=0;
@@ -983,7 +983,7 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
   // written in the low 32 bit trace.
   //
   // Here are some examples:
-  //                                                upper 2 bits 
+  //                                                upper 2 bits
   //    cycle counter    |  trace[i]    trace[i+1]    [i]   [i+1]
   //---------------------+----------------------------------------
   //         0x12345678  |  0x92345678  0x40000000    10     01
@@ -1009,31 +1009,31 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
       (get(k) & CYCLE_COUNTER_HI) )
     {
       if(get(j) & CYCLE_COUNTER_HI)
-	{
-	  // The upper two bits of the current trace are set. This means that
-	  // the trace is either the high 32 bits or the low 32 bits of the cycle 
-	  // counter. This ambiguity is resolved by examining the trace buffer on
-	  // either side of the current index. If the entry immediately proceeding
-	  // this one is not a cycle counter trace, then we know that we're pointing
-	  // at the low 32 bits. If the proceeding entry IS a cycle counter trace then
-	  // we have two consecutive cycle traces (we already know that the entry
-	  // immediately following the current trace index is a cycle counter trace).
-	  // Now we know that if  have consecutive cycle traces, then they differ by one
-	  // count. We only need to look at the low 32 bits of these consecutive
-	  // traces to ascertain this.
-	  int i = (index - 1) &  TRACE_BUFFER_MASK;   // previous index
-	  if( (get(i) & (CYCLE_COUNTER_HI | CYCLE_COUNTER_LO)) &&
-	      (((get(k) - get(i)) & 0x7fffffff) == 1) )
-	    return 1;
-	}
+        {
+          // The upper two bits of the current trace are set. This means that
+          // the trace is either the high 32 bits or the low 32 bits of the cycle
+          // counter. This ambiguity is resolved by examining the trace buffer on
+          // either side of the current index. If the entry immediately proceeding
+          // this one is not a cycle counter trace, then we know that we're pointing
+          // at the low 32 bits. If the proceeding entry IS a cycle counter trace then
+          // we have two consecutive cycle traces (we already know that the entry
+          // immediately following the current trace index is a cycle counter trace).
+          // Now we know that if  have consecutive cycle traces, then they differ by one
+          // count. We only need to look at the low 32 bits of these consecutive
+          // traces to ascertain this.
+          int i = (index - 1) &  TRACE_BUFFER_MASK;   // previous index
+          if( (get(i) & (CYCLE_COUNTER_HI | CYCLE_COUNTER_LO)) &&
+              (((get(k) - get(i)) & 0x7fffffff) == 1) )
+            return 1;
+        }
 
       // The current index points to the low int and the next entry is
       // the high int.
       // extract the ~64bit cycle counter from the trace buffer.
       if(cvt_cycle) {
-	*cvt_cycle = get(k)&0x3fffffff;
-	*cvt_cycle = (*cvt_cycle << 32) | 
-	  ((get(j)&0x7fffffff) | (get(k)&0x80000000 ));
+        *cvt_cycle = get(k)&0x3fffffff;
+        *cvt_cycle = (*cvt_cycle << 32) |
+          ((get(j)&0x7fffffff) | (get(k)&0x80000000 ));
       }
 
       return 2;
@@ -1062,7 +1062,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
   if(return_value == 2)
     return(return_value);
-  
+
   return_value = 1;
 
   switch (type(index))
@@ -1073,7 +1073,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       /*
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
-	       get(index)&0xff);
+               get(index)&0xff);
       break;
     case BREAKPOINT:
       snprintf(buffer, bufsize,"BREAK: ");
@@ -1081,46 +1081,46 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       break;
     case _RESET:
       switch( (RESET_TYPE) (get(index)&0xff))
-	{
-	case POR_RESET:
-	  snprintf(buffer, bufsize," POR");
-	  break;
-	case WDT_RESET:
-	  snprintf(buffer, bufsize," WDT reset");
-	  break;
-	case SOFT_RESET:
-	  snprintf(buffer, bufsize,"SOFT reset");
-	  break;
-	default:
-	  snprintf(buffer, bufsize,"unknown reset");
-	}
+        {
+        case POR_RESET:
+          snprintf(buffer, bufsize," POR");
+          break;
+        case WDT_RESET:
+          snprintf(buffer, bufsize," WDT reset");
+          break;
+        case SOFT_RESET:
+          snprintf(buffer, bufsize,"SOFT reset");
+          break;
+        default:
+          snprintf(buffer, bufsize,"unknown reset");
+        }
       break;
 
     case OPCODE_WRITE:
       if(type(index-1) == OPCODE_WRITE)
-	snprintf(buffer, bufsize," wrote opcode: 0x%04x to pgm memory: 0x%05x",
-	       get(index)&0xffff,
-	       get(index - 1) & 0xffffff);
+        snprintf(buffer, bufsize," wrote opcode: 0x%04x to pgm memory: 0x%05x",
+               get(index)&0xffff,
+               get(index - 1) & 0xffffff);
 
       break;
       */
     default:
       if(type(index) != CYCLE_COUNTER_HI) {
-	map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(index));
+        map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(index));
 
-	if(tti != trace_map.end()) {
-	  TraceType *tt = (*tti).second;
+        if(tti != trace_map.end()) {
+          TraceType *tt = (*tti).second;
 
-	  if(tt) {
-	    tt->dump_raw(this,index,buffer,bufsize);
-	    return_value = tt->size();
-	  }
-	  break;
-	} 
+          if(tt) {
+            tt->dump_raw(this,index,buffer,bufsize);
+            return_value = tt->size();
+          }
+          break;
+        }
 
 
-	if(cpu)
-	  return_value = cpu->trace_dump1(get(index),buffer,bufsize);
+        if(cpu)
+          return_value = cpu->trace_dump1(get(index),buffer,bufsize);
       }
     }
 
@@ -1180,20 +1180,20 @@ int Trace::dump(int n, FILE *out_stream)
   unsigned int k = frame_start;
 
 
-  // Save the state of the CPU here. 
+  // Save the state of the CPU here.
   cpu->save_state();
 
   //
   // Decode the trace buffer
   //
   // Starting at the end of the trace buffer, step backwards
-  // and count 'n' trace frames. A trace frame describes a 
-  // boundary. All of the traced information between frames 
-  // describe what happened at the boundary. For example, 
+  // and count 'n' trace frames. A trace frame describes a
+  // boundary. All of the traced information between frames
+  // describe what happened at the boundary. For example,
   // when a movf temp,W executes, the Program counter creates
   // the frame boundary and the write to temp and read from W
   // are stored in it. The frame boundary is recorded at the
-  // end of the frame. 
+  // end of the frame.
 
   current_frame = 0;
 
@@ -1216,14 +1216,14 @@ int Trace::dump(int n, FILE *out_stream)
         if (tt->isFrameBoundary() && traceFrames.size()==frames-1)
           break; // We're done!
 
-	TraceObject *pTO = tt->decode(k);
-	if (pTO)
-	  addToCurrentFrame(pTO);
+        TraceObject *pTO = tt->decode(k);
+        if (pTO)
+          addToCurrentFrame(pTO);
       }
 
       if(is_cycle_trace(k,&cycle) == 2)
-	current_cycle_time = cycle;
-	
+        current_cycle_time = cycle;
+
     } else if (get(k) != NOTHING) {
 
       cout << " could not decode trace type: 0x" << hex << get(k) << endl;
@@ -1246,7 +1246,7 @@ int Trace::dump(int n, FILE *out_stream)
 //
 unsigned int Trace::allocateTraceType(TraceType *tt)
 {
-  
+
   if(tt) {
     unsigned int i;
 
@@ -1255,8 +1255,8 @@ unsigned int Trace::allocateTraceType(TraceType *tt)
 
     if(tt->bitsTraced() < 24) {
       if(lastSubTraceType == 0) {
-	lastSubTraceType = lastTraceType;
-	lastTraceType += n;
+        lastSubTraceType = lastTraceType;
+        lastTraceType += n;
       }
 
       ltt = &lastSubTraceType;
@@ -1276,7 +1276,7 @@ unsigned int Trace::allocateTraceType(TraceType *tt)
 }
 //---------------------------------------------------------
 // dump_raw
-// mostly for debugging, 
+// mostly for debugging,
 void Trace::dump_raw(int n)
 {
   if(!n)
@@ -1304,17 +1304,17 @@ void Trace::dump_raw(int n)
     if(tt) {
       tSize = tt->entriesUsed(this,i);
       /*
-	fprintf(out_stream, "%02X:",tSize);
-	for (unsigned int ii=0; ii<tSize; ii++)
-	  fprintf(out_stream, "%08X:",get(i+ii));
+        fprintf(out_stream, "%02X:",tSize);
+        for (unsigned int ii=0; ii<tSize; ii++)
+          fprintf(out_stream, "%08X:",get(i+ii));
       */
 
       tt->dump_raw(this,i,buffer,sizeof(buffer));
     }
-    
+
     if(!tSize)
       fprintf(out_stream, "%08X:  ??",get(i));
-    if(buffer[0]) 
+    if(buffer[0])
       fprintf(out_stream,"%s",buffer);
 
     tSize = tSize ? tSize : 1;
@@ -1356,7 +1356,7 @@ TraceLog::~TraceLog()
 {
 
   disable_logging();
-    
+
   close_logfile();
 
 }
@@ -1368,22 +1368,22 @@ void TraceLog::callback()
   get_trace().cycle_counter(get_cycles().get());
 
   if((log_file||lxtp) && logging) {
-    if(last_trace_index < get_trace().trace_index) { 
+    if(last_trace_index < get_trace().trace_index) {
       for (unsigned int c=last_trace_index; c<get_trace().trace_index; c++)
         if ((get_trace().trace_buffer[c] & 0xff000000) == Trace::INSTRUCTION)
-	  n++;
+          n++;
     } else {
       for (unsigned int c=last_trace_index; c<=TRACE_BUFFER_MASK; c++)
         if ((get_trace().trace_buffer[c] & 0xff000000) == Trace::INSTRUCTION)
-	  n++;
+          n++;
       for (unsigned int c=0; c<get_trace().trace_index; c++)
         if ((get_trace().trace_buffer[c] & 0xff000000) == Trace::INSTRUCTION)
-	  n++;
+          n++;
     }
 
     //trace.dump(n, log_file, watch_reg);
     if(file_format==TRACE_FILE_FORMAT_ASCII)
-	trace.dump(n, log_file);
+        trace.dump(n, log_file);
 
     last_trace_index = trace.trace_index;
     get_cycles().set_break(get_cycles().get() + 1000,this);
@@ -1396,15 +1396,15 @@ void TraceLog::open_logfile(const char *new_fname, int format)
 
     if(!new_fname)
     {
-	switch(format)
-	{
-	case TRACE_FILE_FORMAT_LXT:
-	    new_fname = "gpsim.lxt";
+        switch(format)
+        {
+        case TRACE_FILE_FORMAT_LXT:
+            new_fname = "gpsim.lxt";
             break;
-	case TRACE_FILE_FORMAT_ASCII:
-	    new_fname = "gpsim.log";
-	    break;
-	}
+        case TRACE_FILE_FORMAT_ASCII:
+            new_fname = "gpsim.log";
+            break;
+        }
     }
 
   if(log_filename) {
@@ -1413,7 +1413,7 @@ void TraceLog::open_logfile(const char *new_fname, int format)
     // want to open a different one.
     //
 
-    if(strcmp(new_fname, log_filename) == 0 ) 
+    if(strcmp(new_fname, log_filename) == 0 )
       return;  // the file with this name is already opened
 
 
@@ -1449,12 +1449,12 @@ void TraceLog::close_logfile()
       switch(file_format)
       {
       case TRACE_FILE_FORMAT_ASCII:
-	  write_logfile();
-	  fclose(log_file);
-	  break;
+          write_logfile();
+          fclose(log_file);
+          break;
       case TRACE_FILE_FORMAT_LXT:
-	  lt_close(lxtp);
-	  break;
+          lt_close(lxtp);
+          break;
       }
 
       free(log_filename);
@@ -1482,13 +1482,13 @@ void TraceLog::write_logfile()
       buf[0] = 0;
 
       if(buffer.is_cycle_trace(i,&cycle))
-	fprintf(log_file,"Cycle 0x%016" PRINTF_INT64_MODIFIER "X\n",cycle);
+        fprintf(log_file,"Cycle 0x%016" PRINTF_GINT64_MODIFIER "X\n",cycle);
 
       i = (i + buffer.dump1(i,buf, sizeof(buf))) & TRACE_BUFFER_MASK;
 
       if(buf[0]) {
-	items_logged++;
-	fprintf(log_file,"%s\n", buf);
+        items_logged++;
+        fprintf(log_file,"%s\n", buf);
       }
     }
 
@@ -1539,12 +1539,12 @@ void TraceLog::status()
       switch(file_format)
       {
       case TRACE_FILE_FORMAT_LXT:
-	  cout << " in LXT mode" << endl;
-	  break;
+          cout << " in LXT mode" << endl;
+          break;
       case TRACE_FILE_FORMAT_ASCII:
       default:
-	  cout << " in ASCII mode" << endl;
-	  break;
+          cout << " in ASCII mode" << endl;
+          break;
       }
 
     // note that there's the cycle counter is traced for every
@@ -1561,18 +1561,18 @@ void TraceLog::status()
     int first = 1;
 
     for(int i = 0; i<MAX_BREAKPOINTS; i++) {
-      if( 
-	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_READ) ||
-	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_WRITE) ||
-	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_READ_VALUE) ||
-	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_WRITE_VALUE)
-	 ) {
+      if(
+         (bp.break_status[i].type == bp.NOTIFY_ON_REG_READ) ||
+         (bp.break_status[i].type == bp.NOTIFY_ON_REG_WRITE) ||
+         (bp.break_status[i].type == bp.NOTIFY_ON_REG_READ_VALUE) ||
+         (bp.break_status[i].type == bp.NOTIFY_ON_REG_WRITE_VALUE)
+         ) {
 
-	if(first) 
-	  cout << "Log triggers:\n";
-	first = 0;
+        if(first)
+          cout << "Log triggers:\n";
+        first = 0;
 
-	bp.dump1(i);
+        bp.dump1(i);
       }
     }
 
@@ -1598,13 +1598,13 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
     symp=lt_symbol_find(lxtp, name);
     if(symp==0)
     {
-	symp=lt_symbol_add(lxtp,
-			   name,         // name
-			   0,            // rows
-			   7,            // msb
-			   0,            // lsb
-			   LT_SYM_F_BITS //flags
-			  );
+        symp=lt_symbol_add(lxtp,
+                           name,         // name
+                           0,            // rows
+                           7,            // msb
+                           0,            // lsb
+                           LT_SYM_F_BITS //flags
+                          );
         assert(symp!=0);
     }
     lt_emit_value_int(lxtp, symp, 0, value);
@@ -1621,7 +1621,7 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
       buffer.cycle_counter(cc);
       buffer.raw(pReg->read_trace.get() | pReg->get_value());
       if(buffer.near_full())
-	write_logfile();
+        write_logfile();
       break;
     case TRACE_FILE_FORMAT_LXT:
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
@@ -1640,7 +1640,7 @@ void TraceLog::register_write(Register *pReg, guint64 cc)
       buffer.cycle_counter(cc);
       buffer.raw(pReg->write_trace.get() | pReg->get_value());
       if(buffer.near_full())
-	write_logfile();
+        write_logfile();
       break;
     case TRACE_FILE_FORMAT_LXT:
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
@@ -1659,7 +1659,7 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
       buffer.cycle_counter(cc);
       buffer.raw(pReg->read_trace.get() | pReg->get_value());
       if(buffer.near_full())
-	write_logfile();
+        write_logfile();
       break;
     case TRACE_FILE_FORMAT_LXT:
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
@@ -1678,7 +1678,7 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
       buffer.cycle_counter(cc);
       buffer.raw(pReg->write_trace.get() | pReg->get_value());
       if(buffer.near_full())
-	write_logfile();
+        write_logfile();
       break;
     case TRACE_FILE_FORMAT_LXT:
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
@@ -1712,39 +1712,39 @@ void ProfileKeeper::catchup()
         return;
     for(unsigned int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK)
     {
-	  /*
-	switch (trace.trace_buffer[i] & 0xff000000)
-	{
-	case Trace::INSTRUCTION:
-	    instruction_address=trace_pc_value;
-	    cpu->program_memory[instruction_address]->cycle_count++;
-	    trace_pc_value++;
-	    break;
+          /*
+        switch (trace.trace_buffer[i] & 0xff000000)
+        {
+        case Trace::INSTRUCTION:
+            instruction_address=trace_pc_value;
+            cpu->program_memory[instruction_address]->cycle_count++;
+            trace_pc_value++;
+            break;
 
-	case Trace::PROGRAM_COUNTER:
-	case Trace::PC_SKIP:
-	    trace_pc_value=trace.trace_buffer[i]&0xffff;
-	    break;
-	case Trace::CYCLE_INCREMENT:
-	    cpu->program_memory[instruction_address]->cycle_count++;
-	    break;
-	case Trace::REGISTER_READ:
-	    r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
-	    if(r->isa() == Register::FILE_REGISTER)
-	    {
-		r->read_access_count++;
-	    }
-	    break;
-	case Trace::REGISTER_WRITE:
-	    r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
-	    if(r->isa() == Register::FILE_REGISTER)
-	    {
-		r->write_access_count++;
-	    }
-	    break;
-		break;
-	}
-	    */
+        case Trace::PROGRAM_COUNTER:
+        case Trace::PC_SKIP:
+            trace_pc_value=trace.trace_buffer[i]&0xffff;
+            break;
+        case Trace::CYCLE_INCREMENT:
+            cpu->program_memory[instruction_address]->cycle_count++;
+            break;
+        case Trace::REGISTER_READ:
+            r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
+            if(r->isa() == Register::FILE_REGISTER)
+            {
+                r->read_access_count++;
+            }
+            break;
+        case Trace::REGISTER_WRITE:
+            r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
+            if(r->isa() == Register::FILE_REGISTER)
+            {
+                r->write_access_count++;
+            }
+            break;
+                break;
+        }
+            */
     }
 
     last_trace_index = trace.trace_index;
@@ -1755,7 +1755,7 @@ void ProfileKeeper::callback()
     if(enabled)
     {
         catchup();
-	get_cycles().set_break(get_cycles().get() + 1000,this);
+        get_cycles().set_break(get_cycles().get() + 1000,this);
     }
 }
 
@@ -1763,13 +1763,13 @@ void ProfileKeeper::enable_profiling()
 {
 
     if(enabled)
-	return;
+        return;
 
     if(!cpu) {
-	if(get_active_cpu())
-	    cpu = get_active_cpu();
-	else
-	    cout << "Warning: Profiling can't be enabled until a cpu has been selected.";
+        if(get_active_cpu())
+            cpu = get_active_cpu();
+        else
+            cout << "Warning: Profiling can't be enabled until a cpu has been selected.";
     }
 
     last_trace_index = trace.trace_index;
@@ -1781,7 +1781,7 @@ void ProfileKeeper::disable_profiling()
 {
 
     if(!enabled)
-	return;
+        return;
 
     enabled = 0;
 }
@@ -1794,7 +1794,7 @@ void ProfileKeeper::switch_cpus(Processor *pcpu)
 //*****************************************************************
 // *** KNOWN CHANGE ***
 //  Support functions that will get replaced by the CORBA interface.
-//  
+//
 
 //--------------------------------------------
 void trace_dump_all()
@@ -1850,7 +1850,7 @@ inline bool BoolEventBuffer::event(bool state)
     }
 
     return false;
-	
+
   }
 
   return true;
@@ -1864,7 +1864,7 @@ inline bool BoolEventBuffer::event(bool state)
 // search for it in the event buffer.
 //
 
-unsigned int BoolEventBuffer::get_index(guint64 event_time) 
+unsigned int BoolEventBuffer::get_index(guint64 event_time)
 {
   guint32 start_index, end_index, search_index, bstep;
   guint64 time_offset;
@@ -1905,7 +1905,7 @@ unsigned int BoolEventBuffer::get_index(guint64 event_time)
 //
 // BoolEventBuffer::activate
 //
-// 
+//
 void BoolEventBuffer::activate(bool _initial_state)
 {
 
@@ -1965,14 +1965,14 @@ BoolEventBuffer::BoolEventBuffer(bool _initial_state, guint32 _max_events)
     max_events <<= 1;
     while(1) {
       if(max_events && (max_events & (max_events-1)))
-	max_events &= max_events - 1;
+        max_events &= max_events - 1;
       else
-	break;
+        break;
 
     }
   } else if(!max_events)
     max_events = 4096;
-    
+
   max_events--;  // make the max_events a mask
 
   buffer = new guint64[max_events];
@@ -1984,5 +1984,5 @@ BoolEventBuffer::~BoolEventBuffer()
 {
 
   delete [] buffer;
-  
+
 }

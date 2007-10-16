@@ -198,7 +198,7 @@ void Value::set(Packet &pb)
 void Value::get(gint64 &i)
 {
   throw new Error(showType() +
-		  " cannot be converted to an integer ");
+                  " cannot be converted to an integer ");
 }
 
 void Value::get(int &i)
@@ -219,17 +219,17 @@ void Value::get(guint64 &i)
 void Value::get(bool &b)
 {
   throw new Error(showType() +
-		  " cannot be converted to a boolean");
+                  " cannot be converted to a boolean");
 }
 
 void Value::get(double &d)
 {
   throw new Error(showType() +
-		  " cannot be converted to a double ");
+                  " cannot be converted to a double ");
 }
 
 // get as a string - no error is thrown if the derived class
-// does not provide a method for converting to a string - 
+// does not provide a method for converting to a string -
 // instead we'll return a bogus value.
 
 void Value::get(char *buffer, int buf_size)
@@ -245,8 +245,8 @@ void Value::get(Packet &pb)
 
 bool Value::compare(ComparisonOperator *compOp, Value *rvalue)
 {
-  throw new Error(compOp->showOp() + 
-		  " comparison is not defined for " + showType());
+  throw new Error(compOp->showOp() +
+                  " comparison is not defined for " + showType());
 }
 
 Value *Value::copy()
@@ -422,7 +422,7 @@ string AbstractRange::toString()
   char buff[256];
 
   string str = "";
-  
+
   snprintf(buff,sizeof(buff),"%d:%d",left,right);
   return (string(buff));
 }
@@ -465,8 +465,8 @@ AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc)
 }
 bool AbstractRange::compare(ComparisonOperator *compOp, Value *rvalue)
 {
-  throw new Error(compOp->showOp() + 
-		  " comparison is not defined for " + showType());
+  throw new Error(compOp->showOp() +
+                  " comparison is not defined for " + showType());
 }
 
 Value *AbstractRange::copy()
@@ -510,7 +510,7 @@ bool Boolean::Parse(const char *pValue, bool &bValue) {
     return true;
   }
   else if(strncmp("false", pValue, sizeof("false")-1) == 0) {
-  	bValue = false;
+        bValue = false;
     return true;
   }
   return false;
@@ -583,7 +583,7 @@ Boolean* Boolean::typeCheck(Value* val, string valDesc)
 
 bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
 {
-  
+
   Boolean *rv = typeCheck(rvalue,"");
 
   switch(compOp->isa()) {
@@ -617,13 +617,13 @@ void Boolean::get(bool &b)
 // the member value. The reason for this is so that derived
 // classes can capture the access.
 void Boolean::get(int &i)
-{ 
+{
   bool b;
   get(b);
-  i = b ? 1 : 0; 
+  i = b ? 1 : 0;
 }
 /*
-void Boolean::get(double &d) 
+void Boolean::get(double &d)
 {
   bool b;
   get(b);
@@ -638,7 +638,7 @@ void Boolean::get(char *buffer, int buf_size)
     get(b);
     if(b)
       strncpy(buffer,"true",buf_size);
-    else 
+    else
       strncpy(buffer,"false",buf_size);
   }
 
@@ -740,10 +740,10 @@ void Integer::setDefaultBitmask(gint64 bitmask) {
 }
 
 Value *Integer::copy()
-{ 
+{
   gint64 i;
   get(i);
-  return new Integer(i); 
+  return new Integer(i);
 }
 
 void Integer::set(double d)
@@ -806,14 +806,14 @@ bool Integer::Parse(const char *pValue, gint64 &iValue) {
       }
       else {
         // decimal or 0x integer
-        return sscanf(pValue, "%" PRINTF_INT64_MODIFIER "i", &iValue) == 1;
+        return sscanf(pValue, "%" PRINTF_GINT64_MODIFIER "i", &iValue) == 1;
       }
     }
     else if(*pValue == '$' && ::isxdigit(*(pValue+1))) {
       // hexidecimal integer
       char szHex[10] = "0x";
       strcat(&szHex[0], pValue + 1);
-      return sscanf(szHex, "%"  PRINTF_INT64_MODIFIER "i" , &iValue) == 1;
+      return sscanf(szHex, "%"  PRINTF_GINT64_MODIFIER "i" , &iValue) == 1;
     }
     return false;
 }
@@ -828,12 +828,12 @@ Integer * Integer::NewObject(const char *_name, const char *pValue, const char *
 
 
 void Integer::get(gint64 &i)
-{ 
+{
   i = value;
 }
 
 void Integer::get(double &d)
-{ 
+{
   gint64 i;
   get(i);
   d = (double)i;
@@ -878,7 +878,7 @@ int Integer::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *ex
       return get_bp().set_execution_break(pCpu, iProgAddress, expr);
     }
   }
-  
+
   return -1;
 }
 
@@ -916,7 +916,7 @@ string Integer::toString(gint64 value)
   char cvtBuf[1024];
   long long int v=value;
   snprintf(cvtBuf,sizeof(cvtBuf), "%" PRINTF_INT64_MODIFIER "d", v);
-  return (string(&cvtBuf[0]));  
+  return (string(&cvtBuf[0]));
 }
 
 char *Integer::toString(char *return_str, int len)
@@ -940,7 +940,7 @@ char *Integer::toBitStr(char *return_str, int len)
     int mask=1<<31;
     for( ; mask ; mask>>=1, j++)
       if(j<len)
-	return_str[j] = ( (i & mask) ? 1 : 0);
+        return_str[j] = ( (i & mask) ? 1 : 0);
 
     if(j<len)
       return_str[j]=0;
@@ -966,14 +966,14 @@ Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin)
 
   iVal = Integer::typeCheck(val, valDesc);
   iVal->get(i);
-  
+
   if (i < valMin) {
     throw new Error(valDesc +
-                    " must be greater than " + Integer::toString(valMin) + 
+                    " must be greater than " + Integer::toString(valMin) +
                     ", saw " + Integer::toString(i)
                     );
   }
-  
+
   return(iVal);
 }
 
@@ -981,24 +981,24 @@ Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 
 {
   Integer* iVal;
   gint64 i;
-  
+
   iVal = (Integer::typeCheck(val, valDesc));
 
   iVal->get(i);
-  
+
   if ((i < valMin) || (i>valMax)) {
     throw new Error(valDesc +
-                    " must be be in the range [" + Integer::toString(valMin) + ".." + 
+                    " must be be in the range [" + Integer::toString(valMin) + ".." +
                     Integer::toString(valMax) + "], saw " + Integer::toString(i)
                     );
   }
-  
+
   return(iVal);
 }
 
 bool Integer::compare(ComparisonOperator *compOp, Value *rvalue)
 {
-  
+
   Integer *rv = typeCheck(rvalue,"");
 
   gint64 i,r;
@@ -1055,7 +1055,7 @@ Float::Float(const char *_name, double newValue,const char *_desc)
   value = newValue;
 }
 
-bool Float::Parse(const char *pValue, double &fValue) 
+bool Float::Parse(const char *pValue, double &fValue)
 {
   return pValue ? sscanf(pValue,"%lg",&fValue) == 1 : false;
 }
@@ -1125,13 +1125,13 @@ void Float::set(Packet &p)
 }
 
 void Float::get(gint64 &i)
-{ 
+{
   double d;
   get(d);
   i = (gint64)d;
 }
 void Float::get(double &d)
-{ 
+{
   d = value;
 }
 
@@ -1201,7 +1201,7 @@ Float* Float::typeCheck(Value* val, string valDesc)
 
 bool Float::compare(ComparisonOperator *compOp, Value *rvalue)
 {
-  
+
   Float *rv = typeCheck(rvalue,"");
 
   double d,r;
@@ -1256,7 +1256,7 @@ string String::toString()
 {
   if(value)
     return string(value);
-  else 
+  else
     return string("");
 }
 
@@ -1336,7 +1336,7 @@ String* String::typeCheck(Value* val, string valDesc)
 /*
 bool String::compare(ComparisonOperator *compOp, Value *rvalue)
 {
-  
+
   String *rv = typeCheck(rvalue,"");
 
   if(value < rv->value)

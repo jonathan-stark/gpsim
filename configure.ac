@@ -24,13 +24,13 @@ AC_ARG_ENABLE(gui,
      esac],[use_gui=yes])
 
 if test "$use_gui" = "no"; then
-	echo disabling gui support
+        echo disabling gui support
 else
-	echo enabling gui support
-	[
-	 use_gui=yes
-	]
-	AC_DEFINE([HAVE_GUI],[],[True if GUI is being used])
+        echo enabling gui support
+        [
+         use_gui=yes
+        ]
+        AC_DEFINE([HAVE_GUI],[],[True if GUI is being used])
 fi
 
 
@@ -52,7 +52,7 @@ else
         [
          use_sockets=yes
         ]
-	AC_DEFINE([HAVE_SOCKETS],[],[True if gpsim socket interface is being used])
+        AC_DEFINE([HAVE_SOCKETS],[],[True if gpsim socket interface is being used])
 fi
 
 GTK=
@@ -135,6 +135,15 @@ AC_CHECK_FUNCS([floor gethostbyname gethostname gettimeofday memset pow select s
 # config_win32.h.in defines this for Visual Studio stdclib as "I64"
 AC_DEFINE([PRINTF_INT64_MODIFIER],["ll"],[printf modifier define for long long])
 
+# define printf modifier for GINT64 (guint64 and gint64) as "ll" on 32 bit machines and as "l" on 64 bit machines
+# config_win32.h.in defines this for Visual Studio stdclib as "I64"
+AC_CHECK_SIZEOF(long)
+if test "$ac_cv_sizeof_long" -ge 8; then
+  gpsim_cv_printf_gint64_modifier=l
+else
+  gpsim_cv_printf_gint64_modifier=ll
+fi
+AC_DEFINE_UNQUOTED([PRINTF_GINT64_MODIFIER],"$gpsim_cv_printf_gint64_modifier",[printf modifier define for GINT64])
 
 AM_CFLAGS=
 AM_CXXFLAGS=
@@ -180,9 +189,9 @@ AC_CONFIG_FILES([Makefile
                  gpsim/Makefile
                  gui/Makefile
                  modules/Makefile
-		 regression/Makefile
+                 regression/Makefile
                  src/Makefile
-		 src/dspic/Makefile
+                 src/dspic/Makefile
                  xpms/Makefile
                  gpsim.spec])
 

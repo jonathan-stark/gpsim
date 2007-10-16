@@ -172,8 +172,8 @@ static unsigned int lookup_address_symbol(const char *name)
 }
 
 static void add_range(Profile_Window *pw,
-		      const char *startaddress_text,
-		      const char *endaddress_text)
+                      const char *startaddress_text,
+                      const char *endaddress_text)
 {
     guint64 gcycles;
     struct profile_range_entry *profile_range_entry;
@@ -190,27 +190,27 @@ static void add_range(Profile_Window *pw,
     startaddress = strtoul(startaddress_text,&end,0);
     if(*end!='\0')
     {
-	// Try to look the address up in symbol table.
-	startaddress=lookup_address_symbol(startaddress_text);
-	if(startaddress==UINT_MAX)
-	{
-	    startaddress=0;
-	    sprintf(msg,"Could not find symbol \"%s\"",startaddress_text);
-	    gui_message(msg);
-	}
+        // Try to look the address up in symbol table.
+        startaddress=lookup_address_symbol(startaddress_text);
+        if(startaddress==UINT_MAX)
+        {
+            startaddress=0;
+            sprintf(msg,"Could not find symbol \"%s\"",startaddress_text);
+            gui_message(msg);
+        }
     }
 
     endaddress = strtoul(endaddress_text,&end,0);
     if(*end!='\0')
     {
-	// Try to look the address up in symbol table.
+        // Try to look the address up in symbol table.
         endaddress=lookup_address_symbol(endaddress_text);
-	if(endaddress==UINT_MAX)
-	{
-	    endaddress=0;
-	    sprintf(msg,"Could not find symbol \"%s\"",endaddress_text);
-	    gui_message(msg);
-	}
+        if(endaddress==UINT_MAX)
+        {
+            endaddress=0;
+            sprintf(msg,"Could not find symbol \"%s\"",endaddress_text);
+            gui_message(msg);
+        }
     }
 
     gcycles=0;
@@ -259,52 +259,52 @@ static void add_range_dialog(Profile_Window *pw)
 
     if(dialog==0)
     {
-	dialog = gtk_dialog_new();
-	gtk_window_set_title(GTK_WINDOW(dialog),"Add range");
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",
-				  GTK_SIGNAL_FUNC(gtk_widget_hide),
-				  GTK_OBJECT(dialog));
+        dialog = gtk_dialog_new();
+        gtk_window_set_title(GTK_WINDOW(dialog),"Add range");
+        gtk_signal_connect_object(GTK_OBJECT(dialog),
+                                  "delete_event",
+                                  GTK_SIGNAL_FUNC(gtk_widget_hide),
+                                  GTK_OBJECT(dialog));
 
-	label=gtk_label_new("addresses can be entered either as symbols, or as values. \nValues can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
-	
-	hbox = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+        label=gtk_label_new("addresses can be entered either as symbols, or as values. \nValues can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
+        gtk_widget_show(label);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
 
-	button = gtk_button_new_with_label("Add range");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-	
-	button = gtk_button_new_with_label("Cancel");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+        hbox = gtk_hbox_new(0,0);
+        gtk_widget_show(hbox);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
 
-	label=gtk_label_new("Enter start address");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
+        button = gtk_button_new_with_label("Add range");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
 
-	startentry=gtk_entry_new();
-	gtk_widget_show(startentry);
-	gtk_box_pack_start(GTK_BOX(hbox), startentry,FALSE,FALSE,20);
+        button = gtk_button_new_with_label("Cancel");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
 
-	label=gtk_label_new("Enter stop address");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
+        label=gtk_label_new("Enter start address");
+        gtk_widget_show(label);
+        gtk_box_pack_start(GTK_BOX(hbox), label,
+                           FALSE,FALSE, 20);
 
-	endentry=gtk_entry_new();
-	gtk_widget_show(endentry);
-	gtk_box_pack_start(GTK_BOX(hbox), endentry,FALSE,FALSE,20);
+        startentry=gtk_entry_new();
+        gtk_widget_show(startentry);
+        gtk_box_pack_start(GTK_BOX(hbox), startentry,FALSE,FALSE,20);
+
+        label=gtk_label_new("Enter stop address");
+        gtk_widget_show(label);
+        gtk_box_pack_start(GTK_BOX(hbox), label,
+                           FALSE,FALSE, 20);
+
+        endentry=gtk_entry_new();
+        gtk_widget_show(endentry);
+        gtk_box_pack_start(GTK_BOX(hbox), endentry,FALSE,FALSE,20);
 
 
     }
@@ -313,29 +313,29 @@ static void add_range_dialog(Profile_Window *pw)
 
     gtk_grab_add(dialog);
     while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-	gtk_main_iteration();
+        gtk_main_iteration();
     gtk_grab_remove(dialog);
-    
+
     gtk_widget_hide(dialog);
 
     if(retval==(int)TRUE)
     {
-	// Add range.
+        // Add range.
 
-	const gchar *startentry_text;
-	const gchar *endentry_text;
+        const gchar *startentry_text;
+        const gchar *endentry_text;
 
-	startentry_text = gtk_entry_get_text(GTK_ENTRY(startentry));
-	if(*startentry_text!='\0')
-	{
-	    endentry_text = gtk_entry_get_text(GTK_ENTRY(endentry));
-	    if(*endentry_text!='\0')
-	    {
+        startentry_text = gtk_entry_get_text(GTK_ENTRY(startentry));
+        if(*startentry_text!='\0')
+        {
+            endentry_text = gtk_entry_get_text(GTK_ENTRY(endentry));
+            if(*endentry_text!='\0')
+            {
                 add_range(pw, startentry_text, endentry_text);
-	    }
-	}
+            }
+        }
     }
-    
+
     return;
 }
 
@@ -357,7 +357,7 @@ symcompare(Value *sym1, Value *sym2)
       return 1;
   }
   catch (Error *e) {
-    
+
     delete e;
   }
   return 0;
@@ -365,7 +365,7 @@ symcompare(Value *sym1, Value *sym2)
 
 static void
 file_selection_ok (GtkWidget        *w,
-		   GtkFileSelection *fs)
+                   GtkFileSelection *fs)
 {
     const char *file;
 
@@ -375,7 +375,7 @@ file_selection_ok (GtkWidget        *w,
                               GTK_PLOT_PORTRAIT, 0, GTK_PLOT_LETTER);
 #else
     gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), (char *)file, 0, 0,
-			      GTK_PLOT_LETTER);
+                              GTK_PLOT_LETTER);
 #endif
 
     gtk_widget_hide (GTK_WIDGET (fs));
@@ -393,7 +393,7 @@ print_plot (Profile_Window *pw)
                               GTK_PLOT_PORTRAIT, 0, GTK_PLOT_LETTER);
 #else
     gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file, 0, 0,
-			      GTK_PLOT_LETTER);
+                              GTK_PLOT_LETTER);
 #endif
     sprintf(cmd,"lpr %s",file);
     system(cmd);
@@ -402,7 +402,7 @@ print_plot (Profile_Window *pw)
 
 extern int gui_question(char *question, char *a, char *b);
 
-static GtkItemFactoryCallback 
+static GtkItemFactoryCallback
 open_plotsave_dialog(Profile_Window *pw)
 {
     static GtkWidget *window = 0;
@@ -410,26 +410,26 @@ open_plotsave_dialog(Profile_Window *pw)
     if (!window)
     {
 
-	window = gtk_file_selection_new ("Save postscript to file...");
+        window = gtk_file_selection_new ("Save postscript to file...");
 
-	gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
+        gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
 
-	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
+        gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-	gtk_signal_connect_object(GTK_OBJECT(window),
-				  "delete_event",
-				  GTK_SIGNAL_FUNC(gtk_widget_hide),
-				  GTK_OBJECT(window));
-//	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-//				   GTK_OBJECT(window));
+        gtk_signal_connect_object(GTK_OBJECT(window),
+                                  "delete_event",
+                                  GTK_SIGNAL_FUNC(gtk_widget_hide),
+                                  GTK_OBJECT(window));
+//      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//                                 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//                                 GTK_OBJECT(window));
 
-	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
-			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
-			    window);
-	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-				   "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
-				   GTK_OBJECT (window));
+        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
+                            "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+                            window);
+        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+                                   "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
+                                   GTK_OBJECT (window));
     }
     gtk_widget_show (window);
     return 0;
@@ -445,10 +445,10 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==0 || data==0)
     {
-	printf("Warning plot_popup_activated(%p,%p)\n",widget,data);
-	return;
+        printf("Warning plot_popup_activated(%p,%p)\n",widget,data);
+        return;
     }
-    
+
     item = (menu_item *)data;
 
     entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
@@ -456,14 +456,14 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
     switch(item->id)
     {
     case MENU_SAVE_PS:
-	open_plotsave_dialog(popup_pw);
-	break;
+        open_plotsave_dialog(popup_pw);
+        break;
     case MENU_PRINT:
         print_plot(popup_pw);
-	break;
+        break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+        puts("Unhandled menuitem?");
+        break;
     }
 }
 #endif
@@ -476,20 +476,20 @@ exestats_popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==0 || data==0)
     {
-	printf("Warning exestats_popup_activated(%p,%p)\n",widget,data);
-	return;
+        printf("Warning exestats_popup_activated(%p,%p)\n",widget,data);
+        return;
     }
-    
+
     item = (menu_item *)data;
 
     switch(item->id)
     {
     case MENU_PLOT:
         plot_routine_histogram(popup_pw);
-	break;
+        break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+        puts("Unhandled menuitem?");
+        break;
     }
 }
 
@@ -508,22 +508,22 @@ plot_build_menu(Profile_Window *pw)
       printf("Warning build_menu(%p)\n",pw);
       return 0;
   }
-    
+
   popup_pw = pw;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
+
   for (i=0; i < (sizeof(plot_menu_items)/sizeof(plot_menu_items[0])) ; i++){
       plot_menu_items[i].item=item=gtk_menu_item_new_with_label(plot_menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) plot_popup_activated,
-			 &plot_menu_items[i]);
-      
+                         (GtkSignalFunc) plot_popup_activated,
+                         &plot_menu_items[i]);
+
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
@@ -546,22 +546,22 @@ exestats_build_menu(Profile_Window *pw)
       printf("Warning build_menu(%p)\n",pw);
       return 0;
   }
-    
+
   popup_pw = pw;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
+
   for (i=0; i < (sizeof(exestats_menu_items)/sizeof(exestats_menu_items[0])) ; i++){
       exestats_menu_items[i].item=item=gtk_menu_item_new_with_label(exestats_menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) exestats_popup_activated,
-			 &exestats_menu_items[i]);
-      
+                         (GtkSignalFunc) exestats_popup_activated,
+                         &exestats_menu_items[i]);
+
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
@@ -578,8 +578,8 @@ exestats_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
 
     if(widget==0 || event==0 || pw==0)
     {
-	printf("Warning exestats_popup(%p,%p,%p)\n",widget,event,pw);
-	return 0;
+        printf("Warning exestats_popup(%p,%p,%p)\n",widget,event,pw);
+        return 0;
     }
 
     popup=pw->exestats_popup_menu;
@@ -588,7 +588,7 @@ exestats_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
     {
 
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		     3, event->time);
+                     3, event->time);
     }
     return FALSE;
 }
@@ -603,8 +603,8 @@ plot_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
 
     if(widget==0 || event==0 || pw==0)
     {
-	printf("Warning do_popup(%p,%p,%p)\n",widget,event,pw);
-	return 0;
+        printf("Warning do_popup(%p,%p,%p)\n",widget,event,pw);
+        return 0;
     }
 
     popup=pw->plot_popup_menu;
@@ -613,7 +613,7 @@ plot_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
     {
 
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		     3, event->time);
+                     3, event->time);
     }
     return FALSE;
 }
@@ -660,12 +660,12 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
     if(has_old_graph)
     {
-	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext);
-	for(i=0;i<last_numpoints;i++)
-	{
-	    gtk_plot_remove_text(GTK_PLOT(active_plot),bartext[i]);
+        gtk_plot_remove_text(GTK_PLOT(active_plot),infotext);
+        for(i=0;i<last_numpoints;i++)
+        {
+            gtk_plot_remove_text(GTK_PLOT(active_plot),bartext[i]);
 
-	}
+        }
         free(px2);
         free(py2);
         free(bartext);
@@ -687,10 +687,10 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
     for(i=0;i<numpoints;i++)
     {
-	px2[i]=(i+1)*barwidth*2;
-	if(maxy<cyclearray[i])
+        px2[i]=(i+1)*barwidth*2;
+        if(maxy<cyclearray[i])
             maxy=cyclearray[i];
-	py2[i]=cyclearray[i];
+        py2[i]=cyclearray[i];
     }
 
     maxy=maxy + (maxy/10);
@@ -701,7 +701,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     i64=1;
     while(x>=10L)
     {
-	x/=10L;
+        x/=10L;
         i64*=10L;
     }
     tickdelta=x*i64/10;
@@ -709,7 +709,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     if(tickdelta<1)
         tickdelta=1;
 
-    
+
     if(!pw || !pw->gp || !pw->gp->cpu)
       return 0;
 
@@ -724,36 +724,36 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
       const char *file_name;
 
       if(fc)
-	file_name = fc->name().c_str();
+        file_name = fc->name().c_str();
       else
-	continue;
-        
+        continue;
+
 
       //gpsim_file = &(gp->cpu->files[i]);
       //file_name = gpsim_file->name;
-	if(!strcmp(file_name+strlen(file_name)-4,".asm")
-	   ||!strcmp(file_name+strlen(file_name)-4,".ASM")
-	   ||!strcmp(file_name+strlen(file_name)-4,".hex")
-	   ||!strcmp(file_name+strlen(file_name)-4,".HEX")
-	  )
-	{
-	    strncpy(filename,file_name,strlen(file_name)-4);
-	    filename[strlen(file_name)-4]=0;
+        if(!strcmp(file_name+strlen(file_name)-4,".asm")
+           ||!strcmp(file_name+strlen(file_name)-4,".ASM")
+           ||!strcmp(file_name+strlen(file_name)-4,".hex")
+           ||!strcmp(file_name+strlen(file_name)-4,".HEX")
+          )
+        {
+            strncpy(filename,file_name,strlen(file_name)-4);
+            filename[strlen(file_name)-4]=0;
             break;
-	}
+        }
     }
 
 
     // This information is put at the top of the plot
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
-	    filename,
+            filename,
             ctime(&t),
-	    pw->gp->cpu->name().c_str());
+            pw->gp->cpu->name().c_str());
 
     // ctime adds a newline. Remove it.
     for(i=0;infostring[i];i++)
-	if(infostring[i]=='\n')
-	    infostring[i]=' ';
+        if(infostring[i]=='\n')
+            infostring[i]=' ';
 
 
 
@@ -763,120 +763,120 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     // Only create the window once.
     if(!window1)
     {
-	window1=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window1), "Profile plot");
-	gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
-	gtk_container_border_width(GTK_CONTAINER(window1),0);
+        window1=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+        gtk_window_set_title(GTK_WINDOW(window1), "Profile plot");
+        gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
+        gtk_container_border_width(GTK_CONTAINER(window1),0);
 
-	gtk_signal_connect_object(GTK_OBJECT(window1),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
-//	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
-//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-//				   GTK_OBJECT(window1));
+        gtk_signal_connect_object(GTK_OBJECT(window1),
+                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
+//      gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+//                                 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//                                 GTK_OBJECT(window1));
 
-	vbox1=gtk_vbox_new(FALSE,0);
-	gtk_container_add(GTK_CONTAINER(window1),vbox1);
-	gtk_widget_show(vbox1);
+        vbox1=gtk_vbox_new(FALSE,0);
+        gtk_container_add(GTK_CONTAINER(window1),vbox1);
+        gtk_widget_show(vbox1);
 
-	scrollw1=gtk_scrolled_window_new(0, 0);
-	gtk_container_border_width(GTK_CONTAINER(scrollw1),0);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollw1),
-				       GTK_POLICY_ALWAYS,GTK_POLICY_ALWAYS);
-	gtk_box_pack_start(GTK_BOX(vbox1),scrollw1, TRUE, TRUE,0);
-	gtk_widget_show(scrollw1);
+        scrollw1=gtk_scrolled_window_new(0, 0);
+        gtk_container_border_width(GTK_CONTAINER(scrollw1),0);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollw1),
+                                       GTK_POLICY_ALWAYS,GTK_POLICY_ALWAYS);
+        gtk_box_pack_start(GTK_BOX(vbox1),scrollw1, TRUE, TRUE,0);
+        gtk_widget_show(scrollw1);
 
-	pw->plot_canvas=canvas = gtk_plot_canvas_new(page_width, page_height, 1.);
-	GTK_PLOT_CANVAS_SET_FLAGS(GTK_PLOT_CANVAS(canvas), GTK_PLOT_CANVAS_DND_FLAGS);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollw1), canvas);
+        pw->plot_canvas=canvas = gtk_plot_canvas_new(page_width, page_height, 1.);
+        GTK_PLOT_CANVAS_SET_FLAGS(GTK_PLOT_CANVAS(canvas), GTK_PLOT_CANVAS_DND_FLAGS);
+        gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollw1), canvas);
 
-	gtk_widget_show(canvas);
+        gtk_widget_show(canvas);
 
 
-	pw->plot_popup_menu=plot_build_menu(pw);
+        pw->plot_popup_menu=plot_build_menu(pw);
 
-	gtk_signal_connect(GTK_OBJECT(canvas),
-			   "button_press_event",
-			   (GtkSignalFunc) plot_do_popup,
-			   pw);
+        gtk_signal_connect(GTK_OBJECT(canvas),
+                           "button_press_event",
+                           (GtkSignalFunc) plot_do_popup,
+                           pw);
 
-	plot = gtk_plot_new_with_size(0, PLOTWIDTH, PLOTHEIGHT);
-	gtk_widget_show(plot);
+        plot = gtk_plot_new_with_size(0, PLOTWIDTH, PLOTHEIGHT);
+        gtk_widget_show(plot);
 
-	active_plot=plot;
+        active_plot=plot;
 
-	gdk_color_parse("light yellow", &bg_color);
-	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
-	gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
+        gdk_color_parse("light yellow", &bg_color);
+        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
+        gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
 
-	gdk_color_parse("black", &color1);
-	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
-	gdk_color_parse("black", &color2);
-	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
+        gdk_color_parse("black", &color1);
+        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
+        gdk_color_parse("black", &color2);
+        gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
 #ifdef GTKEXTRA_2
-	gtk_plot_hide_legends(GTK_PLOT(active_plot));
-	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP),0);
-	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM),0);
-	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT),0);
-	gtk_plot_axis_set_visible(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP), TRUE);
-	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
-	gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(canvas), gtk_plot_canvas_plot_new(GTK_PLOT(active_plot)), PLOTXPOS, PLOTYPOS, PLOTWIDTH, PLOTHEIGHT);
-	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP));
-	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM));
-	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT));
-	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT));
+        gtk_plot_hide_legends(GTK_PLOT(active_plot));
+        gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP),0);
+        gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM),0);
+        gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT),0);
+        gtk_plot_axis_set_visible(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP), TRUE);
+        gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
+        gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(canvas), gtk_plot_canvas_plot_new(GTK_PLOT(active_plot)), PLOTXPOS, PLOTYPOS, PLOTWIDTH, PLOTHEIGHT);
+        gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP));
+        gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM));
+        gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT));
+        gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT));
 #else
-	gtk_plot_hide_legends(GTK_PLOT(active_plot));
+        gtk_plot_hide_legends(GTK_PLOT(active_plot));
 
-	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
-	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM,0);
-	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
-	gtk_plot_axis_set_visible(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP, TRUE);
-	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
-	gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
-	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP);
-	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM);
-	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT);
-	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
+        gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
+        gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM,0);
+        gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
+        gtk_plot_axis_set_visible(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP, TRUE);
+        gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
+        gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
+        gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP);
+        gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM);
+        gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT);
+        gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
 #endif
-	gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
-	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
-	gtk_widget_show(active_plot);
+        gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
+        gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
+        gtk_widget_show(active_plot);
 
 
 
-	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
-	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
+        dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
+        gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
 #ifdef GTKEXTRA_2
     gtk_plot_axis_set_ticks(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT), tickdelta, 0);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
     gtk_plot_axis_set_labels_numbers(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT),
-				     maxy < 10000 ? GTK_PLOT_LABEL_FLOAT : GTK_PLOT_LABEL_EXP, 0);
+                                     maxy < 10000 ? GTK_PLOT_LABEL_FLOAT : GTK_PLOT_LABEL_EXP, 0);
 #else
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_Y, tickdelta, 0);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
-				     GTK_PLOT_AXIS_LEFT,
-				     maxy<10000?0:GTK_PLOT_LABEL_EXP,
+                                     GTK_PLOT_AXIS_LEFT,
+                                     maxy<10000?0:GTK_PLOT_LABEL_EXP,
                                      0);
 #endif
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, 0, 0, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
-			     GTK_PLOT_SYMBOL_NONE,
-			     GTK_PLOT_SYMBOL_FILLED,
-			     0, 4.0, &color1,&color2);
+                             GTK_PLOT_SYMBOL_NONE,
+                             GTK_PLOT_SYMBOL_FILLED,
+                             0, 4.0, &color1,&color2);
 #if GTK_MAJOR_VERSION >= 2
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-				      GTK_PLOT_LINE_NONE,
+                                      GTK_PLOT_LINE_NONE,
                                       GDK_CAP_BUTT, GDK_JOIN_MITER,
-				      5, &color2);
+                                      5, &color2);
 #else
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-				      GTK_PLOT_LINE_NONE,
-				      5, &color2);
+                                      GTK_PLOT_LINE_NONE,
+                                      5, &color2);
 #endif
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
@@ -887,33 +887,33 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     for(i=0;i<numpoints;i++)
     {
 
-	bartext[i]=gtk_plot_put_text(GTK_PLOT(active_plot),
-				     PLOTXPOS+px2[i]*PLOTWIDTH,
-				     PLOTYPOS+PLOTHEIGHT+0.01,
-				     0,
-				     20,
-				     270,
-				     0,
-				     0,
-				     TRUE,
-				     GTK_JUSTIFY_LEFT,
-				     pointlabel[i]);
+        bartext[i]=gtk_plot_put_text(GTK_PLOT(active_plot),
+                                     PLOTXPOS+px2[i]*PLOTWIDTH,
+                                     PLOTYPOS+PLOTHEIGHT+0.01,
+                                     0,
+                                     20,
+                                     270,
+                                     0,
+                                     0,
+                                     TRUE,
+                                     GTK_JUSTIFY_LEFT,
+                                     pointlabel[i]);
 
-	gtk_plot_draw_text(GTK_PLOT(active_plot),*bartext[i]);
+        gtk_plot_draw_text(GTK_PLOT(active_plot),*bartext[i]);
 
     }
 
     infotext=gtk_plot_put_text(GTK_PLOT(active_plot),
-			       0.5,
-			       PLOTYPOS-0.05,
-			       0,
-			       20,
-			       00,
-			       0,
-			       0,
-			       TRUE,
-			       GTK_JUSTIFY_CENTER,
-			       infostring);
+                               0.5,
+                               PLOTYPOS-0.05,
+                               0,
+                               20,
+                               00,
+                               0,
+                               0,
+                               TRUE,
+                               GTK_JUSTIFY_CENTER,
+                               infostring);
 
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext);
 
@@ -923,7 +923,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
     has_old_graph=1;
     last_numpoints=numpoints;
-#endif // 
+#endif //
     return 0;
 }
 
@@ -981,8 +981,8 @@ int plot_routine_histogram(Profile_Window *pw)
 
     if(has_old_graph)
     {
-	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext1);
-	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext2);
+        gtk_plot_remove_text(GTK_PLOT(active_plot),infotext1);
+        gtk_plot_remove_text(GTK_PLOT(active_plot),infotext2);
         free(px2);
         free(py2);
     }
@@ -1000,8 +1000,8 @@ int plot_routine_histogram(Profile_Window *pw)
     iter=pw->histogram_profile_list;
     while(iter!=0)
     {
-	numpoints++;
-	iter=iter->next;
+        numpoints++;
+        iter=iter->next;
     }
 
     px2=(double*)malloc(numpoints*sizeof(double));
@@ -1015,23 +1015,23 @@ int plot_routine_histogram(Profile_Window *pw)
 
     while(iter!=0)
     {
-	struct cycle_histogram_counter *chc;
+        struct cycle_histogram_counter *chc;
         chc=(struct cycle_histogram_counter*)iter->data;
 
-	px2[j]=(double)chc->histo_cycles;
-	py2[j]=(double)chc->count;
-	if(maxy<chc->count)
-	    maxy=chc->count;
-	if(maxx<chc->histo_cycles)
-	    maxx=chc->histo_cycles;
-	if(minx>chc->histo_cycles)
-	    minx=chc->histo_cycles;
+        px2[j]=(double)chc->histo_cycles;
+        py2[j]=(double)chc->count;
+        if(maxy<chc->count)
+            maxy=chc->count;
+        if(maxx<chc->histo_cycles)
+            maxx=chc->histo_cycles;
+        if(minx>chc->histo_cycles)
+            minx=chc->histo_cycles;
 
-	totalcycles+=chc->histo_cycles*chc->count;
+        totalcycles+=chc->histo_cycles*chc->count;
         totalcount+=chc->count;
 
         j++;
-	iter=iter->next;
+        iter=iter->next;
     }
 
     mincycles=minx;
@@ -1047,19 +1047,19 @@ int plot_routine_histogram(Profile_Window *pw)
     i64=1;
     while(y>=10L)
     {
-	y/=10L;
+        y/=10L;
         i64*=10L;
     }
     tickdelta_y=y*i64/10;
     if(tickdelta_y<1)
-	tickdelta_y=1;
+        tickdelta_y=1;
 
     // Compute tickdelta for easy reading.
     x=maxx-minx;
     i64=1;
     while(x>=10L)
     {
-	x/=10L;
+        x/=10L;
         i64*=10L;
     }
     tickdelta_x=x*i64/5;
@@ -1072,7 +1072,7 @@ int plot_routine_histogram(Profile_Window *pw)
     margin= margin + (margin>>3) + (margin>>5)+1;
     maxx=maxx+margin;
     if(minx>margin)
-	minx=minx-margin;
+        minx=minx-margin;
     else
         minx=0;
 
@@ -1082,123 +1082,123 @@ int plot_routine_histogram(Profile_Window *pw)
     // Only create the window once.
     if(!window1)
     {
-	window1=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_title(GTK_WINDOW(window1), "Routine histogram");
-	gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
-	gtk_container_border_width(GTK_CONTAINER(window1),0);
+        window1=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+        gtk_window_set_title(GTK_WINDOW(window1), "Routine histogram");
+        gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
+        gtk_container_border_width(GTK_CONTAINER(window1),0);
 
-	gtk_signal_connect_object(GTK_OBJECT(window1),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
+        gtk_signal_connect_object(GTK_OBJECT(window1),
+                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
 
-	vbox1=gtk_vbox_new(FALSE,0);
-	gtk_container_add(GTK_CONTAINER(window1),vbox1);
-	gtk_widget_show(vbox1);
+        vbox1=gtk_vbox_new(FALSE,0);
+        gtk_container_add(GTK_CONTAINER(window1),vbox1);
+        gtk_widget_show(vbox1);
 
-	scrollw1=gtk_scrolled_window_new(0, 0);
-	gtk_container_border_width(GTK_CONTAINER(scrollw1),0);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollw1),
-				       GTK_POLICY_ALWAYS,GTK_POLICY_ALWAYS);
-	gtk_box_pack_start(GTK_BOX(vbox1),scrollw1, TRUE, TRUE,0);
-	gtk_widget_show(scrollw1);
+        scrollw1=gtk_scrolled_window_new(0, 0);
+        gtk_container_border_width(GTK_CONTAINER(scrollw1),0);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrollw1),
+                                       GTK_POLICY_ALWAYS,GTK_POLICY_ALWAYS);
+        gtk_box_pack_start(GTK_BOX(vbox1),scrollw1, TRUE, TRUE,0);
+        gtk_widget_show(scrollw1);
 
-	pw->plot_canvas=canvas = gtk_plot_canvas_new(page_width, page_height, 1.);
-	GTK_PLOT_CANVAS_SET_FLAGS(GTK_PLOT_CANVAS(canvas), GTK_PLOT_CANVAS_DND_FLAGS);
-	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollw1), canvas);
+        pw->plot_canvas=canvas = gtk_plot_canvas_new(page_width, page_height, 1.);
+        GTK_PLOT_CANVAS_SET_FLAGS(GTK_PLOT_CANVAS(canvas), GTK_PLOT_CANVAS_DND_FLAGS);
+        gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrollw1), canvas);
 
-	gtk_widget_show(canvas);
+        gtk_widget_show(canvas);
 
 
-	pw->plot_popup_menu=plot_build_menu(pw);
+        pw->plot_popup_menu=plot_build_menu(pw);
 
-	gtk_signal_connect(GTK_OBJECT(canvas),
-			   "button_press_event",
-			   (GtkSignalFunc) plot_do_popup,
-			   pw);
+        gtk_signal_connect(GTK_OBJECT(canvas),
+                           "button_press_event",
+                           (GtkSignalFunc) plot_do_popup,
+                           pw);
 
-	plot = gtk_plot_new_with_size(0, PLOTWIDTH, PLOTHEIGHT);
-	gtk_widget_show(plot);
+        plot = gtk_plot_new_with_size(0, PLOTWIDTH, PLOTHEIGHT);
+        gtk_widget_show(plot);
 
-	active_plot=plot;
+        active_plot=plot;
 
-	gdk_color_parse("light yellow", &bg_color);
-	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
-	gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
+        gdk_color_parse("light yellow", &bg_color);
+        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
+        gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
 
-	gdk_color_parse("black", &color1);
-	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
-	gdk_color_parse("black", &color2);
-	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
+        gdk_color_parse("black", &color1);
+        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
+        gdk_color_parse("black", &color2);
+        gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
 #ifdef GTKEXTRA_2
-	gtk_plot_hide_legends(GTK_PLOT(active_plot));
-	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP),0);
-	gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT),0);
-	gtk_plot_axis_set_visible(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP), TRUE);
-	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
-	gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(canvas), gtk_plot_canvas_plot_new(GTK_PLOT(active_plot)), PLOTXPOS, PLOTYPOS, PLOTWIDTH, PLOTHEIGHT);
-	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP));
-	gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT));
+        gtk_plot_hide_legends(GTK_PLOT(active_plot));
+        gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP),0);
+        gtk_plot_axis_show_labels(gtk_plot_get_axis(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT),0);
+        gtk_plot_axis_set_visible(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP), TRUE);
+        gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
+        gtk_plot_canvas_put_child(GTK_PLOT_CANVAS(canvas), gtk_plot_canvas_plot_new(GTK_PLOT(active_plot)), PLOTXPOS, PLOTYPOS, PLOTWIDTH, PLOTHEIGHT);
+        gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP));
+        gtk_plot_axis_hide_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT));
 #else
-	gtk_plot_hide_legends(GTK_PLOT(active_plot));
-	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
-	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
-	gtk_plot_axis_set_visible(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP, TRUE);
-	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
-	gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
-	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP);
-	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
+        gtk_plot_hide_legends(GTK_PLOT(active_plot));
+        gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
+        gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
+        gtk_plot_axis_set_visible(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP, TRUE);
+        gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
+        gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
+        gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP);
+        gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
 #endif
-	gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
-	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
-	gtk_widget_show(active_plot);
+        gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
+        gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
+        gtk_widget_show(active_plot);
 
 
 
-	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
-	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
+        dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
+        gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
 #ifdef GTKEXTRA_2
     gtk_plot_axis_set_ticks(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT), tickdelta_y, 1);
     gtk_plot_axis_set_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT), "Frequency");
     gtk_plot_axis_set_labels_numbers(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT),
-				     GTK_PLOT_LABEL_FLOAT, 0);
+                                     GTK_PLOT_LABEL_FLOAT, 0);
 
     gtk_plot_axis_set_ticks(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT), tickdelta_x, 1);
     gtk_plot_axis_set_title(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM), "Cycles");
     gtk_plot_axis_set_labels_numbers(gtk_plot_get_axis(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM),
-				     maxx<10000 ? GTK_PLOT_LABEL_FLOAT : GTK_PLOT_LABEL_EXP, 0);
+                                     maxx<10000 ? GTK_PLOT_LABEL_FLOAT : GTK_PLOT_LABEL_EXP, 0);
 #else
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_Y, tickdelta_y, 1);
     gtk_plot_axis_set_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT, "Frequency");
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
-				     GTK_PLOT_AXIS_LEFT,
-				     0,
+                                     GTK_PLOT_AXIS_LEFT,
+                                     0,
                                      0);
 
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_X, tickdelta_x, 1);
     gtk_plot_axis_set_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM, "Cycles");
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
-				     GTK_PLOT_AXIS_BOTTOM,
-				     maxx<10000?0:GTK_PLOT_LABEL_EXP,
-				     0);
+                                     GTK_PLOT_AXIS_BOTTOM,
+                                     maxx<10000?0:GTK_PLOT_LABEL_EXP,
+                                     0);
 #endif
     gtk_plot_set_range(GTK_PLOT(active_plot), minx, (gdouble)maxx, 0., (gdouble)maxy);
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, 0, 0, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
-			     GTK_PLOT_SYMBOL_NONE,
-			     GTK_PLOT_SYMBOL_FILLED,
-			     0, 4.0, &color1,&color2);
+                             GTK_PLOT_SYMBOL_NONE,
+                             GTK_PLOT_SYMBOL_FILLED,
+                             0, 4.0, &color1,&color2);
 #if GTK_MAJOR_VERSION >= 2
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-				      GTK_PLOT_LINE_NONE,
+                                      GTK_PLOT_LINE_NONE,
                                       GDK_CAP_BUTT, GDK_JOIN_MITER,
-				      5, &color2);
+                                      5, &color2);
 #else
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-				      GTK_PLOT_LINE_NONE,
-				      5, &color2);
+                                      GTK_PLOT_LINE_NONE,
+                                      5, &color2);
 #endif
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
@@ -1217,69 +1217,69 @@ int plot_routine_histogram(Profile_Window *pw)
       const char *file_name;
 
       if(fc)
-	file_name = fc->name().c_str();
+        file_name = fc->name().c_str();
       else
-	continue;
-        
+        continue;
+
 
       //gpsim_file = &(gp->cpu->files[i]);
       //file_name = gpsim_file->name;
-	if(!strcmp(file_name+strlen(file_name)-4,".asm")
-	   ||!strcmp(file_name+strlen(file_name)-4,".ASM")
-	   ||!strcmp(file_name+strlen(file_name)-4,".hex")
-	   ||!strcmp(file_name+strlen(file_name)-4,".HEX")
-	  )
-	{
-	    strncpy(filename,file_name,strlen(file_name)-4);
-	    filename[strlen(file_name)-4]=0;
+        if(!strcmp(file_name+strlen(file_name)-4,".asm")
+           ||!strcmp(file_name+strlen(file_name)-4,".ASM")
+           ||!strcmp(file_name+strlen(file_name)-4,".hex")
+           ||!strcmp(file_name+strlen(file_name)-4,".HEX")
+          )
+        {
+            strncpy(filename,file_name,strlen(file_name)-4);
+            filename[strlen(file_name)-4]=0;
             break;
-	}
+        }
     }
     // This information is put at top of the plot
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
-	    filename,
+            filename,
             ctime(&t),
-	    pw->gp->cpu->name().c_str());
+            pw->gp->cpu->name().c_str());
 
     // ctime adds a newline. Remove it.
     for(i=0;infostring[i];i++)
-	if(infostring[i]=='\n')
-	    infostring[i]=' ';
+        if(infostring[i]=='\n')
+            infostring[i]=' ';
     infotext1=gtk_plot_put_text(GTK_PLOT(active_plot),
-				0.5,
-				PLOTYPOS-0.05,
-				0,
-				20,
-				00,
-				0,
-				0,
-				TRUE,
-				GTK_JUSTIFY_CENTER,
-				infostring);
+                                0.5,
+                                PLOTYPOS-0.05,
+                                0,
+                                20,
+                                00,
+                                0,
+                                0,
+                                TRUE,
+                                GTK_JUSTIFY_CENTER,
+                                infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext1);
 
-    static char * pInfoStringFormat = 
+    static char * pInfoStringFormat =
       "\\BMin:\\N\%" PRINTF_INT64_MODIFIER
       "d \\BMax:\\N%" PRINTF_INT64_MODIFIER
       "d \\BAverage:\\N%.1f \\BMedian:\\N%.1f \\BStandard deviation:\\N%.1f";
     // Infostring2
     sprintf(infostring,pInfoStringFormat, // "\\BMin:\\N\%lld \\BMax:\\N%lld \\BAverage:\\N%.1f \\BMedian:\\N%.1f \\BStandard deviation:\\N%.1f",
-	    mincycles,
-	    maxcycles,
-	    averagecycles,
-	    mediancycles,
-	    stddevcycles);
+            mincycles,
+            maxcycles,
+            averagecycles,
+            mediancycles,
+            stddevcycles);
     infotext2=gtk_plot_put_text(GTK_PLOT(active_plot),
-				0.5,
-				PLOTYPOS-0.03,
-				0,
-				20,
-				00,
-				0,
-				0,
-				TRUE,
-				GTK_JUSTIFY_CENTER,
-				infostring);
+                                0.5,
+                                PLOTYPOS-0.03,
+                                0,
+                                20,
+                                00,
+                                0,
+                                0,
+                                TRUE,
+                                GTK_JUSTIFY_CENTER,
+                                infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext2);
 
     gtk_widget_queue_draw(window1);
@@ -1315,8 +1315,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==0 || data==0)
     {
-	printf("Warning popup_activated(%p,%p)\n",widget,data);
-	return;
+        printf("Warning popup_activated(%p,%p)\n",widget,data);
+        return;
     }
 
 
@@ -1414,9 +1414,9 @@ popup_activated(GtkWidget *widget, gpointer data)
           toaddress_string[0]='\0';
           free(s);
           iter=iter->next;
-	      }
-	      sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
-	      add_range(popup_pw,fromaddress_string,toaddress_string);
+              }
+              sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
+              add_range(popup_pw,fromaddress_string,toaddress_string);
       }
 
       while(symlist!=0)
@@ -1424,47 +1424,47 @@ popup_activated(GtkWidget *widget, gpointer data)
 
       break;
     case MENU_PLOT:
-	{
-	guint64 *cyclearray;//{100,200,300,400,500,600,900,555};
-	char **pointlabel;/*={
-	    "start - labelx 0",
-	    "start - labelx 1",
-	    "start - labelx 2",
-	    "start - dgfdslabelx 3",
-	    "start - labelx 4",
-	    "start - labelx 5",
-	    "start - labelx 6",
-	    "start - labelx 7"
-	};*/
-	int numpoints=8;
+        {
+        guint64 *cyclearray;//{100,200,300,400,500,600,900,555};
+        char **pointlabel;/*={
+            "start - labelx 0",
+            "start - labelx 1",
+            "start - labelx 2",
+            "start - dgfdslabelx 3",
+            "start - labelx 4",
+            "start - labelx 5",
+            "start - labelx 6",
+            "start - labelx 7"
+        };*/
+        int numpoints=8;
         int i;
 
-	pointlabel=(char**)malloc(sizeof(char*)*numpoints);
+        pointlabel=(char**)malloc(sizeof(char*)*numpoints);
         cyclearray=(guint64*)malloc(sizeof(guint64)*numpoints);
 
-	for(i=0;i<numpoints;i++)
-	{
-	    range_entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),i);
-	    if(range_entry==0)
-	    {
-		if(i!=0)
-		    plot_profile(popup_pw,pointlabel,cyclearray,i);
+        for(i=0;i<numpoints;i++)
+        {
+            range_entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),i);
+            if(range_entry==0)
+            {
+                if(i!=0)
+                    plot_profile(popup_pw,pointlabel,cyclearray,i);
                 break;
-	    }
-	    else
-	    {
+            }
+            else
+            {
                 pointlabel[i]=(char*)malloc(128);
-		sprintf(pointlabel[i],"%s (end: %s)",range_entry->startaddress_text,range_entry->endaddress_text);
+                sprintf(pointlabel[i],"%s (end: %s)",range_entry->startaddress_text,range_entry->endaddress_text);
                 cyclearray[i]=range_entry->last_count;
-	    }
-	}
+            }
+        }
         if(range_entry!=0)
-	    plot_profile(popup_pw,pointlabel,cyclearray,numpoints);
-	}
+            plot_profile(popup_pw,pointlabel,cyclearray,numpoints);
+        }
         break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+        puts("Unhandled menuitem?");
+        break;
     }
 #endif
 }
@@ -1476,33 +1476,33 @@ static void update_menus(Profile_Window *pw)
     unsigned int i;
 
     for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
-	item=range_menu_items[i].item;
-//	if(range_menu_items[i].id!=MENU_ADD_GROUP)
-	{
-	    if(pw)
-	    {
-		entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
-		if(range_menu_items[i].id!=MENU_ADD_GROUP &&
-		   range_menu_items[i].id!=MENU_ADD_ALL_LABELS &&
-		   range_menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
-		   range_menu_items[i].id!=MENU_PLOT &&
-		   entry==0)
-		    gtk_widget_set_sensitive (item, FALSE);
-		else
-		    gtk_widget_set_sensitive (item, TRUE);
-	    }
-	    else
-	    {
-		gtk_widget_set_sensitive (item, FALSE);
-	    }
-	}
+        item=range_menu_items[i].item;
+//      if(range_menu_items[i].id!=MENU_ADD_GROUP)
+        {
+            if(pw)
+            {
+                entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
+                if(range_menu_items[i].id!=MENU_ADD_GROUP &&
+                   range_menu_items[i].id!=MENU_ADD_ALL_LABELS &&
+                   range_menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
+                   range_menu_items[i].id!=MENU_PLOT &&
+                   entry==0)
+                    gtk_widget_set_sensitive (item, FALSE);
+                else
+                    gtk_widget_set_sensitive (item, TRUE);
+            }
+            else
+            {
+                gtk_widget_set_sensitive (item, FALSE);
+            }
+        }
     }
 }
 
 static gint
 key_press(GtkWidget *widget,
-	  GdkEventKey *key, 
-	  gpointer data)
+          GdkEventKey *key,
+          gpointer data)
 {
 
   struct profile_range_entry *entry;
@@ -1517,7 +1517,7 @@ key_press(GtkWidget *widget,
   case GDK_Delete:
       entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
       if(entry!=0)
-	  remove_entry(pw,(struct profile_entry *)entry);
+          remove_entry(pw,(struct profile_entry *)entry);
       break;
   }
   return TRUE;
@@ -1527,17 +1527,17 @@ static gint profile_range_list_row_selected(GtkCList *profilelist,gint row, gint
 {
     struct profile_range_entry *entry;
     //    int bit;
-    
+
     pw->range_current_row=row;
 //    pw->current_column=column;
 
     entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_clist), row);
 
     if(!entry)
-	return TRUE;
+        return TRUE;
 
     update_menus(pw);
-  
+
     return 0;
 }
 
@@ -1555,28 +1555,28 @@ build_menu(Profile_Window *pw)
     printf("Warning profile window is null\n");
     return 0;
   }
-    
+
   popup_pw = pw;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
+
   for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
       range_menu_items[i].item=item=gtk_menu_item_new_with_label(range_menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &range_menu_items[i]);
-      
+                         (GtkSignalFunc) popup_activated,
+                         &range_menu_items[i]);
+
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
 
   update_menus(pw);
-  
+
   return menu;
 }
 
@@ -1598,7 +1598,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
     {
 
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		     3, event->time);
+                     3, event->time);
     }
     return FALSE;
 }
@@ -1620,44 +1620,44 @@ profile_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
     switch (row1->cell[clist->sort_column].type)
     {
     case GTK_CELL_TEXT:
-	text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
-	break;
+        text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
+        break;
     case GTK_CELL_PIXTEXT:
-	text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
-	break;
+        text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
+        break;
     default:
-	assert(0);
-	break;
+        assert(0);
+        break;
     }
 
     switch (row2->cell[clist->sort_column].type)
     {
     case GTK_CELL_TEXT:
-	text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
-	break;
+        text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
+        break;
     case GTK_CELL_PIXTEXT:
-	text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
-	break;
+        text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
+        break;
     default:
-	assert(0);
-	break;
+        assert(0);
+        break;
     }
 
     if (!text2)
-	assert(0);
-    //	return (text1 != 0);
+        assert(0);
+    //  return (text1 != 0);
 
     if (!text1)
-	assert(0);
-    //	return -1;
+        assert(0);
+    //  return -1;
 
     if(1==sscanf(text1,"%li",&val1))
     {
-	if(1==sscanf(text2,"%li",&val2))
-	{
-//	    printf("Value %d %d\n",val1,val2);
-	    return val1-val2;
-	}
+        if(1==sscanf(text2,"%li",&val2))
+        {
+//          printf("Value %d %d\n",val1,val2);
+            return val1-val2;
+        }
     }
     return strcmp(text1,text2);
 }
@@ -1670,9 +1670,9 @@ gint histogram_list_compare_func_cycles(gconstpointer a, gconstpointer b)
     const struct cycle_histogram_counter *h2=(struct cycle_histogram_counter*)b;
 
     if(h1->histo_cycles > h2->histo_cycles)
-	return 1;
+        return 1;
     if(h1->histo_cycles == h2->histo_cycles)
-	return 0;
+        return 0;
     return -1;
 }
 
@@ -1682,18 +1682,18 @@ gint histogram_list_compare_func(gconstpointer a, gconstpointer b)
     const struct cycle_histogram_counter *h2=(struct cycle_histogram_counter*)b;
 
     if(h1->start_address > h2->start_address)
-	return 1;
+        return 1;
     if(h1->start_address == h2->start_address)
     {
-	if(h1->stop_address > h2->stop_address)
-	    return 1;
-	if(h1->stop_address == h2->stop_address)
-	{
-	    if(h1->histo_cycles*h1->count > h2->histo_cycles*h2->count)
-		return 1;
-	    if(h1->histo_cycles*h1->count == h2->histo_cycles*h2->count)
-		return 0;
-	}
+        if(h1->stop_address > h2->stop_address)
+            return 1;
+        if(h1->stop_address == h2->stop_address)
+        {
+            if(h1->histo_cycles*h1->count > h2->histo_cycles*h2->count)
+                return 1;
+            if(h1->histo_cycles*h1->count == h2->histo_cycles*h2->count)
+                return 0;
+        }
     }
     return -1;
 }
@@ -1707,19 +1707,19 @@ double calculate_median(GList *start, GList *stop)
     int count_sum=0;
 
     if(start==0)
-	return -4.2;
+        return -4.2;
 
     if(stop==0)
     {
         stop=start;
-	while(stop->next!=0)
-	    stop=stop->next;
+        while(stop->next!=0)
+            stop=stop->next;
     }
 
     // Copy list and sort it on cycles
     while(start!=stop)
     {
-	sorted_list=g_list_append(sorted_list,start->data);
+        sorted_list=g_list_append(sorted_list,start->data);
         start=start->next;
     }
     sorted_list=g_list_append(sorted_list,start->data);
@@ -1729,7 +1729,7 @@ double calculate_median(GList *start, GList *stop)
     start=sorted_list;
     stop=start;
     while(stop->next!=0)
-	stop=stop->next;
+        stop=stop->next;
 
 
     chc_start=(struct cycle_histogram_counter*)start->data;
@@ -1737,56 +1737,56 @@ double calculate_median(GList *start, GList *stop)
 
     while(start!=stop)
     {
-	if(count_sum>=0)
-	{
-	    // Move start to right
-	    start = start->next;
-	    count_sum-=chc_start->count;
-	    chc_start=(struct cycle_histogram_counter*)start->data;
+        if(count_sum>=0)
+        {
+            // Move start to right
+            start = start->next;
+            count_sum-=chc_start->count;
+            chc_start=(struct cycle_histogram_counter*)start->data;
             continue;
-	}
-	else
-	{
-	    // Move stop to left
-	    stop=stop->prev;
-	    count_sum+=chc_stop->count;
-	    chc_stop=(struct cycle_histogram_counter*)stop->data;
+        }
+        else
+        {
+            // Move stop to left
+            stop=stop->prev;
+            count_sum+=chc_stop->count;
+            chc_stop=(struct cycle_histogram_counter*)stop->data;
             continue;
-	}
+        }
     }
 
     if(count_sum>(int)chc_start->count)
     {
         start=start->next;
-	chc_start=(struct cycle_histogram_counter*)start->data;
-	g_list_free(sorted_list);
-	return (double)chc_start->histo_cycles;
+        chc_start=(struct cycle_histogram_counter*)start->data;
+        g_list_free(sorted_list);
+        return (double)chc_start->histo_cycles;
     }
     if(-count_sum>(int)chc_start->count)
     {
         start=start->prev;
-	chc_start=(struct cycle_histogram_counter*)start->data;
-	g_list_free(sorted_list);
-	return (double)chc_start->histo_cycles;
+        chc_start=(struct cycle_histogram_counter*)start->data;
+        g_list_free(sorted_list);
+        return (double)chc_start->histo_cycles;
     }
     if(-count_sum==(int)chc_start->count)
     {
         stop=stop->prev;
-	chc_stop=(struct cycle_histogram_counter*)stop->data;
-	g_list_free(sorted_list);
-	return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
+        chc_stop=(struct cycle_histogram_counter*)stop->data;
+        g_list_free(sorted_list);
+        return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
     }
     if(count_sum==(int)chc_start->count)
     {
         stop=stop->next;
-	chc_stop=(struct cycle_histogram_counter*)stop->data;
-	g_list_free(sorted_list);
-	return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
+        chc_stop=(struct cycle_histogram_counter*)stop->data;
+        g_list_free(sorted_list);
+        return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
     }
     if((unsigned int)abs(count_sum)<chc_start->count)
     {
-	g_list_free(sorted_list);
-	return (double)chc_start->histo_cycles;
+        g_list_free(sorted_list);
+        return (double)chc_start->histo_cycles;
     }
 
     assert(0);
@@ -1801,31 +1801,31 @@ float calculate_stddev(GList *start, GList *stop, float average)
     struct cycle_histogram_counter *chc_start, *chc_stop;
 
     if(start==stop)
-	return 0.0;
+        return 0.0;
 
     if(stop==0)
     {
         stop=start;
-	while(stop->next!=0)
-	    stop=stop->next;
+        while(stop->next!=0)
+            stop=stop->next;
     }
 
     while(start!=stop)
     {
-	float diff, diff2;
+        float diff, diff2;
 
-	chc_start=(struct cycle_histogram_counter*)start->data;
-	chc_stop=(struct cycle_histogram_counter*)stop->data;
+        chc_start=(struct cycle_histogram_counter*)start->data;
+        chc_stop=(struct cycle_histogram_counter*)stop->data;
 
-	diff=chc_start->histo_cycles-average;
+        diff=chc_start->histo_cycles-average;
 
-	diff2=diff*diff;
+        diff2=diff*diff;
 
-	sum+=diff2*chc_start->count;
+        sum+=diff2*chc_start->count;
 
-	count+=chc_start->count;
+        count+=chc_start->count;
 
-	start=start->next;
+        start=start->next;
     }
 
     variance=sum/count;
@@ -1871,7 +1871,7 @@ void Profile_Window::Update()
           break;
         }
 
-        sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count);
+        sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count);
         gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
       }
       iter=iter->next;
@@ -1896,17 +1896,17 @@ void Profile_Window::Update()
 
       if(range_entry->last_count!=count)
       {
-	  int row;
+          int row;
 
-	  range_entry->last_count=count;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_range_clist),range_entry);
-	  if(row==-1)
-	  {
-	      break;
-	  }
+          range_entry->last_count=count;
+          row=gtk_clist_find_row_from_data(GTK_CLIST(profile_range_clist),range_entry);
+          if(row==-1)
+          {
+              break;
+          }
 
-	  sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count);
-	  gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
+          sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count);
+          gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
       }
       iter=iter->next;
   }
@@ -1926,29 +1926,29 @@ void Profile_Window::Update()
       count_write = reg->write_access_count;
 
       if(register_entry->last_count_read!=count_read||
-	 register_entry->last_count_write!=count_write)
+         register_entry->last_count_write!=count_write)
       {
-	  int row;
+          int row;
 
-	  register_entry->last_count_read=count_read;
-	  register_entry->last_count_write=count_write;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_register_clist),register_entry);
-	  if(row==-1)
-	  {
-	      break;
-	  }
+          register_entry->last_count_read=count_read;
+          register_entry->last_count_write=count_write;
+          row=gtk_clist_find_row_from_data(GTK_CLIST(profile_register_clist),register_entry);
+          if(row==-1)
+          {
+              break;
+          }
 
-	  sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count_read);
-	  gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,2,count_string);
-	  sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count_write);
-	  gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,3,count_string);
+          sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count_read);
+          gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,2,count_string);
+          sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count_write);
+          gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,3,count_string);
       }
       iter=iter->next;
   }
 
   // Update cummulative statistics list
   histogram_profile_list = g_list_sort(histogram_profile_list,
-					   histogram_list_compare_func);
+                                           histogram_list_compare_func);
   // Remove all of clist (for now)
   gtk_clist_freeze(GTK_CLIST(profile_exestats_clist));
   gtk_clist_clear(GTK_CLIST(profile_exestats_clist));
@@ -1960,73 +1960,73 @@ void Profile_Window::Update()
       guint64 min=0xffffffffffffffffULL, max=0;
       guint64 cycles_sum=0;
       GList *list_start=0, *list_end=0;
-	char fromaddress_string[100]="";
-	char toaddress_string[100]="";
-	char executions_string[100]="";
-	char min_string[100]="";
-	char max_string[100]="";
-	char median_string[100]="";
-	char average_string[100]="";
-	char stddev_string[100]="";
-	char total_string[100]="";
-	char *entry[PROFILE_EXESTATS_COLUMNS]={
-	    fromaddress_string,
-	    toaddress_string,
-	    executions_string,
+        char fromaddress_string[100]="";
+        char toaddress_string[100]="";
+        char executions_string[100]="";
+        char min_string[100]="";
+        char max_string[100]="";
+        char median_string[100]="";
+        char average_string[100]="";
+        char stddev_string[100]="";
+        char total_string[100]="";
+        char *entry[PROFILE_EXESTATS_COLUMNS]={
+            fromaddress_string,
+            toaddress_string,
+            executions_string,
             min_string,
-	    max_string,
+            max_string,
             median_string,
-	    average_string,
+            average_string,
             stddev_string,
             total_string
-	};
+        };
 
-	iter=histogram_profile_list;
+        iter=histogram_profile_list;
         list_start = iter;
       while(iter!=0)
       {
-	  chc=(struct cycle_histogram_counter*)iter->data;
+          chc=(struct cycle_histogram_counter*)iter->data;
 
-	  
-	  if(start==chc->start_address &&
-	     stop==chc->stop_address)
-	  {
-	      // Add data to statistics
 
-	      count_sum+=chc->count;
-	      if(chc->histo_cycles<min)
-		  min=chc->histo_cycles;
-	      if(chc->histo_cycles>max)
-		  max=chc->histo_cycles;
+          if(start==chc->start_address &&
+             stop==chc->stop_address)
+          {
+              // Add data to statistics
+
+              count_sum+=chc->count;
+              if(chc->histo_cycles<min)
+                  min=chc->histo_cycles;
+              if(chc->histo_cycles>max)
+                  max=chc->histo_cycles;
               cycles_sum+=chc->histo_cycles*chc->count;
-	  }
-	  else
-	  {
-	      if(count_sum!=0)
-	      {
-		  // We have data, display it.
-		  sprintf(fromaddress_string,"0x%04x",start);
-		  sprintf(toaddress_string,"0x%04x",stop);
-		  sprintf(executions_string,"%d",count_sum);
-		  sprintf(min_string,"%ld",(long)min);
-		  sprintf(max_string,"%ld",(long)max);
-		  sprintf(median_string,"%.1f", calculate_median(list_start,list_end));
+          }
+          else
+          {
+              if(count_sum!=0)
+              {
+                  // We have data, display it.
+                  sprintf(fromaddress_string,"0x%04x",start);
+                  sprintf(toaddress_string,"0x%04x",stop);
+                  sprintf(executions_string,"%d",count_sum);
+                  sprintf(min_string,"%ld",(long)min);
+                  sprintf(max_string,"%ld",(long)max);
+                  sprintf(median_string,"%.1f", calculate_median(list_start,list_end));
                   sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
-		  sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
+                  sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
                   sprintf(total_string,"%d",(int)cycles_sum);
-		  gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
-	      }
+                  gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
+              }
 
-	      // Start new calculation
-	      count_sum=chc->count;
-	      start = chc->start_address;
-	      stop = chc->stop_address;
-	      min=chc->histo_cycles;
-	      max=chc->histo_cycles;
-	      cycles_sum=chc->histo_cycles*chc->count;
-	      list_start = iter;
+              // Start new calculation
+              count_sum=chc->count;
+              start = chc->start_address;
+              stop = chc->stop_address;
+              min=chc->histo_cycles;
+              max=chc->histo_cycles;
+              cycles_sum=chc->histo_cycles*chc->count;
+              list_start = iter;
 
-	  }
+          }
           list_end=iter;
           iter=iter->next;
       }
@@ -2106,52 +2106,52 @@ public:
 
       stopcycle = get_cycles().get();
       if(startcycle==stopcycle)
-	// This was probably an attempt to measure the whole loop.
-	// Set stopcycle to unset, and wait for the next one
-	stopcycle=END_OF_TIME;
+        // This was probably an attempt to measure the whole loop.
+        // Set stopcycle to unset, and wait for the next one
+        stopcycle=END_OF_TIME;
 
       else {
-	
-	guint64 cycles;
-	GList *iter;
+
+        guint64 cycles;
+        GList *iter;
   stopaddress=pw->gp->cpu->pma->get_PC();
 
-	// We have a new measurement
-	cycles=(int)stopcycle-(int)startcycle;
+        // We have a new measurement
+        cycles=(int)stopcycle-(int)startcycle;
 
-	// Search to see if there are an entry with this startaddress,
-	// stopaddress and cycle count.
-	iter=pw->histogram_profile_list;
-	while(iter!=0) {
-	  
-	  struct cycle_histogram_counter *chc;
-	  chc=(struct cycle_histogram_counter*)iter->data;
-	  if(chc->start_address == startaddress &&
-	     chc->stop_address == stopaddress &&
-	     chc->histo_cycles == cycles)
-	    {
-	      // If so then add 1 to the counter
-	      chc->count++;
-	      break;
-	    }
-	  iter=iter->next;
-	}
+        // Search to see if there are an entry with this startaddress,
+        // stopaddress and cycle count.
+        iter=pw->histogram_profile_list;
+        while(iter!=0) {
 
-	if(iter==0) {
-	  
-	  // Else malloc a new struct, fill with values and add (sorted) to list
-	  struct cycle_histogram_counter *chc;
+          struct cycle_histogram_counter *chc;
+          chc=(struct cycle_histogram_counter*)iter->data;
+          if(chc->start_address == startaddress &&
+             chc->stop_address == stopaddress &&
+             chc->histo_cycles == cycles)
+            {
+              // If so then add 1 to the counter
+              chc->count++;
+              break;
+            }
+          iter=iter->next;
+        }
 
-	  chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
-	  chc->start_address=startaddress;
-	  chc->stop_address=stopaddress;
-	  chc->histo_cycles=cycles;
-	  chc->count=1;
+        if(iter==0) {
 
-	  pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
-	}
+          // Else malloc a new struct, fill with values and add (sorted) to list
+          struct cycle_histogram_counter *chc;
 
-	startcycle=stopcycle=END_OF_TIME;
+          chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
+          chc->start_address=startaddress;
+          chc->stop_address=stopaddress;
+          chc->histo_cycles=cycles;
+          chc->count=1;
+
+          pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
+        }
+
+        startcycle=stopcycle=END_OF_TIME;
       }
     }
   }
@@ -2185,7 +2185,7 @@ void Profile_Window::StartExe(int address)
 
     // FIXME -- memory leak...
     gp->cpu->pma->set_profile_start_at_address(address,
-					      new ProfileStart(this,address));
+                                              new ProfileStart(this,address));
 
   }
 
@@ -2201,26 +2201,26 @@ void Profile_Window::StopExe(int address)
 {
   if(enabled)
     ChangeView(VIEW_SHOW);
-      
+
   if(gp->cpu->pma->address_has_profile_stop(address))
     gp->cpu->pma->clear_profile_stop_at_address(address);
   else {
-	
+
     if(gp->cpu->pma->address_has_profile_start(address))
       // Can't have both start and stop at the same address
       // ..it becomes difficult to calculate the cycles
       gp->cpu->pma->clear_profile_start_at_address(address);
-	
+
     // FIXME -- memory leak...
     gp->cpu->pma->set_profile_stop_at_address(address,
-					      new ProfileStop(this,address));
+                                              new ProfileStop(this,address));
   }
 }
 
 /*****************************************************************
  * ProfileWindow_new_program
  *
- * 
+ *
  */
 
 void Profile_Window::NewProgram(GUI_Processor *_gp)
@@ -2237,10 +2237,10 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
     return;
 
   program=1;
-    
+
   if(!enabled)
     return;
-    
+
   profile_keeper.enable_profiling();
 
   // Instruction clist
@@ -2248,7 +2248,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
   Processor *pProcessor = gp->cpu;
   ProgramMemoryAccess *pPMA = pProcessor->pma;
   for(uPMIndex=0; uPMIndex < pProcessor->program_memory_size(); uPMIndex++) {
-    
+
     struct profile_entry *profile_entry;
     char address_string[100];
     char instruction_string[100];
@@ -2258,12 +2258,12 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
     instruction * pInstruction = pProcessor->pma->getFromIndex(uPMIndex);
     unsigned int uAddress = pProcessor->map_pm_index2address(uPMIndex);
     if(pPMA->hasValid_opcode_at_index(uPMIndex)) {
-	
+
       sprintf(address_string, "0x%04x",uAddress);
       strcpy(instruction_string, pInstruction->name().c_str());
 
       cycles=pProcessor->cycles_used(uPMIndex);
-      sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",cycles);
+      sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",cycles);
 
       row=gtk_clist_append(GTK_CLIST(profile_clist), entry);
 
@@ -2282,7 +2282,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
   // Register clist
   gtk_clist_freeze(profile_register_clist);
   for(unsigned int i=0; i < pProcessor->rma.get_size(); i++) {
-    
+
     struct profile_register_entry *profile_register_entry;
     char address_string[100];
     char count_string_read[100];
@@ -2304,29 +2304,29 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
           &&
        !((reg->isa() == Register::SFR_REGISTER) || (i != reg->address)) ) {
 
-	sprintf(address_string,"0x%04x",i);
-	name = (char*)reg->name().c_str();
-	if(name==0)
-	  name = address_string;
-	strcpy(register_string, name);
+        sprintf(address_string,"0x%04x",i);
+        name = (char*)reg->name().c_str();
+        if(name==0)
+          name = address_string;
+        strcpy(register_string, name);
 
-	read_cycles=reg->read_access_count;
-	sprintf(count_string_read,"0x%" PRINTF_INT64_MODIFIER "x",read_cycles);
+        read_cycles=reg->read_access_count;
+        sprintf(count_string_read,"0x%" PRINTF_GINT64_MODIFIER "x",read_cycles);
 
-	write_cycles=reg->write_access_count;
-	sprintf(count_string_write,"0x%" PRINTF_INT64_MODIFIER "x",write_cycles);
+        write_cycles=reg->write_access_count;
+        sprintf(count_string_write,"0x%" PRINTF_GINT64_MODIFIER "x",write_cycles);
 
-	row=gtk_clist_append(GTK_CLIST(profile_register_clist), entry_register);
+        row=gtk_clist_append(GTK_CLIST(profile_register_clist), entry_register);
 
-	// FIXME this memory is never freed?
-	profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
-	profile_register_entry->address=i;
-	profile_register_entry->last_count_read=read_cycles;
-	profile_register_entry->last_count_read=write_cycles;
+        // FIXME this memory is never freed?
+        profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
+        profile_register_entry->address=i;
+        profile_register_entry->last_count_read=read_cycles;
+        profile_register_entry->last_count_read=write_cycles;
 
-	gtk_clist_set_row_data(GTK_CLIST(profile_register_clist), row, (gpointer)profile_register_entry);
+        gtk_clist_set_row_data(GTK_CLIST(profile_register_clist), row, (gpointer)profile_register_entry);
 
-	profile_register_list = g_list_append(profile_register_list, (gpointer)profile_register_entry);
+        profile_register_list = g_list_append(profile_register_list, (gpointer)profile_register_entry);
       }
   }
   gtk_clist_thaw(profile_register_clist);
@@ -2336,7 +2336,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
 /*****************************************************************
  * ProfileWindow_new_processor
  *
- * 
+ *
  */
 
 void Profile_Window::NewProcessor(GUI_Processor *_gp)
@@ -2350,7 +2350,7 @@ void Profile_Window::NewProcessor(GUI_Processor *_gp)
 }
 
 static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+                        GdkEvent  *event,
                         Register_Window *rw)
 {
   rw->ChangeView(VIEW_HIDE);
@@ -2375,14 +2375,14 @@ void Profile_Window::Build(void)
   GtkWidget *label;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
-    
+
   gint column_width,char_width;
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), this);
+                     GTK_SIGNAL_FUNC(delete_event), this);
 
   main_vbox=gtk_vbox_new(FALSE,1);
-  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
+  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0);
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
@@ -2402,14 +2402,14 @@ void Profile_Window::Build(void)
 //  gtk_clist_set_sort_column (pw->profile_clist,1);
 //  gtk_clist_set_sort_type (pw->profile_clist,GTK_SORT_DESCENDING);
   gtk_clist_set_compare_func(GTK_CLIST(profile_clist),
-			     (GtkCListCompareFunc)profile_compare_func);
+                             (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_clist,GTK_CAN_DEFAULT);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_clist));
-  
+
   gtk_widget_show(GTK_WIDGET(profile_clist));
 
   gtk_widget_show(scrolled_window);
@@ -2428,26 +2428,26 @@ void Profile_Window::Build(void)
   gtk_clist_set_sort_column (profile_range_clist,2);
   gtk_clist_set_sort_type (profile_range_clist,GTK_SORT_DESCENDING);
   gtk_clist_set_compare_func(GTK_CLIST(profile_range_clist),
-			     (GtkCListCompareFunc)profile_compare_func);
+                             (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_range_clist,GTK_CAN_DEFAULT);
-    
+
   range_popup_menu=build_menu(this);
 
   gtk_signal_connect(GTK_OBJECT(profile_range_clist),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup,
-		     this);
+                     "button_press_event",
+                     (GtkSignalFunc) do_popup,
+                     this);
   gtk_signal_connect(GTK_OBJECT(profile_range_clist),"key_press_event",
-		     (GtkSignalFunc) key_press,
-		     (gpointer) this);
+                     (GtkSignalFunc) key_press,
+                     (gpointer) this);
   gtk_signal_connect(GTK_OBJECT(profile_range_clist),"select_row",
-		     (GtkSignalFunc)profile_range_list_row_selected,this);
+                     (GtkSignalFunc)profile_range_list_row_selected,this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_range_clist));
-  
+
   gtk_widget_show(GTK_WIDGET(profile_range_clist));
 
   gtk_widget_show(scrolled_window);
@@ -2467,14 +2467,14 @@ void Profile_Window::Build(void)
 //  gtk_clist_set_sort_column (pw->profile_register_clist,1);
 //  gtk_clist_set_sort_type (pw->profile_register_clist,GTK_SORT_DESCENDING);
   gtk_clist_set_compare_func(profile_register_clist,
-			     (GtkCListCompareFunc)profile_compare_func);
+                             (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_register_clist,GTK_CAN_DEFAULT);
-    
+
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_register_clist));
-  
+
   gtk_widget_show(GTK_WIDGET(profile_register_clist));
 
   gtk_widget_show(scrolled_window);
@@ -2502,14 +2502,14 @@ void Profile_Window::Build(void)
 
   exestats_popup_menu=exestats_build_menu(this);
   gtk_signal_connect(GTK_OBJECT(profile_exestats_clist),
-		     "button_press_event",
-		     (GtkSignalFunc) exestats_do_popup,
-		     this);
+                     "button_press_event",
+                     (GtkSignalFunc) exestats_do_popup,
+                     this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_exestats_clist));
-  
+
   gtk_widget_show(GTK_WIDGET(profile_exestats_clist));
 
   gtk_widget_show(scrolled_window);
@@ -2532,7 +2532,7 @@ void Profile_Window::Build(void)
   column_width = 3 * char_width + 6;
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-  			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
 
 

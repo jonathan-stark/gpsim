@@ -121,8 +121,8 @@ namespace ExtendedStimuli {
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
   PulseAttribute::PulseAttribute(PulseGen *pParent,
-				 const char *_name, const char * desc,
-				 double voltage)
+                                 const char *_name, const char * desc,
+                                 double voltage)
     : Integer(_name,0,desc), m_pParent(pParent), m_voltage(voltage)
   {
   }
@@ -138,7 +138,7 @@ namespace ExtendedStimuli {
 
   //----------------------------------------------------------------------
   PulsePeriodAttribute::PulsePeriodAttribute(PulseGen *pParent,
-					     const char *_name, const char * desc)
+                                             const char *_name, const char * desc)
     : Integer(_name,0,desc), m_pParent(pParent)
   {
   }
@@ -230,7 +230,7 @@ Pulse Generator\n\
     m_set = new PulseAttribute(this, "set","r/w cycle time when ouput will be driven high", 5.0);
     m_clear = new PulseAttribute(this, "clear","r/w cycle time when ouput will be driven low",0.0);
     m_period = new PulsePeriodAttribute(this,
-					"period","r/w cycle time to specify pulse stream repeat rate");
+                                        "period","r/w cycle time to specify pulse stream repeat rate");
     m_init = new PulseInitial(this, "initial","initial I/O pin voltage", 5.0);
 
     addSymbol(m_set);
@@ -272,8 +272,8 @@ Pulse Generator\n\
       // then we're done.
 
       if (sample_iterator == samples.end()  &&
-	  m_period->getVal() == 0)
-	return;
+          m_period->getVal() == 0)
+        return;
 
       // If this is a periodic pulse stream and either
       //     a) we reached the end of the sequence
@@ -281,10 +281,10 @@ Pulse Generator\n\
       // then
       //   start the stream over.
       if (m_period->getVal() && ((sample_iterator == samples.end()  ||
-				  (*sample_iterator).time > m_period->getVal()))) {
+                                  (*sample_iterator).time > m_period->getVal()))) {
 
-	sample_iterator = samples.begin();
-	m_start_cycle += m_period->getVal();
+        sample_iterator = samples.begin();
+        m_start_cycle += m_period->getVal();
       }
 
       m_future_cycle = m_start_cycle + (*sample_iterator).time;
@@ -367,14 +367,14 @@ Pulse Generator\n\
       // If the next sample *is* the second one then we've been here before
       // (and that means we've already handled the first sample)
       if (sample_iterator == si)
-	return;
+        return;
 
       if (si == samples.end()) {
-	si = samples.begin();
-	sample_iterator = si;
-	double d;
-	(*si).v->get(d);
-	m_pin->putState(d > 2.5);
+        si = samples.begin();
+        sample_iterator = si;
+        double d;
+        (*si).v->get(d);
+        m_pin->putState(d > 2.5);
       }
 
       sample_iterator = si;
@@ -436,7 +436,7 @@ Pulse Generator\n\
       (*si).v->get(d);
       sOut << "  {0x" << (*si).time << ',' << d << '}';
       if (si == sample_iterator)
-	sOut << " <-- Next at cycle 0x" << (m_start_cycle + (*si).time);
+        sOut << " <-- Next at cycle 0x" << (m_start_cycle + (*si).time);
       ++si;
     }
     sOut << ends;
@@ -466,8 +466,8 @@ Pulse Generator\n\
   };
   //=1024;
   FileNameAttribute::FileNameAttribute(FileStimulus *pParent,
-				       const char *_name,
-				       const char * _desc)
+                                       const char *_name,
+                                       const char * _desc)
     : String(_name,"",_desc), m_Parent(pParent), m_pFile(0)
   {
 
@@ -534,7 +534,7 @@ File Stimulus\n\
     float v;
 
     //fscanf(m_file,"%" PRINTF_INT64_MODIFIER "i %g",&t, &v);
-    sscanf(cP,"%" PRINTF_INT64_MODIFIER "i %g",&t, &v);
+    sscanf(cP,"%" PRINTF_GINT64_MODIFIER "i %g",&t, &v);
 
     cout << "  read 0x" << hex << t << "," << v << endl;
 
@@ -585,13 +585,13 @@ File Stimulus\n\
     if (pcpu && m_replaced) {
 
       if (m_replaced->address != InvalidAddress)
-	pcpu->rma.removeRegister(m_replaced->address,m_replaced);
+        pcpu->rma.removeRegister(m_replaced->address,m_replaced);
 
       m_replaced->set_cpu(pcpu);
 
       m_replaced->address = i & 0xffffffff;
       if (!pcpu->rma.insertRegister(m_replaced->address,m_replaced))
-	  m_replaced->address = InvalidAddress;
+          m_replaced->address = InvalidAddress;
 
       gint64 insertAddress = m_replaced->address;
 
@@ -741,12 +741,12 @@ Port Stimulus\n\
     for (int i=0; i<m_nPins; i++) {
       int p = i+1;
       if (p<10) {
-	pinNumber[0] = p+'0';
-	pinNumber[1] = 0;
+        pinNumber[0] = p+'0';
+        pinNumber[1] = 0;
       } else {
-	pinNumber[0] = (p/10)+'0';
-	pinNumber[1] = (p%10)+'0';
-	pinNumber[2] = 0;
+        pinNumber[0] = (p/10)+'0';
+        pinNumber[1] = (p%10)+'0';
+        pinNumber[2] = 0;
       }
 
       IO_bi_directional *ppin;
