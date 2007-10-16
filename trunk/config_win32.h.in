@@ -110,8 +110,10 @@
  * instead of "ll" used by libc.
  */
 #define PRINTF_INT64_MODIFIER "I64"
+#define PRINTF_GINT64_MODIFIER "I64"
 #else
 #define PRINTF_INT64_MODIFIER "ll"
+#define PRINTF_GINT64_MODIFIER "ll"
 #endif
 
 
