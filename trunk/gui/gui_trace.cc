@@ -97,8 +97,8 @@ public:
 
     if(!tw->gp || !tw->gp->cpu)
       {
-	puts("Warning gp or gp->cpu == NULL in TraceWindow_update");
-	return;
+        puts("Warning gp or gp->cpu == NULL in TraceWindow_update");
+        return;
       }
 
     // If we're not allowing xref updates then exit
@@ -114,14 +114,14 @@ public:
 
       // Advance the trace_map_index using rollover arithmetic
       if(++tw->trace_map_index >= MAXTRACES)
-	tw->trace_map_index = 0;
+        tw->trace_map_index = 0;
 
       clist=GTK_CLIST(tw->trace_clist);
 
-      sprintf(cycle_string,"0x%016" PRINTF_INT64_MODIFIER "x", get_trace().string_cycle);
+      sprintf(cycle_string,"0x%016" PRINTF_GINT64_MODIFIER "x", get_trace().string_cycle);
 
       gtk_clist_append  (clist, entry);
-      
+
       if(clist->rows>MAXTRACES)
         gtk_clist_remove(clist,0);
 
@@ -139,7 +139,7 @@ public:
  * The purpose of this routine is to refresh the trace window with
  * the latest trace information. The current pic simulation cycle (should
  * this be change to real time???) is examined and compared to what
- * is currently displayed in the trace window. If the info in the 
+ * is currently displayed in the trace window. If the info in the
  * trace window is really old, this the entire window is deleted and
  * the trace is redrawn with the latest. If the trace window is rather
  * recent then the older trace info is deleted and the new is appended
@@ -171,7 +171,7 @@ void Trace_Window::Update(void)
   if(get_cycles().get()-last_cycle>=MAXTRACES)
     // redraw the whole thing
     get_trace().dump(MAXTRACES, 0);
-  else 
+  else
     get_trace().dump(get_cycles().get()-last_cycle, 0);
 
 
@@ -185,7 +185,7 @@ void Trace_Window::Update(void)
 /*****************************************************************
  * TraceWindow_new_processor
  *
- * 
+ *
  */
 
 void Trace_Window::NewProcessor(GUI_Processor *_gp)
@@ -200,7 +200,7 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
 
   if(!enabled)
     return;
-    
+
   cross_reference = new TraceXREF();
   cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
@@ -211,7 +211,7 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
 }
 
 static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+                        GdkEvent  *event,
                         Trace_Window *rw)
 {
   rw->ChangeView(VIEW_HIDE);
@@ -224,14 +224,14 @@ void Trace_Window::Build(void)
     return;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
-    
+
   gint i;
   gint column_width,char_width;
 
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   main_vbox=gtk_vbox_new(FALSE,1);
-  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
+  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0);
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
@@ -242,19 +242,19 @@ void Trace_Window::Build(void)
   gtk_clist_set_column_auto_resize(trace_clist,0,TRUE);
 
   GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);
-    
+
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), this);
+                     GTK_SIGNAL_FUNC(delete_event), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(trace_clist));
-  
+
   gtk_widget_show(GTK_WIDGET(trace_clist));
   gtk_widget_show(scrolled_window);
 
@@ -273,15 +273,15 @@ void Trace_Window::Build(void)
   column_width = 3 * char_width + 6;
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-  			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
 
 
   gtk_widget_show (window);
 
-  if(!trace_map) { 
+  if(!trace_map) {
     trace_map = (struct TraceMapping *)malloc(MAXTRACES * sizeof(struct TraceMapping));
-    
+
     for(i=0; i<MAXTRACES; i++) {
       trace_map[i].cycle = 0;
       trace_map[i].simulation_trace_index = 0;
@@ -301,7 +301,7 @@ void Trace_Window::Build(void)
 }
 
 //------------------------------------------------------------------------
-// 
+//
 //
 //
 

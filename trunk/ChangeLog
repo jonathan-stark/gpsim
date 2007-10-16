@@ -1,3 +1,9 @@
+2007-10-16 Borut Razem <borut.razem@siol.net>
+	* src/value.cc, src/trace.cc, modules/stimuli.cc, gui/gui_trace.cc,
+	  gui/gui_profile.cc, gui/gui_menu.cc, gui/gui_scope.cc:
+	  introduced PRINTF_GINT64_MODIFIER which defines the printf modifier
+	  for gint64 and guint64 types
+
 2007-10-14 Borut Razem <borut.razem@siol.net>
 	* src/p16x6x.h, src/p16x6x.cc, src/eeprom.cc, src/pic-processor.cc,
 	  src/p16f62x.cc, src/12bit-processors.cc, src/pic-processor.h,

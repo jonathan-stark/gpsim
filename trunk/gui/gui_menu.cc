@@ -1220,7 +1220,7 @@ public:
 
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().get());
+    snprintf(buf,size,"0x%016" PRINTF_GINT64_MODIFIER "x",get_cycles().get());
   }
 };
 
@@ -1236,7 +1236,7 @@ public:
 
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"%016" PRINTF_INT64_MODIFIER "d",get_cycles().get());
+    snprintf(buf,size,"%016" PRINTF_GINT64_MODIFIER "d",get_cycles().get());
   }
 };
 
