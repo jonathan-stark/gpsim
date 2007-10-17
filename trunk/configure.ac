@@ -162,6 +162,10 @@ case "${host}" in
     ;;
 esac
 
+CFLAGS="${CFLAGS} ${AM_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${AM_CXXFLAGS}"
+LDFLAGS="${LDFLAGS} ${AM_LDFLAGS}"
+
 # Host filesystem options
 case "${host}" in
   *mingw* | *-pc-os2_emx | *-pc-os2-emx | *djgpp* )

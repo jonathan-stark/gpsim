@@ -1,3 +1,7 @@
+2007-10-17 Borut Razem <borut.razem@siol.net>
+	* configure.ac: added -Wall gcc command line option to CFLAGS and
+	  CXXFLAGS
+
 2007-10-16 Borut Razem <borut.razem@siol.net>
 	* src/value.cc, src/trace.cc, modules/stimuli.cc, gui/gui_trace.cc,
 	  gui/gui_profile.cc, gui/gui_menu.cc, gui/gui_scope.cc, configure.ac,
