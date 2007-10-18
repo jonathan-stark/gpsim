@@ -1,3 +1,10 @@
+2007-10-18  Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc: Fixed a printf format specifier bug.
+
+2007-10-18  Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, gui/gui_src_asm.cc: Removed #if 0'd code. Made
+	the dependency on the "new" source browser permanent.
+
 2007-10-17 Borut Razem <borut.razem@siol.net>
 	* configure.ac: added -Wall gcc command line option to CFLAGS and
 	  CXXFLAGS
