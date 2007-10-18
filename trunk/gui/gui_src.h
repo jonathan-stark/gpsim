@@ -30,8 +30,6 @@ class StatusBar_Window;
 class Value;
 class SourceBrowserParent_Window;
 
-// #if defined(NEW_SOURCE_BROWSER)
-
 class SourceWindow;
 
 enum eSourceFileType {
@@ -509,9 +507,6 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   SourceBrowserParent_Window *parent;
 
   SourceBrowserAsm_Window(GUI_Processor *gp,char* new_name);
-#if ! defined(NEW_SOURCE_BROWSER)
-  virtual void Build(void);
-#endif
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
   virtual void SetPC(int address);
@@ -608,12 +603,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 
 
 
-#if defined(NEW_SOURCE_BROWSER)
 #define SOURCE_WINDOW SourceWindow
-#else
-#define SOURCE_WINDOW SourceBrowserAsm_Window
-#endif
-
 
 
 //
@@ -644,8 +634,6 @@ class SourceBrowserParent_Window : public GUI_Object
 
   SOURCE_WINDOW *getChild(int);
   list<SOURCE_WINDOW *> children;
-
-// #if defined(NEW_SOURCE_BROWSER)
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
 
@@ -680,7 +668,7 @@ class SourceBrowserParent_Window : public GUI_Object
 
   // FIXME - change these items to list objects
   SourceBuffer **ppSourceBuffers;
-// #endif
+
 };
 
 
