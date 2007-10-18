@@ -123,7 +123,7 @@ public:
 
     snprintf(buff,sizeof(buff),
              "$%04x\n"
-             " WDTEN=%d - WDT is %s, prescale=1:\n",
+             " WDTEN=%d - WDT is %s, prescale=1:%d\n",
              i,
              (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
              1 << (i & (WDTPS0 | WDTPS1 | WDTPS2)>>1));
