@@ -86,16 +86,6 @@ static char *strReverse(const char *start, char *dest, int nChars)
   return dest;
 }
 
-#if 0 // defined but not used
-static int strFindSubString(const char *cPsrc, const char *cPpattern)
-{
-
-  const char *found = strstr(cPsrc, cPpattern);
-
-  return found ? (found - cPsrc) : - 1;
-}
-#endif
-
 //========================================================================
 
 class SourceXREF : public CrossReferenceToGUI
@@ -106,13 +96,8 @@ public:
   {
     SOURCE_WINDOW *sbaw = (SOURCE_WINDOW*)(parent_window);
 
-#if defined(NEW_SOURCE_BROWSER)
     if(sbaw->bSourceLoaded())
       sbaw->SetPC(new_value);
-#else
-    if(sbaw->m_bSourceLoaded)
-      sbaw->SetPC(new_value);
-#endif
   }
 
   void Remove(void) {}
@@ -1392,9 +1377,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
   switch(item->id) {
 
   case MENU_SETTINGS:
-#if defined(NEW_SOURCE_BROWSER)
     settings_dialog(pSW);
-#endif
     break;
   case MENU_FIND_TEXT:
     pSW->findText();
@@ -1658,7 +1641,6 @@ void SourceWindow::Build()
   else
     strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
 
-#if defined(NEW_SOURCE_BROWSER)
   while(!load_fonts(this)) {
 
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
@@ -1673,7 +1655,7 @@ void SourceWindow::Build()
       settings_dialog(this);
     }
   }
-#endif
+
   symbol_font       = gtk_style_get_font(symbol_text_style);
   label_font        = gtk_style_get_font(label_text_style);
   instruction_font  = gtk_style_get_font(instruction_text_style);
@@ -2434,11 +2416,6 @@ static struct {
   char *string;                // current string, extracted from entry
 } searchdlg = {0,0,-1,0,0,0,0,0,0,0};
 
-#if !defined(NEW_SOURCE_BROWSER)
-static bool bSearchdlgInitialized = false;
-#endif
-
-
 static int dlg_x=200, dlg_y=200;
 
 //========================================================================
@@ -2955,9 +2932,6 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
   switch(item->id) {
 
   case MENU_SETTINGS:
-#if ! defined(NEW_SOURCE_BROWSER)
-    settings_dialog(popup_sbaw);
-#endif
     break;
   case MENU_FIND_TEXT:
     gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
@@ -3016,16 +2990,10 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
       gint i, temp;
       gint start, end;
 
-
-  #if GTK_MAJOR_VERSION >= 2
       if (!gtk_editable_get_selection_bounds(
         GTK_EDITABLE(popup_sbaw->pages[id].source_text),
         &start, &end))
         break;
-  #else
-      start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
-      end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
-  #endif
       if(start != end) {
         if(start>end)
         {
@@ -3291,7 +3259,7 @@ gint SourceBrowserAsm_Window::sigh_button_event(
 
       switch(menu_items[i].id){
       case MENU_SELECT_SYMBOL:
-#if GTK_MAJOR_VERSION >= 2
+
         {
           gint start, end;
 
@@ -3307,20 +3275,6 @@ gint SourceBrowserAsm_Window::sigh_button_event(
           }
           break;
         }
-#else
-        // Why does "if(editable->has_selection)" not work? FIXME
-        assert(GTK_EDITABLE(popup_sbaw->pages[id].source_text));
-        if(GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos
-          == GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos)
-        {
-          gtk_widget_set_sensitive (item, FALSE);
-        }
-        else
-        {
-          gtk_widget_set_sensitive (item, TRUE);
-        }
-        break;
-#endif
       default:
         break;
       }
@@ -3330,11 +3284,10 @@ gint SourceBrowserAsm_Window::sigh_button_event(
     gtk_menu_popup(GTK_MENU(sbaw->popup_menu), 0, 0, 0, 0,
       3, event->time);
 
-#if GTK_MAJOR_VERSION < 2
     // override pages[id].source_text's handler
     // is there a better way? FIXME
     gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
-#endif
+
     return 1;
   }
 
@@ -3382,34 +3335,6 @@ static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
 }
 
 
-#if 0 //warning: 'gint drag_scroll_cb(void*)' defined but not used
-static float drag_scroll_speed;
-static gint drag_scroll_cb(gpointer data)
-{
-  SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)data;
-
-  int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
-
-  puts("scroll");
-
-  GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=
-    GTK_TEXT(sbaw->pages[id].source_text)->vadj->step_increment*drag_scroll_speed;
-
-  if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower ||
-    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
-  {
-    if(drag_scroll_speed > 0)
-      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
-    else
-      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
-  }
-
-  gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-
-  return TRUE; // refresh timer
-}
-#endif
-
 /*
 This is handler for motion, button press and release for source_layout.
 The GdkEventMotion and GdkEventButton are very similar so I (Ralf) use
@@ -3434,9 +3359,7 @@ static gint marker_cb(GtkWidget *w1,
 
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-#if GTK_MAJOR_VERSION >= 2
   vadj_value=GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-#endif
 
   switch(event->type) {
 
@@ -3622,13 +3545,6 @@ int source_line_represents_code(Processor *cpu,
 
   return address>=0;
 }
-
-#if GTK_MAJOR_VERSION < 2
-static GdkFont *gtk_style_get_font(GtkStyle *style)
-{
-  return style->font;
-}
-#endif
 
 static int s_TotalTextLength = 0;
 static CFormattedTextFragment * s_pLast = NULL;
@@ -4061,7 +3977,7 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
 
 static int load_fonts(SOURCE_WINDOW *sbaw)
 {
-#if GTK_MAJOR_VERSION >= 2
+
   gtk_style_set_font(sbaw->comment_text_style,
     gdk_font_from_description(pango_font_description_from_string(sbaw->commentfont_string)));
 
@@ -4076,22 +3992,7 @@ static int load_fonts(SOURCE_WINDOW *sbaw)
     return 0;
   if (gtk_style_get_font(sbaw->default_text_style) == 0)
     return 0;
-#else
-  sbaw->comment_text_style->font=
-    gdk_fontset_load(sbaw->commentfont_string);
 
-  sbaw->default_text_style->font=
-    sbaw->label_text_style->font=
-    sbaw->symbol_text_style->font=
-    sbaw->instruction_text_style->font=
-    sbaw->number_text_style->font=
-    gdk_fontset_load(sbaw->sourcefont_string);
-
-  if(sbaw->comment_text_style->font==0)
-    return 0;
-  if(sbaw->default_text_style->font==0)
-    return 0;
-#endif
   return 1;
 }
 
@@ -4117,12 +4018,6 @@ gint DialogFontSelect::DialogRun(GtkWidget *w, gpointer user_data)
     m_pFontSelDialog=gtk_font_selection_dialog_new("Select font");
 
     fontstring=gtk_entry_get_text(entry);
-#if GTK_MAJOR_VERSION < 2
-    gchar *spacings[] = { "c", "m", 0 };
-    gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (m_pFontSelDialog),
-      GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
-      0, 0, 0, 0, spacings, 0);
-#endif
   }
   gint result = gtk_dialog_run (GTK_DIALOG (m_pFontSelDialog));
   switch (result) {
@@ -4145,18 +4040,6 @@ int font_dialog_browse(GtkWidget *w, gpointer user_data) {
 }
 
 /********************** Settings dialog ***************************/
-#if 0 // defined but not used
-static int settings_active;
-static void settingsok_cb(GtkWidget *w, gpointer user_data)
-{
-  if(settings_active)
-  {
-    settings_active=0;
-    //  gtk_main_quit();
-  }
-}
-#endif
-
 static int settings_dialog(SOURCE_WINDOW *sbaw)
 {
   static GtkWidget *dialog=0;
@@ -4649,187 +4532,6 @@ void SourceBrowserAsm_Window::find_clear_cb(
   gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
 }
 
-#if 0 // defined but not used
-static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
-{
-  GdkColor text_fg;
-  GdkColor text_bg;
-
-  gdk_color_parse(fg_color, &text_fg);
-  gdk_color_parse(bg_color, &text_bg);
-  *style = gtk_style_new();
-  (*style)->base[GTK_STATE_NORMAL] = text_bg;
-  (*style)->fg[GTK_STATE_NORMAL] = text_fg;
-
-}
-#endif
-
-#if !defined(NEW_SOURCE_BROWSER)
-static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
-{
-  GtkWidget *hbox;
-  GtkWidget *button;
-  GtkWidget *label;
-
-  searchdlg.lastid=-1;  // will reset search
-
-  searchdlg.window = gtk_dialog_new();
-
-  gtk_signal_connect(GTK_OBJECT(searchdlg.window),
-    "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-  gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
-    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
-
-  gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
-
-  hbox = gtk_hbox_new(FALSE,15);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-    FALSE,TRUE,5);
-  label = gtk_label_new("Find:");
-  gtk_widget_show(label);
-  gtk_box_pack_start(GTK_BOX(hbox),label,
-    FALSE,FALSE,5);
-  searchdlg.entry = gtk_combo_new();
-  gtk_widget_show(searchdlg.entry);
-  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
-    TRUE,TRUE,5);
-  gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
-  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),
-    "activate",
-    GTK_SIGNAL_FUNC(SourceBrowserAsm_Window::find_cb),sbaw);
-
-  hbox = gtk_hbox_new(FALSE,15);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),
-    hbox,FALSE,TRUE,5);
-  gtk_widget_show(hbox);
-  searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
-  gtk_widget_show(searchdlg.case_button);
-  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
-    FALSE,FALSE,5);
-  searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
-  gtk_widget_show(searchdlg.backwards_button);
-  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
-    FALSE,FALSE,5);
-
-  button = gtk_button_new_with_label("Find");
-  gtk_widget_show(button);
-  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-    GTK_SIGNAL_FUNC(SourceBrowserAsm_Window::find_cb),sbaw);
-  GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
-  gtk_widget_grab_default(button);
-
-  button = gtk_button_new_with_label("Clear");
-  gtk_widget_show(button);
-  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-    GTK_SIGNAL_FUNC(SourceBrowserAsm_Window::find_clear_cb),0);
-
-  button = gtk_button_new_with_label("Close");
-  gtk_widget_show(button);
-  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-  gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
-
-}
-
-void SourceBrowserAsm_Window::Build(void)
-{
-  if(bIsBuilt)
-    return;
-
-  char *fontstring;
-
-  Dprintf(("Build\n"));
-
-  SourceBrowser_Window::Create();
-
-  SetTitle();
-  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-
-  notebook = gtk_notebook_new();
-  gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_LEFT);
-  gtk_notebook_set_scrollable((GtkNotebook*)notebook,TRUE);
-
-  for(int i=0;i<SBAW_NRFILES;i++) {
-    pages[i].notebook = notebook;
-  }
-  gtk_signal_connect(GTK_OBJECT(notebook),
-    "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),this);
-  gtk_widget_show(notebook);
-
-  popup_menu=BuildPopupMenu(notebook,this);
-
-  gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
-
-  set_style_colors("black", "white", &default_text_style);
-  set_style_colors("dark green", "white", &symbol_text_style);
-  set_style_colors("orange", "white", &label_text_style);
-  set_style_colors("red", "white", &instruction_text_style);
-  set_style_colors("blue", "white", &number_text_style);
-  set_style_colors("dim gray", "white", &comment_text_style);
-
-  //#if GTK_MAJOR_VERSION >= 2
-  //#define DEFAULT_COMMENTFONT "Courier Bold Oblique 12"
-  //#define DEFAULT_SOURCEFONT "Courier Bold 12"
-  //#else
-  //#endif
-
-  if(config_get_string(name(),"commentfont",&fontstring))
-    strcpy(commentfont_string,fontstring);
-  else 
-    strcpy(commentfont_string,DEFAULT_COMMENTFONT);
-
-  if(config_get_string(name(),"sourcefont",&fontstring))
-    strcpy(sourcefont_string,fontstring);
-  else
-    strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
-
-  while(!load_fonts(this)) {
-
-    if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
-    {
-      strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
-      strcpy(commentfont_string,DEFAULT_COMMENTFONT);
-      config_set_string(name(),"sourcefont",sourcefont_string);
-      config_set_string(name(),"commentfont",commentfont_string);
-    }
-    else
-    {
-      settings_dialog(this);
-    }
-  }
-
-  symbol_font       = gtk_style_get_font(symbol_text_style);
-  label_font        = gtk_style_get_font(label_text_style);
-  instruction_font  = gtk_style_get_font(instruction_text_style);
-  number_font       = gtk_style_get_font(number_text_style);
-  comment_font      = gtk_style_get_font(comment_text_style);
-  default_font      = gtk_style_get_font(default_text_style);
-
-  if(!bSearchdlgInitialized) {
-    BuildSearchDlg(this);
-    bSearchdlgInitialized = true;
-  }
-
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-    GTK_SIGNAL_FUNC(gui_object_configure_event),this);
-  if(status_bar)
-    status_bar->Create(vbox);
-
-  gtk_widget_show(window);
-
-  bIsBuilt = true;;
-  if(m_bLoadSource)
-    NewSource(gp);
-  UpdateMenuItem();
-
-}
-#endif
-
-
 void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 {
   pma = new_pma;
@@ -4914,7 +4616,6 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   gp = _gp;
   set_name("source_browser_parent");
 
-#if defined(NEW_SOURCE_BROWSER)
   pma = 0;
   m_TabType = GTK_POS_BOTTOM;
   mpTagTable = gtk_text_tag_table_new();
@@ -4984,9 +4685,6 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   for (int i=0; i<SBAW_NRFILES; i++)
     ppSourceBuffers[i] = 0;
   children.push_back(new SourceWindow(_gp,this,true));
-#else
-  children.push_back(new SOURCE_WINDOW(_gp));
-#endif
 }
 
 SOURCE_WINDOW *SourceBrowserParent_Window::getChild(int n)
@@ -5018,9 +4716,7 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
   sbaw_iterator = children.begin();
   pma_iterator = gp->cpu->pma_context.begin();
 
-#if defined(NEW_SOURCE_BROWSER)
   CreateSourceBuffers(gp);
-#endif
 
   int child = 1;
   SOURCE_WINDOW *sbaw=0;
@@ -5032,11 +4728,7 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
     {
       child++;
       sprintf(child_name,"source_browser%d",child);
-#if defined(NEW_SOURCE_BROWSER)
       sbaw = new SOURCE_WINDOW(gp,this, true, child_name);
-#else
-      sbaw = new SOURCE_WINDOW(gp,child_name);
-#endif
       children.push_back(sbaw);
     }
     else
@@ -5119,9 +4811,7 @@ void SourceBrowserParent_Window::NewSource(GUI_Processor *gp)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-#if defined(NEW_SOURCE_BROWSER)
   CreateSourceBuffers(gp);
-#endif
   for (sbaw_iterator = children.begin();  
     sbaw_iterator != children.end(); 
     sbaw_iterator++)
@@ -5147,7 +4837,6 @@ int SourceBrowserParent_Window::set_config()
     sbaw_iterator++)
     (*sbaw_iterator)->set_config();
 
-#if defined(NEW_SOURCE_BROWSER)
   const char *sName = "source_config";
   char buff[100];
   config_set_string(sName,"mnemonic_fg",mMnemonic->mFG.get(buff, sizeof(buff)));
@@ -5163,7 +4852,6 @@ int SourceBrowserParent_Window::set_config()
   config_set_variable(sName, "addresses", margin().bAddresses());
   config_set_variable(sName, "opcodes", margin().bOpcodes());
 
-#endif
 
   return 0;
 }
