@@ -110,7 +110,7 @@ MAIN    CODE
    .sim "PD1.ypos = 96.0"
 
    .sim "module load switch SW2"
-   .sim "SW2.state=false"
+   .sim "SW2.state=open"
    .sim "SW2.xpos = 216.0"
    .sim "SW2.ypos = 228.0"
    .sim "SW2.Ropen = 1.0e6"
@@ -275,7 +275,7 @@ start
 
 	BSF	PORTB,0		; Drive one side of switch high
 
-   .command "SW2.state=true"
+   .command "SW2.state=closed"
 	nop
 
    .assert "(portc & 7) == 7, \"2 Switch drive high\""
@@ -288,7 +288,7 @@ start
    ; Now test very large switch resistance
    .command "SW1.state=false"
         nop
-   .command "SW2.state=false"
+   .command "SW2.state=open"
         nop
 	BCF	PORTB,0
 

@@ -624,7 +624,112 @@ namespace Leds {
   }
 
 
+class ColorAttribute : public Value
+{
+  public:
+	ColorAttribute(Led *_led) :
+		Value("color", "On color of LED"), m_led(_led)
+	{
+	}
 
+	virtual void get(char *return_str, int len);
+	virtual void set(const char *buffer, int buf_size = 0);
+	virtual void set(Value *v);
+	virtual bool Parse(const char *pValue, Colors &bValue);
+
+  private:
+	Led *m_led;
+};
+
+void ColorAttribute::set(Value *v)
+{
+  if ( typeid(*v) == typeid(String))
+  {
+     char buff[20];
+
+     v->get((char *)buff, sizeof(buff));
+     set(buff);
+  }
+  else
+    throw new TypeMismatch(string("set "), "ColorAttribute", v->showType());
+}
+
+void ColorAttribute::set(const char *buffer, int len)
+{
+  if(buffer) {
+    Colors color;
+
+    if(Parse(buffer, color)) {
+      m_led->set_on_color(color);
+    }
+    else
+    {
+	cout << "ColorAttribute::set " << buffer << " unknown color\n";
+   }
+  }
+
+}
+void ColorAttribute::get(char *return_str, int len)
+{
+  if(return_str) {
+
+    switch(m_led->get_on_color())
+    {
+    case RED:
+	strncpy(return_str, "red", len);
+	break;
+
+    case ORANGE:
+	strncpy(return_str, "orange", len);
+	break;
+
+    case GREEN:
+	strncpy(return_str, "green", len);
+	break;
+
+    case YELLOW:
+	strncpy(return_str, "yellow", len);
+	break;
+
+    case BLUE:
+	strncpy(return_str, "blue", len);
+	break;
+
+    }
+  }
+}
+
+bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
+{
+
+    
+    if(strncmp("red", pValue, sizeof("red")) == 0)
+    {
+	bValue = RED;
+	return true;
+    }
+    else if (strncmp("orange", pValue, sizeof("orange")) == 0)
+    {
+	bValue = ORANGE;
+	return true;
+    }
+    else if (strncmp("green", pValue, sizeof("green")) == 0)
+    {
+	bValue = GREEN;
+	return true;
+    }
+    else if (strncmp("yellow", pValue, sizeof("yellow")) == 0)
+    {
+	bValue = YELLOW;
+	return true;
+    }
+    else if (strncmp("blue", pValue, sizeof("blue")) == 0)
+    {
+	bValue = BLUE;
+	return true;
+    }
+    return false;
+}
 
   //-------------------------------------------------------------
   // Led (simple)
@@ -676,8 +781,8 @@ namespace Leds {
 			w_height);
 
     if(m_pin->getDrivenState()) {
-      gdk_gc_set_foreground(gc,&led_segment_on_color);
-      gdk_draw_arc(drawable, gc,
+        gdk_gc_set_foreground(gc,&led_on_color[on_color]);
+        gdk_draw_arc(drawable, gc,
 		   TRUE,
 		   0,
 		   0,
@@ -685,6 +790,18 @@ namespace Leds {
 		   w_height,
 		   0,64*360);
     }
+  }
+
+  void Led::set_on_color(Colors color)
+  {
+	if (color != on_color)
+	{
+	    if (!led_on_color[color].pixel) // color not allocated
+    		gdk_color_alloc(gdk_colormap_get_system(), 
+			&led_on_color[color]);
+	    on_color = color;
+	    update();
+	}
   }
 
 
@@ -739,12 +856,20 @@ namespace Leds {
 
     gc=NULL;
 
-    // The 'on' color is bright red
-    led_segment_on_color.red = 0xc000;
-    led_segment_on_color.green = 0x0000;
-    led_segment_on_color.blue = 0x0000;
+    // The default 'on' color is bright red
+    on_color = RED;
 
-    gdk_color_alloc(gdk_colormap_get_system(), &led_segment_on_color);
+    for(int i = RED; i <= BLUE; i++ )
+	led_on_color[i].pixel = 0;
+
+    gdk_color_parse("red3", &led_on_color[RED]);
+    gdk_color_parse("orange", &led_on_color[ORANGE]);
+    gdk_color_parse("green", &led_on_color[GREEN]);
+    gdk_color_parse("yellow", &led_on_color[YELLOW]);
+    gdk_color_parse("blue", &led_on_color[BLUE]);
+
+
+    gdk_color_alloc(gdk_colormap_get_system(), &led_on_color[on_color]);
 
     // The `off' color is dark red
     led_segment_off_color.red = 0x4000;
@@ -752,6 +877,8 @@ namespace Leds {
     led_segment_off_color.blue = 0x0000;
 
     gdk_color_alloc(gdk_colormap_get_system(), &led_segment_off_color);
+    m_colorAttribute = new ColorAttribute(this);
+    addSymbol(m_colorAttribute);
 
   }
 
@@ -763,6 +890,7 @@ namespace Leds {
     create_iopin_map();
     if(get_interface().bUsingGUI())
       build_window();
+   
 
     led_interface = new LED_Interface(this);
     get_interface().add_interface(led_interface);
@@ -771,6 +899,9 @@ namespace Leds {
 
   Led::~Led()
   {
+
+     if(get_interface().bUsingGUI())
+	delete m_colorAttribute;
     /* deleted elsewhere RRR
     delete m_pin;
     */

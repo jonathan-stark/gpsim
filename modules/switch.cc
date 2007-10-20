@@ -57,7 +57,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/gpsim_interface.h"
 #include "../src/gpsim_time.h"
 
+
 #include "switch.h"
+
 
 namespace Switches {
   //------------------------------------------------------------------------
@@ -337,10 +339,65 @@ namespace Switches {
     }
 
     virtual void set(bool  b);
+    virtual void set(Value *v);
+    virtual void set(const char *buffer, int buf_size = 0);
+    virtual void get(char *return_str, int len);
+    virtual bool Parse(const char *pValue, bool &bValue);
     void setFromButton(bool  b);
   private:
     SwitchBase *m_pParent;
   };
+
+bool SwitchAttribute::Parse(const char *pValue, bool &bValue) {
+
+
+  if(strncmp("true", pValue, sizeof("true")) == 0 ||
+     strncmp("closed", pValue, sizeof("closed")) == 0)
+  {
+    bValue = true;
+    return true;
+  }
+  else if(strncmp("false", pValue, sizeof("false")) == 0 ||
+     strncmp("open", pValue, sizeof("open")) == 0)
+  {
+    bValue = false;
+    return true;
+  }
+  return false;
+}
+void SwitchAttribute::set(Value *v)
+{
+   double d;
+
+  if (typeid(*v) == typeid(Boolean))
+  {
+      bool d;
+
+      v->get(d);
+      set(d);
+  }
+  else if ( typeid(*v) == typeid(String))
+  {
+     char buff[20];
+
+     v->get((char *)buff, sizeof(buff));
+     set(buff);
+  }
+  else
+    throw new TypeMismatch(string("set "), "SwitchAttribute", v->showType());
+}
+
+
+void SwitchAttribute::set(const char *buffer, int buf_size)
+{
+  if(buffer) {
+    bool bValue;
+    if(Parse(buffer, bValue)) {
+      set(bValue);
+    }
+  }
+}
+
 
   void SwitchAttribute::set(bool b)
   {
@@ -352,6 +409,15 @@ namespace Switches {
   {
     Boolean::set(b);
   }
+void SwitchAttribute::get(char *return_str, int len)
+{
+  if(return_str) {
+    bool b;
+    Boolean::get(b);
+    snprintf(return_str,len,"%s",(b ? "closed" : "open"));
+  }
+}
+
 
 
   //--------------------------------------------------------------
