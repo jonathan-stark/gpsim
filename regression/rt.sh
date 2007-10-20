@@ -17,6 +17,10 @@ cd $1
 LOGFILE="$2results.log"
 touch $LOGFILE
 
+# If gpsim is crashing during the regression tests, then uncomment
+# the 'echo' to see which regression test was invoked:
+# echo "make $1 $2"
+
 # Run the simulation and save the results
 make $2 > $LOGFILE
 
