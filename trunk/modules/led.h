@@ -39,6 +39,16 @@ namespace Leds {
   class LED_Interface;  // Defined in led.cc
   class Led_Input;
 
+  enum Colors
+  {
+	RED = 0,
+	ORANGE,
+	GREEN,
+	YELLOW,
+	BLUE		// Must be last
+  };
+	
+
   //------------------------------------------------------------------------
   // LED base class
 
@@ -149,6 +159,7 @@ namespace Leds {
   //------------------------------------------------------------------------
   // Simple LED
   //
+  class ColorAttribute;
 
   class Led: public Module, public Led_base, public TriggerObject
   {
@@ -156,7 +167,7 @@ namespace Leds {
 
     GtkWidget *darea;
     GdkGC *gc;
-    GdkColor led_segment_on_color;
+    GdkColor led_on_color[BLUE+1];
     GdkColor led_segment_off_color;
     int w_width, w_height;
 
@@ -178,9 +189,14 @@ namespace Leds {
     // Inheritance from Module class
     const virtual char *type() { return ("led"); };
     static Module *construct(const char *new_name);
+    Colors get_on_color() { return on_color; }
+    void set_on_color(Colors color);
+    
 
   private:
     Led_Input *m_pin;
+    Colors on_color;
+    ColorAttribute *m_colorAttribute;
   };
 
 } // end of namespace Led

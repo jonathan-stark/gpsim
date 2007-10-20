@@ -4106,7 +4106,7 @@ If the expression at this instruction evaluates to false, then halt the
 \end_layout
 
 \begin_layout LyX-Code
-   .command "SW1.state=true"
+   .command "SW1.state=closed"
 \end_layout
 
 \begin_layout LyX-Code
@@ -4348,7 +4348,7 @@ A command assertion is a gpsim associated with a particular instruction
 \begin_inset Quotes eld
 \end_inset
 
-SW1.state = false
+SW1.state = open
 \begin_inset Quotes erd
 \end_inset
 
@@ -6472,11 +6472,23 @@ Attributes
 
 \begin_layout Standard
 .state - Switch state.
- When 
+ The switch state takes the values of 
+\emph on
+open 
+\emph default
+or 
+\emph on
+closed
+\emph default
+, although 
 \emph on
 false
 \emph default
- the switch is open.
+ for open and 
+\emph on
+true 
+\emph default
+for closed is supported for backward compatibility.
  The 
 \emph on
 .state
@@ -6554,6 +6566,115 @@ I/O Pins
 
 \begin_layout Standard
 .pin - the only pin exposed.
+\end_layout
+
+\begin_layout Subsection
+LED_7SEGMENTS
+\begin_inset LatexCommand index
+name "7SEGMENTS"
+
+\end_inset
+
+ and LED
+\begin_inset LatexCommand index
+name "LED"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+led_7segments - 7 segment common cathod LED display
+\end_layout
+
+\begin_layout Standard
+The segments are numberd as per the following figure.
+\end_layout
+
+\begin_layout LyX-Code
+   ___
+\end_layout
+
+\begin_layout LyX-Code
+5 | 0 | 1
+\end_layout
+
+\begin_layout LyX-Code
+   ___
+\end_layout
+
+\begin_layout LyX-Code
+4 | 6 | 2
+\end_layout
+
+\begin_layout LyX-Code
+   ___
+\end_layout
+
+\begin_layout LyX-Code
+    3
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.cc - common cathod
+\end_layout
+
+\begin_layout Standard
+.seg0 - segment 0
+\end_layout
+
+\begin_layout Standard
+.seg1 - segment 1
+\end_layout
+
+\begin_layout Standard
+.seg2 - segment 2
+\end_layout
+
+\begin_layout Standard
+.seg3 - segment 3
+\end_layout
+
+\begin_layout Standard
+.seg4 - segment 4
+\end_layout
+
+\begin_layout Standard
+.seg5 - segment 5
+\end_layout
+
+\begin_layout Standard
+.seg6 - segment 6
+\end_layout
+
+\begin_layout Subsection*
+Led - Simple LED
+\end_layout
+
+\begin_layout Standard
+The simple LED is a single pin module with an implied grounded cathod.
+ The LED is by default red, but can be made a different color via an attribute.
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+color - LED color, possible values red, green, yellow, orange or blue
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pin
+\end_layout
+
+\begin_layout Standard
+.in - drives LED
 \end_layout
 
 \begin_layout Section

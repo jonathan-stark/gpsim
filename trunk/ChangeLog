@@ -1,3 +1,10 @@
+2007-10-21 Roy Rankin <rrankin@ihug.com.au>
+	* doc/gpsim.lyx: Add LED doc, new switch state values
+	* modules/switch.cc: State attribute given values open and closed
+	* modules/led.cc, modules/led.h: Add color for simple LED
+	* regression/switch_test/switch_test.asm: test new state values
+	* examples/modules/led_test/led_mod.stc: Add position, simple green LED
+
 2007-10-20  Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc: Fixed the 'Step-Over' bug that was
 	preventing the gui from updating properly.
