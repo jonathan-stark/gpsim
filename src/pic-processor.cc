@@ -901,7 +901,7 @@ void pic_processor::step_over (bool refresh)
   unsigned int nextExpected_pc =
     saved_pc + map_pm_index2address(nextInstruction->instruction_size());
 
-  step(1,refresh); // Try one step
+  step(1,false); // Try one step -- without refresh
 
   // if the pc did not advance just one instruction, then some kind of branch occurred.
 
@@ -929,6 +929,9 @@ void pic_processor::step_over (bool refresh)
   // note that we don't need to tell the gui to update its windows since
   // that is already done by step() or run().
 
+  if(refresh)
+    get_interface().simulation_has_stopped();
+    
 }
 
 //-------------------------------------------------------------------
