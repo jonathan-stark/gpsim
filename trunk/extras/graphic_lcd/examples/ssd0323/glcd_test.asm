@@ -155,8 +155,8 @@ start
    .sim "R1.ypos=264.0"
    .sim "R2.xpos=312.0"
    .sim "R2.ypos=264.0"
-   .sim "R3.xpos=376.0"
-   .sim "R3.ypos=264.0"
+;   .sim "R3.xpos=376.0"
+;   .sim "R3.ypos=264.0"
 
 
   if InterfaceMode == ModeSPI
@@ -220,7 +220,9 @@ LL
 	decf	Tx,F
 	BNN	LL
 
+        CLRWDT
 	RCALL	LCD_RefreshEntireDisplay
+        CLRWDT
 
         MOVLW	0
 	MOVWF	PixelX
