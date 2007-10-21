@@ -1,4 +1,8 @@
 2007-10-21 Roy Rankin <rrankin@ihug.com.au>
+	* modules/switch.cc: Fix compiler warning
+	* modules/led.cc: Fix core dump when no GUI
+
+2007-10-21 Roy Rankin <rrankin@ihug.com.au>
 	* doc/gpsim.lyx: Add LED doc, new switch state values
 	* modules/switch.cc: State attribute given values open and closed
 	* modules/led.cc, modules/led.h: Add color for simple LED
