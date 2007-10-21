@@ -367,7 +367,6 @@ bool SwitchAttribute::Parse(const char *pValue, bool &bValue) {
 }
 void SwitchAttribute::set(Value *v)
 {
-   double d;
 
   if (typeid(*v) == typeid(Boolean))
   {

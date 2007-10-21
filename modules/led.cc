@@ -171,6 +171,9 @@ namespace Leds {
 
     guint i;
 
+    if(!get_interface().bUsingGUI())
+      return;
+
     w_width = new_width;
     w_height = new_height;
     GdkDrawable *drawable = widget->window;
@@ -796,11 +799,14 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
   {
 	if (color != on_color)
 	{
-	    if (!led_on_color[color].pixel) // color not allocated
-    		gdk_color_alloc(gdk_colormap_get_system(), 
-			&led_on_color[color]);
 	    on_color = color;
-	    update();
+            if(get_interface().bUsingGUI() )
+	    {
+	    	if (!led_on_color[color].pixel) // color not allocated
+    			gdk_color_alloc(gdk_colormap_get_system(), 
+			    &led_on_color[color]);
+	    	update();
+	    }
 	}
   }
 
@@ -857,7 +863,6 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     gc=NULL;
 
     // The default 'on' color is bright red
-    on_color = RED;
 
     for(int i = RED; i <= BLUE; i++ )
 	led_on_color[i].pixel = 0;
@@ -877,8 +882,6 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     led_segment_off_color.blue = 0x0000;
 
     gdk_color_alloc(gdk_colormap_get_system(), &led_segment_off_color);
-    m_colorAttribute = new ColorAttribute(this);
-    addSymbol(m_colorAttribute);
 
   }
 
@@ -892,6 +895,9 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
       build_window();
    
 
+    on_color = RED;
+    m_colorAttribute = new ColorAttribute(this);
+    addSymbol(m_colorAttribute);
     led_interface = new LED_Interface(this);
     get_interface().add_interface(led_interface);
     callback();
@@ -900,8 +906,7 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
   Led::~Led()
   {
 
-     if(get_interface().bUsingGUI())
-	delete m_colorAttribute;
+    delete m_colorAttribute;
     /* deleted elsewhere RRR
     delete m_pin;
     */
