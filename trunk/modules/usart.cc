@@ -89,7 +89,7 @@ static bool bIsHigh(char state)
 
 
   The  USART module is a general purpose universal synchronous/asynchronous
-serial receiver and transmitter. In other words, it's a serial port. It's 
+serial receiver and transmitter. In other words, it's a serial port. It's
 purpose is to provide a tool to assist in the debugging of serial interfaces.
 Users can load this module and tie it to their receive and transmit pins
 of their simulated PIC's. Then experiments can be conducted on things like
@@ -118,7 +118,7 @@ public:
   USARTModule *usart;
 
   USART_RXPIN (USARTModule *_usart,
-	       char *opt_name=NULL) : IO_bi_directional_pu(opt_name) { 
+               char *opt_name=NULL) : IO_bi_directional_pu(opt_name) {
 
     usart = _usart;
 
@@ -128,7 +128,7 @@ public:
 
     // Let the pin think it's in the high state. If this is wrong,
     // then the I/O pin driving it will correct it. (Starting off
-    // low prevents the start bit from being captured.) 
+    // low prevents the start bit from being captured.)
     // Note, may want to add a flag that indicates if the pin
     // has ever been driven at all. This way, we can capture the
     // first edge. Or we could add another parameter to the constructor.
@@ -142,7 +142,7 @@ public:
   };
 
 
-  void setDrivenState(bool new_dstate) { 
+  void setDrivenState(bool new_dstate) {
     bool diff = new_dstate ^ bDrivenState;
 
     Dprintf((" usart module rxpin new state=%d\n",new_dstate));
@@ -177,8 +177,8 @@ public:
   USARTModule *usart;
 
   USART_TXPIN (USARTModule *_usart,
-	       char *opt_name=NULL) 
-  { 
+               char *opt_name=NULL)
+  {
 
     usart = _usart;
 
@@ -272,13 +272,13 @@ private:
     // The stop bit time is included in the total packet time
 
     if(get_active_cpu()) {
-      time_per_packet = 
-	(guint64)( get_cycles().instruction_cps() * ( 
-			  (1.0 +             // start bit
-			  bits_per_byte +   // data bits
-			  stop_bits  +      // stop bit(s)
-			  use_parity)       //
-			 /baud));
+      time_per_packet =
+        (guint64)( get_cycles().instruction_cps() * (
+                          (1.0 +             // start bit
+                          bits_per_byte +   // data bits
+                          stop_bits  +      // stop bit(s)
+                          use_parity)       //
+                         /baud));
       time_per_bit = (guint64)(get_cycles().instruction_cps() / baud);
     } else
       time_per_packet = time_per_bit = 0;
@@ -326,8 +326,8 @@ private:
       txpin->putState((txr & 1) ? true : false);
       if (0)
       {
-          cout << "usart tx module sent a " << (txr&1) <<  
-		" bit count " << bit_count << '\n';
+          cout << "usart tx module sent a " << (txr&1) <<
+                " bit count " << bit_count << '\n';
       }
     }
 
@@ -337,22 +337,22 @@ private:
       future_time = last_time + time_per_bit;
       get_cycles().set_break(future_time, this);
     } else {
-      // We've sent the whole byte. 
+      // We've sent the whole byte.
       /* output data from buffer if configured */
 #ifdef HAVE_TXFIFO
       if(usart && usart->mGetTxByte(tx_byte))
-	mSendByte(tx_byte);
+        mSendByte(tx_byte);
       else
 #endif
-	empty();
+        empty();
     }
 
   }
 
 
-  void mSendByte(unsigned _tx_byte) 
+  void mSendByte(unsigned _tx_byte)
   {
-    
+
     if(0) {
       cout << "\n\n";
       cout << "TXREG::" << __FUNCTION__ << "\n";
@@ -379,8 +379,8 @@ private:
 
     if (0)
     {
-        cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb 
-	 <<" txr 0x" << txr << "  bits " << bit_count << '\n';
+        cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb
+         <<" txr 0x" << txr << "  bits " << bit_count << '\n';
     }
 
   }
@@ -389,10 +389,10 @@ private:
 
 //=================================================================
 //
-//  RCREG 
+//  RCREG
 //
-// Create a receive register 
-// 
+// Create a receive register
+//
 //
 
 class RCREG : public TriggerObject
@@ -436,12 +436,12 @@ class RCREG : public TriggerObject
     */
 
     if(get_active_cpu()) {
-      time_per_packet = 
-	(guint64)(get_cycles().instruction_cps() * (1.0 +     // start bit
-			       bits_per_byte +   // data bits
-			       stop_bits  +      // stop bit(s)
-			       use_parity)       //
-		  	       /baud);
+      time_per_packet =
+        (guint64)(get_cycles().instruction_cps() * (1.0 +     // start bit
+                               bits_per_byte +   // data bits
+                               stop_bits  +      // stop bit(s)
+                               use_parity)       //
+                               /baud);
 
       time_per_bit = (guint64)(get_cycles().instruction_cps() / baud);
     } else
@@ -496,7 +496,7 @@ private:
   bool    parity;         // 0 = even, 1 = odd
   double  baud;
   unsigned int rx_byte;
-  int	  rx_count;
+  int     rx_count;
 
   guint64 time_per_packet;
 
@@ -528,7 +528,7 @@ RCREG::RCREG(USARTModule *pUsart)
 }
 
 //------------------------------------------------------------------------
-void RCREG::callback() 
+void RCREG::callback()
 {
 
   Dprintf((" usart module RCREG time:0x%llx=%lld\n",get_cycles().get(),get_cycles().get()));
@@ -539,17 +539,17 @@ void RCREG::callback()
     Dprintf(("waiting for start\n"));
     break;
 
-  case RS_START_BIT:	// should now be in middle of start bit
+  case RS_START_BIT:    // should now be in middle of start bit
      if (bIsLow(m_cLastRXState))
      {
-	receive_state = RS_RECEIVING;
-	rx_count = bits_per_byte + use_parity;
-	rx_byte = 0;
-  	future_time = get_cycles().get() + time_per_bit;
+        receive_state = RS_RECEIVING;
+        rx_count = bits_per_byte + use_parity;
+        rx_byte = 0;
+        future_time = get_cycles().get() + time_per_bit;
 
-  	if(!autobaud) 
-    	  get_cycles().set_break(future_time, this);
-       
+        if(!autobaud)
+          get_cycles().set_break(future_time, this);
+
      }
      else // Not valid start bit
      {
@@ -561,22 +561,22 @@ void RCREG::callback()
 
     if (rx_count--)
     {
-	rx_byte = (rx_byte >> 1) | (bIsHigh(m_cLastRXState) ?  
-		1<<(bits_per_byte-1) : 0);
-  	future_time = get_cycles().get() + time_per_bit;
+        rx_byte = (rx_byte >> 1) | (bIsHigh(m_cLastRXState) ?
+                1<<(bits_per_byte-1) : 0);
+        future_time = get_cycles().get() + time_per_bit;
 
-  	if(!autobaud) 
-    	  get_cycles().set_break(future_time, this);
+        if(!autobaud)
+          get_cycles().set_break(future_time, this);
     }
     else if (bIsHigh(m_cLastRXState)) // on stop bit
     {
-	m_usart->newRxByte(rx_byte);
-	m_usart->show_tx(rx_byte);
+        m_usart->newRxByte(rx_byte);
+        m_usart->show_tx(rx_byte);
         receive_state = RS_WAITING_FOR_START;
     }
     else
     {
-	cout << "USART module RX overrun error\n";
+        cout << "USART module RX overrun error\n";
         receive_state = RS_WAITING_FOR_START;
     }
 
@@ -593,7 +593,7 @@ void RCREG::callback()
 };
 
 //------------------------------------------------------------------------
-void RCREG::start() 
+void RCREG::start()
 {
 
   receive_state = RS_START_BIT;
@@ -616,7 +616,7 @@ void RCREG::start()
 //  event buffer. No effort is made here to decode a byte;
 //  instead, decoding will take place in callback().
 
-void RCREG::new_rx_edge(bool bit) 
+void RCREG::new_rx_edge(bool bit)
 {
 
   // Save the event state
@@ -629,8 +629,8 @@ void RCREG::new_rx_edge(bool bit)
     switch(receive_state) {
     case RS_WAITING_FOR_START:
       if(bIsLow(currentRXState)) {
-	start();
-	Dprintf(("Start bit at t=0x%llx\n",get_cycles().get()));
+        start();
+        Dprintf(("Start bit at t=0x%llx\n",get_cycles().get()));
       }
 
       break;
@@ -663,7 +663,7 @@ public:
   }
 
   USART_IO ( USARTModule *_usart,
-	     unsigned int b,
+             unsigned int b,
              char *opt_name ) : IO_bi_directional_pu(opt_name) {
     usart = _usart;
 
@@ -678,7 +678,7 @@ public:
     Zpullup = 10e3;
   }
 
-  void setDrivenState(bool new_dstate) { 
+  void setDrivenState(bool new_dstate) {
     bool diff = new_dstate ^ bDrivenState;
 
 //    Dprintf((" usart module %s new state=%d\n",name(),new_dstate));
@@ -698,7 +698,7 @@ public:
 //
 //  USART attributes
 //
-//  Provide attributes that allow the user to dynamically 
+//  Provide attributes that allow the user to dynamically
 // configure the USART module
 //
 // Attribute    Default
@@ -711,7 +711,7 @@ public:
 //   parity        0
 //   start_bits    1
 //   stop_bits     1
-//   
+//
 
 
 class RxBaudRateAttribute : public Integer
@@ -757,7 +757,7 @@ public:
     assert(txreg);
   }
 
-  void set(Value *v) 
+  void set(Value *v)
   {
     Integer::set(v);
 
@@ -816,7 +816,7 @@ public:
     return Integer::toString("%" PRINTF_INT64_MODIFIER "d");
   }
 
-  void newByte(gint64 b) 
+  void newByte(gint64 b)
   {
     Dprintf((" RxBuffer received a byte: 0x%02x=%d=%c",b,b,b));
     Integer::set(b);
@@ -836,7 +836,7 @@ void USARTModule::newRxByte(unsigned int aByte)
   m_RxBuffer->newByte(aByte);
   if(m_loop->getVal())
   {
-	SendByte(aByte);
+        SendByte(aByte);
   }
 }
 
@@ -851,7 +851,7 @@ bool USARTModule::mGetTxByte(unsigned int &aByte)
   if (_tx_index > sizeof(Test_Hello))
     return false;
 
-  aByte = Test_Hello[_tx_index++]; 
+  aByte = Test_Hello[_tx_index++];
   return true;
 
 }
@@ -870,7 +870,7 @@ bool USARTModule::mGetTxByte(unsigned int &aByte)
 #endif
 
 //--------------------------------------------------------------
-// create_iopin_map 
+// create_iopin_map
 //
 //  This is where the information for the Module's package is defined.
 // Specifically, the I/O pins of the module are created.
@@ -915,7 +915,7 @@ void USARTModule::create_iopin_map(void)
 
   // Complete the usart initialization
 
-  m_txreg->txpin = txpin; 
+  m_txreg->txpin = txpin;
   m_txreg->usart = this; // Point back to the module
   m_rcreg->rxpin = rxpin;
 
@@ -990,9 +990,11 @@ USARTModule::USARTModule(const char *_name) : Module(_name, "USART")
 
 USARTModule::~USARTModule()
 {
+#ifdef HAVE_GUI
     if(window)
-	gtk_widget_destroy(window);
-    
+        gtk_widget_destroy(window);
+#endif
+
 #ifdef HAVE_TXFIFO
     delete m_TxFIFO;
 #endif
@@ -1062,49 +1064,49 @@ void USARTModule::SendByte(unsigned tx_byte)
 };
 
 #ifdef HAVE_GUI
-static bool ctl = false;	// true when ctrl key is down
+static bool ctl = false;        // true when ctrl key is down
 
 static gint
 key_press(GtkWidget *widget,
           GdkEventKey *key,
           gpointer data)
 {
-	unsigned int c = key->keyval;
+        unsigned int c = key->keyval;
 
         gtk_signal_emit_stop_by_name (GTK_OBJECT (widget), "key_press_event");
-	if(c == 0xffe3 || c == 0xffe4) // key is left or right ctrl
-	{
-	    ctl = true;
-	    return(1);
-	}
-	if (ctl && c < 0xff00)	// build control character
-	{
-		Dprintf(("CTL 0x%02x\n", c));
-		c &= 0x1f;
-	}
-	if ( c < 0xff20)	// send character to usart
-	{
-	    c &= 0xff;
-	    ((USARTModule *)data)->USARTModule::SendByte(c);
-	    Dprintf(("Send %c 0x%x\n", c,c));
-	}
-	else
-	{
-		Dprintf(( "0x%02x\n", c));
-	}
-	return(1);
+        if(c == 0xffe3 || c == 0xffe4) // key is left or right ctrl
+        {
+            ctl = true;
+            return(1);
+        }
+        if (ctl && c < 0xff00)  // build control character
+        {
+                Dprintf(("CTL 0x%02x\n", c));
+                c &= 0x1f;
+        }
+        if ( c < 0xff20)        // send character to usart
+        {
+            c &= 0xff;
+            ((USARTModule *)data)->USARTModule::SendByte(c);
+            Dprintf(("Send %c 0x%x\n", c,c));
+        }
+        else
+        {
+                Dprintf(( "0x%02x\n", c));
+        }
+        return(1);
 }
 static gint
 key_release(GtkWidget *widget,
           GdkEventKey *key,
           gpointer data)
 {
-	unsigned int c = key->keyval;
-	if(c == 0xffe3 || c == 0xffe4)	// Capture release of ctrl key
-	{
-	    ctl = false;
-	}
-	return(1);
+        unsigned int c = key->keyval;
+        if(c == 0xffe3 || c == 0xffe4)  // Capture release of ctrl key
+        {
+            ctl = false;
+        }
+        return(1);
 }
 #endif //HAVE_GUI
 
@@ -1142,14 +1144,14 @@ void USARTModule::show_tx(unsigned int data)
       else {
         char hex[5];
         sprintf (hex, "<%02X>", data);
-        gtk_text_buffer_insert(buff, &iter, hex, 4);  
+        gtk_text_buffer_insert(buff, &iter, hex, 4);
       }
       gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0.0, 1.0);
   }
 #endif //HAVE_GUI
 }
 
-// Create a GUI text window 
+// Create a GUI text window
 void USARTModule::CreateGraphics()
 {
 #ifdef HAVE_GUI
@@ -1161,8 +1163,8 @@ void USARTModule::CreateGraphics()
     GtkWidget *pSW = gtk_scrolled_window_new (0,0);
     gtk_container_add (GTK_CONTAINER (window), pSW);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
-				    GTK_POLICY_AUTOMATIC,
-				    GTK_POLICY_AUTOMATIC);
+                                    GTK_POLICY_AUTOMATIC,
+                                    GTK_POLICY_AUTOMATIC);
     text = gtk_text_view_new ();
     gtk_text_view_set_editable (GTK_TEXT_VIEW (text), TRUE);
     gtk_container_add (GTK_CONTAINER (pSW), text);
@@ -1176,20 +1178,20 @@ void USARTModule::CreateGraphics()
     gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK);
 
     gtk_signal_connect(GTK_OBJECT(text),"key_press_event",
-		       (GtkSignalFunc) key_press,
-		       this);
+                       (GtkSignalFunc) key_press,
+                       this);
     gtk_signal_connect(GTK_OBJECT(text),"key_release_event",
-		       (GtkSignalFunc) key_release,
-		       this);
+                       (GtkSignalFunc) key_release,
+                       this);
 
     gtk_signal_connect (GTK_OBJECT (window), "destroy",
                         GTK_SIGNAL_FUNC (gtk_widget_destroy), window);
-                                                                                
+
     gtk_widget_show_all(window);
-    
+
   } else {
     window = 0;
     text = 0;
   }
-#endif	// HAVE_GUI
+#endif  // HAVE_GUI
 }
