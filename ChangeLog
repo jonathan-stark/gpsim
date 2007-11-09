@@ -1,3 +1,7 @@
+2007-11-09 Borut Razem <borut.razem@siol.net>
+	* modules/usart.cc> fixed bug #1828634: SVN does not build with
+	  --disable-gui
+
 2007-10-21 Roy Rankin <rrankin@ihug.com.au>
 	* modules/switch.cc: Fix compiler warning
 	* modules/led.cc: Fix core dump when no GUI
