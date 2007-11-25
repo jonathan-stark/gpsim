@@ -1266,9 +1266,8 @@ void TMR2::update(int ut)
 }
 void TMR2::put(unsigned int new_value)
 {
-  current_value();
 
-  unsigned int old_value = value.get();
+  unsigned int old_value = get_value();
 
 
   trace.raw(write_trace.get() | value.get());
@@ -1505,7 +1504,9 @@ void TMR2::current_value()
   value.put(tmr2_val & 0xff);
 
   if(tmr2_val > 0x100)	// Can get to 0x100 during transition
-   cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";
+  {
+   cout << "TMR2 BUG!! value = " << tmr2_val << " which is greater than 0xff\n";
+  }
 }
 
 // TMR2 callback is called when the cycle counter hits the break point that
