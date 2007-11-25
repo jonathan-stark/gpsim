@@ -1,3 +1,6 @@
+2007-11-25 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.cc: Fix TMR2 BUG message on reset
+
 2007-11-09 Borut Razem <borut.razem@siol.net>
 	* modules/usart.cc> fixed bug #1828634: SVN does not build with
 	  --disable-gui
