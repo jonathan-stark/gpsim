@@ -1,3 +1,23 @@
+2007-12-02 Roy Rankin <rrankin@ihug.com.au>
+      	* regression/wdt/18f452.lkr regression/wdt/16f88.lkr
+      	  regression/wdt/16f628.lkr regression/wdt/16c64.lkr
+      	  regression/wdt/wdt_16c64.asm regression/wdt/nwdt_18f452.asm
+          regression/wdt/wdt_18f452.asm regression/wdt/nwdt_16f628.asm
+      	  regression/wdt/nwdt_16f88.asm regression/wdt/wdt_16f88.asm
+      	  regression/wdt/wdt_16f628.asm regression/wdt/Makefile
+      	  regression/wdt/nwdt_16c64.asm regression/Makefile.am 
+	  regression/run_regression.sh:
+	- Add regression tests for Watchdog Time
+	* regression/p16f84/reset.asm: Sleep continues on WDT expire
+	* src/Makefile.am src/rcon.h src/16bit-registers.h: RCON moved to rcon.h 
+	* src/pic-processor.cc src/pic-processor.h src/16bit-processors.cc 
+	  src/pic-registers.cc src/14bit-registers.h src/p16f8x.h
+	  src/p16f8x.cc:  WDT and configuration fixes
+	* src/processor.cc: Frequency change updates WDT
+      	* src/14bit-registers.cc: WDTCON functions added, 
+		Status register rcon support
+	* src/16bit-instructions.cc: Implement Sleep instruction
+
 2007-11-25 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc: Fix TMR2 BUG message on reset
 

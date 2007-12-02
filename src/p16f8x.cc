@@ -54,6 +54,12 @@ public:
   Config1(P16F8x *pCpu)
     : ConfigWord("CONFIG1", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
+    if (m_pCpu) 
+    {
+	m_pCpu->wdt.initialize(true); // default WDT enabled
+        m_pCpu->wdt.set_timeout(0.000035);
+	m_pCpu->set_config_word(0x2007, 0x3fff);
+    }
   }
 
   enum {
@@ -78,19 +84,10 @@ public:
 
   virtual void set(gint64 v)
   {
-    gint64 oldV = getVal();
 
     Integer::set(v);
-    if (m_pCpu) {
-
-      gint64 diff = oldV ^ v;
-
-      if (diff & WDTEN)
-      {
+    if (m_pCpu) 
 	m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
-      }
-
-    }
 
   }
 
@@ -101,7 +98,7 @@ public:
 
 P16F8x::P16F8x(const char *_name, const char *desc)
   : P16X6X_processor(_name,desc),
-    wdtcon(this, "wdtcon", "WDT Control"),
+    wdtcon(this, "wdtcon", "WDT Control", 0x1f),
     osccon(this, "osccon", "OSC Control"),
     osctune(this, "osctune", "OSC Tune"),
     usart(this),
@@ -111,8 +108,6 @@ P16F8x::P16F8x(const char *_name, const char *desc)
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
   pir1 = pir1_2_reg;
   pir2 = pir2_2_reg;
-  //pir1 = &pir1_2_reg;
-  //pir2 = &pir2_2_reg;
 }
 
 P16F8x::~P16F8x()
@@ -253,7 +248,7 @@ void P16F8x::create_sfr_map()
 
   add_sfr_register(&comparator.cmcon, 0x9c, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9d, RegisterValue(0,0),"cvrcon");
-  add_sfr_register(&wdtcon, 0x105, RegisterValue(0,0),"wdtcon");
+  add_sfr_register(&wdtcon, 0x105, RegisterValue(0x08,0),"wdtcon");
 }
 
 void P16F8x::create_symbols()
@@ -286,7 +281,9 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 
   // Let the base class do most of the work:
 
-  if (pic_processor::set_config_word(address, cfg_word)) {
+  if (address == 0x2007)
+  {
+    pic_processor::set_config_word(address, cfg_word);
 
     if (verbose)
         cout << "p16f88 0x" << hex << address << " setting config word 0x" << cfg_word << '\n';
@@ -311,15 +308,20 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     case 3:     // EC:  RA6 is an I/O, RA7 is a CLKIN
     case 0x12:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
+        (m_porta->getPin(6))->newGUIname("porta6");
         (m_porta->getPin(7))->newGUIname("CLKIN");
         valid_pins =  (valid_pins & 0x7f)|0x40;
         break;
 
     case 0x10:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+        (m_porta->getPin(6))->newGUIname("porta6");
+        (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins |= 0xc0;
         break;
 
     case 0x11:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+	(m_porta->getPin(6))->newGUIname("CLKOUT");
+        (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins = (valid_pins & 0xbf)|0x80;
         break;
 
@@ -328,13 +330,15 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
     // a general purpose I/O pin.
 
-    if (! (cfg_word & CFG_MCLRE)) 
+    if ((cfg_word & CFG_MCLRE)) 
     {
-      valid_pins |= ( 1<< 5); 		// porta5 IO port
+	(m_porta->getPin(5))->newGUIname("MCLR");
+        valid_pins &= ~( 1<< 5); 		// porta5 not IO port
     }
     else
     {
-	(m_porta->getPin(5))->newGUIname("MCLR");
+	(m_porta->getPin(5))->newGUIname("porta5");
+        valid_pins |= ( 1<< 5); 		// porta5 IO port
     }
 
     if (cfg_word & CFG_CCPMX)
@@ -400,7 +404,6 @@ P16F81x::P16F81x(const char *_name, const char *desc)
     adcon1(this,"adcon1", "A2D Control 1"),
     adresh(this,"adresh", "A2D Result High"),
     adresl(this,"adresl", "A2D Result Low"),
-    wdtcon(this, "wdtcon", "WDT Control"),
     osccon(this, "osccon", "OSC Control"),
     osctune(this, "osctune", "OSC Tune")
 {
@@ -408,8 +411,6 @@ P16F81x::P16F81x(const char *_name, const char *desc)
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
   pir1 = pir1_2_reg;
   pir2 = pir2_2_reg;
-  //pir1 = &pir1_2_reg;
-  //pir2 = &pir2_2_reg;
 }
 
 P16F81x::~P16F81x()
@@ -632,15 +633,20 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     case 3:     // EC:  RA6 is an I/O, RA7 is a CLKIN
     case 0x12:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
+        (m_porta->getPin(6))->newGUIname("porta6");
         (m_porta->getPin(7))->newGUIname("CLKIN");
         valid_pins =  (valid_pins & 0x7f)|0x40;
         break;
 
     case 0x10:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+        (m_porta->getPin(6))->newGUIname("porta6");
+        (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins |= 0xc0;
         break;
 
     case 0x11:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+	(m_porta->getPin(6))->newGUIname("CLKOUT");
+        (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins = (valid_pins & 0xbf)|0x80;
         break;
 
@@ -649,13 +655,15 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
     // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
     // a general purpose I/O pin.
 
-    if (! (cfg_word & CFG_MCLRE)) 
+    if ((cfg_word & CFG_MCLRE)) 
     {
-      valid_pins |= ( 1<< 5); 		// porta5 IO port
+        valid_pins &= ~( 1<< 5); 		// porta5 not IO port
+	(m_porta->getPin(5))->newGUIname("MCLR");
     }
     else
     {
-	(m_porta->getPin(5))->newGUIname("MCLR");
+	(m_porta->getPin(5))->newGUIname("porta5");
+        valid_pins |= ( 1<< 5); 		// porta5 IO port
     }
 
     if (cfg_word & CFG_CCPMX)
@@ -673,10 +681,6 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
         m_porta->setTris(m_trisa);
     }
     return true;
-  }
-  else if (address == 0x2008 )
-  {
-    cout << "p16f8i18 0x" << hex << address << " config word 0x" << cfg_word << '\n';
   }
 
   return false;

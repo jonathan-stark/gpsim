@@ -33,6 +33,7 @@ class _14bit_processor;
 
 #include "breakpoints.h"
 
+#include "rcon.h"
 class stimulus;  // forward reference
 class IOPIN;
 class source_stimulus;
@@ -82,6 +83,7 @@ public:
 //---------------------------------------------------------
 // Status register
 //
+class RCON;
 
 class Status_register : public sfr_register
 {
@@ -113,9 +115,12 @@ public:
   unsigned int break_on_z,break_on_c;
   unsigned int rp_mask;
   unsigned int write_mask;    // Bits that instructions can modify
+  RCON *rcon;
 
   Status_register(Processor *, const char *pName, const char *pDesc=0);
   void reset(RESET_TYPE r);
+
+  void set_rcon(RCON *p_rcon) { rcon = p_rcon;}
 
   virtual void put(unsigned int new_value);
 
@@ -180,28 +185,46 @@ public:
 
   inline void put_PD(unsigned int new_pd)
   {
-
-    get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~STATUS_PD) | ((new_pd) ? STATUS_PD : 0));
-  }
+    if (rcon)
+        rcon->put_PD(new_pd);
+    else
+    {
+        get_trace().raw(write_trace.get() | value.get());
+        value.put((value.get() & ~STATUS_PD) | ((new_pd) ? STATUS_PD : 0));
+    }  
+}
 
   inline unsigned int get_PD()
   {
-
-    get_trace().raw(read_trace.get() | value.get());
-    return( ( (value.get() & STATUS_PD) == 0) ? 0 : 1);
+    if (rcon)
+	return (rcon->get_PD());
+    else
+    {
+        get_trace().raw(read_trace.get() | value.get());
+        return( ( (value.get() & STATUS_PD) == 0) ? 0 : 1);
+    }
   }
 
   inline void put_TO(unsigned int new_to)
   {
-    get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~STATUS_TO) | ((new_to) ? STATUS_TO : 0));
+    if (rcon)
+	rcon->put_TO(new_to);
+    else
+    {
+        get_trace().raw(write_trace.get() | value.get());
+        value.put((value.get() & ~STATUS_TO) | ((new_to) ? STATUS_TO : 0));
+    }
   }
 
   inline unsigned int get_TO()
   {
-    get_trace().raw(read_trace.get() | value.get());
-    return( ( (value.get() & STATUS_TO) == 0) ? 0 : 1);
+    if (rcon)
+	return(rcon->get_TO());
+    else
+    {
+        get_trace().raw(read_trace.get() | value.get());
+        return( ( (value.get() & STATUS_TO) == 0) ? 0 : 1);
+    }
   }
 
   // Special member function to set Z, C, DC, OV, and N for the 18cxxx family
@@ -273,7 +296,6 @@ public:
     return( (value.get()>>STATUS_FSR1_BIT) & 0x03);
   }
 
-  
 
 };
 
@@ -450,13 +472,19 @@ class WDTCON : public  sfr_register
   unsigned int valid_bits;
                                                                                 
   enum {
+    WDTPS3 = 1<<4,
+    WDTPS2 = 1<<3,
+    WDTPS1 = 1<<2,
+    WDTPS0 = 1<<1,
     SWDTEN = 1<<0
   };
                                                                                 
-  WDTCON(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), valid_bits(1)
+  WDTCON(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bits)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(bits)
   {
   }
+  virtual void put(unsigned int new_value);
+  virtual void reset(RESET_TYPE r);
                                                                                 
 };
 

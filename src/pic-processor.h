@@ -208,8 +208,10 @@ public:
   WDT(pic_processor *, double _timeout);
   void put(unsigned int new_value);
   virtual void initialize(bool enable);
+  virtual void swdten(bool enable);
   void set_timeout(double);
   virtual void set_prescale(unsigned int);
+  virtual void set_postscale(unsigned int);
   virtual void reset(RESET_TYPE r);
   void clear();
   virtual void callback();
@@ -222,15 +224,16 @@ protected:
   pic_processor *cpu;           // The cpu to which this wdt belongs.
 
   unsigned int
-    value,
     breakpoint,
-    prescale;
+    prescale,
+    postscale;
   guint64
     future_cycle;
 
   double timeout;   // When no prescaler is assigned
   bool   wdte;
   bool   warned;
+  bool 	 cfgw_enable;  // Enabled from Configureation word
 
 
 };
@@ -315,6 +318,7 @@ public:
   void sleep();
   virtual void enter_sleep();
   virtual void exit_sleep();
+  bool is_sleeping();
   virtual void step(unsigned int steps,bool refresh=true);
   virtual void step_over(bool refresh=true);
   virtual void step_cycle();
@@ -392,6 +396,7 @@ class ConfigWord : public Integer
 public:
   ConfigWord(const char *_name, unsigned int default_val, const char *desc,
              pic_processor *pCpu, unsigned int addr);
+  unsigned int ConfigWordAdd() { return m_addr; }
 protected:
   pic_processor *m_pCpu;
   unsigned int m_addr;

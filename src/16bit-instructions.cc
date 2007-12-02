@@ -1844,12 +1844,7 @@ void SETF::execute()
 
 void SLEEP16::execute()
 {
-
-  //cpu_pic->status->put_TO(1);
-  //cpu_pic->status->put_PD(0);
-
-  cout << "16BIT-SLEEP is not implemented\n";
-
+  cpu_pic->enter_sleep();
 }
 
 //--------------------------------------------------

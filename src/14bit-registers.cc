@@ -202,6 +202,22 @@ void  OSCCON::put(unsigned int new_value)
 	    new_value |= IOFS;
   }
 }
+void WDTCON::put(unsigned int new_value)
+{
+  unsigned int masked_value = new_value & valid_bits;
+
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(masked_value);
+
+  if (valid_bits > 1)
+      cpu_pic->wdt.set_prescale(masked_value >> 1);
+  cpu_pic->wdt.swdten((masked_value & SWDTEN) == SWDTEN);
+}
+void WDTCON::reset(RESET_TYPE r)
+{
+   putRV(por_value);
+}
 //
 //--------------------------------------------------
 // member functions for the FSR class
@@ -297,6 +313,7 @@ unsigned int FSR_12::get_value()
 Status_register::Status_register(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc)
 {
+  rcon = NULL;
   break_point = 0;
   break_on_z =0;
   break_on_c =0;

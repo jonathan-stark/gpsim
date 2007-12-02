@@ -35,6 +35,7 @@ class InvalidRegister;   // Forward reference
 #include "uart.h"
 #include "a2dconverter.h"
 #include "ssp.h"
+#include "rcon.h"
 #define _16BIT_REGISTER_MASK   0xfff
 
 class _16bit_processor;
@@ -382,24 +383,6 @@ public:
 
 class TMR0_16;
 
-//---------------------------------------------------------
-class RCON :  public sfr_register
-{
-public:
-
-  enum
-  {
-    BOR  = 1<<0,
-    POR  = 1<<1,
-    PD   = 1<<2,
-    TO   = 1<<3,
-    RI   = 1<<4,
-    LWRT = 1<<6,
-    IPEN = 1<<7
-  };
-  RCON(Processor *, const char *pName, const char *pDesc=0);
-
-};
 
 //---------------------------------------------------------
 class CPUSTA :  public sfr_register
@@ -652,6 +635,5 @@ public:
 
   LVDCON(Processor *, const char *pName, const char *pDesc=0);
 };
-
 
 #endif

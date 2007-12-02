@@ -145,6 +145,7 @@ gpsiminclude_HEADERS = \
 	protocol.h \
 	pthread-wrap.h \
 	registers.h \
+	rcon.h \
 	sim_context.h \
 	stimuli.h \
 	symbol.h \

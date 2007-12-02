@@ -437,9 +437,24 @@ void pic_processor::exit_sleep()
 {
 
 #if defined(CLOCK_EXPERIMENTS)
+  m_ActivityState = ePAActive;
   mCurrentPhase->setNextPhase(mExecute1Cycle);
 #else
   bp.clear_sleep();
+#endif
+}
+
+//-------------------------------------------------------------------
+//
+// is_sleeping
+
+bool pic_processor::is_sleeping()
+{
+
+#if defined(CLOCK_EXPERIMENTS)
+  return m_ActivityState == ePASleeping;
+#else
+  return false;	// don't know what to do and is not being used - RRR
 #endif
 }
 
@@ -1279,21 +1294,23 @@ void pic_processor::create_symbols ()
 bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 {
 
-  // Clear all of the configuration bits in config_modes and then
-  // reset each of them based on the config bits in cfg_word:
-  //config_modes &= ~(CM_WDTE);
-  //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
+  if (m_configMemory)
+  {
+      for(int i = 0; m_configMemory->getConfigWord(i); i++)
+      {
+        if (m_configMemory->getConfigWord(i)->ConfigWordAdd() == address)
+        {
+            m_configMemory->getConfigWord(i)->set((int)cfg_word);
+            if (i == 0 && config_modes)
+            {
+                config_word = cfg_word;
+                config_modes->config_mode = (config_modes->config_mode & ~7) |
+                                        (cfg_word & 7);
+            }
 
-  if((address == config_word_address()) && config_modes) {
-
-    config_word = cfg_word;
-
-    config_modes->config_mode = (config_modes->config_mode & ~7) | (cfg_word & 7);
-
-    if((bool)verbose && config_modes)
-      config_modes->print();
-
-    return true;
+            return true;
+        }
+     }
   }
 
   return false;
@@ -1408,7 +1425,8 @@ void ProgramMemoryAccess::callback()
 //--------------------------------------------------
 WDT::WDT(pic_processor *p_cpu, double _timeout)
   : gpsimObject("WDT","Watch Dog Timer"),
-    cpu(p_cpu), breakpoint(0),prescale(1), future_cycle(0), timeout(_timeout), wdte(false)
+    cpu(p_cpu), breakpoint(0),prescale(1), postscale(128), future_cycle(0), 
+    timeout(_timeout), wdte(false), cfgw_enable(false)
 {
 }
 
@@ -1417,26 +1435,32 @@ void WDT::update()
 {
   if(wdte) {
     // FIXME - the WDT should not be tied to the instruction counter...
-    value = (unsigned int )(timeout/get_cycles().seconds_per_cycle());
-    //value = (unsigned int )(cpu->get_frequency()*timeout);
-    //prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+    guint64 delta_cycles;
+
+
+    delta_cycles = (guint64)(postscale*prescale*timeout/get_cycles().seconds_per_cycle());
+    
+   if (verbose)
+   {
+	cout << "WDT::update timeout in " << (postscale*prescale*timeout);
+	cout << " seconds (" << dec << delta_cycles << " cycles), ";
+	cout << "CPU frequency " << (cpu->get_frequency()) << endl;
+   }
+
+    guint64 fc = get_cycles().get() + delta_cycles ;
 
     if(future_cycle) {
 
-      guint64 fc = get_cycles().get() + value * (1<<prescale);
 
       if(verbose)
         cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
 
       get_cycles().reassign_break(future_cycle, fc, this);
-      future_cycle = fc;
 
     } else {
-
-      future_cycle = get_cycles().get() + value * (1<<prescale);
-
-      get_cycles().set_break(future_cycle, this);
+      get_cycles().set_break(fc, this);
     }
+    future_cycle = fc;
   }
 
 }
@@ -1447,42 +1471,72 @@ void WDT::update()
 
 void WDT::put(unsigned int new_value)
 {
-  value = new_value;
-
-  update();
-
+  cout << "WDT::put should not be called\n";
 }
 void WDT::set_timeout( double _timeout)
 {
   timeout = _timeout;
   update();
 }
+//  TMR0 prescale is WDT postscale
+void WDT::set_postscale(unsigned int newPostscale)
+{
+  unsigned int value = 1<< newPostscale; 
+  if (verbose)
+      cout << "WDT::set_postscale postscale = " << dec << value << endl;
+  if (value != postscale) {
+    postscale = value;
+    update();
+  }
+}
+void WDT::swdten(bool enable)
+{
+    if (cfgw_enable)
+	return;
+
+    if (wdte != enable)
+    {
+    	wdte = enable;
+  	warned = 0;
+  	if(verbose)
+    	    cout << " WDT swdten "
+		<< ( (enable) ?  "enabling\n" : ", but disabling WDT\n");
+	if (wdte)
+	{
+	    update();
+	}
+	else
+	{
+    	    if (future_cycle) {
+      		cout << "Disabling WDT\n";
+      		get_cycles().clear_break(this);
+      		future_cycle = 0;
+	    }
+	}
+    }
+}
+// For WDT period select 0-11
 void WDT::set_prescale(unsigned int newPrescale)
 {
-  if (newPrescale != prescale) {
-    prescale = newPrescale;
+  unsigned int value = 1<< (5 + newPrescale); 
+  if (verbose)
+      cout << "WDT::set_prescale prescale = " << dec << value << endl;
+  if (value != prescale) {
+    prescale = value;
     update();
   }
 }
 void WDT::initialize(bool enable)
 {
   wdte = enable;
+  cfgw_enable = enable;
   warned = 0;
 
   if(verbose)
     cout << " WDT init called "<< ( (enable) ? "enabling\n" :", but disabling WDT\n");
 
   if(wdte) {
-    value = (unsigned int) (cpu->get_frequency()*timeout);
-    //prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
-
-    future_cycle = get_cycles().get() + value * (1<<prescale);
-    if (verbose)
-      cout << "Enabling WDT timeout = " << (timeout*(1<<prescale)) << " seconds = "
-           << hex << (value *(1<<prescale)) << " cycles\n";
-
-    get_cycles().set_break(future_cycle, this);
-
+	update();
   } else {
 
     if (future_cycle) {
@@ -1524,16 +1578,24 @@ void WDT::callback()
     if(verbose)
       cout<<"WDT timeout: " << hex << get_cycles().get() << '\n';
 
-    update();
 
-    // The TO bit gets cleared when the WDT times out.
-    cpu->status->put_TO(0);
 
     if(breakpoint)
       bp.halt();
+    else if (cpu->is_sleeping())
+    {
+	cout << "WDT expired during sleep\n";
+        update();
+	cpu->exit_sleep();
+        cpu->status->put_TO(0);
+    }
     else
     {
-      cpu->reset(WDT_RESET);
+      // The TO bit gets cleared when the WDT times out.
+        cout << "WDT expired reset\n";
+        update();
+        cpu->status->put_TO(0);
+        cpu->reset(WDT_RESET);
     }
   }
 
