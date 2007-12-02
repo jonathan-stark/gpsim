@@ -104,7 +104,6 @@ public:
   sfr_register  adresh;
   sfr_register  adresl;
 
-  WDTCON       wdtcon;
   OSCCON       osccon;
   OSCTUNE      osctune;
 

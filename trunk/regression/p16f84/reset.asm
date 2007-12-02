@@ -89,6 +89,7 @@ START  CODE    0x000                    ;
   .sim "ResetSequence=0"
 
   .sim ".BreakOnReset = false"
+  .sim "p16f84.frequency=100000"
 
   ; Set a cycle break point far in the future in case the resets fail.
   .sim "break c 0x1000000"
@@ -240,7 +241,7 @@ PowerOnReset:
    ; (note, the instruction after the SLEEP should not be executed).
         
         nop
-  .command "resetCounter = resetCounter+1"
+;RRR  .command "resetCounter = resetCounter+1"
         nop
 ;========================================================================
 ;

@@ -105,12 +105,16 @@ public:
   Config2H(_16bit_processor *pCpu, unsigned int addr)
     : ConfigWord("CONFIG2H", CONFIG2H_default, "WatchDog configuration", pCpu, addr)
   {
+	set(CONFIG2H_default);
   }
   virtual void set(gint64 v)
   {
     Integer::set(v);
     if (m_pCpu)
+    {
+      m_pCpu->wdt.set_postscale((v & (WDTPS0|WDTPS1|WDTPS2)) >> 1);
       m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
+    }
   }
 
   virtual string toString()
@@ -156,7 +160,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     tmr0l(this, "tmr0l", "TMR0 Low"),
     tmr0h(this, "tmr0h", "TMR0 High"),
     t0con(this, "t0con", "TMR0 Control"),
-    rcon(this, "rcon", ""),
+    rcon(this, "rcon", "Reset Control"),
     pir1(this,"pir1","Peripheral Interrupt Register",0,0),
     ipr1(this, "ipr1", "Interrupt Priorities"),
     ipr2(this, "ipr2", "Interrupt Priorities"),
@@ -181,7 +185,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
 
     osccon(this, "osccon", "OSC Control"),
     lvdcon(this, "lvdcon", "LVD Control"),
-    wdtcon(this, "wdtcon", "WDT Control"),
+    wdtcon(this, "wdtcon", "WDT Control", 1),
     prodh(this, "prodh", "Product High"),
     prodl(this, "prodl", "Product Low"),
     pclatu(this, "pclatu", "Program Counter Latch upper byte"),
@@ -318,7 +322,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&tmr1l,	  0xfce,porv,"tmr1l");
   add_sfr_register(&tmr1h,	  0xfcf,porv,"tmr1h");
 
-  add_sfr_register(&rcon,	  0xfd0,porv,"rcon");
+  add_sfr_register(&rcon,	  0xfd0,RegisterValue(0x1c,0),"rcon");
   add_sfr_register(&wdtcon,	  0xfd1,porv,"wdtcon");
   add_sfr_register(&lvdcon,	  0xfd2,porv,"lvdcon");
   add_sfr_register(&osccon,	  0xfd3,porv,"osccon");
@@ -329,6 +333,7 @@ void _16bit_processor :: create_sfr_map()
   t0con.put(0xff);  /**FIXME - need a way to set this to 0xff at reset*/
 
   add_sfr_register(status,       0xfd8);
+  status->set_rcon(&rcon);
 
   add_sfr_register(&ind2.fsrl,	  0xfd9,porv,"fsr2l");
   add_sfr_register(&ind2.fsrh,    0xfda,porv,"fsr2h");

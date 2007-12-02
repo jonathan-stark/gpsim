@@ -44,6 +44,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 #include "modules.h"
 #include "processor.h"
+#include "pic-processor.h"
 #include "xref.h"
 #include "attributes.h"
 
@@ -86,9 +87,12 @@ CPU_Freq::CPU_Freq(Processor * _cpu, double freq)
 
 void CPU_Freq::set(double d)
 {
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
   Float::set ( d );
   if ( cpu )
     cpu->update_cps();
+  if ( pCpu )
+    pCpu->wdt.update();
 }
 
 //------------------------------------------------------------------------

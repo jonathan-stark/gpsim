@@ -55,7 +55,11 @@ EXTRA_DIST = \
 	i2c/16f876a.lkr i2c/16f88.lkr i2c/i2c_low.inc i2c/Makefile i2c/p16f876a.asm i2c/p16f88.asm \
 	i2c/16f819.lkr i2c/p16f819.asm \
 	port_stim/Makefile port_stim/18f452.lkr port_stim/Makefile port_stim/port_stim.asm \
-	port_stim/port_stim.stc
+	port_stim/port_stim.stc \
+	wdt/Makefile wdt/16f88.lkr wdt/18f452.lkr wdt/16f628.lkr wdt/16c64.lkr \
+	wdt/nwdt_16f628.asm wdt/nwdt_16c64.asm wdt/nwdt_16f88.asm \
+	wdt/nwdt_18f452.asm wdt/wdt_18f452.asm wdt/wdt_16f88.asm \
+	wdt/wdt_16c64.asm wdt/wdt_16f628.asm
 
 MOSTLYCLEANFILES = *.hex *.cod *.lst *~
 CLEANFILES = *.hex *.cod *.lst *~

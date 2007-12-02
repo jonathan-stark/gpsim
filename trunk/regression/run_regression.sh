@@ -15,7 +15,7 @@ case "$1" in
 node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_wide 
 interrupts_14bit macro_test logic_test resistor usart_test txisr_test tmr0_16bit 
 switch_test p18f comparator a2d psp ttl ccp wavegen spi i2c port_stim 
-p12c509'
+p12c509 wdt'
 
         echo ${DIRS}
         for i in ${DIRS} ; do
@@ -150,4 +150,16 @@ echo "(in src/clock_phase.cc) is defined."
 ${RT} p12c509 sim_p12c509_reset
 
 ${RT} p16f84 sim_reset
+
+${RT} wdt sim_wdt_16f88
+${RT} wdt sim_nwdt_16f88
+
+${RT} wdt sim_wdt_16f628
+${RT} wdt sim_nwdt_16f628
+
+${RT} wdt sim_wdt_16c64
+${RT} wdt sim_nwdt_16c64
+
+${RT} wdt sim_wdt_18f452
+${RT} wdt sim_nwdt_18f452
 
