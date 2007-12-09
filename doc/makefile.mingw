@@ -14,7 +14,7 @@ LATEX = latex
 
 %.tex: %.lyx
 	@echo "### Export Latex from lyx: $< -> $@"
-	$(LYX) --export latex $<
+	-$(LYX) --export latex $<
  
 %.dvi: %.tex
 	@echo "### Create dvi from tex: $< -> $@"
@@ -22,11 +22,11 @@ LATEX = latex
  
 %.txt: %.lyx
 	@echo "### Export txt from lyx: $< -> $@"
-	$(LYX) --export text $<
+	-$(LYX) --export text $<
 
 %.ps: %.lyx
 	@echo "### Export ps from lyx: $< -> $@"
-	$(LYX) --export ps $<
+	-$(LYX) --export ps $<
 
 %.pdf: %.tex
 	@echo "### Create pdf from tex: $< -> $@"

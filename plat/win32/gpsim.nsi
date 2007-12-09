@@ -188,22 +188,6 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-cedilla.dll"
   File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\immodules\im-viqr.dll"
 
-  SetOutPath "$INSTDIR\lib\gtk-2.0\2.10.0\loaders"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-xpm.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-xbm.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-wbmp.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-tiff.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-tga.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-ras.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-pnm.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-png.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-pcx.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-jpeg.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-ico.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-gif.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-bmp.dll"
-  File "${PKG_ROOT}\lib\gtk-2.0\2.10.0\loaders\libpixbufloader-ani.dll"
-
   SetOutPath "$INSTDIR"
   File /r "${PKG_ROOT}\share"
 

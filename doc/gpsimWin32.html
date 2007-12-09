@@ -20,7 +20,7 @@ microcontrollers</a>.</h3>
 WIN32 platforms.</p>
 <p>Gpsim can be compiled in a CLI - command line interface mode
 (no gui), or in GUI - graphical user interface mode.<br />
-&nbsp;</p>
+</p>
 <h2>Which tools are required, where to get
 them</h2>
 <p>Native WIN32 gpsim port can be compiled with</p>
@@ -32,7 +32,7 @@ builds)</li>
 </ul>
 <p>or with</p>
 <ul>
-  <li>Microsoft Visual Studio .NET 2003 using&nbsp; VS .NET
+  <li>Microsoft Visual Studio .NET 2003 using VS .NET
 project files</li>
 </ul>
 <p>Some additional GNU tools are required to build gpsim:</p>
@@ -50,19 +50,19 @@ project and <a href="http://gnuwin32.sourceforge.net">GnuWin32</a>
 project.</p>
 <p>Cygwin environment is required (or at least recommended) for
 WIN32 native compilation of additional packages.<br />
-&nbsp;</p>
+</p>
 <h2>How to set up development environment
 for WIN32 port of gpsim</h2>
 <h3>Cygwin installation:</h3>
 <p>Select DOS as the Default Text File type.
 In the Devel Category select bison, flex, gawk, make, gcc, gcc-g++,
-gcc-mingw-core and&nbsp; gcc-mingw-g++ packages.<br />
+gcc-mingw-core and gcc-mingw-g++ packages.<br />
 You have to have C:\cygwin\bin specified in the PATH environment
 variable.</p>
 <p>In Microsoft Visual Studio .NET 2003 select Tools/Options...<br />
 In the Options dialog select Projects VC++ Directories and add
 C:\cygwin\bin path.<br />
-&nbsp;</p>
+</p>
 <h2>Which additional packages are required,
 where to get them, how to to install them</h2>
 <h3>CLI (supported only by VS .NET compilation):</h3>
@@ -132,7 +132,7 @@ header files, static libraries and DLL, built from <a href="#gtk_extra_src">gtk+
   </li>
   <li>pthreads - The <a href="http://sources.redhat.com/pthreads-win32/">pthreads-win32</a>
 package implements Posix Threads on Win32. Note, pthreads are currently
-used&nbsp;only in modules and in particular in the usart module.
+used only in modules and in particular in the usart module.
     <ul>
       <li> <a href="#pthreads">pthreads-*-*-*.exe</a>:
 sources, header files, static libraries and DLLs, required for gpsim
@@ -189,7 +189,7 @@ is a 2D graphics library with support for multiple output devices.
 required for gpsim development</li>
       <li><a href="#cairo">cairo-*.zip</a>:
 required by gpsim GUI run time
-&nbsp;</li>
+      </li>
     </ul>
     <br />
   </li>
@@ -200,7 +200,7 @@ Open, Extensible Image Format with Lossless Compression
       <li><a href="#libpng_bin">libpng-*-bin.zip</a>
 and <a href="#libpng_dep">libpng-1.2.8-dep.zip</a>:
 required by gpsim GUI run time<br />
-&nbsp;</li>
+      </li>
     </ul>
   </li>
 </ul>
@@ -263,7 +263,7 @@ gtkextra-2\bin</li>
   </li>
   <li>Unpack <a href="#pthreads">pthreads-*-*-*.exe</a>
 self extracting archive to some directory and copy the contents
-of&nbsp; the Pre-built directory to pthreads.</li>
+of the Pre-built directory to pthreads.</li>
   <li> Compile gpsim native WIN32 port:
     <ul>
       <li>
@@ -315,13 +315,13 @@ package to the same directory where gpsim.exe resides.</li>
 package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\libpng13.dll from <a href="#libpng_bin">libpng-*-bin.zip</a>
 package to the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\zlib1.dll from&nbsp;<a href="#libpng_dep">libpng-*-dep.zip</a>
+  <li>Extract bin\zlib1.dll from <a href="#libpng_dep">libpng-*-dep.zip</a>
 package to the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\gtkextra-win32-2.1.dll from&nbsp;<a href="gpsimWin32.html#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>
+  <li>Extract bin\gtkextra-win32-2.1.dll from <a href="gpsimWin32.html#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>
 package to the same directory where gpsim.exe resides or copy compiled
 gtkextra-2\bin\gtkextra-win32-2.1.dll to the same directory where
 gpsim.exe resides.<br />
-&nbsp;</li>
+  </li>
 </ul>
 <h3>Modules:</h3>
 <ul>
@@ -332,11 +332,11 @@ resides.</li>
 </ul>
 <h2>gpsimWin32 snapshots</h2>
 <p>gpsimWin32 snapshots can be found at <a href="http://gpsim.sourceforge.net/snap.php">http://gpsim.sourceforge.net/snap.php.</a><br />
-&nbsp;</p>
+</p>
 <h2>Document status</h2>
 <p>If you have questions / comments / other experiences about
 WIN32 gpsim port, post them to the gnupic mailing list: <a href="mailto:gnupic@linuxhacker.org">gnupic@linuxhacker.org</a>.<br />
-&nbsp;</p>
+</p>
 <h2>Package versions</h2>
 <p>Packages from
 <a href="http://gnuwin32.sourceforge.net">GnuWin32</a>
@@ -353,18 +353,22 @@ project:</p>
 <a href="http://www.gimp.org/%7Etml/gimp/win32/">GTK+ (and
 GIMP) for Windows</a> project:</p>
 <ul>
-  <li> <a href="http://ftp.gtk.org/pub/glib/2.14/win32/glib-dev-2.14.1.zip" name="glib_dev">glib-dev-2.14.1.zip</a></li>
-  <li> <a href="http://ftp.gtk.org/pub/glib/2.14/win32/glib-2.14.1.zip" name="glib">glib-2.14.1.zip</a></li>
-  <li> <a href="http://ftp.gtk.org/pub/gtk/v2.10/win32/gtk+-dev-2.10.7.zip" name="gtk_dev">gtk+-dev-2.10.7.zip</a></li>
-  <li> <a href="http://ftp.gtk.org/pub/gtk/v2.10/win32/gtk+-2.10.7.zip" name="gtk">gtk+-2.10.7.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.18/pango-dev-1.18.2.zip" name="pango_dev">pango-dev-1.18.2.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.18/pango-1.18.2.zip" name="pango">pango-1.18.2.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.14/glib-dev-2.14.4.zip" name="glib_dev">glib-dev-2.14.4.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.14/glib-2.14.4.zip" name="glib">glib-2.14.4.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.12/gtk+-dev-2.12.3.zip" name="gtk_dev">gtk+-dev-2.12.3.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.12/gtk+-dev-2.12.3.zip" name="gtk">gtk+-2.12.3.zip</a><br />
+  gpsim + GTK+ version > 2.10.11 doesn't work if the theme share/themes/MS-Windows/gtk-2.0/gtkrc is used. The problem is in file lib/gtk-2.0/2.10.0/engines/libwimp.dll
+  due to changes in source file modules/engines/ms-windows/msw_style.c.<br />
+  <b>Solution:</b> Replace file lib/gtk-2.0/2.10.0/engines/libwimp.dll with the one with date 2007-03-14 from GTK+ version 2.10.11. 
+  </li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.18/pango-dev-1.18.3.zip" name="pango_dev">pango-dev-1.18.3.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.18/pango-1.18.3.zip" name="pango">pango-1.18.3.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/cairo-dev-1.4.10.zip" name="cairo_dev">cairo-dev-1.4.10.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/cairo-1.4.10.zip" name="cairo">cairo-1.4.10.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/atk/1.20/atk-dev-1.20.0.zip" name="atk_dev">atk-dev-1.20.3.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/atk/1.20/atk-1.20.0.zip" name="atk">atk-1.20.0.zip</a></li>
-  <li> <a href="http://www.gimp.org/%7Etml/gimp/win32/fontconfig-dev-2.2.2-20040412.zip" name="fontconfig_dev"> fontconfig-dev-2.2.2-20040412.zip</a></li>
-  <li> <a href="http://www.gimp.org/%7Etml/gimp/win32/gettext-0.14.5.tar.gz" name="gettext">gettext-0.14.5.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/fontconfig-dev-2.4.2-tml-20071015.zip" name="fontconfig_dev">fontconfig-dev-2.4.2-tml-20071015.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime-0.17.zip" name="gettext">gettext-runtime-0.17.zip</a></li>
   <li> <a href="http://www.gimp.org/%7Etml/gimp/win32/libiconv-1.9.1.bin.woe32.zip" name="libiconv_bin_woe32">libiconv-1.9.1.bin.woe32.zip</a></li>
 </ul>
 <p>Other packages:</p>
