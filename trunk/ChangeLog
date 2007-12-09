@@ -1,11 +1,18 @@
+2007-12-09 Borut Razem <borut.razem@siol.net>
+	* doc/gpsimWin32.html: NSIS v2.33, fontconfig-2.4.2-tml-20071015,
+	  gettext-runtime-0.17, glib-2.14.4, gtk+-2.12.3, pango-1.18.3
+	* doc/makefile.mingw: ignore errors
+	* plat/gpsim.nsi: updated for gtk+-2.12.3
+	* plat/win32/gpsim.def: MSVC sync
+
 2007-12-02 Roy Rankin <rrankin@ihug.com.au>
-      	* regression/wdt/18f452.lkr regression/wdt/16f88.lkr
-      	  regression/wdt/16f628.lkr regression/wdt/16c64.lkr
-      	  regression/wdt/wdt_16c64.asm regression/wdt/nwdt_18f452.asm
-          regression/wdt/wdt_18f452.asm regression/wdt/nwdt_16f628.asm
-      	  regression/wdt/nwdt_16f88.asm regression/wdt/wdt_16f88.asm
-      	  regression/wdt/wdt_16f628.asm regression/wdt/Makefile
-      	  regression/wdt/nwdt_16c64.asm regression/Makefile.am 
+	* regression/wdt/18f452.lkr regression/wdt/16f88.lkr
+	  regression/wdt/16f628.lkr regression/wdt/16c64.lkr
+	  regression/wdt/wdt_16c64.asm regression/wdt/nwdt_18f452.asm
+	  regression/wdt/wdt_18f452.asm regression/wdt/nwdt_16f628.asm
+	  regression/wdt/nwdt_16f88.asm regression/wdt/wdt_16f88.asm
+	  regression/wdt/wdt_16f628.asm regression/wdt/Makefile
+	  regression/wdt/nwdt_16c64.asm regression/Makefile.am 
 	  regression/run_regression.sh:
 	- Add regression tests for Watchdog Time
 	* regression/p16f84/reset.asm: Sleep continues on WDT expire
