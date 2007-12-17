@@ -34,6 +34,8 @@ EXTRA_DIST = \
 	txisr_test/txisr_test.stc \
 	tmr0_16bit/Makefile tmr0_16bit/18f452.lkr tmr0_16bit/delay.asm \
 	tmr0_16bit/delay.inc tmr0_16bit/tmr0_16bit.asm tmr0_16bit/tmr0_16bit.stc \
+	tmr1_16bit/Makefile tmr1_16bit/18f452.lkr  \
+	tmr1_16bit/tmr1_16bit.asm tmr1_16bit/tmr1_16bit.stc \
 	switch_test/Makefile switch_test/16f877.lkr switch_test/switch_test.asm \
 	switch_test/switch_test.stc \
 	p18f/Makefile p18f/18f452.lkr p18f/extended_instructions.asm p18f/instructions.asm \

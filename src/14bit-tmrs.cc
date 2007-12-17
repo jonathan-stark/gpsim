@@ -525,6 +525,36 @@ void CCPCON::put(unsigned int new_value)
 
 }
 
+// Attribute for frequency of external Timer1 oscillator
+class TMR1_Freq_Attribute : public Float
+{
+public:
+  TMR1_Freq_Attribute(Processor * _cpu, double freq); 
+
+  virtual void set(double d);
+  double get_freq();
+
+private:
+  Processor * cpu;
+};
+
+TMR1_Freq_Attribute::TMR1_Freq_Attribute(Processor * _cpu, double freq)
+  : Float("tmr1_freq",freq, " Tmr1 oscillator frequency."),
+    cpu(_cpu)
+{
+}
+
+double TMR1_Freq_Attribute::get_freq()
+{
+	double d;
+	Float::get(d);
+	return(d);
+}
+void TMR1_Freq_Attribute::set(double d)
+{
+    Float::set ( d );
+}
+
 //--------------------------------------------------
 // T1CON
 //--------------------------------------------------
@@ -533,6 +563,7 @@ T1CON::T1CON(Processor *pCpu, const char *pName, const char *pDesc)
     tmrl(0)
 {
 
+  pCpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768.));
   new_name("T1CON");
 
 }
@@ -549,7 +580,7 @@ void T1CON::put(unsigned int new_value)
     return;
   // First, check the tmr1 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
-  if( diff & TMR1CS)
+  if( diff & (TMR1CS | T1OSCEN))
     tmrl->new_clock_source();
 
   if( diff & TMR1ON)
@@ -568,7 +599,7 @@ unsigned int T1CON::get()
 
 unsigned int T1CON::get_prescale()
 {
-  return( ((value.get() &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
+  return( ((value.get() &(T1CKPS0 | T1CKPS1)) >> 4) );
 }
 
 
@@ -588,14 +619,21 @@ TMRH::TMRH(Processor *pCpu, const char *pName, const char *pDesc)
 
 void TMRH::put(unsigned int new_value)
 {
-
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-  value.put(new_value & 0xff);
   if(!tmrl)
+  {
+    value.put(new_value & 0xff);
     return;
+  }
+
+  tmrl->set_ext_scale();
+  value.put(new_value & 0xff);
   tmrl->synchronized_cycle = get_cycles().get();
-  tmrl->last_cycle = tmrl->synchronized_cycle - (tmrl->value.get() + (value.get()<<8))*tmrl->prescale;
+  tmrl->last_cycle = tmrl->synchronized_cycle 
+	- (gint64)((tmrl->value.get() + (value.get()<<8) 
+	* tmrl->prescale * tmrl->ext_scale) +0.5);
+
 
   if(tmrl->t1con->get_tmr1on())
     tmrl->update();
@@ -624,8 +662,6 @@ unsigned int TMRH::get_value()
 
   tmrl->current_value();
 
-  value.put(((tmrl->value_16bit)>>8) & 0xff);
-
   return(value.get());
   
 }
@@ -646,7 +682,9 @@ TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   compare_value = 0;
   compare_mode = 0;
   last_cycle = 0;
+  future_cycle = 0;
 
+  ext_scale = 1.;
   tmrh    = 0;
   t1con   = 0;
   ccpcon  = 0;
@@ -656,6 +694,28 @@ TMRL::~TMRL()
 {
   if (m_Interrupt)
     m_Interrupt->release();
+}
+/*
+ * If we are similating an external RTC crystal for timer1,
+ * compute scale factor between crsytal speed and processor
+ * instruction cycle rate
+ */ 
+void TMRL::set_ext_scale() 
+{ 
+    current_value();
+    if (t1con->get_t1oscen() && t1con->get_tmr1cs())
+    {
+    	ext_scale = get_cycles().instruction_cps()/
+	            t1con->freq_attribute->get_freq();
+    }
+    else
+	ext_scale = 1.;
+
+    if (future_cycle)
+    {
+      last_cycle = get_cycles().get()
+			- (gint64)(value_16bit *( prescale * ext_scale) + 0.5);
+    }
 }
 
 void TMRL::release()
@@ -713,7 +773,11 @@ void TMRL::increment()
     tmrh->value.put((value_16bit >> 8) & 0xff);
     value.put(value_16bit & 0xff);
     if(value_16bit == 0 && m_Interrupt)
+    {
+      if (verbose & 4)
+          cout << "TMRL:increment interrupt now=" << dec << get_cycles().get() << " value_16bit "  << value_16bit << endl;
       m_Interrupt->Trigger();
+    }
   }
 
 }
@@ -731,7 +795,8 @@ void TMRL::on_or_off(int new_state)
     // Compute the "effective last cycle", i.e. the cycle
     // at which TMR1 was last 0 had it always been counting.
 
-    last_cycle = get_cycles().get() - value_16bit*prescale;
+    last_cycle = (gint64)(get_cycles().get() -
+	(value.get() + (tmrh->value.get()<<8)) * prescale * ext_scale + 0.5);
     update();
   }
   else {
@@ -740,8 +805,11 @@ void TMRL::on_or_off(int new_state)
 
     // turn off the timer and save the current value
     current_value();
-    value.put(value_16bit & 0xff);
-    tmrh->value.put((value_16bit>>8) & 0xff);
+    if (future_cycle)
+    {
+        get_cycles().clear_break(this);
+	future_cycle = 0;
+    }
   }
 
 }
@@ -758,18 +826,38 @@ void TMRL::update()
 
   if(t1con->get_tmr1on()) {
 
-    if(t1con->get_tmr1cs()) {
-      cout << "TMRl::update - external clock is not fully implemented\n";
+    if(t1con->get_tmr1cs() && t1con->get_t1oscen()) {
+
+	/*
+	 external timer1 clock runs off a crystal which is typically
+	 32768 Hz and is independant on the instruction clock, but
+	 gpsim runs on the instruction clock. Ext_scale is the ratio 
+	 of these two clocks so the breakpoint can be adjusted to be
+	 triggered at the correct time. 
+	*/
+      if(verbose & 0x4)
+	cout << "Tmr1 External clock\n";
+      
+    }
+    else if(t1con->get_tmr1cs() && !  t1con->get_t1oscen()) {
+      prescale = 1 << t1con->get_prescale();
+      prescale_counter = prescale;
+      set_ext_scale();
+      return;
     } else {
 	
       if(verbose & 0x4)
-	cout << "Internal clock\n";
+	cout << "Tmr1 Internal clock\n";
 
-      current_value();
+    }
+
+    set_ext_scale();
 
 
       // Note, unlike TMR0, anytime something is written to TMRL, the 
-      // prescaler is unaffected.
+      // prescaler is unaffected on the P18 processors. However, it is
+      // reset on the p16f88 processor, which is how the current code
+      // works. This only effects the external drive mode.
 
       prescale = 1 << t1con->get_prescale();
       prescale_counter = prescale;
@@ -778,7 +866,10 @@ void TMRL::update()
       //  synchronized_cycle = cycles.get() + 2;
       synchronized_cycle = get_cycles().get();
 
-      last_cycle = synchronized_cycle - value_16bit * prescale;
+
+      last_cycle = synchronized_cycle  
+			- (gint64)(value_16bit *( prescale * ext_scale) + 0.5);
+
 
       break_value = 0x10000;  // Assume that a rollover will happen first.
 
@@ -793,16 +884,15 @@ void TMRL::update()
 	    }
 	}
 
-      guint64 fc = get_cycles().get() + (break_value - value_16bit) * prescale;
+      guint64 fc = get_cycles().get() 
+		+ (guint64)((break_value - value_16bit) * prescale * ext_scale);
 
       if(future_cycle)
 	get_cycles().reassign_break(future_cycle, fc, this);
       else
 	get_cycles().set_break(fc, this);
 
-      //cout << "TMR1: update; new break cycle = " << fc << '\n';
       future_cycle = fc;
-    }
     }
   else
     {
@@ -813,6 +903,7 @@ void TMRL::update()
 void TMRL::put(unsigned int new_value)
 {
 
+  set_ext_scale();
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
@@ -821,7 +912,10 @@ void TMRL::put(unsigned int new_value)
     return;
 
   synchronized_cycle = get_cycles().get();
-  last_cycle = synchronized_cycle - ( value.get() + (tmrh->value.get()<<8)) * prescale;
+  last_cycle = synchronized_cycle - (gint64)(( value.get() 
+	+ (tmrh->value.get()<<8)) * prescale * ext_scale + 0.5);
+
+  current_value();
 
   if(t1con->get_tmr1on())
     update();
@@ -848,20 +942,26 @@ unsigned int TMRL::get_value()
 
   current_value();
 
-  value.put(value_16bit & 0xff);
-
   return(value.get());
 }
 
 //%%%FIXME%%% inline this
+// if break inactive (future_cycle == 0), just read the TMR1H and TMR1L 
+// registers otherwise compute what the register should be and then
+// update TMR1H and TMR1L.
+//
 void TMRL::current_value()
 {
-  if(t1con->get_tmr1cs())
+  if(future_cycle == 0)
     value_16bit = tmrh->value.get() * 256 + value.get();
   else
-    value_16bit = (unsigned int)((get_cycles().get() - last_cycle)/ prescale) & 0xffff;
+  {
+    value_16bit = (guint64)((get_cycles().get() - last_cycle)/ 
+		(prescale* ext_scale)) & 0xffff;
+    value.put(value_16bit & 0xff);
+    tmrh->value.put((value_16bit>>8) & 0xff);
+  }
 }
-
 unsigned int TMRL::get_low_and_high()
 {
 
@@ -870,29 +970,52 @@ unsigned int TMRL::get_low_and_high()
   if(get_cycles().get() <= synchronized_cycle)
     return value.get();
 
-  //  value_16bit = (cycles.get().lo - last_cycle)/ prescale;
-
   current_value();
 
-  value.put(value_16bit & 0xff);
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address, value.get());
 
-  tmrh->value.put((value_16bit>>8) & 0xff);
   trace.raw(tmrh->read_trace.get() | tmrh->value.get());
-  //trace.register_read(tmrh->address, tmrh->value.get());
 
   return(value_16bit);
   
 }
 
+// set m_bExtClkEnable is tmr1 is being clocked by an external stimulus
 void TMRL::new_clock_source()
 {
 
-  if(t1con->get_tmr1cs())
-    m_bExtClkEnabled = true;
+  m_bExtClkEnabled = false;
+
+  current_value();
+
+  if(t1con->get_tmr1cs() && ! t1con->get_t1oscen()) // external stimuli
+  {
+      if(verbose & 0x4)
+	cout << "Tmr1 External Stimuli\n";
+	cout << "Tmr1 External Stimuli\n";
+      if (future_cycle)
+      {
+        // Compute value_16bit with old prescale and ext_scale
+      	current_value();
+        get_cycles().clear_break(this);
+        future_cycle = 0;
+      }
+      prescale = 1 << t1con->get_prescale();
+      prescale_counter = prescale;
+      set_ext_scale();
+      m_bExtClkEnabled = true;
+  }
+  else if(! t1con->get_tmr1cs() && ! t1con->get_t1oscen()) // Fosc/4
+  {
+      if(verbose & 0x4)
+	cout << "Tmr1 Fosc/4 \n";
+	cout << "Tmr1 Fosc/4 \n";
+      put(value.get());
+  }
   else {
-    m_bExtClkEnabled = false;
+      if(verbose & 0x4)
+	cout << "Tmr1 External Crystal\n";
+	cout << "Tmr1 External Crystal\n";
     put(value.get());    // let TMRL::put() set a cycle counter break point
   }
 }
@@ -907,7 +1030,7 @@ void TMRL::clear_timer()
 {
 
   last_cycle = get_cycles().get();
-  //cout << "TMR1 has been cleared\n";
+  cout << "TMR1 has been cleared\n";
 }
 
 // TMRL callback is called when the cycle counter hits the break point that
@@ -917,20 +1040,23 @@ void TMRL::clear_timer()
 void TMRL::callback()
 {
 
+
   if(verbose & 4)
     cout << "TMRL::callback\n";
 
   // If TMRL is being clocked by the external clock, then at some point
   // the simulate code must have switched from the internal clock to
   // external clock. The cycle break point was still set, so just ignore it.
-  if(t1con->get_tmr1cs())
+  if(t1con->get_tmr1cs() && ! t1con->get_t1oscen())
     {
+      cout << "TMRL:callback No oscillator\n";
+      value.put(0);
+      tmrh->value.put(0);
       future_cycle = 0;  // indicates that TMRL no longer has a break point
       return;
     }
 
   future_cycle = 0;     // indicate that there's no break currently set
-  //cout << "in tmrl callback break_value = " << break_value << '\n';
 
   if(break_value < 0x10000)
     {
@@ -954,7 +1080,8 @@ void TMRL::callback()
 
       synchronized_cycle = get_cycles().get();
       last_cycle = synchronized_cycle;
-
+      value.put(0);
+      tmrh->value.put(0);
     }
 
   update();

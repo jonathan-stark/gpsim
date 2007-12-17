@@ -13,7 +13,8 @@ case "$1" in
     *clean)
         DIRS='breakpoints instructions_12bit instructions_14bit instructions_16bit 
 node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_wide 
-interrupts_14bit macro_test logic_test resistor usart_test txisr_test tmr0_16bit 
+interrupts_14bit macro_test logic_test resistor usart_test txisr_test 
+tmr0_16bit tmr1_16bit 
 switch_test p18f comparator a2d psp ttl ccp wavegen spi i2c port_stim 
 p12c509 wdt'
 
@@ -90,6 +91,8 @@ ${RT} usart_test sim_pir1v2
 ${RT} txisr_test sim
 
 ${RT} tmr0_16bit sim
+
+${RT} tmr1_16bit sim
 
 ${RT} switch_test sim
 
