@@ -1,3 +1,13 @@
+2007-12-17 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.h src/14bit-tmrs.cc: Add TMR1 external crystal 
+	  simulation
+	* regression/tmr1_16bit/tmr1_16bit.asm regression/tmr1_16bit/Makefile:
+	- Add tests for external crystal and Fosc/4, 
+	  lower frequency to speed up test time
+	* regression/Makefile.am regression/run_regression.sh:
+	- Run tmr1_16bit as part of regression tests
+	* doc/gpsim.lyx: Add TMR1 external drive documentation
+
 2007-12-09 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html: NSIS v2.33, fontconfig-2.4.2-tml-20071015,
 	  gettext-runtime-0.17, glib-2.14.4, gtk+-2.12.3, pango-1.18.3

@@ -152,6 +152,7 @@ private:
 
 
 };
+class TMR1_Freq_Attribute;
 //---------------------------------------------------------
 // T1CON - Timer 1 control register
 
@@ -171,6 +172,7 @@ enum
 };
 
   TMRL  *tmrl;
+  TMR1_Freq_Attribute *freq_attribute;
 
   T1CON(Processor *pCpu, const char *pName, const char *pDesc=0);
 
@@ -192,6 +194,10 @@ enum
   unsigned int get_tmr1on()
     {
       return(value.get() & TMR1ON);
+    }
+  unsigned int get_t1oscen()
+    {
+      return(value.get() & T1OSCEN);
     }
   virtual void put(unsigned int new_value);
 
@@ -229,10 +235,12 @@ public:
     compare_value,
     value_16bit;         /* Low and high concatenated */
 
+  double ext_scale;
+
   guint64
     synchronized_cycle,
-    last_cycle,
     future_cycle;
+  gint64 last_cycle;  // last_cycle can be negative for small cycle counts
 
   bool compare_mode;
 
@@ -241,6 +249,9 @@ public:
 
   TMRL(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~TMRL();
+
+  void set_ext_scale();
+
   virtual void release();
 
   virtual void put(unsigned int new_value);

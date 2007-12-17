@@ -1,4 +1,4 @@
-#LyX 1.5.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 276
 \begin_document
 \begin_header
@@ -7886,6 +7886,37 @@ A call back function is a pointer to a function.
  If there IS a match, then the call back function associated with this break
  point is invoked and the next break point in the doubly-linked list serves
  as the reference for the next cycle break.
+\end_layout
+
+\begin_layout Section
+TIMER1 External input
+\end_layout
+
+\begin_layout Standard
+The timer1 module can support external input, on some processors, as either
+ a crystal using two pins or a single pin drive.
+\end_layout
+
+\begin_layout Subsubsection*
+External Crystal
+\end_layout
+
+\begin_layout Standard
+If an external crystal, typically 32,768 KHz, is being used, then both T1OSCEN
+ and TMR1CS in register T1CON should be true.
+ Gpsim will then automatically simulate timer1 being driven at the crystal
+ frequency which can be changed from the default frequency by changing the
+ value of the processor symbol called tmr1_freq.
+\end_layout
+
+\begin_layout Subsubsection
+Single pin drive
+\end_layout
+
+\begin_layout Standard
+If the single pin drive is being used, then the T1CON register bits for
+ T1OSCEN should be false and TMR1CS true, and the T1CKI pin must be driven
+ manually such as by a stimuli command.
 \end_layout
 
 \begin_layout Chapter*
