@@ -2,6 +2,7 @@
 	* doc/gpsimWin32.html: fixed typo
 	* doc/gpsim_svn.html: corrected the URL of svn repository,
 	  thanks to Graeme Jury
+	* doc/*.html: make WEB pages XHTML 1.0 Transitional copliant
 
 2007-12-17 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.h src/14bit-tmrs.cc: Add TMR1 external crystal 
