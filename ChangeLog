@@ -1,3 +1,8 @@
+2007-12-23 Borut Razem <borut.razem@siol.net>
+	* doc/gpsimWin32.html: fixed typo
+	* doc/gpsim_svn.html: corrected the URL of svn repository,
+	  thanks to Graeme Jury
+
 2007-12-17 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.h src/14bit-tmrs.cc: Add TMR1 external crystal 
 	  simulation
@@ -31,8 +36,8 @@
 	  src/pic-registers.cc src/14bit-registers.h src/p16f8x.h
 	  src/p16f8x.cc:  WDT and configuration fixes
 	* src/processor.cc: Frequency change updates WDT
-      	* src/14bit-registers.cc: WDTCON functions added, 
-		Status register rcon support
+	* src/14bit-registers.cc: WDTCON functions added, 
+	  Status register rcon support
 	* src/16bit-instructions.cc: Implement Sleep instruction
 
 2007-11-25 Roy Rankin <rrankin@ihug.com.au>
