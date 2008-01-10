@@ -1,6 +1,6 @@
 # gpsim.nsi - NSIS installer script for gpsim
 #
-# Copyright (c) 2004-2006 Borut Razem
+# Copyright (c) 2004-2008 Borut Razem
 #
 # This file is part of gpsim.
 #
@@ -27,11 +27,16 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "gpsim"
-!ifndef PRODUCT_VERSION
-!define PRODUCT_VERSION "0.22.0"
+
+; Version
+!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+  !define PRODUCT_VERSION "${VER_MAJOR}.${VER_MINOR}.${VER_REVISION}"
+!else
+  !define PRODUCT_VERSION "XX.XX.XX"
 !endif
+
 !ifndef PRODUCT_WEB_SITE
-!define PRODUCT_WEB_SITE "http://gpsim.sourceforge.net/gpsim.html"
+  !define PRODUCT_WEB_SITE "http://gpsim.sourceforge.net/gpsim.html"
 !endif
 !define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
@@ -40,14 +45,27 @@
 
 !define GPSIM_ROOT "..\.."
 !ifndef SETUP_DIR
-!define SETUP_DIR "..\..\..\..\gpsim_snapshots"
+  !define SETUP_DIR "..\..\..\..\gpsim_snapshots"
 !endif
 !define PKG_ROOT "${SETUP_DIR}\gpsim_pkg"
 
 SetCompressor /SOLID lzma
 
-; MUI 1.67 compatible ------
-!include "MUI.nsh"
+;--------------------------------
+; Header Files
+
+!include "MUI2.nsh"
+!include "WordFunc.nsh"
+
+;--------------------------------
+; Functions
+
+!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+  !insertmacro VersionCompare
+!endif
+
+;--------------------------------
+; Configuration
 
 ; MUI Settings
 !define MUI_ABORTWARNING
@@ -58,6 +76,10 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_PAGE_WELCOME
 ; License page
 !insertmacro MUI_PAGE_LICENSE "${GPSIM_ROOT}\COPYING"
+; Uninstall/reinstall page
+!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+Page custom PageReinstall PageLeaveReinstall
+!endif
 ; Components page
 !insertmacro MUI_PAGE_COMPONENTS
 ; Directory page
@@ -70,28 +92,28 @@ SetCompressor /SOLID lzma
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
 ; Language files
 !insertmacro MUI_LANGUAGE "English"
 
-; Reserve files
-!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-
-; MUI end ------
-
 !ifndef DATE
-!define DATE "YYYYMMDD"
+  !define DATE "YYYYMMDD"
 !endif
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${SETUP_DIR}\gpsim-${PRODUCT_VERSION}-${DATE}-setup.exe"
 InstallDir "$PROGRAMFILES\gpsim"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
-ShowInstDetails show
-ShowUnInstDetails show
+;;;;ShowInstDetails show
+;;;;ShowUnInstDetails show
 
+!ifndef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+; Old unistallation method
 Function .onInit
+  MessageBox MB_OK "I'm here!"
+
   ;Uninstall the old version, if present
   ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   StrCmp $R0 "" inst
@@ -123,6 +145,7 @@ inst:
 
 done:
 FunctionEnd
+!endif
 
 InstType "gpsim + extras modules"
 InstType "gpsim"
@@ -433,9 +456,18 @@ Section -Icons
 SectionEnd
 
 Section -Post
-  WriteUninstaller "$INSTDIR\uninst.exe"
+  WriteRegStr HKLM "Software\${PRODUCT_NAME}" "" $INSTDIR
+!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+  WriteRegDword HKLM "Software\${PRODUCT_NAME}" "VersionMajor" "${VER_MAJOR}"
+  WriteRegDword HKLM "Software\${PRODUCT_NAME}" "VersionMinor" "${VER_MINOR}"
+  WriteRegDword HKLM "Software\${PRODUCT_NAME}" "VersionRevision" "${VER_REVISION}"
+  WriteRegDword HKLM "Software\${PRODUCT_NAME}" "VersionBuild" "${VER_BUILD}"
+!endif
+
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\gpsim.bat"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "Path" "$INSTDIR"
+
+  WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
 ;  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\gpsim.exe"
@@ -443,17 +475,6 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
-
-
-Function un.onUninstSuccess
-  HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) was successfully removed from your computer."
-FunctionEnd
-
-Function un.onInit
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove $(^Name) and all of its components?" IDYES +2
-  Abort
-FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
@@ -562,6 +583,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\gtkextra-win32-2.1.dll"
   Delete "$INSTDIR\bin\iconv.dll"
   Delete "$INSTDIR\bin\intl.dll"
+  Delete "$INSTDIR\bin\jpeg62.dll"
   Delete "$INSTDIR\bin\libatk-1.0-0.dll"
   Delete "$INSTDIR\bin\libcairo-2.dll"
   Delete "$INSTDIR\bin\libgdk_pixbuf-2.0-0.dll"
@@ -579,6 +601,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libpangoft2-1.0-0.dll"
   Delete "$INSTDIR\bin\libpangowin32-1.0-0.dll"
   Delete "$INSTDIR\bin\libpng13.dll"
+  Delete "$INSTDIR\bin\libtiff3.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\pthreadGC2.dll"
   Delete "$INSTDIR\bin\readline5.dll"
@@ -642,8 +665,10 @@ Section Uninstall
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
-  SetAutoClose true
+  DeleteRegKey HKLM "Software\${PRODUCT_NAME}"
+;;;;  SetAutoClose true
 SectionEnd
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Functions                                                                   ;
@@ -664,3 +689,126 @@ Function CreateBatFile
 
   Pop $0
 FunctionEnd
+
+
+; Uninstall/Reinstall page
+
+!ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+
+Var ReinstallPageCheck
+
+Function PageReinstall
+
+  ReadRegStr $R0 HKLM "Software\${PRODUCT_NAME}" ""
+
+  ${If} $R0 == ""
+    ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
+    ${If} $R0 == ""
+      Abort
+    ${EndIf}
+  ${EndIf}
+
+  ReadRegDWORD $R0 HKLM "Software\${PRODUCT_NAME}" "VersionMajor"
+  ReadRegDWORD $R1 HKLM "Software\${PRODUCT_NAME}" "VersionMinor"
+  ReadRegDWORD $R2 HKLM "Software\${PRODUCT_NAME}" "VersionRevision"
+  ReadRegDWORD $R3 HKLM "Software\${PRODUCT_NAME}" "VersionBuild"
+  StrCpy $R0 $R0.$R1.$R2.$R3
+
+  ${VersionCompare} ${VER_MAJOR}.${VER_MINOR}.${VER_REVISION}.${VER_BUILD} $R0 $R0
+  ${If} $R0 == 0
+    StrCpy $R1 "${PRODUCT_NAME} ${PRODUCT_VERSION} is already installed. Select the operation you want to perform and click Next to continue."
+    StrCpy $R2 "Add/Reinstall components"
+    StrCpy $R3 "Uninstall ${PRODUCT_NAME}"
+    !insertmacro MUI_HEADER_TEXT "Already Installed" "Choose the maintenance option to perform."
+    StrCpy $R0 "2"
+  ${ElseIf} $R0 == 1
+    StrCpy $R1 "An older version of ${PRODUCT_NAME} is installed on your system. It's recommended that you uninstall the current version before installing. Select the operation you want to perform and click Next to continue."
+    StrCpy $R2 "Uninstall before installing"
+    StrCpy $R3 "Do not uninstall"
+    !insertmacro MUI_HEADER_TEXT "Already Installed" "Choose how you want to install ${PRODUCT_NAME}."
+    StrCpy $R0 "1"
+  ${ElseIf} $R0 == 2
+    StrCpy $R1 "A newer version of ${PRODUCT_NAME} is already installed! It is not recommended that you install an older version. If you really want to install this older version, it's better to uninstall the current version first. Select the operation you want to perform and click Next to continue."
+    StrCpy $R2 "Uninstall before installing"
+    StrCpy $R3 "Do not uninstall"
+    !insertmacro MUI_HEADER_TEXT "Already Installed" "Choose how you want to install ${PRODUCT_NAME}."
+    StrCpy $R0 "1"
+  ${Else}
+    Abort
+  ${EndIf}
+
+  nsDialogs::Create /NOUNLOAD 1018
+
+  ${NSD_CreateLabel} 0 0 100% 24u $R1
+  Pop $R1
+
+  ${NSD_CreateRadioButton} 30u 50u -30u 8u $R2
+  Pop $R2
+  ${NSD_OnClick} $R2 PageReinstallUpdateSelection
+
+  ${NSD_CreateRadioButton} 30u 70u -30u 8u $R3
+  Pop $R3
+  ${NSD_OnClick} $R3 PageReinstallUpdateSelection
+
+  ${If} $ReinstallPageCheck != 2
+    SendMessage $R2 ${BM_SETCHECK} ${BST_CHECKED} 0
+  ${Else}
+    SendMessage $R3 ${BM_SETCHECK} ${BST_CHECKED} 0
+  ${EndIf}
+
+  nsDialogs::Show
+
+FunctionEnd
+
+Function PageReinstallUpdateSelection
+
+  Pop $R1
+
+  ${NSD_GetState} $R2 $R1
+
+  ${If} $R1 == ${BST_CHECKED}
+    StrCpy $ReinstallPageCheck 1
+  ${Else}
+    StrCpy $ReinstallPageCheck 2
+  ${EndIf}
+
+FunctionEnd
+
+Function PageLeaveReinstall
+
+  ${NSD_GetState} $R2 $R1
+
+  StrCmp $R0 "1" 0 +2
+    StrCmp $R1 "1" reinst_uninstall reinst_done
+
+  StrCmp $R0 "2" 0 +3
+    StrCmp $R1 "1" reinst_done reinst_uninstall
+
+  reinst_uninstall:
+  ReadRegStr $R1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "UninstallString"
+
+  ;Run uninstaller
+  HideWindow
+
+    ClearErrors
+    ExecWait '$R1 _?=$INSTDIR'
+
+    IfErrors no_remove_uninstaller
+    IfFileExists "$INSTDIR\bin\${PRODUCT_NAME}.exe" no_remove_uninstaller
+
+      Delete $R1
+      RMDir $INSTDIR
+
+    no_remove_uninstaller:
+
+  StrCmp $R0 "2" 0 +2
+    Quit
+
+  BringToFront
+
+  reinst_done:
+
+FunctionEnd
+
+!endif # VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
+
