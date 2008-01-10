@@ -1,3 +1,8 @@
+2008-10-01 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi, plat/win32/makefile.migw: changed NSIS
+	  installation
+	* doc/gpsimWin32.html: fixed typo
+
 2007-12-23 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html: fixed typo; jpeg and tiff dependencies
 	* plat/win32/gpsim.nsi: added jpeg62.dll and libtiff3.dll
