@@ -41,7 +41,6 @@
 !define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
-!define PRODUCT_UNINST_ROOT_KEY "HKLM"
 
 !define GPSIM_ROOT "..\.."
 !ifndef SETUP_DIR
@@ -74,18 +73,34 @@ SetCompressor /SOLID lzma
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
+
 ; License page
 !insertmacro MUI_PAGE_LICENSE "${GPSIM_ROOT}\COPYING"
+
 ; Uninstall/reinstall page
 !ifdef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
 Page custom PageReinstall PageLeaveReinstall
 !endif
+
+; StartMenu page
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER ${PRODUCT_NAME}
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM"
+!define MUI_STARTMENUPAGE_REGISTRY_KEY ${PRODUCT_UNINST_KEY}
+!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "NSIS:StartMenuDir"
+!define MUI_STARTMENUPAGE_NODISABLE
+Var MUI_STARTMENUPAGE_VARIABLE
+!insertmacro MUI_PAGE_STARTMENU Application $MUI_STARTMENUPAGE_VARIABLE
+
 ; Components page
+!define MUI_COMPONENTSPAGE_SMALLDESC
 !insertmacro MUI_PAGE_COMPONENTS
+
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
+
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
+
 ; Finish page
 !define MUI_FINISHPAGE_RUN "$INSTDIR\gpsim.bat"
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.TXT"
@@ -112,8 +127,6 @@ InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 !ifndef VER_MAJOR & VER_MINOR & VER_REVISION & VER_BUILD
 ; Old unistallation method
 Function .onInit
-  MessageBox MB_OK "I'm here!"
-
   ;Uninstall the old version, if present
   ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   StrCmp $R0 "" inst
@@ -128,13 +141,6 @@ uninst:
   ; Run the uninstaller
   ClearErrors
   ExecWait '$R0 _?=$INSTDIR' ;Do not copy the uninstaller to a temp file
-
-  ;IfErrors no_remove_uninstaller
-  ;  ;You can either use Delete /REBOOTOK in the uninstaller or add some code
-  ;  ;here to remove to remove the uninstaller. Use a registry key to check
-  ;  ;whether the user has chosen to uninstall. If you are using an uninstaller
-  ;  ;components page, make sure all sections are uninstalled.
-  ;no_remove_uninstaller:
 
   Goto done
 inst:
@@ -428,31 +434,32 @@ SectionEnd
 ;--------------------------------
 ;Descriptions
 
-  ;Language strings
-  LangString DESC_SEC01 ${LANG_ENGLISH} "gpim"
-  LangString DESC_SEC02 ${LANG_ENGLISH} "extras modules"
+;Language strings
+LangString DESC_SEC01 ${LANG_ENGLISH} "gpim"
+LangString DESC_SEC02 ${LANG_ENGLISH} "extras modules"
 
-  ;Assign language strings to sections
-  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} $(DESC_SEC01)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} $(DESC_SEC02)
-  !insertmacro MUI_FUNCTION_DESCRIPTION_END
+;Assign language strings to sections
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC01} $(DESC_SEC01)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SEC02} $(DESC_SEC02)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
 ;--------------------------------
 
 Section -Icons
-  CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
-
   Call CreateBatFile
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
 
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.bat" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+  CreateDirectory "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE"
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.bat" "" "$INSTDIR\gpsim.ico" "" "" "" ""
 ;  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.bat" "" "$INSTDIR\gpsim.ico" "" "" "" ""
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} on the Web.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\doc\gpsim.pdf" "" "$INSTDIR\gpsim.ico" "" "" "" ""
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Change Log.lnk" "$INSTDIR\ChangeLog.txt" "" "$INSTDIR\gpsim.ico" "" "" "" ""
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\README.lnk" "$INSTDIR\README.TXT" "" "$INSTDIR\gpsim.ico" "" "" "" ""
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\GPL 2 License.lnk" "$INSTDIR\COPYING.TXT"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\${PRODUCT_NAME} on the Web.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\Documentation.lnk" "$INSTDIR\doc\gpsim.pdf" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\Change Log.lnk" "$INSTDIR\ChangeLog.txt" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\README.lnk" "$INSTDIR\README.TXT" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\GPL 2 License.lnk" "$INSTDIR\COPYING.TXT"
+  CreateShortCut "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\Uninstall.lnk" "$INSTDIR\uninstall.exe"
+!insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
 Section -Post
@@ -467,19 +474,33 @@ Section -Post
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\gpsim.bat"
   WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "Path" "$INSTDIR"
 
-  WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-;  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\gpsim.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
+  WriteUninstaller "$INSTDIR\uninstall.exe"
+  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
+  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninstall.exe"
+;  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\bin\gpsim.exe"
+  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
+  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
+  WriteRegStr HKLM "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
 Section Uninstall
+  ; Remove StartMenu
+  !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_STARTMENUPAGE_VARIABLE
+
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\${PRODUCT_NAME}.lnk"
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\${PRODUCT_NAME} on the Web.lnk"
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\Documentation.lnk"
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\Change Log.lnk"
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\README.lnk"
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\GPL 2 License.lnk"
+  Delete "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE\Uninstall.lnk"
+
+  RMDir "$SMPROGRAMS\$MUI_STARTMENUPAGE_VARIABLE"
+
+  ; Remove installation directory
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\.gpsim"
-  Delete "$INSTDIR\uninst.exe"
+  Delete "$INSTDIR\uninstall.exe"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\COPYING.TXT"
   Delete "$INSTDIR\gpsim.bat"
@@ -488,7 +509,6 @@ Section Uninstall
 
   Delete "$INSTDIR\bin\libgpsim_modules.dll"
 
-; extras modules
   Delete "$INSTDIR\bin\libgpsim_graphicLCD.dll"
   Delete "$INSTDIR\bin\libgpsim_lcd.dll"
 
@@ -663,7 +683,9 @@ Section Uninstall
   RMDir "$INSTDIR\include"
   RMDir "$INSTDIR"
 
-  DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
+  ; Clean the registry
+  DeleteRegValue HKLM ${PRODUCT_UNINST_KEY} "NSIS:StartMenuDir"
+  DeleteRegKey HKLM "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
   DeleteRegKey HKLM "Software\${PRODUCT_NAME}"
 ;;;;  SetAutoClose true
