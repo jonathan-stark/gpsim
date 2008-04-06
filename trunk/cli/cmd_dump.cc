@@ -223,14 +223,15 @@ void cmd_dump::dump(int mem_type)
   unsigned int reg_size=1;
   Register **fr=0;
 
-  if(!have_cpu(1))
+  Processor *pCpu = GetActiveCPU(true);
+  if(!pCpu)
     return;
 
   switch(mem_type)
     {
     case DUMP_EEPROM:
       {
-      pic_processor *pic = dynamic_cast<pic_processor *> (GetActiveCPU());
+      pic_processor *pic = dynamic_cast<pic_processor *> (pCpu);
       if(pic && pic->eeprom) {
         fr = pic->eeprom->get_rom();
         mem_size = pic->eeprom->get_rom_size();
@@ -261,7 +262,7 @@ void cmd_dump::dump(int mem_type)
 
     dump_sfrs();
 
-    pic_processor *pic = dynamic_cast<pic_processor *>(GetActiveCPU());
+    pic_processor *pic = dynamic_cast<pic_processor *>(pCpu);
     if(pic)
       printf("\n%s = %02x\n",pic->W->name().c_str(), pic->W->get_value());
 

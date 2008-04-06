@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GPSIM_INTERFACE_H__
 #define __GPSIM_INTERFACE_H__
 
+#include "gpsim_classes.h"
 #include "interface.h"
 #include "trigger.h"
 
@@ -40,10 +41,12 @@ class ISimConsole;
 // can notify the GUI and thus save the gui having to continuously
 // poll. (This may occur when the command line interface changes
 // something; such changes need to be propogated up to the gui.) 
+//
+// FIXME -- shouldn't this be a pure virtual class?
 
-
-class Interface {
- public:
+class Interface 
+{
+public:
 
   unsigned int interface_id;
   gpointer objectPTR;
@@ -131,14 +134,35 @@ class Interface {
 };
 
 
-class gpsimInterface : public TriggerObject {
- public:
+class gpsimInterface : public TriggerObject 
+{
+public:
 
-  gpsimInterface(void);
+  gpsimInterface();
 
-  void start_simulation (void);
-  void reset (void);
-  void simulation_has_stopped (void);
+  /*
+   * start_simulation -begin simulating. Simulation stops whenever
+   *  a breakpoint is encountered or the specified duration has expired.
+   */
+  void start_simulation (double duration=0.0);
+
+  /*
+   * step_simulation - run the simulation for one or more simulation cycles.
+   */
+  void step_simulation(int nSteps);
+
+  /*
+   * advance_simulation - run simulation until advancement condition is met.
+   */
+  enum eAdvancementModes {
+    eAdvanceNextInstruction, // processors - step over call instructions
+    eAdvanceNextCycle,       // system - 
+    eAdvanceNextCall,        // processors - run until call instruction
+    eAdvanceNextReturn,      // processors - run until next return
+  };
+  void advance_simulation(eAdvancementModes nAdvancement);
+  void reset (RESET_TYPE resetType=SIM_RESET);
+  void simulation_has_stopped ();
   bool bSimulating();
   bool bUsingGUI();
   void setGUImode(bool);
@@ -147,7 +171,7 @@ class gpsimInterface : public TriggerObject {
 
   void update_object (gpointer xref,int new_value);
   void remove_object (gpointer xref);
-  void update (void);
+  void update ();
   void new_processor (Processor *);
   void new_module  (Module *module);
   void node_configuration_changed  (Stimulus_Node *node);
@@ -161,11 +185,11 @@ class gpsimInterface : public TriggerObject {
   void remove_interface(unsigned int interface_id);
 
 
-  virtual bool set_break(void) {return false;}
-  virtual void callback(void);
-  virtual void callback_print(void);
-  virtual void print(void);
-  virtual void clear(void);
+  virtual bool set_break() {return false;}
+  virtual void callback();
+  virtual void callback_print();
+  virtual void print();
+  virtual void clear();
   virtual char const * bpName() { return "gpsim interface"; }
   virtual ISimConsole &GetConsole();
 
@@ -184,13 +208,13 @@ private:
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access gi object directly!
-LIBGPSIM_EXPORT gpsimInterface & get_interface(void);
+LIBGPSIM_EXPORT gpsimInterface & get_interface();
 #else
 // we are in gpsim: use of get_interface() is recommended,
 // even if gi object can be accessed directly.
 extern gpsimInterface gi;
 
-inline gpsimInterface &get_interface(void)
+inline gpsimInterface &get_interface()
 {
   return gi;
 }

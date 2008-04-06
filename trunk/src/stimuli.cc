@@ -1698,7 +1698,8 @@ void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
   if (!pNode || !pPinList)
     return;
 
-  //cout << __FUNCTION__ << " pNode " << pNode->name() << "\n";
+  if(verbose)
+    cout << __FUNCTION__ << " pNode " << pNode->name() << "\n";
 
   gpsimObjectList_t :: iterator si = pPinList->begin();
 
@@ -1724,10 +1725,11 @@ void stimuli_attach(gpsimObject *pNode, gpsimObjectList_t *pPinList)
     Value *v = dynamic_cast<Value *>(*si);
     if (v)
       ast->setClientAttribute(v);
-    /*
-    cout << __FUNCTION__ << " pNode " << pNode->name() << " is an attribute stimulus\n";
-    if (v)
-      cout << __FUNCTION__ << " connecting " << v->name() << endl;
-    */
+
+    if (verbose) {
+      cout << __FUNCTION__ << " pNode " << pNode->name() << " is an attribute stimulus\n";
+      if (v)
+        cout << __FUNCTION__ << " connecting " << v->name() << endl;
+    }
   }
 }

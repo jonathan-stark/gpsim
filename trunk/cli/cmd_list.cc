@@ -73,10 +73,9 @@ cmd_list::cmd_list()
 void cmd_list::list(void)
 {
 
-  if(!have_cpu(1))
-    return;
-
-  GetActiveCPU()->list(file_id,GetActiveCPU()->pc->value,starting_line,ending_line);
+  Processor *pCpu = GetActiveCPU(true);
+  if(pCpu)
+    pCpu->list(file_id,pCpu->pc->value,starting_line,ending_line);
 
 }
 void cmd_list::list(cmd_options *opt)

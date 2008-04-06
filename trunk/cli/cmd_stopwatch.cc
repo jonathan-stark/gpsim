@@ -66,9 +66,6 @@ void cmd_stopwatch::set()
 void cmd_stopwatch::set(int bit_flag)
 {
 
-  if(!have_cpu(false))
-    return;
-
   switch(bit_flag) {
 
   case eStop:

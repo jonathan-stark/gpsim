@@ -55,28 +55,16 @@ cmd_step::cmd_step()
 
 void cmd_step::step(int instructions)
 {
-  if(!have_cpu(1))
-    return;
-
-  GetActiveCPU()->step(instructions);
-
+  get_interface().step_simulation(instructions);
 }
 
 void cmd_step::step(Expression *expr)
 {
-  if(!have_cpu(1))
-    return;
-
-  GetActiveCPU()->step((int)evaluate(expr));
-
+  get_interface().step_simulation((int)evaluate(expr));
 }
 
 void cmd_step::over(void)
 {
 
-  if(!have_cpu(1))
-    return;
-
-  GetActiveCPU()->step_over();
-
+  get_interface().advance_simulation(gpsimInterface::eAdvanceNextInstruction);
 }

@@ -139,22 +139,12 @@ void execute_line(char *cmd)
     cout << "Executing a line:\n  " << cmd;
 }
 
-Processor *command::GetActiveCPU() {
-  return CSimulationContext::GetContext()->GetActiveCPU();
-}
-
-bool command::have_cpu(bool display_warning)
+Processor *command::GetActiveCPU(bool bDisplayWarnings) 
 {
-
-  if(!GetActiveCPU())
-    {
-      if(display_warning)
-        cout << "No cpu has been selected\n";
-      return(0);
-    }
-
-  return 1;
-
+  Processor *pCpu = CSimulationContext::GetContext()->GetActiveCPU();
+  if (bDisplayWarnings && !pCpu)
+    cout << "No cpu has been selected\n";
+  return pCpu;
 }
 
 Value *command::toValue(Expression *expr)
