@@ -1,3 +1,10 @@
+2008-04-05  Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_interface.h, src/interface.cc, cli/cmd_stopwatch.cc,
+	  cli/cmd_frequency.cc, cli/cmd_dump.cc, cli/cmd_list.cc,
+	  cli/command.cc, cli/cmd_step.cc, cli/command.h:
+	 The step and step over commands are now directed through the
+	 gpsim interface instead through the currently active processor.
+
 2008-01-13 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: added StartMenu page
 	* configure.ac: corrected URL

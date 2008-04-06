@@ -73,11 +73,9 @@ public:
 
   const char *name() { return m_pName; }
   const char *abbreviation() { return m_pAbbreviation; }
-  static Processor * GetActiveCPU();
+  static Processor * GetActiveCPU(bool bDisplayWarnings=false);
 
   int get_token() {return token_value;};
-
-  bool have_cpu(bool display_warning);
 
   // Assume command is not repeatable
   virtual int is_repeatable() { return 0; };

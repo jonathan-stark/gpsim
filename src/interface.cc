@@ -350,7 +350,10 @@ void start_run_thread(void)
 }
 #endif
 
-void gpsimInterface::start_simulation (void)
+
+//========================================================================
+//
+void gpsimInterface::start_simulation (double duration)
 {
 
 #if defined(CLOCK_EXPERIMENTS)
@@ -405,9 +408,38 @@ void gpsimInterface::start_simulation (void)
 #endif
 }
 
-void gpsimInterface::reset (void)
+void gpsimInterface::step_simulation (int nSteps)
 {
-  CSimulationContext::GetContext()->Reset(SIM_RESET);
+  Processor *cpu = get_active_cpu();
+
+  if (cpu)
+    cpu->step(nSteps);
+
+}
+
+void gpsimInterface::advance_simulation(eAdvancementModes nAdvancement)
+{
+  switch (nAdvancement)
+  {
+  case eAdvanceNextInstruction:
+    {
+      Processor *cpu = get_active_cpu();
+
+      if (cpu)
+        cpu->step_over();
+
+    }
+    break;
+  case eAdvanceNextCycle:
+  case eAdvanceNextCall:
+  case eAdvanceNextReturn:
+    break;
+
+  }
+}
+void gpsimInterface::reset (RESET_TYPE resetType)
+{
+  CSimulationContext::GetContext()->Reset(resetType);
 }
 
 bool gpsimInterface::bSimulating()
