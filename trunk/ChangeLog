@@ -4,7 +4,7 @@
             adcon interaction, enable CCP output drive
         * src/p16f62x.cc:
             Enable CCP onto the correct port pin
-        * regression/ccp_628/* regression/run_regression.sh:
+        * regression/ccp_628/* regression/run_regression.sh regression/Makefile.am:
             Add regression tests for these fixes, and others
         Changes are for bug 1967803 and to repair 679540, plus tests for 1811305, 1652549
 
