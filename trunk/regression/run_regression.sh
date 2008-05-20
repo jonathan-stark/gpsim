@@ -15,7 +15,7 @@ case "$1" in
 node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_wide 
 interrupts_14bit macro_test logic_test resistor usart_test txisr_test 
 tmr0_16bit tmr1_16bit 
-switch_test p18f comparator a2d psp ttl ccp wavegen spi i2c port_stim 
+switch_test p18f comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
 p12c509 wdt'
 
         echo ${DIRS}
@@ -131,6 +131,8 @@ ${RT} ccp sim_ccp_877a
 ${RT} ccp sim_ccp_819
 
 ${RT} ccp sim_pwm_877a
+
+${RT} ccp_628 sim
 
 ${RT} wavegen sim
 

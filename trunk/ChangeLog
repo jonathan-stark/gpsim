@@ -1,3 +1,13 @@
+2008-05-20  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/14bit-tmrs.cc:
+            Fix TMR1 behaviour around CCP compare events, remove incorrect
+            adcon interaction, enable CCP output drive
+        * src/p16f62x.cc:
+            Enable CCP onto the correct port pin
+        * regression/ccp_628/* regression/run_regression.sh:
+            Add regression tests for these fixes, and others
+        Changes are for bug 1967803 and to repair 679540, plus tests for 1811305, 1652549
+
 2008-04-05  Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_interface.h, src/interface.cc, cli/cmd_stopwatch.cc,
 	  cli/cmd_frequency.cc, cli/cmd_dump.cc, cli/cmd_list.cc,
