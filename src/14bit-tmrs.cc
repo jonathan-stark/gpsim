@@ -240,6 +240,7 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     ccprl(0), pir_set(0), tmr2(0), adcon0(0)
 {
 }
+
 CCPCON::~CCPCON()
 {
   //delete m_sink;
@@ -258,16 +259,19 @@ void CCPCON::setIOpin(PinModule *new_PinModule)
   m_source = new CCPSignalSource(this);
 
 }
+
 void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR_SET *_pir_set, TMR2 *_tmr2)
 {
   ccprl = _ccprl;
   pir_set = _pir_set;
   tmr2 = _tmr2;
 }
+
 void CCPCON::setADCON(ADCON0 *_adcon0)
 {
   adcon0 = _adcon0;
 }
+
 char CCPCON::getState()
 {
   return m_bOutputEnabled ?  m_cOutputState : '?';
@@ -454,6 +458,10 @@ void CCPCON::put(unsigned int new_value)
 	tmr2->stop_pwm(address);
       m_bInputEnabled = false;
       m_bOutputEnabled = false;
+
+      // RP - According to 16F87x data sheet section 8.2.1 clearing CCP1CON also clears the latch
+      m_cOutputState = '0';
+
       break;
     case CAP_FALLING_EDGE:
     case CAP_RISING_EDGE:
@@ -484,21 +492,23 @@ void CCPCON::put(unsigned int new_value)
 
     case COM_SET_OUT:
     case COM_CLEAR_OUT:
+      m_bOutputEnabled = true;
     case COM_INTERRUPT:
     case COM_TRIGGER:
-      ccprl->tmrl->ccpcon = this;
+      ccprl->tmrl->ccpcon = this;   // %%%FIXME%%% - how can this work when there's two CCPs?
       ccprl->start_compare_mode();
       ccprl->stop_pwm_mode();
       tmr2->stop_pwm(address);
 
-      if(adcon0)
-	adcon0->start_conversion();
+      // RP - just writing CCP2CON doesn't trigger the ADC; that only happens on a match
+      //if(adcon0)
+      //  adcon0->start_conversion();
 
-      m_bInputEnabled = true;
-      m_bOutputEnabled = false;
+      m_bInputEnabled = false;
       //if(adcon0) cout << "CCP triggering an A/D\n";
 
       break;
+
     case PWM0:
     case PWM1:
     case PWM2:
@@ -862,7 +872,7 @@ void TMRL::update()
       prescale = 1 << t1con->get_prescale();
       prescale_counter = prescale;
 
-      //cout << "TMRL: Current prescale " << prescale << '\n';
+      //cout << "TMRL: Current prescale " << prescale << ", ext scale " << ext_scale << '\n';
       //  synchronized_cycle = cycles.get() + 2;
       synchronized_cycle = get_cycles().get();
 
@@ -880,7 +890,7 @@ void TMRL::update()
 	    {
 	      // A compare interrupt is going to happen before the timer
 	      // will rollover.
-	      break_value = compare_value - value_16bit;
+	      break_value = compare_value;
 	    }
 	}
 
@@ -949,6 +959,12 @@ unsigned int TMRL::get_value()
 // if break inactive (future_cycle == 0), just read the TMR1H and TMR1L 
 // registers otherwise compute what the register should be and then
 // update TMR1H and TMR1L.
+// RP: Using future_cycle here is not strictly right. What we really want is
+// the condition "TMR1 is running on a GPSIM-generated clock" (as opposed
+// to being off, or externally clocked by a stimulus). The presence of a
+// breakpoint is _usually_ a good indication of this, but not while we're
+// actually processing that breakpoint. For the time being, we work around
+// this by calling current_value "redundantly" in callback()
 //
 void TMRL::current_value()
 {
@@ -1056,6 +1072,8 @@ void TMRL::callback()
       return;
     }
 
+  current_value();      // Because this relies on future_cycle, we must call it before clearing that
+
   future_cycle = 0;     // indicate that there's no break currently set
 
   if(break_value < 0x10000)
@@ -1063,7 +1081,7 @@ void TMRL::callback()
 
       // The break was due to a "compare"
 
-      //cout << "TMR1 break due to compare "  << hex << cycles.get().lo << '\n';
+      //cout << "TMR1 break due to compare "  << hex << get_cycles().get() << '\n';
       ccpcon->compare_match();
 
     }

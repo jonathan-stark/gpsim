@@ -199,7 +199,7 @@ L1:	clrwdt
   ; TMR1 on Fosc/4 with prescale of 8
   ;
 	; Load TMR1H, TMR1L with 0x8000 for one second interupts
-;	BCF	T1CON,TMR1ON ; Microchip recommend stopping couter for writes
+	BCF	T1CON,TMR1ON ; Microchip recommend stopping couter for writes
 	CLRF	TMR1L
 	MOVLW	0x80
 	MOVWF	TMR1H

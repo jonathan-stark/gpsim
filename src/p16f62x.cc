@@ -166,8 +166,8 @@ void P16F62x::create_sfr_map()
 
   comparator.cmcon.put(0);
 
-  // Link ccp1 and portb
-  //1((PORTB_62x*)portb)->ccp1con = &ccp1con;
+  // Link ccp1 onto portb
+  ccp1con.setIOpin(&((*m_portb)[3]));
 }
 
 void P16F62x::create_symbols()
