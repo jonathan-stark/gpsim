@@ -51,6 +51,7 @@ EXTRA_DIST = \
 	ttl/Makefile ttl/18f452.lkr ttl/Makefile ttl/ttl377.asm ttl/ttl377.stc \
 	ccp/Makefile ccp/16f877a.lkr ccp/ccp_877a.asm ccp/ccp_877a.stc ccp/ccp.asm \
 	ccp/ccp.stc ccp/pwm_877a.asm  ccp/16f819.lkr ccp/ccp_819.asm \
+        ccp_628/Makefile ccp_628/ccp_628.asm ccp_628/16f628.lkr \
 	wavegen/Makefile wavegen/16f877a.lkr wavegen/pulsegen.asm wavegen/pulsegen.stc \
 	spi/Makefile spi/16c62.lkr spi/16f88.lkr spi/18f242.lkr spi/p16c62.asm \
 	spi/p16f88.asm spi/p18f242.asm \
