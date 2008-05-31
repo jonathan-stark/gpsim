@@ -640,6 +640,36 @@ TableRead:
 	tblrd   *
 	movlw	0x22
 	rcall	TestTablat
+	tblrd	+*
+	movlw	0x33
+	rcall	TestTablat
+
+	clrf	TBLPTRH
+	setf	TBLPTRL
+	tblrd	*+
+	movlw	1
+	cpfseq	TBLPTRH
+  .assert  "\"FAILED tblrd increment over boundary\""
+	 bra 	failed
+
+	tblrd	*-
+	movlw	0
+	cpfseq	TBLPTRH
+  .assert  "\"FAILED tblrd decrement over boundary\""
+	 bra 	failed
+
+	clrf	TBLPTRL
+	tblrd	*-
+	movlw	0xFF
+	cpfseq	TBLPTRH
+  .assert  "\"FAILED tblrd decrement over boundary\""
+	 bra 	failed
+
+	tblrd	+*
+	movlw	0
+	cpfseq	TBLPTRH
+  .assert  "\"FAILED tblrd increment over boundary\""
+	 bra 	failed
 
 	bra	TableReadEnd
 	
@@ -648,6 +678,7 @@ TableDATA:
 
 TestTablat:	
 	cpfseq	TABLAT
+  .assert  "\"FAILED tblrd indexing / value\""
 	 bra	failed
 	return
 TableReadEnd:	

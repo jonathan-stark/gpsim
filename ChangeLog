@@ -12,6 +12,9 @@
             wrong (missing BAUDCON and SPBRGH), as is the ADC (ADCON2 missing, not
             enough channels) and the OSCTUNE register is missing. Also the RAM is 
             too big.
+        * src/16bit-registers.cc regression/instructions_16bit/instructions_16bit.asm
+            Fixed a bug in the TBLPTR decrement on 256 byte boundaries, and added
+            regression test for it.
 
 2008-05-20  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/14bit-tmrs.cc:

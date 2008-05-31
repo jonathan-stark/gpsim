@@ -1227,6 +1227,8 @@ void TBL_MODULE::decrement()
     if(tabptrh.value.get() == 0) {
       tabptrh.put(0xff);
       tabptru.put(tabptru.value.get() - 1);
+    } else {
+      tabptrh.put(tabptrh.value.get() - 1);
     }
   }
   else
