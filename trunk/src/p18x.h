@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-processors.h"
 #include "eeprom.h"
 #include "psp.h"
+#include "comparator.h"
 
 class PicPortRegister;
 class PicTrisRegister;
@@ -38,6 +39,7 @@ class P18C2x2 : public _16bit_processor
   void create();
 
   virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x400; };
@@ -96,6 +98,7 @@ class P18C4x2 : public _16bit_processor
   void create();
 
   virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x400; };
@@ -231,6 +234,7 @@ class P18Fxx20 : public _16bit_processor
 {
 public:
   P18Fxx20(const char *_name=0, const char *desc=0);
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
 };
 
 class P18F1220 : public P18Fxx20
@@ -257,5 +261,57 @@ class P18F1320 : public P18F1220
   virtual unsigned int program_memory_size() const { return 0x2000; };
 
 };
+
+
+
+class P18F2x21 : public _16bit_processor
+{
+ public:
+
+  PicPortRegister  *m_porte;
+  PicPSP_TrisRegister  *m_trise;
+  PicLatchRegister *m_late;
+
+//  OSCTUNE      osctune;
+  ComparatorModule comparator;
+
+  P18F2x21(const char *_name=0, const char *desc=0);
+
+  void create();
+
+  virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
+  virtual void create_symbols();
+
+  virtual unsigned int program_memory_size() const { return 0x400; };
+
+// Setting the correct register memory size breaks things
+//  virtual unsigned int register_memory_size () const { return 0x200;};
+
+  virtual void create_iopin_map();
+  virtual void create_sfr_map();
+
+
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
+   assert(0);
+  }
+  virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
+  virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
+};
+
+class P18F2321 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2321_;};
+  P18F2321(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int program_memory_size() const { return 0x1000; };
+
+};
+
 
 #endif

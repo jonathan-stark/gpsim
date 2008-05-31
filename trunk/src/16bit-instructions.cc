@@ -48,21 +48,8 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
 
   cpu = new_cpu;
 
-  switch(cpu16->isa()) {
-    case  _P18Cxx2_:
-    case  _P18C2x2_:
-    case  _P18C242_:
-    case  _P18C252_:
-    case  _P18C442_:
-    case  _P18C452_:
-    case  _P18F242_:
-    case  _P18F252_:
-    case  _P18F442_:
-    case  _P18F248_:
-    case  _P18F452_:
-    case  _P18F1220_:
-    case  _P18F1320_:
-    case  _P18F2455_:
+  switch(cpu16->base_isa()) {
+    case  _PIC18_PROCESSOR_:
       destination_index = (new_opcode & 0xff)+1;
       absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
  
@@ -73,12 +60,7 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
         }
       break;
 
-    case _P17C7xx_:
-    case _P17C75x_:
-    case _P17C756_:
-    case _P17C756A_:
-    case _P17C762_:
-    case _P17C766_:
+    case  _PIC17_PROCESSOR_:
       cout << "Which instructions go here?\n";
       break;
 

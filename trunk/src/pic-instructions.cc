@@ -349,45 +349,18 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
   cpu = new_cpu;
   switch(cpu_pic->base_isa())
     {
-    case _16BIT_PROCESSOR_:
-      switch(cpu_pic->isa()) {
-        case  _P18Cxx2_:
-        case  _P18C2x2_:
-        case  _P18C242_:
-        case  _P18C252_:
-        case  _P18C442_:
-        case  _P18C452_:
-        case  _P18F242_:
-        case  _P18F252_:
-        case  _P18F442_:
-        case  _P18F248_:
-        case  _P18F448_:
-        case  _P18F452_:
-        case  _P18F1220_:
-        case  _P18F1320_:
-        case  _P18F2455_:
-          mask = 1 << ((opcode >> 9) & 7);
-          register_address = opcode & REG_MASK_16BIT;
-                  access = (opcode & ACCESS_MASK_16BIT) ? true : false;
-          if((!access) && (opcode & 0x80))
-            register_address |= 0xf00;
+    case _PIC17_PROCESSOR_:
+      mask = 1 << ((opcode >> 8) & 7);
+      register_address = opcode & REG_MASK_16BIT;
+      access = 0;
+      break;
 
-          break;
-        case _P17C7xx_:
-        case _P17C75x_:
-        case _P17C756_:
-        case _P17C756A_:
-        case _P17C762_:
-        case _P17C766_:
-          mask = 1 << ((opcode >> 8) & 7);
-          register_address = opcode & REG_MASK_16BIT;
-          access = 0;
-          break;
-
-        default:
-          cout << "ERROR: (Bit_op) the processor is not defined\n";
-          break;
-      }
+    case _PIC18_PROCESSOR_:
+      mask = 1 << ((opcode >> 9) & 7);
+      register_address = opcode & REG_MASK_16BIT;
+      access = (opcode & ACCESS_MASK_16BIT) ? true : false;
+      if((!access) && (opcode & 0x80))
+        register_address |= 0xf00;
       break;
 
     case _14BIT_PROCESSOR_:
@@ -419,7 +392,9 @@ char * Bit_op::name(char *return_str,int len)
 
   switch(cpu_pic->base_isa())
     {
-    case _16BIT_PROCESSOR_:
+    case _PIC17_PROCESSOR_:
+        cout << "Bit_op::name %%% FIX ME %%% treating 17x as 18x\n";
+    case _PIC18_PROCESSOR_:
       bit = ((opcode >> 9) & 7);
       snprintf(return_str,len,"%s\t%s,%d,%c",
                gpsimObject::name().c_str(),
@@ -473,7 +448,7 @@ char * Register_op::name(char *return_str,int len)
 
   source = get_cpu()->registers[register_address];
 
-  if(cpu_pic->base_isa() != _16BIT_PROCESSOR_)
+  if ( cpu_pic->base_isa() != _PIC18_PROCESSOR_ )
     snprintf(return_str,len,"%s\t%s,%c",
              gpsimObject::name().c_str(),
              source->name().c_str(),
@@ -504,9 +479,11 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
 
   switch(cpu_pic->base_isa())
     {
-    case _16BIT_PROCESSOR_:
-                destination = (opcode & DESTINATION_MASK_16BIT) ? true : false;
-                access = (opcode & ACCESS_MASK_16BIT) ? true : false;
+    case _PIC17_PROCESSOR_:
+        cout << "Register_op::decode %%% FIXME %%% - PIC17 core is not the same as PIC18\n";
+    case _PIC18_PROCESSOR_:
+      destination = (opcode & DESTINATION_MASK_16BIT) ? true : false;
+      access = (opcode & ACCESS_MASK_16BIT) ? true : false;
       register_address = opcode & REG_MASK_16BIT;
       if((!access) && (opcode & 0x80))
         register_address |= 0xf00;
@@ -515,13 +492,13 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
 
     case _14BIT_PROCESSOR_:
       register_address = opcode & REG_MASK_14BIT;
-          destination = (opcode & DESTINATION_MASK_14BIT) ? true : false;
+      destination = (opcode & DESTINATION_MASK_14BIT) ? true : false;
       access = 1;
       break;
 
     case _12BIT_PROCESSOR_:
       register_address = opcode & REG_MASK_12BIT;
-          destination = (opcode & DESTINATION_MASK_12BIT) ? true : false;
+      destination = (opcode & DESTINATION_MASK_12BIT) ? true : false;
       access = 1;
       break;
 
