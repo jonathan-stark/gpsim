@@ -413,7 +413,8 @@ void INDF::initialize()
     fsr_mask = 0x7f;
     break;
 
-  case _16BIT_PROCESSOR_:
+  case _PIC17_PROCESSOR_:
+  case _PIC18_PROCESSOR_:
     cout << "BUG: INDF::"<<__FUNCTION__<<". 16bit core uses a different class for indf.";
     break;
   default:

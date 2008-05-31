@@ -168,16 +168,6 @@ ProcessorConstructor pP12F509(P12F509::construct ,
                               "__12F509", "pic12f509",  "p12f509", "12f509");
 ProcessorConstructor pP12F510(P12F510::construct ,
                               "__12F510", "pic12f510",  "p12f510", "12f510");
-ProcessorConstructor pP16C84(P16C84::construct ,
-                             "__16C84",  "pic16c84",   "p16c84", "16c84");
-ProcessorConstructor pP16CR83(P16CR83::construct ,
-                              "__16CR83", "pic16cr83",  "p16cr83", "16cr83");
-ProcessorConstructor pP16CR84(P16CR84::construct ,
-                              "__16CR84", "pic16cr84",  "p16cr84", "16cr84");
-ProcessorConstructor pP16F83(P16F83::construct ,
-                             "__16F83",   "pic16f83",   "p16f83", "16f83");
-ProcessorConstructor pP16F84(P16F84::construct ,
-                             "__16F84",   "pic16f84",   "p16f84", "16f84");
 ProcessorConstructor pP16C54(P16C54::construct ,
                              "__16C54",   "pic16c54",   "p16c54", "16c54");
 ProcessorConstructor pP16C55(P16C55::construct ,
@@ -186,6 +176,12 @@ ProcessorConstructor pP16C56(P16C56::construct ,
                              "__16C56",   "pic16c56",   "p16c56", "16c56");
 ProcessorConstructor pP16C61(P16C61::construct ,
                              "__16C61",   "pic16c61",   "p16c61", "16c61");
+ProcessorConstructor pP16C84(P16C84::construct ,
+                             "__16C84",  "pic16c84",   "p16c84", "16c84");
+ProcessorConstructor pP16CR83(P16CR83::construct ,
+                              "__16CR83", "pic16cr83",  "p16cr83", "16cr83");
+ProcessorConstructor pP16CR84(P16CR84::construct ,
+                              "__16CR84", "pic16cr84",  "p16cr84", "16cr84");
 ProcessorConstructor pP16C71(P16C71::construct ,
                              "__16C71",   "pic16c71",   "p16c71", "16c71");
 ProcessorConstructor pP16C712(P16C712::construct ,
@@ -216,6 +212,10 @@ ProcessorConstructor pP16F73(P16F73::construct ,
                              "__16F73",   "pic16f73",   "p16f73", "16f73");
 ProcessorConstructor pP16F74(P16F74::construct ,
                              "__16F74",   "pic16f74",   "p16f74", "16f74");
+ProcessorConstructor pP16F83(P16F83::construct ,
+                             "__16F83",   "pic16f83",   "p16f83", "16f83");
+ProcessorConstructor pP16F84(P16F84::construct ,
+                             "__16F84",   "pic16f84",   "p16f84", "16f84");
 ProcessorConstructor pP16F627(P16F627::construct ,
                               "__16F627", "pic16f627",  "p16f627", "16f627");
 ProcessorConstructor pP16F627A(P16F627::construct ,
@@ -280,12 +280,12 @@ ProcessorConstructor pP18C452(P18C452::construct ,
                               "__18C452", "pic18c452",  "p18c452", "18c452");
 ProcessorConstructor pP18F242(P18F242::construct ,
                               "__18F242", "pic18f242",  "p18f242", "18f242");
+ProcessorConstructor pP18F248(P18F248::construct ,
+                              "__18F248", "pic18f248",  "p18f248", "18f248");
 ProcessorConstructor pP18F252(P18F252::construct ,
                               "__18F252", "pic18f252",  "p18f252", "18f252");
 ProcessorConstructor pP18F442(P18F442::construct ,
                               "__18F442", "pic18f442",  "p18f442", "18f442");
-ProcessorConstructor pP18F248(P18F248::construct ,
-                              "__18F248", "pic18f248",  "p18f248", "18f248");
 ProcessorConstructor pP18F448(P18F448::construct ,
                               "__18F448", "pic18f448",  "p18f448", "18f448");
 ProcessorConstructor pP18F452(P18F452::construct,
@@ -296,6 +296,8 @@ ProcessorConstructor pP18F1320(P18F1320::construct,
                               "__18F1320", "pic18f1320",  "p18f1320", "18f1320");
 ProcessorConstructor pP18F2455(P18F2455::construct,
                               "__18F2455", "pic18f2455",  "p18f2455", "18f2455");
+ProcessorConstructor pP18F2321(P18F2321::construct,
+                              "__18F2321", "pic18f2321",  "p18f2321", "18f2321");
 
 
 //========================================================================

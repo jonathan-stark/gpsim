@@ -1,3 +1,18 @@
+2008-05-31  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/pic-processor.h, src/16bit-processors.h, p18x.h,
+          src/16bit-instructions.cc, src/pic-instructions.cc, src/14bit-registers.cc:
+            Split out the _16BIT_PROCESSOR_ base type into _PIC17_PROCESSOR_ and 
+            _PIC18_PROCESSOR_ because nearly every place that tested it should have 
+            treated them differently. This led to some awkward switch cases where 
+            all PIC18 devices were listed in one block and all PIC17s in another 
+            (and which could easily be overlooked and cause pain when adding new 
+            devices). These are now simple and generic.
+	* src/pic-processor.cc, src/pic-processor.h, p18x.cc, p18x.h:
+            Initial attempt at providing support for the PIC18F2321. The USART is 
+            wrong (missing BAUDCON and SPBRGH), as is the ADC (ADCON2 missing, not
+            enough channels) and the OSCTUNE register is missing. Also the RAM is 
+            too big.
+
 2008-05-20  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/14bit-tmrs.cc:
             Fix TMR1 behaviour around CCP compare events, remove incorrect
