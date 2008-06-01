@@ -89,10 +89,12 @@ void StopWatch_Window::Update(void)
   cyclecounter_last = get_cycles().get();
 
 
+  // %%% FIXME %%% - This surely must be wrong, given that we're working with
+  // the local copy ('_cyclecounter')
   while(cyclecounter<offset)
     cyclecounter+=rollover;
 
-  cyclecounter=_cyclecounter;
+  cyclecounter=_cyclecounter;   // See! We overwrite what we just did
 
   _cyclecounter=(_cyclecounter-offset)%rollover;
   ////////////////////////

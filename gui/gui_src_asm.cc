@@ -1403,6 +1403,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
           pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
       if(address!=INVALID_VALUE) {
         pSW->gp->cpu->run_to_address(address);
+        pSW->SetPC(pSW->pma->get_PC());     // RP - update GUI after running
       }
     }
     break;

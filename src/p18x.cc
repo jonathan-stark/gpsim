@@ -1146,3 +1146,250 @@ Processor * P18F2321::construct(const char *name)
   return p;
 }
 
+
+
+//========================================================================
+//
+// Pic 18F4x21
+//
+
+void P18F4x21::create()
+{
+  if(verbose)
+    cout << "P18F4x21::create\n";
+
+  create_iopin_map();
+
+  _16bit_processor::create();
+
+}
+
+//------------------------------------------------------------------------
+void P18F4x21::create_iopin_map()
+{
+  package = new Package(40);
+
+  if(!package)
+    return;
+
+  // Build the links between the I/O Ports and their tris registers.
+
+  package->assign_pin( 1, m_porte->addPin(new IO_bi_directional("porte3"),3));
+
+  package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta0"),0));
+  package->assign_pin( 3, m_porta->addPin(new IO_bi_directional("porta1"),1));
+  package->assign_pin( 4, m_porta->addPin(new IO_bi_directional("porta2"),2));
+  package->assign_pin( 5, m_porta->addPin(new IO_bi_directional("porta3"),3));
+  package->assign_pin( 6, m_porta->addPin(new IO_open_collector("porta4"),4));
+  package->assign_pin( 7, m_porta->addPin(new IO_bi_directional("porta5"),5));
+
+  package->assign_pin( 8, m_porte->addPin(new IO_bi_directional("porte0"),0));
+  package->assign_pin( 9, m_porte->addPin(new IO_bi_directional("porte1"),1));
+  package->assign_pin(10, m_porte->addPin(new IO_bi_directional("porte2"),2));
+
+
+  package->assign_pin(11, 0);   // Vdd
+  package->assign_pin(12, 0);   // Vss
+  package->assign_pin(13, m_porta->addPin(new IO_bi_directional("porta7"),7));
+  package->assign_pin(14, m_porta->addPin(new IO_bi_directional("porta6"),6));
+
+  package->assign_pin(15, m_portc->addPin(new IO_bi_directional("portc0"),0));
+  package->assign_pin(16, m_portc->addPin(new IO_bi_directional("portc1"),1));
+  package->assign_pin(17, m_portc->addPin(new IO_bi_directional("portc2"),2));
+  package->assign_pin(18, m_portc->addPin(new IO_bi_directional("portc3"),3));
+  package->assign_pin(23, m_portc->addPin(new IO_bi_directional("portc4"),4));
+  package->assign_pin(24, m_portc->addPin(new IO_bi_directional("portc5"),5));
+  package->assign_pin(25, m_portc->addPin(new IO_bi_directional("portc6"),6));
+  package->assign_pin(26, m_portc->addPin(new IO_bi_directional("portc7"),7));
+
+  package->assign_pin(19, m_portd->addPin(new IO_bi_directional("portd0"),0));
+  package->assign_pin(20, m_portd->addPin(new IO_bi_directional("portd1"),1));
+  package->assign_pin(21, m_portd->addPin(new IO_bi_directional("portd2"),2));
+  package->assign_pin(22, m_portd->addPin(new IO_bi_directional("portd3"),3));
+  package->assign_pin(27, m_portd->addPin(new IO_bi_directional("portd4"),4));
+  package->assign_pin(28, m_portd->addPin(new IO_bi_directional("portd5"),5));
+  package->assign_pin(29, m_portd->addPin(new IO_bi_directional("portd6"),6));
+  package->assign_pin(30, m_portd->addPin(new IO_bi_directional("portd7"),7));
+
+  package->assign_pin(31, 0);   // Vss
+  package->assign_pin(32, 0);   // Vdd
+
+  package->assign_pin(33, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
+  package->assign_pin(34, m_portb->addPin(new IO_bi_directional_pu("portb1"),1));
+  package->assign_pin(35, m_portb->addPin(new IO_bi_directional_pu("portb2"),2));
+  package->assign_pin(36, m_portb->addPin(new IO_bi_directional_pu("portb3"),3));
+  package->assign_pin(37, m_portb->addPin(new IO_bi_directional_pu("portb4"),4));
+  package->assign_pin(38, m_portb->addPin(new IO_bi_directional_pu("portb5"),5));
+  package->assign_pin(39, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
+  package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
+
+  psp.initialize(&pir_set_def,    // PIR
+                m_portd,           // Parallel port
+                m_trisd,           // Parallel tris
+                m_trise,           // Control tris
+                &(*m_porte)[0],    // NOT RD
+                &(*m_porte)[1],    // NOT WR
+                &(*m_porte)[2]);   // NOT CS
+
+  tmr1l.setIOpin(&(*m_portc)[0]);
+
+  ssp.initialize(&pir_set_def,    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+                m_trisc,         // i2c tris port
+		SSP_TYPE_MSSP
+       );
+  //1portc.ccp1con = &ccp1con;
+  //1portc.usart = &usart16;
+
+}
+
+// Missing :
+//      OSCTUNE at 0xF9B
+//      SPBRGH  at 0xFB0
+//      BAUDCON at 0xFB8
+//      ADCON2  at 0xFC0
+
+void P18F4x21::create_symbols()
+{
+  if(verbose)
+    cout << "P18F4x21 create symbols\n";
+
+  _16bit_processor::create_symbols();
+}
+
+P18F4x21::P18F4x21(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18f4x21 constructor, type = " << isa() << '\n';
+
+  m_portd = new PicPSP_PortRegister(this,"portd","",8,0x08);
+  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
+  m_latd  = new PicLatchRegister(this,"latd","",m_portd);
+
+//  m_porte = new PicPortRegister(this,"porte","",8,0x08);
+  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
+  m_late  = new PicLatchRegister(this,"late","",m_porte);
+
+}
+
+void P18F4x21::create_sfr_map()
+{
+
+  if(verbose)
+    cout << "create_sfr_map P18F4x21\n";
+
+  _16bit_processor::create_sfr_map();
+
+  RegisterValue porv(0,0);
+
+  add_sfr_register(m_portd,       0xf83,porv);
+  add_sfr_register(m_porte,       0xf84,porv);
+
+  add_sfr_register(m_latd,        0xf8c,porv);
+  add_sfr_register(m_late,        0xf8d,porv);
+
+  add_sfr_register(m_trisd,       0xf95,RegisterValue(0xff,0));
+  add_sfr_register(m_trise,       0xf96,RegisterValue(0x07,0));
+
+//  add_sfr_register(&osctune,      0xf9b,porv);
+
+  // rest of configuration in parent class
+  adcon1.setNumberOfChannels(12);
+  adcon1.setIOPin(5, &(*m_porte)[0]);
+  adcon1.setIOPin(6, &(*m_porte)[1]);
+  adcon1.setIOPin(7, &(*m_porte)[2]);
+  adcon1.setIOPin(8, &(*m_portb)[2]);
+  adcon1.setIOPin(9, &(*m_portb)[3]);
+  adcon1.setIOPin(10, &(*m_portb)[1]);
+  adcon1.setIOPin(11, &(*m_portb)[4]);
+  adcon1.setIOPin(12, &(*m_portb)[0]);
+
+  // Link the comparator and voltage ref to porta
+  comparator.initialize(&pir_set_def, &(*m_porta)[2], &(*m_porta)[0], 
+	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
+	&(*m_porta)[4]);
+
+  comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
+  comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
+  comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
+  comparator.cmcon.set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
+  comparator.cmcon.set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+
+  add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
+  add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
+
+  //1 usart16.initialize_16(this,&pir_set_def,&portc);
+
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18F4321
+// 
+
+P18F4321::P18F4321(const char *_name, const char *desc)
+  : P18F4x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F4321 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F4321::create()
+{
+  EEPROM_PIR *e;
+
+  if(verbose)
+    cout << " 18F4321 create \n";
+
+  e = new EEPROM_PIR(this,&pir2);
+
+  // We might want to pass this value in for larger eeproms
+  e->initialize(256);
+  //e->set_pir_set(&pir_set_def);
+  e->set_intcon(&intcon);
+
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
+
+  P18F2x21::create();
+
+}
+
+Processor * P18F4321::construct(const char *name)
+{
+
+  P18F4321 *p = new P18F4321(name);
+
+  if(verbose)
+    cout << " 18F4321 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F4321 construct completed\n";
+  return p;
+}
+
+

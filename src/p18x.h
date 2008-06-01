@@ -314,4 +314,38 @@ class P18F2321 : public P18F2x21
 };
 
 
+class P18F4x21 : public P18F2x21
+{
+ public:
+
+  PicPSP_PortRegister  *m_portd;
+  PicTrisRegister  *m_trisd;
+  PicLatchRegister *m_latd;
+
+  PSP               psp;
+
+  P18F4x21(const char *_name=0, const char *desc=0);
+
+  void create();
+
+  virtual void create_symbols();
+
+  virtual void create_iopin_map();
+  virtual void create_sfr_map();
+
+};
+
+class P18F4321 : public P18F4x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4321_;};
+  P18F4321(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int program_memory_size() const { return 0x1000; };
+
+};
+
+
 #endif

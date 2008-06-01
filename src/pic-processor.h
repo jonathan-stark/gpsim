@@ -124,6 +124,7 @@ enum PROCESSOR_TYPE
   _P18F1320_,
   _P18F2455_,
   _P18F2321_,
+  _P18F4321_,
 };
 
 // Configuration modes.  DELETE THIS...
