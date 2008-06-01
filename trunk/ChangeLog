@@ -1,3 +1,14 @@
+2008-06-01  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/pic-processor.cc, src/pic-processor.h, p18x.cc, p18x.h:
+            Initial attempt at providing support for the PIC18F4321. The same
+            issues are present as per the 18F2321.
+	* src/16bit-registers.cc, gui/gui_src_asm.cc:
+            Bug fixes - "run to here" now updates the source browser PC indicator,
+            and "set PC here" now works properly on 16bit processors
+        * gui/gui_stopwatch.cc:
+            No actual code change, but some comments regarding a suspicious looking
+            sequence of operations.
+
 2008-05-31  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/pic-processor.h, src/16bit-processors.h, p18x.h,
           src/16bit-instructions.cc, src/pic-instructions.cc, src/14bit-registers.cc:

@@ -373,7 +373,7 @@ enum
 
 
 /*
- * PIR_SET defines and interface to some common interrupt capabilities.
+ * PIR_SET defines an interface to some common interrupt capabilities.
  * PIR_SET is a pure virtual class - you must instantiate a more specific
  * version of PIR_SET.
  *

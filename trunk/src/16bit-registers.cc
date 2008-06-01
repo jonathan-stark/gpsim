@@ -611,7 +611,10 @@ void Program_Counter16::put_value(unsigned int new_value)
 
   trace.raw(trace_other | (value<<1));
 
-  value = (new_value) & memory_size_mask;
+  // RP - The new_value passed in is a byte address, but the Program_Counter16
+  // class's internal value is a word address
+  value = (new_value/2) & memory_size_mask;
+
   cpu_pic->pcl->value.put(value & 0xff);
   cpu_pic->pclath->value.put((value >> 8) & 0xff);
   cpu16->pclatu.value.put((value >> 16) & 0xff);
