@@ -57,6 +57,7 @@ class P18C242 : public P18C2x2
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int last_actual_register () const { return 0x02FF;};
 
 };
 
@@ -70,6 +71,7 @@ class P18C252 : public P18C242
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
 
 
 };
@@ -117,6 +119,7 @@ class P18C442 : public P18C4x2
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int last_actual_register () const { return 0x02FF;};
 
 };
 
@@ -129,6 +132,7 @@ class P18C452 : public P18C442
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
 
 };
 
@@ -287,6 +291,7 @@ class P18F2x21 : public _16bit_processor
 
 // Setting the correct register memory size breaks things
 //  virtual unsigned int register_memory_size () const { return 0x200;};
+  virtual unsigned int last_actual_register () const { return 0x01FF;};
 
   virtual void create_iopin_map();
   virtual void create_sfr_map();

@@ -256,7 +256,7 @@ void _16bit_processor :: create_sfr_map()
   if(verbose)
     cout << "creating 18cxxx common registers\n";
 
-  add_file_registers(0x0, 0xf7f, 0);
+  add_file_registers(0x0, last_actual_register(), 0);
 
   RegisterValue porv(0,0);
   RegisterValue porv2(0,0);
