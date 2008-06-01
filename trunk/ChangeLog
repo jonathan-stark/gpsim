@@ -8,6 +8,8 @@
         * gui/gui_stopwatch.cc:
             No actual code change, but some comments regarding a suspicious looking
             sequence of operations.
+	* src/16bit-processors.cc, src/16bit-processors.h, p18x.h:
+            Fixed RAM sizes of 18F series processors
 
 2008-05-31  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/pic-processor.h, src/16bit-processors.h, p18x.h,
