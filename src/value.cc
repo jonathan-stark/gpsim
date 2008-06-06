@@ -427,7 +427,7 @@ string AbstractRange::toString()
   return (string(buff));
 }
 
-string AbstractRange::toString(char* format)
+string AbstractRange::toString(const char* format)
 {
   char cvtBuf[1024];
 
@@ -561,7 +561,7 @@ char *Boolean::toBitStr(char *return_str, int len)
   return return_str;
 }
 
-string Boolean::toString(char* format)
+string Boolean::toString(const char* format)
 {
   char cvtBuf[1024];
   bool b;
@@ -891,7 +891,7 @@ string Integer::toString()
 }
 
 
-string Integer::toString(char* format)
+string Integer::toString(const char* format)
 {
   char cvtBuf[1024];
 
@@ -903,7 +903,7 @@ string Integer::toString(char* format)
 }
 
 
-string Integer::toString(char* format, gint64 value)
+string Integer::toString(const char* format, gint64 value)
 {
   char cvtBuf[1024];
 
@@ -1166,7 +1166,7 @@ string Float::toString()
 }
 
 
-string Float::toString(char* format)
+string Float::toString(const char* format)
 {
   char cvtBuf[1024];
 
@@ -1312,42 +1312,6 @@ void String::get(Packet &p)
   p.EncodeString(value);
 }
 
-/*
-string String::toString(char* format)
-{
-  char cvtBuf[1024];
-
-  sprintf(cvtBuf, format, value.c_str());
-  return (string(&cvtBuf[0]));
-}
-*/
-/**
-String* String::typeCheck(Value* val, string valDesc)
-{
-  if (typeid(*val) != typeid(String)) {
-    throw new TypeMismatch(valDesc, "String", val->showType());
-  }
-
-  // This static cast is totally safe in light of our typecheck, above.
-  return((String*)(val));
-}
-*/
-
-/*
-bool String::compare(ComparisonOperator *compOp, Value *rvalue)
-{
-
-  String *rv = typeCheck(rvalue,"");
-
-  if(value < rv->value)
-    return compOp->less();
-
-  if(value > rv->value)
-    return compOp->greater();
-
-  return compOp->equal();
-}
-*/
 const char *String::getVal()
 {
   return value;

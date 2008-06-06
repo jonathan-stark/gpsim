@@ -1947,7 +1947,7 @@ TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 char *TBLRD::name(char *return_str,int len)
 {
-  char *index_modes[4] = {"*","*+","*-","+*"};
+  const char *index_modes[4] = {"*","*+","*-","+*"};
 
   snprintf(return_str,len,"%s\t%s",
 	   gpsimObject::name().c_str(),
@@ -1984,7 +1984,7 @@ TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 char *TBLWT::name(char *return_str,int len)
 {
-  char *index_modes[4] = {"*","*+","*-","+*"};
+  const char *index_modes[4] = {"*","*+","*-","+*"};
 
   snprintf(return_str,len,"%s\t%s",
 	   gpsimObject::name().c_str(),
@@ -2025,7 +2025,7 @@ TLRD::TLRD (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 char *TLRD::name(char *return_str,int len)
 {
-  char *index_modes[4] = {"*","*+","*-","+*"};
+  const char *index_modes[4] = {"*","*+","*-","+*"};
 
   snprintf(return_str,len,"%s\t%s",
 	  gpsimObject::name().c_str(),
@@ -2064,7 +2064,7 @@ TLWT::TLWT (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 char *TLWT::name(char *return_str,int len)
 {
-  char *index_modes[4] = {"*","*+","*-","+*"};
+  const char *index_modes[4] = {"*","*+","*-","+*"};
 
   snprintf(return_str,len,"%s\t%s",
 	   gpsimObject::name().c_str(),
