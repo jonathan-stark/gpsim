@@ -209,9 +209,9 @@ public:
   virtual ~Boolean();
 
   string toString();
-  string toString(char* format);
+  string toString(const char* format);
   static string toString(bool value);
-  static string toString(char* format, bool value);
+  static string toString(const char* format, bool value);
 
   virtual void get(bool &b);
   virtual void get(int &i);
@@ -231,8 +231,8 @@ public:
   virtual Value *copy();
 
   /// copy the object value to a user char array
-  virtual char *toString(char *, int len);
-  virtual char *toBitStr(char *, int len);
+  virtual char *toString(char *return_str, int len);
+  virtual char *toBitStr(char *return_str, int len);
 
   inline operator bool() {
     bool bValue;
@@ -270,9 +270,9 @@ public:
   virtual ~Integer();
 
   virtual string toString();
-  string toString(char* format);
+  string toString(const char* format);
   static string toString(gint64 value);
-  static string toString(char* format, gint64 value);
+  static string toString(const char* format, gint64 value);
 
   virtual void get(gint64 &i);
   virtual void get(double &d);
@@ -431,9 +431,9 @@ public:
   virtual ~Float();
 
   virtual string toString();
-  string toString(char* format);
+  string toString(const char* format);
   static string toString(double value);
-  static string toString(char* format, double value);
+  static string toString(const char* format, double value);
 
   virtual void get(gint64 &i);
   virtual void get(double &d);
@@ -542,7 +542,7 @@ public:
   virtual ~AbstractRange();
 
   virtual string toString();
-  string toString(char* format);
+  string toString(const char* format);
 
   virtual unsigned int get_leftVal();
   virtual unsigned int get_rightVal();
@@ -551,7 +551,7 @@ public:
 
   virtual Value *copy();
   /// copy the object value to a user char array
-  virtual char *toString(char *, int len);
+  virtual char *toString(char *return_str, int len);
 
   static AbstractRange* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
