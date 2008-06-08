@@ -1005,8 +1005,6 @@ void P18F2x21::create_iopin_map()
 
 // Missing :
 //      OSCTUNE at 0xF9B
-//      SPBRGH  at 0xFB0
-//      BAUDCON at 0xFB8
 //      ADCON2  at 0xFC0
 
 void P18F2x21::create_symbols()
@@ -1080,7 +1078,9 @@ void P18F2x21::create_sfr_map()
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
-
+  add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");
+  add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
+  usart.set_eusart(true);
 }
 
 void P18F2x21::set_out_of_range_pm(unsigned int address, unsigned int value)
@@ -1248,8 +1248,6 @@ void P18F4x21::create_iopin_map()
 
 // Missing :
 //      OSCTUNE at 0xF9B
-//      SPBRGH  at 0xFB0
-//      BAUDCON at 0xFB8
 //      ADCON2  at 0xFC0
 
 void P18F4x21::create_symbols()
@@ -1335,7 +1333,9 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
-
+  add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");
+  add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
+  usart.set_eusart(true);
 }
 
 

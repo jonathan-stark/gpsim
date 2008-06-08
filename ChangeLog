@@ -1,3 +1,8 @@
+2008-06-08  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/uart.cc, src/uart.h, p18x.cc:
+            Initial support for EUSART, as part of the existing usart class. Has been
+            regression tested in legacy mode only.
+
 2008-04-05  Scott Dattalo <scott@dattalo.com>
 	* src/value.h, src/value.cc, src/16bit-instructions.cc
 	  C++ cleanup - char * is now const char * in many places

@@ -131,11 +131,23 @@ _TXREG::_TXREG(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
 }
 
 
-_SPBRG::_SPBRG(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc),
-    txsta(0), rcsta(0)
+_BAUDCON::_BAUDCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
 {
 }
+
+_SPBRG::_SPBRG(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    txsta(0), rcsta(0), brgh(0), baudcon(0)
+{
+}
+
+
+_SPBRGH::_SPBRGH(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc), m_spbrg(0)
+{
+}
+
 
 //-----------------------------------------------------------
 // TXREG - USART Transmit Register
@@ -219,6 +231,9 @@ void _TXSTA::put(unsigned int new_value)
 
   trace.raw(write_trace.get() | value.get());
 
+  if ( ! mUSART->IsEUSART() )
+      new_value &= ~SENDB;      // send break only supported on EUSART
+
   // The TRMT bit is controlled entirely by hardware.
   // It is high if the TSR has any data.
 
@@ -242,6 +257,8 @@ void _TXSTA::put(unsigned int new_value)
       if (m_PinModule)
 	m_PinModule->setSource(m_source);
       mUSART->emptyTX();
+      if ( value.get() & SENDB )
+        transmit_break();
     } else {
       stop_transmitting();
       if (m_PinModule)
@@ -368,6 +385,32 @@ void _TXSTA::start_transmitting()
 
 }
 
+void _TXSTA::transmit_break()
+{
+  Dprintf(("starting a USART sync-break transmission\n"));
+
+  // A sync-break is 12 consecutive low bits and one stop bit. Use the 
+  // standard transmit logic to achieve this
+
+  if(!txreg)
+    return;
+
+  tsr = 1<<12;
+
+  bit_count = 13;  // 12 break, 1 stop 
+
+  // Set a callback breakpoint at the next SPBRG edge
+  if(cpu)
+    get_cycles().set_break(spbrg->get_cpu_cycle(1), this);
+
+  // The TSR now has data, so clear the Transmit Shift 
+  // Register Status bit.
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() & ~TRMT);
+
+}
+
 void _TXSTA::transmit_a_bit()
 {
 
@@ -393,6 +436,8 @@ void _TXSTA::callback()
   transmit_a_bit();
 
   if(!bit_count) {
+
+    value.put(value.get() & ~SENDB);
 
     // tsr is empty.
     // If there is any more data in the TXREG, then move it to
@@ -806,6 +851,9 @@ unsigned int _RCREG::get()
   return value.get();
 }
 
+
+
+
 //-----------------------------------------------------------
 // SPBRG - Serial Port Baud Rate Generator
 //
@@ -816,32 +864,46 @@ unsigned int _RCREG::get()
 
 void _SPBRG::get_next_cycle_break()
 {
-  unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
-
-
-  if(txsta && (txsta->value.get() & _TXSTA::SYNC))
-    {
-      // Synchronous mode
-      future_cycle = last_cycle + (value.get() + 1)*4/cpi;
-    }
-  else
-    {
-      // Asynchronous mode
-      if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-      {
-	future_cycle = last_cycle + (value.get() + 1)*16/cpi;
-      }
-      else
-      {
-	future_cycle = last_cycle + (value.get() + 1)*64/cpi;
-      }
-    }
+  future_cycle = last_cycle + get_cycles_per_tick();
 
   if(cpu)
     get_cycles().set_break(future_cycle, this);
 
   //Dprintf(("SPBRG::callback next break at 0x%llx\n",future_cycle));
   
+}
+
+unsigned int _SPBRG::get_cycles_per_tick()
+{
+    unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
+    unsigned int brgval, cpt;
+
+    if ( baudcon && baudcon->brg16() )
+    {
+        brgval =  ( brgh ? brgh->value.get() * 256 : 0 ) + value.get();
+        cpt = 4;    // hi-speed divisor in 16-bit mode is 4
+    }
+    else
+    {
+        brgval = value.get();
+        cpt = 16;   // hi-speed divisor in 8-bit mode is 16
+    }
+
+    if ( txsta && (txsta->value.get() & _TXSTA::SYNC) )
+    {
+      // Synchronous mode - divisor is always 4
+      cpt = 4;
+    }
+    else
+    {
+        // Asynchronous mode
+        if(txsta && !(txsta->value.get() & _TXSTA::BRGH))
+        {
+            cpt *= 4;   // lo-speed divisor is 4 times hi-speed
+        }
+    }
+
+    return ((brgval+1)*cpt)/cpi;  
 }
 
 void _SPBRG::start()
@@ -895,26 +957,13 @@ guint64 _SPBRG::get_last_cycle()
 
 guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 {
-
-  unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
-
   // There's a chance that a SPBRG break point exists on the current
   // cpu cycle, but has not yet been serviced. 
   guint64 cycle = (get_cycles().get() == future_cycle) ? future_cycle : last_cycle;
 
-  if(txsta && (txsta->value.get() & _TXSTA::SYNC))
-    // Synchronous mode
-    return ( edges_from_now * (value.get() + 1)*4/cpi + cycle);
-
-  else  {
-      // Asynchronous mode
-    if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-      return ( edges_from_now * (value.get() + 1)*16/cpi + cycle);
-    else
-      return ( edges_from_now * (value.get() + 1)*64/cpi + cycle);
-  }
-
+  return ( edges_from_now * get_cycles_per_tick() + cycle );
 }
+
 void _SPBRG::callback()
 {
 
@@ -1001,7 +1050,29 @@ void USART_MODULE::clear_rcif()
 USART_MODULE::USART_MODULE(Processor *pCpu)
   : txsta(pCpu,"txsta","USART Transmit Status",this),
     rcsta(pCpu,"rcsta","USART Receive Status",this),
-    spbrg(pCpu,"spbrg","Serial Port Baud Rate Generator")
+    spbrg(pCpu,"spbrg","Serial Port Baud Rate Generator"),
+    spbrgh(pCpu,"spbrgh","Serial Port Baud Rate high byte"),
+    baudcon(pCpu,"baudcon","Serial Port Baud Rate Control"),
+    is_eusart(false)
 {
+}
+
+//--------------------------------------------------
+void USART_MODULE::set_eusart ( bool is_it )
+{
+    if ( is_it )
+    {
+        spbrgh.assign_spbrg ( &spbrg );
+        spbrg.baudcon = &baudcon;
+        spbrg.brgh = &spbrgh;
+        is_eusart = true;
+    }
+    else
+    {
+        spbrgh.assign_spbrg ( 0 );
+        spbrg.baudcon = 0;
+        spbrg.brgh = 0;
+        is_eusart = false;
+    }
 }
 

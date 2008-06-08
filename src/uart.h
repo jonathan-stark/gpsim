@@ -35,6 +35,8 @@ class InvalidRegister;   // Forward reference
 class _TXSTA;   // Forward references
 class _SPBRG;
 class _RCSTA;
+class _SPBRGH;
+class _BAUDCON;
 class  _14bit_processor;
 
 class RXSignalSink;
@@ -69,13 +71,14 @@ public:
   unsigned int bit_count;
 
   enum {
-    TX9D = 1<<0,
-    TRMT = 1<<1,
-    BRGH = 1<<2,
-    SYNC = 1<<4,
-    TXEN = 1<<5,
-    TX9  = 1<<6,
-    CSRC = 1<<7
+    TX9D  = 1<<0,
+    TRMT  = 1<<1,
+    BRGH  = 1<<2,
+    SENDB = 1<<3,
+    SYNC  = 1<<4,
+    TXEN  = 1<<5,
+    TX9   = 1<<6,
+    CSRC  = 1<<7
   };
 
   _TXSTA(Processor *pCpu, const char *pName, const char *pDesc,USART_MODULE *);
@@ -87,6 +90,7 @@ public:
   virtual void transmit_a_bit();
   virtual void start_transmitting();
   virtual void stop_transmitting();
+  virtual void transmit_break();
   virtual void callback();
   virtual void callback_print();
   virtual char getState();
@@ -197,11 +201,46 @@ protected:
 };
 
 
+class _BAUDCON : public sfr_register
+{
+ public:
+  enum {
+    ABDEN  = 1<<0,
+    WUE    = 1<<1,
+    BRG16  = 1<<3,
+    TXCKP  = 1<<4,
+    RXDTP  = 1<<5,
+    RCIDL  = 1<<6,
+    ABDOVF = 1<<7
+  };
+
+  _BAUDCON(Processor *pCpu, const char *pName, const char *pDesc);
+
+//  virtual void put(unsigned int);
+//  virtual void put_value(unsigned int);
+  bool brg16(void) { return ( value.get() & BRG16 ) != 0; };
+
+// private:
+};
+
+class _SPBRGH : public sfr_register
+{
+ public:
+
+
+  _SPBRGH(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void assign_spbrg(_SPBRG *new_spbrg) { m_spbrg = new_spbrg; };
+ private:
+  _SPBRG   *m_spbrg;
+};
+
 class _SPBRG : public sfr_register, public TriggerObject
 {
  public:
   _TXSTA *txsta;
   _RCSTA *rcsta;
+  _SPBRGH *brgh;
+  _BAUDCON *baudcon;
 
   guint64 
     start_cycle,   // The cycle the SPBRG was started
@@ -218,6 +257,8 @@ class _SPBRG : public sfr_register, public TriggerObject
   virtual void get_next_cycle_break();
   virtual guint64 get_cpu_cycle(unsigned int edges_from_now);
   virtual guint64 get_last_cycle();
+ protected:
+  virtual unsigned int get_cycles_per_tick();
 };
 
 //---------------------------------------------------------------
@@ -234,6 +275,10 @@ public:
   _RCREG      *rcreg;
   PIR_SET     *pir_set;
 
+  // Extra registers for when it's an EUSART
+  _SPBRGH  spbrgh;
+  _BAUDCON baudcon;
+
   USART_MODULE(Processor *pCpu);
 
   void initialize(PIR_SET *, 
@@ -245,6 +290,13 @@ public:
   void full();
   void set_rcif();
   void clear_rcif();
+  bool IsEUSART ( void ) { return is_eusart; };
+  void set_eusart ( bool is_it );
+
+ private:
+  bool is_eusart;
 };
+
+
 
 #endif
