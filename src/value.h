@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gpsim_object.h"
 #include <glib.h>
+#include <cstring>
 
 class Processor;
 class Module;

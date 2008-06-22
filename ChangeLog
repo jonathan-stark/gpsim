@@ -1,3 +1,15 @@
+2008-06-05  Scott Dattalo <scott@dattalo.com>
+	* src/os_dependent.cc:
+	  Now the library extension is appended to library names if the raw library
+	  name fails to load
+	
+2008-06-05  Scott Dattalo <scott@dattalo.com> for Steffen Joeris <Steffen.Joeris@skolelinux.de>
+	* src/modules.h, src/operator.cc, src/processor.h, src/gpsim_object.cc
+	* src/value.h, src/modules.cc, src/value.cc, src/processor.cc, modules/switch.cc
+	* gui/gui_src.cc, gui/gui_symbols.cc, gui/gui_regwin.cc, gui/gui_stack.cc
+	* gui/settings_exdbm.cc, cli/cmd_x.cc, cli/cmd_clear.cc
+	Fixups for gcc-4.3
+
 2008-06-22  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/uart.cc, src/uart.h, regression/usart_test/Makefile, regression/run_regression.sh,
           regression/usart_test/eusart.asm, regression/usart_test/18f2321.lkr:
@@ -8,7 +20,7 @@
             Initial support for EUSART, as part of the existing usart class. Has been
             regression tested in legacy mode only.
 
-2008-04-05  Scott Dattalo <scott@dattalo.com>
+2008-06-05  Scott Dattalo <scott@dattalo.com>
 	* src/value.h, src/value.cc, src/16bit-instructions.cc
 	  C++ cleanup - char * is now const char * in many places
 

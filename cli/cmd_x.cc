@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 #include <string>
-
+#include <typeinfo>
 
 #include "command.h"
 #include "cmd_x.h"

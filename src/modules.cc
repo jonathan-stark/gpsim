@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <list>
 #include <vector>
+#include <typeinfo>
 
 #include "../config.h"
 
@@ -143,7 +144,7 @@ int ModuleLibrary::LoadFile(string &fName)
   const char *pszError;
   bool bReturn = false;
 
-  string sPath= fName;//(pFilename);
+  string sPath= fName;
   FixupLibraryName(sPath);
   string sName;
   MakeCanonicalName(sPath, sName);

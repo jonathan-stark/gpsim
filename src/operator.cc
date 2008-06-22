@@ -5,6 +5,7 @@
 #include "symbol.h"
 #include "processor.h"
 
+#include <typeinfo>
 
 static bool isFloat(Value *v)
 {
