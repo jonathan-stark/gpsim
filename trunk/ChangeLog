@@ -1,3 +1,8 @@
+2008-06-22  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/uart.cc, src/uart.h, regression/usart_test/Makefile, regression/run_regression.sh,
+          regression/usart_test/eusart.asm, regression/usart_test/18f2321.lkr:
+            Added regression test for (and fixed) EUSART operation in BRG16 mode.
+
 2008-06-08  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/uart.cc, src/uart.h, p18x.cc:
             Initial support for EUSART, as part of the existing usart class. Has been

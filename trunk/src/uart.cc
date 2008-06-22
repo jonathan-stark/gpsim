@@ -108,7 +108,7 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
   : sfr_register(pCpu, pName, pDesc), txreg(0), spbrg(0),
     mUSART(pUSART), 
     m_PinModule(0),  
-    m_source(0), m_cTxState('?')
+    m_source(0), m_cTxState('?'), bInvertPin(0)
 {
   assert(mUSART);
 }
@@ -205,7 +205,7 @@ void _TXSTA::setIOpin(PinModule *newPinModule)
 void _TXSTA::putTXState(char newTXState)
 {
 
-  m_cTxState = newTXState;
+  m_cTxState = bInvertPin ? newTXState ^ 1 : newTXState;
 
   if (m_PinModule)
     m_PinModule->updatePinModule();
@@ -702,12 +702,13 @@ void _RCSTA::overrun()
 
 void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 {
-  unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
-  //  last_cycle = cycles.value;
+  unsigned int time_to_event;
 
   if(cpu && spbrg)
-    get_cycles().set_break(get_cycles().get() + (spbrg->value.get() + 1) * spbrg_edge/cpi, this);
-
+  {
+    time_to_event = ( spbrg->get_cycles_per_tick() * spbrg_edge ) / TOTAL_SAMPLE_STATES;  
+    get_cycles().set_break(get_cycles().get() + time_to_event, this);
+  }
 }
 void _RCSTA::receive_start_bit()
 {
@@ -773,9 +774,9 @@ void _RCSTA::callback()
     // If this wasn't the last bit then go ahead and set a break for the next bit.
     if(state==RCSTA_RECEIVING) {
       if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-	set_callback_break(TOTAL_BRGH_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
+	set_callback_break(TOTAL_SAMPLE_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
       else
-	set_callback_break(TOTAL_BRGL_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
+	set_callback_break(TOTAL_SAMPLE_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
 
       sample_state = RCSTA_WAITING_MID1;
     }
@@ -981,6 +982,42 @@ void _SPBRG::callback()
     }
 }
 
+//-----------------------------------------------------------
+// TXSTA - Transmit Register Status and Control
+
+void _BAUDCON::put_value(unsigned int new_value)
+{
+
+  put(new_value);
+
+  update();
+
+}
+
+void _BAUDCON::put(unsigned int new_value)
+{
+
+  unsigned int old_value = value.get();
+
+  trace.raw(write_trace.get() | value.get());
+
+  // The RCIDL bit is controlled entirely by hardware.
+  new_value & ~RCIDL;
+  if ( rcsta->rc_is_idle() ) new_value |= RCIDL;
+  
+  value.put(new_value);
+
+  Dprintf((" BAUDCON value=0x%x\n",value.get()));
+
+
+  if( (old_value ^ value.get()) & TXCKP) {
+
+    // The TXCKP bit has changed states.
+    //
+    txsta->set_pin_pol ( value.get() & TXCKP );  
+  }
+}
+
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
@@ -1055,6 +1092,8 @@ USART_MODULE::USART_MODULE(Processor *pCpu)
     baudcon(pCpu,"baudcon","Serial Port Baud Rate Control"),
     is_eusart(false)
 {
+    baudcon.txsta = &txsta;
+    baudcon.rcsta = &rcsta;
 }
 
 //--------------------------------------------------

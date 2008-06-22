@@ -88,6 +88,8 @@ ${RT} usart_test sim_pir1v1
 
 ${RT} usart_test sim_pir1v2
 
+${RT} usart_test sim_eusart
+
 ${RT} txisr_test sim
 
 ${RT} tmr0_16bit sim
