@@ -254,9 +254,6 @@ static void * sLoad(const char *library_name)
 
 void FixupLibraryName(string &sPath) {
   translatePath(sPath);
-  if (STRICMP(&sPath[sPath.size() - (sizeof(MODULE_EXT)-1)], MODULE_EXT) != 0) {
-    sPath.append(MODULE_EXT);
-  }
 }
 
 void GetFileName(string &sPath, string &sName) {
@@ -321,34 +318,44 @@ void * load_library(const char *library_name, const char **pszError)
   FixupLibraryName(sPath);
   asDllSearchPath.AddPathFromFilePath(sPath, sFile);
 
-  // First, see if we can load the library from where ever the 
-  // system thinks libraries are located.
-  if( (handle = sLoad(sPath.c_str())) != 0)
-    return handle;
 
-  *pszError = get_error_message();
-  unsigned long uError = get_error(*pszError);
+  // loop twice: first time take the file name as is,
+  // the second time append the os-dependent library extension.
+  for (int i=0; i<2; i++) {
 
-  if (uError == OS_E_FILENOTFOUND) {
-    // Failed to find the library in the system paths, so try to load
-    // from one of our paths.
+    // First, see if we can load the library from where ever the 
+    // system thinks libraries are located.
+    if( (handle = sLoad(sPath.c_str())) != 0)
+      return handle;
 
-    free_error_message(*pszError);
+    *pszError = get_error_message();
+    unsigned long uError = get_error(*pszError);
 
-    CFileSearchPath::iterator itSearchPath;
-    for (itSearchPath = asDllSearchPath.begin();
-        itSearchPath != asDllSearchPath.end();
-        itSearchPath++) {
-      sPath = *itSearchPath + sFile;
+    if (uError == OS_E_FILENOTFOUND) {
+      // Failed to find the library in the system paths, so try to load
+      // from one of our paths.
 
-      handle = sLoad(sPath.c_str());
+      free_error_message(*pszError);
 
-      if (NULL != handle) {
-        return handle;
+      CFileSearchPath::iterator itSearchPath;
+      for (itSearchPath = asDllSearchPath.begin();
+	   itSearchPath != asDllSearchPath.end();
+	   itSearchPath++) {
+	sPath = *itSearchPath + sFile;
+
+	handle = sLoad(sPath.c_str());
+
+	if (NULL != handle) {
+	  return handle;
+	}
+	*pszError = get_error_message();
       }
-      *pszError = get_error_message();
     }
+    // Append the module extension and try again.
+    sFile.append(MODULE_EXT);
   }
+
+  // Should there be a free?
   if (*pszError)
       printf("Failed loading %s: %s\n",
             sPath.c_str(), *pszError);
