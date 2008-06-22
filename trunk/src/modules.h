@@ -31,6 +31,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MODULES_H__
 #define __MODULES_H__
 
+#include <cstdlib>
+#include <cstring>
 #include <list>
 #include <string>
 #include <map>

@@ -33,6 +33,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "cmd_gpsim.h"
 
+#include <typeinfo>
+
 char * TrimWhiteSpaceFromString(char * pBuffer) {
   size_t iPos = 0;
   char * pChar = pBuffer;

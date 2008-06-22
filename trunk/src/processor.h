@@ -398,7 +398,7 @@ public:
   /// (for those processors that support interrupts), the processor is
   /// in a different 'state' then when the interrupt flag is cleared.
 
-  list<ProgramMemoryAccess *> pma_context;
+  std::list<ProgramMemoryAccess *> pma_context;
 
   /// Tracing
   /// The readTT and writeTT are TraceType objects for tracing

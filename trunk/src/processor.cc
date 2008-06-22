@@ -54,6 +54,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "clock_phase.h"
 
+#include <typeinfo>
+
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'.
 // 'active' means that it's the one currently being simulated or the one
