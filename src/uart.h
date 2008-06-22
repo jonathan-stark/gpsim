@@ -43,8 +43,6 @@ class RXSignalSink;
 class TXSignalSource;
 class USART_MODULE;
 
-#define TOTAL_BRGH_STATES      16
-#define TOTAL_BRGL_STATES      64
 
 
 class _TXREG : public sfr_register
@@ -99,11 +97,15 @@ public:
   virtual void putTXState(char newTXState);
 
   bool bTXEN() { return (value.get() & TXEN) != 0; }
+  
+  void set_pin_pol ( bool invert ) { bInvertPin = invert; };
+
 protected:
   USART_MODULE *mUSART;
   PinModule *m_PinModule;
   TXSignalSource *m_source;
   char m_cTxState;
+  bool bInvertPin;
 };
 
 class _RCREG : public sfr_register
@@ -158,13 +160,15 @@ class _RCSTA : public sfr_register, public TriggerObject
   // produces a sample based on majority averaging. 
   // 
 
+#define TOTAL_SAMPLE_STATES    16
+
 #define BRGH_FIRST_MID_SAMPLE  4
 #define BRGH_SECOND_MID_SAMPLE 8
 #define BRGH_THIRD_MID_SAMPLE  12
 
-#define BRGL_FIRST_MID_SAMPLE  28
-#define BRGL_SECOND_MID_SAMPLE 32
-#define BRGL_THIRD_MID_SAMPLE  36
+#define BRGL_FIRST_MID_SAMPLE  7
+#define BRGL_SECOND_MID_SAMPLE 8
+#define BRGL_THIRD_MID_SAMPLE  9
 
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
@@ -186,14 +190,16 @@ class _RCSTA : public sfr_register, public TriggerObject
   virtual void start_receiving();
   virtual void stop_receiving();
   virtual void overrun();
-  void set_callback_break(unsigned int spbrg_edge);
   virtual void callback();
   virtual void callback_print();
   void setState(char new_RxState);
   bool bSPEN() { return (value.get() & SPEN) != 0; }
   virtual void setIOpin(PinModule *);
+  bool rc_is_idle(void) { return ( state <= RCSTA_WAITING_FOR_START ); };
 
 protected:
+  void set_callback_break(unsigned int spbrg_edge);
+
   USART_MODULE *mUSART;
   PinModule *m_PinModule;
   RXSignalSink *m_sink;
@@ -214,10 +220,14 @@ class _BAUDCON : public sfr_register
     ABDOVF = 1<<7
   };
 
+  _TXSTA *txsta;
+  _RCSTA *rcsta;
+
+
   _BAUDCON(Processor *pCpu, const char *pName, const char *pDesc);
 
-//  virtual void put(unsigned int);
-//  virtual void put_value(unsigned int);
+  virtual void put(unsigned int);
+  virtual void put_value(unsigned int);
   bool brg16(void) { return ( value.get() & BRG16 ) != 0; };
 
 // private:
@@ -257,7 +267,7 @@ class _SPBRG : public sfr_register, public TriggerObject
   virtual void get_next_cycle_break();
   virtual guint64 get_cpu_cycle(unsigned int edges_from_now);
   virtual guint64 get_last_cycle();
- protected:
+// protected:
   virtual unsigned int get_cycles_per_tick();
 };
 
