@@ -172,7 +172,10 @@ void _TXREG::put(unsigned int new_value)
       // If the transmit buffer is empty and the transmitter is enabled
       // then transmit this new data now...
 
-      m_txsta->start_transmitting();
+      if ( m_txsta->value.get() & _TXSTA::SENDB )   // %%%FIXME - better in start_transmitting?
+        m_txsta->transmit_break();
+      else
+        m_txsta->start_transmitting();
     }
 
 }
@@ -257,8 +260,6 @@ void _TXSTA::put(unsigned int new_value)
       if (m_PinModule)
 	m_PinModule->setSource(m_source);
       mUSART->emptyTX();
-      if ( value.get() & SENDB )
-        transmit_break();
     } else {
       stop_transmitting();
       if (m_PinModule)
@@ -389,15 +390,15 @@ void _TXSTA::transmit_break()
 {
   Dprintf(("starting a USART sync-break transmission\n"));
 
-  // A sync-break is 12 consecutive low bits and one stop bit. Use the 
+  // A sync-break is 13 consecutive low bits and one stop bit. Use the 
   // standard transmit logic to achieve this
 
   if(!txreg)
     return;
 
-  tsr = 1<<12;
+  tsr = 1<<13;
 
-  bit_count = 13;  // 12 break, 1 stop 
+  bit_count = 14;  // 13 break, 1 stop 
 
   // Set a callback breakpoint at the next SPBRG edge
   if(cpu)
@@ -409,6 +410,9 @@ void _TXSTA::transmit_break()
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TRMT);
 
+  // Tell the TXREG that its data has been consumed.
+
+  mUSART->emptyTX();
 }
 
 void _TXSTA::transmit_a_bit()
@@ -1002,7 +1006,7 @@ void _BAUDCON::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   // The RCIDL bit is controlled entirely by hardware.
-  new_value & ~RCIDL;
+  new_value &= ~RCIDL;
   if ( rcsta->rc_is_idle() ) new_value |= RCIDL;
   
   value.put(new_value);

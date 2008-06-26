@@ -1,3 +1,7 @@
+2008-06-26  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/uart.cc, regression/usart_test/eusart.asm :
+            Added regression test for (and fixed) EUSART sync break operation.
+
 2008-06-05  Scott Dattalo <scott@dattalo.com>
 	* src/os_dependent.cc:
 	  Now the library extension is appended to library names if the raw library
