@@ -187,12 +187,6 @@ start
    .assert "U1.rx == 0x33, \"*** FAILED sending 0x33\""
 	call	TransmitNextByte
    .assert "U1.rx == 0x34, \"*** FAILED sending 0x34\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x35, \"*** FAILED sending 0x35\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x36, \"*** FAILED sending 0x36\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x37, \"*** FAILED sending 0x37\""
 
         ;; Switch to 16-bit BRG mode
         bsf     BAUDCON,BRG16
@@ -203,17 +197,15 @@ start
         rcall   delay
 
 	call	TransmitNextByte
+   .assert "U1.rx == 0x35, \"*** FAILED sending 0x35\""
+	call	TransmitNextByte
+   .assert "U1.rx == 0x36, \"*** FAILED sending 0x36\""
+	call	TransmitNextByte
+   .assert "U1.rx == 0x37, \"*** FAILED sending 0x37\""
+	call	TransmitNextByte
    .assert "U1.rx == 0x38, \"*** FAILED sending 0x38\""
 	call	TransmitNextByte
    .assert "U1.rx == 0x39, \"*** FAILED sending 0x39\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x41, \"*** FAILED sending 0x41\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x42, \"*** FAILED sending 0x42\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x43, \"*** FAILED sending 0x43\""
-	call	TransmitNextByte
-   .assert "U1.rx == 0x44, \"*** FAILED sending 0x44\""
 	nop
 ;
 ; setup tmr0
@@ -229,7 +221,7 @@ start
          goto   $-1
 
         btfss   TXSTA,TRMT ;Wait 'til through transmitting
-         goto   $-1
+         bra    $-2
 ;
 ;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
 ;  and < 10 bits or between 0.9375 and 1.041 msec.
@@ -243,6 +235,35 @@ start
 	clrf	rxFlag
         call rx_loop
 
+        ; Disable interrupts because the following tests don't give good receive bytes
+        bcf     PIE1,RCIE
+
+        bsf     TXSTA,SENDB     ; request a break sequence
+        btfss   PORTC,6         ; Shouldn't happen just yet
+    .assert "\"*** FAILED break sent too soon\""
+        nop
+
+        clrf    TMR0L
+        movlw   0x55
+        movwf   TXREG
+
+        rcall   delay
+
+        btfsc   PORTC,6         ; Should happen by now
+    .assert "\"*** FAILED to send break\""
+        nop
+
+        btfsc   PORTC,6         ; Wait 'til through transmitting
+         bra    $-2
+;
+;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 13 bits 
+;  and < 14 bits or between 1.352 and 1.456 msec.
+;  with oscillator at 20MHz and TMR0 / 64 expect between 113 and 121
+;  TMR0 cycles.
+
+	movf	TMR0L,W
+
+  .assert "tmr0 > 113 && tmr0 < 121, \"*** FAILED sync pulse\""
 
 done:
   .assert  "\"*** PASSED E-Usart on 18F2321\""
@@ -254,16 +275,11 @@ tx_message:
 	incf	tx_ptr,w
 	andlw	0x0f
 	movwf	tx_ptr
-        addwf   WREG,f
-	addlw	TX_TABLE
-	movwf	PCL
-TX_TABLE:
-	dt	"0123456789ABCDEF",0
+        addlw   0x30
+        return
 
 
 delay:
-	decfsz	temp1,f
-	 bra 	$+2
 	decfsz	temp2,f
 	 bra    delay
 	return
