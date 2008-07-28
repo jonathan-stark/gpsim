@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream>
 #include <iomanip>
-
+#include <typeinfo>
 
 #include "../src/modules.h"
 #include "../src/stimuli.h"

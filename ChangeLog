@@ -1,3 +1,8 @@
+2008-07-28 Borut Razem <borut.razem@siol.net>
+	* cli/cmd_symbol.cc, gui/gui_breadboard.cc, modules/led.cc:
+	  enabled compilation on Fedora 9, gcc 4.3.0, fixed gcc error:
+	  must #include <typeinfo> before using typeid
+
 2008-06-26  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/uart.cc, regression/usart_test/eusart.asm :
             Added regression test for (and fixed) EUSART sync break operation.
