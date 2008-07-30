@@ -38,6 +38,9 @@ p12c509 wdt'
         ;;
 esac
 
+GPSIM_MODULE_PATH=$(pwd)/../modules/.libs
+export GPSIM_MODULE_PATH
+
 RT=./rt.sh
 
 # Basic breakpoint test

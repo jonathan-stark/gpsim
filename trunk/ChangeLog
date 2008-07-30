@@ -1,3 +1,9 @@
+2008-07-30 Borut Razem <borut.razem@siol.net>
+	* regression/run_regression.sh:
+	  set GPSIM_MODULE_PATH=$(pwd)/../modules/.libs so that the correct
+	  libgpsim_modules.so is loaded during regression test execution on
+	  *nix platforms
+
 2008-07-28 Borut Razem <borut.razem@siol.net>
 	* cli/cmd_symbol.cc, gui/gui_breadboard.cc, modules/led.cc:
 	  enabled compilation on Fedora 9, gcc 4.3.0, fixed gcc error:
@@ -5,13 +11,13 @@
 
 2008-06-26  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/uart.cc, regression/usart_test/eusart.asm :
-            Added regression test for (and fixed) EUSART sync break operation.
+	    Added regression test for (and fixed) EUSART sync break operation.
 
 2008-06-05  Scott Dattalo <scott@dattalo.com>
 	* src/os_dependent.cc:
 	  Now the library extension is appended to library names if the raw library
 	  name fails to load
-	
+
 2008-06-05  Scott Dattalo <scott@dattalo.com> for Steffen Joeris <Steffen.Joeris@skolelinux.de>
 	* src/modules.h, src/operator.cc, src/processor.h, src/gpsim_object.cc
 	* src/value.h, src/modules.cc, src/value.cc, src/processor.cc, modules/switch.cc
@@ -21,13 +27,13 @@
 
 2008-06-22  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/uart.cc, src/uart.h, regression/usart_test/Makefile, regression/run_regression.sh,
-          regression/usart_test/eusart.asm, regression/usart_test/18f2321.lkr:
-            Added regression test for (and fixed) EUSART operation in BRG16 mode.
+	  regression/usart_test/eusart.asm, regression/usart_test/18f2321.lkr:
+	    Added regression test for (and fixed) EUSART operation in BRG16 mode.
 
 2008-06-08  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/uart.cc, src/uart.h, p18x.cc:
-            Initial support for EUSART, as part of the existing usart class. Has been
-            regression tested in legacy mode only.
+	    Initial support for EUSART, as part of the existing usart class. Has been
+	    regression tested in legacy mode only.
 
 2008-06-05  Scott Dattalo <scott@dattalo.com>
 	* src/value.h, src/value.cc, src/16bit-instructions.cc
@@ -35,44 +41,44 @@
 
 2008-06-01  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/pic-processor.cc, src/pic-processor.h, p18x.cc, p18x.h:
-            Initial attempt at providing support for the PIC18F4321. The same
-            issues are present as per the 18F2321.
+	    Initial attempt at providing support for the PIC18F4321. The same
+	    issues are present as per the 18F2321.
 	* src/16bit-registers.cc, gui/gui_src_asm.cc:
-            Bug fixes - "run to here" now updates the source browser PC indicator,
-            and "set PC here" now works properly on 16bit processors
-        * gui/gui_stopwatch.cc:
-            No actual code change, but some comments regarding a suspicious looking
-            sequence of operations.
+	    Bug fixes - "run to here" now updates the source browser PC indicator,
+	    and "set PC here" now works properly on 16bit processors
+	* gui/gui_stopwatch.cc:
+	    No actual code change, but some comments regarding a suspicious looking
+	    sequence of operations.
 	* src/16bit-processors.cc, src/16bit-processors.h, p18x.h:
             Fixed RAM sizes of 18F series processors
 
 2008-05-31  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/pic-processor.h, src/16bit-processors.h, p18x.h,
-          src/16bit-instructions.cc, src/pic-instructions.cc, src/14bit-registers.cc:
-            Split out the _16BIT_PROCESSOR_ base type into _PIC17_PROCESSOR_ and 
-            _PIC18_PROCESSOR_ because nearly every place that tested it should have 
-            treated them differently. This led to some awkward switch cases where 
-            all PIC18 devices were listed in one block and all PIC17s in another 
-            (and which could easily be overlooked and cause pain when adding new 
-            devices). These are now simple and generic.
+	  src/16bit-instructions.cc, src/pic-instructions.cc, src/14bit-registers.cc:
+	    Split out the _16BIT_PROCESSOR_ base type into _PIC17_PROCESSOR_ and 
+	    _PIC18_PROCESSOR_ because nearly every place that tested it should have 
+	    treated them differently. This led to some awkward switch cases where 
+	    all PIC18 devices were listed in one block and all PIC17s in another 
+	    (and which could easily be overlooked and cause pain when adding new 
+	    devices). These are now simple and generic.
 	* src/pic-processor.cc, src/pic-processor.h, p18x.cc, p18x.h:
-            Initial attempt at providing support for the PIC18F2321. The USART is 
-            wrong (missing BAUDCON and SPBRGH), as is the ADC (ADCON2 missing, not
-            enough channels) and the OSCTUNE register is missing. Also the RAM is 
-            too big.
-        * src/16bit-registers.cc regression/instructions_16bit/instructions_16bit.asm
-            Fixed a bug in the TBLPTR decrement on 256 byte boundaries, and added
-            regression test for it.
+	    Initial attempt at providing support for the PIC18F2321. The USART is 
+	    wrong (missing BAUDCON and SPBRGH), as is the ADC (ADCON2 missing, not
+	    enough channels) and the OSCTUNE register is missing. Also the RAM is 
+	    too big.
+	* src/16bit-registers.cc regression/instructions_16bit/instructions_16bit.asm
+	    Fixed a bug in the TBLPTR decrement on 256 byte boundaries, and added
+	    regression test for it.
 
 2008-05-20  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/14bit-tmrs.cc:
-            Fix TMR1 behaviour around CCP compare events, remove incorrect
-            adcon interaction, enable CCP output drive
-        * src/p16f62x.cc:
-            Enable CCP onto the correct port pin
-        * regression/ccp_628/* regression/run_regression.sh regression/Makefile.am:
-            Add regression tests for these fixes, and others
-        Changes are for bug 1967803 and to repair 679540, plus tests for 1811305, 1652549
+	    Fix TMR1 behaviour around CCP compare events, remove incorrect
+	    adcon interaction, enable CCP output drive
+	* src/p16f62x.cc:
+	    Enable CCP onto the correct port pin
+	* regression/ccp_628/* regression/run_regression.sh regression/Makefile.am:
+	    Add regression tests for these fixes, and others
+	Changes are for bug 1967803 and to repair 679540, plus tests for 1811305, 1652549
 
 2008-04-05  Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_interface.h, src/interface.cc, cli/cmd_stopwatch.cc,
