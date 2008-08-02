@@ -37,7 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
 
-extern int gui_question(char *question, char *a, char *b);
+extern int gui_question(const char *question, const char *a, const char *b);
 
 #include "gui.h"
 #include "gui_src.h"
@@ -69,7 +69,7 @@ typedef enum {
 
 
 typedef struct _menu_item {
-    char *name;
+    const char *name;
     menu_id id;
 } menu_item;
 
@@ -121,7 +121,7 @@ public:
     SourceBrowserOpcode_Window *sbow;
 
     sbow = (SourceBrowserOpcode_Window*)(parent_window);
-    
+
     sbow->SetPC(new_value);
 
   }
@@ -143,58 +143,58 @@ static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
 
     if(sbow == 0 || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
     {
-	printf("Warning update_ascii(%p,%x)\n",sbow,row);
-	return;
+        printf("Warning update_ascii(%p,%x)\n",sbow,row);
+        return;
     }
 
     if(row<0 || row>GTK_SHEET(sbow->sheet)->maxrow)
-	return;
+        return;
 
     switch(sbow->ascii_mode)
     {
     case 0:
-	for(i=0; i<16; i++)
-	{
-	    byte = sbow->memory[row*16 + i]&0xff;
+        for(i=0; i<16; i++)
+        {
+            byte = sbow->memory[row*16 + i]&0xff;
 
-	    name[i] = byte;
-	    
-	    if( (name[i] < ' ') || (name[i]>'z'))
-		name[i] = '.';
-	}
-	name[i] = 0;
-	break;
+            name[i] = byte;
+
+            if( (name[i] < ' ') || (name[i]>'z'))
+                name[i] = '.';
+        }
+        name[i] = 0;
+        break;
     case 1: // two bytes, MSB first
-	for(i=0; i<32; i++)
-	{
-	    if(i%2)
-		byte = sbow->memory[row*16 + i/2]&0xff;
-	    else
-		byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
+        for(i=0; i<32; i++)
+        {
+            if(i%2)
+                byte = sbow->memory[row*16 + i/2]&0xff;
+            else
+                byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
 
-	    name[i] = byte;
-	    
-	    if( (name[i] < ' ') || (name[i]>'z'))
-		name[i] = '.';
-	}
-	name[i] = 0;
-	break;
+            name[i] = byte;
+
+            if( (name[i] < ' ') || (name[i]>'z'))
+                name[i] = '.';
+        }
+        name[i] = 0;
+        break;
     case 2: // two bytes, LSB first
-	for(i=0; i<32; i++)
-	{
+        for(i=0; i<32; i++)
+        {
 
-	    if(i%2)
-		byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
-	    else
-		byte = sbow->memory[row*16 + i/2]&0xff;
+            if(i%2)
+                byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
+            else
+                byte = sbow->memory[row*16 + i/2]&0xff;
 
-	    name[i] = byte;
-	    
-	    if( (name[i] < ' ') || (name[i]>'z'))
-		name[i] = '.';
-	}
-	name[i] = 0;
-	break;
+            name[i] = byte;
+
+            if( (name[i] < ' ') || (name[i]>'z'))
+                name[i] = '.';
+        }
+        name[i] = 0;
+        break;
     }
     gtk_sheet_set_cell(GTK_SHEET(sbow->sheet), row,OPCODES_PER_ROW, GTK_JUSTIFY_RIGHT,name);
 
@@ -214,7 +214,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
   if(!widget || !data)
     return;
-    
+
   if(!popup_sbow || !popup_sbow->gp || !popup_sbow->gp->cpu) {
     printf("%s:%d - 0 pointer \n",__FILE__,__LINE__);
     return;
@@ -222,7 +222,7 @@ popup_activated(GtkWidget *widget, gpointer data)
   item = (menu_item *)data;
   sheet=GTK_SHEET(popup_sbow->sheet);
   range = sheet->range;
-    
+
   pm_size = popup_sbow->gp->cpu->program_memory_size();
 #if GTK_MAJOR_VERSION >= 2
   char_width = gdk_string_width(gtk_style_get_font(popup_sbow->normal_style), "9");
@@ -237,35 +237,35 @@ popup_activated(GtkWidget *widget, gpointer data)
       printf("This function is not implemented\n");
 
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++) {
-	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
-	  popup_sbow->gp->cpu->pma->toggle_break_at_address(address);
-	}
+        for(i=range.col0;i<=range.coli;i++) {
+          unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+          popup_sbow->gp->cpu->pma->toggle_break_at_address(address);
+        }
       break;
 
     case MENU_BREAK_EXECUTE:
 
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++) {
-	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
-	  popup_sbow->gp->cpu->pma->set_break_at_address(address);
-	}
+        for(i=range.col0;i<=range.coli;i++) {
+          unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+          popup_sbow->gp->cpu->pma->set_break_at_address(address);
+        }
       break;
     case MENU_BREAK_CLEAR:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++) {
-	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
-	  popup_sbow->gp->cpu->pma->set_break_at_address(address);
-	}
+        for(i=range.col0;i<=range.coli;i++) {
+          unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+          popup_sbow->gp->cpu->pma->set_break_at_address(address);
+        }
       break;
     case MENU_ADD_WATCH:
       puts("not implemented");
       /*
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++) {
-	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
-	  WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
-	}
+        for(i=range.col0;i<=range.coli;i++) {
+          unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+          WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
+        }
       */
       break;
     case MENU_ASCII_1BYTE:
@@ -273,21 +273,21 @@ popup_activated(GtkWidget *widget, gpointer data)
       config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 16*char_width + 6);
       for(i=0;i<pm_size/16;i++)
-	update_ascii(popup_sbow,i);
+        update_ascii(popup_sbow,i);
       break;
     case MENU_ASCII_2BYTEMSB:
       popup_sbow->ascii_mode=1;
       config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
       for(i=0;i<pm_size/16;i++)
-	update_ascii(popup_sbow,i);
+        update_ascii(popup_sbow,i);
       break;
     case MENU_ASCII_2BYTELSB:
       popup_sbow->ascii_mode=2;
       config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
       for(i=0;i<pm_size/16;i++)
-	update_ascii(popup_sbow,i);
+        update_ascii(popup_sbow,i);
       break;
     case MENU_SETTINGS:
       settings_dialog(popup_sbow);
@@ -306,7 +306,7 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
     GtkWidget *item;
 
     GSList *group=0;
-    
+
     GtkWidget *submenu;
 
   unsigned int i;
@@ -318,55 +318,55 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
   }
 
   popup_sbow=sbow;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
-  
+
+
   for (i=0; i < (sizeof(sheet_menu_items)/sizeof(sheet_menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(sheet_menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &sheet_menu_items[i]);
+                         (GtkSignalFunc) popup_activated,
+                         &sheet_menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
       if(sheet_menu_items[i].id==MENU_ADD_WATCH)
       {
-	  GTK_WIDGET_UNSET_FLAGS (item,
-				  GTK_SENSITIVE | GTK_CAN_FOCUS);
+          GTK_WIDGET_UNSET_FLAGS (item,
+                                  GTK_SENSITIVE | GTK_CAN_FOCUS);
       }
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
-  
+
     submenu=gtk_menu_new();
     for (i=0; i < (sizeof(sheet_submenu_items)/sizeof(sheet_submenu_items[0])) ; i++){
-	item=gtk_radio_menu_item_new_with_label(group, sheet_submenu_items[i].name);
+        item=gtk_radio_menu_item_new_with_label(group, sheet_submenu_items[i].name);
 
-	group=gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) popup_activated,
-			   &sheet_submenu_items[i]);
-	
-	GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+        group=gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
+        gtk_signal_connect(GTK_OBJECT(item),"activate",
+                           (GtkSignalFunc) popup_activated,
+                           &sheet_submenu_items[i]);
 
-	gtk_widget_show(item);
-	
-	if(i==sbow->ascii_mode)
-	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),1);
-	
-	gtk_menu_append(GTK_MENU(submenu),item);
+        GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+
+        gtk_widget_show(item);
+
+        if(i==sbow->ascii_mode)
+            gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),1);
+
+        gtk_menu_append(GTK_MENU(submenu),item);
     }
     item = gtk_menu_item_new_with_label ("ASCII mode");
     gtk_menu_append (GTK_MENU (menu), item);
     gtk_widget_show (item);
     gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
-  
+
   return menu;
 }
 
@@ -385,31 +385,31 @@ build_menu_for_clist(SourceBrowserOpcode_Window *sbow)
   }
 
   popup_sbow=sbow;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
-  
+
+
   for (i=0; i < (sizeof(clist_menu_items)/sizeof(clist_menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(clist_menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &clist_menu_items[i]);
+                         (GtkSignalFunc) popup_activated,
+                         &clist_menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
       if(clist_menu_items[i].id==MENU_ADD_WATCH)
       {
-	  GTK_WIDGET_UNSET_FLAGS (item,
-				  GTK_SENSITIVE | GTK_CAN_FOCUS);
+          GTK_WIDGET_UNSET_FLAGS (item,
+                                  GTK_SENSITIVE | GTK_CAN_FOCUS);
       }
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
-  
+
   return menu;
 }
 
@@ -425,40 +425,40 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 
     if(widget==0 || event==0)
     {
-	printf("Warning button_press(%p,%p,%p)\n",widget,event,sbow);
-	return 0;
+        printf("Warning button_press(%p,%p,%p)\n",widget,event,sbow);
+        return 0;
     }
-  
+
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
-	popup_sbow = sbow;
+        popup_sbow = sbow;
 
-	if(GTK_IS_CLIST(GTK_OBJECT(widget)))
-	{
-	    popup=sbow->clist_popup_menu;
-    	    gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-			   3, event->time);
-	}
-	else
-	{
-	    popup=sbow->sheet_popup_menu;
-    	    gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-			   3, event->time);
-	}
+        if(GTK_IS_CLIST(GTK_OBJECT(widget)))
+        {
+            popup=sbow->clist_popup_menu;
+            gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
+                           3, event->time);
+        }
+        else
+        {
+            popup=sbow->sheet_popup_menu;
+            gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
+                           3, event->time);
+        }
     }
 
     if ((event->type == GDK_2BUTTON_PRESS) &&
-	(event->button == 1))
+        (event->button == 1))
 
     {
-	if(GTK_IS_CLIST(GTK_OBJECT(widget)))
-	{
-	    break_row =  GTK_CLIST (sbow->clist)->focus_row;
+        if(GTK_IS_CLIST(GTK_OBJECT(widget)))
+        {
+            break_row =  GTK_CLIST (sbow->clist)->focus_row;
 
-	    unsigned address = sbow->gp->cpu->map_pm_index2address(break_row);
-	    sbow->gp->cpu->pma->toggle_break_at_address(address);
-	    return TRUE;
-	}
+            unsigned address = sbow->gp->cpu->map_pm_index2address(break_row);
+            sbow->gp->cpu->pma->toggle_break_at_address(address);
+            return TRUE;
+        }
     }
     return FALSE;
 }
@@ -475,12 +475,12 @@ static void filter(char *clean, char *dirty, int max)
 
 
       if(*dirty == '\t')
-	for(j=0,dirty++; j<8 && i%8; j++,i++)
-	  *clean++ = ' ';
+        for(j=0,dirty++; j<8 && i%8; j++,i++)
+          *clean++ = ' ';
       else if (*dirty <' ')
-	dirty++;
+        dirty++;
       else
-	*clean++ = *dirty++;
+        *clean++ = *dirty++;
 
 
 
@@ -508,7 +508,7 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
   range.rowi=row;
   range.col0=column;
   range.coli=column;
-    
+
   if(!sbow->gp->cpu) {
     gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
     return;
@@ -548,18 +548,18 @@ static void update_label(SourceBrowserOpcode_Window *sbow, int address)
   } else {
 
     oc = sbow->gp->cpu->pma->get_opcode(address);
-	
+
     filter(labeltext,
-	   sbow->gp->cpu->pma->get_opcode_name(address,entrytext,sizeof(entrytext)),
-	   sizeof(labeltext));
+           sbow->gp->cpu->pma->get_opcode_name(address,entrytext,sizeof(entrytext)),
+           sizeof(labeltext));
 
     sprintf(entrytext, "0x%04X", oc);
   }
-    
+
   sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(GTK_SHEET(sbow->sheet)));
   gtk_label_set(GTK_LABEL(sbow->label), labeltext);
   gtk_entry_set_max_length(GTK_ENTRY(sbow->entry),
-			   GTK_ENTRY(sheet_entry)->text_max_length);
+                           GTK_ENTRY(sheet_entry)->text_max_length);
   gtk_entry_set_text(GTK_ENTRY(sbow->entry), entrytext);
 
 }
@@ -577,21 +577,21 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
 
   oc = sbow->gp->cpu->pma->get_opcode(address);
   if(oc != sbow->memory[uMemoryIndex]) {
-    
+
     sbow->memory[address]=oc;
     // Put new values, in case they changed
     sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
     sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
-    filter(row_text[MNEMONIC_COLUMN], 
-	   sbow->gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
-	   sizeof(buf));
+    filter(row_text[MNEMONIC_COLUMN],
+           sbow->gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
+           sizeof(buf));
 
     gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
     gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
 
     gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
-		       row,column,
-		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
+                       row,column,
+                       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
   }
 }
 
@@ -608,8 +608,8 @@ static void update(SourceBrowserOpcode_Window *sbow, int address)
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
     if(widget->window==0)
-	return 0;
-    
+        return 0;
+
     gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
     return 0; // what should be returned?, FIXME
 }
@@ -634,7 +634,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
 #else
     gdk_font_unref (sbow->normal_style->font);
     sbow->normal_style->font =
-	gdk_fontset_load (sbow->normalfont_string);
+        gdk_fontset_load (sbow->normalfont_string);
 #endif
 
     text_bg.red   = 30000;
@@ -650,7 +650,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
 #else
     gdk_font_unref (sbow->current_line_number_style->font);
     sbow->current_line_number_style->font =
-	gdk_fontset_load (sbow->pcfont_string);
+        gdk_fontset_load (sbow->pcfont_string);
 #endif
 
     gdk_color_parse("red", &text_bg);
@@ -665,7 +665,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
 #else
     gdk_font_unref (sbow->breakpoint_line_number_style->font);
     sbow->breakpoint_line_number_style->font =
-	gdk_fontset_load (sbow->breakpointfont_string);
+        gdk_fontset_load (sbow->breakpointfont_string);
 #endif
 
     gdk_color_parse("white",&sbow->normal_pm_bg_color);
@@ -680,11 +680,11 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
       return 0;
 #else
     if(sbow->breakpoint_line_number_style->font==0)
-	return 0;
+        return 0;
     if(sbow->current_line_number_style->font==0)
-	return 0;
+        return 0;
     if(sbow->normal_style->font==0)
-	return 0;
+        return 0;
 #endif
 
     return 1;
@@ -710,86 +710,86 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
     static GtkWidget *pcfontstringentry;
     GtkWidget *label;
     int fonts_ok=0;
-    
+
     if(dialog==0)
     {
-	dialog = gtk_dialog_new();
-	gtk_window_set_title (GTK_WINDOW (dialog), "Opcode browser settings");
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+        dialog = gtk_dialog_new();
+        gtk_window_set_title (GTK_WINDOW (dialog), "Opcode browser settings");
+        gtk_signal_connect(GTK_OBJECT(dialog),
+                           "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+        gtk_signal_connect_object(GTK_OBJECT(dialog),
+                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 
-	// Normal font
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-	gtk_widget_show(hbox);
-	label=gtk_label_new("Normal font:");
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
-	gtk_widget_show(label);
-	normalfontstringentry=gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
-			   TRUE, TRUE, 0);
-	gtk_widget_show(normalfontstringentry);
-	button = gtk_button_new_with_label("Browse...");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(hbox), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
+        // Normal font
+        hbox = gtk_hbox_new(0,0);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+        gtk_widget_show(hbox);
+        label=gtk_label_new("Normal font:");
+        gtk_box_pack_start(GTK_BOX(hbox), label,
+                           FALSE,FALSE, 20);
+        gtk_widget_show(label);
+        normalfontstringentry=gtk_entry_new();
+        gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
+                           TRUE, TRUE, 0);
+        gtk_widget_show(normalfontstringentry);
+        button = gtk_button_new_with_label("Browse...");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(hbox), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
 
 
-	// Breakpoint font
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-	gtk_widget_show(hbox);
-	label=gtk_label_new("Breakpoint font:");
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
-	gtk_widget_show(label);
-	breakpointfontstringentry=gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), breakpointfontstringentry,
-			   TRUE, TRUE, 0);
-	gtk_widget_show(breakpointfontstringentry);
-	button = gtk_button_new_with_label("Browse...");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(hbox), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)breakpointfontstringentry);
+        // Breakpoint font
+        hbox = gtk_hbox_new(0,0);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+        gtk_widget_show(hbox);
+        label=gtk_label_new("Breakpoint font:");
+        gtk_box_pack_start(GTK_BOX(hbox), label,
+                           FALSE,FALSE, 20);
+        gtk_widget_show(label);
+        breakpointfontstringentry=gtk_entry_new();
+        gtk_box_pack_start(GTK_BOX(hbox), breakpointfontstringentry,
+                           TRUE, TRUE, 0);
+        gtk_widget_show(breakpointfontstringentry);
+        button = gtk_button_new_with_label("Browse...");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(hbox), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)breakpointfontstringentry);
 
 
-	// PC font
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-	gtk_widget_show(hbox);
-	label=gtk_label_new("PC font:");
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
-	gtk_widget_show(label);
-	pcfontstringentry=gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), pcfontstringentry,
-			   TRUE, TRUE, 0);
-	gtk_widget_show(pcfontstringentry);
-	button = gtk_button_new_with_label("Browse...");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(hbox), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)pcfontstringentry);
+        // PC font
+        hbox = gtk_hbox_new(0,0);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+        gtk_widget_show(hbox);
+        label=gtk_label_new("PC font:");
+        gtk_box_pack_start(GTK_BOX(hbox), label,
+                           FALSE,FALSE, 20);
+        gtk_widget_show(label);
+        pcfontstringentry=gtk_entry_new();
+        gtk_box_pack_start(GTK_BOX(hbox), pcfontstringentry,
+                           TRUE, TRUE, 0);
+        gtk_widget_show(pcfontstringentry);
+        button = gtk_button_new_with_label("Browse...");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(hbox), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)pcfontstringentry);
 
 
-	// OK button
-	button = gtk_button_new_with_label("OK");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+        // OK button
+        button = gtk_button_new_with_label("OK");
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+                           FALSE,FALSE,10);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
     }
-    
+
     gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), sbow->normalfont_string);
     gtk_entry_set_text(GTK_ENTRY(breakpointfontstringentry), sbow->breakpointfont_string);
     gtk_entry_set_text(GTK_ENTRY(pcfontstringentry), sbow->pcfont_string);
@@ -801,81 +801,81 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 
     while(fonts_ok!=3)
     {
-	char fontname[256];
+        char fontname[256];
 #if GTK_MAJOR_VERSION >= 2
         PangoFontDescription *font;
 #else
-	GdkFont *font;
+        GdkFont *font;
 #endif
 
         settings_active=1;
-	while(settings_active)
-	    gtk_main_iteration();
+        while(settings_active)
+            gtk_main_iteration();
 
-	fonts_ok=0;
+        fonts_ok=0;
 
-	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+        strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
 #if GTK_MAJOR_VERSION >= 2
-	if((font=pango_font_description_from_string(fontname))==0)
-#else
-	if((font=gdk_fontset_load(fontname))==0)
-#endif
-	{
-	    if(gui_question("Normalfont did not load!","Try again","Ignore/Cancel")==FALSE)
-		break;
-	}
-	else
-	{
-#if GTK_MAJOR_VERSION >= 2
-#else
-            gdk_font_unref(font);
-#endif
-	    strcpy(sbow->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	    config_set_string(sbow->name(),"normalfont",sbow->normalfont_string);
-            fonts_ok++;
-	}
-
-	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-#if GTK_MAJOR_VERSION >= 2
-	if((font=pango_font_description_from_string(fontname))==0)
+        if((font=pango_font_description_from_string(fontname))==0)
 #else
         if((font=gdk_fontset_load(fontname))==0)
 #endif
-	{
-	    if(gui_question("Breakpointfont did not load!","Try again","Ignore/Cancel")==FALSE)
-		break;
-	}
+        {
+            if(gui_question("Normalfont did not load!","Try again","Ignore/Cancel")==FALSE)
+                break;
+        }
         else
-	{
+        {
 #if GTK_MAJOR_VERSION >= 2
 #else
             gdk_font_unref(font);
 #endif
-	    strcpy(sbow->breakpointfont_string,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-	    config_set_string(sbow->name(),"breakpointfont",sbow->breakpointfont_string);
+            strcpy(sbow->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+            config_set_string(sbow->name(),"normalfont",sbow->normalfont_string);
             fonts_ok++;
-	}
+        }
 
-	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
+        strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
 #if GTK_MAJOR_VERSION >= 2
-	if((font=pango_font_description_from_string(fontname))==0)
+        if((font=pango_font_description_from_string(fontname))==0)
 #else
         if((font=gdk_fontset_load(fontname))==0)
 #endif
-	{
-	    if(gui_question("PCfont did not load!","Try again","Ignore/Cancel")==FALSE)
-		break;
-	}
+        {
+            if(gui_question("Breakpointfont did not load!","Try again","Ignore/Cancel")==FALSE)
+                break;
+        }
         else
-	{
+        {
 #if GTK_MAJOR_VERSION >= 2
 #else
             gdk_font_unref(font);
 #endif
-	    strcpy(sbow->pcfont_string,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
-	    config_set_string(sbow->name(),"pcfont",sbow->pcfont_string);
+            strcpy(sbow->breakpointfont_string,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
+            config_set_string(sbow->name(),"breakpointfont",sbow->breakpointfont_string);
             fonts_ok++;
-	}
+        }
+
+        strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+        if((font=pango_font_description_from_string(fontname))==0)
+#else
+        if((font=gdk_fontset_load(fontname))==0)
+#endif
+        {
+            if(gui_question("PCfont did not load!","Try again","Ignore/Cancel")==FALSE)
+                break;
+        }
+        else
+        {
+#if GTK_MAJOR_VERSION >= 2
+#else
+            gdk_font_unref(font);
+#endif
+            strcpy(sbow->pcfont_string,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
+            config_set_string(sbow->name(),"pcfont",sbow->pcfont_string);
+            fonts_ok++;
+        }
     }
 
 
@@ -892,7 +892,7 @@ static unsigned long get_number_in_string(const char *number_string)
   unsigned long retval = 0;
   char *bad_position;
   int current_base = 16;
-  
+
   if(number_string==0)
   {
       printf("Warning get_number_in_string(%p)\n",number_string);
@@ -905,7 +905,7 @@ static unsigned long get_number_in_string(const char *number_string)
 
   retval = strtoul(number_string, &bad_position, current_base);
 
-  if( strlen(bad_position) ) 
+  if( strlen(bad_position) )
     errno = EINVAL;  /* string contains an invalid number */
 
   /*
@@ -931,7 +931,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
   int justification;
 
   sheet=GTK_SHEET(widget);
-  
+
   if(row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0)
   {
@@ -942,7 +942,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
   if(sbow->memory==0)
       return;
 
-  
+
   justification=GTK_JUSTIFY_RIGHT;
 
   if(col < OPCODES_PER_ROW)
@@ -955,22 +955,22 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 
       errno = 0;
       if(strlen(text)>0)
-	n = get_number_in_string(text);
+        n = get_number_in_string(text);
       else
-	errno = ERANGE;
+        errno = ERANGE;
 
       if(errno != 0)
       {
-	  n = sbow->gp->cpu->pma->get_opcode(reg);
-	  sbow->memory[reg] = INVALID_VALUE;
+          n = sbow->gp->cpu->pma->get_opcode(reg);
+          sbow->memory[reg] = INVALID_VALUE;
       }
 
       if(n != sbow->memory[reg])
       {
-	  printf("Writing new value, new %d, last %d\n",n,sbow->memory[reg]);
-	  sbow->memory[reg]=n;
-	  sbow->gp->cpu->pma->put_opcode(reg, n);
-	  update_ascii(sbow,row);
+          printf("Writing new value, new %d, last %d\n",n,sbow->memory[reg]);
+          sbow->memory[reg]=n;
+          sbow->gp->cpu->pma->put_opcode(reg, n);
+          update_ascii(sbow,row);
       }
     }
   else
@@ -987,7 +987,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  GtkEntry *sheet_entry;
 
  int row,col;
- 
+
  if(widget==0|| sbow==0)
   {
       printf("Warning show_sheet_entry(%p,%p)\n",widget,sbow);
@@ -995,7 +995,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
   }
 
  if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
- 
+
  sheet=GTK_SHEET(sbow->sheet);
  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
@@ -1029,7 +1029,7 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
   col=sheet->active_cell.col;
 
   parse_numbers(GTK_WIDGET(sheet),sheet->active_cell.row,sheet->active_cell.col,sbow);
-  
+
   update_label(sbow,row*16+col);
 }
 
@@ -1040,7 +1040,7 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 static void
 show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 {
- const char *text; 
+ const char *text;
  GtkSheet *sheet;
  GtkWidget * sheet_entry;
   gint row, col;
@@ -1050,14 +1050,14 @@ show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
       printf("Warning show_entry(%p,%p)\n",widget,sbow);
       return;
   }
-  
+
  if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
 
  sheet=GTK_SHEET(sbow->sheet);
  sheet_entry = gtk_sheet_get_entry(sheet);
 
  row=sheet->active_cell.row; col=sheet->active_cell.col;
- 
+
  if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
      gtk_entry_set_text(GTK_ENTRY(sbow->entry), text);
 }
@@ -1069,23 +1069,23 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, SourceBrowserOpcod
 {
     GtkSheet *sheet;
     GtkSheetCellAttr attributes;
-  
+
     sheet=GTK_SHEET(sbow->sheet);
 
     if(widget==0 || row>sheet->maxrow || row<0||
        column>sheet->maxcol || column<0 || sbow==0)
     {
-	printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,sbow);
-	return 0;
+        printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,sbow);
+        return 0;
     }
 
     if(column<16)
-	update_label(sbow,row*16+column);
+        update_label(sbow,row*16+column);
     else
-	update_label(sbow,-1);
-    
+        update_label(sbow,-1);
+
     gtk_sheet_get_attributes(sheet,sheet->active_cell.row,
-			     sheet->active_cell.col, &attributes);
+                             sheet->active_cell.col, &attributes);
     gtk_entry_set_editable(GTK_ENTRY(sbow->entry), attributes.is_editable);
     gtk_sheet_range_set_justification(sheet, &sheet->range, GTK_JUSTIFY_RIGHT);
 
@@ -1112,7 +1112,7 @@ void SourceBrowserOpcode_Window::SelectAddress(int address)
 void SourceBrowserOpcode_Window::UpdateLine(int address)
 {
 
-    
+
   if(!enabled)
     return;
 
@@ -1134,22 +1134,22 @@ void SourceBrowserOpcode_Window::SetPC(int address)
     {
       UpdateLine(last_address);
       gtk_clist_set_row_style (GTK_CLIST (clist),
-			       gp->cpu->map_pm_address2index(last_address),
-			       normal_style);
+                               gp->cpu->map_pm_address2index(last_address),
+                               normal_style);
 
       UpdateLine(address);
-      gtk_clist_set_row_style (GTK_CLIST (clist), 
-			       gp->cpu->map_pm_address2index(address),
-			       current_line_number_style);
+      gtk_clist_set_row_style (GTK_CLIST (clist),
+                               gp->cpu->map_pm_address2index(address),
+                               current_line_number_style);
     }
 
   unsigned int current_row = gp->cpu->map_pm_address2index(current_address);
   if(GTK_VISIBILITY_FULL != gtk_clist_row_is_visible (GTK_CLIST (clist),
-						      current_row))
+                                                      current_row))
     {
-      gtk_clist_moveto (GTK_CLIST (clist), 
-			current_row, 
-			0, .5, 0.0);
+      gtk_clist_moveto (GTK_CLIST (clist),
+                        current_row,
+                        0, .5, 0.0);
     }
 }
 
@@ -1190,16 +1190,16 @@ void SourceBrowserOpcode_Window::Fill()
     sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
     sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
     filter(row_text[MNEMONIC_COLUMN],
-	   gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
-	   128);
+           gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
+           128);
 
     if(GTK_SHEET(sheet)->maxrow<i/16)
       gtk_sheet_add_row(GTK_SHEET(sheet),1);
 
     gtk_sheet_set_cell(GTK_SHEET(sheet),
-		       i/16,
-		       i%16,
-		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
+                       i/16,
+                       i%16,
+                       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
 
     gtk_clist_append (GTK_CLIST (clist), row_text);
     update_styles(this,i);
@@ -1207,7 +1207,7 @@ void SourceBrowserOpcode_Window::Fill()
 
   for(i=0;i<pm_size/16;i++)
     update_ascii(this,i);
-    
+
   gtk_clist_set_row_style (GTK_CLIST (clist), 0, current_line_number_style);
 
   pc=gp->cpu->pma->get_PC();
@@ -1240,7 +1240,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     cross_reference->parent_window_type =   WT_status_bar;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) this;
-  
+
     gp->cpu->pc->add_xref((gpointer) cross_reference);
 
   }
@@ -1258,7 +1258,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
     return;
 
   current_address=0;
-    
+
   if(!enabled)
     return;
 
@@ -1286,9 +1286,9 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   range.row0=range.rowi=0;
   range.col0=range.coli=0;
   gtk_sheet_select_range(GTK_SHEET(sheet),&range);
-    
+
   update_label(this,0);
-    
+
 }
 
 void SourceBrowserOpcode_Window::Build(void)
@@ -1299,7 +1299,7 @@ void SourceBrowserOpcode_Window::Build(void)
   GtkWidget *hbox;
   GtkWidget *scrolled_win;
   GtkRequisition request;
-  
+
   gchar _name[10];
   gint column_width,char_width;
   gint i;
@@ -1309,7 +1309,7 @@ void SourceBrowserOpcode_Window::Build(void)
 
   if(window!=0)
     gtk_widget_destroy(window);
-  
+
   SourceBrowser_Window::Create();
 
 
@@ -1351,16 +1351,16 @@ void SourceBrowserOpcode_Window::Build(void)
   {
       if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
       {
-	  strcpy(normalfont_string,DEFAULT_NORMALFONT);
-	  strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
-	  strcpy(pcfont_string,DEFAULT_PCFONT);
-	  config_set_string(name(),"normalfont",normalfont_string);
-	  config_set_string(name(),"breakpointfont",breakpointfont_string);
-	  config_set_string(name(),"pcfont",pcfont_string);
+          strcpy(normalfont_string,DEFAULT_NORMALFONT);
+          strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
+          strcpy(pcfont_string,DEFAULT_PCFONT);
+          config_set_string(name(),"normalfont",normalfont_string);
+          config_set_string(name(),"breakpointfont",breakpointfont_string);
+          config_set_string(name(),"pcfont",pcfont_string);
       }
       else
       {
-	  settings_dialog(this);
+          settings_dialog(this);
       }
   }
 
@@ -1372,10 +1372,10 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_widget_show(scrolled_win);
   gtk_container_set_border_width (GTK_CONTAINER (scrolled_win), 5);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_win),
-				  GTK_POLICY_AUTOMATIC, 
-				  GTK_POLICY_AUTOMATIC);
+                                  GTK_POLICY_AUTOMATIC,
+                                  GTK_POLICY_AUTOMATIC);
 
-  /* create GtkCList here so we have a pointer to throw at the 
+  /* create GtkCList here so we have a pointer to throw at the
    * button callbacks -- more is done with it later */
   clist = gtk_clist_new_with_titles (columns, column_titles);
   gtk_widget_show(clist);
@@ -1386,13 +1386,13 @@ void SourceBrowserOpcode_Window::Build(void)
    * commands for setting and/or clearing break points
    */
   gtk_signal_connect(GTK_OBJECT(clist),"button_press_event",
-		     (GtkSignalFunc) button_press,
-		     (gpointer) this);
+                     (GtkSignalFunc) button_press,
+                     (gpointer) this);
 
 
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
-			   scrolled_win,
-			   gtk_label_new("Assembly"));
+                           scrolled_win,
+                           gtk_label_new("Assembly"));
 
   gtk_clist_set_row_height (GTK_CLIST (clist), 18);
   gtk_widget_set_usize (clist, 300, 100);
@@ -1404,11 +1404,11 @@ void SourceBrowserOpcode_Window::Build(void)
 
       gtk_clist_set_column_auto_resize (GTK_CLIST (clist), i, FALSE);
       gtk_clist_set_column_justification (GTK_CLIST (clist), i,
-					  GTK_JUSTIFY_LEFT);
+                                          GTK_JUSTIFY_LEFT);
       // %%% FIX ME
       //   Hide the profile column for now...
       if(i == 0)
-	gtk_clist_set_column_visibility (GTK_CLIST (clist), i, FALSE);
+        gtk_clist_set_column_visibility (GTK_CLIST (clist), i, FALSE);
     }
 
 
@@ -1432,7 +1432,7 @@ void SourceBrowserOpcode_Window::Build(void)
   hbox=gtk_hbox_new(FALSE,1);
   gtk_widget_show(hbox);
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
-  
+
   label=gtk_label_new("");
   style=gtk_style_new();
 #if GTK_MAJOR_VERSION >= 2
@@ -1456,19 +1456,19 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_widget_set_style(entry,style);
   gtk_widget_show(entry);
   gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
-  
+
   // Create sheet
   scrolled_win=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_win);
   gtk_box_pack_start(GTK_BOX(vbox), scrolled_win, TRUE, TRUE, 0);
-  
+
   sheet=gtk_sheet_new(1,17,"where does this string go?");
   gtk_widget_show(sheet);
   gtk_container_add(GTK_CONTAINER(scrolled_win), sheet);
-  
+
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
-			   vbox,
-			   gtk_label_new("Opcodes"));
+                           vbox,
+                           gtk_label_new("Opcodes"));
 
 #if GTK_MAJOR_VERSION >= 2
   char_width = gdk_string_width(gtk_style_get_font(normal_style), "9");
@@ -1489,40 +1489,40 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_sheet_set_column_title(GTK_SHEET(sheet), i, _name);
   gtk_sheet_set_row_titles_width(GTK_SHEET(sheet), column_width);
 
-  
+
   gtk_signal_connect(GTK_OBJECT(sheet),
-		     "button_press_event",
-		     (GtkSignalFunc) button_press,
-		     this);
+                     "button_press_event",
+                     (GtkSignalFunc) button_press,
+                     this);
 
   gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(sheet))),
-		     "changed", (GtkSignalFunc)show_entry, this);
+                     "changed", (GtkSignalFunc)show_entry, this);
 
   gtk_signal_connect(GTK_OBJECT(sheet),
-		     "activate", (GtkSignalFunc)activate_sheet_cell,
-		     (gpointer) this);
+                     "activate", (GtkSignalFunc)activate_sheet_cell,
+                     (gpointer) this);
 
   gtk_signal_connect(GTK_OBJECT(entry),
-		     "changed", (GtkSignalFunc)show_sheet_entry, this);
+                     "changed", (GtkSignalFunc)show_sheet_entry, this);
 
   gtk_signal_connect(GTK_OBJECT(entry),
-		     "activate", (GtkSignalFunc)activate_sheet_entry,
-		     this);
+                     "activate", (GtkSignalFunc)activate_sheet_entry,
+                     this);
   gtk_signal_connect(GTK_OBJECT(sheet),
-		     "set_cell",
-		     (GtkSignalFunc) parse_numbers,
-		     this);
+                     "set_cell",
+                     (GtkSignalFunc) parse_numbers,
+                     this);
   /////////////////////////////////////////////////////////////////
 
 
 
-  
+
   gtk_widget_show(scrolled_win);
   gtk_widget_show(sheet);
-  
+
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
-  
+                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+
   gtk_widget_show(window);
 
   bIsBuilt = true;
@@ -1543,7 +1543,7 @@ void SourceBrowserOpcode_Window::Build(void)
 
 SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 {
-  static char *titles[] =
+  static gchar *titles[] =
     {
       "profile", "address", "opcode", "instruction"
     };

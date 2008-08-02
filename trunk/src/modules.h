@@ -190,7 +190,7 @@ class Module_Types
 {
 public:
 
-  char *names[2];
+  const char *names[2];
   Module * (*module_constructor) (const char *module_name);
 };
 

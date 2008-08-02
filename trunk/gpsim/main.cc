@@ -85,20 +85,20 @@ void initialize_ConsoleUI();
 // Here are the variables that popt (the command line invocation parsing
 // library) will assign values to:
 
-static char *startup_name = "";
-static char *include_startup_name = "";
-static char *processor_name = "";
-static char *cod_name     = "";
-static char *hex_name     = "";
-static char *search_path  = "";
-static char *icd_port     = "";
-static char *defineSymbol = "";
-static char *sExitOn      = "";
-static char *sourceEnabled = "";
+static const char *startup_name = "";
+static const char *include_startup_name = "";
+static const char *processor_name = "";
+static const char *cod_name     = "";
+static const char *hex_name     = "";
+static const char *search_path  = "";
+static const char *icd_port     = "";
+static const char *defineSymbol = "";
+static const char *sExitOn      = "";
+static const char *sourceEnabled = "";
 
 
 #define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
-			0, "Examples:\n\
+                        0, "Examples:\n\
   gpsim -s myprog.cod          <-- loads a symbol file\n\
   gpsim -p p16f877 myprog.hex  <-- select processor and load hex\n\
   gpsim -c myscript.stc        <-- loads a script\n\
@@ -112,7 +112,7 @@ static char *sourceEnabled = "";
 // a pointer to a variable is supplied. Some options like the 'echo'
 // option have no associated varaible. After the variable name, the
 // poptOption structure contains a 'val' field. If this is 0 then popt
-// will assign an option to a variable when poptGetNextOpt is called. 
+// will assign an option to a variable when poptGetNextOpt is called.
 // Otherwise, poptGetNextOpt will return the value of 'val' and allow
 // gpsim to interpret and further parse the option.
 
@@ -154,7 +154,7 @@ struct poptOption optionsTable[] = {
 // copied the format of this from the popt.h include file:
 
 
-void 
+void
 helpme (char *iam)
 {
   printf ("\n\nuseage:\n%s [-h] [[-p <device> [<hex_file>]] | [-s <cod_file>]] [-c <stc_file>]\n", iam);
@@ -189,7 +189,7 @@ void welcome(void)
   return;
 }
 
-int 
+int
 main (int argc, char *argv[])
 {
   bool bEcho = false;
@@ -229,7 +229,7 @@ main (int argc, char *argv[])
       case 'd':
         printf("Use ICD with serial port \"%s\".\n", icd_port);
         break;
-	
+
       case 'v':
         gpsim_version();
         break;
@@ -272,7 +272,7 @@ main (int argc, char *argv[])
           printf("%s is invalid exit condition for -e option.\n", sExitOn);
         }
         break;
-      }	
+      }
 
       if (usage)
         break;
@@ -304,12 +304,12 @@ main (int argc, char *argv[])
     *bEnableSourceLoad = bSourceEnabled;
 
   // initialize the gui
-  
+
 #ifdef HAVE_GUI
   if(bUseGUI) {
     if (gui_init (argc,argv) != 0) {
       std::cerr << "Error initialising GUI, reverting to cmd-line mode."
-	        << std::endl;
+                << std::endl;
       bUseGUI = false;
     }
     // Move this from above to accurately report whether the GUI
@@ -342,12 +342,12 @@ main (int argc, char *argv[])
         "\"\nsince the .cod file specifies the hex code\n";
 
     snprintf(command_str, sizeof(command_str),
-	     "load s \"%s\"\n",cod_name);
+             "load s \"%s\"\n",cod_name);
     parse_string(command_str);
 
   } else  if(*processor_name) {
     snprintf(command_str, sizeof(command_str),
-	     "processor \"%s\"\n",processor_name);
+             "processor \"%s\"\n",processor_name);
     parse_string(command_str);
 
     if(*hex_name){
@@ -358,19 +358,19 @@ main (int argc, char *argv[])
   }
   if(*icd_port) {
       snprintf(command_str, sizeof(command_str),
-	       "icd open \"%s\"\n",icd_port);
+               "icd open \"%s\"\n",icd_port);
       parse_string(command_str);
   }
-  
+
   if(*startup_name) {
       snprintf(command_str, sizeof(command_str),
-	       "load c \"%s\"\n",startup_name);
+               "load c \"%s\"\n",startup_name);
       parse_string(command_str);
   }
 
   if(*include_startup_name) {
       snprintf(command_str, sizeof(command_str),
-	       "load i \"%s\"\n",include_startup_name);
+               "load i \"%s\"\n",include_startup_name);
       parse_string(command_str);
   }
 

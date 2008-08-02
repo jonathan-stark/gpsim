@@ -54,7 +54,7 @@ Boston, MA 02111-1307, USA.  */
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1
 
-extern int gui_question(char *question, char *a, char *b);
+extern int gui_question(const char *question, const char *a, const char *b);
 
 
 // extern GUI_Processor *gp;
@@ -128,7 +128,7 @@ MenuItem *__menu_items[] = {
 
 
 typedef struct _menu_item {
-    char *name;
+    const char *name;
     menu_id id;
 } menu_item;
 
@@ -162,7 +162,7 @@ Register_Window *popup_rw;
 //--------------------------------------------------
 // get_register
 // get the "real" register. If 'bTopLevelOnly' is true
-// 
+//
 Register *GUIRegister::get_register()
 {
   if(!rma)
@@ -298,7 +298,7 @@ char *GUIRegister::name()
     sprintf(buffer,"alias (%s)", reg->name().c_str());
   else
     sprintf(buffer,"%s", reg->name().c_str());
-    
+
   /*  else {
     if(pRegSym == 0) {
       strcpy(buffer,reg->name().c_str());
@@ -351,7 +351,7 @@ public:
     Register_Window *rw;
     int address;
 
-  
+
     reg = (GUIRegister *) (data);
     rw  = (Register_Window *) (parent_window);
 
@@ -365,7 +365,7 @@ public:
 
     rw->registers->Get(address)->bUpdateFull=true;
     rw->UpdateRegisterCell(address);
-  
+
     rw->UpdateASCII(reg->row);
   }
 
@@ -381,8 +381,8 @@ public:
 
 class InvalidGuiRegister : public GUIRegister {
 public:
-  void put_value(unsigned int new_value) 
-  { 
+  void put_value(unsigned int new_value)
+  {
     printf("(gui_regwin)Warning: writing to invalid register\n");
   };
   unsigned int get_value() { return 0;};
@@ -440,18 +440,18 @@ static void b_cb(GtkWidget *w, gpointer user_data)
 //    gtk_main_quit();
 }
 // used for reading a value from user when break on value is requested
-int gui_get_value(char *prompt)
+int gui_get_value(const char *prompt)
 {
     static GtkWidget *dialog=0;
     static GtkWidget *label;
     static GtkWidget *entry;
     GtkWidget *button;
     GtkWidget *hbox;
-    
+
     int retval=-1;
 
     int value;
-    
+
     if(dialog==0) {
       dialog = gtk_dialog_new();
       gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
@@ -494,7 +494,7 @@ int gui_get_value(char *prompt)
     else {
       gtk_label_set_text(GTK_LABEL(label),prompt);
     }
-    
+
 //    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
     gtk_widget_show_now(dialog);
 
@@ -502,7 +502,7 @@ int gui_get_value(char *prompt)
     while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
       gtk_main_iteration();
     gtk_grab_remove(dialog);
-    
+
     gtk_widget_hide(dialog);
 
     if(retval==(int)TRUE)
@@ -516,12 +516,12 @@ int gui_get_value(char *prompt)
       else
         return -1;
     }
-    
+
     return -1;
 }
 
 // used for reading a value from user when break on value is requested
-void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
+void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int *value2)
 {
     static GtkWidget *dialog=0;
     GtkWidget *button;
@@ -530,7 +530,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
     static GtkWidget *entry1, *entry2;
 
     int value;
-    
+
     int retval=-1;
 
     if(dialog==0)
@@ -545,14 +545,14 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
         label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
         gtk_widget_show(label);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
-        
+
         button = gtk_button_new_with_label("OK");
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                            FALSE,FALSE,10);
         gtk_signal_connect(GTK_OBJECT(button),"clicked",
                            GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-        
+
         button = gtk_button_new_with_label("Cancel");
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
@@ -594,7 +594,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
         gtk_label_set_text(GTK_LABEL(label1),prompt1);
         gtk_label_set_text(GTK_LABEL(label2),prompt2);
     }
-    
+
 //    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
     gtk_widget_show_now(dialog);
 
@@ -602,7 +602,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
     while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
       gtk_main_iteration();
     gtk_grab_remove(dialog);
-    
+
     gtk_widget_hide(dialog);
 
     if(retval==(int)TRUE)
@@ -686,7 +686,7 @@ static char *gui_get_log_settings(const char **filename, int *mode)
     GtkWidget *menu;
     GtkWidget *item;
 
-    char *prompt="Log settings";
+    const char *prompt="Log settings";
 
     if (!window)
     {
@@ -759,7 +759,7 @@ static char *gui_get_log_settings(const char **filename, int *mode)
     while(!fs_done && GTK_WIDGET_VISIBLE(window))
         gtk_main_iteration();
     gtk_grab_remove(window);
-    
+
     gtk_widget_hide(window);
 
     if(file_selection_name==0)
@@ -772,8 +772,6 @@ static char *gui_get_log_settings(const char **filename, int *mode)
     *mode=filemode;
     return 0;
 }
-
-extern int gui_question(char *question, char *a, char *b);
 
 // called when user has selected a menu item
 static void
@@ -800,7 +798,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     printf(" no cpu\n");
     return;
   }
-    
+
   item = (menu_item *)data;
   sheet=GTK_SHEET(popup_rw->register_sheet);
   range = sheet->range;
@@ -814,7 +812,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       case MENU_BREAK_READ:
         get_bp().set_read_break(popup_rw->gp->cpu, address);
         break;
-      
+
       case MENU_BREAK_WRITE:
         get_bp().set_write_break(popup_rw->gp->cpu, address);
         break;
@@ -1021,15 +1019,15 @@ build_menu(Register_Window *rw)
       printf("Warning build_menu(%p)\n",rw);
       return 0;
   }
-    
+
   menu=gtk_menu_new();
 
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
-  
+
+
   for (i=0; i < (int)(sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(menu_items[i].name);
 
@@ -1048,7 +1046,7 @@ build_menu(Register_Window *rw)
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
-  
+
   return menu;
 }
 
@@ -1062,20 +1060,20 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
   GtkSheet *sheet;
 
   popup=rw->popup_menu;
-    
+
   if(widget==0 || event==0 || rw==0)
     {
       printf("Warning do_popup(%p,%p,%p)\n",widget,event,rw);
       return 0;
     }
-  
+
   sheet=GTK_SHEET(widget);
 
   if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
 
       popup_rw = rw;
-  
+
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
                      3, event->time);
     }
@@ -1091,7 +1089,7 @@ static unsigned long get_number_in_string(const char *number_string)
   unsigned long retval = 0;
   char *bad_position;
   int current_base = 16;
-  
+
   if(number_string==0)
   {
       printf("Warning get_number_in_string(%p)\n",number_string);
@@ -1104,7 +1102,7 @@ static unsigned long get_number_in_string(const char *number_string)
 
   retval = strtoul(number_string, &bad_position, current_base);
 
-  if( strlen(bad_position) ) 
+  if( strlen(bad_position) )
     errno = EINVAL;  /* string contains an invalid number */
 
   return(retval);
@@ -1124,7 +1122,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
   //int crow, ccol;
 
   sheet=GTK_SHEET(widget);
-  
+
   if(widget==0 ||
      row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0 || rw==0)
@@ -1136,7 +1134,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   GUIRegister *reg = rw->getRegister(row,col);
 
-  
+
   if(!reg)
     return; // ignore user changes in ascii column for right now
 
@@ -1172,7 +1170,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 //------------------------------------------------------------------------
 // int column_width(int col)
 //
-// Return the width of one of the register sheet columns. 
+// Return the width of one of the register sheet columns.
 //
 // Column = -1 is the row label
 // Columns 0-REGISTERS_PER_ROW are ram/registers
@@ -1242,7 +1240,7 @@ void Register_Window::UpdateEntry()
 {
   gint row, col;
 
-  const char *text; 
+  const char *text;
   GtkWidget * sheet_entry;
 
   if(register_sheet != 0) {
@@ -1278,7 +1276,7 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
 
   if(widget->window==0)
     return 0;
-    
+
   gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
   return 0; // what should be returned?, FIXME
 }
@@ -1411,7 +1409,7 @@ int Register_Window::SettingsDialog()
     gtk_signal_connect(GTK_OBJECT(button),"clicked",
                        GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
   }
-    
+
   gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), normalfont_string);
 
   gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
@@ -1485,7 +1483,7 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
     if((key->keyval=='c' || key->keyval == 'C') && sheet->state != GTK_STATE_NORMAL){
 #if GTK_MAJOR_VERSION >= 2
       /*
-        --- tsd - commented out because this function 
+        --- tsd - commented out because this function
         is not defined in the official gtkextra-2.0 release.
       if (gtk_sheet_in_clip(sheet))
         gtk_sheet_unclip_range(sheet);
@@ -1497,21 +1495,21 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
       gtk_sheet_clip_range(sheet, &sheet->range);
     }
     if(key->keyval=='x' || key->keyval == 'X')
-            gtk_sheet_unclip_range(sheet);    
+            gtk_sheet_unclip_range(sheet);
   }
   return 0;
 }
 
-static void 
-resize_handler(GtkWidget *widget, GtkSheetRange *old_range, 
-                                  GtkSheetRange *new_range, 
+static void
+resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
+                                  GtkSheetRange *new_range,
                                   Register_Window *rw)
 {
   Dprintf((" resize_handler\n"));
 
   int i, j, cti, ctj;
   int from, to;
-    
+
   if(widget==0 || old_range==0 || new_range==0 || rw==0)
     {
       printf("Warning resize_handler(%p,%p,%p,%p)\n",widget,old_range,new_range,rw);
@@ -1523,7 +1521,7 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
 
   // We always copy from this one cell.
   from = rw->row_to_address[old_range->row0]+old_range->col0;
-    
+
   for(j=0;j<ctj;j++)
     {
       for(i=0;i<cti;i++)
@@ -1534,10 +1532,10 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
     }
 }
 
-static void 
-move_handler(GtkWidget *widget, 
-             GtkSheetRange *old_range, 
-             GtkSheetRange *new_range, 
+static void
+move_handler(GtkWidget *widget,
+             GtkSheetRange *old_range,
+             GtkSheetRange *new_range,
              Register_Window *rw)
 {
   Dprintf((" move_handler\n"));
@@ -1575,7 +1573,7 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
   GtkEntry *sheet_entry;
 
   int row,col;
- 
+
   if(!widget || !rw)
     {
       printf("Warning show_sheet_entry(%p,%p)\n",widget,rw);
@@ -1583,7 +1581,7 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
     }
 
   if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
- 
+
   sheet=GTK_SHEET(rw->register_sheet);
   sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
@@ -1618,7 +1616,7 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
       printf("Warning activate_sheet_entry(%p,%p)\n",widget,rw);
       return;
   }
-  
+
   sheet=GTK_SHEET(rw->register_sheet);
   //row=sheet->active_cell.row; col=sheet->active_cell.col;
   gtk_sheet_get_active_cell(sheet, &row, &col);
@@ -1629,7 +1627,7 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
   // so we use set_cell() to write the changes from the sheet cell to gpsim
   set_cell(GTK_WIDGET(sheet),row,col,rw);
   rw->UpdateASCII(row);
-      
+
 }
 
 /*
@@ -1646,9 +1644,9 @@ show_entry(GtkWidget *widget, Register_Window *rw)
         printf("Warning show_entry(%p,%p)\n",widget,rw);
         return;
     }
-    
+
     if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
-    
+
     rw->UpdateEntry();
 
 }
@@ -1657,7 +1655,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
    label and entry above the sheet
  */
 static gint
-activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw) 
+activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw)
 {
   Dprintf((" activate_sheet_cell rma=%p\n",(rw? rw->rma :0)));
 
@@ -1682,7 +1680,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
     // disable editing invalid cells
     gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
 
-    
+
   rw->UpdateLabelEntry();
 
   return TRUE;
@@ -1720,12 +1718,12 @@ void Register_Window::SelectRegister(int regnumber)
 {
   GtkSheetRange range;
   int row, col;
-    
+
   if(regnumber > MAX_REGISTERS || regnumber<0) {
     printf("Warning: %s - regnumber = %x\n",__FUNCTION__,regnumber);
     return;
   }
-  
+
   if(!gp || !gp->cpu ||!registers || !registers->Get(regnumber)) {
     printf("SelectRegister is not ready yet\n");
     return;
@@ -1744,7 +1742,7 @@ void Register_Window::SelectRegister(int regnumber)
     gtk_sheet_moveto(GTK_SHEET(register_sheet),row,col,0.5,0.5);
 
   UpdateLabelEntry();
-    
+
 }
 void Register_Window::SelectRegister(Value *regSym)
 {
@@ -1764,15 +1762,15 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 {
   Dprintf((" build_entry_bar\n"));
 
-  GtkRequisition request; 
+  GtkRequisition request;
   GtkWidget *status_box;
-  
+
   if(main_vbox == 0 || rw==0)
   {
       printf("Warning build_entry_bar(%p,%p)\n",main_vbox,rw);
       return;
   }
-  
+
   status_box=gtk_hbox_new(FALSE, 1);
   gtk_container_set_border_width(GTK_CONTAINER(status_box),0);
   gtk_box_pack_start(GTK_BOX(main_vbox), status_box, FALSE, TRUE, 0);
@@ -1787,7 +1785,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 
   rw->entry=gtk_entry_new();
   gtk_box_pack_start(GTK_BOX(status_box), rw->entry,
-                     TRUE, TRUE, 0); 
+                     TRUE, TRUE, 0);
   gtk_widget_show(rw->entry);
 
 }
@@ -1805,7 +1803,7 @@ void Register_Window::UpdateASCII(gint row)
 
   if(!registers_loaded)
       return;
-  
+
   for(i=0; i<REGISTERS_PER_ROW; i++)
   {
 
@@ -1836,10 +1834,10 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
       printf("Warning update_register_cell(%x)\n",reg_number);
       return 0;
   }
-  
-  if(!enabled) 
+
+  if(!enabled)
     return 0;      // Don't read registers when hidden. Esp with ICD.
-  
+
   GUIRegister *guiReg = registers->Get(reg_number);
 
   if (!guiReg || !guiReg->rma)
@@ -1874,14 +1872,14 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     if(guiReg->row<=register_sheet->maxrow) {
 
       guiReg->getValueAsString(name,sizeof(name),pCellFormat, new_value);
-    
+
       gtk_sheet_set_cell(GTK_SHEET(register_sheet),
                          guiReg->row,
                          guiReg->col,
                          GTK_JUSTIFY_RIGHT,name);
     }
     // else the register is invalid and out of the register sheet
- 
+
 
     //if(new_value != last_value) {
     if(guiReg->hasChanged(new_value)) {
@@ -1906,13 +1904,13 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.sfr_bg());
     else
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.normal_bg());
-   
+
 
     retval=TRUE;
   } else if(guiReg->hasChanged(new_value)) { //new_value!=last_value) {
 
     if(new_value.data==INVALID_VALUE) {
-      
+
       guiReg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
       sprintf (name, "??");
     } else {
@@ -1965,13 +1963,13 @@ void Register_Window::Update()
 
   if(!enabled)
     return;
-    
+
   if(!GTK_WIDGET_VISIBLE(window))
     return;
 
   if(!registers_loaded)
     return;
-  
+
   if(!gp || !gp->cpu || !register_sheet || !gp->cpu->isHardwareOnline()) {
     puts("Warning can't update register window");
     return;
@@ -2040,7 +2038,7 @@ void Register_Window::SetRegisterSize()
     gtk_sheet_set_column_title(register_sheet, i, buffer);
 
     gtk_sheet_set_column_width (register_sheet, i, column_width(i));
-  
+
     gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
 
   }
@@ -2092,12 +2090,12 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   if( !enabled)
     return;
-    
+
   if(!register_sheet){
     printf("Warning %s:%d\n",__FUNCTION__,__LINE__);
     return;
   }
-      
+
   row_created=FALSE;
   unsigned int nRegs;
   nRegs = (rma->get_size() < MAX_REGISTERS) ? (rma->get_size()) : MAX_REGISTERS;
@@ -2106,7 +2104,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     return;
 
   gtk_sheet_freeze(register_sheet);
-    
+
   j=0;
   i=0;
 
@@ -2117,12 +2115,12 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   for(reg_number=0;reg_number<nRegs;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
-        
+
     if(i==0 && row_created) {
       j++;
       row_created=FALSE;
     }
-        
+
     GUIRegister *pGReg = registers->Get(reg_number);
     pGReg->row = j;
     pGReg->col = i;
@@ -2234,17 +2232,17 @@ void Register_Window::Build()
 
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
-    
+
   char *fontstring;
 
   if(window!=0) {
     gtk_widget_destroy(window);
   }
-        
+
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   main_vbox=gtk_vbox_new(FALSE,1);
-  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
+  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0);
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
@@ -2306,7 +2304,7 @@ void Register_Window::Build()
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(register_sheet));
-  
+
 #if GTK_MAJOR_VERSION >= 2
   GTK_SHEET_CLIP_TEXT(register_sheet);
 #else
@@ -2335,22 +2333,22 @@ void Register_Window::Build()
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
                      "key_press_event",
-                     (GtkSignalFunc) clipboard_handler, 
+                     (GtkSignalFunc) clipboard_handler,
                      0);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
                      "resize_range",
-                     (GtkSignalFunc) resize_handler, 
+                     (GtkSignalFunc) resize_handler,
                      this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
                      "move_range",
-                     (GtkSignalFunc) move_handler, 
+                     (GtkSignalFunc) move_handler,
                      this);
-        
+
   gtk_signal_connect(GTK_OBJECT(register_sheet),
                      "button_press_event",
-                     (GtkSignalFunc) do_popup, 
+                     (GtkSignalFunc) do_popup,
                      this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
@@ -2367,11 +2365,11 @@ void Register_Window::Build()
   gtk_widget_show (window);
 
   gtk_widget_grab_default(location);
-  
+
   //  GTKWAIT;
-  
+
   bIsBuilt = true;
-  
+
   NewProcessor(gp);
 
   UpdateMenuItem();
@@ -2400,7 +2398,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   register_sheet = NULL;
 
   registers_loaded=0;
-  
+
   registers = 0;
 
   for(i=0;i<MAX_REGISTERS/REGISTERS_PER_ROW;i++)
@@ -2455,7 +2453,7 @@ EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
   type = REGISTER_EEPROM;
 
   set_name("register_viewer_eeprom");
-  
+
   get_config();
 
   if(enabled)

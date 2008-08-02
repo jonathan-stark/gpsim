@@ -51,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
 #define BITCOL 5
 #define LASTCOL BITCOL
 
-static char *watch_titles[]={"name","address","dec","hex","ascii","bits"};
+static gchar *watch_titles[]={"name","address","dec","hex","ascii","bits"};
 
 #define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
@@ -86,7 +86,7 @@ typedef enum {
 
 
 typedef struct _menu_item {
-    char *name;
+    const char *name;
     menu_id id;
     GtkWidget *item;
 } menu_item;
@@ -175,7 +175,7 @@ void Watch_Window::UpdateMenus(void)
     if(menu_items[i].id!=MENU_COLUMNS) {
 
       entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(watch_clist),current_row);
-      if(menu_items[i].id!=MENU_COLUMNS && 
+      if(menu_items[i].id!=MENU_COLUMNS &&
           (entry==0 ||
           (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
           (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
@@ -212,7 +212,7 @@ void Watch_Window::WriteSymbolList()
     if (entry && entry->pRegister)
       config_set_string(name(), cwv, entry->pRegister->name().c_str());
   }
-  
+
 }
 
 void Watch_Window::DeleteSymbolList() {
@@ -246,10 +246,10 @@ void Watch_Window::ReadSymbolList()
 }
 
 static void unselect_row(GtkCList *clist,
-			 gint row,
-			 gint column,
-			 GdkEvent *event,
-			 Watch_Window *ww)
+                         gint row,
+                         gint column,
+                         GdkEvent *event,
+                         Watch_Window *ww)
 {
   ww->UpdateMenus();
 }
@@ -269,7 +269,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       printf("Warning popup_activated(%p,%p)\n",widget,data);
       return;
     }
-    
+
   item = (menu_item *)data;
 
   entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
@@ -289,7 +289,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_SET_VALUE:
       value = gui_get_value("value:");
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       entry->put_value(value);
       break;
     case MENU_BREAK_READ:
@@ -301,13 +301,13 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_BREAK_READ_VALUE:
       value = gui_get_value("value to read for breakpoint:");
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       get_bp().set_read_value_break(entry->cpu,entry->address,value);
       break;
     case MENU_BREAK_WRITE_VALUE:
       value = gui_get_value("value to write for breakpoint:");
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       get_bp().set_write_value_break(entry->cpu,entry->address,value);
       break;
     case MENU_BREAK_CLEAR:
@@ -341,29 +341,29 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
     gtk_container_set_border_width(GTK_CONTAINER(dialog),30);
 
     gtk_signal_connect_object(GTK_OBJECT(dialog),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
+                              "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
 
-    for(i=0;i<COLUMNS;i++) 
+    for(i=0;i<COLUMNS;i++)
       if (coldata[i].isValid()) {
-	button=gtk_check_button_new_with_label(watch_titles[i]);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].isVisible);
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(set_column),(gpointer)&coldata[i]);
+        button=gtk_check_button_new_with_label(watch_titles[i]);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].isVisible);
+        gtk_widget_show(button);
+        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
+        gtk_signal_connect(GTK_OBJECT(button),"clicked",
+                           GTK_SIGNAL_FUNC(set_column),(gpointer)&coldata[i]);
       }
 
     button = gtk_button_new_with_label("OK");
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-		       FALSE,FALSE,10);
+                       FALSE,FALSE,10);
     gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-			      GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
+                              GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
     GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
     gtk_widget_grab_default(button);
 
     gtk_widget_show(dialog);
-    
+
     return;
 }
 
@@ -381,27 +381,27 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
       printf("Warning build_menu(%p,%p)\n",sheet,ww);
       return 0;
   }
-    
+
   popup_ww = ww;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
+
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &menu_items[i]);
+                         (GtkSignalFunc) popup_activated,
+                         &menu_items[i]);
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
 
   ww->UpdateMenus();
-  
+
   return menu;
 }
 
@@ -422,7 +422,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
 
   if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		   3, event->time);
+                   3, event->time);
 
   /*
   WatchEntry *entry;
@@ -432,11 +432,11 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
     {
       int column=ww->current_column;
       int row=ww->current_row;
-	
+
       entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
-    
+
       if(column>=MSBCOL && column<=LSBCOL) {
-	
+
         int value;  // , bit;
         printf("column %d\n",column);
         // Toggle the bit.
@@ -452,8 +452,8 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
 
 static gint
 key_press(GtkWidget *widget,
-	  GdkEventKey *key, 
-	  gpointer data)
+          GdkEventKey *key,
+          gpointer data)
 {
 
   WatchEntry *entry;
@@ -468,7 +468,7 @@ key_press(GtkWidget *widget,
   case GDK_Delete:
       entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
       if(entry!=0)
-	  ww->ClearWatch(entry);
+          ww->ClearWatch(entry);
       break;
   }
   return TRUE;
@@ -478,17 +478,17 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
 {
   WatchEntry *entry;
   GUI_Processor *gp;
-    
+
   ww->current_row=row;
   ww->current_column=column;
 
   gp=ww->gp;
-    
+
   entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
 
   if(!entry)
     return TRUE;
-    
+
   if(entry->type==REGISTER_RAM)
     gp->regwin_ram->SelectRegister(entry->address);
   else if(entry->type==REGISTER_EEPROM)
@@ -496,7 +496,7 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
 
 
   ww->UpdateMenus();
-    
+
   return 0;
 }
 
@@ -504,22 +504,22 @@ static void watch_click_column(GtkCList *clist, int column)
 {
     static int last_col=-1;
     static GtkSortType last_sort_type=GTK_SORT_DESCENDING;
-    
+
     if(last_col==-1)
-	last_col=column;
+        last_col=column;
 
     if(last_col == column)
     {
-	if(last_sort_type==GTK_SORT_DESCENDING)
-	{
-	    gtk_clist_set_sort_type(clist,GTK_SORT_ASCENDING);
-	    last_sort_type=GTK_SORT_ASCENDING;
-	}
-	else
-	{
-	    gtk_clist_set_sort_type(clist,GTK_SORT_DESCENDING);
-	    last_sort_type=GTK_SORT_DESCENDING;
-	}
+        if(last_sort_type==GTK_SORT_DESCENDING)
+        {
+            gtk_clist_set_sort_type(clist,GTK_SORT_ASCENDING);
+            last_sort_type=GTK_SORT_ASCENDING;
+        }
+        else
+        {
+            gtk_clist_set_sort_type(clist,GTK_SORT_DESCENDING);
+            last_sort_type=GTK_SORT_DESCENDING;
+        }
     }
 
     gtk_clist_set_sort_column(clist,column);
@@ -528,7 +528,7 @@ static void watch_click_column(GtkCList *clist, int column)
 }
 
 static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+                        GdkEvent  *event,
                         Watch_Window *ww)
 {
   ww->ChangeView(VIEW_HIDE);
@@ -538,7 +538,7 @@ static int delete_event(GtkWidget *widget,
 //========================================================================
 // UpdateWatch
 // A single watch entry is updated here. Here's what's done:
-// 
+//
 // If the value has not changed since the last update, then the
 // foreground and background colors are refreshed and we return.
 //
@@ -560,9 +560,9 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 
   if (entry->get_shadow() == rvNewValue) {
     gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.normal_fg());
-    gtk_clist_set_background(GTK_CLIST(watch_clist), 
-			     row, 
-			     (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
+    gtk_clist_set_background(GTK_CLIST(watch_clist),
+                             row,
+                             (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
     return;
   }
 
@@ -601,14 +601,14 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 
   // Bit representation
   char sBits[25];
-  rvNewValue.toBitStr(sBits, 25, entry->cpu->register_mask(), 
-			       NULL);
+  rvNewValue.toBitStr(sBits, 25, entry->cpu->register_mask(),
+                               NULL);
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, BITCOL, sBits);
 
   // Set foreground and background colors
   gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.item_has_changed());
-  gtk_clist_set_background(GTK_CLIST(watch_clist), row, 
-			   (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
+  gtk_clist_set_background(GTK_CLIST(watch_clist), row,
+                           (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
 
 }
 
@@ -626,7 +626,7 @@ void Watch_Window::Update()
   iter=watches;
 
   while(iter) {
-   
+
     entry=(WatchEntry*)iter->data;
     if (entry)
       UpdateWatch(entry);
@@ -651,13 +651,13 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 
 void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
 {
-  char vname[50], addressstring[50];
-  char *entry[COLUMNS]={vname, addressstring, "", "","",""};
+  char vname[50], addressstring[50], empty[] = "";
+  char *entry[COLUMNS]={vname, addressstring, empty, empty, empty, empty};
   int row;
   WatchWindowXREF *cross_reference;
 
   WatchEntry *watch_entry;
-    
+
   if(!gp || !gp->cpu || !reg || !reg->bIsValid())
     return;
 
@@ -688,7 +688,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
     uAddrMask<<=4;
     uAddrMask |= 0xf;
   }
-  strcpy(addressstring, 
+  strcpy(addressstring,
          GetUserInterface().FormatProgramAddress(pReg->getAddress(),
                                                  uAddrMask, IUserInterface::eHex));
 
@@ -703,7 +703,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
   watch_entry->rma = reg->rma;
 
   gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
-    
+
   watches = g_list_append(watches, (gpointer)watch_entry);
 
   UpdateWatch(watch_entry);
@@ -797,12 +797,12 @@ void Watch_Window::Build(void)
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
-  
+
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
+                      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
-  
+                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+
   watch_clist = gtk_clist_new_with_titles(COLUMNS,watch_titles);
   gtk_widget_show(watch_clist);
 
@@ -813,41 +813,41 @@ void Watch_Window::Build(void)
     coldata[i].column = i;
     coldata[i].Show();
   }
-  
+
   gtk_clist_set_selection_mode (GTK_CLIST(watch_clist), GTK_SELECTION_BROWSE);
 
   gtk_signal_connect(GTK_OBJECT(watch_clist),"click_column",
-		     (GtkSignalFunc)watch_click_column,0);
+                     (GtkSignalFunc)watch_click_column,0);
   gtk_signal_connect(GTK_OBJECT(watch_clist),"select_row",
-		     (GtkSignalFunc)watch_list_row_selected,this);
+                     (GtkSignalFunc)watch_list_row_selected,this);
   gtk_signal_connect(GTK_OBJECT(watch_clist),"unselect_row",
-		     (GtkSignalFunc)unselect_row,this);
-  
+                     (GtkSignalFunc)unselect_row,this);
+
   gtk_signal_connect(GTK_OBJECT(watch_clist),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup,
-		     this);
+                     "button_press_event",
+                     (GtkSignalFunc) do_popup,
+                     this);
   gtk_signal_connect(GTK_OBJECT(window),"key_press_event",
-		     (GtkSignalFunc) key_press,
-		     (gpointer) this);
+                     (GtkSignalFunc) key_press,
+                     (gpointer) this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_window);
 
   vbox = gtk_vbox_new(FALSE,1);
   gtk_widget_show(vbox);
-  
+
   gtk_container_add(GTK_CONTAINER(scrolled_window), watch_clist);
-  
+
   gtk_container_add(GTK_CONTAINER(window),vbox);
 
   gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
-  
+
   popup_menu=build_menu(window,this);
-  
+
   gtk_widget_show (window);
-  
-  
+
+
   enabled=1;
 
   bIsBuilt = true;
@@ -860,7 +860,7 @@ void Watch_Window::Build(void)
 Watch_Window::Watch_Window(GUI_Processor *_gp)
 {
   unsigned int i;
-    
+
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
@@ -884,7 +884,7 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
       config_set_variable(name(),watch_titles[i],1);
   }
 
-  { 
+  {
     // Fix a db error in previous versions of gpsim
     int j;
     while (config_get_variable(name(),"hex",&j))

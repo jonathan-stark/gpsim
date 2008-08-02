@@ -58,9 +58,9 @@ public:
 
   virtual void setDrivenState( bool new_state);
 
-  Logic_Input (LogicGate *parent, unsigned int b, const char *opt_name=0) 
+  Logic_Input (LogicGate *parent, unsigned int b, const char *opt_name=0)
     : IOPIN(opt_name), LGParent(parent), m_iobit(b)
-    { 
+    {
     }
 
 };
@@ -72,9 +72,9 @@ private:
   unsigned int m_iobit;
 public:
 
-  Logic_Output (LogicGate *parent, unsigned int b,const char *opt_name=0) 
+  Logic_Output (LogicGate *parent, unsigned int b,const char *opt_name=0)
     : IO_bi_directional(opt_name), LGParent(parent), m_iobit(b)
-    { 
+    {
     }
 
 };
@@ -124,7 +124,7 @@ public:
   virtual int get_num_of_pins(void) {return number_of_pins;};
   void set_number_of_pins(int npins){number_of_pins=npins;};
 #ifdef HAVE_GUI
-  GtkWidget *create_pixmap(char **pixmap_data);
+  GtkWidget *create_pixmap(gchar **pixmap_data);
 #endif
 };
 
@@ -173,7 +173,7 @@ public:
   const virtual char *type(void) { return ("or2"); };
   OR2Gate(const char *name);
   ~OR2Gate(void);
-  
+
 };
 
 class XORGate: public LogicGate
@@ -197,7 +197,7 @@ public:
   const virtual char *type(void) { return ("xor2"); };
   XOR2Gate(const char *name);
   ~XOR2Gate(void);
-  
+
 };
 
 class NOTGate: public LogicGate
@@ -210,7 +210,7 @@ public:
   virtual void update_state(void);
   NOTGate(const char *name);
   ~NOTGate(void);
-  
+
 };
 #endif //  __LOGIC_H__
 

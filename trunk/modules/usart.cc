@@ -118,7 +118,7 @@ public:
   USARTModule *usart;
 
   USART_RXPIN (USARTModule *_usart,
-               char *opt_name=NULL) : IO_bi_directional_pu(opt_name) {
+               const char *opt_name=NULL) : IO_bi_directional_pu(opt_name) {
 
     usart = _usart;
 
@@ -177,7 +177,7 @@ public:
   USARTModule *usart;
 
   USART_TXPIN (USARTModule *_usart,
-               char *opt_name=NULL)
+               const char *opt_name=NULL)
   {
 
     usart = _usart;
@@ -664,7 +664,7 @@ public:
 
   USART_IO ( USARTModule *_usart,
              unsigned int b,
-             char *opt_name ) : IO_bi_directional_pu(opt_name) {
+             const char *opt_name ) : IO_bi_directional_pu(opt_name) {
     usart = _usart;
 
     string n(usart->name());

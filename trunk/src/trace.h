@@ -112,10 +112,10 @@ public:
   ModuleTraceType *pModuleTraceType;
   unsigned int mTracedData;
 
-  ModuleTraceObject(Module *_module, 
+  ModuleTraceObject(Module *_module,
                     ModuleTraceType *pmtt,
                     unsigned int d)
-    : TraceObject() , 
+    : TraceObject() ,
       pModule(_module),
       pModuleTraceType(pmtt),
       mTracedData(d)
@@ -176,9 +176,9 @@ public:
 
 //========================================================================
 // The TraceType class is the base class for the various trace types that
-// are supported by gpsim. In general, when a trace type is created, 
+// are supported by gpsim. In general, when a trace type is created,
 // a 32 bit identifier is created. The upper byte of this identifier is
-// the "type" of the trace and is dynamically allocated. The lower 24 
+// the "type" of the trace and is dynamically allocated. The lower 24
 // bits of this identifer are 0. When a TraceType is traced, the lower
 // 24 bits are filled with the information that is to be recorded in
 // the trace buffer. The whole 32 bits are then written to the trace buffer
@@ -200,7 +200,7 @@ public:
   // upper 32-bits of an unsigned integer. A TraceType can have
   // more than one type, although the types are consecutive.
   unsigned int type(unsigned int iType=0)
-  { 
+  {
     return (iType<mSize) ? (mType + (iType<<24)) : mType;
   }
   unsigned int size() { return mSize; }
@@ -210,7 +210,7 @@ public:
   // and attempt to decode them. In addition, the index is
   // incremented by the number of trace entries this type
   // used in the trace buffer (note, that this may not equal
-  // to the allocated mSize). 
+  // to the allocated mSize).
 
   virtual TraceObject *decode(unsigned int tbi) = 0;
 
@@ -218,7 +218,7 @@ public:
   // will return the number of trace buffer entries that
   // were used to record this TraceType event. The default
   // is the size allocated for this type.
-  
+
   virtual int entriesUsed(Trace *,unsigned int tbi);
 
   virtual bool isFrameBoundary() { return false;}
@@ -243,7 +243,7 @@ private:
   unsigned int mSize;           // The number of positions this
                                 // type occupies
 protected:
-  const char *mpDescription;    // 
+  const char *mpDescription;    //
 
 };
 
@@ -266,7 +266,7 @@ class ModuleTraceType : public TraceType
 {
 public:
   Module *pModule;
-  ModuleTraceType(Module *_pModule, 
+  ModuleTraceType(Module *_pModule,
                   unsigned int nTraceEntries,
                   const char *desc);
 
@@ -284,7 +284,7 @@ class ProcessorTraceType : public TraceType
 public:
   Processor *cpu;
 
-  ProcessorTraceType(Processor *_cpu, 
+  ProcessorTraceType(Processor *_cpu,
                      unsigned int nTraceEntries,
                      const char *pDesc);
 
@@ -384,7 +384,7 @@ public:
   list <TraceObject *> traceObjects;
   guint64 cycle_time;
 
-  TraceFrame(); 
+  TraceFrame();
   virtual ~TraceFrame();
   virtual void add(TraceObject *to);
   virtual void print(FILE *);
@@ -400,7 +400,7 @@ public:
   FILE *log_file;
 
   void log();
-  void enable(char*);
+  void enable(const char*);
   void disable();
 
   TraceRawLog();
@@ -516,14 +516,14 @@ class Trace
     return index & TRACE_BUFFER_MASK;
   }
 
-  // inRange - returns true if the trace index i is between the 
-  // indices of low and high. 
+  // inRange - returns true if the trace index i is between the
+  // indices of low and high.
   // It's assumed that the range does not exceed half of the trace buffer
   bool inRange(unsigned int i, unsigned int low, unsigned int high)
   {
     i = tbi(i);
 
-    if( low < high) 
+    if( low < high)
       return (i >= low && i <= high);
     // Looks like the range straddles the roll over boundary.
     return (i >= low || i <= high);
@@ -551,7 +551,7 @@ class Trace
   int is_cycle_trace(unsigned int index, guint64 *cvt_cycle);
 
   // When logging is enabled, the entire trace buffer will be copied to a file.
-  void enableLogging(char *fname);
+  void enableLogging(const char *fname);
   void disableLogging();
 
   unsigned int allocateTraceType(TraceType *);
@@ -677,7 +677,7 @@ extern ProfileKeeper profile_keeper;
  *
  * Each small buffer is associated with a contiguous time span. The
  * start and end of this span is recorded so that one can quickly
- * ascertain if a certain time instant resideds in the buffer. 
+ * ascertain if a certain time instant resideds in the buffer.
  *
  * The binary tree is fairly standard. A single top node records three
  * numbers: the start time for the left child, the end time for the
@@ -699,9 +699,9 @@ extern ProfileKeeper profile_keeper;
  * before the buffer fills, then this buffer is closed and added to the
  * binary and a new buffer is started.
  *
- * Repeated events are not logged. E.g.. if two 1's are logged, the 
+ * Repeated events are not logged. E.g.. if two 1's are logged, the
  * second one is ignored.
- * 
+ *
  */
 
 class BoolEventBuffer : public TriggerObject

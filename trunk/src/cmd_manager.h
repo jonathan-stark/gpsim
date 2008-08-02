@@ -13,7 +13,7 @@ public:
   CommandHandlerKey(const char *name) {
     m_name = name;
   }
-  virtual char *GetName(void) {return (char*)m_name; }
+  virtual const char *GetName(void) {return m_name; }
   virtual int Execute(const char * commandline, ISimConsole *out) {
     return CMD_ERR_COMMANDNOTDEFINED;}
   virtual int ExecuteScript(list<string *> &script, ISimConsole *out)

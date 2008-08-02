@@ -57,7 +57,7 @@ typedef enum {
 
 
 typedef struct _menu_item {
-    char *name;
+    const char *name;
     menu_id id;
     GtkWidget *item;
 } menu_item;
@@ -117,10 +117,10 @@ popup_activated(GtkWidget *widget, gpointer data)
       printf("Warning popup_activated(%p,%p)\n",widget,data);
       return;
     }
-    
+
   item = (menu_item *)data;
 
-  Value *entry = 
+  Value *entry =
     (Value*) gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
 
   if(!entry)
@@ -154,15 +154,15 @@ build_menu(GtkWidget *sheet, Symbol_Window *sw)
       printf("Warning build_menu(%p,%p)\n",sheet,sw);
       return 0;
   }
-    
+
   popup_sw = sw;
-  
+
   menu=gtk_menu_new();
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
-  
+
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
 
@@ -175,7 +175,7 @@ build_menu(GtkWidget *sheet, Symbol_Window *sw)
   }
 
   update_menus(sw);
-  
+
   return menu;
 }
 
@@ -274,13 +274,13 @@ void Symbol_Window::Update(void)
 
 
   load_symbols=1;
-    
+
   if(!enabled)
     return;
-    
+
 
   gtk_clist_freeze(GTK_CLIST(symbol_clist));
-    
+
   gtk_clist_clear(GTK_CLIST(symbol_clist));
 
   while (symbols)
@@ -306,7 +306,7 @@ void Symbol_Window::Update(void)
       continue;
     }
 
-    
+
     char **entry = (char**)malloc(3*sizeof(char*));
     const int cMaxLength = 32;
 
@@ -354,7 +354,7 @@ static void do_symbol_select(Symbol_Window *sw, Value *e)
       sw->gp->source_browser->SelectAddress(e);
     if(sw->gp->program_memory)
       sw->gp->program_memory->SelectAddress(e);
-  } else 
+  } else
     if(typeid(*e) == typeid(Register))
       if(sw->gp->regwin_ram)
         sw->gp->regwin_ram->SelectRegister(e);
@@ -382,7 +382,7 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
       return;
     if(!sw->enabled)
         return;
-    
+
     p=sw->symbols;
     while(p)
     {
@@ -409,7 +409,7 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
         p=p->next;
       }
     }
-       
+
 }
 
 void Symbol_Window::SelectSymbolName(char *symbol_name)
@@ -418,7 +418,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
 #if 0
   GList *p;
   //sym *s;
-    
+
   if(!symbol_name)
     return;
 
@@ -437,7 +437,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
     // ignore line numbers
     if(typeid(*sym) == typeid(line_number_symbol))
                   continue;
-    
+
     if(!strcasecmp((*sti)->name().data(),symbol_name)) {
 
        if(filter_addresses && (typeid(*sym) == typeid(address_symbol)))
@@ -448,16 +448,16 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
     }
 
-    
+
 /*
   list <symbol *>::iterator sti = st.begin();
 
   for(sti = st.begin(); sti != st.end(); sti++) {
-    
+
     if(!strcasecmp((*sti)->name().data(),symbol_name)) {
 
       switch((*sti)->isa()) {
-            
+
       case SYMBOL_ADDRESS:
         if(filter_addresses) {
           gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
@@ -490,20 +490,20 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
   // Find the symbol and select it from the clist
   p=symbols;
   while(p) {
-    
+
     Value *e;
     e=(sym*)p->data;
     if(!strcasecmp(e->name,symbol_name)) {
-      
+
       int row;
       row=gtk_clist_find_row_from_data(GTK_CLIST(symbol_clist),e);
       if(row!=-1) {
-        
+
                                 gtk_clist_select_row(GTK_CLIST(symbol_clist),row,0);
         gtk_clist_moveto(GTK_CLIST(symbol_clist),row,0,0.5,0.5);
-        
+
                                 do_symbol_select(this,e);
-                
+
       }
     }
     p=p->next;
@@ -575,7 +575,7 @@ static void symbol_click_column(GtkCList *clist, int column)
 {
     static int last_col=-1;
     static GtkSortType last_sort_type=GTK_SORT_DESCENDING;
-    
+
     if(last_col==-1)
         last_col=column;
 
@@ -630,7 +630,7 @@ toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
     sw->Update();
 }
 
-static char *symbol_titles[3]={"Name","Type","Address/Value"};
+static gchar *symbol_titles[3]={"Name","Type","Address/Value"};
 
 //------------------------------------------------------------------------
 // Build
@@ -648,11 +648,11 @@ void Symbol_Window::Build(void)
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   gtk_window_set_title(GTK_WINDOW(window), "Symbol Viewer");
-  
+
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
-  
+
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                       GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
 
@@ -680,9 +680,9 @@ void Symbol_Window::Build(void)
   gtk_widget_show(scrolled_window);
 
   vbox = gtk_vbox_new(FALSE,1);
-  
+
   gtk_container_add(GTK_CONTAINER(scrolled_window), symbol_clist);
-  
+
   gtk_container_add(GTK_CONTAINER(window),vbox);
 
 
@@ -700,7 +700,7 @@ void Symbol_Window::Build(void)
   gtk_signal_connect (GTK_OBJECT (addressesbutton), "toggled",
                       GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)this);
 
-  
+
   constantsbutton = gtk_check_button_new_with_label ("constants");
   gtk_box_pack_start (GTK_BOX (hbox), constantsbutton, TRUE, TRUE, 5);
   if(filter_constants)
@@ -710,7 +710,7 @@ void Symbol_Window::Build(void)
   gtk_signal_connect (GTK_OBJECT (constantsbutton), "toggled",
                       GTK_SIGNAL_FUNC (toggle_constants), (gpointer)this);
 
-  
+
   registersbutton = gtk_check_button_new_with_label ("registers");
   gtk_box_pack_start (GTK_BOX (hbox), registersbutton, TRUE, TRUE, 5);
   if(filter_registers)
@@ -723,9 +723,9 @@ void Symbol_Window::Build(void)
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
                            GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
-  
+
   gtk_widget_show_all (window);
-  
+
 
   bIsBuilt = true;
 
@@ -733,9 +733,9 @@ void Symbol_Window::Build(void)
     NewSymbols();
 
   UpdateMenuItem();
-  
+
   popup_menu=build_menu(window,this);
-  
+
 }
 
 
@@ -761,7 +761,7 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   filter_registers=0;
 
   load_symbols=0;
-  
+
   get_config();
 
   config_get_variable(name(),"filter_addresses",&filter_addresses);
@@ -770,7 +770,7 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
 
   if(enabled)
     Build();
-  
+
 }
 
 #endif // HAVE_GUI

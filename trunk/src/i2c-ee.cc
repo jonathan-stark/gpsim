@@ -1,7 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2004 Rob Pearce
-		 2006	Roy R Rankin
+                 2006   Roy R Rankin
 
 This file is part of gpsim.
 
@@ -50,7 +50,7 @@ using namespace std;
 //
 //  It's main purpose is to provide a means by which the port pins
 //  may communicate.
-// 
+//
 
 
 //--------------------------------------------------------------
@@ -62,9 +62,9 @@ public:
 
   I2C_EE *eeprom;
 
-  I2C_EE_PIN (I2C_EE *_eeprom, char *_name) 
+  I2C_EE_PIN (I2C_EE *_eeprom, const char *_name)
     : IO_open_collector(_name)
-  { 
+  {
 
     eeprom = _eeprom;
 
@@ -94,7 +94,7 @@ class I2C_EE_SDA : public I2C_EE_PIN
 {
 public:
 
-  I2C_EE_SDA (I2C_EE *_eeprom, char *_name) 
+  I2C_EE_SDA (I2C_EE *_eeprom, const char *_name)
     : I2C_EE_PIN (_eeprom,_name)
   {
   }
@@ -116,7 +116,7 @@ class I2C_EE_SCL : public I2C_EE_PIN
 {
 public:
 
-  I2C_EE_SCL (I2C_EE *_eeprom, char *_name) 
+  I2C_EE_SCL (I2C_EE *_eeprom, const char *_name)
     : I2C_EE_PIN (_eeprom,_name)
   {
   }
@@ -135,7 +135,7 @@ public:
 
 };
 
-PromAddress::PromAddress(I2C_EE *eeprom,const char *_name, const char * desc)
+PromAddress::PromAddress(I2C_EE *eeprom, const char *_name, const char * desc)
     : Value(_name,desc)
 {
      m_eeprom = eeprom;
@@ -150,16 +150,16 @@ void PromAddress::get(char *buffer, int buf_size)
 // I2C EE PROM
 //
 // There are many conditions that need to be verified against a real part:
-//    1) what happens if 
-//       > the simulator 
+//    1) what happens if
+//       > the simulator
 //    2) what happens if a RD is initiated while data is being written?
 //       > the simulator ignores the read
-//    3) what happens if 
-//       > the simulator 
+//    3) what happens if
+//       > the simulator
 
 I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page_size,
-	unsigned int _addr_bytes, unsigned int _CSmask,
-	unsigned int _BSmask, unsigned int _BSshift)
+        unsigned int _addr_bytes, unsigned int _CSmask,
+        unsigned int _BSmask, unsigned int _BSshift)
   : rom(0),
     rom_size(_rom_size),                // size of eeprom in bytes
     rom_data_size(1),
@@ -192,17 +192,17 @@ I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page
     rom[i]->value.put(0);
     rom[i]->alias_mask = 0;
   }
-  
+
   if (pCpu)
   {
-	m_UiAccessOfRom = new RegisterCollection(pCpu,
+        m_UiAccessOfRom = new RegisterCollection(pCpu,
                                              "eeData",
                                              rom,
                                              rom_size);
 
   }
   else
-	m_UiAccessOfRom = NULL;
+        m_UiAccessOfRom = NULL;
 
   scl = new I2C_EE_SCL ( this, "SCL" );
   sda = new I2C_EE_SDA ( this, "SDA" );
@@ -211,11 +211,11 @@ I2C_EE::I2C_EE(Processor *pCpu, unsigned int _rom_size, unsigned int _write_page
 I2C_EE::~I2C_EE()
 {
   for (unsigned int i = 0; i < rom_size; i++)
-	delete rom[i];
+        delete rom[i];
   delete [] rom;
 
   if (m_UiAccessOfRom)
-	delete m_UiAccessOfRom;
+        delete m_UiAccessOfRom;
 }
 
 // Bit 0 is write protect, 1-3 is A0 - A2
@@ -275,11 +275,11 @@ void I2C_EE::debug()
   cout << " t=0x"<< hex <<get_cycles().get() << endl;
   cout << "  scl drivenState="  << scl->getDrivenState()
        << " drivingState=" << scl->getDrivingState()
-       << " direction=" << ((scl->get_direction()==IOPIN::DIR_INPUT) ?"IN":"OUT") 
+       << " direction=" << ((scl->get_direction()==IOPIN::DIR_INPUT) ?"IN":"OUT")
        << endl;
   cout << "  sda drivenState="  << sda->getDrivenState()
        << " drivingState=" << sda->getDrivingState()
-       << " direction=" << ((sda->get_direction()==IOPIN::DIR_INPUT) ?"IN":"OUT") 
+       << " direction=" << ((sda->get_direction()==IOPIN::DIR_INPUT) ?"IN":"OUT")
        << endl;
 
   cout << "  bit_count:"<<bit_count
@@ -309,13 +309,13 @@ void I2C_EE::start_write()
     unsigned int addr = xfr_addr + write_page_off;
     if (! m_write_protect)
     {
-    	rom[addr]->put ( xfr_data );
+        rom[addr]->put ( xfr_data );
     }
      else
-	cout << "I2c_EE start_write- write protect\n";
+        cout << "I2c_EE start_write- write protect\n";
 }
 
-// allow 5 msec after last write 
+// allow 5 msec after last write
 void I2C_EE::write_busy()
 {
     guint64 fc;
@@ -332,7 +332,7 @@ void I2C_EE::write_busy()
 }
 
 
-void I2C_EE::write_is_complete() 
+void I2C_EE::write_is_complete()
 {
 }
 
@@ -411,34 +411,34 @@ void I2C_EE::new_scl_edge ( bool direction )
             case RX_CMD :
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
-		    Vprintf(("I2C_EE : got command:0x%x\n", xfr_data));
+                    Vprintf(("I2C_EE : got command:0x%x\n", xfr_data));
                     //if ( ( xfr_data & 0xf0 ) == 0xA0 )
-		    if (processCommand(xfr_data))
+                    if (processCommand(xfr_data))
                     {
                         bus_state = ACK_CMD;
-			Vprintf((" - OK\n"));
-			// Acknowledge the command by pulling SDA low.
+                        Vprintf((" - OK\n"));
+                        // Acknowledge the command by pulling SDA low.
                         sda->setDrivingState ( false );
                     }
                     else
                     {
                         // not for us
                         bus_state = IDLE;
-			Vprintf((" - not for us\n"));
+                        Vprintf((" - not for us\n"));
                     }
                 }
                 break;
-                
+
             case ACK_CMD :
                 sda->setDrivingState ( true );
-		// Check the R/W bit of the command
+                // Check the R/W bit of the command
                 if ( m_command & 0x01 )
                 {
                     // it's a read command
                     bus_state = TX_DATA;
                     bit_count = 8;
-		    xfr_addr += write_page_off;
-		    write_page_off = 0;
+                    xfr_addr += write_page_off;
+                    write_page_off = 0;
                     xfr_data = rom[xfr_addr]->get();
                     sda->setDrivingState ( shift_write_bit() );
                 }
@@ -448,8 +448,8 @@ void I2C_EE::new_scl_edge ( bool direction )
                     bus_state = RX_ADDR;
                     bit_count = 0;
                     xfr_data = 0;
-		    xfr_addr = (m_command & m_BSmask) >> m_BSshift;
-		    m_addr_cnt = m_addr_bytes;
+                    xfr_addr = (m_command & m_BSmask) >> m_BSshift;
+                    m_addr_cnt = m_addr_bytes;
                 }
                 break;
 
@@ -457,26 +457,26 @@ void I2C_EE::new_scl_edge ( bool direction )
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
                     sda->setDrivingState ( false );
-		    // convert xfr_data to base and page offset to allow
-		    // sequencel writes to wrap around page
+                    // convert xfr_data to base and page offset to allow
+                    // sequencel writes to wrap around page
                     xfr_addr = ((xfr_addr << 8) | xfr_data ) % rom_size;
                     bus_state = ACK_ADDR;
-		    Vprintf(("I2C_EE : address set to 0x%x data:0x%x\n", xfr_addr,xfr_data));
+                    Vprintf(("I2C_EE : address set to 0x%x data:0x%x\n", xfr_addr,xfr_data));
                 }
                 break;
 
             case ACK_ADDR :
                 sda->setDrivingState ( true );
-		if (--m_addr_cnt)
+                if (--m_addr_cnt)
                     bus_state = RX_ADDR;
-		else
-		{
-		    write_page_off = xfr_addr % write_page_size;
-		    xfr_addr -= write_page_off;
-		    Vprintf(("I2C_EE : address set to 0x%x page offset 0x%x data:0x%x\n", 
-			xfr_addr, write_page_off ,xfr_data));
+                else
+                {
+                    write_page_off = xfr_addr % write_page_size;
+                    xfr_addr -= write_page_off;
+                    Vprintf(("I2C_EE : address set to 0x%x page offset 0x%x data:0x%x\n",
+                        xfr_addr, write_page_off ,xfr_data));
                     bus_state = RX_DATA;
-		}
+                }
                 bit_count = 0;
                 xfr_data = 0;
                 break;
@@ -484,11 +484,11 @@ void I2C_EE::new_scl_edge ( bool direction )
             case RX_DATA :
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
-		    start_write();
-		    Vprintf(("I2C_EE : data set to 0x%x\n", xfr_data));
+                    start_write();
+                    Vprintf(("I2C_EE : data set to 0x%x\n", xfr_data));
                     sda->setDrivingState ( false );
                     bus_state = ACK_WR;
-		    write_page_off = ++write_page_off % write_page_size;
+                    write_page_off = ++write_page_off % write_page_size;
                 }
                 break;
 
@@ -530,9 +530,9 @@ void I2C_EE::new_scl_edge ( bool direction )
                     sda->setDrivingState ( shift_write_bit() );
                 }
                 else
-		{
+                {
                     bus_state = IDLE;   // Actually a limbo state
-		}
+                }
                 break;
 
             default :
@@ -560,11 +560,11 @@ void I2C_EE::new_sda_edge ( bool direction )
         if ( direction )
         {
             // stop bit
-	    Vprintf(("I2C_EE SDA : Rising edge in SCL high => stop bit\n"));
+            Vprintf(("I2C_EE SDA : Rising edge in SCL high => stop bit\n"));
             if ( bus_state == WRPEND )
             {
-	        Vprintf(("I2C_EE : write is pending - commence...\n"));
-		write_busy();
+                Vprintf(("I2C_EE : write is pending - commence...\n"));
+                write_busy();
                 bus_state = IDLE;   // Should be busy
             }
             else
@@ -573,11 +573,11 @@ void I2C_EE::new_sda_edge ( bool direction )
         else
         {
             // start bit
-	    Vprintf(("I2C_EE SDA : Falling edge in SCL high => start bit\n"));
-            if ( ee_busy ) 
-	    {
-	      Vprintf(("             Device is busy - ignoring start bit\n"));
-	    }
+            Vprintf(("I2C_EE SDA : Falling edge in SCL high => start bit\n"));
+            if ( ee_busy )
+            {
+              Vprintf(("             Device is busy - ignoring start bit\n"));
+            }
             else
             {
                 bus_state = START;
@@ -586,10 +586,10 @@ void I2C_EE::new_sda_edge ( bool direction )
             }
         }
 
-	if ((bool)verbose && bus_state != curBusState) {
-	  Vprintf(("I2C_EE::new_sda_edge() new bus state = %d\n",bus_state));
-	  debug();
-	}
+        if ((bool)verbose && bus_state != curBusState) {
+          Vprintf(("I2C_EE::new_sda_edge() new bus state = %d\n",bus_state));
+          debug();
+        }
 
     }
 }
@@ -603,7 +603,7 @@ void I2C_EE::reset(RESET_TYPE by)
     case POR_RESET:
         bus_state = IDLE;
         ee_busy = false;
-	break;
+        break;
     default:
       break;
     }
@@ -635,30 +635,30 @@ void I2C_EE::dump()
       cout << setw(2) << setfill('0') <<  i << ":  ";
 
       for (j = 0; j < 16; j++)
-	{
-	  reg_num = i * 16 + j;
-	  if(reg_num < rom_size)
-	    {
-	      v = rom[reg_num]->get_value();
-	      cout << setw(2) << setfill('0') <<  v << ' ';
-	    }
-	  else
-	    cout << "-- ";
-	}
+        {
+          reg_num = i * 16 + j;
+          if(reg_num < rom_size)
+            {
+              v = rom[reg_num]->get_value();
+              cout << setw(2) << setfill('0') <<  v << ' ';
+            }
+          else
+            cout << "-- ";
+        }
       cout << "   ";
 
       for (j = 0; j < 16; j++)
-	{
-	  reg_num = i * 16 + j;
-	  if(reg_num < rom_size)
-	    {
-	      v = rom[reg_num]->get_value();
-	      if( (v >= ' ') && (v <= 'z'))
-		cout.put(v);
-	      else
-		cout.put('.');
-	    }
-	}
+        {
+          reg_num = i * 16 + j;
+          if(reg_num < rom_size)
+            {
+              v = rom[reg_num]->get_value();
+              if( (v >= ' ') && (v <= 'z'))
+                cout.put(v);
+              else
+                cout.put('.');
+            }
+        }
 
       cout << '\n';
 

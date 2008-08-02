@@ -39,7 +39,7 @@ void CGpsimConsole::Putc(const char c) {
   fputc(c, m_pfOut);
 }
 
-char* CGpsimConsole::Gets(char *s, int size) {
+const char* CGpsimConsole::Gets(char *s, int size) {
   return fgets(s, size, m_pfIn);
 }
 

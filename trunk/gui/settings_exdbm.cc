@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 SettingsEXdbm::SettingsEXdbm(const char *appl_name)
 {
   int ret;
-  char *homedir;
+  const char *homedir;
   string path;
 
   ret = eXdbmInit();

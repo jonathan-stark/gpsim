@@ -17,7 +17,7 @@
 
 
 LIBGPSIM_EXPORT bool get_use_icd();
-int icd_connect(char *dev);
+int icd_connect(const char *dev);
 int icd_reconnect(void);
 int icd_disconnect(void);
 int icd_detected(void);
@@ -52,9 +52,9 @@ int icd_write_eeprom(int address, int data);
 /*
 class icd_Register : public file_register
 {
-	public:
-	  file_register *replaced;   // A pointer to the register that this break replaces
-	  int is_stale;
+        public:
+          file_register *replaced;   // A pointer to the register that this break replaces
+          int is_stale;
 
       icd_Register();
 
@@ -63,15 +63,15 @@ class icd_Register : public file_register
 
       virtual void put_value(unsigned int new_value);
        virtual void put(unsigned int new_value);
-	  virtual unsigned int get_value(void);
+          virtual unsigned int get_value(void);
     virtual unsigned int get(void);
 };
 
 class icd_statusReg : public Status_register
 {
-	public:
-	  Status_register *replaced;   // A pointer to the register that this break replaces
-	  int is_stale;
+        public:
+          Status_register *replaced;   // A pointer to the register that this break replaces
+          int is_stale;
 
       icd_statusReg();
 
@@ -80,15 +80,15 @@ class icd_statusReg : public Status_register
 
       virtual void put_value(unsigned int new_value);
        virtual void put(unsigned int new_value);
-	  virtual unsigned int get_value(void);
+          virtual unsigned int get_value(void);
     virtual unsigned int get(void);
 };
 
 class icd_WREG : public WREG
 {
-	public:
-	  WREG *replaced;   // A pointer to the register that this break replaces
-	  int is_stale;
+        public:
+          WREG *replaced;   // A pointer to the register that this break replaces
+          int is_stale;
 
       icd_WREG();
 
@@ -97,19 +97,19 @@ class icd_WREG : public WREG
 
       virtual void put_value(unsigned int new_value);
        virtual void put(unsigned int new_value);
-	  virtual unsigned int get_value(void);
+          virtual unsigned int get_value(void);
     virtual unsigned int get(void);
 };
 
 class icd_PC : public Program_Counter
 {
-	Program_Counter *replaced;
-	int is_stale;
+        Program_Counter *replaced;
+        int is_stale;
 
-	icd_PC();
-	
-	virtual void put_value(unsigned int new_value);
-	virtual unsigned int get_value(void);
+        icd_PC();
+
+        virtual void put_value(unsigned int new_value);
+        virtual unsigned int get_value(void);
 };
 */
 

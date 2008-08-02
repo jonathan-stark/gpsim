@@ -196,11 +196,11 @@ typedef enum {
 } time_menu_id;
 
 typedef struct _time_menu_item {
-  char *name;
+  const char *name;
   time_menu_id id;
 } time_menu_item;
 
-class TimeLabeledEntry : public LabeledEntry 
+class TimeLabeledEntry : public LabeledEntry
 {
 public:
   TimeLabeledEntry();
@@ -223,7 +223,7 @@ public:
 };
 
 //------------------------------------------------------------------------
-// The KeyEvent class is used for key mapping (e.g. mapping the 's' 
+// The KeyEvent class is used for key mapping (e.g. mapping the 's'
 // key to step)
 
 class KeyEvent
@@ -266,7 +266,7 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
 
 void ProfileWindow_notify_start_callback(Profile_Window *pw);
 void ProfileWindow_notify_stop_callback(Profile_Window *pw);
-int gui_get_value(char *prompt);
+int gui_get_value(const char *prompt);
 
 
 //------------------------------------------------------------------------
