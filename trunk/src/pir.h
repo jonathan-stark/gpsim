@@ -36,6 +36,7 @@ class PIR : public sfr_register
 protected:
   INTCON  *intcon;
   PIE     *pie;
+  sfr_register *ipr;
 public:
   int valid_bits;
   int writable_bits;
@@ -81,6 +82,7 @@ public:
 
   void set_intcon(INTCON *);
   void set_pie(PIE *);
+  void set_ipr(sfr_register *);
 
 };
 //---------------------------------------------------------

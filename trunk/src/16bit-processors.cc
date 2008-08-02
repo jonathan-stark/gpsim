@@ -220,6 +220,10 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, true);
   m_latc  = new PicLatchRegister(this,"latc","", m_portc);
 
+  //tmr0l.set_cpu(this, m_porta, 4, option_reg);
+  //tmr0l.start(0);
+  m_porta->addSink(&tmr0l,4);
+
   stack = new Stack16(this);
 }
 
@@ -444,12 +448,13 @@ void _16bit_processor :: create_sfr_map()
 
   pir1.set_intcon(&intcon);
   pir1.set_pie(&pie1);
+  pir1.set_ipr(&ipr1);
   pie1.setPir(&pir1);
   //pie1.new_name("pie1");
 
   pir2.set_intcon(&intcon);
   pir2.set_pie(&pie2);
-  
+  pir2.set_ipr(&ipr2);
   pie2.setPir(&pir2);
   //pie2.new_name("pie2");
 
@@ -577,8 +582,7 @@ void _16bit_processor::create_symbols ()
 // in 'interrupt_vector'.
 //
 //-------------------------------------------------------------------
-void _16bit_processor::
-interrupt ()
+void _16bit_processor::interrupt ()
 {
   
   bp.clear_interrupt();

@@ -550,9 +550,11 @@ void PCLATH::put(unsigned int new_value)
 
 void PCLATH::put_value(unsigned int new_value)
 {
-
+  cout << "PCLATH::put_value(" << new_value << ")\n";
   value.put(new_value & PCLATH_MASK);
-  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffff00ff) | (value.get()<<8) );
+
+  // RP - I cannot think of a single possible reason I'd want to affect the real PC here!
+  //  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffff00ff) | (value.get()<<8) );
 
   // The gui (if present) will be updated in the pc->put_value call.
 }

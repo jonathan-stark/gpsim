@@ -81,9 +81,12 @@ void INTCON::put(unsigned int new_value)
       cpu_pic->BP_set_interrupt();
 }
 
-void INTCON::peripheral_interrupt()
+void INTCON::peripheral_interrupt ( bool hi_pri )
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
+
+  if ( hi_pri )
+      cout << "Dodgy call to 14-bit INTCON::peripheral_interrupt with priority set\n";
 
   if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
     cpu_pic->BP_set_interrupt();
@@ -165,6 +168,31 @@ INTCON_16::INTCON_16(Processor *pCpu, const char *pName, const char *pDesc)
 }
 
 
+void INTCON_16::peripheral_interrupt ( bool hi_pri )
+{
+  Dprintf((" INTCON_16::%s\n",__FUNCTION__));
+  assert(rcon != 0);
+
+  if(rcon->value.get() & RCON::IPEN)
+  {
+    if ( hi_pri )
+    {
+      if ( value.get() & GIEH ) 
+        cpu_pic->BP_set_interrupt();
+    }
+    else
+    {
+      if ( value.get() & GIEL )
+        cpu_pic->BP_set_interrupt();
+    }
+  }
+  else
+  {
+    if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
+      cpu_pic->BP_set_interrupt();
+  }
+}
+
 
 //----------------------------------------------------------------------
 // void INTCON_16::clear_gies()
@@ -182,7 +210,9 @@ void INTCON_16::clear_gies()
 
   assert(cpu != 0);
 
-  if(haveHighPriorityInterrupt())
+  if ( !(rcon->value.get() & RCON::IPEN) )
+    put(get() & ~GIE);
+  else if ( isHighPriorityInterrupt() )
     put(get() & ~GIEH);
   else
     put(get() & ~GIEL);
