@@ -9,7 +9,7 @@
 	  gui/gui_src_opcode.cc, gui/gui.h, gui/gui_breadboard.cc, ChangeLog,
 	  xpms/startp.xpm, xpms/pc.xpm, xpms/break.xpm, xpms/stopp.xpm,
 	  xpms/canbreak.xpm, cli/misc.h, cli/socket.cc, cli/ui_gpsim.h, cli/input.cc,
-	  cli/ui_gpsim.cc: 
+	  cli/ui_gpsim.cc, plat/win32/icd.cc:
 	  fixed gcc warnings "warning: deprecated conversion from string constant to 'char*'"
 
 2008-08-02  Rob Pearce <rob@bdt-home.demon.co.uk>

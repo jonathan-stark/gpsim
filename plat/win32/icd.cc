@@ -70,7 +70,7 @@ int icd_clear_break(void)
 }
 
 
-int icd_connect(char *port)
+int icd_connect(const char *port)
 {
     return 1;
 }
