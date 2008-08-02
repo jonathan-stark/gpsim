@@ -958,7 +958,7 @@ void P18F2x21::create_iopin_map()
   package->assign_pin( 3, m_porta->addPin(new IO_bi_directional("porta1"),1));
   package->assign_pin( 4, m_porta->addPin(new IO_bi_directional("porta2"),2));
   package->assign_pin( 5, m_porta->addPin(new IO_bi_directional("porta3"),3));
-  package->assign_pin( 6, m_porta->addPin(new IO_open_collector("porta4"),4));
+  package->assign_pin( 6, m_porta->addPin(new IO_open_collector("porta4"),4));  // %%%FIXME - is this O/C ?
   package->assign_pin( 7, m_porta->addPin(new IO_bi_directional("porta5"),5));
 
 

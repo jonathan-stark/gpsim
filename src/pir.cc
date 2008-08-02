@@ -28,7 +28,7 @@ Boston, MA 02111-1307, USA.  */
 
 PIR::PIR(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie, int _valid_bits)
   : sfr_register(pCpu,pName,pDesc),
-    intcon(_intcon),pie(_pie),valid_bits(_valid_bits)  ,writable_bits(0)
+    intcon(_intcon),pie(_pie),ipr(0),valid_bits(_valid_bits),writable_bits(0)
 {
 }
 
@@ -44,7 +44,7 @@ void PIR::put(unsigned int new_value)
   value.put(new_value & writable_bits | value.get() & ~writable_bits);
 
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 
 }
 
@@ -59,6 +59,11 @@ void PIR::set_pie(PIE *_pie)
   pie = _pie;
 }
 
+void PIR::set_ipr(sfr_register *_ipr)
+{
+  ipr = _ipr;
+}
+
 void PIR::setInterrupt(unsigned int bitMask)
 {
   put(value.get() | bitMask);
@@ -68,8 +73,9 @@ void PIR::setInterrupt(unsigned int bitMask)
 void PIR::setPeripheralInterrupt()
 {
   if (intcon)
-    intcon->peripheral_interrupt();
+    intcon->peripheral_interrupt ( ipr && (value.get() & valid_bits & ipr->value.get() & pie->value.get()) );
 }
+
 bool PIR::interrupt_status()
 {
   assert(pie);
@@ -125,7 +131,7 @@ void PIR1v1::set_txif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | TXIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 
 void PIR1v1::clear_txif(void)
@@ -139,7 +145,7 @@ void PIR1v1::set_rcif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | RCIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 
 void PIR1v1::clear_rcif(void)
@@ -153,7 +159,7 @@ void PIR1v1::set_cmif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | CMIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 
 void PIR1v1::set_eeif(void)
@@ -161,7 +167,7 @@ void PIR1v1::set_eeif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | EEIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 //------------------------------------------------------------------------
 //
@@ -186,7 +192,7 @@ void PIR1v2::set_txif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | TXIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 
 void PIR1v2::set_pspif(void)
@@ -194,14 +200,14 @@ void PIR1v2::set_pspif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | PSPIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 void PIR1v2::set_sspif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | SSPIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 
 void PIR1v2::clear_txif(void)
@@ -215,7 +221,7 @@ void PIR1v2::set_rcif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | RCIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 
 void PIR1v2::clear_rcif(void)
@@ -244,21 +250,21 @@ void PIR2v2::set_cmif(void)
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | CMIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 void PIR2v2::set_eeif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | EEIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 void PIR2v2::set_bclif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | BCLIF);
   if( value.get() & pie->value.get() )
-    intcon->peripheral_interrupt();
+    setPeripheralInterrupt();
 }
 //------------------------------------------------------------------------
 PIR3v2::PIR3v2(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)

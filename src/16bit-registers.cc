@@ -615,9 +615,11 @@ void Program_Counter16::put_value(unsigned int new_value)
   // class's internal value is a word address
   value = (new_value/2) & memory_size_mask;
 
-  cpu_pic->pcl->value.put(value & 0xff);
-  cpu_pic->pclath->value.put((value >> 8) & 0xff);
-  cpu16->pclatu.value.put((value >> 16) & 0xff);
+  cpu_pic->pcl->value.put(new_value & 0xfe);
+
+// RP - removed these lines as setting the actual PC should not affect the latches
+//  cpu_pic->pclath->value.put((new_value >> 8) & 0xff);
+//  cpu16->pclatu.value.put((new_value >> 16) & 0xff);
 
 
   cpu_pic->pcl->update();

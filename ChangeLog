@@ -1,3 +1,15 @@
+2008-08-02  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/14bit-registers.cc, src/16bit-registers.cc :
+            Fixed behaviour of PCLATH and PCL :
+                - Setting PC from GUI no longer changes PCLATH on 16-bit cores
+                - Setting PCLATH from GUI no longer changes PC
+	* src/p18x.cc :
+            Annotation - I think porta4 is defined wrong
+	* src/pir.cc, src/pir.h, src/intcon.cc, src/intcon.h, src/16bit-processors.cc :
+            Support for interrupt priority on 16-bit core peripherals
+	* src/16bit-processors.cc :
+            Fix TMR0 external inputs on 16-bit cores (T0CKI was not being connected)
+
 2008-07-30 Borut Razem <borut.razem@siol.net>
 	* regression/run_regression.sh:
 	  set GPSIM_MODULE_PATH=$(pwd)/../modules/.libs so that the correct

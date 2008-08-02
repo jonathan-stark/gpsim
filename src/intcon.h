@@ -70,7 +70,7 @@ enum
   // which bit 6 enables becomes true. (e.g. for the c84, this
   // routine is called when EEIF goes high.)
   */
-  void peripheral_interrupt();
+  virtual void peripheral_interrupt ( bool hi_pri = false );
 
   inline void set_rbif(bool b)
   {
@@ -198,6 +198,8 @@ public:
 
   virtual void put(unsigned int new_value);
 
+  virtual void peripheral_interrupt ( bool hi_pri = false );
+
   void clear_gies();
   void set_gies();
   virtual bool check_peripheral_interrupt() {return false;} // Is this right?
@@ -205,9 +207,9 @@ public:
   {
     return interrupt_vector;
   }
-  bool haveHighPriorityInterrupt() 
+  bool isHighPriorityInterrupt() 
   { 
-    return  true;
+    return ( interrupt_vector == INTERRUPT_VECTOR_HI );
   }
   void set_interrupt_vector(unsigned int new_int_vect)
   {
