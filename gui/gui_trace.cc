@@ -53,7 +53,7 @@ typedef enum {
     MENU_ADD_WATCH,
 } menu_id;
 
-static char *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
+static gchar *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
 
 // gui trace flags:
 #define GTF_ENABLE_XREF_UPDATES    (1<<0)

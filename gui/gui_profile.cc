@@ -61,16 +61,16 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkplotprint.h>
 
 #define PROFILE_COLUMNS    3
-static char *profile_titles[PROFILE_COLUMNS]={"Address", "Cycles","Instruction"};
+static gchar *profile_titles[PROFILE_COLUMNS]={"Address", "Cycles","Instruction"};
 
 #define PROFILE_RANGE_COLUMNS    3
-static char *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Cycles"};
+static gchar *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Cycles"};
 
 #define PROFILE_REGISTER_COLUMNS    4
-static char *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
+static gchar *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
 
 #define PROFILE_EXESTATS_COLUMNS    9
-static char *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
+static gchar *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
 
 struct profile_entry {
     unsigned int address;
@@ -102,7 +102,7 @@ typedef enum {
 } menu_id;
 
 typedef struct _menu_item {
-    char *name;
+    const char *name;
     menu_id id;
     GtkWidget *item;
 } menu_item;
@@ -127,7 +127,7 @@ static menu_item exestats_menu_items[] = {
 };
 
 
-extern int gui_message(char *message);
+extern int gui_message(const char *message);
 
 static GtkStyle *normal_style;
 

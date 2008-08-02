@@ -52,7 +52,7 @@ public:
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
     if(sbw && sbw->pma)
-	sbw->pma->step(1);
+        sbw->pma->step(1);
   }
   void release(gpointer data) {}
 };
@@ -114,8 +114,8 @@ static map<guint, KeyEvent *> KeyMap;
 
 static gint
 key_press(GtkWidget *widget,
-	  GdkEventKey *key, 
-	  gpointer data)
+          GdkEventKey *key,
+          gpointer data)
 {
   int low_level_step=0;
 
@@ -131,13 +131,13 @@ key_press(GtkWidget *widget,
       SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
 
       if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
-	  return FALSE;
+          return FALSE;
 
       low_level_step=1;
   }
-  
+
   KeyEvent *pKE = KeyMap[key->keyval];
-  if(pKE) 
+  if(pKE)
     {
       pKE->press(data);
       return TRUE;
@@ -147,7 +147,7 @@ key_press(GtkWidget *widget,
 }
 
 static int delete_event(GtkWidget *widget,
-			GdkEvent  *event,
+                        GdkEvent  *event,
                         SourceBrowser_Window *sbw)
 {
     sbw->ChangeView(VIEW_HIDE);
@@ -188,8 +188,8 @@ void SourceBrowser_Window::Create(void)
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-		      GTK_SIGNAL_FUNC(delete_event),
-		      (gpointer) this);
+                      GTK_SIGNAL_FUNC(delete_event),
+                      (gpointer) this);
 
   // FIXME - populate the KeyMap map with source browser functions. This should
   // FIXME   probably go into some kind of configuration file.
@@ -216,11 +216,11 @@ void SourceBrowser_Window::Create(void)
    * key commands for single stepping, running, etc.
    */
   gtk_signal_connect(GTK_OBJECT(window),"key_press_event",
-		     (GtkSignalFunc) key_press,
-		     (gpointer) this);
+                     (GtkSignalFunc) key_press,
+                     (gpointer) this);
 
 
-  
+
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
   vbox = gtk_vbox_new (FALSE, 0);
@@ -235,7 +235,7 @@ void SourceBrowser_Window::SetTitle() {
   if (gp->cpu == NULL || pma == NULL) {
       return;
   }
-    
+
   if (last_simulation_mode != eSM_INITIAL &&
     ((last_simulation_mode == eSM_RUNNING &&
     gp->cpu->simulation_mode == eSM_RUNNING) ||
@@ -245,7 +245,7 @@ void SourceBrowser_Window::SetTitle() {
       return;
   }
   last_simulation_mode = gp->cpu->simulation_mode;
-  char * sStatus;
+  const char * sStatus;
   if (gp->cpu->simulation_mode == eSM_RUNNING)
     sStatus = "Run";
   else // if (gp->cpu->simulation_mode == eSM_STOPPED)
@@ -274,7 +274,7 @@ void SourceBrowser_Window::SelectAddress(Value *addrSym)
     addrSym->get(i);
     SelectAddress(i);
   }
-       
+
 }
 
 
@@ -283,13 +283,13 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
 //    struct gui_config_winattr winattr;
 
     if(widget->window==0)
-	return 0;
-    
+        return 0;
+
     gdk_window_get_root_origin(widget->window,&go->x,&go->y);
     gdk_window_get_size(widget->window,&go->width,&go->height);
-    
+
     go->set_config();
-    
+
     return 0; // what should be returned?, FIXME
 }
 

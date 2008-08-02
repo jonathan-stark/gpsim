@@ -71,7 +71,7 @@ ModuleTypeInfo_t ModuleTypes;
 // Add a new type to the ModuleTypes map if the name for that type
 // does not exist already.
 
-static void AddModuleType(char *pName, Module_Types *pType)
+static void AddModuleType(const char *pName, Module_Types *pType)
 {
   string sName(pName);
   ModuleTypeInfo_t::iterator mti = ModuleTypes.find(sName);

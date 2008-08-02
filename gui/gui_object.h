@@ -32,11 +32,11 @@ Boston, MA 02111-1307, USA.  */
 class GUI_Processor;
 
 //========================================================================
-// GUI_Object 
+// GUI_Object
 //  All window attributes that are common are placed into the GUI_Object
 // structure. This structure is then include in each of the other structures.
 // It's also the very first item in these 'derived' structures. Consequently a
-// pointer to one object may be type cast into another. 
+// pointer to one object may be type cast into another.
 //
 
 class GUI_Object {
@@ -48,7 +48,7 @@ class GUI_Object {
   enum window_category wc;
   enum window_types wt;
 
-  char *menu;
+  const char *menu;
 
   // Window geometry. This info is saved when the window associated
   // with this gui object is hidden. Note: gtk saves the window origin

@@ -40,11 +40,11 @@ class ISimConsole;
 // For example, if the contents of a register change, the simulator
 // can notify the GUI and thus save the gui having to continuously
 // poll. (This may occur when the command line interface changes
-// something; such changes need to be propogated up to the gui.) 
+// something; such changes need to be propogated up to the gui.)
 //
 // FIXME -- shouldn't this be a pure virtual class?
 
-class Interface 
+class Interface
 {
 public:
 
@@ -66,7 +66,7 @@ public:
   /*
    * remove_object - Invoked when gpsim has removed something.
    *
-   * If an object, like a register, is deleted then this function 
+   * If an object, like a register, is deleted then this function
    * will be called. There is one parameter:
    *  xref - this is a pointer to some structure in the client's data space.
    *
@@ -124,7 +124,7 @@ public:
    * destructor - called when the interface is destroyed - this gives
    *  the interface object a chance to save state information.
    */
-  virtual ~Interface() 
+  virtual ~Interface()
   {
   }
 
@@ -134,7 +134,7 @@ public:
 };
 
 
-class gpsimInterface : public TriggerObject 
+class gpsimInterface : public TriggerObject
 {
 public:
 
@@ -156,7 +156,7 @@ public:
    */
   enum eAdvancementModes {
     eAdvanceNextInstruction, // processors - step over call instructions
-    eAdvanceNextCycle,       // system - 
+    eAdvanceNextCycle,       // system -
     eAdvanceNextCall,        // processors - run until call instruction
     eAdvanceNextReturn,      // processors - run until next return
   };
@@ -167,7 +167,7 @@ public:
   bool bUsingGUI();
   void setGUImode(bool);
   // gpsim will call these functions to notify gui and/or modules
-  // that something has changed. 
+  // that something has changed.
 
   void update_object (gpointer xref,int new_value);
   void remove_object (gpointer xref);
@@ -267,7 +267,7 @@ public:
   {
   }
 
-  virtual char *GetName(void) = 0;
+  virtual const char *GetName(void) = 0;
   // Fixme: should Execute be renamed ExecuteCommand?
   virtual int Execute(const char * commandline, ISimConsole *out) = 0;
   virtual int ExecuteScript(list<string *> &script, ISimConsole *out) = 0;

@@ -23,7 +23,7 @@ public:
   virtual void VPrintf(const char *fmt, va_list argptr) = 0;
   virtual void Puts(const char*) = 0;
   virtual void Putc(const char) = 0;
-  virtual char* Gets(char *, int) = 0;
+  virtual const char* Gets(char *, int) = 0;
 };
 
 class IUserInterface {
@@ -64,7 +64,7 @@ public:
   virtual const char * FormatValue(gint64 uValue, guint64 uMask,
     int iRadix) = 0;
 
-  virtual char *       FormatValue(char *str, int len,
+  virtual const char * FormatValue(char *str, int len,
     int iRegisterSize, RegisterValue value) = 0;
 
   virtual void SetProgramAddressRadix(int iRadix) = 0;

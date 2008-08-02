@@ -11,7 +11,7 @@ public:
   void VPrintf(const char *fmt, va_list argptr);
   void Puts(const char*);
   void Putc(const char);
-  char* Gets(char *, int);
+  const char* Gets(char *, int);
 
   void SetOut(FILE *pOut);
   void SetIn(FILE *pIn);

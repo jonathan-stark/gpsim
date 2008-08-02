@@ -152,7 +152,7 @@ bool winsockets_init(void)
   things like sockets so that they work nicely when compiled for other
   platforms. Now, whenever a client connects to gpsim, another GIOChannel
   is created. This new channel has the client socket associated with
-  it and is used to communicate with the client. 
+  it and is used to communicate with the client.
 
   Thus, like most socket server applications, gpsim creates a single
   socket to listen for clients. As clients come along, connections are
@@ -164,7 +164,7 @@ bool winsockets_init(void)
   command line commands that are directed to the command line parser.
   Although, at the moment, the output of these commands still is sent
   to the terminal from which the gpsim executable was spawned (instead
-  of being sent to the client socket...). Probably more powerful though 
+  of being sent to the client socket...). Probably more powerful though
   is the ability for a client to establish 'links' to gpsim internal
   objects. These links are provide a client with an efficient access
   to gpsim's symbol table.
@@ -181,7 +181,7 @@ bool winsockets_init(void)
   time except when the simulation is running). So the idea is that
   clients can send stuff to the simulator, and if the simulator is not
   running, the information is processed and a response is returned to
-  the client. 
+  the client.
 
   Simulator Sources are for sending unsolicited simulator data to a
   client. This is a blocking operation, i.e. it will not return until
@@ -224,9 +224,9 @@ public:
 
 //------------------------------------------------------------------------
 // Socket wrapper class
-// 
+//
 // This class is a simple wrapper around the standard BSD socket calls.
-// 
+//
 
 
 class SocketBase
@@ -237,7 +237,7 @@ public:
 
   SOCKET getSocket();
   void Close();
-  bool Send(char *);
+  bool Send(const char *);
   void Service();
   void ParseObject();
 
@@ -480,7 +480,7 @@ void Socket::init(int port)
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
   addr.sin_port = htons(port);
-  
+
   Bind();
   Listen();
 }
@@ -503,12 +503,12 @@ void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition
 #endif
 #endif
 
-    g_io_add_watch(channel, 
+    g_io_add_watch(channel,
                    condition,
                    server_function,
                    (void*)this);
   }
- 
+
 }
 
 void Socket::Close(SocketBase **sock)
@@ -557,7 +557,7 @@ SocketBase *Socket::Accept()
 }
 
 
-bool SocketBase::Send(char *b)
+bool SocketBase::Send(const char *b)
 {
   if(!socket)
     return false;
@@ -616,8 +616,8 @@ void SocketBase::ParseObject()
 
       if(sl) {
         unsigned int i=0;
-        
-        if(packet->DecodeUInt32(i) && i) 
+
+        if(packet->DecodeUInt32(i) && i)
           sl->setBlocking(true);
 
         //NotifyLink *nl = new NotifyLink(sl);
@@ -669,7 +669,7 @@ void SocketBase::ParseObject()
 
       ParseSocketLink(packet, &sl);
 
-      if(sl) 
+      if(sl)
         sl->Send();
     }
     break;
@@ -713,7 +713,7 @@ void SocketBase::ParseObject()
       // The client has requested to write directly to a symbol
       // (without using a SocketLink). So, we'll extract the symbol
       // name from the packet and look it up in the symbol table.
-      // If the symbol is found then, it will get assigned the 
+      // If the symbol is found then, it will get assigned the
       // value that's stored in the packet.
 
       char tmp[256];
@@ -778,7 +778,7 @@ void SocketBase::ParseObject()
     get_interface().reset();
     Send("-");
     break;
-    
+
   default:
     printf("Invalid object type: %d\n",ObjectType);
     Send("-");
@@ -863,7 +863,7 @@ bool SocketLink::Send(bool bTimeStamp)
     /*
     std::cout << "SocketLink::Send() "
               << " socket=" << parent->getSocket()
-              << " sending " 
+              << " sending "
               << parent->packet->txBuff() << endl;
     */
 
@@ -886,7 +886,7 @@ bool SocketLink::Receive()
     parent->packet->prepare();
 
     int bytes= recv(parent->getSocket(),
-                    parent->packet->rxBuff(), 
+                    parent->packet->rxBuff(),
                     parent->packet->rxSize(), 0);
 
     if (bytes  == -1) {
@@ -997,7 +997,7 @@ AttributeLink *gCreateSocketLink(unsigned int handle, Packet &p, SocketBase *sb)
       return new AttributeLink(handle,sb,sym);
   }
 
-  return 0; 
+  return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1078,8 +1078,8 @@ static void debugPrintCondition(GIOCondition cond)
   server_callback ()
 
   This call back function is invoked from the GTK main loop whenever a client
-  socket has sent something to send to gpsim. This callback will only be 
-  invoked for those clients that have already connected to gpsim. Those 
+  socket has sent something to send to gpsim. This callback will only be
+  invoked for those clients that have already connected to gpsim. Those
   connected clients have associated with them a 'SocketBase' object. A pointer
   to that object is passed in the server_callback parameters.
 
@@ -1090,8 +1090,8 @@ static void debugPrintCondition(GIOCondition cond)
 
  */
 
-static gboolean server_callback(GIOChannel *channel, 
-                                GIOCondition condition, 
+static gboolean server_callback(GIOChannel *channel,
+                                GIOCondition condition,
                                 void *pSocketBase )
 {
 
@@ -1127,14 +1127,14 @@ static gboolean server_callback(GIOChannel *channel,
 #if !defined _WIN32 || defined _DEBUG
     g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
 #endif
-    stat = g_io_channel_read_chars(channel, 
-                                   s->packet->rxBuff(), 
-                                   s->packet->rxSize(), 
-                                   &b, 
+    stat = g_io_channel_read_chars(channel,
+                                   s->packet->rxBuff(),
+                                   s->packet->rxSize(),
+                                   &b,
                                    &err);
     bytes_read = b;
     s->packet->rxAdvance(bytes_read);
- 
+
     if(err) {
       std::cout << "GError:" << err->message << endl;
     }
@@ -1199,7 +1199,7 @@ static gboolean sink_server_accept(GIOChannel *channel, GIOCondition condition, 
 #endif
 #endif
 
-  g_io_add_watch(new_channel, 
+  g_io_add_watch(new_channel,
                  new_condition,
                  server_callback,
                  (void*)client);
@@ -1220,11 +1220,11 @@ static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition
   if(!client)
     return FALSE;
 
-  int bytes= recv(client->getSocket(), 
-                  client->packet->rxBuff(), 
+  int bytes= recv(client->getSocket(),
+                  client->packet->rxBuff(),
                   client->packet->rxSize(), 0);
 
-  std::cout << " SourceServer received data" << client->packet->rxBuff() 
+  std::cout << " SourceServer received data" << client->packet->rxBuff()
             << endl;
 
   if (bytes  == -1) {

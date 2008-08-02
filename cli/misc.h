@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 // miscellaneous definitions that are used
 
 struct cmd_options {
-  char *name;
+  const char *name;
   int  value;
   int  token_type;
 };

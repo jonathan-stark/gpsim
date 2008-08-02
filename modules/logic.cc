@@ -36,13 +36,14 @@ In here you'll find some simple logic devices:
 #include "../config.h"    // get the definition for HAVE_GUI
 
 #ifdef HAVE_GUI
+#include <gtk/gtk.h>
 
 /* XPM */
-static char * and2_pixmap[] = {
+static gchar * and2_pixmap[] = {
 "32 32 3 1",
-" 	c black",
-".	c None",
-"X	c white",
+"       c black",
+".      c None",
+"X      c white",
 "                    ............",
 "                        ........",
 "  XXXXXXXXXXXXXXXXXX    ........",
@@ -77,11 +78,11 @@ static char * and2_pixmap[] = {
 "                    ............"};
 
 /* XPM */
-static char * or2_pixmap[] = {
+static gchar * or2_pixmap[] = {
 "32 32 3 1",
-" 	c black",
-".	c None",
-"X	c white",
+"       c black",
+".      c None",
+"X      c white",
 "                    ............",
 "                        ........",
 "  XXXXXXXXXXXXXXXXXX    ........",
@@ -115,11 +116,11 @@ static char * or2_pixmap[] = {
 "                        ........",
 "                    ............"};
 
-static char * xor2_pixmap[] = {
+static gchar * xor2_pixmap[] = {
 "40 32 3 1",
-" 	c None",
-".	c black",
-"X	c white",
+"       c None",
+".      c black",
+"X      c white",
 "        ....................            ",
 "  ..    ....................            ",
 " ....   ........................        ",
@@ -153,11 +154,11 @@ static char * xor2_pixmap[] = {
 " ....   ..XXXXXXXXXXXXXXXXXX....        ",
 "  ..    ........................        "};
 
-static char * not_pixmap[] = {
+static gchar * not_pixmap[] = {
 "32 32 3 1",
-" 	c black",
-".	c None",
-"X	c white",
+"       c black",
+".      c None",
+"X      c white",
 " ...............................",
 "   .............................",
 "     ...........................",
@@ -190,9 +191,6 @@ static char * not_pixmap[] = {
 "     ...........................",
 "   .............................",
 " ..............................."};
-
-#include <gtk/gtk.h>
-
 #endif
 
 #include <errno.h>
@@ -210,14 +208,14 @@ static char * not_pixmap[] = {
 //   This class is a minor extension of a normal IO_input. I may
 // remove it later, but for now it does serve a simple purpose.
 // Specifically, this derivation will intercept when a stimulus
-// is being changed. 
+// is being changed.
 
 void Logic_Input::setDrivenState( bool new_state)
 {
 
   if(1)
-    cout << name()<< " setDrivenState= " 
-	 << (new_state ? "high" : "low") << endl;
+    cout << name()<< " setDrivenState= "
+         << (new_state ? "high" : "low") << endl;
 
   if(new_state != getDrivenState()) {
 
@@ -284,7 +282,7 @@ void LogicGate::update_input_pin(unsigned int pin, bool bValue)
 }
 
 //--------------------------------------------------------------
-// create_iopin_map 
+// create_iopin_map
 //
 //  This is where the information for the Module's package is defined.
 // Specifically, the I/O pins of the module are created.
@@ -303,7 +301,7 @@ void LogicGate::create_iopin_map()
 
   // Define the I/O pins and assign them to the package.
   //   There are two things happening here. First, there is
-  //   a new I/O pin that is being created. For the binary 
+  //   a new I/O pin that is being created. For the binary
   //   indicator, both pins are inputs. The second thing is
   //   that the pins are "assigned" to the package. If we
   //   need to reference these newly created I/O pins (like
@@ -362,26 +360,26 @@ void LogicGate::create_iopin_map()
 
 #ifdef HAVE_GUI
 static gboolean expose(GtkWidget *widget,
-		GdkEventExpose *event,
-		LogicGate *lg)
+                GdkEventExpose *event,
+                LogicGate *lg)
 {
-	if(lg->pixmap==0)
-	{
-		puts("LogicGate has no pixmap");
-		return 0;
-	}
+        if(lg->pixmap==0)
+        {
+                puts("LogicGate has no pixmap");
+                return 0;
+        }
 
-	gdk_draw_pixmap(widget->window,
-			widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-			lg->pixmap,
-			event->area.x, event->area.y,
-			event->area.x, event->area.y,
-			event->area.width, event->area.height);
-	
-	return 0;
+        gdk_draw_pixmap(widget->window,
+                        widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+                        lg->pixmap,
+                        event->area.x, event->area.y,
+                        event->area.x, event->area.y,
+                        event->area.width, event->area.height);
+
+        return 0;
 }
 
-GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
+GtkWidget *LogicGate::create_pixmap(gchar **pixmap_data)
 {
     GtkStyle *style;
     GdkBitmap *mask;
@@ -389,12 +387,12 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
     int width,height;
 
     style = gtk_style_new();
-    
+
     pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL,
-						   gdk_colormap_get_system(),
-						   &mask,
-						   &style->bg[GTK_STATE_NORMAL],
-						   pixmap_data);
+                                                   gdk_colormap_get_system(),
+                                                   &mask,
+                                                   &style->bg[GTK_STATE_NORMAL],
+                                                   pixmap_data);
 #if GTK_MAJOR_VERSION >= 2
     gdk_drawable_get_size(pixmap,&width,&height);
 #else
@@ -403,7 +401,7 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
     da = gtk_drawing_area_new();
     gtk_drawing_area_size(GTK_DRAWING_AREA(da),width,height);
     gtk_signal_connect(GTK_OBJECT(da),"expose_event",
-    		(GtkSignalFunc) expose,this);
+                (GtkSignalFunc) expose,this);
     return da;
 }
 #endif

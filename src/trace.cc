@@ -215,7 +215,7 @@ void TraceRawLog::log()
 
 }
 
-void TraceRawLog::enable(char *fname)
+void TraceRawLog::enable(const char *fname)
 {
   if(!fname) {
     cout << "Trace logging - invalid file name\n";
@@ -1129,7 +1129,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 }
 
 //------------------------------------------------------------------
-void Trace::enableLogging(char *fname)
+void Trace::enableLogging(const char *fname)
 {
   if(fname)
     logger.enable(fname);

@@ -1,14 +1,28 @@
+2008-08-02 Borut Razem <borut.razem@siol.net>
+	* gpsim/main.cc, src/gpsim_interface.h, src/icd.h, src/modules.h,
+	  src/i2c-ee.cc, src/ui.h, src/trace.h, src/ui.cc, src/icd.cc,
+	  src/modules.cc, src/trace.cc, src/cmd_manager.h, modules/usart.cc,
+	  modules/logic.cc, modules/logic.h, gui/gui_src.cc, gui/gui_symbols.cc
+	  gui/gui_src.h, gui/gui_regwin.cc, gui/gui_trace.cc, gui/gui_profile.cc
+	  gui/gui_src_asm.cc, gui/gui_dialog.cc, gui/gui_menu.cc, gui/gui_stack.cc
+	  gui/gui_watch.cc, gui/gui_object.h, gui/settings_exdbm.cc,
+	  gui/gui_src_opcode.cc, gui/gui.h, gui/gui_breadboard.cc, ChangeLog,
+	  xpms/startp.xpm, xpms/pc.xpm, xpms/break.xpm, xpms/stopp.xpm,
+	  xpms/canbreak.xpm, cli/misc.h, cli/socket.cc, cli/ui_gpsim.h, cli/input.cc,
+	  cli/ui_gpsim.cc: 
+	  fixed gcc warnings "warning: deprecated conversion from string constant to 'char*'"
+
 2008-08-02  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/14bit-registers.cc, src/16bit-registers.cc :
-            Fixed behaviour of PCLATH and PCL :
-                - Setting PC from GUI no longer changes PCLATH on 16-bit cores
-                - Setting PCLATH from GUI no longer changes PC
+	    Fixed behaviour of PCLATH and PCL :
+	        - Setting PC from GUI no longer changes PCLATH on 16-bit cores
+	        - Setting PCLATH from GUI no longer changes PC
 	* src/p18x.cc :
-            Annotation - I think porta4 is defined wrong
+	   Annotation - I think porta4 is defined wrong
 	* src/pir.cc, src/pir.h, src/intcon.cc, src/intcon.h, src/16bit-processors.cc :
-            Support for interrupt priority on 16-bit core peripherals
+	    Support for interrupt priority on 16-bit core peripherals
 	* src/16bit-processors.cc :
-            Fix TMR0 external inputs on 16-bit cores (T0CKI was not being connected)
+	    Fix TMR0 external inputs on 16-bit cores (T0CKI was not being connected)
 
 2008-07-30 Borut Razem <borut.razem@siol.net>
 	* regression/run_regression.sh:

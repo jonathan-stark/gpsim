@@ -138,7 +138,7 @@ void EnableSTCEcho(bool bEnable)
 class CCliCommandHandler : public ICommandHandler
 {
 public:
-  virtual char *GetName();
+  virtual const char *GetName();
   virtual int Execute(const char * commandline, ISimConsole *out);
   virtual int ExecuteScript(list<string *> &script, ISimConsole *out);
 };
@@ -334,9 +334,9 @@ void LLStack::print(void)
       int depth =0;
       while(h) {
 
-	cout << "   " <<stack_number <<':'<<depth << "  "<<  h->data;
-	depth++;
-	h = h->next_input;
+        cout << "   " <<stack_number <<':'<<depth << "  "<<  h->data;
+        depth++;
+        h = h->next_input;
       }
       stack_number++;
       s = s->next_stack;
@@ -540,7 +540,7 @@ void process_command_file(const char * file_name, bool bCanChangeDirectory)
             str[iLast-1] = '\n';
           }
 #endif
-	  add_string_to_input_buffer(s);
+          add_string_to_input_buffer(s);
       }
 
       fclose(cmd_file);
@@ -571,7 +571,7 @@ void process_command_file(const char * file_name, bool bCanChangeDirectory)
 */
 
 int gpsim_open(Processor *cpu, const char *pFileName,
-	       const char * pProcessorType, const char *pProcessorName)
+               const char * pProcessorType, const char *pProcessorName)
 {
   if(!pFileName)
     return 0;
@@ -705,7 +705,7 @@ command_generator (const char *text, int state)
     {
 
       if(strstr(command_list[i]->name(), text) == command_list[i]->name())
-	return(g_strndup(command_list[i++]->name(), cMaxStringLen));
+        return(g_strndup(command_list[i++]->name(), cMaxStringLen));
 
       i++;
     }
@@ -745,12 +745,12 @@ gpsim_completion (const char *text, int start, int end)
 #endif
 
 #if defined(_WIN32) || defined(WIN32)
-	if (start) {
-		char *empty = strdup("");
-		matches = (char **) malloc(2 * (sizeof(&empty)));
-		matches[0] = empty;
-		matches[1] = 0;
-	}
+        if (start) {
+                char *empty = strdup("");
+                matches = (char **) malloc(2 * (sizeof(&empty)));
+                matches[0] = empty;
+                matches[1] = 0;
+        }
 #endif
 
   return (matches);
@@ -952,7 +952,7 @@ void EnableKeypressHook(bool bEnable) {
 // used by symbol files that embed gpsim scripts. See src/modules.cc.
 //
 
-char *CCliCommandHandler::GetName()
+const char *CCliCommandHandler::GetName()
 {
   return "gpsimCLI";
 }

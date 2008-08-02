@@ -63,7 +63,7 @@ Boston, MA 02111-1307, USA.  */
 #define PAGE_BORDER 3
 #define PIXMAP_SIZE 14
 
-extern int gui_question(char *question, char *a, char *b);
+extern int gui_question(const char *question, const char *a, const char *b);
 
 static int load_fonts(SOURCE_WINDOW *sbaw);
 
@@ -129,7 +129,7 @@ gtk_source_view_get_lines (GtkTextView  *text_view,
   GtkTextIter iter;
   gint count;
   gint size;
-  gint last_line_num = -1;  
+  gint last_line_num = -1;
 
   g_array_set_size (buffer_coords, 0);
   g_array_set_size (numbers, 0);
@@ -183,10 +183,10 @@ gtk_source_view_get_lines (GtkTextView  *text_view,
 
 
 //------------------------------------------------------------------------
-// 
+//
 gint
 NSourcePage::KeyPressHandler(GtkTextView *pView,
-               GdkEventKey *key, 
+               GdkEventKey *key,
                SourceWindow *pSW)
 {
   GtkTextBuffer *pBuffer = gtk_text_view_get_buffer(pView);
@@ -213,12 +213,12 @@ NSourcePage::KeyPressHandler(GtkTextView *pView,
 
 gint
 NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
-            GdkEventExpose *pEvent, 
+            GdkEventExpose *pEvent,
             SourceWindow *pSW)
 {
 
   if (pEvent->window == gtk_text_view_get_window (pView,
-    GTK_TEXT_WINDOW_LEFT)) 
+    GTK_TEXT_WINDOW_LEFT))
   {
     //gtk_source_view_paint_margin (view, event);
     //event_handled = TRUE;
@@ -247,20 +247,20 @@ NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
 
     pPage->updateMargin(y1,y2);
 
-  } 
+  }
   else {
     Dprintf(("Expose event for view %p\n",pSW));
   }
   return FALSE;
 }
 //------------------------------------------------------------------------
-// 
+//
 gint
 SourceWindow::KeyPressHandler(GtkWidget *widget,
-          GdkEventKey *key, 
+          GdkEventKey *key,
           SourceWindow *pSW)
 {
-  if (!pSW || !key) 
+  if (!pSW || !key)
     return FALSE;
 
   switch (key->keyval) {
@@ -306,14 +306,14 @@ SourceWindow::KeyPressHandler(GtkWidget *widget,
 }
 
 //======================================================================
-// 
+//
 // When a user right-clicks in the source browser, a menu will popup.
 // There can only be one menu active at any given time.
 
 
 //
-//  'aPopupMenu' pointer is a local pointer to a GtkMenu. 
-// 
+//  'aPopupMenu' pointer is a local pointer to a GtkMenu.
+//
 
 static GtkWidget *aPopupMenu=0;
 
@@ -346,7 +346,7 @@ typedef enum {
 
 
 typedef struct _menu_item {
-  char *name;
+  const char *name;
   menu_id id;
   GtkWidget *item;
 } menu_item;
@@ -378,13 +378,13 @@ static menu_item submenu_items[] = {
 // Event handler for text view mouse clicks.
 gint
 NSourcePage::ButtonPressHandler(GtkTextView *pView,
-                  GdkEventButton *pButton, 
+                  GdkEventButton *pButton,
                   SourceWindow *pSW)
 {
   if (pButton->window == gtk_text_view_get_window (pView,
-    GTK_TEXT_WINDOW_LEFT)) 
+    GTK_TEXT_WINDOW_LEFT))
   {
-    // Margin 
+    // Margin
     NSourcePage *pPage = PageMap[pView];
     gint x = (gint) pButton->x;
     gint y = (gint) pButton->y;
@@ -432,7 +432,7 @@ int SourceWindow::DeleteEventHandler(GtkWidget *widget,
 
 
 //========================================================================
-// Helper functions for parsing 
+// Helper functions for parsing
 static int isString(const char *cP)
 {
   int i=0;
@@ -490,7 +490,7 @@ static int isComment(const char *cP)
 //------------------------------------------------------------------------
 static bool isButtonEvent (GdkEventType type)
 {
-  return 
+  return
     type == GDK_BUTTON_PRESS ||
     type == GDK_2BUTTON_PRESS ||
     type == GDK_3BUTTON_PRESS ||
@@ -518,7 +518,7 @@ static gboolean TagEvent (GtkTextTag *texttag,
       if (pTextStyle)
         pTextStyle->doubleClickEvent(arg2);
 
-      gint signal_id =  g_signal_lookup ("button_press_event", 
+      gint signal_id =  g_signal_lookup ("button_press_event",
         G_TYPE_FROM_INSTANCE(arg1));
 
       GSignalQuery query;
@@ -532,7 +532,7 @@ static gboolean TagEvent (GtkTextTag *texttag,
       if (GTK_WIDGET_TOPLEVEL (toplevel)) {
         //g_signal_emit_by_name (toplevel, "button_press_event",evtButton,&b);
         g_signal_emit_by_name (GTK_WIDGET (arg1), "button_press_event",evtButton,&b);
-      } else 
+      } else
         printf("TagEvent: arg1 is not toplevel\n");
 
     }
@@ -909,7 +909,7 @@ GtkTextBuffer *SourceBuffer::getBuffer()
 }
 
 //------------------------------------------------------------------------
-// 
+//
 /*
 void SourceBuffer::setBreak(int line)
 {
@@ -962,7 +962,7 @@ m_pParent->mBreakpointTag->tag(),
 
 //========================================================================
 NSourcePage::NSourcePage(SourceWindow *pParent,
-                         SourceBuffer *pBuffer, 
+                         SourceBuffer *pBuffer,
                          int file_id,
                          GtkWidget *pContainer)
                          : m_fileid(file_id),
@@ -976,12 +976,12 @@ NSourcePage::NSourcePage(SourceWindow *pParent,
 }
 
 
-GtkTextBuffer *NSourcePage::buffer() 
+GtkTextBuffer *NSourcePage::buffer()
 {
   return m_pBuffer ? m_pBuffer->getBuffer() : 0;
 }
 //------------------------------------------------------------------------
-SourceWindow::SourceWindow(GUI_Processor *pgp, 
+SourceWindow::SourceWindow(GUI_Processor *pgp,
                            SourceBrowserParent_Window *pParent,
                            bool bUseConfig,
                            const char *newName)
@@ -1080,7 +1080,7 @@ void SourceWindow::set_style_colors(const char *fg_color, const char *bg_color, 
 //------------------------------------------------------------------------
 // toggleBreak
 //
-// 
+//
 void SourceWindow::toggleBreak(NSourcePage *pPage, int line)
 {
   if (pma && pPage) {
@@ -1094,7 +1094,7 @@ void SourceWindow::toggleBreak(NSourcePage *pPage, int line)
 //------------------------------------------------------------------------
 // movePC
 //
-// 
+//
 void SourceWindow::movePC(int line)
 {
 }
@@ -1154,7 +1154,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
   unsigned int patternLen = strlen(pText);
   char buff[1024];
   patternLen = (patternLen < sizeof(buff)) ? patternLen : sizeof(buff);
-  const char *pattern = bDirection ? pText : 
+  const char *pattern = bDirection ? pText :
   strReverse(pText, &buff[patternLen], patternLen);
 
   //printf("findText %s view:%p\n",pattern,pViewContainingPopup);
@@ -1252,7 +1252,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
         line, pos);
       gtk_text_buffer_get_iter_at_line_offset(pPage->buffer(),
         &iEnd,
-        line, 
+        line,
         pos+ (bDirection ? patternLen : -patternLen));
 
       gtk_text_buffer_select_range (pPage->buffer(),
@@ -1261,7 +1261,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
       return gtk_text_iter_get_offset(bDirection ? &iEnd : &iStart);
     }
 
-    // Now we'll search whole lines. 
+    // Now we'll search whole lines.
     offset = 0;
 
     if (bDirection) {
@@ -1276,7 +1276,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
       gtk_text_iter_backward_line (&iEnd);
       line--;
     }
-  } 
+  }
 
   printf("Did not find %s\n",pattern);
 
@@ -1320,7 +1320,7 @@ void NSourcePage::invalidateView()
     vRect.width=100;
     vRect.height=100;
     gdk_window_invalidate_rect
-      (gtk_text_view_get_window (m_view, 
+      (gtk_text_view_get_window (m_view,
                                  GTK_TEXT_WINDOW_LEFT),
                                  &vRect,
                                  TRUE);
@@ -1391,7 +1391,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
       address = pSW->pma->find_closest_address_to_line(
         pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
       if(address!=INVALID_VALUE) {
-	pSW->pma->set_PC(address);
+        pSW->pma->set_PC(address);
         pSW->SetPC(pSW->pma->get_PC());
       }
     }
@@ -1563,7 +1563,7 @@ SourceWindow::BuildPopupMenu()
 //------------------------------------------------------------------------
 // Build
 //
-// 
+//
 void SourceWindow::Build()
 {
   char *fontstring;
@@ -1634,7 +1634,7 @@ void SourceWindow::Build()
 
   if(config_get_string(name(),"commentfont",&fontstring))
     strcpy(commentfont_string,fontstring);
-  else 
+  else
     strcpy(commentfont_string,DEFAULT_COMMENTFONT);
 
   if(config_get_string(name(),"sourcefont",&fontstring))
@@ -1693,7 +1693,7 @@ void SourceWindow::SetTitle()
     }
 
     last_simulation_mode = gp->cpu->simulation_mode;
-    char * sStatus;
+    const char * sStatus;
     if (gp->cpu->simulation_mode == eSM_RUNNING)
       sStatus = "Run";
     else // if (gp->cpu->simulation_mode == eSM_STOPPED)
@@ -1746,7 +1746,7 @@ void SourceWindow::Update()
   if (!window || !enabled)
     return;
 
-  if (m_Notebook && 
+  if (m_Notebook &&
     ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==FALSE
     && m_pParent->getTabPosition()<0) ||
     (m_pParent->getTabPosition() != gtk_notebook_get_tab_pos(GTK_NOTEBOOK(m_Notebook))))) {
@@ -1892,8 +1892,8 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
     len -= npos;
 
 
-    npos = (m_bShowOpcodes && opcode >= 0) ? 
-      g_snprintf(&str[pos], len, "%c%04X", m_bShowAddresses?':':' ', opcode) 
+    npos = (m_bShowOpcodes && opcode >= 0) ?
+      g_snprintf(&str[pos], len, "%c%04X", m_bShowAddresses?':':' ', opcode)
       : 0;
     pos += npos;
     len -= npos;
@@ -2067,7 +2067,7 @@ void NSourcePage::updateMargin(int y1, int y2)
               NULL,
               GTK_WIDGET (text_view),
               NULL,
-              2, //text_width + 2, 
+              2, //text_width + 2,
               pos,
               layout);
 
@@ -2077,12 +2077,12 @@ void NSourcePage::updateMargin(int y1, int y2)
 
 
       if (line == PCline) {
-        gtk_paint_arrow 
+        gtk_paint_arrow
           (GTK_WIDGET (text_view)->style,
           win,
           GTK_STATE_NORMAL,
           GTK_SHADOW_OUT,    // GtkShadowType shadow_type,
-          NULL, 
+          NULL,
           GTK_WIDGET (text_view),
           NULL,
           GTK_ARROW_RIGHT,   //GtkArrowType arrow_type,
@@ -2099,7 +2099,7 @@ void NSourcePage::updateMargin(int y1, int y2)
           win,
           GTK_STATE_NORMAL,
           bHasBreak ? GTK_SHADOW_IN : GTK_SHADOW_OUT,
-          NULL, 
+          NULL,
           GTK_WIDGET (text_view),
           NULL,
           text_width+BP_START,
@@ -2148,7 +2148,7 @@ void SourceWindow::SetPC(int address)
   if (!bSourceLoaded() || !pma)
     return;
 
-  int currPage = m_Notebook ? 
+  int currPage = m_Notebook ?
     gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook)) :
   -1;
 
@@ -2308,7 +2308,7 @@ void SourceWindow::NewSource(GUI_Processor *gp)
   }
 
 
-  i=0; 
+  i=0;
   while (m_pParent->ppSourceBuffers[i]) {
 
     AddPage(m_pParent->ppSourceBuffers[i]);
@@ -2441,7 +2441,7 @@ break_widget(0), canbreak_widget(0)
 
 BreakPointInfo::BreakPointInfo(BreakPointInfo & Dup)
 {
-  address = Dup.address; 
+  address = Dup.address;
   index = Dup.index;
   line = Dup.line;
   pos = Dup.pos;
@@ -2509,7 +2509,7 @@ void BreakPointInfo::setCanBreakWidget(GtkWidget *pCanBreak)
 //========================================================================
 
 // all of these gui_xxxx_to_entry() do linear search.
-// Binary search is possible, the list is sorted. 
+// Binary search is possible, the list is sorted.
 // pixel is 0 -> maxfont-1 for line zero.
 // maxfont -> maxfont*2-1 for line one
 //         ...
@@ -2684,10 +2684,10 @@ void SourceBrowserAsm_Window::DetermineBreakinfos(int id)
 }
 
 void SourceBrowserAsm_Window::SetPC(int address)
-{ 
-  BreakPointInfo *e; 
-  int row; 
-  gdouble inc; 
+{
+  BreakPointInfo *e;
+  int row;
+  gdouble inc;
   unsigned int i;
   unsigned int sbawFileId;
 
@@ -2894,14 +2894,14 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
 
   if(pma->address_has_profile_start(address))
-    notify_start_list.Add(address, 
-    gtk_pixmap_new(pixmap_profile_start,startp_mask), 
+    notify_start_list.Add(address,
+    gtk_pixmap_new(pixmap_profile_start,startp_mask),
     pages[id].source_layout,
     e->pos);
 
   else if(pma->address_has_profile_stop(address))
-    notify_stop_list.Add(address, 
-    gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
+    notify_stop_list.Add(address,
+    gtk_pixmap_new(pixmap_profile_stop,stopp_mask),
     pages[id].source_layout,
     e->pos);
 
@@ -3185,7 +3185,7 @@ void SourceBrowserAsm_Window::remove_all_points(
   sbaw->breakpoints.Remove();
   sbaw->notify_start_list.Remove();
   sbaw->notify_stop_list.Remove();
-}  
+}
 
 gint SourceBrowserAsm_Window::switch_page_cb(
                             GtkNotebook     *notebook,
@@ -3555,9 +3555,9 @@ static void InitCache(FileContext::Cache &FileCache) {
   s_pLast = NULL;
 }
 
-static void AddCache(FileContext::Cache &FileCache, const char *pFragment, 
+static void AddCache(FileContext::Cache &FileCache, const char *pFragment,
                      int length,
-                     GtkStyle *pStyle, GdkFont *font) 
+                     GtkStyle *pStyle, GdkFont *font)
 {
   if(s_pLast && s_pLast->m_text_style == pStyle) {
     if(length == -1) {
@@ -3792,15 +3792,15 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
       }
     } //end of while( p < end )
 
-    totallinesheight += CFormattedTextFragment::s_linedescent + 
+    totallinesheight += CFormattedTextFragment::s_linedescent +
       CFormattedTextFragment::s_lineascent;
 
     // create an entry in sa_xlate_list for this source line.
     // 'this source line' is the one in 'buf' with line number
     // 'line' and index 'index' into text
     int     pos = totallinesheight -
-      (CFormattedTextFragment::s_lineascent - 
-      CFormattedTextFragment::s_linedescent) - 
+      (CFormattedTextFragment::s_lineascent -
+      CFormattedTextFragment::s_linedescent) -
       PIXMAP_SIZE/2 + PAGE_BORDER;
 
     entry= new BreakPointInfo(0, line,index,pos);
@@ -4192,7 +4192,7 @@ message_close_cb(GtkWidget *widget, gpointer d)
   return FALSE;
 }
 
-int gui_message(char *message)
+int gui_message(const char *message)
 {
   static GtkWidget *dialog=0;
   static GtkWidget *label;
@@ -4252,7 +4252,7 @@ static void b_cb(GtkWidget *w, gpointer user_data)
 }
 
 // modal dialog, asking a yes/no question
-int gui_question(char *question, char *a, char *b)
+int gui_question(const char *question, const char *a, const char *b)
 {
   static GtkWidget *dialog=0;
   static GtkWidget *label;
@@ -4700,8 +4700,8 @@ void SourceBrowserParent_Window::Build(void)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->Build();
 
@@ -4735,7 +4735,7 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
     else
       sbaw = *sbaw_iterator++;
 
-    if(pma_iterator != gp->cpu->pma_context.end()) 
+    if(pma_iterator != gp->cpu->pma_context.end())
     {
       sbaw->set_pma(*pma_iterator);
       pma_iterator++;
@@ -4752,8 +4752,8 @@ void SourceBrowserParent_Window::SelectAddress(int address)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->SelectAddress(address);
 }
@@ -4762,8 +4762,8 @@ void SourceBrowserParent_Window::SelectAddress(Value *addrSym)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->SelectAddress(addrSym);
 }
@@ -4772,8 +4772,8 @@ void SourceBrowserParent_Window::Update(void)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->Update();
 }
@@ -4782,8 +4782,8 @@ void SourceBrowserParent_Window::UpdateLine(int address)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->UpdateLine(address);
 }
@@ -4792,8 +4792,8 @@ void SourceBrowserParent_Window::SetPC(int address)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->SetPC(address);
 }
@@ -4802,8 +4802,8 @@ void SourceBrowserParent_Window::CloseSource(void)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->CloseSource();
 }
@@ -4813,8 +4813,8 @@ void SourceBrowserParent_Window::NewSource(GUI_Processor *gp)
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
   CreateSourceBuffers(gp);
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->NewSource(gp);
 }
@@ -4823,8 +4823,8 @@ void SourceBrowserParent_Window::ChangeView(int view_state)
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->ChangeView(view_state);
 }
@@ -4833,8 +4833,8 @@ int SourceBrowserParent_Window::set_config()
 {
   list <SOURCE_WINDOW *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-    sbaw_iterator != children.end(); 
+  for (sbaw_iterator = children.begin();
+    sbaw_iterator != children.end();
     sbaw_iterator++)
     (*sbaw_iterator)->set_config();
 
@@ -4907,7 +4907,7 @@ void SourceBuffer::parseLine(const char *cP,
       addTagRange(m_pParent->mComment,i+offset,i+j+offset);
       i += j;
       return;
-    } else 
+    } else
       i++;
   }
 }
@@ -4951,7 +4951,7 @@ void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *
   while(pFC->gets(text_buffer, sizeof(text_buffer))) {
 
     int address;
-    // The syntax highlighting doesn't work on list files 
+    // The syntax highlighting doesn't work on list files
     address = pFC->IsList() ? -1 : gp->cpu->pma->find_address_from_line(pFC,line);
 
     pBuffer->parseLine(text_buffer,address);
@@ -4991,7 +4991,7 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
 
       if(strcmp(file_name+iNameLength-4,".cod")
         && strcmp(file_name+iNameLength-4,".COD")
-        && (i < SBAW_NRFILES) ) 
+        && (i < SBAW_NRFILES) )
         ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
 
       else {

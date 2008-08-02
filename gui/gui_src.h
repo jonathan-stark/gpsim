@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 // forward references
-class SourceBrowserAsm_Window;     
+class SourceBrowserAsm_Window;
 class SourceBrowserParent_Window;
 class StatusBar_Window;
 class Value;
@@ -62,7 +62,7 @@ protected:
 // TextStyle
 //
 // A TextSyle is wrapper around a GtkTextTag and provides a simple way
-// to change the text foreground and background colors. Also, color 
+// to change the text foreground and background colors. Also, color
 // editing is supported.
 class TextStyle
 {
@@ -83,7 +83,7 @@ public:
   void setFG(GdkColor *pNewColor);
 
   virtual void doubleClickEvent(GtkTextIter *);
-  
+
   ColorHolder  mFG;  // Foreground color
   ColorHolder  mBG;  // Background color
 
@@ -169,18 +169,18 @@ public:
   void setFont(const char *);
   void setSource();
   bool bHasSource();
-  
+
   FileContext *getFC();
 
   // callbacks
   static gint KeyPressHandler(GtkTextView *pView,
-                GdkEventKey *key, 
+                GdkEventKey *key,
                 SourceWindow *pSW);
   static gint ButtonPressHandler(GtkTextView *pView,
-                  GdkEventButton *pButton, 
+                  GdkEventButton *pButton,
                   SourceWindow *pSW);
   static gint ViewExposeEventHandler(GtkTextView *pView,
-                GdkEventExpose *pEvent, 
+                GdkEventExpose *pEvent,
                 SourceWindow *pSW);
 
 
@@ -199,7 +199,7 @@ class SearchDialog;
 class SourceWindow : public GUI_Object
 {
 public:
-  SourceWindow(GUI_Processor *gp, 
+  SourceWindow(GUI_Processor *gp,
                SourceBrowserParent_Window *,
                bool bUseConfig,
                const char *newName=0);
@@ -251,7 +251,7 @@ public:
   GtkStyle *number_text_style;       // for numbers in .asm display
   GtkStyle *comment_text_style;      // for comments in .asm display
   GtkStyle *default_text_style;      // the rest
-    
+
   GdkFont  *symbol_font;             // for symbols in .asm display
   GdkFont  *label_font;              // for label in .asm display
   GdkFont  *instruction_font;        // for instruction in .asm display
@@ -279,7 +279,7 @@ private:
     int  line;                // Line within the page.
     GtkTextBuffer *pBuffer;   // Buffer containing the Program Counter
     GtkTextIter   iBegin;     // Start of where highlight begins
-    GtkTextIter   iEnd;       // End of highlight 
+    GtkTextIter   iEnd;       // End of highlight
   } mProgramCounter;
 
   // Popup Menu
@@ -290,7 +290,7 @@ private:
 
   // Callbacks
   static gint KeyPressHandler(GtkWidget *widget,
-                GdkEventKey *key, 
+                GdkEventKey *key,
                 SourceWindow *pSW);
   static int DeleteEventHandler(GtkWidget *widget,
                 GdkEvent  *event,
@@ -364,7 +364,7 @@ public:
   int address;
   int pos;
   unsigned int index;           // gtktext index to start of line
-private:  
+private:
   unsigned int line;            // line number, first line eq. 0
   GtkWidget *break_widget;      // breakpoint widget on this line.
   GtkWidget *canbreak_widget;   // 'can break' widget on this line.
@@ -385,7 +385,7 @@ class BreakPointList {
 class PixmapObject {
 public:
   PixmapObject(void)
-   { 
+   {
      mask = 0;
      pixmap = 0;
      widget = 0;
@@ -426,12 +426,12 @@ class SourcePage
     notebook_child = 0;
     notebook = 0;
   }
-    
+
   void Close(void);
 };
 
 //
-// The Source Assembler Browser 
+// The Source Assembler Browser
 //
 class SourceBrowserAsm_Window :public  SourceBrowser_Window
 {
@@ -468,7 +468,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GtkWidget *popup_menu;
 
   BreakPointInfo *menu_data;  // used by menu callbacks
-    
+
   GdkBitmap *pc_mask;
   GdkBitmap *bp_mask;
   GdkBitmap *canbp_mask;
@@ -482,7 +482,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GtkStyle *number_text_style;       // for numbers in .asm display
   GtkStyle *comment_text_style;      // for comments in .asm display
   GtkStyle *default_text_style;      // the rest
-    
+
   GdkFont  *symbol_font;             // for symbols in .asm display
   GdkFont  *label_font;              // for label in .asm display
   GdkFont  *instruction_font;        // for instruction in .asm display
@@ -572,7 +572,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   GdkColor normal_pm_bg_color;
   GdkColor breakpoint_color;
 
-  char **column_titles; //
+  gchar **column_titles; //
   int  columns;         //
 
   GtkWidget *notebook;
@@ -587,7 +587,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   // one byte/cell,
   // two bytes/cell MSB first
   // two bytes/cell LSB first
-    
+
   unsigned int *memory;
 
   SourceBrowserOpcode_Window(GUI_Processor *gp);
@@ -608,7 +608,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 
 //
 // The Source Browser Child window.
-// 
+//
 // The gui supports "context" debugging, where a context
 // may be code written for interrupt routines, non-interrupt
 // routines, high versus low interrupt priorities, etc. Each

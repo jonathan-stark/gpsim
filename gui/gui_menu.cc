@@ -75,7 +75,7 @@ do_quit_app(GtkWidget *widget)
 
 
 static void
-show_message (char *title, char *message)
+show_message (const char *title, const char *message)
 {
   GtkWidget *window;
   GtkWidget *label;
@@ -808,7 +808,7 @@ file_selection_hide_fileops (GtkWidget *widget,
   gtk_file_selection_hide_fileop_buttons (fs);
 }
 
-extern int gui_message(char *message);
+extern int gui_message(const char *message);
 
 void
 file_selection_ok (GtkWidget        *w,

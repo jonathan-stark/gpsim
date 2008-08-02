@@ -498,7 +498,7 @@ static void create_dumb_register_file(void)
 }
 
 
-int icd_connect(char *port)
+int icd_connect(const char *port)
 {
   pic_processor *pic=dynamic_cast<pic_processor *>(active_cpu);
 

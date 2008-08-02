@@ -27,7 +27,7 @@ const char * s_psEnglishMessages[] = {
   "the program file type does not contain processor\n"    // first part of IDS_FILE_NEED_PROCESSOR_SPECIFIED
   "you need to specify processor with the processor command\n", // IDS_FILE_NEED_PROCESSOR_SPECIFIED
   "an appropriate list file for %s was not found\n",      // IDS_LIST_FILE_NOT_FOUND
-  "Hit breakpoint %d\n",                                  // IDS_HIT_BREAK 
+  "Hit breakpoint %d\n",                                  // IDS_HIT_BREAK
   NULL,     // IDS_
 };
 
@@ -64,7 +64,7 @@ public:
   virtual const char * FormatValue(gint64 uValue,
     guint64 uMask, int iRadix, const char * pHexPrefix);
 
-  virtual char *       FormatValue(char *str, int len,
+  virtual const char * FormatValue(char *str, int len,
     int iRegisterSize, RegisterValue value);
 //  virtual char *       FormatValueAsBinary(char *str, int len,
 //    int iRegisterSize, RegisterValue value);
@@ -118,7 +118,7 @@ public:
   virtual void VPrintf(const char *fmt, va_list argptr) {}
   virtual void Puts(const char*) {}
   virtual void Putc(const char) {}
-  virtual char* Gets(char *, int) { return "";}
+  virtual const char * Gets(char *, int) { return "";}
 };
 
 NullConsole g_NullConsole;
@@ -150,7 +150,7 @@ public:
   virtual const char * FormatValue(gint64 uValue, guint64 uMask,
     int iRadix) {return "";}
 
-  virtual char *       FormatValue(char *str, int len,
+  virtual const char * FormatValue(char *str, int len,
     int iRegisterSize, RegisterValue value) {return "";}
 
   virtual void SetProgramAddressRadix(int iRadix) {}
@@ -229,7 +229,7 @@ void CGpsimUserInterface::DisplayMessage(FILE * pOut, unsigned int uStringID, ..
   }
   else {
     vfprintf(pOut, m_paStrings[uStringID], ap);
-  }   
+  }
   va_end(ap);
 }
 
@@ -248,7 +248,7 @@ void CGpsimUserInterface::DisplayMessage(FILE * pOut, const char *fmt, ...) {
   }
   else {
     vfprintf(pOut, fmt, ap);
-  }   
+  }
   va_end(ap);
 }
 
@@ -307,12 +307,12 @@ const char * CGpsimUserInterface::FormatRegisterAddress(Register *pReg)
     return "";
 
   return FormatLabeledValue(pReg->name().c_str(),
-			    pReg->address,
-			    s_iRAMAddrMask, s_iRAMAddrRadix, s_sRAMAddrHexPrefix);
+                            pReg->address,
+                            s_iRAMAddrMask, s_iRAMAddrRadix, s_sRAMAddrHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatRegisterAddress(unsigned int uAddress,
-                                                        unsigned int uMask) 
+                                                        unsigned int uMask)
 {
   //register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(uAddress, uMask);
   //const char * pLabel = pRegSym == NULL ? "" : pRegSym->name().c_str();
@@ -394,7 +394,7 @@ const char * CGpsimUserInterface::FormatValue(gint64 uValue,
   return m_sFormatValueGint64.c_str();
 }
 
-char * CGpsimUserInterface::FormatValue(char *str, int len,
+const char * CGpsimUserInterface::FormatValue(char *str, int len,
                                         int iRegisterSize,
                                         RegisterValue value)
 {
