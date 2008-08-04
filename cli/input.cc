@@ -51,13 +51,13 @@ Boston, MA 02111-1307, USA.  */
 
 #endif
 
+#include "../config.h"
+
 #ifdef HAVE_GUI
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gdk/gdk.h>
 #endif
-
-#include "../config.h"
 
 #include "../src/exports.h"
 #include "../src/sim_context.h"
