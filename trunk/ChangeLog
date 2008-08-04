@@ -1,3 +1,10 @@
+2008-08-04 Borut Razem <borut.razem@siol.net>
+	* src/protocol.cc, src/i2c-ee.cc, src/eeprom.cc, src/pic-processor.cc.
+	  src/gpsim_object.cc, src/comparator.cc, src/value.h, src/p12x.cc,
+	  src/value.cc, src/cod.cc, config_win32.h.in, cli/scan.ll,
+	  cli/command.cc, cli/input.cc, plat/win32/libgpsim.def:
+	  MSVC sync, enable compilation on VC 2008
+
 2008-08-02 Borut Razem <borut.razem@siol.net>
 	* gpsim/main.cc, src/gpsim_interface.h, src/icd.h, src/modules.h,
 	  src/i2c-ee.cc, src/ui.h, src/trace.h, src/ui.cc, src/icd.cc,
