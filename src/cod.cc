@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 // cod.cc
 //
 //  The file contains the code for reading Byte Craft's .cod
-// formatted symbol files. 
+// formatted symbol files.
 //
 #include <stdio.h>
 #include <iostream>
@@ -34,6 +34,8 @@ Boston, MA 02111-1307, USA.  */
 #ifdef _WIN32
 #include <direct.h>
 #endif
+
+#include "../config.h"
 
 #include "exports.h"
 #include "gpsim_def.h"
@@ -58,7 +60,7 @@ PicCodProgramFileType::PicCodProgramFileType() {
   memset(&main_dir, 0, sizeof(main_dir));
 
   // Define a flag that tells whether or not we should care about the
-  // case of text strings in the .cod file. 
+  // case of text strings in the .cod file.
   ignore_case_in_cod = 1;
 
   gputils_recent = 0;
@@ -127,7 +129,7 @@ void PicCodProgramFileType::read_block(char * block, int block_number)
 unsigned int get_be_int( char * buff)
 {
   return ( (unsigned char)buff[3]       + ((unsigned char)buff[2] << 8) +
-	   ((unsigned char)buff[1] << 16) + ((unsigned char)buff[0] << 24));
+           ((unsigned char)buff[1] << 16) + ((unsigned char)buff[0] << 24));
 }
 
 //-----------------------------------------------------------
@@ -153,13 +155,13 @@ int cod_address_in_range(char *range_block,int address)
       i+=2;
 
       if((address>=start) && (address<=end))
-	return 1;  // in range
+        return 1;  // in range
 
-      // The end address can be zero on only the first 
+      // The end address can be zero on only the first
       // start/end pair.
 
       if((end == 0) && (i>4))
-	return 0;
+        return 0;
 
     }
   while(i<COD_BLOCK_SIZE);
@@ -189,8 +191,8 @@ void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
 
     if( (i!=j) || (i==0))
       {
-	cout << ".cod range error \n";
-	return;
+        cout << ".cod range error \n";
+        return;
       }
 
     _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 15;
@@ -202,17 +204,17 @@ void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
     for(i=0; i<COD_CODE_IMAGE_BLOCKS; i++)
       {
 
-	index = get_short_int(&dbi->dir.block[2*(COD_DIR_CODE + i)]);
+        index = get_short_int(&dbi->dir.block[2*(COD_DIR_CODE + i)]);
 
-	if (index != 0) {
-	  read_block(temp_block, index);
-	  for(j=0; j<COD_BLOCK_SIZE/2; j++) {
-	    int PCindex  = i*COD_BLOCK_SIZE/2 + j;
-	    if(cod_address_in_range(range_block, PCindex)) {
-	      cpu->init_program_memory_at_index(PCindex+_64k_base, (int)get_short_int(&temp_block[j*2]));
-	    }
-	  }
-	}
+        if (index != 0) {
+          read_block(temp_block, index);
+          for(j=0; j<COD_BLOCK_SIZE/2; j++) {
+            int PCindex  = i*COD_BLOCK_SIZE/2 + j;
+            if(cod_address_in_range(range_block, PCindex)) {
+              cpu->init_program_memory_at_index(PCindex+_64k_base, (int)get_short_int(&temp_block[j*2]));
+            }
+          }
+        }
       }
 
     dbi = dbi->next_dir_block_info;
@@ -253,7 +255,7 @@ FILE *PicCodProgramFileType::open_a_file(char **filename)
 // imo this is cheezy because the .cod file and .lst file have
 // to have the same base file name. By convention, mpasm always
 // made sure this happened. gpasm otoh, gives you an option to
-// make the two different. Furthermore, gpasm includes the .lst 
+// make the two different. Furthermore, gpasm includes the .lst
 // file file name in the list of source files within the .cod
 // file - unfortunately mpasm doesn't ... so gpsim has to assume
 // the list file isn't present
@@ -272,7 +274,7 @@ int PicCodProgramFileType::cod_open_lst(const char *filename)
       pc = lstfilename + i;
     else
       return ERR_FILE_NAME_TOO_LONG;
-      
+
   }
   strcpy(pc, ".lst");
 
@@ -297,7 +299,7 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
   char b[FILE_SIZE];
 
   num_files = 0;
-  end_block = 0;			// eliminates a (spurious) warning
+  end_block = 0;                        // eliminates a (spurious) warning
   //start_block = get_short_int(&directory_block_data[COD_DIR_NAMTAB]);
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_NAMTAB]);
 
@@ -329,7 +331,7 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
       read_block(temp_block, j);
       for(i=0; i<FILES_PER_BLOCK; i++) {
 
-        char	*filenm;
+        char    *filenm;
 
         offset = i*FILE_SIZE;
         if((iReturn = get_string(b,&temp_block[offset],sizeof b)) != SUCCESS) {
@@ -351,8 +353,8 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
         if ((filenm[0] >= 'A') && (filenm[0] <= 'Z')
             && (':' == filenm[1]) && ('\\' == filenm[2])) {
           char *cp;
-          filenm += 3;			// strip C:\ from MPLAB files
-			    // convert \ to / now???
+          filenm += 3;                  // strip C:\ from MPLAB files
+                            // convert \ to / now???
           for (cp = filenm; *cp; ++cp) { // convert DOS slash to Unix slash
             if ('\\' == *cp) *cp = '/';
           }
@@ -368,7 +370,7 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
           //
           cpu->files.Add(filenm);
 
-          if((strncmp(lstfilename, filenm,256) == 0) && 
+          if((strncmp(lstfilename, filenm,256) == 0) &&
               (cpu->files.list_id() >= cpu->files.nsrc_files()) ) {
             if(verbose)
               cout << "Found list file " << ((cpu->files)[num_files])->name() << endl;
@@ -385,8 +387,8 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
       cout << "Found " << num_files << " source files in .cod file\n";
 
     if(num_files != cpu->files.nsrc_files())
-      cout << "warning, number of sources changed from " << num_files << " to " 
-	   << cpu->files.nsrc_files() << " while reading code (gpsim bug)\n";
+      cout << "warning, number of sources changed from " << num_files << " to "
+           << cpu->files.nsrc_files() << " while reading code (gpsim bug)\n";
 
     if(!found_lst_in_cod) {
       cpu->files.Add(lstfilename);
@@ -401,7 +403,7 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
 
 _Cleanup:
   if(0){
-    // Debug code 
+    // Debug code
     int i;
     cout << " new file stuff: " << cpu->files.nsrc_files() << " new files\n";
     for(i=0; i<cpu->files.nsrc_files(); i++) {
@@ -434,20 +436,20 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 
       for(offset=0; offset<(COD_BLOCK_SIZE-COD_LS_SIZE); offset += COD_LS_SIZE) {
 
-	if((temp_block[offset+COD_LS_SMOD] & 4) == 0) {
-	  file_id = temp_block[offset+COD_LS_SFILE];
-	  address = get_short_int(&temp_block[offset+COD_LS_SLOC]);
-	  //address = cpu->map_pm_address2index(address);
-	  sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
-	  smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
+        if((temp_block[offset+COD_LS_SMOD] & 4) == 0) {
+          file_id = temp_block[offset+COD_LS_SFILE];
+          address = get_short_int(&temp_block[offset+COD_LS_SLOC]);
+          //address = cpu->map_pm_address2index(address);
+          sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
+          smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
-	  if( (file_id <= cpu->files.nsrc_files()) &&
-	      (address <= cpu->program_memory_size()) &&
-	      (smod == 0x80) )
+          if( (file_id <= cpu->files.nsrc_files()) &&
+              (address <= cpu->program_memory_size()) &&
+              (smod == 0x80) )
 
-	    cpu->attach_src_line(address,file_id,sline,0);
-	  
-	}
+            cpu->attach_src_line(address,file_id,sline,0);
+
+        }
       }
     }
     cpu->read_src_files();
@@ -459,7 +461,7 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 // read_message_area(Processor *cpu)
 //
 // The .cod file message area contains information like assertions
-// and simulation scripts. 
+// and simulation scripts.
 
 void PicCodProgramFileType::read_message_area(Processor *cpu)
 {
@@ -485,20 +487,20 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 
 #if 0
       {
-	// Debug code to display the contents of the message area.
-	int q,p;
-	printf ("Codefile block 0x%x\n",i);
+        // Debug code to display the contents of the message area.
+        int q,p;
+        printf ("Codefile block 0x%x\n",i);
 
-	for (q=0,p=0; q < COD_BLOCK_SIZE; q+=16) {
+        for (q=0,p=0; q < COD_BLOCK_SIZE; q+=16) {
 
-	  for (p=0; p<16; p++)
-	    printf("%02X ",(unsigned char)temp_block[q+p]);
-	  for (p=0; p<16; p++)
-	    printf("%c", isascii(temp_block[q+p]) ? temp_block[q+p] : '.');
-	  printf("\n");
-	}
+          for (p=0; p<16; p++)
+            printf("%02X ",(unsigned char)temp_block[q+p]);
+          for (p=0; p<16; p++)
+            printf("%c", isascii(temp_block[q+p]) ? temp_block[q+p] : '.');
+          printf("\n");
+        }
 #endif
-    
+
       j = 0;
 
       // Each message has the form of
@@ -509,68 +511,68 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 
       while (j < COD_BLOCK_SIZE-8) {
 
-	/* read big endian */
-	laddress = get_be_int(&temp_block[j]);
-        
+        /* read big endian */
+        laddress = get_be_int(&temp_block[j]);
+
         j += 4;   // 4 = size of big endian
 
-	DebugType = temp_block[j++];
+        DebugType = temp_block[j++];
 
-	if (DebugType == 0) {
-	  break;
-	}
+        if (DebugType == 0) {
+          break;
+        }
 
         get_string(DebugMessage, &temp_block[j], sizeof DebugMessage);
 
-	j += strlen(DebugMessage)+1;
+        j += strlen(DebugMessage)+1;
 
         if(verbose)
           printf("debug message: addr=%#x command=\"%c\" string=\"%s\"\n",
                   laddress,
                   DebugType,
                   DebugMessage);
-      
+
         // The lower case commands are user commands.  The upper case are
         // compiler or assembler generated.  This code makes no distinction
         // between them.
-      
+
         switch(DebugType) {
         // The 'A' and 'E' options in gpasm specifies a list of gpsim commands
         // that are to be executed after the .cod file has been loaded.
         case 'a':
         case 'A':
           // assertion
-	  {
-	    string script("directive");
-	    char buff[256];
-	    snprintf(buff,sizeof(buff),"break e %d, %s\n",laddress,DebugMessage);
-	    string cmd(buff);
-	    cpu->add_command(script,cmd);
-	  }
+          {
+            string script("directive");
+            char buff[256];
+            snprintf(buff,sizeof(buff),"break e %d, %s\n",laddress,DebugMessage);
+            string cmd(buff);
+            cpu->add_command(script,cmd);
+          }
           break;
         case 'e':
         case 'E':
           // gpsim command
-	  {
-	    string script("directive");
-	    string cmd(DebugMessage);
-	    cmd = cmd + '\n';
-	    cpu->add_command(script,cmd);
-	  }
+          {
+            string script("directive");
+            string cmd(DebugMessage);
+            cmd = cmd + '\n';
+            cpu->add_command(script,cmd);
+          }
           break;
 
-	case 'c':
-	case 'C':
-	  // gpsim command
-	  // The 'c'/'C' option in gpasm specifies a single gpsim command that is
-	  // to be invoked whenever the address associated with this directive
-	  // is being simulated.
-	  {
-	    bool bPost = DebugType == 'c';
-	    CommandAssertion *pCA = new CommandAssertion(cpu,laddress,0,
-							DebugMessage,bPost);
-	    get_bp().set_breakpoint(pCA,cpu);
-	  }
+        case 'c':
+        case 'C':
+          // gpsim command
+          // The 'c'/'C' option in gpasm specifies a single gpsim command that is
+          // to be invoked whenever the address associated with this directive
+          // is being simulated.
+          {
+            bool bPost = DebugType == 'c';
+            CommandAssertion *pCA = new CommandAssertion(cpu,laddress,0,
+                                                        DebugMessage,bPost);
+            get_bp().set_breakpoint(pCA,cpu);
+          }
         case 'f':
         case 'F':
           // printf
@@ -630,7 +632,7 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           cpu->registers[value]->new_name(b);
           //register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
           //symbol_table.add(rs);
-          //cpu->addSymbol(cpu->registers[value]); 
+          //cpu->addSymbol(cpu->registers[value]);
           }
           break;
 
@@ -646,9 +648,9 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           }
           break;
 
-	case COD_ST_CONSTANT: 	// Ignore as no useful purpose and may
-				// conflict with other symbols - RRR
-	  break;
+        case COD_ST_CONSTANT:   // Ignore as no useful purpose and may
+                                // conflict with other symbols - RRR
+          break;
 
         default:
           iReturn = get_string(b,s,sizeof b);
@@ -681,7 +683,7 @@ void create_block(Block *b)
 
   b->block = (char *)malloc(COD_BLOCK_SIZE);
   clear_block(b);
-  
+
 }
 
 void delete_block(Block *b)
@@ -763,11 +765,11 @@ int PicCodProgramFileType::check_for_gputils(char *block)
     if (isdigit(buffer[0])) {
       // Extract version numbers in new gputils format
       sscanf(&buffer[0],"%d.%d.%d",&major,&minor,&micro);
-  
+
       if(verbose)
         cout << "gputils version major "<< major << " minor " << minor << " micro " << micro << endl;
 
-      // if gputils version is greater than or equal to 0.13.0, then gputils 
+      // if gputils version is greater than or equal to 0.13.0, then gputils
       // is considered "recent"
       if ((major >= 1) || ( minor >= 13))
         gputils_recent = 1;
@@ -775,7 +777,7 @@ int PicCodProgramFileType::check_for_gputils(char *block)
     } else {
       // version number in old gputils format, so it can't be recent
       gputils_recent = 0;
-    } 
+    }
 
   }
 
@@ -823,20 +825,20 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
   // Find the file context that contain the .asm file.
   // This assumes 'there can be only one'.
   for(i=0;i<cpu->number_of_source_files;i++) {
-    
+
     gpsim_file = &cpu->files[i];
     file_name = gpsim_file->name;
     if(!strcmp(file_name+strlen(file_name)-4,".asm")) {
-      
+
       // Make sure that the file is open
       if(!gpsim_file->file_ptr) {
-	
-	gpsim_file->file_ptr = fopen_path(file_name,"r");
-	if(!gpsim_file->file_ptr) {
 
-	  printf("file \"%s\" not found!!!\n",file_name);
-	  return;
-	}
+        gpsim_file->file_ptr = fopen_path(file_name,"r");
+        if(!gpsim_file->file_ptr) {
+
+          printf("file \"%s\" not found!!!\n",file_name);
+          return;
+        }
       }
       break;
     }
@@ -873,28 +875,28 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
       char *ptr2;
       asmsrc_line++;
       if(0!=strncmp(text_buffer,";#CSRC",6))
-	continue;
+        continue;
 
       // Found a line marker
 
       ptr=text_buffer+7;
       for(;*ptr!='\0';ptr++)
-	if(*ptr==' '||*ptr=='\t')
-	  break;
+        if(*ptr==' '||*ptr=='\t')
+          break;
       if(*ptr=='\0')
-	continue; // Syntax error
+        continue; // Syntax error
 
       // file name
       for(ptr2=text_buffer+7;ptr2<ptr;ptr2++)
-	filename[ptr2-(text_buffer+7)]=*ptr2;
+        filename[ptr2-(text_buffer+7)]=*ptr2;
       filename[ptr2-(text_buffer+7)]=0;
 
       ptr++;
       for(;*ptr!='\0';ptr++)
-	if(isdigit(*ptr) || isspace(*ptr))
-	  break;
+        if(isdigit(*ptr) || isspace(*ptr))
+          break;
       if(!isdigit(*ptr))
-	continue; // Syntax error
+        continue; // Syntax error
 
       found_line_numbers=1; // The .asm file contains line numbers.
 
@@ -905,9 +907,9 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 
         if(!strcmp(filename,hll_source_files[hll_files_index].filename)) {
 
-	      // Found it!
-	      file_index=hll_files_index+cpu->number_of_source_files;
-	      break;
+              // Found it!
+              file_index=hll_files_index+cpu->number_of_source_files;
+              break;
         }
       }
 
@@ -1010,7 +1012,7 @@ int open_cod_file(Processor **pcpu, const char *filename)
   char directory[256];
   const char *dir_path_end;
   dir_path_end = get_dir_delim(filename);
-  
+
   if(dir_path_end!=0)
   {
       strncpy(directory,filename,dir_path_end-filename);
@@ -1027,7 +1029,7 @@ int open_cod_file(Processor **pcpu, const char *filename)
 int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
                                            const char *filename,
                                            FILE *pFile,
-					   const char *pProcessorName)
+                                           const char *pProcessorName)
 {
   int error_code= SUCCESS;
   Processor *ccpu = 0;
@@ -1057,7 +1059,7 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
 
   // If we get here, then the .cod file is good.
   if(*pcpu == 0) {
-    
+
     char processor_type[16];
     processor_type[0] = 'p';  // Hack to get around processors whose name begin with a digit.
 
@@ -1065,31 +1067,31 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
       cout << "ascertaining cpu from the .cod file\n";
 
     if(SUCCESS == get_string(&processor_type[1],
-			     &main_dir.dir.block[COD_DIR_PROCESSOR - 1],
-			     sizeof (processor_type)-1)) {
+                             &main_dir.dir.block[COD_DIR_PROCESSOR - 1],
+                             sizeof (processor_type)-1)) {
 
-      char *pProcessorTypeOffset = isdigit(processor_type[1]) ? 
-	&processor_type[0] : &processor_type[1];
+      char *pProcessorTypeOffset = isdigit(processor_type[1]) ?
+        &processor_type[0] : &processor_type[1];
 
       if (!pProcessorName)
-	pProcessorName = pProcessorTypeOffset;
+        pProcessorName = pProcessorTypeOffset;
 
       if(verbose)
-	cout << "found a " << processor_type << " in the .cod file\n";
+        cout << "found a " << processor_type << " in the .cod file\n";
 
       *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_type,
-									   pProcessorName);
+                                                                           pProcessorName);
       if(*pcpu == 0) {
-	if(!ignore_case_in_cod)
-	  return(ERR_UNRECOGNIZED_PROCESSOR);
+        if(!ignore_case_in_cod)
+          return(ERR_UNRECOGNIZED_PROCESSOR);
 
-	// Could be that there's a case sensitivity issue:
-	strtolower(processor_type);
-	*pcpu = (Processor *)CSimulationContext::GetContext()->
-	  add_processor(processor_type,pProcessorName);
+        // Could be that there's a case sensitivity issue:
+        strtolower(processor_type);
+        *pcpu = (Processor *)CSimulationContext::GetContext()->
+          add_processor(processor_type,pProcessorName);
 
-	if(*pcpu == 0)
-	  return(ERR_UNRECOGNIZED_PROCESSOR);
+        if(*pcpu == 0)
+          return(ERR_UNRECOGNIZED_PROCESSOR);
       }
     }
     else {
@@ -1106,7 +1108,7 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
   ccpu->files.SetSourcePath(filename);
   read_src_files_from_cod(ccpu);
 
-  // Associate the .lst and .asm files' line numbers with 
+  // Associate the .lst and .asm files' line numbers with
   // the assembly instructions' addresses.
 
   read_line_numbers_from_cod(ccpu);

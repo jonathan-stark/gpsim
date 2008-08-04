@@ -19,11 +19,13 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-#include "protocol.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../config.h"
+
+#include "protocol.h"
 
 #ifdef putc
 #undef putc
@@ -141,7 +143,7 @@ Packet::Packet(unsigned int rxsize, unsigned int txsize)
 
 bool Packet::DecodeHeader()
 {
-  
+
   if(*rxBuffer->buffer == '$') {
     rxBuffer->index = 1;
     return true;
@@ -196,7 +198,7 @@ bool Packet::DecodeBool(bool  &b)
 
   if(ascii2uint(&buff,2) == eGPSIM_TYPE_BOOLEAN) {
 
-    if(*buff == '0') 
+    if(*buff == '0')
       b = false;
     else if(*buff == '1')
       b = true;
@@ -217,7 +219,7 @@ bool Packet::DecodeFloat(double  &d)
   if(ascii2uint(&b,2) == eGPSIM_TYPE_FLOAT) {
 
     double dtry = strtod(b, &b);
-    unsigned int len = b - rxBuffer->buffer; 
+    unsigned int len = b - rxBuffer->buffer;
     if( len < rxBuffer->size - rxBuffer->index) {
 
       rxBuffer->index += len;

@@ -109,7 +109,7 @@ public:
     return *this;
   }
 
-  /// compare - this method will compare another object to this 
+  /// compare - this method will compare another object to this
   /// object. It takes a pointer to a ComparisonOperator as its
   /// input. Of the object's are mismatched for the particular
   /// operator, a 'Type Mismatch' Error will be thown.
@@ -202,7 +202,7 @@ private:
 class Boolean : public Value {
 
 public:
-	
+
   Boolean(bool newValue);
   Boolean(const char *_name, bool newValue, const char *desc=0);
   static bool Parse(const char *pValue, bool &bValue);
@@ -261,7 +261,7 @@ inline bool operator!=(Boolean &LValue, Boolean &RValue) {
 class Integer : public Value {
 
 public:
-	
+
   Integer(const Integer &new_value);
   Integer(gint64 new_value);
   Integer(const char *_name, gint64 new_value, const char *desc=0);
@@ -417,14 +417,14 @@ private:
 inline bool operator!=(Integer &iLValue, Integer &iRValue) {
   return (gint64)iLValue != (gint64)iRValue;
 }
-    
+
 //------------------------------------------------------------------------
 /// Float - built in gpsim type for a 'double'
 
 class Float : public Value {
 
 public:
-	
+
   Float(double newValue = 0.0);
   Float(const char *_name, double newValue, const char *desc=0);
   static bool Parse(const char *pValue, double &fValue);
@@ -500,8 +500,9 @@ inline bool operator!=(Float &iLValue, Float &iRValue) {
 class String : public Value {
 
 public:
-	
+
   String(const char *newValue);
+  String(const char *newValue, size_t len);
   String(const char *_name, const char *newValue, const char *desc=0);
   virtual ~String();
 
@@ -532,13 +533,13 @@ inline bool operator!=(String &LValue, String &RValue) {
   return strcmp((const char *)LValue, (const char *)RValue) != 0;
 }
 
-    
+
 /*****************************************************************/
 
 class AbstractRange : public Value {
 
 public:
-	
+
   AbstractRange(unsigned int leftVal, unsigned int rightVal);
   virtual ~AbstractRange();
 

@@ -23,8 +23,11 @@ Boston, MA 02111-1307, USA.  */
 #include <typeinfo>
 #include <stdio.h>
 #include <ctype.h>
-#include "gpsim_object.h"
 #include <cstring>
+
+#include "../config.h"
+
+#include "gpsim_object.h"
 
 //========================================================================
 
@@ -50,9 +53,9 @@ gpsimObject::~gpsimObject()
 string gpsimObject::showType()
 {
   const char* name;
-  
+
   name = typeid(*this).name();
-  
+
   /* Unfortunately, the class name string returned by typeid() is
    * implementation-specific.  If a particular compiler produces
    * ugly output, this is your chance to clean it up. */
@@ -78,9 +81,9 @@ string gpsimObject::showType()
     }
     name = buf;
   }
-  else	// just nn name
+  else  // just nn name
   {
-      while (isdigit(*name)) 
+      while (isdigit(*name))
         name++;
   }
 #elif defined _MSC_VER

@@ -1237,6 +1237,18 @@ String::String(const char *newValue)
   else
     value = 0;
 }
+
+String::String(const char *newValue, size_t len)
+{
+  if (newValue) {
+    value = (char *)malloc(len + 1);
+    strncpy(value, newValue, len);
+    value[len] = '\0';
+  }
+  else
+    value = 0;
+}
+
 String::String(const char *_name, const char *newValue,const char *_desc)
   : Value(_name,_desc)
 {
@@ -1252,7 +1264,6 @@ String::~String()
   if(value)
     free(value);
 }
-
 
 string String::toString()
 {

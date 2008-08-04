@@ -33,6 +33,8 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <string>
 
+#include "../config.h"
+
 #include "packages.h"
 #include "stimuli.h"
 #include "i2c-ee.h"

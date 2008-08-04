@@ -194,6 +194,7 @@ EXPORTS
     ?address_has_notify@ProgramMemoryAccess@@UAEHI@Z
     ?address_has_profile_start@ProgramMemoryAccess@@UAEHI@Z
     ?address_has_profile_stop@ProgramMemoryAccess@@UAEHI@Z
+    ?advance_simulation@gpsimInterface@@QAEXW4eAdvancementModes@1@@Z
     ?advanceIndex@PacketBuffer@@QAEXI@Z
     ?allocateTraceType@Trace@@QAEIPAVTraceType@@@Z
     ?assertValid@Integer@@SAPAV1@PAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_J2@Z
@@ -275,7 +276,7 @@ EXPORTS
     ?dump_raw@TraceType@@UAEHPAVTrace@@IPADH@Z
     ?dump_registers@Processor@@UAEXXZ
     ?dump_stimulus_list@@YAXXZ
-    ?enableLogging@Trace@@QAEXPAD@Z
+    ?enableLogging@Trace@@QAEXPBD@Z
     ?enable_logging@TraceLog@@QAEXPBDH@Z
     ?enable_profiling@ProfileKeeper@@QAEXXZ
     ?entriesUsed@TraceType@@UAEHPAVTrace@@I@Z
@@ -392,7 +393,7 @@ EXPORTS
     ?hasBreak@RegisterMemoryAccess@@QAE_NI@Z
     ?hasValid_opcode_at_address@ProgramMemoryAccess@@QAE_NI@Z
     ?hasValid_opcode_at_index@ProgramMemoryAccess@@QAE_NI@Z
-    ?icd_connect@@YAHPAD@Z
+    ?icd_connect@@YAHPBD@Z
     ?icd_detected@@YAHXZ
     ?icd_disconnect@@YAHXZ
     ?icd_has_debug_module@@YAHXZ
@@ -468,7 +469,7 @@ EXPORTS
     ?remove_xref@Value@@UAEXPAX@Z
     ?reset@Module@@UAEXW4RESET_TYPE@@@Z
     ?reset@Program_Counter@@QAEXXZ
-    ?reset@gpsimInterface@@QAEXXZ
+    ?reset@gpsimInterface@@QAEXW4RESET_TYPE@@@Z
     ?reset@sfr_register@@UAEXW4RESET_TYPE@@@Z
     ?rewind@FileContext@@QAEXXZ
     ?rts@ByteLogger@gpsim@@QAEX_K@Z
@@ -578,9 +579,10 @@ EXPORTS
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
     ?simulation_start_cycle@@3_KA
     ?start@ByteLogger@gpsim@@QAEX_K@Z
-    ?start_simulation@gpsimInterface@@QAEXXZ
+	?start_simulation@gpsimInterface@@QAEXN@Z
     ?status@TraceLog@@QAEXXZ
     ?step_over@Processor@@UAEX_N@Z
+    ?step_simulation@gpsimInterface@@QAEXH@Z
     ?stimuli_attach@@YAXPAVgpsimObject@@PAV?$list@PAVgpsimObject@@V?$allocator@PAVgpsimObject@@@std@@@std@@@Z
     ?stop@ByteLogger@gpsim@@QAEX_K@Z
     ?stop@ProgramMemoryAccess@@UAEXXZ
@@ -592,11 +594,9 @@ EXPORTS
     ?toBitStr@RegisterValue@@QBEPADPADHIPBD111@Z
     ?toBitStr@gpsimObject@@UAEPADPADH@Z
     ?toString@AnError@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
-    ?toString@Boolean@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAD@Z
     ?toString@Boolean@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_N@Z
     ?toString@Boolean@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Boolean@@UAEPADPADH@Z
-    ?toString@Float@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAD@Z
     ?toString@Float@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Float@@UAEPADPADH@Z
     ?toString@IIndexedCollection@@MAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@HAAV?$vector@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$allocator@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@2@@3@0@Z
@@ -604,8 +604,7 @@ EXPORTS
     ?toString@IIndexedCollection@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@IIndexedCollection@@UAEPADPADH@Z
     ?toString@IndexedSymbol@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
-    ?toString@Integer@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAD@Z
-    ?toString@Integer@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAD_J@Z
+    ?toString@Integer@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PBD@Z
     ?toString@Integer@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Integer@@UAEPADPADH@Z
     ?toString@Register@@UAEPADPADH@Z

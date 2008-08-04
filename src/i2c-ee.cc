@@ -28,6 +28,8 @@ using namespace std;
 
 #include <glib.h>
 
+#include "../config.h"
+
 #include "trace.h"
 #include "pic-processor.h"
 #include "stimuli.h"
