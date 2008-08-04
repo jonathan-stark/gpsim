@@ -32,17 +32,19 @@ Boston, MA 02111-1307, USA.  */
 #include <io.h>
 #endif
 
-#include "command.h"
+#include "../config.h"
+
 #include "../src/operator.h"
-//#include "../src/errors.h"
-#include "cmd_macro.h"
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
+#include "../src/processor.h"
+
+#include "command.h"
+#include "cmd_macro.h"
 
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
-#include "../src/processor.h"
 
 /* Since our parser is reentrant, it needs to pass us a pointer
  * to the yylval that it would like us to use */
@@ -72,7 +74,7 @@ struct LexerStateStruct {
 
 static char *        m_pLastFullCommand = NULL;
 
-void SetLastFullCommand(const char *pCmd) 
+void SetLastFullCommand(const char *pCmd)
 {
   if (strlen(pCmd)>1) {
     if (m_pLastFullCommand)
@@ -80,7 +82,7 @@ void SetLastFullCommand(const char *pCmd)
     m_pLastFullCommand = strdup(pCmd);
   }
 }
-const char * GetLastFullCommand() 
+const char * GetLastFullCommand()
 {
   return m_pLastFullCommand;
 }
@@ -99,7 +101,7 @@ static int process_booleanLiteral(YYSTYPE* yylvalP, bool value);
 static int process_macroBody(YYSTYPE* yylvalP, const char *text);
 static int process_floatLiteral(YYSTYPE* yylvalP, char *buffer);
 static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer);
-static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer);
+static int process_quotedStringLiteral(YYSTYPE* yylvalP, char *buffer);
 static int process_shellLine(YYSTYPE* yylvalP, const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
@@ -117,7 +119,7 @@ static Macro *gCurrentMacro=0;
 //========================================================================
 // MacroChain class
 //
-// 
+//
 
 class MacroChain
 {
@@ -133,7 +135,7 @@ public:
     head.prev = head.next =0;
     curr = &head;
   }
-  
+
   void push(Macro *m) {
     if (verbose & 4 && m) {
       cout << "Pushing " << m->name() << " onto the macro chain\n";
@@ -204,24 +206,24 @@ static MacroChain theMacroChain;
 
 %}
 
-D	[0-9]
-S	[ \t]
-NL	((\n)|(\r\n))
-SNL	({S}|{NL})
-BS	(\\)
-CONT	({EL}|{BS})
-CCHAR	(#)
-COMMENT	({CCHAR}.*)
-SNLCMT	({SNL}|{COMMENT})
+D       [0-9]
+S       [ \t]
+NL      ((\n)|(\r\n))
+SNL     ({S}|{NL})
+BS      (\\)
+CONT    ({EL}|{BS})
+CCHAR   (#)
+COMMENT ({CCHAR}.*)
+SNLCMT  ({SNL}|{COMMENT})
 INDIRECT (\*)
 IDENTIFIER ([\']?[/_a-zA-Z\.][/_a-zA-Z0-9\.\-]*)
 INDEXERLEFT    (\[)
 INDEXERRIGHT    (\])
-EXPON	([DdEe][+-]?{D}+)
+EXPON   ([DdEe][+-]?{D}+)
 DEC     ({D}+)
 HEX1    ((0[Xx])[0-9a-fA-F]+)
 HEX2    ("$"[0-9a-fA-F]+)
-FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
+FLOAT   (({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
 SHELLCHAR (^[!])
@@ -246,11 +248,11 @@ QUOTEDTOKEN (("\"".*\")|("\'".*'))
 // Comments. Ignore all text after a comment character
 %}
 
-{COMMENT} 
-  { 
+{COMMENT}
+  {
     return recognize(COMMENT_T,"comment");
   }
- 
+
 
 {S}+      {   /* ignore white space */ }
 
@@ -259,37 +261,37 @@ QUOTEDTOKEN (("\"".*\")|("\'".*'))
           cout << "got EOL\n";
 
       pLexerState->input_mode = 0;  // assume that this is not a multi-line command.
-      if(pLexerState->cmd && 
-	 pLexerState->cmd->can_span_lines() && 
-	 pLexerState->have_parameters && 
-	 !pLexerState->end_of_command ) 
+      if(pLexerState->cmd &&
+         pLexerState->cmd->can_span_lines() &&
+         pLexerState->have_parameters &&
+         !pLexerState->end_of_command )
 
-	pLexerState->input_mode = CONTINUING_LINE;
+        pLexerState->input_mode = CONTINUING_LINE;
 
       else {
-	pLexerState->cmd = 0;
+        pLexerState->cmd = 0;
         return recognize(EOLN_T, " end of line");
       }
 }
 
-<INITIAL>  { 
+<INITIAL>  {
       // Got an eol.
       if(verbose)
           cout << "got INITIAL\n";
 
       pLexerState->input_mode = 0;  // assume that this is not a multi-line command.
-      if(pLexerState->cmd && 
-	 pLexerState->cmd->can_span_lines() && 
-	 pLexerState->have_parameters && 
-	 !pLexerState->end_of_command ) 
+      if(pLexerState->cmd &&
+         pLexerState->cmd->can_span_lines() &&
+         pLexerState->have_parameters &&
+         !pLexerState->end_of_command )
 
-	pLexerState->input_mode = CONTINUING_LINE;
+        pLexerState->input_mode = CONTINUING_LINE;
 
       //else
       //  return recognize(EOLN_T, " end of line");
     }
 
-q{S}+\n { /* short cut for quiting */ 
+q{S}+\n { /* short cut for quiting */
       quit_parse  =1;
       return QUIT;
     }
@@ -363,7 +365,7 @@ abort_gpsim_now {
                                printf("adding [%c]\n", *yytext);
                              if (macroBodyPtr > max_bodyPtr) {
                                cout << "buffer overflow in macro definition\n";
-			       exit(0);
+                               exit(0);
                              }
                          }
 
@@ -485,7 +487,7 @@ int yywrap (void)
 
 /************************************************************************
  * push_input_stack
- * 
+ *
  * called when macros are being expanded.
  */
 static void push_input_stack(void)
@@ -495,7 +497,7 @@ static void push_input_stack(void)
 }
 
 /************************************************************************
- * 
+ *
  */
 static int recognize(int token_id,const char *description)
 {
@@ -535,9 +537,9 @@ static bool bTryMacroParameterExpansion(string &s)
   string replaced;
   Macro *currentMacro = theMacroChain.nextParamSource();
 
-  if (verbose & 4) { 
+  if (verbose & 4) {
     cout << "Searching for parameter named:" << s;
-    if (currentMacro) 
+    if (currentMacro)
       cout << " in macro: " << currentMacro->name() << endl;
     else
       cout << " but there is no current macro\n";
@@ -565,12 +567,12 @@ static bool bTryMacroParameterExpansion(string &s)
 *
 *  input   string &s
 *          cmd_options **op
-*  output  int 
+*  output  int
 *
 *  1 - If `op' is NULL, then handle identifier hasn't been called
 *      for the current command that's being processed. So, the
 *      the string `s' is compared to all of the valid commands.
-*      If it is valid, then `op' is assigned a pointer to the 
+*      If it is valid, then `op' is assigned a pointer to the
 *      options associated with the command. If the string is not
 *      found, then that's a syntax error and the string is ignored.
 *  2 - If `op' is non-NULL, then handle_identifier has been called
@@ -592,20 +594,20 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 
   if(! *op) {
 
-    
+
     // If the first character in the string is a ' (single quote character) then
     // this means that the user is explicitly trying to access a user defined symbol
     // (e.g. if there is variable named "help" in the user's symbol table, then the
     // only way to get access to it is by using the single quote character:
-    //    'help   
+    //    'help
 
     if(s[0] == '\'')
 
       // Strip away the quote, we won't treat this as a command and the parser
       // doesn't want to know about it.
 
-      s=s.erase(0,1); 
-    
+      s=s.erase(0,1);
+
     else {
 
       // Search the commands
@@ -614,12 +616,12 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
         if(verbose&2)
           cout << "\n  *******\nprocessing command " << (pLexerState->cmd->name()) << "\n  token value " <<
             (pLexerState->cmd->get_token()) << "\n *******\n";
-	
+
         *op = pLexerState->cmd->get_op();
         pLexerState->have_parameters = 0;
         retval = pLexerState->cmd->get_token();
 
-	// ugh. This is problem when the parser becomes re-entrant.
+        // ugh. This is problem when the parser becomes re-entrant.
         last_command_is_repeatable = pLexerState->cmd->is_repeatable();
 
         return recognize(retval,"good command");
@@ -639,14 +641,14 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
   } else {
 
     if(verbose&2)
-      cout << "search options for command '" 
-	   << (pLexerState->cmd ? pLexerState->cmd->name() : "?") 
-	   << "'\n";
+      cout << "search options for command '"
+           << (pLexerState->cmd ? pLexerState->cmd->name() : "?")
+           << "'\n";
 
     if (bTryMacroParameterExpansion(s))
       return 0;
 
-    // We already have the command, so search the options. 
+    // We already have the command, so search the options.
 
     struct cmd_options *opt = *op;
 
@@ -717,12 +719,12 @@ static int process_intLiteral(YYSTYPE* yylvalP, char *buffer, int conversionBase
     nxtDigit = (c) <= '9' ? c-'0' : c-'A'+10;
     if ((nxtDigit >= conversionBase) || (nxtDigit<0)) {
       /* If the next digit exceeds the base, then it's an error unless
-	 this is a binary conversion and the character is a single quote */
+         this is a binary conversion and the character is a single quote */
       if(!(conversionBase == 2 && c == '\''))
-	literalValue = 0;
+        literalValue = 0;
       break;
     }
-    
+
     literalValue *= conversionBase;
     literalValue += nxtDigit;
   }
@@ -760,7 +762,7 @@ static int process_floatLiteral(YYSTYPE* yylvalP, char *buffer)
 #if 0
   errno = 0;
   floatValue = atof(buffer);
-  
+
   if (errno != 0) {
     /* The conversion failed */
     throw new Error("Bad floating point literal");
@@ -787,7 +789,7 @@ static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
 }
 
 
-static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer)
+static int process_quotedStringLiteral(YYSTYPE* yylvalP, char *buffer)
 {
   char * pCloseQuote = strchr(buffer, '\"');
   if(pCloseQuote == NULL)
@@ -860,7 +862,7 @@ void FlushLexerBuffer() {
 static void pushLexerState()
 {
   if(verbose)
-    cout << "pushing lexer state: from level " << sLevels 
+    cout << "pushing lexer state: from level " << sLevels
          << " to " << (sLevels+1) << endl;
 
   sLevels++;
@@ -881,7 +883,7 @@ static void pushLexerState()
 static void popLexerState()
 {
   if(verbose)
-    cout << "popping lexer state: from level " << sLevels 
+    cout << "popping lexer state: from level " << sLevels
          << " to " << (sLevels-1) << endl;
 
   sLevels--;
@@ -1016,14 +1018,14 @@ static bool isWhiteSpace(char c)
 
 //----------------------------------------
 // getNextMacroParameter(char *s, int l)
-// 
+//
 // returns true if a macro parameter can be extracted
 // from yyinput buffer. If it does return true, then the
 // extracted macro parameter will get copied to
-// the string 's'. 
+// the string 's'.
 //
 // This routine will lexically analyze a character string
-// and split it up into chunks that can be passed to a 
+// and split it up into chunks that can be passed to a
 // macro invocation. It might be possible to add a new
 // lex state and do this work in the lexer...
 //
@@ -1061,18 +1063,18 @@ static bool getNextMacroParameter(char *s, int l)
       c = yyinput();
 
       if(c == '(')
-	nParen++;
+        nParen++;
       if(c == ')' && --nParen < 0 )
-	bDone = true;
+        bDone = true;
 
       if(c==',')
-	break;
+        break;
 
       if(c==0 || c=='\n' ) {
-	bDone=true;
-	unput(c);
+        bDone=true;
+        unput(c);
       } else
-	*s++ = c;
+        *s++ = c;
     } while(--l>0  && !bDone);
   }
 done:
@@ -1102,12 +1104,12 @@ void lexer_InvokeMacro(Macro *m)
     char s[256];
 
     bValidParameter = getNextMacroParameter(s,sizeof(s));
-    
+
     if(bValidParameter) {
       m->add_parameter(s);
 
       if(verbose &4)
-	cout << "macro param: " << s << endl;
+        cout << "macro param: " << s << endl;
     }
   } while (bValidParameter && i<m->nParameters());
 

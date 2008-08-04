@@ -1,5 +1,5 @@
 /*
-	out = output
+        out = output
    Copyright (C) 1998 T. Scott Dattalo
    Copyright (C) 2006 Roy R. Rankin
 
@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <string>
 
+#include "../config.h"
+
 #include "pic-ioports.h"
 #include "trace.h"
 #include "processor.h"
@@ -39,9 +41,9 @@ ComparatorModule::ComparatorModule(Processor *pCpu)
 {
 }
 void ComparatorModule::initialize( PIR_SET *pir_set,
-	PinModule *pin_vr0, PinModule *pin_cm0, 
-	PinModule *pin_cm1, PinModule *pin_cm2, PinModule *pin_cm3, 
-	PinModule *pin_cm4, PinModule *pin_cm5)
+        PinModule *pin_vr0, PinModule *pin_cm0,
+        PinModule *pin_cm1, PinModule *pin_cm2, PinModule *pin_cm3,
+        PinModule *pin_cm4, PinModule *pin_cm5)
 {
   //  cmcon = new CMCON;
   cmcon.assign_pir_set(pir_set);
@@ -81,7 +83,7 @@ public:
   }
   void putState(bool new_val)
   {
-	m_state = new_val?'1':'0';
+        m_state = new_val?'1':'0';
   }
 private:
   char m_state;
@@ -90,12 +92,12 @@ private:
 CM_stimulus::CM_stimulus(CMCON * arg, const char *cPname,double _Vth, double _Zth)
   : stimulus(cPname, _Vth, _Zth)
 {
-	_cmcon = arg;
+        _cmcon = arg;
 }
 
 void   CM_stimulus::set_nodeVoltage(double v)
 {
-        _cmcon->get();	// recalculate comparator values
+        _cmcon->get();  // recalculate comparator values
         nodeVoltage = v;
 }
 
@@ -103,13 +105,13 @@ void   CM_stimulus::set_nodeVoltage(double v)
 /*
     Setup the configuration for the comparators. Must be called
     for each comparator and each mode(CN2:CM0) that can be used.
-	il1 = input Vin- when CIS == 0
-	ih1 = input Vin+ when CIS == 0
-	il2 = input Vin- when CIS == 1
-	ih2 = input Vin+ when CIS == 1
-	out = output
+        il1 = input Vin- when CIS == 0
+        ih1 = input Vin+ when CIS == 0
+        il2 = input Vin- when CIS == 1
+        ih2 = input Vin+ when CIS == 1
+        out = output
 
-	if input == VREF, reference voltage is used.
+        if input == VREF, reference voltage is used.
 */
 
 void CMCON::set_configuration(int comp, int mode, int il1, int ih1, int il2,
@@ -117,18 +119,18 @@ int ih2, int out)
 {
     if (comp > cMaxComparators || comp < 1 )
     {
-	cout << "CMCON::set_configuration comp=" << comp << " out of range\n";
-	return;
+        cout << "CMCON::set_configuration comp=" << comp << " out of range\n";
+        return;
     }
     if (mode > cMaxConfigurations)
     {
-	cout << "CMCON::set_configuration mode too large\n";
-	return;
+        cout << "CMCON::set_configuration mode too large\n";
+        return;
     }
-    m_configuration_bits[comp-1][mode] = (il1 << CFG_SHIFT*4) | 
-	(ih1 << CFG_SHIFT*3) |
-	(il2 << CFG_SHIFT*2) | (ih2 << CFG_SHIFT) | out;
-} 
+    m_configuration_bits[comp-1][mode] = (il1 << CFG_SHIFT*4) |
+        (ih1 << CFG_SHIFT*3) |
+        (il2 << CFG_SHIFT*2) | (ih2 << CFG_SHIFT) | out;
+}
 
 //------------------------------------------------------------------------
 CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
@@ -174,75 +176,75 @@ double CMCON::comp_voltage(int ind, int invert)
     switch(ind)
     {
     case VREF:
-	Voltage = _vrcon->get_Vref();
-	break;
+        Voltage = _vrcon->get_Vref();
+        break;
 
     case NO_IN:
-	Voltage = invert ? 5. : 0.;
-	break;
+        Voltage = invert ? 5. : 0.;
+        break;
 
     default:
-	Voltage = cm_input[ind]->getPin().get_nodeVoltage();
-	break;
+        Voltage = cm_input[ind]->getPin().get_nodeVoltage();
+        break;
     }
     return Voltage;
 }
 /*
-**	get()
-**		read the comparator inputs and set C2OUT and C1OUT
-**		as required. Also drive output pins if required.
+**      get()
+**              read the comparator inputs and set C2OUT and C1OUT
+**              as required. Also drive output pins if required.
 */
-unsigned int CMCON::get() 
-{ 
+unsigned int CMCON::get()
+{
     unsigned int cmcon_val = value.get();
     int mode = cmcon_val & 0x07;
     int i;
-                                                                                
+
     for (i = 0; i < 2; i++)
     {
-	double Vhigh;
-	double Vlow;
-	bool out_true;
-	int out;
-	int invert_bit = (i == 0) ? C1INV : C2INV;
-	int output_bit = (i == 0) ? C1OUT : C2OUT;
-	int shift = (cmcon_val & CIS) ? CFG_SHIFT : CFG_SHIFT*3;
+        double Vhigh;
+        double Vlow;
+        bool out_true;
+        int out;
+        int invert_bit = (i == 0) ? C1INV : C2INV;
+        int output_bit = (i == 0) ? C1OUT : C2OUT;
+        int shift = (cmcon_val & CIS) ? CFG_SHIFT : CFG_SHIFT*3;
 
-	if ((m_configuration_bits[i][mode] & CFG_MASK) != ZERO)
+        if ((m_configuration_bits[i][mode] & CFG_MASK) != ZERO)
         {
-	    Vhigh = comp_voltage( 
-		(m_configuration_bits[i][mode] >> shift) & CFG_MASK,
-		cmcon_val & invert_bit);
-	    Vlow = comp_voltage( 
-		(m_configuration_bits[i][mode] >> (shift + CFG_SHIFT)) & CFG_MASK,
-		(cmcon_val & invert_bit) == 0);
-		
-	    if (Vhigh > Vlow)
-	    	out_true = (cmcon_val & invert_bit)?false:true;
+            Vhigh = comp_voltage(
+                (m_configuration_bits[i][mode] >> shift) & CFG_MASK,
+                cmcon_val & invert_bit);
+            Vlow = comp_voltage(
+                (m_configuration_bits[i][mode] >> (shift + CFG_SHIFT)) & CFG_MASK,
+                (cmcon_val & invert_bit) == 0);
+
+            if (Vhigh > Vlow)
+                out_true = (cmcon_val & invert_bit)?false:true;
             else
-	    	out_true = (cmcon_val & invert_bit)?true:false;
+                out_true = (cmcon_val & invert_bit)?true:false;
 
-   	    if (out_true)  
-	    	cmcon_val |= output_bit;
-   	    else
-	    	cmcon_val &= ~output_bit;
+            if (out_true)
+                cmcon_val |= output_bit;
+            else
+                cmcon_val &= ~output_bit;
 
-	    if ( (out = m_configuration_bits[i][mode] & CFG_MASK) < 2)
-	    {
-	    	cm_source[out]->putState(out_true);
-	    	cm_output[out]->updatePinModule();
-	    	update();
-	    }
-	}
-	else			// Don't care about inputs, register value 0
-	    cmcon_val &= ~output_bit;
+            if ( (out = m_configuration_bits[i][mode] & CFG_MASK) < 2)
+            {
+                cm_source[out]->putState(out_true);
+                cm_output[out]->updatePinModule();
+                update();
+            }
+        }
+        else                    // Don't care about inputs, register value 0
+            cmcon_val &= ~output_bit;
    }
 
    if (value.get() ^ cmcon_val) // change of state
    {
-	// Generate interupt ?
-	if (pir_set)
-		pir_set->set_cmif();
+        // Generate interupt ?
+        if (pir_set)
+                pir_set->set_cmif();
    }
    value.put(cmcon_val);
    return(cmcon_val);
@@ -255,7 +257,7 @@ void CMCON::put(unsigned int new_value)
   unsigned int out_mask = 0;
   unsigned int configuration;
   int i;
-                                                                                
+
   if (verbose)
       cout << "CMCON::put(new_value) =" << hex << new_value << endl;
 
@@ -267,24 +269,24 @@ void CMCON::put(unsigned int new_value)
   {
      configuration = m_configuration_bits[i][mode];
      if ((configuration & CFG_MASK) < 2)
-	out_mask |= (1 << (configuration & CFG_MASK));
+        out_mask |= (1 << (configuration & CFG_MASK));
      for(int j = 0; j < 4; j++)
      {
-	configuration >>= CFG_SHIFT;
-	if ((configuration & CFG_MASK) < 4)
-		in_mask |= (1 << (configuration & CFG_MASK));
+        configuration >>= CFG_SHIFT;
+        if ((configuration & CFG_MASK) < 4)
+                in_mask |= (1 << (configuration & CFG_MASK));
      }
   }
 
   if (verbose)
       cout << "CMCON::put in_mask=" << in_mask << " out_mask=" << out_mask << endl;
 
-  if ((mode != 0) && (mode != 7) && ! cm_stimulus[0])	// initialize stimulus
+  if ((mode != 0) && (mode != 7) && ! cm_stimulus[0])   // initialize stimulus
   {
-	cm_stimulus[0] = new CM_stimulus(this, "cm_stimulus_1", 0, 1e12);
-	cm_stimulus[1] = new CM_stimulus(this, "cm_stimulus_2", 0, 1e12);
-	cm_stimulus[2] = new CM_stimulus(this, "cm_stimulus_3", 0, 1e12);
-	cm_stimulus[3] = new CM_stimulus(this, "cm_stimulus_4", 0, 1e12);
+        cm_stimulus[0] = new CM_stimulus(this, "cm_stimulus_1", 0, 1e12);
+        cm_stimulus[1] = new CM_stimulus(this, "cm_stimulus_2", 0, 1e12);
+        cm_stimulus[2] = new CM_stimulus(this, "cm_stimulus_3", 0, 1e12);
+        cm_stimulus[3] = new CM_stimulus(this, "cm_stimulus_4", 0, 1e12);
   }
   //
   // setup outputs
@@ -294,54 +296,54 @@ void CMCON::put(unsigned int new_value)
       if (out_mask & (1<<i))
       {
           if ( ! cm_source[i])
-		cm_source[i] = new CMSignalSource();
-	  cm_output[i]->setSource(cm_source[i]);
+                cm_source[i] = new CMSignalSource();
+          cm_output[i]->setSource(cm_source[i]);
       }
       else if (cm_source[i])
       {
-	    cm_output[i]->setSource(0);
+            cm_output[i]->setSource(0);
       }
   }
   //
   // setup inputs
   for(i = 0; i < 4; i++)
   {
-	const char *name = cm_input[i]->getPin().GUIname().c_str();
+        const char *name = cm_input[i]->getPin().GUIname().c_str();
 
-	if (cm_input[i]->getPin().snode)
+        if (cm_input[i]->getPin().snode)
         {
-	    if (in_mask & (1 << i))
-		(cm_input[i]->getPin().snode)->attach_stimulus(cm_stimulus[i]);
-	    else
-		(cm_input[i]->getPin().snode)->detach_stimulus(cm_stimulus[i]);
-	}
-	// rewrite GUI name as required
-	if (in_mask & (1 << i) ) 
-	{
-	    char newname[20];
+            if (in_mask & (1 << i))
+                (cm_input[i]->getPin().snode)->attach_stimulus(cm_stimulus[i]);
+            else
+                (cm_input[i]->getPin().snode)->detach_stimulus(cm_stimulus[i]);
+        }
+        // rewrite GUI name as required
+        if (in_mask & (1 << i) )
+        {
+            char newname[20];
 
-	    if (strncmp(name, "an", 2))
-	    {
-	    	sprintf(newname, "an%d", i);
-	    	cm_input[i]->getPin().newGUIname(newname);
-	    }
-	}
-	else
-	{
-	    if (!strncmp(name, "an", 2))
-		cm_input[i]->getPin().newGUIname(cm_input[i]->getPin().name().c_str());
-	}
-	 
+            if (strncmp(name, "an", 2))
+            {
+                sprintf(newname, "an%d", i);
+                cm_input[i]->getPin().newGUIname(newname);
+            }
+        }
+        else
+        {
+            if (!strncmp(name, "an", 2))
+                cm_input[i]->getPin().newGUIname(cm_input[i]->getPin().name().c_str());
+        }
+
    }
 
   value.put(new_value);
   if (verbose)
       cout << "CMCON_1::put() val=0x" << hex << new_value <<endl;
-  get();	// update comparator values
-      
+  get();        // update comparator values
+
 }
 //--------------------------------------------------
-//	Voltage reference
+//      Voltage reference
 //--------------------------------------------------
 
 VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
@@ -364,73 +366,73 @@ void VRCON::setIOpin(PinModule *newPinModule)
 
 void VRCON::put(unsigned int new_value)
 {
-                                                                                
-  new_value &= 0xef;	// Bit 4 always 0
+
+  new_value &= 0xef;    // Bit 4 always 0
   unsigned int old_value = value.get();
   unsigned int diff = new_value ^ old_value;
-                                                                                
+
   trace.raw(write_trace.get() | value.get());
-                                                                                
+
   if (verbose & 2)
-  	cout << "VRCON::put old=" << hex << old_value << " new=" << new_value << endl;
+        cout << "VRCON::put old=" << hex << old_value << " new=" << new_value << endl;
   if (!diff)
-	return;
+        return;
 
   value.put(new_value);
-  if (new_value & VREN)		// Vreference enable set
+  if (new_value & VREN)         // Vreference enable set
   {
-    	double VDD =  ((Processor *)cpu)->get_Vdd();
-	vr_Rhigh = (8 + (16 - new_value & 0x0f)) * 2000.;
-	vr_Rlow = (new_value & 0x0f) * 2000.;
-	if (! (new_value & VRR))	// High range ?
-	    vr_Rlow += 16000.;
-	
-	vr_Vref = VDD * vr_Rlow / (vr_Rhigh + vr_Rlow);
-	if (verbose)
-	{
-	    cout << "VRCON::put Rhigh=" <<vr_Rhigh << " Rlow=" << vr_Rlow 
-		<< " Vout=" << vr_Vref << endl;
-	}
-	if (new_value & VROE)	// output voltage to pin
-	{
+        double VDD =  ((Processor *)cpu)->get_Vdd();
+        vr_Rhigh = (8 + (16 - new_value & 0x0f)) * 2000.;
+        vr_Rlow = (new_value & 0x0f) * 2000.;
+        if (! (new_value & VRR))        // High range ?
+            vr_Rlow += 16000.;
 
-	    if (! vr_pu)
-	    {
-		vr_pu = new stimulus("vref_pu", VDD, vr_Rhigh);
-	    }
+        vr_Vref = VDD * vr_Rlow / (vr_Rhigh + vr_Rlow);
+        if (verbose)
+        {
+            cout << "VRCON::put Rhigh=" <<vr_Rhigh << " Rlow=" << vr_Rlow
+                << " Vout=" << vr_Vref << endl;
+        }
+        if (new_value & VROE)   // output voltage to pin
+        {
 
-	    if (! vr_pd)
-		vr_pd = new stimulus("vref_pd", 0.0, vr_Rlow);
-	    if (strcmp("Vref", vr_PinModule->getPin().name().c_str()))
- 	    	vr_PinModule->getPin().newGUIname("Vref");
+            if (! vr_pu)
+            {
+                vr_pu = new stimulus("vref_pu", VDD, vr_Rhigh);
+            }
 
-	    if (vr_PinModule->getPin().snode)
-	    {
-		vr_pu->set_Zth(vr_Rhigh);
-		vr_pd->set_Zth(vr_Rlow);
-	    	vr_PinModule->getPin().snode->attach_stimulus(vr_pu);
-	    	vr_PinModule->getPin().snode->attach_stimulus(vr_pd);
-		vr_PinModule->getPin().snode->update();
-	    }
-	}
-	else 	// not outputing voltage to pin
-	{
-	    if (!strcmp("Vref", vr_PinModule->getPin().name().c_str()))
- 	    	vr_PinModule->getPin().newGUIname(pin_name);
-	    if (diff & 0x0f)	// did value of vreference change ?
-		_cmcon->get();
-	    if(vr_PinModule && vr_PinModule->getPin().snode)
-	    {
+            if (! vr_pd)
+                vr_pd = new stimulus("vref_pd", 0.0, vr_Rlow);
+            if (strcmp("Vref", vr_PinModule->getPin().name().c_str()))
+                vr_PinModule->getPin().newGUIname("Vref");
+
+            if (vr_PinModule->getPin().snode)
+            {
+                vr_pu->set_Zth(vr_Rhigh);
+                vr_pd->set_Zth(vr_Rlow);
+                vr_PinModule->getPin().snode->attach_stimulus(vr_pu);
+                vr_PinModule->getPin().snode->attach_stimulus(vr_pd);
+                vr_PinModule->getPin().snode->update();
+            }
+        }
+        else    // not outputing voltage to pin
+        {
+            if (!strcmp("Vref", vr_PinModule->getPin().name().c_str()))
+                vr_PinModule->getPin().newGUIname(pin_name);
+            if (diff & 0x0f)    // did value of vreference change ?
+                _cmcon->get();
+            if(vr_PinModule && vr_PinModule->getPin().snode)
+            {
                 vr_PinModule->getPin().snode->detach_stimulus(vr_pu);
                 vr_PinModule->getPin().snode->detach_stimulus(vr_pd);
                 vr_PinModule->getPin().snode->update();
-	    }
-	}
+            }
+        }
   }
-  else	// vref disable
+  else  // vref disable
   {
     if (vr_PinModule && !strcmp("Vref", vr_PinModule->getPin().name().c_str()))
- 	  vr_PinModule->getPin().newGUIname(pin_name);
+          vr_PinModule->getPin().newGUIname(pin_name);
 
     if(vr_PinModule && vr_PinModule->getPin().snode)
     {

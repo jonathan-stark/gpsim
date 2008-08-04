@@ -24,6 +24,13 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <vector>
 
+#include "../config.h"
+
+#include "../src/expr.h"
+#include "../src/pic-processor.h"
+#include "../src/sim_context.h"
+#include "../src/trace.h"
+
 #include "command.h"
 
 #include "cmd_attach.h"
@@ -54,12 +61,6 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_version.h"
 #include "cmd_x.h"
 #include "cmd_icd.h"
-
-#include "../src/expr.h"
-
-#include "../src/pic-processor.h"
-#include "../src/sim_context.h"
-#include "../src/trace.h"
 
 int quit_gpsim = 0;
 
@@ -103,10 +104,10 @@ command::command(const char *_name, const char *_abbr)
   token_value = 0;
 }
 /*
-command::command(struct cmd_options *options,int tv) 
-{ 
+command::command(struct cmd_options *options,int tv)
+{
   abbreviation = 0;
-  op = options; 
+  op = options;
   token_value = tv;
 }
 */
@@ -139,7 +140,7 @@ void execute_line(char *cmd)
     cout << "Executing a line:\n  " << cmd;
 }
 
-Processor *command::GetActiveCPU(bool bDisplayWarnings) 
+Processor *command::GetActiveCPU(bool bDisplayWarnings)
 {
   Processor *pCpu = CSimulationContext::GetContext()->GetActiveCPU();
   if (bDisplayWarnings && !pCpu)
@@ -162,7 +163,7 @@ double command::evaluate(Expression *expr)
     if(expr) {
 
       Value *v = toValue(expr);
-      
+
       v->get(value);
 
       delete v;
@@ -189,7 +190,7 @@ static gint64 evaluateToInt(Expression *expr)
     if(expr) {
 
       Value *v = expr->evaluate();
-      
+
       v->get(value);
 
       delete v;
@@ -207,8 +208,8 @@ static gint64 evaluateToInt(Expression *expr)
   return value;
 }
 void command::evaluate(ExprList_t *eList,
-		       guint64 *parameters, 
-		       int *nParameters)
+                       guint64 *parameters,
+                       int *nParameters)
 {
   ExprList_itor ei;
 
@@ -222,8 +223,8 @@ void command::evaluate(ExprList_t *eList,
     return;
 
   int n = 0;
-  for(ei = eList->begin(); 
-      (ei != eList->end()) && (n < *nParameters); 
+  for(ei = eList->begin();
+      (ei != eList->end()) && (n < *nParameters);
       ++ei, n++)
     {
       parameters[n] = evaluateToInt(*ei);

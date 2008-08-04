@@ -124,11 +124,18 @@
 
 #define snprintf  _snprintf
 #ifndef strcasecmp
-#define strcasecmp  stricmp
+#define strcasecmp  _stricmp
 #endif
-#define strncasecmp strnicmp
+#define strncasecmp _strnicmp
 #define bzero(dest, count)  memset(dest, 0, count)
 #define strtoll _strtoi64
+
+#define strdup    _strdup
+#define chdir     _chdir
+#define fileno    _fileno
+#define isatty    _isatty
+#define snprintf  _snprintf
+#define getcwd    _getcwd
 
 #define _USE_MATH_DEFINES
 #endif

@@ -35,6 +35,8 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <map>
 
+#include "../config.h"
+
 #include "exports.h"
 #include "gpsim_def.h"
 #include "pic-processor.h"
@@ -458,7 +460,7 @@ bool pic_processor::is_sleeping()
 #if defined(CLOCK_EXPERIMENTS)
   return m_ActivityState == ePASleeping;
 #else
-  return false;	// don't know what to do and is not being used - RRR
+  return false; // don't know what to do and is not being used - RRR
 #endif
 }
 
@@ -950,7 +952,7 @@ void pic_processor::step_over (bool refresh)
 
   if(refresh)
     get_interface().simulation_has_stopped();
-    
+
 }
 
 //-------------------------------------------------------------------
@@ -1429,7 +1431,7 @@ void ProgramMemoryAccess::callback()
 //--------------------------------------------------
 WDT::WDT(pic_processor *p_cpu, double _timeout)
   : gpsimObject("WDT","Watch Dog Timer"),
-    cpu(p_cpu), breakpoint(0),prescale(1), postscale(128), future_cycle(0), 
+    cpu(p_cpu), breakpoint(0),prescale(1), postscale(128), future_cycle(0),
     timeout(_timeout), wdte(false), cfgw_enable(false)
 {
 }
@@ -1443,12 +1445,12 @@ void WDT::update()
 
 
     delta_cycles = (guint64)(postscale*prescale*timeout/get_cycles().seconds_per_cycle());
-    
+
    if (verbose)
    {
-	cout << "WDT::update timeout in " << (postscale*prescale*timeout);
-	cout << " seconds (" << dec << delta_cycles << " cycles), ";
-	cout << "CPU frequency " << (cpu->get_frequency()) << endl;
+        cout << "WDT::update timeout in " << (postscale*prescale*timeout);
+        cout << " seconds (" << dec << delta_cycles << " cycles), ";
+        cout << "CPU frequency " << (cpu->get_frequency()) << endl;
    }
 
     guint64 fc = get_cycles().get() + delta_cycles ;
@@ -1485,7 +1487,7 @@ void WDT::set_timeout( double _timeout)
 //  TMR0 prescale is WDT postscale
 void WDT::set_postscale(unsigned int newPostscale)
 {
-  unsigned int value = 1<< newPostscale; 
+  unsigned int value = 1<< newPostscale;
   if (verbose)
       cout << "WDT::set_postscale postscale = " << dec << value << endl;
   if (value != postscale) {
@@ -1496,33 +1498,33 @@ void WDT::set_postscale(unsigned int newPostscale)
 void WDT::swdten(bool enable)
 {
     if (cfgw_enable)
-	return;
+        return;
 
     if (wdte != enable)
     {
-    	wdte = enable;
-  	warned = 0;
-  	if(verbose)
-    	    cout << " WDT swdten "
-		<< ( (enable) ?  "enabling\n" : ", but disabling WDT\n");
-	if (wdte)
-	{
-	    update();
-	}
-	else
-	{
-    	    if (future_cycle) {
-      		cout << "Disabling WDT\n";
-      		get_cycles().clear_break(this);
-      		future_cycle = 0;
-	    }
-	}
+        wdte = enable;
+        warned = 0;
+        if(verbose)
+            cout << " WDT swdten "
+                << ( (enable) ?  "enabling\n" : ", but disabling WDT\n");
+        if (wdte)
+        {
+            update();
+        }
+        else
+        {
+            if (future_cycle) {
+                cout << "Disabling WDT\n";
+                get_cycles().clear_break(this);
+                future_cycle = 0;
+            }
+        }
     }
 }
 // For WDT period select 0-11
 void WDT::set_prescale(unsigned int newPrescale)
 {
-  unsigned int value = 1<< (5 + newPrescale); 
+  unsigned int value = 1<< (5 + newPrescale);
   if (verbose)
       cout << "WDT::set_prescale prescale = " << dec << value << endl;
   if (value != prescale) {
@@ -1540,7 +1542,7 @@ void WDT::initialize(bool enable)
     cout << " WDT init called "<< ( (enable) ? "enabling\n" :", but disabling WDT\n");
 
   if(wdte) {
-	update();
+        update();
   } else {
 
     if (future_cycle) {
@@ -1588,9 +1590,9 @@ void WDT::callback()
       bp.halt();
     else if (cpu->is_sleeping())
     {
-	cout << "WDT expired during sleep\n";
+        cout << "WDT expired during sleep\n";
         update();
-	cpu->exit_sleep();
+        cpu->exit_sleep();
         cpu->status->put_TO(0);
     }
     else
