@@ -1,3 +1,10 @@
+2008-08-06  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/intcon.cc :
+	    Corrected low priority non-peripheral interrupts to obey the GIEL bit
+        * regression/interrupts_16bit/(18f2321.lkr, Makefile, interrupts_16bit.asm,
+          interrupts_16bit.stc, priority.asm, priority.stc) :
+            First stab at some regression tests for the 16bit core prioritised interrupts
+
 2008-08-04 Borut Razem <borut.razem@siol.net>
 	* src/protocol.cc, src/i2c-ee.cc, src/eeprom.cc, src/pic-processor.cc.
 	  src/gpsim_object.cc, src/comparator.cc, src/value.h, src/p12x.cc,

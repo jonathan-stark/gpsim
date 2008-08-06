@@ -334,7 +334,8 @@ void INTCON_16::put(unsigned int new_value)
       // interrupts pending. So let's check for the low priority
       // ones.
 
-      if(i1 & ( (~intcon2->value.get() & (T0IF | RBIF)) | INTF))
+      if ( (i1 & (~intcon2->value.get() & (T0IF | RBIF)))
+        && (value.get() & GIEL) )
 	{
 	  //cout << " selecting low priority vector\n";
 	  set_interrupt_vector(INTERRUPT_VECTOR_LO);
