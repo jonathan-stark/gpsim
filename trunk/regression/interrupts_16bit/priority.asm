@@ -73,13 +73,13 @@ check_int:
         bcf     INTCON,INT0IF
 
 check_t0:
-        btfsc   PIR1,TMR1IF
-         btfss  PIE1,TMR1IE
+        btfsc   PIR1,TMR2IF
+         btfss  PIE1,TMR2IE
           bra   exit_int
 
     ;; tmr0 has rolled over
 
-        bcf     PIR1,TMR1IF     ; Clear the pending interrupt
+        bcf     PIR1,TMR2IF     ; Clear the pending interrupt
         bsf     intflags,2      ; Set a flag to indicate rollover
                 
 exit_int:               
@@ -108,13 +108,13 @@ check_inth:
         bcf     INTCON,INT0IF
 
 check_t0h:
-        btfsc   PIR1,TMR1IF
-         btfss  PIE1,TMR1IE
+        btfsc   PIR1,TMR2IF
+         btfss  PIE1,TMR2IE
           bra   exit_inth
 
     ;; tmr1 has rolled over
         
-        bcf     PIR1,TMR1IF         ; Clear the pending interrupt
+        bcf     PIR1,TMR2IF         ; Clear the pending interrupt
         bsf     intflags,6          ; Set a flag to indicate rollover
                 
 exit_inth:
@@ -238,7 +238,7 @@ rbif_l1:
         swapf   temp2,w
         xorwf   PORTB,f
 
-    .assert "intflags == 0, \"*** FAILED low priority interrupt not masked\""
+    .assert "intflags == 0, \"*** FAILED low priority portB interrupt not masked\""
         tstfsz  intflags
          bra    failed
 
@@ -254,58 +254,45 @@ rbif_l1:
 
 
         ;;
-        ;; The following block of code tests tmr1 together with interrupts.
-        
-        bsf     PIE1,TMR1IE     ;Enable TMR1 overflow interrupts
+        ;; The following block of code tests tmr2 together with interrupts.
+
+        bsf     PIE1,TMR2IE     ;Enable TMR2 overflow interrupts
 
         clrf    intflags        ;Software flag used to monitor when the
                                 ;interrupt has been serviced.
 
-;        movlw   0xC0
-;        movwf   T0CON           ;Assign new prescale value
-;
-;test_tmr0:      
-;        btfss   temp1,0         ;Wait for the interrupt to occur and
-;         bra    test_tmr0       ;get serviced
-;
-;        
-;        clrf    temp1           ;Clear flag for the next time
-;        
-;        incf    T0CON,f
-;        
-;        btfss   T0CON,3         ; When we've done all prescaler values, PSA gets set
-;         bra    test_tmr0
-;
-;        bcf     INTCON,T0IE     ;Disable tmr0 interrupts
-;
-;        ;; Now check tmr0 with an external clock source
-;        ;;
-;        ;; It assumes that port b bit 0 is the stimulus.
-;        ;; This requires that the following gpsim commands be invoked:
-;        ;;  gpsim> node new_test_node
-;        ;;  gpsim> attach new_test_node porta4 portb0
-;
-;        bcf     TRISB,0        ;portb bit 0 is an output
-;
-;        ;; assign the prescaler to the wdt so that tmr0 counts every edge
-;        ;; select the clock source to be tocki
-;        ;; and capture low to high transitions (tose = 0)
-;        
-;        movlw   (1<<T0CS) | (1<<PSA) | (1<<TMR0ON) | (1<<T08BIT)
-;        movwf   T0CON
-;
-;        movlw   0xff
-;        movwf   temp2
-;        movwf   temp3
-;        movwf   temp4
-;
+        movlw   0x04
+        movwf   T2CON           ;Assign new prescale value
+        movlw   0x80
+        movwf   PR2
+
+        clrf    temp1
+        decfsz  temp1,f         ; Hang around long enough that an overflow should occur
+        goto    $-2
+
+        btfss   PIR1,TMR2IF     ; check the overflow happened
+    .assert "\"*** FAILED no TMR2 overflow detected\""
+         bra    failed
+
+    .assert "intflags == 0, \"*** FAILED low priority TRM2 interrupt not masked\""
+        tstfsz  intflags
+         bra    failed
+
+        bcf     PIE1,TMR2IE     ;Disable TMR2 overflow interrupts
+        clrf    T2CON           ; and switch off TMR2
+
+
+        ;; Next we test that with low priority interrupts enabled, 
+        ;; those set to low priority are handled by the low priority ISR
+        ;;
+
 
 done:   
-  .assert  "\"*** PASSED 16bit-core core interrupt test\""
+  .assert  "\"*** PASSED 16bit interrupt priority test\""
         goto    $
 
 failed:	
-  .assert  "\"*** FAILED 16bit-core core interrupt test\""
+  .assert  "\"*** FAILED 16bit interrupt priority test\""
         goto    $
 
         end

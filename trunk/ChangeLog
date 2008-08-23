@@ -1,3 +1,8 @@
+2008-08-23  Rob Pearce <rob@bdt-home.demon.co.uk>
+        * regression/interrupts_16bit/(interrupts_16bit.asm, priority.asm)
+          regression/run_regression.sh  :
+            Enhance and enable regression tests for the 16bit core prioritised interrupts
+
 2008-08-06  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/intcon.cc :
 	    Corrected low priority non-peripheral interrupts to obey the GIEL bit
