@@ -320,11 +320,11 @@ rbif_l1:
 
 
 done:   
-  .assert  "\"*** PASSED 16bit-core core interrupt test\""
+  .assert  "\"*** PASSED 16bit-core basic interrupt test\""
         goto    $
 
 failed:	
-  .assert  "\"*** FAILED 16bit-core core interrupt test\""
+  .assert  "\"*** FAILED 16bit-core basic interrupt test\""
         goto    $
 
         end
