@@ -285,6 +285,156 @@ rbif_l1:
         ;; Next we test that with low priority interrupts enabled, 
         ;; those set to low priority are handled by the low priority ISR
         ;;
+        bsf     INTCON,GIEL     ;Enable low priority interrupts
+
+        ;;
+        ;; test_rbif
+        ;;
+        ;; This next block uses the interrupt on change feature of
+        ;; port b's I/O pins 4-7 to confirm that a low priority interrupt
+        ;; is responded to as such.
+        ;; 
+test_rbif_2:
+        bsf     TRISA,4         ; Porta bit 4 is now an input
+
+        movlw   0xF0
+        movwf   TRISB           ; Upper nibble of port B is connected to lower nibble
+
+        movlw   0x10
+        movwf   temp2
+
+	movlw	6
+	movwf	PORTB
+
+rbif_l2:
+        
+        bcf     INTCON,RBIE
+        
+        movf    PORTB,W
+
+        clrf    intflags         ; Interrupt flag
+
+        bcf     INTCON,RBIF
+        bcf     INTCON2,RBIP
+        bsf     INTCON,RBIE
+
+        swapf   temp2,w
+        xorwf   PORTB,f
+
+    .assert "intflags == 1, \"*** FAILED low priority portB interrupt not seen\""
+        decfsz  intflags,w
+         bra    failed
+
+        clrc
+        rlcf    temp2,f
+
+        skpc
+         bra    rbif_l2
+
+
+        ;;
+        ;; The following block of code tests tmr2 together with interrupts.
+
+        bsf     PIE1,TMR2IE     ;Enable TMR2 overflow interrupts
+
+        clrf    intflags        ;Software flag used to monitor when the
+                                ;interrupt has been serviced.
+
+        movlw   0x04
+        movwf   T2CON           ;Assign new prescale value
+        movlw   0x80
+        movwf   PR2
+
+        clrf    temp1
+        decfsz  temp1,f         ; Hang around long enough that an overflow should occur
+        goto    $-2
+
+        btfsc   PIR1,TMR2IF     ; check the overflow happened
+    .assert "\"*** FAILED no TMR2 overflow detected\""
+         bra    failed
+
+    .assert "intflags == 4, \"*** FAILED low priority TRM2 interrupt not masked\""
+
+        bcf     PIE1,TMR2IE     ;Disable TMR2 overflow interrupts
+        clrf    T2CON           ; and switch off TMR2
+
+        ;; Finally test that setting peripherals to high priority causes the
+        ;; right ISR to be run
+        ;;
+        bsf     INTCON,GIEL     ;Enable low priority interrupts
+
+        ;;
+        ;; test_rbif
+        ;;
+        ;; This next block uses the interrupt on change feature of
+        ;; port b's I/O pins 4-7 to confirm that a low priority interrupt
+        ;; is responded to as such.
+        ;; 
+test_rbif_3:
+        bsf     TRISA,4         ; Porta bit 4 is now an input
+
+        movlw   0xF0
+        movwf   TRISB           ; Upper nibble of port B is connected to lower nibble
+
+        movlw   0x10
+        movwf   temp2
+
+	movlw	6
+	movwf	PORTB
+
+        bsf     INTCON2,RBIP
+
+rbif_l3:
+        
+        bcf     INTCON,RBIE
+        
+        movf    PORTB,W
+
+        clrf    intflags         ; Interrupt flag
+
+        bcf     INTCON,RBIF
+        bsf     INTCON,RBIE
+
+        swapf   temp2,w
+        xorwf   PORTB,f
+
+    .assert "intflags == 0x10, \"*** FAILED high priority portB interrupt not seen\""
+;        decfsz  intflags,w
+;         bra    failed
+
+        clrc
+        rlcf    temp2,f
+
+        skpc
+         bra    rbif_l3
+
+
+        ;;
+        ;; The following block of code tests tmr2 together with interrupts.
+
+        bsf     PIE1,TMR2IE     ;Enable TMR2 overflow interrupts
+        bsf     IPR1,TMR2IP     ; ... as high priority
+
+        clrf    intflags        ;Software flag used to monitor when the
+                                ;interrupt has been serviced.
+
+        movlw   0x04
+        movwf   T2CON           ;Assign new prescale value
+        movlw   0x80
+        movwf   PR2
+
+        clrf    temp1
+        decfsz  temp1,f         ; Hang around long enough that an overflow should occur
+        goto    $-2
+
+        btfsc   PIR1,TMR2IF     ; check the overflow happened
+    .assert "\"*** FAILED no TMR2 overflow detected\""
+         bra    failed
+
+    .assert "intflags == 0x40, \"*** FAILED high priority TRM2 interrupt not masked\""
+
+        bcf     PIE1,TMR2IE     ;Disable TMR2 overflow interrupts
+        clrf    T2CON           ; and switch off TMR2
 
 
 done:   
