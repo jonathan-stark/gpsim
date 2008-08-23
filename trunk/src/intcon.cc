@@ -175,15 +175,22 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
 
   if(rcon->value.get() & RCON::IPEN)
   {
+      cout << "peripheral interrupt, priority " << hi_pri << "\n";
     if ( hi_pri )
     {
-      if ( value.get() & GIEH ) 
+      if ( value.get() & GIEH )
+      {
+        set_interrupt_vector(INTERRUPT_VECTOR_HI);
         cpu_pic->BP_set_interrupt();
+      }
     }
     else
     {
       if ( value.get() & GIEL )
+      {
+        set_interrupt_vector(INTERRUPT_VECTOR_LO);
         cpu_pic->BP_set_interrupt();
+      }
     }
   }
   else
