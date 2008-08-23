@@ -81,7 +81,8 @@ ${RT} eeprom_wide sim
 
 ${RT} interrupts_14bit sim
 
-${RT} interrupts_16bit sim
+${RT} interrupts_16bit test_basic
+${RT} interrupts_16bit test_priority
 
 ${RT} macro_test sim
 
