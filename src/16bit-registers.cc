@@ -574,7 +574,7 @@ Program_Counter16::Program_Counter16(Processor *pCpu)
 
 void Program_Counter16::computed_goto(unsigned int new_address)
 {
-  cout << "Program_Counter16::computed_goto \n";
+//  cout << "Program_Counter16::computed_goto \n";
 
   trace.raw(trace_other | (value<<1));
 

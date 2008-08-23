@@ -2,6 +2,8 @@
         * regression/interrupts_16bit/(interrupts_16bit.asm, priority.asm)
           regression/run_regression.sh  :
             Enhance and enable regression tests for the 16bit core prioritised interrupts
+	* src/intcon.cc :
+	    Corrected peripheral interrupts to use the right vectors when IPEN is set
 
 2008-08-06  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/intcon.cc :
