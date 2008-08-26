@@ -176,8 +176,8 @@ public:
 
   virtual void create_iopin_map();
 
-  virtual int  map_pm_address2index(int address) {return address/2;};
-  virtual int  map_pm_index2address(int index) {return index*2;};
+  virtual int  map_pm_address2index(int address) const {return address/2;};
+  virtual int  map_pm_index2address(int index) const {return index*2;};
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   virtual unsigned int get_config_word(unsigned int address);
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);

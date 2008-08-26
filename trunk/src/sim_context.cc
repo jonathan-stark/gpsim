@@ -188,7 +188,7 @@ Processor * CSimulationContext::add_processor(Processor *p)
     active_cpu_id = ++cpu_ids;
     if(verbose) {
       cout << p->name() << '\n';
-      cout << "Program Memory size " <<  p->program_memory_size() << '\n';
+      cout << "Program Memory size " <<  p->program_memory_size() << " words\n";
       cout << "Register Memory size " <<  p->register_memory_size() << '\n';
     }
 

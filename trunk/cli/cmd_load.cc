@@ -249,8 +249,8 @@ static int load1(const char *s1, const char *s2)
   }
 
   return s2 ? gpsim_open(get_active_cpu(), s2, 0, s1) : 0;
-
 }
+
 int cmd_load::load(gpsimObject *file, gpsimObject *pProcessorType)
 {
   cout << endl;

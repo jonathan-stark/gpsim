@@ -1368,7 +1368,7 @@ popup_activated(GtkWidget *widget, gpointer data)
         iter=iter->next;
       }
 
-      sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
+      sprintf(toaddress_string,"%d",gp->cpu->program_address_limit());
       add_range(popup_pw,fromaddress_string,toaddress_string);
 
       while(symlist!=0)
@@ -1415,7 +1415,7 @@ popup_activated(GtkWidget *widget, gpointer data)
           free(s);
           iter=iter->next;
               }
-              sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
+              sprintf(toaddress_string,"%d",gp->cpu->program_address_limit());
               add_range(popup_pw,fromaddress_string,toaddress_string);
       }
 
