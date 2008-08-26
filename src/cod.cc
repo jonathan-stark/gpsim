@@ -444,7 +444,8 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
           smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
           if( (file_id <= cpu->files.nsrc_files()) &&
-              (address <= cpu->program_memory_size()) &&
+//              (address <= cpu->program_memory_size()) &&
+              cpu->IsAddressInRange(address) &&
               (smod == 0x80) )
 
             cpu->attach_src_line(address,file_id,sline,0);

@@ -612,7 +612,7 @@ void Processor::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   cout << "Warning::Out of range address " << address << " value " << value << endl;
-  cout << "Max allowed address is 0x" << hex << (program_memory_size()-1) << '\n';
+  cout << "Max allowed address is 0x" << hex << (program_address_limit()-1) << '\n';
 
 }
 
@@ -630,6 +630,8 @@ void Processor::attach_src_line(unsigned int address,
   unsigned int uIndex = map_pm_address2index(address);
   if(uIndex < program_memory_size())
     program_memory[uIndex]->update_line_number(file_id,sline,lst_line,-1,-1);
+  else
+      printf ( "%s:Address %03X out of range\n", __FUNCTION__, uIndex );
 }
 
 //-------------------------------------------------------------------
@@ -1593,7 +1595,7 @@ ProgramMemoryCollection::~ProgramMemoryCollection()
 
 unsigned int ProgramMemoryCollection::GetSize()
 {
-  return m_pProcessor->map_pm_address2index(m_pProcessor->program_memory_size());
+  return m_pProcessor->program_memory_size();
 }
 
 Value &ProgramMemoryCollection::GetAt(unsigned int uAddress, Value *)
@@ -2113,11 +2115,12 @@ bool  ProgramMemoryAccess::hasValid_opcode_at_index(unsigned int uIndex)
 }
 //--------------------------------------------------------------------------
 
-bool  ProgramMemoryAccess::isModified(unsigned int address)
+bool  ProgramMemoryAccess::isModified(unsigned int address)     // ***FIXME*** - address or index?
 {
+  unsigned int uIndex = cpu->map_pm_address2index(address);
 
-  if((address < cpu->program_memory_size()) &&
-     cpu->program_memory[address]->bIsModified())
+  if((uIndex < cpu->program_memory_size()) &&
+     cpu->program_memory[uIndex]->bIsModified())
     return true;
 
   return false;

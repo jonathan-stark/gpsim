@@ -1,3 +1,9 @@
+2008-08-26  Rob Pearce <rob@bdt-home.demon.co.uk>
+        * src/processor.cc src/processor.h src/sim_context.cc src/cod.cc
+          src/16bit-processors.h gui/gui_profile.cc :
+            Corrections to use of Processor::program_memory_size() so that all
+            of them expect it to be instruction words, not byte addresses.
+
 2008-08-23  Rob Pearce <rob@bdt-home.demon.co.uk>
         * regression/interrupts_16bit/(interrupts_16bit.asm, priority.asm)
           regression/run_regression.sh  :

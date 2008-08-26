@@ -451,17 +451,20 @@ public:
   virtual void init_program_memory_at_index(unsigned int address, 
                                             const unsigned char *, int nBytes);
   virtual unsigned int program_memory_size(void) const {return 0;};
+  virtual unsigned int program_address_limit(void) const {
+      return map_pm_index2address(program_memory_size());
+  };
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   void build_program_memory(unsigned int *memory,
                             unsigned int minaddr, 
                             unsigned int maxaddr);
 
-  virtual int  map_pm_address2index(int address) {return address;};
-  virtual int  map_pm_index2address(int index) {return index;};
+  virtual int  map_pm_address2index(int address) const {return address;};
+  virtual int  map_pm_index2address(int index) const {return index;};
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   guint64 cycles_used(unsigned int address);
   virtual bool         IsAddressInRange(unsigned int address) {
-    return address < program_memory_size();
+    return address < program_address_limit();
   }
 
   // opcode_size - number of bytes for an opcode.
