@@ -129,7 +129,7 @@ public:
   void put(unsigned int new_value);
   char getState();
 
-  void setCrosslinks(CCPRL *, PIR_SET *, TMR2 *);
+  void setCrosslinks(CCPRL *, PIR *, TMR2 *);
   void setADCON(ADCON0 *);
   CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~CCPCON();
@@ -145,7 +145,7 @@ private:
   int   edges;
 
   CCPRL   *ccprl;
-  PIR_SET *pir_set;
+  PIR     *pir;
   TMR2    *tmr2;
   ADCON0  *adcon0;
 

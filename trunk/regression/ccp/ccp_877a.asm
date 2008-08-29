@@ -2,8 +2,9 @@
 	;; ccp_877a
         ;; The purpose of this program is to test gpsim's ability to simulate
         ;; the Capture Compare peripherals in a midrange pic (e.g. pic16c64).
-
-    
+        ;;
+        ;; Additionally, by using a 16F877 it can test the behaviour of dual
+        ;; CCP peripherals
 
 
         list    p=16f877a
@@ -116,10 +117,23 @@ check_tmr1:
 check_ccp1:
         btfsc   PIR1,CCP1IF
          btfss  interrupt_temp,CCP1IE
-          goto  exit_int
+          goto  check_ccp2
 
         bcf     PIR1,CCP1IF     ; Clear the pending interrupt
         bsf     temp1,1         ; Set a flag to indicate match
+
+check_ccp2:
+        bsf     STATUS,RP0
+        movf    PIE2 ^ 0x80,W
+        bcf     STATUS,RP0
+        movwf   interrupt_temp
+
+        btfsc   PIR2,CCP2IF
+         btfss  interrupt_temp,CCP2IE
+          goto  exit_int
+
+        bcf     PIR2,CCP2IF     ; Clear the pending interrupt
+        bsf     temp1,2         ; Set a flag to indicate match
 
 exit_int:               
 
@@ -160,6 +174,7 @@ start
         
         clrf    T1CON           ;
         clrf    PIR1            ; Clear the interrupt/roll over flag
+        clrf    PIR2
 
         ;; Zero TMR1
 
@@ -234,7 +249,7 @@ ccp_test1:
 
   .assert "(capTimeL==0) && (capTimeH==0x40)"
 
-	goto done
+	goto    test_ccp1_compare
 
 ;------------------------------------------------------------------------
 ;ccpCaptureTwoEvents
@@ -340,12 +355,7 @@ ccpWDCounter:
         ;; Compare
         ;;
         ;; Now for the compare mode. 
-ccp_test2:
-
-	goto    done
-
-  ;;##########################################
-
+test_ccp1_compare:
 
         clrf    T1CON
         clrf    TMR1L
@@ -400,9 +410,74 @@ tt3:
         ;; (and are starting pwm modes)
 
         btfsc   CCP1CON,2
-         goto   done
+         goto   done_ccp1
 
         goto    tt3
+
+done_ccp1:
+;        goto    done
+        clrf    T1CON
+        clrf    TMR1L
+        clrf    TMR1H
+
+        bsf     STATUS,RP0
+        bcf     TRISC ^ 0x80, 1         ;CCP bit is an output
+        bsf     PIE2 ^ 0x80, CCP2IE
+        bcf     STATUS,RP0
+
+        ;; Start off the compare mode by setting the output on a compare match
+        ;;
+        ;; ccp = 8  <- Set output on match
+        ;; ccp = 9  <- Clear output on match
+        ;; ccp = 10  <- Just set the ccp1if flag, but don't change the output
+        ;; ccp = 11  <- Reset tmr1 on a match
+
+        movlw   0x8
+        movwf   CCP2CON
+
+        ;;
+        clrf    PIR2
+        
+        ;; Initialize the 16-bit compare register:
+
+        movlw   0x34
+        movwf   CCPR2L
+        movlw   0x0
+        movwf   CCPR2H
+
+        ;; Clear the interrupt flag
+        clrf    temp1
+
+tt4:
+        ;; Stop and clear tmr1
+        clrf    T1CON
+        clrf    TMR1L
+        clrf    TMR1H
+
+        ;; Now start it
+        bsf     T1CON,TMR1ON
+
+        ;; Wait for the interrupt routine to set the flag:
+        btfss   temp1,2
+         goto   $-1
+
+        bcf     temp1,2
+        
+        ;; Try the next capture mode
+        incf    CCP2CON,F
+
+        ;; If bit 2 of ccp2con is set then we're through with capture modes
+        ;; (and are starting pwm modes)
+
+        btfsc   CCP2CON,2
+         goto   done_ccp2
+
+        goto    tt4
+
+done_ccp2:
+        goto    done
+
+
 
 failed:	
   .assert  "\"*** FAILED CCP 877a test\""

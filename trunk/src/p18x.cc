@@ -1077,6 +1077,12 @@ void P18F2x21::create_sfr_map()
   add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
+  ccp2con.setCrosslinks(&ccpr2l, &pir2, &tmr2);
+  ccp2con.setIOpin(&((*m_portc)[1]));
+  ccpr2l.ccprh  = &ccpr2h;
+  ccpr2l.tmrl   = &tmr1l;
+  ccpr2h.ccprl  = &ccpr2l;
+
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
   add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");
   add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
@@ -1331,6 +1337,12 @@ void P18F4x21::create_sfr_map()
 
   add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
+
+  ccp2con.setCrosslinks(&ccpr2l, &pir2, &tmr2);
+  ccp2con.setIOpin(&((*m_portc)[1]));
+  ccpr2l.ccprh  = &ccpr2h;
+  ccpr2l.tmrl   = &tmr1l;
+  ccpr2h.ccprl  = &ccpr2l;
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
   add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");

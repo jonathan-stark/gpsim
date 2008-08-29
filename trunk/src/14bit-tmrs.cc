@@ -237,7 +237,7 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     m_bOutputEnabled(false),
     m_cOutputState('?'),
     edges(0),
-    ccprl(0), pir_set(0), tmr2(0), adcon0(0)
+    ccprl(0), pir(0), tmr2(0), adcon0(0)
 {
 }
 
@@ -260,10 +260,10 @@ void CCPCON::setIOpin(PinModule *new_PinModule)
 
 }
 
-void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR_SET *_pir_set, TMR2 *_tmr2)
+void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR *_pir, TMR2 *_tmr2)
 {
   ccprl = _ccprl;
-  pir_set = _pir_set;
+  pir = _pir;
   tmr2 = _tmr2;
 }
 
@@ -293,7 +293,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_FALLING_EDGE:
       if (level == 0 && ccprl) {
 	ccprl->capture_tmr();
-	pir_set->set_ccpif();
+	pir->set_ccpif();
 	Dprintf(("--CCPCON caught falling edge\n"));
       }
       break;
@@ -301,7 +301,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE:
       if (level && ccprl) {
 	ccprl->capture_tmr();
-	pir_set->set_ccpif();
+	pir->set_ccpif();
 	Dprintf(("--CCPCON caught rising edge\n"));
       }
       break;
@@ -309,7 +309,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE4:
       if (level && --edges <= 0) {
 	ccprl->capture_tmr();
-	pir_set->set_ccpif();
+	pir->set_ccpif();
 	edges = 4;
 	Dprintf(("--CCPCON caught 4th rising edge\n"));
       }
@@ -320,7 +320,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE16:
       if (level && --edges <= 0) {
 	ccprl->capture_tmr();
-	pir_set->set_ccpif();
+	pir->set_ccpif();
 	edges = 16;
 	Dprintf(("--CCPCON caught 4th rising edge\n"));
       }
@@ -364,30 +364,30 @@ void CCPCON::compare_match()
     case COM_SET_OUT:
       m_cOutputState = '1';
       m_PinModule->updatePinModule();
-      if (pir_set)
-	pir_set->set_ccpif();
+      if (pir)
+	pir->set_ccpif();
       Dprintf(("-- CCPCON setting compare output to 1\n"));
       break;
 
     case COM_CLEAR_OUT:
       m_cOutputState = '0';
       m_PinModule->updatePinModule();
-      if (pir_set)
-	pir_set->set_ccpif();
+      if (pir)
+	pir->set_ccpif();
       Dprintf(("-- CCPCON setting compare output to 0\n"));
       break;
 
     case COM_INTERRUPT:
-      if (pir_set)
-	pir_set->set_ccpif();
+      if (pir)
+	pir->set_ccpif();
       Dprintf(("-- CCPCON setting interrupt\n"));
       break;
 
     case COM_TRIGGER:
       if (ccprl)
 	ccprl->tmrl->clear_timer();
-      if (pir_set)
-	pir_set->set_ccpif();
+      if (pir)
+	pir->set_ccpif();
       if(adcon0)
 	adcon0->start_conversion();
 
