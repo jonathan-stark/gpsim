@@ -275,6 +275,7 @@ public:
 
 enum
 {
+    CCP2IF  = 1<<0,
     ECCP1IF = 1<<0,             /* only on the PIC18F4xx devices */
     TMR3IF  = 1<<1,
     LVDIF   = 1<<2,
@@ -286,6 +287,11 @@ enum
   virtual void set_eccp1if()
     {
       put(get() | ECCP1IF);
+    }
+
+  virtual void set_ccpif()    /* RP - needs to define set_ccpif too! */
+    {
+      put(get() | CCP2IF);
     }
 
   virtual void set_tmr3if()

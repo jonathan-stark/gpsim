@@ -1,3 +1,12 @@
+2008-08-29  Rob Pearce <rob@bdt-home.demon.co.uk>
+        * src/14bit-tmrs.cc src/14bit-tmrs.h src/pir.h src/16bit-processors.cc 
+          src/p16x6x.cc src/p18x.cc regression/ccp/ccp_877a.asm :
+            Changed the CCPCON class to not use pir_set, since this broke its 
+            ability to be duplicated. It now refers to a specific PIR register,
+            meaning that the second CCP on a 16F87x or similar can actually
+            generate the right interrupt.
+            Added tests for this in the CCP_877a regression test
+
 2008-08-26  Rob Pearce <rob@bdt-home.demon.co.uk>
         * src/processor.cc src/processor.h src/sim_context.cc src/cod.cc
           src/16bit-processors.h gui/gui_profile.cc :
