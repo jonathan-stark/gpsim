@@ -55,6 +55,9 @@ else
         AC_DEFINE([HAVE_SOCKETS],[],[True if gpsim socket interface is being used])
 fi
 
+dnl check if popt is installed
+AC_CHECK_HEADER(popt.h, , AC_MSG_ERROR(popt not installed: cannot find popt.h))
+
 GTK=
 GDK=
 GLIB=

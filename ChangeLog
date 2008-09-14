@@ -1,22 +1,26 @@
+2008-09-14 Borut Razem <borut.razem@siol.net>
+	* configure.ac:
+	  fixed bug #1698566: missing libpopt header is unnoticed by configure
+
 2008-08-29  Rob Pearce <rob@bdt-home.demon.co.uk>
-        * src/14bit-tmrs.cc src/14bit-tmrs.h src/pir.h src/16bit-processors.cc 
-          src/p16x6x.cc src/p18x.cc regression/ccp/ccp_877a.asm :
-            Changed the CCPCON class to not use pir_set, since this broke its 
-            ability to be duplicated. It now refers to a specific PIR register,
-            meaning that the second CCP on a 16F87x or similar can actually
-            generate the right interrupt.
-            Added tests for this in the CCP_877a regression test
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/pir.h src/16bit-processors.cc 
+	  src/p16x6x.cc src/p18x.cc regression/ccp/ccp_877a.asm :
+	    Changed the CCPCON class to not use pir_set, since this broke its 
+	    ability to be duplicated. It now refers to a specific PIR register,
+	    meaning that the second CCP on a 16F87x or similar can actually
+	    generate the right interrupt.
+	    Added tests for this in the CCP_877a regression test
 
 2008-08-26  Rob Pearce <rob@bdt-home.demon.co.uk>
-        * src/processor.cc src/processor.h src/sim_context.cc src/cod.cc
-          src/16bit-processors.h gui/gui_profile.cc :
-            Corrections to use of Processor::program_memory_size() so that all
-            of them expect it to be instruction words, not byte addresses.
+	* src/processor.cc src/processor.h src/sim_context.cc src/cod.cc
+	  src/16bit-processors.h gui/gui_profile.cc :
+	    Corrections to use of Processor::program_memory_size() so that all
+	    of them expect it to be instruction words, not byte addresses.
 
 2008-08-23  Rob Pearce <rob@bdt-home.demon.co.uk>
-        * regression/interrupts_16bit/(interrupts_16bit.asm, priority.asm)
-          regression/run_regression.sh  :
-            Enhance and enable regression tests for the 16bit core prioritised interrupts
+	* regression/interrupts_16bit/(interrupts_16bit.asm, priority.asm)
+	  regression/run_regression.sh  :
+	    Enhance and enable regression tests for the 16bit core prioritised interrupts
 	* src/intcon.cc :
 	    Corrected peripheral interrupts to use the right vectors when IPEN is set
 
