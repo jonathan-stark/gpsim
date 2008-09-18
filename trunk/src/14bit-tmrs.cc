@@ -87,7 +87,8 @@ void CCPRL::start_compare_mode()
   tmrl->compare_mode = 1;
 
   int capture_value = value.get() + 256*ccprh->value.get();
-  //cout << "start compare mode with capture value = " << capture_value << '\n';
+  if(verbose & 4)
+    cout << "start compare mode with capture value = " << capture_value << '\n';
   tmrl->compare_value = capture_value;
   tmrl->update();
 }
@@ -872,7 +873,8 @@ void TMRL::update()
       prescale = 1 << t1con->get_prescale();
       prescale_counter = prescale;
 
-      //cout << "TMRL: Current prescale " << prescale << ", ext scale " << ext_scale << '\n';
+      if(verbose & 0x4)
+        cout << "TMRL: Current prescale " << prescale << ", ext scale " << ext_scale << '\n';
       //  synchronized_cycle = cycles.get() + 2;
       synchronized_cycle = get_cycles().get();
 
@@ -885,7 +887,8 @@ void TMRL::update()
 
       if(compare_mode)
 	{
-	  //cout << "compare mode. compare_value = " << compare_value << '\n';
+          if(verbose & 0x4)
+	    cout << "compare mode. compare_value = " << compare_value << '\n';
 	  if(compare_value > value_16bit)
 	    {
 	      // A compare interrupt is going to happen before the timer
@@ -1081,7 +1084,8 @@ void TMRL::callback()
 
       // The break was due to a "compare"
 
-      //cout << "TMR1 break due to compare "  << hex << get_cycles().get() << '\n';
+      if(verbose & 4)
+        cout << "TMR1 break due to compare "  << hex << get_cycles().get() << '\n';
       ccpcon->compare_match();
 
     }
