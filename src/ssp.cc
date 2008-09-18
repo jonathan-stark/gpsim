@@ -258,6 +258,7 @@ void _SSPBUF::put(unsigned int new_value)
 {
   put_value(new_value);
   m_sspmod->newSSPBUF(value.get());
+  m_bIsFull = false;
 }
 
 /*
@@ -450,7 +451,8 @@ void SPI::callback()
   if (!m_sspmod)
     return;
 
-  //cout << "SPI callback m_state=" << m_state << endl;
+  if (verbose)
+    cout << "SPI callback m_state=" << m_state << endl;
 
   switch( m_state ) {
   case eIDLE:
@@ -578,7 +580,7 @@ void SPI::stop_transfer()
       if (verbose)
           cout << "SPI: Stopping transfer. SSPBUF Overflow setting SSPOV." << endl;
         m_sspcon->setSSPOV();
-
+        m_sspmod->set_sspif();      // The real PIC sets sspif even with overflow
     } else {
       cout << "SPI: Stopping transfer. Cancel finish." << endl;
       // The transfer was canceled in some way

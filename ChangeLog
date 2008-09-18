@@ -1,3 +1,11 @@
+2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/ssp.cc :
+	    Corrected SPI transfer complete behaviour so that SSPIF is set on completion
+            of a master mode transfer regardless of the SSPOV state. (Confirmed this
+            behaviour on an 18F2321)
+	* src/14bit-tmrs.cc :
+            Made some commented out debug code available with higher verbosity, for testing
+
 2008-09-14 Borut Razem <borut.razem@siol.net>
 	* configure.ac:
 	  fixed bug #1698566: missing libpopt header is unnoticed by configure
