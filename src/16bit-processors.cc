@@ -543,6 +543,7 @@ void _16bit_processor :: create ()
 
   intcon.set_rcon(&rcon);
   intcon.set_intcon2(&intcon2);
+  intcon.set_pir_set(&pir_set_def);
 
   //tbl.initialize(this);
   tmr0l.start(0);

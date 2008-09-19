@@ -195,6 +195,7 @@ public:
 
   inline void set_rcon(RCON *r) { rcon = r; }
   inline void set_intcon2(INTCON2 *ic) { intcon2 = ic; }
+  inline void set_pir_set(PIR_SET *p) { pir_set = p; }
 
   virtual void put(unsigned int new_value);
 
@@ -202,7 +203,7 @@ public:
 
   void clear_gies();
   void set_gies();
-  virtual bool check_peripheral_interrupt() {return false;} // Is this right?
+  virtual bool check_peripheral_interrupt();// {return false;} // Is this right?
   unsigned int get_interrupt_vector() 
   {
     return interrupt_vector;
@@ -220,6 +221,7 @@ private:
   unsigned int interrupt_vector;        // Starting address of the interrupt
   RCON *rcon;
   INTCON2 *intcon2;
+  PIR_SET *pir_set;
 };
 
 

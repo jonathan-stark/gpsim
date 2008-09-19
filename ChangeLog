@@ -1,4 +1,18 @@
 2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
+	* src/intcon.cc :
+            Fixed response to low priority interrupts during high priority ISR (i.e. it
+            no longer runs the low-pri ISR immediately)
+        * src/16bit-processors.cc src/intcon.cc src/intcon.h
+          regression/interrupts_16bit/priority.asm regression/analog_stim/p18f452.asm
+          regression/a2d/p18f452.asm
+            Fixed handling of interrupts during ISR execution on 16-bit, at least for the
+            non-priority case, so that the new interrupt will be handled after the RETFIE
+            (as already worked on 14-bit). Also added test of priority nesting, which 
+            currently doesn't test this fix (it uses RBIF, which already worked). Also 
+            fixed a couple of ADC regression tests that failed to acknowledge the interrupt 
+            (due to a typo) and thus only passed because this condition was buggy.
+
+2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/ssp.cc :
 	    Corrected SPI transfer complete behaviour so that SSPIF is set on completion
             of a master mode transfer regardless of the SSPOV state. (Confirmed this

@@ -163,7 +163,7 @@ bool INTCON_14_PIR::check_peripheral_interrupt()
 //----------------------------------------------------------------------
 INTCON_16::INTCON_16(Processor *pCpu, const char *pName, const char *pDesc)
   : INTCON(pCpu, pName, pDesc),
-    interrupt_vector(0), rcon(0), intcon2(0)
+    interrupt_vector(0), rcon(0), intcon2(0), pir_set(0)
 {
 }
 
@@ -186,7 +186,7 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
     }
     else
     {
-      if ( value.get() & GIEL )
+      if ( ( value.get() & (GIEH|GIEL) ) == (GIEH|GIEL) )
       {
         set_interrupt_vector(INTERRUPT_VECTOR_LO);
         cpu_pic->BP_set_interrupt();
@@ -200,6 +200,14 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
   }
 }
 
+bool INTCON_16::check_peripheral_interrupt()
+{
+  assert(pir_set != 0);
+
+  Dprintf((" INTCON_16::%s\n",__FUNCTION__));
+  return (pir_set->interrupt_status());     // Not quite right, but...
+  // was return 0; but that was blatantly broken
+}
 
 //----------------------------------------------------------------------
 // void INTCON_16::clear_gies()
@@ -311,6 +319,7 @@ void INTCON_16::put(unsigned int new_value)
       unsigned int i1;
 
       // Use interrupt priorities
+      // %%%FIXME%%% ***BUG*** - does not attempt to look for peripheral interrupts
 
       if( 0 == (value.get() & GIEH))
 	return;    // Interrupts are disabled
