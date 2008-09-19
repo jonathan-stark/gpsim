@@ -116,6 +116,15 @@ check_t0h:
         
         bcf     PIR1,TMR2IF         ; Clear the pending interrupt
         bsf     intflags,6          ; Set a flag to indicate rollover
+
+        btfsc   temp5,7             ; Is a nesting test in progress?
+        btg     PORTB,2
+        nop
+        nop
+        btfsc   intflags,0
+    .assert "\"*** FAILED - low priority PORTB interrupt serviced during high priority ISR\""
+        bsf     failures,7
+
                 
 exit_inth:
         retfie  FAST
@@ -130,6 +139,7 @@ start
         ;; Assume no failures
 
         clrf    failures
+        clrf    temp5
 
         movlw   0Fh    ; Configure all A/D
         movwf   ADCON1 ; for digital inputs
@@ -353,7 +363,7 @@ rbif_l2:
     .assert "\"*** FAILED no TMR2 overflow detected\""
          bra    failed
 
-    .assert "intflags == 4, \"*** FAILED low priority TRM2 interrupt not masked\""
+    .assert "intflags == 4, \"*** FAILED low priority TMR2 interrupt not masked\""
 
         bcf     PIE1,TMR2IE     ;Disable TMR2 overflow interrupts
         clrf    T2CON           ; and switch off TMR2
@@ -431,7 +441,30 @@ rbif_l3:
     .assert "\"*** FAILED no TMR2 overflow detected\""
          bra    failed
 
-    .assert "intflags == 0x40, \"*** FAILED high priority TRM2 interrupt not masked\""
+    .assert "intflags == 0x40, \"*** FAILED high priority TMR2 interrupt not seen\""
+
+
+        ;;
+        ;; The following block of code tests nesting of interrupts, by generating a
+        ;; high priority TMR2 interrupt with the "cause PORTB interrupt" flag set. 
+        ;; The high priority ISR then triggers a low priority interrupt, which should
+        ;; be handled after leaving the high priority but before doing any more of
+        ;; the background stuff.
+
+        bcf     INTCON2,RBIP
+        bsf     temp5,7         ; TMR2 ISR triggers a PORTB event
+
+        clrf    intflags        ;Software flag used to monitor when the
+                                ;interrupt has been serviced.
+
+;        clrf    temp1
+;        decfsz  temp1,f         ; Hang around long enough that an overflow should occur
+;        goto    $-2
+
+        btfss   intflags,6      ; Wait for the TMR2 interrupt (must only see one)
+        goto    $-2
+
+    .assert "intflags == 0x41, \"*** FAILED priority nesting test\""
 
         bcf     PIE1,TMR2IE     ;Disable TMR2 overflow interrupts
         clrf    T2CON           ; and switch off TMR2

@@ -44,7 +44,7 @@ check_TMR0_interrupt:
 ;;	An A/D interrupt has occurred
 a2dint:
 	bsf	a2dIntFlag,0	;Set a flag to indicate we got the int.
-	bcf	ADCON0,ADIF	;Clear the a/d interrupt
+	bcf	PIR1,ADIF	;Clear the a/d interrupt
 
 ExitInterrupt:
 	RETFIE	1
