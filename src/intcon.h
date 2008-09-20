@@ -108,7 +108,7 @@ enum
       put(get() | T0IE);
     }
 
-  virtual bool check_peripheral_interrupt()=0;
+  virtual int check_peripheral_interrupt()=0;
   virtual void put(unsigned int new_value);
 
 };
@@ -168,7 +168,7 @@ public:
 
   inline void set_pir_set(PIR_SET *p) { pir_set = p; }
 
-  virtual bool check_peripheral_interrupt();
+  virtual int check_peripheral_interrupt();
 
   //private:
   PIR_SET *pir_set;
@@ -203,7 +203,7 @@ public:
 
   void clear_gies();
   void set_gies();
-  virtual bool check_peripheral_interrupt();// {return false;} // Is this right?
+  virtual int check_peripheral_interrupt();
   unsigned int get_interrupt_vector() 
   {
     return interrupt_vector;

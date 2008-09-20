@@ -146,7 +146,7 @@ INTCON_14_PIR::INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDe
     pir_set(0)
 {}
 
-bool INTCON_14_PIR::check_peripheral_interrupt()
+int INTCON_14_PIR::check_peripheral_interrupt()
 {
   assert(pir_set != 0);
 
@@ -200,7 +200,7 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
   }
 }
 
-bool INTCON_16::check_peripheral_interrupt()
+int INTCON_16::check_peripheral_interrupt()
 {
   assert(pir_set != 0);
 
@@ -317,6 +317,7 @@ void INTCON_16::put(unsigned int new_value)
   if(rcon->value.get() & RCON::IPEN)
     {
       unsigned int i1;
+      int i2;
 
       // Use interrupt priorities
       // %%%FIXME%%% ***BUG*** - does not attempt to look for peripheral interrupts
@@ -337,8 +338,10 @@ void INTCON_16::put(unsigned int new_value)
       // associated priority bit!
 
       i1 =  ( (value.get()>>3)&value.get()) & (T0IF | INTF | RBIF);
+      i2 =  check_peripheral_interrupt();
 
-      if(i1 & ( (intcon2->value.get() & (T0IF | RBIF)) | INTF))
+      if ( ( i1 & ( (intcon2->value.get() & (T0IF | RBIF)) | INTF) )
+        || ( i2 & 2 ) )
 	{
 	  set_interrupt_vector(INTERRUPT_VECTOR_HI);
           cpu_pic->BP_set_interrupt();
@@ -350,7 +353,8 @@ void INTCON_16::put(unsigned int new_value)
       // interrupts pending. So let's check for the low priority
       // ones.
 
-      if ( (i1 & (~intcon2->value.get() & (T0IF | RBIF)))
+      if ( ( (i1 & (~intcon2->value.get() & (T0IF | RBIF)))
+          || (i2 & 1) )  
         && (value.get() & GIEL) )
 	{
 	  //cout << " selecting low priority vector\n";
