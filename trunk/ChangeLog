@@ -1,3 +1,11 @@
+2008-09-20  Rob Pearce <rob@bdt-home.demon.co.uk>
+        * src/intcon.cc src/intcon.h src/pir.cc src/pir.h
+          src/p16x7x.cc
+            Fixed handling of peripheral interrupts during ISR execution on 16-bit with
+            priority enables, so that the new interrupt will be handled after the RETFIE
+            This involved changing the PIR::interrupt_status() and dependents to return
+            a bit-map of priorities rather than a simple boolean.
+
 2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/intcon.cc :
             Fixed response to low priority interrupts during high priority ISR (i.e. it

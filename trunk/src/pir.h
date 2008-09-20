@@ -74,7 +74,9 @@ public:
   virtual unsigned int get_rcif() { return 0;}
   virtual unsigned int get_sspif() { return 0;}
 
-  virtual bool interrupt_status();
+  /// Obtain interrupt request state, as a mask of priorities if relevant
+  virtual int interrupt_status();
+
   virtual void put(unsigned int new_value);
 
   virtual void setInterrupt(unsigned int bitMask);
@@ -398,9 +400,9 @@ public:
   {
   }
 
-  virtual bool interrupt_status()
+  virtual int interrupt_status()
   {
-    return false;
+    return 0;
   }
 
   // uart stuff
@@ -458,10 +460,10 @@ class PIR_SET_1 : public PIR_SET
   void set_pir1(PIR *p1) { pir1 = p1; }
   void set_pir2(PIR *p2) { pir2 = p2; }
 
-  virtual bool interrupt_status() {
+  virtual int interrupt_status() {
     assert(pir1 != 0);
     if (pir2 != 0)
-      return (pir1->interrupt_status() ||
+      return (pir1->interrupt_status() |
               pir2->interrupt_status());
     else
       return (pir1->interrupt_status());
@@ -561,15 +563,14 @@ class PIR_SET_2 : public PIR_SET
   void set_pir2(PIR *p2) { pir2 = p2; }
   void set_pir3(PIR *p3) { pir3 = p3; }
 
-  virtual bool interrupt_status() {
+  virtual int interrupt_status() {
     assert(pir1 != 0);
-    if (pir1 != 0 && pir1->interrupt_status())
-        return(true);
-    else if (pir2 != 0 && pir2->interrupt_status())
-        return(true);
-    else if (pir3 != 0 && pir3->interrupt_status())
-        return(true);
-    return(false);   
+    int result = pir1->interrupt_status();
+    if ( pir2 != 0 )
+        result |= pir2->interrupt_status();
+    if ( pir3 != 0 )
+        result |= pir3->interrupt_status();
+    return result; 
   }
 
   // uart stuff

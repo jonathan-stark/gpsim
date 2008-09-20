@@ -56,7 +56,7 @@ public:
   {
   }
 
-  virtual bool interrupt_status()
+  virtual int interrupt_status()
   {
     return m_adcon0->getADIF();
   }

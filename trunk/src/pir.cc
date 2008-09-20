@@ -76,13 +76,20 @@ void PIR::setPeripheralInterrupt()
     intcon->peripheral_interrupt ( ipr && (value.get() & valid_bits & ipr->value.get() & pie->value.get()) );
 }
 
-bool PIR::interrupt_status()
+int PIR::interrupt_status()
 {
   assert(pie);
-  if( value.get() & valid_bits & pie->value.get())
-    return true;
-
-  return false;
+  if ( ipr )
+  {
+    int result = 0;
+    if ( value.get() & valid_bits & pie->value.get() & ~(ipr->value.get()) )
+        result |= 1;
+    if ( value.get() & valid_bits & pie->value.get() & ipr->value.get() )
+        result |= 2;
+    return result;
+  }
+  else
+    return ( value.get() & valid_bits & pie->value.get() ) ? 1 : 0;
 }
 
 //========================================================================
