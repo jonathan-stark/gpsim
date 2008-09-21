@@ -187,6 +187,8 @@ required by gpsim GUI run time
     </ul>
     <br />
   </li>
+  </ul>
+  <ul>
   <li>PNG - <a href="http://www.libpng.org/">Portable
 Network Graphics</a>: An
 Open, Extensible Image Format with Lossless Compression
@@ -195,13 +197,17 @@ Open, Extensible Image Format with Lossless Compression
 required by gpsim GUI run time<br />
       </li>
     </ul>
-    <li>JPEG - <a href="http://www.ijg.org/">JPEG image compression</a>
+    <br />
+  </li>
+  <li>JPEG - <a href="http://www.ijg.org/">JPEG image compression</a>
     <ul>
       <li><a href="#jpeg_bin">jpeg-*-bin.zip</a>
 and <a href="#jpeg_dep">jpeg-*-dep.zip</a>:
 required by gpsim GUI run time<br />
       </li>
     </ul>
+    <br />
+  </li>
   <li>TIFF - <a href="http://www.remotesensing.org/libtiff/">Tag Image File Format</a>
     <ul>
       <li><a href="#libpng_bin">tiff-*-bin.zip</a>
@@ -315,7 +321,6 @@ package to the same directory where gpsim.exe resides.</li>
 package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\libpng12-0.dll from <a href="#libpng_bin">libpng-*.zip</a>
 package to the same directory where gpsim.exe resides.</li>
-package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\gtkextra-win32-2.1.dll from <a href="gpsimWin32.html#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>
 package to the same directory where gpsim.exe resides or copy compiled
 gtkextra-2\bin\gtkextra-win32-2.1.dll to the same directory where
@@ -354,8 +359,8 @@ project:</p>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.18/glib-dev_2.18.1-1_win32.zip" name="glib_dev">glib-dev_2.18.1-1_win32.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.18/glib_2.18.1-1_win32.zip" name="glib">glib_2.18.1-1_win32.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.14/gtk+-dev_2.14.2-1_win32.zip" name="gtk_dev">gtk+-dev_2.14.2-1_win32.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.14/gtk+_2.14.2-1_win32.zip" name="gtk">gtk+_2.14.2-1_win32.zip</a><br />
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/libpng-1.2.29.zip" name="libpng_bin">libpng-1.2.29.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.14/gtk+_2.14.2-1_win32.zip" name="gtk">gtk+_2.14.2-1_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/libpng-1.2.29.zip" name="libpng_bin">libpng-1.2.29.zip</a><br />
   gpsim + GTK+ version > 2.10.11 doesn't work if the theme share/themes/MS-Windows/gtk-2.0/gtkrc is used. The problem is in file lib/gtk-2.0/2.10.0/engines/libwimp.dll
   due to changes in source file modules/engines/ms-windows/msw_style.c.<br />
   <b>Solution:</b> Replace file lib/gtk-2.0/2.10.0/engines/libwimp.dll with the one with date 2007-03-14 from GTK+ version 2.10.11. 
