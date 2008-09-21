@@ -78,24 +78,21 @@ project, are required:
 required for gpsim development</li>
       <li><a href="#popt_bin">popt-*-bin.zip</a>:
 required by gpsim run time</li>
-      <li><a href="#libintl_bin">libintl-*-bin.zip</a>:
+      <li><a href="#popt_dep">popt-*-dep.zip</a>:
 required by popt run time</li>
-      <li><a href="#libiconv_bin">libiconv-*-bin.zip</a>:
-required by libintl run time</li>
     </ul>
     <br />
   </li>
   <li><a href="http://www.gtk.org/">glib</a>
 is the low-level core library that forms the basis for projects such as
 GTK+ and GNOME.<br />
-The WIN32 port of glib package is a part of Tor Lillqvist's <a href="http://www.gimp.org/%7Etml/gimp/win32/">GTK+ (and
-GIMP) for Windows</a> project. The latest version of developer,
-runtime and source package can be found at <a href="http://www.gimp.org/%7Etml/gimp/win32/downloads.html">Tor
-Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.
+The WIN32 port of glib package is a part of <a href="http://www.gtk.org/">The GTK+ Project</a>.
+The latest version of developer, runtime and source packages can be found at
+<a href="http://www.gtk.org/download-windows.html">GTK+ - Download for Windows</a>.
     <ul>
-      <li><a href="#glib_dev">glib-dev-*.zip</a>:
+      <li><a href="#glib_dev">glib-dev_*_win32.zip</a>:
 required for gpsim development</li>
-      <li><a href="#glib">glib-*.zip</a>:
+      <li><a href="#glib">glib_*_win32.zip</a>:
 required by gpsim GUI run time</li>
     </ul>
   </li>
@@ -140,22 +137,19 @@ modules development and by gpsim modules runtime. </li>
     </ul>
   </li>
 </ul>
-<p>The WIN32 ports of following packages are a part of Tor
-Lillqvist's <a href="http://www.gimp.org/%7Etml/gimp/win32/">GTK+
-(and GIMP) for Windows</a> project. The latest version of
-developer, runtime and source packages can be found at <a href="http://www.gimp.org/%7Etml/gimp/win32/downloads.html">Tor
-Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.</p>
+<p>The WIN32 ports of following packages are a part of
+<a href="http://www.gtk.org/">The GTK+ Project</a>.
+The latest version of developer, runtime and source packages can be found at
+<a href="http://www.gtk.org/download-windows.html">GTK+ - Download for Windows</a>.</p>
 <ul>
   <li>gtk - <a href="http://www.gtk.org/">GTK+</a>
 is a multi-platform toolkit for creating graphical user interfaces.
     <ul>
-      <li><a href="#gtk_dev">gtk+-dev-*.zip</a>:
+      <li><a href="#gtk_dev">gtk+-dev_*_win32.zip</a>:
 required for gpsim development</li>
-      <li><a href="#gtk">gtk+-*.zip</a>:
+      <li><a href="#gtk">gtk+_*_win32.zip</a>:
 required by gpsim GUI run time</li>
-      <li> <a href="#gettext_runtime">gettext-runtime-*.zip</a>:
-required by GTK+ run time</li>
-      <li> <a href="#libiconv_bin_woe32">libiconv-*.bin.woe32.zip</a>:
+      <li> <a href="#iconv_bin">win_iconv_dll-tml-*.zip</a>:
 required by GTK+ run time</li>
     </ul>
     <br />
@@ -165,9 +159,9 @@ is a library for layout and rendering of text, with an emphasis on
 internationalization. It forms the core of text and font handling for
 GTK+-2.0.
     <ul>
-      <li><a href="#pango_dev">pango-dev-*.zip</a>:
+      <li><a href="#pango_dev">pango-dev_*_win32.zip</a>:
 required for gpsim development</li>
-      <li><a href="#pango">pango-*.zip</a>:
+      <li><a href="#pango">pango_*_win32.zip</a>:
 required by gpsim GUI run time</li>
     </ul>
     <br />
@@ -175,9 +169,9 @@ required by gpsim GUI run time</li>
   <li>atk - The <a href="http://www.gtk.org/">ATK</a>
 library provides a set of interfaces for accessibility.
     <ul>
-      <li><a href="#atk_dev">atk-dev-*.zip</a>:
+      <li><a href="#atk_dev">atk-dev-*_win32.zip</a>:
 required for gpsim development</li>
-      <li><a href="#atk">atk-*.zip</a>:
+      <li><a href="#atk">atk_*_win32.zip</a>:
 required by gpsim GUI run time </li>
     </ul>
     <br />
@@ -197,8 +191,7 @@ required by gpsim GUI run time
 Network Graphics</a>: An
 Open, Extensible Image Format with Lossless Compression
     <ul>
-      <li><a href="#libpng_bin">libpng-*-bin.zip</a>
-and <a href="#libpng_dep">libpng-*-dep.zip</a>:
+      <li><a href="#libpng_bin">libpng-*.zip</a>:
 required by gpsim GUI run time<br />
       </li>
     </ul>
@@ -230,7 +223,7 @@ download the latest gpsim version from <a href="http://sourceforge.net/svn/?grou
   <li>Create the readline subdirectory and extract <a href="#readline_lib">readline-*-lib.zip</a>
 into it</li>
   <li>Create the popt subdirectory and extract <a href="#popt_lib">popt-*-lib.zip</a> into it</li>
-  <li>Create the glib subdirectory and extract <a href="#glib_dev">glib-dev-*.zip</a> into it
+  <li>Create the glib subdirectory and extract <a href="#glib_dev">glib-dev_*_win32.zip</a> into it
     <ul>
       <li>For the development of CLI mode, only header files from
 glib package are required. The only functionality needed from the
@@ -247,9 +240,9 @@ rebuild the solution.</li>
 <h3>GUI:</h3>
 <ul>
   <li>Execute steps, described in previous CLI section</li>
-  <li>Create the gtk+ subdirectory and extract <a href="#gtk_dev">gtk+-dev-*.zip</a> into it</li>
-  <li>Create the pango subdirectory and extract <a href="#atk_dev">pango-dev-*.zip</a> into it</li>
-  <li>Create the atk subdirectory and extract <a href="#atk_dev">atk-dev-*.zip</a> into it</li>
+  <li>Create the gtk+ subdirectory and extract <a href="#gtk_dev">gtk+-dev_*_win32.zip</a> into it</li>
+  <li>Create the pango subdirectory and extract <a href="#pango_dev">pango-dev_*_win32.zip</a> into it</li>
+  <li>Create the atk subdirectory and extract <a href="#atk_dev">atk-dev_*_win32.zip</a> into it</li>
   <li>Create the cairo subdirectory and extract <a href="gpsimWin32.html#cairo_dev">cairo-dev-*.zip</a>
 into it</li>
   <li>Create the fontconfig subdirectory and extract <a href="#fontconfig_dev">fontconfig-dev-*.zip</a> into it</li>
@@ -294,42 +287,34 @@ Release GUI solution configuration and rebuild the solution. </li>
 <h2>Setting up the runtime</h2>
 <h3>CLI:</h3>
 <ul>
-  <li>Extract popt1.dll from <a href="#popt_bin">popt-*-bin.zip</a>
-package, bin directory to the same directory where gpsim.exe resides.</li>
-  <li>Extract libintl-2.dll from <a href="#libintl_bin">libintl-*-bin.zip</a>
-package, bin
-directory to the same directory where gpsim.exe resides.</li>
-  <li>Extract libiconv-2.dll from <a href="#libiconv_bin">libiconv-*-bin.zip</a>
-package,
-bin directory to the same directory where gpsim.exe resides.</li>
-  <li>Extract readline5.dll from <a href="#readline_bin">readline-*-bin.zip</a>
-package,
-bin directory to the same directory where gpsim.exe resides.</li>
+  <li>Extract bin\popt1.dll from <a href="#popt_bin">popt-*-bin.zip</a>
+package to the same directory where gpsim.exe resides.</li>
+  <li>Extract bin\libintl-2.dll and bin\libiconv-2.dll from <a href="#popt_dep">popt-1.8-1-dep.zip</a>
+package to the same directory where gpsim.exe resides.</li>
+  <li>Extract bun\readline5.dll from <a href="#readline_bin">readline-*-bin.zip</a>
+package to the same directory where gpsim.exe resides.</li>
 </ul>
 <h3>GUI:</h3>
 <ul>
-  <li>Extract bin\libglib-2.0-0.dll, bin\libgobject-2.0-0.dll and
-bin\libgmodule-2.0-0.dll from <a href="#glib">glib-*.zip</a>
+  <li>Extract bin\libgio-2.0-0.dll, bin\libglib-2.0-0.dll, bin\libgobject-2.0-0.dll and
+bin\libgmodule-2.0-0.dll from <a href="#glib">glib_*_win32.zip</a>
 package to the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\iconv.dll from <a href="#libiconv_bin_woe32">libiconv-*.bin.woe32.zip</a>
-package to the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\intl.dll from <a href="#gettext">gettext-*.zip</a>
+  <li>Extract bin\iconv.dll from <a href="#iconv_bin">win_iconv_dll-tml-*.zip</a>
 package to the same directory where gpsim.exe resides.</li>
   <li>Extract everything in bin directory, complete etc and
-complete lib directory from <a href="#gtk">gtk+-*.zip</a>
+complete lib directory from <a href="#gtk">gtk+_*_win32.zip</a>
 package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\libpango-1.0-0.dll,
 bin\libpangowin32-1.0-0.dll and bin\libpangocairo-1.0-0.dll, complete
 etc and complete lib directory
-from <a href="#pango">pango-*.zip</a> package to
+from <a href="#pango">pango_*_win32.zip</a> package to
 the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\libatk-1.0-0.dll from <a href="#atk">atk-*.zip</a>
+  <li>Extract bin\libatk-1.0-0.dll from <a href="#atk">atk_*_win32.zip</a>
 package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\cairo-2.dll from <a href="#cairo">cairo-*.zip</a>
 package to the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\libpng13.dll from <a href="#libpng_bin">libpng-*-bin.zip</a>
+  <li>Extract bin\libpng12-0.dll from <a href="#libpng_bin">libpng-*.zip</a>
 package to the same directory where gpsim.exe resides.</li>
-  <li>Extract bin\zlib1.dll from <a href="#libpng_dep">libpng-*-dep.zip</a>
 package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\gtkextra-win32-2.1.dll from <a href="gpsimWin32.html#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>
 package to the same directory where gpsim.exe resides or copy compiled
@@ -358,36 +343,31 @@ project:</p>
 <ul>
   <li> <a href="http://gnuwin32.sourceforge.net/downlinks/popt-lib-zip.php" name="popt_lib">popt-1.8-1-lib.zip</a></li>
   <li> <a href="http://gnuwin32.sourceforge.net/downlinks/popt-bin-zip.php" name="popt_bin">popt-1.8-1-bin.zip</a></li>
-  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/libintl-bin-zip.php" name="libintl_bin">libintl-0.11.5-2-bin.zip</a></li>
-  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/libiconv-bin-zip.php" name="libiconv_bin">libiconv-1.8-1-bin.zip</a></li>
-  <li><a href="http://gnuwin32.sourceforge.net/downlinks/libpng-bin-zip.php" name="libpng_bin">libpng-1.2.8-bin.zip</a></li>
-  <li><a href="http://gnuwin32.sourceforge.net/downlinks/libpng-dep-zip.php" name="libpng_dep">libpng-1.2.8-dep.zip</a></li>
-  <li><a href="http://gnuwin32.sourceforge.net/downlinks/jpeg-bin-zip.php" name="jpeg_bin">jpeg-6b-4-bin.zip</a></li>
-  <li><a href="http://gnuwin32.sourceforge.net/downlinks/jpeg-dep-zip.php" name="jpeg_dep">jpeg-6b-4-dep.zip</a></li>
-  <li><a href="http://gnuwin32.sourceforge.net/downlinks/tiff-bin-zip.php" name="tiff_bin">tiff-3.8.2-1-bin.zip</a></li>
-  <li><a href="http://gnuwin32.sourceforge.net/downlinks/tiff-dep-zip.php" name="tiff_dep">tiff-3.8.2-1-dep.zip</a></li>
+  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/popt-dep-zip.php" name="popt_dep">popt-1.8-1-dep.zip</a></li>
+  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/jpeg-bin-zip.php" name="jpeg_bin">jpeg-6b-4-bin.zip</a></li>
+  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/jpeg-dep-zip.php" name="jpeg_dep">jpeg-6b-4-dep.zip</a></li>
+  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/tiff-bin-zip.php" name="tiff_bin">tiff-3.8.2-1-bin.zip</a></li>
+  <li> <a href="http://gnuwin32.sourceforge.net/downlinks/tiff-dep-zip.php" name="tiff_dep">tiff-3.8.2-1-dep.zip</a></li>
 </ul>
-<p>Packages from Tor Lillqvist's
-<a href="http://www.gimp.org/%7Etml/gimp/win32/">GTK+ (and
-GIMP) for Windows</a> project:</p>
+<p>Packages from <a href="http://www.gtk.org/download-windows.html">GTK+ - Download for Windows</a>:</p>
 <ul>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.14/glib-dev-2.14.4.zip" name="glib_dev">glib-dev-2.14.4.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.14/glib-2.14.4.zip" name="glib">glib-2.14.4.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.12/gtk+-dev-2.12.3.zip" name="gtk_dev">gtk+-dev-2.12.3.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.12/gtk+-2.12.3.zip" name="gtk">gtk+-2.12.3.zip</a><br />
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.18/glib-dev_2.18.1-1_win32.zip" name="glib_dev">glib-dev_2.18.1-1_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.18/glib_2.18.1-1_win32.zip" name="glib">glib_2.18.1-1_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.14/gtk+-dev_2.14.2-1_win32.zip" name="gtk_dev">gtk+-dev_2.14.2-1_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/gtk+/2.14/gtk+_2.14.2-1_win32.zip" name="gtk">gtk+_2.14.2-1_win32.zip</a><br />
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/libpng-1.2.29.zip" name="libpng_bin">libpng-1.2.29.zip</a></li>
   gpsim + GTK+ version > 2.10.11 doesn't work if the theme share/themes/MS-Windows/gtk-2.0/gtkrc is used. The problem is in file lib/gtk-2.0/2.10.0/engines/libwimp.dll
   due to changes in source file modules/engines/ms-windows/msw_style.c.<br />
   <b>Solution:</b> Replace file lib/gtk-2.0/2.10.0/engines/libwimp.dll with the one with date 2007-03-14 from GTK+ version 2.10.11. 
   </li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.18/pango-dev-1.18.3.zip" name="pango_dev">pango-dev-1.18.3.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.18/pango-1.18.3.zip" name="pango">pango-1.18.3.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/cairo-dev-1.4.10.zip" name="cairo_dev">cairo-dev-1.4.10.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/cairo-1.4.10.zip" name="cairo">cairo-1.4.10.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/atk/1.20/atk-dev-1.20.0.zip" name="atk_dev">atk-dev-1.20.3.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/atk/1.20/atk-1.20.0.zip" name="atk">atk-1.20.0.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.20/pango-dev_1.20.5-2_win32.zip" name="pango_dev">pango-dev_1.20.5-2_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/pango/1.20/pango_1.20.5-2_win32.zip" name="pango">pango_1.20.5-2_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/cairo-dev-1.6.4-2.zip" name="cairo_dev">cairo-dev-1.6.4-2.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/cairo-1.6.4-2.zip" name="cairo">cairo-1.6.4-2.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/atk/1.22/atk-dev_1.22.0-2_win32.zip" name="atk_dev">atk-dev_1.22.0-2_win32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/atk/1.22/atk_1.22.0-2_win32.zip" name="atk">atk_1.22.0-2_win32.zip</a></li>
   <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/fontconfig-dev-2.4.2-tml-20071015.zip" name="fontconfig_dev">fontconfig-dev-2.4.2-tml-20071015.zip</a></li>
-  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime-0.17.zip" name="gettext">gettext-runtime-0.17.zip</a></li>
-  <li> <a href="http://www.gimp.org/%7Etml/gimp/win32/libiconv-1.9.1.bin.woe32.zip" name="libiconv_bin_woe32">libiconv-1.9.1.bin.woe32.zip</a></li>
+  <li> <a href="http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/win_iconv_dll-tml-20080320.zip" name="iconv_bin">win_iconv_dll-tml-20080320.zip</a></li>
 </ul>
 <p>Other packages:</p>
 <ul>
