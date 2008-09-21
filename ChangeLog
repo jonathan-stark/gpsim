@@ -1,32 +1,37 @@
+2008-09-21 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi, doc/gpsimWin32.html:
+	  updated for libpng-1.2.29, win_iconv_dll-tml-20080320, atk_1.22.0-2_win32,
+	  gtk+_2.14.2-1_win32, cairo-1.6.4-2, pango_1.20.5-2_win32, glib_2.18.1-1_win32
+
 2008-09-20  Rob Pearce <rob@bdt-home.demon.co.uk>
-        * src/intcon.cc src/intcon.h src/pir.cc src/pir.h
-          src/p16x7x.cc
-            Fixed handling of peripheral interrupts during ISR execution on 16-bit with
-            priority enables, so that the new interrupt will be handled after the RETFIE
-            This involved changing the PIR::interrupt_status() and dependents to return
-            a bit-map of priorities rather than a simple boolean.
+	* src/intcon.cc src/intcon.h src/pir.cc src/pir.h
+	  src/p16x7x.cc
+	    Fixed handling of peripheral interrupts during ISR execution on 16-bit with
+	    priority enables, so that the new interrupt will be handled after the RETFIE
+	    This involved changing the PIR::interrupt_status() and dependents to return
+	    a bit-map of priorities rather than a simple boolean.
 
 2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/intcon.cc :
-            Fixed response to low priority interrupts during high priority ISR (i.e. it
-            no longer runs the low-pri ISR immediately)
-        * src/16bit-processors.cc src/intcon.cc src/intcon.h
-          regression/interrupts_16bit/priority.asm regression/analog_stim/p18f452.asm
-          regression/a2d/p18f452.asm
-            Fixed handling of interrupts during ISR execution on 16-bit, at least for the
-            non-priority case, so that the new interrupt will be handled after the RETFIE
-            (as already worked on 14-bit). Also added test of priority nesting, which 
-            currently doesn't test this fix (it uses RBIF, which already worked). Also 
-            fixed a couple of ADC regression tests that failed to acknowledge the interrupt 
-            (due to a typo) and thus only passed because this condition was buggy.
+	    Fixed response to low priority interrupts during high priority ISR (i.e. it
+	    no longer runs the low-pri ISR immediately)
+	* src/16bit-processors.cc src/intcon.cc src/intcon.h
+	  regression/interrupts_16bit/priority.asm regression/analog_stim/p18f452.asm
+	  regression/a2d/p18f452.asm
+	    Fixed handling of interrupts during ISR execution on 16-bit, at least for the
+	    non-priority case, so that the new interrupt will be handled after the RETFIE
+	    (as already worked on 14-bit). Also added test of priority nesting, which 
+	    currently doesn't test this fix (it uses RBIF, which already worked). Also 
+	    fixed a couple of ADC regression tests that failed to acknowledge the interrupt 
+	    (due to a typo) and thus only passed because this condition was buggy.
 
 2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/ssp.cc :
 	    Corrected SPI transfer complete behaviour so that SSPIF is set on completion
-            of a master mode transfer regardless of the SSPOV state. (Confirmed this
-            behaviour on an 18F2321)
+	    of a master mode transfer regardless of the SSPOV state. (Confirmed this
+	    behaviour on an 18F2321)
 	* src/14bit-tmrs.cc :
-            Made some commented out debug code available with higher verbosity, for testing
+	    Made some commented out debug code available with higher verbosity, for testing
 
 2008-09-14 Borut Razem <borut.razem@siol.net>
 	* configure.ac:
@@ -57,9 +62,9 @@
 2008-08-06  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/intcon.cc :
 	    Corrected low priority non-peripheral interrupts to obey the GIEL bit
-        * regression/interrupts_16bit/(18f2321.lkr, Makefile, interrupts_16bit.asm,
-          interrupts_16bit.stc, priority.asm, priority.stc) :
-            First stab at some regression tests for the 16bit core prioritised interrupts
+	* regression/interrupts_16bit/(18f2321.lkr, Makefile, interrupts_16bit.asm,
+	  interrupts_16bit.stc, priority.asm, priority.stc) :
+	    First stab at some regression tests for the 16bit core prioritised interrupts
 
 2008-08-04 Borut Razem <borut.razem@siol.net>
 	* src/protocol.cc, src/i2c-ee.cc, src/eeprom.cc, src/pic-processor.cc.
@@ -146,7 +151,7 @@
 	    No actual code change, but some comments regarding a suspicious looking
 	    sequence of operations.
 	* src/16bit-processors.cc, src/16bit-processors.h, p18x.h:
-            Fixed RAM sizes of 18F series processors
+	    Fixed RAM sizes of 18F series processors
 
 2008-05-31  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/pic-processor.h, src/16bit-processors.h, p18x.h,
