@@ -114,10 +114,12 @@ public:
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   {
     if (((new_opcode>>6)&3) == 3)
+    {
       if (new_opcode & 0x100)
 	return new ADDULNK(new_cpu,new_opcode,"subulnk", address);
       else
 	return new ADDULNK(new_cpu,new_opcode,"addulnk", address);
+    }
     if (new_opcode & 0x100)
       return new ADDFSR(new_cpu,new_opcode,"subfsr", address);
     return new ADDFSR(new_cpu,new_opcode,"addfsr", address);

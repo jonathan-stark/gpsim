@@ -41,7 +41,7 @@ void PIR::put(unsigned int new_value)
 
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-  value.put(new_value & writable_bits | value.get() & ~writable_bits);
+  value.put((new_value & writable_bits) | (value.get() & ~writable_bits));
 
   if( value.get() & pie->value.get() )
     setPeripheralInterrupt();

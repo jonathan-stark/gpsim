@@ -62,14 +62,14 @@ private:
   int read_le_word(FILE * file);
   // Compute checksum for extended address record
   inline int ext_csum(gint32 add) { 
-	return ((-(6 + add & 0xff + (add >> 8) & 0xff)) & 0xff);
+	return ((-(6 + (add & 0xff) + ((add >> 8) & 0xff)) & 0xff));
   }
   void writeihexN(int bytes_per_word, Register **fr, gint32 size, FILE *file, gint32 out_base);
   int readihexN (int bytes_per_word, Register **fr, gint32 size, FILE * file, gint32 offset);
   // The following do the same function of ntohs and htons
   // these save having to include networking includes
-  inline int ntoh16(int w) { return isBigEndian ? w : (w >> 8) & 0xff | (w & 0xff) << 8;}
-  inline int hton16(int w) { return isBigEndian ? w : (w >> 8) & 0xff | (w & 0xff) << 8;}
+  inline int ntoh16(int w) { return isBigEndian ? w : ((w >> 8) & 0xff) | ((w & 0xff) << 8);}
+  inline int hton16(int w) { return isBigEndian ? w : ((w >> 8) & 0xff) | ((w & 0xff) << 8);}
 
 };
 

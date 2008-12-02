@@ -648,7 +648,7 @@ File Stimulus\n\
 
       for (unsigned int i=1,j=0; diff && i; i<<=1, j++)
         if (diff & i)
-          m_port->getPin(j)->update_pullup((value.data & i !=0) ? '1':'0',true);
+          m_port->getPin(j)->update_pullup(((value.data & i) !=0) ? '1':'0',true);
 
       m_port->updatePort();
     }

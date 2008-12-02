@@ -657,12 +657,12 @@ unsigned int TOSL::get_value()
 void TOSL::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  stack->put_tos( stack->get_tos() & 0xffffff00 | new_value & 0xff);
+  stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
 }
 
 void TOSL::put_value(unsigned int new_value)
 {
-  stack->put_tos( stack->get_tos() & 0xffffff00 | new_value & 0xff);
+  stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
   update();
 }
 
@@ -692,13 +692,13 @@ unsigned int TOSH::get_value()
 void TOSH::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  stack->put_tos( stack->get_tos() & 0xffff00ff | ( (new_value & 0xff) << 8));
+  stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
 }
 
 void TOSH::put_value(unsigned int new_value)
 {
 
-  stack->put_tos( stack->get_tos() & 0xffff00ff | ( (new_value & 0xff) << 8));
+  stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
 
   update();
 
@@ -729,12 +729,12 @@ unsigned int TOSU::get_value()
 void TOSU::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  stack->put_tos( stack->get_tos() & 0xffe0ffff | ( (new_value & 0x1f) << 16));
+  stack->put_tos( (stack->get_tos() & 0xffe0ffff) | ( (new_value & 0x1f) << 16));
 }
 
 void TOSU::put_value(unsigned int new_value)
 {
-  stack->put_tos( stack->get_tos() & 0xffe0ffff | ( (new_value & 0x1f) << 16));
+  stack->put_tos( (stack->get_tos() & 0xffe0ffff) | ( (new_value & 0x1f) << 16));
   update();
 }
 

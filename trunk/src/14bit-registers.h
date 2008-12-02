@@ -265,7 +265,7 @@ public:
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? 0 : STATUS_C)   |
 	      (((new_value ^ src1 ^ src2)&0x10) ? 0 : STATUS_DC) |
-	      (((src1 & ~src2 & ~new_value | new_value & ~src1 & src2) & 0x80) ? STATUS_OV : 0) |
+	      ((((src1 & ~src2 & ~new_value) | (new_value & ~src1 & src2)) & 0x80) ? STATUS_OV : 0) |
 	      ((new_value & 0x80)   ? STATUS_N : 0));
   }
 
