@@ -966,7 +966,7 @@ void pic_processor::finish()
   if(!stack)
     return;
 
-  run_to_address( stack->contents[stack->pointer-1 & stack->stack_mask]);
+  run_to_address( stack->contents[(stack->pointer-1) & stack->stack_mask]);
 
 }
 

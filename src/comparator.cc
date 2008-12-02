@@ -382,7 +382,7 @@ void VRCON::put(unsigned int new_value)
   if (new_value & VREN)         // Vreference enable set
   {
         double VDD =  ((Processor *)cpu)->get_Vdd();
-        vr_Rhigh = (8 + (16 - new_value & 0x0f)) * 2000.;
+        vr_Rhigh = (8 + (16 - (new_value & 0x0f))) * 2000.;
         vr_Rlow = (new_value & 0x0f) * 2000.;
         if (! (new_value & VRR))        // High range ?
             vr_Rlow += 16000.;

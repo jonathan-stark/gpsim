@@ -686,8 +686,8 @@ namespace dspic_instructions
       ((resRV.data & 0xffff  )  ? 0  : eZ) |
       ((resRV.data & 0x10000 )  ? eC : 0) |
       (((resRV.data ^ baseRV.data ^ srcRV.data)&0x10) ? eDC : 0) |
-      (((resRV.data & ~baseRV.data & ~srcRV.data | 
-	 ~resRV.data & baseRV.data & srcRV.data) & 0x8000) ? eOV : 0) |
+      ((((resRV.data & ~baseRV.data & ~srcRV.data) | 
+	 (~resRV.data & baseRV.data & srcRV.data)) & 0x8000) ? eOV : 0) |
       ((resRV.data & 0x8000 )  ? eN : 0);
 
     cpu_dsPic->m_status.putFlags(flags, eC|eZ|eOV|eN|eDC, 0);
@@ -1321,8 +1321,8 @@ namespace dspic_instructions
       ((resRV.data & 0xffff  )  ? 0  : eZ) |
       ((resRV.data & 0x10000 )  ? eC : 0) |
       (((resRV.data ^ baseRV.data ^ srcRV.data)&0x10) ? eDC : 0) |
-      (((resRV.data & ~baseRV.data & ~srcRV.data | 
-	 ~resRV.data & baseRV.data & srcRV.data) & 0x8000) ? eOV : 0) |
+      ((((resRV.data & ~baseRV.data & ~srcRV.data) | 
+	 (~resRV.data & baseRV.data & srcRV.data)) & 0x8000) ? eOV : 0) |
       ((resRV.data & 0x8000 )  ? eN : 0);
 
     cpu_dsPic->m_status.putFlags(flags, eC|eZ|eOV|eN|eDC, 0);

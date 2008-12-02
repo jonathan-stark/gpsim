@@ -454,7 +454,7 @@ void INDF::put_value(unsigned int new_value)
 
   update();
   int r = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value + 
-	   ((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2);
+	   (((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2));
   if(r & fsr_mask) 
     cpu_pic->registers[r]->update();
 
