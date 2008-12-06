@@ -520,19 +520,6 @@ public:
 };
 
 //-------------------------------------------------------------------
-
-class ADCON0_16 : public ADCON0
-{
-public:
-  ADCON0_16(Processor *, const char *pName, const char *pDesc=0);
-  virtual void set_interrupt();
-
-  virtual void setPir(PIR *);
-private:
-  PIR *m_pPir;
-};
-
-//-------------------------------------------------------------------
 #if 0
 
 class TABLAT : public sfr_register

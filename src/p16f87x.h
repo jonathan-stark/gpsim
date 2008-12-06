@@ -41,7 +41,7 @@ class P16F871 : public P16C64   // The 74 has too much RAM and too many CCPs
 
   virtual PIR *get_pir2() { return (pir2_2_reg); }
 
-  ADCON0_withccp adcon0;
+  ADCON0 adcon0;
   ADCON1 adcon1;
   sfr_register  adres;
   sfr_register  adresl;

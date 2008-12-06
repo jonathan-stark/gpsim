@@ -1,3 +1,18 @@
+2008-12-07 Roy Rankin <rrankin@ihug.com.au>
+        * src/16bit-registers.h src/p16f87x.cc src/p16f87x.h
+          src/p16x7x.h src/a2dconverter.h src/p16x7x.cc src/p16f8x.h
+          src/16bit-registers.cc src/p16f8x.cc src/a2dconverter.cc :
+	    Consolidate ADCON0_withcpp, ADCON0_16 and ADCON0 classes
+	    to just ADCON0. Fix ADCON1::setNumberOfChannels() to allow
+	    number of channels to be increased.
+
+2008-12-02 Roy Rankin <rrankin@ihug.com.au>
+        * src/14bit-registers.h src/dspic/dspic-instructions.cc 
+          src/pic-processor.cc src/pir.cc src/16bit-instructions.h 
+          src/comparator.cc src/hexutils.h src/14bit-registers.cc 
+          src/16bit-registers.cc modules/stimuli.cc :
+	    Fix GCC 4.3.0 warnings
+
 2008-09-21 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi, doc/gpsimWin32.html:
 	  updated for libpng-1.2.29, win_iconv_dll-tml-20080320, atk_1.22.0-2_win32,

@@ -99,7 +99,7 @@ public:
   PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
 
-  ADCON0_withccp adcon0;
+  ADCON0 adcon0;
   ADCON1 adcon1;
   sfr_register  adresh;
   sfr_register  adresl;
@@ -163,7 +163,7 @@ public:
 
 
   ANSEL  ansel;
-  ADCON0_withccp adcon0;
+  ADCON0 adcon0;
   ADCON1 adcon1;
   sfr_register  adresh;
   sfr_register  adresl;

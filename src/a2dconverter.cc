@@ -60,7 +60,7 @@ void ADRES::put(int new_value)
 //
 ADCON0::ADCON0(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    adres(0), adresl(0), adcon1(0), intcon(0), ad_state(AD_IDLE),
+    adres(0), adresl(0), adcon1(0), intcon(0), m_pPir(0), ad_state(AD_IDLE),
     channel_mask(7)
 {
 }
@@ -92,6 +92,14 @@ void ADCON0::setAdcon1(ADCON1 *new_adcon1)
 void ADCON0::setIntcon(INTCON *new_intcon)
 {
   intcon = new_intcon;
+}
+/*
+ * Link PIC register for PIR
+ * If set ADIF in PIR otherwise ADIF in ADCON0
+ */
+void ADCON0::setPir(PIR *pPir)
+{
+  m_pPir = pPir;
 }
 
 /*
@@ -291,27 +299,22 @@ void ADCON0::callback(void)
 }
 
 //------------------------------------------------------
+// If the ADIF bit is in the PIR1 register, call setPir() 
+// in the ADC setup. Otherwise, ADIF is assumed to be in
+// the ADCON0 register
 //
 void ADCON0::set_interrupt(void)
 {
-  value.put(value.get() | ADIF);
-  intcon->peripheral_interrupt();
+  if (m_pPir)
+      m_pPir->set_adif();
+  else
+  {
+      value.put(value.get() | ADIF);
+      intcon->peripheral_interrupt();
+  }
 
 }
 
-//------------------------------------------------------
-//
-ADCON0_withccp::ADCON0_withccp(Processor *pCpu, const char *pName, const char *pDesc)
-  : ADCON0(pCpu, pName, pDesc)
-{
-}
-
-void ADCON0_withccp::set_interrupt(void)
-{
-
-  pir_set->set_adif();
-
-}
 
 
 //------------------------------------------------------
@@ -386,15 +389,30 @@ void ADCON1::setVrefHiConfiguration(unsigned int cfg, unsigned int channel)
  */
 void ADCON1::setNumberOfChannels(unsigned int nChannels)
 {
-  if (m_nAnalogChannels || !nChannels)
+  PinModule **save = NULL;
+
+  if (!nChannels || nChannels <= m_nAnalogChannels)
     return;
 
+  if (m_nAnalogChannels && nChannels > m_nAnalogChannels )
+        save = m_AnalogPins;
+
+  m_AnalogPins = new PinModule *[nChannels];
+
+  for (unsigned int i=0; i<nChannels; i++)
+  {
+    if(i < m_nAnalogChannels)
+    {
+        if (save)
+            m_AnalogPins[i] = save[i];
+    }
+    else
+        m_AnalogPins[i] = &AnInvalidAnalogInput;
+  }
+  if (save)
+        delete save;
+
   m_nAnalogChannels = nChannels;
-  m_AnalogPins = new PinModule *[m_nAnalogChannels];
-
-  for (unsigned int i=0; i<m_nAnalogChannels; i++)
-    m_AnalogPins[i] = &AnInvalidAnalogInput;
-
 }
 
 /*

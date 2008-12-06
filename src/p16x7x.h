@@ -98,7 +98,7 @@ class P16C72 : public P16C62
   PIR1v2 *pir1_2_reg;
   PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
-  ADCON0_withccp adcon0;
+  ADCON0 adcon0;
   ADCON1 adcon1;
   sfr_register  adres;
 
@@ -127,7 +127,7 @@ class P16C73 : public P16C63
   PIR1v2 *pir1_2_reg;
   PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
-  ADCON0_withccp adcon0;
+  ADCON0 adcon0;
   ADCON1 adcon1;
   sfr_register  adres;
 
@@ -173,7 +173,7 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   PIR1v2 *pir1_2_reg;
   PIR2v2 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
-  ADCON0_withccp adcon0;
+  ADCON0 adcon0;
   ADCON1 adcon1;
   sfr_register  adres;
 
