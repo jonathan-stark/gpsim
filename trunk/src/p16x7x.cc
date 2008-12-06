@@ -295,8 +295,7 @@ void P16C72::create_sfr_map()
   adcon0.setAdresLow(0);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
-  // adcon0.pir_set = get_pir_set();
-  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setPir(pir1_2_reg);
   adcon0.setChannel_Mask(7); // even though there are only 5 inputs...
   adcon0.setA2DBits(8);
 
@@ -398,14 +397,11 @@ void P16C73::create_sfr_map()
 
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
-  //1adcon0.analog_port = porta;
-  //2adcon0.analog_port2 = 0;
   adcon0.setAdres(&adres);
   adcon0.setAdresLow(0);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
-  // adcon0.pir_set = get_pir_set();
-  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setPir(pir1_2_reg);
   adcon0.setChannel_Mask(7); // even though there are only 5 inputs...
   adcon0.setA2DBits(8);
 
@@ -601,7 +597,7 @@ void P16C74::create_sfr_map()
   adcon0.setAdresLow(0);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
-  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setPir(pir1_2_reg);
   adcon0.setChannel_Mask(7);
   adcon0.setA2DBits(8);
 

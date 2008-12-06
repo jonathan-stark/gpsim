@@ -527,7 +527,7 @@ void P16F81x::create_sfr_map()
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
   adcon0.setA2DBits(10);
-  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setPir(pir1);
   adcon0.setChannel_Mask(7);
                                                                                 
   adcon1.setNumberOfChannels(5);
@@ -800,7 +800,7 @@ void P16F88::create_sfr_map()
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
   adcon0.setA2DBits(10);
-  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setPir(pir1);
   adcon0.setChannel_Mask(7);
                                                                                 
   adcon1.setNumberOfChannels(7);

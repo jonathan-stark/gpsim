@@ -1152,22 +1152,6 @@ void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 
 }
 
-//-------------------------------------------------------------------
-ADCON0_16::ADCON0_16(Processor *pCpu, const char *pName, const char *pDesc)
-  : ADCON0(pCpu,pName,pDesc), m_pPir(0)
-{
-}
-
-void ADCON0_16::setPir(PIR *pPir)
-{
-  m_pPir = pPir;
-}
-
-void ADCON0_16::set_interrupt()
-{
-  if (m_pPir)
-    m_pPir->set_adif();
-}
 
 //-------------------------------------------------------------------
 //

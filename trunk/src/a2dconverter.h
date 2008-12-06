@@ -146,6 +146,7 @@ public:
   void setAdresLow(sfr_register *);
   void setAdcon1(ADCON1 *);
   void setIntcon(INTCON *);
+  virtual void setPir(PIR *);
   void setA2DBits(unsigned int);
   void setChannel_Mask(unsigned int ch_mask) { channel_mask = ch_mask; }
 
@@ -155,6 +156,7 @@ private:
   sfr_register *adresl;
   ADCON1 *adcon1;
   INTCON *intcon;
+  PIR    *m_pPir;
 
   double m_dSampledVoltage;
   double m_dSampledVrefHi;
@@ -166,19 +168,6 @@ private:
   unsigned int Tad_2;
   unsigned int Tad;
   unsigned int channel_mask;
-};
-
-//---------------------------------------------------------
-// ADCON0_withccp
-//
-
-class ADCON0_withccp : public ADCON0
-{
-public:
-  ADCON0_withccp(Processor *pCpu, const char *pName, const char *pDesc);
-  PIR_SET   *pir_set;
-  virtual void set_interrupt();
-
 };
 
 

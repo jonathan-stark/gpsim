@@ -129,7 +129,7 @@ void P16F871::create_sfr_map()
   adcon0.setAdres(&adres);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
-  adcon0.pir_set = &pir_set_2_def;
+  adcon0.setPir(pir1);
   adcon0.setChannel_Mask(7);
 
   adcon0.setAdresLow(&adresl);
