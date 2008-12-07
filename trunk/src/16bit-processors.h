@@ -82,7 +82,7 @@ public:
   PicLatchRegister *m_latc;
 
 
-  ADCON0_16    adcon0;
+  ADCON0       adcon0;
   ADCON1       adcon1;
   sfr_register adresl;
   sfr_register adresh;
