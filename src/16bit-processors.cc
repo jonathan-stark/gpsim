@@ -149,8 +149,10 @@ public:
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   : pic_processor(_name,desc),
+/*
     adcon0(this, "adcon0", "A2D control register"),
     adcon1(this, "adcon1", "A2D control register"),
+*/
     adresl(this, "adresl", "A2D result low"),
     adresh(this, "adresh", "A2D result high"),
     intcon(this, "intcon", "Interrupt control"),
@@ -307,8 +309,6 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ccpr1l,	  0xfbe,porv,"ccpr1l");
   add_sfr_register(&ccpr1h,	  0xfbf,porv,"ccpr1h");
 
-  add_sfr_register(&adcon1,	  0xfc1,porv,"adcon1");
-  add_sfr_register(&adcon0,	  0xfc2,porv,"adcon0");
   add_sfr_register(&adresl,	  0xfc3,porv,"adresl");
   add_sfr_register(&adresh,	  0xfc4,porv,"adresh");
 
@@ -462,59 +462,10 @@ void _16bit_processor :: create_sfr_map()
   status->write_mask = 0xff;
 
 
-  adcon0.setAdresLow(&adresl);
-  adcon0.setAdres(&adresh);
-  adcon0.setAdcon1(&adcon1);
-  adcon0.setIntcon(&intcon);
-  adcon0.setPir(&pir1);
-  adcon0.setChannel_Mask(7); // Greater than 4 channels
-  adcon0.setA2DBits(10);
-
-  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
-			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
-
-  adcon1.setNumberOfChannels(8);	// Allow 8 channel configuration
-  adcon1.setChannelConfiguration(0, 0xff);
-  adcon1.setChannelConfiguration(1, 0xff);
-  adcon1.setChannelConfiguration(2, 0x1f);
-  adcon1.setChannelConfiguration(3, 0x1f);
-  adcon1.setChannelConfiguration(4, 0x0b);
-  adcon1.setChannelConfiguration(5, 0x0b);
-  adcon1.setChannelConfiguration(6, 0x00);
-  adcon1.setChannelConfiguration(7, 0x00);
-  adcon1.setChannelConfiguration(8, 0xff);
-  adcon1.setChannelConfiguration(9, 0x3f);
-  adcon1.setChannelConfiguration(10, 0x3f);
-  adcon1.setChannelConfiguration(11, 0x3f);
-  adcon1.setChannelConfiguration(12, 0x1f);
-  adcon1.setChannelConfiguration(13, 0x0f);
-  adcon1.setChannelConfiguration(14, 0x01);
-  adcon1.setChannelConfiguration(15, 0x0d);
-
-  adcon1.setVrefHiConfiguration(1, 3);
-  adcon1.setVrefHiConfiguration(3, 3);
-  adcon1.setVrefHiConfiguration(5, 3);
-  adcon1.setVrefHiConfiguration(8, 3);
-  adcon1.setVrefHiConfiguration(10, 3);
-  adcon1.setVrefHiConfiguration(11, 3);
-  adcon1.setVrefHiConfiguration(12, 3);
-  adcon1.setVrefHiConfiguration(13, 3);
-  adcon1.setVrefHiConfiguration(15, 3);
-
-  adcon1.setVrefLoConfiguration(8, 2);
-  adcon1.setVrefLoConfiguration(11, 2);
-  adcon1.setVrefLoConfiguration(12, 2);
-  adcon1.setVrefLoConfiguration(13, 2);
-  adcon1.setVrefLoConfiguration(15, 2);
-
-  adcon1.setNumberOfChannels(5);
-  adcon1.setIOPin(0, &(*m_porta)[0]);
-  adcon1.setIOPin(1, &(*m_porta)[1]);
-  adcon1.setIOPin(2, &(*m_porta)[2]);
-  adcon1.setIOPin(3, &(*m_porta)[3]);
-  adcon1.setIOPin(4, &(*m_porta)[5]);
   // AN5,AN6 and AN7 exist only on devices with a PORTE.
 }
+
+//-------------------------------------------------------------------
 
 //-------------------------------------------------------------------
 //
@@ -706,3 +657,138 @@ void _16bit_processor::create_iopin_map()
   cout << "_16bit_processor::create_iopin_map WARNING --- not creating package \n";
 }
 
+void _16bit_compat_adc::create()
+{
+
+    adcon0 = new ADCON0(this, "adcon0", "A2D control register"),
+    adcon1 = new ADCON1(this, "adcon1", "A2D control register"),
+
+    _16bit_processor::create();
+
+    a2d_compat();
+}
+
+void _16bit_compat_adc::create_sfr_map()
+{
+	_16bit_processor::create_sfr_map();
+}
+
+void _16bit_compat_adc::create_symbols()
+{
+	_16bit_processor::create_symbols();
+}
+
+void _16bit_compat_adc :: a2d_compat()
+{
+  if(verbose)
+      cout << "creating old (compatible) A2D\n";
+
+  RegisterValue porv(0,0);
+
+  add_sfr_register(adcon1,	  0xfc1,porv,"adcon1");
+  add_sfr_register(adcon0,	  0xfc2,porv,"adcon0");
+
+
+  adcon0->setAdresLow(&adresl);
+  adcon0->setAdres(&adresh);
+  adcon0->setAdcon1(adcon1);
+  adcon0->setIntcon(&intcon);
+  adcon0->setPir(&pir1);
+  adcon0->setChannel_Mask(7); // Greater than 4 channels
+  adcon0->setA2DBits(10);
+
+  adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
+
+  adcon1->setNumberOfChannels(8);	// Allow 8 channel configuration
+  adcon1->setChannelConfiguration(0, 0xff);
+  adcon1->setChannelConfiguration(1, 0xff);
+  adcon1->setChannelConfiguration(2, 0x1f);
+  adcon1->setChannelConfiguration(3, 0x1f);
+  adcon1->setChannelConfiguration(4, 0x0b);
+  adcon1->setChannelConfiguration(5, 0x0b);
+  adcon1->setChannelConfiguration(6, 0x00);
+  adcon1->setChannelConfiguration(7, 0x00);
+  adcon1->setChannelConfiguration(8, 0xff);
+  adcon1->setChannelConfiguration(9, 0x3f);
+  adcon1->setChannelConfiguration(10, 0x3f);
+  adcon1->setChannelConfiguration(11, 0x3f);
+  adcon1->setChannelConfiguration(12, 0x1f);
+  adcon1->setChannelConfiguration(13, 0x0f);
+  adcon1->setChannelConfiguration(14, 0x01);
+  adcon1->setChannelConfiguration(15, 0x0d);
+
+  adcon1->setVrefHiConfiguration(1, 3);
+  adcon1->setVrefHiConfiguration(3, 3);
+  adcon1->setVrefHiConfiguration(5, 3);
+  adcon1->setVrefHiConfiguration(8, 3);
+  adcon1->setVrefHiConfiguration(10, 3);
+  adcon1->setVrefHiConfiguration(11, 3);
+  adcon1->setVrefHiConfiguration(12, 3);
+  adcon1->setVrefHiConfiguration(13, 3);
+  adcon1->setVrefHiConfiguration(15, 3);
+
+  adcon1->setVrefLoConfiguration(8, 2);
+  adcon1->setVrefLoConfiguration(11, 2);
+  adcon1->setVrefLoConfiguration(12, 2);
+  adcon1->setVrefLoConfiguration(13, 2);
+  adcon1->setVrefLoConfiguration(15, 2);
+
+  adcon1->setNumberOfChannels(5);
+  adcon1->setIOPin(0, &(*m_porta)[0]);
+  adcon1->setIOPin(1, &(*m_porta)[1]);
+  adcon1->setIOPin(2, &(*m_porta)[2]);
+  adcon1->setIOPin(3, &(*m_porta)[3]);
+  adcon1->setIOPin(4, &(*m_porta)[5]);
+
+}
+_16bit_compat_adc::_16bit_compat_adc(const char *_name, const char *desc) 
+	: _16bit_processor(_name, desc)
+{
+}
+void _16bit_v2_adc::create(int nChannels)
+{
+
+    adcon0 = new ADCON0_V2(this, "adcon0", "A2D control register");
+    adcon1 = new ADCON1_V2(this, "adcon1", "A2D control register");
+    adcon2 = new ADCON2_V2(this, "adcon2", "A2D control register");
+
+
+    RegisterValue porv(0,0);
+
+    add_sfr_register(adcon2,	  0xfc0,porv,"adcon2");
+    add_sfr_register(adcon1,	  0xfc1,porv,"adcon1");
+    add_sfr_register(adcon0,	  0xfc2,porv,"adcon0");
+
+
+    adcon0->setAdresLow(&adresl);
+    adcon0->setAdres(&adresh);
+    adcon0->setAdcon1(adcon1);
+    adcon0->setAdcon2(adcon2);
+    adcon0->setIntcon(&intcon);
+    adcon0->setPir(&pir1);
+    adcon0->setChannel_Mask(0xf); // upto 16 channels
+    adcon0->setA2DBits(10);
+
+    adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
+
+    adcon1->setNumberOfChannels(nChannels);	
+    adcon1->setChanTable(0x1ff, 0x1fff, 0x1fff, 0x0fff,
+        0x07ff, 0x03ff, 0x01ff, 0x00ff, 0x007f, 0x003f,
+        0x001f, 0x000f, 0x0007, 0x0003, 0x0001, 0x0000);
+    adcon1->setVrefHiChannel(3);
+    adcon1->setVrefLoChannel(2);
+
+
+    adcon1->setIOPin(0, &(*m_porta)[0]);
+    adcon1->setIOPin(1, &(*m_porta)[1]);
+    adcon1->setIOPin(2, &(*m_porta)[2]);
+    adcon1->setIOPin(3, &(*m_porta)[3]);
+
+
+}
+_16bit_v2_adc::_16bit_v2_adc(const char *_name, const char *desc) 
+	: _16bit_processor(_name, desc)
+{
+}
