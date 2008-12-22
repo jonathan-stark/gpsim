@@ -20,6 +20,7 @@ libgpsim_la_SOURCES = \
 	16bit-tmrs.cc \
 	attributes.cc \
 	a2dconverter.cc \
+	a2d_v2.cc \
 	bitlog.cc \
 	bit.cc \
 	bytelog.cc \
@@ -94,6 +95,7 @@ gpsiminclude_HEADERS = \
 	16bit-registers.h \
 	16bit-tmrs.h \
 	a2dconverter.h \
+	a2d_v2.h \
 	attributes.h \
 	bit.h \
 	bitlog.h \

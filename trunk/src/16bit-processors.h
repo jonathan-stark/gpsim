@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pir.h"
 #include "uart.h"
 #include "a2dconverter.h"
+#include "a2d_v2.h"
 #include "value.h"
 
 // forward references
@@ -82,8 +83,6 @@ public:
   PicLatchRegister *m_latc;
 
 
-  ADCON0       adcon0;
-  ADCON1       adcon1;
   sfr_register adresl;
   sfr_register adresh;
   INTCON_16    intcon;
@@ -195,6 +194,30 @@ protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
 };
 
+class _16bit_compat_adc : public _16bit_processor 
+{
+public:
+
+  ADCON0       *adcon0;
+  ADCON1       *adcon1;
+
+  _16bit_compat_adc(const char *_name=0, const char *desc=0);
+  virtual void create_symbols();
+  virtual void create();
+  virtual void create_sfr_map();
+  virtual void a2d_compat();
+};
+class _16bit_v2_adc : public _16bit_processor 
+{
+public:
+
+  ADCON0_V2       *adcon0;
+  ADCON1_V2       *adcon1;
+  ADCON2_V2       *adcon2;
+
+  _16bit_v2_adc(const char *_name=0, const char *desc=0);
+  virtual void create(int nChannels);
+};
 #define cpu16 ( (_16bit_processor *)cpu)
 
 #endif

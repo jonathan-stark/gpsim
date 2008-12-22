@@ -29,8 +29,11 @@ Boston, MA 02111-1307, USA.  */
 class PicPortRegister;
 class PicTrisRegister;
 class PicLatchRegister;
+class ADCON0_V2;
+class ADCON1_V2;
+class ADCON2_V2;
 
-class P18C2x2 : public _16bit_processor
+class P18C2x2 : public _16bit_compat_adc
 {
  public:
 
@@ -80,7 +83,8 @@ class P18C252 : public P18C242
  *  class definitions for the 18C4x2 family
  */
 
-class P18C4x2 : public _16bit_processor
+//class P18C4x2 : public _16bit_processor
+class P18C4x2 : public _16bit_compat_adc
 {
  public:
 
@@ -234,7 +238,7 @@ class P18F2455 : public P18F442
 
 };
 
-class P18Fxx20 : public _16bit_processor
+class P18Fxx20 : public _16bit_v2_adc
 {
 public:
   P18Fxx20(const char *_name=0, const char *desc=0);
@@ -268,7 +272,7 @@ class P18F1320 : public P18F1220
 
 
 
-class P18F2x21 : public _16bit_processor
+class P18F2x21 : public _16bit_v2_adc
 {
  public:
 

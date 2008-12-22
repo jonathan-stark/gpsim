@@ -42,7 +42,7 @@ void P18C2x2::create()
 
   create_iopin_map();
 
-  _16bit_processor::create();
+  _16bit_compat_adc::create();
 
 }
 
@@ -116,7 +116,7 @@ void P18C2x2::create_symbols()
 }
 
 P18C2x2::P18C2x2(const char *_name, const char *desc)
-  : _16bit_processor(_name,desc)
+  : _16bit_compat_adc(_name,desc)
 {
 
   if(verbose)
@@ -225,7 +225,7 @@ void P18C4x2::create()
 
   create_iopin_map();
 
-  _16bit_processor::create();
+  _16bit_compat_adc::create();
 
 }
 //------------------------------------------------------------------------
@@ -319,7 +319,7 @@ void P18C4x2::create_symbols()
 }
 
 P18C4x2::P18C4x2(const char *_name, const char *desc)
-  : _16bit_processor(_name,desc)
+  : _16bit_compat_adc(_name,desc)
 {
 
   if(verbose)
@@ -356,16 +356,14 @@ void P18C4x2::create_sfr_map()
   add_sfr_register(m_trise,       0xf96,RegisterValue(0x07,0));
 
   // rest of configureation in parent class
-  adcon1.setNumberOfChannels(8);
-  adcon1.setIOPin(5, &(*m_porte)[0]);
-  adcon1.setIOPin(6, &(*m_porte)[1]);
-  adcon1.setIOPin(7, &(*m_porte)[2]);
+  adcon1->setNumberOfChannels(8);
+  adcon1->setIOPin(5, &(*m_porte)[0]);
+  adcon1->setIOPin(6, &(*m_porte)[1]);
+  adcon1->setIOPin(7, &(*m_porte)[2]);
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
 
 }
-
-
 
 //------------------------------------------------------------------------
 //
@@ -805,7 +803,7 @@ Processor * P18F2455::construct(const char *name)
 //------------------------------------------------------------------------
 
 P18Fxx20::P18Fxx20(const char *_name, const char *desc)
-  : _16bit_processor(_name,desc)
+  : _16bit_v2_adc(_name,desc)
 {
 }
 
@@ -836,6 +834,13 @@ void P18F1220::create()
   create_iopin_map();
 
   _16bit_processor::create();
+  _16bit_v2_adc::create(7);
+  adcon1->setIOPin(4, &(*m_portb)[0]);
+  adcon1->setIOPin(5, &(*m_portb)[1]);
+  adcon1->setIOPin(6, &(*m_portb)[4]);
+  adcon1->setValidCfgBits(0x7f, 0);
+  adcon0->setChannel_Mask(0x7);
+  adcon1->setAdcon0(adcon0);	// VCFG0, VCFG1 in adcon0
 
 }
 //------------------------------------------------------------------------
@@ -1005,7 +1010,6 @@ void P18F2x21::create_iopin_map()
 
 // Missing :
 //      OSCTUNE at 0xF9B
-//      ADCON2  at 0xFC0
 
 void P18F2x21::create_symbols()
 {
@@ -1016,7 +1020,7 @@ void P18F2x21::create_symbols()
 }
 
 P18F2x21::P18F2x21(const char *_name, const char *desc)
-  : _16bit_processor(_name,desc),
+  : _16bit_v2_adc(_name,desc),
 //    osctune(this, "osctune", "OSC Tune"),
     comparator(this)
 {
@@ -1024,7 +1028,8 @@ P18F2x21::P18F2x21(const char *_name, const char *desc)
   if(verbose)
     cout << "18c2x21 constructor, type = " << isa() << '\n';
 
-  m_porte = new PicPortRegister(this,"porte","",8,0x08);
+    m_porte = new PicPortRegister(this,"porte","",8,0x08);
+
 //  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
 //  m_late  = new PicLatchRegister(this,"late","",m_porte);
 
@@ -1037,20 +1042,28 @@ void P18F2x21::create_sfr_map()
     cout << "create_sfr_map P18F2x21\n";
 
   _16bit_processor::create_sfr_map();
+  _16bit_v2_adc::create(13);
 
   RegisterValue porv(0,0);
 
+
   add_sfr_register(m_porte,       0xf84,porv);
+
+  adcon1->setIOPin(4, &(*m_porta)[5]);
+/*  Not on 28 pin processors
+  adcon1->setIOPin(5, &(*m_porte)[0]);
+  adcon1->setIOPin(6, &(*m_porte)[1]);
+  adcon1->setIOPin(7, &(*m_porte)[2]);
+*/
+  adcon1->setIOPin(8, &(*m_portb)[2]);
+  adcon1->setIOPin(9, &(*m_portb)[3]);
+  adcon1->setIOPin(10, &(*m_portb)[1]);
+  adcon1->setIOPin(11, &(*m_portb)[4]);
+  adcon1->setIOPin(12, &(*m_portb)[0]);
 
 //  add_sfr_register(&osctune,      0xf9b,porv);
 
   // rest of configuration in parent class
-  adcon1.setNumberOfChannels(12);
-  adcon1.setIOPin(8, &(*m_portb)[2]);
-  adcon1.setIOPin(9, &(*m_portb)[3]);
-  adcon1.setIOPin(10, &(*m_portb)[1]);
-  adcon1.setIOPin(11, &(*m_portb)[4]);
-  adcon1.setIOPin(12, &(*m_portb)[0]);
 
   // Link the comparator and voltage ref to porta
   comparator.initialize(&pir_set_def, &(*m_porta)[2], &(*m_porta)[0], 
@@ -1254,7 +1267,6 @@ void P18F4x21::create_iopin_map()
 
 // Missing :
 //      OSCTUNE at 0xF9B
-//      ADCON2  at 0xFC0
 
 void P18F4x21::create_symbols()
 {
@@ -1275,7 +1287,7 @@ P18F4x21::P18F4x21(const char *_name, const char *desc)
   m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
   m_latd  = new PicLatchRegister(this,"latd","",m_portd);
 
-//  m_porte = new PicPortRegister(this,"porte","",8,0x08);
+  //m_porte = new PicPortRegister(this,"porte","",8,0x08);
   m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
@@ -1288,6 +1300,8 @@ void P18F4x21::create_sfr_map()
     cout << "create_sfr_map P18F4x21\n";
 
   _16bit_processor::create_sfr_map();
+  _16bit_v2_adc::create(13);
+
 
   RegisterValue porv(0,0);
 
@@ -1300,18 +1314,29 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(m_trisd,       0xf95,RegisterValue(0xff,0));
   add_sfr_register(m_trise,       0xf96,RegisterValue(0x07,0));
 
+
 //  add_sfr_register(&osctune,      0xf9b,porv);
 
-  // rest of configuration in parent class
-  adcon1.setNumberOfChannels(12);
-  adcon1.setIOPin(5, &(*m_porte)[0]);
-  adcon1.setIOPin(6, &(*m_porte)[1]);
-  adcon1.setIOPin(7, &(*m_porte)[2]);
-  adcon1.setIOPin(8, &(*m_portb)[2]);
-  adcon1.setIOPin(9, &(*m_portb)[3]);
-  adcon1.setIOPin(10, &(*m_portb)[1]);
-  adcon1.setIOPin(11, &(*m_portb)[4]);
-  adcon1.setIOPin(12, &(*m_portb)[0]);
+  adcon1->setIOPin(4, &(*m_porta)[5]);
+  adcon1->setIOPin(5, &(*m_porte)[0]);
+  adcon1->setIOPin(6, &(*m_porte)[1]);
+  adcon1->setIOPin(7, &(*m_porte)[2]);
+  adcon1->setIOPin(8, &(*m_portb)[2]);
+  adcon1->setIOPin(9, &(*m_portb)[3]);
+  adcon1->setIOPin(10, &(*m_portb)[1]);
+  adcon1->setIOPin(11, &(*m_portb)[4]);
+  adcon1->setIOPin(12, &(*m_portb)[0]);
+/*
+  adcon1->setChanTable(0x1ff, 0x1fff, 0x1fff, 0x0fff,
+	0x07ff, 0x03ff, 0x01ff, 0x00ff, 0x007f, 0x003f,
+	0x001f, 0x000f, 0x0007, 0x0003, 0x0001, 0x0000);
+  adcon1->setVrefHiChannel(3);
+  adcon1->setVrefLoChannel(2);
+*/
+
+
+
+
 
   // Link the comparator and voltage ref to porta
   comparator.initialize(&pir_set_def, &(*m_porta)[2], &(*m_porta)[0], 
