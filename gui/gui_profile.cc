@@ -805,13 +805,13 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
         active_plot=plot;
 
         gdk_color_parse("light yellow", &bg_color);
-        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
+        gdk_colormap_alloc_color(gtk_widget_get_colormap(active_plot), &bg_color, FALSE, TRUE);
         gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
 
         gdk_color_parse("black", &color1);
-        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
+        gdk_colormap_alloc_color(gtk_widget_get_colormap(active_plot), &color1, FALSE, TRUE);
         gdk_color_parse("black", &color2);
-        gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
+        gdk_colormap_alloc_color(gtk_widget_get_colormap(canvas), &color2, FALSE, TRUE);
 
 #ifdef GTKEXTRA_2
         gtk_plot_hide_legends(GTK_PLOT(active_plot));
@@ -1121,13 +1121,13 @@ int plot_routine_histogram(Profile_Window *pw)
         active_plot=plot;
 
         gdk_color_parse("light yellow", &bg_color);
-        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
+        gdk_colormap_alloc_color(gtk_widget_get_colormap(active_plot), &bg_color, FALSE, TRUE);
         gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
 
         gdk_color_parse("black", &color1);
-        gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
+        gdk_colormap_alloc_color(gtk_widget_get_colormap(active_plot), &color1, FALSE, TRUE);
         gdk_color_parse("black", &color2);
-        gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
+        gdk_colormap_alloc_color(gtk_widget_get_colormap(canvas), &color2, FALSE, TRUE);
 
 #ifdef GTKEXTRA_2
         gtk_plot_hide_legends(GTK_PLOT(active_plot));

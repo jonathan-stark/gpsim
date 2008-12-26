@@ -55,7 +55,7 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
 
   colors = 3;
   sprintf(buffer, "%d %d %d 1", cols, 1+lcdP->dots.y * lcdP->pixels.y,
-	  colors);
+          colors);
   xpm_template[0] = (gchar *)strdup(buffer);
   xpm_template[1] = (gchar *)strdup("  c None");
   xpm_template[2] = (gchar *)strdup("B c #113311");
@@ -83,12 +83,12 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
 
       for(jj=k; jj<k+lcdP->pixels.y-1; jj++) {
 
-	xpm_template[jj][m] = bc;
-	for(ii=m+1; ii<m+lcdP->pixels.x; ii++)
-	  xpm_template[jj][ii] = pc;
+        xpm_template[jj][m] = bc;
+        for(ii=m+1; ii<m+lcdP->pixels.x; ii++)
+          xpm_template[jj][ii] = pc;
       }
       for(ii=m; ii<m+lcdP->pixels.x; ii++)
-	xpm_template[k+lcdP->pixels.y-1][ii] = bc;
+        xpm_template[k+lcdP->pixels.y-1][ii] = bc;
     }
 
     //if we want to have the right edge a different color...
@@ -184,8 +184,8 @@ GdkPixmap *LcdDisplay::get_pixmap(gint row, gint col)
 
 static gint
 lcd_expose_event (GtkWidget *widget,
-		  GdkEvent  *event,
-		  gpointer   user_data)
+                  GdkEvent  *event,
+                  gpointer   user_data)
 {
 
   LcdDisplay *lcdP;
@@ -207,8 +207,8 @@ lcd_expose_event (GtkWidget *widget,
 }
 
 void LcdDisplay::update(  GtkWidget *widget,
-			     guint new_width,
-			     guint new_height)
+                             guint new_width,
+                             guint new_height)
 {
 
 
@@ -225,11 +225,11 @@ void LcdDisplay::update(  GtkWidget *widget,
   w_height = new_height;
 
   gdk_draw_rectangle (drawable, lcd_gc,
-		      TRUE,
-		      0,
-		      0,
-		      w_width,
-		      w_height);
+                      TRUE,
+                      0,
+                      0,
+                      w_width,
+                      w_height);
 
 
   // Don't display anything if the display is disabled
@@ -252,25 +252,25 @@ void LcdDisplay::update(  GtkWidget *widget,
     for(j=0; j<rows; j++)
       for(i=0; i<cols; i++)
         gdk_draw_pixmap (widget->window,lcd_gc,get_pixmap(j,i),
-		         0,0,
-		         border+i*cw, border+j*(ch+border),
-		         cw,ch);
+                         0,0,
+                         border+i*cw, border+j*(ch+border),
+                         cw,ch);
   }
   else {
     guint pos;
     for(pos=0,j=0; j<rows; j++)
       for(i=0; i<cols; pos++,i++)
         gdk_draw_pixmap (widget->window,lcd_gc,get_pixmap(j,i),
-		         0,0,
-		         border+pos*cw, border,
-		         cw,ch);
+                         0,0,
+                         border+pos*cw, border,
+                         cw,ch);
   }
 }
 
 static gint
 cursor_event (GtkWidget          *widget,
-	      GdkEvent           *event,
-	      gpointer  *user_data)
+              GdkEvent           *event,
+              gpointer  *user_data)
 {
   if ((event->type == GDK_BUTTON_PRESS) &&
       ((event->button.button == 1) ||
@@ -292,7 +292,7 @@ GdkColor *NewColor(gint32 red, gint32 green, gint32 blue)
   c->green = green;
   c->blue = blue;
 
-  gdk_color_alloc(gdk_colormap_get_system(), c);
+  gdk_colormap_alloc_color(gdk_colormap_get_system(), c, FALSE, TRUE);
 
   return c;
 
@@ -332,7 +332,7 @@ void LcdDisplay::CreateGraphics (void)
     gtk_window_set_title(GTK_WINDOW(window), "LCD");
 
 //    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-//			GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
+//                      GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
 
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
@@ -340,47 +340,47 @@ void LcdDisplay::CreateGraphics (void)
 
     vbox =
       gtk_widget_new (gtk_vbox_get_type (),
-		      "GtkBox::homogeneous", FALSE,
-		      //"GtkBox::spacing", 5,
-		      //"GtkContainer::border_width", 10,
-		      "GtkWidget::parent", main_vbox,
-		      "GtkWidget::visible", TRUE,
-		      NULL);
+                      "GtkBox::homogeneous", FALSE,
+                      //"GtkBox::spacing", 5,
+                      //"GtkContainer::border_width", 10,
+                      "GtkWidget::parent", main_vbox,
+                      "GtkWidget::visible", TRUE,
+                      NULL);
 
 
     frame =
       gtk_widget_new (gtk_frame_get_type (),
-		      "GtkFrame::shadow", GTK_SHADOW_ETCHED_IN,
-		      "GtkFrame::label_xalign", 0.5,
-		      "GtkFrame::label", title,
-		      //"GtkContainer::border_width", 10,
-		      "GtkWidget::parent", vbox,
-		      "GtkWidget::visible", TRUE,
-		      NULL);
+                      "GtkFrame::shadow", GTK_SHADOW_ETCHED_IN,
+                      "GtkFrame::label_xalign", 0.5,
+                      "GtkFrame::label", title,
+                      //"GtkContainer::border_width", 10,
+                      "GtkWidget::parent", vbox,
+                      "GtkWidget::visible", TRUE,
+                      NULL);
 
 
     darea = gtk_drawing_area_new ();
     if (!(disp_type & TWO_ROWS_IN_ONE)) {
       gtk_widget_set_usize (darea,
-			    cols*get_char_width()+2*get_border(),
-			    rows*(get_char_height()+get_border())+get_border());
+                            cols*get_char_width()+2*get_border(),
+                            rows*(get_char_height()+get_border())+get_border());
     }
     else {
       gtk_widget_set_usize (darea,
-			    rows*cols*get_char_width()+2*get_border(),
-			    get_char_height()+2*get_border());
+                            rows*cols*get_char_width()+2*get_border(),
+                            get_char_height()+2*get_border());
     }
     gtk_container_add (GTK_CONTAINER (frame), darea);
 
     gtk_signal_connect (GTK_OBJECT (darea),
-			"expose_event",
-			GTK_SIGNAL_FUNC (lcd_expose_event),
-			this);
+                        "expose_event",
+                        GTK_SIGNAL_FUNC (lcd_expose_event),
+                        this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_signal_connect (GTK_OBJECT (darea),
-			"button_press_event",
-			GTK_SIGNAL_FUNC (cursor_event),
-			NULL);
+                        "button_press_event",
+                        GTK_SIGNAL_FUNC (cursor_event),
+                        NULL);
 
     gtk_widget_show (darea);
 

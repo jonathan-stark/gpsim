@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
   --------------------
        a
       ---
-   f | g | b    
+   f | g | b
       ---
    e |   | c
       ---
@@ -104,14 +104,14 @@ namespace Leds {
     }
     virtual void GuiUpdate  (gpointer object)
     {
-      if(led) 
-	led->update();
+      if(led)
+        led->update();
       /* {
-	int portval = led->port->get_value();
-	if(lastport != portval) {
-	  lastport=portval;
-	  led->update();
-	}
+        int portval = led->port->get_value();
+        if(lastport != portval) {
+          lastport=portval;
+          led->update();
+        }
 
       }
       */
@@ -159,15 +159,15 @@ namespace Leds {
 
   void Led_7Segments::callback()
   {
-                                                                                
+
     get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
     update();
-                                                                                
+
   }
 
   void Led_7Segments::update(  GtkWidget *widget,
-			       guint new_width,
-			       guint new_height)
+                               guint new_width,
+                               guint new_height)
   {
 
     guint i;
@@ -184,13 +184,13 @@ namespace Leds {
 
     if(segment_gc==NULL)
       {
-	segment_gc = gdk_gc_new(darea->window);
-	gdk_gc_set_line_attributes(segment_gc,
-				   5,
-				   GDK_LINE_SOLID,
-				   GDK_CAP_ROUND,
-				   GDK_JOIN_ROUND);
-	g_assert(segment_gc!=NULL);
+        segment_gc = gdk_gc_new(darea->window);
+        gdk_gc_set_line_attributes(segment_gc,
+                                   5,
+                                   GDK_LINE_SOLID,
+                                   GDK_CAP_ROUND,
+                                   GDK_JOIN_ROUND);
+        g_assert(segment_gc!=NULL);
       }
 
 
@@ -201,14 +201,14 @@ namespace Leds {
     GdkGC *gc = segment_gc;
 
     gdk_gc_set_foreground(gc,
-			  &led_background_color);
+                          &led_background_color);
 
     gdk_draw_rectangle (drawable, gc,
-			TRUE,
-			0,
-			0,
-			w_width,
-			w_height);
+                        TRUE,
+                        0,
+                        0,
+                        w_width,
+                        w_height);
 
 
     // cout << "expose led, segment states = " << segment_states << '\n';
@@ -220,12 +220,12 @@ namespace Leds {
       gdk_gc_set_foreground(gc,&led_segment_on_color);
 
       for(i=0; i<7; i++) {
-	if(segment_states & (2<<i))
-	  gdk_draw_polygon ( drawable,
-			     gc,
-			     TRUE,
-			     segments[i].p,
-			     6);
+        if(segment_states & (2<<i))
+          gdk_draw_polygon ( drawable,
+                             gc,
+                             TRUE,
+                             segments[i].p,
+                             6);
 
 
       }
@@ -237,11 +237,11 @@ namespace Leds {
 
     for(i=0; i<7; i++) {
       if((segment_states & (2<<i)) == 0)
-	gdk_draw_polygon ( drawable,
-			   gc,
-			   TRUE,
-			   segments[i].p,
-			   6);
+        gdk_draw_polygon ( drawable,
+                           gc,
+                           TRUE,
+                           segments[i].p,
+                           6);
 
     }
   }
@@ -249,8 +249,8 @@ namespace Leds {
 
   static gint
   led7_expose_event (GtkWidget *widget,
-		     GdkEvent  *event,
-		     gpointer   user_data)
+                     GdkEvent  *event,
+                     gpointer   user_data)
   {
 
 
@@ -274,14 +274,14 @@ namespace Leds {
 
   static gint
   cursor_event (GtkWidget          *widget,
-		GdkEvent           *event,
-		gpointer  *user_data)
+                GdkEvent           *event,
+                gpointer  *user_data)
   {
     if ((event->type == GDK_BUTTON_PRESS) &&
-	((event->button.button == 1) ||
-	 (event->button.button == 3)))
+        ((event->button.button == 1) ||
+         (event->button.button == 3)))
       {
-	return TRUE;
+        return TRUE;
       }
 
     return FALSE;
@@ -297,7 +297,7 @@ namespace Leds {
   //
   // Each segment on the LED is comprised of a 6 point polygon.
   // This routine will calculate what those points should be and
-  // store them an arrary. 
+  // store them an arrary.
 
   void Led_7Segments::build_segments( int w, int h)
   {
@@ -319,7 +319,7 @@ namespace Leds {
     angle = 6;
 
     /* define various useful constants */
- 
+
     segxw = sxw * w;
     slope = angle;
     seg_width = width_factor * w;
@@ -330,8 +330,8 @@ namespace Leds {
     midpt = (float)h / 2;
 
     /* define some trigonometric values */
-    /*  phi is the forward angle separating two segments; 
-	psi is the reverse angle separating two segments. */
+    /*  phi is the forward angle separating two segments;
+        psi is the reverse angle separating two segments. */
 
     invsinphi = sqrt(1 + fslope * fslope) / fslope;
     invcosphi = sqrt(1 + 1/(fslope * fslope)) * fslope;
@@ -377,7 +377,7 @@ namespace Leds {
     pts[2].x = pts[5].x + xfactor;
     pts[3].y = pts[4].y = seg_width;
     pts[4].x = temp_xpts[3] + dx4;
-    pts[3].x = temp_xpts[0] + xfactor - dx3; 
+    pts[3].x = temp_xpts[0] + xfactor - dx3;
 
     pts = &(seg_pts[MIDDLE][0]);
     pts[0].y = pts[1].y = midpt - seg_width/2;
@@ -394,7 +394,7 @@ namespace Leds {
     pts[3].y = pts[4].y = (float)h;
     pts[2].y = pts[5].y = h - (seg_width / 2) + dy5 + dy6;
     pts[0].y = pts[1].y = h - seg_width;
-    pts[0].x = spacer + segxw + seg_width/slope + dx3;  
+    pts[0].x = spacer + segxw + seg_width/slope + dx3;
     pts[1].x = spacer + (h - pts[1].y)/slope + xfactor - dx4;
     pts[4].x = spacer + segxw - dx4;
     pts[5].x = spacer + segxw/2 + (h - pts[5].y)/slope + dx6 - dx5;
@@ -410,7 +410,7 @@ namespace Leds {
     pts[5].y = seg_width - dy1;
     pts[0].x = temp_xpts[1] - dx5 - dx6;
     pts[1].x = temp_xpts[3] - dx2;
-    pts[2].x = seg_pts[MIDDLE][0].x + 2 * dx1; 
+    pts[2].x = seg_pts[MIDDLE][0].x + 2 * dx1;
     pts[3].x = seg_pts[MIDDLE][5].x - 2 * dx6;
     pts[4].x = spacer + (h - pts[4].y)/slope;
     pts[5].x = temp_xpts[0] + dx1;
@@ -463,8 +463,8 @@ namespace Leds {
 
       for(j=0; j<MAX_PTS; j++) {
 
-	segments[i].p[j].x = (int)seg_pts[i][j].x;
-	segments[i].p[j].y = (int)seg_pts[i][j].y;
+        segments[i].p[j].x = (int)seg_pts[i][j].x;
+        segments[i].p[j].y = (int)seg_pts[i][j].y;
       }
     }
 
@@ -480,31 +480,31 @@ namespace Leds {
 
     vbox =
       gtk_widget_new (gtk_vbox_get_type (),
-		      "GtkBox::homogeneous", FALSE,
-		      //"GtkBox::spacing", 5,
-		      //"GtkContainer::border_width", 10,
-		      "GtkWidget::parent", main_vbox,
-		      "GtkWidget::visible", TRUE,
-		      NULL);
+                      "GtkBox::homogeneous", FALSE,
+                      //"GtkBox::spacing", 5,
+                      //"GtkContainer::border_width", 10,
+                      "GtkWidget::parent", main_vbox,
+                      "GtkWidget::visible", TRUE,
+                      NULL);
     gtk_widget_show(vbox);
 
 
     darea = gtk_drawing_area_new ();
 
-    gtk_widget_set_usize (darea, 
-			  100, 
-			  110);
+    gtk_widget_set_usize (darea,
+                          100,
+                          110);
     gtk_container_add (GTK_CONTAINER (vbox), darea);
 
     gtk_signal_connect (GTK_OBJECT (darea),
-			"expose_event",
-			GTK_SIGNAL_FUNC (led7_expose_event),
-			this);
+                        "expose_event",
+                        GTK_SIGNAL_FUNC (led7_expose_event),
+                        this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_signal_connect (GTK_OBJECT (darea),
-			"button_press_event",
-			GTK_SIGNAL_FUNC (cursor_event),
-			NULL);
+                        "button_press_event",
+                        GTK_SIGNAL_FUNC (cursor_event),
+                        NULL);
 
     gtk_widget_show (darea);
 
@@ -517,21 +517,21 @@ namespace Leds {
     led_segment_on_color.green = 0x0000;
     led_segment_on_color.blue = 0x0000;
 
-    gdk_color_alloc(gdk_colormap_get_system(), &led_segment_on_color);
+    gdk_colormap_alloc_color(gdk_colormap_get_system(), &led_segment_on_color, FALSE, TRUE);
 
     // The `off' color is dark red
     led_segment_off_color.red = 0x4000;
     led_segment_off_color.green = 0x0000;
     led_segment_off_color.blue = 0x0000;
 
-    gdk_color_alloc(gdk_colormap_get_system(), &led_segment_off_color);
+    gdk_colormap_alloc_color(gdk_colormap_get_system(), &led_segment_off_color, FALSE, TRUE);
 
     // The background is black like my coffee
     led_background_color.red = 0x0000;
     led_background_color.green = 0x0000;
     led_background_color.blue = 0x0000;
 
-    gdk_color_alloc(gdk_colormap_get_system(), &led_background_color);
+    gdk_colormap_alloc_color(gdk_colormap_get_system(), &led_background_color, FALSE, TRUE);
 
     //  }
 
@@ -564,7 +564,7 @@ namespace Leds {
   }
 
   //--------------------------------------------------------------
-  // create_iopin_map 
+  // create_iopin_map
   //
   //  This is where the information for the Module's package is defined.
   // Specifically, the I/O pins of the module are created.
@@ -585,7 +585,7 @@ namespace Leds {
     for (int i = 1; i <= 8; i++)
     {
         package->setPinGeometry(i, 0.0, ypos, 0, false);
-	ypos += 12.;
+        ypos += 12.;
     }
 
     // Here, we create and name the I/O pins. In gpsim, we will reference
@@ -631,18 +631,18 @@ namespace Leds {
 class ColorAttribute : public Value
 {
   public:
-	ColorAttribute(Led *_led) :
-		Value("color", "On color of LED"), m_led(_led)
-	{
-	}
+        ColorAttribute(Led *_led) :
+                Value("color", "On color of LED"), m_led(_led)
+        {
+        }
 
-	virtual void get(char *return_str, int len);
-	virtual void set(const char *buffer, int buf_size = 0);
-	virtual void set(Value *v);
-	virtual bool Parse(const char *pValue, Colors &bValue);
+        virtual void get(char *return_str, int len);
+        virtual void set(const char *buffer, int buf_size = 0);
+        virtual void set(Value *v);
+        virtual bool Parse(const char *pValue, Colors &bValue);
 
   private:
-	Led *m_led;
+        Led *m_led;
 };
 
 void ColorAttribute::set(Value *v)
@@ -668,7 +668,7 @@ void ColorAttribute::set(const char *buffer, int len)
     }
     else
     {
-	cout << "ColorAttribute::set " << buffer << " unknown color\n";
+        cout << "ColorAttribute::set " << buffer << " unknown color\n";
    }
   }
 
@@ -680,24 +680,24 @@ void ColorAttribute::get(char *return_str, int len)
     switch(m_led->get_on_color())
     {
     case RED:
-	strncpy(return_str, "red", len);
-	break;
+        strncpy(return_str, "red", len);
+        break;
 
     case ORANGE:
-	strncpy(return_str, "orange", len);
-	break;
+        strncpy(return_str, "orange", len);
+        break;
 
     case GREEN:
-	strncpy(return_str, "green", len);
-	break;
+        strncpy(return_str, "green", len);
+        break;
 
     case YELLOW:
-	strncpy(return_str, "yellow", len);
-	break;
+        strncpy(return_str, "yellow", len);
+        break;
 
     case BLUE:
-	strncpy(return_str, "blue", len);
-	break;
+        strncpy(return_str, "blue", len);
+        break;
 
     }
   }
@@ -706,31 +706,31 @@ void ColorAttribute::get(char *return_str, int len)
 bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
 {
 
-    
+
     if(strncmp("red", pValue, sizeof("red")) == 0)
     {
-	bValue = RED;
-	return true;
+        bValue = RED;
+        return true;
     }
     else if (strncmp("orange", pValue, sizeof("orange")) == 0)
     {
-	bValue = ORANGE;
-	return true;
+        bValue = ORANGE;
+        return true;
     }
     else if (strncmp("green", pValue, sizeof("green")) == 0)
     {
-	bValue = GREEN;
-	return true;
+        bValue = GREEN;
+        return true;
     }
     else if (strncmp("yellow", pValue, sizeof("yellow")) == 0)
     {
-	bValue = YELLOW;
-	return true;
+        bValue = YELLOW;
+        return true;
     }
     else if (strncmp("blue", pValue, sizeof("blue")) == 0)
     {
-	bValue = BLUE;
-	return true;
+        bValue = BLUE;
+        return true;
     }
     return false;
 }
@@ -745,14 +745,14 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
 
   void Led::callback()
   {
-                                                                                
+
     get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
     update();
-                                                                                
+
   }
   void Led::update(  GtkWidget *widget,
-		     guint new_width,
-		     guint new_height)
+                     guint new_width,
+                     guint new_height)
   {
     if(!get_interface().bUsingGUI())
       return;
@@ -766,56 +766,56 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
 
     if(gc==NULL)
       {
-	gc = gdk_gc_new(darea->window);
-	gdk_gc_set_line_attributes(gc,
-				   5,
-				   GDK_LINE_SOLID,
-				   GDK_CAP_ROUND,
-				   GDK_JOIN_ROUND);
-	g_assert(gc!=NULL);
+        gc = gdk_gc_new(darea->window);
+        gdk_gc_set_line_attributes(gc,
+                                   5,
+                                   GDK_LINE_SOLID,
+                                   GDK_CAP_ROUND,
+                                   GDK_JOIN_ROUND);
+        g_assert(gc!=NULL);
       }
 
 
     gdk_gc_set_foreground(gc,&led_segment_off_color);
     gdk_draw_rectangle (drawable, gc,
-			TRUE,
-			0,
-			0,
-			w_width,
-			w_height);
+                        TRUE,
+                        0,
+                        0,
+                        w_width,
+                        w_height);
 
     if(m_pin->getDrivenState()) {
         gdk_gc_set_foreground(gc,&led_on_color[on_color]);
         gdk_draw_arc(drawable, gc,
-		   TRUE,
-		   0,
-		   0,
-		   w_width,
-		   w_height,
-		   0,64*360);
+                   TRUE,
+                   0,
+                   0,
+                   w_width,
+                   w_height,
+                   0,64*360);
     }
   }
 
   void Led::set_on_color(Colors color)
   {
-	if (color != on_color)
-	{
-	    on_color = color;
-            if(get_interface().bUsingGUI() )
-	    {
-	    	if (!led_on_color[color].pixel) // color not allocated
-    			gdk_color_alloc(gdk_colormap_get_system(), 
-			    &led_on_color[color]);
-	    	update();
-	    }
-	}
+        if (color != on_color)
+        {
+            on_color = color;
+            if (get_interface().bUsingGUI() )
+            {
+                if (!led_on_color[color].pixel) // color not allocated
+                        gdk_colormap_alloc_color(gdk_colormap_get_system(),
+                                            &led_on_color[color], FALSE, TRUE);
+                update();
+            }
+        }
   }
 
 
   static gint
   led_expose_event (GtkWidget *widget,
-		    GdkEvent  *event,
-		    gpointer   user_data)
+                    GdkEvent  *event,
+                    gpointer   user_data)
   {
 
 
@@ -849,13 +849,13 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     w_height=20;
     w_width=20;
 
-    gtk_widget_set_usize (darea, 
-			  w_height,
-			  w_width);
+    gtk_widget_set_usize (darea,
+                          w_height,
+                          w_width);
     gtk_signal_connect (GTK_OBJECT (darea),
-			"expose_event",
-			GTK_SIGNAL_FUNC (led_expose_event),
-			this);
+                        "expose_event",
+                        GTK_SIGNAL_FUNC (led_expose_event),
+                        this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_widget_show (darea);
 
@@ -866,7 +866,7 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     // The default 'on' color is bright red
 
     for(int i = RED; i <= BLUE; i++ )
-	led_on_color[i].pixel = 0;
+        led_on_color[i].pixel = 0;
 
     gdk_color_parse("red3", &led_on_color[RED]);
     gdk_color_parse("orange", &led_on_color[ORANGE]);
@@ -874,16 +874,17 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     gdk_color_parse("yellow", &led_on_color[YELLOW]);
     gdk_color_parse("blue", &led_on_color[BLUE]);
 
+    GdkColormap *colormap = gdk_colormap_get_system();
 
-    gdk_color_alloc(gdk_colormap_get_system(), &led_on_color[on_color]);
+    for(int i = RED; i <= BLUE; i++ )
+        gdk_colormap_alloc_color(colormap, &led_on_color[i], FALSE, TRUE);
 
     // The `off' color is dark red
     led_segment_off_color.red = 0x4000;
     led_segment_off_color.green = 0x0000;
     led_segment_off_color.blue = 0x0000;
 
-    gdk_color_alloc(gdk_colormap_get_system(), &led_segment_off_color);
-
+    gdk_colormap_alloc_color(colormap, &led_segment_off_color, FALSE, TRUE);
   }
 
   //--------------------------------------------------------------
@@ -894,7 +895,7 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     create_iopin_map();
     if(get_interface().bUsingGUI())
       build_window();
-   
+
 
     on_color = RED;
     m_colorAttribute = new ColorAttribute(this);
@@ -914,7 +915,7 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
   }
 
   //--------------------------------------------------------------
-  // create_iopin_map 
+  // create_iopin_map
   //
   //  This is where the information for the Module's package is defined.
   // Specifically, the I/O pins of the module are created.
