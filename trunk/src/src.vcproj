@@ -246,6 +246,9 @@
 				RelativePath=".\a2dconverter.cc">
 			</File>
 			<File
+				RelativePath=".\a2d_v2.cc">
+			</File>
+			<File
 				RelativePath=".\attributes.cc">
 			</File>
 			<File
@@ -501,6 +504,9 @@
 			</File>
 			<File
 				RelativePath=".\a2dconverter.h">
+			</File>
+			<File
+				RelativePath=".\a2d_v2.h">
 			</File>
 			<File
 				RelativePath=".\attributes.h">
