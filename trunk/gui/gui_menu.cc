@@ -70,7 +70,7 @@ extern GUI_Processor *gpGuiProcessor;
 static void
 do_quit_app(GtkWidget *widget)
 {
-        exit_gpsim();
+        exit_gpsim(0);
 }
 
 

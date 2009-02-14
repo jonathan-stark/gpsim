@@ -54,6 +54,7 @@ Boston, MA 02111-1307, USA.  */
 #define YY_DECL int yylex ( YYSTYPE* yylvalP )
 #endif
 extern int yyparse(void);
+#define exit exit_gpsim
 
 /* This is the max length of a line within a macro definition */
 static char macroBody[65536], *macroBodyPtr=0;

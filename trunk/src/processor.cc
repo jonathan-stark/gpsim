@@ -55,6 +55,7 @@ Boston, MA 02111-1307, USA.  */
 #include "clock_phase.h"
 
 #include <typeinfo>
+void exit_gpsim(int);
 
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'.
@@ -279,7 +280,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   if (registers  == 0)
     {
       cout << "*** ERROR *** Out of memory - PIC register space\n";
-      exit (1);
+      exit_gpsim (1);
     }
 
 
@@ -503,7 +504,7 @@ void Processor::init_program_memory (unsigned int memory_size)
   program_memory = new instruction *[memory_size];
   if (program_memory == 0) {
     cout << "*** ERROR *** Out of memory for program space\n";
-    exit (1);
+    exit_gpsim (1);
   }
 
   m_ProgramMemoryAllocationSize = memory_size;
@@ -541,7 +542,7 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
 
   if (!program_memory) {
     printf("ERROR: internal bug %s:%d",__FILE__,__LINE__);
-    exit(1);
+    exit_gpsim(1);
   }
 
   if(uIndex < program_memory_size()) {
@@ -847,7 +848,7 @@ void Processor::disassemble (signed int s, signed int e)
   char str2[iConsoleWidth];
   if (!pc) {
     printf("ERROR: Internal bug %s:%d\n",__FILE__,__LINE__);
-    exit(1);
+    exit_gpsim(1);
   }
   unsigned uPCAddress = pc->get_value();
   const char *pszPC;
@@ -1469,7 +1470,7 @@ void Processor::run_to_address (unsigned int destination)
 void Processor::create (void)
 {
   cout << " a generic processor cannot be created " << __FILE__ << __LINE__ <<endl;
-  exit(1);
+  exit_gpsim(1);
 }
 
 //-------------------------------------------------------------------

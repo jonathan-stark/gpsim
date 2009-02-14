@@ -103,7 +103,7 @@ LIBGPSIM_EXPORT bool gUsingThreads(); // in ../src/interface.cc
 void initialize_readline (void);
 void clear_input_buffer(void);
 
-void exit_gpsim(void);
+void exit_gpsim(int);
 #ifdef HAVE_GUI
 void quit_gui(void);
 #endif
@@ -458,7 +458,7 @@ int start_parse(void)
   int retval = init_parser();
 
   if(quit_parse)
-    exit_gpsim();
+    exit_gpsim(0);
 
   return retval;
 }
@@ -819,7 +819,7 @@ void have_line(char *s)
 
 /**********************************************************************
  **/
-void exit_gpsim(void)
+void exit_cli(void)
 {
   if(get_use_icd())
     icd_disconnect();
@@ -844,8 +844,6 @@ void exit_gpsim(void)
   cout << "Exiting gpsim\n";
   simulation_cleanup();
 
-  // FIXME - find out why this exit is needed
-  exit(0);
 }
 
 /* redisplay_prompt will redisplay the current data in the readline buffer.
