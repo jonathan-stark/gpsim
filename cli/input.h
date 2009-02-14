@@ -25,7 +25,8 @@ Boston, MA 02111-1307, USA.  */
 
 extern int gpsim_read (char *buf, unsigned max_size);
 extern void initialize_readline (void);
-extern void exit_gpsim(void);
+extern void exit_cli(void);
+extern void exit_gpsim(int);
 void SetLastFullCommand(const char *pCmd);
 const char * GetLastFullCommand();
 void EnableSTCEcho(bool bEnable);

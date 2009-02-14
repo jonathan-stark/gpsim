@@ -1,3 +1,13 @@
+2009-02-14 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim/main.cc 
+	  src/icd.cc src/processor.cc gui/gui_menu.cc
+	  cli/scan.ll cli/socket.cc cli/input.cc cli/input.h:
+	    Do not exit from library routines
+	* regression/Makefile.am
+	    make clean, cleans files in regression sub-directories
+	    fix list of files so make dist works
+	  
+	  
 2008-12-26 Borut Razem <borut.razem@siol.net>
 	* extras/lcd/lcdgui.cc, modules/led.cc, gui/gui_profile.cc:
 	  applied patch 2458749: segfault in gdk_color_alloc(),
