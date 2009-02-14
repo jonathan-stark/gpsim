@@ -4,7 +4,7 @@ EXTRA_DIST = \
 	rt.sh run_regression.sh make.regression startup.stc \
 	a2d/16f88.lkr a2d/p16f871.asm a2d/Makefile a2d/16f871.lkr \
 	a2d/p16f819.asm a2d/p16f873a.asm a2d/p16f874a.asm a2d/p18f4321.asm \
-	a2d/18f452.lkr a2d/16f873a.lkr a2d/16c71.lkr a2d/p18f1220.asm a2d/q \
+	a2d/18f452.lkr a2d/16f873a.lkr a2d/16c71.lkr a2d/p18f1220.asm \
 	a2d/p16c71.asm a2d/16f874a.lkr a2d/p18f452.asm a2d/18f4321.lkr \
 	a2d/p16f88.asm a2d/18f1220.lkr a2d/16f819.lkr analog_stim/Makefile \
 	analog_stim/18f452.lkr analog_stim/p18f452.asm assertions/Makefile \
@@ -21,9 +21,9 @@ EXTRA_DIST = \
 	comparator/compar_873a.stc comparator/compar_877a.stc \
 	digital_stim/Makefile digital_stim/16f84.lkr \
 	digital_stim/digital_stim.asm digital_stim/digital_stim.stc \
-	eeprom_wide/Makefile eeprom_wide/q eeprom_wide/eeprom_wide.stc \
+	eeprom_wide/Makefile eeprom_wide/eeprom_wide.stc \
 	eeprom_wide/16f873.lkr eeprom_wide/eeprom_wide.asm i2c/16f88.lkr \
-	i2c/Makefile i2c/p16f819.asm i2c/rrr.stc i2c/netlist.stc \
+	i2c/Makefile i2c/p16f819.asm i2c/netlist.stc \
 	i2c/i2c_low.inc i2c/p16f88.asm i2c/p16f876a.asm i2c/16f876a.lkr \
 	i2c/16f819.lkr instructions_12bit/Makefile \
 	instructions_12bit/instructions_12bit.stc \
@@ -64,7 +64,7 @@ EXTRA_DIST = \
 	switch_test/switch_test.stc switch_test/switch_test.asm \
 	tmr0_16bit/Makefile tmr0_16bit/18f452.lkr tmr0_16bit/tmr0_16bit.stc \
 	tmr0_16bit/tmr0_16bit.asm tmr0_16bit/delay.inc tmr0_16bit/delay.asm \
-	tmr1_16bit/Makefile tmr1_16bit/18f452.lkr tmr1_16bit/Makefile.old \
+	tmr1_16bit/Makefile tmr1_16bit/18f452.lkr \
 	tmr1_16bit/tmr1_16bit.asm tmr1_16bit/tmr1_16bit.stc ttl/Makefile \
 	ttl/ttl377.asm ttl/18f452.lkr ttl/ttl377.stc txisr_test/Makefile \
 	txisr_test/16f871.lkr txisr_test/txisr_test.asm \
