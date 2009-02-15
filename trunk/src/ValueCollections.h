@@ -30,6 +30,7 @@ This file originated by J.R. Heisey
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cstdio>
 
 #include "value.h"
 #include "expr.h"

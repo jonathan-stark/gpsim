@@ -25,10 +25,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 
-#ifdef putc
-#undef putc
-#endif
-
 #include "protocol.h"
 
 unsigned int a2i(char b)

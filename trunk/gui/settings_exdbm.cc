@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "settings_exdbm.h"
 #include <stdlib.h>
+#include <cstdio>
 
 SettingsEXdbm::SettingsEXdbm(const char *appl_name)
 {
