@@ -635,9 +635,10 @@ module_cmd
           }
           | MODULE string_option string_list
           {
-            c_module.module($2, $3); 
-            delete $2; 
-            delete $3;
+	    if ($2 != NULL && $3 != NULL)
+                c_module.module($2, $3); 
+            if ($2 != NULL) delete $2; 
+            if ($3 != NULL) delete $3;
           }
           ;
 
@@ -948,13 +949,14 @@ string_option:
             $$ = new cmd_options_str(pValue->getVal());
             $$->co  = $1;
             if(verbose&2)
-              cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
+              cout << " name " << $$->co->name << " value " << $$->str << " got a symbol option \n"; 
           }
           else {
-            cout << " option variable '"
+            cout << " symbol option '"
                  << $2->name()
                  << "' is not a string"
                  << endl; 
+	    $$ = NULL;
           }
           //delete $2;
         }
