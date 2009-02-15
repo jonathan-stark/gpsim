@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 
 #include "operator.h"
 #include "errors.h"

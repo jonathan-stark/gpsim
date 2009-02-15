@@ -53,6 +53,7 @@ Boston, MA 02111-1307, USA.  */
 #include "usart.h"
 
 
+#include <cstdio>
 #include "../src/value.h"
 #include "../src/modules.h"
 #include "../src/packages.h"

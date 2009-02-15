@@ -40,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 #include <string>
 #include <list>
+#include <cstdio>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <termios.h>

@@ -27,6 +27,11 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PROTCOL_H__
 #define __PROTCOL_H__
 
+#ifdef putc
+#undef putc
+#endif
+
+
 /// gpsim protocol
 ///
 /// gpsim's protocol interface is designed to provide a way for clients 

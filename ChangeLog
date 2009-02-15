@@ -1,6 +1,11 @@
 2009-02-14 Roy Rankin <rrankin@ihug.com.au>
-	* regression/Makefile.am
-	  correction on file list for make dist
+	* src/expr.cc src/protocol.cc src/operator.cc src/ValueCollections.h
+	  src/protocol.h src/icd.cc src/comparator.cc src/value.cc
+	  src/processor.cc src/16bit-instructions.cc modules/usart.cc
+	  gui/settings_exdbm.cc gui/gui.h: Changes to compile with GCC 4.4
+	    
+2009-02-14 Roy Rankin <rrankin@ihug.com.au>
+	* regression/Makefile.am: correction on file list for make dist
 
 2009-02-14 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/main.cc 
