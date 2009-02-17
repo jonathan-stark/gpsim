@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <list>
 #include <vector>
+#include <typeinfo>
 #include <unistd.h>
 #include <glib.h>
 using namespace std;
@@ -983,7 +984,15 @@ gpsimObject : GPSIMOBJECT_T '(' SYMBOL_T ')'
           {
             // Ex: pin(MyVariable)  -- where MyVariable is the name of a symbol 
             //  This allows one to programmatically select a particular pin number.
-            $$ = toStimulus($3);
+
+	    // If Symbol has an integer type, assume it is a CPU pin number
+	    // otherwise assume it is a stimulus such as a pin name
+	    if (typeid(*$3) == typeid(Integer))
+	    {
+                $$ = toStimulus($3);
+   	    }
+            else
+	        $$ = $3;
 
             //$$=new Pin_t(Pin_t::ePackageBased | Pin_t::eActiveProc, $3);
           }

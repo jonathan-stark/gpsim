@@ -1,3 +1,10 @@
+2009-02-17 Roy Rankin <rrankin@ihug.com.au>
+	* src/os_dependent.cc: Fix loading module libraries
+	* cli/parse.yy cli/cmd_attach.cc doc/gpsim.lyx:
+	    fix help for attach and segfault (bug 2556045)
+	* src/p16x6x.cc src/p16f62x.cc src/ioports.cc:
+	    debuging output only if verbose set
+
 2009-02-14 Roy Rankin <rrankin@ihug.com.au>
 	* cli/parse.yy: fix segfault (bug 2556041)
 

@@ -127,7 +127,8 @@ public:
   }
   virtual void release()
   {
-    cout << "Deleting SignalSource\n";
+    if (verbose)
+        cout << "Deleting SignalSource\n";
     delete this;
   }
 
