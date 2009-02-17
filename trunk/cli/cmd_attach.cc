@@ -43,6 +43,39 @@ cmd_attach::cmd_attach()
   brief_doc = string("Attach stimuli to nodes");
 
   long_doc = string ("attach node1 stimulus_1 [stimulus_2 stimulu_N]\n"
+    "\tAttach is used to define connections between one or more stimulus\n"
+    "\tand a node. One node and at least one stimulus must be specified, but\n"
+    "\tin general two or more stimuli are used. Attach can be viewed as\n"
+    "\twiring stimuli together, with the node acting as the wire. A stimulus\n"
+    "\tis either a CPU or module I/O pin or a stimulus name.\n\n"
+    "\tstimulus_n                 May be one of four forms:\n"
+    "\tpin(<number>) or pin(<symbol>)\n"
+    "\t    This refers to a pin of the current active CPU.\n"
+    "\t    <number> is the pin number\n"
+    "\t    <symbol> is an integer symbol whose value is a pin number\n"
+    "\n"
+    "\t<connection> or pin(<connection>)\n"
+    "\t    These two forms are treated exactly the same\n"
+    "\t            ( i.e. the pin() has no meaning).\n"
+    "\t    <connection> is a stimulus name or an I/O pin name.\n"
+    "\t            I/O pin name can be just the pin name for the CPU or\n"
+    "\t                <module_name>.pin_name for a module\n"
+    "\n"
+    "\texample:\n"
+    "\n"
+    "\t**gpsim> load instructions_14bit.cod     # load code\n"
+    "\t**gpsim> module library libgpsim_modules #load module lib\n"
+    "\t**gpsim> module load usart U1            # create USART\n"
+    "\t**gpsim> node n1                         # define a node\n"
+    "\t**gpsim> node n2                         #define another node\n"
+    "\t**gpsim> symbol TWO=2                    #define symbol with value 2\n"
+    "\t**gpsim> attach n1 pin(1) pin(TWO)       #attach CPU pins 1 and 2 to n1\n"
+    "\t**gpsim> attach n1 U1.RXPIN              #add usart pin to n1\n"
+    "\t**gpsim> attach n2 portb0 pin(U1.TXPIN)  #connect portb0 to UASRT TX pin\n"
+    "\t**gpsim> node                   # show results\n"
+    );
+#ifdef Q
+  long_doc = string ("attach node1 stimulus_1 [stimulus_2 stimulu_N]\n"
     "\t  attach is used to define the connections between stimuli and nodes.\n"
     "\tAt least one node and one stimulus must be specified. If more stimuli\n"
     "\tare specified then they will all be attached to the node.\n\n"
@@ -74,6 +107,7 @@ cmd_attach::cmd_attach()
     "\tdeprecated:\n"
     "\t  attach pin2pin_test porta4 portb0\n"
     );
+#endif // Q
 
   op = cmd_attach_options; 
 }
@@ -94,7 +128,10 @@ stimulus *toStimulus(int pinNumber)
   Processor *pMod = attach.GetActiveCPU();
   stimulus *pStim = pMod ? pMod->get_pin(pinNumber) : 0;
   if (!pStim)
-    GetUserInterface().DisplayMessage("unable to select pin\n");
+  {
+    cout << "unable to select pin " << pinNumber << "\n";
+  //  GetUserInterface().DisplayMessage("unable to select pin\n");
+  }
   return pStim;
 }
 
@@ -105,7 +142,6 @@ stimulus *toStimulus(gpsimObject *pObj)
     cout << (pObj?pObj->name():"") << " cannot be converted to a pin number\n";
     return 0;
   }
-
   return toStimulus((gint64)*pVal);
 }
 

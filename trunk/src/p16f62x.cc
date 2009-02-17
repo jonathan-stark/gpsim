@@ -344,7 +344,8 @@ P16F628::P16F628(const char *_name, const char *desc)
 
 P16F628::~P16F628()
 {
-  cout << "'628 destructor\n";
+  if (verbose)
+      cout << "'628 destructor\n";
 }
 
 

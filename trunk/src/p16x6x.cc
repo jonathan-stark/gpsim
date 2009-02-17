@@ -363,17 +363,16 @@ P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
 P16X6X_processor::~P16X6X_processor()
 {
 
-  cout << __FUNCTION__ << endl;
-
   delete_file_registers(0x20,0x7f);
   delete_file_registers(0xa0,0xbf);
   delete_sfr_register(m_portc);
   delete_sfr_register(m_trisc);
-  cout << "deleting PIR2:\n";
+  if(verbose)
+      cout << "deleting PIR2:\n";
   delete_sfr_register(pir2);
-  cout << "deleting PIR1:\n";
+  if(verbose)
+      cout << "deleting PIR1:\n";
   delete_sfr_register(pir1);
-  cout << "leaving "<<__FUNCTION__<<endl;
 }
 
 /*******************************************************************

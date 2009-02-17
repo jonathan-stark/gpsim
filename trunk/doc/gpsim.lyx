@@ -1,8 +1,9 @@
-#LyX 1.5.2 created this file. For more info see http://www.lyx.org/
-\lyxformat 276
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
 \begin_document
 \begin_header
 \textclass book
+\use_default_options false
 \language english
 \inputencoding default
 \font_roman times
@@ -13,9 +14,11 @@
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
+
 \graphics default
 \paperfontsize 10
 \spacing single
+\use_hyperref false
 \papersize default
 \use_geometry false
 \use_amsmath 1
@@ -52,7 +55,8 @@ $Date$
 \end_layout
 
 \begin_layout Standard
-\begin_inset LatexCommand tableofcontents
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
 
 \end_inset
 
@@ -69,7 +73,7 @@ gpsim is a full-featured software simulator for Microchip PIC microcontrollers
 \begin_inset Note Note
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 scott2 Wed Sep 30 13:25:58 1998
 \end_layout
 
@@ -124,33 +128,33 @@ gpsim's executable is created in a manner that's consistent with much of
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
 <features>
-<column alignment="left" valignment="top" leftline="true" width="0pt">
-<column alignment="left" valignment="top" leftline="true" rightline="true" width="0pt">
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 command 
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 description
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 tar -xvzf gpsim-x.y.z.tar.gz
 \end_layout
 
@@ -159,18 +163,18 @@ tar -xvzf gpsim-x.y.z.tar.gz
 <cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 expand the compressed tar file
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 ./configure
 \end_layout
 
@@ -179,18 +183,18 @@ expand the compressed tar file
 <cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Create a 'makefile' unique to your system
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 make
 \end_layout
 
@@ -199,27 +203,27 @@ make
 <cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 compile gpsim
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 make install
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 install gpsim
 \end_layout
 
@@ -426,7 +430,7 @@ gputils, the gnupic utilities package, is also very useful.
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 .cod files are symbol files that were created by ByteCraft and are used by
  Microchip.
 \end_layout
@@ -438,7 +442,7 @@ status collapsed
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 MPASM is Microchip's Assembler.
 \end_layout
 
@@ -474,36 +478,40 @@ help
 \begin_inset Tabular
 <lyxtabular version="3" rows="27" columns="2">
 <features>
-<column alignment="center" valignment="top" leftline="true" width="0pt">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 command
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 summary
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 attach
-\begin_inset LatexCommand index
-name "attach"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+attach
+\end_layout
 
 \end_inset
 
@@ -512,24 +520,28 @@ name "attach"
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Attach stimuli to nodes 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 break
-\begin_inset LatexCommand index
-name "break"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+break
+\end_layout
 
 \end_inset
 
@@ -541,21 +553,25 @@ name "break"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Set a break point
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 bus
-\begin_inset LatexCommand index
-name "bus"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+bus
+\end_layout
 
 \end_inset
 
@@ -567,21 +583,25 @@ name "bus"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Add or display node busses
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 clear
-\begin_inset LatexCommand index
-name "clear"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+clear
+\end_layout
 
 \end_inset
 
@@ -593,21 +613,25 @@ name "clear"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Remove a break point
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 disassemble
-\begin_inset LatexCommand index
-name "disassemble"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+disassemble
+\end_layout
 
 \end_inset
 
@@ -619,21 +643,25 @@ name "disassemble"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Disassemble the current cpu
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 dump
-\begin_inset LatexCommand index
-name "dump"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+dump
+\end_layout
 
 \end_inset
 
@@ -645,21 +673,25 @@ name "dump"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Display either the RAM or EEPROM 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 frequency
-\begin_inset LatexCommand index
-name "frequency"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+frequency
+\end_layout
 
 \end_inset
 
@@ -671,21 +703,25 @@ name "frequency"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Set processor frequency
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 help
-\begin_inset LatexCommand index
-name "help"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+help
+\end_layout
 
 \end_inset
 
@@ -697,21 +733,25 @@ name "help"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Type help "command" for more help on a command
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 icd
-\begin_inset LatexCommand index
-name "icd"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+icd
+\end_layout
 
 \end_inset
 
@@ -723,21 +763,25 @@ name "icd"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 In Circuit Debugger support.
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 list
-\begin_inset LatexCommand index
-name "list"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+list
+\end_layout
 
 \end_inset
 
@@ -749,21 +793,25 @@ name "list"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Display source and list files
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 load
-\begin_inset LatexCommand index
-name "load"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+load
+\end_layout
 
 \end_inset
 
@@ -775,21 +823,25 @@ name "load"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Load either a hex or command file
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 log
-\begin_inset LatexCommand index
-name "log"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+log
+\end_layout
 
 \end_inset
 
@@ -801,21 +853,25 @@ name "log"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Log/record events to a file
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 node
-\begin_inset LatexCommand index
-name "node"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+node
+\end_layout
 
 \end_inset
 
@@ -827,21 +883,25 @@ name "node"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Add or display stimulus nodes
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 module
-\begin_inset LatexCommand index
-name "module"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+module
+\end_layout
 
 \end_inset
 
@@ -853,7 +913,7 @@ name "module"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family roman
 \series medium
@@ -869,14 +929,18 @@ Select & Display modules
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 processor
-\begin_inset LatexCommand index
-name "processor"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+processor
+\end_layout
 
 \end_inset
 
@@ -888,21 +952,25 @@ name "processor"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Add/list processors
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 quit
-\begin_inset LatexCommand index
-name "quit"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+quit
+\end_layout
 
 \end_inset
 
@@ -914,18 +982,18 @@ name "quit"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Quit gpsim
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 reset
 \end_layout
 
@@ -934,7 +1002,7 @@ reset
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family roman
 \series medium
@@ -950,14 +1018,18 @@ Reset all or parts of the simulation
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 run
-\begin_inset LatexCommand index
-name "run"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+run
+\end_layout
 
 \end_inset
 
@@ -969,21 +1041,25 @@ name "run"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Execute the pic program
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 set
-\begin_inset LatexCommand index
-name "set"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+set
+\end_layout
 
 \end_inset
 
@@ -995,7 +1071,7 @@ name "set"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family roman
 \series medium
@@ -1011,14 +1087,18 @@ display and control gpsim behavior flags
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 step
-\begin_inset LatexCommand index
-name "step"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+step
+\end_layout
 
 \end_inset
 
@@ -1030,21 +1110,25 @@ name "step"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Execute one or more instructions
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 stimulus
-\begin_inset LatexCommand index
-name "stimulus"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+stimulus
+\end_layout
 
 \end_inset
 
@@ -1056,21 +1140,25 @@ name "stimulus"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Create a stimulus
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 stopwatch
-\begin_inset LatexCommand index
-name "stopwatch"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+stopwatch
+\end_layout
 
 \end_inset
 
@@ -1082,7 +1170,7 @@ name "stopwatch"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \family roman
 \series medium
@@ -1098,14 +1186,18 @@ Measure time between events
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 symbol
-\begin_inset LatexCommand index
-name "symbol"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+symbol
+\end_layout
 
 \end_inset
 
@@ -1117,21 +1209,25 @@ name "symbol"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Add/list symbols
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 trace
-\begin_inset LatexCommand index
-name "trace"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+trace
+\end_layout
 
 \end_inset
 
@@ -1143,21 +1239,25 @@ name "trace"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Dump the trace history
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 version
-\begin_inset LatexCommand index
-name "version"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+version
+\end_layout
 
 \end_inset
 
@@ -1169,21 +1269,25 @@ name "version"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Display gpsim's version
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 x
-\begin_inset LatexCommand index
-name "x"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+x
+\end_layout
 
 \end_inset
 
@@ -1195,7 +1299,7 @@ name "x"
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 (deprecated) examine and/or modify memory
 \end_layout
 
@@ -1222,8 +1326,12 @@ The built in 'help' command provides additional online information.
 
 \begin_layout Section
 attach
-\begin_inset LatexCommand index
-name "attach"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+attach
+\end_layout
 
 \end_inset
 
@@ -1235,28 +1343,116 @@ attach node1 stimulus1 [stimulus2 stimulus_N]
 \end_layout
 
 \begin_layout Standard
-attach is used to define the connections between stimuli and nodes.
- At least one node and one stimulus must be specified.
- If more stimuli are specified then they will all be attached to the node
- examples:
+Attach is used to define connections between one or more stimulus and a
+ node.
+ One node and at least one stimulus must be specified, but in general two
+ or more stimuli are used.
+ Attach can be viewed as wiring stimuli together, with the node acting
+ as the wire.
+ A stimulus is either a CPU or module I/O pin or a stimulus name.
+\end_layout
+
+\begin_layout Standard
+Attach_pointN can have one of the following formats
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+pin(<number>) or pin(<symbol>) 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+This refers to a pin of the current active CPU.
+ 
+\end_layout
+
+\begin_layout Standard
+<number> is the pin number
+\end_layout
+
+\begin_layout Standard
+<symbol> is an integer symbol whose value is a pin number
+\end_layout
+
+\end_deeper
+\begin_layout List
+\labelwidthstring 00.00.0000
+<connection> or pin(<connection>) 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+These two forms are treated exactly the same ( i.e.
+ the pin() has no meaning).
+\end_layout
+
+\begin_layout Standard
+<connection> is a stimulus name or an I/O pin name.
+\end_layout
+
+\begin_layout Standard
+I/O pin name can be just the pin name for the CPU or <module_name>.pin_name
+ for a module or CPU
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Example
 \end_layout
 
 \begin_layout LyX-Code
-gpsim> node  n1                # Define a new node.
+**gpsim> load instructions_14bit.cod     # load code
 \end_layout
 
 \begin_layout LyX-Code
-gpsim> attach n1 porta4 portb0 # Connect two I/O pins to the node.
+**gpsim> module library libgpsim_modules #load module lib
 \end_layout
 
 \begin_layout LyX-Code
-gpsim> node                    # Display the new "net list".
+**gpsim> module load usart U1            # create USART
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> node n1                         # define a node
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> node n2                         #define another node
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> symbol TWO=2                    #define symbol with value 2
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> attach n1 pin(1) pin(TWO)       #attach CPU pins 1 and 2
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> attach n1 U1.RXPIN              #add usart pin to n1
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> attach n2 portb0 pin(U1.TXPIN)  #connect portb0 to UASRT TX pin
+\end_layout
+
+\begin_layout LyX-Code
+**gpsim> node                            # show results
+\end_layout
+
+\begin_layout LyX-Code
+
 \end_layout
 
 \begin_layout Section
 break
-\begin_inset LatexCommand index
-name "break"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+break
+\end_layout
 
 \end_inset
 
@@ -1271,7 +1467,8 @@ The break command is used to set and examine break points.
  is true.
  Break points are ignored during single stepping.
  See chapter 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "cha:Assertions-and-Extended"
 
 \end_inset
@@ -1479,8 +1676,12 @@ The cycle counter is gpsim's time keeper.
 
 \begin_layout Section
 clear
-\begin_inset LatexCommand index
-name "clear"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+clear
+\end_layout
 
 \end_inset
 
@@ -1510,7 +1711,7 @@ break
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A break point disable/enable feature has been discussed and may be added
  a future date.
 \end_layout
@@ -1522,8 +1723,12 @@ A break point disable/enable feature has been discussed and may be added
 
 \begin_layout Section
 disassemble
-\begin_inset LatexCommand index
-name "disassemble"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+disassemble
+\end_layout
 
 \end_inset
 
@@ -1594,8 +1799,12 @@ With a single numeric option, the disassemble command will
 
 \begin_layout Section
 dump
-\begin_inset LatexCommand index
-name "dump"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+dump
+\end_layout
 
 \end_inset
 
@@ -1655,8 +1864,12 @@ See the 'x' command for examining and modifying individual registers.
 
 \begin_layout Section
 echo
-\begin_inset LatexCommand index
-name "echo"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+echo
+\end_layout
 
 \end_inset
 
@@ -1670,8 +1883,12 @@ The echo command is used like a print statement within configuration files.
 
 \begin_layout Section
 frequency
-\begin_inset LatexCommand index
-name "frequency"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+frequency
+\end_layout
 
 \end_inset
 
@@ -1691,8 +1908,12 @@ This command sets the clock frequency.
 
 \begin_layout Section
 help
-\begin_inset LatexCommand index
-name "help"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+help
+\end_layout
 
 \end_inset
 
@@ -1708,8 +1929,12 @@ By itself, help will display all of the commands along with a brief description
 
 \begin_layout Section
 icd
-\begin_inset LatexCommand index
-name "icd"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+icd
+\end_layout
 
 \end_inset
 
@@ -1733,8 +1958,12 @@ The open command is used to enable ICD mode and specify the serial port
 
 \begin_layout Section
 list 
-\begin_inset LatexCommand index
-name "list"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+list
+\end_layout
 
 \end_inset
 
@@ -1775,8 +2004,12 @@ The list command allows you to view the source code while you are debugging.
 
 \begin_layout Section
 load
-\begin_inset LatexCommand index
-name "load"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+load
+\end_layout
 
 \end_inset
 
@@ -1825,8 +2058,12 @@ This command loads the contents of either a processor's EEPROM or an EEPROM
 
 \begin_layout Section
 macros
-\begin_inset LatexCommand index
-name "macros"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+macros
+\end_layout
 
 \end_inset
 
@@ -2053,8 +2290,12 @@ endm
 
 \begin_layout Section
 module
-\begin_inset LatexCommand index
-name "module"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+module
+\end_layout
 
 \end_inset
 
@@ -2067,7 +2308,8 @@ The
 module
 \emph default
  command is used to load and query external modules (see section 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "cha:Modules"
 
 \end_inset
@@ -2228,8 +2470,12 @@ Querying modules
 
 \begin_layout Section
 node
-\begin_inset LatexCommand index
-name "node"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+node
+\end_layout
 
 \end_inset
 
@@ -2279,8 +2525,12 @@ node n1 n2 n3  // create and add 3 new nodes to the list
 
 \begin_layout Section
 processor
-\begin_inset LatexCommand index
-name "processor"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+processor
+\end_layout
 
 \end_inset
 
@@ -2357,8 +2607,12 @@ processor p16c65         // Create one with no name.
 
 \begin_layout Section
 quit
-\begin_inset LatexCommand index
-name "quit"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+quit
+\end_layout
 
 \end_inset
 
@@ -2371,8 +2625,12 @@ Quit gpsim.
 
 \begin_layout Section
 run
-\begin_inset LatexCommand index
-name "run"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+run
+\end_layout
 
 \end_inset
 
@@ -2386,8 +2644,12 @@ Start (or continue) simulation.
 
 \begin_layout Section
 step
-\begin_inset LatexCommand index
-name "step"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+step
+\end_layout
 
 \end_inset
 
@@ -2423,8 +2685,12 @@ over
 
 \begin_layout Section
 symbol
-\begin_inset LatexCommand index
-name "symbol"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+symbol
+\end_layout
 
 \end_inset
 
@@ -2448,8 +2714,12 @@ symbol
 
 \begin_layout Section
 stimulus
-\begin_inset LatexCommand index
-name "stimulus"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+stimulus
+\end_layout
 
 \end_inset
 
@@ -2480,102 +2750,102 @@ Note that in most cases it is easier to create a stimulus file then to type
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
 <features islongtable="true" firstHeadEmpty="true" headBottomDL="true">
-<column alignment="center" valignment="top" leftline="true" width="0">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0">
-<row topline="true" bottomline="true" endhead="true" endfirsthead="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row endhead="true" endfirsthead="true">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 option
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 description
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 initial_state
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 state at the start and at the rollover
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 start_cycle
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 simulation cycle when the stimulus will begin
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 period
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 stimulus period 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 name
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 specifies the stimulus name
 \end_layout
 
@@ -2757,7 +3027,8 @@ Even though this example uses 1's and 0's for the data, one can use integers,
  Integers are useful for supplying a stimulus to an attribute.
  Expressions are useful for abstracting the data.
  See Chapter 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "cha:Simulating-the-Real"
 
 \end_inset
@@ -2767,8 +3038,12 @@ reference "cha:Simulating-the-Real"
 
 \begin_layout Section
 stopwatch
-\begin_inset LatexCommand index
-name "stopwatch"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+stopwatch
+\end_layout
 
 \end_inset
 
@@ -2776,7 +3051,7 @@ name "stopwatch"
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 The stopwatch is really a collection of attributes and not a command.
  But the behavior is so similar to a command that it has been included here.
 \end_layout
@@ -2843,8 +3118,12 @@ stopwatch
 
 \begin_layout Section
 trace
-\begin_inset LatexCommand index
-name "trace"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+trace
+\end_layout
 
 \end_inset
 
@@ -2880,8 +3159,12 @@ Display gpsim's version.
 
 \begin_layout Section
 x
-\begin_inset LatexCommand index
-name "x"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+x
+\end_layout
 
 \end_inset
 
@@ -2957,7 +3240,8 @@ gpsim> my_variable = (porta ^ portc) & 0x0f
 \end_layout
 
 \begin_layout Chapter
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "cha:Graphical-User-Interface"
 
 \end_inset
@@ -3058,23 +3342,34 @@ Never Don't ever update the GUI when simulating.
 
 \begin_layout List
 \labelwidthstring 0000000.00.0000
-x\InsetSpace ~
+x
+\begin_inset space ~
+\end_inset
+
 cycles Update the GUI every x cycles simulated.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 0000000.00.0000
-every\InsetSpace ~
+every
+\begin_inset space ~
+\end_inset
+
 cycle Update the GUI every cycle.
  (you see everything, if you have filled up on coffee :-)
 \end_layout
 
 \begin_layout List
 \labelwidthstring 0000000.00.0000
-x\InsetSpace ~
-ms\InsetSpace ~
-animate Here you can slow down simulation with a delay between every
- cycle.
+x
+\begin_inset space ~
+\end_inset
+
+ms
+\begin_inset space ~
+\end_inset
+
+animate Here you can slow down simulation with a delay between every cycle.
 \end_layout
 
 \begin_layout List
@@ -3133,56 +3428,88 @@ A right button click on the source pops up a menu with six items (the word
 \labelwidthstring 00.00.0000.0000
 
 \series bold
-Menu\InsetSpace ~
+Menu
+\begin_inset space ~
+\end_inset
+
 item Description
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Find\InsetSpace ~
-PC This menu item will find the PC and changed page tab and scroll the
- source view to the current PC.
+Find
+\begin_inset space ~
+\end_inset
+
+PC This menu item will find the PC and changed page tab and scroll the source
+ view to the current PC.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Run\InsetSpace ~
+Run
+\begin_inset space ~
+\end_inset
+
 here This sets a breakpoint 'here' and starts running until a breakpoint
  is hit.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Move\InsetSpace ~
-PC\InsetSpace ~
-here This simply changes PC to the address that line 'here' in source
- has.
+Move
+\begin_inset space ~
+\end_inset
+
+PC
+\begin_inset space ~
+\end_inset
+
+here This simply changes PC to the address that line 'here' in source has.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Breakpoint\InsetSpace ~
+Breakpoint
+\begin_inset space ~
+\end_inset
+
 here Set a breakpoint 'here'.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Profile\InsetSpace ~
-start\InsetSpace ~
+Profile
+\begin_inset space ~
+\end_inset
+
+start
+\begin_inset space ~
+\end_inset
+
 here Set a start marker for routine profiling here.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Profile\InsetSpace ~
-stop\InsetSpace ~
+Profile
+\begin_inset space ~
+\end_inset
+
+stop
+\begin_inset space ~
+\end_inset
+
 here Set a stop marker.
  (See the section for the profiling window.)
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Select\InsetSpace ~
+Select
+\begin_inset space ~
+\end_inset
+
 symbol.
  This menu item is only available when some text is selected in the text
  widget.
@@ -3210,7 +3537,10 @@ If it's a constant, address, register or ioport, it is selected in the symbol
 \end_deeper
 \begin_layout List
 \labelwidthstring 00.00.0000.0000
-Find\InsetSpace ~
+Find
+\begin_inset space ~
+\end_inset
+
 text This opens up a search dialog.
  Every time you hit the 'Find' button, the current notebook page is found
  and the source in that page is used.
@@ -3666,7 +3996,8 @@ Trace viewer
 \begin_layout Standard
 This window shows the trace of instructions executed.
  See 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "trace"
 
 \end_inset
@@ -3707,28 +4038,46 @@ The right click menu contains:
 
 \begin_layout List
 \labelwidthstring 00000000.00.0000
-Remove\InsetSpace ~
+Remove
+\begin_inset space ~
+\end_inset
+
 range Remove an entry.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00000000.00.0000
-Add\InsetSpace ~
+Add
+\begin_inset space ~
+\end_inset
+
 range...
  Open a dialog from where you can add a range of instructions as an entry.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00000000.00.0000
-Add\InsetSpace ~
-all\InsetSpace ~
+Add
+\begin_inset space ~
+\end_inset
+
+all
+\begin_inset space ~
+\end_inset
+
 labels Add all code labels as ranges.
 \end_layout
 
 \begin_layout List
 \labelwidthstring 00000000.00.0000
-Snapshot\InsetSpace ~
-to\InsetSpace ~
+Snapshot
+\begin_inset space ~
+\end_inset
+
+to
+\begin_inset space ~
+\end_inset
+
 plot Open a window containing a graph of the data.
  From this new window you can also save (postscript) or print it.
 \end_layout
@@ -4077,7 +4426,8 @@ The
 \emph default
  macro provides a source code mechanism for setting breakpoints (see chapter
  
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "cha:Assertions-and-Extended"
 
 \end_inset
@@ -4143,7 +4493,8 @@ In this example, the
 .state
 \emph default
  attribute (see section 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "sub:Switches-&-Resistors"
 
 \end_inset
@@ -4174,7 +4525,8 @@ examples/scripts
 \end_layout
 
 \begin_layout Chapter
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "cha:Assertions-and-Extended"
 
 \end_inset
@@ -4362,7 +4714,8 @@ This assignment writes to the state attribute of a switch module named SW1.
 
 \begin_layout Chapter
 Trace and Log: What has happen?
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "trace"
 
 \end_inset
@@ -4392,33 +4745,33 @@ Inspecting the current state of your program is sometimes insufficient to
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="2">
 <features>
-<column alignment="center" valignment="top" leftline="true" width="0pt">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
-<row topline="true" bottomline="true">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<row>
 <cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 What's traced
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 notes
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 program counter
 \end_layout
 
@@ -4427,18 +4780,18 @@ program counter
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 addresses executed
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 instructions
 \end_layout
 
@@ -4447,18 +4800,18 @@ instructions
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 opcode
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 register read
 \end_layout
 
@@ -4467,18 +4820,18 @@ register read
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 value and location
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 register write
 \end_layout
 
@@ -4487,18 +4840,18 @@ register write
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 value and location
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 cycle counter
 \end_layout
 
@@ -4507,18 +4860,18 @@ cycle counter
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 current value
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 skipped instructions
 \end_layout
 
@@ -4527,18 +4880,18 @@ skipped instructions
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 addresses skipped
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 status register
 \end_layout
 
@@ -4547,18 +4900,18 @@ status register
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 during implicit modification
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 interrupts
 \end_layout
 
@@ -4567,18 +4920,18 @@ interrupts
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 break points
 \end_layout
 
@@ -4587,18 +4940,18 @@ break points
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 type
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 resets
 \end_layout
 
@@ -4607,18 +4960,18 @@ resets
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 type
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
@@ -4627,27 +4980,27 @@ type
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
@@ -4774,46 +5127,46 @@ Each trace frame begins with a new simulation cycle.
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 64-bit simulation cycle
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 processor
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 PC
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 opcode
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 instruction
 \end_layout
 
@@ -4821,46 +5174,46 @@ instruction
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x00000000000026F6
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 p18f452
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x001C
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x1003
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 iorwf  reg3,w,0
 \end_layout
 
@@ -4920,7 +5273,7 @@ raw
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 FIXME - The dynamically created trace type information needs to be written
  to this file too.
  Without it, it is difficult to tell what each traced item is.
@@ -4932,14 +5285,19 @@ FIXME - The dynamically created trace type information needs to be written
 \end_layout
 
 \begin_layout Chapter
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "cha:Simulating-the-Real"
 
 \end_inset
 
 Simulating the Real World: Stimuli
-\begin_inset LatexCommand index
-name "Stimulus"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Stimulus
+\end_layout
 
 \end_inset
 
@@ -4993,7 +5351,7 @@ In general, you can have several 'sources' and several 'loads' that are
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Although, gpsim is currently limited to 'one-port' devices.
  In other words, it is assumed that ground serves as a common reference
  for the sources and the loads.
@@ -5111,33 +5469,33 @@ Here's a list of the types of I/O pin stimuli that are supported:
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
 <features>
-<column alignment="center" valignment="top" leftline="true" width="0pt">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 I/O Pin Type
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Function
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 INPUT_ONLY
 \end_layout
 
@@ -5146,18 +5504,18 @@ INPUT_ONLY
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Only accepts input (like MCLR)
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 BI_DIRECTIONAL
 \end_layout
 
@@ -5166,18 +5524,18 @@ BI_DIRECTIONAL
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Can be a source or a load (most I/O pins)
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 BI_DIRECTIONAL_PU
 \end_layout
 
@@ -5186,27 +5544,27 @@ BI_DIRECTIONAL_PU
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 PU=Pullup resistor (PORTB)
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 OPEN_COLLECTOR
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Can only drive low (RA4 on c84)
 \end_layout
 
@@ -5256,53 +5614,53 @@ Asynchronous stimuli are analog or digital stimuli that can change states
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
 <features>
-<column alignment="center" valignment="top" leftline="true" width="0pt">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 parameter
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 function
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 start_cycle
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 The # of cycles before the stimulus starts
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 cycles[]
 \end_layout
 
@@ -5311,18 +5669,18 @@ cycles[]
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 An array of cycle #'s
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 data[]
 \end_layout
 
@@ -5331,18 +5689,18 @@ data[]
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Stimulus state for a cycle
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 period
 \end_layout
 
@@ -5351,18 +5709,18 @@ period
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 The # of cycles for one period
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row bottomline="true">
+<row>
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 initial_state
 \end_layout
 
@@ -5371,7 +5729,7 @@ initial_state
 <cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 The initial state before data[0]
 \end_layout
 
@@ -5414,7 +5772,9 @@ Here's an example that generates three pulses and then repeats:
 
 \begin_layout LyX-Code
 stimulus asynchronous_stimulus # or we could have used asy
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \end_layout
 
@@ -5424,13 +5784,17 @@ stimulus asynchronous_stimulus # or we could have used asy
 
 \begin_layout LyX-Code
 # it rolls over
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \end_layout
 
 \begin_layout LyX-Code
 initial_state 1
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \end_layout
 
@@ -5440,20 +5804,26 @@ initial_state 1
 
 \begin_layout LyX-Code
 start_cycle 100
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \end_layout
 
 \begin_layout LyX-Code
 # the asynchronous stimulus will roll over in 'period'
-\newline
+\begin_inset Newline newline
+\end_inset
+
 # cycles.
  Delete this line if you don't want a roll over.
 \end_layout
 
 \begin_layout LyX-Code
 period 5000
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \end_layout
 
@@ -5465,7 +5835,9 @@ period 5000
 # specified.
  The initial cycle was specified above.
  So 
-\newline
+\begin_inset Newline newline
+\end_inset
+
 # the first cycle specified below will toggle this state.
  
 \end_layout
@@ -5518,7 +5890,9 @@ period 5000
 
 \begin_layout LyX-Code
 name asy_test
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \end_layout
 
@@ -5569,13 +5943,18 @@ PullDown
 
 \begin_layout Chapter
 Modules
-\begin_inset LatexCommand index
-name "Modules"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Modules
+\end_layout
 
 \end_inset
 
 
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "cha:Modules"
 
 \end_inset
@@ -5732,33 +6111,33 @@ gpsim provides a library of useful modules for simulation.
 \begin_inset Tabular
 <lyxtabular version="3" rows="18" columns="2">
 <features>
-<column alignment="center" valignment="top" leftline="true" width="0">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0">
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 pushbutton
 \end_layout
 
@@ -5767,18 +6146,18 @@ pushbutton
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 pullup
 \end_layout
 
@@ -5787,18 +6166,18 @@ pullup
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A resistor connected (nominally) to Vdd
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 pulldown
 \end_layout
 
@@ -5807,18 +6186,18 @@ pulldown
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A resistor connected (nominally) to Vss
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 usart
 \end_layout
 
@@ -5827,18 +6206,18 @@ usart
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A serial interface with a GUI terminal window
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 pulsegen
 \end_layout
 
@@ -5847,78 +6226,78 @@ pulsegen
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 I2C-EEPROM2K
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A 256 byte I2C serial EEPROM like the 24LC024.
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 I2C-EEPROM16K
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A 2k byte I2C serial EEPROM like the 24LC16B.
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 I2C-EEPROM256K
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A 32k byte I2C serial EEPROM like the 24LC256.
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 switch
 \end_layout
 
@@ -5927,18 +6306,18 @@ switch
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Switch, which connects two nodes together
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 and2
 \end_layout
 
@@ -5947,18 +6326,18 @@ and2
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 2-input logical AND gate
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 or2
 \end_layout
 
@@ -5967,18 +6346,18 @@ or2
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 2-input logical OR gate
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 xor2
 \end_layout
 
@@ -5987,18 +6366,18 @@ xor2
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 2-input logical XOR gate
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 not
 \end_layout
 
@@ -6007,18 +6386,18 @@ not
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Inverter (logical NOT gate)
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 led_7segments
 \end_layout
 
@@ -6027,18 +6406,18 @@ led_7segments
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A 7-segment LED digit
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 led 
 \end_layout
 
@@ -6047,7 +6426,7 @@ led
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A single LED with cathode tied to Vss.
  
 \end_layout
@@ -6055,11 +6434,11 @@ A single LED with cathode tied to Vss.
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 TTL377
 \end_layout
 
@@ -6068,27 +6447,27 @@ TTL377
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A 74HC377 style 8-bit tristate latch
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Encoder
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 
 \end_layout
 
@@ -6104,8 +6483,12 @@ Encoder
 
 \begin_layout Subsection
 USART
-\begin_inset LatexCommand index
-name "USART module"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+USART module
+\end_layout
 
 \end_inset
 
@@ -6216,8 +6599,12 @@ I/O Pins
 
 \begin_layout Subsection
 Logic
-\begin_inset LatexCommand index
-name "Logic"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Logic
+\end_layout
 
 \end_inset
 
@@ -6238,7 +6625,7 @@ The only attributes supported be the logic devices are the standard
 \begin_inset Note Greyedout
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 FIXME There should be attributes to specify the switching characteristics.
 \end_layout
 
@@ -6249,8 +6636,12 @@ FIXME There should be attributes to specify the switching characteristics.
 
 \begin_layout Subsection*
 and2
-\begin_inset LatexCommand index
-name "and2"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+and2
+\end_layout
 
 \end_inset
 
@@ -6275,8 +6666,12 @@ I/O pins
 
 \begin_layout Subsection*
 or2
-\begin_inset LatexCommand index
-name "or2"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+or2
+\end_layout
 
 \end_inset
 
@@ -6297,8 +6692,12 @@ name "or2"
 
 \begin_layout Subsection*
 xor2
-\begin_inset LatexCommand index
-name "xor2"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+xor2
+\end_layout
 
 \end_inset
 
@@ -6319,8 +6718,12 @@ name "xor2"
 
 \begin_layout Subsection*
 not
-\begin_inset LatexCommand index
-name "not"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+not
+\end_layout
 
 \end_inset
 
@@ -6337,8 +6740,12 @@ name "not"
 
 \begin_layout Subsection
 I2C EEPROM
-\begin_inset LatexCommand index
-name "I2C EEPROM"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+I2C EEPROM
+\end_layout
 
 \end_inset
 
@@ -6422,20 +6829,29 @@ I/O Pins
 \end_layout
 
 \begin_layout Subsection
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "sub:Switches-&-Resistors"
 
 \end_inset
 
 Switches
-\begin_inset LatexCommand index
-name "Switches"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Switches
+\end_layout
 
 \end_inset
 
  & Resistors
-\begin_inset LatexCommand index
-name "Resistors"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Resistors
+\end_layout
 
 \end_inset
 
@@ -6510,20 +6926,32 @@ I/O Pins
 
 \begin_layout Subsection
 Voltage Sources
-\begin_inset LatexCommand index
-name "Voltage Sources"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Voltage Sources
+\end_layout
 
 \end_inset
 
 , Resistors
-\begin_inset LatexCommand index
-name "Resistors"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Resistors
+\end_layout
 
 \end_inset
 
 , and Capacitors
-\begin_inset LatexCommand index
-name "Capacitors"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+Capacitors
+\end_layout
 
 \end_inset
 
@@ -6570,14 +6998,22 @@ I/O Pins
 
 \begin_layout Subsection
 LED_7SEGMENTS
-\begin_inset LatexCommand index
-name "7SEGMENTS"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+7SEGMENTS
+\end_layout
 
 \end_inset
 
  and LED
-\begin_inset LatexCommand index
-name "LED"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+LED
+\end_layout
 
 \end_inset
 
@@ -6689,8 +7125,12 @@ In addition to the standard modules, third are separately distribute gpsim
 
 \begin_layout Subsection
 Character LCD - HD44780
-\begin_inset LatexCommand index
-name "HD44780"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+HD44780
+\end_layout
 
 \end_inset
 
@@ -6703,8 +7143,12 @@ This module emulates the ubiquitous HD44780 character LCDs.
 
 \begin_layout Subsection
 Graphic LCD - SED1530
-\begin_inset LatexCommand index
-name "SED1530"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+SED1530
+\end_layout
 
 \end_inset
 
@@ -7069,48 +7513,50 @@ Don't use the last stack level.
 
 \begin_layout Itemize
 Don't use these registers and program words:
-\newline
+\begin_inset Newline newline
+\end_inset
+
 
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="3">
 <features>
-<column alignment="center" valignment="top" leftline="true" width="0pt">
-<column alignment="center" valignment="top" leftline="true" width="0pt">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<column alignment="center" valignment="top" width="0pt">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Processor
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Register
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 Program
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 -870/1/2
 \end_layout
 
@@ -7119,7 +7565,7 @@ Program
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x70, 0xBB-0xBF
 \end_layout
 
@@ -7128,18 +7574,18 @@ Program
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x6E0-0x7FF
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true">
+<row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 -873/4
 \end_layout
 
@@ -7148,7 +7594,7 @@ Program
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x6D, 0x1fD, 0xEB-0xF0, 0x1Eb-0x1F0
 \end_layout
 
@@ -7157,36 +7603,36 @@ Program
 <cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0xEE0-0xFFF
 \end_layout
 
 \end_inset
 </cell>
 </row>
-<row topline="true" bottomline="true">
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 -876/7
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x70, 0x1Eb-0x1Ef
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
-\begin_layout Standard
+\begin_layout Plain Layout
 0x1F00-0x1FFF
 \end_layout
 
@@ -7243,15 +7689,23 @@ Now you can type 'icd' to see some information:
 
 \emph on
 **gpsim> icd 
-\newline
+\begin_inset Newline newline
+\end_inset
+
 ICD version "2.31.00" was found.
  
-\newline
+\begin_inset Newline newline
+\end_inset
+
 Target controller is 16F877 rev 13.
  
-\newline
+\begin_inset Newline newline
+\end_inset
+
 Vdd: 5.2 Vpp: 13.3 
-\newline
+\begin_inset Newline newline
+\end_inset
+
 Debug module is present
 \end_layout
 
@@ -7323,7 +7777,8 @@ examples/modules
  subdirectory contains several examples illustrating how to use gpsim's
  various modules.
  Finally, as described in chapter 
-\begin_inset LatexCommand ref
+\begin_inset CommandInset ref
+LatexCommand ref
 reference "cha:Regression-Tests"
 
 \end_inset
@@ -7426,7 +7881,8 @@ Fixme
 
 \begin_layout Chapter
 Regression Tests
-\begin_inset LatexCommand label
+\begin_inset CommandInset label
+LatexCommand label
 name "cha:Regression-Tests"
 
 \end_inset
@@ -7477,8 +7933,12 @@ gpsim is written mostly in C++.
 
 \begin_layout Section
 Instructions
-\begin_inset LatexCommand index
-name "instructions"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+instructions
+\end_layout
 
 \end_inset
 
@@ -7515,8 +7975,12 @@ which says, get the instruction at the current program counter (pc.value)
 
 \begin_layout Section
 General File Registers
-\begin_inset LatexCommand index
-name "registers"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+registers
+\end_layout
 
 \end_inset
 
@@ -7868,7 +8332,7 @@ Cycle break points are implemented with a sorted doubly-linked list.
 \begin_inset Foot
 status collapsed
 
-\begin_layout Standard
+\begin_layout Plain Layout
 A call back function is a pointer to a function.
  In this context, gpsim is given a pointer to the function that's to be
  invoked (called) whenever a cycle break occurs.
@@ -7930,14 +8394,22 @@ The document is part of gpsim.
 \begin_layout Standard
 gpsim is free software; you can redistribute it and/or modify it under the
  terms of the 
-\begin_inset LatexCommand index
-name "GNU"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+GNU
+\end_layout
 
 \end_inset
 
 GNU General Public 
-\begin_inset LatexCommand index
-name "License"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+License
+\end_layout
 
 \end_inset
 
@@ -7948,8 +8420,12 @@ License as published by the Free Software Foundation; either version 2,
 \begin_layout Standard
 gpsim is distributed in the hope that it will be useful, but WITHOUT ANY
  
-\begin_inset LatexCommand index
-name "NO WARRANTY"
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+NO WARRANTY
+\end_layout
 
 \end_inset
 
@@ -7968,7 +8444,8 @@ You should have received a copy of the GNU General Public License along
 
 \begin_layout Standard
 \start_of_appendix
-\begin_inset LatexCommand printindex
+\begin_inset CommandInset index_print
+LatexCommand printindex
 
 \end_inset
 

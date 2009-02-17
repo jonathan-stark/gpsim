@@ -353,6 +353,7 @@ void * load_library(const char *library_name, const char **pszError)
     }
     // Append the module extension and try again.
     sFile.append(MODULE_EXT);
+    sPath = sFile;
   }
 
   // Should there be a free?
