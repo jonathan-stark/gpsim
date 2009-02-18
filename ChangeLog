@@ -1,3 +1,7 @@
+2009-02-18 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_src_asm.cc: Handle non uft8 characters is Source Browser
+	window (bugs 1869795, 2579637)
+
 2009-02-17 Roy Rankin <rrankin@ihug.com.au>
 	* src/os_dependent.cc: Fix loading module libraries
 	* cli/parse.yy cli/cmd_attach.cc doc/gpsim.lyx:
