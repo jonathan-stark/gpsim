@@ -4954,7 +4954,40 @@ void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *
     // The syntax highlighting doesn't work on list files
     address = pFC->IsList() ? -1 : gp->cpu->pma->find_address_from_line(pFC,line);
 
-    pBuffer->parseLine(text_buffer,address);
+    // check if text_buffer in uft8 character set
+    if (!g_utf8_validate(text_buffer, -1, NULL))
+    {
+	gsize bytes_read, bytes_written;
+	gchar *new_buffer;
+	GError *Gerror = NULL;
+
+	// try to convert to uft8 using current locale
+	// if we succeed, do normal processing on converted text
+	if ((new_buffer = g_locale_to_utf8((const gchar *)text_buffer, 
+		-1, &bytes_read, &bytes_written, &Gerror)))
+	{
+        	pBuffer->parseLine(new_buffer,address);
+		g_free(new_buffer);
+	}
+	// Conversion based on locale did not work
+	else
+	{
+	    // replace comment which may have unknown character set
+	    if((new_buffer = strchr(text_buffer, ';')))
+	    {
+		*new_buffer = 0;
+		strcat(text_buffer, "; comment stripped, characters from unknown locale\n");
+	    }
+	    // if still not OK replace entire line so line numbering still OK
+    	    if (!g_utf8_validate(text_buffer, -1, NULL))
+	    {
+		strcpy(text_buffer, "; non-comment characters from unknow locale\n");
+	    }
+            pBuffer->parseLine(text_buffer,address);
+	}
+    }
+    else
+        pBuffer->parseLine(text_buffer,address);
 
     line++;
   }
