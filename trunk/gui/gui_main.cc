@@ -465,6 +465,8 @@ int gui_init (int argc, char **argv)
       return -1;
   }
 
+  // standardize IO format ref bug 1832702
+  setlocale(LC_NUMERIC, "C");
 
   gte();
   gpGuiProcessor = new GUI_Processor();
