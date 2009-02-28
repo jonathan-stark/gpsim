@@ -44,7 +44,6 @@ Boston, MA 02111-1307, USA.  */
 #else
 #include <winsock2.h>
 #endif
-void exit_gpsim(int);
 
 
 //******** E X P E R I M E N T A L   C O D E !!! *************************
@@ -466,7 +465,7 @@ void Socket::init(int port)
 
   if ((new_socket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
     psocketerror("socket");
-    exit_gpsim(1);
+    exit(1);
   }
 
   my_socket = new SocketBase(new_socket);
@@ -474,7 +473,7 @@ void Socket::init(int port)
   int on = 1;
   if ( setsockopt ( new_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) != 0 ) {
     psocketerror("setsockopt");
-    exit_gpsim(1);
+    exit(1);
   }
 
   memset(&addr, 0, sizeof(addr));
@@ -551,7 +550,7 @@ SocketBase *Socket::Accept()
 
   if (client_socket == INVALID_SOCKET) {
     psocketerror("accept");
-    exit_gpsim(1);
+    exit(1);
   }
 
   return new SocketBase(client_socket);
@@ -892,7 +891,7 @@ bool SocketLink::Receive()
 
     if (bytes  == -1) {
       perror("recv");
-      exit_gpsim(1);
+      exit(1);
     }
 
     parent->packet->rxTerminate(bytes);
@@ -1230,7 +1229,7 @@ static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition
 
   if (bytes  == -1) {
     perror("recv");
-    exit_gpsim(1);
+    exit(1);
   }
 
   client->packet->rxAdvance(bytes);
