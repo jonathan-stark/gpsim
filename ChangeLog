@@ -1,3 +1,9 @@
+2009-02-28 Borut Razem <borut.razem@siol.net>
+	* gpsim/main.cc, src/icd.cc, src/processor.cc, gui/gui_menu.cc,
+	  cli/scan.ll, cli/socket.cc, cli/input.cc, cli/input.h:
+	  use atexit() to execute exit_gpsim() when exiting to solve
+	  Win32 libgpsim.dll problem.
+
 2009-02-28 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim.spec.in: update 
 	* src/trace.cc: fix segfualt (bug 1490171)

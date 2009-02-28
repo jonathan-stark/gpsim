@@ -60,7 +60,6 @@ Boston, MA 02111-1307, USA.  */
 #define O_SYNC 0
 #endif
 
-void exit_gpsim(int);
 static bool use_icd = false;
 static int bulk_flag = 0;
 
@@ -226,7 +225,7 @@ static void dtr_set()
 
     if(ioctl(icd_fd, TIOCMBIS, &flag)) {
         perror("ioctl");
-        exit_gpsim(-1);
+        exit(-1);
     }
 }
 
@@ -238,7 +237,7 @@ static void dtr_clear()
 
     if(ioctl(icd_fd, TIOCMBIC, &flag)) {
         perror("ioctl");
-        exit_gpsim(-1);
+        exit(-1);
     }
 }
 
@@ -250,7 +249,7 @@ static void rts_set()
 
     if(ioctl(icd_fd, TIOCMBIS, &flag)) {
         perror("ioctl");
-        exit_gpsim(-1);
+        exit(-1);
     }
 }
 
@@ -262,7 +261,7 @@ static void rts_clear()
 
     if(ioctl(icd_fd, TIOCMBIC, &flag)) {
         perror("ioctl");
-        exit_gpsim(-1);
+        exit(-1);
     }
 }
 
