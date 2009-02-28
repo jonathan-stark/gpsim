@@ -1,3 +1,10 @@
+2009-02-28 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim.spec.in: update 
+	* src/trace.cc: fix segfualt (bug 1490171)
+	* src/registers.cc src/pic-processor.h: fix pcl setting and segfault
+	  (bug 1642109)
+	* src/eeprom.cc: fix segfault (bug 1823171)
+
 2009-02-19 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_main.cc: set LC_NUMERIC locale to standardize IO
 	  (bug 1832702)

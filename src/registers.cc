@@ -453,7 +453,7 @@ void Register::set(Value * pVal)
   }
 
   if (pVal) {
-    put( (unsigned int)*pVal);
+    put_value( (unsigned int)*pVal);
   }
 }
 

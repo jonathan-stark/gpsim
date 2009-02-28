@@ -338,7 +338,13 @@ void EEPROM::callback()
     //cout << "eeread\n";
 
     eecon2.unarm();
-    eedata.value.put(rom[eeadr.value.get()]->get());
+    if (eeadr.value.get() < rom_size)
+        eedata.value.put(rom[eeadr.value.get()]->get());
+    else
+    {
+	cout << "EEPROM read address is out of range " << hex << eeadr.value.get() << endl;
+	bp.halt();
+    }
     eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
     break;
   case EECON2::EEWRITE_IN_PROGRESS:
@@ -347,7 +353,10 @@ void EEPROM::callback()
     if(wr_adr < rom_size)
       rom[wr_adr]->value.put(wr_data);
     else
-      cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
+    {
+      cout << "EEPROM write address is out of range " << hex << wr_adr << '\n';
+      bp.halt();
+    }
 
     write_is_complete();
 
@@ -361,6 +370,7 @@ void EEPROM::callback()
   default:
     cout << "EEPROM::callback() bad eeprom state " <<
       eecon2.get_eestate() << '\n';
+    bp.halt();
   }
 }
 
@@ -547,7 +557,13 @@ void EEPROM_WIDE::callback()
       eedatah.value.put((opcode>>8) & 0xff);
 
     } else {
-      eedata.value.put(rom[eeadr.value.get()]->get());
+      if (eeadr.value.get() < rom_size)
+      	eedata.value.put(rom[eeadr.value.get()]->get());
+      else
+      {
+        cout << "WIDE_EEPROM read adrress is out of range " << hex << eeadr.value.get() << '\n';
+        bp.halt();
+      }
     }
 
     eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
@@ -567,7 +583,10 @@ void EEPROM_WIDE::callback()
            rom[wr_adr]->value.put(wr_data);
         }
         else
-           cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
+        {
+           cout << "WIDE_EEPROM write address is out of range " << hex << wr_adr << '\n';
+	   bp.halt();
+        }
     }
 
     write_is_complete();
@@ -580,6 +599,7 @@ void EEPROM_WIDE::callback()
 
   default:
     cout << "EEPROM_WIDE::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
+    bp.halt();
   }
 }
 
