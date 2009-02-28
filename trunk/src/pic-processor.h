@@ -327,7 +327,13 @@ public:
   virtual void step_cycle();
 
   virtual void step_one(bool refresh=true) {
-    program_memory[pc->value]->execute();
+    if (pc->value >= 0 && pc->value < program_memory_size())
+        program_memory[pc->value]->execute();
+    else
+    {
+	cout << "Program counter not valid " << hex << pc->value << endl;
+	bp.halt();
+    }
   }
 
   // Take a snap shot of the internal state.

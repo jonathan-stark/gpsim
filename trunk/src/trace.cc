@@ -245,8 +245,9 @@ void TraceRawLog::disable()
     log_filename = 0;
 
   }
-  fclose(log_file);
-  log_file = 0;
+  if (log_file != NULL)
+      fclose(log_file);
+  log_file = NULL;
 
   cout << "Trace logging disabled\n";
 
