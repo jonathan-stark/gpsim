@@ -48,6 +48,19 @@ Error::~Error()
 
 
 /*****************************************************************
+ * Generate assembler errors of severity "FATAL_ERROR"
+ */
+FatalError::FatalError(string errMsg)
+  : AnError(string("FATAL_ERROR"), errMsg)
+{
+}
+
+FatalError::~FatalError()
+{
+}
+
+
+/*****************************************************************
  * Generate a generic Type Mismatch error of the "expected xx,
  * observed yy" variety.
  */
@@ -63,7 +76,7 @@ TypeMismatch::TypeMismatch(string theOperator, string expectedType, string obser
  * cannot be applied to type y" variety.
  */
 TypeMismatch::TypeMismatch(string theOperator, string observedType)
-  : Error("Operator <" + theOperator + "> cannot be applied to type " 
+  : Error("Operator <" + theOperator + "> cannot be applied to type "
           + observedType)
 {
 }

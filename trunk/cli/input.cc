@@ -457,7 +457,7 @@ int start_parse(void)
   int retval = init_parser();
 
   if(quit_parse)
-    exit(0);
+    exit_gpsim(0);
 
   return retval;
 }
@@ -818,7 +818,7 @@ void have_line(char *s)
 
 /**********************************************************************
  **/
-void exit_gpsim(void)
+void exit_cli(void)
 {
   if(get_use_icd())
     icd_disconnect();
@@ -842,6 +842,7 @@ void exit_gpsim(void)
   globalSymbolTable().deleteSymbol("CliTrace");
   cout << "Exiting gpsim\n";
   simulation_cleanup();
+
 }
 
 /* redisplay_prompt will redisplay the current data in the readline buffer.

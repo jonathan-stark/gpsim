@@ -225,7 +225,7 @@ static void dtr_set()
 
     if(ioctl(icd_fd, TIOCMBIS, &flag)) {
         perror("ioctl");
-        exit(-1);
+        throw new FatalError("ioctl");
     }
 }
 
@@ -237,7 +237,7 @@ static void dtr_clear()
 
     if(ioctl(icd_fd, TIOCMBIC, &flag)) {
         perror("ioctl");
-        exit(-1);
+        throw new FatalError("ioctl");
     }
 }
 
@@ -249,7 +249,7 @@ static void rts_set()
 
     if(ioctl(icd_fd, TIOCMBIS, &flag)) {
         perror("ioctl");
-        exit(-1);
+        throw new FatalError("ioctl");
     }
 }
 
@@ -261,7 +261,7 @@ static void rts_clear()
 
     if(ioctl(icd_fd, TIOCMBIC, &flag)) {
         perror("ioctl");
-        exit(-1);
+        throw new FatalError("ioctl");
     }
 }
 

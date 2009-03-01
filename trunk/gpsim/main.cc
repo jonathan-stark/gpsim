@@ -189,6 +189,12 @@ void welcome(void)
   return;
 }
 
+void exit_gpsim(int ret)
+{
+  exit_cli();
+  exit(ret);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -204,8 +210,6 @@ main (int argc, char *argv[])
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
 
   welcome();
-
-  atexit(exit_gpsim);
 
   InitSourceSearchAsSymbol();
   initialize_ConsoleUI();
@@ -377,7 +381,7 @@ main (int argc, char *argv[])
   }
 
   if(abort_gpsim)
-    exit(0);
+    exit_gpsim(0);
 
   // Now enter the event loop and start processing user
   // commands.
@@ -394,6 +398,15 @@ main (int argc, char *argv[])
     {
       cout << "FATAL ERROR: " << err_message << endl;
     }
+  catch (FatalError *err)
+    {
+      if(err) {
+        cout << err->toString() << endl;
+        delete err;
+        exit_gpsim(1);
+      }
+    }
 
+  exit_gpsim(0);
   return 0;
 }
