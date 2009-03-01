@@ -1,3 +1,10 @@
+2009-03-01 Borut Razem <borut.razem@siol.net>
+	* gpsim/main.cc, src/errors.h, src/errors.cc, src/uart.cc, src/icd.cc,
+	  src/a2d_v2.cc, src/pic-processor.h, src/processor.cc,
+	  gui/gui_menu.cc, cli/scan.ll, cli/socket.cc, cli/input.cc,
+	  cli/input.h, doc/gpsim.lyx: undone changes I made yesterday: libgpsim
+	  functions now throw FataError exception, which is catched by main()
+
 2009-02-28 Borut Razem <borut.razem@siol.net>
 	* gpsim/main.cc, src/icd.cc, src/processor.cc, gui/gui_menu.cc,
 	  cli/scan.ll, cli/socket.cc, cli/input.cc, cli/input.h:

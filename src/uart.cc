@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 //--------------------------------------------------
-// 
+//
 //--------------------------------------------------
 class TXSignalSource : public SignalControl
 {
@@ -106,8 +106,8 @@ _RCSTA::~_RCSTA()
 //-----------------------------------------------------------
 _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
   : sfr_register(pCpu, pName, pDesc), txreg(0), spbrg(0),
-    mUSART(pUSART), 
-    m_PinModule(0),  
+    mUSART(pUSART),
+    m_PinModule(0),
     m_source(0), m_cTxState('?'), bInvertPin(0)
 {
   assert(mUSART);
@@ -258,12 +258,12 @@ void _TXSTA::put(unsigned int new_value)
     if(value.get() & TXEN) {
       Dprintf(("TXSTA - enabling transmitter\n"));
       if (m_PinModule)
-	m_PinModule->setSource(m_source);
+        m_PinModule->setSource(m_source);
       mUSART->emptyTX();
     } else {
       stop_transmitting();
       if (m_PinModule)
-	m_PinModule->setSource(0);
+        m_PinModule->setSource(0);
 
     }
   }
@@ -292,13 +292,13 @@ void _TXSTA::stop_transmitting()
   // is set. In other words, when the Transmitter is enabled
   // the txreg is emptied (and hence TXIF set). But what happens
   // when TXEN is cleared? Should we clear TXIF too?
-  // 
+  //
   // There is one sentence that says when the transmitter is
   // disabled that the whole transmitter is reset. So I interpret
   // this to mean that the TXIF gets cleared. I could be wrong
   // (and I don't have a way to test it on a real device).
-  // 
-  // Another interpretation is that TXIF retains it state 
+  //
+  // Another interpretation is that TXIF retains it state
   // through changing TXEN. However, when SPEN (serial port) is
   // set then the whole usart is reinitialized and TXIF will
   // get set.
@@ -313,7 +313,7 @@ void _TXSTA::start_transmitting()
 
   // Build the serial byte that's about to be transmitted.
   // I doubt the pic really does this way, but gpsim builds
-  // the entire bit stream including the start bit, 8 data 
+  // the entire bit stream including the start bit, 8 data
   // bits, optional 9th data bit and the stop, and places
   // this into the tsr register. But since the contents of
   // the tsr are inaccessible, I guess we'll never know.
@@ -332,10 +332,10 @@ void _TXSTA::start_transmitting()
   //  of a new character waits for the next callback. This delay maybe,
   //  in fact, the stop bit of the previous transmision,
   //
-  //  [Recall that the TRMT bit indicates when the tsr 
+  //  [Recall that the TRMT bit indicates when the tsr
   //  {transmit shift register} is empty. It's not tied to
   //  an interrupt pin, so the pic application software
-  //  most poll this bit. 
+  //  most poll this bit.
   //
   //  RRR Also The following is wrong:
   //  This bit is set after the STOP
@@ -353,11 +353,11 @@ void _TXSTA::start_transmitting()
   if(value.get() & TX9)
     {
       // Copy the stop bit and the 9th data bit to the tsr.
-      // (See note above for the reason why two stop bits 
+      // (See note above for the reason why two stop bits
       // are appended to the packet.)
 
       tsr |= ( (value.get() & TX9D) ? (3<<9) : (2<<9));
-      bit_count = 11;  // 1 start, 9 data, 1 stop 
+      bit_count = 11;  // 1 start, 9 data, 1 stop
     }
   else
     {
@@ -365,7 +365,7 @@ void _TXSTA::start_transmitting()
       // for the reason why two stop bits are appended to
       // the packet.)
       tsr |= (1<<9);
-      bit_count = 10;  // 1 start, 8 data, 1 stop 
+      bit_count = 10;  // 1 start, 8 data, 1 stop
     }
 
 
@@ -374,7 +374,7 @@ void _TXSTA::start_transmitting()
   if(cpu)
     get_cycles().set_break(spbrg->get_cpu_cycle(1), this);
 
-  // The TSR now has data, so clear the Transmit Shift 
+  // The TSR now has data, so clear the Transmit Shift
   // Register Status bit.
 
   trace.raw(write_trace.get() | value.get());
@@ -390,7 +390,7 @@ void _TXSTA::transmit_break()
 {
   Dprintf(("starting a USART sync-break transmission\n"));
 
-  // A sync-break is 13 consecutive low bits and one stop bit. Use the 
+  // A sync-break is 13 consecutive low bits and one stop bit. Use the
   // standard transmit logic to achieve this
 
   if(!txreg)
@@ -398,13 +398,13 @@ void _TXSTA::transmit_break()
 
   tsr = 1<<13;
 
-  bit_count = 14;  // 13 break, 1 stop 
+  bit_count = 14;  // 13 break, 1 stop
 
   // Set a callback breakpoint at the next SPBRG edge
   if(cpu)
     get_cycles().set_break(spbrg->get_cpu_cycle(1), this);
 
-  // The TSR now has data, so clear the Transmit Shift 
+  // The TSR now has data, so clear the Transmit Shift
   // Register Status bit.
 
   trace.raw(write_trace.get() | value.get());
@@ -448,7 +448,7 @@ void _TXSTA::callback()
     // the tsr and continue transmitting other wise set the TRMT bit
 
     // (See the note above about the 'extra' stop bit that was stuffed
-    // into the tsr register. 
+    // into the tsr register.
 
     if(mUSART->bIsTXempty())
       value.put(value.get() | TRMT);
@@ -475,7 +475,7 @@ void _TXSTA::callback_print()
 // Receiver portion of the USART
 //-----------------------------------------------------------
 //
-// First RCSTA -- Receiver Control and Status 
+// First RCSTA -- Receiver Control and Status
 // The RCSTA class controls the usart reception. The PIC usarts have
 // two modes: synchronous and asynchronous.
 // Asynchronous reception:
@@ -535,22 +535,22 @@ void _RCSTA::put(unsigned int new_value)
     if( (value.get() & (SPEN | CREN)) == (SPEN | CREN) ) {
 
       // The receiver is enabled. Now check to see if that just happened
-      
-      if(diff & (SPEN | CREN)) {
-    
-	// The serial port has just been enabled. 
-	start_receiving();
 
-	// If the rx line is low, then go ahead and start receiving now.
-	//if(uart_port && !uart_port->get_bit(rx_bit))
-	if (m_cRxState == '0' || m_cRxState == 'w')
-	  receive_start_bit();
+      if(diff & (SPEN | CREN)) {
+
+        // The serial port has just been enabled.
+        start_receiving();
+
+        // If the rx line is low, then go ahead and start receiving now.
+        //if(uart_port && !uart_port->get_bit(rx_bit))
+        if (m_cRxState == '0' || m_cRxState == 'w')
+          receive_start_bit();
       }
 
       // Clear overrun error on CREN enabling
       if ( diff & CREN )
          value.put( value.get() & (~OERR) );
- 
+
     } else {
       // The serial port is not enabled.
 
@@ -609,8 +609,8 @@ void _RCSTA::setState(char new_RxState)
 //
 // A new bit needs to be copied to the the Receive Shift Register.
 // If the receiver is receiving data, then this routine will copy
-// the incoming bit to the rsr. If this is the last bit, then a 
-// check will be made to see if we need to set up for the next 
+// the incoming bit to the rsr. If this is the last bit, then a
+// check will be made to see if we need to set up for the next
 // serial byte.
 // If this is not the last bit, then the receive state machine.
 
@@ -710,7 +710,7 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 
   if(cpu && spbrg)
   {
-    time_to_event = ( spbrg->get_cycles_per_tick() * spbrg_edge ) / TOTAL_SAMPLE_STATES;  
+    time_to_event = ( spbrg->get_cycles_per_tick() * spbrg_edge ) / TOTAL_SAMPLE_STATES;
     get_cycles().set_break(get_cycles().get() + time_to_event, this);
   }
 }
@@ -722,7 +722,7 @@ void _RCSTA::receive_start_bit()
     Dprintf(("  but not enabled\n"));
     return;
   }
-  
+
   if(txsta && (txsta->value.get() & _TXSTA::BRGH))
     set_callback_break(BRGH_FIRST_MID_SAMPLE);
   else
@@ -778,9 +778,9 @@ void _RCSTA::callback()
     // If this wasn't the last bit then go ahead and set a break for the next bit.
     if(state==RCSTA_RECEIVING) {
       if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-	set_callback_break(TOTAL_SAMPLE_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
+        set_callback_break(TOTAL_SAMPLE_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
       else
-	set_callback_break(TOTAL_SAMPLE_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
+        set_callback_break(TOTAL_SAMPLE_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
 
       sample_state = RCSTA_WAITING_MID1;
     }
@@ -812,7 +812,7 @@ void _RCREG::push(unsigned int new_value)
 
     if (m_rcsta)
       m_rcsta->overrun();
-      
+
     Dprintf(("receive overrun\n"));
 
   } else {
@@ -875,7 +875,7 @@ void _SPBRG::get_next_cycle_break()
     get_cycles().set_break(future_cycle, this);
 
   //Dprintf(("SPBRG::callback next break at 0x%llx\n",future_cycle));
-  
+
 }
 
 unsigned int _SPBRG::get_cycles_per_tick()
@@ -908,7 +908,7 @@ unsigned int _SPBRG::get_cycles_per_tick()
         }
     }
 
-    return ((brgval+1)*cpt)/cpi;  
+    return ((brgval+1)*cpt)/cpi;
 }
 
 void _SPBRG::start()
@@ -958,12 +958,12 @@ guint64 _SPBRG::get_last_cycle()
 //     baud = cpu frequency / 64 / (spbrg.value + 1)
 //
 // What this routine will do is return the cpu cycle corresponding
-// to a (rising) edge of the spbrg clock. 
+// to a (rising) edge of the spbrg clock.
 
 guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 {
   // There's a chance that a SPBRG break point exists on the current
-  // cpu cycle, but has not yet been serviced. 
+  // cpu cycle, but has not yet been serviced.
   guint64 cycle = (get_cycles().get() == future_cycle) ? future_cycle : last_cycle;
 
   return ( edges_from_now * get_cycles_per_tick() + cycle );
@@ -979,7 +979,7 @@ void _SPBRG::callback()
   if(rcsta && (rcsta->value.get() & _RCSTA::SPEN))
     {
 
-      // If the serial port is enabled, then set another 
+      // If the serial port is enabled, then set another
       // break point for the next clock edge.
       get_next_cycle_break();
 
@@ -1008,7 +1008,7 @@ void _BAUDCON::put(unsigned int new_value)
   // The RCIDL bit is controlled entirely by hardware.
   new_value &= ~RCIDL;
   if ( rcsta->rc_is_idle() ) new_value |= RCIDL;
-  
+
   value.put(new_value);
 
   Dprintf((" BAUDCON value=0x%x\n",value.get()));
@@ -1018,7 +1018,7 @@ void _BAUDCON::put(unsigned int new_value)
 
     // The TXCKP bit has changed states.
     //
-    txsta->set_pin_pol ( value.get() & TXCKP );  
+    txsta->set_pin_pol ((value.get() & TXCKP) ? true : false);
   }
 }
 
@@ -1026,8 +1026,8 @@ void _BAUDCON::put(unsigned int new_value)
 // member functions for the USART
 //--------------------------------------------------
 void USART_MODULE::initialize(PIR_SET *_pir_set,
-			      PinModule *tx_pin, PinModule *rx_pin,
-			      _TXREG *_txreg, _RCREG *_rcreg)
+                              PinModule *tx_pin, PinModule *rx_pin,
+                              _TXREG *_txreg, _RCREG *_rcreg)
 {
   assert(_txreg && _rcreg);
 

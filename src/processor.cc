@@ -279,8 +279,7 @@ void Processor::init_register_memory (unsigned int memory_size)
 
   if (registers  == 0)
     {
-      cout << "*** ERROR *** Out of memory - PIC register space\n";
-      exit(1);
+      throw new FatalError("Out of memory - PIC register space");
     }
 
 
@@ -503,8 +502,7 @@ void Processor::init_program_memory (unsigned int memory_size)
   // are stored.
   program_memory = new instruction *[memory_size];
   if (program_memory == 0) {
-    cout << "*** ERROR *** Out of memory for program space\n";
-    exit(1);
+    throw new FatalError("Out of memory for program space");
   }
 
   m_ProgramMemoryAllocationSize = memory_size;
@@ -541,8 +539,9 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
   unsigned int uIndex = map_pm_address2index(address);
 
   if (!program_memory) {
-    printf("ERROR: internal bug %s:%d",__FILE__,__LINE__);
-    exit(1);
+    std::stringstream buf;
+    buf << "ERROR: internal bug " << __FILE__ << ":" << __LINE__;
+    throw new FatalError(buf.str());
   }
 
   if(uIndex < program_memory_size()) {
@@ -847,8 +846,9 @@ void Processor::disassemble (signed int s, signed int e)
   char str[iConsoleWidth];
   char str2[iConsoleWidth];
   if (!pc) {
-    printf("ERROR: Internal bug %s:%d\n",__FILE__,__LINE__);
-    exit(1);
+    std::stringstream buf;
+    buf << "ERROR: internal bug " << __FILE__ << ":" << __LINE__;
+    throw new FatalError(buf.str());
   }
   unsigned uPCAddress = pc->get_value();
   const char *pszPC;
@@ -1469,8 +1469,9 @@ void Processor::run_to_address (unsigned int destination)
 
 void Processor::create (void)
 {
-  cout << " a generic processor cannot be created " << __FILE__ << __LINE__ <<endl;
-  exit(1);
+    std::stringstream buf;
+    buf << " a generic processor cannot be created " << __FILE__ << ":" << __LINE__;
+    throw new FatalError(buf.str());
 }
 
 //-------------------------------------------------------------------
@@ -1614,7 +1615,7 @@ void ProgramMemoryCollection::SetAt(unsigned int uAddress, Value *pValue)
 {
   Integer *pInt = dynamic_cast<Integer*>(pValue);
   if(pInt == NULL) {
-    throw Error("rValue is not an Integer");
+    throw new Error("rValue is not an Integer");
   }
   else {
     m_pPma->put_rom(uAddress, (unsigned int)(int)*pInt);

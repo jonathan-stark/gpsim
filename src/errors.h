@@ -30,6 +30,13 @@ class Error : public AnError {
 };
 
 //*****************************************************************
+class FatalError : public AnError {
+ public:
+  FatalError(string errMsg);
+  virtual ~FatalError();
+};
+
+//*****************************************************************
 class TypeMismatch : public Error {
  public:
   TypeMismatch(string theOperator, string expectedType, string observedType);

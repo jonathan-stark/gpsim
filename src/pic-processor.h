@@ -236,7 +236,7 @@ protected:
   double timeout;   // When no prescaler is assigned
   bool   wdte;
   bool   warned;
-  bool 	 cfgw_enable;  // Enabled from Configureation word
+  bool   cfgw_enable;  // Enabled from Configureation word
 
 
 };
@@ -331,8 +331,8 @@ public:
         program_memory[pc->value]->execute();
     else
     {
-	cout << "Program counter not valid " << hex << pc->value << endl;
-	bp.halt();
+        cout << "Program counter not valid " << hex << pc->value << endl;
+        get_bp().halt();
     }
   }
 
