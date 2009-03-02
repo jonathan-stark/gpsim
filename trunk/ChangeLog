@@ -1,3 +1,8 @@
+2009-03-02 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim/main.cc: expand extent of try
+	* gpsim.spec.in: improve utf8 conversion of AUTHORS file
+	* ANNOUNCE: update for 0.23.0
+
 2009-03-01 Borut Razem <borut.razem@siol.net>
 	* gpsim/main.cc, src/errors.h, src/errors.cc, src/uart.cc, src/icd.cc,
 	  src/a2d_v2.cc, src/pic-processor.h, src/processor.cc,
