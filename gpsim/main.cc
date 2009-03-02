@@ -337,6 +337,8 @@ main (int argc, char *argv[])
   quit_parse = 0;
   abort_gpsim = 0;
 
+  try {
+
   // Convert the remaining command line options into gpsim commands
   if(*cod_name) {
 
@@ -385,7 +387,6 @@ main (int argc, char *argv[])
 
   // Now enter the event loop and start processing user
   // commands.
-  try {
 
 #ifdef HAVE_GUI
       gui_main();

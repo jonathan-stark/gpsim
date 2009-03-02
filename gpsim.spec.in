@@ -44,10 +44,12 @@ qui utilisent la bibliothèque gpsim.
 
 %prep
 %setup -q
-cat AUTHORS | iconv -f ISO88592 -t UTF8  > AUTHORS
+# Fix files with non UTF8 characters
+mv AUTHORS AUTHORS.raw
 mv ChangeLog ChangeLog.raw
+iconv -f ISO88592 -t UTF8  AUTHORS.raw -o AUTHORS
 iconv -f ISO88592 -t UTF8  ChangeLog.raw -o ChangeLog
-rm -f ChangeLog.raw
+rm -f ChangeLog.raw AUTHORS.raw
 autoconf
 
 %build
@@ -87,6 +89,9 @@ autoconf
 %{_includedir}/*
 
 %changelog
+* Sun Mar 01 2009 Roy Rankin <rrankin@ihug.com.au> 0.23.0-1
+  - Convert doc files to UTF8 character set, version 0.23.0
+
 * Thu Sep 27 2007 Alain Portal <aportal[AT]univ-montp2[DOT]fr> 0.22.0-5
   - Add BR popt-devel
 

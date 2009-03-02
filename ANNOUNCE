@@ -6,67 +6,43 @@
       Microchip's PIC microcontrollers.
 
 
-Version 0.22.0 is now officially released. 
+Version 0.23.0 release
 
 http://sourceforge.net/project/showfiles.php?group_id=2341
 http://gpsim.sourceforge.net/gpsim.html
 
-There are about 300 changelog entries since gpsim was last released in
-October of last year! There have been many new features added and many
-bugs fixed. I'm particularly pleased to see major contributions from
-several other developers.
 
 Here's a very abbreviated list of the new features:
 
-10NOV06 gpsim-0.22.0
-  o J.R. Heisy added a mechanism for exposing the command prompt to modules
-  o Roy Rankin and Scott Dattalo added a switch module.
-  o Roy Rankin added analog signal processing to the switch module
-  o Roy Rankin added a switch module regression test.
-  o J.R. Heisy array type support and array range support
-  o Robert Pearce added support for 10F20x devices
-  o Roy Rankin added support for the 16f87 16f88
-  o J.R. Heisy added an 'address of' operator
-  o Roy Rankin added a gui console for USART module
-  o Roy Rankin fixed bugs in the USART module and regressions tests for it
-  o Scott Dattalo added regression tests for breakpoints
-  o Roy Rankin added regression tests for the resistor module.
-  o Roy Rankin added regression tests for EEPROMs
-  o Roy Rankin added support for comparators (e.g in 16f62x)
-  o Scott Dattalo enhanced breakpoint expressions and added breakpoint messages.
-  o Scott Dattalo wrote a new source browser.
-  o Scott Dattalo added support for displaying list files in the source browser.
-  o Scott Dattalo started basic dsPic support.
-  o Scott Dattalo added support for the 18f extended instructions.
-  o Scott Dattalo and Borut Razem migrated from CVS to SVN.
-  o Scott Dattalo added A2D support for the 16bit core and to the 16x71
-  o Scott Dattalo added a 74X377 module.
-  o Robert Pearce improved UART regression tests.
-  o Scott Dattalo added a regression test for the CCP module.
-  o Scott Dattalo added an attribute controlled stimulus module.
-  o Scott Dattalo added a romData[] operator similar to ramData[]
-  o Scott Dattalo added command line writable processor config bits.
-  o Scott Dattalo added a GUI scope window
-  o Roy Rankin added PSP support
-  o Roy Rankin added I2C EEPROM modules
-  o Scott Dattalo fixed file logging.
-  o Roy Rankin added SPI support
-  o Roy Rankin added I2C support
-  o Scott Dattalo added the p16f624 and p16f624a
-  o Scott Dattalo added a memory-mappable parallel port stimulus module
-  o Scott Dattalo updated the documentation
+New Features
 
-It should be pointed out that despite not having his listed too many
-times above that Borut fixed dozens of bugs. He accounts for over 1/6
-of the 300 ChangeLog entries. Those of you familiar with SDCC know
-that Borut has taken on an immensely important role of making sure all
-details are taken care of.
+  o Roy Rankin added P16F818 and P16F819 processors
+  o Scott Dattalo added 10F200, 10F202, 10F204 and 10F206 processors
+  o Scott Dattalo added analog syncs
+  o Roy Rankin added EEPROM dump/load
+  o Scott Dattalo added 12F508, 12F509, 12F510 processors
+  o Roy Rankin added TMR1 external crystal simulation
+  o Rob Pearce added 18f4321 and 18F2321 processors
+  o Borut Razem fixed compiling under gcc 4.3.0
+  o Rob Pearce added support for interrupt priority for 16-bit cores
+  o Roy Rankin added new style A2D with up to 16 channels
+  o Roy Rankin fixed internationalization in source browser window
+  o Roy Rankin fixed compiling under gcc 4.4.0
 
-In addition several users have supplied patches, suggestions, and
-filed bug reports:
+Scott Dattalo provided significant rewrites of parts of gpsim and Borut Razem, Rob Pearce, Roy Rankin and Scott Dattalo contributed bug fixes. Bourt Razem also made many code cleanup fixes.
 
- Alex Holden, Alain Portal, Xiaofan Chen, Steffen Joeris, 
-David Barnett, Eamon Skelton, Ralf Forsberg, Colm Flaherty
+Supplied Patches
+
+  o Jean-Etienne Lamiaud - added UART framing and overrun errors 
+    and fixes dynamic module loading on OS X
+  o Vitaly Lipatov - linking order fixes
+  o Don Wooton - segfault in gdk_color_alloc() fix
+
+In addition several users have filed bug reports:
+
+  Colm O Flaherty, Dave Fielder, Daniel Black, Harald Geyer,
+  Joerg Wunsch, John Coppens, Tibor Palinkas 
+
 
 And I know I'm probably missing others
 
@@ -78,14 +54,14 @@ INSTALL:
 -------
 install gpsim the standard way:
 
-tar -xvzf gpsim-0.22.0.tar.gz
+tar -xvzf gpsim-0.23.0.tar.gz
 ./configure
-cd gpsim-0.22.0/
+cd gpsim-0.23.0/
 make
 su root
 make install
 
-this will expand into a child directory named gpsim-0.22.0 . From there you
+this will expand into a child directory named gpsim-0.23.0 . From there you
 can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
 files for more information. The rest of the steps will build gpsim and place
 the executable into /usr/local/bin . If you don't have root privileges then
@@ -93,4 +69,4 @@ you can copy the executable at gpsim-0.20.0/gpsim/gpsim to a directory in the
 execution path. Or better, check out INSTALL
 
 
-Scott
+Gpsim development team
