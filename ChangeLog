@@ -1,3 +1,6 @@
+2009-03-18 Roy Rankin <rrankin@ihug.com.au>
+	* extras/lcd/configure.in: bump release number
+
 2009-03-02 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/main.cc: expand extent of try
 	* gpsim.spec.in: improve utf8 conversion of AUTHORS file
