@@ -1,0 +1,72 @@
+
+
+                    gpsim
+
+      GNU Pic Simulator, a simulator for 
+      Microchip's PIC microcontrollers.
+
+
+Version 0.23.0 release
+
+http://sourceforge.net/project/showfiles.php?group_id=2341
+http://gpsim.sourceforge.net/gpsim.html
+
+
+Here's a very abbreviated list of the new features:
+
+New Features
+
+  o Roy Rankin added P16F818 and P16F819 processors
+  o Scott Dattalo added 10F200, 10F202, 10F204 and 10F206 processors
+  o Scott Dattalo added analog syncs
+  o Roy Rankin added EEPROM dump/load
+  o Scott Dattalo added 12F508, 12F509, 12F510 processors
+  o Roy Rankin added TMR1 external crystal simulation
+  o Rob Pearce added 18f4321 and 18F2321 processors
+  o Borut Razem fixed compiling under gcc 4.3.0
+  o Rob Pearce added support for interrupt priority for 16-bit cores
+  o Roy Rankin added new style A2D with up to 16 channels
+  o Roy Rankin fixed internationalization in source browser window
+  o Roy Rankin fixed compiling under gcc 4.4.0
+
+Scott Dattalo provided significant rewrites of parts of gpsim and Borut Razem, Rob Pearce, Roy Rankin and Scott Dattalo contributed bug fixes. Bourt Razem also made many code cleanup fixes.
+
+Supplied Patches
+
+  o Jean-Etienne Lamiaud - added UART framing and overrun errors 
+    and fixes dynamic module loading on OS X
+  o Vitaly Lipatov - linking order fixes
+  o Don Wooton - segfault in gdk_color_alloc() fix
+
+In addition several users have filed bug reports:
+
+  Colm O Flaherty, Dave Fielder, Daniel Black, Harald Geyer,
+  Joerg Wunsch, John Coppens, Tibor Palinkas 
+
+
+And I know I'm probably missing others
+
+README:
+------
+Please see the README file for all of the details on the new features.
+
+INSTALL:
+-------
+install gpsim the standard way:
+
+tar -xvzf gpsim-0.23.0.tar.gz
+./configure
+cd gpsim-0.23.0/
+make
+su root
+make install
+
+this will expand into a child directory named gpsim-0.23.0 . From there you
+can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
+files for more information. The rest of the steps will build gpsim and place
+the executable into /usr/local/bin . If you don't have root privileges then
+you can copy the executable at gpsim-0.20.0/gpsim/gpsim to a directory in the
+execution path. Or better, check out INSTALL
+
+
+Gpsim development team
