@@ -1,3 +1,7 @@
+2009-03-23 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac: set release 0.23.9
+	* ANNOUNCE:	fix typo
+
 2009-03-18 Roy Rankin <rrankin@ihug.com.au>
 	* extras/lcd/configure.in: bump release number
 

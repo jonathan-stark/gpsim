@@ -65,7 +65,7 @@ this will expand into a child directory named gpsim-0.23.0 . From there you
 can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
 files for more information. The rest of the steps will build gpsim and place
 the executable into /usr/local/bin . If you don't have root privileges then
-you can copy the executable at gpsim-0.20.0/gpsim/gpsim to a directory in the
+you can copy the executable at gpsim-0.23.0/gpsim/gpsim to a directory in the
 execution path. Or better, check out INSTALL
 
 
