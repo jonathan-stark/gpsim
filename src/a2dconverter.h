@@ -51,10 +51,7 @@ public:
   AD_IN_SignalControl(){}
   ~AD_IN_SignalControl(){}
   char getState() { return '1'; }
-  void release()
-  {
-    delete this;
-  }
+  void release() { }
 };
 //---------------------------------------------------------
 // ADCON1

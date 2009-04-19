@@ -1,4 +1,7 @@
 2009-04-20 Roy Rankin <rrankin@ihug.com.au>
+        * src/a2dconverter.h: Fix sigsegv introduced in last patch
+
+2009-04-20 Roy Rankin <rrankin@ihug.com.au>
         * src/pic-processor.cc src/pic-processor.h src/p12x.cc src/p12x.h
           src/a2dconverter.cc src/a2dconverter.h regression/a2d/10f222.lkr
           regression/a2d/p10f222.asm regression/a2d/Makefile
