@@ -61,7 +61,7 @@ void ADRES::put(int new_value)
 ADCON0::ADCON0(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     adres(0), adresl(0), adcon1(0), intcon(0), m_pPir(0), ad_state(AD_IDLE),
-    channel_mask(7)
+    channel_mask(7), channel_shift(3), GO_bit(GO)
 {
 }
 
@@ -114,7 +114,7 @@ void ADCON0::setA2DBits(unsigned int nBits)
 void ADCON0::start_conversion(void)
 {
 
-  Dprintf(("starting A/D conversion\n"));
+  Dprintf(("starting A/D conversion at 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get() ));
 
   if(!(value.get() & ADON) ) {
     Dprintf((" A/D converter is disabled\n"));
@@ -253,7 +253,7 @@ void ADCON0::callback(void)
 {
   int channel;
 
-  Dprintf((" ADCON0 Callback: 0x%"PRINTF_INT64_MODIFIER"x\n",cycles.value));
+  Dprintf((" ADCON0 Callback: 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
   //
   // The a/d converter is simulated with a state machine. 
@@ -266,7 +266,7 @@ void ADCON0::callback(void)
       break;
 
     case AD_ACQUIRING:
-      channel = (value.get() >> 3) & channel_mask;
+      channel = (value.get() >> channel_shift) & channel_mask;
 
       m_dSampledVoltage = adcon1->getChannelVoltage(channel);
       m_dSampledVrefHi  = adcon1->getVrefHi();
@@ -290,7 +290,7 @@ void ADCON0::callback(void)
       put_conversion();
 
       // Clear the GO/!DONE flag.
-      value.put(value.get() & (~GO));
+      value.put(value.get() & (~GO_bit));
       set_interrupt();
 
       ad_state = AD_IDLE;
@@ -303,11 +303,14 @@ void ADCON0::callback(void)
 // in the ADC setup. Otherwise, ADIF is assumed to be in
 // the ADCON0 register
 //
+// Chips like 10f220 do not have interupt and intcon is not defined.
+// Thus no interrupt needs be generated
+//
 void ADCON0::set_interrupt(void)
 {
   if (m_pPir)
       m_pPir->set_adif();
-  else
+  else if (intcon)
   {
       value.put(value.get() | ADIF);
       intcon->peripheral_interrupt();
@@ -322,8 +325,8 @@ void ADCON0::set_interrupt(void)
 //
 ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    m_AnalogPins(0), m_nAnalogChannels(0),
-    mValidCfgBits(0), mCfgBitShift(0)
+    m_AnalogPins(0),  m_voltageRef(0), m_nAnalogChannels(0),
+    mValidCfgBits(0), mCfgBitShift(0), m_ad_in_ctl(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
     setChannelConfiguration(i, 0);
@@ -397,6 +400,7 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
   if (m_nAnalogChannels && nChannels > m_nAnalogChannels )
         save = m_AnalogPins;
 
+  m_voltageRef = new float [nChannels];
   m_AnalogPins = new PinModule *[nChannels];
 
   for (unsigned int i=0; i<nChannels; i++)
@@ -446,27 +450,51 @@ void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
 }
 
 
+void ADCON1::setVoltRef(unsigned int channel, float value)
+{
+    if (channel < m_nAnalogChannels )
+    {
+	m_voltageRef[channel] = value;
+    }
+    else
+    {
+	printf("ADCON1::%s invalid channel number %d\n", __FUNCTION__, channel);
+    }
+}
+
 //------------------------------------------------------
 double ADCON1::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
-  if(channel <= m_nAnalogChannels) {
+  if(channel < m_nAnalogChannels) {
     if ( (1<<channel) & m_configuration_bits[get_cfg(value.data)]) {
       PinModule *pm = m_AnalogPins[channel];
       if (pm != &AnInvalidAnalogInput)
           voltage = pm->getPin().get_nodeVoltage();
+      
       else
       {
 	cout << "ADCON1::getChannelVoltage channel " << channel << 
 		" not valid analog input\n";
-	voltage = 0.;
+	cout << "Please raise a Gpsim bug report\n";
       }
     }
-    else
+    else	// use voltage reference
     {
+	voltage = m_voltageRef[channel];
+/*
 	cout << "ADCON1::getChannelVoltage channel " << channel <<
                 " not a configured input\n";
+	cout << "Please raise a Gpsim bug report\n";
+*/
     }
+  }
+  else
+  {
+	cout << "ADCON1::getChannelVoltage channel " << channel <<
+                " >= "
+		<< m_nAnalogChannels << " (number of channels)\n";
+	cout << "Please raise a Gpsim bug report\n";
   }
 
   return voltage;
@@ -488,6 +516,23 @@ double ADCON1::getVrefLo()
   return 0.0;
 }
 
+//	if on is true, set pin as input regardless of TRIS state
+//	else restore TRIS control
+//
+void ADCON1::set_channel_in(unsigned int channel, bool on)
+{
+    Dprintf(("channel=%d on=%d m_ad_in_ctl=%p\n", channel, on, m_ad_in_ctl));
+
+    if (on && (m_ad_in_ctl == NULL))
+	m_ad_in_ctl = new AD_IN_SignalControl();
+
+    if (on) 
+	m_AnalogPins[channel]->setControl(m_ad_in_ctl);
+    else   
+	m_AnalogPins[channel]->setControl(0);
+
+    m_AnalogPins[channel]->updatePinModule();
+}
 ANSEL::ANSEL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     adcon1(0)
@@ -521,3 +566,56 @@ void ANSEL::put(unsigned int new_value)
   value.put(new_value);
 }
 
+
+//------------------------------------------------------
+// ADCON0
+//
+ADCON0_10::ADCON0_10(Processor *pCpu, const char *pName, const char *pDesc)
+  : ADCON0(pCpu, pName, pDesc)
+{
+  GO_bit = GO;	//ADCON0 and ADCON0_10 have GO flag at different bit
+  // It should take 13 CPU instructions to complete conversion
+  // Tad of 6 completes in 15 
+  Tad = 6;
+}
+void ADCON0_10::put(unsigned int new_value)
+{
+  unsigned int old_value=value.get();
+ /* On first call of this function old_value has already been set to
+ *  it's default value, but we want to call set_channel_in. First 
+ *  gives us a way to do this.
+ */
+  static bool first = true;
+
+  trace.raw(write_trace.get() | value.get());
+
+  Dprintf(("ADCON0_10::put new_value=0x%02x old_value=0x%02x\n", new_value, old_value));
+  
+  if ((new_value ^ old_value) & ANS0 || first)
+	adcon1->set_channel_in(0, (new_value & ANS0) == ANS0); 
+  if ((new_value ^ old_value) & ANS1 || first )
+	adcon1->set_channel_in(1, (new_value & ANS1) == ANS1); 
+
+  first = false;
+
+  // If ADON is clear GO cannot be set
+  if ((new_value & ADON) != ADON)
+	new_value &= ~GO;
+
+
+  // SET: Reflect it first!
+  value.put(new_value);
+  if(new_value & ADON) {
+    // The A/D converter is being turned on (or maybe left on)
+
+    if((new_value & ~old_value) & GO) {
+      if (verbose)
+	printf("starting A2D conversion\n");
+      // The 'GO' bit is being turned on, which is request to initiate
+      // and A/D conversion
+      start_conversion();
+    }
+  } else
+    stop_conversion();
+
+}

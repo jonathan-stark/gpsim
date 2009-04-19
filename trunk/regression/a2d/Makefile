@@ -1,6 +1,6 @@
 include ../make.regression
 
-all : p16c71.cod p18f452.cod p16f873a.cod p16f88.cod p16f871.cod p16f874a.cod p16f819.cod p18f4321.cod p18f1220.cod
+all : p16c71.cod p18f452.cod p16f873a.cod p16f88.cod p16f871.cod p16f874a.cod p16f819.cod p18f4321.cod p18f1220.cod p10f222.cod 
 
 
 p%.cod : p%.o

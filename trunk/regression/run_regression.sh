@@ -132,6 +132,8 @@ ${RT} a2d sim_p18f4321
 
 ${RT} a2d sim_p18f1220
 
+${RT} a2d sim_p10f222
+
 ${RT} psp sim_p18f452
 
 ${RT} psp sim_p16f871

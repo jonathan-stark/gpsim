@@ -1,3 +1,10 @@
+2009-04-20 Roy Rankin <rrankin@ihug.com.au>
+        * src/pic-processor.cc src/pic-processor.h src/p12x.cc src/p12x.h
+          src/a2dconverter.cc src/a2dconverter.h regression/a2d/10f222.lkr
+          regression/a2d/p10f222.asm regression/a2d/Makefile
+	  regression/run_regression.sh:
+	- Add P10F220 and P10F222 processors  
+
 2009-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac: set release 0.23.9
 	* ANNOUNCE:	fix typo
