@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 //    PIC12C508 PIC12C509
 //    PIC12CE518 PIC12CE519
 //    PIC10F200 PIC10F202 PIC10F204
-//
+//    PIC10F220 PIC10F222
 //
 
 #include <stdio.h>
@@ -221,7 +221,7 @@ void P12bitBase::enter_sleep()
   pic_processor::enter_sleep();
 
   status->put( status->get() & ~STATUS_GPWUF);
-  //cout << "enter sleep status="<<hex <<status->get()<<endl;
+  cout << "enter sleep status="<<hex <<status->get()<<endl;
 }
 
 
@@ -239,10 +239,10 @@ void P12bitBase::create_sfr_map()
 
   add_sfr_register(indf,   0, porVal);
   add_sfr_register(&tmr0,  1, porVal);
-  add_sfr_register(pcl,    2, porVal);
+  add_sfr_register(pcl,    2, RegisterValue(0xff,0));
   add_sfr_register(status, 3, porVal);
   add_sfr_register(fsr,    4, porVal);
-  add_sfr_register(&osccal,5, porVal);
+  add_sfr_register(&osccal,5, RegisterValue(0xfe,0));
   add_sfr_register(m_gpio, 6, porVal);
   add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
   add_sfr_register(W, 0xffffffff, porVal);
@@ -828,6 +828,7 @@ public:
   }
 };
 
+
 class CIN_SignalSink;
 class CMCON0 : public sfr_register
 {
@@ -1049,6 +1050,154 @@ Processor * P10F204::construct(const char *name)
 {
 
   P10F204 *p = new P10F204(name);
+
+  p->pc->set_reset_address(0x1ff);
+
+  p->create();
+  p->create_symbols();
+  return p;
+
+}
+//========================================================================
+P10F220::P10F220(const char *_name, const char *desc)
+  : P10F200(_name,desc),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adres(this,"adres", "A2D Result")
+
+{
+}
+
+void P10F220::create()
+{
+  P10F200::create();
+  add_sfr_register(&adcon0,  0x07, RegisterValue(0xcc,0));
+  add_sfr_register(&adres,  0x08, RegisterValue(0,0));
+
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1,0);
+  adcon1.setNumberOfChannels(4);
+  adcon1.setIOPin(0, &(*m_gpio)[0]);
+  adcon1.setIOPin(1, &(*m_gpio)[1]);
+  adcon1.setVoltRef(2, 0.6);
+  adcon1.setVoltRef(3, 0.6);
+  adcon1.setChannelConfiguration(0, 0x03);
+  adcon1.setChannelConfiguration(1, 0x03);
+  adcon1.setChannelConfiguration(2, 0x00);
+  adcon1.setChannelConfiguration(3, 0x00);
+
+  adcon0.setChannel_Mask(3);
+  adcon0.setChannel_shift(2);
+  adcon0.setAdres(&adres);
+  adcon0.setAdresLow(0);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setA2DBits(8);
+
+
+
+
+/*
+  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control",
+                        &(*m_gpio)[0], &(*m_gpio)[1], &(*m_gpio)[2]);
+*/
+
+  RegisterValue porVal = RegisterValue(0xff,0);
+ // add_sfr_register(m_cmcon0, 7, porVal);
+
+}
+
+#ifdef RRR
+void P10F220::updateGP2Source()
+{
+/*
+  PinModule *pmGP2 = &(*m_gpio)[2];
+
+  if (m_cmcon0->isEnabled()) {
+    pmGP2->setControl(m_cmcon0->getGPDirectionControl());
+    pmGP2->setSource(m_cmcon0->getSource());
+    cout << "comparator is controlling the output\n";
+  } else
+*/
+    P10F200::updateGP2Source();
+}
+#endif
+
+//========================================================================
+Processor * P10F220::construct(const char *name)
+{
+
+  P10F220 *p = new P10F220(name);
+
+  p->pc->set_reset_address(0xff);
+
+  p->create();
+  p->create_symbols();
+  // RRR
+  //pma->init_program_memory(0xff, 0x0c00);
+  //p->program_memory[map_pm_adress2index(0xff)] = 0x0c00;
+  //p->program_memory[0xff] = disasm12(p->get_cpu(), 0xff, 0x0c00);
+  return p;
+
+}
+void P10F220::enter_sleep()
+{
+  unsigned int val;
+
+  pic_processor::enter_sleep();
+
+  status->put( status->get() & ~STATUS_GPWUF);
+  //cout << "RRR enter sleep status="<<hex <<status->get()<<endl;
+  val = (adcon0.get() & ~(ADCON0_10::ADON|ADCON0_10::GO)) 
+  	| ADCON0_10::CHS1 | ADCON0_10::CHS0;
+  adcon0.put(val);
+}
+void P10F220::exit_sleep()
+{
+  pic_processor::exit_sleep();
+  //cout << "RRR exit sleep status="<<hex <<status->get()<<endl;
+  adcon0.put(adcon0.get() | ADCON0_10::ANS1 | ADCON0_10::ANS0);
+}
+//========================================================================
+P10F222::P10F222(const char *_name, const char *desc)
+  : P10F220(_name,desc)
+{
+}
+
+void P10F222::create()
+{
+  P10F220::create();
+  add_file_registers(0x09, 0x0f, 0);    // 10F222 has 23 bytes RAM
+
+/*
+  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control",
+                        &(*m_gpio)[0], &(*m_gpio)[1], &(*m_gpio)[2]);
+*/
+
+  RegisterValue porVal = RegisterValue(0xff,0);
+ // add_sfr_register(m_cmcon0, 7, porVal);
+
+}
+
+#ifdef RRR
+void P10F222::updateGP2Source()
+{
+/*
+  PinModule *pmGP2 = &(*m_gpio)[2];
+
+  if (m_cmcon0->isEnabled()) {
+    pmGP2->setControl(m_cmcon0->getGPDirectionControl());
+    pmGP2->setSource(m_cmcon0->getSource());
+    cout << "comparator is controlling the output\n";
+  } else
+*/
+    P10F200::updateGP2Source();
+}
+#endif
+
+//========================================================================
+Processor * P10F222::construct(const char *name)
+{
+
+  P10F222 *p = new P10F222(name);
 
   p->pc->set_reset_address(0x1ff);
 

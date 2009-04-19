@@ -23,6 +23,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "12bit-processors.h"
 #include "pic-ioports.h"
+#include "a2dconverter.h"
+
 
 class P12_I2C_EE;
 
@@ -241,6 +243,43 @@ public:
   virtual void updateGP2Source();
 protected:
   CMCON0 *m_cmcon0;
+};
+
+// A 10F220 is based on 10f200
+class P10F220 : public P10F200
+{
+public:
+
+  ADCON0_10 adcon0;
+  ADCON1 adcon1;
+  sfr_register  adres;
+
+  virtual PROCESSOR_TYPE isa(){return _P10F220_;};
+
+  P10F220(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  virtual void create();
+  virtual void enter_sleep();
+  virtual void exit_sleep();
+  // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
+ // virtual void updateGP2Source();
+protected:
+};
+
+// A 10F220 is like a 10f220
+class P10F222 : public P10F220
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P10F222_;};
+
+  P10F222(const char *_name=0, const char *desc=0);
+  virtual unsigned int program_memory_size() const { return 0x200; };
+  static Processor *construct(const char *name);
+  virtual void create();
+  // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
+//  virtual void updateGP2Source();
+protected:
 };
 
 #endif //  __P12X_H__

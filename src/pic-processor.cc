@@ -156,6 +156,10 @@ ProcessorConstructor pP10F202(P10F202::construct ,
                               "__10F202", "pic10f202",  "p10f202", "10f202");
 ProcessorConstructor pP10F204(P10F204::construct ,
                               "__10F204", "pic10f204",  "p10f204", "10f204");
+ProcessorConstructor pP10F220(P10F220::construct ,
+                              "__10F220", "pic10f220",  "p10f220", "10f220");
+ProcessorConstructor pP10F222(P10F222::construct ,
+                              "__10F222", "pic10f222",  "p10f222", "10f222");
 ProcessorConstructor pP12C508(P12C508::construct ,
                               "__12C508", "pic12c508",  "p12c508", "12c508");
 ProcessorConstructor pP12C509(P12C509::construct ,

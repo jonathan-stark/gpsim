@@ -41,6 +41,21 @@ public:
 };
 */
 
+/*
+	AD_IN_SignalControl is used to set an ADC pin as input
+	regardless of the setting to the TRIS register
+*/
+class AD_IN_SignalControl : public SignalControl
+{
+public:
+  AD_IN_SignalControl(){}
+  ~AD_IN_SignalControl(){}
+  char getState() { return '1'; }
+  void release()
+  {
+    delete this;
+  }
+};
 //---------------------------------------------------------
 // ADCON1
 //
@@ -76,10 +91,15 @@ public:
   void setValidCfgBits(unsigned int m, unsigned int s);
   void setNumberOfChannels(unsigned int);
   void setIOPin(unsigned int, PinModule *);
+  void setVoltRef(unsigned int, float);
   int  get_cfg(unsigned int);
+
+  void set_channel_in(unsigned int channel, bool on);
+  
 
 private:
   PinModule **m_AnalogPins;
+  float	*m_voltageRef;
   unsigned int m_nAnalogChannels;
   unsigned int mValidCfgBits;
   unsigned int mCfgBitShift;
@@ -102,7 +122,10 @@ private:
    */
   unsigned int m_configuration_bits[cMaxConfigurations];
 
+  // used bt setControl to set pin direction as input
+  AD_IN_SignalControl *m_ad_in_ctl;
 };
+
 
 
 //---------------------------------------------------------
@@ -149,8 +172,11 @@ public:
   virtual void setPir(PIR *);
   void setA2DBits(unsigned int);
   void setChannel_Mask(unsigned int ch_mask) { channel_mask = ch_mask; }
+  void setChannel_shift(unsigned int ch_shift) { channel_shift = ch_shift; }
 
 private:
+
+  friend class ADCON0_10;
 
   sfr_register *adres;
   sfr_register *adresl;
@@ -168,9 +194,33 @@ private:
   unsigned int Tad_2;
   unsigned int Tad;
   unsigned int channel_mask;
+  unsigned int channel_shift;
+  unsigned int GO_bit;
 };
 
 
+//---------------------------------------------------------
+// ADCON0_10 register for 10f22x A2D
+//
+
+class ADCON0_10 : public ADCON0
+{
+public:
+
+  enum
+    {
+      ADON = 1<<0,
+      GO   = 1<<1,
+      CHS0 = 1<<2,
+      CHS1 = 1<<3,
+      ANS0 = 1<<6,
+      ANS1 = 1<<7
+    };
+  void put(unsigned int new_value);
+  ADCON0_10(Processor *pCpu, const char *pName, const char *pDesc);
+private:
+	AD_IN_SignalControl ad_pin_input;
+};
 //---------------------------------------------------------
 // ANSEL
 //
