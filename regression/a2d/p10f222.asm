@@ -61,7 +61,7 @@ START
 	MOVLW		B'000001100'
 	TRIS		GPIO				
 ;if all pins input V1 and V2 pull voltage high
-    .assert "gpio == 0xf,\"FAILED 10f222 a2d holding pins as input\""
+    .assert "gpio != 0x0,\"FAILED 10f222 a2d holding pins as input\""
 	nop
 	CLRF		ADCON0	
 ; TRIS back in control pins 0,1 pull output low

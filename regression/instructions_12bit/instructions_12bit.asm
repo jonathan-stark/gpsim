@@ -16,7 +16,7 @@
 	include <p12c508.inc>           ; processor specific variable definitions
         include <coff.inc>              ; Grab some useful macros
 
-  __config _WDT_ON
+  __config _WDT_ON & _MCLRE_OFF
 
 ;----------------------------------------------------------------------
 ;----------------------------------------------------------------------

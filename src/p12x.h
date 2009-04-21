@@ -41,6 +41,20 @@ private:
   bool m_bPU;
 };
 
+//--------------------------------------------------------
+/*
+ *         IN_SignalControl is used to set a pin as input
+ *                 regardless of the setting to the TRIS register
+ */
+class IN_SignalControl : public SignalControl
+{
+public:
+  IN_SignalControl(){}
+  ~IN_SignalControl(){}
+  char getState() { return '1'; }
+  void release() { }
+};
+
 class P12bitBase : public  _12bit_processor
 {
 public:
@@ -75,6 +89,8 @@ public:
 
 
   virtual void option_new_bits_6_7(unsigned int);
+
+  IN_SignalControl *m_IN_SignalControl;
 
 };
 
@@ -211,6 +227,7 @@ public:
   virtual void create_iopin_map();
   // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
   virtual void updateGP2Source();
+
 };
 
 
@@ -261,8 +278,6 @@ public:
   virtual void create();
   virtual void enter_sleep();
   virtual void exit_sleep();
-  // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
- // virtual void updateGP2Source();
 protected:
 };
 
@@ -278,7 +293,7 @@ public:
   static Processor *construct(const char *name);
   virtual void create();
   // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
-//  virtual void updateGP2Source();
+  //virtual void updateGP2Source();
 protected:
 };
 

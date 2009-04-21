@@ -1,10 +1,15 @@
-2009-04-20 Roy Rankin <rrankin@ihug.com.au>
-        * src/a2dconverter.h: Fix sigsegv introduced in last patch
+2009-04-21 Roy Rankin <rrankin@ihug.com.au>
+	* regression/instructions_12bit/instructions_12bit.asm
+	  regression/a2d/p10f222.asm src/p12x.cc src/p12x.h:
+	- Fix pullup on gpio3 on all p12x processors
 
 2009-04-20 Roy Rankin <rrankin@ihug.com.au>
-        * src/pic-processor.cc src/pic-processor.h src/p12x.cc src/p12x.h
-          src/a2dconverter.cc src/a2dconverter.h regression/a2d/10f222.lkr
-          regression/a2d/p10f222.asm regression/a2d/Makefile
+	* src/a2dconverter.h: Fix sigsegv introduced in last patch
+
+2009-04-20 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc src/pic-processor.h src/p12x.cc src/p12x.h
+	  src/a2dconverter.cc src/a2dconverter.h regression/a2d/10f222.lkr
+	  regression/a2d/p10f222.asm regression/a2d/Makefile
 	  regression/run_regression.sh:
 	- Add P10F220 and P10F222 processors  
 
