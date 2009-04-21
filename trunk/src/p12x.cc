@@ -154,7 +154,7 @@ P12bitBase::~P12bitBase()
 
   delete_sfr_register(m_gpio);
   delete_sfr_register(m_tris);
-  delete_file_registers(0x7, 0x1f);
+  //delete_file_registers(0x7, 0x1f);
   /*
   removeSymbol(*m_configMemory);
   delete *m_configMemory;
@@ -186,12 +186,16 @@ void P12bitBase::create_iopin_map()
   package->assign_pin(7, m_gpio->addPin(new IO_bi_directional_pu("gpio0"),0));
   package->assign_pin(6, m_gpio->addPin(new IO_bi_directional_pu("gpio1"),1));
   package->assign_pin(5, m_gpio->addPin(new IO_bi_directional("gpio2"),2));
-  package->assign_pin(4, m_gpio->addPin(new IOPIN("gpio3"),3));
+  package->assign_pin(4, m_gpio->addPin(new IO_bi_directional_pu("gpio3"),3));
   package->assign_pin(3, m_gpio->addPin(new IO_bi_directional("gpio4"),4));
   package->assign_pin(2, m_gpio->addPin(new IO_bi_directional("gpio5"),5));
   package->assign_pin(1, 0);
   package->assign_pin(8, 0);
 
+  // gpio3 is input only, but we want pullup, so use IO_bi_directional_pu
+  // but force as input pin disableing TRIS control
+  m_IN_SignalControl = new IN_SignalControl;
+  (&(*m_gpio)[3])->setControl(m_IN_SignalControl);
 
 }
 
@@ -246,7 +250,6 @@ void P12bitBase::create_sfr_map()
   add_sfr_register(m_gpio, 6, porVal);
   add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
   add_sfr_register(W, 0xffffffff, porVal);
-  //add_sfr_register(option_reg, 0xffffffff, RegisterValue(0x00,0));
   option_reg->set_cpu(this);
   osccal.new_name("osccal");
 
@@ -649,7 +652,7 @@ void GPIO::setPullUp ( bool bNewPU )
 
 
 
-//--------------------------------------------------------
+
 //------------------------------------------------------------------------
 
 
@@ -663,10 +666,14 @@ void P10F200::create_iopin_map()
   package->assign_pin(1, m_gpio->addPin(new IO_bi_directional_pu("gpio0"),0));
   package->assign_pin(3, m_gpio->addPin(new IO_bi_directional_pu("gpio1"),1));
   package->assign_pin(4, m_gpio->addPin(new IO_bi_directional("gpio2"),2));
-  package->assign_pin(6, m_gpio->addPin(new IOPIN("gpio3"),3));
+  package->assign_pin(6, m_gpio->addPin(new IO_bi_directional_pu("gpio3"),3));
   package->assign_pin(2, 0);
   package->assign_pin(5, 0);
 
+  // gpio3 is input only, but we want pullup, so use IO_bi_directional_pu
+  // but force as input pin disableing TRIS control
+  m_IN_SignalControl = new IN_SignalControl;
+  (&(*m_gpio)[3])->setControl(m_IN_SignalControl);
 
 }
 
@@ -1095,31 +1102,9 @@ void P10F220::create()
 
 
 
-/*
-  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control",
-                        &(*m_gpio)[0], &(*m_gpio)[1], &(*m_gpio)[2]);
-*/
-
   RegisterValue porVal = RegisterValue(0xff,0);
- // add_sfr_register(m_cmcon0, 7, porVal);
 
 }
-
-#ifdef RRR
-void P10F220::updateGP2Source()
-{
-/*
-  PinModule *pmGP2 = &(*m_gpio)[2];
-
-  if (m_cmcon0->isEnabled()) {
-    pmGP2->setControl(m_cmcon0->getGPDirectionControl());
-    pmGP2->setSource(m_cmcon0->getSource());
-    cout << "comparator is controlling the output\n";
-  } else
-*/
-    P10F200::updateGP2Source();
-}
-#endif
 
 //========================================================================
 Processor * P10F220::construct(const char *name)
@@ -1131,10 +1116,6 @@ Processor * P10F220::construct(const char *name)
 
   p->create();
   p->create_symbols();
-  // RRR
-  //pma->init_program_memory(0xff, 0x0c00);
-  //p->program_memory[map_pm_adress2index(0xff)] = 0x0c00;
-  //p->program_memory[0xff] = disasm12(p->get_cpu(), 0xff, 0x0c00);
   return p;
 
 }
@@ -1167,31 +1148,10 @@ void P10F222::create()
   P10F220::create();
   add_file_registers(0x09, 0x0f, 0);    // 10F222 has 23 bytes RAM
 
-/*
-  m_cmcon0 = new CMCON0(this, "cmcon0", "Comparator Control",
-                        &(*m_gpio)[0], &(*m_gpio)[1], &(*m_gpio)[2]);
-*/
-
   RegisterValue porVal = RegisterValue(0xff,0);
- // add_sfr_register(m_cmcon0, 7, porVal);
 
 }
 
-#ifdef RRR
-void P10F222::updateGP2Source()
-{
-/*
-  PinModule *pmGP2 = &(*m_gpio)[2];
-
-  if (m_cmcon0->isEnabled()) {
-    pmGP2->setControl(m_cmcon0->getGPDirectionControl());
-    pmGP2->setSource(m_cmcon0->getSource());
-    cout << "comparator is controlling the output\n";
-  } else
-*/
-    P10F200::updateGP2Source();
-}
-#endif
 
 //========================================================================
 Processor * P10F222::construct(const char *name)
