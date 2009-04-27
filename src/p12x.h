@@ -27,17 +27,38 @@ Boston, MA 02111-1307, USA.  */
 
 
 class P12_I2C_EE;
+class P12bitBase;
+
+class P12_OSCCON : public  sfr_register
+{
+public:
+  enum {
+	FOSC4 = 1 << 0
+  };
+
+  P12_OSCCON(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc), m_CPU(0)
+  {
+  }
+
+    void put(unsigned int new_value);
+    void set_cpu(P12bitBase *pCPU) { m_CPU = pCPU;}
+private:
+  P12bitBase *m_CPU;
+};
+
 
 class GPIO : public PicPortRegister
 {
 public:
-  GPIO(Processor *pCpu, const char *pName, const char *pDesc,
+  GPIO(P12bitBase *pCpu, const char *pName, const char *pDesc,
        unsigned int numIopins, 
        unsigned int enableMask);
   void setbit(unsigned int bit_number, char new_value);
-  void setPullUp ( bool bNewPU );
+  void setPullUp ( bool bNewPU , bool mclr);
 
 private:
+  P12bitBase *m_CPU;
   bool m_bPU;
 };
 
@@ -55,12 +76,41 @@ public:
   void release() { }
 };
 
+//--------------------------------------------------------
+/*
+ *         OUT_SignalControl is used to set a pin as input
+ *                 regardless of the setting to the TRIS register
+ */
+class OUT_SignalControl : public SignalControl
+{
+public:
+  OUT_SignalControl(){}
+  ~OUT_SignalControl(){}
+  char getState() { return '0'; }
+  void release() { }
+};
+
+//--------------------------------------------------------
+/*
+ *         OUT_DriveControl is used to override output
+ *                 regardless of the setting to the GPIO register
+ */
+class OUT_DriveControl : public SignalControl
+{
+public:
+  OUT_DriveControl(){}
+  ~OUT_DriveControl(){}
+  char getState() { return '1'; }
+  void release() { }
+};
+
 class P12bitBase : public  _12bit_processor
 {
 public:
   GPIO            *m_gpio;
   PicTrisRegister *m_tris;
-  sfr_register osccal;  // %%% FIX ME %%% Nothing's done with this.
+  P12_OSCCON 	  osccal;  
+  
 
   virtual PROCESSOR_TYPE isa(){return _P12C508_;};
   virtual void create_symbols();
@@ -91,6 +141,25 @@ public:
   virtual void option_new_bits_6_7(unsigned int);
 
   IN_SignalControl *m_IN_SignalControl;
+  OUT_SignalControl *m_OUT_SignalControl;
+  OUT_DriveControl *m_OUT_DriveControl;
+
+  virtual void updateGP2Source();
+  virtual void freqCalibration();
+  virtual void setConfigWord(unsigned int val, unsigned int diff);
+
+
+    unsigned int configWord;
+
+// bits of Configuration word
+    enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    WDTEN  = 1<<2,
+    CP     = 1<<3,
+    MCLRE  = 1<<4
+  };
+
 
 };
 
@@ -175,6 +244,7 @@ class P12CE518 : public P12C508
   static Processor *construct(const char *name);
   virtual void create();
   virtual void create_iopin_map();
+  virtual void freqCalibration();
 private:
   P12_I2C_EE *m_eeprom;
   
@@ -227,6 +297,7 @@ public:
   virtual void create_iopin_map();
   // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
   virtual void updateGP2Source();
+  virtual void freqCalibration();
 
 };
 
@@ -278,6 +349,13 @@ public:
   virtual void create();
   virtual void enter_sleep();
   virtual void exit_sleep();
+  virtual void setConfigWord(unsigned int val, unsigned int diff);
+
+// Bits of configuration word
+    enum {
+    IOSCFS  = 1<<0,
+    NOT_MCPU  = 1<<1,
+   };
 protected:
 };
 
