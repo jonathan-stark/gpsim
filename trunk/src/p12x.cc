@@ -50,8 +50,9 @@ Boston, MA 02111-1307, USA.  */
 class Generic12bitConfigWord : public ConfigWord
 {
 public:
-  Generic12bitConfigWord(_12bit_processor *pCpu)
-    : ConfigWord("CONFIG", 0xfff, "Configuration Word", pCpu, 0xfff)
+  Generic12bitConfigWord(P12bitBase *pCpu)
+    : ConfigWord("CONFIG", 0xfff, "Configuration Word", pCpu, 0xfff),
+	m_pCpu(pCpu)
   {
     assert(pCpu);
     pCpu->wdt.initialize(true);
@@ -74,11 +75,7 @@ public:
 
       gint64 diff = oldV ^ v;
 
-      if (diff & WDTEN)
-        m_pCpu->wdt.initialize((v & WDTEN) == WDTEN);
-
-      if (diff & MCLRE)
-        m_pCpu->config_modes->set_mclre((v&MCLRE)==MCLRE);
+      m_pCpu->setConfigWord(v & 0x3ff, diff & 0x3ff);
 
     }
 
@@ -105,8 +102,25 @@ public:
              (i&MCLRE?1:0), ((i&MCLRE) ? "enabled" : "disabled"));
     return string(buff);
   }
+private:
+  P12bitBase *m_pCpu;
 
 };
+
+void  P12_OSCCON::put(unsigned int new_value)
+{
+  unsigned int old = value.get();
+  if (verbose)
+      printf("P12_OSCCON::put new_value=%x old=%x\n", new_value, value.get());
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+  if((new_value ^ old) & FOSC4 && m_CPU)
+	m_CPU->updateGP2Source();
+
+  if ((new_value ^ old) & 0xfe && m_CPU)
+  	m_CPU->freqCalibration();
+	
+}
 
 //========================================================================
 // The P12 devices with an EEPROM contain two die. One is the 12C core and
@@ -144,6 +158,7 @@ P12bitBase::P12bitBase(const char *_name, const char *desc)
     m_tris(0),
     osccal(this,"osccal","Oscillator Calibration")
 {
+  set_frequency(4e6);
   if(config_modes)
     config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
@@ -154,12 +169,6 @@ P12bitBase::~P12bitBase()
 
   delete_sfr_register(m_gpio);
   delete_sfr_register(m_tris);
-  //delete_file_registers(0x7, 0x1f);
-  /*
-  removeSymbol(*m_configMemory);
-  delete *m_configMemory;
-  delete [] m_configMemory;
-  */
 }
 
 
@@ -168,10 +177,6 @@ void P12bitBase::create_config_memory()
   m_configMemory = new ConfigMemory(this,1);
   m_configMemory->addConfigWord(0,new Generic12bitConfigWord(this));
 
-  /*
-  m_configMemory = new ConfigMemory *[1];
-  *m_configMemory = new Generic12bitConfigWord(this);
-  */
 }
 
 
@@ -229,11 +234,51 @@ void P12bitBase::enter_sleep()
 }
 
 
+void  P12bitBase::updateGP2Source()
+{
+  PinModule *pmGP2 = &(*m_gpio)[2];
+
+  if(option_reg->get() & OPTION_REG::T0CS)
+  {
+    printf("OPTION_REG::T0CS forcing GPIO2 as input, TRIS disabled\n");
+    pmGP2->setControl(m_IN_SignalControl);
+    pmGP2->getPin().newGUIname("T0CS");
+  }
+  else
+  {
+    cout << "TRIS now controlling gpio2\n";
+    pmGP2->getPin().newGUIname("gpio2");
+    pmGP2->setControl(0);
+  }
+}
+// freqCalibrate modifies the internal RC frequency
+// the base varsion is for the 12C508 and 12C509 Processors
+// the spec sheet does not indicate the range or step size of corrections
+// so this is based on +/- 12.5 % as per 16f88
+void  P12bitBase::freqCalibration()
+{
+    // If internal RC oscilator
+    if((configWord & (FOSC0 | FOSC1)) == FOSC1)
+    {
+	int osccal_val = (osccal.get() >> 4) - 0x07;
+        double freq = get_frequency();
+    	freq *= 1. + 0.125 * osccal_val / 0x08;
+	set_frequency(freq);
+        if (verbose)
+    	    printf("P12bitBase::freqCalibration new freq %g\n", freq);
+    }
+}
+// option_new_bits_6_7 is called from class OPTION_REG when
+// bits 5, 6, or 7 of  OPTION_REG change state
+//
 void  P12bitBase::option_new_bits_6_7(unsigned int bits)
 {
   if(verbose)
-    cout << "p12c508 option_new_bits_6_7\n";
-  m_gpio->setPullUp ( (bits & (1<<6)) == (1<<6) );
+    cout << "P12bitBase::option_new_bits_6_7 bits=" << hex << bits << "\n";
+  // Weak pullup if NOT_GPPU == 0
+  m_gpio->setPullUp ( (bits & OPTION_REG::BIT6) != OPTION_REG::BIT6 , (configWord & MCLRE));
+  updateGP2Source();
+
 }
 
 void P12bitBase::create_sfr_map()
@@ -246,12 +291,13 @@ void P12bitBase::create_sfr_map()
   add_sfr_register(pcl,    2, RegisterValue(0xff,0));
   add_sfr_register(status, 3, porVal);
   add_sfr_register(fsr,    4, porVal);
-  add_sfr_register(&osccal,5, RegisterValue(0xfe,0));
+  add_sfr_register(&osccal,5, RegisterValue(0x70,0));
   add_sfr_register(m_gpio, 6, porVal);
   add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
   add_sfr_register(W, 0xffffffff, porVal);
   option_reg->set_cpu(this);
-  osccal.new_name("osccal");
+
+  osccal.set_cpu(this);
 
 
 }
@@ -260,7 +306,6 @@ void P12bitBase::create_symbols()
 {
   _12bit_processor::create_symbols();
 
-  //symbol_table.add_register(m_gpio);
   addSymbol(m_tris);
 }
 
@@ -277,12 +322,31 @@ void P12bitBase::dump_registers ()
 }
 
 
+void  P12bitBase::setConfigWord(unsigned int val, unsigned int diff)
+{
+    PinModule *pmGP3 = &(*m_gpio)[3];
+
+    configWord = val;
+
+    if (verbose)
+        printf("P12bitBase::setConfigWord val=%x diff=%x\n", val, diff);
+    if (diff & WDTEN)
+        wdt.initialize((val & WDTEN) == WDTEN);
+
+    if ((val & MCLRE) == MCLRE)
+    {
+    	    pmGP3->getPin().update_pullup('1', true);
+    	    pmGP3->getPin().newGUIname("MCLR");
+    }
+    else
+    	    pmGP3->getPin().newGUIname("gpio3");
+
+}
+
 void P12bitBase::tris_instruction(unsigned int tris_register)
 {
   m_tris->put(W->value.get());
 
-
-  //trace.write_TRIS(m_tris->value.get());
 }
 
 void P12C508::create()
@@ -483,6 +547,8 @@ void P12CE518::create()
   m_gpio->wdtr_value  = por_value;
   m_gpio->put(0xc0);
 
+  osccal.por_value = RegisterValue(0x80,0);
+
   // Kludge to force top two bits to be outputs
   m_tris->put(0x3f);
 
@@ -539,6 +605,25 @@ void P12CE518::tris_instruction(unsigned int tris_register)
 }
 
 
+// freqCalibrate modifies the internal RC frequency
+// this version is for the 12CE518 and 12CE519 Processors but would also 
+// be correct for 12C508A/C509A/CR509A
+// the spec sheet does not indicate the range or step size of corrections
+// so this is based on +/- 12.5 % as per 16f88
+void  P12CE518::freqCalibration()
+{
+
+    // If internal RC oscilator
+    if((configWord & (FOSC0 | FOSC1)) == FOSC1)
+    {
+	int osccal_val = (osccal.get() >> 2) - 0x20;
+        double freq = 4e6;
+    	freq *= 1. + 0.125 * osccal_val / 0x20;
+    	set_frequency(freq);
+	if(verbose)
+    	    printf("P12CE518::freqCalibration new freq %g\n", freq);
+    }
+}
 //--------------------------------------------------------
 
 void P12CE519::create_sfr_map()
@@ -591,10 +676,10 @@ P12CE519::P12CE519(const char *_name, const char *desc)
 //
 // GPIO Port
 
-GPIO::GPIO(Processor *pCpu, const char *pName, const char *pDesc,
+GPIO::GPIO(P12bitBase *pCpu, const char *pName, const char *pDesc,
            unsigned int numIopins,
            unsigned int enableMask)
-  : PicPortRegister (pCpu,pName,pDesc, numIopins, enableMask)
+  : PicPortRegister (pCpu,pName,pDesc, numIopins, enableMask), m_CPU(pCpu)
 {
 }
 
@@ -610,7 +695,8 @@ void GPIO::setbit(unsigned int bit_number, char new_value)
   //    Then wake
 
   unsigned int diff = lastDrivenValue ^ rvDrivenValue.data;
-  if ((diff & (1<<3)) && cpu_pic->config_modes->get_mclre()) { // GP3 is the reset pin
+  //if ((diff & (1<<3)) && cpu_pic->config_modes->get_mclre()) { // GP3 is the reset pin
+  if ((diff & (1<<3)) && (m_CPU->configWord & P12bitBase::MCLRE)) { // GP3 is the reset pin
 
     cpu->reset( (rvDrivenValue.data & (1<<3)) ? EXIT_RESET : MCLR_RESET);
     return;
@@ -633,21 +719,28 @@ so the processor is waking up\n";
   }
 }
 
-void GPIO::setPullUp ( bool bNewPU )
+// if bNewPU == true set weak pullups otherwise clear weak pullups
+void GPIO::setPullUp ( bool bNewPU , bool mclr)
 {
-  m_bPU = !bNewPU;
+  m_bPU = bNewPU;
 
   if ( verbose & 16 )
     printf("GPIO::setPullUp() =%d\n",(m_bPU?1:0));
 
   // In the following do not change pullup state of internal pins
   unsigned int mask = getEnableMask() & 0x3f;
+  
+  // If mclr active do not change pullup on gpio3
+  if (mclr) mask &= 0x37;
+
   for (unsigned int i=0, m=1; mask; i++, m<<= 1)
+  {
     if (mask & m)
     {
       mask ^= m;
       getPin(i)->update_pullup ( m_bPU ? '1' : '0', true );
     }
+  }
 }
 
 
@@ -673,6 +766,8 @@ void P10F200::create_iopin_map()
   // gpio3 is input only, but we want pullup, so use IO_bi_directional_pu
   // but force as input pin disableing TRIS control
   m_IN_SignalControl = new IN_SignalControl;
+  m_OUT_SignalControl = new OUT_SignalControl;
+  m_OUT_DriveControl = new OUT_DriveControl;
   (&(*m_gpio)[3])->setControl(m_IN_SignalControl);
 
 }
@@ -692,6 +787,8 @@ void P10F200::create()
 
   tmr0.set_cpu(this,m_gpio,2,option_reg);
   tmr0.start(0);
+  osccal.set_cpu(this);
+  osccal.por_value = RegisterValue(0xfe,0);
 
   pc->reset();
 }
@@ -729,17 +826,53 @@ P10F200::~P10F200()
 {
 
 }
+
+
 void P10F200::updateGP2Source()
 {
   PinModule *pmGP2 = &(*m_gpio)[2];
 
-  // revert to default control, i.e. let TRIS control the output
-  pmGP2->setControl(0);
-  pmGP2->setSource(0);
+  if (osccal.get() & P12_OSCCON::FOSC4 )
+  {
 
-  cout << "tris is controlling the output\n";
+    pmGP2->setSource(m_OUT_DriveControl);
+    printf("OSCCON::FOSC4 forcing GPIO2 high on output, TODO FOSC4 toggle output\n");
+    pmGP2->getPin().newGUIname("FOSC4");
+  }
+  else if(option_reg->get() & OPTION_REG::T0CS)
+  {
+    printf("OPTION_REG::T0CS forcing GPIO2 as input, TRIS disabled\n");
+    pmGP2->setControl(m_IN_SignalControl);
+    pmGP2->setSource(0);
+    pmGP2->getPin().newGUIname("T0CS");
+  }
+  else
+  {
+    // revert to default control, i.e. let TRIS control the output
+    pmGP2->setControl(0);
+    pmGP2->setSource(0);
+    cout << "TRIS now controlling gpio2\n";
+    pmGP2->getPin().newGUIname("gpio2");
+  }
+  pmGP2->updatePinModule();
 
 
+}
+// freqCalibrate modifies the internal RC frequency
+// this version is for the 10F2xx Processors 
+// the spec sheet does not indicate the range or step size of corrections
+// so this is based on +/- 12.5 % as per 16f88
+void  P10F200::freqCalibration()
+{
+
+    // If internal RC oscilator
+	char osccal_val = (osccal.get() & 0xfe);
+        double freq = (configWord & 1)? 8e6 : 4e6;
+
+    	freq *= 1. + (0.125 * osccal_val) / 0x80;
+    	set_frequency(freq);
+	if (verbose)
+    	    printf("P10F200::freqCalibration new freq %g\n", freq);
 }
 //------------------------------------------------------------------------
 
@@ -866,7 +999,8 @@ public:
     char ret='Z';
     if ( (value.get() & (COUTEN | CMPON)) == CMPON)
       ret = (((value.get() & CMPOUT)==CMPOUT) ^ ((value.get() & POL)==POL)) ? '0' : '1';
-    cout <<"CMCON0::getState-->"<<ret << endl;
+    if (verbose)
+      cout <<"CMCON0::getState-->"<<ret << endl;
     return ret;
   }
 
@@ -916,7 +1050,8 @@ public:
   {}
   void setSinkState(char new3State)
   {
-    cout << "LINE:"<<__LINE__<< "  "<< (m_binput ? "POS ":"NEG ")
+    if (verbose)
+      cout << "CIN_SignalSink::setSinkState  "<< (m_binput ? "POS ":"NEG ")
          <<"set sink:"<<new3State << endl;
 
     m_cmcon0->setInputState(new3State, m_binput);
@@ -1011,7 +1146,8 @@ void CMCON0::setInputState(char newState, bool bInput)
       m_nV = 0.6;
   }
 
-  cout << " setInputState: pV="<<m_pV<<",nV="<<m_nV << endl;
+  if(verbose)
+     cout << "CMCON0::setInputState: pV="<<m_pV<<",nV="<<m_nV << endl;
 
   unsigned old_value = value.get();
   trace.raw(write_trace.get() | old_value);
@@ -1044,12 +1180,33 @@ void P10F204::updateGP2Source()
   //    m_gpio->getIOpins(2)->setSource(m_cmcon0->getSource());
   PinModule *pmGP2 = &(*m_gpio)[2];
 
-  if (m_cmcon0->isEnabled()) {
+  if (osccal.get() & P12_OSCCON::FOSC4 )
+  {
+
+    pmGP2->setSource(m_OUT_DriveControl);
+    printf("OSCCON::FOSC4 forcing GPIO2 high on output, TODO FOSC4 toggle output\n");
+    pmGP2->getPin().newGUIname("FOSC4");
+  }
+  else if (m_cmcon0->isEnabled()) {
     pmGP2->setControl(m_cmcon0->getGPDirectionControl());
     pmGP2->setSource(m_cmcon0->getSource());
-    cout << "comparator is controlling the output\n";
-  } else
-    P10F200::updateGP2Source();
+    cout << "comparator is controlling the output of GPIO2\n";
+    pmGP2->getPin().newGUIname("COUT");
+  } 
+  else if(option_reg->get() & OPTION_REG::T0CS)
+  {
+    printf("OPTION_REG::T0CS forcing GPIO2 as input, TRIS disabled\n");
+    pmGP2->setControl(m_IN_SignalControl);
+    pmGP2->setSource(0);
+    pmGP2->getPin().newGUIname("T0CS");
+  }
+  else {
+  
+    pmGP2->setControl(0);
+    pmGP2->setSource(0);
+    pmGP2->getPin().newGUIname("gpio2");
+  }
+  pmGP2->updatePinModule();
 }
 
 //========================================================================
@@ -1126,7 +1283,6 @@ void P10F220::enter_sleep()
   pic_processor::enter_sleep();
 
   status->put( status->get() & ~STATUS_GPWUF);
-  //cout << "RRR enter sleep status="<<hex <<status->get()<<endl;
   val = (adcon0.get() & ~(ADCON0_10::ADON|ADCON0_10::GO)) 
   	| ADCON0_10::CHS1 | ADCON0_10::CHS0;
   adcon0.put(val);
@@ -1134,8 +1290,29 @@ void P10F220::enter_sleep()
 void P10F220::exit_sleep()
 {
   pic_processor::exit_sleep();
-  //cout << "RRR exit sleep status="<<hex <<status->get()<<endl;
   adcon0.put(adcon0.get() | ADCON0_10::ANS1 | ADCON0_10::ANS0);
+}
+void  P10F220::setConfigWord(unsigned int val, unsigned int diff)
+{
+        PinModule *pmGP3 = &(*m_gpio)[3];
+
+    configWord = val;
+    if (verbose)
+        printf("P10F220::setConfigWord val=%x diff=%x\n", val, diff);
+    if (diff & WDTEN)
+        wdt.initialize((val & WDTEN) == WDTEN);
+
+    if ((val & MCLRE))
+    {
+	if (!(val & NOT_MCPU))
+    	    pmGP3->getPin().update_pullup('1', true);
+        pmGP3->getPin().newGUIname("MCLR");
+    }
+    else
+        pmGP3->getPin().newGUIname("gpio3");
+
+    if ((val & IOSCFS))
+  	set_frequency(8e6);
 }
 //========================================================================
 P10F222::P10F222(const char *_name, const char *desc)

@@ -435,8 +435,8 @@ void OPTION_REG::put(unsigned int new_value)
   if( (value.get() ^ old_value) & (PSA | PS2 | PS1 | PS0))
     cpu_pic->wdt.set_postscale( (value.get() & PSA) ? (value.get() & ( PS2 | PS1 | PS0 )) : 0);
 
-  if( (value.get() ^ old_value) & (BIT6 | BIT7))
-    cpu_pic->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
+  if( (value.get() ^ old_value) & (T0CS | BIT6 | BIT7))
+    cpu_pic->option_new_bits_6_7(value.get() & (T0CS | BIT6 | BIT7));
 
 
 }
