@@ -1,4 +1,8 @@
 2009-04-28 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-registers.cc : backout part of last change which causes
+	sigsegv
+
+2009-04-28 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-registers.h src/pic-registers.cc src/pic-ioports.cc
 	  regression/digital_stim/digital_stim.asm:
 	- OPTION_REG values not properly processed on initial reset
