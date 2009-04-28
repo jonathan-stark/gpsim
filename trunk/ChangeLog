@@ -1,6 +1,12 @@
+2009-04-28 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-registers.h src/pic-registers.cc src/pic-ioports.cc
+	  regression/digital_stim/digital_stim.asm:
+	- OPTION_REG values not properly processed on initial reset
+	  causing wrong edge detect for interrupt
+
 2009-04-27 Roy Rankin <rrankin@ihug.com.au>
 	* src/p12x.cc src/p12x.h src/pic-registers.cc:
-	¯ For p12x processors support osccal function for internal RC
+	- For p12x processors support osccal function for internal RC
 	  frequency tuning and FOSC4. Add Configuration word support
 	  for IOSCFS and NOT_MCPU. Pin driving and label for
 	  FOSC4/COUT/T0SC/gpio2 and MCLR/gpio3

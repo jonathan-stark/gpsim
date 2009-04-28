@@ -98,6 +98,7 @@ enum
 
   virtual void put(unsigned int new_value);
   virtual void reset(RESET_TYPE r);
+  virtual void initialize();
 
 };
 

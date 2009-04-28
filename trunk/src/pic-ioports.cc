@@ -243,7 +243,7 @@ PicPortBRegister::PicPortBRegister(Processor *pCpu, const char *pName, const cha
 				   unsigned int enableMask)
   : PicPortRegister(pCpu, pName, pDesc, numIopins, enableMask),
     m_bRBPU(false),
-    m_bIntEdge(false),
+    m_bIntEdge(true), 
     m_bsRBPU(0),
     m_pIntcon(pIntcon)
 {
@@ -289,7 +289,7 @@ unsigned int PicPortBRegister::get()
 
 void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 {
-  Dprintf(("PicPortBRegister::setbit() bit=%d,val=%c\n",bit_number,new3State));
+  Dprintf(("PicPortBRegister::setbit() bit=%d,val=%c bIntEdge=%d\n",bit_number,new3State, m_bIntEdge));
 
   bool bNewValue = new3State=='1' || new3State=='W';
   if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
