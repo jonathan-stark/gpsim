@@ -411,6 +411,14 @@ OPTION_REG::OPTION_REG(Processor *pCpu, const char *pName, const char *pDesc)
   value = RegisterValue(0,0);  // por_value;
 }
 
+// make sure intial por_value does it's stuff
+void OPTION_REG::initialize()
+{
+    cpu_pic->tmr0.new_prescale();
+    cpu_pic->wdt.set_postscale( (value.get() & PSA) ? (value.get() & ( PS2 | PS1 | PS0 )) : 0);
+    cpu_pic->option_new_bits_6_7(value.get() & (T0CS | BIT6 | BIT7));
+}
+
 void OPTION_REG::put(unsigned int new_value)
 {
 
