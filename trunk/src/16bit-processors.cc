@@ -565,6 +565,26 @@ void _16bit_processor::option_new_bits_6_7(unsigned int bits)
 
 }
 
+//-------------------------------------------------------------------
+void _16bit_processor::enter_sleep()
+{
+    if (verbose)
+	cout << "_16bit_processor::enter_sleep() \n";
+    tmr0l.sleep();
+    pic_processor::enter_sleep();
+}
+
+//-------------------------------------------------------------------
+void _16bit_processor::exit_sleep()
+{
+  if (verbose)
+	cout << "_16bit_processor::exit_sleep() \n";
+  if (m_ActivityState == ePASleeping)
+  {
+      tmr0l.wake();
+      pic_processor::exit_sleep();
+  }
+}
 
 //-------------------------------------------------------------------
 // Fetch the rom contents at a particular address.

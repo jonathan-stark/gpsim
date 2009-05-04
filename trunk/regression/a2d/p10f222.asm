@@ -2,7 +2,7 @@
 	include <p10f222.inc>        ; processor specific variable definitions
  	include <coff.inc>
 
-	__CONFIG   _MCLRE_OFF & _CP_OFF & _WDT_ON & _MCPU_OFF & _IOFSCS_4MHZ
+	__CONFIG   _MCLRE_OFF & _CP_OFF & _WDT_ON & _MCPU_OFF & _IOFSCS_8MHZ
 
   ; The purpose of this test is to check the functioning of the ADC for a P10F222
   ;  1> IO pin control
@@ -43,7 +43,9 @@ MAIN	CODE	  0x000
 
 
 
-	movlw	0x00
+	movlw	0x7f
+	movwf 	  OSCCAL        ; update register with factory cal value
+	movlw	0x81
 	movwf 	  OSCCAL        ; update register with factory cal value
 	bcf	  OSCCAL,0	; Make sure GP2 is not FOSC4
 	GOTO	  START
@@ -52,8 +54,8 @@ MAIN	CODE	  0x000
 
 START
 ;			No wakeup or pullup on pins
-;			clock T0 high to low, and T0 prescale 256
-	MOVLW		1<<NOT_GPWU | 1<<NOT_GPPU | 1<<T0SE | 0x7
+;			clock T0 high to low, and T0 prescale 1
+	MOVLW		1<<NOT_GPWU | 1<<NOT_GPPU | 1<<T0SE |  0x0
 	OPTION				
 
 	CLRF		GPIO	
@@ -127,7 +129,11 @@ START
 ;	A2D should stop in sleep and change adcon0 bits
 	MOVLW		0xcf
 	MOVWF		ADCON0	
-	sleep
+  	MOVF		TMR0,W
+	SLEEP
+	NOP
+  .assert "(tmr0 - W) == 0, \"FAILED 10f222 tmr0 after sleep\""
+	nop
 
   .assert "(adcon0 & 0xcf) == 0xcc, \"FAILED 10f222 adcon0 after sleep\""
 	nop

@@ -104,6 +104,8 @@ public:
 
   virtual unsigned int program_memory_size() const = 0;
   virtual unsigned int get_program_memory_at_address(unsigned int address);
+  virtual void enter_sleep();
+  virtual void exit_sleep();
 
   _14bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_14bit_processor();

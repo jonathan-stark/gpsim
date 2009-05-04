@@ -150,7 +150,7 @@ void TMR0::start(int restart_value, int sync)
 
     future_cycle = fc;
 
-    Dprintf(("last_cycle:0x%llx future_cycle:0xllx\n",last_cycle,future_cycle));
+    Dprintf(("last_cycle:0x%"PRINTF_GINT64_MODIFIER"x future_cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle,future_cycle));
 
   }
 
@@ -172,12 +172,14 @@ void TMR0::clear_trigger()
 
 unsigned int TMR0::get_prescale()
 {
-  Dprintf(("\n"));
+  Dprintf(("OPTION::PSA=%d\n", m_pOptionReg->get_psa()));
 
   //return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
   return (m_pOptionReg->get_psa()  ? 0 : (1+m_pOptionReg->get_prescale()));
 }
 
+// This is used to drive timer ias counter of IO port if T0CS is true
+//
 void TMR0::increment()
 {
   Dprintf(("\n"));
@@ -283,12 +285,12 @@ void TMR0::new_prescale()
 
   old_option ^= option_diff;   // save old option value. ( (a^b) ^b = a)
 
+
   if(option_diff & OPTION_REG::T0CS) {
     // TMR0's clock source has changed.
     if(verbose)
       cout << "T0CS has changed to ";
 
-    //if(cpu_pic->option_reg.get_t0cs()) {
     if(m_pOptionReg->get_t0cs()) {
       // External clock
       if(verbose)
@@ -303,6 +305,7 @@ void TMR0::new_prescale()
       if(verbose)
 	cout << "internal clock\n";
     }
+
     start(value.get());
 
   } else {
@@ -413,7 +416,7 @@ void TMR0::new_clock_source()
 void TMR0::callback()
 {
 
-  Dprintf(("0x%llx\n",cycles.value));
+  Dprintf(("now=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
   if((state & 1) == 0) {
 
@@ -455,4 +458,36 @@ void TMR0::callback_print()
 {
 
   cout << "TMR0\n";
+}
+
+// Suspend TMR0 for sleep
+void TMR0::sleep()
+{
+
+    if(verbose)
+	printf("TMR0::sleep state=%d\n", state);
+
+    if((state & RUNNING))
+    {
+	stop();
+	state = SLEEPING;
+    }
+}
+// wake up TMR0 when sleep command terminates
+void TMR0::wake()
+{
+    if(verbose)
+	printf("TMR0::wake state=%d\n", state);
+
+    if ((state & SLEEPING))
+    {
+	if (! (state & RUNNING))
+        {
+	    state = STOPPED;
+	    start(value.get(), 0);
+	}
+	else
+	    state &= ~SLEEPING;
+	
+    }
 }

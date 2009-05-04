@@ -69,7 +69,14 @@ public:
   virtual void set_cpu(Processor *, PortRegister *, unsigned int pin,OPTION_REG *);
   virtual void set_cpu(Processor *new_cpu, PinModule *pin,OPTION_REG *);
   virtual void setSinkState(char);
+  virtual void sleep();
+  virtual void wake();
 
+  enum {
+	STOPPED = 0,
+	RUNNING = 1,
+	SLEEPING = 2
+  };
 private:
   bool m_bLastClockedState;
 };

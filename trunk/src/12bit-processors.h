@@ -116,6 +116,8 @@ enum _12BIT_DEFINITIONS
 
   virtual unsigned int config_word_address() const {return 0xfff;};
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual void enter_sleep();
+  virtual void exit_sleep();
 
   _12bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_12bit_processor();

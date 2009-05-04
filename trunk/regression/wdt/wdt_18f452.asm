@@ -52,9 +52,14 @@ include <coff.inc>
 
 ;
 ;	During sleep, іf the WDT goes off, PC = PC + 2 
+        bcf	T0CON,5	; set tmr0 as timer
+	movf	TMR0L,W
 	sleep
+	
 	nop
   .assert "(rcon & 0x0c) == 0x00,\"*** FAILED p18f452 status after sleep\""
+	nop
+  .assert "(tmr0l - W) == 0x3,\"*** FAILED p18f452 TMR0 stops during sleep\""
 	nop
 
 
