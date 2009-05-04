@@ -887,6 +887,15 @@ void T0CON::put(unsigned int new_value)
 }
 
 //--------------------------------------------------
+void T0CON::initialize()
+{
+//    cpu16->tmr0l.new_prescale();
+    cpu16->wdt.set_postscale( (value.get() & PSA) ? (value.get() & ( PS2 | PS1 | PS0 )) : 0);
+    cpu16->option_new_bits_6_7(value.get() & (T0CS | BIT6 | BIT7));
+
+}
+
+//--------------------------------------------------
 
 TMR0H::TMR0H(Processor *pCpu, const char *pName, const char *pDesc)
   :sfr_register(pCpu,pName,pDesc)
@@ -1097,6 +1106,36 @@ void TMR0_16::callback()
 void TMR0_16::callback_print()
 {
   cout << "TMR0_16 " << name() << " CallBack ID " << CallBackID << '\n';
+}
+
+void TMR0_16::sleep()
+{
+   if (verbose)
+	cout << "TMR0_16::sleep state=" << state << "\n";
+
+    if((state & RUNNING))
+    {
+        TMR0::stop();
+        state = SLEEPING;
+    }
+
+}
+void TMR0_16::wake()
+{
+    if (verbose)
+	cout << "TMR0_16::wake state=" << state << "\n";
+
+    if ((state & SLEEPING))
+    {
+        if (! (state & RUNNING))
+        {
+            state = STOPPED;
+            start(value.get(), 0);
+        }
+        else
+            state &= ~SLEEPING;
+    }
+
 }
 
 //--------------------------------------------------

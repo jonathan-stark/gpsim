@@ -1,3 +1,16 @@
+2009-05-04 Roy Rankin <rrankin@ihug.com.au>
+	* src/16bit-registers.h  src/16bit-registers.cc  
+	  src/16bit-processors.cc  src/tmr0.cc  src/tmr0.h  
+	  src/p12x.cc  src/pic-registers.cc  src/12bit-processors.cc
+	  src/12bit-processors.h src/14bit-processors.cc
+	  src/14bit-processors.h src/16bit-processors.h 
+	  regression/tmr0_16bit/tmr0_16bit.asm regression/wdt/wdt_18f452.asm
+	  regression/p16f84/reset.asm regression/a2d/p10f222.asm:
+	- TMR0 stops during sleep - bug #502665
+	* regression/a2d/p16f871.asm regression/a2d/p16f873a.asm
+	  regression/a2d/p16f874a.asm:
+	- bad register name in assert
+
 2009-04-28 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-registers.cc : backout part of last change which causes
 	sigsegv

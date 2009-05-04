@@ -40,6 +40,7 @@ countHi		RES	1
   GLOBAL tmr0Lo, tmr0Hi
   GLOBAL psa,b16bitMode
   GLOBAL done
+  GLOBAL TMR0_RollOver
   GLOBAL countLo, countHi
 
 
@@ -346,6 +347,16 @@ TMR0_WaitForInt:
 	btfss	psa,3
 	 bra	L1_InterruptTest
 
+	nop
+
+;
+; TMR0 should not interrupt during sleep as it is turned off
+; The WDT cancels the sleep
+;
+	clrf	TMR0_RollOver
+	sleep
+	nop
+  .assert "TMR0_RollOver == 0, \"*** FAILED 16bit-core TMR0 test- TMR0 interrupt in sleep\""
 	nop
 
 ;------------------------------------------------------------

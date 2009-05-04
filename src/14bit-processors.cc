@@ -203,6 +203,23 @@ bool _14bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
 
 }
 
+//-------------------------------------------------------------------
+void _14bit_processor::enter_sleep()
+{
+    tmr0.sleep();
+    pic_processor::enter_sleep();
+}
+
+ //-------------------------------------------------------------------
+void _14bit_processor::exit_sleep()
+{
+  if (m_ActivityState == ePASleeping)
+  {
+    tmr0.wake();
+    pic_processor::exit_sleep();
+  }
+
+}
 #if 0
 //-------------------------------------------------------------------
 class PortBSink;

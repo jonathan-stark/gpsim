@@ -245,3 +245,20 @@ void _12bit_processor::dump_registers ()
 
 }
 
+//-------------------------------------------------------------------
+void _12bit_processor::enter_sleep()
+{
+    tmr0.sleep();
+    pic_processor::enter_sleep();
+}
+
+ //-------------------------------------------------------------------
+void _12bit_processor::exit_sleep()
+{
+  if (m_ActivityState == ePASleeping)
+  {
+    tmr0.wake();
+    pic_processor::exit_sleep();
+  }
+
+}

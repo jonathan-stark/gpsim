@@ -113,7 +113,7 @@ start:
 	
 	call	Convert
 
-  .assert "adresh == 0xff, \"FAILED 16F874a initial test\""
+  .assert "adres == 0xff, \"FAILED 16F874a initial test\""
 	nop
 
 	;; The next test consists of misusing the A/D converter.
@@ -145,7 +145,7 @@ start:
 	
 	call	Convert
 
-  .assert "adresh == 0x00, \"FAILED 16F874a digital low\""
+  .assert "adres == 0x00, \"FAILED 16F874a digital low\""
 	nop
 	;;
 	;; Now do some with the digital output high
@@ -156,7 +156,7 @@ start:
 	
 	call	Convert
 
-  .assert "adresh == 0xff, \"FAILED 16F874a digital high\""
+  .assert "adres == 0xff, \"FAILED 16F874a digital high\""
 	nop
 	;;
 	;; Now make the inputs analog (like they normally would be)
@@ -171,13 +171,13 @@ start:
 
 	call	Convert
 
-  .assert "adresh == 0xff, \"FAILED 16F874a AN0=5V\""
+  .assert "adres == 0xff, \"FAILED 16F874a AN0=5V\""
 	nop
 
   .command "V1.voltage=1.0"
 
 	call	Convert
-  .assert "adresh == 0x33, \"FAILED 16F874a AN0=1V\""
+  .assert "adres == 0x33, \"FAILED 16F874a AN0=1V\""
 	nop
 
 	;;
@@ -193,7 +193,7 @@ start:
 
 	call	Convert
 
-  .assert "adresh == 0x80, \"FAILED 16F874a AN0=1V Vref+=2V\""
+  .assert "adres == 0x80, \"FAILED 16F874a AN0=1V Vref+=2V\""
 	nop
   .assert  "\"*** PASSED 16F874a a2d test\""
 	

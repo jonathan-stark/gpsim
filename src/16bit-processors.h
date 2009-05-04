@@ -181,6 +181,8 @@ public:
   virtual unsigned int get_config_word(unsigned int address);
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual unsigned int configMemorySize() { return CONFIG7H-CONFIG1L+1; }
+  virtual void enter_sleep();
+  virtual void exit_sleep();
 
 
   static pic_processor *construct();

@@ -415,6 +415,7 @@ public:
 
   T0CON(Processor *, const char *pName, const char *pDesc=0);
   void put(unsigned int new_value);
+  void initialize();
 };
 
 //---------------------------------------------------------
@@ -463,6 +464,8 @@ public:
   virtual bool get_t0cs();
   virtual void initialize();
   virtual void start(int new_value,int sync=0);
+  virtual void sleep();
+  virtual void wake();
 };
 
 

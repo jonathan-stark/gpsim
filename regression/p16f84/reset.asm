@@ -97,9 +97,9 @@ START  CODE    0x000                    ;
 
 
 RESET_VECTOR  CODE    0x000              ; processor reset vector
-  .assert "option==0xff"
-  .assert "(trisa&0x1f)==0x1f"
-  .assert "(trisb&0xff)==0xff"
+  .assert "option_reg==0xff,\"*** FAILED 16f84 reset bad OPTION_REG\""
+  .assert "(trisa&0x1f)==0x1f, \"*** FAILED 16f84 reset bad TRISA\""
+  .assert "(trisb&0xff)==0xff, \"*** FAILED 16f84 reset bad TRISB\""
 
 
         movlw  high  start               ; load upper byte of 'start' label
@@ -170,6 +170,7 @@ start
 
    ; OPTION register setup
 
+	BANKSEL	OPTION_REG
         MOVF    optionShadow,W  ;optionShadow is initialized by the gpsim script
         MOVWF   OPTION_REG
 
@@ -239,6 +240,7 @@ PowerOnReset:
 
    ; The WDT should cause a reset. So we shouldn't fall through
    ; (note, the instruction after the SLEEP should not be executed).
+   ; RRR WDT will not cause a reset but will fall through
         
         nop
 ;RRR  .command "resetCounter = resetCounter+1"
@@ -282,10 +284,12 @@ WDTTimeOut:
         MOVLW   1<<RBIE
         MOVWF   INTCON
 
+	MOVF	TMR0,W
 	SLEEP
 
         nop    ; the processor should idle at this instruction.
   .command "resetCounter = resetCounter+1"
+  .assert "(tmr0 - W) == 2, \"*** FAILED 16f84 reset - TMR0 stops during sleep\""
         nop
 
 ;========================================================================

@@ -1280,7 +1280,7 @@ void P10F220::enter_sleep()
 {
   unsigned int val;
 
-  pic_processor::enter_sleep();
+  _12bit_processor::enter_sleep();
 
   status->put( status->get() & ~STATUS_GPWUF);
   val = (adcon0.get() & ~(ADCON0_10::ADON|ADCON0_10::GO)) 
@@ -1289,7 +1289,9 @@ void P10F220::enter_sleep()
 }
 void P10F220::exit_sleep()
 {
-  pic_processor::exit_sleep();
+
+  _12bit_processor::exit_sleep();
+  
   adcon0.put(adcon0.get() | ADCON0_10::ANS1 | ADCON0_10::ANS0);
 }
 void  P10F220::setConfigWord(unsigned int val, unsigned int diff)

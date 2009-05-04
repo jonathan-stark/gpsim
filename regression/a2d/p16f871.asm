@@ -117,7 +117,7 @@ start:
 	
 	call	Convert
 
-  .assert "adresh == 0xff, \"Failed 16F871 initial test\""
+  .assert "adres == 0xff, \"Failed 16F871 initial test\""
 	nop
 
 	;; The next test consists of misusing the A/D converter.
@@ -148,7 +148,7 @@ start:
 	
 	call	Convert
 
-  .assert "adresh == 0x00, \"Failed 16F871 Digital low\""
+  .assert "adres == 0x00, \"Failed 16F871 Digital low\""
 	nop
 
 	;;
@@ -160,7 +160,7 @@ start:
 	
 	call	Convert
 
-  .assert "adresh == 0xff, \"Failed 16F871 Digital high\""
+  .assert "adres == 0xff, \"Failed 16F871 Digital high\""
 	nop
 	;;
 	;; Now make the inputs analog (like they normally would be)
@@ -175,7 +175,7 @@ start:
 
 	call	Convert
 
-  .assert "adresh == 0xff, \"Failed 16F871 AN0=5V\""
+  .assert "adres == 0xff, \"Failed 16F871 AN0=5V\""
 	nop
 
 
@@ -183,7 +183,7 @@ start:
 
 	call	Convert
 
-  .assert "adresh == 0x33, \"Failed 16F871 AN0=1V\""
+  .assert "adres == 0x33, \"Failed 16F871 AN0=1V\""
 	nop
 	;;
 	;; Now let's use the external analog signal connected to AN3
@@ -197,7 +197,7 @@ start:
   .command "V2.voltage=2.0"
 
 	call	Convert
-  .assert "adresh == 0x80, \"Failed 16F871 AN0=1V Vref+=2V\""
+  .assert "adres == 0x80, \"Failed 16F871 AN0=1V Vref+=2V\""
 	nop
 
   .assert  "\"*** PASSED 16F871 a2d test\""
