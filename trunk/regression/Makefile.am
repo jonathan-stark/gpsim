@@ -78,7 +78,7 @@ EXTRA_DIST = \
 	wdt/wdt_16c64.asm wdt/nwdt_18f452.asm wdt/16f628.lkr \
 	wdt/wdt_16f628.asm 
 
-MOSTLYCLEANFILES = */*.hex */*.cod */*.lst */*.log */*.map */*~ 
-CLEANFILES = */*.hex */*.cod */*.lst */*.log */*.map */*~ 
-DISTCLEANFILES = */*.hex */*.cod */*.lst */*.log */*.map */*~ 
-MAINTAINERCLEANFILES = */*.hex */*.cod */*.lst */*.log */*.map */*~ 
+MOSTLYCLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 
+CLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 
+DISTCLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 
+MAINTAINERCLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 
