@@ -168,7 +168,6 @@ void cmd_processor::processor(int bit_flag)
 void cmd_processor::processor(const char * processor_type,
                               const char * processor_new_name)
 {
-  printf("RRR cmd_processor::processor %s %s\n", processor_type, processor_new_name);
   if(!CSimulationContext::GetContext()->SetDefaultProcessor( processor_type,
     processor_new_name))
     cout << "Unable to find processor\n";

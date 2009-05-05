@@ -354,14 +354,12 @@ main (int argc, char *argv[])
     parse_string(command_str);
 
   } else  if(*processor_name) {
-    snprintf(command_str, sizeof(command_str),
-             "processor \"%s\"\n",processor_name);
-    parse_string(command_str);
 
     if(*hex_name){
       snprintf(command_str, sizeof(command_str),
-        "load h \"%s\"\n",hex_name);
+        "load \%s \"%s\"\n",processor_name, hex_name);
       parse_string(command_str);
+
     }
   }
   if(*icd_port) {
@@ -379,6 +377,13 @@ main (int argc, char *argv[])
   if(*include_startup_name) {
       snprintf(command_str, sizeof(command_str),
                "load i \"%s\"\n",include_startup_name);
+      parse_string(command_str);
+  }
+  // otherwise see if load will work
+  if (argc == 2)
+  {
+      snprintf(command_str, sizeof(command_str),
+               "load  \"%s\"\n",argv[1]);
       parse_string(command_str);
   }
 
