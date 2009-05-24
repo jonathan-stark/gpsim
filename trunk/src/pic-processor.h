@@ -59,6 +59,8 @@ enum PROCESSOR_TYPE
   _P12F508_,
   _P12F509_,
   _P12F510_,
+  _P12F629_,
+  _P12F675_,
   _P16C84_,
   _P16CR83_,
   _P16CR84_,

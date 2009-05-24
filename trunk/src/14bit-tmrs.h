@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2009 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -168,7 +169,8 @@ enum
   T1OSCEN = 1<<3,
   T1CKPS0 = 1<<4,
   T1CKPS1 = 1<<5,
-  T1RD16  = 1<<6
+  T1RD16  = 1<<6,
+  TMR1GE  = 1<<6	// TMR1 Gate Enable used if TMR1L::setGatepin() has been called
 };
 
   TMRL  *tmrl;
@@ -198,6 +200,14 @@ enum
   unsigned int get_t1oscen()
     {
       return(value.get() & T1OSCEN);
+    }
+  unsigned int get_tmr1GE()
+    {
+      return(value.get() & TMR1GE);
+    }
+  unsigned int get_t1sync()
+    {
+      return(value.get() & T1SYNC);
     }
   virtual void put(unsigned int new_value);
 
@@ -265,12 +275,18 @@ public:
   virtual void clear_timer();
   virtual void setSinkState(char);
   virtual void setIOpin(PinModule *);
+  virtual void setGatepin(PinModule *);
+  virtual void new_gate_edge(bool);
   virtual void setInterruptSource(InterruptSource *);
+  virtual void sleep();
+  virtual void wake();
 protected:
   virtual void increment();   // Used when TMR1 is attached to an external clock
 private:
   char m_cState;
+  bool m_GateState;		// Only changes state if setGatepin() has been called
   bool m_bExtClkEnabled;
+  bool m_sleeping;
   InterruptSource *m_Interrupt;
 };
 

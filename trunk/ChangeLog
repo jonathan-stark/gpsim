@@ -1,3 +1,23 @@
+2009-R2405-05 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p12f675/12f675.lkr regression/p12f675/p12f675.asm
+	  regression/p12f675/Makefile regression/Makefile.am src/Makefile.am
+	  regression/run_regression.sh src/p12f6xx.cc src/p12f6xx.h
+	  src/pic-processor.h src/pic-processor.cc : 
+	- Add 12f675 and 12f629 processors and regression tests
+	* src/14bit-tmrs.cc src/14bit-tmrs.h : hooks to handle stop/start of
+	- TMR1 for sleep, support for TMR1 Gate Enable
+	* src/comparator.cc : fixes to allow single comparator
+	* src/14bit-registers.cc src/14bit-registers.h : Add OSCCAL class
+	- (OSCillator CALibration) , IOC class (Interrupt On Change) and WPU
+	- class (Weak Pull Up) used in P12f629/675
+	* src/a2dconverter.cc src/a2dconverter.h : Add ADCON0_12F and
+	- ANSEL_12F classes to support ADC for p12f675
+	* src/pic-ioports.cc src/pic-ioports.h : Add PicPortGRegister port
+	- class which support IOC (Interrupt On Change) register
+	* src/14bit-processors.cc src/14bit-processors.h : handle MCLR pin 
+	-  action, remove dead code
+	* src/p16f8x.cc : fix POR value for register ANSEL
+
 2009-05-05 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_processor.cc: revert as fix not in this file
 	* gpsim/main.cc: fix "gpsim -p processor file.hex" bug # 1629719

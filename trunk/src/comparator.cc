@@ -157,11 +157,13 @@ CMCON::~CMCON()
 }
 void CMCON::setINpin(int i, PinModule *newPinModule)
 {
+    if (newPinModule == NULL) return;
     cm_input[i] = newPinModule;
     cm_input_pin[i] = strdup(newPinModule->getPin().name().c_str());
 }
 void CMCON::setOUTpin(int i, PinModule *newPinModule)
 {
+    if (newPinModule == NULL) return;
     cm_output[i] = newPinModule;
     cm_output_pin[i] = strdup(newPinModule->getPin().name().c_str());
 }
@@ -292,7 +294,7 @@ void CMCON::put(unsigned int new_value)
   //
   // setup outputs
   //
-  for( i = 0; i < 2; i++)
+  for( i = 0; i < 2 && cm_output[i]; i++)
   {
       if (out_mask & (1<<i))
       {
@@ -307,7 +309,7 @@ void CMCON::put(unsigned int new_value)
   }
   //
   // setup inputs
-  for(i = 0; i < 4; i++)
+  for(i = 0; i < 4 && cm_input[i]; i++)
   {
         const char *name = cm_input[i]->getPin().GUIname().c_str();
 
@@ -337,9 +339,11 @@ void CMCON::put(unsigned int new_value)
 
    }
 
+  // if only one comparator,  mask C2INV
+  if (!cm_output[1]) new_value &= 0x1f;
   value.put(new_value);
   if (verbose)
-      cout << "CMCON_1::put() val=0x" << hex << new_value <<endl;
+      cout << "CMCON::put() val=0x" << hex << new_value <<endl;
   get();        // update comparator values
 
 }
@@ -361,6 +365,7 @@ VRCON::~VRCON()
 
 void VRCON::setIOpin(PinModule *newPinModule)
 {
+    if (newPinModule == NULL) return;
     vr_PinModule = newPinModule;
     pin_name = strdup(newPinModule->getPin().name().c_str());
 }
@@ -379,6 +384,8 @@ void VRCON::put(unsigned int new_value)
   if (!diff)
         return;
 
+  // if no PinModule clear VROE bit
+  if (!vr_PinModule) new_value &= 0xaf;
   value.put(new_value);
   if (new_value & VREN)         // Vreference enable set
   {
@@ -416,7 +423,7 @@ void VRCON::put(unsigned int new_value)
                 vr_PinModule->getPin().snode->update();
             }
         }
-        else    // not outputing voltage to pin
+        else if (vr_PinModule)    // not outputing voltage to pin
         {
             if (!strcmp("Vref", vr_PinModule->getPin().name().c_str()))
                 vr_PinModule->getPin().newGUIname(pin_name);

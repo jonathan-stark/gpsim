@@ -76,7 +76,7 @@ EXTRA_DIST = \
 	wdt/18f452.lkr wdt/nwdt_16f628.asm wdt/nwdt_16c64.asm \
 	wdt/wdt_18f452.asm wdt/wdt_16f88.asm wdt/nwdt_16f88.asm wdt/16c64.lkr \
 	wdt/wdt_16c64.asm wdt/nwdt_18f452.asm wdt/16f628.lkr \
-	wdt/wdt_16f628.asm 
+	wdt/wdt_16f628.asm p12f675/Makefile p12f675/12f675.lkr p12f675/p12f675.asm
 
 MOSTLYCLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 
 CLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 

@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006 Roy R Rankin
+   Copyright (C) 2006,2009 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -596,7 +596,7 @@ void T1CON::put(unsigned int new_value)
 
   if( diff & TMR1ON)
     tmrl->on_or_off(value.get() & TMR1ON);
-  else  if( diff & (T1CKPS0 | T1CKPS1))
+  else  if( diff & (T1CKPS0 | T1CKPS1 | TMR1GE))
     tmrl->update();
 
 }
@@ -679,11 +679,35 @@ unsigned int TMRH::get_value()
 
 
 //--------------------------------------------------
+//
+//--------------------------------------------------
+
+class TMRl_GateSignalSink : public SignalSink
+{
+public:
+  TMRl_GateSignalSink(TMRL *_tmr1l)
+    : m_tmr1l(_tmr1l)
+  {
+    assert(_tmr1l);
+  }
+
+  void release() 
+  {
+    delete this;
+  }
+  void setSinkState(char new3State)
+  {
+    m_tmr1l->new_gate_edge( new3State=='1' || new3State=='W');
+  }
+private:
+  TMRL *m_tmr1l;
+};
+//--------------------------------------------------
 // member functions for the TMRL base class
 //--------------------------------------------------
 TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    m_cState('?'), m_bExtClkEnabled(false), m_Interrupt(0)
+    m_cState('?'), m_GateState(false), m_bExtClkEnabled(false), m_sleeping(false), m_Interrupt(0)
 {
 
   value.put(0);
@@ -742,6 +766,7 @@ void TMRL::setIOpin(PinModule *extClkSource)
     extClkSource->addSink(this);
 }
 
+
 void TMRL::setSinkState(char new3State)
 {
   if (new3State != m_cState) {
@@ -749,6 +774,30 @@ void TMRL::setSinkState(char new3State)
 
     if (m_bExtClkEnabled && (m_cState == '1' || m_cState == 'W'))
       increment();
+  }
+}
+
+
+void TMRL::setGatepin(PinModule *extGateSource)
+{
+  Dprintf(("TMRL::setGatepin\n"));
+
+  if (extGateSource)
+    extGateSource->addSink(new TMRl_GateSignalSink(this));
+}
+
+void TMRL::new_gate_edge(bool state)
+{
+  if (m_GateState != state)
+  {
+    m_GateState = state;
+    
+    Dprintf(("TMRL::new_gate_edge state %d \n", state));
+
+    if (t1con->get_tmr1GE())
+    {
+	update();
+    }
   }
 }
 
@@ -771,6 +820,10 @@ void TMRL::increment()
 
   if(--prescale_counter == 0) {
     prescale_counter = prescale;
+
+  // In synchronous counter mode prescaler works but rest of tmr1 does not
+  if (t1con->get_t1sync() == 0 && m_sleeping)
+    return;
 
     // If TMRH/TMRL have been manually changed, we'll want to 
     // get the up-to-date values;
@@ -835,7 +888,11 @@ void TMRL::update()
 
   Dprintf(("TMR1 update 0x%llx\n",get_cycles().get()));
 
-  if(t1con->get_tmr1on()) {
+  // The second part of the if will always be true unless TMR1 Gate enable
+  // pin has been defined by a call to TMRL::setGatepin()
+  //
+  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? !m_GateState : true)) {
+
 
     if(t1con->get_tmr1cs() && t1con->get_t1oscen()) {
 
@@ -909,6 +966,13 @@ void TMRL::update()
     }
   else
     {
+      // turn off the timer and save the current value
+      if (future_cycle)
+      {
+        current_value();
+        get_cycles().clear_break(this);
+	future_cycle = 0;
+      } 
       //cout << "TMR1: not running\n";
     }
 }
@@ -1118,6 +1182,36 @@ void TMRL::callback_print()
 
 }
 
+
+//---------------------------
+
+void TMRL::sleep()
+{
+    m_sleeping = true;
+    Dprintf(("TMRL::sleep t1sysc %d\n", t1con->get_t1sync()));
+    // If tmr1 is running off Fosc/4 this assumes Fosc stops during sleep
+    if (  t1con->get_tmr1on() && t1con->get_tmr1cs() == 0)
+    {
+      if (future_cycle)
+      {
+        current_value();
+        get_cycles().clear_break(this);
+	future_cycle = 0;
+      } 
+    }
+}
+
+//---------------------------
+
+void TMRL::wake()
+{
+    m_sleeping = false;
+    Dprintf(("TMRL::wake\n"));
+    if (  t1con->get_tmr1on() && t1con->get_tmr1cs() == 0)
+    {
+	update();
+    }
+}
 
 //--------------------------------------------------
 // member functions for the PR2 base class

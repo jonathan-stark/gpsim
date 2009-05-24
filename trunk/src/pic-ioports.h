@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2009 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -61,6 +62,8 @@ protected:
 };
 
 class INTCON;
+//  PicPortBRegister is usually used for portb and interrupts on selected edge
+//  of bit 0 and sleep wakeup and interrupt on level changes for bits 4-7. 
 class PicPortBRegister : public PicPortRegister
 {
 public:
@@ -87,6 +90,34 @@ private:
   INTCON  *m_pIntcon;
 };
 
+class IOC;
+//	Like PicPortBRegister, PicPortGRegister allows wakeup from sleep
+//	and interrupt on pin level change. However, PicPortGRegister
+//	uses IOC to determine which of any of the bits will do this.
+//	Note: as GPIF,GPIE are the same bits as RBIF,RBIE in INTCON we can
+//	use the existing set_rbif function to set the GPIF bit.
+//
+class PicPortGRegister : public PicPortBRegister
+{
+ 
+public:
+  INTCON *m_pIntcon;
+  IOC	*m_pIoc;
+
+  PicPortGRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                   INTCON *pIntcon, IOC *pIoc,
+                   unsigned int numIopins, unsigned int enableMask=0x3f)
+	: PicPortBRegister(pCpu, pName, pDesc, pIntcon, numIopins, enableMask),
+	m_pIntcon(pIntcon), m_pIoc(pIoc)
+  {
+  }
+
+  virtual void setbit(unsigned int bit_number, char new3State);
+  void setIntEdge(bool);
+
+private:
+  bool m_bIntEdge;
+};
 class PSP;
 
 class PicPSP_PortRegister : public PortRegister

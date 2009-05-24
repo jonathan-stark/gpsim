@@ -1,5 +1,7 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2009 Roy R. Rankin
+
 
 This file is part of gpsim.
 
@@ -96,7 +98,8 @@ public:
 
 //-------------------------------------------------------------------
 _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
-  : pic_processor(_name,_desc), intcon(0)
+  : pic_processor(_name,_desc), intcon(0),
+    m_MCLR(0), m_MCLRMonitor(0)
 {
   pc = new Program_Counter("pc", "Program Counter", this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
@@ -220,75 +223,11 @@ void _14bit_processor::exit_sleep()
   }
 
 }
-#if 0
-//-------------------------------------------------------------------
-class PortBSink;
-
-class PortBIntEdgeSink :: public SignalSink
-{
-public:
-  PortBIntEdgeSink(PortBSink *, unsigned int iobit);
-  virtual void setSinkState(bool);
-private:
-  PortBSink    *m_PortBSink;
-  unsigned int  m_bitMask;
-};
-class PortBSink
-{
-public:
-  PortBSink(PortRegister *portReg);
-  void setSink(unsigned int, bool);
-  void setPullups(bool);
-private:
-  PortRegister *m_port;
-  bool m_bPullupState;
-};
-
-//------------------------------------------------------------------------
-PortBIntEdgeSink::PortBIntEdgeSink(PortBSink *_PortBSink, unsigned int iobit)
-  : m_PortBSink(_PortBSink), m_bitMask(1<<iobit)
-{
-}
-
-void PortBIntEdgeSink::setSinkState(bool bMewState)
-{
-  m_PortBSink->setSink(m_bitBask, bNewState);
-}
-
-//------------------------------------------------------------------------
-PortBSink::PortBSink(PicPortRegister *portReg)
-  : m_port(portReg),
-    m_bPullupState(false)
-{
-  assert (portReg);
-
-  portReg->addSink(new PortBIntEdgeSink(this, 0), 0);
-
-  unsigned int mask = portReg->getEnableMask();
-  for (unsigned int i=0, m=1; mask; i++, m<<= 1)
-    if (mask & m) {
-      mask ^= m;
-      portReg->addSink(new PortBPinSink(this, i), i);
-    }
-
-}
-
-void PortBSink::setPullups(bool new_pullupState)
-{
-  unsigned int mask = portReg->getEnableMask();
-  for (unsigned int i=0, m=1; mask; i++, m<<= 1)
-    if (mask & m) {
-      mask ^= m;
-      (*portReg)[i].update_pullup(new_pullupState);
-    }
-}
-#endif
 
 //-------------------------------------------------------------------
 Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
   : _14bit_processor(_name,_desc),
-    intcon_reg(this,"intcon","Interrupt Control"),
-    m_MCLR(0), m_MCLRMonitor(0)
+    intcon_reg(this,"intcon","Interrupt Control")
 {
   m_porta = new PicPortRegister(this,"porta","", 8,0x1f);
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
@@ -402,7 +341,7 @@ void MCLRPinMonitor::setDrivenState(char newState)
 
 }
 //-------------------------------------------------------------------
-void Pic14Bit::createMCLRPin(int pkgPinNumber)
+void _14bit_processor::createMCLRPin(int pkgPinNumber)
 {
   if (m_MCLR) {
     cout << "BUG?: assigning multiple MCLR pins: " << __FILE__ << __LINE__ << endl;
@@ -414,4 +353,38 @@ void Pic14Bit::createMCLRPin(int pkgPinNumber)
     m_MCLRMonitor = new MCLRPinMonitor(this);
     m_MCLR->setMonitor(m_MCLRMonitor);
   }
+}
+//-------------------------------------------------------------------
+// This function is called instead of createMCLRPin where the pin
+// is already defined, but the configuration word has set the function
+// to MCLR
+
+
+void _14bit_processor::assignMCLRPin(int pkgPinNumber)
+{
+  if (m_MCLR) {
+    cout << "BUG?: assigning multiple MCLR pins: " << __FILE__ << __LINE__ << endl;
+  }
+  if(package) {
+    m_MCLR = package->get_pin(pkgPinNumber);
+    m_mclr_pin_name = package->get_pin_name(pkgPinNumber);
+    m_MCLR->newGUIname("MCLR");
+    cout << "_14bit_processor::assignMCLRPin " << m_mclr_pin_name
+	<< "\n";
+
+    if(!m_MCLRMonitor)
+      m_MCLRMonitor = new MCLRPinMonitor(this);
+    m_MCLR->setMonitor(m_MCLRMonitor);
+  }
+}
+//-------------------------------------------------------------------
+// This function sets the pin currently set as MCLR back to its original function
+void _14bit_processor::unassignMCLRPin()
+{
+    if(m_MCLR)
+    {
+	m_MCLR->newGUIname(m_mclr_pin_name.c_str());
+	m_MCLR->setMonitor(0);
+        m_MCLR = NULL;
+    }
 }

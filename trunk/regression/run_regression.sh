@@ -16,7 +16,7 @@ node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_
 interrupts_14bit macro_test logic_test resistor usart_test txisr_test 
 tmr0_16bit tmr1_16bit 
 switch_test p18f comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
-p12c509 wdt'
+p12c509 wdt p12f675'
 
         echo ${DIRS}
         for i in ${DIRS} ; do
@@ -163,6 +163,8 @@ ${RT} i2c sim_p16f819
 ${RT} i2c sim_p16f876a
 
 ${RT} port_stim sim_port_stim
+
+${RT} p12f675	sim
 
 echo "The following tests only pass if CLOCK_EXPERIMENTS"
 echo "(in src/clock_phase.cc) is defined."
