@@ -1,5 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
+   Copyright (C) 2009 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -151,12 +152,8 @@ void ADCON0::stop_conversion(void)
 }
 
 
-
-void ADCON0::put(unsigned int new_value)
+void ADCON0::set_Tad(unsigned int new_value)
 {
-
-  trace.raw(write_trace.get() | value.get());
-
   // Get the A/D Conversion Clock Select bits
   // 
   // This switch case will get the ADCS bits and set the Tad, or The A/D
@@ -190,6 +187,14 @@ void ADCON0::put(unsigned int new_value)
       break;
 
     }
+}
+
+void ADCON0::put(unsigned int new_value)
+{
+
+  trace.raw(write_trace.get() | value.get());
+
+  set_Tad(new_value);
     
   unsigned int old_value=value.get();
   // SET: Reflect it first!
@@ -230,7 +235,7 @@ void ADCON0::put_conversion(void)
 
   if(adresl) {   // non-null for more than 8 bit conversion
 
-    if(adcon1->value.get() & ADCON1::ADFM) {
+    if(get_ADFM()) {
       adresl->put(converted & 0xff);
       adres->put( (converted >> 8) & 0x3);
     } else {
@@ -268,9 +273,9 @@ void ADCON0::callback(void)
     case AD_ACQUIRING:
       channel = (value.get() >> channel_shift) & channel_mask;
 
-      m_dSampledVoltage = adcon1->getChannelVoltage(channel);
-      m_dSampledVrefHi  = adcon1->getVrefHi();
-      m_dSampledVrefLo  = adcon1->getVrefLo();
+      m_dSampledVoltage = getChannelVoltage(channel);
+      m_dSampledVrefHi  = getVrefHi();
+      m_dSampledVrefLo  = getVrefLo();
 
       Dprintf(("Acquiring channel:%d V=%g reflo=%g refhi=%g\n",
 	       channel,m_dSampledVoltage,m_dSampledVrefLo,m_dSampledVrefHi));
@@ -362,6 +367,7 @@ unsigned int ADCON1::getVrefLoChannel(unsigned int cfg)
 }
 unsigned int ADCON1::getVrefHiChannel(unsigned int cfg)
 {
+  Dprintf(("ADCON1::getVrefHiChannel cfg=%d %d\n", cfg, Vrefhi_position[cfg]));
   if (cfg < cMaxConfigurations)
     return(Vrefhi_position[cfg]);
   return(0xffff);
@@ -405,6 +411,7 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
 
   for (unsigned int i=0; i<nChannels; i++)
   {
+    m_voltageRef[i] = -1.0;
     if(i < m_nAnalogChannels)
     {
         if (save)
@@ -481,12 +488,15 @@ double ADCON1::getChannelVoltage(unsigned int channel)
     }
     else	// use voltage reference
     {
+	Dprintf(("ADCON1::getChannelVoltage channel=%d voltage %f\n", \
+		channel, m_voltageRef[channel]));
 	voltage = m_voltageRef[channel];
-/*
-	cout << "ADCON1::getChannelVoltage channel " << channel <<
+	if (voltage < 0.0)
+	{
+	    cout << "ADCON1::getChannelVoltage channel " << channel <<
                 " not a configured input\n";
-	cout << "Please raise a Gpsim bug report\n";
-*/
+	    voltage = 0.0;
+	}
     }
   }
   else
@@ -568,7 +578,7 @@ void ANSEL::put(unsigned int new_value)
 
 
 //------------------------------------------------------
-// ADCON0
+// ADCON0_10
 //
 ADCON0_10::ADCON0_10(Processor *pCpu, const char *pName, const char *pDesc)
   : ADCON0(pCpu, pName, pDesc)
@@ -618,4 +628,115 @@ void ADCON0_10::put(unsigned int new_value)
   } else
     stop_conversion();
 
+}
+//------------------------------------------------------
+// ADCON0_12F used in 12f675. Uses ADCON1 as virtual rather than physical
+// register
+//
+ADCON0_12F::ADCON0_12F(Processor *pCpu, const char *pName, const char *pDesc)
+  : ADCON0(pCpu, pName, pDesc)
+{
+  GO_bit = GO;	//ADCON0 and ADCON0_10 have GO flag at different bit
+}
+
+
+
+void ADCON0_12F::put(unsigned int new_value)
+{
+  unsigned int old_value=value.get();
+  new_value &= 0xcf;	// clear unused bits
+ /* On first call of this function old_value has already been set to
+ *  it's default value, but we want to call set_channel_in. First 
+ *  gives us a way to do this.
+ */
+
+  trace.raw(write_trace.get() | value.get());
+
+  Dprintf(("ADCON0_12F::put new_value=0x%02x old_value=0x%02x\n", new_value, old_value));
+  // tell adcon1 to use Vref or Vdd and set ADFM
+  adcon1->value.put((new_value & VCFG) ? (new_value & ADFM) | ADCON1::VCFG1 
+	: (new_value & ADFM));
+  
+
+  // If ADON is clear GO cannot be set
+  if ((new_value & ADON) != ADON)
+	new_value &= ~GO;
+
+
+  // SET: Reflect it first!
+  value.put(new_value);
+  if(new_value & ADON) {
+    // The A/D converter is being turned on (or maybe left on)
+
+    if((new_value & ~old_value) & GO) {
+      if (verbose)
+	printf("starting A2D conversion\n");
+      // The 'GO' bit is being turned on, which is request to initiate
+      // and A/D conversion
+      start_conversion();
+    }
+  } else
+    stop_conversion();
+
+}
+ANSEL_12F::ANSEL_12F(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    adcon1(0)
+{
+}
+
+
+void ANSEL_12F::set_tad(unsigned int new_value)
+{
+   unsigned int Tad = 6;
+
+  switch(new_value & (ADCS0 | ADCS1))
+    {
+
+    case 0:
+      Tad =  (new_value & ADCS2) ? 4 : 2;
+      break;
+
+    case ADCS0:
+      Tad =  (new_value & ADCS2) ? 16 : 8;
+      break;
+
+    case ADCS1:
+      Tad =  (new_value & ADCS2) ? 64 : 32;
+      break;
+
+    case (ADCS0|ADCS1):	// typical 4 usec, convert to osc cycles
+      if (cpu)
+      {
+         Tad = (unsigned int)(4.e-6  * p_cpu->get_frequency());
+	 Tad = Tad < 2? 2 : Tad;
+      }
+      else
+	 Tad = 6;
+      break;
+
+    }
+   Dprintf(("ANSEL_12F::set_tad %x Tad=%d\n", new_value, Tad));
+  adcon0->set_Tad(Tad);
+
+}
+void ANSEL_12F::put(unsigned int new_value)
+{
+  unsigned int cfgmax = adcon1->get_cfg(0xff)+1;
+  unsigned int i;
+  unsigned int mask;
+  trace.raw(write_trace.get() | value.get());
+  /*
+	Generate ChannelConfiguration from ansel register
+  */
+  for(i=0; i < cfgmax; i++)
+  {
+	mask = new_value & 0x0f;
+	adcon1->setChannelConfiguration(i, mask);
+  }
+  /*
+  * 	Convert A2D conversion times and set in adcon
+  */
+  set_tad(new_value & ( ADCS2 | ADCS1 | ADCS0));
+  value.put(new_value & 0x7f);
 }

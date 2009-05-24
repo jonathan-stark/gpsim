@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 Scott Dattalo
+   Copyright (C) 2009 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -291,6 +292,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 {
   Dprintf(("PicPortBRegister::setbit() bit=%d,val=%c bIntEdge=%d\n",bit_number,new3State, m_bIntEdge));
 
+  // interrupt bit 0 on specified edge 
   bool bNewValue = new3State=='1' || new3State=='W';
   if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
@@ -300,6 +302,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   RegisterValue lastDrivenValue = rvDrivenValue;
   PortRegister::setbit(bit_number, new3State);
 
+ // interrupt and exit sleep level change top 4 bits on input
   unsigned int bitMask = (1<<bit_number) & 0xF0;
 
   if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
@@ -354,6 +357,33 @@ void PicPortBRegister::setIntEdge(bool bNewIntEdge)
   m_bIntEdge = bNewIntEdge;
 }
 
+// set_rbif involves RBIF,RBIE in INTCON which are the same bits as GPIF,GPIE
+void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
+{
+  // interrupt bit 2 on specified edge 
+  bool bNewValue = new3State=='1' || new3State=='W';
+  if (bit_number == 2 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
+      && (bNewValue == m_bIntEdge))
+    m_pIntcon->set_intf(true);
+
+    RegisterValue lastDrivenValue = rvDrivenValue;
+    PortRegister::setbit(bit_number, new3State);
+
+ // interrupt and exit sleep for level change on bits where IOC set
+    bool bitMask = m_pIoc->get() & (1 << bit_number);
+
+   if (verbose)
+       printf("PicPortGRegister::setbit() bit=%d,val=%c IOC_bit=%x\n",bit_number,new3State, bitMask);
+
+    if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
+      cpu_pic->exit_sleep();
+      m_pIntcon->set_rbif(true);
+    }
+}
+void PicPortGRegister::setIntEdge(bool bNewIntEdge)
+{
+  m_bIntEdge = bNewIntEdge;
+}
 
 PicPSP_PortRegister::PicPSP_PortRegister(Processor *pCpu, const char *pName, const char *pDesc,
                                          /*const char *port_name,*/

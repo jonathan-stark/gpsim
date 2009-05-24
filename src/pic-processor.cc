@@ -52,6 +52,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"
 #include "p16x7x.h"
 #include "p12x.h"
+#include "p12f6xx.h"
 #ifdef P17C7XX  // code no longer works
 #include "p17c75x.h"
 #endif
@@ -174,6 +175,10 @@ ProcessorConstructor pP12F509(P12F509::construct ,
                               "__12F509", "pic12f509",  "p12f509", "12f509");
 ProcessorConstructor pP12F510(P12F510::construct ,
                               "__12F510", "pic12f510",  "p12f510", "12f510");
+ProcessorConstructor pP12F629(P12F629::construct ,
+                              "__12F629", "pic12f629",  "p12f629", "12f629");
+ProcessorConstructor pP12F675(P12F675::construct ,
+                              "__12F675", "pic12f675",  "p12f675", "12f675");
 ProcessorConstructor pP16C54(P16C54::construct ,
                              "__16C54",   "pic16c54",   "p16c54", "16c54");
 ProcessorConstructor pP16C55(P16C55::construct ,

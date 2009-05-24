@@ -439,6 +439,26 @@ class OSCTUNE : public  sfr_register
   }
 };
 
+
+// This class is used to trim the frequency of the internal RC clock
+//  111111 - Max freq
+//  100000 - no adjustment
+//  000000 - mix freq
+class OSCCAL : public  sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  void set_freq(float base_freq);
+  unsigned int bit_mask;
+  float base_freq;
+                                                                                
+  OSCCAL(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask)
+    : sfr_register(pCpu,pName,pDesc), bit_mask(bitMask), base_freq(0.)
+  {
+  }
+};
+
 class OSCCON : public  sfr_register,  public TriggerObject
 {
  public:
@@ -489,4 +509,46 @@ class WDTCON : public  sfr_register
 };
 
 
+
+
+// Interrupt-On-Change GPIO Register
+class IOC :  public sfr_register
+{
+public:
+ unsigned int bit_mask;
+
+ IOC(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc), bit_mask(0x3f)
+  {
+  }
+
+  void put(unsigned int new_value)
+  {
+    unsigned int masked_value = new_value & bit_mask;
+
+    trace.raw(write_trace.get() | value.get());
+    value.put(masked_value);
+  }
+
+};
+
+class PicPortRegister;
+// WPU set weak pullups on pin by pin basis
+//
+class WPU  : public  sfr_register
+{
+
+public:
+  unsigned int bit_mask;
+  PicPortRegister *wpu_gpio;
+  bool wpu_pu;
+
+  void put(unsigned int new_value);
+  void set_wpu_pu(bool pullup_enable);
+
+  WPU(Processor *pCpu, const char *pName, const char *pDesc, PicPortRegister* gpio, unsigned int mask=0x37)
+    : sfr_register(pCpu,pName,pDesc), bit_mask(mask), wpu_gpio(gpio), wpu_pu(false)
+  {
+  }
+};
 #endif

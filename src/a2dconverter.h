@@ -1,5 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
+   Copyright (C) 2009 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -170,10 +171,20 @@ public:
   void setA2DBits(unsigned int);
   void setChannel_Mask(unsigned int ch_mask) { channel_mask = ch_mask; }
   void setChannel_shift(unsigned int ch_shift) { channel_shift = ch_shift; }
+  virtual bool get_ADFM() { return(adcon1->value.get() & ADCON1::ADFM); };
+  virtual void set_Tad(unsigned int);
+  virtual double getChannelVoltage(unsigned int channel) { 
+	return( adcon1->getChannelVoltage(channel)); }
+  virtual double getVrefHi() {
+      return(m_dSampledVrefHi  = adcon1->getVrefHi());}
+  virtual double getVrefLo() {
+      return (m_dSampledVrefLo  = adcon1->getVrefLo());}
+
 
 private:
 
   friend class ADCON0_10;
+  friend class ADCON0_12F;
 
   sfr_register *adres;
   sfr_register *adresl;
@@ -243,5 +254,58 @@ public:
 
 private:
     ADCON1 *adcon1;
+};
+//---------------------------------------------------------
+// ADCON0_12F register for 12f675 A2D
+//
+
+class ADCON0_12F : public ADCON0
+{
+public:
+
+  enum
+    {
+      ADON = 1<<0,
+      GO   = 1<<1,
+      CHS0 = 1<<2,
+      CHS1 = 1<<3,
+      VCFG = 1<<6,
+      ADFM = 1<<7
+    };
+  void put(unsigned int new_value);
+  virtual bool get_ADFM() { return(value.get() & ADFM); }
+  virtual void set_Tad(unsigned int _tad) { Tad = _tad; }
+  ADCON0_12F(Processor *pCpu, const char *pName, const char *pDesc);
+private:
+	AD_IN_SignalControl ad_pin_input;
+};
+//---------------------------------------------------------
+// ANSEL_12F
+//
+
+class ANSEL_12F : public sfr_register
+{
+public:
+  enum
+  {
+    ANS0 = 1 << 0,
+    ANS1 = 1 << 1,
+    ANS2 = 1 << 2,
+    ANS3 = 1 << 3,
+    ADCS0 = 1 << 4,
+    ADCS1 = 1 << 5,
+    ADCS2 = 1 << 6
+  };
+
+  ANSEL_12F(Processor *pCpu, const char *pName, const char *pDesc);
+
+  void setAdcon0(ADCON0_12F *new_adcon0) { adcon0 = new_adcon0; }
+  void setAdcon1(ADCON1 *new_adcon1) { adcon1 = new_adcon1; }
+  void put(unsigned int new_val);
+  void set_tad(unsigned int);
+
+private:
+    ADCON1 *adcon1;
+    ADCON0_12F *adcon0;
 };
 #endif // __A2DCONVERTER_H__

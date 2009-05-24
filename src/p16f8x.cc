@@ -791,7 +791,7 @@ void P16F88::create_sfr_map()
                                                                                 
   add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
-  add_sfr_register(&ansel, 0x9b, RegisterValue(0,0));
+  add_sfr_register(&ansel, 0x9b, RegisterValue(0x7f,0));
                                                                                 
 
   ansel.setAdcon1(&adcon1);

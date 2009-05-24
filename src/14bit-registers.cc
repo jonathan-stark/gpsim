@@ -101,6 +101,33 @@ void file_register::put_value(unsigned int new_value)
 
 #endif
 
+// Adjust internal RC oscillator frequency as per 12f675/629
+// Spec sheet does not give range so assume +/- 12.5% as per 16f88
+// The fact that base_freq is not 0. indicates the RC oscillator is being used
+// and thus an adjustment should be made.
+//
+// This will work for any number of adjustment bits in byte but must be left justified
+// and 1000000 centre frequency and 11111111 highest frequency
+void  OSCCAL::put(unsigned int new_value)
+{
+  int   adj = new_value & bit_mask;
+  float tune;
+  trace.raw(write_trace.get() | value.get());
+  value.put(adj);
+  if (base_freq > 0.)
+  {
+    adj  = adj -  0x80;
+    tune = (1. + 0.125 * adj / 0x80) * base_freq;
+    cpu_pic->set_frequency(tune);
+  }
+}
+
+void OSCCAL::set_freq(float new_base_freq)
+{
+  base_freq = new_base_freq;
+  put(value.get());
+}
+
 void  OSCTUNE::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
@@ -793,3 +820,30 @@ WREG::~WREG()
 {
   delete m_tt;
 }
+
+
+void WPU::put(unsigned int new_value)
+{
+    unsigned int masked_value = new_value & bit_mask;
+    int i;
+
+    trace.raw(write_trace.get() | value.get());
+
+    value.put(masked_value);
+    for(i = 0; i < 8; i++)
+    {
+	if((1<<i) & bit_mask)
+	{
+	    (&(*wpu_gpio)[i])->getPin().update_pullup((((1<<i) & masked_value) && wpu_pu )? '1' : '0', true);
+	}
+    }
+}
+void WPU::set_wpu_pu(bool pullup_enable)
+{
+    if (pullup_enable != wpu_pu)
+    {
+	wpu_pu = pullup_enable;
+        put(value.get());	// change pull-ups based on value of WPU and gpio_pu
+    }
+}
+
