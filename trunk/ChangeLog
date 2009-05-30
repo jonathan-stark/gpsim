@@ -1,4 +1,12 @@
-2009-R2405-05 Roy Rankin <rrankin@ihug.com.au>
+2009-30-05 Roy Rankin <rrankin@ihug.com.au>
+	* regression/comparator/compar_10f204.asm : reset vector wrong address
+	* regression/p12f675/p12f675.asm : fix typos, clear analog ports at
+	- end of ADC test
+	* regression/Makefile.am : fix make dist
+	* src/intcon.h src/intcon.cc src/pic-instructions.cc src/p12x.cc :
+	- remove extraneous trace messages
+
+2009-24-05 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p12f675/12f675.lkr regression/p12f675/p12f675.asm
 	  regression/p12f675/Makefile regression/Makefile.am src/Makefile.am
 	  regression/run_regression.sh src/p12f6xx.cc src/p12f6xx.h

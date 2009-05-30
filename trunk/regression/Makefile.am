@@ -23,7 +23,7 @@ EXTRA_DIST = \
 	digital_stim/digital_stim.asm digital_stim/digital_stim.stc \
 	eeprom_wide/Makefile eeprom_wide/eeprom_wide.stc \
 	eeprom_wide/16f873.lkr eeprom_wide/eeprom_wide.asm i2c/16f88.lkr \
-	i2c/Makefile i2c/p16f819.asm i2c/netlist.stc \
+	i2c/Makefile i2c/p16f819.asm  \
 	i2c/i2c_low.inc i2c/p16f88.asm i2c/p16f876a.asm i2c/16f876a.lkr \
 	i2c/16f819.lkr instructions_12bit/Makefile \
 	instructions_12bit/instructions_12bit.stc \
@@ -58,7 +58,7 @@ EXTRA_DIST = \
 	psp/p18f452.asm register_stim/Makefile register_stim/16f84.lkr \
 	register_stim/register_stim.stc register_stim/register_stim.asm \
 	resistor/Makefile resistor/resistor.stc resistor/resistor.asm \
-	resistor/16f873.lkr spi/p18f242.asm.sav spi/16f88.lkr spi/Makefile \
+	resistor/16f873.lkr  spi/16f88.lkr spi/Makefile \
 	spi/18f242.lkr spi/p16f88.asm spi/p16c62.asm spi/16c62.lkr \
 	spi/p18f242.asm switch_test/16f877.lkr switch_test/Makefile \
 	switch_test/switch_test.stc switch_test/switch_test.asm \

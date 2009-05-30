@@ -50,18 +50,15 @@ INTCON::INTCON(Processor *pCpu, const char *pName, const char *pDesc)
 void INTCON::set_T0IF()
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
-  trace.raw(write_trace.get() | value.get());
 
-  value.put(value.get() | T0IF);
+  put(value.get() | T0IF);
 
 }
 
 void INTCON::put(unsigned int new_value)
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
-
   trace.raw(write_trace.get() | value.get());
-
   value.put(new_value);
 
   // Now let's see if there's a pending interrupt
@@ -226,11 +223,11 @@ void INTCON_16::clear_gies()
   assert(cpu != 0);
 
   if ( !(rcon->value.get() & RCON::IPEN) )
-    put(get() & ~GIE);
+    put(value.get() & ~GIE);
   else if ( isHighPriorityInterrupt() )
-    put(get() & ~GIEH);
+    put(value.get() & ~GIEH);
   else
-    put(get() & ~GIEL);
+    put(value.get() & ~GIEL);
 
 
 }

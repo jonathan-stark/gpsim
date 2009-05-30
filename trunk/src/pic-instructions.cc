@@ -621,7 +621,7 @@ void BCF::execute()
   else
     reg = cpu_pic->register_bank[register_address];
 
-  reg->put(reg->get() & mask);
+  reg->put(reg->value.get() & mask);
 
   cpu_pic->pc->increment();
 
@@ -644,7 +644,7 @@ void BSF::execute()
   else
     reg = cpu_pic->register_bank[register_address];
 
-  reg->put(reg->get() | mask);
+  reg->put(reg->value.get() | mask);
 
 
   cpu_pic->pc->increment();

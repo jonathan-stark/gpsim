@@ -53,13 +53,12 @@ enum
   INTCON(Processor *pCpu, const char *pName, const char *pDesc);
   inline void set_gie()
   {
-    value.put(value.get() | GIE);
-    put(value.get());
+    put(value.get() | GIE);
   }
 
   inline void clear_gie()
   {
-    put(get() & ~GIE);
+    put(value.get() & ~GIE);
   }
 
   void set_T0IF();
@@ -74,38 +73,40 @@ enum
 
   inline void set_rbif(bool b)
   {
-    if (b)
-      put(get() | RBIF);
-    else
-      put(get() & ~RBIF);
+    bool current = (value.get() & RBIF) == RBIF;
+    if (b && !current)
+      put(value.get() | RBIF);
+    if (!b && current)
+      put(value.get() & ~RBIF);
   }
 
   inline void set_intf(bool b)
   {
-    if (b)
-      put(get() | INTF);
-    else
-      put(get() & ~INTF);
+    bool current = (value.get() & INTF) == INTF;
+    if (b && !current)
+      put(value.get() | INTF);
+    if (!b && current)
+      put(value.get() & ~INTF);
  }
 
   inline void set_t0if()
     {
-      put(get() | T0IF);
+      put(value.get() | T0IF);
     }
 
   inline void set_rbie()
     {
-      put(get() | RBIE);
+      put(value.get() | RBIE);
     }
 
   inline void set_inte()
     {
-      put(get() | INTE);
+      put(value.get() | INTE);
     }
 
   inline void set_t0ie()
     {
-      put(get() | T0IE);
+      put(value.get() | T0IE);
     }
 
   virtual int check_peripheral_interrupt()=0;
