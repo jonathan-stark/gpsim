@@ -345,7 +345,7 @@ delay4: return
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
 ;----------------------------------------------------------------------
-RESET_VECTOR  CODE    0x3ff              ; processor reset vector
+RESET_VECTOR  CODE    0xff              ; processor reset vector
 
 OSC_CAL_VALUE	EQU	0x80
 

@@ -179,7 +179,7 @@ start
 	call test_eerom
 	call test_adc
 
-  .assert  "\"*** PASSED 12f875 Functionality\""
+  .assert  "\"*** PASSED 12f675 Functionality\""
 	goto	$
 
 test_compare:
@@ -463,7 +463,7 @@ l1:
 	return
 
 eefail:
-  .assert "\"***FAILED 12f875 eerom write/read error\""
+  .assert "\"***FAILED 12f675 eerom write/read error\""
 	nop
 
 test_tmr0:
@@ -501,6 +501,9 @@ test_adc:
 	bsf	ADCON0,CHS1	; select shannel 2 which is not ADC analog pin
 	call	Convert
 
+	BANKSEL ANSEL
+	clrf	ANSEL		; return ports to digital I/O
+	BANKSEL ADCON0
 
 	return
 
@@ -514,7 +517,6 @@ Convert:
          goto   $-1
 
         movf    ADRESH,W                ;Read the high 8-bits of the result
-
 
         return
 

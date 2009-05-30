@@ -213,7 +213,7 @@ void P12bitBase::reset(RESET_TYPE r)
   switch (r) {
   case IO_RESET:
     // Set GPWUF flag
-    status->put(status->get() | 0x80);
+    status->put(status->value.get() | 0x80);
 
     // fall through...
    default:
@@ -229,7 +229,7 @@ void P12bitBase::enter_sleep()
 {
   pic_processor::enter_sleep();
 
-  status->put( status->get() & ~STATUS_GPWUF);
+  status->put( status->value.get() & ~STATUS_GPWUF);
   cout << "enter sleep status="<<hex <<status->get()<<endl;
 }
 
@@ -238,7 +238,7 @@ void  P12bitBase::updateGP2Source()
 {
   PinModule *pmGP2 = &(*m_gpio)[2];
 
-  if(option_reg->get() & OPTION_REG::T0CS)
+  if(option_reg->value.get() & OPTION_REG::T0CS)
   {
     printf("OPTION_REG::T0CS forcing GPIO2 as input, TRIS disabled\n");
     pmGP2->setControl(m_IN_SignalControl);
@@ -832,14 +832,14 @@ void P10F200::updateGP2Source()
 {
   PinModule *pmGP2 = &(*m_gpio)[2];
 
-  if (osccal.get() & P12_OSCCON::FOSC4 )
+  if (osccal.value.get() & P12_OSCCON::FOSC4 )
   {
 
     pmGP2->setSource(m_OUT_DriveControl);
     printf("OSCCON::FOSC4 forcing GPIO2 high on output, TODO FOSC4 toggle output\n");
     pmGP2->getPin().newGUIname("FOSC4");
   }
-  else if(option_reg->get() & OPTION_REG::T0CS)
+  else if(option_reg->value.get() & OPTION_REG::T0CS)
   {
     printf("OPTION_REG::T0CS forcing GPIO2 as input, TRIS disabled\n");
     pmGP2->setControl(m_IN_SignalControl);
@@ -866,7 +866,7 @@ void  P10F200::freqCalibration()
 {
 
     // If internal RC oscilator
-	char osccal_val = (osccal.get() & 0xfe);
+	char osccal_val = (osccal.value.get() & 0xfe);
         double freq = (configWord & 1)? 8e6 : 4e6;
 
     	freq *= 1. + (0.125 * osccal_val) / 0x80;
