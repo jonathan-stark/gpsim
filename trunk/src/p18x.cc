@@ -841,6 +841,12 @@ void P18F1220::create()
   adcon1->setValidCfgBits(0x7f, 0);
   adcon0->setChannel_Mask(0x7);
   adcon1->setAdcon0(adcon0);	// VCFG0, VCFG1 in adcon0
+  remove_sfr_register(&ssp.sspcon2);
+  remove_sfr_register(&ssp.sspcon);
+  remove_sfr_register(&ssp.sspstat);
+  remove_sfr_register(&ssp.sspadd);
+  remove_sfr_register(&ssp.sspbuf);
+
 
 }
 //------------------------------------------------------------------------

@@ -76,6 +76,8 @@ public:
 
   ADCON1(Processor *pCpu, const char *pName, const char *pDesc);
 
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
   void setChannelConfiguration(unsigned int cfg, unsigned int bitMask);
   void setVrefLoConfiguration(unsigned int cfg, unsigned int channel);
   void setVrefHiConfiguration(unsigned int cfg, unsigned int channel);
@@ -88,11 +90,14 @@ public:
 
   void setValidCfgBits(unsigned int m, unsigned int s);
   void setNumberOfChannels(unsigned int);
+  unsigned int getNumberOfChannels() { return(m_nAnalogChannels);}
   void setIOPin(unsigned int, PinModule *);
   void setVoltRef(unsigned int, float);
   int  get_cfg(unsigned int);
+  virtual unsigned int get_adc_configmask(unsigned int);
 
   void set_channel_in(unsigned int channel, bool on);
+  
   
 
 private:
@@ -101,6 +106,7 @@ private:
   unsigned int m_nAnalogChannels;
   unsigned int mValidCfgBits;
   unsigned int mCfgBitShift;
+  unsigned int mIoMask;
 
   static const unsigned int cMaxConfigurations=16;
 

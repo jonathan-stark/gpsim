@@ -838,6 +838,9 @@ void WPU::put(unsigned int new_value)
 	}
     }
 }
+/*
+ * enable/disable all WPU  pullups
+ */
 void WPU::set_wpu_pu(bool pullup_enable)
 {
     if (pullup_enable != wpu_pu)

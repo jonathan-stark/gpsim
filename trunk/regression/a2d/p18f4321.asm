@@ -57,18 +57,28 @@ ExitInterrupt:
 ;----------------------------------------------------------------------
 MAIN    CODE
 
+    .sim "p18f4321.xpos = 192"
+    .sim "p18f4321.ypos = 48"
+
 
    .sim "module library libgpsim_modules"
    ; Use a pullup resistor as a voltage source
    .sim "module load pullup V1"
    .sim "V1.resistance = 100.0"
+   .sim "V1.xpos = 48"
+   .sim "V1.ypos = 24"
+
    .sim "module load pullup V2"
    .sim "V2.resistance = 100.0"
+   .sim "V2.xpos = 48"
+   .sim "V2.ypos = 204"
 
    ; V3 and na1 required for A/D to see voltage bug ?
    ; RRR 5/06
    .sim "module load pullup V3"
    .sim "V3.resistance = 10e6"
+   .sim "V3.xpos = 48"
+   .sim "V3.ypos = 120"
 
    .sim "node na0"
    .sim "attach na0 V1.pin porta0"
@@ -90,6 +100,10 @@ Start:
     ; ADCS = 110   == FOSC/64
     ; ADFM = 0     == 6 LSB of ADRESL are 0.
     ;
+	clrf	TRISA
+	MOVLW	0xff
+	movwf	PORTA
+	movf	PORTA,W
 
 	MOVLW	1<<RA0
 	MOVWF	TRISA

@@ -1,3 +1,17 @@
+2009-01-06 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p12f675/p12f675.asm 
+	  regression/a2d/p18f1220.asm regression/a2d/p18f4321.asm :
+	- Test that analog pins read as 0
+	* regression/resistor/resistor.asm 
+	* regression/p18f452_ports/p18f452_ports.asm :
+	- Set Analog pins to digital before tests
+	* regression/a2d/p18f452.asm : set position in breadboard
+	* src/ioports.h src/ioports.cc src/16bit-processors.cc
+	  src/a2d_v2.h src/a2d_v2.cc src/a2dconverter.h src/a2dconverter.cc
+	  src/comparator.cc src/14bit-registers.cc src/pic-ioports.cc :
+	- analog pins are labeled and read as 0 (bug 1832222)
+	* src/p18x.cc : remove ssp registers on p18f1220
+
 2009-30-05 Roy Rankin <rrankin@ihug.com.au>
 	* regression/comparator/compar_10f204.asm : reset vector wrong address
 	* regression/p12f675/p12f675.asm : fix typos, clear analog ports at

@@ -331,7 +331,7 @@ void ADCON0::set_interrupt(void)
 ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     m_AnalogPins(0),  m_voltageRef(0), m_nAnalogChannels(0),
-    mValidCfgBits(0), mCfgBitShift(0), m_ad_in_ctl(0)
+    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), m_ad_in_ctl(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
     setChannelConfiguration(i, 0);
@@ -340,6 +340,36 @@ ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   }
 }
 
+void ADCON1::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
+void ADCON1::put_value(unsigned int new_value)
+{
+    unsigned int new_mask = get_adc_configmask(new_value);
+    unsigned int diff = mIoMask ^ new_mask;
+
+
+	char newname[20];
+
+	for(unsigned int i = 0; i < m_nAnalogChannels; i++)
+        {
+	  if ((diff & (1 << i)) && m_AnalogPins[i] != &AnInvalidAnalogInput)
+	  {
+
+	    if (new_mask & (1<<i))
+	    {
+	      sprintf(newname, "an%d", i);
+	      m_AnalogPins[i]->UpAnalogCnt(true, newname);
+	    }
+	    else
+	      m_AnalogPins[i]->UpAnalogCnt(false, m_AnalogPins[i]->getPin().name().c_str());
+          }  
+	}
+	mIoMask = new_mask;
+	value.put(new_value);
+}
 /*
  * If A2D uses PCFG, call for each PCFG value (cfg 0 to 15) with
  * each set bit of bitMask indicating port is an analog port
@@ -438,6 +468,11 @@ void ADCON1::setValidCfgBits(unsigned int mask, unsigned int shift)
     mCfgBitShift = shift;
 }
 
+unsigned int ADCON1::get_adc_configmask(unsigned int reg)
+{
+    return(m_configuration_bits[get_cfg(reg)]);
+}
+
 int ADCON1::get_cfg(unsigned int reg)
 {
     return((reg & mValidCfgBits) >> mCfgBitShift);
@@ -474,7 +509,7 @@ double ADCON1::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
   if(channel < m_nAnalogChannels) {
-    if ( (1<<channel) & m_configuration_bits[get_cfg(value.data)]) {
+    if ( (1<<channel) & get_adc_configmask(value.data) ) {
       PinModule *pm = m_AnalogPins[channel];
       if (pm != &AnInvalidAnalogInput)
           voltage = pm->getPin().get_nodeVoltage();
@@ -556,7 +591,7 @@ void ANSEL::setAdcon1(ADCON1 *new_adcon1)
 
 void ANSEL::put(unsigned int new_value)
 {
-  unsigned int cfgmax = adcon1->get_cfg(0xff)+1;
+  unsigned int cfgmax = adcon1->getNumberOfChannels();
   unsigned int i;
   unsigned int mask;
   trace.raw(write_trace.get() | value.get());
@@ -654,7 +689,7 @@ void ADCON0_12F::put(unsigned int new_value)
 
   Dprintf(("ADCON0_12F::put new_value=0x%02x old_value=0x%02x\n", new_value, old_value));
   // tell adcon1 to use Vref or Vdd and set ADFM
-  adcon1->value.put((new_value & VCFG) ? (new_value & ADFM) | ADCON1::VCFG1 
+  adcon1->put_value((new_value & VCFG) ? (new_value & ADFM) | ADCON1::VCFG1 
 	: (new_value & ADFM));
   
 
@@ -722,9 +757,11 @@ void ANSEL_12F::set_tad(unsigned int new_value)
 }
 void ANSEL_12F::put(unsigned int new_value)
 {
-  unsigned int cfgmax = adcon1->get_cfg(0xff)+1;
+  unsigned int cfgmax = adcon1->getNumberOfChannels();
   unsigned int i;
   unsigned int mask;
+
+  Dprintf(("ANSEL_12F::put %x cfgmax %d\n", new_value, cfgmax));
   trace.raw(write_trace.get() | value.get());
   /*
 	Generate ChannelConfiguration from ansel register
@@ -739,4 +776,5 @@ void ANSEL_12F::put(unsigned int new_value)
   */
   set_tad(new_value & ( ADCS2 | ADCS1 | ADCS0));
   value.put(new_value & 0x7f);
+  adcon1->put_value(adcon1->value.get());
 }

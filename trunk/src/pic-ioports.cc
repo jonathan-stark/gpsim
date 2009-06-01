@@ -37,7 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
@@ -281,7 +281,7 @@ unsigned int PicPortBRegister::get()
 {
   m_pIntcon->set_rbif(false);
 
-  return rvDrivenValue.data;
+  return mOutputMask & rvDrivenValue.data;
 }
 
 //------------------------------------------------------------------------

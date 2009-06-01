@@ -1,5 +1,5 @@
 /*
-        out = output
+        
    Copyright (C) 1998 T. Scott Dattalo
    Copyright (C) 2006 Roy R. Rankin
 
@@ -110,7 +110,6 @@ void   CM_stimulus::set_nodeVoltage(double v)
         ih1 = input Vin+ when CIS == 0
         il2 = input Vin- when CIS == 1
         ih2 = input Vin+ when CIS == 1
-        out = output
 
         if input == VREF, reference voltage is used.
 */
@@ -298,12 +297,16 @@ void CMCON::put(unsigned int new_value)
   {
       if (out_mask & (1<<i))
       {
+	  char name[20];
           if ( ! cm_source[i])
                 cm_source[i] = new CMSignalSource();
+	  sprintf(name, "c%dout", i+1);
+	  cm_output[i]->getPin().newGUIname(name);
           cm_output[i]->setSource(cm_source[i]);
       }
       else if (cm_source[i])
       {
+	    cm_output[i]->getPin().newGUIname(cm_output[i]->getPin().name().c_str());
             cm_output[i]->setSource(0);
       }
   }
@@ -328,13 +331,15 @@ void CMCON::put(unsigned int new_value)
             if (strncmp(name, "an", 2))
             {
                 sprintf(newname, "an%d", i);
-                cm_input[i]->getPin().newGUIname(newname);
+                cm_input[i]->UpAnalogCnt(true, newname);
             }
         }
         else
         {
-            if (!strncmp(name, "an", 2))
-                cm_input[i]->getPin().newGUIname(cm_input[i]->getPin().name().c_str());
+
+          if (!strncmp(name, "an", 2))
+	    cm_input[i]->UpAnalogCnt(false, cm_input[i]->getPin().name().c_str());
+
         }
 
    }
