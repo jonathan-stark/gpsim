@@ -720,7 +720,6 @@ void _16bit_compat_adc :: a2d_compat()
   adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
 			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
 
-  adcon1->setNumberOfChannels(8);	// Allow 8 channel configuration
   adcon1->setChannelConfiguration(0, 0xff);
   adcon1->setChannelConfiguration(1, 0xff);
   adcon1->setChannelConfiguration(2, 0x1f);
@@ -794,7 +793,7 @@ void _16bit_v2_adc::create(int nChannels)
 			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
 
     adcon1->setNumberOfChannels(nChannels);	
-    adcon1->setChanTable(0x1ff, 0x1fff, 0x1fff, 0x0fff,
+    adcon1->setChanTable(0x1fff, 0x1fff, 0x1fff, 0x0fff,
         0x07ff, 0x03ff, 0x01ff, 0x00ff, 0x007f, 0x003f,
         0x001f, 0x000f, 0x0007, 0x0003, 0x0001, 0x0000);
     adcon1->setVrefHiChannel(3);

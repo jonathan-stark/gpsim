@@ -305,7 +305,7 @@ ADCON1_V2::ADCON1_V2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     m_AnalogPins(0), m_nAnalogChannels(0),
     mValidCfgBits(0), mCfgBitShift(0), m_vrefHiChan(-1),
-    m_vrefLoChan(-1), m_adcon0(0)
+    m_vrefLoChan(-1),  mIoMask(0), m_adcon0(0)
 
 
 {
@@ -314,6 +314,36 @@ ADCON1_V2::ADCON1_V2(Processor *pCpu, const char *pName, const char *pDesc)
   }
 }
 
+
+void ADCON1_V2::put(unsigned int new_value)
+{
+    unsigned int new_mask = get_adc_configmask(new_value);
+    unsigned int diff = mIoMask ^ new_mask;
+
+    trace.raw(write_trace.get() | value.get());
+
+
+	char newname[20];
+
+	for(unsigned int i = 0; i < m_nAnalogChannels; i++)
+        {
+	  if ((diff & (1 << i)) && m_AnalogPins[i] != &AnInvalidAnalogInput)
+	  {
+
+	    if (new_mask & (1<<i))
+	    {
+	      sprintf(newname, "an%d", i);
+	      m_AnalogPins[i]->UpAnalogCnt(true, newname);
+	    }
+	    else
+	    {
+	      m_AnalogPins[i]->UpAnalogCnt(false, m_AnalogPins[i]->getPin().name().c_str());
+	    }
+          }  
+	}
+	mIoMask = new_mask;
+	value.put(new_value);
+}
 /*
  * Set the channel used for Vref+ when VCFG0 is set
  */
@@ -427,8 +457,7 @@ void ADCON1_V2::setValidCfgBits(unsigned int mask, unsigned int shift)
 }
 
 /*
- * is_analog_channel() is called with the value of the adcon1 register
- * and an A2D channel number.
+ * get_adc_configmask() is called with the value of the adcon1 register
  *
  * if the configuration bit mask is less than 16, the confiiguration bit table
  * is used to determine if the channel is an analog port.
@@ -436,19 +465,18 @@ void ADCON1_V2::setValidCfgBits(unsigned int mask, unsigned int shift)
  * Otherwise, each bit in the adcon1 register indicates that the port is
  * digital(1) or analog(0) aka the 18f1220.
  *
- * returns true if channel is analog
  * */
-bool ADCON1_V2::is_analog_channel(unsigned int reg, unsigned int channel)
+unsigned int ADCON1_V2::get_adc_configmask(unsigned int reg)
 {
     unsigned int cfgBit = (reg >>  mCfgBitShift) & mValidCfgBits;
 
     if (mValidCfgBits <= 0xf) // use config bit table
     {
-      return ((1<<channel) & m_configuration_bits[cfgBit]) ? true : false;
+      return (m_configuration_bits[(reg >>  mCfgBitShift) & mValidCfgBits]);
     }
     else // register directly gives Analog ports (18f1220)
     {
-      return (((1<<channel) & mValidCfgBits) && ((1<<channel) & ~cfgBit)) ? true : false;
+      return (~(reg >> mCfgBitShift) & mValidCfgBits);
     }
 }
 
@@ -476,7 +504,7 @@ double ADCON1_V2::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
   if(channel <= m_nAnalogChannels) {
-    if ( is_analog_channel(value.data, channel)) {
+    if ( (1<<channel) & get_adc_configmask(value.data) ) {
       PinModule *pm = m_AnalogPins[channel];
       if (pm != &AnInvalidAnalogInput)
           voltage = pm->getPin().get_nodeVoltage();

@@ -142,6 +142,17 @@ exit_int:
 ;----------------------------------------------------------------------
 MAIN    CODE
 start
+	;
+	; test pins in analog mode return 0 on register read
+	BANKSEL TRISIO
+	clrf	TRISIO
+	BANKSEL GPIO
+	movlw	0xff
+	movwf	GPIO
+   .assert "gpio == 0x28, \"**FAILED 12f675  analog bits read 0\""
+	nop
+	movf	GPIO,W
+
 	movlw	0xff
 	movwf	CMCON		; turn off Comparator
     .assert "cmcon == 0x1f, \"**FAILED 12f675 CMCON read 0 bits\""

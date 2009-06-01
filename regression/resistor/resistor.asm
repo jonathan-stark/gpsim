@@ -53,9 +53,17 @@ start
 
 
         nop
+  ; Turn off the A2D converter and make PORTA's I/O's digital:
+
+        bsf     STATUS,RP0
+	movlw	(1<<PCFG1) | (1<<PCFG2)
+	movwf	ADCON1
+
+        bcf     STATUS,RP0
 ;
 ;	pull-up should set input ports high
     .assert "(porta&1) == 1, \"*** FAILED - Pullup doesn't give high state\""
+	nop
 ;
 
         bsf     STATUS,RP0
@@ -63,45 +71,46 @@ start
 ;
 ;	 the pull-down resistor should pull down the weak B port pull-up
     .assert "(portb&1) == 0, \"*** FAILED weak pull-up vs. pull down\""
+	nop
 ;
         movlw   0x81		;Port A 0 in others out
 	movwf	TRISA
 	bcf	OPTION_REG,NOT_RBPU	; turn on portb pullups
 
-
-  ; Turn off the A2D converter and make PORTA's I/O's digital:
-
-	movlw	(1<<PCFG1) | (1<<PCFG2)
-	movwf	ADCON1
-
         bcf     STATUS,RP0
+
 
 	clrf	PORTA
 ;
 ;	low output porta1 should drive pull-up resistor low
     .assert "(porta&3) == 0, \"*** FAILED low output driving pull-up\""
+	nop
 ;
 
 ;
 ;	low output porta2 should drive portb0 and pull-down resistor low
     .assert "(portb&1) == 0, \"*** FAILED low output propagation\""
+	nop
 ;
 
 	bsf	PORTA,1
 ;
 ;	high output porta1 high should drive porta0 and pull-up high
     .assert "(porta&1) == 1, \"*** FAILED high output with pull-up\""
+	nop
 ;
 	bsf	PORTA,2
 ;
 ;	high output porta2 should drive portb0 and pull-down resistor high
     .assert "(portb&1) == 1, \"*** FAILED high output driving pull-down\""
+	nop
 ;
 
 	bcf	PORTA,1
 ;
 ;	low output porta1 should drive porta0 and pull-up low
     .assert "(porta&3) == 0, \"*** FAILED low output driving pull-up\""
+	nop
 ;
 	bcf	PORTA,2
 ;

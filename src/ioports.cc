@@ -182,6 +182,7 @@ PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
 
 void PortRegister::setEnableMask(unsigned int newEnableMask)
 {
+  mOutputMask = newEnableMask;
   //unsigned int maskDiff = getEnableMask() ^ newEnableMask;
   unsigned int oldEnableMask = getEnableMask();
 
@@ -284,11 +285,11 @@ unsigned int PortRegister::get()
   trace.raw(read_trace.get()  | rvDrivenValue.data);
   trace.raw(read_trace.geti() | rvDrivenValue.init);
 
-  return rvDrivenValue.data;
+  return mOutputMask & rvDrivenValue.data;
 }
 unsigned int PortRegister::get_value()
 {
-  return rvDrivenValue.data;
+  return mOutputMask & rvDrivenValue.data;
 }
 void PortRegister::putDrive(unsigned int new_value)
 {
@@ -405,6 +406,7 @@ PinModule::PinModule()
   : PinMonitor(),
     m_cLastControlState('?'), m_cLastSinkState('?'),
     m_cLastSourceState('?'), m_cLastPullupControlState('?'),
+    m_AnalogCnt(0),
     m_defaultSource(0), m_activeSource(0),
     m_defaultControl(0), m_activeControl(0),
     m_defaultPullupControl(0), m_activePullupControl(0),
@@ -598,6 +600,49 @@ void PinModule::updateUI()
   m_port->updateUI();
 }
 
+//	UpAnalogCnt is called by modules such as ADC and Comparator
+//	to set or release a pin to/from analog mode. When a pin is in
+//	analog mode the TRIS register is still active and output pins
+//	are still driven high or low, but reads of the port register 
+//	return 0 for the pin.
+//
+//	As more than one module can place a pin into analog mode at
+//	the same time, a count is maintained of analog requests.
+//	The up requests increment the counter and donw requests
+//	decrement the counter. The pin is in analog mode when the counter
+//	is not zero.
+void PinModule::UpAnalogCnt(bool up, const char *newname)
+{
+    if (up && m_port)	// Count up
+    {
+	m_AnalogCnt++;
+	if (m_AnalogCnt == 1)
+	{
+	    unsigned int mask = m_port->getOutputMask();
+ 	    mask &= ~(1 << getPinNumber());
+	    m_port->setOutputMask(mask);
+	    Dprintf(("PinModule::UpAnalogCnt up %s  newname=%s mask=%x\n", getPin().name().c_str(), newname, mask));
+	    getPin().newGUIname(newname);
+ 	}
+    }
+    else if (!up && m_port && m_AnalogCnt > 0)  // Count Down
+    {
+	m_AnalogCnt--;
+ 	if (m_AnalogCnt == 0)
+        {
+	    unsigned int mask = m_port->getOutputMask();
+	    mask |= (1 << getPinNumber());
+	    Dprintf(("PinModule::UpAnalogCnt down %s  newname=%s mask=%x\n", getPin().name().c_str(), newname, mask));
+	    m_port->setOutputMask(mask);
+	    getPin().newGUIname(newname);
+	}
+    }
+    else if (m_port && m_AnalogCnt == 0)
+    {
+	cout << "Gpsim error PinModule::UpAnalogCnt would be < 0 ";
+	cout << getPin().name()  << "\n";
+    }
+}
 
 
 // The IOPORT class is deprecated.

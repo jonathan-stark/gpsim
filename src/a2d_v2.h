@@ -50,6 +50,7 @@ public:
     };
 
   ADCON1_V2(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void put(unsigned int new_value);
 
   void setChanTable(
 	unsigned int m0, unsigned int m1, unsigned int m2, unsigned int m3,
@@ -68,8 +69,8 @@ public:
   void setValidCfgBits(unsigned int m, unsigned int s);
   void setNumberOfChannels(unsigned int);
   void setIOPin(unsigned int, PinModule *);
-  bool is_analog_channel(unsigned int, unsigned int);
   void setAdcon0(ADCON0_V2 *adcon0){ m_adcon0 = adcon0;}
+  virtual unsigned int get_adc_configmask(unsigned int); 
 
 private:
   PinModule **m_AnalogPins;
@@ -78,6 +79,7 @@ private:
   unsigned int mCfgBitShift;
   int 		m_vrefHiChan;
   int 		m_vrefLoChan;
+  unsigned int mIoMask;
   ADCON0_V2    *m_adcon0;	// if set use to get VCFG0 and VCFG1
 
   static const unsigned int cMaxConfigurations=16;

@@ -19,6 +19,11 @@ a2dIntFlag	RES	1  ;LSB is set when an A2D interrupt occurs
   GLOBAL done
   GLOBAL a2dIntFlag
 
+	; internal RC OSC PORTA 6,7 I/O
+       __CONFIG  _CONFIG1H,  _INTIO2_OSC_1H 
+
+
+
 ;------------------------------------------------------------------------
 STARTUP    CODE	0
 
@@ -58,17 +63,27 @@ ExitInterrupt:
 MAIN    CODE
 
 
+   .sim "p18f1220.xpos = 192"
+   .sim "p18f1220.ypos = 120"
+
    .sim "module library libgpsim_modules"
    ; Use a pullup resistor as a voltage source
    .sim "module load pullup V1"
    .sim "V1.resistance = 100.0"
+   .sim "V1.xpos = 204"
+   .sim "V1.ypos = 36"
+
    .sim "module load pullup V2"
    .sim "V2.resistance = 100.0"
+   .sim "V2.xpos = 72"
+   .sim "V2.ypos = 156"
 
    ; V3 and na1 required for A/D to see voltage bug ?
    ; RRR 5/06
    .sim "module load pullup V3"
    .sim "V3.resistance = 10e6"
+   .sim "V3.xpos = 72"
+   .sim "V3.ypos = 72"
 
    .sim "node na0"
    .sim "attach na0 V1.pin porta0"
@@ -80,13 +95,23 @@ MAIN    CODE
 
 Start:
 
+	CLRF 	TRISA
+	MOVLW	0xff
+	MOVWF	PORTA
+   .assert "(porta & 0x0f) == 0, \"FALIED 18F1220 a2d analog pins read 0\""
+	nop
+	CLRF 	TRISB
+	MOVWF	PORTB
+   .assert "(portb & 0x13) == 0, \"FALIED 18F1220 a2d analog pins read 0\""
+	nop
+
 
     ; RA0 is an Analog Input.
-    ; RA1 - RA5 are all configured as outputs.
+    ; RA1 - RA6 are all configured as outputs.
     ;
     ; Use VDD and VSS for Voltage references.
     ;
-    ; PCFG = 1110  == AN0 is the only analog input
+    ; PCFG = 1111110  == AN0 is the only analog input
     ; ADCS = 110   == FOSC/64
     ; ADFM = 0     == 6 LSB of ADRESL are 0.
     ;
@@ -94,7 +119,7 @@ Start:
 	MOVLW	1<<RA0
 	MOVWF	TRISA
 
-	MOVLW	(1<<PCFG1) | (1<<PCFG2) | (1<<PCFG3)
+	MOVLW	~(1<<PCFG0)
 	MOVWF	ADCON1
         MOVLW	(1<<ADCS1) | (1<<ADCS2)
 	MOVWF	ADCON2

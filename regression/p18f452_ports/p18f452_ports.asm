@@ -25,6 +25,10 @@ MAIN    CODE
 
 	CLRF	failures	;Assume success
 
+   ;	Set ADC ports to digital I/O
+	MOVLW	(1<<PCFG2) | (1<<PCFG1)
+	MOVWF	ADCON1
+
 	CLRF	BSR
 
 	MOVLW	0xff

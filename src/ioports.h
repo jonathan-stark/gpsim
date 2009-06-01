@@ -217,8 +217,15 @@ public:
 
   PinModule * getIOpins(unsigned int pin_number);
 
+  // set/get OutputMask which controls bits returned on I/O
+  // port register get() call. Used to return 0 for  analog pins
+  virtual void setOutputMask (unsigned int OutputMask) 
+	{ mOutputMask = OutputMask;}
+  virtual unsigned int getOutputMask () 
+	{ return(mOutputMask);}
 protected:
   unsigned int mNumIopins;
+  unsigned int  mOutputMask;
 
 private:
 
@@ -268,6 +275,7 @@ public:
   char getSourceState();
   char getPullupControlState();
   unsigned int getPinNumber() { return m_pinNumber;}
+  void UpAnalogCnt(bool up, const char *analogName);
 
   IOPIN &getPin() { return *m_pin;}
 
@@ -285,6 +293,7 @@ private:
   char          m_cLastSinkState;
   char          m_cLastSourceState;
   char          m_cLastPullupControlState;
+  unsigned int  m_AnalogCnt;
 
   SignalControl *m_defaultSource,  *m_activeSource;
   SignalControl *m_defaultControl, *m_activeControl;
