@@ -332,13 +332,11 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     if ((cfg_word & CFG_MCLRE)) 
     {
-	(m_porta->getPin(5))->newGUIname("MCLR");
-        valid_pins &= ~( 1<< 5); 		// porta5 not IO port
+	assignMCLRPin(4);
     }
     else
     {
-	(m_porta->getPin(5))->newGUIname("porta5");
-        valid_pins |= ( 1<< 5); 		// porta5 IO port
+	unassignMCLRPin();
     }
 
     if (cfg_word & CFG_CCPMX)
@@ -657,13 +655,11 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     if ((cfg_word & CFG_MCLRE)) 
     {
-        valid_pins &= ~( 1<< 5); 		// porta5 not IO port
-	(m_porta->getPin(5))->newGUIname("MCLR");
+	assignMCLRPin(4);
     }
     else
     {
-	(m_porta->getPin(5))->newGUIname("porta5");
-        valid_pins |= ( 1<< 5); 		// porta5 IO port
+	unassignMCLRPin();
     }
 
     if (cfg_word & CFG_CCPMX)

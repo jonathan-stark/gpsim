@@ -108,20 +108,12 @@ public:
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   virtual void enter_sleep();
   virtual void exit_sleep();
-  virtual void createMCLRPin(int pkgPinNumber);
-  virtual void assignMCLRPin(int pkgPinNumber);
-  virtual void unassignMCLRPin();
 
   _14bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_14bit_processor();
 
 protected:
   OPTION_REG   *option_reg;
-  // Most midrange PIC's have a dedicated MCLR pin.
-  // For the ones that don't, m_MCLR will be null.
-  IOPIN *m_MCLR;
-  PinMonitor *m_MCLRMonitor;
-  string m_mclr_pin_name;
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)

@@ -30,6 +30,103 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "symbol.h"
 
+#define MCLRE (1<<7)
+#define LPT1OSC (1<<2)
+#define PBADEN (1<<1)
+#define CCP2MX (1<<0)
+
+class Config3H_2x21 : public ConfigWord
+{
+public:
+  Config3H_2x21(_16bit_processor *pCpu, unsigned int addr, unsigned int def_val)
+    : ConfigWord("CONFIG3H", ~def_val & 0xfff, "Config Reg 3H", pCpu, addr)
+  {
+	set(def_val);
+  }
+
+  virtual void set(gint64 v)
+  {
+    gint64 i64;
+    get(i64);
+    int diff = (i64 ^ v) &0xfff;
+    Integer::set(v);
+
+    printf("RRR Config3H::set val=%x\n", (unsigned int)v);
+    if (m_pCpu)
+    {
+	if (diff & MCLRE)
+	    (v & MCLRE) ? m_pCpu->assignMCLRPin(1) : m_pCpu->unassignMCLRPin();
+    }
+  }
+
+    virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+    snprintf(buff, sizeof(buff), "$%04x\n"
+	" MCLRE=%d - %s\n"
+	" LPT1OSC=%d - Timer1 configured for %s operation\n"
+	" PBADEN=%d - PORTB<4:0> pins %s\n"
+	" CCP2MX=%d - CCP2 I/O is muxed with %s\n",
+	i,
+	(i & MCLRE) ? 1:0, (i & MCLRE) ? "Pin is MCLRE" : "Pin is RE3",
+	(i & LPT1OSC) ? 1:0, (i & LPT1OSC) ? "low-power" : "higher power",
+	(i & PBADEN) ?1:0, 
+		(i & PBADEN) ? "analog on Reset" : "digital I/O on reset",
+	(i & CCP2MX) ? 1:0, (i & CCP2MX) ? "RC1" : "RB3"
+    );
+    return string(buff);
+  }
+
+};
+
+//----------------------------------------------------------------------
+// For only MCLRE in CONFIG3H and using pin 4 (RA5)
+//
+class Config3H_1x20 : public ConfigWord
+{
+public:
+  Config3H_1x20(_16bit_processor *pCpu, unsigned int addr, unsigned int def_val)
+    : ConfigWord("CONFIG3H", ~def_val & 0xfff, "Config Reg 3H", pCpu, addr)
+  {
+	set(def_val);
+  }
+
+  virtual void set(gint64 v)
+  {
+    gint64 i64;
+    get(i64);
+    int diff = (i64 ^ v) &0xfff;
+    Integer::set(v);
+
+    printf("RRR Config3H::set val=%x diff=%x old=%x\n", (unsigned int)v, diff, (unsigned int)i64);
+    if (m_pCpu)
+    {
+	if (diff & MCLRE)
+	    (v & MCLRE) ? m_pCpu->assignMCLRPin(4) : m_pCpu->unassignMCLRPin();
+    }
+  }
+
+    virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+    snprintf(buff, sizeof(buff), "$%04x\n"
+	" MCLRE=%d - %s\n",
+	i,
+	(i & MCLRE) ? 1:0, (i & MCLRE) ? "Pin is MCLRE" : "Pin is RA5"
+    );
+    return string(buff);
+  }
+
+};
+
 //========================================================================
 //
 // Pic 18C2x2
@@ -56,7 +153,8 @@ void P18C2x2::create_iopin_map()
 
   // Build the links between the I/O Ports and their tris registers.
 
-  package->assign_pin(1, 0);  // /MCLR
+  //package->assign_pin(1, 0);  // /MCLR
+  createMCLRPin(1);
 
   package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta0"),0));
   package->assign_pin( 3, m_porta->addPin(new IO_bi_directional("porta1"),1));
@@ -237,7 +335,8 @@ void P18C4x2::create_iopin_map()
   if(!package)
     return;
 
-  package->assign_pin(1, 0); // /MCLR
+  createMCLRPin(1);
+  //package->assign_pin(1, 0); // /MCLR
 
   package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta0"),0));
   package->assign_pin( 3, m_porta->addPin(new IO_bi_directional("porta1"),1));
@@ -783,6 +882,7 @@ void P18F2455::create()
                SSP_TYPE_MSSP
        );
 
+  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
 }
 
 Processor * P18F2455::construct(const char *name)
@@ -847,6 +947,7 @@ void P18F1220::create()
   remove_sfr_register(&ssp.sspadd);
   remove_sfr_register(&ssp.sspbuf);
 
+  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_1x20(this, CONFIG3H, 0x80));
 
 }
 //------------------------------------------------------------------------
@@ -942,6 +1043,7 @@ Processor * P18F1320::construct(const char *name)
 // Pic 18C2x21
 //
 
+
 void P18F2x21::create()
 {
   if(verbose)
@@ -950,6 +1052,8 @@ void P18F2x21::create()
   create_iopin_map();
 
   _16bit_processor::create();
+  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+
 
 }
 
@@ -1013,6 +1117,7 @@ void P18F2x21::create_iopin_map()
 
   //1portc.usart = &usart16;
 }
+
 
 // Missing :
 //      OSCTUNE at 0xF9B

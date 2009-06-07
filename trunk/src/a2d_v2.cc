@@ -468,7 +468,6 @@ void ADCON1_V2::setValidCfgBits(unsigned int mask, unsigned int shift)
  * */
 unsigned int ADCON1_V2::get_adc_configmask(unsigned int reg)
 {
-    unsigned int cfgBit = (reg >>  mCfgBitShift) & mValidCfgBits;
 
     if (mValidCfgBits <= 0xf) // use config bit table
     {

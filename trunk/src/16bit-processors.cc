@@ -58,6 +58,16 @@ public:
   {
   }
 
+  virtual void set(gint64 v)
+  {
+    Integer::set(v);
+
+    printf("RRR Config1H::set val=%x\n", (unsigned int)v);
+    if (m_pCpu)
+    {
+    }
+  }
+
   virtual string toString()
   {
     gint64 i64;
@@ -655,6 +665,8 @@ bool  _16bit_processor::set_config_word(unsigned int address, unsigned int cfg_w
 
       return true;
     }
+    else
+	cout << "Setting config word no m_configMemory\n";
   }
 
   return false;
@@ -665,6 +677,7 @@ void _16bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory(this,configMemorySize());
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H(this, CONFIG1H));
+  printf("RRR _16bit_processor::create_config_memory %d %d\n", CONFIG1H-CONFIG1L, CONFIG2H-CONFIG1L);
   m_configMemory->addConfigWord(CONFIG2H-CONFIG1L,new Config2H(this, CONFIG2H));
 }
 
