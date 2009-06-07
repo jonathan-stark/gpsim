@@ -98,8 +98,7 @@ public:
 
 //-------------------------------------------------------------------
 _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
-  : pic_processor(_name,_desc), intcon(0),
-    m_MCLR(0), m_MCLRMonitor(0)
+  : pic_processor(_name,_desc), intcon(0)
 {
   pc = new Program_Counter("pc", "Program Counter", this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
@@ -301,90 +300,3 @@ void Pic14Bit::option_new_bits_6_7(unsigned int bits)
   m_portb->setIntEdge((bits & (1<<6)) == (1<<6));
 }
 
-//-------------------------------------------------------------------
-class MCLRPinMonitor : public PinMonitor
-{
-public:
-  MCLRPinMonitor(pic_processor *pCpu);
-  ~MCLRPinMonitor() {}
-
-  virtual void setDrivenState(char);
-  virtual void setDrivingState(char) {}
-  virtual void set_nodeVoltage(double) {}
-  virtual void putState(char) {}
-  virtual void setDirection() {}
-private:
-  pic_processor *m_pCpu;
-  char m_cLastResetState;
-};
-
-MCLRPinMonitor::MCLRPinMonitor(pic_processor *pCpu)
-  : m_pCpu(pCpu),
-    m_cLastResetState('I')  // I is not a valid state. It's used here for 'I'nitialization
-{
-}
-
-
-void MCLRPinMonitor::setDrivenState(char newState)
-{
-  if (newState =='0' || newState =='w') {
-    m_cLastResetState = '0';
-    m_pCpu->reset(MCLR_RESET);
-  }
-
-  if (newState =='1' || newState =='W') {
-    if (m_cLastResetState == '0')
-      m_pCpu->reset(EXIT_RESET);
-
-    m_cLastResetState = 1;
-  }
-
-}
-//-------------------------------------------------------------------
-void _14bit_processor::createMCLRPin(int pkgPinNumber)
-{
-  if (m_MCLR) {
-    cout << "BUG?: assigning multiple MCLR pins: " << __FILE__ << __LINE__ << endl;
-  }
-  if(package) {
-    m_MCLR = new IO_open_collector("MCLR");
-    package->assign_pin(pkgPinNumber,m_MCLR);
-
-    m_MCLRMonitor = new MCLRPinMonitor(this);
-    m_MCLR->setMonitor(m_MCLRMonitor);
-  }
-}
-//-------------------------------------------------------------------
-// This function is called instead of createMCLRPin where the pin
-// is already defined, but the configuration word has set the function
-// to MCLR
-
-
-void _14bit_processor::assignMCLRPin(int pkgPinNumber)
-{
-  if (m_MCLR) {
-    cout << "BUG?: assigning multiple MCLR pins: " << __FILE__ << __LINE__ << endl;
-  }
-  if(package) {
-    m_MCLR = package->get_pin(pkgPinNumber);
-    m_mclr_pin_name = package->get_pin_name(pkgPinNumber);
-    m_MCLR->newGUIname("MCLR");
-    cout << "_14bit_processor::assignMCLRPin " << m_mclr_pin_name
-	<< "\n";
-
-    if(!m_MCLRMonitor)
-      m_MCLRMonitor = new MCLRPinMonitor(this);
-    m_MCLR->setMonitor(m_MCLRMonitor);
-  }
-}
-//-------------------------------------------------------------------
-// This function sets the pin currently set as MCLR back to its original function
-void _14bit_processor::unassignMCLRPin()
-{
-    if(m_MCLR)
-    {
-	m_MCLR->newGUIname(m_mclr_pin_name.c_str());
-	m_MCLR->setMonitor(0);
-        m_MCLR = NULL;
-    }
-}

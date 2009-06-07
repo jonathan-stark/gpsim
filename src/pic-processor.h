@@ -369,6 +369,9 @@ public:
 
   virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom() { return (eeprom); }
+  virtual void createMCLRPin(int pkgPinNumber);
+  virtual void assignMCLRPin(int pkgPinNumber);
+  virtual void unassignMCLRPin();
 
   // Activity States reflect what the processor is currently doing
   // (The breakpoint class formally implemented this functionality).
@@ -389,6 +392,11 @@ protected:
   eProcessorActivityStates m_ActivityState;
   ResetTraceType *m_pResetTT;
   InterruptTraceType *m_pInterruptTT;
+  // Most midrange PIC's have a dedicated MCLR pin.
+  // For the ones that don't, m_MCLR will be null.
+  IOPIN *m_MCLR;
+  PinMonitor *m_MCLRMonitor;
+  string m_mclr_pin_name;
 };
 
 

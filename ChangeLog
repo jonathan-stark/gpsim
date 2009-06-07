@@ -1,3 +1,10 @@
+2009-07-06 Roy Rankin <rrankin@ihug.com.au>
+	* src/16bit-processors.cc src/pic-processor.h src/pic-processor.cc
+	  src/p18x.cc src/14bit-processors.h src/14bit-processors.cc :
+	- Add MCLR pin support to P18 processors
+	* src/p16f8x.cc : Fix MCLR support
+	* src/a2d_v2.cc : Remove unused variable to stop compiler warning
+
 2009-01-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p12f675/p12f675.asm 
 	  regression/a2d/p18f1220.asm regression/a2d/p18f4321.asm :
