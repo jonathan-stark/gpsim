@@ -110,9 +110,9 @@ bool LIBGPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt)
 {
   string s(pszFile);
 
-  int i = s.rfind(pFileExt) ;
+  string::size_type i = s.rfind('.') ;
   
-  return i>=0;
+  return (i != string::npos) && (s.substr(i+1)==pFileExt);
 
 }
 
