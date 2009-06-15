@@ -141,17 +141,10 @@ void OSCCON::callback()
 }
 bool OSCCON::set_rc_frequency()
 {
-  unsigned int cfg_word = cpu_pic->get_config_word(cpu_pic->config_word_address());
   double base_frequency = 31.25e3;
-  enum {
-    CFG_FOSC0 = 1<<0,
-    CFG_FOSC1 = 1<<1,
-    CFG_FOSC2 = 1<<4,
-    CFG_MCLRE = 1<<5
-  };
 
-  if(   !((cfg_word & ( CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) == 0x10) && 
-	!((cfg_word & ( CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) == 0x11))
+
+  if (!cpu_pic->get_int_osc())
      return false;
 
     unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
@@ -229,6 +222,7 @@ void  OSCCON::put(unsigned int new_value)
 	    new_value |= IOFS;
   }
 }
+
 void WDTCON::put(unsigned int new_value)
 {
   unsigned int masked_value = new_value & valid_bits;

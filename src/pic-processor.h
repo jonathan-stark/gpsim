@@ -372,6 +372,7 @@ public:
   virtual void createMCLRPin(int pkgPinNumber);
   virtual void assignMCLRPin(int pkgPinNumber);
   virtual void unassignMCLRPin();
+  virtual void osc_mode(unsigned int );
 
   // Activity States reflect what the processor is currently doing
   // (The breakpoint class formally implemented this functionality).
@@ -387,6 +388,25 @@ public:
   pic_processor(const char *_name=0, const char *desc=0);
   virtual ~pic_processor();
 
+  void set_osc_pin_Number(unsigned int i, unsigned int val, PinModule *pm)
+        {osc_pin_Number[i] = val; m_osc_Monitor[i] = pm;}
+  unsigned char get_osc_pin_Number(unsigned int i)
+        {return osc_pin_Number[i];}
+  PinModule * get_osc_PinMonitor(unsigned int i)
+	{ return m_osc_Monitor[i]; }
+
+  void set_clk_pin(unsigned int pkg_Pin_Number,
+                                     PinModule *PinMod,
+                                     const char * name,
+                                     bool in);
+  void clr_clk_pin(unsigned int pkg_Pin_Number, PinModule *PinMod );
+
+  virtual void set_int_osc(bool val){ internal_osc = val;}
+  virtual bool get_int_osc(){ return internal_osc; }
+
+
+
+
 protected:
   ConfigMemory *m_configMemory;
   eProcessorActivityStates m_ActivityState;
@@ -397,6 +417,10 @@ protected:
   IOPIN *m_MCLR;
   PinMonitor *m_MCLRMonitor;
   string m_mclr_pin_name;
+  unsigned char osc_pin_Number[2];
+  PinModule *m_osc_Monitor[2];
+  bool internal_osc;
+
 };
 
 

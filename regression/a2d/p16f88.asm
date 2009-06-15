@@ -71,18 +71,29 @@ check:
 MAIN    CODE
 start:
 
+   .sim "p16f88.xpos = 72"
+   .sim "p16f88.ypos = 72"
+
    .sim "module library libgpsim_modules"
    ; Use a pullup resistor as a voltage source
    .sim "module load pullup V1"
    .sim "V1.resistance = 100.0"
+   .sim "V1.xpos = 240"
+   .sim "V1.ypos = 72"
+
    .sim "module load pullup V2"
    .sim "V2.resistance = 100.0"
+   .sim "V2.xpos = 84"
+   .sim "V2.ypos = 24"
+
 
    ; V3 and node na0 required for A/D to see pin voltage
    ; this may be a bug RRR 5/06
 
    .sim "module load pullup V3"	
    .sim "V3.resistance = 10e6"
+   .sim "V3.xpos = 240"
+   .sim "V3.ypos = 120"
 
    .sim "node na0"
    .sim "attach na0 V3.pin porta0"

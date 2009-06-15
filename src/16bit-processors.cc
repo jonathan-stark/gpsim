@@ -41,34 +41,8 @@ Boston, MA 02111-1307, USA.  */
 //
 
 
-//------------------------------------------------------------------------
-// Config1H - default 
 
-class Config1H : public ConfigWord 
-{
-#define FOSC0   (1<<0)
-#define FOSC1   (1<<1)
-#define FOSC2   (1<<2)
-#define OSCEN   (1<<5)
-
-#define CONFIG1H_default (OSCEN | FOSC2 | FOSC1 | FOSC0)
-public:
-  Config1H(_16bit_processor *pCpu, unsigned int addr)
-    : ConfigWord("CONFIG1H", CONFIG1H_default, "Oscillator configuration", pCpu, addr)
-  {
-  }
-
-  virtual void set(gint64 v)
-  {
-    Integer::set(v);
-
-    printf("RRR Config1H::set val=%x\n", (unsigned int)v);
-    if (m_pCpu)
-    {
-    }
-  }
-
-  virtual string toString()
+  string Config1H::toString()
   {
     gint64 i64;
     get(i64);
@@ -77,14 +51,14 @@ public:
     char buff[256];
 
     const char *OSCdesc[8] = {
-      "RC oscillator w/ OSC2 configured as RA6",
-      "HS oscillator with PLL enabled/Clock frequency = (4 x FOSC)",
-      "EC oscillator w/ OSC2 configured as RA6",
-      "EC oscillator w/ OSC2 configured as divide-by-4 clock output",
-      "RC oscillator",
-      "HS oscillator",
-      "XT oscillator",
       "LP oscillator"
+      "XT oscillator",
+      "HS oscillator",
+      "RC oscillator",
+      "EC oscillator w/ OSC2 configured as divide-by-4 clock output",
+      "EC oscillator w/ OSC2 configured as RA6",
+      "HS oscillator with PLL enabled/Clock frequency = (4 x FOSC)",
+      "RC oscillator w/ OSC2 configured as RA6"
     };
     snprintf(buff,sizeof(buff),
              "$%04x\n"
@@ -97,9 +71,43 @@ public:
     return string(buff);
   }
 
-};
 
+  string Config1H_4bits::toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
 
+    char buff[256];
+
+    const char *OSCdesc[] = {
+      "LP oscillator",
+      "XT oscillator",
+      "HS oscillator",
+      "RC oscillator",
+      "EC oscillator w/ OSC2 configured as divide-by-4 clock output",
+      "EC oscillator w/ OSC2 configured as RA6",
+      "HS oscillator with PLL enabled/Clock frequency = (4 x FOSC)",
+      "RC oscillator w/ OSC2 configured as RA6",
+      "Internal oscillator block, port function on RA6 and RA7",
+      "Internal oscillator block, CLKO function on RA6, port function on RA7",
+      "External RC oscillator, CLKO function on RA6",
+      "External RC oscillator, CLKO function on RA6",
+      "External RC oscillator, CLKO function on RA6",
+      "External RC oscillator, CLKO function on RA6",
+      "External RC oscillator, CLKO function on RA6",
+      "External RC oscillator, CLKO function on RA6"
+    };
+    snprintf(buff,sizeof(buff),
+             "$%04x\n"
+             " FOSC=%d - Clk source = %s\n"
+             " OSCEN=%d - Oscillator switching is %s\n",
+             i,
+             i&(FOSC0|FOSC1|FOSC2|FOSC3), OSCdesc[i&(FOSC0|FOSC1|FOSC2|FOSC3)],
+             (i&OSCEN?1:0), ((i&OSCEN) ? "disabled" : "enabled"));
+
+    return string(buff);
+  }
 //------------------------------------------------------------------------
 // Config2H - default 
 //  The default Config2H register controls the 18F series WDT. 
@@ -211,25 +219,26 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     ssp(this)
 {
 
+  set_osc_pin_Number(0, 253, NULL);
+  set_osc_pin_Number(1, 253, NULL);
   package = 0;
-  cout << "FIXME: 16bit processor is assuming that PLL is on - should check config bits\n";
-  pll_factor = 2;
+  pll_factor = 0;
 
   pc = new Program_Counter16(this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
 
   m_porta = new PicPortRegister(this,"porta","",8,0x7f);
-  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, true);
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
   m_lata  = new PicLatchRegister(this,"lata","", m_porta);
   m_lata->setEnableMask(0x7f);
 
   m_portb = new PicPortBRegister(this,"portb","", &intcon, 8,0xff);
   m_portb->assignRBPUSink(7,&intcon2);
-  m_trisb = new PicTrisRegister(this,"trisb","", m_portb, true);
+  m_trisb = new PicTrisRegister(this,"trisb","", m_portb, false);
   m_latb  = new PicLatchRegister(this,"latb","", m_portb);
 
   m_portc = new PicPortRegister(this,"portc","",8,0xff);
-  m_trisc = new PicTrisRegister(this,"trisc","", m_portc, true);
+  m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false);
   m_latc  = new PicLatchRegister(this,"latc","", m_portc);
 
   //tmr0l.set_cpu(this, m_porta, 4, option_reg);
@@ -677,7 +686,6 @@ void _16bit_processor::create_config_memory()
 {
   m_configMemory = new ConfigMemory(this,configMemorySize());
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H(this, CONFIG1H));
-  printf("RRR _16bit_processor::create_config_memory %d %d\n", CONFIG1H-CONFIG1L, CONFIG2H-CONFIG1L);
   m_configMemory->addConfigWord(CONFIG2H-CONFIG1L,new Config2H(this, CONFIG2H));
 }
 
@@ -689,6 +697,7 @@ void _16bit_processor::create_iopin_map()
 {
   cout << "_16bit_processor::create_iopin_map WARNING --- not creating package \n";
 }
+
 
 void _16bit_compat_adc::create()
 {

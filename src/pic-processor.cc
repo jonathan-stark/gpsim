@@ -1671,7 +1671,8 @@ ConfigMemory::~ConfigMemory()
 int ConfigMemory::addConfigWord(unsigned int addr, ConfigWord *pConfigWord)
 {
   if (addr < m_nConfigWords) {
-    delete m_ConfigWords[addr];
+    if (m_ConfigWords[addr])
+	m_pCpu->deleteSymbol(m_ConfigWords[addr]);
     m_ConfigWords[addr] = pConfigWord;
     m_pCpu->addSymbol(pConfigWord);
     return 1;
@@ -1752,8 +1753,6 @@ void pic_processor::assignMCLRPin(int pkgPinNumber)
     m_MCLR = package->get_pin(pkgPinNumber);
     m_mclr_pin_name = package->get_pin_name(pkgPinNumber);
     m_MCLR->newGUIname("MCLR");
-    cout << "_14bit_processor::assignMCLRPin " << m_mclr_pin_name
-	<< "\n";
 
     if(!m_MCLRMonitor)
       m_MCLRMonitor = new MCLRPinMonitor(this);
@@ -1770,4 +1769,79 @@ void pic_processor::unassignMCLRPin()
 	m_MCLR->setMonitor(0);
         m_MCLR = NULL;
     }
+}
+//--------------------------------------------------
+//
+class IO_SignalControl : public SignalControl
+{
+public:
+  IO_SignalControl(char _dir){ direction = _dir; }
+  ~IO_SignalControl(){}
+  char getState() { return direction; }
+  void release() { }
+private:
+  char direction;
+};
+
+// This function sets a label on a pin and if PinMod is defined
+// removes its control from it's port register
+//
+void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number, 
+				     PinModule *PinMod, 
+				     const char * name,
+				     bool in)
+{
+  IOPIN *m_pin = package->get_pin(pkg_Pin_Number);
+  if (name)
+	m_pin->newGUIname(name);
+  else
+        m_pin->newGUIname(package->get_pin_name(pkg_Pin_Number).c_str());
+  if (PinMod)
+  {
+    	PinMod->setSource(new IO_SignalControl('0'));
+    	PinMod->setControl(new IO_SignalControl(in ? '1' : '0'));
+ 	PinMod->updatePinModule();
+  }
+}
+// This function reverses the effects of the previous function
+void pic_processor::clr_clk_pin(unsigned int pkg_Pin_Number, 
+				     PinModule *PinMod )
+{
+  IOPIN *m_pin = package->get_pin(pkg_Pin_Number);
+  m_pin->newGUIname(package->get_pin_name(pkg_Pin_Number).c_str());
+  if (PinMod)
+  {
+    	PinMod->setSource(0);
+    	PinMod->setControl(0);
+ 	PinMod->updatePinModule();
+  }
+}
+void pic_processor::osc_mode(unsigned int value)
+{
+  IOPIN *m_pin;
+  unsigned int pin_Number =  get_osc_pin_Number(0);
+  
+  if (pin_Number < 253)
+  {
+	m_pin = package->get_pin(pin_Number);
+  }
+  if ( (pin_Number =  get_osc_pin_Number(1)) < 253 &&
+	(m_pin = package->get_pin(pin_Number)))
+  {
+	pll_factor = 0;
+        if (value < 5)
+	{
+	    set_clk_pin(pin_Number, m_osc_Monitor[1], "OSC2", true);
+	}
+	else if(value == 6 )
+	{
+	    pll_factor = 2;
+	    set_clk_pin(pin_Number, m_osc_Monitor[1], "CLKO", false);
+	}
+	else
+	{
+	    clr_clk_pin(pin_Number, m_osc_Monitor[1]);
+	}
+  }
+  
 }

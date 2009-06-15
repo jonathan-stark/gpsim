@@ -104,9 +104,11 @@ ${RT} tmr1_16bit sim
 
 ${RT} switch_test sim
 
-${RT} p18f test1
+${RT} p18f sim_instructions
 
-${RT} p18f test2
+${RT} p18f sim_extended_instructions
+
+${RT} p18f sim_reset
 
 ${RT} comparator sim_628
 

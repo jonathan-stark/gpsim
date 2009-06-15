@@ -51,7 +51,6 @@ public:
     int diff = (i64 ^ v) &0xfff;
     Integer::set(v);
 
-    printf("RRR Config3H::set val=%x\n", (unsigned int)v);
     if (m_pCpu)
     {
 	if (diff & MCLRE)
@@ -102,7 +101,6 @@ public:
     int diff = (i64 ^ v) &0xfff;
     Integer::set(v);
 
-    printf("RRR Config3H::set val=%x diff=%x old=%x\n", (unsigned int)v, diff, (unsigned int)i64);
     if (m_pCpu)
     {
 	if (diff & MCLRE)
@@ -202,6 +200,8 @@ void P18C2x2::create_iopin_map()
        );
 
 
+  set_osc_pin_Number(0,9, NULL);
+  set_osc_pin_Number(1,10, &(*m_porta)[6]);
   //1portc.usart = &usart16;
 
 }
@@ -336,7 +336,6 @@ void P18C4x2::create_iopin_map()
     return;
 
   createMCLRPin(1);
-  //package->assign_pin(1, 0); // /MCLR
 
   package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta0"),0));
   package->assign_pin( 3, m_porta->addPin(new IO_bi_directional("porta1"),1));
@@ -352,7 +351,7 @@ void P18C4x2::create_iopin_map()
 
   package->assign_pin(11, 0);
   package->assign_pin(12, 0);
-  package->assign_pin(13, 0);
+  package->assign_pin(13, new IOPIN("OSC1"));
   package->assign_pin(14, m_porta->addPin(new IO_bi_directional("porta6"),6));
 
   package->assign_pin(15, m_portc->addPin(new IO_bi_directional("portc0"),0));
@@ -425,11 +424,11 @@ P18C4x2::P18C4x2(const char *_name, const char *desc)
     cout << "18c4x2 constructor, type = " << isa() << '\n';
 
   m_portd = new PicPSP_PortRegister(this,"portd","",8,0xff);
-  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
+  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, false);
   m_latd  = new PicLatchRegister(this,"latd","",m_portd);
 
   m_porte = new PicPortRegister(this,"porte","",8,0x07);
-  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
+  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, false);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
 }
@@ -484,8 +483,12 @@ void P18C442::create()
   if(verbose)
     cout << " 18c442 create \n";
 
+
   P18C4x2::create();
 
+    cout << " 18c442 create \n";
+  set_osc_pin_Number(0,13, NULL);
+  set_osc_pin_Number(1,14, &(*m_porta)[6]);
 }
 
 Processor * P18C442::construct(const char *name)
@@ -947,6 +950,13 @@ void P18F1220::create()
   remove_sfr_register(&ssp.sspadd);
   remove_sfr_register(&ssp.sspbuf);
 
+  add_sfr_register(&osctune,      0xf9b,RegisterValue(0,0));
+  osccon.set_osctune(&osctune);
+  osctune.set_osccon(&osccon);
+
+  set_osc_pin_Number(0,16, &(*m_porta)[7]);
+  set_osc_pin_Number(1,15, &(*m_porta)[6]);
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0xcf));
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_1x20(this, CONFIG3H, 0x80));
 
 }
@@ -983,7 +993,8 @@ void P18F1220::create_iopin_map()
 }
 
 P18F1220::P18F1220(const char *_name, const char *desc)
-  : P18Fxx20(_name,desc)
+  : P18Fxx20(_name,desc),
+    osctune(this, "osctune", "OSC Tune")
 {
 
   if(verbose)
@@ -992,6 +1003,57 @@ P18F1220::P18F1220(const char *_name, const char *desc)
 
 }
 
+void P18F1220::osc_mode(unsigned int value)
+{
+  IOPIN *m_pin;
+  unsigned int pin_Number =  get_osc_pin_Number(0);
+  
+  
+  set_int_osc(false);
+  if (pin_Number < 253)
+  {
+	m_pin = package->get_pin(pin_Number);
+	if (value == 7 || value == 8)
+	{
+	    clr_clk_pin(pin_Number, get_osc_PinMonitor(0));
+	    set_int_osc(true);
+	}
+	else
+	{
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(0), "OSC1", true);
+	}
+  }
+  if ( (pin_Number =  get_osc_pin_Number(1)) < 253 &&
+	(m_pin = package->get_pin(pin_Number)))
+  {
+	pll_factor = 0;
+	switch(value)
+	{
+	case 6:
+	    pll_factor = 2;
+	case 0:
+	case 1:
+	case 2:
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(1), "OSC2", true);
+	    break;
+
+	case 4:
+	case 9:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+	    cout << "CLKO not simulated\n";
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(1) , "CLKO", false);
+	    break;
+
+	default:
+	    clr_clk_pin(pin_Number, get_osc_PinMonitor(1));
+	    break;
+	}
+  }
+  
+}
 
 //------------------------------------------------------------------------
 //
@@ -1119,8 +1181,6 @@ void P18F2x21::create_iopin_map()
 }
 
 
-// Missing :
-//      OSCTUNE at 0xF9B
 
 void P18F2x21::create_symbols()
 {
@@ -1132,7 +1192,7 @@ void P18F2x21::create_symbols()
 
 P18F2x21::P18F2x21(const char *_name, const char *desc)
   : _16bit_v2_adc(_name,desc),
-//    osctune(this, "osctune", "OSC Tune"),
+    osctune(this, "osctune", "OSC Tune"),
     comparator(this)
 {
 
@@ -1140,7 +1200,6 @@ P18F2x21::P18F2x21(const char *_name, const char *desc)
     cout << "18c2x21 constructor, type = " << isa() << '\n';
 
     m_porte = new PicPortRegister(this,"porte","",8,0x08);
-
 //  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
 //  m_late  = new PicLatchRegister(this,"late","",m_porte);
 
@@ -1172,7 +1231,9 @@ void P18F2x21::create_sfr_map()
   adcon1->setIOPin(11, &(*m_portb)[4]);
   adcon1->setIOPin(12, &(*m_portb)[0]);
 
-//  add_sfr_register(&osctune,      0xf9b,porv);
+  add_sfr_register(&osctune,      0xf9b,porv);
+  osccon.set_osctune(&osctune);
+  osctune.set_osccon(&osccon);
 
   // rest of configuration in parent class
 
@@ -1257,6 +1318,9 @@ void P18F2321::create()
 
   P18F2x21::create();
 
+  set_osc_pin_Number(0, 9, &(*m_porta)[7]);
+  set_osc_pin_Number(1,10, &(*m_porta)[6]);
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
 }
 
 Processor * P18F2321::construct(const char *name)
@@ -1276,6 +1340,60 @@ Processor * P18F2321::construct(const char *name)
   return p;
 }
 
+void P18F2321::osc_mode(unsigned int value)
+{
+  IOPIN *m_pin;
+  unsigned int pin_Number =  get_osc_pin_Number(0);
+  
+  set_int_osc(false);
+  if (pin_Number < 253)
+  {
+	m_pin = package->get_pin(pin_Number);
+	if (value == 8 || value == 9)	// internal RC clock
+	{
+	    clr_clk_pin(pin_Number, get_osc_PinMonitor(0));
+	    set_int_osc(true);
+	}
+	else
+        {
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(0), "OSC1", true);
+	    set_int_osc(false);
+	}
+  }
+  if ( (pin_Number =  get_osc_pin_Number(1)) < 253 &&
+	(m_pin = package->get_pin(pin_Number)))
+  {
+	pll_factor = 0;
+	switch(value)
+	{
+	case 6:
+	    pll_factor = 2;
+	case 0:
+	case 1:
+	case 2:
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(1), "OSC2", true);
+	    break;
+
+	case 3:
+	case 4:
+	case 9:
+	case 10:
+	case 11:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+	    cout << "CLKO not simulated\n";
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(1) , "CLKO", false);
+	    break;
+
+	default:
+	    clr_clk_pin(pin_Number, get_osc_PinMonitor(1));
+	    break;
+	}
+  }
+  
+}
 
 
 //========================================================================
@@ -1371,13 +1489,14 @@ void P18F4x21::create_iopin_map()
                 m_trisc,         // i2c tris port
 		SSP_TYPE_MSSP
        );
+
+
+
+
   //1portc.ccp1con = &ccp1con;
   //1portc.usart = &usart16;
 
 }
-
-// Missing :
-//      OSCTUNE at 0xF9B
 
 void P18F4x21::create_symbols()
 {
@@ -1426,7 +1545,9 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(m_trise,       0xf96,RegisterValue(0x07,0));
 
 
-//  add_sfr_register(&osctune,      0xf9b,porv);
+  add_sfr_register(&osctune,      0xf9b,porv);
+  osccon.set_osctune(&osctune);
+  osctune.set_osccon(&osccon);
 
   adcon1->setIOPin(4, &(*m_porta)[5]);
   adcon1->setIOPin(5, &(*m_porte)[0]);
@@ -1520,6 +1641,9 @@ void P18F4321::create()
   set_eeprom_pir(e);
 
   P18F2x21::create();
+  set_osc_pin_Number(0, 13, &(*m_porta)[7]);
+  set_osc_pin_Number(1,14, &(*m_porta)[6]);
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
 
 }
 
@@ -1541,3 +1665,57 @@ Processor * P18F4321::construct(const char *name)
 }
 
 
+void P18F4321::osc_mode(unsigned int value)
+{
+  IOPIN *m_pin;
+  unsigned int pin_Number =  get_osc_pin_Number(0);
+  
+  
+  set_int_osc(false);
+  if (pin_Number < 253)
+  {
+	m_pin = package->get_pin(pin_Number);
+	if (value == 7 || value == 8)
+	{
+	    set_int_osc(true);
+	    clr_clk_pin(pin_Number, get_osc_PinMonitor(0));
+	}
+	else
+	{
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(0), "OSC1", true);
+	}
+  }
+  if ( (pin_Number =  get_osc_pin_Number(1)) < 253 &&
+	(m_pin = package->get_pin(pin_Number)))
+  {
+	pll_factor = 0;
+	switch(value)
+	{
+	case 6:
+	   pll_factor = 2;
+	case 0:
+	case 1:
+	case 2:
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(1), "OSC2", true);
+	    break;
+
+	case 3:
+	case 4:
+	case 9:
+	case 10:
+	case 11:
+	case 12:
+	case 13:
+	case 14:
+	case 15:
+	    cout << "CLKO not simulated\n";
+	    set_clk_pin(pin_Number, get_osc_PinMonitor(1) , "CLKO", false);
+	    break;
+
+	default:
+	    clr_clk_pin(pin_Number, get_osc_PinMonitor(1));
+	    break;
+	}
+  }
+  
+}

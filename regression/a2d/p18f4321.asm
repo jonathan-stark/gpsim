@@ -19,6 +19,8 @@ a2dIntFlag	RES	1  ;LSB is set when an A2D interrupt occurs
   GLOBAL done
   GLOBAL a2dIntFlag
 
+  __CONFIG _CONFIG3H, _MCLRE_OFF_3H
+
 ;------------------------------------------------------------------------
 STARTUP    CODE	0
 

@@ -248,12 +248,14 @@ public:
 class P18F1220 : public P18Fxx20
 {
  public:
+  OSCTUNE      osctune;
   virtual PROCESSOR_TYPE isa(){return _P18F1220_;};
   P18F1220(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
   void create();
   virtual void create_iopin_map();
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual void osc_mode(unsigned int value);
 
 };
 
@@ -280,7 +282,7 @@ class P18F2x21 : public _16bit_v2_adc
   PicPSP_TrisRegister  *m_trise;
   PicLatchRegister *m_late;
 
-//  OSCTUNE      osctune;
+  OSCTUNE      osctune;
   ComparatorModule comparator;
 
   P18F2x21(const char *_name=0, const char *desc=0);
@@ -319,6 +321,7 @@ class P18F2321 : public P18F2x21
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual void osc_mode(unsigned int value);
 
 };
 
@@ -353,6 +356,7 @@ class P18F4321 : public P18F4x21
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual void osc_mode(unsigned int value);
 
 };
 
