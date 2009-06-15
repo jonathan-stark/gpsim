@@ -183,6 +183,14 @@ public:
   virtual unsigned int configMemorySize() { return CONFIG7H-CONFIG1L+1; }
   virtual void enter_sleep();
   virtual void exit_sleep();
+/*
+  virtual void osc_mode(unsigned int value);
+  void set_osc_pin_Number(unsigned int i, unsigned int val) 
+	{osc_pin_Number[i] = val;};
+  unsigned char get_osc_pin_Number(unsigned int i) 
+	{return(osc_pin_Number[i]);};
+*/
+
 
 
   static pic_processor *construct();
@@ -194,6 +202,7 @@ public:
   void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
+//  unsigned char osc_pin_Number[2];
 };
 
 class _16bit_compat_adc : public _16bit_processor 
@@ -221,5 +230,67 @@ public:
   virtual void create(int nChannels);
 };
 #define cpu16 ( (_16bit_processor *)cpu)
+
+#define FOSC0   (1<<0)
+#define FOSC1   (1<<1)
+#define FOSC2   (1<<2)
+// FOSC3 may not be used
+#define FOSC3   (1<<3)
+#define OSCEN   (1<<5)
+
+//------------------------------------------------------------------------
+// Config1H - default 3 bits FOSC
+
+class Config1H : public ConfigWord 
+{
+
+#define CONFIG1H_default (OSCEN | FOSC2 | FOSC1 | FOSC0)
+public:
+  Config1H(_16bit_processor *pCpu, unsigned int addr)
+    : ConfigWord("CONFIG1H", CONFIG1H_default, "Oscillator configuration", pCpu, addr)
+  {
+	set(CONFIG1H_default);
+  }
+
+  virtual void set(gint64 v)
+  {
+    Integer::set(v);
+
+    if (m_pCpu)
+    {
+	m_pCpu->osc_mode(v & ( FOSC2 | FOSC1 | FOSC0));
+    }
+  }
+
+  virtual string toString();
+
+};
+
+//------------------------------------------------------------------------
+// Config1H -  4 bits FOSC
+
+class Config1H_4bits : public ConfigWord 
+{
+
+public:
+  Config1H_4bits(_16bit_processor *pCpu, unsigned int addr, unsigned int def_val)
+    : ConfigWord("CONFIG1H", def_val, "Oscillator configuration", pCpu, addr)
+  {
+	set(def_val);
+  }
+
+  virtual void set(gint64 v)
+  {
+    Integer::set(v);
+
+    if (m_pCpu)
+    {
+	m_pCpu->osc_mode(v & ( FOSC3 | FOSC2 | FOSC1 | FOSC0));
+    }
+  }
+
+  virtual string toString();
+
+};
 
 #endif

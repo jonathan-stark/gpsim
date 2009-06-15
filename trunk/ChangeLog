@@ -1,3 +1,15 @@
+2009-15-06 Roy Rankin <rrankin@ihug.com.au>
+	* src/p18x.h src/p18x.cc src/16bit-processors.h src/16bit-processors.cc
+	  src/pic-processor.h src/pic-processor.cc src/p16f62x.cc src/ioports.cc
+	  src/p18x.cc src/14bit-registers.cc src/p16f8x.cc : Config word set
+	- clock mode and pins, add OSCTUNE where appropriate for p18 processors
+	* regression/Makefile.am regression/run_regression.sh
+	  regression/p18f/reset.asm regression/p18f/Makefile : Add regression
+	- test for p18 resets
+	* regression/a2d/p18f1220.asm : add intrc frequency tests
+	* regression/a2d/p18f4321.asm : MCLR turned off with Configword
+	* regression/a2d/p16f88.asm : position test resistors
+
 2009-06-10 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/os_dependent.cc
           Fixed IsFileExtension so that the extension must match the end of 

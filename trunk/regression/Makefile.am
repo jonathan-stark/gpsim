@@ -50,6 +50,7 @@ EXTRA_DIST = \
 	p16f628/p16f628.stc p16f628/p16f628.asm p16f84/Makefile \
 	p16f84/p16f84.asm p16f84/16f84.lkr p16f84/reset.asm \
 	p16f873/p16f873.asm p18f/Makefile p18f/instructions.asm \
+	p18f/reset.asm \
 	p18f/18f452.lkr p18f/extended_instructions.asm p18f452_ports/Makefile \
 	p18f452_ports/p18f452_ports.asm p18f452_ports/18f452.lkr \
 	p18f452_ports/p18f452_ports.stc port_stim/Makefile \

@@ -478,11 +478,14 @@ void PinModule::updatePinModule()
 	    m_cLastControlState,m_cLastSourceState,m_cLastPullupControlState));
 
   char cCurrentControlState = getControlState();
+  unsigned int old_dir = m_pin->get_direction();
+  unsigned int new_dir = (cCurrentControlState=='1') ? IOPIN::DIR_INPUT : 
+		IOPIN::DIR_OUTPUT;
 
-  if (cCurrentControlState != m_cLastControlState) {
+
+  if (new_dir != old_dir) {
     m_cLastControlState = cCurrentControlState;
-    m_pin->update_direction((cCurrentControlState=='1') ? IOPIN::DIR_INPUT : IOPIN::DIR_OUTPUT,
-			    false);
+    m_pin->update_direction(new_dir, false);
     bStateChange = true;
   }
 

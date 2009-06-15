@@ -291,6 +291,7 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     unsigned int valid_pins = m_porta->getEnableMask();
 
+    set_int_osc(false);
     // Careful these bits not adjacent
     switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) {
 
@@ -314,12 +315,14 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
         break;
 
     case 0x10:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+        set_int_osc(true);
         (m_porta->getPin(6))->newGUIname("porta6");
         (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins |= 0xc0;
         break;
 
     case 0x11:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+        set_int_osc(true);
 	(m_porta->getPin(6))->newGUIname("CLKOUT");
         (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins = (valid_pins & 0xbf)|0x80;
@@ -614,6 +617,7 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
 
     unsigned int valid_pins = m_porta->getEnableMask();
 
+    set_int_osc(false);
     // Careful these bits not adjacent
     switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) {
 
@@ -637,12 +641,14 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
         break;
 
     case 0x10:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+        set_int_osc(true);
         (m_porta->getPin(6))->newGUIname("porta6");
         (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins |= 0xc0;
         break;
 
     case 0x11:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+        set_int_osc(true);
 	(m_porta->getPin(6))->newGUIname("CLKOUT");
         (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins = (valid_pins & 0xbf)|0x80;
