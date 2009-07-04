@@ -894,7 +894,7 @@ IOPIN::IOPIN(const char *_name,
 
 void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
 {
-  if (!m_monitor && new_pinMonitor)
+ if (!m_monitor && new_pinMonitor)
     m_monitor = new_pinMonitor;
 }
 
@@ -1220,6 +1220,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(const char *_name,
 {
   Vpullup = Vth;
   bPullUp = false;
+  is_analog = false;
 }
 
 IO_bi_directional_pu::~IO_bi_directional_pu(void)
@@ -1227,10 +1228,21 @@ IO_bi_directional_pu::~IO_bi_directional_pu(void)
 
 }
 
+void IO_bi_directional_pu::set_is_analog(bool flag)
+{
+    if (is_analog != flag)
+    {
+      is_analog = flag;
+      if (snode)
+	snode->update();
+      else if (!getDriving())
+	setDrivenState(bPullUp && ! is_analog);
+    }
+}
 void IO_bi_directional_pu::update_pullup(char new_state, bool refresh)
 {
   bool bNewPullupState = new_state == '1' || new_state == 'W';
-  if (bPullUp != bNewPullupState) {
+  if (bPullUp != bNewPullupState)  {
     bPullUp = bNewPullupState;
     if (refresh) {
       // If there is a node attached to the pin, then we already 
@@ -1240,14 +1252,14 @@ void IO_bi_directional_pu::update_pullup(char new_state, bool refresh)
       if (snode)
 	snode->update();
       else if (!getDriving())
-	setDrivenState(bPullUp);
+	setDrivenState(bPullUp && ! is_analog);
     }
   }
 }
 
 double IO_bi_directional_pu::get_Zth()
 {
-  return getDriving() ? Zth : (bPullUp ? Zpullup : ZthIn);
+  return getDriving() ? Zth : ((bPullUp && ! is_analog)? Zpullup : ZthIn);
 }
 
 double IO_bi_directional_pu::get_Vth()
@@ -1255,13 +1267,14 @@ double IO_bi_directional_pu::get_Vth()
   
   /**/
   if(verbose & 1)
-    cout << name() << " get_Vth PU "
+    cout << " " << name() << " get_Vth PU "
 	 << " driving=" << getDriving()
 	 << " DrivingState=" << getDrivingState()
 	 << " bDrivenState=" << bDrivenState
 	 << " Vth=" << Vth
 	 << " VthIn=" << VthIn
-	 << " bPullUp=" << bPullUp << endl;
+	 << " bPullUp=" << bPullUp 
+	 << " is_analog=" << is_analog << endl;
   /**/  
 
   // If the pin is configured as an output, then the driving voltage
@@ -1273,7 +1286,7 @@ double IO_bi_directional_pu::get_Vth()
   if(getDriving())
     return getDrivingState() ? Vth : 0;
   else
-    return bPullUp ? Vpullup : VthIn;
+    return (bPullUp && ! is_analog) ? Vpullup : VthIn;
 
 }
 

@@ -413,7 +413,8 @@ class IOPIN : public stimulus
   // interface for the derived classes.
   virtual void update_direction(unsigned int x, bool refresh){ };
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
-  virtual void update_pullup(char new_state, bool refresh) { }
+  virtual void update_pullup(char new_state, bool refresh) {}
+  virtual void set_is_analog(bool flag) {}
 
   virtual double get_Vth();
 
@@ -504,7 +505,9 @@ public:
 
   virtual char getBitChar();
   virtual void update_pullup(char new3State, bool refresh);
+  virtual void set_is_analog(bool flag);
 protected:
+  bool   is_analog;  // When is analog is true bPullup false
   bool   bPullUp;  // True when pullup is enabled
   double Zpullup;  // resistance of the pullup
   double Vpullup;  // Voltage the pullup resistor is tied to.

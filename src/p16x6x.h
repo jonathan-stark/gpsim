@@ -28,6 +28,10 @@ Boston, MA 02111-1307, USA.  */
 #include "pir.h"
 #include "ssp.h"
 #include "psp.h"
+#include "eeprom.h"
+#include "comparator.h"
+#include "a2dconverter.h"
+
 
 class P16C61 : public P16X8X
 {
@@ -203,4 +207,81 @@ class P16C65 : public  P16C64
 };
 
 
+class P16F630 :  public _14bit_processor
+{
+public:
+
+  P16F630(const char *_name=0, const char *desc=0);
+  virtual ~P16F630();
+
+  T1CON   t1con;
+  PIR    *pir1;
+  PIE     pie1;
+  TMRL    tmr1l;
+  TMRH    tmr1h;
+  OSCCAL  osccal;
+
+  EEPROM_WIDE *e;
+  PIR1v3 *pir1_3_reg;
+
+  INTCON_14_PIR    intcon_reg;
+  ComparatorModule comparator;
+  PIR_SET_1    pir_set_def;
+  WPU              *m_wpu;
+  IOC              *m_ioc;
+
+
+  virtual PIR *get_pir2() { return (NULL); }
+  virtual PIR *get_pir1() { return (pir1); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_def); }
+
+
+
+  PicPortGRegister  *m_porta;
+  PicTrisRegister  *m_trisa;
+
+  PicPortRegister *m_portc;
+  PicTrisRegister  *m_trisc;
+
+  virtual PROCESSOR_TYPE isa(){return _P16F630_;}
+  static Processor *construct(const char *name);
+  void create(int);
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+  virtual void create_iopin_map();
+  virtual void option_new_bits_6_7(unsigned int bits);
+  virtual bool hasSSP() {return false;}
+
+
+  virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual unsigned int register_memory_size () const { return 0x100; }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) { eeprom = ep; }
+  virtual void create_config_memory();
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
+
+
+
+
+
+
+};
+class P16F676 :  public P16F630
+{
+public:
+  ANSEL  ansel;
+  ADCON0_12F adcon0;
+  ADCON1_16F adcon1;
+  sfr_register  adresh;
+  sfr_register  adresl;
+
+
+  P16F676(const char *_name=0, const char *desc=0);
+  virtual ~P16F676();
+
+  virtual PROCESSOR_TYPE isa(){return _P16F676_;}
+  static Processor *construct(const char *name);
+  virtual void create(int);
+  virtual void create_sfr_map();
+};
 #endif

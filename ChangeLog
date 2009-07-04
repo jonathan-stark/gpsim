@@ -1,3 +1,20 @@
+2009-05-07 Roy Rankin <rrankin@ihug.com.au>
+	* src/16bit-processors.cc : fix Config1H::toString
+	* src/eeprom.cc : fix delete issue
+	* src/pic-processor.cc src/pic-processor.h src/p16x6x.cc src/p16x6x.h 
+	  regression/p16f676/16f676.lkr regression/p16f676/Makefile
+	  regression/p16f676/p16f676.asm regression/Makefile.am
+	  regression/run_regression.sh :
+	- Add p16f630, p16f676
+	* src/pir.cc src/pir.h : New PIR1 register type
+	* src/p16f62x.cc : fix MCLR calls
+	* src/stimuli.cc src/stimuli.h : input pull-up off for analog pins
+	  bug 2814950
+	* src/comparator.cc : new analog mode call, fix sigsegv
+	* src/ioports.cc src/ioports.h src/a2d_v2.cc : new analog mode call
+	* src/a2dconverter.cc src/a2dconverter.h : new analog pin mode call,
+	  16f676 mode
+
 2009-04-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/interrupts_14bit/interrupts_14bit.stc
 	  regression/interrupts_16bit/interrupts_16bit.stc :

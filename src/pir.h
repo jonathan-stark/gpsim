@@ -240,6 +240,35 @@ public:
          INTCON *, PIE *);
 };
 
+//---------------------------------------------------------
+// PIR1 Peripheral Interrupt register # 1
+//
+// This is version 3 of the PIR1 register - as seen on the p16f630 devices
+
+class PIR1v3 : public PIR
+{
+public:
+
+  enum {
+    TMR1IF  = 1<<0,
+    CMIF    = 1<<3,
+    ADIF    = 1<<6,
+    EEIF    = 1<<7
+  };
+ 
+  virtual void set_tmr1if() { put(get() | TMR1IF); }
+
+  virtual void set_cmif();
+
+  virtual void set_adif();
+
+  virtual void set_eeif();
+
+ 
+  PIR1v3(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
+
 
 
 //---------------------------------------------------------

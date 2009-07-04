@@ -238,6 +238,38 @@ void PIR1v2::clear_rcif(void)
 }
 
 //------------------------------------------------------------------------
+
+PIR1v3::PIR1v3(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  valid_bits = TMR1IF | ADIF | CMIF | EEIF;
+  writable_bits = TMR1IF | ADIF | CMIF | EEIF;
+}
+
+void PIR1v3::set_cmif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | CMIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+
+void PIR1v3::set_eeif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | EEIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR1v3::set_adif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | ADIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+
+//------------------------------------------------------------------------
 PIR2v1::PIR2v1(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
   : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
 {

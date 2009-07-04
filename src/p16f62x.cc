@@ -250,11 +250,12 @@ bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
     // a general purpose I/O pin.
 
     if (! (cfg_word & CFG_MCLRE)) {
+      unassignMCLRPin();
       valid_pins |= ( 1<< 5);           // porta5 IO port
     }
     else
     {
-        (m_porta->getPin(5))->newGUIname("MCLR");
+	assignMCLRPin(4); 	// pin 4
     }
 
     //cout << " porta valid_iopins " << porta->valid_iopins <<

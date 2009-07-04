@@ -333,11 +333,11 @@ void ADCON1_V2::put(unsigned int new_value)
 	    if (new_mask & (1<<i))
 	    {
 	      sprintf(newname, "an%d", i);
-	      m_AnalogPins[i]->UpAnalogCnt(true, newname);
+	      m_AnalogPins[i]->AnalogReq(this, true, newname);
 	    }
 	    else
 	    {
-	      m_AnalogPins[i]->UpAnalogCnt(false, m_AnalogPins[i]->getPin().name().c_str());
+	      m_AnalogPins[i]->AnalogReq(this, false, m_AnalogPins[i]->getPin().name().c_str());
 	    }
           }  
 	}

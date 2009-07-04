@@ -345,8 +345,10 @@ PinModule * PortModule::getIOpins(unsigned int iPinNumber)
 void PortModule::updatePort()
 {
   for (unsigned int i=0; i<mNumIopins; i++) 
-    if (iopins[i])
+  {
+    if (iopins[i] != &AnInvalidPinModule)
       iopins[i]->updatePinModule();
+  }
 }
 void PortModule::updateUI()
 {
@@ -379,7 +381,6 @@ IOPIN *PortModule::addPin(IOPIN *new_pin, unsigned int iPinNumber)
     // If there is not a PinModule for this pin, then add one.
     if (iopins[iPinNumber] == &AnInvalidPinModule)
       iopins[iPinNumber] = new PinModule(this,iPinNumber);
-
     iopins[iPinNumber]->setPin(new_pin);
   }
   return new_pin;
@@ -406,12 +407,13 @@ PinModule::PinModule()
   : PinMonitor(),
     m_cLastControlState('?'), m_cLastSinkState('?'),
     m_cLastSourceState('?'), m_cLastPullupControlState('?'),
-    m_AnalogCnt(0),
     m_defaultSource(0), m_activeSource(0),
     m_defaultControl(0), m_activeControl(0),
     m_defaultPullupControl(0), m_activePullupControl(0),
     m_pin(0), m_port(0), m_pinNumber(0)
 {
+    for(int i = 0; i < ANALOG_TABLE_SIZE; i++)
+	m_analog_reg[i] = NULL;
 
 }
 
@@ -421,11 +423,13 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
     m_cLastSourceState('?'), m_cLastPullupControlState('?'),
     m_defaultSource(0), m_activeSource(0),
     m_defaultControl(0), m_activeControl(0),
-    m_defaultPullupControl(0), m_activePullupControl(0),
+    m_defaultPullupControl(0), m_activePullupControl(0), 
     m_pin(_pin), m_port(_port), m_pinNumber(_pinNumber),
     m_bForcedUpdate(false)
 {
   setPin(m_pin);
+  for(int i = 0; i < 3; i++)
+    m_analog_reg[i] = NULL;
 }
 
 PinModule::~PinModule()
@@ -603,47 +607,73 @@ void PinModule::updateUI()
   m_port->updateUI();
 }
 
-//	UpAnalogCnt is called by modules such as ADC and Comparator
+//	AnalogReq is called by modules such as ADC and Comparator
 //	to set or release a pin to/from analog mode. When a pin is in
 //	analog mode the TRIS register is still active and output pins
 //	are still driven high or low, but reads of the port register 
-//	return 0 for the pin.
+//	return 0 for the pin. When a pin mode is changes the breadboard
+//	name of the pin is changed to newname.
 //
-//	As more than one module can place a pin into analog mode at
-//	the same time, a count is maintained of analog requests.
-//	The up requests increment the counter and donw requests
-//	decrement the counter. The pin is in analog mode when the counter
-//	is not zero.
-void PinModule::UpAnalogCnt(bool up, const char *newname)
+//	A table of each calling module is kept as a module may 
+//	request analog mode after another has. The pin is put in
+//	analog mode when the first module requests it (up=true) 
+//	and is taken out of analog mode when all modules have 
+//	requested analog mode to be released (up=false);
+//	
+void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 {
-    if (up && m_port)	// Count up
+    int i, index;
+    unsigned int total_cnt = 0;
+
+    if (!m_port) return;
+
+    // is the calling register in the table and what is the current
+    // count of modules requesting analog mode    
+
+    for(i=0, index=-1; i < ANALOG_TABLE_SIZE && m_analog_reg[i]; i++)
     {
-	m_AnalogCnt++;
-	if (m_AnalogCnt == 1)
+	if (m_analog_reg[i] == reg)
+	    index = i;
+        if (m_analog_active[i])
+	    total_cnt++;
+    }
+
+    // Register is not in table so add it.
+    //
+    if (index < 0)
+    {
+	assert(i < ANALOG_TABLE_SIZE); // table not large enough
+	index = i;
+	m_analog_reg[index] = reg;
+	m_analog_active[index] = false;
+    }
+
+    if (analog)	// Set pin to analog mode request
+    {
+	m_analog_active[index] = true;
+	if (total_cnt == 0)
 	{
 	    unsigned int mask = m_port->getOutputMask();
  	    mask &= ~(1 << getPinNumber());
 	    m_port->setOutputMask(mask);
 	    Dprintf(("PinModule::UpAnalogCnt up %s  newname=%s mask=%x\n", getPin().name().c_str(), newname, mask));
 	    getPin().newGUIname(newname);
+	    getPin().set_is_analog(true);
  	}
     }
-    else if (!up && m_port && m_AnalogCnt > 0)  // Count Down
+    else if (!analog && m_analog_active[index])  // release register request 
+						 // for analog pin
     {
-	m_AnalogCnt--;
- 	if (m_AnalogCnt == 0)
+	m_analog_active[index] = false;
+ 	if (total_cnt == 1)
         {
 	    unsigned int mask = m_port->getOutputMask();
 	    mask |= (1 << getPinNumber());
 	    Dprintf(("PinModule::UpAnalogCnt down %s  newname=%s mask=%x\n", getPin().name().c_str(), newname, mask));
 	    m_port->setOutputMask(mask);
 	    getPin().newGUIname(newname);
+	    getPin().set_is_analog(false);
 	}
-    }
-    else if (m_port && m_AnalogCnt == 0)
-    {
-	cout << "Gpsim error PinModule::UpAnalogCnt would be < 0 ";
-	cout << getPin().name()  << "\n";
     }
 }
 

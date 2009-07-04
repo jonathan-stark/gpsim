@@ -51,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
     char buff[256];
 
     const char *OSCdesc[8] = {
-      "LP oscillator"
+      "LP oscillator",
       "XT oscillator",
       "HS oscillator",
       "RC oscillator",
