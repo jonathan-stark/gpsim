@@ -95,8 +95,11 @@ public:
   void setVoltRef(unsigned int, float);
   int  get_cfg(unsigned int);
   virtual unsigned int get_adc_configmask(unsigned int);
+  virtual void set_cfg_index(unsigned int index) { cfg_index = index;}
 
   void set_channel_in(unsigned int channel, bool on);
+  void setADCnames();
+
   
   
 
@@ -107,6 +110,7 @@ private:
   unsigned int mValidCfgBits;
   unsigned int mCfgBitShift;
   unsigned int mIoMask;
+  unsigned int cfg_index;
 
   static const unsigned int cMaxConfigurations=16;
 
@@ -130,6 +134,29 @@ private:
   AD_IN_SignalControl *m_ad_in_ctl;
 };
 
+class ADCON0;
+//---------------------------------------------------------
+// ADCON1_16F 
+//
+
+class ADCON1_16F : public ADCON1
+{
+public:
+
+  enum 
+    {
+	ADCS0 = (1<<4),
+	ADCS1 = (1<<5),
+	ADCS2 = (1<<6)
+    };
+
+  ADCON1_16F(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void put_value(unsigned int new_value);
+  void setAdcon0 (ADCON0 *_adcon0) {adcon0 = _adcon0;}
+
+private:
+   ADCON0 *adcon0;
+};
 
 
 //---------------------------------------------------------
@@ -275,6 +302,7 @@ public:
       GO   = 1<<1,
       CHS0 = 1<<2,
       CHS1 = 1<<3,
+      CHS2 = 1<<4,
       VCFG = 1<<6,
       ADFM = 1<<7
     };

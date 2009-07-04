@@ -244,6 +244,7 @@ private:
 /// The parent class 'PinMonitor', allows the PinModule to be 
 /// registered with the I/O pin. In other words, when the I/O pin 
 /// changes state, the PinModule will be notified.
+#define ANALOG_TABLE_SIZE 3
 
 class PinModule : public PinMonitor
 {
@@ -275,7 +276,7 @@ public:
   char getSourceState();
   char getPullupControlState();
   unsigned int getPinNumber() { return m_pinNumber;}
-  void UpAnalogCnt(bool up, const char *analogName);
+  void AnalogReq(Register *reg, bool analog, const char *newName);
 
   IOPIN &getPin() { return *m_pin;}
 
@@ -293,7 +294,6 @@ private:
   char          m_cLastSinkState;
   char          m_cLastSourceState;
   char          m_cLastPullupControlState;
-  unsigned int  m_AnalogCnt;
 
   SignalControl *m_defaultSource,  *m_activeSource;
   SignalControl *m_defaultControl, *m_activeControl;
@@ -303,6 +303,8 @@ private:
   PortModule   *m_port;
   unsigned int  m_pinNumber;
   bool          m_bForcedUpdate;
+  Register     *m_analog_reg[ANALOG_TABLE_SIZE];	
+  bool		m_analog_active[ANALOG_TABLE_SIZE];
 };
 
 

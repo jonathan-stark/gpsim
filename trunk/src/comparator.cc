@@ -140,6 +140,7 @@ CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
 {
   value.put(0);
   cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=0;
+  cm_output[0] = cm_output[1] = 0;
   cm_input_pin[0]=cm_input_pin[1]=cm_input_pin[2]=cm_input_pin[3]=0;
   cm_output_pin[0]=cm_output_pin[1]=0;
   cm_source[0]=cm_source[1]=0;
@@ -331,14 +332,14 @@ void CMCON::put(unsigned int new_value)
             if (strncmp(name, "an", 2))
             {
                 sprintf(newname, "an%d", i);
-                cm_input[i]->UpAnalogCnt(true, newname);
+                cm_input[i]->AnalogReq(this, true, newname);
             }
         }
         else
         {
 
           if (!strncmp(name, "an", 2))
-	    cm_input[i]->UpAnalogCnt(false, cm_input[i]->getPin().name().c_str());
+	    cm_input[i]->AnalogReq(this, false, cm_input[i]->getPin().name().c_str());
 
         }
 
@@ -358,6 +359,7 @@ void CMCON::put(unsigned int new_value)
 
 VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
+    vr_PinModule(0),
     pin_name(0)
 {
   value.put(0);

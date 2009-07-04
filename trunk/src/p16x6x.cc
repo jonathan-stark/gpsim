@@ -775,3 +775,461 @@ Processor * P16C65::construct(const char *name)
 
 }
 
+//========================================================================
+//
+// Configuration Memory for 16F630/676
+
+class ConfigF630 : public ConfigWord
+{
+public:
+  ConfigF630(P16F630 *pCpu)
+    : ConfigWord("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
+  {
+    //Dprintf(("ConfigF630::ConfigF630 %p\n", m_pCpu));
+    if (m_pCpu)
+    {
+        m_pCpu->set_config_word(0x2007, 0x3fff);
+    }
+  }
+
+    enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    FOSC2  = 1<<2,
+    WDTEN  = 1<<3,
+    PWRTEN = 1<<4,
+    MCLRE =  1<<5,
+    BODEN =  1<<6,
+    CP =     1<<7,
+    CPD =    1<<8
+  };
+
+ string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[356];
+
+    const char *OSCdesc[8] = {
+      "LP oscillator",
+      "XT oscillator",
+      "HS oscillator",
+      "EC oscillator w/ OSC2 configured as I/O",
+      "INTOSC oscillator: I/O on RA4 pin, I/O on RA5",
+      "INTOSC oscillator: CLKOUT on RA4 pin, I/O on RA5",
+      "RC oscillator: I/O on RA4 pin, RC on RA5",
+      "RC oscillator: CLKOUT on RA4 pin, RC on RA5"
+    };
+    snprintf(buff,sizeof(buff),
+	" $%04x\n"
+        " FOSC=%d - Clk source = %s\n"
+	" WDTEN=%d - WDT is %s\n"
+	" PWRTEN=%d - Power up timer is %s\n"
+	" MCLRE=%d - RA3 Pin %s\n"
+	" BODEN=%d -  Brown-out Detect %s\n"
+	" CP=%d - Code Protection %s\n"
+	" CPD=%d -  Data Code Protection %s\n",
+             i,
+             i&(FOSC0|FOSC1|FOSC2), OSCdesc[i&(FOSC0|FOSC1|FOSC2)],
+             ((i&WDTE) ? 1 : 0), ((i&WDTE) ? "enabled" : "disabled"),
+             ((i&PWRTEN) ? 1 : 0), ((i&PWRTEN) ? "disabled" : "enabled"),
+             ((i&MCLRE) ? 1 : 0), ((i&MCLRE) ? "MCLR" : "Input"),
+             ((i&BODEN) ? 1 : 0), ((i&BODEN) ? "enabled" : "disabled"),
+             ((i&CP) ? 1 : 0), ((i&CP) ? "disabled" : "enabled"),
+             ((i&CPD) ? 1 : 0), ((i&CPD) ? "disabled" : "enabled")
+    );
+    return string(buff);
+
+  }
+
+};
+
+//------------------------------------------------------------------------
+//
+//
+
+P16F630::P16F630(const char *_name, const char *desc)
+   : _14bit_processor(_name, desc),
+    t1con(this, "t1con", "TMR1 Control"),
+    pie1(this,"PIE1", "Peripheral Interrupt Enable"),
+    tmr1l(this, "tmr1l", "TMR1 Low"),
+    tmr1h(this, "tmr1h", "TMR1 High"),
+    osccal(this, "osccal", "Oscillator Calibration Register", 0xfc),
+     intcon_reg(this,"intcon","Interrupt Control"),
+     comparator(this)
+{
+  if(verbose)
+    cout << "P16F630 constructor, type = " << isa() << '\n';
+
+  pir1_3_reg = new PIR1v3(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir1 = pir1_3_reg;
+
+  m_ioc = new IOC(this, "ioc", "Interrupt-On-Change GPIO Register");
+
+  m_porta = new PicPortGRegister(this,"porta","",&intcon_reg, m_ioc, 8,0x3f);
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
+
+  m_wpu = new WPU(this, "wpu", "Weak Pull-up Register", m_porta, 0x37);
+  tmr0.set_cpu(this, m_porta, 4, option_reg);
+  tmr0.start(0);
+
+  m_portc = new PicPortRegister(this,"portc","",8,0x3f);
+  m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false);
+
+
+
+}
+
+P16F630::~P16F630()
+{
+  if (verbose)
+    cout << __FUNCTION__ << endl;
+
+  delete_sfr_register(m_portc);
+  delete_sfr_register(m_trisc);
+
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_trisa);
+  delete_sfr_register(m_ioc);
+  delete_sfr_register(m_wpu);
+  delete_sfr_register(pir1_3_reg);
+  delete e;
+
+}
+void P16F630::create_iopin_map(void)
+{
+  package = new Package(14);
+  if(!package)
+    return;
+
+  package->assign_pin(1, 0);	// Vdd
+
+  package->assign_pin( 2, m_porta->addPin(new IO_bi_directional_pu("porta5"),5));
+  package->assign_pin( 3, m_porta->addPin(new IO_bi_directional_pu("porta4"),4));
+  package->assign_pin( 4, m_porta->addPin(new IOPIN("porta3"),3));
+  package->assign_pin( 5, m_portc->addPin(new IO_bi_directional_pu("portc5"),5));
+  package->assign_pin( 6, m_portc->addPin(new IO_bi_directional("portc4"),4));
+  package->assign_pin( 7, m_portc->addPin(new IO_bi_directional("portc3"),3));
+
+  package->assign_pin( 8, m_portc->addPin(new IO_bi_directional("portc2"),2));
+  package->assign_pin( 9, m_portc->addPin(new IO_bi_directional("portc1"),1));
+  package->assign_pin(10, m_portc->addPin(new IO_bi_directional("portc0"),0));
+
+  package->assign_pin(11, m_porta->addPin(new IO_bi_directional_pu("porta2"),2));
+  package->assign_pin(12, m_porta->addPin(new IO_bi_directional_pu("porta1"),1));
+  package->assign_pin(13, m_porta->addPin(new IO_bi_directional_pu("porta0"),0));
+
+  package->assign_pin(14, 0); //VSS
+
+
+  tmr1l.setIOpin(&(*m_portc)[0]);
+
+}
+Processor * P16F630::construct(const char *name)
+{
+
+  P16F630 *p = new P16F630(name);
+
+  if(verbose)
+    cout << " P16F630 construct\n";
+
+  p->create(128);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+void P16F630::create(int eesize)
+{
+   create_iopin_map();
+
+   _14bit_processor::create();
+
+   e = new EEPROM_WIDE(this,pir1);
+   e->initialize(eesize);
+   e->set_intcon(&intcon_reg);
+   set_eeprom_wide(e);
+
+   P16F630::create_sfr_map();
+
+
+
+}
+
+void P16F630::create_symbols()
+{
+  pic_processor::create_symbols();
+  addSymbol(W);
+
+}
+
+//-------------------------------------------------------------------
+void P16F630::create_sfr_map()
+{
+
+  pir_set_def.set_pir1(pir1);
+
+  add_file_registers(0x20, 0x5f, 0);
+  alias_file_registers(0x20, 0x5f, 0x80);
+
+  add_sfr_register(indf,    0x00);
+  alias_file_registers(0x00,0x00,0x80);
+
+  add_sfr_register(&tmr0,   0x01);
+  add_sfr_register(option_reg,  0x81, RegisterValue(0xff,0));
+
+  add_sfr_register(pcl,     0x02, RegisterValue(0,0));
+  add_sfr_register(status,  0x03, RegisterValue(0x18,0));
+  add_sfr_register(fsr,     0x04);
+  alias_file_registers(0x02,0x04,0x80);
+
+  add_sfr_register(m_porta, 0x05);
+  add_sfr_register(m_trisa, 0x85, RegisterValue(0x3f,0));
+
+  add_sfr_register(m_portc, 0x07);
+  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
+
+  add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
+
+  add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
+  alias_file_registers(0x0a,0x0b,0x80);
+  add_sfr_register(pir1, 0x0c, RegisterValue(0,0));
+  add_sfr_register(&tmr1l, 0x0e, RegisterValue(0,0), "tmr1l");
+  add_sfr_register(&tmr1h, 0x0f, RegisterValue(0,0), "tmr1h");
+  add_sfr_register(&t1con, 0x10, RegisterValue(0,0));
+
+  intcon = &intcon_reg;
+  intcon_reg.set_pir_set(get_pir_set());
+
+  tmr1l.tmrh = &tmr1h;
+  tmr1l.t1con = &t1con;
+  // FIXME -- can't delete this new'd item
+  tmr1l.setInterruptSource(new InterruptSource(pir1, PIR1v3::TMR1IF));
+  tmr1h.tmrl  = &tmr1l;
+  t1con.tmrl  = &tmr1l;
+
+  tmr1l.setIOpin(&(*m_porta)[5]);
+  tmr1l.setGatepin(&(*m_porta)[4]);
+
+  add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
+  if (pir1) {
+    pir1->set_intcon(&intcon_reg);
+    pir1->set_pie(&pie1);
+  }
+  pie1.setPir(pir1);
+
+
+  // Link the comparator and voltage ref to porta
+  comparator.initialize(get_pir_set(), NULL, 
+	&(*m_porta)[0], &(*m_porta)[1], 
+	NULL, NULL,
+	&(*m_porta)[2], NULL);
+
+  comparator.cmcon.set_configuration(1, 0, AN0, AN1, AN0, AN1, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN1, AN0, AN1, OUT0);
+  comparator.cmcon.set_configuration(1, 2, AN0, AN1, AN0, AN1, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN1, VREF, AN1, VREF, OUT0);
+  comparator.cmcon.set_configuration(1, 4, AN1, VREF, AN1, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, AN1, VREF, AN0, VREF, OUT0);
+  comparator.cmcon.set_configuration(1, 6, AN1, VREF, AN0, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 0, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 2, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 3, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 4, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 6, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+  comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+
+  add_sfr_register(&comparator.cmcon, 0x19, RegisterValue(0,0),"cmcon");
+  add_sfr_register(&comparator.vrcon, 0x99, RegisterValue(0,0),"cvrcon");
+
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x9a);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x9b);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x9c, RegisterValue(0,0));
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x9d);
+  add_sfr_register(m_wpu, 0x95, RegisterValue(0x37,0),"wpua");
+  add_sfr_register(m_ioc, 0x96, RegisterValue(0,0),"ioca");
+  add_sfr_register(&osccal, 0x90, RegisterValue(0x80,0));
+
+}
+//-------------------------------------------------------------------
+void P16F630::option_new_bits_6_7(unsigned int bits)
+{
+  m_wpu->set_wpu_pu( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7);
+  m_porta->setIntEdge((bits & OPTION_REG::BIT6) == OPTION_REG::BIT6);
+}
+//-------------------------------------------------------------------
+void P16F630::create_config_memory()
+{
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new ConfigF630(this));
+
+};
+
+//-------------------------------------------------------------------
+bool P16F630::set_config_word(unsigned int address, unsigned int cfg_word)
+{
+  enum {
+    CFG_FOSC0 = 1<<0,
+    CFG_FOSC1 = 1<<1,
+    CFG_FOSC2 = 1<<2,
+    CFG_WDTE  = 1<<3,
+    CFG_MCLRE = 1<<5,
+  };
+
+  
+   if(address == config_word_address())
+    {
+       unsigned int valid_pins = m_porta->getEnableMask();
+
+        if ((cfg_word & CFG_MCLRE) == CFG_MCLRE)
+	{
+            assignMCLRPin(4);  
+	}
+        else
+	{
+            unassignMCLRPin();
+	}
+
+        wdt.initialize((cfg_word & CFG_WDTE) == CFG_WDTE);
+
+
+       set_int_osc(false);
+
+	// AnalogReq is used so ADC does not change clock names
+	// set_config_word is first called with default and then
+	// often called a second time. the following call is to
+	// reset porta so next call to AnalogReq sill set the pin name
+	//
+        (&(*m_porta)[4])->AnalogReq((Register *)this, false, "porta4");
+	valid_pins |= 0x20;
+       	switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) 
+	{
+
+       	case 0:  // LP oscillator: low power crystal is on RA4 and RA5
+       	case 1:     // XT oscillator: crystal/resonator is on RA4 and RA5
+       	case 2:     // HS oscillator: crystal/resonator is on RA4 and RA5
+            (&(*m_porta)[4])->AnalogReq((Register *)this, true, "OSC2");
+            (m_porta->getPin(5))->newGUIname("OSC1");
+	    valid_pins &= 0xcf;
+            break;
+
+	case 3:	// EC I/O on RA4 pin, CLKIN on RA5
+            (m_porta->getPin(5))->newGUIname("CLKIN");
+	    valid_pins &= 0xef;
+            break;
+
+	    
+	case 5: // INTOSC CLKOUT on RA4 pin
+            (&(*m_porta)[4])->AnalogReq((Register *)this, true, "CLKOUT");
+	case 4: // INTOSC
+            (m_porta->getPin(5))->newGUIname("porta5");
+             set_int_osc(true);
+             osccal.set_freq(4e6);
+	    break;
+
+	case 6: //RC oscillator: I/O on RA4 pin, RC on RA5
+            (m_porta->getPin(5))->newGUIname("RC");
+	    valid_pins &= 0xdf;
+            break;
+
+	case 7: // RC oscillator: CLKOUT on RA4 pin, RC on RA5
+            (&(*m_porta)[4])->AnalogReq((Register *)this, true, "CLKOUT");
+            (m_porta->getPin(5))->newGUIname("RC");
+	    valid_pins &= 0xdf;
+            break;
+	};
+
+	if (valid_pins != m_porta->getEnableMask()) // enable new pins for IO
+    	{
+            m_porta->setEnableMask(valid_pins);
+	    m_trisa->setEnableMask(valid_pins);
+    	}
+	return(true);
+
+    }
+    return false;
+}
+
+
+//------------------------------------------------------------------------
+//
+//
+
+P16F676::P16F676(const char *_name, const char *desc)
+   : P16F630(_name, desc),
+    ansel(this,"ansel", "Analog Select"),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+    adresh(this,"adresh", "A2D Result High"),
+    adresl(this,"adresl", "A2D Result Low")
+
+{
+}
+Processor * P16F676::construct(const char *name)
+{
+
+  P16F676 *p = new P16F676(name);
+
+  if(verbose)
+    cout << " P16F676 construct\n";
+  p->create(128);
+  p->create_invalid_registers ();
+  p->create_symbols();
+
+  return p;
+}
+P16F676::~P16F676()
+{
+  if (verbose)
+    cout << __FUNCTION__ << endl;
+
+}
+void P16F676::create(int ram_top)
+{
+    P16F630::create(ram_top);
+    create_sfr_map();
+}
+void P16F676::create_sfr_map()
+{
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+  add_sfr_register(&adresh,  0x1e, RegisterValue(0,0));
+
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
+  add_sfr_register(&ansel, 0x91, RegisterValue(0xff,0));
+
+
+  ansel.setAdcon1(&adcon1);
+//  ansel.setAdcon0(&adcon0);
+  adcon0.setAdresLow(&adresl);
+  adcon0.setAdres(&adresh);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(10);
+  adcon0.setPir(pir1);
+  adcon0.setChannel_Mask(7);
+  adcon0.setChannel_shift(2);
+
+  adcon1.setAdcon0(&adcon0);
+  adcon1.setNumberOfChannels(8);
+
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[4]);
+  adcon1.setIOPin(4, &(*m_portc)[0]);
+  adcon1.setIOPin(5, &(*m_portc)[1]);
+  adcon1.setIOPin(6, &(*m_portc)[2]);
+  adcon1.setIOPin(7, &(*m_portc)[3]);
+
+  adcon1.setVrefHiConfiguration(2, 1);
+
+/* Channel Configuration done dynamiclly based on ansel */
+
+}

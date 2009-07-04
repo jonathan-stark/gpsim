@@ -512,11 +512,7 @@ EEPROM_WIDE::EEPROM_WIDE(Processor *pCpu, PIR *pPir)
 
 EEPROM_WIDE::~EEPROM_WIDE()
 {
-  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
-  if (pCpu) {
-    pCpu->remove_sfr_register(&eedatah);
-    pCpu->remove_sfr_register(&eeadrh);
-  }
+
 }
 
 void EEPROM_WIDE::start_write()
@@ -609,9 +605,5 @@ void EEPROM_WIDE::initialize(unsigned int new_rom_size)
   eedatah.set_eeprom(this);
   eeadrh.set_eeprom(this);
 
-
-
   EEPROM::initialize(new_rom_size);
-
-
 }
