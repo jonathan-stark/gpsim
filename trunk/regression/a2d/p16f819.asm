@@ -5,7 +5,7 @@
 
   __CONFIG _WDT_OFF
 
-	;; The purpose of this program is to test gpsim's ability to simulate a pic 16c71.
+	;; The purpose of this program is to test gpsim
 	;; Specifically, the a/d converter is tested.
 
         errorlevel -302 

@@ -6,7 +6,8 @@
         __CONFIG  _CONFIG1, _CP_OFF & _WDT_OFF &  _INTRC_IO & _PWRTE_ON & _LVP_OFF & _BODEN_OFF & _MCLR_OFF
         __CONFIG    _CONFIG2, _IESO_OFF & _FCMEN_OFF
 
-	;; The purpose of this program is to test gpsim's ability to simulate a pic 16F88.
+	;; The purpose of this program is to test gpsim's ability to 
+	;; simulate a pic 16F88.
 	;; Specifically, the a/d converter is tested.
 
         errorlevel -302 
@@ -203,6 +204,7 @@ start:
 
 	bsf	STATUS,RP0
 	bsf	ADCON1,VCFG1
+	bsf	ANSEL,3
 	bcf	STATUS,RP0
 
   .command "V2.voltage=2.0"

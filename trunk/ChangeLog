@@ -1,3 +1,11 @@
+2009-04-07 Roy Rankin <rrankin@ihug.com.au>
+	* regression/interrupts_14bit/interrupts_14bit.stc
+	  regression/interrupts_16bit/interrupts_16bit.stc :
+	+ terminate test when interrupts fail
+	* regression/a2d/p16f819.asm : fix comment
+	* regression/a2d/p16f88.asm : set vref as analog pin
+	* regression/a2d/Makefile : fix "make sim"
+
 2009-15-06 Roy Rankin <rrankin@ihug.com.au>
 	* src/p18x.h src/p18x.cc src/16bit-processors.h src/16bit-processors.cc
 	  src/pic-processor.h src/pic-processor.cc src/p16f62x.cc src/ioports.cc

@@ -34,3 +34,4 @@ attach n2 portb2 portb6
 attach n3 portb3 portb7
 attach test_node portb4
 
+break c 0x200000
