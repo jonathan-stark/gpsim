@@ -226,7 +226,7 @@ class P18F452 : public P18F442
 
 };
 
-class P18F2455 : public P18F442
+class P18F2455 : public P18F242
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
@@ -234,7 +234,21 @@ class P18F2455 : public P18F442
   static Processor *construct(const char *name);
   void create();
 
-  virtual unsigned int program_memory_size() const { return 0x40000; };
+  virtual unsigned int program_memory_size() const { return 0x3000; };
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
+
+};
+
+class P18F4455 : public P18F442
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
+  P18F4455(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int program_memory_size() const { return 0x3000; };
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
 
 };
 

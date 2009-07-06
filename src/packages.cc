@@ -160,13 +160,13 @@ PinGeometry *Package::getPinGeometry(unsigned int pin_number)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
+void Package::assign_pin(unsigned int pin_number, IOPIN *pin, bool warn)
 {
 
   switch(pin_existance(pin_number)) {
 
   case E_PIN_EXISTS:
-    if(pins[pin_number-1])
+    if(pins[pin_number-1] && warn)
       cout << "warning: Package::assign_pin. Pin number " << pin_number << " already exists.\n";
 
   case E_NO_PIN:
@@ -189,7 +189,8 @@ void Package::destroy_pin(unsigned int pin_number, IOPIN *pin)
 
     if(pin_number <= number_of_pins) {
       IOPIN *pPin = pins[pin_number-1];
-      delete pPin;
+      if (pPin)
+          delete pPin;
       pins[pin_number-1] = 0;
     }
 

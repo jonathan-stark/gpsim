@@ -1,4 +1,11 @@
-2009-05-07 Roy Rankin <rrankin@ihug.com.au>
+2009-07-07 Roy Rankin <rrankin@ihug.com.au>
+	+ src/pic-processor.cc src/pic-processor.h src/p18x.cc src/p18x.h :
+	- Fix 18f2455 sigsegv, package size (2814946), ram and program size
+	  add 18f4455 40 pin version but still no USB support
+	* src/processor.cc : Remove 2^N restriction on program memory size
+	* src/packages.h src/packages.cc : Make warning in assign_pin optional
+
+2009-07-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.cc : fix Config1H::toString
 	* src/eeprom.cc : fix delete issue
 	* src/pic-processor.cc src/pic-processor.h src/p16x6x.cc src/p16x6x.h 
@@ -15,7 +22,7 @@
 	* src/a2dconverter.cc src/a2dconverter.h : new analog pin mode call,
 	  16f676 mode
 
-2009-04-07 Roy Rankin <rrankin@ihug.com.au>
+2009-07-04 Roy Rankin <rrankin@ihug.com.au>
 	* regression/interrupts_14bit/interrupts_14bit.stc
 	  regression/interrupts_16bit/interrupts_16bit.stc :
 	+ terminate test when interrupts fail
@@ -23,7 +30,7 @@
 	* regression/a2d/p16f88.asm : set vref as analog pin
 	* regression/a2d/Makefile : fix "make sim"
 
-2009-15-06 Roy Rankin <rrankin@ihug.com.au>
+2009-06-15 Roy Rankin <rrankin@ihug.com.au>
 	* src/p18x.h src/p18x.cc src/16bit-processors.h src/16bit-processors.cc
 	  src/pic-processor.h src/pic-processor.cc src/p16f62x.cc src/ioports.cc
 	  src/p18x.cc src/14bit-registers.cc src/p16f8x.cc : Config word set
@@ -42,14 +49,14 @@
           but not using the patch supplied as it wasn't quite semantically
           correct.
 
-2009-07-06 Roy Rankin <rrankin@ihug.com.au>
+2009-06-07 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.cc src/pic-processor.h src/pic-processor.cc
 	  src/p18x.cc src/14bit-processors.h src/14bit-processors.cc :
 	- Add MCLR pin support to P18 processors
 	* src/p16f8x.cc : Fix MCLR support
 	* src/a2d_v2.cc : Remove unused variable to stop compiler warning
 
-2009-01-06 Roy Rankin <rrankin@ihug.com.au>
+2009-06-01 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p12f675/p12f675.asm 
 	  regression/a2d/p18f1220.asm regression/a2d/p18f4321.asm :
 	- Test that analog pins read as 0
@@ -63,7 +70,7 @@
 	- analog pins are labeled and read as 0 (bug 1832222)
 	* src/p18x.cc : remove ssp registers on p18f1220
 
-2009-30-05 Roy Rankin <rrankin@ihug.com.au>
+2009-05-30 Roy Rankin <rrankin@ihug.com.au>
 	* regression/comparator/compar_10f204.asm : reset vector wrong address
 	* regression/p12f675/p12f675.asm : fix typos, clear analog ports at
 	- end of ADC test
@@ -71,7 +78,7 @@
 	* src/intcon.h src/intcon.cc src/pic-instructions.cc src/p12x.cc :
 	- remove extraneous trace messages
 
-2009-24-05 Roy Rankin <rrankin@ihug.com.au>
+2009-05-24 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p12f675/12f675.lkr regression/p12f675/p12f675.asm
 	  regression/p12f675/Makefile regression/Makefile.am src/Makefile.am
 	  regression/run_regression.sh src/p12f6xx.cc src/p12f6xx.h
