@@ -479,9 +479,15 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 //
 // The purpose of this member function is to allocate memory for the
 // pic's code space. The 'memory_size' parameter tells how much memory
-// is to be allocated AND it should be an integer of the form of 2^n.
+// is to be allocated 
+//
+//  The following is not correct for 18f2455 and 18f4455 processors
+//  so test has been disabled (RRR)
+//
+//  AND it should be an integer of the form of 2^n.
 // If the memory size is not of the form of 2^n, then this routine will
 // round up to the next integer that is of the form 2^n.
+//
 //   Once the memory has been allocated, this routine will initialize
 // it with the 'bad_instruction'. The bad_instruction is an instantiation
 // of the instruction class that chokes gpsim if it is executed. Note that
@@ -491,12 +497,14 @@ void Processor::init_program_memory (unsigned int memory_size)
 {
   if(verbose)
     cout << "Initializing program memory: 0x"<<memory_size<<" words\n";
+#ifdef RRR
   if ((memory_size-1) & memory_size)
     {
       cout << "*** WARNING *** memory_size should be of the form 2^N\n";
       memory_size = (memory_size + ~memory_size) & MAX_PROGRAM_MEMORY;
       cout << "gpsim is rounding up to memory_size = " << memory_size << '\n';
     }
+#endif
   // Initialize 'program_memory'. 'program_memory' is a pointer to an array of
   // pointers of type 'instruction'. This is where the simulated instructions
   // are stored.
