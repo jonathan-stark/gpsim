@@ -1,3 +1,11 @@
+2009-07-11 Roy Rankin <rrankin@ihug.com.au>
+	* regression/comparator/compar_877a.stc : position modules
+	* regression/interrupts_14bit/interrupts_14bit.asm : use WDT
+	* regression/usart_test/usart_pir1v1.asm
+	* regression/usart_test/usart_pir1v2.asm
+	  regression/usart_test/eusart.asm  
+	  regression/i2c/p16f876a.asm : Stop run-away tests
+
 2009-07-07 Roy Rankin <rrankin@ihug.com.au>
 	+ src/pic-processor.cc src/pic-processor.h src/p18x.cc src/p18x.h :
 	- Fix 18f2455 sigsegv, package size (2814946), ram and program size

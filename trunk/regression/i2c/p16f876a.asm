@@ -40,6 +40,7 @@ PROG1 	CODE
 
 ;
 start	
+   .sim "break c 0x100000"
    .sim "module lib libgpsim_modules"
    .sim "module load e24xx024 ee"
    .sim "module load pu pu1"
