@@ -94,6 +94,7 @@ MAIN    CODE
 start	
 
    .sim ".frequency=20e6"
+   .sim "break c 0x100000"
    .sim "module library libgpsim_modules"
    .sim "module load usart U1"
  ;  .sim "U1.xpos = 250.0"

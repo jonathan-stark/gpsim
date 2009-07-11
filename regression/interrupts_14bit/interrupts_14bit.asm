@@ -10,7 +10,7 @@
  ;; Suppress warnings of using 'option' instruction.
 	errorlevel -224
 
-  __CONFIG _WDT_OFF
+  __CONFIG _WDT_ON
 
 
 
@@ -87,6 +87,7 @@ exit_int:
         movwf   STATUS
         swapf   w_temp,f
         swapf   w_temp,w
+	clrwdt
         retfie
 
 
@@ -163,6 +164,7 @@ test_tmr0:
         bcf     INTCON,T0IF     ;not necessary..., but clear pending int.
         bsf     INTCON,T0IE     ;Re-enable tmr0 interrupts
         
+	clrwdt
 tmr0_l1:
         bcf     temp1,0         ;Interrupt flag
 
@@ -207,6 +209,7 @@ tmr0_l1:
         ;; the logic highs, the portb weak pull-up resistors
         ;; need to be enabled.
         
+	clrwdt
 test_inte:
 
         
@@ -235,6 +238,7 @@ test_inte:
         ;; temp1 counts the number of times an interrupt has occurred
         ;; temp2 counts the number of times the interrupt was due to
         ;;      a rising edge.
+	clrwdt
 inte_edgecount:
         bcf     temp5,0         ;Interrupt flag
 
@@ -277,6 +281,7 @@ inte_edgecount:
         ;; This next block tests the interrupt on change feature of
         ;; port b's I/O pins 4-7
         ;; 
+	clrwdt
 test_rbif
 
         bcf     INTCON,INTE     ;Disable the rb0 interrupt
@@ -294,6 +299,7 @@ test_rbif
 	movlw	6
 	movwf	PORTB
 
+	clrwdt
 rbif_l1:
         
         bcf     INTCON,RBIE

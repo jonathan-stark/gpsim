@@ -8,18 +8,18 @@ module library libgpsim_modules
 
 
 # Modules:
-U1.xpos=84.
-U1.ypos=24.
-
+U1.xpos = 60
+U1.ypos = 36
 
 module load pullup PU1
-PU1.resistance=10000.
+PU1.resistance = 10000
+PU1.xpos = 228
+PU1.ypos = 36
 
 module load pulldown PD2
-PD2.resistance=10000.
-
-
-module load pullup PU2
+PD2.resistance = 10000
+PD2.xpos = 228
+PD2.ypos = 96
 
 # Connections:
 node nb0
