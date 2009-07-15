@@ -418,6 +418,8 @@ protected:
   // Most midrange PIC's have a dedicated MCLR pin.
   // For the ones that don't, m_MCLR will be null.
   IOPIN *m_MCLR;
+  IOPIN *m_MCLR_Save;
+  int   m_MCLR_pin;
   PinMonitor *m_MCLRMonitor;
   string m_mclr_pin_name;
   unsigned char osc_pin_Number[2];

@@ -390,8 +390,17 @@ MAIN    CODE
 start:
 
   .sim "module lib libgpsim_modules"
+   .sim "p16f88.xpos = 96"
+   .sim "p16f88.ypos = 144"
+
    .sim "module load pu pu1"
+   .sim "pu1.xpos = 276"
+   .sim "pu1.ypos = 72"
+
    .sim "module load pu pu2"
+   .sim "pu2.xpos = 96"
+   .sim "pu2.ypos = 48"
+
    .sim "node n1"
    .sim "attach n1 portb2 pu1.pin portb4" ; ee.SCL"
    .sim "node n2"

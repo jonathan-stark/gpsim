@@ -890,6 +890,7 @@ IOPIN::IOPIN(const char *_name,
 {
   if(verbose)
     cout << "IOPIN default constructor\n";
+  is_analog = false;
 }
 
 void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
@@ -901,6 +902,9 @@ void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
 
 IOPIN::~IOPIN()
 {
+    if (m_monitor)
+	((PinModule *)m_monitor)->clrPin();
+
 }
 
 
@@ -1028,7 +1032,7 @@ void IOPIN::setDrivenState(bool new_state)
 
   // Propagate the new state to those things monitoring this pin.
   // (note that the 3-state value is what's propagated).
-  if(m_monitor)
+  if(m_monitor && !is_analog)
   {
     m_monitor->setDrivenState(getBitChar());
     if(verbose & 16)
@@ -1220,7 +1224,6 @@ IO_bi_directional_pu::IO_bi_directional_pu(const char *_name,
 {
   Vpullup = Vth;
   bPullUp = false;
-  is_analog = false;
 }
 
 IO_bi_directional_pu::~IO_bi_directional_pu(void)
@@ -1233,6 +1236,7 @@ void IO_bi_directional_pu::set_is_analog(bool flag)
     if (is_analog != flag)
     {
       is_analog = flag;
+
       if (snode)
 	snode->update();
       else if (!getDriving())
