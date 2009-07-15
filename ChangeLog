@@ -1,3 +1,9 @@
+2009-07-15 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* src/14bit_tmrs.cc src/14bit_tmrs.h
+          Changed around the structure of who does what when a CCP is in 
+          compare mode. At the moment this should not have changed any 
+          functionality, but is in preparation for fixing bug 2819395
+
 2009-07-15 Roy Rankin <rrankin@ihug.com.au>
 	* regression/i2c/p16f88.asm : position modules
 	* modules/stimuli.cc : fix error causing warning message
