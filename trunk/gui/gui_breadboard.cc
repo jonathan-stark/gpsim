@@ -106,6 +106,7 @@ public:
     bbw->Update();
 
   }
+  void Remove() { }
 };
 //========================================================================
 
@@ -1966,7 +1967,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     GtkWidget *vbox;
     GtkWidget *scrolledwindow;
 
-    gchar *module_clist_titles[]={"Name1","Name2", "Library"};
+    const gchar *module_clist_titles[]={"Name1","Name2", "Library"};
 
     cancel=-1;
 
@@ -1985,9 +1986,9 @@ static char *select_module_dialog(Breadboard_Window *bbw)
         gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 #ifdef OLD_MODULE_LIBRARY
-        module_clist = gtk_clist_new_with_titles (2, module_clist_titles);
+        module_clist = gtk_clist_new_with_titles (2, (gchar **)module_clist_titles);
 #else
-        module_clist = gtk_clist_new_with_titles (3, module_clist_titles);
+        module_clist = gtk_clist_new_with_titles (3, (gchar **)module_clist_titles);
 #endif
         gtk_clist_set_column_auto_resize(GTK_CLIST(module_clist),0,TRUE);
         gtk_widget_show (module_clist);
@@ -2599,15 +2600,16 @@ void GuiPin::SetModulePosition(int x, int y)
 //========================================================================
 GuiPin::GuiPin(Breadboard_Window *_bbw,
                GuiModule *pModule,
-               IOPIN *_iopin,
+		Package *_package,
                unsigned int pin_number)
   : GuiBreadBoardObject(_bbw, 0, 0),
+    package(_package),
     m_pModule(pModule), m_module_x(0), m_module_y(0),
     m_label_x(0), m_label_y(0),
     m_pkgPinNumber(pin_number)
 {
 
-  iopin = _iopin;
+  IOPIN *iopin = getIOpin();
   m_width=pinspacing;
   m_height=pinspacing;
 
@@ -2660,8 +2662,10 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
 
 }
 
-const char *GuiPin::pinName() const
+const char *GuiPin::pinName()
 {
+
+  IOPIN *iopin = getIOpin();
 
   return iopin ? iopin->name().c_str() : 0;
 }
@@ -2670,6 +2674,7 @@ const char *GuiPin::pinName() const
 //
 void GuiPin::Update()
 {
+  IOPIN *iopin = getIOpin();
 
   if(iopin) {
 
@@ -2690,6 +2695,7 @@ void GuiPin::Update()
 //------------------------------------------------------------------------
 void GuiPin::toggleState()
 {
+  IOPIN *iopin = getIOpin();
   if(iopin) {
     char cPinState = iopin->getForcedDrivenState();
 
@@ -2819,6 +2825,7 @@ void GuiPin::SetLabelPosition(int x, int y)
 void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
 {
   const char *name;
+  IOPIN *iopin = getIOpin();
 
 
   name = iopin ? iopin->name().c_str() : "";
@@ -2844,6 +2851,7 @@ void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
 //
 int GuiPin::DrawGUIlabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
 {
+  IOPIN *iopin = getIOpin();
   const char *name;
   int orient;
 
@@ -2888,7 +2896,7 @@ void GuiPin::addXref(CrossReferenceToGUI *newXref)
 void GuiPin::Destroy()
 {
   if(xref)
-    iopin->remove_xref(xref);
+    getIOpin()->remove_xref(xref);
 
   gdk_pixmap_unref(pixmap);
   gtk_widget_destroy(m_pinDrawingArea);
@@ -3090,7 +3098,7 @@ void GuiModule::AddPin(unsigned int pin_number)
     iopin->add_xref(cross_reference);
   }
 
-  GuiPin *pin = new GuiPin(m_bbw, this, iopin, pin_number);
+  GuiPin *pin = new GuiPin(m_bbw, this, m_module->package, pin_number);
   pin->addXref(cross_reference);
   m_pins = g_list_append(m_pins, pin);
 

@@ -187,3 +187,4 @@ ${RT} wdt sim_wdt_18f452
 ${RT} wdt sim_nwdt_18f452
 
 ${RT} p16f676 sim_p16f676
+${RT} p16f676 sim_reset

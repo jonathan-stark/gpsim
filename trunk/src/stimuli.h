@@ -427,6 +427,7 @@ class IOPIN : public stimulus
   virtual void clr_is_newGUIname(void) { gui_name_updated = false; }
 
 protected:
+  bool   is_analog;  		  // Pin is in analog mode
   bool    gui_name_updated;       // True if object name has changed
   string  gui_name;               //
 
@@ -507,7 +508,6 @@ public:
   virtual void update_pullup(char new3State, bool refresh);
   virtual void set_is_analog(bool flag);
 protected:
-  bool   is_analog;  // When is analog is true bPullup false
   bool   bPullUp;  // True when pullup is enabled
   double Zpullup;  // resistance of the pullup
   double Vpullup;  // Voltage the pullup resistor is tied to.

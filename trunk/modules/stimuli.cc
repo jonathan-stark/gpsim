@@ -260,7 +260,9 @@ Pulse Generator\n\
   {
     //guint64 currCycle = get_cycles().get();
 
+
     if (sample_iterator != samples.end()) {
+      m_future_cycle = 0;
 
       double d;
       (*sample_iterator).v->get(d);

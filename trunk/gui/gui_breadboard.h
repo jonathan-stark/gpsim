@@ -22,6 +22,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_BREADBOARD_H__
 #define __GUI_BREADBOARD_H__
 
+#include "../src/packages.h"
+
 
 //
 // The Breadboard window data
@@ -91,7 +93,7 @@ protected:
 class GuiPin : public GuiBreadBoardObject
 {
 public:
-  GuiPin(Breadboard_Window *, GuiModule *,IOPIN *, unsigned int pin_number);
+  GuiPin(Breadboard_Window *, GuiModule *,Package *, unsigned int pin_number);
   bool getState() {return value;}
   void putState(bool bNewState) { value = bNewState;}
   void toggleState();
@@ -115,9 +117,9 @@ public:
   void SetOrientation(eOrientation o) { orientation = o; }
 
   unsigned int number() { return m_pkgPinNumber; }
-  Stimulus_Node *getSnode() {return iopin ? iopin->snode : 0;}
-  IOPIN *getIOpin() {return iopin;}
-  const char *pinName() const;
+  Stimulus_Node *getSnode() {return getIOpin() ? getIOpin()->snode : 0;}
+  IOPIN *getIOpin() {return package->get_pin(m_pkgPinNumber);}
+  const char *pinName();
 
   GtkWidget *m_pinDrawingArea;
   GdkPixmap *pixmap;
@@ -129,7 +131,8 @@ public:
 
 protected:
   bool   value;
-  IOPIN *iopin;
+//  IOPIN *iopin;
+  Package *package;
   CrossReferenceToGUI *xref;
 
   GuiModule *m_pModule;     // Module to which this pin belongs.

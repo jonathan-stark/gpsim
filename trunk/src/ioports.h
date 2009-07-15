@@ -265,6 +265,7 @@ public:
   void refreshPinOnUpdate(bool bForcedUpdate);
 
   void setPin(IOPIN *);
+  void clrPin() { m_pin = NULL; } 
   void setDefaultSource(SignalControl *);
   void setSource(SignalControl *);
   void setDefaultControl(SignalControl *);

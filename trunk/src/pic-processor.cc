@@ -1080,7 +1080,7 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
     W(0), pcl(0), pclath(0),m_PCHelper(0),
     tmr0(this,"tmr0","Timer 0"),
     m_configMemory(0),
-    m_MCLR(0), m_MCLRMonitor(0)
+    m_MCLR(0), m_MCLR_Save(0), m_MCLRMonitor(0)
 {
 
 #ifdef CLOCK_EXPERIMENTS
@@ -1752,28 +1752,50 @@ void pic_processor::createMCLRPin(int pkgPinNumber)
 
 void pic_processor::assignMCLRPin(int pkgPinNumber)
 {
-  if (m_MCLR) {
-    cout << "BUG?: assigning multiple MCLR pins: " << __FILE__ << dec << " " << __LINE__ << endl;
-  }
-  if(package) {
-    m_MCLR = package->get_pin(pkgPinNumber);
-    m_mclr_pin_name = package->get_pin_name(pkgPinNumber);
-    m_MCLR->newGUIname("MCLR");
+  if (package)
+  {
 
-    if(!m_MCLRMonitor)
-      m_MCLRMonitor = new MCLRPinMonitor(this);
-    m_MCLR->setMonitor(m_MCLRMonitor);
+    if (m_MCLR == NULL)
+    {
+	m_MCLR_pin = pkgPinNumber;
+    	m_MCLR = new IO_open_collector("MCLR");
+	m_MCLR_Save = package->get_pin(pkgPinNumber);
+    	package->assign_pin(pkgPinNumber,m_MCLR, false);
+
+    	m_MCLRMonitor = new MCLRPinMonitor(this);
+    	m_MCLR->setMonitor(m_MCLRMonitor);
+    	m_MCLR->newGUIname("MCLR");
+    }
+    else if (m_MCLR != package->get_pin(pkgPinNumber))
+    {
+
+        cout << "BUG?: assigning multiple MCLR pins: " 
+	<< dec << pkgPinNumber << " " << __FILE__ <<  " " 
+	<< __LINE__ << endl;
+    }
   }
 }
 //-------------------------------------------------------------------
 // This function sets the pin currently set as MCLR back to its original function
 void pic_processor::unassignMCLRPin()
 {
-    if(m_MCLR)
+  
+    if (package && m_MCLR_Save)
     {
-	m_MCLR->newGUIname(m_mclr_pin_name.c_str());
-	m_MCLR->setMonitor(0);
-        m_MCLR = NULL;
+
+	package->assign_pin(m_MCLR_pin,m_MCLR_Save, false);
+        m_MCLR_Save->newGUIname(m_MCLR_Save->name().c_str());
+	if (m_MCLR)
+	{
+	    m_MCLR->setMonitor(0);
+	    delete m_MCLR;
+	    m_MCLR = NULL;
+	    if (m_MCLRMonitor)
+	    {
+		delete m_MCLRMonitor;
+		m_MCLRMonitor = NULL;
+	    }
+	}
     }
 }
 //--------------------------------------------------
