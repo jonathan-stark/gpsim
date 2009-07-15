@@ -32,6 +32,7 @@ class TMRL;
 class TMRH;
 class TMR2;
 class CCPRL;
+class CCPCON;
 class ADCON0;
 class PIR_SET;
 class InterruptSource;
@@ -70,12 +71,14 @@ class CCPRL : public sfr_register
 public:
 
   CCPRH  *ccprh;
+  CCPCON *ccpcon;
   TMRL   *tmrl;
 
   void put(unsigned int new_value);
   void capture_tmr();
-  void start_compare_mode();
+  void start_compare_mode(CCPCON *ref=0);
   void stop_compare_mode();
+  bool test_compare_mode();
   void start_pwm_mode();
   void stop_pwm_mode();
   void assign_tmr(TMRL *ptmr);
@@ -129,6 +132,7 @@ public:
   void pwm_match(int new_state);
   void put(unsigned int new_value);
   char getState();
+  bool test_compare_mode();
 
   void setCrosslinks(CCPRL *, PIR *, TMR2 *);
   void setADCON(ADCON0 *);
@@ -150,9 +154,9 @@ private:
   TMR2    *tmr2;
   ADCON0  *adcon0;
 
-
-
 };
+
+
 class TMR1_Freq_Attribute;
 //---------------------------------------------------------
 // T1CON - Timer 1 control register
@@ -280,6 +284,10 @@ public:
   virtual void setInterruptSource(InterruptSource *);
   virtual void sleep();
   virtual void wake();
+
+  void set_compare_event ( unsigned int value, CCPCON *host );
+  void clear_compare_event ( CCPCON *host );
+
 protected:
   virtual void increment();   // Used when TMR1 is attached to an external clock
 private:

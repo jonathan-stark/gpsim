@@ -48,8 +48,13 @@ Boston, MA 02111-1307, USA.  */
 
 CCPRL::CCPRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    ccprh(0), tmrl(0)
+    ccprh(0), ccpcon(0), tmrl(0)
 {
+}
+
+bool CCPRL::test_compare_mode()
+{
+    return tmrl && ccpcon && ccpcon->test_compare_mode();
 }
 
 void CCPRL::put(unsigned int new_value)
@@ -58,7 +63,7 @@ void CCPRL::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   value.put(new_value);
 
-  if(tmrl && tmrl->compare_mode)
+  if(test_compare_mode())
     start_compare_mode();   // Actually, re-start with new capture value.
 
 }
@@ -81,28 +86,32 @@ void CCPRL::capture_tmr()
     cout << "CCPRL captured: " << c << '\n';
 }
 
-void CCPRL::start_compare_mode()
+void CCPRL::start_compare_mode(CCPCON *ref)
 {
-
-  tmrl->compare_mode = 1;
-
   int capture_value = value.get() + 256*ccprh->value.get();
   if(verbose & 4)
     cout << "start compare mode with capture value = " << capture_value << '\n';
-  tmrl->compare_value = capture_value;
-  tmrl->update();
+
+  if ( ref )
+  {
+    ccpcon = ref;
+  }
+  if ( ccpcon )
+    tmrl->set_compare_event ( capture_value, ccpcon );
+  else
+    cout << "CPRL: Attempting to set a compare callback with no CCPCON\n";
 }
 
 void CCPRL::stop_compare_mode()
 {
-  // If tmr1 is in the compare mode, then change to non-compare and update
+  // If this CCP is in the compare mode, then change to non-compare and cancel
   // the tmr breakpoint.
 
-  if(tmrl && tmrl->compare_mode)
-    {
-      tmrl->compare_mode = 0;
-      tmrl->update();
-    }
+  if(test_compare_mode())
+  {
+    tmrl->clear_compare_event ( ccpcon );
+  }
+  ccpcon = 0;
 }
 
 void CCPRL::start_pwm_mode()
@@ -160,7 +169,7 @@ void CCPRH::put(unsigned int new_value)
     {
       put_value(new_value);
 
-      if(ccprl && ccprl->tmrl && ccprl->tmrl->compare_mode)
+      if(ccprl && ccprl->test_compare_mode())
 	ccprl->start_compare_mode();   // Actually, re-start with new capture value.
 
     }
@@ -462,8 +471,8 @@ void CCPCON::put(unsigned int new_value)
 
       // RP - According to 16F87x data sheet section 8.2.1 clearing CCP1CON also clears the latch
       m_cOutputState = '0';
-
       break;
+
     case CAP_FALLING_EDGE:
     case CAP_RISING_EDGE:
       edges = 0;
@@ -496,8 +505,7 @@ void CCPCON::put(unsigned int new_value)
       m_bOutputEnabled = true;
     case COM_INTERRUPT:
     case COM_TRIGGER:
-      ccprl->tmrl->ccpcon = this;   // %%%FIXME%%% - how can this work when there's two CCPs?
-      ccprl->start_compare_mode();
+      ccprl->start_compare_mode(this);
       ccprl->stop_pwm_mode();
       tmr2->stop_pwm(address);
 
@@ -535,6 +543,36 @@ void CCPCON::put(unsigned int new_value)
     m_PinModule->updatePinModule();
 
 }
+
+bool CCPCON::test_compare_mode()
+{
+  switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
+  {
+    case ALL_OFF0:
+    case ALL_OFF1:
+    case ALL_OFF2:
+    case ALL_OFF3:
+    case CAP_FALLING_EDGE:
+    case CAP_RISING_EDGE:
+    case CAP_RISING_EDGE4:
+    case CAP_RISING_EDGE16:
+    case PWM0:
+    case PWM1:
+    case PWM2:
+    case PWM3:
+      return false;  
+      break;
+
+    case COM_SET_OUT:
+    case COM_CLEAR_OUT:
+    case COM_INTERRUPT:
+    case COM_TRIGGER:
+      return true;  
+      break;
+  }
+}
+
+
 
 // Attribute for frequency of external Timer1 oscillator
 class TMR1_Freq_Attribute : public Float
@@ -777,6 +815,24 @@ void TMRL::setSinkState(char new3State)
   }
 }
 
+void TMRL::set_compare_event ( unsigned int value, CCPCON *host )
+{
+  if ( ccpcon != host ) // %%%FIXME%%% - report a problem condition
+    cout << "TMRL: Overriding compare mode for " << ccpcon <<
+                   " with " << host << '\n';
+  if ( host )
+    ccpcon = host;   // %%%FIXME%%% - how can this work when there's two CCPs?
+  compare_mode = 1;
+  compare_value = value;
+  update();
+}
+
+void TMRL::clear_compare_event ( CCPCON *host )
+{
+  if ( host == ccpcon )
+    compare_mode = 0;   // %%%FIXME%%% - how can this work when there's two CCPs?
+  update();
+}
 
 void TMRL::setGatepin(PinModule *extGateSource)
 {
@@ -1147,6 +1203,9 @@ void TMRL::callback()
     {
 
       // The break was due to a "compare"
+
+      if ( value_16bit != break_value )
+          cout << "TMR1 compare break: value=" << value_16bit << " but break_value=" << break_value << '\n';
 
       if(verbose & 4)
         cout << "TMR1 break due to compare "  << hex << get_cycles().get() << '\n';
