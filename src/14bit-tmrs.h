@@ -234,29 +234,30 @@ public:
 
 };
 
+class TMR1CapComRef;
+
 class TMRL : public sfr_register, public TriggerObject, public SignalSink
 {
 public:
 
   TMRH  *tmrh;
   T1CON *t1con;
-  CCPCON *ccpcon;
 
   unsigned int 
     prescale,
     prescale_counter,
     break_value,
-    compare_value,
     value_16bit;         /* Low and high concatenated */
 
   double ext_scale;
+
+  TMR1CapComRef * compare_queue;
 
   guint64
     synchronized_cycle,
     future_cycle;
   gint64 last_cycle;  // last_cycle can be negative for small cycle counts
 
-  bool compare_mode;
 
   virtual void callback();
   virtual void callback_print();

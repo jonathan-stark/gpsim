@@ -470,7 +470,7 @@ rbif_l3:
         clrf    T2CON           ; and switch off TMR2
 
 
-done:   
+done:  
   .assert  "\"*** PASSED 16bit interrupt priority test\""
         goto    $
 

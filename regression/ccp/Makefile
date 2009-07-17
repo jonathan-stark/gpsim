@@ -15,5 +15,5 @@ ccp_819.cod : ccp_819.o
 pwm_877a.cod : pwm_877a.o
 	gplink --map -s 16f877a.lkr -o $@  $^
 
-sim: sim_ccp_877a sim_pwm_887a sim_ccp_819
+sim: sim_ccp_877a sim_pwm_877a sim_ccp_819
 

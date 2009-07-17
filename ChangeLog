@@ -1,3 +1,16 @@
+2009-07-17 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* src/14bit_tmrs.cc src/14bit_tmrs.h
+          Turned the ccpcon/compare_value member pair in TMRL into a 
+          linked list of CCP references, built on demand and deleted 
+          when compare mode cancelled, thus fixing bug 2819395
+        * src/16bit-processors.cc p16x6x.cc
+          Removed setting of tmrl->ccpcon as it no longer exists. The
+          operation was pointless anyway, as it would always be set
+          again before it became meaningful
+        * regression/ccp/ccp877a.asm
+          Added regression test for dual compare mode. This is a very
+          slightly enhanced version of Roy's attachment in bug 2819395
+
 2009-07-15 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/14bit_tmrs.cc src/14bit_tmrs.h
           Changed around the structure of who does what when a CCP is in 
