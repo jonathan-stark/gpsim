@@ -705,7 +705,7 @@ unsigned int TMRH::get_value()
   if(get_cycles().get() <= tmrl->synchronized_cycle)
     return value.get();
 
-  // If he TMR is not running then return.
+  // If the TMR is not running then return.
   if(!tmrl->t1con->get_tmr1on())
     return value.get();
 
@@ -740,6 +740,22 @@ public:
 private:
   TMRL *m_tmr1l;
 };
+
+//--------------------------------------------------
+// trivial class to represent a compare event reference
+//--------------------------------------------------
+
+class TMR1CapComRef
+{
+public:
+    TMR1CapComRef * next;
+
+    CCPCON * ccpcon;
+    unsigned int value;
+
+    TMR1CapComRef ( CCPCON * c, unsigned int v ) : ccpcon(c), value(v) {};
+};
+
 //--------------------------------------------------
 // member functions for the TMRL base class
 //--------------------------------------------------
@@ -752,15 +768,13 @@ TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   synchronized_cycle=0;
   prescale_counter=prescale=1;
   break_value = 0x10000;
-  compare_value = 0;
-  compare_mode = 0;
   last_cycle = 0;
   future_cycle = 0;
 
   ext_scale = 1.;
   tmrh    = 0;
   t1con   = 0;
-  ccpcon  = 0;
+  compare_queue = 0;
 }
 
 TMRL::~TMRL()
@@ -817,21 +831,46 @@ void TMRL::setSinkState(char new3State)
 
 void TMRL::set_compare_event ( unsigned int value, CCPCON *host )
 {
-  if ( ccpcon != host ) // %%%FIXME%%% - report a problem condition
-    cout << "TMRL: Overriding compare mode for " << ccpcon <<
-                   " with " << host << '\n';
+  TMR1CapComRef * event = compare_queue;
+
   if ( host )
-    ccpcon = host;   // %%%FIXME%%% - how can this work when there's two CCPs?
-  compare_mode = 1;
-  compare_value = value;
-  update();
+  {
+    while ( event )
+    {
+      if ( event->ccpcon == host )
+      {
+        event->value = value;
+        update();
+        return;
+      }
+      event = event->next;
+    }
+    event = new TMR1CapComRef ( host, value );
+    event->next = compare_queue;
+    compare_queue = event;
+    update();
+  }
+  else
+      cout << "TMRL::set_compare_event called with no CAPCOM\n";
 }
 
 void TMRL::clear_compare_event ( CCPCON *host )
 {
-  if ( host == ccpcon )
-    compare_mode = 0;   // %%%FIXME%%% - how can this work when there's two CCPs?
-  update();
+  TMR1CapComRef * event = compare_queue;
+  TMR1CapComRef * * eptr = &compare_queue;
+
+  while ( event )
+  {
+    if ( event->ccpcon == host )
+    {
+      *eptr = event->next;
+      delete event;
+      update();
+      return;
+    }
+    eptr = &event->next;
+    event = event->next;
+  }
 }
 
 void TMRL::setGatepin(PinModule *extGateSource)
@@ -947,11 +986,10 @@ void TMRL::update()
   // The second part of the if will always be true unless TMR1 Gate enable
   // pin has been defined by a call to TMRL::setGatepin()
   //
-  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? !m_GateState : true)) {
-
-
-    if(t1con->get_tmr1cs() && t1con->get_t1oscen()) {
-
+  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? !m_GateState : true)) 
+  {
+    if(t1con->get_tmr1cs() && t1con->get_t1oscen()) 
+    {
 	/*
 	 external timer1 clock runs off a crystal which is typically
 	 32768 Hz and is independant on the instruction clock, but
@@ -963,16 +1001,17 @@ void TMRL::update()
 	cout << "Tmr1 External clock\n";
       
     }
-    else if(t1con->get_tmr1cs() && !  t1con->get_t1oscen()) {
+    else if(t1con->get_tmr1cs() && !  t1con->get_t1oscen()) 
+    {
       prescale = 1 << t1con->get_prescale();
       prescale_counter = prescale;
       set_ext_scale();
       return;
-    } else {
-	
+    }
+    else
+    {
       if(verbose & 0x4)
 	cout << "Tmr1 Internal clock\n";
-
     }
 
     set_ext_scale();
@@ -998,17 +1037,19 @@ void TMRL::update()
 
       break_value = 0x10000;  // Assume that a rollover will happen first.
 
-      if(compare_mode)
+      for ( TMR1CapComRef * event = compare_queue; event; event = event->next )
+      {
+        if(verbose & 0x4)
+	    cout << "compare mode on " << event->ccpcon << ", value = " << event->value << '\n';
+	if ( event->value > value_16bit && event->value < break_value )
 	{
-          if(verbose & 0x4)
-	    cout << "compare mode. compare_value = " << compare_value << '\n';
-	  if(compare_value > value_16bit)
-	    {
-	      // A compare interrupt is going to happen before the timer
-	      // will rollover.
-	      break_value = compare_value;
-	    }
+	    // A compare interrupt is going to happen before the timer
+	    // will rollover.
+	    break_value = event->value;
 	}
+      }
+      if(verbose & 0x4)
+        cout << "TMR1 now at " << value_16bit << ", next event at " << break_value << '\n';
 
       guint64 fc = get_cycles().get() 
 		+ (guint64)((break_value - value_16bit) * prescale * ext_scale);
@@ -1101,9 +1142,9 @@ void TMRL::current_value()
     tmrh->value.put((value_16bit>>8) & 0xff);
   }
 }
+
 unsigned int TMRL::get_low_and_high()
 {
-
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(get_cycles().get() <= synchronized_cycle)
@@ -1131,7 +1172,6 @@ void TMRL::new_clock_source()
   {
       if(verbose & 0x4)
 	cout << "Tmr1 External Stimuli\n";
-	cout << "Tmr1 External Stimuli\n";
       if (future_cycle)
       {
         // Compute value_16bit with old prescale and ext_scale
@@ -1148,12 +1188,10 @@ void TMRL::new_clock_source()
   {
       if(verbose & 0x4)
 	cout << "Tmr1 Fosc/4 \n";
-	cout << "Tmr1 Fosc/4 \n";
       put(value.get());
   }
   else {
       if(verbose & 0x4)
-	cout << "Tmr1 External Crystal\n";
 	cout << "Tmr1 External Crystal\n";
     put(value.get());    // let TMRL::put() set a cycle counter break point
   }
@@ -1169,7 +1207,8 @@ void TMRL::clear_timer()
 {
 
   last_cycle = get_cycles().get();
-  cout << "TMR1 has been cleared\n";
+  if(verbose & 0x4)
+    cout << "TMR1 has been cleared\n";
 }
 
 // TMRL callback is called when the cycle counter hits the break point that
@@ -1188,7 +1227,8 @@ void TMRL::callback()
   // external clock. The cycle break point was still set, so just ignore it.
   if(t1con->get_tmr1cs() && ! t1con->get_t1oscen())
     {
-      cout << "TMRL:callback No oscillator\n";
+      if(verbose & 4)
+        cout << "TMRL:callback No oscillator\n";
       value.put(0);
       tmrh->value.put(0);
       future_cycle = 0;  // indicates that TMRL no longer has a break point
@@ -1200,8 +1240,7 @@ void TMRL::callback()
   future_cycle = 0;     // indicate that there's no break currently set
 
   if(break_value < 0x10000)
-    {
-
+  {
       // The break was due to a "compare"
 
       if ( value_16bit != break_value )
@@ -1209,8 +1248,15 @@ void TMRL::callback()
 
       if(verbose & 4)
         cout << "TMR1 break due to compare "  << hex << get_cycles().get() << '\n';
-      ccpcon->compare_match();
 
+      for ( TMR1CapComRef * event = compare_queue; event; event = event->next )
+      {
+	if ( event->value == break_value )
+	{
+	    // This CCP channel has a compare at this time
+          event->ccpcon->compare_match();
+	}
+      }
     }
   else
     {

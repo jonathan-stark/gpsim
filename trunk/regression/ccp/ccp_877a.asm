@@ -475,6 +475,64 @@ tt4:
         goto    tt4
 
 done_ccp2:
+;
+;	test running both CCPs in compare mode at the same time
+;
+        clrf    T1CON
+        clrf    TMR1L
+        clrf    TMR1H
+
+        bsf     STATUS,RP0
+        bcf     TRISC, 2         ;CCP bit is an output
+        bcf     TRISC, 1         ;CCP bit is an output
+        bsf     PIE2, CCP2IE
+        bcf     STATUS,RP0
+
+        movlw   0x8
+        movwf   CCP2CON
+        movwf   CCP1CON
+
+        ;;
+        clrf    PIR2
+        
+        ;; Initialize the 16-bit compare register:
+
+        movlw   0x34
+        movwf   CCPR2L
+        movlw   0x0
+        movwf   CCPR2H
+
+        movlw   0x34
+        movwf   CCPR1L
+        movlw   0x2
+        movwf   CCPR1H
+
+        ;; Clear the interrupt flag
+        clrf    temp1
+        ;; Now start T1
+        bsf     T1CON,TMR1ON
+
+        ;; Wait for the interrupt routine to set the flag:
+ccp12_loop1:
+	movf	temp1,W
+        btfsc   STATUS,Z
+	goto ccp12_loop1
+
+        ;; Now confirm that it wasn't CCP1 that happened first
+  .assert "(temp1 & 0x3) != 2, \"*** FAILED CCP 877a test both CCP running\""
+	nop
+
+        ;; Wait until the timer reaches 0x300
+ccp12_loop2:
+	movf	TMR1H,W
+        xorlw   3
+        btfss   STATUS,Z
+	goto    ccp12_loop2
+
+        ;; and confirm that both CCPs have fired by now
+  .assert "(temp1 == 6), \"*** FAILED CCP 877a test both CCP running\""
+	nop
+
         goto    done
 
 
@@ -488,4 +546,5 @@ done:
 
         goto    $
 
+;   .sim "set verbose 4"
         end
