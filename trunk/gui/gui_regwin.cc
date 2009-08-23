@@ -37,8 +37,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 
-#include <gtkextra/gtksheet.h>
-
 #include "../src/interface.h"
 #include "../src/trace.h"
 #include "../src/breakpoints.h"

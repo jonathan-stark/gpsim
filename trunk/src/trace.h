@@ -492,13 +492,6 @@ class Trace
     trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  /*
-  void interrupt (void)
-  {
-    trace_buffer[trace_index] = INTERRUPT;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
   inline bool near_full(void) {
     return (trace_index > TRACE_BUFFER_NEAR_FULL);
   }

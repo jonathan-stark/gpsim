@@ -179,6 +179,8 @@ ProcessorConstructor pP12F629(P12F629::construct ,
                               "__12F629", "pic12f629",  "p12f629", "12f629");
 ProcessorConstructor pP12F675(P12F675::construct ,
                               "__12F675", "pic12f675",  "p12f675", "12f675");
+ProcessorConstructor pP12F683(P12F683::construct ,
+                              "__12F683", "pic12f683",  "p12f683", "12f683");
 ProcessorConstructor pP16C54(P16C54::construct ,
                              "__16C54",   "pic16c54",   "p16c54", "16c54");
 ProcessorConstructor pP16C55(P16C55::construct ,

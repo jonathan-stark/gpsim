@@ -570,6 +570,7 @@ bool CCPCON::test_compare_mode()
       return true;  
       break;
   }
+  return false;
 }
 
 
@@ -634,7 +635,7 @@ void T1CON::put(unsigned int new_value)
 
   if( diff & TMR1ON)
     tmrl->on_or_off(value.get() & TMR1ON);
-  else  if( diff & (T1CKPS0 | T1CKPS1 | TMR1GE))
+  else  if( diff & (T1CKPS0 | T1CKPS1 | TMR1GE | T1GINV))
     tmrl->update();
 
 }
@@ -735,7 +736,7 @@ public:
   }
   void setSinkState(char new3State)
   {
-    m_tmr1l->new_gate_edge( new3State=='1' || new3State=='W');
+    m_tmr1l->IO_gate( new3State=='1' || new3State=='W');
   }
 private:
   TMRL *m_tmr1l;
@@ -761,7 +762,8 @@ public:
 //--------------------------------------------------
 TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    m_cState('?'), m_GateState(false), m_bExtClkEnabled(false), m_sleeping(false), m_Interrupt(0)
+    m_cState('?'), m_GateState(false), m_bExtClkEnabled(false), 
+    m_sleeping(false), m_t1gss(true), m_Interrupt(0)
 {
 
   value.put(0);
@@ -881,13 +883,38 @@ void TMRL::setGatepin(PinModule *extGateSource)
     extGateSource->addSink(new TMRl_GateSignalSink(this));
 }
 
-void TMRL::new_gate_edge(bool state)
+void TMRL::set_T1GSS(bool arg)
 {
-  if (m_GateState != state)
+
+    m_t1gss = arg;
+    if (m_t1gss)
+	IO_gate(m_io_GateState);
+    else
+	compare_gate(m_compare_GateState);
+}
+void TMRL::compare_gate(bool state)
+{
+  m_compare_GateState = state;
+  if (!m_t1gss && m_GateState != state)
   {
     m_GateState = state;
     
-    Dprintf(("TMRL::new_gate_edge state %d \n", state));
+    Dprintf(("TMRL::compare_gate state %d \n", state));
+
+    if (t1con->get_tmr1GE())
+    {
+	update();
+    }
+  }
+}
+void TMRL::IO_gate(bool state)
+{
+  m_io_GateState = state;
+  if (m_t1gss && m_GateState != state)
+  {
+    m_GateState = state;
+    
+    Dprintf(("TMRL::IO_gate state %d \n", state));
 
     if (t1con->get_tmr1GE())
     {
@@ -986,7 +1013,8 @@ void TMRL::update()
   // The second part of the if will always be true unless TMR1 Gate enable
   // pin has been defined by a call to TMRL::setGatepin()
   //
-  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? !m_GateState : true)) 
+  bool gate = t1con->get_t1GINV() ? m_GateState : !m_GateState;
+  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? gate : true)) 
   {
     if(t1con->get_tmr1cs() && t1con->get_t1oscen()) 
     {

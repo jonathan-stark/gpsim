@@ -174,7 +174,8 @@ enum
   T1CKPS0 = 1<<4,
   T1CKPS1 = 1<<5,
   T1RD16  = 1<<6,
-  TMR1GE  = 1<<6	// TMR1 Gate Enable used if TMR1L::setGatepin() has been called
+  TMR1GE  = 1<<6,  // TMR1 Gate Enable used if TMR1L::setGatepin() has been called
+  T1GINV  = 1<<7
 };
 
   TMRL  *tmrl;
@@ -208,6 +209,10 @@ enum
   unsigned int get_tmr1GE()
     {
       return(value.get() & TMR1GE);
+    }
+  unsigned int get_t1GINV()
+    {
+      return(value.get() & T1GINV);
     }
   unsigned int get_t1sync()
     {
@@ -281,7 +286,8 @@ public:
   virtual void setSinkState(char);
   virtual void setIOpin(PinModule *);
   virtual void setGatepin(PinModule *);
-  virtual void new_gate_edge(bool);
+  virtual void IO_gate(bool);
+  virtual void compare_gate(bool);
   virtual void setInterruptSource(InterruptSource *);
   virtual void sleep();
   virtual void wake();
@@ -289,13 +295,20 @@ public:
   void set_compare_event ( unsigned int value, CCPCON *host );
   void clear_compare_event ( CCPCON *host );
 
+  void set_T1GSS(bool arg);
+
 protected:
   virtual void increment();   // Used when TMR1 is attached to an external clock
 private:
   char m_cState;
   bool m_GateState;		// Only changes state if setGatepin() has been called
+  bool m_compare_GateState;
+  bool m_io_GateState;
   bool m_bExtClkEnabled;
   bool m_sleeping;
+  bool m_t1gss;			// T1 gate source
+				// true - IO pin controls gate, 
+				// false - compare controls gate
   InterruptSource *m_Interrupt;
 };
 

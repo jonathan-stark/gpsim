@@ -171,9 +171,13 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
 
 #ifdef __DEBUG_CYCLE_COUNTER__
   cout << "Cycle_Counter::set_break  cycle = 0x" << hex<<future_cycle;
+  cout << " now=" << value;
 
     if(f)
-      cout << " has callback\n";
+    {
+      cout << " has callback ";
+	f->callback_print();
+    }
     else
       cout << " does not have callback\n";
 #endif
@@ -232,6 +236,11 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
 	f->CallBackID = ++CallBackID_Sequence;
 
 #ifdef __DEBUG_CYCLE_COUNTER__
+      cout << "set_break l1->next=" << hex << l1->next << " ";
+      if (f)
+	f->callback_print();
+      else
+	cout << endl;
       cout << "cycle break " << future_cycle << " bpn " << bpn << '\n';
       if(f)
 	cout << "call back sequence number = "<< f->CallBackID <<'\n';
@@ -665,6 +674,7 @@ void Cycle_Counter::clear_current_break(TriggerObject *f)
   if(value == break_on_this && (!f || (f && f==active.next->f))) {
 
 #ifdef __DEBUG_CYCLE_COUNTER__
+    cout << "Cycle_Counter::clear_current_break ";
     cout << "current cycle " << hex << setw(16) << setfill('0') << value << endl;
     cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this;
     if(active.next->f)

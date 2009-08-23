@@ -170,6 +170,7 @@ public:
   virtual void set_intcon(INTCON *ic);
 
   virtual void callback();
+  virtual void callback_print(){ cout << " EEPROM\n";}
   virtual void start_write();
   virtual void write_is_complete();
   virtual void start_program_memory_read();  
@@ -245,6 +246,7 @@ public:
 
   virtual void start_write();
   virtual void callback();
+  virtual void callback_print(){ cout << " EEPROM_WIDE\n";}
   virtual void start_program_memory_read();
   virtual void initialize(unsigned int new_rom_size);
 

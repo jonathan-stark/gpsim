@@ -34,10 +34,12 @@ Boston, MA 02111-1307, USA.  */
 #include "processor.h"
 #include "pir.h"
 #include "stimuli.h"
+#include "14bit-tmrs.h"
 #include "comparator.h"
 
 ComparatorModule::ComparatorModule(Processor *pCpu)
   : cmcon(pCpu,"cmcon", "Comparator Module Control"),
+    cmcon1(pCpu,"cmcon1", "Comparator Configure Register"),
     vrcon(pCpu,"vrcon", "Voltage Reference Control")
 {
 }
@@ -136,7 +138,7 @@ int ih2, int out)
 CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     _vrcon(0),
-    pir_set(0)
+    pir_set(0), m_tmrl(0)
 {
   value.put(0);
   cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=0;
@@ -249,6 +251,8 @@ unsigned int CMCON::get()
         if (pir_set)
                 pir_set->set_cmif();
    }
+   if (m_tmrl)
+	m_tmrl->compare_gate((cmcon_val & C1OUT) == C1OUT);
    value.put(cmcon_val);
    return(cmcon_val);
 }
@@ -352,6 +356,24 @@ void CMCON::put(unsigned int new_value)
       cout << "CMCON::put() val=0x" << hex << new_value <<endl;
   get();        // update comparator values
 
+}
+//------------------------------------------------------------------------
+CMCON1::CMCON1(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc), m_tmrl(0)
+{
+}
+CMCON1::~CMCON1() {}
+void CMCON1::put(unsigned int new_value)
+{
+
+  if (verbose)
+      cout << "CMCON1::put(new_value) =" << hex << new_value << endl;
+
+  assert(m_tmrl);
+  m_tmrl->set_T1GSS((new_value & T1GSS) == T1GSS);
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
 }
 //--------------------------------------------------
 //      Voltage reference

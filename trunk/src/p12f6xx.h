@@ -47,6 +47,7 @@ public:
   TMRH    tmr1h;
   PCON    pcon;
   OSCCAL  osccal;
+  EEPROM_PIR *e;
 
   PicPortGRegister  *m_gpio;
   PicTrisRegister  *m_trisio;
@@ -60,12 +61,13 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P12F629_;};
   P12F629(const char *_name=0, const char *desc=0);
+  ~P12F629();
   static Processor *construct(const char *name);
   virtual void create_sfr_map();
   virtual void create_symbols();
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void create_iopin_map();
-  virtual void create(int ram_top);
+  virtual void create(int ram_top, int eeprom_size);
   virtual unsigned int register_memory_size () const { return 0x100; }
   virtual void option_new_bits_6_7(unsigned int bits);
   virtual unsigned int program_memory_size() const { return 0x400; }
@@ -91,10 +93,36 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P12F675_;};
 
-  virtual void create(int ram_top);
+  virtual void create(int ram_top, int eeprom_size);
   virtual unsigned int program_memory_size() const { return 0x400; };
 
   P12F675(const char *_name=0, const char *desc=0);
+  ~P12F675() {};
+  static Processor *construct(const char *name);
+  virtual void create_sfr_map();
+};
+
+class P12F683 : public P12F675
+{
+public:
+  T2CON   t2con;
+  PR2     pr2;
+  TMR2    tmr2;
+  CCPCON  ccp1con;
+  CCPRL   ccpr1l;
+  CCPRH   ccpr1h;
+  WDTCON  wdtcon;
+  OSCCON  osccon;
+  OSCTUNE  osctune;
+
+
+  virtual PROCESSOR_TYPE isa(){return _P12F683_;};
+
+  virtual void create(int ram_top, int eeprom_size);
+  virtual unsigned int program_memory_size() const { return 0x800; };
+
+  P12F683(const char *_name=0, const char *desc=0);
+  ~P12F683() {};
   static Processor *construct(const char *name);
   virtual void create_sfr_map();
 };
