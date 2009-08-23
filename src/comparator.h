@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 class CMSignalSource;
 class VRSignalSource;
 class CMCON;
+class TMRL;
 
   enum compare_inputs
    {
@@ -103,6 +104,25 @@ class CM_stimulus : public stimulus
      virtual void   set_nodeVoltage(double v);
 
 };
+class CMCON1 : public sfr_register
+{
+ public:
+  enum CMCON1_bits
+  {
+	CMSYNC = 1<<0,
+	T1GSS  = 1<<1
+  };
+
+  virtual void put(unsigned int);
+  void set_tmrl(TMRL *arg) { m_tmrl = arg; }
+  CMCON1(Processor *pCpu, const char *pName, const char *pDesc);
+  ~CMCON1();
+
+ private:
+  TMRL *m_tmrl;
+
+};
+
 class CMCON : public sfr_register
 {
  public:
@@ -133,6 +153,7 @@ class CMCON : public sfr_register
 
 
 
+  void set_tmrl(TMRL *arg) { m_tmrl = arg; }
   CMCON(Processor *pCpu, const char *pName, const char *pDesc);
   ~CMCON();
 
@@ -144,6 +165,7 @@ protected:
   CMSignalSource *cm_source[2];
   unsigned int m_CMval[2];
   PIR_SET *pir_set;
+  TMRL *m_tmrl;
   CM_stimulus *cm_stimulus[4];
 
   static const int cMaxConfigurations=8;
@@ -158,16 +180,12 @@ class ComparatorModule
  public:
 
   ComparatorModule(Processor *);
-  /*
-  void initialize( PIR_SET *pir_set, PinModule *pin_vr0, PinModule *pin_cm0, 
-	PinModule *pin_cm1, PinModule *pin_cm2,
-	PinModule *pin_cm3, PinModule *pin_cm4);
-  */
   void initialize( PIR_SET *pir_set, PinModule *pin_vr0, PinModule *pin_cm0, 
 	PinModule *pin_cm1, PinModule *pin_cm2,
 	PinModule *pin_cm3, PinModule *pin_cm4, PinModule *pin_cm5);
   //protected:
   CMCON cmcon;
+  CMCON1 cmcon1;
   VRCON vrcon;
 
 };

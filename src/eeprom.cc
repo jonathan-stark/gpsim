@@ -79,6 +79,10 @@ void EECON1::put(unsigned int new_value)
           value.put(value.get() | WR);
           eeprom->start_write();
         }
+      else if( (new_value & WR) && (new_value & RD))
+	{
+         cout << "\n*** EECON1: write ignored " <<hex << new_value << " both WR & RD set\n\n";
+	}
 
       //    else cout << "EECON1: write ignored " << new_value << "  (WREN is probably already set)\n";
 

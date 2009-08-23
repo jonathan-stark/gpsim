@@ -166,7 +166,9 @@ ${RT} i2c sim_p16f876a
 
 ${RT} port_stim sim_port_stim
 
-${RT} p12f675	sim
+${RT} p12f675	sim_p12f675
+
+${RT} p12f675	sim_p12f683
 
 echo "The following tests only pass if CLOCK_EXPERIMENTS"
 echo "(in src/clock_phase.cc) is defined."

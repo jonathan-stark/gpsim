@@ -1,3 +1,18 @@
+2009-08-23 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p12f675/12f683.lkr regression/p12f675/p12f683.asm
+	  regression/p12f675/Makefile regression/run_regression.sh
+	- add p12f683 regression test
+	* regression/p12f675/p12f675.asm : fix bug in test
+	* src/14bit-tmrs.h src/14bit-tmrs.cc  src/comparator.h 
+	  src/comparator.cc : support cmp T1 gate
+	* src/p12f6xx.h src/p12f6xx.cc src/pic-processor.cc 
+	  src/pic-processor.h : add P12f683 
+	* src/eeprom.cc : print message if both RD and WR set in EECON1::put
+	* src/gpsim_time.cc : add more debug output
+	* src/trace.h : delete commented out code
+	* src/eeprom.h :  add callback_print() for debugging
+	* gui/gui_regwin.cc : remove unneeded include
+
 2009-07-17 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/14bit_tmrs.cc src/14bit_tmrs.h
           Turned the ccpcon/compare_value member pair in TMRL into a 

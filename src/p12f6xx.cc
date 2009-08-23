@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 //  This file supports:
 //    PIC12F629
 //    PIC12F675
+//    PIC12F683
 //
 //Note: unlike most other 12F processors these have 14bit instructions
 
@@ -159,7 +160,7 @@ bool P12F629::set_config_word(unsigned int address,unsigned int cfg_word)
         else
 	    unassignMCLRPin();
      
- 	wdt.initialize((cfg_word & WDTE) == WDTE);
+ 	wdt.initialize((cfg_word & WDTEN) == WDTEN);
         if ((cfg_word & (FOSC2 | FOSC1 )) == 0x04) // internal RC OSC
 	  osccal.set_freq(4e6);
        
@@ -199,12 +200,16 @@ P12F629::P12F629(const char *_name, const char *desc)
 
 }
 
+P12F629::~P12F629()
+{
+    delete e;
+}
 Processor * P12F629::construct(const char *name)
 {
 
   P12F629 *p = new P12F629(name);
 
-  p->create(0x5f);
+  p->create(0x5f, 128);
   p->create_invalid_registers ();
   p->create_symbols();
   return p;
@@ -340,9 +345,8 @@ void P12F629::create_iopin_map()
 
 
 
-void  P12F629::create(int ram_top)
+void  P12F629::create(int ram_top, int eeprom_size)
 {
-  EEPROM_PIR *e;
 
   create_iopin_map();
 
@@ -350,7 +354,7 @@ void  P12F629::create(int ram_top)
 
 
   e = new EEPROM_PIR(this, pir1);
-  e->initialize(128);
+  e->initialize(eeprom_size);
   e->set_intcon(&intcon_reg);
   set_eeprom(e);
 
@@ -393,7 +397,7 @@ Processor * P12F675::construct(const char *name)
 
   P12F675 *p = new P12F675(name);
 
-  p->create(0x2f);
+  p->create(0x5f, 128);
   p->create_invalid_registers ();
   p->create_symbols();
   return p;
@@ -410,9 +414,9 @@ P12F675::P12F675(const char *_name, const char *desc)
 {
 }
 
-void  P12F675::create(int ram_top)
+void  P12F675::create(int ram_top, int eeprom_size)
 {
-  P12F629::create(ram_top);
+  P12F629::create(ram_top, eeprom_size);
   create_sfr_map();
 }
 
@@ -454,5 +458,92 @@ void P12F675::create_sfr_map()
 
    adcon1.setValidCfgBits(ADCON1::VCFG0 | ADCON1::VCFG1 , 4);
 
+
+}
+//========================================================================
+//
+// Pic 16F683
+//
+
+Processor * P12F683::construct(const char *name)
+{
+
+  P12F683 *p = new P12F683(name);
+
+  p->create(0x7f, 256);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+P12F683::P12F683(const char *_name, const char *desc)
+  : P12F675(_name,desc),
+   t2con(this, "t2con", "TMR2 Control"),
+    pr2(this, "pr2", "TMR2 Period Register"),
+    tmr2(this, "tmr2", "TMR2 Register"),
+    ccp1con(this, "ccp1con", "Capture Compare Control"),
+    ccpr1l(this, "ccpr1l", "Capture Compare 1 Low"),
+    ccpr1h(this, "ccpr1h", "Capture Compare 1 High"),
+    wdtcon(this, "wdtcon", "WDT Control", 0x1f),
+    osccon(this, "osccon", "OSC Control"),
+    osctune(this, "osctune", "OSC Tune")
+
+{
+}
+
+void  P12F683::create(int ram_top, int eeprom_size)
+{
+  P12F629::create(0, eeprom_size);
+
+  add_file_registers(0x20, 0x6f, 0);
+  add_file_registers(0xa0, 0xbf, 0);
+  add_file_registers(0x70, 0x7f, 0x80);
+
+  create_sfr_map();
+}
+
+
+void P12F683::create_sfr_map()
+{
+  P12F675::create_sfr_map();
+
+  add_sfr_register(&tmr2,   0x11, RegisterValue(0,0));
+  add_sfr_register(&t2con,  0x12, RegisterValue(0,0));
+  add_sfr_register(&pr2,    0x92, RegisterValue(0xff,0));
+
+  add_sfr_register(&ccpr1l,  0x13, RegisterValue(0,0));
+  add_sfr_register(&ccpr1h,  0x14, RegisterValue(0,0));
+  add_sfr_register(&ccp1con, 0x15, RegisterValue(0,0));
+  add_sfr_register(&wdtcon, 0x18, RegisterValue(0x08,0),"wdtcon");
+  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
+  add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
+
+  osccon.set_osctune(&osctune);
+  osctune.set_osccon(&osccon);
+
+
+
+
+
+  t2con.tmr2  = &tmr2;
+  tmr2.pir_set   = get_pir_set();
+  tmr2.pr2    = &pr2;
+  tmr2.t2con  = &t2con;
+  tmr2.ccp1con = &ccp1con;
+  pr2.tmr2    = &tmr2;
+
+
+  ccp1con.setCrosslinks(&ccpr1l, pir1, &tmr2);
+  ccp1con.setIOpin(&((*m_gpio)[2]));
+  ccpr1l.ccprh  = &ccpr1h;
+  ccpr1l.tmrl   = &tmr1l;
+  ccpr1h.ccprl  = &ccpr1l;
+
+  comparator.cmcon.new_name("cmcon0");
+  comparator.cmcon.set_tmrl(&tmr1l);
+  comparator.cmcon1.set_tmrl(&tmr1l);
+  add_sfr_register(&comparator.cmcon1, 0x1a, RegisterValue(2,0),"cmcon1");
+  wdt.set_timeout(1./31000.);
 
 }
