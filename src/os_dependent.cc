@@ -67,6 +67,7 @@ using namespace std;
 #else
 #define MODULE_EXT ".so"
 #endif
+#define MODULE_VER ".0"
 #define FOLDERDELIMITER '/'
 #define FOLDERDELIMITERALTERNATIVE '\\'
 #define PATHDELIMITER ":"
@@ -352,7 +353,18 @@ void * load_library(const char *library_name, const char **pszError)
       }
     }
     // Append the module extension and try again.
-    sFile.append(MODULE_EXT);
+    string::size_type nPos = sFile.find(MODULE_EXT,0);
+    if( nPos == string::npos)
+    {
+        sFile.append(MODULE_EXT);
+    }
+#ifndef _WIN32
+    else if( sFile.find(MODULE_VER, nPos) == string::npos)
+    {
+	i--;
+	sFile.append(MODULE_VER);
+    }
+#endif 
     sPath = sFile;
   }
 
