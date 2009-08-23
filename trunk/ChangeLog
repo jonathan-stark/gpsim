@@ -1,4 +1,7 @@
 2009-08-23 Roy Rankin <rrankin@ihug.com.au>
+	* * src/os_dependent.cc : For linux fix loading modlib bug #2837446
+
+2009-08-23 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p12f675/12f683.lkr regression/p12f675/p12f683.asm
 	  regression/p12f675/Makefile regression/run_regression.sh
 	- add p12f683 regression test
