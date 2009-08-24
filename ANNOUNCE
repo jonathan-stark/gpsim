@@ -6,43 +6,38 @@
       Microchip's PIC microcontrollers.
 
 
-Version 0.23.0 release
+Version 0.24.0 release
 
 http://sourceforge.net/project/showfiles.php?group_id=2341
 http://gpsim.sourceforge.net/gpsim.html
 
 
-Here's a very abbreviated list of the new features:
+New Processors:
+	P10F220 P10F222 P12F675 P12F629 P12F683 P16F630 P16F676 
+	P18F4455(No USB support)
 
-New Features
+Bug Fixes
 
-  o Roy Rankin added P16F818 and P16F819 processors
-  o Scott Dattalo added 10F200, 10F202, 10F204 and 10F206 processors
-  o Scott Dattalo added analog syncs
-  o Roy Rankin added EEPROM dump/load
-  o Scott Dattalo added 12F508, 12F509, 12F510 processors
-  o Roy Rankin added TMR1 external crystal simulation
-  o Rob Pearce added 18f4321 and 18F2321 processors
-  o Borut Razem fixed compiling under gcc 4.3.0
-  o Rob Pearce added support for interrupt priority for 16-bit cores
-  o Roy Rankin added new style A2D with up to 16 channels
-  o Roy Rankin fixed internationalization in source browser window
-  o Roy Rankin fixed compiling under gcc 4.4.0
+	TMR0 should stop during sleep (#502665)
+	Multiple CCPs fail in compare mode (#2819395)
+ 	weak pull-up not disabled for analog pins (#2814950)
+ 	p18f2455 sigsegv, wrong package size (#2814946)
+ 	cannot load a file with "stc" in the filename (#2803756)
+ 	Port A simulation error in 16f87x (#1832222)
+	"gpsim -p processor file.hex" will work (#1629719)
+	Fix MCLR pin operation when shared with IO pin
+   	Module library does not load if .so file does not exist (#2837446)
 
-Scott Dattalo provided significant rewrites of parts of gpsim and Borut Razem, Rob Pearce, Roy Rankin and Scott Dattalo contributed bug fixes. Bourt Razem also made many code cleanup fixes.
+Enhancements
+	*.cod and *.stc files on command line correctly loaded
+	    without -s, -c flag
+
+
+Roy Rankin and Rob Pearce commited changes for this release.
 
 Supplied Patches
 
-  o Jean-Etienne Lamiaud - added UART framing and overrun errors 
-    and fixes dynamic module loading on OS X
-  o Vitaly Lipatov - linking order fixes
-  o Don Wooton - segfault in gdk_color_alloc() fix
-
-In addition several users have filed bug reports:
-
-  Colm O Flaherty, Dave Fielder, Daniel Black, Harald Geyer,
-  Joerg Wunsch, John Coppens, Tibor Palinkas 
-
+  o Kamal Mostafa - cannot load a file with "stc" in the filename
 
 And I know I'm probably missing others
 
@@ -54,18 +49,18 @@ INSTALL:
 -------
 install gpsim the standard way:
 
-tar -xvzf gpsim-0.23.0.tar.gz
+tar -xvzf gpsim-0.24.0.tar.gz
 ./configure
-cd gpsim-0.23.0/
+cd gpsim-0.24.0/
 make
 su root
 make install
 
-this will expand into a child directory named gpsim-0.23.0 . From there you
+this will expand into a child directory named gpsim-0.24.0 . From there you
 can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
 files for more information. The rest of the steps will build gpsim and place
 the executable into /usr/local/bin . If you don't have root privileges then
-you can copy the executable at gpsim-0.23.0/gpsim/gpsim to a directory in the
+you can copy the executable at gpsim-0.24.0/gpsim/gpsim to a directory in the
 execution path. Or better, check out INSTALL
 
 
