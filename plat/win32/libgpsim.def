@@ -200,7 +200,7 @@ EXPORTS
     ?assertValid@Integer@@SAPAV1@PAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_J2@Z
     ?assertValid@Integer@@SAPAV1@PAVValue@@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@_J@Z
     ?assign_pin@Module@@UAEXIPAVIOPIN@@@Z
-    ?assign_pin@Package@@QAEXIPAVIOPIN@@@Z
+    ?assign_pin@Package@@QAEXIPAVIOPIN@@_N@Z
     ?assign_xref@ProgramMemoryAccess@@QAEXIPAX@Z
     ?attach@IOPIN@@UAEXPAVStimulus_Node@@@Z
     ?attach_src_line@Processor@@QAEXIIII@Z
@@ -375,6 +375,7 @@ EXPORTS
     ?get_opcode@ProgramMemoryAccess@@QAEII@Z
     ?get_opcode_name@ProgramMemoryAccess@@QAEPADIPADI@Z
     ?get_pin@Module@@UAEPAVIOPIN@@I@Z
+    ?get_pin@Package@@QAEPAVIOPIN@@I@Z
     ?get_pin_count@Module@@UAEHXZ
     ?get_pin_name@Module@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@Z
     ?get_pin_state@Module@@UAEHI@Z
@@ -542,6 +543,7 @@ EXPORTS
     ?set_expression@Breakpoints@@QAE_NIPAVExpression@@@Z
     ?set_frequency@Processor@@QAEXN@Z
     ?set_hll_mode@ProgramMemoryAccess@@QAEXI@Z
+    ?set_is_analog@IO_bi_directional_pu@@UAEX_N@Z
     ?set_message@Breakpoints@@QAEXIAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?set_module@Value@@UAEXPAVModule@@@Z
     ?set_nodeVoltage@IOPIN@@UAEXN@Z

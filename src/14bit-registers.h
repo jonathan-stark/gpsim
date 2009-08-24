@@ -526,7 +526,7 @@ public:
   {
     unsigned int masked_value = new_value & bit_mask;
 
-    trace.raw(write_trace.get() | value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put(masked_value);
   }
 
