@@ -70,6 +70,7 @@ src_OBJECTS =			\
 	modules.o		\
 	operator.o		\
 	os_dependent.o		\
+	p12f6xx.o		\
 	p12x.o			\
 	p16f62x.o		\
 	p16f87x.o		\
