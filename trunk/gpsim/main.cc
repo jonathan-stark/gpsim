@@ -99,9 +99,9 @@ static const char *sourceEnabled = "";
 
 #define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
                         0, "Examples:\n\
-  gpsim -s myprog.cod          <-- loads a symbol file\n\
+  gpsim  myprog.cod          <-- loads a symbol file\n\
   gpsim -p p16f877 myprog.hex  <-- select processor and load hex\n\
-  gpsim -c myscript.stc        <-- loads a script\n\
+  gpsim  myscript.stc        <-- loads a script\n\
 \nHelp options:", NULL },
 
 //------------------------------------------------------------------------
@@ -122,9 +122,9 @@ struct poptOption optionsTable[] = {
   { "processor", 'p', POPT_ARG_STRING, &processor_name, 0,
     "processor (e.g. -pp16c84 for the 'c84)","<processor name>" },
   { "command",   'c', POPT_ARG_STRING, &startup_name, 0,
-    "startup command file",0 },
+    "startup command file (-c optional)",0 },
   { "symbol",    's', POPT_ARG_STRING, &cod_name, 0,
-    ".cod symbol file",0 } ,
+    ".cod symbol file (-s optional)",0 } ,
   { "sourcepath", 'L',POPT_ARG_STRING, &search_path, 'L',
     "colon separated list of directories to search.", 0},
   { "include", 'I',POPT_ARG_STRING, &include_startup_name, 0,
@@ -157,12 +157,12 @@ struct poptOption optionsTable[] = {
 void
 helpme (char *iam)
 {
-  printf ("\n\nuseage:\n%s [-h] [[-p <device> [<hex_file>]] | [-s <cod_file>]] [-c <stc_file>]\n", iam);
+  printf ("\n\nuseage:\n%s [-h] [[-p <device> [<hex_file>]] | [[-s] <cod_file>]] [[-c] <stc_file>]\n", iam);
   printf ("\t-h             : this help list\n");
   printf ("\t-p <device>    : processor (e.g. -pp16c84 for the 'c84)\n");
   printf ("\t<hex_file>     : input file in \"intelhex16\" format\n");
-  printf ("\t-c <stc_file>  : startup command file\n");
-  printf ("\t-s <cod_file>  : .cod symbol file\n");
+  printf ("\t-c <stc_file>  : startup command file (-c optional)\n");
+  printf ("\t-s <cod_file>  : .cod symbol file (-s optional)\n");
   printf ("\t-L <path list> : colon separated list of directories to search.\n");
   printf ("\t-d <port>      : Use ICD with serial port <port>\n");
   printf ("\t-D <symbol>=<value> : Define a symbol that will exist in the gpsim\n"
@@ -171,9 +171,9 @@ helpme (char *iam)
   printf ("\n Long options:\n\n");
   printf ("\t--cli          : command line mode only\n");
   printf ("\n\texamples:\n\n");
-  printf ("%s -s myprog.cod          <-- loads a symbol file\n",iam);
+  printf ("%s myprog.cod          <-- loads a symbol file\n",iam);
   printf ("%s -p p16f877 myprog.hex  <-- select processor and load hex\n",iam);
-  printf ("%s -c myscript.stc        <-- loads a script\n",iam);
+  printf ("%s myscript.stc        <-- loads a script\n",iam);
 
 }
 

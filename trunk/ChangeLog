@@ -1,3 +1,8 @@
+2009-08-24 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim/main.cc doc/gpsim.lyx : document optional -c -s
+	* configure.ac ANNOUNCE : update for release 0.24.0
+	* doc/gpsim.html PROCESSORS : update with new processors
+
 2009-08-23 Roy Rankin <rrankin@ihug.com.au>
 	* * src/os_dependent.cc : For linux fix loading modlib bug #2837446
 

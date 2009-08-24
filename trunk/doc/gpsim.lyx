@@ -326,7 +326,7 @@ The executable created above is called: gpsim.
 \end_layout
 
 \begin_layout LyX-Code
-gpsim [-?] [-p <device> [<hex_file>]] [-c <stc_file>]
+gpsim [-?] [-p <device> [<hex_file>]] [[-c] <stc_file>] [[-s] <symbol file>]
 \end_layout
 
 \begin_layout LyX-Code
@@ -335,11 +335,11 @@ gpsim [-?] [-p <device> [<hex_file>]] [-c <stc_file>]
 \end_layout
 
 \begin_layout LyX-Code
-  -c, --command=STRING                 startup command file
+  -c, --command=STRING                 startup command file (optional .stc files)
 \end_layout
 
 \begin_layout LyX-Code
-  -s                                   .cod symbol file
+  -s                                   .cod symbol file (optional .cod files)
 \end_layout
 
 \begin_layout LyX-Code
@@ -381,7 +381,7 @@ Typically gpsim will be invoked like:
 \end_layout
 
 \begin_layout LyX-Code
-[My-Computer]$ gpsim -s mypic-program.cod
+[My-Computer]$ gpsim  mypic-program.cod
 \end_layout
 
 \begin_layout Standard
