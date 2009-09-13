@@ -1,3 +1,9 @@
+2009-09-13 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * extras/graphic_lcd/src/gpsim_modules.cc, extras/lcd/module_manager.cc,
+          modules/gpsim_modules.cc, modules/encoder.cc
+          Trivial changes only - removed some very obsolete commented out code
+          and erroneous statements about module libraries.
+
 2009-08-24 Borut Razem <borut.razem@siol.net>
 	* src/14bit-registers.h, src/makefile.mingw, plat/win32/libgpsim.def:
 	  src/src.vcproj: mingw and MSVC sync

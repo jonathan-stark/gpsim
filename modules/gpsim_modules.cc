@@ -38,8 +38,8 @@ Here are a list of functions that a gpsim compliant module library should
 support:
 
   void mod_list(void) - Prints a list of the modules in a library
-  Module * getmodule(char *module_type) - creates a new module
- */
+  Module_Types * get_mod_list(void)  - Obtain pointer to the list of modules
+*/
 
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
@@ -69,18 +69,9 @@ support:
 #include "i2c-eeprom.h"
 #include "i2c.h"
 
-/*
-class Module_Types
-{
-public:
 
-  char *names[2];
-  Module * (*module_constructor) (void);
-};
-*/
 Module_Types available_modules[] =
 {
-
 
 #ifndef _WIN32
   // Parallel port interface
@@ -149,18 +140,19 @@ extern "C" {
  * This is a required function for gpsim compliant libraries.
  */
 
-  Module_Types * get_mod_list(void)
-  {
+Module_Types * get_mod_list(void)
+{
 
     return available_modules;
 
-  }
+}
+
+
 /********************************************************************************
  * mod_list - Display all of the modules in this library.
  *
  * This is a required function for gpsim compliant libraries.
  */
-
 void mod_list(void)
 {
 
@@ -200,7 +192,6 @@ void mod_list(void)
  *
  * _init() - this is called when the library is opened.
  */
-
 void init(void)
 {
 
@@ -208,17 +199,18 @@ void init(void)
   printf("%s\n",__FUNCTION__);
 }
 
+
 /************************************************************
  *
  * _fini() - this is called when the library is closed.
  */
-
 void fini(void)
 {
 
   //cout << "gpsim modules has been closed\n";
   printf("%s\n",__FUNCTION__);
 }
+
 
 void test(void)
 {

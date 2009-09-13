@@ -30,15 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "glcd_100X32_sed1520.h"
 #include "osram.h"
 
-/*
-class Module_Types
-{
-public:
 
-  char *names[2];
-  Module * (*module_constructor) (void);
-};
-*/
 Module_Types available_modules[] =
 {
   { {"LCD100X32", "LCD100X32"},   gLCD_100X32_SED1520::construct },

@@ -38,7 +38,7 @@ Here are a list of functions that a gpsim compliant module library should
 support:
 
   void mod_list(void) - Prints a list of the modules in a library
-  Module * getmodule(char *module_type) - creates a new module
+  Module_Types * get_mod_list(void)  - Obtain pointer to the list of modules
 */
 
 
@@ -51,15 +51,7 @@ support:
 #include <gpsim/modules.h>
 #include "lcd.h"
 
-/*
-class Module_Types
-{
-public:
 
-  char *names[2];
-  Module * (*module_constructor) (void);
-};
-*/
 Module_Types available_modules[] =
 {
   { {"lcd_display", "lcd_2X20"}, LcdDisplay::construct},
