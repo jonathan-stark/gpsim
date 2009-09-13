@@ -87,24 +87,6 @@ void Encoder::create_iopin_map(void)
   b_pin = new IO_bi_directional((name() + ".b").c_str());
   assign_pin(2, b_pin);
   package->set_pin_position(2,(float)0.9999);
-
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-  /*
-  if(a_pin) {
-    get_symbol_table().add_stimulus(a_pin);
-    a_pin->update_direction(1,true);
-    if(a_pin->snode)
-      a_pin->snode->update();
-  }
-  if(b_pin) {
-    get_symbol_table().add_stimulus(b_pin);
-    b_pin->update_direction(1,true);
-    if(b_pin->snode)
-      b_pin->snode->update();
-  }
-  */
 }
 
 //--------------------------------------------------------------
