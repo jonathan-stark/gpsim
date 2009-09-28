@@ -1,3 +1,14 @@
+2009-09-28 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/16bit-hexdecode.cc, src/pic-processor.cc, src/16bit-tmrs.cc
+          src/14bit-tmrs.cc, src/14bit-registers.cc, src/pic-ioports.cc
+          Trivial changes only:
+            - re-ordered processor type creation so the list reported is nearer 
+              numeric order
+            - removed all #includes of processor type headers from "core" code
+              (i.e. not processor type definition files) except pic-processor.cc
+          The idea is to head towards being able to define processors outside of
+          the core GPSim library, by making GPSim follow that sort of structure.
+
 2009-09-13 Rob Pearce<rob@bdt-home.demon.co.uk>
         * extras/graphic_lcd/src/gpsim_modules.cc, extras/lcd/module_manager.cc,
           modules/gpsim_modules.cc, modules/encoder.cc
