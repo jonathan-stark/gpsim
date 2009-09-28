@@ -26,7 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "14bit-processors.h"
-#include "p16x6x.h"
+#include "14bit-registers.h"
+#include "psp.h"     // needed for operator[] on WPU::wpu_gpio (not sure why)
 
 #include <string>
 #include "stimuli.h"

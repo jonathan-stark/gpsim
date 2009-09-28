@@ -31,8 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"  // %%% FIXME %%% remove the dependencies on this
 #include "pic-ioports.h"
 #include "interface.h"
-#include "p16x6x.h"
-//#include "p16f62x.h"
+#include "psp.h"
 
 #include "xref.h"
 //#define DEBUG

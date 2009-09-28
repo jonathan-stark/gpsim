@@ -35,9 +35,6 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-processor.h"
 #include "picdis.h"
 #include "stimuli.h"
-#include "p16x8x.h"
-#include "p16x6x.h"
-#include "p16x7x.h"
 
 
 /* PIC 16-bit instruction set */
