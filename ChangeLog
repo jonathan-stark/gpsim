@@ -1,3 +1,7 @@
+2009-10-11 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac : Missing readline lib now a terminating error
+	  for configure. (bug 2868402) Set version to 0.24.1
+
 2009-09-28 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/16bit-hexdecode.cc, src/pic-processor.cc, src/16bit-tmrs.cc
           src/14bit-tmrs.cc, src/14bit-registers.cc, src/pic-ioports.cc

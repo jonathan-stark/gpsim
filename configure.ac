@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([gpsim], [0.24.0], [<http://gpsim.sourceforge.net/gpsim.html>])
+AC_INIT([gpsim], [0.24.1], [<http://gpsim.sourceforge.net/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
@@ -93,6 +93,9 @@ else
 fi
 
 wi_LIB_READLINE
+  if test "$wi_cv_lib_readline" != yes; then
+	AC_MSG_ERROR(Cannot find readline library)
+  fi
 
 # Checks for programs.
 AC_PROG_CXX
