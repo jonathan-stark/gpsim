@@ -1,3 +1,6 @@
+2009-10-25 Roy Rankin <rrankin@ihug.com.au>
+	* src/p16f62x.h : wrong program memory size (bug 2885817)
+
 2009-10-11 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac : Missing readline lib now a terminating error
 	  for configure. (bug 2868402) Set version to 0.24.1

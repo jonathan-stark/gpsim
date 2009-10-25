@@ -78,7 +78,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P16F627_;};
 
-  virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
   P16F627(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
@@ -90,7 +90,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P16F628_;};
 
-  virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int program_memory_size() const { return 0x800; };
 
   P16F628(const char *_name=0, const char *desc=0);
   ~P16F628();
@@ -103,7 +103,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P16F648_;};
 
-  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int program_memory_size() const { return 0x1000; };
   virtual void create_sfr_map();
 
   P16F648(const char *_name=0, const char *desc=0);
