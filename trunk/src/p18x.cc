@@ -1566,11 +1566,12 @@ P18F4x21::P18F4x21(const char *_name, const char *desc)
   if(verbose)
     cout << "18f4x21 constructor, type = " << isa() << '\n';
 
-  m_portd = new PicPSP_PortRegister(this,"portd","",8,0x08);
+  m_portd = new PicPSP_PortRegister(this,"portd","",8,0xFF);
   m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
   m_latd  = new PicLatchRegister(this,"latd","",m_portd);
 
-  //m_porte = new PicPortRegister(this,"porte","",8,0x08);
+//  m_porte = new PicPortRegister(this,"porte","",8,0x07);
+  m_porte->setEnableMask(0x07);     // It's been created by the P18F2x21 constructor, but with the wrong enables
   m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 

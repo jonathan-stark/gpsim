@@ -1,3 +1,7 @@
+2009-11-22 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.cc
+          Fixed the creation of ports D and E on 18F4x21 devices
+
 2009-10-25 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f62x.h : wrong program memory size (bug 2885817)
 
