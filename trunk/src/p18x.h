@@ -223,7 +223,7 @@ class P18F452 : public P18F442
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
-
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
 };
 
 class P18F2455 : public P18F242
