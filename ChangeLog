@@ -1,3 +1,6 @@
+2006-11-07 Scott Dattalo <scott@dattalo.com>
+        * src/p18x.hh: wrong register memory size (bug 2921532)
+
 2009-11-22 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.cc
           Fixed the creation of ports D and E on 18F4x21 devices
