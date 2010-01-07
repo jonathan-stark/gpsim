@@ -1,3 +1,7 @@
+2010-01-07 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_menu.cc: Fix sigsegv when changing simulation time
+	  units when no processor is defined (bug 2926629)
+
 2006-11-07 Scott Dattalo <scott@dattalo.com>
         * src/p18x.hh: wrong register memory size (bug 2921532)
 
