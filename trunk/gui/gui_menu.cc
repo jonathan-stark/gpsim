@@ -1145,7 +1145,9 @@ public:
 
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e6;
+    double time_db = 0.;
+    if(gpGuiProcessor && gpGuiProcessor->cpu)
+        time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e6;
     snprintf(buf,size, "%19.2f us",time_db);
   }
 };
@@ -1162,7 +1164,9 @@ public:
 
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e3;
+    double time_db = 0.;
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
+        time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e3;
     snprintf(buf,size, "%19.3f ms",time_db);
   }
 };
@@ -1179,7 +1183,9 @@ public:
 
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
+    double time_db = 0.;
+  if(gpGuiProcessor && gpGuiProcessor->cpu)
+       time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
     snprintf(buf,size, "%19.3f Sec",time_db);
   }
 };
@@ -1196,7 +1202,9 @@ public:
 
   void Format(char *buf, int size)
   {
-    double time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
+    double time_db = 0.;
+    if(gpGuiProcessor && gpGuiProcessor->cpu)
+        time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
     double v=time_db;
     int hh=(int)(v/3600),mm,ss,cc;
     v-=hh*3600.0;
