@@ -1274,7 +1274,7 @@ void TBL_MODULE::read()
     ( (tabptrh.value.get() & 0xff) << 8 )  |
     ( (tabptrl.value.get() & 0xff) << 0 );
 
-  opcode = cpu_pic->pma->get_opcode(tabptr & 0xfffffe);
+  opcode = cpu_pic->pma->get_rom(tabptr & 0xfffffe);
 
   if(tabptr & 1)
     {

@@ -1,3 +1,11 @@
+2010-01-12 Roy Rankin <rrankin@ihug.com.au>
+       * src/p18x.h src/p18x.cc src/16bit-registers.cc: Add
+         eeprom, usart for 18f1220/1320
+       * src/uart.cc src/uart.h: Eusart fixes and debug print fixes
+       * modules/usart.cc: scroll patch and debug print fixes
+       * regression/usart_test/eusart.asm: Pin direction per docs
+       - Most of above changes supplied by Geoffrey Hausheer
+
 2010-01-07 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_menu.cc: Fix sigsegv when changing simulation time
 	  units when no processor is defined (bug 2926629)

@@ -41,6 +41,7 @@ class  _14bit_processor;
 
 class RXSignalSink;
 class TXSignalSource;
+class TXSignalControl;
 class USART_MODULE;
 
 
@@ -104,6 +105,7 @@ protected:
   USART_MODULE *mUSART;
   PinModule *m_PinModule;
   TXSignalSource *m_source;
+  TXSignalControl *m_control;
   char m_cTxState;
   bool bInvertPin;
 };
@@ -240,6 +242,8 @@ class _SPBRGH : public sfr_register
 
   _SPBRGH(Processor *pCpu, const char *pName, const char *pDesc);
   virtual void assign_spbrg(_SPBRG *new_spbrg) { m_spbrg = new_spbrg; };
+  virtual void put(unsigned int);
+  virtual void put_value(unsigned int);
  private:
   _SPBRG   *m_spbrg;
 };
@@ -267,8 +271,14 @@ class _SPBRG : public sfr_register, public TriggerObject
   virtual void get_next_cycle_break();
   virtual guint64 get_cpu_cycle(unsigned int edges_from_now);
   virtual guint64 get_last_cycle();
+
+  virtual void put(unsigned int);
+  virtual void put_value(unsigned int);
+  void set_start_cycle();
 // protected:
   virtual unsigned int get_cycles_per_tick();
+private:
+  guint64 skip;
 };
 
 //---------------------------------------------------------------

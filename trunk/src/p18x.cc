@@ -984,10 +984,28 @@ Processor * P18F1220::construct(const char *name)
 
 void P18F1220::create()
 {
+  EEPROM_PIR *e;
+
   if(verbose)
     cout << "P18F1220::create\n";
 
+  e = new EEPROM_PIR(this,&pir2);
+
+  // We might want to pass this value in for larger eeproms
+  e->initialize(256);
+  //e->set_pir_set(&pir_set_def);
+  e->set_intcon(&intcon);
+
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
+
   create_iopin_map();
+
+  //call his before _16bit_processor::create() because 1st one wins
+  //with regards to the rx/tx ports
+  usart.initialize(&pir_set_def,&(*m_portb)[1], &(*m_portb)[4],
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   _16bit_processor::create();
   _16bit_v2_adc::create(7);
@@ -1012,6 +1030,8 @@ void P18F1220::create()
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0xcf));
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_1x20(this, CONFIG3H, 0x80));
 
+  add_sfr_register(&usart.baudcon,  0xfaa,RegisterValue(0,0),"baudcon");
+  usart.set_eusart(true);
 }
 //------------------------------------------------------------------------
 void P18F1220::create_iopin_map()
@@ -1106,6 +1126,29 @@ void P18F1220::osc_mode(unsigned int value)
 	}
   }
   
+}
+
+void P18F1220::set_out_of_range_pm(unsigned int address, unsigned int value)
+{
+
+  if( (address>= 0xf00000) && (address < 0xf00000 +
+    get_eeprom()->get_rom_size()))
+    {
+      if (value > 0xff)
+        get_eeprom()->change_rom(1 + address - 0xf00000, value >> 8);
+      get_eeprom()->change_rom(address - 0xf00000, value & 0xff);
+    }
+  else if( (address>= 0x200000) && (address < 0x200008) ) {
+    idloc[(address - 0x200000) >> 1] = value;
+  }
+ 
+}
+
+unsigned int P18F1220::get_program_memory_at_address(unsigned int address)
+{
+  if( (address>= 0x200000) && (address < 0x200008) )
+    return idloc[(address - 0x200000) >> 1];
+  return _16bit_processor::get_program_memory_at_address(address);
 }
 
 //------------------------------------------------------------------------
