@@ -63,6 +63,25 @@ private:
   _TXSTA *m_txsta;
 };
 
+class TXSignalControl : public SignalControl
+{
+public:
+  TXSignalControl()
+  {
+  }
+  ~TXSignalControl()
+  {
+  }
+  char getState()
+  {
+    return '0';
+  }
+  void release()
+  {
+    delete this;
+  }
+};
+
 //--------------------------------------------------
 //
 //--------------------------------------------------
@@ -108,7 +127,10 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
   : sfr_register(pCpu, pName, pDesc), txreg(0), spbrg(0),
     mUSART(pUSART),
     m_PinModule(0),
-    m_source(0), m_cTxState('?'), bInvertPin(0)
+    m_source(0), 
+    m_control(0),
+    m_cTxState('?'),
+    bInvertPin(0)
 {
   assert(mUSART);
 }
@@ -138,7 +160,7 @@ _BAUDCON::_BAUDCON(Processor *pCpu, const char *pName, const char *pDesc)
 
 _SPBRG::_SPBRG(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    txsta(0), rcsta(0), brgh(0), baudcon(0)
+    txsta(0), rcsta(0), brgh(0), baudcon(0), skip(0)
 {
 }
 
@@ -147,7 +169,6 @@ _SPBRGH::_SPBRGH(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc), m_spbrg(0)
 {
 }
-
 
 //-----------------------------------------------------------
 // TXREG - USART Transmit Register
@@ -197,6 +218,7 @@ void _TXSTA::setIOpin(PinModule *newPinModule)
 {
   if (!m_source) {
     m_source = new TXSignalSource(this);
+    m_control = new TXSignalControl();
     m_PinModule = newPinModule;
   }
 
@@ -257,14 +279,19 @@ void _TXSTA::put(unsigned int new_value)
 
     if(value.get() & TXEN) {
       Dprintf(("TXSTA - enabling transmitter\n"));
-      if (m_PinModule)
+      if (m_PinModule) {
         m_PinModule->setSource(m_source);
+        if(mUSART->IsEUSART()) // EUSART can configure input as output for transmit
+          m_PinModule->setControl(m_control);
+      }
       mUSART->emptyTX();
     } else {
       stop_transmitting();
-      if (m_PinModule)
+      if (m_PinModule) {
         m_PinModule->setSource(0);
-
+        if(mUSART->IsEUSART())
+          m_PinModule->setControl(0);
+      }
     }
   }
 }
@@ -421,7 +448,7 @@ void _TXSTA::transmit_a_bit()
 
   if(bit_count) {
 
-    Dprintf(("Transmit bit #%x: bit val:%d time:0x%llx\n",bit_count, (tsr&1),get_cycles().get()));
+    Dprintf(("Transmit bit #%x: bit val:%d time:0x%"PRINTF_GINT64_MODIFIER"x\n",bit_count, (tsr&1), get_cycles().get()));
 
     putTXState(tsr&1 ? '1' : '0');
 
@@ -435,7 +462,7 @@ void _TXSTA::transmit_a_bit()
 
 void _TXSTA::callback()
 {
-  Dprintf(("TXSTA callback - time:%llx\n",get_cycles().get()));
+  Dprintf(("TXSTA callback - time:%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
   transmit_a_bit();
 
@@ -619,7 +646,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  Dprintf(("receive_a_bit state:%d bit:%d time:0x%llx\n",state,bit,get_cycles().get()));
+  Dprintf(("receive_a_bit state:%d bit:%d time:0x%"PRINTF_GINT64_MODIFIER"x\n",state,bit,get_cycles().get()));
 
   if( state == RCSTA_MAYBE_START) {
     if (bit)
@@ -737,7 +764,7 @@ void _RCSTA::receive_start_bit()
 void _RCSTA::callback()
 {
 
-  Dprintf(("RCSTA callback. time:0x%llx\n",cycles.value));
+  Dprintf(("RCSTA callback. time:0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
   // A bit is sampled 3 times.
 
@@ -874,7 +901,7 @@ void _SPBRG::get_next_cycle_break()
   if(cpu)
     get_cycles().set_break(future_cycle, this);
 
-  //Dprintf(("SPBRG::callback next break at 0x%llx\n",future_cycle));
+  //Dprintf(("SPBRG::callback next break at 0x%"PRINTF_GINT64_MODIFIER"x\n",future_cycle));
 
 }
 
@@ -914,14 +941,64 @@ unsigned int _SPBRG::get_cycles_per_tick()
 void _SPBRG::start()
 {
 
-  if(cpu)
-    last_cycle = get_cycles().get();
+  if(! skip  || get_cycles().get() >= skip) {
+    if(cpu)
+      last_cycle = get_cycles().get();
+    skip = 0;
+  }
+
   start_cycle = last_cycle;
 
   get_next_cycle_break();
 
-  Dprintf((" SPBRG::start   last_cycle:0x%llx: future_cycle:0x%llx\n",last_cycle,future_cycle));
+  Dprintf((" SPBRG::start   last_cycle:0x%"PRINTF_GINT64_MODIFIER"x: future_cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle,future_cycle));
+}
 
+void _SPBRG::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+
+  Dprintf((" SPBRG value=0x%x\n",value.get()));
+  //Prevent updating last_cycle until all current breakpoints have expired
+  //Otehrwise we see that rx/tx persiods get screwed up from now until future_cycle
+  future_cycle = last_cycle + get_cycles_per_tick();
+  skip = future_cycle;
+  Dprintf((" SPBRG value=0x%x skip=0x%"PRINTF_GINT64_MODIFIER"x last=0x%"PRINTF_GINT64_MODIFIER"x cycles/tick=0x%x\n",value.get(), skip, last_cycle, get_cycles_per_tick()));
+}
+
+void _SPBRG::put_value(unsigned int new_value)
+{
+
+  put(new_value);
+
+  update();
+
+}
+
+void _SPBRGH::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+
+  if(m_spbrg)
+    m_spbrg->set_start_cycle();
+}
+
+void _SPBRG::set_start_cycle()
+{
+  //Prevent updating last_cycle until all current breakpoints have expired
+  //Otherwise we see that rx/tx persiods get screwed up from now until future_cycle
+  future_cycle = last_cycle + get_cycles_per_tick();
+  skip = future_cycle;
+}
+
+void _SPBRGH::put_value(unsigned int new_value)
+{
+
+  put(new_value);
+
+  update();
 
 }
 
@@ -972,9 +1049,16 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 void _SPBRG::callback()
 {
 
-  last_cycle = get_cycles().get();
+  if (skip)
+  {
+  Dprintf((" SPBRG skip=0x%"PRINTF_GINT64_MODIFIER"x, cycle=0x%"PRINTF_GINT64_MODIFIER"x\n", skip, get_cycles().get()));
+  }
+  if(! skip  || get_cycles().get() >= skip) {
+    last_cycle = get_cycles().get();
+    skip = 0;
+  }
 
-  //Dprintf(("SPBRG rollover at cycle:0x%llx\n",last_cycle));
+  //Dprintf(("SPBRG rollover at cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle));
 
   if(rcsta && (rcsta->value.get() & _RCSTA::SPEN))
     {

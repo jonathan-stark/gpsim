@@ -532,7 +532,7 @@ RCREG::RCREG(USARTModule *pUsart)
 void RCREG::callback()
 {
 
-  Dprintf((" usart module RCREG time:0x%llx=%lld\n",get_cycles().get(),get_cycles().get()));
+  Dprintf((" usart module RCREG time:0x%"PRINTF_GINT64_MODIFIER"x=%"PRINTF_GINT64_MODIFIER"d\n", get_cycles().get(), get_cycles().get()));
 
 
   switch(receive_state) {
@@ -606,7 +606,7 @@ void RCREG::start()
     get_cycles().set_break(future_time, this);
   }
 
-  Dprintf((" usart module RCREG current cycle=%lld future_cycle=%lld\n", get_cycles().get(),future_time));
+  Dprintf((" usart module RCREG current cycle=0x%"PRINTF_GINT64_MODIFIER"x future_cycle=0x%"PRINTF_GINT64_MODIFIER"x\n", get_cycles().get(),future_time));
 }
 
 //------------------------------------------------------------------------
@@ -631,7 +631,7 @@ void RCREG::new_rx_edge(bool bit)
     case RS_WAITING_FOR_START:
       if(bIsLow(currentRXState)) {
         start();
-        Dprintf(("Start bit at t=0x%llx\n",get_cycles().get()));
+        Dprintf(("Start bit at t=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
       }
 
       break;
@@ -819,7 +819,7 @@ public:
 
   void newByte(gint64 b)
   {
-    Dprintf((" RxBuffer received a byte: 0x%02x=%d=%c",b,b,b));
+    Dprintf((" RxBuffer received a byte: 0x%02x=%d=%c",(int)b, (int)b, (int)b));
     Integer::set(b);
   }
 };
@@ -1137,6 +1137,7 @@ void USARTModule::show_tx(unsigned int data)
   if(get_interface().bUsingGUI()) {
       GtkTextBuffer *buff = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
       GtkTextIter iter;
+      GtkTextMark *insert_mark;
       gtk_text_buffer_get_end_iter(buff, &iter);
       if (IsAscii) {
         char ch = data;
@@ -1147,8 +1148,19 @@ void USARTModule::show_tx(unsigned int data)
         sprintf (hex, "<%02X>", data);
         gtk_text_buffer_insert(buff, &iter, hex, 4);
       }
-      gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(text), &iter, 0.0, TRUE, 0.0, 1.0);
-  }
+
+      /* get end iter again */
+      gtk_text_buffer_get_end_iter (buff, &iter);
+ 
+      /* get the current ( cursor )mark name */
+      insert_mark = gtk_text_buffer_get_insert (buff);
+ 
+      /* move mark and selection bound to the end */
+      gtk_text_buffer_place_cursor(buff, &iter);
+
+      /* scroll to the end view */
+      gtk_text_view_scroll_to_mark( GTK_TEXT_VIEW (text),
+                insert_mark, 0.0, TRUE, 0.0, 1.0); }
 #endif //HAVE_GUI
 }
 

@@ -134,7 +134,7 @@ start
                                 ;it is programmed as an output.
 
 	bsf	TRISC,7		;RX is an input
-	bcf	TRISC,6		;TX is an output
+	bsf	TRISC,6		;TX EUSART sets pin direction
 
 	;; CSRC - clock source is a don't care
 	;; TX9  - 0 8-bit data
