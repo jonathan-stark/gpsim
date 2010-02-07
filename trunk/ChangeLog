@@ -1,3 +1,6 @@
+2010-02-07 Roy Rankin <rrankin@ihug.com.au>
+       * src/pic-processor.cc: Fix real-time mode regression
+
 2010-01-12 Roy Rankin <rrankin@ihug.com.au>
        * src/p18x.h src/p18x.cc src/16bit-registers.cc: Add
          eeprom, usart for 18f1220/1320
