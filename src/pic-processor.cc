@@ -688,6 +688,9 @@ void pic_processor::run (bool refresh)
   // If the first instruction we're simulating is a break point,
   // then ignore it.
 
+  if(realtime_mode)
+    realtime_cbp.start(active_cpu);
+
   simulation_start_cycle = get_cycles().get();
   bp.clear_global();
 
@@ -701,6 +704,9 @@ void pic_processor::run (bool refresh)
     do
       mCurrentPhase = mCurrentPhase->advance();
     while(!bp.global_break);
+
+  if(realtime_mode)
+    realtime_cbp.stop();
 
     /* FIXME
     if(bp.have_pm_write())
