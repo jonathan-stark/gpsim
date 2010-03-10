@@ -64,6 +64,19 @@ b_to_a_loop:
 	DECFSZ	PORTB,W
 	 bra	b_to_a_loop
 
+    ; Now test whether the LAT register and PORT register behave like
+    ; they point to the same latches (as on the real PIC)
+	MOVLW	0x3C
+	MOVWF	PORTB		; Writing port and latch are internally
+	XORWF	LATB,W		; the same thing
+	bnz	FAILED
+
+	MOVLW	0xA5
+	MOVWF	LATB
+	XORWF	PORTB,W
+	bnz	FAILED
+
+
   .assert  "\"*** PASSED 18F452 port test\""
 	bra	$
 

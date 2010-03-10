@@ -461,6 +461,7 @@ void PicLatchRegister::put_value(unsigned int new_value)
 }
 unsigned int PicLatchRegister::get()
 {
+    value.data = m_port->getDriving();
   trace.raw(read_trace.get()  | value.data);
   trace.raw(read_trace.geti() | value.init);
 
