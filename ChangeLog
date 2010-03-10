@@ -2,6 +2,10 @@
         * src/16bit-instructions.cc 
           regression/instructions_16bit/instructions_16bit.asm :
           Fix issue 2968248; carry flag is "sticky" to DAW instruction
+        * src/pic-ioports.cc 
+          regression/p18f452_ports/p18f452_ports.asm :
+          Fix issue 2902082; writing the PORT register now updates the LAT 
+          register too.
 
 2010-02-07 Roy Rankin <rrankin@ihug.com.au>
        * src/pic-processor.cc: Fix real-time mode regression
