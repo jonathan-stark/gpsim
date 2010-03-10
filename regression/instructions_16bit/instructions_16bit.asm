@@ -584,6 +584,49 @@ start:
          bra    failed
 
         ;;
+        ;; daw
+        ;;
+
+        ; trivial case : 13+25=38, DAW makes no adjustment
+        movlw   0x13
+        addlw   0x25
+        daw
+        bc      failed
+        xorlw   0x38
+        bnz     failed
+        ; simple case : 28+39=67, DAW adjusts lower nibble only
+        movlw   0x28
+        addlw   0x39
+        daw
+        bc      failed
+        xorlw   0x67
+        bnz     failed
+        ; carry case : 84+39=123, DAW adjusts both nibbles and sets carry
+        movlw   0x84
+        addlw   0x39
+        daw
+        bnc     failed
+        xorlw   0x23
+        bnz     failed
+        ; corner case : 96+84=180, DAW adjusts both nibbles but must leave existing carry set
+        movlw   0x96
+        addlw   0x84
+        daw
+        bnc     failed      ; this used to fail
+        xorlw   0x80
+        bnz     failed
+ if 0
+        ; subtract case : 47-19=28, DAW adjusts lower nibble only
+        ; Not sure the real PIC works here - the data sheet says "addition"
+        movlw   0x19
+        sublw   0x47
+        daw
+        bnc     failed
+        xorlw   0x28
+        bnz     failed
+ endif
+
+        ;;
 
         clrf    temp
         negf    temp

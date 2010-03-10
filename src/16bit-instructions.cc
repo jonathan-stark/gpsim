@@ -799,7 +799,8 @@ void DAW::execute()
     new_value += 0x60;
 
   cpu16->W->put(new_value & 0xff);
-  cpu16->status->put_C(new_value>0xff);
+  if ( new_value>0xff )
+      cpu16->status->put_C(1);
 
   cpu16->pc->increment();
 
