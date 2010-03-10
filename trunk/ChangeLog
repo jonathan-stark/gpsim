@@ -1,3 +1,8 @@
+2010-03-10 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/16bit-instructions.cc 
+          regression/instructions_16bit/instructions_16bit.asm :
+          Fix issue 2968248; carry flag is "sticky" to DAW instruction
+
 2010-02-07 Roy Rankin <rrankin@ihug.com.au>
        * src/pic-processor.cc: Fix real-time mode regression
 
