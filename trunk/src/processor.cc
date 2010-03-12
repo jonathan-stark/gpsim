@@ -616,6 +616,16 @@ void Processor::build_program_memory(unsigned int *memory,
 }
 
 //-------------------------------------------------------------------
+/** @brief Write a word of data into memory outside flash
+ *
+ *  This method is called when loading data from the COD or HEX file
+ *  and the address is not in the program ROM or normal config space.
+ *  In this base class, there is no such memory. Real processors,
+ *  particularly those with EEPROM, will need to override this method.
+ *
+ *  @param  address Memory address to set. Byte address on 18F
+ *  @param  value   Word data to write in.
+ */
 void Processor::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 

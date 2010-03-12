@@ -1,3 +1,7 @@
+2010-03-12 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.cc src/processor.cc
+          Fixed loading of EEPROM data from COD/HEX on 18F (bug 2968268)
+
 2010-03-10 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/16bit-instructions.cc 
           regression/instructions_16bit/instructions_16bit.asm :
