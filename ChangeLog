@@ -1,3 +1,7 @@
+2010-03-28 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p16f62x.cc
+          Fixed missing aliases of INDF, PCLATH and INTCON (bug 2977843)
+
 2010-03-12 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.cc src/processor.cc
           Fixed loading of EEPROM data from COD/HEX on 18F (bug 2968268)

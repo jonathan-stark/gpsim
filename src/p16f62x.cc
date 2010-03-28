@@ -101,6 +101,7 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0x70,0x7f,0x100);
   alias_file_registers(0x70,0x7f,0x180);
+  alias_file_registers(0x0,0x0,0x100);      // INDF exists in all four pages, 16x6x did the first two
   alias_file_registers(0x0,0x0,0x180);
   alias_file_registers(0x01,0x04,0x100);
   alias_file_registers(0x81,0x84,0x100);
@@ -120,9 +121,11 @@ void P16F62x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x9d);
 
   // PCLATH
+  alias_file_registers(0x0a,0x0a,0x100);
   alias_file_registers(0x0a,0x0a,0x180);
 
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
+  alias_file_registers(0x0b,0x0b,0x100);
   alias_file_registers(0x0b,0x0b,0x180);
 
   usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
