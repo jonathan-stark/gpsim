@@ -1,3 +1,13 @@
+2010-03-29 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/16bit-processors.cc src/16bit-processors.h src/p18x.cc src/p18x.h 
+          regression/instructions_16bit/18f452.lkr 
+          regression/instructions_16bit/instructions_16bit.asm
+          Moved loading/reading of EEPROM and ID locations for 18F out of
+          the 18fxx20 class into the base class, as it's common to all the
+          family
+        * src/intcon.cc
+          Commented out an annoying debug print that isn't needed any more
+
 2010-03-29 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_scope.cc
 	  use previous size and position of window (bug 2973982)

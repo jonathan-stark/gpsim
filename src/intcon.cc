@@ -172,7 +172,7 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
 
   if(rcon->value.get() & RCON::IPEN)
   {
-      cout << "peripheral interrupt, priority " << hi_pri << "\n";
+//      cout << "peripheral interrupt, priority " << hi_pri << "\n";
     if ( hi_pri )
     {
       if ( value.get() & GIEH )

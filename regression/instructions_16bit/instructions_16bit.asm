@@ -20,6 +20,9 @@ failures        RES     1
 
   GLOBAL done
 
+IDLOCS  CODE
+	db	"ID"	; This is the id locations
+
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
 ;----------------------------------------------------------------------
@@ -506,23 +509,23 @@ start:
         ;;  positive - positive => positive  no overflow
         movlw   0x03
         subwf   temp,W
-        bov     failed
+        bov     failed2
                                                                                 
         ;; positive - positive => negative, no overflow
                                                                                 
         movlw   0x07
         subwf   temp,W
-        bov     failed
+        bov     failed2
                                                                                 
         ;; positive - negative => positive, no overflow.
         movlw   0xff
         subwf   temp,W
-        bov     failed
+        bov     failed2
 
        ;; positive - negative => negative, overflow.
         movlw   0x81
         subwf   temp,W
-        bnov    failed
+        bnov    failed2
 
         movlw   -0x05
         movwf   temp
@@ -530,23 +533,23 @@ start:
         ;;  negative - positive => positive,  overflow
         movlw   0x7e
         subwf   temp,W
-        bnov    failed
+        bnov    failed2
 
         ;; negative - positive => negative, no overflow
 
         movlw   0x02
         subwf   temp,W
-        bov     failed
+        bov     failed2
 
         ;; negative - negative => positive, no overflow.
         movlw   -0x07
         subwf   temp,W
-        bov     failed
+        bov     failed2
 
         ;; negative - negative => negative, overflow.
         movlw   -0x02
         subwf   temp,W
-        bov     failed
+        bov     failed2
 
         clrc
         clrdc
@@ -638,6 +641,7 @@ start:
          bra    failed
 
         goto    BranchTest
+failed2:	; interim label for tests above
         bra     failed
 BranchTest:
         call    CallTest
@@ -714,6 +718,17 @@ TableRead:
   .assert  "\"FAILED tblrd increment over boundary\""
 	 bra 	failed
 
+	; Now a quick check of an ID location
+        movlw	0x20
+        movwf	TBLPTRU
+        clrf	TBLPTRH
+        clrf	TBLPTRL
+        tblrd	*+
+	movlw	0x49
+	rcall	TestTablat
+	tblrd   *
+	movlw	0x44
+	rcall	TestTablat
 	bra	TableReadEnd
 	
 TableDATA:
