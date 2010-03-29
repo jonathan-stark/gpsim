@@ -171,7 +171,7 @@ public:
 
   virtual unsigned int register_memory_size () const { return 0x1000;};
   virtual unsigned int last_actual_register () const { return 0x0F7F;};
-  //virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual void create_iopin_map();
 
@@ -181,6 +181,7 @@ public:
   virtual unsigned int get_config_word(unsigned int address);
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual unsigned int configMemorySize() { return CONFIG7H-CONFIG1L+1; }
+  virtual unsigned int IdentMemorySize() const { return 4; }    // four words default (18F)
   virtual void enter_sleep();
   virtual void exit_sleep();
 /*
@@ -203,6 +204,8 @@ public:
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
 //  unsigned char osc_pin_Number[2];
+
+  unsigned int idloc[4];    ///< ID locations - not all 16-bit CPUs have 8 bytes
 };
 
 class _16bit_compat_adc : public _16bit_processor 

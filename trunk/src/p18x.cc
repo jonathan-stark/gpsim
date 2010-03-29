@@ -596,16 +596,6 @@ void P18F242::create_sfr_map()
 }
 */
 
-void P18F242::set_out_of_range_pm(unsigned int address, unsigned int value)
-{
-  // This method is only called by Processor::init_program_memory which writes words
-  if ( (address>= 0xf00000)
-    && (address < 0xf00000 + get_eeprom()->get_rom_size()))
-    {
-        get_eeprom()->change_rom(1 + address - 0xf00000, value >> 8);
-        get_eeprom()->change_rom(address - 0xf00000, value & 0xff);
-    }
-}
 
 Processor * P18F242::construct(const char *name)
 {
@@ -711,16 +701,7 @@ void P18F442::create_sfr_map()
 
 }
 */
-void P18F442::set_out_of_range_pm(unsigned int address, unsigned int value)
-{
-  // This method is only called by Processor::init_program_memory which writes words
-  if ( (address>= 0xf00000)
-    && (address < 0xf00000 + get_eeprom()->get_rom_size()))
-    {
-        get_eeprom()->change_rom(1 + address - 0xf00000, value >> 8);
-        get_eeprom()->change_rom(address - 0xf00000, value & 0xff);
-    }
-}
+
 
 Processor * P18F442::construct(const char *name)
 {
@@ -1130,27 +1111,7 @@ void P18F1220::osc_mode(unsigned int value)
   
 }
 
-void P18F1220::set_out_of_range_pm(unsigned int address, unsigned int value)
-{
-  // This method is only called by Processor::init_program_memory which writes words
-  if ( (address>= 0xf00000)
-    && (address < 0xf00000 + get_eeprom()->get_rom_size()))
-    {
-        get_eeprom()->change_rom(1 + address - 0xf00000, value >> 8);
-        get_eeprom()->change_rom(address - 0xf00000, value & 0xff);
-    }
-  else if( (address>= 0x200000) && (address < 0x200008) ) {
-    idloc[(address - 0x200000) >> 1] = value;
-  }
- 
-}
 
-unsigned int P18F1220::get_program_memory_at_address(unsigned int address)
-{
-  if( (address>= 0x200000) && (address < 0x200008) )
-    return idloc[(address - 0x200000) >> 1];
-  return _16bit_processor::get_program_memory_at_address(address);
-}
 
 //------------------------------------------------------------------------
 //
@@ -1371,17 +1332,6 @@ void P18F2x21::create_sfr_map()
   usart.set_eusart(true);
 }
 
-
-void P18F2x21::set_out_of_range_pm(unsigned int address, unsigned int value)
-{
-  // This method is only called by Processor::init_program_memory which writes words
-  if ( (address>= 0xf00000)
-    && (address < 0xf00000 + get_eeprom()->get_rom_size()))
-    {
-        get_eeprom()->change_rom(1 + address - 0xf00000, value >> 8);
-        get_eeprom()->change_rom(address - 0xf00000, value & 0xff);
-    }
-}
 
 
 //------------------------------------------------------------------------

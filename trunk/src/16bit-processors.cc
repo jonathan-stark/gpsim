@@ -618,6 +618,10 @@ unsigned int _16bit_processor::get_program_memory_at_address(unsigned int addres
   if (address >= CONFIG1L && address <= 0x30000D)
     return get_config_word(address);
 
+  uIndex = (address - 0x200000) >> 1;  // Look to see if it's an ID location
+  if( uIndex < IdentMemorySize() )
+    return idloc[uIndex];
+
   static const unsigned int DEVID1 = 0x3ffffe;
   static const unsigned int DEVID2 = 0x3fffff;
   if (address == DEVID1)
@@ -687,6 +691,23 @@ void _16bit_processor::create_config_memory()
   m_configMemory = new ConfigMemory(this,configMemorySize());
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H(this, CONFIG1H));
   m_configMemory->addConfigWord(CONFIG2H-CONFIG1L,new Config2H(this, CONFIG2H));
+}
+
+
+void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int value)
+{
+  // This method is only called by Processor::init_program_memory which writes words
+  if ( get_eeprom()
+    && (address>= 0xf00000)
+    && (address < 0xf00000 + get_eeprom()->get_rom_size()))
+    {
+        get_eeprom()->change_rom(1 + address - 0xf00000, value >> 8);
+        get_eeprom()->change_rom(address - 0xf00000, value & 0xff);
+    }
+  else if( (address>= 0x200000) && (address < 0x200008) ) {
+    idloc[(address - 0x200000) >> 1] = value;
+  }
+ 
 }
 
 //-------------------------------------------------------------------

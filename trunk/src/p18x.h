@@ -46,6 +46,7 @@ class P18C2x2 : public _16bit_compat_adc
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual unsigned int IdentMemorySize() const { return 2; }    // only two words on 18C
 
   virtual void create_iopin_map();
 
@@ -108,6 +109,7 @@ class P18C4x2 : public _16bit_compat_adc
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual unsigned int IdentMemorySize() const { return 2; }    // only two words on 18C
 
   virtual void create_sfr_map();
   virtual void create_iopin_map();
@@ -148,8 +150,8 @@ class P18F242 : public P18C242
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int IdentMemorySize() const { return 4; }
 
-  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
    assert(0);
@@ -178,8 +180,8 @@ class P18F442 : public P18C442
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int IdentMemorySize() const { return 4; }
 
-  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
    assert(0);
@@ -270,8 +272,6 @@ class P18F1220 : public P18Fxx20
   virtual void create_iopin_map();
   virtual unsigned int program_memory_size() const { return 0x1000; };
   virtual void osc_mode(unsigned int value);
-  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
-  virtual unsigned int get_program_memory_at_address(unsigned int address);
 
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
@@ -279,8 +279,6 @@ class P18F1220 : public P18Fxx20
   }
   virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
   virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
- private:
-  unsigned int idloc[4];
 };
 
 
@@ -327,7 +325,6 @@ class P18F2x21 : public _16bit_v2_adc
   virtual void create_sfr_map();
 
 
-  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
    assert(0);
