@@ -1340,6 +1340,9 @@ void Scope_Window::Build()
 
   gtk_window_set_title(GTK_WINDOW(window), "Scope");
 
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+
 
   tooltips = gtk_tooltips_new();
 
