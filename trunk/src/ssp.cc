@@ -31,6 +31,13 @@ Boston, MA 02111-1307, USA.  */
 
 #include "xref.h"
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 //#warning only supports SPI mode.
 //-----------------------------------------------------------
 // SSPSTAT - Synchronous Serial Port Status register.
@@ -1582,12 +1589,12 @@ void SSP_MODULE::newSSPBUF(unsigned int value)
 {
   if (!m_spi)
   {
-	cout << "Warning bug, SPI initialization error " << __FILE__ << ":" << __LINE__<<endl;
+	cout << "Warning bug, SPI initialization error " << __FILE__ << ":" << dec << __LINE__<<endl;
 	return;
   }
   if (!m_i2c)
   {
-	cout << "Warning bug, I2C initialization error " << __FILE__ << ":" << __LINE__<<endl;
+	cout << "Warning bug, I2C initialization error " << __FILE__ << ":" << dec << __LINE__<<endl;
 	return;
   }
   if(sspcon.isSPIActive(sspcon.value.get()))

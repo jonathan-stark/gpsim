@@ -1,3 +1,16 @@
+2010-04-06 Roy Rankin <rrankin@ihug.com.au>
+	* src/p16f88x.h src/p16f88x.cc src/Makefile.am src/pic-processor.h
+	  src/pic-processor.cc : Add 16f882/883/884/886/887 processors
+	* src/comparator.h src/comparator.cc: add class used in 16f88x
+	* src/14bit-tmrs.h src/14bit-tmrs.cc: add PWM(enhanced mode) support
+	* src/pir.h src/pir.cc: add interupts for 16f88x
+	* src/uart.cc: fix send_break code
+	* src/uart.h: define 16f88x SCKP bit in  _BAUDCON
+	* src/a2dconverter.h src/a2dconverter.cc: ADC for 16f88x
+	* src/ssp.cc: warning message line numbers in decimal
+	* src/pic-registers.cc : fix debug statement
+	* regression/usart_test/eusart.asm: refine test
+
 2010-03-29 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/16bit-processors.cc src/16bit-processors.h src/p18x.cc src/p18x.h 
           regression/instructions_16bit/18f452.lkr 
@@ -31,6 +44,7 @@
 
 2010-02-07 Roy Rankin <rrankin@ihug.com.au>
        * src/pic-processor.cc: Fix real-time mode regression
+         (bug 2930175)
 
 2010-01-12 Roy Rankin <rrankin@ihug.com.au>
        * src/p18x.h src/p18x.cc src/16bit-registers.cc: Add

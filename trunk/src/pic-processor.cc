@@ -47,6 +47,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x5x.h"
 #include "p16f62x.h"
 #include "p16f8x.h"
+#include "p16f88x.h"
 #include "p16x8x.h"
 #include "p16f87x.h"
 #include "p16x6x.h"
@@ -233,6 +234,16 @@ ProcessorConstructor pP16F87(P16F87::construct ,
                               "__16F87",    "pic16f87",     "p16f87",   "16f87");
 ProcessorConstructor pP16F88(P16F88::construct ,
                               "__16F88",    "pic16f88",     "p16f88",   "16f88");
+ProcessorConstructor pP16F882(P16F882::construct ,
+                     "__16F882",    "pic16f882",     "p16f882",   "16f882");
+ProcessorConstructor pP16F883(P16F883::construct ,
+                     "__16F883",    "pic16f883",     "p16f883",   "16f883");
+ProcessorConstructor pP16F884(P16F884::construct ,
+                     "__16F884",    "pic16f884",     "p16f884",   "16f884");
+ProcessorConstructor pP16F886(P16F886::construct ,
+                     "__16F886",    "pic16f886",     "p16f886",   "16f886");
+ProcessorConstructor pP16F887(P16F887::construct ,
+                     "__16F887",    "pic16f887",     "p16f887",   "16f887");
 ProcessorConstructor pP16F627(P16F627::construct ,
                               "__16F627",   "pic16f627",    "p16f627",  "16f627");
 ProcessorConstructor pP16F627A(P16F627::construct ,
@@ -1295,6 +1306,7 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 
 void pic_processor::create_symbols ()
 {
+
 
   if(verbose)
     cout << __FUNCTION__ << " register memory size = " << register_memory_size() << '\n';

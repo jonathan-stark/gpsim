@@ -51,6 +51,8 @@ public:
   virtual void set_bclif(){}
   virtual void set_ccpif(){}
   virtual void set_cmif(){}
+  virtual void set_c1if(){}
+  virtual void set_c2if(){}
   virtual void set_eccp1if(){}
   virtual void set_eeif(){}
   virtual void set_errif(){}
@@ -343,6 +345,41 @@ enum
          INTCON *, PIE *);
 };
 
+//---------------------------------------------------------
+// PIR2 Peripheral Interrupt register # 3
+//
+// This is version 2 of the PIR2 register - as seen on the 16f88x devices
+
+class PIR2v3 : public PIR
+{
+public:
+
+enum
+{
+    CCP2IF  = 1<<0,
+    ULPWUIF = 1<<2,
+    BCLIF   = 1<<3,
+    EEIF    = 1<<4,
+    C1IF    = 1<<5,
+    C2IF    = 1<<6,
+    OSFIF   = 1<<7
+};
+
+
+  virtual void set_ccpif() 
+    {
+      put(get() | CCP2IF);
+    }
+
+  virtual void set_bclif();
+  virtual void set_eeif();
+  virtual void set_c1if();
+  virtual void set_c2if();
+
+  PIR2v3(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
+
 
 //---------------------------------------------------------
 // PIR2 Peripheral Interrupt register # 3
@@ -460,6 +497,8 @@ public:
 
   virtual void set_pspif() {}
   virtual void set_cmif() {}
+  virtual void set_c1if() {}
+  virtual void set_c2if() {}
 
   // eeprom stuff
   virtual void set_eeif() {}
@@ -674,6 +713,15 @@ class PIR_SET_2 : public PIR_SET
   virtual void set_cmif() {
     assert(pir2 != 0);
     pir2->set_cmif();
+  }
+
+  virtual void set_c1if() {
+    assert(pir2 != 0);
+    pir2->set_c1if();
+  }
+  virtual void set_c2if() {
+    assert(pir2 != 0);
+    pir2->set_c2if();
   }
 
   // I2C master

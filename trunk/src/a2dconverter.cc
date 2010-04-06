@@ -202,7 +202,7 @@ void ADCON0::put(unsigned int new_value)
   if(new_value & ADON) {
     // The A/D converter is being turned on (or maybe left on)
 
-    if((new_value & ~old_value) & GO) {
+    if((new_value & ~old_value) & GO_bit) {
       if (verbose)
 	printf("starting A2D conversion\n");
       Dprintf(("starting A2D conversion\n"));
@@ -232,7 +232,7 @@ void ADCON0::put_conversion(void)
   if (verbose)
 	printf ("result=0x%02x\n", converted);
 
-  Dprintf(("%d-bit result 0x%x\n", m_nBits, converted));
+  Dprintf(("%d-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
 
   if(adresl) {   // non-null for more than 8 bit conversion
 
@@ -329,6 +329,7 @@ void ADCON0::set_interrupt(void)
 ADCON1_16F::ADCON1_16F(Processor *pCpu, const char *pName, const char *pDesc)
   : ADCON1(pCpu, pName, pDesc)
 {
+    valid_bits = 0x70;
 }
 void ADCON1_16F::put_value(unsigned int new_value)
 {
@@ -362,7 +363,7 @@ void ADCON1_16F::put_value(unsigned int new_value)
 
     }
     adcon0->set_Tad(Tad);
-    value.put(new_value);
+    value.put(new_value & valid_bits);
 }
 //------------------------------------------------------
 // ADCON1
@@ -370,7 +371,8 @@ void ADCON1_16F::put_value(unsigned int new_value)
 ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     m_AnalogPins(0),  m_voltageRef(0), m_nAnalogChannels(0),
-    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), m_ad_in_ctl(0)
+    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), 
+    valid_bits(0xff), m_ad_in_ctl(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
     setChannelConfiguration(i, 0);
@@ -381,14 +383,16 @@ ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
 
 void ADCON1::put(unsigned int new_value)
 {
+  unsigned int masked_value = new_value & valid_bits;
   trace.raw(write_trace.get() | value.get());
-  put_value(new_value);
+  put_value(masked_value);
 }
 void ADCON1::put_value(unsigned int new_value)
 {
-    cfg_index = get_cfg(new_value);
+    unsigned int masked_value = new_value & valid_bits;
+    cfg_index = get_cfg(masked_value);
     setADCnames();
-    value.put(new_value);
+    value.put(masked_value);
 }
 
 // Obtain new mIoMask and set pin names as per function
@@ -457,6 +461,7 @@ unsigned int ADCON1::getVrefHiChannel(unsigned int cfg)
  */
 void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
 {
+  
   if (cfg < cMaxConfigurations) 
     Vreflo_position[cfg] = channel;
 }
@@ -556,6 +561,7 @@ void ADCON1::setVoltRef(unsigned int channel, float value)
 double ADCON1::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
+
   if(channel < m_nAnalogChannels) {
     if ( (1<<channel) & m_configuration_bits[cfg_index] ) {
       PinModule *pm = m_AnalogPins[channel];
@@ -627,9 +633,10 @@ void ADCON1::set_channel_in(unsigned int channel, bool on)
 
     m_AnalogPins[channel]->updatePinModule();
 }
+
 ANSEL::ANSEL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    adcon1(0)
+    adcon1(0), anselh(0), valid_bits(0x7f)
 {
 }
 
@@ -642,7 +649,9 @@ void ANSEL::put(unsigned int new_value)
 {
   unsigned int cfgmax = adcon1->getNumberOfChannels();
   unsigned int i;
-  unsigned int mask = new_value;
+  unsigned int mask = (new_value & valid_bits);
+
+  if (anselh) mask |= anselh->value.get() << 8;
   trace.raw(write_trace.get() | value.get());
   /*
 	Generate ChannelConfiguration from ansel register
@@ -651,7 +660,39 @@ void ANSEL::put(unsigned int new_value)
   {
 	adcon1->setChannelConfiguration(i, mask);
   }
-  value.put(new_value);
+  value.put(new_value & valid_bits);
+  adcon1->setADCnames();
+}
+
+
+ANSEL_H::ANSEL_H(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    adcon1(0), ansel(0), valid_bits(0x3f)
+{
+}
+
+void ANSEL_H::setAdcon1(ADCON1 *new_adcon1)
+{
+  adcon1 = new_adcon1;
+}
+
+void ANSEL_H::put(unsigned int new_value)
+{
+  unsigned int cfgmax = adcon1->getNumberOfChannels();
+  unsigned int i;
+  unsigned int mask = ((new_value & valid_bits) << 8) ;
+  trace.raw(write_trace.get() | value.get());
+
+  if (ansel)
+	mask |= ansel->value.get();
+  /*
+	Generate ChannelConfiguration from ansel register
+  */
+  for(i=0; i < cfgmax; i++)
+  {
+	adcon1->setChannelConfiguration(i, mask);
+  }
+  value.put(new_value & valid_bits);
   adcon1->setADCnames();
 }
 
@@ -689,7 +730,7 @@ void ADCON0_10::put(unsigned int new_value)
 
   // If ADON is clear GO cannot be set
   if ((new_value & ADON) != ADON)
-	new_value &= ~GO;
+	new_value &= ~GO_bit;
 
 
   // SET: Reflect it first!
@@ -697,7 +738,7 @@ void ADCON0_10::put(unsigned int new_value)
   if(new_value & ADON) {
     // The A/D converter is being turned on (or maybe left on)
 
-    if((new_value & ~old_value) & GO) {
+    if((new_value & ~old_value) & GO_bit) {
       if (verbose)
 	printf("starting A2D conversion\n");
       // The 'GO' bit is being turned on, which is request to initiate
@@ -738,7 +779,7 @@ void ADCON0_12F::put(unsigned int new_value)
 
   // If ADON is clear GO cannot be set
   if ((new_value & ADON) != ADON)
-	new_value &= ~GO;
+	new_value &= ~GO_bit;
 
 
   // SET: Reflect it first!
@@ -746,7 +787,7 @@ void ADCON0_12F::put(unsigned int new_value)
   if(new_value & ADON) {
     // The A/D converter is being turned on (or maybe left on)
 
-    if((new_value & ~old_value) & GO) {
+    if((new_value & ~old_value) & GO_bit) {
       if (verbose)
 	printf("starting A2D conversion\n");
       // The 'GO' bit is being turned on, which is request to initiate

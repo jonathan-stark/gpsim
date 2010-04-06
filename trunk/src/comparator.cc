@@ -1,7 +1,7 @@
 /*
         
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006 Roy R. Rankin
+   Copyright (C) 2006,2010 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -375,6 +375,294 @@ void CMCON1::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   value.put(new_value);
 }
+//------------------------------------------------------------------------
+SRCON::SRCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+    writable_bits = SR1 | SR0 | C1SEN | C2REN | FVREN;
+   SR_Q = FALSE;
+}
+void SRCON::put(unsigned int new_value)
+{
+  // PULSR and PULSS should be only settable using bsf
+  // it is not clear if these bits read anything other than 0,
+  // but this is what I am assuming RRR
+  if (new_value & PULSR)
+	SR_Q = FALSE;
+  else if (new_value & PULSS && ! reset)
+	SR_Q = TRUE;
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & writable_bits);
+
+}
+CM2CON1::CM2CON1(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+    writable_bits = C1RSEL | C2RSEL | T1GSS | C2SYNC;
+}
+void CM2CON1::link_cm12con0(CM1CON0 *_cm1con0, CM2CON0 *_cm2con0)
+{
+	m_cm1con0 = _cm1con0;
+	m_cm2con0 = _cm2con0;
+}
+void CM2CON1::put(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & writable_bits);
+  if (((new_value ^ old_value) & C1RSEL) && m_cm1con0)
+	m_cm1con0->get();
+  if (((new_value ^ old_value) & C2RSEL) && m_cm2con0)
+	m_cm2con0->get();
+
+}
+
+
+void CM1CON0::state_change(unsigned int cmcon_val)
+{
+   if (!cm_stimulus[0])
+   {
+        cm_stimulus[0] = new CM_stimulus((CMCON *)this, "cm1_stimulus_1", 0, 1e12);
+        cm_stimulus[1] = new CM_stimulus((CMCON *)this, "cm1_stimulus_2", 0, 1e12);
+   }
+   if (value.get() ^ cmcon_val) // change of state
+   {
+
+	// Mirror C1OUT in CM2CON1::MC1OUT
+	if (cmcon_val & OUT)
+	{
+	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC1OUT);
+	    if (m_srcon->value.get() & SRCON::C1SEN)
+	    {
+		m_srcon->set = TRUE;
+		if (!m_srcon->reset)
+		    m_srcon->SR_Q = TRUE;
+	    }
+	}
+	else
+	{
+	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC1OUT);
+	    if (m_srcon->value.get() & SRCON::C1SEN)
+	    {
+		m_srcon->set = FALSE;
+	    }
+	}
+
+        // Generate interupt ?
+        if (pir_set)
+	{
+                pir_set->set_c1if();
+	}
+   }
+   if (cmcon_val & OE)	// output pin enabled
+   {
+    if (!(m_srcon->value.get() & SRCON::SR0)) //SRCON select comparator output
+    {
+        cm_source->putState((cmcon_val & OUT) != 0);
+     }
+     else	// RS latch output
+     {
+        cm_source->putState(m_srcon->SR_Q);
+     }
+     cm_output->updatePinModule();
+     update();
+    }
+}
+double CM1CON0::CVref()
+{
+
+	if (m_cm2con1->value.get() & CM2CON1::C1RSEL)
+	    return(m_vrcon->get_Vref());
+	else
+	    return(0.6);
+}
+
+void CM2CON0::state_change(unsigned int cmcon_val)
+{
+   if (value.get() ^ cmcon_val) // change of state
+   {
+	// Mirror C2OUT in CM2CON1::MC2OUT
+	if (cmcon_val & OUT)
+	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC2OUT);
+	else
+	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC2OUT);
+        // Generate interupt ?
+        if (pir_set)
+                pir_set->set_c2if();
+   }
+   if (m_tmrl)
+	m_tmrl->compare_gate((cmcon_val & OUT) == OUT);
+  
+   if (cmcon_val & OE)	// output pin enabled
+   {
+    if (!(m_srcon->value.get() & SRCON::SR1)) //SRCON select comparator output
+    {
+        cm_source->putState((cmcon_val & OUT) != 0);
+     }
+     else	// RS latch output
+     {
+        cm_source->putState(!m_srcon->SR_Q);
+     }
+     cm_output->updatePinModule();
+     update();
+    }
+}
+double CM2CON0::CVref()
+{
+
+	if (m_cm2con1->value.get() & CM2CON1::C2RSEL)
+	    return(m_vrcon->get_Vref());
+	else
+	    return(0.6);
+}
+
+CM12CON0::CM12CON0(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    m_vrcon(0), m_cm2con1(0), m_srcon(0),
+    pir_set(0), m_tmrl(0)
+{
+  value.put(0);
+  cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=cm_input[4]=0;
+  cm_output = 0;
+  cm_source=0;
+  cm_stimulus[0]=cm_stimulus[1]=0;
+  cm_snode[0]=cm_snode[1]=0;
+}
+
+CM12CON0::~CM12CON0()
+{
+
+}
+void CM12CON0::put(unsigned int new_value)
+{
+  unsigned int old_val = value.get();
+
+  if (verbose)
+      cout << "CM12CON0::put(new_value) =" << hex << new_value << endl;
+
+  // ON/OFF or channel change
+  if ((old_val ^ (new_value & 0xf7)) & ( ON | R | CH1 | CH0))
+  {
+	if (new_value & ON)
+	{
+	    int channel = new_value & (CH1 | CH0);
+	    if ( !(new_value & R))	// Monitor input for CIN+
+	    {
+		if (cm_snode[0] == NULL)
+		{
+		    cm_snode[0] = cm_input[4]->getPin().snode;
+		    cm_snode[0]->attach_stimulus(cm_stimulus[0]);
+		}
+			
+	    }
+	    else if (cm_snode[0] != NULL) // Using CVref so turn of monitoring
+	    {
+		cm_snode[0]->detach_stimulus(cm_stimulus[0]);
+		cm_snode[0] = NULL;
+	    }
+	    if (cm_snode[1] == NULL) // No CIN- monitoring active
+	    {
+		cm_snode[1] = cm_input[channel]->getPin().snode;
+		cm_snode[1]->attach_stimulus(cm_stimulus[1]);
+	    }
+	    // Change CIN- monitoring if on differnt pin
+	    else if (cm_snode[1] != cm_input[channel]->getPin().snode)
+	    {
+		cm_snode[1]->detach_stimulus(cm_stimulus[1]);
+		cm_snode[1] = cm_input[channel]->getPin().snode;
+		cm_snode[1]->attach_stimulus(cm_stimulus[1]);
+	    }
+	    
+	}
+	else // turning off, stop all monitoring of pins
+	{
+	    if (cm_snode[0] != NULL)
+	    {
+		cm_snode[0]->detach_stimulus(cm_stimulus[0]);
+                cm_snode[0] = NULL;
+            }
+	    if (cm_snode[1] != NULL)
+	    {
+		cm_snode[1]->detach_stimulus(cm_stimulus[1]);
+                cm_snode[1] = NULL;
+	    }
+	}
+
+  }
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & 0xf7);
+
+  get();        // update comparator values
+
+}
+/*
+**      get()
+**              read the comparator inputs and set C2OUT and C1OUT
+**              as required. Also drive output pins if required.
+*/
+unsigned int CM12CON0::get()
+{
+    unsigned int cmcon_val = value.get();
+    bool out_true;
+    if (cmcon_val & ON)
+    {
+        double Vhigh;
+        double Vlow;
+	Vlow = cm_input[cmcon_val & 0x3]->getPin().get_nodeVoltage();
+	if (cmcon_val & R) // use Cvref
+	{
+		Vhigh = CVref();
+	}
+	else	// use cin+
+	{
+	    Vhigh = cm_input[4]->getPin().get_nodeVoltage();
+	}
+	out_true = Vhigh > Vlow;
+
+	out_true ^= ((cmcon_val & POL) == POL);
+    }
+    else	// If not on, output same as POL
+    {
+	out_true = ((cmcon_val & POL) == POL);
+    }
+    if (out_true)
+	cmcon_val |= OUT;
+    else
+	cmcon_val &= ~OUT;
+
+   state_change(cmcon_val);
+   value.put(cmcon_val);
+   return(cmcon_val);
+}
+void CM12CON0::setpins(PinModule * c12in0, PinModule * c12in1,
+        PinModule * c12in2, PinModule * c12in3,
+        PinModule * cinPlus, PinModule * cout)
+{
+   // Multiplexed in - pins
+   cm_input[0] = c12in0;
+   cm_input[1] = c12in1;
+   cm_input[2] = c12in2;
+   cm_input[3] = c12in3;
+
+   // one in + pin
+   cm_input[4] = cinPlus;
+
+   // one output pin
+   cm_output = cout;
+   if (! cm_source)
+	cm_source = new CMSignalSource();
+   cm_output->setSource(cm_source);
+} 
+void CM12CON0::link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
+        VRCON *_vrcon, SRCON *_srcon)
+{
+	pir_set = new_pir_set;
+	m_cm2con1 = _cm2con1;
+	m_vrcon = _vrcon;
+	m_srcon = _srcon;
+}
+
 //--------------------------------------------------
 //      Voltage reference
 //--------------------------------------------------
@@ -384,6 +672,7 @@ VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
     vr_PinModule(0),
     pin_name(0)
 {
+  valid_bits = VR0|VR1|VR2|VR3|VRR|VROE|VREN;
   value.put(0);
 }
 
@@ -399,10 +688,28 @@ void VRCON::setIOpin(PinModule *newPinModule)
     pin_name = strdup(newPinModule->getPin().name().c_str());
 }
 
+double VRCON::get_Vref()
+{
+	unsigned int new_value = value.get();
+        Vref_high =  ((Processor *)cpu)->get_Vdd();
+   	Vref_low = 0.0;
+        vr_Rhigh = (8 + (16 - (new_value & 0x0f))) * 2000.;
+        vr_Rlow = (new_value & 0x0f) * 2000.;
+        if (! (new_value & VRR))        // High range ?
+            vr_Rlow += 16000.;
+
+        vr_Vref = (Vref_high - Vref_low) * vr_Rlow / (vr_Rhigh + vr_Rlow) + Vref_low;
+        if (verbose)
+        {
+            cout << "VRCON::put Rhigh=" <<vr_Rhigh << " Rlow=" << vr_Rlow
+                << " Vout=" << vr_Vref << endl;
+        }
+	return(vr_Vref);
+}
 void VRCON::put(unsigned int new_value)
 {
 
-  new_value &= 0xef;    // Bit 4 always 0
+  new_value &= valid_bits;
   unsigned int old_value = value.get();
   unsigned int diff = new_value ^ old_value;
 
@@ -414,32 +721,21 @@ void VRCON::put(unsigned int new_value)
         return;
 
   // if no PinModule clear VROE bit
-  if (!vr_PinModule) new_value &= 0xaf;
+  if (!vr_PinModule) new_value &= ~VROE;
   value.put(new_value);
   if (new_value & VREN)         // Vreference enable set
   {
-        double VDD =  ((Processor *)cpu)->get_Vdd();
-        vr_Rhigh = (8 + (16 - (new_value & 0x0f))) * 2000.;
-        vr_Rlow = (new_value & 0x0f) * 2000.;
-        if (! (new_value & VRR))        // High range ?
-            vr_Rlow += 16000.;
-
-        vr_Vref = VDD * vr_Rlow / (vr_Rhigh + vr_Rlow);
-        if (verbose)
-        {
-            cout << "VRCON::put Rhigh=" <<vr_Rhigh << " Rlow=" << vr_Rlow
-                << " Vout=" << vr_Vref << endl;
-        }
+	get_Vref();
         if (new_value & VROE)   // output voltage to pin
         {
 
             if (! vr_pu)
             {
-                vr_pu = new stimulus("vref_pu", VDD, vr_Rhigh);
+                vr_pu = new stimulus("vref_pu", Vref_high, vr_Rhigh);
             }
 
             if (! vr_pd)
-                vr_pd = new stimulus("vref_pd", 0.0, vr_Rlow);
+                vr_pd = new stimulus("vref_pd", Vref_low, vr_Rlow);
             if (strcmp("Vref", vr_PinModule->getPin().name().c_str()))
                 vr_PinModule->getPin().newGUIname("Vref");
 

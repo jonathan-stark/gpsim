@@ -254,17 +254,16 @@ start
     .assert "\"*** FAILED to send break\""
         nop
 
-        btfsc   PORTC,6         ; Wait 'til through transmitting
+        btfss   PORTC,6         ; Wait for stop bit
          bra    $-2
 ;
-;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 13 bits 
-;  and < 14 bits or between 1.352 and 1.456 msec.
-;  with oscillator at 20MHz and TMR0 / 64 expect between 113 and 121
-;  TMR0 cycles.
+;  At 4800 baud each bit takes 0.208 msec. Output will be low for
+;  start + 12 bit times or 2.70 msec. With 10Mhz TMR0 / 64 is 106 TMR0 counts.
 
 	movf	TMR0L,W
 
-  .assert "tmr0 > 113 && tmr0 < 121, \"*** FAILED sync pulse\""
+  .assert "tmr0 > 101 && tmr0 < 111, \"*** FAILED sync pulse\""
+	nop
 
 done:
   .assert  "\"*** PASSED E-Usart on 18F2321\""
