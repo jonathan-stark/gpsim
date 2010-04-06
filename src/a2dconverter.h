@@ -99,6 +99,7 @@ public:
 
   void set_channel_in(unsigned int channel, bool on);
   void setADCnames();
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
 
   
   
@@ -111,6 +112,7 @@ private:
   unsigned int mCfgBitShift;
   unsigned int mIoMask;
   unsigned int cfg_index;
+  unsigned int valid_bits;
 
   static const unsigned int cMaxConfigurations=16;
 
@@ -156,6 +158,7 @@ public:
 
 private:
    ADCON0 *adcon0;
+   unsigned int valid_bits;
 };
 
 
@@ -204,6 +207,7 @@ public:
   void setA2DBits(unsigned int);
   void setChannel_Mask(unsigned int ch_mask) { channel_mask = ch_mask; }
   void setChannel_shift(unsigned int ch_shift) { channel_shift = ch_shift; }
+  void setGo(unsigned int go) { GO_bit = (1 << go); }
   virtual bool get_ADFM() { return(adcon1->value.get() & ADCON1::ADFM); };
   virtual void set_Tad(unsigned int);
   virtual double getChannelVoltage(unsigned int channel) { 
@@ -266,6 +270,8 @@ private:
 // ANSEL
 //
 
+class ANSEL_H;
+
 class ANSEL : public sfr_register
 {
 public:
@@ -277,16 +283,50 @@ public:
     ANS3 = 1 << 3,
     ANS4 = 1 << 4,
     ANS5 = 1 << 5,
-    ANS6 = 1 << 6
+    ANS6 = 1 << 6,
+    ANS7 = 1 << 7
   };
 
   ANSEL(Processor *pCpu, const char *pName, const char *pDesc);
 
   void setAdcon1(ADCON1 *new_adcon1);
+  void setAnselh(ANSEL_H *new_anselh) { anselh = new_anselh;}
   void put(unsigned int new_val);
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
 
 private:
     ADCON1 *adcon1;
+    ANSEL_H *anselh;
+    unsigned int valid_bits;
+};
+//---------------------------------------------------------
+// ANSEL_H
+//
+
+class ANSEL_H : public sfr_register
+{
+public:
+  enum
+  {
+    ANS8 = 1 << 0,
+    ANS9 = 1 << 1,
+    ANS10 = 1 << 2,
+    ANS11 = 1 << 3,
+    ANS12 = 1 << 4,
+    ANS13 = 1 << 5,
+  };
+
+  ANSEL_H(Processor *pCpu, const char *pName, const char *pDesc);
+
+  void setAdcon1(ADCON1 *new_adcon1);
+  void setAnsel(ANSEL *new_ansel) { ansel = new_ansel;}
+  void put(unsigned int new_val);
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
+
+private:
+    ADCON1 *adcon1;
+    ANSEL *ansel;
+    unsigned int valid_bits;
 };
 //---------------------------------------------------------
 // ADCON0_12F register for 12f675 A2D

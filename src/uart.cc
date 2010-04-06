@@ -397,9 +397,9 @@ void _TXSTA::start_transmitting()
 
 
   // Set a callback breakpoint at the next SPBRG edge
-
   if(cpu)
     get_cycles().set_break(spbrg->get_cpu_cycle(1), this);
+
 
   // The TSR now has data, so clear the Transmit Shift
   // Register Status bit.
@@ -427,10 +427,6 @@ void _TXSTA::transmit_break()
 
   bit_count = 14;  // 13 break, 1 stop
 
-  // Set a callback breakpoint at the next SPBRG edge
-  if(cpu)
-    get_cycles().set_break(spbrg->get_cpu_cycle(1), this);
-
   // The TSR now has data, so clear the Transmit Shift
   // Register Status bit.
 
@@ -440,6 +436,7 @@ void _TXSTA::transmit_break()
   // Tell the TXREG that its data has been consumed.
 
   mUSART->emptyTX();
+  callback();	// sent start bit
 }
 
 void _TXSTA::transmit_a_bit()

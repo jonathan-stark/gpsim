@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998-2002 T. Scott Dattalo
-   Copyright (C) 2006 Roy R. Rankin
+   Copyright (C) 2006,2010 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -63,14 +63,14 @@ class VRCON : public sfr_register
 
   enum VRCON_bits
     {
-      VR0 = 1<<0,
+      VR0 = 1<<0,	// VR0-3 Value selection
       VR1 = 1<<1,
       VR2 = 1<<2,
       VR3 = 1<<3,
-
-      VRR = 1<<5,
-      VROE = 1<<6,
-      VREN = 1<<7
+      VRSS = 1<<4,	// Use external references (16f88x)
+      VRR = 1<<5,	// Range select
+      VROE = 1<<6,	// Output Reference to external pin 
+      VREN = 1<<7	// Enable Vref 
     };
 
   VRCON(Processor *pCpu, const char *pName, const char *pDesc);
@@ -78,15 +78,19 @@ class VRCON : public sfr_register
 
   virtual void put(unsigned int new_value);
   virtual void setIOpin(PinModule *);
-  virtual double get_Vref() { return(vr_Vref); };
+  virtual double get_Vref();
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
                                                                                 
 protected:
+  unsigned int		valid_bits;
   PinModule 		*vr_PinModule;
   double 		vr_Vref;
   stimulus		*vr_pu;
   stimulus		*vr_pd;
   double		vr_Rhigh;
   double		vr_Rlow;
+  double		Vref_high;	// usually VDD
+  double		Vref_low;	// usually VSS
   char			*pin_name;	// original name of pin
 
 };
@@ -188,5 +192,145 @@ class ComparatorModule
   CMCON1 cmcon1;
   VRCON vrcon;
 
+};
+
+/*
+ * Compare module for 16f88x processors
+ */
+
+class CM1CON0;
+class CM2CON0;
+
+/*
+ * SRCON SR Latch Control Register
+ */
+class SRCON  : public sfr_register
+{
+ public:
+
+
+  enum SRCON_bits
+  {
+	FVREN = 1<<0,  // Fixed Voltage Reference Enable
+	PULSR = 1<<2,  // Pulse Reset of SR latch
+	PULSS = 1<<3,  // Pulse set of SR Latch
+	C2REN = 1<<4,  // C2OUT resets SR latch
+	C1SEN = 1<<5,  // C1OUT sets SR latch
+	SR0   = 1<<6,  // MUX SR Q out and C1OUT
+	SR1   = 1<<7   // MUX SR -Q out and C2OUT
+  };
+  int writable_bits;
+  bool SR_Q;
+  bool set;
+  bool reset;
+
+  virtual void put(unsigned int new_value);
+
+  SRCON(Processor *pCpu, const char *pName, const char *pDesc);
+  ~SRCON(){}
+};
+
+/*
+ * CM2CON1 Comparator control register 1
+ */
+class CM2CON1 : public sfr_register
+{
+ public:
+
+  
+  enum CM2CON1_bits
+  {
+	C2SYNC = 1<<0, //C2 Output sync bit
+	T1GSS  = 1<<1, // Timer1 Gate Source Select bit
+	C2RSEL = 1<<4, // C2 Reference Select bit
+	C1RSEL = 1<<5, // C1 Reference Select bit
+	MC2OUT = 1<<6, // Mirror C2OUT bit
+	MC1OUT = 1<<7  // Mirror C1OUT bit
+  };
+  int writable_bits;
+  CM1CON0 *m_cm1con0;
+  CM2CON0 *m_cm2con0;
+
+  virtual void put(unsigned int new_value);
+  void link_cm12con0(CM1CON0 *_cm1con0, CM2CON0 *_cm2con0);
+
+  CM2CON1(Processor *pCpu, const char *pName, const char *pDesc);
+  ~CM2CON1(){}
+};
+
+/*
+ * CM12CON0 is common support for CM1CON0 AND CM2CON0
+ */
+class CM12CON0 : public sfr_register
+{
+ public:
+
+
+  VRCON *m_vrcon;
+  enum CM12CON0_bits
+    {
+      CH0 = 1<<0,	// Channel select bit 0
+      CH1 = 1<<1,	// Channel select bit 1
+      R   = 1<<2,	// Reference select bit (non-inverting input)
+      POL = 1<<4,	// Output polarity select bit
+      OE  = 1<<5,	// Output enable
+      OUT = 1<<6,	// Output bit 
+      ON  = 1<<7,	// Enable bit
+    };
+
+
+  virtual void put(unsigned int);
+  virtual unsigned int get();
+  virtual void setpins(PinModule * c12in0, PinModule * c12in1,
+	PinModule * c12in2, PinModule * c12in3, PinModule * cinPlus,
+	PinModule * cout);
+  virtual void state_change(unsigned int cmcon_val) { cout << "CM12CON:state_change should not be called\n"; }
+  virtual double CVref() { cout << "CM12CON:CVref should not be called\n"; return(0.);}
+ 
+  virtual void link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
+	VRCON *_vrcon, SRCON *_srcon);
+
+/*
+
+  void set_tmrl(TMRL *arg) { m_tmrl = arg; }
+*/
+  CM12CON0(Processor *pCpu, const char *pName, const char *pDesc);
+  ~CM12CON0();
+
+protected:
+  friend class CM1CON0;
+  friend class CM2CON0;
+
+  PinModule *cm_input[5];
+  PinModule *cm_output;
+  CMSignalSource *cm_source;
+  CM2CON1 *m_cm2con1;
+  SRCON *m_srcon;
+  PIR_SET *pir_set;
+  TMRL *m_tmrl;
+  CM_stimulus *cm_stimulus[2];
+  Stimulus_Node *cm_snode[2];
+
+};
+
+class CM1CON0 : public CM12CON0
+{
+ public:
+  CM1CON0(Processor *pCpu, const char *pName, const char *pDesc) :
+	CM12CON0(pCpu, pName, pDesc) {}
+  ~CM1CON0(){}
+
+  virtual void state_change(unsigned int cmcon_val);
+  virtual double CVref();
+};
+class CM2CON0 : public CM12CON0
+{
+ public:
+  CM2CON0(Processor *pCpu, const char *pName, const char *pDesc) :
+	CM12CON0(pCpu, pName, pDesc) {}
+  ~CM2CON0() {}
+
+  virtual void state_change(unsigned int cmcon_val);
+  virtual double CVref();
 };
 #endif // __COMPARATOR_H__

@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2009 Roy R. Rankin
+   Copyright (C) 2009,2010 Roy R. Rankin
 
 This file is part of gpsim.
 
@@ -33,6 +33,7 @@ class TMRH;
 class TMR2;
 class CCPRL;
 class CCPCON;
+class PWM1CON;
 class ADCON0;
 class PIR_SET;
 class InterruptSource;
@@ -85,6 +86,87 @@ public:
   CCPRL(Processor *pCpu, const char *pName, const char *pDesc=0);
 };
 
+//
+// Enhanced Capture/Compare/PWM Auto-Shutdown control register
+//
+class ECCPAS : public sfr_register
+{
+public:
+
+  /* Bit definitions for the register */
+  enum {
+	PSSBD0  = 1 << 0,	// Pins P1B and P1D Shutdown control bits
+	PSSBD1  = 1 << 1,
+	PSSAC0  = 1 << 2,	// Pins P1A and P1C Shutdown control bits
+	PSSAC1  = 1 << 3,
+	ECCPAS0 = 1 << 4,	// ECCP Auto-shutdown Source Select bits
+	ECCPAS1 = 1 << 5,
+	ECCPAS2 = 1 << 6,
+	ECCPASE = 1 << 7	// ECCP Auto-Shutdown Event Status bit
+  };
+
+
+  ECCPAS(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~ECCPAS();
+
+  void put(unsigned int new_value);
+
+private:
+  PWM1CON *pwm1con;
+  CCPCON  *ccp1con;
+  
+};
+//
+// Enhanced PWM control register
+//
+class PWM1CON : public sfr_register
+{
+public:
+
+  /* Bit definitions for the register */
+  enum {
+	PDC0    = 1 << 0,	// PWM delay count bits
+	PDC1    = 1 << 1,
+	PDC2    = 1 << 2,
+	PDC3    = 1 << 3,
+	PDC4    = 1 << 4,
+	PDC5    = 1 << 5,
+	PDC6    = 1 << 6,
+	PRSEN   = 1 << 7	// PWM Restart Enable bit
+  };
+
+
+  PWM1CON(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~PWM1CON();
+
+  void put(unsigned int new_value);
+
+private:
+};
+//
+// Enhanced PWM Pulse Steering control register
+//
+class PSTRCON : public sfr_register
+{
+public:
+
+  /* Bit definitions for the register */
+  enum {
+	STRA    = 1 << 0,	// Steering enable bit A
+	STRB    = 1 << 1,	// Steering enable bit B
+	STRC    = 1 << 2,	// Steering enable bit C
+	STRD    = 1 << 3,	// Steering enable bit D
+	STRSYNC = 1 << 4,	// Steering Sync bit
+  };
+
+
+  PSTRCON(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~PSTRCON();
+
+  void put(unsigned int new_value);
+
+private:
+};
 
 //---------------------------------------------------------
 // CCPCON - Capture and Compare Control register
@@ -92,8 +174,9 @@ public:
 class CCPSignalSource;  // I/O pin interface
 class CCPSignalSink;    // I/O pin interface
 class PinModule;
+class CCP12CON;
 
-class CCPCON : public sfr_register
+class CCPCON : public sfr_register, public TriggerObject
 {
 public:
 
@@ -104,7 +187,9 @@ public:
     CCPM2 = 1 << 2,
     CCPM3 = 1 << 3,
     CCPY  = 1 << 4,
-    CCPX  = 1 << 5
+    CCPX  = 1 << 5,
+    P1M0  = 1 << 6,	// CCP1 EPWM Output config bits 16f88x
+    P1M1  = 1 << 7
   };
 
   /* Define the Modes (based on the CCPM bits) */
@@ -127,32 +212,42 @@ public:
     PWM3 = 15
   };
 
+  void setBitMask(unsigned int bv) { bit_mask = bv; }
   void new_edge(unsigned int level);
   void compare_match();
   void pwm_match(int new_state);
   void put(unsigned int new_value);
   char getState();
   bool test_compare_mode();
+  void callback();
 
   void setCrosslinks(CCPRL *, PIR *, TMR2 *);
   void setADCON(ADCON0 *);
   CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~CCPCON();
+  void setIOpin(PinModule *p1, PinModule *p2=0, PinModule *p3=0, PinModule *p4=0);
+  PSTRCON *pstrcon;
+  PWM1CON *pwm1con;
+  ECCPAS  *eccpas;
 
-  void setIOpin(PinModule *);
-private:
-  PinModule *m_PinModule;
-  CCPSignalSource *m_source;
+protected:
+  unsigned int bit_mask;
+  PinModule *m_PinModule[4];
+  CCPSignalSource *m_source[4];
   CCPSignalSink   *m_sink;
   bool  m_bInputEnabled;    // Input mode for capture/compare
   bool  m_bOutputEnabled;   // Output mode for PWM
   char  m_cOutputState;
   int   edges;
+  guint64 future_cycle;
+  bool delay_source0, delay_source1;
+
 
   CCPRL   *ccprl;
   PIR     *pir;
   TMR2    *tmr2;
   ADCON0  *adcon0;
+  
 
 };
 

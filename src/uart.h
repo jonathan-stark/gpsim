@@ -217,6 +217,7 @@ class _BAUDCON : public sfr_register
     WUE    = 1<<1,
     BRG16  = 1<<3,
     TXCKP  = 1<<4,
+    SCKP   = 1<<4,	// synchronous clock polarity Select bit (16f88x)
     RXDTP  = 1<<5,
     RCIDL  = 1<<6,
     ABDOVF = 1<<7

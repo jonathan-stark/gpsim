@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006,2009 Roy R Rankin
+   Copyright (C) 2006,2009,2010 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -191,7 +191,8 @@ class CCPSignalSource : public SignalControl
 {
 public:
   CCPSignalSource(CCPCON *_ccp)
-    : m_ccp(_ccp)
+    : m_ccp(_ccp),
+    state('?')
   {
     assert(m_ccp);
   }
@@ -199,16 +200,15 @@ public:
   {
   }
 
-  virtual char getState()
-  {
-    return m_ccp->getState();
-  }
+  void setState(char m_state) { state = m_state; }
+  virtual char getState() { return state; }
   virtual void release() 
   {
     delete this;
   }
 private:
   CCPCON *m_ccp;
+  char state;
 };
 
 //--------------------------------------------------
@@ -241,32 +241,49 @@ private:
 //--------------------------------------------------
 CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    m_PinModule(0),
-    m_source(0),
+    bit_mask(0x3f),
+    m_sink(0),
     m_bInputEnabled(false),
     m_bOutputEnabled(false),
     m_cOutputState('?'),
     edges(0),
     ccprl(0), pir(0), tmr2(0), adcon0(0)
 {
+	m_PinModule[0] = 0;
 }
 
-CCPCON::~CCPCON()
-{
-  //delete m_sink;
-  //delete m_source;
+CCPCON::~CCPCON() 
+{ 
 }
 
-void CCPCON::setIOpin(PinModule *new_PinModule)
+// EPWM has four outputs PWM 1
+void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4)
 {
-  Dprintf(("CCPCON::setIOpin\n"));
+  Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():""));
 
-  m_PinModule = new_PinModule;
-
-  m_sink = new CCPSignalSink(this);
-  m_PinModule->addSink(m_sink);
-
-  m_source = new CCPSignalSource(this);
+  if (p1)
+  {
+    m_PinModule[0] = p1;
+    m_sink = new CCPSignalSink(this);
+    m_source[0] = new CCPSignalSource(this);
+    p1->addSink(m_sink);
+  }
+  m_PinModule[1] = m_PinModule[2] = m_PinModule[3] = 0;
+  if (p2)
+  {
+    m_PinModule[1] = p2;
+    m_source[1] = new CCPSignalSource(this);
+  }
+  if (p3)
+  {
+    m_PinModule[2] = p3;
+    m_source[2] = new CCPSignalSource(this);
+  }
+  if (p4)
+  {
+    m_PinModule[3] = p4;
+    m_source[3] = new CCPSignalSource(this);
+  }
 
 }
 
@@ -289,7 +306,7 @@ char CCPCON::getState()
 
 void CCPCON::new_edge(unsigned int level)
 {
-  Dprintf(("CCPCON::new_edge() level=%d\n",level));
+  Dprintf(("%s::new_edge() level=%d\n",name().c_str(), level));
 
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -353,7 +370,7 @@ void CCPCON::new_edge(unsigned int level)
 void CCPCON::compare_match()
 {
 
-  Dprintf(("CCPCON::compare_match()\n"));
+  Dprintf(("%s::compare_match()\n", name().c_str()));
 
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -373,7 +390,8 @@ void CCPCON::compare_match()
 
     case COM_SET_OUT:
       m_cOutputState = '1';
-      m_PinModule->updatePinModule();
+      m_source[0]->setState('1');
+      m_PinModule[0]->updatePinModule();
       if (pir)
 	pir->set_ccpif();
       Dprintf(("-- CCPCON setting compare output to 1\n"));
@@ -381,7 +399,8 @@ void CCPCON::compare_match()
 
     case COM_CLEAR_OUT:
       m_cOutputState = '0';
-      m_PinModule->updatePinModule();
+      m_source[0]->setState('0');
+      m_PinModule[0]->updatePinModule();
       if (pir)
 	pir->set_ccpif();
       Dprintf(("-- CCPCON setting compare output to 0\n"));
@@ -410,40 +429,228 @@ void CCPCON::compare_match()
     case PWM3:
       //cout << "CCPCON is set up as an output\n";
       return;
+
     }
 }
 
+// handle dead-band delay in half-bridge mode
+void CCPCON::callback()
+{
+
+    if(delay_source0)
+    {
+       	m_source[0]->setState('1');
+    	m_PinModule[0]->updatePinModule();
+        delay_source0 = false;
+    }
+    if(delay_source1)
+    {
+       	m_source[1]->setState('1');
+    	m_PinModule[1]->updatePinModule();
+        delay_source1 = false;
+    }
+}
 void CCPCON::pwm_match(int level)
 {
-  Dprintf(("CCPCON::pwm_match()\n"));
+  unsigned int new_value = value.get();
+  Dprintf(("%s::pwm_match() level=%d\n", name().c_str(), level));
 
-  if( (value.get() & PWM0) == PWM0) {
 
-    m_cOutputState = level ? '1' : '0';
-
-    // if the level is 'high', then tmr2 == pr2 and the pwm cycle
-    // is starting over. In which case, we need to update the duty
-    // cycle by reading ccprl and the ccp X & Y and caching them
-    // in ccprh's pwm slave register.
-
-    if(level) {
+  // if the level is 1, then tmr2 == pr2 and the pwm cycle
+  // is starting over. In which case, we need to update the duty
+  // cycle by reading ccprl and the ccp X & Y and caching them
+  // in ccprh's pwm slave register.
+  if(level == 1) {
       ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
       tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
       ccprl->ccprh->put_value(ccprl->value.get());
+  }
+  if( !pstrcon) {
+
+    m_cOutputState = level ? '1' : '0';
+    m_source[0]->setState(level ? '1' : '0');
+    m_PinModule[0]->setSource(m_source[0]);
+
+
+    if(level) {
       if (!ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
-	m_cOutputState = '0';
+          m_source[0]->setState('0');
     }
-    m_PinModule->updatePinModule();
+    m_PinModule[0]->updatePinModule();
 
     //cout << "iopin should change\n";
-  }  else
-    cout << "not pwm mode. bug?\n";
+  }  
+  else	// EPWM
+  {
+      assert(pwm1con);
+
+      unsigned int pstrcon_value = pstrcon->value.get();
+      bool active_high[4];
+      int pwm_width;
+      int delay = pwm1con->value.get() & ~PWM1CON::PRSEN;
+      switch (new_value & (CCPM3|CCPM2|CCPM1|CCPM0))
+      {
+        case PWM0:	//P1A, P1C, P1B, P1D active high
+	active_high[0] = true;
+	active_high[1] = true;
+	active_high[2] = true;
+	active_high[3] = true;
+    	break;
+    
+        case PWM1:	// P1A P1C active high P1B P1D active low
+	active_high[0] = true;
+	active_high[1] = false;
+	active_high[2] = true;
+	active_high[3] = false;
+    	break;
+    
+        case PWM2: 	// P1A P1C active low P1B P1D active high 
+	active_high[0] = false;
+	active_high[1] = true;
+	active_high[2] = false;
+	active_high[3] = true;
+    	break;
+    
+        case PWM3:	// //P1A, P1C, P1B, P1D active low
+	active_high[0] = false;
+	active_high[1] = false;
+	active_high[2] = false;
+	active_high[3] = false;
+    	break;
+    
+        default:
+            cout << "not pwm mode. bug?\n";
+    	return;
+    	break;
+      }
+
+	switch((new_value & (P1M1|P1M0))>>6) // ECCP bridge mode
+	{
+	    case 0:	// Single
+		Dprintf(("Single bridge pstrcon=0x%x\n", pstrcon->value.get()));
+		for (int i = 0; i <4; i++)
+		{
+		    if (pstrcon_value & (1<<i))
+		    {
+			m_PinModule[i]->setSource(m_source[i]);
+			// follow level except where duty cycle = 0
+			if (level && ccprl->ccprh->pwm_value)
+          		    m_source[i]->setState(active_high[i]?'1':'0');
+			else
+          		    m_source[i]->setState(active_high[i]?'0':'1');
+    			m_PinModule[i]->updatePinModule();
+		    }
+		    else
+			m_PinModule[i]->setSource(0);
+		}
+		break;
+	
+	    case 2:	// Half-Bridge
+		Dprintf(("half-bridge\n"));
+		m_PinModule[0]->setSource(m_source[0]);
+		m_PinModule[1]->setSource(m_source[1]);
+		m_PinModule[2]->setSource(0);
+		m_PinModule[3]->setSource(0);
+		delay_source0 = false;
+		delay_source1 = false;
+		// FIXME need to add deadband
+		// follow level except where duty cycle = 0
+		pwm_width = level ? 
+			ccprl->ccprh->pwm_value : 
+			((tmr2->pr2->value.get()+1)*4)-ccprl->ccprh->pwm_value;
+		if (!(level^active_high[0]) && ccprl->ccprh->pwm_value)
+		{
+		    // No delay, change state
+		    if (delay == 0)
+       		    	m_source[0]->setState('1');
+		    else if (delay < pwm_width) // there is a delay
+		    {
+			future_cycle = get_cycles().get() + delay;
+          		get_cycles().set_break(future_cycle, this);
+			delay_source0 = true;
+		    }
+		}
+		else
+		{
+       		    m_source[0]->setState('0');
+		}
+		if (!(level^active_high[1]) && ccprl->ccprh->pwm_value)
+		{
+       		    m_source[1]->setState('0');
+		}
+		else
+		{
+		    // No delay, change state
+		    if (delay == 0)
+       		    	m_source[1]->setState('1');
+		    else if (delay < pwm_width) // there is a delay
+		    {
+			future_cycle = get_cycles().get() + delay;
+          		get_cycles().set_break(future_cycle, this);
+			delay_source1 = true;
+		    }
+		}
+    		m_PinModule[0]->updatePinModule();
+    		m_PinModule[1]->updatePinModule();
+		break;
+	
+	    case 1:	// Full bidge Forward
+		Dprintf(("full-bridge, forward\n"));
+		m_PinModule[0]->setSource(m_source[0]);
+		m_PinModule[1]->setSource(m_source[1]);
+		m_PinModule[2]->setSource(m_source[2]);
+		m_PinModule[3]->setSource(m_source[3]);
+		// P1D toggles
+		if (level && ccprl->ccprh->pwm_value)
+          	    m_source[3]->setState(active_high[3]?'1':'0');
+		else
+          	    m_source[3]->setState(active_high[3]?'0':'1');
+		// P1A High (if active high)
+          	m_source[0]->setState(active_high[0]?'1':'0');
+		// P1B, P1C low (if active high)
+          	m_source[1]->setState(active_high[1]?'0':'1');
+          	m_source[2]->setState(active_high[2]?'0':'1');
+    		m_PinModule[0]->updatePinModule();
+    		m_PinModule[1]->updatePinModule();
+    		m_PinModule[2]->updatePinModule();
+    		m_PinModule[3]->updatePinModule();
+		break;
+	
+	    case 3:	// Full bridge reverse
+		Dprintf(("full-bridge reverse\n"));
+		m_PinModule[0]->setSource(m_source[0]);
+		m_PinModule[1]->setSource(m_source[1]);
+		m_PinModule[2]->setSource(m_source[2]);
+		m_PinModule[3]->setSource(m_source[3]);
+		// P1B toggles
+		if (level && ccprl->ccprh->pwm_value)
+          	    m_source[1]->setState(active_high[1]?'1':'0');
+		else
+          	    m_source[1]->setState(active_high[1]?'0':'1');
+		// P1C High (if active high)
+          	m_source[2]->setState(active_high[2]?'1':'0');
+		// P1A, P1D low (if active high)
+          	m_source[0]->setState(active_high[0]?'0':'1');
+          	m_source[3]->setState(active_high[3]?'0':'1');
+    		m_PinModule[0]->updatePinModule();
+    		m_PinModule[1]->updatePinModule();
+    		m_PinModule[2]->updatePinModule();
+    		m_PinModule[3]->updatePinModule();
+		break;
+
+	    default:
+		printf("%s::pwm_match impossible ECCP bridge mode\n", name().c_str());
+		break;
+	}
+	
+  }
 }
 
 void CCPCON::put(unsigned int new_value)
 {
 
-  Dprintf(("CCPCON::put() new_value=0x%x\n",new_value));
+  unsigned int old_value =  value.get();
+  Dprintf(("%s::put() new_value=0x%x\n",name().c_str(), new_value));
   trace.raw(write_trace.get() | value.get());
 
   value.put(new_value);
@@ -471,6 +678,7 @@ void CCPCON::put(unsigned int new_value)
 
       // RP - According to 16F87x data sheet section 8.2.1 clearing CCP1CON also clears the latch
       m_cOutputState = '0';
+      m_source[0]->setState('0');
       break;
 
     case CAP_FALLING_EDGE:
@@ -528,19 +736,34 @@ void CCPCON::put(unsigned int new_value)
       tmr2->pwm_dc( ccprl->ccprh->pwm_value, address);
 */
       m_bInputEnabled = false;
-      m_bOutputEnabled = true;
+      m_bOutputEnabled = false;	// this is done in pwm_match
       m_cOutputState = '0';
+      if ((old_value & P1M0) && (new_value & P1M0)) // old and new full-bridge
+      {		// need to adjust timer if P1M1 also changed
+	Dprintf(("full bridge repeat old=0x%x new=%x\n", old_value, new_value));
+      }
+      else
+          pwm_match(2);
+      return;
       break;
 
     }
 
-  if (oldbOutEn != m_bOutputEnabled && m_PinModule) 
-    m_PinModule->setSource(m_bOutputEnabled ? m_source : 0);
+    if (oldbOutEn != m_bOutputEnabled && m_PinModule)
+    {
+	if (m_bOutputEnabled)
+            m_PinModule[0]->setSource(m_source[0]);
+	else
+	{
+            m_PinModule[0]->setSource(0);
+	    m_source[0]->setState('?');
+	}
+    }
 
-  if ((oldbInEn  != m_bInputEnabled  || 
+    if ((oldbInEn  != m_bInputEnabled  ||
        oldbOutEn != m_bOutputEnabled)
-      && m_PinModule)
-    m_PinModule->updatePinModule();
+      && m_PinModule[0])
+        m_PinModule[0]->updatePinModule();
 
 }
 
@@ -814,6 +1037,7 @@ void TMRL::release()
 
 void TMRL::setIOpin(PinModule *extClkSource)
 {
+  Dprintf(("%s::setIOpin %s\n", name().c_str(), extClkSource?extClkSource->getPin().name().c_str():""));
   Dprintf(("TMRL::setIOpin\n"));
 
   if (extClkSource)
@@ -1008,7 +1232,7 @@ void TMRL::on_or_off(int new_state)
 void TMRL::update()
 {
 
-  Dprintf(("TMR1 update 0x%llx\n",get_cycles().get()));
+  Dprintf(("TMR1 update 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
   // The second part of the if will always be true unless TMR1 Gate enable
   // pin has been defined by a call to TMRL::setGatepin()
@@ -1361,6 +1585,7 @@ void PR2::put(unsigned int new_value)
 
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
+  Dprintf(("PR2:: put %x\n", new_value));
 
   if(value.get() != new_value)
     {
@@ -1826,6 +2051,7 @@ void TMR2::new_pre_post_scale()
 
 void TMR2::new_pr2(unsigned int new_value)
 {
+  Dprintf(("TMR2::new_pr2 on=%d\n", t2con->get_tmr2on()));
 
   if(t2con->get_tmr2on())
     {
@@ -1936,9 +2162,10 @@ void TMR2::callback()
 
          if (ssp_module)
                ssp_module->tmr2_clock();
-
           if ((ccp1con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
+	  {
                ccp1con->pwm_match(1);
+	  }
 
           if ((ccp2con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
                ccp2con->pwm_match(1);
@@ -1984,4 +2211,67 @@ void TMR2_MODULE::initialize(T2CON *t2con_, PR2 *pr2_, TMR2  *tmr2_)
   pr2   = pr2_;
   tmr2  = tmr2_;
 
+}
+
+//--------------------------------------------------
+// ECCPAS
+//--------------------------------------------------
+ECCPAS::ECCPAS(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+}
+
+ECCPAS::~ECCPAS()
+{
+}
+void ECCPAS::put(unsigned int new_value)
+{
+
+  Dprintf(("ECCPAS::put() new_value=0x%x\n",new_value));
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(new_value);
+  if (new_value & (ECCPAS0|ECCPAS1|ECCPAS2))
+	printf("ECCP Auto-Shutdown not implemented yet\n");
+}
+//--------------------------------------------------
+// PWM1CON
+//--------------------------------------------------
+PWM1CON::PWM1CON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+}
+
+PWM1CON::~PWM1CON()
+{
+}
+void PWM1CON::put(unsigned int new_value)
+{
+
+  Dprintf(("PWM1CON::put() new_value=0x%x\n",new_value));
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(new_value);
+  if (new_value & PRSEN)
+	printf("Enhanced PWM not impleminted yet\n");
+}
+//--------------------------------------------------
+// PSTRCON
+//--------------------------------------------------
+PSTRCON::PSTRCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+}
+
+PSTRCON::~PSTRCON()
+{
+}
+void PSTRCON::put(unsigned int new_value)
+{
+
+  Dprintf(("PSTRCON::put() new_value=0x%x\n",new_value));
+  new_value &= STRSYNC|STRD|STRC|STRB|STRA;
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(new_value);
 }
