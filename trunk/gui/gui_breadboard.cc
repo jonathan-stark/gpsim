@@ -3892,7 +3892,7 @@ void Breadboard_Window::Build(void)
   GdkColormap *colormap = gdk_colormap_get_system();
 
   gdk_color_parse("red",&high_output_color);
-  gdk_color_parse("darkgreen",&low_output_color);
+  gdk_color_parse("green",&low_output_color);
   gdk_color_parse("black",&black_color);
   gdk_color_parse("gray",&gray_color);
 
