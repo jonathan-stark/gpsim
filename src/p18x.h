@@ -231,6 +231,8 @@ class P18F452 : public P18F442
 class P18F2455 : public P18F242
 {
  public:
+  ECCPAS        eccpas;
+  PWM1CON       pwm1con;
   virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
   P18F2455(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
@@ -244,6 +246,9 @@ class P18F2455 : public P18F242
 class P18F4455 : public P18F442
 {
  public:
+  ECCPAS        eccpas;
+  PWM1CON       pwm1con;
+
   virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
   P18F4455(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
@@ -265,6 +270,9 @@ class P18F1220 : public P18Fxx20
 {
  public:
   OSCTUNE      osctune;
+  ECCPAS        eccpas;
+  PWM1CON       pwm1con;
+
   virtual PROCESSOR_TYPE isa(){return _P18F1220_;};
   P18F1220(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
@@ -356,6 +364,8 @@ class P18F4x21 : public P18F2x21
   PicLatchRegister *m_latd;
 
   PSP               psp;
+  ECCPAS        eccpas;
+  PWM1CON       pwm1con;
 
   P18F4x21(const char *_name=0, const char *desc=0);
 
