@@ -110,10 +110,12 @@ public:
   ~ECCPAS();
 
   void put(unsigned int new_value);
+  void set_mask(unsigned int bm) { bit_mask = bm; }
 
 private:
   PWM1CON *pwm1con;
   CCPCON  *ccp1con;
+  unsigned int bit_mask;
   
 };
 //
@@ -140,8 +142,10 @@ public:
   ~PWM1CON();
 
   void put(unsigned int new_value);
+  void set_mask(unsigned int bm) { bit_mask = bm; }
 
 private:
+  unsigned int bit_mask;
 };
 //
 // Enhanced PWM Pulse Steering control register

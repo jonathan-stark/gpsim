@@ -1006,15 +1006,12 @@ static void trace_node(struct gui_node *gn)
     {
         p = find_gui_pin(bbw, stimulus);
 
-        if(p==0)
-        {
-            puts("Not found");
-            g_list_free(pinlist);
-            return;
-        }
+	if (p)
+	{
 
-        pinlist = g_list_append(pinlist, p);
-        nr_of_nodes++;
+            pinlist = g_list_append(pinlist, p);
+            nr_of_nodes++;
+	}
 
         stimulus=stimulus->next;
     }

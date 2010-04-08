@@ -838,7 +838,9 @@ Processor * P18F452::construct(const char *name)
 // 
 
 P18F2455::P18F2455(const char *_name, const char *desc)
-  : P18F242(_name,desc)
+  : P18F242(_name,desc),
+    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
+    pwm1con(this, "eccp1del", "Enhanced PWM Control Register")
 
 {
 
@@ -869,6 +871,11 @@ void P18F2455::create()
        );
 
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  pwm1con.set_mask(0x80);
+  eccpas.set_mask(0xfc);
+  ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
 }
 
 Processor * P18F2455::construct(const char *name)
@@ -891,7 +898,9 @@ Processor * P18F2455::construct(const char *name)
 // 
 
 P18F4455::P18F4455(const char *_name, const char *desc)
-  : P18F442(_name,desc)
+  : P18F442(_name,desc),
+    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
+    pwm1con(this, "eccp1del", "Enhanced PWM Control Register")
 
 {
 
@@ -922,6 +931,10 @@ void P18F4455::create()
        );
 
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 }
 
 Processor * P18F4455::construct(const char *name)
@@ -1008,6 +1021,7 @@ void P18F1220::create()
   osccon.set_osctune(&osctune);
   osctune.set_osccon(&osccon);
 
+
   set_osc_pin_Number(0,16, &(*m_porta)[7]);
   set_osc_pin_Number(1,15, &(*m_porta)[6]);
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0xcf));
@@ -1015,6 +1029,11 @@ void P18F1220::create()
 
   add_sfr_register(&usart.baudcon,  0xfaa,RegisterValue(0,0),"baudcon");
   usart.set_eusart(true);
+
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setIOpin(&((*m_portb)[3]), &((*m_portb)[2]), &((*m_portb)[6]), &((*m_portb)[7]));
 }
 //------------------------------------------------------------------------
 void P18F1220::create_iopin_map()
@@ -1050,7 +1069,10 @@ void P18F1220::create_iopin_map()
 
 P18F1220::P18F1220(const char *_name, const char *desc)
   : P18Fxx20(_name,desc),
-    osctune(this, "osctune", "OSC Tune")
+    osctune(this, "osctune", "OSC Tune"),
+    eccpas(this, "eccpas", "ECCP Auto-Shutdown Control Register"),
+    pwm1con(this, "pwm1con", "Enhanced PWM Control Register")
+
 {
 
   if(verbose)
@@ -1556,7 +1578,9 @@ void P18F4x21::create_symbols()
 }
 
 P18F4x21::P18F4x21(const char *_name, const char *desc)
-  : P18F2x21(_name,desc)
+  : P18F2x21(_name,desc),
+    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
+    pwm1con(this, "eccp1del", "Enhanced PWM Control Register")
 {
 
   if(verbose)
@@ -1694,6 +1718,10 @@ void P18F4321::create()
   set_osc_pin_Number(0, 13, &(*m_porta)[7]);
   set_osc_pin_Number(1,14, &(*m_porta)[6]);
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 
 }
 

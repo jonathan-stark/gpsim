@@ -1,3 +1,10 @@
+2010-04-08 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.cc: fix trace bug 2983580 
+	* src/pic-processor.cc: fix realtime mode lockup (bug 2973978)
+	* src/p18x.h src/p18x.cc: add extended PWM 
+	* src/14bit-tmrs.cc src/14bit-tmrs.h: initialize some variables, fix
+	  to have extended PWM work with processors without prtrcon register
+
 2010-04-07 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc: lighten low pin color for those with
 	  red-green color blindness

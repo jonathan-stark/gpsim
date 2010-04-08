@@ -241,6 +241,9 @@ private:
 //--------------------------------------------------
 CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
+    pstrcon(0),
+    pwm1con(0),
+    eccpas(0),
     bit_mask(0x3f),
     m_sink(0),
     m_bInputEnabled(false),
@@ -259,14 +262,30 @@ CCPCON::~CCPCON()
 // EPWM has four outputs PWM 1
 void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4)
 {
-  Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():""));
-
-  if (p1)
+  Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():"unknown"));
+  if (!&(p1->getPin()))
   {
-    m_PinModule[0] = p1;
-    m_sink = new CCPSignalSink(this);
-    m_source[0] = new CCPSignalSource(this);
-    p1->addSink(m_sink);
+	Dprintf(("FIXME %s::setIOpin called where p1 has unassigned pin\n", name().c_str()));
+  }
+
+  if (p1 && &(p1->getPin()))
+  {
+    if (m_PinModule[0])
+    {
+	if (m_PinModule[0] != p1)
+	fprintf(stderr, "FIXME %s::setIOpin called for port %s then %s %p %p\n", 
+		name().c_str(), 
+		m_PinModule[0]->getPin().name().c_str(), 
+		p1->getPin().name().c_str() , m_PinModule[0], p1
+	);
+    }
+    else
+    {
+        m_PinModule[0] = p1;
+        m_sink = new CCPSignalSink(this);
+        m_source[0] = new CCPSignalSource(this);
+        p1->addSink(m_sink);
+    }
   }
   m_PinModule[1] = m_PinModule[2] = m_PinModule[3] = 0;
   if (p2)
@@ -465,7 +484,7 @@ void CCPCON::pwm_match(int level)
       tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
       ccprl->ccprh->put_value(ccprl->value.get());
   }
-  if( !pstrcon) {
+  if( !pwm1con) { // simple PWM
 
     m_cOutputState = level ? '1' : '0';
     m_source[0]->setState(level ? '1' : '0');
@@ -482,9 +501,13 @@ void CCPCON::pwm_match(int level)
   }  
   else	// EPWM
   {
-      assert(pwm1con);
-
-      unsigned int pstrcon_value = pstrcon->value.get();
+      unsigned int pstrcon_value;
+      // pstrcon allows port steering for "single output"
+      // if it is not defined, just use the first port
+      if (pstrcon)
+	  pstrcon_value = pstrcon->value.get();
+      else
+	  pstrcon_value = 1;
       bool active_high[4];
       int pwm_width;
       int delay = pwm1con->value.get() & ~PWM1CON::PRSEN;
@@ -527,7 +550,7 @@ void CCPCON::pwm_match(int level)
 	switch((new_value & (P1M1|P1M0))>>6) // ECCP bridge mode
 	{
 	    case 0:	// Single
-		Dprintf(("Single bridge pstrcon=0x%x\n", pstrcon->value.get()));
+		Dprintf(("Single bridge pstrcon=0x%x\n", pstrcon_value));
 		for (int i = 0; i <4; i++)
 		{
 		    if (pstrcon_value & (1<<i))
@@ -2217,7 +2240,8 @@ void TMR2_MODULE::initialize(T2CON *t2con_, PR2 *pr2_, TMR2  *tmr2_)
 // ECCPAS
 //--------------------------------------------------
 ECCPAS::ECCPAS(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    pwm1con(0), ccp1con(0), bit_mask(0xff)
 {
 }
 
@@ -2227,6 +2251,7 @@ ECCPAS::~ECCPAS()
 void ECCPAS::put(unsigned int new_value)
 {
 
+  new_value &= bit_mask;
   Dprintf(("ECCPAS::put() new_value=0x%x\n",new_value));
   trace.raw(write_trace.get() | value.get());
 
@@ -2238,7 +2263,8 @@ void ECCPAS::put(unsigned int new_value)
 // PWM1CON
 //--------------------------------------------------
 PWM1CON::PWM1CON(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+  bit_mask(0xff)
 {
 }
 
@@ -2248,6 +2274,7 @@ PWM1CON::~PWM1CON()
 void PWM1CON::put(unsigned int new_value)
 {
 
+  new_value &= bit_mask;
   Dprintf(("PWM1CON::put() new_value=0x%x\n",new_value));
   trace.raw(write_trace.get() | value.get());
 
