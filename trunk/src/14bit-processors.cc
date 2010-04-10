@@ -139,7 +139,12 @@ void _14bit_processor::interrupt ()
 
   bp.clear_interrupt();
 
-  stack->push(pc->value);
+  if (bp.have_sleep()) {
+      bp.clear_sleep();
+      stack->push(pc->value+1);
+  } else {
+      stack->push(pc->value);
+  }
   intcon->clear_gie();
 
   pc->interrupt(INTERRUPT_VECTOR);

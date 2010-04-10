@@ -1394,7 +1394,7 @@ The most common break point is an execution break point.
 \end_layout
 
 \begin_layout LyX-Code
-break e|r|w ADDRESS [expr]
+break e|r|w ADDRESS [,expr [,message]]
 \end_layout
 
 \begin_layout Standard
@@ -1402,6 +1402,7 @@ The simulation halts when the address is executed, read, or written.
  The ADDRESS can be a symbol or a number.
  If the optional expression is specified, then it must evaluate to true
  before the simulation will halt.
+ The optional message allows a description to be associated with the break.
  The read and write options only apply to those processors that can manipulate
  their own program memory.
 \end_layout
@@ -1427,7 +1428,7 @@ halt execution whenever bit 4 of register 42 is cleared
 \end_layout
 
 \begin_layout LyX-Code
-break r|w REGISTER [expr] 
+break r|w|ch REGISTER [,expr [,message]]
 \end_layout
 
 \begin_layout Standard
@@ -1435,14 +1436,32 @@ The simulation halts when
 \emph on
 REGISTER
 \emph default
- is read or written and the optional expression evaluates to true.
- There are two styles of expressions supported.
- One involves only expressions of the 
+ is read, written, or changed on write, and the optional expression evaluates to true.
+\end_layout
+
+\begin_layout Standard
+Other syntaxes with a boolean expression are:
+\end_layout
+
+\begin_layout LyX-Code
+break r|w|ch REGISTER == value
+\end_layout
+
+\begin_layout Standard
+The simulation halts when 
 \emph on
 REGISTER
 \emph default
-, the other is completely arbitrary.
- The examples below illustrate the differences.
+ is assigned the specified value, and:
+\end_layout
+
+\begin_layout LyX-Code
+break r|w|ch REGISTER & mask == value
+\end_layout
+
+\begin_layout Standard
+The simulation halts when specified bits in REGISTER are assigned the specified
+ value.
 \end_layout
 
 \begin_layout Standard
@@ -1458,31 +1477,6 @@ temp1
 
 \begin_layout LyX-Code
 break w temp1
-\end_layout
-
-\begin_layout Standard
-Here the write is conditioned to happen for only a certain value:
-\end_layout
-
-\begin_layout LyX-Code
-break w temp1==0x22
-\end_layout
-
-\begin_layout Standard
-Here the condition applies to specific bits:
-\end_layout
-
-\begin_layout LyX-Code
-break w temp1 & 0b11110000 == 0b11000000
-\end_layout
-
-\begin_layout Standard
-This one breaks only if the hex digit 'C' is written to the upper nibble
- of temp1.
-\end_layout
-
-\begin_layout Subsubsection*
-Boolean Expressions
 \end_layout
 
 \begin_layout Standard
@@ -1531,8 +1525,43 @@ If the firmware writes to the variable temp1 then the simulation will halt
  if the lower nibble of CurTask is not equal to 5.
 \end_layout
 
+\begin_layout Standard
+This example breaks only if the hex digit 'C' is written to the upper nibble
+ of temp1:
+\end_layout
+
+\begin_layout LyX-Code
+break w temp1 & 0b11110000 == 0b11000000
+\end_layout
+
+\begin_layout Subsubsection
+Processor exception breakpoints
+\end_layout
+
+\begin_layout Standard
+Stack overflow, underflow and watchdog timeout can also halt the simulation.
+\end_layout
+
+\begin_layout LyX-Code
+break so
+\end_layout
+
+\begin_layout LyX-Code
+break su
+\end_layout
+
+\begin_layout LyX-Code
+break wdt
+\end_layout
+
 \begin_layout Subsubsection*
 Attribute Breakpoints
+\end_layout
+
+\begin_layout LyX-Code
+break 
+\emph on
+attribute
 \end_layout
 
 \begin_layout Standard
@@ -1620,7 +1649,7 @@ name "disassemble"
 \end_layout
 
 \begin_layout LyX-Code
-disassemble [[begin:end] | [length]]
+disassemble [[begin:end] | [count]]
 \end_layout
 
 \begin_layout LyX-Code
@@ -1678,7 +1707,21 @@ current pc = 0x1c
 \end_layout
 
 \begin_layout Standard
-With a single numeric option, the disassemble command will 
+With a single numeric option, the 
+\emph on
+disassemble
+\emph default
+ command will disassemble given number of instructions starting with the
+ instruction at the PC.
+\end_layout
+
+\begin_layout Standard
+With a two numbers, the 
+\emph on
+disassemble
+\emph default
+ command will disassemble instructions starting and ending given number
+ of instructions from the PC.
 \end_layout
 
 \begin_layout Section
@@ -1692,7 +1735,7 @@ name "dump"
 \end_layout
 
 \begin_layout LyX-Code
-dump [r | e [module_name [filename]]]
+dump [r | s | e [module_name [filename]]]
 \end_layout
 
 \begin_layout LyX-Code
@@ -1705,16 +1748,12 @@ dump r or dump with no options will display all of the file registers and
 \end_layout
 
 \begin_layout Standard
-
+dump s will display only special function registers.
 \end_layout
 
 \begin_layout Standard
 dump e will display the contents of the processor EEPROM (if the pic being
  simulated contains any).
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard
@@ -1724,18 +1763,10 @@ The 'dump e module_name' command will display the contents of an EEPROM
 \end_layout
 
 \begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
 The 'dump e module_name filename' command dumps the contents of a module's
  EEPROM, in Intel hex format, into the file with the given name.
  The 'load e' command can later be used to read the dumped file thus allowing
  the contents of the EEPROM  to be preserved between runs of gpsim.
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard
@@ -1768,14 +1799,13 @@ name "frequency"
 \end_layout
 
 \begin_layout Standard
-This command sets the clock frequency.
- By default gpsim uses 20 MHz as clock.
- The clock frequency is used to compute time in seconds.
+This command sets the oscillator frequency.
+ By default gpsim uses 20 MHz oscillator.
+ The oscillator frequency is used to compute time in seconds.
  Use this command to adjust this value.
- If no value is provided this command prints the current clock.
- Note that PICs have an instruction clock that's a forth of the external
- clock.
- This value is the external clock.
+ If no value is provided this command prints the current frequency.
+ Note that PICs have an instruction frequency that's a quarter of the oscillator
+ frequency clock.
 \end_layout
 
 \begin_layout Section
@@ -1788,10 +1818,18 @@ name "help"
 
 \end_layout
 
+\begin_layout LyX-Code
+help [
+\emph on
+command
+\emph default
+]
+\end_layout
+
 \begin_layout Standard
 By itself, help will display all of the commands along with a brief description
  on how they work.
- 'help <command>' provides more extensive online help.
+ With a command as a parameter help provides more extensive online help.
  The help command can also display information about attributes.
 \end_layout
 
@@ -1805,9 +1843,7 @@ name "icd"
 
 \end_layout
 
-\begin_layout Standard
-
-\emph on
+\begin_layout LyX-Code
 icd [open <port>]
 \end_layout
 
@@ -1830,36 +1866,33 @@ name "list"
 
 \end_layout
 
+\begin_layout Standard
+The list command allows you to view the source code while you are debugging.
+\end_layout
+
 \begin_layout LyX-Code
 list [[s | l] [*pc] [line_number1 [,line_number2]]]
 \end_layout
 
-\begin_layout LyX-Code
-Display the contents of source and list files.
- 
-\end_layout
-
-\begin_layout LyX-Code
+\begin_layout Standard
 Without any options, list will use the last specified options.
- 
-\end_layout
-
-\begin_layout LyX-Code
-list s will display lines in the source (or .asm) file.
- 
-\end_layout
-
-\begin_layout LyX-Code
-list l will display lines in the .lst file 
-\end_layout
-
-\begin_layout LyX-Code
-list *pc will display either .asm or .lst lines around the pc
 \end_layout
 
 \begin_layout Standard
-The list command allows you to view the source code while you are debugging.
- 
+list s will display lines in the source (or .asm) file.
+\end_layout
+
+\begin_layout Standard
+list l will display lines in the .lst file.
+\end_layout
+
+\begin_layout Standard
+list *pc will display either .asm or .lst lines around the PC.
+ Without *pc use current PC as a reference.
+\end_layout
+
+\begin_layout Standard
+Line numbers are relative to the line of the PC.
 \end_layout
 
 \begin_layout Section
@@ -1873,31 +1906,45 @@ name "load"
 \end_layout
 
 \begin_layout Standard
-The load command is used to load either hex, configuration, or .cod files.
- A hex file is usually used to program the physical part.
- Consequently, it provides no symbolic information.
+The load command is used to load a program file, a command file, or eeprom data.
+\end_layout
+
+\begin_layout Standard
+Program file is usually used to program the physical part.
+ A .hex file provides no symbolic information.
  .cod files on the other hand, do provide symbolic information.
  The only reason to use a hex file is when there's no .cod file available.
 \end_layout
 
 \begin_layout Standard
-The syntax for loading source code files is:
+The syntax for loading program files is:
 \end_layout
 
 \begin_layout LyX-Code
-load [processortype] file
+load [processortype] programfile
 \end_layout
 
 \begin_layout Standard
 gpsim will automatically determine if the file is a .hex or .cod file.
- The optional processortype allows one to override the processor specified
- in a .cod file.
+ The optional 
+\emph on
+processortype
+\emph default
+ is needed if a .hex file is loaded and processor is not yet defined.
+ It also allows one to override the processor specified in a .cod file.
+\end_layout
+
+\begin_layout LyX-Code
+load [i] commandfile.stc
 \end_layout
 
 \begin_layout Standard
-Configuration files are script files containing gpsim commands.
+Command files contain gpsim commands.
  These are extremely useful for creating a debugging environment that will
  be used repeatedly.
+ Normally loading a command file residing in other directories changes working
+ directory.
+ This can be overridden with the 'i' (include) option.
 \end_layout
 
 \begin_layout LyX-Code
@@ -2221,19 +2268,11 @@ gpsim> module list
 \end_layout
 
 \begin_layout LyX-Code
-Module Libraries libgpsim_modules.so
+Module Library Files
 \end_layout
 
 \begin_layout LyX-Code
-   pullup
-\end_layout
-
-\begin_layout LyX-Code
-   pulldown
-\end_layout
-
-\begin_layout LyX-Code
-   usart
+libgpsim_modules.so
 \end_layout
 
 \begin_layout LyX-Code
@@ -2265,6 +2304,22 @@ Module Libraries libgpsim_modules.so
 \end_layout
 
 \begin_layout LyX-Code
+   push_button
+\end_layout
+
+\begin_layout LyX-Code
+   PortStimulus
+\end_layout
+
+\begin_layout LyX-Code
+   pullup
+\end_layout
+
+\begin_layout LyX-Code
+   pulldown
+\end_layout
+
+\begin_layout LyX-Code
    pulsegen
 \end_layout
 
@@ -2273,7 +2328,23 @@ Module Libraries libgpsim_modules.so
 \end_layout
 
 \begin_layout LyX-Code
+   usart
+\end_layout
+
+\begin_layout LyX-Code
    TTL377
+\end_layout
+
+\begin_layout LyX-Code
+   I2C-EEPROM2k
+\end_layout
+
+\begin_layout LyX-Code
+   I2C-EEPROM16k
+\end_layout
+
+\begin_layout LyX-Code
+   I2C-EEPROM256k
 \end_layout
 
 \begin_layout Subsubsection*
@@ -2307,8 +2378,16 @@ gpsim> module load led D1
 Display loaded modules
 \end_layout
 
+\begin_layout LyX-Code
+module
+\end_layout
+
 \begin_layout Subsubsection*
 Querying modules
+\end_layout
+
+\begin_layout Standard
+Dumping modules and listing the pins is not yet implemented.
 \end_layout
 
 \begin_layout LyX-Code
@@ -4371,35 +4450,20 @@ Assertions and Embedded Simulation commands
 \begin_layout Standard
 gpsim's breakpoint design is a powerful tool that can catch many problems.
  The assertion design extends this power even further.
- An assertion is like a breakpoint that is associated with a particular
- instruction.
+ An assertion is like a breakpoint that is defined in the program source
+ code for a particular instruction.
+ gpsim reads the breakpoint from a special message area in the .cod file.
  For example, you may have a routine that requires BANK 0 be selected.
  A gpsim assertion can be placed at the entry of the routine to verify that
  this is the case.
 \end_layout
 
 \begin_layout LyX-Code
-    .assert  
-\begin_inset Quotes eld
-\end_inset
-
-(status & 0x60) == 0, 
+    .assert  "(status & 0x60) == 0, 
 \backslash
-
-\begin_inset Quotes erd
-\end_inset
-
-Bank 0 must be selected!
+"Bank 0 must be selected!
 \backslash
-
-\begin_inset Quotes erd
-\end_inset
-
-
-\begin_inset Quotes erd
-\end_inset
-
-
+""
 \end_layout
 
 \begin_layout Standard

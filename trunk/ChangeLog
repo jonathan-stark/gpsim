@@ -1,3 +1,10 @@
+2010-04-10 Roy Rankin <rrankin@ihug.com.au>
+	* src/p16f8x.cc: correct usart pins for p16f87/8 (patch 2116354)
+	* src/14bit-processors.cc: Correctly wake up from sleep 
+	  (patch 2348392)
+	* cli/cmd_load.cc doc/gpsim.lyx : Documentation updates
+	  (patch 2108073)
+
 2010-04-08 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc: fix trace bug 2983580 
 	* src/pic-processor.cc: fix realtime mode lockup (bug 2973978)
