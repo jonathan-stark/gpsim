@@ -182,6 +182,8 @@ PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
 
 void PortRegister::setEnableMask(unsigned int newEnableMask)
 {
+  Dprintf (( "PortRegister::setEnableMask for %s to %02X\n", 
+             name_str.c_str(), newEnableMask ));
   mOutputMask = newEnableMask;
   //unsigned int maskDiff = getEnableMask() ^ newEnableMask;
   unsigned int oldEnableMask = getEnableMask();
@@ -289,6 +291,8 @@ unsigned int PortRegister::get()
 }
 unsigned int PortRegister::get_value()
 {
+  Dprintf (( "PortRegister::get_value of %s mask=%02X, data=%02X\n",
+              name_str.c_str(), mOutputMask, rvDrivenValue.data ));
   return mOutputMask & rvDrivenValue.data;
 }
 void PortRegister::putDrive(unsigned int new_value)
