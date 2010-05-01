@@ -401,7 +401,8 @@ void ADCON1::setADCnames()
     unsigned int new_mask = m_configuration_bits[cfg_index];
     unsigned int diff = mIoMask ^ new_mask;
 
-
+    Dprintf (( "ADCON1::setADCnames - cfg_index=%d new_mask %02X\n",
+               cfg_index, new_mask ));
 
     char newname[20];
 

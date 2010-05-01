@@ -94,6 +94,15 @@ start:
    .sim "attach p7 portb7 portd7"
 
 ;
+; The test relies on porta being digital I/O, and porte being PSP, so it's 
+; necessary to disable all ADC channels
+	bsf     STATUS,RP0      ; bank 1
+	movlw	0x07
+	movwf	ADCON1
+	bcf	STATUS,RP0      ; bank 0
+
+
+;
 ; First test portd operates in normal mode
 
 	bsf     STATUS,RP0      ; bank 1

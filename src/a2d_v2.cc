@@ -320,6 +320,7 @@ void ADCON1_V2::put(unsigned int new_value)
     unsigned int new_mask = get_adc_configmask(new_value);
     unsigned int diff = mIoMask ^ new_mask;
 
+    Dprintf (( "ADCON1_V2::put ( %02X ) - new_mask %02X\n", new_value, new_mask ));
     trace.raw(write_trace.get() | value.get());
 
 

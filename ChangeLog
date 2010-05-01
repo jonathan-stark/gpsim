@@ -1,3 +1,12 @@
+2010-05-01 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/16bit-registers.cc src/pic-instructions.cc
+          Fixed bug #2983660 - BSF and BCF now work right on PLUSW registers
+          Also PLUSW registers now work if destination is address 0
+        * regression/psp/p16f871.asm regression/psp/p18f452.asm
+          Fixed the PSP regression test code to de-select the ADC channels,
+          because the above fix shows up that they should (probably) have 
+          failed before.
+
 2010-04-10 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f8x.cc: correct usart pins for p16f87/8 (patch 2116354)
 	* src/14bit-processors.cc: Correctly wake up from sleep 

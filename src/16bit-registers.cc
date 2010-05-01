@@ -277,26 +277,22 @@ PLUSW::PLUSW(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Add
 
 unsigned int PLUSW::get()
 {
-
   trace.raw(read_trace.get() | value.get());
 
   int destination = iam->plusw_fsr_value();
-  if(destination > 0)
-    return(cpu_pic->registers[destination]->get());
+  if(destination >= 0)
+    return (cpu_pic->registers[destination]->get());
   else
     return 0;
-
 }
 
 unsigned int PLUSW::get_value()
 {
-
   int destination = iam->plusw_fsr_value();
-  if(destination > 0)
-    return(cpu_pic->registers[destination]->get_value());
+  if(destination >= 0)
+    return (cpu_pic->registers[destination]->get_value());
   else
     return 0;
-
 }
 
 void PLUSW::put(unsigned int new_value)
@@ -305,21 +301,20 @@ void PLUSW::put(unsigned int new_value)
   //trace.register_write(address,new_value);
 
   int destination = iam->plusw_fsr_value();
-  if(destination > 0)
+  if(destination >= 0)
     cpu_pic->registers[destination]->put(new_value);
 }
 
 void PLUSW::put_value(unsigned int new_value)
 {
   int destination = iam->plusw_fsr_value();
-  if(destination > 0)
+  if(destination >= 0)
     cpu_pic->registers[destination]->put_value(new_value);
 
 
   update();
-  if(destination > 0)
+  if(destination >= 0)
     cpu_pic->registers[destination]->update();
-
 }
 
 //------------------------------------------------

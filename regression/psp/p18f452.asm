@@ -92,6 +92,13 @@ start:
    .sim "attach p7 portb7 portd7"
 
 ;
+; The test relies on porta being digital I/O, and porte being PSP, so it's 
+; necessary to disable all ADC channels
+	movlw	0x07
+	movwf	ADCON1
+
+
+;
 ; First test portd operates in normal mode
 
 	clrf    TRISD           ; PortD output
