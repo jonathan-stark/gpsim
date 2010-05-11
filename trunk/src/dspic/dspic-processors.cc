@@ -72,7 +72,9 @@ namespace dspic {
   void dsPicProcessor::create()
   {
     init_program_memory (program_memory_size());
+#ifndef CLOCK_EXPERIMENTS
     pc->memory_size_mask = program_memory_size()-1;
+#endif
     init_register_memory (register_memory_size()/2);
 
     create_sfr_map();

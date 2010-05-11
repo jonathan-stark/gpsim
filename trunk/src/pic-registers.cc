@@ -53,7 +53,9 @@ Program_Counter::Program_Counter(const char *name, const char *desc, Module *pM)
 
   reset_address = 0;
   value = 0;
+#ifndef CLOCK_EXPERIMENTS
   memory_size_mask = 0;
+#endif
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
   instruction_phase = 0;
 
@@ -96,7 +98,18 @@ void Program_Counter::increment()
 
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_increment | value);
-  value = (value + 1) & memory_size_mask;
+  value = (value + 1);
+  if (value == memory_size) // Some processors start at highest memory and roll over
+  {
+	
+        printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, value, memory_size);
+	value = 0;
+  }
+  else if (value > memory_size) // assume this is a mistake
+  {
+        printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, value, memory_size);
+        bp.halt();
+  }
 
   // Update pcl. Note that we don't want to pcl.put() because that 
   // will trigger a break point if there's one set on pcl. (A read/write
@@ -126,7 +139,14 @@ void Program_Counter::skip()
 
 
 #ifdef CLOCK_EXPERIMENTS
-  mExecute2ndHalf->firstHalf((value + 2) & memory_size_mask);
+
+  if ((value + 2) >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, value, memory_size);
+    bp.halt();
+  }
+  else
+    mExecute2ndHalf->firstHalf( value + 2);
 #else
   //value = (value + 1) & memory_size_mask;
   //cpu_pic->pcl->value.put(value & 0xff);
@@ -226,7 +246,13 @@ void Program_Counter::jump(unsigned int new_address)
   // see Update pcl comment in Program_Counter::increment()
   
 #ifdef CLOCK_EXPERIMENTS
-  mExecute2ndHalf->firstHalf(new_address & memory_size_mask);
+  if (new_address >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, new_address, memory_size);
+    bp.halt();
+  }
+  else
+    mExecute2ndHalf->firstHalf(new_address);
 #else
   value = new_address & memory_size_mask;
   cpu_pic->pcl->value.put(value & 0xff);
@@ -248,7 +274,13 @@ void Program_Counter::interrupt(unsigned int new_address)
   // Trace the value of the program counter before it gets changed.
   trace.raw(trace_branch | value);
 
-  mExecuteInterrupt->firstHalf(new_address & memory_size_mask);
+  if (new_address >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, new_address, memory_size);
+    bp.halt();
+  }
+  else
+    mExecute2ndHalf->firstHalf(new_address);
 #else
 
   // Trace the value of the program counter before it gets changed.
@@ -283,7 +315,12 @@ void Program_Counter::computed_goto(unsigned int new_address)
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  value = (new_address | cpu_pic->get_pclath_branching_modpcl() ) & memory_size_mask;
+  value = new_address | cpu_pic->get_pclath_branching_modpcl() ;
+  if (value >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, value, memory_size);
+    bp.halt();
+  }
 
   // see Update pcl comment in Program_Counter::increment()
 
@@ -316,7 +353,13 @@ void Program_Counter::new_address(unsigned int new_address)
   trace.raw(trace_branch | value);
 
 #ifdef CLOCK_EXPERIMENTS
-  mExecute2ndHalf->firstHalf(new_address & memory_size_mask);
+  if (new_address >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, new_address, memory_size);
+    bp.halt();
+  }
+  else
+    mExecute2ndHalf->firstHalf(new_address);
 #else
   value = new_address & memory_size_mask;
 
@@ -335,8 +378,14 @@ void Program_Counter::new_address(unsigned int new_address)
 
 unsigned int Program_Counter::get_next()
 {
+  unsigned int new_address = value + cpu_pic->program_memory[value]->instruction_size();
 
-  return( (value + cpu_pic->program_memory[value]->instruction_size()) & memory_size_mask);
+  if (new_address >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, new_address, memory_size);
+    bp.halt();
+  }
+  return( new_address);
 
 }
 
@@ -353,7 +402,12 @@ void Program_Counter::put_value(unsigned int new_value)
 
   trace.raw(trace_other | value);
 
-  value = new_value & memory_size_mask;
+  if (new_value >= memory_size)
+  {
+    printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, new_value, memory_size);
+    bp.halt();
+  }
+  value = new_value;
   cpu_pic->pcl->value.put(value & 0xff);
   cpu_pic->pclath->value.put((new_value >> 8) & PCLATH_MASK);
 
@@ -367,7 +421,8 @@ void Program_Counter::reset()
   //trace.program_counter(value);  //FIXME
   value = reset_address;
 #ifdef CLOCK_EXPERIMENTS
-  mExecute2ndHalf->firstHalf(reset_address & memory_size_mask);
+  value = (value >= memory_size) ? value - memory_size : value;
+  mExecute2ndHalf->firstHalf(value);
 #endif
 }
 
