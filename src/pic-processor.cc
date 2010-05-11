@@ -1304,7 +1304,7 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 
   // The memory_size_mask is used by the branching instructions
 
-  pc->memory_size_mask = memory_size - 1;
+  pc->memory_size = memory_size;
 
   Processor::init_program_memory(memory_size);
 }

@@ -576,7 +576,10 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // Use the new_address and the cached pclath
   // to generate the destination address:
 
-  value = ( (new_address | cpu_pic->get_pclath_branching_modpcl() )>>1) & memory_size_mask;
+
+  value = ( (new_address | cpu_pic->get_pclath_branching_modpcl() )>>1);
+  if (value >= memory_size)
+	value -= memory_size;
 
   // see Update pcl comment in Program_Counter::increment()
   cpu_pic->pcl->value.put((value<<1) & 0xff);
@@ -608,7 +611,9 @@ void Program_Counter16::put_value(unsigned int new_value)
 
   // RP - The new_value passed in is a byte address, but the Program_Counter16
   // class's internal value is a word address
-  value = (new_value/2) & memory_size_mask;
+  value = (new_value/2);
+  if (value >= memory_size)
+	value -= memory_size;
 
   cpu_pic->pcl->value.put(new_value & 0xfe);
 

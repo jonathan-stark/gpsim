@@ -295,7 +295,10 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   bool bNewValue = new3State=='1' || new3State=='W';
   if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
+  {
+    cpu_pic->exit_sleep();
     m_pIntcon->set_intf(true);
+  }
 
 
   RegisterValue lastDrivenValue = rvDrivenValue;

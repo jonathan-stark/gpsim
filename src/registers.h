@@ -34,6 +34,7 @@ class Module;
 #include "gpsim_classes.h"
 #include "value.h"
 #include "ValueCollections.h"
+#include "clock_phase.h"
 
 
 //---------------------------------------------------------
@@ -431,7 +432,10 @@ class Program_Counter : public Value
 {
 public:
   unsigned int value;              /* pc's current value */
+#ifndef CLOCK_EXPERIMENTS
   unsigned int memory_size_mask; 
+#endif
+  unsigned int memory_size; 
   unsigned int pclath_mask;        /* pclath confines PC to banks */
   unsigned int instruction_phase;
   unsigned int trace_state;        /* used while reconstructing the trace history */

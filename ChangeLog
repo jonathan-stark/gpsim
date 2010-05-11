@@ -1,3 +1,10 @@
+2010-05-11 Roy Rankin <rrankin@ihug.com.au>
+	* src/dspic/dspic-processors.cc src/dspic/dspic-registers.cc
+	  src/pic-processor.cc src/icd.cc src/16bit-registers.cc
+	  src/registers.h src/pic-registers.cc: Remove use of memory_size_mask
+	  which assumed memory size 2^n (bug 2979021)
+	* src/pic-ioports.cc: B0 edge wakes processor from sleep (bug 2999264)
+
 2010-05-01 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/16bit-registers.cc src/pic-instructions.cc
           Fixed bug #2983660 - BSF and BCF now work right on PLUSW registers
