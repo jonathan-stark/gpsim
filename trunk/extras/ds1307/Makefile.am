@@ -12,7 +12,7 @@ lib_LTLIBRARIES = libgpsim_ds1307.la
 libgpsim_ds1307_la_SOURCES = \
 	module_manager.cc ds1307.cc
 
-libgpsim_lcd_la_LDFLAGS =  @X_LDFLAGS@
+libgpsim_ds1307_la_LDFLAGS =  @X_LDFLAGS@
 
 
 

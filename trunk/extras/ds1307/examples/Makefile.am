@@ -10,7 +10,7 @@ MAINTAINERCLEANFILES = *.o *.hex *.cod *.lst *.map *~
 ds1307.cod : ds1307.o
 	gplink --map -s 16f876a.lkr -o $@  $<
 
-%.o : %.asm
+ds1307.o : ds1307.asm
 	gpasm -c $<
 
 
