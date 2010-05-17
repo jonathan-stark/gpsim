@@ -1,4 +1,7 @@
 2010-05-17 Roy Rankin <rrankin@ihug.com.au>
+	- Extras built, installed as part of Gpsim
+
+2010-05-17 Roy Rankin <rrankin@ihug.com.au>
 	- Add ds1307 Realtime Clock module
 
 2010-05-11 Roy Rankin <rrankin@ihug.com.au>

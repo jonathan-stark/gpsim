@@ -7,6 +7,7 @@ AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
+AC_CONFIG_MACRO_DIR([m4])
 
 # Determine the host and build type. The target is always a PIC.
 AC_CANONICAL_BUILD
@@ -199,6 +200,13 @@ AC_CONFIG_FILES([Makefile
                  gpsim/Makefile
                  gui/Makefile
                  modules/Makefile
+		 extras/Makefile
+		 extras/graphic_lcd/Makefile
+		 extras/graphic_lcd/src/Makefile
+		 extras/lcd/Makefile
+		 extras/lcd/examples/Makefile
+		 extras/ds1307/Makefile
+		 extras/ds1307/examples/Makefile
                  regression/Makefile
                  src/Makefile
                  src/dspic/Makefile

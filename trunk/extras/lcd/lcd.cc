@@ -57,11 +57,13 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#include "config.h"
+#ifdef HAVE_GUI
 #include <gtk/gtk.h>
 
 #include "hd44780.h"
 #include "lcd.h"
-#include <gpsim/gpsim_time.h>
+#include <src/gpsim_time.h>
 
 
 Trace *gTrace=0;                // Points to gpsim's global trace object.
@@ -543,3 +545,4 @@ LcdDisplayDisplaytech161A::LcdDisplayDisplaytech161A(const char *pN, int aRows, 
 LcdDisplayDisplaytech161A::~LcdDisplayDisplaytech161A()
 {
 }
+#endif //HVAE_GUI

@@ -20,6 +20,9 @@ Boston, MA 02111-1307, USA.  */
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
+#include "config.h"
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 
 #include "lcd.h"
@@ -69,12 +72,12 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
     //xpm_template[i] = (gchar *)strdup("                ");
   }
 
-  for(j=0; j<lcdP->dots.y; j++) {
+  for(j=0; j<(guint)lcdP->dots.y; j++) {
 
     k = 5 + lcdP->pixels.y*j;
 
 
-    for(i=0; i<lcdP->dots.x; i++) {
+    for(i=0; i<(guint)lcdP->dots.x; i++) {
       pc = (ch[0][j][i] == '.') ? 'B' : ' ';
       bc = (ch[0][j][i] == '.') ? 'G' : ' ';
 
@@ -145,7 +148,7 @@ void LcdFont::update_pixmap(int pos, _5X7 *tempchar, LcdDisplay *lcdP)
 
 GdkPixmap *LcdFont::getPixMap(unsigned int index)
 {
-  return ( (index < num_elements) && pixmaps[index]) ? pixmaps[index] : pixmaps[0];
+  return ( (index < (unsigned int)num_elements) && pixmaps[index]) ? pixmaps[index] : pixmaps[0];
 }
 
 void LcdDisplay::update_cgram_pixmaps()
@@ -411,3 +414,4 @@ void LcdDisplay::clear_display(void)
   m_hd44780->clearDisplay();
   m_hd44780->moveCursor(0,0);
 }
+#endif //HAVE_GUI

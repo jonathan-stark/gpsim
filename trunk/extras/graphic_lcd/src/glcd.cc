@@ -19,8 +19,13 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
+#include <config.h>
+
+#ifdef HAVE_GUI
+
+
 #include "glcd.h"
-#include <gpsim/trace.h>
+#include <src/trace.h>
 
 //------------------------------------------------------------------------
 gLCD::gLCD(GtkWidget *darea,
@@ -217,3 +222,5 @@ LcdPortRegister::~LcdPortRegister()
 {
   delete mMTT;
 }
+
+#endif //HAVE_GUI

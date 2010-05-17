@@ -33,14 +33,17 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#include "config.h"
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 
 
-#include <gpsim/packages.h>
-#include <gpsim/stimuli.h>
-#include <gpsim/symbol.h>
-#include <gpsim/gpsim_interface.h>
-#include <gpsim/gpsim_time.h>
+#include <src/packages.h>
+#include <src/stimuli.h>
+#include <src/symbol.h>
+#include <src/gpsim_interface.h>
+#include <src/gpsim_time.h>
 
 
 #include "hd44780.h"
@@ -61,15 +64,15 @@ Boston, MA 02111-1307, USA.  */
  * LCD Command "Set Display Data RAM Address" = 10000000
  */
 
-static const int LCD_CMD_SET_DDRAM  = 0x80;
-static const int LCD_MASK_SET_DDRAM = 0x80;
+static const unsigned int LCD_CMD_SET_DDRAM  = 0x80;
+static const unsigned int LCD_MASK_SET_DDRAM = 0x80;
 
 /*
  * LCD Command "Set Display Character Generator RAM Address" = 01aaaaaa
  */
 
-static const int LCD_CMD_SET_CGRAM  = 0x40;
-static const int LCD_MASK_SET_CGRAM = 0xc0;
+static const unsigned int LCD_CMD_SET_CGRAM  = 0x40;
+static const unsigned int LCD_MASK_SET_CGRAM = 0xc0;
 
 
 /*
@@ -80,14 +83,14 @@ static const int LCD_MASK_SET_CGRAM = 0xc0;
  * f = font size. f=1 is for 5x11 dots while f=0 is for 5x8 dots.
  */
 
-static const int LCD_CMD_FUNC_SET  = 0x20;    // LCD Command "Function Set"
-static const int LCD_MASK_FUNC_SET = 0xe0;    //
-static const int LCD_4bit_MODE     = 0x00;    // d=0
-static const int LCD_8bit_MODE     = 0x10;    // d=1
-static const int LCD_1_LINE        = 0x00;    // n=0
-static const int LCD_2_LINES       = 0x08;    // n=1
-static const int LCD_SMALL_FONT    = 0x00;    // f=0
-static const int LCD_LARGE_FONT    = 0x04;    // f=1
+static const unsigned int LCD_CMD_FUNC_SET  = 0x20;    // LCD Command "Function Set"
+static const unsigned int LCD_MASK_FUNC_SET = 0xe0;    //
+static const unsigned int LCD_4bit_MODE     = 0x00;    // d=0
+static const unsigned int LCD_8bit_MODE     = 0x10;    // d=1
+static const unsigned int LCD_1_LINE        = 0x00;    // n=0
+static const unsigned int LCD_2_LINES       = 0x08;    // n=1
+static const unsigned int LCD_SMALL_FONT    = 0x00;    // f=0
+static const unsigned int LCD_LARGE_FONT    = 0x04;    // f=1
 
 /*
  * LCD Command "Cursor Display" = 0001sdxx
@@ -95,8 +98,8 @@ static const int LCD_LARGE_FONT    = 0x04;    // f=1
  *  d = 1 Shift right 0 = shift left
  */
 
-static const int LCD_CMD_CURSOR_DISPLAY   = 0x10;   // LCD Command "Cursor Display"
-static const int LCD_MASK_CURSOR_DISPLAY  = 0xf0;   //
+static const unsigned int LCD_CMD_CURSOR_DISPLAY   = 0x10;   // LCD Command "Cursor Display"
+static const unsigned int LCD_MASK_CURSOR_DISPLAY  = 0xf0;   //
 
 /*
  * LCD Command Display Control = 00001dcb
@@ -105,14 +108,14 @@ static const int LCD_MASK_CURSOR_DISPLAY  = 0xf0;   //
  *  b = 1 blinking cursor or 0 non-blinking cursor
  */
 
-static const int LCD_CMD_DISPLAY_CTRL  = 0x08;    // LCD Command "Display Control"
-static const int LCD_MASK_DISPLAY_CTRL = 0xf8;    //
-static const int LCD_DISPLAY_OFF       = 0x00;    // d=0
-static const int LCD_DISPLAY_ON        = 0x04;    // d=1
-static const int LCD_CURSOR_OFF        = 0x00;    // c=0
-static const int LCD_CURSOR_ON         = 0x02;    // c=1
-static const int LCD_BLINK_OFF         = 0x00;    // b=0
-static const int LCD_BLINK_ON          = 0x01;    // b=1
+static const unsigned int LCD_CMD_DISPLAY_CTRL  = 0x08;    // LCD Command "Display Control"
+static const unsigned int LCD_MASK_DISPLAY_CTRL = 0xf8;    //
+static const unsigned int LCD_DISPLAY_OFF       = 0x00;    // d=0
+static const unsigned int LCD_DISPLAY_ON        = 0x04;    // d=1
+static const unsigned int LCD_CURSOR_OFF        = 0x00;    // c=0
+static const unsigned int LCD_CURSOR_ON         = 0x02;    // c=1
+static const unsigned int LCD_BLINK_OFF         = 0x00;    // b=0
+static const unsigned int LCD_BLINK_ON          = 0x01;    // b=1
 
 
 /*
@@ -122,23 +125,23 @@ static const int LCD_BLINK_ON          = 0x01;    // b=1
  *       cursor reaches the edge of the display window.
  */
 
-static const int LCD_CMD_ENTRY_MODE  = 0x04;    // LCD Command "Entry Mode"
-static const int LCD_MASK_ENTRY_MODE = 0xfc;    //
-static const int LCD_DEC_CURSOR_POS  = 0x00;    // i=0
-static const int LCD_INC_CURSOR_POS  = 0x02;    // i=1
-static const int LCD_NO_SCROLL       = 0x00;    // s=0
-static const int LCD_SCROLL          = 0x01;    // s=1
+static const unsigned int LCD_CMD_ENTRY_MODE  = 0x04;    // LCD Command "Entry Mode"
+static const unsigned int LCD_MASK_ENTRY_MODE = 0xfc;    //
+static const unsigned int LCD_DEC_CURSOR_POS  = 0x00;    // i=0
+static const unsigned int LCD_INC_CURSOR_POS  = 0x02;    // i=1
+static const unsigned int LCD_NO_SCROLL       = 0x00;    // s=0
+static const unsigned int LCD_SCROLL          = 0x01;    // s=1
 
 /*
  * LCD Command "Cursor Home" = 0000001x
  */
 
-static const int LCD_CMD_CURSOR_HOME   = 0x02;   // LCD Command "Cursor Home"
-static const int LCD_MASK_CURSOR_HOME  = 0xfe;   //
+static const unsigned int LCD_CMD_CURSOR_HOME   = 0x02;   // LCD Command "Cursor Home"
+static const unsigned int LCD_MASK_CURSOR_HOME  = 0xfe;   //
 
 // LCD Command Clear Display = 00000001
-static const int LCD_CMD_CLEAR_DISPLAY  = 0x01;
-static const int LCD_MASK_CLEAR_DISPLAY = 0xff;
+static const unsigned int LCD_CMD_CLEAR_DISPLAY  = 0x01;
+static const unsigned int LCD_MASK_CLEAR_DISPLAY = 0xff;
 
 
 //========================================================================
@@ -327,9 +330,11 @@ unsigned int HD44780::getData()
   return  m_DDRam[ddram_address];
 }
 
+
 void HD44780::executeCommand()
 {
   unsigned int command;
+  // command is set in the following call
   if (!phasedDataWrite(command))
     return;
 
@@ -584,7 +589,7 @@ void HD44780::test()
   setE(true);
   setE(false);
 
-  char *s ="ASHLEY & AMANDA";
+  const char *s ="ASHLEY & AMANDA";
   int l = strlen(s);
   int i;
 
@@ -622,3 +627,5 @@ void HD44780::test()
   viewInternals(0xff);
 #endif
 }
+
+#endif // HAVE_GUI

@@ -23,9 +23,9 @@ Boston, MA 02111-1307, USA.  */
 #define __GLCD_H__
 
 #include <gtk/gtk.h>
-#include <gpsim/modules.h>
-#include <gpsim/gpsim_interface.h>
-#include <gpsim/ioports.h>
+#include <src/modules.h>
+#include <src/gpsim_interface.h>
+#include <src/ioports.h>
 
 #define IN_BREADBOARD 0
 
