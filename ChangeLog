@@ -1,3 +1,6 @@
+2010-05-17 Roy Rankin <rrankin@ihug.com.au>
+	- Add ds1307 Realtime Clock module
+
 2010-05-11 Roy Rankin <rrankin@ihug.com.au>
 	* src/dspic/dspic-processors.cc src/dspic/dspic-registers.cc
 	  src/pic-processor.cc src/icd.cc src/16bit-registers.cc
