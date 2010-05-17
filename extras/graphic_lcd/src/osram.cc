@@ -18,17 +18,19 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <config.h>
+#ifdef HAVE_GUI
 
 #include "osram.h"
 #include "glcd.h"
 #include "ssd0323.h"
 
-#include <gpsim/stimuli.h>
-#include <gpsim/ioports.h>
-#include <gpsim/packages.h>
-#include <gpsim/symbol.h>
-#include <gpsim/trace.h>
-#include <gpsim/gpsim_interface.h>
+#include <src/stimuli.h>
+#include <src/ioports.h>
+#include <src/packages.h>
+#include <src/symbol.h>
+#include <src/trace.h>
+#include <src/gpsim_interface.h>
 
 
 #define DEBUG
@@ -531,3 +533,5 @@ namespace OSRAM
   }
 
 } // end of namespace OSRAM
+
+#endif // HAVE_GUI

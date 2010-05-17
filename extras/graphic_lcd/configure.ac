@@ -5,6 +5,7 @@ AC_PREREQ(2.57)
 AC_INIT([graphicLCD], [0.4.0], [<URL:http://gpsim.sourceforge.net/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
@@ -28,7 +29,6 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 
 # Checks for libraries.
 AC_LANG([C++])

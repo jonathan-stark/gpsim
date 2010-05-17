@@ -18,6 +18,8 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <config.h>
+#ifdef HAVE_GUI
 
 #define IN_MODULE
 
@@ -36,10 +38,10 @@ Boston, MA 02111-1307, USA.  */
 #include <gtk/gtk.h>
 
 
-#include <gpsim/packages.h>
-#include <gpsim/stimuli.h>
-#include <gpsim/symbol.h>
-#include <gpsim/gpsim_interface.h>
+#include <src/packages.h>
+#include <src/stimuli.h>
+#include <src/symbol.h>
+#include <src/gpsim_interface.h>
 
 
 #include "sed1520.h"
@@ -179,3 +181,4 @@ unsigned int &SED1520::prBadRam(unsigned int index)
   printf("WARNING SED1520 - illegal RAM access index=%d\n",index);
   return si;
 }
+#endif // HAVE_GUI

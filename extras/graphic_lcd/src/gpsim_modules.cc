@@ -18,6 +18,9 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <config.h>
+
+
 /*
  */
 
@@ -27,14 +30,20 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <stdio.h>
 
+#include <src/modules.h>
+
+#ifdef HAVE_GUI
 #include "glcd_100X32_sed1520.h"
 #include "osram.h"
+#endif
 
 
 Module_Types available_modules[] =
 {
+#ifdef HAVE_GUI
   { {"LCD100X32", "LCD100X32"},   gLCD_100X32_SED1520::construct },
   { {"OSRAM128X64", "OSRAM128X64"},   OSRAM::PK27_Series::construct },
+#endif
 
   // No more modules
   { {0,0},0}

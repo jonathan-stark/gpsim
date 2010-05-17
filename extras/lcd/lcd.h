@@ -24,11 +24,11 @@ Boston, MA 02111-1307, USA.  */
 
 //#include "state_machine.h"
 
-#include <gpsim/stimuli.h>
-#include <gpsim/ioports.h>
-#include <gpsim/symbol.h>
-#include <gpsim/trace.h>
-#include <gpsim/gpsim_interface.h>
+#include <src/stimuli.h>
+#include <src/ioports.h>
+#include <src/symbol.h>
+#include <src/trace.h>
+#include <src/gpsim_interface.h>
 
 #include <gtk/gtk.h>
 
@@ -255,7 +255,7 @@ public:
 
   GdkGC *gc;
 
-  gint rows,cols;   // e.g. 2x20 would be 2 rows, 20 columns
+  guint rows,cols;   // e.g. 2x20 would be 2 rows, 20 columns
 #define TWO_ROWS_IN_ONE 1
   unsigned disp_type;
 

@@ -1,3 +1,9 @@
+2010-05-17 Roy Rankin <rrankin@ihug.com.au>
+	* src/glcd.h src/osram.cc src/ssd0323.cc src/sed1520.cc 
+	  src/gpsim_modules.cc src/glcd_100X32_sed1520.cc src/glcd.cc
+	- Config now from gpsim root, so include paths change and
+	   may be built without GUI.
+
 2007-10-20 Scott Dattalo <scott@dattalo.com>
 	* examples/ssd0323/glcd_test.asm: WDT was timing out
 	

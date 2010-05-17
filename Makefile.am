@@ -1,5 +1,7 @@
 
-SUBDIRS = eXdbm src cli xpms gui gpsim modules examples doc regression
+ACLOCAL_AMFLAGS = -I m4
+
+SUBDIRS = eXdbm src cli xpms gui gpsim modules examples doc regression extras
 
 dist-hook:
 	cp gpsim.spec $(distdir)     

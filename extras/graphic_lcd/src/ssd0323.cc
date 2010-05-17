@@ -18,6 +18,8 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <config.h>
+#ifdef HAVE_GUI
 
 #define IN_MODULE
 
@@ -37,10 +39,10 @@ using namespace std;
 #include <gtk/gtk.h>
 
 
-#include <gpsim/packages.h>
-#include <gpsim/stimuli.h>
-#include <gpsim/symbol.h>
-#include <gpsim/gpsim_interface.h>
+#include <src/packages.h>
+#include <src/stimuli.h>
+#include <src/symbol.h>
+#include <src/gpsim_interface.h>
 
 #include "ssd0323.h"
 
@@ -719,3 +721,4 @@ void unitTest(SSD0323 *pSSD0323)
 }
 
 #endif // UNIT_TESTING
+#endif // HAVE_GUI

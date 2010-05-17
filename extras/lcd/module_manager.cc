@@ -48,14 +48,19 @@ support:
 #include <iostream>
 #include <stdio.h>
 #include <glib.h>
-#include <gpsim/modules.h>
+#include <src/modules.h>
+#include "config.h"
+#ifdef HAVE_GUI
 #include "lcd.h"
+#endif
 
 
 Module_Types available_modules[] =
 {
+#ifdef HAVE_GUI
   { {"lcd_display", "lcd_2X20"}, LcdDisplay::construct},
   { {"lcd_dt161A",  "lcd_2X8"},  LcdDisplayDisplaytech161A::construct},
+#endif
 
   // No more modules
   { {NULL, NULL}, NULL}
