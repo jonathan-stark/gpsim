@@ -518,7 +518,8 @@ Section Uninstall
 
   Delete "$INSTDIR\bin\libgpsim_graphicLCD.dll"
   Delete "$INSTDIR\bin\libgpsim_lcd.dll"
-
+  Delete "$INSTDIR\bin\libgpsim_ds1307.dll"
+  
   Delete "$INSTDIR\examples\12bit\*.*"
   Delete "$INSTDIR\examples\14bit\*.*"
   Delete "$INSTDIR\examples\16bit\*.*"
@@ -546,7 +547,7 @@ Section Uninstall
   Delete "$INSTDIR\extras\lcd\*.*"
   Delete "$INSTDIR\extras\rs232-gen\example\*.*"
   Delete "$INSTDIR\extras\rs232-gen\*.*"
-  Delete "$INSTDIR\extras\ds1307\example\*.*"
+  Delete "$INSTDIR\extras\ds1307\examples\*.*"
   Delete "$INSTDIR\extras\ds1307\*.*"
 
   Delete "$INSTDIR\lib\gpsim\libgpsim.a"
@@ -676,7 +677,7 @@ Section Uninstall
   RMDir "$INSTDIR\extras\lcd"
   RMDir "$INSTDIR\extras\rs232-gen\example"
   RMDir "$INSTDIR\extras\rs232-gen"
-  RMDir "$INSTDIR\extras\ds1307\example"
+  RMDir "$INSTDIR\extras\ds1307\examples"
   RMDir "$INSTDIR\extras\ds1307"
   RMDir "$INSTDIR\extras"
 
