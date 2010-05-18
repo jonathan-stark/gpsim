@@ -1,3 +1,12 @@
+2010-05-18 Borut Razem <borut.razem@siol.net>
+	* src/makefile.mingw: added p16f88x.o
+	* extras/graphic_lcd/src/makefile.mingw, extras/lcd/makefile.mingw:
+	  include project root directory for config.h
+	* extras/graphic_lcd/src/ssd0323.cc: fixed compilation warnings
+	* extras/ds1307/makefile.mingw: added
+	* makefile.mingw: adedd extras/ds1307 build
+	* plat/win32/gpsim.nsi: added extras/ds1307/* to the package
+
 2010-05-17 Roy Rankin <rrankin@ihug.com.au>
 	- Extras built, installed as part of Gpsim
 
