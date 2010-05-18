@@ -52,7 +52,7 @@ LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
 	$(CAIRO_PATH)/lib/cairo.lib \
 	$(GPSIM_LIB_PATH)/libgpsim.a
 
-INCLUDES = -I $(GPSIM_INCLUDE_PATH) \
+INCLUDES = -I ../.. -I $(GPSIM_INCLUDE_PATH) \
 	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
 	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
 	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \

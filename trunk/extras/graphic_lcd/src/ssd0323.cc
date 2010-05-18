@@ -670,7 +670,7 @@ void unitTest(SSD0323 *pSSD0323)
   // Phase Length
   WriteCommand(0xB1);    /* Set Phase Length */
   WriteCommand(0x22);    /* [3:0]:Phase 1 period of 1~16 clocks */
-                         /* [7:4]:Phase 2 period of 1~16 clocks /* POR = 0111 0100 */
+                         /* [7:4]:Phase 2 period of 1~16 clocks // POR = 0111 0100 */
 
   // Set Pre-charge Compensation Enable
   WriteCommand(0xB0); /* Set Pre-charge Compensation Enable */
@@ -691,7 +691,7 @@ void unitTest(SSD0323 *pSSD0323)
   WriteCommand(0x0D); /* [3:0]:VSL */
   // VCOMH
   WriteCommand(0xBE); /* Set VCOMH (3) */
-  WriteCommand(0x02); /* [7:0]:VCOMH, (0.53 X Vref = 0.53 X 15 V = 7.95V)*
+  WriteCommand(0x02); /* [7:0]:VCOMH, (0.53 X Vref = 0.53 X 15 V = 7.95V)*/
 
   // VP
   /* Set VP (4) */
