@@ -426,6 +426,7 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\ds1307\ds1307.cc"
   File "${GPSIM_ROOT}\extras\ds1307\ds1307.h"
   File "${GPSIM_ROOT}\extras\ds1307\Makefile.am"
+  File "${GPSIM_ROOT}\extras\ds1307\makefile.mingw"
   File "${GPSIM_ROOT}\extras\ds1307\module_manager.cc"  
 SectionEnd
 
