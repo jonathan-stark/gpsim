@@ -281,7 +281,7 @@ void _TXSTA::put(unsigned int new_value)
       Dprintf(("TXSTA - enabling transmitter\n"));
       if (m_PinModule) {
         m_PinModule->setSource(m_source);
-        if(mUSART->IsEUSART()) // EUSART can configure input as output for transmit
+// all set diection ? RRR        if(mUSART->IsEUSART()) // EUSART can configure input as output for transmit
           m_PinModule->setControl(m_control);
       }
       mUSART->emptyTX();

@@ -2256,8 +2256,14 @@ void ECCPAS::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   value.put(new_value);
-  if (new_value & (ECCPAS0|ECCPAS1|ECCPAS2))
+  switch (new_value & (ECCPAS0|ECCPAS1|ECCPAS2))
+  {
+  case 0:	// Autoshutdown disabled
+	return;
+  
+  default:
 	printf("ECCP Auto-Shutdown not implemented yet\n");
+  };
 }
 //--------------------------------------------------
 // PWM1CON

@@ -39,7 +39,7 @@ In here you'll find some simple logic devices:
 #include <gtk/gtk.h>
 
 /* XPM */
-static gchar * and2_pixmap[] = {
+static const gchar * and2_pixmap[] = {
 "32 32 3 1",
 "       c black",
 ".      c None",
@@ -78,7 +78,7 @@ static gchar * and2_pixmap[] = {
 "                    ............"};
 
 /* XPM */
-static gchar * or2_pixmap[] = {
+static const gchar * or2_pixmap[] = {
 "32 32 3 1",
 "       c black",
 ".      c None",
@@ -116,7 +116,7 @@ static gchar * or2_pixmap[] = {
 "                        ........",
 "                    ............"};
 
-static gchar * xor2_pixmap[] = {
+static const gchar * xor2_pixmap[] = {
 "40 32 3 1",
 "       c None",
 ".      c black",
@@ -154,7 +154,7 @@ static gchar * xor2_pixmap[] = {
 " ....   ..XXXXXXXXXXXXXXXXXX....        ",
 "  ..    ........................        "};
 
-static gchar * not_pixmap[] = {
+static const gchar * not_pixmap[] = {
 "32 32 3 1",
 "       c black",
 ".      c None",
@@ -213,7 +213,7 @@ static gchar * not_pixmap[] = {
 void Logic_Input::setDrivenState( bool new_state)
 {
 
-  if(1)
+  if(verbose)
     cout << name()<< " setDrivenState= "
          << (new_state ? "high" : "low") << endl;
 
@@ -426,7 +426,7 @@ AND2Gate::AND2Gate(const char *name) : ANDGate(name, "And2Gate")
 {
 #ifdef HAVE_GUI
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap(and2_pixmap));
+    set_widget(create_pixmap((gchar **)and2_pixmap));
 #endif
 
 }
@@ -451,7 +451,7 @@ OR2Gate::OR2Gate(const char *name) : ORGate(name, "OR2Gate")
 #ifdef HAVE_GUI
 
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap(or2_pixmap));
+    set_widget(create_pixmap((gchar **)or2_pixmap));
 #endif
 }
 OR2Gate::~OR2Gate()
@@ -499,7 +499,7 @@ NOTGate::NOTGate(const char *name) : LogicGate(name, "NOTGate")
 #ifdef HAVE_GUI
 
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap(not_pixmap));
+    set_widget(create_pixmap((gchar **)not_pixmap));
 #endif
 }
 NOTGate::~NOTGate()
@@ -509,7 +509,8 @@ NOTGate::~NOTGate()
 
 void NOTGate::update_state()
 {
-  cout << name() << " update_state\n";
+  if (verbose)
+    cout << name() << " update_state\n";
   pOutputPin->putState((input_state & input_bit_mask) == 0);
 }
 
@@ -522,7 +523,7 @@ XOR2Gate::XOR2Gate(const char *name) : XORGate(name, "XOR2Gate")
 #ifdef HAVE_GUI
 
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap(xor2_pixmap));
+    set_widget(create_pixmap((gchar **)xor2_pixmap));
 #endif
 }
 XOR2Gate::~XOR2Gate()
