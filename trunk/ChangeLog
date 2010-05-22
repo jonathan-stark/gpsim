@@ -1,3 +1,9 @@
+2010-05-22 Roy Rankin <rrankin@ihug.com.au>
+	* src/comparator.h src/14bit-tmrs.cc src/comparator.cc src/p16f88x.cc
+	- Add comparator 2 gate control of timer 1 for 16f88x
+	* src/uart.cc : fix bug 2827439 USART pin direction
+	* modules/logic.cc : fixed compilation warnings
+
 2010-05-18 Borut Razem <borut.razem@siol.net>
 	* src/makefile.mingw: added p16f88x.o
 	* extras/graphic_lcd/src/makefile.mingw, extras/lcd/makefile.mingw:

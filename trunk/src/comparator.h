@@ -290,15 +290,14 @@ class CM12CON0 : public sfr_register
   virtual void link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
 	VRCON *_vrcon, SRCON *_srcon);
 
-/*
 
   void set_tmrl(TMRL *arg) { m_tmrl = arg; }
-*/
   CM12CON0(Processor *pCpu, const char *pName, const char *pDesc);
   ~CM12CON0();
 
 protected:
   friend class CM1CON0;
+  friend class CM2CON1;
   friend class CM2CON0;
 
   PinModule *cm_input[5];

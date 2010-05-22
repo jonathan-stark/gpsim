@@ -415,6 +415,10 @@ void CM2CON1::put(unsigned int new_value)
   if (((new_value ^ old_value) & C2RSEL) && m_cm2con0)
 	m_cm2con0->get();
 
+  if (m_cm2con0->m_tmrl)
+	m_cm2con0->m_tmrl->set_T1GSS((new_value & T1GSS) == T1GSS);
+
+
 }
 
 
@@ -491,7 +495,9 @@ void CM2CON0::state_change(unsigned int cmcon_val)
                 pir_set->set_c2if();
    }
    if (m_tmrl)
+   {
 	m_tmrl->compare_gate((cmcon_val & OUT) == OUT);
+   }
   
    if (cmcon_val & OE)	// output pin enabled
    {

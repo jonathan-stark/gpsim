@@ -294,6 +294,7 @@ void P16F88x::create_sfr_map()
 	&(*m_portb)[1], &(*m_porta)[2], &(*m_porta)[5]);
   cm1con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon);
   cm2con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon);
+  cm2con0.set_tmrl(&tmr1l);
   cm2con1.link_cm12con0(&cm1con0, &cm2con0);
   add_sfr_register(&cm1con0, 0x107, RegisterValue(0,0),"cm1con0");
   add_sfr_register(&cm2con0, 0x108, RegisterValue(0,0),"cm2con0");
