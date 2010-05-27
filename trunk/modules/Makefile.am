@@ -16,10 +16,10 @@ libgpsim_modules_la_SOURCES = \
 	i2c-eeprom.cc i2c-eeprom.h \
 	stimuli.h stimuli.cc \
 	ttl.cc ttl.h \
+	video.cc video.h \
 	i2c.cc i2c.h
-
+ # TSD - removed 17APR06 #PGS added back
 ##	paraface.cc paraface.h \  # TSD - removed 16APR06
-##	video.cc video.h \ # TSD - removed 17APR06
 
 libgpsim_modules_la_LIBADD = ../eXdbm/libgpsim_eXdbm.la -lstdc++ -lpopt \
   @X_LDFLAGS@ @Y_LDFLAGS@ @LIBREADLINE@ ../src/libgpsim.la

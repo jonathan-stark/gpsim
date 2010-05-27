@@ -61,7 +61,7 @@ support:
 #ifdef HAVE_GUI
 #include "led.h"
 #include "push_button.h"
-//#include "video.h"
+#include "video.h"
 #include "encoder.h"
 #endif
 #include "stimuli.h"
@@ -104,11 +104,10 @@ Module_Types available_modules[] =
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
   { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },
 
-  /*
-    TSD Removed 17APR06
+   // PGS added back 23MAY10
+   // TSD Removed 17APR06
   // Video
   { {"PAL_video", "video"}, Video::construct},
-  */
 #ifdef HAVE_GUI
   // Encoder
   { {"Encoder", "encoder"}, Encoder::construct},

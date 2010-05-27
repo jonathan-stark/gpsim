@@ -22,12 +22,12 @@ Boston, MA 02111-1307, USA.  */
 
 A PAL video module.
 
-It makes use of two digital inputs to generate four video levels.
+It makes use of two digital inputs to generate PAL signal
 
-in1	in2	result
+sync	lume	result
 0	0	sync
-0	1	black
-1	0	grey (not implemented)
+0	1	not valid
+1	0	black
 1	1	white
 
 */
@@ -102,19 +102,20 @@ public:
 // remove it later, but for now it does serve a simple purpose.
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
-void Another_Input::putState( bool new_state)
+void IOPIN_Monitor::setDrivenState( bool new_state)
 {
 
-  bool current_state = getDrivingState();
+  bool current_state = getDrivenState();
 
-  IOPIN::putState(new_state);
+  IOPIN::setDrivenState(new_state);
 
-  if(current_state != getDrivingState()) {
+  if(current_state != getDrivenState()) {
 
     if(video)
       video->update_state();
   }
 }
+
 
 /*
 static void gui_update(gpointer callback_data)
@@ -138,6 +139,9 @@ static void expose(GtkWidget *widget,
 
 Video::Video(const char *_name) : Module(_name)
 {
+     sync_pin = new IOPIN_Monitor(this,(name() + ".sync").c_str());
+     lume_pin = new IOPIN_Monitor(this,(name() + ".lume").c_str());
+
   //cout << "Video base class constructor\n";
   sync_time=0;
   scanline=0;
@@ -204,8 +208,9 @@ Video::~Video(void)
     //cout << "Video base class destructor\n";
 
     gtk_widget_destroy(window);
-    //gpsim_unregister_interface(interface_id);
-    delete port;
+
+    delete sync_pin;
+    delete lume_pin;
 }
 
 //--------------------------------------------------------------
@@ -216,30 +221,12 @@ Video::~Video(void)
 
 void Video::create_iopin_map(void)
 {
-  int i;
-
   // Create an I/O port to which the I/O pins can interface
   //   The module I/O pins are treated in a similar manner to
   //   the pic I/O pins. Each pin has a unique pin number that
   //   describes it's position on the physical package. This
   //   pin can then be logically grouped with other pins to define
   //   an I/O port. 
-
-  port = new IOPORT;
-  port->value.put(0);
-
-  // Here, we name the port `pin'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the logic gate (which is assigned by the user and
-  //   obtained with the name() member function call).
-
-  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
-  if(pin_name) {
-    port->new_name(pin_name);
-  }
-  else
-    port->new_name("pin");
-
 
   // Define the physical package.
   //   The Package class, which is a parent of all of the modules,
@@ -249,7 +236,7 @@ void Video::create_iopin_map(void)
   create_pkg(2);
 
 
-  // Define the I/O pins and assign them to the package.
+  // Define the I/O pins (already done) and assign them to the package. //FIX comment
   //   There are two things happening here. First, there is
   //   a new I/O pin that is being created. For the binary 
   //   indicator, both pins are inputs. The second thing is
@@ -257,18 +244,12 @@ void Video::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  Another_Input *vi;
-  vi=new Another_Input(this, port, 0, "in1");
-  assign_pin(1, vi);
-  vi=new Another_Input(this, port, 1, "in2");
-  assign_pin(2, vi);
-  
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
 
-  for(i= 1; i<=package->get_pin_count(); i++)
-    get_symbol_table().add_stimulus(get_pin(i));
+     assign_pin(1, sync_pin);
+     //package->set_pin_position(1,(float)0.0);
+
+     assign_pin(2, lume_pin);
+     //package->set_pin_position(2,(float)0.9999);
 
 }
 
@@ -278,13 +259,13 @@ void Video::create_iopin_map(void)
 Module * Video::construct(const char *_new_name)
 {
 
-  //cout << " AND2Gate  construct\n";
+  //cout << " Video  construct\n";
 
   Video *video = new Video(_new_name) ;
 
   video->create_iopin_map();
 
-  //cout << "AND2Gate should be constructed\n";
+  //cout << "Video should be constructed\n";
 
   return video;
 
@@ -310,9 +291,13 @@ void Video::copy_scanline_to_pixmap(void)
 	y=line_nr*2;
       else
 	y=(line_nr-313)*2+1;
-      if(line[i]>2)
+      if(line[i]>=4)
 	{
 	  gdk_draw_point(pixmap, white_gc, i, y);
+	}
+      else if(line[i]>2)
+	{
+	  gdk_draw_point(pixmap, grey_gc, i, y);
 	}
       else
 	{
@@ -357,7 +342,8 @@ void Video::update_state(void)
   guint64 cycletime;
   guint64 index;
   static int last_port_value=0;
-  int val=port->value.get();
+  //int val=(int)(lume_pin->get_Vth()); // needs more work to make this work
+  int val=(lume_pin->getDrivenState())?4:0; // 4 to get it above the 2 threshold for visibility maybe use Vth??
   static int shortsync_counter, last_shortsync_counter;
 
   // get the current simulation cycle time from gpsim.
@@ -383,10 +369,10 @@ void Video::update_state(void)
     memset(line,0x80,XRES); // clear line buffer
   }
   
-  if(last_port_value!=0 && port->value.get()==0) // Start of sync
+  if(last_port_value==1 && (sync_pin->getDrivenState()?1:0)==0) // Start of sync
   {
     // Every 32 or 64us there should be a sync.
-	  
+   
     sync_time=cycletime;
 	  
     // Start measure on negative flank, when we have lots in buffer.
@@ -440,7 +426,7 @@ void Video::update_state(void)
 	shortsync_counter++;
       }
   }
-  if(last_port_value==0 && port->value.get()!=0) // End of sync
+  if(last_port_value==0 && (sync_pin->getDrivenState()?1:0)!=0) // End of sync
   {
     guint64 us_time;
 	  
@@ -464,7 +450,7 @@ void Video::update_state(void)
 	  index=XRES-1;
   
   line[index]=val;
-  last_port_value=port->value.get();
+  last_port_value=(sync_pin->getDrivenState()?1:0);
 }
 
 #endif // HAVE_GUI

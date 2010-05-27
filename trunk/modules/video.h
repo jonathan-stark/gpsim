@@ -37,28 +37,29 @@ class Video_Interface;
 
 /*********************************************************
  *
- * Create a class derived from the IO_input class that
+ * Create a class derived from the IOPIN class that
  * will allow us to intercept when the I/O input is being
  * driven. (This isn't done for PIC I/O pins because the
- * logic for handling I/O pin changes resides in the IOPORT
+ * logic for handling I/O pin changes resides in the ???
  * class.)
  */
 
 
-class Another_Input : public IOPIN
+class IOPIN_Monitor : public IOPIN
 {
 private:
   Video *video;
 public:
 
-  virtual void putState( bool new_state);
+  virtual void setDrivenState( bool new_state);
 
-  Another_Input (Video *v, IOPORT *i, unsigned int b, char *opt_name=NULL) 
-    : IOPIN(i,b,opt_name) , video(v)
+  IOPIN_Monitor (Video *v, const char *opt_name) 
+    : IOPIN(opt_name) , video(v)
     { 
     }
 
 };
+
 
 #define XRES 320
 #define YRES 625
@@ -67,7 +68,8 @@ class Video : public Module
 {
 public:
 
-  IOPORT  *port;
+  IOPIN * sync_pin;
+  IOPIN * lume_pin;
   guint64 sync_time; // gpsim cycle counter at last H-sync
   int scanline;
   unsigned char line[XRES]; // buffer for one line
@@ -86,7 +88,6 @@ public:
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
-
 
   virtual void update_state(void);
   virtual int get_num_of_pins(void) {return 2;};
