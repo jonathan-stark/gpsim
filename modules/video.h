@@ -61,7 +61,7 @@ public:
 };
 
 
-#define XRES 320
+#define XRES 640
 #define YRES 625
 
 class Video : public Module
@@ -73,6 +73,7 @@ public:
   guint64 sync_time; // gpsim cycle counter at last H-sync
   int scanline;
   unsigned char line[XRES]; // buffer for one line
+  unsigned char shadow[XRES][YRES]; // pixmap mirror
   Processor *cpu;
 
   GtkWidget *window;
@@ -80,6 +81,7 @@ public:
   GdkGC *white_gc, *black_gc, *grey_gc;
   GdkPixmap *pixmap;
   int line_nr;
+  int last_line_nr;
 
   GdkColor black_color, grey_color, white_color;
   

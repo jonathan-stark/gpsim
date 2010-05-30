@@ -146,7 +146,9 @@ Video::Video(const char *_name) : Module(_name)
   sync_time=0;
   scanline=0;
   line_nr=0;
+  last_line_nr=0;
   memset(line,0x80,XRES);
+  memset(shadow,0x42,XRES*YRES); // initalize shadow to invalid values
 
   //  cpu = get_processor(1);
   cpu = get_active_cpu();  //FIXME
@@ -271,12 +273,39 @@ Module * Video::construct(const char *_new_name)
 
 }
 
+
+static int screen_y_from_line(int line)
+{
+  int y;
+  if(line<313)
+    y=line*2;
+  else
+    y=(line-313)*2+1;
+  return y;
+}
+
 void Video::copy_scanline_to_pixmap(void)
 {
   int i, y;
   int last=line[0];
 
-  // Fill unfilled values
+  // Clear any skipped lines.
+  if(last_line_nr>line_nr)
+    last_line_nr=0;  // new frame
+  if(last_line_nr<line_nr-1)
+  {
+    int l;
+    for(l=last_line_nr;l<line_nr;l++)
+    {
+      for(i=0;i<XRES;i++)
+        shadow[i][l]=0;
+      y=screen_y_from_line(l);
+      gdk_draw_line(pixmap, black_gc, 0, y, XRES-1, y);
+    }
+  }
+  last_line_nr=line_nr;
+
+  // Fill unfilled values in the line.
   for(i=1;i<XRES;i++)
     {
       if(line[i]&0x80) // Not written, use last written value
@@ -284,13 +313,21 @@ void Video::copy_scanline_to_pixmap(void)
       last=line[i];
     }
 
-  // Draw
+  // Get screen y position
+  y=screen_y_from_line(line_nr);
+
+  // Draw changes compared to shadow
   for(i=1;i<XRES;i++)
     {
+      if(line[i]==shadow[i][line_nr])
+        continue;
+      shadow[i][line_nr]=line[i];
+
       if(line_nr<313)
 	y=line_nr*2;
       else
 	y=(line_nr-313)*2+1;
+
       if(line[i]>=4)
 	{
 	  gdk_draw_point(pixmap, white_gc, i, y);
@@ -304,7 +341,6 @@ void Video::copy_scanline_to_pixmap(void)
 	  gdk_draw_point(pixmap, black_gc, i, y);
 	}
     }
-  // Copy line to drawing area
 }
 
 guint64 Video::cycles_to_us(guint64 cycles)
@@ -388,14 +424,6 @@ void Video::update_state(void)
 
 	  // Draw the last full image
 	  refresh();
-
-	  // Clear pixmap
-	  gdk_draw_rectangle (pixmap,
-			      da->style->bg_gc[GTK_WIDGET_STATE (da)],
-			      TRUE,
-			      0, 0,
-			      XRES,
-			      YRES);
 	}
 	else if(shortsync_counter < last_shortsync_counter)
 	  {
