@@ -1,5 +1,7 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2010 Roy R Rankin
+
 
 This file is part of gpsim.
 
@@ -312,6 +314,9 @@ class P18F2x21 : public _16bit_v2_adc
   PicPSP_TrisRegister  *m_trise;
   PicLatchRegister *m_late;
 
+  ECCPAS        eccpas;
+  PWM1CON       pwm1con;
+
   OSCTUNE      osctune;
   ComparatorModule comparator;
 
@@ -364,8 +369,6 @@ class P18F4x21 : public P18F2x21
   PicLatchRegister *m_latd;
 
   PSP               psp;
-  ECCPAS        eccpas;
-  PWM1CON       pwm1con;
 
   P18F4x21(const char *_name=0, const char *desc=0);
 

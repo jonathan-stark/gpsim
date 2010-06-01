@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2010 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -834,7 +835,7 @@ Processor * P18F452::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
-// P18F2455
+// P18F2455	- 18 pin
 // 
 
 P18F2455::P18F2455(const char *_name, const char *desc)
@@ -873,8 +874,12 @@ void P18F2455::create()
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  ccp1con.setBitMask(0x3f);
   pwm1con.set_mask(0x80);
   eccpas.set_mask(0xfc);
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+
   ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
 }
 
@@ -933,6 +938,11 @@ void P18F4455::create()
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+//RRR  comparator.cmcon.set_eccpas(&eccpas);
+  ccp1con.setBitMask(0xff);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 }
@@ -1032,6 +1042,10 @@ void P18F1220::create()
 
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  ccp1con.setBitMask(0xff);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
+  eccpas.setIOpin(&(*m_portb)[1], &(*m_portb)[2], &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portb)[3]), &((*m_portb)[2]), &((*m_portb)[6]), &((*m_portb)[7]));
 }
@@ -1272,6 +1286,8 @@ void P18F2x21::create_symbols()
 
 P18F2x21::P18F2x21(const char *_name, const char *desc)
   : _16bit_v2_adc(_name,desc),
+    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
+    pwm1con(this, "eccp1del", "Enhanced PWM Control Register"),
     osctune(this, "osctune", "OSC Tune"),
     comparator(this)
 {
@@ -1392,6 +1408,17 @@ void P18F2321::create()
   set_osc_pin_Number(0, 9, &(*m_porta)[7]);
   set_osc_pin_Number(1,10, &(*m_porta)[6]);
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  eccpas.set_mask(0xfc);
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+  comparator.cmcon.set_eccpas(&eccpas);
+  ccp1con.setBitMask(0x3f);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
+  pwm1con.set_mask(0x80);
 }
 
 Processor * P18F2321::construct(const char *name)
@@ -1578,9 +1605,7 @@ void P18F4x21::create_symbols()
 }
 
 P18F4x21::P18F4x21(const char *_name, const char *desc)
-  : P18F2x21(_name,desc),
-    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
-    pwm1con(this, "eccp1del", "Enhanced PWM Control Register")
+  : P18F2x21(_name,desc)
 {
 
   if(verbose)
@@ -1720,6 +1745,11 @@ void P18F4321::create()
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+  comparator.cmcon.set_eccpas(&eccpas);
+  ccp1con.setBitMask(0xff);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 

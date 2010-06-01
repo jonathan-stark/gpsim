@@ -236,6 +236,14 @@ private:
   CCPCON *m_ccp;
 };
 
+class Tristate : public SignalControl
+{
+public:
+  Tristate() { }
+  ~Tristate() { }
+  char getState() { return '1'; }	// set port to high impedance by setting it to input
+  void release() { delete this; }
+};
 //--------------------------------------------------
 // CCPCON
 //--------------------------------------------------
@@ -246,10 +254,11 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     eccpas(0),
     bit_mask(0x3f),
     m_sink(0),
+    m_tristate(0),
     m_bInputEnabled(false),
     m_bOutputEnabled(false),
     m_cOutputState('?'),
-    edges(0),
+    edges(0), bridge_shutdown(false),
     ccprl(0), pir(0), tmr2(0), adcon0(0)
 {
 	m_PinModule[0] = 0;
@@ -283,11 +292,13 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
     {
         m_PinModule[0] = p1;
         m_sink = new CCPSignalSink(this);
+	m_tristate = new Tristate();
         m_source[0] = new CCPSignalSource(this);
         p1->addSink(m_sink);
     }
   }
   m_PinModule[1] = m_PinModule[2] = m_PinModule[3] = 0;
+  m_source[1] = m_source[2] = m_source[3] = 0;
   if (p2)
   {
     m_PinModule[1] = p2;
@@ -306,11 +317,12 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
 
 }
 
-void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR *_pir, TMR2 *_tmr2)
+void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR *_pir, TMR2 *_tmr2, ECCPAS *_eccpas)
 {
   ccprl = _ccprl;
   pir = _pir;
   tmr2 = _tmr2;
+  eccpas = _eccpas;
 }
 
 void CCPCON::setADCON(ADCON0 *_adcon0)
@@ -480,27 +492,56 @@ void CCPCON::pwm_match(int level)
   // cycle by reading ccprl and the ccp X & Y and caching them
   // in ccprh's pwm slave register.
   if(level == 1) {
+      // Auto shutdown comes off at start of PWM if ECCPASE clear
+      if (bridge_shutdown && (!eccpas || !(eccpas->get_value() & ECCPAS::ECCPASE)))
+      {
+          Dprintf(("bridge_shutdown=%d eccpas=%p ECCPAS=%x\n", bridge_shutdown, eccpas, 
+		eccpas ? eccpas->get_value() & ECCPAS::ECCPASE: 0));
+	  for(int i = 0; i < 4; i++)
+	  {
+            if(m_PinModule[i])
+	    {
+		 m_PinModule[i]->setControl(0); //restore defailt pin direction
+        	 m_PinModule[i]->updatePinModule();
+	    }
+	  }
+	  bridge_shutdown = false;
+      }
+
       ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
       tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
       ccprl->ccprh->put_value(ccprl->value.get());
   }
   if( !pwm1con) { // simple PWM
 
-    m_cOutputState = level ? '1' : '0';
-    m_source[0]->setState(level ? '1' : '0');
-    m_PinModule[0]->setSource(m_source[0]);
+    if (bridge_shutdown == false) // some processors use shutdown and simple PWM
+    {
+        m_cOutputState = level ? '1' : '0';
+        m_source[0]->setState(level ? '1' : '0');
+        m_PinModule[0]->setSource(m_source[0]);
+    
+    
+        if(level && !ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
+              m_source[0]->setState('0');
 
-
-    if(level) {
-      if (!ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
-          m_source[0]->setState('0');
+        m_PinModule[0]->updatePinModule();
+    
+        //cout << "iopin should change\n";
     }
-    m_PinModule[0]->updatePinModule();
-
-    //cout << "iopin should change\n";
   }  
   else	// EPWM
   {
+
+
+      if (!bridge_shutdown)
+      	drive_bridge(level, new_value);
+  }
+}
+//
+//  Drive PWM bridge
+//
+void CCPCON::drive_bridge(int level, int new_value)
+{
       unsigned int pstrcon_value;
       // pstrcon allows port steering for "single output"
       // if it is not defined, just use the first port
@@ -508,9 +549,10 @@ void CCPCON::pwm_match(int level)
 	  pstrcon_value = pstrcon->value.get();
       else
 	  pstrcon_value = 1;
-      bool active_high[4];
       int pwm_width;
       int delay = pwm1con->value.get() & ~PWM1CON::PRSEN;
+
+      bool active_high[4];
       switch (new_value & (CCPM3|CCPM2|CCPM1|CCPM0))
       {
         case PWM0:	//P1A, P1C, P1B, P1D active high
@@ -546,9 +588,8 @@ void CCPCON::pwm_match(int level)
     	return;
     	break;
       }
-
-	switch((new_value & (P1M1|P1M0))>>6) // ECCP bridge mode
-	{
+      switch((new_value & (P1M1|P1M0))>>6) // ECCP bridge mode
+      {
 	    case 0:	// Single
 		Dprintf(("Single bridge pstrcon=0x%x\n", pstrcon_value));
 		for (int i = 0; i <4; i++)
@@ -563,7 +604,7 @@ void CCPCON::pwm_match(int level)
           		    m_source[i]->setState(active_high[i]?'0':'1');
     			m_PinModule[i]->updatePinModule();
 		    }
-		    else
+		    else if (m_PinModule[i])
 			m_PinModule[i]->setSource(0);
 		}
 		break;
@@ -664,15 +705,64 @@ void CCPCON::pwm_match(int level)
 	    default:
 		printf("%s::pwm_match impossible ECCP bridge mode\n", name().c_str());
 		break;
-	}
+       }
 	
-  }
+}
+//
+// Set PWM bridge into shutdown mode
+//
+void CCPCON::shutdown_bridge(int eccpas)
+{
+    bridge_shutdown = true;
+
+    Dprintf(("eccpas=0x%x\n", eccpas));
+
+    switch(eccpas & (ECCPAS::PSSBD0 | ECCPAS::PSSBD1))
+    {
+    case 0:	// B D output 0
+	if (m_source[1]) m_source[1]->setState('0');
+	if (m_source[3]) m_source[3]->setState('0');
+	break;
+
+    case 1:	// B, D output 1
+	if (m_source[1]) m_source[1]->setState('1');
+	if (m_source[3]) m_source[3]->setState('1');
+	break;
+
+    default:	// Tristate B & D
+        if(m_PinModule[1])  m_PinModule[1]->setControl(m_tristate);
+        if(m_PinModule[3])  m_PinModule[3]->setControl(m_tristate);
+	break;
+    }
+    switch(eccpas & ((ECCPAS::PSSAC0 | ECCPAS::PSSAC1) >> 2))
+    {
+    case 0:	// A, C output 0
+	m_source[0]->setState('0');
+	if (m_source[2]) m_source[2]->setState('0');
+	break;
+
+    case 1:	// A, C output 1
+	m_source[0]->setState('1');
+	if (m_source[2]) m_source[2]->setState('1');
+	break;
+
+    default:	// Tristate A & C
+        m_PinModule[0]->setControl(m_tristate);
+        if(m_PinModule[2])  m_PinModule[2]->setControl(m_tristate);
+	break;
+    }
+    m_PinModule[0]->updatePinModule();
+    if (m_PinModule[1]) m_PinModule[1]->updatePinModule();
+    if (m_PinModule[2]) m_PinModule[2]->updatePinModule();
+    if (m_PinModule[3]) m_PinModule[3]->updatePinModule();
 }
 
 void CCPCON::put(unsigned int new_value)
 {
 
   unsigned int old_value =  value.get();
+  new_value &= bit_mask;
+  
   Dprintf(("%s::put() new_value=0x%x\n",name().c_str(), new_value));
   trace.raw(write_trace.get() | value.get());
 
@@ -2237,33 +2327,136 @@ void TMR2_MODULE::initialize(T2CON *t2con_, PR2 *pr2_, TMR2  *tmr2_)
 }
 
 //--------------------------------------------------
+//
+//--------------------------------------------------
+
+class INT_SignalSink : public SignalSink
+{
+public:
+  INT_SignalSink(ECCPAS *_eccpas, int _index)
+    : m_eccpas(_eccpas), m_index(_index)
+  {
+    assert(_eccpas);
+  }
+
+  void release() 
+  {
+    delete this;
+  }
+  void setSinkState(char new3State)
+  {
+    m_eccpas->set_trig_state( m_index, new3State=='0' || new3State=='w');
+  }
+private:
+  ECCPAS *m_eccpas;
+  int     m_index;
+};
+
+//--------------------------------------------------
 // ECCPAS
 //--------------------------------------------------
 ECCPAS::ECCPAS(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    pwm1con(0), ccp1con(0), bit_mask(0xff)
+    pwm1con(0), ccp1con(0), bit_mask(0xff),
+    m_PinModule(0)
 {
+    trig_state[0] = trig_state[1] = trig_state[2] = false;
 }
 
 ECCPAS::~ECCPAS()
 {
 }
+void ECCPAS::link_registers(PWM1CON *_pwm1con, CCPCON *_ccp1con)
+{
+	pwm1con = _pwm1con;
+	ccp1con = _ccp1con;
+}
 void ECCPAS::put(unsigned int new_value)
 {
-
-  new_value &= bit_mask;
   Dprintf(("ECCPAS::put() new_value=0x%x\n",new_value));
   trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
+void ECCPAS::put_value(unsigned int new_value)
+{
 
-  value.put(new_value);
-  switch (new_value & (ECCPAS0|ECCPAS1|ECCPAS2))
+  int old_value = value.get();
+  new_value &= bit_mask;
+
+
+  // Auto-shutdown trigger active
+  //   make sure ECCPASE is set
+  //   if change in shutdown status, drive bridge outputs as per current flags
+  if (shutdown_trigger(new_value))
   {
-  case 0:	// Autoshutdown disabled
-	return;
-  
-  default:
-	printf("ECCP Auto-Shutdown not implemented yet\n");
-  };
+	new_value |= ECCPASE;
+	if ((new_value ^ old_value) &  (ECCPASE|PSSAC1|PSSAC0|PSSBD1|PSSBD0))
+	    ccp1con->shutdown_bridge(new_value);
+  }
+  else // no Auto-shutdown triggers active
+  {
+      if (pwm1con->value.get() & PWM1CON::PRSEN) // clear ECCPASE bit
+	new_value &= ~ ECCPASE;
+  }
+  value.put(new_value);
+}
+// Return true is shutdown trigger is active
+bool ECCPAS::shutdown_trigger(int key)
+{
+
+  if ((key & ECCPAS0) && trig_state[0])
+	return true;
+
+  if ((key & ECCPAS1) && trig_state[1])
+	return true;
+
+  if ((key & ECCPAS2) && trig_state[2])
+	return true;
+
+  return false;
+}
+// connect IO pins to shutdown trigger source
+void ECCPAS::setIOpin(PinModule *p0, PinModule *p1, PinModule *p2)
+{
+    if (p0)
+    {
+        m_PinModule = p0;
+        m_sink = new INT_SignalSink(this, 0);
+        p0->addSink(m_sink);
+    }
+    if (p1)
+    {
+        m_PinModule = p1;
+        m_sink = new INT_SignalSink(this, 1);
+        p1->addSink(m_sink);
+    }
+    if (p2)
+    {
+        m_PinModule = p2;
+        m_sink = new INT_SignalSink(this, 2);
+        p2->addSink(m_sink);
+    }
+}
+
+// set shutdown trigger states
+void ECCPAS::set_trig_state(int index, bool state)
+{
+    if (trig_state[index] != state)
+    {
+	Dprintf(("index=%d state=%d old=%d\n", index, state, trig_state[index]));
+        trig_state[index] = state;
+        put_value(value.get());
+    }
+}
+// Trigger state from comparator 1
+void ECCPAS::c1_output(int state)
+{
+    set_trig_state(0, state);
+}
+// Trigger state from comparator 2
+void ECCPAS::c2_output(int state)
+{
+    set_trig_state(1, state);
 }
 //--------------------------------------------------
 // PWM1CON
@@ -2285,8 +2478,6 @@ void PWM1CON::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   value.put(new_value);
-  if (new_value & PRSEN)
-	printf("Enhanced PWM not impleminted yet\n");
 }
 //--------------------------------------------------
 // PSTRCON

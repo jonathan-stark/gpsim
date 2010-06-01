@@ -138,7 +138,7 @@ int ih2, int out)
 CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     _vrcon(0),
-    pir_set(0), m_tmrl(0)
+    pir_set(0), m_tmrl(0), m_eccpas(0)
 {
   value.put(0);
   cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=0;
@@ -147,6 +147,7 @@ CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
   cm_output_pin[0]=cm_output_pin[1]=0;
   cm_source[0]=cm_source[1]=0;
   cm_stimulus[0]=cm_stimulus[1]=cm_stimulus[2]=cm_stimulus[3]=0;
+  
 }
 
 CMCON::~CMCON()
@@ -247,6 +248,15 @@ unsigned int CMCON::get()
 
    if (value.get() ^ cmcon_val) // change of state
    {
+	// Signal ECCPAS ?
+	if (m_eccpas)
+	{
+	    int diff = value.get() ^ cmcon_val;
+	    if (diff & C1OUT)
+		m_eccpas->c1_output(cmcon_val & C1OUT);
+	    if (diff & C2OUT)
+		m_eccpas->c2_output(cmcon_val & C2OUT);
+	}
         // Generate interupt ?
         if (pir_set)
                 pir_set->set_cmif();
@@ -451,6 +461,7 @@ void CM1CON0::state_change(unsigned int cmcon_val)
 		m_srcon->set = FALSE;
 	    }
 	}
+	if (m_eccpas) m_eccpas->c1_output(cmcon_val & OUT);
 
         // Generate interupt ?
         if (pir_set)
@@ -499,6 +510,8 @@ void CM2CON0::state_change(unsigned int cmcon_val)
 	m_tmrl->compare_gate((cmcon_val & OUT) == OUT);
    }
   
+   if (m_eccpas) m_eccpas->c2_output(cmcon_val & OUT);
+
    if (cmcon_val & OE)	// output pin enabled
    {
     if (!(m_srcon->value.get() & SRCON::SR1)) //SRCON select comparator output
@@ -557,7 +570,7 @@ void CM12CON0::put(unsigned int new_value)
 		if (cm_snode[0] == NULL)
 		{
 		    cm_snode[0] = cm_input[4]->getPin().snode;
-		    cm_snode[0]->attach_stimulus(cm_stimulus[0]);
+		    if (cm_snode[0]) cm_snode[0]->attach_stimulus(cm_stimulus[0]);
 		}
 			
 	    }
@@ -569,14 +582,14 @@ void CM12CON0::put(unsigned int new_value)
 	    if (cm_snode[1] == NULL) // No CIN- monitoring active
 	    {
 		cm_snode[1] = cm_input[channel]->getPin().snode;
-		cm_snode[1]->attach_stimulus(cm_stimulus[1]);
+		if (cm_snode[1]) cm_snode[1]->attach_stimulus(cm_stimulus[1]);
 	    }
 	    // Change CIN- monitoring if on differnt pin
 	    else if (cm_snode[1] != cm_input[channel]->getPin().snode)
 	    {
 		cm_snode[1]->detach_stimulus(cm_stimulus[1]);
 		cm_snode[1] = cm_input[channel]->getPin().snode;
-		cm_snode[1]->attach_stimulus(cm_stimulus[1]);
+		if (cm_snode[1]) cm_snode[1]->attach_stimulus(cm_stimulus[1]);
 	    }
 	    
 	}
@@ -661,12 +674,13 @@ void CM12CON0::setpins(PinModule * c12in0, PinModule * c12in1,
    cm_output->setSource(cm_source);
 } 
 void CM12CON0::link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
-        VRCON *_vrcon, SRCON *_srcon)
+        VRCON *_vrcon, SRCON *_srcon, ECCPAS *_eccpas)
 {
 	pir_set = new_pir_set;
 	m_cm2con1 = _cm2con1;
 	m_vrcon = _vrcon;
 	m_srcon = _srcon;
+	m_eccpas = _eccpas;
 }
 
 //--------------------------------------------------

@@ -292,8 +292,8 @@ void P16F88x::create_sfr_map()
 	&(*m_portb)[1], &(*m_porta)[3], &(*m_porta)[4]);
   cm2con0.setpins( &(*m_porta)[0], &(*m_porta)[1], &(*m_portb)[3],
 	&(*m_portb)[1], &(*m_porta)[2], &(*m_porta)[5]);
-  cm1con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon);
-  cm2con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon);
+  cm1con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon, &eccpas);
+  cm2con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon, &eccpas);
   cm2con0.set_tmrl(&tmr1l);
   cm2con1.link_cm12con0(&cm1con0, &cm2con0);
   add_sfr_register(&cm1con0, 0x107, RegisterValue(0,0),"cm1con0");
@@ -368,6 +368,8 @@ void P16F88x::create_sfr_map()
   add_sfr_register(&pwm1con, 0x9b, RegisterValue(0,0));
   add_sfr_register(&pstrcon, 0x9d, RegisterValue(1,0));
   add_sfr_register(&eccpas, 0x9c, RegisterValue(0,0));
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
   add_sfr_register(&ssp.sspcon2,  0x91, RegisterValue(0,0) ,"sspcon2");
   if (hasSSP()) {
     add_sfr_register(&ssp.sspbuf,  0x13, RegisterValue(0,0),"sspbuf");
@@ -404,8 +406,7 @@ void P16F88x::create_sfr_map()
   ccp1con.setBitMask(0xff);
   ccp1con.pstrcon = &pstrcon;
   ccp1con.pwm1con = &pwm1con;
-  ccp1con.setCrosslinks(&ccpr1l, pir1, &tmr2);
-  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portb)[2], &(*m_portb)[1], &(*m_portb)[4]);
+  ccp1con.setCrosslinks(&ccpr1l, pir1, &tmr2, &eccpas);
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
@@ -666,6 +667,7 @@ void P16F882::create_symbols(void)
 void P16F882::create_sfr_map()
 {
 
+  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portb)[2], &(*m_portb)[1], &(*m_portb)[4]);
 
 }
 //========================================================================
@@ -717,6 +719,7 @@ void P16F883::create_sfr_map()
 
   add_file_registers(0xc0,0xef,0);
   add_file_registers(0x120,0x16f,0);
+  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portb)[2], &(*m_portb)[1], &(*m_portb)[4]);
 
 
 }
@@ -770,6 +773,7 @@ void P16F886::create_sfr_map()
   add_file_registers(0xc0,0xef,0);
   add_file_registers(0x120,0x16f,0);
   add_file_registers(0x190,0x1ef,0);
+  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portb)[2], &(*m_portb)[1], &(*m_portb)[4]);
 
 
 }
@@ -822,6 +826,7 @@ void P16F887::create_sfr_map()
   add_sfr_register(m_portd, 0x08);
   add_sfr_register(m_trisd, 0x88, RegisterValue(0xff,0));
 
+  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portd)[5], &(*m_portd)[6], &(*m_portd)[7]);
   adcon1.setIOPin(5, &(*m_porte)[0]);
   adcon1.setIOPin(6, &(*m_porte)[1]);
   adcon1.setIOPin(7, &(*m_porte)[2]);
@@ -947,6 +952,7 @@ void P16F884::create_sfr_map()
   add_sfr_register(m_portd, 0x08);
   add_sfr_register(m_trisd, 0x88, RegisterValue(0xff,0));
 
+  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portd)[5], &(*m_portd)[6], &(*m_portd)[7]);
   adcon1.setIOPin(5, &(*m_porte)[0]);
   adcon1.setIOPin(6, &(*m_porte)[1]);
   adcon1.setIOPin(7, &(*m_porte)[2]);
