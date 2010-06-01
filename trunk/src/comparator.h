@@ -158,6 +158,7 @@ class CMCON : public sfr_register
 
 
   void set_tmrl(TMRL *arg) { m_tmrl = arg; }
+  void set_eccpas(ECCPAS *_eccpas) { m_eccpas = _eccpas; }
   CMCON(Processor *pCpu, const char *pName, const char *pDesc);
   ~CMCON();
 
@@ -171,6 +172,7 @@ protected:
   PIR_SET *pir_set;
   TMRL *m_tmrl;
   CM_stimulus *cm_stimulus[4];
+  ECCPAS 	*m_eccpas;
 
   static const int cMaxConfigurations=8;
   static const int cMaxComparators=2;
@@ -288,7 +290,7 @@ class CM12CON0 : public sfr_register
   virtual double CVref() { cout << "CM12CON:CVref should not be called\n"; return(0.);}
  
   virtual void link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
-	VRCON *_vrcon, SRCON *_srcon);
+	VRCON *_vrcon, SRCON *_srcon, ECCPAS *_eccpas);
 
 
   void set_tmrl(TMRL *arg) { m_tmrl = arg; }
@@ -300,15 +302,16 @@ protected:
   friend class CM2CON1;
   friend class CM2CON0;
 
-  PinModule *cm_input[5];
-  PinModule *cm_output;
+  PinModule 	*cm_input[5];
+  PinModule 	*cm_output;
   CMSignalSource *cm_source;
-  CM2CON1 *m_cm2con1;
-  SRCON *m_srcon;
-  PIR_SET *pir_set;
-  TMRL *m_tmrl;
-  CM_stimulus *cm_stimulus[2];
+  CM2CON1 	*m_cm2con1;
+  SRCON 	*m_srcon;
+  PIR_SET 	*pir_set;
+  TMRL 		*m_tmrl;
+  CM_stimulus 	*cm_stimulus[2];
   Stimulus_Node *cm_snode[2];
+  ECCPAS 	*m_eccpas;
 
 };
 

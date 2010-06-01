@@ -1,3 +1,7 @@
+2010-06-01 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.h src/14bit-tmrs.cc src/comparator.h src/comparator.cc
+	  src/p16f88x.cc src/p18x.h src/p18x.cc : Enhanced PWM Auto-Shutdown
+
 2010-05-27 Roy Rankin <rrankin@ihug.com.au>
 	* modules/video.cc modules/gpsim_modules.cc modules/video.h modules/Makefile.am
 	+ resurrect video module patch 3007214 by Paul S

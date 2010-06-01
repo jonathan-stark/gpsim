@@ -86,6 +86,8 @@ public:
   CCPRL(Processor *pCpu, const char *pName, const char *pDesc=0);
 };
 
+class INT_SignalSink;    // I/O pin interface
+class PinModule;
 //
 // Enhanced Capture/Compare/PWM Auto-Shutdown control register
 //
@@ -110,12 +112,25 @@ public:
   ~ECCPAS();
 
   void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
   void set_mask(unsigned int bm) { bit_mask = bm; }
+  void setIOpin(PinModule *p0, PinModule *p1, PinModule *p2);
+  void c1_output(int value);
+  void c2_output(int value);
+  void set_trig_state(int index, bool state);
+  bool shutdown_trigger(int);
+  void link_registers(PWM1CON *_pwm1con, CCPCON *_ccp1con);
 
 private:
-  PWM1CON *pwm1con;
-  CCPCON  *ccp1con;
-  unsigned int bit_mask;
+  PWM1CON 	*pwm1con;
+  CCPCON  	*ccp1con;
+  unsigned int 	bit_mask;
+  PinModule 	*m_PinModule;
+  INT_SignalSink  *m_sink;
+  bool		trig_state[3];
+  int		c1_state;
+  int		c2_state;
+  int		int_state;
   
 };
 //
@@ -177,7 +192,7 @@ private:
 //---------------------------------------------------------
 class CCPSignalSource;  // I/O pin interface
 class CCPSignalSink;    // I/O pin interface
-class PinModule;
+class Tristate;		// I/O pin high impedance
 class CCP12CON;
 
 class CCPCON : public sfr_register, public TriggerObject
@@ -220,12 +235,14 @@ public:
   void new_edge(unsigned int level);
   void compare_match();
   void pwm_match(int new_state);
+  void drive_bridge(int level, int new_value);
+  void shutdown_bridge(int eccpas);
   void put(unsigned int new_value);
   char getState();
   bool test_compare_mode();
   void callback();
 
-  void setCrosslinks(CCPRL *, PIR *, TMR2 *);
+  void setCrosslinks(CCPRL *, PIR *, TMR2 *, ECCPAS *_eccpas=0);
   void setADCON(ADCON0 *);
   CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~CCPCON();
@@ -235,16 +252,18 @@ public:
   ECCPAS  *eccpas;
 
 protected:
-  unsigned int bit_mask;
-  PinModule *m_PinModule[4];
+  unsigned int 	bit_mask;
+  PinModule 	*m_PinModule[4];
   CCPSignalSource *m_source[4];
-  CCPSignalSink   *m_sink;
-  bool  m_bInputEnabled;    // Input mode for capture/compare
-  bool  m_bOutputEnabled;   // Output mode for PWM
-  char  m_cOutputState;
-  int   edges;
-  guint64 future_cycle;
-  bool delay_source0, delay_source1;
+  CCPSignalSink *m_sink;
+  Tristate	*m_tristate;
+  bool  	m_bInputEnabled;    // Input mode for capture/compare
+  bool  	m_bOutputEnabled;   // Output mode for PWM
+  char  	m_cOutputState;
+  int   	edges;
+  guint64 	future_cycle;
+  bool 		delay_source0, delay_source1;
+  bool 		bridge_shutdown;
 
 
   CCPRL   *ccprl;
