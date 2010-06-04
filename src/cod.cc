@@ -863,16 +863,20 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 				if(current_hll_file_id<0)
 				{
 					current_hll_file_id=cpu->files.Add(fn, true);
+					cpu->files[current_hll_file_id]->ReadSource();
 				}
 
-				// Find closest address of asm line and set hll line number and hll file id for this address.
+				// Find closest address of asm line and set hll line number, hll file id and file context pm address.
 				address=cpu->pma->find_closest_address_to_line(file_index, asmsrc_line);
 				if(address >= 0) {
 					cpu->program_memory[address]->set_hll_src_line(line_number);
 					cpu->program_memory[address]->set_hll_file_id(current_hll_file_id);
+					cpu->files[current_hll_file_id]->put_address(line_number, address);
 				}
+
 			}
-			// Find address of last asm line and set hll_line -1.
+
+			// Find address of last asm line and set hll_line -1, so we know the end when filling the gaps.
 			address=cpu->pma->find_closest_address_to_line(file_index, asmsrc_line-1);
 			if(address>=0)
 			{
