@@ -2052,7 +2052,7 @@ void NSourcePage::updateMargin(int y1, int y2)
         &pos);
 
       int address    = pFC && !pFC->IsList() ? m_Parent->getAddress(this,line) : - 1;
-      int opcode     = pFC && !pFC->IsList() ? m_Parent->getOpcode(address) : -1;
+      int opcode     = pFC && !pFC->IsList() && !pFC->IsHLL() ? m_Parent->getOpcode(address) : -1;
       bool bHasBreak = m_Parent->bAddressHasBreak(m_Parent->getAddress(this,line));
 
 
@@ -4948,8 +4948,8 @@ void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *
   while(pFC->gets(text_buffer, sizeof(text_buffer))) {
 
     int address;
-    // The syntax highlighting doesn't work on list files
-    address = pFC->IsList() ? -1 : gp->cpu->pma->find_address_from_line(pFC,line);
+    // The syntax highlighting doesn't work on list files or hll files
+    address = pFC->IsList()||pFC->IsHLL() ? -1 : gp->cpu->pma->find_address_from_line(pFC,line);
 
     // check if text_buffer in uft8 character set
     if (!g_utf8_validate(text_buffer, -1, NULL))
