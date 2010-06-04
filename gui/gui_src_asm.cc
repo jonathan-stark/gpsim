@@ -1301,7 +1301,10 @@ gint SourceWindow::switch_page_cb(guint newPage)
 
     if (!pPage)
       return TRUE;
-
+    if(gp->cpu->files[pPage->m_fileid]->IsHLL())
+      pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
+    else
+      pma->set_hll_mode(ProgramMemoryAccess::ASM_MODE);
     pPage->setSource();
     pPage->invalidateView();
 
@@ -2834,10 +2837,8 @@ void SourceBrowserAsm_Window::Update(void)
   SetTitle();
 
   SetPC(pma->get_PC());
-
   if(status_bar)
     status_bar->Update();
-
 }
 
 /*
@@ -3578,7 +3579,6 @@ static void AddCache(FileContext::Cache &FileCache, const char *pFragment,
   s_TotalTextLength += (length == -1) ? strlen(pFragment) : length;
 
 }
-
 /*
 Fills sbaw->pages[id].source_text with text from
 file pointer sbaw->sbw.gui_obj.gp->p->files[file_id].file_ptr
@@ -3855,7 +3855,6 @@ void SourceBrowserAsm_Window::CloseSource(void)
 
 void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 {
-
   int i;
   int id;
 
@@ -3900,7 +3899,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
       pma->GetProgramCounter()->add_xref((gpointer) cross_reference);
     }
   }
-
   if(pProc->files.nsrc_files() != 0) {
 
     for(i=0;i<pProc->files.nsrc_files();i++) {
@@ -3965,7 +3963,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   Dprintf((" Source is loaded\n"));
 }
-
 
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {

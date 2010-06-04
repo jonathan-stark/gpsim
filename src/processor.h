@@ -242,18 +242,17 @@ class FileContext
 private:
   string name_str;           // File name
   FILE   *fptr;              // File ptr when the file is opened
-  vector<int> *line_seek;    // A vector of file offsets to the start of lines
-  vector<int> *pm_address;   // A vector of program memory addresses for lines 
+  vector<int> line_seek;     // A vector of file offsets to the start of lines
+  vector<int> pm_address;    // A vector of program memory addresses for lines 
   unsigned int m_uiMaxLine;  // number of lines in the file
 
   friend class FileContextList;
 protected:
   bool m_bIsList;          // True if this is a list file.
+  bool m_bIsHLL;           // True if this is a HLL file.
 
-  void setListId(bool b)
-  { 
-    m_bIsList = b; 
-  }
+  void setListId(bool b) { m_bIsList = b; }
+  void setHLLId(bool b) { m_bIsHLL = b; }
 public:
   // cache -- deprecated - this was used with the old gui source browser
   typedef vector<gpsimObject*> Cache;
@@ -271,6 +270,7 @@ public:
   void close();
   bool IsOpen() { return fptr != NULL; }
   bool IsList() { return m_bIsList; }
+  bool IsHLL() { return m_bIsHLL; }
 
   /// get_address - given a line number, return the program memory address
   int get_address(unsigned int line);
@@ -300,8 +300,8 @@ public:
   FileContextList();
   ~FileContextList();
 
-  int Add(string& new_name);
-  int Add(const char *new_name);
+  int Add(string& new_name, bool hll=false);
+  int Add(const char *new_name, bool hll=false);
 
   int Find(string &fname);
 

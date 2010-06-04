@@ -112,9 +112,11 @@ public:
   virtual void setAddress(unsigned int addr) { m_uAddrOfInstr = addr;}
   virtual int get_src_line() { return(src_line); }
   virtual int get_hll_src_line() { return(hll_src_line); }
+  virtual void set_hll_src_line(int line) { hll_src_line=line; }
   virtual int get_lst_line() { return(lst_line); }
   virtual int get_file_id() {return(file_id); }
   virtual int get_hll_file_id() {return(hll_file_id); }
+  virtual void set_hll_file_id(int file_id) {hll_file_id=file_id; }
   virtual enum INSTRUCTION_TYPES isa() {return NORMAL_INSTRUCTION;}
   virtual guint64 getCyclesUsed() { return cycle_count;}
   virtual bool isBase() = 0;

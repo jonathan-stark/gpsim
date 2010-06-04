@@ -2399,26 +2399,22 @@ FileContext::FileContext(string &new_name)
 {
   name_str = new_name;
   fptr = NULL;
-  line_seek = 0;
   m_uiMaxLine = 0;
-  pm_address = 0;
   m_bIsList = false;
+  m_bIsHLL = false;
 }
 
 FileContext::FileContext(const char *new_name)
 {
   name_str = string(new_name);
   fptr = NULL;
-  line_seek = 0;
   m_uiMaxLine = 0;
-  pm_address = 0;
   m_bIsList = false;
+  m_bIsHLL = false;
 }
 
 FileContext::~FileContext(void)
 {
-  delete line_seek;
-  delete pm_address;
 }
 
 //----------------------------------------
@@ -2451,20 +2447,16 @@ void FileContext::ReadSource(void)
     return;
   }
 
-  delete line_seek;
-  delete pm_address;
-
-  line_seek = new vector<int>(max_line()+1);
-  pm_address = new vector<int>(max_line()+1);
+  line_seek.resize(max_line()+1);
+  pm_address.resize(max_line()+1);
 
   std::rewind(fptr);
 
   char buf[256],*s;
-  (*line_seek)[0] = 0;
+  line_seek[0] = 0;
   for(unsigned int j=1; j<=max_line(); j++) {
-
-    (*pm_address)[j] = -1;
-    (*line_seek)[j] = ftell(fptr);
+    pm_address[j] = -1;
+    line_seek[j] = ftell(fptr);
     s = fgets(buf,256,fptr);
 
     if(s != buf)
@@ -2484,7 +2476,7 @@ char *FileContext::ReadLine(unsigned int line_number, char *buf, unsigned int nB
     return 0;
 
   fseek(fptr,
-        (*line_seek)[line_number],
+        line_seek[line_number],
         SEEK_SET);
   return fgets(buf, nBytes, fptr);
 
@@ -2541,15 +2533,15 @@ void FileContext::close()
 //----------------------------------------
 int FileContext::get_address(unsigned int line_number)
 {
-  if(line_number <= max_line()  && pm_address)
-    return (*pm_address)[line_number];
+  if(line_number <= max_line() && pm_address.size() > line_number)
+    return pm_address[line_number];
   return -1;
 }
 //----------------------------------------
 void FileContext::put_address(unsigned int line_number, unsigned int address)
 {
-  if(line_number <= max_line()  && pm_address && (*pm_address)[line_number]<0)
-    (*pm_address)[line_number] = address;
+  if(line_number <= max_line()  && pm_address.size() > line_number && pm_address[line_number]<0)
+    pm_address[line_number] = address;
 }
 
 //------------------------------------------------------------------------
@@ -2595,11 +2587,12 @@ int FileContextList::Find(string &fname)
 
 extern bool bHasAbsolutePath(string &fname);
 
-int FileContextList::Add(string &new_name)
+int FileContextList::Add(string &new_name, bool hll)
 {
 
   string sFull = bHasAbsolutePath(new_name) ? new_name : (sSourcePath + new_name);
   push_back(FileContext(sFull));
+  back().setHLLId(hll);
   lastFile++;
   if(CSimulationContext::GetContext()->IsSourceEnabled()) {
     back().open("r");
@@ -2611,10 +2604,10 @@ int FileContextList::Add(string &new_name)
   return lastFile-1;
 }
 
-int FileContextList::Add(const char *new_name)
+int FileContextList::Add(const char *new_name, bool hll)
 {
   string sNewName(new_name);
-  return Add (sNewName);
+  return Add (sNewName, hll);
 }
 
 FileContext *FileContextList::operator [] (int file_id)
