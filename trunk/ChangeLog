@@ -1,3 +1,12 @@
+2010-06-04 Ralf Forsberg <rfg@users.sourceforge.net>
+	* Added back HLL source browser support for sdcc and jal.
+	* Fixed bug in FileContext where the vector pointers could become
+	  dangling after stl magic because of missing copy constrctor.
+	  Made them objects instead of pointers.
+
+2010-05-?? Ralf Forsberg <rfg@users.sourceforge.net>
+	* Optimized video module using pixmap shadow buffer.
+
 2010-06-01 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.h src/14bit-tmrs.cc src/comparator.h src/comparator.cc
 	  src/p16f88x.cc src/p18x.h src/p18x.cc : Enhanced PWM Auto-Shutdown
