@@ -652,13 +652,13 @@ void TimeLabeledEntry::Update()
 
   case MENU_TIME_HHMMSS:
     {
-      double v=time_db;
+      double v=time_db + 0.005;	// round msec
       int hh=(int)(v/3600),mm,ss,cc;
       v-=hh*3600.0;
       mm=(int)(v/60);
       v-=mm*60.0;
       ss=(int)v;
-      cc=(int)(v*100.0+0.5);
+      cc=(int)((v-ss)*100.0);
       sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
     }
     break;

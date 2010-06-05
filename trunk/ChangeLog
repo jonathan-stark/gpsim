@@ -1,4 +1,8 @@
 2010-06-05 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_menu.cc gui/gui_statusbar.cc : fix bug 3009843 
+	  Simulation Time HH:MM:SS.CC displays incorrectly
+
+2010-06-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/ modules/ COPPYING.LESSER README : to LGPLv2+
 
 2010-06-04 Ralf Forsberg <rfg@users.sourceforge.net>
