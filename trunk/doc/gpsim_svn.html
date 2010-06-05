@@ -13,13 +13,26 @@
 <p></p>
 <p></p>
 <p></p>
-<p>If you need to be on the bleeding edge, you can get the code
+<p>If you need the latest processors,  peripherals and fixes which have not yet
+been included in the most recent release, 
+you can get the code
 straight from
 <a href="http://gpsim.svn.sourceforge.net/viewvc/gpsim/trunk/">gpsim's
 SVN repository</a>
 on <a href="http://sourceforge.net/projects/gpsim/">gpsim's
-SourceForge Page</a> , which is of course hosted by <a href="http://sourceforge.net/">SourceForge</a>. But <b>BE
-WARNED</b>, the SVN is development code and may be unstable! </p>
+SourceForge Page</a> , which is of course hosted by 
+<a href="http://sourceforge.net/">SourceForge</a>. 
+</p><p>
+Although every effort is made by the developers to maintain the
+SVN code in a usable state, problems may occur with it from time to time.
+Thus be prepared to either 
+request assistance from the
+<a href="mailto:gpsim-devel@lists.sourceforge.net">
+gpsim-devel mailing list.</a>
+or file a 
+<a href="https://sourceforge.net/tracker/?group_id=2341&atid=102341">
+bug report</a> when using the SVN.
+</p>
 <h2> Getting the source</h2>
 <p>
 </p>
@@ -27,8 +40,8 @@ WARNED</b>, the SVN is development code and may be unstable! </p>
 Note, don't forget the '.' at the end of the last command! If you did,
 then the code will get placed into a directory named gpsim/trunk. Also,
 note that svn is chunky around the edges; you'll need about 45M of disc
-space to get a copy of the reposistory. Actually, the 'trunk' is where
-thelatest code is stored. The whole repository is a third of a gig!
+space to get a copy of the repository. Actually, the 'trunk' is where
+the latest code is stored. The whole repository is a third of a gig!
 <p></p>
 <h2> Compiling your SVN copy the first time</h2>
 <p>When you get the code from SVN this first time, you'll have to
@@ -42,6 +55,10 @@ directory you downloaded gpsim from SVN, enter these commands:
 Go get a cup of coffee and read <a href="http://slashdot.org">/.</a>
 as your computer cranks through compiling gpsim. When
 it's done, you can then install it:
+</p>
+<p>
+On multi-core processors the compile time can be shortened by running parallel make
+by using the command "make -j n" where n is 2 * number of cores.
 </p>
 <pre>$ su root<br /># make install<br /># exit<br /></pre>
 <p>
@@ -96,7 +113,7 @@ local copy, then all you need to do is this:
 <p>
 The 'update' command will compare your local copy with the master SVN
 copy and
-then update your's with the differences. It's a whole faster than
+then update yours with the differences. It's a whole faster than
 re-downloading
 everything.
 </p>
@@ -112,9 +129,11 @@ SVN repository</a>
 <a href="http://sourceforge.net/">SourceForge</a>
 </p>
 <hr />
-<address>This page is maintained by <a href="http://www.dattalo.com">Scott
-Dattalo</a>. You can reach me at home: <a href="mailto:scott@dattalo.com">scott@dattalo.com
-</a></address>
+<address>
+This page is maintained by the gpsim administrators 
+<a href="mailto:gpsim-devel@lists.sourceforge.net">gpsim-devel
+</a>
+</address>
 <address>Last modified on $Date$.</address>
 <p></p>
 <table>
