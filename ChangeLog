@@ -1,3 +1,9 @@
+2010-06-06 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p18f/extended_instructions.asm: add nops after asserts
+	* INSTALL.gpsim : rename as INSTALL gets overwritten
+	* doc/gpsim.html doc/gpsim_svn.html README Makefile.am : document
+	  LGPLv2+ change
+
 2010-06-05 Borut Razem <borut.razem@siol.net>
 	* modules/makefile.mingw: included video.* module
 	* plat/win32/gpsim.nsi: updated dependency packages

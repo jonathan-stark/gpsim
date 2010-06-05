@@ -54,18 +54,24 @@ start:
 
 	addfsr	0,15
    .assert "(fsr0l==15) && (fsr0h==0)"
+	nop
 	addfsr	1,15
    .assert "(fsr1l==15) && (fsr1h==0)"
+	nop
 	addfsr	2,15
    .assert "(fsr2l==15) && (fsr2h==0)"
+	nop
 
 
 	subfsr	0,10
    .assert "(fsr0l==5) && (fsr0h==0)"
+	nop
 	subfsr	1,10
    .assert "(fsr1l==5) && (fsr1h==0)"
+	nop
 	subfsr	2,10
    .assert "(fsr2l==5) && (fsr2h==0)"
+	nop
 
 
    ;; CALLW test

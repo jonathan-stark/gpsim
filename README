@@ -3,13 +3,15 @@ gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 http://gpsim.sourceforge.net/
 
 
-Please see the INSTALL file to get instructions on how to install gpsim.
+Please see the INSTALL.gpsim file to get instructions on how to install gpsim.
 Please see the TODO file to get an idea of the current status and a little background on how the code works.
 Please see the HISTORY file to see how gpsim has evolved.
 Please see the README.EXAMPLES file for information about the examples.
 Please see the PROCESSORS file to see a list of supported processors.
 Please see doc/gpsim.lyx or doc/gpsim.ps for the latest documentation
-Please see COPYING for the GPL.
+Gpsim is licensed under GPLv2+ with the exception of eXdbm/ src/ and
+  modules/ files which are under LGPLv2+.  Please see COPYING and 
+  COPYING.LESSER for the terms of these licenses.
 
 
   
@@ -26,14 +28,15 @@ installer on his web page:
   http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html
 
 
-For Linux, it's assumed that you have GTK+ 2.x and gtk-extra+ installed.
+For Linux, it's assumed that you have GTK+ 2.x and gtk+extra >= 2.1.2 
+or a patched version of gtk+extra-2.1.1 installed.
 
 
 
 Installing:
 ----------
 
-See the INSTALL file.
+See the INSTALL.gpsim file.
 
 Invoking:
 ---------

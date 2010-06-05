@@ -37,9 +37,15 @@
     <tr>
       <td colspan="4" width="90%">
       <p>gpsim is a full-featured software simulator for <a href="http://www.microchip.com/">Microchip</a> PIC
-microcontrollers distributed under the <a href="http://www.fsf.org/">GNU</a>
-      <a href="http://www.fsf.org/copyleft/gpl.html">General
-Public License</a></p>
+microcontrollers distributed under the 
+<a href="http://www.fsf.org/">GNU</a>
+      <a href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html"
+      >General Public License</a>, Version 2 or higher, 
+and some of it's libraries under
+<a href="http://www.fsf.org/">GNU</a>
+      <a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html"
+      >Lesser General Public License</a>, Version 2 or higher.
+</p>
       <p>gpsim has been designed to be as accurate as possible.
 Accuracy includes
 the entire PIC - from the core to the I/O pins and including ALL of the
@@ -70,7 +76,7 @@ and
 write break points on values (e.g. break if a specific value is read
 from or
 written to a register).</p>
-      <p>gpsim is not^B^B^B fancy, but^B^B^Band it's improving.
+      <p>gpsim is not fancy, but it's improving.
 It supports a good ol' fashioned CLI like gdb and a gui based on <a href="http://www.gtk.org/">gtk</a>. </p>
       </td>
     </tr>
@@ -102,22 +108,17 @@ viewer 2</a>. </p>
     </tr>
     <tr>
       <td>
-      <p><a href="http://sourceforge.net/project/showfiles.php?group_id=2341">Download</a>.
-Also,
-Windows snapshots are available on the <a href="http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html">gpsimWin32
-page</a> </p>
       <h2>Linux</h2>
-      <ul>
-        <li> <a href="http://sourceforge.net/project/showfiles.php?group_id=2341">gpsim</a>
-        </li>
-        <li> <a href="http://gtkextra.sourceforge.net/">gtk+extra
-          </a></li>
-      </ul>
-      <p>Don't forget the latest version of the <a href="http://gputils.sourceforge.net/">gnupic assembler </a>.
+      <p>
+      To build gpsim from the latest released source, download the
+      <a href="http://sourceforge.net/project/showfiles.php?group_id=2341"> source tarball </a>.
       </p>
-      <p>Here are a few <a href="http://www.linuxhacker.org/cgi-bin/ezmlm-cgi?1:mss:3641:200412:lecfjpaammlnkeekfboj">notes</a>
-from the <a href="http://www.linuxhacker.org/cgi-bin/ezmlm-cgi/1">gnupic
-mailing list</a> about installing gtk+extra from the tar file. </p>
+      <p>
+      If your distribution does not have a current or patched version of gtk+extra,
+      then you should
+      <a href="https://sourceforge.net/projects/gtkextra/">download gtk+extra</a>,
+      build it, and install it prior to building gpsim.
+      </p>
       <h2>Windows</h2>
       <p>Borut Ražem has ported gpsim to Windows and called the
 package <a href="http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html">
@@ -132,11 +133,13 @@ shots</a>. </p>
     </tr>
     <tr>
       <td>
-      <p>The gpsim source is on the <a href="http://sourceforge.net/project/?group_id=2341">gpsim
-SourceForge page</a>. From there you may browse the SVN and check
-out the very latest versions. The <a href="gpsim_svn.html">instructions
-for getting gpsim from SVN</a> provide a step-by-step description
-on how you can get the code. </p>
+      <p>The current gpsim SVN source can be browsed using the
+         <a href="http://gpsim.svn.sourceforge.net/viewvc/gpsim/trunk/">
+         gpsim SourceForge SVN browser</a>.</p>
+      <p>To get the gpsim SVN source tree for local build, follow the
+	<a href="gpsim_svn.html">instructions for getting gpsim from SVN</a> 
+	which provides a step-by-step description on how you can get the code. 
+	</p>
       </td>
     </tr>
     <tr>
@@ -150,7 +153,7 @@ on how you can get the code. </p>
       <p>Where 'x.y' is the version number. This will create a
 subdirectory called gpsim-0.x.y . All of gpsim's source code will be
 untarred to here. From there, you can read the <a href="README">README</a>
-and <a href="INSTALL">INSTALL</a> files for more
+and <a href="INSTALL.gpsim">INSTALL.gpsim</a> files for more
 info. But they basically tell you to</p>
       <pre>cd gpsim-0.x.y<br />./configure    This will create the Makefile<br />make           &lt;--- This will create the executable<br />su root        if you have root privileges<br />make install   places a copy of the executable in /usr/local/bin<br /> </pre>
       <p>Oh, don't forget to check the gpsim-0.x.y/examples
@@ -162,7 +165,7 @@ subdirectory for some example asm and stimulus files...</p>
 Processors</span> </td>
     </tr>
     <tr>
-      <td></td>
+      <td>As processors are being added all the time, the best way to determine currently supported processors is to run the command "processor list" in the Command line of Gpsim</td>
     </tr>
     <tr>
       <td>
@@ -269,7 +272,13 @@ Processors</span> </td>
             <td>PIC16F874A</td>
             <td>PIC16F876A</td>
             <td>PIC16F877A</td>
-            <td> </td>
+            <td>PIC16F882 </td>
+          </tr>
+          <tr>
+            <td>PIC16F883</td>
+            <td>PIC16F884</td>
+            <td>PIC16F886</td>
+            <td>PIC16F887</td>
           </tr>
           <tr>
             <td>PIC18C242</td>
@@ -297,7 +306,7 @@ Processors</span> </td>
           </tr>
         </tbody>
       </table>
-      <p>* Not fully supported (yet).</p>
+      <p>* USB functionality not supported (yet).</p>
       </td>
     </tr>
     <tr>
@@ -309,7 +318,7 @@ Processors</span> </td>
       <p>Here's the beginning of <a href="gpsim.ps">gpsim.ps
       </a> and <a href="gpsim.pdf">gpsim.pdf</a>,
 the gpsim documentation.</p>
-      <p>Or if you perfer, here's the <a href="http://www.lyx.org">Lyx</a>
+      <p>Or if you prefer, here's the <a href="http://www.lyx.org">Lyx</a>
 source <a href="http://gpsim.svn.sourceforge.net/viewvc/gpsim/trunk/doc/gpsim.lyx">gpsim.lyx</a>.</p>
       </td>
     </tr>
@@ -319,16 +328,16 @@ source <a href="http://gpsim.svn.sourceforge.net/viewvc/gpsim/trunk/doc/gpsim.ly
     </tr>
     <tr>
       <td>
-      <p>There are two mailing lists where support for gpsim is
-discussed. The <a href="http://lists.sourceforge.net/lists/listinfo/gpsim-devel">gpsim-devel</a>
-is devoted
+      <p>
+	The <a href="http://lists.sourceforge.net/lists/listinfo/gpsim-devel">gpsim-devel</a>
+mailing list is devoted
 to gpsim specific issues. While primarily intended for gpsim
 development, this list may
-also be used as a user resource to ask any question. The other list
-where gpsim is discussed
-is <a href="http://www.gnupic.org/">GNUPIC</a>
-mailing list. The <a href="http://www.gnupic.org/">GNUPIC</a>
-project is devoted to Open Source tools for <a href="http://www.microchip.com/">Microchip PICs</a>. </p>
+also be used as a user resource to ask any question. </p>
+<p>
+In addition to the mailing list, bug reports and feature requests can be filed at the
+<a href="https://sourceforge.net/tracker/?group_id=2341">gpsim SourceForge tracker</a>.
+</p>
       </td>
     </tr>
     <tr>
@@ -391,10 +400,13 @@ well.</p>
 <!-- <IMG SRC="/cgi-bin/count.cgi?gpsim.dat"> -->
 <p></p>
 <hr />
-<address>This page is maintained by <a href="http://www.dattalo.com">Scott
-Dattalo</a>. You can reach me at home: <a href="mailto:scott@dattalo.com">scott@dattalo.com
+<address>
+This page is maintained by the gpsim administrators 
+<a href="mailto:gpsim-devel@lists.sourceforge.net">gpsim-devel
 </a></address>
-<address>Last modified on $Date$.</address>
+<address>
+Last modified on $Date$.
+</address>
 <p></p>
 <table>
   <tbody>
