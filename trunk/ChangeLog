@@ -1,3 +1,6 @@
+2010-06-05 Roy Rankin <rrankin@ihug.com.au>
+	* src/ modules/ COPPYING.LESSER README : to LGPLv2+
+
 2010-06-04 Ralf Forsberg <rfg@users.sourceforge.net>
 	* Added back HLL source browser support for sdcc and jal.
 	* Fixed bug in FileContext where the vector pointers could become
