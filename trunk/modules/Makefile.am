@@ -24,3 +24,4 @@ libgpsim_modules_la_SOURCES = \
 libgpsim_modules_la_LIBADD = ../eXdbm/libgpsim_eXdbm.la -lstdc++ -lpopt \
   @X_LDFLAGS@ @Y_LDFLAGS@ @LIBREADLINE@ ../src/libgpsim.la
 
+EXTRA_DIST = makefile.mingw

@@ -11,3 +11,5 @@ libgpsim_graphicLCD_la_SOURCES = \
 	ssd0323.cc ssd0323.h
 
 libgpsim_graphicLCD_la_LDFLAGS =  @X_LDFLAGS@
+
+EXTRA_DIST = makefile.mingw

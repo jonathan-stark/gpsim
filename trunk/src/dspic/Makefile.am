@@ -12,3 +12,4 @@ libgpsim_dspic_la_SOURCES = \
 
 libgpsim_dspic_la_LDFLAGS =  @X_LDFLAGS@
 
+EXTRA_DIST = makefile.mingw

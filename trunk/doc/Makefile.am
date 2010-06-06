@@ -6,6 +6,7 @@ gpsim.pdf: gpsim.lyx
 	lyx -e pdf gpsim.lyx
 
 EXTRA_DIST = \
+	makefile.mingw \
 	gpsim.lyx \
 	gpsim.pdf \
 	gpsim.ps

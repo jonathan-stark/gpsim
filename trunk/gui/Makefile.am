@@ -24,3 +24,5 @@ pixmapdir = $(datadir)/gpsim
 AM_CFLAGS =
 AM_CXXFLAGS =
 AM_CPPFLAGS =
+
+EXTRA_DIST = makefile.mingw

@@ -178,3 +178,5 @@ libgpsim_la_LIBADD =  @X_LDFLAGS@
 libgpsim_la_LDFLAGS = -lpthread
 
 SUBDIRS = dspic
+
+EXTRA_DIST = makefile.mingw
