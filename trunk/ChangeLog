@@ -1,4 +1,7 @@
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
+	* Don't add files from cod if the actual file is missing.
+
+2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
 	* Switching to realtime mode could hang up.
 
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>

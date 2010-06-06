@@ -2592,6 +2592,14 @@ int FileContextList::Add(string &new_name, bool hll)
 {
 
   string sFull = bHasAbsolutePath(new_name) ? new_name : (sSourcePath + new_name);
+
+  // Check that the file is available.
+  // FIXME stat() would be better, but would need some stat_path() I guess.
+  FILE *f=fopen_path(sFull.c_str(), "r");
+  if(f==NULL)
+    return -1;
+  fclose(f);
+
   push_back(FileContext(sFull));
   back().setHLLId(hll);
   lastFile++;

@@ -368,7 +368,10 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
           //
           // Add this file to the list
           //
-          cpu->files.Add(filenm);
+          if(cpu->files.Add(filenm)<0) {
+            // File not available.
+            continue;
+          }
 
           if((strncmp(lstfilename, filenm,256) == 0) &&
               (cpu->files.list_id() >= cpu->files.nsrc_files()) ) {
