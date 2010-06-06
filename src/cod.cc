@@ -801,7 +801,7 @@ _Cleanup:
 void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 {
   int line_number;
-  int address;
+  unsigned int address;
 
   int file_index;
 
@@ -816,7 +816,6 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 	int nfiles=cpu->files.nsrc_files();
 	for(file_index=0;file_index<nfiles;file_index++) {
 		char text_buffer[256];
-		size_t pos = 1+cpu->files[file_index]->name().rfind('.');
 		// If asm file
 		if(!cpu->files[file_index]->name().compare(cpu->files[file_index]->name().length()-4,4,".asm")) {
 			int current_hll_file_id;
@@ -866,6 +865,8 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 				if(current_hll_file_id<0)
 				{
 					current_hll_file_id=cpu->files.Add(fn, true);
+					if(current_hll_file_id<0)
+						continue;
 					cpu->files[current_hll_file_id]->ReadSource();
 				}
 
