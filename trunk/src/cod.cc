@@ -805,8 +805,8 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 	// Reset hll_file_id and hll_src_line throughout cpu memory
 	for(address=0;address<cpu->program_memory_size();address++)
 	{
-		cpu->program_memory[address]->set_hll_file_id(0);
-		cpu->program_memory[address]->set_hll_src_line(0);
+		cpu->program_memory[address]->set_hll_file_id(-1);
+		cpu->program_memory[address]->set_hll_src_line(0); // Meaning 'not set' in this function.
 	}
 
 	// For each file
@@ -881,7 +881,6 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 			if(address>=0)
 			{
 				cpu->program_memory[address]->set_hll_src_line(-1);
-				cpu->program_memory[address]->set_hll_file_id(-1);
 			}
 			else
 			{

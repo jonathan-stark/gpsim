@@ -1007,6 +1007,7 @@ void pic_processor::finish()
 
   run_to_address( stack->contents[(stack->pointer-1) & stack->stack_mask]);
 
+  get_interface().simulation_has_stopped();
 }
 
 

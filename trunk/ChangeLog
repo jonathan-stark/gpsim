@@ -1,3 +1,7 @@
+2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
+	* Fixed step_over in HLL_MODE.
+	* Update gui after finish command.
+
 2010-06-06 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/Makefile.am src/dspic/Makefile.am src/Makefile.am doc/Makefile.am
 	  extras/graphic_lcd/src/Makefile.am extras/ds1307/Makefile.am modules/Makefile.am
@@ -5,7 +9,7 @@
 	  files in distribution tarball
 
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
-	* Remove MCLR pin monitor in pic desctructor to avoid segfault in IOPIN desctructor.
+	* Remove MCLR pin monitor in pic destructor to avoid segfault in IOPIN desctructor.
 
 2010-06-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p18f/extended_instructions.asm: add nops after asserts

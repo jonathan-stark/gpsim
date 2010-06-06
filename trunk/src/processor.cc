@@ -1078,7 +1078,7 @@ void ProgramMemoryAccess::set_hll_mode(unsigned int new_hll_mode)
   }
 }
 //--------------------------------------------------------------------------
-unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
+int ProgramMemoryAccess::get_src_line(unsigned int address)
 {
   unsigned int line=0;
 
@@ -1100,7 +1100,7 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 }
 
 //--------------------------------------------------------------------------
-unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
+int ProgramMemoryAccess::get_file_id(unsigned int address)
 {
 
   if(!cpu)
@@ -2018,23 +2018,29 @@ void ProgramMemoryAccess::step(unsigned int steps,bool refresh)
     break;
 
   case HLL_MODE:
-    {
-      unsigned int initial_line = cpu->pma->get_src_line(cpu->pc->get_value());
-      unsigned int initial_pc = cpu->pc->get_value();
+    unsigned int initial_pc = cpu->pc->get_value();
+    int initial_line = cpu->pma->get_src_line(initial_pc);
+    int initial_file = cpu->pma->get_file_id(initial_pc);
 
-      while(1) {
-        cpu->step(1,false);
+    while(1) {
+      cpu->step(1,false);
 
-        if(( cpu->pc->get_value() == initial_pc) ||
-           (get_src_line(cpu->pc->get_value()) != initial_line)) {
-          if(refresh)
-            get_interface().simulation_has_stopped();
-          break;
-        }
+      unsigned int current_pc = cpu->pc->get_value();
+      int current_line = cpu->pma->get_src_line(current_pc);
+      int current_file = cpu->pma->get_file_id(current_pc);
+
+      if(current_line<0 || current_file<0)
+        continue;
+
+      if(current_pc == initial_pc ||
+         current_line != initial_line ||
+         current_file != initial_file) {
+        if(refresh)
+          get_interface().simulation_has_stopped();
+        break;
       }
-
-      break;
     }
+    break;
   }
 }
 
@@ -2052,44 +2058,39 @@ void ProgramMemoryAccess::step_over(bool refresh)
     break;
 
   case HLL_MODE:
-    {
-
-#if 0
-      //
-      // High level language step-overs are only supported for
-      // pic processors
-      //
-
-      pic_processor *pic = dynamic_cast<pic_processor *>cpu;
-
-      if(!pic) {
-        cout << "step-over is not supported for non-PIC processors\n";
-        return;
-      }
-      unsigned int initial_line = cpu->pma.get_src_line(cpu->pc->get_value());
-      unsigned int initial_pc = cpu->pc->get_value();
-      unsigned int initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
-
-      while(1)
-        {
-          step(1);
-
-          if(initial_stack_depth < pic->stack->pointer&pic->stack->stack_mask)
-            gpsim_finish(processor_id);
-
-          if(pic->pc->get_value()==initial_pc)
-            break;
-
-          if(get_src_line(initial_pc) != initial_line)
-            {
-              if(gpsim_get_file_id(processor_id, pic->pc->get_value()))
-                break;
-            }
-        }
-      break;
-#endif
-      cout << "HLL Step is not supported\n";
+    pic_processor *pic = dynamic_cast<pic_processor *>(cpu);
+    if(!pic) {
+      cout << "step-over is not supported for non-PIC processors\n";
+      return;
     }
+
+    unsigned int initial_pc = cpu->pc->get_value();
+    int initial_line = cpu->pma->get_src_line(initial_pc);
+    int initial_file = cpu->pma->get_file_id(initial_pc);
+    unsigned int initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
+
+    while(1) {
+      cpu->step(1,false);
+
+      if(initial_stack_depth < (pic->stack->pointer&pic->stack->stack_mask))
+        cpu->finish();
+
+      unsigned int current_pc = cpu->pc->get_value();
+      int current_line = cpu->pma->get_src_line(current_pc);
+      int current_file = cpu->pma->get_file_id(current_pc);
+
+      if(current_line<0 || current_file<0)
+        continue;
+
+      if(current_pc == initial_pc ||
+         current_line != initial_line ||
+         current_file != initial_file) {
+        if(refresh)
+          get_interface().simulation_has_stopped();
+        break;
+      }
+    }
+    break;
   }
 
 }
