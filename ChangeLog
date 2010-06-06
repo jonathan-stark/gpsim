@@ -1,3 +1,7 @@
+2010-06-06 Borut Razem <borut.razem@siol.net>
+	* modules/modules.vcproj, plat/win32/libgpsim.def,
+	  modules/gpsim_modules.cc: MSVC sync
+
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
 	* Don't add files from cod if the actual file is missing.
 
