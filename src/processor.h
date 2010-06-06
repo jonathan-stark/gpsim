@@ -138,10 +138,10 @@ class ProgramMemoryAccess :  public MemoryAccess
   // Given an address to an instruction, find the source line that 
   // created it:
 
-  unsigned int get_src_line(unsigned int address);
+  int get_src_line(unsigned int address);
 
   // Return the file ID of the source program responsible for the opcode at address.
-  unsigned int get_file_id(unsigned int address);
+  int get_file_id(unsigned int address);
 
   // A couple of functions for manipulating  breakpoints
   virtual unsigned int  set_break_at_address(unsigned int address);
