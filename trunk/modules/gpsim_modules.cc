@@ -104,11 +104,12 @@ Module_Types available_modules[] =
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
   { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },
 
-   // PGS added back 23MAY10
-   // TSD Removed 17APR06
+#ifdef HAVE_GUI
+  // PGS added back 23MAY10
+  // TSD Removed 17APR06
   // Video
   { {"PAL_video", "video"}, Video::construct},
-#ifdef HAVE_GUI
+
   // Encoder
   { {"Encoder", "encoder"}, Encoder::construct},
 #endif
