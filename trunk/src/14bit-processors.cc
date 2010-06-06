@@ -246,9 +246,6 @@ Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 Pic14Bit::~Pic14Bit()
 {
-  //delete m_MCLR; <-- this is a package pin
-  delete m_MCLRMonitor;
-
   delete_sfr_register(m_portb);
   delete_sfr_register(m_trisb);
 

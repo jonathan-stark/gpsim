@@ -895,7 +895,9 @@ IOPIN::IOPIN(const char *_name,
 
 void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
 {
- if (!m_monitor && new_pinMonitor)
+  if (m_monitor && new_pinMonitor)
+    cout << "IOPIN already has a monitor!" << endl;
+  else
     m_monitor = new_pinMonitor;
 }
 

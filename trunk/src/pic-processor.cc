@@ -1159,6 +1159,14 @@ pic_processor::~pic_processor()
 
   delete config_modes;
   delete m_configMemory;
+
+  if (m_MCLR)
+    m_MCLR->setMonitor(0);
+  if (m_MCLR_Save)
+    m_MCLR_Save->setMonitor(0);
+  if (m_MCLRMonitor)
+    delete m_MCLRMonitor;
+
 }
 //-------------------------------------------------------------------
 //

@@ -456,6 +456,8 @@ PinModule::~PinModule()
   if (m_defaultPullupControl)
     m_defaultPullupControl->release();
 
+  if (m_pin)
+    m_pin->setMonitor(0);
 }
 
 void PinModule::setPin(IOPIN *new_pin)
