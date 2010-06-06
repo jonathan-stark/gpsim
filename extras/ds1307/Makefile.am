@@ -16,7 +16,7 @@ libgpsim_ds1307_la_LDFLAGS =  @X_LDFLAGS@
 
 
 
-EXTRA_DIST = ds1307.h ChangeLog
+EXTRA_DIST = ds1307.h ChangeLog makefile.mingw
 
 
 SUBDIRS = examples

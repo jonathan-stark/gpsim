@@ -52,4 +52,4 @@ AM_YFLAGS = -dvt
 libgpsimcli_la_LIBADD = @X_LDFLAGS@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../src/libgpsim.la
 
 
-EXTRA_DIST = scan.h parse.h
+EXTRA_DIST = scan.h parse.h  makefile.mingw

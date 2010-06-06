@@ -12,3 +12,5 @@ gpsim_SOURCES = main.cc
 gpsim_LDADD = ../src/libgpsim.la ../cli/libgpsimcli.la ../gui/libgpsimgui.la \
   ../eXdbm/libgpsim_eXdbm.la @GTK@ @GDK@ @GLIB@ -lstdc++ -lpopt \
   @X_LDFLAGS@ @Y_LDFLAGS@ @LIBREADLINE@
+
+EXTRA_DIST = makefile.mingw
