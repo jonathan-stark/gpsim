@@ -576,18 +576,20 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
 
 void  gpsimInterface::set_update_rate  (guint64 _update_rate)
 {
-
-  guint64 fc = get_cycles().get() + _update_rate;
-
   update_rate = _update_rate;
 
-  if(fc) {
-    if(future_cycle)
-      get_cycles().reassign_break(future_cycle, fc, this);
-    else
-      get_cycles().set_break(fc, this);
+  if(update_rate)
+  {
+    guint64 fc = get_cycles().get() + _update_rate;
+
+    if(fc) {
+      if(future_cycle)
+        get_cycles().reassign_break(future_cycle, fc, this);
+      else
+        get_cycles().set_break(fc, this);
   
-    future_cycle = fc;
+      future_cycle = fc;
+    }
   }
 }
 
