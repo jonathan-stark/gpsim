@@ -359,7 +359,7 @@ EXPORTS
     ?get_dir_delim@@YAPBDPBD@Z
     ?get_errMsg@AnError@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?get_file_id@AliasedInstruction@@UAEHXZ
-    ?get_file_id@ProgramMemoryAccess@@QAEII@Z
+    ?get_file_id@ProgramMemoryAccess@@QAEHI@Z
     ?get_frequency@Processor@@UAENXZ
     ?get_hll_file_id@AliasedInstruction@@UAEHXZ
     ?get_hll_src_line@AliasedInstruction@@UAEHXZ
@@ -379,7 +379,7 @@ EXPORTS
     ?get_pin_state@Module@@UAEHI@Z
     ?get_program_memory_at_address@Processor@@UAEII@Z
     ?get_src_line@AliasedInstruction@@UAEHXZ
-    ?get_src_line@ProgramMemoryAccess@@QAEII@Z
+    ?get_src_line@ProgramMemoryAccess@@QAEHI@Z
     ?get_trace@@YAAAVTrace@@XZ
     ?get_update_rate@gpsimInterface@@QAE_KXZ
     ?get_value@AliasedInstruction@@UAEIXZ
