@@ -1,3 +1,6 @@
+2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
+	* Remove MCLR pin monitor in pic desctructor to avoid segfault in IOPIN desctructor.
+
 2010-06-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p18f/extended_instructions.asm: add nops after asserts
 	* INSTALL.gpsim : rename as INSTALL gets overwritten
