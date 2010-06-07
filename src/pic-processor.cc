@@ -662,7 +662,7 @@ public:
         update_gui();
     }
 
-    printf("dt=%3ld ms diff=%ld delta=%ld period=%ld\n", (system_time - oldtime)/1000, idiff, delta_cycles, period);
+    //printf("dt=%3ld ms diff=%ld delta=%ld period=%ld\n", (system_time - oldtime)/1000, idiff, delta_cycles, period);
     oldtime = system_time;
 
     guint64 fc = get_cycles().get() + delta_cycles;
