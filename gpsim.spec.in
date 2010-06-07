@@ -5,7 +5,8 @@ Summary:	A simulator for Microchip (TM) PIC (TM) microcontrollers
 Summary(fr):	Un simulateur pour les microcontrôleurs PIC (TM) Microchip (TM)
 
 Group:		Development/Debuggers
-License:	GPLv2+
+# Source code is GPLv2+ except src/, modules/ and eXdbm/ which are LGPLv2+
+License:	GPLv2+ and LGPLv2+
 URL:		http://www.dattalo.com/gnupic/gpsim.html
 Source:		http://dl.sf.net/gpsim/gpsim-%{version}.tar.gz
 BuildRoot: 	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -72,7 +73,7 @@ autoconf
 
 %files
 %defattr(-,root,root,-)
-%doc ANNOUNCE AUTHORS COPYING ChangeLog HISTORY NEWS
+%doc ANNOUNCE AUTHORS COPYING COPYING.LESSER ChangeLog HISTORY NEWS
 %doc README README.EXAMPLES README.MODULES TODO
 %doc doc/gpsim.lyx doc/gpsim.pdf doc/gpsim.ps
 %doc examples/
@@ -82,13 +83,16 @@ autoconf
 
 %files devel
 %defattr(-,root,root,-)
-%doc COPYING
-%{_libdir}/*.a
+%doc COPYING COPYING.LESSER
 %{_libdir}/*.so
 %exclude %{_libdir}/*.la
+%exclude %{_libdir}/*.a
 %{_includedir}/*
 
 %changelog
+* Sun Jun 06 2010 Roy Rankin <rrankin@ihug.com.au> 0.25.0-1
+  - Add LGPLv2+ license, do not include *.a files
+
 * Sun Mar 01 2009 Roy Rankin <rrankin@ihug.com.au> 0.23.0-1
   - Convert doc files to UTF8 character set, version 0.23.0
 

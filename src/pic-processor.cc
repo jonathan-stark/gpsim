@@ -588,31 +588,36 @@ public:
 
   void callback()
   {
-    gint64 system_time;
-    double diff;
+    guint64 system_time;	// wall clock time since datum in micro seconds
+    guint64 simulation_time;	// simulation time since datum in micro seconds
+    guint64 idiff;
     struct timeval tv;
+    static guint64 oldtime = 0;
 
     // We just hit the break point. A few moments ago we
     // grabbed a snap shot of the system time and the simulated
     // pic's time. Now we're going to compare the two deltas and
-    // see how well they've tracked. If the host is running
-    // way faster than the PIC, we'll put the host to sleep
-    // briefly.
+    // see how well they've tracked. 
+    //
+    // If the host is running faster than the PIC, we'll put the 
+    // host to sleep briefly.
+    //
+    // If the host is running slower than the PIC, lengthen the
+    // time between GUI updates.
 
 
     gettimeofday(&tv,0);
 
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
-    diff = system_time - ((get_cycles().get()-cycle_start)*4.0e6*cpu->get_OSCperiod());
+    simulation_time = ((get_cycles().get()-cycle_start)*4.0e6*cpu->get_OSCperiod());
 
 
-    guint64  idiff;
-    if( diff < 0 )
+    if( simulation_time > system_time)
     {
         // we are simulating too fast
 
-        idiff = (guint64)(-diff/4);
+	idiff = (simulation_time - system_time)/4;
 
         if(idiff>1000)
             period -= idiff/500;
@@ -625,7 +630,7 @@ public:
     }
     else
     {
-      idiff = (guint64)(diff/4);
+	idiff = (system_time - simulation_time) / 4;
 
         if(idiff>1000)
             period+=idiff/500;
@@ -657,6 +662,8 @@ public:
         update_gui();
     }
 
+    printf("dt=%3ld ms diff=%ld delta=%ld period=%ld\n", (system_time - oldtime)/1000, idiff, delta_cycles, period);
+    oldtime = system_time;
 
     guint64 fc = get_cycles().get() + delta_cycles;
 
