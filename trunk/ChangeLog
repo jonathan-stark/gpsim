@@ -1,3 +1,8 @@
+2010-06-07 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc : patches for realtime with GUI mode
+	* doc/gpsim.html doc/gpsim.lyx gpsim.spec.in : Documentation of new
+	  license
+
 2010-06-06 Borut Razem <borut.razem@siol.net>
 	* modules/modules.vcproj, plat/win32/libgpsim.def,
 	  modules/gpsim_modules.cc: MSVC sync
