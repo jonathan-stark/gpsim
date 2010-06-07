@@ -1,4 +1,7 @@
 2010-06-07 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_src_asm.cc : fix bug 3012488 finish key SIGSEGV for hex file
+
+2010-06-07 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.cc : patches for realtime with GUI mode
 	* doc/gpsim.html doc/gpsim.lyx gpsim.spec.in : Documentation of new
 	  license
