@@ -1793,6 +1793,9 @@ void SourceWindow::UpdateLine(int address)
     return;
 
   gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
+  if (currPage < 0 || currPage > SBAW_NRFILES)
+      return;
+
   NSourcePage *pPage = pages[currPage];
 
   if (!pPage)
