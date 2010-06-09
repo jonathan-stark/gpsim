@@ -530,7 +530,13 @@ public:
   guint64 cycle_start;
   guint64 future_cycle;
   int warntimer;
-  guint64 period;
+  guint64 period;            // callback period in us
+
+#define REALTIME_DEBUG
+  guint64 diffmax;
+  guint64 diffsum;
+  int diffsumct;
+  struct timeval stat_start;
 
   RealTimeBreakPoint()
   {
@@ -538,12 +544,19 @@ public:
     warntimer = 1;
     period = 1;
     future_cycle = 0;
+    diffsum=0;
+    diffsumct=0;
+    diffmax=0;
   }
 
   void start(Processor *active_cpu)
   {
     if(!active_cpu)
       return;
+
+    diffsum=0;
+    diffsumct=0;
+    diffmax=0;
 
     // Grab the system time and record the simulated pic's time.
     // We'll then set a break point a short time in the future
@@ -552,12 +565,13 @@ public:
     cpu = active_cpu;
 
     gettimeofday(&tv_start,0);
+    stat_start=tv_start;
 
     cycle_start=get_cycles().get();
 
     guint64 fc = cycle_start+100;
 
-    cout << "real time start : " << future_cycle << '\n';
+    //cout << "real time start : " << cycle_start << '\n';
 
     if(future_cycle)
       get_cycles().reassign_break(future_cycle, fc, this);
@@ -571,9 +585,13 @@ public:
   void stop()
   {
 
-    // Clear any pending break point.
-    cout << "real time stop : " << future_cycle << '\n';
+    //cout << "real time stop : " << future_cycle << '\n';
 
+#ifdef REALTIME_DEBUG
+    dump_stats();
+#endif
+
+    // Clear any pending break point.
     if(future_cycle) {
       cout << " real time clearing\n";
       get_cycles().clear_break(this);
@@ -586,13 +604,31 @@ public:
 
   }
 
+#ifdef REALTIME_DEBUG
+  void dump_stats(void)
+  {
+    struct timeval tv;
+    gettimeofday(&tv,0);
+    double simulation_time = (tv.tv_sec-stat_start.tv_sec)+(tv.tv_usec-stat_start.tv_usec)/1000000.0; // in seconds
+    cout << dec << "Average realtime error: " << diffsum/diffsumct << " microseconds. Max: "<<diffmax<<endl;
+    if(realtime_mode_with_gui)
+      cout << "Number of realtime callbacks (gui refreshes) per second:";
+    else
+      cout << "Number of realtime callbacks per second:";
+    cout << diffsumct/(double)simulation_time << endl;
+    stat_start=tv;
+    diffsum=0;
+    diffsumct=0;
+    diffmax=0;
+  }
+#endif
+
   void callback()
   {
     guint64 system_time;	// wall clock time since datum in micro seconds
     guint64 simulation_time;	// simulation time since datum in micro seconds
-    guint64 idiff;
+    guint64 diff_us;
     struct timeval tv;
-    static guint64 oldtime = 0;
 
     // We just hit the break point. A few moments ago we
     // grabbed a snap shot of the system time and the simulated
@@ -608,7 +644,7 @@ public:
 
     gettimeofday(&tv,0);
 
-    system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
+    system_time = (tv.tv_sec-tv_start.tv_sec)*1000000ULL+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
     simulation_time = ((get_cycles().get()-cycle_start)*4.0e6*cpu->get_OSCperiod());
 
@@ -617,27 +653,24 @@ public:
     {
         // we are simulating too fast
 
-	idiff = (simulation_time - system_time)/4;
+	diff_us = simulation_time - system_time;
 
-        if(idiff>1000)
-            period -= idiff/500;
-        if(period<1)
-            period=1;
-
-        // Then sleep for a while
-        if(idiff)
-          usleep((unsigned int)idiff);
+	if(period > diff_us)
+          period -= diff_us;
+        else
+          period=1;
+        usleep((unsigned int)diff_us);
     }
     else
     {
-	idiff = (system_time - simulation_time) / 4;
+	diff_us = system_time - simulation_time;
 
-        if(idiff>1000)
-            period+=idiff/500;
-        if(period>10000)
-            period=10000;
+	period+=diff_us;
 
-        if(idiff>1000000)
+        if(period>1000000)
+            period=1000000; // limit to a one second callback period
+
+        if(diff_us>1000000)
         {
             // we are simulating too slow
             if(warntimer<10)
@@ -652,7 +685,7 @@ public:
             warntimer=0;
     }
 
-    guint64 delta_cycles= (guint64)(100*period*cpu->get_frequency()/4000000);
+    guint64 delta_cycles= (guint64)(period*cpu->get_frequency()/4000000);
     if(delta_cycles<1)
       delta_cycles=1;
 
@@ -662,8 +695,22 @@ public:
         update_gui();
     }
 
-    //printf("dt=%3ld ms diff=%ld delta=%ld period=%ld\n", (system_time - oldtime)/1000, idiff, delta_cycles, period);
+#ifdef REALTIME_DEBUG
+    if(tv.tv_sec<stat_start.tv_sec+10) {
+      diffsum+=diff_us;
+      diffsumct++;
+    }
+    else
+    {
+      dump_stats();
+    }
+    if(diff_us>diffmax)
+      diffmax=diff_us;
+
+    static guint64 oldtime = 0;
+    //cout<<dec<<"dt="<<(system_time-oldtime)/1000 << "\tdiff_us="<<diff_us<<"\tdelta_cycles="<<delta_cycles<<"\tperiod="<<period<<endl;
     oldtime = system_time;
+#endif
 
     guint64 fc = get_cycles().get() + delta_cycles;
 
