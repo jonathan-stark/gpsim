@@ -1,3 +1,6 @@
+2010-06-09 Ralf Forsberg <rfg@users.sourceforge.net>
+	* src/pic-processor.cc : Fix integer overflow in realtime mode.
+
 2010-06-07 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src_asm.cc : fix bug 3012488 finish key SIGSEGV for hex file
 
@@ -11,14 +14,14 @@
 	  modules/gpsim_modules.cc: MSVC sync
 
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
-	* Don't add files from cod if the actual file is missing.
+	- Don't add files from cod if the actual file is missing.
 
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
-	* Switching to realtime mode could hang up.
+	- Switching to realtime mode could hang up.
 
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
-	* Fixed step_over in HLL_MODE.
-	* Update gui after finish command.
+	- Fixed step_over in HLL_MODE.
+	- Update gui after finish command.
 
 2010-06-06 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/Makefile.am src/dspic/Makefile.am src/Makefile.am doc/Makefile.am
@@ -27,7 +30,7 @@
 	  files in distribution tarball
 
 2010-06-06 Ralf Forsberg <rfg@users.sourceforge.net>
-	* Remove MCLR pin monitor in pic destructor to avoid segfault in IOPIN desctructor.
+	- Remove MCLR pin monitor in pic destructor to avoid segfault in IOPIN desctructor.
 
 2010-06-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p18f/extended_instructions.asm: add nops after asserts
@@ -47,13 +50,13 @@
 	* src/ modules/ COPPYING.LESSER README : to LGPLv2+
 
 2010-06-04 Ralf Forsberg <rfg@users.sourceforge.net>
-	* Added back HLL source browser support for sdcc and jal.
-	* Fixed bug in FileContext where the vector pointers could become
+	- Added back HLL source browser support for sdcc and jal.
+	- Fixed bug in FileContext where the vector pointers could become
 	  dangling after stl magic because of missing copy constrctor.
 	  Made them objects instead of pointers.
 
 2010-05-?? Ralf Forsberg <rfg@users.sourceforge.net>
-	* Optimized video module using pixmap shadow buffer.
+	- Optimized video module using pixmap shadow buffer.
 
 2010-06-01 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.h src/14bit-tmrs.cc src/comparator.h src/comparator.cc
