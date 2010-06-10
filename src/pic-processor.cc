@@ -610,7 +610,7 @@ public:
     struct timeval tv;
     gettimeofday(&tv,0);
     double simulation_time = (tv.tv_sec-stat_start.tv_sec)+(tv.tv_usec-stat_start.tv_usec)/1000000.0; // in seconds
-    if(diffmax>0)
+    if(diffsumct>0)
     {
       cout << dec << "Average realtime error: " << diffsum/diffsumct << " microseconds. Max: "<<diffmax<<endl;
       if(realtime_mode_with_gui)
