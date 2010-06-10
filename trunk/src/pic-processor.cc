@@ -532,7 +532,7 @@ public:
   int warntimer;
   guint64 period;            // callback period in us
 
-#define REALTIME_DEBUG
+//#define REALTIME_DEBUG
   guint64 diffmax;
   guint64 diffsum;
   int diffsumct;
@@ -610,7 +610,7 @@ public:
     struct timeval tv;
     gettimeofday(&tv,0);
     double simulation_time = (tv.tv_sec-stat_start.tv_sec)+(tv.tv_usec-stat_start.tv_usec)/1000000.0; // in seconds
-    if(diffsumct>0)
+    if(diffsumct>0 && simulation_time>0)
     {
       cout << dec << "Average realtime error: " << diffsum/diffsumct << " microseconds. Max: "<<diffmax<<endl;
       if(realtime_mode_with_gui)
