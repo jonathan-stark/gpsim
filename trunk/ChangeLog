@@ -1,3 +1,7 @@
+2010-05-01 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/14bit-tmrs.cc
+          Fix uninitialised ssp_module pointer (potential segfault)
+
 2010-06-09 Ralf Forsberg <rfg@users.sourceforge.net>
 	* src/pic-processor.cc : Fix integer overflow in realtime mode.
 

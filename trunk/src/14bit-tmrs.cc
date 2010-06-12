@@ -1751,7 +1751,7 @@ TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
     prescale(1),
     prescale_counter(0),
     last_cycle(0),
-    pr2(0), pir_set(0), t2con(0), ccp1con(0), ccp2con(0)
+    pr2(0), pir_set(0), t2con(0), ccp1con(0), ccp2con(0), ssp_module(0)
 {
   value.put(0);
   future_cycle = 0;
