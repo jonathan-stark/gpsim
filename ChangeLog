@@ -1,4 +1,8 @@
-2010-05-01 Rob Pearce<rob@bdt-home.demon.co.uk>
+2010-06-20 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc src/clock_phase.cc
+	- fix cycle counter bug 3018510
+
+2010-06-12 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/14bit-tmrs.cc
           Fix uninitialised ssp_module pointer (potential segfault)
 

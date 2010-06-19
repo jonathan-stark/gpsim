@@ -767,12 +767,8 @@ void pic_processor::run (bool refresh)
   simulation_start_cycle = get_cycles().get();
   bp.clear_global();
 
-  // Take one step to get past any break point.
   mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
 
-  //  do {
-
-    mCurrentPhase = mCurrentPhase->advance();
 
     do
       mCurrentPhase = mCurrentPhase->advance();
