@@ -1034,27 +1034,6 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 
   return closest_address;
 
-#if 0
-  int distance = cpu->program_memory_size();
-
-  for(int i = cpu->program_memory_size()-1; i>=0; i--) {
-
-    // Find the closet instruction to the src file line number
-    if( (cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION) &&
-        (cpu->program_memory[i]->get_file_id()==file_id)                    &&
-        (abs(cpu->program_memory[i]->get_src_line() - src_line) < distance))
-
-      {
-        distance = abs(cpu->program_memory[i]->get_src_line() - src_line);
-        closest_address = i;
-
-        if(distance == 0)
-          return cpu->map_pm_index2address(closest_address);
-      }
-  }
-
-  return cpu->map_pm_index2address(closest_address);
-#endif
 
 }
 //-------------------------------------------------------------------
@@ -1359,90 +1338,6 @@ RegisterValue Processor::getReadTT(unsigned int j)
   return RegisterValue(tt, tt + (1<<24) );
 }
 
-//-------------------------------------------------------------------
-//
-// run  -- Begin simulating and don't stop until there is a break.
-// FIXME - shouldn't this be a pure virtual function?
-#if 0
-void Processor::run (bool refresh)
-{
-
-  cout << __FUNCTION__ << endl;
-}
-#endif
-//-------------------------------------------------------------------
-//
-// step - Simulate one (or more) instructions. If a breakpoint is set
-// at the current PC-> 'step' will go right through it. (That's supposed
-// to be a feature.)
-//
-#if 0
-extern phaseExecute1Cycle *mExecute1Cycle;
-extern phaseExecute2ndHalf *mExecute2ndHalf;
-void Processor::step (unsigned int steps, bool refresh)
-{
-  if(!steps)
-    return;
-
-  if(simulation_mode != eSM_STOPPED) {
-    if(verbose)
-      cout << "Ignoring step request because simulation is not stopped\n";
-    return;
-  }
-
-  simulation_mode = eSM_SINGLE_STEPPING;
-#ifdef CLOCK_EXPERIMENTS
-
-  mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
-
-  do
-    mCurrentPhase = mCurrentPhase->advance();
-  while(!bp.have_halt() && --steps>0);
-
-  // complete the step if this is a multi-cycle instruction.
-
-  if (mCurrentPhase == mExecute2ndHalf)
-    while (mCurrentPhase != mExecute1Cycle)
-      mCurrentPhase = mCurrentPhase->advance();
-
-  get_trace().cycle_counter(get_cycles().get());
-  if(refresh)
-    trace_dump(0,1);
-#else
-  do {
-
-
-    if(bp.have_sleep() || bp.have_pm_write()) {
-
-      // If we are sleeping or writing to the program memory (18cxxx only)
-      // then step one cycle - but don't execute any code
-
-      get_cycles().increment();
-      if(refresh)
-        trace_dump(0,1);
-
-    }
-    else if(bp.have_interrupt())
-      interrupt();
-    else {
-
-      step_one(refresh);
-      get_trace().cycle_counter(get_cycles().get());
-      if(refresh)
-        trace_dump(0,1);
-
-    }
-
-  }  while(!bp.have_halt() && --steps>0);
-#endif // CLOCK_EXPERIMENTS
-
-  bp.clear_halt();
-  simulation_mode = eSM_STOPPED;
-
-  if(refresh)
-    get_interface().simulation_has_stopped();
-}
-#endif
 
 //-------------------------------------------------------------------
 //

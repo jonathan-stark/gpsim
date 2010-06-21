@@ -20,7 +20,6 @@ License along with this library; if not, see
 
 
 #include "clock_phase.h"
-#if defined(CLOCK_EXPERIMENTS)
 
 #include "processor.h"
 #include "gpsim_time.h"
@@ -92,4 +91,3 @@ ClockPhase *phaseIdle::advance()
   get_cycles().increment();
   return m_pNextPhase;
 }
-#endif // defined(CLOCK_EXPERIMENTS)

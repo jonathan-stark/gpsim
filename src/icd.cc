@@ -452,9 +452,6 @@ void put_dumb_pc_register(Program_Counter **frp)
 {
     Program_Counter *fr = *frp;
     icd_PC *ir = new icd_PC(fr->get_cpu());
-#ifndef CLOCK_EXPERIMENTS
-    ir->memory_size_mask = fr->memory_size_mask;
-#endif
     *frp = ir;
     ir->replaced = fr;
 }

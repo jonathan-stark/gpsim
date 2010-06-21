@@ -592,11 +592,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // the instruction (i.e. via the ::increment() method). The second cycle occurs
   // here:
 
-#ifdef CLOCK_EXPERIMENTS
   mCurrentPhase = mExecute1Cycle;
-#else
-  get_cycles().increment();
-#endif
 }
 
 //--------------------------------------------------

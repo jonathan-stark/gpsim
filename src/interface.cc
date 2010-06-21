@@ -356,7 +356,6 @@ void start_run_thread(void)
 void gpsimInterface::start_simulation (double duration)
 {
 
-#if defined(CLOCK_EXPERIMENTS)
 
   Processor *cpu = get_active_cpu();
   if (cpu) {
@@ -368,44 +367,6 @@ void gpsimInterface::start_simulation (double duration)
     simulation_has_stopped();
   }
 
-#else
-  Processor *cpu = get_active_cpu();
-
-  mbSimulating = true;
-
-  if(cpu) {
-#if GLIB_MAJOR_VERSION >= 2
-
-    if(gUsingThreads()) {
-      static bool thread_initialized=false;
-
-      if(!thread_initialized) {
-	start_run_thread();
-	g_usleep(10000);
-	thread_initialized = true;
-      }
-
-      g_mutex_lock (muRunMutex);
-
-      tcpu = cpu;
-      printf("signalling run thread\n");
-      g_cond_signal  (cvRunCondition);
-      g_mutex_unlock (muRunMutex);
-      printf("leaving start_simulation\n");
-    } else
-#endif
-      {
-
-	if(verbosity && verbosity->getVal()) {
-	  cout << "running...\n";
-	  cpu->run(true);
-	} else
-	  cpu->run(false);
-      }
-  }
-
-  mbSimulating = false;
-#endif
 }
 
 void gpsimInterface::step_simulation (int nSteps)

@@ -566,12 +566,7 @@ void _16bit_processor::interrupt ()
 
   intcon.clear_gies();  // The appropriate gie bits get cleared (not just gieh)
 
-#if defined(CLOCK_EXPERIMENTS)
   pc->interrupt(intcon.get_interrupt_vector());
-#else
-  pc->interrupt(intcon.get_interrupt_vector());
-  //pc->jump(intcon.get_interrupt_vector());
-#endif
 
 }
 

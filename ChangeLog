@@ -1,3 +1,6 @@
+2010-06-22 Roy Rankin <rrankin@ihug.com.au>
+	- remove dead code from CLOCK_EXPERIMENTS
+
 2010-06-20 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.cc src/clock_phase.cc
 	- fix cycle counter bug 3018510
