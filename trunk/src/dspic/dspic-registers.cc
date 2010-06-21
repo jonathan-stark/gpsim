@@ -112,11 +112,7 @@ namespace dspic_registers {
 
     dspic::gTrace->raw(trace_other | (value<<1));
     value = new_address;
-#ifndef CLOCK_EXPERIMENTS
-    value &=  memory_size_mask;
-#else
     value = (value >= memory_size) ? value - memory_size : value;
-#endif
 
     m_pcl->value.put(value & 0xffff);
 
@@ -134,11 +130,7 @@ namespace dspic_registers {
     // for 12 bit cores) to generate the destination address: 
 
     value = (new_address >>1);
-#ifndef CLOCK_EXPERIMENTS
-    value &=  memory_size_mask;
-#else
     value = (value >= memory_size) ? value - memory_size : value;
-#endif
 
     // see Update pcl comment in Program_Counter::increment()
     m_pcl->value.put((value<<1) & 0xffff);
@@ -158,11 +150,7 @@ namespace dspic_registers {
     dspic::gTrace->raw(trace_other | (value<<1));
 
     value = new_value;
-#ifndef CLOCK_EXPERIMENTS
-    value = new_value & memory_size_mask;
-#else
     value = (value >= memory_size) ? value - memory_size : value;
-#endif
     m_pcl->value.put(value & 0xff);
     //m_cpu->pclath->value.put((value >> 8) & 0xff);
     m_pcl->update();
@@ -189,11 +177,7 @@ namespace dspic_registers {
     // Trace the value of the program counter before it gets changed.
     dspic::gTrace->raw(trace_increment | value);
     value = (value + 1);
-#ifndef CLOCK_EXPERIMENTS
-    value = new_value & memory_size_mask;
-#else
     value = (value >= memory_size) ? value - memory_size : value;
-#endif
 
     // Update pcl. Note that we don't want to pcl.put() because that 
     // will trigger a break point if there's one set on pcl. (A read/write

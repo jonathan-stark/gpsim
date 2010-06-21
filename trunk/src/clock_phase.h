@@ -21,10 +21,8 @@ License along with this library; if not, see
 #if !defined(__CLOCK_PHASE_H__)
 #define __CLOCK_PHASE_H__
 
-#define CLOCK_EXPERIMENTS
 
 
-#if defined(CLOCK_EXPERIMENTS)
 /*
   Clock Phase
 
@@ -121,6 +119,5 @@ extern phaseExecute2ndHalf *mExecute2ndHalf;
 extern phaseExecuteInterrupt *mExecuteInterrupt;
 extern phaseIdle *mIdle;
 
-#endif // defined(CLOCK_EXPERIMENTS)
 
 #endif  //if !defined(__CLOCK_PHASE_H__)

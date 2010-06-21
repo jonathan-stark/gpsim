@@ -68,7 +68,6 @@ guint64 simulation_start_cycle;
 
 
 #include "clock_phase.h"
-#ifdef CLOCK_EXPERIMENTS
 
 class phaseCaptureInterrupt : public ProcessorPhase
 {
@@ -136,7 +135,6 @@ void phaseCaptureInterrupt::firstHalf()
   mCurrentPhase = this;
 }
 
-#endif
 
 //================================================================================
 // Global Declarations
@@ -409,11 +407,7 @@ void pic_processor::BP_set_interrupt()
 {
 
   m_pInterruptTT->record();
-#ifdef CLOCK_EXPERIMENTS
   mCaptureInterrupt->firstHalf();
-#else
-  bp.set_interrupt();
-#endif
 }
 
 //-------------------------------------------------------------------
@@ -423,7 +417,6 @@ void pic_processor::BP_set_interrupt()
 
 void pic_processor::sleep ()
 {
-#if !defined(CLOCK_EXPERIMENTS)
   simulation_mode = eSM_SLEEPING;
 
   if(!bp.have_sleep())
@@ -438,7 +431,6 @@ void pic_processor::sleep ()
     pc->increment();
 
   simulation_mode = eSM_RUNNING;
-#endif
 }
 //-------------------------------------------------------------------
 //
@@ -451,15 +443,11 @@ void pic_processor::enter_sleep()
   status->put_PD(0);
 
   wdt.update();
-#ifdef CLOCK_EXPERIMENTS
   pc->increment();
   mCurrentPhase->setNextPhase(mIdle);
   mCurrentPhase = mIdle;
   mCurrentPhase->setNextPhase(mIdle);
   m_ActivityState = ePASleeping;
-#else
-  bp.set_sleep();
-#endif
 
 }
 
@@ -470,12 +458,8 @@ void pic_processor::enter_sleep()
 void pic_processor::exit_sleep()
 {
 
-#if defined(CLOCK_EXPERIMENTS)
   m_ActivityState = ePAActive;
   mCurrentPhase->setNextPhase(mExecute1Cycle);
-#else
-  bp.clear_sleep();
-#endif
 }
 
 //-------------------------------------------------------------------
@@ -485,11 +469,7 @@ void pic_processor::exit_sleep()
 bool pic_processor::is_sleeping()
 {
 
-#if defined(CLOCK_EXPERIMENTS)
   return m_ActivityState == ePASleeping;
-#else
-  return false; // don't know what to do and is not being used - RRR
-#endif
 }
 
 //-------------------------------------------------------------------
@@ -746,7 +726,6 @@ void pic_processor::save_state()
 //
 // run  -- Begin simulating and don't stop until there is a break.
 //
-#if defined(CLOCK_EXPERIMENTS)
 
 void pic_processor::run (bool refresh)
 {
@@ -803,90 +782,6 @@ void pic_processor::run (bool refresh)
 
 }
 
-#else
-
-void pic_processor::run (bool refresh)
-{
-  if(get_use_icd())
-  {
-    cout  << "WARNING: gui_refresh is not being called "
-          <<  __FILE__<<':'<<__LINE__<<endl;
-
-      simulation_mode = eSM_RUNNING;
-      icd_run();
-      while(!icd_stopped())
-      {
-        //#ifdef HAVE_GUI
-        //        if(use_gui)
-        //            gui_refresh();
-        //#endif
-      }
-      simulation_mode=eSM_STOPPED;
-      disassemble((signed int)pc->get_value(), (signed int)pc->get_value());
-      gi.simulation_has_stopped();
-      return;
-  }
-
-
-  if(simulation_mode != eSM_STOPPED) {
-    if(verbose)
-      cout << "Ignoring run request because simulation is not stopped\n";
-    return;
-  }
-
-  simulation_mode = eSM_RUNNING;
-
-  if(realtime_mode)
-    realtime_cbp.start(active_cpu);
-
-  // If the first instruction we're simulating is a break point, then ignore it.
-
-  simulation_start_cycle = get_cycles().get();
-
-  do {
-
-    // Take one step to get past any break point.
-    step(1,false);
-
-    do {
-      program_memory[pc->value]->execute();
-    } while(!bp.global_break);
-
-    if(bp.have_interrupt())
-      interrupt();
-
-    if(bp.have_sleep())
-      sleep();
-
-    if(bp.have_pm_write())
-      pm_write();
-
-    if(bp.have_socket_break()) {
-      cout << " socket break point \n";
-      Interface *i = gi.get_socket_interface();
-      if (i)
-        i->Update(0);
-      bp.clear_socket_break();
-    }
-
-  } while(!bp.global_break);
-
-
-  if(realtime_mode)
-    realtime_cbp.stop();
-
-  bp.clear_global();
-  trace.cycle_counter(get_cycles().get());
-
-  simulation_mode = eSM_STOPPED;
-
-  if(refresh) {
-    trace.dump_last_instruction();
-    gi.simulation_has_stopped();
-  }
-
-}
-#endif
 
 //-------------------------------------------------------------------
 //
@@ -924,7 +819,6 @@ void pic_processor::step (unsigned int steps, bool refresh)
 
   simulation_mode = eSM_SINGLE_STEPPING;
 
-#ifdef CLOCK_EXPERIMENTS
 
   mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
 
@@ -941,33 +835,6 @@ void pic_processor::step (unsigned int steps, bool refresh)
   get_trace().cycle_counter(get_cycles().get());
   if(refresh)
     trace_dump(0,1);
-#else
-  do {
-
-
-    if(bp.have_sleep() || bp.have_pm_write()) {
-
-      // If we are sleeping or writing to the program memory (18cxxx only)
-      // then step one cycle - but don't execute any code
-
-      get_cycles().increment();
-      if(refresh)
-        trace_dump(0,1);
-
-    }
-    else if(bp.have_interrupt())
-      interrupt();
-    else {
-
-      step_one(refresh);
-      get_trace().cycle_counter(get_cycles().get());
-      if(refresh)
-        trace_dump(0,1);
-
-    }
-
-  }  while(!bp.have_halt() && --steps>0);
-#endif // CLOCK_EXPERIMENTS
 
   bp.clear_halt();
   simulation_mode = eSM_STOPPED;
@@ -980,11 +847,7 @@ void pic_processor::step (unsigned int steps, bool refresh)
 //-------------------------------------------------------------------
 void pic_processor::step_cycle()
 {
-#ifdef CLOCK_EXPERIMENTS
   mCurrentPhase = mCurrentPhase->advance();
-#else
-  step(1,false);
-#endif
 }
 
 //
@@ -1105,35 +968,27 @@ void pic_processor::reset (RESET_TYPE r)
       if(config_modes) config_modes->print();
     }
     bHaltSimulation = false;
-#ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
     m_ActivityState = ePAActive;
-#endif
     break;
 
   case MCLR_RESET:
-#ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
     mCurrentPhase->setNextPhase(mIdle);
     m_ActivityState = ePAIdle;
-#endif
     break;
 
   case IO_RESET:
-#ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mExecute1Cycle;
     mCurrentPhase->setNextPhase(mExecute1Cycle);
     m_ActivityState = ePAActive;
-#endif
     break;
 
   case WDT_RESET:
   case EXIT_RESET:
-#ifdef CLOCK_EXPERIMENTS
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
     mCurrentPhase->setNextPhase(mExecute1Cycle);
     m_ActivityState = ePAActive;
-#endif
     break;
 
   default:
@@ -1161,14 +1016,12 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
     m_MCLR(0), m_MCLR_Save(0), m_MCLRMonitor(0)
 {
 
-#ifdef CLOCK_EXPERIMENTS
    mExecute1Cycle    = new phaseExecute1Cycle(this);
    mExecute2ndHalf   = new phaseExecute2ndHalf(this);
    mExecuteInterrupt = new phaseExecuteInterrupt(this);
    mCaptureInterrupt = new phaseCaptureInterrupt(this);
    mIdle             = new phaseIdle(this);
    mCurrentPhase   = mExecute1Cycle;
-#endif
 
   m_Capabilities = eSTACK | eWATCHDOGTIMER;
 
@@ -1203,13 +1056,11 @@ pic_processor::~pic_processor()
   delete m_PCHelper;
   delete stack;
 
-#ifdef CLOCK_EXPERIMENTS
   delete mExecute1Cycle;
   delete mExecute2ndHalf;
   delete mExecuteInterrupt;
   delete mCaptureInterrupt;
   delete mIdle;
-#endif
 
   delete config_modes;
   delete m_configMemory;

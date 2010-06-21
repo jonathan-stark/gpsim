@@ -170,8 +170,6 @@ ${RT} p12f675	sim_p12f675
 
 ${RT} p12f675	sim_p12f683
 
-echo "The following tests only pass if CLOCK_EXPERIMENTS"
-echo "(in src/clock_phase.cc) is defined."
 ${RT} p12c509 sim_p12c509_reset
 
 ${RT} p16f84 sim_reset

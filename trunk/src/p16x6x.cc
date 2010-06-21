@@ -73,7 +73,8 @@ P16C61::P16C61(const char *_name, const char *desc)
 }
 P16C61::~P16C61()
 {
-  cout << __FUNCTION__ << endl;
+  if (verbose)
+    cout << __FUNCTION__ << endl;
 }
 
 //------------------------------------------------------------------------
@@ -522,7 +523,8 @@ P16C63::P16C63(const char *_name, const char *desc)
 
 P16C63::~P16C63()
 {
-  cout << __FUNCTION__ << endl;
+  if (verbose)
+    cout << __FUNCTION__ << endl;
 
   delete_file_registers(0xc0, 0xff);
   delete_file_registers(0x19, 0x1a);  // usart tx and rx registers.
@@ -654,7 +656,8 @@ P16C64::P16C64(const char *_name, const char *desc)
 }
 P16C64::~P16C64()
 {
-  cout << __FUNCTION__ << endl;
+  if (verbose)
+    cout << __FUNCTION__ << endl;
 
   //delete_sfr_register(m_portc,0x07);
   //delete_sfr_register(m_trisc,0x87);
@@ -739,7 +742,8 @@ P16C65::P16C65(const char *_name, const char *desc)
 }
 P16C65::~P16C65()
 {
-  cout << __FUNCTION__ << endl;
+  if (verbose)
+    cout << __FUNCTION__ << endl;
 
   delete_file_registers(0xc0, 0xff);
 }

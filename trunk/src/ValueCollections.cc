@@ -110,7 +110,6 @@ string IIndexedCollection::toString() {
   return toString(iColumnWidth, asIndexes, asValue);
 }
 
-#if  1
 string IIndexedCollection::toString(ExprList_t* pIndexerExprs) {
   try {
     ostringstream sOut;
@@ -185,7 +184,6 @@ string IIndexedCollection::toString(ExprList_t* pIndexerExprs) {
     return e.toString();
   }
 }
-#endif
 
 void IIndexedCollection::PushValue(int iFirstIndex, int iCurrentIndex,
                                    Value *pValue,
