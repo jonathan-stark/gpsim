@@ -25,7 +25,6 @@ License along with this library; if not, see
 //  This file supports:
 //    P16C61
 
-#define PORT_EXPERIMENT true
 
 
 #include <stdio.h>
