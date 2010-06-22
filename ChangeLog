@@ -1,3 +1,6 @@
+2010-06-23 Roy Rankin <rrankin@ihug.com.au>
+	- missed CLOCK_EXPERIMENTS changes
+
 2010-06-22 Roy Rankin <rrankin@ihug.com.au>
 	- remove dead code from CLOCK_EXPERIMENTS
 

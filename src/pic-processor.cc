@@ -417,20 +417,6 @@ void pic_processor::BP_set_interrupt()
 
 void pic_processor::sleep ()
 {
-  simulation_mode = eSM_SLEEPING;
-
-  if(!bp.have_sleep())
-    return;
-
-  do
-    {
-      get_cycles().increment();   // burn cycles until something wakes us
-    } while(bp.have_sleep() && !bp.have_halt());
-
-  if(!bp.have_sleep())
-    pc->increment();
-
-  simulation_mode = eSM_RUNNING;
 }
 //-------------------------------------------------------------------
 //
