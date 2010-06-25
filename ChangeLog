@@ -1,3 +1,8 @@
+2010-06-25 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
+          Fix to TTL377 so that all eight latches update "simultaneously"
+          Added TTL595 serial-in-parallel-out shift register
+
 2010-06-23 Roy Rankin <rrankin@ihug.com.au>
 	- missed CLOCK_EXPERIMENTS changes
 
