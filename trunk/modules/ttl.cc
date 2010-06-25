@@ -53,10 +53,13 @@ TTLbase::~TTLbase()
 }
 
 //------------------------------------------------------------------------
-// TTL377 - Octal Latch
+// Some edge-sensitive pins
 //
 // 
 
+//------------------------------------------------------------
+// Clock
+//
 class Clock : public IOPIN
 {
 public:
@@ -67,6 +70,44 @@ public:
 private:
   TTLbase *m_pParent;
 };
+
+Clock::Clock(const char *n, TTLbase *pParent)
+  : IOPIN(n), m_pParent(pParent)
+{
+}
+
+void Clock::setDrivenState(bool bNewState)
+{
+  IOPIN::setDrivenState(bNewState);
+  if (m_pParent)
+    m_pParent->setClock(bNewState);
+}
+
+//------------------------------------------------------------
+// Strobe
+//
+class Strobe : public IOPIN
+{
+public:
+  Strobe(const char *n, TTLbase *pParent);
+
+  virtual void setDrivenState(bool);
+
+private:
+  TTLbase *m_pParent;
+};
+
+Strobe::Strobe(const char *n, TTLbase *pParent)
+  : IOPIN(n), m_pParent(pParent)
+{
+}
+
+void Strobe::setDrivenState(bool bNewState)
+{
+  IOPIN::setDrivenState(bNewState);
+  if (m_pParent)
+    m_pParent->setStrobe(bNewState);
+}
 
 //------------------------------------------------------------
 // Enable
@@ -82,24 +123,11 @@ private:
   TTLbase *m_pParent;
 };
 
-
-//------------------------------------------------------------------------
-Clock::Clock(const char *n, TTLbase *pParent)
-  : IOPIN(n), m_pParent(pParent)
-{
-}
-void Clock::setDrivenState(bool bNewState)
-{
-  IOPIN::setDrivenState(bNewState);
-  if (m_pParent)
-    m_pParent->setClock(bNewState);
-}
-
-//------------------------------------------------------------------------
 Enable::Enable(const char *n, TTLbase *pParent)
   : IOPIN(n), m_pParent(pParent)
 {
 }
+
 void Enable::setDrivenState(bool bNewState)
 {
   IOPIN::setDrivenState(bNewState);
@@ -107,7 +135,37 @@ void Enable::setDrivenState(bool bNewState)
     m_pParent->setEnable(bNewState);
 }
 
+//------------------------------------------------------------
+// Reset
+//
+class Reset : public IOPIN
+{
+public:
+  Reset(const char *n, TTLbase *pParent);
+
+  virtual void setDrivenState(bool);
+
+private:
+  TTLbase *m_pParent;
+};
+
+Reset::Reset(const char *n, TTLbase *pParent)
+  : IOPIN(n), m_pParent(pParent)
+{
+}
+
+void Reset::setDrivenState(bool bNewState)
+{
+  IOPIN::setDrivenState(bNewState);
+  if (m_pParent)
+    m_pParent->setReset(bNewState);
+}
+
+
 //------------------------------------------------------------------------
+// TTL377 - Octal Latch
+//
+// 
 
 Module *TTL377::construct(const char *_new_name)
 {
@@ -166,9 +224,14 @@ void TTL377::setEnable(bool bNewEnable)
 
 void TTL377::update_state()
 {
-  // Copy the inputs to the outputs
-  for (int i=0; i<8; i++) 
-    m_Q[i]->putState(m_D[i]->getDrivenState());
+  int i;
+  bool state[8];
+  // Copy the inputs to the outputs through an intermediary to simulate
+  // the simultaneous action of the real part.
+  for (i=0; i<8; i++) 
+    state[i]=m_D[i]->getDrivenState();
+  for (i=0; i<8; i++) 
+    m_Q[i]->putState(state[i]);
 }
 
 void TTL377::create_iopin_map()
@@ -194,6 +257,121 @@ void TTL377::create_iopin_map()
   package->assign_pin(18, m_D[7]);
   package->assign_pin(19, m_Q[7]);
   
+}
+
+
+//------------------------------------------------------------------------
+// TTL595 - Octal shift register
+//
+// 
+
+Module *TTL595::construct(const char *_new_name)
+{
+  TTL595 *pTTL595 = new TTL595(_new_name);
+
+  pTTL595->new_name(_new_name);
+  pTTL595->create_iopin_map();
+
+
+  return pTTL595;
+}
+
+
+TTL595::TTL595(const char *_name)
+  : TTLbase(_name, "TTL595 - Octal Shift Register"), sreg(0)
+{
+
+  m_Q = new IO_bi_directional *[8];
+
+  char pName[4];
+  pName[0] = '.';
+  pName[3] = 0;
+  int i;
+  string sPinName;
+  for (i=0; i<8; i++) {
+    pName[1] = 'Q';
+    pName[2] = '0' + i;
+    sPinName = name() + pName;
+    m_Q[i] = new IO_bi_directional(sPinName.c_str());
+    m_Q[i]->setDriving(true);
+  }
+
+  sPinName = name() + ".Ds";
+  m_Ds = new IOPIN(sPinName.c_str());
+  sPinName = name() + ".Qs";
+  m_Qs = new IO_bi_directional(sPinName.c_str());
+  m_Qs->setDriving(true);
+  sPinName = name() + ".OE";
+  m_enable = new Enable(sPinName.c_str(),this);
+  sPinName = name() + ".SCK";
+  m_clock  = new Clock(sPinName.c_str(),this);
+  sPinName = name() + ".RCK";
+  m_strobe = new Strobe(sPinName.c_str(),this);
+  sPinName = name() + ".MR";
+  m_reset  = new Reset(sPinName.c_str(),this);
+}
+
+void TTL595::setClock(bool bNewClock)
+{
+  // Clock shifts the shift register on rising edge, if MR pin is high
+  if (bNewClock && !m_bClock && m_reset->getDrivenState())
+  {
+    // Move the shift register left and out.
+    m_Qs->putState ( (sreg & 0x80)!=0 );
+    sreg <<= 1;
+    if ( m_Ds->getDrivenState() )
+      sreg |= 0x01;
+  }
+  m_bClock = bNewClock;
+}
+
+void TTL595::setEnable(bool bNewEnable)
+{
+  // This is the output enable pin on this device
+  for (int i=0; i<8; i++) 
+    m_Q[i]->update_direction(!bNewEnable,true);
+}
+
+void TTL595::setReset(bool bNewReset)
+{
+  if (!bNewReset)
+    sreg = 0;
+}
+
+void TTL595::setStrobe(bool bNewStrobe)
+{
+  // Strobe copies the contents of the shift register into the outputs
+  if (bNewStrobe && !m_bStrobe) {
+    update_state();
+  }
+  m_bStrobe = bNewStrobe;
+}
+
+void TTL595::update_state()
+{
+  for (int i=0, ss=sreg; i<8; i++,ss>>=1)
+    m_Q[i]->putState(ss&1);
+}
+
+void TTL595::create_iopin_map()
+{
+  package = new Package(16);
+
+  package->assign_pin( 1, m_Q[1]);
+  package->assign_pin( 2, m_Q[2]);
+  package->assign_pin( 3, m_Q[3]);
+  package->assign_pin( 4, m_Q[4]);
+  package->assign_pin( 5, m_Q[5]);
+  package->assign_pin( 6, m_Q[6]);
+  package->assign_pin( 7, m_Q[7]);
+  package->assign_pin( 9, m_Qs);
+  package->assign_pin(10, m_reset);
+  package->assign_pin(11, m_clock);
+  package->assign_pin(12, m_strobe);
+  package->assign_pin(13, m_enable);
+  package->assign_pin(14, m_Ds);
+  package->assign_pin(15, m_Q[0]);
+
 }
 
 

@@ -40,7 +40,9 @@ namespace TTL {
     ~TTLbase();
 
     virtual void setClock(bool) {}
+    virtual void setStrobe(bool) {}
     virtual void setEnable(bool) {}
+    virtual void setReset(bool) {}
     //virtual void create_iopin_map();
     virtual void update_state()=0;
     //GtkWidget *create_pixmap(char **pixmap_data);
@@ -53,7 +55,9 @@ namespace TTL {
   };
 
   class Clock;
+  class Strobe;
   class Enable;
+  class Reset;
 
   class TTL377 : public TTLbase
   {
@@ -71,6 +75,31 @@ namespace TTL {
     Enable *m_enable;
     IOPIN **m_D;
     IO_bi_directional **m_Q;
+  };
+
+  class TTL595 : public TTLbase
+  {
+  public:
+
+    TTL595(const char *_name);
+    static Module *construct(const char *new_name=NULL);
+
+    virtual void create_iopin_map();
+    virtual void setClock(bool);
+    virtual void setStrobe(bool);
+    virtual void setEnable(bool);
+    virtual void setReset(bool);
+    virtual void update_state();
+  protected:
+    bool    m_bStrobe;
+    Clock  *m_clock;
+    Strobe *m_strobe;
+    Reset  *m_reset;
+    Enable *m_enable;
+    IOPIN  *m_Ds;
+    IOPIN  *m_Qs;
+    IO_bi_directional **m_Q;
+    unsigned short sreg;
   };
 
 } // end of namespace TTL
