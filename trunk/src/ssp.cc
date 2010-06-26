@@ -335,6 +335,7 @@ void SPI::clock( bool ClockState )
 {
   // A clock has happened. Either we sent one or we recieved one.
   bool onbeat;
+  bool allDone = false;
   if( !m_sspstat || ! m_sspcon)
     return;
   unsigned int sspstat_val = m_sspstat->value.get();
@@ -374,6 +375,8 @@ void SPI::clock( bool ClockState )
     }
     else 
     {
+        // RP: This is only relevant in slave mode? I think clock is never called
+        // while idle in master mode.
       if (verbose)
       	cout << "SPI clock called start_transfer\n";
       start_transfer();
@@ -418,15 +421,18 @@ void SPI::clock( bool ClockState )
       if( (sspstat_val & _SSPSTAT::SMP) && !(sspstat_val & _SSPSTAT::CKE) ) 
       {
 	m_state = eWAITING_FOR_LAST_SMP;
-	set_halfclock_break();
       } 
       else 
       {
 	stop_transfer();
+        allDone = true;
       }
     }
   }
+  if ( !allDone && m_sspcon->isSPIMaster() )
+    set_halfclock_break();
 }
+
 void SPI::set_halfclock_break()
 {
   int clock_in_cycles = 1;
@@ -467,7 +473,6 @@ void SPI::callback()
   case eACTIVE:
     m_sspmod->Sck_toggle();
     clock( m_sspmod->get_SCL_State() );
-    set_halfclock_break();
     break;
   case eWAITING_FOR_LAST_SMP:
     if( m_sspstat && m_sspstat->value.get() & _SSPSTAT::SMP ) {
@@ -550,10 +555,13 @@ void SPI::start_transfer()
   case _SSPCON::SSPM_SPImaster4:
   case _SSPCON::SSPM_SPImaster16:
   case _SSPCON::SSPM_SPImaster64:
+    // In master mode, the SDO line is always set at the start of the transfer
+    m_sspmod->putStateSDO((m_SSPsr &(1<<7)) ? '1' : '0');
     // Setup callbacks for clocks
     set_halfclock_break();
     break;
   case _SSPCON::SSPM_SPImasterTMR2: 
+      m_sspmod->putStateSDO((m_SSPsr &(1<<7)) ? '1' : '0');
 	break;
   case _SSPCON::SSPM_SPIslaveSS:
     // The SS pin was pulled low

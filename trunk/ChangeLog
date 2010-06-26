@@ -1,3 +1,10 @@
+2010-06-26 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/ssp.cc regression/spi/p18f242.asm
+          Fix for bug #3021514 :
+            - MSbit is now correctly sent in CKE=1 mode
+            - Clock not disturbed if second byte sent within half bit of SSPIF
+          Extended one of the SPI regression tests to include CKE=1 mode
+
 2010-06-25 Rob Pearce<rob@bdt-home.demon.co.uk>
         * modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
           Fix to TTL377 so that all eight latches update "simultaneously"

@@ -206,6 +206,30 @@ loop3:
   .assert "W == 0x54, \"FAILED MSSP SPI Master TMR2 wrong data\""
     nop
 
+;
+;  	Test SPI Master mode with different clock phasing
+;
+    movlw	0x31	; SSPEN | SPI master Fosc/16 / CKP=1
+    movwf	SSPCON1
+    bsf         SSPSTAT,CKE     ; Delayed clock phasing
+    bcf		PIR1,SSPIF
+    movlw	0xc9
+    movwf	SSPBUF
+
+loop5:
+    btfss	PIR1,SSPIF
+    goto	loop5
+
+  .assert "(sspstat & 1) == 1, \"FAILED MSSP SPI Master BF not set\""
+    nop
+    movf	SSPBUF,W
+  .assert "(sspstat & 1) == 0, \"FAILED MSSP SPI Master BF not cleared\""
+    nop
+  .assert "W == 0x36, \"FAILED MSSP SPI Master (CKP) wrong data\""
+    nop
+
+
+
   .assert "\"*** PASSED 18f424 MSSP SPI test\""
     
     goto $
