@@ -1,0 +1,44 @@
+Installation instructions
+-------------------------
+
+You'll need at least gpsim-0.21.11 for this to work.
+
+un tar the graphic_lcd-X.Y.Z.tar.gz tarball and then:
+
+$ cd graphic_lcd-X.Y.Z
+$ ./configure
+$ make
+$ su
+# make install
+# exit
+
+At this point, the Graphic LCD module has been compiled and installed
+as a shared library that can be loaded by gpsim. If you want to
+see if it works, then run the example:
+
+$ cd graphic_lcd-X.Y.Z/examples
+$ make
+$ gpsim -s glcd_test.cod
+
+This will assemble the PIC code that tests the LCD module.This code is
+fairly complete and can be used as an LCD driver for a real PIC/LCD board.
+
+When gpsim comes up, you should see the Graphic LCD display. A random
+number of pixels will be on. As you single step through the code, you
+can see some of the test patterns written to the display.
+
+
+Subversion
+----------
+
+If you're getting the code from Subversion, you'll need to generate files
+that are unique to your system. This is done with the script:
+
+$ libtoolize
+$ aclocal
+$ autoheader
+$ automake --add-missing
+$ autoconf
+$ ./configure
+$ make
+$ make install

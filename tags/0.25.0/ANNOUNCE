@@ -1,0 +1,57 @@
+
+                    gpsim
+
+      GNU Pic Simulator, a simulator for 
+      Microchip's PIC microcontrollers.
+
+
+Version 0.25.0 release
+
+http://sourceforge.net/project/showfiles.php?group_id=2341
+http://gpsim.sourceforge.net/gpsim.html
+
+
+New Processors:
+
+	P16f882 P16f883 P16f884 P16f886 P16f887
+
+Bugs fixed
+
+3021904		 fix porta7 as I/O pin for P18 processors
+3021514		 MSSP SPI behaviour broken
+3018510		 Cycle counter off by one on break from run
+3012488		 gpsim gives sigsegv using finish button on hex file
+3009843  	 Simulation Time HH:MM:SS.CC displays incorrectly
+2999264  	 Processor does not wake from sleep on b0 edge
+2983660  	 PLUSW register misbehaviour
+2983580  	 breadboard trace bug
+2979021  	 memory_size_mask makes incorrect assumption
+2977843		 attempt write to invalid file register in version 0.24.0
+2973978		 realtime mode can lockup
+2973982  	 scope resize not permenant
+2968268  	 Loading EEPROM data from COD on 18F
+2968248  	 DAW instruction failure case
+2926629  	 change Simulation Time format crash
+2902082  	 Incomplete PORTx/LATx interaction
+2885817  	 wrong program memory sizes for pic16f62x
+2868402  	 missing readline check in configure
+		 Fix uninitialised ssp_module pointer (potential segfault)
+		 Fix to TTL377 so that all eight latches update "simultaneously"
+
+Feature requests closed
+
+2977969  	 Colour blindness discrimination problem
+2943904  	 Add support for 16F887 and 18F4455
+3007214  	 Re-implement PAL Video Module
+
+
+New Features
+
+	src/ and modules/ license change to LGPLv2+
+	ECCP implemented
+	video module resurected
+	Added back HLL source browser support
+	DS1307 realtime clock extra added
+	extras compiled and loaded as part of gpsim
+	Added TTL595 serial-in-parallel-out shift register
+	
