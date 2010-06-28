@@ -156,7 +156,7 @@ PicTrisRegister::PicTrisRegister(Processor *pCpu, const char *pName, const char 
 void PicTrisRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
-  value.data = new_value;
+  value.data = new_value & m_EnableMask;
   if (m_port)
     m_port->updatePort();
 }

@@ -134,7 +134,7 @@ bSWITCH equ 0
 start
 
   .assert "option_reg==0xff"
-  .assert "(trisa&0x3f)==0x3f"
+  .assert "(trisa&0x3f)==0x1f"
 ;RRR        MOVWF   OSCCAL          ; put calibration into oscillator cal reg
 
    ; PORTA setup

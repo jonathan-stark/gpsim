@@ -25,6 +25,7 @@ License along with this library; if not, see
 //#include "14bit-registers.h"
 //#include "14bit-instructions.h"
 #include "../config.h"
+#include "packages.h"
 #include "16bit-processors.h"
 
 #include <string>
@@ -227,8 +228,10 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   pc = new Program_Counter16(this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
 
-  m_porta = new PicPortRegister(this,"porta","",8,0x7f);
+  m_porta = new PicPortRegister(this,"porta","",8,0xff);
+  m_porta->setEnableMask(0x7f);
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
+  m_trisa->setEnableMask(0x7f);
   m_lata  = new PicLatchRegister(this,"lata","", m_porta);
   m_lata->setEnableMask(0x7f);
 
@@ -704,7 +707,38 @@ void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int va
   }
  
 }
-
+void _16bit_processor::osc_mode(unsigned int value)
+{
+  IOPIN *m_pin;
+  unsigned int pin_Number =  get_osc_pin_Number(0);
+  
+  if (pin_Number < 253)
+  {
+	m_pin = package->get_pin(pin_Number);
+  }
+  if ( (pin_Number =  get_osc_pin_Number(1)) < 253 &&
+	(m_pin = package->get_pin(pin_Number)))
+  {
+	pll_factor = 0;
+        if (value < 5)
+	{
+	    set_clk_pin(pin_Number, m_osc_Monitor[1], "OSC2", true,
+		m_porta, m_trisa, m_lata);
+	}
+	else if(value == 6 )
+	{
+	    pll_factor = 2;
+	    set_clk_pin(pin_Number, m_osc_Monitor[1], "CLKO", false,
+		m_porta, m_trisa, m_lata);
+	}
+	else
+	{
+	    clr_clk_pin(pin_Number, m_osc_Monitor[1],
+		m_porta, m_trisa, m_lata);
+	}
+  }
+  
+}
 //-------------------------------------------------------------------
 //
 // Package stuff

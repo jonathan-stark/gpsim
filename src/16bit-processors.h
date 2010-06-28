@@ -184,13 +184,7 @@ public:
   virtual unsigned int IdentMemorySize() const { return 4; }    // four words default (18F)
   virtual void enter_sleep();
   virtual void exit_sleep();
-/*
-  virtual void osc_mode(unsigned int value);
-  void set_osc_pin_Number(unsigned int i, unsigned int val) 
-	{osc_pin_Number[i] = val;};
-  unsigned char get_osc_pin_Number(unsigned int i) 
-	{return(osc_pin_Number[i]);};
-*/
+  virtual void osc_mode(unsigned int );
 
 
 
@@ -203,7 +197,6 @@ public:
   void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
-//  unsigned char osc_pin_Number[2];
 
   unsigned int idloc[4];    ///< ID locations - not all 16-bit CPUs have 8 bytes
 };

@@ -282,6 +282,8 @@ enum IOPIN_TYPES
  *
  * All pic processors are derived from this class.
  */
+class PicTrisRegister;
+class PicLatchRegister;
 
 class pic_processor : public Processor
 {
@@ -404,11 +406,20 @@ public:
   PinModule * get_osc_PinMonitor(unsigned int i)
 	{ return m_osc_Monitor[i]; }
 
+
   void set_clk_pin(unsigned int pkg_Pin_Number,
-                                     PinModule *PinMod,
-                                     const char * name,
-                                     bool in);
-  void clr_clk_pin(unsigned int pkg_Pin_Number, PinModule *PinMod );
+                       PinModule *PinMod,
+                       const char * name,
+                       bool in,
+		PicPortRegister *m_port = 0,
+		PicTrisRegister *m_tris = 0,
+		PicLatchRegister *m_lat = 0
+				  );
+  void clr_clk_pin(unsigned int pkg_Pin_Number, PinModule *PinMod,
+		PicPortRegister *m_port = 0,
+		PicTrisRegister *m_tris = 0,
+		PicLatchRegister *m_lat = 0
+		 );
 
   virtual void set_int_osc(bool val){ internal_osc = val;}
   virtual bool get_int_osc(){ return internal_osc; }
