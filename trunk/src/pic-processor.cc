@@ -1739,9 +1739,12 @@ private:
 // removes its control from it's port register
 //
 void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number, 
-				     PinModule *PinMod, 
-				     const char * name,
-				     bool in)
+		PinModule *PinMod, 
+		const char * name,
+		bool in,
+                PicPortRegister *m_port,
+                PicTrisRegister *m_tris,
+                PicLatchRegister *m_lat)
 {
   IOPIN *m_pin = package->get_pin(pkg_Pin_Number);
   if (name)
@@ -1750,6 +1753,16 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
         m_pin->newGUIname(package->get_pin_name(pkg_Pin_Number).c_str());
   if (PinMod)
   {
+	if (m_port)
+	{
+	    unsigned int mask = m_port->getEnableMask();
+	    mask &= ~(1<< PinMod->getPinNumber());
+	    m_port->setEnableMask(mask);
+	    if (m_tris)
+		m_tris->setEnableMask(mask);
+	    if (m_lat)
+		m_lat->setEnableMask(mask);
+	}
     	PinMod->setSource(new IO_SignalControl('0'));
     	PinMod->setControl(new IO_SignalControl(in ? '1' : '0'));
  	PinMod->updatePinModule();
@@ -1757,17 +1770,31 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
 }
 // This function reverses the effects of the previous function
 void pic_processor::clr_clk_pin(unsigned int pkg_Pin_Number, 
-				     PinModule *PinMod )
+		PinModule *PinMod,
+		PicPortRegister *m_port,
+		PicTrisRegister *m_tris,
+		PicLatchRegister *m_lat)
 {
   IOPIN *m_pin = package->get_pin(pkg_Pin_Number);
   m_pin->newGUIname(package->get_pin_name(pkg_Pin_Number).c_str());
   if (PinMod)
   {
+	if (m_port)
+	{
+	    unsigned int mask = m_port->getEnableMask();
+	    mask |= (1<< PinMod->getPinNumber());
+	    m_port->setEnableMask(mask);
+	    if (m_tris)
+		m_tris->setEnableMask(mask);
+	    if (m_lat)
+		m_lat->setEnableMask(mask);
+	}
     	PinMod->setSource(0);
     	PinMod->setControl(0);
  	PinMod->updatePinModule();
   }
 }
+
 void pic_processor::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;

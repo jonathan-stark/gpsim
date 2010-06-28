@@ -1,3 +1,10 @@
+2010-06-28 Roy Rankin <rrankin@ihug.com.au>
+	* src/16bit-processors.h src/16bit-processors.cc 
+	  src/pic-processor.cc src/pic-processor.h src/p18x.cc :
+	- fix porta7 for P18 processors, bug 3021904
+	* src/pic-ioports.h src/pic-ioports.cc regression/p16f676/reset.asm :
+	- mask bits on write to tris regeister
+
 2010-06-26 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/ssp.cc regression/spi/p18f242.asm
           Fix for bug #3021514 :

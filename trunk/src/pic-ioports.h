@@ -50,10 +50,7 @@ public:
   virtual unsigned int get();
   virtual char get3StateBit(unsigned int bitMask);
   void setEnableMask(unsigned int);
-  unsigned int getEnableMask()
-  {
-    return m_EnableMask;
-  }
+  unsigned int getEnableMask() { return m_EnableMask; }
   void reset(RESET_TYPE r);
 protected:
   PicPortRegister *m_port;
