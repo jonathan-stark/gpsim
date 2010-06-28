@@ -1,4 +1,8 @@
 2010-06-28 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac : release changed to 0.25.0
+	* ANNOUNCE : 0.25.0 highlights
+
+2010-06-28 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.h src/16bit-processors.cc 
 	  src/pic-processor.cc src/pic-processor.h src/p18x.cc :
 	- fix porta7 for P18 processors, bug 3021904
