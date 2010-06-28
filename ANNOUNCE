@@ -1,67 +1,57 @@
 
-
                     gpsim
 
       GNU Pic Simulator, a simulator for 
       Microchip's PIC microcontrollers.
 
 
-Version 0.24.0 release
+Version 0.25.0 release
 
 http://sourceforge.net/project/showfiles.php?group_id=2341
 http://gpsim.sourceforge.net/gpsim.html
 
 
 New Processors:
-	P10F220 P10F222 P12F675 P12F629 P12F683 P16F630 P16F676 
-	P18F4455(No USB support)
 
-Bug Fixes
+	P16f882 P16f883 P16f884 P16f886 P16f887
 
-	TMR0 should stop during sleep (#502665)
-	Multiple CCPs fail in compare mode (#2819395)
- 	weak pull-up not disabled for analog pins (#2814950)
- 	p18f2455 sigsegv, wrong package size (#2814946)
- 	cannot load a file with "stc" in the filename (#2803756)
- 	Port A simulation error in 16f87x (#1832222)
-	"gpsim -p processor file.hex" will work (#1629719)
-	Fix MCLR pin operation when shared with IO pin
-   	Module library does not load if .so file does not exist (#2837446)
+Bugs fixed
 
-Enhancements
-	*.cod and *.stc files on command line correctly loaded
-	    without -s, -c flag
+3021904		 fix porta7 as I/O pin for P18 processors
+3021514		 MSSP SPI behaviour broken
+3018510		 Cycle counter off by one on break from run
+3012488		 gpsim gives sigsegv using finish button on hex file
+3009843  	 Simulation Time HH:MM:SS.CC displays incorrectly
+2999264  	 Processor does not wake from sleep on b0 edge
+2983660  	 PLUSW register misbehaviour
+2983580  	 breadboard trace bug
+2979021  	 memory_size_mask makes incorrect assumption
+2977843		 attempt write to invalid file register in version 0.24.0
+2973978		 realtime mode can lockup
+2973982  	 scope resize not permenant
+2968268  	 Loading EEPROM data from COD on 18F
+2968248  	 DAW instruction failure case
+2926629  	 change Simulation Time format crash
+2902082  	 Incomplete PORTx/LATx interaction
+2885817  	 wrong program memory sizes for pic16f62x
+2868402  	 missing readline check in configure
+		 Fix uninitialised ssp_module pointer (potential segfault)
+		 Fix to TTL377 so that all eight latches update "simultaneously"
 
+Feature requests closed
 
-Roy Rankin and Rob Pearce commited changes for this release.
-
-Supplied Patches
-
-  o Kamal Mostafa - cannot load a file with "stc" in the filename
-
-And I know I'm probably missing others
-
-README:
-------
-Please see the README file for all of the details on the new features.
-
-INSTALL:
--------
-install gpsim the standard way:
-
-tar -xvzf gpsim-0.24.0.tar.gz
-./configure
-cd gpsim-0.24.0/
-make
-su root
-make install
-
-this will expand into a child directory named gpsim-0.24.0 . From there you
-can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
-files for more information. The rest of the steps will build gpsim and place
-the executable into /usr/local/bin . If you don't have root privileges then
-you can copy the executable at gpsim-0.24.0/gpsim/gpsim to a directory in the
-execution path. Or better, check out INSTALL
+2977969  	 Colour blindness discrimination problem
+2943904  	 Add support for 16F887 and 18F4455
+3007214  	 Re-implement PAL Video Module
 
 
-Gpsim development team
+New Features
+
+	src/ and modules/ license change to LGPLv2+
+	ECCP implemented
+	video module resurected
+	Added back HLL source browser support
+	DS1307 realtime clock extra added
+	extras compiled and loaded as part of gpsim
+	Added TTL595 serial-in-parallel-out shift register
+	
