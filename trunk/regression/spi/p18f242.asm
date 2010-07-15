@@ -230,7 +230,7 @@ loop5:
 
 
 
-  .assert "\"*** PASSED 18f424 MSSP SPI test\""
+  .assert "\"*** PASSED 18f242 MSSP SPI test\""
     
     goto $
 
