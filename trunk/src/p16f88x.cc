@@ -276,7 +276,7 @@ void P16F88x::create_sfr_map()
   osccon.set_osctune(&osctune);
   osctune.set_osccon(&osccon);
 
-  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+  usart.initialize(pir1,&(*m_portc)[6], &(*m_portc)[7],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 

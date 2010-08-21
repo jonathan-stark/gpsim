@@ -395,4 +395,88 @@ class P18F4321 : public P18F4x21
 };
 
 
+
+class P18F6x20 : public _16bit_v2_adc
+{
+ public:
+
+  PicPSP_PortRegister  *m_portd;
+  PicTrisRegister  *m_trisd;
+  PicLatchRegister *m_latd;
+
+  PicPortRegister  *m_porte;
+  PicPSP_TrisRegister  *m_trise;
+  PicLatchRegister *m_late;
+
+  PicPortRegister  *m_portf;
+  PicTrisRegister  *m_trisf;
+  PicLatchRegister *m_latf;
+
+  PicPortRegister  *m_portg;
+  PicTrisRegister  *m_trisg;
+  PicLatchRegister *m_latg;
+
+  PSP               psp;
+
+//  ECCPAS        eccpas;
+//  PWM1CON       pwm1con;
+  T2CON        t4con;
+  PR2          pr4;
+  TMR2         tmr4;
+  PIR2v2       pir3;
+  PIE          pie3;
+  sfr_register ipr3;
+  CCPCON       ccp3con;
+  CCPRL        ccpr3l;
+  CCPRH        ccpr3h;
+  CCPCON       ccp4con;
+  CCPRL        ccpr4l;
+  CCPRH        ccpr4h;
+  CCPCON       ccp5con;
+  CCPRL        ccpr5l;
+  CCPRH        ccpr5h;
+  USART_MODULE         usart2;
+
+//  OSCTUNE      osctune;
+  ComparatorModule comparator;
+
+  P18F6x20(const char *_name=0, const char *desc=0);
+
+  void create();
+
+  virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
+  virtual void create_symbols();
+
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+
+// Setting the correct register memory size breaks things
+//  virtual unsigned int register_memory_size () const { return 0x800;};
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
+
+  virtual void create_iopin_map();
+  virtual void create_sfr_map();
+
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
+   assert(0);
+  }
+  virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
+  virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
+};
+
+
+class P18F6520 : public P18F6x20
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F6520_;};
+  P18F6520(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+//  virtual unsigned int program_memory_size() const { return 0x4000; };
+
+};
+
 #endif

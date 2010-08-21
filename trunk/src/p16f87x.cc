@@ -64,7 +64,7 @@ void P16F871::create_sfr_map()
   // Parent classes just set PIR1
   pir_set_2_def.set_pir2(pir2_2_reg);
 
-  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+  usart.initialize(pir1,&(*m_portc)[6], &(*m_portc)[7],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 

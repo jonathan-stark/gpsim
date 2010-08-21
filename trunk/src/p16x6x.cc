@@ -474,7 +474,7 @@ void P16C63::create_sfr_map(void)
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+  usart.initialize(pir1,&(*m_portc)[6], &(*m_portc)[7],
                    new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
@@ -694,7 +694,7 @@ void P16C65::create_sfr_map(void)
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+  usart.initialize(pir1,&(*m_portc)[6], &(*m_portc)[7],
                    new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
