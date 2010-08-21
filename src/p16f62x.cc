@@ -128,7 +128,7 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x0b,0x0b,0x100);
   alias_file_registers(0x0b,0x0b,0x180);
 
-  usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
+  usart.initialize(pir1,&(*m_portb)[2], &(*m_portb)[1],
                    new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 

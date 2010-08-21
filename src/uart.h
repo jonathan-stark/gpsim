@@ -294,7 +294,7 @@ public:
 
   _TXREG      *txreg;
   _RCREG      *rcreg;
-  PIR_SET     *pir_set;
+  PIR         *pir;
 
   // Extra registers for when it's an EUSART
   _SPBRGH  spbrgh;
@@ -302,7 +302,7 @@ public:
 
   USART_MODULE(Processor *pCpu);
 
-  void initialize(PIR_SET *, 
+  void initialize(PIR *, 
 		  PinModule *tx_pin, PinModule *rx_pin,
 		  _TXREG *, _RCREG *);
 

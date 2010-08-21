@@ -1106,13 +1106,13 @@ void _BAUDCON::put(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
-void USART_MODULE::initialize(PIR_SET *_pir_set,
+void USART_MODULE::initialize(PIR *_pir,
                               PinModule *tx_pin, PinModule *rx_pin,
                               _TXREG *_txreg, _RCREG *_rcreg)
 {
   assert(_txreg && _rcreg);
 
-  pir_set = _pir_set;
+  pir = _pir;
 
   spbrg.txsta = &txsta;
   spbrg.rcsta = &rcsta;
@@ -1137,35 +1137,35 @@ void USART_MODULE::initialize(PIR_SET *_pir_set,
 
 bool USART_MODULE::bIsTXempty()
 {
-  return pir_set ? pir_set->get_txif() : true;
+  return pir ? pir->get_txif() : true;
 }
 void USART_MODULE::emptyTX()
 {
   Dprintf(("usart::empty - setting TXIF\n"));
-  if (rcsta.bSPEN() && txsta.bTXEN() && pir_set)
-    pir_set->set_txif();
+  if (rcsta.bSPEN() && txsta.bTXEN() && pir)
+    pir->set_txif();
 
 }
 
 void USART_MODULE::full()
 {
   Dprintf(("txreg::full - clearing TXIF\n"));
-  if(pir_set)
-    pir_set->clear_txif();
+  if(pir)
+    pir->clear_txif();
 }
 
 void USART_MODULE::set_rcif()
 {
   Dprintf((" - setting RCIF\n"));
-  if(pir_set)
-    pir_set->set_rcif();
+  if(pir)
+    pir->set_rcif();
 }
 
 void USART_MODULE::clear_rcif()
 {
   Dprintf((" - clearing RCIF\n"));
-  if(pir_set)
-    pir_set->clear_rcif();
+  if(pir)
+    pir->clear_rcif();
 }
 
 //--------------------------------------------------

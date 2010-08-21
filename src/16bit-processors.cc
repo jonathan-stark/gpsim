@@ -303,14 +303,14 @@ void _16bit_processor :: create_sfr_map()
 
   add_sfr_register(&pie1,	  0xf9d,porv,"pie1");
   add_sfr_register(&pir1,	  0xf9e,porv,"pir1");
-
   add_sfr_register(&ipr1,	  0xf9f,porv,"ipr1");
+
   add_sfr_register(&pie2,	  0xfa0,porv,"pie2");
   add_sfr_register(&pir2,	  0xfa1,porv,"pir2");
   add_sfr_register(&ipr2,	  0xfa2,porv,"ipr2");
 
 
-  usart.initialize(&pir_set_def,&(*m_portc)[6], &(*m_portc)[7],
+  usart.initialize(&pir1,&(*m_portc)[6], &(*m_portc)[7],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
