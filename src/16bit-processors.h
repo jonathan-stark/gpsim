@@ -143,6 +143,7 @@ public:
   virtual void create();// {return;};
   virtual PROCESSOR_TYPE isa(){return _PIC17_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _PIC17_PROCESSOR_;};
+  virtual int access_gprs() { return 0x80; };
   virtual instruction * disasm (unsigned int address, unsigned int inst)
     {
       return disasm16(this, address, inst);

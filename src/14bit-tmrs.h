@@ -242,7 +242,7 @@ public:
   bool test_compare_mode();
   void callback();
 
-  void setCrosslinks(CCPRL *, PIR *, TMR2 *, ECCPAS *_eccpas=0);
+  void setCrosslinks(CCPRL *, PIR *, unsigned int _mask, TMR2 *, ECCPAS *_eccpas=0);
   void setADCON(ADCON0 *);
   CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~CCPCON();
@@ -270,7 +270,7 @@ protected:
   PIR     *pir;
   TMR2    *tmr2;
   ADCON0  *adcon0;
-  
+  unsigned int pir_mask;
 
 };
 

@@ -423,7 +423,7 @@ class P18F6x20 : public _16bit_v2_adc
   T2CON        t4con;
   PR2          pr4;
   TMR2         tmr4;
-  PIR2v2       pir3;
+  PIR3v1       pir3;
   PIE          pie3;
   sfr_register ipr3;
   CCPCON       ccp3con;
@@ -446,6 +446,7 @@ class P18F6x20 : public _16bit_v2_adc
 
   virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
   virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
+  virtual int access_gprs() { return 0x60; };
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };

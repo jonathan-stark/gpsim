@@ -1428,7 +1428,10 @@ void MOVWF16::execute()
 MOVWF16a::MOVWF16a(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : MOVWF(new_cpu,new_opcode, address)
 {
-  register_address = ((new_opcode & 0x80) ? 0xf80 : 0 ) | (new_opcode & 0x7f);
+//    pic_processor * cpu = (pic_processor*) new_cpu;
+  register_address =  (new_opcode & 0xff);
+  if ( register_address >= cpu_pic->access_gprs() )  // some 18f devices split at 0x60
+    register_address |= 0xf00;
 }
 
 void MOVWF16a::execute()

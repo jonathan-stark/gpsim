@@ -462,7 +462,7 @@ void _16bit_processor :: create_sfr_map()
   t3con.ccpr1l = &ccpr1l;
   t3con.ccpr2l = &ccpr2l;
 
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2);
   ccp1con.setIOpin(&((*m_portc)[2]));
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;

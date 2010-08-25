@@ -406,13 +406,13 @@ void P16F88x::create_sfr_map()
   ccp1con.setBitMask(0xff);
   ccp1con.pstrcon = &pstrcon;
   ccp1con.pwm1con = &pwm1con;
-  ccp1con.setCrosslinks(&ccpr1l, pir1, &tmr2, &eccpas);
+  ccp1con.setCrosslinks(&ccpr1l, pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
   ccp2con.setIOpin(&(*m_portc)[1]);
-  ccp2con.setCrosslinks(&ccpr2l, pir2, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, pir2, PIR2v3::CCP2IF, &tmr2);
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;

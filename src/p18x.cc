@@ -942,7 +942,7 @@ void P18F4455::create()
   eccpas.link_registers(&pwm1con, &ccp1con);
 //RRR  comparator.cmcon.set_eccpas(&eccpas);
   ccp1con.setBitMask(0xff);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 }
@@ -1043,7 +1043,7 @@ void P18F1220::create()
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
   ccp1con.setBitMask(0xff);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
   eccpas.setIOpin(&(*m_portb)[1], &(*m_portb)[2], &(*m_portb)[0]);
   eccpas.link_registers(&pwm1con, &ccp1con);
   ccp1con.pwm1con = &pwm1con;
@@ -1362,7 +1362,7 @@ void P18F2x21::create_sfr_map()
   add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
-  ccp2con.setCrosslinks(&ccpr2l, &pir2, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -1419,7 +1419,7 @@ void P18F2321::create()
   eccpas.link_registers(&pwm1con, &ccp1con);
   comparator.cmcon.set_eccpas(&eccpas);
   ccp1con.setBitMask(0x3f);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
   pwm1con.set_mask(0x80);
@@ -1703,7 +1703,7 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
-  ccp2con.setCrosslinks(&ccpr2l, &pir2, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -1758,7 +1758,7 @@ void P18F4321::create()
   eccpas.link_registers(&pwm1con, &ccp1con);
   comparator.cmcon.set_eccpas(&eccpas);
   ccp1con.setBitMask(0xff);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, &tmr2, &eccpas);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 
@@ -2100,7 +2100,7 @@ void P18F6x20::create_sfr_map()
 
 
   // cout << "Setting CCP cross-links\n";
-  ccp2con.setCrosslinks(&ccpr2l, &pir2, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -2119,6 +2119,24 @@ void P18F6x20::create_sfr_map()
   add_sfr_register(&t4con,	  0xf76,porv,"t4con");
   add_sfr_register(&pr4,	  0xf77,RegisterValue(0xff,0),"pr4");
   add_sfr_register(&tmr4,	  0xf78,porv,"tmr4");
+
+  ccp3con.setCrosslinks(&ccpr3l, &pir3, PIR3v1::CCP3IF, &tmr2);
+  ccp3con.setIOpin(&((*m_portg)[0]));
+  ccpr3l.ccprh  = &ccpr3h;
+  ccpr3l.tmrl   = &tmr1l;
+  ccpr3h.ccprl  = &ccpr3l;
+
+  ccp4con.setCrosslinks(&ccpr4l, &pir3, PIR3v1::CCP4IF, &tmr2);
+  ccp4con.setIOpin(&((*m_portg)[3]));
+  ccpr4l.ccprh  = &ccpr4h;
+  ccpr4l.tmrl   = &tmr1l;
+  ccpr4h.ccprl  = &ccpr4l;
+
+  ccp5con.setCrosslinks(&ccpr5l, &pir3, PIR3v1::CCP5IF, &tmr2);
+  ccp5con.setIOpin(&((*m_portg)[4]));
+  ccpr5l.ccprh  = &ccpr5h;
+  ccpr5l.tmrl   = &tmr1l;
+  ccpr5h.ccprl  = &ccpr5l;
 
 
 
