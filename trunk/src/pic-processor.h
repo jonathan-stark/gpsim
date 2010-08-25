@@ -370,6 +370,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _PIC_PROCESSOR_;};
+  virtual int access_gprs() { return 0; };
 
   /* The program_counter class calls these two functions to get the upper bits of the PC
    * for branching (e.g. goto) or modify PCL instructions (e.g. addwf pcl,f) */

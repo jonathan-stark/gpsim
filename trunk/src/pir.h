@@ -76,6 +76,12 @@ public:
   virtual unsigned int get_rcif() { return 0;}
   virtual unsigned int get_sspif() { return 0;}
 
+  /// A generic method to set an interrupt bit by mask
+  virtual void set(int mask)
+  {
+    put(get() | mask);
+  }
+
   /// Obtain interrupt request state, as a mask of priorities if relevant
   virtual int interrupt_status();
 
@@ -380,6 +386,52 @@ enum
          INTCON *, PIE *);
 };
 
+
+//---------------------------------------------------------
+// PIR2 Peripheral Interrupt register # 3
+//
+// This is version 1 of the PIR3 register - as seen on the 18F6520 devices
+
+class PIR3v1 : public PIR
+{
+public:
+
+enum
+{
+    CCP3IF  = 1<<0,
+    CCP4IF  = 1<<1,
+    CCP5IF  = 1<<2,
+    TMR4IF  = 1<<3,
+    TXIF   = 1<<4,
+    RCIF   = 1<<5
+};
+
+  virtual void set_ccpif()    /* RP - needs to define set_ccpif too! */
+    {
+      put(get() | CCP3IF);
+    }
+
+  virtual void set_tmr2if()
+    {
+      put(get() | TMR4IF);
+    }
+  virtual void set_txif();
+  virtual void set_rcif();
+
+  virtual unsigned int get_txif()
+  {
+    return value.get() & TXIF;
+  }
+  virtual void clear_txif();
+  unsigned int get_rcif()
+  {
+    return value.get() & RCIF;
+  }
+  virtual void clear_rcif();
+ 
+  PIR3v1(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
 
 //---------------------------------------------------------
 // PIR2 Peripheral Interrupt register # 3

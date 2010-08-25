@@ -534,7 +534,7 @@ void P12F683::create_sfr_map()
   pr2.tmr2    = &tmr2;
 
 
-  ccp1con.setCrosslinks(&ccpr1l, pir1, &tmr2);
+  ccp1con.setCrosslinks(&ccpr1l, pir1, PIR1v1::CCP1IF, &tmr2);
   ccp1con.setIOpin(&((*m_gpio)[2]));
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;

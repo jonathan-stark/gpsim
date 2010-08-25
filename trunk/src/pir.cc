@@ -341,6 +341,48 @@ void PIR2v3::set_bclif(void)
   if( value.get() & pie->value.get() )
     setPeripheralInterrupt();
 }
+
+//------------------------------------------------------------------------
+
+PIR3v1::PIR3v1(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  // Even though TXIF is a valid bit, it can't be written by the PIC
+  // source code.  Its state reflects whether the usart txreg is full
+  // or not. Similarly for RCIF
+  valid_bits = CCP3IF | CCP4IF | CCP5IF | TMR4IF | TXIF | RCIF;
+  writable_bits = CCP3IF | CCP4IF | CCP5IF | TMR4IF;
+}
+
+
+void PIR3v1::set_txif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | TXIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+
+void PIR3v1::clear_txif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() & ~TXIF);
+}
+
+void PIR3v1::set_rcif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | RCIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+
+void PIR3v1::clear_rcif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() & ~RCIF);
+}
+
 //------------------------------------------------------------------------
 PIR3v2::PIR3v2(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
   : PIR(pCpu,pName,pDesc,_intcon, _pie,0)

@@ -317,12 +317,14 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
 
 }
 
-void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR *_pir, TMR2 *_tmr2, ECCPAS *_eccpas)
+void CCPCON::setCrosslinks ( CCPRL *_ccprl, PIR *_pir, unsigned int _mask, 
+                             TMR2 *_tmr2, ECCPAS *_eccpas )
 {
   ccprl = _ccprl;
   pir = _pir;
   tmr2 = _tmr2;
   eccpas = _eccpas;
+  pir_mask = _mask;
 }
 
 void CCPCON::setADCON(ADCON0 *_adcon0)
@@ -351,7 +353,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_FALLING_EDGE:
       if (level == 0 && ccprl) {
 	ccprl->capture_tmr();
-	pir->set_ccpif();
+	pir->set(pir_mask);
 	Dprintf(("--CCPCON caught falling edge\n"));
       }
       break;
@@ -359,7 +361,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE:
       if (level && ccprl) {
 	ccprl->capture_tmr();
-	pir->set_ccpif();
+	pir->set(pir_mask);
 	Dprintf(("--CCPCON caught rising edge\n"));
       }
       break;
@@ -367,7 +369,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE4:
       if (level && --edges <= 0) {
 	ccprl->capture_tmr();
-	pir->set_ccpif();
+	pir->set(pir_mask);
 	edges = 4;
 	Dprintf(("--CCPCON caught 4th rising edge\n"));
       }
@@ -378,7 +380,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE16:
       if (level && --edges <= 0) {
 	ccprl->capture_tmr();
-	pir->set_ccpif();
+	pir->set(pir_mask);
 	edges = 16;
 	Dprintf(("--CCPCON caught 4th rising edge\n"));
       }
@@ -424,7 +426,7 @@ void CCPCON::compare_match()
       m_source[0]->setState('1');
       m_PinModule[0]->updatePinModule();
       if (pir)
-	pir->set_ccpif();
+	pir->set(pir_mask);
       Dprintf(("-- CCPCON setting compare output to 1\n"));
       break;
 
@@ -433,13 +435,13 @@ void CCPCON::compare_match()
       m_source[0]->setState('0');
       m_PinModule[0]->updatePinModule();
       if (pir)
-	pir->set_ccpif();
+	pir->set(pir_mask);
       Dprintf(("-- CCPCON setting compare output to 0\n"));
       break;
 
     case COM_INTERRUPT:
       if (pir)
-	pir->set_ccpif();
+	pir->set(pir_mask);
       Dprintf(("-- CCPCON setting interrupt\n"));
       break;
 
@@ -447,7 +449,7 @@ void CCPCON::compare_match()
       if (ccprl)
 	ccprl->tmrl->clear_timer();
       if (pir)
-	pir->set_ccpif();
+	pir->set(pir_mask);
       if(adcon0)
 	adcon0->start_conversion();
 
@@ -501,7 +503,7 @@ void CCPCON::pwm_match(int level)
 	  {
             if(m_PinModule[i])
 	    {
-		 m_PinModule[i]->setControl(0); //restore defailt pin direction
+		 m_PinModule[i]->setControl(0); //restore default pin direction
         	 m_PinModule[i]->updatePinModule();
 	    }
 	  }

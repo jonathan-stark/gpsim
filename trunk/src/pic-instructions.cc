@@ -359,7 +359,7 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
       mask = 1 << ((opcode >> 9) & 7);
       register_address = opcode & REG_MASK_16BIT;
       access = (opcode & ACCESS_MASK_16BIT) ? true : false;
-      if((!access) && (opcode & 0x80))
+      if((!access) && (register_address >= cpu_pic->access_gprs()))  // some 18f devices split at 0x60
         register_address |= 0xf00;
       break;
 
@@ -485,7 +485,7 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
       destination = (opcode & DESTINATION_MASK_16BIT) ? true : false;
       access = (opcode & ACCESS_MASK_16BIT) ? true : false;
       register_address = opcode & REG_MASK_16BIT;
-      if((!access) && (opcode & 0x80))
+      if((!access) && (register_address >= cpu_pic->access_gprs()))  // some 18f devices split at 0x60
         register_address |= 0xf00;
 
       break;

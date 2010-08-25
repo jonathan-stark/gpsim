@@ -297,7 +297,7 @@ void P16X6X_processor::create_sfr_map()
   pr2.tmr2    = &tmr2;
 
 
-  ccp1con.setCrosslinks(&ccpr1l, pir1, &tmr2);
+  ccp1con.setCrosslinks(&ccpr1l, pir1, PIR1v1::CCP1IF, &tmr2);
   ccp1con.setIOpin(&((*m_portc)[2]));
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
@@ -468,7 +468,7 @@ void P16C63::create_sfr_map(void)
   // get_pir_set()->set_pir2(get_pir2());
   pir_set_def.set_pir2(pir2);
 
-  ccp2con.setCrosslinks(&ccpr2l, pir2, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, pir2, PIR2v1::CCP2IF, &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -687,7 +687,7 @@ void P16C65::create_sfr_map(void)
   pir_set_def.set_pir2(pir2);
 
 
-  ccp2con.setCrosslinks(&ccpr2l, pir2, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, pir2, PIR2v2::CCP2IF, &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));
 
   ccpr2l.ccprh  = &ccpr2h;
