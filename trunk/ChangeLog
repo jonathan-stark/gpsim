@@ -1,3 +1,10 @@
+2010-09-29 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.h src/p18x.cc src/16bit-processors.cc src/16bit-processors.h
+          Fixed GPR memory size and SFR peripheral set of 18F1220 (the 16 bit 
+          base class assumptions of portC and CCP2 are now optional)
+        * src/14bit-tmrs.h src/14bit-tmrs.cc src/uart.cc
+          Partial rework for >2 PWMs as on 18F6520, and multiple UARTs naming
+
 2010-08-25 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.h src/p18x.cc src/p16x6x.cc src/p12f6xx.cc src/p16f88x.cc
           src/16bit-processors.cc src/16bit-processors.h src/pir.cc src/pir.h

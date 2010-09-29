@@ -69,7 +69,7 @@ public:
   static const unsigned int CONFIG7L = 0x30000C;
   static const unsigned int CONFIG7H = 0x30000D;
 
-  // So far, all 18xxx parts contain ports A,B,C
+  // The early 18xxx parts all contain ports A,B,C
   PicPortRegister  *m_porta;
   PicTrisRegister  *m_trisa;
   PicLatchRegister *m_lata;
@@ -136,6 +136,9 @@ public:
   SSP_MODULE           ssp;
 
 
+  // Some configuration stuff for stripping down where needed
+  virtual bool HasPortC(void) { return true; };
+  virtual bool HasCCP2(void) { return true; };
 
   virtual void create_symbols();
 
