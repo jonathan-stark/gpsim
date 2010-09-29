@@ -266,6 +266,11 @@ class P18Fxx20 : public _16bit_v2_adc
 public:
   P18Fxx20(const char *_name=0, const char *desc=0);
   virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
+  virtual unsigned int last_actual_register () const { return 0x00FF;};
+
+  // Strip down from base class
+  virtual bool HasPortC(void) { return false; };
+  virtual bool HasCCP2(void) { return false; };
 };
 
 class P18F1220 : public P18Fxx20

@@ -1170,9 +1170,9 @@ void USART_MODULE::clear_rcif()
 
 //--------------------------------------------------
 USART_MODULE::USART_MODULE(Processor *pCpu)
-  : txsta(pCpu,"txsta","USART Transmit Status",this),
-    rcsta(pCpu,"rcsta","USART Receive Status",this),
-    spbrg(pCpu,"spbrg","Serial Port Baud Rate Generator"),
+  : txsta(pCpu,"","USART Transmit Status",this),    // Don't set names incase there are two UARTS
+    rcsta(pCpu,"","USART Receive Status",this),
+    spbrg(pCpu,"","Serial Port Baud Rate Generator"),
     spbrgh(pCpu,"spbrgh","Serial Port Baud Rate high byte"),
     baudcon(pCpu,"baudcon","Serial Port Baud Rate Control"),
     is_eusart(false)

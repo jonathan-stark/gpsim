@@ -1037,7 +1037,8 @@ void P18F1220::create()
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0xcf));
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_1x20(this, CONFIG3H, 0x80));
 
-  add_sfr_register(&usart.baudcon,  0xfaa,RegisterValue(0,0),"baudcon");
+  add_sfr_register(&usart.spbrgh,   0xfb0,RegisterValue(0,0),"spbrgh");
+  add_sfr_register(&usart.baudcon,  0xfaa,RegisterValue(0,0),"baudctl");
   usart.set_eusart(true);
 
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));

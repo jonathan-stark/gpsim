@@ -1814,7 +1814,7 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
     {
       //cout << "TMR2:  pwm mode with ccp1. duty cycle = " << hex << dc << '\n';
 
-      duty_cycle1 = dc;
+      duty_cycle[0] = dc;
 
       // Update the cycle break if this is the first time to go into pwm mode
       if( (pwm_mode & TMR2_PWM1_UPDATE) == 0)
@@ -1827,7 +1827,7 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
     {
       //cout << "TMR2: starting pwm mode with ccp2. duty cycle = " << hex << dc << '\n';
 
-      duty_cycle2 = dc;
+      duty_cycle[1] = dc;
 
       // Update the cycle break if this is the first time to go into pwm mode
       if( (pwm_mode & TMR2_PWM2_UPDATE) == 0)
@@ -1919,11 +1919,11 @@ void TMR2::update(int ut)
 	// We are in pwm mode... So let's see what happens first: a pr2 compare
 	// or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	if( (duty_cycle1 > (value.get()*4) ) && (duty_cycle1 < break_value))
+	if( (duty_cycle[0] > (value.get()*4) ) && (duty_cycle[0] < break_value))
 	  {
 	    //cout << "TMR2:PWM1 update\n";
 	    last_update = TMR2_PWM1_UPDATE;
-            fc = last_cycle + duty_cycle1 * prescale;
+            fc = last_cycle + duty_cycle[0] * prescale;
 	  }
       }
 
@@ -1932,25 +1932,25 @@ void TMR2::update(int ut)
 	  // We are in pwm mode... So let's see what happens first: a pr2 compare
 	  // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	  if( (duty_cycle2 > (value.get()*4) ) && (duty_cycle2 < break_value))
+	  if( (duty_cycle[1] > (value.get()*4) ) && (duty_cycle[1] < break_value))
 	  {
 	      //cout << "TMR2:PWM2 update\n";
                                                                                 
             if (last_update == TMR2_PWM1_UPDATE)
             {
                 // set break for first duty cycle change
-                if (duty_cycle2 < duty_cycle1)
+                if (duty_cycle[1] < duty_cycle[0])
                 {
-                    fc = last_cycle + duty_cycle2 * prescale;
+                    fc = last_cycle + duty_cycle[1] * prescale;
                     last_update = TMR2_PWM2_UPDATE;
                 }
-                else if (duty_cycle2 == duty_cycle1)
+                else if (duty_cycle[1] == duty_cycle[0])
                     last_update |= TMR2_PWM2_UPDATE;
             }
             else
             {
                 last_update = TMR2_PWM2_UPDATE;
-                fc = last_cycle + duty_cycle2 * prescale;
+                fc = last_cycle + duty_cycle[1] * prescale;
             }
                                                                                 
 	}

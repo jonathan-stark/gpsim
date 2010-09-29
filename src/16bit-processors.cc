@@ -291,15 +291,18 @@ void _16bit_processor :: create_sfr_map()
 
   add_sfr_register(m_porta,       0xf80,porv);
   add_sfr_register(m_portb,       0xf81,porv);
-  add_sfr_register(m_portc,       0xf82,porv);
+  if ( HasPortC() )
+    add_sfr_register(m_portc,       0xf82,porv);
 
   add_sfr_register(m_lata,        0xf89,porv);
   add_sfr_register(m_latb,        0xf8a,porv);
-  add_sfr_register(m_latc,        0xf8b,porv);
+  if ( HasPortC() )
+    add_sfr_register(m_latc,        0xf8b,porv);
 
   add_sfr_register(m_trisa,       0xf92,RegisterValue(0x7f,0));
   add_sfr_register(m_trisb,       0xf93,RegisterValue(0xff,0));
-  add_sfr_register(m_trisc,       0xf94,RegisterValue(0xff,0));
+  if ( HasPortC() )
+    add_sfr_register(m_trisc,       0xf94,RegisterValue(0xff,0));
 
   add_sfr_register(&pie1,	  0xf9d,porv,"pie1");
   add_sfr_register(&pir1,	  0xf9e,porv,"pir1");
@@ -324,9 +327,12 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&tmr3l,	  0xfb2,porv,"tmr3l");
   add_sfr_register(&tmr3h,	  0xfb3,porv,"tmr3h");
 
-  add_sfr_register(&ccp2con,	  0xfba,porv,"ccp2con");
-  add_sfr_register(&ccpr2l,	  0xfbb,porv,"ccpr2l");
-  add_sfr_register(&ccpr2h,	  0xfbc,porv,"ccpr2h");
+  if ( HasCCP2() )
+  {
+    add_sfr_register(&ccp2con,	  0xfba,porv,"ccp2con");
+    add_sfr_register(&ccpr2l,	  0xfbb,porv,"ccpr2l");
+    add_sfr_register(&ccpr2h,	  0xfbc,porv,"ccpr2h");
+  }
   add_sfr_register(&ccp1con,	  0xfbd,porv,"ccp1con");
   add_sfr_register(&ccpr1l,	  0xfbe,porv,"ccpr1l");
   add_sfr_register(&ccpr1h,	  0xfbf,porv,"ccpr1h");

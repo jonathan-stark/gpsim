@@ -509,7 +509,7 @@ enum
 
 };
 
-
+#define MAX_PWM_CHANS   2
 
 //---------------------------------------------------------
 // TMR2 - Timer
@@ -519,10 +519,10 @@ public:
   /* Define the way in which the tmr2 callback function may be updated. */
   enum TMR2_UPDATE_TYPES
   {
-    TMR2_PWM1_UPDATE = 1<<0,       // wrt ccp1
-    TMR2_PWM2_UPDATE = 1<<1,       // wrt ccp2
-    TMR2_PR2_UPDATE  = 1<<2,       // update pr2 match
-    TMR2_WRAP        = 1<<3,	   // wrap TMR2
+    TMR2_WRAP        = 1<<0,	   // wrap TMR2
+    TMR2_PR2_UPDATE  = 1<<1,       // update pr2 match
+    TMR2_PWM1_UPDATE = 1<<2,       // wrt ccp1
+    TMR2_PWM2_UPDATE = 1<<3,       // wrt ccp2
     TMR2_DONTCARE_UPDATE = 0xf     // whatever comes next
   };
 
@@ -534,8 +534,7 @@ public:
     prescale,
     prescale_counter,
     break_value,
-    duty_cycle1,     /* for ccp1 */
-    duty_cycle2;     /* for ccp2 */
+    duty_cycle[MAX_PWM_CHANS];     /* for ccp channels */
   int
     post_scale;
   guint64
