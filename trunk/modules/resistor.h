@@ -54,7 +54,7 @@ public:
 
 #endif
 
-  PullupResistor(const char *init_name=NULL, const char *desc=NULL);
+  PullupResistor(const char *init_name=NULL, const char *desc=NULL, float vinit=5.0);
   ~PullupResistor();
 
   // Inheritances from the Package class

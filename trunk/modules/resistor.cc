@@ -189,7 +189,7 @@ Module * PullupResistor::pu_construct(const char *_new_name)
 Module * PullupResistor::pd_construct(const char *_new_name)
 {
 
-  PullupResistor *pur = new PullupResistor(_new_name, "PullDown resistor");
+  PullupResistor *pur = new PullupResistor(_new_name, "PullDown resistor", 0.0);
 
   pur->res->set_Vth(0);
   pur->res->set_Vpullup(0.0);
@@ -197,7 +197,7 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 }
 
 //--------------------------------------------------------------
-PullupResistor::PullupResistor(const char *init_name, const char * desc) : 
+PullupResistor::PullupResistor(const char *init_name, const char * desc, float vinit) : 
 	Module(init_name, desc)
 {
   string s;
@@ -211,6 +211,7 @@ PullupResistor::PullupResistor(const char *init_name, const char * desc) :
   }
 
   res = new IO_bi_directional_pu(s.c_str());
+  res->set_Vpullup(vinit);
 
 
   create_iopin_map();

@@ -1,3 +1,8 @@
+2010-10-08 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * modules/resistor.cc modules/resistor.h
+          Minor fix to pulldown so that its resistance attribute is correctly
+          initialised to 0 (it was confused and showed as 5V)
+
 2010-09-29 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.h src/p18x.cc src/16bit-processors.cc src/16bit-processors.h
           Fixed GPR memory size and SFR peripheral set of 18F1220 (the 16 bit 
