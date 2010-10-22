@@ -148,6 +148,8 @@ ${RT} ccp sim_ccp_819
 
 ${RT} ccp sim_pwm_877a
 
+${RT} ccp sim_pwm_6520
+
 ${RT} ccp_628 sim
 
 ${RT} wavegen sim

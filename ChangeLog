@@ -1,3 +1,13 @@
+2010-10-22 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/14bit-tmrs.cc src/14bit-tmrs.h src/16bit-processors.cc
+          src/p12f6xx.cc src/p16f88x.cc src/p16x6x.cc src/p18x.cc
+          Fixed TMR2 to support multiple PWMs, bug #2823242
+          Implemented all five PWMs on the 18F6520
+          Fixed TMR2 wrap bug, #3092906
+        * regression/ccp/pwm_6520.asm regression/ccp/18f6520.lkr
+          regression/ccp/Makefile regression/run_regression.sh
+          Added regression test for the above
+
 2010-10-08 Rob Pearce<rob@bdt-home.demon.co.uk>
         * modules/resistor.cc modules/resistor.h
           Minor fix to pulldown so that its resistance attribute is correctly
