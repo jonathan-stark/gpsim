@@ -451,8 +451,8 @@ void _16bit_processor :: create_sfr_map()
   tmr2.pir_set = &pir_set_def; //get_pir_set();
   tmr2.pr2    = &pr2;
   tmr2.t2con  = &t2con;
-  tmr2.ccp1con = &ccp1con;
-  tmr2.ccp2con = &ccp2con;
+  tmr2.add_ccp ( &ccp1con );
+  tmr2.add_ccp ( &ccp2con );
   pr2.tmr2    = &tmr2;
 
 

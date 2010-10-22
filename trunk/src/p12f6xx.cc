@@ -530,7 +530,7 @@ void P12F683::create_sfr_map()
   tmr2.pir_set   = get_pir_set();
   tmr2.pr2    = &pr2;
   tmr2.t2con  = &t2con;
-  tmr2.ccp1con = &ccp1con;
+  tmr2.add_ccp ( &ccp1con );
   pr2.tmr2    = &tmr2;
 
 

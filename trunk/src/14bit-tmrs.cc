@@ -791,7 +791,7 @@ void CCPCON::put(unsigned int new_value)
       m_bInputEnabled = false;
       m_bOutputEnabled = false;
 
-      // RP - According to 16F87x data sheet section 8.2.1 clearing CCP1CON also clears the latch
+      // RP - According to 16F87x data sheet section 8.2.1 clearing CCPxCON also clears the latch
       m_cOutputState = '0';
       m_source[0]->setState('0');
       break;
@@ -1748,15 +1748,17 @@ void T2CON::put(unsigned int new_value)
 TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     pwm_mode(0),
-    update_state(TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE),
+    update_state(TMR2_ANY_PWM_UPDATE | TMR2_PR2_UPDATE),
     last_update(0),
     prescale(1),
     prescale_counter(0),
     last_cycle(0),
-    pr2(0), pir_set(0), t2con(0), ccp1con(0), ccp2con(0), ssp_module(0)
+    pr2(0), pir_set(0), t2con(0), ssp_module(0)
 {
   value.put(0);
   future_cycle = 0;
+  for ( int cc=0; cc<MAX_PWM_CHANS; cc++ )
+      ccp[cc] = 0;
 }
 
 void TMR2::callback_print() 
@@ -1772,6 +1774,21 @@ void TMR2::start()
   last_cycle = 0;
   future_cycle = 0;
 
+}
+
+bool TMR2::add_ccp ( CCPCON * _ccp )
+{
+  int cc;
+
+  for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+  {
+    if ( ccp[cc] == 0 || ccp[cc] == _ccp )
+    {
+        ccp[cc] = _ccp;
+        return true;
+    }
+  }
+  return false;
 }
 
 
@@ -1808,42 +1825,37 @@ void TMR2::on_or_off(int new_state)
 
 void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
 {
+    int modeMask = TMR2_PWM1_UPDATE;
+    bool found = false;
+    int cc;
 
-  //cout << "TMR2_PWM constants pwm1 " << TMR2_PWM1_UPDATE << " pwm2 " << TMR2_PWM2_UPDATE << '\n';
-  if(ccp_address == ccp1con->address)
+  for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+  {
+    if ( ccp[cc] && ( ccp_address == ccp[cc]->address ) )
     {
       //cout << "TMR2:  pwm mode with ccp1. duty cycle = " << hex << dc << '\n';
-
-      duty_cycle[0] = dc;
-
-      // Update the cycle break if this is the first time to go into pwm mode
-      if( (pwm_mode & TMR2_PWM1_UPDATE) == 0)
-	{
-	  pwm_mode |= TMR2_PWM1_UPDATE;
-//wait for next TMR2 update	  update();	
-	}
-    }
-  else if(ccp_address == ccp2con->address)
-    {
-      //cout << "TMR2: starting pwm mode with ccp2. duty cycle = " << hex << dc << '\n';
-
-      duty_cycle[1] = dc;
+      duty_cycle[cc] = dc;
 
       // Update the cycle break if this is the first time to go into pwm mode
-      if( (pwm_mode & TMR2_PWM2_UPDATE) == 0)
-	{
-	  pwm_mode |= TMR2_PWM2_UPDATE;
-
+      if ( (pwm_mode & modeMask) == 0 )
+      {
+	pwm_mode |= modeMask;
 //wait for next TMR2 update	  update();	
-	}
+      }
+      
+      found = true;
     }
-  else
-    {
-      cout << "TMR2: error bad ccpxcon address while in pwm_dc()\n";
-      cout << "ccp_address = " << ccp_address << " expected 1con " << 
-	ccp1con->address << " or 2con " << ccp2con->address << '\n';
-    }
-
+    modeMask <<= 1;
+  }
+  if ( ! found )
+  {
+    cout << "TMR2: error bad ccpxcon address while in pwm_dc()\n";
+    cout << "ccp_address = " << ccp_address << " expected one of";
+    for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+      if ( ccp[cc] )
+        cout << " " << ccp[cc]->address;
+    cout << '\n';
+  }
 }
 
 //
@@ -1852,48 +1864,46 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
 
 void TMR2::stop_pwm(unsigned int ccp_address)
 {
+    int modeMask = TMR2_PWM1_UPDATE;
+    int cc;
+    int old_pwm = pwm_mode;
 
-  int old_pwm = pwm_mode;
-
-  if(ccp_address == ccp1con->address)
+  for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+  {
+    if ( ccp[cc] && ( ccp_address == ccp[cc]->address ) )
     {
-      // cout << "TMR2:  stopping pwm mode with ccp1.\n";
-      pwm_mode &= ~TMR2_PWM1_UPDATE;
-      if(last_update & TMR2_PWM1_UPDATE)
-         update_state &= (~TMR2_PWM1_UPDATE);
-
+      // cout << "TMR2:  stopping pwm mode with ccp" << cc+1 << ".\n";
+      pwm_mode &= ~modeMask;
+      if(last_update & modeMask)
+         update_state &= (~modeMask);
     }
-  else if(ccp_address == ccp2con->address)
-    {
-      // cout << "TMR2:  stopping pwm mode with ccp2.\n";
-      pwm_mode &= ~TMR2_PWM2_UPDATE;
-      if(last_update & TMR2_PWM2_UPDATE)
-         update_state &= (~TMR2_PWM2_UPDATE);
-    }
+    modeMask <<= 1;
+  }
 
   if((pwm_mode ^ old_pwm) && future_cycle && t2con->get_tmr2on())
     update(update_state);
-
 }
 
 //
 // update 
 //  This member function will determine if/when there is a TMR2 break point
 // that needs to be set and will set/move it if so.
-//  There are three different break sources: 1) TMR2 matching PR2 2) TMR2 matching
-// the ccp1 registers in pwm mode and 3) TMR2 matching the ccp2 registers in pwm
-// mode.
+//  There are two different types of break sources:
+//     1) TMR2 matching PR2 
+//     2) TMR2 matching one of the ccp registers in pwm mode
 //
 
 void TMR2::update(int ut)
 {
+    int modeMask = TMR2_PWM1_UPDATE;
+    int cc;
 
   //cout << "TMR2 update. cpu cycle " << hex << cycles.get() <<'\n';
 
-  if(t2con->get_tmr2on()) {
-
-    if(future_cycle) {
-
+  if(t2con->get_tmr2on())
+  {
+    if(future_cycle)
+    {
       // If TMR2 is enabled (i.e. counting) then 'future_cycle' is non-zero,
       // which means there's a cycle break point set on TMR2 that needs to
       // be moved to a new cycle.
@@ -1914,46 +1924,31 @@ void TMR2::update(int ut)
           fc = last_cycle + break_value * prescale;
       }
 
-      if(pwm_mode & ut & TMR2_PWM1_UPDATE) {
+      for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+      {
+        if ( pwm_mode & ut & modeMask )
+        {
+          // We are in pwm mode... So let's see what happens first: a pr2 compare
+          // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	// We are in pwm mode... So let's see what happens first: a pr2 compare
-	// or a duty cycle compare. (recall, the duty cycle is really 10-bits)
-
-	if( (duty_cycle[0] > (value.get()*4) ) && (duty_cycle[0] < break_value))
+          if ( (duty_cycle[cc] > (value.get()*4) ) && ( duty_cycle[cc] < break_value ) )
 	  {
-	    //cout << "TMR2:PWM1 update\n";
-	    last_update = TMR2_PWM1_UPDATE;
-            fc = last_cycle + duty_cycle[0] * prescale;
+            guint64 nc = last_cycle + duty_cycle[cc] * prescale;
+
+	    // cout << "TMR2:PWM" << cc+1 << " update at " << hex << nc << 
+            //         ", dc=" << duty_cycle[cc] << "\n";
+            if ( nc < fc )      /// @bug not robust against wrap-around of guint64
+            {
+              last_update = modeMask;
+              fc = nc;
+            }
+            else if ( nc == fc )
+            {
+              last_update |= modeMask;
+            }  
 	  }
-      }
-
-      if(pwm_mode & ut & TMR2_PWM2_UPDATE)
-	{
-	  // We are in pwm mode... So let's see what happens first: a pr2 compare
-	  // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
-
-	  if( (duty_cycle[1] > (value.get()*4) ) && (duty_cycle[1] < break_value))
-	  {
-	      //cout << "TMR2:PWM2 update\n";
-                                                                                
-            if (last_update == TMR2_PWM1_UPDATE)
-            {
-                // set break for first duty cycle change
-                if (duty_cycle[1] < duty_cycle[0])
-                {
-                    fc = last_cycle + duty_cycle[1] * prescale;
-                    last_update = TMR2_PWM2_UPDATE;
-                }
-                else if (duty_cycle[1] == duty_cycle[0])
-                    last_update |= TMR2_PWM2_UPDATE;
-            }
-            else
-            {
-                last_update = TMR2_PWM2_UPDATE;
-                fc = last_cycle + duty_cycle[1] * prescale;
-            }
-                                                                                
-	}
+        }
+        modeMask <<= 1;
       }
 
       if(fc < future_cycle)
@@ -1966,20 +1961,19 @@ void TMR2::update(int ut)
           get_cycles().reassign_break(future_cycle, fc, this);
           future_cycle = fc;
       }
-
     }
     else
-      {
-	cout << "TMR2 BUG!! tmr2 is on but has no cycle_break set on it\n";
-      }
-
+    {
+      cout << "TMR2 BUG!! tmr2 is on but has no cycle_break set on it\n";
+    }
   }
   else
-    {
-      //cout << "TMR2 is not running (no update occurred)\n";
-    }
-
+  {
+    // cout << "TMR2 is not running (no update occurred)\n";
+  }
 }
+
+
 void TMR2::put(unsigned int new_value)
 {
 
@@ -2001,21 +1995,26 @@ void TMR2::put(unsigned int new_value)
       unsigned int delta = (future_cycle - last_cycle);
       int shift = (new_value - old_value) * prescale;
 
+//      printf ( "TMR2::put(%02X) with future_cycle -\n", new_value );
+
       if (pwm_mode)
 	shift <<= 2;
-  
+
+//      printf ( "   move break from 0x%" PRINTF_INT64_MODIFIER "X by %d\n", current_cycle, shift );
+
       // set cycle when tmr2 would have been zero
 
       last_cycle = current_cycle - shift;
       unsigned int now = (current_cycle - last_cycle);
       
+//      printf ( "   value now is 0x%X\n", now );
 
       guint64 fc;
 
       /*
 	Three possible cases
 	   1> TMR2 is still before the next break point.
-		Adjust the breakpoint to ocurr at correct TMR2 value
+		Adjust the breakpoint to occur at correct TMR2 value
 	   2> TMR2 is now greater the PR2
 		Assume TMR2 must count up to 0xff, roll-over and then
 		we are back in business. High CCP outputs stay high.
@@ -2027,6 +2026,9 @@ void TMR2::put(unsigned int new_value)
       if (now < delta) // easy case, just shift break.
       {
           fc = last_cycle + delta;
+
+//          printf ( "   now < delta (0x%X), set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", delta, fc );
+
           get_cycles().reassign_break(future_cycle, fc, this);
           future_cycle = fc;
       }
@@ -2038,11 +2040,15 @@ void TMR2::put(unsigned int new_value)
 	    fc = last_cycle + (0x100 * prescale << 2);
 	else
 	    fc = last_cycle + 0x100 * prescale;
+
+//        printf ( "   now > break (0x%X), set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", break_value * prescale, fc );
+
         get_cycles().reassign_break(future_cycle, fc, this);
         future_cycle = fc;
       }
       else	// new break < PR2 but > duty cycle break
       {
+//          printf ( "   new break < PR2 but > duty cycle\n" );
           update(update_state);
       }
 
@@ -2170,15 +2176,18 @@ void TMR2::new_pr2(unsigned int new_value)
 
   if(t2con->get_tmr2on())
     {
+      Dprintf(( "TMR2::new_pr2(0x%02X) with timer at 0x%02X -\n", new_value, value.get() ));
 
       unsigned int cur_break = (future_cycle - last_cycle)/prescale;
       unsigned int new_break = (pwm_mode)? (1 + new_value) << 2 : 1 + new_value;
       unsigned int now_cycle = (get_cycles().get() - last_cycle) / prescale;
 
       guint64 fc = last_cycle;
+      Dprintf(( "   cur_break = 0x%X,  new_break = 0x%X,  now = 0x%X\n", cur_break, new_break, now_cycle ));
+      Dprintf(( "   last_cycle = 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
 
       /*
-	PR2 change casses
+	PR2 change cases
 
 	1> TMR2 greater than new PR2
 		TMR2 wraps through 0xff
@@ -2198,6 +2207,7 @@ void TMR2::new_pr2(unsigned int new_value)
 	    fc += (0x100 * prescale << 2);
 	else
 	    fc += 0x100 * prescale;
+        Dprintf(( "   now > new, set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
         get_cycles().reassign_break(future_cycle, fc, this);
         future_cycle = fc;
       }
@@ -2205,8 +2215,12 @@ void TMR2::new_pr2(unsigned int new_value)
 	       new_break < cur_break)		// new break less than current
       {
 	fc += new_break * prescale;
+        Dprintf(( "   new<break, set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
+	if ( cur_break != break_value )
+            last_update = TMR2_PR2_UPDATE;      // RP : fix bug 3092906
         get_cycles().reassign_break(future_cycle, fc, this);
         future_cycle = fc;
+        Dprintf(( "   next event mask %02X\n", last_update ));
       }
     }
 }
@@ -2232,6 +2246,7 @@ void TMR2::current_value()
 
 void TMR2::callback()
 {
+  int cc;  
 
   //cout<<"TMR2 callback cycle: " << hex << cycles.value << '\n';
 
@@ -2248,53 +2263,55 @@ void TMR2::callback()
 	// This (implicitly) resets the timer to zero:
 	last_cycle = get_cycles().get();
       }
-      else if( last_update & (TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE))
+      else if ( last_update & TMR2_ANY_PWM_UPDATE )
       {
+        int modeMask = TMR2_PWM1_UPDATE;
 
-        if(last_update & TMR2_PWM1_UPDATE)
-	{
-	  // duty cycle match
-	  //cout << "TMR2: duty cycle match for pwm1 \n";
-	  update_state &= (~TMR2_PWM1_UPDATE);
-	  ccp1con->pwm_match(0);
-	}
-        if(last_update & TMR2_PWM2_UPDATE)
-	{
-	  // duty cycle match
-	  //cout << "TMR2: duty cycle match for pwm2 \n";
-	  update_state &= (~TMR2_PWM2_UPDATE);
-	  ccp2con->pwm_match(0);
-	}
+        for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+        {
+          if ( last_update & modeMask )
+	  {
+	    // duty cycle match
+	    //cout << "TMR2: duty cycle match for pwm" << cc+1 << "\n";
+	    update_state &= (~modeMask);
+	    if ( ccp[cc] )      // shouldn't be needed
+                ccp[cc]->pwm_match(0);
+            else
+                cout << "TMR2::callback() found update of non-existent CCP\n";
+	  }
+          modeMask <<= 1;
+        }
       }
       else
-	{
-	  // matches PR2
+      {
+        // matches PR2
 
-	  //cout << "TMR2: PR2 match. pwm_mode is " << pwm_mode <<'\n';
+	//cout << "TMR2: PR2 match. pwm_mode is " << pwm_mode <<'\n';
 
-	  // This (implicitly) resets the timer to zero:
-	  last_cycle = get_cycles().get();
+	// This (implicitly) resets the timer to zero:
+	last_cycle = get_cycles().get();
 
-         if (ssp_module)
-               ssp_module->tmr2_clock();
-          if ((ccp1con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
+        if (ssp_module)
+             ssp_module->tmr2_clock();
+
+        for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+        {
+          if ( ccp[cc] && ( ccp[cc]->value.get() & CCPCON::PWM0 ) == CCPCON::PWM0 )
 	  {
-               ccp1con->pwm_match(1);
+             ccp[cc]->pwm_match(1);
 	  }
+        }
 
-          if ((ccp2con->value.get() & CCPCON::PWM0) == CCPCON::PWM0)
-               ccp2con->pwm_match(1);
+	if(--post_scale < 0)
+        {
+          //cout << "setting IF\n";
+          pir_set->set_tmr2if();
+          post_scale = t2con->get_post_scale();
+        }
 
-	  if(--post_scale < 0)
-	    {
-	      //cout << "setting IF\n";
-	      pir_set->set_tmr2if();
-	      post_scale = t2con->get_post_scale();
-	    }
+        update_state = TMR2_ANY_PWM_UPDATE | TMR2_PR2_UPDATE;
 
-	  update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
-
-	}
+      }
       update(update_state);
 
     }

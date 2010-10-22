@@ -2126,18 +2126,21 @@ void P18F6x20::create_sfr_map()
   ccpr3l.ccprh  = &ccpr3h;
   ccpr3l.tmrl   = &tmr1l;
   ccpr3h.ccprl  = &ccpr3l;
+  tmr2.add_ccp ( &ccp3con );
 
   ccp4con.setCrosslinks(&ccpr4l, &pir3, PIR3v1::CCP4IF, &tmr2);
   ccp4con.setIOpin(&((*m_portg)[3]));
   ccpr4l.ccprh  = &ccpr4h;
   ccpr4l.tmrl   = &tmr1l;
   ccpr4h.ccprl  = &ccpr4l;
+  tmr2.add_ccp ( &ccp4con );
 
   ccp5con.setCrosslinks(&ccpr5l, &pir3, PIR3v1::CCP5IF, &tmr2);
   ccp5con.setIOpin(&((*m_portg)[4]));
   ccpr5l.ccprh  = &ccpr5h;
   ccpr5l.tmrl   = &tmr1l;
   ccpr5h.ccprl  = &ccpr5l;
+  tmr2.add_ccp ( &ccp5con );
 
 
 
@@ -2156,8 +2159,8 @@ void P18F6x20::create_sfr_map()
   tmr4.pir_set = &pir_set_def; //get_pir_set();
   tmr4.pr2    = &pr4;
   tmr4.t2con  = &t4con;
-  tmr4.ccp1con = &ccp1con;
-  tmr4.ccp2con = &ccp2con;
+  tmr4.add_ccp ( &ccp1con );
+  tmr4.add_ccp ( &ccp2con );
   pr4.tmr2    = &tmr4;
 
   pir3.set_intcon(&intcon);

@@ -509,12 +509,15 @@ enum
 
 };
 
-#define MAX_PWM_CHANS   2
+#define MAX_PWM_CHANS   5
 
 //---------------------------------------------------------
 // TMR2 - Timer
 class TMR2 : public sfr_register, public TriggerObject
 {
+protected:
+  CCPCON * ccp[MAX_PWM_CHANS];
+
 public:
   /* Define the way in which the tmr2 callback function may be updated. */
   enum TMR2_UPDATE_TYPES
@@ -522,8 +525,10 @@ public:
     TMR2_WRAP        = 1<<0,	   // wrap TMR2
     TMR2_PR2_UPDATE  = 1<<1,       // update pr2 match
     TMR2_PWM1_UPDATE = 1<<2,       // wrt ccp1
-    TMR2_PWM2_UPDATE = 1<<3,       // wrt ccp2
-    TMR2_DONTCARE_UPDATE = 0xf     // whatever comes next
+//    TMR2_PWM2_UPDATE = 1<<3,       // wrt ccp2
+    // PWM must be last as a variable number of channels follows
+    TMR2_ANY_PWM_UPDATE = 0xfc,    // up to six PWM channels
+    TMR2_DONTCARE_UPDATE = 0xff    // whatever comes next
   };
 
   int pwm_mode;
@@ -544,8 +549,6 @@ public:
   PR2  *pr2;
   PIR_SET *pir_set;
   T2CON *t2con;
-  CCPCON *ccp1con;
-  CCPCON *ccp2con;
   SSP_MODULE *ssp_module;
 
   virtual void callback();
@@ -564,6 +567,7 @@ public:
   void stop_pwm(unsigned int ccp_address);
   virtual unsigned int get_value();
 
+  bool add_ccp ( CCPCON * _ccp );
 };
 
 
