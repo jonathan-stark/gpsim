@@ -102,6 +102,30 @@ namespace TTL {
     unsigned short sreg;
   };
 
+  class TTL165 : public TTLbase
+  {
+  public:
+
+    TTL165(const char *_name);
+    static Module *construct(const char *new_name=NULL);
+
+    virtual void create_iopin_map();
+    virtual void setClock(bool);
+    virtual void setStrobe(bool);
+    virtual void setEnable(bool);
+    virtual void update_state();
+  protected:
+    bool    m_bStrobe;
+    Clock  *m_clock;
+    Strobe *m_strobe;
+    Enable *m_enable;
+    IOPIN  *m_Ds;
+    IOPIN  *m_Q;
+    IOPIN  *m_Qbar;
+    IOPIN  **m_D;
+    unsigned short sreg;
+  };
+
 } // end of namespace TTL
 
 #endif // __ttl_H__

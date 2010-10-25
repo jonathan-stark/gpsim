@@ -1,22 +1,14 @@
 
-EXTENDED_INSTRUCTIONS=1
-
 include ../make.regression
 
 
 SCRIPT = 18f452.lkr
 
-PROJECT = ttl377
-OBJECTS =  $(PROJECT).o
-OUTPUT = $(PROJECT).hex
-COD = $(PROJECT).cod
 
-all : sim_377
+all : ttl377.cod ttl165.cod
 
-$(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
-	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
+ttl%.cod : ttl%.o
+	gplink --map -s $(SCRIPT) -o $@  $<
 
-sim_377: $(COD)
-	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<
-
+sim : sim_ttl377 sim_ttl165
 

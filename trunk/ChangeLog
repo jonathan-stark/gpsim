@@ -1,3 +1,9 @@
+2010-10-25 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
+          regression/ttl/ttl165.asm regression/ttl/Makefile
+          regression/run_regression.sh
+          Added a module to simulate a 74x165 parallel-to-serial shift register
+
 2010-10-22 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/14bit-tmrs.cc src/14bit-tmrs.h src/16bit-processors.cc
           src/p12f6xx.cc src/p16f88x.cc src/p16x6x.cc src/p18x.cc

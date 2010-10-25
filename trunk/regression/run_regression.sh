@@ -140,7 +140,9 @@ ${RT} psp sim_p18f452
 
 ${RT} psp sim_p16f871
 
-${RT} ttl sim_377
+${RT} ttl sim_ttl377
+
+${RT} ttl sim_ttl165
 
 ${RT} ccp sim_ccp_877a
 

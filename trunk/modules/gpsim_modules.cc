@@ -117,8 +117,9 @@ Module_Types available_modules[] =
   { {"usart",            "usart"}, USARTModule::USART_construct},
 
   // TTL devices
+  { {"TTL165", "ttl165"}, TTL::TTL165::construct},
   { {"TTL377", "ttl377"}, TTL::TTL377::construct},
-  { {"TTL595", "TTL595"}, TTL::TTL595::construct},
+  { {"TTL595", "ttl595"}, TTL::TTL595::construct},
 
   // I2c EEPROM
   { {"I2C-EEPROM2k", "e24xx024"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_2k},

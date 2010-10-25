@@ -375,4 +375,124 @@ void TTL595::create_iopin_map()
 }
 
 
+//------------------------------------------------------------------------
+// TTL165 - 8-bit parallel to serial shift register
+//
+// 
+
+Module *TTL165::construct(const char *_new_name)
+{
+  TTL165 *pTTL165 = new TTL165(_new_name);
+
+  pTTL165->new_name(_new_name);
+  pTTL165->create_iopin_map();
+
+
+  return pTTL165;
+}
+
+
+TTL165::TTL165(const char *_name)
+  : TTLbase(_name, "TTL165 - PISO Shift Register"), sreg(0)
+{
+
+  m_D = new IOPIN *[8];
+
+  char pName[4];
+  pName[0] = '.';
+  pName[3] = 0;
+  int i;
+  string sPinName;
+  for (i=0; i<8; i++) {
+    pName[1] = 'D';
+    pName[2] = '0' + i;
+    sPinName = name() + pName;
+    m_D[i] = new IOPIN(sPinName.c_str());
+  }
+
+  sPinName = name() + ".Ds";
+  m_Ds = new IOPIN(sPinName.c_str());
+  sPinName = name() + ".Q7";
+  m_Q = new IO_bi_directional(sPinName.c_str());
+  m_Q->setDriving(true);
+  sPinName = name() + ".nQ7";
+  m_Qbar = new IO_bi_directional(sPinName.c_str());
+  m_Qbar->setDriving(true);
+  sPinName = name() + ".CE";
+  m_enable = new Enable(sPinName.c_str(),this);
+  sPinName = name() + ".CP";
+  m_clock  = new Clock(sPinName.c_str(),this);
+  sPinName = name() + ".PL";
+  m_strobe = new Strobe(sPinName.c_str(),this);
+}
+
+
+void TTL165::setClock(bool bNewClock)
+{
+  // Clock shifts the shift register on rising edge, if CE pin is low and PL is high
+  if ( bNewClock && !m_bClock && !m_enable->getDrivenState() && m_strobe->getDrivenState() )
+  {
+    // Move the shift register left and out.
+    sreg <<= 1;
+    if ( m_Ds->getDrivenState() )
+      sreg |= 0x01;
+    m_Q->putState ( (sreg & 0x80)!=0 );
+    m_Qbar->putState ( (sreg & 0x80)==0 );
+  }
+  m_bClock = bNewClock;
+}
+
+void TTL165::setEnable(bool bNewEnable)
+{
+  // This is the clock enable pin on this device. No explicit action needed on change.
+}
+
+
+void TTL165::setStrobe(bool bNewStrobe)
+{
+  // Strobe copies the contents of the parallel inputs into the shift register
+  if (bNewStrobe && !m_bStrobe) {
+    update_state();
+  }
+  if ( !bNewStrobe )
+  {
+    m_Q->putState ( m_D[7]->getDrivenState() );
+    m_Qbar->putState ( !m_D[7]->getDrivenState() );
+  }
+  m_bStrobe = bNewStrobe;
+}
+
+void TTL165::update_state()
+{
+  unsigned short ss = 0;
+  for (int i=0; i<8; i++)
+  {
+    if ( m_D[i]->getDrivenState() )
+        ss |= 1<<i;
+  }
+  sreg = ss;
+}
+
+void TTL165::create_iopin_map()
+{
+  package = new Package(16);
+
+  package->assign_pin( 1, m_strobe);
+  package->assign_pin( 2, m_clock);
+  package->assign_pin( 3, m_D[4]);
+  package->assign_pin( 4, m_D[5]);
+  package->assign_pin( 5, m_D[6]);
+  package->assign_pin( 6, m_D[7]);
+  package->assign_pin( 7, m_Qbar);
+  package->assign_pin( 9, m_Q);
+  package->assign_pin(10, m_Ds);
+  package->assign_pin(11, m_D[0]);
+  package->assign_pin(12, m_D[1]);
+  package->assign_pin(13, m_D[2]);
+  package->assign_pin(14, m_D[3]);
+  package->assign_pin(15, m_enable);
+
+}
+
+
 }
