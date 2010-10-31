@@ -451,7 +451,7 @@ class P18F6x20 : public _16bit_v2_adc
 
   virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
   virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
-  virtual int access_gprs() { return 0x60; };
+  virtual unsigned int access_gprs() { return 0x60; };
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
@@ -482,6 +482,7 @@ class P18F6520 : public P18F6x20
   void create();
 
 //  virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int bugs() { return BUG_DAW; };
 
 };
 

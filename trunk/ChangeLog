@@ -1,3 +1,13 @@
+2010-10-31 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/16bit-instructions.cc src/pic-processor.h src/p18x.h
+          Partial implementation of "bugs" list (errata per CPU type) so that 
+          the 18F6520 has a buggy DAW instruction while the 18F4321 has a 
+          correct one. This matches the real hardware for those two - others
+          need checking.
+        * src/16bit-processors.h src/16bit-instructions.cc src/p18x.h
+          A different approach to fixing the compiler warning Roy spotted (I'd 
+          already corrected my earlier error locally).
+
 2010-10-31 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.cc src/intcon.h src/intcon.cc
 	  src/pic-ioports.h src/pic-ioports.cc

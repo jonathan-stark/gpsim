@@ -370,7 +370,8 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _PIC_PROCESSOR_;};
-  virtual int access_gprs() { return 0; };
+  virtual unsigned int access_gprs() { return 0; };
+  virtual unsigned int bugs() { return 0; };    // default is no errata
 
   /* The program_counter class calls these two functions to get the upper bits of the PC
    * for branching (e.g. goto) or modify PCL instructions (e.g. addwf pcl,f) */
@@ -449,6 +450,14 @@ protected:
 
 
 #define cpu_pic ( (pic_processor *)cpu)
+
+
+// Bit field of known silicon bugs
+#define BUG_NONE        0
+#define BUG_DAW         0x00000001
+
+
+
 
 //------------------------------------------------------------------------
 // Base Class for configuration memory
