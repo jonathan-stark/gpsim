@@ -146,6 +146,34 @@ class INTCON3 :  public sfr_register
 {
 public:
   INTCON3(Processor *pCpu, const char *pName, const char *pDesc);
+
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+
+  inline void set_int1f(bool b)
+  {
+    bool current = (value.get() & INT1IF) == INT1IF;
+    if (b && !current)
+      put(value.get() | INT1IF);
+    if (!b && current)
+      put(value.get() & ~INT1IF);
+  }
+  inline void set_int2f(bool b)
+  {
+    bool current = (value.get() & INT2IF) == INT2IF;
+    if (b && !current)
+      put(value.get() | INT2IF);
+    if (!b && current)
+      put(value.get() & ~INT2IF);
+  }
+  inline void set_int1e()
+    {
+      put(value.get() | INT1IE);
+    }
+  inline void set_int2e()
+    {
+      put(value.get() | INT2IE);
+    }
   enum
   {
     INT1IF  = 1<<0,
@@ -187,7 +215,11 @@ public:
 
   enum {
     GIEH = GIE,
-    GIEL = XXIE
+    GIEL = XXIE,
+    TMR0IE = T0IE,
+    INT0IE = INTE,
+    TMR0IF = T0IF,
+    INT0IF = INTF
   };
 #define INTERRUPT_VECTOR_LO       (0x18 >> 1)
 #define INTERRUPT_VECTOR_HI       (0x08 >> 1)

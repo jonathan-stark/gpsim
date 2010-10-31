@@ -59,6 +59,8 @@ protected:
 };
 
 class INTCON;
+class INTCON2;
+class INTCON3;
 //  PicPortBRegister is usually used for portb and interrupts on selected edge
 //  of bit 0 and sleep wakeup and interrupt on level changes for bits 4-7. 
 class PicPortBRegister : public PicPortRegister
@@ -66,7 +68,11 @@ class PicPortBRegister : public PicPortRegister
 public:
   PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
                    INTCON *pIntcon,
-                   unsigned int numIopins, unsigned int enableMask=0xff);
+                   unsigned int numIopins, 
+		   unsigned int enableMask=0xff,
+		   INTCON2 *pIntcon2 = NULL,
+		   INTCON3 *pIntcon3 = NULL
+		);
   ~PicPortBRegister();
 
   virtual void put(unsigned int new_value);
@@ -85,6 +91,8 @@ private:
 
   BitSink *m_bsRBPU;
   INTCON  *m_pIntcon;
+  INTCON2  *m_pIntcon2;
+  INTCON3  *m_pIntcon3;
 };
 
 class IOC;

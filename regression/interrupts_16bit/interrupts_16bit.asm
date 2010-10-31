@@ -1,6 +1,6 @@
 
         ;; The purpose of this program is to test gpsim's ability to 
-        ;; simulate interrupts on the midrange core (specifically the 'f84).
+        ;; simulate interrupts on the midrange core (specifically the 'f2321).
 
 
 	list    p=18f2321               ; list directive to define processor
@@ -49,11 +49,16 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 ;
 ;------------------------------------------------------------------------
 
-INT_VECTOR   CODE    0x008               ; interrupt vector location
+INT_VECTOR   CODE    0x008               ; Hi priority interrupt vector location
 
         movwf   w_temp
         swapf   STATUS,W
         movwf   status_temp
+	goto	check_rbi
+
+LOW_INT_VECTOR CODE 0x018		; Low priority interrupt vector
+  .assert  "\"*** FAILED 16bit-core basic interrupt test low interrupt\""
+        goto    $
 
 check_rbi:
         btfsc   INTCON,RBIF
@@ -67,10 +72,26 @@ check_rbi:
 check_int:
         btfsc   INTCON,INT0IF
          btfss  INTCON,INT0IE
-          bra   check_t0
+          bra   check_b1
 
         bsf     temp5,0         ;Set a flag to indicate rb0 int occured
         bcf     INTCON,INT0IF
+
+check_b1:
+        btfsc   INTCON3,INT1IF
+         btfss  INTCON3,INT1IE
+          bra   check_b2
+
+        bsf     temp5,2         ;Set a flag to indicate rb1 int occured
+        bcf     INTCON3,INT1IF
+
+check_b2:
+        btfsc   INTCON3,INT2IF
+         btfss  INTCON3,INT2IE
+          bra   check_t0
+
+        bsf     temp5,3         ;Set a flag to indicate rb2 int occured
+        bcf     INTCON3,INT2IF
 
 check_t0:
         btfsc   INTCON,T0IF
@@ -318,6 +339,39 @@ rbif_l1:
         skpc
          bra    rbif_l1
 
+	;; Test int1, interrupts using intcon3 register
+	;; B5 drives B1
+test_int1
+	bcf	INTCON,RBIE	; turn off b 4-7 intterupts 
+	bsf     TRISB,1        	; and portb bit 1 an input
+	bcf	PORTB,5		; drive portb1 low
+	clrf	temp5
+	bcf	INTCON3,INT1IF
+	bsf	INTCON3,INT1IP  ; priority interrupt
+	bsf	INTCON3,INT1IE
+	bsf	PORTB,5		; drive portb1 high
+    .assert "(temp5) == 4,\"*** FAILED 16bit-core basic, no int1 interrupt\""
+	nop
+	clrf	temp5
+	bcf	PORTB,5		; drive portb1 low 
+    .assert "(temp5) == 0,\"*** FAILED 16bit-core basic, unexpected int1 interrupt\""
+	nop
+	;; Test int2, interrupts using intcon3 register
+	;; B6 drives B2
+test_int2
+	bsf     TRISB,2        	; and portb bit 2 an input
+	bcf	PORTB,6		; drive portb2 low
+	clrf	temp5
+	bcf	INTCON3,INT2IF
+	bsf	INTCON3,INT2IP  ; priority interrupt
+	bsf	INTCON3,INT2IE
+	bsf	PORTB,6		; drive portb2 high
+    .assert "(temp5) == 8,\"*** FAILED 16bit-core basic, no int2 interrupt\""
+	nop
+	clrf	temp5
+	bcf	PORTB,6		; drive portb2 low 
+    .assert "(temp5) == 0,\"*** FAILED 16bit-core basic, unexpected int2 interrupt\""
+	nop
 
 done:   
   .assert  "\"*** PASSED 16bit-core basic interrupt test\""

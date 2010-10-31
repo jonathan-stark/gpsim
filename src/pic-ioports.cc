@@ -240,12 +240,16 @@ unsigned int PicPSP_TrisRegister::get(void)
 PicPortBRegister::PicPortBRegister(Processor *pCpu, const char *pName, const char *pDesc,
                                    INTCON *pIntcon,
 				   unsigned int numIopins, 
-				   unsigned int enableMask)
+				   unsigned int enableMask,
+				   INTCON2 *pIntcon2,
+				   INTCON3 *pIntcon3)
   : PicPortRegister(pCpu, pName, pDesc, numIopins, enableMask),
     m_bRBPU(false),
     m_bIntEdge(true), 
     m_bsRBPU(0),
-    m_pIntcon(pIntcon)
+    m_pIntcon(pIntcon),
+    m_pIntcon2(pIntcon2),
+    m_pIntcon3(pIntcon3)
 {
   assert(m_pIntcon);
 }
@@ -293,7 +297,64 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 
   // interrupt bit 0 on specified edge 
   bool bNewValue = new3State=='1' || new3State=='W';
-  if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
+  RegisterValue lastDrivenValue = rvDrivenValue;
+  PortRegister::setbit(bit_number, new3State);
+
+  if (m_pIntcon3 && (bit_number != 0))
+  {
+	bool drive = (lastDrivenValue.data&(1 << bit_number)) ;
+	bool level;
+	int intcon3 = m_pIntcon3->value.get();
+	switch(bit_number)
+	{
+	case 1:
+	    level = m_pIntcon2->value.get() & INTCON2::INTEDG1;
+	    if ((drive != level) && (bNewValue == level)) 
+	    {
+    		cpu_pic->exit_sleep();
+		m_pIntcon3->set_int1f(true);
+		if (((intcon3 & INTCON3::INT1IE) == 0) ||
+		    (m_pIntcon->value.get() & INTCON_16::GIEH) == 0)
+		    return; // Interrupts are disabled
+		if (intcon3 & INTCON3::INT1IP) //priority interrupt
+	        {
+		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_HI);
+		    cpu_pic->BP_set_interrupt();
+		}
+		else if ((m_pIntcon->value.get() & INTCON_16::GIEL) != 0)
+		{
+		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_LO);
+		    cpu_pic->BP_set_interrupt();
+		}
+	    }
+	    return;
+	    break;
+
+	case 2:
+	    level = m_pIntcon2->INTEDG2;
+	    if ((drive != level) && (bNewValue == level)) 
+	    {
+    		cpu_pic->exit_sleep();
+		m_pIntcon3->set_int2f(true);
+		if (((intcon3 & INTCON3::INT2IE) == 0) ||
+		    (m_pIntcon->value.get() & INTCON_16::GIEH) == 0)
+		    return; // Interrupts are disabled
+		if (intcon3 & INTCON3::INT2IP) //priority interrupt
+	        {
+		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_HI);
+		    cpu_pic->BP_set_interrupt();
+		}
+		else if ((m_pIntcon->value.get() & INTCON_16::GIEL) != 0)
+		{
+		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_LO);
+		    cpu_pic->BP_set_interrupt();
+		}
+	    }
+	    return;
+	    break;
+	}
+  }
+  if (bit_number == 0 && (((lastDrivenValue.data&1)==1)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
   {
     cpu_pic->exit_sleep();
@@ -301,8 +362,6 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   }
 
 
-  RegisterValue lastDrivenValue = rvDrivenValue;
-  PortRegister::setbit(bit_number, new3State);
 
  // interrupt and exit sleep level change top 4 bits on input
   unsigned int bitMask = (1<<bit_number) & 0xF0;

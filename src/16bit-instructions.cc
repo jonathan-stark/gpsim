@@ -1430,7 +1430,7 @@ MOVWF16a::MOVWF16a(Processor *new_cpu, unsigned int new_opcode, unsigned int add
 {
 //    pic_processor * cpu = (pic_processor*) new_cpu;
   register_address =  (new_opcode & 0xff);
-  if ( register_address >= cpu_pic->access_gprs() )  // some 18f devices split at 0x60
+  if ( register_address >= (unsigned int)(cpu_pic->access_gprs()) )  // some 18f devices split at 0x60
     register_address |= 0xf00;
 }
 

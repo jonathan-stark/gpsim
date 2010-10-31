@@ -1,3 +1,11 @@
+2010-10-31 Roy Rankin <rrankin@ihug.com.au>
+	* src/16bit-processors.cc src/intcon.h src/intcon.cc
+	  src/pic-ioports.h src/pic-ioports.cc
+	  regression/interrupts_16bit/priority.asm
+	  regression/interrupts_16bit/interrupts_16bit.asm :
+	- implement intcon3 for int1, int2 operation bug #3071596
+	* src/16bit-instructions.cc : fix complier warning
+
 2010-10-25 Rob Pearce<rob@bdt-home.demon.co.uk>
         * modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
           regression/ttl/ttl165.asm regression/ttl/Makefile
