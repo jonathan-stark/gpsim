@@ -1,6 +1,6 @@
 
         ;; The purpose of this program is to test gpsim's ability to 
-        ;; simulate interrupts on the midrange core (specifically the 'f84).
+        ;; simulate interrupts on the midrange core (specifically the 'f2321).
 
 
 	list    p=18f2321               ; list directive to define processor
@@ -75,13 +75,29 @@ check_int:
 check_t0:
         btfsc   PIR1,TMR2IF
          btfss  PIE1,TMR2IE
-          bra   exit_int
+          bra   check_int1
 
     ;; tmr0 has rolled over
 
         bcf     PIR1,TMR2IF     ; Clear the pending interrupt
         bsf     intflags,2      ; Set a flag to indicate rollover
                 
+check_int1:
+        btfsc   INTCON3,INT1IF
+         btfss  INTCON3,INT1IE
+          bra   check_int2
+
+        bsf     temp3,0         ;Set a flag to indicate rb1 int occured
+        bcf     INTCON3,INT1IF
+
+check_int2:
+        btfsc   INTCON3,INT2IF
+         btfss  INTCON3,INT2IE
+          bra   exit_int
+
+        bsf     temp3,1         ;Set a flag to indicate rb2 int occured
+        bcf     INTCON3,INT2IF
+
 exit_int:               
 
         movf    w_temp,w
@@ -90,6 +106,22 @@ exit_int:
 
 
 hi_pri_isr:
+check_int1hi:
+        btfsc   INTCON3,INT1IF
+         btfss  INTCON3,INT1IE
+          bra   check_int2hi
+
+        bsf     temp3,2         ;Set a flag to indicate rb1 int occured
+        bcf     INTCON3,INT1IF
+
+check_int2hi:
+        btfsc   INTCON3,INT2IF
+         btfss  INTCON3,INT2IE
+          bra   check_rbih
+
+        bsf     temp3,3         ;Set a flag to indicate rb2 int occured
+        bcf     INTCON3,INT2IF
+
 check_rbih:
         btfsc   INTCON,RBIF
          btfss  INTCON,RBIE
@@ -465,10 +497,38 @@ rbif_l3:
         goto    $-2
 
     .assert "intflags == 0x41, \"*** FAILED priority nesting test\""
+	nop
 
         bcf     PIE1,TMR2IE     ;Disable TMR2 overflow interrupts
         clrf    T2CON           ; and switch off TMR2
 
+	;; Test int1 and int2 
+	;; 1> low priority with GIEL=0 (no inturrupt expected)
+	;; 2> log priority with GIEL=1
+
+	
+        bcf     INTCON,GIEL     ;disable low priority interrupts
+	movlw	0x6		; b5 drives b1 b6 drives b2
+	movwf	TRISB
+	bcf	PORTB,5
+	bcf	PORTB,6
+	clrf	temp3
+	movlw	(1<<INT1IE)|(1<<INT2IE)	; enable int1, int2 inturrupt with low priority
+	movwf	INTCON3
+	bsf	PORTB,5
+	bsf	PORTB,6
+	bcf	PORTB,5
+	bcf	PORTB,6
+    .assert "temp3 == 0, \"***FAILED GIEL not masking int1 or int2\""
+	nop
+
+	bsf	INTCON,GIEL
+	bsf	PORTB,5
+	bsf	PORTB,6
+	bcf	PORTB,5
+	bcf	PORTB,6
+    .assert "temp3 == 3, \"***FAILED low priority inturrupt on int1 or int2\""
+	nop
 
 done:  
   .assert  "\"*** PASSED 16bit interrupt priority test\""

@@ -138,6 +138,24 @@ INTCON3::INTCON3(Processor *pCpu, const char *pName, const char *pDesc)
 
 //----------------------------------------------------------------------
 //----------------------------------------------------------------------
+void INTCON3::put_value(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  value.put(new_value);
+
+
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+void INTCON3::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
+
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 INTCON_14_PIR::INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDesc)
   : INTCON(pCpu, pName, pDesc),
     pir_set(0)
