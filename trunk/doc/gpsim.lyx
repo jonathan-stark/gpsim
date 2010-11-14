@@ -1,4 +1,4 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -4522,7 +4522,7 @@ reference "cha:Assertions-and-Extended"
 
 ).
  An assertion is an expression associated with a specific instruction.
- It essential means, 
+ It essentially means, 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4535,12 +4535,12 @@ If the expression at this instruction evaluates to false, then halt the
 \end_layout
 
 \begin_layout LyX-Code
-   ; Close the switch because of capacitance portc1 will go high after a
- delay:
+   ; Close the switch.
+ Because of capacitance, portc1 will go high after a delay:
 \end_layout
 
 \begin_layout LyX-Code
-   ; R=145, C=4.2e-6 TC=6.11e-4 or 1527 cycles 0-2 volts requires 0.51 Tc
+   ; R=145, C=4.2e-6 TC=6.11e-4 or 1527 cycles, 0-2 volts requires 0.51 Tc
 \end_layout
 
 \begin_layout LyX-Code
@@ -4609,7 +4609,7 @@ gpsim supports a socket interface.
 examples/scripts
 \emph default
  subdirectory.
- This code not distributed and is only available in the subversion repository.
+ This code is not distributed and is only available in the subversion repository.
 \end_layout
 
 \begin_layout Chapter
@@ -5379,7 +5379,7 @@ Stimulus
 
 \begin_layout Standard
 Stimuli are extremely useful, if not necessary, for simulations.
- They provides a means for simulating interactions with the real world.
+ They provide a means for simulating interactions with the real world.
  
 \end_layout
 
@@ -5401,6 +5401,12 @@ Analog stimuli are also available.
  For example, it's possible to combine two analog stimuli together to create
  signals like DTMF tones.
  
+\end_layout
+
+\begin_layout Standard
+Note, however, that gpsim does not attempt to be a full electronic circuit
+ simulator, and certain approximations made for efficiency will cause inaccuracy
+ in complex simulation environments.
 \end_layout
 
 \begin_layout Section
@@ -6014,6 +6020,48 @@ PullDown
  sources (FIXME, would it make sense to rename these modules?).
 \end_layout
 
+\begin_layout Section
+Limitations of the Simulus Mechanism
+\end_layout
+
+\begin_layout Standard
+The simulation of external devices using gpsim stimuli and nodes is intended
+ to assist in PIC software debugging, not electronic circuit design.
+ As such it takes a simplified approach to certain things.
+\end_layout
+
+\begin_layout Subsection
+Propagation Delays
+\end_layout
+
+\begin_layout Standard
+gpsim makes no attempt to simulate propagation delays in the circuit.
+ Usually this is not a problem.
+ However, when using modules
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "cha:Modules"
+
+\end_inset
+
+ to expand gpsim's environment, it is possible to create situations where
+ it matters.
+ For example, daisy-chaining two or more shift registers with a shared clock
+ relies on the propagation delay of the first register to ensure the second
+ shifts the correct data in.
+ Since gpsim does not simulate this delay, the results may be wrong
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+They may be right, it depends on execution order, which is subtle.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
 \begin_layout Chapter
 Modules
 \begin_inset Index
@@ -6049,6 +6097,14 @@ system
  be a processor and an LCD display.
  gpsim provides a few modules that one may use either for debugging or as
  templates for creating new modules.
+\end_layout
+
+\begin_layout Standard
+Note the gpsim's modules are provided to facilitate debugging of the PIC
+ code, not the hardware.
+ gpsim does not attempt to be a circuit simulator by itself.
+ If you need that functionality, the gpsim core can be embedded into third
+ party simulators.
 \end_layout
 
 \begin_layout Standard
@@ -6135,7 +6191,7 @@ U1.ypos = 276.0000000000000
 \end_layout
 
 \begin_layout Standard
-Modules may provide only help which can be accessed using the help command:
+Modules may provide help which can be accessed using the help command:
 \end_layout
 
 \begin_layout LyX-Code
@@ -6182,7 +6238,7 @@ gpsim provides a library of useful modules for simulation.
 
 \begin_layout Standard
 \begin_inset Tabular
-<lyxtabular version="3" rows="18" columns="2">
+<lyxtabular version="3" rows="20" columns="2">
 <features>
 <column alignment="center" valignment="top" width="0">
 <column alignment="center" valignment="top" width="0">
@@ -6521,7 +6577,47 @@ TTL377
 \begin_inset Text
 
 \begin_layout Plain Layout
-A 74HC377 style 8-bit tristate latch
+A 74xx377 style 8-bit tristate latch
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TTL165
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A 74xx165 parallel-in-serial-out shift register
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+TTL595
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A 74xx595 serial-in-parallel-out shift register
 \end_layout
 
 \end_inset
@@ -6809,6 +6905,143 @@ not
 
 \begin_layout Standard
 .out - Output
+\end_layout
+
+\begin_layout Subsection*
+TTL377
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+ttl377
+\end_layout
+
+\end_inset
+
+ - Octal Latch
+\end_layout
+
+\begin_layout Standard
+The TTL377 module simulates an 8-bit parallel latch with output enable.
+ It latches all bits simultaneously so that connecting an output to an input
+ gives correct results.
+ However, this is not guaranteed where multiple modules are so connected.
+\end_layout
+
+\begin_layout Standard
+.D0..7 - Input
+\end_layout
+
+\begin_layout Standard
+.Q0..7 - Output
+\end_layout
+
+\begin_layout Standard
+.E - output enable
+\end_layout
+
+\begin_layout Standard
+.CP - clock (rising edge)
+\end_layout
+
+\begin_layout Subsection*
+TTL165
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+ttl165
+\end_layout
+
+\end_inset
+
+ - Parallel to Serial Shift Register
+\end_layout
+
+\begin_layout Standard
+The TTL165 module simulates an 8-bit parallel input serial output shift
+ register.
+ It is particularly useful for connecting to a SPI peripheral.
+ Note, however, that the common practice of daisy-chaining such shift registers
+ is not guaranteed to simulate correctly.
+\end_layout
+
+\begin_layout Standard
+.D0..7 - parallel input
+\end_layout
+
+\begin_layout Standard
+.Ds - daisy-chain serial input
+\end_layout
+
+\begin_layout Standard
+.Q7 - output
+\end_layout
+
+\begin_layout Standard
+.nQ7 - inverted output
+\end_layout
+
+\begin_layout Standard
+.CE - clock enable
+\end_layout
+
+\begin_layout Standard
+.CP - clock (rising edge)
+\end_layout
+
+\begin_layout Standard
+.PL - parallel load
+\end_layout
+
+\begin_layout Subsection*
+TTL595
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+ttl595
+\end_layout
+
+\end_inset
+
+ - Serial to Parallel Shift Register
+\end_layout
+
+\begin_layout Standard
+The TTL595 module simulates an 8-bit serial input parallel output shift
+ register.
+ It is particularly useful for connecting to a SPI peripheral.
+ Note, however, that the common practice of daisy-chaining such shift registers
+ is not guaranteed to simulate correctly.
+\end_layout
+
+\begin_layout Standard
+.Q0..7 - parallel output
+\end_layout
+
+\begin_layout Standard
+.Ds - serial input
+\end_layout
+
+\begin_layout Standard
+.Qs - daisy-chain serial output
+\end_layout
+
+\begin_layout Standard
+.OE - output enable
+\end_layout
+
+\begin_layout Standard
+.SCK - shift clock (rising edge)
+\end_layout
+
+\begin_layout Standard
+.RCK - output latch clock (rising edge)
+\end_layout
+
+\begin_layout Standard
+.MR - master reset
 \end_layout
 
 \begin_layout Subsection
