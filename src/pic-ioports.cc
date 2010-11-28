@@ -300,15 +300,31 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   RegisterValue lastDrivenValue = rvDrivenValue;
   PortRegister::setbit(bit_number, new3State);
 
-  if (m_pIntcon3 && (bit_number != 0))
+  if (m_pIntcon3)
   {
 	bool drive = (lastDrivenValue.data&(1 << bit_number)) ;
 	bool level;
+	int intcon2 = m_pIntcon2->value.get();
 	int intcon3 = m_pIntcon3->value.get();
 	switch(bit_number)
 	{
+	case 0:
+	    level = intcon2 & INTCON2::INTEDG0;
+	    if ((drive != level) && (bNewValue == level)) 
+	    {
+    		cpu_pic->exit_sleep();
+		m_pIntcon->set_intf(true);
+//		if (((intcon3 & INTCON::INTE) == 0) ||
+//		    (m_pIntcon->value.get() & INTCON_16::GIEH) == 0)
+//		    return; // Interrupts are disabled
+//		((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_HI);
+//		cpu_pic->BP_set_interrupt();
+	    }
+	    return;
+	    break;
+
 	case 1:
-	    level = m_pIntcon2->value.get() & INTCON2::INTEDG1;
+	    level = intcon2 & INTCON2::INTEDG1;
 	    if ((drive != level) && (bNewValue == level)) 
 	    {
     		cpu_pic->exit_sleep();
@@ -331,7 +347,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 	    break;
 
 	case 2:
-	    level = m_pIntcon2->INTEDG2;
+	    level = intcon2 & INTCON2::INTEDG2;
 	    if ((drive != level) && (bNewValue == level)) 
 	    {
     		cpu_pic->exit_sleep();
@@ -340,6 +356,29 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 		    (m_pIntcon->value.get() & INTCON_16::GIEH) == 0)
 		    return; // Interrupts are disabled
 		if (intcon3 & INTCON3::INT2IP) //priority interrupt
+	        {
+		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_HI);
+		    cpu_pic->BP_set_interrupt();
+		}
+		else if ((m_pIntcon->value.get() & INTCON_16::GIEL) != 0)
+		{
+		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_LO);
+		    cpu_pic->BP_set_interrupt();
+		}
+	    }
+	    return;
+	    break;
+
+	case 3:
+	    level = intcon2 & INTCON2::INTEDG3;
+	    if ((drive != level) && (bNewValue == level)) 
+	    {
+    		cpu_pic->exit_sleep();
+		m_pIntcon3->set_int3f(true);
+		if (((intcon3 & INTCON3::INT3IE) == 0) ||
+		    (m_pIntcon->value.get() & INTCON_16::GIEH) == 0)
+		    return; // Interrupts are disabled
+		if (intcon2 & INTCON2::INT3IP) //priority interrupt
 	        {
 		    ((INTCON_16 *)m_pIntcon)->set_interrupt_vector(INTERRUPT_VECTOR_HI);
 		    cpu_pic->BP_set_interrupt();

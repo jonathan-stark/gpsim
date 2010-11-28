@@ -231,62 +231,30 @@ tmr0_l1:
         
 test_inte:
 
-        
-        bsf     TRISB,0        ;and portb bit 0 an input
-        bcf     TRISA,4        ;Make porta bit 4 an output
+        bsf     TRISB,0        ;Make portb bit 0 an input
+        bcf     TRISA,4        ; and porta bit 4 an output
         bcf     INTCON2,NOT_RBPU  ;Enable the portb weak pull-ups
+
         bsf     INTCON2,INTEDG0   ;Interrupt on rising edge
 
+        rcall   test_int_pin
 
-        movlw   0xff
-        movwf   temp1
-        movwf   temp2
-        movwf   temp3
-        movwf   temp4
-                
-        bcf     PORTA,4
-        bcf     INTCON,INT0IF
-        bsf     INTCON,INT0IE
+    .assert "(temp2) == 0x40,\"*** FAILED 16bit-core, no int0 rising\""
+	nop
+    .assert "(temp1) == 0x00,\"*** FAILED 16bit-core, int0 interrupt on wrong edge\""
+	nop
 
-
-        ;;
-        ;; This routine toggles porta bit 4 with the hope of generating
-        ;; an interrupt on portb bit 0.
-        ;; temp1 counts the number of times an interrupt has occurred
-        ;; temp2 counts the number of times the interrupt was due to
-        ;;      a rising edge.
-inte_edgecount:
-        bcf     temp5,0         ;Interrupt flag
-
-        clrz    
-        bcf     PORTA,4         ;Falling edge
-
-        btfsc   temp5,0
-         decf   temp2,f         ;Falling edge caused the interrupt
-
-        bcf     temp5,0
-        bsf     PORTA,4         ;Rising edge
-
-        btfsc   temp5,0
-         decf   temp3,f         ;Rising edge caused the interrupt
-
-        ;; if either temp2 or temp3 decremented to zero, then z will be set
-        bnz     inte_edgecount
-
-        incfsz  temp4,f
-         bra    test_rbif
-        
-        ;; Now let's test the falling edge
-        
         bcf     INTCON,INT0IE             ;Disable inte interrupt
-        bcf     PORTA,4
-        bcf     INTCON,INT0IF
-        
-        bcf     INTCON2,INTEDG0    ;Interrupt on falling edge
+        bcf     INTCON2,INTEDG0   ;Interrupt on falling edge
 
-        bsf     INTCON,INT0IE
+        rcall   test_int_pin
+
+    .assert "(temp1) == 0x40,\"*** FAILED 16bit-core, no int0 falling\""
+	nop
+    .assert "(temp2) == 0x00,\"*** FAILED 16bit-core, int0 interrupt on wrong edge\""
+	nop
+
         
-        goto    inte_edgecount
 
         ;;
         ;; test_rbif
@@ -294,7 +262,7 @@ inte_edgecount:
         ;; This next block tests the interrupt on change feature of
         ;; port b's I/O pins 4-7
         ;; 
-test_rbif
+test_rbif:
 
         bcf     INTCON,INT0IE     ;Disable the rb0 interrupt
 
@@ -380,5 +348,52 @@ done:
 failed:	
   .assert  "\"*** FAILED 16bit-core basic interrupt test\""
         goto    $
+
+
+
+        ;;
+        ;; This routine toggles one of the porta bits with the hope of generating
+        ;; an interrupt on one of the portb bits.
+        ;; temp1 counts the number of interrupts due to falling edges
+        ;; temp2 counts the number of interrupts due to rising edges
+        ;;
+test_int_pin:
+        bsf     TRISB,0        ;and portb bit 0 an input
+        bcf     TRISA,4        ;Make porta bit 4 an output
+        bcf     INTCON2,NOT_RBPU  ;Enable the portb weak pull-ups
+
+        clrf    temp1
+        clrf    temp2
+        movlw   0x40
+        movwf   temp3       ; used for counting
+        movwf   temp4
+
+        bcf     PORTA,4
+        bcf     INTCON,INT0IF
+        bsf     INTCON,INT0IE
+
+        ;;
+        ;; Now loop round 64 times toggling the pin and count the interrupts
+        ;;
+inte_edgecount:
+        bcf     temp5,0         ;Interrupt flag
+
+        clrz    
+        bsf     PORTA,4         ;Falling edge
+
+        btfsc   temp5,0
+         incf   temp2,f         ;Falling edge caused the interrupt
+
+        bcf     temp5,0
+        bcf     PORTA,4         ;Rising edge
+
+        btfsc   temp5,0
+         incf   temp1,f         ;Rising edge caused the interrupt
+
+        decfsz  temp3,f
+         bra    inte_edgecount
+
+        return
+
 
         end

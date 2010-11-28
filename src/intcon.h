@@ -130,7 +130,9 @@ public:
   enum
   {
     RBIP    = 1<<0,
+    INT3IP  = 1<<1,
     TMR0IP  = 1<<2,
+    INTEDG3 = 1<<3,
     INTEDG2 = 1<<4,
     INTEDG1 = 1<<5,
     INTEDG0 = 1<<6,
@@ -166,6 +168,14 @@ public:
     if (!b && current)
       put(value.get() & ~INT2IF);
   }
+  inline void set_int3f(bool b)
+  {
+    bool current = (value.get() & INT3IF) == INT3IF;
+    if (b && !current)
+      put(value.get() | INT3IF);
+    if (!b && current)
+      put(value.get() & ~INT3IF);
+  }
   inline void set_int1e()
     {
       put(value.get() | INT1IE);
@@ -174,12 +184,18 @@ public:
     {
       put(value.get() | INT2IE);
     }
+  inline void set_int3e()
+    {
+      put(value.get() | INT3IE);
+    }
   enum
   {
     INT1IF  = 1<<0,
     INT2IF  = 1<<1,
+    INT3IF  = 1<<2,
     INT1IE  = 1<<3,
     INT2IE  = 1<<4,
+    INT3IE  = 1<<5,
     INT1IP  = 1<<6,
     INT2IP  = 1<<7
   };
