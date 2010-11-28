@@ -1,4 +1,12 @@
 2010-10-31 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/pic-ioports.cc src/intcon.h
+	  regression/interrupts_16bit/interrupts_16bit.asm :
+          Fix for bug #3120903 : INT0 edge selection moved to the correct
+          register on 16-bit devices. Also fixed the regression test so that it
+          actually bothers to check which edge caused the interrupt.
+          Code for INT3 implemented but not tested yet.
+
+2010-10-31 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/16bit-instructions.cc src/pic-processor.h src/p18x.h
           Partial implementation of "bugs" list (errata per CPU type) so that 
           the 18F6520 has a buggy DAW instruction while the 18F4321 has a 
