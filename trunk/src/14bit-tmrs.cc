@@ -1918,9 +1918,10 @@ void TMR2::update(int ut)
 
       last_update = TMR2_PR2_UPDATE;
 
+      // RP - I strongly suspect this is now entirely redundant, as I think the
+      // result comes out the same as above.
       if (pwm_mode)
       {
-          break_value <<= 2;    // now pwm value
           fc = last_cycle + break_value * prescale;
       }
 
@@ -1929,11 +1930,12 @@ void TMR2::update(int ut)
         if ( pwm_mode & ut & modeMask )
         {
           // We are in pwm mode... So let's see what happens first: a pr2 compare
-          // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
+          // or a duty cycle compare. The duty cycle is 10-bits, but the two
+          // least significant match against the prescaler rather than TMR2.
 
-          if ( (duty_cycle[cc] > (value.get()*4) ) && ( duty_cycle[cc] < break_value ) )
+          if ( (duty_cycle[cc] > (value.get()*4) ) && ( duty_cycle[cc] < break_value*4 ) )
 	  {
-            guint64 nc = last_cycle + duty_cycle[cc] * prescale;
+            guint64 nc = last_cycle + ( duty_cycle[cc] * prescale ) / 4;
 
 	    // cout << "TMR2:PWM" << cc+1 << " update at " << hex << nc << 
             //         ", dc=" << duty_cycle[cc] << "\n";
@@ -1997,9 +1999,6 @@ void TMR2::put(unsigned int new_value)
 
 //      printf ( "TMR2::put(%02X) with future_cycle -\n", new_value );
 
-      if (pwm_mode)
-	shift <<= 2;
-
 //      printf ( "   move break from 0x%" PRINTF_INT64_MODIFIER "X by %d\n", current_cycle, shift );
 
       // set cycle when tmr2 would have been zero
@@ -2036,10 +2035,7 @@ void TMR2::put(unsigned int new_value)
       {
         // set break to when TMR2 will overflow
 	last_update |= TMR2_WRAP;
-	if (pwm_mode)
-	    fc = last_cycle + (0x100 * prescale << 2);
-	else
-	    fc = last_cycle + 0x100 * prescale;
+        fc = last_cycle + 0x100 * prescale;
 
 //        printf ( "   now > break (0x%X), set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", break_value * prescale, fc );
 
@@ -2179,7 +2175,7 @@ void TMR2::new_pr2(unsigned int new_value)
       Dprintf(( "TMR2::new_pr2(0x%02X) with timer at 0x%02X -\n", new_value, value.get() ));
 
       unsigned int cur_break = (future_cycle - last_cycle)/prescale;
-      unsigned int new_break = (pwm_mode)? (1 + new_value) << 2 : 1 + new_value;
+      unsigned int new_break = 1 + new_value;
       unsigned int now_cycle = (get_cycles().get() - last_cycle) / prescale;
 
       guint64 fc = last_cycle;
@@ -2203,10 +2199,7 @@ void TMR2::new_pr2(unsigned int new_value)
       {
         // set break to when TMR2 will overflow
 	last_update |= TMR2_WRAP;
-	if (pwm_mode)
-	    fc += (0x100 * prescale << 2);
-	else
-	    fc += 0x100 * prescale;
+        fc += 0x100 * prescale;
         Dprintf(( "   now > new, set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
         get_cycles().reassign_break(future_cycle, fc, this);
         future_cycle = fc;
@@ -2228,9 +2221,6 @@ void TMR2::new_pr2(unsigned int new_value)
 void TMR2::current_value()
 {
   unsigned int tmr2_val = (get_cycles().get() - last_cycle)/ prescale;
-
-  if (pwm_mode)
-       tmr2_val >>= 2;
 
   value.put(tmr2_val & 0xff);
 
