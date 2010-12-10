@@ -103,7 +103,7 @@ start:
     clrf   PIR1          ;  Clear peripheral interrupts Flags
     movlw  0x2C          ;  PWM mode, 2 LSbs of Duty cycle = 10
     movwf  CCP1CON       ;
-    movlw  0x05		 ; Start Timer2 prescaler is 4
+    movlw  0x06		 ; Start Timer2 prescaler is 16 (to match TMR0, of course!)
     movwf  T2CON
     movlw  0x2C          ;  PWM mode, 2 LSbs of Duty cycle = 10
     movwf  CCP2CON       ;

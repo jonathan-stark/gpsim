@@ -1,4 +1,10 @@
-2010-10-31 Rob Pearce<rob@bdt-home.demon.co.uk>
+2010-12-10 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/14bit-tmrs.cc regression/ccp/pwm_6520.asm regression/ccp/pwm_877a.asm
+          Fix for bug #3132914 : The clocking of TMR2 should not be affected by 
+          whether any of the CCPs are in PWM mode, and now it isn't. Duty cycle 
+          value is now handled correctly instead.
+
+2010-11-28 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/pic-ioports.cc src/intcon.h
 	  regression/interrupts_16bit/interrupts_16bit.asm :
           Fix for bug #3120903 : INT0 edge selection moved to the correct
