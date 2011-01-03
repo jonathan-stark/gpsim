@@ -114,6 +114,8 @@ ${RT} comparator sim_628
 
 ${RT} comparator sim_877a
 
+${RT} comparator sim_882
+
 ${RT} comparator sim_10f204
 
 ${RT} a2d sim_p16c71

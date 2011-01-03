@@ -1,3 +1,11 @@
+2011-01-03 Roy Rankin <rrankin@ihug.com.au>
+	* src/comparator.cc regression/comparator/compar_882.asm
+	  regression/comparator/16f882.lkr regression/comparator/Makefile
+	  regression/run_regression.sh : Fix for bug # 3150231 
+	  Polarity should not change when ON bit is off. Fix comparator
+	  output pins cannot be driven from port when comparator is off.
+	  Add regression tests.
+
 2010-12-10 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/14bit-tmrs.cc regression/ccp/pwm_6520.asm regression/ccp/pwm_877a.asm
           Fix for bug #3132914 : The clocking of TMR2 should not be affected by 

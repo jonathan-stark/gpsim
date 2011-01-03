@@ -559,6 +559,10 @@ void CM12CON0::put(unsigned int new_value)
   if (verbose)
       cout << "CM12CON0::put(new_value) =" << hex << new_value << endl;
 
+  if (new_value & (ON | OE))
+  	cm_output->setSource(cm_source);
+  else
+   	cm_output->setSource(0);
   // ON/OFF or channel change
   if ((old_val ^ (new_value & 0xf7)) & ( ON | R | CH1 | CH0))
   {
@@ -643,7 +647,8 @@ unsigned int CM12CON0::get()
     }
     else	// If not on, output same as POL
     {
-	out_true = ((cmcon_val & POL) == POL);
+	//out_true = ((cmcon_val & POL) == POL);
+	out_true = false;
     }
     if (out_true)
 	cmcon_val |= OUT;
@@ -671,7 +676,6 @@ void CM12CON0::setpins(PinModule * c12in0, PinModule * c12in1,
    cm_output = cout;
    if (! cm_source)
 	cm_source = new CMSignalSource();
-   cm_output->setSource(cm_source);
 } 
 void CM12CON0::link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
         VRCON *_vrcon, SRCON *_srcon, ECCPAS *_eccpas)
