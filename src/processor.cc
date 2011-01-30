@@ -1147,7 +1147,7 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
                                                 instruction::BREAKPOINT_INSTRUCTION)
 {
   unsigned int uIndex = cpu->map_pm_address2index(address);
-  if( uIndex >= 0  && uIndex<cpu->program_memory_size()) {
+  if ( uIndex<cpu->program_memory_size() ) {
 
     instruction *instr = find_instruction(address,type);
     if(instr!=0) {
