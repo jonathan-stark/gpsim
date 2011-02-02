@@ -1,3 +1,10 @@
+2011-02-02 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/cod.cc
+          Fixed addressing of memory on 16-bit cores while allocating HLL code
+          references. This was responsible for a crash with large programs / long
+          addresses found in 18F4620 development and bug #3154828, although it's
+          not necessarily the only cause of that.
+
 2011-01-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/comparator.cc regression/comparator/compar_882.asm
 	  regression/comparator/16f882.lkr regression/comparator/Makefile

@@ -873,8 +873,9 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 				// Find closest address of asm line and set hll line number, hll file id and file context pm address.
 				address=cpu->pma->find_closest_address_to_line(file_index, asmsrc_line);
 				if(address >= 0) {
-					cpu->program_memory[address]->set_hll_src_line(line_number);
-					cpu->program_memory[address]->set_hll_file_id(current_hll_file_id);
+					int index = cpu->map_pm_address2index(address);
+					cpu->program_memory[index]->set_hll_src_line(line_number);
+					cpu->program_memory[index]->set_hll_file_id(current_hll_file_id);
 					cpu->files[current_hll_file_id]->put_address(line_number, address);
 				}
 
@@ -884,7 +885,8 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 			address=cpu->pma->find_closest_address_to_line(file_index, asmsrc_line-1);
 			if(address>=0)
 			{
-				cpu->program_memory[address]->set_hll_src_line(-1);
+				int index = cpu->map_pm_address2index(address);
+				cpu->program_memory[index]->set_hll_src_line(-1);
 			}
 			else
 			{
