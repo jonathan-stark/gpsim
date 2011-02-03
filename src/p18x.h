@@ -349,6 +349,8 @@ class P18F2x21 : public _16bit_v2_adc
   }
   virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
   virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
+
+  virtual void osc_mode(unsigned int value);
 };
 
 class P18F2321 : public P18F2x21
@@ -360,8 +362,6 @@ class P18F2321 : public P18F2x21
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
-  virtual void osc_mode(unsigned int value);
-
 };
 
 
@@ -395,8 +395,26 @@ class P18F4321 : public P18F4x21
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
-  virtual void osc_mode(unsigned int value);
 
+};
+
+
+/***
+PIC18F4620
+Not implemented: 
+  OSCFIF bit in peripheral interrupt register 2 (PIR2v2 pir2)(And Enable Bit)
+  
+***/
+class P18F4620 : public P18F4x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4620_;};
+  P18F4620(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int program_memory_size() const { return 0x8000; };
+  virtual unsigned int last_actual_register () const { return 0x0F7F;};
 };
 
 

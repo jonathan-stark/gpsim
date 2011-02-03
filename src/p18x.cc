@@ -36,13 +36,22 @@ License along with this library; if not, see
 #define PBADEN (1<<1)
 #define CCP2MX (1<<0)
 
+
+/**
+ *  A special variant of the Config3H class that includes all the bits that
+ *  config register does on PIC18F2x21 and derivatives (including 4620). Note
+ *  that the "set" method requires that the parent processor is an instance
+ *  of the P18F2x21 class (or a derived variant thereof).
+ */
 class Config3H_2x21 : public ConfigWord
 {
 public:
   Config3H_2x21(_16bit_processor *pCpu, unsigned int addr, unsigned int def_val)
     : ConfigWord("CONFIG3H", ~def_val & 0xfff, "Config Reg 3H", pCpu, addr)
   {
-	set(def_val);
+    set(def_val);
+	if (verbose)
+	  cout << "Config3H_2x21\n";
   }
 
   virtual void set(gint64 v)
@@ -52,14 +61,30 @@ public:
     int diff = (i64 ^ v) &0xfff;
     Integer::set(v);
 
+    printf ( "Config3H_2x21::set ( 0x%02X )\n", (int)v );
     if (m_pCpu)
     {
-	if (diff & MCLRE)
-	    (v & MCLRE) ? m_pCpu->assignMCLRPin(1) : m_pCpu->unassignMCLRPin();
+      P18F2x21 *pCpu21 = (P18F2x21*)m_pCpu;
+
+      if (diff & MCLRE)
+        (v & MCLRE) ? m_pCpu->assignMCLRPin(1) : m_pCpu->unassignMCLRPin();
+      if ( pCpu21->adcon1 )
+      {
+        unsigned int pcfg = (v & PBADEN) ? 0 
+                           : (ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2);
+        pCpu21->adcon1->por_value=RegisterValue(pcfg,0);
+      }
+      if ( diff & CCP2MX )
+      {
+        if ( v & CCP2MX )
+          pCpu21->ccp2con.setIOpin(&((*pCpu21->m_portc)[1]));
+        else
+          pCpu21->ccp2con.setIOpin(&((*pCpu21->m_portb)[3]));
+      }
     }
   }
 
-    virtual string toString()
+  virtual string toString()
   {
     gint64 i64;
     get(i64);
@@ -835,7 +860,7 @@ Processor * P18F452::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
-// P18F2455	- 18 pin
+// P18F2455	- 28 pin
 // 
 
 P18F2455::P18F2455(const char *_name, const char *desc)
@@ -859,7 +884,7 @@ void P18F2455::create()
   if(verbose)
     cout << " 18f2455 create \n";
 
-  package->assign_pin(18, 0, false);          // Vusb
+  package->assign_pin(14, 0, false);          // Vusb
 
   /* The MSSP/I2CC pins are different on this chip. */
   ssp.initialize(&pir_set_def,         // PIR
@@ -871,7 +896,8 @@ void P18F2455::create()
                SSP_TYPE_MSSP
        );
 
-  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+  // RP: Need to make this class a 2x21 derivative to reinstate the following
+//  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
   ccp1con.setBitMask(0x3f);
@@ -935,7 +961,8 @@ void P18F4455::create()
                SSP_TYPE_MSSP
        );
 
-  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+  // RP: Need to make this class a 4x21 derivative to reinstate the following
+//  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
   eccpas.setIOpin(0, 0, &(*m_portb)[0]);
@@ -1213,9 +1240,26 @@ void P18F2x21::create()
   create_iopin_map();
 
   _16bit_processor::create();
+
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
 
+  set_osc_pin_Number(0, 9, &(*m_porta)[7]);
+  set_osc_pin_Number(1,10, &(*m_porta)[6]);
 
+  /// @bug registers not present on 28 pin according to table 5-1 of the
+  /// data sheet, but bit-restricted according to section 16.4.7
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  eccpas.set_mask(0xfc);
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+  comparator.cmcon.set_eccpas(&eccpas);
+  ccp1con.setBitMask(0x3f);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
+  pwm1con.set_mask(0x80);
 }
 
 //------------------------------------------------------------------------
@@ -1364,7 +1408,7 @@ void P18F2x21::create_sfr_map()
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
   ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
-  ccp2con.setIOpin(&((*m_portc)[1]));
+//  ccp2con.setIOpin(&((*m_portc)[1]));     // handled by Config3H_2x21
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
@@ -1410,20 +1454,6 @@ void P18F2321::create()
 
   P18F2x21::create();
 
-  set_osc_pin_Number(0, 9, &(*m_porta)[7]);
-  set_osc_pin_Number(1,10, &(*m_porta)[6]);
-  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
-  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
-  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
-  eccpas.set_mask(0xfc);
-  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
-  eccpas.link_registers(&pwm1con, &ccp1con);
-  comparator.cmcon.set_eccpas(&eccpas);
-  ccp1con.setBitMask(0x3f);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
-  ccp1con.pwm1con = &pwm1con;
-  ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
-  pwm1con.set_mask(0x80);
 }
 
 Processor * P18F2321::construct(const char *name)
@@ -1443,7 +1473,7 @@ Processor * P18F2321::construct(const char *name)
   return p;
 }
 
-void P18F2321::osc_mode(unsigned int value)
+void P18F2x21::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
@@ -1517,6 +1547,22 @@ void P18F4x21::create()
   create_iopin_map();
 
   _16bit_processor::create();
+
+  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
+
+  set_osc_pin_Number(0, 13, &(*m_porta)[7]);
+  set_osc_pin_Number(1,14, &(*m_porta)[6]);
+
+  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+  comparator.cmcon.set_eccpas(&eccpas);
+  ccp1con.setBitMask(0xff);
+  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
 
 }
 
@@ -1705,7 +1751,7 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
   ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
-  ccp2con.setIOpin(&((*m_portc)[1]));
+//  ccp2con.setIOpin(&((*m_portc)[1]));     // Handled by Config3H_2x21::set
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
@@ -1749,20 +1795,7 @@ void P18F4321::create()
   // assign this eeprom to the processor
   set_eeprom_pir(e);
 
-  P18F2x21::create();
-  set_osc_pin_Number(0, 13, &(*m_porta)[7]);
-  set_osc_pin_Number(1,14, &(*m_porta)[6]);
-  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
-  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
-  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
-  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
-  eccpas.link_registers(&pwm1con, &ccp1con);
-  comparator.cmcon.set_eccpas(&eccpas);
-  ccp1con.setBitMask(0xff);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
-  ccp1con.pwm1con = &pwm1con;
-  ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
-
+  P18F4x21::create();
 }
 
 Processor * P18F4321::construct(const char *name)
@@ -1783,64 +1816,58 @@ Processor * P18F4321::construct(const char *name)
 }
 
 
-void P18F4321::osc_mode(unsigned int value)
+
+
+//------------------------------------------------------------------------
+//
+// P18F4620
+// 
+
+P18F4620::P18F4620(const char *_name, const char *desc)
+  : P18F4x21(_name,desc)
 {
-  IOPIN *m_pin;
-  unsigned int pin_Number =  get_osc_pin_Number(0);
-  
-  
-  set_int_osc(false);
-  if (pin_Number < 253)
-  {
-	m_pin = package->get_pin(pin_Number);
-	if (value == 8 || value == 9)
-	{
-	    set_int_osc(true);
-	    clr_clk_pin(pin_Number, get_osc_PinMonitor(0),
-		m_porta, m_trisa, m_lata);
-	}
-	else
-	{
-	    set_clk_pin(pin_Number, get_osc_PinMonitor(0), "OSC1", true,
-		m_porta, m_trisa, m_lata);
-	}
-  }
-  if ( (pin_Number =  get_osc_pin_Number(1)) < 253 &&
-	(m_pin = package->get_pin(pin_Number)))
-  {
-	pll_factor = 0;
-	switch(value)
-	{
-	case 6:
-	   pll_factor = 2;
-	case 0:
-	case 1:
-	case 2:
-	    set_clk_pin(pin_Number, get_osc_PinMonitor(1), "OSC2", true,
-		m_porta, m_trisa, m_lata);
-	    break;
 
-	case 3:
-	case 4:
-	case 9:
-	case 10:
-	case 11:
-	case 12:
-	case 13:
-	case 14:
-	case 15:
-	    cout << "CLKO not simulated\n";
-	    set_clk_pin(pin_Number, get_osc_PinMonitor(1) , "CLKO", false,
-		m_porta, m_trisa, m_lata);
-	    break;
+  if(verbose)
+    cout << "18F4620 constructor, type = " << isa() << '\n';
 
-	default:
-	    clr_clk_pin(pin_Number, get_osc_PinMonitor(1),
-		m_porta, m_trisa, m_lata);
-	    break;
-	}
-  }
-  
+}
+
+void P18F4620::create()
+{
+  EEPROM_PIR *e;
+
+  if(verbose)
+    cout << " 18F4620 create \n";
+
+  e = new EEPROM_PIR(this,&pir2);
+
+  e->initialize(1024);
+  //e->set_pir_set(&pir_set_def);
+  e->set_intcon(&intcon);
+
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
+
+  P18F4x21::create();
+
+  add_sfr_register(get_eeprom()->get_reg_eeadrh(), 0xfaa);
+}
+
+Processor * P18F4620::construct(const char *name)
+{
+
+  P18F4620 *p = new P18F4620(name);
+
+  if(verbose) 
+    cout << " 18F4620 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F4620 construct completed\n";
+  return p;
 }
 
 
@@ -2227,5 +2254,4 @@ Processor * P18F6520::construct(const char *name)
     cout << " 18F6520 construct completed\n";
   return p;
 }
-
 

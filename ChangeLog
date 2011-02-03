@@ -1,3 +1,14 @@
+2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
+          src/eeprom.cc src/eeprom.h
+          Initial implementation of PIC18F4620 for feature request #3159000
+          EEPROM_PIR class modified to support >256 byte EEPROM
+          Some re-factoring of 18F2x21 derivatives for less duplication
+          Config3H_2x21 class now implements PBADEN bit. Attempts to implement
+          CCP2MX bit too, but the CCPCON class doesn't allow the pin re-allocation
+          Note: This would break the 18F2455 so its Config3H has been commented 
+          until it is re-factored to be derived from the right base class!
+
 2011-02-02 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/cod.cc
           Fixed addressing of memory on 16-bit cores while allocating HLL code

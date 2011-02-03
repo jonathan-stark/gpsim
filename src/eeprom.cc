@@ -215,13 +215,29 @@ EEADR::EEADR(Processor *pCpu, const char *pName, const char *pDesc)
 
 //------------------------------------------------------------------------
 EEPROM_PIR::EEPROM_PIR(Processor *pCpu, PIR *pPir)
-  : EEPROM(pCpu),m_pir(pPir)
+  : EEPROM(pCpu),m_pir(pPir),
+    eeadrh(pCpu, "eeadrh", "EE Address High byte")
 {
 }
 
 EEPROM_PIR::~EEPROM_PIR()
 {
 }
+
+void EEPROM_PIR::start_write()
+{
+
+  get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
+
+  if ( rom_size > 256 )
+      wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
+  else
+      wr_adr = eeadr.value.get();
+  wr_data = eedata.value.get();
+
+  eecon2.start_write();
+}
+
 
 //------------------------------------------------------------------------
 // Set the EEIF and clear the WR bits.
@@ -234,6 +250,15 @@ void EEPROM_PIR::write_is_complete()
   eecon1.value.put( eecon1.value.get()  & (~eecon1.WR));
 
   m_pir->set_eeif();
+}
+
+
+void EEPROM_PIR::initialize(unsigned int new_rom_size)
+{
+
+  eeadrh.set_eeprom(this);
+
+  EEPROM::initialize(new_rom_size);
 }
 
 
@@ -342,8 +367,8 @@ void EEPROM::callback()
     //cout << "eeread\n";
 
     eecon2.unarm();
-    if (eeadr.value.get() < rom_size)
-        eedata.value.put(rom[eeadr.value.get()]->get());
+    if ( get_address() < rom_size )
+        eedata.value.put(rom[get_address()]->get());
     else
     {
 	cout << "EEPROM read address is out of range " << hex << eeadr.value.get() << endl;
@@ -509,8 +534,7 @@ void EEPROM::dump()
 //------------------------------------------------------------------------
 EEPROM_WIDE::EEPROM_WIDE(Processor *pCpu, PIR *pPir)
   : EEPROM_PIR(pCpu,pPir),
-    eedatah(pCpu,"eedatah", "EE Data High byte"),
-    eeadrh(pCpu, "eeadr", "EE Address High byte")
+    eedatah(pCpu,"eedatah", "EE Data High byte")
 {
 }
 
@@ -611,3 +635,62 @@ void EEPROM_WIDE::initialize(unsigned int new_rom_size)
 
   EEPROM::initialize(new_rom_size);
 }
+
+
+void EEPROM_PIR::callback()
+{
+
+  switch(eecon2.get_eestate()) {
+  case EECON2::EEREAD:
+    //cout << "eeread\n";
+
+    eecon2.unarm();
+    if(eecon1.value.get() & EECON1::EEPGD) {
+      cout << "Should not be possible to get here\n";
+    } else {
+      if ( get_address() < rom_size )
+      	eedata.value.put(rom[get_address()]->get());
+      else
+      {
+        cout << "LONG_EEPROM read adrress is out of range " << hex << eeadr.value.get()  + (eeadrh.value.get() << 8) << '\n';
+        bp.halt();
+      }
+    }
+
+    eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
+    break;
+
+  case EECON2::EEWRITE_IN_PROGRESS:
+    //cout << "eewrite\n";
+
+    if(eecon1.value.get() & EECON1::EEPGD) // write program memory
+    {
+        cout << "EEPROM_PIR can't do program writes\n";
+    }
+    else                                  // read eeprom memory
+    {
+        if(wr_adr < rom_size)
+        {
+           rom[wr_adr]->value.put(wr_data);
+        }
+        else
+        {
+           cout << "LONG_EEPROM write address is out of range " << hex << wr_adr << '\n';
+	   bp.halt();
+        }
+    }
+
+    write_is_complete();
+
+    if (eecon1.value.get() & eecon1.WREN)
+      eecon2.unready();
+    else
+      eecon2.unarm();
+    break;
+
+  default:
+    cout << "EEPROM_LONG::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
+    bp.halt();
+  }
+}
+
