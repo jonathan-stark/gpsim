@@ -215,8 +215,16 @@ public:
   unsigned int rd_adr;          // latched adr for eereads.
   unsigned int abp;             // break point number that's set during eewrites
 
+protected:
+  virtual unsigned int get_address(void)   { return eeadr.value.get(); };
 };
 
+/**
+ *  A class for the EEPROM in later devices with PIR-mapped status. Some of
+ *  these devices (e.g. 18F4620) have more than 256 bytes of EEPROM so this
+ *  class implements the eeadrh register too. This will not be used if the
+ *  EEPROM size is 256 or less.
+ */
 class EEPROM_PIR : public EEPROM
 {
 public:
@@ -229,12 +237,22 @@ public:
   // care of when the '628 is constructed, the EEIF is taken
   // care of here:
 
+  virtual void start_write();
   virtual void write_is_complete();
+  virtual void callback();
+
+  inline virtual EEADR *get_reg_eeadrh() { return (&eeadrh); }
+  virtual void initialize(unsigned int new_rom_size);
+  virtual void callback_print(){ cout << " EEPROM_PIR\n";}
 
 protected:
   PIR *m_pir;
 
+  EEADR  eeadrh;
 
+  virtual unsigned int get_address(void)   
+          { return (rom_size <= 256 ) ? eeadr.value.get() 
+                    : (eeadrh.value.get()<<8)+eeadr.value.get(); };
 };
 
 
@@ -251,12 +269,11 @@ public:
   virtual void initialize(unsigned int new_rom_size);
 
   inline virtual EEDATA *get_reg_eedatah() { return (&eedatah); }
-  inline virtual EEADR *get_reg_eeadrh() { return (&eeadrh); }
 
   //protected:
   EEDATA eedatah;
-  EEADR  eeadrh;
 };
+
 
 
 #endif /* EEPROM_H */
