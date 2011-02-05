@@ -85,6 +85,9 @@ void INTCON::peripheral_interrupt ( bool hi_pri )
   if ( hi_pri )
       cout << "Dodgy call to 14-bit INTCON::peripheral_interrupt with priority set\n";
 
+  if (cpu_pic->is_sleeping())
+        cpu_pic->exit_sleep();
+
   if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
     cpu_pic->BP_set_interrupt();
 }

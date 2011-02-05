@@ -1,3 +1,12 @@
+2011-02-03 Roy Rankin <rrankin@ihug.com.au>
+	* src/intcon.cc regression/tmr0_16bit/tmr0_16bit.asm
+	  regression/ccp_628/ccp_628.asm : 
+	+ tmr0 not waking after sleep (bug 3162315)
+	* src/ssp.cc : SPI and I2C may not start (bug 3169541)
+	* extras/rs232-gen/rs232-gen.c extras/rs232-gen/example/Makefile
+	  extras/rs232-gen/Makefile : Update syntax (patch 3125817), 
+	  fix baud rate
+
 2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
           src/eeprom.cc src/eeprom.h

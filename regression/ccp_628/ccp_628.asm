@@ -90,6 +90,27 @@ main:
  subwf  time_l,w
 
  .assert "W == 0xFF, \"*** FAILED 14bit TMR1 keeps counting while disabled ***\""
+ nop
+;
+;	test t0 running after wakeup from sleep by t1
+;
+	banksel OPTION_REG
+        bsf     OPTION_REG,PSA       ; bypass precounter
+	bcf	OPTION_REG,T0CS
+        bsf     PIE1,TMR1IE     ; turn on interrupt
+ 	bcf     INTCON,GIE
+	banksel T1CON
+        bsf     T1CON,NOT_T1SYNC    ;sync off
+        bsf     T1CON,TMR1ON    ; start timer 1
+        sleep
+        movf    TMR0,W
+        bcf     T1CON,NOT_T1SYNC    ;sync off
+	bcf	PIR1,TMR1IF
+        nop
+        nop
+  .assert "tmr0 != W, \"*** FAILED CCP_628  test- TMR0 stopped after sleep\""
+        nop
+
 
  clrf   TMR1L
  clrf   TMR1H
@@ -104,6 +125,7 @@ main:
  nop
  btfsc  PORTB,3
  .assert  "\"*** FAILED CCP_628 output set too soon\""
+	nop
  bsf    PORTB,6
 
  bsf    INTCON,PEIE
