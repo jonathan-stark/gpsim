@@ -100,23 +100,30 @@ TMR0H_ShadowRegisterTest:
 	MOVLW	42
 	MOVWF	TMR0H
   .assert "tmr0h == 42"
+	nop
 
 	MOVWF	TMR0L
   .assert "tmr0l == 42"
+	nop
 
 	MOVF	TMR0L,W
   .assert "tmr0l == 42"
+	nop
+
 	MOVF	TMR0H,W
   .assert "tmr0h == 42"
+	nop
 
     ; Clear the shadowed TMR0H register and verify that it cleared.
 	CLRF	TMR0H
   .assert "tmr0h == 0"
+	nop
 
     ; Now, when we read the low byte of Timer 0, the high byte gets
     ; refreshed. So let's check that TMR0H changes due to a TMR0L read:
 	MOVF	TMR0L,W
   .assert "tmr0l == 42"
+	nop
 	MOVF	TMR0H,W
   .assert "tmr0h == 42"
 	NOP
@@ -130,15 +137,18 @@ TMR0_8BitModeTest:
 	CLRF	TMR0L
 	CLRF	TMR0H
   .assert "(tmr0l == 0) && (tmr0h == 0)"
+	nop
 
   ; The timer is off, so any value written to it should be read back
   ; unchanged.
 	MOVLW	42
 	MOVWF	TMR0L
   .assert "tmr0l == 42"
+	NOP
 
 	MOVWF	TMR0H
   .assert "tmr0h == 42"
+	NOP
 	MOVWF	tmr0Hi
   ;------------------------------------------------------------
   ; 8-bit mode tests
@@ -343,10 +353,24 @@ TMR0_WaitForInt:
 	 bra	TMR0_WaitForInt
 
   .assert " (((countHi<<8)+countLo)>>(5+psa)) == 1"
+	nop
 	INCF	psa,F
 	btfss	psa,3
 	 bra	L1_InterruptTest
 
+;
+;	test that t0 continues to run after sleep woken up by t1
+	nop
+	bsf	T0CON,PSA  	; bypass precounter
+	bsf	T1CON,T1SYNC	;sync off
+	bsf	T1CON,TMR1ON	; start timer 1
+	bsf	PIE1,TMR1IE	; turn on interrupt
+	sleep
+	movf	TMR0L,W
+	bcf	T1CON,TMR1ON	; stop timer 1
+	nop
+	nop
+  .assert "tmr0l != W, \"*** FAILED 16bit-core TMR0 test- TMR0 stopped after sleep\""
 	nop
 
 ;

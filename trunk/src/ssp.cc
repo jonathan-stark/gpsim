@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998,1999,2000,2001,2002 Scott Dattalo
-	         2006 Roy R Rankin
+	         2006,2011 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -329,6 +329,7 @@ SPI::SPI(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat, _SSPBUF *_s
     m_sspcon = _sspcon;
     m_sspstat = _sspstat;
     m_sspbuf = _sspbuf;
+    m_state = eIDLE;
 }
 
 void SPI::clock( bool ClockState )
@@ -619,6 +620,7 @@ I2C::I2C(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat,
     m_sspcon2 = _sspcon2;
     m_sspadd = _sspadd;
     future_cycle = 0;
+    i2c_state = eIDLE;
 }
 
 void I2C::set_idle()
