@@ -860,7 +860,7 @@ Processor * P18F452::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
-// P18F2455	- 28 pin
+// P18F2455	- 28 pin        ***FIXME***
 // 
 
 P18F2455::P18F2455(const char *_name, const char *desc)
@@ -1234,8 +1234,16 @@ Processor * P18F1320::construct(const char *name)
 
 void P18F2x21::create()
 {
+  EEPROM_PIR *e;
+
   if(verbose)
     cout << "P18F2x21::create\n";
+
+  e = new EEPROM_PIR(this,&pir2);
+  e->initialize ( eeprom_memory_size() );
+  e->set_intcon(&intcon);
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
 
   create_iopin_map();
 
@@ -1340,14 +1348,11 @@ P18F2x21::P18F2x21(const char *_name, const char *desc)
     osctune(this, "osctune", "OSC Tune"),
     comparator(this)
 {
-
   if(verbose)
-    cout << "18c2x21 constructor, type = " << isa() << '\n';
+    cout << "18F2x21 constructor, type = " << isa() << '\n';
 
     m_porte = new PicPortRegister(this,"porte","",8,0x08);
-//  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
-//  m_late  = new PicLatchRegister(this,"late","",m_porte);
-
+    // No TRIS register for port E on 28-pin devices
 }
 
 void P18F2x21::create_sfr_map()
@@ -1419,60 +1424,6 @@ void P18F2x21::create_sfr_map()
   usart.set_eusart(true);
 }
 
-
-
-//------------------------------------------------------------------------
-//
-// P18F2321
-// 
-
-P18F2321::P18F2321(const char *_name, const char *desc)
-  : P18F2x21(_name,desc)
-{
-
-  if(verbose)
-    cout << "18F2321 constructor, type = " << isa() << '\n';
-
-}
-
-void P18F2321::create()
-{
-  EEPROM_PIR *e;
-
-  if(verbose)
-    cout << " 18F2321 create \n";
-
-  e = new EEPROM_PIR(this,&pir2);
-
-  // We might want to pass this value in for larger eeproms
-  e->initialize(256);
-  //e->set_pir_set(&pir_set_def);
-  e->set_intcon(&intcon);
-
-  // assign this eeprom to the processor
-  set_eeprom_pir(e);
-
-  P18F2x21::create();
-
-}
-
-Processor * P18F2321::construct(const char *name)
-{
-
-  P18F2321 *p = new P18F2321(name);
-
-  if(verbose)
-    cout << " 18F2321 construct\n";
-
-  p->create();
-  p->create_invalid_registers();
-  p->create_symbols();
-
-  if(verbose&2)
-    cout << " 18F2321 construct completed\n";
-  return p;
-}
-
 void P18F2x21::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;
@@ -1534,6 +1485,41 @@ void P18F2x21::osc_mode(unsigned int value)
 }
 
 
+
+//------------------------------------------------------------------------
+//
+// P18F2321
+// 
+
+P18F2321::P18F2321(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F2321 constructor, type = " << isa() << '\n';
+
+}
+
+
+Processor * P18F2321::construct(const char *name)
+{
+
+  P18F2321 *p = new P18F2321(name);
+
+  if(verbose)
+    cout << " 18F2321 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F2321 construct completed\n";
+  return p;
+}
+
+
+
 //========================================================================
 //
 // Pic 18F4x21
@@ -1541,8 +1527,16 @@ void P18F2x21::osc_mode(unsigned int value)
 
 void P18F4x21::create()
 {
+  EEPROM_PIR *e;
+
   if(verbose)
     cout << "P18F4x21::create\n";
+
+  e = new EEPROM_PIR(this,&pir2);
+  e->initialize ( eeprom_memory_size() );
+  e->set_intcon(&intcon);
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
 
   create_iopin_map();
 
@@ -1645,11 +1639,8 @@ void P18F4x21::create_iopin_map()
        );
 
 
-
-
   //1portc.ccp1con = &ccp1con;
   //1portc.usart = &usart16;
-
 }
 
 void P18F4x21::create_symbols()
@@ -1778,26 +1769,6 @@ P18F4321::P18F4321(const char *_name, const char *desc)
 
 }
 
-void P18F4321::create()
-{
-  EEPROM_PIR *e;
-
-  if(verbose)
-    cout << " 18F4321 create \n";
-
-  e = new EEPROM_PIR(this,&pir2);
-
-  // We might want to pass this value in for larger eeproms
-  e->initialize(256);
-  //e->set_pir_set(&pir_set_def);
-  e->set_intcon(&intcon);
-
-  // assign this eeprom to the processor
-  set_eeprom_pir(e);
-
-  P18F4x21::create();
-}
-
 Processor * P18F4321::construct(const char *name)
 {
 
@@ -1830,27 +1801,6 @@ P18F4620::P18F4620(const char *_name, const char *desc)
   if(verbose)
     cout << "18F4620 constructor, type = " << isa() << '\n';
 
-}
-
-void P18F4620::create()
-{
-  EEPROM_PIR *e;
-
-  if(verbose)
-    cout << " 18F4620 create \n";
-
-  e = new EEPROM_PIR(this,&pir2);
-
-  e->initialize(1024);
-  //e->set_pir_set(&pir_set_def);
-  e->set_intcon(&intcon);
-
-  // assign this eeprom to the processor
-  set_eeprom_pir(e);
-
-  P18F4x21::create();
-
-  add_sfr_register(get_eeprom()->get_reg_eeadrh(), 0xfaa);
 }
 
 Processor * P18F4620::construct(const char *name)

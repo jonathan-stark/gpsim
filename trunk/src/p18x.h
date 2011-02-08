@@ -334,6 +334,7 @@ class P18F2x21 : public _16bit_v2_adc
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual unsigned int eeprom_memory_size() const { return 0x100; };
 
 // Setting the correct register memory size breaks things
 //  virtual unsigned int register_memory_size () const { return 0x200;};
@@ -353,13 +354,13 @@ class P18F2x21 : public _16bit_v2_adc
   virtual void osc_mode(unsigned int value);
 };
 
+
 class P18F2321 : public P18F2x21
 {
  public:
   virtual PROCESSOR_TYPE isa(){return _P18F2321_;};
   P18F2321(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
 };
@@ -392,7 +393,6 @@ class P18F4321 : public P18F4x21
   virtual PROCESSOR_TYPE isa(){return _P18F4321_;};
   P18F4321(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
 
@@ -411,9 +411,9 @@ class P18F4620 : public P18F4x21
   virtual PROCESSOR_TYPE isa(){return _P18F4620_;};
   P18F4620(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
 
   virtual unsigned int program_memory_size() const { return 0x8000; };
+  virtual unsigned int eeprom_memory_size() const { return 1024; };
   virtual unsigned int last_actual_register () const { return 0x0F7F;};
 };
 

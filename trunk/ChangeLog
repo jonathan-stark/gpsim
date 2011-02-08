@@ -1,3 +1,9 @@
+2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.h src/16bit-processors.cc src/p18x.cc src/eeprom.h
+          Small re-organisation of how the EEPROM gets added to 18f2x21 and 4x21
+          derivatives. Some of the decisions pushed into the core classes so that
+          new CPU derivatives need fewer unique methods.
+
 2011-02-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/intcon.cc regression/tmr0_16bit/tmr0_16bit.asm
 	  regression/ccp_628/ccp_628.asm : 

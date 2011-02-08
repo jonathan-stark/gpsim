@@ -429,6 +429,8 @@ void _16bit_processor :: create_sfr_map()
   if (e) {
     add_sfr_register(e->get_reg_eedata(), 0xfa8);
     add_sfr_register(e->get_reg_eeadr(), 0xfa9);
+    if ( e->get_reg_eeadrh() )
+        add_sfr_register(e->get_reg_eeadrh(), 0xfaa);
     add_sfr_register(e->get_reg_eecon1(), 0xfa6, RegisterValue(0,0));
     add_sfr_register(e->get_reg_eecon2(), 0xfa7);
   }

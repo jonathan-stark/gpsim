@@ -193,6 +193,7 @@ public:
   inline virtual EECON2 *get_reg_eecon2() { return (&eecon2); }
   inline virtual EEDATA *get_reg_eedata() { return (&eedata); }
   inline virtual EEADR *get_reg_eeadr() { return (&eeadr); }
+  inline virtual EEADR *get_reg_eeadrh() { return 0; }  // No eeadrh on basic EEPROM
 
   void dump();
 
@@ -241,7 +242,7 @@ public:
   virtual void write_is_complete();
   virtual void callback();
 
-  inline virtual EEADR *get_reg_eeadrh() { return (&eeadrh); }
+  inline virtual EEADR *get_reg_eeadrh() { return (rom_size>256) ? (&eeadrh) : 0; }
   virtual void initialize(unsigned int new_rom_size);
   virtual void callback_print(){ cout << " EEPROM_PIR\n";}
 
@@ -268,6 +269,7 @@ public:
   virtual void start_program_memory_read();
   virtual void initialize(unsigned int new_rom_size);
 
+  inline virtual EEADR *get_reg_eeadrh() { return (&eeadrh); }
   inline virtual EEDATA *get_reg_eedatah() { return (&eedatah); }
 
   //protected:
