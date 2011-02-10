@@ -1,4 +1,9 @@
 2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.h src/p18x.cc
+          Re-factored 18F2455 and 18F4455 to be derived from 2x21 and 4x21 so 
+          they get the right Config3H and the right ADC, plus RE3/MCLRE pin
+
+2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.h src/16bit-processors.cc src/p18x.cc src/eeprom.h
           Small re-organisation of how the EEPROM gets added to 18f2x21 and 4x21
           derivatives. Some of the decisions pushed into the core classes so that

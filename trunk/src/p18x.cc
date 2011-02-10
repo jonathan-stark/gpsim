@@ -860,26 +860,24 @@ Processor * P18F452::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
-// P18F2455	- 28 pin        ***FIXME***
+// P18F2455	- 28 pin
 // 
 
 P18F2455::P18F2455(const char *_name, const char *desc)
-  : P18F242(_name,desc),
-    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
-    pwm1con(this, "eccp1del", "Enhanced PWM Control Register")
-
+  : P18F2x21(_name,desc)
 {
 
   cout << "\nP18F2455 does not support USB registers and functionality\n\n";
   if(verbose)
     cout << "18f2455 constructor, type = " << isa() << '\n';
 
+  // RP : I'm fairly sure this line is wrong
   m_trisc = new PicTrisRegister(this,"trisc","", (PicPortRegister *)m_portc, true);
 }
 
 void P18F2455::create()
 {
-  P18F242::create();
+  P18F2x21::create();
 
   if(verbose)
     cout << " 18f2455 create \n";
@@ -888,25 +886,13 @@ void P18F2455::create()
 
   /* The MSSP/I2CC pins are different on this chip. */
   ssp.initialize(&pir_set_def,         // PIR
-                &(*m_portb)[1],        // SCK
-                &(*m_porta)[5],        // SS
-               &(*m_portc)[7],         // SDO
-                &(*m_portb)[0],        // SDI
-               m_trisb,                // i2c tris port
-               SSP_TYPE_MSSP
+                 &(*m_portb)[1],       // SCK
+                 &(*m_porta)[5],       // SS
+                 &(*m_portc)[7],       // SDO
+                 &(*m_portb)[0],       // SDI
+                 m_trisb,              // i2c tris port
+                 SSP_TYPE_MSSP
        );
-
-  // RP: Need to make this class a 2x21 derivative to reinstate the following
-//  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
-  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
-  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
-  ccp1con.setBitMask(0x3f);
-  pwm1con.set_mask(0x80);
-  eccpas.set_mask(0xfc);
-  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
-  eccpas.link_registers(&pwm1con, &ccp1con);
-
-  ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
 }
 
 Processor * P18F2455::construct(const char *name)
@@ -929,49 +915,36 @@ Processor * P18F2455::construct(const char *name)
 // 
 
 P18F4455::P18F4455(const char *_name, const char *desc)
-  : P18F442(_name,desc),
-    eccpas(this, "eccp1as", "ECCP Auto-Shutdown Control Register"),
-    pwm1con(this, "eccp1del", "Enhanced PWM Control Register")
-
+  : P18F4x21(_name,desc)
 {
-
   cout << "\nP18F4455 does not support USB registers and functionality\n\n";
   if(verbose)
     cout << "18f4455 constructor, type = " << isa() << '\n';
 
+  // RP : I'm fairly sure this line is wrong
   m_trisc = new PicTrisRegister(this,"trisc","", (PicPortRegister *)m_portc, true);
 }
 
 void P18F4455::create()
 {
-  P18F442::create();
+  P18F4x21::create();
 
   if(verbose)
     cout << " 18f4455 create \n";
 
- package->assign_pin(18, 0, false);          // Vusb
+  package->assign_pin(18, 0, false);          // Vusb
 
   /* The MSSP/I2CC pins are different on this chip. */
   ssp.initialize(&pir_set_def,         // PIR
-                &(*m_portb)[1],        // SCK
-                &(*m_porta)[5],        // SS
-               &(*m_portc)[7],         // SDO
-                &(*m_portb)[0],        // SDI
-               m_trisb,                // i2c tris port
-               SSP_TYPE_MSSP
+                 &(*m_portb)[1],       // SCK
+                 &(*m_porta)[5],       // SS
+                 &(*m_portc)[7],       // SDO
+                 &(*m_portb)[0],       // SDI
+                 m_trisb,              // i2c tris port
+                 SSP_TYPE_MSSP
        );
 
-  // RP: Need to make this class a 4x21 derivative to reinstate the following
-//  m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
-  add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
-  add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
-  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
-  eccpas.link_registers(&pwm1con, &ccp1con);
-//RRR  comparator.cmcon.set_eccpas(&eccpas);
-  ccp1con.setBitMask(0xff);
-  ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
-  ccp1con.pwm1con = &pwm1con;
-  ccp1con.setIOpin(&((*m_portc)[2]), &((*m_portd)[5]), &((*m_portd)[6]), &((*m_portd)[7]));
+  // RP: RRR commented out comparator.cmcon.set_eccpas(&eccpas);  ??
 }
 
 Processor * P18F4455::construct(const char *name)
@@ -987,6 +960,9 @@ Processor * P18F4455::construct(const char *name)
   p->create_symbols();
   return p;
 }
+
+
+
 
 
 //------------------------------------------------------------------------
