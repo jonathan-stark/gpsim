@@ -230,36 +230,7 @@ class P18F452 : public P18F442
   virtual unsigned int last_actual_register () const { return 0x05FF;};
 };
 
-class P18F2455 : public P18F242
-{
- public:
-  ECCPAS        eccpas;
-  PWM1CON       pwm1con;
-  virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
-  P18F2455(const char *_name=0, const char *desc=0);
-  static Processor *construct(const char *name);
-  void create();
 
-  virtual unsigned int program_memory_size() const { return 0x3000; };
-  virtual unsigned int last_actual_register () const { return 0x07FF;};
-
-};
-
-class P18F4455 : public P18F442
-{
- public:
-  ECCPAS        eccpas;
-  PWM1CON       pwm1con;
-
-  virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
-  P18F4455(const char *_name=0, const char *desc=0);
-  static Processor *construct(const char *name);
-  void create();
-
-  virtual unsigned int program_memory_size() const { return 0x3000; };
-  virtual unsigned int last_actual_register () const { return 0x07FF;};
-
-};
 
 class P18Fxx20 : public _16bit_v2_adc
 {
@@ -365,6 +336,20 @@ class P18F2321 : public P18F2x21
   virtual unsigned int program_memory_size() const { return 0x1000; };
 };
 
+class P18F2455 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
+  P18F2455(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int program_memory_size() const { return 0x3000; };
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
+
+};
+
+
 
 class P18F4x21 : public P18F2x21
 {
@@ -395,6 +380,19 @@ class P18F4321 : public P18F4x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+
+};
+
+class P18F4455 : public P18F4x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
+  P18F4455(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int program_memory_size() const { return 0x3000; };
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
 
 };
 
