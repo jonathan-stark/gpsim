@@ -1,4 +1,9 @@
-2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
+2011-02-12 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.h src/p18x.cc src/pic-processor.cc src/pic-processor.h
+          Implemented the remaining devices from DS39689E (18F2221 & 4221) and
+          all devices from DS39631D (18F2420,2520,4420,4520)
+
+2011-02-10 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.h src/p18x.cc
           Re-factored 18F2455 and 18F4455 to be derived from 2x21 and 4x21 so 
           they get the right Config3H and the right ADC, plus RE3/MCLRE pin

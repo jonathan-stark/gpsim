@@ -1464,6 +1464,40 @@ void P18F2x21::osc_mode(unsigned int value)
 
 //------------------------------------------------------------------------
 //
+// P18F2221
+// 
+
+P18F2221::P18F2221(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F2221 constructor, type = " << isa() << '\n';
+
+}
+
+
+Processor * P18F2221::construct(const char *name)
+{
+
+  P18F2221 *p = new P18F2221(name);
+
+  if(verbose)
+    cout << " 18F2221 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F2221 construct completed\n";
+  return p;
+}
+
+
+
+//------------------------------------------------------------------------
+//
 // P18F2321
 // 
 
@@ -1491,6 +1525,74 @@ Processor * P18F2321::construct(const char *name)
 
   if(verbose&2)
     cout << " 18F2321 construct completed\n";
+  return p;
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18F2420
+// 
+
+P18F2420::P18F2420(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F2420 constructor, type = " << isa() << '\n';
+
+}
+
+
+Processor * P18F2420::construct(const char *name)
+{
+
+  P18F2420 *p = new P18F2420(name);
+
+  if(verbose)
+    cout << " 18F2420 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F2420 construct completed\n";
+  return p;
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18F2520
+// 
+
+P18F2520::P18F2520(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F2520 constructor, type = " << isa() << '\n';
+
+}
+
+
+Processor * P18F2520::construct(const char *name)
+{
+
+  P18F2520 *p = new P18F2520(name);
+
+  if(verbose)
+    cout << " 18F2520 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F2520 construct completed\n";
   return p;
 }
 
@@ -1733,6 +1835,39 @@ void P18F4x21::create_sfr_map()
 
 //------------------------------------------------------------------------
 //
+// P18F4221
+// 
+
+P18F4221::P18F4221(const char *_name, const char *desc)
+  : P18F4x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F4221 constructor, type = " << isa() << '\n';
+
+}
+
+Processor * P18F4221::construct(const char *name)
+{
+
+  P18F4221 *p = new P18F4221(name);
+
+  if(verbose)
+    cout << " 18F4221 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F4221 construct completed\n";
+  return p;
+}
+
+
+
+//------------------------------------------------------------------------
+//
 // P18F4321
 // 
 
@@ -1759,6 +1894,71 @@ Processor * P18F4321::construct(const char *name)
 
   if(verbose&2)
     cout << " 18F4321 construct completed\n";
+  return p;
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18F4420
+// 
+
+P18F4420::P18F4420(const char *_name, const char *desc)
+  : P18F4x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F4420 constructor, type = " << isa() << '\n';
+
+}
+
+Processor * P18F4420::construct(const char *name)
+{
+
+  P18F4420 *p = new P18F4420(name);
+
+  if(verbose)
+    cout << " 18F4420 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F4420 construct completed\n";
+  return p;
+}
+
+
+//------------------------------------------------------------------------
+//
+// P18F4520
+// 
+
+P18F4520::P18F4520(const char *_name, const char *desc)
+  : P18F4x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F4520 constructor, type = " << isa() << '\n';
+
+}
+
+Processor * P18F4520::construct(const char *name)
+{
+
+  P18F4520 *p = new P18F4520(name);
+
+  if(verbose)
+    cout << " 18F4520 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F4520 construct completed\n";
   return p;
 }
 

@@ -326,6 +326,16 @@ class P18F2x21 : public _16bit_v2_adc
 };
 
 
+class P18F2221 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2221_;};
+  P18F2221(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x800; };
+};
+
 class P18F2321 : public P18F2x21
 {
  public:
@@ -334,6 +344,16 @@ class P18F2321 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+};
+
+class P18F2420 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2420_;};
+  P18F2420(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 };
 
 class P18F2455 : public P18F2x21
@@ -347,6 +367,16 @@ class P18F2455 : public P18F2x21
   virtual unsigned int program_memory_size() const { return 0x3000; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
 
+};
+
+class P18F2520 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2520_;};
+  P18F2520(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x4000; };
 };
 
 
@@ -372,6 +402,17 @@ class P18F4x21 : public P18F2x21
 
 };
 
+
+class P18F4221 : public P18F4x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4221_;};
+  P18F4221(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x800; };
+};
+
 class P18F4321 : public P18F4x21
 {
  public:
@@ -380,7 +421,16 @@ class P18F4321 : public P18F4x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+};
 
+class P18F4420 : public P18F4x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4420_;};
+  P18F4420(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 };
 
 class P18F4455 : public P18F4x21
@@ -395,6 +445,19 @@ class P18F4455 : public P18F4x21
   virtual unsigned int last_actual_register () const { return 0x07FF;};
 
 };
+
+class P18F4520 : public P18F4x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F4520_;};
+  P18F4520(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x4000; };
+};
+
+
+
 
 
 /***
