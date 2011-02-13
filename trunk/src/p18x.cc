@@ -2005,13 +2005,22 @@ Processor * P18F4620::construct(const char *name)
 
 void P18F6x20::create()
 {
+  EEPROM_PIR *e;
+
   if(verbose)
     cout << "P18F6x20::create\n";
+
+  e = new EEPROM_PIR(this,&pir2);
+  e->initialize ( eeprom_memory_size() );
+  e->set_intcon(&intcon);
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
 
   create_iopin_map();
 
   _16bit_processor::create();
 
+  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x27));
 }
 
 //------------------------------------------------------------------------
@@ -2334,39 +2343,12 @@ void P18F6x20::create_sfr_map()
 P18F6520::P18F6520(const char *_name, const char *desc)
   : P18F6x20(_name,desc)
 {
-
   if(verbose)
     cout << "18F6520 constructor, type = " << isa() << '\n';
-
-}
-
-void P18F6520::create()
-{
-  EEPROM_PIR *e;
-
-  if(verbose)
-    cout << " 18F6520 create \n";
-
-  e = new EEPROM_PIR(this,&pir2);
-
-  // We might want to pass this value in for larger eeproms
-  e->initialize(256);
-  //e->set_pir_set(&pir_set_def);
-  e->set_intcon(&intcon);
-
-  // assign this eeprom to the processor
-  set_eeprom_pir(e);
-
-  P18F6x20::create();
-  set_osc_pin_Number(0, 13, &(*m_porta)[7]);
-  set_osc_pin_Number(1,14, &(*m_porta)[6]);
-  m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
-
 }
 
 Processor * P18F6520::construct(const char *name)
 {
-
   P18F6520 *p = new P18F6520(name);
 
   if(verbose)

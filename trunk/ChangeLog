@@ -1,3 +1,8 @@
+2011-02-13 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/p18x.h src/p18x.cc
+          Fixes to 18F6520 implementation: correct EEPROM size, remove spurious
+          wrong clock pin allocation, adjust structure to match style of 4x21 types
+
 2011-02-12 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.h src/p18x.cc src/pic-processor.cc src/pic-processor.h
           Implemented the remaining devices from DS39689E (18F2221 & 4221) and

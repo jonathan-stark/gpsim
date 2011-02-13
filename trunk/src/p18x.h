@@ -534,6 +534,7 @@ class P18F6x20 : public _16bit_v2_adc
   virtual void create_symbols();
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int eeprom_memory_size() const { return 1024; };
 
 // Setting the correct register memory size breaks things
 //  virtual unsigned int register_memory_size () const { return 0x800;};
@@ -558,11 +559,9 @@ class P18F6520 : public P18F6x20
   virtual PROCESSOR_TYPE isa(){return _P18F6520_;};
   P18F6520(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
-  void create();
 
 //  virtual unsigned int program_memory_size() const { return 0x4000; };
   virtual unsigned int bugs() { return BUG_DAW; };
-
 };
 
 #endif
