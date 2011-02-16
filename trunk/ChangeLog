@@ -1,3 +1,6 @@
+2011-02-17 Borut Razem <borut.razem@gmail.com>
+	* plat/win32/gpsim.nsi: fixed bug #3151323: problem on start gpsim
+
 2011-02-13 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/p18x.h src/p18x.cc
           Fixes to 18F6520 implementation: correct EEPROM size, remove spurious

@@ -55,6 +55,7 @@ SetCompressor /SOLID lzma
 
 !include "MUI2.nsh"
 !include "WordFunc.nsh"
+!include "WinVer.nsh"
 
 ;--------------------------------
 ; Functions
@@ -141,10 +142,9 @@ uninst:
   ; Run the uninstaller
   ClearErrors
   ExecWait '$R0 _?=$INSTDIR' ;Do not copy the uninstaller to a temp file
-
   Goto done
-inst:
 
+inst:
   ; Install the new version
   MessageBox MB_YESNO|MB_ICONQUESTION "This will install $(^Name). Do you wish to continue?" IDYES +2
   Abort
@@ -191,6 +191,8 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\pthreadGC2.dll"
   File "${PKG_ROOT}\bin\readline5.dll"
   File "${PKG_ROOT}\bin\zlib1.dll"
+
+  Call GPSIM.Win2kInstallWs2_23_dll
 
   SetOutPath "$INSTDIR\doc"
   File "${GPSIM_ROOT}\doc\gpsim.lyx"
@@ -601,6 +603,9 @@ Section Uninstall
   Delete "$INSTDIR\bin\readline5.dll"
   Delete "$INSTDIR\bin\zlib1.dll"
 
+  Delete "$INSTDIR\bin\ws2_32.dll"
+  Delete "$INSTDIR\bin\ws2_32_org.dll"
+
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"
   Delete "$DESKTOP\gpsim.lnk"
@@ -686,6 +691,18 @@ Function CreateBatFile
   Pop $0
 FunctionEnd
 
+Function GPSIM.Win2kInstallWs2_23_dll
+  ; ============================================================================
+  ; Windows 2000 support 
+  ; ============================================================================
+  ; Get the Windows version
+  ${If} ${IsWin2000}
+    ; Install the OldCigarettes Windows 2000 XP API Wrapper
+    SetOutPath "$INSTDIR\bin"
+    File "${PKG_ROOT}\bin\ws2_32.dll"
+    CopyFiles "$SYSDIR\ws2_32.dll" "$INSTDIR\bin\ws2_32_org.dll"
+  ${EndIf}
+FunctionEnd
 
 ; Uninstall/Reinstall page
 
