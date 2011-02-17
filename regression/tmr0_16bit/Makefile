@@ -7,7 +7,6 @@ PROJECT = tmr0_16bit
 OBJECTS =  $(PROJECT).o delay.o
 OUTPUT = $(PROJECT).hex
 COD = $(PROJECT).cod
-STC = $(PROJECT).stc
 
 all : $(OUTPUT)
 

@@ -521,11 +521,11 @@ RCREG::RCREG(USARTModule *pUsart)
   receive_state = RS_WAITING_FOR_START;
 
   autobaud = false;
-  set_bits_per_byte(8);
+  baud = DEFAULT_BAUD;
   set_stop_bits(0.9);
   set_noparity();
+  set_bits_per_byte(8);
 
-  set_baud_rate(DEFAULT_BAUD);
 }
 
 //------------------------------------------------------------------------

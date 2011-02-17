@@ -337,6 +337,10 @@ Indirect_Addressing::Indirect_Addressing(_16bit_processor *pCpu, const string &n
   postdec.iam = this;
   plusw.iam = this;
   */
+  current_cycle = 0;
+  fsr_value = 0;
+  fsr_state = 0;
+  fsr_delta = 0;
   cpu = pCpu;
 
 }

@@ -1,3 +1,12 @@
+2011-02-17 Roy Rankin <rrankin@ihug.com.au>
+	* regression/tmr0_16bit/tmr0_16bit.stc regression/tmr0_16bit/Makefile
+	  regression/Makefile.am : remove trivial STC file
+	* src/16bit-processors.cc src/14bit-registers.h src/uart.cc
+	  src/gpsim_time.cc src/psp.h src/bitlog.cc src/16bit-registers.cc
+	  modules/usart.cc gui/gui_symbols.cc gui/gui_profile.cc
+	  gui/gui_src_asm.cc : Fix uninitialized variables detected by
+	  valgrind
+
 2011-02-17 Borut Razem <borut.razem@gmail.com>
 	* plat/win32/gpsim.nsi: fixed bug #3151323: problem on start gpsim
 
