@@ -434,7 +434,7 @@ class OSCTUNE : public  sfr_register
   OSCCON *osccon;
                                                                                 
   OSCTUNE(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), valid_bits(6)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(6), osccon(0)
   {
   }
 };
@@ -480,7 +480,7 @@ class OSCCON : public  sfr_register,  public TriggerObject
   };
                                                                                 
   OSCCON(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), valid_bits(7)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(7), osctune(0)
   {
   }
 };

@@ -759,7 +759,7 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   filter_addresses=0;
   filter_constants=1;
   filter_registers=0;
-
+  current_row = 0;
   load_symbols=0;
 
   get_config();

@@ -61,16 +61,16 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkplotprint.h>
 
 #define PROFILE_COLUMNS    3
-static gchar *profile_titles[PROFILE_COLUMNS]={"Address", "Cycles","Instruction"};
+static const gchar *profile_titles[PROFILE_COLUMNS]={"Address", "Cycles","Instruction"};
 
 #define PROFILE_RANGE_COLUMNS    3
-static gchar *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Cycles"};
+static const gchar *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Cycles"};
 
 #define PROFILE_REGISTER_COLUMNS    4
-static gchar *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
+static const gchar *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
 
 #define PROFILE_EXESTATS_COLUMNS    9
-static gchar *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
+static const gchar *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
 
 struct profile_entry {
     unsigned int address;
@@ -1914,6 +1914,7 @@ void Profile_Window::Update()
 
   // Update register list
   iter=profile_register_list;
+
   while(iter)
   {
       struct profile_register_entry *register_entry;
@@ -2321,8 +2322,8 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
         // FIXME this memory is never freed?
         profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
         profile_register_entry->address=i;
-        profile_register_entry->last_count_read=read_cycles;
-        profile_register_entry->last_count_read=write_cycles;
+        profile_register_entry->last_count_read = read_cycles;
+        profile_register_entry->last_count_write = write_cycles;
 
         gtk_clist_set_row_data(GTK_CLIST(profile_register_clist), row, (gpointer)profile_register_entry);
 
@@ -2395,7 +2396,7 @@ void Profile_Window::Build(void)
 
 
   // Instruction profile clist
-  profile_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_COLUMNS,profile_titles));
+  profile_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_COLUMNS, (gchar **)profile_titles));
   //profile_clist = GTK_CLIST(profile_clist);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),1,TRUE);
@@ -2422,7 +2423,7 @@ void Profile_Window::Build(void)
 
 
   // Instruction range profile clist
-  profile_range_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,profile_range_titles));
+  profile_range_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,(gchar **)profile_range_titles));
   gtk_clist_set_column_auto_resize(profile_range_clist,0,TRUE);
   gtk_clist_set_column_auto_resize(profile_range_clist,1,TRUE);
   gtk_clist_set_sort_column (profile_range_clist,2);
@@ -2459,7 +2460,7 @@ void Profile_Window::Build(void)
 
 
   // Register profile clist
-  profile_register_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS,profile_register_titles));
+  profile_register_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS, (gchar **)profile_register_titles));
   gtk_clist_set_column_auto_resize(profile_register_clist,0,TRUE);
   gtk_clist_set_column_auto_resize(profile_register_clist,1,TRUE);
   gtk_clist_set_column_auto_resize(profile_register_clist,2,TRUE);
@@ -2487,7 +2488,7 @@ void Profile_Window::Build(void)
 
 
   // Execution time statistics tab
-  profile_exestats_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS,profile_exestats_titles));
+  profile_exestats_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS, (gchar **)profile_exestats_titles));
   gtk_clist_set_column_auto_resize(profile_exestats_clist,0,TRUE);
   gtk_clist_set_column_auto_resize(profile_exestats_clist,1,TRUE);
   gtk_clist_set_column_auto_resize(profile_exestats_clist,2,TRUE);
@@ -2567,6 +2568,7 @@ Profile_Window::Profile_Window(GUI_Processor *_gp)
   profile_range_list=0;
   profile_register_list=0;
   histogram_profile_list=0;
+  range_current_row = 0;
 
   program=0;
 

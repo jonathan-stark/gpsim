@@ -989,6 +989,7 @@ SourceWindow::SourceWindow(GUI_Processor *pgp,
                            pma(0),
                            status_bar(0),
                            last_simulation_mode(eSM_INITIAL),
+			   m_Notebook(0),
                            m_pParent(pParent)
 {
   Dprintf(("Constructor \n"));
@@ -1607,7 +1608,7 @@ void SourceWindow::Build()
     GTK_SIGNAL_FUNC(cb_notebook_switchpage),
     (gpointer) this);
 
-  gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook,m_TabPosition);
+  gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook, GTK_POS_LEFT);
   gtk_notebook_set_scrollable ((GtkNotebook*)m_Notebook, TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), m_Notebook, TRUE, TRUE, 0);
 
@@ -1749,8 +1750,9 @@ void SourceWindow::Update()
   if (!window || !enabled)
     return;
 
+
   if (m_Notebook &&
-    ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==FALSE
+    ((gtk_notebook_get_show_tabs(GTK_NOTEBOOK(m_Notebook))==false
     && m_pParent->getTabPosition()<0) ||
     (m_pParent->getTabPosition() != gtk_notebook_get_tab_pos(GTK_NOTEBOOK(m_Notebook))))) {
 

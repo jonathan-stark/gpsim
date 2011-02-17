@@ -48,6 +48,8 @@ public:
   void psp_put(unsigned int new_value);
   unsigned int psp_get(void);
 
+  PSP() { m_rd_sink=0; m_cs_sink=0; m_wr_sink=0;}
+
   enum {
         TRIS_MASK = 7,
         PSPMODE = 1<<4,

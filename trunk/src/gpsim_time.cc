@@ -889,6 +889,7 @@ StopWatch::StopWatch()
   rollover    = new StopWatchRollover(this);
   enable      = new StopWatchEnable(this);
   direction   = new StopWatchDirection(this);
+  break_cycle = 0;
 
   if(!value || !rollover || !enable || !direction)
     throw Error("StopWatch");

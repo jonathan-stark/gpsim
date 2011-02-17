@@ -250,6 +250,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_porta->addSink(&tmr0l,4);
 
   stack = new Stack16(this);
+  internal_osc = false;
 }
 
 //-------------------------------------------------------------------

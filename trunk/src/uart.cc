@@ -141,7 +141,7 @@ _TXSTA::~_TXSTA()
 
 //-----------------------------------------------------------
 _RCREG::_RCREG(Processor *pCpu, const char *pName, const char *pDesc, USART_MODULE *pUSART)
-  : sfr_register(pCpu, pName, pDesc), mUSART(pUSART), m_rcsta(0)
+  : sfr_register(pCpu, pName, pDesc), fifo_sp(0),  mUSART(pUSART), m_rcsta(0)
 {
   assert(mUSART);
 }
@@ -160,7 +160,8 @@ _BAUDCON::_BAUDCON(Processor *pCpu, const char *pName, const char *pDesc)
 
 _SPBRG::_SPBRG(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    txsta(0), rcsta(0), brgh(0), baudcon(0), skip(0)
+    txsta(0), rcsta(0), brgh(0), baudcon(0), start_cycle(0), last_cycle(0),
+    future_cycle(0), skip(0)
 {
 }
 

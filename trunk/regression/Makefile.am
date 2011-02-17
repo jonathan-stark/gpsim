@@ -63,7 +63,7 @@ EXTRA_DIST = \
 	spi/18f242.lkr spi/p16f88.asm spi/p16c62.asm spi/16c62.lkr \
 	spi/p18f242.asm switch_test/16f877.lkr switch_test/Makefile \
 	switch_test/switch_test.stc switch_test/switch_test.asm \
-	tmr0_16bit/Makefile tmr0_16bit/18f452.lkr tmr0_16bit/tmr0_16bit.stc \
+	tmr0_16bit/Makefile tmr0_16bit/18f452.lkr \
 	tmr0_16bit/tmr0_16bit.asm tmr0_16bit/delay.inc tmr0_16bit/delay.asm \
 	tmr1_16bit/Makefile tmr1_16bit/18f452.lkr \
 	tmr1_16bit/tmr1_16bit.asm tmr1_16bit/tmr1_16bit.stc ttl/Makefile \

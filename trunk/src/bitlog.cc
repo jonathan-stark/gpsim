@@ -243,7 +243,10 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
 
   // Initialize the time buffer
   for (unsigned int i = 0; i < max_events; i++)
+  {
+    pEventBuffer[i] = 0;
     pTimeBuffer[i] = 0;
+  }
 
   gcycles = &get_cycles();
 
@@ -301,7 +304,7 @@ unsigned int ThreeStateEventLogger::get_nEvents(guint64 start_time, guint64 stop
   return get_nEvents(start_index,stop_index);
 }
 
-void ThreeStateEventLogger::event(char state)
+void ThreeStateEventLogger::event(const char state)
 {
   // If the new event is different the most recently logged one
   // then we need to log this event. (Note that the event is implicitly
