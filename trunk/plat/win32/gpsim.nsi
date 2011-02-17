@@ -1,6 +1,6 @@
 # gpsim.nsi - NSIS installer script for gpsim
 #
-# Copyright (c) 2004-2008 Borut Razem
+# Copyright (c) 2004-2011 Borut Razem
 #
 # This file is part of gpsim.
 #
@@ -192,7 +192,15 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\readline5.dll"
   File "${PKG_ROOT}\bin\zlib1.dll"
 
-  Call GPSIM.Win2kInstallWs2_23_dll
+  ; ============================================================================
+  ; Windows 2000 support 
+  ; ============================================================================
+  ${If} ${IsWin2000}
+    ; Install the OldCigarettes Windows 2000 XP API Wrapper
+    SetOutPath "$INSTDIR\bin"
+    File "${PKG_ROOT}\bin\ws2_32.dll"
+    CopyFiles "$SYSDIR\ws2_32.dll" "$INSTDIR\bin\ws2_32_org.dll"
+  ${EndIf}
 
   SetOutPath "$INSTDIR\doc"
   File "${GPSIM_ROOT}\doc\gpsim.lyx"
@@ -603,8 +611,13 @@ Section Uninstall
   Delete "$INSTDIR\bin\readline5.dll"
   Delete "$INSTDIR\bin\zlib1.dll"
 
-  Delete "$INSTDIR\bin\ws2_32.dll"
-  Delete "$INSTDIR\bin\ws2_32_org.dll"
+  ; ============================================================================
+  ; Windows 2000 support 
+  ; ============================================================================
+  ${If} ${IsWin2000}
+    Delete "$INSTDIR\bin\ws2_32.dll"
+    Delete "$INSTDIR\bin\ws2_32_org.dll"
+  ${EndIf}
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"
@@ -689,19 +702,6 @@ Function CreateBatFile
   FileClose $0
 
   Pop $0
-FunctionEnd
-
-Function GPSIM.Win2kInstallWs2_23_dll
-  ; ============================================================================
-  ; Windows 2000 support 
-  ; ============================================================================
-  ; Get the Windows version
-  ${If} ${IsWin2000}
-    ; Install the OldCigarettes Windows 2000 XP API Wrapper
-    SetOutPath "$INSTDIR\bin"
-    File "${PKG_ROOT}\bin\ws2_32.dll"
-    CopyFiles "$SYSDIR\ws2_32.dll" "$INSTDIR\bin\ws2_32_org.dll"
-  ${EndIf}
 FunctionEnd
 
 ; Uninstall/Reinstall page
