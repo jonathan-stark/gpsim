@@ -1901,7 +1901,7 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
 
 
     npos = (m_bShowOpcodes && opcode >= 0) ?
-      g_snprintf(&str[pos], len, "%c%04X", m_bShowAddresses?':':' ', opcode)
+      g_snprintf(&str[pos], len, "%c%04X  ", m_bShowAddresses?':':' ', opcode)
       : 0;
     pos += npos;
     len -= npos;
@@ -4019,9 +4019,12 @@ gint DialogFontSelect::DialogRun(GtkWidget *w, gpointer user_data)
   {
 
     m_pFontSelDialog=gtk_font_selection_dialog_new("Select font");
+  }
 
     fontstring=gtk_entry_get_text(entry);
-  }
+    gtk_font_selection_dialog_set_font_name(
+		(GtkFontSelectionDialog *) m_pFontSelDialog, fontstring);
+
   gint result = gtk_dialog_run (GTK_DIALOG (m_pFontSelDialog));
   switch (result) {
   case GTK_RESPONSE_OK:

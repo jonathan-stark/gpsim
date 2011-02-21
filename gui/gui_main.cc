@@ -302,7 +302,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     gui_processors = g_slist_append(gui_processors,gp);
 
     gp->regwin_ram->NewProcessor(gp);
-    gp->program_memory->NewProcessor(gp);
+// RRR    gp->program_memory->NewProcessor(gp);
     gp->source_browser->CloseSource();
     gp->source_browser->NewProcessor(gp);
     gp->symbol_window->NewSymbols();
