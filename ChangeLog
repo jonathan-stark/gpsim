@@ -1,3 +1,7 @@
+2011-03-01 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_src_opcode.cc : Further font fixes in program memory window
+	* gui/gui_src.cc : memory program window updated during running
+
 2011-02-21 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src.h gui/gui_src_opcode.cc gui/gui_main.cc :
 	+ Fix issues with program memory window with P18 processors (3174547)

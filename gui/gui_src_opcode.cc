@@ -568,7 +568,7 @@ static void update_label(SourceBrowserOpcode_Window *sbow, int address)
 
 static void update_values(SourceBrowserOpcode_Window *sbow, int address)
 {
-  if(!sbow || !sbow->gp || !sbow->gp->cpu)
+  if(!sbow || !sbow->gp || !sbow->gp->cpu || !sbow->memory)
     return;
 
   unsigned uMemoryIndex = sbow->gp->cpu->map_pm_address2index(address);
@@ -637,7 +637,8 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
 #if GTK_MAJOR_VERSION >= 2
     if (sbow->normalPFD)
 	pango_font_description_free(sbow->normalPFD);
-    sbow->normalPFD = pango_font_description_from_string(sbow->normalfont_string);
+    sbow->normalPFD = 
+	    pango_font_description_from_string(sbow->normalfont_string);
     sbow->normal_style->font_desc = sbow->normalPFD;
 #else
     sbow->normalfont=gdk_fontset_load (sbow->normalfont_string);
@@ -840,10 +841,11 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
         strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
 #if GTK_MAJOR_VERSION >= 2
         if((font=pango_font_description_from_string(fontname))==0)
+	{
 #else
         if((font=gdk_fontset_load(fontname))==0)
+	{
 #endif
-        {
             if(gui_question("Normalfont did not load!","Try again","Ignore/Cancel")==FALSE)
                 break;
         }
@@ -854,14 +856,14 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 #else
             if (strcmp(
 			sbow->normalfont_string, 
-			gtk_entry_get_text(GTK_ENTRY(normalfontstringentry))
+			fontname
 		       ))
 #endif
             {
 	       
 			
             	strcpy(sbow->normalfont_string,
-			gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+			fontname);
             	config_set_string(sbow->name(),"normalfont",sbow->normalfont_string);
 		change = true;
 	    }
@@ -1201,8 +1203,8 @@ void SourceBrowserOpcode_Window::SetPC(int address)
   current_address = address;
 
   if(address != last_address)
-    {
       UpdateLine(last_address);
+  {
 
       UpdateLine(address);
       gtk_clist_set_row_style (GTK_CLIST (clist),
@@ -1240,6 +1242,8 @@ void SourceBrowserOpcode_Window::SetPC(int address)
 
 void SourceBrowserOpcode_Window::Fill()
 {
+  GtkSheetRange range;
+
   if(!bIsBuilt)
     Build();
 
@@ -1251,6 +1255,7 @@ void SourceBrowserOpcode_Window::Fill()
   gint i;
   int pm_size;
   int pc;
+  gint column_width,char_width;
 
   // Clearing and appending is faster than changing
   gtk_clist_clear(GTK_CLIST(clist));
@@ -1264,14 +1269,38 @@ void SourceBrowserOpcode_Window::Fill()
   memory=(unsigned int*)malloc(pm_size*sizeof(*memory));
 
   gchar _name[10];
+  gtk_clist_freeze(GTK_CLIST (clist));
   gtk_sheet_freeze(GTK_SHEET(sheet));
+
+#if GTK_MAJOR_VERSION >= 2
+    PangoRectangle rect;
+    PangoLayout *layout;
+
+    layout = gtk_widget_create_pango_layout (GTK_WIDGET(sheet), "A");
+    pango_layout_set_font_description (layout, normalPFD);
+
+    pango_layout_get_extents (layout, NULL, &rect);
+
+  char_width = PANGO_PIXELS(rect.width);
+  column_width = 4 * char_width + 5;
+  g_object_unref(layout);
+#else
+  char_width = gdk_string_width (normal_style->font,"9");
+  column_width = 5 * char_width + 5;
+#endif
+
   for(i=0; i<GTK_SHEET(sheet)->maxcol; i++){
 
     sprintf(_name,"%02x",gp->cpu->map_pm_index2address(i));
     gtk_sheet_column_button_add_label(GTK_SHEET(sheet), i, _name);
     gtk_sheet_set_column_title(GTK_SHEET(sheet), i, _name);
+    gtk_sheet_set_column_width (GTK_SHEET(sheet), i, column_width);
   }
 
+  range.row0=0;range.col0=0;
+  range.rowi=GTK_SHEET(sheet)->maxrow;
+  range.coli=GTK_SHEET(sheet)->maxcol;
+  gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normalPFD);
   for(i=0; i < pm_size; i++) {
     int address = gp->cpu->map_pm_index2address(i);
     opcode = gp->cpu->pma->get_opcode(address);
@@ -1282,6 +1311,7 @@ void SourceBrowserOpcode_Window::Fill()
            gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
            128);
  
+    update_styles(this,i);
     if(GTK_SHEET(sheet)->maxrow < i/16)
     {
         int j = i/16;
@@ -1298,15 +1328,13 @@ void SourceBrowserOpcode_Window::Fill()
                        GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
 
     gtk_clist_append (GTK_CLIST (clist), row_text);
-    update_styles(this,i);
   }
 
   for(i=0;i<pm_size/16;i++)
     update_ascii(this,i);
 
   gtk_sheet_thaw(GTK_SHEET(sheet));
-
-  gtk_clist_set_row_style (GTK_CLIST (clist), 0, current_line_number_style);
+  gtk_clist_thaw(GTK_CLIST (clist));
 
   pc=gp->cpu->pma->get_PC();
   SetPC(pc);
@@ -1367,7 +1395,6 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   pma = gp->cpu->pma;
 
-  Fill();
 
   range.row0=0;range.col0=0;
   range.rowi=GTK_SHEET(sheet)->maxrow;
@@ -1427,21 +1454,34 @@ void SourceBrowserOpcode_Window::Build(void)
 #define DEFAULT_NORMALFONT "Nimbus Mono L 12"
 #define DEFAULT_BREAKPOINTFONT "Nimbus Mono L Bold 12"
 #define DEFAULT_PCFONT "Nimbus Mono L Bold 12"
+  style  = gtk_style_new();
+  if (style->font_desc)
+  {
+      strcpy(normalfont_string, pango_font_description_to_string(style->font_desc));
+      strcpy(breakpointfont_string, normalfont_string);
+      strcpy(pcfont_string, normalfont_string);
+  }
+  else
+  {
+      strcpy(normalfont_string,DEFAULT_NORMALFONT);
+      strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
+      strcpy(pcfont_string,DEFAULT_PCFONT);
+  }
 #else
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
 #define DEFAULT_BREAKPOINTFONT "-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*"
 #define DEFAULT_PCFONT "-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*"
+  strcpy(normalfont_string,DEFAULT_NORMALFONT);
+  strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
+  strcpy(pcfont_string,DEFAULT_PCFONT);
 #endif
 
-  strcpy(normalfont_string,DEFAULT_NORMALFONT);
   if(config_get_string(name(),"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
 
-  strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
   if(config_get_string(name(),"breakpointfont",&fontstring))
     strcpy(breakpointfont_string,fontstring);
 
-  strcpy(pcfont_string,DEFAULT_PCFONT);
   if(config_get_string(name(),"pcfont",&fontstring))
       strcpy(pcfont_string,fontstring);
 
@@ -1567,7 +1607,6 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
                            vbox,
                            gtk_label_new("Opcodes"));
-
 #if GTK_MAJOR_VERSION >= 2
     PangoRectangle rect;
     PangoLayout *layout;
@@ -1578,7 +1617,8 @@ void SourceBrowserOpcode_Window::Build(void)
     pango_layout_get_extents (layout, NULL, &rect);
 
   char_width = PANGO_PIXELS(rect.width);
-  column_width = 5 * char_width + 5;
+  column_width = 4 * char_width + 5;
+  g_object_unref(layout);
 #else
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 5 * char_width + 5;

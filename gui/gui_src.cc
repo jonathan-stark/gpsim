@@ -169,9 +169,6 @@ void SourceBrowser_Window::Update(void)
 {
   if(!gp || !gp->cpu)
     return;
-  if (gp->cpu->simulation_mode == eSM_RUNNING ||
-    gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
-    return;
 
   SetPC(gp->cpu->pma->get_PC());
 }
