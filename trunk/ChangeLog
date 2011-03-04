@@ -1,3 +1,6 @@
+2011-03-05 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_src_opcode.cc : set style for all p18 in program memory window
+
 2011-03-01 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src_opcode.cc : Further font fixes in program memory window
 	* gui/gui_src.cc : memory program window updated during running

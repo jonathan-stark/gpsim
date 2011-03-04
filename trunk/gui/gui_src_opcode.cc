@@ -1311,7 +1311,6 @@ void SourceBrowserOpcode_Window::Fill()
            gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
            128);
  
-    update_styles(this,i);
     if(GTK_SHEET(sheet)->maxrow < i/16)
     {
         int j = i/16;
@@ -1328,6 +1327,7 @@ void SourceBrowserOpcode_Window::Fill()
                        GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
 
     gtk_clist_append (GTK_CLIST (clist), row_text);
+    update_styles(this, address);
   }
 
   for(i=0;i<pm_size/16;i++)
