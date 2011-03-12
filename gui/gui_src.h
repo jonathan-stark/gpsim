@@ -412,7 +412,7 @@ class SourcePage
   GtkAdjustment *source_layout_adj;
   GtkWidget *source_layout;
   GtkWidget *source_text;
-  unsigned int pageindex_to_fileid;
+  int 	    pageindex_to_fileid;
   GtkWidget *source_pcwidget;
   GtkWidget *notebook;   // parent
   GtkWidget *notebook_child;

@@ -87,10 +87,47 @@ protected:
   double 		vr_Vref;
   stimulus		*vr_pu;
   stimulus		*vr_pd;
+  stimulus		*vr_06v;
   double		vr_Rhigh;
   double		vr_Rlow;
   double		Vref_high;	// usually VDD
   double		Vref_low;	// usually VSS
+  char			*pin_name;	// original name of pin
+
+};
+
+// VSCOM class with two comparators as per 16f690
+//
+class VRCON_2 : public sfr_register
+{
+ public:
+
+ CMCON *_cmcon;
+
+  enum VRCON_bits
+    {
+      VR0 = 1<<0,	// VR0-3 Value selection
+      VR1 = 1<<1,
+      VR2 = 1<<2,
+      VR3 = 1<<3,
+      VP6EN = 1<<4,	// 0.6V reference enable
+      VRR = 1<<5,	// Range select
+      C2VREN = 1<<6,	// Comparator 2 Reference enable
+      C1VREN = 1<<7	// Comparator 1 Reference enable
+    };
+
+  VRCON_2(Processor *pCpu, const char *pName, const char *pDesc);
+  ~VRCON_2();
+
+  virtual void put(unsigned int new_value);
+
+protected:
+  unsigned int		valid_bits;
+  PinModule 		*vr_PinModule;
+  double 		vr_Vref;
+  stimulus		*vr_pu;
+  stimulus		*vr_pd;
+  stimulus		*vr_06v;
   char			*pin_name;	// original name of pin
 
 };
@@ -201,6 +238,7 @@ class ComparatorModule
  */
 
 class CM1CON0;
+class CM1CON0_2;
 class CM2CON0;
 
 /*
@@ -298,6 +336,7 @@ class CM12CON0 : public sfr_register
   ~CM12CON0();
 
 protected:
+  friend class CM1CON0_2;
   friend class CM1CON0;
   friend class CM2CON1;
   friend class CM2CON0;
@@ -312,6 +351,8 @@ protected:
   CM_stimulus 	*cm_stimulus[2];
   Stimulus_Node *cm_snode[2];
   ECCPAS 	*m_eccpas;
+  CM_stimulus 	*cm_cvref;
+  CM_stimulus 	*cm_v06ref;
 
 };
 
@@ -324,6 +365,7 @@ class CM1CON0 : public CM12CON0
 
   virtual void state_change(unsigned int cmcon_val);
   virtual double CVref();
+
 };
 class CM2CON0 : public CM12CON0
 {
@@ -331,6 +373,26 @@ class CM2CON0 : public CM12CON0
   CM2CON0(Processor *pCpu, const char *pName, const char *pDesc) :
 	CM12CON0(pCpu, pName, pDesc) {}
   ~CM2CON0() {}
+
+  virtual void state_change(unsigned int cmcon_val);
+  virtual double CVref();
+};
+class CM1CON0_2 : public CM12CON0
+{
+ public:
+  CM1CON0_2(Processor *pCpu, const char *pName, const char *pDesc) :
+	CM12CON0(pCpu, pName, pDesc) {}
+  ~CM1CON0_2(){}
+
+  virtual void state_change(unsigned int cmcon_val);
+  virtual double CVref();
+};
+class CM2CON0_2 : public CM12CON0
+{
+ public:
+  CM2CON0_2(Processor *pCpu, const char *pName, const char *pDesc) :
+	CM12CON0(pCpu, pName, pDesc) {}
+  ~CM2CON0_2() {}
 
   virtual void state_change(unsigned int cmcon_val);
   virtual double CVref();

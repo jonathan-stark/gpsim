@@ -217,6 +217,7 @@ public:
   virtual double getVrefLo() {
       return (m_dSampledVrefLo  = adcon1->getVrefLo());}
 
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
 
 private:
 
@@ -241,6 +242,7 @@ private:
   unsigned int channel_mask;
   unsigned int channel_shift;
   unsigned int GO_bit;
+  unsigned int valid_bits;
 };
 
 
@@ -351,7 +353,7 @@ public:
   virtual void set_Tad(unsigned int _tad) { Tad = _tad; }
   ADCON0_12F(Processor *pCpu, const char *pName, const char *pDesc);
 private:
-	AD_IN_SignalControl ad_pin_input;
+  AD_IN_SignalControl ad_pin_input;
 };
 //---------------------------------------------------------
 // ANSEL_12F
@@ -381,5 +383,20 @@ public:
 private:
     ADCON1 *adcon1;
     ADCON0_12F *adcon0;
+};
+// set voltage from stimulus
+class a2d_stimulus : public stimulus
+{
+   public:
+
+	a2d_stimulus(ADCON1 *arg, int chan, const char *n=0,
+           double _Vth=0.0, double _Zth=1e12
+           );
+
+    ADCON1 *_adcon1;
+    int	   channel;
+
+     virtual void   set_nodeVoltage(double v);
+
 };
 #endif // __A2DCONVERTER_H__

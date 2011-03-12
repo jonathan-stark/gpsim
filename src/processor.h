@@ -352,6 +352,11 @@ public:
   /// Supply voltage
   double Vdd;
 
+  /// Stimulus nodes for CVREF and V06REF
+  Stimulus_Node         *CVREF;
+  Stimulus_Node         *V06REF;
+
+
   /// Processor capabilities
   unsigned long m_Capabilities;
   enum {

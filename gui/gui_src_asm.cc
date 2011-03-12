@@ -1300,7 +1300,7 @@ gint SourceWindow::switch_page_cb(guint newPage)
 
     NSourcePage *pPage = pages[m_currentPage];
 
-    if (!pPage)
+    if (!pPage || !gp->cpu->files[pPage->m_fileid])
       return TRUE;
     if(gp->cpu->files[pPage->m_fileid]->IsHLL())
       pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
@@ -2119,6 +2119,9 @@ void NSourcePage::updateMargin(int y1, int y2)
 
     }
 
+    if (layout)
+	g_object_unref(layout);
+
     g_array_free (pixels, TRUE);
     g_array_free (numbers, TRUE);
 
@@ -2697,7 +2700,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   int row;
   gdouble inc;
   unsigned int i;
-  unsigned int sbawFileId;
+  int sbawFileId;
 
   GtkWidget *new_pcw;
   int id=-1;
@@ -2710,7 +2713,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   // find notebook page containing address 'address'
   sbawFileId = pma->get_file_id(address);
 
-  if(sbawFileId == 0xffffffff)
+  if(sbawFileId == (int)0xffffffff)
     return;
 
   for(i=0;i<SBAW_NRFILES;i++) {
@@ -3863,6 +3866,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   int i;
   int id;
 
+
   const char *file_name;
   int file_id;
 
@@ -3981,8 +3985,11 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
 static int load_fonts(SOURCE_WINDOW *sbaw)
 {
 
+/*
   gtk_style_set_font(sbaw->comment_text_style,
     gdk_font_from_description(pango_font_description_from_string(sbaw->commentfont_string)));
+*/
+   sbaw->comment_text_style->font_desc = pango_font_description_from_string(sbaw->commentfont_string);
 
   GdkFont *font = gdk_font_from_description(pango_font_description_from_string(sbaw->sourcefont_string));
   gtk_style_set_font(sbaw->default_text_style, font);
@@ -4180,8 +4187,6 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
   }
 
   load_fonts(sbaw);
-  if(sbaw->m_bLoadSource)
-    sbaw->NewSource(sbaw->gp);
 
   gtk_widget_hide(dialog);
 

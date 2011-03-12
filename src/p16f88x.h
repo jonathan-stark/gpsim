@@ -220,4 +220,233 @@ public:
   virtual void create_sfr_map();
 };
 
+class P16F631 :  public _14bit_processor
+{
+public:
+
+  P16F631(const char *_name=0, const char *desc=0);
+  virtual ~P16F631();
+
+  T1CON   t1con;
+  PIR    *pir1;
+  PIR    *pir2;
+  PIE     pie1;
+  PIE     pie2;
+  TMRL    tmr1l;
+  TMRH    tmr1h;
+  OSCTUNE  osctune;
+  PCON    pcon;
+  WDTCON  wdtcon;
+  OSCCON  osccon;
+  VRCON_2   vrcon;
+  SRCON   srcon;
+  ANSEL  ansel;
+  CM1CON0_2 cm1con0;
+  CM2CON0_2 cm2con0;
+  CM2CON1 cm2con1;
+  ADCON0_12F  adcon0;
+  ADCON1_16F  adcon1;
+
+
+  EEPROM_WIDE *e;
+  PIR1v2 *pir1_2_reg;
+  PIR2v3 *pir2_3_reg;
+
+  INTCON_14_PIR    intcon_reg;
+//  ComparatorModule comparator;
+  PIR_SET_2    pir_set_2_def;
+  WPU              *m_wpua;
+  WPU              *m_wpub;
+  IOC              *m_ioca;
+  IOC              *m_iocb;
+
+
+  virtual PIR *get_pir2() { return (pir2); }
+  virtual PIR *get_pir1() { return (pir1); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
+
+
+
+  PicPortGRegister  	*m_porta;
+  PicTrisRegister  	*m_trisa;
+
+  PicPortGRegister  	*m_portb;
+  PicTrisRegister  	*m_trisb;
+
+  PicPortRegister 	*m_portc;
+  PicTrisRegister  	*m_trisc;
+
+  a2d_stimulus 		*m_cvref;
+  a2d_stimulus 		*m_v06ref;
+
+  virtual PROCESSOR_TYPE isa(){return _P16F631_;}
+  static Processor *construct(const char *name);
+  void create(int);
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+  virtual void create_iopin_map();
+  virtual void option_new_bits_6_7(unsigned int bits);
+  virtual bool hasSSP() {return false;}
+
+
+  virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual unsigned int register_memory_size () const { return 0x200; }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) { eeprom = ep; }
+  virtual void create_config_memory();
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
+};
+class P16F677 : public P16F631
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F677_;};
+
+  virtual unsigned int program_memory_size() const { return 4096; };
+  virtual bool hasSSP() { return true;}
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
+
+
+  P16F677(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  SSP_MODULE   ssp;
+
+  ANSEL_H  anselh;
+  sfr_register  adresh;
+  sfr_register  adresl;
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+};
+class P16F687 : public P16F677
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F687_;};
+
+  virtual unsigned int program_memory_size() const { return 2048; };
+  virtual bool hasSSP() { return true;}
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
+
+
+  P16F687(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  TMRL    tmr1l;
+  TMRH    tmr1h;
+  PCON    pcon;
+
+  USART_MODULE usart;
+
+
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+};
+class P16F685 : public P16F677
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F685_;};
+
+  virtual unsigned int program_memory_size() const { return 4096; };
+  virtual bool hasSSP() { return false;}
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
+
+
+  P16F685(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  T2CON   t2con;
+  PR2     pr2;
+  TMR2    tmr2;
+  TMRL    tmr1l;
+  TMRH    tmr1h;
+  CCPCON  ccp1con;
+  CCPRL   ccpr1l;
+  CCPRH   ccpr1h;
+  PCON    pcon;
+  ECCPAS	eccpas;
+  PWM1CON	pwm1con;
+  PSTRCON	pstrcon;
+
+
+
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+};
+class P16F689 : public P16F687
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F689_;};
+
+  virtual unsigned int program_memory_size() const { return 4096; };
+  virtual bool hasSSP() { return true;}
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
+
+
+  P16F689(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+};
+class P16F690 : public P16F685
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16F690_;};
+
+  virtual unsigned int program_memory_size() const { return 4096; };
+  virtual bool hasSSP() { return true;}
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
+
+
+  P16F690(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+  CCPCON  ccp2con;
+  CCPRL   ccpr2l;
+  CCPRH   ccpr2h;
+
+  USART_MODULE usart;
+
+
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+};
 #endif

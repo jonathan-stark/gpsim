@@ -289,9 +289,9 @@ void P16F88x::create_sfr_map()
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
   usart.set_eusart(true);
   cm1con0.setpins( &(*m_porta)[0], &(*m_porta)[1], &(*m_portb)[3],
-	&(*m_portb)[1], &(*m_porta)[3], &(*m_porta)[4]);
+        &(*m_portb)[1], &(*m_porta)[3], &(*m_porta)[4]);
   cm2con0.setpins( &(*m_porta)[0], &(*m_porta)[1], &(*m_portb)[3],
-	&(*m_portb)[1], &(*m_porta)[2], &(*m_porta)[5]);
+        &(*m_portb)[1], &(*m_porta)[2], &(*m_porta)[5]);
   cm1con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon, &eccpas);
   cm2con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon, &eccpas);
   cm2con0.set_tmrl(&tmr1l);
@@ -956,7 +956,814 @@ void P16F884::create_sfr_map()
   adcon1.setIOPin(5, &(*m_porte)[0]);
   adcon1.setIOPin(6, &(*m_porte)[1]);
   adcon1.setIOPin(7, &(*m_porte)[2]);
+}
+//------------------------------------------------------------------------
+//
+//
+
+class ConfigF631 : public ConfigWord
+{
+public:
+  ConfigF631(P16F631 *pCpu)
+    : ConfigWord("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
+  {
+    //Dprintf(("ConfigF631::ConfigF631 %p\n", m_pCpu));
+    if (m_pCpu)
+    {
+	m_pCpu->wdt.initialize(true); // default WDT enabled
+        m_pCpu->wdt.set_timeout(0.000035);
+        m_pCpu->set_config_word(0x2007, 0x3fff);
+    }
+  }
+
+    enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    FOSC2  = 1<<2,
+    WDTEN  = 1<<3,
+    PWRTEN = 1<<4,
+    MCLRE =  1<<5,
+    BODEN =  1<<6,
+    CP =     1<<7,
+    CPD =    1<<8
+  };
+
+ string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[356];
+
+    const char *OSCdesc[8] = {
+      "LP oscillator",
+      "XT oscillator",
+      "HS oscillator",
+      "EC oscillator w/ OSC2 configured as I/O",
+      "INTOSC oscillator: I/O on RA4 pin, I/O on RA5",
+      "INTOSC oscillator: CLKOUT on RA4 pin, I/O on RA5",
+      "RC oscillator: I/O on RA4 pin, RC on RA5",
+      "RC oscillator: CLKOUT on RA4 pin, RC on RA5"
+    };
+    snprintf(buff,sizeof(buff),
+	" $%04x\n"
+        " FOSC=%d - Clk source = %s\n"
+	" WDTEN=%d - WDT is %s\n"
+	" PWRTEN=%d - Power up timer is %s\n"
+	" MCLRE=%d - RA3 Pin %s\n"
+	" BODEN=%d -  Brown-out Detect %s\n"
+	" CP=%d - Code Protection %s\n"
+	" CPD=%d -  Data Code Protection %s\n",
+             i,
+             i&(FOSC0|FOSC1|FOSC2), OSCdesc[i&(FOSC0|FOSC1|FOSC2)],
+             ((i&WDTE) ? 1 : 0), ((i&WDTE) ? "enabled" : "disabled"),
+             ((i&PWRTEN) ? 1 : 0), ((i&PWRTEN) ? "disabled" : "enabled"),
+             ((i&MCLRE) ? 1 : 0), ((i&MCLRE) ? "MCLR" : "Input"),
+             ((i&BODEN) ? 1 : 0), ((i&BODEN) ? "enabled" : "disabled"),
+             ((i&CP) ? 1 : 0), ((i&CP) ? "disabled" : "enabled"),
+             ((i&CPD) ? 1 : 0), ((i&CPD) ? "disabled" : "enabled")
+    );
+    return string(buff);
+
+  }
+
+};
+P16F631::P16F631(const char *_name, const char *desc)
+   : _14bit_processor(_name, desc),
+    t1con(this, "t1con", "TMR1 Control"),
+    pie1(this,"pie1", "Peripheral Interrupt Enable"),
+    pie2(this,"pie2", "Peripheral Interrupt Enable"),
+    tmr1l(this, "tmr1l", "TMR1 Low"),
+    tmr1h(this, "tmr1h", "TMR1 High"),
+    osctune(this, "osctune", "OSC Tune"),
+    pcon(this, "pcon", "pcon"),
+    wdtcon(this, "wdtcon", "WDT Control", 0x1f),
+    osccon(this, "osccon", "OSC Control"),
+    vrcon(this, "vrcon", "Voltage Reference Control Register"),
+    srcon(this, "srcon", "SR Latch Control Resgister"),
+    ansel(this,"ansel", "Analog Select"),
+    cm1con0(this, "cm1con0", "Comparator 1 Control Register"),
+    cm2con0(this, "cm2con0", "Comparator 2 Control Register"),
+    cm2con1(this, "cm2con1", "Comparator 2 Control Register"),
+    adcon0(this,"adcon0", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"),
+
+     intcon_reg(this,"intcon","Interrupt Control")
+{
+  if(verbose)
+    cout << "P16F631 constructor, type = " << isa() << '\n';
+
+  pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir1 = pir1_2_reg;
+  pir2_3_reg = new PIR2v3(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  pir2 = pir2_3_reg;
+
+  m_ioca = new IOC(this, "ioca", "Interrupt-On-Change GPIO Register");
+  m_iocb = new IOC(this, "iocb", "Interrupt-On-Change GPIO Register");
+
+  m_porta = new PicPortGRegister(this,"porta","",&intcon_reg, m_ioca, 8,0x3f);
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
+
+  m_portb = new PicPortGRegister(this,"portb","",&intcon_reg, m_iocb, 8,0xf0);
+  m_trisb = new PicTrisRegister(this,"trisb","", m_portb, false);
+
+  m_wpua = new WPU(this, "wpua", "Weak Pull-up Register", m_porta, 0x37);
+  m_wpub = new WPU(this, "wpub", "Weak Pull-up Register", m_portb, 0xf0);
+  tmr0.set_cpu(this, m_porta, 4, option_reg);
+  tmr0.start(0);
+
+  m_portc = new PicPortRegister(this,"portc","",8,0x3f);
+  m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false);
 
 
+}
 
+P16F631::~P16F631()
+{
+  if (verbose)
+    cout << __FUNCTION__ << endl;
+
+  delete_sfr_register(m_portc);
+  delete_sfr_register(m_trisc);
+
+  delete_sfr_register(m_portb);
+  delete_sfr_register(m_trisb);
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_trisa);
+  delete_sfr_register(m_ioca);
+  delete_sfr_register(m_iocb);
+  delete_sfr_register(m_wpua);
+  delete_sfr_register(m_wpub);
+  delete_sfr_register(pir1_2_reg);
+  delete e;
+
+}
+void P16F631::create_iopin_map(void)
+{
+  package = new Package(20);
+  if(!package)
+    return;
+
+  package->assign_pin(1, 0);	// Vdd
+
+  package->assign_pin( 2, m_porta->addPin(new IO_bi_directional_pu("porta5"),5));
+  package->assign_pin( 3, m_porta->addPin(new IO_bi_directional_pu("porta4"),4));
+  package->assign_pin( 4, m_porta->addPin(new IOPIN("porta3"),3));
+  package->assign_pin( 5, m_portc->addPin(new IO_bi_directional_pu("portc5"),5));
+  package->assign_pin( 6, m_portc->addPin(new IO_bi_directional("portc4"),4));
+  package->assign_pin( 7, m_portc->addPin(new IO_bi_directional("portc3"),3));
+
+  package->assign_pin( 8, m_portc->addPin(new IO_bi_directional("portc6"),6));
+  package->assign_pin( 9, m_portc->addPin(new IO_bi_directional("portc7"),7));
+  package->assign_pin(10, m_portb->addPin(new IO_bi_directional("portb7"),7));
+
+  package->assign_pin(11, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
+  package->assign_pin(12, m_portb->addPin(new IO_bi_directional_pu("portb5"),5));
+  package->assign_pin(13, m_portb->addPin(new IO_bi_directional_pu("portb4"),4));
+  package->assign_pin(14, m_portc->addPin(new IO_bi_directional_pu("portc2"),2));
+  package->assign_pin(15, m_portc->addPin(new IO_bi_directional_pu("portc1"),1));
+  package->assign_pin(16, m_portc->addPin(new IO_bi_directional_pu("portc0"),0));
+  package->assign_pin(17, m_porta->addPin(new IO_bi_directional_pu("porta2"),2));
+  package->assign_pin(18, m_porta->addPin(new IO_bi_directional_pu("porta1"),1));
+  package->assign_pin(19, m_porta->addPin(new IO_bi_directional_pu("porta0"),0));
+
+  package->assign_pin(20, 0); //VSS
+
+
+  tmr1l.setIOpin(&(*m_portc)[0]);
+
+}
+Processor * P16F631::construct(const char *name)
+{
+
+  P16F631 *p = new P16F631(name);
+
+  if(verbose)
+    cout << " P16F631 construct\n";
+
+  p->create(128);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+void P16F631::create(int eesize)
+{
+   create_iopin_map();
+
+   _14bit_processor::create();
+
+   e = new EEPROM_WIDE(this,pir2);
+   e->initialize(eesize);
+   e->set_intcon(&intcon_reg);
+   set_eeprom_wide(e);
+
+
+  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
+  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
+
+
+   P16F631::create_sfr_map();
+}
+
+void P16F631::create_symbols()
+{
+  pic_processor::create_symbols();
+  addSymbol(W);
+
+}
+
+//-------------------------------------------------------------------
+void P16F631::create_sfr_map()
+{
+
+  pir_set_2_def.set_pir1(pir1);
+  pir_set_2_def.set_pir2(pir2);
+
+  add_file_registers(0x40, 0x7f, 0);
+  alias_file_registers(0x70, 0x7f, 0x80);
+  alias_file_registers(0x70, 0x7f, 0x100);
+  alias_file_registers(0x70, 0x7f, 0x180);
+
+  add_sfr_register(indf,    0x00);
+  alias_file_registers(0x00,0x00,0x80);
+  alias_file_registers(0x00,0x00,0x100);
+  alias_file_registers(0x00,0x00,0x180);
+
+  add_sfr_register(&tmr0,   0x01);
+  alias_file_registers(0x01,0x01,0x100);
+  add_sfr_register(option_reg,  0x81, RegisterValue(0xff,0));
+  alias_file_registers(0x81,0x81,0x100);
+
+  add_sfr_register(pcl,     0x02, RegisterValue(0,0));
+  add_sfr_register(status,  0x03, RegisterValue(0x18,0));
+  add_sfr_register(fsr,     0x04);
+  alias_file_registers(0x02,0x04,0x80);
+  alias_file_registers(0x02,0x04,0x100);
+  alias_file_registers(0x02,0x04,0x180);
+
+  add_sfr_register(m_porta, 0x05);
+  add_sfr_register(m_trisa, 0x85, RegisterValue(0x3f,0));
+
+  add_sfr_register(m_portb, 0x06);
+  add_sfr_register(m_trisb, 0x86, RegisterValue(0xf0,0));
+
+  add_sfr_register(m_portc, 0x07);
+  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
+  alias_file_registers(0x05,0x07,0x100);
+  alias_file_registers(0x85,0x87,0x100);
+
+  add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
+
+  alias_file_registers(0x0a,0x0b,0x80);
+  alias_file_registers(0x0a,0x0b,0x100);
+  alias_file_registers(0x0a,0x0b,0x180);
+  add_sfr_register(pir1, 0x0c, RegisterValue(0,0));
+  add_sfr_register(pir2, 0x0d, RegisterValue(0,0));
+  add_sfr_register(&tmr1l, 0x0e, RegisterValue(0,0), "tmr1l");
+  add_sfr_register(&tmr1h, 0x0f, RegisterValue(0,0), "tmr1h");
+  add_sfr_register(&t1con, 0x10, RegisterValue(0,0));
+  add_sfr_register(&pcon, 0x8e, RegisterValue(0,0));
+  add_sfr_register(&wdtcon, 0x97, RegisterValue(0x08,0));
+  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0));
+  cm1con0.setpins( &(*m_porta)[1], &(*m_portc)[1], &(*m_portc)[2],
+	&(*m_portc)[3], &(*m_porta)[0], &(*m_porta)[2]);
+  cm2con0.setpins( &(*m_porta)[1], &(*m_portc)[1], &(*m_portc)[2],
+	&(*m_portc)[3], &(*m_portc)[0], &(*m_portc)[4]);
+  cm1con0.link_registers(get_pir_set(), &cm2con1, (VRCON *)&vrcon, &srcon, NULL);
+  cm2con0.link_registers(get_pir_set(), &cm2con1, (VRCON *)&vrcon, &srcon, NULL);
+  cm2con0.set_tmrl(&tmr1l);
+  cm2con1.link_cm12con0((CM1CON0 *)&cm1con0, (CM2CON0 *)&cm2con0);
+
+  add_sfr_register(&vrcon, 0x118, RegisterValue(0,0),"vrcon");
+  add_sfr_register(&cm1con0, 0x119, RegisterValue(0,0),"cm1con0");
+  add_sfr_register(&cm2con0, 0x11a, RegisterValue(0,0),"cm2con0");
+  add_sfr_register(&cm2con1, 0x11b, RegisterValue(0,0),"cm2con1");
+  add_sfr_register(&ansel, 0x11e, RegisterValue(0xff,0));
+  add_sfr_register(&srcon, 0x19e, RegisterValue(0,0),"srcon");
+
+  ansel.setAdcon1(&adcon1);
+  ansel.setValidBits(0xff);
+
+  adcon1.setNumberOfChannels(12);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(4, &(*m_portc)[0]);
+
+  adcon1.setIOPin(5, &(*m_portc)[1]);
+  adcon1.setIOPin(6, &(*m_portc)[2]);
+  adcon1.setIOPin(7, &(*m_portc)[3]);
+  intcon = &intcon_reg;
+  intcon_reg.set_pir_set(get_pir_set());
+
+  tmr1l.tmrh = &tmr1h;
+  tmr1l.t1con = &t1con;
+  // FIXME -- can't delete this new'd item
+  tmr1l.setInterruptSource(new InterruptSource(pir1, PIR1v3::TMR1IF));
+  tmr1h.tmrl  = &tmr1l;
+  t1con.tmrl  = &tmr1l;
+
+  tmr1l.setIOpin(&(*m_porta)[5]);
+  tmr1l.setGatepin(&(*m_porta)[4]);
+
+  add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
+  add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
+  if (pir1) {
+    pir1->set_intcon(&intcon_reg);
+    pir1->set_pie(&pie1);
+  }
+  pie1.setPir(pir1);
+  pie2.setPir(pir2);
+
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
+  add_sfr_register(m_wpua, 0x95, RegisterValue(0x37,0),"wpua");
+  add_sfr_register(m_wpub, 0x115, RegisterValue(0xf0,0),"wpub");
+  add_sfr_register(m_ioca, 0x96, RegisterValue(0,0),"ioca");
+  add_sfr_register(m_iocb, 0x116, RegisterValue(0,0),"iocb");
+  add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
+
+  osccon.set_osctune(&osctune);
+  osctune.set_osccon(&osccon);
+
+}
+//-------------------------------------------------------------------
+void P16F631::option_new_bits_6_7(unsigned int bits)
+{
+  m_wpua->set_wpu_pu( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7);
+  m_wpub->set_wpu_pu( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7);
+  m_porta->setIntEdge((bits & OPTION_REG::BIT6) == OPTION_REG::BIT6);
+}
+//-------------------------------------------------------------------
+void P16F631::create_config_memory()
+{
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new ConfigF631(this));
+
+};
+
+//-------------------------------------------------------------------
+bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
+{
+  enum {
+    CFG_FOSC0 = 1<<0,
+    CFG_FOSC1 = 1<<1,
+    CFG_FOSC2 = 1<<2,
+    CFG_WDTE  = 1<<3,
+    CFG_MCLRE = 1<<5,
+  };
+
+  
+   if(address == config_word_address())
+    {
+       unsigned int valid_pins = m_porta->getEnableMask();
+
+        if ((cfg_word & CFG_MCLRE) == CFG_MCLRE)
+	{
+            assignMCLRPin(4);  
+	}
+        else
+	{
+            unassignMCLRPin();
+	}
+
+        wdt.initialize((cfg_word & CFG_WDTE) == CFG_WDTE);
+
+
+       set_int_osc(false);
+
+	// AnalogReq is used so ADC does not change clock names
+	// set_config_word is first called with default and then
+	// often called a second time. the following call is to
+	// reset porta so next call to AnalogReq sill set the pin name
+	//
+        (&(*m_porta)[4])->AnalogReq((Register *)this, false, "porta4");
+	valid_pins |= 0x20;
+       	switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) 
+	{
+
+       	case 0:  // LP oscillator: low power crystal is on RA4 and RA5
+       	case 1:     // XT oscillator: crystal/resonator is on RA4 and RA5
+       	case 2:     // HS oscillator: crystal/resonator is on RA4 and RA5
+            (&(*m_porta)[4])->AnalogReq((Register *)this, true, "OSC2");
+            (m_porta->getPin(5))->newGUIname("OSC1");
+	    valid_pins &= 0xcf;
+            break;
+
+	case 3:	// EC I/O on RA4 pin, CLKIN on RA5
+            (m_porta->getPin(5))->newGUIname("CLKIN");
+	    valid_pins &= 0xef;
+            break;
+
+	    
+	case 5: // INTOSC CLKOUT on RA4 pin
+            (&(*m_porta)[4])->AnalogReq((Register *)this, true, "CLKOUT");
+	case 4: // INTOSC
+            (m_porta->getPin(5))->newGUIname("porta5");
+             set_int_osc(true);
+	    osccon.set_rc_frequency();
+	    break;
+
+	case 6: //RC oscillator: I/O on RA4 pin, RC on RA5
+            (m_porta->getPin(5))->newGUIname("RC");
+	    valid_pins &= 0xdf;
+            break;
+
+	case 7: // RC oscillator: CLKOUT on RA4 pin, RC on RA5
+            (&(*m_porta)[4])->AnalogReq((Register *)this, true, "CLKOUT");
+            (m_porta->getPin(5))->newGUIname("RC");
+	    valid_pins &= 0xdf;
+            break;
+	};
+
+	if (valid_pins != m_porta->getEnableMask()) // enable new pins for IO
+    	{
+            m_porta->setEnableMask(valid_pins);
+	    m_trisa->setEnableMask(valid_pins);
+    	}
+	return(true);
+
+    }
+    return false;
+}
+
+//========================================================================
+//
+// Pic 16F677 
+//
+
+Processor * P16F677::construct(const char *name)
+{
+
+  P16F677 *p = new P16F677(name);
+
+  p->create(256);
+  p->create_sfr_map();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+P16F677::P16F677(const char *_name, const char *desc)
+  : P16F631(_name,desc),
+    ssp(this),
+    anselh(this,"anselh", "Analog Select high"),
+    adresh(this,"adresh", "A2D Result High"),
+    adresl(this,"adresl", "A2D Result Low")
+{
+
+  if(verbose)
+    cout << "f677 constructor, type = " << isa() << '\n';
+
+}
+
+void P16F677::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "creating f677 symbols\n";
+
+  P16F631::create_symbols();
+
+}
+
+void P16F677::create_sfr_map()
+{
+
+  ansel.setAdcon1(&adcon1);
+  ansel.setAnselh(&anselh);
+  anselh.setAdcon1(&adcon1);
+  anselh.setAnsel(&ansel);
+  anselh.setValidBits(0x0f);
+  ansel.setValidBits(0xff);
+  adcon0.setAdresLow(&adresl);
+  adcon0.setAdres(&adresh);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(10);
+  adcon0.setPir(pir1);
+  adcon0.setChannel_Mask(0xf);
+  adcon0.setChannel_shift(2);
+  adcon0.setGo(1);
+  adcon0.setValidBits(0xff);
+                               
+  adcon1.setValidBits(0xb0);
+  adcon1.setAdcon0(&adcon0);
+  adcon1.setNumberOfChannels(14);
+  adcon1.setValidCfgBits(ADCON1::VCFG0 , 6);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[4]);
+
+  adcon1.setIOPin(8, &(*m_portc)[6]);
+  adcon1.setIOPin(9, &(*m_portc)[7]);
+  adcon1.setIOPin(10, &(*m_portb)[4]);
+  adcon1.setIOPin(11, &(*m_portb)[5]);
+  adcon1.setVoltRef(12, 0.0);
+  adcon1.setVoltRef(13, 0.0);
+  m_cvref = new a2d_stimulus(&adcon1, 12, "a2d_cvref");
+  m_v06ref = new a2d_stimulus(&adcon1, 13, "a2d_v06ref");
+  ((Processor *)this)->CVREF->attach_stimulus(m_cvref);
+  ((Processor *)this)->V06REF->attach_stimulus(m_v06ref);
+
+
+  // set a2d modes where an1 is Vref+ 
+  adcon1.setVrefHiConfiguration(2, 1);
+
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
+  add_sfr_register(&anselh, 0x11f, RegisterValue(0x0f,0));
+  add_file_registers(0x20,0x3f,0);
+  add_file_registers(0xa0,0xbf,0);
+//  ccp1con.setIOpin(&(*m_portc)[2], &(*m_portb)[2], &(*m_portb)[1], &(*m_portb)[4]);
+
+
+  if (hasSSP()) {
+    add_sfr_register(&ssp.sspbuf,  0x13, RegisterValue(0,0),"sspbuf");
+    add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
+    add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
+    add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
+
+    ssp.initialize(
+		get_pir_set(),    // PIR
+                &(*m_portb)[6],   // SCK
+                &(*m_portc)[6],   // SS
+                &(*m_portc)[7],   // SDO
+                &(*m_portb)[4],    // SDI
+                m_trisb,          // i2c tris port
+		SSP_TYPE_SSP
+	);
+  }
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+  add_sfr_register(&adresh,  0x1e, RegisterValue(0,0));
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
+}
+//========================================================================
+//
+// Pic 16F685 
+//
+
+Processor * P16F685::construct(const char *name)
+{
+
+  P16F685 *p = new P16F685(name);
+
+
+  p->create(256);
+  p->create_sfr_map();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+P16F685::P16F685(const char *_name, const char *desc)
+  : P16F677(_name,desc),
+    t2con(this, "t2con", "TMR2 Control"),
+    pr2(this, "pr2", "TMR2 Period Register"),
+    tmr2(this, "tmr2", "TMR2 Register"),
+    tmr1l(this, "tmr1l", "TMR1 Low"),
+    tmr1h(this, "tmr1h", "TMR1 High"),
+    ccp1con(this, "ccp1con", "Capture Compare Control"),
+    ccpr1l(this, "ccpr1l", "Capture Compare 1 Low"),
+    ccpr1h(this, "ccpr1h", "Capture Compare 1 High"),
+    pcon(this, "pcon", "pcon"),
+    eccpas(this, "eccpas", "ECCP Auto-Shutdown Control Register"),
+    pwm1con(this, "pwm1con", "Enhanced PWM Control Register"),
+    pstrcon(this, "pstrcon", "Pulse Sterring Control Register")
+{
+
+  if(verbose)
+    cout << "f685 constructor, type = " << isa() << '\n';
+
+
+}
+
+void P16F685::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "creating f685 symbols\n";
+
+  P16F677::create_symbols();
+
+}
+
+void P16F685::create_sfr_map()
+{
+
+  P16F677::create_sfr_map();
+
+
+  add_sfr_register(get_eeprom()->get_reg_eedatah(),  0x10e);
+  add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x10f);
+
+  add_sfr_register(&tmr2,   0x11, RegisterValue(0,0));
+  add_sfr_register(&t2con,  0x12, RegisterValue(0,0));
+  add_sfr_register(&pr2,    0x92, RegisterValue(0xff,0));
+  t2con.tmr2  = &tmr2;
+  tmr2.pir_set   = get_pir_set();
+  tmr2.pr2    = &pr2;
+  tmr2.t2con  = &t2con;
+  tmr2.add_ccp ( &ccp1con );
+  pr2.tmr2    = &tmr2;
+
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+  add_sfr_register(&pstrcon, 0x19d, RegisterValue(1,0));
+
+  ccp1con.setIOpin(&(*m_portc)[5], &(*m_portc)[4], &(*m_portc)[3], &(*m_portc)[2]);
+  ccp1con.setBitMask(0xff);
+  ccp1con.pstrcon = &pstrcon;
+  ccp1con.pwm1con = &pwm1con;
+  ccp1con.setCrosslinks(&ccpr1l, pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
+  ccpr1l.ccprh  = &ccpr1h;
+  ccpr1l.tmrl   = &tmr1l;
+  ccpr1h.ccprl  = &ccpr1l;
+
+  add_sfr_register(&ccpr1l, 0x15, RegisterValue(0,0));
+  add_sfr_register(&ccpr1h, 0x16, RegisterValue(0,0));
+  add_sfr_register(&ccp1con, 0x17, RegisterValue(0,0));
+
+  add_sfr_register(&pwm1con, 0x1c, RegisterValue(0,0));
+  add_sfr_register(&eccpas, 0x1d, RegisterValue(0,0));
+  add_file_registers(0x20,0x3f,0);
+  add_file_registers(0xa0,0xef,0);
+  add_file_registers(0x120,0x16f,0);
+
+
+}
+//========================================================================
+//
+// Pic 16F687 
+//
+
+Processor * P16F687::construct(const char *name)
+{
+
+  P16F687 *p = new P16F687(name);
+
+
+  p->create(256);
+  p->create_sfr_map();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+P16F687::P16F687(const char *_name, const char *desc)
+  : P16F677(_name,desc),
+    tmr1l(this, "tmr1l", "TMR1 Low"),
+    tmr1h(this, "tmr1h", "TMR1 High"),
+    pcon(this, "pcon", "pcon"),
+    usart(this)
+{
+
+  if(verbose)
+    cout << "f687 constructor, type = " << isa() << '\n';
+
+
+}
+
+void P16F687::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "creating f687 symbols\n";
+
+  P16F677::create_symbols();
+
+}
+
+void P16F687::create_sfr_map()
+{
+  P16F677::create_sfr_map();
+
+
+  add_sfr_register(get_eeprom()->get_reg_eedatah(),  0x10e);
+  add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x10f);
+
+
+  add_file_registers(0x20,0x3f,0);
+  add_file_registers(0xa0,0xbf,0);
+
+  usart.initialize(pir1,&(*m_portb)[7], &(*m_portb)[5],
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
+
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(&usart.spbrgh, 0x9a, RegisterValue(0,0),"spbrgh");
+  add_sfr_register(&usart.baudcon,  0x9b,RegisterValue(0x40,0),"baudctl");
+  add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
+  usart.set_eusart(true);
+
+}
+//========================================================================
+//
+// Pic 16F689 
+//
+
+Processor * P16F689::construct(const char *name)
+{
+
+  P16F689 *p = new P16F689(name);
+
+
+  p->create(256);
+  p->create_sfr_map();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+P16F689::P16F689(const char *_name, const char *desc)
+  : P16F687(_name,desc)
+{
+
+  if(verbose)
+    cout << "f689 constructor, type = " << isa() << '\n';
+
+
+}
+
+//========================================================================
+//
+// Pic 16F690 
+//
+
+Processor * P16F690::construct(const char *name)
+{
+
+  P16F690 *p = new P16F690(name);
+
+
+  p->create(256);
+  p->create_sfr_map();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+P16F690::P16F690(const char *_name, const char *desc)
+  : P16F685(_name,desc),
+    ccp2con(this, "ccp2con", "Capture Compare Control"),
+    ccpr2l(this, "ccpr2l", "Capture Compare 2 Low"),
+    ccpr2h(this, "ccpr2h", "Capture Compare 2 High"),
+    usart(this)
+{
+
+  if(verbose)
+    cout << "f690 constructor, type = " << isa() << '\n';
+
+
+}
+
+void P16F690::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "creating f690 symbols\n";
+
+  P16F685::create_symbols();
+
+}
+
+void P16F690::create_sfr_map()
+{
+
+  P16F685::create_sfr_map();
+
+  tmr2.ssp_module = &ssp;
+  eccpas.setIOpin(0, 0, &(*m_portb)[0]);
+  eccpas.link_registers(&pwm1con, &ccp1con);
+
+  usart.initialize(pir1,&(*m_portb)[7], &(*m_portb)[5],
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
+
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(&usart.spbrgh, 0x9a, RegisterValue(0,0),"spbrgh");
+  add_sfr_register(&usart.baudcon,  0x9b,RegisterValue(0x40,0),"baudctl");
+  add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
+  usart.set_eusart(true);
+
+  add_sfr_register(&pstrcon, 0x19d, RegisterValue(1,0));
 }
