@@ -1,3 +1,19 @@
+2011-03-12 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p16f690/nwdt_16f631.asm regression/p16f690/eusart.asm
+	  regression/p16f690/epwm.asm regression/p16f690/p16f690.asm
+	  regression/p16f690/wdt_16f685.asm regression/p16f690/wdt_16f677.asm
+	  regression/p16f690/16f631.lkr regression/p16f690/Makefile
+	  regression/Makefile.am regression/run_regression.sh
+	  src/comparator.h src/14bit-registers.h src/processor.h
+	  src/pic-processor.cc src/a2dconverter.h src/p16f88x.h
+	  src/comparator.cc src/p16f88x.cc src/pic-processor.h
+	  src/14bit-registers.cc src/a2dconverter.cc :
+	+   Feature request 3110405 add 16f690/631/677/685/687/689
+	* gui/gui_src_asm.cc gui/gui_src.h :
+	+   Fix Source browser crash on font change (3190800)
+	* src/p16x6x.h regression/interrupts_16bit/Makefile
+	  regression/usart_test/eusart.asm : Cosmetic fixes
+
 2011-03-05 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src_opcode.cc : set style for all p18 in program memory window
 

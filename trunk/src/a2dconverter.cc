@@ -274,6 +274,7 @@ void ADCON0::callback(void)
     case AD_ACQUIRING:
       channel = (value.get() >> channel_shift) & channel_mask;
 
+
       m_dSampledVoltage = getChannelVoltage(channel);
       m_dSampledVrefHi  = getVrefHi();
       m_dSampledVrefLo  = getVrefLo();
@@ -541,7 +542,8 @@ void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
       m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
     m_AnalogPins[channel] = newPin;
   } else {
-    printf("%s:%d WARNING invalid channel number config for ADCON1\n",__FILE__,__LINE__);
+    printf("%s:%d WARNING invalid channel number config for ADCON1 %d num %d\n",__FILE__,__LINE__, channel, m_nAnalogChannels);
+   
   }
 }
 
@@ -758,6 +760,7 @@ ADCON0_12F::ADCON0_12F(Processor *pCpu, const char *pName, const char *pDesc)
   : ADCON0(pCpu, pName, pDesc)
 {
   GO_bit = GO;	//ADCON0 and ADCON0_10 have GO flag at different bit
+  valid_bits = 0xdf;
 }
 
 
@@ -765,7 +768,7 @@ ADCON0_12F::ADCON0_12F(Processor *pCpu, const char *pName, const char *pDesc)
 void ADCON0_12F::put(unsigned int new_value)
 {
   unsigned int old_value=value.get();
-  new_value &= 0xcf;	// clear unused bits
+  new_value &= valid_bits;	// clear unused bits
  /* On first call of this function old_value has already been set to
  *  it's default value, but we want to call set_channel_in. First 
  *  gives us a way to do this.
@@ -862,4 +865,20 @@ void ANSEL_12F::put(unsigned int new_value)
   set_tad(new_value & ( ADCS2 | ADCS1 | ADCS0));
   value.put(new_value & 0x7f);
   adcon1->setADCnames();
+}
+
+// catch stimulus and set channel voltage
+//
+a2d_stimulus::a2d_stimulus(ADCON1 * arg, int chan, const char *cPname,double _Vth, double _Zth)
+  : stimulus(cPname, _Vth, _Zth)
+{
+        _adcon1 = arg;
+	channel = chan;
+}
+
+void   a2d_stimulus::set_nodeVoltage(double v)
+{
+	Dprintf(("nodeVoltage =%.1f\n", v));
+        nodeVoltage = v;
+        _adcon1->setVoltRef(channel, v);
 }

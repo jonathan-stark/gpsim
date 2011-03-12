@@ -592,10 +592,11 @@ unsigned int PCLATH::get()
 // member functions for the PCON base class
 //--------------------------------------------------
 //
-PCON::PCON(Processor *pCpu, const char *pName, const char *pDesc)
+PCON::PCON(Processor *pCpu, const char *pName, const char *pDesc, 
+	unsigned int bitMask)
   : sfr_register(pCpu, pName, pDesc)
 {
-  valid_bits = BOR | POR;
+  valid_bits = bitMask;
 }
 
 void PCON::put(unsigned int new_value)

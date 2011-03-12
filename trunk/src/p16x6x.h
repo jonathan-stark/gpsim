@@ -259,12 +259,6 @@ public:
   virtual void set_eeprom_wide(EEPROM_WIDE *ep) { eeprom = ep; }
   virtual void create_config_memory();
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
-
-
-
-
-
-
 };
 class P16F676 :  public P16F630
 {

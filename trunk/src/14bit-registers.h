@@ -404,14 +404,17 @@ class PCON : public sfr_register
 
   enum {
     BOR = 1<<0,   // Brown Out Reset
-    POR = 1<<1    // Power On Reset
+    POR = 1<<1,    // Power On Reset
+    SBOREN = 1<<4, //  Software BOR Enable bit
+    ULPWUE = 1<<5  // Ultra Low-Power Wake-up Enable bit
   };
 
   unsigned int valid_bits;
 
   void put(unsigned int new_value);
 
-  PCON(Processor *, const char *pName, const char *pDesc=0);
+  PCON(Processor *, const char *pName, const char *pDesc=0, 
+			unsigned int bitMask=0x03);
 };
 
 class OSCCON;

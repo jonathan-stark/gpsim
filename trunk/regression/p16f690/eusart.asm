@@ -8,12 +8,11 @@
    ;;
    ;;
 
-	list	p=18f2321
-	include <p18f2321.inc>
+	list	p=16f687
+	include <p16f687.inc>
 	include <coff.inc>
 
- CONFIG WDT=OFF
- CONFIG MCLRE=ON, LPT1OSC=OFF, PBADEN=DIG, CCP2MX=RC1
+ __CONFIG _WDT_OFF  & _INTRC_OSC_NOCLKOUT
 
 
         errorlevel -302 
@@ -28,16 +27,12 @@ BAUDLO  equ     129
 
 
 ;
-INT_VAR        UDATA   0x00
+GPR_DATA                UDATA_SHR
+
+#define	RX_BUF_SIZE	0x10
 w_temp          RES     1
 status_temp     RES     1
 pclath_temp     RES     1
-
-
-
-GPR_DAT        UDATA
-
-#define	RX_BUF_SIZE	0x10
 
 temp1		RES	1
 temp2		RES	1
@@ -62,7 +57,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 ;
 ;------------------------------------------------------------------------
 
-INT_VECTOR   CODE    0x018               ; interrupt vector location
+INT_VECTOR   CODE    0x004               ; interrupt vector location
 
 	movwf	w_temp
 	swapf	STATUS,w
@@ -106,15 +101,15 @@ start
    .sim "break c 0x100000"
    .sim "module library libgpsim_modules"
    .sim "module load usart U1"
- ;  .sim "U1.xpos = 250.0"
-;   .sim "U1.ypos = 80.0"
+   .sim "U1.xpos = 84"
+   .sim "U1.ypos = 276"
 
    .sim "node PIC_tx"
    .sim "node PIC_rx"
 
    ;; Tie the USART module to the PIC
-   .sim "attach PIC_tx portc6  U1.RXPIN"
-   .sim "attach PIC_rx portc7 U1.TXPIN"
+   .sim "attach PIC_tx portb7  U1.RXPIN"
+   .sim "attach PIC_rx portb5 U1.TXPIN"
 
    ;; Set the USART module's Baud Rate
 
@@ -130,11 +125,14 @@ start
 	
 	clrf	STATUS
 
-	bsf	PORTC,6         ;Make sure the TX line drives high when 
+	bsf	PORTB,7         ;Make sure the TX line drives high when 
                                 ;it is programmed as an output.
+	BANKSEL ANSELH
+	bcf	ANSELH,ANS11
 
-	bsf	TRISC,7		;RX is an input
-	bsf	TRISC,6		;TX EUSART sets pin direction
+	BANKSEL TRISB
+	bsf	TRISB,5		;RX is an input
+	bsf	TRISB,7		;TX EUSART sets pin direction
 
 	;; CSRC - clock source is a don't care
 	;; TX9  - 0 8-bit data
@@ -144,17 +142,21 @@ start
 	;; TRMT - x read only
 	;; TX9D - 0 not used
 	
+	BANKSEL TXSTA
 	movlw	(1<<BRGH)
 	movwf	TXSTA
 
+	BANKSEL SPBRG
 	movlw   BAUDLO  	;4800 baud at 10MHz clock.
 	movwf   SPBRG
 
 
-  .assert "(portc & 0x40) == 0x40, \"FAILED: TX bit initilized as high\""
+  .assert "(portb & 0x80) == 0x80, \"FAILED: TX bit initilized as high\""
+	nop
 	clrf	tx_ptr
 			
 	;; Turn on the serial port
+	BANKSEL RCSTA
 	movlw	(1<<SPEN) | (1<<CREN)
 	movwf	RCSTA
 
@@ -174,8 +176,11 @@ start
 	nop
 
 	;; Enable the transmitter
+	BANKSEL TXSTA
 	bsf	TXSTA,TXEN
   .assert "pir1 == 0x10, \"*** FAILED TXIF should now be set\""
+	nop
+	BANKSEL PIE1
 	bsf	PIE1,RCIE	; Enable Rx interrupts
 
 	;; Now Transmit some data and verify that it is transmitted correctly.
@@ -194,12 +199,13 @@ start
 	nop
 
         ;; Switch to 16-bit BRG mode
-        bsf     BAUDCON,BRG16
+	BANKSEL BAUDCTL
+        bsf     BAUDCTL,BRG16
         movlw   low(BAUDHI)
         movwf   SPBRG
         movlw   high(BAUDHI)
         movwf   SPBRGH
-        rcall   delay
+        call   delay
 
 	call	TransmitNextByte
    .assert "U1.rx == 0x35, \"*** FAILED sending 0x35\""
@@ -215,25 +221,31 @@ start
 ;
 ; setup tmr0
 ;
-        movlw  0xC5          ; Tmr0 internal clock prescaler 64
-        movwf  T0CON
+	BANKSEL OPTION_REG   ;
+	movlw   b'11000000' ;Mask TMR0 select and
+	andwf   OPTION_REG,W ; prescaler bits
+	iorlw   b'00000101' ;Set prescale to 1:64
+	movwf   OPTION_REG   ;
 
-        clrf    TMR0L
+	BANKSEL TMR0
+        clrf    TMR0
         movlw   0x55
         movwf   TXREG
 
         btfss   PIR1,TXIF       ;Did the interrupt flag get set?
          goto   $-1
 
+	BANKSEL TXSTA
         btfss   TXSTA,TRMT ;Wait 'til through transmitting
-         bra    $-2
+         goto    $-1
 ;
 ;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
 ;  and < 10 bits or between 0.9375 and 1.041 msec.
 ;  with oscillator at 20MHz and TMR0 / 64 expect between 73 and 81
 ;  TMR0 cycles.
 
-	movf	TMR0L,W
+	BANKSEL TMR0
+	movf	TMR0,W
 
   .assert "tmr0 > 73 && tmr0 < 81, \"*** FAILED baud rate\""
 	nop
@@ -241,36 +253,39 @@ start
         call rx_loop
 
         ; Disable interrupts because the following tests don't give good receive bytes
+	BANKSEL PIE1
         bcf     PIE1,RCIE
 
-        bsf     TXSTA,SENDB     ; request a break sequence
-        btfss   PORTC,6         ; Shouldn't happen just yet
+	BANKSEL TXSTA
+        bsf     TXSTA,SENB     ; request a break sequence
+	BANKSEL PORTB
+        btfss   PORTB,7         ; Shouldn't happen just yet
     .assert "\"*** FAILED break sent too soon\""
         nop
 
-        clrf    TMR0L
+        clrf    TMR0
         movlw   0x55
         movwf   TXREG
 
-        rcall   delay
+        call   delay
 
-        btfsc   PORTC,6         ; Should happen by now
+        btfsc   PORTB,7         ; Should happen by now
     .assert "\"*** FAILED to send break\""
         nop
 
-        btfss   PORTC,6         ; Wait for stop bit
-         bra    $-2
+        btfss   PORTB,7         ; Wait for stop bit
+         goto    $-1
 ;
 ;  At 4800 baud each bit takes 0.208 msec. Output will be low for
 ;  start + 12 bit times or 2.70 msec. With 10Mhz TMR0 / 64 is 106 TMR0 counts.
 
-	movf	TMR0L,W
+	movf	TMR0,W
 
   .assert "tmr0 > 101 && tmr0 < 111, \"*** FAILED sync pulse\""
 	nop
 
 done:
-  .assert  "\"*** PASSED E-Usart on 18F2321\""
+  .assert  "\"*** PASSED E-Usart on 16F687\""
 	goto $
 
 
@@ -285,27 +300,27 @@ tx_message:
 
 delay:
 	decfsz	temp2,f
-	 bra    delay
+	 goto    delay
 	return
 
 
 
 TransmitNextByte:	
+	BANKSEL TXREG
 	clrf	rxFlag
 	call	tx_message
 	movwf	TXREG
-        clrwdt
 
 rx_loop:
 
 	btfss	rxFlag,0
-	 bra	rx_loop
+	 goto	rx_loop
 
 ;	clrf	temp2
 ;	call	delay		;; Delay between bytes.
 
 	btfss	PIR1,TXIF
-	 bra	$-1
+	 goto	$-1
 
 	return
 

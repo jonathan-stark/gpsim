@@ -32,10 +32,20 @@ License along with this library; if not, see
 #include "pic-ioports.h"
 #include "trace.h"
 #include "processor.h"
+#include "p16f88x.h"
 #include "pir.h"
 #include "stimuli.h"
 #include "14bit-tmrs.h"
 #include "comparator.h"
+
+//#define DEBUG
+#if defined(DEBUG)
+#include "../config.h"
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 
 ComparatorModule::ComparatorModule(Processor *pCpu)
   : cmcon(pCpu,"cmcon", "Comparator Module Control"),
@@ -100,8 +110,9 @@ CM_stimulus::CM_stimulus(CMCON * arg, const char *cPname,double _Vth, double _Zt
 
 void   CM_stimulus::set_nodeVoltage(double v)
 {
-        _cmcon->get();  // recalculate comparator values
+	Dprintf(("set_nodeVoltage =%.1f\n", v));
         nodeVoltage = v;
+        _cmcon->get();  // recalculate comparator values
 }
 
 
@@ -491,7 +502,6 @@ double CM1CON0::CVref()
 	else
 	    return(0.6);
 }
-
 void CM2CON0::state_change(unsigned int cmcon_val)
 {
    if (value.get() ^ cmcon_val) // change of state
@@ -533,6 +543,115 @@ double CM2CON0::CVref()
 	    return(m_vrcon->get_Vref());
 	else
 	    return(0.6);
+}
+void CM1CON0_2::state_change(unsigned int cmcon_val)
+{
+   if (!cm_stimulus[0])
+   {
+        cm_stimulus[0] = new CM_stimulus((CMCON *)this, "cm1_stimulus_1", 0, 1e12);
+        cm_stimulus[1] = new CM_stimulus((CMCON *)this, "cm1_stimulus_2", 0, 1e12);
+        cm_cvref = new CM_stimulus((CMCON *)this, "cm1_cvref", 0, 1e12);
+        cm_v06ref = new CM_stimulus((CMCON *)this, "cm1_v06ref", 0, 1e12);
+	((Processor *)cpu)->CVREF->attach_stimulus(cm_cvref);
+	((Processor *)cpu)->V06REF->attach_stimulus(cm_v06ref);
+   }
+   if (value.get() ^ cmcon_val) // change of state
+   {
+
+	// Mirror C1OUT in CM2CON1::MC1OUT
+	if (cmcon_val & OUT)
+	{
+	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC1OUT);
+	    if (m_srcon->value.get() & SRCON::C1SEN)
+	    {
+		m_srcon->set = TRUE;
+		if (!m_srcon->reset)
+		    m_srcon->SR_Q = TRUE;
+	    }
+	}
+	else
+	{
+	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC1OUT);
+	    if (m_srcon->value.get() & SRCON::C1SEN)
+	    {
+		m_srcon->set = FALSE;
+	    }
+	}
+	if (m_eccpas) m_eccpas->c1_output(cmcon_val & OUT);
+
+        // Generate interupt ?
+        if (pir_set)
+	{
+                pir_set->set_c1if();
+	}
+   }
+   if (cmcon_val & OE)	// output pin enabled
+   {
+    if (!(m_srcon->value.get() & SRCON::SR0)) //SRCON select comparator output
+    {
+        cm_source->putState((cmcon_val & OUT) != 0);
+     }
+     else	// RS latch output
+     {
+        cm_source->putState(m_srcon->SR_Q);
+     }
+     cm_output->updatePinModule();
+     update();
+    }
+}
+double CM1CON0_2::CVref()
+{
+
+   	Dprintf(("%x vrcon %x CVREF %.1f V06REF %.1f\n", 
+	    m_vrcon->value.get(), ((Processor *)cpu)->CVREF->get_nodeVoltage(),
+            ((Processor *)cpu)->V06REF->get_nodeVoltage()));
+	if (m_vrcon->value.get() & VRCON_2::C1VREN)
+	    return(((Processor *)cpu)->CVREF->get_nodeVoltage());
+	else
+	    return(((Processor *)cpu)->V06REF->get_nodeVoltage());
+}
+
+void CM2CON0_2::state_change(unsigned int cmcon_val)
+{
+   if (value.get() ^ cmcon_val) // change of state
+   {
+	// Mirror C2OUT in CM2CON1::MC2OUT
+	if (cmcon_val & OUT)
+	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC2OUT);
+	else
+	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC2OUT);
+        // Generate interupt ?
+        if (pir_set)
+                pir_set->set_c2if();
+   }
+   if (m_tmrl)
+   {
+	m_tmrl->compare_gate((cmcon_val & OUT) == OUT);
+   }
+  
+   if (m_eccpas) m_eccpas->c2_output(cmcon_val & OUT);
+
+   if (cmcon_val & OE)	// output pin enabled
+   {
+    if (!(m_srcon->value.get() & SRCON::SR1)) //SRCON select comparator output
+    {
+        cm_source->putState((cmcon_val & OUT) != 0);
+     }
+     else	// RS latch output
+     {
+        cm_source->putState(!m_srcon->SR_Q);
+     }
+     cm_output->updatePinModule();
+     update();
+    }
+}
+double CM2CON0_2::CVref()
+{
+
+	if (m_vrcon->value.get() & VRCON_2::C2VREN)
+	    return(((Processor *)cpu)->CVREF->get_nodeVoltage());
+	else
+	    return(((Processor *)cpu)->V06REF->get_nodeVoltage());
 }
 
 CM12CON0::CM12CON0(Processor *pCpu, const char *pName, const char *pDesc)
@@ -641,6 +760,7 @@ unsigned int CM12CON0::get()
 	{
 	    Vhigh = cm_input[4]->getPin().get_nodeVoltage();
 	}
+    	Dprintf(("Vhigh %.1f Vlow %.1f\n", Vhigh, Vlow));
 	out_true = Vhigh > Vlow;
 
 	out_true ^= ((cmcon_val & POL) == POL);
@@ -693,7 +813,7 @@ void CM12CON0::link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
 
 VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    vr_PinModule(0),
+    vr_PinModule(0), vr_pu(0), vr_pd(0),
     pin_name(0)
 {
   valid_bits = VR0|VR1|VR2|VR3|VRR|VROE|VREN;
@@ -798,6 +918,83 @@ void VRCON::put(unsigned int new_value)
           vr_PinModule->getPin().snode->update();
     }
   }
+}
+
+
+//--------------------------------------------------
+//      Voltage reference
+//--------------------------------------------------
+class P16F631;
+
+VRCON_2::VRCON_2(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+  value.put(0);
+  vr_06v = new stimulus("vref_06v", 0.0, 100.);
+  vr_pu = new stimulus("Cvref_pu", 0.0 , 48000.);
+  vr_pd = new stimulus("Cvref_pd", 0.0, 0.0);
+  ((Processor *)cpu)->CVREF = new Stimulus_Node("CVREF");
+  ((Processor *)cpu)->V06REF = new Stimulus_Node("V0.6REF");
+  ((Processor *)cpu)->CVREF->attach_stimulus(vr_pu);
+  ((Processor *)cpu)->CVREF->attach_stimulus(vr_pd);
+  ((Processor *)cpu)->V06REF->attach_stimulus(vr_06v);
+}
+
+VRCON_2::~VRCON_2()
+{
+   delete vr_06v;
+   delete vr_pu;
+   delete vr_pd;
+   delete ((Processor *)cpu)->CVREF;
+   delete ((Processor *)cpu)->V06REF;
+}
+
+
+
+
+void VRCON_2::put(unsigned int new_value)
+{
+
+  unsigned int old_value = value.get();
+  unsigned int diff = new_value ^ old_value;
+
+  trace.raw(write_trace.get() | value.get());
+
+  if (verbose & 2)
+        cout << "VRCON_2::put old=" << hex << old_value << " new=" << new_value << endl;
+  if (!diff)
+        return;
+
+  value.put(new_value);
+  // Turn 0.6 V reference on or off ?
+  if (diff & VP6EN)
+  {
+	if (new_value & VP6EN)
+		vr_06v->set_Vth(0.6);
+	else
+		vr_06v->set_Vth(0.0);
+
+	((Processor *)cpu)->V06REF->update();
+  }
+
+  if(diff & (C1VREN | C2VREN | VRR | VR3 | VR2 | VR1 | VR0))
+  {
+      double vr_Rhigh, vr_Rlow;
+      if(new_value & (C1VREN | C2VREN))
+	    vr_pu->set_Vth(((Processor *)cpu)->get_Vdd());
+      else
+	    vr_pu->set_Vth(0.0);
+	
+      vr_Rhigh = (8 + (16 - (new_value & 0x0f))) * 2000.;
+      vr_pu->set_Zth(vr_Rhigh);
+      vr_Rlow = (new_value & 0x0f) * 2000.;
+      if (! (new_value & VRR))        // High range ?
+            vr_Rlow += 16000.;
+      vr_pd->set_Zth(vr_Rlow);
+      ((Processor *)cpu)->CVREF->update();
+      ((Processor *)cpu)->CVREF->update();
+  }
+
 }
 
 

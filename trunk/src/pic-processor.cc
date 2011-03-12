@@ -252,12 +252,24 @@ ProcessorConstructor pP16F628A(P16F628::construct ,
                               "__16F628A",  "pic16f628a",   "p16f628a", "16f628a");
 ProcessorConstructor pP16F630(P16F630::construct ,
                               "__16F630",   "pic16f630",    "p16f630",  "16f630");
+ProcessorConstructor pP16F631(P16F631::construct ,
+                              "__16F631",   "pic16f631",    "p16f631",  "16f631");
 ProcessorConstructor pP16F648(P16F648::construct ,
                               "__16F648",   "pic16f648",    "p16f648",  "16f648");
 ProcessorConstructor pP16F648A(P16F648::construct ,
                               "__16F648A",  "pic16f648a",   "p16f648a", "16f648a");
 ProcessorConstructor pP16F676(P16F676::construct ,
                               "__16F676",   "pic16f676",    "p16f676",  "16f676");
+ProcessorConstructor pP16F677(P16F677::construct ,
+                              "__16F677",   "pic16f677",    "p16f677",  "16f677");
+ProcessorConstructor pP16F685(P16F685::construct ,
+                              "__16F685",   "pic16f685",    "p16f685",  "16f685");
+ProcessorConstructor pP16F687(P16F687::construct ,
+                              "__16F687",   "pic16f687",    "p16f687",  "16f687");
+ProcessorConstructor pP16F689(P16F689::construct ,
+                              "__16F689",   "pic16f689",    "p16f689",  "16f689");
+ProcessorConstructor pP16F690(P16F690::construct ,
+                              "__16F690",   "pic16f690",    "p16f690",  "16f690");
 ProcessorConstructor pP16F818(P16F818::construct ,
                               "__16F818",   "pic16f818",    "p16f818",  "16f818");
 ProcessorConstructor pP16F819(P16F819::construct ,
@@ -441,6 +453,7 @@ void pic_processor::sleep ()
 
 void pic_processor::enter_sleep()
 {
+
   status->put_TO(1);
   status->put_PD(0);
 
