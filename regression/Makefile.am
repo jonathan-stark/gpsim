@@ -6,21 +6,27 @@ EXTRA_DIST = \
 	a2d/p16f819.asm a2d/p16f873a.asm a2d/p16f874a.asm a2d/p18f4321.asm \
 	a2d/18f452.lkr a2d/16f873a.lkr a2d/16c71.lkr a2d/p18f1220.asm \
 	a2d/p16c71.asm a2d/16f874a.lkr a2d/p18f452.asm a2d/18f4321.lkr \
-	a2d/p16f88.asm a2d/18f1220.lkr a2d/16f819.lkr analog_stim/Makefile \
+	a2d/p16f88.asm a2d/18f1220.lkr a2d/16f819.lkr a2d/p10f222.asm \
+	a2d/10f222.lkr \
+	p12f675/p12f683.asm p12f675/Makefile p12f675/12f683.lkr \
+	p12f675/p12f675.asm p12f675/12f675.lkr \
+	analog_stim/Makefile \
 	analog_stim/18f452.lkr analog_stim/p18f452.asm assertions/Makefile \
 	assertions/assertions.asm assertions/16f873.lkr breakpoints/Makefile \
 	breakpoints/breakpoints.stc breakpoints/16f873.lkr \
 	breakpoints/breakpoints.asm ccp/Makefile ccp/ccp.stc ccp/ccp_819.asm \
 	ccp/ccp_877a.asm ccp/16f877a.lkr ccp/ccp.asm ccp/ccp_877a.stc \
-	ccp/pwm_877a.asm ccp/16f819.lkr ccp_628/Makefile ccp_628/ccp_628.asm \
-	ccp_628/16f628.lkr comparator/Makefile comparator/compar_628.asm \
+	ccp/pwm_877a.asm ccp/16f819.lkr ccp/pwm_6520.asm ccp/18f6520.lkr \
+	ccp_628/Makefile ccp_628/ccp_628.asm  ccp_628/16f628.lkr \
+	comparator/Makefile comparator/compar_628.asm \
 	comparator/compar_873a.asm comparator/16f873a.lkr \
+	comparator/compar_882.asm comparator/16f882.lkr \
 	comparator/10f204.lkr comparator/16f877a.lkr \
 	comparator/compar_877a.asm comparator/compar_628.stc \
 	comparator/16f628.lkr comparator/compar_10f204.asm \
 	comparator/compar_873a.stc comparator/compar_877a.stc \
 	digital_stim/Makefile digital_stim/16f84.lkr \
-	digital_stim/digital_stim.asm digital_stim/digital_stim.stc \
+	digital_stim/digital_stim.asm  digital_stim/digital_stim.stc \
 	eeprom_wide/Makefile eeprom_wide/eeprom_wide.stc \
 	eeprom_wide/16f873.lkr eeprom_wide/eeprom_wide.asm i2c/16f88.lkr \
 	i2c/Makefile i2c/p16f819.asm  \
@@ -67,8 +73,8 @@ EXTRA_DIST = \
 	tmr0_16bit/tmr0_16bit.asm tmr0_16bit/delay.inc tmr0_16bit/delay.asm \
 	tmr1_16bit/Makefile tmr1_16bit/18f452.lkr \
 	tmr1_16bit/tmr1_16bit.asm tmr1_16bit/tmr1_16bit.stc ttl/Makefile \
-	ttl/ttl377.asm ttl/18f452.lkr ttl/ttl377.stc txisr_test/Makefile \
-	txisr_test/16f871.lkr txisr_test/txisr_test.asm \
+	ttl/ttl377.asm ttl/18f452.lkr ttl/ttl377.stc ttl/ttl165.asm \
+	txisr_test/Makefile txisr_test/16f871.lkr txisr_test/txisr_test.asm \
 	txisr_test/txisr_test.stc usart_test/16f877.lkr usart_test/Makefile \
 	usart_test/18f2321.lkr usart_test/usart_pir1v2.asm \
 	usart_test/eusart.asm usart_test/usart_pir1v1.asm \
@@ -77,10 +83,13 @@ EXTRA_DIST = \
 	wdt/18f452.lkr wdt/nwdt_16f628.asm wdt/nwdt_16c64.asm \
 	wdt/wdt_18f452.asm wdt/wdt_16f88.asm wdt/nwdt_16f88.asm wdt/16c64.lkr \
 	wdt/wdt_16c64.asm wdt/nwdt_18f452.asm wdt/16f628.lkr \
-	wdt/wdt_16f628.asm p12f675/Makefile p12f675/12f675.lkr p12f675/p12f675.asm \
+	wdt/wdt_16f628.asm  wdt/wdt_10f200.asm  wdt/10f200.lkr \
+	p12f675/Makefile p12f675/12f675.lkr p12f675/p12f675.asm \
 	p16f676/p16f676.asm p16f676/Makefile p16f676/16f676.lkr \
-	16f631.lkr epwm.asm eusart.asm Makefile nwdt_16f631.asm p16f690.asm \
-	wdt_16f677.asm wdt_16f685.asm
+	p16f676/reset.asm \
+	p16f690/16f631.lkr p16f690/epwm.asm p16f690/eusart.asm \
+	p16f690/Makefile p16f690/nwdt_16f631.asm p16f690/p16f690.asm \
+	p16f690/wdt_16f677.asm p16f690/wdt_16f685.asm 
 
 MOSTLYCLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 
 CLEANFILES = */*.o */*.hex */*.cod */*.lst */*.log */*.map */*~ 

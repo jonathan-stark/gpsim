@@ -180,6 +180,7 @@ ${RT} p12c509 sim_p12c509_reset
 
 ${RT} p16f84 sim_reset
 
+${RT} wdt sim_wdt_10f200
 ${RT} wdt sim_wdt_16f88
 ${RT} wdt sim_nwdt_16f88
 

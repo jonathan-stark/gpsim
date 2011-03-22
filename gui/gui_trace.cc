@@ -53,7 +53,7 @@ typedef enum {
     MENU_ADD_WATCH,
 } menu_id;
 
-static gchar *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
+static const gchar *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
 
 // gui trace flags:
 #define GTF_ENABLE_XREF_UPDATES    (1<<0)
@@ -238,7 +238,7 @@ void Trace_Window::Build(void)
   gtk_window_set_title(GTK_WINDOW(window), "trace viewer");
 
   // Trace clist
-  trace_clist=GTK_CLIST(gtk_clist_new_with_titles(TRACE_COLUMNS,trace_titles));
+  trace_clist=GTK_CLIST(gtk_clist_new_with_titles(TRACE_COLUMNS,(gchar **)trace_titles));
   gtk_clist_set_column_auto_resize(trace_clist,0,TRUE);
 
   GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);

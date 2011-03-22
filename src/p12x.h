@@ -298,6 +298,8 @@ public:
   // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
   virtual void updateGP2Source();
   virtual void freqCalibration();
+  // WDT causes reset on sleep
+  virtual bool exit_wdt_sleep() { return false; } 
 
 };
 

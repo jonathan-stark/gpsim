@@ -350,6 +350,7 @@ public:
   void sleep();
   virtual void enter_sleep();
   virtual void exit_sleep();
+  virtual bool exit_wdt_sleep() { return true; } // WDT wakes sleep
   bool is_sleeping();
   virtual void step(unsigned int steps,bool refresh=true);
   virtual void step_over(bool refresh=true);
