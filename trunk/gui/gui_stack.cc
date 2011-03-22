@@ -52,7 +52,7 @@ struct stack_entry {
 #define COLUMNS 2
 #define DEPTHCOL 0
 #define RETADDRCOL 1
-static gchar *stack_titles[COLUMNS]={"depth", "return address"};
+static const gchar *stack_titles[COLUMNS]={"depth", "return address"};
 
 /*
  */
@@ -295,7 +295,7 @@ void Stack_Window::Build(void)
   gtk_signal_connect_after(GTK_OBJECT(window), "button_press_event",
                            GTK_SIGNAL_FUNC(sigh_button_event), this);
 
-  stack_clist=gtk_clist_new_with_titles(COLUMNS,stack_titles);
+  stack_clist=gtk_clist_new_with_titles(COLUMNS,(gchar **)stack_titles);
   gtk_widget_show(stack_clist);
 
 

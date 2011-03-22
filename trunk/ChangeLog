@@ -1,3 +1,15 @@
+2011-03-23 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc src/pic-processor.h src/p12x.h
+	  regression/wdt/10f200.lkr regression/wdt/wdt_10f200.asm
+	  regression/wdt/Makefile regression/a2d/p10f222.asm
+	  regression/run_regression.sh : Fix 10f2xx WDT bug 3059498 
+	* regression/Makefile.am : 
+	- Add missing regression files into dist tarball
+	* extras/lcd/examples/lcdmemtest.hex :
+	- delete file from svn make clean removes
+	* gui/gui_symbols.cc gui/gui_trace.cc gui/gui_menu.cc gui/gui_stack.cc
+	  gui/gui_watch.cc : Fix compiler warnings
+
 2011-03-12 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f690/nwdt_16f631.asm regression/p16f690/eusart.asm
 	  regression/p16f690/epwm.asm regression/p16f690/p16f690.asm

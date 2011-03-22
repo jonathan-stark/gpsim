@@ -51,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
 #define BITCOL 5
 #define LASTCOL BITCOL
 
-static gchar *watch_titles[]={"name","address","dec","hex","ascii","bits"};
+static const gchar *watch_titles[]={"name","address","dec","hex","ascii","bits"};
 
 #define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
@@ -142,7 +142,7 @@ void ColumnData::Show()
   if (ww) {
     int show = isVisible & (bIsValid ? 1 : 0);
     gtk_clist_set_column_visibility(GTK_CLIST(ww->watch_clist),column,show);
-    config_set_variable(ww->name(), watch_titles[column],show);
+    config_set_variable(ww->name(), (gchar *)watch_titles[column],show);
   }
 }
 bool ColumnData::isValid()
@@ -345,7 +345,7 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 
     for(i=0;i<COLUMNS;i++)
       if (coldata[i].isValid()) {
-        button=gtk_check_button_new_with_label(watch_titles[i]);
+        button=gtk_check_button_new_with_label((gchar *)watch_titles[i]);
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].isVisible);
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
@@ -803,7 +803,7 @@ void Watch_Window::Build(void)
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
                            GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
-  watch_clist = gtk_clist_new_with_titles(COLUMNS,watch_titles);
+  watch_clist = gtk_clist_new_with_titles(COLUMNS,(gchar **)watch_titles);
   gtk_widget_show(watch_clist);
 
   for(i=0;i<LASTCOL;i++) {
@@ -880,8 +880,8 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
 
   for(i=0;i<COLUMNS;i++) {
 
-    if (!config_get_variable(name(),watch_titles[i],&coldata[i].isVisible))
-      config_set_variable(name(),watch_titles[i],1);
+    if (!config_get_variable(name(),(gchar *)watch_titles[i],&coldata[i].isVisible))
+      config_set_variable(name(),(gchar *)watch_titles[i],1);
   }
 
   {
@@ -891,7 +891,7 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
       config_remove(name(), "hex");
 
     const int hexIndex=3;
-    config_set_variable(name(),watch_titles[hexIndex],coldata[hexIndex].isVisible);
+    config_set_variable(name(),(gchar *)watch_titles[hexIndex],coldata[hexIndex].isVisible);
   }
 
   if(enabled)

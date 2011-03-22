@@ -24,6 +24,7 @@ RESET_VECTOR	CODE   0x1FF       ; processor reset vector
 ; as a movlw k, where the k is a literal value.
 
 MAIN	CODE	  0x000
+   .sim "p10f222.BreakOnReset = false"
    .sim "module library libgpsim_modules"
    ; Use a pullup resistor as a voltage source
    .sim "module load pullup V1"
@@ -41,6 +42,12 @@ MAIN	CODE	  0x000
    .sim "V2.xpos = 72"
    .sim "V2.ypos = 156"
 
+
+
+; are we seeing a WDT reset?
+
+        btfss   STATUS,NOT_TO
+        goto    after_sleep
 
 
 	movlw	0x7f
@@ -131,6 +138,7 @@ START
 	MOVWF		ADCON0	
   	MOVF		TMR0,W
 	SLEEP
+after_sleep:
 	NOP
   .assert "(tmr0 - W) == 0, \"FAILED 10f222 tmr0 after sleep\""
 	nop

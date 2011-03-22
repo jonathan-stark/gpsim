@@ -543,6 +543,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   if (!gpGuiProcessor && !gpGuiProcessor->source_browser)
     return;
+  printf("RRR SourceBrowserPreferences::SourceBrowserPreferences\n");
 
   GtkWidget *notebook = gtk_notebook_new();
   gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_TOP);
@@ -751,6 +752,7 @@ gpsimGuiPreferences::gpsimGuiPreferences()
 
   m_SourceBrowser = new SourceBrowserPreferences(vbox);
   gtk_widget_show_all(vbox);
+
 
 
   // Cancel and Apply buttons
@@ -1376,49 +1378,49 @@ gtk_ifactory_cb (gpointer             callback_data,
 
 static GtkItemFactoryEntry menu_items[] =
 {
-  { "/_File",            0,         0,                     0, "<Branch>" },
-  { "/File/tearoff1",    0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Tearoff>" },
-  //{ "/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { "/File/_Open",       "<control>O", (GtkItemFactoryCallback)fileopen_dialog,       0 },
-  //{ "/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //{ "/File/Save _As...", 0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { "/File/sep1",        0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Separator>" },
-  { "/File/_Quit",       "<control>Q", (GtkItemFactoryCallback)do_quit_app,         0 },
+  { (gchar *)"/_File",            0,         0,        0, (gchar *)"<Branch>" },
+  { (gchar *)"/File/tearoff1",    0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, (gchar *)"<Tearoff>" },
+  //{ (gchar *)"/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  { (gchar *)"/File/_Open",       (gchar *)"<control>O", (GtkItemFactoryCallback)fileopen_dialog,       0 },
+  //{ (gchar *)"/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //{ (gchar *)"/File/Save _As...", 0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  { (gchar *)"/File/sep1",        0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, (gchar *)"<Separator>" },
+  { (gchar *)"/File/_Quit",       (gchar *)"<control>Q", (GtkItemFactoryCallback)do_quit_app,         0 },
 
-  //  { "/_Processor",           0,       0,               0, "<Branch>" },
-  //  { "/_Processor/New",   0,       (GtkItemFactoryCallback)new_processor_dialog,       0 },
-  //  { "/_Processor/Delete",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //  { "/_Processor/Switch",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { (gchar *)"/_Processor",           0,       0,               0, "<Branch>" },
+  //  { (gchar *)"/_Processor/New",   0,       (GtkItemFactoryCallback)new_processor_dialog,       0 },
+  //  { (gchar *)"/_Processor/Delete",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { (gchar *)"/_Processor/Switch",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
 
-  //  { "/_Break",       0, 0,               0, "<Branch>" },
-  //  { "/_Break/Set",       0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //  { "/_Break/Clear",     0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { (gchar *)"/_Break",       0, 0,               0, "<Branch>" },
+  //  { (gchar *)"/_Break/Set",       0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { (gchar *)"/_Break/Clear",     0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
-  { "/_Windows",     0, 0,       0, "<Branch>" },
-  { "/Windows/Program _memory", 0, TOGGLE_WINDOW,WT_opcode_source_window,"<ToggleItem>" },
-  { "/Windows/_Source",         0, TOGGLE_WINDOW,WT_asm_source_window,"<ToggleItem>" },
-  { "/Windows/sep1",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/_Ram",            0, TOGGLE_WINDOW,WT_register_window,"<ToggleItem>" },
-  { "/Windows/_EEPROM",         0, TOGGLE_WINDOW,WT_eeprom_window,"<ToggleItem>" },
-  { "/Windows/_Watch",          0, TOGGLE_WINDOW,WT_watch_window,"<ToggleItem>" },
-  { "/Windows/Sta_ck",          0, TOGGLE_WINDOW,WT_stack_window,"<ToggleItem>" },
-  { "/Windows/sep2",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/Symbo_ls",        0, TOGGLE_WINDOW,WT_symbol_window,"<ToggleItem>" },
-  { "/Windows/_Breadboard",     0, TOGGLE_WINDOW,WT_breadboard_window,"<ToggleItem>" },
-  { "/Windows/sep3",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/_Trace",          0, TOGGLE_WINDOW,WT_trace_window,"<ToggleItem>" },
-  { "/Windows/Pro_file",        0, TOGGLE_WINDOW,WT_profile_window,"<ToggleItem>" },
-  { "/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,"<ToggleItem>" },
-  { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
+  { (gchar *)"/_Windows",     0, 0,       0, (gchar *)"<Branch>" },
+  { (gchar *)"/Windows/Program _memory", 0, TOGGLE_WINDOW,WT_opcode_source_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/_Source",         0, TOGGLE_WINDOW,WT_asm_source_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/sep1",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,(gchar *)"<Separator>"  },
+  { (gchar *)"/Windows/_Ram",            0, TOGGLE_WINDOW,WT_register_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/_EEPROM",         0, TOGGLE_WINDOW,WT_eeprom_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/_Watch",          0, TOGGLE_WINDOW,WT_watch_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/Sta_ck",          0, TOGGLE_WINDOW,WT_stack_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/sep2",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,(gchar *)"<Separator>"  },
+  { (gchar *)"/Windows/Symbo_ls",        0, TOGGLE_WINDOW,WT_symbol_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/_Breadboard",     0, TOGGLE_WINDOW,WT_breadboard_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/sep3",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,(gchar *)"<Separator>"  },
+  { (gchar *)"/Windows/_Trace",          0, TOGGLE_WINDOW,WT_trace_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/Pro_file",        0, TOGGLE_WINDOW,WT_profile_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,(gchar *)"<ToggleItem>" },
+  { (gchar *)"/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,(gchar *)"<ToggleItem>" },
 
 #if defined(NEW_SOURCE_BROWSER)
-  { "/_Edit",     0, 0,       0, "<Branch>" },
-  { "/Edit/Preferences",        0, (GtkItemFactoryCallback)gpsimGuiPreferences::setup, 0 },
+  { (gchar *)"/_Edit",     0, 0,       0, (gchar *)"<Branch>" },
+  { (gchar *)"/Edit/Preferences",        0, (GtkItemFactoryCallback)gpsimGuiPreferences::setup, 0 },
 #endif
 
-  { "/_Help",            0,         0,                     0, "<LastBranch>" },
-  { "/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },
+  { (gchar *)"/_Help",            0,         0,                     0, (gchar *)"<LastBranch>" },
+  { (gchar *)"/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },
 
 };
 

@@ -630,7 +630,7 @@ toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
     sw->Update();
 }
 
-static gchar *symbol_titles[3]={"Name","Type","Address/Value"};
+static const gchar *symbol_titles[3]={"Name","Type","Address/Value"};
 
 //------------------------------------------------------------------------
 // Build
@@ -656,7 +656,7 @@ void Symbol_Window::Build(void)
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                       GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
 
-  symbol_clist=gtk_clist_new_with_titles(3,symbol_titles);
+  symbol_clist=gtk_clist_new_with_titles(3,(gchar **)symbol_titles);
   gtk_widget_show(symbol_clist);
   gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),1,TRUE);

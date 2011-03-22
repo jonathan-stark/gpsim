@@ -1558,7 +1558,7 @@ void WDT::callback()
 
     if(breakpoint)
       bp.halt();
-    else if (cpu->is_sleeping())
+    else if (cpu->is_sleeping() && cpu->exit_wdt_sleep())
     {
         cout << "WDT expired during sleep\n";
         update();
