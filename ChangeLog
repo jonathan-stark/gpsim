@@ -1,3 +1,7 @@
+2011-03-30 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_src_asm.cc : fix <main>/Windows/Source not ticked on
+	  startup.
+
 2011-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.cc src/pic-processor.h src/p12x.h
 	  regression/wdt/10f200.lkr regression/wdt/wdt_10f200.asm
