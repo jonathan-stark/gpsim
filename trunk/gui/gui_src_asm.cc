@@ -1670,6 +1670,9 @@ void SourceWindow::Build()
 
   bIsBuilt = true;
 
+  menu = "<main>/Windows/Source";
+  gtk_window_set_title (GTK_WINDOW (window), "Source Browser");
+  UpdateMenuItem();
   if(m_bLoadSource) {
     Dprintf((" \n"));
 
@@ -4560,7 +4563,6 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
 {
   m_SourceWindowIndex = m_SourceWindowCount;
   m_SourceWindowCount++;
-  menu = "<main>/Windows/Source";
 
   window = 0;
   gp = _gp;
