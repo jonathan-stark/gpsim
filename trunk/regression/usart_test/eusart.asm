@@ -8,8 +8,8 @@
    ;;
    ;;
 
-	list	p=18f2321
-	include <p18f2321.inc>
+	list	p=18f2221
+	include <p18f2221.inc>
 	include <coff.inc>
 
  CONFIG WDT=OFF
@@ -270,7 +270,7 @@ start
 	nop
 
 done:
-  .assert  "\"*** PASSED E-Usart on 18F2321\""
+  .assert  "\"*** PASSED E-Usart on 18F2221\""
 	goto $
 
 
