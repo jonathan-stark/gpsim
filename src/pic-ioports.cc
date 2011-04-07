@@ -462,7 +462,7 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
 {
   // interrupt bit 2 on specified edge 
   bool bNewValue = new3State=='1' || new3State=='W';
-  if (bit_number == 2 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
+  if (bit_number == 2 && (((rvDrivenValue.data&4)==4)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
     m_pIntcon->set_intf(true);
 
@@ -479,10 +479,6 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
       cpu_pic->exit_sleep();
       m_pIntcon->set_rbif(true);
     }
-}
-void PicPortGRegister::setIntEdge(bool bNewIntEdge)
-{
-  m_bIntEdge = bNewIntEdge;
 }
 
 PicPSP_PortRegister::PicPSP_PortRegister(Processor *pCpu, const char *pName, const char *pDesc,
