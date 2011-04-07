@@ -1,3 +1,14 @@
+2011-04-07 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* src/p12f6xx.cc src/p16f88x.cc src/pic-ioports.h src/pic-ioports.cc
+          regression/p12f675/12f629.lkr regression/p12f675/p12f629.asm
+          regression/p12f675/Makefile 
+          regression/interrupts_14bit/interrupts_14bit.asm
+          regression/run_regression.sh :
+          Implemented patch for bug 3277143 (INT pin mis-handled on 12F629)
+          and fixed the similar error on 16F88x. Also fixed the interrupt
+          regression test to check INTEDG works (as had previously been done
+          for 18F devices) and added a 12F629 test that checks interrupts
+
 2011-03-30 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src_asm.cc : fix <main>/Windows/Source not ticked on
 	  startup.

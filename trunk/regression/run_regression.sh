@@ -172,8 +172,8 @@ ${RT} i2c sim_p16f876a
 
 ${RT} port_stim sim_port_stim
 
+${RT} p12f675	sim_p12f629
 ${RT} p12f675	sim_p12f675
-
 ${RT} p12f675	sim_p12f683
 
 ${RT} p12c509 sim_p12c509_reset

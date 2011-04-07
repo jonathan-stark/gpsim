@@ -384,7 +384,7 @@ void P12F629::exit_sleep()
 void P12F629::option_new_bits_6_7(unsigned int bits)
 {
 	Dprintf(("P12F629::option_new_bits_6_7 bits=%x\n", bits));
-  m_gpio->setIntEdge ( (bits & OPTION_REG::BIT6) != OPTION_REG::BIT6); 
+  m_gpio->setIntEdge ( (bits & OPTION_REG::BIT6) == OPTION_REG::BIT6); 
   m_wpu->set_wpu_pu ( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7); 
 }
 //========================================================================

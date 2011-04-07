@@ -81,7 +81,7 @@ public:
   void setRBPU(bool);
   void setIntEdge(bool);
   void assignRBPUSink(unsigned int bitPos, sfr_register *);
-private:
+protected:
   enum {
     eIntEdge = 1<<6,
     eRBPU    = 1<<7
@@ -118,10 +118,6 @@ public:
   }
 
   virtual void setbit(unsigned int bit_number, char new3State);
-  void setIntEdge(bool);
-
-private:
-  bool m_bIntEdge;
 };
 class PSP;
 

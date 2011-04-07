@@ -429,7 +429,7 @@ void P16F88x::create_sfr_map()
 void P16F88x::option_new_bits_6_7(unsigned int bits)
 {
         Dprintf(("P18F88x::option_new_bits_6_7 bits=%x\n", bits));
-        m_portb->setIntEdge ( (bits & OPTION_REG::BIT6) != OPTION_REG::BIT6);
+        m_portb->setIntEdge ( (bits & OPTION_REG::BIT6) == OPTION_REG::BIT6);
         m_wpu->set_wpu_pu ( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7);
 }
 

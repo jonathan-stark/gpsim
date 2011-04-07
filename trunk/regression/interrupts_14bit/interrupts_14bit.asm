@@ -220,60 +220,30 @@ test_inte:
         bsf     (OPTION_REG^0x80),INTEDG    ;Interrupt on rising edge
         bcf     STATUS,RP0
 
-
-        movlw   0xff
-        movwf   temp1
-        movwf   temp2
-        movwf   temp3
-        movwf   temp4
-                
         bcf     PORTA,4
-        bcf     INTCON,RBIF
-        bsf     INTCON,INTE
+        bcf     INTCON,T0IE
+
+        call    test_int_pin
 
 
-        ;;
-        ;; This routine toggles porta bit 4 with the hope of generating
-        ;; an interrupt on portb bit 0.
-        ;; temp1 counts the number of times an interrupt has occurred
-        ;; temp2 counts the number of times the interrupt was due to
-        ;;      a rising edge.
-	clrwdt
-inte_edgecount:
-        bcf     temp5,0         ;Interrupt flag
+    .assert "(temp2) == 0x40,\"*** FAILED 14bit-interrupts, no int0 rising\""
+	nop
+    .assert "(temp1) == 0x00,\"*** FAILED 14bit-interrupts, int0 interrupt on wrong edge\""
+	nop
 
-        clrz    
-        bcf     PORTA,4         ;Falling edge
-
-        btfsc   temp5,0
-         decf   temp2,f         ;Falling edge caused the interrupt
-
-        bcf     temp5,0
-        bsf     PORTA,4         ;Rising edge
-
-        btfsc   temp5,0
-         decf   temp3,f         ;Rising edge caused the interrupt
-
-        ;; if either temp2 or temp3 decremented to zero, then z will be set
-        skpz
-         goto   inte_edgecount
-
-        incfsz  temp4,f
-         goto   test_rbif
-        
-        ;; Now let's test the falling edge
-        
         bcf     INTCON,INTE             ;Disable inte interrupt
-        bcf     PORTA,4
-        bcf     INTCON,INTF
-        
         bsf     STATUS,RP0
         bcf     (OPTION_REG^0x80),INTEDG    ;Interrupt on falling edge
         bcf     STATUS,RP0
 
-        bsf     INTCON,INTE
-        
-        goto    inte_edgecount
+        call    test_int_pin
+
+    .assert "(temp1) == 0x40,\"*** FAILED 14bit-interrupts, no int0 falling\""
+	nop
+    .assert "(temp2) == 0x00,\"*** FAILED 14bit-interrupts, int0 interrupt on wrong edge\""
+	nop
+
+
 
         ;;
         ;; test_rbif
@@ -282,7 +252,7 @@ inte_edgecount:
         ;; port b's I/O pins 4-7
         ;; 
 	clrwdt
-test_rbif
+test_rbif:
 
         bcf     INTCON,INTE     ;Disable the rb0 interrupt
 
@@ -338,5 +308,55 @@ done:
 failed:	
   .assert  "\"*** FAILED MidRange core interrupt test\""
         goto    $
+
+
+
+        ;;
+        ;; This routine toggles one of the porta bits with the hope of generating
+        ;; an interrupt on one of the portb bits.
+        ;; temp1 counts the number of interrupts due to falling edges
+        ;; temp2 counts the number of interrupts due to rising edges
+        ;;
+test_int_pin:
+        
+        bsf     STATUS,RP0
+        bcf     (TRISA ^ 0x80),4        ;Make porta bit 4 an output
+        bsf     (TRISB ^ 0x80),0        ;and portb bit 0 an input
+        bcf     (OPTION_REG^0x80),NOT_RBPU  ;Enable the portb weak pull-ups
+        bcf     STATUS,RP0
+
+        clrf    temp1
+        clrf    temp2
+        movlw   0x40
+        movwf   temp3       ; used for counting
+        movwf   temp4
+
+        bcf     PORTA,4
+        bcf     INTCON,INTF
+        bsf     INTCON,INTE
+
+        ;;
+        ;; Now loop round 64 times toggling the pin and count the interrupts
+        ;;
+inte_edgecount:
+        bcf     temp5,0         ;Interrupt flag
+
+        clrz    
+        bsf     PORTA,4         ;Falling edge
+
+        btfsc   temp5,0
+         incf   temp2,f         ;Falling edge caused the interrupt
+
+        bcf     temp5,0
+        bcf     PORTA,4         ;Rising edge
+
+        btfsc   temp5,0
+         incf   temp1,f         ;Rising edge caused the interrupt
+
+        decfsz  temp3,f
+         goto   inte_edgecount
+
+        return
+
 
         end
