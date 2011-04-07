@@ -34,5 +34,5 @@ usart_pir1v2.cod : usart_pir1v2.o
 	gplink --map -s 16f877.lkr -o $@  $<
 
 eusart.cod : eusart.o
-	gplink --map -s 18f2321.lkr -o $@  $<
+	gplink --map -s 18f2221.lkr -o $@  $<
 
