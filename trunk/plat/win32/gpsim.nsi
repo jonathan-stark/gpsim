@@ -324,7 +324,6 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd_mod.asm"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd_mod.stc"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcdmemtest.c"
-  File "${GPSIM_ROOT}\extras\lcd\examples\lcdmemtest.hex"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcdmemtest.stc"
   File "${GPSIM_ROOT}\extras\lcd\examples\p16c64.inc"
   File "${GPSIM_ROOT}\extras\lcd\examples\p16c84.inc"

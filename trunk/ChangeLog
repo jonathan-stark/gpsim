@@ -1,13 +1,16 @@
+2011-04-09 Borut Razem <borut.razem@gmail.com>
+	* plat/win32/gpsim.nsi: removed extras/lcd/examples/lcdmemtest.hex
+
 2011-04-07 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/p12f6xx.cc src/p16f88x.cc src/pic-ioports.h src/pic-ioports.cc
-          regression/p12f675/12f629.lkr regression/p12f675/p12f629.asm
-          regression/p12f675/Makefile 
-          regression/interrupts_14bit/interrupts_14bit.asm
-          regression/run_regression.sh :
-          Implemented patch for bug 3277143 (INT pin mis-handled on 12F629)
-          and fixed the similar error on 16F88x. Also fixed the interrupt
-          regression test to check INTEDG works (as had previously been done
-          for 18F devices) and added a 12F629 test that checks interrupts
+	  regression/p12f675/12f629.lkr regression/p12f675/p12f629.asm
+	  regression/p12f675/Makefile 
+	  regression/interrupts_14bit/interrupts_14bit.asm
+	  regression/run_regression.sh :
+	  Implemented patch for bug 3277143 (INT pin mis-handled on 12F629)
+	  and fixed the similar error on 16F88x. Also fixed the interrupt
+	  regression test to check INTEDG works (as had previously been done
+	  for 18F devices) and added a 12F629 test that checks interrupts
 
 2011-03-30 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_src_asm.cc : fix <main>/Windows/Source not ticked on
@@ -67,25 +70,25 @@
 	* plat/win32/gpsim.nsi: fixed bug #3151323: problem on start gpsim
 
 2011-02-13 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/p18x.cc
-          Fixes to 18F6520 implementation: correct EEPROM size, remove spurious
-          wrong clock pin allocation, adjust structure to match style of 4x21 types
+	* src/p18x.h src/p18x.cc
+	  Fixes to 18F6520 implementation: correct EEPROM size, remove spurious
+	  wrong clock pin allocation, adjust structure to match style of 4x21 types
 
 2011-02-12 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/p18x.cc src/pic-processor.cc src/pic-processor.h
-          Implemented the remaining devices from DS39689E (18F2221 & 4221) and
-          all devices from DS39631D (18F2420,2520,4420,4520)
+	* src/p18x.h src/p18x.cc src/pic-processor.cc src/pic-processor.h
+	  Implemented the remaining devices from DS39689E (18F2221 & 4221) and
+	  all devices from DS39631D (18F2420,2520,4420,4520)
 
 2011-02-10 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/p18x.cc
-          Re-factored 18F2455 and 18F4455 to be derived from 2x21 and 4x21 so 
-          they get the right Config3H and the right ADC, plus RE3/MCLRE pin
+	* src/p18x.h src/p18x.cc
+	  Re-factored 18F2455 and 18F4455 to be derived from 2x21 and 4x21 so 
+	  they get the right Config3H and the right ADC, plus RE3/MCLRE pin
 
 2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/16bit-processors.cc src/p18x.cc src/eeprom.h
-          Small re-organisation of how the EEPROM gets added to 18f2x21 and 4x21
-          derivatives. Some of the decisions pushed into the core classes so that
-          new CPU derivatives need fewer unique methods.
+	* src/p18x.h src/16bit-processors.cc src/p18x.cc src/eeprom.h
+	  Small re-organisation of how the EEPROM gets added to 18f2x21 and 4x21
+	  derivatives. Some of the decisions pushed into the core classes so that
+	  new CPU derivatives need fewer unique methods.
 
 2011-02-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/intcon.cc regression/tmr0_16bit/tmr0_16bit.asm
@@ -97,22 +100,22 @@
 	  fix baud rate
 
 2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
-          src/eeprom.cc src/eeprom.h
-          Initial implementation of PIC18F4620 for feature request #3159000
-          EEPROM_PIR class modified to support >256 byte EEPROM
-          Some re-factoring of 18F2x21 derivatives for less duplication
-          Config3H_2x21 class now implements PBADEN bit. Attempts to implement
-          CCP2MX bit too, but the CCPCON class doesn't allow the pin re-allocation
-          Note: This would break the 18F2455 so its Config3H has been commented 
-          until it is re-factored to be derived from the right base class!
+	* src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
+	  src/eeprom.cc src/eeprom.h
+	  Initial implementation of PIC18F4620 for feature request #3159000
+	  EEPROM_PIR class modified to support >256 byte EEPROM
+	  Some re-factoring of 18F2x21 derivatives for less duplication
+	  Config3H_2x21 class now implements PBADEN bit. Attempts to implement
+	  CCP2MX bit too, but the CCPCON class doesn't allow the pin re-allocation
+	  Note: This would break the 18F2455 so its Config3H has been commented 
+	  until it is re-factored to be derived from the right base class!
 
 2011-02-02 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/cod.cc
-          Fixed addressing of memory on 16-bit cores while allocating HLL code
-          references. This was responsible for a crash with large programs / long
-          addresses found in 18F4620 development and bug #3154828, although it's
-          not necessarily the only cause of that.
+	* src/cod.cc
+	  Fixed addressing of memory on 16-bit cores while allocating HLL code
+	  references. This was responsible for a crash with large programs / long
+	  addresses found in 18F4620 development and bug #3154828, although it's
+	  not necessarily the only cause of that.
 
 2011-01-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/comparator.cc regression/comparator/compar_882.asm
@@ -123,28 +126,28 @@
 	  Add regression tests.
 
 2010-12-10 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/14bit-tmrs.cc regression/ccp/pwm_6520.asm regression/ccp/pwm_877a.asm
-          Fix for bug #3132914 : The clocking of TMR2 should not be affected by 
-          whether any of the CCPs are in PWM mode, and now it isn't. Duty cycle 
-          value is now handled correctly instead.
+	* src/14bit-tmrs.cc regression/ccp/pwm_6520.asm regression/ccp/pwm_877a.asm
+	  Fix for bug #3132914 : The clocking of TMR2 should not be affected by 
+	  whether any of the CCPs are in PWM mode, and now it isn't. Duty cycle 
+	  value is now handled correctly instead.
 
 2010-11-28 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/pic-ioports.cc src/intcon.h
+	* src/pic-ioports.cc src/intcon.h
 	  regression/interrupts_16bit/interrupts_16bit.asm :
-          Fix for bug #3120903 : INT0 edge selection moved to the correct
-          register on 16-bit devices. Also fixed the regression test so that it
-          actually bothers to check which edge caused the interrupt.
-          Code for INT3 implemented but not tested yet.
+	  Fix for bug #3120903 : INT0 edge selection moved to the correct
+	  register on 16-bit devices. Also fixed the regression test so that it
+	  actually bothers to check which edge caused the interrupt.
+	  Code for INT3 implemented but not tested yet.
 
 2010-10-31 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/16bit-instructions.cc src/pic-processor.h src/p18x.h
-          Partial implementation of "bugs" list (errata per CPU type) so that 
-          the 18F6520 has a buggy DAW instruction while the 18F4321 has a 
-          correct one. This matches the real hardware for those two - others
-          need checking.
-        * src/16bit-processors.h src/16bit-instructions.cc src/p18x.h
-          A different approach to fixing the compiler warning Roy spotted (I'd 
-          already corrected my earlier error locally).
+	* src/16bit-instructions.cc src/pic-processor.h src/p18x.h
+	  Partial implementation of "bugs" list (errata per CPU type) so that 
+	  the 18F6520 has a buggy DAW instruction while the 18F4321 has a 
+	  correct one. This matches the real hardware for those two - others
+	  need checking.
+	* src/16bit-processors.h src/16bit-instructions.cc src/p18x.h
+	  A different approach to fixing the compiler warning Roy spotted (I'd 
+	  already corrected my earlier error locally).
 
 2010-10-31 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.cc src/intcon.h src/intcon.cc
@@ -155,49 +158,49 @@
 	* src/16bit-instructions.cc : fix complier warning
 
 2010-10-25 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
-          regression/ttl/ttl165.asm regression/ttl/Makefile
-          regression/run_regression.sh
-          Added a module to simulate a 74x165 parallel-to-serial shift register
+	* modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
+	  regression/ttl/ttl165.asm regression/ttl/Makefile
+	  regression/run_regression.sh
+	  Added a module to simulate a 74x165 parallel-to-serial shift register
 
 2010-10-22 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/14bit-tmrs.cc src/14bit-tmrs.h src/16bit-processors.cc
-          src/p12f6xx.cc src/p16f88x.cc src/p16x6x.cc src/p18x.cc
-          Fixed TMR2 to support multiple PWMs, bug #2823242
-          Implemented all five PWMs on the 18F6520
-          Fixed TMR2 wrap bug, #3092906
-        * regression/ccp/pwm_6520.asm regression/ccp/18f6520.lkr
-          regression/ccp/Makefile regression/run_regression.sh
-          Added regression test for the above
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/16bit-processors.cc
+	  src/p12f6xx.cc src/p16f88x.cc src/p16x6x.cc src/p18x.cc
+	  Fixed TMR2 to support multiple PWMs, bug #2823242
+	  Implemented all five PWMs on the 18F6520
+	  Fixed TMR2 wrap bug, #3092906
+	* regression/ccp/pwm_6520.asm regression/ccp/18f6520.lkr
+	  regression/ccp/Makefile regression/run_regression.sh
+	  Added regression test for the above
 
 2010-10-08 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * modules/resistor.cc modules/resistor.h
-          Minor fix to pulldown so that its resistance attribute is correctly
-          initialised to 0 (it was confused and showed as 5V)
+	* modules/resistor.cc modules/resistor.h
+	  Minor fix to pulldown so that its resistance attribute is correctly
+	  initialised to 0 (it was confused and showed as 5V)
 
 2010-09-29 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/p18x.cc src/16bit-processors.cc src/16bit-processors.h
-          Fixed GPR memory size and SFR peripheral set of 18F1220 (the 16 bit 
-          base class assumptions of portC and CCP2 are now optional)
-        * src/14bit-tmrs.h src/14bit-tmrs.cc src/uart.cc
-          Partial rework for >2 PWMs as on 18F6520, and multiple UARTs naming
+	* src/p18x.h src/p18x.cc src/16bit-processors.cc src/16bit-processors.h
+	  Fixed GPR memory size and SFR peripheral set of 18F1220 (the 16 bit 
+	  base class assumptions of portC and CCP2 are now optional)
+	* src/14bit-tmrs.h src/14bit-tmrs.cc src/uart.cc
+	  Partial rework for >2 PWMs as on 18F6520, and multiple UARTs naming
 
 2010-08-25 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/p18x.cc src/p16x6x.cc src/p12f6xx.cc src/p16f88x.cc
-          src/16bit-processors.cc src/16bit-processors.h src/pir.cc src/pir.h
-          src/pic-instructions.cc src/pic-processor.h src/16bit-instructions.cc
-          src/14bit-tmrs.h src/14bit-tmrs.cc
-          Implemented PIR3 for 18F6520, including the presence of multiple
-          CCPxIF flags in one PIR (needed some re-design)
-          Fixed implementation of 18F "access bank", as some devices have more 
-          than 128 bytes mapped to SFR space
+	* src/p18x.h src/p18x.cc src/p16x6x.cc src/p12f6xx.cc src/p16f88x.cc
+	  src/16bit-processors.cc src/16bit-processors.h src/pir.cc src/pir.h
+	  src/pic-instructions.cc src/pic-processor.h src/16bit-instructions.cc
+	  src/14bit-tmrs.h src/14bit-tmrs.cc
+	  Implemented PIR3 for 18F6520, including the presence of multiple
+	  CCPxIF flags in one PIR (needed some re-design)
+	  Fixed implementation of 18F "access bank", as some devices have more 
+	  than 128 bytes mapped to SFR space
 
 2010-08-21 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.h src/p18x.cc src/p16x6x.cc src/p16f87x.cc src/p16f62x.cc
-          src/p16f88x.cc src/p16f8x.cc src/16bit-processors.cc
-          src/pic-processor.cc src/pic-processor.h src/uart.cc src/uart.h
-          Partial implementation of 18F6520, including change to UART-PIR
-          linkage for multiple UART support.
+	* src/p18x.h src/p18x.cc src/p16x6x.cc src/p16f87x.cc src/p16f62x.cc
+	  src/p16f88x.cc src/p16f8x.cc src/16bit-processors.cc
+	  src/pic-processor.cc src/pic-processor.h src/uart.cc src/uart.h
+	  Partial implementation of 18F6520, including change to UART-PIR
+	  linkage for multiple UART support.
 
 2010-07-12 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac : release changed to 0.25.1 post release SVN
@@ -214,16 +217,16 @@
 	- mask bits on write to tris regeister
 
 2010-06-26 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/ssp.cc regression/spi/p18f242.asm
-          Fix for bug #3021514 :
-            - MSbit is now correctly sent in CKE=1 mode
-            - Clock not disturbed if second byte sent within half bit of SSPIF
-          Extended one of the SPI regression tests to include CKE=1 mode
+	* src/ssp.cc regression/spi/p18f242.asm
+	  Fix for bug #3021514 :
+	    - MSbit is now correctly sent in CKE=1 mode
+	    - Clock not disturbed if second byte sent within half bit of SSPIF
+	  Extended one of the SPI regression tests to include CKE=1 mode
 
 2010-06-25 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
-          Fix to TTL377 so that all eight latches update "simultaneously"
-          Added TTL595 serial-in-parallel-out shift register
+	* modules/ttl.cc modules/ttl.h modules/gpsim_modules.cc
+	  Fix to TTL377 so that all eight latches update "simultaneously"
+	  Added TTL595 serial-in-parallel-out shift register
 
 2010-06-23 Roy Rankin <rrankin@ihug.com.au>
 	- missed CLOCK_EXPERIMENTS changes
@@ -236,8 +239,8 @@
 	- fix cycle counter bug 3018510
 
 2010-06-12 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/14bit-tmrs.cc
-          Fix uninitialised ssp_module pointer (potential segfault)
+	* src/14bit-tmrs.cc
+	  Fix uninitialised ssp_module pointer (potential segfault)
 
 2010-06-09 Ralf Forsberg <rfg@users.sourceforge.net>
 	* src/pic-processor.cc : Fix integer overflow in realtime mode.
@@ -336,13 +339,13 @@
 	* src/pic-ioports.cc: B0 edge wakes processor from sleep (bug 2999264)
 
 2010-05-01 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/16bit-registers.cc src/pic-instructions.cc
-          Fixed bug #2983660 - BSF and BCF now work right on PLUSW registers
-          Also PLUSW registers now work if destination is address 0
-        * regression/psp/p16f871.asm regression/psp/p18f452.asm
-          Fixed the PSP regression test code to de-select the ADC channels,
-          because the above fix shows up that they should (probably) have 
-          failed before.
+	* src/16bit-registers.cc src/pic-instructions.cc
+	  Fixed bug #2983660 - BSF and BCF now work right on PLUSW registers
+	  Also PLUSW registers now work if destination is address 0
+	* regression/psp/p16f871.asm regression/psp/p18f452.asm
+	  Fixed the PSP regression test code to de-select the ADC channels,
+	  because the above fix shows up that they should (probably) have 
+	  failed before.
 
 2010-04-10 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f8x.cc: correct usart pins for p16f87/8 (patch 2116354)
@@ -376,43 +379,43 @@
 	* regression/usart_test/eusart.asm: refine test
 
 2010-03-29 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/16bit-processors.cc src/16bit-processors.h src/p18x.cc src/p18x.h 
-          regression/instructions_16bit/18f452.lkr 
-          regression/instructions_16bit/instructions_16bit.asm
-          Moved loading/reading of EEPROM and ID locations for 18F out of
-          the 18fxx20 class into the base class, as it's common to all the
-          family
-        * src/intcon.cc
-          Commented out an annoying debug print that isn't needed any more
+	* src/16bit-processors.cc src/16bit-processors.h src/p18x.cc src/p18x.h 
+	  regression/instructions_16bit/18f452.lkr 
+	  regression/instructions_16bit/instructions_16bit.asm
+	  Moved loading/reading of EEPROM and ID locations for 18F out of
+	  the 18fxx20 class into the base class, as it's common to all the
+	  family
+	* src/intcon.cc
+	  Commented out an annoying debug print that isn't needed any more
 
 2010-03-29 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_scope.cc
 	  use previous size and position of window (bug 2973982)
 
 2010-03-28 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p16f62x.cc
-          Fixed missing aliases of INDF, PCLATH and INTCON (bug 2977843)
+	* src/p16f62x.cc
+	  Fixed missing aliases of INDF, PCLATH and INTCON (bug 2977843)
 
 2010-03-12 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.cc src/processor.cc
-          Fixed loading of EEPROM data from COD/HEX on 18F (bug 2968268)
+	* src/p18x.cc src/processor.cc
+	  Fixed loading of EEPROM data from COD/HEX on 18F (bug 2968268)
 
 2010-03-10 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/16bit-instructions.cc 
-          regression/instructions_16bit/instructions_16bit.asm :
-          Fix issue 2968248; carry flag is "sticky" to DAW instruction
-        * src/pic-ioports.cc 
-          regression/p18f452_ports/p18f452_ports.asm :
-          Fix issue 2902082; writing the PORT register now updates the LAT 
-          register too.
+	* src/16bit-instructions.cc 
+	  regression/instructions_16bit/instructions_16bit.asm :
+	  Fix issue 2968248; carry flag is "sticky" to DAW instruction
+	* src/pic-ioports.cc 
+	  regression/p18f452_ports/p18f452_ports.asm :
+	  Fix issue 2902082; writing the PORT register now updates the LAT 
+	  register too.
 
 2010-02-07 Roy Rankin <rrankin@ihug.com.au>
        * src/pic-processor.cc: Fix real-time mode regression
-         (bug 2930175)
+	 (bug 2930175)
 
 2010-01-12 Roy Rankin <rrankin@ihug.com.au>
        * src/p18x.h src/p18x.cc src/16bit-registers.cc: Add
-         eeprom, usart for 18f1220/1320
+	 eeprom, usart for 18f1220/1320
        * src/uart.cc src/uart.h: Eusart fixes and debug print fixes
        * modules/usart.cc: scroll patch and debug print fixes
        * regression/usart_test/eusart.asm: Pin direction per docs
@@ -423,11 +426,11 @@
 	  units when no processor is defined (bug 2926629)
 
 2006-11-07 Scott Dattalo <scott@dattalo.com>
-        * src/p18x.hh: wrong register memory size (bug 2921532)
+	* src/p18x.hh: wrong register memory size (bug 2921532)
 
 2009-11-22 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/p18x.cc
-          Fixed the creation of ports D and E on 18F4x21 devices
+	* src/p18x.cc
+	  Fixed the creation of ports D and E on 18F4x21 devices
 
 2009-10-25 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f62x.h : wrong program memory size (bug 2885817)
@@ -437,21 +440,21 @@
 	  for configure. (bug 2868402) Set version to 0.24.1
 
 2009-09-28 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/16bit-hexdecode.cc, src/pic-processor.cc, src/16bit-tmrs.cc
-          src/14bit-tmrs.cc, src/14bit-registers.cc, src/pic-ioports.cc
-          Trivial changes only:
-            - re-ordered processor type creation so the list reported is nearer 
-              numeric order
-            - removed all #includes of processor type headers from "core" code
-              (i.e. not processor type definition files) except pic-processor.cc
-          The idea is to head towards being able to define processors outside of
-          the core GPSim library, by making GPSim follow that sort of structure.
+	* src/16bit-hexdecode.cc, src/pic-processor.cc, src/16bit-tmrs.cc
+	  src/14bit-tmrs.cc, src/14bit-registers.cc, src/pic-ioports.cc
+	  Trivial changes only:
+	    - re-ordered processor type creation so the list reported is nearer 
+	      numeric order
+	    - removed all #includes of processor type headers from "core" code
+	      (i.e. not processor type definition files) except pic-processor.cc
+	  The idea is to head towards being able to define processors outside of
+	  the core GPSim library, by making GPSim follow that sort of structure.
 
 2009-09-13 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * extras/graphic_lcd/src/gpsim_modules.cc, extras/lcd/module_manager.cc,
-          modules/gpsim_modules.cc, modules/encoder.cc
-          Trivial changes only - removed some very obsolete commented out code
-          and erroneous statements about module libraries.
+	* extras/graphic_lcd/src/gpsim_modules.cc, extras/lcd/module_manager.cc,
+	  modules/gpsim_modules.cc, modules/encoder.cc
+	  Trivial changes only - removed some very obsolete commented out code
+	  and erroneous statements about module libraries.
 
 2009-08-24 Borut Razem <borut.razem@siol.net>
 	* src/14bit-registers.h, src/makefile.mingw, plat/win32/libgpsim.def:
@@ -8151,14 +8154,14 @@ gpsim-0.21.0
 
 03FEB00 gpsim-0.18.0
  o cli - added 'processor pins' command to display
-         the state of a pic's I/O pins
+	 the state of a pic's I/O pins
  o cli - added 'set' command for modifying gpsim behavior
-         flags. set options supported:
-         -- verbose - if set, diagnostic info will be displayed
-         -- radix - not supported yet
-         -- gui_update - controls the rate at which the gui is refreshed
+	 flags. set options supported:
+	 -- verbose - if set, diagnostic info will be displayed
+	 -- radix - not supported yet
+	 -- gui_update - controls the rate at which the gui is refreshed
  o cli - added 's' option to the dump command to display only the
-         special function registers (and not the rest of ram).
+	 special function registers (and not the rest of ram).
  o 18cxxx:
    -- TBLRD & TBLWT instructions are now supported
    -- MULLW & MULWF instructions are now supported
