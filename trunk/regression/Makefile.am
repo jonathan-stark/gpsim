@@ -76,7 +76,7 @@ EXTRA_DIST = \
 	ttl/ttl377.asm ttl/18f452.lkr ttl/ttl377.stc ttl/ttl165.asm \
 	txisr_test/Makefile txisr_test/16f871.lkr txisr_test/txisr_test.asm \
 	txisr_test/txisr_test.stc usart_test/16f877.lkr usart_test/Makefile \
-	usart_test/18f2321.lkr usart_test/usart_pir1v2.asm \
+	usart_test/18f2221.lkr usart_test/usart_pir1v2.asm \
 	usart_test/eusart.asm usart_test/usart_pir1v1.asm \
 	usart_test/16f628.lkr wavegen/Makefile wavegen/16f877a.lkr \
 	wavegen/pulsegen.stc wavegen/pulsegen.asm wdt/16f88.lkr wdt/Makefile \
@@ -85,6 +85,7 @@ EXTRA_DIST = \
 	wdt/wdt_16c64.asm wdt/nwdt_18f452.asm wdt/16f628.lkr \
 	wdt/wdt_16f628.asm  wdt/wdt_10f200.asm  wdt/10f200.lkr \
 	p12f675/Makefile p12f675/12f675.lkr p12f675/p12f675.asm \
+	p12f675/p12f629.asm p12f675/12f629.lkr \
 	p16f676/p16f676.asm p16f676/Makefile p16f676/16f676.lkr \
 	p16f676/reset.asm \
 	p16f690/16f631.lkr p16f690/epwm.asm p16f690/eusart.asm \
