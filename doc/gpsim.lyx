@@ -4294,7 +4294,7 @@ portc4
 \end_layout
 
 \begin_layout Standard
-Once the data are caputred, the scope window display may need to be altered
+Once the data are captured, the scope window display may need to be altered
  to better see the data.
  In the GUI, the following keys can be used:
 \end_layout
@@ -4320,7 +4320,7 @@ r Pan right
 \end_layout
 
 \begin_layout Standard
-In the command line, zooming and panning can be achieved by modifiying the
+In the command line, zooming and panning can be achieved by modifying the
  scope.start and scope.end variables.
 \end_layout
 
@@ -6545,7 +6545,6 @@ A 7-segment LED digit
 <row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
-
 \begin_layout Plain Layout
 led 
 \end_layout
@@ -6556,7 +6555,7 @@ led
 \begin_inset Text
 
 \begin_layout Plain Layout
-A single LED with cathode tied to Vss.
+A single pin LED which can be active either high or low
  
 \end_layout
 
@@ -7327,11 +7326,11 @@ LED
 \end_layout
 
 \begin_layout Subsection*
-led_7segments - 7 segment common cathod LED display
+led_7segments - 7 segment common cathode LED display
 \end_layout
 
 \begin_layout Standard
-The segments are numberd as per the following figure.
+The segments are numbered as per the following figure.
 \end_layout
 
 \begin_layout LyX-Code
@@ -7363,7 +7362,7 @@ I/O Pins
 \end_layout
 
 \begin_layout Standard
-.cc - common cathod
+.cc - common cathode
 \end_layout
 
 \begin_layout Standard
@@ -7399,8 +7398,13 @@ Led - Simple LED
 \end_layout
 
 \begin_layout Standard
-The simple LED is a single pin module with an implied grounded cathod.
- The LED is by default red, but can be made a different color via an attribute.
+The simple LED is a single pin module internally tied to either Vss or Vdd.
+By default the LED is internally tied to Vdd(0V) and turns on when the pin is driven high.
+However, by setting the ActiveState parameter to low, the LED is internally tied to Vss(5V) and turns on when the pin is driven low.
+Like a real LED, the module will either sink or source current from  the driving line which may affect its logic level.
+\end_layout
+\begin_layout Standard
+The LED color is by default red, but can be set to other colors.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -7409,6 +7413,10 @@ Attributes
 
 \begin_layout Standard
 color - LED color, possible values red, green, yellow, orange or blue
+\end_layout
+
+\begin_layout Standard
+ActiveState - LED active state mode, possible values: high or low
 \end_layout
 
 \begin_layout Subsubsection*
@@ -8795,7 +8803,7 @@ Libraries libgpsim, libgpsim_modules, libgpsim_eXdbm
 \begin_layout Standard
 The libraries libgpsim, libgpsim_modules, and libgpsim_eXdbm are licensed
  under version 2.1 of the GNU Lesser General Public License.
- Details of this license can be found in the COPYING.LESSER file whcih should
+ Details of this license can be found in the COPYING.LESSER file which should
  have come with the program.
  If not, the license can be found at 
 \begin_inset CommandInset href

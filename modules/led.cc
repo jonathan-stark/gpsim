@@ -106,15 +106,6 @@ namespace Leds {
     {
       if(led)
         led->update();
-      /* {
-        int portval = led->port->get_value();
-        if(lastport != portval) {
-          lastport=portval;
-          led->update();
-        }
-
-      }
-      */
     }
 
 
@@ -609,10 +600,15 @@ namespace Leds {
   unsigned int Led_7Segments::getPinState()
   {
     unsigned int s=0;
-    for (int i=0; i<8; i++)
-      s = (s>>1) | (m_pins[i]->getDrivenState() ? 0x80 : 0);
-    return s;
+    double delta_v;
 
+
+    for (int i=1; i<8; i++)
+    {
+      delta_v = m_pins[i]->get_nodeVoltage() -m_pins[0]->get_nodeVoltage();
+      s = (s>>1) | (delta_v > 1.5 ? 0x80 : 0);
+    }
+    return s;
   }
 
   //--------------------------------------------------------------
@@ -735,6 +731,87 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     return false;
 }
 
+
+class ActiveStateAttribute : public Value
+{
+  public:
+        ActiveStateAttribute(Led *_led) :
+                Value("ActiveState", "high or low"), m_led(_led)
+        {
+        }
+
+        virtual void get(char *return_str, int len);
+        virtual void set(const char *buffer, int buf_size = 0);
+        virtual void set(Value *v);
+        virtual bool Parse(const char *pValue, ActiveStates &bValue);
+
+  private:
+        Led *m_led;
+};
+
+void ActiveStateAttribute::set(Value *v)
+{
+  if ( typeid(*v) == typeid(String))
+  {
+     char buff[20];
+
+     v->get((char *)buff, sizeof(buff));
+     set(buff);
+  }
+  else
+    throw new TypeMismatch(string("set "), "ActiveStateAttribute", v->showType());
+}
+
+void ActiveStateAttribute::set(const char *buffer, int len)
+{
+  if(buffer) {
+    ActiveStates activestate;
+
+    if(Parse(buffer, activestate)) {
+      m_led->set_the_activestate(activestate);
+    }
+    else
+    {
+        cout << "ActiveStateAttribute::set " << buffer << " unknown active state\n";
+   }
+  }
+
+}
+void ActiveStateAttribute::get(char *return_str, int len)
+{
+  if(return_str) {
+
+    switch(m_led->get_the_activestate())
+    {
+    case HIGH:
+        strncpy(return_str, "high", len);
+        break;
+
+    case LOW:
+        strncpy(return_str, "low", len);
+        break;
+    }
+  }
+}
+
+bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
+{
+
+
+    if(strncmp("high", pValue, sizeof("high")) == 0)
+    {
+        bValue = HIGH;
+        return true;
+    }
+    else if (strncmp("low", pValue, sizeof("low")) == 0)
+    {
+        bValue = LOW;
+        return true;
+    }
+    return false;
+}
+
+
   //-------------------------------------------------------------
   // Led (simple)
   //-------------------------------------------------------------
@@ -784,7 +861,19 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
                         w_width,
                         w_height);
 
-    if(m_pin->getDrivenState()) {
+    // Led is on when DrivenState=TRUE in current HIGH active state OR
+    // when DrivenState=FALSE in current LOW active state.
+    double delta_v ;
+    if (get_the_activestate() == HIGH)
+	delta_v = m_pin->get_nodeVoltage() - m_pin->get_Vth();
+    else
+	delta_v = m_pin->get_Vth() - m_pin->get_nodeVoltage();
+/*
+    if((m_pin->getDrivenState() && get_the_activestate()==HIGH) ||
+       (!m_pin->getDrivenState() && get_the_activestate()==LOW)) {
+*/
+    if (delta_v > 1.5)
+    {
         gdk_gc_set_foreground(gc,&led_on_color[on_color]);
         gdk_draw_arc(drawable, gc,
                    TRUE,
@@ -806,6 +895,22 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
                 if (!led_on_color[color].pixel) // color not allocated
                         gdk_colormap_alloc_color(gdk_colormap_get_system(),
                                             &led_on_color[color], FALSE, TRUE);
+                update();
+            }
+        }
+  }
+
+  void Led::set_the_activestate(ActiveStates activestate)
+  {
+        if (activestate != the_activestate)
+        {
+	    if (activestate == HIGH)
+    		m_pin->set_Vth(0.);
+	    else
+    		m_pin->set_Vth(3.5); // includes LED voltage drop
+            the_activestate = activestate;
+            if (get_interface().bUsingGUI() )
+            {
                 update();
             }
         }
@@ -893,6 +998,10 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
   {
 
     create_iopin_map();
+    // the following will load the driver of the input as would a real
+    // LED
+    m_pin->set_Zth(150.);
+    m_pin->set_Vth(0.);
     if(get_interface().bUsingGUI())
       build_window();
 
@@ -900,6 +1009,9 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
     on_color = RED;
     m_colorAttribute = new ColorAttribute(this);
     addSymbol(m_colorAttribute);
+    the_activestate = HIGH;
+    m_activestateAttribute = new ActiveStateAttribute(this);
+    addSymbol(m_activestateAttribute);
     led_interface = new LED_Interface(this);
     get_interface().add_interface(led_interface);
     callback();
@@ -943,7 +1055,6 @@ bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
   {
 
     Led *ledP = new Led(_new_name);
-    //ledP->new_name(_new_name);
 
     return ledP;
 

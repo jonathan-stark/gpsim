@@ -1,3 +1,9 @@
+2011-04-17 Roy Rankin <rrankin@ihug.com.au>
+	* regression/usart_test/18f2221.lkr : replaces 18f2321.lkr
+	* regression/Makefile.am : update regression file list
+	* doc/gpsim.lyx modules/led.cc modules/led.h : Led module active high
+	  or low. Original patch from Tom Crane.
+
 2011-04-09 Borut Razem <borut.razem@gmail.com>
 	* plat/win32/gpsim.nsi: removed extras/lcd/examples/lcdmemtest.hex
 

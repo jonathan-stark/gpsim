@@ -39,6 +39,11 @@ namespace Leds {
   class LED_Interface;  // Defined in led.cc
   class Led_Input;
 
+  enum ActiveStates {
+    HIGH,
+    LOW
+  };
+
   enum Colors
   {
 	RED = 0,
@@ -161,6 +166,8 @@ namespace Leds {
   //
   class ColorAttribute;
 
+  class ActiveStateAttribute;
+
   class Led: public Module, public Led_base, public TriggerObject
   {
   public:
@@ -191,12 +198,16 @@ namespace Leds {
     static Module *construct(const char *new_name);
     Colors get_on_color() { return on_color; }
     void set_on_color(Colors color);
+    ActiveStates get_the_activestate() { return the_activestate; }
+    void set_the_activestate(ActiveStates activestate);
     
 
   private:
     Led_Input *m_pin;
     Colors on_color;
     ColorAttribute *m_colorAttribute;
+    ActiveStates the_activestate;
+    ActiveStateAttribute *m_activestateAttribute;
   };
 
 } // end of namespace Led
