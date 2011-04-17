@@ -1,4 +1,4 @@
-#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.8 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -6100,7 +6100,7 @@ system
 \end_layout
 
 \begin_layout Standard
-Note the gpsim's modules are provided to facilitate debugging of the PIC
+Note that gpsim's modules are provided to facilitate debugging of the PIC
  code, not the hardware.
  gpsim does not attempt to be a circuit simulator by itself.
  If you need that functionality, the gpsim core can be embedded into third
@@ -6545,6 +6545,7 @@ A 7-segment LED digit
 <row>
 <cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
+
 \begin_layout Plain Layout
 led 
 \end_layout
@@ -6555,8 +6556,7 @@ led
 \begin_inset Text
 
 \begin_layout Plain Layout
-A single pin LED which can be active either high or low
- 
+A single pin LED which can be active either high or low 
 \end_layout
 
 \end_inset
@@ -6681,7 +6681,8 @@ Attributes
 \emph default
  attribute is the USART transmit register.
  Data written to this attribute will initiate a transmission.
- The USART does not support a transmit FIFO.
+ The USART supports a transmit FIFO, making it possible to stuff several
+ bytes into the transmit queue while the program under test is paused.
 \end_layout
 
 \begin_layout Standard
@@ -7398,11 +7399,14 @@ Led - Simple LED
 \end_layout
 
 \begin_layout Standard
-The simple LED is a single pin module internally tied to either Vss or Vdd.
-By default the LED is internally tied to Vdd(0V) and turns on when the pin is driven high.
-However, by setting the ActiveState parameter to low, the LED is internally tied to Vss(5V) and turns on when the pin is driven low.
-Like a real LED, the module will either sink or source current from  the driving line which may affect its logic level.
+The simple LED is a single pin module internally tied to either Vss or Vdd.By
+ default the LED is internally tied to Vdd(0V) and turns on when the pin
+ is driven high.However, by setting the ActiveState parameter to low, the
+ LED is internally tied to Vss(5V) and turns on when the pin is driven low.Like
+ a real LED, the module will either sink or source current from  the driving
+ line which may affect its logic level.
 \end_layout
+
 \begin_layout Standard
 The LED color is by default red, but can be set to other colors.
 \end_layout
@@ -8224,8 +8228,8 @@ Starting with version 0.22.0, gpsim distributes regression tests.
  The purpose of a regression test is to validate correctness.
  The tests are designed to exercise many of the aspects of gpsim and gpsim's
  modules.
- While designed primarily for developers though, the regression tests also
- serve as a rich source of examples.
+ While designed primarily for developers, the regression tests also serve
+ as a rich source of examples.
  There are many features gpsim's developers will tuck away into a regression
  test and fail to document!
 \end_layout
@@ -8290,16 +8294,44 @@ on mnemonic, the opcode, and a pointer to the processor owning  the instruction.
 \end_layout
 
 \begin_layout Quotation
-program_memory[pc.value]->execute();
+program_memory[pc->value]->execute();
 \end_layout
 
 \begin_layout Standard
-which says, get the instruction at the current program counter (pc.value)
+which says, get the instruction at the current program index (pc->value)
  and invoke via the virtual function execute().
  This approach allows execution break points to be easily set.
  A special break point instruction can replace the one residing in the program
  memory array.
  When 'execute' is called the break point can be invoked.
+\end_layout
+
+\begin_layout Subsubsection
+Program memory
+\end_layout
+
+\begin_layout Standard
+Note that in the above discussion, the pc->value is referred to as the 
+\begin_inset Quotes eld
+\end_inset
+
+program index
+\begin_inset Quotes erd
+\end_inset
+
+.
+ On the 12-bit and 14-bit PIC cores this is unambiguous as the program memory
+ is instruction-word-wide and the program counter increments by one for
+ each instruction.
+ On the PIC17 and PIC18 cores, however, the program memory is accessible
+ through the TBLPTR in byte-wide form.
+ The program counter increments by two for each instruction.
+\end_layout
+
+\begin_layout Standard
+The program_memory array in gpsim is always an array of instructions.
+ Thus the pc->value on a PIC18 is an index whose value is half of the PC
+ register-triple value.
 \end_layout
 
 \begin_layout Section
@@ -8380,7 +8412,7 @@ Here's an example of the code for the movf instruction that illustrates
 \end_layout
 
 \begin_layout LyX-Code
-program_memory[pc.value]->execute();
+program_memory[pc->value]->execute();
 \end_layout
 
 \begin_layout Standard
@@ -8551,7 +8583,7 @@ void MOVF::execute(void)
 \end_layout
 
 \begin_layout LyX-Code
-  cpu->pc.increment();
+  cpu->pc->increment();
 \end_layout
 
 \begin_layout LyX-Code

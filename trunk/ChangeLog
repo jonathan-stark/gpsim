@@ -1,3 +1,7 @@
+2011-04-17 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* doc/gpsim.lyx : Minor corrections and a note on PIC18 program memory 
+          addressing.
+
 2011-04-17 Roy Rankin <rrankin@ihug.com.au>
 	* regression/usart_test/18f2221.lkr : replaces 18f2321.lkr
 	* regression/Makefile.am : update regression file list
