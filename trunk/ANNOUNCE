@@ -1,57 +1,47 @@
-
                     gpsim
 
       GNU Pic Simulator, a simulator for 
       Microchip's PIC microcontrollers.
 
 
-Version 0.25.0 release
+Version 0.26.0 release
 
 http://sourceforge.net/project/showfiles.php?group_id=2341
 http://gpsim.sourceforge.net/gpsim.html
 
 
+
 New Processors:
+	18F6520, 18F4620, 18F2221, 18F4221, 
+        18F2420, 18F2520, 18F4420, 18F4520, 
+        16f690, 16f631, 16f677, 16f685, 16f687, 16f689
 
-	P16f882 P16f883 P16f884 P16f886 P16f887
+Bugs Reports closed:
 
-Bugs fixed
+ 3277143 	The INT in pic12F675 (12F629) dosen't work 	
+ 3190800 	Source browser crash on font change 	
+ 3174547 	Program memory opcode tab wrong for p18 processors 	
+ 3169541 	SPI and I2C may not start 	
+ 3162315 	tmr0 stops after sleep waken by tmr1 	
+ 3154828 	With Pic18F2455 gpsim crashes on long goto 	
+ 3151323 	problem on start gpsim 	
+ 3150231 	Dual mux comparator errors 	
+ 3132914 	TMR2 interrupt rate wrong (when using PWMs?) 	
+ 3092906 	TMR2 bug : failure to wrap around 	
+ 3071596 	Int1 problem 	
+ 3059498 	PIC10F20x: WDT expired during sleep continues PC 	
+ 3041385 	Build error 	
 
-3021904		 fix porta7 as I/O pin for P18 processors
-3021514		 MSSP SPI behaviour broken
-3018510		 Cycle counter off by one on break from run
-3012488		 gpsim gives sigsegv using finish button on hex file
-3009843  	 Simulation Time HH:MM:SS.CC displays incorrectly
-2999264  	 Processor does not wake from sleep on b0 edge
-2983660  	 PLUSW register misbehaviour
-2983580  	 breadboard trace bug
-2979021  	 memory_size_mask makes incorrect assumption
-2977843		 attempt write to invalid file register in version 0.24.0
-2973978		 realtime mode can lockup
-2973982  	 scope resize not permenant
-2968268  	 Loading EEPROM data from COD on 18F
-2968248  	 DAW instruction failure case
-2926629  	 change Simulation Time format crash
-2902082  	 Incomplete PORTx/LATx interaction
-2885817  	 wrong program memory sizes for pic16f62x
-2868402  	 missing readline check in configure
-		 Fix uninitialised ssp_module pointer (potential segfault)
-		 Fix to TTL377 so that all eight latches update "simultaneously"
+Feature Requests closed
 
-Feature requests closed
+3159000 	Support for 18F4620
+3110405 	Add support for 16F690
 
-2977969  	 Colour blindness discrimination problem
-2943904  	 Add support for 16F887 and 18F4455
-3007214  	 Re-implement PAL Video Module
+Other New Features
 
-
-New Features
-
-	src/ and modules/ license change to LGPLv2+
-	ECCP implemented
-	video module resurected
-	Added back HLL source browser support
-	DS1307 realtime clock extra added
-	extras compiled and loaded as part of gpsim
-	Added TTL595 serial-in-parallel-out shift register
-	
+Enabled a "bugs" attribute for errata (currently just DAW instruction)
+Corrected 18f2455 Vbus pin
+Fixed ADC type and RE3/MCLR pin on 18f2455/4455
+Added a 74x165 shift register module
+Fixed minor bug on "pull-down" module
+Simple LED module can be active high or low
