@@ -1,3 +1,9 @@
+2011-04-20 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac ANNOUNCE : New release
+	* regression/wdt/nwdt_16f648a.asm regression/wdt/Makefile 
+	  regression/Makefile.am regression/run_regression.sh : 
+	  new regression test
+
 2011-04-17 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* doc/gpsim.lyx : Minor corrections and a note on PIC18 program memory 
           addressing.

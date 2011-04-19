@@ -186,6 +186,7 @@ ${RT} wdt sim_nwdt_16f88
 
 ${RT} wdt sim_wdt_16f628
 ${RT} wdt sim_nwdt_16f628
+${RT} wdt sim_nwdt_16f648a
 
 ${RT} wdt sim_wdt_16c64
 ${RT} wdt sim_nwdt_16c64

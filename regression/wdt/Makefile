@@ -7,7 +7,7 @@ include ../make.regression
 
 all :   wdt_16f88.cod nwdt_16f88.cod wdt_16f628.cod nwdt_16f628.cod \
 	wdt_16c64.cod nwdt_16c64.cod wdt_18f452.cod nwdt_18f452.cod \
-	wdt_10f200.cod
+	wdt_10f200.cod nwdt_16f648a.cod
 
 
 p%.cod : p%.o
