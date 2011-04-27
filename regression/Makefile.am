@@ -84,7 +84,7 @@ EXTRA_DIST = \
 	wdt/wdt_18f452.asm wdt/wdt_16f88.asm wdt/nwdt_16f88.asm wdt/16c64.lkr \
 	wdt/wdt_16c64.asm wdt/nwdt_18f452.asm wdt/16f628.lkr \
 	wdt/wdt_16f628.asm  wdt/wdt_10f200.asm  wdt/10f200.lkr \
-	wdt/nwdt_16f648a.asm \
+	wdt/nwdt_16f648a.asm wdt/16f648a.lkr \
 	p12f675/Makefile p12f675/12f675.lkr p12f675/p12f675.asm \
 	p12f675/p12f629.asm p12f675/12f629.lkr \
 	p16f676/p16f676.asm p16f676/Makefile p16f676/16f676.lkr \

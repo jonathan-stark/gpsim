@@ -5,7 +5,7 @@ include ../make.regression
 #
 # Use 16f631.lkr for all processors in this family
 #
-SCRIPT = /usr/share/gputils/lkr/16f631.lkr
+SCRIPT = 16f631.lkr
 
 all : nwdt_16f631.cod wdt_16f677.cod p16f690.cod epwm.cod \
 	wdt_16f685.cod eusart.cod 
