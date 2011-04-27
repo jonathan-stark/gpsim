@@ -1,3 +1,9 @@
+2011-04-27 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p16f690/Makefile : use local lkr file
+	* regression/Makefile.am : tarball fix
+	* configure.ac : increase release number
+	* doc/gpsim.html ANNOUNCE : update documentation for release
+
 2011-04-20 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac ANNOUNCE : New release
 	* regression/wdt/nwdt_16f648a.asm regression/wdt/16f648a.lkr 
