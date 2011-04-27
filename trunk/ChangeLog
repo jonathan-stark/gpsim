@@ -1,3 +1,6 @@
+2011-04-27 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* doc/gpsim.html : Minor corrections to CPU list.
+
 2011-04-27 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f690/Makefile : use local lkr file
 	* regression/Makefile.am : tarball fix
