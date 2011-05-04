@@ -1,0 +1,1951 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="7.10"
+	Name="GpsimDevInstall"
+	ProjectGUID="{9D6358AA-3A6D-4835-8F34-7950A2A6C351}"
+	RootNamespace="Install"
+	Keyword="CustomAppWizProj">
+	<Platforms>
+		<Platform
+			Name="Win32"/>
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="10">
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="10">
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Script Files"
+			Filter="js">
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="">
+			<File
+				RelativePath="..\..\src\12bit-instructions.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\12bit-processors.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\14bit-instructions.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\14bit-processors.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\14bit-registers.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\14bit-tmrs.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\16bit-instructions.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\16bit-processors.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\16bit-registers.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\16bit-tmrs.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\attributes.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\bit.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\bitlog.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\breakpoints.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\bytelog.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\cmd_gpsim.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\cmd_manager.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\cod.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\eeprom.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\errors.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\exports.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\expr.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\fd2raw.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\fopen-path.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\gpsim_classes.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\gpsim_def.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\gpsim_interface.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\gpsim_object.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\gpsim_time.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\i2c-ee.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\icd.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\intcon.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\interface.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\ioports.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\lxt_write.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\modules.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\operator.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p12x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p16f62x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p16f87x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p16x5x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p16x6x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p16x7x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p16x8x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p17c75x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\p18x.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\packages.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pic-instructions.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pic-packages.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pic-processor.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pic-registers.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\picdis.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pie.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pir.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\processor.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\program_files.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\protocol.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\pthread-wrap.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\registers.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\settings_reg.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\sim_context.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\ssp.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\stimuli.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\symbol.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\tmr0.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\trace.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\trace_orb.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\trigger.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\ttoken.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\uart.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\ui.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\unistd.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\uxtime.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\value.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\ValueCollections.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\src\xref.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;%GPSIMINCLUDE%\*.*&quot; md &quot;%GPSIMINCLUDE%&quot;
+if not exist &quot;%GPSIMINCLUDE%\gpsim\*.*&quot; md &quot;%GPSIMINCLUDE%\gpsim&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMINCLUDE)\gpsim&quot;
+"
+						Outputs="$(GPSIMINCLUDE)\gpsim\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Libraries"
+			Filter="">
+			<File
+				RelativePath="..\..\src\Debug GUI\libgpsim.lib">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;$(GPSIMLIB)\*.*&quot; md &quot;$(GPSIMLIB)&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;
+"
+						Outputs="$(GPSIMLIB)\$(InputFileName)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Install $(InputFileName)"
+						CommandLine="if not exist &quot;$(GPSIMLIB)\*.*&quot; md &quot;$(GPSIMLIB)&quot;
+copy &quot;$(InputPath)&quot; &quot;$(GPSIMLIB)&quot;
+"
+						Outputs="$(GPSIMLIB)\$(InputFileName)"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

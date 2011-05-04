@@ -1,0 +1,21 @@
+## Makefile for building the gpsim setup executable on WIN32.
+## The build uses tools running on cygwin.
+
+## Use: make -f makefile.mingw
+
+MAKENSYS = "/cygdrive/c/Program Files/NSIS/makensis"
+
+DATE = $(shell date +%Y%m%d)
+
+VERSION =  $(shell awk '/^AC_INIT\(\[[^]]*\], \[[^]]*\].*\).*/ {print(gensub("^AC_INIT\\(\\[[^]]*\\], \\[([^]]*)\\].*\\).*", "\\1", "1"))}' ../../configure.ac)
+VER_MAJOR = $(shell echo $(VERSION) | awk 'BEGIN { FS="."; getline; print $$1 }')
+VER_MINOR = $(shell echo $(VERSION) | awk 'BEGIN { FS="."; getline; print $$2 }')
+VER_REVISION = $(shell echo $(VERSION) | awk 'BEGIN { FS="."; getline; print $$3 }')
+VER_BUILD = 0
+
+WEB_SITE = $(shell awk '/^AC_INIT\(\[[^]]*\], \[[^]]*\], \[<[^>]*>\].*\).*/ {print(gensub("^AC_INIT\\(\\[[^]]*\\], \\[[^]]*\\], \\[<([^>]*)>\\].*\\).*", "\\1", "1"))}' ../../configure.ac)
+
+all:
+	$(MAKENSYS) /DDATE=$(DATE) /DVER_MAJOR=$(VER_MAJOR) /DVER_MINOR=$(VER_MINOR) /DVER_REVISION=$(VER_REVISION) /DVER_BUILD=$(VER_BUILD) /DPRODUCT_WEB_SITE=$(WEB_SITE) gpsim.nsi
+
+clean:

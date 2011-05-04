@@ -1,0 +1,78 @@
+## Makefile for building the libgpsim_lcd with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+ifdef DEBUG
+  OPTIMIZE = -O2 -g
+else
+  OPTIMIZE = -O2
+  CLDFLAGS = -Wl,--strip-all
+endif
+
+ifndef GLIB_PATH
+  GLIB_PATH = ../../../glib
+endif
+ifndef GTK_PATH
+  GTK_PATH = ../../../gtk+
+endif
+ifndef PANGO_PATH
+  PANGO_PATH = ../../../pango
+endif
+ifndef ATK_PATH
+  ATK_PATH = ../../../atk
+endif
+ifndef CAIRO_PATH
+  CAIRO_PATH = ../../../cairo
+endif
+
+ifndef GPSIM_LIB_PATH
+  GPSIM_LIB_PATH = ../../lib/gpsim
+endif
+ifndef GPSIM_INCLUDE_PATH
+  GPSIM_INCLUDE_PATH = ../../include
+endif
+ifndef GPSIM_DEF_PATH
+  GPSIM_DEF_PATH = ../../lib/gpsim
+endif
+
+CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) -Wall
+
+CXX = c++ -mno-cygwin -mtune=pentium -mms-bitfields
+
+.cc.o:
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
+	$(GTK_PATH)/lib/gdk-win32-2.0.lib $(GTK_PATH)/lib/gtk-win32-2.0.lib \
+	$(CAIRO_PATH)/lib/cairo.lib \
+	$(GPSIM_LIB_PATH)/libgpsim.a
+
+INCLUDES = -I ../.. -I $(GPSIM_INCLUDE_PATH) \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
+	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
+	-I $(CAIRO_PATH)/include/cairo
+
+DEFINES += -DHAVE_GUI
+
+all :				\
+	libgpsim_lcd.dll 
+
+libgpsim_lcd_OBJECTS =		\
+	lcdgui.o		\
+	module_manager.o	\
+	lcd.o			\
+	hd44780.o
+
+################ The modules DLL
+
+libgpsim_lcd.dll : $(libgpsim_lcd_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_lcd.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_lcd_OBJECTS) $(LIBS)
+
+clean :
+	-rm -f *.o *.dll

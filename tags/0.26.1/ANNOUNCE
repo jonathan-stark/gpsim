@@ -1,0 +1,47 @@
+                    gpsim
+
+      GNU Pic Simulator, a simulator for 
+      Microchip's PIC microcontrollers.
+
+
+Version 0.26.1 release
+
+http://sourceforge.net/project/showfiles.php?group_id=2341
+http://gpsim.sourceforge.net/gpsim.html
+
+
+
+New Processors:
+	18F6520, 18F4620, 18F2221, 18F4221, 
+        18F2420, 18F2520, 18F4420, 18F4520, 
+        16f690, 16f631, 16f677, 16f685, 16f687, 16f689
+
+Bugs Reports closed:
+
+ 3277143 	The INT in pic12F675 (12F629) dosen't work 	
+ 3190800 	Source browser crash on font change 	
+ 3174547 	Program memory opcode tab wrong for p18 processors 	
+ 3169541 	SPI and I2C may not start 	
+ 3162315 	tmr0 stops after sleep waken by tmr1 	
+ 3154828 	With Pic18F2455 gpsim crashes on long goto 	
+ 3151323 	problem on start gpsim 	
+ 3150231 	Dual mux comparator errors 	
+ 3132914 	TMR2 interrupt rate wrong (when using PWMs?) 	
+ 3092906 	TMR2 bug : failure to wrap around 	
+ 3071596 	Int1 problem 	
+ 3059498 	PIC10F20x: WDT expired during sleep continues PC 	
+ 3041385 	Build error 	
+
+Feature Requests closed
+
+3159000 	Support for 18F4620
+3110405 	Add support for 16F690
+
+Other New Features
+
+Enabled a "bugs" attribute for errata (currently just DAW instruction)
+Corrected 18f2455 Vbus pin
+Fixed ADC type and RE3/MCLR pin on 18f2455/4455
+Added a 74x165 shift register module
+Fixed minor bug on "pull-down" module
+Simple LED module can be active high or low
