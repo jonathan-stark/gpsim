@@ -1,3 +1,6 @@
+2011-05-15 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac : increase release number for development cycle
+
 2011-04-27 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* doc/gpsim.html : Minor corrections to CPU list.
 
