@@ -364,6 +364,7 @@ class P18F2455 : public P18F2x21
   static Processor *construct(const char *name);
   void create();
 
+  virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 0x3000; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
 
@@ -441,6 +442,7 @@ class P18F4455 : public P18F4x21
   static Processor *construct(const char *name);
   void create();
 
+  virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 0x3000; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
 

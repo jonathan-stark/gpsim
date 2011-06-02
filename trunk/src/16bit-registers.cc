@@ -507,6 +507,19 @@ int Indirect_Addressing::plusw_fsr_value()
 
 }
 
+int Indirect_Addressing::plusk_fsr_value(int k)
+{
+
+  fsr_value += fsr_delta;
+  fsr_delta = 0;
+  unsigned int destination = (fsr_value + k) & _16BIT_REGISTER_MASK;
+  if(is_indirect_register(destination))
+    return -1;
+  else
+    return destination;
+
+}
+
 //------------------------------------------------
 void Fast_Stack::init(_16bit_processor *new_cpu)
 {
