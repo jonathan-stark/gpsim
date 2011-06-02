@@ -240,8 +240,9 @@ char *PUSHL::name(char *return_str,int len)
 }
 void PUSHL::execute()
 {
-  cpu16->ind2.put(m_lit);
-  cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() -1);
+//  cpu16->ind2.put(m_lit);
+//  cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() -1);
+  cpu16->ind2.postdec.put(m_lit);
   cpu16->pc->increment();
 }
 
@@ -309,14 +310,14 @@ void MOVSF::execute()
   if(!initialized)
     runtime_initialize();
 
-  unsigned int source_addr = (cpu16->ind2.get_fsr_value() + source)&0xfff;
+  unsigned int source_addr = cpu16->ind2.plusk_fsr_value(source);
 
   unsigned int r =  cpu_pic->registers[source_addr]->get();
   cpu16->pc->skip();
 
   unsigned int destination_addr =
     (opcode & 0x80) ? 
-    (cpu16->ind2.get_fsr_value() + destination)&0xfff
+    cpu16->ind2.plusk_fsr_value(destination)
     :
     destination;
   cpu_pic->registers[destination_addr]->put(r);

@@ -1,3 +1,12 @@
+2011-06-02 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* src/p18x.h
+          Fixed SFR size for 18Fx455 CPUs (with USB)
+        * src/16bit-registers.cc src/16bit-registers.h src/16bit-instructions.cc
+          regression/p18f/extended_instructions.asm :
+          Fix for bug #3309120 and related indirect addressing problems on 18F
+          in extended mode. Also a regression test for such issues.
+
+
 2011-05-15 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac : increase release number for development cycle
 

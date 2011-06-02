@@ -218,6 +218,7 @@ public:
   void postinc_fsr_value();
   void postdec_fsr_value();
   int  plusw_fsr_value();
+  int  plusk_fsr_value(int k);
 
   /* bool is_indirect_register(unsigned int reg_address)
    *

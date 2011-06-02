@@ -20,6 +20,7 @@ failures        RES     1
 
 
 dataStack	RES	32
+dataStackEnd    RES     1
 
   GLOBAL done
   GLOBAL temp1
@@ -47,9 +48,9 @@ start:
 
         clrf    temp1           ;Assume clrf works...
                                 ;
-	clrf	FSR0
-	clrf	FSR1
-	clrf	FSR2
+	lfsr    0,0
+	lfsr    1,0
+	lfsr    2,0
 	clrf	BSR
 
 	addfsr	0,15
@@ -72,6 +73,15 @@ start:
 	subfsr	2,10
    .assert "(fsr2l==5) && (fsr2h==0)"
 	nop
+
+   ;; Also test that addfsr followed immediately by and INDF access works
+        clrf    dataStackEnd
+        movlw   0x55
+        lfsr    1,dataStack
+        addfsr  1,32
+        movwf   POSTDEC1
+   .assert "dataStackEnd == 0x55"
+        nop
 
 
    ;; CALLW test
@@ -96,6 +106,15 @@ callw_loop:
 	 bra	callw_loop
 
 
+    ;; Test interaction of postdec and movsf
+        lfsr	2,dataStack+1
+        movlw   0xAA
+        movwf   POSTDEC2
+        movsf   [1],temp1
+
+    .assert "temp1 == 0xAA"
+        nop
+
     ;;
 	lfsr	2, dataStack+10
 	clrf	dataStack
@@ -106,6 +125,24 @@ callw_loop:
 
 	movsf	[1],WREG
    .assert "W == 0x42"
+
+        nop
+
+    ;;   Test for the mixed-mode-repeat condition c.f. bug #3309120
+        pushl   0x01
+        pushl   0x02
+        pushl   0x03
+        movlw   3
+        movff   PLUSW2,POSTDEC2
+        movff   PLUSW2,POSTDEC2
+        pushl   0x04
+        pushl   0x05
+        
+   .assert "(fsr2l == ((&dataStack)+10-8))"
+        nop
+
+	movsf	[1],WREG
+   .assert "W == 0x05"
 
 	movss	[1],[3]
 
