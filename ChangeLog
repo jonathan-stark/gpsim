@@ -1,4 +1,12 @@
 2011-06-02 Rob Pearce<rob@bdt-home.demon.co.uk>
+	* src/16bit-registers.cc
+          Attempt to fix bug 3311944 - reported as a POSTDEC bug but actually was
+          that lfsr didn't work as the very first instruction at the reset vector
+        * src/registers.h src/pic-registers.cc
+          Fix ability to set PC from the command line, but not using the nasty
+          hack in patch #3318235 - instead it's done properly
+
+2011-06-02 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/p18x.h
           Fixed SFR size for 18Fx455 CPUs (with USB)
         * src/16bit-registers.cc src/16bit-registers.h src/16bit-instructions.cc
