@@ -151,6 +151,19 @@ void Program_Counter::start_skip()
 
 }
 
+//--------------------------------------------------
+// set - The next instruction is at an arbitrary location. This method is used
+// by the command line parser--the GUI uses put_value directly.
+//   
+void Program_Counter::set(Value *v)
+{
+    int i;
+    v->get(i);
+    //printf ( "Assign %d to PC\n", i );
+    put_value ( i );
+}
+
+
 //========================================================================
 
 phaseExecute2ndHalf::phaseExecute2ndHalf(Processor *pcpu)

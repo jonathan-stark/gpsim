@@ -467,6 +467,12 @@ public:
     this->update();
   }
 
+  /// set --- cast another Value object type into a program counter register type
+  /// this is used primarily by expression and stimuli processing
+  /// (the put() methods are used by the processors).
+  /// FIXME -- consolidate the get, set, and put methods
+  virtual void set(Value *);
+
   // initialize the dynamically allocated trace type
   virtual void set_trace_command();
 
