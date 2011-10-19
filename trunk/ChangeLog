@@ -1,3 +1,13 @@
+2011-10-19 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/registers.h src/14bit-registers.cc src/14bit-tmrs.cc 
+          src/ioports.cc src/registers.cc src/14bit-tmrs.h 
+          src/14bit-registers.h src/16bit-processors.cc
+          gui/gui_watch.cc
+          Cleaned up Register class "bit_mask" member and fixed bug 3425453
+        * regression/instructions_16bit/instructions_16bit.asm 
+          regression/instructions_14bit/branching.asm
+          Regression tests for PCLATH register width
+
 2011-06-02 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/16bit-registers.cc
           Attempt to fix bug 3311944 - reported as a POSTDEC bug but actually was

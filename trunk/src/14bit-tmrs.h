@@ -113,7 +113,7 @@ public:
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  void set_mask(unsigned int bm) { bit_mask = bm; }
+  void set_mask(unsigned int bm) { mValidBits = bm; }
   void setIOpin(PinModule *p0, PinModule *p1, PinModule *p2);
   void c1_output(int value);
   void c2_output(int value);
@@ -124,7 +124,6 @@ public:
 private:
   PWM1CON 	*pwm1con;
   CCPCON  	*ccp1con;
-  unsigned int 	bit_mask;
   PinModule 	*m_PinModule;
   INT_SignalSink  *m_sink;
   bool		trig_state[3];
@@ -157,10 +156,9 @@ public:
   ~PWM1CON();
 
   void put(unsigned int new_value);
-  void set_mask(unsigned int bm) { bit_mask = bm; }
+  void set_mask(unsigned int bm) { mValidBits = bm; }
 
 private:
-  unsigned int bit_mask;
 };
 //
 // Enhanced PWM Pulse Steering control register
@@ -231,7 +229,7 @@ public:
     PWM3 = 15
   };
 
-  void setBitMask(unsigned int bv) { bit_mask = bv; }
+  void setBitMask(unsigned int bv) { mValidBits = bv; }
   void new_edge(unsigned int level);
   void compare_match();
   void pwm_match(int new_state);
@@ -252,7 +250,6 @@ public:
   ECCPAS  *eccpas;
 
 protected:
-  unsigned int 	bit_mask;
   PinModule 	*m_PinModule[4];
   CCPSignalSource *m_source[4];
   CCPSignalSink *m_sink;

@@ -240,7 +240,7 @@ Register::Register(Module *_cpu, const char *pName, const char *pDesc)
   xref().assign_data(this);
   read_access_count=0;
   write_access_count=0;
-  bit_mask = 7;
+  mValidBits = 0xFF;
 
 }
 Register::~Register()
@@ -319,9 +319,11 @@ double Register::get_bit_voltage(unsigned int bit_number)
 // classes that overide this function
 void Register::setbit(unsigned int bit_number, bool new_value)
 {
-  if(bit_number <= bit_mask) {
+    int set_mask = (1<<bit_number);
+
+  if ( set_mask & mValidBits ) {
     trace.raw(write_trace.get() | value.get());
-    value.put((value.get() & ~(1<<bit_number)) | (new_value ? (1<<bit_number) : 0));
+    value.put((value.get() & ~set_mask) | (new_value ? set_mask : 0));
   }
 }
 

@@ -417,6 +417,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(pcl,     0xff9);
   add_sfr_register(pclath,  0xffa);
   add_sfr_register(&pclatu, 0xffb, porv, "pclatu");
+  pclath->mValidBits = 0xFF;    // Data sheet implies does not depend on memory size
 
   Stack16 *stack16 = static_cast<Stack16 *>(stack);
   add_sfr_register(&stack16->stkptr,  0xffc,porv,"stkptr");
