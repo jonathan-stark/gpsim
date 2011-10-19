@@ -111,7 +111,7 @@ void file_register::put_value(unsigned int new_value)
 // and 1000000 centre frequency and 11111111 highest frequency
 void  OSCCAL::put(unsigned int new_value)
 {
-  int   adj = new_value & bit_mask;
+  int   adj = new_value & mValidBits;
   float tune;
   trace.raw(write_trace.get() | value.get());
   value.put(adj);
@@ -561,19 +561,20 @@ void PCL::reset(RESET_TYPE r)
 PCLATH::PCLATH(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc)
 {
+    mValidBits = PCLATH_MASK;
 }
 
 void PCLATH::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-  value.put(new_value & PCLATH_MASK);
+  value.put(new_value & mValidBits);
 }
 
 void PCLATH::put_value(unsigned int new_value)
 {
   cout << "PCLATH::put_value(" << new_value << ")\n";
-  value.put(new_value & PCLATH_MASK);
+  value.put(new_value & mValidBits);
 
   // RP - I cannot think of a single possible reason I'd want to affect the real PC here!
   //  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffff00ff) | (value.get()<<8) );
@@ -585,7 +586,7 @@ unsigned int PCLATH::get()
 {
   trace.raw(read_trace.get() | value.get());
   //trace.register_read(address,value.get());
-  return(value.get() & PCLATH_MASK);
+  return(value.get() & mValidBits);
 }
 
 //--------------------------------------------------
@@ -820,7 +821,7 @@ WREG::~WREG()
 
 void WPU::put(unsigned int new_value)
 {
-    unsigned int masked_value = new_value & bit_mask;
+    unsigned int masked_value = new_value & mValidBits;
     int i;
 
     trace.raw(write_trace.get() | value.get());
@@ -828,7 +829,7 @@ void WPU::put(unsigned int new_value)
     value.put(masked_value);
     for(i = 0; i < 8; i++)
     {
-	if((1<<i) & bit_mask)
+	if((1<<i) & mValidBits)
 	{
 	    (&(*wpu_gpio)[i])->getPin().update_pullup((((1<<i) & masked_value) && wpu_pu )? '1' : '0', true);
 	}

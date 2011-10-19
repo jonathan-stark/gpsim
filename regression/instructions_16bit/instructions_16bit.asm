@@ -741,6 +741,18 @@ TestTablat:
 	return
 TableReadEnd:	
 
+   ;
+   ; Now test 16-bit core SFRs (which should be done in an SFR test but there isn't one)
+   ;
+
+        movlw   0xFF
+        movwf   PCLATH
+        
+   .assert "pclath == 0xFF, \"*** FAILED 16-bit PCLATH masking\""
+        nop
+        clrf    PCLATH
+
+
 done:
   .assert  "\"*** PASSED 16bit-core instruction test\""
         bra     $

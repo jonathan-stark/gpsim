@@ -252,7 +252,6 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     pstrcon(0),
     pwm1con(0),
     eccpas(0),
-    bit_mask(0x3f),
     m_sink(0),
     m_tristate(0),
     m_bInputEnabled(false),
@@ -262,6 +261,7 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     ccprl(0), pir(0), tmr2(0), adcon0(0)
 {
 	m_PinModule[0] = 0;
+    mValidBits = 0x3f;
 }
 
 CCPCON::~CCPCON() 
@@ -763,7 +763,7 @@ void CCPCON::put(unsigned int new_value)
 {
 
   unsigned int old_value =  value.get();
-  new_value &= bit_mask;
+  new_value &= mValidBits;
   
   Dprintf(("%s::put() new_value=0x%x\n",name().c_str(), new_value));
   trace.raw(write_trace.get() | value.get());
@@ -2366,10 +2366,11 @@ private:
 //--------------------------------------------------
 ECCPAS::ECCPAS(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    pwm1con(0), ccp1con(0), bit_mask(0xff),
+    pwm1con(0), ccp1con(0), 
     m_PinModule(0)
 {
     trig_state[0] = trig_state[1] = trig_state[2] = false;
+    mValidBits = 0xff;
 }
 
 ECCPAS::~ECCPAS()
@@ -2390,7 +2391,7 @@ void ECCPAS::put_value(unsigned int new_value)
 {
 
   int old_value = value.get();
-  new_value &= bit_mask;
+  new_value &= mValidBits;
 
 
   // Auto-shutdown trigger active
@@ -2471,9 +2472,9 @@ void ECCPAS::c2_output(int state)
 // PWM1CON
 //--------------------------------------------------
 PWM1CON::PWM1CON(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc),
-  bit_mask(0xff)
+  : sfr_register(pCpu, pName, pDesc)
 {
+  mValidBits = 0xff;
 }
 
 PWM1CON::~PWM1CON()
@@ -2482,7 +2483,7 @@ PWM1CON::~PWM1CON()
 void PWM1CON::put(unsigned int new_value)
 {
 
-  new_value &= bit_mask;
+  new_value &= mValidBits;
   Dprintf(("PWM1CON::put() new_value=0x%x\n",new_value));
   trace.raw(write_trace.get() | value.get());
 

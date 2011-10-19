@@ -453,12 +453,12 @@ class OSCCAL : public  sfr_register
 
   void put(unsigned int new_value);
   void set_freq(float base_freq);
-  unsigned int bit_mask;
   float base_freq;
                                                                                 
   OSCCAL(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask)
-    : sfr_register(pCpu,pName,pDesc), bit_mask(bitMask), base_freq(0.)
+    : sfr_register(pCpu,pName,pDesc), base_freq(0.)
   {
+      mValidBits=bitMask;  // Can't use initialiser for parent class members 
   }
 };
 
@@ -518,16 +518,16 @@ class WDTCON : public  sfr_register
 class IOC :  public sfr_register
 {
 public:
- unsigned int bit_mask;
 
  IOC(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), bit_mask(0x3f)
+    : sfr_register(pCpu,pName,pDesc)
   {
+      mValidBits=0x3f;
   }
 
   void put(unsigned int new_value)
   {
-    unsigned int masked_value = new_value & bit_mask;
+    unsigned int masked_value = new_value & mValidBits;
 
     get_trace().raw(write_trace.get() | value.get());
     value.put(masked_value);
@@ -542,7 +542,6 @@ class WPU  : public  sfr_register
 {
 
 public:
-  unsigned int bit_mask;
   PicPortRegister *wpu_gpio;
   bool wpu_pu;
 
@@ -550,8 +549,9 @@ public:
   void set_wpu_pu(bool pullup_enable);
 
   WPU(Processor *pCpu, const char *pName, const char *pDesc, PicPortRegister* gpio, unsigned int mask=0x37)
-    : sfr_register(pCpu,pName,pDesc), bit_mask(mask), wpu_gpio(gpio), wpu_pu(false)
+    : sfr_register(pCpu,pName,pDesc), wpu_gpio(gpio), wpu_pu(false)
   {
+      mValidBits=mask;  // Can't use initialiser for parent class members 
   }
 };
 #endif

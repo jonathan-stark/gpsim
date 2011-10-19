@@ -144,6 +144,18 @@ test_flag:
         skpz
          goto   test_tmr0
 
+
+   ;
+   ; Now test 14-bit core SFRs (which should be done in an SFR test but there isn't one)
+   ;
+
+        movlw   0xFF
+        movwf   PCLATH
+        
+   .assert "pclath == 0x1F, \"*** FAILED 14-bit PCLATH masking\""
+        nop
+        clrf    PCLATH
+
         goto    done
 
 L1:

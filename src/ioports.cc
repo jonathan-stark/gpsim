@@ -177,7 +177,7 @@ PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
     drivingValue(0), rvDrivenValue(0,0)
 
 {
-  bit_mask = numIopins-1; // ugh.
+    mValidBits = (1<<numIopins)-1; // ugh.
 }
 
 void PortRegister::setEnableMask(unsigned int newEnableMask)
@@ -256,7 +256,8 @@ void PortRegister::updateUI()
 
 void PortRegister::setbit(unsigned int bit_number, char new3State)
 {
-  if(bit_number <= bit_mask) {
+    int set_mask = (1<<bit_number);
+  if(set_mask & mValidBits) {
 
     trace.raw(write_trace.get()  | value.data);
     trace.raw(write_trace.geti() | value.init);
@@ -276,7 +277,7 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
     value = rvDrivenValue;
   } else {
     Dprintf(("PortRegister::::setbit() %s INVALID BIT bit=%d mask=0x%x\n",
-	     name().c_str(), bit_number, bit_mask));
+	     name().c_str(), bit_number, mValidBits));
 
   }
 

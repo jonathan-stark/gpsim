@@ -573,7 +573,7 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 
   if(entry->pRegister) {
     rvMaskedNewValue = entry->pRegister->getRV_notrace();
-    uBitmask = entry->pRegister->bit_mask; //getBitmask();
+    uBitmask = entry->pRegister->mValidBits; //getBitmask();
   }
   else {
     rvMaskedNewValue = entry->getRV();

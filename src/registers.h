@@ -172,7 +172,7 @@ public:
 
   RegisterValue por_value;  // power on reset value
 
-  unsigned int bit_mask;   // = 7 for 8-bit registers, = 15 for 16-bit registers.
+  unsigned int mValidBits;  // = 255 for 8-bit registers, = 65535 for 16-bit registers.
 
   // The read_trace and write_trace variables are used while
   // tracing register reads and writes. Essentially, these are
