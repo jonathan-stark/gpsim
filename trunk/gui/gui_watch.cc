@@ -595,8 +595,8 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
 
   // ASCII representation
-  str[0] = (rvNewValue.data>'0' && rvNewValue.data<='z') ? rvNewValue.data : 0;
-  str[1] =0;
+  str[0] = ( rvNewValue.data>0x20 && rvNewValue.data<0x7F ) ? rvNewValue.data : 0;
+  str[1] = 0;
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, ASCIICOL, str);
 
   // Bit representation

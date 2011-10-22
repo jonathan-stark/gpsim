@@ -2216,8 +2216,10 @@ ProcessorConstructorList * ProcessorConstructor::GetList()
 ProcessorConstructor *ProcessorConstructorList::findByType(const char *name)
 {
   ProcessorConstructorList::iterator processor_iterator;
-  for (processor_iterator = processor_list->begin();
-       processor_iterator != processor_list->end();
+  ProcessorConstructorList *pl = ProcessorConstructor::GetList();
+
+  for (processor_iterator = pl->begin();
+       processor_iterator != pl->end();
        ++processor_iterator) {
 
     ProcessorConstructor *p = *processor_iterator;
@@ -2241,16 +2243,16 @@ string ProcessorConstructorList::DisplayString(void)
 
   int i,j,k,longest;
 
+  ProcessorConstructorList *pl = ProcessorConstructor::GetList();
   ProcessorConstructor *p;
-
 
   // loop through all of the processors and find the
   // one with the longest name
 
   longest = 0;
 
-  for (processor_iterator = processor_list->begin();
-       processor_iterator != processor_list->end();
+  for (processor_iterator = pl->begin();
+       processor_iterator != pl->end();
        processor_iterator++) {
 
     p = *processor_iterator;
@@ -2264,10 +2266,10 @@ string ProcessorConstructorList::DisplayString(void)
 
   // Print the name of each processor.
 
-  for (processor_iterator = processor_list->begin();
-       processor_iterator != processor_list->end(); ) {
+  for (processor_iterator = pl->begin();
+       processor_iterator != pl->end(); ) {
 
-    for(i=0; i<nPerRow && processor_iterator != processor_list->end(); i++) {
+    for(i=0; i<nPerRow && processor_iterator != pl->end(); i++) {
 
       p = *processor_iterator++;
       stream << p->names[1];

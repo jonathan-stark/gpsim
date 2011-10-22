@@ -1235,7 +1235,7 @@ void P18F2x21::create()
   /// data sheet, but bit-restricted according to section 16.4.7
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
-  eccpas.set_mask(0xfc);
+  eccpas.setBitMask(0xfc);
   eccpas.setIOpin(0, 0, &(*m_portb)[0]);
   eccpas.link_registers(&pwm1con, &ccp1con);
   comparator.cmcon.set_eccpas(&eccpas);
@@ -1243,7 +1243,7 @@ void P18F2x21::create()
   ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2, &eccpas);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portc)[2]), 0, 0, 0);
-  pwm1con.set_mask(0x80);
+  pwm1con.setBitMask(0x80);
 }
 
 //------------------------------------------------------------------------
