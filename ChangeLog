@@ -1,3 +1,15 @@
+2011-10-22 Rob Pearce<rob@bdt-home.demon.co.uk>
+        * src/processor.cc
+          Applied patch from Rupert Swarbrick in bug 3426928 - don't rely on 
+          static ProcessorConstructor instances being constructed before 
+          ProcessorConstructorList::findByType is called (avoids a segfault 
+          with some compilers)
+        * src/14bit-tmrs.h src/p18x.cc
+          Trivial: renamed a method for consistency with similar classes.
+        * gui/gui_watch.cc
+          Show all printable ASCII characters in watch window, not just those
+          between '0' and 'z'
+
 2011-10-19 Rob Pearce<rob@bdt-home.demon.co.uk>
         * src/registers.h src/14bit-registers.cc src/14bit-tmrs.cc 
           src/ioports.cc src/registers.cc src/14bit-tmrs.h 

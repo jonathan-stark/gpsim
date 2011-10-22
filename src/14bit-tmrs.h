@@ -113,7 +113,7 @@ public:
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  void set_mask(unsigned int bm) { mValidBits = bm; }
+  void setBitMask(unsigned int bm) { mValidBits = bm; }
   void setIOpin(PinModule *p0, PinModule *p1, PinModule *p2);
   void c1_output(int value);
   void c2_output(int value);
@@ -156,7 +156,7 @@ public:
   ~PWM1CON();
 
   void put(unsigned int new_value);
-  void set_mask(unsigned int bm) { mValidBits = bm; }
+  void setBitMask(unsigned int bm) { mValidBits = bm; }
 
 private:
 };
