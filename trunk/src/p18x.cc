@@ -864,7 +864,34 @@ Processor * P18F452::construct(const char *name)
 // 
 
 P18F2455::P18F2455(const char *_name, const char *desc)
-  : P18F2x21(_name,desc)
+  : P18F2x21(_name,desc),
+      ufrml(this, "ufrml", "USB Frame Number register Low"      ),
+      ufrmh(this, "ufrmh", "USB Frame Number register High"     ),
+      uir  (this, "uir"  , "USB Interrupt Status register"      ),
+      uie  (this, "uie"  , "USB Interrupt Enable register"      ),
+      ueir (this, "ueir" , "USB Error Interrupt Status register"),
+      ueie (this, "ueie" , "USB Error Interrupt Enable register"),
+      ustat(this, "ustat", "USB Transfer Status register"       ),
+      ucon (this, "ucon" , "USB Control register"               ),
+      uaddr(this, "uaddr", "USB Device Address register"        ),
+      ucfg (this, "ucfg" , "USB Configuration register"         ),
+      uep0 (this, "uep0" , "USB Endpoint 0 Enable register"     ),
+      uep1 (this, "uep1" , "USB Endpoint 1 Enable register"     ),
+      uep2 (this, "uep2" , "USB Endpoint 2 Enable register"     ),
+      uep3 (this, "uep3" , "USB Endpoint 3 Enable register"     ),
+      uep4 (this, "uep4" , "USB Endpoint 4 Enable register"     ),
+      uep5 (this, "uep5" , "USB Endpoint 5 Enable register"     ),
+      uep6 (this, "uep6" , "USB Endpoint 6 Enable register"     ),
+      uep7 (this, "uep7" , "USB Endpoint 7 Enable register"     ),
+      uep8 (this, "uep8" , "USB Endpoint 8 Enable register"     ),
+      uep9 (this, "uep9" , "USB Endpoint 9 Enable register"     ),
+      uep10(this, "uep10", "USB Endpoint 10 Enable register"    ),
+      uep11(this, "uep11", "USB Endpoint 11 Enable register"    ),
+      uep12(this, "uep12", "USB Endpoint 12 Enable register"    ),
+      uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
+      uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
+      uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
+      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
 {
 
   cout << "\nP18F2455 does not support USB registers and functionality\n\n";
@@ -893,6 +920,44 @@ void P18F2455::create()
                  m_trisb,              // i2c tris port
                  SSP_TYPE_MSSP
        );
+  add_sfr_register(&ufrml,0x0F66, RegisterValue(0,0),"ufrm");
+  add_sfr_register(&ufrmh,0X0F67, RegisterValue(0,0));
+  add_sfr_register(&uir  ,0x0F68, RegisterValue(0,0));
+  add_sfr_register(&uie  ,0x0F69, RegisterValue(0,0));
+  add_sfr_register(&ueir ,0x0F6A, RegisterValue(0,0));
+  add_sfr_register(&ueie ,0x0F6B, RegisterValue(0,0));
+  add_sfr_register(&ustat,0X0F6C, RegisterValue(0,0));
+  add_sfr_register(&ucon ,0x0F6D, RegisterValue(0,0));
+  add_sfr_register(&uaddr,0X0F6E, RegisterValue(0,0));
+  add_sfr_register(&ucfg ,0x0F6F, RegisterValue(0,0));
+  add_sfr_register(&uep0 ,0x0F70, RegisterValue(0,0));
+  add_sfr_register(&uep1 ,0x0F71, RegisterValue(0,0));
+  add_sfr_register(&uep2 ,0x0F72, RegisterValue(0,0));
+  add_sfr_register(&uep3 ,0x0F73, RegisterValue(0,0));
+  add_sfr_register(&uep4 ,0x0F74, RegisterValue(0,0));
+  add_sfr_register(&uep5 ,0x0F75, RegisterValue(0,0));
+  add_sfr_register(&uep6 ,0x0F76, RegisterValue(0,0));
+  add_sfr_register(&uep7 ,0x0F77, RegisterValue(0,0));
+  add_sfr_register(&uep8 ,0x0F78, RegisterValue(0,0));
+  add_sfr_register(&uep9 ,0x0F79, RegisterValue(0,0));
+  add_sfr_register(&uep10,0x0F7A, RegisterValue(0,0));
+  add_sfr_register(&uep11,0x0F7B, RegisterValue(0,0));
+  add_sfr_register(&uep12,0x0F7C, RegisterValue(0,0));
+  add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
+  add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
+  add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
+  add_sfr_register(&pir2 ,0x0FA1, RegisterValue(0,0));
+
+  // Initialize the register cross linkages
+  pir_set_def.set_pir2(&pir2);
+  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
+  pir2.set_intcon(&intcon);
+  pir2.set_pie(&pie2);
+  pir2.set_ipr(&ipr2);
+  pie2.setPir(&pir2);
+  //pie2.new_name("pie2");
+
+  new InterruptSource(&pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F2455::construct(const char *name)
@@ -915,7 +980,35 @@ Processor * P18F2455::construct(const char *name)
 // 
 
 P18F4455::P18F4455(const char *_name, const char *desc)
-  : P18F4x21(_name,desc)
+  : P18F4x21(_name,desc),
+      ufrml(this, "ufrml", "USB Frame Number register Low"      ),
+      ufrmh(this, "ufrmh", "USB Frame Number register High"     ),
+      uir  (this, "uir"  , "USB Interrupt Status register"      ),
+      uie  (this, "uie"  , "USB Interrupt Enable register"      ),
+      ueir (this, "ueir" , "USB Error Interrupt Status register"),
+      ueie (this, "ueie" , "USB Error Interrupt Enable register"),
+      ustat(this, "ustat", "USB Transfer Status register"       ),
+      ucon (this, "ucon" , "USB Control register"               ),
+      uaddr(this, "uaddr", "USB Device Address register"        ),
+      ucfg (this, "ucfg" , "USB Configuration register"         ),
+      uep0 (this, "uep0" , "USB Endpoint 0 Enable register"     ),
+      uep1 (this, "uep1" , "USB Endpoint 1 Enable register"     ),
+      uep2 (this, "uep2" , "USB Endpoint 2 Enable register"     ),
+      uep3 (this, "uep3" , "USB Endpoint 3 Enable register"     ),
+      uep4 (this, "uep4" , "USB Endpoint 4 Enable register"     ),
+      uep5 (this, "uep5" , "USB Endpoint 5 Enable register"     ),
+      uep6 (this, "uep6" , "USB Endpoint 6 Enable register"     ),
+      uep7 (this, "uep7" , "USB Endpoint 7 Enable register"     ),
+      uep8 (this, "uep8" , "USB Endpoint 8 Enable register"     ),
+      uep9 (this, "uep9" , "USB Endpoint 9 Enable register"     ),
+      uep10(this, "uep10", "USB Endpoint 10 Enable register"    ),
+      uep11(this, "uep11", "USB Endpoint 11 Enable register"    ),
+      uep12(this, "uep12", "USB Endpoint 12 Enable register"    ),
+      uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
+      uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
+      uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
+      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+
 {
   cout << "\nP18F4455 does not support USB registers and functionality\n\n";
   if(verbose)
@@ -945,6 +1038,44 @@ void P18F4455::create()
        );
 
   // RP: RRR commented out comparator.cmcon.set_eccpas(&eccpas);  ??
+  add_sfr_register(&ufrml,0x0F66, RegisterValue(0,0),"ufrm");
+  add_sfr_register(&ufrmh,0X0F67, RegisterValue(0,0));
+  add_sfr_register(&uir  ,0x0F68, RegisterValue(0,0));
+  add_sfr_register(&uie  ,0x0F69, RegisterValue(0,0));
+  add_sfr_register(&ueir ,0x0F6A, RegisterValue(0,0));
+  add_sfr_register(&ueie ,0x0F6B, RegisterValue(0,0));
+  add_sfr_register(&ustat,0X0F6C, RegisterValue(0,0));
+  add_sfr_register(&ucon ,0x0F6D, RegisterValue(0,0));
+  add_sfr_register(&uaddr,0X0F6E, RegisterValue(0,0));
+  add_sfr_register(&ucfg ,0x0F6F, RegisterValue(0,0));
+  add_sfr_register(&uep0 ,0x0F70, RegisterValue(0,0));
+  add_sfr_register(&uep1 ,0x0F71, RegisterValue(0,0));
+  add_sfr_register(&uep2 ,0x0F72, RegisterValue(0,0));
+  add_sfr_register(&uep3 ,0x0F73, RegisterValue(0,0));
+  add_sfr_register(&uep4 ,0x0F74, RegisterValue(0,0));
+  add_sfr_register(&uep5 ,0x0F75, RegisterValue(0,0));
+  add_sfr_register(&uep6 ,0x0F76, RegisterValue(0,0));
+  add_sfr_register(&uep7 ,0x0F77, RegisterValue(0,0));
+  add_sfr_register(&uep8 ,0x0F78, RegisterValue(0,0));
+  add_sfr_register(&uep9 ,0x0F79, RegisterValue(0,0));
+  add_sfr_register(&uep10,0x0F7A, RegisterValue(0,0));
+  add_sfr_register(&uep11,0x0F7B, RegisterValue(0,0));
+  add_sfr_register(&uep12,0x0F7C, RegisterValue(0,0));
+  add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
+  add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
+  add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
+  add_sfr_register(&pir2 ,0x0FA1, RegisterValue(0,0));
+
+  // Initialize the register cross linkages
+  pir_set_def.set_pir2(&pir2);
+  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
+  pir2.set_intcon(&intcon);
+  pir2.set_pie(&pie2);
+  pir2.set_ipr(&ipr2);
+  pie2.setPir(&pir2);
+  //pie2.new_name("pie2");
+
+  new InterruptSource(&pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F4455::construct(const char *name)

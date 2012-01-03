@@ -175,12 +175,18 @@ void GUIRegister::put_value(unsigned int new_value)
   Register *reg = get_register();
 
   if(reg)
+  {
     reg->put_value(new_value);
 
   // Shadow a copy of the register value so that we can tell if it has changed
   // when we go to perform an update in the future.
 
-  shadow = reg->getRV_notrace();
+    shadow = reg->getRV_notrace();
+  }
+  else
+  {
+	fprintf(stderr, "RRR %s %d reg is 0 new_value=%x\n", __FUNCTION__, __LINE__, new_value);
+  }
 }
 
 void GUIRegister::put_shadow(RegisterValue new_value)
