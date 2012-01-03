@@ -342,6 +342,40 @@ void PIR2v3::set_bclif(void)
     setPeripheralInterrupt();
 }
 
+PIR2v4::PIR2v4(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  valid_bits = OSCFIF | CMIF | USBIF | EEIF | BCLIF | HLVDIF | TMR3IF | CCP2IF;
+  writable_bits = valid_bits;
+}
+void PIR2v4::set_usbif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | USBIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR2v4::set_cmif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | CMIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR2v4::set_eeif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | EEIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR2v4::set_bclif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | BCLIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
 //------------------------------------------------------------------------
 
 PIR3v1::PIR3v1(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)

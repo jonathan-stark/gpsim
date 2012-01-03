@@ -26,6 +26,7 @@ License along with this library; if not, see
 #include "16bit-processors.h"
 #include "eeprom.h"
 #include "psp.h"
+#include "pir.h"
 #include "comparator.h"
 
 class PicPortRegister;
@@ -359,6 +360,12 @@ class P18F2420 : public P18F2x21
 class P18F2455 : public P18F2x21
 {
  public:
+  sfr_register ufrml, ufrmh, uir,  uie,  ueir,  ueie,  ustat,  ucon,
+               uaddr, ucfg,  uep0, uep1, uep2,  uep3,  uep4,   uep5,
+               uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
+               uep14,  uep15;
+
+  PIR2v4       pir2;
   virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
   P18F2455(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);
@@ -437,6 +444,13 @@ class P18F4420 : public P18F4x21
 class P18F4455 : public P18F4x21
 {
  public:
+  sfr_register ufrml, ufrmh, uir,  uie,  ueir,  ueie,  ustat,  ucon,
+               uaddr, ucfg,  uep0, uep1, uep2,  uep3,  uep4,   uep5,
+               uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
+               uep14,  uep15;
+
+  PIR2v4       pir2;
+
   virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
   P18F4455(const char *_name=0, const char *desc=0);
   static Processor *construct(const char *name);

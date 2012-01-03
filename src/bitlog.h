@@ -25,7 +25,7 @@ class Cycle_Counter;
 
 // include the absolute minimum portion of GLIB to get the definitions
 // for guint64, etc.
-#include <glibconfig.h>
+#include <glib.h>
 
 /**********************************************************************
  * boolean event logging

@@ -71,6 +71,7 @@ public:
   virtual void set_txb2if(){}
   virtual void set_txif(){}
   virtual void set_wakif(){}
+  virtual void set_usbif(){}
 
   virtual unsigned int get_txif() { return 0;}
   virtual unsigned int get_rcif() { return 0;}
@@ -383,6 +384,50 @@ enum
   virtual void set_c2if();
 
   PIR2v3(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
+
+//---------------------------------------------------------
+// PIR2 Peripheral Interrupt register # 3
+//
+// This is version 4 of the PIR2 register - as seen on the 18F4455 devices
+
+class PIR2v4 : public PIR
+{
+public:
+
+enum
+{
+    CCP2IF  = 1<<0,
+    TMR3IF  = 1<<1,
+    HLVDIF  = 1<<2,
+    BCLIF   = 1<<3,
+    EEIF    = 1<<4,
+    USBIF   = 1<<5,
+    CMIF    = 1<<6,
+    OSCFIF  = 1<<7
+};
+
+
+  virtual void set_ccpif(){
+      put(get() | CCP2IF);
+    }
+  virtual void set_tmr3if() {
+      put(get() | TMR3IF);
+    }
+  virtual void set_hlvdif() {
+      put(get() | HLVDIF);
+    }
+  virtual void set_oscfif() {
+      put(get() | OSCFIF);
+    }
+
+  virtual void set_bclif();
+  virtual void set_eeif();
+  virtual void set_usbif();
+  virtual void set_cmif();
+
+  PIR2v4(Processor *pCpu, const char *pName, const char *pDesc,
          INTCON *, PIE *);
 };
 
