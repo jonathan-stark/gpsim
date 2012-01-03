@@ -71,7 +71,7 @@ case "${host}" in
     if test "x$GCC" = "xyes"; then
       AM_CFLAGS="-Wall"
       AM_CXXFLAGS="-Wall"
-      AM_LDFLAGS="-Wl,-warn-common -Wl,-warn-once"
+      AM_LDFLAGS="-Wl,-warn-common"
     fi
     ;;
   *mingw* )

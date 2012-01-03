@@ -1,4 +1,8 @@
 2012-01-03 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim/Makefile.am extras/graphic_lcd/configure.ac
+	  Changes for clantg++ compatibility as per bug 3426932
+
+2012-01-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/p18x.h src/pir.cc src/pir.h src/p18x.cc
 	  Add USB registers (but not functionality) to 18F2455, 18F4455 
 	  after patch 3308765.
