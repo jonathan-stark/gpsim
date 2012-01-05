@@ -722,7 +722,7 @@ int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, 
 
   Register *reg = cpu->rma.get_register(address);
   int m = snprintf(buf, bufsize,
-                   "  Reg Write: %s(0x%04X) was 0x%x ",
+                   "  Reg Write: %s(0x%04X) was 0x%0X ",
                    (reg ? reg->name().c_str() : ""), address,
                    tv & 0xff);
   if(m>0)
@@ -1026,6 +1026,7 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
           if( (get(i) & (CYCLE_COUNTER_HI | CYCLE_COUNTER_LO)) &&
               (((get(k) - get(i)) & 0x7fffffff) == 1) )
             return 1;
+
         }
 
       // The current index points to the low int and the next entry is
@@ -1057,6 +1058,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
   guint64 cycle;
   int return_value = is_cycle_trace(index,&cycle);
+
 
   if(bufsize)
     buffer[0] = 0;   // 0 terminate just in case no string is created
@@ -1114,7 +1116,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
           if(tt) {
             tt->dump_raw(this,index,buffer,bufsize);
-            return_value = tt->size();
+	    return_value = tt->entriesUsed(this, index);
           }
           break;
         }
@@ -1483,7 +1485,9 @@ void TraceLog::write_logfile()
       buf[0] = 0;
 
       if(buffer.is_cycle_trace(i,&cycle))
+      {
         fprintf(log_file,"Cycle 0x%016" PRINTF_GINT64_MODIFIER "X\n",cycle);
+      }
 
       i = (i + buffer.dump1(i,buf, sizeof(buf))) & TRACE_BUFFER_MASK;
 
@@ -1632,6 +1636,7 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
 
 void TraceLog::register_write(Register *pReg, guint64 cc)
 {
+
   if (!pReg)
     return;
 
@@ -1670,6 +1675,7 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
 
 void TraceLog::register_write_value(Register *pReg, guint64 cc)
 {
+
   if (!pReg)
     return;
 
@@ -1867,10 +1873,9 @@ inline bool BoolEventBuffer::event(bool state)
 
 unsigned int BoolEventBuffer::get_index(guint64 event_time)
 {
-  guint32 start_index, end_index, search_index, bstep;
+  guint32 start_index, search_index, bstep;
   guint64 time_offset;
 
-  end_index = index;
   start_index = 0;
 
   bstep = (max_events+1) >> 1;

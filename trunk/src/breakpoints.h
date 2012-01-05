@@ -651,6 +651,8 @@ class Log_Register_Write : public Break_register_write
     Break_register_write(_cpu,_repl,bp ) { };
   virtual char const * bpName() { return "log register write"; }
   virtual void takeAction();
+  virtual void put(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
 };
 
 class Log_Register_Read : public Break_register_read
@@ -660,6 +662,10 @@ public:
     Break_register_read(_cpu,_repl,bp ) { };
   virtual char const * bpName() { return "log register read"; }
   virtual void takeAction();
+  virtual unsigned int get();
+  virtual RegisterValue getRV();
+  virtual RegisterValue getRVN();
+  virtual bool get_bit(unsigned int bit_number);
 };
 
 class Log_Register_Read_value : public  Break_register_read_value

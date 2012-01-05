@@ -163,11 +163,11 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
   if (verbose) {
     cout << "setting breakpoint:\n";
     if (pFirst)
-      cout << " first expression" << pFirst->toString() << endl;
+      cout << " first expression " << pFirst->toString() << endl;
     if (pSecond)
-      cout << " second expression" << pSecond->toString() << endl;
+      cout << " second expression " << pSecond->toString() << endl;
     if (pThird)
-      cout << " third expression" << pThird->toString() << endl;
+      cout << " third expression " << pThird->toString() << endl;
   }
 
   LiteralString *pString=0;

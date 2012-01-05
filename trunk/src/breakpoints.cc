@@ -863,6 +863,7 @@ void Breakpoints::dump_traced(unsigned int b)
 
 void Breakpoints::clear_all(Processor *c)
 {
+  GetTraceLog().close_logfile();
   for(int i=0; i<MAX_BREAKPOINTS; i++)
     if(break_status[i].type != BREAK_CLEAR
        && break_status[i].cpu == c)
@@ -1716,6 +1717,7 @@ Break_register_write::Break_register_write(Processor *_cpu, int _repl, int bp ):
 { 
 }
 
+
 Break_register_write::~Break_register_write()
 {
 }
@@ -2023,6 +2025,16 @@ int CommandAssertion::printTraced(Trace *pTrace, unsigned int tbi,
 
 //============================================================================
 
+void Log_Register_Write::put(unsigned int new_value)
+{
+  getReplaced()->put(new_value);
+  takeAction();
+}
+void Log_Register_Write::setbit(unsigned int bit_number, bool new_value)
+{
+  getReplaced()->setbit(bit_number,new_value);
+  takeAction();
+}
 void Log_Register_Write::takeAction()
 {
   GetTraceLog().register_write(getReg(),
@@ -2032,6 +2044,32 @@ void Log_Register_Write_value::takeAction()
 {
   GetTraceLog().register_write_value(getReg(),
 				     get_cycles().get());
+}
+
+unsigned int Log_Register_Read::get()
+{
+  unsigned int v = getReplaced()->get();
+  takeAction();
+  return v;
+}
+RegisterValue  Log_Register_Read::getRV()
+{
+  RegisterValue rv = getReplaced()->getRV();
+  takeAction();
+  return rv;
+}
+
+RegisterValue  Log_Register_Read::getRVN()
+{
+  RegisterValue rv = getReplaced()->getRVN();
+  takeAction();
+  return rv;
+}
+
+bool Log_Register_Read::get_bit(unsigned int bit_number)
+{
+  takeAction();
+  return(getReplaced()->get_bit(bit_number));
 }
 
 void Log_Register_Read::takeAction()
