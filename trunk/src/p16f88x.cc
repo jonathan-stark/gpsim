@@ -1073,7 +1073,7 @@ P16F631::P16F631(const char *_name, const char *desc)
   tmr0.set_cpu(this, m_porta, 4, option_reg);
   tmr0.start(0);
 
-  m_portc = new PicPortRegister(this,"portc","",8,0x3f);
+  m_portc = new PicPortRegister(this,"portc","",8,0xff);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false);
 
 

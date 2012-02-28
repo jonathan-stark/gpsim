@@ -370,6 +370,8 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
           //
           if(cpu->files.Add(filenm)<0) {
             // File not available.
+            if(verbose)
+              cout << "Failed to add '" << filenm << "'\n";
             continue;
           }
 
@@ -383,6 +385,8 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
 
           num_files++;
         }
+        else if(verbose)
+              cout << "Could not find '" << filenm << "'\n";
       }
     }
 
