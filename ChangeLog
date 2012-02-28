@@ -1,3 +1,7 @@
+2012-02-28 Rob Pearce <rob@bdt-home.demon.co.uk>
+        * src/p16f88x.cc
+          Fix port C for 16f631 family - support request 3495121
+
 2012-01-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/breakpoints.h src/breakpoints.cc src/trace.cc cli/cmd_break.cc
 	  Get logging working - bug 3432821
