@@ -453,7 +453,7 @@ void CCPCON::compare_match()
       if(adcon0)
 	adcon0->start_conversion();
 
-      Dprintf(("-- CCPCON triggering an A/D conversion\n"));
+      Dprintf(("-- CCPCON triggering an A/D conversion ccprl %p\n", ccprl));
       break;
 
     case PWM0:
@@ -1573,7 +1573,10 @@ void TMRL::new_clock_source()
 void TMRL::clear_timer()
 {
 
-  last_cycle = get_cycles().get();
+  synchronized_cycle = get_cycles().get();
+  last_cycle = synchronized_cycle;
+  value.put(0);
+  tmrh->value.put(0);
   if(verbose & 0x4)
     cout << "TMR1 has been cleared\n";
 }

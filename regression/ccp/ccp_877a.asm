@@ -1,7 +1,7 @@
 
 	;; ccp_877a
         ;; The purpose of this program is to test gpsim's ability to simulate
-        ;; the Capture Compare peripherals in a midrange pic (e.g. pic16c64).
+        ;; the Capture Compare peripherals in a midrange pic (e.g. pic16f877a).
         ;;
         ;; Additionally, by using a 16F877 it can test the behaviour of dual
         ;; CCP peripherals
@@ -220,7 +220,8 @@ ccp_test1:
         call    ccpWaitForPORTC2_high
 	call	ccpCaptureTwoEvents
 
-  .assert "(capTimeL==0) && (capTimeH==4)"
+  .assert "(capTimeL==0) && (capTimeH==4), \"*** FAILED CCP 16f877a mode 4\""
+	nop
 
         clrf    temp1           ;Clear the software interrupt flag.
         incf    CCP1CON,F       ;Next mode --> 5
@@ -231,7 +232,9 @@ ccp_test1:
         call    ccpWaitForPORTC2_high
 	call	ccpCaptureTwoEvents
 
-  .assert "(capTimeL==0) && (capTimeH==4)"
+  .assert "(capTimeL==0) && (capTimeH==4), \"*** FAILED CCP 16f877a mode 5\""
+        nop
+
 
         clrf    temp1           ;Clear the software interrupt flag.
         incf    CCP1CON,F       ;Next mode --> 6
@@ -239,7 +242,8 @@ ccp_test1:
         call    ccpWaitForPORTC2_high
 	call	ccpCaptureTwoEvents
 
-  .assert "(capTimeL==0) && (capTimeH==0x10)"
+  .assert "(capTimeL==0) && (capTimeH==0x10), \"*** FAILED CCP 16f877a mode 6\""
+	nop
 
         clrf    temp1           ;Clear the software interrupt flag.
         incf    CCP1CON,F       ;Next mode --> 7
@@ -247,7 +251,8 @@ ccp_test1:
         call    ccpWaitForPORTC2_high
 	call	ccpCaptureTwoEvents
 
-  .assert "(capTimeL==0) && (capTimeH==0x40)"
+  .assert "(capTimeL==0) && (capTimeH==0x40), \"*** FAILED CCP 16f877a mode 7\""
+	nop
 
 	goto    test_ccp1_compare
 
@@ -416,6 +421,9 @@ tt3:
 
 done_ccp1:
 ;        goto    done
+
+  .assert "(tmr1h==0) && (tmr1l<0x40), \"*** FAILED CCP 16f877a ccp1con=b no tmr1 reset\""
+	nop
         clrf    T1CON
         clrf    TMR1L
         clrf    TMR1H

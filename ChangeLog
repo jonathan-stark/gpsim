@@ -1,3 +1,7 @@
+2012-03-19 Roy Rankin <rrankin@ihug.com.au>
+	* regression/ccp/ccp_877a.asm src/14bit-tmrs.cc
+	  Fix CCP compare zero of TMR1 - bug 3508318
+
 2012-02-28 Rob Pearce <rob@bdt-home.demon.co.uk>
         * src/p16f88x.cc
           Fix port C for 16f631 family - support request 3495121
