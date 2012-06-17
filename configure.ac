@@ -79,15 +79,20 @@ if test "$use_gui" = "no"; then
 else
   dnl gtk2 checks
 
-  $PKGCONFIG --exists gtkextra-2.0
+  GTKEXTRAMOD="gtkextra-2.0"
+  $PKGCONFIG --exists $GTKEXTRAMOD
   if test $? != 0; then
-    AC_MSG_ERROR(Cannot find gtkextra-2.0 package)
+    GTKEXTRAMOD="gtkextra-3.0"
+    $PKGCONFIG --exists $GTKEXTRAMOD
+    if test $? != 0; then
+      AC_MSG_ERROR(Cannot find gtkextra-2.0 or gtkextra-3.0 package)
+    fi
   fi
 
   X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
   X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
-  Y_LDFLAGS=`$PKGCONFIG --libs gtkextra-2.0`
-  Y_CFLAGS=`$PKGCONFIG --cflags gtkextra-2.0`
+  Y_LDFLAGS=`$PKGCONFIG --libs $GTKEXTRAMOD`
+  Y_CFLAGS=`$PKGCONFIG --cflags $GTKEXTRAMOD`
   GTK_VERSION_T=`$PKGCONFIG --modversion gtk+-2.0`
   echo linking with gtk-$GTK_VERSION_T
   AC_DEFINE_UNQUOTED([GTK_VERSION],"$GTK_VERSION_T",[gtk version])
