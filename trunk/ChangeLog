@@ -1,3 +1,9 @@
+2012-06-19 Borut Razem <borut.razem@gmail.com>
+	* src/cod.cc:
+	  fixed loading cod file for program memory > 64k
+	* gui/gui_menu.cc:
+	  modified mail address
+
 2012-06-17 Rob Pearce <rob@bdt-home.demon.co.uk>
         * configure.ac
           Applied patch 3531562 to allow build against gtkextra-3
