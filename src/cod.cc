@@ -123,7 +123,8 @@ unsigned short get_short_int( char * buff)
 void PicCodProgramFileType::read_block(char * block, int block_number)
 {
   fseek(codefile, block_number * COD_BLOCK_SIZE, SEEK_SET);
-  fread(block, COD_BLOCK_SIZE, 1, codefile);
+  size_t n = fread(block, 1, COD_BLOCK_SIZE, codefile);
+  assert(COD_BLOCK_SIZE == n);
 }
 
 unsigned int get_be_int( char * buff)
@@ -177,50 +178,43 @@ int cod_address_in_range(char *range_block,int address)
 void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
 {
   int _64k_base;
-  int safety = 0;
-  int i,j,index;
+  int i, j, index;
   char range_block[COD_BLOCK_SIZE];
-  DirBlockInfo *dbi;
-
-  dbi = &main_dir;
+  DirBlockInfo *dbi = &main_dir;
 
   do {
-
     i = get_short_int(&dbi->dir.block[COD_DIR_MEMMAP]);
-    j = get_short_int(&dbi->dir.block[COD_DIR_MEMMAP+2]);
+    j = get_short_int(&dbi->dir.block[COD_DIR_MEMMAP + 2]);
 
-    if( (i!=j) || (i==0))
+    if ((i != j) || (i == 0))
       {
         cout << ".cod range error \n";
         return;
       }
 
-    _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 15;
+    _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 16;
 
     read_block(range_block, i);
 
     // Loop through all of the .cod file blocks that (may) contain code
 
-    for(i=0; i<COD_CODE_IMAGE_BLOCKS; i++)
+    for (i = 0; i < COD_CODE_IMAGE_BLOCKS; i++)
       {
-
-        index = get_short_int(&dbi->dir.block[2*(COD_DIR_CODE + i)]);
+        index = get_short_int(&dbi->dir.block[2 * (COD_DIR_CODE + i)]);
 
         if (index != 0) {
           read_block(temp_block, index);
-          for(j=0; j<COD_BLOCK_SIZE/2; j++) {
-            int PCindex  = i*COD_BLOCK_SIZE/2 + j;
-            if(cod_address_in_range(range_block, PCindex)) {
-              cpu->init_program_memory_at_index(PCindex+_64k_base, (int)get_short_int(&temp_block[j*2]));
+          for(j = 0; j < COD_BLOCK_SIZE / 2; j++) {
+            int PCindex = i * COD_BLOCK_SIZE / 2 + j;
+            if (cod_address_in_range(range_block, PCindex)) {
+              cpu->init_program_memory_at_index(PCindex + _64k_base, (int)get_short_int(&temp_block[j * 2]));
             }
           }
         }
       }
 
     dbi = dbi->next_dir_block_info;
-
-  } while(dbi && ++safety<10);
-
+  } while (dbi);
 }
 
 //-----------------------------------------------------------
@@ -426,43 +420,44 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
   int j,start_block,end_block,offset;
   int file_id, sline,smod;
   unsigned int address;
+  DirBlockInfo *dbi = &main_dir;
 
-  start_block = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB]);
+  do {
+    start_block = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB]);
 
-  if(start_block) {
+    if (start_block) {
+      end_block = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB + 2]);
 
-    end_block   = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB+2]);
+      int _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 16;
 
-    // Loop through all of the .cod file blocks that contain line number info
+      // Loop through all of the .cod file blocks that contain line number info
 
-    for(j=start_block; j<=end_block; j++) {
+      for (j = start_block; j <= end_block; j++) {
+        read_block(temp_block,j);
 
-      read_block(temp_block,j);
+        // Get the line number info from within one .cod block
 
-      // Get the line number info from within one .cod block
+        for (offset = 0; offset < (COD_BLOCK_SIZE - COD_LS_SIZE); offset += COD_LS_SIZE) {
+          if ((temp_block[offset + COD_LS_SMOD] & 4) == 0) {
+            file_id = temp_block[offset + COD_LS_SFILE];
+            address = _64k_base + get_short_int(&temp_block[offset + COD_LS_SLOC]);
+            //address = cpu->map_pm_address2index(address);
+            sline = get_short_int(&temp_block[offset + COD_LS_SLINE]);
+            smod = temp_block[offset + COD_LS_SMOD] & 0xff;
 
-      for(offset=0; offset<(COD_BLOCK_SIZE-COD_LS_SIZE); offset += COD_LS_SIZE) {
-
-        if((temp_block[offset+COD_LS_SMOD] & 4) == 0) {
-          file_id = temp_block[offset+COD_LS_SFILE];
-          address = get_short_int(&temp_block[offset+COD_LS_SLOC]);
-          //address = cpu->map_pm_address2index(address);
-          sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
-          smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
-
-          if( (file_id <= cpu->files.nsrc_files()) &&
+            if ((file_id <= cpu->files.nsrc_files()) &&
 //              (address <= cpu->program_memory_size()) &&
-              cpu->IsAddressInRange(address) &&
-              (smod == 0x80) )
-
-            cpu->attach_src_line(address,file_id,sline,0);
-
+                cpu->IsAddressInRange(address) &&
+                (smod == 0x80))
+              cpu->attach_src_line(address, file_id, sline, 0);
+          }
         }
       }
+      cpu->read_src_files();
     }
-    cpu->read_src_files();
-  }
 
+    dbi = dbi->next_dir_block_info;
+  } while (dbi);
 }
 
 //-----------------------------------------------------------
@@ -605,7 +600,6 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 //
 void PicCodProgramFileType::read_symbols( Processor *cpu )
 {
-  int iReturn = SUCCESS;
   char *s,length;
   short type;
   int i,j,start_block,end_block, value;
@@ -636,7 +630,6 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
         switch(type) {
         case COD_ST_C_SHORT: {
           // Change the register name to its symbolic name
-          iReturn = get_string(b, s, sizeof b);
           cpu->registers[value]->new_name(b);
           //register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
           //symbol_table.add(rs);
@@ -645,7 +638,6 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           break;
 
         case COD_ST_ADDRESS: {
-          iReturn = get_string(b, s, sizeof b);
           instruction *pI = cpu->pma->getFromAddress(value);
           if (pI) {
             string s(b);
@@ -661,7 +653,6 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           break;
 
         default:
-          iReturn = get_string(b,s,sizeof b);
           cpu->addSymbol(new Integer(b,value));
           break;
         }
