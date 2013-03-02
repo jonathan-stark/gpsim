@@ -121,6 +121,7 @@ AC_LANG([C++])
 AC_CHECK_LIB([popt], [main])
 #AC_CHECK_LIB([pthread], [main])
 
+AC_CHECK_LIB([dl], [dlopen], [LIBDL="-ldl"])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -194,6 +195,7 @@ AC_SUBST(GTK)
 AC_SUBST(GDK)
 AC_SUBST(GLIB)
 AC_SUBST(LIBREADLINE)
+AC_SUBST(LIBDL)
 
 AC_CONFIG_FILES([Makefile
                  cli/Makefile
