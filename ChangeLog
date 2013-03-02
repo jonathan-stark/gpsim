@@ -1,3 +1,8 @@
+2013-03-02 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac, Makefile.am
+	  On OpenBSD, dlopen() and friends are provided within libc and there
+	  is no libdl.- patch 3601674
+
 2012-06-19 Borut Razem <borut.razem@gmail.com>
 	* src/cod.cc:
 	  fixed loading cod file for program memory > 64k
