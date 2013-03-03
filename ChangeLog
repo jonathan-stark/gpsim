@@ -1,5 +1,11 @@
+2013-03-03 Roy Rankin <rrankin@ihug.com.au>
+	* src/cod.cc:
+	  fix regressions caused by 2012-06-19 changes
+	* cli/parse.yy:
+	  fix compile error with gcc 4.7.2
+	  
 2013-03-02 Roy Rankin <rrankin@ihug.com.au>
-	* configure.ac, Makefile.am
+	* configure.ac, Makefile.am:
 	  On OpenBSD, dlopen() and friends are provided within libc and there
 	  is no libdl.- patch 3601674
 

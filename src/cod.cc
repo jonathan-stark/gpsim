@@ -192,7 +192,7 @@ void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
         return;
       }
 
-    _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 16;
+    _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 15;
 
     read_block(range_block, i);
 
@@ -428,7 +428,7 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
     if (start_block) {
       end_block = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB + 2]);
 
-      int _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 16;
+      int _64k_base = get_short_int(&dbi->dir.block[COD_DIR_HIGHADDR]) << 15;
 
       // Loop through all of the .cod file blocks that contain line number info
 
@@ -457,7 +457,7 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
     }
 
     dbi = dbi->next_dir_block_info;
-  } while (dbi);
+   } while (dbi);
 }
 
 //-----------------------------------------------------------
@@ -630,21 +630,18 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
         switch(type) {
         case COD_ST_C_SHORT: {
           // Change the register name to its symbolic name
+          get_string(b, s, sizeof b);
           cpu->registers[value]->new_name(b);
-          //register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
-          //symbol_table.add(rs);
-          //cpu->addSymbol(cpu->registers[value]);
           }
           break;
 
         case COD_ST_ADDRESS: {
+          get_string(b, s, sizeof b);
           instruction *pI = cpu->pma->getFromAddress(value);
           if (pI) {
             string s(b);
             pI->addLabel(s);
           }
-          //cpu->addSymbol(new AddressSymbol(cpu, b, value));
-          //symbol_table.add_address(cpu,b, value);
           }
           break;
 
@@ -653,6 +650,7 @@ void PicCodProgramFileType::read_symbols( Processor *cpu )
           break;
 
         default:
+          get_string(b, s, sizeof b);
           cpu->addSymbol(new Integer(b,value));
           break;
         }
