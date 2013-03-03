@@ -89,7 +89,7 @@ extern const char * GetLastFullCommand();
 // From scan.ll
 void FlushLexerBuffer();
 
-void yyerror(char *message)
+void yyerror(const char *message)
 {
   printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
   const char *last = GetLastFullCommand();
