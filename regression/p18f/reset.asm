@@ -1,4 +1,4 @@
-	; 18f452 gpsim regression test
+	; 18f4321 gpsim regression test
 	;
 	; The purpose of this test is to verify that the 16bit processors
 	; is implemented correctly. Here's a list of specific things
@@ -9,8 +9,8 @@
 	; 3) Sleep
 	; 4) Wakeup on PIN change.
 
-	list	p=18f452
-        include <p18f452.inc>
+	list	p=18f4321
+        include <p18f4321.inc>
         include <coff.inc>
 
   ;__CONFIG  _CONFIG2H,  _WDT_ON_2H
@@ -50,8 +50,8 @@ START  CODE    0x000                    ;
 ;# Create a stimulus to simulate a switch
 ;
 
-   .sim "p18f452.xpos = 84"
-   .sim "p18f452.ypos = 96"
+   .sim "p18f4321.xpos = 84"
+   .sim "p18f4321.ypos = 96"
 
    .sim "module lib libgpsim_modules"
    .sim "module load pulsegen P_INTF"
@@ -99,7 +99,7 @@ START  CODE    0x000                    ;
   .sim "ResetSequence=0"
 
   .sim ".BreakOnReset = false"
-  .sim "p18f452.frequency=100000"
+  .sim "p18f4321.frequency=100000"
 
   ; Set a cycle break point far in the future in case the resets fail.
   .sim "break c 0x1000000"
@@ -174,15 +174,15 @@ bSWITCH equ 0
 MAIN    CODE
 start
 
-  .assert "(trisa&0x1f)==0x1f, \"*** FAILED 18f452 reset bad TRISA\""
+  .assert "(trisa&0x1f)==0x1f, \"*** FAILED 18f4321 reset bad TRISA\""
 	nop
-  .assert "trisb==0xff, \"*** FAILED 18f452 reset bad TRISB\""
+  .assert "trisb==0xff, \"*** FAILED 18f4321 reset bad TRISB\""
 	nop
-  .assert "trisc==0xff, \"*** FAILED 18f452 reset bad TRISC\""
+  .assert "trisc==0xff, \"*** FAILED 18f4321 reset bad TRISC\""
 	nop
-  .assert "trisd==0xff, \"*** FAILED 18f452 reset bad TRISD\""
+  .assert "trisd==0xff, \"*** FAILED 18f4321 reset bad TRISD\""
 	nop
-  .assert "(trise&0x03)==0x03, \"*** FAILED 18f452 reset bad TRISE\""
+  .assert "(trise&0x03)==0x03, \"*** FAILED 18f4321 reset bad TRISE\""
 	nop
    ; OPTION register setup
 
@@ -260,6 +260,16 @@ PowerOnReset:
    ; RRR WDT will not cause a reset but will fall through
         
         nop
+  .assert "(trisa&0x1f)==0x00, \"*** FAILED 18f4321 WDT sleep bad TRISA\""
+	nop
+  .assert "trisb==0x11, \"*** FAILED 18f4321 WDT sleep bad TRISB\""
+	nop
+  .assert "trisc==0x00, \"*** FAILED 18f4321 WDT sleep bad TRISC\""
+	nop
+  .assert "trisd==0x00, \"*** FAILED 18f4321 WDT sleep bad TRISD\""
+	nop
+  .assert "(trise&0x03)==0x00, \"*** FAILED 18f4321 WDT sleep bad TRISE\""
+	nop
 ;RRR  .command "resetCounter = resetCounter+1"
         nop
 ;========================================================================
@@ -308,7 +318,7 @@ WDTTimeOut:
 
         nop    ; the processor should idle at this instruction.
   .command "resetCounter = resetCounter+1"
-  .assert "(tmr0l - W) == 0, \"*** FAILED 18f452 reset - TMR0 stops during sleep\""
+  .assert "(tmr0l - W) == 0, \"*** FAILED 18f4321 reset - TMR0 stops during sleep\""
         nop
 
 ;========================================================================
@@ -356,7 +366,7 @@ AwakeMCLR:
 waitForMCLR:    goto waitForMCLR
 
 
-  .assert  "\"*** PASSED 18f452 Sleep and Reset test\""
+  .assert  "\"*** PASSED 18f4321 Sleep and Reset test\""
 
 done:
 	goto	done

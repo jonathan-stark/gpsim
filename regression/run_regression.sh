@@ -140,6 +140,8 @@ ${RT} a2d sim_p10f222
 
 ${RT} psp sim_p18f452
 
+${RT} psp sim_p18f6520
+
 ${RT} psp sim_p16f871
 
 ${RT} ttl sim_ttl377

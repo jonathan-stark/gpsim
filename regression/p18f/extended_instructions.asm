@@ -4,8 +4,8 @@
         ;; the 18f extended instructions.
 
 
-	list    p=18f452                ; list directive to define processor
-	include <p18f452.inc>           ; processor specific variable definitions
+	list    p=18f4321                ; list directive to define processor
+	include <p18f4321.inc>           ; processor specific variable definitions
         include <coff.inc>              ; Grab some useful macros
 
 	radix dec

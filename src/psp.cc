@@ -90,11 +90,42 @@ private:
   PSP *m_psp;
 };
 
+
+/*
+ * Some devices use high bits of a TRIS register, but others
+ * have a dedicated PSPCON register which is defined here
+ */
+
+PSPCON::PSPCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
+}
+void PSPCON::put(unsigned int new_value)
+{
+  unsigned int mask = (PSP::OBF | PSP::IBF | 0x0f);
+  unsigned int fixed;
+
+  trace.raw(write_trace.get() | value.data);
+  if (! (new_value & PSP::PSPMODE))
+    fixed = 0;
+  else
+    fixed = value.data & mask;
+
+  value.data = (new_value & ~mask) | fixed;
+}
+
+void PSPCON::put_value(unsigned int new_value)
+{
+
+  trace.raw(write_trace.get() | value.data);
+
+  value.data = new_value;
+}
 //
 // setup information for PSP module
 //
 void PSP::initialize( PIR_SET *_pir_set, PicPSP_PortRegister *_port_set,
-	PicTrisRegister *_port_tris, PicPSP_TrisRegister *_cntl_tris,
+	PicTrisRegister *_port_tris, sfr_register *_pspcon,
         PinModule *pin_RD, PinModule *pin_WR, PinModule *pin_CS)
 {
    if (verbose & 2)
@@ -103,7 +134,7 @@ void PSP::initialize( PIR_SET *_pir_set, PicPSP_PortRegister *_port_set,
    parallel_port = _port_set;
    parallel_port->setPSP(this);
    parallel_tris = _port_tris;
-   cntl_tris = _cntl_tris;
+   cntl_tris = _pspcon;
    //
    // The rest of this function allows catching of changes to PSP contol signals
    //

@@ -505,7 +505,8 @@ class P18F6x20 : public _16bit_v2_adc
   PicLatchRegister *m_latd;
 
   PicPortRegister  *m_porte;
-  PicPSP_TrisRegister  *m_trise;
+  //RRRPicPSP_TrisRegister  *m_trise;
+  PicTrisRegister  *m_trise;
   PicLatchRegister *m_late;
 
   PicPortRegister  *m_portf;
@@ -517,6 +518,7 @@ class P18F6x20 : public _16bit_v2_adc
   PicLatchRegister *m_latg;
 
   PSP               psp;
+  PSPCON	    *pspcon;
 
 //  ECCPAS        eccpas;
 //  PWM1CON       pwm1con;

@@ -166,7 +166,7 @@ CMCON::~CMCON()
   free(cm_input_pin[0]);  free(cm_input_pin[1]);
   free(cm_input_pin[2]);  free(cm_input_pin[3]);
   free(cm_output_pin[0]); free(cm_output_pin[1]);
-  free(cm_output_pin[2]); free(cm_output_pin[3]);
+ //RRR  free(cm_output_pin[2]); free(cm_output_pin[3]);
 
 }
 void CMCON::setINpin(int i, PinModule *newPinModule)

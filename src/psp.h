@@ -32,12 +32,19 @@ class WR_SignalSink;
 class PicPSP_PortRegister;
 class PicTrisRegister;
 
+class PSPCON : public sfr_register, public TriggerObject
+{
+public:
+  PSPCON(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+};
 
 class PSP
 {
 public:
   void initialize( PIR_SET *pir_set, PicPSP_PortRegister *port_set, 
-	PicTrisRegister *port_tris, PicPSP_TrisRegister *_cntl_tris,
+	PicTrisRegister *port_tris, sfr_register *PSPcon,
 	PinModule *pin_RD, PinModule *pin_CS, PinModule *pin_WR);
   void setRD_State(char new3State);
   void setCS_State(char new3State);
@@ -74,7 +81,7 @@ protected:
   PIR_SET 	*pir_set;
   PicPSP_PortRegister *parallel_port;
   PicTrisRegister *parallel_tris;
-  PicPSP_TrisRegister *cntl_tris;
+  sfr_register   *cntl_tris;
   PinModule 	*Not_RD;
   PinModule 	*Not_CS;
   PinModule 	*Not_WR;
