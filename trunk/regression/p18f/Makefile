@@ -4,7 +4,7 @@ EXTENDED_INSTRUCTIONS=1
 include ../make.regression
 
 
-SCRIPT = 18f452.lkr
+SCRIPT = 18f4321.lkr
 
 all : instructions.cod extended_instructions.cod reset.cod
 

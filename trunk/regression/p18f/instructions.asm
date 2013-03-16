@@ -5,8 +5,8 @@
         ;; Nothing useful is performed - this program is only used to
         ;; debug gpsim.
 
-	list    p=18f452                ; list directive to define processor
-	include <p18f452.inc>           ; processor specific variable definitions
+	list    p=18f4321                ; list directive to define processor
+	include <p18f4321.inc>           ; processor specific variable definitions
         include <coff.inc>              ; Grab some useful macros
 
 ;----------------------------------------------------------------------

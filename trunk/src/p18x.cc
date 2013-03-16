@@ -1868,12 +1868,12 @@ P18F4x21::P18F4x21(const char *_name, const char *desc)
     cout << "18f4x21 constructor, type = " << isa() << '\n';
 
   m_portd = new PicPSP_PortRegister(this,"portd","",8,0xFF);
-  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
+  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, false);
   m_latd  = new PicLatchRegister(this,"latd","",m_portd);
 
 //  m_porte = new PicPortRegister(this,"porte","",8,0x07);
   m_porte->setEnableMask(0x07);     // It's been created by the P18F2x21 constructor, but with the wrong enables
-  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
+  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, false);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
 }
@@ -2248,6 +2248,14 @@ void P18F6x20::create_iopin_map()
   package->assign_pin(63, m_porte->addPin(new IO_bi_directional("porte3"),3));
   package->assign_pin(64, m_porte->addPin(new IO_bi_directional("porte2"),2));
 
+  psp.initialize(&pir_set_def,    // PIR
+                m_portd,           // Parallel port
+                m_trisd,           // Parallel tris
+                pspcon,           // Control register
+                &(*m_porte)[0],    // NOT RD
+                &(*m_porte)[1],    // NOT WR
+                &(*m_porte)[2]);   // NOT CS
+
   tmr1l.setIOpin(&(*m_portc)[0]);
   ssp.initialize(&pir_set_def,    // PIR
                 &(*m_portc)[3],   // SCK
@@ -2296,20 +2304,23 @@ P18F6x20::P18F6x20(const char *_name, const char *desc)
     cout << "18F6x20 constructor, type = " << isa() << '\n';
 
   m_portd = new PicPSP_PortRegister(this,"portd","",8,0xFF);
-  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, true);
+  m_trisd = new PicTrisRegister(this,"trisd","", (PicPortRegister *)m_portd, false);
   m_latd  = new PicLatchRegister(this,"latd","",m_portd);
 
   m_porte = new PicPortRegister(this,"porte","",8,0xFF);
-  m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, true);
+  m_trise = new PicTrisRegister(this,"trise","", m_porte, false);
+  //RRR m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, false);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
   m_portf = new PicPortRegister(this,"portf","",8,0xFF);
-  m_trisf = new PicTrisRegister(this,"trisf","", (PicPortRegister *)m_portf, true);
+  m_trisf = new PicTrisRegister(this,"trisf","", m_portf, false);
   m_latf  = new PicLatchRegister(this,"latf","",m_portf);
 
   m_portg = new PicPortRegister(this,"portg","",8,0x1F);
-  m_trisg = new PicTrisRegister(this,"trisg","", m_portg, true);
+  m_trisg = new PicTrisRegister(this,"trisg","", m_portg, false);
   m_latg  = new PicLatchRegister(this,"latg","",m_portg);
+
+  pspcon = new PSPCON(this, "pspcon","");
 
 
 }
@@ -2347,6 +2358,7 @@ void P18F6x20::create_sfr_map()
   add_sfr_register(&pir3,	  0xfa4,porv,"pir3");
   add_sfr_register(&ipr3,	  0xfa5,porv,"ipr3");
 
+  add_sfr_register(pspcon,       0xfb0,RegisterValue(0x00,0));
 
   // cout << "Assign ADC pins to " << adcon1 << "\n";
   adcon1->setIOPin(4, &(*m_porta)[5]);

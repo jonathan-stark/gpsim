@@ -16,7 +16,10 @@
  include "p16f628.inc"
  include "coff.inc"
 
- __CONFIG _CP_OFF & _DATA_CP_OFF & _BODEN_ON & _MCLRE_OFF & _PWRTE_ON & _WDT_OFF & _INTRC_OSC_NOCLKOUT & _LVP_OFF
+ifndef _CPD_OFF
+#define _CPD_OFF _DATA_CP_OFF
+endif
+ __CONFIG _CP_OFF & _CPD_OFF & _BODEN_ON & _MCLRE_OFF & _PWRTE_ON & _WDT_OFF & _INTRC_OSC_NOCLKOUT & _LVP_OFF
 
  cblock 0x30
   time_l

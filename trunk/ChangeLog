@@ -1,3 +1,18 @@
+2013-03-16 Roy Rankin <rrankin@ihug.com.au>
+	* regression/ccp_628/ccp_628.asm: 
+	- fix for gpasm change
+	* regression/p18f/18f4321.lkr regression/p18f/Makefile
+	  regression/p18f/extended_instructions.asm 
+	  regression/p18f/instructions.asm regression/p18f/reset.asm:
+	- Switch to 18f4321 from 18f453 for true extended instruction set
+          as now required by gpasm
+	* regression/psp/18f6520.lkr regression/psp/Makefile
+	  regression/psp/p18f6520.asm regression/run_regression.sh
+	  src/psp.cc src/psp.h src/p18x.cc src/p18x.h:
+	- Add psp functionality to 18f6520 - bug 3607516 
+	  Fix TRISD TRISE values after WDT reset - bug  3607517
+	* src/comparator.cc: Fix for compiler warning
+
 2013-03-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/cod.cc:
 	  fix regressions caused by 2012-06-19 changes
