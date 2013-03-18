@@ -30,7 +30,7 @@ License along with this library; if not, see
 #define p_cpu ((Processor *)cpu)
 
 
-//#define DEBUG
+#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
@@ -897,7 +897,15 @@ void _SPBRG::get_next_cycle_break()
   future_cycle = last_cycle + get_cycles_per_tick();
 
   if(cpu)
+  {
+    if (future_cycle <= get_cycles().get())
+    {
+	Dprintf(("future %"PRINTF_GINT64_MODIFIER"d <= now %"PRINTF_GINT64_MODIFIER"d\n", future_cycle, get_cycles().get()));
+	last_cycle = get_cycles().get();
+	future_cycle = last_cycle + get_cycles_per_tick();
+    }
     get_cycles().set_break(future_cycle, this);
+  }
 
   //Dprintf(("SPBRG::callback next break at 0x%"PRINTF_GINT64_MODIFIER"x\n",future_cycle));
 
@@ -1040,6 +1048,7 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
   // There's a chance that a SPBRG break point exists on the current
   // cpu cycle, but has not yet been serviced.
   guint64 cycle = (get_cycles().get() == future_cycle) ? future_cycle : last_cycle;
+
 
   return ( edges_from_now * get_cycles_per_tick() + cycle );
 }

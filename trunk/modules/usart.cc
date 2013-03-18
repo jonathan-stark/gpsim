@@ -68,7 +68,7 @@ License along with this library; if not, see
 
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#define Dprintf(arg) {printf("module-%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
