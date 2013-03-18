@@ -102,11 +102,15 @@ MAIN    CODE
 start	
 
    .sim ".frequency=10e6"
+   .sim ".xpos = 48"
+   .sim ".ypos = 36"
    .sim "break c 0x100000"
    .sim "module library libgpsim_modules"
    .sim "module load usart U1"
- ;  .sim "U1.xpos = 250.0"
-;   .sim "U1.ypos = 80.0"
+
+   .sim "U1.xpos = 240"
+   .sim "U1.ypos = 204"
+
 
    .sim "node PIC_tx"
    .sim "node PIC_rx"
@@ -156,6 +160,7 @@ start
 
 	bcf	STATUS,RP0
   .assert "(portc & 0x40) == 0x40, \"FAILED: TX bit initilized as high\""
+	nop
 	clrf	tx_ptr
 			
 	;; Turn on the serial port
@@ -185,6 +190,7 @@ start
 	bsf	STATUS,RP0
 	bsf	TXSTA^0x80,TXEN
   .assert "pir1 == 0x10, \"*** FAILED TXIF should now be set\""
+	nop
 	bsf	PIE1^0x80,RCIE	; Enable Rx interrupts
 	bcf	STATUS,RP0
 
@@ -192,29 +198,41 @@ start
 
 	call	TransmitNextByte
    .assert "U1.rx == 0x31, \"*** FAILED sending 0x31\""
+	nop
 
 	call	TransmitNextByte
    .assert "U1.rx == 0x32, \"*** FAILED sending 0x32\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x33, \"*** FAILED sending 0x33\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x34, \"*** FAILED sending 0x34\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x35, \"*** FAILED sending 0x35\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x36, \"*** FAILED sending 0x36\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x37, \"*** FAILED sending 0x37\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x38, \"*** FAILED sending 0x38\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x39, \"*** FAILED sending 0x39\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x41, \"*** FAILED sending 0x41\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x42, \"*** FAILED sending 0x42\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x43, \"*** FAILED sending 0x43\""
+	nop
 	call	TransmitNextByte
    .assert "U1.rx == 0x44, \"*** FAILED sending 0x44\""
 	nop
@@ -230,8 +248,12 @@ start
         movlw   0x55
         movwf   TXREG
 
-        btfss   PIR1,TXIF       ;Did the interrupt flag get set?
-         goto   $-1
+   .assert "(pir1 & 0x10) == 0x10, \"*** FAILED TXIF low\""
+	nop
+
+        movwf   TXREG
+   .assert "(pir1 & 0x10) == 0, \"*** FAILED TXIF high when tx full\""
+	nop
 
         bsf     STATUS,RP0
         btfss   TXSTA^0x80,TRMT ;Wait 'til through transmitting
@@ -241,14 +263,17 @@ start
 ;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
 ;  and < 10 bits or between 0.9375 and 1.041 msec.
 ;  with oscillator at 20MHz and TMR0 / 64 expect between 73 and 81
-;  TMR0 cycles.
+;  TMR0 cycles. Or 146 - 162 for 2 characters
 
 	movf	TMR0,W
 
-  .assert "tmr0 > 73 && tmr0 < 81, \"*** FAILED baud rate\""
+  .assert "tmr0 > 146 && tmr0 < 162, \"*** FAILED baud rate\""
 	nop
 	clrf	rxFlag
         call rx_loop
+
+   .assert "(pir1 & 0x10) == 0x10, \"*** FAILED TXIF low double send\""
+	nop
 
 
 done:
