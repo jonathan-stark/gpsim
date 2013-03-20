@@ -96,6 +96,8 @@ ${RT} usart_test sim_pir1v2
 
 ${RT} usart_test sim_eusart
 
+${RT} usart_test sim_eusart_2455
+
 ${RT} txisr_test sim
 
 ${RT} tmr0_16bit sim

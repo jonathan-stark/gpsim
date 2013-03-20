@@ -898,8 +898,6 @@ P18F2455::P18F2455(const char *_name, const char *desc)
   if(verbose)
     cout << "18f2455 constructor, type = " << isa() << '\n';
 
-  // RP : I'm fairly sure this line is wrong
-  m_trisc = new PicTrisRegister(this,"trisc","", (PicPortRegister *)m_portc, true);
 }
 
 void P18F2455::create()
@@ -1014,8 +1012,6 @@ P18F4455::P18F4455(const char *_name, const char *desc)
   if(verbose)
     cout << "18f4455 constructor, type = " << isa() << '\n';
 
-  // RP : I'm fairly sure this line is wrong
-  m_trisc = new PicTrisRegister(this,"trisc","", (PicPortRegister *)m_portc, true);
 }
 
 void P18F4455::create()
