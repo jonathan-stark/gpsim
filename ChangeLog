@@ -1,3 +1,16 @@
+2013-03-23 Roy Rankin <rrankin@ihug.com.au>
+	* extras/Makefile.am extras/ds1307/Makefile.am
+	  extras/graphic_lcd/INSTALL extras/lcd/INSTALL extras/lcd/Makefile.am
+	- extras/graphic_lcd/configure.ac extras/lcd/autogen.sh
+	  extras/lcd/configure.in : Integrate extras further into linux build
+	  bug - 3560435
+
+2013-03-20 Roy Rankin <rrankin@ihug.com.au>
+	* regression/run_regression.sh regression/usart_test/18f2455.lkr
+	  regression/usart_test/Makefile regression/usart_test/eusart_2455.asm
+	  src/p18x.cc: Fix portc tris control and thus eusart operation
+	  for 18f[24]455 processors, bug 3171842
+
 2013-03-18 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc: Debug message improved
 	* regression/usart_test/usart_pir1v2.asm: test improved

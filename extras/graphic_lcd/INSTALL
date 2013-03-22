@@ -1,16 +1,5 @@
-Installation instructions
--------------------------
-
-You'll need at least gpsim-0.21.11 for this to work.
-
-un tar the graphic_lcd-X.Y.Z.tar.gz tarball and then:
-
-$ cd graphic_lcd-X.Y.Z
-$ ./configure
-$ make
-$ su
-# make install
-# exit
+This module has now been integrated into the gpsim source tree,
+so no seperate process is required to build or install the module.
 
 At this point, the Graphic LCD module has been compiled and installed
 as a shared library that can be loaded by gpsim. If you want to
@@ -27,18 +16,3 @@ When gpsim comes up, you should see the Graphic LCD display. A random
 number of pixels will be on. As you single step through the code, you
 can see some of the test patterns written to the display.
 
-
-Subversion
-----------
-
-If you're getting the code from Subversion, you'll need to generate files
-that are unique to your system. This is done with the script:
-
-$ libtoolize
-$ aclocal
-$ autoheader
-$ automake --add-missing
-$ autoconf
-$ ./configure
-$ make
-$ make install
