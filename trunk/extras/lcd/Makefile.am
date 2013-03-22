@@ -1,9 +1,5 @@
 # Makefile for the LCD module
 # 
-# running 'automake' within the same directory
-# of this file will generate Makefile.in . Then
-# running ./configure will generate the Makefile
-# that is used to build this project
 
 INCLUDES = @X_CFLAGS@
 
@@ -17,7 +13,7 @@ libgpsim_lcd_la_LDFLAGS =  @X_LDFLAGS@
 
 
 EXTRA_DIST = lcd.gif caps.pl lcd.xpm lcdfont.h lcdfont.inc README lcd.h  \
-	autogen.sh makefile.mingw hd44780.h
+	makefile.mingw hd44780.h
 
 
 SUBDIRS = examples

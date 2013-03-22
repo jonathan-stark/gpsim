@@ -7,7 +7,6 @@ You'll need at least gpsim-0.21.2 for this to work.
 un tar the lcd-0.2.1.tar.gz tarball and then:
 
 $ cd lcd-0.2.1
-$ ./configure
 $ make
 $ su
 # make install
@@ -33,17 +32,5 @@ not automatically updated, so you'll have to force a manual refresh
 by partially hiding the LCD window and then re-exposing it.
 
 
-Subversion
-----------
-
-If you're getting the code from Subversion, you'll need to generate files
-that are unique to your system. This is done with the script:
-
-$ ./autogen.sh --enable-shared
-
-
-After that, you should be able to 
-
-$ make
-
-etc.
+This module has been integrated into the gpsim sources, so no
+seperate processes are required to build or install this module.

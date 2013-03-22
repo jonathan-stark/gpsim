@@ -1,9 +1,5 @@
-# Makefile for the LCD module
+# Makefile for the DS1307 module
 # 
-# running 'automake' within the same directory
-# of this file will generate Makefile.in . Then
-# running ./configure will generate the Makefile
-# that is used to build this project
 
 INCLUDES = @X_CFLAGS@
 
