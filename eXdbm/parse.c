@@ -49,7 +49,7 @@ static char vcid[] = "$Id$";
 
 /* externals */
 
-extern int DbmParseLineNumber;
+extern unsigned long DbmParseLineNumber;
 
 /* enumerations */
 
@@ -178,9 +178,7 @@ int ParseEntryValue(FILE *f, TDbmEntryValue *value)
   int state;
   char value_string[MAX_ENTRY_LENGTH];
   int pos_in_string = 0;
-  int type;
 
-  type = -1;
   state=0;
   while(1) {
     
