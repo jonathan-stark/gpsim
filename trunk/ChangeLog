@@ -1,3 +1,8 @@
+2013-03-25 Roy Rankin <rrankin@ihug.com.au>
+	* eXdbm/parse.c: fix variable type mismatch, bug 3570700
+	* src/16bit-registers.cc src/pic-registers.cc: commands with
+	  PCL modification should take 2 cycles, bug 3509904
+	
 2013-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* extras/Makefile.am extras/ds1307/Makefile.am
 	  extras/graphic_lcd/INSTALL extras/lcd/INSTALL extras/lcd/Makefile.am
