@@ -338,7 +338,6 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\graphic_lcd\Makefile.am"
   File "${GPSIM_ROOT}\extras\graphic_lcd\NEWS"
   File "${GPSIM_ROOT}\extras\graphic_lcd\README"
-  File "${GPSIM_ROOT}\extras\graphic_lcd\configure.ac"
 
   SetOutPath "$INSTDIR\extras\graphic_lcd\examples\sed1520"
   File "${GPSIM_ROOT}\extras\graphic_lcd\examples\sed1520\18f452.lkr"
@@ -396,9 +395,7 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\lcd\makefile.mingw"
   File "${GPSIM_ROOT}\extras\lcd\NEWS"
   File "${GPSIM_ROOT}\extras\lcd\README"
-  File "${GPSIM_ROOT}\extras\lcd\autogen.sh"
   File "${GPSIM_ROOT}\extras\lcd\caps.pl"
-  File "${GPSIM_ROOT}\extras\lcd\configure.in"
   File "${GPSIM_ROOT}\extras\lcd\hd44780.cc"
   File "${GPSIM_ROOT}\extras\lcd\hd44780.h"
   File "${GPSIM_ROOT}\extras\lcd\lcd.cc"
