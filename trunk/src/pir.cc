@@ -246,6 +246,22 @@ PIR1v3::PIR1v3(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_in
   writable_bits = TMR1IF | ADIF | CMIF | EEIF;
 }
 
+void PIR1v3::set_tmr1if(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | TMR1IF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+
+void PIR1v3::set_tmr2if(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | TMR2IF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+
 void PIR1v3::set_cmif(void)
 {
   trace.raw(write_trace.get() | value.get());
@@ -265,6 +281,20 @@ void PIR1v3::set_adif(void)
 {
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() | ADIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR1v3::set_c1if(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | C1IF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR1v3::set_c2if(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | C2IF);
   if( value.get() & pie->value.get() )
     setPeripheralInterrupt();
 }

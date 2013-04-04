@@ -107,6 +107,11 @@ PIR1v12f(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, 
       setPeripheralInterrupt();
   }
 
+  virtual void set_c1if()
+  {
+	set_cmif();
+  }
+
   virtual void set_eeif()
   {
     trace.raw(write_trace.get() | value.get());
