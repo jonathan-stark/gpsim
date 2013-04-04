@@ -357,6 +357,83 @@ public:
   virtual void create_symbols();
   virtual void create_sfr_map();
 };
+class P16F684 : public  _14bit_processor
+{
+public:
+
+  ComparatorModule comparator;
+  virtual PROCESSOR_TYPE isa(){return _P16F684_;};
+  virtual unsigned int program_memory_size() const { return 2048; };
+  virtual unsigned int register_memory_size () const { return 0x100;};
+  virtual void create(int eesize);
+  virtual void create_iopin_map();
+
+
+  virtual bool hasSSP() { return false;}
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
+
+  virtual void option_new_bits_6_7(unsigned int bits);
+
+  virtual void create_config_memory();
+  virtual bool set_config_word(unsigned int, unsigned int);
+
+
+  P16F684(const char *_name=0, const char *desc=0);
+  virtual ~P16F684();
+  static Processor *construct(const char *name);
+  PicPortGRegister  *m_porta;
+  PicTrisRegister  *m_trisa;
+
+  PicPortRegister *m_portc;
+  PicTrisRegister  *m_trisc;
+
+  WPU              *m_wpua;
+  IOC              *m_ioca;
+
+
+  T1CON   t1con;
+  T2CON   t2con;
+  PIR1v3    *pir1;
+  PIE     pie1;
+  PR2     pr2;
+  TMR2    tmr2;
+  TMRL    tmr1l;
+  TMRH    tmr1h;
+  OSCTUNE  osctune;
+  PCON    pcon;
+  WDTCON  wdtcon;
+  OSCCON  osccon;
+  ANSEL  ansel;
+  ADCON0_12F  adcon0;
+  ADCON1_16F  adcon1;
+  sfr_register  adresh;
+  sfr_register  adresl;
+
+  CCPCON  ccp1con;
+  CCPRL   ccpr1l;
+  CCPRH   ccpr1h;
+  ECCPAS	eccpas;
+  PWM1CON	pwm1con;
+  PSTRCON	pstrcon;
+  PIR1v3 	*pir1_3_reg;
+  INTCON_14_PIR    intcon_reg;
+  PIR_SET_1     pir_set_def;
+  IOC              *m_iocc;
+  EEPROM_WIDE *e;
+
+  virtual PIR_SET *get_pir_set() { return (&pir_set_def); }
+ virtual void create_symbols();
+  virtual void create_sfr_map();
+};
+
 class P16F685 : public P16F677
 {
 public:

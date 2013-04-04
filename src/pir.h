@@ -51,8 +51,8 @@ public:
   virtual void set_bclif(){}
   virtual void set_ccpif(){}
   virtual void set_cmif(){}
-  virtual void set_c1if(){}
-  virtual void set_c2if(){}
+  virtual void set_c1if(){fprintf(stderr, "RRR set_c1if FIX\n");}
+  virtual void set_c2if(){fprintf(stderr, "RRR set_c2if FIX\n");}
   virtual void set_eccp1if(){}
   virtual void set_eeif(){}
   virtual void set_errif(){}
@@ -153,6 +153,9 @@ public:
   virtual void set_rcif();
 
   virtual void set_cmif();
+  virtual void set_c1if(){set_cmif();}
+  virtual void set_c2if(){set_cmif();}
+ 
 
   virtual void set_eeif();
 
@@ -260,18 +263,26 @@ public:
 
   enum {
     TMR1IF  = 1<<0,
+    TMR2IF  = 1<<1,	//16f684
+    OSFIF   = 1<<2,	//16f684
     CMIF    = 1<<3,
+    C1IF    = 1<<3,	//16f684
+    C2IF    = 1<<4,	//16f684
+    CCP1IF  = 1<<5,	//16f684
     ADIF    = 1<<6,
     EEIF    = 1<<7
   };
  
-  virtual void set_tmr1if() { put(get() | TMR1IF); }
-
+  virtual void set_tmr1if();
+  virtual void set_tmr2if();
   virtual void set_cmif();
 
   virtual void set_adif();
 
   virtual void set_eeif();
+  virtual void set_c1if();
+  virtual void set_c2if();
+  virtual void set_ccpif() { put(get() | CCP1IF); }
 
  
   PIR1v3(Processor *pCpu, const char *pName, const char *pDesc,
@@ -347,6 +358,8 @@ enum
   virtual void set_bclif();
   virtual void set_eeif();
   virtual void set_cmif();
+  virtual void set_c1if(){ set_cmif();}
+  virtual void set_c2if(){ set_cmif();}
 
   PIR2v2(Processor *pCpu, const char *pName, const char *pDesc,
          INTCON *, PIE *);
@@ -426,6 +439,8 @@ enum
   virtual void set_eeif();
   virtual void set_usbif();
   virtual void set_cmif();
+  virtual void set_c1if(){ set_cmif(); }
+  virtual void set_c2if(){ set_cmif(); }
 
   PIR2v4(Processor *pCpu, const char *pName, const char *pDesc,
          INTCON *, PIE *);
@@ -705,6 +720,15 @@ class PIR_SET_1 : public PIR_SET
   virtual void set_cmif() {
     assert(pir1 != 0);
     pir1->set_cmif();
+  }
+
+  virtual void set_c1if() {
+    assert(pir1 != 0);
+    pir1->set_c1if();
+  }
+  virtual void set_c2if() {
+    assert(pir1 != 0);
+    pir1->set_c2if();
   }
 
 private:

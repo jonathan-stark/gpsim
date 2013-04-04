@@ -1,3 +1,17 @@
+2013-04-05 Roy Rankin <rrankin@ihug.com.au>
+	* regression/Makefile.am: use regexp for regression EXTRA_DIST files
+	* regression/run_regression.sh
+	  regression/p16f684/16f684.lkr regression/p16f684/Makefile
+	  regression/p16f684/a2d_684.asm regression/p16f684/compar_684.asm
+	  regression/p16f684/compar_684.stc regression/p16f684/epwm.asm
+	  regression/p16f684/nwdt_16f684.asm regression/p16f684/reset.asm
+	  regression/p16f684/wdt_16f684.asm
+	  regression/wdt/18f4620.lkr regression/wdt/Makefile 
+	  regression/wdt/nwdt_18f4620.asm regression/wdt/wdt_18f4620.asm:
+	- New regression tests
+	* src/p12f6xx.cc src/p16f88x.cc src/p16f88x.h src/pic-processor.cc
+	  src/pic-processor.h src/pir.cc src/pir.h: Add 16f684 processor
+
 2013-03-25 Roy Rankin <rrankin@ihug.com.au>
 	* eXdbm/parse.c: fix variable type mismatch, bug 3570700
 	* src/16bit-registers.cc src/pic-registers.cc: commands with
