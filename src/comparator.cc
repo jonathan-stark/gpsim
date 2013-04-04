@@ -166,9 +166,8 @@ CMCON::~CMCON()
   free(cm_input_pin[0]);  free(cm_input_pin[1]);
   free(cm_input_pin[2]);  free(cm_input_pin[3]);
   free(cm_output_pin[0]); free(cm_output_pin[1]);
- //RRR  free(cm_output_pin[2]); free(cm_output_pin[3]);
-
 }
+
 void CMCON::setINpin(int i, PinModule *newPinModule)
 {
     if (newPinModule == NULL) return;
@@ -259,10 +258,11 @@ unsigned int CMCON::get()
 
    if (value.get() ^ cmcon_val) // change of state
    {
+	int diff = value.get() ^ cmcon_val;
+
 	// Signal ECCPAS ?
 	if (m_eccpas)
 	{
-	    int diff = value.get() ^ cmcon_val;
 	    if (diff & C1OUT)
 		m_eccpas->c1_output(cmcon_val & C1OUT);
 	    if (diff & C2OUT)
@@ -270,7 +270,13 @@ unsigned int CMCON::get()
 	}
         // Generate interupt ?
         if (pir_set)
-                pir_set->set_cmif();
+	{
+	    if (diff & C1OUT)
+                pir_set->set_c1if();
+
+	    if (diff & C2OUT)
+                pir_set->set_c2if();
+	}
    }
    if (m_tmrl)
 	m_tmrl->compare_gate((cmcon_val & C1OUT) == C1OUT);
@@ -504,6 +510,7 @@ double CM1CON0::CVref()
 }
 void CM2CON0::state_change(unsigned int cmcon_val)
 {
+
    if (value.get() ^ cmcon_val) // change of state
    {
 	// Mirror C2OUT in CM2CON1::MC2OUT
@@ -896,7 +903,7 @@ void VRCON::put(unsigned int new_value)
         {
             if (!strcmp("Vref", vr_PinModule->getPin().name().c_str()))
                 vr_PinModule->getPin().newGUIname(pin_name);
-            if (diff & 0x0f)    // did value of vreference change ?
+            if (diff & 0x2f)    // did value of vreference change ?
                 _cmcon->get();
             if(vr_PinModule && vr_PinModule->getPin().snode)
             {
@@ -905,6 +912,11 @@ void VRCON::put(unsigned int new_value)
                 vr_PinModule->getPin().snode->update();
             }
         }
+	else	// output pin not defined
+	{
+            if (diff & 0x2f)    // did value of vreference change ?
+                _cmcon->get();
+	}
   }
   else  // vref disable
   {

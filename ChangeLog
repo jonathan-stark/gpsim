@@ -1,4 +1,7 @@
 2013-04-05 Roy Rankin <rrankin@ihug.com.au>
+	* src/comparator.cc: fix pir1  setting with 2 comparators
+
+2013-04-05 Roy Rankin <rrankin@ihug.com.au>
 	* regression/Makefile.am: use regexp for regression EXTRA_DIST files
 	* regression/run_regression.sh
 	  regression/p16f684/16f684.lkr regression/p16f684/Makefile
