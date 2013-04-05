@@ -9,17 +9,21 @@
 	  regression/p16f684/compar_684.stc regression/p16f684/epwm.asm
 	  regression/p16f684/nwdt_16f684.asm regression/p16f684/reset.asm
 	  regression/p16f684/wdt_16f684.asm
-	  regression/wdt/18f4620.lkr regression/wdt/Makefile 
+	  regression/wdt/18f4620.lkr regression/wdt/Makefile
 	  regression/wdt/nwdt_18f4620.asm regression/wdt/wdt_18f4620.asm:
 	- New regression tests
 	* src/p12f6xx.cc src/p16f88x.cc src/p16f88x.h src/pic-processor.cc
 	  src/pic-processor.h src/pir.cc src/pir.h: Add 16f684 processor
 
+2013-04-02 Borut Razem <borut.razem@gmail.com>
+	* doc/gpsim.html, doc/gpsim_svn.html:
+	  update links after project update to Allura
+
 2013-03-25 Roy Rankin <rrankin@ihug.com.au>
 	* eXdbm/parse.c: fix variable type mismatch, bug 3570700
 	* src/16bit-registers.cc src/pic-registers.cc: commands with
 	  PCL modification should take 2 cycles, bug 3509904
-	
+
 2013-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* extras/Makefile.am extras/ds1307/Makefile.am
 	  extras/graphic_lcd/INSTALL extras/lcd/INSTALL extras/lcd/Makefile.am
@@ -39,17 +43,17 @@
 	* src/uart.cc: fix SPBRG callback stall, bug 3602243
 
 2013-03-16 Roy Rankin <rrankin@ihug.com.au>
-	* regression/ccp_628/ccp_628.asm: 
+	* regression/ccp_628/ccp_628.asm:
 	- fix for gpasm change
 	* regression/p18f/18f4321.lkr regression/p18f/Makefile
-	  regression/p18f/extended_instructions.asm 
+	  regression/p18f/extended_instructions.asm
 	  regression/p18f/instructions.asm regression/p18f/reset.asm:
 	- Switch to 18f4321 from 18f453 for true extended instruction set
-          as now required by gpasm
+	  as now required by gpasm
 	* regression/psp/18f6520.lkr regression/psp/Makefile
 	  regression/psp/p18f6520.asm regression/run_regression.sh
 	  src/psp.cc src/psp.h src/p18x.cc src/p18x.h:
-	- Add psp functionality to 18f6520 - bug 3607516 
+	- Add psp functionality to 18f6520 - bug 3607516
 	  Fix TRISD TRISE values after WDT reset - bug  3607517
 	* src/comparator.cc: Fix for compiler warning
 
@@ -58,7 +62,7 @@
 	  fix regressions caused by 2012-06-19 changes
 	* cli/parse.yy:
 	  fix compile error with gcc 4.7.2
-	  
+
 2013-03-02 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac, Makefile.am:
 	  On OpenBSD, dlopen() and friends are provided within libc and there
@@ -71,16 +75,16 @@
 	  modified mail address
 
 2012-06-17 Rob Pearce <rob@bdt-home.demon.co.uk>
-        * configure.ac
-          Applied patch 3531562 to allow build against gtkextra-3
+	* configure.ac
+	  Applied patch 3531562 to allow build against gtkextra-3
 
 2012-03-19 Roy Rankin <rrankin@ihug.com.au>
 	* regression/ccp/ccp_877a.asm src/14bit-tmrs.cc
 	  Fix CCP compare zero of TMR1 - bug 3508318
 
 2012-02-28 Rob Pearce <rob@bdt-home.demon.co.uk>
-        * src/p16f88x.cc
-          Fix port C for 16f631 family - support request 3495121
+	* src/p16f88x.cc
+	  Fix port C for 16f631 family - support request 3495121
 
 2012-01-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/breakpoints.h src/breakpoints.cc src/trace.cc cli/cmd_break.cc
@@ -92,48 +96,48 @@
 
 2012-01-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/p18x.h src/pir.cc src/pir.h src/p18x.cc
-	  Add USB registers (but not functionality) to 18F2455, 18F4455 
+	  Add USB registers (but not functionality) to 18F2455, 18F4455
 	  after patch 3308765.
 	* src/bitlog.h : fix to compile with latest glib
 	* gui/gui_regwin.cc : fix reg=0 defense
 
 2011-10-22 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/processor.cc
-          Applied patch from Rupert Swarbrick in bug 3426928 - don't rely on 
-          static ProcessorConstructor instances being constructed before 
-          ProcessorConstructorList::findByType is called (avoids a segfault 
-          with some compilers)
-        * src/14bit-tmrs.h src/p18x.cc
-          Trivial: renamed a method for consistency with similar classes.
-        * gui/gui_watch.cc
-          Show all printable ASCII characters in watch window, not just those
-          between '0' and 'z'
+	* src/processor.cc
+	  Applied patch from Rupert Swarbrick in bug 3426928 - don't rely on
+	  static ProcessorConstructor instances being constructed before
+	  ProcessorConstructorList::findByType is called (avoids a segfault
+	  with some compilers)
+	* src/14bit-tmrs.h src/p18x.cc
+	  Trivial: renamed a method for consistency with similar classes.
+	* gui/gui_watch.cc
+	  Show all printable ASCII characters in watch window, not just those
+	  between '0' and 'z'
 
 2011-10-19 Rob Pearce<rob@bdt-home.demon.co.uk>
-        * src/registers.h src/14bit-registers.cc src/14bit-tmrs.cc 
-          src/ioports.cc src/registers.cc src/14bit-tmrs.h 
-          src/14bit-registers.h src/16bit-processors.cc
-          gui/gui_watch.cc
-          Cleaned up Register class "bit_mask" member and fixed bug 3425453
-        * regression/instructions_16bit/instructions_16bit.asm 
-          regression/instructions_14bit/branching.asm
-          Regression tests for PCLATH register width
+	* src/registers.h src/14bit-registers.cc src/14bit-tmrs.cc
+	  src/ioports.cc src/registers.cc src/14bit-tmrs.h
+	  src/14bit-registers.h src/16bit-processors.cc
+	  gui/gui_watch.cc
+	  Cleaned up Register class "bit_mask" member and fixed bug 3425453
+	* regression/instructions_16bit/instructions_16bit.asm
+	  regression/instructions_14bit/branching.asm
+	  Regression tests for PCLATH register width
 
 2011-06-02 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/16bit-registers.cc
-          Attempt to fix bug 3311944 - reported as a POSTDEC bug but actually was
-          that lfsr didn't work as the very first instruction at the reset vector
-        * src/registers.h src/pic-registers.cc
-          Fix ability to set PC from the command line, but not using the nasty
-          hack in patch #3318235 - instead it's done properly
+	  Attempt to fix bug 3311944 - reported as a POSTDEC bug but actually was
+	  that lfsr didn't work as the very first instruction at the reset vector
+	* src/registers.h src/pic-registers.cc
+	  Fix ability to set PC from the command line, but not using the nasty
+	  hack in patch #3318235 - instead it's done properly
 
 2011-06-02 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/p18x.h
-          Fixed SFR size for 18Fx455 CPUs (with USB)
-        * src/16bit-registers.cc src/16bit-registers.h src/16bit-instructions.cc
-          regression/p18f/extended_instructions.asm :
-          Fix for bug #3309120 and related indirect addressing problems on 18F
-          in extended mode. Also a regression test for such issues.
+	  Fixed SFR size for 18Fx455 CPUs (with USB)
+	* src/16bit-registers.cc src/16bit-registers.h src/16bit-instructions.cc
+	  regression/p18f/extended_instructions.asm :
+	  Fix for bug #3309120 and related indirect addressing problems on 18F
+	  in extended mode. Also a regression test for such issues.
 
 
 2011-05-15 Roy Rankin <rrankin@ihug.com.au>
@@ -150,13 +154,13 @@
 
 2011-04-20 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac ANNOUNCE : New release
-	* regression/wdt/nwdt_16f648a.asm regression/wdt/16f648a.lkr 
-	  regression/wdt/Makefile regression/Makefile.am 
+	* regression/wdt/nwdt_16f648a.asm regression/wdt/16f648a.lkr
+	  regression/wdt/Makefile regression/Makefile.am
 	  regression/run_regression.sh : new regression test
 
 2011-04-17 Rob Pearce<rob@bdt-home.demon.co.uk>
-	* doc/gpsim.lyx : Minor corrections and a note on PIC18 program memory 
-          addressing.
+	* doc/gpsim.lyx : Minor corrections and a note on PIC18 program memory
+	  addressing.
 
 2011-04-17 Roy Rankin <rrankin@ihug.com.au>
 	* regression/usart_test/18f2221.lkr : replaces 18f2321.lkr
@@ -170,7 +174,7 @@
 2011-04-07 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/p12f6xx.cc src/p16f88x.cc src/pic-ioports.h src/pic-ioports.cc
 	  regression/p12f675/12f629.lkr regression/p12f675/p12f629.asm
-	  regression/p12f675/Makefile 
+	  regression/p12f675/Makefile
 	  regression/interrupts_14bit/interrupts_14bit.asm
 	  regression/run_regression.sh :
 	  Implemented patch for bug 3277143 (INT pin mis-handled on 12F629)
@@ -186,8 +190,8 @@
 	* src/pic-processor.cc src/pic-processor.h src/p12x.h
 	  regression/wdt/10f200.lkr regression/wdt/wdt_10f200.asm
 	  regression/wdt/Makefile regression/a2d/p10f222.asm
-	  regression/run_regression.sh : Fix 10f2xx WDT bug 3059498 
-	* regression/Makefile.am : 
+	  regression/run_regression.sh : Fix 10f2xx WDT bug 3059498
+	* regression/Makefile.am :
 	- Add missing regression files into dist tarball
 	* extras/lcd/examples/lcdmemtest.hex :
 	- delete file from svn make clean removes
@@ -247,7 +251,7 @@
 
 2011-02-10 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/p18x.h src/p18x.cc
-	  Re-factored 18F2455 and 18F4455 to be derived from 2x21 and 4x21 so 
+	  Re-factored 18F2455 and 18F4455 to be derived from 2x21 and 4x21 so
 	  they get the right Config3H and the right ADC, plus RE3/MCLRE pin
 
 2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
@@ -258,11 +262,11 @@
 
 2011-02-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/intcon.cc regression/tmr0_16bit/tmr0_16bit.asm
-	  regression/ccp_628/ccp_628.asm : 
+	  regression/ccp_628/ccp_628.asm :
 	+ tmr0 not waking after sleep (bug 3162315)
 	* src/ssp.cc : SPI and I2C may not start (bug 3169541)
 	* extras/rs232-gen/rs232-gen.c extras/rs232-gen/example/Makefile
-	  extras/rs232-gen/Makefile : Update syntax (patch 3125817), 
+	  extras/rs232-gen/Makefile : Update syntax (patch 3125817),
 	  fix baud rate
 
 2011-02-03 Rob Pearce<rob@bdt-home.demon.co.uk>
@@ -273,7 +277,7 @@
 	  Some re-factoring of 18F2x21 derivatives for less duplication
 	  Config3H_2x21 class now implements PBADEN bit. Attempts to implement
 	  CCP2MX bit too, but the CCPCON class doesn't allow the pin re-allocation
-	  Note: This would break the 18F2455 so its Config3H has been commented 
+	  Note: This would break the 18F2455 so its Config3H has been commented
 	  until it is re-factored to be derived from the right base class!
 
 2011-02-02 Rob Pearce<rob@bdt-home.demon.co.uk>
@@ -286,15 +290,15 @@
 2011-01-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/comparator.cc regression/comparator/compar_882.asm
 	  regression/comparator/16f882.lkr regression/comparator/Makefile
-	  regression/run_regression.sh : Fix for bug # 3150231 
+	  regression/run_regression.sh : Fix for bug # 3150231
 	  Polarity should not change when ON bit is off. Fix comparator
 	  output pins cannot be driven from port when comparator is off.
 	  Add regression tests.
 
 2010-12-10 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/14bit-tmrs.cc regression/ccp/pwm_6520.asm regression/ccp/pwm_877a.asm
-	  Fix for bug #3132914 : The clocking of TMR2 should not be affected by 
-	  whether any of the CCPs are in PWM mode, and now it isn't. Duty cycle 
+	  Fix for bug #3132914 : The clocking of TMR2 should not be affected by
+	  whether any of the CCPs are in PWM mode, and now it isn't. Duty cycle
 	  value is now handled correctly instead.
 
 2010-11-28 Rob Pearce<rob@bdt-home.demon.co.uk>
@@ -307,12 +311,12 @@
 
 2010-10-31 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/16bit-instructions.cc src/pic-processor.h src/p18x.h
-	  Partial implementation of "bugs" list (errata per CPU type) so that 
-	  the 18F6520 has a buggy DAW instruction while the 18F4321 has a 
+	  Partial implementation of "bugs" list (errata per CPU type) so that
+	  the 18F6520 has a buggy DAW instruction while the 18F4321 has a
 	  correct one. This matches the real hardware for those two - others
 	  need checking.
 	* src/16bit-processors.h src/16bit-instructions.cc src/p18x.h
-	  A different approach to fixing the compiler warning Roy spotted (I'd 
+	  A different approach to fixing the compiler warning Roy spotted (I'd
 	  already corrected my earlier error locally).
 
 2010-10-31 Roy Rankin <rrankin@ihug.com.au>
@@ -346,7 +350,7 @@
 
 2010-09-29 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/p18x.h src/p18x.cc src/16bit-processors.cc src/16bit-processors.h
-	  Fixed GPR memory size and SFR peripheral set of 18F1220 (the 16 bit 
+	  Fixed GPR memory size and SFR peripheral set of 18F1220 (the 16 bit
 	  base class assumptions of portC and CCP2 are now optional)
 	* src/14bit-tmrs.h src/14bit-tmrs.cc src/uart.cc
 	  Partial rework for >2 PWMs as on 18F6520, and multiple UARTs naming
@@ -358,7 +362,7 @@
 	  src/14bit-tmrs.h src/14bit-tmrs.cc
 	  Implemented PIR3 for 18F6520, including the presence of multiple
 	  CCPxIF flags in one PIR (needed some re-design)
-	  Fixed implementation of 18F "access bank", as some devices have more 
+	  Fixed implementation of 18F "access bank", as some devices have more
 	  than 128 bytes mapped to SFR space
 
 2010-08-21 Rob Pearce<rob@bdt-home.demon.co.uk>
@@ -376,7 +380,7 @@
 	* ANNOUNCE : 0.25.0 highlights
 
 2010-06-28 Roy Rankin <rrankin@ihug.com.au>
-	* src/16bit-processors.h src/16bit-processors.cc 
+	* src/16bit-processors.h src/16bit-processors.cc
 	  src/pic-processor.cc src/pic-processor.h src/p18x.cc :
 	- fix porta7 for P18 processors, bug 3021904
 	* src/pic-ioports.h src/pic-ioports.cc regression/p16f676/reset.asm :
@@ -453,7 +457,7 @@
 	* plat/win32/gpsim.nsi: updated dependency packages
 
 2010-06-05 Roy Rankin <rrankin@ihug.com.au>
-	* gui/gui_menu.cc gui/gui_statusbar.cc : fix bug 3009843 
+	* gui/gui_menu.cc gui/gui_statusbar.cc : fix bug 3009843
 	  Simulation Time HH:MM:SS.CC displays incorrectly
 
 2010-06-05 Roy Rankin <rrankin@ihug.com.au>
@@ -510,20 +514,20 @@
 	  Also PLUSW registers now work if destination is address 0
 	* regression/psp/p16f871.asm regression/psp/p18f452.asm
 	  Fixed the PSP regression test code to de-select the ADC channels,
-	  because the above fix shows up that they should (probably) have 
+	  because the above fix shows up that they should (probably) have
 	  failed before.
 
 2010-04-10 Roy Rankin <rrankin@ihug.com.au>
 	* src/p16f8x.cc: correct usart pins for p16f87/8 (patch 2116354)
-	* src/14bit-processors.cc: Correctly wake up from sleep 
+	* src/14bit-processors.cc: Correctly wake up from sleep
 	  (patch 2348392)
 	* cli/cmd_load.cc doc/gpsim.lyx : Documentation updates
 	  (patch 2108073)
 
 2010-04-08 Roy Rankin <rrankin@ihug.com.au>
-	* gui/gui_breadboard.cc: fix trace bug 2983580 
+	* gui/gui_breadboard.cc: fix trace bug 2983580
 	* src/pic-processor.cc: fix realtime mode lockup (bug 2973978)
-	* src/p18x.h src/p18x.cc: add extended PWM 
+	* src/p18x.h src/p18x.cc: add extended PWM
 	* src/14bit-tmrs.cc src/14bit-tmrs.h: initialize some variables, fix
 	  to have extended PWM work with processors without prtrcon register
 
@@ -545,8 +549,8 @@
 	* regression/usart_test/eusart.asm: refine test
 
 2010-03-29 Rob Pearce<rob@bdt-home.demon.co.uk>
-	* src/16bit-processors.cc src/16bit-processors.h src/p18x.cc src/p18x.h 
-	  regression/instructions_16bit/18f452.lkr 
+	* src/16bit-processors.cc src/16bit-processors.h src/p18x.cc src/p18x.h
+	  regression/instructions_16bit/18f452.lkr
 	  regression/instructions_16bit/instructions_16bit.asm
 	  Moved loading/reading of EEPROM and ID locations for 18F out of
 	  the 18fxx20 class into the base class, as it's common to all the
@@ -567,12 +571,12 @@
 	  Fixed loading of EEPROM data from COD/HEX on 18F (bug 2968268)
 
 2010-03-10 Rob Pearce<rob@bdt-home.demon.co.uk>
-	* src/16bit-instructions.cc 
+	* src/16bit-instructions.cc
 	  regression/instructions_16bit/instructions_16bit.asm :
 	  Fix issue 2968248; carry flag is "sticky" to DAW instruction
-	* src/pic-ioports.cc 
+	* src/pic-ioports.cc
 	  regression/p18f452_ports/p18f452_ports.asm :
-	  Fix issue 2902082; writing the PORT register now updates the LAT 
+	  Fix issue 2902082; writing the PORT register now updates the LAT
 	  register too.
 
 2010-02-07 Roy Rankin <rrankin@ihug.com.au>
@@ -609,7 +613,7 @@
 	* src/16bit-hexdecode.cc, src/pic-processor.cc, src/16bit-tmrs.cc
 	  src/14bit-tmrs.cc, src/14bit-registers.cc, src/pic-ioports.cc
 	  Trivial changes only:
-	    - re-ordered processor type creation so the list reported is nearer 
+	    - re-ordered processor type creation so the list reported is nearer
 	      numeric order
 	    - removed all #includes of processor type headers from "core" code
 	      (i.e. not processor type definition files) except pic-processor.cc
@@ -639,10 +643,10 @@
 	  regression/p12f675/Makefile regression/run_regression.sh
 	* add p12f683 regression test
 	* regression/p12f675/p12f675.asm : fix bug in test
-	* src/14bit-tmrs.h src/14bit-tmrs.cc  src/comparator.h 
+	* src/14bit-tmrs.h src/14bit-tmrs.cc  src/comparator.h
 	  src/comparator.cc : support cmp T1 gate
-	* src/p12f6xx.h src/p12f6xx.cc src/pic-processor.cc 
-	  src/pic-processor.h : add P12f683 
+	* src/p12f6xx.h src/p12f6xx.cc src/pic-processor.cc
+	  src/pic-processor.h : add P12f683
 	* src/eeprom.cc : print message if both RD and WR set in EECON1::put
 	* src/gpsim_time.cc : add more debug output
 	* src/trace.h : delete commented out code
@@ -651,8 +655,8 @@
 
 2009-07-17 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/14bit_tmrs.cc src/14bit_tmrs.h
-	  Turned the ccpcon/compare_value member pair in TMRL into a 
-	  linked list of CCP references, built on demand and deleted 
+	  Turned the ccpcon/compare_value member pair in TMRL into a
+	  linked list of CCP references, built on demand and deleted
 	  when compare mode cancelled, thus fixing bug 2819395
 	* src/16bit-processors.cc p16x6x.cc
 	  Removed setting of tmrl->ccpcon as it no longer exists. The
@@ -664,8 +668,8 @@
 
 2009-07-15 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/14bit_tmrs.cc src/14bit_tmrs.h
-	  Changed around the structure of who does what when a CCP is in 
-	  compare mode. At the moment this should not have changed any 
+	  Changed around the structure of who does what when a CCP is in
+	  compare mode. At the moment this should not have changed any
 	  functionality, but is in preparation for fixing bug 2819395
 
 2009-07-15 Roy Rankin <rrankin@ihug.com.au>
@@ -676,14 +680,14 @@
 	  gui/gui_breadboard.h gui/gui_breadboard.cc
 	  regression/p16f676/reset.asm regression/p16f676/Makefile
 	  regression/run_regression.sh :
-	- Fix MCLR when it can be an IO pin 
+	- Fix MCLR when it can be an IO pin
 
 2009-07-11 Roy Rankin <rrankin@ihug.com.au>
 	* regression/comparator/compar_877a.stc : position modules
 	* regression/interrupts_14bit/interrupts_14bit.asm : use WDT
 	* regression/usart_test/usart_pir1v1.asm
 	* regression/usart_test/usart_pir1v2.asm
-	  regression/usart_test/eusart.asm  
+	  regression/usart_test/eusart.asm
 	  regression/i2c/p16f876a.asm : Stop run-away tests
 
 2009-07-07 Roy Rankin <rrankin@ihug.com.au>
@@ -696,7 +700,7 @@
 2009-07-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.cc : fix Config1H::toString
 	* src/eeprom.cc : fix delete issue
-	* src/pic-processor.cc src/pic-processor.h src/p16x6x.cc src/p16x6x.h 
+	* src/pic-processor.cc src/pic-processor.h src/p16x6x.cc src/p16x6x.h
 	  regression/p16f676/16f676.lkr regression/p16f676/Makefile
 	  regression/p16f676/p16f676.asm regression/Makefile.am
 	  regression/run_regression.sh :
@@ -732,7 +736,7 @@
 
 2009-06-10 Rob Pearce<rob@bdt-home.demon.co.uk>
 	* src/os_dependent.cc
-	  Fixed IsFileExtension so that the extension must match the end of 
+	  Fixed IsFileExtension so that the extension must match the end of
 	  the file name and be preceeded by a dot. This is for bug 2803756
 	  but not using the patch supplied as it wasn't quite semantically
 	  correct.
@@ -745,10 +749,10 @@
 	* src/a2d_v2.cc : Remove unused variable to stop compiler warning
 
 2009-06-01 Roy Rankin <rrankin@ihug.com.au>
-	* regression/p12f675/p12f675.asm 
+	* regression/p12f675/p12f675.asm
 	  regression/a2d/p18f1220.asm regression/a2d/p18f4321.asm :
 	- Test that analog pins read as 0
-	* regression/resistor/resistor.asm 
+	* regression/resistor/resistor.asm
 	* regression/p18f452_ports/p18f452_ports.asm :
 	- Set Analog pins to digital before tests
 	* regression/a2d/p18f452.asm : set position in breadboard
@@ -770,7 +774,7 @@
 	* regression/p12f675/12f675.lkr regression/p12f675/p12f675.asm
 	  regression/p12f675/Makefile regression/Makefile.am src/Makefile.am
 	  regression/run_regression.sh src/p12f6xx.cc src/p12f6xx.h
-	  src/pic-processor.h src/pic-processor.cc : 
+	  src/pic-processor.h src/pic-processor.cc :
 	- Add 12f675 and 12f629 processors and regression tests
 	* src/14bit-tmrs.cc src/14bit-tmrs.h : hooks to handle stop/start of
 	- TMR1 for sleep, support for TMR1 Gate Enable
@@ -782,7 +786,7 @@
 	- ANSEL_12F classes to support ADC for p12f675
 	* src/pic-ioports.cc src/pic-ioports.h : Add PicPortGRegister port
 	- class which support IOC (Interrupt On Change) register
-	* src/14bit-processors.cc src/14bit-processors.h : handle MCLR pin 
+	* src/14bit-processors.cc src/14bit-processors.h : handle MCLR pin
 	-  action, remove dead code
 	* src/p16f8x.cc : fix POR value for register ANSEL
 
@@ -797,11 +801,11 @@
 	* regression/Makefile.am: remove */*.o files on make clean
 
 2009-05-04 Roy Rankin <rrankin@ihug.com.au>
-	* src/16bit-registers.h  src/16bit-registers.cc  
-	  src/16bit-processors.cc  src/tmr0.cc  src/tmr0.h  
+	* src/16bit-registers.h  src/16bit-registers.cc
+	  src/16bit-processors.cc  src/tmr0.cc  src/tmr0.h
 	  src/p12x.cc  src/pic-registers.cc  src/12bit-processors.cc
 	  src/12bit-processors.h src/14bit-processors.cc
-	  src/14bit-processors.h src/16bit-processors.h 
+	  src/14bit-processors.h src/16bit-processors.h
 	  regression/tmr0_16bit/tmr0_16bit.asm regression/wdt/wdt_18f452.asm
 	  regression/p16f84/reset.asm regression/a2d/p10f222.asm:
 	- TMR0 stops during sleep - bug #502665
@@ -839,11 +843,11 @@
 	  src/a2dconverter.cc src/a2dconverter.h regression/a2d/10f222.lkr
 	  regression/a2d/p10f222.asm regression/a2d/Makefile
 	  regression/run_regression.sh:
-	- Add P10F220 and P10F222 processors  
+	- Add P10F220 and P10F222 processors
 
 2009-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac: set release 0.23.9
-	* ANNOUNCE:	fix typo
+	* ANNOUNCE: fix typo
 
 2009-03-18 Roy Rankin <rrankin@ihug.com.au>
 	* extras/lcd/configure.in: bump release number
@@ -867,7 +871,7 @@
 	  Win32 libgpsim.dll problem.
 
 2009-02-28 Roy Rankin <rrankin@ihug.com.au>
-	* gpsim.spec.in: update 
+	* gpsim.spec.in: update
 	* src/trace.cc: fix segfualt (bug 1490171)
 	* src/registers.cc src/pic-processor.h: fix pcl setting and segfault
 	  (bug 1642109)
@@ -896,19 +900,19 @@
 	  src/protocol.h src/icd.cc src/comparator.cc src/value.cc
 	  src/processor.cc src/16bit-instructions.cc modules/usart.cc
 	  gui/settings_exdbm.cc gui/gui.h: Changes to compile with GCC 4.4
-	    
+
 2009-02-14 Roy Rankin <rrankin@ihug.com.au>
 	* regression/Makefile.am: correction on file list for make dist
 
 2009-02-14 Roy Rankin <rrankin@ihug.com.au>
-	* gpsim/main.cc 
+	* gpsim/main.cc
 	  src/icd.cc src/processor.cc gui/gui_menu.cc
 	  cli/scan.ll cli/socket.cc cli/input.cc cli/input.h:
 	    Do not exit from library routines
 	* regression/Makefile.am
 	    make clean, cleans files in regression sub-directories
 	    fix list of files so make dist works
-	  
+
 2008-12-26 Borut Razem <borut.razem@siol.net>
 	* extras/lcd/lcdgui.cc, modules/led.cc, gui/gui_profile.cc:
 	  applied patch 2458749: segfault in gdk_color_alloc(),
@@ -922,22 +926,22 @@
 	  src/p18x.h src/16bit-processors.cc
 	  src/a2d_v2.h src/Makefile.am src/a2d_v2.cc
 	  src/p18x.cc src/a2dconverter.cc src/16bit-processors.h :
-	    Add new style A2D converter with adcon2 register which 
+	    Add new style A2D converter with adcon2 register which
 	    supports up to 16 channels
 
 2008-12-07 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-registers.h src/p16f87x.cc src/p16f87x.h
 	  src/p16x7x.h src/a2dconverter.h src/p16x7x.cc src/p16f8x.h
-	  src/16bit-registers.cc src/p16f8x.cc src/a2dconverter.cc 
+	  src/16bit-registers.cc src/p16f8x.cc src/a2dconverter.cc
 	  src/16bit-processors.h :
 	    Consolidate ADCON0_withcpp, ADCON0_16 and ADCON0 classes
 	    to just ADCON0. Fix ADCON1::setNumberOfChannels() to allow
 	    number of channels to be increased.
 
 2008-12-02 Roy Rankin <rrankin@ihug.com.au>
-	* src/14bit-registers.h src/dspic/dspic-instructions.cc 
-	  src/pic-processor.cc src/pir.cc src/16bit-instructions.h 
-	  src/comparator.cc src/hexutils.h src/14bit-registers.cc 
+	* src/14bit-registers.h src/dspic/dspic-instructions.cc
+	  src/pic-processor.cc src/pir.cc src/16bit-instructions.h
+	  src/comparator.cc src/hexutils.h src/14bit-registers.cc
 	  src/16bit-registers.cc modules/stimuli.cc :
 	    Fix GCC 4.3.0 warnings
 
@@ -963,9 +967,9 @@
 	  regression/a2d/p18f452.asm
 	    Fixed handling of interrupts during ISR execution on 16-bit, at least for the
 	    non-priority case, so that the new interrupt will be handled after the RETFIE
-	    (as already worked on 14-bit). Also added test of priority nesting, which 
-	    currently doesn't test this fix (it uses RBIF, which already worked). Also 
-	    fixed a couple of ADC regression tests that failed to acknowledge the interrupt 
+	    (as already worked on 14-bit). Also added test of priority nesting, which
+	    currently doesn't test this fix (it uses RBIF, which already worked). Also
+	    fixed a couple of ADC regression tests that failed to acknowledge the interrupt
 	    (due to a typo) and thus only passed because this condition was buggy.
 
 2008-09-17  Rob Pearce <rob@bdt-home.demon.co.uk>
@@ -981,9 +985,9 @@
 	  fixed bug #1698566: missing libpopt header is unnoticed by configure
 
 2008-08-29  Rob Pearce <rob@bdt-home.demon.co.uk>
-	* src/14bit-tmrs.cc src/14bit-tmrs.h src/pir.h src/16bit-processors.cc 
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/pir.h src/16bit-processors.cc
 	  src/p16x6x.cc src/p18x.cc regression/ccp/ccp_877a.asm :
-	    Changed the CCPCON class to not use pir_set, since this broke its 
+	    Changed the CCPCON class to not use pir_set, since this broke its
 	    ability to be duplicated. It now refers to a specific PIR register,
 	    meaning that the second CCP on a 16F87x or similar can actually
 	    generate the right interrupt.
@@ -1099,16 +1103,16 @@
 2008-05-31  Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/pic-processor.h, src/16bit-processors.h, p18x.h,
 	  src/16bit-instructions.cc, src/pic-instructions.cc, src/14bit-registers.cc:
-	    Split out the _16BIT_PROCESSOR_ base type into _PIC17_PROCESSOR_ and 
-	    _PIC18_PROCESSOR_ because nearly every place that tested it should have 
-	    treated them differently. This led to some awkward switch cases where 
-	    all PIC18 devices were listed in one block and all PIC17s in another 
-	    (and which could easily be overlooked and cause pain when adding new 
+	    Split out the _16BIT_PROCESSOR_ base type into _PIC17_PROCESSOR_ and
+	    _PIC18_PROCESSOR_ because nearly every place that tested it should have
+	    treated them differently. This led to some awkward switch cases where
+	    all PIC18 devices were listed in one block and all PIC17s in another
+	    (and which could easily be overlooked and cause pain when adding new
 	    devices). These are now simple and generic.
 	* src/pic-processor.cc, src/pic-processor.h, p18x.cc, p18x.h:
-	    Initial attempt at providing support for the PIC18F2321. The USART is 
+	    Initial attempt at providing support for the PIC18F2321. The USART is
 	    wrong (missing BAUDCON and SPBRGH), as is the ADC (ADCON2 missing, not
-	    enough channels) and the OSCTUNE register is missing. Also the RAM is 
+	    enough channels) and the OSCTUNE register is missing. Also the RAM is
 	    too big.
 	* src/16bit-registers.cc regression/instructions_16bit/instructions_16bit.asm
 	    Fixed a bug in the TBLPTR decrement on 256 byte boundaries, and added
@@ -1148,10 +1152,10 @@
 	* doc/*.html: make WEB pages XHTML 1.0 Transitional copliant
 
 2007-12-17 Roy Rankin <rrankin@ihug.com.au>
-	* src/14bit-tmrs.h src/14bit-tmrs.cc: Add TMR1 external crystal 
+	* src/14bit-tmrs.h src/14bit-tmrs.cc: Add TMR1 external crystal
 	  simulation
 	* regression/tmr1_16bit/tmr1_16bit.asm regression/tmr1_16bit/Makefile:
-	- Add tests for external crystal and Fosc/4, 
+	- Add tests for external crystal and Fosc/4,
 	  lower frequency to speed up test time
 	* regression/Makefile.am regression/run_regression.sh:
 	- Run tmr1_16bit as part of regression tests
@@ -1171,16 +1175,16 @@
 	  regression/wdt/wdt_18f452.asm regression/wdt/nwdt_16f628.asm
 	  regression/wdt/nwdt_16f88.asm regression/wdt/wdt_16f88.asm
 	  regression/wdt/wdt_16f628.asm regression/wdt/Makefile
-	  regression/wdt/nwdt_16c64.asm regression/Makefile.am 
+	  regression/wdt/nwdt_16c64.asm regression/Makefile.am
 	  regression/run_regression.sh:
 	- Add regression tests for Watchdog Time
 	* regression/p16f84/reset.asm: Sleep continues on WDT expire
-	* src/Makefile.am src/rcon.h src/16bit-registers.h: RCON moved to rcon.h 
-	* src/pic-processor.cc src/pic-processor.h src/16bit-processors.cc 
+	* src/Makefile.am src/rcon.h src/16bit-registers.h: RCON moved to rcon.h
+	* src/pic-processor.cc src/pic-processor.h src/16bit-processors.cc
 	  src/pic-registers.cc src/14bit-registers.h src/p16f8x.h
 	  src/p16f8x.cc:  WDT and configuration fixes
 	* src/processor.cc: Frequency change updates WDT
-	* src/14bit-registers.cc: WDTCON functions added, 
+	* src/14bit-registers.cc: WDTCON functions added,
 	  Status register rcon support
 	* src/16bit-instructions.cc: Implement Sleep instruction
 
@@ -1208,7 +1212,7 @@
 	* regression/rt.sh: Added an echo print that will display which
 	regression test is currently running. This is commented out for
 	now...
-	
+
 2007-10-18  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc: Fixed a printf format specifier bug.
 
@@ -1239,7 +1243,7 @@
 2007-10-14 Roy Rankin <rrankin@ihug.com.au>
 	* src/value.cc: Allow Float::set to take Value type Integer
 	* src/modules.h src/modules.cc gui/gui_breadboard.cc:
-	- reinstate operation of breadboard "Add library", "Add module" and 
+	- reinstate operation of breadboard "Add library", "Add module" and
 	  "Save Configuration" buttons and module attributes.
 
 2007-10-13 Borut Razem <borut.razem@siol.net>
@@ -1265,7 +1269,7 @@
 	* modules/i2c-eeprom.cc, cli/cmd_dump.cc, src/pic-processor.cc,
 	src/symbol.cc, src/i2c-ee.cc:
 	Fixed errors that Borut uncovered during the clean up process.
-	
+
 2007-10-09 Borut Razem <borut.razem@siol.net>
 	* src/symbol.cc: fixed the fixed warnig ;-)
 
@@ -1310,8 +1314,8 @@
 	    format, don't dump line number symbols.
 	* gui/gui_symbols.cc: symbols dumped as module.symbol.
 	* src/registers.cc: Add module name in response to query array value.
-	* src/i2c-ee.h, src/i2c-ee.cc, modules/i2c-eeprom.cc: Add 
-	    RegisterCollection to allow command line viewing & change 
+	* src/i2c-ee.h, src/i2c-ee.cc, modules/i2c-eeprom.cc: Add
+	    RegisterCollection to allow command line viewing & change
 	    of EEPROM cells.
 	* doc/gpsim.lyx:Document new EEPROM functionality, improve scope
 	    window documentation.
@@ -1323,16 +1327,16 @@
 	* regression/rt.sh: simplified due to above change.
 
 2007-09-13 Roy Rankin <rrankin@ihug.com.au>
-	* src/hexutils.cc src/hexutils.h: read/write Intel hex files from/to 
+	* src/hexutils.cc src/hexutils.h: read/write Intel hex files from/to
 	    register arrays. File format not dependant on endian of processor.
 	* src/i2c-ee.h src/i2c-ee.cc src/eeprom.cc src/eeprom.h: EEPROM given
-	    register size. 
+	    register size.
 	* modules/i2c-eeprom.h modules/i2c-eeprom.cc: .eeprom symbol added so
 	    dump/load can converse with module
 	* cli/cmd_load.h cli/cmd_load.cc cli/cmd_dump.h cli/cmd_dump.cc
 	  cli/parse.yy: add EEPROM dump/load commands.
-	* doc/gpsim.lyx: spelling corrections, document new load and dump 
-		commands, improve EEPROM documentation.
+	* doc/gpsim.lyx: spelling corrections, document new load and dump
+	  commands, improve EEPROM documentation.
 	* regression/i2c/p16f876a.asm: Add tests for EEPROM dump/load.
 
 2007-09-02 Borut Razem <borut.razem@siol.net>
@@ -1353,7 +1357,7 @@
 
 2007-08-26 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_symbols.cc: fix memory leak, re-enable filtering
-	* gui/gui_breadboard.h gui/gui_breadboard.cc: breadboard need not be 
+	* gui/gui_breadboard.h gui/gui_breadboard.cc: breadboard need not be
 	+     running on start of gpsim to work
 	* regression/resistor/resistor.asm: position resistors
 
@@ -1362,9 +1366,9 @@
 	* modules/led.cc modules/i2c-eeprom.h modules/video.cc
 	* modules/resistor.cc modules/push_button.h modules/stimuli.cc
 	* modules/logic.cc modules/logic.h modules/i2c-eeprom.cc
-	* modules/paraface.h modules/led.h modules/video.h 
-	* modules/push_button.cc modules/resistor.h modules/encoder.cc 
-	* modules/encoder.h modules/stimuli.h gui/gui_breadboard.h 
+	* modules/paraface.h modules/led.h modules/video.h
+	* modules/push_button.cc modules/resistor.h modules/encoder.cc
+	* modules/encoder.h modules/stimuli.h gui/gui_breadboard.h
 	* gui/gui_breadboard.cc: fix extra xpos, ypos in symbol table,
 	+ fix issues in deleting modules including core dumps
 
@@ -1380,7 +1384,7 @@
 	directing a signal to more than one object.
 	* src/pic-processor.cc, src/pic-processor.h: Added the 10F202 and 10F204
 	* src/tmr0.cc: Fixed bug in computing current TMR0 value.
-	* src/12bit-processors.cc: 
+	* src/12bit-processors.cc:
 	  - option register wasn't accessible from command line
 	  - Config word wasn't handled properly.
 	* src/p12x.cc, src/p12x.h
@@ -1395,7 +1399,7 @@
 	- Added a regression test for the 10F204.
 
 2007-07-22 Rob Pearce <rob@bdt-home.demon.co.uk>
-	* modules/usart.cc modules/usart.h doc/gpsim.lyx: 
+	* modules/usart.cc modules/usart.h doc/gpsim.lyx:
 	  Added a "hex" attribute to the usart module to force the display to
 	  show all bytes as hex, for use with pure binary data simulations.
 
@@ -1404,9 +1408,9 @@
 	  regression/ccp/16f819.lkr regression/ccp/ccp_819.asm
 	  regression/ccp/Makefile regression/a2d/16f819.lkr
 	  regression/a2d/p16f819.asm regression/a2d/Makefile
-	  regression/run_regression.sh regression/Makefile.am 
-	  regression/i2c/16f819.lkr regression/i2c/Makefile 
-	  regression/i2c/p16f819.asm: 
+	  regression/run_regression.sh regression/Makefile.am
+	  regression/i2c/16f819.lkr regression/i2c/Makefile
+	  regression/i2c/p16f819.asm:
 	- Add P16f818 and P16f819 processors
 
 2007-07-10 Roy Rankin <rrankin@ihug.com.au>
@@ -1422,7 +1426,7 @@
 
 2007-03-27  Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, src/gpsim_object.h, src/breakpoints.h,
-	src/registers.cc, src/registers.h, src/breakpoints.cc, 
+	src/registers.cc, src/registers.h, src/breakpoints.cc,
 	gui/gui_regwin.cc
 	- Added break on register change feature. From the command line:
 	gpsim> break ch myvar
@@ -1461,7 +1465,7 @@
 2007-03-14  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc, src/intcon.cc, src/pic-ioports.h,
 	src/intcon.h, src/pic-ioports.cc, src/registers.h,
-	src/16bit-processors.h: 
+	src/16bit-processors.h:
 	- Added the concept of a 'bit sink' to the SFR registers. This
 	allows arbitrary clients to associate themselves with arbitrary
 	bits in an SFR. More work needs to be done, but this is used at
@@ -1482,7 +1486,7 @@
 	* src/symbol.cc, src/stimuli.cc, src/packages.cc, src/modules.cc,
 	src/cod.cc, src/breakpoints.cc, src/attributes.cc,
 	modules/stimuli.cc, modules/stimuli.h, gui/gui_breadboard.cc,
-	cli/cmd_attach.cc: 
+	cli/cmd_attach.cc:
 	- printf debug clean up.
 
 2007-03-05  Scott Dattalo <scott@dattalo.com>
@@ -1540,7 +1544,7 @@
 	- Memory leak fixes.
 
 2007-02-12  Scott Dattalo <scott@dattalo.com>
-	* src/symbol.cc: Deleted #if 0'd code.(the old symbol 
+	* src/symbol.cc: Deleted #if 0'd code.(the old symbol
 	table implementation)
 
 2007-02-11  Scott Dattalo <scott@dattalo.com>
@@ -1611,7 +1615,7 @@
 	src/trigger.cc, src/intcon.cc:
 	- Added a Trace Type for Resets and Interrupts.
 	- Removed some deprecated trace types (e.g. TRIS and Option).
-	- Single stepping uses the clock phase code. 
+	- Single stepping uses the clock phase code.
 	* regression/rt.sh: Removed outdated comment.
 
 	* cli/cmd_trace.cc: added an 'info' option to the trace
@@ -1626,7 +1630,7 @@
 2007-01-17  Scott Dattalo <scott@dattalo.com>
 	* src/expr.cc: Bug [1638250]. ramData[] references in expressions
 	were evaluating to the index of the ramData and not to the ramData
-	contents. 
+	contents.
 
 2007-01-14  Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_stopwatch.cc, cli/cmd_quit.cc, cli/scan.ll,
@@ -1675,7 +1679,7 @@
 	'phaseCaptureInterrupt'. As its name implies, this is part of the
 	clock phase stuff and it's designed to handle interrupts.
 	* src/pic-processor.cc:
-	 - Sleep is now handled by the clock phase code. 
+	 - Sleep is now handled by the clock phase code.
 	 - Interrupts are now handled by the clock phase code.
 	 - The run() method now only looks at the global break point
 	 flag. (Before, the sleep and interrupt states were handled with
@@ -1683,9 +1687,9 @@
 	 - Added an 'ActivityState' to reflect what the processor is
 	 currently doing. This is primarily used by the 12-bit core to
 	 determine if the processor is sleeping.
-	* src/14bit-registers.cc: cosmetic. Added debug code. 
+	* src/14bit-registers.cc: cosmetic. Added debug code.
 	* src/pic-ioports.cc: Port B wakeup on change feature was not
-	working. 
+	working.
 	* src/pic-registers.cc: Numerous clock phase related changes. Now
 	interrupts are properly handled. Also, there was a nasty design
 	error that prevent proper handling of interrupts during the middle
@@ -1702,7 +1706,7 @@
 	* plat/win32/libgpsim.def: MSVC sync
 
 2007-01-10  Scott Dattalo <scott@dattalo.com>
-	* src/symbol.cc, src/symbol.h, src/stimuli.cc, src/stimuli.h: 
+	* src/symbol.cc, src/symbol.h, src/stimuli.cc, src/stimuli.h:
 	 - stimulus and node symbols can now be added to the symbol table
 	 with the 'Clearable' flag turned off.
 
@@ -1768,7 +1772,7 @@
 
 2007-01-02  Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc, src/16bit-processors.h,
-	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h, 
+	src/dspic/dspic-processors.cc, src/dspic/dspic-processors.h,
 	src/12bit-processors.cc, src/12bit-processors.h,
 	src/14bit-processors.cc, src/14bit-processors.h:
 	- removed 'por()' method from Processor class
@@ -1789,7 +1793,7 @@
 	 12c50x processors, the CPU is held in reset.
 	* src/clock_phase.cc, src/clock_phase.h:
 	 - Added phaseIdle class.
-	* src/pic-registers.cc: 
+	* src/pic-registers.cc:
 	 - The program counter class now handles resets.
 	* src/16bit-instructions.cc: removed a comment.
 	* src/gpsim_classes.h:
@@ -2071,7 +2075,7 @@
 
 2006-11-08 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_macro.cc:
-	- Made some of the macro command console output	conditional
+	- Made some of the macro command console output conditional
 	on the verbose variable to clean up the console output.
 	- Enhanced the console output of the cmd_macro::end_define().
 	* src/breakpoints.cc: Added call in Breakpoints::set_breakpoint()
@@ -4667,7 +4671,7 @@
 	* src/p18x.cc: typo in porte names.
 
 2005-09-01 Manuel Bouyer <bouyer@antioche.eu.org>
-	* src/p18x.cc: Fix crash when an 18F252	is instantiated.
+	* src/p18x.cc: Fix crash when an 18F252 is instantiated.
 	* src/gpsim_time.cc: Disabled unnecessary debug printing
 	* src/uart.cc: Fixed spurious uart transmit. Add io sink for
 	Receiver.
@@ -5051,7 +5055,7 @@
 
 	* cli/cmd_symbol.cc,h, cli/cmd_load.cc,h, cli/parse.yy:
 	The load command will now accept symbols as input for the
-	filename. Combined with	the symbol defines on the command
+	filename. Combined with the symbol defines on the command
 	line, one STC file can be used to open any program file by
 	defining a symbol on the gpsim command line and referencing
 	that symbol in the load commmand.
@@ -5086,7 +5090,7 @@
 	from being added as a symbol.
 
 	* src/stimuli.cc: Added a check to prevent a IOPIN name null string
-	pointer	from being added to the symbol table.
+	pointer from being added to the symbol table.
 
 	* modules/resistor.cc: PullupResistor() constructor was setting
 	its attribute before it had set its own name resulting in the
@@ -5192,7 +5196,7 @@
 2005-07-15 J.R. Heisey <jrheisey@sourceforge.com>
 	* gui/gui_watch.cc, gui/gui_watch.h: Fixed problem with
 	register symbol names not displaying in the Watch
-	window. Introduced this	bug when I made the bit mask feature
+	window. Introduced this bug when I made the bit mask feature
 	in register symbols.
 
 	* gui/gui_regwin.cc:  Fixed problem with register symbol
@@ -5268,7 +5272,7 @@
 	address labels in break related messages.
 
 	* plat/win32/gpsim.def, src/pic-instructions.cc,
-	src/pic-instructions.h,	src/processor.cc, src/processor.h,
+	src/pic-instructions.h, src/processor.cc, src/processor.h,
 	src/symbol.cc: Code to display address labels in a
 	disassembly output. Added members to Processor class to
 	support a page mask and offset mask that can be used to
@@ -5440,7 +5444,7 @@
 	not being used. Now we dump the registers listed in
 	MemoryAccess::SpecialRegisters.
 
-	* cli/input.cc: Implemented the	ability to break running
+	* cli/input.cc: Implemented the ability to break running
 	firmware using Ctrl->C key when running under Windows.
 	It would previously exit gpsim.
 
@@ -5678,7 +5682,7 @@
 	because of a typo in an if statement.
 	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h: Added 'break
 	#number' to allow inspection of an individual break point. Clean
-	up some memory 	management.
+	up some memory management.
 	* src/breakpoints.cc: 'dump1()' wasn't checking to see if the
 	break point number was valid.
 	* src/os_dependent.cc: non-windows file extension comparisons were
@@ -8159,7 +8163,7 @@
 	* gui/gui_processor.cc - use memset instead of bzero.
 
 2003-09-14  Scott Dattalo  <scott@dattalo.com>
- 	* src/gpsim_time.h - changed cycle counter break point from a Singly linked
+	* src/gpsim_time.h - changed cycle counter break point from a Singly linked
 	list to a doubly linked list. This is in preparation for separating module
 	time from pic processor time so that when the PIC goes to sleep, time
 	doesn't stop.
@@ -8191,9 +8195,9 @@
 
 2003-08-19  Scott Dattalo  <scott@dattalo.com>
 	* eXdbm/parse.c - "char" is used to store result of fgetc, but
-			EOF doesn't fit in the default unsigned chars.
+	  EOF doesn't fit in the default unsigned chars.
 	* src/cod.cc - an endian issue which made symbol values come out wrong.
-		- note these fixes came from a patch attached to an anonymous  bug report
+	  - note these fixes came from a patch attached to an anonymous  bug report
 
 2003-08-18  Scott Dattalo  <scott@dattalo.com>
 	* src/ioports.cc - Port A on the F62x devices was named "ioport"
