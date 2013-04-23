@@ -74,7 +74,6 @@ int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 				unsigned arg2, 
 				TriggerObject *f1)
 {
-  Register *fr;
 
   breakpoint_number = find_free();
   if(breakpoint_number >= MAX_BREAKPOINTS)
@@ -90,7 +89,6 @@ int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
     {
 
     case BREAK_ON_INVALID_FR:
-      fr = cpu->registers[arg1];
       return(breakpoint_number);
       break;
 

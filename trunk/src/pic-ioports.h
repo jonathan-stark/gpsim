@@ -102,6 +102,7 @@ class IOC;
 //	Note: as GPIF,GPIE are the same bits as RBIF,RBIE in INTCON we can
 //	use the existing set_rbif function to set the GPIF bit.
 //
+//	 
 class PicPortGRegister : public PicPortBRegister
 {
  
@@ -119,6 +120,26 @@ public:
 
   virtual void setbit(unsigned int bit_number, char new3State);
 };
+class PicPortIOCRegister : public PicPortBRegister
+{
+ 
+public:
+  INTCON *m_pIntcon;
+  IOC	*m_Iocap;
+  IOC	*m_Iocan;
+  IOC	*m_Iocaf;
+
+  PicPortIOCRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                   INTCON *pIntcon, IOC *pIocap, IOC *pIocan, IOC *pIocaf,
+                   unsigned int numIopins, unsigned int enableMask=0x3f)
+	: PicPortBRegister(pCpu, pName, pDesc, pIntcon, numIopins, enableMask),
+	m_pIntcon(pIntcon), m_Iocap(pIocap), m_Iocan(pIocan), m_Iocaf(pIocaf)
+  {
+  }
+
+  virtual void setbit(unsigned int bit_number, char new3State);
+};
+
 class PSP;
 
 class PicPSP_PortRegister : public PortRegister

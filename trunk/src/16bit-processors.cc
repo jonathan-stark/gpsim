@@ -424,6 +424,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&stack16->tosl,    0xffd,porv,"tosl");
   add_sfr_register(&stack16->tosh,    0xffe,porv,"tosh");
   add_sfr_register(&stack16->tosu,    0xfff,porv,"tosu");
+  stack16->stack_mask = 31;
 
 
   EEPROM *e = get_eeprom();

@@ -1,3 +1,17 @@
+2013-04-23 Roy Rankin <rrankin@ihug.com.au>
+	* 14bit-hexdecode.cc 14bit-instructions.cc 14bit-instructions.h
+	  14bit-processors.cc 14bit-processors.h 14bit-registers.cc
+	  14bit-registers.h 16bit-hexdecode.cc 16bit-instructions.cc
+	  16bit-instructions.h 16bit-processors.cc 16bit-registers.cc
+	  16bit-registers.h pic-instructions.cc pic-ioports.cc
+	  pic-ioports.h pic-processor.cc pic-processor.h:
+	- Add 14bit enhanced base class _14bit_e_processor
+	* intcon.cc breakpoints.cc interface.cc: Fix compiler warnings
+	* p12f182x.cc p12f182x.h Makefile.am: 
+	- add p12f1822 processor(incomplete)
+	* gpsim_classes.h 12bit-processors.cc trace.cc: New stack with reset
+	* processor.cc processor.h eeprom.cc eeprom.h: New eeprom class
+
 2013-04-05 Roy Rankin <rrankin@ihug.com.au>
 	* src/comparator.cc: fix pir1  setting with 2 comparators
 

@@ -303,7 +303,7 @@ GCond  *cvRunCondition;
 
 static Processor *tcpu=0;
 
-static void *run_thread( void *ptr )
+static void run_thread( void *ptr )
 {
   printf("run thread\n");
   while(1) {
@@ -321,7 +321,6 @@ static void *run_thread( void *ptr )
     g_mutex_unlock(muRunMutex);
 
   }
-
 }
 
 

@@ -103,11 +103,11 @@ protected:
 };
 
 //---------------------------------------------------------
-class ADDFSR : public instruction 
+class ADDFSR16 : public instruction 
 {
 
 public:
-  ADDFSR(Processor *new_cpu, unsigned int new_opcode,const char *, unsigned int address);
+  ADDFSR16(Processor *new_cpu, unsigned int new_opcode,const char *, unsigned int address);
   virtual bool isBase() { return true;}
   virtual void execute();
   virtual char *name(char *,int);
@@ -121,8 +121,8 @@ public:
 	return new ADDULNK(new_cpu,new_opcode,"addulnk", address);
     }
     if (new_opcode & 0x100)
-      return new ADDFSR(new_cpu,new_opcode,"subfsr", address);
-    return new ADDFSR(new_cpu,new_opcode,"addfsr", address);
+      return new ADDFSR16(new_cpu,new_opcode,"subfsr", address);
+    return new ADDFSR16(new_cpu,new_opcode,"addfsr", address);
   }
 protected:
   unsigned int m_fsr;
@@ -131,16 +131,16 @@ protected:
 };
 
 //---------------------------------------------------------
-class CALLW : public instruction
+class CALLW16 : public CALLW
 {
 public:
-  CALLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  CALLW16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) :
+	CALLW(new_cpu, new_opcode, address){};
   virtual bool isBase() { return true;}
   virtual void execute();
-  virtual char *name(char *,int);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   {
-    return new CALLW(new_cpu,new_opcode,address);
+    return new CALLW16(new_cpu,new_opcode,address);
   }
 };
 //---------------------------------------------------------
@@ -204,14 +204,15 @@ public:
 };
 
 //---------------------------------------------------------
-class ADDWFC : public Register_op
+class ADDWFC16 : public ADDWFC
 {
 public:
 
-  ADDWFC(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  ADDWFC16(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+    : ADDWFC(new_cpu,new_opcode,address){};
   virtual void execute();
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  {return new ADDWFC(new_cpu,new_opcode,address);}
+  {return new ADDWFC16(new_cpu,new_opcode,address);}
 };
 
 //---------------------------------------------------------
@@ -324,18 +325,18 @@ public:
 };
 
 //---------------------------------------------------------
-class BRA : public instruction
+class BRA16 : public instruction
 {
 public:
   int destination_index;
   unsigned int absolute_destination_index;
 
-  BRA(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  BRA16(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute();
   virtual char *name(char *,int);
   virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  {return new BRA(new_cpu,new_opcode,address);}
+  {return new BRA16(new_cpu,new_opcode,address);}
 };
 
 //---------------------------------------------------------
@@ -632,13 +633,13 @@ public:
 
 //---------------------------------------------------------
 
-class MOVLB : public Literal_op
+class MOVLB16 : public Literal_op
 {
 public:
-  MOVLB(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  MOVLB16(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute();
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  {return new MOVLB(new_cpu,new_opcode,address);}
+  {return new MOVLB16(new_cpu,new_opcode,address);}
 
 };
 
@@ -785,19 +786,6 @@ public:
   virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   {return new RCALL(new_cpu,new_opcode,address);}
-};
-
-//---------------------------------------------------------
-class RESET : public instruction
-{
-public:
-
-  RESET(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
-  virtual void execute();
-  virtual bool isBase() { return true;}
-  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  {return new RESET(new_cpu,new_opcode,address);}
-
 };
 
 
@@ -967,15 +955,16 @@ public:
 };
 
 //---------------------------------------------------------
-class SUBWFB : public Register_op
+class SUBWFB16 : public SUBWFB
 {
 public:
 
-  SUBWFB(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
+  SUBWFB16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) :
+      SUBWFB(new_cpu,new_opcode,address) { };
   virtual void execute();
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  {return new SUBWFB(new_cpu,new_opcode,address);}
+  {return new SUBWFB16(new_cpu,new_opcode,address);}
 
 };
 

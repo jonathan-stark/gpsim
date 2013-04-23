@@ -480,6 +480,33 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
       m_pIntcon->set_rbif(true);
     }
 }
+void PicPortIOCRegister::setbit(unsigned int bit_number, char new3State)
+{
+    int lastDrivenValue = rvDrivenValue.data & (1 << bit_number);
+    PortRegister::setbit(bit_number, new3State);
+    int newDrivenValue = rvDrivenValue.data & (1 << bit_number);
+
+   if (verbose)
+       printf("PicPortIOCRegister::setbit() bit=%d,val=%c IOC_+=%x IOC_-=%x\n",bit_number,new3State, m_Iocap->get_value() & (1<<bit_number), m_Iocan->get_value() & (1<<bit_number));
+    if ( newDrivenValue > lastDrivenValue) // positive edge
+    {
+	if ( m_tris->get_value() & (m_Iocap->get_value() & (1 << bit_number)))
+	{
+          cpu_pic->exit_sleep();
+          m_pIntcon->set_rbif(true);
+	  m_Iocaf->put(m_Iocaf->get_value() | (1 << bit_number));
+	}
+    }
+    else if ( newDrivenValue < lastDrivenValue) // negative edge
+    {
+	if ( m_tris->get_value() & (m_Iocan->get_value() & (1 << bit_number)))
+	{
+          cpu_pic->exit_sleep();
+          m_pIntcon->set_rbif(true);
+	  m_Iocaf->put(m_Iocaf->get_value() | (1 << bit_number));
+	}
+    }
+}
 
 PicPSP_PortRegister::PicPSP_PortRegister(Processor *pCpu, const char *pName, const char *pDesc,
                                          /*const char *port_name,*/

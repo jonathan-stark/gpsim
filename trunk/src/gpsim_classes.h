@@ -49,7 +49,10 @@ enum RESET_TYPE
   BOD_RESET,          // Brown out detection reset
   SIM_RESET,          // Simulation Reset
   EXIT_RESET,         // Leaving Reset, resuming normal execution.
-  OTHER_RESET         //
+  OTHER_RESET,         //
+  STKUNF_RESET,		// Stack undeflow reset
+  STKOVF_RESET		// Statck overflow reset
+
 };
 
 #endif //  __GPSIM_CLASSES_H__
