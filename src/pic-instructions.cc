@@ -364,6 +364,7 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
       break;
 
     case _14BIT_PROCESSOR_:
+    case _14BIT_E_PROCESSOR_:
       mask = 1 << ((opcode >> 7) & 7);
       register_address = opcode & REG_MASK_14BIT;
       access = 1;
@@ -406,6 +407,7 @@ char * Bit_op::name(char *return_str,int len)
       break;
 
     case _14BIT_PROCESSOR_:
+    case _14BIT_E_PROCESSOR_:
       bit = ((opcode >> 7) & 7);
       break;
 
@@ -491,6 +493,7 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
       break;
 
     case _14BIT_PROCESSOR_:
+    case _14BIT_E_PROCESSOR_:
       register_address = opcode & REG_MASK_14BIT;
       destination = (opcode & DESTINATION_MASK_14BIT) ? true : false;
       access = 1;
@@ -547,6 +550,41 @@ void ADDWF::execute()
 
 }
 
+
+//--------------------------------------------------
+
+ADDWFC::ADDWFC (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("addwfc");
+}
+
+void ADDWFC::execute()
+{
+  unsigned int new_value,src_value,w_value;
+
+  source = ((!access) ?
+	    cpu_pic->registers[register_address] 
+	    :
+	    cpu_pic->register_bank[register_address] );
+
+  new_value = (src_value = source->get()) + 
+    (w_value = cpu_pic->W->value.get()) +
+    ((cpu_pic->status->value.get() & STATUS_C) ? 1 : 0);
+
+  // Store the result
+
+  if(destination)
+    source->put(new_value & 0xff);      // Result goes to source
+  else
+    cpu_pic->W->put(new_value & 0xff);
+
+  cpu_pic->status->put_Z_C_DC(new_value, src_value, w_value);
+
+  cpu_pic->pc->increment();
+
+}
 //--------------------------------------------------
 
 ANDLW::ANDLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
@@ -605,6 +643,41 @@ void ANDWF::execute()
 
 //--------------------------------------------------
 
+ASRF::ASRF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("asrf");
+}
+
+void ASRF::execute()
+{
+  unsigned int new_value,src_value, carry, msb;
+
+  source = ((!access) ?
+	    cpu_pic->registers[register_address] 
+	    :
+	    cpu_pic->register_bank[register_address] );
+
+  carry = (src_value = source->get()) & 1;
+  msb = src_value & 0x80;
+  new_value = ((src_value & 0xff) >> 1) | msb;
+  
+  // Store the result
+
+  if(destination)
+    source->put(new_value);      // Result goes to source
+  else
+    cpu_pic->W->put(new_value);
+
+  cpu_pic->status->put_Z(new_value==0);
+  cpu_pic->status->put_C(carry);
+
+  cpu_pic->pc->increment();
+
+}
+//--------------------------------------------------
+
 BCF::BCF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : Bit_op(new_cpu, new_opcode, address)
 {
@@ -625,6 +698,70 @@ void BCF::execute()
 
   cpu_pic->pc->increment();
 
+}
+
+//--------------------------------------------------
+BRA::BRA (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
+{
+  destination_index = (new_opcode & 0x1ff)+1;
+  absolute_destination_index = (address + destination_index) & 0xfffff;
+
+  if(new_opcode & 0x100)
+    {
+      absolute_destination_index -= 0x200;
+      destination_index = 0x200 - destination_index;
+    }
+
+  new_name("bra");
+}
+
+void BRA::execute()
+{
+  cpu_pic->pc->jump(absolute_destination_index);
+
+}
+
+char * BRA::name(char *return_str,int len)
+{
+
+
+  sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
+	  gpsimObject::name().c_str(),
+	  (opcode & 0x100) ? '-' : '+', 
+	  (destination_index & 0x1ff)<<1,
+	  absolute_destination_index<<1);
+
+  return(return_str);
+}
+
+//--------------------------------------------------
+BRW::BRW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
+{
+  destination_index = cpu_pic->W->value.get();
+  absolute_destination_index = address + destination_index;
+
+  new_name("brw");
+}
+
+void BRW::execute()
+{
+  cpu_pic->pc->jump(absolute_destination_index);
+
+}
+
+char * BRW::name(char *return_str,int len)
+{
+
+
+  sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
+	  gpsimObject::name().c_str(),
+	  (opcode & 0x100) ? '-' : '+', 
+	  (destination_index & 0x1ff)<<1,
+	  absolute_destination_index<<1);
+
+  return(return_str);
 }
 
 //--------------------------------------------------
@@ -711,6 +848,7 @@ CALL::CALL (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   switch(cpu_pic->base_isa())
     {
     case _14BIT_PROCESSOR_:
+    case _14BIT_E_PROCESSOR_:
       destination = opcode&0x7ff;
       break;
 
@@ -727,9 +865,9 @@ CALL::CALL (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 void CALL::execute()
 {
 
-  cpu_pic->stack->push(cpu_pic->pc->get_next());
-
-  cpu_pic->pc->jump(cpu_pic->get_pclath_branching_jump() | destination);
+  // do not jump if the push fails
+  if (cpu_pic->stack->push(cpu_pic->pc->get_next()))
+        cpu_pic->pc->jump(cpu_pic->get_pclath_branching_jump() | destination);
 
 }
 
@@ -743,6 +881,28 @@ char * CALL::name(char *return_str,int len)
   return(return_str);
 }
 
+
+//--------------------------------------------------
+CALLW::CALLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  :instruction (new_cpu, new_opcode, address)
+{
+  new_name("callw");
+}
+char *CALLW::name(char *return_str,int len)
+{
+
+  snprintf(return_str,len,"%s",
+	   gpsimObject::name().c_str());
+  return(return_str);
+}
+void CALLW::execute()
+{
+  if (cpu_pic->stack->push(cpu_pic->pc->get_next()))
+  {
+      cpu_pic->pcl->put(cpu_pic->W->get());
+      cpu_pic->pc->increment();
+  }
+}
 
 //--------------------------------------------------
 CLRF::CLRF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
@@ -919,6 +1079,7 @@ GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   switch(cpu_pic->base_isa())
     {
     case _14BIT_PROCESSOR_:
+    case _14BIT_E_PROCESSOR_:
       destination = opcode&0x7ff;
       break;
 
@@ -1070,6 +1231,96 @@ void IORWF::execute()
 
 //--------------------------------------------------
 
+LSLF::LSLF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("lslf");
+}
+
+void LSLF::execute()
+{
+  unsigned int new_value,src_value, carry;
+
+  source = ((!access) ?
+	    cpu_pic->registers[register_address] 
+	    :
+	    cpu_pic->register_bank[register_address] );
+
+  carry = (src_value = source->get()) & 0x80;
+  new_value = (src_value << 1) & 0xff;
+  
+  // Store the result
+
+  if(destination)
+    source->put(new_value);      // Result goes to source
+  else
+    cpu_pic->W->put(new_value);
+
+  cpu_pic->status->put_Z(new_value==0);
+  cpu_pic->status->put_C(carry);
+
+  cpu_pic->pc->increment();
+
+}
+
+
+//--------------------------------------------------
+
+LSRF::LSRF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("lsrf");
+}
+
+void LSRF::execute()
+{
+  unsigned int new_value,src_value, carry;
+
+  source = ((!access) ?
+	    cpu_pic->registers[register_address] 
+	    :
+	    cpu_pic->register_bank[register_address] );
+
+  carry = (src_value = source->get()) & 1;
+  new_value = (src_value & 0xff) >> 1;
+  
+  // Store the result
+
+  if(destination)
+    source->put(new_value);      // Result goes to source
+  else
+    cpu_pic->W->put(new_value);
+
+  cpu_pic->status->put_Z(new_value==0);
+  cpu_pic->status->put_C(carry);
+
+  cpu_pic->pc->increment();
+
+}
+
+
+
+//--------------------------------------------------
+
+MOVLP::MOVLP (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Literal_op(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("movlp");
+}
+
+void MOVLP::execute()
+{
+  cpu_pic->pclath->put(L);
+
+  cpu_pic->pc->increment();
+
+}
+
+//--------------------------------------------------
+
 MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : Literal_op(new_cpu, new_opcode, address)
 {
@@ -1205,6 +1456,20 @@ void OPTION::execute()
 
 //--------------------------------------------------
 
+RESET::RESET (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : instruction(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("reset");
+}
+
+void RESET::execute()
+{
+  cpu_pic->reset(SOFT_RESET);
+}
+
+//--------------------------------------------------
+
 RETLW::RETLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : Literal_op(new_cpu, new_opcode, address)
 {
@@ -1331,6 +1596,37 @@ void SUBWF::execute()
 
 }
 
+//--------------------------------------------------
+
+SUBWFB::SUBWFB (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  : Register_op(new_cpu, new_opcode, address)
+{
+  decode(new_cpu, new_opcode);
+  new_name("subwfb");
+}
+
+void SUBWFB::execute()
+{
+  unsigned int new_value,src_value,w_value;
+
+  source = ((!access) ?
+	    cpu_pic->registers[register_address] 
+	    :
+	    cpu_pic->register_bank[register_address] );
+
+  new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value.get()) -
+    (1 - cpu_pic->status->get_C());
+
+  if(destination)
+    source->put(new_value & 0xff);
+  else
+    cpu_pic->W->put(new_value & 0xff);
+
+  cpu_pic->status->put_Z_C_DC_for_sub(new_value, src_value, w_value);
+
+  cpu_pic->pc->increment();
+
+}
 
 //--------------------------------------------------
 
@@ -1385,7 +1681,8 @@ TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
     }
   else {
-     if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
+     if(cpu_pic->base_isa() == _14BIT_PROCESSOR_ ||
+          cpu_pic->base_isa() == _14BIT_PROCESSOR_)
        register_address |= 0x80;  // The destination register is the TRIS
   }
   new_name("tris");
@@ -1396,7 +1693,8 @@ void TRIS::execute()
   if(register_address)
     {
       // Execute the instruction only if the register is valid.
-      if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
+      if(cpu_pic->base_isa() == _14BIT_PROCESSOR_ ||
+          cpu_pic->base_isa() == _14BIT_PROCESSOR_)
         cpu_pic->registers[register_address]->put(cpu_pic->W->get());
       else
         cpu_pic->tris_instruction(register_address);

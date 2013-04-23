@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2009 Roy R. Rankin
+   Copyright (C) 2009,2013 Roy R. Rankin
 
 
 This file is part of the libgpsim library of gpsim
@@ -31,6 +31,7 @@ License along with this library; if not, see
 
      // forward references
 class _14bit_processor;
+class _14bit_e_processor;
 class PicPortRegister;
 class PicTrisRegister;
 
@@ -42,6 +43,7 @@ class IO_open_collector;
 class PinMonitor;
 
 extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst, unsigned int address);
+extern instruction *disasm14E (_14bit_e_processor *cpu,unsigned int inst, unsigned int address);
 
 
 
@@ -58,7 +60,7 @@ public:
 
   INTCON       *intcon;
 
-  void interrupt();
+  virtual void interrupt();
   virtual void save_state();
   virtual void create();
   virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
@@ -163,6 +165,62 @@ public:
   virtual bool hasSSP() {return false;}
 };
 
+// 14 bit processors with extended instructions
+//
+class _14bit_e_processor : public pic_processor
+{
+public:
+  INTCON       		*intcon;
+  INTCON_14_PIR          intcon_reg;
+  BSR			 bsr;
+  PCON			 pcon;
+  WDTCON		 wdtcon;
+  Indirect_Addressing14  ind0;
+  Indirect_Addressing14  ind1;
+  sfr_register		 status_shad;
+  sfr_register		 wreg_shad;
+  sfr_register		 bsr_shad;
+  sfr_register		 pclath_shad;
+  sfr_register		 fsr0l_shad;
+  sfr_register		 fsr0h_shad;
+  sfr_register		 fsr1l_shad;
+  sfr_register		 fsr1h_shad;
 
+  virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
+  virtual PROCESSOR_TYPE base_isa(){return _14BIT_E_PROCESSOR_;};
+  virtual instruction * disasm (unsigned int address, unsigned int inst)
+  {
+    return disasm14E(this, address, inst);
+  }
 
+  _14bit_e_processor(const char *_name=0, const char *desc=0);
+  virtual ~_14bit_e_processor();
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+  virtual void interrupt();
+  virtual bool exit_wdt_sleep() {return wdt_sleep;}
+  virtual void reset(RESET_TYPE r);
+  virtual void create_config_memory();
+  virtual bool set_config_word(unsigned int address,unsigned int cfg_word);
+  virtual void oscillator_select(unsigned int mode, bool clkout);
+  virtual void program_memory_wp(unsigned int mode);
+
+  // Return the portion of pclath that is used during branching instructions
+  virtual unsigned int get_pclath_branching_jump()
+    {
+      return ((pclath->value.get() & 0x18)<<8);
+    }
+
+  // Return the portion of pclath that is used during modify PCL instructions
+  virtual unsigned int get_pclath_branching_modpcl()
+    {
+      return((pclath->value.get() & 0x1f)<<8);
+    }
+
+protected:
+  OPTION_REG   *option_reg;
+  bool		wdt_sleep;	// if true wdt will interupt in sleep
+};
+
+#define cpu14e ( (_14bit_e_processor *)cpu)
 #endif

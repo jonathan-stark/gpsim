@@ -44,6 +44,21 @@ class pic_processor;
 #include "ioports.h"
 
 //---------------------------------------------------------
+// BSR register
+//
+
+class BSR : public sfr_register
+{
+public:
+  BSR(Processor *, const char *pName, const char *pDesc=0);
+
+  unsigned int register_page_bits;
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+
+};
+//---------------------------------------------------------
 // FSR register
 //
 
@@ -316,18 +331,87 @@ public:
   bool break_on_overflow;          /* Should over flow cause a break? */
   bool break_on_underflow;         /* Should under flow cause a break? */
 
-  Stack();
+  Stack(Processor *);
   virtual ~Stack() {}
-  virtual void push(unsigned int);
+  virtual bool push(unsigned int);
+  virtual bool stack_overflow();
+  virtual bool stack_underflow();
   virtual unsigned int pop();
   virtual void reset() {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
   // because I'm not sure how the stack is affected by a reset.
   virtual bool set_break_on_overflow(bool clear_or_set);
   virtual bool set_break_on_underflow(bool clear_or_set);
+  virtual unsigned int get_tos();
+  virtual void put_tos(unsigned int);
+
+
+  bool STVREN;
+  Processor *cpu;
 
 };
 
+class STKPTR : public sfr_register
+{
+public:
 
+  enum {
+	STKUNF = 1<<6,
+	STKOVF = 1<<7
+  };
+  STKPTR(Processor *, const char *pName, const char *pDesc=0);
+
+  Stack *stack;
+  void put_value(unsigned int new_value);
+  void put(unsigned int new_value);
+};
+
+class TOSL : public sfr_register
+{
+public:
+  TOSL(Processor *, const char *pName, const char *pDesc=0);
+
+  Stack *stack;
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  unsigned int get();
+  unsigned int get_value();
+      
+};
+
+class TOSH : public sfr_register
+{
+public:
+  TOSH(Processor *, const char *pName, const char *pDesc=0);
+
+  Stack *stack;
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  unsigned int get();
+  unsigned int get_value();
+      
+};
+//
+// Stack for enhanced 14 bit porcessors
+//
+class Stack14E : public Stack
+{
+public:
+  STKPTR stkptr;
+  TOSL   tosl;
+  TOSH   tosh;
+
+  Stack14E(Processor *);
+
+  virtual void reset();
+  virtual unsigned int pop();
+  virtual bool push(unsigned int address);
+  virtual bool stack_overflow();
+  virtual bool stack_underflow();
+
+#define NO_ENTRY 0x20
+};
 //---------------------------------------------------------
 // W register
 class WTraceType;
@@ -362,7 +446,125 @@ public:
   virtual void initialize();
 };
 
+//---------------------------------------------------------
+// 
+// Indirect_Addressing
+//
+// This class coordinates the indirect addressing on the 18cxxx
+// parts. Each of the registers comprising the indirect addressing
+// subsystem: FSRnL,FSRnH, INDFn, POSTINCn, POSTDECn, PREINCn, and
+// PLUSWn are each individually defined as sfr_registers AND included
+// in the Indirect_Addressing class. So accessing these registers
+// is the same as accessing any register: through the core cpu's
+// register memory. The only difference for these registers is that
+// the 
 
+class Indirect_Addressing14;   // Forward reference
+
+//---------------------------------------------------------
+// FSR registers
+
+class FSRL14 : public sfr_register
+{
+public:
+  FSRL14(Processor *, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM);
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+
+protected:
+  Indirect_Addressing14  *iam;
+};
+
+class FSRH14 : public sfr_register
+{
+ public:
+  FSRH14(Processor *, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM);
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+      
+protected:
+  Indirect_Addressing14  *iam;
+};
+
+class INDF14 : public sfr_register
+{
+ public:
+  INDF14(Processor *, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM);
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  unsigned int get();
+  unsigned int get_value();
+      
+protected:
+  Indirect_Addressing14  *iam;
+};
+
+class Indirect_Addressing14
+{
+public:
+  Indirect_Addressing14(pic_processor *cpu, const string &n);
+
+  pic_processor *cpu;
+
+  unsigned int fsr_value;     // 16bit concatenation of fsrl and fsrh
+  unsigned int fsr_state;     /* used in conjunction with the pre/post incr
+			       * and decrement. This is mainly needed for
+			       * those instructions that perform read-modify-
+			       * write operations on the indirect registers
+			       * eg. btg POSTINC1,4 . The post increment must
+			       * occur after the bit is toggled and not during
+			       * the read operation that's determining the 
+			       * current state.
+			       */
+  int     fsr_delta;          /* If there's a pending update to the fsr register
+			       * pair, then the magnitude of that update is
+			       * stored here.
+			       */
+  guint64 current_cycle;      /* Stores the cpu cycle when the fsr was last
+			       * changed. 
+			       */
+  FSRL14    fsrl;
+  FSRH14    fsrh;
+  INDF14    indf;
+
+  //void init(_16bit_processor *new_cpu);
+  void put(unsigned int new_value);
+  unsigned int get();
+  unsigned int get_value();
+  void put_fsr(unsigned int new_fsr);
+  unsigned int get_fsr_value(){return (fsr_value & 0xfff);};
+  void update_fsr_value();
+/*
+  void preinc_fsr_value();
+  void postinc_fsr_value();
+  void postdec_fsr_value();
+  int  plusw_fsr_value();
+  int  plusk_fsr_value(int k);
+*/
+
+  /* bool is_indirect_register(unsigned int reg_address)
+   *
+   * The purpose of this routine is to determine whether or not the
+   * 'reg_address' is the address of an indirect register. This is
+   * used by the 'put' and 'get' functions of the indirect registers.
+   * Indirect registers are forbidden access to other indirect registers.
+   * (Although double indirection in a single instruction cycle would
+   * be powerful!).
+   */
+
+  inline bool is_indirect_register(unsigned int reg_address)
+    {
+	unsigned int bank_address = reg_address % 0x80;
+      if(bank_address == 0 || bank_address == 1 || bank_address == 4 ||
+	 bank_address == 5 || bank_address == 6 || bank_address == 7)
+	return 1;
+      return 0;
+    }
+
+
+};
 
 //---------------------------------------------------------
 // PCL - Program Counter Low
@@ -403,10 +605,14 @@ class PCON : public sfr_register
  public:
 
   enum {
-    BOR = 1<<0,   // Brown Out Reset
-    POR = 1<<1,    // Power On Reset
+    BOR = 1<<0,   // clear on Brown Out Reset
+    POR = 1<<1,    // clear on Power On Reset
+    RI  = 1<<2,	   // clear on Reset instruction 
+    RMCLR = 1<<3,  // clear if hardware MCLR occurs
     SBOREN = 1<<4, //  Software BOR Enable bit
-    ULPWUE = 1<<5  // Ultra Low-Power Wake-up Enable bit
+    ULPWUE = 1<<5,  // Ultra Low-Power Wake-up Enable bit
+    STKUNF = 1<<6,  // Stack undeflow
+    STKOVF = 1<<7   // Stack overflow
   };
 
   unsigned int valid_bits;

@@ -157,7 +157,7 @@ void ADDULNK::execute()
 }
 
 //---------------------------------------------------------
-ADDFSR::ADDFSR(Processor *new_cpu, unsigned int new_opcode, const char *pName, unsigned int address)
+ADDFSR16::ADDFSR16(Processor *new_cpu, unsigned int new_opcode, const char *pName, unsigned int address)
   : instruction(new_cpu,  new_opcode,address)
 {
   m_fsr = (opcode>>6)&3;
@@ -183,7 +183,7 @@ ADDFSR::ADDFSR(Processor *new_cpu, unsigned int new_opcode, const char *pName, u
 
 }
 
-char *ADDFSR::name(char *return_str,int len)
+char *ADDFSR16::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t%d,0x%x",
@@ -195,7 +195,7 @@ char *ADDFSR::name(char *return_str,int len)
 }
 
 
-void ADDFSR::execute()
+void ADDFSR16::execute()
 {
   if (opcode & 0x100)
     ia->put_fsr(ia->get_fsr_value() - m_lit);  //SUBFSR
@@ -205,23 +205,13 @@ void ADDFSR::execute()
 }
 
 //--------------------------------------------------
-CALLW::CALLW(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  :instruction (new_cpu, new_opcode, address)
+void CALLW16::execute()
 {
-  new_name("callw");
-}
-char *CALLW::name(char *return_str,int len)
-{
-
-  snprintf(return_str,len,"%s",
-	   gpsimObject::name().c_str());
-  return(return_str);
-}
-void CALLW::execute()
-{
-  cpu16->stack->push(cpu16->pc->get_next());
-  cpu16->pcl->put(cpu16->W->get());
-  cpu16->pc->increment();
+  if(cpu16->stack->push(cpu16->pc->get_next()))
+  {
+    cpu16->pcl->put(cpu16->W->get());
+    cpu16->pc->increment();
+  }
 }
 
 //--------------------------------------------------
@@ -371,14 +361,7 @@ void ADDWF16::execute()
 
 //--------------------------------------------------
 
-ADDWFC::ADDWFC (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  : Register_op(new_cpu, new_opcode, address)
-{
-  decode(new_cpu, new_opcode);
-  new_name("addwfc");
-}
-
-void ADDWFC::execute()
+void ADDWFC16::execute()
 {
   unsigned int new_value,src_value,w_value;
 
@@ -570,7 +553,7 @@ void BOV::execute()
 }
 
 //--------------------------------------------------
-BRA::BRA (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+BRA16::BRA16 (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : instruction(new_cpu, new_opcode, address)
 {
   destination_index = (new_opcode & 0x7ff)+1;
@@ -585,13 +568,13 @@ BRA::BRA (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   new_name("bra");
 }
 
-void BRA::execute()
+void BRA16::execute()
 {
   cpu16->pc->jump(absolute_destination_index);
 
 }
 
-char * BRA::name(char *return_str,int len)
+char * BRA16::name(char *return_str,int len)
 {
 
 
@@ -664,11 +647,13 @@ void CALL16::execute()
   if(!initialized)
     runtime_initialize();
 
-  cpu16->stack->push(cpu16->pc->get_next());
-  if(fast)
-    cpu16->fast_stack.push();
+  if (cpu16->stack->push(cpu16->pc->get_next()))
+  {
+    if(fast)
+      cpu16->fast_stack.push();
 
-  cpu16->pc->jump(destination_index);
+    cpu16->pc->jump(destination_index);
+  }
 
 }
 
@@ -1306,22 +1291,24 @@ void MOVFP::execute()
 
 }
 
+
 //--------------------------------------------------
 
-MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+MOVLB16::MOVLB16 (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : Literal_op(new_cpu, new_opcode, address)
 {
   decode(new_cpu, new_opcode);
   new_name("movlb");
 }
 
-void MOVLB::execute()
+void MOVLB16::execute()
 {
   cpu16->bsr.put(L);
 
   cpu16->pc->increment();
 
 }
+
 
 //--------------------------------------------------
 
@@ -1600,9 +1587,8 @@ RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void RCALL::execute()
 {
-  cpu16->stack->push(cpu16->pc->get_next());
-
-  cpu16->pc->jump(absolute_destination_index);
+  if(cpu16->stack->push(cpu16->pc->get_next()))
+      cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -1620,19 +1606,6 @@ char * RCALL::name(char *return_str,int len)
 }
 
 
-//--------------------------------------------------
-
-RESET::RESET (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  : instruction(new_cpu, new_opcode, address)
-{
-  decode(new_cpu, new_opcode);
-  new_name("reset");
-}
-
-void RESET::execute()
-{
-  cpu16->reset(SOFT_RESET);
-}
 
 //--------------------------------------------------
 void RETFIE16::execute()
@@ -1913,14 +1886,7 @@ void SUBWF16::execute()
 
 //--------------------------------------------------
 
-SUBWFB::SUBWFB (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
-  : Register_op(new_cpu, new_opcode, address)
-{
-  decode(new_cpu, new_opcode);
-  new_name("subwfb");
-}
-
-void SUBWFB::execute()
+void SUBWFB16::execute()
 {
   unsigned int new_value,src_value,w_value;
 

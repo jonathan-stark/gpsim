@@ -109,7 +109,7 @@ Processor::Processor(const char *_name, const char *_desc)
     rma(this),
     ema(this),
     pc(0),
-    bad_instruction(0, 0, 0)
+    bad_instruction(0, 0x3fff, 0)
 {
   registers = 0;
 
@@ -567,6 +567,39 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
     ;
   else
     set_out_of_range_pm(address,value);  // could be e2prom
+
+
+}
+//-------------------------------------------------------------------
+//erase_program_memory(unsigned int address)
+//
+//	Checks if a program memory location contains an instruction
+//	and deletes it if it does. 
+//
+void Processor::erase_program_memory(unsigned int address)
+{
+  unsigned int uIndex = map_pm_address2index(address);
+
+  if (!program_memory) {
+    std::stringstream buf;
+    buf << "ERROR: internal bug " << __FILE__ << ":" << __LINE__;
+    throw new FatalError(buf.str());
+  }
+
+  if(uIndex < program_memory_size()) {
+
+    if(program_memory[uIndex] != 0 && program_memory[uIndex]->isa() != instruction::INVALID_INSTRUCTION) {
+      delete program_memory[uIndex];
+      program_memory[uIndex] = &bad_instruction;
+    }
+  }
+  else
+  {
+    cout << "Erase Program memory\n";
+    cout << "Warning::Out of range address " << hex << address << endl;
+    cout << "Max allowed address is 0x" << hex << (program_address_limit()-1) << '\n';
+  
+  }
 
 
 }

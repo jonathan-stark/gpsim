@@ -1,7 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
-                 2006 Roy Rankin
+                 2006,2013 Roy Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -59,7 +59,7 @@ void EECON1::put(unsigned int new_value)
 
   new_value &= valid_bits;
 
-  //cout << "EECON1::put new_value " << new_value << "  valid_bits " << valid_bits << '\n';
+  //cout << "EECON1::put new_value " << hex << new_value << "  valid_bits " << valid_bits << '\n';
   if(new_value & WREN)
     {
       if(eeprom->get_reg_eecon2()->is_unarmed())
@@ -103,7 +103,7 @@ void EECON1::put(unsigned int new_value)
 
   if ( (value.get() & RD) && !( value.get() & WR) )
     {
-      if(value.get() & EEPGD) {
+      if(value.get() & (EEPGD|CFGS)) {
         eeprom->get_reg_eecon2()->read();
         eeprom->start_program_memory_read();
         //cout << "eestate " << eeprom->eecon2->eestate << '\n';
@@ -690,6 +690,264 @@ void EEPROM_PIR::callback()
 
   default:
     cout << "EEPROM_LONG::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
+    bp.halt();
+  }
+}
+
+//------------------------------------------------------------------------
+// EEPROM_EXTND is based on data sheets for 16F193X and 
+// 12(L)F1822/PIC16(L)F1823. It has the following features
+//
+// read/write with 16 bit data path
+// performs I/O to eeprom, program and configuration memory
+// supports data latches for writing to program and Configuration memory
+// Performs block erase of program and Configuration memory
+// Supports write protect of program memory
+//
+EEPROM_EXTND::EEPROM_EXTND(Processor *pCpu, PIR *pPir)
+  : EEPROM_WIDE(pCpu,pPir), write_latches(NULL), prog_wp(0)
+{
+}
+EEPROM_EXTND::~EEPROM_EXTND()
+{
+    if (write_latches != NULL)
+        delete write_latches;
+}
+
+void EEPROM_EXTND::initialize(
+		unsigned int new_rom_size,
+		int block_size, 
+	 	int num_latches, 
+		unsigned int cfg_word_base)
+
+{
+   EEPROM_WIDE::initialize(new_rom_size);
+   erase_block_size = block_size;
+   num_write_latches = num_latches;
+   if (write_latches != NULL)
+	delete write_latches;
+   write_latches = new unsigned int [num_latches];
+   for(int i = 0; i < num_latches; i++)
+	write_latches[i] = LATCH_MT;
+
+    config_word_base = cfg_word_base;
+}
+
+void EEPROM_EXTND::start_write()
+{
+  eecon1.value.put( eecon1.value.get()  | eecon1.WRERR);
+
+  if (eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS))
+      get_cycles().set_break(get_cycles().get() + 1, this);
+  else
+      get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
+
+  wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
+  wr_data = eedata.value.get() + (eedatah.value.get() << 8);
+
+  eecon2.start_write();
+}
+
+
+void EEPROM_EXTND::callback()
+{
+   int index;
+   bool write_error = false;
+  //cout << "eeprom call back\n";
+
+
+  switch(eecon2.get_eestate()) {
+  case EECON2::EEREAD:
+    //cout << "eeread\n";
+
+    eecon2.unarm();
+    if(eecon1.value.get() & EECON1::EEPGD) {
+      // read program memory
+
+        int opcode = cpu->pma->get_opcode(rd_adr);
+        eedata.value.put(opcode & 0xff);
+        eedatah.value.put((opcode>>8) & 0xff);
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+
+    }
+    else if (eecon1.value.get() & EECON1::CFGS) // Read Config data
+    {
+	unsigned int read_data;
+	read_data = cpu->get_config_word(config_word_base | rd_adr);
+        if (read_data == 0xffffffff) read_data = 0;
+	eedata.value.put(read_data & 0xff);
+	eedatah.value.put((read_data>>8) & 0xff);
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+    } 
+    else	// read eeprom data 
+    {
+      if (eeadr.value.get() < rom_size)
+      	eedata.value.put(rom[eeadr.value.get()]->get());
+      else
+      {
+        cout << "EXTND_EEPROM read adrress is out of range " << hex << eeadr.value.get() << '\n';
+        bp.halt();
+      }
+    }
+
+    eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
+    break;
+
+  case EECON2::EEWRITE_IN_PROGRESS:
+    //cout << "eewrite\n";
+
+    switch(eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS|EECON1::LWLO|EECON1::FREE))
+    {
+    case EECON1::EEPGD:	// write program memory
+	index = wr_adr & (num_write_latches - 1);
+        wr_adr &= ~(num_write_latches - 1);
+	write_latches[index] = wr_data;
+	if (wr_adr >= prog_wp)
+	{
+	    for(int i = 0; i < num_write_latches; i++)
+	    {
+		if (write_latches[i] != LATCH_MT)
+		{
+		    cpu->init_program_memory(wr_adr+i, write_latches[i]);
+		    write_latches[i] = LATCH_MT;
+		}
+	    }
+	} 
+	else
+	{
+	    printf("Warning: attempt to Write  protected Program memory 0x%x\n",
+			wr_adr);
+	    write_error = true;
+	    bp.halt();
+	    gi.simulation_has_stopped();
+	}
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+	// execution stalls for 2ms
+	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
+	    get_cycles().increment(); 
+	break;
+
+    case EECON1::EEPGD|EECON1::LWLO:	// write to latches
+    case EECON1::CFGS|EECON1::LWLO:	// write to latches
+	index = wr_adr & (num_write_latches - 1);
+	write_latches[index] = wr_data;
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+	break;
+
+    case EECON1::CFGS:	// write config word memory
+	index = wr_adr & (num_write_latches - 1);
+        wr_adr &= ~(num_write_latches - 1);
+	write_latches[index] = wr_data;
+	for(int i = 0; i < num_write_latches; i++)
+	{
+	    if (write_latches[i] != LATCH_MT) // was latch modified?
+	    {
+		unsigned int cfg_add = config_word_base | (wr_adr+i);
+        	index = cpu->get_config_index(cfg_add);
+        	if (index < 0)
+        	{
+	    	    printf("EEWRITE No config word at 0x%x\n", cfg_add);
+	    	    write_error = true;
+		}
+        	else if (!cpu_pic->getConfigMemory()->getConfigWord(index)->isEEWritable())
+        	{
+	    	    printf("EEWRITE config word at 0x%x write protected\n", cfg_add); 
+	    	    write_error = true;
+        	}
+        	else
+        	{
+	    	    if(!cpu->set_config_word(cfg_add, wr_data))
+	    	    {
+			printf("EEWRITE unknown failure to write %x to 0x%x\n", wr_data, cfg_add);
+	    		write_error = true;
+	    	    }
+		
+		}    
+
+	        write_latches[i] = LATCH_MT;
+	    }
+	} 
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+	// execution stalls for 2ms
+	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
+	    get_cycles().increment(); 
+	break;
+
+    case EECON1::CFGS|EECON1::FREE:	// free Configuration memory row
+	// This row erase simply skips non-existant or write protected
+	// configuration words
+	wr_adr &= ~(erase_block_size);
+	for(int i = 0; i < erase_block_size; i++)
+	{
+	    unsigned int cfg_add = config_word_base | (wr_adr+i);
+            index = cpu->get_config_index(cfg_add);
+	    if (index >= 0 && 
+		cpu_pic->getConfigMemory()->getConfigWord(index)->isEEWritable())
+	    {
+		cpu->set_config_word(cfg_add, 0);
+	    }
+	}
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+	// execution stalls for 2ms
+	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
+	    get_cycles().increment(); 
+	break;
+
+    case EECON1::EEPGD|EECON1::FREE:	// free program memory row
+	wr_adr &= ~(erase_block_size);
+        if (wr_adr >= prog_wp)
+	{
+	    for(int i = 0; i < erase_block_size; i++)
+		cpu->erase_program_memory(wr_adr+i);
+	}
+	else
+	{
+	    printf("Warning: attempt to row erase protected Program memory\n");
+	    write_error = true;
+	    bp.halt();
+	    gi.simulation_has_stopped();
+	}
+    	cpu_pic->pc->increment();
+    	cpu_pic->pc->increment();
+	// execution stalls for 2ms
+	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
+	    get_cycles().increment(); 
+	break;
+
+    case EECON1::LWLO:	// LWLO ignored to eeprom
+    default:		// write to eeprom
+        if(wr_adr < rom_size)
+        {
+           rom[wr_adr]->value.put(wr_data);
+        }
+        else
+        {
+           cout << "EXTND_EEPROM write address is out of range " << hex << wr_adr << '\n';
+	   write_error = true;
+	   bp.halt();
+        }
+
+	break;
+    }
+
+    if (!write_error)
+       	eecon1.value.put( eecon1.value.get()  & ~ eecon1.WRERR);
+    write_is_complete();
+
+    if (eecon1.value.get() & eecon1.WREN)
+      eecon2.unready();
+    else
+      eecon2.unarm();
+    break;
+
+  default:
+    cout << "EEPROM_EXTND::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
     bp.halt();
   }
 }

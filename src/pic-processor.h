@@ -45,6 +45,7 @@ enum PROCESSOR_TYPE
 {
   _PIC_PROCESSOR_,
   _14BIT_PROCESSOR_,
+  _14BIT_E_PROCESSOR_, // 14bit enhanced processor
   _12BIT_PROCESSOR_,
   _PIC17_PROCESSOR_,
   _PIC18_PROCESSOR_,
@@ -62,6 +63,8 @@ enum PROCESSOR_TYPE
   _P12F629_,
   _P12F675_,
   _P12F683_,
+  _P12F1822_,
+  _P12F1823_,
   _P16C84_,
   _P16CR83_,
   _P16CR84_,
@@ -375,8 +378,10 @@ public:
   void BP_set_interrupt();
   void pm_write();
 
+  virtual ConfigMemory * getConfigMemory(){ return m_configMemory;}
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual unsigned int get_config_word(unsigned int address);
+  virtual int get_config_index(unsigned int address);
   virtual unsigned int config_word_address() const {return 0x2007;};
   virtual ConfigMode *create_ConfigMode() { return new ConfigMode; };
   virtual void reset(RESET_TYPE r);
@@ -488,11 +493,13 @@ class ConfigWord : public Integer
 {
 public:
   ConfigWord(const char *_name, unsigned int default_val, const char *desc,
-             pic_processor *pCpu, unsigned int addr);
+             pic_processor *pCpu, unsigned int addr, bool EEw=true);
   unsigned int ConfigWordAdd() { return m_addr; }
+  bool isEEWritable() { return EEWritable;};
 protected:
   pic_processor *m_pCpu;
   unsigned int m_addr;
+  bool EEWritable;
 };
 
 class ConfigMemory
@@ -502,6 +509,8 @@ public:
   ~ConfigMemory();
   int addConfigWord(unsigned int addr, ConfigWord *);
   ConfigWord *getConfigWord(unsigned int addr);
+  int getnConfigWords() { return m_nConfigWords; }
+
 protected:
   pic_processor *m_pCpu;
   ConfigWord **m_ConfigWords;

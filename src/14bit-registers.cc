@@ -102,6 +102,38 @@ void file_register::put_value(unsigned int new_value)
 
 #endif
 
+//--------------------------------------------------
+// member functions for the BSR class
+//--------------------------------------------------
+//
+BSR::BSR(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc),
+    register_page_bits(0)
+{
+}
+
+void  BSR::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(new_value & 0x01f);
+  if(cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
+      cpu_pic->register_bank = &cpu_pic->registers[ value.get() << 7 ];
+  else
+      cpu_pic->register_bank = &cpu_pic->registers[ value.get() << 8 ];
+
+
+}
+
+void  BSR::put_value(unsigned int new_value)
+{
+  put(new_value);
+
+  update();
+  cpu_pic->indf->update();
+}
+
+
 // Adjust internal RC oscillator frequency as per 12f675/629
 // Spec sheet does not give range so assume +/- 12.5% as per 16f88
 // The fact that base_freq is not 0. indicates the RC oscillator is being used
@@ -602,14 +634,250 @@ PCON::PCON(Processor *pCpu, const char *pName, const char *pDesc,
 
 void PCON::put(unsigned int new_value)
 {
+  Dprintf((" value %x add %x\n", new_value, new_value&valid_bits));
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
   value.put(new_value&valid_bits);
 }
 
 
+//------------------------------------------------
+
+Indirect_Addressing14::Indirect_Addressing14(pic_processor *pCpu, const string &n)
+  : fsrl(pCpu, (string("fsrl")+n).c_str(), "FSR Low", this),
+    fsrh(pCpu, (string("fsrh")+n).c_str(), "FSR High", this),
+    indf(pCpu, (string("indf")+n).c_str(), "Indirect Register", this)
+{
+  current_cycle = (guint64)(-1);   // Not zero! See bug #3311944
+  fsr_value = 0;
+  fsr_state = 0;
+  fsr_delta = 0;
+  cpu = pCpu;
+
+}
+
+/*
+ * put - Each of the indirect registers associated with this
+ * indirect addressing class will call this routine to indirectly
+ * write data.
+ */
+void Indirect_Addressing14::put(unsigned int new_value)
+{
+    unsigned int fsr_adj = fsr_value + fsr_delta;
+
+    if (fsr_adj < 0x1000) 	// Traditional Data Memory
+    {
+	if(is_indirect_register(fsr_adj))
+	    return;
+	cpu_pic->registers[fsr_adj]->put(new_value);
+    }
+    else if (fsr_adj >= 0x2000 && fsr_adj < 0x29b0) // Linear GPR region
+    {
+	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
+	unsigned int low_bits = ((fsr_adj & 0xfff) % 0x50) + 0x20;
+        Dprintf(("fsr_adj %x bank %x low_bits %x add %x\n", fsr_adj, bank, low_bits, (bank*0x80 + low_bits)));
+        cpu_pic->registers[bank * 0x80 + low_bits]->put(new_value); 
+    }
+    else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
+    {
+	return;	// Not writable
+    }
+
+}
+
+/*
+ * get - Each of the indirect registers associated with this
+ * indirect addressing class will call this routine to indirectly
+ * retrieve data.
+ */
+unsigned int Indirect_Addressing14::get()
+{
+    unsigned int fsr_adj = fsr_value + fsr_delta;
+
+    if (fsr_adj < 0x1000) // Traditional Data Memory
+    {
+	if(is_indirect_register(fsr_adj))
+	    return 0;
+	return cpu_pic->registers[fsr_adj]->get();
+    }
+    else if (fsr_adj >= 0x2000 && fsr_adj < 0x29b0) // Linear GPR region
+    {
+	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
+	unsigned int low_bits = ((fsr_adj & 0xff) % 0x50) + 0x20;
+        return(cpu_pic->registers[bank * 0x80 + low_bits]->get()); 
+    }
+    else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
+    {
+	unsigned int pm;
+	unsigned address = fsr_adj - 0x8000;
+
+  	if (address <= cpu_pic->program_memory_size())
+        {
+	  pm = cpu_pic->get_program_memory_at_address(address);
+          Dprintf((" address %x max %x value %x\n",address, cpu_pic->program_memory_size(), pm));
+	    return pm & 0xff;
+        }
+    }
+    return 0;
+}
+
+/*
+ * get - Each of the indirect registers associated with this
+ * indirect addressing class will call this routine to indirectly
+ * retrieve data.
+ */
+unsigned int Indirect_Addressing14::get_value()
+{
+    unsigned int fsr_adj = fsr_value + fsr_delta;
+    if (fsr_adj < 0x1000)	// Traditional Data Memory
+    {
+	if(is_indirect_register(fsr_adj))
+	    return 0;
+	
+	return cpu_pic->registers[fsr_adj]->get_value();
+    }
+    else if (fsr_adj >= 0x2000 && fsr_adj < 0x29b0) // Linear GPR region
+    {
+	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
+	unsigned int low_bits = ((fsr_adj & 0xfff) % 0x50) + 0x20;
+
+        return(cpu_pic->registers[bank * 0x80 + low_bits]->get_value()); 
+    }
+    else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
+    {
+	unsigned int pm;
+	unsigned address = fsr_adj - 0x8000;
+
+  	if (address <= cpu_pic->program_memory_size())
+        {
+	  pm = cpu_pic->get_program_memory_at_address(address);
+	    return pm & 0xff;
+        }
+    }
+    return 0;
+}
+
+void Indirect_Addressing14::put_fsr(unsigned int new_fsr)
+{
+
+  fsrl.put(new_fsr & 0xff);
+  fsrh.put((new_fsr>>8) & 0xff);
+
+}
+
+
+/*
+ * update_fsr_value - This routine is called by the FSRL and FSRH
+ * classes. It's purpose is to update the 16-bit 
+ * address formed by the concatenation of FSRL and FSRH.
+ *
+ */
+
+void Indirect_Addressing14::update_fsr_value()
+{
+
+  if(current_cycle != get_cycles().get())
+    {
+      fsr_value = (fsrh.value.get() << 8) |  fsrl.value.get();
+      fsr_delta = 0;
+    }
+}
 //--------------------------------------------------
-Stack::Stack()
+// member functions for the FSR class
+//--------------------------------------------------
+//
+FSRL14::FSRL14(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+void  FSRL14::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
+  value.put(new_value & 0xff);
+  iam->fsr_delta = 0;
+  iam->update_fsr_value();
+}
+
+void  FSRL14::put_value(unsigned int new_value)
+{
+
+  put(new_value);
+
+  update();
+  cpu14->indf->update();
+
+}
+
+FSRH14::FSRH14(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+void  FSRH14::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & 0xff);
+
+  iam->update_fsr_value();
+
+}
+
+void  FSRH14::put_value(unsigned int new_value)
+{
+
+  put(new_value);
+
+  update();
+  cpu14->indf->update();
+}
+
+INDF14::INDF14(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM)
+  : sfr_register(pCpu,pName,pDesc),
+    iam(pIAM)
+{
+}
+
+void INDF14::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  if(iam->fsr_value & 0x8000) // extra cycle for program memory access
+      get_cycles().increment();
+
+  iam->put(new_value);
+  iam->fsr_delta = 0;
+}
+
+void INDF14::put_value(unsigned int new_value)
+{
+  iam->put(new_value);
+  iam->fsr_delta = 0;
+  update();
+}
+
+unsigned int INDF14::get()
+{
+  unsigned int ret;
+
+  Dprintf((" get val %x delta %x \n", iam->fsr_value, iam->fsr_delta));
+  trace.raw(read_trace.get() | value.get());
+  if(iam->fsr_value & 0x8000)
+      get_cycles().increment();
+
+  ret = iam->get();
+  iam->fsr_delta = 0;
+  return ret;
+}
+
+unsigned int INDF14::get_value()
+{
+  return(iam->get_value());
+}
+//--------------------------------------------------
+Stack::Stack(Processor *pCpu) : cpu(pCpu)
 {
 
   stack_warnings_flag = 0;   // Do not display over/under flow stack warnings
@@ -618,8 +886,10 @@ Stack::Stack()
   stack_mask = 7;            // Assume a 14 bit core.
   pointer = 0;
 
-  for(int i=0; i<8; i++)
+  for(int i=0; i<31; i++)
     contents[i] = 0;
+
+  STVREN = 0;
 
 }
 
@@ -629,12 +899,13 @@ Stack::Stack()
 // push the passed address onto the stack by storing it at the current
 // 
 
-void Stack::push(unsigned int address)
+bool Stack::push(unsigned int address)
 {
   Dprintf(("pointer=%d address0x%x\n",pointer,address));
   // Write the address at the current point location. Note that the '& stack_mask'
   // implicitly handles the stack wrap around.
 
+  
   contents[pointer & stack_mask] = address;
 
   // If the stack pointer is too big, then the stack has definitely over flowed.
@@ -642,12 +913,19 @@ void Stack::push(unsigned int address)
   // for them to ignore the warnings.
 
   if(pointer++ >= (int)stack_mask) {
+	stack_overflow();
+	return false;
+  }
+  return true;
+
+}
+bool Stack::stack_overflow()
+{
     if(stack_warnings_flag || break_on_overflow)
       cout << "stack overflow ";
     if(break_on_overflow)
       bp.halt();
-  }
-
+    return true;
 }
 
 //
@@ -660,16 +938,23 @@ unsigned int Stack::pop()
   // First decrement the stack pointer.
 
   if(--pointer < 0)  {
-    if(stack_warnings_flag || break_on_underflow)
-      cout << "stack underflow ";
-    if(break_on_underflow) 
-      bp.halt();
+	stack_underflow();
+	return 0;
   }
 
 
   Dprintf(("pointer=%d address0x%x\n",pointer,contents[pointer & stack_mask]));
 
   return(contents[pointer & stack_mask]);
+}
+bool Stack::stack_underflow()
+{
+    pointer = 0;
+    if(stack_warnings_flag || break_on_underflow)
+      cout << "stack underflow ";
+    if(break_on_underflow) 
+      bp.halt();
+    return true;
 }
 
 //
@@ -704,6 +989,211 @@ bool Stack::set_break_on_underflow(bool clear_or_set)
 
   return 1;
 
+}
+
+// Read value at top of stack
+//
+unsigned int Stack::get_tos()
+{
+  if (pointer > 0)
+    return (contents[pointer-1]);
+  else
+    return (0);
+}
+
+// Modify value at top of stack;
+//
+void Stack::put_tos(unsigned int new_tos)
+{
+
+  if (pointer > 0)
+      contents[pointer-1] = new_tos;
+
+}
+
+// Stack14E for extended 14bit processors
+// This stack implementation differs from both the other 14bit
+// and 16bit stacks as a dummy empty location is used so a
+// stack with 16 slots can hold 16 values. The other implementaion
+// of the stack hold n-1 values for an n slot stack.
+// This stack also supports stkptr, tosl, and tosh like the 16bit
+// (p18) processors 
+Stack14E::Stack14E(Processor *pCpu) : Stack(pCpu),
+    stkptr(pCpu, "stkptr", "Stack pointer"),
+    tosl(pCpu, "tosl", "Top of Stack low byte"),
+    tosh(pCpu, "tosh", "Top of Stack high byte")
+{
+  stkptr.stack = this;
+  tosl.stack = this;
+  tosh.stack = this;
+
+
+  STVREN = 1;
+}
+
+void Stack14E::reset()
+{
+    pointer = NO_ENTRY;
+    if (STVREN)
+	contents[stack_mask] = 0;
+    else
+	contents[pointer-1] = contents[stack_mask];
+  
+    Dprintf((" pointer %x\n", pointer));
+    stkptr.put(pointer-1);
+}
+
+bool Stack14E::push(unsigned int address)
+{
+  Dprintf(("pointer=%d address 0x%x\n",pointer,address));
+  // Write the address at the current point location. Note that the '& stack_mask'
+  // implicitly handles the stack wrap around.
+
+  if(pointer == NO_ENTRY)
+	pointer = 0;
+  
+  contents[pointer & stack_mask] = address;
+
+  // If the stack pointer is too big, then the stack has definitely over flowed.
+  // However, some pic programs take advantage of this 'feature', so provide a means
+  // for them to ignore the warnings.
+
+  if(pointer++ > (int)stack_mask) {
+	return stack_overflow();
+  }
+  stkptr.put(pointer-1);
+  return true;
+
+}
+unsigned int  Stack14E::pop()
+{
+    unsigned int ret = 0;
+
+    if (pointer == NO_ENTRY)
+    {
+	return stack_underflow();
+    }
+    pointer--;
+    ret = contents[pointer];
+    if (pointer <= 0)
+	pointer = NO_ENTRY;
+    
+    stkptr.put(pointer-1);
+    return(ret);
+}
+bool Stack14E::stack_overflow()
+{
+    cpu14e->pcon.put(cpu14e->pcon.get() | PCON::STKOVF);
+    if(STVREN) 
+    {
+	cpu->reset(STKOVF_RESET);
+	return false;
+    }
+    else
+    {
+	cout << "Stack overflow\n";
+    }
+    return true;
+}
+bool Stack14E::stack_underflow()
+{
+    Dprintf((" cpu %p STVREN %d\n", cpu, STVREN));
+    cpu14e->pcon.put(cpu14e->pcon.get() | PCON::STKUNF);
+    if(STVREN) 
+    {
+	cpu->reset(STKUNF_RESET);
+    	return false;
+    }
+    else
+    {
+	cout << "Stack underflow\n";
+    }
+    return true;
+
+}
+
+//------------------------------------------------
+// TOSL
+TOSL::TOSL(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
+
+unsigned int TOSL::get()
+{
+  value.put(stack->get_tos() & 0xff);
+  trace.raw(read_trace.get() | value.get());
+  return(value.get());
+}
+
+unsigned int TOSL::get_value()
+{
+  value.put(stack->get_tos() & 0xff);
+  return(value.get());
+}
+
+void TOSL::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
+}
+
+void TOSL::put_value(unsigned int new_value)
+{
+  stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
+  update();
+}
+
+
+//------------------------------------------------
+// TOSH
+TOSH::TOSH(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
+
+unsigned int TOSH::get()
+{
+  value.put((stack->get_tos() >> 8) & 0xff);
+  trace.raw(read_trace.get() | value.get());
+  return(value.get());
+
+}
+
+unsigned int TOSH::get_value()
+{
+
+  value.put((stack->get_tos() >> 8) & 0xff);
+  return(value.get());
+
+}
+
+void TOSH::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
+}
+
+void TOSH::put_value(unsigned int new_value)
+{
+
+  stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
+
+  update();
+
+}
+STKPTR::STKPTR(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{}
+void STKPTR::put_value(unsigned int new_value)
+{
+  stack->pointer = (new_value & 0x1f) + 1;
+  value.put(new_value);
+  update();
+}
+
+void STKPTR::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
 }
 
 

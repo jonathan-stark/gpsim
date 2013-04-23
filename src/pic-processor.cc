@@ -54,6 +54,7 @@ License along with this library; if not, see
 #include "p16x7x.h"
 #include "p12x.h"
 #include "p12f6xx.h"
+#include "p12f182x.h"
 #ifdef P17C7XX  // code no longer works
 #include "p17c75x.h"
 #endif
@@ -180,6 +181,8 @@ ProcessorConstructor pP12F675(P12F675::construct ,
                               "__12F675",   "pic12f675",    "p12f675",  "12f675");
 ProcessorConstructor pP12F683(P12F683::construct ,
                               "__12F683",   "pic12f683",    "p12f683",  "12f683");
+ProcessorConstructor pP12F1822(P12F1822::construct ,
+                              "__12F1822", "pic12f1822", "p12f1822", "12f1822");
 ProcessorConstructor pP16C54(P16C54::construct ,
                              "__16C54",     "pic16c54",     "p16c54",   "16c54");
 ProcessorConstructor pP16C55(P16C55::construct ,
@@ -963,18 +966,11 @@ void pic_processor::reset (RESET_TYPE r)
   }
 
   m_pResetTT->record(r);
-  if(r == SOFT_RESET) {
-
-    pc->reset();
-    gi.simulation_has_stopped();
-    cout << " --- Soft Reset (not fully implemented)\n";
-    return;
-  }
 
   rma.reset(r);
-  pc->reset();
   stack->reset();
   wdt.reset(r);
+  pc->reset();
 
   bp.clear_global();
 
@@ -989,7 +985,16 @@ void pic_processor::reset (RESET_TYPE r)
     m_ActivityState = ePAActive;
     break;
 
+  case SOFT_RESET:
+    cout << "Reset due to Software reset instruction\n";
+    mCurrentPhase = mExecute1Cycle;
+    mCurrentPhase->setNextPhase(mExecute1Cycle);
+    m_ActivityState = ePAActive;
+    break;
+
+
   case MCLR_RESET:
+    cout << "MCLR reset\n";
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
     mCurrentPhase->setNextPhase(mIdle);
     m_ActivityState = ePAIdle;
@@ -1003,12 +1008,31 @@ void pic_processor::reset (RESET_TYPE r)
 
   case WDT_RESET:
   case EXIT_RESET:
+    cout << "Reset on Watch Dog Timer expire\n";
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
     mCurrentPhase->setNextPhase(mExecute1Cycle);
     m_ActivityState = ePAActive;
     break;
 
+  case STKOVF_RESET:
+    cout << "Reset on Stack overflow\n";
+     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
+    mCurrentPhase->setNextPhase(mIdle);
+    m_ActivityState = ePAActive;
+  //  mCurrentPhase->setNextPhase(mExecute1Cycle);
+  //  m_ActivityState = ePAActive;
+    break;
+
+  case STKUNF_RESET:
+    cout << "Reset on Stack undeflow\n";
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
+    mCurrentPhase->setNextPhase(mIdle);
+    m_ActivityState = ePAActive;
+    break;
+
+
   default:
+    printf("pic_processor::reset unknow reset type %d\n", r);
     m_ActivityState = ePAActive;
     break;
   }
@@ -1268,26 +1292,22 @@ void pic_processor::create_symbols ()
 
 //-------------------------------------------------------------------
 
+
 bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 {
 
-  if (m_configMemory)
-  {
-      for(int i = 0; m_configMemory->getConfigWord(i); i++)
-      {
-        if (m_configMemory->getConfigWord(i)->ConfigWordAdd() == address)
-        {
-            m_configMemory->getConfigWord(i)->set((int)cfg_word);
-            if (i == 0 && config_modes)
-            {
-                config_word = cfg_word;
-                config_modes->config_mode = (config_modes->config_mode & ~7) |
-                                        (cfg_word & 7);
-            }
+  int i = get_config_index(address);
 
-            return true;
-        }
-     }
+  if ( i >= 0)
+  {
+      m_configMemory->getConfigWord(i)->set((int)cfg_word);
+      if (i == 0 && config_modes)
+      {
+           config_word = cfg_word;
+           config_modes->config_mode = (config_modes->config_mode & ~7) |
+                                        (cfg_word & 7);
+      }
+      return true;
   }
 
   return false;
@@ -1297,7 +1317,32 @@ bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 
 unsigned int pic_processor::get_config_word(unsigned int address)
 {
-  return address == config_word_address() ? config_word : 0xffffffff;
+  int i;
+
+  if ((i = get_config_index(address)) >= 0)
+       return m_configMemory->getConfigWord(i)->getVal();
+
+  return 0xffffffff;
+}
+
+int pic_processor::get_config_index(unsigned int address)
+{
+  if (m_configMemory)
+  {
+
+      for(int i = 0; i < m_configMemory->getnConfigWords(); i++)
+      {
+	if (m_configMemory->getConfigWord(i))
+        {
+          if (m_configMemory->getConfigWord(i)->ConfigWordAdd() == address)
+          {
+            return i;
+          }
+	}
+     }
+  }
+ 
+  return -1;
 }
 
 
@@ -1599,8 +1644,9 @@ void WDT::callback_print()
 //------------------------------------------------------------------------
 // ConfigMemory - Base class
 ConfigWord::ConfigWord(const char *_name, unsigned int default_val, const char *desc,
-                       pic_processor *pCpu, unsigned int addr)
-  : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr)
+                       pic_processor *pCpu, unsigned int addr, bool EEw)
+  : Integer(_name, default_val, desc), m_pCpu(pCpu), m_addr(addr),
+    EEWritable(EEw)
 {
   /*
   if (m_pCpu)

@@ -451,6 +451,7 @@ public:
 
   virtual void init_program_memory(unsigned int memory_size);
   virtual void init_program_memory(unsigned int address, unsigned int value);
+  virtual void erase_program_memory(unsigned int address);
   virtual void init_program_memory_at_index(unsigned int address,
     unsigned int value);
   virtual void init_program_memory_at_index(unsigned int address, 
@@ -592,6 +593,7 @@ public:
     {return false;} // fixme - make this a pure virtual function...
   virtual unsigned int get_config_word(unsigned int address) = 0;
   virtual unsigned int config_word_address(void) {return 0;}
+  virtual int get_config_index(unsigned int address){return -1;};
 
   //
   // Processor reset

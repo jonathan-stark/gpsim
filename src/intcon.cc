@@ -143,7 +143,6 @@ INTCON3::INTCON3(Processor *pCpu, const char *pName, const char *pDesc)
 //----------------------------------------------------------------------
 void INTCON3::put_value(unsigned int new_value)
 {
-  unsigned int old_value = value.get();
   value.put(new_value);
 
 

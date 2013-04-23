@@ -116,7 +116,7 @@ _12bit_processor::_12bit_processor(const char *_name, const char *desc)
   option_reg->set_write_trace(rv);
   option_reg->set_read_trace(rv);
 
-  stack = new Stack();
+  stack = new Stack(this);
 }
 
 _12bit_processor::~_12bit_processor()

@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2013 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -32,6 +33,24 @@ License along with this library; if not, see
 #include "14bit-processors.h"
 #include "14bit-instructions.h"
 
+struct instruction_constructor op_16ext[] = {
+  { 0x3f00,  0x3d00,  ADDWFC::construct },
+  { 0x3f00,  0x3700,  ASRF::construct },
+  { 0x3e00,  0x3200,  BRA::construct },
+  { 0x3fff,  0x000b,  BRW::construct },
+  { 0x3fff,  0x000a,  CALLW::construct },
+  { 0x3ff8,  0x0010,  MOVIW::construct },
+  { 0x3f80,  0x3f00,  MOVIW::construct },
+  { 0x3fe0,  0x0020,  MOVLB::construct },
+  { 0x3f80,  0x3810,  MOVLP::construct },
+  { 0x3ff8,  0x0018,  MOVWI::construct },
+  { 0x3f80,  0x3f80,  MOVWI::construct },
+  { 0x3f00,  0x3500,  LSLF::construct },
+  { 0x3f00,  0x3600,  LSRF::construct },
+  { 0x3fff,  0x0001,  RESET::construct },
+  { 0x3f00,  0x3b00,  SUBWFB::construct },
+
+};
 struct instruction_constructor op_16cxx[] = {
 
   { 0x3f00,  0x3e00,  ADDLW::construct }, 
@@ -89,6 +108,7 @@ struct instruction_constructor op_16cxx[] = {
 
 
 const int NUM_OP_16CXX	= sizeof(op_16cxx) / sizeof(op_16cxx[0]);
+const int NUM_OP_16EXT	= sizeof(op_16ext) / sizeof(op_16ext[0]);
 
 
 instruction * disasm14 (_14bit_processor *cpu, unsigned int addr, unsigned int inst)
@@ -96,7 +116,28 @@ instruction * disasm14 (_14bit_processor *cpu, unsigned int addr, unsigned int i
   instruction *pi;
 
   pi = 0;
-  for(int i =0; i<NUM_OP_16CXX; i++)
+
+  for(int i =0; i<NUM_OP_16CXX && !pi; i++)
+    if((op_16cxx[i].inst_mask & inst) == op_16cxx[i].opcode)
+      pi = op_16cxx[i].inst_constructor(cpu, inst, addr);
+
+  if(!pi)
+    pi = invalid_instruction::construct(cpu, inst, addr);
+
+  return (pi);
+}
+// decode for 14bit processors with enhanced instructions 
+instruction * disasm14E (_14bit_e_processor *cpu, unsigned int addr, unsigned int inst)
+{
+  instruction *pi;
+
+  pi = 0;
+
+  for(int i =0; i<NUM_OP_16EXT && !pi; i++)
+      if((op_16ext[i].inst_mask & inst) == op_16ext[i].opcode)
+        pi = op_16ext[i].inst_constructor(cpu, inst, addr);
+  
+  for(int i =0; i<NUM_OP_16CXX && !pi; i++)
     if((op_16cxx[i].inst_mask & inst) == op_16cxx[i].opcode)
       pi = op_16cxx[i].inst_constructor(cpu, inst, addr);
 

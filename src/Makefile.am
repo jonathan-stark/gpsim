@@ -43,6 +43,7 @@ libgpsim_la_SOURCES = \
 	lxt_write.c \
 	modules.cc \
 	os_dependent.cc \
+	p12f182x.cc \
 	p12f6xx.cc \
 	p12x.cc \
 	p16f62x.cc \
@@ -126,6 +127,7 @@ gpsiminclude_HEADERS = \
 	operator.h \
 	p12f6xx.h \
 	p12x.h \
+	p12f182x.h \
 	p16x5x.h \
 	p16f62x.h \
 	p16x6x.h \

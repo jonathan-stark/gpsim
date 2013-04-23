@@ -514,6 +514,8 @@ const char * resetName(RESET_TYPE r)
   case BOD_RESET:  return "BOD_RESET";
   case SIM_RESET:  return "SIM_RESET";
   case EXIT_RESET: return "EXIT_RESET";
+  case STKUNF_RESET: return "STKUNF_RESET";
+  case STKOVF_RESET: return "STKOVF_RESET";
   case OTHER_RESET: return "OTHER_RESET";
   }
   return "unknown reset";

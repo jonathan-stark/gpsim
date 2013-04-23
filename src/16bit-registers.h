@@ -47,21 +47,6 @@ class Stimulus_Node;
 class PORTB;
 
 
-//---------------------------------------------------------
-// BSR register
-//
-
-class BSR : public sfr_register
-{
-public:
-  BSR(Processor *, const char *pName, const char *pDesc=0);
-
-  unsigned int register_page_bits;
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-
-};
 
 
 //---------------------------------------------------------
@@ -178,9 +163,10 @@ protected:
 class Indirect_Addressing
 {
 public:
-  Indirect_Addressing(_16bit_processor *cpu, const string &n);
+  Indirect_Addressing(pic_processor *cpu, const string &n);
 
-  _16bit_processor *cpu;
+  pic_processor *cpu;
+//RRR  _16bit_processor *cpu;
 
   unsigned int fsr_value;     // 16bit concatenation of fsrl and fsrh
   unsigned int fsr_state;     /* used in conjunction with the pre/post incr
@@ -310,16 +296,23 @@ public:
 // Stack
 //
 class Stack16;
-#define  Stack16_MASK  0x1f
 
-class STKPTR : public sfr_register
+class STKPTR16 : public sfr_register
 {
 public:
-  STKPTR(Processor *, const char *pName, const char *pDesc=0);
+
+  enum {
+	STKUNF = 1<<6,
+	STKOVF = 1<<7
+  };
+  STKPTR16(Processor *, const char *pName, const char *pDesc=0);
 
   Stack16 *stack;
   void put_value(unsigned int new_value);
+  void put(unsigned int new_value);
 };
+
+#ifdef RRR
 
 class TOSL : public sfr_register
 {
@@ -348,6 +341,7 @@ public:
   unsigned int get_value();
       
 };
+#endif //RRR
 
 class TOSU : public sfr_register
 {
@@ -367,17 +361,17 @@ public:
 class Stack16 : public Stack
 {
 public:
-  STKPTR stkptr;
+  STKPTR16 stkptr;
   TOSL   tosl;
   TOSH   tosh;
   TOSU   tosu;
 
   Stack16(Processor *);
-  virtual void push(unsigned int);
+  virtual bool push(unsigned int);
   virtual unsigned int pop();
   virtual void reset();
-  virtual unsigned int get_tos();
-  virtual void put_tos(unsigned int);
+  virtual bool stack_overflow();
+  virtual bool stack_underflow();
 
 };
 

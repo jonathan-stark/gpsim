@@ -32,35 +32,6 @@ License along with this library; if not, see
 #include "clock_phase.h"
 
 //--------------------------------------------------
-// member functions for the BSR class
-//--------------------------------------------------
-//
-BSR::BSR(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu,pName,pDesc),
-    register_page_bits(0)
-{
-}
-
-void  BSR::put(unsigned int new_value)
-{
-  trace.raw(write_trace.get() | value.get());
-
-  value.put(new_value & 0x0f);
-  cpu_pic->register_bank = &cpu_pic->registers[ value.get() << 8 ];
-
-
-}
-
-void  BSR::put_value(unsigned int new_value)
-{
-  put(new_value);
-
-  update();
-  cpu16->indf->update();
-}
-
-
-//--------------------------------------------------
 // member functions for the FSR class
 //--------------------------------------------------
 //
@@ -319,7 +290,7 @@ void PLUSW::put_value(unsigned int new_value)
 
 //------------------------------------------------
 
-Indirect_Addressing::Indirect_Addressing(_16bit_processor *pCpu, const string &n)
+Indirect_Addressing::Indirect_Addressing(pic_processor *pCpu, const string &n)
   : fsrl(pCpu, (string("fsrl")+n).c_str(), "FSR Low", this),
     fsrh(pCpu, (string("fsrh")+n).c_str(), "FSR High", this),
     indf(pCpu, (string("indf")+n).c_str(), "Indirect Register", this),
@@ -648,75 +619,6 @@ unsigned int Program_Counter16::get_value()
   return value << 1;
 }
 
-//------------------------------------------------
-// TOSL
-TOSL::TOSL(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu,pName,pDesc)
-{}
-
-unsigned int TOSL::get()
-{
-  value.put(stack->get_tos() & 0xff);
-  trace.raw(read_trace.get() | value.get());
-  return(value.get());
-}
-
-unsigned int TOSL::get_value()
-{
-  value.put(stack->get_tos() & 0xff);
-  return(value.get());
-}
-
-void TOSL::put(unsigned int new_value)
-{
-  trace.raw(write_trace.get() | value.get());
-  stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
-}
-
-void TOSL::put_value(unsigned int new_value)
-{
-  stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
-  update();
-}
-
-
-//------------------------------------------------
-// TOSH
-TOSH::TOSH(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu,pName,pDesc)
-{}
-
-unsigned int TOSH::get()
-{
-  value.put((stack->get_tos() >> 8) & 0xff);
-  trace.raw(read_trace.get() | value.get());
-  return(value.get());
-
-}
-
-unsigned int TOSH::get_value()
-{
-
-  value.put((stack->get_tos() >> 8) & 0xff);
-  return(value.get());
-
-}
-
-void TOSH::put(unsigned int new_value)
-{
-  trace.raw(write_trace.get() | value.get());
-  stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
-}
-
-void TOSH::put_value(unsigned int new_value)
-{
-
-  stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
-
-  update();
-
-}
-
 
 //------------------------------------------------
 // TOSU
@@ -754,20 +656,26 @@ void TOSU::put_value(unsigned int new_value)
 
 //------------------------------------------------
 // STKPTR
-STKPTR::STKPTR(Processor *pCpu, const char *pName, const char *pDesc)
+STKPTR16::STKPTR16(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc)
 {}
-void STKPTR::put_value(unsigned int new_value)
+void STKPTR16::put_value(unsigned int new_value)
 {
+  stack->pointer = new_value & stack->stack_mask;
   value.put(new_value);
   update();
 }
 
+void STKPTR16::put(unsigned int new_value)
+{
+    trace.raw(write_trace.get() | value.get());
+    put_value(new_value);
+}
 
 //--------------------------------------------------
 //
-Stack16::Stack16(Processor *pCpu)
-  : stkptr(pCpu, "stkptr"),
+Stack16::Stack16(Processor *pCpu) : Stack(pCpu), 
+    stkptr(pCpu, "stkptr", "Stack pointer"),
     tosl(pCpu, "tosl", "Top of Stack low byte"),
     tosh(pCpu, "tosh", "Top of Stack high byte"),
     tosu(pCpu, "tosu", "Top of Stack upper byte")
@@ -777,66 +685,48 @@ Stack16::Stack16(Processor *pCpu)
   tosh.stack = this;
   tosu.stack = this;
 
-}
-
-void Stack16::push(unsigned int address)
-{
-
-  stkptr.value.put(1+stkptr.value.get());
-
-  if((stkptr.value.get() & Stack16_MASK) == 0)
-    {
-      // check the STVREN bit
-      // if(STVREN) {reset(stack_over_flow); return;}
-      stkptr.value.put( stkptr.value.get() | 0x9f);
-    }
-
-  // Push 21-bit address onto the stack
-
-  contents[stkptr.value.get() & Stack16_MASK] = address << 1;
-
-  stkptr.value.put(stkptr.value.get() & 0xdf);
+  STVREN = 1;
 
 }
 
-unsigned int Stack16::pop()
-{
-  if(stkptr.value.get() & Stack16_MASK)
-    {
-      // read 21-bit address from stack
-      unsigned int ret = (contents[stkptr.value.get() & Stack16_MASK]) >> 1;
-      stkptr.value.put(stkptr.value.get()-1);
-      stkptr.value.put(stkptr.value.get() & 0x5f);
-      return(ret);
 
-    }
-    // return(contents[ (--stkptr.value) & Stack16_MASK]);
-  else
-    {
-      // check the STVREN bit
-      // if(STVREN) {reset(stack_over_flow); return;}
-      stkptr.value.put(0x40); // don't decrement past 0, signalize STKUNF
-      return(0); // return 0 if underflow
-    }
+unsigned int Stack16::pop() 
+{ 
+    unsigned int ret = Stack::pop() >> 1;
+    stkptr.value.put(pointer);
+    return ret;
+}
+bool Stack16::push(unsigned int address) 
+{ 
+    bool ret =  Stack::push(address << 1);
+    stkptr.value.put(pointer);
+    return ret;
 }
 
 void Stack16::reset()
 {
-  stkptr.value.put( 0);
+  pointer = 0;
+  stkptr.value.put( pointer);
 }
-
-unsigned int Stack16::get_tos()
+bool Stack16::stack_underflow()
 {
-
-  return (contents[stkptr.value.get() & Stack16_MASK]);
-
+    stkptr.value.put(STKPTR::STKUNF); // don't decrement past 0, signalize STKUNF
+    if(STVREN)
+    {
+ 	cpu->reset(STKUNF_RESET);
+	return false;
+    }
+    return true;
 }
-
-void Stack16::put_tos(unsigned int new_tos)
+bool Stack16::stack_overflow()
 {
-
-  contents[stkptr.value.get() & Stack16_MASK] = new_tos;
-
+    stkptr.value.put( STKPTR::STKOVF);
+    if(STVREN)
+    {
+	cpu->reset(STKOVF_RESET);
+	return false;
+    }
+    return true;
 }
 
 //--------------------------------------------------

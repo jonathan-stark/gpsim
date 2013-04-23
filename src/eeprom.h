@@ -1,6 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
+		 2013 Roy Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -49,6 +50,9 @@ enum
  WREN  = (1<<2),
  WRERR = (1<<3),
  EEIF  = (1<<4),
+ FREE  = (1<<4),	// 14 bit Extended
+ LWLO  = (1<<5),	//    ""
+ CFGS  = (1<<6),	//    ""
  EEPGD = (1<<7)
 };
 
@@ -59,7 +63,7 @@ enum
   unsigned int get();
 
   inline void set_eeprom(EEPROM *ee) { eeprom = ee; }
-  inline void set_valid_bits(unsigned int vb) { valid_bits = valid_bits; }
+  inline void set_valid_bits(unsigned int vb) { valid_bits = vb; }
   inline unsigned int get_valid_bits() { return (valid_bits); }
   inline void set_bits(unsigned int b) { valid_bits |= b; }
   inline void clear_bits(unsigned int b) { valid_bits &= ~b; }
@@ -274,6 +278,29 @@ public:
 
   //protected:
   EEDATA eedatah;
+};
+
+class EEPROM_EXTND : public EEPROM_WIDE
+{
+public:
+  EEPROM_EXTND(Processor *pCpu, PIR *);
+  ~EEPROM_EXTND();
+
+  virtual void start_write();
+  virtual void callback();
+  virtual void callback_print(){ cout << " EEPROM_EXTND\n";}
+  void	initialize(unsigned int new_rom_size, int block_size, int num_latches, unsigned int cfg_word_base);
+  void	  set_prog_wp(unsigned int adr) { prog_wp = adr;}
+
+#define LATCH_MT 0x7fff
+
+protected:
+   int	erase_block_size;
+   int  num_write_latches;
+   unsigned int *write_latches;
+   unsigned int config_word_base;
+   unsigned int prog_wp;	// program memory below this address is write protected
+
 };
 
 
