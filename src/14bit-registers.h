@@ -337,7 +337,7 @@ public:
   virtual bool stack_overflow();
   virtual bool stack_underflow();
   virtual unsigned int pop();
-  virtual void reset() {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
+  virtual void reset(RESET_TYPE r) {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
   // because I'm not sure how the stack is affected by a reset.
   virtual bool set_break_on_overflow(bool clear_or_set);
   virtual bool set_break_on_underflow(bool clear_or_set);
@@ -404,7 +404,7 @@ public:
 
   Stack14E(Processor *);
 
-  virtual void reset();
+  virtual void reset(RESET_TYPE r);
   virtual unsigned int pop();
   virtual bool push(unsigned int address);
   virtual bool stack_overflow();

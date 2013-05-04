@@ -149,10 +149,20 @@ char *ADDULNK::name(char *return_str,int len)
 }
 void ADDULNK::execute()
 {
-  if (opcode & 0x100)
-    cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() - m_lit); // SUBULNK
+  if (cpu16->extended_instruction())
+  {
+      if (opcode & 0x100)
+    	cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() - m_lit); // SUBULNK
+      else
+    	cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() + m_lit); // ADDULNK
+  }
   else
-    cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() + m_lit); // ADDULNK
+  {
+      printf("Error %s extended instruction not supported, check XINST\n", 
+	(opcode&0x100)?"SUBULNK":"ADDULNK");
+      bp.halt();
+  }
+
   cpu16->pc->new_address(cpu16->stack->pop());
 }
 
@@ -197,20 +207,43 @@ char *ADDFSR16::name(char *return_str,int len)
 
 void ADDFSR16::execute()
 {
-  if (opcode & 0x100)
-    ia->put_fsr(ia->get_fsr_value() - m_lit);  //SUBFSR
+  if (cpu16->extended_instruction())
+  {
+      if (opcode & 0x100)
+    	ia->put_fsr(ia->get_fsr_value() - m_lit);  //SUBFSR
+      else
+    	ia->put_fsr(ia->get_fsr_value() + m_lit);  //ADDFSR
+  }
   else
-    ia->put_fsr(ia->get_fsr_value() + m_lit);  //ADDFSR
+  {
+      printf("Error %s extended instruction not supported, check XINST\n", 
+	(opcode&0x100)?"SUBFSR":"ADDFSR");
+      bp.halt();
+  }
+  
   cpu16->pc->increment();
 }
 
 //--------------------------------------------------
 void CALLW16::execute()
 {
-  if(cpu16->stack->push(cpu16->pc->get_next()))
+  if (cpu16->extended_instruction())
   {
-    cpu16->pcl->put(cpu16->W->get());
-    cpu16->pc->increment();
+      if(cpu16->stack->push(cpu16->pc->get_next()))
+      {
+    	cpu16->pcl->put(cpu16->W->get());
+    	cpu16->pc->increment();
+      }
+      else	// stack overflow reset
+      {
+          cpu16->pc->jump(0);
+      }
+  } 
+  else
+  {
+      printf("Error %s extended instruction not supported, check XINST\n", 
+	"CALLW");
+      bp.halt();
   }
 }
 
@@ -232,7 +265,16 @@ void PUSHL::execute()
 {
 //  cpu16->ind2.put(m_lit);
 //  cpu16->ind2.put_fsr(cpu16->ind2.get_fsr_value() -1);
-  cpu16->ind2.postdec.put(m_lit);
+  if (cpu16->extended_instruction())
+  {
+      cpu16->ind2.postdec.put(m_lit);
+  }
+  else
+  {
+      printf("Error %s extended instruction not supported, check XINST\n", 
+	"PUSHL");
+      bp.halt();
+  }
   cpu16->pc->increment();
 }
 
@@ -297,20 +339,29 @@ char *MOVSF::name(char *return_str,int len)
 
 void MOVSF::execute()
 {
-  if(!initialized)
-    runtime_initialize();
+  if (cpu16->extended_instruction())
+  {
+      if(!initialized)
+	runtime_initialize();
 
-  unsigned int source_addr = cpu16->ind2.plusk_fsr_value(source);
+      unsigned int source_addr = cpu16->ind2.plusk_fsr_value(source);
 
-  unsigned int r =  cpu_pic->registers[source_addr]->get();
-  cpu16->pc->skip();
+      unsigned int r =  cpu_pic->registers[source_addr]->get();
+      cpu16->pc->skip();
 
-  unsigned int destination_addr =
-    (opcode & 0x80) ? 
-    cpu16->ind2.plusk_fsr_value(destination)
-    :
-    destination;
-  cpu_pic->registers[destination_addr]->put(r);
+      unsigned int destination_addr =
+    	(opcode & 0x80) ? 
+    	  cpu16->ind2.plusk_fsr_value(destination)
+    	  :
+    	  destination;
+      cpu_pic->registers[destination_addr]->put(r);
+  }
+  else
+  {
+      printf("Error %s extended instruction not supported, check XINST\n", 
+	(opcode & 0x80)?"MOVSS":"MOVSF");
+      bp.halt();
+  }
 
   //cpu16->pc->increment();
 
@@ -335,10 +386,12 @@ void ADDWF16::execute()
 {
   unsigned int new_value,src_value,w_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (src_value = source->get()) + (w_value = cpu16->W->value.get());
 
@@ -365,10 +418,12 @@ void ADDWFC16::execute()
 {
   unsigned int new_value,src_value,w_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (src_value = source->get()) + 
     (w_value = cpu16->W->value.get()) +
@@ -408,10 +463,12 @@ void ANDWF16::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = source->get() & cpu16->W->value.get();
 
@@ -587,6 +644,85 @@ char * BRA16::name(char *return_str,int len)
   return(return_str);
 }
 
+//--------------------------------------------------
+void BSF16::execute()
+{
+
+
+  if (access)
+      reg = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      reg = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      reg = cpu_pic->registers[register_address];
+
+  reg->put(reg->get_value() | mask);    // Must not use reg->value.get() as it breaks indirects
+
+
+  cpu16->pc->increment();
+
+}
+
+//--------------------------------------------------
+void BCF16::execute()
+{
+
+
+  if (access)
+      reg = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      reg = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      reg = cpu_pic->registers[register_address];
+
+  reg->put(reg->get_value() & mask);    // Must not use reg->value.get() as it breaks indirects
+
+
+  cpu16->pc->increment();
+
+}
+
+//--------------------------------------------------
+void BTFSC16::execute()
+{
+
+
+  if (access)
+      reg = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      reg = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      reg = cpu_pic->registers[register_address];
+
+
+  unsigned int result = mask & reg->get();
+
+  if(!result)
+    cpu_pic->pc->skip();                  // Skip next instruction
+  else
+    cpu_pic->pc->increment();
+}
+
+//--------------------------------------------------
+void BTFSS16::execute()
+{
+
+
+  if (access)
+      reg = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      reg = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      reg = cpu_pic->registers[register_address];
+
+
+  unsigned int result = mask & reg->get();
+
+  if(result)
+    cpu_pic->pc->skip();                  // Skip next instruction
+  else
+    cpu_pic->pc->increment();
+}
 
 //--------------------------------------------------
 
@@ -599,10 +735,12 @@ BTG::BTG (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void BTG::execute()
 {
-  if(!access)
-    reg = cpu_pic->registers[register_address];
+  if (access)
+      reg = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      reg = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
   else
-    reg = cpu_pic->register_bank[register_address];
+      reg = cpu_pic->registers[register_address];
 
   reg->put(reg->get() ^ mask);
 
@@ -654,6 +792,8 @@ void CALL16::execute()
 
     cpu16->pc->jump(destination_index);
   }
+  else	// stack overflow reset
+    cpu16->pc->jump(0);
 
 }
 
@@ -675,10 +815,12 @@ void COMF16::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = source->get() ^ 0xff;
 
@@ -706,10 +848,12 @@ CPFSEQ::CPFSEQ (Processor *new_cpu, unsigned int new_opcode, unsigned int addres
 
 void CPFSEQ::execute()
 {
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   if(source->get() == cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
@@ -729,10 +873,12 @@ CPFSGT::CPFSGT (Processor *new_cpu, unsigned int new_opcode, unsigned int addres
 
 void CPFSGT::execute()
 {
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   if(source->get() > cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
@@ -752,10 +898,12 @@ CPFSLT::CPFSLT (Processor *new_cpu, unsigned int new_opcode, unsigned int addres
 
 void CPFSLT::execute()
 {
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   if(source->get() < cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
@@ -764,6 +912,21 @@ void CPFSLT::execute()
 
 }
 
+void CLRF16::execute()
+{
+
+  if (access)
+      cpu_pic->register_bank[register_address]->put(0);
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      cpu_pic->registers[register_address + cpu16->ind2.fsr_value]->put(0);
+  else
+      cpu_pic->registers[register_address]->put(0);
+
+  cpu16->status->put_Z(1);
+
+  cpu16->pc->increment();
+
+}
 //--------------------------------------------------
 
 DAW::DAW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
@@ -799,10 +962,12 @@ void DAW::execute()
 void DECF16::execute()
 {
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   unsigned int src_value = source->get();
   unsigned int new_value = src_value - 1;
@@ -825,10 +990,12 @@ void DECFSZ16::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (source->get() - 1)&0xff;
 
@@ -857,10 +1024,12 @@ void DCFSNZ::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (source->get() - 1)&0xff;
 
@@ -903,10 +1072,12 @@ void INCF16::execute()
   unsigned int new_value, src_value;
 
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   src_value = source->get();
   new_value = (src_value + 1);
@@ -932,10 +1103,12 @@ void INCFSZ16::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (source->get() + 1)&0xff;
 
@@ -964,10 +1137,12 @@ void INFSNZ::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (source->get() + 1)&0xff;
 
@@ -1004,10 +1179,12 @@ void IORWF16::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = source->get() | cpu16->W->value.get();
 
@@ -1148,10 +1325,12 @@ void MOVF16::execute()
 {
   unsigned int source_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   source_value = source->get();
 
@@ -1402,18 +1581,23 @@ void MOVPF::execute()
 MOVWF16::MOVWF16(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : MOVWF(new_cpu,new_opcode, address)
 {
-  register_address = new_opcode & 0xff;
 }
 
 void MOVWF16::execute()
 {
-  source = cpu_pic->register_bank[register_address];
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   source->put(cpu16->W->get());
 
   cpu16->pc->increment();
 }
 
+#ifdef RRR
 //--------------------------------------------------
 MOVWF16a::MOVWF16a(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : MOVWF(new_cpu,new_opcode, address)
@@ -1431,6 +1615,7 @@ void MOVWF16a::execute()
 
   cpu16->pc->increment();
 }
+#endif //RRR
 
 //--------------------------------------------------
 
@@ -1471,10 +1656,12 @@ void MULWF::execute()
 {
   unsigned int value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   //It's not necessary to '&' the get()'s with 0xff, but it doesn't
   //hurt either. 
@@ -1500,10 +1687,12 @@ void NEGF::execute()
 {
   unsigned int new_value,src_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   src_value = source->get();
   new_value = 1 + ~src_value;        // two's complement
@@ -1565,9 +1754,10 @@ PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 void PUSH::execute()
 {
 
-  cpu16->stack->push(cpu16->pc->get_next());
-
-  cpu16->pc->increment();
+  if (cpu16->stack->push(cpu16->pc->get_next()))
+      cpu16->pc->increment();
+  else	// stack overflow reset
+      cpu16->pc->jump(0);
 
 }
 
@@ -1589,6 +1779,8 @@ void RCALL::execute()
 {
   if(cpu16->stack->push(cpu16->pc->get_next()))
       cpu16->pc->jump(absolute_destination_index);
+  else	// stack overflow reset
+      cpu16->pc->jump(0);
 
 }
 
@@ -1661,10 +1853,12 @@ void RLCF::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (source->get() << 1) | cpu16->status->get_C();
 
@@ -1693,10 +1887,12 @@ void RLNCF::execute()
 {
   unsigned int new_value,src_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   src_value = source->get();
   new_value = (src_value << 1) | ( (src_value & 0x80) ? 1 : 0);
@@ -1727,10 +1923,12 @@ void RRCF::execute()
 {
   unsigned int new_value,src_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   src_value = source->get() & 0xff;
   new_value = (src_value >> 1) | (cpu16->status->get_C() ? 0x80 : 0);
@@ -1760,10 +1958,12 @@ void RRNCF::execute()
 {
   unsigned int new_value,src_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   src_value = source->get() & 0xff;
   new_value = (src_value >> 1) | ( (src_value & 1) ? 0x80 : 0);
@@ -1791,10 +1991,13 @@ SETF::SETF (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void SETF::execute()
 {
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
 
   source->put(0xff);
@@ -1840,10 +2043,12 @@ void SUBFWB::execute()
 {
   unsigned int new_value,src_value,w_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (w_value = cpu16->W->value.get()) - (src_value = source->get()) -
     (1 - cpu16->status->get_C());
@@ -1866,10 +2071,12 @@ void SUBWF16::execute()
 {
   unsigned int new_value,src_value,w_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (src_value = source->get()) - (w_value = cpu16->W->value.get());
 
@@ -1890,10 +2097,12 @@ void SUBWFB16::execute()
 {
   unsigned int new_value,src_value,w_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = (src_value = source->get()) - (w_value = cpu16->W->value.get()) -
     (1 - cpu16->status->get_C());
@@ -1904,6 +2113,33 @@ void SUBWFB16::execute()
     cpu16->W->put(new_value & 0xff);
 
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, src_value, w_value);
+
+  cpu16->pc->increment();
+
+}
+
+
+//--------------------------------------------------
+
+void SWAPF16::execute()
+{
+  unsigned int src_value;
+
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
+
+  src_value = source->get();
+
+  if(destination)
+    source->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
+  else
+    cpu_pic->W->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
+
+
 
   cpu16->pc->increment();
 
@@ -2081,10 +2317,12 @@ TSTFSZ::TSTFSZ (Processor *new_cpu, unsigned int new_opcode, unsigned int addres
 void TSTFSZ::execute()
 {
 
-  if(!access)
-    source = cpu_pic->registers[register_address];
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
   else
-    source = cpu_pic->register_bank[register_address];
+      source = cpu_pic->registers[register_address];
 
   if( 0 == (source->get() & 0xff) )
     cpu16->pc->skip();                  // Skip next instruction
@@ -2113,10 +2351,12 @@ void XORWF16::execute()
 {
   unsigned int new_value;
 
-  source = ((!access) ?
-	    cpu_pic->registers[register_address] 
-	    :
-	    cpu_pic->register_bank[register_address] );
+  if (access)
+      source = cpu_pic->register_bank[register_address];
+  else if (cpu16->extended_instruction() && register_address < 0x60)
+      source = cpu_pic->registers[register_address + cpu16->ind2.fsr_value];
+  else
+      source = cpu_pic->registers[register_address];
 
   new_value = source->get() ^ cpu16->W->value.get();
 

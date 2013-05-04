@@ -1,3 +1,14 @@
+2013-05-04 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_profile.cc: compiler warning cleanup
+	* regression/p18f/extended_instructions.asm src/16bit-hexdecode.cc 
+	  src/16bit-instructions.cc src/16bit-instructions.h
+       	  src/16bit-processors.cc src/16bit-processors.h
+	  src/p18x.cc:
+	- fix "Data addressing wrong (PIC18 w/ extended instruction mode)" - #139
+	* src/16bit-registers.cc src/16bit-registers.h regression/p18f/reset.asm
+	  src/14bit-registers.cc src/14bit-registers.h src/pic-processor.cc:
+	- 18F stack reset on over/under flow - bug #154
+
 2013-04-23 Roy Rankin <rrankin@ihug.com.au>
 	* 14bit-hexdecode.cc 14bit-instructions.cc 14bit-instructions.h
 	  14bit-processors.cc 14bit-processors.h 14bit-registers.cc

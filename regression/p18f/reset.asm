@@ -30,6 +30,7 @@ status_temp RES 1
 temp1 RES 1
 
   GLOBAL optionShadow, ResetSequence
+  GLOBAL temp1
 
 
     ; Define the reset conditions to be checked.
@@ -39,6 +40,8 @@ eRSTSequence_AwakeMCLR		equ	2
 eRSTSequence_AwakeWDT		equ	3
 eRSTSequence_AwakeIO		equ	4
 eRSTSequence_WDTTimeOut		equ	5
+eRSTSequence_STKUNF		equ	6
+eRSTSequence_STKFUL		equ	7
 
 ;----------------------------------------------------------------------
 ;   ********************* STARTUP LOCATION  ***************************
@@ -217,6 +220,12 @@ start
 	 goto   AwakeMCLR	;/TO=1, /PD=0 ==> /MCLR while sleeping
                                 ;            -or- Interrupt wake-up from sleep
 
+        btfsc   STKPTR,STKUNF   ; Stack undeflow has occured
+	goto	stack_underflow
+
+        btfsc   STKPTR,STKFUL   ; Stack overflow has occured
+	goto	stack_overflow
+
 	goto	PowerOnReset	;/TO=1, /PD=1 ==> Power has just been applied
 
 TO_is_low
@@ -241,7 +250,7 @@ PowerOnReset:
         movf    ResetSequence,W
         XORLW   eRSTSequence_AwakeMCLR
         skpnz
-         goto   done
+        goto   to_underflow
 
         movf    PORTB,W         ;Clear RBIF
   .assert "(intcon&1)==0, \"*** FAILED to clear INTCON\""
@@ -366,10 +375,34 @@ AwakeMCLR:
 waitForMCLR:    goto waitForMCLR
 
 
+
+
+
+stack_underflow:
+  .assert "resetCounter==6,\"*** FAILED Stack undeflow Reset\""
+	nop
+  .command "resetCounter = resetCounter+1"
+	CLRWDT
+	bcf     STKPTR,STKUNF
+	clrf	temp1
+	call	full
+
+full:
+	incf	temp1,F
+	call full
+	return		; never gets executed
+	nop
+
+stack_overflow:
+  .assert "resetCounter==7,\"*** FAILED Stack overflow Reset\""
+	nop
+  .assert "temp1==31, \"*** FAILED Stack overflow size\""
+	nop
   .assert  "\"*** PASSED 18f4321 Sleep and Reset test\""
+	nop
+	nop
 
-done:
-	goto	done
-
+to_underflow:
+	return	; RRR stack undeflow
 	
 	end

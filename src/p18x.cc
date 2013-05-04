@@ -61,7 +61,6 @@ public:
     int diff = (i64 ^ v) &0xfff;
     Integer::set(v);
 
-    printf ( "Config3H_2x21::set ( 0x%02X )\n", (int)v );
     if (m_pCpu)
     {
       P18F2x21 *pCpu21 = (P18F2x21*)m_pCpu;
@@ -1957,7 +1956,6 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
   usart.set_eusart(true);
 }
-
 
 
 //------------------------------------------------------------------------

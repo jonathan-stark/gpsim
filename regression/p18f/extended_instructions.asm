@@ -10,6 +10,8 @@
 
 	radix dec
 
+ 	CONFIG   XINST=ON
+
 ;----------------------------------------------------------------------
 ;----------------------------------------------------------------------
 GPR_DATA                UDATA
@@ -25,6 +27,7 @@ dataStackEnd    RES     1
   GLOBAL done
   GLOBAL temp1
   GLOBAL dataStack
+  GLOBAL dataStackEnd
 
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
@@ -50,7 +53,7 @@ start:
                                 ;
 	lfsr    0,0
 	lfsr    1,0
-	lfsr    2,0
+	lfsr    2,0x1ff
 	clrf	BSR
 
 	addfsr	0,15
@@ -59,8 +62,8 @@ start:
 	addfsr	1,15
    .assert "(fsr1l==15) && (fsr1h==0)"
 	nop
-	addfsr	2,15
-   .assert "(fsr2l==15) && (fsr2h==0)"
+	addfsr	2,15	; 0x1ff + 15 = 0x20e
+   .assert "(fsr2l==0x0e) && (fsr2h==2)"
 	nop
 
 
@@ -70,9 +73,111 @@ start:
 	subfsr	1,10
    .assert "(fsr1l==5) && (fsr1h==0)"
 	nop
-	subfsr	2,10
-   .assert "(fsr2l==5) && (fsr2h==0)"
+	subfsr	2,15	; 0x20e - 15 = 0x1ff
+   .assert "(fsr2l==0xff) && (fsr2h==1)"
 	nop
+
+	lfsr    2,0x80
+	movlw	0x10
+	movwf	temp1
+	addwf   [1],W
+   .assert "W == 0x20"
+	nop
+	addwfc [1],W
+	bsf	[1],0
+   .assert "temp1 == 0x11"
+	nop
+	clrf	[1]
+   .assert "temp1==0"
+	nop
+	setf	[1]
+   .assert "temp1 == 0xff"
+	nop
+
+  	call 	test_addulnk
+    .assert "(fsr2l==0x81) && (fsr2h==0)"
+	nop
+	movlw	0xf0
+	andwf	[0],W
+    .assert "W==0xf0"
+	nop
+	bcf	[0],0
+    .assert "temp1==0xfe"
+	nop
+	btfsc	[0],0
+	goto	failed
+	btfss	[0],1
+	goto	failed
+	btg	[0],0
+    .assert "temp1==0xff"
+	nop
+	comf	[0],F
+    .assert "temp1==0x00"
+	nop
+	movlw	0
+	cpfseq  [0]
+	goto	failed
+	nop
+	decf	[0],F
+    .assert "temp1==0xff"
+	nop
+	cpfsgt	[0]
+	goto	failed
+	cpfslt	[0]
+	goto	$+8
+	goto	failed
+	decfsz	[0],W
+	goto	$+8
+	goto	failed
+	dcfsnz	[0],W
+	goto	failed
+	incfsz	[0],F
+	goto	failed
+	infsnz	[0],F
+	goto	failed
+	iorwf	[0],W
+    .assert "W==0xff"
+	nop
+	movf	[0],W
+    .assert "W==0x01"
+	nop
+	movlw	2
+	movwf	[0]
+	mulwf	[0]
+    .assert "(prodl==4) && (prodh==0)"
+	nop
+	negf	[0]
+    .assert "temp1==0xfe"
+	nop
+	rlcf	[0],W
+    .assert "W==0xfc"
+	nop
+	rlncf	[0],W
+    .assert "W==0xfd"
+	nop
+	rrcf	[0],W
+    .assert "W==0xff"
+	nop
+	rrncf	[0],W
+    .assert "W==0x7f"
+	nop
+	subfwb	[0],W
+    .assert "W==0x80"
+	nop
+	subwfb	[0],W
+    .assert "W==0x7d"
+	nop
+	swapf	[0],F
+    .assert "temp1==0xef"
+	nop
+	tstfsz	[0]
+	goto	$+8
+	goto	failed
+	xorwf	[0],W
+    .assert "W==0x92"
+	nop
+	
+	
 
    ;; Also test that addfsr followed immediately by and INDF access works
         clrf    dataStackEnd
@@ -94,7 +199,6 @@ start:
 	clrf	PCLATU
 	clrf	PCLATH
 	movlw	5
-   .assert "temp1==0"
 	movwf	temp1		;temp1 is used as the index into 
 	nop			;function vector table.
 
@@ -143,10 +247,12 @@ callw_loop:
 
 	movsf	[1],WREG
    .assert "W == 0x05"
+	nop
 
 	movss	[1],[3]
 
    .assert "(*(fsr2l+1))==(*(fsr2l+3))"
+	nop
         bra     done
 
 ;------------------------------------------------------------
@@ -185,6 +291,8 @@ failed:
   .assert  "\"*** FAILED 16bit-core extended instruction test\""
         bra     done
 
+test_addulnk:
+	addulnk 1	; should do return
 
 
         end

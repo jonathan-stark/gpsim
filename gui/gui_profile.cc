@@ -1798,7 +1798,7 @@ float calculate_stddev(GList *start, GList *stop, float average)
     float variance;
     int count=0;
     float sum=0;
-    struct cycle_histogram_counter *chc_start, *chc_stop;
+    struct cycle_histogram_counter *chc_start;
 
     if(start==stop)
         return 0.0;
@@ -1815,7 +1815,6 @@ float calculate_stddev(GList *start, GList *stop, float average)
         float diff, diff2;
 
         chc_start=(struct cycle_histogram_counter*)start->data;
-        chc_stop=(struct cycle_histogram_counter*)stop->data;
 
         diff=chc_start->histo_cycles-average;
 
@@ -2377,7 +2376,6 @@ void Profile_Window::Build(void)
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
 
-  gint column_width,char_width;
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
                      GTK_SIGNAL_FUNC(delete_event), this);
@@ -2525,12 +2523,6 @@ void Profile_Window::Build(void)
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   normal_style = gtk_style_new ();
-#if GTK_MAJOR_VERSION >= 2
-  char_width = gdk_string_width(gtk_style_get_font(normal_style) ,"9");
-#else
-  char_width = gdk_string_width (normal_style->font,"9");
-#endif
-  column_width = 3 * char_width + 6;
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
                            GTK_SIGNAL_FUNC(gui_object_configure_event),this);
