@@ -41,20 +41,20 @@ License along with this library; if not, see
 
 
 struct instruction_constructor op_18cxx[] = {
-
-  { 0xfe00,  0xe800,  ADDFSR16::construct },
+  // Extended Instructions
+  { 0xfe00,  0xe800,  ADDFSR16::construct }, // ADDFSR & SUBFSR, ADDULNK, SUBULNK
   { 0xffff,  0x0014,  CALLW16::construct },
-  { 0xff00,  0xeb00,  MOVSF::construct },
+  { 0xff00,  0xeb00,  MOVSF::construct },  // MOVSF & MOVSS
   { 0xff00,  0xea00,  PUSHL::construct },
-  { 0xff00,  0xeb00,  MOVSF::construct },
 
+  // Normal instructions
   { 0xff00,  0x0f00,  ADDLW16::construct },
   { 0xfc00,  0x2400,  ADDWF16::construct },
   { 0xfc00,  0x2000,  ADDWFC16::construct },
   { 0xff00,  0x0b00,  ANDLW16::construct },
   { 0xfc00,  0x1400,  ANDWF16::construct },
   { 0xff00,  0xe200,  BC::construct },
-  { 0xf000,  0x9000,  BCF::construct },
+  { 0xf000,  0x9000,  BCF16::construct },
   { 0xff00,  0xe600,  BN::construct },
   { 0xff00,  0xe300,  BNC::construct },
   { 0xff00,  0xe700,  BNN::construct },
@@ -62,13 +62,13 @@ struct instruction_constructor op_18cxx[] = {
   { 0xff00,  0xe100,  BNZ::construct },
   { 0xff00,  0xe400,  BOV::construct },
   { 0xf800,  0xd000,  BRA16::construct },
-  { 0xf000,  0x8000,  BSF::construct },
-  { 0xf000,  0xb000,  BTFSC::construct },
-  { 0xf000,  0xa000,  BTFSS::construct },
+  { 0xf000,  0x8000,  BSF16::construct },
+  { 0xf000,  0xb000,  BTFSC16::construct },
+  { 0xf000,  0xa000,  BTFSS16::construct },
   { 0xf000,  0x7000,  BTG::construct },
   { 0xff00,  0xe000,  BZ::construct },
   { 0xfe00,  0xec00,  CALL16::construct },
-  { 0xfe00,  0x6a00,  CLRF::construct },
+  { 0xfe00,  0x6a00,  CLRF16::construct },
   { 0xffff,  0x0004,  CLRWDT::construct },
   { 0xfc00,  0x1c00,  COMF16::construct },
   { 0xfe00,  0x6200,  CPFSEQ::construct },
@@ -89,8 +89,9 @@ struct instruction_constructor op_18cxx[] = {
   { 0xf000,  0xc000,  MOVFF::construct },
   { 0xff00,  0x0100,  MOVLB16::construct },
   { 0xff00,  0x0e00,  MOVLW::construct },
-  { 0xff00,  0x6f00,  MOVWF16::construct },
-  { 0xff00,  0x6e00,  MOVWF16a::construct },
+  { 0xfe00,  0x6e00,  MOVWF16::construct },
+ //RRR { 0xff00,  0x6f00,  MOVWF16::construct },
+ //RRR { 0xff00,  0x6e00,  MOVWF16a::construct },
   { 0xff00,  0x0d00,  MULLW::construct },
   { 0xfe00,  0x0200,  MULWF::construct },
   { 0xfe00,  0x6c00,  NEGF::construct },
@@ -113,7 +114,7 @@ struct instruction_constructor op_18cxx[] = {
   { 0xff00,  0x0800,  SUBLW16::construct },
   { 0xfc00,  0x5c00,  SUBWF16::construct },
   { 0xfc00,  0x5800,  SUBWFB16::construct },
-  { 0xfc00,  0x3800,  SWAPF::construct },
+  { 0xfc00,  0x3800,  SWAPF16::construct },
   { 0xfffc,  0x0008,  TBLRD::construct },
   { 0xfffc,  0x000c,  TBLWT::construct },
   { 0xfe00,  0x6600,  TSTFSZ::construct },
@@ -194,7 +195,7 @@ instruction * disasm16 (pic_processor *cpu, unsigned int address, unsigned int i
   cpu16->setCurrentDisasmAddress(address);
 
   pi = 0;
-  for(int i =0; i<NUM_OP_18CXX; i++)
+  for(int i =0; i<NUM_OP_18CXX && !pi; i++)
     if((op_18cxx[i].inst_mask & inst) == op_18cxx[i].opcode)
       pi = op_18cxx[i].inst_constructor(cpu, inst,address);
 

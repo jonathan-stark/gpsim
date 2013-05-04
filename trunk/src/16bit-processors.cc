@@ -155,6 +155,57 @@ public:
   }
 };
 
+//------------------------------------------------------------------------
+// Config4L - default 
+//  The default Config4L register controls the 18F series WDT. 
+class Config4L : public ConfigWord 
+{
+#define STKVREN  (1<<0)
+#define LVP	(1<<2)
+#define BBSIZ0	(1<<4)
+#define BBSIZ1	(1<<5)
+#define XINST	(1<<6)
+#define _DEBUG	(1<<7)
+
+#define CONFIG4L_default (STKVREN | LVP | _DEBUG)
+public:
+  Config4L(_16bit_processor *pCpu, unsigned int addr)
+    : ConfigWord("CONFIG4L", CONFIG4L_default, "Config word 4L", pCpu, addr)
+  {
+	set(CONFIG4L_default);
+  }
+#define Cpu16 ((_16bit_processor *)m_pCpu)
+  virtual void set(gint64 v)
+  {
+    Integer::set(v);
+    if (m_pCpu)
+    {
+	Cpu16->set_extended_instruction((v & XINST) == XINST);
+    	if(m_pCpu->stack)
+	    m_pCpu->stack->STVREN = ((v & STKVREN) == STKVREN);
+    }
+
+  }
+
+  virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+
+    snprintf(buff,sizeof(buff),
+             "$%04x\n"
+             " STVREN=%d - BBSIZE=%x XINST=%d\n",
+             i,
+             (i&STKVREN?1:0), (i & (BBSIZ1 | BBSIZ0))>>4,
+	     (i&XINST?1:0));
+
+    return string(buff);
+  }
+};
+
 
 
 #define PWRTEN  1<<0
@@ -164,7 +215,6 @@ public:
 
 #define CCP2MX  1<<0
 
-#define STVREN  1<<0
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   : pic_processor(_name,desc),
@@ -615,6 +665,18 @@ void _16bit_processor::exit_sleep()
   }
 }
 
+//------------------------------------------------------------------
+// It is assummed that this will only be set to true for processors
+// that support extended instructions
+//
+void _16bit_processor::set_extended_instruction(bool v)
+{
+    if (verbose)
+	cout << "_16bit_processor::set_extended_instruction " << v <<"\n";
+
+   extended_instruction_flag = v;
+}
+
 //-------------------------------------------------------------------
 // Fetch the rom contents at a particular address.
 unsigned int _16bit_processor::get_program_memory_at_address(unsigned int address)
@@ -671,7 +733,8 @@ bool  _16bit_processor::set_config_word(unsigned int address, unsigned int cfg_w
 {
   if (address >= CONFIG1L && address <= 0x30000D) {
 
-    cout << "Setting config word 0x"<<hex<<address<< " = 0x"<<cfg_word<< endl;
+    if (verbose)
+        cout << "Setting config word 0x"<<hex<<address<< " = 0x"<<cfg_word<< endl;
     address -= CONFIG1L;
 
     if (m_configMemory) {
@@ -701,6 +764,7 @@ void _16bit_processor::create_config_memory()
   m_configMemory = new ConfigMemory(this,configMemorySize());
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H(this, CONFIG1H));
   m_configMemory->addConfigWord(CONFIG2H-CONFIG1L,new Config2H(this, CONFIG2H));
+  m_configMemory->addConfigWord(CONFIG4L-CONFIG1L,new Config4L(this, CONFIG4L));
 }
 
 

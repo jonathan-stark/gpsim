@@ -312,36 +312,6 @@ public:
   void put(unsigned int new_value);
 };
 
-#ifdef RRR
-
-class TOSL : public sfr_register
-{
-public:
-  TOSL(Processor *, const char *pName, const char *pDesc=0);
-
-  Stack16 *stack;
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-      
-};
-
-class TOSH : public sfr_register
-{
-public:
-  TOSH(Processor *, const char *pName, const char *pDesc=0);
-
-  Stack16 *stack;
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-      
-};
-#endif //RRR
 
 class TOSU : public sfr_register
 {
@@ -369,7 +339,7 @@ public:
   Stack16(Processor *);
   virtual bool push(unsigned int);
   virtual unsigned int pop();
-  virtual void reset();
+  virtual void reset(RESET_TYPE);
   virtual bool stack_overflow();
   virtual bool stack_underflow();
 

@@ -589,7 +589,8 @@ void Program_Counter16::computed_goto(unsigned int new_address)
 
 void Program_Counter16::put_value(unsigned int new_value)
 {
-  cout << "Program_Counter16::put_value 0x" << hex << new_value << '\n';
+  if (verbose)
+      cout << "Program_Counter16::put_value 0x" << hex << new_value << '\n';
 
   trace.raw(trace_other | (value<<1));
 
@@ -685,28 +686,47 @@ Stack16::Stack16(Processor *pCpu) : Stack(pCpu),
   tosh.stack = this;
   tosu.stack = this;
 
-  STVREN = 1;
-
 }
 
 
+// pop of empty stack sets undeflow and returns 0
 unsigned int Stack16::pop() 
 { 
-    unsigned int ret = Stack::pop() >> 1;
-    stkptr.value.put(pointer);
-    return ret;
+    if(pointer <= 0)
+    {
+	pointer = 0;
+	stack_underflow();
+	return(0);
+    }
+    --pointer;
+    unsigned int stkptr_status = stkptr.value.get() & ~stack_mask;
+    stkptr.value.put((pointer & stack_mask) | stkptr_status);
+    return(contents[pointer & stack_mask] >> 1);
 }
+// When stack is full last(top) entry is overwritten
 bool Stack16::push(unsigned int address) 
 { 
-    bool ret =  Stack::push(address << 1);
-    stkptr.value.put(pointer);
-    return ret;
+    contents[pointer & stack_mask] = address << 1;
+    if(pointer >= (int)stack_mask)
+    {
+	pointer = stack_mask;
+	return stack_overflow();
+    }
+    pointer++;
+    stkptr.value.put((pointer & stack_mask) | (stkptr.value.get() & ~stack_mask));
+    return true;
 }
 
-void Stack16::reset()
+void Stack16::reset(RESET_TYPE r)
 {
+  unsigned int reg_value;
+
+  if (r != POR_RESET && r != BOD_RESET)
+	reg_value = stkptr.value.get() & ~stack_mask;
+  else
+	reg_value = 0;
   pointer = 0;
-  stkptr.value.put( pointer);
+  stkptr.value.put( reg_value);
 }
 bool Stack16::stack_underflow()
 {
@@ -716,16 +736,18 @@ bool Stack16::stack_underflow()
  	cpu->reset(STKUNF_RESET);
 	return false;
     }
+    cout <<"Stack undeflow\n";
     return true;
 }
 bool Stack16::stack_overflow()
 {
-    stkptr.value.put( STKPTR::STKOVF);
+    stkptr.value.put( STKPTR::STKOVF | (pointer & stack_mask));
     if(STVREN)
     {
 	cpu->reset(STKOVF_RESET);
 	return false;
     }
+    cout << "Stack overflow\n";
     return true;
 }
 

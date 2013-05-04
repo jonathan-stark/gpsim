@@ -1031,7 +1031,7 @@ Stack14E::Stack14E(Processor *pCpu) : Stack(pCpu),
   STVREN = 1;
 }
 
-void Stack14E::reset()
+void Stack14E::reset(RESET_TYPE r)
 {
     pointer = NO_ENTRY;
     if (STVREN)

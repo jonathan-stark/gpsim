@@ -340,6 +340,58 @@ public:
 };
 
 //---------------------------------------------------------
+class BSF16 : public BSF
+{
+public:
+  int i;
+
+  BSF16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) 
+    : BSF(new_cpu,new_opcode,address){};
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  {return new BSF16(new_cpu,new_opcode,address);}
+};
+
+//---------------------------------------------------------
+class BCF16 : public BCF
+{
+public:
+  int i;
+
+  BCF16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) 
+    : BCF(new_cpu,new_opcode,address){};
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  {return new BCF16(new_cpu,new_opcode,address);}
+};
+
+//---------------------------------------------------------
+class BTFSC16 : public BTFSC
+{
+public:
+  int i;
+
+  BTFSC16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) 
+    : BTFSC(new_cpu,new_opcode,address){};
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  {return new BTFSC16(new_cpu,new_opcode,address);}
+};
+
+//-----------------------------------------------------------
+class BTFSS16 : public BTFSS
+{
+public:
+  int i;
+
+  BTFSS16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) 
+    : BTFSS(new_cpu,new_opcode,address){};
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  {return new BTFSS16(new_cpu,new_opcode,address);}
+};
+
+//---------------------------------------------------------
 class BTG : public Bit_op
 {
 public:
@@ -378,6 +430,18 @@ public:
 
 };
 
+
+//-----------------------------------------------------------
+class CLRF16 : public CLRF
+{
+public:
+
+  CLRF16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) 
+    : CLRF(new_cpu,new_opcode,address){};
+  virtual void execute();
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  {return new CLRF16(new_cpu,new_opcode,address);}
+};
 
 //---------------------------------------------------------
 class COMF16 : public COMF
@@ -686,6 +750,7 @@ public:
 
 //---------------------------------------------------------
 
+#ifdef RRR
 class MOVWF16a : public MOVWF
 {
 public:
@@ -698,6 +763,7 @@ public:
 
 };
 
+#endif //RRR
 //---------------------------------------------------------
 
 class MULLW : public Literal_op
@@ -965,6 +1031,20 @@ public:
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   {return new SUBWFB16(new_cpu,new_opcode,address);}
+
+};
+
+//---------------------------------------------------------
+class SWAPF16 : public SWAPF
+{
+public:
+
+  SWAPF16(Processor *new_cpu, unsigned int new_opcode, unsigned int address) :
+      SWAPF(new_cpu,new_opcode,address) { };
+  virtual void execute();
+
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
+  {return new SWAPF16(new_cpu,new_opcode,address);}
 
 };
 

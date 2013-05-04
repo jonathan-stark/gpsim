@@ -136,6 +136,7 @@ public:
   SSP_MODULE           ssp;
 
 
+
   // Some configuration stuff for stripping down where needed
   virtual bool HasPortC(void) { return true; };
   virtual bool HasCCP2(void) { return true; };
@@ -189,6 +190,8 @@ public:
   virtual void enter_sleep();
   virtual void exit_sleep();
   virtual void osc_mode(unsigned int );
+  virtual void set_extended_instruction(bool);
+  virtual bool extended_instruction() {return extended_instruction_flag;}
 
 
 
@@ -203,6 +206,7 @@ protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
 
   unsigned int idloc[4];    ///< ID locations - not all 16-bit CPUs have 8 bytes
+  bool	extended_instruction_flag;	// Instruction set extension and Indexed Addressing 
 };
 
 class _16bit_compat_adc : public _16bit_processor 

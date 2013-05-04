@@ -968,7 +968,7 @@ void pic_processor::reset (RESET_TYPE r)
   m_pResetTT->record(r);
 
   rma.reset(r);
-  stack->reset();
+  stack->reset(r);
   wdt.reset(r);
   pc->reset();
 
