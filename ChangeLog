@@ -1,3 +1,15 @@
+2013-05-17 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac extras/Makefile.am extras/ds1820/Makefile.am
+	  extras/ds1820/bit1w.cc extras/ds1820/bit1w.h
+	  extras/ds1820/ds1820.cc extras/ds1820/ds1820.h
+	  extras/ds1820/makefile.mingw extras/ds1820/module_manager.cc
+	  extras/ds1820/rom1w.cc extras/ds1820/rom1w.h
+	  extras/ds1820/examples/16f1823_g.lkr extras/ds1820/examples/Makefile
+	  extras/ds1820/examples/README extras/ds1820/examples/ds1820.asm
+	  extras/ds1820/examples/ds18b20.asm: Add module for ds1820, ds18s20
+	  and ds18b20 temperature sensors
+	* extras/ds1307/examples/README: fix typo
+
 2013-05-04 Borut Razem <borut.razem@gmail.com>
 	* src/makefile.mingw: added p12f182x.o
 
