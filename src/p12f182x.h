@@ -29,12 +29,16 @@ public:
   CCPCON  ccp1con;
   CCPRL   ccpr1l;
   CCPRH   ccpr1h;
-  ANSEL   ansela;
-  ADCON0_12F adcon0;
+  FVRCON  fvrcon;
+  BORCON  borcon;
+  ANSEL_P ansela;
+  ADCON0  adcon0;
   ADCON1_16F adcon1;
   sfr_register  adresh;
   sfr_register  adresl;
-  OSCCAL  osccal;
+  OSCCON  osccon;
+  OSCTUNE osctune;
+  WDTCON  wdtcon;
   EEPROM_EXTND *e;
 
 
@@ -65,8 +69,6 @@ public:
   virtual unsigned int register_memory_size () const { return 0x1000; }
   virtual void option_new_bits_6_7(unsigned int bits);
   virtual unsigned int program_memory_size() const { return 2048; }
-//RRR  virtual void create_config_memory();
-//RRR  virtual bool set_config_word(unsigned int address,unsigned int cfg_word);
   virtual void enter_sleep();
   virtual void exit_sleep();
   virtual void oscillator_select(unsigned int mode, bool clkout);
@@ -75,4 +77,22 @@ public:
 
 };
 
+class P16F1823 : public P12F1822
+{
+public:
+  ANSEL_P   anselc;
+  virtual PROCESSOR_TYPE isa(){return _P16F1823_;};
+
+ P16F1823(const char *_name=0, const char *desc=0);
+  ~P16F1823();
+  static Processor *construct(const char *name);
+  virtual void create_sfr_map();
+  virtual void create_iopin_map();
+  virtual void create(int ram_top, int eeprom_size);
+
+  PicPortBRegister  *m_portc;
+  PicTrisRegister  *m_trisc;
+  PicLatchRegister *m_latc;
+  WPU              *m_wpuc;
+};
 #endif //__P12F182x_H__

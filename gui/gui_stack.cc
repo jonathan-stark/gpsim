@@ -1,6 +1,7 @@
 /*
    Copyright (C) 2000,2001
     Ralf Forsberg
+   Copyright (c) 2013 Roy R Rankin
 
 This file is part of gpsim.
 
@@ -86,12 +87,9 @@ static gint sigh_button_event(GtkWidget *widget,
 static gint stack_list_row_selected(GtkCList *stacklist,gint row, gint column,GdkEvent *event, Stack_Window *sw)
 {
     struct stack_entry *entry;
-    GUI_Processor *gp;
 
     sw->current_row=row;
     sw->current_column=column;
-
-    gp=sw->gp;
 
     entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
@@ -175,7 +173,8 @@ static int get_closest_label(Stack_Window *sw,
     }
   }
 #endif
-  cout << "FIXME gui_stack.cc get closest label\n";
+   if(verbose)
+       cout << "FIXME gui_stack.cc get closest label\n";
   if(closest_symbol) {
     strcpy(name,closest_symbol->name().data());
     int i;
@@ -211,7 +210,11 @@ void Stack_Window::Update(void)
   if(!pic)
     return;
 
-  nrofentries = pic->stack->pointer & pic->stack->stack_mask;
+  // Enhanced 14bit processors use 0x1f(31) for empty index which is
+  // also P18 max stack slot, so we mask with 0x1f
+  nrofentries = pic->stack->pointer & 0x1f;
+  if (nrofentries && ((nrofentries-1) > (int)pic->stack->stack_mask))
+	return;
 
   if(last_stacklen!=nrofentries) {
 

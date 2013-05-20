@@ -42,7 +42,7 @@ struct instruction_constructor op_16ext[] = {
   { 0x3ff8,  0x0010,  MOVIW::construct },
   { 0x3f80,  0x3f00,  MOVIW::construct },
   { 0x3fe0,  0x0020,  MOVLB::construct },
-  { 0x3f80,  0x3810,  MOVLP::construct },
+  { 0x3f80,  0x3180,  MOVLP::construct },
   { 0x3ff8,  0x0018,  MOVWI::construct },
   { 0x3f80,  0x3f80,  MOVWI::construct },
   { 0x3f00,  0x3500,  LSLF::construct },

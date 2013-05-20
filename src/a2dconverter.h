@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
-   Copyright (C) 2009 Roy R. Rankin
+   Copyright (C) 2009, 2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -329,6 +329,30 @@ private:
     ADCON1 *adcon1;
     ANSEL *ansel;
     unsigned int valid_bits;
+};
+
+//
+//	ANSEL_P is an analog select register associated
+//	with a port. 
+class ANSEL_P : public sfr_register
+{
+public:
+  ANSEL_P(Processor *pCpu, const char *pName, const char *pDesc);
+  void setAdcon1(ADCON1 *new_adcon1);
+  void setAnsel(ANSEL_P *new_ansel) { ansel = new_ansel;}
+  void put(unsigned int new_val);
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
+  void config(unsigned int pins, unsigned int first_chan)
+	{ analog_pins = pins; first_channel = first_chan;}
+  unsigned int get_mask() { return cfg_mask;}
+
+private:
+    ADCON1 *adcon1;
+    ANSEL_P *ansel;
+    unsigned int valid_bits;	// register bit mask
+    unsigned int analog_pins;	// bit map of analog port pins
+    unsigned int first_channel;	// channel number for LSB of analog_pins
+    unsigned int cfg_mask;	// A2D mask this port only
 };
 //---------------------------------------------------------
 // ADCON0_12F register for 12f675 A2D

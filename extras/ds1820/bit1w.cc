@@ -14,6 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "config.h"
 #include "bit1w.h"
 
 bool debug = false;
@@ -70,7 +71,7 @@ void LowLevel1W::change(bool pinChange) {
 	if(cicluReper != bit_break)
             get_cycles().set_break(cicluReper, this);
 	if(debug)
-	    printf("%s now %lx next break  %lx last break %lx delta(usec) %.1f\n", name().c_str(), ciclu, cicluReper, bit_break, (cicluReper-ciclu)*4./20.);
+	    printf("%s now %" PRINTF_GINT64_MODIFIER "x next break  %" PRINTF_GINT64_MODIFIER "x last break %" PRINTF_GINT64_MODIFIER "x delta(usec) %.1f\n", name().c_str(), ciclu, cicluReper, bit_break, (cicluReper-ciclu)*4./20.);
 	bit_break = cicluReper;
     }
 }

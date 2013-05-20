@@ -50,6 +50,13 @@ using namespace std;
 //
 // EEPROM related registers
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 
 void EECON1::put(unsigned int new_value)
 {
@@ -60,6 +67,7 @@ void EECON1::put(unsigned int new_value)
   new_value &= valid_bits;
 
   //cout << "EECON1::put new_value " << hex << new_value << "  valid_bits " << valid_bits << '\n';
+  //Dprintf(("new_value %x valid_bits %x\n", new_value, valid_bits));
   if(new_value & WREN)
     {
       if(eeprom->get_reg_eecon2()->is_unarmed())
@@ -102,19 +110,20 @@ void EECON1::put(unsigned int new_value)
   value.put((value.get() & (RD | WR)) | new_value);
 
   if ( (value.get() & RD) && !( value.get() & WR) )
-    {
+  {
+      //Dprintf(("RD true WR false EEPGD|CFFS %x\n", value.get() & (EEPGD|CFGS)));
       if(value.get() & (EEPGD|CFGS)) {
         eeprom->get_reg_eecon2()->read();
         eeprom->start_program_memory_read();
         //cout << "eestate " << eeprom->eecon2->eestate << '\n';
         // read program memory
-      } else {
+  } else {
         //eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
         eeprom->get_reg_eecon2()->read();
         eeprom->callback();
         value.put(value.get() & ~RD);
       }
-    }
+  }
 
 }
 
@@ -860,6 +869,7 @@ void EEPROM_EXTND::callback()
         	}
         	else
         	{
+		    Dprintf(("write config data cfg_add %x wr_data %x\n", cfg_add, wr_data));
 	    	    if(!cpu->set_config_word(cfg_add, wr_data))
 	    	    {
 			printf("EEWRITE unknown failure to write %x to 0x%x\n", wr_data, cfg_add);
@@ -874,8 +884,8 @@ void EEPROM_EXTND::callback()
     	cpu_pic->pc->increment();
     	cpu_pic->pc->increment();
 	// execution stalls for 2ms
-	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
-	    get_cycles().increment(); 
+	get_cycles().clear_break(get_cycles().get());    
+	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::CFGS|EECON1::FREE:	// free Configuration memory row

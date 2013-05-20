@@ -64,7 +64,6 @@ enum PROCESSOR_TYPE
   _P12F675_,
   _P12F683_,
   _P12F1822_,
-  _P12F1823_,
   _P16C84_,
   _P16CR83_,
   _P16CR84_,
@@ -123,6 +122,7 @@ enum PROCESSOR_TYPE
   _P16F884_,
   _P16F886_,
   _P16F887_,
+  _P16F1823_,
   _P17C7xx_,
   _P17C75x_,
   _P17C752_,
@@ -494,8 +494,11 @@ class ConfigWord : public Integer
 public:
   ConfigWord(const char *_name, unsigned int default_val, const char *desc,
              pic_processor *pCpu, unsigned int addr, bool EEw=true);
+  virtual void get(char *buffer, int buf_size);
+  virtual void get(gint64 &i);
   unsigned int ConfigWordAdd() { return m_addr; }
-  bool isEEWritable() { return EEWritable;};
+  bool isEEWritable() { return EEWritable;}
+
 protected:
   pic_processor *m_pCpu;
   unsigned int m_addr;

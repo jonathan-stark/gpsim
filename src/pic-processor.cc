@@ -297,6 +297,8 @@ ProcessorConstructor pP16F876A(P16F876A::construct ,
                               "__16F876a",  "pic16f876a",   "p16f876a", "16f876a");
 ProcessorConstructor pP16F877A(P16F877A::construct ,
                               "__16F877a",  "pic16f877a",   "p16f877a", "16f877a");
+ProcessorConstructor pP16F1823(P16F1823::construct ,
+                              "__16F1823", "pic16f1823", "p16f1823", "16f1823");
 #ifdef P17C7XX  // code no longer works
 ProcessorConstructor pP17C7xx(P17C7xx::construct ,
                               "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx");
@@ -1653,6 +1655,22 @@ ConfigWord::ConfigWord(const char *_name, unsigned int default_val, const char *
     m_pCpu->addSymbol(this);
   */
 }
+// this get controls the display format in the symbols window
+void ConfigWord::get(char *buffer, int buf_size)
+{
+    if(buffer)
+    {
+   	gint64 i;
+    	get(i);
+	long long int j = i;
+    	snprintf(buffer,buf_size,"0x%" PRINTF_INT64_MODIFIER "x",j);
+    }
+}
+void ConfigWord::get(gint64 &i)
+{
+    Integer::get(i);
+}
+
 
 //------------------------------------------------------------------------
 ConfigMemory::ConfigMemory(pic_processor *pCpu, unsigned int nWords)

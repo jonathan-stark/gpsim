@@ -44,6 +44,19 @@ class pic_processor;
 #include "ioports.h"
 
 //---------------------------------------------------------
+// BORCON register
+//
+
+class BORCON : public sfr_register
+{
+public:
+  BORCON(Processor *, const char *pName, const char *pDesc=0);
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+
+};
+//---------------------------------------------------------
 // BSR register
 //
 
@@ -91,6 +104,23 @@ public:
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
+
+};
+
+//---------------------------------------------------------
+// FVRCON register
+//
+
+class FVRCON : public sfr_register
+{
+public:
+  FVRCON(Processor *, const char *pName, const char *pDesc=0, unsigned int bitMask= 0xff, unsigned int alwaysOne = 0);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
+  unsigned int mask_writable;
+  unsigned int always_one;
 
 };
 

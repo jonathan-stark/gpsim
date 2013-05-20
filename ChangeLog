@@ -1,3 +1,15 @@
+2013-05-21 Roy Rankin <rrankin@ihug.com.au>
+	* extras/ds1820/rom1w.cc extras/ds1820/bit1w.cc:
+	- Fixes for windows compile
+	* gui/gui_stack.cc: Fix issue for 14bit enhanced stack
+	* src/14bit-hexdecode.cc src/14bit-instructions.cc
+	  src/14bit-instructions.h src/14bit-registers.cc
+	  src/pic-instructions.cc src/14bit-registers.h:
+	- 14bit enhanced commands and register fixup
+	* src/a2dconverter.cc src/a2dconverter.h src/eeprom.cc
+	  src/pic-processor.cc src/pic-processor.h src/p12f182x.cc
+	  src/p12f182x.h: Add incomplete p16f1823 processor
+
 2013-05-17 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac extras/Makefile.am extras/ds1820/Makefile.am
 	  extras/ds1820/bit1w.cc extras/ds1820/bit1w.h
