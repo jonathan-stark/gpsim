@@ -23,7 +23,7 @@ class ROMCodeAttribute : public Integer {
 public:
 
   ROMCodeAttribute() 
-    : Integer("ROMCode",0x06050403020110,"Device ROM code")
+    : Integer("ROMCode",0x06050403020110LL,"Device ROM code")
   {
 	// Add CRC
 	gint64 v = getVal();
@@ -33,7 +33,7 @@ public:
 
   void set(gint64 i)
   {
-    gint64 id = (i & 0xffffffffffff00) | 0x10;
+    gint64 id = (i & 0xffffffffffff00LL) | 0x10;
     gint64 crc;
     crc = Rom1W::calculateCRC8((const unsigned char *)&id, 7);
     id |= crc << 56;

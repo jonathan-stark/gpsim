@@ -406,8 +406,10 @@ char * Bit_op::name(char *return_str,int len)
       return(return_str);
       break;
 
-    case _14BIT_PROCESSOR_:
     case _14BIT_E_PROCESSOR_:
+	if(access)
+  	    reg = get_cpu()->register_bank[register_address];
+    case _14BIT_PROCESSOR_:
       bit = ((opcode >> 7) & 7);
       break;
 
@@ -450,11 +452,22 @@ char * Register_op::name(char *return_str,int len)
 
   source = get_cpu()->registers[register_address];
 
-  if ( cpu_pic->base_isa() != _PIC18_PROCESSOR_ )
+  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ )
+  {
+    if (access)
+	source = cpu_pic->register_bank[register_address];
     snprintf(return_str,len,"%s\t%s,%c",
              gpsimObject::name().c_str(),
              source->name().c_str(),
              destination ? 'f' : 'w');
+  }
+  else if ( cpu_pic->base_isa() != _PIC18_PROCESSOR_ )
+  {
+    snprintf(return_str,len,"%s\t%s,%c",
+             gpsimObject::name().c_str(),
+             source->name().c_str(),
+             destination ? 'f' : 'w');
+  }
   else
     snprintf(return_str,len,"%s\t%s,%c,%c",
              gpsimObject::name().c_str(),
@@ -929,9 +942,12 @@ void CLRF::execute()
 char * CLRF::name(char *return_str,int len)
 {
 
+  source = get_cpu()->registers[register_address];
+  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ && access)
+	source = cpu_pic->register_bank[register_address];
   snprintf(return_str,len,"%s\t%s",
            gpsimObject::name().c_str(),
-           get_cpu()->registers[register_address]->name().c_str());
+           source->name().c_str());
 
   return(return_str);
 }
@@ -1319,6 +1335,16 @@ void MOVLP::execute()
 
 }
 
+char * MOVLP::name(char *return_str, int len)
+{
+
+  
+  snprintf(return_str,len,"%s\t%d",
+           gpsimObject::name().c_str(),
+           L&0x7f);
+
+  return(return_str);
+}
 //--------------------------------------------------
 
 MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
@@ -1401,9 +1427,13 @@ void MOVWF::execute()
 char * MOVWF::name(char *return_str, int len)
 {
 
+  
+  source = get_cpu()->registers[register_address];
+  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ && access)
+	source = cpu_pic->register_bank[register_address];
   snprintf(return_str,len,"%s\t%s",
            gpsimObject::name().c_str(),
-           get_cpu()->registers[register_address]->name().c_str());
+           source->name().c_str());
 
   return(return_str);
 }
@@ -1706,9 +1736,12 @@ void TRIS::execute()
 char * TRIS::name(char *return_str,int len)
 {
 
+  source = get_cpu()->registers[register_address];
+  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ && access)
+	source = cpu_pic->register_bank[register_address];
   snprintf(return_str,len,"%s\t%s",
            gpsimObject::name().c_str(),
-           cpu_pic->registers[register_address]->name().c_str());
+           source->name().c_str());
 
   return(return_str);
 }

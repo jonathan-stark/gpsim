@@ -126,6 +126,7 @@ void ADCON0::start_conversion(void)
   guint64 fc = get_cycles().get() + (2 * Tad) /
 		p_cpu->get_ClockCycles_per_Instruction();
 
+  Dprintf(("ad_state %d fc %lx now %lx\n", ad_state, fc, get_cycles().get()))
   if(ad_state != AD_IDLE)
     {
       // The A/D converter is either 'converting' or 'acquiring'
@@ -191,7 +192,6 @@ void ADCON0::set_Tad(unsigned int new_value)
 
 void ADCON0::put(unsigned int new_value)
 {
-
   trace.raw(write_trace.get() | value.get());
 
   set_Tad(new_value);
@@ -372,7 +372,7 @@ void ADCON1_16F::put_value(unsigned int new_value)
 ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     m_AnalogPins(0),  m_voltageRef(0), m_nAnalogChannels(0),
-    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), 
+    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), cfg_index(0), 
     valid_bits(0xff), m_ad_in_ctl(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
@@ -402,8 +402,8 @@ void ADCON1::setADCnames()
     unsigned int new_mask = m_configuration_bits[cfg_index];
     unsigned int diff = mIoMask ^ new_mask;
 
-    Dprintf (( "ADCON1::setADCnames - cfg_index=%d new_mask %02X\n",
-               cfg_index, new_mask ));
+    Dprintf (( "ADCON1::setADCnames - cfg_index=%d new_mask %02X channels %d\n",
+               cfg_index, new_mask, m_nAnalogChannels ));
 
     char newname[20];
 
@@ -654,6 +654,7 @@ void ANSEL::put(unsigned int new_value)
   unsigned int i;
   unsigned int mask = (new_value & valid_bits);
 
+
   if (anselh) mask |= anselh->value.get() << 8;
   trace.raw(write_trace.get() | value.get());
   /*
@@ -687,7 +688,53 @@ void ANSEL_H::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   if (ansel)
-	mask |= ansel->value.get();
+       mask |= ansel->value.get();
+
+  /*
+	Generate ChannelConfiguration from ansel register
+  */
+  for(i=0; i < cfgmax; i++)
+  {
+	adcon1->setChannelConfiguration(i, mask);
+  }
+  value.put(new_value & valid_bits);
+  adcon1->setADCnames();
+}
+
+ANSEL_P::ANSEL_P(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+    adcon1(0), ansel(0), valid_bits(0x3f)
+{
+}
+
+void ANSEL_P::setAdcon1(ADCON1 *new_adcon1)
+{
+  adcon1 = new_adcon1;
+}
+
+void ANSEL_P::put(unsigned int new_value)
+{
+  unsigned int cfgmax = adcon1->getNumberOfChannels();
+  unsigned int i;
+  unsigned int mask;
+  unsigned int chan = first_channel;
+  trace.raw(write_trace.get() | value.get());
+
+  new_value &= valid_bits;
+
+  cfg_mask = 0;
+  for(i=0; i< 8; i++)
+  {
+      if ((1<<i) & analog_pins)
+      {
+	if ((1<<i) & new_value)
+	    cfg_mask |= (1<<chan);
+	chan++;
+      }
+  }
+  mask = cfg_mask;
+  if (ansel)
+      mask |= ansel->get_mask();
   /*
 	Generate ChannelConfiguration from ansel register
   */

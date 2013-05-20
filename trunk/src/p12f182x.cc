@@ -169,12 +169,16 @@ P12F1822::P12F1822(const char *_name, const char *desc)
     ccp1con(this, "ccp1con", "Capture Compare Control"),
     ccpr1l(this, "ccpr1l", "Capture Compare 1 Low"),
     ccpr1h(this, "ccpr1h", "Capture Compare 1 High"),
+    fvrcon(this, "fvrcon", "Voltage reference control register", 0xbf, 0x40),
+    borcon(this, "borcon", "Brown-out reset control register"),
     ansela(this, "ansela", "Analog Select"),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
     adresh(this,"adresh", "A2D Result High"),
     adresl(this,"adresl", "A2D Result Low"),
-    osccal(this, "osccal", "Oscillator Calibration Register", 0xfc)
+    osccon(this, "osccon", "Oscillator Control Register"),
+    osctune(this, "osctune", "Oscillator Tunning Register"),
+    wdtcon(this, "wdtcon", "Watch dog timer control", 0x3f)
 
 
 {
@@ -196,11 +200,6 @@ P12F1822::P12F1822(const char *_name, const char *desc)
 
 //  tmr0.set_cpu(this, m_gpio, 4, option_reg); FIX port steer
   tmr0.start(0);
-
-  if(config_modes)
-    config_modes->valid_bits = ConfigMode::CM_FOSC0 | ConfigMode::CM_FOSC1 | 
-      ConfigMode::CM_FOSC1x | ConfigMode::CM_WDTE | ConfigMode::CM_PWRTE;
-
 }
 
 P12F1822::~P12F1822()
@@ -223,6 +222,7 @@ void P12F1822::create_symbols()
 {
   pic_processor::create_symbols();
   addSymbol(W);
+
 
 }
 void P12F1822::create_sfr_map()
@@ -251,6 +251,9 @@ void P12F1822::create_sfr_map()
   add_sfr_register(m_trisa, 0x8c, RegisterValue(0x3f,0));
 
   add_sfr_register(option_reg,  0x95, RegisterValue(0xff,0));
+  add_sfr_register(&wdtcon,  0x97, RegisterValue(0x16,0));
+  add_sfr_register(&osctune,  0x98, RegisterValue(0,0));
+  add_sfr_register(&osccon,  0x99, RegisterValue(0x38,0));
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
@@ -268,7 +271,6 @@ void P12F1822::create_sfr_map()
 
   add_sfr_register(&pie1,   0x91, RegisterValue(0,0));
   add_sfr_register(&pie2,   0x92, RegisterValue(0,0));
-  add_sfr_register(&osccal, 0x99, RegisterValue(0x80,0));
   add_sfr_register(&adresl, 0x9b);
   add_sfr_register(&adresh, 0x9c);
   add_sfr_register(&adcon0, 0x9d, RegisterValue(0x00,0));
@@ -277,6 +279,8 @@ void P12F1822::create_sfr_map()
 
 
   add_sfr_register(m_lata, 0x10c);
+  add_sfr_register(&borcon, 0x116, RegisterValue(0x80,0));
+  add_sfr_register(&fvrcon, 0x117, RegisterValue(0x00,0));
   add_sfr_register(&ansela, 0x18c, RegisterValue(0x17,0));
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x191);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x192);
@@ -307,23 +311,26 @@ void P12F1822::create_sfr_map()
 //  tmr2.add_ccp ( &ccp2con );
   pr2.tmr2    = &tmr2;
 
+  ansela.config(0x17, 0);
   ansela.setValidBits(0x17);
   ansela.setAdcon1(&adcon1);
+
   adcon0.setAdresLow(&adresl);
   adcon0.setAdres(&adresh);
   adcon0.setAdcon1(&adcon1);
   adcon0.setIntcon(&intcon_reg);
   adcon0.setA2DBits(10);
   adcon0.setPir(pir1);
-  adcon0.setChannel_Mask(0x0f);
+  adcon0.setChannel_Mask(0x1f);
   adcon0.setChannel_shift(2);
+  adcon0.setGo(1);
 
   adcon1.setAdcon0(&adcon0); 
-  adcon1.setNumberOfChannels(5);
+  adcon1.setNumberOfChannels(4);
   adcon1.setIOPin(0, &(*m_porta)[0]);
   adcon1.setIOPin(1, &(*m_porta)[1]);
   adcon1.setIOPin(2, &(*m_porta)[2]);
-  adcon1.setIOPin(4, &(*m_porta)[4]);
+  adcon1.setIOPin(3, &(*m_porta)[4]);
 
 
 
@@ -349,6 +356,9 @@ void P12F1822::create_sfr_map()
   comparator.cmcon.set_configuration(2, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   comparator.cmcon.set_configuration(2, 6, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
+
+  osccon.set_osctune(&osctune);
+  osctune.set_osccon(&osccon);
 }
 
 //-------------------------------------------------------------------
@@ -401,7 +411,9 @@ void  P12F1822::create(int ram_top, int eeprom_size)
   add_file_registers(0x20, ram_top, 0x00);
   _14bit_e_processor::create_sfr_map();
   P12F1822::create_sfr_map();
-
+  // Set DeviceID
+  if (m_configMemory && m_configMemory->getConfigWord(6))
+      m_configMemory->getConfigWord(6)->set(0x2700);
 }
 
 //-------------------------------------------------------------------
@@ -433,7 +445,8 @@ void P12F1822::option_new_bits_6_7(unsigned int bits)
 
 void P12F1822::oscillator_select(unsigned int mode, bool clkout)
 {
-    unsigned int mask;
+    unsigned int mask = 0x1f;
+
     switch(mode)
     {
     case 0:	//LP oscillator: low power crystal
@@ -523,4 +536,105 @@ void P12F1822::program_memory_wp(unsigned int mode)
 	    break;
 	}
 
+}
+//========================================================================
+
+
+P16F1823::P16F1823(const char *_name, const char *desc)
+  : P12F1822(_name,desc), 
+    anselc(this, "anselc", "Analog Select port c")
+{
+   
+  m_portc = new PicPortBRegister(this,"portc","", &intcon_reg, 8,0x3f);
+  m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false, 0x3f);
+  m_latc  = new PicLatchRegister(this,"latc","",m_portc, 0x3f);
+  m_wpuc = new WPU(this, "wpuc", "Weak Pull-up Register", m_portc, 0x37);
+}
+void P16F1823::create_iopin_map()
+{
+
+  package = new Package(14);
+  if(!package)
+    return;
+
+  // Now Create the package and place the I/O pins
+  package->assign_pin(13, m_porta->addPin(new IO_bi_directional_pu("porta0"),0));
+  package->assign_pin(12, m_porta->addPin(new IO_bi_directional_pu("porta1"),1));
+  package->assign_pin(11, m_porta->addPin(new IO_bi_directional_pu("porta2"),2));
+  package->assign_pin(4, m_porta->addPin(new IO_bi_directional_pu("porta3"),3));
+  package->assign_pin(3, m_porta->addPin(new IO_bi_directional_pu("porta4"),4));
+  package->assign_pin(2, m_porta->addPin(new IO_bi_directional_pu("porta5"),5));
+
+  package->assign_pin(10, m_portc->addPin(new IO_bi_directional_pu("portc0"),0));
+  package->assign_pin(9, m_portc->addPin(new IO_bi_directional_pu("portc1"),1));
+  package->assign_pin(8, m_portc->addPin(new IO_bi_directional_pu("portc2"),2));
+  package->assign_pin(7, m_portc->addPin(new IO_bi_directional_pu("portc3"),3));
+  package->assign_pin(6, m_portc->addPin(new IO_bi_directional_pu("portc4"),4));
+  package->assign_pin(5, m_portc->addPin(new IO_bi_directional_pu("portc5"),5));
+
+  package->assign_pin( 1, 0);	// Vdd
+  package->assign_pin( 14, 0);	// Vss
+
+
+}
+
+
+Processor * P16F1823::construct(const char *name)
+{
+
+  P16F1823 *p = new P16F1823(name);
+
+  p->create(0x7f, 256);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+
+void  P16F1823::create(int ram_top, int eeprom_size)
+{
+
+  create_iopin_map();
+  e = new EEPROM_EXTND(this, pir2);
+  set_eeprom(e);
+
+  pic_processor::create();
+
+
+  e->initialize(eeprom_size, 16, 16, 0x8000);
+  e->set_intcon(&intcon_reg);
+  e->get_reg_eecon1()->set_valid_bits(0xff);
+
+  add_file_registers(0x20, ram_top, 0x00);
+  _14bit_e_processor::create_sfr_map();
+  P12F1822::create_sfr_map();
+  P16F1823::create_sfr_map();
+  // Set DeviceID
+  if (m_configMemory && m_configMemory->getConfigWord(6))
+      m_configMemory->getConfigWord(6)->set(0x2720);
+
+}
+void P16F1823::create_sfr_map()
+{
+    add_sfr_register(m_portc, 0x0e);
+    add_sfr_register(m_trisc, 0x8e, RegisterValue(0x3f,0));
+    add_sfr_register(m_latc, 0x10e);
+    add_sfr_register(&anselc, 0x18e, RegisterValue(0x0f,0));
+    add_sfr_register(m_wpuc, 0x20e, RegisterValue(0x37,0),"wpuc");
+
+    anselc.config(0x0f, 4);
+    anselc.setValidBits(0x0f);
+    anselc.setAdcon1(&adcon1);
+    ansela.setAnsel(&anselc);
+    anselc.setAnsel(&ansela);
+  adcon1.setNumberOfChannels(8);
+  adcon1.setIOPin(4, &(*m_portc)[0]);
+  adcon1.setIOPin(5, &(*m_portc)[1]);
+  adcon1.setIOPin(6, &(*m_portc)[2]);
+  adcon1.setIOPin(7, &(*m_portc)[3]);
+}
+P16F1823::~P16F1823()
+{
+    //RRRdelete e;
 }

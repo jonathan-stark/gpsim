@@ -213,6 +213,7 @@ class MOVLB : public Literal_op
 public:
   MOVLB(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute();
+  virtual char *name(char *return_str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   {return new MOVLB(new_cpu,new_opcode,address);}
 
@@ -225,6 +226,7 @@ class MOVLP : public Literal_op
 public:
   MOVLP(Processor *new_cpu, unsigned int new_opcode, unsigned int address);
   virtual void execute();
+  virtual char *name(char *return_str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   {return new MOVLP(new_cpu,new_opcode,address);}
 

@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998-2000 Scott Dattalo
+   Copyright (C) 2013	Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -101,6 +102,31 @@ void file_register::put_value(unsigned int new_value)
 }
 
 #endif
+
+//--------------------------------------------------
+// member functions for the BORCON class
+// currently does not do anything
+//--------------------------------------------------
+//
+BORCON::BORCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu,pName,pDesc)
+{
+}
+
+void  BORCON::put(unsigned int new_value)
+{
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & 0x80);
+
+
+
+}
+
+void  BORCON::put_value(unsigned int new_value)
+{
+  put(new_value&0x80);
+}
 
 //--------------------------------------------------
 // member functions for the BSR class
@@ -353,6 +379,47 @@ unsigned int FSR_12::get_value()
   //cout << "FSR_12:get_value - valid_bits 0x" << hex << valid_bits << endl;
   return ((value.get() & valid_bits) | (~valid_bits & 0xff));
 
+}
+
+
+//
+//--------------------------------------------------
+// member functions for the FVRCON class
+//--------------------------------------------------
+//
+FVRCON::FVRCON(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, unsigned int alwaysOne)
+  : sfr_register(pCpu, pName, pDesc)
+{
+    mask_writable = bitMask;
+    always_one = alwaysOne;
+}
+
+void  FVRCON::put(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & mask_writable) | always_one;
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(masked_value);
+}
+
+void  FVRCON::put_value(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & mask_writable) | always_one;
+  put(masked_value);
+
+  update();
+}
+
+
+unsigned int FVRCON::get()
+{
+  trace.raw(read_trace.get() | value.get());
+  return(value.get());
+}
+
+unsigned int FVRCON::get_value()
+{
+  return(value.get());
 }
 
 

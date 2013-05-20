@@ -318,6 +318,14 @@ void MOVLB::execute()
 
 }
 
+char *MOVLB::name(char *return_str,int len)
+{
+  snprintf(return_str,len,"%s\t0x%02x",
+           gpsimObject::name().c_str(),L&0x1f);
+
+  return(return_str);
+
+}
 
 //--------------------------------------------------
 
