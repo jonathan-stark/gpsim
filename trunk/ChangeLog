@@ -1,3 +1,6 @@
+2013-05-21 Borut Razem <borut.razem@gmail.com>
+	* plat/win32/gpsim.nsi: added RequestExecutionLevel admin
+
 2013-05-21 Roy Rankin <rrankin@ihug.com.au>
 	* extras/ds1820/rom1w.cc extras/ds1820/bit1w.cc:
 	- Fixes for windows compile
