@@ -122,6 +122,7 @@ Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${SETUP_DIR}\gpsim-${PRODUCT_VERSION}-${DATE}-setup.exe"
 InstallDir "$PROGRAMFILES\gpsim"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
+RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
 ;;;;ShowInstDetails show
 ;;;;ShowUnInstDetails show
 
