@@ -1,6 +1,6 @@
 # gpsim.nsi - NSIS installer script for gpsim
 #
-# Copyright (c) 2004-2011 Borut Razem
+# Copyright (c) 2004-2013 Borut Razem
 #
 # This file is part of gpsim.
 #
