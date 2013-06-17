@@ -49,10 +49,12 @@ class SS_SignalSink;
 enum SSP_TYPE {
 	SSP_TYPE_BSSP = 1,
 	SSP_TYPE_SSP,
-	SSP_TYPE_MSSP
+	SSP_TYPE_MSSP,
+	SSP_TYPE_MSSP1
 };
 
 class SSP_MODULE;
+class SSP1_MODULE;
 
 class _SSPCON : public sfr_register, public TriggerObject
 {
@@ -67,6 +69,7 @@ public:
     SSPM_SPImasterTMR2 = 0x3,   // SPI master mode, clock = TMR2/2
     SSPM_SPIslaveSS = 0x4,      // SPI slave mode, clock = SCK, /SS controlled
     SSPM_SPIslave = 0x5,        // SPI slave mode, clock = SCK, not /SS controlled
+    SSPM_SPImasterAdd = 0xa,	// SPI master mode, clock = FOSC/4*(sspadd+1)
 
     SSPM_I2Cslave_7bitaddr = 0x6,
     SSPM_I2Cslave_10bitaddr = 0x7,
@@ -111,9 +114,7 @@ public:
   bool isI2CMaster(unsigned int); 
   bool isSPIActive(unsigned int);
 	
-  bool isSPIMaster() {
-    return isSSPEnabled() && ((value.get() & SSPM_mask) <= SSPM_SPImasterTMR2);
-  }
+  bool isSPIMaster(); 
   void setWCOL();
   void setSSPOV() { put_value(value.get() | SSPOV);}
   void setSSPMODULE(SSP_MODULE *);
@@ -144,6 +145,41 @@ class _SSPCON2 : public sfr_register
 
 private:
   SSP_MODULE   *m_sspmod;
+};
+
+class _SSP1CON3 : public sfr_register
+{
+ public:
+
+  enum {
+    DHEN  = 1<<0,	// Data hold enable
+    AHEN  = 1<<1,	// Address hold enable
+    SBCDE = 1<<2,	// Slave Mode Bus Collision Detect Enable bit 
+    SDAHT = 1<<3,	// SDA Hold Time Selection bit
+    BOEN  = 1<<4,	// Buffer Overwrite Enable bit
+    SCIE  = 1<<5,	// Start Condition Interrupt Enable bit
+    PCIE  = 1<<6,	// Stop Condition Interrupt Enable bit
+    ACKTIM = 1<<7	// Acknowledge Time Status bit
+  };
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  _SSP1CON3(Processor *pCpu, SSP1_MODULE *);
+
+private:
+  SSP1_MODULE   *m_sspmod;
+};
+class _SSP1MSK : public sfr_register
+{
+ public:
+
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  _SSP1MSK(Processor *pCpu, SSP1_MODULE *);
+
+private:
+  SSP1_MODULE   *m_sspmod;
 };
 
 class _SSPSTAT : public sfr_register
@@ -223,13 +259,13 @@ class SPI: public  TriggerObject
   virtual void clock(bool);
   virtual void start_transfer();
   virtual void stop_transfer();
-  void set_halfclock_break();
+  virtual void set_halfclock_break();
   virtual void callback();
   void newSSPBUF(unsigned int);
   virtual void startSPI();
 
   
-private:
+protected:
   unsigned int m_SSPsr;  // internal Shift Register
   enum SSPStateMachine {
     eIDLE,
@@ -239,6 +275,18 @@ private:
 
 
   int bits_transfered;
+};
+
+class SPI_1: public  SPI
+{
+ public:
+
+  _SSP1CON3   	*m_ssp1con3;
+  _SSPADD	*m_sspadd;
+
+  SPI_1(SSP1_MODULE *, _SSPCON *, _SSPSTAT *, _SSPBUF *, _SSP1CON3 *, _SSPADD *);
+  virtual void stop_transfer();
+  virtual void set_halfclock_break();
 };
 
 class I2C: public  TriggerObject
@@ -272,7 +320,7 @@ class I2C: public  TriggerObject
   virtual bool end_ack();
 
 
-private:
+protected:
   unsigned int m_SSPsr;  // internal Shift Register
 
   enum I2CStateMachine {
@@ -295,6 +343,20 @@ private:
   guint64 future_cycle;
 };
 
+class I2C_1: public  I2C
+{
+ public:
+  SSP_MODULE *m_sspmod;
+  _SSP1CON3  *m_sspcon3;
+  _SSP1MSK   *m_ssp1msk;
+
+
+  virtual void clock(bool);
+  virtual void sda(bool);
+  virtual void bus_collide();
+
+  I2C_1(SSP_MODULE *, _SSPCON *, _SSPSTAT *, _SSPBUF *, _SSPCON2 *, _SSPADD *, _SSP1CON3 *,_SSP1MSK *);
+};
 class SSP_MODULE 
 {
  public:
@@ -309,7 +371,7 @@ class SSP_MODULE
   SSP_MODULE(Processor *);
   virtual ~SSP_MODULE();
 
-  void initialize(PIR_SET *ps,
+  virtual void initialize(PIR_SET *ps,
 		  PinModule *_SckPin,
 		  PinModule *_SdiPin,
 		  PinModule *_SdoPin,
@@ -343,8 +405,11 @@ class SSP_MODULE
   virtual void setSCL(bool);
   virtual void setSDA(bool);
   virtual bool SaveSSPsr(unsigned int value);
+  virtual bool isI2CIdle() { return m_i2c->isIdle();}
+  virtual bool isI2CMaster() { return sspcon.isI2CMaster(sspcon.value.get());}
+  virtual bool isI2CSlave() { return sspcon.isI2CSlave(sspcon.value.get());}
 
-private:
+protected:
   PIR_SET   *m_pirset;
   SPI 	    *m_spi;
   I2C 	    *m_i2c;
@@ -368,4 +433,31 @@ private:
   bool m_sink_set;
 };
 
+class SSP1_MODULE : public SSP_MODULE //MSSP1
+{
+ public:
+  SSP1_MODULE(Processor *);
+  ~SSP1_MODULE(){};
+
+   _SSP1CON3  	ssp1con3;
+   _SSP1MSK	ssp1msk;
+
+  virtual void initialize(PIR_SET *ps,
+		  PinModule *_SckPin,
+		  PinModule *_SdiPin,
+		  PinModule *_SdoPin,
+		  PinModule *_SsPin,
+        	  PicTrisRegister *_i2ctris, 
+		  SSP_TYPE ssptype = SSP_TYPE_MSSP1);
+
+   void set_sckPin(PinModule *_sckPin);
+   void set_sdiPin(PinModule *_sdiPin);
+   void set_sdoPin(PinModule *_sdoPin);
+   void set_ssPin(PinModule *_ssPin);
+   void set_tris(PicTrisRegister *_i2ctris) { m_i2c_tris = _i2ctris;}
+  virtual void changeSSP(unsigned int new_value, unsigned int old_value);
+  virtual bool SaveSSPsr(unsigned int value);
+
+
+};
 #endif  // __SSP_H__

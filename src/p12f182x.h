@@ -11,34 +11,76 @@
 #include "a2dconverter.h"
 #include "pic-ioports.h"
 
+#define FOSC0 (1<<0)
+#define FOSC1 (1<<1)
+#define FOSC2 (1<<2)
+#define IESO (1<<12)
+
+
+class APFCON : public  sfr_register
+{
+ public:
+  void put(unsigned int new_value);
+  void set_pins(unsigned int bit, PinModule *pin0, PinModule *pin1)
+  {
+	m_bitPin[0][bit] = pin0;
+	m_bitPin[1][bit] = pin1;
+  }
+  void set_usart(USART_MODULE    *_usart) { m_usart = _usart;};
+  void set_ssp(SSP1_MODULE    *_ssp) { m_ssp = _ssp;};
+  void set_t1gcon(T1GCON    *_t1gcon) { m_t1gcon = _t1gcon;};
+  void set_ccpcon(CCPCON    *_ccpcon) { m_ccpcon = _ccpcon;};
+  void set_ValidBits(unsigned int _mask){mValidBits = _mask;}
+
+   APFCON(Processor *pCpu, const char *pName, const char *pDesc);
+  
+  private:
+
+PinModule	*m_bitPin[2][8];
+USART_MODULE 	*m_usart;
+SSP1_MODULE 	*m_ssp;
+T1GCON    	*m_t1gcon;
+CCPCON		*m_ccpcon;
+
+
+};
+
 class P12F1822 : public _14bit_e_processor
 {
 public:
- ComparatorModule comparator;
+ ComparatorModule2 comparator;
   PIR_SET_2 pir_set_2_def;
   PIE     pie1;
   PIR    *pir1;
   PIE     pie2;
-  PIR	  *pir2;
+  PIR    *pir2;
   T2CON	  t2con;
   PR2	  pr2;
   TMR2    tmr2;
-  T1CON   t1con;
+  T1CON_G   t1con_g;
   TMRL    tmr1l;
   TMRH    tmr1h;
-  CCPCON  ccp1con;
-  CCPRL   ccpr1l;
-  CCPRH   ccpr1h;
-  FVRCON  fvrcon;
-  BORCON  borcon;
-  ANSEL_P ansela;
-  ADCON0  adcon0;
-  ADCON1_16F adcon1;
+  CCPCON	ccp1con;
+  CCPRL		ccpr1l;
+  CCPRH		ccpr1h;
+  FVRCON	fvrcon;
+  BORCON	borcon;
+  ANSEL_P 	ansela;
+  ADCON0  	adcon0;
+  ADCON1_16F 	adcon1;
   sfr_register  adresh;
   sfr_register  adresl;
-  OSCCON  osccon;
-  OSCTUNE osctune;
-  WDTCON  wdtcon;
+  OSCCON_2  	osccon;
+  OSCTUNE 	osctune;
+  OSCSTAT 	oscstat;
+  //OSCCAL  osccal;
+  WDTCON  	wdtcon;
+  USART_MODULE 	usart;
+  SSP1_MODULE 	ssp;
+  APFCON	apfcon;
+  PWM1CON	pwm1con;
+  ECCPAS        ccp1as;
+  PSTRCON       pstr1con;
   EEPROM_EXTND *e;
 
 
@@ -49,6 +91,8 @@ public:
   PicPortIOCRegister  *m_porta;
   PicTrisRegister  *m_trisa;
   PicLatchRegister *m_lata;
+  DACCON0	   *m_daccon0;
+  DACCON1	   *m_daccon1;
 
   virtual PIR *get_pir2() { return (NULL); }
   virtual PIR *get_pir1() { return (pir1); }

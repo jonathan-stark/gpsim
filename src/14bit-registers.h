@@ -1,5 +1,7 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2013 Roy R. Rankin
+		 
 
 This file is part of the libgpsim library of gpsim
 
@@ -104,23 +106,6 @@ public:
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
-
-};
-
-//---------------------------------------------------------
-// FVRCON register
-//
-
-class FVRCON : public sfr_register
-{
-public:
-  FVRCON(Processor *, const char *pName, const char *pDesc=0, unsigned int bitMask= 0xff, unsigned int alwaysOne = 0);
-  virtual void put(unsigned int new_value);
-  virtual void put_value(unsigned int new_value);
-  virtual unsigned int get();
-  virtual unsigned int get_value();
-  unsigned int mask_writable;
-  unsigned int always_one;
 
 };
 
@@ -566,13 +551,6 @@ public:
   void put_fsr(unsigned int new_fsr);
   unsigned int get_fsr_value(){return (fsr_value & 0xfff);};
   void update_fsr_value();
-/*
-  void preinc_fsr_value();
-  void postinc_fsr_value();
-  void postdec_fsr_value();
-  int  plusw_fsr_value();
-  int  plusk_fsr_value(int k);
-*/
 
   /* bool is_indirect_register(unsigned int reg_address)
    *
@@ -724,6 +702,73 @@ class OSCCON : public  sfr_register,  public TriggerObject
   }
 };
 
+
+class OSCSTAT : public  sfr_register
+{
+ public:
+  void put(unsigned int new_value){;}
+
+  enum
+  {
+	HFIOFS = 1<<0,
+	LFIOFR = 1<<1,
+	MFIOFR = 1<<2,
+	HFIOFL = 1<<3,
+	HFIOFR = 1<<4,
+	OSTS   = 1<<5,
+	PLLR   = 1<<6,
+	T1OSCR = 1<<7
+  };
+  OSCSTAT(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc) {}
+};
+class OSCCON_2 : public  sfr_register,  public TriggerObject
+{
+ public:
+  void put(unsigned int new_value);
+  virtual void callback();
+  virtual bool set_rc_frequency();
+  virtual void set_osctune(OSCTUNE *new_osctune) { osctune = new_osctune;}
+  virtual void set_oscstat(OSCSTAT *_oscstat) { oscstat = _oscstat;}
+  virtual void set_config(unsigned int cfg_fosc, bool cfg_ieso);
+  virtual void set_callback();
+  virtual void wake();
+  unsigned int 	valid_bits;
+  unsigned int 	mode;
+  guint64	next_callback;
+  OSCTUNE 	*osctune;
+  OSCSTAT 	*oscstat;
+  unsigned int  config_fosc;	// FOSC bits from config word
+  bool		config_ieso;	//internal/external switchover bit from config word
+
+  enum MODE
+  {
+	LF = 0,
+	MF,
+	HF,
+	T1OSC,
+	EC,	// external clock, always stable
+	OST,	// use on startup timer
+	PLL = 0x10
+  };
+                                                                                
+  enum {
+    SCS0   = 1<<0,
+    SCS1   = 1<<1,
+    IRCF0  = 1<<3,
+    IRCF1  = 1<<4,
+    IRCF2  = 1<<5,
+    IRCF3  = 1<<6,
+    SPLLEN = 1<<7
+  };
+                                                                                
+  OSCCON_2(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc), valid_bits(0xfb), 
+	next_callback(0), osctune(0), oscstat(0)
+  {
+  }
+};
+
 class WDTCON : public  sfr_register
 {
  public:
@@ -790,4 +835,5 @@ public:
       mValidBits=mask;  // Can't use initialiser for parent class members 
   }
 };
+
 #endif

@@ -1,3 +1,23 @@
+2013-06-17 Roy Rankin <rrankin@ihug.com.au>
+	* regression/i2c/p16f819.asm: Don't overwrite registers
+	* regression/instructions_16bit/instructions_16bit.asm: 
+	- test subwfb and movlb instructions
+	* cli/cmd_load.cc: error message on missing file
+	* gui/gui_stopwatch.cc: use units for frequency
+	* src/14bit-instructions.cc: fix register restore on retfie
+	* src/14bit-processors.cc src/14bit-processors.h: Add CPU Temp
+	* src/a2d_v2.h: add comment
+	* src/14bit-registers.cc src/14bit-registers.h src/tmr0.cc src/tmr0.h
+	  src/14bit-tmrs.cc src/14bit-tmrs.h 
+	  src/a2dconverter.cc src/a2dconverter.h src/stimuli.h
+	  src/comparator.cc src/comparator.h src/ssp.cc src/ssp.h
+	  src/p12f182x.cc src/p12f182x.h: 
+	- add or fix DAC, A2D, Comparator, T0, Tmr1, APFCON, SSP, USART, OSCCON
+	* src/p12x.cc src/i2c-ee.cc: compile clean-up
+	* src/pic-processor.h: Phase lock * 4 oscilator
+	* src/pir.h: add set_c3if, set_c4if, set_tmr1gif
+	* src/uart.cc src/uart.h: allow port select
+
 2013-05-21 Borut Razem <borut.razem@gmail.com>
 	* plat/win32/gpsim.nsi: added RequestExecutionLevel admin
 

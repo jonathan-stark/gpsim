@@ -101,7 +101,11 @@ void StopWatch_Window::Update(void)
 
   timevalue = (_cyclecounter*1000000*cycle_per_inst)/frequency;
 
-  sprintf(frequencystring, "%.0f Hz", frequency);
+  if (frequency < 1e6)
+     sprintf(frequencystring, "%.3f KHz", frequency/1e3);
+  else
+     sprintf(frequencystring, "%.3f MHz", frequency/1e6);
+   
   sprintf(cyclestring, "%Ld", _cyclecounter);
   if(timevalue<1000)
     sprintf(timestring, "%.2f us", timevalue/1.0);

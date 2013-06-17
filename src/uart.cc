@@ -1145,6 +1145,14 @@ void USART_MODULE::initialize(PIR *_pir,
 
 }
 
+void USART_MODULE::set_TXpin(PinModule *tx_pin)
+{
+  txsta.setIOpin(tx_pin);
+}
+void USART_MODULE::set_RXpin(PinModule *rx_pin)
+{
+  rcsta.setIOpin(rx_pin);
+}
 bool USART_MODULE::bIsTXempty()
 {
   return pir ? pir->get_txif() : true;

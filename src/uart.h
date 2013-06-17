@@ -306,6 +306,8 @@ public:
 		  PinModule *tx_pin, PinModule *rx_pin,
 		  _TXREG *, _RCREG *);
 
+  void set_TXpin(PinModule *tx_pin);
+  void set_RXpin(PinModule *rx_pin);
   bool bIsTXempty();
   void emptyTX();
   void full();

@@ -324,7 +324,8 @@ _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
     fsr0l_shad(this, "fsr0l_shad", "fsr0l shadow register"),
     fsr0h_shad(this, "fsr0h_shad", "fsr0h shadow register"),
     fsr1l_shad(this, "fsr1l_shad", "fsr1l shadow register"),
-    fsr1h_shad(this, "fsr1h_shad", "fsr1h shadow register")
+    fsr1h_shad(this, "fsr1h_shad", "fsr1h shadow register"),
+    m_cpu_temp(0)
 {
   pc = new Program_Counter("pc", "Program Counter", this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
@@ -500,6 +501,7 @@ bool _14bit_e_processor::set_config_word(unsigned int address,unsigned int cfg_w
     BOREN0 = 1<<9,
     BOREN1 = 1<<10,
     NOT_CLKOUTEN = 1<<11,
+//    IESO   = 1<<12,
     // Config word 2
     WRT0   = 1<<0,
     WRT1   = 1<<1,
@@ -521,7 +523,7 @@ bool _14bit_e_processor::set_config_word(unsigned int address,unsigned int cfg_w
             unassignMCLRPin();
 	wdt_sleep = (wdt_flag == WDTEN1)?false:true; // will WDT interrupt sleep
         wdt.initialize(wdt_flag & WDTEN1);
-        oscillator_select(cfg_word & (FOSC2 | FOSC1 | FOSC0), (cfg_word & NOT_CLKOUTEN) != NOT_CLKOUTEN);
+        oscillator_select(cfg_word, (cfg_word & NOT_CLKOUTEN) != NOT_CLKOUTEN);
     }
     else if (address == 0x8008)
     {
@@ -530,6 +532,7 @@ bool _14bit_e_processor::set_config_word(unsigned int address,unsigned int cfg_w
        Dprintf((" STVREN %x flag %d\n", cfg_word&STVREN, stack->STVREN));
 	// Program memory write protect (eeprom)
 	program_memory_wp(cfg_word & (WRT1|WRT0));
+	set_pplx4_osc(cfg_word & PLLEN);
 
     }
     return(pic_processor::set_config_word(address, cfg_word));

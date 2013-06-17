@@ -1256,11 +1256,6 @@ void P10F220::create()
   adcon0.setAdcon1(&adcon1);
   adcon0.setA2DBits(8);
 
-
-
-
-  RegisterValue porVal = RegisterValue(0xff,0);
-
 }
 
 //========================================================================
@@ -1326,8 +1321,6 @@ void P10F222::create()
 {
   P10F220::create();
   add_file_registers(0x09, 0x0f, 0);    // 10F222 has 23 bytes RAM
-
-  RegisterValue porVal = RegisterValue(0xff,0);
 
 }
 

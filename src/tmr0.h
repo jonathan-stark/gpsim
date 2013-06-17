@@ -23,6 +23,7 @@ License along with this library; if not, see
 
 #include "ioports.h"
 
+class T1GCON;
 //---------------------------------------------------------
 // TMR0 - Timer
 class TMR0 : public sfr_register, public TriggerObject, public SignalSink
@@ -71,6 +72,7 @@ public:
   virtual void setSinkState(char);
   virtual void sleep();
   virtual void wake();
+  void set_t1gcon(T1GCON *_t1gcon) { m_t1gcon = _t1gcon; }
 
   enum {
 	STOPPED = 0,
@@ -78,7 +80,8 @@ public:
 	SLEEPING = 2
   };
 private:
-  bool m_bLastClockedState;
+  bool 		m_bLastClockedState;
+  T1GCON 	*m_t1gcon;
 };
 
 #endif

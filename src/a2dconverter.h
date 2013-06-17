@@ -26,6 +26,7 @@ License along with this library; if not, see
 #include "trigger.h"
 #include "intcon.h"
 #include "pir.h"
+#include "comparator.h"
 
 class PinModule;
 class pic_processor;
@@ -85,8 +86,8 @@ public:
   unsigned int getVrefLoChannel(unsigned int cfg);
 
   double getChannelVoltage(unsigned int channel);
-  double getVrefHi();
-  double getVrefLo();
+  virtual double getVrefHi();
+  virtual double getVrefLo();
 
   void setValidCfgBits(unsigned int m, unsigned int s);
   void setNumberOfChannels(unsigned int);
@@ -100,11 +101,16 @@ public:
   void set_channel_in(unsigned int channel, bool on);
   void setADCnames();
   void setValidBits(unsigned int mask) { valid_bits = mask;}
+  bool getADFM() { return adfm;}
+  unsigned int getMaxCfg() { return cMaxConfigurations;}
 
   
   
 
-private:
+protected:
+
+  unsigned int valid_bits;
+  bool		adfm;
   PinModule **m_AnalogPins;
   float	*m_voltageRef;
   unsigned int m_nAnalogChannels;
@@ -112,7 +118,6 @@ private:
   unsigned int mCfgBitShift;
   unsigned int mIoMask;
   unsigned int cfg_index;
-  unsigned int valid_bits;
 
   static const unsigned int cMaxConfigurations=16;
 
@@ -147,18 +152,23 @@ public:
 
   enum 
     {
+	ADPREF0 = (1<<0),
+	ADPREF1 = (1<<1),
 	ADCS0 = (1<<4),
 	ADCS1 = (1<<5),
-	ADCS2 = (1<<6)
+	ADCS2 = (1<<6),
+	ADFM  = (1<<7)
     };
 
   ADCON1_16F(Processor *pCpu, const char *pName, const char *pDesc);
   virtual void put_value(unsigned int new_value);
   void setAdcon0 (ADCON0 *_adcon0) {adcon0 = _adcon0;}
+  virtual double getVrefHi();
+  void set_FVR_chan(unsigned int chan) { FVR_chan = chan;}
 
 private:
    ADCON0 *adcon0;
-   unsigned int valid_bits;
+   unsigned int FVR_chan;
 };
 
 
@@ -208,7 +218,7 @@ public:
   void setChannel_Mask(unsigned int ch_mask) { channel_mask = ch_mask; }
   void setChannel_shift(unsigned int ch_shift) { channel_shift = ch_shift; }
   void setGo(unsigned int go) { GO_bit = (1 << go); }
-  virtual bool get_ADFM() { return(adcon1->value.get() & ADCON1::ADFM); };
+  virtual bool get_ADFM() { return adcon1->getADFM(); }
   virtual void set_Tad(unsigned int);
   virtual double getChannelVoltage(unsigned int channel) { 
 	return( adcon1->getChannelVoltage(channel)); }
@@ -423,4 +433,108 @@ class a2d_stimulus : public stimulus
      virtual void   set_nodeVoltage(double v);
 
 };
+
+
+//---------------------------------------------------------
+// FVRCON register for Fixed Voltage Reference
+//
+
+class DACCON0;	
+
+class FVRCON : public sfr_register
+{
+public:
+
+  enum 
+  {
+	ADFVR0 	= 1<<0,
+	ADFVR1 	= 1<<1,
+	CDAFVR0 = 1<<2,
+	CDAFVR1 = 1<<3,
+	TSRNG	= 1<<4,
+	TSEN	= 1<<5,
+	FVRRDY	= 1<<6,
+	FVREN	= 1<<7,
+  };
+  FVRCON(Processor *, const char *pName, const char *pDesc=0, unsigned int bitMask= 0xff, unsigned int alwaysOne = 0);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  void set_adcon1(ADCON1 *_adcon1) { adcon1 = _adcon1;}
+  void set_cmModule(ComparatorModule2 *_cmModule) { cmModule = _cmModule;}
+  void set_daccon0(DACCON0 *_daccon0) { daccon0 = _daccon0;}
+  void set_VTemp_AD_chan(unsigned int _chan) {VTemp_AD_chan = _chan;}
+  void set_FVRAD_AD_chan(unsigned int _chan) {FVRAD_AD_chan = _chan;}
+private:
+  double compute_VTemp(unsigned int);	//Voltage of core temperature setting
+  double compute_FVR_AD(unsigned int);	//Voltage reference for ADC
+  double compute_FVR_CDA(unsigned int);	//Voltage reference for Comparators, DAC, CPS
+  ADCON1 *adcon1;
+  DACCON0 *daccon0;
+  ComparatorModule2 *cmModule;
+  unsigned int VTemp_AD_chan;
+  unsigned int FVRAD_AD_chan;
+  unsigned int mask_writable;
+  unsigned int always_one;	// bits in register that are always 1
+};
+
+//
+//  DAC module
+//
+
+class DACCON1;
+class DACCON0 : public sfr_register
+{
+public:
+  enum
+  {
+	DACPSS0	= (1<<2),
+	DACPSS1	= (1<<3),
+	DACOE	= (1<<5),
+	DACLPS  = (1<<6),
+	DACEN	= (1<<7),
+  };
+
+  DACCON0(Processor *, const char *pName, const char *pDesc=0, unsigned int bitMask= 0xe6, unsigned int bit_res = 32);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  void set_adcon1(ADCON1 *_adcon1) { adcon1 = _adcon1;}
+  void set_cmModule(ComparatorModule2 *_cmModule) { cmModule = _cmModule;}
+  void set_FVRCDA_AD_chan(unsigned int _chan) {FVRCDA_AD_chan = _chan;}
+  void set_dcaccon1_reg(unsigned int reg);
+  void set_FVR_CDA_volt(double volt) { FVR_CDA_volt = volt;}
+  void setDACOUT(PinModule *pin){ output_pin = pin;}
+  //void setDACOUT(IO_bi_directional_pu *_pin){ pin = _pin;}
+
+private:
+  void	compute_dac(unsigned int value);
+  double get_Vhigh(unsigned int value);
+  ADCON1	*adcon1;
+  ComparatorModule2 *cmModule;
+  unsigned int  FVRCDA_AD_chan;
+  unsigned int  bit_mask;
+  unsigned int  bit_resolution;
+  unsigned int  daccon1_reg;
+  double	FVR_CDA_volt;
+  bool		Pin_Active;
+  double	Vth;
+  double	Zth;
+  PinModule	*output_pin;
+  IOPIN *pin;
+  IO_bi_directional_pu *out_pin;
+
+};
+
+class DACCON1 : public sfr_register
+{
+public:
+  DACCON1(Processor *, const char *pName, const char *pDesc=0, unsigned int bitMask= 0x1f, DACCON0 *_daccon0 = 0);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  void set_daccon0(DACCON0 *_daccon0) { daccon0 = _daccon0;}
+
+private:
+    unsigned int bit_mask;
+    DACCON0	*daccon0;
+};
+
 #endif // __A2DCONVERTER_H__

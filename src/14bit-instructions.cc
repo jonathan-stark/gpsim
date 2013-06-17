@@ -342,14 +342,14 @@ void RETFIE::execute(void)
   cpu14->intcon->set_gie();
   if(cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
   {
-	cpu14e->status->value = cpu14e->status_shad.value;
-	cpu14e->W->value = cpu14e->wreg_shad.value;
-	cpu14e->bsr.value = cpu14e->bsr_shad.value;
-	cpu14e->pclath->value = cpu14e->pclath_shad.value;
-	cpu14e->ind0.fsrl.value = cpu14e->fsr0l_shad.value;
-	cpu14e->ind0.fsrh.value = cpu14e->fsr0h_shad.value;
-	cpu14e->ind1.fsrl.value = cpu14e->fsr1l_shad.value;
-	cpu14e->ind1.fsrh.value = cpu14e->fsr1h_shad.value;
+	cpu14e->status->put(cpu14e->status_shad.get());
+	cpu14e->W->put(cpu14e->wreg_shad.get());
+	cpu14e->bsr.put(cpu14e->bsr_shad.get());
+	cpu14e->pclath->put(cpu14e->pclath_shad.get());
+	cpu14e->ind0.fsrl.put(cpu14e->fsr0l_shad.get());
+	cpu14e->ind0.fsrh.put(cpu14e->fsr0h_shad.get());
+	cpu14e->ind1.fsrl.put(cpu14e->fsr1l_shad.get());
+	cpu14e->ind1.fsrh.put(cpu14e->fsr1h_shad.get());
   }
 }
 
