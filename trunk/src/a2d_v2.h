@@ -19,6 +19,8 @@ License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
+// For A2D modules which have ADCON0, ADCON1 and ADCON2 registers
+
 #ifndef __A2D_V2_H__
 #define __A2D_v2_H__
 

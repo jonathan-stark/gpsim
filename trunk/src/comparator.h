@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998-2002 T. Scott Dattalo
-   Copyright (C) 2006,2010 Roy R. Rankin
+   Copyright (C) 2006,2010,2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -21,6 +21,8 @@ License along with this library; if not, see
 
 #ifndef __COMPARATOR_H__
 #define __COMPARATOR_H__
+
+#include "14bit-tmrs.h"
 
 /***************************************************************************
  *
@@ -396,5 +398,121 @@ class CM2CON0_2 : public CM12CON0
 
   virtual void state_change(unsigned int cmcon_val);
   virtual double CVref();
+};
+// The following classes are for comparators which have 3 registers
+//
+class CMxCON1;
+class ComparatorModule2;
+
+class CMxCON0 : public sfr_register
+{
+ public:
+
+  enum 
+    {
+      CxSYNC 	= 1<<0,	// Output Synchronous Mode bit
+      CxHYS 	= 1<<1,	// Hysteresis Enable bit
+      CxSP   	= 1<<2,	// Speed/Power Select bit
+      CxZLF	= 1<<3, // Zero Latency Filter Enable bit
+      CxPOL 	= 1<<4,	// Output polarity select bit
+      CxOE  	= 1<<5,	// Output enable
+      CxOUT 	= 1<<6,	// Output bit 
+      CxON  	= 1<<7,	// Enable bit
+    };
+
+  CMxCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int x, ComparatorModule2 *);
+  void put(unsigned int);
+  unsigned int  get();
+  void setBitMask(unsigned int bm) { mValidBits = bm; }
+
+protected:
+
+  unsigned int cm;	// comparator number
+  PinModule	*cm_output;
+  CMxCON1	*m_cmxcon1;
+  ComparatorModule2 *m_cmModule;
+  CMSignalSource *cm_source;
+};
+// CMxCON1 only uses 1 0r 2 of Negative select bits and 2 Positive select bits
+class CMxCON1 : public sfr_register
+{
+ public:
+
+  enum 
+    {
+      CxNCH0 	= 1<<0,	//  Negative Input Channel Select bits
+      CxNCH1 	= 1<<1,	//  Negative Input Channel Select bits
+      CxNCH2 	= 1<<2,	//  Negative Input Channel Select bits
+      CxPCH0	= 1<<3, //  Positive Input Channel Select bits
+      CxPCH1	= 1<<4, //  Positive Input Channel Select bits
+      CxPCH2	= 1<<5, //  Positive Input Channel Select bits
+      CxINTN 	= 1<<6,	//  Interrupt on Negative Going Edge Enable bits
+      CxINTP  	= 1<<7,	//  Interrupt on Positive Going Edge Enable bits
+      CxNMASK = (CxNCH0 | CxNCH1 | CxNCH2),
+      CxPMASK = (CxPCH0 | CxPCH1 | CxPCH2),
+      NEG	= 0,
+      POS	= 1,
+
+    };
+  CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _x, ComparatorModule2 *);
+
+  void setBitMask(unsigned int bm) { mValidBits = bm; }
+  void put(unsigned int new_value);
+  double get_Vpos();
+  double get_Vneg();
+  void setPinStimulus(PinModule *, bool);
+  void set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, PinModule *pin_cm2=0,  PinModule *pin_cm3=0,  PinModule *pin_cm4=0);
+  void set_OUTpin(PinModule *pin_cm0);
+  void set_INpinPos(PinModule *pin_cm0, PinModule *pin_cm1=0);
+  PinModule *output_pin() { return cm_output; }
+
+protected:
+
+  unsigned int cm;	// comparator number
+  CM_stimulus 		*cm_stimulus[2];
+  PinModule		*stimulus_pin[2];
+  PinModule 		*cm_inputNeg[5];
+  PinModule 		*cm_inputPos[2];
+  PinModule 		*cm_output;
+  ComparatorModule2 	*m_cmModule;
+};
+class CMOUT : public sfr_register
+{
+ public:
+
+    void put(unsigned int val) { cout << "cmout read only\n"; return;} // Read only by user
+
+    CMOUT(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc) {}
+
+};
+
+// uses CMxCON0, CMxCON1, CMOUT
+class ComparatorModule2
+{
+ public:
+
+  ComparatorModule2(Processor *);
+
+  void run_get(unsigned int comp) { cmxcon0[comp]->get();}
+
+
+  void set_DAC_volt(double);
+  void set_FVR_volt(double);
+  void set_cmout(unsigned int bit, bool value);
+  void set_if(unsigned int);
+  void assign_pir_set(PIR_SET *new_pir_set){ pir_set = new_pir_set;}
+  void assign_t1gcon(T1GCON *_t1gcon) { t1gcon = _t1gcon;}
+
+  CMxCON0	*cmxcon0[4];
+  CMxCON1 	*cmxcon1[4];
+  CMOUT		*cmout;
+
+//protected:
+  double 	DAC_voltage;
+  double 	FVR_voltage;
+  PIR_SET 	*pir_set;
+  T1GCON	*t1gcon;
+
 };
 #endif // __COMPARATOR_H__

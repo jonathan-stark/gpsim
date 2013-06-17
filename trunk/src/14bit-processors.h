@@ -165,6 +165,12 @@ public:
   virtual bool hasSSP() {return false;}
 };
 
+class CPU_Temp : public Float
+{
+public:
+  CPU_Temp(const char  *_name, double temp, const char *desc) : Float(_name, temp, desc) {}
+};
+
 // 14 bit processors with extended instructions
 //
 class _14bit_e_processor : public pic_processor
@@ -185,6 +191,7 @@ public:
   sfr_register		 fsr0h_shad;
   sfr_register		 fsr1l_shad;
   sfr_register		 fsr1h_shad;
+  CPU_Temp         	*m_cpu_temp;
 
   virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _14BIT_E_PROCESSOR_;};
@@ -223,4 +230,5 @@ protected:
 };
 
 #define cpu14e ( (_14bit_e_processor *)cpu)
+
 #endif

@@ -1,7 +1,7 @@
 /*
         
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006,2010 Roy R. Rankin
+   Copyright (C) 2006,2010,2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -1010,3 +1010,299 @@ void VRCON_2::put(unsigned int new_value)
 }
 
 
+CMxCON0::CMxCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
+  : sfr_register(pCpu, pName, pDesc),
+  cm(_cm), m_cmModule(cmModule), cm_source(0)
+{
+}
+
+void CMxCON0::put(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  new_value &= mValidBits;
+  unsigned int diff = new_value ^ old_value;
+
+  if (diff == 0)
+  {
+     get(); 
+     return;
+  }
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+  if (diff & CxOE)
+  {
+      PinModule *out_pin = m_cmModule->cmxcon1[cm]->output_pin();
+      if(new_value & CxOE)
+      {
+	  char name[20];
+          if ( ! cm_source)
+                cm_source = new CMSignalSource();
+	  sprintf(name, "c%dout", cm+1);
+	  assert(out_pin);
+	  out_pin->getPin().newGUIname(name);
+          out_pin->setSource(cm_source);
+      }
+      else if (cm_source)	// Enable output enable turned off
+      {
+	    out_pin->getPin().newGUIname(out_pin->getPin().name().c_str());
+            out_pin->setSource(0);
+      }
+  }
+  get();
+}
+//
+// evaluate inputs and determine output
+//
+unsigned int CMxCON0::get()
+{
+    bool output;
+    unsigned int cmxcon0 = value.get();
+    double Vpos = m_cmModule->cmxcon1[cm]->get_Vpos();
+    double Vneg = m_cmModule->cmxcon1[cm]->get_Vneg();
+    bool old_out = cmxcon0 & CxOUT;
+    
+    if (! cmxcon0 & CxON)
+	output = false;
+
+    else if (cmxcon0 & CxHYS)
+    {
+    	bool cxout = cmxcon0 & CxOUT;
+    	if (cmxcon0 & CxPOL) cxout = !cxout;
+    	    output = cxout;
+    	if (cxout && (Vpos + 0.05) < Vneg)
+    	   output = false;
+    	else if (!cout && Vpos > (Vneg + 0.05))
+    	   output = true;
+    }
+    else
+    {
+        output = Vpos > Vneg;
+    }
+    if (cmxcon0 & CxPOL) output = !output;
+
+    if(output)
+	cmxcon0 |= CxOUT;
+    else
+	cmxcon0 &= ~CxOUT;
+    Dprintf(("cm%d Vpos %.2f Vneg %.2f POL %d output %d cmxcon0=%x\n", cm+1, Vpos, Vneg, (bool)(cmxcon0 & CxPOL), output, cmxcon0));
+    value.put(cmxcon0);
+    m_cmModule->set_cmout(cm, output);
+    if (cmxcon0 & CxOE)
+    {
+        cm_source->putState(output);
+        m_cmModule->cmxcon1[cm]->output_pin()->updatePinModule();
+    }
+    if (old_out != output) // state change
+    {
+	// Positive going edge, set interrupt ? 
+	if (output && (m_cmModule->cmxcon1[cm]->value.get() & CMxCON1::CxINTP))
+	    m_cmModule->set_if(cm);
+
+	// Negative going edge, set interrupt ? 
+	if (!output && (m_cmModule->cmxcon1[cm]->value.get() & CMxCON1::CxINTN))
+	    m_cmModule->set_if(cm);
+    }
+    return cmxcon0;
+}
+
+
+CMxCON1::CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
+  : sfr_register(pCpu, pName, pDesc),
+  cm(_cm), m_cmModule(cmModule)
+{
+     cm_stimulus[NEG] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[cm], "cm_stimulus_-", 0, 1e12);
+     cm_stimulus[POS] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[cm], "cm_stimulus_+", 0, 1e12);
+     stimulus_pin[NEG] = 0;
+     stimulus_pin[POS] = 0;
+    for(int i = 0; i<5; i++)
+	cm_inputNeg[i] = 0;
+    for(int i = 0; i<2; i++)
+	cm_inputPos[i] = 0;
+    cm_output = 0;
+}
+double CMxCON1::get_Vneg()
+{
+    unsigned int cxNchan = value.get() & CxNMASK;
+    if (!stimulus_pin[NEG])
+	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+    return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
+}
+double CMxCON1::get_Vpos()
+{
+    unsigned int cxPchan = (value.get() & CxPMASK) >> 3;
+    double	Voltage;
+
+    switch(cxPchan)
+    {
+    case 0:
+	if (!stimulus_pin[POS])
+	    setPinStimulus(cm_inputPos[cxPchan], POS);
+	Voltage = cm_inputPos[cxPchan]->getPin().get_nodeVoltage();
+	break;
+
+    case 2:
+	Voltage = m_cmModule->DAC_voltage;
+	break;
+
+    case 4:
+	Voltage = m_cmModule->FVR_voltage;
+	break;
+
+    default:
+	printf("CMxCON1::get_Vpos unexpected Pchan %x\n", cxPchan);
+    case 6:
+	Voltage = 0.;
+	break;
+    }
+    return Voltage;
+
+}
+
+// Attach a stimulus to an input pin so that changes
+// in the pin voltage can be reflected in the comparator output.
+//
+// pin may be 0 in which case a current stimulus, if any, will be detached
+// pol is either the enum POS or NEG
+//
+void CMxCON1::setPinStimulus(PinModule *pin, bool pol)
+{
+	if (pin == stimulus_pin[pol]) return;
+
+	if (stimulus_pin[pol])
+	{
+            (stimulus_pin[pol]->getPin().snode)->detach_stimulus(cm_stimulus[pol]);
+	    stimulus_pin[pol] = 0;
+	}
+	if (pin && pin->getPin().snode)
+	{
+	    stimulus_pin[pol] = pin;
+
+            (stimulus_pin[pol]->getPin().snode)->attach_stimulus(cm_stimulus[pol]);
+	}
+}
+void CMxCON1::put(unsigned int new_value)
+{
+    unsigned int old_value = value.get();
+    new_value &= mValidBits;
+    unsigned int diff = old_value ^ new_value;
+    trace.raw(write_trace.get() | value.get());
+    value.put(new_value);
+
+    if ((diff & CxNMASK) || !stimulus_pin[NEG])
+    {
+        unsigned int cxNchan = new_value & CxNMASK;
+
+	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+
+    }
+    if ((diff & CxPMASK) || !stimulus_pin[POS])
+    {
+	unsigned int cxPchan = (new_value & CxPMASK) >> 3;
+
+	if (cxPchan == 0)
+		setPinStimulus(cm_inputPos[cxPchan], POS);
+	else if (stimulus_pin[POS])
+		setPinStimulus(0, POS);
+    }
+    m_cmModule->run_get(cm);
+}
+
+void CMxCON1::set_OUTpin(PinModule *pin_cm0)
+{
+    cm_output = pin_cm0;
+}
+
+void CMxCON1::set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, PinModule *pin_cm2,  PinModule *pin_cm3,  PinModule *pin_cm4)
+{
+    cm_inputNeg[0] = pin_cm0;
+    cm_inputNeg[1] = pin_cm1;
+    cm_inputNeg[2] = pin_cm2;
+    cm_inputNeg[3] = pin_cm3;
+    cm_inputNeg[4] = pin_cm4;
+}
+void CMxCON1::set_INpinPos(PinModule *pin_cm0, PinModule *pin_cm1)
+{
+    cm_inputPos[0] = pin_cm0;
+    cm_inputPos[1] = pin_cm1;
+}
+
+ComparatorModule2::ComparatorModule2(Processor *pCpu)
+{
+    for(int i = 0; i < 4; i++)
+    {
+	cmxcon0[i] = 0;
+	cmxcon1[i] = 0;
+    }
+    cmout = 0;
+    t1gcon = 0;
+
+}
+
+// this function sets the bits in the CMOUT register and also
+// sends the state to the T1GCON class if t1gcon is defined
+//
+void ComparatorModule2::set_cmout(unsigned int bit, bool value)
+{
+    if (value)
+        cmout->value.put(cmout->value.get() | (1<<bit));
+    else
+        cmout->value.put(cmout->value.get() & ~(1<<bit));
+
+    if(t1gcon)
+    {
+	switch(bit)
+	{
+	case 0:		//CM1
+		t1gcon->CM1_gate(value);
+		break;
+
+	case 1:		//CM2
+		t1gcon->CM2_gate(value);
+		break;
+
+	default:	//Do nonthing other CMs
+		break;
+	}
+    }
+}
+
+void ComparatorModule2::set_DAC_volt(double _volt)
+{
+	DAC_voltage = _volt;
+	for (int i=0; i < 4; i++)
+	{
+	    if (cmxcon0[i]) cmxcon0[i]->get();
+	}
+}
+void ComparatorModule2::set_FVR_volt(double _volt)
+{
+	FVR_voltage = _volt;
+	for (int i=0; i < 4; i++)
+	{
+	    if (cmxcon0[i]) cmxcon0[i]->get();
+	}
+}
+// set interrupt for comparator cm
+void ComparatorModule2::set_if(unsigned int cm)
+{
+    switch(cm)
+    {
+    case 0:	
+	pir_set->set_c1if();
+	break;
+
+    case 1:	
+	pir_set->set_c2if();
+	break;
+
+    case 2:	
+	pir_set->set_c3if();
+	break;
+
+    case 3:	
+	pir_set->set_c4if();
+	break;
+
+    }
+}

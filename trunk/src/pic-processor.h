@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998-2000 T. Scott Dattalo
+   Copyright (C) 2013      Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -446,6 +447,8 @@ public:
 
   virtual void set_int_osc(bool val){ internal_osc = val;}
   virtual bool get_int_osc(){ return internal_osc; }
+  virtual void set_pplx4_osc(bool val){ PPLx4 = val;}
+  virtual bool get_pplx4_osc(){ return PPLx4; }
 
 
 
@@ -464,7 +467,8 @@ protected:
   string m_mclr_pin_name;
   unsigned char osc_pin_Number[2];
   PinModule *m_osc_Monitor[2];
-  bool internal_osc;
+  bool internal_osc;	// internal RC oscilator enabled on Config Word
+  bool PPLx4;		// 4x PPL enabled on Config Word
 
 };
 

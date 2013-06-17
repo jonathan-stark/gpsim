@@ -461,6 +461,10 @@ public:
                     double _ZthIn = 1e8);
   virtual double get_Zth();
   virtual double get_Vth();
+  virtual double get_VthIn() { return VthIn;}
+  virtual double get_ZthIn() { return ZthIn;}
+  virtual void set_VthIn(double _VthIn) { VthIn = _VthIn;}
+  virtual void set_ZthIn(double _ZthIn) { ZthIn = _ZthIn;}
   virtual char getBitChar();
 
   virtual void set_nodeVoltage(double new_nodeVoltage);

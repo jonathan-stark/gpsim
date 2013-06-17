@@ -1,6 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
+		 2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -53,6 +54,8 @@ public:
   virtual void set_cmif(){}
   virtual void set_c1if(){fprintf(stderr, "RRR set_c1if FIX\n");}
   virtual void set_c2if(){fprintf(stderr, "RRR set_c2if FIX\n");}
+  virtual void set_c3if(){fprintf(stderr, "RRR set_c3if FIX\n");}
+  virtual void set_c4if(){fprintf(stderr, "RRR set_c4if FIX\n");}
   virtual void set_eccp1if(){}
   virtual void set_eeif(){}
   virtual void set_errif(){}
@@ -64,6 +67,7 @@ public:
   virtual void set_rxb1if(){}
   virtual void set_sspif(){}
   virtual void set_tmr1if(){}
+  virtual void set_tmr1gif(){}
   virtual void set_tmr2if(){}
   virtual void set_tmr3if(){}
   virtual void set_txb0if(){}
@@ -611,6 +615,8 @@ public:
   virtual void set_cmif() {}
   virtual void set_c1if() {}
   virtual void set_c2if() {}
+  virtual void set_c3if() {}
+  virtual void set_c4if() {}
 
   // eeprom stuff
   virtual void set_eeif() {}
@@ -620,6 +626,7 @@ public:
 
   // Timer stuff
   virtual void set_tmr1if() {}
+  virtual void set_tmr1gif() {}
   virtual void set_tmr2if() {}
   virtual void set_adif() {}
 };
@@ -731,6 +738,15 @@ class PIR_SET_1 : public PIR_SET
     pir1->set_c2if();
   }
 
+  virtual void set_c3if() {
+    assert(pir1 != 0);
+    pir1->set_c3if();
+  }
+  virtual void set_c4if() {
+    assert(pir1 != 0);
+    pir1->set_c4if();
+  }
+
 private:
   PIR   *pir1;
   PIR   *pir2;
@@ -820,6 +836,10 @@ class PIR_SET_2 : public PIR_SET
     assert(pir1 != 0);
     pir1->set_tmr1if();
   }
+  virtual void set_tmr1gif() {
+    assert(pir1 != 0);
+    pir1->set_tmr1gif();
+  }
   virtual void set_tmr2if() {
     assert(pir1 != 0);
     pir1->set_tmr2if();
@@ -843,6 +863,16 @@ class PIR_SET_2 : public PIR_SET
   virtual void set_c2if() {
     assert(pir2 != 0);
     pir2->set_c2if();
+  }
+
+  virtual void set_c3if() {
+    assert(pir2 != 0);
+    pir2->set_c3if();
+  }
+
+  virtual void set_c4if() {
+    assert(pir2 != 0);
+    pir2->set_c4if();
   }
 
   // I2C master

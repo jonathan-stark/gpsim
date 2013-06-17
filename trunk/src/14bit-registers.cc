@@ -23,6 +23,7 @@ License along with this library; if not, see
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
+#include <assert.h>
 
 
 #include "../config.h"
@@ -281,6 +282,274 @@ void  OSCCON::put(unsigned int new_value)
 	    new_value |= IOFS;
   }
 }
+// Clock is stable
+void OSCCON_2::callback()
+{
+    unsigned int mask = 0;
+    unsigned int val;
+
+    if (!oscstat) return;
+
+    val = oscstat->value.get();
+    switch(mode)
+    {
+    case LF:
+	mask = OSCSTAT::LFIOFR;
+	break;
+
+    case MF:
+	mask = OSCSTAT::MFIOFR;
+	break;
+
+    case HF:
+	mask = OSCSTAT::HFIOFL | OSCSTAT::HFIOFR;
+	break;
+
+    case PLL:
+	mask = OSCSTAT::PLLR;
+	break;
+
+    case T1OSC:
+	break;
+    }
+    val |= mask;
+    oscstat->value.put(val);
+}
+bool OSCCON_2::set_rc_frequency()
+{
+  double base_frequency = 31.25e3;
+  unsigned int sys_clock = value.get() & (SCS0 | SCS1);
+  bool osccon_pplx4 = value.get() & SPLLEN;
+  bool config_pplx4 = cpu_pic->get_pplx4_osc();
+
+
+  if (sys_clock == 0 && config_fosc != 4) // Not internal oscillator
+  {
+	if (config_fosc >= 3) // always run at full speed
+	{
+  	    unsigned int oscstat_reg = (oscstat->value.get() & 0x1f);
+	    oscstat->value.put(oscstat_reg | OSCSTAT::OSTS);
+	    mode = EC;
+	}
+	else if (config_ieso) // internal/external switchover
+	{
+	    mode = OST;
+        }
+  
+  }
+
+  if((osccon_pplx4 && !config_pplx4) && sys_clock == 0)\
+  {
+	mode |= PLL;
+	return true;
+  }
+  if (!cpu_pic->get_int_osc() && (sys_clock == 0))
+     return false;
+
+  if (sys_clock == 1) // T1OSC
+  {
+	base_frequency = 32.e3;
+	mode = T1OSC;
+  }
+  else if (sys_clock > 1)
+  {
+    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2 |IRCF3)) >> 3;
+    switch (new_IRCF)
+    {
+    case 0:
+    case 1:
+	base_frequency = 30.e3;
+	mode = LF;
+	break;
+
+    case 2:
+	mode = MF;
+	base_frequency = 31.25e3;
+	break;
+	
+    case 3:
+	mode = HF;
+	base_frequency = 31.25e3;
+	break;
+	
+    case 4:
+	mode = MF;
+	base_frequency = 62.5e3;
+	break;
+	
+    case 5:
+	mode = MF;
+	base_frequency = 125e3;
+	break;
+	
+    case 6:
+	mode = MF;
+	base_frequency = 250e3;
+	break;
+	
+    case 7:
+	mode = MF;
+	base_frequency = 500e3;
+	break;
+	
+    case 8:
+	mode = HF;
+	base_frequency = 125e3;
+	break;
+	
+    case 9:
+	mode = HF;
+	base_frequency = 250e3;
+	break;
+	
+    case 10:
+	mode = HF;
+	base_frequency = 500e3;
+	break;
+	
+    case 11:
+	mode = HF;
+	base_frequency = 1e6;
+	break;
+	
+    case 12:
+	mode = HF;
+	base_frequency = 2e6;
+	break;
+	
+    case 13:
+	mode = HF;
+	base_frequency = 4e6;
+	break;
+	
+    case 14:
+	// The treatment for PPL based on Fig 5-1 of P12f1822 ref manual
+	if (osccon_pplx4 || config_pplx4)
+	{
+	   mode = PLL;
+	   base_frequency = 32e6;
+	}
+	else
+	{
+	   mode = HF;
+	   base_frequency = 8e6;
+	}
+	break;
+	
+    case 15:
+	mode = HF;
+	base_frequency = 16e6;
+	break;
+   }
+   if (osctune)
+   {
+       int tune;
+       unsigned int osctune_value = osctune->value.get();
+       tune = osctune_value & (OSCTUNE::TUN5-1);
+       tune = (OSCTUNE::TUN5 & osctune_value) ? -tune : tune;
+       base_frequency *= 1. + 0.125 * tune / 31.;
+   }
+  }
+   cpu_pic->set_frequency(base_frequency);
+   if ((bool)verbose)
+   {
+	cout << "set_rc_frequency() : osccon=" << hex << value.get();
+	if (osctune)
+	    cout << " osctune=" << osctune->value.get();
+	cout << " new frequency=" << base_frequency << endl;
+   }
+   return true;
+}
+void  OSCCON_2::put(unsigned int new_value)
+{
+  
+  unsigned int old_value = value.get();
+  unsigned int oscstat_reg = 0;
+  unsigned int oscstat_new = 0;
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+  if (old_value == new_value) return;
+
+  assert(oscstat);
+  
+  oscstat_reg = oscstat->value.get();
+  oscstat_new = oscstat_reg;
+	if (((new_value & (SCS0 | SCS1))==0) && !cpu_pic->get_int_osc())
+		oscstat_new |= OSCSTAT::OSTS;
+	else
+		oscstat_new &= ~OSCSTAT::OSTS;
+
+  
+
+  if (set_rc_frequency())  // using internal RC Oscillator
+	set_callback();
+}
+void OSCCON_2::set_config(unsigned int cfg_fosc, bool cfg_ieso)
+{
+    config_fosc = cfg_fosc;
+    config_ieso = cfg_ieso;
+
+#ifdef RRR
+    printf("RRR OSCCON_2::set_config fosc %x ppl=%d\n", fosc, cpu_pic->get_pplx4_osc());
+    switch(fosc)
+    {
+    case 0:     //LP oscillator: low power crystal
+    case 1:     //XT oscillator: Crystal/resonator 
+    case 2:     //HS oscillator: High-speed crystal/resonator
+	mode = OST;
+	break;
+
+    case 5:     //ECL: External Clock, Low-Power mode (0-0.5 MHz)
+    case 6:     //ECM: External Clock, Medium-Power mode (0.5-4 MHz)
+    case 7:     //ECH: External Clock, High-Power mode (4-32 MHz)
+	mode = EC;
+	break;
+#endif //RRR
+}
+void OSCCON_2::wake()
+{
+}
+void OSCCON_2::set_callback()
+{
+	unsigned int oscstat_reg = oscstat->value.get();;
+	unsigned int oscstat_new = oscstat_reg;
+	guint64 settle = 0;
+
+	switch(mode&~PLL)
+	{
+	case LF:
+		oscstat_new &= ~(OSCSTAT::OSTS | OSCSTAT::PLLR | OSCSTAT::T1OSCR);
+		settle = get_cycles().get() + 2;
+		break;
+
+	case MF:
+		oscstat_new &= ~(OSCSTAT::OSTS | OSCSTAT::PLLR | OSCSTAT::T1OSCR);
+		settle = get_cycles().get(2e-6); // 2us settle time
+		break;
+
+	case HF:
+		oscstat_new &= ~(OSCSTAT::OSTS | OSCSTAT::PLLR | OSCSTAT::T1OSCR);
+		settle = get_cycles().get(2e-6); // 2us settle time
+		break;
+
+	case T1OSC:
+		settle = get_cycles().get() + 1024/4;
+		break;
+	}
+  	if((mode & PLL) && (oscstat_reg & OSCSTAT::PLLR) == 0)
+		settle = get_cycles().get(2e-3); // 2ms
+
+	if (settle)
+	{
+		if (next_callback > get_cycles().get())
+		    get_cycles().clear_break(next_callback);
+
+	        get_cycles().set_break(settle, this);
+		next_callback = settle;
+	}
+	if(oscstat && (oscstat_new != oscstat_reg))
+		oscstat->put(oscstat_new);
+}
 
 void WDTCON::put(unsigned int new_value)
 {
@@ -380,48 +649,6 @@ unsigned int FSR_12::get_value()
   return ((value.get() & valid_bits) | (~valid_bits & 0xff));
 
 }
-
-
-//
-//--------------------------------------------------
-// member functions for the FVRCON class
-//--------------------------------------------------
-//
-FVRCON::FVRCON(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, unsigned int alwaysOne)
-  : sfr_register(pCpu, pName, pDesc)
-{
-    mask_writable = bitMask;
-    always_one = alwaysOne;
-}
-
-void  FVRCON::put(unsigned int new_value)
-{
-  unsigned int masked_value = (new_value & mask_writable) | always_one;
-  trace.raw(write_trace.get() | value.get());
-
-  value.put(masked_value);
-}
-
-void  FVRCON::put_value(unsigned int new_value)
-{
-  unsigned int masked_value = (new_value & mask_writable) | always_one;
-  put(masked_value);
-
-  update();
-}
-
-
-unsigned int FVRCON::get()
-{
-  trace.raw(read_trace.get() | value.get());
-  return(value.get());
-}
-
-unsigned int FVRCON::get_value()
-{
-  return(value.get());
-}
-
 
 //
 //--------------------------------------------------
@@ -747,6 +974,8 @@ void Indirect_Addressing14::put(unsigned int new_value)
     }
     else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
     {
+	cout << "WARNING cannot write via FSR/INDF to program memory address 0x"
+		<<hex << fsr_adj << endl;
 	return;	// Not writable
     }
 

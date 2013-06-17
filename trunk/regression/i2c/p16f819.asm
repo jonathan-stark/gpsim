@@ -318,6 +318,7 @@ I2C_READ_SUB2    MACRO   _BYTES_, _DestPointer_, _SubAddress_, _SubAddress2_
 ;----------------------------------------------------------------------
     cblock 0x20
 
+Add:2
 IO_buf:10
 IN_buf:10
     endc

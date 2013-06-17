@@ -26,6 +26,7 @@ License along with this library; if not, see
 
 #include "../config.h"
 #include "14bit-processors.h"
+#include "14bit-tmrs.h"
 #include "interface.h"
 
 #include <string>
@@ -46,7 +47,7 @@ License along with this library; if not, see
 //--------------------------------------------------
 TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc),
-    m_pOptionReg(0)
+    m_pOptionReg(0), m_t1gcon(0)
 {
   value.put(0);
   synchronized_cycle=0;
@@ -385,10 +386,18 @@ bool TMR0::get_t0se()
 
 void TMR0::set_t0if()
 {
-  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
+  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_ ||
+	cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
     {
       cpu14->intcon->set_t0if();
     }
+  if (m_t1gcon)
+  {
+	m_t1gcon->T0_gate(true);
+	// Spec sheet does not indicate when the overflow signal
+	// is cleared, so I am assuming it is just a pulse. RRR
+	m_t1gcon->T0_gate(false);
+  }
 }
 
 void TMR0::new_clock_source()

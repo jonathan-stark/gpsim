@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2009,2010 Roy R. Rankin
+   Copyright (C) 2009,2010,2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -245,6 +245,9 @@ public:
   CCPCON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~CCPCON();
   void setIOpin(PinModule *p1, PinModule *p2=0, PinModule *p3=0, PinModule *p4=0);
+  void setIOPin1(PinModule *p1);
+  void setIOPin2(PinModule *p2);
+
   PSTRCON *pstrcon;
   PWM1CON *pwm1con;
   ECCPAS  *eccpas;
@@ -309,27 +312,27 @@ enum
 
   virtual unsigned int get_prescale();
 
-  unsigned int get_tmr1cs()
+  virtual unsigned int get_tmr1cs()
     {
-      return(value.get() & TMR1CS);
+      return((value.get() & TMR1CS)?2:0);
     }
-  unsigned int get_tmr1on()
+  virtual bool get_tmr1on()
     {
       return(value.get() & TMR1ON);
     }
-  unsigned int get_t1oscen()
+  virtual bool  get_t1oscen()
     {
       return(value.get() & T1OSCEN);
     }
-  unsigned int get_tmr1GE()
+  virtual bool get_tmr1GE()
     {
       return(value.get() & TMR1GE);
     }
-  unsigned int get_t1GINV()
+  virtual bool get_t1GINV()
     {
       return(value.get() & T1GINV);
     }
-  unsigned int get_t1sync()
+  virtual bool get_t1sync()
     {
       return(value.get() & T1SYNC);
     }
@@ -337,6 +340,119 @@ enum
 
 };
 
+
+
+class T1GCon_GateSignalSink;
+class T1CON_G;
+
+// Timer 1 gate control Register
+class T1GCON : public sfr_register
+{
+public:
+
+  enum
+  {
+	T1GSS0	= 1<<0,		// Gate source select bits
+	T1GSS1	= 1<<1,
+	T1GVAL  = 1<<2,		// Current state bit
+	T1GGO	= 1<<3,		// Gate Single-Pulse Acquisition Status bit
+	T1GSPM	= 1<<4, 	// Gate Single-Pulse Mode bit
+	T1GTM	= 1<<5,		// Gate Toggle Mode bit
+	T1GPOL	= 1<<6,		// Gate Polarity bit
+	TMR1GE  = 1<<7,		// Gate Enable bit
+  };
+
+  void put(unsigned int new_value);
+  virtual void setGatepin(PinModule *);
+  virtual void IO_gate(bool);
+  virtual void T0_gate(bool);
+  virtual void CM1_gate(bool);
+  virtual void CM2_gate(bool);
+  virtual void new_gate(bool);
+  void set_WRmask(unsigned int mask) { write_mask = mask;}
+  void set_tmrl(TMRL *_tmrl) { tmrl = _tmrl;}
+  void set_pir_set(PIR_SET *_pir_set) { pir_set = _pir_set;}
+  virtual bool get_tmr1GE()
+    {
+      return(value.get() & TMR1GE);
+    }
+  bool get_t1GPOL() { return (value.get() & T1GPOL); }
+  
+
+  T1GCON(Processor *pCpu, const char *pName, const char *pDesc=0, T1CON_G *t1con_g=0);
+
+private:
+
+  T1GCon_GateSignalSink *sink;
+  unsigned int 	write_mask;
+  TMRL		*tmrl;
+  T1CON_G	*t1con_g;
+  PIR_SET 	*pir_set;
+  bool 		IO_gate_state;
+  bool 		T0_gate_state;
+  bool 		CM1_gate_state;
+  bool 		CM2_gate_state;
+  bool 		last_t1g_in;
+};
+
+class T1CON_G : public T1CON
+{
+public:
+
+  enum
+  {
+    TMR1ON  = 1<<0,
+    T1SYNC  = 1<<2,
+    T1OSCEN = 1<<3,
+    T1CKPS0 = 1<<4,
+    T1CKPS1 = 1<<5,
+    TMR1CS0  = 1<<6,
+    TMR1CS1  = 1<<7,
+  };
+
+  TMRL  *tmrl;
+  TMR1_Freq_Attribute *freq_attribute;
+
+  T1CON_G(Processor *pCpu, const char *pName, const char *pDesc=0);
+
+  // RRR unsigned int get();
+
+  // For (at least) the 18f family, there's a 4X PLL that effects the
+  // the relative timing between gpsim's cycle counter (which is equivalent
+  // to the cumulative instruction count) and the external oscillator. In
+  // all parts, the clock source for the timer is fosc, the external oscillator.
+  // However, for the 18f parts, the instructions execute 4 times faster when
+  // the PLL is selected.
+
+  virtual unsigned int get_prescale() 
+	{ return( ((value.get() &(T1CKPS0 | T1CKPS1)) >> 4) );}
+
+  virtual unsigned int get_tmr1cs()
+    {
+      return((value.get() & (TMR1CS1 | TMR1CS0))>>6);
+    }
+  virtual bool get_tmr1on()
+    {
+      return(value.get() & TMR1ON);
+    }
+  virtual bool get_t1oscen()
+    {
+      return(value.get() & T1OSCEN);
+    }
+  virtual bool get_t1sync()
+    {
+      return(value.get() & T1SYNC);
+    }
+  virtual void put(unsigned int new_value);
+  virtual bool get_tmr1GE() 
+  {
+    return t1gcon.get_tmr1GE();
+  }
+  virtual bool get_t1GINV() { return true;}
+
+  T1GCON t1gcon;
+
+};
 
 //---------------------------------------------------------
 // TMRL & TMRH - Timer 1

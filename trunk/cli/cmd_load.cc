@@ -247,6 +247,8 @@ static int load1(const char *s1, const char *s2)
     fclose (fp);
     return gpsim_open(get_active_cpu(), s1, s2, 0);
   }
+  if(!s2) // can be called s1=name s2=file
+      perror(s1); 
 
   return s2 ? gpsim_open(get_active_cpu(), s2, 0, s1) : 0;
 }

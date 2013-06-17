@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
-   Copyright (C) 2009 Roy R. Rankin
+   Copyright (C) 2009, 2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -25,6 +25,7 @@ License along with this library; if not, see
 #include "ui.h"
 #include "pic-processor.h"
 #include "a2dconverter.h"
+#include "14bit-processors.h"
 
 #define p_cpu ((Processor *)cpu)
 
@@ -328,16 +329,17 @@ void ADCON0::set_interrupt(void)
 
 
 ADCON1_16F::ADCON1_16F(Processor *pCpu, const char *pName, const char *pDesc)
-  : ADCON1(pCpu, pName, pDesc)
+  : ADCON1(pCpu, pName, pDesc), FVR_chan(99)
 {
     valid_bits = 0x70;
 }
 void ADCON1_16F::put_value(unsigned int new_value)
 {
+    unsigned int masked_value = new_value & valid_bits;
      unsigned int Tad = 6;
     setADCnames();
 
-    switch(new_value & (ADCS0 | ADCS1))
+    switch(masked_value & (ADCS0 | ADCS1))
     {
 
     case 0:
@@ -364,16 +366,54 @@ void ADCON1_16F::put_value(unsigned int new_value)
 
     }
     adcon0->set_Tad(Tad);
+    if (ADFM & valid_bits)
+	adfm = ADFM & masked_value;
+
+    //RRR FIXME handle ADPREF
     value.put(new_value & valid_bits);
+}
+double ADCON1_16F::getVrefHi()
+{
+  if (ADPREF0 & valid_bits)
+  {
+	unsigned int mode = value.get() & (ADPREF1 | ADPREF0);
+        switch(mode)
+	{
+	case 0:
+  	    return ((Processor *)cpu)->get_Vdd();
+
+	case 1:
+	    cerr << "WARNING reserved value for ADPREF\n";
+	    return -1.;
+ 	   
+	case 2:
+  	    if (Vrefhi_position[cfg_index] < m_nAnalogChannels)
+    		return getChannelVoltage(Vrefhi_position[cfg_index]);
+	    cerr << "WARNING Vrefhi pin not configured\n";
+	    return -1.;
+
+	case 3:
+  	    if (FVR_chan < m_nAnalogChannels)
+    		return getChannelVoltage(FVR_chan);
+	    cerr << "WARNING FVR_chan not set\n";
+	    return -1.;
+	};
+	    
+  }
+  if (Vrefhi_position[cfg_index] < m_nAnalogChannels)
+    return getChannelVoltage(Vrefhi_position[cfg_index]);
+
+  return ((Processor *)cpu)->get_Vdd();
 }
 //------------------------------------------------------
 // ADCON1
 //
 ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
+    valid_bits(0xff), adfm(false),
     m_AnalogPins(0),  m_voltageRef(0), m_nAnalogChannels(0),
     mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), cfg_index(0), 
-    valid_bits(0xff), m_ad_in_ctl(0)
+    m_ad_in_ctl(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
     setChannelConfiguration(i, 0);
@@ -393,6 +433,7 @@ void ADCON1::put_value(unsigned int new_value)
     unsigned int masked_value = new_value & valid_bits;
     cfg_index = get_cfg(masked_value);
     setADCnames();
+    adfm = masked_value & ADFM;
     value.put(masked_value);
 }
 
@@ -483,10 +524,10 @@ void ADCON1::setVrefHiConfiguration(unsigned int cfg, unsigned int channel)
  */
 void ADCON1::setNumberOfChannels(unsigned int nChannels)
 {
-  PinModule **save = NULL;
+  PinModule **save = NULL;	// save existing pins when nChannels increases
 
   if (!nChannels || nChannels <= m_nAnalogChannels)
-    return;
+    return;	// do nothing if NChannels decreases
 
   if (m_nAnalogChannels && nChannels > m_nAnalogChannels )
         save = m_AnalogPins;
@@ -506,7 +547,7 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
         m_AnalogPins[i] = &AnInvalidAnalogInput;
   }
   if (save)
-        delete save;
+      delete save;
 
   m_nAnalogChannels = nChannels;
 }
@@ -565,6 +606,7 @@ double ADCON1::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
 
+
   if(channel < m_nAnalogChannels) {
     if ( (1<<channel) & m_configuration_bits[cfg_index] ) {
       PinModule *pm = m_AnalogPins[channel];
@@ -574,9 +616,9 @@ double ADCON1::getChannelVoltage(unsigned int channel)
       }
       else
       {
-	cout << "ADCON1::getChannelVoltage channel " << channel << 
+	cerr << "ADCON1::getChannelVoltage channel " << channel << 
 		" not valid analog input\n";
-	cout << "Please raise a Gpsim bug report\n";
+	cerr << "Please raise a Gpsim bug report\n";
       }
     }
     else	// use voltage reference
@@ -594,10 +636,10 @@ double ADCON1::getChannelVoltage(unsigned int channel)
   }
   else
   {
-	cout << "ADCON1::getChannelVoltage channel " << channel <<
+	cerr << "ADCON1::getChannelVoltage channel " << channel <<
                 " >= "
 		<< m_nAnalogChannels << " (number of channels)\n";
-	cout << "Please raise a Gpsim bug report\n";
+	cerr << "Please raise a Gpsim bug report\n";
   }
 
   return voltage;
@@ -714,7 +756,7 @@ void ANSEL_P::setAdcon1(ADCON1 *new_adcon1)
 
 void ANSEL_P::put(unsigned int new_value)
 {
-  unsigned int cfgmax = adcon1->getNumberOfChannels();
+  unsigned int cfgmax = adcon1->getMaxCfg();
   unsigned int i;
   unsigned int mask;
   unsigned int chan = first_channel;
@@ -929,3 +971,208 @@ void   a2d_stimulus::set_nodeVoltage(double v)
         nodeVoltage = v;
         _adcon1->setVoltRef(channel, v);
 }
+//
+//--------------------------------------------------
+// member functions for the FVRCON class
+//--------------------------------------------------
+//
+FVRCON::FVRCON(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, unsigned int alwaysOne)
+  : sfr_register(pCpu, pName, pDesc)
+{
+    mask_writable = bitMask;
+    always_one = alwaysOne;
+}
+
+void  FVRCON::put(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & mask_writable) | always_one;
+  trace.raw(write_trace.get() | value.get());
+
+  value.put(masked_value);
+  compute_VTemp(masked_value);
+  compute_FVR_AD(masked_value);
+  compute_FVR_CDA(masked_value);
+}
+
+void  FVRCON::put_value(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & mask_writable) | always_one;
+  put(masked_value);
+
+  update();
+}
+
+
+double FVRCON::compute_VTemp(unsigned int fvrcon)
+{
+    double ret = -1.;
+    double Vt;	//Transister junction threshold voltage at core temperature
+
+    if((fvrcon & TSEN) && cpu14e->m_cpu_temp)
+    { 
+        Vt = 0.659 - ( cpu14e->m_cpu_temp->getVal() + 40.) * 0.00132;
+	ret = ((Processor *)cpu)->get_Vdd() - ((fvrcon&TSRNG)?4.:2.) * Vt;
+	if (ret < 0.)
+	{
+	    ret = -1.;
+	    cerr << "Warning FVRCON Vdd too low for temperature range\n";
+	}
+    }
+    if(adcon1) adcon1->setVoltRef(VTemp_AD_chan, ret);
+    return ret;
+}
+
+double FVRCON::compute_FVR_AD(unsigned int fvrcon)
+{
+    double ret = -1.;
+    unsigned int gain = (fvrcon & (ADFVR0|ADFVR1));
+
+    if ((fvrcon & FVREN) && gain)
+	ret = 1.024 * (1 << (gain - 1));
+    if (ret > ((Processor *)cpu)->get_Vdd())
+    {
+	cerr << "warning FVRCON FVRAD > Vdd\n";
+	ret = -1.;
+    }
+    if(adcon1)adcon1->setVoltRef(FVRAD_AD_chan, ret);
+    return ret;
+}
+
+double FVRCON::compute_FVR_CDA(unsigned int fvrcon)
+{
+    double ret = 0.;
+    unsigned int gain = (fvrcon & (CDAFVR0|CDAFVR1))>>2;
+
+    if ((fvrcon & FVREN) && gain)
+	ret = 1.024 * (1 << (gain - 1));
+
+    if(daccon0) daccon0->set_FVR_CDA_volt(ret);
+    if(cmModule) cmModule->set_FVR_volt(ret);
+    return ret;
+}
+//
+//--------------------------------------------------
+// member functions for the DAC classes
+//--------------------------------------------------
+//
+DACCON0::DACCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, unsigned int bit_res)
+  : sfr_register(pCpu, pName, pDesc),
+    adcon1(0),
+    bit_mask(bitMask), bit_resolution(bit_res),
+    FVR_CDA_volt(0.), Pin_Active(false)
+{
+}
+
+void  DACCON0::put(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & bit_mask);
+  trace.raw(write_trace.get() | value.get());
+  value.put(masked_value);
+  compute_dac(masked_value);
+}
+
+void  DACCON0::put_value(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & bit_mask);
+  value.put(masked_value);
+  compute_dac(masked_value);
+
+  update();
+}
+
+void DACCON0::set_dcaccon1_reg(unsigned int reg)
+{
+    daccon1_reg = reg;
+    compute_dac(value.get());
+}
+
+void  DACCON0::compute_dac(unsigned int value)
+{
+    double Vhigh = get_Vhigh(value);
+    double Vlow = 0.;
+    double Vout;
+
+    if(value & DACEN)	// DAC is enabled
+    {
+	Vout = (Vhigh - Vlow) * daccon1_reg/bit_resolution - Vlow;
+    }
+    else if (value & DACLPS)
+	Vout = Vhigh;
+    else
+	Vout = Vlow;
+
+    if (value & DACOE)
+    {
+	if (!Pin_Active)	// DACOUT going to active
+	{
+	    output_pin->AnalogReq(this, true, "DACOUT");
+	    Pin_Active = true;
+            out_pin = (IO_bi_directional_pu *) &(output_pin->getPin());
+	    Vth = out_pin->get_VthIn();
+	    Zth = out_pin->get_ZthIn();
+	    out_pin->set_ZthIn(150e3);
+	}
+
+	out_pin->set_VthIn(Vout);
+    }
+    else if (Pin_Active)	// DACOUT leaving active
+    {
+	output_pin->AnalogReq(this, false, output_pin->getPin().name().c_str());
+	Pin_Active = false;
+	out_pin->set_VthIn(Vth);
+	out_pin->set_ZthIn(Zth);
+    }
+	
+    if(adcon1) adcon1->setVoltRef(FVRCDA_AD_chan, Vout);
+    if(cmModule) cmModule->set_DAC_volt(Vout);
+}
+ 	
+double DACCON0::get_Vhigh(unsigned int value)
+{
+    unsigned int mode = (value & (DACPSS0|DACPSS1)) >> 2;
+    switch(mode)
+    {
+    case 0:	// Vdd
+	return ((Processor *)cpu)->get_Vdd();
+
+    case 1:	// Vref+ pin, get is from A2D setup
+        if(adcon1)
+	    return(adcon1->getChannelVoltage(adcon1->getVrefHiChannel(0)));
+	cerr << "ERROR DACCON0 DACPSS=01b adcon1 not set\n";
+	return 0.;
+
+    case 2:	// Fixed Voltage Reference
+	return FVR_CDA_volt;
+
+    case 3:	// Reserved value
+	cerr << "ERROR DACCON0 DACPSS=11b is reserved value\n";
+	return 0.;
+
+    }
+    return 0.;	// cant get here
+} 
+	
+
+DACCON1::DACCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, DACCON0 *_daccon0)
+  : sfr_register(pCpu, pName, pDesc),
+    bit_mask(bitMask), daccon0(_daccon0)
+{
+}
+
+void  DACCON1::put(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & bit_mask);
+  trace.raw(write_trace.get() | value.get());
+  value.put(masked_value);
+  if (daccon0) daccon0->set_dcaccon1_reg(masked_value);
+}
+
+void  DACCON1::put_value(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & bit_mask);
+  value.put(masked_value);
+  if (daccon0) daccon0->set_dcaccon1_reg(masked_value);
+
+  update();
+}
+

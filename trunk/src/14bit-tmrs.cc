@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006,2009,2010 Roy R Rankin
+   Copyright (C) 2006,2009,2010,2013 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -260,7 +260,11 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     edges(0), bridge_shutdown(false),
     ccprl(0), pir(0), tmr2(0), adcon0(0)
 {
-	m_PinModule[0] = 0;
+    for(int i=0; i<4; i++)
+    {
+	m_PinModule[i] = 0;
+	m_source[i] = 0;
+    }
     mValidBits = 0x3f;
 }
 
@@ -268,25 +272,18 @@ CCPCON::~CCPCON()
 { 
 }
 
-// EPWM has four outputs PWM 1
-void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4)
+void CCPCON::setIOPin1(PinModule *p1)
 {
-  Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():"unknown"));
-  if (!&(p1->getPin()))
-  {
-	Dprintf(("FIXME %s::setIOpin called where p1 has unassigned pin\n", name().c_str()));
-  }
-
   if (p1 && &(p1->getPin()))
   {
     if (m_PinModule[0])
     {
 	if (m_PinModule[0] != p1)
-	fprintf(stderr, "FIXME %s::setIOpin called for port %s then %s %p %p\n", 
-		name().c_str(), 
-		m_PinModule[0]->getPin().name().c_str(), 
-		p1->getPin().name().c_str() , m_PinModule[0], p1
-	);
+	{
+	    p1->removeSink(m_sink);
+	    m_PinModule[0] = p1;
+	    p1->addSink(m_sink);
+	}
     }
     else
     {
@@ -297,22 +294,65 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
         p1->addSink(m_sink);
     }
   }
-  m_PinModule[1] = m_PinModule[2] = m_PinModule[3] = 0;
-  m_source[1] = m_source[2] = m_source[3] = 0;
+}
+
+void CCPCON::setIOPin2(PinModule *p2)
+{
   if (p2)
   {
     m_PinModule[1] = p2;
-    m_source[1] = new CCPSignalSource(this);
+    if (!m_source[1])
+        m_source[1] = new CCPSignalSource(this);
   }
+  else
+  {
+	if (m_source[1])
+	{
+		delete m_source[1];
+		m_source[1] = 0;
+	}
+	m_PinModule[1] = 0;
+  }
+}
+// EPWM has four outputs PWM 1
+void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4)
+{
+  Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():"unknown"));
+  if (!&(p1->getPin()))
+  {
+	printf("FIXME %s::setIOpin called where p1 has unassigned pin\n", name().c_str());
+  }
+
+  setIOPin1(p1);
+  setIOPin2(p2);
   if (p3)
   {
     m_PinModule[2] = p3;
-    m_source[2] = new CCPSignalSource(this);
+    if (!m_source[2])
+        m_source[2] = new CCPSignalSource(this);
+  }
+  else
+  {
+	if (m_source[2])
+	{
+		delete m_source[2];
+		m_source[2] = 0;
+	}
+	m_PinModule[2] = 0;
   }
   if (p4)
   {
     m_PinModule[3] = p4;
-    m_source[3] = new CCPSignalSource(this);
+    if (!m_source[3])
+        m_source[3] = new CCPSignalSource(this);
+  }
+  else
+  {
+	if (m_source[3])
+	{
+		delete m_source[3];
+		m_source[3] = 0;
+	}
   }
 
 }
@@ -991,7 +1031,232 @@ unsigned int T1CON::get_prescale()
 }
 
 
+//--------------------------------------------------
+//
+//--------------------------------------------------
 
+//
+//  Signal T1GCon on change of state of Gate pin
+//
+class T1GCon_GateSignalSink : public SignalSink
+{
+public:
+  T1GCon_GateSignalSink(T1GCON *_t1gcon)
+    : m_t1gcon(_t1gcon)
+  {
+    assert(_t1gcon);
+  }
+
+  void release() 
+  {
+    delete this;
+  }
+  void setSinkState(char new3State)
+  {
+    m_t1gcon->IO_gate( new3State=='1' || new3State=='W');
+  }
+private:
+  T1GCON *m_t1gcon;
+};
+
+T1GCON::T1GCON(Processor *pCpu, const char *pName, const char *pDesc, T1CON_G *_t1con_g)
+  : sfr_register(pCpu, pName, pDesc), sink(0), write_mask(0xfb), tmrl(0),
+    t1con_g(_t1con_g),
+    IO_gate_state(false), T0_gate_state(false), CM1_gate_state(false),
+    CM2_gate_state(false)
+{
+}
+
+void T1GCON::put(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  new_value = (new_value & write_mask) | (old_value & ~write_mask);
+  unsigned int diff = new_value ^ old_value;
+  bool t1ggo = new_value & T1GGO;
+
+  assert(pir_set);
+  assert(tmrl);
+
+  if (!diff) return;
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+
+
+  if (diff & (T1GSS1 | T1GSS0 | T1GPOL))
+  {
+      switch(new_value & (T1GSS1 | T1GSS0))
+      {
+      case 0:
+	IO_gate(IO_gate_state);
+	break;
+
+      case 1:
+	T0_gate(T0_gate_state);
+	break;
+
+      case 2:
+	CM1_gate(CM1_gate_state);
+	break;
+
+      case 3:
+	CM2_gate(CM2_gate_state);
+	break;
+      }
+      // Dont't allow gate change to clear new T1GG0
+      if((diff & T1GGO) && t1ggo)
+	value.put(value.get() | T1GGO);
+  }
+  if (diff & T1GTM)
+  {
+	if ((value.get() & T1GTM) && t1con_g->get_tmr1on()) // T1GTM going high, set t1g_in to 0
+	{
+	   if(value.get() & T1GVAL)
+	   {
+		value.put(value.get() & ~(T1GVAL|T1GGO));
+		pir_set->set_tmr1gif();
+		tmrl->IO_gate(false); // Counting should be stopped
+	   }
+	}
+  }
+
+  tmrl->update();
+}
+
+void T1GCON::setGatepin(PinModule *pin)
+{
+    
+    if(sink) delete sink;
+    sink = new T1GCon_GateSignalSink(this);
+    Dprintf(("T1GCON::setGatepin %s\n", pin->getPin().name().c_str()));
+    pin->addSink(sink);
+}
+
+// The following 4 functions are called on a state change.
+// They pass the state to new_gate if that input is selected.
+void T1GCON::IO_gate(bool state)
+{
+    IO_gate_state = state;
+    if((value.get() & (T1GSS0|T1GSS1)) == 0)
+	new_gate(state);
+}
+void T1GCON::T0_gate(bool state)
+{
+    T0_gate_state = state;
+    if((value.get() & (T1GSS0|T1GSS1)) == 1)
+	new_gate(state);
+}
+void T1GCON::CM1_gate(bool state)
+{
+    CM1_gate_state = state;
+    if((value.get() & (T1GSS0|T1GSS1)) == 2)
+	new_gate(state);
+}
+void T1GCON::CM2_gate(bool state)
+{
+    CM2_gate_state = state;
+    if((value.get() & (T1GSS0|T1GSS1)) == 3)
+	new_gate(state);
+}
+void T1GCON::new_gate(bool state)
+{
+    // TMR1 counts when state low (unless t1gpol is set)
+    // t1g_in is inverted as per XOR in spec sheet flow chart
+    bool t1g_in = (!get_t1GPOL()) ^ state ; 
+    bool t1g_val = value.get() & T1GVAL;
+    unsigned int reg_value = value.get();
+
+    
+    if (t1g_in == last_t1g_in) // no state change, do nothing
+    {
+  //  	tmrl->IO_gate(t1g_val);
+	return;
+    }
+
+    last_t1g_in = t1g_in;
+
+    if ( reg_value & T1GTM) // Toggle mode
+    {
+	t1g_val = reg_value & T1GVAL;
+	if (t1g_in)	// rising edge
+	{
+	    t1g_val = ! t1g_val;		// t1gval changes state
+	}
+	t1g_in = !t1g_val;
+    }
+    else	// Gate directly in control
+    {
+	t1g_val = t1g_in;
+    }
+
+    if (reg_value & T1GSPM)	// Single pulse mode
+    {
+	if (!(reg_value & T1GGO))  // do nothing if T1GGO clear
+	    return;
+
+	if (!t1g_in)		// End of gate
+	{
+	    reg_value &= ~T1GGO;  //set done
+	}
+	t1g_val = t1g_in;
+    }
+
+    
+    if (t1g_val)
+    {
+	reg_value |= T1GVAL;
+    }
+    else
+    {
+	if (reg_value & T1GVAL)	// interrupt on T1GVAL negative edge 
+	{
+	    pir_set->set_tmr1gif();
+
+	}
+	reg_value &= ~T1GVAL;
+    }
+
+    value.put(reg_value);
+	    
+	    
+    // get_t1GINV is set to true so t1g_val active high works OK
+    tmrl->IO_gate(t1g_val);
+}
+
+//--------------------------------------------------
+// T1CON
+//--------------------------------------------------
+T1CON_G::T1CON_G(Processor *pCpu, const char *pName, const char *pDesc)
+  //: sfr_register(pCpu, pName, pDesc),
+  : T1CON(pCpu, pName, pDesc),
+    tmrl(0),
+    t1gcon(pCpu, "t1gcon", "TM1 Gate Control Register", this)
+{
+
+  pCpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768.));
+  new_name("T1CON");
+
+}
+void T1CON_G::put(unsigned int new_value)
+{
+
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
+
+  unsigned int diff = value.get() ^ new_value;
+  value.put(new_value);
+  if (!tmrl)
+    return;
+  // First, check the tmr1 clock source bit to see if we are  changing from
+  // internal to external (or vice versa) clocks.
+  if( diff & (TMR1CS0 | TMR1CS1 | T1OSCEN))
+    tmrl->new_clock_source();
+
+  if( diff & TMR1ON)
+    tmrl->on_or_off(value.get() & TMR1ON);
+  else  if( diff & (T1CKPS0 | T1CKPS1 ))
+    tmrl->update();
+
+}
 //--------------------------------------------------
 // member functions for the TMRH base class
 //--------------------------------------------------
@@ -1021,7 +1286,6 @@ void TMRH::put(unsigned int new_value)
   tmrl->last_cycle = tmrl->synchronized_cycle 
 	- (gint64)((tmrl->value.get() + (value.get()<<8) 
 	* tmrl->prescale * tmrl->ext_scale) +0.5);
-
 
   if(tmrl->t1con->get_tmr1on())
     tmrl->update();
@@ -1126,15 +1390,19 @@ TMRL::~TMRL()
  * If we are similating an external RTC crystal for timer1,
  * compute scale factor between crsytal speed and processor
  * instruction cycle rate
+ *
+ * If tmr1cs = 1 Fosc is 4 x normal speed so reduce ticks by 1/4
  */ 
 void TMRL::set_ext_scale() 
 { 
     current_value();
-    if (t1con->get_t1oscen() && t1con->get_tmr1cs())
+    if (t1con->get_t1oscen()  && (t1con->get_tmr1cs() == 2)) // external clock
     {
     	ext_scale = get_cycles().instruction_cps()/
 	            t1con->freq_attribute->get_freq();
     }
+    else if (t1con->get_tmr1cs() == 1) // Fosc
+	ext_scale = 0.25;
     else
 	ext_scale = 1.;
 
@@ -1353,10 +1621,22 @@ void TMRL::update()
   // pin has been defined by a call to TMRL::setGatepin()
   //
   bool gate = t1con->get_t1GINV() ? m_GateState : !m_GateState;
+  Dprintf(("TMRL::update gate %d GateState %d inv %d get_tmr1on %x tmr1GE %x tmr1cs %x t1oscen %x\n", gate, m_GateState, t1con->get_t1GINV(), t1con->get_tmr1on(), t1con->get_tmr1GE(), t1con->get_tmr1cs(), t1con->get_t1oscen()));
   if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? gate : true)) 
   {
-    if(t1con->get_tmr1cs() && t1con->get_t1oscen()) 
+    switch(t1con->get_tmr1cs())
     {
+    case 0:	// internal clock Fosc/4
+	if(verbose & 0x4)
+	    cout << "Tmr1 Internal clock\n";
+	break;
+
+    case 1:	// internal clock Fosc
+	break;
+
+    case 2:	// External clock
+	if (t1con->get_t1oscen())	// External clock enabled
+	{
 	/*
 	 external timer1 clock runs off a crystal which is typically
 	 32768 Hz and is independant on the instruction clock, but
@@ -1364,24 +1644,24 @@ void TMRL::update()
 	 of these two clocks so the breakpoint can be adjusted to be
 	 triggered at the correct time. 
 	*/
-      if(verbose & 0x4)
-	cout << "Tmr1 External clock\n";
-      
-    }
-    else if(t1con->get_tmr1cs() && !  t1con->get_t1oscen()) 
-    {
-      prescale = 1 << t1con->get_prescale();
-      prescale_counter = prescale;
-      set_ext_scale();
-      return;
-    }
-    else
-    {
-      if(verbose & 0x4)
-	cout << "Tmr1 Internal clock\n";
-    }
+	      if(verbose & 0x4)
+		cout << "Tmr1 External clock\n";
+	}
+	else
+	{
+	      prescale = 1 << t1con->get_prescale();
+	      prescale_counter = prescale;
+	      set_ext_scale();
+	      return;
+	}
+	break;
 
-    set_ext_scale();
+     default:
+	cout << "TMR1SC reserved value " << t1con->get_tmr1cs() << endl;
+	break;
+     }
+
+     set_ext_scale();
 
 
       // Note, unlike TMR0, anytime something is written to TMRL, the 
@@ -1437,7 +1717,6 @@ void TMRL::update()
         get_cycles().clear_break(this);
 	future_cycle = 0;
       } 
-      //cout << "TMR1: not running\n";
     }
 }
 
@@ -1535,7 +1814,7 @@ void TMRL::new_clock_source()
 
   current_value();
 
-  if(t1con->get_tmr1cs() && ! t1con->get_t1oscen()) // external stimuli
+  if((t1con->get_tmr1cs() == 2 ) && ! t1con->get_t1oscen()) // external stimuli
   {
       if(verbose & 0x4)
 	cout << "Tmr1 External Stimuli\n";
@@ -1551,7 +1830,7 @@ void TMRL::new_clock_source()
       set_ext_scale();
       m_bExtClkEnabled = true;
   }
-  else if(! t1con->get_tmr1cs() && ! t1con->get_t1oscen()) // Fosc/4
+  else if( t1con->get_tmr1cs()  < 2 ) // Fosc/4 or Fosc
   {
       if(verbose & 0x4)
 	cout << "Tmr1 Fosc/4 \n";
@@ -1595,7 +1874,7 @@ void TMRL::callback()
   // If TMRL is being clocked by the external clock, then at some point
   // the simulate code must have switched from the internal clock to
   // external clock. The cycle break point was still set, so just ignore it.
-  if(t1con->get_tmr1cs() && ! t1con->get_t1oscen())
+  if((t1con->get_tmr1cs() == 2) && ! t1con->get_t1oscen())
     {
       if(verbose & 4)
         cout << "TMRL:callback No oscillator\n";
@@ -1664,8 +1943,8 @@ void TMRL::sleep()
 {
     m_sleeping = true;
     Dprintf(("TMRL::sleep t1sysc %d\n", t1con->get_t1sync()));
-    // If tmr1 is running off Fosc/4 this assumes Fosc stops during sleep
-    if (  t1con->get_tmr1on() && t1con->get_tmr1cs() == 0)
+    // If tmr1 is running off Fosc/4 or Fosc this assumes Fosc stops during sleep
+    if (  t1con->get_tmr1on() && t1con->get_tmr1cs() < 2)
     {
       if (future_cycle)
       {
@@ -1682,7 +1961,7 @@ void TMRL::wake()
 {
     m_sleeping = false;
     Dprintf(("TMRL::wake\n"));
-    if (  t1con->get_tmr1on() && t1con->get_tmr1cs() == 0)
+    if (  t1con->get_tmr1on() && t1con->get_tmr1cs() < 2)
     {
 	update();
     }

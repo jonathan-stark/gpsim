@@ -18,7 +18,7 @@ temp2           RES     1
 failures        RES     1
 
 
-  GLOBAL done
+  GLOBAL done, temp
 
 IDLOCS  CODE
 	db	"ID"	; This is the id locations
@@ -550,6 +550,15 @@ start:
         movlw   -0x02
         subwf   temp,W
         bov     failed2
+	
+	;; test subwfc
+	movlw	0xf0
+	subwfb  temp,W ;; temp=fb - W=f0 - B = W=a
+   .assert "W == 0xa, \"*** FAILED subwfb fb - f0 - 1 = a\""
+	nop
+	subwfb  temp,F ;; temp=fb - W=a -0 =  temp=f1
+   .assert "temp == 0xf1, \"*** FAILED subwfb fb - a - 0 = f1\""
+	nop
 
         clrc
         clrdc
@@ -751,6 +760,10 @@ TableReadEnd:
    .assert "pclath == 0xFF, \"*** FAILED 16-bit PCLATH masking\""
         nop
         clrf    PCLATH
+
+	movlb   5
+   .assert "bsr == 5, \"*** FAILED movlb\""
+	nop
 
 
 done:
