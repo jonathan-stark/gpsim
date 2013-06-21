@@ -284,7 +284,9 @@ P12F1822::P12F1822(const char *_name, const char *desc)
     apfcon(this, "apfcon", "Alternate Pin Function Control Register"),
     pwm1con(this, "pwm1con", "Enhanced PWM Control Register"),
     ccp1as(this, "ccp1as", "CCP1 Auto-Shutdown Control Register"),
-    pstr1con(this, "pstr1con", "Pulse Sterring Control Register")
+    pstr1con(this, "pstr1con", "Pulse Sterring Control Register"),
+    cpscon0(this, "cpscon0", " Capacitive Sensing Control Register 0"),
+    cpscon1(this, "cpscon1", " Capacitive Sensing Control Register 1")
 
 
 {
@@ -301,6 +303,10 @@ P12F1822::P12F1822(const char *_name, const char *desc)
   tmr0.set_cpu(this, m_porta, 4, option_reg);
   tmr0.start(0);
   tmr0.set_t1gcon(&t1con_g.t1gcon);
+  cpscon1.m_cpscon0 = &cpscon0;
+  cpscon0.m_tmr0 = &tmr0;
+  cpscon0.m_t1con_g = &t1con_g;
+
 
 
   m_wpua = new WPU(this, "wpua", "Weak Pull-up Register", m_porta, 0x37);
@@ -359,6 +365,8 @@ void P12F1822::create_sfr_map()
   add_sfr_register(&tmr2,   0x1a, RegisterValue(0,0));
   add_sfr_register(&pr2,    0x1b, RegisterValue(0,0));
   add_sfr_register(&t2con,  0x1c, RegisterValue(0,0));
+  add_sfr_register(&cpscon0,  0x1e, RegisterValue(0,0));
+  add_sfr_register(&cpscon1,  0x1f, RegisterValue(0,0));
 
 
   add_sfr_register(m_trisa, 0x8c, RegisterValue(0x3f,0));
@@ -526,15 +534,22 @@ void P12F1822::create_sfr_map()
     comparator.assign_pir_set(get_pir_set());
     comparator.assign_t1gcon(&t1con_g.t1gcon);
     fvrcon.set_adcon1(&adcon1);
+    fvrcon.set_cpscon0(&cpscon0);
     fvrcon.set_daccon0(m_daccon0);
     fvrcon.set_cmModule(&comparator);
     fvrcon.set_VTemp_AD_chan(0x1d);
     fvrcon.set_FVRAD_AD_chan(0x1f);
 
     m_daccon0->set_adcon1(&adcon1);
+    m_daccon0->set_cpscon0(&cpscon0);
     m_daccon0->set_cmModule(&comparator);
     m_daccon0->set_FVRCDA_AD_chan(0x1e);
     m_daccon0->setDACOUT(&(*m_porta)[0]);
+
+    cpscon0.set_pin(0, &(*m_porta)[0]);
+    cpscon0.set_pin(1, &(*m_porta)[1]);
+    cpscon0.set_pin(2, &(*m_porta)[2]);
+    cpscon0.set_pin(3, &(*m_porta)[4]);
 
 
 
@@ -737,6 +752,7 @@ P16F1823::P16F1823(const char *_name, const char *desc)
   m_wpuc = new WPU(this, "wpuc", "Weak Pull-up Register", m_portc, 0x3f);
   comparator.cmxcon0[1] = new CMxCON0(this, "cm2con0", " Comparator C2 Control Register 0", 1, &comparator);
   comparator.cmxcon1[1] = new CMxCON1(this, "cm2con1", " Comparator C2 Control Register 1", 1, &comparator);
+  cpscon1.mValidBits = 0x0f;
 }
 void P16F1823::create_iopin_map()
 {
@@ -850,6 +866,12 @@ void P16F1823::create_sfr_map()
     comparator.cmxcon0[1]->setBitMask(0xf7);
     comparator.cmxcon1[0]->setBitMask(0xf3);
     comparator.cmxcon1[1]->setBitMask(0xf3);
+
+
+    cpscon0.set_pin(4, &(*m_portc)[0]);
+    cpscon0.set_pin(5, &(*m_portc)[1]);
+    cpscon0.set_pin(6, &(*m_portc)[2]);
+    cpscon0.set_pin(7, &(*m_portc)[3]);
 }
 P16F1823::~P16F1823()
 {

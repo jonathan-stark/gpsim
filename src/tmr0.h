@@ -63,6 +63,8 @@ public:
   virtual bool get_t0cs();
   virtual bool get_t0se();
   virtual void set_t0if();
+  virtual void set_t0xcs(bool _t0xcs){t0xcs = _t0xcs;}
+  virtual bool get_t0xcs() {return t0xcs;}
   virtual void reset(RESET_TYPE r);
   virtual void callback_print();
   virtual void clear_trigger();
@@ -82,6 +84,7 @@ public:
 private:
   bool 		m_bLastClockedState;
   T1GCON 	*m_t1gcon;
+  bool		t0xcs;			//  clock source is the capacitive sensing oscillator
 };
 
 #endif

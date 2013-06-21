@@ -1223,7 +1223,7 @@ void T1GCON::new_gate(bool state)
 }
 
 //--------------------------------------------------
-// T1CON
+// T1CON_G
 //--------------------------------------------------
 T1CON_G::T1CON_G(Processor *pCpu, const char *pName, const char *pDesc)
   //: sfr_register(pCpu, pName, pDesc),
@@ -1256,6 +1256,13 @@ void T1CON_G::put(unsigned int new_value)
   else  if( diff & (T1CKPS0 | T1CKPS1 ))
     tmrl->update();
 
+}
+
+// If Cap. sensing oscillator T1 clock source, pass to T1
+void T1CON_G::t1_cap_increment()
+{
+	if (get_tmr1cs() == 3)	// T1 input Cap. sensing oscillator
+	    tmrl->increment();
 }
 //--------------------------------------------------
 // member functions for the TMRH base class
@@ -1554,6 +1561,10 @@ void TMRL::increment()
   if (t1con->get_t1sync() == 0 && m_sleeping)
     return;
 
+  // prescaler works but rest of timer turned off
+  if (!t1con->get_tmr1on())
+	return;
+
     // If TMRH/TMRL have been manually changed, we'll want to 
     // get the up-to-date values;
 
@@ -1647,13 +1658,20 @@ void TMRL::update()
 	      if(verbose & 0x4)
 		cout << "Tmr1 External clock\n";
 	}
-	else
+	else			// External stimuli(pin)
 	{
 	      prescale = 1 << t1con->get_prescale();
 	      prescale_counter = prescale;
 	      set_ext_scale();
 	      return;
 	}
+	break;
+
+     case 3:			// Cap. sensing oscillator
+	prescale = 1 << t1con->get_prescale();
+	prescale_counter = prescale;
+	set_ext_scale();
+	return;
 	break;
 
      default:
@@ -1810,37 +1828,66 @@ unsigned int TMRL::get_low_and_high()
 void TMRL::new_clock_source()
 {
 
-  m_bExtClkEnabled = false;
+    m_bExtClkEnabled = false;
 
-  current_value();
+    current_value();
 
-  if((t1con->get_tmr1cs() == 2 ) && ! t1con->get_t1oscen()) // external stimuli
-  {
-      if(verbose & 0x4)
-	cout << "Tmr1 External Stimuli\n";
-      if (future_cycle)
-      {
-        // Compute value_16bit with old prescale and ext_scale
-      	current_value();
-        get_cycles().clear_break(this);
-        future_cycle = 0;
-      }
-      prescale = 1 << t1con->get_prescale();
-      prescale_counter = prescale;
-      set_ext_scale();
-      m_bExtClkEnabled = true;
-  }
-  else if( t1con->get_tmr1cs()  < 2 ) // Fosc/4 or Fosc
-  {
-      if(verbose & 0x4)
-	cout << "Tmr1 Fosc/4 \n";
-      put(value.get());
-  }
-  else {
-      if(verbose & 0x4)
-	cout << "Tmr1 External Crystal\n";
-    put(value.get());    // let TMRL::put() set a cycle counter break point
-  }
+    switch(t1con->get_tmr1cs())
+    {
+    case 0:	// Fosc/4
+	if(verbose & 0x4)
+	    cout << "Tmr1 Fosc/4 \n";
+	put(value.get());
+	break;
+
+    case 1:	// Fosc
+	if(verbose & 0x4)
+	    cout << "Tmr1 Fosc \n";
+	put(value.get());
+	break;
+
+    case 2:	// External pin or crystal
+
+	if(t1con->get_t1oscen())	// External crystal, simulate
+	{
+	    if(verbose & 0x4)
+		cout << "Tmr1 External Crystal\n";
+	    put(value.get());    // let TMRL::put() set a cycle counter break point
+	}
+	else	// external pin
+	{
+	    if(verbose & 0x4)
+		cout << "Tmr1 External Stimuli\n";
+	    if (future_cycle)
+	    {
+	      // Compute value_16bit with old prescale and ext_scale
+		current_value();
+		get_cycles().clear_break(this);
+		future_cycle = 0;
+	    }
+	    prescale = 1 << t1con->get_prescale();
+	    prescale_counter = prescale;
+	    set_ext_scale();
+	    m_bExtClkEnabled = true;
+	}
+	break;
+
+    case 3:	// Capacitor sense oscillator
+	if(verbose & 0x4)
+		cout << "Tmr1 Cap. sensing oscillator\n";
+	if (future_cycle)
+	{
+	  // Compute value_16bit with old prescale and ext_scale
+		current_value();
+		get_cycles().clear_break(this);
+		future_cycle = 0;
+	}
+	prescale = 1 << t1con->get_prescale();
+	prescale_counter = prescale;
+	set_ext_scale();
+	break;
+    }
+
 }
 
 //

@@ -395,6 +395,9 @@ private:
   bool 		last_t1g_in;
 };
 
+//
+// T1CON_G	combines T1CON and T1GCON into one virtual register
+//
 class T1CON_G : public T1CON
 {
 public:
@@ -414,6 +417,8 @@ public:
   TMR1_Freq_Attribute *freq_attribute;
 
   T1CON_G(Processor *pCpu, const char *pName, const char *pDesc=0);
+
+  void t1_cap_increment();
 
   // RRR unsigned int get();
 
@@ -527,9 +532,8 @@ public:
   void clear_compare_event ( CCPCON *host );
 
   void set_T1GSS(bool arg);
-
-protected:
   virtual void increment();   // Used when TMR1 is attached to an external clock
+
 private:
   char m_cState;
   bool m_GateState;		// Only changes state if setGatepin() has been called

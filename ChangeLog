@@ -1,3 +1,13 @@
+2013-06-21 Roy Rankin <rrankin@ihug.com.au>
+	* modules/resistor.cc: Update stimulus node on all property changes
+	* src/14bit-instructions.h: Update copyright
+	* src/14bit-registers.cc src/14bit-registers.h: 
+	- Add CPSCON classes for capacitor sensor module
+	* src/14bit-tmrs.cc src/14bit-tmrs.h: Add support for capacitor sensor
+	* src/a2dconverter.cc src/a2dconverter.h: FVR connect to capacitor sensor
+	* src/p12f182x.cc src/p12f182x.h: Add compacitor sensor
+	* src/tmr0.cc src/tmr0.h: Support t0xcs flag, remove magic number
+
 2013-06-17 Roy Rankin <rrankin@ihug.com.au>
 	* regression/i2c/p16f819.asm: Don't overwrite registers
 	* regression/instructions_16bit/instructions_16bit.asm: 

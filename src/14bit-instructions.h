@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
+		 2013 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 

@@ -81,6 +81,8 @@ public:
   PWM1CON	pwm1con;
   ECCPAS        ccp1as;
   PSTRCON       pstr1con;
+  CPSCON0	cpscon0;
+  CPSCON1	cpscon1;
   EEPROM_EXTND *e;
 
 
