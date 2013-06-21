@@ -30,6 +30,7 @@ License along with this library; if not, see
 #include "14bit-processors.h"
 #include "14bit-registers.h"
 #include "psp.h"     // needed for operator[] on WPU::wpu_gpio (not sure why)
+#include "14bit-tmrs.h"
 
 #include <string>
 #include "stimuli.h"
@@ -323,6 +324,7 @@ bool OSCCON_2::set_rc_frequency()
   bool config_pplx4 = cpu_pic->get_pplx4_osc();
 
 
+
   if (sys_clock == 0 && config_fosc != 4) // Not internal oscillator
   {
 	if (config_fosc >= 3) // always run at full speed
@@ -338,6 +340,7 @@ bool OSCCON_2::set_rc_frequency()
   
   }
 
+
   if((osccon_pplx4 && !config_pplx4) && sys_clock == 0)\
   {
 	mode |= PLL;
@@ -351,7 +354,7 @@ bool OSCCON_2::set_rc_frequency()
 	base_frequency = 32.e3;
 	mode = T1OSC;
   }
-  else if (sys_clock > 1)
+  else if (sys_clock > 1 || config_fosc == 4)
   {
     unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2 |IRCF3)) >> 3;
     switch (new_IRCF)
@@ -460,6 +463,10 @@ bool OSCCON_2::set_rc_frequency()
    }
    return true;
 }
+void  OSCCON_2::put_value(unsigned int new_value)
+{
+	value.put(new_value);
+}
 void  OSCCON_2::put(unsigned int new_value)
 {
   
@@ -468,6 +475,7 @@ void  OSCCON_2::put(unsigned int new_value)
   unsigned int oscstat_new = 0;
   trace.raw(write_trace.get() | value.get());
   value.put(new_value);
+
   if (old_value == new_value) return;
 
   assert(oscstat);
@@ -489,22 +497,6 @@ void OSCCON_2::set_config(unsigned int cfg_fosc, bool cfg_ieso)
     config_fosc = cfg_fosc;
     config_ieso = cfg_ieso;
 
-#ifdef RRR
-    printf("RRR OSCCON_2::set_config fosc %x ppl=%d\n", fosc, cpu_pic->get_pplx4_osc());
-    switch(fosc)
-    {
-    case 0:     //LP oscillator: low power crystal
-    case 1:     //XT oscillator: Crystal/resonator 
-    case 2:     //HS oscillator: High-speed crystal/resonator
-	mode = OST;
-	break;
-
-    case 5:     //ECL: External Clock, Low-Power mode (0-0.5 MHz)
-    case 6:     //ECM: External Clock, Medium-Power mode (0.5-4 MHz)
-    case 7:     //ECH: External Clock, High-Power mode (4-32 MHz)
-	mode = EC;
-	break;
-#endif //RRR
 }
 void OSCCON_2::wake()
 {
@@ -1633,3 +1625,204 @@ void WPU::set_wpu_pu(bool pullup_enable)
     }
 }
 
+CPSCON0::CPSCON0(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu, pName, pDesc), m_tmr0(0), chan(0),
+        cps_stimulus(0)
+{
+      mValidBits = 0xcf;
+      for(int i =0; i < 16; i++)
+        pin[i] = 0;
+}
+
+CPSCON0::~CPSCON0()
+{
+    if (cps_stimulus)
+	delete cps_stimulus;
+}
+
+void CPSCON0::put(unsigned int new_value)
+{
+    unsigned int masked_value = (new_value & mValidBits) & ~CPSOUT;
+    unsigned int diff = masked_value ^ value.get();
+
+    trace.raw(write_trace.get() | value.get());
+
+    value.put(masked_value);
+    if (diff & T0XCS)
+	m_tmr0->set_t0xcs(masked_value & T0XCS);
+    calculate_freq();
+}
+
+#define p_cpu ((Processor *)cpu)
+
+void CPSCON0::calculate_freq()
+{
+
+    if (!(value.get() & CPSON)) // not active, return
+	return;
+
+    if (!pin[chan] || !pin[chan]->getPin().snode)
+    {
+	return;
+    }
+
+    double cap = pin[chan]->getPin().snode->Cth;
+    double current = 0;
+    double deltat;
+
+    switch((value.get() & (CPSRNG0 | CPSRNG1)) >> 2)
+    {
+    case 1:
+	current = (value.get() & CPSRM) ? 9e-6 : 0.1e-6;
+	break;
+
+    case 2:
+	current = (value.get() & CPSRM) ? 30e-6 : 1.2e-6;
+	break;
+
+    case 3:
+	current = (value.get() & CPSRM) ? 100e-6 : 18e-6;
+	break;
+    };
+
+    if (current < 1e-12)
+	return;
+    // deltat is the time required to charge the capacitance on the pin
+    // from a constant current source for the specified voltage swing.
+    // The voltage swing for the internal reference is not specified
+    // and it is just a guess that it is Vdd - 2 diode drops.
+    //
+    // This implimentation does not work if capacitor oscillator
+    // runs faster than Fosc/4
+    //
+    if (value.get() & CPSRM)
+    {
+        deltat = (FVR_voltage - DAC_voltage)*cap/current;
+	if (deltat <= 0.)
+	{
+	    cout << "CPSCON FVR must be greater than DAC for high range to work\n";
+	    return;
+	}
+    }
+    else
+    {
+	deltat = (p_cpu->get_Vdd() - 1.2) * cap / current;
+    }
+ 
+    period = (p_cpu->get_frequency() * deltat + 2) / 4;
+
+    if (period <= 0)
+    {
+	cout << "CPSCON Oscillator > Fosc/4, setting to Fosc/4\n";
+	period = 1;
+    }
+    guint64 fc = get_cycles().get() + period;
+    if (future_cycle > get_cycles().get())
+    {
+	get_cycles().reassign_break(future_cycle, fc, this);
+    }
+    else
+        get_cycles().set_break(fc, this);
+
+    future_cycle = fc;
+}
+
+void CPSCON0::callback()
+{
+    Dprintf(("now=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+
+    if (!(value.get() & CPSON))
+	return;
+
+    if (value.get() & CPSOUT) // High to low transition
+    {
+	value.put(value.get() & ~CPSOUT);
+	if (m_tmr0 && (value.get() & T0XCS) && 
+	    m_tmr0->get_t0se() && m_tmr0->get_t0cs())
+	{
+		m_tmr0->increment();
+	}
+		
+    }
+    else			// Low to high transition
+    {
+	value.put(value.get() | CPSOUT);
+	if (m_tmr0 && (value.get() & T0XCS) && 
+	    !m_tmr0->get_t0se() && m_tmr0->get_t0cs())
+	{
+		m_tmr0->increment();
+	}
+	if (m_t1con_g)
+	    m_t1con_g->t1_cap_increment();
+    }
+
+
+    calculate_freq();
+}
+
+void CPSCON0::set_chan(unsigned int _chan)
+{
+    if (_chan == chan)
+	return;
+
+    if (!pin[_chan])
+    {
+	cout << "CPSCON Channel " << _chan << " reserved\n";
+	return;
+    }
+    if (!pin[_chan]->getPin().snode)
+    {
+	cout << "CPSCON Channel " << pin[_chan]->getPin().name() << " requires a node attached\n";
+	chan = _chan;
+	return;
+    }
+    if (!cps_stimulus)
+	cps_stimulus = new CPS_stimulus(this, "cps_stimulus");
+    else if (pin[_chan]->getPin().snode)
+    {
+	(pin[_chan]->getPin().snode)->detach_stimulus(cps_stimulus);
+    }
+
+    chan = _chan;
+    (pin[_chan]->getPin().snode)->attach_stimulus(cps_stimulus);
+    calculate_freq();
+}
+
+void CPSCON0::set_DAC_volt(double volt)
+{
+    DAC_voltage = volt;
+    if ((value.get() & (CPSON|CPSRM)) == (CPSON|CPSRM))
+	calculate_freq();
+}
+void CPSCON0::set_FVR_volt(double volt)
+{
+    FVR_voltage = volt;
+    if ((value.get() & (CPSON|CPSRM)) == (CPSON|CPSRM))
+	calculate_freq();
+}
+
+CPS_stimulus::CPS_stimulus(CPSCON0 * arg, const char *cPname,double _Vth, double _Zth)
+  : stimulus(cPname, _Vth, _Zth)
+{
+    m_cpscon0 = arg;
+}
+
+// Thisvis also called when the capacitance chages,
+// not just when the voltage changes
+void   CPS_stimulus::set_nodeVoltage(double v)
+{
+	Dprintf(("set_nodeVoltage =%.1f\n", v));
+ 	nodeVoltage = v;;
+	m_cpscon0->calculate_freq();
+}
+	
+void CPSCON1::put(unsigned int new_value)
+{
+    unsigned int masked_value = new_value & mValidBits;
+
+    trace.raw(write_trace.get() | value.get());
+
+    value.put(masked_value);
+    assert(m_cpscon0);
+    m_cpscon0->set_chan(masked_value);
+}

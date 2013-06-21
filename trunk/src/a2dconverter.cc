@@ -977,7 +977,8 @@ void   a2d_stimulus::set_nodeVoltage(double v)
 //--------------------------------------------------
 //
 FVRCON::FVRCON(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, unsigned int alwaysOne)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc),
+	adcon1(0), daccon0(0), cmModule(0), cpscon0(0)
 {
     mask_writable = bitMask;
     always_one = alwaysOne;
@@ -1048,6 +1049,7 @@ double FVRCON::compute_FVR_CDA(unsigned int fvrcon)
 
     if(daccon0) daccon0->set_FVR_CDA_volt(ret);
     if(cmModule) cmModule->set_FVR_volt(ret);
+    if(cpscon0) cpscon0->set_FVR_volt(ret);
     return ret;
 }
 //
@@ -1057,7 +1059,7 @@ double FVRCON::compute_FVR_CDA(unsigned int fvrcon)
 //
 DACCON0::DACCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, unsigned int bit_res)
   : sfr_register(pCpu, pName, pDesc),
-    adcon1(0),
+    adcon1(0), cmModule(0), cpscon0(0),
     bit_mask(bitMask), bit_resolution(bit_res),
     FVR_CDA_volt(0.), Pin_Active(false)
 {
@@ -1125,6 +1127,7 @@ void  DACCON0::compute_dac(unsigned int value)
 	
     if(adcon1) adcon1->setVoltRef(FVRCDA_AD_chan, Vout);
     if(cmModule) cmModule->set_DAC_volt(Vout);
+    if(cpscon0) cpscon0->set_DAC_volt(Vout);
 }
  	
 double DACCON0::get_Vhigh(unsigned int value)

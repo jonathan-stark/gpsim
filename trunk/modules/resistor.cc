@@ -73,7 +73,10 @@ public:
     Float::set(r);
 
     if(pur)
+    {
       pur->res->set_Zpullup(r);
+      pur->res->updateNode();
+    }
 
   };
 
@@ -105,7 +108,10 @@ public:
     Float::set(r);
 
     if(pur)
+    {
       pur->res->set_Cth(r);
+      pur->res->updateNode();
+    }
 
   };
 

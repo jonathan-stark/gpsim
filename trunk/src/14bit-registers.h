@@ -726,6 +726,7 @@ class OSCCON_2 : public  sfr_register,  public TriggerObject
 {
  public:
   void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
   virtual void callback();
   virtual bool set_rc_frequency();
   virtual void set_osctune(OSCTUNE *new_osctune) { osctune = new_osctune;}
@@ -836,4 +837,74 @@ public:
   }
 };
 
+class CPSCON1;
+class T1CON_G;
+class CPS_stimulus;
+
+class CPSCON0  : public  sfr_register,  public TriggerObject
+{
+
+public:
+
+  enum {
+	T0XCS	= 1<<0,		// Timer0 External Clock Source Select bit
+	CPSOUT	= 1<<1,		// Capacitive Sensing Oscillator Status bit
+	CPSRNG0	= 1<<2,		// Capacitive Sensing Current Range bits
+	CPSRNG1	= 1<<3,		
+	CPSRM	= 1<<6,		// Capacitive Sensing Reference Mode bit
+	CPSON	= 1<<7		// CPS Module Enable bit
+	};
+
+  void put(unsigned int new_value);
+  void set_chan(unsigned int _chan);
+  void calculate_freq();
+  void set_pin(unsigned int _chan, PinModule *_pin) { pin[_chan] = _pin;}
+  void set_DAC_volt(double);
+  void set_FVR_volt(double);
+  void callback();
+
+  CPSCON0(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~CPSCON0();
+
+  TMR0	*m_tmr0;
+  T1CON_G  *m_t1con_g;
+
+private:
+  unsigned int 	chan;
+  PinModule 	*pin[16];
+  double	DAC_voltage;
+  double	FVR_voltage;
+  guint64	future_cycle;
+  int		period;
+  CPS_stimulus  *cps_stimulus;
+
+};
+class CPSCON1  : public  sfr_register
+{
+
+public:
+
+  void put(unsigned int new_value);
+
+  CPSCON1(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu, pName, pDesc), m_cpscon0(0)
+  {
+	mValidBits = 0x03;
+  }
+
+  CPSCON0	*m_cpscon0;
+};
+class CPS_stimulus : public stimulus
+{
+   public:
+
+	CPS_stimulus(CPSCON0 *arg, const char *n=0,
+           double _Vth=0.0, double _Zth=1e12
+           );
+
+    CPSCON0 *m_cpscon0;
+
+     virtual void   set_nodeVoltage(double v);
+
+};
 #endif

@@ -462,6 +462,7 @@ public:
   void set_adcon1(ADCON1 *_adcon1) { adcon1 = _adcon1;}
   void set_cmModule(ComparatorModule2 *_cmModule) { cmModule = _cmModule;}
   void set_daccon0(DACCON0 *_daccon0) { daccon0 = _daccon0;}
+  void set_cpscon0(CPSCON0 *_cpscon0) { cpscon0 = _cpscon0;}
   void set_VTemp_AD_chan(unsigned int _chan) {VTemp_AD_chan = _chan;}
   void set_FVRAD_AD_chan(unsigned int _chan) {FVRAD_AD_chan = _chan;}
 private:
@@ -471,6 +472,7 @@ private:
   ADCON1 *adcon1;
   DACCON0 *daccon0;
   ComparatorModule2 *cmModule;
+  CPSCON0 *cpscon0;
   unsigned int VTemp_AD_chan;
   unsigned int FVRAD_AD_chan;
   unsigned int mask_writable;
@@ -498,6 +500,7 @@ public:
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   void set_adcon1(ADCON1 *_adcon1) { adcon1 = _adcon1;}
+  void set_cpscon0(CPSCON0 *_cpscon0) { cpscon0 = _cpscon0;}
   void set_cmModule(ComparatorModule2 *_cmModule) { cmModule = _cmModule;}
   void set_FVRCDA_AD_chan(unsigned int _chan) {FVRCDA_AD_chan = _chan;}
   void set_dcaccon1_reg(unsigned int reg);
@@ -510,6 +513,7 @@ private:
   double get_Vhigh(unsigned int value);
   ADCON1	*adcon1;
   ComparatorModule2 *cmModule;
+  CPSCON0	*cpscon0;
   unsigned int  FVRCDA_AD_chan;
   unsigned int  bit_mask;
   unsigned int  bit_resolution;

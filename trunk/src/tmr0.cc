@@ -47,13 +47,13 @@ License along with this library; if not, see
 //--------------------------------------------------
 TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc),
-    m_pOptionReg(0), m_t1gcon(0)
+    m_pOptionReg(0), m_t1gcon(0), t0xcs(false)
 {
   value.put(0);
   synchronized_cycle=0;
   future_cycle=0;
   last_cycle=0;
-  state=0;      // start disabled (will change to enabled by other init code)
+  state=STOPPED;      // start disabled (will change to enabled by other init code)
   prescale=1;
   m_bLastClockedState=false;
   new_name("tmr0");
@@ -76,7 +76,7 @@ void TMR0::setSinkState(char new3State)
     m_bLastClockedState = bNewState;
     if ( verbose & 2 )
       printf("TMR0::setSinkState:%d cs:%d se:%d\n",bNewState,get_t0cs(),get_t0se());
-    if (get_t0cs() && bNewState != get_t0se())
+    if (get_t0cs() && !get_t0xcs() && bNewState != get_t0se())
       increment();
   }
 }
@@ -105,12 +105,12 @@ void TMR0::stop()
   Dprintf(("\n"));
 
   // If tmr0 is running, then stop it:
-  if (state & 1) {
+  if (state & RUNNING) {
 
     // refresh the current value.
     get_value();
 
-    state &= (~1);      // the timer is disabled.
+    state &= (~RUNNING);      // the timer is disabled.
     clear_trigger();
 
   }
@@ -121,7 +121,7 @@ void TMR0::start(int restart_value, int sync)
 
   Dprintf(("restart_value=%d sync=%d\n",restart_value, sync));
 
-  state |= 1;          // the timer is on
+  state |= RUNNING;          // the timer is on
 
   value.put(restart_value&0xff);
 
@@ -185,7 +185,7 @@ void TMR0::increment()
 {
   Dprintf(("\n"));
 
-  if((state & 1) == 0)
+  if((state & RUNNING) == 0)
     return;
 
   if(--prescale_counter == 0)
@@ -213,7 +213,7 @@ void TMR0::put_value(unsigned int new_value)
   value.put(new_value & 0xff);
 
   // If tmr0 is enabled, then start it up.
-  if(state & 1)
+  if(state & RUNNING)
     start(new_value,2);
 }
 
@@ -234,7 +234,7 @@ unsigned int TMR0::get_value()
 
   // If we're running off the external clock or the tmr is disabled
   // then just return the register value.
-  if(get_t0cs() || ((state & 1)==0))
+  if(get_t0cs() || ((state & RUNNING)==0))
     return(value.get());
 
   int new_value = (int )((get_cycles().get() - last_cycle)/ prescale);
@@ -315,7 +315,7 @@ void TMR0::new_prescale()
     // below to recompute the value for 'last_cycle'
     get_value();
 
-    if(get_t0cs() || ((state & 1)==0)) {
+    if(get_t0cs() || ((state & RUNNING)==0)) {
       prescale = 1 << get_prescale();
       prescale_counter = prescale;
 
@@ -427,7 +427,7 @@ void TMR0::callback()
 
   Dprintf(("now=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
-  if((state & 1) == 0) {
+  if((state & RUNNING) == 0) {
 
     cout << "TMR0 callback ignored because timer is disabled\n";
   }
