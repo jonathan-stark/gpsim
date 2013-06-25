@@ -742,12 +742,24 @@ void EEPROM_EXTND::initialize(
     config_word_base = cfg_word_base;
 }
 
+void EEPROM_EXTND::start_program_memory_read()
+{
+
+  rd_adr = eeadr.value.get() | (eeadrh.value.get() << 8);
+
+  get_cycles().set_break(get_cycles().get() + 2, this);
+  cpu_pic->pc->increment();
+
+}
 void EEPROM_EXTND::start_write()
 {
   eecon1.value.put( eecon1.value.get()  | eecon1.WRERR);
 
   if (eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS))
+  {
       get_cycles().set_break(get_cycles().get() + 1, this);
+      cpu_pic->pc->increment();
+  }
   else
       get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
 
@@ -776,8 +788,6 @@ void EEPROM_EXTND::callback()
         int opcode = cpu->pma->get_opcode(rd_adr);
         eedata.value.put(opcode & 0xff);
         eedatah.value.put((opcode>>8) & 0xff);
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
 
     }
     else if (eecon1.value.get() & EECON1::CFGS) // Read Config data
@@ -787,8 +797,6 @@ void EEPROM_EXTND::callback()
         if (read_data == 0xffffffff) read_data = 0;
 	eedata.value.put(read_data & 0xff);
 	eedatah.value.put((read_data>>8) & 0xff);
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
     } 
     else	// read eeprom data 
     {
@@ -832,19 +840,14 @@ void EEPROM_EXTND::callback()
 	    bp.halt();
 	    gi.simulation_has_stopped();
 	}
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
 	// execution stalls for 2ms
-	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
-	    get_cycles().increment(); 
+	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::EEPGD|EECON1::LWLO:	// write to latches
     case EECON1::CFGS|EECON1::LWLO:	// write to latches
 	index = wr_adr & (num_write_latches - 1);
 	write_latches[index] = wr_data;
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
 	break;
 
     case EECON1::CFGS:	// write config word memory
@@ -881,8 +884,7 @@ void EEPROM_EXTND::callback()
 	        write_latches[i] = LATCH_MT;
 	    }
 	} 
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
+
 	// execution stalls for 2ms
 	get_cycles().clear_break(get_cycles().get());    
 	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
@@ -902,11 +904,8 @@ void EEPROM_EXTND::callback()
 		cpu->set_config_word(cfg_add, 0);
 	    }
 	}
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
 	// execution stalls for 2ms
-	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
-	    get_cycles().increment(); 
+	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::EEPGD|EECON1::FREE:	// free program memory row
@@ -923,11 +922,8 @@ void EEPROM_EXTND::callback()
 	    bp.halt();
 	    gi.simulation_has_stopped();
 	}
-    	cpu_pic->pc->increment();
-    	cpu_pic->pc->increment();
 	// execution stalls for 2ms
-	for(int i=0; i < (int)(cpu->get_frequency()*.002/4); i++)
-	    get_cycles().increment(); 
+	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::LWLO:	// LWLO ignored to eeprom

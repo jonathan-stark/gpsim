@@ -152,7 +152,7 @@ PWM_Period_Match
 
   .assert "(intcon & 2) == 0, \"PWM duty > PR2 : pin goes low\""
    nop
-  .assert "tmr0 == 0x40, \"TMR2 period\""
+  .assert "tmr0 == 0x3f, \"TMR2 period\""
    nop
 ;
 ; Increase  TMR2 but less than first duty cycle

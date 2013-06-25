@@ -292,6 +292,7 @@ void TMR0::new_prescale()
     if(verbose)
       cout << "T0CS has changed to ";
 
+
     if(m_pOptionReg->get_t0cs()) {
       // External clock
       if(verbose)
@@ -400,23 +401,6 @@ void TMR0::set_t0if()
   }
 }
 
-void TMR0::new_clock_source()
-{
-  // This is handled in the new_prescale() function now
-#if 0
-  //  cout << "TMR0:new_clock_source changed to the ";
-  if(get_t0cs())
-    {
-      //cout << "external\n";
-      //      cycles.
-    }
-  else
-    {
-      //cout << "internal\n";
-      put(value.get());    // let TMR0::put() set a cycle counter break point
-    }
-#endif
-}
 
 // TMR0 callback is called when the cycle counter hits the break point that
 // was set in TMR0::put. The cycle counter will clear the break point, so

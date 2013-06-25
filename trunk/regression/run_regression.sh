@@ -16,7 +16,7 @@ node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_
 interrupts_14bit macro_test logic_test resistor usart_test txisr_test 
 tmr0_16bit tmr1_16bit 
 switch_test p18f comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
-p12c509 wdt p12f675 p16f676 p16f690 p16f684'
+p12c509 wdt p12f675 p16f676 p16f690 p16f684 p1xf18xx'
 
         echo ${DIRS}
         for i in ${DIRS} ; do
@@ -210,3 +210,10 @@ ${RT}       p16f684 sim_epwm
 ${RT}       p16f684 sim_nwdt_16f684
 ${RT}       p16f684 sim_reset
 ${RT}       p16f684 sim_wdt_16f684
+
+${RT}       p1xf18xx sim_p12f1822
+${RT}       p1xf18xx sim_p16f1823
+${RT}       p1xf18xx sim_p16f1823_comp
+${RT}       p1xf18xx sim_p16f1823_i2c
+${RT}       p1xf18xx sim_p16f1823_i2c_v2
+${RT}       p1xf18xx sim_p16f1823_spi

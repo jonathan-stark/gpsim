@@ -32,7 +32,8 @@ endif
 
  org 4
 isr:
- .assert "tmr1l == 0x80 && tmr1h == 0x02, \"*** FAILED TMR1 value does not match CCP\""
+ .assert "tmr1l == 0x81 && tmr1h == 0x02, \"*** FAILED TMR1 value does not match CCP\""
+ nop
  
  btfss  PORTB,3
  .assert "\"*** FAILED CCP1 output compare does not set pin\""
@@ -64,6 +65,7 @@ main:
  movf   TMR1L,w
  nop
  .assert "W == 0x34, \"*** FAILED 14bit TMR1 cannot write TMR1L\""
+ nop
 
  movf   TMR1H,w
  nop

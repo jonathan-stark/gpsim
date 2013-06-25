@@ -1826,3 +1826,291 @@ void CPSCON1::put(unsigned int new_value)
     assert(m_cpscon0);
     m_cpscon0->set_chan(masked_value);
 }
+
+SRCON0::SRCON0(Processor *pCpu, const char *pName, const char *pDesc, SR_MODULE *_sr_module)
+    : sfr_register(pCpu, pName, pDesc),
+	m_sr_module(_sr_module)
+{
+}
+void SRCON0::put(unsigned int new_value)
+{
+    unsigned int diff = new_value ^ value.get();
+
+    if (!diff)
+	return;
+
+    trace.raw(write_trace.get() | value.get());
+
+    value.put(new_value  & ~(SRPR|SRPS)); // SRPR AND SRPS not saved
+
+    if ((diff & SRPS) && (new_value & SRPS))
+	m_sr_module->pulse_set();
+    if ((diff & SRPR) && (new_value & SRPR))
+	m_sr_module->pulse_reset();
+
+    if (diff & CLKMASK)
+	m_sr_module->clock_diff((new_value & CLKMASK) >> CLKSHIFT);
+
+    if (diff & (SRQEN | SRLEN))
+	m_sr_module->Qoutput();
+    if (diff & (SRNQEN | SRLEN))
+	m_sr_module->NQoutput();
+
+    m_sr_module->update();
+}
+
+SRCON1::SRCON1(Processor *pCpu, const char *pName, const char *pDesc, SR_MODULE *_sr_module)
+    : sfr_register(pCpu, pName, pDesc),
+	m_sr_module(_sr_module), mValidBits(0xdd)
+{
+}
+
+void SRCON1::put(unsigned int new_value)
+{
+    unsigned int masked_value = new_value & mValidBits;
+    unsigned int diff = masked_value ^ value.get();
+
+    trace.raw(write_trace.get() | value.get());
+
+    value.put(masked_value);
+
+    if (!diff)
+	return;
+
+    if (diff & (SRRCKE | SRSCKE))
+    {
+	if (!(new_value & (SRRCKE | SRSCKE)))	// all clocks off
+	    m_sr_module->clock_disable(); // turn off clock
+	else 
+	    m_sr_module->clock_enable(); // turn on clock
+    }
+    m_sr_module->update();
+}
+
+class SRinSink : public SignalSink
+{
+public:
+  SRinSink(SR_MODULE *_sr_module)
+     : sr_module(_sr_module)
+  {}
+
+  void setSinkState(char new3State)
+  {
+	sr_module->setState(new3State);
+  }
+  void release()
+  {
+	delete this;
+  }
+private:
+  SR_MODULE *sr_module;
+};
+
+SR_MODULE::SR_MODULE(Processor *_cpu) :
+    srcon0(_cpu, "srcon0", "SR Latch Control 0 Register", this),
+    srcon1(_cpu, "srcon1", "SR Latch Control 1 Register", this),
+    cpu(_cpu), future_cycle(0), state_set(false), state_reset(false),
+    state_Q(false), srclk(0), syncc1out(false), syncc2out(false),
+    SRI_pin(0), SRQ_pin(0), SRNQ_pin(0), m_SRinSink(0),
+    m_SRQsource(0), m_SRNQsource(0)
+{
+}
+
+// determine output state of RS flip-flop
+// If both state_set and state_reset are true, Q output is 0
+// SPR[SP] and clocked inputs maybe set outside the update
+// function prior to its call.
+void SR_MODULE::update()
+{
+
+    if ((srcon1.value.get() & SRCON1::SRSC1E) && syncc1out)
+	state_set = true;
+
+    if ((srcon1.value.get() & SRCON1::SRSC2E) && syncc2out)
+	state_set = true;
+
+    if ((srcon1.value.get() & SRCON1::SRSPE) && SRI_pin->getPin().getState())
+	state_set = true;
+
+    if ((srcon1.value.get() & SRCON1::SRRC1E) && syncc1out)
+	state_reset = true;
+
+    if ((srcon1.value.get() & SRCON1::SRRC2E) && syncc2out)
+	state_reset = true;
+
+    if ((srcon1.value.get() & SRCON1::SRRPE) && SRI_pin->getPin().getState())
+	state_reset = true;
+    if (state_set)
+	state_Q = true;
+
+    // reset overrides a set
+    if (state_reset)
+	state_Q = false;
+
+
+    state_set = state_reset = false;
+
+    if (!(srcon0.value.get() & SRCON0::SRLEN))
+	return;
+
+    if ((srcon0.value.get() & SRCON0::SRQEN))
+	m_SRQsource->putState(state_Q ? '1' : '0');
+
+    if ((srcon0.value.get() & SRCON0::SRNQEN))
+	m_SRNQsource->putState(!state_Q ? '1' : '0');
+
+}
+
+// Stop clock if currently running
+void SR_MODULE::clock_disable()
+{
+    if (future_cycle> get_cycles().get())
+    {
+	get_cycles().clear_break(this);
+	future_cycle = 0;
+    }
+    future_cycle = 0;
+}
+
+// Start clock if not running
+// As break works on instruction cycles, clock runs every 1-128
+// instructions which is 1 << srclk
+//
+void SR_MODULE::clock_enable()
+{
+    if (!future_cycle)
+    {
+	future_cycle = get_cycles().get() + (1 << srclk);
+	get_cycles().set_break(future_cycle, this);
+    }
+}
+
+// Called for clock rate change
+void SR_MODULE::clock_diff(unsigned int _srclk)
+{
+    srclk = _srclk;
+
+    clock_disable();
+
+    if (srcon1.value.get() & (SRCON1::SRSCKE | SRCON1::SRRCKE)) 
+    {
+	clock_enable();
+    }
+}
+
+void SR_MODULE::callback()
+{
+    bool active = false;
+
+    if (srcon1.value.get() & (SRCON1::SRSCKE)) //Set clock enabled
+    {
+	active = true;
+	pulse_set();
+    }
+
+    if (srcon1.value.get() & (SRCON1::SRRCKE)) //Reset clock enabled
+    {
+	active = true;
+	pulse_reset();
+    }
+    if (active)
+    {
+	future_cycle = 0;
+	clock_enable();
+    }
+    update();
+
+}
+void SR_MODULE::setPins(PinModule *sri, PinModule *srq, PinModule *srnq)
+{
+
+    if(!SRI_pin)
+    {
+	m_SRinSink = new SRinSink(this);
+	sri->addSink(m_SRinSink);
+    }
+    else if (SRI_pin != sri)
+    {
+	SRI_pin->removeSink(m_SRinSink);
+	sri->addSink(m_SRinSink);
+    }
+    SRI_pin = sri;
+	SRQ_pin = srq;
+	SRNQ_pin = srnq;
+
+}
+
+// If pin chnages and we are looking at it, call update
+void SR_MODULE::setState(char IOin)
+{
+    if (srcon1.value.get() & (SRCON1::SRSPE | SRCON1::SRRPE))
+	update();
+}
+
+void SR_MODULE::syncC1out(bool val)
+{
+    if (syncc1out != val)
+    {
+	syncc1out = val;
+	if (srcon1.value.get() & (SRCON1::SRSC1E | SRCON1::SRRC1E))
+	{
+		update();
+	}
+    }
+}
+void SR_MODULE::syncC2out(bool val)
+{
+    if (syncc2out != val)
+    {
+	syncc2out = val;
+	if (srcon1.value.get() & (SRCON1::SRSC2E | SRCON1::SRRC2E))
+	{
+		update();
+	}
+    }
+}
+
+// Setup or tear down RSQ output pin
+// This is only call if SRLEN OR SRQEN has changed
+void SR_MODULE::Qoutput()
+{
+    if ((srcon0.value.get() & (SRCON0::SRLEN | SRCON0::SRQEN)) ==
+	(SRCON0::SRLEN | SRCON0::SRQEN))
+    {
+	if (!m_SRQsource)
+	    m_SRQsource = new PeripheralSignalSource(SRQ_pin);
+
+	SRQ_pin->setSource(m_SRQsource);
+	SRQ_pin->getPin().newGUIname("SRQ");
+    }
+    else
+    {
+	SRQ_pin->setSource(0);
+	if (strcmp("SRQ", SRQ_pin->getPin().GUIname().c_str()) == 0)
+	{
+	    SRQ_pin->getPin().newGUIname(SRQ_pin->getPin().name().c_str());
+	}
+    }
+}
+// Setup or tear down RSNQ output pin
+// This is only call if SRLEN OR SRNQEN has changed
+void SR_MODULE::NQoutput()
+{
+    if ((srcon0.value.get() & (SRCON0::SRLEN | SRCON0::SRNQEN)) == 
+	(SRCON0::SRLEN | SRCON0::SRNQEN))
+    {
+	if (!m_SRNQsource)
+	    m_SRNQsource = new PeripheralSignalSource(SRNQ_pin);
+
+	SRNQ_pin->setSource(m_SRNQsource);
+	SRNQ_pin->getPin().newGUIname("SRNQ");
+    }
+    else
+    {
+	SRNQ_pin->setSource(0);
+	if (strcmp("SRNQ", SRNQ_pin->getPin().GUIname().c_str()) == 0)
+	{
+	    SRNQ_pin->getPin().newGUIname(SRNQ_pin->getPin().name().c_str());
+	}
+    }
+}
