@@ -404,8 +404,13 @@ void Cycle_Counter::breakpoint()
       Cycle_Counter_breakpoint_list  *l1 = active.next;
       TriggerObject *lastBreak = active.next->f;
 
-      l1->bActive = false;
-      l1->f->callback();
+      // this stops recursive callbacks
+      if (l1->bActive) 
+      {
+
+        l1->bActive = false;
+        l1->f->callback();
+      }
       clear_current_break(lastBreak);
     } else {
       get_bp().check_cycle_break(active.next->breakpoint_number);
@@ -519,6 +524,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       if(l1->next->next == 0) {
 
 	l1->next->break_value = new_cycle;
+	l1->next->bActive = true;
 	break_on_this = active.next->break_value;
 #ifdef __DEBUG_CYCLE_COUNTER__
 	cout << " replaced at current position (next is NULL)\n";
@@ -530,6 +536,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       // Is the next one in the list still beyond this one?
       if(l1->next->next->break_value >= new_cycle) {
 	l1->next->break_value = new_cycle;
+	l1->next->bActive = true;
 	break_on_this = active.next->break_value;
 #ifdef __DEBUG_CYCLE_COUNTER__
 	cout << " replaced at current position (next is greater)\n";
@@ -571,6 +578,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       break_on_this = active.next->break_value;
 
       l2->break_value = new_cycle;
+      l2->bActive = true;
 
 #ifdef __DEBUG_CYCLE_COUNTER__
       dump_breakpoints();   // debug
@@ -586,6 +594,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       if(l1 == &active)
 	{
 	  l1->next->break_value = new_cycle;
+	  l1->next->bActive = true;
 	  break_on_this = new_cycle;
 #ifdef __DEBUG_CYCLE_COUNTER__
 	  cout << " replaced at current position\n";
@@ -598,6 +607,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       if(l1->break_value < new_cycle)
 	{
 	  l1->next->break_value = new_cycle;
+	  l1->next->bActive = true;
 
 	  break_on_this = active.next->break_value;
 
@@ -636,6 +646,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       l2->prev = l1;
 
       l2->break_value = new_cycle;
+      l2->bActive = true;
 
       break_on_this = active.next->break_value;
 
@@ -681,7 +692,7 @@ void Cycle_Counter::clear_current_break(TriggerObject *f)
       cout << " Call Back ID  = " << active.next->f->CallBackID;
     cout <<'\n';
 
-    if(active.next->next->break_value == break_on_this) {
+    if(active.next->next && active.next->next->break_value == break_on_this) {
       cout << "  but there's one pending at the same cycle";
       if(active.next->next->f)
 	cout << " With ID = " << active.next->next->f->CallBackID;

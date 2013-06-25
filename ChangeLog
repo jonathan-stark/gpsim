@@ -1,3 +1,25 @@
+2013-06-25 Roy Rankin <rrankin@ihug.com.au>
+	* regression/ccp/pwm_6520.asm regression/ccp_628/ccp_628.asm
+	  regression/p16f84/reset.asm regression/p18f/reset.asm
+	  regression/wdt/wdt_18f452.asm regression/wdt/wdt_18f4620.asm:
+	- Adjust tmr0 counts in sleep tests
+	* regression/p1xf18xx regression/p1xf18xx/12f1822_g.lkr
+	  regression/p1xf18xx/16f1823_g.lkr regression/p1xf18xx/Makefile
+	  regression/p1xf18xx/i2c_low.inc regression/p1xf18xx/p12f1822.asm
+	  regression/p1xf18xx/p16f1823.asm regression/p1xf18xx/p16f1823_comp.asm
+	  regression/p1xf18xx/p16f1823_i2c.asm regression/p1xf18xx/p16f1823_spi.asm
+	  regression/p1xf18xx/p16f1823_i2c_v2.asm regression/run_regression.sh
+	- Add regression tests for p12f1822 and p16f1823
+	* regression/rt.sh: Print fail message
+	* src/14bit-registers.cc src/14bit-registers.h
+	  src/comparator.cc src/comparator.h src/p12f182x.cc src/p12f182x.h:
+	- Add SR latch
+	* src/eeprom.cc src/eeprom.h: Modify insturction skip and wait
+	* src/gpsim_time.cc src/gpsim_time.h:
+	- Modify cycle increment and advance functions
+	* src/16bit-registers.cc src/tmr0.cc src/tmr0.h:
+	- Fix tmr0 overflow bug and remove empty function
+
 2013-06-21 Roy Rankin <rrankin@ihug.com.au>
 	* modules/resistor.cc: Update stimulus node on all property changes
 	* src/14bit-instructions.h: Update copyright

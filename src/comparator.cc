@@ -1249,21 +1249,24 @@ void ComparatorModule2::set_cmout(unsigned int bit, bool value)
     else
         cmout->value.put(cmout->value.get() & ~(1<<bit));
 
-    if(t1gcon)
+    switch(bit)
     {
-	switch(bit)
-	{
-	case 0:		//CM1
-		t1gcon->CM1_gate(value);
-		break;
+    case 0:		//CM1
+    	if (t1gcon)
+    	    t1gcon->CM1_gate(value);
+    	if (sr_module)
+    	    sr_module->syncC1out(value);
+    	break;
 
-	case 1:		//CM2
-		t1gcon->CM2_gate(value);
-		break;
+    case 1:		//CM2
+        if (t1gcon)
+	    t1gcon->CM2_gate(value);
+    	if (sr_module)
+    	    sr_module->syncC2out(value);
+    	break;
 
-	default:	//Do nonthing other CMs
-		break;
-	}
+    default:	//Do nonthing other CMs
+    	break;
     }
 }
 

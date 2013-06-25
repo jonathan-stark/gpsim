@@ -59,7 +59,7 @@ include <coff.inc>
 	nop
   .assert "(rcon & 0x0c) == 0x00,\"*** FAILED p18f452 status after sleep\""
 	nop
-  .assert "(tmr0l - W) == 0x3,\"*** FAILED p18f452 TMR0 stops during sleep\""
+  .assert "(tmr0l - W) <= 0x4,\"*** FAILED p18f452 TMR0 stops during sleep\""
 	nop
 
 

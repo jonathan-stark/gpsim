@@ -327,7 +327,7 @@ WDTTimeOut:
 
         nop    ; the processor should idle at this instruction.
   .command "resetCounter = resetCounter+1"
-  .assert "(tmr0l - W) == 0, \"*** FAILED 18f4321 reset - TMR0 stops during sleep\""
+  .assert "(tmr0l - W) <= 1, \"*** FAILED 18f4321 reset - TMR0 stops during sleep\""
         nop
 
 ;========================================================================

@@ -796,16 +796,12 @@ void T0CON::put(unsigned int new_value)
 
   } 
 
-  // First, check the tmr0 clock source bit to see if we are  changing from
-  // internal to external (or vice versa) clocks.
-  if( (value.get() ^ old_value) & T0CS)
-    cpu16->tmr0l.new_clock_source();
 
   // %%%FIX ME%%% - can changing the state of TOSE cause the timer to
   // increment if tmr0 is being clocked by an external clock?
 
   // Now check the rest of the tmr0 bits.
-  if( (value.get() ^ old_value) & (T0SE | PSA | PS2 | PS1 | PS0))
+  if( (value.get() ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
     cpu16->tmr0l.new_prescale();
 
   //cout <<"T0CON::put - new val 0x" << hex << value.get() <<'\n';

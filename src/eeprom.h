@@ -287,6 +287,7 @@ public:
   ~EEPROM_EXTND();
 
   virtual void start_write();
+  virtual void start_program_memory_read();  
   virtual void callback();
   virtual void callback_print(){ cout << " EEPROM_EXTND\n";}
   void	initialize(unsigned int new_rom_size, int block_size, int num_latches, unsigned int cfg_word_base);

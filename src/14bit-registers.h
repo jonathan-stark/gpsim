@@ -907,4 +907,106 @@ class CPS_stimulus : public stimulus
      virtual void   set_nodeVoltage(double v);
 
 };
+
+class SR_MODULE;
+
+// SR LATCH CONTROL 0 REGISTER
+class SRCON0  : public  sfr_register
+{
+
+public:
+  enum {
+      SRPR   = 1<<0,	// Pulse Reset Input of the SR Latch bit
+      SRPS   = 1<<1,	// Pulse Set Input of the SR Latch bit
+      SRNQEN = 1<<2,	// Latch Not Q Output Enable bit
+      SRQEN  = 1<<3,	// Latch Q Output Enable bit
+      SRCLK0 = 1<<4,    // Latch Clock Divider bits
+      SRCLK1 = 1<<5,    // Latch Clock Divider bits
+      SRCLK2 = 1<<6,    // Latch Clock Divider bits
+      SRLEN  = 1<<7,	// Latch Enable bit
+      CLKMASK = SRCLK0|SRCLK1|SRCLK2,
+      CLKSHIFT = 4
+
+  };
+
+    SRCON0(Processor *pCpu, const char *pName, const char *pDesc, SR_MODULE *_sr_module);
+    void put(unsigned int new_value);
+
+private:
+   SR_MODULE 	*m_sr_module;
+};
+
+
+//  SR LATCH CONTROL 1 REGISTER
+//
+class SRCON1  : public  sfr_register
+{
+
+public:
+  enum {
+      SRRC1E  = 1<<0,	// Latch C1 Reset Enable bit
+      SRRC2E  = 1<<1,	// Latch C2 Reset Enable bit
+      SRRCKE  = 1<<2,   // Latch Reset Clock Enable bit
+      SRRPE   = 1<<3,	// Latch Peripheral Reset Enable bit
+      SRSC1E  = 1<<4,	// Latch C1 Set Enable bit
+      SRSC2E  = 1<<5,	// Latch C2 Set Enable bit
+      SRSCKE  = 1<<6,   // Latch Set Clock Enable bit
+      SRSPE   = 1<<7    // Latch Peripheral Set Enable bit
+  };
+
+    SRCON1(Processor *pCpu, const char *pName, const char *pDesc, SR_MODULE *m_sr_module);
+    void put(unsigned int new_value);
+    void set_ValidBits(unsigned int validbits) { mValidBits = validbits;}
+
+private:
+   SR_MODULE 	*m_sr_module;
+   unsigned int	mValidBits;
+};
+
+class SRinSink;
+
+class SR_MODULE: public TriggerObject
+{
+
+public:
+
+    SR_MODULE(Processor *);
+
+    void	update();
+    SRCON0 	srcon0;
+    SRCON1 	srcon1;
+
+    void 	pulse_reset() { state_reset = true;}
+    void 	pulse_set() { state_set = true;}
+    void	clock_diff(unsigned int);
+    void	clock_enable();
+    void	clock_disable();
+    void	syncC1out(bool val);
+    void	syncC2out(bool val);
+    void	setPins(PinModule *, PinModule *,PinModule *);
+    void	setState(char);
+    void	Qoutput();
+    void	NQoutput();
+
+protected:
+
+    void   callback();
+
+    Processor   *cpu;
+    guint64	future_cycle;
+    bool	state_set;
+    bool	state_reset;
+    bool	state_Q;
+    unsigned int srclk;
+    bool	syncc1out;	// Synced output from comparator 1
+    bool	syncc2out;	// Synced output from comparator 2
+    PinModule 	*SRI_pin;
+    PinModule 	*SRQ_pin;
+    PinModule 	*SRNQ_pin;
+    bool	SRI;		// state of input pin
+    SRinSink	*m_SRinSink;
+    PeripheralSignalSource *m_SRQsource;
+    PeripheralSignalSource *m_SRNQsource;
+};
+
 #endif

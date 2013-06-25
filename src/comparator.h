@@ -480,7 +480,7 @@ class CMOUT : public sfr_register
 {
  public:
 
-    void put(unsigned int val) { cout << "cmout read only\n"; return;} // Read only by user
+    void put(unsigned int val) { return;} // Read only by user
 
     CMOUT(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc) {}
@@ -503,6 +503,7 @@ class ComparatorModule2
   void set_if(unsigned int);
   void assign_pir_set(PIR_SET *new_pir_set){ pir_set = new_pir_set;}
   void assign_t1gcon(T1GCON *_t1gcon) { t1gcon = _t1gcon;}
+  void assign_sr_module(SR_MODULE *_sr_module) { sr_module = _sr_module;}
 
   CMxCON0	*cmxcon0[4];
   CMxCON1 	*cmxcon1[4];
@@ -513,6 +514,7 @@ class ComparatorModule2
   double 	FVR_voltage;
   PIR_SET 	*pir_set;
   T1GCON	*t1gcon;
+  SR_MODULE	*sr_module;
 
 };
 #endif // __COMPARATOR_H__

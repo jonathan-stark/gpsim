@@ -83,6 +83,7 @@ public:
   PSTRCON       pstr1con;
   CPSCON0	cpscon0;
   CPSCON1	cpscon1;
+  SR_MODULE	sr_module;
   EEPROM_EXTND *e;
 
 

@@ -286,7 +286,8 @@ P12F1822::P12F1822(const char *_name, const char *desc)
     ccp1as(this, "ccp1as", "CCP1 Auto-Shutdown Control Register"),
     pstr1con(this, "pstr1con", "Pulse Sterring Control Register"),
     cpscon0(this, "cpscon0", " Capacitive Sensing Control Register 0"),
-    cpscon1(this, "cpscon1", " Capacitive Sensing Control Register 1")
+    cpscon1(this, "cpscon1", " Capacitive Sensing Control Register 1"),
+    sr_module(this)
 
 
 {
@@ -419,6 +420,8 @@ void P12F1822::create_sfr_map()
   add_sfr_register(&fvrcon,   0x117, RegisterValue(0x00,0));
   add_sfr_register(m_daccon0, 0x118, RegisterValue(0x00,0));
   add_sfr_register(m_daccon1, 0x119, RegisterValue(0x00,0));
+  add_sfr_register(&sr_module.srcon0, 0x11a, RegisterValue(0x00,0));
+  add_sfr_register(&sr_module.srcon1, 0x11b, RegisterValue(0x00,0));
   add_sfr_register(&apfcon ,  0x11d, RegisterValue(0x00,0));
   add_sfr_register(&ansela,   0x18c, RegisterValue(0x17,0));
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x191);
@@ -533,6 +536,7 @@ void P12F1822::create_sfr_map()
     comparator.cmxcon1[0]->setBitMask(0xf1);
     comparator.assign_pir_set(get_pir_set());
     comparator.assign_t1gcon(&t1con_g.t1gcon);
+    comparator.assign_sr_module(&sr_module);
     fvrcon.set_adcon1(&adcon1);
     fvrcon.set_cpscon0(&cpscon0);
     fvrcon.set_daccon0(m_daccon0);
@@ -552,6 +556,7 @@ void P12F1822::create_sfr_map()
     cpscon0.set_pin(3, &(*m_porta)[4]);
 
 
+    sr_module.setPins(&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[5]);
 
     osccon.set_osctune(&osctune);
     osccon.set_oscstat(&oscstat);
@@ -872,6 +877,8 @@ void P16F1823::create_sfr_map()
     cpscon0.set_pin(5, &(*m_portc)[1]);
     cpscon0.set_pin(6, &(*m_portc)[2]);
     cpscon0.set_pin(7, &(*m_portc)[3]);
+    sr_module.srcon1.set_ValidBits(0xff);
+    sr_module.setPins(&(*m_porta)[1], &(*m_porta)[2], &(*m_portc)[4]);
 }
 P16F1823::~P16F1823()
 {

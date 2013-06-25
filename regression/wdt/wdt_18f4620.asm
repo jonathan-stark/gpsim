@@ -56,10 +56,9 @@ include <coff.inc>
 	movf	TMR0L,W
 	sleep
 	
-	nop
   .assert "(rcon & 0x0c) == 0x00,\"*** FAILED p18f4620 status after sleep\""
 	nop
-  .assert "(tmr0l - W) == 0x3,\"*** FAILED p18f4620 TMR0 stops during sleep\""
+  .assert "(tmr0l - W) <= 0x4,\"*** FAILED p18f4620 TMR0 stops during sleep\""
 	nop
 
 

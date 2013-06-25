@@ -59,7 +59,6 @@ public:
   virtual void new_prescale();
   virtual unsigned int get_prescale();
   virtual unsigned int max_counts() {return 256;};
-  void new_clock_source();
   virtual bool get_t0cs();
   virtual bool get_t0se();
   virtual void set_t0if();

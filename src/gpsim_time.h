@@ -117,14 +117,18 @@ public:
 						
   inline void increment()
   {
+
+    // This has been changed so the cycle counter (value)
+    // is incremented after processing breakpoints
  
     // Increment the current cycle then check if
     // we have a break point set here
 
-    value++;
 
     if(value == break_on_this)
       breakpoint();
+
+    value++;
 
     // Note that it's really inefficient to trace every cycle increment. 
     // Instead, we implicitly trace the increments with the instruction traces.
@@ -142,9 +146,11 @@ public:
 
     while (step--) {
 
-      if (++value == break_on_this)
+
+      if (value == break_on_this)
 	breakpoint();
     }
+      value++;
 
   }
 

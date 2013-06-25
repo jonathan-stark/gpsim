@@ -28,4 +28,5 @@ grep "PASSED" $LOGFILE
 
 if [ $? -ne 0 ] ; then
   echo "!!! FAILED $1/make $2"
+  grep "FAILED" $LOGFILE
 fi
