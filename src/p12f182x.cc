@@ -339,7 +339,7 @@ Processor * P12F1822::construct(const char *name)
 void P12F1822::create_symbols()
 {
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
   addSymbol(m_cpu_temp);
 
 

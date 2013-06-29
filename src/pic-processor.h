@@ -323,7 +323,7 @@ public:
   Stack        *stack;
 
   Status_register *status;
-  WREG         *W;
+  WREG	       *Wreg;		// Used when W is a normal register
   PCL          *pcl;
   PCLATH       *pclath;
   PCHelper     *m_PCHelper;
@@ -449,6 +449,9 @@ public:
   virtual bool get_int_osc(){ return internal_osc; }
   virtual void set_pplx4_osc(bool val){ PPLx4 = val;}
   virtual bool get_pplx4_osc(){ return PPLx4; }
+
+  virtual void Wput(unsigned int);
+  virtual unsigned int Wget();
 
 
 

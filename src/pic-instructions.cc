@@ -548,14 +548,14 @@ void ADDWF::execute()
   else
     source = cpu_pic->register_bank[register_address];
 
-  new_value = (src_value = source->get()) + (w_value = cpu_pic->W->value.get());
+  new_value = (src_value = source->get()) + (w_value = cpu_pic->Wget());
 
   // Store the result
 
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu_pic->W->put(new_value & 0xff);
+    cpu_pic->Wput(new_value & 0xff);
 
   cpu_pic->status->put_Z_C_DC(new_value, src_value, w_value);
 
@@ -583,7 +583,7 @@ void ADDWFC::execute()
 	    cpu_pic->register_bank[register_address] );
 
   new_value = (src_value = source->get()) + 
-    (w_value = cpu_pic->W->value.get()) +
+    (w_value = cpu_pic->Wget()) +
     ((cpu_pic->status->value.get() & STATUS_C) ? 1 : 0);
 
   // Store the result
@@ -591,7 +591,7 @@ void ADDWFC::execute()
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu_pic->W->put(new_value & 0xff);
+    cpu_pic->Wput(new_value & 0xff);
 
   cpu_pic->status->put_Z_C_DC(new_value, src_value, w_value);
 
@@ -611,9 +611,9 @@ void ANDLW::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu_pic->W->value.get() & L;
+  new_value = cpu_pic->Wget() & L;
 
-  cpu_pic->W->put(new_value);
+  cpu_pic->Wput(new_value);
   cpu_pic->status->put_Z(0==new_value);
 
   cpu_pic->pc->increment();
@@ -640,12 +640,12 @@ void ANDWF::execute()
   else
     source = cpu_pic->register_bank[register_address];
 
-  new_value = source->get() & cpu_pic->W->value.get();
+  new_value = source->get() & cpu_pic->Wget();
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(0==new_value);
 
@@ -681,7 +681,7 @@ void ASRF::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(new_value==0);
   cpu_pic->status->put_C(carry);
@@ -752,7 +752,7 @@ char * BRA::name(char *return_str,int len)
 BRW::BRW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : instruction(new_cpu, new_opcode, address)
 {
-  destination_index = cpu_pic->W->value.get();
+  destination_index = cpu_pic->Wget();
   absolute_destination_index = address + destination_index;
 
   new_name("brw");
@@ -912,7 +912,7 @@ void CALLW::execute()
 {
   if (cpu_pic->stack->push(cpu_pic->pc->get_next()))
   {
-      cpu_pic->pcl->put(cpu_pic->W->get());
+      cpu_pic->pcl->put(cpu_pic->Wget());
       cpu_pic->pc->increment();
   }
 }
@@ -965,7 +965,7 @@ CLRW::CLRW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 void CLRW::execute()
 {
 
-  cpu_pic->W->put(0);
+  cpu_pic->Wput(0);
 
   cpu_pic->status->put_Z(1);
   cpu_pic->pc->increment();
@@ -1016,7 +1016,7 @@ void COMF::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(0==new_value);
 
@@ -1047,7 +1047,7 @@ void DECF::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(0==new_value);
 
@@ -1078,7 +1078,7 @@ void DECFSZ::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   if(0==new_value)
     cpu_pic->pc->skip();                  // Skip next instruction
@@ -1151,7 +1151,7 @@ void INCF::execute()
   if(destination)
     source->put(new_value);
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
 
   cpu_pic->status->put_Z(0==new_value);
@@ -1183,7 +1183,7 @@ void INCFSZ::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   if(0==new_value)
     cpu_pic->pc->skip();                  // Skip next instruction
@@ -1205,9 +1205,9 @@ void IORLW::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu_pic->W->value.get() | L;
+  new_value = cpu_pic->Wget() | L;
 
-  cpu_pic->W->put(new_value);
+  cpu_pic->Wput(new_value);
   cpu_pic->status->put_Z(0==new_value);
 
   cpu_pic->pc->increment();
@@ -1232,12 +1232,12 @@ void IORWF::execute()
   else
     source = cpu_pic->register_bank[register_address];
 
-  new_value = source->get() | cpu_pic->W->value.get();
+  new_value = source->get() | cpu_pic->Wget();
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(0==new_value);
 
@@ -1271,7 +1271,7 @@ void LSLF::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(new_value==0);
   cpu_pic->status->put_C(carry);
@@ -1307,7 +1307,7 @@ void LSRF::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(new_value==0);
   cpu_pic->status->put_C(carry);
@@ -1329,7 +1329,10 @@ MOVLP::MOVLP (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void MOVLP::execute()
 {
-  cpu_pic->pclath->put(L);
+  if (cpu_pic->pclath->addr)
+      cpu_pic->registers[cpu_pic->pclath->addr]->put(L);
+  else
+      cpu_pic->pclath->put(L);
 
   cpu_pic->pc->increment();
 
@@ -1357,7 +1360,7 @@ MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 void MOVLW::execute()
 {
 
-  cpu_pic->W->put(L);
+  cpu_pic->Wput(L);
 
   cpu_pic->pc->increment();
 
@@ -1388,7 +1391,7 @@ void MOVF::execute()
   if(destination)
     source->put(source_value);
   else
-    cpu_pic->W->put(source_value);
+    cpu_pic->Wput(source_value);
 
 
   cpu_pic->status->put_Z(0==source_value);
@@ -1417,9 +1420,9 @@ void MOVWF::execute()
 {
 
   if(!access)
-    cpu_pic->registers[register_address]->put(cpu_pic->W->get());
+    cpu_pic->registers[register_address]->put(cpu_pic->Wget());
   else
-    cpu_pic->register_bank[register_address]->put(cpu_pic->W->get());
+    cpu_pic->register_bank[register_address]->put(cpu_pic->Wget());
 
   cpu_pic->pc->increment();
 }
@@ -1478,7 +1481,7 @@ OPTION::OPTION (Processor *new_cpu, unsigned int new_opcode, unsigned int addres
 void OPTION::execute()
 {
 
-  cpu_pic->put_option_reg(cpu_pic->W->get());
+  cpu_pic->put_option_reg(cpu_pic->Wget());
 
   cpu_pic->pc->increment();
 
@@ -1510,7 +1513,7 @@ RETLW::RETLW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 void RETLW::execute()
 {
 
-  cpu_pic->W->put(L);
+  cpu_pic->Wput(L);
 
   cpu_pic->pc->new_address(cpu_pic->stack->pop());
 
@@ -1539,7 +1542,7 @@ void RLF::execute()
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu_pic->W->put(new_value&0xff);
+    cpu_pic->Wput(new_value&0xff);
 
   cpu_pic->status->put_C(new_value>0xff);
 
@@ -1571,7 +1574,7 @@ void RRF::execute()
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu_pic->W->put(new_value&0xff);
+    cpu_pic->Wput(new_value&0xff);
 
   cpu_pic->status->put_C(old_value&0x01);
 
@@ -1611,14 +1614,14 @@ void SUBWF::execute()
   else
     source = cpu_pic->register_bank[register_address];
 
-  new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value.get());
+  new_value = (src_value = source->get()) - (w_value = cpu_pic->Wget());
 
   // Store the result
 
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu_pic->W->put(new_value & 0xff);
+    cpu_pic->Wput(new_value & 0xff);
 
   cpu_pic->status->put_Z_C_DC_for_sub(new_value, src_value, w_value);
 
@@ -1644,13 +1647,13 @@ void SUBWFB::execute()
 	    :
 	    cpu_pic->register_bank[register_address] );
 
-  new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value.get()) -
+  new_value = (src_value = source->get()) - (w_value = cpu_pic->Wget()) -
     (1 - cpu_pic->status->get_C());
 
   if(destination)
     source->put(new_value & 0xff);
   else
-    cpu_pic->W->put(new_value & 0xff);
+    cpu_pic->Wput(new_value & 0xff);
 
   cpu_pic->status->put_Z_C_DC_for_sub(new_value, src_value, w_value);
 
@@ -1681,7 +1684,7 @@ void SWAPF::execute()
   if(destination)
     source->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
   else
-    cpu_pic->W->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
+    cpu_pic->Wput( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
 
   cpu_pic->pc->increment();
 
@@ -1725,7 +1728,7 @@ void TRIS::execute()
       // Execute the instruction only if the register is valid.
       if(cpu_pic->base_isa() == _14BIT_PROCESSOR_ ||
           cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-        cpu_pic->registers[register_address]->put(cpu_pic->W->get());
+        cpu_pic->registers[register_address]->put(cpu_pic->Wget());
       else
         cpu_pic->tris_instruction(register_address);
     }
@@ -1760,9 +1763,9 @@ void XORLW::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu_pic->W->value.get() ^ L;
+  new_value = cpu_pic->Wget() ^ L;
 
-  cpu_pic->W->put(new_value);
+  cpu_pic->Wput(new_value);
   cpu_pic->status->put_Z(0==new_value);
 
   cpu_pic->pc->increment();
@@ -1787,12 +1790,12 @@ void XORWF::execute()
   else
     source = cpu_pic->register_bank[register_address];
 
-  new_value = source->get() ^ cpu_pic->W->value.get();
+  new_value = source->get() ^ cpu_pic->Wget();
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu_pic->W->put(new_value);
+    cpu_pic->Wput(new_value);
 
   cpu_pic->status->put_Z(0==new_value);
 

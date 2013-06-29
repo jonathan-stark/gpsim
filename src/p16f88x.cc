@@ -439,7 +439,7 @@ void P16F88x::create_symbols()
     cout << "88x create symbols\n";
 
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
 }
 
 void P16F88x::set_out_of_range_pm(unsigned int address, unsigned int value)
@@ -1172,7 +1172,7 @@ void P16F631::create(int eesize)
 void P16F631::create_symbols()
 {
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
 
 }
 
@@ -1531,7 +1531,7 @@ void P16F684::create(int eesize)
 void P16F684::create_symbols()
 {
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
 
 }
 

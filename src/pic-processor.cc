@@ -737,8 +737,8 @@ void pic_processor::save_state()
 {
   Processor::save_state();
 
-  if(W)
-    W->put_trace_state(W->value);
+  if(Wreg)
+    Wreg->put_trace_state(Wreg->value);
 
   if(eeprom)
     eeprom->save_state();
@@ -845,7 +845,9 @@ void pic_processor::step (unsigned int steps, bool refresh)
   mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
 
   do
+  {
     mCurrentPhase = mCurrentPhase->advance();
+  }
   while(!bp.have_halt() && --steps>0);
 
   // complete the step if this is a multi-cycle instruction.
@@ -1053,7 +1055,7 @@ void pic_processor::reset (RESET_TYPE r)
 pic_processor::pic_processor(const char *_name, const char *_desc)
   : Processor(_name,_desc),
     wdt(this, 18.0e-3),indf(0),fsr(0), stack(0), status(0),
-    W(0), pcl(0), pclath(0),m_PCHelper(0),
+    Wreg(0), pcl(0), pclath(0),m_PCHelper(0),
     tmr0(this,"tmr0","Timer 0"),
     m_configMemory(0),
     m_MCLR(0), m_MCLR_Save(0), m_MCLRMonitor(0)
@@ -1090,7 +1092,7 @@ pic_processor::~pic_processor()
   delete m_pResetTT;
   delete m_pInterruptTT;
 
-  delete_sfr_register(W);
+  delete_sfr_register(Wreg);
   delete_sfr_register(pcl);
 
   delete_sfr_register(pclath);
@@ -1135,7 +1137,7 @@ void pic_processor::create ()
   // Now, initialize the core stuff:
   pc->set_cpu(this);
 
-  W = new WREG(this,"W","Working Register");
+  Wreg = new WREG(this,"W","Working Register");
 
   pcl = new PCL(this,"pcl", "Program Counter Low");
   pclath = new PCLATH(this,"pclath", "Program Counter Latch High");
@@ -1150,11 +1152,11 @@ void pic_processor::create ()
     m_PCHelper = new PCHelper(this,pma);
     rma.SpecialRegisters.push_back(m_PCHelper);
     rma.SpecialRegisters.push_back(status);
-    rma.SpecialRegisters.push_back(W);
+    rma.SpecialRegisters.push_back(Wreg);
 
     pma->SpecialRegisters.push_back(m_PCHelper);
     pma->SpecialRegisters.push_back(status);
-    pma->SpecialRegisters.push_back(W);
+    pma->SpecialRegisters.push_back(Wreg);
 
   }
 
@@ -1919,4 +1921,12 @@ void pic_processor::osc_mode(unsigned int value)
 	}
   }
   
+}
+void pic_processor::Wput(unsigned int value)
+{
+    Wreg->put(value);
+}
+unsigned int pic_processor::Wget()
+{
+    return Wreg->get();
 }

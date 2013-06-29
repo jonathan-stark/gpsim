@@ -486,6 +486,7 @@ class Trace
 
   inline void cycle_counter (guint64 cc)
   {
+    //RRRprintf("trace.cycle_counter index %x cycle %x\n", trace_index, (unsigned int)(cc & 0xffffffff));
     // The 64 bit cycle counter requires two 32 bit traces.
     trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_LO | (cc & 0xffffffff));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;

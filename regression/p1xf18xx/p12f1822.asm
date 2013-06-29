@@ -71,6 +71,9 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
   .sim "node n3"
   .sim "attach n3 porta2 porta5"
   .sim "p12f1822.BreakOnReset = false"
+  .sim "log w porta"
+  .sim "log lxt"
+  ;.sim "log on"
 
 
 ;------------------------------------------------------------------------

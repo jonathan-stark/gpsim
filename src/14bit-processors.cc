@@ -263,7 +263,7 @@ void Pic14Bit::create_symbols()
 {
   pic_processor::create_symbols();
 
-  addSymbol(W);
+  addSymbol(Wreg);
 
 }
 
@@ -342,7 +342,7 @@ _14bit_e_processor::~_14bit_e_processor()
 void _14bit_e_processor::create_symbols()
 {
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
 }
 
 void _14bit_e_processor::create_sfr_map()
@@ -358,9 +358,12 @@ void _14bit_e_processor::create_sfr_map()
   add_sfr_register(&ind0.fsrh,  0x05, RegisterValue(0,0), "fsr0h");
   add_sfr_register(&ind1.fsrl,  0x06, RegisterValue(0,0), "fsr1l");
   add_sfr_register(&ind1.fsrh,  0x07, RegisterValue(0,0), "fsr1h");
-  add_sfr_register(&bsr,     0x08);
-  add_sfr_register(W,     0x09);
-  add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
+  bsr.addr = 0x08;
+  add_sfr_register(&bsr,     bsr.addr);
+  Wreg->addr = 0x09;
+  add_sfr_register(Wreg,     Wreg->addr);
+  pclath->addr = 0x0a;
+  add_sfr_register(pclath,  pclath->addr, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
   add_sfr_register(&pcon,   0x96, RegisterValue(0,0),"pcon");
@@ -445,7 +448,7 @@ void _14bit_e_processor::interrupt ()
       stack->push(pc->value);
   }
   status_shad.value = status->value;
-  wreg_shad.value = W->value;
+  wreg_shad.value = Wreg->value;
   bsr_shad.value = bsr.value;
   pclath_shad.value = pclath->value;
   fsr0l_shad.value = ind0.fsrl.value;
@@ -555,4 +558,23 @@ void _14bit_e_processor::program_memory_wp(unsigned int mode)
     printf("Error _14bit_e_processor::program_memory_wp called\n");
 }
 
+// This function routes Wreg put requests through registers (if possible)
+// for breaking and logging
+void _14bit_e_processor::Wput(unsigned int value)
+{
+    if(Wreg->addr)
+	registers[Wreg->addr]->put(value);
+    else
+	Wreg->put(value);
+}
+
+// This function routes Wreg get requests through registers (if possible)
+// for breaking and logging
+unsigned int _14bit_e_processor::Wget()
+{
+    if(Wreg->addr)
+	return registers[Wreg->addr]->get();
+    else
+	return Wreg->get();
+}
 

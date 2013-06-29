@@ -68,6 +68,7 @@ public:
   BSR(Processor *, const char *pName, const char *pDesc=0);
 
   unsigned int register_page_bits;
+  unsigned int addr;			// used by MOVLB instruction
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
@@ -437,6 +438,8 @@ public:
 
   WREG(Processor *, const char *pName, const char *pDesc=0);
   ~WREG();
+
+  unsigned int addr;
 protected:
   WTraceType *m_tt;
 };
@@ -601,6 +604,8 @@ public:
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   unsigned int get();
+
+  unsigned int addr;
 
   PCLATH(Processor *, const char *pName, const char *pDesc=0);
 };

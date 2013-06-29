@@ -264,7 +264,7 @@ void cmd_dump::dump(int mem_type)
 
     pic_processor *pic = dynamic_cast<pic_processor *>(pCpu);
     if(pic)
-      printf("\n%s = %02x\n",pic->W->name().c_str(), pic->W->get_value());
+      printf("\n%s = %02x\n",pic->Wreg->name().c_str(), pic->Wreg->get_value());
 
     printf("pc = 0x%x\n",GetActiveCPU()->pc->value);
   }

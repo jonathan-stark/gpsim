@@ -235,6 +235,7 @@ public:
 #define  GLOBAL_SLEEP         (1<<2)
 #define  GLOBAL_PM_WRITE      (1<<3)
 #define  GLOBAL_SOCKET        (1<<4)
+#define  GLOBAL_LOG	      (1<<5)
 
   struct BreakStatus
   {
@@ -349,6 +350,7 @@ public:
   bool set_expression(unsigned bp_number, Expression *pExpr);
 
   inline void clear_global() {global_break = GLOBAL_CLEAR;};
+  inline void set_logging() { global_break |= GLOBAL_LOG; }
   void halt();
   inline bool have_halt() 
     { 

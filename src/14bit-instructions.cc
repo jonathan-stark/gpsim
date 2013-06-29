@@ -86,9 +86,9 @@ void ADDLW::execute(void)
 {
   unsigned int old_value,new_value;
 
-  new_value = (old_value = cpu14->W->value.get()) + L;
+  new_value = (old_value = cpu14->Wget()) + L;
 
-  cpu14->W->put(new_value & 0xff);
+  cpu14->Wput(new_value & 0xff);
   cpu14->status->put_Z_C_DC(new_value, old_value, L);
 
   cpu14->pc->increment();
@@ -174,27 +174,27 @@ void MOVIW::execute()
   if (m_op == PREINC)
   {
     ia->put_fsr(ia->fsr_value + 1);
-    cpu14->W->put(ia->indf.get());
+    cpu14->Wput(ia->indf.get());
   }
   else if (m_op == PREDEC)
   {
     ia->put_fsr(ia->fsr_value - 1);
-    cpu14->W->put(ia->indf.get());
+    cpu14->Wput(ia->indf.get());
   }
   else if (m_op == POSTINC)
   {
-    cpu14->W->put(ia->indf.get());
+    cpu14->Wput(ia->indf.get());
     ia->put_fsr(ia->fsr_value + 1);
   }
   else if (m_op == POSTDEC)
   {
-    cpu14->W->put(ia->indf.get());
+    cpu14->Wput(ia->indf.get());
     ia->put_fsr(ia->fsr_value - 1);
   }
   else if (m_op == DELTA)
   {
 	ia->fsr_delta = m_lit;
-        cpu14->W->put(ia->indf.get());
+        cpu14->Wput(ia->indf.get());
   }
   cpu_pic->pc->increment();
 }
@@ -276,28 +276,28 @@ void MOVWI::execute()
   if (m_op == PREINC)
   {
     ia->put_fsr(ia->fsr_value + 1);
-    ia->indf.put(cpu14->W->get());
+    ia->indf.put(cpu14->Wget());
   }
   else if (m_op == PREDEC)
   {
     ia->put_fsr(ia->fsr_value - 1);
-    ia->indf.put(cpu14->W->get());
+    ia->indf.put(cpu14->Wget());
   }
   else if (m_op == POSTINC)
   {
-    ia->indf.put(cpu14->W->get());
+    ia->indf.put(cpu14->Wget());
     ia->put_fsr(ia->fsr_value + 1);
   }
   else if (m_op == POSTDEC)
   {
-    ia->indf.put(cpu14->W->get());
+    ia->indf.put(cpu14->Wget());
     ia->put_fsr(ia->fsr_value - 1);
   }
   else if (m_op == DELTA)
   {
     Dprintf((" DELTA fsr %d delta %d\n", m_fsr, m_lit));
     ia->fsr_delta = m_lit;
-    ia->indf.put(cpu14->W->get());
+    ia->indf.put(cpu14->Wget());
   }
   cpu_pic->pc->increment();
 }
@@ -312,7 +312,7 @@ MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void MOVLB::execute()
 {
-  cpu14e->bsr.put(L);
+  cpu_pic->registers[cpu14e->bsr.addr]->put(L);
 
   cpu_pic->pc->increment();
 
@@ -343,7 +343,7 @@ void RETFIE::execute(void)
   if(cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
   {
 	cpu14e->status->put(cpu14e->status_shad.get());
-	cpu14e->W->put(cpu14e->wreg_shad.get());
+	cpu14e->Wput(cpu14e->wreg_shad.get());
 	cpu14e->bsr.put(cpu14e->bsr_shad.get());
 	cpu14e->pclath->put(cpu14e->pclath_shad.get());
 	cpu14e->ind0.fsrl.put(cpu14e->fsr0l_shad.get());
@@ -380,9 +380,9 @@ void SUBLW::execute(void)
 {
   unsigned int old_value,new_value;
 
-  new_value = L - (old_value = cpu14->W->value.get());
+  new_value = L - (old_value = cpu14->Wget());
 
-  cpu14->W->put(new_value & 0xff);
+  cpu14->Wput(new_value & 0xff);
 
   cpu14->status->put_Z_C_DC_for_sub(new_value, old_value, L);
 

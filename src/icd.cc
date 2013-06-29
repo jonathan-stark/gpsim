@@ -493,7 +493,7 @@ static void create_dumb_register_file(void)
     put_dumb_status_register(&cpu->status);
     put_dumb_pc_register(&cpu->pc);
     put_dumb_pclath_register(&cpu->pclath);
-    put_dumb_w_register(&cpu->W);
+    put_dumb_w_register(&cpu->Wreg);
     put_dumb_fsr_register(&cpu->fsr);
 }
 
@@ -602,7 +602,7 @@ static void make_stale(void)
         ir->is_stale=1;
     }
 
-    icd_WREG *iw = dynamic_cast<icd_WREG*>(cpu->W);
+    icd_WREG *iw = dynamic_cast<icd_WREG*>(cpu->Wreg);
     assert(iw!=0);
     iw->is_stale=1;
 
