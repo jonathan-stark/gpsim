@@ -1482,7 +1482,7 @@ MOVLB16::MOVLB16 (Processor *new_cpu, unsigned int new_opcode, unsigned int addr
 
 void MOVLB16::execute()
 {
-  cpu16->registers[cpu16->bsr.addr]->put(L);
+  cpu16->registers[cpu16->bsr.address]->put(L);
 
   cpu16->pc->increment();
 

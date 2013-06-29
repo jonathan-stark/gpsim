@@ -1329,8 +1329,8 @@ MOVLP::MOVLP (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void MOVLP::execute()
 {
-  if (cpu_pic->pclath->addr)
-      cpu_pic->registers[cpu_pic->pclath->addr]->put(L);
+  if (cpu_pic->pclath->address)
+      cpu_pic->registers[cpu_pic->pclath->address]->put(L);
   else
       cpu_pic->pclath->put(L);
 

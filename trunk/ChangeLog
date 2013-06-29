@@ -1,4 +1,13 @@
 2013-06-25 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-instructions.cc src/16bit-instructions.cc
+	  src/14bit-processors.cc src/14bit-registers.cc src/14bit-registers.h
+	  src/16bit-processors.cc src/pic-instructions.cc:
+	- remove redundant field added in last patch to WREG, BSR and PCLATH
+	  registers
+	* src/processor.cc: 
+	- Speed-up start by skipping resets on alias register memory locations
+
+2013-06-25 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_dump.cc src/icd.cc src/p16f88x.cc src/p16x6x.cc
 	  src/12bit-processors.cc src/p12f182x.cc src/p12f6xx.cc src/p12x.cc:
 	- rename W Wreg

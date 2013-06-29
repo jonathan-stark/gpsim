@@ -427,8 +427,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ind2.postinc, 0xfde,porv,"postinc2");
   add_sfr_register(&ind2.indf,    0xfdf,porv,"indf2");
 
-  bsr.addr = 0xfe0;
-  add_sfr_register(&bsr,          bsr.addr,porv,"bsr");
+  add_sfr_register(&bsr,          0xfe0,porv, "bsr");
 
   add_sfr_register(&ind1.fsrl,	  0xfe1,porv,"fsr1l");
   add_sfr_register(&ind1.fsrh,    0xfe2,porv,"fsr1h");

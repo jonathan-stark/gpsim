@@ -878,7 +878,7 @@ void PCL::reset(RESET_TYPE r)
 //--------------------------------------------------
 
 PCLATH::PCLATH(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc), addr(0)
+  : sfr_register(pCpu, pName, pDesc)
 {
     mValidBits = PCLATH_MASK;
 }
@@ -1084,7 +1084,6 @@ FSRL14::FSRL14(Processor *pCpu, const char *pName, const char *pDesc, Indirect_A
 void  FSRL14::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
   iam->fsr_delta = 0;
   iam->update_fsr_value();
@@ -1093,7 +1092,9 @@ void  FSRL14::put(unsigned int new_value)
 void  FSRL14::put_value(unsigned int new_value)
 {
 
-  put(new_value);
+  value.put(new_value & 0xff);
+  iam->fsr_delta = 0;
+  iam->update_fsr_value();
 
   update();
   cpu14->indf->update();
@@ -1118,12 +1119,14 @@ void  FSRH14::put(unsigned int new_value)
 void  FSRH14::put_value(unsigned int new_value)
 {
 
-  put(new_value);
+  value.put(new_value & 0xff);
+  iam->update_fsr_value();
 
   update();
   cpu14->indf->update();
 }
 
+// INDF14 used by 14bit enhanced indirect addressing
 INDF14::INDF14(Processor *pCpu, const char *pName, const char *pDesc, Indirect_Addressing14 *pIAM)
   : sfr_register(pCpu,pName,pDesc),
     iam(pIAM)
@@ -1580,7 +1583,7 @@ TraceObject * WTraceType::decode(unsigned int tbi)
 
 
 WREG::WREG(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu,pName,pDesc), addr(0)
+  : sfr_register(pCpu,pName,pDesc)
 {
   if(cpu) {
     unsigned int trace_command = trace.allocateTraceType(m_tt = new WTraceType(get_cpu(),1));
