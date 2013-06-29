@@ -312,7 +312,7 @@ MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
 
 void MOVLB::execute()
 {
-  cpu_pic->registers[cpu14e->bsr.addr]->put(L);
+  cpu_pic->registers[cpu14e->bsr.address]->put(L);
 
   cpu_pic->pc->increment();
 

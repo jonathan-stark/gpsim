@@ -358,12 +358,9 @@ void _14bit_e_processor::create_sfr_map()
   add_sfr_register(&ind0.fsrh,  0x05, RegisterValue(0,0), "fsr0h");
   add_sfr_register(&ind1.fsrl,  0x06, RegisterValue(0,0), "fsr1l");
   add_sfr_register(&ind1.fsrh,  0x07, RegisterValue(0,0), "fsr1h");
-  bsr.addr = 0x08;
-  add_sfr_register(&bsr,     bsr.addr);
-  Wreg->addr = 0x09;
-  add_sfr_register(Wreg,     Wreg->addr);
-  pclath->addr = 0x0a;
-  add_sfr_register(pclath,  pclath->addr, RegisterValue(0,0));
+  add_sfr_register(&bsr,     0x08);
+  add_sfr_register(Wreg,     0x09);
+  add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
   add_sfr_register(&pcon,   0x96, RegisterValue(0,0),"pcon");
@@ -562,8 +559,8 @@ void _14bit_e_processor::program_memory_wp(unsigned int mode)
 // for breaking and logging
 void _14bit_e_processor::Wput(unsigned int value)
 {
-    if(Wreg->addr)
-	registers[Wreg->addr]->put(value);
+    if(Wreg->address)
+	registers[Wreg->address]->put(value);
     else
 	Wreg->put(value);
 }
@@ -572,8 +569,8 @@ void _14bit_e_processor::Wput(unsigned int value)
 // for breaking and logging
 unsigned int _14bit_e_processor::Wget()
 {
-    if(Wreg->addr)
-	return registers[Wreg->addr]->get();
+    if(Wreg->address)
+	return registers[Wreg->address]->get();
     else
 	return Wreg->get();
 }

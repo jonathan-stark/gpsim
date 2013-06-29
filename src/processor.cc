@@ -2188,7 +2188,11 @@ Register &RegisterMemoryAccess::operator [] (unsigned int address)
 void RegisterMemoryAccess::reset (RESET_TYPE r)
 {
   for(unsigned int i=0; i<nRegisters; i++)
-    operator[](i).reset(r);
+  {
+    // Do not reset aliased registers
+    if ( !(operator[](i).alias_mask && (operator[](i).alias_mask & i)))
+        operator[](i).reset(r);
+  }
 }
 
 //========================================================================
