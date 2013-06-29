@@ -235,6 +235,32 @@ EXPORTS
     ?compare@Integer@@UAE_NPAVComparisonOperator@@PAVValue@@@Z
     ?compare@Value@@UAE_NPAVComparisonOperator@@PAV1@@Z
     ?computed_goto@Program_Counter@@UAEXI@Z
+    ?construct@P12F1822@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F1823@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F631@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F631@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F677@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F677@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F684@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F684@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F685@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F685@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F687@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F687@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F689@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F689@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F690@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F690@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F882@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F882@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F883@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F883@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F884@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F884@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F886@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F886@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F887@@SAPAVProcessor@@PBD@Z
+    ?construct@P16F887@@SAPAVProcessor@@PBD@Z
     ?construct@Stimulus_Node@@SAPAV1@PBD@Z
     ?convertToNew@PinGeometry@@QAEXXZ
     ?copy@Boolean@@UAEPAVValue@@XZ

@@ -357,7 +357,7 @@ main (int argc, char *argv[])
 
     if(*hex_name){
       snprintf(command_str, sizeof(command_str),
-        "load \%s \"%s\"\n",processor_name, hex_name);
+        "load %s \"%s\"\n",processor_name, hex_name);
       parse_string(command_str);
 
     }

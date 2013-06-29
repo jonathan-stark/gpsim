@@ -67,11 +67,11 @@ ClockPhase *phaseExecute1Cycle::advance()
   m_pcpu->step_one(false);
   if (bp.global_break & GLOBAL_LOG)
   {
-      if (trace_log.log_file)
+      if (GetTraceLog().log_file)
       {
 	   trace.cycle_counter(get_cycles().get());
-            trace.dump(1, trace_log.log_file);
-	  trace_log.items_logged++;
+            trace.dump(1, GetTraceLog().log_file);
+	  GetTraceLog().items_logged++;
       }
       bp.global_break &= ~GLOBAL_LOG;
   }
