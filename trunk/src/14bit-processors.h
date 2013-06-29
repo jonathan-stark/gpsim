@@ -224,6 +224,9 @@ public:
       return((pclath->value.get() & 0x1f)<<8);
     }
 
+  virtual void Wput(unsigned int);
+  virtual unsigned int Wget();
+
 protected:
   OPTION_REG   *option_reg;
   bool		wdt_sleep;	// if true wdt will interupt in sleep

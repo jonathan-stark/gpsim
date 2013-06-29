@@ -259,8 +259,12 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
     int set_mask = (1<<bit_number);
   if(set_mask & mValidBits) {
 
+// The following traces just seem to muddy the water
+#ifdef RRR
     trace.raw(write_trace.get()  | value.data);
     trace.raw(write_trace.geti() | value.init);
+#endif
+
 
     Dprintf(("PortRegister::setbit() %s bit=%d,val=%c\n",name().c_str(), bit_number,new3State));
 

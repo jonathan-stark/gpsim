@@ -294,7 +294,7 @@ void P12bitBase::create_sfr_map()
   add_sfr_register(&osccal,5, RegisterValue(0x70,0));
   add_sfr_register(m_gpio, 6, porVal);
   add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
-  add_sfr_register(W, 0xffffffff, porVal);
+  add_sfr_register(Wreg, 0xffffffff, porVal);
   option_reg->set_cpu(this);
 
   osccal.set_cpu(this);
@@ -345,7 +345,7 @@ void  P12bitBase::setConfigWord(unsigned int val, unsigned int diff)
 
 void P12bitBase::tris_instruction(unsigned int tris_register)
 {
-  m_tris->put(W->value.get());
+  m_tris->put(Wget());
 
 }
 
@@ -598,7 +598,7 @@ void P12CE518::tris_instruction(unsigned int tris_register)
 {
     unsigned int w_val;
 
-  w_val = W->value.get();
+  w_val = Wget();
   m_tris->put ( w_val & 0x3F );     // top two bits always output
 
   //  trace.write_TRIS(w_val);

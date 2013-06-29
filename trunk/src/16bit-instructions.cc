@@ -231,7 +231,7 @@ void CALLW16::execute()
   {
       if(cpu16->stack->push(cpu16->pc->get_next()))
       {
-    	cpu16->pcl->put(cpu16->W->get());
+    	cpu16->pcl->put(cpu16->Wget());
     	cpu16->pc->increment();
       }
       else	// stack overflow reset
@@ -372,9 +372,9 @@ void ADDLW16::execute()
 {
   unsigned int old_value,new_value;
 
-  new_value = (old_value = cpu16->W->value.get()) + L;
+  new_value = (old_value = cpu16->Wget()) + L;
 
-  cpu16->W->put(new_value & 0xff);
+  cpu16->Wput(new_value & 0xff);
   cpu16->status->put_Z_C_DC_OV_N(new_value, old_value, L);
 
   cpu16->pc->increment();
@@ -393,7 +393,7 @@ void ADDWF16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = (src_value = source->get()) + (w_value = cpu16->W->value.get());
+  new_value = (src_value = source->get()) + (w_value = cpu16->Wget());
 
   // Store the result
 
@@ -404,7 +404,7 @@ void ADDWF16::execute()
     }
   else
     {
-      cpu16->W->put(new_value & 0xff);
+      cpu16->Wput(new_value & 0xff);
       cpu16->status->put_Z_C_DC_OV_N(new_value, w_value, src_value);
     }
 
@@ -426,7 +426,7 @@ void ADDWFC16::execute()
       source = cpu_pic->registers[register_address];
 
   new_value = (src_value = source->get()) + 
-    (w_value = cpu16->W->value.get()) +
+    (w_value = cpu16->Wget()) +
     ((cpu16->status->value.get() & STATUS_C) ? 1 : 0);
 
   // Store the result
@@ -434,7 +434,7 @@ void ADDWFC16::execute()
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value & 0xff);
+    cpu16->Wput(new_value & 0xff);
 
   cpu16->status->put_Z_C_DC_OV_N(new_value, src_value, w_value);
 
@@ -448,9 +448,9 @@ void ANDLW16::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu16->W->value.get() & L;
+  new_value = cpu16->Wget() & L;
 
-  cpu16->W->put(new_value);
+  cpu16->Wput(new_value);
   cpu16->status->put_N_Z(new_value);
 
   cpu16->pc->increment();
@@ -470,12 +470,12 @@ void ANDWF16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = source->get() & cpu16->W->value.get();
+  new_value = source->get() & cpu16->Wget();
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   cpu16->status->put_N_Z(new_value);
 
@@ -829,7 +829,7 @@ void COMF16::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   cpu16->status->put_N_Z(new_value);
 
@@ -855,7 +855,7 @@ void CPFSEQ::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  if(source->get() == cpu16->W->value.get())
+  if(source->get() == cpu16->Wget())
     cpu16->pc->skip();                  // Skip next instruction
   else
     cpu16->pc->increment();
@@ -880,7 +880,7 @@ void CPFSGT::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  if(source->get() > cpu16->W->value.get())
+  if(source->get() > cpu16->Wget())
     cpu16->pc->skip();                  // Skip next instruction
   else
     cpu16->pc->increment();
@@ -905,7 +905,7 @@ void CPFSLT::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  if(source->get() < cpu16->W->value.get())
+  if(source->get() < cpu16->Wget())
     cpu16->pc->skip();                  // Skip next instruction
   else
     cpu16->pc->increment();
@@ -940,14 +940,14 @@ void DAW::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu16->W->value.get();
+  new_value = cpu16->Wget();
   if(((new_value & 0x0f) > 0x9) || (cpu16->status->value.get() & STATUS_DC))
     new_value += 0x6;
 
   if(((new_value & 0xf0) > 0x90) || (cpu16->status->value.get() & STATUS_C))
     new_value += 0x60;
 
-  cpu16->W->put(new_value & 0xff);
+  cpu16->Wput(new_value & 0xff);
   if ( new_value>0xff )
       cpu16->status->put_C(1);
   else if ( cpu16->bugs() & BUG_DAW )
@@ -975,7 +975,7 @@ void DECF16::execute()
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value & 0xff);
+    cpu16->Wput(new_value & 0xff);
 
   //  cpu16->status->put_N_Z(new_value);
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value,src_value,1);
@@ -1002,7 +1002,7 @@ void DECFSZ16::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   if(0==new_value)
     cpu16->pc->skip();                  // Skip next instruction
@@ -1036,7 +1036,7 @@ void DCFSNZ::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   if(0!=new_value)
     cpu16->pc->skip();                  // Skip next instruction
@@ -1089,7 +1089,7 @@ void INCF16::execute()
     }
   else
     {
-      cpu16->W->put(new_value & 0xff);
+      cpu16->Wput(new_value & 0xff);
       cpu16->status->put_Z_C_DC_OV_N(new_value, 1, src_value);
     }
 
@@ -1115,7 +1115,7 @@ void INCFSZ16::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   if(0==new_value)
     cpu16->pc->skip();                  // Skip next instruction
@@ -1149,7 +1149,7 @@ void INFSNZ::execute()
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   if(0!=new_value)
     cpu16->pc->skip();                  // Skip next instruction
@@ -1164,9 +1164,9 @@ void IORLW16::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu16->W->value.get() | L;
+  new_value = cpu16->Wget() | L;
 
-  cpu16->W->put(new_value);
+  cpu16->Wput(new_value);
   cpu16->status->put_N_Z(new_value);
 
   cpu16->pc->increment();
@@ -1186,12 +1186,12 @@ void IORWF16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = source->get() | cpu16->W->value.get();
+  new_value = source->get() | cpu16->Wget();
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   cpu16->status->put_N_Z(new_value);
 
@@ -1339,7 +1339,7 @@ void MOVF16::execute()
   if(destination)
     source->put(source_value);
   else
-    cpu16->W->put(source_value);
+    cpu16->Wput(source_value);
 
 
   cpu16->status->put_N_Z(source_value);
@@ -1482,7 +1482,7 @@ MOVLB16::MOVLB16 (Processor *new_cpu, unsigned int new_opcode, unsigned int addr
 
 void MOVLB16::execute()
 {
-  cpu16->bsr.put(L);
+  cpu16->registers[cpu16->bsr.addr]->put(L);
 
   cpu16->pc->increment();
 
@@ -1592,7 +1592,7 @@ void MOVWF16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  source->put(cpu16->W->get());
+  source->put(cpu16->Wget());
 
   cpu16->pc->increment();
 }
@@ -1611,7 +1611,7 @@ MOVWF16a::MOVWF16a(Processor *new_cpu, unsigned int new_opcode, unsigned int add
 void MOVWF16a::execute()
 {
   source = cpu_pic->registers[register_address];
-  source->put(cpu16->W->get());
+  source->put(cpu16->Wget());
 
   cpu16->pc->increment();
 }
@@ -1633,7 +1633,7 @@ void MULLW::execute()
 {
   unsigned int value;
 
-  value = (0xff & cpu16->W->get()) * L;
+  value = (0xff & cpu16->Wget()) * L;
 
   cpu16->prodl.put(value &0xff);
   cpu16->prodh.put((value>>8) &0xff);
@@ -1665,7 +1665,7 @@ void MULWF::execute()
 
   //It's not necessary to '&' the get()'s with 0xff, but it doesn't
   //hurt either. 
-  value = (0xff & cpu16->W->get()) * (0xff & source->get());
+  value = (0xff & cpu16->Wget()) * (0xff & source->get());
 
   cpu16->prodl.put(value &0xff);
   cpu16->prodh.put((value>>8) &0xff);
@@ -1866,7 +1866,7 @@ void RLCF::execute()
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value&0xff);
+    cpu16->Wput(new_value&0xff);
 
   cpu16->status->put_Z_C_N(new_value);
 
@@ -1901,7 +1901,7 @@ void RLNCF::execute()
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value&0xff);
+    cpu16->Wput(new_value&0xff);
 
   cpu16->status->put_N_Z(new_value);
 
@@ -1937,7 +1937,7 @@ void RRCF::execute()
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value&0xff);
+    cpu16->Wput(new_value&0xff);
 
   cpu16->status->put_Z_C_N(new_value | ((src_value & 1) ? 0x100 : 0) );
 
@@ -1972,7 +1972,7 @@ void RRNCF::execute()
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value&0xff);
+    cpu16->Wput(new_value&0xff);
 
   cpu16->status->put_N_Z(new_value | ((src_value & 1) ? 0x100 : 0) );
 
@@ -2019,9 +2019,9 @@ void SUBLW16::execute()
 {
   unsigned int new_value,old_value;
 
-  new_value = L - (old_value = cpu16->W->value.get());
+  new_value = L - (old_value = cpu16->Wget());
 
-  cpu16->W->put(new_value & 0xff);
+  cpu16->Wput(new_value & 0xff);
 
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, L, old_value);
 
@@ -2050,13 +2050,13 @@ void SUBFWB::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = (w_value = cpu16->W->value.get()) - (src_value = source->get()) -
+  new_value = (w_value = cpu16->Wget()) - (src_value = source->get()) -
     (1 - cpu16->status->get_C());
 
   if(destination)
     source->put(new_value & 0xff);
   else
-    cpu16->W->put(new_value & 0xff);
+    cpu16->Wput(new_value & 0xff);
 
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, w_value, src_value);
 
@@ -2078,12 +2078,12 @@ void SUBWF16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = (src_value = source->get()) - (w_value = cpu16->W->value.get());
+  new_value = (src_value = source->get()) - (w_value = cpu16->Wget());
 
   if(destination)
     source->put(new_value & 0xff);
   else
-    cpu16->W->put(new_value & 0xff);
+    cpu16->Wput(new_value & 0xff);
 
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, src_value, w_value);
 
@@ -2104,13 +2104,13 @@ void SUBWFB16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = (src_value = source->get()) - (w_value = cpu16->W->value.get()) -
+  new_value = (src_value = source->get()) - (w_value = cpu16->Wget()) -
     (1 - cpu16->status->get_C());
 
   if(destination)
     source->put(new_value & 0xff);
   else
-    cpu16->W->put(new_value & 0xff);
+    cpu16->Wput(new_value & 0xff);
 
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, src_value, w_value);
 
@@ -2137,7 +2137,7 @@ void SWAPF16::execute()
   if(destination)
     source->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
   else
-    cpu_pic->W->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
+    cpu_pic->Wput( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
 
 
 
@@ -2336,9 +2336,9 @@ void XORLW16::execute()
 {
   unsigned int new_value;
 
-  new_value = cpu16->W->value.get() ^ L;
+  new_value = cpu16->Wget() ^ L;
 
-  cpu16->W->put(new_value);
+  cpu16->Wput(new_value);
   cpu16->status->put_N_Z(new_value);
 
   cpu16->pc->increment();
@@ -2358,12 +2358,12 @@ void XORWF16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = source->get() ^ cpu16->W->value.get();
+  new_value = source->get() ^ cpu16->Wget();
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->Wput(new_value);
 
   cpu16->status->put_N_Z(new_value);
 

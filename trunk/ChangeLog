@@ -1,4 +1,19 @@
 2013-06-25 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_dump.cc src/icd.cc src/p16f88x.cc src/p16x6x.cc
+	  src/12bit-processors.cc src/p12f182x.cc src/p12f6xx.cc src/p12x.cc:
+	- rename W Wreg
+	* src/14bit-processors.cc src/14bit-processors.h src/pic-processor.cc 
+	  src/pic-processor.h src/14bit-registers.cc src/14bit-registers.h
+	  src/14bit-instructions.cc src/16bit-instructions.cc
+	  src/pic-instructions.cc src/16bit-processors.cc src/16bit-registers.cc
+	  src/p16x5x.cc:
+	- Allow break, logging on Wreg(if register in memory), rename W Wreg
+	* src/ioports.cc: remove port trace messages
+	* src/breakpoints.cc: remove debugging message
+	* src/breakpoints.h src/clock_phase.cc src/trace.cc src/trace.h
+	- Change logging to be same as break or single step as per doco
+
+2013-06-25 Roy Rankin <rrankin@ihug.com.au>
 	* regression/ccp/pwm_6520.asm regression/ccp_628/ccp_628.asm
 	  regression/p16f84/reset.asm regression/p18f/reset.asm
 	  regression/wdt/wdt_18f452.asm regression/wdt/wdt_18f4620.asm:

@@ -135,7 +135,7 @@ void _12bit_processor::create_symbols()
   addSymbol(option_reg);
   // Create an alias for the option_reg
   option_reg->new_name("option");
-  addSymbol(W);
+  addSymbol(Wreg);
 }
 
 void _12bit_processor::reset(RESET_TYPE r)

@@ -30,6 +30,16 @@ License along with this library; if not, see
 #include "trace_orb.h"
 #include "xref.h"
 
+#define NEWTRACE 
+
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
+
 #define MODE "0x" << hex
 
 Trace trace;               /* Instantiate the trace buffer class.
@@ -586,7 +596,7 @@ int TraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 
   for(int i = 0; i < iUsed; i++) {
 
-    int n = snprintf(buf,bufsize,"%08X:", pTrace->get(tbi+i));
+    int n = snprintf(buf,bufsize," %08X:", pTrace->get(tbi+i));
     if(n < 0)
       break;
 
@@ -711,6 +721,8 @@ TraceObject *RegisterWriteTraceType::decode(unsigned int tbi)
 
 int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int bufsize)
 {
+  unsigned int val = 0;
+
   if (!pTrace)
     return 0;
 
@@ -723,10 +735,15 @@ int RegisterWriteTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, 
   unsigned int address = (tv >> 8) & 0xfff;
 
   Register *reg = cpu->rma.get_register(address);
+  if(reg)
+    val = reg->get_value();
+
   int m = snprintf(buf, bufsize,
-                   "  Reg Write: %s(0x%04X) was 0x%0X ",
+                   "  Reg Write: 0x%0x to %s(0x%04X) was 0x%0X ",
+		   val&0xff,
                    (reg ? reg->name().c_str() : ""), address,
                    tv & 0xff);
+  Dprintf(("dump_raw %s %x\n", buf, tv&0xff));
   if(m>0)
     n += m;
 
@@ -1243,6 +1260,7 @@ int Trace::dump(int n, FILE *out_stream)
 
   deleteTraceFrame();
 
+  fflush(out_stream);
   return n;
 }
 //------------------------------------------------------------------------
@@ -1336,6 +1354,9 @@ void Trace::dump_raw(int n)
 
 void Trace::dump_last_instruction()
 {
+
+  if (trace_log.log_file)
+	dump(1, trace_log.log_file);
   dump(1,stdout);
 }
 
@@ -1434,6 +1455,7 @@ void TraceLog::open_logfile(const char *new_fname, int format)
       log_file = fopen(new_fname, "w");
       lxtp=0;
       break;
+
   case TRACE_FILE_FORMAT_LXT:
       lxtp = lt_init(new_fname);
       lt_set_timescale(lxtp, -8);
@@ -1454,9 +1476,12 @@ void TraceLog::close_logfile()
       switch(file_format)
       {
       case TRACE_FILE_FORMAT_ASCII:
+#ifndef NEWTRACE
           write_logfile();
+#endif
           fclose(log_file);
           break;
+
       case TRACE_FILE_FORMAT_LXT:
           lt_close(lxtp);
           break;
@@ -1470,6 +1495,7 @@ void TraceLog::close_logfile()
 
 void TraceLog::write_logfile()
 {
+#ifndef NEWTRACE
 
   unsigned int i,j;
   char buf[256];
@@ -1488,7 +1514,7 @@ void TraceLog::write_logfile()
 
       if(buffer.is_cycle_trace(i,&cycle))
       {
-        fprintf(log_file,"Cycle 0x%016" PRINTF_GINT64_MODIFIER "X\n",cycle);
+        fprintf(log_file,"Cycle 0x%016" PRINTF_GINT64_MODIFIER "X ",cycle);
       }
 
       i = (i + buffer.dump1(i,buf, sizeof(buf))) & TRACE_BUFFER_MASK;
@@ -1497,11 +1523,14 @@ void TraceLog::write_logfile()
         items_logged++;
         fprintf(log_file,"%s\n", buf);
       }
+      else
+	fprintf(log_file, "\n");
     }
 
     buffer.trace_index = 0;
   }
 
+#endif //NEWTRACE
 }
 
 void TraceLog::enable_logging(const char *new_fname, int format)
@@ -1558,7 +1587,8 @@ void TraceLog::status()
     // item that is in the log buffer, so the actual events that
     // triggered a log is the total buffer size divided by 2.
 
-    int total_items = (buffer.trace_index + items_logged)/2;
+    //int total_items = (buffer.trace_index + items_logged)/2;
+    int total_items = (buffer.trace_index + items_logged);
     if(total_items) {
       cout << "So far, it contains " << hex << "0x" << total_items << " logged events\n";
     } else {
@@ -1599,6 +1629,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
     char *name;
 
     name = (char *)cpu->registers[address]->name().c_str();
+    items_logged++;
 
     lt_set_time(lxtp, (int)(get_cycles().get()*4.0e8*cpu->get_OSCperiod()));
 
@@ -1625,12 +1656,20 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
+      Dprintf(("cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+#ifdef NEWTRACE
+      bp.set_logging();
+      return;
+#else
       buffer.cycle_counter(cc);
       buffer.raw(pReg->read_trace.get() | pReg->get_value());
       if(buffer.near_full())
         write_logfile();
+#endif //NEWTRACE
       break;
+
     case TRACE_FILE_FORMAT_LXT:
+      Dprintf(("LXT cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1645,12 +1684,20 @@ void TraceLog::register_write(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
+      Dprintf(("cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+#ifdef NEWTRACE
+      bp.set_logging();
+      return;
+#else
       buffer.cycle_counter(cc);
       buffer.raw(pReg->write_trace.get() | pReg->get_value());
       if(buffer.near_full())
         write_logfile();
+#endif //NEWTRACE
       break;
+
     case TRACE_FILE_FORMAT_LXT:
+      Dprintf(("LXT cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1664,12 +1711,20 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
+      Dprintf(("cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+#ifdef NEWTRACE
+      bp.set_logging();
+      return;
+#else
       buffer.cycle_counter(cc);
       buffer.raw(pReg->read_trace.get() | pReg->get_value());
       if(buffer.near_full())
         write_logfile();
+#endif //NEWTRACE
       break;
+
     case TRACE_FILE_FORMAT_LXT:
+      Dprintf(("LXT cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1684,12 +1739,20 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
+      Dprintf(("cycle=%lx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+#ifdef NEWTRACE
+      bp.set_logging();
+      return;
+#else
       buffer.cycle_counter(cc);
       buffer.raw(pReg->write_trace.get() | pReg->get_value());
       if(buffer.near_full())
         write_logfile();
+#endif //NEWTRACE
       break;
+
     case TRACE_FILE_FORMAT_LXT:
+      Dprintf(("LXT cycle=%lx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }

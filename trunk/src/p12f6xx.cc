@@ -224,7 +224,7 @@ Processor * P12F629::construct(const char *name)
 void P12F629::create_symbols()
 {
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
 
 }
 void P12F629::create_sfr_map()

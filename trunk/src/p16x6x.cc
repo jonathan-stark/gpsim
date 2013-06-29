@@ -965,7 +965,7 @@ void P16F630::create(int eesize)
 void P16F630::create_symbols()
 {
   pic_processor::create_symbols();
-  addSymbol(W);
+  addSymbol(Wreg);
 
 }
 

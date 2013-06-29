@@ -65,6 +65,16 @@ ClockPhase *phaseExecute1Cycle::advance()
 {
   setNextPhase(this);
   m_pcpu->step_one(false);
+  if (bp.global_break & GLOBAL_LOG)
+  {
+      if (trace_log.log_file)
+      {
+	   trace.cycle_counter(get_cycles().get());
+            trace.dump(1, trace_log.log_file);
+	  trace_log.items_logged++;
+      }
+      bp.global_break &= ~GLOBAL_LOG;
+  }
   if (!bp.global_break)
       get_cycles().increment();
   return m_pNextPhase;

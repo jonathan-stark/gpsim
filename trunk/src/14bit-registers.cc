@@ -145,6 +145,7 @@ void  BSR::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   value.put(new_value & 0x01f);
+  //value.put(new_value & 0x01f);
   if(cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
       cpu_pic->register_bank = &cpu_pic->registers[ value.get() << 7 ];
   else
@@ -877,7 +878,7 @@ void PCL::reset(RESET_TYPE r)
 //--------------------------------------------------
 
 PCLATH::PCLATH(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
+  : sfr_register(pCpu, pName, pDesc), addr(0)
 {
     mValidBits = PCLATH_MASK;
 }
@@ -1521,8 +1522,8 @@ WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv)
   pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
 
   if(pcpu) {
-    to = cpu_pic->W->trace_state;
-    cpu_pic->W->trace_state = from;
+    to = cpu_pic->Wreg->trace_state;
+    cpu_pic->Wreg->trace_state = from;
   }
 
 }
@@ -1545,8 +1546,8 @@ WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv)
   pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
 
   if(pcpu) {
-    to = cpu_pic->W->trace_state;
-    cpu_pic->W->trace_state = from;
+    to = cpu_pic->Wreg->trace_state;
+    cpu_pic->Wreg->trace_state = from;
   }
 
 }
@@ -1579,7 +1580,7 @@ TraceObject * WTraceType::decode(unsigned int tbi)
 
 
 WREG::WREG(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu,pName,pDesc)
+  : sfr_register(pCpu,pName,pDesc), addr(0)
 {
   if(cpu) {
     unsigned int trace_command = trace.allocateTraceType(m_tt = new WTraceType(get_cpu(),1));
