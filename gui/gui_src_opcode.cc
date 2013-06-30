@@ -995,7 +995,6 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 
   GtkSheet *sheet;
   const gchar *text;
-  int justification;
 
   sheet=GTK_SHEET(widget);
 
@@ -1008,9 +1007,6 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 
   if(sbow->memory==0)
       return;
-
-
-  justification=GTK_JUSTIFY_RIGHT;
 
   if(col < OPCODES_PER_ROW)
     {
@@ -1053,7 +1049,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  GtkSheet *sheet;
  GtkEntry *sheet_entry;
 
- int row,col;
+ //RRRint row,col;
 
  if(widget==0|| sbow==0)
   {
@@ -1066,7 +1062,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  sheet=GTK_SHEET(sbow->sheet);
  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
- row=sheet->active_cell.row; col=sheet->active_cell.col;
+ //RRRrow=sheet->active_cell.row; col=sheet->active_cell.col;
 
  if((text=gtk_entry_get_text (GTK_ENTRY(sbow->entry))))
      gtk_entry_set_text(sheet_entry, text);
@@ -1110,7 +1106,7 @@ show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  const char *text;
  GtkSheet *sheet;
  GtkWidget * sheet_entry;
-  gint row, col;
+ // gint row, col;
 
   if(widget==0|| sbow==0)
   {
@@ -1123,7 +1119,7 @@ show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  sheet=GTK_SHEET(sbow->sheet);
  sheet_entry = gtk_sheet_get_entry(sheet);
 
- row=sheet->active_cell.row; col=sheet->active_cell.col;
+ //row=sheet->active_cell.row; col=sheet->active_cell.col;
 
  if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
      gtk_entry_set_text(GTK_ENTRY(sbow->entry), text);

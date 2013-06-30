@@ -490,7 +490,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                     Vprintf(("I2C_EE : data set to 0x%x\n", xfr_data));
                     sda->setDrivingState ( false );
                     bus_state = ACK_WR;
-                    write_page_off = (++write_page_off) % write_page_size;
+                    write_page_off = (write_page_off+1) % write_page_size;
                 }
                 break;
 

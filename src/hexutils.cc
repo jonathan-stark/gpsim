@@ -229,7 +229,7 @@ int IntelHexProgramFileType::readihex16 (Processor *pProcessor, FILE * file)
   int extended_address = 0;
   int address;
   int linetype = 0;
-  int wordsthisline, bytesthisline;
+  int bytesthisline;
   int i;
   int lineCount = 1;
   int csby;
@@ -245,7 +245,6 @@ int IntelHexProgramFileType::readihex16 (Processor *pProcessor, FILE * file)
 
       checksum = 0;
       bytesthisline = getbyte (file);
-      wordsthisline = bytesthisline  / 2;
       address = read_be_word(file) / 2;
 
       /* wierdness of INHX16! address different */

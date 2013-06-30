@@ -310,7 +310,7 @@ void Pic14Bit::option_new_bits_6_7(unsigned int bits)
 
 
 _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
-  : pic_processor(_name,_desc),
+  : _14bit_processor(_name,_desc),
     intcon_reg(this,"intcon","Interrupt Control"),
     bsr(this, "bsr", "Bank Select Register"),
     pcon(this, "pcon", "Power Control Register", 0xcf),
@@ -327,17 +327,16 @@ _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
     fsr1h_shad(this, "fsr1h_shad", "fsr1h shadow register"),
     m_cpu_temp(0)
 {
-  pc = new Program_Counter("pc", "Program Counter", this);
-  pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
   option_reg = new OPTION_REG(this,"option_reg");
+  delete stack;
   stack = new Stack14E(this);
   stack->stack_mask = 15; // ehanced has stack 16 high
+  intcon = &intcon_reg;
 
 };
 
 _14bit_e_processor::~_14bit_e_processor()
 {
-    delete pc;
 }
 void _14bit_e_processor::create_symbols()
 {

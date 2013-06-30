@@ -61,7 +61,7 @@ static const gchar *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
 guint64 row_to_cycle[MAXTRACES];
 
 
-static GtkStyle *normal_style;
+//RRR static GtkStyle *normal_style;
 
 //struct TraceMapping trace_map[MAXTRACES];
 
@@ -226,7 +226,7 @@ void Trace_Window::Build(void)
   GtkWidget *scrolled_window;
 
   gint i;
-  gint column_width,char_width;
+  //RRR gint column_width,char_width;
 
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -264,6 +264,7 @@ void Trace_Window::Build(void)
 
 
 
+/* RRR
   normal_style = gtk_style_new ();
 #if GTK_MAJOR_VERSION >= 2
   char_width = gdk_string_width(gtk_style_get_font(normal_style), "9");
@@ -271,6 +272,7 @@ void Trace_Window::Build(void)
   char_width = gdk_string_width(normal_style->font, "9");
 #endif
   column_width = 3 * char_width + 6;
+RRR*/
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
                            GTK_SIGNAL_FUNC(gui_object_configure_event),this);

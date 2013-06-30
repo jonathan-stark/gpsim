@@ -1327,8 +1327,6 @@ gint Scope_Window::signalButtonPress(GtkWidget *widget,
 void Scope_Window::Build()
 {
 
-  GtkTooltips *tooltips;
-
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   if (!window)
     return;
@@ -1344,7 +1342,7 @@ void Scope_Window::Build()
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
 
 
-  tooltips = gtk_tooltips_new();
+  gtk_tooltips_new();
 
 
 

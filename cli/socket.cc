@@ -496,11 +496,10 @@ void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition
 
 #if GLIB_MAJOR_VERSION >= 2
     GError *err = NULL;
-    GIOStatus stat;
 
-    stat = g_io_channel_set_encoding (channel, NULL, &err);
+    g_io_channel_set_encoding (channel, NULL, &err);
 #if !defined _WIN32 || defined _DEBUG
-        stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
+        g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
 #endif
 #endif
 
@@ -1122,13 +1121,12 @@ static gboolean server_callback(GIOChannel *channel,
 #if GLIB_MAJOR_VERSION >= 2
 
     GError *err=NULL;
-    GIOStatus stat;
     gsize b;
 
 #if !defined _WIN32 || defined _DEBUG
     g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
 #endif
-    stat = g_io_channel_read_chars(channel,
+    g_io_channel_read_chars(channel,
                                    s->packet->rxBuff(),
                                    s->packet->rxSize(),
                                    &b,
@@ -1191,12 +1189,11 @@ static gboolean sink_server_accept(GIOChannel *channel, GIOCondition condition, 
 
 #if GLIB_MAJOR_VERSION >= 2
   GError *err = NULL;
-  GIOStatus stat;
 
-  stat = g_io_channel_set_encoding (channel, NULL, &err);
+  g_io_channel_set_encoding (channel, NULL, &err);
 #if !defined _WIN32 || defined _DEBUG
   //stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
-  stat = g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
+  g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
 #endif
 #endif
 

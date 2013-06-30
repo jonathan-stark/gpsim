@@ -191,9 +191,8 @@ void BoolEventLogger::dump_ASCII_art(guint64 time_step,
 
 unsigned int BoolEventLogger::get_index(guint64 event_time)
 {
-  unsigned long start_index, end_index, search_index, bstep;
+  unsigned long start_index, search_index, bstep;
 
-  end_index = index;
   start_index = (index + 1) & max_events;
 
   bstep = (max_events+1) >> 1;
@@ -261,9 +260,8 @@ unsigned int ThreeStateEventLogger::get_index(guint64 event_time)
   if (!bHaveEvents)
     return 0;
 
-  unsigned long start_index, end_index, search_index, bstep;
+  unsigned long start_index, search_index, bstep;
 
-  end_index = index;
   start_index = (index + 1) & max_events;
 
   bstep = (max_events+1) >> 1;
