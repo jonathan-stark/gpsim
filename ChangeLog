@@ -1,3 +1,7 @@
+2013-06-30 Borut Razem <borutr@users.sourceforge.net>
+	* plat/win32/gpsim.nsi, plat/win32/make.mingw:
+	  Mingw compilatin with i686-pc-mingw32-gcc GCC 4.5.2
+
 2013-06-30 Roy Rankin <rrankin@ihug.com.au>
 	* cli/socket.cc eXdbm/eXdbm.c eXdbm/misc.c eXdbm/parse.c
 	  extras/graphic_lcd/src/glcd.cc gui/gui_regwin.cc
@@ -8,6 +12,11 @@
 	* src/16bit-registers.cc: Too many reads of WREG traced
 	* src/14bit-processors.h src/14bit-processors.cc src/p12f182x.cc:
 	- Try to fix windows regression issues
+
+2013-06-29 Borut Razem <borutr@users.sourceforge.net>
+	* gpsim/main.cc: fixed invalid escape
+	* plat/win32/libgpsim.def: MSVC sync
+	* src/clock_phase.cc: GetTraceLog() for WIN32 compilation
 
 2013-06-29 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-instructions.cc src/16bit-instructions.cc
