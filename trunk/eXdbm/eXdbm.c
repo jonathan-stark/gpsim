@@ -37,10 +37,6 @@
 
 /*      $Id$         */
 
-#ifndef lint
-static char vcid[] = "$Id$";
-#endif /* lint */
-
 /* includes */
 
 #include <stdlib.h>

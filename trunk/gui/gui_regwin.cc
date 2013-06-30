@@ -1061,7 +1061,6 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 
   GtkWidget *popup;
   //    GdkModifierType mods;
-  GtkSheet *sheet;
 
   popup=rw->popup_menu;
 
@@ -1071,7 +1070,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
       return 0;
     }
 
-  sheet=GTK_SHEET(widget);
+  GTK_SHEET(widget);
 
   if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {

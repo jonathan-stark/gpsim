@@ -128,7 +128,6 @@ gtk_source_view_get_lines (GtkTextView  *text_view,
 {
   GtkTextIter iter;
   gint count;
-  gint size;
   gint last_line_num = -1;
 
   g_array_set_size (buffer_coords, 0);
@@ -141,7 +140,6 @@ gtk_source_view_get_lines (GtkTextView  *text_view,
   * Stop when we pass last_y
   */
   count = 0;
-  size = 0;
 
   while (!gtk_text_iter_is_end (&iter))
   {
@@ -2200,10 +2198,8 @@ void SourceWindow::SetPC(int address)
     //PCline--;
   }
 
-  int oldPCpage = -1;
   bool bFirstUpdate=true;
   if (mProgramCounter.bIsActive) {
-    oldPCpage = mProgramCounter.page;
     bFirstUpdate=false;
   } else
     GTKWAIT;
@@ -3095,11 +3091,10 @@ SourceBrowserAsm_Window::BuildPopupMenu(GtkWidget *sheet, SourceBrowserAsm_Windo
   GtkWidget *submenu;
   GtkWidget *item;
   unsigned int i;
-  int id;
 
   popup_sbaw=sbaw;
 
-  id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
+  gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
   menu=gtk_menu_new();
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
     item=gtk_menu_item_new_with_label(menu_items[i].name);
@@ -3361,9 +3356,8 @@ static gint marker_cb(GtkWidget *w1,
                       SourceBrowserAsm_Window *sbaw)
 {
   static int button_pressed;
-  static int button_pressed_y;
-  static int button_pressed_x;
-  static gdouble vadj_value=0.0;
+//  static int button_pressed_y;
+//  static int button_pressed_x;
 
   static int timeout_tag=-1;
 
@@ -3372,7 +3366,7 @@ static gint marker_cb(GtkWidget *w1,
 
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-  vadj_value=GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+  GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
 
   switch(event->type) {
 
@@ -3382,8 +3376,8 @@ static gint marker_cb(GtkWidget *w1,
     if(button_pressed==1)
       break;  // click number two(/three?) of a double click?
     button_pressed = 1;
-    button_pressed_x = (int)event->x;  // and initial position of
-    button_pressed_y = (int)event->y;  // possible drag action
+ //   button_pressed_x = (int)event->x;  // and initial position of
+ //   button_pressed_y = (int)event->y;  // possible drag action
     break;
   case GDK_2BUTTON_PRESS:
     if(event->button == 1) {

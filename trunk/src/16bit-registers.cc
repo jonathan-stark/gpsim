@@ -469,7 +469,7 @@ int Indirect_Addressing::plusw_fsr_value()
 
   fsr_value += fsr_delta;
   fsr_delta = 0;
-  int signExtendedW = cpu_pic->Wget() | ((cpu_pic->Wreg->value.get() > 127) ? 0xf00 : 0);
+  int signExtendedW = cpu_pic->Wreg->value.get() | ((cpu_pic->Wreg->value.get() > 127) ? 0xf00 : 0);
   unsigned int destination = (fsr_value + signExtendedW) & _16BIT_REGISTER_MASK;
   if(is_indirect_register(destination))
     return -1;

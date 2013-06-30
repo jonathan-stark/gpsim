@@ -294,7 +294,7 @@ P12F1822::P12F1822(const char *_name, const char *desc)
   m_iocaf = new IOC(this, "iocaf", "Interrupt-On-Change flag Register");
   m_iocap = new IOC(this, "iocap", "Interrupt-On-Change positive edge");
   m_iocan = new IOC(this, "iocan", "Interrupt-On-Change negative edge");
-  m_porta = new PicPortIOCRegister(this,"porta","", &intcon_reg, m_iocap, m_iocan, m_iocaf, 8,0x3f);
+  m_porta = new PicPortIOCRegister(this,"porta","", intcon, m_iocap, m_iocan, m_iocaf, 8,0x3f);
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false, 0x37);
   m_lata  = new PicLatchRegister(this,"lata","",m_porta, 0x37);
   m_daccon0 = new DACCON0(this, "daccon0", "DAC Voltage reference register 0", 0xec, 32);
@@ -312,8 +312,8 @@ P12F1822::P12F1822(const char *_name, const char *desc)
 
   m_wpua = new WPU(this, "wpua", "Weak Pull-up Register", m_porta, 0x37);
 
-  pir1 = new PIR1v1822(this,"pir1","Peripheral Interrupt Register",&intcon_reg, &pie1);
-  pir2 = new PIR2v1822(this,"pir2","Peripheral Interrupt Register",&intcon_reg, &pie2);
+  pir1 = new PIR1v1822(this,"pir1","Peripheral Interrupt Register",intcon, &pie1);
+  pir2 = new PIR2v1822(this,"pir2","Peripheral Interrupt Register",intcon, &pie2);
 
   comparator.cmxcon0[0] = new CMxCON0(this, "cm1con0", " Comparator C1 Control Register 0", 0, &comparator);
   comparator.cmxcon1[0] = new CMxCON1(this, "cm1con1", " Comparator C1 Control Register 1", 0, &comparator);
@@ -380,7 +380,6 @@ void P12F1822::create_sfr_map()
   add_sfr_register(&osccon,     0x99, RegisterValue(0x38,0));
   add_sfr_register(&oscstat,    0x9a, RegisterValue(0,0));
 
-  intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
 
 
@@ -480,7 +479,7 @@ void P12F1822::create_sfr_map()
     apfcon.set_pins(6, &(*m_porta)[0], &(*m_porta)[4]); //SSP SDO
     apfcon.set_pins(7, &(*m_porta)[1], &(*m_porta)[5]); //USART RX Pin
     if (pir1) {
-    	pir1->set_intcon(&intcon_reg);
+    	pir1->set_intcon(intcon);
     	pir1->set_pie(&pie1);
     }
     pie1.setPir(pir1);
@@ -512,7 +511,7 @@ void P12F1822::create_sfr_map()
     adcon0.setAdresLow(&adresl);
     adcon0.setAdres(&adresh);
     adcon0.setAdcon1(&adcon1);
-    adcon0.setIntcon(&intcon_reg);
+    adcon0.setIntcon(intcon);
     adcon0.setA2DBits(10);
     adcon0.setPir(pir1);
     adcon0.setChannel_Mask(0x1f);
@@ -607,7 +606,7 @@ void  P12F1822::create(int ram_top, int eeprom_size)
 
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
-  e->set_intcon(&intcon_reg);
+  e->set_intcon(intcon);
   e->get_reg_eecon1()->set_valid_bits(0xff);
 
   add_file_registers(0x20, ram_top, 0x00);
@@ -751,7 +750,7 @@ P16F1823::P16F1823(const char *_name, const char *desc)
     anselc(this, "anselc", "Analog Select port c")
 {
    
-  m_portc = new PicPortBRegister(this,"portc","", &intcon_reg, 8,0x3f);
+  m_portc = new PicPortBRegister(this,"portc","", intcon, 8,0x3f);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false, 0x3f);
   m_latc  = new PicLatchRegister(this,"latc","",m_portc, 0x3f);
   m_wpuc = new WPU(this, "wpuc", "Weak Pull-up Register", m_portc, 0x3f);
@@ -812,7 +811,7 @@ void  P16F1823::create(int ram_top, int eeprom_size)
 
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
-  e->set_intcon(&intcon_reg);
+  e->set_intcon(intcon);
   e->get_reg_eecon1()->set_valid_bits(0xff);
 
   add_file_registers(0x20, ram_top, 0x00);
@@ -882,5 +881,4 @@ void P16F1823::create_sfr_map()
 }
 P16F1823::~P16F1823()
 {
-    //RRRdelete e;
 }

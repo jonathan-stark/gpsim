@@ -204,10 +204,8 @@ void Watch_Window::WriteSymbolList()
   WatchEntry *entry;
   guint uSize = g_list_length(watches);
   char cwv[100];
-  char *vname;
   for (guint i = 0; i<uSize; i++) {
     snprintf(cwv, sizeof(cwv), "WV%d",i);
-    vname = 0;
     entry = (WatchEntry*) g_list_nth_data(watches, i);
     if (entry && entry->pRegister)
       config_set_string(name(), cwv, entry->pRegister->name().c_str());

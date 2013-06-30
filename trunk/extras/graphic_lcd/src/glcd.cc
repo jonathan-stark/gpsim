@@ -105,12 +105,12 @@ void gLCD::setPixel(unsigned int col, unsigned int row, guchar r, guchar g, guch
   unsigned int px = m_xPixel-m_pixelGap;
   unsigned int py = m_yPixel-m_pixelGap;
 
-  for (int j=0; j<py; j++) {
+  for (unsigned int j=0; j<py; j++) {
 
     y = (row + m_border) * m_yPixel+j;
     guchar *pos = &rgbbuf[3* (y*L + x)];
 
-    for (int i=0; i<px; i++) {
+    for (unsigned int i=0; i<px; i++) {
       /*
       if (*pos != r) 
         printf ("   x:%d y:%d r:%d g:%d b:%d\n",x,y,r,g,b);

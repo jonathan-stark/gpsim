@@ -64,10 +64,11 @@ void WarnModeAttribute::get(bool &b)
 SafeModeAttribute::SafeModeAttribute(Processor *_cpu) 
   :
   Boolean("SafeMode",
+	  false,
           " Model the processor's specification when true. Model the actual\n"
           " processor when false (e.g. TRIS instruction for mid range PICs\n"
-          " will emit a warning if SafeMode is true).",
-          false),
+          " will emit a warning if SafeMode is true)."
+          ),
   cpu(_cpu)
 {
 }

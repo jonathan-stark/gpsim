@@ -117,7 +117,6 @@ key_press(GtkWidget *widget,
           GdkEventKey *key,
           gpointer data)
 {
-  int low_level_step=0;
 
   SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
 
@@ -133,7 +132,6 @@ key_press(GtkWidget *widget,
       if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
           return FALSE;
 
-      low_level_step=1;
   }
 
   KeyEvent *pKE = KeyMap[key->keyval];

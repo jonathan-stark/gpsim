@@ -173,10 +173,9 @@ public:
 
 // 14 bit processors with extended instructions
 //
-class _14bit_e_processor : public pic_processor
+class _14bit_e_processor : public _14bit_processor
 {
 public:
-  INTCON       		*intcon;
   INTCON_14_PIR          intcon_reg;
   BSR			 bsr;
   PCON			 pcon;
