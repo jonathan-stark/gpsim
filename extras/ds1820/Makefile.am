@@ -12,7 +12,7 @@ libgpsim_ds1820_la_LDFLAGS =  @X_LDFLAGS@
 
 
 
-EXTRA_DIST = ds1820.h makefile.mingw bit1w.h  rom1W.h
+EXTRA_DIST = ds1820.h makefile.mingw bit1w.h  rom1w.h
 
 SUBDIRS = examples
 

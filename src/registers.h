@@ -36,6 +36,7 @@ class Module;
 #include "ValueCollections.h"
 #include "clock_phase.h"
 
+#define AN_INVALID_ADDRESS 0xffffffff
 
 //---------------------------------------------------------
 // RegisterValue class
@@ -247,7 +248,7 @@ public:
 
   virtual RegisterValue getRV_notrace()
   { 
-    value.data = get_value();
+    value.data = value.get();
     return value;
   }
   virtual void putRV_notrace(RegisterValue rv)

@@ -407,9 +407,9 @@ char * Bit_op::name(char *return_str,int len)
       break;
 
     case _14BIT_E_PROCESSOR_:
+    case _14BIT_PROCESSOR_:
 	if(access)
   	    reg = get_cpu()->register_bank[register_address];
-    case _14BIT_PROCESSOR_:
       bit = ((opcode >> 7) & 7);
       break;
 
@@ -452,7 +452,8 @@ char * Register_op::name(char *return_str,int len)
 
   source = get_cpu()->registers[register_address];
 
-  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ )
+  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ ||
+ 	cpu_pic->base_isa() == _14BIT_PROCESSOR_ )
   {
     if (access)
 	source = cpu_pic->register_bank[register_address];
@@ -943,7 +944,7 @@ char * CLRF::name(char *return_str,int len)
 {
 
   source = get_cpu()->registers[register_address];
-  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ && access)
+  if (access)
 	source = cpu_pic->register_bank[register_address];
   snprintf(return_str,len,"%s\t%s",
            gpsimObject::name().c_str(),
@@ -1432,7 +1433,7 @@ char * MOVWF::name(char *return_str, int len)
 
   
   source = get_cpu()->registers[register_address];
-  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ && access)
+  if (access)
 	source = cpu_pic->register_bank[register_address];
   snprintf(return_str,len,"%s\t%s",
            gpsimObject::name().c_str(),
@@ -1740,8 +1741,6 @@ char * TRIS::name(char *return_str,int len)
 {
 
   source = get_cpu()->registers[register_address];
-  if ( cpu_pic->base_isa() == _14BIT_E_PROCESSOR_ && access)
-	source = cpu_pic->register_bank[register_address];
   snprintf(return_str,len,"%s\t%s",
            gpsimObject::name().c_str(),
            source->name().c_str());
