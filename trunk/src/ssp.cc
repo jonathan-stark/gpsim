@@ -74,6 +74,97 @@ void _SSPSTAT::put_value(unsigned int new_value)
   value.put(new_value);
 
 }
+class SCK_SignalSource : public SignalControl
+{
+public:
+  SCK_SignalSource(SSP_MODULE *_ssp_mod, PinModule *_pin)
+	: m_pin(_pin), m_ssp_mod(_ssp_mod), m_cState('?')
+  {}
+  ~SCK_SignalSource(){}
+  virtual void release(){m_ssp_mod->releaseSCKpin();}
+
+  virtual char getState() { return m_cState;}
+
+  virtual void putState(const char new3State)
+  {
+    if (new3State != m_cState) {
+      m_cState = new3State;
+      m_pin->updatePinModule();
+    }
+  }
+
+  virtual void toggle()
+  {
+    switch (m_cState) 
+    {
+    case '1':
+    case 'W':
+      putState('0');
+      break;
+    case '0':
+    case 'w':
+      putState('1');
+      break;
+    }
+  }
+
+
+private:
+  PinModule *m_pin;
+  SSP_MODULE *m_ssp_mod;
+  char m_cState;
+};
+
+
+class SDO_SignalSource : public SignalControl
+{
+public:
+  SDO_SignalSource(SSP_MODULE *_ssp_mod, PinModule *_pin)
+	: m_pin(_pin), m_ssp_mod(_ssp_mod), m_cState('?')
+  {}
+  virtual void release(){m_ssp_mod->releaseSDOpin();}
+
+  virtual char getState() { return m_cState;}
+
+  virtual void putState(const char new3State)
+  {
+    if (new3State != m_cState) {
+      m_cState = new3State;
+      m_pin->updatePinModule();
+    }
+  }
+
+private:
+  PinModule *m_pin;
+  SSP_MODULE *m_ssp_mod;
+  char m_cState;
+};
+
+class SDI_SignalSource : public SignalControl
+{
+public:
+  SDI_SignalSource(SSP_MODULE *_ssp_mod, PinModule *_pin)
+	: m_pin(_pin), m_ssp_mod(_ssp_mod), m_cState('?')
+  {}
+  virtual void release(){m_ssp_mod->releaseSDIpin();}
+
+  virtual char getState() { return m_cState;}
+
+  virtual void putState(const char new3State)
+  {
+    if (new3State != m_cState) {
+      m_cState = new3State;
+      m_pin->updatePinModule();
+    }
+  }
+
+private:
+  PinModule *m_pin;
+  SSP_MODULE *m_ssp_mod;
+  char m_cState;
+};
+
+
 class SDI_SignalSink : public SignalSink
 {
 public:
@@ -83,7 +174,7 @@ public:
     assert(_ssp_mod);
   }
   virtual ~SDI_SignalSink(){}
-  virtual void release(){}
+  virtual void release(){delete this;}
 
   void setSinkState(char new3State)
   {
@@ -102,7 +193,7 @@ public:
     assert(_ssp_mod);
   }
   virtual ~SCL_SignalSink(){}
-  virtual void release(){}
+  virtual void release(){delete this; }
 
   void setSinkState(char new3State)
   {
@@ -120,7 +211,7 @@ public:
     assert(_ssp_mod);
   }
   virtual ~SS_SignalSink(){}
-  virtual void release(){}
+  virtual void release(){delete this; }
 
   void setSinkState(char new3State)
   {
@@ -623,17 +714,48 @@ SSP_MODULE::SSP_MODULE(Processor *pCpu)
     m_sdo(0),
     m_sdi(0),
     m_i2c_tris(0),
+    m_SDI_State(false),
+    m_SCL_State(false),
+    m_SS_State(false),
     m_SckSource(0),
     m_SdoSource(0),
     m_SdiSource(0),
     m_SDI_Sink(0),
     m_SCL_Sink(0),
     m_SS_Sink(0),
-    m_sink_set(false)
+    m_sink_set(false),
+    m_sdo_active(false),
+    m_sdi_active(false),
+    m_sck_active(false)
 {
 }
 SSP_MODULE::~SSP_MODULE()
 {
+
+    if (!m_sink_set)
+    {
+	delete m_SDI_Sink;
+	delete m_SCL_Sink;
+	delete m_SS_Sink;
+    }
+
+    if (m_sdi_active && m_sdi)
+        m_sdi->setSource(0);
+    if (m_SdiSource)
+	delete m_SdiSource;
+
+    if (m_sdo_active && m_sdo) m_sdo->setSource(0);
+    if (m_SdoSource) delete m_SdoSource;
+
+    
+    if (m_sck_active && m_sck)
+	m_sck->setSource(0);
+    if (m_SckSource) delete m_SckSource;
+    if (m_spi)
+    {
+	delete m_spi;
+	delete m_i2c;
+    }
 }
 
 SSP1_MODULE::SSP1_MODULE(Processor *pCpu) : 
@@ -647,21 +769,22 @@ void SSP1_MODULE::set_sckPin(PinModule *_sckPin)
    if (m_sck == _sckPin) return;	// No change, do nothing
    m_sck = _sckPin;
    if(m_SckSource) delete m_SckSource; 
-   m_SckSource = new PeripheralSignalSource(m_sck);
+   m_SckSource = new SCK_SignalSource(this, m_sck);
 }
 void SSP1_MODULE::set_sdoPin(PinModule *_sdoPin)
 {
    if (m_sdo == _sdoPin) return;	// No change, do nothing
    m_sdo = _sdoPin;
+ 
    if(m_SdoSource) delete m_SdoSource; 
-   m_SdoSource = new PeripheralSignalSource(m_sdo);
+   m_SdoSource = new SDO_SignalSource(this, m_sdo);
 }
 void SSP1_MODULE::set_sdiPin(PinModule *_sdiPin)
 {
    if (m_sdi == _sdiPin) return;	// No change, do nothing
    m_sdi = _sdiPin;
    if(m_SdiSource) delete m_SdiSource; 
-   m_SdiSource = new PeripheralSignalSource(m_sdi);
+   m_SdiSource = new SDI_SignalSource(this, m_sdi);
 }
 void SSP1_MODULE::set_ssPin(PinModule *_ssPin)
 {
@@ -686,9 +809,9 @@ void SSP1_MODULE::initialize(
   m_sdi = SdiPin;
   m_i2c_tris = _i2ctris;
   m_ssptype = _ssptype;
-  m_SckSource = new PeripheralSignalSource(m_sck);
-  m_SdoSource = new PeripheralSignalSource(m_sdo);
-  m_SdiSource = new PeripheralSignalSource(m_sdi);
+  m_SckSource = new SCK_SignalSource(this, m_sck);
+  m_SdoSource = new SDO_SignalSource(this, m_sdo);
+  m_SdiSource = new SDI_SignalSource(this, m_sdi);
   if (! m_spi)
   {
     m_spi = new SPI_1(this, &sspcon, &sspstat, &sspbuf, &ssp1con3, &sspadd);
@@ -1808,6 +1931,7 @@ void I2C::master_rx()
 */
 void I2C::start_bit()
 {
+
     if (m_sspmod->get_SCL_State() && m_sspmod->get_SDI_State())
     {
 
@@ -1911,9 +2035,6 @@ void SSP_MODULE::initialize(
   m_sdi = SdiPin;
   m_i2c_tris = _i2ctris;
   m_ssptype = _ssptype;
-  m_SckSource = new PeripheralSignalSource(m_sck);
-  m_SdoSource = new PeripheralSignalSource(m_sdo);
-  m_SdiSource = new PeripheralSignalSource(m_sdi);
   if (! m_spi)
   {
     m_spi = new SPI(this, &sspcon, &sspstat, &sspbuf);
@@ -1921,6 +2042,9 @@ void SSP_MODULE::initialize(
     m_SDI_Sink = new SDI_SignalSink(this);
     m_SCL_Sink = new SCL_SignalSink(this);
     m_SS_Sink = new SS_SignalSink(this);
+    m_SckSource = new SCK_SignalSource(this, m_sck);
+    m_SdoSource = new SDO_SignalSource(this, m_sdo);
+    m_SdiSource = new SDI_SignalSource(this, m_sdi);
   }
 
 
@@ -1951,13 +2075,13 @@ void SSP_MODULE::setSCL(bool direction)
 	return;
 
     unsigned int pin = m_sck->getPinNumber();
-    unsigned int tris_val = m_i2c_tris->get();
+    unsigned int tris_val = m_i2c_tris->get_value();
     if (!direction)
 	tris_val &= ~(1<<pin);
     else
 	tris_val |= (1<<pin);
 
-    m_i2c_tris->put_value(tris_val);
+    m_i2c_tris->put(tris_val);
 }
 /*
 	drive SDA by changing pin direction (with data low)
@@ -1965,13 +2089,13 @@ void SSP_MODULE::setSCL(bool direction)
 void SSP_MODULE::setSDA(bool direction)
 {
     unsigned int pin = m_sdi->getPinNumber();
-    unsigned int tris_val = m_i2c_tris->get();
+    unsigned int tris_val = m_i2c_tris->get_value();
     if (!direction)
 	tris_val &= ~(1<<pin);
     else
 	tris_val |= (1<<pin);
 
-    m_i2c_tris->put_value(tris_val);
+    m_i2c_tris->put(tris_val);
 }
 /*
 	deactivate SPI and I2C mode
@@ -1983,6 +2107,8 @@ void SSP_MODULE::stopSSP(unsigned int old_value)
         m_spi->stop_transfer();
         m_sck->setSource(0);
         m_sdo->setSource(0);
+	m_sdo_active = false;
+	m_sck_active = false;
 
         if (verbose)
       	    cout << "SSP: SPI turned off" << endl;
@@ -1992,9 +2118,19 @@ void SSP_MODULE::stopSSP(unsigned int old_value)
 	m_i2c->set_idle();
         m_sck->setSource(0);
         m_sdi->setSource(0);
+	m_sck_active = false;
+	m_sdi_active = false;
         if (verbose)
       	    cout << "SSP: I2C turned off" << endl;
     }
+}
+void SSP_MODULE::putStateSDO(char _state)
+{
+    m_SdoSource->putState(_state);
+}
+void SSP_MODULE::putStateSCK(char _state)
+{
+    m_SckSource->putState(_state);
 }
 /*
 	activate SPI module
@@ -2019,15 +2155,27 @@ void SSP_MODULE::startSSP(unsigned int value)
     case _SSPCON::SSPM_SPImaster64:
     case _SSPCON::SSPM_SPImasterAdd:
     Dprintf(("SSP_MODULE case cmd %x\n", value &  _SSPCON::SSPM_mask ));
-  	if (m_sck) m_sck->setSource(m_SckSource);
-  	if (m_sdo) m_sdo->setSource(m_SdoSource);
+  	if (m_sck) 
+	{
+	    m_sck->setSource(m_SckSource);
+	    m_sck_active = true;
+	}
+  	if (m_sdo)
+	{
+	     m_sdo->setSource(m_SdoSource);
+	     m_sdo_active = true;
+	}
         if (m_SckSource) m_SckSource->putState( (value & _SSPCON::CKP) ? '1' : '0' );
 	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
 	break;
 
     case _SSPCON::SSPM_SPIslave:
     case _SSPCON::SSPM_SPIslaveSS:
-  	if (m_sdo) m_sdo->setSource(m_SdoSource);
+  	if (m_sdo)
+	{
+	     m_sdo->setSource(m_SdoSource);
+	     m_sdo_active = true;
+	}
 	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
 	break;
 
@@ -2040,6 +2188,8 @@ void SSP_MODULE::startSSP(unsigned int value)
 	m_i2c->set_idle();
   	m_sck->setSource(m_SckSource);
   	m_sdi->setSource(m_SdiSource);
+	m_sck_active = true;
+	m_sdi_active = true;
 	m_sck->refreshPinOnUpdate(true);
 	m_sdi->refreshPinOnUpdate(true);
 	m_SdiSource->putState('0'); 
@@ -2080,6 +2230,63 @@ void SSP_MODULE::changeSSP(unsigned int new_value, unsigned int old_value)
     }
 }
 
+void SSP_MODULE::releaseSDIpin()
+{
+    if (m_sdi)
+    {
+	m_sdi_active = false;
+	delete m_SdiSource;
+	m_SdiSource = 0;
+    }
+    m_sdi = 0;
+}
+
+void SSP_MODULE::releaseSDOpin()
+{
+    if (m_sdo)
+    {
+	delete m_SdoSource;
+	m_SdoSource = 0;
+    }
+    m_sdo = 0;
+}
+void SSP_MODULE::releaseSCKpin()
+{
+    if (m_sck)
+    {
+	delete m_SckSource;
+	m_SckSource = 0;
+    }
+    m_sck = 0;
+}
+
+
+
+
+void SSP_MODULE::releaseSCLpin()
+{
+    if (m_sck)
+    {
+	m_sck->setSource(0);
+	m_sck_active = false;
+	delete m_SckSource;
+	m_SckSource = 0;
+    }
+    m_sck = 0;
+}
+
+
+void SSP_MODULE::releaseSSpin()
+{
+    if (m_SS_Sink)
+    {
+        delete m_SS_Sink;
+        m_SS_Sink = 0;
+    }
+    m_ss = 0;
+}
+
+void SSP_MODULE::Sck_toggle() { m_SckSource->toggle();}
 /*
 	process mode change or clock edge due to write to SSPCON
 */
@@ -2365,6 +2572,7 @@ void _SSPCON2::put(unsigned int new_value)
   
   if (verbose & 2)
       cout << "_SSPCON2::put " << hex << new_value << endl;
+
 
 
   if (!diff) return;	// nothing to do

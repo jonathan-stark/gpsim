@@ -57,6 +57,13 @@ License along with this library; if not, see
 
 #include <typeinfo>
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'.
 // 'active' means that it's the one currently being simulated or the one
@@ -334,6 +341,7 @@ void Processor::create_invalid_registers ()
       char nameBuff[100];
       snprintf(nameBuff,sizeof(nameBuff), "INVREG_%X",addr);
 
+
       registers[index] = new InvalidRegister(this, nameBuff);
       registers[index]->setAddress(addr);
     }
@@ -350,12 +358,25 @@ void Processor::delete_invalid_registers ()
   unsigned int i=0;
 
   for (i = 0; i < rma.get_size(); i++) {
-    //cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" << registers[i] << endl;
+   // cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" << registers[i] << endl;
+	
     InvalidRegister *pReg = dynamic_cast<InvalidRegister *> (registers[i]);
     if (pReg) {
       delete registers[i];
       registers[i]= 0;
+      
     }
+    else if (registers[i])
+   {
+      char reg_name[11];
+      cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" << 
+	registers[i] ;
+      cout.flush();
+      strncpy(reg_name, registers[i]->name().c_str(), 10);
+      reg_name[10] = 0;
+      cout << " " << reg_name <<endl;
+   }
+
   }
 }
 
@@ -372,9 +393,22 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
   unsigned int j;
 
   // Initialize the General Purpose Registers:
+  Dprintf((" from 0x%x to 0x%x alias 0x%x\n", start_address, end_address, alias_offset));
 
   char str[100];
   for  (j = start_address; j <= end_address; j++) {
+
+#ifdef DEBUG
+    if (j == 0x11)
+    {
+	printf("Processor::add_file_registers j 0x%x\n", j);
+    }
+#endif
+    if (registers[j] && (registers[j]->isa() == Register::INVALID_REGISTER))
+	delete registers[j];
+    else if (registers[j])
+	cout << __FUNCTION__ << " Already register " << registers[j]->name() 
+		<< " at 0x" << hex << j <<endl; 
 
     //The default register name is simply its address
     snprintf (str, sizeof(str), "REG%03X", j);
@@ -420,6 +454,8 @@ void Processor::delete_file_registers(unsigned int start_address,
 #define ALIAS_MASK (SMALLEST_ALIAS_DISTANCE-1)
   unsigned int i,j;
 
+  if (start_address != end_address)
+      Dprintf(("from 0x%x to 0x%x\n", start_address, end_address));
 
   for (j = start_address; j <= end_address; j++) {
     if(registers[j]) {
@@ -441,6 +477,8 @@ void Processor::delete_file_registers(unsigned int start_address,
       if (!bRemoveWithoutDelete)
         delete thisReg;
     }
+    else
+	printf("%s register 0x%x already deleted\n", __FUNCTION__, j);
   }
 }
 
@@ -460,11 +498,28 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 
   // FIXME -- it'd probably make better sense to keep a list of register addresses at
   // which a particular register appears.
+#ifdef DEBUG
+  if (start_address == 0x20)
+	printf("DEBUG trace %x\n", start_address);
+  if (start_address != end_address)
+	Dprintf((" from 0x%x to 0x%x alias_offset 0x%x\n", start_address, end_address, alias_offset));
+#endif
 
   for (j = start_address; j <= end_address; j++)
     {
       if (alias_offset && (j+alias_offset < rma.get_size()))
         {
+	  if (registers[j + alias_offset])
+	  {
+		if (registers[j + alias_offset] == registers[j])
+		{
+		    printf("alias_file_register Duplicate alias %s from 0x%x to 0x%x \n",registers[j + alias_offset]->name().c_str(), j, j+alias_offset);
+		}
+		else
+		{
+		    delete registers[j + alias_offset];
+		}
+	   }
           registers[j + alias_offset] = registers[j];
           if (registers[j])
             registers[j]->alias_mask = alias_offset;

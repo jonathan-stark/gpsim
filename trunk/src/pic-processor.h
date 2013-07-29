@@ -303,6 +303,7 @@ enum IOPIN_TYPES
  */
 class PicTrisRegister;
 class PicLatchRegister;
+class IO_SignalControl;
 
 class pic_processor : public Processor
 {

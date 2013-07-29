@@ -54,7 +54,7 @@ extern int gui_init (int argc, char **argv);
 extern void gui_main(void);
 extern void cli_main(void);
 // os_dependent.cc'
-extern void AddModulePathFromFilePath(string &sFolder);
+extern void AddModulePathFromFilePath(char *arg);
 
 void initialize_gpsim();
 
@@ -207,7 +207,6 @@ main (int argc, char *argv[])
 
   // Perform basic initialization before parsing invocation arguments
 
-  optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
 
   welcome();
 
@@ -217,8 +216,12 @@ main (int argc, char *argv[])
   initialize_gpsim();
   initialize_commands();
 
+  optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   if(argc>=2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
+
+	char * optArg = poptGetOptArg(optCon);
+	free(optArg);
       switch (c) {
 
       default:
@@ -230,6 +233,7 @@ main (int argc, char *argv[])
 
       case 'L':
         set_search_path (search_path);
+	free((char *)search_path);
         break;
 
       case 'd':
@@ -250,6 +254,7 @@ main (int argc, char *argv[])
         snprintf(command_str, sizeof(command_str),
                  "symbol %s\n",defineSymbol);
         parse_string(command_str);
+	free((char *)defineSymbol);
         defineSymbol = "";
         break;
 
@@ -263,6 +268,7 @@ main (int argc, char *argv[])
         else {
           usage = 1;
         }
+	free ((char *)sourceEnabled);
         break;
 
       case 'E':
@@ -277,6 +283,7 @@ main (int argc, char *argv[])
         else {
           printf("%s is invalid exit condition for -e option.\n", sExitOn);
         }
+	free ((char *)sExitOn);
         break;
       }
 
@@ -284,6 +291,7 @@ main (int argc, char *argv[])
         break;
 
     }
+    poptFreeContext(optCon);
   }
 
   if (usage) {
@@ -300,7 +308,6 @@ main (int argc, char *argv[])
   if(poptPeekArg(optCon))
     hex_name=strdup(poptPeekArg(optCon));
 
-  poptFreeContext(optCon);
 
   initialize_readline();
 
@@ -327,8 +334,7 @@ main (int argc, char *argv[])
 #endif
 
 
-  string sGpsimPath(argv[0]);
-  AddModulePathFromFilePath(sGpsimPath);
+  AddModulePathFromFilePath(argv[0]);
 
   initialization_is_complete();
 
@@ -412,7 +418,6 @@ main (int argc, char *argv[])
         exit_gpsim(1);
       }
     }
-
   exit_gpsim(0);
   return 0;
 }

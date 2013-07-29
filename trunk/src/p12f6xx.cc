@@ -207,6 +207,28 @@ P12F629::P12F629(const char *_name, const char *desc)
 
 P12F629::~P12F629()
 {
+
+  delete_file_registers(0x20, ram_top);
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+  remove_sfr_register(&pcon);
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(&pie1);
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(&osccal);
+
+  delete_sfr_register(m_gpio);
+  delete_sfr_register(m_trisio);
+  delete_sfr_register(m_wpu);
+  delete_sfr_register(m_ioc);
+  delete_sfr_register(pir1);
     delete e;
 }
 Processor * P12F629::construct(const char *name)
@@ -234,7 +256,7 @@ void P12F629::create_sfr_map()
   add_sfr_register(indf,    0x00);
   alias_file_registers(0x00,0x00,0x80);
 
-  add_sfr_register(&tmr0,   0x01);
+  add_sfr_register(&tmr0,   0x01, RegisterValue(0xff,0));
   add_sfr_register(option_reg,  0x81, RegisterValue(0xff,0));
 
   add_sfr_register(pcl,     0x02, RegisterValue(0,0));
@@ -350,9 +372,10 @@ void P12F629::create_iopin_map()
 
 
 
-void  P12F629::create(int ram_top, int eeprom_size)
+void  P12F629::create(int _ram_top, int eeprom_size)
 {
 
+  ram_top = _ram_top;
   create_iopin_map();
 
   _14bit_processor::create();
@@ -419,6 +442,14 @@ P12F675::P12F675(const char *_name, const char *desc)
 {
 }
 
+P12F675::~P12F675()
+{
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&ansel);
+
+}
 void  P12F675::create(int ram_top, int eeprom_size)
 {
   P12F629::create(ram_top, eeprom_size);
@@ -495,10 +526,29 @@ P12F683::P12F683(const char *_name, const char *desc)
     osctune(this, "osctune", "OSC Tune")
 
 {
+    internal_osc = false;
 }
 
-void  P12F683::create(int ram_top, int eeprom_size)
+P12F683::~P12F683()
 {
+  delete_file_registers(0x20, 0x7f);
+  delete_file_registers(0xa0, 0xbf);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&pr2);
+
+  remove_sfr_register(&ccpr1l);
+  remove_sfr_register(&ccpr1h);
+  remove_sfr_register(&ccp1con);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&osctune);
+  remove_sfr_register(&comparator.cmcon1);
+}
+
+void  P12F683::create(int _ram_top, int eeprom_size)
+{
+
   P12F629::create(0, eeprom_size);
 
   add_file_registers(0x20, 0x6f, 0);
@@ -522,6 +572,7 @@ void P12F683::create_sfr_map()
   add_sfr_register(&ccp1con, 0x15, RegisterValue(0,0));
   add_sfr_register(&wdtcon, 0x18, RegisterValue(0x08,0),"wdtcon");
   add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
+  remove_sfr_register(&osccal);
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
   osccon.set_osctune(&osctune);

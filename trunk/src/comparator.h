@@ -141,6 +141,7 @@ class CM_stimulus : public stimulus
 	CM_stimulus(CMCON *arg, const char *n=0,
            double _Vth=0.0, double _Zth=1e12
            );
+	~CM_stimulus();
 
     CMCON *_cmcon;
 
@@ -193,6 +194,8 @@ class CMCON : public sfr_register
   virtual void put(unsigned int);
   virtual void set_configuration(int comp, int mode, int il1, int ih1, int il2, int ih2, int out);
   virtual double comp_voltage(int ind, int invert);
+
+  void releasePin(int);
 
 
 
@@ -300,6 +303,7 @@ class CM2CON1 : public sfr_register
   ~CM2CON1(){}
 };
 
+class CM12SignalSource;
 /*
  * CM12CON0 is common support for CM1CON0 AND CM2CON0
  */
@@ -334,6 +338,8 @@ class CM12CON0 : public sfr_register
 
 
   void set_tmrl(TMRL *arg) { m_tmrl = arg; }
+  void releasePin();
+
   CM12CON0(Processor *pCpu, const char *pName, const char *pDesc);
   ~CM12CON0();
 
@@ -345,7 +351,7 @@ protected:
 
   PinModule 	*cm_input[5];
   PinModule 	*cm_output;
-  CMSignalSource *cm_source;
+  CM12SignalSource *cm_source;
   CM2CON1 	*m_cm2con1;
   SRCON 	*m_srcon;
   PIR_SET 	*pir_set;
@@ -384,7 +390,7 @@ class CM1CON0_2 : public CM12CON0
  public:
   CM1CON0_2(Processor *pCpu, const char *pName, const char *pDesc) :
 	CM12CON0(pCpu, pName, pDesc) {}
-  ~CM1CON0_2(){}
+  ~CM1CON0_2();
 
   virtual void state_change(unsigned int cmcon_val);
   virtual double CVref();
@@ -421,6 +427,7 @@ class CMxCON0 : public sfr_register
     };
 
   CMxCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int x, ComparatorModule2 *);
+  ~CMxCON0();
   void put(unsigned int);
   unsigned int  get();
   void setBitMask(unsigned int bm) { mValidBits = bm; }
@@ -428,10 +435,9 @@ class CMxCON0 : public sfr_register
 protected:
 
   unsigned int cm;	// comparator number
-  PinModule	*cm_output;
   CMxCON1	*m_cmxcon1;
   ComparatorModule2 *m_cmModule;
-  CMSignalSource *cm_source;
+  PeripheralSignalSource *cm_source;
 };
 // CMxCON1 only uses 1 0r 2 of Negative select bits and 2 Positive select bits
 class CMxCON1 : public sfr_register
@@ -455,6 +461,7 @@ class CMxCON1 : public sfr_register
 
     };
   CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _x, ComparatorModule2 *);
+  ~CMxCON1();
 
   void setBitMask(unsigned int bm) { mValidBits = bm; }
   void put(unsigned int new_value);
@@ -493,6 +500,7 @@ class ComparatorModule2
  public:
 
   ComparatorModule2(Processor *);
+  ~ComparatorModule2();
 
   void run_get(unsigned int comp) { cmxcon0[comp]->get();}
 

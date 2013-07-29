@@ -156,7 +156,7 @@ start
 	BANKSEL TRISA
 	clrf	STATUS
 	clrf	TRISA
-   .assert "trisa == 0x00, \"*** FAILED 16f1823  TRISA not clear\""
+   .assert "trisa == 0x08, \"*** FAILED 16f1823  TRISA not clear except bit 3\""
 	nop
 	BANKSEL PORTA
 	movlw	0xff

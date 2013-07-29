@@ -44,7 +44,7 @@ public:
   {
     assert(_psp);
   }
-  virtual void release(){}
+  virtual void release(){ delete this;}
 
   void setSinkState(char new3State)
   {
@@ -62,7 +62,7 @@ public:
   {
     assert(_psp);
   }
-  virtual void release(){}
+  virtual void release(){ delete this;}
 
   void setSinkState(char new3State)
   {
@@ -80,7 +80,7 @@ public:
   {
     assert(_psp);
   }
-  virtual void release(){}
+  virtual void release(){delete this;}
 
   void setSinkState(char new3State)
   {

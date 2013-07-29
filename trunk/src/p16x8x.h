@@ -28,11 +28,15 @@ class P16X8X : public Pic14Bit
 {
 public:
   P16X8X(const char *_name=0, const char *desc=0);
+  ~P16X8X();
   virtual void create_sfr_map();
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void create_iopin_map();
   virtual void create(int ram_top);
   virtual unsigned int register_memory_size () const { return 0x100; }
+
+protected:
+  unsigned int ram_top;
 };
 
 class P16C84 : public P16X8X

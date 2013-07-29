@@ -211,7 +211,9 @@ RegisterValue GUIRegister::getRV()
   Register *reg = get_register();
 
   if(reg)
+  {
     return reg->getRV_notrace();
+  }
 
   return RegisterValue(0,0);
 }
@@ -329,7 +331,7 @@ bool GUIRegister::bIsSFR()
   return false;
 }
 
-GUIRegister:: GUIRegister()
+GUIRegister::GUIRegister()
 {
   rma = 0;
   xref = 0;
@@ -1843,12 +1845,14 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
   GUIRegister *guiReg = registers->Get(reg_number);
 
+
   if (!guiReg || !guiReg->rma)
     return 0;
 
   if(reg_number >= guiReg->rma->get_size())
     return 0;
 
+  
   range.row0=guiReg->row;
   range.rowi=guiReg->row;
   range.col0=guiReg->col;
@@ -1860,6 +1864,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   gpsim_set_bulk_mode(0);
 
   RegisterValue last_value=guiReg->get_shadow();
+
 
   if(bTrace)
     printf("UpdateRegisterCell() Entry: regID=%3d, Full=%s, hasChanged=%s\n",
@@ -1884,7 +1889,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     // else the register is invalid and out of the register sheet
 
 
-    //if(new_value != last_value) {
+    //if(new_value != last_value) 
     if(guiReg->hasChanged(new_value)) {
 
       guiReg->put_shadow(new_value);
@@ -2056,6 +2061,7 @@ GUIRegisterList::GUIRegisterList(RegisterMemoryAccess *pRMA) {
   unsigned int uRegisterSize;
 
   uRegisterSize = (pRMA->get_size() < MAX_REGISTERS) ? (pRMA->get_size()) : MAX_REGISTERS;
+
 
   for(uAddress=0; uAddress < uRegisterSize; uAddress++) {
     GUIRegister *pReg = new GUIRegister();

@@ -68,7 +68,9 @@ Processor * P16C61::construct(const char *name)
 }
 
 P16C61::P16C61(const char *_name, const char *desc)
+  : P16X8X(_name,desc)
 {
+    ram_top = 0x2f;
 }
 P16C61::~P16C61()
 {
@@ -357,11 +359,32 @@ P16X6X_processor::P16X6X_processor(const char *_name, const char *_desc)
 
   pir1 = new PIR1v1(this,"pir1","Peripheral Interrupt Register",&intcon_reg, &pie1);
   pir2 = new PIR2v1(this,"pir2","Peripheral Interrupt Register",&intcon_reg, &pie2);
-
 }
 
 P16X6X_processor::~P16X6X_processor()
 {
+
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+
+  remove_sfr_register(&pcon);
+
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&pr2);
+
+  if( hasSSP()) {
+    remove_sfr_register(&ssp.sspbuf);
+    remove_sfr_register(&ssp.sspcon);
+    remove_sfr_register(&ssp.sspadd);
+    remove_sfr_register(&ssp.sspstat);
+  }
+
+  remove_sfr_register(&ccpr1l);
+  remove_sfr_register(&ccpr1h);
+  remove_sfr_register(&ccp1con);
+  remove_sfr_register(&pie1);
 
   delete_file_registers(0x20,0x7f);
   delete_file_registers(0xa0,0xbf);
@@ -387,6 +410,7 @@ P16C62::P16C62(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "c62 constructor, type = " << isa() << '\n';
+  set_hasSSP();
 }
 
 void P16C62::create_sfr_map()
@@ -454,7 +478,6 @@ void P16C63::create_sfr_map(void)
   if(verbose)
     cout << "creating c63 registers\n";
 
-  P16C62::create_sfr_map();
 
   add_file_registers(0xc0, 0xff, 0);
 
@@ -525,8 +548,19 @@ P16C63::~P16C63()
   if (verbose)
     cout << __FUNCTION__ << endl;
 
-  delete_file_registers(0xc0, 0xff);
-  delete_file_registers(0x19, 0x1a);  // usart tx and rx registers.
+  remove_sfr_register(&pie2);
+  remove_sfr_register(&ccpr2l);
+  remove_sfr_register(&ccpr2h);
+  remove_sfr_register(&ccp2con);
+  if (registers[0xf0]->alias_mask & 0x80)
+      delete_file_registers(0xc0, 0xef);
+  else
+      delete_file_registers(0xc0, 0xff);
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
 
   //delete_sfr_register(pir2,0x0d);
 }
@@ -642,7 +676,9 @@ P16C64::P16C64(const char *_name, const char *desc)
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
 
+  set_hasSSP();
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  delete pir1;
   pir1 = pir1_2_reg;
 
 
@@ -657,9 +693,13 @@ P16C64::~P16C64()
 {
   if (verbose)
     cout << __FUNCTION__ << endl;
+    cout << __FUNCTION__ << endl;
 
-  //delete_sfr_register(m_portc,0x07);
-  //delete_sfr_register(m_trisc,0x87);
+  delete_sfr_register(m_portd);
+  delete_sfr_register(m_trisd);
+
+  delete_sfr_register(m_porte);
+  delete_sfr_register(m_trise);
 
 }
 //------------------------------------------------------------------------
@@ -744,7 +784,19 @@ P16C65::~P16C65()
   if (verbose)
     cout << __FUNCTION__ << endl;
 
-  delete_file_registers(0xc0, 0xff);
+  if (registers[0xf0]->alias_mask & 0x80)
+      delete_file_registers(0xc0, 0xef);
+  else
+      delete_file_registers(0xc0, 0xff);
+  remove_sfr_register(&ccpr2l);
+  remove_sfr_register(&ccpr2h);
+  remove_sfr_register(&ccp2con);
+  remove_sfr_register(&pie2);
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
 }
 
 void P16C65::create(void)
@@ -889,7 +941,8 @@ P16F630::~P16F630()
 {
   if (verbose)
     cout << __FUNCTION__ << endl;
-
+  unassignMCLRPin();
+  delete_file_registers(0x20, 0x5f);
   delete_sfr_register(m_portc);
   delete_sfr_register(m_trisc);
 
@@ -898,6 +951,15 @@ P16F630::~P16F630()
   delete_sfr_register(m_ioc);
   delete_sfr_register(m_wpu);
   delete_sfr_register(pir1_3_reg);
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
+  remove_sfr_register(&osccal);
+  remove_sfr_register(&pie1);
   delete e;
 
 }
@@ -1174,6 +1236,17 @@ P16F676::P16F676(const char *_name, const char *desc)
 
 {
 }
+P16F676::~P16F676()
+{
+  if (verbose)
+    cout << __FUNCTION__ << endl;
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&ansel);
+
+}
 Processor * P16F676::construct(const char *name)
 {
 
@@ -1186,12 +1259,6 @@ Processor * P16F676::construct(const char *name)
   p->create_symbols();
 
   return p;
-}
-P16F676::~P16F676()
-{
-  if (verbose)
-    cout << __FUNCTION__ << endl;
-
 }
 void P16F676::create(int ram_top)
 {

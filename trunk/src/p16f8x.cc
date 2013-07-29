@@ -51,15 +51,9 @@ License along with this library; if not, see
 class Config1 : public ConfigWord
 {
 public:
-  Config1(P16F8x *pCpu)
+  Config1(pic_processor *pCpu)
     : ConfigWord("CONFIG1", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
-    if (m_pCpu) 
-    {
-	m_pCpu->wdt.initialize(true); // default WDT enabled
-        m_pCpu->wdt.set_timeout(0.000035);
-	m_pCpu->set_config_word(0x2007, 0x3fff);
-    }
   }
 
   enum {
@@ -106,15 +100,35 @@ P16F8x::P16F8x(const char *_name, const char *desc)
 {
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  delete pir1;
+  delete pir2;
   pir1 = pir1_2_reg;
   pir2 = pir2_2_reg;
 }
 
 P16F8x::~P16F8x()
 {
-  delete_file_registers(0xa0, 0xef);
+  delete_file_registers(0xc0, 0xef);
   delete_file_registers(0x110,0x16f);
   delete_file_registers(0x190,0x1ef);
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
+  delete get_eeprom();
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&osctune);
+  remove_sfr_register(&pie2);
 }
 
 void P16F8x::create_iopin_map()
@@ -164,7 +178,7 @@ void P16F8x::create_sfr_map()
   pir_set_2_def.set_pir1(pir1);
   pir_set_2_def.set_pir2(pir2);
  
-  add_file_registers(0xa0, 0xef, 0);
+  add_file_registers(0xc0, 0xef, 0);
   add_file_registers(0x110,0x16f,0);
   add_file_registers(0x190,0x1ef,0);
 
@@ -181,12 +195,7 @@ void P16F8x::create_sfr_map()
   alias_file_registers(0x00,0x04,0x100);
   alias_file_registers(0x80,0x84,0x100);
 
-  add_sfr_register(m_porta, 0x05);
-  add_sfr_register(m_trisa, 0x85, RegisterValue(0xff,0));
-
-  add_sfr_register(m_portb, 0x06);
   alias_file_registers(0x06,0x06,0x100);
-  add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
   alias_file_registers(0x86,0x86,0x100);
 
 
@@ -197,17 +206,12 @@ void P16F8x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
-  add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
-
-  alias_file_registers(0x0a,0x0b,0x080);
+  //alias_file_registers(0x0a,0x0b,0x080); // Already done
   alias_file_registers(0x0a,0x0b,0x100);
   alias_file_registers(0x0a,0x0b,0x180);
 
-
-
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
-
 
   add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
@@ -369,6 +373,9 @@ void P16F8x::create_config_memory()
   m_configMemory = new ConfigMemory(this,2);
   m_configMemory->addConfigWord(0,new Config1(this));
   m_configMemory->addConfigWord(1,new ConfigWord("CONFIG2", 0,"Configuration Word",this,0x2008));
+  wdt.initialize(true); // default WDT enabled
+  wdt.set_timeout(0.000035);
+  set_config_word(0x2007, 0x3fff);
 
 }
 
@@ -377,7 +384,9 @@ void P16F8x::create_config_memory()
 void  P16F8x::create(int eesize)
 {
 
+  set_hasSSP();
   create_iopin_map();
+
 
   _14bit_processor::create();
 
@@ -410,15 +419,28 @@ P16F81x::P16F81x(const char *_name, const char *desc)
 {
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  delete pir1;
+  delete pir2;
   pir1 = pir1_2_reg;
   pir2 = pir2_2_reg;
 }
 
 P16F81x::~P16F81x()
 {
-  delete_file_registers(0xa0, 0xef);
-  delete_file_registers(0x110,0x16f);
-  delete_file_registers(0x190,0x1ef);
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&osctune);
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(&pie2);
+  delete get_eeprom();
 }
 
 void P16F81x::create_iopin_map()
@@ -468,9 +490,10 @@ void P16F81x::create_sfr_map()
   pir_set_2_def.set_pir1(pir1);
   pir_set_2_def.set_pir2(pir2);
  
-  add_file_registers(0xa0, 0xef, 0);
-  add_file_registers(0x110,0x16f,0);
-  add_file_registers(0x190,0x1ef,0);
+  //add_file_registers(0xa0, 0xef, 0);
+  //add_file_registers(0xc0, 0xef, 0);
+  //add_file_registers(0x110,0x16f,0);
+  //add_file_registers(0x190,0x1ef,0);
 
 
   add_sfr_register(get_pir2(),   0x0d, RegisterValue(0,0),"pir2");
@@ -482,12 +505,7 @@ void P16F81x::create_sfr_map()
   alias_file_registers(0x00,0x04,0x100);
   alias_file_registers(0x80,0x84,0x100);
 
-  add_sfr_register(m_porta, 0x05);
-  add_sfr_register(m_trisa, 0x85, RegisterValue(0xff,0));
-
-  add_sfr_register(m_portb, 0x06);
   alias_file_registers(0x06,0x06,0x100);
-  add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
   alias_file_registers(0x86,0x86,0x100);
 
 
@@ -498,9 +516,7 @@ void P16F81x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
-  add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
-
-  alias_file_registers(0x0a,0x0b,0x080);
+  //alias_file_registers(0x0a,0x0b,0x080);  //Already done
   alias_file_registers(0x0a,0x0b,0x100);
   alias_file_registers(0x0a,0x0b,0x180);
 
@@ -582,7 +598,7 @@ void P16F81x::create_sfr_map()
 void P16F81x::create_symbols()
 {
   if(verbose)
-    cout << "8x create symbols\n";
+    cout << "81x create symbols\n";
 
   Pic14Bit::create_symbols();
 }
@@ -688,14 +704,28 @@ bool P16F81x::set_config_word(unsigned int address, unsigned int cfg_word)
   return false;
 }
 
+//========================================================================
+
+void P16F81x::create_config_memory()
+{
+  m_configMemory = new ConfigMemory(this,2);
+  m_configMemory->addConfigWord(0,new Config1(this));
+  m_configMemory->addConfigWord(1,new ConfigWord("CONFIG2", 0,"Configuration Word",this,0x2008));
+  wdt.initialize(true); // default WDT enabled
+  wdt.set_timeout(0.000035);
+  set_config_word(0x2007, 0x3fff);
+
+}
 
 //========================================================================
 void  P16F81x::create(int eesize)
 {
 
+  set_hasSSP();
   create_iopin_map();
 
   _14bit_processor::create();
+
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
@@ -778,6 +808,14 @@ P16F88::P16F88(const char *_name, const char *desc)
     cout << "f88 constructor, type = " << isa() << '\n';
 }
 
+P16F88::~P16F88()
+{
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&ansel);
+}
 void  P16F88::create()
 {
 	P16F8x::create(256);
@@ -863,9 +901,6 @@ void  P16F818::create()
 
 void P16F818::create_sfr_map()
 {
-  delete_file_registers(0x110,0x11f);
-  delete_file_registers(0x190,0x19f);
-
   alias_file_registers(0x40,0x7f,0x80);
   alias_file_registers(0x20,0x7f,0x100);
   alias_file_registers(0x20,0x7f,0x180);
@@ -897,6 +932,12 @@ P16F819::P16F819(const char *_name, const char *desc)
     cout << "f819 constructor, type = " << isa() << '\n';
 }
 
+P16F819::~P16F819()
+{
+  delete_file_registers(0xc0,0xef);
+  delete_file_registers(0x120,0x16f);
+}
+
 void  P16F819::create()
 {
 	P16F81x::create(256);
@@ -907,8 +948,8 @@ void  P16F819::create()
 
 void P16F819::create_sfr_map()
 {
-  delete_file_registers(0x110,0x11f);
-  delete_file_registers(0x190,0x19f);
+  add_file_registers(0xc0,0xef, 0);
+  add_file_registers(0x120,0x16f, 0);
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0x70,0x7f,0x100);
   alias_file_registers(0x20,0x7f,0x180);

@@ -434,7 +434,8 @@ int InterruptTraceType::dump_raw(Trace *pTrace,unsigned int tbi, char *buf, int 
 void pic_processor::set_eeprom(EEPROM *e)
 {
   eeprom = e;
-  ema.set_Registers(e->rom, e->rom_size);
+  if (e)
+      ema.set_Registers(e->rom, e->rom_size);
 }
 
 //-------------------------------------------------------------------
@@ -1184,6 +1185,19 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
   reg->set_cpu(this);
   if(addr < register_memory_size())
     {
+      if (registers[addr]) 
+      {
+	if (registers[addr]->isa() == Register::INVALID_REGISTER)
+	  delete registers[addr];
+	else
+	    printf("%s 0x%x Already register %s\n", __FUNCTION__, addr, registers[addr]->name().c_str());
+      }
+#ifdef DEBUG
+      if (addr == 0xfa1)
+      {
+	printf("DEBUG trace 0x%x\n", addr);
+      }
+#endif
       registers[addr] = reg;
       registers[addr]->address = addr;
       registers[addr]->alias_mask = 0;
@@ -1204,6 +1218,8 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
 //-------------------------------------------------------------------
 //
 // delete_sfr_register
+// This both deletes the register from the registers array,
+// but also deletes the register class.
 //
 void pic_processor::delete_sfr_register(Register *pReg)
 {
@@ -1211,6 +1227,7 @@ void pic_processor::delete_sfr_register(Register *pReg)
   if (pReg) {
 
     unsigned int a = pReg->getAddress();
+
     if (0)
       cout << __FUNCTION__ << " addr = 0x"<<hex<<a
            <<" reg " << pReg->name()<<endl;
@@ -1226,7 +1243,8 @@ void pic_processor::delete_sfr_register(Register *pReg)
 
 //-------------------------------------------------------------------
 //
-// delete_sfr_register
+// remove_sfr_register
+// This is the inverse of add_sfr_register and does not delete the register.
 //
 void pic_processor::remove_sfr_register(Register *ppReg)
 {
@@ -1234,6 +1252,8 @@ void pic_processor::remove_sfr_register(Register *ppReg)
   if (ppReg) {
 
     unsigned int a = ppReg->getAddress();
+    if (a == AN_INVALID_ADDRESS)
+	return;
     if (registers[a] == ppReg)
       delete_file_registers(a,a,true);
   }
@@ -1331,6 +1351,7 @@ unsigned int pic_processor::get_config_word(unsigned int address)
 
 int pic_processor::get_config_index(unsigned int address)
 {
+  
   if (m_configMemory)
   {
 
@@ -1827,8 +1848,9 @@ class IO_SignalControl : public SignalControl
 public:
   IO_SignalControl(char _dir){ direction = _dir; }
   ~IO_SignalControl(){}
-  char getState() { return direction; }
-  void release() { }
+  virtual char getState() { return direction; }
+  virtual void release() {delete this;}
+  void setState(char _dir) { direction = _dir; }
 private:
   char direction;
 };
@@ -1844,6 +1866,9 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
                 PicTrisRegister *m_tris,
                 PicLatchRegister *m_lat)
 {
+  IO_SignalControl *clksource;
+  IO_SignalControl *clkcontrol;
+
   IOPIN *m_pin = package->get_pin(pkg_Pin_Number);
   if (name)
 	m_pin->newGUIname(name);
@@ -1861,8 +1886,10 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
 	    if (m_lat)
 		m_lat->setEnableMask(mask);
 	}
-    	PinMod->setSource(new IO_SignalControl('0'));
-    	PinMod->setControl(new IO_SignalControl(in ? '1' : '0'));
+	clksource = new IO_SignalControl('0');
+	clkcontrol = new IO_SignalControl(in ? '1' : '0');
+    	PinMod->setSource(clksource);
+    	PinMod->setControl(clkcontrol);
  	PinMod->updatePinModule();
   }
 }
@@ -1887,7 +1914,11 @@ void pic_processor::clr_clk_pin(unsigned int pkg_Pin_Number,
 	    if (m_lat)
 		m_lat->setEnableMask(mask);
 	}
+	if (PinMod->getActiveSource())
+	    delete (PinMod->getActiveSource());
     	PinMod->setSource(0);
+	if (PinMod->getActiveControl())
+	    delete (PinMod->getActiveControl());
     	PinMod->setControl(0);
  	PinMod->updatePinModule();
   }

@@ -239,6 +239,8 @@ public:
   char getState();
   bool test_compare_mode();
   void callback();
+  void releasePins(int);
+  void releaseSink();
 
   void setCrosslinks(CCPRL *, PIR *, unsigned int _mask, TMR2 *, ECCPAS *_eccpas=0);
   void setADCON(ADCON0 *);
@@ -255,6 +257,7 @@ public:
 protected:
   PinModule 	*m_PinModule[4];
   CCPSignalSource *m_source[4];
+  bool		source_active[4];
   CCPSignalSink *m_sink;
   Tristate	*m_tristate;
   bool  	m_bInputEnabled;    // Input mode for capture/compare
@@ -300,6 +303,7 @@ enum
   TMR1_Freq_Attribute *freq_attribute;
 
   T1CON(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~T1CON();
 
   unsigned int get();
 
@@ -380,6 +384,7 @@ public:
   
 
   T1GCON(Processor *pCpu, const char *pName, const char *pDesc=0, T1CON_G *t1con_g=0);
+  ~T1GCON();
 
 private:
 
@@ -393,6 +398,7 @@ private:
   bool 		CM1_gate_state;
   bool 		CM2_gate_state;
   bool 		last_t1g_in;
+  PinModule	*gate_pin;
 };
 
 //
@@ -417,6 +423,7 @@ public:
   TMR1_Freq_Attribute *freq_attribute;
 
   T1CON_G(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~T1CON_G();
 
   void t1_cap_increment();
 
@@ -525,6 +532,7 @@ public:
   virtual void IO_gate(bool);
   virtual void compare_gate(bool);
   virtual void setInterruptSource(InterruptSource *);
+  virtual InterruptSource * getInterruptSource() { return m_Interrupt; }
   virtual void sleep();
   virtual void wake();
 

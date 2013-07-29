@@ -106,12 +106,12 @@ void P16F871::create_sfr_map()
   alias_file_registers(0x06,0x06,0x100);
   alias_file_registers(0x86,0x86,0x100);
 
-  alias_file_registers(0x0a,0x0b,0x080);
+  //alias_file_registers(0x0a,0x0b,0x080);  //already called
   alias_file_registers(0x0a,0x0b,0x100);
   alias_file_registers(0x0a,0x0b,0x180);
 
 
-  alias_file_registers(0x20,0x7f,0x100);
+  //alias_file_registers(0x20,0x7f,0x100);  // already called
   alias_file_registers(0xa0,0xbf,0x100);
 
 
@@ -247,10 +247,31 @@ P16F871::P16F871(const char *_name, const char *desc)
 
   //pir2 = &pir2_2_reg;
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+  delete pir2;
   pir2 = pir2_2_reg;
 }
 
 
+P16F871::~P16F871()
+{
+  remove_sfr_register(&pie2);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  delete get_eeprom();
+}
 
 //-------------------------------------------------------
 
@@ -416,7 +437,21 @@ P16F873::P16F873(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "f873 constructor, type = " << isa() << '\n';
+  set_hasSSP();
 
+}
+
+P16F873::~P16F873()
+{
+  remove_sfr_register(&ssp.sspcon2);
+  remove_sfr_register(&adresl);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  delete get_eeprom();
 }
 
 void P16F873A::create()
@@ -488,6 +523,11 @@ P16F873A::P16F873A(const char *_name, const char *desc)
 
 }
 
+P16F873A::~P16F873A()
+{
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
+}
 
 
 Processor * P16F876::construct(const char *name)
@@ -506,11 +546,106 @@ Processor * P16F876::construct(const char *name)
 }
 
 
+void P16F876::set_out_of_range_pm(unsigned int address, unsigned int value)
+{
+
+  if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
+    {
+      get_eeprom()->change_rom(address - 0x2100, value);
+    }
+}
+
+
 void P16F876::create_sfr_map()
 {
 
   if(verbose)
     cout << "creating f876 registers \n";
+
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
+
+  // Enable program memory reads and writes.
+  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
+
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
+
+  add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
+  add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
+
+
+                                                                                
+
+  alias_file_registers(0x80,0x80,0x80);
+  alias_file_registers(0x01,0x01,0x100);
+  alias_file_registers(0x82,0x84,0x80);
+  alias_file_registers(0x06,0x06,0x100);
+  alias_file_registers(0x8a,0x8b,0x80);
+  alias_file_registers(0x100,0x100,0x80);
+  alias_file_registers(0x81,0x81,0x100);
+  alias_file_registers(0x102,0x104,0x80);
+  alias_file_registers(0x86,0x86,0x100);
+  alias_file_registers(0x10a,0x10b,0x80);
+
+
+  add_file_registers(0x110, 0x16f, 0);
+  add_file_registers(0x190, 0x1ef, 0);
+  alias_file_registers(0x70,0x7f,0x80);
+  alias_file_registers(0x70,0x7f,0x100);
+  alias_file_registers(0x70,0x7f,0x180);
+
+  // The rest of the A/D definition in 16C73
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
+  adcon0.setAdresLow(&adresl);
+  adcon0.setA2DBits(10);
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3 , 0);
+
+  adcon1.setChannelConfiguration(0, 0x1f);
+  adcon1.setChannelConfiguration(1, 0x1f);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
+  adcon1.setChannelConfiguration(8, 0x1f);
+  adcon1.setChannelConfiguration(9, 0x1f);
+  adcon1.setChannelConfiguration(10, 0x1f);
+  adcon1.setChannelConfiguration(11, 0x1f);
+  adcon1.setChannelConfiguration(12, 0x1f);
+  adcon1.setChannelConfiguration(13, 0x1f);
+  adcon1.setChannelConfiguration(14, 0x01);
+  adcon1.setChannelConfiguration(15, 0x0d);
+
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
+  adcon1.setVrefHiConfiguration(8, 3);
+  adcon1.setVrefHiConfiguration(10, 3);
+  adcon1.setVrefHiConfiguration(11, 3);
+  adcon1.setVrefHiConfiguration(12, 3);
+  adcon1.setVrefHiConfiguration(13, 3);
+  adcon1.setVrefHiConfiguration(15, 3);
+
+  adcon1.setVrefLoConfiguration(8, 2);
+  adcon1.setVrefLoConfiguration(11, 2);
+  adcon1.setVrefLoConfiguration(12, 2);
+  adcon1.setVrefLoConfiguration(13, 2);
+  adcon1.setVrefLoConfiguration(15, 2);
+  add_sfr_register(&ssp.sspcon2,  0x91, RegisterValue(0,0) ,"sspcon2");
+
+  ssp.initialize(
+		get_pir_set(),    // PIR
+                &(*m_portc)[3],   // SCK
+                &(*m_porta)[5],   // SS
+                &(*m_portc)[5],   // SDO
+                &(*m_portc)[4],   // SDI
+                m_trisc,    	  // i2c tris port
+		SSP_TYPE_MSSP
+        );
+
 
 }
 
@@ -520,15 +655,18 @@ void P16F876::create()
   if(verbose)
     cout << " f876 create \n";
 
-  P16F873::create();
+  P16C73::create();
 
+  EEPROM_WIDE *e;
+  e = new EEPROM_WIDE(this,pir2);
+  e->initialize(128);
+  e->set_intcon(&intcon_reg);
+  set_eeprom_wide(e);
 
-  add_file_registers(0x110, 0x16f, 0);
-  add_file_registers(0x190, 0x1ef, 0);
-  delete_file_registers(0xf0,0xff);
-  alias_file_registers(0x70,0x7f,0x80);
-  alias_file_registers(0x70,0x7f,0x100);
-  alias_file_registers(0x70,0x7f,0x180);
+  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
+  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
+
 
   P16F876::create_sfr_map();
 
@@ -542,10 +680,27 @@ void P16F876::create_symbols()
 }
 
 P16F876::P16F876(const char *_name, const char *desc)
-  : P16F873(_name,desc)
+  : P16C73(_name,desc),
+    adresl(this,"adresl", "A2D Result Low")
 {
   if(verbose)
     cout << "f876 constructor, type = " << isa() << '\n';
+}
+
+P16F876::~P16F876()
+{
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  delete get_eeprom();
+  remove_sfr_register(&ssp.sspcon2);
+  remove_sfr_register(&adresl);
+
+  delete_file_registers(0x110, 0x16f);
+  delete_file_registers(0x190, 0x1ef);
 }
 
 Processor * P16F876A::construct(const char *name)
@@ -580,9 +735,13 @@ void P16F876A::create()
 
   P16F873A::create();
 
+  // get rid of aliases
+  delete_file_registers(0x20,0x7f);	// get rid of aliases
+  delete_file_registers(0xa0,0xff);	// ""
+  add_file_registers(0x20,0x7f, 0);
+  add_file_registers(0xa0, 0xef,0);
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
-  delete_file_registers(0xf0,0xff);
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0x70,0x7f,0x100);
   alias_file_registers(0x70,0x7f,0x180);
@@ -599,6 +758,11 @@ P16F876A::P16F876A(const char *_name, const char *desc)
     cout << "f876A constructor, type = " << isa() << '\n';
 }
 
+P16F876A::~P16F876A()
+{
+  delete_file_registers(0x110, 0x16f);
+  delete_file_registers(0x190, 0x1ef);
+}
 
 //-------------------------------------------------------
 
@@ -757,7 +921,21 @@ P16F874::P16F874(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "f874 constructor, type = " << isa() << '\n';
+  set_hasSSP();
 
+}
+
+P16F874::~P16F874()
+{
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&ssp.sspcon2);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  delete get_eeprom();
 }
 
 
@@ -853,6 +1031,13 @@ P16F874A::P16F874A(const char *_name, const char *desc)
 
 }
 
+P16F874A::~P16F874A()
+{
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
+}
+
+
 void P16F877::create_sfr_map()
 {
 
@@ -869,9 +1054,12 @@ void P16F877::create()
 
   P16F874::create();
 
-  add_file_registers(0x110, 0x16f, 0);
-  add_file_registers(0x190, 0x1ef, 0);
-  delete_file_registers(0xf0,0xff);
+  delete_file_registers(0x20, 0x7f); // get rid of alias registers
+  delete_file_registers(0xa0, 0xff); //		""
+  add_file_registers(0x20, 0x7f, 0);
+  add_file_registers(0xa0, 0xef, 0);
+  add_file_registers(0x110, 0x11f, 0);
+  add_file_registers(0x190, 0x19f, 0);
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0x70,0x7f,0x100);
   alias_file_registers(0x70,0x7f,0x180);
@@ -912,6 +1100,12 @@ P16F877::P16F877(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "f877 constructor, type = " << isa() << '\n';
+} 
+
+P16F877::~P16F877()
+{
+  delete_file_registers(0x110, 0x11f);
+  delete_file_registers(0x190, 0x19f);
 }
 
 void P16F877A::create_sfr_map()
@@ -930,9 +1124,13 @@ void P16F877A::create()
 
   P16F874A::create();
 
+  delete_file_registers(0x20, 0x7f);	// get rid of alias registers
+  delete_file_registers(0xa0, 0xff);	// ""
+  add_file_registers(0x20, 0x7f, 0);
+  add_file_registers(0xa0, 0xef, 0);
+
   add_file_registers(0x110, 0x16f, 0);
   add_file_registers(0x190, 0x1ef, 0);
-  delete_file_registers(0xf0,0xff);
   alias_file_registers(0x70,0x7f,0x80);
   alias_file_registers(0x70,0x7f,0x100);
   alias_file_registers(0x70,0x7f,0x180);
@@ -974,4 +1172,10 @@ P16F877A::P16F877A(const char *_name, const char *desc)
 {
   if(verbose)
     cout << "f877A constructor, type = " << isa() << '\n';
+}
+
+P16F877A::~P16F877A()
+{
+  delete_file_registers(0x110, 0x16f);
+  delete_file_registers(0x190, 0x1ef);
 }

@@ -422,6 +422,22 @@ ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   }
 }
 
+ADCON1::~ADCON1()
+{
+  if (m_voltageRef) delete [] m_voltageRef;
+  if (m_AnalogPins)
+  {
+    if (m_ad_in_ctl)
+    {
+	for (unsigned int i = 0; i < m_nAnalogChannels; i++)	
+	    m_AnalogPins[i]->setControl(0);
+	delete m_ad_in_ctl;
+    }
+	
+    delete [] m_AnalogPins;
+  }
+}
+
 void ADCON1::put(unsigned int new_value)
 {
   unsigned int masked_value = new_value & valid_bits;
@@ -448,9 +464,9 @@ void ADCON1::setADCnames()
 
     char newname[20];
 
+
     for(unsigned int i = 0; i < m_nAnalogChannels; i++)
     {
-
       if ((diff & (1 << i)) && m_AnalogPins[i] != &AnInvalidAnalogInput)
       {
 
@@ -532,6 +548,9 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
   if (m_nAnalogChannels && nChannels > m_nAnalogChannels )
         save = m_AnalogPins;
 
+  if (m_voltageRef)
+	delete [] m_voltageRef;
+
   m_voltageRef = new float [nChannels];
   m_AnalogPins = new PinModule *[nChannels];
 
@@ -547,7 +566,7 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
         m_AnalogPins[i] = &AnInvalidAnalogInput;
   }
   if (save)
-      delete save;
+      delete [] save;
 
   m_nAnalogChannels = nChannels;
 }
@@ -745,7 +764,7 @@ void ANSEL_H::put(unsigned int new_value)
 
 ANSEL_P::ANSEL_P(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    adcon1(0), ansel(0), valid_bits(0x3f)
+    adcon1(0), ansel(0), valid_bits(0x3f), cfg_mask(0)
 {
 }
 
@@ -763,6 +782,8 @@ void ANSEL_P::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   new_value &= valid_bits;
+  value.put(new_value);
+
 
   cfg_mask = 0;
   for(i=0; i< 8; i++)
@@ -775,8 +796,11 @@ void ANSEL_P::put(unsigned int new_value)
       }
   }
   mask = cfg_mask;
+
   if (ansel)
+  {
       mask |= ansel->get_mask();
+   }
   /*
 	Generate ChannelConfiguration from ansel register
   */
@@ -784,7 +808,6 @@ void ANSEL_P::put(unsigned int new_value)
   {
 	adcon1->setChannelConfiguration(i, mask);
   }
-  value.put(new_value & valid_bits);
   adcon1->setADCnames();
 }
 

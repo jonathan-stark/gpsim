@@ -387,10 +387,10 @@ public:
 
   Stack *stack;
 
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
       
 };
 
@@ -401,10 +401,10 @@ public:
 
   Stack *stack;
 
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
       
 };
 //
@@ -418,6 +418,7 @@ public:
   TOSH   tosh;
 
   Stack14E(Processor *);
+  ~Stack14E();
 
   virtual void reset(RESET_TYPE r);
   virtual unsigned int pop();
@@ -973,6 +974,7 @@ class SR_MODULE: public TriggerObject
 public:
 
     SR_MODULE(Processor *);
+    ~SR_MODULE();
 
     void	update();
     SRCON0 	srcon0;

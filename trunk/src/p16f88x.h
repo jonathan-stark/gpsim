@@ -134,7 +134,6 @@ public:
   }
   virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
 
-  virtual bool hasSSP() { return true;}
 
   virtual PIR *get_pir1() { return (pir1); }
   virtual PIR *get_pir2() { return (pir2); }
@@ -155,6 +154,7 @@ public:
 
 
   P16F884(const char *_name=0, const char *desc=0);
+  ~P16F884();
   static Processor *construct(const char *name);
   virtual void create_symbols();
   virtual void create_sfr_map();
@@ -171,6 +171,7 @@ public:
 
 
   P16F887(const char *_name=0, const char *desc=0);
+  ~P16F887();
   static Processor *construct(const char *name);
   virtual void create_symbols();
   virtual void create_sfr_map();
@@ -200,6 +201,7 @@ public:
 
 
   P16F883(const char *_name=0, const char *desc=0);
+  ~P16F883();
   static Processor *construct(const char *name);
   virtual void create_symbols();
   virtual void create_sfr_map();
@@ -215,6 +217,7 @@ public:
 
 
   P16F886(const char *_name=0, const char *desc=0);
+  ~P16F886();
   static Processor *construct(const char *name);
   virtual void create_symbols();
   virtual void create_sfr_map();
@@ -286,7 +289,6 @@ public:
   virtual void create_sfr_map();
   virtual void create_iopin_map();
   virtual void option_new_bits_6_7(unsigned int bits);
-  virtual bool hasSSP() {return false;}
 
 
   virtual unsigned int program_memory_size() const { return 0x400; };
@@ -303,7 +305,6 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P16F677_;};
 
   virtual unsigned int program_memory_size() const { return 4096; };
-  virtual bool hasSSP() { return true;}
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
     assert(0);
@@ -316,6 +317,7 @@ public:
 
 
   P16F677(const char *_name=0, const char *desc=0);
+  ~P16F677();
   static Processor *construct(const char *name);
 
   SSP_MODULE   ssp;
@@ -333,7 +335,6 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P16F687_;};
 
   virtual unsigned int program_memory_size() const { return 2048; };
-  virtual bool hasSSP() { return true;}
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
     assert(0);
@@ -346,6 +347,7 @@ public:
 
 
   P16F687(const char *_name=0, const char *desc=0);
+  ~P16F687();
   static Processor *construct(const char *name);
   TMRL    tmr1l;
   TMRH    tmr1h;
@@ -369,7 +371,6 @@ public:
   virtual void create_iopin_map();
 
 
-  virtual bool hasSSP() { return false;}
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
     assert(0);
@@ -441,7 +442,6 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P16F685_;};
 
   virtual unsigned int program_memory_size() const { return 4096; };
-  virtual bool hasSSP() { return false;}
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
     assert(0);
@@ -454,6 +454,7 @@ public:
 
 
   P16F685(const char *_name=0, const char *desc=0);
+  ~P16F685();
   static Processor *construct(const char *name);
   T2CON   t2con;
   PR2     pr2;
@@ -480,7 +481,6 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P16F689_;};
 
   virtual unsigned int program_memory_size() const { return 4096; };
-  virtual bool hasSSP() { return true;}
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
     assert(0);
@@ -502,7 +502,6 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P16F690_;};
 
   virtual unsigned int program_memory_size() const { return 4096; };
-  virtual bool hasSSP() { return true;}
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
     assert(0);
@@ -515,6 +514,7 @@ public:
 
 
   P16F690(const char *_name=0, const char *desc=0);
+  ~P16F690();
   static Processor *construct(const char *name);
   CCPCON  ccp2con;
   CCPRL   ccpr2l;

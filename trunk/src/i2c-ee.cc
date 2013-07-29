@@ -218,6 +218,9 @@ I2C_EE::~I2C_EE()
 
   if (m_UiAccessOfRom)
         delete m_UiAccessOfRom;
+
+  delete scl;
+  delete sda;
 }
 
 // Bit 0 is write protect, 1-3 is A0 - A2

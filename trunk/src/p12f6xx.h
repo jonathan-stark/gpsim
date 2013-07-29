@@ -76,7 +76,6 @@ public:
   virtual void enter_sleep();
   virtual void exit_sleep();
 
-
 };
 
 
@@ -97,7 +96,7 @@ public:
   virtual unsigned int program_memory_size() const { return 0x400; };
 
   P12F675(const char *_name=0, const char *desc=0);
-  ~P12F675() {};
+  ~P12F675();
   static Processor *construct(const char *name);
   virtual void create_sfr_map();
 };
@@ -122,7 +121,7 @@ public:
   virtual unsigned int program_memory_size() const { return 0x800; };
 
   P12F683(const char *_name=0, const char *desc=0);
-  ~P12F683() {};
+  ~P12F683();
   static Processor *construct(const char *name);
   virtual void create_sfr_map();
 };

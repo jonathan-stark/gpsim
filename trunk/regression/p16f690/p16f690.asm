@@ -22,11 +22,13 @@
 #define SDI_PORT PORTB,4
 #define SCK_PORT PORTB,6
 #define SS_PORT PORTC,6
+#define SS_DRIVE PORTA,2
 
-#define SDO_TRIS TRISC,5
+#define SDO_TRIS TRISC,7
 #define SDI_TRIS TRISB,4
 #define SCK_TRIS TRISB,6
 #define SS_TRIS TRISC,6
+#define SS_DRIVE_TRI TRISA,2
 
 #define DRV_CLOCK PORTA,1
 #define DRV_CLOCK_TRIS TRISA,1
@@ -231,7 +233,13 @@ start
 	;
 	; test pins in analog mode return 0 on register read
 	BANKSEL TRISA
+	movlw	0xff
+	movwf	TRISA
+  .assert "trisa == 0x3f, \"***FAILED 16f690 trisa 1 writable\""
+	nop
 	clrf	TRISA
+  .assert "trisa == 0x08, \"***FAILED 16f690 trisa 0 writable\""
+	nop
 ;	bcf	OPTION_REG,NOT_RABPU ; enable pullups on portA
 	BANKSEL PORTA
 	movlw	0xff
@@ -249,25 +257,27 @@ start
 ;
 	BANKSEL PORTA
 	clrf	PORTA
-	bsf	STATUS,RP0
+	BANKSEL	TRISA
 	movlw	0x38
 	movwf	TRISA		;PORTA 0,1,2 output 3,4,5 input
 	bcf	STATUS,RP0
-  .assert "porta == 0x00, \"PORTA = 0x00\""
+  .assert "porta == 0x00, \"**FAILED 16f690 PORTA = 0x00\""
 	nop
 	movlw	0x07
 	movwf	PORTA		; drive 0,1,2  bits high
-  .assert "porta == 0x3f, \"PORTA = 0x3f\""
+  .assert "porta == 0x3f, \"**FAILED 16f690 PORTA = 0x3f\""
 	nop
+	movlw	0x0b
+	movwf	PORTA		; drive 0,1,3  bits high
 	bsf     STATUS,RP0
-	movlw	0x07
-	movwf	TRISA  	; PORTA 4, 5 output 0,1,2,3 input (3 input only)
+	movlw	0x0b
+	movwf	TRISA  	; PORTA 2, 4, 5 output 0,1,3 input (3 input only)
         bcf     STATUS,RP0
-  .assert "porta == 0x00, \"PORTA = 0x00\""
+  .assert "porta == 0x00, \"**FAILED 16f690 PORTA = 0x00\""
 	nop
-	movlw	0x38
-	movwf	PORTA		; drive output bits high
-  .assert "porta == 0x33, \"PORTA = 0x33\""
+	movlw	0x34
+	movwf	PORTA		; drive output 2, 4, 5 bits high
+  .assert "porta == 0x3f, \"**FAILED 16f690 PORTA = 0x33\""
 	nop
 
 	call test_compare
@@ -585,6 +595,7 @@ test_adc:
 	BANKSEL ANSEL
 	clrf	ANSEL		; return ports to digital I/O
 	BANKSEL ADCON0
+	clrf	ADCON0
 
 	return
 
@@ -810,6 +821,10 @@ rx_loop:
 	return
 
 test_ssp:
+    ;banksel	WDTCON
+    ;movlw	0x16
+    ;movwf	WDTCON
+    clrwdt
     banksel	ANSEL
     clrf	ANSEL
     clrf	ANSELH
@@ -853,7 +868,9 @@ test_ssp:
     bcf		DRV_CLOCK_TRIS 	; external SCK drive
     bsf		SCK_TRIS	; SCK
     bsf		SS_TRIS 	; SS
+    bcf		SS_DRIVE_TRI	; SS drive output
     bcf  STATUS,RP0	; bank 0
+    bcf		SS_DRIVE	; drive SS low
     bcf		DRV_CLOCK
     movlw	0x24	; SSPEN | SPI slave mode SS enable
     movwf	SSPCON

@@ -54,6 +54,11 @@ P16F62x::~P16F62x()
   delete_file_registers(0xc0, 0xef);
   delete_file_registers(0x120,0x14f);
 
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
 
@@ -105,12 +110,9 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x0,0x0,0x180);
   alias_file_registers(0x01,0x04,0x100);
   alias_file_registers(0x81,0x84,0x100);
-
-  add_sfr_register(m_porta, 0x05);
+  remove_sfr_register(m_trisa);
   add_sfr_register(m_trisa, 0x85, RegisterValue(0xff,0));
 
-  add_sfr_register(m_portb, 0x06);
-  add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
   alias_file_registers(0x06,0x06,0x100);
   alias_file_registers(0x86,0x86,0x100);
 
@@ -124,7 +126,6 @@ void P16F62x::create_sfr_map()
   alias_file_registers(0x0a,0x0a,0x100);
   alias_file_registers(0x0a,0x0a,0x180);
 
-  add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
   alias_file_registers(0x0b,0x0b,0x100);
   alias_file_registers(0x0b,0x0b,0x180);
 
@@ -385,6 +386,11 @@ P16F648::P16F648(const char *_name, const char *desc)
   if(verbose)
     cout << "f648 constructor, type = " << isa() << '\n';
 
+}
+
+P16F648::~P16F648()
+{
+  delete_file_registers(0x150,0x16f);
 }
 
 void P16F648::create_sfr_map()

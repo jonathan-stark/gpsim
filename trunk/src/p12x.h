@@ -70,7 +70,7 @@ private:
 class IN_SignalControl : public SignalControl
 {
 public:
-  IN_SignalControl(){}
+  IN_SignalControl(){ }
   ~IN_SignalControl(){}
   char getState() { return '1'; }
   void release() { }
@@ -207,6 +207,7 @@ class P12C509 : public P12C508
     }
 
   P12C509(const char *_name=0, const char *desc=0);
+  ~P12C509();
   static Processor *construct(const char *name);
   virtual void create();
 
@@ -241,12 +242,17 @@ class P12CE518 : public P12C508
   virtual void tris_instruction(unsigned int tris_register);
 
   P12CE518(const char *_name=0, const char *desc=0);
+  ~P12CE518();
   static Processor *construct(const char *name);
   virtual void create();
   virtual void create_iopin_map();
   virtual void freqCalibration();
 private:
   P12_I2C_EE *m_eeprom;
+  Stimulus_Node *scl;
+  Stimulus_Node	*sda;
+  IO_bi_directional_pu *io_scl;
+  IO_open_collector *io_sda;
   
 };
 
@@ -273,6 +279,7 @@ class P12CE519 : public P12CE518
     }
 
   P12CE519(const char *_name=0, const char *desc=0);
+  ~P12CE519();
   static Processor *construct(const char *name);
   virtual void create();
 
@@ -313,6 +320,7 @@ public:
   virtual unsigned int program_memory_size() const { return 0x200; };
 
   P10F202(const char *_name=0, const char *desc=0);
+  ~P10F202();
   static Processor *construct(const char *name);
   virtual void create();
 
@@ -327,6 +335,8 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P10F204_;};
 
   P10F204(const char *_name=0, const char *desc=0);
+  ~P10F204();
+
   static Processor *construct(const char *name);
   virtual void create();
   // GP2 can be driven by either FOSC/4, COUT, TMR 0, or the GP I/O driver
@@ -347,6 +357,7 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P10F220_;};
 
   P10F220(const char *_name=0, const char *desc=0);
+  ~P10F220();
   static Processor *construct(const char *name);
   virtual void create();
   virtual void enter_sleep();
@@ -369,6 +380,7 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P10F222_;};
 
   P10F222(const char *_name=0, const char *desc=0);
+  ~P10F222();
   virtual unsigned int program_memory_size() const { return 0x200; };
   static Processor *construct(const char *name);
   virtual void create();

@@ -110,12 +110,16 @@ public:
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   virtual void enter_sleep();
   virtual void exit_sleep();
+  virtual bool hasSSP() {return has_SSP;}
+  virtual void set_hasSSP() { has_SSP = true;}
 
   _14bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_14bit_processor();
 
 protected:
+  bool		has_SSP;
   OPTION_REG   *option_reg;
+  unsigned int  ram_top;
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)
@@ -162,7 +166,6 @@ public:
   virtual void create_symbols();
   virtual void create_sfr_map();
   virtual void option_new_bits_6_7(unsigned int bits);
-  virtual bool hasSSP() {return false;}
 };
 
 class CPU_Temp : public Float
@@ -227,7 +230,6 @@ public:
   virtual unsigned int Wget();
 
 protected:
-  OPTION_REG   *option_reg;
   bool		wdt_sleep;	// if true wdt will interupt in sleep
 };
 

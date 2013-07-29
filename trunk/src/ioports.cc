@@ -35,10 +35,12 @@ License along with this library; if not, see
 #include "xref.h"
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
+#define Dprintf(arg) {printf("%s:%d-%s ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
+//#define D2printf(arg) {printf("%s:%d-%s ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#define D2printf(arg) {}
 
 //--------------------------------------------------
 // 
@@ -128,7 +130,7 @@ public:
   virtual void release()
   {
     if (verbose)
-        cout << "Deleting SignalSource\n";
+       cout << "Deleting SignalSource 0x" << hex << this << endl;
     delete this;
   }
 
@@ -392,6 +394,10 @@ IOPIN *PortModule::addPin(IOPIN *new_pin, unsigned int iPinNumber)
       iopins[iPinNumber] = new PinModule(this,iPinNumber);
     iopins[iPinNumber]->setPin(new_pin);
   }
+  else
+  {
+	printf("PortModule::addPin ERROR pin %d > %d\n", iPinNumber, mNumIopins);
+  }
   return new_pin;
 }
 
@@ -443,18 +449,31 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
 
 PinModule::~PinModule()
 {
+  if (m_pin)
+    D2printf(("Pin %s sources active %p default %p\n", m_pin->name().c_str(), m_activeSource, m_defaultSource));
   if (m_activeSource && (m_activeSource != m_defaultSource)) {
     //cout << __FUNCTION__ << " deleting active source:"<<m_activeSource<<endl;
     //cout << "    state:" <<m_activeSource->getState() <<endl;
-    //m_activeSource->release();
+    m_activeSource->release();
+    m_activeSource = m_defaultSource;
   }
   if (m_defaultSource)
+  {
     m_defaultSource->release();
+    m_defaultSource = 0;
+  }
 
   if (m_activeControl && (m_activeControl != m_defaultControl))
+  {
     m_activeControl->release();
+    m_activeControl = m_defaultControl;
+  }
+  
   if (m_defaultControl)
+  {
     m_defaultControl->release();
+    m_defaultControl = 0;
+  }
 
   if (m_activePullupControl && (m_activePullupControl != m_defaultPullupControl))
     m_activePullupControl->release();

@@ -63,12 +63,6 @@ public:
   Config188x(P16F88x *pCpu)
     : ConfigWord("CONFIG188x", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
-    if (m_pCpu) 
-    {
-	m_pCpu->wdt.initialize(true); // default WDT enabled
-        m_pCpu->wdt.set_timeout(0.000035);
-	m_pCpu->set_config_word(0x2007, 0x3fff);
-    }
   }
 
   enum {
@@ -169,7 +163,84 @@ P16F88x::P16F88x(const char *_name, const char *desc)
 
 P16F88x::~P16F88x()
 {
+  unassignMCLRPin();
+  delete_file_registers(0x20, 0x7f);
   delete_file_registers(0xa0, 0xbf);
+
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(&pie2);
+  remove_sfr_register(&pie1);
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+  remove_sfr_register(&pcon);
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&pr2);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eedatah());
+  remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  delete get_eeprom();
+
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&osctune);
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  remove_sfr_register(&usart.spbrgh);
+  remove_sfr_register(&usart.baudcon);
+  remove_sfr_register(&cm1con0);
+  remove_sfr_register(&cm2con0);
+  remove_sfr_register(&cm2con1);
+  remove_sfr_register(&vrcon);
+  remove_sfr_register(&srcon);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(&ccpr2l);
+  remove_sfr_register(&ccpr2h);
+  remove_sfr_register(&ccp2con);
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&ansel);
+  remove_sfr_register(&anselh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&ccpr1l);
+  remove_sfr_register(&ccpr1h);
+  remove_sfr_register(&ccp1con);
+  remove_sfr_register(&ccpr2l);
+  remove_sfr_register(&ccpr2h);
+  remove_sfr_register(&ccp2con);
+  remove_sfr_register(&pwm1con);
+  remove_sfr_register(&pstrcon);
+  remove_sfr_register(&eccpas);
+  remove_sfr_register(&ssp.sspcon2);
+  if (hasSSP()) {
+    remove_sfr_register(&ssp.sspbuf);
+    remove_sfr_register(&ssp.sspcon);
+    remove_sfr_register(&ssp.sspadd);
+    remove_sfr_register(&ssp.sspstat);
+  }
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_trisa);
+  delete_sfr_register(m_portb);
+  delete_sfr_register(m_trisb);
+  delete_sfr_register(m_porte);
+  delete_sfr_register(m_trise);
+  delete_sfr_register(m_portc);
+  delete_sfr_register(m_trisc);
+
+  delete_sfr_register(pir1);
+  delete_sfr_register(pir2);
+  delete_sfr_register(m_wpu);
+  delete_sfr_register(m_ioc);
+
 }
 
 void P16F88x::create_iopin_map()
@@ -199,7 +270,7 @@ void P16F88x::create_sfr_map()
   add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
 
   add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
-  alias_file_registers(0x0a,0x0b,0x80);
+  //alias_file_registers(0x0a,0x0b,0x80); //Already donw
 
   intcon = &intcon_reg;
 
@@ -228,13 +299,7 @@ void P16F88x::create_sfr_map()
   pie2.setPir(get_pir2());
   alias_file_registers(0x00,0x04,0x100);
   alias_file_registers(0x80,0x84,0x100);
-
-  add_sfr_register(m_porta, 0x05);
-  add_sfr_register(m_trisa, 0x85, RegisterValue(0xff,0));
-
-  add_sfr_register(m_portb, 0x06);
   alias_file_registers(0x06,0x06,0x100);
-  add_sfr_register(m_trisb, 0x86, RegisterValue(0xff,0));
   alias_file_registers(0x86,0x86,0x100);
 
   add_sfr_register(pir1,   0x0c, RegisterValue(0,0),"pir1");
@@ -258,15 +323,12 @@ void P16F88x::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
-  add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
-
   alias_file_registers(0x0a,0x0b,0x080);
   alias_file_registers(0x0a,0x0b,0x100);
   alias_file_registers(0x0a,0x0b,0x180);
 
 
 
-  intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
 
 
@@ -303,10 +365,6 @@ void P16F88x::create_sfr_map()
   add_sfr_register(&srcon, 0x185, RegisterValue(0,0),"srcon");
 
   add_sfr_register(&wdtcon, 0x105, RegisterValue(0x08,0),"wdtcon");
-
-  add_sfr_register(&ccpr2l, 0x1b, RegisterValue(0,0));
-  add_sfr_register(&ccpr2h, 0x1c, RegisterValue(0,0));
-  add_sfr_register(&ccp2con, 0x1d, RegisterValue(0,0));
 
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
   add_sfr_register(&adresh,  0x1e, RegisterValue(0,0));
@@ -548,6 +606,9 @@ void P16F88x::create_config_memory()
   m_configMemory = new ConfigMemory(this,2);
   m_configMemory->addConfigWord(0,new Config188x(this));
   m_configMemory->addConfigWord(1,new ConfigWord("CONFIG2", 0,"Configuration Word",this,0x2008));
+  wdt.initialize(true); // default WDT enabled
+  wdt.set_timeout(0.000035);
+  set_config_word(0x2007, 0x3fff);
 
 }
 
@@ -696,11 +757,13 @@ P16F883::P16F883(const char *_name, const char *desc)
     cout << "f883 constructor, type = " << isa() << '\n';
 
   m_porta->setEnableMask(0xff);
-
-
-
 }
 
+P16F883::~P16F883()
+{
+  delete_file_registers(0xc0,0xef);
+  delete_file_registers(0x120,0x16f);
+}
 void P16F883::create_symbols(void)
 {
 
@@ -749,11 +812,14 @@ P16F886::P16F886(const char *_name, const char *desc)
     cout << "f886 constructor, type = " << isa() << '\n';
 
   m_porta->setEnableMask(0xff);
-
-
-
 }
 
+P16F886::~P16F886()
+{
+  delete_file_registers(0xc0,0xef);
+  delete_file_registers(0x120,0x16f);
+  delete_file_registers(0x190,0x1ef);
+}
 void P16F886::create_symbols(void)
 {
 
@@ -803,6 +869,12 @@ P16F887::P16F887(const char *_name, const char *desc)
     cout << "f887 constructor, type = " << isa() << '\n';
 
 }
+
+P16F887::~P16F887()
+{
+  delete_file_registers(0x110,0x11f);
+  delete_file_registers(0x190,0x1ef);
+}
 void P16F887::create_symbols(void)
 {
 
@@ -818,8 +890,9 @@ void P16F887::create_symbols(void)
 void P16F887::create_sfr_map()
 {
 
-  add_file_registers(0xb0,0xef,0);
+  add_file_registers(0xc0,0xef,0);
   add_file_registers(0x110,0x16f,0);
+  //add_file_registers(0x110,0x11f,0);
   add_file_registers(0x190,0x1ef,0);
 
 
@@ -865,7 +938,14 @@ P16F884::P16F884(const char *_name, const char *desc)
 
   m_portd = new PicPSP_PortRegister(this,"portd","",8,0xff);
   m_trisd = new PicTrisRegister(this,"trisd","",(PicPortRegister *)m_portd, false);
+}
+P16F884::~P16F884()
+{
+  delete_file_registers(0xc0,0xef);
+  delete_file_registers(0x120,0x16f);
 
+  delete_sfr_register(m_portd);
+  delete_sfr_register(m_trisd);
 }
 
 //------------------------------------------------------------------------
@@ -967,13 +1047,7 @@ public:
   ConfigF631(P16F631 *pCpu)
     : ConfigWord("CONFIG", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
-    //Dprintf(("ConfigF631::ConfigF631 %p\n", m_pCpu));
-    if (m_pCpu)
-    {
-	m_pCpu->wdt.initialize(true); // default WDT enabled
-        m_pCpu->wdt.set_timeout(0.000035);
-        m_pCpu->set_config_word(0x2007, 0x3fff);
-    }
+    Dprintf(("ConfigF631::ConfigF631 %p\n", m_pCpu));
   }
 
     enum {
@@ -1063,7 +1137,7 @@ P16F631::P16F631(const char *_name, const char *desc)
   m_iocb = new IOC(this, "iocb", "Interrupt-On-Change GPIO Register");
 
   m_porta = new PicPortGRegister(this,"porta","",&intcon_reg, m_ioca, 8,0x3f);
-  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false);
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false, 0x37);
 
   m_portb = new PicPortGRegister(this,"portb","",&intcon_reg, m_iocb, 8,0xf0);
   m_trisb = new PicTrisRegister(this,"trisb","", m_portb, false);
@@ -1084,6 +1158,30 @@ P16F631::~P16F631()
   if (verbose)
     cout << __FUNCTION__ << endl;
 
+  unassignMCLRPin();
+  delete_file_registers(0x40, 0x7f);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&vrcon);
+  remove_sfr_register(&cm1con0);
+  remove_sfr_register(&cm2con0);
+  remove_sfr_register(&cm2con1);
+  remove_sfr_register(&ansel);
+  remove_sfr_register(&srcon);
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&pcon);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&pie1);
+  remove_sfr_register(&pie2);
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(&osctune);
+  delete_sfr_register(pir2);
   delete_sfr_register(m_portc);
   delete_sfr_register(m_trisc);
 
@@ -1305,6 +1403,9 @@ void P16F631::create_config_memory()
 {
   m_configMemory = new ConfigMemory(this,1);
   m_configMemory->addConfigWord(0,new ConfigF631(this));
+  wdt.initialize(true); // default WDT enabled
+  wdt.set_timeout(0.000035);
+  set_config_word(0x2007, 0x3fff);
 
 };
 
@@ -1385,7 +1486,7 @@ bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
 	if (valid_pins != m_porta->getEnableMask()) // enable new pins for IO
     	{
             m_porta->setEnableMask(valid_pins);
-	    m_trisa->setEnableMask(valid_pins);
+	    m_trisa->setEnableMask(valid_pins & 0xf7);
     	}
 	return(true);
 
@@ -1452,6 +1553,44 @@ P16F684::~P16F684()
 {
   if (verbose)
     cout << __FUNCTION__ << endl;
+
+  unassignMCLRPin();
+
+  delete_file_registers(0x20, 0x7f);
+  delete_file_registers(0xa0, 0xbf);
+
+  remove_sfr_register(&tmr0);
+
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(pir1);
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&ccpr1l);
+  remove_sfr_register(&ccpr1h);
+  remove_sfr_register(&ccp1con);
+  remove_sfr_register(&pwm1con);
+  remove_sfr_register(&eccpas);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.cmcon1);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&pie1);
+  remove_sfr_register(&pcon);
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&osctune);
+  remove_sfr_register(&ansel);
+  remove_sfr_register(&pr2);
+  remove_sfr_register(&comparator.vrcon);
+  remove_sfr_register(get_eeprom()->get_reg_eedata());
+  remove_sfr_register(get_eeprom()->get_reg_eeadr());
+  remove_sfr_register(get_eeprom()->get_reg_eecon1());
+  remove_sfr_register(get_eeprom()->get_reg_eecon2());
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adcon1);
 
   delete_sfr_register(m_portc);
   delete_sfr_register(m_trisc);
@@ -1703,6 +1842,9 @@ void P16F684::create_config_memory()
 {
   m_configMemory = new ConfigMemory(this,1);
   m_configMemory->addConfigWord(0,new ConfigF631((P16F631*)this));
+  wdt.initialize(true); // default WDT enabled
+  wdt.set_timeout(0.000035);
+  set_config_word(0x2007, 0x3fff);
 
 };
 
@@ -1801,6 +1943,7 @@ Processor * P16F677::construct(const char *name)
   P16F677 *p = new P16F677(name);
 
   p->create(256);
+  p->set_hasSSP();
   p->create_sfr_map();
   p->create_invalid_registers ();
   p->create_symbols();
@@ -1819,6 +1962,28 @@ P16F677::P16F677(const char *_name, const char *desc)
   if(verbose)
     cout << "f677 constructor, type = " << isa() << '\n';
 
+}
+
+P16F677::~P16F677()
+{
+  delete_file_registers(0x20,0x3f);
+  delete_file_registers(0xa0,0xbf);
+
+  remove_sfr_register(&anselh);
+
+
+  if (hasSSP()) {
+    remove_sfr_register(&ssp.sspbuf);
+    remove_sfr_register(&ssp.sspcon);
+    remove_sfr_register(&ssp.sspadd);
+    remove_sfr_register(&ssp.sspstat);
+  }
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  delete m_cvref;
+  delete m_v06ref;
 }
 
 void P16F677::create_symbols(void)
@@ -1873,10 +2038,6 @@ void P16F677::create_sfr_map()
   // set a2d modes where an1 is Vref+ 
   adcon1.setVrefHiConfiguration(2, 1);
 
-  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
-  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
-  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
   add_sfr_register(&anselh, 0x11f, RegisterValue(0x0f,0));
   add_file_registers(0x20,0x3f,0);
   add_file_registers(0xa0,0xbf,0);
@@ -1942,7 +2103,23 @@ P16F685::P16F685(const char *_name, const char *desc)
   if(verbose)
     cout << "f685 constructor, type = " << isa() << '\n';
 
+  set_hasSSP();
 
+}
+
+P16F685::~P16F685()
+{
+  delete_file_registers(0xc0,0xef);
+  delete_file_registers(0x120,0x16f);
+  remove_sfr_register(&pstrcon);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&pr2);
+  remove_sfr_register(&ccpr1l);
+  remove_sfr_register(&ccpr1h);
+  remove_sfr_register(&ccp1con);
+  remove_sfr_register(&pwm1con);
+  remove_sfr_register(&eccpas);
 }
 
 void P16F685::create_symbols(void)
@@ -1993,8 +2170,9 @@ void P16F685::create_sfr_map()
 
   add_sfr_register(&pwm1con, 0x1c, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0x1d, RegisterValue(0,0));
-  add_file_registers(0x20,0x3f,0);
-  add_file_registers(0xa0,0xef,0);
+//  add_file_registers(0x20,0x3f,0);
+//  add_file_registers(0xa0,0xef,0);
+  add_file_registers(0xc0,0xef,0);
   add_file_registers(0x120,0x16f,0);
 
 
@@ -2028,10 +2206,20 @@ P16F687::P16F687(const char *_name, const char *desc)
 
   if(verbose)
     cout << "f687 constructor, type = " << isa() << '\n';
-
+  set_hasSSP();
 
 }
 
+P16F687::~P16F687()
+{
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  remove_sfr_register(&usart.spbrgh);
+  remove_sfr_register(&usart.baudcon);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
+}
 void P16F687::create_symbols(void)
 {
 
@@ -2051,8 +2239,8 @@ void P16F687::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x10f);
 
 
-  add_file_registers(0x20,0x3f,0);
-  add_file_registers(0xa0,0xbf,0);
+//  add_file_registers(0x20,0x3f,0);
+//  add_file_registers(0xa0,0xbf,0);
 
   usart.initialize(pir1,&(*m_portb)[7], &(*m_portb)[5],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
@@ -2094,6 +2282,7 @@ P16F689::P16F689(const char *_name, const char *desc)
   if(verbose)
     cout << "f689 constructor, type = " << isa() << '\n';
 
+  set_hasSSP();
 
 }
 
@@ -2127,7 +2316,19 @@ P16F690::P16F690(const char *_name, const char *desc)
   if(verbose)
     cout << "f690 constructor, type = " << isa() << '\n';
 
+  set_hasSSP();
 
+}
+
+P16F690::~P16F690()
+{
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  remove_sfr_register(&usart.spbrgh);
+  remove_sfr_register(&usart.baudcon);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
 }
 
 void P16F690::create_symbols(void)
@@ -2162,5 +2363,5 @@ void P16F690::create_sfr_map()
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
   usart.set_eusart(true);
 
-  add_sfr_register(&pstrcon, 0x19d, RegisterValue(1,0));
+ // add_sfr_register(&pstrcon, 0x19d, RegisterValue(1,0));
 }

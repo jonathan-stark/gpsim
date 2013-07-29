@@ -313,6 +313,10 @@ ADCON1_V2::ADCON1_V2(Processor *pCpu, const char *pName, const char *pDesc)
     setChannelConfiguration(i, 0);
   }
 }
+ADCON1_V2::~ADCON1_V2()
+{
+   delete [] m_AnalogPins;
+}
 
 
 void ADCON1_V2::put(unsigned int new_value)

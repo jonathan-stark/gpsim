@@ -690,8 +690,8 @@ void Status_register::reset(RESET_TYPE r)
 
 void Status_register::put(unsigned int new_value)
 {
+
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   value.put((value.get() & ~write_mask) | (new_value & write_mask));
 
@@ -1323,6 +1323,16 @@ Stack14E::Stack14E(Processor *pCpu) : Stack(pCpu),
   STVREN = 1;
 }
 
+Stack14E::~Stack14E()
+{
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+  if (pCpu) 
+  {
+    pCpu->remove_sfr_register(&stkptr);
+    pCpu->remove_sfr_register(&tosl);
+    pCpu->remove_sfr_register(&tosh);
+  }
+}
 void Stack14E::reset(RESET_TYPE r)
 {
     pointer = NO_ENTRY;
@@ -1427,11 +1437,13 @@ void TOSL::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
   stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
+  value.put(new_value & 0xff);
 }
 
 void TOSL::put_value(unsigned int new_value)
 {
   stack->put_tos( (stack->get_tos() & 0xffffff00) | (new_value & 0xff));
+  value.put(new_value & 0xff);
   update();
 }
 
@@ -1462,12 +1474,14 @@ void TOSH::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
   stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
+  value.put(new_value & 0xff);
 }
 
 void TOSH::put_value(unsigned int new_value)
 {
 
   stack->put_tos( (stack->get_tos() & 0xffff00ff) | ( (new_value & 0xff) << 8));
+  value.put(new_value & 0xff);
 
   update();
 
@@ -1631,7 +1645,7 @@ void WPU::set_wpu_pu(bool pullup_enable)
 
 CPSCON0::CPSCON0(Processor *pCpu, const char *pName, const char *pDesc)
     : sfr_register(pCpu, pName, pDesc), m_tmr0(0), chan(0),
-        cps_stimulus(0)
+        future_cycle(0), cps_stimulus(0)
 {
       mValidBits = 0xcf;
       for(int i =0; i < 16; i++)
@@ -1898,14 +1912,11 @@ public:
      : sr_module(_sr_module)
   {}
 
-  void setSinkState(char new3State)
+  virtual void setSinkState(char new3State)
   {
 	sr_module->setState(new3State);
   }
-  void release()
-  {
-	delete this;
-  }
+  virtual void release() { delete this; }
 private:
   SR_MODULE *sr_module;
 };
@@ -1918,6 +1929,13 @@ SR_MODULE::SR_MODULE(Processor *_cpu) :
     SRI_pin(0), SRQ_pin(0), SRNQ_pin(0), m_SRinSink(0),
     m_SRQsource(0), m_SRNQsource(0)
 {
+}
+SR_MODULE::~SR_MODULE()
+{
+    if ( m_SRQsource)
+	delete  m_SRQsource;
+    if ( m_SRNQsource)
+	delete  m_SRNQsource;
 }
 
 // determine output state of RS flip-flop

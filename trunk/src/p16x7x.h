@@ -29,7 +29,7 @@ License along with this library; if not, see
 
 //---------------------------------------------------------
 
-class P16C71 :  public P16C61
+class P16C71 :  public P16X8X
 {
  public:
 
@@ -45,6 +45,8 @@ class P16C71 :  public P16C61
 
 
   P16C71(const char *_name=0, const char *desc=0);
+  ~P16C71();
+
   void create();
   static Processor *construct(const char *name);
 private:
@@ -68,6 +70,7 @@ class P16C712 :  public P16C62
 
 
   P16C712(const char *_name=0, const char *desc=0);
+  ~P16C712();
   void create();
   static Processor *construct(const char *name);
 
@@ -111,6 +114,7 @@ class P16C72 : public P16C62
 
 
   P16C72(const char *_name=0, const char *desc=0);
+  ~P16C72();
   void create();
   static Processor *construct(const char *name);
 
@@ -139,6 +143,7 @@ class P16C73 : public P16C63
   virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
 
   P16C73(const char *_name=0, const char *desc=0);
+  ~P16C73();
   void create();
   static Processor *construct(const char *name);
 
@@ -153,6 +158,7 @@ public:
   virtual void create_symbols();
   void create_sfr_map();
   P16F73(const char *_name=0, const char *desc=0);
+  ~P16F73();
   void create();
   static Processor *construct(const char *name);
 
@@ -188,6 +194,7 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
 
 
   P16C74(const char *_name=0, const char *desc=0);
+  ~P16C74();
   void create();
   static Processor *construct(const char *name);
 
@@ -202,6 +209,7 @@ public:
   virtual void create_symbols();
   void create_sfr_map();
   P16F74(const char *_name=0, const char *desc=0);
+  ~P16F74();
   void create();
   static Processor *construct(const char *name);
 

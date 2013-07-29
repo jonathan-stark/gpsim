@@ -45,6 +45,9 @@ class _SSPSTAT;
 class SDI_SignalSink;
 class SCL_SignalSink;
 class SS_SignalSink;
+class SDO_SignalSource;
+class SDI_SignalSource;
+class SCK_SignalSource;
 
 enum SSP_TYPE {
 	SSP_TYPE_BSSP = 1,
@@ -387,9 +390,9 @@ class SSP_MODULE
   virtual bool get_SDI_State() { return m_SDI_State;}
   virtual bool get_SCL_State() { return m_SCL_State;}
   virtual bool get_SS_State() { return m_SS_State;}
-  virtual void Sck_toggle() { m_SckSource->toggle();}
-  virtual void putStateSDO(char _state) {m_SdoSource->putState(_state);}
-  virtual void putStateSCK(char _state) {m_SckSource->putState(_state);}
+  virtual void Sck_toggle();
+  virtual void putStateSDO(char _state);
+  virtual void putStateSCK(char _state);
   virtual void set_sspif() { m_pirset->set_sspif();}
   virtual void set_bclif() { m_pirset->set_bclif();}
   virtual void startSSP(unsigned int value);
@@ -408,6 +411,11 @@ class SSP_MODULE
   virtual bool isI2CIdle() { return m_i2c->isIdle();}
   virtual bool isI2CMaster() { return sspcon.isI2CMaster(sspcon.value.get());}
   virtual bool isI2CSlave() { return sspcon.isI2CSlave(sspcon.value.get());}
+  virtual void releaseSDIpin();
+  virtual void releaseSDOpin();
+  virtual void releaseSCLpin();
+  virtual void releaseSSpin();
+  virtual void releaseSCKpin();
 
 protected:
   PIR_SET   *m_pirset;
@@ -424,13 +432,16 @@ protected:
   bool m_SCL_State;
   bool m_SS_State;
 
-  PeripheralSignalSource *m_SckSource;
-  PeripheralSignalSource *m_SdoSource;
-  PeripheralSignalSource *m_SdiSource;
+  SCK_SignalSource 	*m_SckSource;
+  SDO_SignalSource 	*m_SdoSource;
+  SDI_SignalSource 	*m_SdiSource;
   SDI_SignalSink 	*m_SDI_Sink;
   SCL_SignalSink 	*m_SCL_Sink;
   SS_SignalSink 	*m_SS_Sink;
-  bool m_sink_set;
+  bool 			m_sink_set;
+  bool			m_sdo_active;
+  bool			m_sdi_active;
+  bool			m_sck_active;
 };
 
 class SSP1_MODULE : public SSP_MODULE //MSSP1

@@ -337,6 +337,7 @@ public:
   TOSU   tosu;
 
   Stack16(Processor *);
+  ~Stack16();
   virtual bool push(unsigned int);
   virtual unsigned int pop();
   virtual void reset(RESET_TYPE);
