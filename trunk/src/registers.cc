@@ -227,7 +227,7 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 //
 Register::Register(Module *_cpu, const char *pName, const char *pDesc)
   : Value(pName,pDesc,_cpu),
-    address(0xffffffff),
+    address(AN_INVALID_ADDRESS),
     alias_mask(0)
 {
 
@@ -359,7 +359,7 @@ void Register::put_value(unsigned int new_value)
   // all objects derived from a file_register should
   // automagically be correctly updated.
 
-  put(new_value);
+  value.put(new_value);
 
   // Even though we just wrote a value to this register,
   // it's possible that the register did not get fully
@@ -470,7 +470,8 @@ void Register::set(Value * pVal)
 
 Value *Register::copy()
 {
-  return new ValueWrapper(this);
+  Value *val = new ValueWrapper(this);
+  return val;
 }
 void Register::get(gint64 &i)
 {
@@ -507,7 +508,6 @@ void sfr_register::reset(RESET_TYPE r)
 //--------------------------------------------------
 // member functions for the InvalidRegister class
 //--------------------------------------------------
-#define AN_INVALID_ADDRESS 0xffffffff
 void InvalidRegister::put(unsigned int new_value)
 {
   cout << "attempt write to invalid file register\n";

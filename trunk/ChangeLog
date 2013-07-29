@@ -1,3 +1,14 @@
+2013-07-29 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-instructions.cc :
+	- Give proper register name in trace for banked 14bit processor
+	  registers
+	* configure.ac extras/ds1820/Makefile.am
+	  extras/ds1820/examples/Makefile.am :
+	- Fixes for make dist 
+	* src/registers.cc src/registers.h :
+	- Make AN_INVALID_ADDRESS globally available 
+
+
 2013-06-30 Borut Razem <borutr@users.sourceforge.net>
 	* plat/win32/gpsim.nsi, plat/win32/make.mingw:
 	  Mingw compilatin with i686-pc-mingw32-gcc GCC 4.5.2

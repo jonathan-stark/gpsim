@@ -213,6 +213,7 @@ AC_CONFIG_FILES([Makefile
 		 extras/lcd/Makefile
 		 extras/lcd/examples/Makefile
 		 extras/ds1820/Makefile
+		 extras/ds1820/examples/Makefile
 		 extras/ds1307/Makefile
 		 extras/ds1307/examples/Makefile
                  regression/Makefile
