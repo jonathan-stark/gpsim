@@ -332,6 +332,8 @@ void Trace::addToCurrentFrame(TraceObject *to)
 
   if(current_frame)
     current_frame->add(to);
+  else
+    delete to;
 
 }
 void Trace::deleteTraceFrame()
@@ -339,12 +341,14 @@ void Trace::deleteTraceFrame()
   if (!current_frame)
     return;
   list <TraceFrame *> :: iterator tfIter;
+  list <TraceObject *> :: reverse_iterator toIter;
 
   for(tfIter = traceFrames.begin();
       tfIter != traceFrames.end();
-      ++tfIter) {
-    TraceFrame *tf = *tfIter;
-    delete tf;
+      ++tfIter) 
+  {
+      TraceFrame *tf = *tfIter;
+      delete tf;
   }
   traceFrames.clear();
   current_frame = 0;
@@ -821,6 +825,7 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
 
   trace.current_frame->cycle_time = trace.current_cycle_time;
 
+
   return pcto;
 }
 
@@ -1240,7 +1245,9 @@ int Trace::dump(int n, FILE *out_stream)
 
         TraceObject *pTO = tt->decode(k);
         if (pTO)
+	{
           addToCurrentFrame(pTO);
+  	}
       }
 
       if(is_cycle_trace(k,&cycle) == 2)

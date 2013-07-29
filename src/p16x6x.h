@@ -119,7 +119,6 @@ class P16C62 : public  P16X6X_processor
 
   virtual unsigned int program_memory_size() const { return 0x800; };
   virtual void create_iopin_map();
-  virtual bool hasSSP() { return true;}
 
   virtual void create();
 };
@@ -182,7 +181,6 @@ class P16C64 : public  P16X6X_processor
   virtual void create();
   virtual void create_iopin_map();
 
-  virtual bool hasSSP() {return true;}
   virtual bool hasSPS() {return false;}
 
 };
@@ -250,7 +248,6 @@ public:
   virtual void create_sfr_map();
   virtual void create_iopin_map();
   virtual void option_new_bits_6_7(unsigned int bits);
-  virtual bool hasSSP() {return false;}
 
 
   virtual unsigned int program_memory_size() const { return 0x400; };

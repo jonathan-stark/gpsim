@@ -224,6 +224,28 @@ P16C54::P16C54(const char *_name, const char *desc)
 
 P16C54::~P16C54()
 {
+  delete_file_registers(0x07, 0x1f);
+
+ 
+//  add_sfr_register(indf);
+
+  remove_sfr_register(&tmr0);
+
+//  add_sfr_register(pcl);
+//  add_sfr_register(status);
+//  add_sfr_register(fsr);
+
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_portb);
+
+//  delete_sfr_register(option_reg);
+  delete_sfr_register(m_trisa);
+  delete_sfr_register(m_trisb);
+#ifndef USE_PIN_MODULE_FOR_TOCKI
+  delete_sfr_register(m_tocki);
+  delete_sfr_register(m_trist0);
+#endif
+
 }
 
 void P16C54::tris_instruction(unsigned int tris_register)
@@ -256,6 +278,7 @@ void P16C55::create_sfr_map()
 
   P16C54::create_sfr_map();
 
+  delete_file_registers(0x07, 0x07);
   add_sfr_register(m_portc, 0x07);
   add_sfr_register(m_trisc,  0xffffffff, RegisterValue(0xff,0));
 
@@ -303,6 +326,7 @@ P16C55::P16C55(const char *_name, const char *desc)
 }
 P16C55::~P16C55()
 {
+  delete_sfr_register(m_trisc);
 }
 
 void P16C55::tris_instruction(unsigned int tris_register)

@@ -88,8 +88,10 @@ extern "C" {
 }
 
 static GIOChannel *channel;
+gint g_iWatchSourceID = 0;
 
 #endif /* HAVE_READLINE */
+
 
 void simulation_cleanup();
 
@@ -98,7 +100,7 @@ int parse_string(const char * str);
 
 //------------------------------------------------------------------------
 //
-LIBGPSIM_EXPORT bool gUsingThreads(); // in ../src/interface.cc
+LIBGPSIM_EXPORT bool gUsingThreads(); // in ../src/interface.cWatchSourceIDc
 
 void initialize_readline (void);
 void clear_input_buffer(void);
@@ -269,7 +271,9 @@ void initialize_threads(void)
 #if GLIB_MAJOR_VERSION >= 2
   if( !g_thread_supported() )
   {
+#if GLIB_MINOR_VERSION < 32
     g_thread_init(NULL);
+#endif
 #ifdef HAVE_GUI
     gdk_threads_init();
 #endif
@@ -830,6 +834,7 @@ void exit_cli(void)
 #ifdef HAVE_READLINE
   rl_callback_handler_remove();
 #ifdef HAVE_GUI
+  g_source_remove(g_iWatchSourceID);
   g_io_channel_unref(channel);
 #endif
 
@@ -875,7 +880,6 @@ static int gpsim_rl_getc(FILE *in)
 }
 #endif
 
-gint g_iWatchSourceID = 0;
 /* Tell the GNU Readline library how to complete.  We want to try to complete
    on command names if this is the first word in the line, or on filenames
    if not. */
@@ -886,6 +890,7 @@ void initialize_readline (void)
 
   const char *prompt = get_interface().bUsingGUI() ? gpsim_prompt : gpsim_cli_prompt;
 
+ 
 #ifdef HAVE_READLINE
   // Lets us have a gpsim section to .inputrc
   // JRH - not tested

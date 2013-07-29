@@ -322,7 +322,94 @@ P12F1822::P12F1822(const char *_name, const char *desc)
 
 P12F1822::~P12F1822()
 {
+    unassignMCLRPin();
+    delete_file_registers(0x20, 0x7f);
+    delete_file_registers(0xa0, 0xbf);
+
+    delete_sfr_register(m_iocap);
+    delete_sfr_register(m_iocan);
+    delete_sfr_register(m_iocaf);
+    delete_sfr_register(m_daccon0);
+    delete_sfr_register(m_daccon1);
+    delete_sfr_register(m_trisa);
+    delete_sfr_register(m_porta);
+    delete_sfr_register(m_lata);
+
+    delete_sfr_register(m_wpua);
+    remove_sfr_register(&tmr0);
+
+    remove_sfr_register(&tmr1l);
+    remove_sfr_register(&tmr1h);
+    remove_sfr_register(&t1con_g);
+    remove_sfr_register(&t1con_g.t1gcon);
+
+    remove_sfr_register(&tmr2);
+    remove_sfr_register(&pr2);
+    remove_sfr_register(&t2con);
+    remove_sfr_register(&cpscon0);
+    remove_sfr_register(&cpscon1);
+    remove_sfr_register(&ssp.sspbuf);
+    remove_sfr_register(&ssp.sspadd);
+    remove_sfr_register(&ssp.ssp1msk);
+    remove_sfr_register(&ssp.sspstat);
+    remove_sfr_register(&ssp.sspcon);
+    remove_sfr_register(&ssp.sspcon2);
+    remove_sfr_register(&ssp.ssp1con3);
+    remove_sfr_register(&ccpr1l);
+    remove_sfr_register(&ccpr1h);
+    remove_sfr_register(&ccp1con);
+    remove_sfr_register(&pwm1con);
+    remove_sfr_register(&ccp1as);
+    remove_sfr_register(&pstr1con);
+    remove_sfr_register(&pie1);
+    remove_sfr_register(&pie2);
+    remove_sfr_register(&adresl);
+    remove_sfr_register(&adresh);
+    remove_sfr_register(&adcon0);
+    remove_sfr_register(&adcon1);
+    remove_sfr_register(&borcon);
+    remove_sfr_register(&fvrcon);
+    remove_sfr_register(&sr_module.srcon0);
+    remove_sfr_register(&sr_module.srcon1);
+    remove_sfr_register(&apfcon );
+    remove_sfr_register(&ansela);
+    remove_sfr_register(get_eeprom()->get_reg_eeadr());
+    remove_sfr_register(get_eeprom()->get_reg_eeadrh());
+    remove_sfr_register(get_eeprom()->get_reg_eedata());
+    remove_sfr_register(get_eeprom()->get_reg_eedatah());
+    remove_sfr_register(get_eeprom()->get_reg_eecon1());
+    remove_sfr_register(get_eeprom()->get_reg_eecon2());
+    remove_sfr_register(&usart.spbrg);
+    remove_sfr_register(&usart.spbrgh);
+    remove_sfr_register(&usart.rcsta);
+    remove_sfr_register(&usart.txsta);
+    remove_sfr_register(&usart.baudcon);
+    remove_sfr_register(&ssp.sspbuf);
+    remove_sfr_register(&ssp.sspadd);
+    remove_sfr_register(&ssp.ssp1msk);
+    remove_sfr_register(&ssp.sspstat);
+    remove_sfr_register(&ssp.sspcon);
+    remove_sfr_register(&ssp.sspcon2);
+    remove_sfr_register(&ssp.ssp1con3);
+    remove_sfr_register(&ccpr1l);
+    remove_sfr_register(&ccpr1h);
+    remove_sfr_register(&ccp1con);
+    remove_sfr_register(&pwm1con);
+    remove_sfr_register(&ccp1as);
+    remove_sfr_register(&pstr1con);
+    remove_sfr_register(&osctune);
+    remove_sfr_register(&osccon);
+    remove_sfr_register(&oscstat);
+
+    remove_sfr_register(comparator.cmxcon0[0]); 
+    remove_sfr_register(comparator.cmxcon1[0]); 
+    remove_sfr_register(comparator.cmout); 
+    delete_sfr_register(usart.rcreg);
+    delete_sfr_register(usart.txreg);
+    delete_sfr_register(pir1);
+    delete_sfr_register(pir2);
     delete e;
+    delete m_cpu_temp;
 }
 Processor * P12F1822::construct(const char *name)
 {
@@ -374,8 +461,6 @@ void P12F1822::create_sfr_map()
 
   pcon.valid_bits = 0xcf;
   add_sfr_register(option_reg,  0x95, RegisterValue(0xff,0));
-  add_sfr_register(&pcon,       0x96, RegisterValue(0x0c,0), "pcon");
-  add_sfr_register(&wdtcon,     0x97, RegisterValue(0x16,0));
   add_sfr_register(&osctune,    0x98, RegisterValue(0,0));
   add_sfr_register(&osccon,     0x99, RegisterValue(0x38,0));
   add_sfr_register(&oscstat,    0x9a, RegisterValue(0,0));
@@ -758,6 +843,16 @@ P16F1823::P16F1823(const char *_name, const char *desc)
   comparator.cmxcon1[1] = new CMxCON1(this, "cm2con1", " Comparator C2 Control Register 1", 1, &comparator);
   cpscon1.mValidBits = 0x0f;
 }
+P16F1823::~P16F1823()
+{
+    delete_sfr_register(m_portc);
+    delete_sfr_register(m_trisc);
+    delete_sfr_register(m_latc);
+    remove_sfr_register(comparator.cmxcon0[1]); 
+    remove_sfr_register(comparator.cmxcon1[1]); 
+    delete_sfr_register(m_wpuc);
+    remove_sfr_register(&anselc);
+}
 void P16F1823::create_iopin_map()
 {
 
@@ -878,7 +973,4 @@ void P16F1823::create_sfr_map()
     cpscon0.set_pin(7, &(*m_portc)[3]);
     sr_module.srcon1.set_ValidBits(0xff);
     sr_module.setPins(&(*m_porta)[1], &(*m_porta)[2], &(*m_portc)[4]);
-}
-P16F1823::~P16F1823()
-{
 }

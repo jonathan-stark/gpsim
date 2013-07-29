@@ -202,7 +202,12 @@ ${RT} wdt sim_nwdt_18f4620
 
 ${RT} p16f676 sim_p16f676
 ${RT} p16f676 sim_reset
-${RT} p16f690 sim
+${RT} p16f690 sim_epwm 
+${RT} p16f690 sim_eusart 
+${RT} p16f690 sim_nwdt_16f631
+${RT} p16f690 sim_p16f690
+${RT} p16f690 sim_wdt_16f677
+${RT} p16f690 sim_wdt_16f685
 
 ${RT}       p16f684 sim_a2d_684
 ${RT}       p16f684 sim_compar_684

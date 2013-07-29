@@ -278,6 +278,10 @@ public:
   char getPullupControlState();
   unsigned int getPinNumber() { return m_pinNumber;}
   void AnalogReq(Register *reg, bool analog, const char *newName);
+  // If active control not default, return it
+  SignalControl *getActiveControl() {return (m_activeControl == m_defaultControl)?0:m_activeControl;}
+  // If active source not default, return it
+  SignalControl *getActiveSource() {return (m_activeSource == m_defaultSource)?0:m_activeSource;}
 
   IOPIN &getPin() { return *m_pin;}
 

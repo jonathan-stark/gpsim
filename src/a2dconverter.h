@@ -76,6 +76,7 @@ public:
     };
 
   ADCON1(Processor *pCpu, const char *pName, const char *pDesc);
+  ~ADCON1();
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);

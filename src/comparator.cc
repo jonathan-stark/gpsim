@@ -77,18 +77,17 @@ void ComparatorModule::initialize( PIR_SET *pir_set,
 class CMSignalSource : public SignalControl
 {
 public:
-  CMSignalSource()
-    : m_state('0')
+  CMSignalSource(CMCON *_cmcon, int _index)
+    : m_state('0'), m_cmcon(_cmcon), index(_index)
   {
   }
   ~CMSignalSource()
   {
-    cout << "deleting CMsignal source " << this << endl;
+//    cout << "deleting CMsignal source " << this << endl;
   }
   virtual void release()
   {
-    cout << "CMSignalSource:" << this << endl;
-    delete this;
+    m_cmcon->releasePin(index);
   }
   virtual char getState()
   {
@@ -100,12 +99,50 @@ public:
   }
 private:
   char m_state;
+  CMCON * m_cmcon;
+  int  index;
+};
+//--------------------------------------------------
+//
+//--------------------------------------------------
+class CM12CON0;
+
+class CM12SignalSource : public SignalControl
+{
+public:
+  CM12SignalSource( CM12CON0 *_cm12con0)
+    : m_state('0'), m_cm12con0(_cm12con0)
+  {
+  }
+  ~CM12SignalSource()
+  {
+//    cout << "deleting CMsignal source " << this << endl;
+  }
+  virtual void release()
+  {
+    m_cm12con0->releasePin();
+  }
+  virtual char getState()
+  {
+    return m_state;
+  }
+  void putState(bool new_val)
+  {
+        m_state = new_val?'1':'0';
+  }
+private:
+  char m_state;
+  CM12CON0 *m_cm12con0;
 };
 
 CM_stimulus::CM_stimulus(CMCON * arg, const char *cPname,double _Vth, double _Zth)
   : stimulus(cPname, _Vth, _Zth)
 {
         _cmcon = arg;
+}
+
+CM_stimulus::~CM_stimulus()
+{
 }
 
 void   CM_stimulus::set_nodeVoltage(double v)
@@ -163,11 +200,39 @@ CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
 
 CMCON::~CMCON()
 {
+  unsigned int mode = value.get() & 0x07;
+
+
+  for(int i = 0; i <2; i++)
+  {
+	if (cm_source[i])
+	{
+	    int cfg = m_configuration_bits[i][mode] & CFG_MASK;
+	    
+	    // Our Source active so port still defined if cm_output defined,
+	    // set default source.
+	    if (cfg == i && cm_output[i])
+		cm_output[i]->setSource(0);
+	    delete cm_source[i];
+	}
+  }
+  if (cm_stimulus[0]) delete cm_stimulus[0];
+  if (cm_stimulus[1]) delete cm_stimulus[1];
+  if (cm_stimulus[2]) delete cm_stimulus[2];
+  if (cm_stimulus[3]) delete cm_stimulus[3];
   free(cm_input_pin[0]);  free(cm_input_pin[1]);
   free(cm_input_pin[2]);  free(cm_input_pin[3]);
   free(cm_output_pin[0]); free(cm_output_pin[1]);
 }
 
+
+void CMCON::releasePin(int i)
+{
+    if (cm_output[i]) cm_output[i]->setSource(0);
+    if (cm_source[i]) delete cm_source[i];
+    cm_output[i] = 0;
+    cm_source[i] = 0;
+}
 void CMCON::setINpin(int i, PinModule *newPinModule)
 {
     if (newPinModule == NULL) return;
@@ -331,7 +396,7 @@ void CMCON::put(unsigned int new_value)
       {
 	  char name[20];
           if ( ! cm_source[i])
-                cm_source[i] = new CMSignalSource();
+                cm_source[i] = new CMSignalSource(this, i);
 	  sprintf(name, "c%dout", i+1);
 	  cm_output[i]->getPin().newGUIname(name);
           cm_output[i]->setSource(cm_source[i]);
@@ -393,11 +458,12 @@ CMCON1::~CMCON1() {}
 void CMCON1::put(unsigned int new_value)
 {
 
+
   if (verbose)
       cout << "CMCON1::put(new_value) =" << hex << new_value << endl;
 
   assert(m_tmrl);
-  m_tmrl->set_T1GSS((new_value & T1GSS) == T1GSS);
+  m_tmrl->set_T1GSS(new_value & T1GSS);
 
   trace.raw(write_trace.get() | value.get());
   value.put(new_value);
@@ -551,6 +617,16 @@ double CM2CON0::CVref()
 	else
 	    return(0.6);
 }
+
+CM1CON0_2::~CM1CON0_2()
+{
+  if (cm_stimulus[0]) delete cm_stimulus[0]; 
+  if (cm_stimulus[1]) delete cm_stimulus[1]; 
+  cm_stimulus[0] = 0;
+  cm_stimulus[1] = 0;
+  if (cm_cvref) delete cm_cvref;
+  if (cm_v06ref) delete cm_v06ref;
+}
 void CM1CON0_2::state_change(unsigned int cmcon_val)
 {
    if (!cm_stimulus[0])
@@ -677,6 +753,12 @@ CM12CON0::CM12CON0(Processor *pCpu, const char *pName, const char *pDesc)
 CM12CON0::~CM12CON0()
 {
 
+
+  if ((value.get() & (ON | OE)) && cm_output) cm_output->setSource(0);
+  if (cm_source) delete cm_source;
+  if ((!cm_snode[0]) && cm_stimulus[0]) delete cm_stimulus[0];
+  if ((!cm_snode[1]) && cm_stimulus[1]) delete cm_stimulus[1];
+
 }
 void CM12CON0::put(unsigned int new_value)
 {
@@ -704,7 +786,7 @@ void CM12CON0::put(unsigned int new_value)
 		}
 			
 	    }
-	    else if (cm_snode[0] != NULL) // Using CVref so turn of monitoring
+	    else if (cm_snode[0] != NULL) // Using CVref so turn off monitoring
 	    {
 		cm_snode[0]->detach_stimulus(cm_stimulus[0]);
 		cm_snode[0] = NULL;
@@ -802,8 +884,15 @@ void CM12CON0::setpins(PinModule * c12in0, PinModule * c12in1,
    // one output pin
    cm_output = cout;
    if (! cm_source)
-	cm_source = new CMSignalSource();
+	cm_source = new CM12SignalSource(this);
 } 
+
+void CM12CON0::releasePin()
+{
+    if (cm_source) delete cm_source;
+    cm_source = 0;
+    cm_output = 0;
+}
 void CM12CON0::link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
         VRCON *_vrcon, SRCON *_srcon, ECCPAS *_eccpas)
 {
@@ -829,7 +918,7 @@ VRCON::VRCON(Processor *pCpu, const char *pName, const char *pDesc)
 
 VRCON::~VRCON()
 {
-  delete pin_name;
+  free(pin_name);
 }
 
 void VRCON::setIOpin(PinModule *newPinModule)
@@ -1015,6 +1104,11 @@ CMxCON0::CMxCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned
   cm(_cm), m_cmModule(cmModule), cm_source(0)
 {
 }
+CMxCON0::~CMxCON0()
+{
+    if (cm_source)
+	delete cm_source;
+}
 
 void CMxCON0::put(unsigned int new_value)
 {
@@ -1037,7 +1131,8 @@ void CMxCON0::put(unsigned int new_value)
       {
 	  char name[20];
           if ( ! cm_source)
-                cm_source = new CMSignalSource();
+                cm_source = new PeripheralSignalSource(out_pin);
+
 	  sprintf(name, "c%dout", cm+1);
 	  assert(out_pin);
 	  out_pin->getPin().newGUIname(name);
@@ -1090,7 +1185,7 @@ unsigned int CMxCON0::get()
     m_cmModule->set_cmout(cm, output);
     if (cmxcon0 & CxOE)
     {
-        cm_source->putState(output);
+        cm_source->putState(output?'1':'0');
         m_cmModule->cmxcon1[cm]->output_pin()->updatePinModule();
     }
     if (old_out != output) // state change
@@ -1120,6 +1215,12 @@ CMxCON1::CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned
     for(int i = 0; i<2; i++)
 	cm_inputPos[i] = 0;
     cm_output = 0;
+}
+
+CMxCON1::~CMxCON1()
+{
+    delete cm_stimulus[NEG];
+    delete cm_stimulus[POS];
 }
 double CMxCON1::get_Vneg()
 {
@@ -1237,6 +1338,18 @@ ComparatorModule2::ComparatorModule2(Processor *pCpu)
     cmout = 0;
     t1gcon = 0;
 
+}
+ComparatorModule2::~ComparatorModule2()
+{
+    for(int i = 0; i < 4; i++)
+    {
+	if (cmxcon0[i])
+	    delete cmxcon0[i];
+	if (cmxcon1[i])
+	    delete cmxcon1[i];
+    }
+    if (cmout)
+	delete cmout;
 }
 
 // this function sets the bits in the CMOUT register and also

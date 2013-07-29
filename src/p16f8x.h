@@ -84,7 +84,6 @@ public:
   }
   virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
 
-  virtual bool hasSSP() { return true;}
 
   virtual PIR *get_pir1() { return (pir1); }
   virtual PIR *get_pir2() { return (pir2); }
@@ -122,6 +121,7 @@ public:
 
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual void create_config_memory();
 
 
   virtual void create(int eesize);
@@ -137,7 +137,6 @@ public:
   }
   virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
 
-  virtual bool hasSSP() { return true;}
 
   virtual PIR *get_pir1() { return (pir1); }
   virtual PIR *get_pir2() { return (pir2); }
@@ -177,6 +176,7 @@ public:
 
 
   P16F88(const char *_name=0, const char *desc=0);
+  ~P16F88();
   static Processor *construct(const char *name);
 };
 
@@ -212,6 +212,7 @@ public:
 
 
   P16F819(const char *_name=0, const char *desc=0);
+  ~P16F819();
   static Processor *construct(const char *name);
 };
 

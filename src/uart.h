@@ -100,12 +100,14 @@ public:
   bool bTXEN() { return (value.get() & TXEN) != 0; }
   
   void set_pin_pol ( bool invert ) { bInvertPin = invert; };
+  void releasePin();
 
 protected:
   USART_MODULE *mUSART;
   PinModule *m_PinModule;
   TXSignalSource *m_source;
   TXSignalControl *m_control;
+  bool		SourceActive;
   char m_cTxState;
   bool bInvertPin;
 };

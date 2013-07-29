@@ -791,7 +791,7 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
 
   gtk_widget_destroy (window);
 
-  //delete m_SourceBrowser;
+  delete m_SourceBrowser;
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

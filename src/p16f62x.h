@@ -107,6 +107,7 @@ public:
   virtual void create_sfr_map();
 
   P16F648(const char *_name=0, const char *desc=0);
+  ~P16F648();
   static Processor *construct(const char *name);
 };
 

@@ -151,8 +151,10 @@ static CFileSearchPath asDllSearchPath;
 #if defined(_DEBUG)
 static bool bAltPaths = false;
 #endif
-void AddModulePathFromFilePath(string &sFolder) {
+//void AddModulePathFromFilePath(string &sFolder) {
+void AddModulePathFromFilePath(char *arg) {
   string sFile;
+  string sFolder = arg;
   asDllSearchPath.AddPathFromFilePath(sFolder, sFile);
   char * pszGpsimModulePath;
   if((pszGpsimModulePath = getenv("GPSIM_MODULE_PATH")) != NULL) {

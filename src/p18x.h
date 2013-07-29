@@ -104,6 +104,7 @@ class P18C4x2 : public _16bit_compat_adc
   PSP               psp;
 
   P18C4x2(const char *_name=0, const char *desc=0);
+  ~P18C4x2();
 
   void create();
 
@@ -254,6 +255,7 @@ class P18F1220 : public P18Fxx20
 
   virtual PROCESSOR_TYPE isa(){return _P18F1220_;};
   P18F1220(const char *_name=0, const char *desc=0);
+  ~P18F1220();
   static Processor *construct(const char *name);
   void create();
   virtual void create_iopin_map();
@@ -298,6 +300,7 @@ class P18F2x21 : public _16bit_v2_adc
   ComparatorModule comparator;
 
   P18F2x21(const char *_name=0, const char *desc=0);
+  ~P18F2x21();
 
   void create();
 
@@ -368,8 +371,9 @@ class P18F2455 : public P18F2x21
   PIR2v4       pir2;
   virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
   P18F2455(const char *_name=0, const char *desc=0);
+  ~P18F2455();
   static Processor *construct(const char *name);
-  void create();
+  void create_sfr_map();
 
   virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 0x3000; };
@@ -400,6 +404,7 @@ class P18F4x21 : public P18F2x21
   PSP               psp;
 
   P18F4x21(const char *_name=0, const char *desc=0);
+  ~P18F4x21();
 
   void create();
 
@@ -453,6 +458,7 @@ class P18F4455 : public P18F4x21
 
   virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
   P18F4455(const char *_name=0, const char *desc=0);
+  ~P18F4455();
   static Processor *construct(const char *name);
   void create();
 
@@ -543,6 +549,7 @@ class P18F6x20 : public _16bit_v2_adc
   ComparatorModule comparator;
 
   P18F6x20(const char *_name=0, const char *desc=0);
+  ~P18F6x20();
 
   void create();
 

@@ -40,6 +40,13 @@ License along with this library; if not, see
 #include "cmd_gpsim.h"
 
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 static char num_nodes = 'a';
 static char num_stimuli = 'a';
 void  gpsim_set_break_delta(guint64 delta, TriggerObject *f=0);
@@ -646,6 +653,8 @@ PinMonitor::~PinMonitor()
   // Release all of the sinks:
   list <SignalSink *> :: iterator ssi = sinks.begin();
   while (ssi != sinks.end()) {
+    Dprintf(("release sink %p\n", *ssi));
+    fflush(stdout);
     (*ssi)->release();
     ++ssi;
   }
@@ -668,7 +677,9 @@ void PinMonitor::addSink(SignalSink *new_sink)
 void PinMonitor::removeSink(SignalSink *pSink)
 {
   if(pSink)
+  {
     sinks.remove(pSink);
+  }
 }
 
 void PinMonitor::addSink(AnalogSink *new_sink)

@@ -190,25 +190,22 @@ unsigned int CCPRH::get()
 class CCPSignalSource : public SignalControl
 {
 public:
-  CCPSignalSource(CCPCON *_ccp)
+  CCPSignalSource(CCPCON *_ccp, int _index)
     : m_ccp(_ccp),
-    state('?')
+    state('?'), index(_index)
   {
     assert(m_ccp);
   }
-  ~CCPSignalSource()
-  {
-  }
+  virtual ~CCPSignalSource() { }
 
   void setState(char m_state) { state = m_state; }
   virtual char getState() { return state; }
-  virtual void release() 
-  {
-    delete this;
-  }
+  virtual void release() { m_ccp->releasePins(index); }
+
 private:
   CCPCON *m_ccp;
   char state;
+  int index;
 };
 
 //--------------------------------------------------
@@ -218,22 +215,21 @@ private:
 class CCPSignalSink : public SignalSink
 {
 public:
-  CCPSignalSink(CCPCON *_ccp)
-    : m_ccp(_ccp)
+  CCPSignalSink(CCPCON *_ccp, int _index)
+    : m_ccp(_ccp), index(_index)
   {
     assert(_ccp);
   }
 
-  void release() 
-  {
-    delete this;
-  }
+  virtual ~CCPSignalSink(){}
+  virtual void release() { m_ccp->releaseSink(); }
   void setSinkState(char new3State)
   {
     m_ccp->new_edge( new3State=='1' || new3State=='W');
   }
 private:
   CCPCON *m_ccp;
+  int index;
 };
 
 class Tristate : public SignalControl
@@ -242,7 +238,7 @@ public:
   Tristate() { }
   ~Tristate() { }
   char getState() { return '1'; }	// set port to high impedance by setting it to input
-  void release() { delete this; }
+  virtual void release() { }
 };
 //--------------------------------------------------
 // CCPCON
@@ -264,12 +260,30 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     {
 	m_PinModule[i] = 0;
 	m_source[i] = 0;
+	source_active[i] = false;
     }
     mValidBits = 0x3f;
 }
 
 CCPCON::~CCPCON() 
 { 
+
+
+    for(int i = 0; i<4; i++)
+    {
+	if (m_source[i])
+	{
+	    if ( source_active[i] && m_PinModule[i] )
+	    {
+		m_PinModule[i]->setSource(0);
+	    }
+	    delete m_source[i];
+	}
+    }
+
+    if (m_tristate) delete m_tristate;
+    if (m_PinModule[0] && m_sink) m_PinModule[0]->removeSink(m_sink);
+    if (m_sink) delete m_sink;
 }
 
 void CCPCON::setIOPin1(PinModule *p1)
@@ -280,7 +294,7 @@ void CCPCON::setIOPin1(PinModule *p1)
     {
 	if (m_PinModule[0] != p1)
 	{
-	    p1->removeSink(m_sink);
+	    m_PinModule[0]->removeSink(m_sink);
 	    m_PinModule[0] = p1;
 	    p1->addSink(m_sink);
 	}
@@ -288,9 +302,9 @@ void CCPCON::setIOPin1(PinModule *p1)
     else
     {
         m_PinModule[0] = p1;
-        m_sink = new CCPSignalSink(this);
+        m_sink = new CCPSignalSink(this, 0);
 	m_tristate = new Tristate();
-        m_source[0] = new CCPSignalSource(this);
+        m_source[0] = new CCPSignalSource(this, 0);
         p1->addSink(m_sink);
     }
   }
@@ -302,7 +316,7 @@ void CCPCON::setIOPin2(PinModule *p2)
   {
     m_PinModule[1] = p2;
     if (!m_source[1])
-        m_source[1] = new CCPSignalSource(this);
+        m_source[1] = new CCPSignalSource(this, 1);
   }
   else
   {
@@ -320,7 +334,8 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
   Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():"unknown"));
   if (!&(p1->getPin()))
   {
-	printf("FIXME %s::setIOpin called where p1 has unassigned pin\n", name().c_str());
+	Dprintf(("FIXME %s::setIOpin called where p1 has unassigned pin\n", name().c_str()));
+	return;
   }
 
   setIOPin1(p1);
@@ -329,7 +344,7 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
   {
     m_PinModule[2] = p3;
     if (!m_source[2])
-        m_source[2] = new CCPSignalSource(this);
+        m_source[2] = new CCPSignalSource(this, 2);
   }
   else
   {
@@ -344,7 +359,7 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
   {
     m_PinModule[3] = p4;
     if (!m_source[3])
-        m_source[3] = new CCPSignalSource(this);
+        m_source[3] = new CCPSignalSource(this, 3);
   }
   else
   {
@@ -523,6 +538,26 @@ void CCPCON::callback()
         delay_source1 = false;
     }
 }
+
+void CCPCON::releaseSink()
+{
+    delete m_sink;
+    m_sink = 0;
+}
+void CCPCON::releasePins(int i)
+{
+    if (m_PinModule[i])
+    {
+	if (m_source[i])
+	{
+	    delete m_source[i];
+	    m_source[i] = 0;
+	}
+
+	m_PinModule[i] = 0;
+    }
+}
+
 void CCPCON::pwm_match(int level)
 {
   unsigned int new_value = value.get();
@@ -561,10 +596,11 @@ void CCPCON::pwm_match(int level)
         m_cOutputState = level ? '1' : '0';
         m_source[0]->setState(level ? '1' : '0');
         m_PinModule[0]->setSource(m_source[0]);
+	source_active[0] = true;
     
     
         if(level && !ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
-              m_source[0]->setState('0');
+            m_source[0]->setState('0');
 
         m_PinModule[0]->updatePinModule();
     
@@ -639,24 +675,33 @@ void CCPCON::drive_bridge(int level, int new_value)
 		    if (pstrcon_value & (1<<i))
 		    {
 			m_PinModule[i]->setSource(m_source[i]);
+			source_active[i] = true;
 			// follow level except where duty cycle = 0
 			if (level && ccprl->ccprh->pwm_value)
           		    m_source[i]->setState(active_high[i]?'1':'0');
 			else
           		    m_source[i]->setState(active_high[i]?'0':'1');
+
     			m_PinModule[i]->updatePinModule();
 		    }
 		    else if (m_PinModule[i])
+		    {
 			m_PinModule[i]->setSource(0);
+			source_active[i] = false;
+		    }
 		}
 		break;
 	
 	    case 2:	// Half-Bridge
 		Dprintf(("half-bridge\n"));
 		m_PinModule[0]->setSource(m_source[0]);
+		source_active[0] = true;
 		m_PinModule[1]->setSource(m_source[1]);
+		source_active[1] = true;
 		m_PinModule[2]->setSource(0);
+		source_active[2] = false;
 		m_PinModule[3]->setSource(0);
+		source_active[3] = false;
 		delay_source0 = false;
 		delay_source1 = false;
 		// FIXME need to add deadband
@@ -706,6 +751,10 @@ void CCPCON::drive_bridge(int level, int new_value)
 		m_PinModule[1]->setSource(m_source[1]);
 		m_PinModule[2]->setSource(m_source[2]);
 		m_PinModule[3]->setSource(m_source[3]);
+		source_active[0] = true;
+		source_active[1] = true;
+		source_active[2] = true;
+		source_active[3] = true;
 		// P1D toggles
 		if (level && ccprl->ccprh->pwm_value)
           	    m_source[3]->setState(active_high[3]?'1':'0');
@@ -728,6 +777,10 @@ void CCPCON::drive_bridge(int level, int new_value)
 		m_PinModule[1]->setSource(m_source[1]);
 		m_PinModule[2]->setSource(m_source[2]);
 		m_PinModule[3]->setSource(m_source[3]);
+		source_active[0] = true;
+		source_active[1] = true;
+		source_active[2] = true;
+		source_active[3] = true;
 		// P1B toggles
 		if (level && ccprl->ccprh->pwm_value)
           	    m_source[1]->setState(active_high[1]?'1':'0');
@@ -907,11 +960,15 @@ void CCPCON::put(unsigned int new_value)
     if (oldbOutEn != m_bOutputEnabled && m_PinModule)
     {
 	if (m_bOutputEnabled)
+	{
             m_PinModule[0]->setSource(m_source[0]);
+	    source_active[0] = true;
+	}
 	else
 	{
             m_PinModule[0]->setSource(0);
 	    m_source[0]->setState('?');
+	    source_active[0] = false;
 	}
     }
 
@@ -995,6 +1052,10 @@ T1CON::T1CON(Processor *pCpu, const char *pName, const char *pDesc)
   new_name("T1CON");
 
 }
+T1CON::~T1CON()
+{
+    delete freq_attribute;
+}
 
 void T1CON::put(unsigned int new_value)
 {
@@ -1046,12 +1107,12 @@ public:
   {
     assert(_t1gcon);
   }
-
-  void release() 
+  virtual ~T1GCon_GateSignalSink()
   {
-    delete this;
   }
-  void setSinkState(char new3State)
+
+  virtual void release() { }
+  virtual void setSinkState(char new3State)
   {
     m_t1gcon->IO_gate( new3State=='1' || new3State=='W');
   }
@@ -1063,8 +1124,16 @@ T1GCON::T1GCON(Processor *pCpu, const char *pName, const char *pDesc, T1CON_G *_
   : sfr_register(pCpu, pName, pDesc), sink(0), write_mask(0xfb), tmrl(0),
     t1con_g(_t1con_g),
     IO_gate_state(false), T0_gate_state(false), CM1_gate_state(false),
-    CM2_gate_state(false)
+    CM2_gate_state(false), last_t1g_in(false), gate_pin(0)
 {
+}
+
+T1GCON::~T1GCON()
+{
+    if(sink)
+    {
+	delete sink;
+    }
 }
 
 void T1GCON::put(unsigned int new_value)
@@ -1125,10 +1194,20 @@ void T1GCON::put(unsigned int new_value)
 void T1GCON::setGatepin(PinModule *pin)
 {
     
-    if(sink) delete sink;
-    sink = new T1GCon_GateSignalSink(this);
-    Dprintf(("T1GCON::setGatepin %s\n", pin->getPin().name().c_str()));
-    pin->addSink(sink);
+
+    if (pin != gate_pin)
+    {
+        if(sink) 
+	{
+	    gate_pin->removeSink(sink);
+        }
+  	else
+	    sink = new T1GCon_GateSignalSink(this);
+
+	gate_pin = pin;
+        Dprintf(("T1GCON::setGatepin %s\n", pin->getPin().name().c_str()));
+        pin->addSink(sink);
+    }
 }
 
 // The following 4 functions are called on a state change.
@@ -1236,6 +1315,11 @@ T1CON_G::T1CON_G(Processor *pCpu, const char *pName, const char *pDesc)
   new_name("T1CON");
 
 }
+
+T1CON_G::~T1CON_G()
+{
+    delete freq_attribute;
+}
 void T1CON_G::put(unsigned int new_value)
 {
 
@@ -1339,10 +1423,7 @@ public:
     assert(_tmr1l);
   }
 
-  void release() 
-  {
-    delete this;
-  }
+  virtual void release() { delete this; }
   void setSinkState(char new3State)
   {
     m_tmr1l->IO_gate( new3State=='1' || new3State=='W');
@@ -1371,7 +1452,8 @@ public:
 //--------------------------------------------------
 TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    m_cState('?'), m_GateState(false), m_bExtClkEnabled(false), 
+    m_cState('?'), m_GateState(false), m_compare_GateState(true),
+    m_io_GateState(true), m_bExtClkEnabled(false), 
     m_sleeping(false), m_t1gss(true), m_Interrupt(0)
 {
 
@@ -1524,7 +1606,8 @@ void TMRL::compare_gate(bool state)
 void TMRL::IO_gate(bool state)
 {
   m_io_GateState = state;
-  if (m_t1gss && m_GateState != state)
+
+  if (m_t1gss && (m_GateState != state))
   {
     m_GateState = state;
     
@@ -2677,10 +2760,7 @@ public:
     assert(_eccpas);
   }
 
-  void release() 
-  {
-    delete this;
-  }
+  virtual void release() { delete this; }
   void setSinkState(char new3State)
   {
     m_eccpas->set_trig_state( m_index, new3State=='0' || new3State=='w');

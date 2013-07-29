@@ -48,14 +48,12 @@ public:
   {
     assert(m_txsta);
   }
-  ~TXSignalSource()
-  {
-  }
-  char getState()
+  ~TXSignalSource() { }
+  virtual char getState()
   {
     return m_txsta->getState();
   }
-  void release()
+  virtual void release()
   {
     delete this;
   }
@@ -66,20 +64,19 @@ private:
 class TXSignalControl : public SignalControl
 {
 public:
-  TXSignalControl()
-  {
+  TXSignalControl(_TXSTA *_txsta) 
+     : m_txsta(_txsta)
+  { }
+  ~TXSignalControl() { }
+  virtual char getState() { return '0'; }
+  virtual void release() 
+  { 
+	m_txsta->releasePin();
+	delete this; 
   }
-  ~TXSignalControl()
-  {
-  }
-  char getState()
-  {
-    return '0';
-  }
-  void release()
-  {
-    delete this;
-  }
+private:
+  _TXSTA *m_txsta;
+
 };
 
 //--------------------------------------------------
@@ -95,14 +92,8 @@ public:
     assert(_rcsta);
   }
 
-  void setSinkState(char new3State)
-  {
-    m_rcsta->setState(new3State);
-  }
-  void release()
-  {
-    delete this;
-  }
+  virtual void setSinkState(char new3State) { m_rcsta->setState(new3State); }
+  virtual void release() { delete this; }
 private:
   _RCSTA *m_rcsta;
 };
@@ -129,6 +120,7 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
     m_PinModule(0),
     m_source(0), 
     m_control(0),
+    SourceActive(false),
     m_cTxState('?'),
     bInvertPin(0)
 {
@@ -137,6 +129,17 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
 
 _TXSTA::~_TXSTA()
 {
+    if (SourceActive && m_PinModule) 
+    {
+        m_PinModule->setSource(0);
+        m_PinModule->setControl(0);
+    }
+
+    if (m_control)
+    {
+        delete m_source;
+        delete m_control;
+    }
 }
 
 //-----------------------------------------------------------
@@ -219,10 +222,17 @@ void _TXSTA::setIOpin(PinModule *newPinModule)
 {
   if (!m_source) {
     m_source = new TXSignalSource(this);
-    m_control = new TXSignalControl();
+    m_control = new TXSignalControl(this);
     m_PinModule = newPinModule;
   }
 
+}
+
+void _TXSTA::releasePin()
+{
+    m_PinModule = 0;
+    m_control = 0;
+    m_source = 0;
 }
 //-----------------------------------------------------------
 // TXSTA - putTXState - update the state of the TX output pin
@@ -284,14 +294,17 @@ void _TXSTA::put(unsigned int new_value)
         m_PinModule->setSource(m_source);
 // all set diection ? RRR        if(mUSART->IsEUSART()) // EUSART can configure input as output for transmit
           m_PinModule->setControl(m_control);
+	  SourceActive = true;
       }
       mUSART->emptyTX();
     } else {
       stop_transmitting();
       if (m_PinModule) {
         m_PinModule->setSource(0);
+	SourceActive = false;
         if(mUSART->IsEUSART())
           m_PinModule->setControl(0);
+	
       }
     }
   }

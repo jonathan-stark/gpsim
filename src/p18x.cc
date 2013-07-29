@@ -457,6 +457,17 @@ P18C4x2::P18C4x2(const char *_name, const char *desc)
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
 }
+P18C4x2::~P18C4x2()
+{
+  delete_sfr_register(m_portd);
+  delete_sfr_register(m_porte);
+
+  delete_sfr_register(m_latd);
+  delete_sfr_register(m_late);
+
+  delete_sfr_register(m_trisd);
+  delete_sfr_register(m_trise);
+}
 
 
 void P18C4x2::create_sfr_map()
@@ -632,7 +643,6 @@ Processor * P18F242::construct(const char *name)
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
   return p;
 
@@ -899,13 +909,45 @@ P18F2455::P18F2455(const char *_name, const char *desc)
 
 }
 
-void P18F2455::create()
+P18F2455::~P18F2455()
 {
-  P18F2x21::create();
+  remove_sfr_register(&ufrml);
+  remove_sfr_register(&ufrmh);
+  remove_sfr_register(&uir  );
+  remove_sfr_register(&uie  );
+  remove_sfr_register(&ueir );
+  remove_sfr_register(&ueie );
+  remove_sfr_register(&ustat);
+  remove_sfr_register(&ucon );
+  remove_sfr_register(&uaddr);
+  remove_sfr_register(&ucfg );
+  remove_sfr_register(&uep0 );
+  remove_sfr_register(&uep1 );
+  remove_sfr_register(&uep2 );
+  remove_sfr_register(&uep3 );
+  remove_sfr_register(&uep4 );
+  remove_sfr_register(&uep5 );
+  remove_sfr_register(&uep6 );
+  remove_sfr_register(&uep7 );
+  remove_sfr_register(&uep8 );
+  remove_sfr_register(&uep9 );
+  remove_sfr_register(&uep10);
+  remove_sfr_register(&uep11);
+  remove_sfr_register(&uep12);
+  remove_sfr_register(&uep13);
+  remove_sfr_register(&uep14);
+  remove_sfr_register(&uep15);
+  remove_sfr_register(&pir2 );
+}
+void P18F2455::create_sfr_map()
+{
 
   if(verbose)
-    cout << " 18f2455 create \n";
+    cout << " 18f2455 create_sfr_map \n";
 
+
+  P18F2x21::create_sfr_map();
+  package->destroy_pin(14);
   package->assign_pin(14, 0, false);          // Vusb
 
   /* The MSSP/I2CC pins are different on this chip. */
@@ -943,10 +985,10 @@ void P18F2455::create()
   add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
   add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
   add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
-  add_sfr_register(&pir2 ,0x0FA1, RegisterValue(0,0));
 
   // Initialize the register cross linkages
   pir_set_def.set_pir2(&pir2);
+  delete tmr3l.getInterruptSource();
   tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
   pir2.set_intcon(&intcon);
   pir2.set_pie(&pie2);
@@ -954,7 +996,7 @@ void P18F2455::create()
   pie2.setPir(&pir2);
   //pie2.new_name("pie2");
 
-  new InterruptSource(&pir2, PIR2v4::USBIF);
+  // new InterruptSource(&pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F2455::construct(const char *name)
@@ -1010,7 +1052,36 @@ P18F4455::P18F4455(const char *_name, const char *desc)
   cout << "\nP18F4455 does not support USB registers and functionality\n\n";
   if(verbose)
     cout << "18f4455 constructor, type = " << isa() << '\n';
+}
 
+P18F4455::~P18F4455()
+{
+  remove_sfr_register(&ufrml);
+  remove_sfr_register(&ufrmh);
+  remove_sfr_register(&uir  );
+  remove_sfr_register(&uie  );
+  remove_sfr_register(&ueir );
+  remove_sfr_register(&ueie );
+  remove_sfr_register(&ustat);
+  remove_sfr_register(&ucon );
+  remove_sfr_register(&uaddr);
+  remove_sfr_register(&ucfg );
+  remove_sfr_register(&uep0 );
+  remove_sfr_register(&uep1 );
+  remove_sfr_register(&uep2 );
+  remove_sfr_register(&uep3 );
+  remove_sfr_register(&uep4 );
+  remove_sfr_register(&uep5 );
+  remove_sfr_register(&uep6 );
+  remove_sfr_register(&uep7 );
+  remove_sfr_register(&uep8 );
+  remove_sfr_register(&uep9 );
+  remove_sfr_register(&uep10);
+  remove_sfr_register(&uep11);
+  remove_sfr_register(&uep12);
+  remove_sfr_register(&uep13);
+  remove_sfr_register(&uep14);
+  remove_sfr_register(&uep15);
 }
 
 void P18F4455::create()
@@ -1020,6 +1091,7 @@ void P18F4455::create()
   if(verbose)
     cout << " 18f4455 create \n";
 
+  package->destroy_pin(18);
   package->assign_pin(18, 0, false);          // Vusb
 
   /* The MSSP/I2CC pins are different on this chip. */
@@ -1059,10 +1131,10 @@ void P18F4455::create()
   add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
   add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
   add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
-  add_sfr_register(&pir2 ,0x0FA1, RegisterValue(0,0));
 
   // Initialize the register cross linkages
   pir_set_def.set_pir2(&pir2);
+  delete tmr3l.getInterruptSource();
   tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
   pir2.set_intcon(&intcon);
   pir2.set_pie(&pie2);
@@ -1070,7 +1142,7 @@ void P18F4455::create()
   pie2.setPir(&pir2);
   //pie2.new_name("pie2");
 
-  new InterruptSource(&pir2, PIR2v4::USBIF);
+  //new InterruptSource(&pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F4455::construct(const char *name)
@@ -1136,14 +1208,11 @@ void P18F1220::create()
 
   create_iopin_map();
 
-  //call his before _16bit_processor::create() because 1st one wins
-  //with regards to the rx/tx ports
-  usart.initialize(&pir1,&(*m_portb)[1], &(*m_portb)[4],
-		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
-                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   _16bit_processor::create();
   _16bit_v2_adc::create(7);
+  usart.txsta.setIOpin(&(*m_portb)[1]);
+  usart.rcsta.setIOpin(&(*m_portb)[4]);
   adcon1->setIOPin(4, &(*m_portb)[0]);
   adcon1->setIOPin(5, &(*m_portb)[1]);
   adcon1->setIOPin(6, &(*m_portb)[4]);
@@ -1223,6 +1292,15 @@ P18F1220::P18F1220(const char *_name, const char *desc)
     cout << "18F1220 constructor, type = " << isa() << '\n';
 
 
+}
+
+P18F1220::~P18F1220()
+{
+  remove_sfr_register(&usart.spbrgh);
+  remove_sfr_register(&usart.baudcon);
+  remove_sfr_register(&osctune);
+  remove_sfr_register(&pwm1con);
+  remove_sfr_register(&eccpas);
 }
 
 void P18F1220::osc_mode(unsigned int value)
@@ -1455,6 +1533,18 @@ P18F2x21::P18F2x21(const char *_name, const char *desc)
 
     m_porte = new PicPortRegister(this,"porte","",8,0x08);
     // No TRIS register for port E on 28-pin devices
+}
+
+P18F2x21::~P18F2x21()
+{
+    delete_sfr_register(m_porte);
+    remove_sfr_register(&usart.spbrgh);
+    remove_sfr_register(&usart.baudcon);
+    remove_sfr_register(&osctune);
+    remove_sfr_register(&comparator.cmcon);
+    remove_sfr_register(&comparator.vrcon);
+    remove_sfr_register(&pwm1con);
+    remove_sfr_register(&eccpas);
 }
 
 void P18F2x21::create_sfr_map()
@@ -1871,6 +1961,16 @@ P18F4x21::P18F4x21(const char *_name, const char *desc)
   m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, false);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
+}
+P18F4x21::~P18F4x21()
+{
+  delete_sfr_register(m_portd);
+  delete_sfr_register(m_trisd);
+  delete_sfr_register(m_latd);
+  delete_sfr_register(m_trise);
+  delete_sfr_register(m_late);
+  remove_sfr_register(&pwm1con);
+  remove_sfr_register(&eccpas);
 }
 
 void P18F4x21::create_sfr_map()
@@ -2303,7 +2403,6 @@ P18F6x20::P18F6x20(const char *_name, const char *desc)
 
   m_porte = new PicPortRegister(this,"porte","",8,0xFF);
   m_trise = new PicTrisRegister(this,"trise","", m_porte, false);
-  //RRR m_trise = new PicPSP_TrisRegister(this,"trise","", m_porte, false);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
 
   m_portf = new PicPortRegister(this,"portf","",8,0xFF);
@@ -2319,6 +2418,48 @@ P18F6x20::P18F6x20(const char *_name, const char *desc)
 
 }
 
+P18F6x20::~P18F6x20()
+{
+  delete_sfr_register(m_portd);
+  delete_sfr_register(m_porte);
+  delete_sfr_register(m_portf);
+  delete_sfr_register(m_portg);
+
+  delete_sfr_register(m_latd);
+  delete_sfr_register(m_late);
+  delete_sfr_register(m_latf);
+  delete_sfr_register(m_latg);
+
+  delete_sfr_register(m_trisd);
+  delete_sfr_register(m_trise);
+  delete_sfr_register(m_trisf);
+  delete_sfr_register(m_trisg);
+  delete_sfr_register(pspcon);
+  delete_sfr_register(usart2.txreg);
+  delete_sfr_register(usart2.rcreg);
+
+  remove_sfr_register(&pie3);
+  remove_sfr_register(&pir3);
+  remove_sfr_register(&ipr3);
+  remove_sfr_register(&usart2.rcsta);
+  remove_sfr_register(&usart2.txsta);
+  remove_sfr_register(&usart2.spbrg);
+  remove_sfr_register(&ccp4con);
+  remove_sfr_register(&ccpr4l);
+  remove_sfr_register(&ccpr4h);
+  remove_sfr_register(&ccp5con);
+  remove_sfr_register(&ccpr5l);
+  remove_sfr_register(&ccpr5h);
+  remove_sfr_register(&t4con);
+  remove_sfr_register(&pr4);
+  remove_sfr_register(&tmr4);
+  remove_sfr_register(&ccp3con);
+  remove_sfr_register(&ccpr3l);
+  remove_sfr_register(&ccpr3h);
+  remove_sfr_register(&comparator.cmcon);
+  remove_sfr_register(&comparator.vrcon);
+
+}
 
 void P18F6x20::create_sfr_map()
 {

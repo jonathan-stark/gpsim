@@ -231,6 +231,9 @@ EEPROM_PIR::EEPROM_PIR(Processor *pCpu, PIR *pPir)
 
 EEPROM_PIR::~EEPROM_PIR()
 {
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+  if (pCpu) 
+    pCpu->remove_sfr_register(&eeadrh);
 }
 
 void EEPROM_PIR::start_write()
@@ -309,10 +312,10 @@ EEPROM::~EEPROM()
 {
   pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
   if (pCpu) {
-    pCpu->remove_sfr_register(&eedata);
-    pCpu->remove_sfr_register(&eeadr);
-    pCpu->remove_sfr_register(&eecon1);
-    pCpu->remove_sfr_register(&eecon2);
+	pCpu->remove_sfr_register(&eedata);
+	pCpu->remove_sfr_register(&eeadr);
+	pCpu->remove_sfr_register(&eecon1);
+	pCpu->remove_sfr_register(&eecon2);
   }
 
   for (unsigned int i = 0; i < rom_size; i++)
@@ -549,6 +552,8 @@ EEPROM_WIDE::EEPROM_WIDE(Processor *pCpu, PIR *pPir)
 
 EEPROM_WIDE::~EEPROM_WIDE()
 {
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+  pCpu->remove_sfr_register(&eedatah);
 
 }
 
@@ -720,7 +725,7 @@ EEPROM_EXTND::EEPROM_EXTND(Processor *pCpu, PIR *pPir)
 EEPROM_EXTND::~EEPROM_EXTND()
 {
     if (write_latches != NULL)
-        delete write_latches;
+        delete[] write_latches;
 }
 
 void EEPROM_EXTND::initialize(
@@ -734,7 +739,7 @@ void EEPROM_EXTND::initialize(
    erase_block_size = block_size;
    num_write_latches = num_latches;
    if (write_latches != NULL)
-	delete write_latches;
+	delete[] write_latches;
    write_latches = new unsigned int [num_latches];
    for(int i = 0; i < num_latches; i++)
 	write_latches[i] = LATCH_MT;

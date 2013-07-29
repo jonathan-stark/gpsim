@@ -688,6 +688,19 @@ Stack16::Stack16(Processor *pCpu) : Stack(pCpu),
 
 }
 
+Stack16::~Stack16()
+{
+
+  pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+  if (pCpu)
+  {
+    pCpu->remove_sfr_register(&stkptr);
+    pCpu->remove_sfr_register(&tosl);
+    pCpu->remove_sfr_register(&tosh);
+    pCpu->remove_sfr_register(&tosu);
+  }
+}
+
 
 // pop of empty stack sets undeflow and returns 0
 unsigned int Stack16::pop() 

@@ -52,6 +52,7 @@ public:
     };
 
   ADCON1_V2(Processor *pCpu, const char *pName, const char *pDesc);
+  ~ADCON1_V2();
   virtual void put(unsigned int new_value);
 
   void setChanTable(

@@ -69,7 +69,13 @@ string BinaryOperator::toString()
 Value *BinaryOperator::evaluate()
 {
 
-  return applyOp(leftExpr->evaluate(), rightExpr->evaluate());
+  Value *left = leftExpr->evaluate();
+  Value *right = rightExpr->evaluate();
+  Value *out = applyOp(left, right);
+
+  if (left) delete left;
+  if (right) delete right;
+  return out;
 }
 Expression *BinaryOperator::getLeft() {
   return leftExpr;

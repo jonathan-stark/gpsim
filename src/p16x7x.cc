@@ -67,7 +67,7 @@ private:
 //------------------------------------------------------------------------
 //
 P16C71::P16C71(const char *_name, const char *desc)
-  : P16C61(_name, desc),
+  : P16X8X(_name, desc),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
     adres(this,"adres", "A2D Result")
@@ -79,6 +79,13 @@ P16C71::P16C71(const char *_name, const char *desc)
   m_pir = new PIR_16C71(&adcon0);
 }
 
+P16C71::~P16C71()
+{
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
+  delete m_pir;
+}
 
 void P16C71::create_sfr_map()
 {
@@ -89,9 +96,7 @@ void P16C71::create_sfr_map()
   add_sfr_register(&adcon0, 0x08, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x88, RegisterValue(0,0));
 
-  //add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
-  alias_file_registers(0x70,0x7f,0x80);
 
 
   adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1,0);
@@ -127,7 +132,15 @@ void P16C71::create_symbols()
 void P16C71::create()
 {
 
-  P16C61::create();
+
+  ram_top = 0x2f;
+  P16X8X::create_iopin_map();
+   _14bit_processor::create();
+
+  set_eeprom(0);
+
+  add_file_registers(0x0c, ram_top, 0x80);
+  Pic14Bit::create_sfr_map();
 
   create_sfr_map();
 
@@ -242,6 +255,12 @@ P16C712::P16C712(const char *_name, const char *desc)
     cout << "c712 constructor, type = " << isa() << '\n';
 }
 
+P16C712::~P16C712()
+{
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
+}
 
 //--------------------------------------
 
@@ -374,11 +393,20 @@ P16C72::P16C72(const char *_name, const char *desc)
 
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
+
+  delete pir1;
+  delete pir2;
   pir1 = pir1_2_reg;
   pir2 = pir2_2_reg;
 
 }
 
+P16C72::~P16C72()
+{
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
+}
 
 //--------------------------------------
 
@@ -482,10 +510,19 @@ P16C73::P16C73(const char *_name, const char *desc)
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
 
+  delete pir1;
   pir1 = pir1_2_reg;
+  delete pir2;
   pir2 = pir2_2_reg;
 
 
+}
+
+P16C73::~P16C73()
+{
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
 }
 
 //------------------------------------------------------------
@@ -568,6 +605,15 @@ P16F73::P16F73(const char *_name, const char *desc)
   if(verbose)
     cout << "f73 constructor, type = " << isa() << '\n';
 
+}
+
+P16F73::~P16F73()
+{
+  remove_sfr_register(pm_rd.get_reg_pmadr());
+  remove_sfr_register(pm_rd.get_reg_pmadrh());
+  remove_sfr_register(pm_rd.get_reg_pmdata());
+  remove_sfr_register(pm_rd.get_reg_pmdath());
+  remove_sfr_register(pm_rd.get_reg_pmcon1());
 }
 
 //------------------------------------------------------------
@@ -682,11 +728,19 @@ P16C74::P16C74(const char *_name, const char *desc)
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir2_2_reg = new PIR2v2(this,"pir2","Peripheral Interrupt Register",&intcon_reg,&pie2);
 
+  delete pir1;
+  delete pir2;
   pir1 = pir1_2_reg;
   pir2 = pir2_2_reg;
 
 }
 
+P16C74::~P16C74()
+{
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
+}
 //------------------------------------------------------------
 
 void P16F74::create_sfr_map()
@@ -768,4 +822,11 @@ P16F74::P16F74(const char *_name, const char *desc)
     cout << "f74 constructor, type = " << isa() << '\n';
 }
 
-
+P16F74::~P16F74()
+{
+  remove_sfr_register(pm_rd.get_reg_pmadr());
+  remove_sfr_register(pm_rd.get_reg_pmadrh());
+  remove_sfr_register(pm_rd.get_reg_pmdata());
+  remove_sfr_register(pm_rd.get_reg_pmdath());
+  remove_sfr_register(pm_rd.get_reg_pmcon1());
+}

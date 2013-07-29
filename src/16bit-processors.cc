@@ -306,7 +306,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
 //-------------------------------------------------------------------
 _16bit_processor::~_16bit_processor()
 {
-
+    delete_sfr_map();
 }
 
 //-------------------------------------------------------------------
@@ -330,13 +330,145 @@ pic_processor *_16bit_processor::construct()
 
 }
 
+void _16bit_processor :: delete_sfr_map()
+{
+  if(verbose)
+    cout << "deleting 18cxxx common registers\n";
+    cout << "deleting 18cxxx common registers " << hex << last_actual_register() <<"\n";
+    cout.flush();
+
+  unassignMCLRPin();
+  delete_file_registers(0x0, last_register);
+  remove_sfr_register(&pie1);
+  remove_sfr_register(&pir1);
+  remove_sfr_register(&ipr1);
+  remove_sfr_register(&pie2);
+  remove_sfr_register(&pir2);
+  remove_sfr_register(&ipr2);
+  remove_sfr_register(&usart.rcsta);
+  remove_sfr_register(&usart.txsta);
+  remove_sfr_register(&usart.spbrg);
+  delete_sfr_register(usart.txreg);
+  delete_sfr_register(usart.rcreg);
+  remove_sfr_register(&t3con);
+  remove_sfr_register(&tmr3l);
+  remove_sfr_register(&tmr3h);
+
+
+  if ( HasCCP2() )
+  {
+    remove_sfr_register(&ccp2con);
+    remove_sfr_register(&ccpr2l);
+    remove_sfr_register(&ccpr2h);
+  }
+  remove_sfr_register(&ccp1con);
+  remove_sfr_register(&ccpr1l);
+  remove_sfr_register(&ccpr1h);
+
+  remove_sfr_register(&adresl);
+  remove_sfr_register(&adresh);
+
+  remove_sfr_register(&ssp.sspcon2);
+  remove_sfr_register(&ssp.sspcon);
+  remove_sfr_register(&ssp.sspstat);
+  remove_sfr_register(&ssp.sspadd);
+  remove_sfr_register(&ssp.sspbuf);
+
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&pr2);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t1con);
+  remove_sfr_register(&tmr1l);
+  remove_sfr_register(&tmr1h);
+
+  remove_sfr_register(&rcon);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(&lvdcon);
+  remove_sfr_register(&osccon);
+  remove_sfr_register(&t0con);
+  remove_sfr_register(&tmr0l);
+  remove_sfr_register(&tmr0h);
+  remove_sfr_register(&ind2.fsrl);
+  remove_sfr_register(&ind2.fsrh);
+  remove_sfr_register(&ind2.plusw);
+  remove_sfr_register(&ind2.preinc);
+  remove_sfr_register(&ind2.postdec);
+  remove_sfr_register(&ind2.postinc);
+  remove_sfr_register(&ind2.postinc);
+  remove_sfr_register(&ind2.indf);
+
+  remove_sfr_register(&bsr);
+
+  remove_sfr_register(&ind1.fsrl);
+  remove_sfr_register(&ind1.fsrh);
+  remove_sfr_register(&ind1.plusw);
+  remove_sfr_register(&ind1.preinc);
+  remove_sfr_register(&ind1.postdec);
+  remove_sfr_register(&ind1.postinc);
+  remove_sfr_register(&ind1.indf);
+
+
+  remove_sfr_register(&ind0.fsrl);
+  remove_sfr_register(&ind0.fsrh);
+  remove_sfr_register(&ind0.plusw);
+  remove_sfr_register(&ind0.preinc);
+  remove_sfr_register(&ind0.postdec);
+  remove_sfr_register(&ind0.postinc);
+  remove_sfr_register(&ind0.indf);
+
+  remove_sfr_register(&intcon3);
+  remove_sfr_register(&intcon2);
+  remove_sfr_register(&intcon);
+
+  remove_sfr_register(&prodl);
+  remove_sfr_register(&prodh);
+
+  remove_sfr_register(&tbl.tablat);
+  remove_sfr_register(&tbl.tabptrl);
+  remove_sfr_register(&tbl.tabptrh);
+  remove_sfr_register(&tbl.tabptru);
+  remove_sfr_register(&pclatu);
+
+  Stack16 *stack16 = static_cast<Stack16 *>(stack);
+  remove_sfr_register(&stack16->stkptr);
+  remove_sfr_register(&stack16->tosl);
+  remove_sfr_register(&stack16->tosh);
+  remove_sfr_register(&stack16->tosu);
+
+  EEPROM *e = get_eeprom();
+
+  if (e) {
+    remove_sfr_register(e->get_reg_eedata());
+    remove_sfr_register(e->get_reg_eeadr());
+    if ( e->get_reg_eeadrh() )
+        remove_sfr_register(e->get_reg_eeadrh());
+    remove_sfr_register(e->get_reg_eecon1());
+    remove_sfr_register(e->get_reg_eecon2());
+    delete e;
+  }
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_lata);
+  delete_sfr_register(m_trisa);
+  delete_sfr_register(m_portb);
+  delete_sfr_register(m_latb);
+  delete_sfr_register(m_trisb);
+  if ( HasPortC() )
+  {
+      delete_sfr_register(m_portc);
+      delete_sfr_register(m_latc);
+      delete_sfr_register(m_trisc);
+  }
+  delete pc;
+}
+
 //-------------------------------------------------------------------
 void _16bit_processor :: create_sfr_map()
 {
   if(verbose)
     cout << "creating 18cxxx common registers\n";
 
-  add_file_registers(0x0, last_actual_register(), 0);
+  last_register = last_actual_register();
+  add_file_registers(0x0, last_register, 0);
 
   RegisterValue porv(0,0);
   RegisterValue porv2(0,0);
@@ -910,8 +1042,15 @@ void _16bit_compat_adc :: a2d_compat()
 
 }
 _16bit_compat_adc::_16bit_compat_adc(const char *_name, const char *desc) 
-	: _16bit_processor(_name, desc)
+	: _16bit_processor(_name, desc), adcon0(0), adcon1(0)
 {
+}
+_16bit_compat_adc::~_16bit_compat_adc()
+{
+    if(adcon0)
+	delete_sfr_register(adcon0);
+    if(adcon1)
+	delete_sfr_register(adcon1);
 }
 void _16bit_v2_adc::create(int nChannels)
 {
@@ -956,6 +1095,15 @@ void _16bit_v2_adc::create(int nChannels)
 
 }
 _16bit_v2_adc::_16bit_v2_adc(const char *_name, const char *desc) 
-	: _16bit_processor(_name, desc)
+	: _16bit_processor(_name, desc), adcon0(0), adcon1(0), adcon2(0)
 {
+}
+_16bit_v2_adc::~_16bit_v2_adc()
+{
+    if(adcon0)
+	delete_sfr_register(adcon0);
+    if(adcon1)
+	delete_sfr_register(adcon1);
+    if(adcon2)
+	delete_sfr_register(adcon2);
 }

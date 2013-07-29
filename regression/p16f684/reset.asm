@@ -133,9 +133,9 @@ raif_int
 bSWITCH equ 0
 start
 
-  .assert "option_reg==0xff"
+  .assert "option_reg==0xff, \"*** FAILED p16f684 resets, option 0xff on reset\""
 	nop
-  .assert "(trisa&0x3f)==0x1f"
+  .assert "trisa==0x3f, \"*** FAILED p16f684 resets, trisa 0x3f on reset\""
 	nop
 ;RRR        MOVWF   OSCCAL          ; put calibration into oscillator cal reg
 

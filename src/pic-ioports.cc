@@ -156,7 +156,16 @@ PicTrisRegister::PicTrisRegister(Processor *pCpu, const char *pName, const char 
 void PicTrisRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
-  value.data = new_value & m_EnableMask;
+  value.put((value.get() & ~m_EnableMask) | (new_value & m_EnableMask));
+
+  if (m_port)
+    m_port->updatePort();
+}
+
+void PicTrisRegister::put_value(unsigned int new_value)
+{
+  value.put(new_value & m_EnableMask);
+
   if (m_port)
     m_port->updatePort();
 }
@@ -405,7 +414,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
  // interrupt and exit sleep level change top 4 bits on input
   unsigned int bitMask = (1<<bit_number) & 0xF0;
 
-  if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
+  if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get_value() & bitMask ) {
     cpu_pic->exit_sleep();
     m_pIntcon->set_rbif(true);
   }
@@ -470,12 +479,12 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
     PortRegister::setbit(bit_number, new3State);
 
  // interrupt and exit sleep for level change on bits where IOC set
-    bool bitMask = m_pIoc->get() & (1 << bit_number);
+    bool bitMask = m_pIoc->get_value() & (1 << bit_number);
 
    if (verbose)
        printf("PicPortGRegister::setbit() bit=%d,val=%c IOC_bit=%x\n",bit_number,new3State, bitMask);
 
-    if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get() & bitMask ) {
+    if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get_value() & bitMask ) {
       cpu_pic->exit_sleep();
       m_pIntcon->set_rbif(true);
     }

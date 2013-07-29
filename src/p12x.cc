@@ -131,6 +131,7 @@ class P12_I2C_EE : public I2C_EE
 {
 public:
   P12_I2C_EE(pic_processor *, unsigned int _rom_size);
+  ~P12_I2C_EE();
 
 protected:
   RegisterCollection *m_UiAccessOfRom; // User access to the rom.
@@ -143,13 +144,13 @@ P12_I2C_EE::P12_I2C_EE(pic_processor *pcpu, unsigned int _rom_size)
 
   if(pcpu) {
     pcpu->ema.set_Registers(rom, rom_size);
-    m_UiAccessOfRom = new RegisterCollection(pcpu,
-                                             "eeData",
-                                             rom,
-                                             rom_size);
   }
 
 }
+P12_I2C_EE::~P12_I2C_EE()
+{
+}
+
 //-------------------------------------------------------------------
 
 P12bitBase::P12bitBase(const char *_name, const char *desc)
@@ -158,17 +159,27 @@ P12bitBase::P12bitBase(const char *_name, const char *desc)
     m_tris(0),
     osccal(this,"osccal","Oscillator Calibration")
 {
+  
+  configWord = 0;
   set_frequency(4e6);
   if(config_modes)
     config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
+   
 }
 
 P12bitBase::~P12bitBase()
 {
 
+  printf("P12bitBase::~P12bitBase\n");
+  (&(*m_gpio)[3])->setControl(0);
+  (&(*m_gpio)[2])->setControl(0);
+  delete m_IN_SignalControl;
   delete_sfr_register(m_gpio);
   delete_sfr_register(m_tris);
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&osccal);
+
 }
 
 
@@ -390,6 +401,7 @@ P12C508::P12C508(const char *_name, const char *desc)
 
 P12C508::~P12C508()
 {
+  delete_file_registers(0x07, 0x1f);
 }
 
 P12F508::P12F508(const char *_name, const char *desc)
@@ -452,6 +464,11 @@ void P12C509::create()
 P12C509::P12C509(const char *_name, const char *desc)
   : P12C508(_name,desc)
 {
+}
+
+P12C509::~P12C509()
+{
+  delete_file_registers(0x30, 0x3f);
 }
 
 
@@ -525,7 +542,6 @@ void P12CE518::create_iopin_map()
 
 void P12CE518::create()
 {
-  Stimulus_Node *scl, *sda;
 
   if(verbose)
     cout << " 12ce518 create \n";
@@ -554,7 +570,7 @@ void P12CE518::create()
 
   {
     scl = new Stimulus_Node ( "EE_SCL" );
-    IO_bi_directional_pu *io_scl = new IO_bi_directional_pu("gpio7");
+    io_scl = new IO_bi_directional_pu("gpio7");
     io_scl->update_pullup('1',true);
     io_scl->setDrivingState(true);
     io_scl->setDriving(true);
@@ -564,7 +580,7 @@ void P12CE518::create()
   {
     sda = new Stimulus_Node ( "EE_SDA" );
 
-    IO_open_collector *io_sda = new IO_open_collector("gpio6");
+    io_sda = new IO_open_collector("gpio6");
     // enable the pullup resistor.
     io_sda->update_pullup('1',true);
     io_sda->setDrivingState(true);
@@ -592,6 +608,15 @@ P12CE518::P12CE518(const char *_name, const char *desc)
   if(config_modes)
     config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
+}
+
+P12CE518::~P12CE518()
+{
+    delete m_eeprom;
+    delete io_scl;
+    delete io_sda;
+    delete scl;
+    delete sda;
 }
 
 void P12CE518::tris_instruction(unsigned int tris_register)
@@ -670,6 +695,10 @@ P12CE519::P12CE519(const char *_name, const char *desc)
     cout << "12ce519 constructor, type = " << isa() << '\n';
 }
 
+P12CE519::~P12CE519()
+{
+  delete_file_registers(0x30, 0x3f);
+}
 
 
 //--------------------------------------------------------
@@ -729,11 +758,12 @@ void GPIO::setPullUp ( bool bNewPU , bool mclr)
 
   // In the following do not change pullup state of internal pins
   unsigned int mask = getEnableMask() & 0x3f;
+
   
   // If mclr active do not change pullup on gpio3
   if (mclr) mask &= 0x37;
 
-  for (unsigned int i=0, m=1; mask; i++, m<<= 1)
+  for (unsigned int i=0, m = 1; mask; i++, m <<= 1)
   {
     if (mask & m)
     {
@@ -824,7 +854,12 @@ P10F200::P10F200(const char *_name, const char *desc)
 
 P10F200::~P10F200()
 {
+    (&(*m_gpio)[3])->setControl(0);
+    (&(*m_gpio)[2])->setControl(0);
 
+    delete m_OUT_SignalControl;
+    delete m_OUT_DriveControl;
+    delete_file_registers(0x10, 0x1f);
 }
 
 
@@ -915,6 +950,11 @@ P10F202::P10F202(const char *_name, const char *desc)
     cout << "10f202 constructor, type = " << isa() << '\n';
 }
 
+P10F202::~P10F202()
+{
+    delete_file_registers(0x08, 0x0f); // Rest is deleted by P10F200
+}
+
 //========================================================================
 // Comparator module for the 10c204 and 10c206
 //
@@ -926,31 +966,7 @@ public:
 
 };
 
-class CMCON0;
-//========================================================================
-// COUT_SignalSource
-//
-// The comparator output is driven on to the GPIO pin if the COUTEN bit in
-// CMCON0 is cleared ( and if the FOSC/4 logic is not driving).
-// This is implemented via COUT_SignalSource. When COUTEN bit is asserted,
-// then COUT_SignalSource overides the default output driver control for
-// the GPIO pin.
-
-class COUT_SignalSource : public SignalControl
-{
-public:
-  COUT_SignalSource(CMCON0 *pcmcon0);
-  ~COUT_SignalSource()
-  {
-  }
-  char getState();
-  void release()
-  {
-    delete this;
-  }
-private:
-  CMCON0 *m_cmcon0;
-};
+class COUT_SignalSource;
 
 //========================================================================
 // COUT_SignalControl -- controls GPIO2's direction when the comparator is
@@ -960,12 +976,9 @@ class COUT_SignalControl : public SignalControl
 {
 public:
   COUT_SignalControl(){}
-  ~COUT_SignalControl(){}
-  char getState() { return '0'; }
-  void release()
-  {
-    delete this;
-  }
+  ~COUT_SignalControl(){ }
+  virtual char getState() { return '0'; }
+  virtual void release() { delete this; }
 };
 
 
@@ -986,6 +999,8 @@ public:
 
   CMCON0(P10F204 *pCpu, const char *pName, const char *pDesc,
          PinModule *CInP, PinModule *CInM, PinModule *COut);
+
+  ~CMCON0();
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -1008,7 +1023,7 @@ public:
 
   SignalControl *getSource()
   {
-    return m_source;
+    return (SignalControl *)m_source;
   }
   SignalControl *getGPDirectionControl()
   {
@@ -1020,6 +1035,8 @@ private:
   P10F204 *p_F204;
   COUT_SignalControl *m_control;
   COUT_SignalSource *m_source;
+  bool			active_control;
+  bool			active_source;
   CIN_SignalSink    *m_PosInput;
   CIN_SignalSink    *m_NegInput;
 
@@ -1032,14 +1049,31 @@ private:
 };
 
 
-COUT_SignalSource::COUT_SignalSource(CMCON0 *pcmcon0)
-  : m_cmcon0(pcmcon0)
+//========================================================================
+// COUT_SignalSource
+//
+// The comparator output is driven on to the GPIO pin if the COUTEN bit in
+// CMCON0 is cleared ( and if the FOSC/4 logic is not driving).
+// This is implemented via COUT_SignalSource. When COUTEN bit is asserted,
+// then COUT_SignalSource overides the default output driver control for
+// the GPIO pin.
+
+class COUT_SignalSource : public SignalControl
 {
-}
-char COUT_SignalSource::getState()
-{
+public:
+  COUT_SignalSource(CMCON0 *pcmcon0)
+      : m_cmcon0(pcmcon0)
+  { }
+  ~COUT_SignalSource() { }
+
+  virtual char getState()
+  {
     return m_cmcon0->getState();
-}
+  }
+  virtual void release() { delete this; }
+private:
+  CMCON0 *m_cmcon0;
+};
 
 class CIN_SignalSink : public SignalSink
 {
@@ -1048,7 +1082,7 @@ public:
     : m_cmcon0(pcmcon0),
       m_binput(binput)  // true==+input
   {}
-  void setSinkState(char new3State)
+  virtual void setSinkState(char new3State)
   {
     if (verbose)
       cout << "CIN_SignalSink::setSinkState  "<< (m_binput ? "POS ":"NEG ")
@@ -1056,10 +1090,8 @@ public:
 
     m_cmcon0->setInputState(new3State, m_binput);
   }
-  void release()
-  {
-    delete this;
-  }
+  virtual void release() {delete this; }
+
 private:
   CMCON0 *m_cmcon0;
   bool m_binput;
@@ -1082,6 +1114,10 @@ CMCON0::CMCON0(P10F204 *pCpu, const char *pName, const char *pDesc,
   m_PosInput = new CIN_SignalSink(this,true);
   m_NegInput = new CIN_SignalSink(this,false);
 
+  active_source = false;
+  active_control = false;
+  
+
   CInP->addSink(m_PosInput);
   CInM->addSink(m_NegInput);
   //COut->setSource(m_source);
@@ -1089,6 +1125,14 @@ CMCON0::CMCON0(P10F204 *pCpu, const char *pName, const char *pDesc,
   m_pV = m_nV = 0.0;
 }
 
+CMCON0::~CMCON0()
+{
+    if (!isEnabled())
+    {
+	delete m_source;
+	delete m_control;
+    }
+}
 void CMCON0::put(unsigned int new_value)
 {
   unsigned old_value = value.get();
@@ -1163,6 +1207,11 @@ P10F204::P10F204(const char *_name, const char *desc)
 {
 }
 
+P10F204::~P10F204()
+{
+  delete_sfr_register(m_cmcon0);
+}
+
 void P10F204::create()
 {
   P10F200::create();
@@ -1230,6 +1279,13 @@ P10F220::P10F220(const char *_name, const char *desc)
     adres(this,"adres", "A2D Result")
 
 {
+}
+
+P10F220::~P10F220()
+{
+    remove_sfr_register(&adcon0);
+    remove_sfr_register(&adcon1);
+    remove_sfr_register(&adres);
 }
 
 void P10F220::create()
@@ -1315,6 +1371,10 @@ void  P10F220::setConfigWord(unsigned int val, unsigned int diff)
 P10F222::P10F222(const char *_name, const char *desc)
   : P10F220(_name,desc)
 {
+}
+P10F222::~P10F222()
+{
+    delete_file_registers(0x09, 0x0f);
 }
 
 void P10F222::create()

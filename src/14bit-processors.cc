@@ -104,7 +104,7 @@ public:
 
 //-------------------------------------------------------------------
 _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
-  : pic_processor(_name,_desc), intcon(0)
+  : pic_processor(_name,_desc), intcon(0), has_SSP(false)
 {
   pc = new Program_Counter("pc", "Program Counter", this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
@@ -114,6 +114,7 @@ _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
 
 _14bit_processor::~_14bit_processor()
 {
+  unassignMCLRPin();
   delete_sfr_register(fsr);
   delete_sfr_register(option_reg);
   delete pc; pc=0;
@@ -252,6 +253,10 @@ Pic14Bit::Pic14Bit(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 Pic14Bit::~Pic14Bit()
 {
+  unassignMCLRPin();
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&intcon_reg);
+
   delete_sfr_register(m_portb);
   delete_sfr_register(m_trisb);
 
@@ -273,7 +278,6 @@ void Pic14Bit::create_sfr_map()
 
   add_sfr_register(indf,    0x00);
   alias_file_registers(0x00,0x00,0x80);
-  //add_sfr_register(indf,    0x00);
 
   add_sfr_register(&tmr0,   0x01);
   add_sfr_register(option_reg,  0x81, RegisterValue(0xff,0));
@@ -327,16 +331,44 @@ _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
     fsr1h_shad(this, "fsr1h_shad", "fsr1h shadow register"),
     m_cpu_temp(0)
 {
-  option_reg = new OPTION_REG(this,"option_reg");
   delete stack;
   stack = new Stack14E(this);
-  stack->stack_mask = 15; // ehanced has stack 16 high
+  stack->stack_mask = 0xf; // ehanced has stack 16 high
   intcon = &intcon_reg;
 
 };
 
 _14bit_e_processor::~_14bit_e_processor()
 {
+
+    remove_sfr_register(&ind0.indf);
+    remove_sfr_register(&ind1.indf);
+
+    remove_sfr_register(&ind0.fsrl);
+    remove_sfr_register(&ind0.fsrh);
+    remove_sfr_register(&ind1.fsrl);
+    remove_sfr_register(&ind1.fsrh);
+    remove_sfr_register(&bsr);
+    remove_sfr_register(&intcon_reg);
+
+    remove_sfr_register(&pcon);
+    remove_sfr_register(&wdtcon);
+
+
+  // These are copies taken at an interrupt
+    remove_sfr_register(&status_shad);
+    remove_sfr_register(&wreg_shad);
+    remove_sfr_register(&bsr_shad);
+    remove_sfr_register(&pclath_shad);
+    remove_sfr_register(&fsr0l_shad);
+    remove_sfr_register(&fsr0h_shad);
+    remove_sfr_register(&fsr1l_shad);
+    remove_sfr_register(&fsr1h_shad);
+
+  Stack14E *stack14E = static_cast<Stack14E *>(stack);
+    remove_sfr_register(&stack14E->stkptr);
+    remove_sfr_register(&stack14E->tosl);
+    remove_sfr_register(&stack14E->tosh);
 }
 void _14bit_e_processor::create_symbols()
 {
@@ -380,7 +412,6 @@ void _14bit_e_processor::create_sfr_map()
   add_sfr_register(&stack14E->stkptr,  0xfed,RegisterValue(0,0),"stkptr");
   add_sfr_register(&stack14E->tosl,    0xfee,RegisterValue(0,0),"tosl");
   add_sfr_register(&stack14E->tosh,    0xfef,RegisterValue(0,0),"tosh");
-
 
   for (bank = 1; bank < 32; bank++)
   {

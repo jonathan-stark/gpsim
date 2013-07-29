@@ -44,7 +44,7 @@ namespace TTL
 // TTL base class
 
 TTLbase::TTLbase(const char *_name, const char *desc)
-  : Module(_name,desc), m_dVdd(0)
+  : Module(_name,desc), m_dVdd(0),m_bClock(false), m_bEnable(false)
 {
 }
 
@@ -393,7 +393,8 @@ Module *TTL165::construct(const char *_new_name)
 
 
 TTL165::TTL165(const char *_name)
-  : TTLbase(_name, "TTL165 - PISO Shift Register"), sreg(0)
+  : TTLbase(_name, "TTL165 - PISO Shift Register"), 
+     m_bStrobe(false), sreg(0)
 {
 
   m_D = new IOPIN *[8];

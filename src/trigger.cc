@@ -88,9 +88,15 @@ void BreakTraceObject::print(FILE *fp)
 //------------------------------------------------------------------------
 TraceObject *BreakTraceType::decode(unsigned int tbi)
 {
-  return (get_trace().type(tbi) == type()) ?
-    new BreakTraceObject(get_trace().get(tbi) & 0xffffff)  :
-    0;
+  TraceObject *to;
+  if (get_trace().type(tbi) == type())
+  {
+      to = new BreakTraceObject(get_trace().get(tbi) );
+      to->print(stdout);
+      return to;
+  }
+  else
+    return 0;
 }
 int BreakTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
 {

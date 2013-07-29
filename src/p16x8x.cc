@@ -54,6 +54,19 @@ P16X8X::P16X8X(const char *_name, const char *desc)
 
 }
 
+P16X8X::~P16X8X()
+{
+  delete_file_registers(0x0c, ram_top);
+  if (get_eeprom())
+  {
+      remove_sfr_register(get_eeprom()->get_reg_eedata());
+      remove_sfr_register(get_eeprom()->get_reg_eecon1());
+      remove_sfr_register(get_eeprom()->get_reg_eeadr());
+      remove_sfr_register(get_eeprom()->get_reg_eecon2());
+      delete get_eeprom();
+  }
+
+}
 void P16X8X::create_sfr_map()
 {
   Pic14Bit::create_sfr_map();
@@ -63,8 +76,6 @@ void P16X8X::create_sfr_map()
 
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x09);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x89);
-
-
 }
 
 //-------------------------------------------------------------------
@@ -109,9 +120,11 @@ void P16X8X::create_iopin_map()
 
 
 
-void  P16X8X::create(int ram_top)
+void  P16X8X::create(int _ram_top)
 {
   EEPROM *e;
+
+  ram_top = _ram_top;
   create_iopin_map();
 
   _14bit_processor::create();

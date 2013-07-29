@@ -153,6 +153,7 @@ public:
       return disasm16(this, address, inst);
     }
   virtual void create_sfr_map();
+  virtual void delete_sfr_map();
   virtual void create_config_memory();
 
   // Return the portion of pclath that is used during branching instructions
@@ -202,11 +203,14 @@ public:
   unsigned int getCurrentDisasmAddress() { return m_current_disasm_address;}
   unsigned int getCurrentDisasmIndex()   { return m_current_disasm_address/2;}
   void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
+
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
 
   unsigned int idloc[4];    ///< ID locations - not all 16-bit CPUs have 8 bytes
   bool	extended_instruction_flag;	// Instruction set extension and Indexed Addressing 
+
+  unsigned int last_register;
 };
 
 class _16bit_compat_adc : public _16bit_processor 
@@ -217,6 +221,7 @@ public:
   ADCON1       *adcon1;
 
   _16bit_compat_adc(const char *_name=0, const char *desc=0);
+  ~_16bit_compat_adc();
   virtual void create_symbols();
   virtual void create();
   virtual void create_sfr_map();
@@ -231,6 +236,7 @@ public:
   ADCON2_V2       *adcon2;
 
   _16bit_v2_adc(const char *_name=0, const char *desc=0);
+  ~_16bit_v2_adc();
   virtual void create(int nChannels);
 };
 #define cpu16 ( (_16bit_processor *)cpu)

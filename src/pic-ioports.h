@@ -47,6 +47,7 @@ public:
                   /*const char *tris_name, */
                   PicPortRegister *,bool bIgnoreWDTResets, unsigned int nEnableMask=0xff);
   virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual char get3StateBit(unsigned int bitMask);
   void setEnableMask(unsigned int);
