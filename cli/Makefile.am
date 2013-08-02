@@ -52,4 +52,7 @@ AM_YFLAGS = -dvt
 libgpsimcli_la_LIBADD = @X_LDFLAGS@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../src/libgpsim.la
 
 
+.yy.cc:
+	$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $@ y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
+
 EXTRA_DIST = scan.h parse.h  makefile.mingw
