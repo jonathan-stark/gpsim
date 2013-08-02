@@ -17,7 +17,7 @@
 ##  int DbmIsInit(void);
 
 
-INCLUDES = @X_CFLAGS@
+AM_CPPFLAGS = @X_CFLAGS@
 
 lib_LTLIBRARIES = libgpsim_eXdbm.la
 gpsim_eXdbmincludedir = $(includedir)/eXdbm

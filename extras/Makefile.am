@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-INCLUDES = @X_CFLAGS@
+AM_CPPFLAGS = @X_CFLAGS@
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = graphic_lcd  lcd  ds1307 ds1820

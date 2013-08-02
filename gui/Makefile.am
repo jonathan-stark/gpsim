@@ -1,6 +1,6 @@
 # gpsim gui
 
-INCLUDES = @X_CFLAGS@ @Y_CFLAGS@
+AM_CPPFLAGS = @X_CFLAGS@ @Y_CFLAGS@
 
 lib_LTLIBRARIES = libgpsimgui.la
 
@@ -23,6 +23,5 @@ pixmapdir = $(datadir)/gpsim
 
 AM_CFLAGS =
 AM_CXXFLAGS =
-AM_CPPFLAGS =
 
 EXTRA_DIST = makefile.mingw
