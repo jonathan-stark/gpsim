@@ -1,4 +1,4 @@
-INCLUDES = @X_CFLAGS@
+AM_CPPFLAGS = @X_CFLAGS@
 
 lib_LTLIBRARIES = libgpsim_graphicLCD.la
 

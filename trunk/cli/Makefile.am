@@ -1,6 +1,8 @@
 # gpsim cli
 
-INCLUDES = @X_CFLAGS@ 
+AM_CPPFLAGS = @X_CFLAGS@ 
+
+MAINTAINERCLEANFILES = parse.h parse.output
 
 lib_LTLIBRARIES = libgpsimcli.la
 
@@ -53,6 +55,9 @@ libgpsimcli_la_LIBADD = @X_LDFLAGS@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../
 
 
 .yy.cc:
-	$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $@ y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
+	$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $*.cc y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
+
+.yy.h:
+	$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $*.cc y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
 
 EXTRA_DIST = scan.h parse.h  makefile.mingw

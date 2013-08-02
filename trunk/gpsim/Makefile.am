@@ -2,7 +2,7 @@
 #
 #
 
-INCLUDES = @X_CFLAGS@ @Y_CFLAGS@
+AM_CPPFLAGS = @X_CFLAGS@ @Y_CFLAGS@
 
 bin_PROGRAMS = gpsim
 

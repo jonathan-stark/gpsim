@@ -1,4 +1,16 @@
 2013-08-02 Roy Rankin <rrankin@ihug.com.au>
+	* cli/Makefile.am: Generate missing parse.h even if parse.cc exists,
+	  remove scan.cc, parse.cc, parse.h on maintainer-clean, replace
+	  INCLUDES
+	* extras/ds1820/examples/Makefile.am: Add an 'all' rule, replace GNU
+	  make syntax
+	* eXdbm/Makefile.am extras/Makefile.am extras/ds1307/Makefile.am
+	  extras/ds1820/Makefile.am extras/graphic_lcd/src/Makefile.am
+	  extras/lcd/Makefile.am gpsim/Makefile.am gui/Makefile.am
+	  modules/Makefile.am src/Makefile.am src/dspic/Makefile.am:
+	- Replace depreciated INCLUDES with AM_CPPFLAGS
+
+2013-08-02 Roy Rankin <rrankin@ihug.com.au>
 	* cli/Makefile.am : fix SVN parse.h issue with automake >= 1.12
 	* gui/gui_src_asm.cc : fix possible array overflow
 	* src/pic-processor.cc : Fix MCLR handeling with erroneous WDT message
