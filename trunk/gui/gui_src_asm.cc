@@ -1152,7 +1152,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
 
   unsigned int patternLen = strlen(pText);
   char buff[1024];
-  patternLen = (patternLen < sizeof(buff)) ? patternLen : sizeof(buff);
+  patternLen = (patternLen < sizeof(buff)) ? patternLen : sizeof(buff) -1;
   const char *pattern = bDirection ? pText :
   strReverse(pText, &buff[patternLen], patternLen);
 
@@ -1229,7 +1229,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
     const char *cpSource = str;
     char buffer2[1024];
     if (!bDirection) {
-      srcLen = (srcLen < sizeof(buffer2)) ? srcLen : sizeof(buffer2);
+      srcLen = (srcLen < sizeof(buffer2)) ? srcLen : sizeof(buffer2)-1;
       cpSource = strReverse(cpSource, &buffer2[srcLen], srcLen);
     }
 

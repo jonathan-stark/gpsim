@@ -1000,7 +1000,7 @@ void pic_processor::reset (RESET_TYPE r)
 
   case MCLR_RESET:
     cout << "MCLR reset\n";
-    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mIdle;
+    mCurrentPhase = mIdle;
     mCurrentPhase->setNextPhase(mIdle);
     m_ActivityState = ePAIdle;
     break;
@@ -1012,11 +1012,18 @@ void pic_processor::reset (RESET_TYPE r)
     break;
 
   case WDT_RESET:
-  case EXIT_RESET:
     cout << "Reset on Watch Dog Timer expire\n";
     mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
     mCurrentPhase->setNextPhase(mExecute1Cycle);
     m_ActivityState = ePAActive;
+    break;
+
+  case EXIT_RESET:	// MCLR reset has cleared
+    cout <<"MCLR low, resume execution\n";
+    mCurrentPhase = mCurrentPhase ? mCurrentPhase : mExecute1Cycle;
+    mCurrentPhase->setNextPhase(mExecute1Cycle);
+    m_ActivityState = ePAActive;
+    return;
     break;
 
   case STKOVF_RESET:

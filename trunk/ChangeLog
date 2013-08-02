@@ -1,3 +1,8 @@
+2013-08-02 Roy Rankin <rrankin@ihug.com.au>
+	* cli/Makefile.am : fix SVN parse.h issue with automake >= 1.12
+	* gui/gui_src_asm.cc : fix possible array overflow
+	* src/pic-processor.cc : Fix MCLR handeling with erroneous WDT message
+
 2013-07-29 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f676/reset.asm regression/p16f684/reset.asm
 	  regression/p16f690/p16f690.asm regression/p1xf18xx/p12f1822.asm
