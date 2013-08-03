@@ -1297,7 +1297,6 @@ BreakpointRegister::BreakpointRegister()
 */
 BreakpointRegister::~BreakpointRegister()
 {
-  //RRR cout << __FUNCTION__ << " destructor\n";
 }
 
 BreakpointRegister::BreakpointRegister(Processor *_cpu, 

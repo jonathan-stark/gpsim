@@ -1,3 +1,8 @@
+2013-08-03 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_main.cc src/interface.cc:
+	- Ifdef out unused depreciated thread code
+	* src/breakpoints.cc: remove debug printout
+
 2013-08-02 Roy Rankin <rrankin@ihug.com.au>
 	* cli/Makefile.am: Generate missing parse.h even if parse.cc exists,
 	  remove scan.cc, parse.cc, parse.h on maintainer-clean, replace

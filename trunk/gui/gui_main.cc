@@ -92,15 +92,19 @@ extern bool gUsingThreads(); // in ../src/interface.cc
 static void gtl()
 {
 #if GLIB_MAJOR_VERSION >= 2
+#ifdef GPSIM_THREAD
   if(gUsingThreads())
     gdk_threads_leave ();
+#endif
 #endif
 }
 static void gte()
 {
 #if GLIB_MAJOR_VERSION >= 2
+#ifdef GPSIM_THREAD
   if(gUsingThreads())
     gdk_threads_enter ();
+#endif
 #endif
 }
 
@@ -202,9 +206,11 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 }
 
 #if GLIB_MAJOR_VERSION >= 2
+#ifdef GPSIM_THREAD
 // thread variables.
 static GMutex *muSimStopMutex=0;
 static GCond  *cvSimStopCondition=0;
+#endif
 #endif
 
 extern int gui_animate_delay; // in milliseconds
@@ -215,11 +221,13 @@ static void *SimulationHasStopped( void *ptr )
 {
 
 #if GLIB_MAJOR_VERSION >= 2
+#ifdef GPSIM_THREAD
   while(1) {
     if(gUsingThreads()) {
       g_mutex_lock(muSimStopMutex);
       g_cond_wait(cvSimStopCondition, muSimStopMutex);
     }
+#endif
 #endif
     if(lgp) {
       GTKWAIT;
@@ -246,12 +254,15 @@ static void *SimulationHasStopped( void *ptr )
     dispatch_Update();
 
 #if GLIB_MAJOR_VERSION >= 2
+#ifdef GPSIM_THREAD
     if(gUsingThreads()) 
       g_mutex_unlock(muSimStopMutex);
     else
       return 0;
   }
 #endif
+#endif
+  return 0;
 
 }
 
@@ -267,12 +278,14 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     
     lgp = (GUI_Processor *) callback_data;
 #if GLIB_MAJOR_VERSION >= 2
+#ifdef GPSIM_THREAD
 
     if(gUsingThreads()) {
       g_mutex_lock(muSimStopMutex);
       g_cond_signal(cvSimStopCondition);
       g_mutex_unlock(muSimStopMutex);
     } else
+#endif
 #endif
     ::SimulationHasStopped(0);
 
@@ -439,6 +452,8 @@ int gui_init (int argc, char **argv)
 #endif
 
 #if GLIB_MAJOR_VERSION >= 2
+// This code is not currently used
+#ifdef GPSIM_THREAD
   if(gUsingThreads()) {
 
     GThread          *Thread1;
@@ -458,6 +473,7 @@ int gui_init (int argc, char **argv)
       }
     g_mutex_unlock(muSimStopMutex);
   }
+#endif // GPSIM_THREAD
 #endif
 
   if (!gtk_init_check (&argc, &argv))
