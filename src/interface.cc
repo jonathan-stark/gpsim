@@ -297,6 +297,8 @@ void gpsimInterface::simulation_has_stopped (void)
 }
 
 #if GLIB_MAJOR_VERSION >= 2
+// This code is not used anywhere, but uses currently depreciated calls RRR
+#ifdef GPSIM_THREAD
 
 GMutex *muRunMutex;
 GCond  *cvRunCondition;
@@ -347,7 +349,9 @@ void start_run_thread(void)
 
   std::cout << " started thread\n";
 }
-#endif
+#endif //GPSIM_THREAD
+#endif //GLIB_MAJOR_VERSION >= 2
+
 
 
 //========================================================================
