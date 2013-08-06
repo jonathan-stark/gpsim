@@ -220,8 +220,10 @@ main (int argc, char *argv[])
   if(argc>=2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
 
-	char * optArg = poptGetOptArg(optCon);
-	free(optArg);
+        const char * optArg = poptGetOptArg(optCon);
+#ifndef _WIN32
+        free((char *)optArg);
+#endif
       switch (c) {
 
       default:
@@ -233,7 +235,9 @@ main (int argc, char *argv[])
 
       case 'L':
         set_search_path (search_path);
-	free((char *)search_path);
+#ifndef _WIN32
+        free((char *)search_path);
+#endif
         break;
 
       case 'd':
@@ -254,7 +258,9 @@ main (int argc, char *argv[])
         snprintf(command_str, sizeof(command_str),
                  "symbol %s\n",defineSymbol);
         parse_string(command_str);
-	free((char *)defineSymbol);
+#ifndef _WIN32
+        free((char *)defineSymbol);
+#endif
         defineSymbol = "";
         break;
 
@@ -268,7 +274,9 @@ main (int argc, char *argv[])
         else {
           usage = 1;
         }
-	free ((char *)sourceEnabled);
+#ifndef _WIN32
+        free ((char *)sourceEnabled);
+#endif
         break;
 
       case 'E':
@@ -283,7 +291,9 @@ main (int argc, char *argv[])
         else {
           printf("%s is invalid exit condition for -e option.\n", sExitOn);
         }
-	free ((char *)sExitOn);
+#ifndef _WIN32
+        free ((char *)sExitOn);
+#endif
         break;
       }
 
