@@ -38,7 +38,11 @@ endif
 
 CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) -Wall
 
-CXX = c++ -mno-cygwin -mtune=pentium -mms-bitfields
+## Cygwin / Mingw GCC 3.4.4 with -mno-cygwin support
+#CXX = c++ -mno-cygwin -mtune=pentium -mms-bitfields
+
+# Mingw GCC 4.7.3
+CXX = c++ -mtune=pentium -mms-bitfields
 
 .cc.o:
 	$(CXX) $(CFLAGS) -c $< -o $@
