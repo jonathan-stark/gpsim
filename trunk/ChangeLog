@@ -1,7 +1,11 @@
-2013-08-03 Roy Rankin <rrankin@ihug.com.au>
+2013-08-03 Borut Razem <borutr@users.sourceforge.net>
 	* gui/gui_main.cc src/interface.cc:
 	- Ifdef out unused depreciated thread code
 	* src/breakpoints.cc: remove debug printout
+	* extras/ds1307/makefile.mingw, extras/ds1820/makefile.mingw,
+	  extras/graphic_lcd/src/makefile.mingw, extras/lcd/makefile.mingw,
+	  plat/win32/make.mingw:
+	  adapted for Mingw GCC 4.7.3
 
 2013-08-02 Roy Rankin <rrankin@ihug.com.au>
 	* cli/Makefile.am: Generate missing parse.h even if parse.cc exists,

@@ -59,7 +59,7 @@ PTHREAD_PATH = $(TOP)/pthreads
 #CXXCOMPILER = $(CCACHE) c++
 #CXX = $(CXXCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 
-# Mingw GCC 4.5.2
+# Mingw GCC 4.7.3
 CCOMPILER = $(CCACHE) i686-pc-mingw32-gcc
 CC = $(CCOMPILER) -mtune=pentium -mms-bitfields
 CXXCOMPILER = $(CCACHE) i686-pc-mingw32-c++
