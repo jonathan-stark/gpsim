@@ -116,7 +116,7 @@ EXPORTS
     ??AFileContextList@@QAEPAVFileContext@@H@Z
     ??APortModule@@QAEAAVPinModule@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
-    ?AddModulePathFromFilePath@@YAXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?AddModulePathFromFilePath@@YAXPAD@Z
     ?Clear@CSimulationContext@@QAEXXZ
     ?ConstructInvalidInstruction@Processor@@UAEPAVinstruction@@PAV1@II@Z
     ?Debug@Processor@@UAEXXZ
