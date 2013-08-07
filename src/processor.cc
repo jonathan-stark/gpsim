@@ -461,6 +461,8 @@ void Processor::delete_file_registers(unsigned int start_address,
     if(registers[j]) {
 
       Register *thisReg = registers[j];
+      Register *replaced = thisReg->getReplaced();
+
       if(thisReg->alias_mask) {
         // This register appears in more than one place. Let's find all
         // of its aliases.
@@ -475,7 +477,10 @@ void Processor::delete_file_registers(unsigned int start_address,
         cout << " deleting: " << hex << j << endl;
       registers[j] = 0;
       if (!bRemoveWithoutDelete)
+      {
+	if (replaced) delete replaced;
         delete thisReg;
+      }
     }
     else
 	printf("%s register 0x%x already deleted\n", __FUNCTION__, j);

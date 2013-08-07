@@ -394,7 +394,7 @@ void _14bit_e_processor::create_sfr_map()
   add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
-  add_sfr_register(&pcon,   0x96, RegisterValue(0,0),"pcon");
+  add_sfr_register(&pcon,   0x96, RegisterValue(0x0c,0),"pcon");
   add_sfr_register(&wdtcon,   0x97, RegisterValue(0x16,0),"wdtcon");
 
 

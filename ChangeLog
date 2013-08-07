@@ -1,3 +1,11 @@
+2013-08-07 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p1xf18xx/p12f1822.asm:
+	- Add test to detect bad pcon, and fix trisa test
+	* src/14bit-processors.cc:
+	- set pcon to correct inital value on 14bit_e_processors
+	* src/16bit-processors.cc: remove debug printout
+	* src/processor.cc src/registers.cc: delete replaced registers
+
 2013-08-06 Borut Razem <borutr@users.sourceforge.net>
 	* gpsim/main.cc: don't free returned popt values on _WIN32 since they
 	  reside in dll heap which is different from the main heap.
