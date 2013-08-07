@@ -141,7 +141,7 @@ start
 	BANKSEL TRISA
 	clrf	STATUS
 	clrf	TRISA
-   .assert "trisa == 0x00, \"**FAILED 12f1822  TRISA not clear\""
+   .assert "trisa == 0x08, \"**FAILED 12f1822  TRISA clears to 0x08\""
 	nop
 	BANKSEL PORTA
 	movlw	0xff
@@ -186,6 +186,8 @@ start
 	reset
 
 soft_reset:
+  .assert "cycles > 100, \"*** FAILED 12f1822 Unexpected soft reset\""
+	nop
   .assert  "\"*** PASSED 12f1822 Functionality\""
 	nop
 	goto	$

@@ -333,9 +333,7 @@ pic_processor *_16bit_processor::construct()
 void _16bit_processor :: delete_sfr_map()
 {
   if(verbose)
-    cout << "deleting 18cxxx common registers\n";
     cout << "deleting 18cxxx common registers " << hex << last_actual_register() <<"\n";
-    cout.flush();
 
   unassignMCLRPin();
   delete_file_registers(0x0, last_register);
