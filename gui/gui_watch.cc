@@ -802,6 +802,10 @@ void Watch_Window::Build(void)
                            GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
   watch_clist = gtk_clist_new_with_titles(COLUMNS,(gchar **)watch_titles);
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(watch_clist, gtk_widget_get_style(watch_clist));
   gtk_widget_show(watch_clist);
 
   for(i=0;i<LASTCOL;i++) {

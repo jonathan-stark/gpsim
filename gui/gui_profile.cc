@@ -2395,7 +2395,13 @@ void Profile_Window::Build(void)
 
   // Instruction profile clist
   profile_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_COLUMNS, (gchar **)profile_titles));
-  //profile_clist = GTK_CLIST(profile_clist);
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(GTK_WIDGET(profile_clist), 
+	gtk_widget_get_style(GTK_WIDGET(profile_clist)));
+
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),1,TRUE);
 //  gtk_clist_set_sort_column (pw->profile_clist,1);
@@ -2422,6 +2428,13 @@ void Profile_Window::Build(void)
 
   // Instruction range profile clist
   profile_range_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,(gchar **)profile_range_titles));
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(GTK_WIDGET(profile_range_clist), 
+	gtk_widget_get_style(GTK_WIDGET(profile_range_clist)));
+
   gtk_clist_set_column_auto_resize(profile_range_clist,0,TRUE);
   gtk_clist_set_column_auto_resize(profile_range_clist,1,TRUE);
   gtk_clist_set_sort_column (profile_range_clist,2);
@@ -2459,6 +2472,12 @@ void Profile_Window::Build(void)
 
   // Register profile clist
   profile_register_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS, (gchar **)profile_register_titles));
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(GTK_WIDGET(profile_register_clist), 
+	gtk_widget_get_style(GTK_WIDGET(profile_register_clist)));
+
   gtk_clist_set_column_auto_resize(profile_register_clist,0,TRUE);
   gtk_clist_set_column_auto_resize(profile_register_clist,1,TRUE);
   gtk_clist_set_column_auto_resize(profile_register_clist,2,TRUE);
@@ -2487,6 +2506,13 @@ void Profile_Window::Build(void)
 
   // Execution time statistics tab
   profile_exestats_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS, (gchar **)profile_exestats_titles));
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(GTK_WIDGET(profile_exestats_clist), 
+	gtk_widget_get_style(GTK_WIDGET(profile_exestats_clist)));
+
+
   gtk_clist_set_column_auto_resize(profile_exestats_clist,0,TRUE);
   gtk_clist_set_column_auto_resize(profile_exestats_clist,1,TRUE);
   gtk_clist_set_column_auto_resize(profile_exestats_clist,2,TRUE);

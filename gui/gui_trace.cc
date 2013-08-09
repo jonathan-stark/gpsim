@@ -239,6 +239,12 @@ void Trace_Window::Build(void)
 
   // Trace clist
   trace_clist=GTK_CLIST(gtk_clist_new_with_titles(TRACE_COLUMNS,(gchar **)trace_titles));
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(GTK_WIDGET(trace_clist), 
+	gtk_widget_get_style(GTK_WIDGET(trace_clist)));
   gtk_clist_set_column_auto_resize(trace_clist,0,TRUE);
 
   GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);

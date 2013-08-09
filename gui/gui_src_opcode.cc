@@ -1512,6 +1512,10 @@ void SourceBrowserOpcode_Window::Build(void)
   /* create GtkCList here so we have a pointer to throw at the
    * button callbacks -- more is done with it later */
   clist = gtk_clist_new_with_titles (columns, (gchar **)column_titles);
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(clist, gtk_widget_get_style(clist));
   gtk_widget_show(clist);
 
   gtk_container_add (GTK_CONTAINER (scrolled_win), clist);
