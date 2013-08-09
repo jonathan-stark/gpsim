@@ -299,6 +299,10 @@ void Stack_Window::Build(void)
                            GTK_SIGNAL_FUNC(sigh_button_event), this);
 
   stack_clist=gtk_clist_new_with_titles(COLUMNS,(gchar **)stack_titles);
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(stack_clist, gtk_widget_get_style(stack_clist));
   gtk_widget_show(stack_clist);
 
 

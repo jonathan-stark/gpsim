@@ -657,6 +657,10 @@ void Symbol_Window::Build(void)
                       GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
 
   symbol_clist=gtk_clist_new_with_titles(3,(gchar **)symbol_titles);
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(symbol_clist, gtk_widget_get_style(symbol_clist));
   gtk_widget_show(symbol_clist);
   gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),1,TRUE);

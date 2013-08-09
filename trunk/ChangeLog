@@ -1,3 +1,9 @@
+2013-08-10 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.cc gui/gui_profile.cc gui/gui_src_opcode.cc
+	  gui/gui_stack.cc gui/gui_symbols.cc gui/gui_trace.cc
+	  gui/gui_watch.cc:
+	- Fix CList GTK assert in Fedora 19 when using Adwaita theme
+
 2013-08-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p1xf18xx/p12f1822.asm:
 	- Add test to detect bad pcon, and fix trisa test

@@ -1907,6 +1907,10 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
         gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
         node_clist = gtk_clist_new (1);
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+        gtk_widget_set_style(node_clist, gtk_widget_get_style(node_clist));
         gtk_widget_show (node_clist);
         gtk_container_add (GTK_CONTAINER(scrolledwindow), node_clist);
 
@@ -1987,6 +1991,11 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 #else
         module_clist = gtk_clist_new_with_titles (3, (gchar **)module_clist_titles);
 #endif
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+        gtk_widget_set_style(module_clist, gtk_widget_get_style(module_clist));
         gtk_clist_set_column_auto_resize(GTK_CLIST(module_clist),0,TRUE);
         gtk_widget_show (module_clist);
         gtk_container_add (GTK_CONTAINER(scrolledwindow), module_clist);
@@ -3990,6 +3999,11 @@ void Breadboard_Window::Build(void)
   gtk_container_add (GTK_CONTAINER (scrolledwindow3), viewport8);
 
   pic_settings_clist = gtk_clist_new (1);
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(pic_settings_clist, gtk_widget_get_style(pic_settings_clist));
   gtk_widget_ref (pic_settings_clist);
   gtk_object_set_data_full (GTK_OBJECT (window), "pic_settings_clist", pic_settings_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -4047,6 +4061,11 @@ void Breadboard_Window::Build(void)
   gtk_container_add (GTK_CONTAINER (scrolledwindow2), viewport7);
 
   node_clist = gtk_clist_new (1);
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(node_clist, gtk_widget_get_style(node_clist));
   gtk_widget_ref (node_clist);
   gtk_object_set_data_full (GTK_OBJECT (window), "node_clist", node_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -4120,6 +4139,11 @@ void Breadboard_Window::Build(void)
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), viewport6);
 
   attribute_clist = gtk_clist_new (1);
+
+
+//  The following line is silly but it stops GTK printing an assert
+//  in Fedora 19 with Adwaita theme
+  gtk_widget_set_style(attribute_clist, gtk_widget_get_style(attribute_clist));
   gtk_widget_ref (attribute_clist);
   gtk_object_set_data_full (GTK_OBJECT (window), "attribute_clist", attribute_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -4276,7 +4300,7 @@ void Breadboard_Window::Build(void)
   UpdateMenuItem();
 
   draw_nodes(this);
-  cout << "FIXME gui_breadboard.cc " << __FUNCTION__ << endl;
+  // cout << "FIXME gui_breadboard.cc " << __FUNCTION__ << endl;
   /*
   // Loop module list
   Symbol_Table::module_symbol_iterator mi = get_symbol_table().beginModuleSymbol();
