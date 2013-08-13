@@ -17,6 +17,7 @@ INCLUDES = -I . -I ../plat/win32 \
 	-I $(ATK_PATH)/include/atk-1.0 \
 	-I $(PANGO_PATH)/include/pango-1.0 \
 	-I $(CAIRO_PATH)/include/cairo \
+	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0 \
 	-I $(GTKEXTRA_PATH)
 
 DEFINES += -DHAVE_GUI

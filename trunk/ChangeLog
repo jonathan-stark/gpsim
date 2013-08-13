@@ -1,3 +1,10 @@
+2013-08-13 Borut Razem <borutr@users.sourceforge.net>
+	* cli/makefile.mingw, extras/ds1307/makefile.mingw,
+	  extras/graphic_lcd/src/makefile.mingw, extras/lcd/makefile.mingw,
+	  gpsim/makefile.mingw, gui/makefile.mingw, makefile.mingw,
+	  modules/makefile.mingw, plat/win32/make.mingw, plat/win32/gpsim.nsi:
+	  libraries upgraded (mingw build)
+
 2013-08-10 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc gui/gui_profile.cc gui/gui_src_opcode.cc
 	  gui/gui_stack.cc gui/gui_symbols.cc gui/gui_trace.cc

@@ -15,6 +15,7 @@ include ../plat/win32/make.mingw
 LIBS = 	-L $(POPT_PATH)/lib -l popt \
 	-L $(PANGO_PATH)/lib -l pango-1.0 \
 	-L $(CAIRO_PATH)/lib -l cairo \
+	-L $(GDK_PIXBUF_PATH)/lib -l gdk_pixbuf-2.0 \
 	-L $(GTK_PATH)/lib -l gdk-win32-2.0 -l gtk-win32-2.0 \
 	-L $(GLIB_PATH)/lib -l glib-2.0 -l gobject-2.0 \
 	../src/libgpsim.a
@@ -24,7 +25,8 @@ INCLUDES = -I ../plat/win32 \
 	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
 	-I $(ATK_PATH)/include/atk-1.0 \
 	-I $(PANGO_PATH)/include/pango-1.0 \
-	-I $(CAIRO_PATH)/include/cairo
+	-I $(CAIRO_PATH)/include/cairo \
+	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0
 
 DEFINES += -DHAVE_GUI
 

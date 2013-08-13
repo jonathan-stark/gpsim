@@ -25,6 +25,9 @@ endif
 ifndef CAIRO_PATH
   CAIRO_PATH = ../../../cairo
 endif
+ifndef GDK_PIXBUF_PATH
+  GDK_PIXBUF_PATH = ../../../gdk-pixbuf
+endif
 
 ifndef GPSIM_LIB_PATH
   GPSIM_LIB_PATH = ../../lib/gpsim
@@ -54,13 +57,15 @@ CXX = i686-pc-mingw32-g++ -mtune=pentium -mms-bitfields
 LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
 	$(GTK_PATH)/lib/gdk-win32-2.0.lib $(GTK_PATH)/lib/gtk-win32-2.0.lib \
 	$(CAIRO_PATH)/lib/cairo.lib \
+	$(GDK_PIXBUF_PATH)/lib/gdk_pixbuf-2.0.lib \
 	$(GPSIM_LIB_PATH)/libgpsim.a
 
 INCLUDES = -I ../.. -I $(GPSIM_INCLUDE_PATH) \
 	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
 	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
 	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
-	-I $(CAIRO_PATH)/include/cairo
+	-I $(CAIRO_PATH)/include/cairo \
+	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0
 
 DEFINES += -DHAVE_GUI
 

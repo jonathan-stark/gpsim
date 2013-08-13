@@ -39,7 +39,7 @@ depend:
 
 .PHONY: extras extras-usart-con extras-graphic-lcd extras-lcd
 
-EXTRAS=extras/graphic_lcd/src extras/lcd
+EXTRAS=extras/graphic_lcd/src extras/lcd extras/ds1307
 
 include/gpsim:
 	mkdir -p include; ln -s ../src include/gpsim
