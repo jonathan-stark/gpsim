@@ -1,3 +1,9 @@
+2013-08-14 Borut Razem <borutr@users.sourceforge.net>
+	* cli/cli.vcxproj, eXdbm/eXdbm.vcxproj, gpsim/gpsim.vcxproj,
+	  gui/gui.vcxproj, modules/modules.vcxproj, plat/win32/Install.vcxproj,
+	  src/src.vcxproj, gpsim.sln: Visual Studio upgraded to Visual Studio 2010,
+	  libraries upgraded (MSVC build)
+
 2013-08-13 Borut Razem <borutr@users.sourceforge.net>
 	* cli/makefile.mingw, extras/ds1307/makefile.mingw,
 	  extras/graphic_lcd/src/makefile.mingw, extras/lcd/makefile.mingw,
