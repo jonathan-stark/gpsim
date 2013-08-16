@@ -22,7 +22,6 @@ EXTRA_DIST = PROCESSORS HISTORY README.EXAMPLES ANNOUNCE README.MODULES \
 	plat/win32/gpsim.nsi \
 	plat/win32/uxtime.cc \
 	plat/win32/fd2raw.cpp \
-	plat/win32/Install.vcproj \
 	plat/win32/unistd.h \
 	plat/win32/fd2raw.h \
 	plat/win32/settings_reg.cpp \

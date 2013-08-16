@@ -1,3 +1,7 @@
+2013-08-16 Borut Razem <borutr@users.sourceforge.net>
+	* doc/doc/gpsimWin32.html: updated libraries, links, ...
+	* Makefile.am: removed plat/win32/Install.vcproj from EXTRA_DIST
+
 2013-08-14 Borut Razem <borutr@users.sourceforge.net>
 	* cli/cli.vcxproj, eXdbm/eXdbm.vcxproj, gpsim/gpsim.vcxproj,
 	  gui/gui.vcxproj, modules/modules.vcxproj, plat/win32/Install.vcxproj,
