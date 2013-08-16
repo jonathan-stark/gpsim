@@ -84,7 +84,7 @@
       <DisableSpecificWarnings>/wd4800</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)libgpsim.dll</OutputFile>
       <ModuleDefinitionFile>../plat/win32/libgpsim.def</ModuleDefinitionFile>
       <ImportLibrary>$(OutDir)libgpsim.lib</ImportLibrary>
@@ -107,7 +107,7 @@
       <DisableSpecificWarnings>/wd4800</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)libgpsim.dll</OutputFile>
       <ModuleDefinitionFile>../plat/win32/libgpsim.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -124,7 +124,7 @@
       <DisableSpecificWarnings>/wd4800</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)libgpsim.dll</OutputFile>
       <ModuleDefinitionFile>../plat/win32/libgpsim.def</ModuleDefinitionFile>
       <ImportLibrary>$(OutDir)libgpsim.lib</ImportLibrary>
@@ -147,7 +147,7 @@
       <DisableSpecificWarnings>4800</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)libgpsim.dll</OutputFile>
       <ModuleDefinitionFile>../plat/win32/libgpsim.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>

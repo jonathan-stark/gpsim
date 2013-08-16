@@ -93,7 +93,7 @@
       <Outputs>libgpsim.dll;%(Outputs)</Outputs>
     </CustomBuildStep>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../popt-1.8.1/lib/libpopt.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/pthreadVC2.lib;../../gtk+/lib/gdk-win32-2.0.lib;../../gdk-pixbuf/lib/gdk_pixbuf-2.0.lib;../../gtk+/lib/gtk-win32-2.0.lib;../../pango/lib/pango-1.0.lib;../../cairo/lib/cairo.lib;../../gtkextra-2/lib/libgtkextra-win32-2.1_dll.lib;../../readline/lib/readline.dll.lib;../eXdbm/Debug/eXdbm.lib;../src/Debug GUI/libgpsim.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../popt-1.8.1/lib/libpopt.lib;../../glib/lib/glib-2.0.lib;../../glib/lib/gobject-2.0.lib;../../glib/lib/gthread-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;../../gtk+/lib/gdk-win32-2.0.lib;../../gdk-pixbuf/lib/gdk_pixbuf-2.0.lib;../../gtk+/lib/gtk-win32-2.0.lib;../../pango/lib/pango-1.0.lib;../../cairo/lib/cairo.lib;../../gtkextra-2/lib/libgtkextra-win32-2.1_dll.lib;../../readline/lib/readline.dll.lib;../eXdbm/Debug/eXdbm.lib;../src/Debug GUI/libgpsim.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)gpsim.exe</OutputFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -158,7 +158,7 @@
       <Outputs>$(TargetDir)\popt1.dll;$(TargetDir)\libintl-2.dll;$(TargetDir)\libiconv-2.dll;$(TargetDir)\libglib-2.0-0.dll;$(TargetDir)\libgthread.dll;$(TargetDir)\libgobject-2.0-0.dll;$(TargetDir)\libgmodule-2.0-0.dll;$(TargetDir)\iconv.dll;$(TargetDir)\intl.dll;$(TargetDir)\libgdk-win32-2.0-0.dll;$(TargetDir)\libgdk_pixbuf-2.0-0.dll;$(TargetDir)\libpango-1.0-0.dll;$(TargetDir)\libpangowin32-1.0-0.dll;$(TargetDir)\libgtk-win32-2.0-0.dll;$(TargetDir)\libatk-1.0-0.dll;%(Outputs)</Outputs>
     </CustomBuildStep>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../popt-1.8.1/lib/libpopt.lib;../../glib/lib/glib-2.0.lib;../../pthreads/lib/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../popt-1.8.1/lib/libpopt.lib;../../glib/lib/glib-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)gpsim.exe</OutputFile>
       <IgnoreSpecificDefaultLibraries>MSVCRT.LIB;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>../plat/win32/gpsim.def</ModuleDefinitionFile>
@@ -186,7 +186,7 @@
       <Outputs>$(TargetDir)\popt1.dll;$(TargetDir)\libintl-2.dll;$(TargetDir)\libiconv-2.dll;$(TargetDir)\libglib-2.0-0.dll;$(TargetDir)\libgthread.dll;$(TargetDir)\libgobject-2.0-0.dll;$(TargetDir)\libgmodule-2.0-0.dll;$(TargetDir)\iconv.dll;$(TargetDir)\intl.dll;$(TargetDir)\libgdk-win32-2.0-0.dll;$(TargetDir)\libgdk_pixbuf-2.0-0.dll;$(TargetDir)\libpango-1.0-0.dll;$(TargetDir)\libpangowin32-1.0-0.dll;$(TargetDir)\libgtk-win32-2.0-0.dll;$(TargetDir)\libatk-1.0-0.dll;%(Outputs)</Outputs>
     </CustomBuildStep>
     <Link>
-      <AdditionalDependencies>wsock32.lib;../../popt-1.8.1/lib/libpopt.lib;../../glib/lib/glib-2.0.lib;../../pthreads/lib/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>wsock32.lib;../../popt-1.8.1/lib/libpopt.lib;../../glib/lib/glib-2.0.lib;../../pthreads/lib/x86/pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)gpsim.exe</OutputFile>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>../plat/win32/gpsim.def</ModuleDefinitionFile>
