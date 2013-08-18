@@ -1551,6 +1551,11 @@ move_handler(GtkWidget *widget,
   if(!widget || !old_range || !new_range || !rw)
       return;
 
+  if (old_range->row0 < 0 || old_range->col0 < 0 ||
+	new_range->row0 < 0 || new_range->col0)
+      return;
+
+
   cti = new_range->coli - new_range->col0 + 1;
   ctj = new_range->rowi - new_range->row0 + 1;
 
