@@ -30,6 +30,9 @@
 #define DRV_CLOCK PORTA,1
 #define DRV_CLOCK_TRIS TRISA,1
 
+#define DRV_SS PORTA,2
+#define DRV_SS_TRIS TRISA,2
+
 
 ;----------------------------------------------------------------------
 ;----------------------------------------------------------------------
@@ -82,14 +85,18 @@ start:
    .sim "module load pu pu1"
    .sim "module load pu pu2"
    .sim "module load not not"
-;   .sim "p16f88.xpos = 132."
-;   .sim "p16f88.ypos = 96."
 
-   .sim "not.xpos=96."
-   .sim "not.ypos=216."
+   .sim "p16f88.xpos = 72"
+   .sim "p16f88.ypos = 24"
 
-   .sim "pu1.xpos=228."
-   .sim "pu1.ypos=216."
+   .sim "pu1.xpos = 228"
+   .sim "pu1.ypos = 24"
+
+   .sim "pu2.xpos = 96"
+   .sim "pu2.ypos = 240"
+
+   .sim "not.xpos = 96"
+   .sim "not.ypos = 168"
 
    .sim "node ss"
    .sim "attach ss portb5 porta2"	; Not SS
@@ -103,14 +110,17 @@ start:
     bsf  STATUS,RP0	; bank 1
     movlw	0xf6	; set internal RC to 8 Mhz
     movwf	OSCCON
+    clrf	ANSEL
     bcf		SDO_TRIS	; SDO
     bcf		SCK_TRIS	; SCK
+    bcf		DRV_SS_TRIS
     movlw	0xff
     movwf	SSPSTAT
   .assert "sspstat == 0xC0, \"SPI sspstat only SMP, CKE writable\""
     clrf	SSPSTAT
-    bcf  STATUS,RP0	; bank 0
 
+    BANKSEL	SSPCON
+    bsf 	DRV_SS		; set SS high
 
 ;
 ;  	Test SPI Master mode
@@ -156,6 +166,21 @@ loop:
     bcf		SSPCON,WCOL	; clear WCOL bit
   .assert "(sspcon & 0x80) == 0x00, \"SSP SPI WCOL was cleared\""
     nop
+    ; SS is high, so transfer should not happen
+    movlw	0x0a
+    movwf	loopcnt
+
+ss_loop:
+    bsf		DRV_CLOCK
+    bcf		DRV_CLOCK
+    decfsz	loopcnt
+    goto	ss_loop
+
+  .assert "(pir1 & 0x08) == 0, \"FAILED SSP SPI slave with SS\""
+    nop
+    bcf		DRV_SS		; clear SS
+    
+
     clrf	loopcnt
 loop2:
     incf	loopcnt,F
