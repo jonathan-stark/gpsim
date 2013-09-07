@@ -790,6 +790,7 @@ void SSP1_MODULE::set_ssPin(PinModule *_ssPin)
 {
    if (m_ss == _ssPin) return;	// No change, do nothing
    m_ss = _ssPin;
+
 }
 
 void SSP1_MODULE::initialize(
@@ -2109,6 +2110,10 @@ void SSP_MODULE::stopSSP(unsigned int old_value)
         m_sdo->setSource(0);
 	m_sdo_active = false;
 	m_sck_active = false;
+	m_ss->getPin().newGUIname(m_ss->getPin().name().c_str());
+	m_sdo->getPin().newGUIname(m_sdo->getPin().name().c_str());
+	m_sdi->getPin().newGUIname(m_sdi->getPin().name().c_str());
+	m_sck->getPin().newGUIname(m_sck->getPin().name().c_str());
 
         if (verbose)
       	    cout << "SSP: SPI turned off" << endl;
@@ -2120,6 +2125,9 @@ void SSP_MODULE::stopSSP(unsigned int old_value)
         m_sdi->setSource(0);
 	m_sck_active = false;
 	m_sdi_active = false;
+	m_sdi->getPin().newGUIname(m_sdi->getPin().name().c_str());
+	m_sck->getPin().newGUIname(m_sck->getPin().name().c_str());
+
         if (verbose)
       	    cout << "SSP: I2C turned off" << endl;
     }
@@ -2143,10 +2151,28 @@ void SSP_MODULE::startSSP(unsigned int value)
     sspbuf.setFullFlag(false);
     if (! m_sink_set)
     {
-	if (m_sdi) m_sdi->addSink(m_SDI_Sink);
-	if (m_sck) m_sck->addSink(m_SCL_Sink);
-	if (m_ss) m_ss->addSink(m_SS_Sink);
+	if (m_sdi) 
+	{
+	   m_sdi->addSink(m_SDI_Sink);
+	   m_SDI_State = m_sdi->getPin().getState();
+	}
+	if (m_sck) 
+	{
+	   m_sck->addSink(m_SCL_Sink);
+	}
+        if (m_ss)
+	{
+	   m_ss->addSink(m_SS_Sink);
+	   m_SS_State = m_ss->getPin().getState();
+	}
 	m_sink_set = true;
+    }
+    if (m_ss)
+    {
+	if ((value & _SSPCON::SSPM_mask) ==  _SSPCON::SSPM_SPIslaveSS)
+		m_ss->getPin().newGUIname("SS");
+	else
+		m_ss->getPin().newGUIname(m_ss->getPin().name().c_str());
     }
     switch( value & _SSPCON::SSPM_mask ) {
     case _SSPCON::SSPM_SPImasterTMR2:
@@ -2159,12 +2185,16 @@ void SSP_MODULE::startSSP(unsigned int value)
 	{
 	    m_sck->setSource(m_SckSource);
 	    m_sck_active = true;
+	     m_sck->getPin().newGUIname("SCK");
 	}
   	if (m_sdo)
 	{
 	     m_sdo->setSource(m_SdoSource);
 	     m_sdo_active = true;
+	     m_sdo->getPin().newGUIname("SDO");
 	}
+	if (m_sdi)
+	     m_sdi->getPin().newGUIname("SDI");
         if (m_SckSource) m_SckSource->putState( (value & _SSPCON::CKP) ? '1' : '0' );
 	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
 	break;
@@ -2175,7 +2205,14 @@ void SSP_MODULE::startSSP(unsigned int value)
 	{
 	     m_sdo->setSource(m_SdoSource);
 	     m_sdo_active = true;
+	     m_sdo->getPin().newGUIname("SDO");
 	}
+	if (m_sdi)
+	     m_sdi->getPin().newGUIname("SDI");
+
+	if (m_sck)
+	     m_sck->getPin().newGUIname("SCK");
+
 	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
 	break;
 
@@ -2185,6 +2222,10 @@ void SSP_MODULE::startSSP(unsigned int value)
       case _SSPCON::SSPM_I2Cfirmwaremaster:
       case _SSPCON::SSPM_I2Cslave_7bitaddr_ints:
       case _SSPCON::SSPM_I2Cslave_10bitaddr_ints:
+	if (m_sdi)
+	     m_sdi->getPin().newGUIname("SDA");
+	if (m_sck)
+	     m_sck->getPin().newGUIname("SCL");
 	m_i2c->set_idle();
   	m_sck->setSource(m_SckSource);
   	m_sdi->setSource(m_SdiSource);
@@ -2425,6 +2466,8 @@ void SSP_MODULE::SS_SinkState(char new3State)
 
   // If SS goes high in the middle of an SPI transfer while in slave_SS mode,
   // transfer is aborted unless BSSP which streches the clocking
+
+  printf("RRR SSP_MODULE::SS_SinkState state %d \n",  m_SS_State);
 
   if (!sspcon.isSSPEnabled() || 
 	! m_SS_State ||

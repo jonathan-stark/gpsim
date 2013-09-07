@@ -1,3 +1,7 @@
+2013-09-07 Roy Rankin <rrankin@ihug.com.au>
+	* regression/spi/p16f88.asm: Test SS operation
+	* src/ssp.cc: Fix SS bug #158, Display pin function labels
+
 2013-09-03 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac: Development version 0.27.90
 
