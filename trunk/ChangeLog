@@ -1,3 +1,8 @@
+2013-09-20 Borut Razem <borutr@users.sourceforge.net>
+	* regression/rt.sh: applied patch
+	  #34 Allow overwriting make in regression tests,
+	  thanks to Ralf Horstmann
+
 2013-09-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/spi/p16f88.asm: Test SS operation
 	* src/ssp.cc: Fix SS bug #158, Display pin function labels
