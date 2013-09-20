@@ -2,6 +2,9 @@
 	* regression/rt.sh: applied patch
 	  #34 Allow overwriting make in regression tests,
 	  thanks to Ralf Horstmann
+	* extras/ds1820/examples/Makefile.am: applied patch
+	  #33 Make gpsim buildable with BSD make,
+	  thanks to Ralf Horstmann
 
 2013-09-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/spi/p16f88.asm: Test SS operation
