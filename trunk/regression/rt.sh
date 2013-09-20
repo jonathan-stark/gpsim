@@ -1,8 +1,6 @@
 #!/bin/sh
 
 # Regression Test Script for invoking specific targets in Makefiles
-#
-# 
 
 USAGE="Usage: `basename $0` DIRECTORY TARGET"
 
@@ -22,7 +20,7 @@ touch $LOGFILE
 # echo "make $1 $2"
 
 # Run the simulation and save the results
-make $2 > $LOGFILE
+${MAKE:-make} $2 > $LOGFILE
 
 grep "PASSED" $LOGFILE
 
