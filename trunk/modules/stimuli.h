@@ -72,7 +72,7 @@ namespace ExtendedStimuli {
   {
   public:
     static Module *construct(const char *new_name);
-    PulseGen(const char *_name);
+    PulseGen(const char *_name=0);
     ~PulseGen();
 
     virtual void callback();

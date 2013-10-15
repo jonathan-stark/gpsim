@@ -216,7 +216,7 @@ namespace ExtendedStimuli {
   //----------------------------------------------------------------------
   //----------------------------------------------------------------------
 
-  PulseGen::PulseGen(const char *_name=0)
+  PulseGen::PulseGen(const char *_name)
     : StimulusBase(_name, "\
 Pulse Generator\n\
  Attributes:\n\

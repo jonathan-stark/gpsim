@@ -88,7 +88,7 @@ namespace Switches {
   class Switch : public SwitchBase
   {
   public:
-    Switch(const char *_name);
+    Switch(const char *_name=0);
     ~Switch();
 
     virtual void setState(bool);
