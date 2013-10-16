@@ -1,3 +1,6 @@
+2013-10-16 Borut Razem <borutr@users.sourceforge.net>
+	* ChangeLog: added svn Revision stamp at the end of file
+
 2013-10-15 Borut Razem <borutr@users.sourceforge.net>
 	* modules/stimuli.cc, modules/stimuli.h, modules/switch.h,
 	  modules/switch.cc, gui/gui_stopwatch.cc: applied patch
@@ -1933,7 +1936,7 @@
 
 2007-01-14 Borut Razem <borut.razem@siol.net>
 	* plat/win32/libgpsim.def: MSVC sync
-	* doc/gpsimWin32, plat/win32/gpsim.nsi: added $Author$,
+	* doc/gpsimWin32, plat/win32/gpsim.nsi: added svn Author stamp
 	  glib-2.12.7, gtk+-2.10.7, pango-1.14.9, NSIS v2.23
 
 2007-01-13  Scott Dattalo <scott@dattalo.com>
@@ -8782,3 +8785,5 @@ to simulate: -pp16c61 .)
 
 30JUL98 gpsim-0.0.1
   o initial release - basic stuff
+
+$Revision$
