@@ -72,6 +72,11 @@ extern int abort_gpsim;
   char szBuild[] = "Release";
 #endif
 
+void gpsim_version(void)
+{
+  printf("%s %s\n", szBuild, VERSION);
+}
+
 // from ui_gpsim.cc
 void initialize_ConsoleUI();
 
