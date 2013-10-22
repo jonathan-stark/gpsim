@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 using namespace std;
 
 #include "../config.h"
+#include "gpsim.h"
 #include "../cli/input.h"
 #include "../src/interface.h"
 #include "../src/gpsim_interface.h"
@@ -71,11 +72,6 @@ extern int abort_gpsim;
   char szBuild[] = "Release";
 #endif
 
-void gpsim_version(void)
-{
-  printf("%s %s\n", szBuild, VERSION);
-}
-
 // from ui_gpsim.cc
 void initialize_ConsoleUI();
 
@@ -85,24 +81,28 @@ void initialize_ConsoleUI();
 // Here are the variables that popt (the command line invocation parsing
 // library) will assign values to:
 
-static const char *startup_name = "";
-static const char *include_startup_name = "";
-static const char *processor_name = "";
-static const char *cod_name     = "";
-static const char *hex_name     = "";
-static const char *search_path  = "";
-static const char *icd_port     = "";
-static const char *defineSymbol = "";
-static const char *sExitOn      = "";
-static const char *sourceEnabled = "";
+static const char *startup_name = NULL;
+static const char *include_startup_name = NULL;
+static const char *processor_name = NULL;
+static const char *cod_name     = NULL;
+static const char *hex_name     = NULL;
+static const char *search_path  = NULL;
+static const char *icd_port     = NULL;
+static const char *defineSymbol = NULL;
+static const char *sExitOn      = NULL;
+static const char *sourceEnabled = NULL;
 
 
-#define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
+
+struct poptOption myHelpOptions[] = {
+    POPT_TABLEEND
+} ;
+
+#define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, myHelpOptions, \
                         0, "Examples:\n\
-  gpsim  myprog.cod          <-- loads a symbol file\n\
-  gpsim -p p16f877 myprog.hex  <-- select processor and load hex\n\
-  gpsim  myscript.stc        <-- loads a script\n\
-\nHelp options:", NULL },
+  gpsim  myprog.cod                    <-- loads a symbol file\n\
+  gpsim -p p16f877 myprog.hex          <-- select processor and load hex\n\
+  gpsim  myscript.stc                  <-- loads a script\n", NULL },
 
 //------------------------------------------------------------------------
 // see popt documentation about how the poptOption structure is defined.
@@ -117,76 +117,42 @@ static const char *sourceEnabled = "";
 // gpsim to interpret and further parse the option.
 
 struct poptOption optionsTable[] = {
-  //  { "help", 'h', 0, 0, 'h',
-  //    "this help list" },
+  { "cli", 'i', POPT_ARG_NONE, 0, 'i',
+    "command line mode only", NULL },
+  { "command", 'c', POPT_ARG_STRING, &startup_name, 0,
+    "startup command file (-c optional)", NULL },
+  { "define", 'D', POPT_ARG_STRING, &defineSymbol, 'D',
+    "define symbol with value that is added to the gpsim symbol table. "
+    "Define any number of symbols.", NULL },
+  { "echo", 'E', POPT_ARG_NONE, 0, 'E',
+    "Echo lines from a command file to the console.", NULL },
+  { "help", 'h', 0, 0, 'h',
+    "display this help and exit" },
+  { "icd", 'd', POPT_ARG_STRING, &icd_port, 0,
+    "use ICD (e.g. -d /dev/ttyS0).", NULL },
+  { "include", 'I', POPT_ARG_STRING, &include_startup_name, 0,
+    "startup command file - does not change directories", NULL },
   { "processor", 'p', POPT_ARG_STRING, &processor_name, 0,
     "processor (e.g. -pp16c84 for the 'c84)","<processor name>" },
-  { "command",   'c', POPT_ARG_STRING, &startup_name, 0,
-    "startup command file (-c optional)",0 },
-  { "symbol",    's', POPT_ARG_STRING, &cod_name, 0,
-    ".cod symbol file (-s optional)",0 } ,
-  { "sourcepath", 'L',POPT_ARG_STRING, &search_path, 'L',
-    "colon separated list of directories to search.", 0},
-  { "include", 'I',POPT_ARG_STRING, &include_startup_name, 0,
-    "startup command file - does not change directories", 0},
-  { "version",'v',0,0,'v',
-    "gpsim version",0},
-  { "echo",'E',POPT_ARG_NONE,0,'E',
-    "Echo lines from a command file to the console.",0},
-  { "cli",'i',POPT_ARG_NONE,0,'i',
-    "command line mode only",0},
-  { "source",'S',POPT_ARG_STRING,&sourceEnabled,'S',
+  { "source", 'S', POPT_ARG_STRING, &sourceEnabled, 'S',
     "'enable' or 'disable' the loading of source code. Default is 'enable'. "
-    "Useful for running faster regression tests.",0},
-  { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
-    "use ICD (e.g. -d /dev/ttyS0).",0 },
-  { "define",'D',POPT_ARG_STRING, &defineSymbol,'D',
-    "define symbol with value that is added to the gpsim symbol table. "
-    "Define any number of symbols.",0},
-  { "exit", 'e',POPT_ARG_STRING, &sExitOn, 'e',
-    "Causes gpsim to auto exit on a condition. Specifying onbreak will cause "
-    "gpsim to exit when the simulation halts, but not until after the current "
-    "command script completes.",0 },
+    "Useful for running faster regression tests.", NULL },
+  { "sourcepath", 'L', POPT_ARG_STRING, &search_path, 'L',
+    "colon separated list of directories to search.", NULL },
+  { "symbol", 's', POPT_ARG_STRING, &cod_name, 0,
+    ".cod symbol file (-s optional)", 0 } ,
+  { "version", 'v', 0, 0, 'v',
+    "gpsim version", NULL },
+  POPT_AUTOHELP
   POPT_MYEXAMPLES
   POPT_TABLEEND
 };
-
-// copied the format of this from the popt.h include file:
-
-
-void
-helpme (char *iam)
-{
-  printf ("\n\nuseage:\n%s [-h] [[-p <device> [<hex_file>]] | [[-s] <cod_file>]] [[-c] <stc_file>]\n", iam);
-  printf ("\t-h             : this help list\n");
-  printf ("\t-p <device>    : processor (e.g. -pp16c84 for the 'c84)\n");
-  printf ("\t<hex_file>     : input file in \"intelhex16\" format\n");
-  printf ("\t-c <stc_file>  : startup command file (-c optional)\n");
-  printf ("\t-s <cod_file>  : .cod symbol file (-s optional)\n");
-  printf ("\t-L <path list> : colon separated list of directories to search.\n");
-  printf ("\t-d <port>      : Use ICD with serial port <port>\n");
-  printf ("\t-D <symbol>=<value> : Define a symbol that will exist in the gpsim\n"
-          "\t                      symbol table\n You may define any number.\n");
-  printf ("\n\t-v             : gpsim version\n");
-  printf ("\n Long options:\n\n");
-  printf ("\t--cli          : command line mode only\n");
-  printf ("\n\texamples:\n\n");
-  printf ("%s myprog.cod          <-- loads a symbol file\n",iam);
-  printf ("%s -p p16f877 myprog.hex  <-- select processor and load hex\n",iam);
-  printf ("%s myscript.stc        <-- loads a script\n",iam);
-
-}
-
-
-
 
 void welcome(void)
 {
   printf("\ngpsim - the GNUPIC simulator\nversion: %s %s\n",
     szBuild, VERSION);
   printf("\n\ntype help for help\n");
-
-  return;
 }
 
 void exit_gpsim(int ret)
@@ -200,15 +166,13 @@ main (int argc, char *argv[])
 {
   bool bEcho = false;
   bool bSourceEnabled = true;
-  int c,usage=0;
+  int c, usage = 0;
   bool bUseGUI = true;    // assume that we want to use the gui
   char command_str[256];
   poptContext optCon;     // context for parsing command-line options
 
   // Perform basic initialization before parsing invocation arguments
 
-
-  welcome();
 
   InitSourceSearchAsSymbol();
   initialize_ConsoleUI();
@@ -217,12 +181,11 @@ main (int argc, char *argv[])
   initialize_commands();
 
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
-  if(argc>=2) {
+  if (argc >= 2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
-
-        const char * optArg = poptGetOptArg(optCon);
+      const char * optArg = poptGetOptArg(optCon);
 #ifndef _WIN32
-        free((char *)optArg);
+      free((char *)optArg);
 #endif
       switch (c) {
 
@@ -245,7 +208,8 @@ main (int argc, char *argv[])
         break;
 
       case 'v':
-        gpsim_version();
+        fprintf(stderr, "%s\n", GPSIM_VERSION_STRING);
+        return 0;
         break;
 
       case 'i':
@@ -261,7 +225,6 @@ main (int argc, char *argv[])
 #ifndef _WIN32
         free((char *)defineSymbol);
 #endif
-        defineSymbol = "";
         break;
 
       case 'S':
@@ -299,15 +262,15 @@ main (int argc, char *argv[])
 
       if (usage)
         break;
-
     }
-    poptFreeContext(optCon);
   }
 
   if (usage) {
-    helpme(argv[0]);
+    poptPrintHelp(optCon, stdout, 0);
     exit (1);
-  }
+ }
+
+  welcome();
 
   if(bEcho) {
     for(int index = 0; index < argc; index++) {
@@ -316,8 +279,9 @@ main (int argc, char *argv[])
     printf("\n");
   }
   if(poptPeekArg(optCon))
-    hex_name=strdup(poptPeekArg(optCon));
+    hex_name=strdup(poptGetArg(optCon));
 
+  poptFreeContext(optCon);
 
   initialize_readline();
 
@@ -356,12 +320,12 @@ main (int argc, char *argv[])
   try {
 
   // Convert the remaining command line options into gpsim commands
-  if(*cod_name) {
+  if(cod_name) {
 
-    if(*processor_name)
+    if(processor_name)
       cout << "WARNING: command line processor named \"" << processor_name <<
         "\" is being ignored\nsince the .cod file specifies the processor\n";
-    if(*hex_name)
+    if(hex_name)
       cout << "WARNING: Ignoring the hex file \"" << hex_name <<
         "\"\nsince the .cod file specifies the hex code\n";
 
@@ -369,28 +333,28 @@ main (int argc, char *argv[])
              "load s \"%s\"\n",cod_name);
     parse_string(command_str);
 
-  } else  if(*processor_name) {
+  } else  if(processor_name) {
 
-    if(*hex_name){
+    if(hex_name){
       snprintf(command_str, sizeof(command_str),
         "load %s \"%s\"\n",processor_name, hex_name);
       parse_string(command_str);
 
     }
   }
-  if(*icd_port) {
+  if(icd_port) {
       snprintf(command_str, sizeof(command_str),
                "icd open \"%s\"\n",icd_port);
       parse_string(command_str);
   }
 
-  if(*startup_name) {
+  if(startup_name) {
       snprintf(command_str, sizeof(command_str),
                "load c \"%s\"\n",startup_name);
       parse_string(command_str);
   }
 
-  if(*include_startup_name) {
+  if(include_startup_name) {
       snprintf(command_str, sizeof(command_str),
                "load i \"%s\"\n",include_startup_name);
       parse_string(command_str);

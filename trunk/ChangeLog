@@ -1,3 +1,8 @@
+2013-10-22 Borut Razem <borutr@users.sourceforge.net>
+	* gpsim/main.cc, gpsim/Makefile.am, set_cl_revision.sh:
+	  fixed mess with --help and --version commnd line options,
+	  show svn revision number in --version
+
 2013-10-16 Borut Razem <borutr@users.sourceforge.net>
 	* ChangeLog: added svn Revision stamp at the end of file
 
