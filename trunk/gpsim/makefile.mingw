@@ -55,8 +55,12 @@ gpsim_OBJECTS =			\
 
 ################ The gpsim EXE
 
-gpsim.exe : $(gpsim_OBJECTS) $(gpsim_LIBS)
+gpsim.exe : $(gpsim_OBJECTS) $(gpsim_LIBS) 
 	$(CXX) $(CFLAGS) $(CLDFLAGS) \
 	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib \
 	-o gpsim.exe $(gpsim_OBJECTS) -Wl,--whole-archive $(gpsim_LIBS) -Wl,--no-whole-archive $(libgpsim_LIBS) $(LIBS)
 
+gpsim.h : gpsim.h.in
+	sed -e "s/@REVISION@/$$(${top_srcdir}\/get_cl_revision.sh -s ${top_srcdir}\/ChangeLog)/g" "$<" > "$@"
+
+main.o : main.cc gpsim.h
