@@ -1,3 +1,6 @@
+2013-10-27 Borut Razem <borutr@users.sourceforge.net>
+	* gpsim/main.cc, gpsim/makefile.mingw: fixed mingw ompilation
+
 2013-10-26 Borut Razem <borutr@users.sourceforge.net>
 	* gpsim/main.h.in: added to source control
 
