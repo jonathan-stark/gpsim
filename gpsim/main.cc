@@ -148,7 +148,11 @@ struct poptOption optionsTable[] = {
     ".cod symbol file (-s optional)", 0 } ,
   { "version", 'v', 0, 0, 'v',
     "gpsim version", NULL },
-  POPT_AUTOHELP
+  /* POPT_AUTOHELP generates
+    error: invalid conversion from `const void*' to `void*' [-fpermis sive]
+    on i686-pc-mingw32-c++ (GCC) 4.7.3 */
+  { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
+    0, "Help options:", NULL },
   POPT_MYEXAMPLES
   POPT_TABLEEND
 };
@@ -188,10 +192,6 @@ main (int argc, char *argv[])
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   if (argc >= 2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
-      const char * optArg = poptGetOptArg(optCon);
-#ifndef _WIN32
-      free((char *)optArg);
-#endif
       switch (c) {
 
       default:
