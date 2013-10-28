@@ -186,14 +186,11 @@ main (int argc, char *argv[])
   InitSourceSearchAsSymbol();
   initialize_ConsoleUI();
   initialize_gpsim_core();
-  initialize_gpsim();
-  initialize_commands();
 
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   if (argc >= 2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
       switch (c) {
-
       default:
         printf("'%c' is an unrecognized option\n",c);
       case '?':
@@ -276,6 +273,8 @@ main (int argc, char *argv[])
  }
 
   welcome();
+  initialize_gpsim();
+  initialize_commands();
 
   if(bEcho) {
     for(int index = 0; index < argc; index++) {
