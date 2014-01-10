@@ -8,7 +8,7 @@ on real devices using parasite power.
 
 Enter
 
-make 
+make ds1820.cod or make ds18b20.cod
 
 to compile the programs and then run them
 
