@@ -7,7 +7,11 @@ MAINTAINERCLEANFILES = *.o *.hex *.cod *.lst *.map *~
 
 SUFFIXES = .o .asm .cod
 
-all: ds1820.cod ds18b20.cod ds1820.o ds18b20.o
+all: 
+
+ds1820.cod: ds1820.o
+
+ds18b20.cod: ds18b20.o
 
 .o.cod:
 	gplink --map -s 16f1823_g.lkr -o $@ $<
