@@ -90,7 +90,6 @@ static const char *startup_name = NULL;
 static const char *include_startup_name = NULL;
 static const char *processor_name = NULL;
 static const char *cod_name     = NULL;
-static const char *hex_name     = NULL;
 static const char *search_path  = NULL;
 static const char *icd_port     = NULL;
 static const char *defineSymbol = NULL;
@@ -120,7 +119,6 @@ struct poptOption myHelpOptions[] = {
 // will assign an option to a variable when poptGetNextOpt is called.
 // Otherwise, poptGetNextOpt will return the value of 'val' and allow
 // gpsim to interpret and further parse the option.
-
 struct poptOption optionsTable[] = {
   { "cli", 'i', POPT_ARG_NONE, 0, 'i',
     "command line mode only", NULL },
@@ -178,6 +176,7 @@ main (int argc, char *argv[])
   int c, usage = 0;
   bool bUseGUI = true;    // assume that we want to use the gui
   char command_str[256];
+  char *hex_name = NULL;
   poptContext optCon;     // context for parsing command-line options
 
   // Perform basic initialization before parsing invocation arguments
@@ -189,9 +188,16 @@ main (int argc, char *argv[])
   initialize_gpsim();
   initialize_commands();
 
+  // If last arg ends in unprintable character such as \r, strip it
+  int len = strlen(argv[argc-1]);
+  if (!isprint(*(argv[argc-1]+len-1)))
+	*(argv[argc-1]+len-1) = 0;
+
+
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   if (argc >= 2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
+
       switch (c) {
       default:
         printf("'%c' is an unrecognized option\n",c);
@@ -267,8 +273,15 @@ main (int argc, char *argv[])
       if (usage)
         break;
     }
-  }
 
+    if (c < -1) {
+      /* an error occurred during option processing */
+      fprintf(stderr, "Gpsim %s: %s\n",
+              poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
+              poptStrerror(c));
+      usage = 1;
+    }
+  }
   if (usage) {
     poptPrintHelp(optCon, stdout, 0);
     exit (1);
@@ -282,8 +295,27 @@ main (int argc, char *argv[])
     }
     printf("\n");
   }
-  if(poptPeekArg(optCon))
+  if(poptPeekArg(optCon)) // unprocessed argument, does not have to be a hex file
+  {
     hex_name=strdup(poptGetArg(optCon));
+    if (strstr(hex_name, ".cod") && cod_name == NULL)
+    {
+	cod_name = hex_name;
+	hex_name = NULL;
+    }
+  }
+
+  if(poptPeekArg(optCon)) // unexpected unprocessed argument
+  {
+    char *arg;
+
+    fprintf(stderr, "Gpsim Unexpected arguments not used: \"");
+    while ((arg=(char *)poptGetArg(optCon)))
+    {
+	fprintf(stderr, "%s ", arg);
+    }
+    fprintf(stderr, "\"\n");
+  }
 
   poptFreeContext(optCon);
 
@@ -329,9 +361,15 @@ main (int argc, char *argv[])
     if(processor_name)
       cout << "WARNING: command line processor named \"" << processor_name <<
         "\" is being ignored\nsince the .cod file specifies the processor\n";
-    if(hex_name)
-      cout << "WARNING: Ignoring the hex file \"" << hex_name <<
-        "\"\nsince the .cod file specifies the hex code\n";
+    if (hex_name)
+    {
+      cout << "WARNING: Ignoring the file \"" << hex_name << "\" ";
+      cout <<  "since \"" << cod_name <<"\" already specified\n";
+ 	free((void *)hex_name);
+	hex_name = NULL;
+    }
+
+    
 
     snprintf(command_str, sizeof(command_str),
              "load s \"%s\"\n",cod_name);
@@ -343,8 +381,17 @@ main (int argc, char *argv[])
       snprintf(command_str, sizeof(command_str),
         "load %s \"%s\"\n",processor_name, hex_name);
       parse_string(command_str);
+      free((void *)hex_name);
+      hex_name = NULL;
 
     }
+    else
+    {
+      snprintf(command_str, sizeof(command_str),
+        "processor %s \n",processor_name);
+      parse_string(command_str);
+    }
+
   }
   if(icd_port) {
       snprintf(command_str, sizeof(command_str),
@@ -364,10 +411,10 @@ main (int argc, char *argv[])
       parse_string(command_str);
   }
   // otherwise see if load will work
-  if (argc == 2)
+  if (hex_name)
   {
       snprintf(command_str, sizeof(command_str),
-               "load  \"%s\"\n",argv[1]);
+               "load  \"%s\"\n", hex_name);
       parse_string(command_str);
   }
 

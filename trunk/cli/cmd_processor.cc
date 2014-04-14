@@ -170,5 +170,5 @@ void cmd_processor::processor(const char * processor_type,
 {
   if(!CSimulationContext::GetContext()->SetDefaultProcessor( processor_type,
     processor_new_name))
-    cout << "Unable to find processor\n";
+    cout << "Unable to find processor " << processor_type << "\n";
 }
