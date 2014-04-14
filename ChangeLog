@@ -1,3 +1,7 @@
+2014-04-40 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_processor.cc: print unfound processor name
+	* gpsim/main.cc: Fix issues with command line arguments - bug 165
+
 2014-01-10 Roy Rankin <rrankin@ihug.com.au>
 	* extras/ds1820/examples/Makefile.am: remove gpasm dependency from
 	  build
