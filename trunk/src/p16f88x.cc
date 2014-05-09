@@ -332,7 +332,7 @@ void P16F88x::create_sfr_map()
   intcon_reg.set_pir_set(get_pir_set());
 
 
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
+  add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0),"osccon");
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
   osccon.set_osctune(&osctune);
@@ -1327,7 +1327,7 @@ void P16F631::create_sfr_map()
   add_sfr_register(&t1con, 0x10, RegisterValue(0,0));
   add_sfr_register(&pcon, 0x8e, RegisterValue(0,0));
   add_sfr_register(&wdtcon, 0x97, RegisterValue(0x08,0));
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0));
+  add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0));
   cm1con0.setpins( &(*m_porta)[1], &(*m_portc)[1], &(*m_portc)[2],
 	&(*m_portc)[3], &(*m_porta)[0], &(*m_porta)[2]);
   cm2con0.setpins( &(*m_porta)[1], &(*m_portc)[1], &(*m_portc)[2],
@@ -1724,7 +1724,7 @@ void P16F684::create_sfr_map()
 
   add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
   add_sfr_register(&pcon, 0x8e, RegisterValue(0,0));
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0));
+  add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0));
 
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
   add_sfr_register(&ansel, 0x91, RegisterValue(0xff,0));

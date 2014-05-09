@@ -53,13 +53,19 @@ class GPIO : public PicPortRegister
 public:
   GPIO(P12bitBase *pCpu, const char *pName, const char *pDesc,
        unsigned int numIopins, 
-       unsigned int enableMask);
+       unsigned int enableMask,
+       unsigned int resetMask  = (1 << 3),
+       unsigned int wakeupMask = 0x0b,
+       unsigned int configMaskMCLRE = (1<<4));
   void setbit(unsigned int bit_number, char new_value);
   void setPullUp ( bool bNewPU , bool mclr);
 
 private:
   P12bitBase *m_CPU;
   bool m_bPU;
+  unsigned int m_resetMask;
+  unsigned int m_wakeupMask;
+  unsigned int m_configMaskMCLRE;
 };
 
 //--------------------------------------------------------
@@ -387,6 +393,46 @@ public:
   // GP2 can be driven by either FOSC/4, TMR 0, or the GP I/O driver
   //virtual void updateGP2Source();
 protected:
+};
+
+class P16F505 : public P12bitBase
+{
+public:
+    enum {
+        FOSC0  = 1<<0,
+        FOSC1  = 1<<1,
+        FOSC2  = 1<<2,
+        WDTEN  = 1<<3,
+        CP     = 1<<4,
+        MCLRE  = 1<<5
+    };
+
+    P16F505(const char *_name=0, const char *desc=0);
+    virtual ~P16F505();
+
+    static Processor *construct(const char *name);
+    virtual PROCESSOR_TYPE isa() { return _P16F505_; };
+
+    virtual void create();
+    virtual void create_symbols();
+    virtual void create_iopin_map();
+    virtual void create_sfr_map();
+    virtual void create_config_memory();
+    virtual void tris_instruction(unsigned int tris_register);
+    virtual void setConfigWord(unsigned int val, unsigned int diff);
+    virtual void updateGP2Source();
+    virtual void option_new_bits_6_7(unsigned int bits);
+    virtual void reset(RESET_TYPE r);
+    virtual void dump_registers();
+
+    virtual unsigned int program_memory_size() const { return 0x400; }
+    virtual unsigned int fsr_valid_bits() { return 0x7f; }
+    virtual unsigned int fsr_register_page_bits() { return 0x60; }
+
+    GPIO            *m_portb;
+    GPIO            *m_portc;
+    PicTrisRegister *m_trisb;
+    PicTrisRegister *m_trisc;
 };
 
 #endif //  __P12X_H__

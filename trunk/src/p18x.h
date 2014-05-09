@@ -234,34 +234,31 @@ class P18F452 : public P18F442
 
 
 
-class P18Fxx20 : public _16bit_v2_adc
-{
-public:
-  P18Fxx20(const char *_name=0, const char *desc=0);
-  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
-  virtual unsigned int last_actual_register () const { return 0x00FF;};
 
-  // Strip down from base class
-  virtual bool HasPortC(void) { return false; };
-  virtual bool HasCCP2(void) { return false; };
-};
-
-class P18F1220 : public P18Fxx20
+class P18F1220 : public  _16bit_v2_adc
 {
  public:
   OSCTUNE      osctune;
   ECCPAS        eccpas;
   PWM1CON       pwm1con;
 
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
   virtual PROCESSOR_TYPE isa(){return _P18F1220_;};
   P18F1220(const char *_name=0, const char *desc=0);
   ~P18F1220();
+
+
   static Processor *construct(const char *name);
   void create();
   virtual void create_iopin_map();
   virtual unsigned int program_memory_size() const { return 0x1000; };
   virtual void osc_mode(unsigned int value);
+  virtual unsigned int last_actual_register () const { return 0x00FF;};
 
+  // Strip down from base class
+  virtual bool HasPortC(void) { return false; };
+  virtual bool HasCCP2(void) { return false; };
+  
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
    assert(0);

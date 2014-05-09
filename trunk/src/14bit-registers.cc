@@ -203,7 +203,7 @@ void OSCCON::callback()
 }
 bool OSCCON::set_rc_frequency()
 {
-  double base_frequency = 31.25e3;
+  double base_frequency = 31.e3;
 
 
   if (!cpu_pic->get_int_osc())
@@ -213,7 +213,7 @@ bool OSCCON::set_rc_frequency()
     switch (new_IRCF)
     {
     case 0:
-	base_frequency = 31.25e3;
+	base_frequency = 31.e3;
 	break;
 	
     case 1:

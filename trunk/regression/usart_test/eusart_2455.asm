@@ -25,8 +25,9 @@
         errorlevel -302 
 	radix dec
 
-BAUDHI  equ     ((100000/4)/48)-1
-BAUDLO  equ     129
+BAUDHI  equ     ((80000/4)/48)-1
+;;BAUDLO  equ     129
+BAUDLO  equ     8000000/(4800*16)-1
 
 
 ;----------------------------------------------------------------------
@@ -108,7 +109,6 @@ int_done:
 MAIN    CODE
 start	
 
-   .sim ".frequency=10e6"
    .sim "break c 0x100000"
    .sim "module library libgpsim_modules"
    .sim "module load usart U1"
@@ -145,6 +145,12 @@ start
 	clrf    TRISC		;RRR test
 	bsf	TRISC,6		;RX is an input
 	bsf	TRISC,7		;TX EUSART sets pin direction
+  .assert "p18f2455.frequency == 1000000., \"FAILED 18f2455 default intrc frequency\""
+	nop
+	movlw	0x70
+	movwf	OSCCON
+  .assert "p18f2455.frequency == 8000000., \"FAILED 18f2455 frequency osccon=070\""
+	nop
 
 	;; CSRC - clock source is a don't care
 	;; TX9  - 0 8-bit data
@@ -240,12 +246,12 @@ start
 ;
 ;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
 ;  and < 10 bits or between 0.9375 and 1.041 msec.
-;  with oscillator at 20MHz and TMR0 / 64 expect between 73 and 81
+;  with oscillator at 8MHz and TMR0 / 64 expect between 58 and 65
 ;  TMR0 cycles.
 
 	movf	TMR0L,W
 
-  .assert "tmr0 > 73 && tmr0 < 81, \"*** FAILED baud rate\""
+  .assert "tmr0 > 58 && tmr0 < 65, \"*** FAILED baud rate\""
 	nop
 	clrf	rxFlag
         call rx_loop
@@ -272,11 +278,11 @@ start
          bra    $-2
 ;
 ;  At 4800 baud each bit takes 0.208 msec. Output will be low for
-;  start + 12 bit times or 2.70 msec. With 10Mhz TMR0 / 64 is 106 TMR0 counts.
+;  start + 12 bit times or 2.70 msec. With 8Mhz TMR0 / 64 is 85 TMR0 counts.
 
 	movf	TMR0L,W
 
-  .assert "tmr0 > 101 && tmr0 < 111, \"*** FAILED sync pulse\""
+  .assert "tmr0 > 81 && tmr0 < 89, \"*** FAILED sync pulse\""
 	nop
 
 done:
@@ -315,7 +321,7 @@ rx_loop:
 ;	call	delay		;; Delay between bytes.
 
 	btfss	PIR1,TXIF
-	 bra	$-1
+	 bra	$-2
 
 	return
 

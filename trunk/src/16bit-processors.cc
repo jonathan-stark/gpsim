@@ -539,7 +539,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&rcon,	  0xfd0,RegisterValue(0x1c,0),"rcon");
   add_sfr_register(&wdtcon,	  0xfd1,porv,"wdtcon");
   add_sfr_register(&lvdcon,	  0xfd2,porv,"lvdcon");
-  add_sfr_register(&osccon,	  0xfd3,porv,"osccon");
+//RRR  add_sfr_register(&osccon,	  0xfd3,porv,"osccon");
   // 0x4 is not defined
   add_sfr_register(&t0con,	  0xfd5,RegisterValue(0xff,0),"t0con");
   add_sfr_register(&tmr0l,	  0xfd6,porv,"tmr0l");
