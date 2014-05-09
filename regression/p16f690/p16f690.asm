@@ -34,8 +34,9 @@
 #define DRV_CLOCK_TRIS TRISA,1
         radix dec
 
-BAUDHI  equ     ((100000/4)/48)-1
-BAUDLO  equ     129
+BAUDHI  equ     ((80000/4)/48)-1
+;;BAUDLO  equ     129
+BAUDLO  equ     103
 
         radix hex
 
@@ -102,7 +103,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
   .sim "attach n3 porta1 porta4 portb6 R2.pin"
   .sim "node n4"
 
-   .sim ".frequency=10e6"
+;;   .sim ".frequency=10e6"
    .sim "break c 0x200000"
    .sim "module library libgpsim_modules"
    .sim "module load usart U1"
@@ -231,6 +232,14 @@ start
 ;	bcf	VRCON,VRR
 ;	bsf	VRCON,C1VREN
 	;
+	.assert "p16f690.frequency == 4000000., \"FALIED 16f690 default frequency\""
+	nop
+	BANKSEL OSCCON
+	movlw	0x70
+	movwf	OSCCON
+	.assert "p16f690.frequency == 8000000., \"FALIED 16f690 max internal oscilator frequency\""
+	nop
+
 	; test pins in analog mode return 0 on register read
 	BANKSEL TRISA
 	movlw	0xff
@@ -737,15 +746,15 @@ test_eusart:
         btfss   TXSTA,TRMT ;Wait 'til through transmitting
          goto    $-1
 ;
-;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
-;  and < 10 bits or between 0.9375 and 1.041 msec.
-;  with oscillator at 20MHz and TMR0 / 64 expect between 73 and 81
-;  TMR0 cycles.
+;  At 4800 baud each bit takes 0.208 msec. (1/4800)
+;  TRMT will be low > 9 bits and < 10 bits or between 1.875 and 2.083 msec.
+;  with oscillator at 8MHz and TMR0 / 64 expect between 58 and 65
+;  TMR0 cycles. (time * 8000000) / (4 * 64)
 
 	BANKSEL TMR0
 	movf	TMR0,W
 
-  .assert "tmr0 > 73 && tmr0 < 81, \"*** FAILED baud rate\""
+  .assert "tmr0 > 58 && tmr0 < 65, \"*** FAILED baud rate\""
 	nop
 	clrf	rxFlag
         call rx_loop
@@ -775,11 +784,12 @@ test_eusart:
          goto    $-1
 ;
 ;  At 4800 baud each bit takes 0.208 msec. Output will be low for
-;  start + 12 bit times or 2.70 msec. With 10Mhz TMR0 / 64 is 106 TMR0 counts.
+;  start + 12 bit times or 2.70 msec. With 8Mhz TMR0 / 64 is 84 TMR0 counts.
+;  8Mhz * 0.00208 / (4 * 64)
 
 	movf	TMR0,W
 
-  .assert "tmr0 > 101 && tmr0 < 111, \"*** FAILED sync pulse\""
+  .assert "tmr0 > 80 && tmr0 < 88, \"*** FAILED sync pulse\""
 	nop
 
 	return

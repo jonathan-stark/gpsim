@@ -362,6 +362,7 @@ private:
 
     mBuildTXpacket(_tx_byte);
     last_time = get_cycles().get();
+    update_packet_time();
     future_time = last_time + time_per_bit;
     get_cycles().set_break(future_time, this);
     full();
@@ -600,6 +601,7 @@ void RCREG::start()
   receive_state = RS_START_BIT;
 
 
+  update_packet_time();
   future_time = get_cycles().get() + time_per_bit/2;
 
   if(!autobaud) {

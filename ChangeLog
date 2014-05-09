@@ -1,4 +1,18 @@
-2014-04-40 Roy Rankin <rrankin@ihug.com.au>
+2014-05-09 Roy Rankin <rrankin@ihug.com.au>
+	* modules/usart.cc: Correct baud rate after CPU frequency change
+	  Bug 167
+	* src/14bit-registers.cc: change OSCCON base frequency from 
+	  31.25 to 31 KHz 
+	* src/p16f88x.cc src/16bit-processors.cc src/p18x.cc src/p18x.h:
+	- Fix default value of OSCCON - Bug 166
+	* src/p12x.cc src/p12x.h src/pic-processor.cc src/pic-processor.h:
+	- Add 16F505 - patch 31
+	* regression/usart_test/Makefile: Fix make all
+	* regression/usart_test/eusart_2455.asm: Test intrc frequency
+	* regression/a2d/p18f1220.asm: Fix initial CPU frequency test
+	* regression/p16f690/p16f690.asm: change for 8MHz INTRC
+
+2014-04-14 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_processor.cc: print unfound processor name
 	* gpsim/main.cc: Fix issues with command line arguments - bug 165
 

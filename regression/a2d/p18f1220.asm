@@ -94,7 +94,7 @@ MAIN    CODE
 
 
 Start:
-   .assert "p18f1220.frequency == 31250., \"FALIED 18F1220 a2d default frequency\""
+   .assert "p18f1220.frequency == 31000., \"FALIED 18F1220 a2d default frequency\""
 	nop
 	movlw	0x70
         movwf	OSCCON

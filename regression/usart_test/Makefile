@@ -13,7 +13,7 @@ OUTPUT = $(PROJECT).hex
 COD = $(PROJECT).cod
 STC = $(PROJECT).stc
 
-all : usart_pir2v1.cod usart_pir1v2.cod eusart.cod eusart_2455.cod
+all : usart_pir1v2.cod eusart.cod eusart_2455.cod
 
 
 sim: sim_pir1v1 sim_pir1v2 sim_eusart sim_eusart_2455

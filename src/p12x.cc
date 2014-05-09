@@ -171,9 +171,11 @@ P12bitBase::P12bitBase(const char *_name, const char *desc)
 P12bitBase::~P12bitBase()
 {
 
-  printf("P12bitBase::~P12bitBase\n");
-  (&(*m_gpio)[3])->setControl(0);
-  (&(*m_gpio)[2])->setControl(0);
+ // printf("P12bitBase::~P12bitBase\n");
+  if (m_gpio) {
+    (&(*m_gpio)[3])->setControl(0);
+    (&(*m_gpio)[2])->setControl(0);
+  }
   delete m_IN_SignalControl;
   delete_sfr_register(m_gpio);
   delete_sfr_register(m_tris);
@@ -707,8 +709,14 @@ P12CE519::~P12CE519()
 
 GPIO::GPIO(P12bitBase *pCpu, const char *pName, const char *pDesc,
            unsigned int numIopins,
-           unsigned int enableMask)
+           unsigned int enableMask,
+           unsigned int resetMask,
+           unsigned int wakeupMask,
+           unsigned int configMaskMCLRE)
   : PicPortRegister (pCpu,pName,pDesc, numIopins, enableMask), m_CPU(pCpu)
+  , m_resetMask(resetMask)
+  , m_wakeupMask(wakeupMask)
+  , m_configMaskMCLRE(configMaskMCLRE)
 {
 }
 
@@ -725,13 +733,13 @@ void GPIO::setbit(unsigned int bit_number, char new_value)
 
   unsigned int diff = lastDrivenValue ^ rvDrivenValue.data;
   //if ((diff & (1<<3)) && cpu_pic->config_modes->get_mclre()) { // GP3 is the reset pin
-  if ((diff & (1<<3)) && (m_CPU->configWord & P12bitBase::MCLRE)) { // GP3 is the reset pin
+  if ((diff & m_resetMask) && (m_CPU->configWord & m_configMaskMCLRE)) {
 
-    cpu->reset( (rvDrivenValue.data & (1<<3)) ? EXIT_RESET : MCLR_RESET);
+    cpu->reset( (rvDrivenValue.data & m_resetMask) ? EXIT_RESET : MCLR_RESET);
     return;
   }
 
-  if (diff & 0x0b) {
+  if (diff & m_wakeupMask) {
     // If /GPWU is 0 (i.e. enabled) and the processor is currently sleeping
     // then wake up the processor by resetting it.
     if( ((cpu12->option_reg->value.get() & 0x80) == 0) &&
@@ -1397,4 +1405,306 @@ Processor * P10F222::construct(const char *name)
   p->create_symbols();
   return p;
 
+}
+
+//========================================================================
+// P16F505 Config Word
+
+class P16F505ConfigWord : public ConfigWord
+{
+public:
+  enum {
+    FOSC0  = 1<<0,
+    FOSC1  = 1<<1,
+    FOSC2  = 1<<2,
+    WDTEN  = 1<<3,
+    CP     = 1<<4,
+    MCLRE  = 1<<5
+  };
+
+  P16F505ConfigWord(P12bitBase *pCpu)
+    : ConfigWord("CONFIG", 0xfff, "Configuration Word", pCpu, 0xfff),
+	m_pCpu(pCpu)
+  {
+    assert(pCpu);
+    pCpu->wdt.initialize(true);
+  }
+
+  virtual void set(gint64 v)
+  {
+    gint64 oldV = getVal();
+
+    Integer::set(v);
+    if (m_pCpu) {
+      gint64 diff = oldV ^ v;
+      m_pCpu->setConfigWord(v & 0x3ff, diff & 0x3ff);
+    }
+  }
+
+  virtual string toString()
+  {
+    gint64 i64;
+    get(i64);
+    int i = i64 &0xfff;
+
+    char buff[256];
+    const char *src;
+
+    switch(i&(FOSC0|FOSC1|FOSC2)) {
+    case 0:
+        src = "LP";
+        break;
+    case 1:
+        src = "XT";
+        break;
+    case 2:
+        src = "HS";
+        break;
+    case 3:
+        src = "EC";
+        break;
+    case 4:
+        src = "INTRCRB4";
+        break;
+    case 5:
+        src = "INTRCCLK";
+        break;
+    case 6:
+        src = "EXTRCRB4";
+        break;
+    case 7:
+        src = "EXTRCCLK";
+        break;
+    }
+
+    snprintf(buff,sizeof(buff),
+             "$%3x\n"
+             " FOSC=%d - Clk source = %s\n"
+             " WDTEN=%d - WDT is %s\n"
+             " CP=%d - Code protect is %s\n"
+             " MCLRE=%d - /MCLR is %s",
+             i,
+             i&(FOSC0|FOSC1), src,
+             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
+             (i&CP?1:0), ((i&CP) ? "enabled" : "disabled"),
+             (i&MCLRE?1:0), ((i&MCLRE) ? "enabled" : "disabled"));
+    return string(buff);
+  }
+private:
+  P12bitBase *m_pCpu;
+};
+
+
+//========================================================================
+// P16F505 Implementation
+P16F505::P16F505(const char *_name, const char *desc)
+  : P12bitBase(_name,desc)
+{
+  m_portb = new GPIO(this,"portb","I/O port",8,0x3f, 1<<3, 0x1B, 1<<5);
+  m_portc = new GPIO(this,"portc","I/O port",8,0x3f, 0, 0);
+  m_trisb = new PicTrisRegister(this,"trisb","Port Direction Control", m_portb, false);
+  m_trisc = new PicTrisRegister(this,"trisc","Port Direction Control", m_portc, false);
+  m_trisb->wdtr_value=RegisterValue(0x3f,0);
+  m_trisc->wdtr_value=RegisterValue(0x3f,0);
+  if (config_modes)
+      config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
+      config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
+
+}
+
+P16F505::~P16F505()
+{
+  delete_sfr_register(m_portb);
+  delete_sfr_register(m_portc);
+  delete_sfr_register(m_trisb);
+  delete_sfr_register(m_trisc);
+  delete_file_registers(0x08, 0x1f);
+  delete_file_registers(0x30, 0x3f);
+  delete_file_registers(0x50, 0x5f);
+  delete_file_registers(0x70, 0x7f);
+}
+
+Processor * P16F505::construct(const char *name)
+{
+  P16F505 *p = new P16F505(name);
+
+  p->pc->set_reset_address(0x3ff);
+  p->create();
+  p->create_symbols();
+  return p;
+}
+
+void P16F505::create()
+{
+  create_iopin_map();
+
+  _12bit_processor::create();
+
+  add_file_registers(0x08, 0x1f, 0);
+  create_sfr_map();
+  create_invalid_registers ();
+
+  alias_file_registers(0x00,0x0f,0x20);
+  add_file_registers(0x30, 0x3f, 0);
+
+  alias_file_registers(0x00,0x0f,0x40);
+  add_file_registers(0x50, 0x5f, 0);
+
+  alias_file_registers(0x00,0x0f,0x60);
+  add_file_registers(0x70, 0x7f, 0);
+
+  pa_bits = PA0;
+  indf->base_address_mask2 = 0x7F;
+
+  tmr0.set_cpu(this,m_portc,5,option_reg); // T0CKI pin
+  tmr0.start(0);
+
+  pc->reset();
+}
+
+void P16F505::create_symbols()
+{
+  _12bit_processor::create_symbols();
+
+  addSymbol(m_trisb);
+  addSymbol(m_trisc);
+}
+
+void P16F505::create_iopin_map()
+{
+  package = new Package(14);
+  if(!package)
+    return;
+
+  package->assign_pin(1, 0);
+  package->assign_pin(2,  m_portb->addPin(new IO_bi_directional("portb5"),5));
+  package->assign_pin(3,  m_portb->addPin(new IO_bi_directional_pu("portb4"),4));
+  package->assign_pin(4,  m_portb->addPin(new IO_bi_directional_pu("portb3"),3));
+  package->assign_pin(5,  m_portc->addPin(new IO_bi_directional("portc5"),5));
+  package->assign_pin(6,  m_portc->addPin(new IO_bi_directional("portc4"),4));
+  package->assign_pin(7,  m_portc->addPin(new IO_bi_directional("portc3"),3));
+  package->assign_pin(8,  m_portc->addPin(new IO_bi_directional("portc2"),2));
+  package->assign_pin(9,  m_portc->addPin(new IO_bi_directional("portc1"),1));
+  package->assign_pin(10, m_portc->addPin(new IO_bi_directional("portc0"),0));
+  package->assign_pin(11, m_portb->addPin(new IO_bi_directional("portb2"),2));
+  package->assign_pin(12, m_portb->addPin(new IO_bi_directional_pu("portb1"),1));
+  package->assign_pin(13, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
+  package->assign_pin(14, 0);
+
+  // portb3 is input only, but we want pullup, so use IO_bi_directional_pu
+  // but force as input pin disableing TRIS control
+  m_IN_SignalControl = new IN_SignalControl;
+  (&(*m_portb)[3])->setControl(m_IN_SignalControl);
+
+}
+
+void P16F505::create_sfr_map()
+{
+  RegisterValue porVal(0,0);
+
+  add_sfr_register(indf,   0, porVal);
+  add_sfr_register(&tmr0,  1, porVal);
+  add_sfr_register(pcl,    2, RegisterValue(0xff,0));
+  add_sfr_register(status, 3, porVal);
+  add_sfr_register(fsr,    4, porVal);
+  add_sfr_register(&osccal,5, RegisterValue(0x70,0));
+  add_sfr_register(m_portb,6, porVal);
+  add_sfr_register(m_portc,7, porVal);
+  add_sfr_register(m_trisb, 0xffffffff, RegisterValue(0x3f,0));
+  add_sfr_register(m_trisc, 0xffffffff, RegisterValue(0x3f,0));
+  add_sfr_register(Wreg, 0xffffffff, porVal);
+  option_reg->set_cpu(this);
+
+  osccal.set_cpu(this);
+}
+
+void P16F505::create_config_memory()
+{
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new P16F505ConfigWord(this));
+}
+
+void P16F505::tris_instruction(unsigned int tris_register)
+{
+	if (tris_register == 6)
+		m_trisb->put(Wget());
+	else if (tris_register == 7)
+		m_trisc->put(Wget());
+}
+
+void  P16F505::setConfigWord(unsigned int val, unsigned int diff)
+{
+    PinModule *pmRB3 = &(*m_portb)[3];
+
+    configWord = val;
+
+    if (verbose)
+        printf("P16F505::setConfigWord val=%x diff=%x\n", val, diff);
+    if (diff & WDTEN)
+        wdt.initialize((val & WDTEN) == WDTEN);
+
+    if ((val & MCLRE) == MCLRE)
+    {
+    	    pmRB3->getPin().update_pullup('1', true);
+    	    pmRB3->getPin().newGUIname("MCLR");
+    }
+    else
+    	    pmRB3->getPin().newGUIname("portb3");
+}
+
+void  P16F505::updateGP2Source()
+{
+  PinModule *pmPC5 = &(*m_portc)[5];
+
+  if(option_reg->value.get() & OPTION_REG::T0CS)
+  {
+    printf("OPTION_REG::T0CS forcing PORTC5 as input, TRIS disabled\n");
+    pmPC5->setControl(m_IN_SignalControl);
+    pmPC5->getPin().newGUIname("T0CS");
+  }
+  else
+  {
+    cout << "TRIS now controlling PORTC5\n";
+    pmPC5->getPin().newGUIname("portc5");
+    pmPC5->setControl(0);
+  }
+}
+
+// option_new_bits_6_7 is called from class OPTION_REG when
+// bits 5, 6, or 7 of  OPTION_REG change state
+//
+void  P16F505::option_new_bits_6_7(unsigned int bits)
+{
+  bool bit6 = (bits & OPTION_REG::BIT6) != OPTION_REG::BIT6;
+  if(verbose)
+    cout << "P16F505::option_new_bits_6_7 bits=" << hex << bits << "\n";
+
+  // Weak pullup if NOT_GPPU == 0
+  m_portb->setPullUp (bit6 , (configWord & MCLRE));
+  updateGP2Source();
+}
+
+void P16F505::reset(RESET_TYPE r)
+{
+  m_trisb->reset(r);
+  m_trisc->reset(r);
+
+  switch (r) {
+  case IO_RESET:
+    // Set GPWUF/RBWUF flag
+    status->put(status->value.get() | 0x80);
+
+    // fall through...
+  default:
+    _12bit_processor::reset(r);
+  }
+}
+
+void P16F505::dump_registers ()
+{
+  _12bit_processor::dump_registers();
+
+  cout << "trisb = 0x" << hex << m_trisb->value.get() << '\n';
+  cout << "trisc = 0x" << hex << m_trisc->value.get() << '\n';
+  cout << "osccal = 0x" << osccal.value.get()  << '\n';
 }
