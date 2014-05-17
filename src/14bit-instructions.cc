@@ -40,6 +40,7 @@ ADDFSR::ADDFSR(Processor *new_cpu, unsigned int new_opcode, const char *pName, u
 {
   m_fsr = (opcode>>6)&1;
   m_lit = opcode & 0x3f;
+  if (m_lit & 0x20) m_lit -= 0x40;
 
   switch(m_fsr) {
   case 0:
@@ -70,7 +71,7 @@ char *ADDFSR::name(char *return_str,int len)
 
 void ADDFSR::execute()
 {
-  ia->put_fsr(ia->get_fsr_value() + m_lit);  //ADDFSR
+  ia->put_fsr(ia->fsr_value + m_lit);  //ADDFSR
   cpu_pic->pc->increment();
 }
 //--------------------------------------------------

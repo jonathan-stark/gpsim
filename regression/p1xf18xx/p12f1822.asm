@@ -471,6 +471,12 @@ test_indr:
 	movlw	0x83
 	movwf	FSR1H
 	clrf    FSR1L
+	addfsr	FSR1,1
+  .assert "fsr1h == 0x83 && fsr1l == 0x01, \"*** FAILED 12f1822 addfsr fsr1,1\""
+	nop
+	addfsr	FSR1,-1		; undo above instruction
+  .assert "fsr1h == 0x83 && fsr1l == 0x00, \"*** FAILED 12f1822 addfsr fsr1,-1\""
+	nop
 	clrf	temp
 	moviw   FSR1++
 	addwf	temp,F
