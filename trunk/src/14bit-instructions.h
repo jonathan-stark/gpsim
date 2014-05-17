@@ -46,8 +46,8 @@ public:
     return new ADDFSR(new_cpu,new_opcode,"addfsr", address);
   }
 protected:
-  unsigned int m_fsr;
-  unsigned int m_lit;
+  unsigned int 	m_fsr;
+  int 		m_lit;
   Indirect_Addressing14 *ia;
 };
 

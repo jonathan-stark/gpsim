@@ -1,4 +1,9 @@
 2014-05-17 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p1xf18xx/p12f1822.asm src/14bit-hexdecode.cc
+	  src/14bit-instructions.cc src/14bit-instructions.h:
+	- fix ADDFSR instruction bug 161 from Tim Burke
+
+2014-05-17 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc gui/gui_breadboard.h:
 	- Replace CList with GtkTreeView (patch 30 with rework)
 	* src/ValueCollections.h: fix throw - bug 159

@@ -34,6 +34,7 @@ License along with this library; if not, see
 #include "14bit-instructions.h"
 
 struct instruction_constructor op_16ext[] = {
+  { 0x3f80,  0x3100,  ADDFSR::construct },
   { 0x3f00,  0x3d00,  ADDWFC::construct },
   { 0x3f00,  0x3700,  ASRF::construct },
   { 0x3e00,  0x3200,  BRA::construct },
