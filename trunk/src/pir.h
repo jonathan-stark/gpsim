@@ -46,6 +46,7 @@ public:
       INTCON *, PIE *, int _valid_bits);
   // The PIR base class supports no PIR bits directly
   virtual void clear_sspif(){}
+  virtual void clear_sppif(){}
   virtual void clear_rcif(){}
   virtual void clear_txif(){}
   virtual void set_adif(){}
@@ -66,6 +67,7 @@ public:
   virtual void set_rxb0if(){}
   virtual void set_rxb1if(){}
   virtual void set_sspif(){}
+  virtual void set_sppif(){fprintf(stderr, "RRR set_sppif FIX\n");}
   virtual void set_tmr1if(){}
   virtual void set_tmr1gif(){}
   virtual void set_tmr2if(){}
@@ -80,6 +82,7 @@ public:
   virtual unsigned int get_txif() { return 0;}
   virtual unsigned int get_rcif() { return 0;}
   virtual unsigned int get_sspif() { return 0;}
+  virtual unsigned int get_sppif() { return 0;}
 
   /// A generic method to set an interrupt bit by mask
   virtual void set(int mask)
@@ -205,7 +208,8 @@ public:
     TXIF    = 1<<4,
     RCIF    = 1<<5,
     ADIF    = 1<<6,     // 18cxxx
-    PSPIF   = 1<<7
+    PSPIF   = 1<<7,
+    SPPIF   = 1<<7
   };
  
   virtual void set_tmr1if()
@@ -239,7 +243,14 @@ public:
     put(get() | ADIF);
   }
 
+  unsigned int get_sppif()
+  {
+    return value.get() & SPPIF;
+  }
+  virtual void set_sppif();
+
   virtual void set_pspif();
+
 
   virtual unsigned int get_txif()
   {
@@ -611,6 +622,7 @@ public:
   virtual void set_bclif() {}
  
 
+  virtual void set_sppif() {}
   virtual void set_pspif() {}
   virtual void set_cmif() {}
   virtual void set_c1if() {}
@@ -638,7 +650,7 @@ public:
 class PIR_SET_1 : public PIR_SET
 {
  public:
-  PIR_SET_1() { pir1 = 0; pir2 = 0; }
+  PIR_SET_1() { pir1 = 0; pir2 = 0;}
 
   virtual ~PIR_SET_1()
   {
@@ -695,6 +707,7 @@ class PIR_SET_1 : public PIR_SET
     assert(pir1 != 0);
     pir1->clear_sspif();
   }
+
 
   // eeprom stuff
   virtual void set_eeif() {
@@ -758,7 +771,7 @@ private:
 class PIR_SET_2 : public PIR_SET
 {
  public:
-  PIR_SET_2() { pir1 = 0; pir2 = 0; pir3 = 0; }
+  PIR_SET_2() { pir1 = 0; pir2 = 0; pir3 = 0;}
 
   virtual ~PIR_SET_2()
   {
@@ -818,6 +831,19 @@ class PIR_SET_2 : public PIR_SET
     pir1->clear_sspif();
   }
 
+  // spp stuff 
+  virtual bool get_sppif() {
+    assert(pir1 != 0);
+    return (pir1->get_sppif() != 0);
+  }
+  virtual void set_sppif() {
+    assert(pir1 != 0);
+    pir1->set_sppif();
+  }
+  virtual void clear_sppif() {
+    assert(pir1 != 0);
+    pir1->clear_sppif();
+  }
 
   // eeprom stuff
   virtual void set_eeif() {

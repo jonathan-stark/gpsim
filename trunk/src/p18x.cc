@@ -411,6 +411,7 @@ void P18C4x2::create_iopin_map()
   package->assign_pin(39, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
+
   psp.initialize(&pir_set_def,    // PIR
                 m_portd,           // Parallel port
                 m_trisd,           // Parallel tris
@@ -1017,6 +1018,152 @@ Processor * P18F2455::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
+// P18F2550	- 28 pin
+// 
+
+P18F2550::P18F2550(const char *_name, const char *desc)
+  : P18F2x21(_name,desc),
+      ufrml(this, "ufrml", "USB Frame Number register Low"      ),
+      ufrmh(this, "ufrmh", "USB Frame Number register High"     ),
+      uir  (this, "uir"  , "USB Interrupt Status register"      ),
+      uie  (this, "uie"  , "USB Interrupt Enable register"      ),
+      ueir (this, "ueir" , "USB Error Interrupt Status register"),
+      ueie (this, "ueie" , "USB Error Interrupt Enable register"),
+      ustat(this, "ustat", "USB Transfer Status register"       ),
+      ucon (this, "ucon" , "USB Control register"               ),
+      uaddr(this, "uaddr", "USB Device Address register"        ),
+      ucfg (this, "ucfg" , "USB Configuration register"         ),
+      uep0 (this, "uep0" , "USB Endpoint 0 Enable register"     ),
+      uep1 (this, "uep1" , "USB Endpoint 1 Enable register"     ),
+      uep2 (this, "uep2" , "USB Endpoint 2 Enable register"     ),
+      uep3 (this, "uep3" , "USB Endpoint 3 Enable register"     ),
+      uep4 (this, "uep4" , "USB Endpoint 4 Enable register"     ),
+      uep5 (this, "uep5" , "USB Endpoint 5 Enable register"     ),
+      uep6 (this, "uep6" , "USB Endpoint 6 Enable register"     ),
+      uep7 (this, "uep7" , "USB Endpoint 7 Enable register"     ),
+      uep8 (this, "uep8" , "USB Endpoint 8 Enable register"     ),
+      uep9 (this, "uep9" , "USB Endpoint 9 Enable register"     ),
+      uep10(this, "uep10", "USB Endpoint 10 Enable register"    ),
+      uep11(this, "uep11", "USB Endpoint 11 Enable register"    ),
+      uep12(this, "uep12", "USB Endpoint 12 Enable register"    ),
+      uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
+      uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
+      uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
+      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+{
+
+  cout << "\nP18F2550 does not support USB registers and functionality\n\n";
+  if(verbose)
+    cout << "18f2550 constructor, type = " << isa() << '\n';
+
+}
+
+P18F2550::~P18F2550()
+{
+  remove_sfr_register(&ufrml);
+  remove_sfr_register(&ufrmh);
+  remove_sfr_register(&uir  );
+  remove_sfr_register(&uie  );
+  remove_sfr_register(&ueir );
+  remove_sfr_register(&ueie );
+  remove_sfr_register(&ustat);
+  remove_sfr_register(&ucon );
+  remove_sfr_register(&uaddr);
+  remove_sfr_register(&ucfg );
+  remove_sfr_register(&uep0 );
+  remove_sfr_register(&uep1 );
+  remove_sfr_register(&uep2 );
+  remove_sfr_register(&uep3 );
+  remove_sfr_register(&uep4 );
+  remove_sfr_register(&uep5 );
+  remove_sfr_register(&uep6 );
+  remove_sfr_register(&uep7 );
+  remove_sfr_register(&uep8 );
+  remove_sfr_register(&uep9 );
+  remove_sfr_register(&uep10);
+  remove_sfr_register(&uep11);
+  remove_sfr_register(&uep12);
+  remove_sfr_register(&uep13);
+  remove_sfr_register(&uep14);
+  remove_sfr_register(&uep15);
+  remove_sfr_register(&pir2 );
+}
+void P18F2550::create_sfr_map()
+{
+
+  if(verbose)
+    cout << " 18f2550 create_sfr_map \n";
+
+
+  P18F2x21::create_sfr_map();
+  package->destroy_pin(14);
+  package->assign_pin(14, 0, false);          // Vusb
+
+  /* The MSSP/I2CC pins are different on this chip. */
+  ssp.initialize(&pir_set_def,         // PIR
+                 &(*m_portb)[1],       // SCK
+                 &(*m_porta)[5],       // SS
+                 &(*m_portc)[7],       // SDO
+                 &(*m_portb)[0],       // SDI
+                 m_trisb,              // i2c tris port
+                 SSP_TYPE_MSSP
+       );
+  add_sfr_register(&ufrml,0x0F66, RegisterValue(0,0),"ufrm");
+  add_sfr_register(&ufrmh,0X0F67, RegisterValue(0,0));
+  add_sfr_register(&uir  ,0x0F68, RegisterValue(0,0));
+  add_sfr_register(&uie  ,0x0F69, RegisterValue(0,0));
+  add_sfr_register(&ueir ,0x0F6A, RegisterValue(0,0));
+  add_sfr_register(&ueie ,0x0F6B, RegisterValue(0,0));
+  add_sfr_register(&ustat,0X0F6C, RegisterValue(0,0));
+  add_sfr_register(&ucon ,0x0F6D, RegisterValue(0,0));
+  add_sfr_register(&uaddr,0X0F6E, RegisterValue(0,0));
+  add_sfr_register(&ucfg ,0x0F6F, RegisterValue(0,0));
+  add_sfr_register(&uep0 ,0x0F70, RegisterValue(0,0));
+  add_sfr_register(&uep1 ,0x0F71, RegisterValue(0,0));
+  add_sfr_register(&uep2 ,0x0F72, RegisterValue(0,0));
+  add_sfr_register(&uep3 ,0x0F73, RegisterValue(0,0));
+  add_sfr_register(&uep4 ,0x0F74, RegisterValue(0,0));
+  add_sfr_register(&uep5 ,0x0F75, RegisterValue(0,0));
+  add_sfr_register(&uep6 ,0x0F76, RegisterValue(0,0));
+  add_sfr_register(&uep7 ,0x0F77, RegisterValue(0,0));
+  add_sfr_register(&uep8 ,0x0F78, RegisterValue(0,0));
+  add_sfr_register(&uep9 ,0x0F79, RegisterValue(0,0));
+  add_sfr_register(&uep10,0x0F7A, RegisterValue(0,0));
+  add_sfr_register(&uep11,0x0F7B, RegisterValue(0,0));
+  add_sfr_register(&uep12,0x0F7C, RegisterValue(0,0));
+  add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
+  add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
+  add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
+
+  // Initialize the register cross linkages
+  pir_set_def.set_pir2(&pir2);
+  delete tmr3l.getInterruptSource();
+  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
+  pir2.set_intcon(&intcon);
+  pir2.set_pie(&pie2);
+  pir2.set_ipr(&ipr2);
+  pie2.setPir(&pir2);
+  //pie2.new_name("pie2");
+
+  // new InterruptSource(&pir2, PIR2v4::USBIF);
+}
+
+Processor * P18F2550::construct(const char *name)
+{
+
+  P18F2550 *p = new P18F2550(name);
+
+  if(verbose)
+    cout << " 18F2550 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+  return p;
+}
+
+//------------------------------------------------------------------------
+//
 // P18F4455
 // 
 
@@ -1048,6 +1195,10 @@ P18F4455::P18F4455(const char *_name, const char *desc)
       uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
       uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
       uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
+      sppcon(this, "sppcon", "Streaming Parallel port control register"),
+      sppcfg(this, "sppcfg", "Streaming Parallel port configuration register"),
+      sppeps(this, "sppeps", "SPP ENDPOINT ADDRESS AND STATUS REGISTER"),
+      sppdata(this, "sppdata", "Streaming Parallel port data register"),
       pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
 
 {
@@ -1084,6 +1235,10 @@ P18F4455::~P18F4455()
   remove_sfr_register(&uep13);
   remove_sfr_register(&uep14);
   remove_sfr_register(&uep15);
+  remove_sfr_register(&sppcon);
+  remove_sfr_register(&sppcfg);
+  remove_sfr_register(&sppeps);
+  remove_sfr_register(&sppdata);
 }
 
 void P18F4455::create()
@@ -1107,6 +1262,24 @@ void P18F4455::create()
        );
 
   // RP: RRR commented out comparator.cmcon.set_eccpas(&eccpas);  ??
+  // Streaming Parallel port (SPP)
+  spp.initialize(&pir_set_def,         // PIR
+		m_portd,		//Parallel port
+		m_trisd,		//Parallel port tristate register
+		&sppcon,
+		&sppcfg,
+		&sppeps,
+		&sppdata,
+		&(*m_porte)[0],		// CLK1SPP
+		&(*m_porte)[1],		// CLK2SPP
+		&(*m_porte)[2],		// OESPP
+		&(*m_portb)[4]		// CSSPP
+	);
+
+  add_sfr_register(&sppdata,0x0F62, RegisterValue(0,0));
+  add_sfr_register(&sppcfg,0x0F63, RegisterValue(0,0));
+  add_sfr_register(&sppeps,0x0F64, RegisterValue(0,0));
+  add_sfr_register(&sppcon,0x0F65, RegisterValue(0,0));
   add_sfr_register(&ufrml,0x0F66, RegisterValue(0,0),"ufrm");
   add_sfr_register(&ufrmh,0X0F67, RegisterValue(0,0));
   add_sfr_register(&uir  ,0x0F68, RegisterValue(0,0));
@@ -1154,6 +1327,179 @@ Processor * P18F4455::construct(const char *name)
 
   if(verbose)
     cout << " 18F4455 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+  return p;
+}
+
+
+//------------------------------------------------------------------------
+//
+// P18F4550
+// 
+
+P18F4550::P18F4550(const char *_name, const char *desc)
+  : P18F4x21(_name,desc),
+      ufrml(this, "ufrml", "USB Frame Number register Low"      ),
+      ufrmh(this, "ufrmh", "USB Frame Number register High"     ),
+      uir  (this, "uir"  , "USB Interrupt Status register"      ),
+      uie  (this, "uie"  , "USB Interrupt Enable register"      ),
+      ueir (this, "ueir" , "USB Error Interrupt Status register"),
+      ueie (this, "ueie" , "USB Error Interrupt Enable register"),
+      ustat(this, "ustat", "USB Transfer Status register"       ),
+      ucon (this, "ucon" , "USB Control register"               ),
+      uaddr(this, "uaddr", "USB Device Address register"        ),
+      ucfg (this, "ucfg" , "USB Configuration register"         ),
+      uep0 (this, "uep0" , "USB Endpoint 0 Enable register"     ),
+      uep1 (this, "uep1" , "USB Endpoint 1 Enable register"     ),
+      uep2 (this, "uep2" , "USB Endpoint 2 Enable register"     ),
+      uep3 (this, "uep3" , "USB Endpoint 3 Enable register"     ),
+      uep4 (this, "uep4" , "USB Endpoint 4 Enable register"     ),
+      uep5 (this, "uep5" , "USB Endpoint 5 Enable register"     ),
+      uep6 (this, "uep6" , "USB Endpoint 6 Enable register"     ),
+      uep7 (this, "uep7" , "USB Endpoint 7 Enable register"     ),
+      uep8 (this, "uep8" , "USB Endpoint 8 Enable register"     ),
+      uep9 (this, "uep9" , "USB Endpoint 9 Enable register"     ),
+      uep10(this, "uep10", "USB Endpoint 10 Enable register"    ),
+      uep11(this, "uep11", "USB Endpoint 11 Enable register"    ),
+      uep12(this, "uep12", "USB Endpoint 12 Enable register"    ),
+      uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
+      uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
+      uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
+      sppcon(this, "sppcon", "Streaming Parallel port control register"),
+      sppcfg(this, "sppcfg", "Streaming Parallel port configuration register"),
+      sppeps(this, "sppeps", "SPP ENDPOINT ADDRESS AND STATUS REGISTER"),
+      sppdata(this, "sppdata", "Streaming Parallel port data register"),
+      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+
+{
+  cout << "\nP18F4550 does not support USB registers and functionality\n\n";
+  if(verbose)
+    cout << "18f4550 constructor, type = " << isa() << '\n';
+}
+
+P18F4550::~P18F4550()
+{
+  remove_sfr_register(&ufrml);
+  remove_sfr_register(&ufrmh);
+  remove_sfr_register(&uir  );
+  remove_sfr_register(&uie  );
+  remove_sfr_register(&ueir );
+  remove_sfr_register(&ueie );
+  remove_sfr_register(&ustat);
+  remove_sfr_register(&ucon );
+  remove_sfr_register(&uaddr);
+  remove_sfr_register(&ucfg );
+  remove_sfr_register(&uep0 );
+  remove_sfr_register(&uep1 );
+  remove_sfr_register(&uep2 );
+  remove_sfr_register(&uep3 );
+  remove_sfr_register(&uep4 );
+  remove_sfr_register(&uep5 );
+  remove_sfr_register(&uep6 );
+  remove_sfr_register(&uep7 );
+  remove_sfr_register(&uep8 );
+  remove_sfr_register(&uep9 );
+  remove_sfr_register(&uep10);
+  remove_sfr_register(&uep11);
+  remove_sfr_register(&uep12);
+  remove_sfr_register(&uep13);
+  remove_sfr_register(&uep14);
+  remove_sfr_register(&uep15);
+  remove_sfr_register(&sppcon);
+  remove_sfr_register(&sppcfg);
+  remove_sfr_register(&sppeps);
+  remove_sfr_register(&sppdata);
+}
+
+void P18F4550::create()
+{
+  P18F4x21::create();
+
+  if(verbose)
+    cout << " 18f4550 create \n";
+
+  package->destroy_pin(18);
+  package->assign_pin(18, 0, false);          // Vusb
+
+  /* The MSSP/I2CC pins are different on this chip. */
+  ssp.initialize(&pir_set_def,         // PIR
+                 &(*m_portb)[1],       // SCK
+                 &(*m_porta)[5],       // SS
+                 &(*m_portc)[7],       // SDO
+                 &(*m_portb)[0],       // SDI
+                 m_trisb,              // i2c tris port
+                 SSP_TYPE_MSSP
+       );
+
+  // Streaming Parallel port (SPP)
+  spp.initialize(&pir_set_def,         // PIR
+		m_portd,		//Parallel port
+		m_trisd,		//Parallel port tristate register
+		&sppcon,
+		&sppcfg,
+		&sppeps,
+		&sppdata,
+		&(*m_porte)[0],		// CLK1SPP
+		&(*m_porte)[1],		// CLK2SPP
+		&(*m_porte)[2],		// OESPP
+		&(*m_portb)[4]		// CSSPP
+	);
+
+  // RP: RRR commented out comparator.cmcon.set_eccpas(&eccpas);  ??
+  add_sfr_register(&sppdata,0x0F62, RegisterValue(0,0));
+  add_sfr_register(&sppcfg,0x0F63, RegisterValue(0,0));
+  add_sfr_register(&sppeps,0x0F64, RegisterValue(0,0));
+  add_sfr_register(&sppcon,0x0F65, RegisterValue(0,0));
+  add_sfr_register(&ufrml,0x0F66, RegisterValue(0,0),"ufrm");
+  add_sfr_register(&ufrmh,0X0F67, RegisterValue(0,0));
+  add_sfr_register(&uir  ,0x0F68, RegisterValue(0,0));
+  add_sfr_register(&uie  ,0x0F69, RegisterValue(0,0));
+  add_sfr_register(&ueir ,0x0F6A, RegisterValue(0,0));
+  add_sfr_register(&ueie ,0x0F6B, RegisterValue(0,0));
+  add_sfr_register(&ustat,0X0F6C, RegisterValue(0,0));
+  add_sfr_register(&ucon ,0x0F6D, RegisterValue(0,0));
+  add_sfr_register(&uaddr,0X0F6E, RegisterValue(0,0));
+  add_sfr_register(&ucfg ,0x0F6F, RegisterValue(0,0));
+  add_sfr_register(&uep0 ,0x0F70, RegisterValue(0,0));
+  add_sfr_register(&uep1 ,0x0F71, RegisterValue(0,0));
+  add_sfr_register(&uep2 ,0x0F72, RegisterValue(0,0));
+  add_sfr_register(&uep3 ,0x0F73, RegisterValue(0,0));
+  add_sfr_register(&uep4 ,0x0F74, RegisterValue(0,0));
+  add_sfr_register(&uep5 ,0x0F75, RegisterValue(0,0));
+  add_sfr_register(&uep6 ,0x0F76, RegisterValue(0,0));
+  add_sfr_register(&uep7 ,0x0F77, RegisterValue(0,0));
+  add_sfr_register(&uep8 ,0x0F78, RegisterValue(0,0));
+  add_sfr_register(&uep9 ,0x0F79, RegisterValue(0,0));
+  add_sfr_register(&uep10,0x0F7A, RegisterValue(0,0));
+  add_sfr_register(&uep11,0x0F7B, RegisterValue(0,0));
+  add_sfr_register(&uep12,0x0F7C, RegisterValue(0,0));
+  add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
+  add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
+  add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
+
+  // Initialize the register cross linkages
+  pir_set_def.set_pir2(&pir2);
+  delete tmr3l.getInterruptSource();
+  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
+  pir2.set_intcon(&intcon);
+  pir2.set_pie(&pie2);
+  pir2.set_ipr(&ipr2);
+  pie2.setPir(&pir2);
+  //pie2.new_name("pie2");
+
+  //new InterruptSource(&pir2, PIR2v4::USBIF);
+}
+
+Processor * P18F4550::construct(const char *name)
+{
+
+  P18F4550 *p = new P18F4550(name);
+
+  if(verbose)
+    cout << " 18F4550 construct\n";
 
   p->create();
   p->create_invalid_registers();
@@ -1914,6 +2260,7 @@ void P18F4x21::create_iopin_map()
   package->assign_pin(39, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
+/*RRR
   psp.initialize(&pir_set_def,    // PIR
                 m_portd,           // Parallel port
                 m_trisd,           // Parallel tris
@@ -1921,7 +2268,7 @@ void P18F4x21::create_iopin_map()
                 &(*m_porte)[0],    // NOT RD
                 &(*m_porte)[1],    // NOT WR
                 &(*m_porte)[2]);   // NOT CS
-
+RRR*/
   tmr1l.setIOpin(&(*m_portc)[0]);
 
   ssp.initialize(&pir_set_def,    // PIR

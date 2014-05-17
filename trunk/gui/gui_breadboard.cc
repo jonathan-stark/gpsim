@@ -1229,11 +1229,9 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 {
 
     char name[STRING_SIZE];
-    char *text[1];
     stimulus *stimulus;
     char str[STRING_SIZE];
-
-    text[0]=name;
+    GtkListStore *list_store;
 
 //    printf("treeselect_node %p\n",gui_node);
 
@@ -1253,7 +1251,8 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     gtk_widget_hide(gui_node->bbw->pic_frame);
 
     // Clear node_clist
-    gtk_clist_clear(GTK_CLIST(gui_node->bbw->node_clist));
+    g_object_get(gui_node->bbw->node_clist, "model", &list_store, NULL);
+    gtk_list_store_clear(list_store);
 
     if(gui_node->node!=0)
     {
@@ -1262,16 +1261,12 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 
         while(stimulus!=0)
         {
-            int row;
+            GtkTreeIter iter;
 
             strncpy(name, stimulus->name().c_str(), sizeof(name));
 
-            row = gtk_clist_append(GTK_CLIST(gui_node->bbw->node_clist),
-                                   text);
-
-            gtk_clist_set_row_data (GTK_CLIST(gui_node->bbw->node_clist),
-                                    row,
-                                    stimulus);
+            gtk_list_store_append(list_store, &iter);
+            gtk_list_store_set(list_store, &iter, 0, name, 1, stimulus, -1);
 
             stimulus = stimulus->next;
         }
@@ -1280,23 +1275,68 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     gui_node->bbw->selected_node = gui_node;
 }
 
+static void treeselect_cb (GtkTreeSelection *selection,
+                           gpointer user_data)
+{
+    GtkTreeModel *model;
+    GtkTreeIter first_iter, iter;
+    GtkTreePath *path;
+    char *spath;
+    
+    gtk_tree_selection_get_selected (selection, &model, &iter);
+    
+    if (!iter.stamp)
+        return;
+    
+    gtk_tree_model_get_iter_first (model, &first_iter);
+    path = gtk_tree_model_get_path (model, &iter);
+    
+    spath = gtk_tree_path_to_string (path);
+    
+    if (spath[0] == '0')
+    {
+        struct gui_node *gn;
+        gtk_tree_model_get (model, &iter, 1, &gn, -1);
+        if (strlen (spath) > 1)
+            treeselect_node (NULL, gn);
+        else
+            gtk_widget_hide (gn->bbw->node_frame);
+    }
+    else
+    {
+        if (strlen (spath) > 1)
+        {
+            GuiPin *gp;
+            gtk_tree_model_get (model, &iter, 1, &gp, -1);
+            treeselect_stimulus (NULL, gp);
+        }
+        else
+        {
+            GuiModule *module;
+            gtk_tree_model_get (model, &iter, 1, &module, -1);
+            treeselect_module (NULL, module);
+        }
+    }
+}
+
 static const char *mod_name;
 
-static void settings_clist_cb(GtkCList       *clist,
-                gint            row,
-                gint            column,
-                GdkEvent       *event,
-                Breadboard_Window *bbw)
+static void settings_clist_cb(GtkTreeSelection *selection,
+                       Breadboard_Window *bbw)
 {
 
         // Save the Attribute*
         Value *attr;
         char str[256];
         char val[256];
-        attr = (Value*) gtk_clist_get_row_data(GTK_CLIST(bbw->attribute_clist),
-                                               row);
+        GtkTreeIter iter;
+        GtkTreeModel *model;
+        
+        gtk_tree_selection_get_selected (selection, &model, &iter);
+        if (!iter.stamp) // check if iter is valid
+            return;
 
-        //attr->getAsStr(attrstr,50);
+        gtk_tree_model_get(model, &iter, 1, &attr, -1);
         attr->get(val, sizeof(val));
 
         if (mod_name)
@@ -1307,9 +1347,9 @@ static void settings_clist_cb(GtkCList       *clist,
         {
             sprintf(str,"%s = %s",attr->name().c_str(),val);
         }
-
         gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
 }
+
 
 static void settings_set_cb(GtkWidget *button,
                 Breadboard_Window *bbw)
@@ -1366,7 +1406,8 @@ static void clistOneAttribute(const SymbolEntry_t &sym)
       // read attributes and add to clist
       char attribute_value[STRING_SIZE];
       char attribute_string[STRING_SIZE];
-      char *text[1]={attribute_string};
+      GtkListStore *list_store;
+      GtkTreeIter iter;
 
       // Filter out non-attributes
       if (  !strstr(typeid(*pVal).name(), "Attribute") )
@@ -1377,13 +1418,11 @@ static void clistOneAttribute(const SymbolEntry_t &sym)
       sprintf(attribute_string,"%s = %s",
                 pVal->name().c_str(),attribute_value);
 
-
-      int row = gtk_clist_append(GTK_CLIST(attribute_clist),
-                           text);
-      // add the Attribute* as data for the clist rows.
-      gtk_clist_set_row_data(GTK_CLIST(attribute_clist),
-                             row,
-                             (gpointer)pVal);
+      g_object_get(attribute_clist, "model", &list_store, NULL);
+      gtk_list_store_append(list_store, &iter);
+      gtk_list_store_set(list_store, &iter,
+                         0, attribute_string,
+                         1, (gpointer) pVal, -1);
   }
 }
 
@@ -1402,20 +1441,17 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
   snprintf(buffer,sizeof(buffer),"%s settings",p->module()->name().c_str());
   gtk_frame_set_label(GTK_FRAME(p->bbw()->module_frame),buffer);
 
-  if( !GTK_WIDGET_VISIBLE(GTK_CLIST(p->bbw()->attribute_clist)))
+  if( !GTK_WIDGET_VISIBLE(GTK_TREE_VIEW(p->bbw()->attribute_clist)))
     return;
 
   // clear clist
-  gtk_clist_clear(GTK_CLIST(p->bbw()->attribute_clist));
+  gtk_list_store_clear((GtkListStore*)
+        gtk_tree_view_get_model((GtkTreeView*)p->bbw()->attribute_clist));
 
-//  lpBW = p->bbw();
   attribute_clist = p->bbw()->attribute_clist;
   mod_name = p->module()->name().c_str();
   globalSymbolTable().ForEachModule(buildCLISTAttribute);
   attribute_clist = NULL;
-//  lpBW = 0;
-//  mod_name = 0;
-
 
   gtk_entry_set_text(GTK_ENTRY(p->bbw()->attribute_entry), "");
 
@@ -1657,6 +1693,8 @@ static gint button(GtkWidget *widget,
                    GdkEventButton *event,
                    GuiPin *p)
 {
+
+
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
     {
@@ -1664,7 +1702,7 @@ static gint button(GtkWidget *widget,
         struct gui_node *gn;
 
         gn = (struct gui_node *)
-          gtk_object_get_data(GTK_OBJECT(p->bbw()->node_tree),
+          g_object_get_data((GObject*)p->bbw()->tree,
                               p->getSnode()->name().c_str());
 
         if(gn!=0) {
@@ -1694,11 +1732,14 @@ static gint button(GtkWidget *widget,
         struct gui_node *gn;
 
         gn = (struct gui_node *)
-          gtk_object_get_data(GTK_OBJECT(p->bbw()->node_tree),
+          g_object_get_data((GObject*)p->bbw()->tree,
                               p->getSnode()->name().c_str());
 
-        trace_node(gn);
-        draw_nodes(gn->bbw);
+	if (gn)
+	{
+            trace_node(gn);
+            draw_nodes(gn->bbw);
+	}
       }
       return 1;
     }
@@ -1709,13 +1750,9 @@ static gint button(GtkWidget *widget,
 
 
 // get_string
-static void a_cb(GtkWidget *w, gpointer user_data)
+static void a_cb(GtkWidget *w, GtkDialog *dialog)
 {
-    *(int*)user_data=TRUE;
-}
-static void b_cb(GtkWidget *w, gpointer user_data)
-{
-    *(int*)user_data=FALSE;
+    gtk_dialog_response (dialog, GTK_RESPONSE_ACCEPT);
 }
 // used for reading a value from user when break on value is requested
 const char *gui_get_string(const char *prompt, const char *initial_text)
@@ -1724,7 +1761,6 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
     static GtkWidget *label;
     static GtkWidget *entry;
     static int retval;
-    GtkWidget *button;
     GtkWidget *hbox;
 
 
@@ -1734,8 +1770,14 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
 
     if(dialog==0)
     {
-        dialog = gtk_dialog_new();
-        gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
+        dialog = gtk_dialog_new_with_buttons("enter value",
+                                             NULL,
+                                             GTK_DIALOG_MODAL,
+                                             GTK_STOCK_OK,
+                                             GTK_RESPONSE_ACCEPT,
+                                             GTK_STOCK_CANCEL,
+                                             GTK_RESPONSE_CANCEL,
+                                             NULL);
         gtk_signal_connect_object(GTK_OBJECT(dialog),
                                   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
@@ -1747,20 +1789,7 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
         gtk_widget_show(hbox);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
 
-        button = gtk_button_new_with_label("OK");
-        gtk_widget_show(button);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                           FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-
-        button = gtk_button_new_with_label("Cancel");
-        gtk_widget_show(button);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                           FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
-
+        
         label=gtk_label_new(prompt);
         gtk_widget_show(label);
         gtk_box_pack_start(GTK_BOX(hbox), label,
@@ -1773,7 +1802,7 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
         gtk_signal_connect(GTK_OBJECT(entry),
                            "activate",
                            (GtkSignalFunc)a_cb,
-                           (gpointer)&retval);
+                           (gpointer)dialog);
 
     }
     else
@@ -1787,14 +1816,10 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
 
     gtk_widget_grab_focus (entry);
 
-    gtk_grab_add(dialog);
-    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-        gtk_main_iteration();
-    gtk_grab_remove(dialog);
-
-    gtk_widget_hide(dialog);
-
-    if(retval==(int)TRUE)
+    retval = gtk_dialog_run ((GtkDialog*) dialog);
+    gtk_widget_hide (dialog);
+    
+    if(retval==GTK_RESPONSE_ACCEPT)
         string=gtk_entry_get_text(GTK_ENTRY(entry));
     else
         string=0;
@@ -1813,79 +1838,83 @@ static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
 
 
 ////////////////////////////////////////////////////////////////////
-static gint ok_cb(GtkWidget *widget,
-                   GdkEventButton *event,
-                    gpointer user_data)
+static void select_node_ok_cb(GtkTreeView *tree_view,
+                  GtkTreePath *path,
+                  GtkTreeViewColumn *column,
+                  GtkDialog *dialog)
 {
-    if(event->type==GDK_2BUTTON_PRESS &&
-       event->button==1)
-    {
-        *(int*)user_data=FALSE; // cancel=FALSE;
-        return 1;
-    }
-    return 0;
-}
-static void cancel_cb(GtkWidget *w, gpointer user_data)
-{
-    *(int*)user_data=TRUE; // cancel=TRUE;
-}
-
-// Select row
-static void node_cb(GtkCList       *clist,
-                    gint            row,
-                    gint            column,
-                    GdkEvent       *event,
-                    gpointer user_data)
-
-{
-    Stimulus_Node *snode;
-
-    snode = (Stimulus_Node*)gtk_clist_get_row_data (clist, row);
-
-    *((Stimulus_Node**) user_data)=snode;
+    Stimulus_Node* snode;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    
+    model = gtk_tree_view_get_model (tree_view);
+        
+    gtk_tree_model_get_iter (model, &iter, path);
+    gtk_tree_model_get (model, &iter, 1, &snode, -1);
+    
+    g_object_set_data ((GObject*)dialog, "snode", snode);
+    
+    gtk_dialog_response(dialog, GTK_RESPONSE_ACCEPT);
 }
 
-static void module_cb(GtkCList       *clist,
-                      gint            row,
-                      gint            column,
-                      GdkEvent       *event,
-                      gpointer user_data)
+static void select_module_ok_cb(GtkTreeView *tree_view,
+                  GtkTreePath *path,
+                  GtkTreeViewColumn *column,
+                  GtkDialog *dialog)
 {
+    int col;
     char *module_type;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    
+    model = gtk_tree_view_get_model (tree_view);
 
-    module_type = (char*) gtk_clist_get_row_data (clist, row);
-
-    strncpy((char*) user_data, module_type, STRING_SIZE);
+    g_object_get (column, "sort-column-id", &col, NULL);
+    
+    if (col > 2) // only column 1 & 2 is valid
+        col = 0;
+        
+    gtk_tree_model_get_iter (model, &iter, path);
+    gtk_tree_model_get (model, &iter, col, &module_type, -1);
+    
+    g_object_set_data (G_OBJECT (dialog), "module_type", module_type);
+    
+    gtk_dialog_response (dialog, GTK_RESPONSE_ACCEPT);
 }
 
-static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
+static void copy_tree_to_clist(GtkTreeModel *model,
+                                     GtkWidget *clist)
 {
-    Stimulus_Node *node;
+    struct gui_node *gn;
     char name[STRING_SIZE];
-    char *text[1]={name};
-    int row;
+    GtkListStore *list_store;
+    GtkTreeIter node_iter, iter, new_iter;
 
-    node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
-
-
-    strcpy(name,node->name().c_str());
-
-    row = gtk_clist_append(GTK_CLIST(clist),
-                           text);
-
-    gtk_clist_set_row_data (GTK_CLIST(clist),
-                            row,
-                            (gpointer)node);
+    gtk_tree_model_get_iter_first (model, &node_iter);
+    gtk_tree_model_iter_n_children (model, &node_iter);
+    gtk_tree_model_iter_children (model, &iter, &node_iter);
+    g_object_get(clist, "model", &list_store, NULL);
+    
+    do
+    {
+        gtk_tree_model_get (model, &iter, 1, &gn, -1);
+        
+        strcpy(name,gn->node->name().c_str());
+        
+        gtk_list_store_append(list_store, &new_iter);
+        gtk_list_store_set(list_store, &new_iter, 0, name, 1, (gpointer) gn->node, -1);
+        
+        if (!iter.stamp)
+            break;
+    } while (gtk_tree_model_iter_next (model, &iter));
 }
 
 static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
     static GtkWidget *node_clist;
-    GtkWidget *cancelbutton;
-    static int cancel;
-
-    cancel=-1;
+    static GtkListStore *list_store;
+    GtkCellRenderer *renderer;
 
     Stimulus_Node *snode=0;
 
@@ -1896,8 +1925,12 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
     {
 
         // Build window
-        dialog = gtk_dialog_new();
-        gtk_window_set_title (GTK_WINDOW (dialog), "Select node to connect to");
+        dialog = gtk_dialog_new_with_buttons("Select node to connect to",
+                                             (GtkWindow*)bbw->window,
+                                             GTK_DIALOG_MODAL,
+                                             GTK_STOCK_CANCEL,
+                                             GTK_RESPONSE_CANCEL,
+                                             NULL);
 
         vbox = GTK_DIALOG(dialog)->vbox;
 
@@ -1906,53 +1939,43 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
         gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
         gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-        node_clist = gtk_clist_new (1);
+        renderer = gtk_cell_renderer_text_new();
+        list_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+        node_clist = gtk_tree_view_new();
+        gtk_tree_view_insert_column_with_attributes((GtkTreeView*) node_clist,
+                                                    0, "Nodes",
+                                                    renderer,
+                                                    "text", 0,
+                                                    NULL);
+        g_object_set(node_clist,
+                     "model", list_store,
+                     "headers-visible", FALSE,
+                     NULL);
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-        gtk_widget_set_style(node_clist, gtk_widget_get_style(node_clist));
         gtk_widget_show (node_clist);
         gtk_container_add (GTK_CONTAINER(scrolledwindow), node_clist);
 
-        cancelbutton = gtk_button_new_with_label ("Cancel");
-        gtk_widget_show (cancelbutton);
-        gtk_box_pack_start (GTK_BOX(GTK_DIALOG(dialog)->action_area), cancelbutton, FALSE, FALSE, 0);
-        gtk_signal_connect(GTK_OBJECT(cancelbutton),"clicked",
-                           GTK_SIGNAL_FUNC(cancel_cb),(gpointer)&cancel);
-
-        gtk_signal_connect(GTK_OBJECT(node_clist),
-                           "select_row",
-                           (GtkSignalFunc) node_cb,
-                           (gpointer)&snode);
-        gtk_signal_connect(GTK_OBJECT(node_clist),
-                           "button_press_event",
-                           GTK_SIGNAL_FUNC(ok_cb),
-                           (gpointer)&cancel);
+        g_signal_connect(node_clist,
+                         "row-activated",
+                         (GCallback) select_node_ok_cb,
+                         dialog);
 
         gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
     }
-    gtk_clist_clear(GTK_CLIST(node_clist));
+    gtk_list_store_clear(list_store);
 
     // Add all nodes
-    gtk_container_foreach(GTK_CONTAINER(bbw->node_tree),
-                          copy_node_tree_to_clist,
-                          (gpointer)node_clist);
+    copy_tree_to_clist (
+            gtk_tree_view_get_model ((GtkTreeView*) bbw->tree),
+            node_clist
+    );
 
-    gtk_widget_show(dialog);
+    int resp = gtk_dialog_run((GtkDialog*)dialog);
+    snode = (Stimulus_Node*) g_object_get_data ((GObject*) dialog, "snode");
+    gtk_widget_hide (dialog);
 
-    gtk_grab_add(dialog);
-    while(cancel==-1 && GTK_WIDGET_VISIBLE(dialog))
-        gtk_main_iteration();
-    gtk_grab_remove(dialog);
-
-
-    if(cancel==(int)TRUE)
-    {
-        gtk_widget_hide(dialog);
+    if (resp == GTK_RESPONSE_CANCEL)
         return 0;
-    }
-
-    gtk_widget_hide(dialog);
 
     return snode;
 }
@@ -1961,23 +1984,25 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
     static GtkWidget *module_clist;
-    GtkWidget *cancelbutton;
-    static int cancel;
-    static char module_type[STRING_SIZE];
+    static GtkListStore *list_store;
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+    int width;
 
     GtkWidget *vbox;
     GtkWidget *scrolledwindow;
 
     const gchar *module_clist_titles[]={"Name1","Name2", "Library"};
 
-    cancel=-1;
-
     if(dialog==0)
     {
-
         // Build window
-        dialog = gtk_dialog_new();
-        gtk_window_set_title (GTK_WINDOW (dialog), "Select module to load");
+        dialog = gtk_dialog_new_with_buttons("Select module to load",
+                                             (GtkWindow*) bbw->window,
+                                             GTK_DIALOG_MODAL,
+                                             GTK_STOCK_CANCEL,
+                                             GTK_RESPONSE_CANCEL,
+                                             NULL);
 
         vbox = GTK_DIALOG(dialog)->vbox;
 
@@ -1986,39 +2011,52 @@ static char *select_module_dialog(Breadboard_Window *bbw)
         gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
         gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
+        int n_columns;
 #ifdef OLD_MODULE_LIBRARY
-        module_clist = gtk_clist_new_with_titles (2, (gchar **)module_clist_titles);
+        n_columns = 2;
+        list_store = gtk_list_store_new(n_columns + 1,
+                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+        width = 220;
 #else
-        module_clist = gtk_clist_new_with_titles (3, (gchar **)module_clist_titles);
+        n_columns = 3;
+        list_store = gtk_list_store_new(n_columns + 1,
+                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+        width = 320;
 #endif
+        module_clist = gtk_tree_view_new();
+        for (int col=0; col<n_columns; col++) {
+            renderer = gtk_cell_renderer_text_new();
+            column = gtk_tree_view_column_new_with_attributes(
+                    module_clist_titles[col],
+                    renderer,
+                    "text", col,
+                    NULL
+            );
+            g_object_set(column,
+                         "resizable", TRUE,
+                         "sort-indicator", TRUE,
+                         "sort-column-id", col,
+                         NULL);
+            gtk_tree_view_append_column((GtkTreeView*) module_clist, column);
+        }
+        g_object_set(module_clist,
+                     "model", list_store,
+                     NULL);
 
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-        gtk_widget_set_style(module_clist, gtk_widget_get_style(module_clist));
-        gtk_clist_set_column_auto_resize(GTK_CLIST(module_clist),0,TRUE);
         gtk_widget_show (module_clist);
         gtk_container_add (GTK_CONTAINER(scrolledwindow), module_clist);
 
-        cancelbutton = gtk_button_new_with_label ("Cancel");
-        gtk_widget_show (cancelbutton);
-        gtk_box_pack_start (GTK_BOX(GTK_DIALOG(dialog)->action_area), cancelbutton, FALSE, FALSE, 0);
-        gtk_signal_connect(GTK_OBJECT(cancelbutton),"clicked",
-                           GTK_SIGNAL_FUNC(cancel_cb),(gpointer)&cancel);
+        g_signal_connect(module_clist,
+                         "row-activated",
+                         (GCallback) select_module_ok_cb,
+                         dialog);
 
-        gtk_signal_connect(GTK_OBJECT(module_clist),
-                           "select_row",
-                           (GtkSignalFunc) module_cb,
-                           (gpointer)&module_type);
-        gtk_signal_connect(GTK_OBJECT(module_clist),
-                           "button_press_event",
-                           GTK_SIGNAL_FUNC(ok_cb),
-                           (gpointer)&cancel);
-
-        gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
+        gtk_window_set_default_size(GTK_WINDOW(dialog), width, 400);
     }
 
-    gtk_clist_clear(GTK_CLIST(module_clist));
+    gtk_list_store_clear(list_store);
+    
 #ifdef OLD_MODULE_LIBRARY
     ModuleLibrary::FileList::iterator  mi;
     ModuleLibrary::FileList::iterator  itFileListEnd(ModuleLibrary::GetFileList().end());
@@ -2042,17 +2080,17 @@ static char *select_module_dialog(Breadboard_Window *bbw)
           char library[STRING_SIZE];
           char *text[2]={name, library};
           int row;
+          GtkTreeIter iter;
 
           strncpy(name,pFileTypes[i].names[0], STRING_SIZE);
           strncpy(library,t->name(), STRING_SIZE);
 
-          row = gtk_clist_append(GTK_CLIST(module_clist),
-                                 text);
-
-          gtk_clist_set_row_data (GTK_CLIST(module_clist),
-                                  row,
-                                  (gpointer)pFileTypes[i].names[1]);
-
+          gtk_list_store_append(list_store, &iter);
+          gtk_list_store_set(list_store, &iter,
+                             0, name,
+                             1, library,
+                             2, pFileTypes[i].names[1],
+                             -1);
           i++;
         }
       }
@@ -2069,44 +2107,40 @@ static char *select_module_dialog(Breadboard_Window *bbw)
         ++mti)
     {
           const char *text[3];
-          int row;
-
+          
           Module_Types * (*get_mod_list)(void) = mti->second->mod_list();
           Module_Types *pLibModList = get_mod_list();
 
           text[2] = mti->second->user_name().c_str();
-
+          
           if(pLibModList)
               for(Module_Types *pModTypes = pLibModList;  pModTypes->names[0]; pModTypes++) {
+                GtkTreeIter iter;
                 text[0] = pModTypes->names[0];
                 text[1] = pModTypes->names[1];
-                row = gtk_clist_append(GTK_CLIST(module_clist),
-                                 (gchar **)text);  // dirty and dangerous cast from const char ** to gchar **
 
-                gtk_clist_set_row_data (GTK_CLIST(module_clist),
-                                  row,
-                                  (gpointer)(text[0]));
+                gtk_list_store_append(list_store, &iter);
+                gtk_list_store_set(list_store, &iter,
+                                   0, text[0],
+                                   1, text[1],
+                                   2, text[2],
+                                   3, text[0],
+                                   -1);
         }
     }
 #endif
 
-  gtk_widget_show(dialog);
-
-  gtk_grab_add(dialog);
-  while(cancel==-1 && GTK_WIDGET_VISIBLE(dialog))
-    gtk_main_iteration();
-  gtk_grab_remove(dialog);
-
-
-  if(cancel==(int)TRUE)
-  {
-    gtk_widget_hide(dialog);
+  char *str;
+  int resp;
+  
+  resp = gtk_dialog_run((GtkDialog*)dialog);
+  gtk_widget_hide (dialog);
+  
+  if (resp == GTK_RESPONSE_CANCEL)
     return 0;
-  }
-
-  gtk_widget_hide(dialog);
-
-  return module_type;
+  
+  str = (char*) g_object_get_data((GObject*)dialog, "module_type");
+  return str;
 }
 
 #if 0
@@ -2233,6 +2267,7 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
             if(!ModuleLibrary::InstantiateObject(mName,refDes))
                 fprintf(stderr, "Module load of %s %s failed\n",
                         module_type, module_name);
+	    g_free((void *)module_name);
         }
 #endif
     }
@@ -2268,12 +2303,18 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     gtk_container_remove(GTK_CONTAINER(bbw->layout),
                          bbw->selected_module->name_widget());
 
+    // Remove module from tree
+    GtkTreeModel *model;
+    GtkTreeSelection *selection;
+    GtkTreeIter iter;
+    
+    selection = gtk_tree_view_get_selection ((GtkTreeView*) bbw->tree);
+    gtk_tree_selection_get_selected (selection, &model, &iter);
+    gtk_tree_store_set ((GtkTreeStore*) model, &iter, 1, NULL, -1);
+    gtk_tree_store_remove ((GtkTreeStore*) model, &iter);
+    
     // Remove from local list of modules
     bbw->modules=g_list_remove(bbw->modules, bbw->selected_module);
-
-    // Remove module from tree
-    gtk_container_remove(GTK_CONTAINER(bbw->tree),
-                         bbw->selected_module->tree_item());
 
     gtk_widget_hide(bbw->module_frame);
     gtk_widget_hide(bbw->pic_frame);
@@ -2283,32 +2324,22 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     bbw->selected_module=0;
 }
 
-static void node_clist_cb(GtkCList       *clist,
-                          gint            row,
-                          gint            column,
-                          GdkEvent       *event,
-                          Breadboard_Window *bbw)
-
-{
-    bbw->selected_node->selected_row = row;
-}
-
 static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
 {
-    gtk_object_remove_data(GTK_OBJECT(bbw->node_tree),
-                           bbw->selected_node->node->name().c_str());
-
-    gtk_object_remove_data(GTK_OBJECT(bbw->selected_node->tree_item), "snode");
-
-    gtk_container_remove(GTK_CONTAINER(bbw->node_tree),
-                         bbw->selected_node->tree_item);
-
-    delete bbw->selected_node->node;
-
-    free(bbw->selected_node);
-
-    bbw->selected_node=0;
-
+    GtkTreeIter iter;
+    GtkTreeModel *model;
+    GtkTreeSelection *selection;
+    struct gui_node *gn;
+    
+    selection = gtk_tree_view_get_selection ((GtkTreeView*) bbw->tree);
+    gtk_tree_selection_get_selected (selection, &model, &iter);
+    gtk_tree_model_get (model, &iter, 1, &gn, -1);
+    
+    gtk_tree_store_remove ((GtkTreeStore*) model, &iter);
+    
+    g_object_set_data (G_OBJECT (bbw->tree), gn->node->name().c_str(), NULL);
+    g_free(gn);
+    
     gtk_widget_hide(bbw->node_frame);
     gtk_widget_hide(bbw->stimulus_frame);
     gtk_widget_hide(bbw->module_frame);
@@ -2318,12 +2349,17 @@ static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
 static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
 {
     stimulus *s;
-
-    s = (stimulus*) gtk_clist_get_row_data(GTK_CLIST(bbw->node_clist), bbw->selected_node->selected_row);
+    GtkTreeSelection *selection;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    
+    selection = gtk_tree_view_get_selection ((GtkTreeView*) bbw->node_clist);
+    gtk_tree_selection_get_selected (selection, &model, &iter);
+    gtk_tree_model_get (model, &iter, 1, &s, -1);
 
     bbw->selected_node->node->detach_stimulus(s);
 
-    gtk_clist_remove(GTK_CLIST(bbw->node_clist), bbw->selected_node->selected_row);
+    gtk_list_store_remove ((GtkListStore*) model, &iter);
 
     bbw->selected_node->selected_row=-1;
 }
@@ -2555,26 +2591,23 @@ static void clear_traces(GtkWidget *button, Breadboard_Window *bbw)
     update_board_matrix(bbw);
 }
 
-static void trace_all_foreach_function(GtkWidget *item, gpointer bbw_gpointer)
-{
-    Stimulus_Node *node;
-    Breadboard_Window *bbw = (Breadboard_Window*)bbw_gpointer;
-
-    node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
-
-    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(((Breadboard_Window*)bbw)->node_tree), node->name().c_str());
-
-    trace_node(gn);
-}
-
 static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
 {
-
+    struct gui_node *gn;
+    GtkTreeModel *model;
+    GtkTreeIter p_iter, c_iter;
+    
     update_board_matrix(bbw);
 
-    gtk_container_foreach(GTK_CONTAINER(bbw->node_tree),
-                          trace_all_foreach_function,
-                          (gpointer)bbw);
+    model = gtk_tree_view_get_model ((GtkTreeView*) bbw->tree);
+    gtk_tree_model_get_iter_first (model, &p_iter);
+    gtk_tree_model_iter_children (model, &c_iter, &p_iter);
+    
+    do
+    {
+        gtk_tree_model_get (model, &c_iter, 1, &gn, -1);
+        trace_node(gn);
+    } while (gtk_tree_model_iter_next (model, &c_iter));    
 
     draw_nodes(bbw);
 
@@ -3370,13 +3403,15 @@ void GuiModule::Build()
   */
   GetPosition(nx,ny);
 
-  m_tree_item = gtk_tree_item_new_with_label (m_module->name().c_str());
-  gtk_signal_connect(GTK_OBJECT(m_tree_item),
-                     "select",
-                     (GtkSignalFunc) treeselect_module,
-                     this);
-  gtk_widget_show(m_tree_item);
-  gtk_tree_append(GTK_TREE(m_bbw->tree), m_tree_item);
+  GtkTreeIter module_titer, pin_titer;
+  GtkTreeStore *tree_store;
+  
+  g_object_get (m_bbw->tree, "model", &tree_store, NULL);
+  gtk_tree_store_append (tree_store, &module_titer, NULL);
+  gtk_tree_store_set (tree_store, &module_titer,
+                      0, m_module->name().c_str(),
+                      1, this,
+                      -1);
 
   hackPackageHeight=(float)((m_pin_count/2+(m_pin_count&1)-1)*pinspacing);
 
@@ -3459,12 +3494,6 @@ void GuiModule::Build()
   BuildReferenceDesignator();
   gtk_widget_show(m_name_widget);
 
-  // Create pins
-  GtkWidget *hackSubtree = gtk_tree_new();
-  GtkWidget *sub_tree_item;
-
-  gtk_widget_show(hackSubtree);
-  gtk_tree_item_set_subtree(GTK_TREE_ITEM(m_tree_item), hackSubtree);
 
   GList *pin_iter;
   pin_iter=m_pins;
@@ -3478,14 +3507,11 @@ void GuiModule::Build()
     // Add pin to tree
     const char *name=pin->pinName();
     if(name) {
-      sub_tree_item = gtk_tree_item_new_with_label (name);
-
-      gtk_signal_connect(GTK_OBJECT(sub_tree_item),
-                         "select",
-                         (GtkSignalFunc) treeselect_stimulus,
-                         pin);
-      gtk_widget_show(sub_tree_item);
-      gtk_tree_append(GTK_TREE(hackSubtree), sub_tree_item);
+      gtk_tree_store_append (tree_store, &pin_titer, &module_titer);
+      gtk_tree_store_set (tree_store, &pin_titer,
+                          0, name,
+                          1, pin,
+                          -1);
     }
 
     pin_iter = pin_iter->next;
@@ -3745,29 +3771,29 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
   if(!g_list_find(nodes, node))
         nodes = g_list_append(nodes, node);
 
-  if(!node_tree)
+  if (!node_iter)
     return;
 
-  struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name().c_str());
+  struct gui_node *gn = (struct gui_node*) g_object_get_data (G_OBJECT (tree), node->name().c_str());
+  GtkTreeStore *tree_store;
+  
+  g_object_get (tree, "model", &tree_store, NULL);
 
   if(gn==0) {
-    GtkWidget *node_item;
+    GtkTreeIter parent_iter, iter;
 
     gn = (struct gui_node *) malloc(sizeof(*gn));
 
     gn->bbw=this;
     gn->node=node;
 
-    node_item = gtk_tree_item_new_with_label (node->name().c_str());
-    gn->tree_item = node_item;
-    gtk_signal_connect(GTK_OBJECT(node_item),
-                       "select",
-                       (GtkSignalFunc) treeselect_node,
-                       gn);
-    gtk_widget_show(node_item);
-    gtk_tree_append(GTK_TREE(node_tree), node_item);
-    gtk_object_set_data(GTK_OBJECT(node_tree), node->name().c_str(), gn);
-    gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
+    g_object_set_data(G_OBJECT(tree), node->name().c_str(), gn);
+    gtk_tree_model_get_iter_first ((GtkTreeModel*) tree_store, &parent_iter);
+    gtk_tree_store_append (tree_store, &iter, &parent_iter);
+    gtk_tree_store_set (tree_store, &iter,
+                        0, node->name().c_str(),
+                        1, gn,
+                        -1);
 
   }
 }
@@ -3822,7 +3848,7 @@ static GtkWidget *bb_vbox(GtkWidget *window, const char *name)
 {
   GtkWidget *vbox = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox);
-  gtk_object_set_data_full (GTK_OBJECT (window), name, vbox,
+  g_object_set_data_full (G_OBJECT (window), name, vbox,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox);
 
@@ -3833,7 +3859,7 @@ static GtkWidget *bb_hbox(GtkWidget *window, const char *name)
 {
   GtkWidget *hbox = gtk_hbox_new (FALSE, 0);
   gtk_widget_ref (hbox);
-  gtk_object_set_data_full (GTK_OBJECT (window), name, hbox,
+  g_object_set_data_full (G_OBJECT (window), name, hbox,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (hbox);
 
@@ -3846,7 +3872,7 @@ GtkWidget* Breadboard_Window::add_button(const char *label, const char *name,
 
   GtkWidget *button = gtk_button_new_with_label (label);
   gtk_widget_ref (button);
-  gtk_object_set_data_full (GTK_OBJECT (window), name, button,
+  g_object_set_data_full (G_OBJECT (window), name, button,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 0);
@@ -3894,6 +3920,11 @@ void Breadboard_Window::Build(void)
   GtkWidget *hbox9;
   GtkWidget *hbox14;
   GtkWidget *scrolledwindow5;
+  
+  GtkCellRenderer *renderer;
+  GtkListStore *list_store;
+  GtkTreeStore *tree_store;
+  GtkTreeSelection *selection;
 
   GdkColormap *colormap = gdk_colormap_get_system();
 
@@ -3912,7 +3943,7 @@ void Breadboard_Window::Build(void)
   //
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_object_set_data (GTK_OBJECT (window), "window", window);
+  g_object_set_data (G_OBJECT (window), "window", window);
   gtk_window_set_title (GTK_WINDOW (window), "Breadboard");
 
   //
@@ -3921,7 +3952,7 @@ void Breadboard_Window::Build(void)
 
   hpaned1 = gtk_hpaned_new ();
   gtk_widget_ref (hpaned1);
-  gtk_object_set_data_full (GTK_OBJECT (window), "hpaned1", hpaned1,
+  g_object_set_data_full (G_OBJECT (window), "hpaned1", hpaned1,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (hpaned1);
   gtk_container_add (GTK_CONTAINER (window), hpaned1);
@@ -3936,7 +3967,7 @@ void Breadboard_Window::Build(void)
 
   scrolledwindow4 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow4);
-  gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow4", scrolledwindow4,
+  g_object_set_data_full (G_OBJECT (window), "scrolledwindow4", scrolledwindow4,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (scrolledwindow4);
   gtk_box_pack_start (GTK_BOX (vbox13), scrolledwindow4, TRUE, TRUE, 0);
@@ -3945,18 +3976,30 @@ void Breadboard_Window::Build(void)
 
   viewport9 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport9);
-  gtk_object_set_data_full (GTK_OBJECT (window), "viewport9", viewport9,
+  g_object_set_data_full (G_OBJECT (window), "viewport9", viewport9,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (viewport9);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow4), viewport9);
 
-  tree = tree1 = gtk_tree_new ();
+  renderer = gtk_cell_renderer_text_new ();
+  tree_store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
+  tree = tree1 = gtk_tree_view_new_with_model ((GtkTreeModel*) tree_store);
+  gtk_tree_view_insert_column_with_attributes ((GtkTreeView*) tree1,
+                                               0, "",
+                                               renderer,
+                                               "text", 0,
+                                               NULL);
+  g_object_set (tree1,
+                "headers-visible", FALSE,
+                "enable-tree-lines", TRUE,
+                NULL);
+  g_signal_connect (gtk_tree_view_get_selection ((GtkTreeView*) tree1),
+                    "changed", (GCallback) treeselect_cb,
+                    NULL);
   gtk_widget_ref (tree1);
-  gtk_object_set_data_full (GTK_OBJECT (window), "tree1", tree1,
+  g_object_set_data_full (G_OBJECT (window), "tree1", tree1,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_tree_set_selection_mode (GTK_TREE(tree),GTK_SELECTION_BROWSE);
   gtk_widget_show (tree1);
-  gtk_container_add (GTK_CONTAINER (viewport9), tree1);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow4), tree1);
 
   hbox12 = bb_hbox(window, "hbox12");
   gtk_box_pack_start (GTK_BOX (vbox13), hbox12, FALSE, FALSE, 0);
@@ -3976,7 +4019,7 @@ void Breadboard_Window::Build(void)
 
   pic_frame = gtk_frame_new ("PIC settings");
   gtk_widget_ref (pic_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "pic_frame", pic_frame,
+  g_object_set_data_full (G_OBJECT (window), "pic_frame", pic_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
   //  gtk_widget_show (pic_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), pic_frame, TRUE, TRUE, 0);
@@ -3985,7 +4028,7 @@ void Breadboard_Window::Build(void)
 
   scrolledwindow3 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow3);
-  gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow3", scrolledwindow3,
+  g_object_set_data_full (G_OBJECT (window), "scrolledwindow3", scrolledwindow3,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (scrolledwindow3);
   gtk_box_pack_start (GTK_BOX (vbox12), scrolledwindow3, TRUE, TRUE, 0);
@@ -3993,7 +4036,7 @@ void Breadboard_Window::Build(void)
 
   viewport8 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport8);
-  gtk_object_set_data_full (GTK_OBJECT (window), "viewport8", viewport8,
+  g_object_set_data_full (G_OBJECT (window), "viewport8", viewport8,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (viewport8);
   gtk_container_add (GTK_CONTAINER (scrolledwindow3), viewport8);
@@ -4005,7 +4048,7 @@ void Breadboard_Window::Build(void)
 //  in Fedora 19 with Adwaita theme
   gtk_widget_set_style(pic_settings_clist, gtk_widget_get_style(pic_settings_clist));
   gtk_widget_ref (pic_settings_clist);
-  gtk_object_set_data_full (GTK_OBJECT (window), "pic_settings_clist", pic_settings_clist,
+  g_object_set_data_full (G_OBJECT (window), "pic_settings_clist", pic_settings_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (pic_settings_clist);
   gtk_container_add (GTK_CONTAINER (viewport8), pic_settings_clist);
@@ -4015,14 +4058,14 @@ void Breadboard_Window::Build(void)
 
   pic_settings_entry = gtk_entry_new ();
   gtk_widget_ref (pic_settings_entry);
-  gtk_object_set_data_full (GTK_OBJECT (window), "pic_settings_entry", pic_settings_entry,
+  g_object_set_data_full (G_OBJECT (window), "pic_settings_entry", pic_settings_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (pic_settings_entry);
   gtk_box_pack_start (GTK_BOX (hbox11), pic_settings_entry, FALSE, FALSE, 0);
 
   pic_settings_button = gtk_button_new_with_label ("Set");
   gtk_widget_ref (pic_settings_button);
-  gtk_object_set_data_full (GTK_OBJECT (window), "pic_settings_button", pic_settings_button,
+  g_object_set_data_full (G_OBJECT (window), "pic_settings_button", pic_settings_button,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (pic_settings_button);
   gtk_box_pack_start (GTK_BOX (hbox11), pic_settings_button, FALSE, FALSE, 0);
@@ -4033,21 +4076,21 @@ void Breadboard_Window::Build(void)
 
   node_frame = gtk_frame_new ("Node connections");
   gtk_widget_ref (node_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "node_frame", node_frame,
+  g_object_set_data_full (G_OBJECT (window), "node_frame", node_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
   //  gtk_widget_show (node_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), node_frame, TRUE, TRUE, 0);
 
   vbox11 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox11);
-  gtk_object_set_data_full (GTK_OBJECT (window), "vbox11", vbox11,
+  g_object_set_data_full (G_OBJECT (window), "vbox11", vbox11,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox11);
   gtk_container_add (GTK_CONTAINER (node_frame), vbox11);
 
   scrolledwindow2 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow2);
-  gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow2", scrolledwindow2,
+  g_object_set_data_full (G_OBJECT (window), "scrolledwindow2", scrolledwindow2,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (scrolledwindow2);
   gtk_box_pack_start (GTK_BOX (vbox11), scrolledwindow2, TRUE, TRUE, 0);
@@ -4055,26 +4098,24 @@ void Breadboard_Window::Build(void)
 
   viewport7 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport7);
-  gtk_object_set_data_full (GTK_OBJECT (window), "viewport7", viewport7,
+  g_object_set_data_full (G_OBJECT (window), "viewport7", viewport7,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (viewport7);
   gtk_container_add (GTK_CONTAINER (scrolledwindow2), viewport7);
 
-  node_clist = gtk_clist_new (1);
+  renderer = gtk_cell_renderer_text_new();
+  list_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+  node_clist = gtk_tree_view_new_with_model((GtkTreeModel*) list_store);
+  gtk_tree_view_insert_column_with_attributes((GtkTreeView*) node_clist, 0,
+                                              "Nodes", renderer,
+                                              "text", 0, NULL);
+  g_object_set(node_clist, "headers-visible", FALSE, NULL);
 
-
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(node_clist, gtk_widget_get_style(node_clist));
   gtk_widget_ref (node_clist);
-  gtk_object_set_data_full (GTK_OBJECT (window), "node_clist", node_clist,
+  g_object_set_data_full (G_OBJECT (window), "node_clist", node_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (node_clist);
   gtk_container_add (GTK_CONTAINER (viewport7), node_clist);
-  gtk_signal_connect(GTK_OBJECT(node_clist),
-                     "select_row",
-                     (GtkSignalFunc) node_clist_cb,
-                     (gpointer)this);
 
   hbox10 = bb_hbox(window, "hbox10");
   gtk_box_pack_start (GTK_BOX (vbox11), hbox10, FALSE, FALSE, 0);
@@ -4084,14 +4125,14 @@ void Breadboard_Window::Build(void)
 
   stimulus_frame = gtk_frame_new ("Stimulus settings");
   gtk_widget_ref (stimulus_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "stimulus_frame", stimulus_frame,
+  g_object_set_data_full (G_OBJECT (window), "stimulus_frame", stimulus_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
   //  gtk_widget_show (stimulus_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), stimulus_frame, FALSE, FALSE, 0);
 
   vbox14 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox14);
-  gtk_object_set_data_full (GTK_OBJECT (window), "vbox14", vbox14,
+  g_object_set_data_full (G_OBJECT (window), "vbox14", vbox14,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox14);
   gtk_container_add (GTK_CONTAINER (stimulus_frame), vbox14);
@@ -4111,21 +4152,21 @@ void Breadboard_Window::Build(void)
 
   module_frame = gtk_frame_new ("Module settings");
   gtk_widget_ref (module_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "module_frame", module_frame,
+  g_object_set_data_full (G_OBJECT (window), "module_frame", module_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
   //  gtk_widget_show (module_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), module_frame, TRUE, TRUE, 0);
 
   vbox10 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox10);
-  gtk_object_set_data_full (GTK_OBJECT (window), "vbox10", vbox10,
+  g_object_set_data_full (G_OBJECT (window), "vbox10", vbox10,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox10);
   gtk_container_add (GTK_CONTAINER (module_frame), vbox10);
 
   scrolledwindow1 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow1);
-  gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow1", scrolledwindow1,
+  g_object_set_data_full (G_OBJECT (window), "scrolledwindow1", scrolledwindow1,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (scrolledwindow1);
   gtk_box_pack_start (GTK_BOX (vbox10), scrolledwindow1, TRUE, TRUE, 0);
@@ -4133,33 +4174,35 @@ void Breadboard_Window::Build(void)
 
   viewport6 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport6);
-  gtk_object_set_data_full (GTK_OBJECT (window), "viewport6", viewport6,
+  g_object_set_data_full (G_OBJECT (window), "viewport6", viewport6,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (viewport6);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), viewport6);
 
-  attribute_clist = gtk_clist_new (1);
+  renderer = gtk_cell_renderer_text_new();
+  list_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+  attribute_clist = gtk_tree_view_new_with_model((GtkTreeModel*) list_store);
+  gtk_tree_view_insert_column_with_attributes((GtkTreeView*) attribute_clist, 0,
+                                              "Attributes", renderer,
+                                              "text", 0, NULL);
+  g_object_set(attribute_clist, "headers-visible", FALSE, NULL);
 
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(attribute_clist, gtk_widget_get_style(attribute_clist));
-  gtk_widget_ref (attribute_clist);
-  gtk_object_set_data_full (GTK_OBJECT (window), "attribute_clist", attribute_clist,
-                            (GtkDestroyNotify) gtk_widget_unref);
+  g_object_ref (attribute_clist);
+  g_object_set_data_full (G_OBJECT (window), "attribute_clist", attribute_clist,
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (attribute_clist);
   gtk_container_add (GTK_CONTAINER (viewport6), attribute_clist);
-  gtk_signal_connect(GTK_OBJECT(attribute_clist),
-                  "select_row",
-                  (GtkSignalFunc)settings_clist_cb,
-                  (gpointer)this);
-
+  selection = gtk_tree_view_get_selection ((GtkTreeView*) attribute_clist);
+  g_signal_connect (selection,
+                    "changed", (GCallback) settings_clist_cb,
+                    this);
   hbox9 = bb_hbox(window, "hbox9");
   gtk_box_pack_start (GTK_BOX (vbox10), hbox9, FALSE, FALSE, 0);
 
   attribute_entry = gtk_entry_new ();
   gtk_widget_ref (attribute_entry);
-  gtk_object_set_data_full (GTK_OBJECT (window), "attribute_entry", attribute_entry,
+  g_object_set_data_full (G_OBJECT (window), "attribute_entry", attribute_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (attribute_entry);
   gtk_box_pack_start (GTK_BOX (hbox9), attribute_entry, FALSE, FALSE, 0);
@@ -4178,7 +4221,7 @@ void Breadboard_Window::Build(void)
 
   scrolledwindow5 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow5);
-  gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow5", scrolledwindow5,
+  g_object_set_data_full (G_OBJECT (window), "scrolledwindow5", scrolledwindow5,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (scrolledwindow5);
   gtk_paned_pack2 (GTK_PANED (hpaned1), scrolledwindow5, TRUE, TRUE);
@@ -4188,7 +4231,7 @@ void Breadboard_Window::Build(void)
 
   layout = gtk_layout_new (hadj, vadj);
   gtk_widget_ref (layout);
-  gtk_object_set_data_full (GTK_OBJECT (window), "layout", layout,
+  g_object_set_data_full (G_OBJECT (window), "layout", layout,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_container_add (GTK_CONTAINER (scrolledwindow5), layout);
   gtk_layout_set_size (GTK_LAYOUT (layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
@@ -4272,23 +4315,18 @@ void Breadboard_Window::Build(void)
     }
 
 
-  GtkWidget *tree_item;
   struct gui_node *gn;
 
   gn = (struct gui_node *) malloc(sizeof(*gn));
   gn->bbw=this;
   gn->node=0; // indicates that this is the root node.
-  tree_item = gtk_tree_item_new_with_label ("nodes");
-  //    gtk_signal_connect(GTK_OBJECT(tree_item),
-  //                   "select",
-  //                   (GtkSignalFunc) treeselect_node,
-  //                   gn);
-  gtk_widget_show(tree_item);
-  gtk_tree_append(GTK_TREE(tree), tree_item);
-  node_tree= gtk_tree_new();
-  gtk_widget_show(node_tree);
-  gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), node_tree);
-  gtk_object_set_data(GTK_OBJECT(node_tree), "root_of_nodes", gn);
+  GtkTreeIter iter;
+  gtk_tree_store_append (tree_store, &iter, NULL);
+  gtk_tree_store_set (tree_store, &iter,
+                      0, "nodes",
+                      1, gn,
+                      -1);
+  node_iter = &iter;
 
   // Handle nodes added before breadboard GUI enabled
   GList *list;
@@ -4344,7 +4382,7 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   pinname_gc = 0;
   pinline_gc = 0;
   case_gc = 0;
-  node_tree = 0;
+  node_iter = 0;
 
   modules=0;
   nodes = 0;

@@ -28,6 +28,7 @@ License along with this library; if not, see
 #include "psp.h"
 #include "pir.h"
 #include "comparator.h"
+#include "spp.h"
 
 class PicPortRegister;
 class PicTrisRegister;
@@ -378,6 +379,27 @@ class P18F2455 : public P18F2x21
 
 };
 
+class P18F2550 : public P18F2x21
+{
+ public:
+  sfr_register ufrml, ufrmh, uir,  uie,  ueir,  ueie,  ustat,  ucon,
+               uaddr, ucfg,  uep0, uep1, uep2,  uep3,  uep4,   uep5,
+               uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
+               uep14,  uep15;
+
+  PIR2v4       pir2;
+  virtual PROCESSOR_TYPE isa(){return _P18F2550_;};
+  P18F2550(const char *_name=0, const char *desc=0);
+  ~P18F2550();
+  static Processor *construct(const char *name);
+  void create_sfr_map();
+
+  virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
+  virtual unsigned int program_memory_size() const { return 16384; };
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
+
+};
+
 class P18F2520 : public P18F2x21
 {
  public:
@@ -398,7 +420,6 @@ class P18F4x21 : public P18F2x21
   PicTrisRegister  *m_trisd;
   PicLatchRegister *m_latd;
 
-  PSP               psp;
 
   P18F4x21(const char *_name=0, const char *desc=0);
   ~P18F4x21();
@@ -451,6 +472,11 @@ class P18F4455 : public P18F4x21
                uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
                uep14,  uep15;
 
+  SPP		spp;
+  SPPCON 	sppcon;
+  SPPCFG 	sppcfg;
+  SPPEPS 	sppeps;
+  SPPDATA 	sppdata;
   PIR2v4       pir2;
 
   virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
@@ -461,6 +487,33 @@ class P18F4455 : public P18F4x21
 
   virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 0x3000; };
+  virtual unsigned int last_actual_register () const { return 0x07FF;};
+
+};
+
+class P18F4550 : public P18F4x21
+{
+ public:
+  sfr_register ufrml, ufrmh, uir,  uie,  ueir,  ueie,  ustat,  ucon,
+               uaddr, ucfg,  uep0, uep1, uep2,  uep3,  uep4,   uep5,
+               uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
+               uep14,  uep15;
+
+  SPP		spp;
+  SPPCON 	sppcon;
+  SPPCFG 	sppcfg;
+  SPPEPS 	sppeps;
+  SPPDATA 	sppdata;
+  PIR2v4       pir2;
+
+  virtual PROCESSOR_TYPE isa(){return _P18F4550_;};
+  P18F4550(const char *_name=0, const char *desc=0);
+  ~P18F4550();
+  static Processor *construct(const char *name);
+  void create();
+
+  virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
+  virtual unsigned int program_memory_size() const { return 16384; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
 
 };

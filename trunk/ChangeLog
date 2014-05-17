@@ -1,3 +1,13 @@
+2014-05-17 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.cc gui/gui_breadboard.h:
+	- Replace CList with GtkTreeView (patch 30 with rework)
+	* src/ValueCollections.h: fix throw - bug 159
+	* src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h:
+	- add p18f2550, p18f4550 without USB support, remove PSP from p18f2520
+	* src/Makefile.am src/makefile.mingw src/pir.cc src/pir.h
+	  src/spp.cc src/spp.h: add streaming parallel port to p18f4455
+	  p18f4550 (without USB functionality)
+
 2014-05-09 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc: Correct baud rate after CPU frequency change
 	  Bug 167
