@@ -347,10 +347,12 @@ ProcessorConstructor pP18F2321(P18F2321::construct,
                               "__18F2321",  "pic18f2321",   "p18f2321", "18f2321");
 ProcessorConstructor pP18F2420(P18F2420::construct,
                               "__18F2420",  "pic18f2420",   "p18f2420", "18f2420");
-ProcessorConstructor pP18F2520(P18F2520::construct,
-                              "__18F2520",  "pic18f2520",   "p18f2520", "18f2520");
 ProcessorConstructor pP18F2455(P18F2455::construct,
                               "__18F2455",  "pic18f2455",   "p18f2455", "18f2455");
+ProcessorConstructor pP18F2520(P18F2520::construct,
+                              "__18F2520",  "pic18f2520",   "p18f2520", "18f2520");
+ProcessorConstructor pP18F2550(P18F2550::construct,
+                              "__18F2550",  "pic18f2550",   "p18f2550", "18f2550");
 ProcessorConstructor pP18F4221(P18F4221::construct,
                               "__18F4221",  "pic18f4221",   "p18f4221", "18f4221");
 ProcessorConstructor pP18F4321(P18F4321::construct,
@@ -359,6 +361,8 @@ ProcessorConstructor pP18F4420(P18F4420::construct,
                               "__18F4420",  "pic18f4420",   "p18f4420", "18f4420");
 ProcessorConstructor pP18F4520(P18F4520::construct,
                               "__18F4520",  "pic18f4520",   "p18f4520", "18f4520");
+ProcessorConstructor pP18F4550(P18F4550::construct,
+                              "__18F4550",  "pic18f4550",   "p18f4550", "18f4550");
 ProcessorConstructor pP18F4455(P18F4455::construct,
                               "__18F4455",  "pic18f4455",   "p18f4455", "18f4455");
 ProcessorConstructor pP18F4620(P18F4620::construct,

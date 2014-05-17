@@ -98,6 +98,7 @@ src_OBJECTS =			\
 	registers.o		\
 	sim_context.o		\
 	ssp.o			\
+	spp.o			\
 	stimuli.o		\
 	symbol.o		\
 	tmr0.o			\

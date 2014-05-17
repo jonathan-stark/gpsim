@@ -266,8 +266,6 @@ public:
   GtkWidget *attribute_entry;
   GtkWidget *attribute_button;
 
-  GtkWidget *node_tree;
-
   GtkWidget *node_clist;
 
   GtkWidget *stimulus_settings_label;
@@ -277,6 +275,8 @@ public:
   GdkPixmap *layout_pixmap;
 
   GtkAdjustment *hadj, *vadj;
+  
+  GtkTreeIter *node_iter;
 
   GuiPin *selected_pin;
   struct gui_node *selected_node;

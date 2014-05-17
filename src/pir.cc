@@ -209,6 +209,13 @@ void PIR1v2::set_pspif(void)
   if( value.get() & pie->value.get() )
     setPeripheralInterrupt();
 }
+void PIR1v2::set_sppif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | SPPIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
 void PIR1v2::set_sspif(void)
 {
   trace.raw(write_trace.get() | value.get());

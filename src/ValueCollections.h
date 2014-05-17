@@ -259,7 +259,7 @@ public:
     else {
       string sMsg;
       sMsg = "Indexer expression does not evaluate to an Integer for " + name(); 
-      throw sMsg.c_str();
+      throw Error(sMsg);
     }
   }
 
