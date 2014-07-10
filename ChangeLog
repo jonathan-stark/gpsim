@@ -1,3 +1,11 @@
+2014-07-10 Roy Rankin <rrankin@ihug.com.au>
+	* modules/stimuli.cc: Fix compile error on FreeBSD - bug #160
+	* regression/p1xf18xx/Makefile: Fix regression test issue - patch #35
+	* gui/gui_menu.cc gui/gui_regwin.cc gui/gui_regwin.h gui/gui_scope.cc
+	  gui/gui_scope.h gui/gui_src.h gui/gui_src_asm.cc src/breakpoints.cc
+	  src/breakpoints.h src/cod.cc src/pic-processor.h:
+	- Fix useless tests on unsigned int variables (FreeBSD warnings)
+
 2014-07-01 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p1xf18xx/16f1788_g.lkr: add to svn
 

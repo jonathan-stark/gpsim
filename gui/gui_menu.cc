@@ -1268,7 +1268,7 @@ cbTimeFormatPopup(GtkWidget *widget, GdkEventButton *event, TimeWidget *tw)
   if(!widget || !event || !tw)
     return 0;
 
-  if( (event->type == GDK_BUTTON_PRESS) ) {// &&  (event->button == 3) ) {
+  if(event->type == GDK_BUTTON_PRESS) {
 
     gtk_menu_popup(GTK_MENU(tw->menu), 0, 0, 0, 0,
                    3, event->time);

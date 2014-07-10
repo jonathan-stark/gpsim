@@ -1830,7 +1830,7 @@ void Register_Window::UpdateASCII(gint row)
 
 }
 
-gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
+gboolean Register_Window::UpdateRegisterCell(int reg_number)
 
 {
   static gboolean bTrace = false;
@@ -1854,7 +1854,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   if (!guiReg || !guiReg->rma)
     return 0;
 
-  if(reg_number >= guiReg->rma->get_size())
+  if((unsigned int)reg_number >= guiReg->rma->get_size())
     return 0;
 
   

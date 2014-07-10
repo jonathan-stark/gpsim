@@ -71,7 +71,7 @@ public:
   gdouble getSpan();
 
   /// mapPixelToTime - convert a pixel horizontal offset to time
-  guint64 mapPixelToTime(unsigned int pixel);
+  guint64 mapPixelToTime(int pixel);
 
   /// mapTimeToPixel - convert time to a pixel horizontal offset.
   int mapTimeToPixel(guint64 time);
@@ -117,7 +117,7 @@ private:
 			       in a horizontal pane */
   GtkWidget *m_phScrollBar; // scroll bar for the waves
 
-  unsigned int m_PixmapWidth; // Width of waveform pixmaps.
+  int m_PixmapWidth; // Width of waveform pixmaps.
 
   GridPointMapping m_MajorTicks;
   GridPointMapping m_MinorTicks;
