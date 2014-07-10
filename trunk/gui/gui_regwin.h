@@ -78,7 +78,7 @@ class Register_Window : public GUI_Object
   virtual void SelectRegister(int reg_number);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual GUIRegister *getRegister(int row, int col);
-  virtual gboolean UpdateRegisterCell(unsigned int reg_number);
+  virtual gboolean UpdateRegisterCell(int reg_number);
   GUIRegister *operator [] (int address);
   int column_width(int col);
   int row_height(int row);

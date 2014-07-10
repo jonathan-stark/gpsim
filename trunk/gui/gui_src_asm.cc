@@ -2584,7 +2584,7 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatLine(int id, unsigned int line)
   return e;
 }
 
-BreakPointInfo *SourceBrowserAsm_Window::getBPatIndex(int id, unsigned int index)
+BreakPointInfo *SourceBrowserAsm_Window::getBPatIndex(int id, int index)
 {
   BreakPointInfo *e;
   GList *p;

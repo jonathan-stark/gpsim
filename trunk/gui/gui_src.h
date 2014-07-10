@@ -363,7 +363,7 @@ public:
   GtkWidget *getCanBreakWidget() { return canbreak_widget;}
   int address;
   int pos;
-  unsigned int index;           // gtktext index to start of line
+  int index;           // gtktext index to start of line
 private:
   unsigned int line;            // line number, first line eq. 0
   GtkWidget *break_widget;      // breakpoint widget on this line.
@@ -532,7 +532,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   void DetermineBreakinfos(int id);
   BreakPointInfo *getBPatLine(int id, unsigned int line);
   BreakPointInfo *getBPatPixel(int id, int pixel);
-  BreakPointInfo *getBPatIndex(int id, unsigned int index);
+  BreakPointInfo *getBPatIndex(int id, int index);
 
   static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw);
   static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw);

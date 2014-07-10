@@ -794,12 +794,13 @@ _Cleanup:
 void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 {
   int line_number;
-  unsigned int address;
+  int address;
+  int	prog_memory_size = cpu->program_memory_size();
 
   int file_index;
 
 	// Reset hll_file_id and hll_src_line throughout cpu memory
-	for(address=0;address<cpu->program_memory_size();address++)
+	for(address=0; address<prog_memory_size; address++)
 	{
 		cpu->program_memory[address]->set_hll_file_id(-1);
 		cpu->program_memory[address]->set_hll_src_line(0); // Meaning 'not set' in this function.
@@ -891,7 +892,7 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 	// Fill the addresses in the gaps.
 	file_index=0;
 	line_number=-1;
-	for(address=0;address<cpu->program_memory_size();address++)
+	for(address=0;address<prog_memory_size;address++)
 	{
 		int line = cpu->program_memory[address]->get_hll_src_line();
 		if(line==0)

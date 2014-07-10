@@ -125,6 +125,8 @@ enum PROCESSOR_TYPE
   _P16F886_,
   _P16F887_,
   _P16F1823_,
+  _P16F1788_,
+  _P16F1789_,
   _P17C7xx_,
   _P17C75x_,
   _P17C752_,
@@ -366,7 +368,7 @@ public:
   virtual void step_cycle();
 
   virtual void step_one(bool refresh=true) {
-    if (pc->value >= 0 && pc->value < program_memory_size())
+    if (pc->value < program_memory_size())
         program_memory[pc->value]->execute();
     else
     {

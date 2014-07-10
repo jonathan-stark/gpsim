@@ -885,7 +885,7 @@ void Breakpoints::clear_all_set_by_user(Processor *c)
 // FIXME -- this tacitly assumes "register memory". Thus it's
 // not possible to use this function on EEPROM or module registers.
 
-void Breakpoints::clear_all_register(Processor *c,unsigned int address)
+void Breakpoints::clear_all_register(Processor *c, gint64 address)
 {
 
   if(!c || address<0 || address > c->register_memory_size())
