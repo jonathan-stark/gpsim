@@ -5,7 +5,7 @@
 include ../make.regression
 
 
-all :   p12f1822.cod  p16f1823.cod p16f1823_spi.cod p16f1823_i2c.cod p16f1823_i2c_v2.cod p16f1823_comp.cod
+all :   p12f1822.cod  p16f1823.cod p16f1823_spi.cod p16f1823_i2c.cod p16f1823_i2c_v2.cod p16f1823_comp.cod p12f1822_usart.cod
 
 p16f1823_i2c_v2.o : p16f1823_i2c_v2.asm i2c_low.inc
 
@@ -16,6 +16,9 @@ p%_i2c.cod : p%_i2c.o
 	gplink --map -s $*_g.lkr -o $@  $<
 
 p%_comp.cod : p%_comp.o
+	gplink --map -s $*_g.lkr -o $@  $<
+
+p%_usart.cod : p%_usart.o
 	gplink --map -s $*_g.lkr -o $@  $<
 
 p%_i2c_v2.cod : p%_i2c_v2.o

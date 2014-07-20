@@ -220,16 +220,36 @@ void _TXREG::put_value(unsigned int new_value)
 
 void _TXSTA::setIOpin(PinModule *newPinModule)
 {
-  if (!m_source) {
-    m_source = new TXSignalSource(this);
-    m_control = new TXSignalControl(this);
-    m_PinModule = newPinModule;
+
+  if (!m_source)
+  {
+      m_source = new TXSignalSource(this);
+      m_control = new TXSignalControl(this);
+  }
+  else if (m_PinModule)
+  {
+	m_PinModule->setSource(0);
+	m_PinModule->setControl(0);
   }
 
+  m_PinModule = newPinModule;
+  if(value.get() & TXEN && m_PinModule)
+  {
+        m_PinModule->setSource(m_source);
+        m_PinModule->setControl(m_control);
+        SourceActive = true;
+  }
 }
 
 void _TXSTA::releasePin()
 {
+
+    if (m_PinModule && SourceActive)
+    {
+	m_PinModule->setSource(0);
+	m_PinModule->setControl(0);
+	SourceActive = false;
+    }
     m_PinModule = 0;
     m_control = 0;
     m_source = 0;
@@ -615,12 +635,16 @@ void _RCSTA::put_value(unsigned int new_value)
 
 void _RCSTA::setIOpin(PinModule *newPinModule)
 {
-  if (!m_sink) {
-    m_sink = new RXSignalSink(this);
-    m_PinModule = newPinModule;
+  if (m_sink) {
     if (m_PinModule)
-      m_PinModule->addSink(m_sink);
+      m_PinModule->removeSink(m_sink);
   }
+  else
+      m_sink = new RXSignalSink(this);
+
+  m_PinModule = newPinModule;
+  if (m_PinModule)
+    m_PinModule->addSink(m_sink);
 
 }
 

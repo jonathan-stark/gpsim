@@ -315,6 +315,7 @@ void Pic14Bit::option_new_bits_6_7(unsigned int bits)
 
 _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
   : _14bit_processor(_name,_desc),
+    mclr_pin(4),
     intcon_reg(this,"intcon","Interrupt Control"),
     bsr(this, "bsr", "Bank Select Register"),
     pcon(this, "pcon", "Power Control Register", 0xcf),
@@ -548,7 +549,7 @@ bool _14bit_e_processor::set_config_word(unsigned int address,unsigned int cfg_w
 	unsigned int wdt_flag = (cfg_word & (WDTEN0|WDTEN1));
         Dprintf((" cfg_word %x MCLRE %x\n", cfg_word, cfg_word & MCLRE));
         if ((cfg_word & MCLRE) == MCLRE)
-            assignMCLRPin(4);   // package pin 4
+            assignMCLRPin(mclr_pin);   
         else
             unassignMCLRPin();
 	wdt_sleep = (wdt_flag == WDTEN1)?false:true; // will WDT interrupt sleep

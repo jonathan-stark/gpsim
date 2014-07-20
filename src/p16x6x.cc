@@ -693,7 +693,6 @@ P16C64::~P16C64()
 {
   if (verbose)
     cout << __FUNCTION__ << endl;
-    cout << __FUNCTION__ << endl;
 
   delete_sfr_register(m_portd);
   delete_sfr_register(m_trisd);
