@@ -784,7 +784,6 @@ void ANSEL_P::put(unsigned int new_value)
   new_value &= valid_bits;
   value.put(new_value);
 
-
   cfg_mask = 0;
   for(i=0; i< 8; i++)
   {
@@ -800,7 +799,9 @@ void ANSEL_P::put(unsigned int new_value)
   if (ansel)
   {
       mask |= ansel->get_mask();
-   }
+  }
+  if (!adcon1)
+	return;
   /*
 	Generate ChannelConfiguration from ansel register
   */

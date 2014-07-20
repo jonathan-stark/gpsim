@@ -151,7 +151,7 @@ modepopup_activated(GtkWidget *widget, gpointer data)
 
   unsigned char dir = *(unsigned char*)data;
 
-  sww = (StopWatch_Window *)gtk_object_get_data(GTK_OBJECT(widget),"sww");
+  sww = (StopWatch_Window *)g_object_get_data(G_OBJECT(widget),"sww");
 
 
   switch(dir)

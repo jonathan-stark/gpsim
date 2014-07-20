@@ -179,6 +179,8 @@ public:
 class _14bit_e_processor : public _14bit_processor
 {
 public:
+  unsigned int mclr_pin;
+
   INTCON_14_PIR          intcon_reg;
   BSR			 bsr;
   PCON			 pcon;
@@ -195,6 +197,7 @@ public:
   sfr_register		 fsr1h_shad;
   CPU_Temp         	*m_cpu_temp;
 
+  void set_mclr_pin(unsigned int pin) { mclr_pin = pin;}
   virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(){return _14BIT_E_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)

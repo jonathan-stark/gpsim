@@ -1,3 +1,19 @@
+2014-07-21 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_stopwatch.cc: replace obsolete gtk_object_get_data function
+	* regression/p1xf18xx/Makefile regression/p1xf18xx/p12f1822_usart.asm
+	  regression/run_regressionj.sh: Add 12f1822 usart regression test
+	* src/p1xf1xxx.cc src/p1xf1xxx.h src/Makefile.am: 
+	- rename of files src/p12f182x.cc and src/p12f182x.h
+	- Fix PIR1 part of bug #170
+	- Fix weak pull-up on 12f1822 RA3 bug #169
+	* src/14bit-processors.cc src/14bit-processors.h: 
+	- fix mcrl pin on extended processors
+	* src/a2dconverter.cc: allow for no adcon1 register
+	* src/p16f87x.cc: Delete all 16f877 registers
+	* src/p16x6x.cc: remove unneeded output of class close
+	* src/pic-processor.cc: add 16f1788 processor (not complete)
+	* src/uart.cc: Fix apfcon pin switching part of bug #170
+
 2014-07-10 Roy Rankin <rrankin@ihug.com.au>
 	* modules/stimuli.cc: Fix compile error on FreeBSD - bug #160
 	* regression/p1xf18xx/Makefile: Fix regression test issue - patch #35

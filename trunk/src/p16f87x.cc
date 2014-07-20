@@ -1104,8 +1104,8 @@ P16F877::P16F877(const char *_name, const char *desc)
 
 P16F877::~P16F877()
 {
-  delete_file_registers(0x110, 0x11f);
-  delete_file_registers(0x190, 0x19f);
+  delete_file_registers(0x110, 0x16f);
+  delete_file_registers(0x190, 0x1ef);
 }
 
 void P16F877A::create_sfr_map()
