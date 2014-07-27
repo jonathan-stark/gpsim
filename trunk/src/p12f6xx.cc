@@ -81,6 +81,7 @@ public:
 
   enum {
 	TMR1IF 	= 1 << 0,
+	TMR2IF  = 1 << 1,	//For 12F683
 	CMIF	= 1 << 3,
 	ADIF	= 1 << 6,
 	EEIF	= 1 << 7
@@ -93,11 +94,21 @@ PIR1v12f(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, 
 {
   valid_bits = TMR1IF | CMIF | ADIF | EEIF;
   writable_bits = TMR1IF | CMIF | ADIF | EEIF;
-
 }
-   virtual void set_tmr1if()
+
+  virtual void set_tmr2if_bits()
+  { 
+	valid_bits |= TMR2IF; 
+	writable_bits |= TMR2IF;
+  }
+  
+  virtual void set_tmr1if()
   {
     put(get() | TMR1IF);
+  }
+  virtual void set_tmr2if()
+  {
+    put(get() | TMR2IF);
   }
   virtual void set_cmif()
   {
@@ -527,6 +538,7 @@ P12F683::P12F683(const char *_name, const char *desc)
 
 {
     internal_osc = false;
+    pir1->set_tmr2if_bits();
 }
 
 P12F683::~P12F683()
