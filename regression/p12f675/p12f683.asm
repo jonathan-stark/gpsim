@@ -32,6 +32,7 @@ status_temp     RES     1
 cmif_cnt	RES	1
 tmr0_cnt	RES	1
 tmr1_cnt	RES	1
+tmr2_cnt	RES	1
 eerom_cnt	RES	1
 adr_cnt		RES	1
 data_cnt	RES	1
@@ -90,6 +91,9 @@ INT_VECTOR   CODE    0x004               ; interrupt vector location
 	btfsc	PIR1,TMR1IF
 	   goto tmr1_int
 
+	btfsc	PIR1,TMR2IF
+	   goto tmr2_int
+
 	btfsc	PIR1,EEIF
 	    goto ee_int
 
@@ -118,6 +122,12 @@ tmr0_int
 tmr1_int
 	incf	tmr1_cnt,F
 	bcf	PIR1,TMR1IF
+	goto	exit_int
+
+; Interrupt from TMR2
+tmr2_int
+	incf	tmr2_cnt,F
+	bcf	PIR1,TMR2IF
 	goto	exit_int
 
 ; Interrupt from eerom
@@ -191,6 +201,7 @@ start
 
 	call test_compare
 	call test_tmr1
+	call test_tmr2
 	call test_eerom
 	call test_adc
 
@@ -430,6 +441,44 @@ tmr1_loop3:
 
    .assert "tmr1l != W, \"*** FAILED 12f683 TMR1 test - TMR1 running\""
 	nop
+	return
+
+test_tmr2:
+        ;; Here are the tests performed:
+        ;;
+        ;; -- TMR2 can be read and written
+        ;; -- TMR2 driven Fosc/4 with prescale of 8 and generates an interrupt
+
+        ; Load TMR2 with 0x80 
+	BANKSEL TMR2
+        MOVLW   0x80
+        MOVWF   TMR2
+
+        BCF     PIR1,TMR2IF     ;Clear any TMR2 pending interrupt
+	BANKSEL PIE1
+        BSF     PIE1,TMR2IE     ;Enable TMR2 interrupts
+        BSF     INTCON,PEIE     ;Enable Peripheral interrupts
+        BSF     INTCON,GIE      ;Enable Global interrupts
+
+	movlw	0xff
+	movwf	PR2		; Set PR2 register to 0xff
+
+	BANKSEL	TMR2
+
+  ; TMR2 not running yet, TMR2 should be unchanged
+        MOVF    TMR2,W         ; test read
+   .assert "W==0x80, \"*** FAILED 12f683 TMR2 test TMR2 read\""
+        nop
+
+	movlw	0x38
+	movwf	T2CON	; 1:8 Postscaler; 1 Prescaler
+	bsf	T2CON,TMR2ON	; Start timer
+	
+tmr2_loop:
+	movf	tmr2_cnt,W
+	btfsc	STATUS,Z
+	goto	tmr2_loop
+	bcf	T2CON,TMR2ON	; stop timer
 	return
 
 test_eerom:

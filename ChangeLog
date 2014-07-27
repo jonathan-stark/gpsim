@@ -1,3 +1,7 @@
+2014-07-27 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p12f675/p12f683.asm src/p12f6xx.cc src/pir.h:
+	- Fix tmr2 interrupt on 12F683 - bug #171
+
 2014-07-21 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_stopwatch.cc: replace obsolete gtk_object_get_data function
 	* regression/p1xf18xx/Makefile regression/p1xf18xx/p12f1822_usart.asm
