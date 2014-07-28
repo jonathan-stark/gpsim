@@ -96,12 +96,6 @@ PIR1v12f(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, 
   writable_bits = TMR1IF | CMIF | ADIF | EEIF;
 }
 
-  virtual void set_tmr2if_bits()
-  { 
-	valid_bits |= TMR2IF; 
-	writable_bits |= TMR2IF;
-  }
-  
   virtual void set_tmr1if()
   {
     put(get() | TMR1IF);
@@ -110,6 +104,7 @@ PIR1v12f(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, 
   {
     put(get() | TMR2IF);
   }
+
   virtual void set_cmif()
   {
     trace.raw(write_trace.get() | value.get());
@@ -538,7 +533,8 @@ P12F683::P12F683(const char *_name, const char *desc)
 
 {
     internal_osc = false;
-    pir1->set_tmr2if_bits();
+    pir1->valid_bits |= PIR1v12f::TMR2IF;
+    pir1->writable_bits |= PIR1v12f::TMR2IF;
 }
 
 P12F683::~P12F683()

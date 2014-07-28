@@ -151,6 +151,30 @@ start
 	movwf	FVRCON
 	BANKSEL STKPTR
 	movf	STKPTR,W
+	;
+	; Check PIR bits writable
+	BANKSEL PIR1
+	movlw	0xff
+	movwf	PIR1
+   .assert "pir1 == 0xcf,  \"*** FAILED 16f1823  PIR1 writable bits\""
+	nop
+	clrf	PIR1
+	movwf	PIR2
+   .assert "pir2 == 0xf8,  \"*** FAILED 16f1823  PIR2 writable bits\""
+	nop
+	clrf	PIR2
+	;
+	; Check PIE bits writable
+	BANKSEL PIE1
+	movlw	0xff
+	movwf	PIE1
+   .assert "PIE1 == 0xff,  \"*** FAILED 16f1823  PIE1 writable bits\""
+	nop
+	clrf	PIE1
+	movwf	PIE2
+   .assert "PIE2 == 0xf8,  \"*** FAILED 16f1823  PIE2 writable bits\""
+	nop
+	clrf	PIE2
 ;	;
 	; test pins in analog mode return 0 on register read
 	BANKSEL TRISA
