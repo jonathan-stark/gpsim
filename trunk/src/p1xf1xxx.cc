@@ -1573,6 +1573,8 @@ P16F1823::P16F1823(const char *_name, const char *desc)
   comparator.cmxcon0[1] = new CMxCON0(this, "cm2con0", " Comparator C2 Control Register 0", 1, &comparator);
   comparator.cmxcon1[1] = new CMxCON1(this, "cm2con1", " Comparator C2 Control Register 1", 1, &comparator);
   cpscon1.mValidBits = 0x0f;
+  pir2->valid_bits |= PIR2v1822::C2IF;
+  pir2->writable_bits |= PIR2v1822::C2IF;
 }
 P16F1823::~P16F1823()
 {

@@ -1,3 +1,11 @@
+2014-07-28 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p1xf18xx/Makefile: generate p16f1788.cod file
+	* regression/p1xf18xx/p16f1823.asm: test writable PIR and PIE bits
+	* src/p12f6xx.cc src/pir.h: revisit bug 171 patch
+	* src/p1xf1xxx.cc: Set PIR2 C2IF bit writable for 16f1823 bug #172
+	* src/pie.cc: use associated PIR register valid_bits mask for PIE
+	- bug # 173
+
 2014-07-27 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p12f675/p12f683.asm src/p12f6xx.cc src/pir.h:
 	- Fix tmr2 interrupt on 12F683 - bug #171
