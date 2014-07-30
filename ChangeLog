@@ -1,3 +1,10 @@
+2014-07-31 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p1xf18xx/p12f1822.asm src/14bit-instructions.cc:
+	- p12f182x: MOVIW must update Z bit - bug #175
+	* src/pic-ioports.cc: IOC only works on gpio0 of p12f675 - bug #174
+	* src/a2dconverter.cc src/p1xf1xxx.cc src/p1xf1xxx.h:
+	- further work on p16f1788
+
 2014-07-28 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p1xf18xx/Makefile: generate p16f1788.cod file
 	* regression/p1xf18xx/p16f1823.asm: test writable PIR and PIE bits

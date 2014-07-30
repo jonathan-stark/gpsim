@@ -1092,6 +1092,7 @@ DACCON0::DACCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned
 void  DACCON0::put(unsigned int new_value)
 {
   unsigned int masked_value = (new_value & bit_mask);
+    printf("RRR %s-%d new_value %x bit_mask %x\n", __FUNCTION__, __LINE__, new_value, bit_mask);
   trace.raw(write_trace.get() | value.get());
   value.put(masked_value);
   compute_dac(masked_value);
@@ -1100,6 +1101,7 @@ void  DACCON0::put(unsigned int new_value)
 void  DACCON0::put_value(unsigned int new_value)
 {
   unsigned int masked_value = (new_value & bit_mask);
+    printf("RRR %s-%d new_value %x bit_mask %x\n", __FUNCTION__, __LINE__, new_value, bit_mask);
   value.put(masked_value);
   compute_dac(masked_value);
 
@@ -1118,6 +1120,7 @@ void  DACCON0::compute_dac(unsigned int value)
     double Vlow = 0.;
     double Vout;
 
+    printf("RRR %s-%d value %x daccon1_reg %x res %x %.2f %.2f\n", __FUNCTION__, __LINE__, value, daccon1_reg, bit_resolution, Vhigh, Vlow);
     if(value & DACEN)	// DAC is enabled
     {
 	Vout = (Vhigh - Vlow) * daccon1_reg/bit_resolution - Vlow;
@@ -1149,6 +1152,7 @@ void  DACCON0::compute_dac(unsigned int value)
 	out_pin->set_ZthIn(Zth);
     }
 	
+    printf("RRR %s-%d adcon1 %p chan %d Volt %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
     if(adcon1) adcon1->setVoltRef(FVRCDA_AD_chan, Vout);
     if(cmModule) cmModule->set_DAC_volt(Vout);
     if(cpscon0) cpscon0->set_DAC_volt(Vout);

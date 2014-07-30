@@ -172,31 +172,39 @@ char *MOVIW::name(char *return_str,int len)
 
 void MOVIW::execute()
 {
+  unsigned int new_value = 0;
+
   if (m_op == PREINC)
   {
     ia->put_fsr(ia->fsr_value + 1);
-    cpu14->Wput(ia->indf.get());
+    new_value = ia->indf.get();
+    cpu14->Wput(new_value);
   }
   else if (m_op == PREDEC)
   {
     ia->put_fsr(ia->fsr_value - 1);
-    cpu14->Wput(ia->indf.get());
+    new_value = ia->indf.get();
+    cpu14->Wput(new_value);
   }
   else if (m_op == POSTINC)
   {
-    cpu14->Wput(ia->indf.get());
+    new_value = ia->indf.get();
+    cpu14->Wput(new_value);
     ia->put_fsr(ia->fsr_value + 1);
   }
   else if (m_op == POSTDEC)
   {
-    cpu14->Wput(ia->indf.get());
+    new_value = ia->indf.get();
+    cpu14->Wput(new_value);
     ia->put_fsr(ia->fsr_value - 1);
   }
   else if (m_op == DELTA)
   {
 	ia->fsr_delta = m_lit;
-        cpu14->Wput(ia->indf.get());
+        new_value = ia->indf.get();
+        cpu14->Wput(new_value);
   }
+  cpu14->status->put_Z(new_value==0);
   cpu_pic->pc->increment();
 }
 //---------------------------------------------------------

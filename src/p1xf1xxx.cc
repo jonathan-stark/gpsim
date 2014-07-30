@@ -171,6 +171,9 @@ class PIR2v1822 : public PIR
 public:
 
   enum {
+    CCP2IF  = 1<<0,	// for 16f178[89]
+    C3IF    = 1<<1,	// for 16f178[89]
+    C4IF    = 1<<2,	// for 16f178[89]
     BCLIF   = 1<<3,
     EEIF    = 1<<4,
     C1IF    = 1<<5,
@@ -187,6 +190,30 @@ PIR2v1822(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon,
   writable_bits = BCLIF | EEIF | C1IF | OSFIF;
 
 }
+
+  void set_ccp2if(void)
+  {
+    trace.raw(write_trace.get() | value.get());
+    value.put(value.get() | CCP2IF);
+    if( value.get() & pie->value.get() )
+      setPeripheralInterrupt();
+  }
+
+  void set_c3if(void)
+  {
+    trace.raw(write_trace.get() | value.get());
+    value.put(value.get() | C3IF);
+    if( value.get() & pie->value.get() )
+      setPeripheralInterrupt();
+  }
+
+  void set_c4if(void)
+  {
+    trace.raw(write_trace.get() | value.get());
+    value.put(value.get() | C4IF);
+    if( value.get() & pie->value.get() )
+      setPeripheralInterrupt();
+  }
 
   void set_bclif(void)
   {
@@ -220,6 +247,30 @@ PIR2v1822(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon,
   {
     trace.raw(write_trace.get() | value.get());
     value.put(value.get() | OSFIF);
+    if( value.get() & pie->value.get() )
+      setPeripheralInterrupt();
+  }
+};
+
+class PIR3v178x : public PIR
+{
+public:
+
+  enum {
+    CCP3IF = 1<<4
+  };
+
+PIR3v178x(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  writable_bits = valid_bits = CCP3IF;
+
+}
+
+  void set_ccp3if(void)
+  {
+    trace.raw(write_trace.get() | value.get());
+    value.put(value.get() | CCP3IF);
     if( value.get() & pie->value.get() )
       setPeripheralInterrupt();
   }
@@ -806,8 +857,9 @@ void P12F1822::program_memory_wp(unsigned int mode)
 P16F178x::P16F178x(const char *_name, const char *desc)
   : _14bit_e_processor(_name,desc), 
     comparator(this),
-    pie1(this,"PIE1", "Peripheral Interrupt Enable"),
-    pie2(this,"PIE2", "Peripheral Interrupt Enable"),
+    pie1(this,"pie1", "Peripheral Interrupt Enable"),
+    pie2(this,"pie2", "Peripheral Interrupt Enable"),
+    pie3(this,"pie3", "Peripheral Interrupt Enable"),
     t2con(this, "t2con", "TMR2 Control"),
     pr2(this, "pr2", "TMR2 Period Register"),
     tmr2(this, "tmr2", "TMR2 Register"),
@@ -857,8 +909,14 @@ P16F178x::P16F178x(const char *_name, const char *desc)
   m_lata  = new PicLatchRegister(this,"lata","",m_porta, 0xff);
   m_porte= new PicPortIOCRegister(this,"porte","", intcon, m_iocap, m_iocan, m_iocaf, 8,0x08);
   m_trise = new PicTrisRegister(this,"trise","", m_porte, false, 0x08);
-  m_daccon0 = new DACCON0(this, "dac1con0", "DAC Voltage reference register 0", 0xec, 32);
-  m_daccon1 = new DACCON1(this, "dac1con1", "DAC Voltage reference register 1", 0x1f, m_daccon0);
+  m_daccon0 = new DACCON0(this, "dac1con0", "DAC1 8bit Voltage reference register 0", 0xec, 256);
+  m_daccon1 = new DACCON1(this, "dac1con1", "DAC1 8bit Voltage reference register 1", 0xff, m_daccon0);
+  m_dac2con0 = new DACCON0(this, "dac2con0", "DAC2 5bit Voltage reference register 0", 0xec, 32);
+  m_dac2con1 = new DACCON1(this, "dac2con1", "DAC2 5bit Voltage reference register 1", 0x1f, m_dac2con0);
+  m_dac3con0 = new DACCON0(this, "dac3con0", "DAC3 5bit Voltage reference register 0", 0xec, 32);
+  m_dac3con1 = new DACCON1(this, "dac3con1", "DAC3 5bit Voltage reference register 1", 0x1f, m_dac3con0);
+  m_dac4con0 = new DACCON0(this, "dac4con0", "DAC4 5bit Voltage reference register 0", 0xec, 32);
+  m_dac4con1 = new DACCON1(this, "dac4con1", "DAC4 5bit Voltage reference register 1", 0x1f, m_dac4con0);
   m_cpu_temp = new CPU_Temp("cpu_temperature", 30., "CPU die temperature");
 
   tmr0.set_cpu(this, m_porta, 4, option_reg);
@@ -873,6 +931,9 @@ P16F178x::P16F178x(const char *_name, const char *desc)
 
   pir1 = new PIR1v1822(this,"pir1","Peripheral Interrupt Register",intcon, &pie1);
   pir2 = new PIR2v1822(this,"pir2","Peripheral Interrupt Register",intcon, &pie2);
+  pir3 = new PIR3v178x(this,"pir3","Peripheral Interrupt Register",intcon, &pie3);
+  pir2->valid_bits |= PIR2v1822::C2IF | PIR2v1822::CCP2IF | PIR2v1822::C3IF | PIR2v1822::C4IF;
+  pir2->writable_bits |= PIR2v1822::C2IF | PIR2v1822::CCP2IF | PIR2v1822::C3IF | PIR2v1822::C4IF;
 
   comparator.cmxcon0[0] = new CMxCON0(this, "cm1con0", " Comparator C1 Control Register 0", 0, &comparator);
   comparator.cmxcon1[0] = new CMxCON1(this, "cm1con1", " Comparator C1 Control Register 1", 0, &comparator);
@@ -902,6 +963,12 @@ P16F178x::~P16F178x()
     delete_sfr_register(m_iocaf);
     delete_sfr_register(m_daccon0);
     delete_sfr_register(m_daccon1);
+    delete_sfr_register(m_dac2con0);
+    delete_sfr_register(m_dac2con1);
+    delete_sfr_register(m_dac3con0);
+    delete_sfr_register(m_dac3con1);
+    delete_sfr_register(m_dac4con0);
+    delete_sfr_register(m_dac4con1);
 
     delete_sfr_register(m_trisa);
     delete_sfr_register(m_porta);
@@ -944,6 +1011,7 @@ P16F178x::~P16F178x()
     remove_sfr_register(&pstr1con);
     remove_sfr_register(&pie1);
     remove_sfr_register(&pie2);
+    remove_sfr_register(&pie3);
     remove_sfr_register(&adresl);
     remove_sfr_register(&adresh);
     remove_sfr_register(&adcon0);
@@ -993,6 +1061,7 @@ P16F178x::~P16F178x()
     delete_sfr_register(usart.txreg);
     delete_sfr_register(pir1);
     delete_sfr_register(pir2);
+    delete_sfr_register(pir3);
     delete e;
     delete m_cpu_temp;
 }
@@ -1010,6 +1079,7 @@ void P16F178x::create_sfr_map()
 
   pir_set_2_def.set_pir1(pir1);
   pir_set_2_def.set_pir2(pir2);
+  pir_set_2_def.set_pir3(pir3);
 
 
   add_file_registers(0x20, 0x7f, 0x00);
@@ -1029,6 +1099,7 @@ void P16F178x::create_sfr_map()
     add_sfr_register(m_porte, 0x10);
     add_sfr_register(pir1,    0x11, RegisterValue(0,0),"pir1");
     add_sfr_register(pir2,    0x12, RegisterValue(0,0),"pir2");
+    add_sfr_register(pir3,    0x13, RegisterValue(0,0),"pir3");
     add_sfr_register(&tmr0,   0x15);
 
     add_sfr_register(&tmr1l,  0x16, RegisterValue(0,0),"tmr1l");
@@ -1069,6 +1140,7 @@ void P16F178x::create_sfr_map()
 
   add_sfr_register(&pie1,   0x91, RegisterValue(0,0));
   add_sfr_register(&pie2,   0x92, RegisterValue(0,0));
+  add_sfr_register(&pie3,   0x93, RegisterValue(0,0));
   add_sfr_register(&adresl, 0x9b);
   add_sfr_register(&adresh, 0x9c);
   add_sfr_register(&adcon0, 0x9d, RegisterValue(0x00,0));
@@ -1138,6 +1210,12 @@ void P16F178x::create_sfr_map()
   add_sfr_register(m_iocan, 0x392, RegisterValue(0,0),"iocan");
   add_sfr_register(m_iocaf, 0x393, RegisterValue(0,0),"iocaf");
 
+    add_sfr_register(m_dac2con0, 0x591, RegisterValue(0x00,0));
+    add_sfr_register(m_dac2con1, 0x592, RegisterValue(0x00,0));
+    add_sfr_register(m_dac3con0, 0x593, RegisterValue(0x00,0));
+    add_sfr_register(m_dac3con1, 0x594, RegisterValue(0x00,0));
+    add_sfr_register(m_dac4con0, 0x595, RegisterValue(0x00,0));
+    add_sfr_register(m_dac4con1, 0x596, RegisterValue(0x00,0));
 
   tmr2.ssp_module = &ssp;
 
@@ -1166,6 +1244,7 @@ void P16F178x::create_sfr_map()
     }
     pie1.setPir(pir1);
     pie2.setPir(pir2);
+    pie3.setPir(pir3);
     t2con.tmr2 = &tmr2;
     tmr2.pir_set   = get_pir_set();
     tmr2.pr2    = &pr2;
@@ -1246,6 +1325,22 @@ void P16F178x::create_sfr_map()
     m_daccon0->set_cmModule(&comparator);
     m_daccon0->set_FVRCDA_AD_chan(0x1e);
     m_daccon0->setDACOUT(&(*m_porta)[0]);
+
+    m_dac2con0->set_adcon1(&adcon1);
+    m_dac2con0->set_cmModule(&comparator);
+    m_dac2con0->set_FVRCDA_AD_chan(0x1c);
+    m_dac2con0->setDACOUT(&(*m_porta)[5]);
+
+    m_dac3con0->set_adcon1(&adcon1);
+    m_dac3con0->set_cmModule(&comparator);
+    m_dac3con0->set_FVRCDA_AD_chan(0x19);
+    m_dac3con0->setDACOUT(&(*m_portb)[2]);
+
+    m_dac4con0->set_adcon1(&adcon1);
+    m_dac4con0->set_cmModule(&comparator);
+    m_dac4con0->set_FVRCDA_AD_chan(0x18);
+    m_dac4con0->setDACOUT(&(*m_porta)[4]);
+
 
     osccon.set_osctune(&osctune);
     osccon.set_oscstat(&oscstat);
