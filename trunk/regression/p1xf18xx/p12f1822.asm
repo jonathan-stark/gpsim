@@ -487,8 +487,13 @@ test_indr:
 	moviw   FSR1++
 	addwf	temp,F
 	moviw   FSR1++
+   .assert "(status & 0x4) == 0x0, \"*** FAILED 12f1822 Z bit is 1 after MOVIW\""
+	nop
 	addwf	temp,F
-   .assert "temp == 0xff, \"*** FAILED read program memory\""
+   .assert "temp == 0xff, \"*** FAILED 12f1822 read program memory\""
+	nop
+	moviw   FSR1++		; Read a 0
+   .assert "(status & 0x4) == 0x4, \"*** FAILED 12f1822 Z bit is 0 after MOVIW\""
 	nop
 	; put address of temp into temp, FSR0 and 0x20
 	movlw	temp
@@ -550,5 +555,5 @@ test_indr:
 
  	org 0x300
 rrDATA
-	dw 0x01, 0x02, 0x03, 0x04, 0xf5
+	dw 0x01, 0x02, 0x03, 0x04, 0xf5, 0
   end

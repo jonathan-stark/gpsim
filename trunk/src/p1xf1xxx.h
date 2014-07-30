@@ -133,6 +133,8 @@ public:
   PIR    *pir1;
   PIE     pie2;
   PIR    *pir2;
+  PIE     pie3;
+  PIR    *pir3;
   T2CON	  t2con;
   PR2	  pr2;
   TMR2    tmr2;
@@ -177,6 +179,12 @@ public:
   WPU              *m_wpue;
   DACCON0	   *m_daccon0;
   DACCON1	   *m_daccon1;
+  DACCON0	   *m_dac2con0;
+  DACCON1	   *m_dac2con1;
+  DACCON0	   *m_dac3con0;
+  DACCON1	   *m_dac3con1;
+  DACCON0	   *m_dac4con0;
+  DACCON1	   *m_dac4con1;
   PicPortBRegister  *m_portb;
   PicTrisRegister  *m_trisb;
   PicLatchRegister *m_latb;

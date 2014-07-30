@@ -479,7 +479,7 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
     PortRegister::setbit(bit_number, new3State);
 
  // interrupt and exit sleep for level change on bits where IOC set
-    bool bitMask = m_pIoc->get_value() & (1 << bit_number);
+    int bitMask = m_pIoc->get_value() & (1 << bit_number);
 
    if (verbose)
        printf("PicPortGRegister::setbit() bit=%d,val=%c IOC_bit=%x\n",bit_number,new3State, bitMask);
