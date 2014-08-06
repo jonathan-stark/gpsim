@@ -82,6 +82,8 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
   .sim "attach n4 portb0 V1.pin"
   .sim "node n5"
   .sim "attach n5 porta6 porta7"
+  .sim "node n6"
+  .sim "attach n6 portb1 portb7"
 
   .sim "p16f1788.xpos = 72"
   .sim "p16f1788.ypos = 72"
@@ -187,6 +189,7 @@ start
 	nop
 	movlw	0x07
 	movwf	PORTA		; drive 0,1,2  bits high
+	bsf	PORTC,7
   .assert "porta == 0x3f, \"PORTA = 0x3f\""
 	nop
 	BANKSEL LATA
@@ -207,12 +210,73 @@ start
         call read_config_data
 	call test_a2d
 	call test_dac
+	call test_a2d_ref
  	call write_prog
 
   .assert  "\"*** PASSED 16f1788 Functionality\""
 	nop
 	reset
 	goto	$
+
+;
+;	Test A/D Vref-pin and differential input
+;
+test_a2d_ref:
+	BANKSEL ANSELA
+	bsf	ANSELA,2
+	bsf	ANSELA,1
+	BANKSEL	TRISA
+	bsf	TRISA,5
+	BANKSEL	DAC1CON0
+	; Pin a2 is both DAC1 output and ADC Vref-pin
+	movlw	(1<<DAC1EN)|(1<<DACOE1)
+	movwf	DAC1CON0
+	movlw	0x10	; Ladder 16/256 * 5V = 0.3125 V
+	movwf	DAC1CON1
+	BANKSEL	ADCON0
+	movlw	(1<<ADFM)|(7 << 4) | (1<<ADNREF) ; 2's comp, Frc, Vref-pin
+	movwf	ADCON1 
+	movlw	0xf		; V- = Vref-pin
+	movwf	ADCON2		
+	movlw	(1<<ADON)|(0xc<<2)	; V+ = AN12
+	movwf   ADCON0      	
+	; DAC output  (1V - 0.3125) /(5-0.3125)
+	call	a2dConvert
+   .assert "adresh == 0x02 && (adresl==0x59), \"*** FAILED 16f1788 AN12=1V V-=Vref-pin\""
+	nop
+
+  	; Test Vdd = 5.00 as Vsource+ = 2.500 DAC4 (5 bit)
+	BANKSEL DAC4CON0
+	movlw	(1<<DACEN)|(1<<DAC4OE1)
+	movwf	DAC4CON0
+	movlw	0x10		; ladder 16/32
+	movwf	DAC4CON1
+	BANKSEL	ADCON0
+	movlw	(1<<ADFM)|(7 << 4) | (1<<ADNREF) ; 2's comp, Frc, Vref-pin
+	movwf	ADCON1 
+	movlw	0x1		; V- =  AN1 (2.5 V)
+	movwf	ADCON2		
+	movlw	(1<<ADON)|(0xc<<2)	; V+ = AN12
+	movwf   ADCON0      	
+	call	a2dConvert
+   .assert "adresh == 0xfa && (adresl==0xe5), \"*** FAILED 16f1788 V+=AN12=1V V-=AN1=2.5V 2's comp\""
+	nop
+	BANKSEL	ADCON0
+	movlw	(7 << 4) | (1<<ADNREF) ; sign-mag, Frc, Vref-pin
+	movwf	ADCON1 
+	movlw	0x1			; V- =  AN1
+	movwf	ADCON2		
+	movlw	(1<<ADON)|(0xc<<2)|(1<<ADRMD)	; V+ = AN12
+	movwf   ADCON0      	
+	call	a2dConvert
+   .assert "adresh == 0x51 && (adresl==0x81), \"*** FAILED 16f1788 V+=AN12=1V V-=AN1=2.5V sign-mag 10bit\""
+	nop
+	BANKSEL DAC4CON0
+	clrf	DAC4CON0
+	BANKSEL DAC1CON0
+	clrf	DAC1CON0
+	return
+
 
 test_pir_pie_bits:
 	BANKSEL PIR1
@@ -246,7 +310,7 @@ test_pir_pie_bits:
 	return
 test_dac:
 	BANKSEL ADCON1      
-	movlw   0xf0 		;A2D right justify, Frc, Vdd ref
+	movlw   (1<<ADFM)| 0x70 ;A2D 2's comp, Frc, Vdd ref+, Vss ref-
 	movwf   ADCON1		
 	BANKSEL TRISC		;
 	bsf     TRISC,0		;Set RC0 to input
@@ -267,20 +331,47 @@ test_dac:
 	movwf	DAC1CON0
 	BANKSEL ADCON0
 	call	a2dConvert
-   .assert "(adresh==0x02) && (adresl==0x00), \"*** FAILED 16f1788 DAC enabled 1/2\""
+   .assert "(adresh==0x08) && (adresl==0x00), \"*** FAILED 16f1788 DAC enabled 1/2\""
 	nop
-  	; Test FVR = 4.065 as Vsource+ = 2.037
+  	; Test  FVR = 4.096 as Vsource+ = 2.048
 	BANKSEL	FVRCON
 	movlw	(1<<FVREN)|(1<<CDAFVR1)|(1<<CDAFVR0)
 	movwf	FVRCON
-	movlw	(1<<DACEN)|(1<<DACPSS1)
+	movlw	(1<<DACEN) | (1<<DACPSS1)
 	movwf	DAC1CON0
 	BANKSEL ADCON0
 	call	a2dConvert
-   .assert "(adresh==0x01) && (adresl==0xa3), \"*** FAILED 16f1788 DAC enabled 1/2 FVR \""
+   .assert "(adresh==0x06) && (adresl==0x8d), \"*** FAILED 16f1788 DAC enabled 1/2 FVR \""
+	nop
+	banksel TRISB
+	bsf	TRISB,7
+	clrf	TRISE
+	
+  	; Test Vdd = 5.00 as Vsource+ = 2.500 DAC4 (5 bit)
+	BANKSEL DAC4CON0
+	movlw	(1<<DACEN)|(1<<DAC4OE1) | (1<<DAC4OE2)
+	movwf	DAC4CON0
+	movlw	0x10		; ladder 16/32
+	movwf	DAC4CON1
+	BANKSEL ADCON0
+	movlw   (0x18<<2)|(1<<ADON)	;Select A2D input from DAC4  and ADC on
+	movwf   ADCON0      	
+	call	a2dConvert
+   .assert "(adresh==0x08) && (adresl==0x00), \"*** FAILED 16f1788 DAC4 enabled 1/2 Vdd \""
 	nop
 	
 
+	; Read DAC4 from output pin. (will be slightly lower than 2.500 V)
+	BANKSEL ADCON0
+	movlw   (0x0a<<2)|(1<<ADON)	;Select A2D input from DAC4 output pin
+	movwf   ADCON0      	
+	call	a2dConvert
+   .assert "(adresh==0x07) && (adresl==0xfd), \"*** FAILED 16f1788 DAC4 output pin\""
+	nop
+	
+
+	BANKSEL DAC4CON0
+	clrf	DAC4CON0
 
 	return
 
@@ -364,31 +455,33 @@ test_a2d
 	banksel ANSELC
 	clrf	ANSELC
 	BANKSEL ADCON1      
-	movlw   0x70 		;Left justify, Frc, Vdd ref
+	movlw   0x70 		;Sign-magnatude, Frc, Vdd ref+, Vss ref-
 	movwf   ADCON1		
+	movlw	0x0f		;negative input is negative reference
+	movwf	ADCON2
 	BANKSEL TRISC		;
 	bsf     TRISC,0		;Set RC0 to input
 	BANKSEL ANSELC		;
 	bsf     ANSELC,0	;Set RC0 to analog
 	BANKSEL ADCON0      	;
-	movlw   0x30|(1<<ADON)	;Select channel AN12 and ADC on
+	movlw   (0xc << 2)|(1<<ADON)	;12bit, Select channel AN12 and ADC on
 	movwf   ADCON0      	
 	call	a2dConvert
-   .assert "adresh == 0x33, \"*** FAILED 16f1788 AN12=1V\""
+   .assert "adresh == 0x33 && (adresl==0x30), \"*** FAILED 16f1788 AN12=1V\""
 	nop
-  ; measure Core Temperature
-	bsf 	ADCON1,ADFM	; right justify result
+  ; measure Core Temperature (v= 2.733 for 30C)
+	bsf 	ADCON1,ADFM	;  2's compliment (right justified)
         movlw	(0x1d << 2) | (1<<ADON) ; Core Temp channel and AD on
 	movwf	ADCON0
 	call	a2dConvert
-   .assert "(adresh==0x02) && (adresl==0x2f), \"*** FAILED 16f1788 ADC Core Temp\""
+   .assert "(adresh==0x08) && (adresl==0xbf), \"*** FAILED 16f1788 ADC Core Temp\""
 	nop
 
-  ; measure FVR 
+  ; measure FVR (2.048)
         movlw	(0x1f << 2) | (1<<ADON) ; FVR channel and AD on
 	movwf	ADCON0
 	call	a2dConvert
-   .assert "(adresh==0x01) && (adresl==0xa3), \"*** FAILED 16f1788 ADC FVR\""
+   .assert "(adresh==0x06) && (adresl==0x8d), \"*** FAILED 16f1788 ADC FVR\""
 	nop
 
   ; measure FVR using FVR Reference
@@ -397,7 +490,7 @@ test_a2d
         movlw	(0x1f << 2) | (1<<ADON) ; FVR channel and AD on
 	movwf	ADCON0
 	call	a2dConvert
-   .assert "(adresh==0x03) && (adresl==0xff), \"*** FAILED 16f1788 ADC FVR with FVR Ref\""
+   .assert "(adresh==0x0f) && (adresl==0xff), \"*** FAILED 16f1788 ADC FVR with FVR Ref\""
 	nop
 
 	return

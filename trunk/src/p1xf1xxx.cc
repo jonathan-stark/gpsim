@@ -876,6 +876,7 @@ P16F178x::P16F178x(const char *_name, const char *desc)
     anselc(this, "anselc", "Analog Select port c"),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
+    adcon2(this,"adcon2", "A2D Control 2"),
     adresh(this,"adresh", "A2D Result High"),
     adresl(this,"adresl", "A2D Result Low"),
     osccon(this, "osccon", "Oscillator Control Register"),
@@ -884,7 +885,8 @@ P16F178x::P16F178x(const char *_name, const char *desc)
     wdtcon(this, "wdtcon", "Watch dog timer control", 0x3f),
     usart(this),
     ssp(this),
-    apfcon(this, "apfcon", "Alternate Pin Function Control Register"),
+    apfcon1(this, "apfcon1", "Alternate Pin Function Control Register 1"),
+    apfcon2(this, "apfcon2", "Alternate Pin Function Control Register 2"),
     pwm1con(this, "pwm1con", "Enhanced PWM Control Register"),
     ccp1as(this, "ccp1as", "CCP1 Auto-Shutdown Control Register"),
     pstr1con(this, "pstr1con", "Pulse Sterring Control Register")
@@ -908,16 +910,17 @@ P16F178x::P16F178x(const char *_name, const char *desc)
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false, 0xff);
   m_lata  = new PicLatchRegister(this,"lata","",m_porta, 0xff);
   m_porte= new PicPortIOCRegister(this,"porte","", intcon, m_iocap, m_iocan, m_iocaf, 8,0x08);
-  m_trise = new PicTrisRegister(this,"trise","", m_porte, false, 0x08);
-  m_daccon0 = new DACCON0(this, "dac1con0", "DAC1 8bit Voltage reference register 0", 0xec, 256);
+  m_trise = new PicTrisRegister(this,"trise","", m_porte, false, 0x00);
+  m_daccon0 = new DACCON0(this, "dac1con0", "DAC1 8bit Voltage reference register 0", 0xbd, 256);
   m_daccon1 = new DACCON1(this, "dac1con1", "DAC1 8bit Voltage reference register 1", 0xff, m_daccon0);
-  m_dac2con0 = new DACCON0(this, "dac2con0", "DAC2 5bit Voltage reference register 0", 0xec, 32);
+  m_dac2con0 = new DACCON0(this, "dac2con0", "DAC2 5bit Voltage reference register 0", 0xb4, 32);
   m_dac2con1 = new DACCON1(this, "dac2con1", "DAC2 5bit Voltage reference register 1", 0x1f, m_dac2con0);
-  m_dac3con0 = new DACCON0(this, "dac3con0", "DAC3 5bit Voltage reference register 0", 0xec, 32);
+  m_dac3con0 = new DACCON0(this, "dac3con0", "DAC3 5bit Voltage reference register 0", 0xb4, 32);
   m_dac3con1 = new DACCON1(this, "dac3con1", "DAC3 5bit Voltage reference register 1", 0x1f, m_dac3con0);
-  m_dac4con0 = new DACCON0(this, "dac4con0", "DAC4 5bit Voltage reference register 0", 0xec, 32);
+  m_dac4con0 = new DACCON0(this, "dac4con0", "DAC4 5bit Voltage reference register 0", 0xb4, 32);
   m_dac4con1 = new DACCON1(this, "dac4con1", "DAC4 5bit Voltage reference register 1", 0x1f, m_dac4con0);
   m_cpu_temp = new CPU_Temp("cpu_temperature", 30., "CPU die temperature");
+
 
   tmr0.set_cpu(this, m_porta, 4, option_reg);
   tmr0.start(0);
@@ -1016,9 +1019,11 @@ P16F178x::~P16F178x()
     remove_sfr_register(&adresh);
     remove_sfr_register(&adcon0);
     remove_sfr_register(&adcon1);
+    remove_sfr_register(&adcon2);
     remove_sfr_register(&borcon);
     remove_sfr_register(&fvrcon);
-    remove_sfr_register(&apfcon );
+    remove_sfr_register(&apfcon1);
+    remove_sfr_register(&apfcon2);
     remove_sfr_register(&ansela);
     remove_sfr_register(&anselb);
     remove_sfr_register(&anselc);
@@ -1113,9 +1118,9 @@ void P16F178x::create_sfr_map()
 
 
     add_sfr_register(m_trisa, 0x8c, RegisterValue(0xff,0));
-    add_sfr_register(m_trisb, 0x8d, RegisterValue(0x3f,0));
-    add_sfr_register(m_trisc, 0x8e, RegisterValue(0x3f,0));
-    add_sfr_register(m_trise, 0x90, RegisterValue(0x04,0));
+    add_sfr_register(m_trisb, 0x8d, RegisterValue(0xff,0));
+    add_sfr_register(m_trisc, 0x8e, RegisterValue(0xff,0));
+    add_sfr_register(m_trise, 0x90, RegisterValue(0x08,0));
 
   pcon.valid_bits = 0xcf;
   add_sfr_register(option_reg,  0x95, RegisterValue(0xff,0));
@@ -1145,6 +1150,7 @@ void P16F178x::create_sfr_map()
   add_sfr_register(&adresh, 0x9c);
   add_sfr_register(&adcon0, 0x9d, RegisterValue(0x00,0));
   add_sfr_register(&adcon1, 0x9e, RegisterValue(0x00,0));
+  add_sfr_register(&adcon2, 0x9f, RegisterValue(0x00,0));
 
 
   usart.initialize(pir1,
@@ -1167,7 +1173,8 @@ void P16F178x::create_sfr_map()
     add_sfr_register(&fvrcon,   0x117, RegisterValue(0x00,0));
     add_sfr_register(m_daccon0, 0x118, RegisterValue(0x00,0));
     add_sfr_register(m_daccon1, 0x119, RegisterValue(0x00,0));
-    add_sfr_register(&apfcon ,  0x11d, RegisterValue(0x00,0));
+    add_sfr_register(&apfcon2 ,  0x11c, RegisterValue(0x00,0));
+    add_sfr_register(&apfcon1 ,  0x11d, RegisterValue(0x00,0));
     add_sfr_register(comparator.cmxcon0[2], 0x11e, RegisterValue(0x04,0)); 
     add_sfr_register(comparator.cmxcon1[2], 0x11f, RegisterValue(0x00,0)); 
     add_sfr_register(&ansela,   0x18c, RegisterValue(0x17,0));
@@ -1228,16 +1235,16 @@ void P16F178x::create_sfr_map()
           m_trisa,          // i2c tris port
 	SSP_TYPE_MSSP1
     );
-    apfcon.set_usart(&usart);
-    apfcon.set_ssp(&ssp);
-    apfcon.set_t1gcon(&t1con_g.t1gcon);
-    apfcon.set_pins(0, &(*m_porta)[2], &(*m_porta)[5]); //CCP1/P1A
-    apfcon.set_pins(1, &(*m_porta)[0], &(*m_porta)[4]); //P1B
-    apfcon.set_pins(2, &(*m_porta)[0], &(*m_porta)[4]); //USART TX Pin
-    apfcon.set_pins(3, &(*m_porta)[4], &(*m_porta)[3]); //tmr1 gate
-    apfcon.set_pins(5, &(*m_porta)[3], &(*m_porta)[0]); //SSP SS
-    apfcon.set_pins(6, &(*m_porta)[0], &(*m_porta)[4]); //SSP SDO
-    apfcon.set_pins(7, &(*m_porta)[1], &(*m_porta)[5]); //USART RX Pin
+    apfcon1.set_usart(&usart);
+    apfcon1.set_ssp(&ssp);
+    apfcon1.set_t1gcon(&t1con_g.t1gcon);
+    apfcon1.set_pins(0, &(*m_porta)[2], &(*m_porta)[5]); //CCP1/P1A
+    apfcon1.set_pins(1, &(*m_porta)[0], &(*m_porta)[4]); //P1B
+    apfcon1.set_pins(2, &(*m_porta)[0], &(*m_porta)[4]); //USART TX Pin
+    apfcon1.set_pins(3, &(*m_porta)[4], &(*m_porta)[3]); //tmr1 gate
+    apfcon1.set_pins(5, &(*m_porta)[3], &(*m_porta)[0]); //SSP SS
+    apfcon1.set_pins(6, &(*m_porta)[0], &(*m_porta)[4]); //SSP SDO
+    apfcon1.set_pins(7, &(*m_porta)[1], &(*m_porta)[5]); //USART RX Pin
     if (pir1) {
     	pir1->set_intcon(intcon);
     	pir1->set_pie(&pie1);
@@ -1279,8 +1286,9 @@ void P16F178x::create_sfr_map()
     adcon0.setAdresLow(&adresl);
     adcon0.setAdres(&adresh);
     adcon0.setAdcon1(&adcon1);
+    adcon0.setAdcon2(&adcon2);
     adcon0.setIntcon(intcon);
-    adcon0.setA2DBits(10);
+    adcon0.setA2DBits(12);
     adcon0.setPir(pir1);
     adcon0.setChannel_Mask(0x1f);
     adcon0.setChannel_shift(2);
@@ -1292,8 +1300,9 @@ void P16F178x::create_sfr_map()
     adcon1.setIOPin(1, &(*m_porta)[1]);
     adcon1.setIOPin(2, &(*m_porta)[2]);
     adcon1.setIOPin(3, &(*m_porta)[4]);
-    adcon1.setValidBits(0xf3);
-    adcon1.setVrefHiConfiguration(0, 1);
+    adcon1.setValidBits(0xf7);
+    adcon1.setVrefHiConfiguration(0, 3);
+    adcon1.setVrefLoConfiguration(0, 2);
     adcon1.set_FVR_chan(0x1f);
 
     comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[0], &(*m_porta)[1],  &(*m_portb)[3],  &(*m_portb)[1]);
@@ -1324,22 +1333,22 @@ void P16F178x::create_sfr_map()
     m_daccon0->set_adcon1(&adcon1);
     m_daccon0->set_cmModule(&comparator);
     m_daccon0->set_FVRCDA_AD_chan(0x1e);
-    m_daccon0->setDACOUT(&(*m_porta)[0]);
+    m_daccon0->setDACOUT(&(*m_porta)[2], &(*m_portb)[7]);
 
     m_dac2con0->set_adcon1(&adcon1);
     m_dac2con0->set_cmModule(&comparator);
     m_dac2con0->set_FVRCDA_AD_chan(0x1c);
-    m_dac2con0->setDACOUT(&(*m_porta)[5]);
+    m_dac2con0->setDACOUT(&(*m_porta)[5], &(*m_portb)[7]);
 
     m_dac3con0->set_adcon1(&adcon1);
     m_dac3con0->set_cmModule(&comparator);
     m_dac3con0->set_FVRCDA_AD_chan(0x19);
-    m_dac3con0->setDACOUT(&(*m_portb)[2]);
+    m_dac3con0->setDACOUT(&(*m_portb)[2], &(*m_portb)[7]);
 
     m_dac4con0->set_adcon1(&adcon1);
     m_dac4con0->set_cmModule(&comparator);
     m_dac4con0->set_FVRCDA_AD_chan(0x18);
-    m_dac4con0->setDACOUT(&(*m_porta)[4]);
+    m_dac4con0->setDACOUT(&(*m_porta)[4], &(*m_portb)[7]);
 
 
     osccon.set_osctune(&osctune);
@@ -1638,13 +1647,14 @@ void P16F1788::create_sfr_map()
     usart.set_RXpin(&(*m_portc)[5]);  // RX pin
 
     ccp1con.setIOpin(&(*m_portc)[5], &(*m_portc)[4], &(*m_portc)[3], &(*m_portc)[2]);
-    apfcon.set_ValidBits(0xec);
+    apfcon1.set_ValidBits(0xff);
+    apfcon2.set_ValidBits(0x07);
     // pins 0,1 not used for p16f1788
-    apfcon.set_pins(2, &(*m_portc)[4], &(*m_porta)[0]); //USART TX Pin
+    apfcon1.set_pins(2, &(*m_portc)[4], &(*m_porta)[0]); //USART TX Pin
     // pin 3 defined in p12f1822
-    apfcon.set_pins(5, &(*m_portc)[3], &(*m_porta)[3]); //SSP SS
-    apfcon.set_pins(6, &(*m_portc)[2], &(*m_porta)[4]); //SSP SDO
-    apfcon.set_pins(7, &(*m_portc)[5], &(*m_porta)[1]); //USART RX Pin
+    apfcon1.set_pins(5, &(*m_portc)[3], &(*m_porta)[3]); //SSP SS
+    apfcon1.set_pins(6, &(*m_portc)[2], &(*m_porta)[4]); //SSP SDO
+    apfcon1.set_pins(7, &(*m_portc)[5], &(*m_porta)[1]); //USART RX Pin
 
     comparator.cmxcon1[3]->set_INpinNeg(&(*m_porta)[0], &(*m_porta)[1],  &(*m_portb)[5],  &(*m_portb)[1]);
     comparator.cmxcon1[3]->set_INpinPos(&(*m_porta)[2], &(*m_portb)[6]);

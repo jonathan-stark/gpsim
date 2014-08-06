@@ -149,8 +149,9 @@ public:
   ANSEL_P 	ansela;
   ANSEL_P   	anselb;
   ANSEL_P 	anselc;
-  ADCON0  	adcon0;
+  ADCON0_DIF  	adcon0;
   ADCON1_16F 	adcon1;
+  ADCON2_DIF	adcon2;
   sfr_register  adresh;
   sfr_register  adresl;
   OSCCON_2  	osccon;
@@ -160,7 +161,8 @@ public:
   WDTCON  	wdtcon;
   USART_MODULE 	usart;
   SSP1_MODULE 	ssp;
-  APFCON	apfcon;
+  APFCON	apfcon1;
+  APFCON	apfcon2;
   PWM1CON	pwm1con;
   ECCPAS        ccp1as;
   PSTRCON       pstr1con;

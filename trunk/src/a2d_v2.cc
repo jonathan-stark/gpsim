@@ -559,7 +559,7 @@ double ADCON1_V2::getVrefLo()
 
 
 //------------------------------------------------------
-// ADCON0
+// ADCON2_V2
 //
 ADCON2_V2::ADCON2_V2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc)

@@ -327,6 +327,85 @@ void ADCON0::set_interrupt(void)
 }
 
 
+//------------------------------------------------------
+// ADCON0
+//
+ADCON0_DIF::ADCON0_DIF(Processor *pCpu, const char *pName, const char *pDesc)
+	: ADCON0(pCpu, pName, pDesc)
+{
+}
+void ADCON0_DIF::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+
+  if (new_value & ADRMD)	// 10 Bit
+      setA2DBits(10);
+  else
+      setA2DBits(12);
+
+  set_Tad(new_value);
+    
+  unsigned int old_value=value.get();
+  // SET: Reflect it first!
+  value.put(new_value);
+  if(new_value & ADON) {
+    // The A/D converter is being turned on (or maybe left on)
+
+    if((new_value & ~old_value) & GO_bit) {
+      if (verbose)
+	printf("starting A2D conversion\n");
+      Dprintf(("starting A2D conversion\n"));
+      // The 'GO' bit is being turned on, which is request to initiate
+      // and A/D conversion
+      start_conversion();
+    }
+  } else
+    stop_conversion();
+
+}
+void ADCON0_DIF::put_conversion(void)
+{
+  int channel = adcon2->value.get() & 0x0f;
+  double dRefSep = m_dSampledVrefHi - m_dSampledVrefLo;
+  double dNormalizedVoltage;
+  double m_dSampledVLo;
+
+  if (channel == 0x0e) // shift AN21 to adcon0 channel
+	channel = 0x15;
+  if (channel == 0x0f)	// use ADNREF for V-
+	m_dSampledVLo = getVrefLo();
+  else
+	m_dSampledVLo = getChannelVoltage(channel);
+
+  dNormalizedVoltage = (m_dSampledVoltage - m_dSampledVLo)/dRefSep;
+  dNormalizedVoltage = dNormalizedVoltage>1.0 ? 1.0 : dNormalizedVoltage;
+
+  int converted = (int)(m_A2DScale*dNormalizedVoltage + 0.5);
+
+  Dprintf(("put_conversion: V+:%g V-:%g Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
+	m_dSampledVoltage, m_dSampledVLo,
+	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
+
+  if (verbose)
+	printf ("result=0x%02x\n", converted);
+
+  Dprintf(("%d-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
+
+    if(!get_ADFM()) { // signed
+
+	int sign = 0;
+	if (converted < 0)
+	{
+		sign = 1;
+		converted = -converted;
+	}
+
+	converted = ((converted << (16-m_nBits)) % 0xffff) | sign;
+    }
+      adresl->put(converted & 0xff);
+      adres->put((converted >> 8) & 0xff);
+
+}
 
 ADCON1_16F::ADCON1_16F(Processor *pCpu, const char *pName, const char *pDesc)
   : ADCON1(pCpu, pName, pDesc), FVR_chan(99)
@@ -372,6 +451,19 @@ void ADCON1_16F::put_value(unsigned int new_value)
     //RRR FIXME handle ADPREF
     value.put(new_value & valid_bits);
 }
+double ADCON1_16F::getVrefLo()
+{
+	if (ADNREF & value.get()) 
+	{
+
+  	    if (Vreflo_position[cfg_index] < m_nAnalogChannels)
+    		return getChannelVoltage(Vreflo_position[cfg_index]);
+	    cerr << "WARNING Vreflo pin not configured\n";
+	    return -1.;
+	}
+	return 0.;	//Vss
+}
+
 double ADCON1_16F::getVrefHi()
 {
   if (ADPREF0 & valid_bits)
@@ -1071,7 +1163,11 @@ double FVRCON::compute_FVR_CDA(unsigned int fvrcon)
     if ((fvrcon & FVREN) && gain)
 	ret = 1.024 * (1 << (gain - 1));
 
-    if(daccon0) daccon0->set_FVR_CDA_volt(ret);
+    for (unsigned int i= 0; i < daccon0_list.size(); i++)
+    {
+	daccon0_list[i]->set_FVR_CDA_volt(ret);
+    }
+//RRR    if(daccon0) daccon0->set_FVR_CDA_volt(ret);
     if(cmModule) cmModule->set_FVR_volt(ret);
     if(cpscon0) cpscon0->set_FVR_volt(ret);
     return ret;
@@ -1085,14 +1181,15 @@ DACCON0::DACCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned
   : sfr_register(pCpu, pName, pDesc),
     adcon1(0), cmModule(0), cpscon0(0),
     bit_mask(bitMask), bit_resolution(bit_res),
-    FVR_CDA_volt(0.), Pin_Active(false)
+    FVR_CDA_volt(0.)
 {
+	Pin_Active[0] = false;
+	Pin_Active[1] = false;
 }
 
 void  DACCON0::put(unsigned int new_value)
 {
   unsigned int masked_value = (new_value & bit_mask);
-    printf("RRR %s-%d new_value %x bit_mask %x\n", __FUNCTION__, __LINE__, new_value, bit_mask);
   trace.raw(write_trace.get() | value.get());
   value.put(masked_value);
   compute_dac(masked_value);
@@ -1101,7 +1198,6 @@ void  DACCON0::put(unsigned int new_value)
 void  DACCON0::put_value(unsigned int new_value)
 {
   unsigned int masked_value = (new_value & bit_mask);
-    printf("RRR %s-%d new_value %x bit_mask %x\n", __FUNCTION__, __LINE__, new_value, bit_mask);
   value.put(masked_value);
   compute_dac(masked_value);
 
@@ -1120,7 +1216,6 @@ void  DACCON0::compute_dac(unsigned int value)
     double Vlow = 0.;
     double Vout;
 
-    printf("RRR %s-%d value %x daccon1_reg %x res %x %.2f %.2f\n", __FUNCTION__, __LINE__, value, daccon1_reg, bit_resolution, Vhigh, Vlow);
     if(value & DACEN)	// DAC is enabled
     {
 	Vout = (Vhigh - Vlow) * daccon1_reg/bit_resolution - Vlow;
@@ -1130,32 +1225,58 @@ void  DACCON0::compute_dac(unsigned int value)
     else
 	Vout = Vlow;
 
-    if (value & DACOE)
-    {
-	if (!Pin_Active)	// DACOUT going to active
-	{
-	    output_pin->AnalogReq(this, true, "DACOUT");
-	    Pin_Active = true;
-            out_pin = (IO_bi_directional_pu *) &(output_pin->getPin());
-	    Vth = out_pin->get_VthIn();
-	    Zth = out_pin->get_ZthIn();
-	    out_pin->set_ZthIn(150e3);
-	}
-
-	out_pin->set_VthIn(Vout);
-    }
-    else if (Pin_Active)	// DACOUT leaving active
-    {
-	output_pin->AnalogReq(this, false, output_pin->getPin().name().c_str());
-	Pin_Active = false;
-	out_pin->set_VthIn(Vth);
-	out_pin->set_ZthIn(Zth);
-    }
+    set_dacoutpin(value & DACOE, 0, Vout);
+    set_dacoutpin(value & DACOE2, 1, Vout);
 	
-    printf("RRR %s-%d adcon1 %p chan %d Volt %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
+    if (verbose)
+        printf("%s-%d adcon1 %p FVRCDA_AD_chan %d Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
     if(adcon1) adcon1->setVoltRef(FVRCDA_AD_chan, Vout);
     if(cmModule) cmModule->set_DAC_volt(Vout);
     if(cpscon0) cpscon0->set_DAC_volt(Vout);
+}
+
+void DACCON0::set_dacoutpin(bool output_enabled, int chan, double Vout)
+{
+    IO_bi_directional_pu *out_pin;
+
+    if (output_pin[chan])
+         out_pin = (IO_bi_directional_pu *) &(output_pin[chan]->getPin());
+    else
+	return;
+
+    if (output_enabled)
+    {
+	if (!Pin_Active[chan])	// DACOUT going to active
+	{
+	    string pin_name = name().substr(0, 4);
+	    if (pin_name.find("dacc", 0) == 0)
+		pin_name = "dacout";
+	    else if (chan == 0)
+	        pin_name += "-1";
+	    else
+		pin_name += "-2";
+
+	    output_pin[chan]->AnalogReq(this, true, pin_name.c_str());
+	    Pin_Active[chan] = true;
+	    Vth[chan] = out_pin->get_VthIn();
+	    Zth[chan] = out_pin->get_ZthIn();
+	    driving[chan] = out_pin->getDriving();
+	    out_pin->set_ZthIn(150e3);
+	    out_pin->setDriving(false);
+	}
+
+	out_pin->set_VthIn(Vout);
+	out_pin->updateNode();
+    }
+    else if (Pin_Active[chan])	// DACOUT leaving active
+    {
+	output_pin[chan]->AnalogReq(this, false, output_pin[chan]->getPin().name().c_str());
+	Pin_Active[chan] = false;
+	out_pin->set_VthIn(Vth[chan]);
+	out_pin->set_ZthIn(Zth[chan]);
+	out_pin->setDriving(driving[chan]);
+	out_pin->updateNode();
+    }
 }
  	
 double DACCON0::get_Vhigh(unsigned int value)
@@ -1205,5 +1326,13 @@ void  DACCON1::put_value(unsigned int new_value)
   if (daccon0) daccon0->set_dcaccon1_reg(masked_value);
 
   update();
+}
+
+//------------------------------------------------------
+// ADCON2_diff for A2D with differential input ie 16f178*
+//
+ADCON2_DIF::ADCON2_DIF(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc)
+{
 }
 
