@@ -155,16 +155,18 @@ public:
     {
 	ADPREF0 = (1<<0),
 	ADPREF1 = (1<<1),
-	ADCS0 = (1<<4),
-	ADCS1 = (1<<5),
-	ADCS2 = (1<<6),
-	ADFM  = (1<<7)
+	ADNREF  = (1<<2),
+	ADCS0   = (1<<4),
+	ADCS1   = (1<<5),
+	ADCS2   = (1<<6),
+	ADFM    = (1<<7)
     };
 
   ADCON1_16F(Processor *pCpu, const char *pName, const char *pDesc);
   virtual void put_value(unsigned int new_value);
   void setAdcon0 (ADCON0 *_adcon0) {adcon0 = _adcon0;}
   virtual double getVrefHi();
+  virtual double getVrefLo();
   void set_FVR_chan(unsigned int chan) { FVR_chan = chan;}
 
 private:
@@ -207,7 +209,7 @@ public:
   virtual void set_interrupt();
   virtual void callback();
   void put(unsigned int new_value);
-  void put_conversion();
+  virtual void put_conversion();
 
   bool getADIF() { return (value.get() & ADIF) != 0; }
   void setAdres(sfr_register *);
@@ -234,6 +236,7 @@ private:
 
   friend class ADCON0_10;
   friend class ADCON0_12F;
+  friend class ADCON0_DIF;
 
   sfr_register *adres;
   sfr_register *adresl;
@@ -257,6 +260,33 @@ private:
 };
 
 
+class ADCON2_DIF;
+/* A/D converter with 12 or 10 bit differential input with ADCON2
+ */
+
+class ADCON0_DIF : public ADCON0
+{
+  enum
+    {
+      ADON = 1<<0,
+      GO   = 1<<1,
+      CHS0 = 1<<2,
+      CHS1 = 1<<3,
+      CHS2 = 1<<4,
+      CHS3 = 1<<5,
+      CHS4 = 1<<6,
+      ADRMD = 1<<7
+    };
+public:
+  ADCON0_DIF(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void put(unsigned int new_value);
+  virtual void put_conversion(void);
+  void	setAdcon2(ADCON2_DIF * _adcon2) { adcon2 = _adcon2;}
+
+private:
+   ADCON2_DIF *adcon2;
+
+};
 //---------------------------------------------------------
 // ADCON0_10 register for 10f22x A2D
 //
@@ -462,7 +492,7 @@ public:
   virtual void put_value(unsigned int new_value);
   void set_adcon1(ADCON1 *_adcon1) { adcon1 = _adcon1;}
   void set_cmModule(ComparatorModule2 *_cmModule) { cmModule = _cmModule;}
-  void set_daccon0(DACCON0 *_daccon0) { daccon0 = _daccon0;}
+  void set_daccon0(DACCON0 *_daccon0) { daccon0_list.push_back(_daccon0);}
   void set_cpscon0(CPSCON0 *_cpscon0) { cpscon0 = _cpscon0;}
   void set_VTemp_AD_chan(unsigned int _chan) {VTemp_AD_chan = _chan;}
   void set_FVRAD_AD_chan(unsigned int _chan) {FVRAD_AD_chan = _chan;}
@@ -472,6 +502,7 @@ private:
   double compute_FVR_CDA(unsigned int);	//Voltage reference for Comparators, DAC, CPS
   ADCON1 *adcon1;
   DACCON0 *daccon0;
+  vector<DACCON0 *> daccon0_list;
   ComparatorModule2 *cmModule;
   CPSCON0 *cpscon0;
   unsigned int VTemp_AD_chan;
@@ -492,6 +523,7 @@ public:
   {
 	DACPSS0	= (1<<2),
 	DACPSS1	= (1<<3),
+	DACOE2	= (1<<4),
 	DACOE	= (1<<5),
 	DACLPS  = (1<<6),
 	DACEN	= (1<<7),
@@ -506,26 +538,28 @@ public:
   void set_FVRCDA_AD_chan(unsigned int _chan) {FVRCDA_AD_chan = _chan;}
   void set_dcaccon1_reg(unsigned int reg);
   void set_FVR_CDA_volt(double volt) { FVR_CDA_volt = volt;}
-  void setDACOUT(PinModule *pin){ output_pin = pin;}
+  void setDACOUT(PinModule *pin1, PinModule *pin2 = NULL){ output_pin[0] = pin1; output_pin[1] = pin2;}
   //void setDACOUT(IO_bi_directional_pu *_pin){ pin = _pin;}
 
 private:
+  void  set_dacoutpin(bool output_enabled, int chan, double Vout);
   void	compute_dac(unsigned int value);
   double get_Vhigh(unsigned int value);
   ADCON1	*adcon1;
   ComparatorModule2 *cmModule;
+  vector<ComparatorModule2 *> cmModule_list;
   CPSCON0	*cpscon0;
   unsigned int  FVRCDA_AD_chan;
   unsigned int  bit_mask;
   unsigned int  bit_resolution;
   unsigned int  daccon1_reg;
   double	FVR_CDA_volt;
-  bool		Pin_Active;
-  double	Vth;
-  double	Zth;
-  PinModule	*output_pin;
+  bool		Pin_Active[2];
+  double	Vth[2];
+  double	Zth[2];
+  bool		driving[2];
+  PinModule	*output_pin[2];
   IOPIN *pin;
-  IO_bi_directional_pu *out_pin;
 
 };
 
@@ -542,4 +576,27 @@ private:
     DACCON0	*daccon0;
 };
 
+class ADCON2_DIF : public sfr_register, public TriggerObject
+{
+public:
+
+  enum
+    {
+      CHSNS0   = 1<<0,
+      CHSNS1   = 1<<1,
+      CHSNS2   = 1<<2,
+      CHSNS3   = 1<<3,
+      TRIGSEL0 = 1<<4,
+      TRIGSEL1 = 1<<5,
+      TRIGSEL2 = 1<<6,
+      TRIGSEL3 = 1<<7,
+    };
+
+
+  ADCON2_DIF(Processor *pCpu, const char *pName, const char *pDesc);
+
+private:
+
+
+};
 #endif // __A2DCONVERTER_H__

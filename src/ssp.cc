@@ -2467,7 +2467,6 @@ void SSP_MODULE::SS_SinkState(char new3State)
   // If SS goes high in the middle of an SPI transfer while in slave_SS mode,
   // transfer is aborted unless BSSP which streches the clocking
 
-  printf("RRR SSP_MODULE::SS_SinkState state %d \n",  m_SS_State);
 
   if (!sspcon.isSSPEnabled() || 
 	! m_SS_State ||

@@ -1,3 +1,11 @@
+2014-08-07 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p1xf18xx/Makefile: add rule for p12f1822_usart.cod
+	* regression/p1xf18xx/p16f1788.asm: tests for p16f1788 DAC and A/D
+	* src/a2d_v2.cc: Fix comment
+	* src/a2dconverter.cc src/a2dconverter.h: DAC and differential A/D
+	* src/p1xf1xxx.cc src/p1xf1xxx.h: add DAC and A/D registers
+	* src/ssp.cc: Remove debug printf statement
+
 2014-07-31 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p1xf18xx/p12f1822.asm src/14bit-instructions.cc:
 	- p12f182x: MOVIW must update Z bit - bug #175
