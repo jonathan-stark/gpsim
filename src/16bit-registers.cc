@@ -1076,7 +1076,7 @@ void TMR0_16::wake()
 // T3CON
 T3CON::T3CON(Processor *pCpu, const char *pName, const char *pDesc)
   : T1CON(pCpu,pName,pDesc),
-    ccpr1l(0),ccpr2l(0),tmr1l(0)
+    ccpr1l(0),ccpr2l(0),tmr1l(0), t1con(0)
 {}
 
 void T3CON::put(unsigned int new_value)
@@ -1100,7 +1100,7 @@ void T3CON::put(unsigned int new_value)
   }
 
   // Let the T1CON class deal with everything else.
-  T1CON::put(new_value);
+  T1CON::put(new_value  & ~(T3CCP1 |  T3CCP2));
 
 }
 

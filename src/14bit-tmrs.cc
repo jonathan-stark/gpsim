@@ -1521,7 +1521,6 @@ void TMRL::setSinkState(char new3State)
 {
   if (new3State != m_cState) {
     m_cState = new3State;
-
     if (m_bExtClkEnabled && (m_cState == '1' || m_cState == 'W'))
       increment();
   }
@@ -1709,7 +1708,7 @@ void TMRL::on_or_off(int new_state)
 void TMRL::update()
 {
 
-  Dprintf(("TMR1 update 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+  Dprintf(("TMR1 %s update 0x%"PRINTF_GINT64_MODIFIER"x\n",name().c_str(), get_cycles().get()));
 
   // The second part of the if will always be true unless TMR1 Gate enable
   // pin has been defined by a call to TMRL::setGatepin()
