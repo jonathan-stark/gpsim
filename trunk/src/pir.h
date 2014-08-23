@@ -67,11 +67,11 @@ public:
   virtual void set_rxb0if(){}
   virtual void set_rxb1if(){}
   virtual void set_sspif(){}
-  virtual void set_sppif(){fprintf(stderr, "RRR set_sppif FIX\n");}
+  virtual void set_sppif(){fprintf(stderr, "set_sppif FIX\n");}
   virtual void set_tmr1if(){}
   virtual void set_tmr1gif(){}
   virtual void set_tmr2if(){}
-  virtual void set_tmr3if(){}
+  virtual void set_tmr3if(){ fprintf(stderr, "set_tmr3if FIX\n");}
   virtual void set_txb0if(){}
   virtual void set_txb1if(){}
   virtual void set_txb2if(){}

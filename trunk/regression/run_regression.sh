@@ -14,7 +14,7 @@ case "$1" in
         DIRS='breakpoints instructions_12bit instructions_14bit instructions_16bit 
 node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_wide 
 interrupts_14bit macro_test logic_test resistor usart_test txisr_test 
-tmr0_16bit tmr1_16bit 
+tmr0_16bit tmr1_16bit tmr3_16bit 
 switch_test p18f comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
 p12c509 wdt p12f675 p16f676 p16f690 p16f684 p1xf18xx'
 
@@ -103,6 +103,8 @@ ${RT} txisr_test sim
 ${RT} tmr0_16bit sim
 
 ${RT} tmr1_16bit sim
+
+${RT} tmr3_16bit sim
 
 ${RT} switch_test sim
 

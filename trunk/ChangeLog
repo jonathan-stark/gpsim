@@ -1,3 +1,12 @@
+2014-08-23 Roy Rankin <rrankin@ihug.com.au>
+	* regression/run_regression.sh regression/tmr3_16bit
+	  regression/tmr3_16bit/18f452.lkr regression/tmr3_16bit/18f4550_g.lkr
+	  regression/tmr3_16bit/Makefile regression/tmr3_16bit/tmr3_16bit.asm
+	  regression/tmr3_16bit/tmr3_18f4550.asm: TMR3 regression test
+	* src/14bit-tmrs.cc src/16bit-processors.cc
+	  src/16bit-processors.h src/16bit-registers.cc src/16bit-registers.h
+	  src/p18x.cc src/p18x.h src/pir.h: fix TMR3 bug #176
+
 2014-08-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p1xf18xx/Makefile: add rule for p12f1822_usart.cod
 	* regression/p1xf18xx/p16f1788.asm: tests for p16f1788 DAC and A/D

@@ -161,9 +161,9 @@ void P18C2x2::create()
     cout << "P18C2x2::create\n";
 
   create_iopin_map();
-
   _16bit_compat_adc::create();
   add_sfr_register(&osccon, 0xfd3, RegisterValue(0x00,0), "osccon");
+  init_pir2(pir2, PIR2v2::TMR3IF);
 
 }
 
@@ -497,6 +497,8 @@ void P18C4x2::create_sfr_map()
   adcon1->setIOPin(5, &(*m_porte)[0]);
   adcon1->setIOPin(6, &(*m_porte)[1]);
   adcon1->setIOPin(7, &(*m_porte)[2]);
+  init_pir2(pir2, PIR2v2::TMR3IF); 
+  tmr3l.setIOpin(&(*m_portc)[0]);
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
 
@@ -609,7 +611,7 @@ void P18F242::create()
   if(verbose)
     cout << " 18f242 create \n";
 
-  e = new EEPROM_PIR(this,&pir2);
+  e = new EEPROM_PIR(this,pir2);
 
   // We might want to pass this value in for larger eeproms
   e->initialize(256);
@@ -714,7 +716,7 @@ void P18F442::create()
   if(verbose)
     cout << " 18f442 create \n";
 
-  e = new EEPROM_PIR(this,&pir2);
+  e = new EEPROM_PIR(this,pir2);
 
   // We might want to pass this value in for larger eeproms
   e->initialize(256);
@@ -902,8 +904,7 @@ P18F2455::P18F2455(const char *_name, const char *desc)
       uep12(this, "uep12", "USB Endpoint 12 Enable register"    ),
       uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
       uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
-      uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
-      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+      uep15(this, "uep15", "USB Endpoint 15 Enable register"    )
 {
 
   cout << "\nP18F2455 does not support USB registers and functionality\n\n";
@@ -940,7 +941,6 @@ P18F2455::~P18F2455()
   remove_sfr_register(&uep13);
   remove_sfr_register(&uep14);
   remove_sfr_register(&uep15);
-  remove_sfr_register(&pir2 );
 }
 void P18F2455::create_sfr_map()
 {
@@ -988,18 +988,6 @@ void P18F2455::create_sfr_map()
   add_sfr_register(&uep13,0x0F7D, RegisterValue(0,0));
   add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
   add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
-
-  // Initialize the register cross linkages
-  pir_set_def.set_pir2(&pir2);
-  delete tmr3l.getInterruptSource();
-  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
-  pir2.set_intcon(&intcon);
-  pir2.set_pie(&pie2);
-  pir2.set_ipr(&ipr2);
-  pie2.setPir(&pir2);
-  //pie2.new_name("pie2");
-
-  // new InterruptSource(&pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F2455::construct(const char *name)
@@ -1048,14 +1036,12 @@ P18F2550::P18F2550(const char *_name, const char *desc)
       uep12(this, "uep12", "USB Endpoint 12 Enable register"    ),
       uep13(this, "uep13", "USB Endpoint 13 Enable register"    ),
       uep14(this, "uep14", "USB Endpoint 14 Enable register"    ),
-      uep15(this, "uep15", "USB Endpoint 15 Enable register"    ),
-      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+      uep15(this, "uep15", "USB Endpoint 15 Enable register"    )
 {
 
   cout << "\nP18F2550 does not support USB registers and functionality\n\n";
   if(verbose)
     cout << "18f2550 constructor, type = " << isa() << '\n';
-
 }
 
 P18F2550::~P18F2550()
@@ -1086,7 +1072,6 @@ P18F2550::~P18F2550()
   remove_sfr_register(&uep13);
   remove_sfr_register(&uep14);
   remove_sfr_register(&uep15);
-  remove_sfr_register(&pir2 );
 }
 void P18F2550::create_sfr_map()
 {
@@ -1135,17 +1120,6 @@ void P18F2550::create_sfr_map()
   add_sfr_register(&uep14,0x0F7E, RegisterValue(0,0));
   add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
 
-  // Initialize the register cross linkages
-  pir_set_def.set_pir2(&pir2);
-  delete tmr3l.getInterruptSource();
-  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
-  pir2.set_intcon(&intcon);
-  pir2.set_pie(&pie2);
-  pir2.set_ipr(&ipr2);
-  pie2.setPir(&pir2);
-  //pie2.new_name("pie2");
-
-  // new InterruptSource(&pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F2550::construct(const char *name)
@@ -1198,8 +1172,7 @@ P18F4455::P18F4455(const char *_name, const char *desc)
       sppcon(this, "sppcon", "Streaming Parallel port control register"),
       sppcfg(this, "sppcfg", "Streaming Parallel port configuration register"),
       sppeps(this, "sppeps", "SPP ENDPOINT ADDRESS AND STATUS REGISTER"),
-      sppdata(this, "sppdata", "Streaming Parallel port data register"),
-      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+      sppdata(this, "sppdata", "Streaming Parallel port data register")
 
 {
   cout << "\nP18F4455 does not support USB registers and functionality\n\n";
@@ -1308,16 +1281,9 @@ void P18F4455::create()
   add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
 
   // Initialize the register cross linkages
-  pir_set_def.set_pir2(&pir2);
-  delete tmr3l.getInterruptSource();
-  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
-  pir2.set_intcon(&intcon);
-  pir2.set_pie(&pie2);
-  pir2.set_ipr(&ipr2);
-  pie2.setPir(&pir2);
-  //pie2.new_name("pie2");
+  init_pir2(pir2, PIR2v4::TMR3IF);
 
-  //new InterruptSource(&pir2, PIR2v4::USBIF);
+  //new InterruptSource(pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F4455::construct(const char *name)
@@ -1371,8 +1337,7 @@ P18F4550::P18F4550(const char *_name, const char *desc)
       sppcon(this, "sppcon", "Streaming Parallel port control register"),
       sppcfg(this, "sppcfg", "Streaming Parallel port configuration register"),
       sppeps(this, "sppeps", "SPP ENDPOINT ADDRESS AND STATUS REGISTER"),
-      sppdata(this, "sppdata", "Streaming Parallel port data register"),
-      pir2 (this, "pir2" , "Peripheral Interrupt Register",0,0  )
+      sppdata(this, "sppdata", "Streaming Parallel port data register")
 
 {
   cout << "\nP18F4550 does not support USB registers and functionality\n\n";
@@ -1481,16 +1446,8 @@ void P18F4550::create()
   add_sfr_register(&uep15,0x0F7F, RegisterValue(0,0));
 
   // Initialize the register cross linkages
-  pir_set_def.set_pir2(&pir2);
-  delete tmr3l.getInterruptSource();
-  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v4::TMR3IF));
-  pir2.set_intcon(&intcon);
-  pir2.set_pie(&pie2);
-  pir2.set_ipr(&ipr2);
-  pie2.setPir(&pir2);
-  //pie2.new_name("pie2");
 
-  //new InterruptSource(&pir2, PIR2v4::USBIF);
+  //new InterruptSource(pir2, PIR2v4::USBIF);
 }
 
 Processor * P18F4550::construct(const char *name)
@@ -1537,7 +1494,7 @@ void P18F1220::create()
   if(verbose)
     cout << "P18F1220::create\n";
 
-  e = new EEPROM_PIR(this,&pir2);
+  e = new EEPROM_PIR(this,pir2);
 
   // We might want to pass this value in for larger eeproms
   e->initialize(256);
@@ -1589,6 +1546,8 @@ void P18F1220::create()
   eccpas.link_registers(&pwm1con, &ccp1con);
   ccp1con.pwm1con = &pwm1con;
   ccp1con.setIOpin(&((*m_portb)[3]), &((*m_portb)[2]), &((*m_portb)[6]), &((*m_portb)[7]));
+  init_pir2(pir2, PIR2v2::TMR3IF);
+  tmr3l.setIOpin(&(*m_portb)[6]);
 }
 //------------------------------------------------------------------------
 void P18F1220::create_iopin_map()
@@ -1761,7 +1720,9 @@ void P18F2x21::create()
   if(verbose)
     cout << "P18F2x21::create\n";
 
-  e = new EEPROM_PIR(this,&pir2);
+  delete pir2;
+  pir2 = (PIR2v2 *)(new PIR2v4(this, "pir2" , "Peripheral Interrupt Register",0,0  ));
+  e = new EEPROM_PIR(this,pir2);
   e->initialize ( eeprom_memory_size() );
   e->set_intcon(&intcon);
   // assign this eeprom to the processor
@@ -1950,7 +1911,7 @@ void P18F2x21::create_sfr_map()
   add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
-  ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, pir2, PIR2v2::CCP2IF, &tmr2);
 //  ccp2con.setIOpin(&((*m_portc)[1]));     // handled by Config3H_2x21
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -1960,6 +1921,8 @@ void P18F2x21::create_sfr_map()
   add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");
   add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
   usart.set_eusart(true);
+  init_pir2(pir2, PIR2v4::TMR3IF); 
+  tmr3l.setIOpin(&(*m_portc)[0]);
 }
 
 void P18F2x21::osc_mode(unsigned int value)
@@ -2172,7 +2135,9 @@ void P18F4x21::create()
   if(verbose)
     cout << "P18F4x21::create\n";
 
-  e = new EEPROM_PIR(this,&pir2);
+  delete pir2;
+  pir2 = (PIR2v2 *)(new PIR2v4(this, "pir2" , "Peripheral Interrupt Register",0,0  ));
+  e = new EEPROM_PIR(this,pir2);
   e->initialize ( eeprom_memory_size() );
   e->set_intcon(&intcon);
   // assign this eeprom to the processor
@@ -2393,7 +2358,7 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(&comparator.cmcon, 0xfb4, RegisterValue(7,0),"cmcon");
   add_sfr_register(&comparator.vrcon, 0xfb5, RegisterValue(0,0),"cvrcon");
 
-  ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, pir2, PIR2v2::CCP2IF, &tmr2);
 //  ccp2con.setIOpin(&((*m_portc)[1]));     // Handled by Config3H_2x21::set
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -2403,6 +2368,8 @@ void P18F4x21::create_sfr_map()
   add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");
   add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
   usart.set_eusart(true);
+  init_pir2(pir2, PIR2v4::TMR3IF); 
+  tmr3l.setIOpin(&(*m_portc)[0]);
 }
 
 
@@ -2583,7 +2550,7 @@ void P18F6x20::create()
   if(verbose)
     cout << "P18F6x20::create\n";
 
-  e = new EEPROM_PIR(this,&pir2);
+  e = new EEPROM_PIR(this,pir2);
   e->initialize ( eeprom_memory_size() );
   e->set_intcon(&intcon);
   // assign this eeprom to the processor
@@ -2595,6 +2562,8 @@ void P18F6x20::create()
   add_sfr_register(&osccon, 0xfd3, RegisterValue(0x40,0), "osccon");
 
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x27));
+  init_pir2(pir2, PIR2v2::TMR3IF);
+  tmr3l.setIOpin(&(*m_portc)[0]);
 }
 
 //------------------------------------------------------------------------
@@ -2890,7 +2859,7 @@ void P18F6x20::create_sfr_map()
 
 
   // cout << "Setting CCP cross-links\n";
-  ccp2con.setCrosslinks(&ccpr2l, &pir2, PIR2v2::CCP2IF, &tmr2);
+  ccp2con.setCrosslinks(&ccpr2l, pir2, PIR2v2::CCP2IF, &tmr2);
   ccp2con.setIOpin(&((*m_portc)[1]));
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;

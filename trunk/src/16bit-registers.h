@@ -449,21 +449,21 @@ public:
 
 };
 */
-class T3CON : public T1CON
-{
-public:
-  enum
-  {
-    T3CCP1 = 1<<3,
-    T3CCP2 = 1<<6,
+class T3CON : public T1CON { public: enum { T3CCP1 = 1<<3, T3CCP2 = 1<<6,
   };
 
   CCPRL *ccpr1l;
   CCPRL *ccpr2l;
   TMRL  *tmr1l; 
+  T1CON *t1con;
 
   T3CON(Processor *pCpu, const char *pName, const char *pDesc=0);
   virtual void put(unsigned int new_value);
+  virtual bool get_t1oscen() { 
+	if (t1con)
+	    return(t1con->get_t1oscen());
+	return(0);
+  }
 
 };
 

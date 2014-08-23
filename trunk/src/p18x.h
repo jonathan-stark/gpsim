@@ -366,7 +366,6 @@ class P18F2455 : public P18F2x21
                uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
                uep14,  uep15;
 
-  PIR2v4       pir2;
   virtual PROCESSOR_TYPE isa(){return _P18F2455_;};
   P18F2455(const char *_name=0, const char *desc=0);
   ~P18F2455();
@@ -387,7 +386,6 @@ class P18F2550 : public P18F2x21
                uep6,  uep7,  uep8, uep9, uep10, uep11, uep12,  uep13,
                uep14,  uep15;
 
-  PIR2v4       pir2;
   virtual PROCESSOR_TYPE isa(){return _P18F2550_;};
   P18F2550(const char *_name=0, const char *desc=0);
   ~P18F2550();
@@ -477,7 +475,6 @@ class P18F4455 : public P18F4x21
   SPPCFG 	sppcfg;
   SPPEPS 	sppeps;
   SPPDATA 	sppdata;
-  PIR2v4       pir2;
 
   virtual PROCESSOR_TYPE isa(){return _P18F4455_;};
   P18F4455(const char *_name=0, const char *desc=0);
@@ -504,7 +501,6 @@ class P18F4550 : public P18F4x21
   SPPCFG 	sppcfg;
   SPPEPS 	sppeps;
   SPPDATA 	sppdata;
-  PIR2v4       pir2;
 
   virtual PROCESSOR_TYPE isa(){return _P18F4550_;};
   P18F4550(const char *_name=0, const char *desc=0);
@@ -561,7 +557,6 @@ class P18F6x20 : public _16bit_v2_adc
   PicLatchRegister *m_latd;
 
   PicPortRegister  *m_porte;
-  //RRRPicPSP_TrisRegister  *m_trise;
   PicTrisRegister  *m_trise;
   PicLatchRegister *m_late;
 

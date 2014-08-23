@@ -98,7 +98,7 @@ public:
   sfr_register ipr2;
   T1CON        t1con;
   PIE          pie1;
-  PIR2v2       pir2;
+  PIR2v2       *pir2;
   PIE          pie2;
   T2CON        t2con;
   PR2          pr2;
@@ -203,6 +203,7 @@ public:
   unsigned int getCurrentDisasmAddress() { return m_current_disasm_address;}
   unsigned int getCurrentDisasmIndex()   { return m_current_disasm_address/2;}
   void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
+  virtual void init_pir2(PIR *pir2, unsigned int bitMask);
 
 protected:
   unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded

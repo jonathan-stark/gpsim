@@ -237,7 +237,6 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     ipr2(this, "ipr2", "Interrupt Priorities"),
     t1con(this, "t1con", "TMR1 Control"),
     pie1(this, "pie1", "Peripheral Interrupt Enable"),
-    pir2(this,"pir2","Peripheral Interrupt Register",0,0),
     pie2(this, "pie2", "Peripheral Interrupt Enable"),
     t2con(this, "t2con", "TMR2 Control"),
     pr2(this, "pr2", "TMR2 Period Register"),
@@ -294,6 +293,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_portc = new PicPortRegister(this,"portc","",8,0xff);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false);
   m_latc  = new PicLatchRegister(this,"latc","", m_portc);
+  pir2 = new  PIR2v2(this,"pir2","Peripheral Interrupt Register",0,0);
 
   //tmr0l.set_cpu(this, m_porta, 4, option_reg);
   //tmr0l.start(0);
@@ -341,7 +341,7 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&pir1);
   remove_sfr_register(&ipr1);
   remove_sfr_register(&pie2);
-  remove_sfr_register(&pir2);
+  remove_sfr_register(pir2);
   remove_sfr_register(&ipr2);
   remove_sfr_register(&usart.rcsta);
   remove_sfr_register(&usart.txsta);
@@ -491,7 +491,6 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ipr1,	  0xf9f,porv,"ipr1");
 
   add_sfr_register(&pie2,	  0xfa0,porv,"pie2");
-  add_sfr_register(&pir2,	  0xfa1,porv,"pir2");
   add_sfr_register(&ipr2,	  0xfa2,porv,"ipr2");
 
 
@@ -620,7 +619,6 @@ void _16bit_processor :: create_sfr_map()
 
   // Initialize all of the register cross linkages
   pir_set_def.set_pir1(&pir1);
-  pir_set_def.set_pir2(&pir2);
 
   tmr2.ssp_module = &ssp;
 
@@ -644,7 +642,6 @@ void _16bit_processor :: create_sfr_map()
 
   tmr3l.tmrh  = &tmr3h;
   tmr3l.t1con = &t3con;
-  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v2::TMR3IF));
 //  tmr3l.ccpcon = &ccp1con;
 
   tmr3h.tmrl  = &tmr3l;
@@ -653,6 +650,7 @@ void _16bit_processor :: create_sfr_map()
   t3con.tmr1l = &tmr1l;
   t3con.ccpr1l = &ccpr1l;
   t3con.ccpr2l = &ccpr2l;
+  t3con.t1con = &t1con;
 
   ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2);
   ccp1con.setIOpin(&((*m_portc)[2]));
@@ -664,19 +662,26 @@ void _16bit_processor :: create_sfr_map()
   pir1.set_pie(&pie1);
   pir1.set_ipr(&ipr1);
   pie1.setPir(&pir1);
-  //pie1.new_name("pie1");
 
-  pir2.set_intcon(&intcon);
-  pir2.set_pie(&pie2);
-  pir2.set_ipr(&ipr2);
-  pie2.setPir(&pir2);
-  //pie2.new_name("pie2");
 
   // All of the status bits on the 16bit core are writable
   status->write_mask = 0xff;
 
 
   // AN5,AN6 and AN7 exist only on devices with a PORTE.
+}
+
+void _16bit_processor::init_pir2(PIR *pir2, unsigned int bitMask)
+{ 
+  RegisterValue porv(0,0);
+  
+  tmr3l.setInterruptSource(new InterruptSource(pir2, bitMask));
+  pir_set_def.set_pir2(pir2);
+  pir2->set_intcon(&intcon);
+  pir2->set_pie(&pie2);
+  pir2->set_ipr(&ipr2);
+  pie2.setPir(pir2);
+  add_sfr_register(pir2, 0xfa1,porv,"pir2");
 }
 
 //-------------------------------------------------------------------
