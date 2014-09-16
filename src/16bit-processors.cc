@@ -764,8 +764,7 @@ void _16bit_processor::interrupt ()
 
   fast_stack.push();
 
-  intcon.clear_gies();  // The appropriate gie bits get cleared (not just gieh)
-
+  intcon.in_interrupt = true; // Mask interrupts
   pc->interrupt(intcon.get_interrupt_vector());
 
 }

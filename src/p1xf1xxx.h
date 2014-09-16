@@ -90,7 +90,7 @@ public:
   WPU              *m_wpua;
   IOC              *m_iocap;
   IOC              *m_iocan;
-  IOC              *m_iocaf;
+  IOCxF            *m_iocaf;
   PicPortIOCRegister  *m_porta;
   PicTrisRegister  *m_trisa;
   PicLatchRegister *m_lata;
@@ -172,10 +172,13 @@ public:
   WPU              *m_wpua;
   IOC              *m_iocap;
   IOC              *m_iocan;
-  IOC              *m_iocaf;
+  IOCxF            *m_iocaf;
   PicPortIOCRegister  *m_porta;
   PicTrisRegister  *m_trisa;
   PicLatchRegister *m_lata;
+  IOC              *m_iocep;
+  IOC              *m_iocen;
+  IOCxF            *m_iocef;
   PicPortIOCRegister  *m_porte;
   PicTrisRegister  *m_trise;
   WPU              *m_wpue;
@@ -187,11 +190,17 @@ public:
   DACCON1	   *m_dac3con1;
   DACCON0	   *m_dac4con0;
   DACCON1	   *m_dac4con1;
+  IOC              *m_iocbp;
+  IOC              *m_iocbn;
+  IOCxF            *m_iocbf;
   PicPortBRegister  *m_portb;
   PicTrisRegister  *m_trisb;
   PicLatchRegister *m_latb;
   WPU              *m_wpub;
 
+  IOC              *m_ioccp;
+  IOC              *m_ioccn;
+  IOCxF            *m_ioccf;
   PicPortBRegister  *m_portc;
   PicTrisRegister  *m_trisc;
   PicLatchRegister *m_latc;

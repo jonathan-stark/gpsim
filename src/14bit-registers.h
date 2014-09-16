@@ -36,6 +36,8 @@ class _14bit_processor;
 #include "breakpoints.h"
 
 #include "rcon.h"
+#include "intcon.h"
+
 class stimulus;  // forward reference
 class IOPIN;
 class source_stimulus;
@@ -804,19 +806,37 @@ class IOC :  public sfr_register
 {
 public:
 
- IOC(Processor *pCpu, const char *pName, const char *pDesc)
+ IOC(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _valid_bits = 0xff)
     : sfr_register(pCpu,pName,pDesc)
   {
-      mValidBits=0x3f;
+      mValidBits=_valid_bits;
   }
 
-  void put(unsigned int new_value)
+  virtual void put(unsigned int new_value)
   {
     unsigned int masked_value = new_value & mValidBits;
 
     get_trace().raw(write_trace.get() | value.get());
     value.put(masked_value);
   }
+
+};
+
+// Interrupt-On-Change  Register
+class IOCxF : public IOC
+{
+public:
+
+  IOCxF(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _valid_bits = 0xff)
+    : IOC(pCpu,pName,pDesc, _valid_bits), intcon(0)
+  {
+  }
+
+  void set_intcon(INTCON *new_value) { intcon = new_value; }
+  void put(unsigned int new_value);
+
+protected:
+    INTCON  *intcon;
 
 };
 

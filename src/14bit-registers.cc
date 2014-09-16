@@ -162,6 +162,19 @@ void  BSR::put_value(unsigned int new_value)
   cpu_pic->indf->update();
 }
 
+void  IOCxF::put(unsigned int new_value)
+{
+  unsigned int masked_value = new_value & mValidBits;
+  Dprintf((" %s value %x add %x\n", name().c_str(), new_value, new_value&valid_bits));
+
+  get_trace().raw(write_trace.get() | value.get());
+  value.put(masked_value);
+  if (intcon)
+  {
+    ((INTCON_14_PIR *)intcon)->set_rbif(masked_value != 0);
+    ((INTCON_14_PIR *)intcon)->aocxf_val(this, masked_value);
+  }
+}
 
 // Adjust internal RC oscillator frequency as per 12f675/629
 // Spec sheet does not give range so assume +/- 12.5% as per 16f88

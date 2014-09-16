@@ -28,5 +28,5 @@ p%_i2c_v2.cod : p%_i2c_v2.o
 p%.cod : p%.o
 	gplink --map -s $*_g.lkr -o $@  $<
 
-sim: sim_p12f1822 sim_p16f1823 sim_p16f1823_i2c_v2 sim_p16f1823_i2c sim_p16f1823_comp sim_p16f1823_spi sim_p12f1822_usart
+sim: sim_p12f1822 sim_p16f1823 sim_p16f1823_i2c_v2 sim_p16f1823_i2c sim_p16f1823_comp sim_p16f1823_spi sim_p12f1822_usart sim_p16f1788
 

@@ -43,7 +43,7 @@ License along with this library; if not, see
 //--------------------------------------------------
 INTCON::INTCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    interrupt_trace(0)
+    interrupt_trace(0),in_interrupt(0)
 {
 }
 
@@ -59,6 +59,12 @@ void INTCON::put(unsigned int new_value)
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
   trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
+
+void INTCON::put_value(unsigned int new_value)
+{
+  Dprintf((" INTCON::%s value %02x\n",__FUNCTION__, new_value));
   value.put(new_value);
 
   // Now let's see if there's a pending interrupt
@@ -72,7 +78,7 @@ void INTCON::put(unsigned int new_value)
   // note: bit6 is not handled here because it is processor
   // dependent (e.g. EEIE for x84 and ADIE for x7x).
 
-  if(value.get() & GIE  &&
+  if(value.get() & GIE  && !in_interrupt &&
      ( ((value.get()>>3)&value.get() & (T0IF | INTF | RBIF)) ||
        ( value.get() & XXIE && check_peripheral_interrupt() )))
       cpu_pic->BP_set_interrupt();
@@ -88,7 +94,7 @@ void INTCON::peripheral_interrupt ( bool hi_pri )
   if (cpu_pic->is_sleeping())
         cpu_pic->exit_sleep();
 
-  if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
+  if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) &&  !in_interrupt)
     cpu_pic->BP_set_interrupt();
 }
 
@@ -160,9 +166,31 @@ void INTCON3::put(unsigned int new_value)
 //----------------------------------------------------------------------
 INTCON_14_PIR::INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDesc)
   : INTCON(pCpu, pName, pDesc),
-    pir_set(0)
+    pir_set(0), write_mask(0xff)
 {}
 
+void INTCON_14_PIR::put_value(unsigned int new_value)
+{
+
+  value.put(new_value);
+  // Now let's see if there's a pending interrupt
+  // The INTCON bits are:
+  // GIE | ---- | TOIE | INTE | RBIE | TOIF | INTF | RBIF
+  // There are 3 sources for interrupts, TMR0, RB0/INTF
+  // and RBIF (RB7:RB4 change). If the corresponding interrupt
+  // flag is set AND the corresponding interrupt enable bit
+  // is set AND global interrupts (GIE) are enabled, THEN
+  // there's an interrupt pending.
+  // note: bit6 is not handled here because it is processor
+  // dependent (e.g. EEIE for x84 and ADIE for x7x).
+
+  if(value.get() & GIE  &&  !in_interrupt &&
+     ( ((value.get()>>3) & value.get() & (T0IF | INTF | IOCIF)) ||
+       ( value.get() & PEIE && check_peripheral_interrupt() )))
+  {
+      cpu_pic->BP_set_interrupt();
+  }
+}
 int INTCON_14_PIR::check_peripheral_interrupt()
 {
   assert(pir_set != 0);
@@ -170,7 +198,48 @@ int INTCON_14_PIR::check_peripheral_interrupt()
   Dprintf((" INTCON::%s\n",__FUNCTION__));
   return (pir_set->interrupt_status());
 }
+void INTCON_14_PIR::put(unsigned int new_value)
+{
+  // preserve read only bits, but do not let them be written
+  unsigned int read_only = value.get() & ~write_mask;
+  Dprintf((" INTCON_14_PIR::%s new_value %02x read_only %02x\n",__FUNCTION__, new_value, read_only));
+  trace.raw(write_trace.get() | value.get());
+  put_value((new_value & write_mask) | read_only);
+}
 
+void INTCON_14_PIR::aocxf_val(IOCxF *ptr, unsigned int val)
+{
+	int i;
+	int sum = val;
+	bool found = false;
+
+
+	for(i = 0; i < (int)aocxf_list.size(); i++)
+	{
+	    if (aocxf_list[i].ptr_iocxf == ptr)
+	    {
+		found = true;
+		aocxf_list[i].val = val;
+	    }
+	    sum |= aocxf_list[i].val;
+	}
+ 	if (!found)
+	{
+	    aocxf_list.push_back(aocxf());
+	    aocxf_list[i].ptr_iocxf = ptr;
+	    aocxf_list[i].val = val;
+	    
+	}
+	set_rbif(sum);
+}
+void INTCON_14_PIR::set_rbif(bool b)
+  {
+    bool current = (value.get() & IOCIF) == IOCIF;
+    if (b && !current)
+      put_value(value.get() | IOCIF);
+    if (!b && current)
+      put_value(value.get() & ~IOCIF);
+  }
 
 //----------------------------------------------------------------------
 // INTCON_16 
@@ -195,7 +264,7 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
 //      cout << "peripheral interrupt, priority " << hi_pri << "\n";
     if ( hi_pri )
     {
-      if ( value.get() & GIEH )
+      if ( value.get() & GIEH &&  !in_interrupt )
       {
         set_interrupt_vector(INTERRUPT_VECTOR_HI);
         cpu_pic->BP_set_interrupt();
@@ -203,7 +272,7 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
     }
     else
     {
-      if ( ( value.get() & (GIEH|GIEL) ) == (GIEH|GIEL) )
+      if ( ( value.get() & (GIEH|GIEL) ) == (GIEH|GIEL) &&  !in_interrupt)
       {
         set_interrupt_vector(INTERRUPT_VECTOR_LO);
         cpu_pic->BP_set_interrupt();
@@ -212,7 +281,7 @@ void INTCON_16::peripheral_interrupt ( bool hi_pri )
   }
   else
   {
-    if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
+    if((value.get() & (GIE | XXIE)) == (GIE | XXIE) &&  !in_interrupt)
       cpu_pic->BP_set_interrupt();
   }
 }
@@ -321,6 +390,10 @@ void INTCON_16::put(unsigned int new_value)
 {
 
   trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
+void INTCON_16::put_value(unsigned int new_value)
+{
   //trace.register_write(address,value.get());
   value.put(new_value);
   //cout << " INTCON_16::put\n";
@@ -339,10 +412,9 @@ void INTCON_16::put(unsigned int new_value)
       // Use interrupt priorities
       // %%%FIXME%%% ***BUG*** - does not attempt to look for peripheral interrupts
 
-      if( 0 == (value.get() & GIEH))
+      if( 0 == (value.get() & GIEH) ||  in_interrupt)
 	return;    // Interrupts are disabled
 
-      // Now we just go through the interrupt logic of the 18cxxx
       // First we check the high priorities and then we check the
       // low ones. When ever we detect an interrupt, then the 
       // bp.interrupt flag is set (which will cause the interrupt
@@ -388,7 +460,7 @@ void INTCON_16::put(unsigned int new_value)
 
       set_interrupt_vector(INTERRUPT_VECTOR_HI);
 
-      if(value.get() & GIE) 
+      if(value.get() & GIE &&  !in_interrupt) 
 	{
 	  if( ( (value.get()>>3)&value.get()) & (T0IF | INTF | RBIF) )
             cpu_pic->BP_set_interrupt();

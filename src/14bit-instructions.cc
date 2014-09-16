@@ -348,7 +348,9 @@ RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode, unsigned int addres
 void RETFIE::execute(void)
 {
   cpu14->pc->new_address(cpu14->stack->pop());
-  cpu14->intcon->set_gie();
+  cpu14->intcon->in_interrupt = false;
+  // test for pending intterrupts
+  cpu14->intcon->put_value(cpu14->intcon->value.get()); 
   if(cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
   {
 	cpu14e->status->put(cpu14e->status_shad.get());

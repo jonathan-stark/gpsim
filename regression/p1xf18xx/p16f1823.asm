@@ -41,10 +41,6 @@
 
 ;----------------------------------------------------------------------
 GPR_DATA                UDATA_SHR
-temp            RES     1
-
-w_temp          RES     1
-status_temp     RES     1
 cmif_cnt	RES	1
 tmr0_cnt	RES	1
 tmr1_cnt	RES	1
@@ -52,7 +48,9 @@ eerom_cnt	RES	1
 adr_cnt		RES	1
 data_cnt	RES	1
 inte_cnt	RES	1
+iocaf_val	RES	1
 
+ GLOBAL inte_cnt, iocaf_val
 
 
 ;----------------------------------------------------------------------
@@ -95,10 +93,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 INT_VECTOR   CODE    0x004               ; interrupt vector location
 	; many of the core registers now saved and restored automatically
                                                                                 
-;        movwf   w_temp
-;        swapf   STATUS,W
 	clrf	BSR		; set bank 0
-;        movwf   status_temp
 
 	btfsc	PIR2,EEIF
 	    goto ee_int
@@ -128,7 +123,7 @@ ee_int
 ; Interrupt from INT pin
 inte_int
 	incf	inte_cnt,F
-	bcf 	INTCON,IOCIF
+	bcf	INTCON,GIE	; stop interrupts
 	goto	exit_int
 
 exit_int:
@@ -543,12 +538,22 @@ test_int:
 
 	BANKSEL OPTION_REG
 	bsf 	OPTION_REG,INTEDG
-	BANKSEL INTCON
+	BANKSEL IOCAF
+	movlw	0xff
+	movwf	IOCAF
+   .assert "iocaf == 0x3f, \"*** FAILED 16f1823 INT test - IOCAF writable bits\""
+	nop
+	clrf	IOCAF		; Clear intcon IOCIF flag 
+	movlw	0x7f
+	movwf	INTCON
+   .assert "intcon == 0x7e, \"*** FAILED 16f1823 INT test - INTCON:IOCIF read only\""
+	nop
+	clrf	INTCON
         bsf     INTCON,GIE      ;Global interrupts
         bcf     INTCON,PEIE     ;No Peripheral interrupts
-        bcf     INTCON,IOCIF     ;Clear flag
         bsf     INTCON,IOCIE
 
+	BANKSEL PORTA
         clrf    inte_cnt
         bsf     PORTA,5          ; make a rising edge
         nop
@@ -557,11 +562,20 @@ test_int:
         nop
    .assert "iocaf == 0x04, \"*** FAILED 16f1823 IOCAF bit 2 not set\""
 	nop
-        clrf    inte_cnt
+	bcf	INTCON,IOCIF
+   .assert "(intcon & 1) == 1, \"*** FAILED 16f1823 INTCON,IOCIF read only\""
+	nop 
+	BANKSEL	IOCAF
+	bcf	IOCAF,2
+   .assert "(intcon & 1) == 0, \"*** FAILED 16f1823 INTCON,IOCIF not cleared from IOCAF\""
+	nop 
+	clrf	inte_cnt
+	bsf	INTCON,GIE	; Turn interrupts back on
+	BANKSEL	PORTA
         bcf     PORTA,5          ; make a falling edge
         nop
         movf    inte_cnt,w
-   .assert "W == 0x00, \"*** FAILED 16f1823 INT test - Unexpected int on falling edge\""
+   .assert "inte_cnt == 0x00, \"*** FAILED 16f1823 INT test - Unexpected int on falling edge\""
         nop
 
 
@@ -571,11 +585,10 @@ test_int:
 	bsf 	IOCAN,2
 	clrf	IOCAF
 	BANKSEL INTCON
-        bcf     INTCON,IOCIF     ;Clear flag
 
         clrf    inte_cnt
+	clrf	iocaf_val
         bsf     PORTA,5          ; make a rising edge
-        nop
         movf    inte_cnt,w
    .assert "W == 0x00, \"*** FAILED 16f1823 INT test - Unexpected int on rising edge\""
         nop
@@ -587,8 +600,10 @@ test_int:
         nop
    .assert "iocaf == 0x04, \"*** FAILED 16f1823 IOCAF bit 2 not set\""
 	nop
-
-
+	BANKSEL	IOCAF
+	CLRF	IOCAF
+	bsf	INTCON,GIE
+	BANKSEL	PORTA
         return
 
 ; read STKPTR, TOSL and cause underflow

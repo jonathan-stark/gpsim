@@ -32,6 +32,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
   .sim "symbol callCounter=1"
   .sim "symbol callFrom=0"
   .sim "symbol cycleCounter=0"
+  .sim "break c 0x100000"
 
         movlw  high  start               ; load upper byte of 'start' label
   .assert "callCounter==1,\"*** FAILED Call level 1\""

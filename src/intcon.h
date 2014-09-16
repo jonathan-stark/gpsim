@@ -1,7 +1,6 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
-
 This file is part of the libgpsim library of gpsim
 
 This library is free software; you can redistribute it and/or
@@ -28,6 +27,7 @@ License along with this library; if not, see
 #include "registers.h"
 #include "breakpoints.h"
 
+class IOCxF;
 //---------------------------------------------------------
 // INTCON - Interrupt control register
 
@@ -35,6 +35,7 @@ class INTCON : public sfr_register
 {
 public:
   unsigned int interrupt_trace;
+  bool in_interrupt;
 
 enum
 {
@@ -51,12 +52,12 @@ enum
 
 
   INTCON(Processor *pCpu, const char *pName, const char *pDesc);
-  inline void set_gie()
+  virtual void set_gie()
   {
     put(value.get() | GIE);
   }
 
-  inline void clear_gie()
+  virtual void clear_gie()
   {
     put(value.get() & ~GIE);
   }
@@ -71,7 +72,7 @@ enum
   */
   virtual void peripheral_interrupt ( bool hi_pri = false );
 
-  inline void set_rbif(bool b)
+  virtual void set_rbif(bool b)
   {
     bool current = (value.get() & RBIF) == RBIF;
     if (b && !current)
@@ -111,6 +112,8 @@ enum
 
   virtual int check_peripheral_interrupt()=0;
   virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual void aocxf_val(IOCxF *, unsigned int val){}
 
 };
 
@@ -211,12 +214,37 @@ public:
 
   INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDesc);
 
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
   inline void set_pir_set(PIR_SET *p) { pir_set = p; }
 
   virtual int check_peripheral_interrupt();
+  virtual void set_rbif(bool b);
+  virtual void set_gie() { put_value(value.get() | GIE); }
+  virtual void clear_gie() { put_value(value.get() & ~GIE); }
+  virtual void aocxf_val(IOCxF *, unsigned int val);
+
+enum
+{
+  IOCIF = 1<<0,
+  INTF  = 1<<1,
+  T0IF  = 1<<2,
+  IOCIE = 1<<3,
+  INTE  = 1<<4,
+  T0IE  = 1<<5,
+  PEIE  = 1<<6,
+  GIE   = 1<<7
+};
 
   //private:
   PIR_SET *pir_set;
+  unsigned int write_mask;    // Bits that instructions can modify
+  struct aocxf
+  {
+	struct IOCxF *ptr_iocxf;
+	unsigned int val;
+  };
+  vector<aocxf>aocxf_list;
 };
 
 
@@ -247,6 +275,7 @@ public:
   inline void set_pir_set(PIR_SET *p) { pir_set = p; }
 
   virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
 
   virtual void peripheral_interrupt ( bool hi_pri = false );
 
