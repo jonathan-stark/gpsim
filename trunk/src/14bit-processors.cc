@@ -152,8 +152,8 @@ void _14bit_processor::interrupt ()
   } else {
       stack->push(pc->value);
   }
-  intcon->clear_gie();
 
+  intcon->in_interrupt = true;
   pc->interrupt(INTERRUPT_VECTOR);
 
 }
@@ -483,8 +483,8 @@ void _14bit_e_processor::interrupt ()
   fsr0h_shad.value = ind0.fsrh.value;
   fsr1l_shad.value = ind1.fsrl.value;
   fsr1h_shad.value = ind1.fsrh.value;
-  intcon->clear_gie();
 
+  intcon->in_interrupt = true;
   pc->interrupt(INTERRUPT_VECTOR);
 
 }

@@ -1807,7 +1807,8 @@ void RETFIE16::execute()
     cpu16->fast_stack.pop();
   //cout << "retfie: need to enable interrupts\n";
 
-  cpu16->intcon.set_gies();  // re-enable the appropriate interrupt
+  cpu16->intcon.in_interrupt = false;
+  cpu16->intcon.put_value(cpu16->intcon.value.get()); //test for new interrupts
 
 }
 

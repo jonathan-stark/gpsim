@@ -315,9 +315,9 @@ P12F1822::P12F1822(const char *_name, const char *desc)
 
 
 {
-  m_iocaf = new IOC(this, "iocaf", "Interrupt-On-Change flag Register");
-  m_iocap = new IOC(this, "iocap", "Interrupt-On-Change positive edge");
-  m_iocan = new IOC(this, "iocan", "Interrupt-On-Change negative edge");
+  m_iocaf = new IOCxF(this, "iocaf", "Interrupt-On-Change flag Register", 0x3f);
+  m_iocap = new IOC(this, "iocap", "Interrupt-On-Change positive edge", 0x3f);
+  m_iocan = new IOC(this, "iocan", "Interrupt-On-Change negative edge", 0x3f);
   m_porta = new PicPortIOCRegister(this,"porta","", intcon, m_iocap, m_iocan, m_iocaf, 8,0x3f);
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false, 0x37);
   m_lata  = new PicLatchRegister(this,"lata","",m_porta, 0x37);
@@ -332,7 +332,7 @@ P12F1822::P12F1822(const char *_name, const char *desc)
   cpscon0.m_tmr0 = &tmr0;
   cpscon0.m_t1con_g = &t1con_g;
 
-
+  ((INTCON_14_PIR *)intcon)->write_mask = 0xfe;
 
   m_wpua = new WPU(this, "wpua", "Weak Pull-up Register", m_porta, 0x3f);
 
@@ -564,7 +564,7 @@ void P12F1822::create_sfr_map()
   add_sfr_register(m_iocap, 0x391, RegisterValue(0,0),"iocap");
   add_sfr_register(m_iocan, 0x392, RegisterValue(0,0),"iocan");
   add_sfr_register(m_iocaf, 0x393, RegisterValue(0,0),"iocaf");
-
+  m_iocaf->set_intcon(intcon);
 
   tmr2.ssp_module = &ssp;
 
@@ -893,23 +893,32 @@ P16F178x::P16F178x(const char *_name, const char *desc)
 
 
 {
-  m_portb = new PicPortBRegister(this,"portb","", intcon, 8,0xff);
+  m_iocbf = new IOCxF(this, "iocbf", "Interrupt-On-Change flag Register");
+  m_iocbp = new IOC(this, "iocbp", "Interrupt-On-Change positive edge");
+  m_iocbn = new IOC(this, "iocbn", "Interrupt-On-Change negative edge");
+  m_portb= new PicPortIOCRegister(this,"portb","", intcon, m_iocbp, m_iocbn, m_iocbf, 8,0xff);
   m_trisb = new PicTrisRegister(this,"trisb","", m_portb, false, 0xff);
   m_latb  = new PicLatchRegister(this,"latb","",m_portb, 0xff);
   m_wpub = new WPU(this, "wpub", "Weak Pull-up Register", m_portb, 0xff);
 
-  m_portc = new PicPortBRegister(this,"portc","", intcon, 8,0xff);
+  m_ioccf = new IOCxF(this, "ioccf", "Interrupt-On-Change flag Register");
+  m_ioccp = new IOC(this, "ioccp", "Interrupt-On-Change positive edge");
+  m_ioccn = new IOC(this, "ioccn", "Interrupt-On-Change negative edge");
+  m_portc= new PicPortIOCRegister(this,"portc","", intcon, m_ioccp, m_ioccn, m_ioccf, 8,0xff);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false, 0xff);
   m_latc  = new PicLatchRegister(this,"latc","",m_portc, 0xff);
   m_wpuc = new WPU(this, "wpuc", "Weak Pull-up Register", m_portc, 0xff);
 
-  m_iocaf = new IOC(this, "iocaf", "Interrupt-On-Change flag Register");
+  m_iocaf = new IOCxF(this, "iocaf", "Interrupt-On-Change flag Register");
   m_iocap = new IOC(this, "iocap", "Interrupt-On-Change positive edge");
   m_iocan = new IOC(this, "iocan", "Interrupt-On-Change negative edge");
   m_porta= new PicPortIOCRegister(this,"porta","", intcon, m_iocap, m_iocan, m_iocaf, 8,0xff);
   m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false, 0xff);
   m_lata  = new PicLatchRegister(this,"lata","",m_porta, 0xff);
-  m_porte= new PicPortIOCRegister(this,"porte","", intcon, m_iocap, m_iocan, m_iocaf, 8,0x08);
+  m_iocef = new IOCxF(this, "iocef", "Interrupt-On-Change flag Register", 0x08);
+  m_iocep = new IOC(this, "iocep", "Interrupt-On-Change positive edge", 0x08);
+  m_iocen = new IOC(this, "iocen", "Interrupt-On-Change negative edge", 0x08);
+  m_porte= new PicPortIOCRegister(this,"porte","", intcon, m_iocep, m_iocen, m_iocef, 8,0x08);
   m_trise = new PicTrisRegister(this,"trise","", m_porte, false, 0x00);
   m_daccon0 = new DACCON0(this, "dac1con0", "DAC1 8bit Voltage reference register 0", 0xbd, 256);
   m_daccon1 = new DACCON1(this, "dac1con1", "DAC1 8bit Voltage reference register 1", 0xff, m_daccon0);
@@ -927,7 +936,7 @@ P16F178x::P16F178x(const char *_name, const char *desc)
   tmr0.set_t1gcon(&t1con_g.t1gcon);
   set_mclr_pin(1);
 
-
+  ((INTCON_14_PIR *)intcon)->write_mask = 0xfe;
 
   m_wpua = new WPU(this, "wpua", "Weak Pull-up Register", m_porta, 0xff);
   m_wpue = new WPU(this, "wpue", "Weak Pull-up Register", m_porte, 0x08);
@@ -964,6 +973,15 @@ P16F178x::~P16F178x()
     delete_sfr_register(m_iocap);
     delete_sfr_register(m_iocan);
     delete_sfr_register(m_iocaf);
+    delete_sfr_register(m_iocbp);
+    delete_sfr_register(m_iocbn);
+    delete_sfr_register(m_iocbf);
+    delete_sfr_register(m_ioccp);
+    delete_sfr_register(m_ioccn);
+    delete_sfr_register(m_ioccf);
+    delete_sfr_register(m_iocep);
+    delete_sfr_register(m_iocen);
+    delete_sfr_register(m_iocef);
     delete_sfr_register(m_daccon0);
     delete_sfr_register(m_daccon1);
     delete_sfr_register(m_dac2con0);
@@ -1216,6 +1234,19 @@ void P16F178x::create_sfr_map()
   add_sfr_register(m_iocap, 0x391, RegisterValue(0,0),"iocap");
   add_sfr_register(m_iocan, 0x392, RegisterValue(0,0),"iocan");
   add_sfr_register(m_iocaf, 0x393, RegisterValue(0,0),"iocaf");
+  m_iocaf->set_intcon(intcon);
+  add_sfr_register(m_iocbp, 0x394, RegisterValue(0,0),"iocbp");
+  add_sfr_register(m_iocbn, 0x395, RegisterValue(0,0),"iocbn");
+  add_sfr_register(m_iocbf, 0x396, RegisterValue(0,0),"iocbf");
+  m_iocbf->set_intcon(intcon);
+  add_sfr_register(m_ioccp, 0x397, RegisterValue(0,0),"ioccp");
+  add_sfr_register(m_ioccn, 0x398, RegisterValue(0,0),"ioccn");
+  add_sfr_register(m_ioccf, 0x399, RegisterValue(0,0),"ioccf");
+  m_ioccf->set_intcon(intcon);
+  add_sfr_register(m_iocep, 0x39d, RegisterValue(0,0),"iocep");
+  add_sfr_register(m_iocen, 0x39e, RegisterValue(0,0),"iocen");
+  add_sfr_register(m_iocef, 0x39f, RegisterValue(0,0),"iocef");
+  m_iocef->set_intcon(intcon);
 
     add_sfr_register(m_dac2con0, 0x591, RegisterValue(0x00,0));
     add_sfr_register(m_dac2con1, 0x592, RegisterValue(0x00,0));

@@ -43,10 +43,6 @@ TSRNG EQU H'0004'
 
 ;----------------------------------------------------------------------
 GPR_DATA                UDATA_SHR
-temp            RES     1
-
-w_temp          RES     1
-status_temp     RES     1
 cmif_cnt	RES	1
 tmr0_cnt	RES	1
 tmr1_cnt	RES	1
@@ -54,8 +50,9 @@ eerom_cnt	RES	1
 adr_cnt		RES	1
 data_cnt	RES	1
 inte_cnt	RES	1
+iocaf_val	RES	1
 
-
+  GLOBAL iocaf_val
 
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
@@ -134,7 +131,11 @@ ee_int
 ; Interrupt from INT pin
 inte_int
 	incf	inte_cnt,F
-	bcf 	INTCON,IOCIF
+	BANKSEL	IOCAF
+	movf	IOCAF,W
+	movwf	iocaf_val
+	xorlw	0xff
+	andwf 	IOCAF, F
 	goto	exit_int
 
 exit_int:
@@ -530,10 +531,33 @@ test_int:
 	BANKSEL OPTION_REG
 	bsf 	OPTION_REG,INTEDG
 	BANKSEL INTCON
+	movlw	0x7f
+	movwf	INTCON
+   .assert "intcon == 0x7e, \"*** FAILED 16f1788 INT test - INTCON:IOCIF read only\""
+	nop
+	BANKSEL	IOCAF 
+	movlw	0xff
+	movwf	IOCAF
+ .assert "iocaf == 0xff, \"*** FAILED 16f1788 INT test - IOCAF writable bits\""
+	nop
+	clrf	IOCAF
+	movwf	IOCBF
+ .assert "iocbf == 0xff, \"*** FAILED 16f1788 INT test - IOCBF writable bits\""
+	nop
+	clrf	IOCBF
+	movwf	IOCCF
+ .assert "ioccf == 0xff, \"*** FAILED 16f1788 INT test - IOCCF writable bits\""
+	nop
+	clrf	IOCCF
+	movwf	IOCEF
+ .assert "iocef == 0x08, \"*** FAILED 16f1788 INT test - IOCEF writable bits\""
+	nop
+	clrf	IOCEF
+	clrf	INTCON
         bsf     INTCON,GIE      ;Global interrupts
-        bcf     INTCON,PEIE     ;No Peripheral interrupts
-        bcf     INTCON,IOCIF     ;Clear flag
         bsf     INTCON,IOCIE
+
+ 	BANKSEL PORTA
 
         clrf    inte_cnt
         bsf     PORTA,5          ; make a rising edge
@@ -541,7 +565,7 @@ test_int:
         movf    inte_cnt,w
    .assert "W == 0x01, \"*** FAILED 16f1788 INT test - No int on rising edge\""
         nop
-   .assert "iocaf == 0x04, \"*** FAILED 16f1788 IOCAF bit 2 not set\""
+   .assert "iocaf_val == 0x04, \"*** FAILED 16f1788 IOCAF bit 2 not set\""
 	nop
         clrf    inte_cnt
         bcf     PORTA,5          ; make a falling edge
@@ -555,6 +579,7 @@ test_int:
 	BANKSEL IOCAP
 	clrf	IOCAP
 	bsf 	IOCAN,2
+	movlw	0xff
 	clrf	IOCAF
 	BANKSEL INTCON
         bcf     INTCON,IOCIF     ;Clear flag
@@ -571,7 +596,7 @@ test_int:
         movf    inte_cnt,w
    .assert "W == 0x01, \"*** FAILED 16f1788 INT test - No int on falling edge\""
         nop
-   .assert "iocaf == 0x04, \"*** FAILED 16f1788 IOCAF bit 2 not set\""
+   .assert "iocaf_val == 0x04, \"*** FAILED 16f1788 IOCAF bit 2 not set\""
 	nop
 
 

@@ -1,3 +1,20 @@
+2014-09-16 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-instructions.cc src/16bit-instructions.cc
+	  src/14bit-processors.cc src/16bit-processors.cc:
+	- Allow clearing INTCON:GIE in interrupt - bug #179
+
+	* src/14bit-registers.cc src/14bit-registers.h
+	  src/intcon.cc src/intcon.h src/p1xf1xxx.cc
+	  src/p1xf1xxx.h src/pic-ioports.h:
+	- Fix INTCON:IOCIF IOCxF interaction - bug #180
+
+	* regression/instructions_14bit/branching.asm
+	  regression/p1xf18xx/Makefile
+	  regression/p1xf18xx/p12f1822.asm
+	  regression/p1xf18xx/p16f1788.asm
+	  regression/p1xf18xx/p16f1823.asm:
+	- Fix tests for bug #180
+
 2014-08-23 Roy Rankin <rrankin@ihug.com.au>
 	* regression/run_regression.sh regression/tmr3_16bit
 	  regression/tmr3_16bit/18f452.lkr regression/tmr3_16bit/18f4550_g.lkr

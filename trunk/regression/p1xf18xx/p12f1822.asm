@@ -22,9 +22,9 @@
         ;; simulate a pic 12F1822.
 
 
-	list    p=12f1822                ; list directive to define processor
-	include <p12f1822.inc>           ; processor specific variable definitions
-        include <coff.inc>              ; Grab some useful macros
+	list    p=12f1822          ; list directive to define processor
+	include <p12f1822.inc>     ; processor specific variable definitions
+        include <coff.inc>         ; Grab some useful macros
 
         __CONFIG _CONFIG1, _CP_OFF & _WDTE_ON &  _FOSC_INTOSC & _PWRTE_ON &  _BOREN_OFF & _MCLRE_OFF & _CLKOUTEN_OFF
         __CONFIG _CONFIG2, _STVREN_ON ; & _WRT_BOOT
@@ -51,10 +51,12 @@ eerom_cnt	RES	1
 adr_cnt		RES	1
 data_cnt	RES	1
 inte_cnt	RES	1
+iocaf_val	RES     1
 
 GPR_DATA2	UDATA	0xa0
 A0		RES	1
 
+  GLOBAL iocaf_val
 
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
@@ -116,7 +118,11 @@ ee_int
 ; Interrupt from INT pin
 inte_int
 	incf	inte_cnt,F
-	bcf	INTCON,IOCIF
+	BANKSEL IOCAF
+	movf	IOCAF,W
+	movwf	iocaf_val
+	xorlw	0xff
+	andwf 	IOCAF, F
 	goto	exit_int
 
 exit_int:
@@ -285,21 +291,25 @@ test_tmr0:
 
 
 
-test_int:
-	BANKSEL TRISA
-	bsf     TRISA,2
-        bcf     TRISA,5
+test_int: 
+	BANKSEL TRISA 
+	bsf     TRISA,2 
+	bcf     TRISA,5
 	BANKSEL PORTA
 	clrf	PORTA
 	BANKSEL IOCAP
 	bsf	IOCAP,2		; set interrupt on + edge of porta2
+	movlw	0xff
+	movwf	IOCAF
+   .assert "iocaf == 0x3f, \"*** FAILED 12f1822 INT test - IOCAF writable bits\""
+	nop
+	clrf	IOCAF
 
 	BANKSEL OPTION_REG
 	bsf	OPTION_REG,INTEDG
 	BANKSEL INTCON
         bsf     INTCON,GIE      ;Global interrupts
         bcf     INTCON,PEIE     ;No Peripheral interrupts
-        bcf     INTCON,IOCIF     ;Clear flag
         bsf     INTCON,IOCIE
 
         clrf    inte_cnt
@@ -308,7 +318,7 @@ test_int:
         movf    inte_cnt,w
    .assert "W == 0x01, \"*** FAILED 12f1822 INT test - No int on rising edge\""
         nop
-   .assert "iocaf == 0x04, \"*** FAILED 12f1822 IOCAF bit 2 not set\""
+   .assert "iocaf_val == 0x04, \"*** FAILED 12f1822 IOCAF bit 2 not set\""
 	nop
         clrf    inte_cnt
         bcf     PORTA,5          ; make a falling edge
@@ -323,8 +333,8 @@ test_int:
 	clrf	IOCAP
 	bsf	IOCAN,2
 	clrf	IOCAF
-	BANKSEL INTCON
-        bcf     INTCON,IOCIF     ;Clear flag
+
+	BANKSEL	PORTA
 
         clrf    inte_cnt
         bsf     PORTA,5          ; make a rising edge
@@ -338,10 +348,8 @@ test_int:
         movf    inte_cnt,w
    .assert "W == 0x01, \"*** FAILED 12f1822 INT test - No int on falling edge\""
         nop
-   .assert "iocaf == 0x04, \"*** FAILED 12f1822 IOCAF bit 2 not set\""
+   .assert "iocaf_val == 0x04, \"*** FAILED 12f1822 IOCAF bit 2 not set\""
 	nop
-
-
         return
 
 ;
@@ -536,7 +544,7 @@ test_indr:
 	movwf	FSR1H
 	incf 	FSR1L,F
 	movf    INDF1,W
-  .assert "W == 0x16, \"*** FAILED 12f1822 INDF operations program mem\""
+  .assert "W == 0x1a, \"*** FAILED 12f1822 INDF operations program mem\""
 	nop
 	movlw	0x20		; linear memory address 0x20000 == 0x20
 	movwf	FSR0H

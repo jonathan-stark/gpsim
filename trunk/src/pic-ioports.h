@@ -97,6 +97,7 @@ protected:
 };
 
 class IOC;
+class IOCxF;
 //	Like PicPortBRegister, PicPortGRegister allows wakeup from sleep
 //	and interrupt on pin level change. However, PicPortGRegister
 //	uses IOC to determine which of any of the bits will do this.
@@ -128,10 +129,10 @@ public:
   INTCON *m_pIntcon;
   IOC	*m_Iocap;
   IOC	*m_Iocan;
-  IOC	*m_Iocaf;
+  IOCxF	*m_Iocaf;
 
   PicPortIOCRegister(Processor *pCpu, const char *pName, const char *pDesc,
-                   INTCON *pIntcon, IOC *pIocap, IOC *pIocan, IOC *pIocaf,
+                   INTCON *pIntcon, IOC *pIocap, IOC *pIocan, IOCxF *pIocaf,
                    unsigned int numIopins, unsigned int enableMask=0x3f)
 	: PicPortBRegister(pCpu, pName, pDesc, pIntcon, numIopins, enableMask),
 	m_pIntcon(pIntcon), m_Iocap(pIocap), m_Iocan(pIocan), m_Iocaf(pIocaf)
