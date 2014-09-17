@@ -1,3 +1,12 @@
+2014-09-17 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac extras/Makefile.am extras/dht11/AUTHORS
+	  extras/dht11/Makefile.am extras/dht11/README extras/dht11/dht11.cc
+	  extras/dht11/dht11.h extras/dht11/examples
+	  extras/dht11/examples/16f627_g.lkr 
+	  extras/dht11/examples/Makefile.am extras/dht11/examples/README
+	  extras/dht11/examples/dht11_example.asm
+	  extras/dht11/module_manager.cc: Add dht11 module - feature # 34
+
 2014-09-16 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-instructions.cc src/16bit-instructions.cc
 	  src/14bit-processors.cc src/16bit-processors.cc:

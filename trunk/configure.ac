@@ -216,6 +216,8 @@ AC_CONFIG_FILES([Makefile
 		 extras/ds1820/examples/Makefile
 		 extras/ds1307/Makefile
 		 extras/ds1307/examples/Makefile
+		 extras/dht11/Makefile
+		 extras/dht11/examples/Makefile
                  regression/Makefile
                  src/Makefile
                  src/dspic/Makefile

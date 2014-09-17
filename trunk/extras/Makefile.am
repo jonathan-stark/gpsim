@@ -3,7 +3,7 @@
 AM_CPPFLAGS = @X_CFLAGS@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = graphic_lcd  lcd  ds1307 ds1820
+SUBDIRS = graphic_lcd  lcd  ds1307 ds1820 dht11
 
 EXTRA_DIST = rs232-gen/Makefile rs232-gen/example/Makefile \
 	rs232-gen/example/example.asm rs232-gen/example/example.stc \
