@@ -777,7 +777,8 @@ void Processor::read_src_files(void)
   unsigned int addr;
   for(addr = 0; addr<program_memory_size(); addr++) {
 
-    if( (program_memory[addr]->isa() != instruction::INVALID_INSTRUCTION)) {
+    if( (program_memory[addr]->isa() != instruction::INVALID_INSTRUCTION) &&
+	(program_memory[addr]->get_file_id() >= 0)) {
 
       FileContext *fc = files[program_memory[addr]->get_file_id()];
 
@@ -1001,7 +1002,7 @@ void Processor::disassemble (signed int s, signed int e)
     if (pAddr)
       cout << pAddr->name() << ':' << endl;
 
-    if(files.nsrc_files() && use_src_to_disasm) {
+    if(fc && files.nsrc_files() && use_src_to_disasm) {
       char buf[256];
 
       files.ReadLine(inst->get_file_id(),
@@ -1100,7 +1101,7 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 {
   int closest_address = -1;
 
-  if(!cpu)
+  if ((!cpu) || (file_id == -1))
     return closest_address;
 
   FileContext *fc = cpu->files[file_id];
@@ -2466,9 +2467,9 @@ void FileContext::ReadSource(void)
 
 char *FileContext::ReadLine(unsigned int line_number, char *buf, unsigned int nBytes)
 {
-
+  buf[0] = '\0';
   if(!fptr)
-    return 0;
+    return buf;
 
   fseek(fptr,
         line_seek[line_number],
@@ -2587,13 +2588,6 @@ int FileContextList::Add(string &new_name, bool hll)
 
   string sFull = bHasAbsolutePath(new_name) ? new_name : (sSourcePath + new_name);
 
-  // Check that the file is available.
-  // FIXME stat() would be better, but would need some stat_path() I guess.
-  FILE *f=fopen_path(sFull.c_str(), "r");
-  if(f==NULL)
-    return -1;
-  fclose(f);
-
   push_back(FileContext(sFull));
   back().setHLLId(hll);
   lastFile++;
@@ -2626,7 +2620,8 @@ char *FileContextList::ReadLine(int file_id, int line_number, char *buf, int nBy
   if(fc)
     return fc->ReadLine(line_number, buf, nBytes);
 
-  return 0;
+  buf[0] = '\0';
+  return buf;
 }
 
 //----------------------------------------

@@ -1,3 +1,9 @@
+2014-09-22 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_menu.cc gui/gui_regwin.cc: Remove debugging printf
+	* gui/gui_src_asm.cc src/cod.cc src/cod.h src/processor.cc:
+	- Handle missing source file BUG # 135
+	* src/os_dependent.cc: Terminate path string for current folder
+
 2014-09-17 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac extras/Makefile.am extras/dht11/AUTHORS
 	  extras/dht11/Makefile.am extras/dht11/README extras/dht11/dht11.cc

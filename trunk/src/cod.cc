@@ -253,35 +253,20 @@ FILE *PicCodProgramFileType::open_a_file(char **filename)
 // file file name in the list of source files within the .cod
 // file - unfortunately mpasm doesn't ... so gpsim has to assume
 // the list file isn't present
-
-int PicCodProgramFileType::cod_open_lst(const char *filename)
+void PicCodProgramFileType::set_lstname(const char *filename)
 {
-  char *pc;
   int i;
 
-  FILE *t;
-
   lstfilename = strdup(filename);
-  pc = strrchr(lstfilename, '.');
+  char *pc = strrchr(lstfilename, '.');
   if (pc == 0) {
     if( (i = strlen(lstfilename)) < (256-4))
       pc = lstfilename + i;
     else
-      return ERR_FILE_NAME_TOO_LONG;
-
+      return;
   }
   strcpy(pc, ".lst");
-
-  // Now, let's see if we can open the file
-  if(0 == (t = open_a_file(&lstfilename)))
-    return ERR_LST_FILE_NOT_FOUND;
-
-  fclose(t);
-
-  return SUCCESS;
 }
-
-
 
 //-----------------------------------------------------------
 int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
@@ -362,12 +347,7 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
           //
           // Add this file to the list
           //
-          if(cpu->files.Add(filenm)<0) {
-            // File not available.
-            if(verbose)
-              cout << "Failed to add '" << filenm << "'\n";
-            continue;
-          }
+	  cpu->files.Add(filenm);
 
           if((strncmp(lstfilename, filenm,256) == 0) &&
               (cpu->files.list_id() >= cpu->files.nsrc_files()) ) {
@@ -403,14 +383,13 @@ int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
     printf("No source file info\n");
 
 _Cleanup:
-  if(0){
+#if 0
     // Debug code
-    int i;
     cout << " new file stuff: " << cpu->files.nsrc_files() << " new files\n";
     for(i=0; i<cpu->files.nsrc_files(); i++) {
       cout << ((cpu->files)[i])->name() << endl;
     }
-  }
+#endif
   return iReturn;
 }
 
@@ -882,10 +861,6 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 				int index = cpu->map_pm_address2index(address);
 				cpu->program_memory[index]->set_hll_src_line(-1);
 			}
-			else
-			{
-				cout<<"Error did not find address of last asm line!"<<endl;
-			}
 		}
 	}
 
@@ -951,11 +926,6 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
     printf("Unable to open %s\n",filename);
     return ERR_FILE_NOT_FOUND;
   }
-  error_code= cod_open_lst(filename);
-  if(error_code != SUCCESS) {
-    display_symbol_file_error(error_code);
-    return error_code;
-  }
 
   temp_block = new char[COD_BLOCK_SIZE];
 
@@ -1017,6 +987,7 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
 
   read_hex_from_cod(ccpu);
 
+  set_lstname(filename);
   ccpu->files.SetSourcePath(filename);
   read_src_files_from_cod(ccpu);
 

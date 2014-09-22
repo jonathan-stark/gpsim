@@ -543,7 +543,6 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   if (!gpGuiProcessor && !gpGuiProcessor->source_browser)
     return;
-  printf("RRR SourceBrowserPreferences::SourceBrowserPreferences\n");
 
   GtkWidget *notebook = gtk_notebook_new();
   gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_TOP);

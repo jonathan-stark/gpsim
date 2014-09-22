@@ -125,10 +125,9 @@ void SplitPathAndFile(string &sSource, string &sFolder, string &sFile) {
   translatePath(sSource);
   string::size_type LastDelimiter = sSource.find_last_of(FOLDERDELIMITER);
   if (LastDelimiter == string::npos) {
-//    sFolder.erase();
     // JRH - I'm not sure this is a good assumption.
     // It will do for the one place it is currently being used.
-    static char sCurrentFolder[] = { '.', FOLDERDELIMITER };
+    static char sCurrentFolder[] = { '.', FOLDERDELIMITER , '\0'};
     sFolder.append(sCurrentFolder);
     sFile = sSource;
   }
