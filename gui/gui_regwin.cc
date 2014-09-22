@@ -183,10 +183,6 @@ void GUIRegister::put_value(unsigned int new_value)
 
     shadow = reg->getRV_notrace();
   }
-  else
-  {
-	fprintf(stderr, "RRR %s %d reg is 0 new_value=%x\n", __FUNCTION__, __LINE__, new_value);
-  }
 }
 
 void GUIRegister::put_shadow(RegisterValue new_value)

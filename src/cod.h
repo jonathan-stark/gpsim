@@ -133,7 +133,7 @@ private:
   void    display_symbol_file_error(int err);
 
   FILE *  open_a_file(char **filename);
-  int     cod_open_lst(const char *filename);
+  void    set_lstname(const char *filename);
 
   void    read_directory(void);
   int     check_for_gputils(char *block);
