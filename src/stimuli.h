@@ -395,6 +395,7 @@ class IOPIN : public stimulus
   virtual char getForcedDrivenState();
   virtual bool getState();
   virtual void putState(bool new_dstate);
+  virtual void putState(double new_Vth);
 
   virtual void set_ZthWeak(double Z) { ZthWeak=Z;}
   virtual double get_ZthWeak() { return ZthWeak;}
@@ -468,6 +469,8 @@ public:
   virtual char getBitChar();
 
   virtual void set_nodeVoltage(double new_nodeVoltage);
+  virtual void putState(bool new_state);
+  virtual void putState(double new_Vth);
 
   virtual void update_direction(unsigned int,bool refresh);
   virtual IOPIN_DIRECTION  get_direction(void)

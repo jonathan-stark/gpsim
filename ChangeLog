@@ -1,3 +1,14 @@
+2014-09-23 Roy Rankin <rrankin@ihug.com.au>
+	* modules/gpsim_modules.cc modules/stimuli.cc modules/stimuli.h:
+	- add the file recorder and file stimulus modules
+	* modules/ttl.cc src/stimuli.cc src/stimuli.h: In analogue stimulus
+	  module drive pin as voltage
+	* regression/analog_stim/12f1822.lkr regression/analog_stim/Makefile
+	  regression/analog_stim/p12f1822.asm
+	  regression/analog_stim/stim_an.sig 
+	  regression/analog_stim/stim_clk.sig: 
+	- Regression tests for for the analogue stimulus.
+
 2014-09-22 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_menu.cc gui/gui_regwin.cc: Remove debugging printf
 	* gui/gui_src_asm.cc src/cod.cc src/cod.h src/processor.cc:

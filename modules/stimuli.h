@@ -28,7 +28,7 @@ License along with this library; if not, see
 #include <glib.h>
 #include "../src/stimuli.h"
 #include "../src/modules.h"
-#include "../src/value.h"
+#include "module_attribute.h"
 #include <list>
 
 class Register;
@@ -41,7 +41,6 @@ namespace ExtendedStimuli {
   class PulseAttribute;
   class PulseInitial;
   class PulsePeriodAttribute;
-  class FileNameAttribute;
 
   class ValueStimulusData {
   public:
@@ -62,7 +61,8 @@ namespace ExtendedStimuli {
     StimulusBase(const char *_name, const char *_desc);
     virtual void callback_print();
     void create_iopin_map();
-    
+    void putState(double new_Vth);
+
   protected:
     IO_bi_directional *m_pin;
   };
@@ -98,21 +98,57 @@ namespace ExtendedStimuli {
 
 
   //----------------------------------------------------------------------
+  // File Stimulus and Recorder use this attribute
+  //----------------------------------------------------------------------
+  template<typename T> 
+  class FileNameAttribute : public String
+  {
+  public:
+    FileNameAttribute(T *parent);
+
+    virtual void update();
+
+  private:
+    T *m_Parent;
+  };
+
+  //----------------------------------------------------------------------
   class FileStimulus : public StimulusBase
   {
   public:
     static Module *construct(const char *new_name);
     FileStimulus(const char *_name);
-    ~FileStimulus();
 
-    void parse(const char *);
     void newFile();
+    void parseLine(bool first = false);
     virtual void callback();
-    virtual string toString();
 
   private:
-    FileNameAttribute *m_file;
+    FileNameAttribute<FileStimulus> *m_filename;
     guint64 m_future_cycle;
+    ifstream *m_fp;
+    double m_future_value;
+  };
+
+  //----------------------------------------------------------------------
+  class Recorder_Input;
+
+  class FileRecorder : public Module
+  {
+  public:
+    static Module *construct(const char *new_name);
+    FileRecorder(const char *_name);
+    ~FileRecorder();
+
+    void newFile();
+    virtual void record(bool NewVal);
+    virtual void record(double NewVal);
+
+  private:
+    FileNameAttribute<FileRecorder> *m_filename;
+    Recorder_Input *m_pin;
+    ofstream *m_fp;
+    double m_lastval;
   };
 
   //----------------------------------------------------------------------
