@@ -62,14 +62,18 @@ License along with this library; if not, see
   pwlgen - piecewise linear generator.
     <not implemented>
 
-  filegen - time and values are specified in a file.
-    <not implemented>
+  FileStimulus - time and values are taken from a file.
+    .file - Name of input file.
 
+  FileRecorder - time and values are written to a file.
+    .file - name of file or pipe to write data to
+    .in_digital - is the signal digital (true) or analog (false)
 
 */
 
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
+#include <fstream>
 
 #include "../config.h"
 #include "../src/gpsim_time.h"
@@ -78,6 +82,7 @@ License along with this library; if not, see
 #include "../src/symbol.h"
 #include "../src/trace.h"
 #include "../src/processor.h"
+#include "../src/packages.h"
 
 namespace ExtendedStimuli {
 
@@ -170,14 +175,16 @@ namespace ExtendedStimuli {
   StimulusBase::StimulusBase(const char *_name, const char *_desc)
     : Module(_name,_desc)
   {
-    // Default module attributes.
-    //initializeAttributes();
-
     // The I/O pin
     m_pin = new IO_bi_directional((name() + ".pin").c_str());
-    m_pin->update_direction(IOPIN::DIR_OUTPUT,true);
+    m_pin->set_is_analog(true);
+    m_pin->set_Zth(0.01);
+    m_pin->update_direction(IOPIN::DIR_OUTPUT, true);
+  }
 
-
+  void StimulusBase::putState(double new_Vth)
+  {
+    m_pin->putState(new_Vth);
   }
 
   //----------------------------------------------------------------------
@@ -453,74 +460,44 @@ Pulse Generator\n\
 
 
   //----------------------------------------------------------------------
-  // File Stimulus
+  // File Stimulus and Recorder use this attribute
   //----------------------------------------------------------------------
-  class FileNameAttribute : public String
+  template<typename T> 
+  FileNameAttribute<T>::FileNameAttribute(T *parent)
+    : String("file", "", "Name of a file or pipe"), m_Parent(parent)
   {
-  public:
-    FileNameAttribute(FileStimulus *, const char *_name, const char * desc);
-
-    virtual void set(Value *);
-
-    const char *getLine();
-    const FILE *fp() { return m_pFile; }
-  private:
-    FileStimulus *m_Parent;
-    FILE *m_pFile;
-    enum  {
-      eBuffSize = 1024
-    };
-    char m_buff[eBuffSize];
-  };
-  //=1024;
-  FileNameAttribute::FileNameAttribute(FileStimulus *pParent,
-                                       const char *_name,
-                                       const char * _desc)
-    : String(_name,"",_desc), m_Parent(pParent), m_pFile(0)
-  {
-
+    parent->addSymbol(this);
   }
 
-  void FileNameAttribute::set(Value *pV)
+  template<typename T> 
+  void FileNameAttribute<T>::update()
   {
-    if (m_pFile)
-      return;
-
-    String::set(pV);
-
-    m_pFile = fopen( getVal(), "r");
-
     m_Parent->newFile();
   }
 
-  const char *FileNameAttribute::getLine()
+  //----------------------------------------------------------------------
+  // File Stimulus
+  //----------------------------------------------------------------------
+  Module *FileStimulus::construct(const char *new_name)
   {
-
-    m_buff[0]=0;
-    if (m_pFile)
-      fgets(m_buff, eBuffSize, m_pFile);
-    return m_buff;
+    FileStimulus *pFileStimulus = new FileStimulus(new_name);
+    return pFileStimulus;
   }
-  //----------------------------------------------------------------------
-  //----------------------------------------------------------------------
+
   FileStimulus::FileStimulus(const char *_name)
     : StimulusBase(_name, "\
 File Stimulus\n\
  Attributes:\n\
- .file - file name\n\
-"), m_future_cycle(0)
+ .file - name of file or pipe supplying data\n\
+"), m_future_cycle(0), m_fp(NULL)
   {
     // Attributes for the pulse generator.
-    m_file = new FileNameAttribute(this, "file","name of file or pipe supplying data");
+    m_filename = new FileNameAttribute<FileStimulus>(this);
 
-    addSymbol(m_file);
+    create_iopin_map();
 
-  }
-
-
-  FileStimulus::~FileStimulus()
-  {
-
+    if (verbose)
+      cout << description() << endl;
   }
 
   void FileStimulus::newFile()
@@ -530,39 +507,199 @@ File Stimulus\n\
       m_future_cycle = 0;
     }
 
-    parse(m_file->getLine());
+    if (m_fp)
+      delete m_fp;
+    m_fp = NULL;
 
+    char fname[20] = "";
+    m_filename->get(fname, 20);
+    if (fname[0])
+      m_fp = new ifstream(fname);
+
+    // Set the first breakpoint
+    parseLine(true);
   }
 
-  void FileStimulus::parse(const char *cP)
+  void FileStimulus::parseLine(bool first)
   {
-    if (!cP)
+    if (!m_fp || m_fp->eof())
       return;
-    guint64 t;
-    float v;
 
-    //fscanf(m_file,"%" PRINTF_INT64_MODIFIER "i %g",&t, &v);
-    sscanf(cP,"%" PRINTF_GINT64_MODIFIER "i %g",&t, &v);
+    m_fp->precision(16);
+    *m_fp >> dec >> m_future_cycle >> m_future_value;
+    if (m_fp->eof())
+      return;
+    if (verbose) {
+      cout << this->name() << " read " << dec << m_future_value << " @ 0x"
+	   << hex << m_future_cycle << endl;
+    }
 
-    cout << "  read 0x" << hex << t << "," << v << endl;
+    if  (m_future_cycle > get_cycles().get())
+      get_cycles().set_break(m_future_cycle, this);
+    else if (first) {
 
+      // Always set the reset value
+      putState(m_future_value);
+      // Set the next breakpoint
+      parseLine();
+    } else {
+      if (verbose)
+	cout << this->name() << " WARNING: Ignoring past stimulus " << dec
+	     << m_future_value << " @ 0x" << hex << m_future_cycle << endl;
+      // Do not set this value, it could have a good or a bad side effect.
+      // Set the next breakpoint
+      parseLine();
+    }
   }
 
   void FileStimulus::callback()
   {
+    // Remove this breakpoint
+    get_cycles().clear_break(this);
+    m_future_cycle = 0;
+
+    // Set the new value
+    putState(m_future_value);
+
+    // Set the next breakpoint
+    parseLine();
   }
 
-
-  string FileStimulus::toString()
+  //----------------------------------------------------------------------
+  // File Recorder
+  //----------------------------------------------------------------------
+  class Recorder_Input : public IOPIN
   {
+  public:
+    Recorder_Input(const char *n, FileRecorder *pParent);
+    virtual void setDrivenState(bool);
+    virtual void set_nodeVoltage(double);
 
-    ostringstream sOut;
+  private:
+    bool is_digital();
 
-    sOut << "fileStimulus toString method" << endl;
+    FileRecorder *m_pParent;
+    BooleanAttribute *m_digitalattribute;
+  };
 
-    sOut << ends;
-    return sOut.str();
+  Recorder_Input::Recorder_Input(const char *n, FileRecorder *pParent)
+    : IOPIN(n), m_pParent(pParent)
+  {
+    m_digitalattribute = new BooleanAttribute("digital", false,
+			"Is the signal digital (true) or analog (false)");
+    pParent->addSymbol(m_digitalattribute);
+  }
 
+  void Recorder_Input::setDrivenState(bool new_dstate)
+  {
+    IOPIN::setDrivenState(new_dstate);
+
+    if (is_digital())
+      m_pParent->record(new_dstate);
+  }
+
+  void Recorder_Input::set_nodeVoltage(double v)
+  {
+    IOPIN::set_nodeVoltage(v);
+
+    if (is_digital())
+      m_pParent->record(v);
+  }
+
+  bool Recorder_Input::is_digital()
+  {
+    bool value;
+    m_digitalattribute->get(value);
+    return value;
+  }
+
+  //------------------------------------------------------------------------
+  Module *FileRecorder::construct(const char *new_name)
+  {
+    FileRecorder *pFileRecorder = new FileRecorder(new_name);
+    return pFileRecorder;
+  }
+
+  FileRecorder::FileRecorder(const char *_name)
+    : Module(_name, "\
+File Recorder\n\
+ Attributes:\n\
+ .file - name of file or pipe to write data to\n\
+ .digital - is the signal digital (true) or analog (false)\n\
+"), m_fp(NULL), m_lastval(99.0)
+  {
+    create_pkg(1);
+    // Position pin on left side of package
+    package->set_pin_position(1,0.5);
+
+    string pinname(_name);
+    pinname += ".pin";
+    m_pin = new Recorder_Input(pinname.c_str(), this);
+    assign_pin(1, m_pin);
+
+    // Attribute for the recorder.
+    m_filename = new FileNameAttribute<FileRecorder>(this);
+
+    if (verbose)
+      cout << description() << endl;
+  }
+
+  FileRecorder::~FileRecorder()
+  {
+    delete m_pin;
+    if (m_fp)
+      delete m_fp;
+  }
+
+  // Invoked when the FileNameAttribute is updated.
+  void FileRecorder::newFile()
+  {
+    if (m_fp)
+      delete m_fp;
+    m_fp = NULL;
+
+    char fname[20] = "";
+    m_filename->get(fname, 20);
+    if (fname[0])
+      m_fp = new ofstream(fname);
+  }
+
+  void FileRecorder::record(bool NewVal)
+  {
+    unsigned newvalue = (NewVal? 1: 0);
+    if (newvalue == m_lastval)
+      return;
+
+    if (m_fp) {
+      gint64 current_cycle = get_cycles().get();
+
+      *m_fp << dec << current_cycle << ' ' << newvalue << endl;
+
+      if (verbose) {
+	cout << this->name() << " recording " << newvalue << " @ 0x" << hex
+	     << current_cycle << endl;
+      }
+      m_lastval = newvalue;
+    }
+  }
+
+  void FileRecorder::record(double NewVal)
+  {
+    if (NewVal == m_lastval)
+      return;
+
+    if (m_fp) {
+      gint64 current_cycle = get_cycles().get();
+
+      m_fp->precision(16);
+      *m_fp << dec << current_cycle << ' ' << NewVal << endl;
+
+      if (verbose) {
+	cout << this->name() << " recording " << NewVal << " @ 0x" << hex
+	     << current_cycle << endl;
+      }
+      m_lastval = NewVal;
+    }
   }
 
   //----------------------------------------------------------------------

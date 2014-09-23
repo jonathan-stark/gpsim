@@ -103,6 +103,8 @@ Module_Types available_modules[] =
   { {"pullup",           "pu"},   PullupResistor::pu_construct },
   { {"pulldown",         "pd"},   PullupResistor::pd_construct },
   { {"pulsegen",         "pg"},   ExtendedStimuli::PulseGen::construct },
+  { {"FileRecorder",     "fr"},   ExtendedStimuli::FileRecorder::construct },
+  { {"FileStimulus",     "fs"},   ExtendedStimuli::FileStimulus::construct },
 
 #ifdef HAVE_GUI
   // PGS added back 23MAY10

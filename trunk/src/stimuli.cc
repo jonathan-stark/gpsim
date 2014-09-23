@@ -990,6 +990,28 @@ void IOPIN::putState(bool new_state)
 
 }
 
+void IOPIN::putState(double new_Vth)
+{
+  if(new_Vth != Vth) {
+    Vth = new_Vth;
+
+    if (Vth <= 0.3)
+      bDrivingState = false;
+    else
+      bDrivingState = true;
+
+    if(verbose & 1)
+      cout << name()<< " putState=" << new_Vth << endl;
+    
+    // If this pin is tied to a node, then update the node.
+    if(snode)
+      snode->update();
+  }
+  if(m_monitor)
+    m_monitor->putState(bDrivingState?'1':'0');
+
+}
+
 //------------------------------------------------------------
 bool IOPIN::getState()
 {
@@ -1080,7 +1102,7 @@ char IOPIN::getForcedDrivenState()
 
 void IOPIN::toggle()
 {
-  putState(getState() ^ true);
+  putState((bool) (getState() ^ true));
 }
 
 /*************************************
@@ -1221,6 +1243,17 @@ void IO_bi_directional::update_direction(unsigned int new_direction, bool refres
   // to a stimulus, then we need to update the stimulus.
   if(refresh && snode)
     snode->update();
+}
+
+void IO_bi_directional::putState(bool new_state)
+{
+  IOPIN::putState(new_state);
+}
+
+void IO_bi_directional::putState(double new_Vth)
+{
+  VthIn = new_Vth;
+  IOPIN::putState(new_Vth);
 }
 
 IO_bi_directional_pu::IO_bi_directional_pu(const char *_name,

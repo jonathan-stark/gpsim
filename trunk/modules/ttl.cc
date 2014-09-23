@@ -350,7 +350,7 @@ void TTL595::setStrobe(bool bNewStrobe)
 void TTL595::update_state()
 {
   for (int i=0, ss=sreg; i<8; i++,ss>>=1)
-    m_Q[i]->putState(ss&1);
+    m_Q[i]->putState((bool) (ss&1));
 }
 
 void TTL595::create_iopin_map()
