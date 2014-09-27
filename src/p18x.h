@@ -65,7 +65,7 @@ class P18C242 : public P18C2x2
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
-  virtual unsigned int last_actual_register () const { return 0x02FF;};
+  virtual unsigned int last_actual_register () const { return 0x01FF;};
 
 };
 
@@ -130,7 +130,7 @@ class P18C442 : public P18C4x2
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
-  virtual unsigned int last_actual_register () const { return 0x02FF;};
+  virtual unsigned int last_actual_register () const { return 0x01FF;};
 
 };
 
@@ -174,6 +174,7 @@ class P18F252 : public P18F242
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
 
 };
 
@@ -356,6 +357,7 @@ class P18F2420 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int last_actual_register () const { return 0x02FF;};
 };
 
 class P18F2455 : public P18F2x21
@@ -406,6 +408,7 @@ class P18F2520 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
 };
 
 
@@ -522,6 +525,7 @@ class P18F4520 : public P18F4x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
 };
 
 
