@@ -209,6 +209,10 @@ void ADDFSR16::execute()
 {
   if (cpu16->extended_instruction())
   {
+      // Apply pending update.
+      ia->fsr_value += ia->fsr_delta;
+      ia->fsr_delta = 0;
+
       if (opcode & 0x100)
     	ia->put_fsr(ia->get_fsr_value() - m_lit);  //SUBFSR
       else

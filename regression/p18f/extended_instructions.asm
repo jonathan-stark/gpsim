@@ -188,6 +188,20 @@ start:
    .assert "dataStackEnd == 0x55"
         nop
 
+    ;;  Test postinc and addfsr interaction
+    lfsr    1,0x80
+    movlw   0xBB
+    movwf   POSTINC1
+    addfsr  1,1
+    .assert "(fsr1h == 0x00) && (fsr1l == 0x82)"
+
+    ;;  Test postinc and subfsr interaction
+    lfsr    1,0x80
+    movlw   0xBB
+    movwf   POSTINC1
+    subfsr  1,1
+    .assert "(fsr1h == 0x00) && (fsr1l == 0x80)"
+
 
    ;; CALLW test
    ;; This test makes 5 indirect calls using the callw instruction.

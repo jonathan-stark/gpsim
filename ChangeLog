@@ -1,3 +1,9 @@
+2014-10-01 Roy Rankin <rrankin@ihug.com.au>
+	* cli/input.cc: give error message if opening .asm file
+	* regression/p18f/extended_instructions.asm
+	  src/16bit-instructions.cc: P18F: Fix interaction of
+	  POSTINC/POSTDEC and SUBFSR/ADDFSR - patch 37
+
 2014-09-26 Roy Rankin <rrankin@ihug.com.au>
 	* modules/module_attribute.h: fix regression from svn 2273
 
