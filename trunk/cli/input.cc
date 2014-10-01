@@ -588,6 +588,12 @@ int gpsim_open(Processor *cpu, const char *pFileName,
     // Just ignore the return value of parse_string().
     parse_string("\n");
     return 1;
+  }
+  else if (IsFileExtension(pFileName,"asm"))
+  {
+	fprintf(stderr, "File %s has extension .asm, not a suitable file\n",
+		pFileName);
+	return 0;
   } else {
 
     // Assume a Program file
