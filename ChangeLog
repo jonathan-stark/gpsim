@@ -1,3 +1,11 @@
+2014-10-03 Roy Rankin <rrankin@ihug.com.au>
+	* examples/modules/usart_test/usart_test.asm
+	  regression/usart_test/Makefile regression/usart_test/eusart.asm
+	  regression/usart_test/eusart_2455.asm
+	  regression/usart_test/usart_pir1v1.asm
+	  regression/usart_test/usart_pir1v2.asm: Fix uart regression tests
+	* src/uart.cc src/uart.h: Fix timing of UART TXIF bit - bug #178
+
 2014-10-01 Roy Rankin <rrankin@ihug.com.au>
 	* cli/input.cc: give error message if opening .asm file
 	* regression/p18f/extended_instructions.asm

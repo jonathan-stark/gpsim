@@ -246,13 +246,23 @@ start
 
         clrf    TMR0
         movlw   0x55
+	btfss	PIR1,TXIF
+	 goto	$-1
         movwf   TXREG
+	nop		    ; give time for TXIF to go low
 
-   .assert "(pir1 & 0x10) == 0x10, \"*** FAILED TXIF low\""
+   .assert "(pir1 & 0x10) == 0x00, \"*** FAILED TXIF low\""
+	nop
+	nop		    ; give time for TXIF to go high
+   .assert "(pir1 & 0x10) == 0x10, \"*** FAILED TXIF high\""
 	nop
 
+	btfss	PIR1,TXIF
+	 goto	$-1
         movwf   TXREG
-   .assert "(pir1 & 0x10) == 0, \"*** FAILED TXIF high when tx full\""
+	nop		    ; give time for TXIF to go low
+	nop		    ; give time to check that TXIF stays low
+   .assert "(pir1 & 0x10) == 0, \"*** FAILED TXIF low when tx full\""
 	nop
 
         bsf     STATUS,RP0
@@ -260,9 +270,9 @@ start
          goto   $-1
         bcf     STATUS,RP0
 ;
-;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
-;  and < 10 bits or between 0.9375 and 1.041 msec.
-;  with oscillator at 20MHz and TMR0 / 64 expect between 73 and 81
+;  At 4800 baud each bit takes 0.208 msec. TRMT will be low > 9 bits 
+;  and < 10 bits or between 1.872 and 2.08 msec.
+;  with oscillator at 10MHz and TMR0 / 64 expect between 73 and 81
 ;  TMR0 cycles. Or 146 - 162 for 2 characters
 
 	movf	TMR0,W
@@ -284,18 +294,14 @@ done:
 TransmitNextByte:	
 	clrf	rxFlag
 	call	tx_message
+	btfss	PIR1,TXIF
+	 goto	$-1
 	movwf	TXREG
 
 rx_loop:
 
 	btfss	rxFlag,0
 	 goto	rx_loop
-
-;	clrf	temp2
-;	call	delay		;; Delay between bytes.
-
-	btfss	PIR1,TXIF
-	 goto	$-1
 
 	return
 

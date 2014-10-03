@@ -309,6 +309,8 @@ delay:
 TransmitNextByte:	
 	clrf	rxFlag
 	call	tx_message
+	btfss	PIR1,TXIF
+	 bra	$-2
 	movwf	TXREG
         clrwdt
 
@@ -316,13 +318,6 @@ rx_loop:
 
 	btfss	rxFlag,0
 	 bra	rx_loop
-
-;	clrf	temp2
-;	call	delay		;; Delay between bytes.
-
-	btfss	PIR1,TXIF
-	 bra	$-2
-
 	return
 
 	end
