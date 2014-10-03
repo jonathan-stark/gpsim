@@ -220,12 +220,11 @@ start
         movwf  OPTION_REG
         bcf    STATUS, RP0   ;  Bank0
 
-        clrf    TMR0
         movlw   0x55
-        movwf   TXREG
-
-        btfss   PIR1,TXIF       ;Did the interrupt flag get set?
+        btfss   PIR1,TXIF       ;check for TXREG ready
          goto   $-1
+        clrf    TMR0
+        movwf   TXREG
 
         bsf     STATUS,RP0
         btfss   TXSTA^0x80,TRMT ;Wait 'til through transmitting
@@ -252,18 +251,14 @@ done:
 TransmitNextByte:	
 	clrf	rxFlag
 	call	tx_message
+	btfss	PIR1,TXIF
+	 goto	$-1
 	movwf	TXREG
 
 rx_loop:
 
 	btfss	rxFlag,0
 	 goto	rx_loop
-
-;	clrf	temp2
-;	call	delay		;; Delay between bytes.
-
-	btfss	PIR1,TXIF
-	 goto	$-1
 
 	return
 

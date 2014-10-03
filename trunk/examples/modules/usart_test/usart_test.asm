@@ -223,13 +223,12 @@ done:
 
 TransmitNextByte:	
 	call	tx_message
+	btfss	PIR1,TXIF
+	 goto	$-1
 	movwf	TXREG
 
 	clrf	temp2
 	call	delay		;; Delay between bytes.
-
-	btfss	PIR1,TXIF
-	 goto	$-1
 
 	return
 

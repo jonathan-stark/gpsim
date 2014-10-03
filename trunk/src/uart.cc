@@ -1,5 +1,6 @@
 /*
    Copyright (C) 1998,1999 Scott Dattalo
+   Copyright (C) 2014	Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -176,6 +177,12 @@ _SPBRGH::_SPBRGH(Processor *pCpu, const char *pName, const char *pDesc)
 
 //-----------------------------------------------------------
 // TXREG - USART Transmit Register
+//
+// writing to this register causes the PIR1::TXIF bit to clear.
+// my reading of the spec is this happens at the end of the next pic 
+// instruction. If the shift register is empty the bit will then be set
+// one pic instruction later. Otherwise the bit is set when the shift
+// register empties.  RRR 10/2014
 
 
 void _TXREG::put(unsigned int new_value)
@@ -189,7 +196,8 @@ void _TXREG::put(unsigned int new_value)
   // The transmit register has data,
   // so clear the TXIF flag
 
-  mUSART->full();
+  full = true;
+  get_cycles().set_break(get_cycles().get() + 1, this);
 
   if(m_txsta &&
      ( (m_txsta->value.get() & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN)))
@@ -201,6 +209,8 @@ void _TXREG::put(unsigned int new_value)
         m_txsta->transmit_break();
       else
         m_txsta->start_transmitting();
+
+      get_cycles().set_break(get_cycles().get() + 2, this);
     }
 
 }
@@ -213,6 +223,23 @@ void _TXREG::put_value(unsigned int new_value)
   update();
 }
 
+void _TXREG::callback()
+{
+  Dprintf(("TXREG callback - time:%"PRINTF_GINT64_MODIFIER"x full %d\n",get_cycles().get(), full));
+  if (full)
+  {
+    mUSART->full();
+    full = false;
+  }   
+  else
+  {
+    mUSART->emptyTX();
+  }
+}
+void _TXREG::callback_print()
+{
+  cout << "TXREG " << name() << " CallBack ID " << CallBackID << '\n';
+}
 //-----------------------------------------------------------
 // TXSTA - setIOpin - assign the I/O pin associated with the
 // the transmitter.
@@ -441,10 +468,6 @@ void _TXSTA::start_transmitting()
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TRMT);
 
-  // Tell the TXREG that its data has been consumed.
-
-  mUSART->emptyTX();
-
 }
 
 void _TXSTA::transmit_break()
@@ -467,9 +490,6 @@ void _TXSTA::transmit_break()
   trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TRMT);
 
-  // Tell the TXREG that its data has been consumed.
-
-  mUSART->emptyTX();
   callback();	// sent start bit
 }
 
@@ -511,7 +531,10 @@ void _TXSTA::callback()
     if(mUSART->bIsTXempty())
       value.put(value.get() | TRMT);
     else
+    {
       start_transmitting();
+      mUSART->emptyTX();
+    }
 
   } else  {
     // bit_count is non zero which means there is still

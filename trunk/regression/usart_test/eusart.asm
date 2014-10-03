@@ -218,12 +218,11 @@ start
         movlw  0xC5          ; Tmr0 internal clock prescaler 64
         movwf  T0CON
 
+        btfss   PIR1,TXIF       ;Wait for TXREG ready for write
+         goto   $-1
         clrf    TMR0L
         movlw   0x55
         movwf   TXREG
-
-        btfss   PIR1,TXIF       ;Did the interrupt flag get set?
-         goto   $-1
 
         btfss   TXSTA,TRMT ;Wait 'til through transmitting
          bra    $-2
@@ -293,6 +292,8 @@ delay:
 TransmitNextByte:	
 	clrf	rxFlag
 	call	tx_message
+	btfss	PIR1,TXIF
+	 bra	$-1
 	movwf	TXREG
         clrwdt
 
@@ -301,11 +302,6 @@ rx_loop:
 	btfss	rxFlag,0
 	 bra	rx_loop
 
-;	clrf	temp2
-;	call	delay		;; Delay between bytes.
-
-	btfss	PIR1,TXIF
-	 bra	$-1
 
 	return
 

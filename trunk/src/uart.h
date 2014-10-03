@@ -46,7 +46,7 @@ class USART_MODULE;
 
 
 
-class _TXREG : public sfr_register
+class _TXREG : public sfr_register, public TriggerObject
 {
  public:
 
@@ -55,9 +55,13 @@ class _TXREG : public sfr_register
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
   virtual void assign_txsta(_TXSTA *new_txsta) { m_txsta = new_txsta; };
+  virtual void callback();
+  virtual void callback_print();
+
 private:
   _TXSTA  *m_txsta;
   USART_MODULE *mUSART;
+  bool full;
 };
 
 class _TXSTA : public sfr_register, public TriggerObject
