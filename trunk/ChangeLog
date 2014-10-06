@@ -1,3 +1,16 @@
+2014-10-05 Roy Rankin <rrankin@ihug.com.au>
+	* extras/dht11/Makefile.am extras/dht11/examples/Makefile.am:
+	- include files in distribution tar ball
+	* extras/dht11/makefile.mingw extras/ds1307/makefile.mingw
+	  extras/ds1820/makefile.mingw extras/graphic_lcd/src/makefile.mingw
+	  extras/lcd/makefile.mingw: 
+	-  compiler determined from plat/win32/make.mingw
+	* makefile.mingw plat/win32/gpsim.nsi:
+	- Add new extra devices
+	* modules/Makefile.am: add missing attribute file
+	* plat/win32/uxtime.h: fix struct class in linux X compile
+	* src/makefile.mingw: fix file name change
+
 2014-10-03 Roy Rankin <rrankin@ihug.com.au>
 	* examples/modules/usart_test/usart_test.asm
 	  regression/usart_test/Makefile regression/usart_test/eusart.asm

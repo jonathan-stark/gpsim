@@ -6,6 +6,7 @@ lib_LTLIBRARIES = libgpsim_modules.la
 
 libgpsim_modules_la_SOURCES = \
 	gpsim_modules.cc \
+	module_attribute.h \
 	resistor.cc resistor.h \
 	usart.cc usart.h \
 	switch.cc switch.h \

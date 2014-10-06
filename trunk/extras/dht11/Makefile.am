@@ -12,9 +12,9 @@ libgpsim_dht11_la_LDFLAGS =  @X_LDFLAGS@
 
 
 
-EXTRA_DIST = 
+EXTRA_DIST = dht11.h README AUTHORS makefile.mingw
 
-SUBDIRS =
+SUBDIRS = examples
 
 
 CFLAGS = @CFLAGS@

@@ -1,0 +1,132 @@
+## Makefile for building the dht11 with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+BASE = ../..
+TOP = $(BASE)/..
+
+ifndef GPSIM_DEF_PATH
+  GPSIM_DEF_PATH = $(BASE)/plat/win32
+endif
+
+include $(GPSIM_DEF_PATH)/make.mingw
+
+
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
+	$(GTK_PATH)/lib/gdk-win32-2.0.lib $(GTK_PATH)/lib/gtk-win32-2.0.lib \
+	$(CAIRO_PATH)/lib/cairo.lib \
+	$(GDK_PIXBUF_PATH)/lib/gdk_pixbuf-2.0.lib \
+	$(BASE)/src/libgpsim.a
+
+INCLUDES = -I $(BASE) -I $(BASE)/include \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
+	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
+	-I $(CAIRO_PATH)/include/cairo \
+	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0
+
+DEFINES += -DHAVE_GUI
+
+all:				\
+	libgpsim_dht11.dll 
+
+libgpsim_dht11_OBJECTS =	\
+	dht11.o			\
+	module_manager.o
+
+################ The modules DLL
+
+libgpsim_dht11.dll : $(libgpsim_dht11_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_dht11.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_dht11_OBJECTS) $(LIBS)
+
+## Makefile for building the libgpsim_lcd with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+ifdef DEBUG
+  OPTIMIZE = -O2 -g
+else
+  OPTIMIZE = -O2
+  CLDFLAGS = -Wl,--strip-all
+endif
+
+ifndef GLIB_PATH
+  GLIB_PATH = ../../../glib
+endif
+ifndef GTK_PATH
+  GTK_PATH = ../../../gtk+
+endif
+ifndef PANGO_PATH
+  PANGO_PATH = ../../../pango
+endif
+ifndef ATK_PATH
+  ATK_PATH = ../../../atk
+endif
+ifndef CAIRO_PATH
+  CAIRO_PATH = ../../../cairo
+endif
+ifndef GDK_PIXBUF_PATH
+  GDK_PIXBUF_PATH = ../../../gdk-pixbuf
+endif
+
+ifndef GPSIM_LIB_PATH
+  GPSIM_LIB_PATH = ../../lib/gpsim
+endif
+ifndef GPSIM_INCLUDE_PATH
+  GPSIM_INCLUDE_PATH = ../../include
+endif
+ifndef GPSIM_DEF_PATH
+  GPSIM_DEF_PATH = ../../lib/gpsim
+endif
+
+CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) -Wall
+
+## Cygwin / Mingw GCC 3.4.4 with -mno-cygwin support
+#CXX = c++ -mno-cygwin -mtune=pentium -mms-bitfields
+
+# Mingw GCC 4.7.3
+CXX = i686-pc-mingw32-g++ -mtune=pentium -mms-bitfields
+
+.cc.o:
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
+	$(GTK_PATH)/lib/gdk-win32-2.0.lib $(GTK_PATH)/lib/gtk-win32-2.0.lib \
+	$(CAIRO_PATH)/lib/cairo.lib \
+	$(GDK_PIXBUF_PATH)/lib/gdk_pixbuf-2.0.lib \
+	$(GPSIM_LIB_PATH)/libgpsim.a
+
+INCLUDES = -I ../.. -I $(GPSIM_INCLUDE_PATH) \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
+	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
+	-I $(CAIRO_PATH)/include/cairo \
+	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0
+
+DEFINES += -DHAVE_GUI
+
+all:				\
+	libgpsim_dht11.dll 
+
+libgpsim_dht11_OBJECTS =	\
+	module_manager.o	\
+	dht11.o
+
+################ The modules DLL
+
+libgpsim_dht11.dll : $(libgpsim_dht11_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_dht11.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_dht11_OBJECTS) $(LIBS)
+
+clean :
+	-rm -f *.o *.dll
