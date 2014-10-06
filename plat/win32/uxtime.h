@@ -52,10 +52,15 @@ struct timezone {
 int gettimeofday(struct timeval *tv, struct timezone *tz);
 #endif
 
+#ifndef _TIMESPEC_DEFINED
+#define _TIMESPEC_DEFINED
+
 struct timespec {
   time_t  tv_sec;   /* Seconds */
   long    tv_nsec;  /* Nanoseconds */
 };
+
+#endif
 
 int nanosleep(const struct timespec *rqtp, struct timespec *rmtp);
 

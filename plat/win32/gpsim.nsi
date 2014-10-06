@@ -435,6 +435,39 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\ds1307\Makefile.am"
   File "${GPSIM_ROOT}\extras\ds1307\makefile.mingw"
   File "${GPSIM_ROOT}\extras\ds1307\module_manager.cc"  
+
+  SetOutPath "$INSTDIR\extras\ds1820\examples"
+  File "${GPSIM_ROOT}\extras\ds1820\examples\16f1823_g.lkr"
+  File "${GPSIM_ROOT}\extras\ds1820\examples\ds1820.asm"
+  File "${GPSIM_ROOT}\extras\ds1820\examples\ds18b20.asm"
+  File "${GPSIM_ROOT}\extras\ds1820\examples\Makefile.am"
+  File "${GPSIM_ROOT}\extras\ds1820\examples\README"
+
+  SetOutPath "$INSTDIR\extras\ds1820"
+  File "${GPSIM_ROOT}\extras\ds1820\ds1820.cc"
+  File "${GPSIM_ROOT}\extras\ds1820\ds1820.h"
+  File "${GPSIM_ROOT}\extras\ds1820\rom1w.cc"
+  File "${GPSIM_ROOT}\extras\ds1820\rom1w.h"
+  File "${GPSIM_ROOT}\extras\ds1820\bit1w.cc"
+  File "${GPSIM_ROOT}\extras\ds1820\bit1w.h"
+  File "${GPSIM_ROOT}\extras\ds1820\Makefile.am"
+  File "${GPSIM_ROOT}\extras\ds1820\makefile.mingw"
+  File "${GPSIM_ROOT}\extras\ds1820\module_manager.cc"  
+
+  SetOutPath "$INSTDIR\extras\dht11\examples"
+  File "${GPSIM_ROOT}\extras\dht11\examples\16f627_g.lkr"
+  File "${GPSIM_ROOT}\extras\dht11\examples\dht11_example.asm"
+  File "${GPSIM_ROOT}\extras\dht11\examples\Makefile.am"
+  File "${GPSIM_ROOT}\extras\dht11\examples\README"
+
+  SetOutPath "$INSTDIR\extras\dht11"
+  File "${GPSIM_ROOT}\extras\dht11\dht11.cc"
+  File "${GPSIM_ROOT}\extras\dht11\dht11.h"
+  File "${GPSIM_ROOT}\extras\dht11\README"
+  File "${GPSIM_ROOT}\extras\dht11\AUTHORS"
+  File "${GPSIM_ROOT}\extras\dht11\Makefile.am"
+  File "${GPSIM_ROOT}\extras\dht11\makefile.mingw"
+  File "${GPSIM_ROOT}\extras\dht11\module_manager.cc"  
 SectionEnd
 
 Section "extras modules" SEC02
@@ -444,6 +477,8 @@ Section "extras modules" SEC02
   File "${GPSIM_ROOT}\extras\graphic_lcd\src\libgpsim_graphicLCD.dll"
   File "${GPSIM_ROOT}\extras\lcd\libgpsim_lcd.dll"
   File "${GPSIM_ROOT}\extras\ds1307\libgpsim_ds1307.dll"
+  File "${GPSIM_ROOT}\extras\ds1820\libgpsim_ds1820.dll"
+  File "${GPSIM_ROOT}\extras\dht11\libgpsim_dht11.dll"
 SectionEnd
 
 ;--------------------------------
