@@ -291,6 +291,8 @@ Module::~Module(void)
   */
   delete package;
   delete xref;
+  package = 0;
+  xref = 0;
 
   globalSymbolTable().removeModule(this);
 

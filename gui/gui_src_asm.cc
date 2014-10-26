@@ -2181,7 +2181,7 @@ void SourceWindow::SetPC(int address)
     PCline = pma->getFromAddress(address)->get_lst_line();
   } else {
     for (id=0; id<SBAW_NRFILES; id++)
-      if(pages[id]->m_fileid == sbawFileId)
+      if(pages[id] && pages[id]->m_fileid == sbawFileId)
         break;
 
     if (id >= SBAW_NRFILES)
@@ -2709,19 +2709,18 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if(!pma)
     return;
 
-  // find notebook page containing address 'address'
+  // find notebook Spage containing address 'address'
   sbawFileId = pma->get_file_id(address);
   if(sbawFileId == -1)
     return;
-
   for(i=0;i<SBAW_NRFILES;i++) {
-    if(pages[i].pageindex_to_fileid == sbawFileId)
+    if(SrcPages[i].pageindex_to_fileid == sbawFileId)
       id=i;
     else {
-      if( pages[i].source_pcwidget!=0 &&
-        GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
+      if( SrcPages[i].source_pcwidget!=0 &&
+        GTK_WIDGET_VISIBLE(SrcPages[i].source_pcwidget) ) {
           //cout << " SetPC: " << name() << "  hiding page "  << i << endl;
-          gtk_widget_hide(pages[i].source_pcwidget);
+          gtk_widget_hide(SrcPages[i].source_pcwidget);
         }
     }
   }
@@ -2732,7 +2731,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   }
 
-  new_pcw = pages[id].source_pcwidget;
+  new_pcw = SrcPages[id].source_pcwidget;
 
   row = pma->get_src_line(address);
 
@@ -2749,11 +2748,11 @@ void SourceBrowserAsm_Window::SetPC(int address)
     int xtext,ytext;
     int xfixed, yfixed;
 
-    if(GTK_TEXT(pages[id].source_text)->text_area!=0 &&
-      pages[id].source_layout->window!=0)
+    if(GTK_TEXT(SrcPages[id].source_text)->text_area!=0 &&
+      SrcPages[id].source_layout->window!=0)
     {
-      gdk_window_get_origin(GTK_TEXT(pages[id].source_text)->text_area,&xtext,&ytext);
-      gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
+      gdk_window_get_origin(GTK_TEXT(SrcPages[id].source_text)->text_area,&xtext,&ytext);
+      gdk_window_get_origin(SrcPages[id].source_layout->window,&xfixed,&yfixed);
 
       layout_offset = ytext-yfixed;
       //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
@@ -2763,12 +2762,12 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if(e==0)
     return;
 
-  inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
+  inc = GTK_ADJUSTMENT(GTK_TEXT(SrcPages[id].source_text)->vadj)->page_increment;
 
-  if( (unsigned int)e->pos< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-    (unsigned int)e->pos> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+  if( (unsigned int)e->pos< GTK_TEXT(SrcPages[id].source_text)->first_onscreen_ver_pixel ||
+    (unsigned int)e->pos> GTK_TEXT(SrcPages[id].source_text)->first_onscreen_ver_pixel+inc ) {
 
-      GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
+      GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(SrcPages[id].source_text)->vadj);
 
       gdouble nvalue = e->pos - inc/2;
       //printf("%d: setting adjustment to %g old value = %g\n",__LINE__,nvalue,adj->value);
@@ -2779,7 +2778,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     if(!GTK_WIDGET_VISIBLE(new_pcw)) {
       gtk_widget_show(new_pcw);
     }
-    gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
+    gtk_layout_move(GTK_LAYOUT(SrcPages[id].source_layout),
       new_pcw,
       PIXMAP_SIZE,
       e->pos+1
@@ -2789,6 +2788,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
 
 void SourceBrowserAsm_Window::SelectAddress(int address)
 {
+
   BreakPointInfo *e;
   int id=-1, i;
   gdouble inc;
@@ -2800,7 +2800,7 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
     return;
 
   for(i=0;i<SBAW_NRFILES;i++) {
-    if(pages[i].pageindex_to_fileid==pma->get_file_id(address))
+    if(SrcPages[i].pageindex_to_fileid==pma->get_file_id(address))
       id=i;
   }
 
@@ -2821,11 +2821,11 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   if(e==0)
     return;
 
-  inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
+  inc = GTK_ADJUSTMENT(GTK_TEXT(SrcPages[id].source_text)->vadj)->page_increment;
 
-  if( (unsigned int)e->pos <= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-    (unsigned int)e->pos >= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
-      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( pages[id].source_text)->vadj),
+  if( (unsigned int)e->pos <= GTK_TEXT(SrcPages[id].source_text)->first_onscreen_ver_pixel ||
+    (unsigned int)e->pos >= GTK_TEXT(SrcPages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( SrcPages[id].source_text)->vadj),
         e->pos-inc/2);
     }
 }
@@ -2864,7 +2864,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     return;
 
   for(i=0;i<SBAW_NRFILES && id<0;i++) {
-    if(pages[i].pageindex_to_fileid==pma->get_file_id(address))
+    if(SrcPages[i].pageindex_to_fileid==pma->get_file_id(address))
       id=i;
   }
 
@@ -2903,23 +2903,23 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   if(pma->address_has_profile_start(address))
     notify_start_list.Add(address,
     gtk_pixmap_new(pixmap_profile_start,startp_mask),
-    pages[id].source_layout,
+    SrcPages[id].source_layout,
     e->pos);
 
   else if(pma->address_has_profile_stop(address))
     notify_stop_list.Add(address,
     gtk_pixmap_new(pixmap_profile_stop,stopp_mask),
-    pages[id].source_layout,
+    SrcPages[id].source_layout,
     e->pos);
 
   else if(pma->address_has_break(address)) {
-    e->Set(pages[id].source_layout,pixmap_break, bp_mask);
+    e->Set(SrcPages[id].source_layout,pixmap_break, bp_mask);
     breakpoints.Add(address,
       gtk_pixmap_new(pixmap_break,bp_mask),
-      pages[id].source_layout,
+      SrcPages[id].source_layout,
       e->pos);
   } else {
-    e->Clear(pages[id].source_layout, pixmap_canbreak, canbp_mask);
+    e->Clear(SrcPages[id].source_layout, pixmap_canbreak, canbp_mask);
   }
 }
 
@@ -2952,7 +2952,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_MOVE_PC:
     line = popup_sbaw->menu_data->getLine();
 
-    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
+    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->SrcPages[id].pageindex_to_fileid,line+1);
     if(address!=INVALID_VALUE)
       popup_sbaw->pma->set_PC(address);
     break;
@@ -2960,7 +2960,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_RUN_HERE:
     line = popup_sbaw->menu_data->getLine()+1;
 
-    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
+    address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->SrcPages[id].pageindex_to_fileid,line);
 
     if(address!=INVALID_VALUE)
       popup_sbaw->gp->cpu->run_to_address(address);
@@ -2969,7 +2969,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_BP_HERE:
     line = popup_sbaw->menu_data->getLine() + 1;
 
-    popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
+    popup_sbaw->pma->toggle_break_at_line(popup_sbaw->SrcPages[id].pageindex_to_fileid,line);
 
     break;
   case MENU_PROFILE_START_HERE:
@@ -2999,7 +2999,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
       gint start, end;
 
       if (!gtk_editable_get_selection_bounds(
-        GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+        GTK_EDITABLE(popup_sbaw->SrcPages[id].source_text),
         &start, &end))
         break;
       if(start != end) {
@@ -3012,7 +3012,7 @@ SourceBrowserAsm_Window::PopupMenuHandler(GtkWidget *widget, gpointer data)
         if((end-start+2)>256) // FIXME bounds?
           end=start+256-2;
         for(i=start;i<end;i++)
-          text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
+          text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->SrcPages[id].source_text),(guint)i);
 
         unsigned int uLastCharIndex = i-start;
         text[uLastCharIndex]=0;
@@ -3210,7 +3210,7 @@ gint SourceBrowserAsm_Window::switch_page_cb(
     unsigned int address;
 
     sbaw->current_page=page_num;
-    id=sbaw->pages[page_num].pageindex_to_fileid;
+    id=sbaw->SrcPages[page_num].pageindex_to_fileid;
     if (id != -1)
       sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
 
@@ -3230,7 +3230,7 @@ gint SourceBrowserAsm_Window::switch_page_cb(
 }
 
 /*
-button event handler for sbaw->pages[id].source_text.
+button event handler for sbaw->SrcPages[id].source_text.
 If we get button1 doubleclick event then we toggle breakpoint
 If we get button3 buttonpress then we popup menu.
 */
@@ -3250,9 +3250,9 @@ gint SourceBrowserAsm_Window::sigh_button_event(
   id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
   assert(id >= 0 && id < SBAW_NRFILES);
-  assert(sbaw->pages[id].source_text != 0);
-  assert(GTK_TEXT(sbaw->pages[id].source_text)->vadj != 0);
-  vadj_value=(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+  assert(sbaw->SrcPages[id].source_text != 0);
+  assert(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj != 0);
+  vadj_value=(int)GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value;
 
   if(event->type==GDK_BUTTON_PRESS &&
     event->button==3)
@@ -3271,7 +3271,7 @@ gint SourceBrowserAsm_Window::sigh_button_event(
           gint start, end;
 
           if (!gtk_editable_get_selection_bounds(
-            GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+            GTK_EDITABLE(popup_sbaw->SrcPages[id].source_text),
             &start, &end))
           {
             gtk_widget_set_sensitive (item, FALSE);
@@ -3293,7 +3293,7 @@ gint SourceBrowserAsm_Window::sigh_button_event(
 
     // override pages[id].source_text's handler
     // is there a better way? FIXME
-    gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
+    gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->SrcPages[id].source_text),"button_press_event");
 
     return 1;
   }
@@ -3303,19 +3303,21 @@ gint SourceBrowserAsm_Window::sigh_button_event(
   if(event->type==GDK_BUTTON_PRESS && event->button==4)
   { // wheel scroll up
     printf("scroll up\n");
-    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
-    if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
-      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
-    gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+    GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->page_increment/4.0;
+    if(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value < GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->lower)
+      GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value = GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->lower;
+    gtk_adjustment_value_changed(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj);
     return 1;
   }
   if(event->type==GDK_BUTTON_PRESS && event->button==5)
   { // wheel scroll down
     printf("scroll down\n");
-    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
-    if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
-      GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
-    gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
+    GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->page_increment/4.0;
+    if(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value > GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->page_increment)
+      GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value = 
+	GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->upper-GTK_TEXT(
+		sbaw->SrcPages[id].source_text)->vadj->page_increment;
+    gtk_adjustment_value_changed(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj);
     return 1;
   }
   return 0;
@@ -3323,7 +3325,7 @@ gint SourceBrowserAsm_Window::sigh_button_event(
 
 static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
 {
-  // when sbaw->pages[id].source_text adjustment changes, we update the layout adj.
+  // when sbaw->SrcPages[id].source_text adjustment changes, we update the layout adj.
 
   // I assume that both adjustments count pixels
 
@@ -3365,7 +3367,7 @@ static gint marker_cb(GtkWidget *w1,
 
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-  GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+  GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj->value;
 
   switch(event->type) {
 
@@ -3383,7 +3385,7 @@ static gint marker_cb(GtkWidget *w1,
       int pos = (int)event->y - sbaw->layout_offset;
       BreakPointInfo *e = sbaw->getBPatPixel(id, pos);
       int line = e->getLine();
-      sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
+      sbaw->pma->toggle_break_at_line(sbaw->SrcPages[id].pageindex_to_fileid ,line+1);
     }
     break;
   case GDK_BUTTON_RELEASE:
@@ -3434,25 +3436,25 @@ int SourceBrowserAsm_Window::add_page(
   id=gtk_notebook_page_num(GTK_NOTEBOOK(sbaw->notebook),hbox);
 
   assert(id<SBAW_NRFILES && id >=0);
-  sbaw->pages[id].pageindex_to_fileid = file_id;
-  sbaw->pages[id].notebook_child=hbox;
+  sbaw->SrcPages[id].pageindex_to_fileid = file_id;
+  sbaw->SrcPages[id].notebook_child=hbox;
 
   gtk_widget_show(hbox);
 
   // Create the Gray column to the left of the Source text.
 
-  sbaw->pages[id].source_layout_adj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
-  sbaw->pages[id].source_layout = gtk_layout_new(0,sbaw->pages[id].source_layout_adj);
+  sbaw->SrcPages[id].source_layout_adj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+  sbaw->SrcPages[id].source_layout = gtk_layout_new(0,sbaw->SrcPages[id].source_layout_adj);
 
-  gtk_widget_set_events(sbaw->pages[id].source_layout,
-    gtk_widget_get_events(sbaw->pages[id].source_layout)|
+  gtk_widget_set_events(sbaw->SrcPages[id].source_layout,
+    gtk_widget_get_events(sbaw->SrcPages[id].source_layout)|
     GDK_BUTTON_PRESS_MASK |
     GDK_BUTTON_MOTION_MASK |
     GDK_BUTTON_RELEASE_MASK);
-  gtk_widget_show(sbaw->pages[id].source_layout);
+  gtk_widget_show(sbaw->SrcPages[id].source_layout);
 
-  gtk_widget_set_usize(GTK_WIDGET(sbaw->pages[id].source_layout),PIXMAP_SIZE*2,0);
-  gtk_box_pack_start(GTK_BOX(hbox), sbaw->pages[id].source_layout,
+  gtk_widget_set_usize(GTK_WIDGET(sbaw->SrcPages[id].source_layout),PIXMAP_SIZE*2,0);
+  gtk_box_pack_start(GTK_BOX(hbox), sbaw->SrcPages[id].source_layout,
     FALSE,FALSE, 0);
 
   // Create the Scroll bar.
@@ -3463,11 +3465,11 @@ int SourceBrowserAsm_Window::add_page(
 
   // Create the text object for holding the Source text
 
-  sbaw->pages[id].source_text = gtk_text_new(0,GTK_RANGE(vscrollbar)->adjustment);
+  sbaw->SrcPages[id].source_text = gtk_text_new(0,GTK_RANGE(vscrollbar)->adjustment);
 
-  gtk_text_set_word_wrap(GTK_TEXT(sbaw->pages[id].source_text),0);
-  gtk_text_set_line_wrap(GTK_TEXT(sbaw->pages[id].source_text),0);
-  gtk_widget_show(sbaw->pages[id].source_text);
+  gtk_text_set_word_wrap(GTK_TEXT(sbaw->SrcPages[id].source_text),0);
+  gtk_text_set_line_wrap(GTK_TEXT(sbaw->SrcPages[id].source_text),0);
+  gtk_widget_show(sbaw->SrcPages[id].source_text);
 
 
   style=gtk_style_new();
@@ -3475,22 +3477,22 @@ int SourceBrowserAsm_Window::add_page(
   style->base[GTK_STATE_NORMAL].green=65535;
   style->base[GTK_STATE_NORMAL].blue=65535;
 
-  gtk_widget_set_style(GTK_WIDGET(sbaw->pages[id].source_text),style);
+  gtk_widget_set_style(GTK_WIDGET(sbaw->SrcPages[id].source_text),style);
 
-  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_text), "button_press_event",
+  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_text), "button_press_event",
     GTK_SIGNAL_FUNC(sigh_button_event), sbaw);
-  gtk_box_pack_start_defaults(GTK_BOX(hbox), sbaw->pages[id].source_text);
+  gtk_box_pack_start_defaults(GTK_BOX(hbox), sbaw->SrcPages[id].source_text);
 
   gtk_box_pack_start(GTK_BOX(hbox), vscrollbar,
     FALSE,FALSE, 0);
-  gtk_signal_connect(GTK_OBJECT(GTK_TEXT(sbaw->pages[id].source_text)->vadj),
-    "value_changed",GTK_SIGNAL_FUNC(text_adj_cb),sbaw->pages[id].source_layout_adj);
+  gtk_signal_connect(GTK_OBJECT(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj),
+    "value_changed",GTK_SIGNAL_FUNC(text_adj_cb),sbaw->SrcPages[id].source_layout_adj);
 
-  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"motion-notify-event",
+  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_layout),"motion-notify-event",
     GTK_SIGNAL_FUNC(marker_cb),sbaw);
-  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_press_event",
+  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_layout),"button_press_event",
     GTK_SIGNAL_FUNC(marker_cb),sbaw);
-  gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
+  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_layout),"button_release_event",
     GTK_SIGNAL_FUNC(marker_cb),sbaw);
 
   // display everything, so that gtk_notebook_get_current_page() works
@@ -3532,10 +3534,10 @@ int SourceBrowserAsm_Window::add_page(
       &style->bg[GTK_STATE_NORMAL],
       (gchar**)stopp_xpm);
   }
-  sbaw->pages[id].source_pcwidget = gtk_pixmap_new(sbaw->pixmap_pc,sbaw->pc_mask);
-  gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
-    sbaw->pages[id].source_pcwidget,PIXMAP_SIZE,0);
-  gtk_widget_show(sbaw->pages[id].source_pcwidget);
+  sbaw->SrcPages[id].source_pcwidget = gtk_pixmap_new(sbaw->pixmap_pc,sbaw->pc_mask);
+  gtk_layout_put(GTK_LAYOUT(sbaw->SrcPages[id].source_layout),
+    sbaw->SrcPages[id].source_pcwidget,PIXMAP_SIZE,0);
+  gtk_widget_show(sbaw->SrcPages[id].source_pcwidget);
 
   return id;
 
@@ -3600,7 +3602,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
 
   // get a manageable pointer to the processor
   Processor *cpu = gp->cpu;
-  GtkWidget *pSourceWindow = pages[id].source_text;
+  GtkWidget *pSourceWindow = SrcPages[id].source_text;
   gtk_text_freeze(GTK_TEXT(pSourceWindow));
 
   gtk_editable_delete_text(GTK_EDITABLE(pSourceWindow),0,-1);
@@ -3638,7 +3640,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
   }
   DetermineBreakinfos(id);
 
-  gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
+  gtk_layout_set_size(GTK_LAYOUT(SrcPages[id].source_layout),
     2*PIXMAP_SIZE,
     s_totallinesheight[id]+5*PIXMAP_SIZE);
   gtk_text_thaw(GTK_TEXT(pSourceWindow));
@@ -3854,7 +3856,7 @@ void SourceBrowserAsm_Window::CloseSource(void)
 
   layout_offset=-1;
   for(int i=0;i<SBAW_NRFILES;i++)
-    pages[i].Close();
+    SrcPages[i].Close();
 }
 
 void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
@@ -4349,7 +4351,7 @@ void SourceBrowserAsm_Window::find_cb(
   if(!pSrcWindow->m_bSourceLoaded) return;
 
   id = gtk_notebook_get_current_page(GTK_NOTEBOOK(pSrcWindow->notebook));
-  SourcePage & SrcPage = pSrcWindow->pages[id];
+  SourcePage & SrcPage = pSrcWindow->SrcPages[id];
 
   if(id != searchdlg.lastid)
   { //  Changed notebook tab since last search reset search.

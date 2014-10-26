@@ -1,3 +1,16 @@
+2014-10-26 Roy Rankin <rrankin@ihug.com.au>
+	* extras/dht11/makefile.mingw: cleanup windows build
+        * plat/win32/make.mingw: set compiler for fedora 21 mingw
+	* gui/gui_regwin.cc: remove disabled code, do not delete invalid
+	  register instances on class destructor
+	* gui/gui_src.h gui/gui_src_asm.cc: rename SourcePage array from pages 
+	  to Srcpages to avoid confusuion with NSourcePage pointer called pages
+	* src/modules.cc src/pic-processor.cc src/trace.cc:
+	- better cleanup on  class removal
+	* src/value.cc src/value.h src/xref.cc src/registers.cc 
+	  src/pic-registers.cc:
+	- make _xref found in class value a pointer
+
 2014-10-05 Roy Rankin <rrankin@ihug.com.au>
 	* extras/dht11/Makefile.am extras/dht11/examples/Makefile.am:
 	- include files in distribution tar ball

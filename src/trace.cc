@@ -934,6 +934,7 @@ Trace::~Trace()
 {
   if(xref)
     delete xref;
+  xref = 0;
 
 }
 

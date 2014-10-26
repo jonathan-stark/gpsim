@@ -449,7 +449,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   // Where the source is stored:
 
   int add_page(SourceBrowserAsm_Window *sbaw, int file_id);
-  SourcePage pages[SBAW_NRFILES];
+  SourcePage SrcPages[SBAW_NRFILES];
   static bool bGlobalInitialized;
   static GList *s_global_sa_xlate_list[SBAW_NRFILES];
   GList *sa_xlate_list[SBAW_NRFILES];
