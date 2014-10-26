@@ -56,7 +56,7 @@ Program_Counter::Program_Counter(const char *name, const char *desc, Module *pM)
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
   instruction_phase = 0;
 
-  xref().assign_data(this);
+  set_xref(new XrefObject(this));
 
   trace_state = 0;
   trace_increment = 0;

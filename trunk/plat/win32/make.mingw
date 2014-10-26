@@ -61,9 +61,15 @@ GDK_PIXBUF_PATH = $(TOP)/gdk-pixbuf
 #CXX = $(CXXCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 
 # Mingw GCC 4.7.3
-CCOMPILER = $(CCACHE) i686-pc-mingw32-gcc
+#CCOMPILER = $(CCACHE) i686-pc-mingw32-gcc
+#CC = $(CCOMPILER) -mtune=pentium -mms-bitfields
+#CXXCOMPILER = $(CCACHE) i686-pc-mingw32-c++
+#CXX = $(CXXCOMPILER) -mtune=pentium -mms-bitfields
+
+# Mingw GCC 4.9.1
+CCOMPILER = $(CCACHE) i686-w64-mingw32-gcc 
 CC = $(CCOMPILER) -mtune=pentium -mms-bitfields
-CXXCOMPILER = $(CCACHE) i686-pc-mingw32-c++
+CXXCOMPILER = $(CCACHE) i686-w64-mingw32-c++
 CXX = $(CXXCOMPILER) -mtune=pentium -mms-bitfields
 
 ################

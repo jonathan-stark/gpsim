@@ -133,7 +133,8 @@ public:
 
   virtual void add_xref(void *xref);
   virtual void remove_xref(void *xref);
-  XrefObject xref() { return _xref; }
+  XrefObject *xref() { return _xref; }
+  void set_xref(XrefObject *__xref) {_xref = __xref;}
 
 
   virtual void set_module(Module *new_cpu);
@@ -145,7 +146,7 @@ public:
   void addName(string &r_sAliasedName);
 
 private:
-  XrefObject _xref;
+  XrefObject *_xref;
 
 protected:
   // A pointer to the module that owns this value.

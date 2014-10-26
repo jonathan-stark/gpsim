@@ -237,7 +237,7 @@ Register::Register(Module *_cpu, const char *pName, const char *pDesc)
   value = RegisterValue(0,0);
   por_value = RegisterValue(0,0);
 
-  xref().assign_data(this);
+  set_xref(new XrefObject(this));
   read_access_count=0;
   write_access_count=0;
   mValidBits = 0xFF;

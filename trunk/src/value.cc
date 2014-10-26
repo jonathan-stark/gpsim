@@ -90,12 +90,12 @@ string &toupper(string & sStr) {
 
 //------------------------------------------------------------------------
 Value::Value()
-  : cpu(0), m_aka(0)
+  : _xref(0), cpu(0), m_aka(0)
 {
 }
 
 Value::Value(const char *_name, const char *desc, Module *pMod)
-  : gpsimObject(_name,desc), cpu(pMod),m_aka(0)
+  : gpsimObject(_name,desc), _xref(0), cpu(pMod),m_aka(0)
 {
 }
 
@@ -121,22 +121,31 @@ Value::~Value()
       m_aka->clear();
       delete m_aka;
     }
+    if(_xref)
+    {
+	delete _xref;
+	_xref = 0;
+    }
 
   }
 }
 void Value::update()
 {
-  _xref._update();
+  if (!_xref)
+     _xref = new XrefObject();
+  _xref->_update();
 }
 
 void Value::add_xref(void *an_xref)
 {
-  _xref._add(an_xref);
+  if (!_xref)
+     _xref = new XrefObject();
+  _xref->_add(an_xref);
 }
 
 void Value::remove_xref(void *an_xref)
 {
-  _xref.clear(an_xref);
+  _xref->clear(an_xref);
 }
 
 void Value::set(const char *cP,int i)

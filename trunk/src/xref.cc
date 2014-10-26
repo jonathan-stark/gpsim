@@ -39,12 +39,14 @@ XrefObject::~XrefObject()
 
     ioi=xrefs.begin();
     for(;ioi!=xrefs.end();ioi++) {
-      gi.remove_object(*ioi);
+        //gi.remove_object(*ioi);
       // Fixme - deleting the memory here causes SEGV because
       // the objects being cross referenced were new'd outside
       // of the context of this class.
       // delete *ioi;
     }
+    while(!xrefs.empty())
+	xrefs.pop_back();
 }
 
 void XrefObject::_add(void *xref)
@@ -84,4 +86,5 @@ void XrefObject::assign_data(gpsimObject *new_data)
 {
 
   data = new_data;
+  
 }

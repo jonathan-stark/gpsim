@@ -166,9 +166,7 @@ public:
 
   RegisterLabeledEntry(GtkWidget *,Register *,bool);
 
-  virtual ~RegisterLabeledEntry()
-  {
-  }
+	virtual ~RegisterLabeledEntry(){}
 
   virtual void put_value(unsigned int);
   void AssignRegister(Register *new_reg);

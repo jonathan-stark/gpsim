@@ -884,126 +884,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 
       }
     }
-
-#if 0
-  switch(item->id)
-    {
-    case MENU_BREAK_READ:
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().set_read_break(popup_rw->gp->cpu, address);
-          }
-      break;
-    case MENU_BREAK_WRITE:
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().set_write_break(popup_rw->gp->cpu, address);
-          }
-      break;
-    case MENU_BREAK_READ_VALUE:
-      value = gui_get_value("value to read for breakpoint:");
-      if(value<0)
-        break; // Cancel
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().set_read_value_break(popup_rw->gp->cpu,address,value);
-          }
-      break;
-    case MENU_BREAK_WRITE_VALUE:
-      value = gui_get_value("value to write for breakpoint:");
-      if(value<0)
-        break; // Cancel
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().set_write_value_break(popup_rw->gp->cpu,address,value);
-          }
-      break;
-    case MENU_BREAK_CLEAR:
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().clear_all_register(popup_rw->gp->cpu,address);
-          }
-      break;
-    case MENU_ADD_WATCH:
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers->Get(address));
-          }
-      break;
-    case MENU_SETTINGS:
-      popup_rw->SettingsDialog();
-      break;
-    case MENU_LOG_SETTINGS:
-      gui_get_log_settings(&filename, &mode);
-      if(filename!=0)
-        GetTraceLog().enable_logging(filename,mode);
-      break;
-    case MENU_LOG_READ:
-      for(j=range.row0;j<=range.rowi;j++) {
-        for(i=range.col0;i<=range.coli;i++)
-        {
-          address=popup_rw->row_to_address[j]+i;
-          GetTraceLog().enable_logging();
-          // FIXME the register type is ignored here (and in all other cases
-          // where we're logging -- it's assumed that the register address is
-          // for ram, even if in fact the user requests eeprom.
-          get_bp().set_notify_read(popup_rw->gp->cpu,address);
-        }
-      }
-      break;
-    case MENU_LOG_WRITE:
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().set_notify_write(popup_rw->gp->cpu,address);
-          }
-      break;
-    case MENU_LOG_READ_VALUE:
-      gui_get_2values("Value that the read must match for logging it:", &value,
-                      "Bitmask that specifies the bits to bother about:", &mask);
-      if(value<0)
-        break; // Cancel
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-            address=popup_rw->row_to_address[j]+i;
-            get_bp().set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
-
-          }
-      break;
-    case MENU_LOG_WRITE_VALUE:
-      gui_get_2values("Value that the write must match for logging it:", &value,
-                      "Bitmask that specifies the bits to bother about:", &mask);
-      if(value<0)
-        break; // Cancel
-      for(j=range.row0;j<=range.rowi;j++)
-        for(i=range.col0;i<=range.coli;i++)
-          {
-          address=popup_rw->row_to_address[j]+i;
-          get_bp().set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
-          }
-      break;
-    case MENU_REGWIN_REFRESH:
-      popup_rw->Update();
-      break;
-    default:
-      puts("Unhandled menuitem?");
-      break;
-    }
-#endif // 0
 }
 
 
@@ -2081,9 +1961,15 @@ GUIRegisterList::~GUIRegisterList() {
   unsigned int uAddress;
 
   nRegs = (m_pRMA->get_size() < MAX_REGISTERS) ? (m_pRMA->get_size()) : MAX_REGISTERS;
+
   for(uAddress=0; uAddress < nRegs; uAddress++) {
-    delete m_paRegisters[uAddress];
+    if (m_paRegisters[uAddress] != &THE_invalid_register)
+    {
+       delete m_paRegisters[uAddress];
+       m_paRegisters[uAddress] = 0;
+    }
   }
+
 }
 
 //------------------------------------------------------------------------

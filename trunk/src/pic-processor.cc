@@ -1077,6 +1077,7 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
     m_MCLR(0), m_MCLR_Save(0), m_MCLRMonitor(0)
 {
 
+
    mExecute1Cycle    = new phaseExecute1Cycle(this);
    mExecute2ndHalf   = new phaseExecute2ndHalf(this);
    mExecuteInterrupt = new phaseExecuteInterrupt(this);
@@ -1105,6 +1106,14 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 //-------------------------------------------------------------------
 pic_processor::~pic_processor()
 {
+
+  if (pma)
+  {
+    while(!rma.SpecialRegisters.empty())
+      rma.SpecialRegisters.pop_back();
+    while(!pma->SpecialRegisters.empty())
+      pma->SpecialRegisters.pop_back();
+  }
   delete m_pResetTT;
   delete m_pInterruptTT;
 
