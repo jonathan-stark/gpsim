@@ -6,6 +6,11 @@ gpsim.pdf: gpsim.lyx
 	lyx -e pdf gpsim.lyx
 
 EXTRA_DIST = \
+	screenshots/breadboard.png \
+	screenshots/registerview.png \
+	screenshots/scope1.png \
+	screenshots/scope2.png  \
+	screenshots/source_browser.png \
 	makefile.mingw \
 	gpsim.lyx \
 	gpsim.pdf \

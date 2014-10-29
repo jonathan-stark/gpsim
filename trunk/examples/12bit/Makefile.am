@@ -1,4 +1,3 @@
-
 EXTRA_DIST = \
 	gpio_stim.stc \
 	p12_it.asm \

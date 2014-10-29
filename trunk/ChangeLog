@@ -1,3 +1,14 @@
+2014-10-30 Roy Rankin <rrankin@ihug.com.au>
+	* Makefile.am configure.ac doc/Makefile.am examples/12bit/Makefile.am
+	  examples/16bit/Makefile.am examples/Makefile.am
+	  examples/modules/Makefile.am examples/modules/usart_test/Makefile
+	  extras/graphic_lcd/Makefile.am extras/lcd/Makefile.am
+	  extras/lcd/examples/Makefile.am: add files to dist tarball required
+	  for mingw compile
+	* plat/win32/gpsim.nsi plat/win32/makefile.mingw:
+	- mingw compile for windows and linux
+	* cli/makefile.mingw: cmd_stopwatch.o not used in distributon
+
 2014-10-26 Roy Rankin <rrankin@ihug.com.au>
 	* extras/dht11/makefile.mingw: cleanup windows build
         * plat/win32/make.mingw: set compiler for fedora 21 mingw
@@ -33,7 +44,7 @@
 	* src/uart.cc src/uart.h: Fix timing of UART TXIF bit - bug #178
 
 2014-10-01 Roy Rankin <rrankin@ihug.com.au>
-	* cli/input.cc: give error message if opening .asm file
+	* cli/input.cc: give error message if opening .asm file - bug #183
 	* regression/p18f/extended_instructions.asm
 	  src/16bit-instructions.cc: P18F: Fix interaction of
 	  POSTINC/POSTDEC and SUBFSR/ADDFSR - patch 37
