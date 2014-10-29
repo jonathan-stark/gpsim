@@ -51,7 +51,6 @@ cli_OBJECTS =			\
 	cmd_shell.o		\
 	cmd_step.o		\
 	cmd_stimulus.o		\
-	cmd_stopwatch.o		\
 	cmd_symbol.o		\
 	cmd_trace.o		\
 	cmd_version.o		\

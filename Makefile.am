@@ -8,6 +8,7 @@ dist-hook:
 
 EXTRA_DIST = PROCESSORS HISTORY README.EXAMPLES ANNOUNCE README.MODULES \
 	README INSTALL.gpsim COPYING.LESSER \
+	config_win32.h.in \
 	makefile.mingw  \
 	plat/win32/uxtime.h \
 	plat/win32/libgpsim.def \

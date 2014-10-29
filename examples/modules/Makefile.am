@@ -6,7 +6,9 @@ EXTRA_DIST = \
 	usart_gui/Makefile usart_gui/README usart_gui/usart_gui.asm  \
 	usart_gui/usart_gui.stc \
 	logic_test/logic_mod.asm logic_test/logic_mod.stc \
-	logic_test/Makefile  logic_test/README
+	logic_test/Makefile  logic_test/README \
+	paraface_test/partest.stc paraface_test/Makefile \
+	paraface_test/partest.asm 
 
 MOSTLYCLEANFILES = *.hex *.cod *.lst *~
 CLEANFILES = *.hex *.cod *.lst *~

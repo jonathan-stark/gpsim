@@ -203,6 +203,9 @@ AC_CONFIG_FILES([Makefile
                  examples/Makefile
                  examples/modules/Makefile
                  examples/projects/Makefile
+                 examples/12bit/Makefile
+                 examples/14bit/Makefile
+                 examples/16bit/Makefile
                  eXdbm/Makefile
                  gpsim/Makefile
                  gui/Makefile

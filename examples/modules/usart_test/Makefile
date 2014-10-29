@@ -24,7 +24,7 @@ $(COD) : $(OBJECTS) $(SCRIPT)
 	gpasm -c $<
 
 clean:
-	rm -f *~ *.o *.lst *.map *.hex
+	rm -f *~ *.o *.lst *.map *.hex *.cod
 
 $(PROJECT).o : $(PROJECT).asm
 

@@ -174,7 +174,7 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\libgailutil-18.dll"
   File "${PKG_ROOT}\bin\libexpat-1.dll"
   File "${PKG_ROOT}\bin\libfontconfig-1.dll"
-  File "${PKG_ROOT}\bin\libgcc_s_dw2-1.dll"
+  File "${PKG_ROOT}\bin\${LIBGCCDDL}"
   File "${PKG_ROOT}\bin\libgdk-win32-2.0-0.dll"
   File "${PKG_ROOT}\bin\libgdk_pixbuf-2.0-0.dll"
   File "${PKG_ROOT}\bin\libgio-2.0-0.dll"
@@ -192,6 +192,7 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\libstdc++-6.dll"
   File "${PKG_ROOT}\bin\libpopt-0.dll"
   File "${PKG_ROOT}\bin\pthreadGC2.dll"
+  File "${PKG_ROOT}\bin\libwinpthread-1.dll"
   File "${PKG_ROOT}\bin\readline5.dll"
   File "${PKG_ROOT}\bin\zlib1.dll"
 
@@ -230,10 +231,10 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\plat\win32\modules.def"
 
   SetOutPath "$INSTDIR\"
-  File /oname=ChangeLog.txt "${GPSIM_ROOT}\ChangeLog"
+  File "${GPSIM_ROOT}\ChangeLog.txt"
   File "${GPSIM_ROOT}\plat\win32\gpsim.ico"
-  File /oname=COPYING.TXT "${GPSIM_ROOT}\COPYING"
-  File /oname=README.TXT "${GPSIM_ROOT}\README"
+  File "${GPSIM_ROOT}\COPYING.TXT"
+  File "${GPSIM_ROOT}\README.TXT"
 
   SetOutPath "$INSTDIR\include\gpsim"
   File "${GPSIM_ROOT}\src\*.h"
@@ -592,6 +593,13 @@ Section Uninstall
   Delete "$INSTDIR\extras\rs232-gen\*.*"
   Delete "$INSTDIR\extras\ds1307\examples\*.*"
   Delete "$INSTDIR\extras\ds1307\*.*"
+  
+  Delete "$INSTDIR\extras\dht11\examples\*.*"
+  Delete "$INSTDIR\extras\dht11\examples\README"
+
+  Delete "$INSTDIR\extras\dht11\*.*"
+  Delete "$INSTDIR\extras\dht11\README"
+  Delete "$INSTDIR\extras\dht11\AUTHORS"
 
   Delete "$INSTDIR\lib\gpsim\libgpsim.a"
   Delete "$INSTDIR\lib\gpsim\modules.def"
@@ -623,7 +631,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libgailutil-18.dll"
   Delete "$INSTDIR\bin\libexpat-1.dll"
   Delete "$INSTDIR\bin\libfontconfig-1.dll"
-  Delete "$INSTDIR\bin\libgcc_s_dw2-1.dll"
+  Delete "$INSTDIR\bin\${LIBGCCDDL}"
   Delete "$INSTDIR\bin\libgdk_pixbuf-2.0-0.dll"
   Delete "$INSTDIR\bin\libgdk-win32-2.0-0.dll"
   Delete "$INSTDIR\bin\libgio-2.0-0.dll"
@@ -642,6 +650,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libstdc++-6.dll"
   Delete "$INSTDIR\bin\libpopt-0.dll"
   Delete "$INSTDIR\bin\pthreadGC2.dll"
+  Delete "$INSTDIR\bin\libwinpthread-1.dll"
   Delete "$INSTDIR\bin\readline5.dll"
   Delete "$INSTDIR\bin\zlib1.dll"
 
