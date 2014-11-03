@@ -1635,7 +1635,7 @@ void ValueStimulus::start()
 
     current       = initial.v;
     next_sample   = *sample_iterator;
-    future_cycle  = next_sample.time;// + start_cycle;
+    future_cycle  = next_sample.time + start_cycle;
 
     get_cycles().set_break(future_cycle, this);
 
