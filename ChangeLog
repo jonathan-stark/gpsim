@@ -1,3 +1,14 @@
+2014-11-03 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_quit.cc: q short command for quit - Feature Request 35
+	* gui/gui_breadboard.cc: fix coredump bug #187
+	* regression/interrupts_14bit/Makefile
+	  regression/interrupts_14bit/int_sleep.asm 
+	  regression/p16f676/reset.asm regression/p16f684/reset.asm
+	  src/pic-processor.cc: fix sleep interrupt, revisit patch #19
+	* src/14bit-processors.cc: Remove dead code
+	* src/pic-ioports.cc: Fix i/o pin wakeup for 16f84A bug #186
+	* src/stimuli.cc: fix start of asynchronous_stimulus bug #185
+
 2014-10-30 Roy Rankin <rrankin@ihug.com.au>
 	* Makefile.am configure.ac doc/Makefile.am examples/12bit/Makefile.am
 	  examples/16bit/Makefile.am examples/Makefile.am

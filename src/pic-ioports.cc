@@ -405,7 +405,10 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   if (bit_number == 0 && (((lastDrivenValue.data&1)==1)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
   {
-    cpu_pic->exit_sleep();
+    if ((m_pIntcon->get() & (INTCON::GIE | INTCON::INTE)) == INTCON::INTE)
+    {
+        cpu_pic->exit_sleep();
+    }
     m_pIntcon->set_intf(true);
   }
 
@@ -415,7 +418,9 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   unsigned int bitMask = (1<<bit_number) & 0xF0;
 
   if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get_value() & bitMask ) {
-    cpu_pic->exit_sleep();
+    
+    if ((m_pIntcon->get() & (INTCON::GIE | INTCON::RBIE)) == INTCON::RBIE)
+        cpu_pic->exit_sleep();
     m_pIntcon->set_rbif(true);
   }
 }

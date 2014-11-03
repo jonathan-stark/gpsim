@@ -2599,9 +2599,12 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
     
     update_board_matrix(bbw);
 
-    model = gtk_tree_view_get_model ((GtkTreeView*) bbw->tree);
-    gtk_tree_model_get_iter_first (model, &p_iter);
-    gtk_tree_model_iter_children (model, &c_iter, &p_iter);
+    if ((model = gtk_tree_view_get_model ((GtkTreeView*) bbw->tree)) == NULL)
+	return;
+    if(!gtk_tree_model_get_iter_first (model, &p_iter))
+	return;
+    if (!gtk_tree_model_iter_children (model, &c_iter, &p_iter))
+	return;
     
     do
     {

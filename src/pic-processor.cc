@@ -105,11 +105,13 @@ const char* phaseDesc(ClockPhase *pPhase)
     return ("mExecuteInterrupt");
   if (pPhase == mCaptureInterrupt)
     return ("mCaptureInterrupt");
+  if (pPhase == mIdle)
+    return ("mIdle");
   return "unknown phase";
 }
 
 phaseCaptureInterrupt::phaseCaptureInterrupt(Processor *pcpu)
-  :  ProcessorPhase(pcpu)
+  :  ProcessorPhase(pcpu), m_pCurrentPhase(0),m_pNextNextPhase(0)
 {
 }
 phaseCaptureInterrupt::~phaseCaptureInterrupt()
@@ -122,10 +124,34 @@ ClockPhase *phaseCaptureInterrupt::advance()
   if (m_pNextPhase == mExecute2ndHalf)
     m_pNextPhase->advance();
 
+  if (m_pCurrentPhase == mIdle) { // Interrupted sleep
+
+    // complete sleeping phase
+    m_pNextPhase = m_pNextNextPhase->advance();
+    
+    if (m_pNextPhase == mIdle)
+    {
+        m_pNextPhase = mExecute1Cycle;
+	do 
+	{
+	    m_pNextPhase = mExecute1Cycle->advance();
+	}while (m_pNextPhase != mExecute1Cycle);
+    }
+    mCurrentPhase = this;
+    if (bp.global_break)
+	m_pNextNextPhase = m_pNextPhase;
+    else
+      m_pCurrentPhase = NULL;
+    
+    ((pic_processor *)m_pcpu)->exit_sleep();
+    return this;
+  }
+
   m_pcpu->interrupt();
 
   return m_pNextPhase;
 }
+
 void phaseCaptureInterrupt::firstHalf()
 {
   m_pCurrentPhase = mCurrentPhase;

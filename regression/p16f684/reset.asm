@@ -200,6 +200,7 @@ PowerOnReset:
 	nop
 	
 	SLEEP
+	nop
 
 ;========================================================================
 ;
@@ -242,6 +243,7 @@ WDTTimeOut:
     
 	CLRF	aint_cnt 
 	SLEEP
+	nop
 
 ;========================================================================
 ;
@@ -261,6 +263,7 @@ WDTTimeOut:
         nop
 
 	SLEEP
+	nop
 ;========================================================================
 ;
 ;  AwakeIO - an I/O pin changed states to awaken us from sleep.
@@ -285,6 +288,7 @@ AwakeIO:
         nop
 
 	SLEEP
+	nop
 
   .assert "\"*** FAILED Unexpected Wakeup waiting for MCLR\""
 	nop
