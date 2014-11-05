@@ -7497,6 +7497,44 @@ This module emulates the Dallas Semiconductor DS1307 Real-Time clock which
  also has 56 x 8 eeprom memory and connects via an I2C serial bus.
 \end_layout
 
+\begin_layout Subsection
+High-Precision 1-Wire Digital Thermometer - DS1820
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+DS1820
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This module emulates the DS1820 High-Precision 1-Wire Digital Thermometer.
+This devices uses a single-wire bus interface.
+\end_layout
+
+\begin_layout Subsection
+Temperature and humidity sensor - DHT11
+\begin_inset Index
+status collapsed
+
+\begin_layout Plain Layout
+DHT11
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This module emulates the DHT11 temperature and humidity sensor.
+This devices uses a single-wire two-way serial interface.
+\end_layout
+
 \begin_layout Section
 Writing new modules
 \end_layout

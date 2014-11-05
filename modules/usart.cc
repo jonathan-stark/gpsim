@@ -335,6 +335,7 @@ private:
     if(bit_count) {
       txr >>= 1;
       bit_count--;
+      update_packet_time();
       future_time = last_time + time_per_bit;
       get_cycles().set_break(future_time, this);
     } else {
