@@ -192,8 +192,16 @@ void  OSCCAL::put(unsigned int new_value)
   if (base_freq > 0.)
   {
     adj  = adj -  0x80;
+    // A hook to honour configured frequency - if we're going to change it now
+    if(cpu_pic->get_frequency() > base_freq*0.875 && base_freq*1.125 > cpu_pic->get_frequency()) {
+      base_freq=cpu_pic->get_frequency();
+      if (verbose)
+        cout << "Adjusting base frequency for INTOSC calibration: " << base_freq << "\n";
+    }
     tune = (1. + 0.125 * adj / 0x80) * base_freq;
     cpu_pic->set_frequency(tune);
+    if (verbose)
+      cout << "Calibrating INTOSC by " << adj << " to " << tune << "\n";
   }
 }
 

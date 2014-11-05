@@ -87,18 +87,6 @@ protected:
   unsigned int m_uiPC;
 };
 
-class phaseExecuteInterrupt : public ProcessorPhase
-{
-public:
-  phaseExecuteInterrupt(Processor *pcpu);
-  virtual ~phaseExecuteInterrupt();
-  virtual ClockPhase *advance();
-
-  ClockPhase *firstHalf(unsigned int uiPC);
-protected:
-  unsigned int m_uiPC;
-};
-
 // phaseIdle - when a processor is idle, the current
 // clock source can be handled by this class.
 
@@ -116,7 +104,6 @@ protected:
 extern ClockPhase *mCurrentPhase;
 extern phaseExecute1Cycle *mExecute1Cycle;
 extern phaseExecute2ndHalf *mExecute2ndHalf;
-extern phaseExecuteInterrupt *mExecuteInterrupt;
 extern phaseIdle *mIdle;
 
 

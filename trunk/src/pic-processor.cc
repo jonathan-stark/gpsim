@@ -86,7 +86,6 @@ protected:
 ClockPhase *mCurrentPhase=0;
 phaseExecute1Cycle *mExecute1Cycle=0;
 phaseExecute2ndHalf *mExecute2ndHalf=0;     // misnomer - should be 2-cycle
-phaseExecuteInterrupt *mExecuteInterrupt=0;
 phaseCaptureInterrupt *mCaptureInterrupt=0;
 phaseIdle *mIdle=0;
 
@@ -97,16 +96,14 @@ void setCurrentPhase(ClockPhase *pPhase)
 
 const char* phaseDesc(ClockPhase *pPhase)
 {
+  if (pPhase == mIdle)
+    return ("mIdle");
   if (pPhase == mExecute1Cycle)
     return ("mExecute1Cycle");
   if (pPhase == mExecute2ndHalf)
     return ("mExecute2ndHalf");
-  if (pPhase == mExecuteInterrupt)
-    return ("mExecuteInterrupt");
   if (pPhase == mCaptureInterrupt)
     return ("mCaptureInterrupt");
-  if (pPhase == mIdle)
-    return ("mIdle");
   return "unknown phase";
 }
 
@@ -1106,7 +1103,6 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
 
    mExecute1Cycle    = new phaseExecute1Cycle(this);
    mExecute2ndHalf   = new phaseExecute2ndHalf(this);
-   mExecuteInterrupt = new phaseExecuteInterrupt(this);
    mCaptureInterrupt = new phaseCaptureInterrupt(this);
    mIdle             = new phaseIdle(this);
    mCurrentPhase   = mExecute1Cycle;
@@ -1154,7 +1150,6 @@ pic_processor::~pic_processor()
 
   delete mExecute1Cycle;
   delete mExecute2ndHalf;
-  delete mExecuteInterrupt;
   delete mCaptureInterrupt;
   delete mIdle;
 

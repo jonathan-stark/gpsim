@@ -191,31 +191,6 @@ ClockPhase *phaseExecute2ndHalf::advance()
   return m_pNextPhase;
 }
 
-
-phaseExecuteInterrupt::phaseExecuteInterrupt(Processor *pcpu)
-  : ProcessorPhase(pcpu), m_uiPC(0)
-{
-}
-phaseExecuteInterrupt::~phaseExecuteInterrupt()
-{
-}
-ClockPhase *phaseExecuteInterrupt::firstHalf(unsigned int uiPC)
-{
-  Dprintf(("first half of Interrupt new PC=0x%x\n",uiPC));
-  ((pic_processor *)m_pcpu)->pc->value = uiPC;
-  ((pic_processor *)m_pcpu)->pcl->value.put(uiPC&0xff);
-  mCurrentPhase->setNextPhase(this);
-  return this;
-}
-
-ClockPhase *phaseExecuteInterrupt::advance()
-{
-  Dprintf(("second half of Interrupt\n"));
-  mCurrentPhase->setNextPhase(mExecute1Cycle);
-  get_cycles().increment();
-  return m_pNextPhase;
-}
-
 //--------------------------------------------------
 // jump - update the program counter. All branching instructions except computed gotos
 //        and returns go through here.
