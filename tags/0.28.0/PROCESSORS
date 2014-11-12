@@ -1,0 +1,40 @@
+gpsim-0.24.0
+
+Here's a list of supported processors:
+
+12bit:
+-----
+
+pic10f200   pic10f202   pic10f204   pic10f220
+pic10f222   pic12c508   pic12c509   pic12ce518
+pic12ce519  pic12f508   pic12f509   pic12f510
+pic12f629   pic12f675   pic12f683 
+
+
+14bit:
+-----
+
+pic12f683   pic16c54
+pic16c55    pic16c56    pic16c61    pic16c84
+pic16cr83   pic16cr84   pic16c71    pic16c712
+pic16c716   pic16c62    pic16c62a   pic16cr62
+pic16c63    pic16c64    pic16c65a   pic16c65
+pic16c72    pic16c73    pic16c74    pic16f73
+pic16f74    pic16f83    pic16f84    pic16f627
+pic16f627a  pic16f628   pic16f628a  pic16f630
+pic16f648   pic16f648a  pic16f87    pic16f676
+pic16f88    pic16f818   pic16f819   pic16f871
+pic16f873   pic16f874   pic16f876   pic16f877
+pic16f873a  pic16f874a  pic16f876a  pic16f877a
+
+
+16bit:
+-----
+
+pic18c242   pic18c252   pic18c442   pic18c452
+pic18f242   pic18f248   pic18f252   pic18f442
+pic18f448   pic18f452   pic18f1220  pic18f1320
+pic18f2455* pic18f4455* pic18f2321  pic18f4321
+
+* USB functionality not supported
+

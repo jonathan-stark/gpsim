@@ -1,0 +1,52 @@
+# Script for testing LED modules
+#
+# The purpose of this script is to load a simple
+# program for a PIC (16C84), load the gpsim module library,
+# and load and connect a 7 segment and simple green LED.
+#
+#
+
+load led_mod.cod
+
+# Processor position:
+p16c84.xpos = 84
+p16c84.ypos = 216
+
+# Modules:
+module library libgpsim_modules.so
+
+module load led_7segments led1
+led1.xpos = 288
+led1.ypos = 72
+
+module load led led2
+led2.color = green
+led2.xpos = 60
+led2.ypos = 48
+
+# Connections:
+node cc
+attach cc porta0 led1.cc
+
+node seg0
+attach seg0 portb0 led1.seg0 led2.in
+
+node seg1
+attach seg1 portb1 led1.seg1
+
+node seg2
+attach seg2 portb2 led1.seg2
+
+node seg3
+attach seg3 portb3 led1.seg3
+
+node seg4
+attach seg4 portb4 led1.seg4
+
+node seg5
+attach seg5 portb5 led1.seg5
+
+node seg6
+attach seg6 portb6 led1.seg6
+
+# End.

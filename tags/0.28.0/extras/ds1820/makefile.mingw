@@ -1,0 +1,48 @@
+## Makefile for building the ds1820 with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+BASE = ../..
+TOP = $(BASE)/..
+
+ifndef GPSIM_DEF_PATH
+  GPSIM_DEF_PATH = $(BASE)/plat/win32
+endif
+
+include $(GPSIM_DEF_PATH)/make.mingw
+
+
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = $(GLIB_PATH)/lib/glib-2.0.lib $(GLIB_PATH)/lib/gobject-2.0.lib \
+	$(GTK_PATH)/lib/gdk-win32-2.0.lib $(GTK_PATH)/lib/gtk-win32-2.0.lib \
+	$(CAIRO_PATH)/lib/cairo.lib \
+	$(GDK_PIXBUF_PATH)/lib/gdk_pixbuf-2.0.lib \
+	$(BASE)/src/libgpsim.a
+
+INCLUDES = -I $(BASE) -I $(BASE)/include \
+	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
+	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
+	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
+	-I $(CAIRO_PATH)/include/cairo \
+	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0
+
+
+all:				\
+	libgpsim_ds1820.dll 
+
+libgpsim_ds1820_OBJECTS =	\
+	module_manager.o	\
+	rom1w.o			\
+	bit1w.o			\
+	ds1820.o
+
+################ The modules DLL
+
+libgpsim_ds1820.dll : $(libgpsim_ds1820_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_ds1820.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_ds1820_OBJECTS) $(LIBS)
+
