@@ -6,6 +6,7 @@ gpsim.pdf: gpsim.lyx
 	lyx -e pdf gpsim.lyx
 
 EXTRA_DIST = \
+	screenshots/control.png
 	screenshots/breadboard.png \
 	screenshots/registerview.png \
 	screenshots/scope1.png \

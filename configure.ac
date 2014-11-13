@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([gpsim], [0.28.0], [<http://gpsim.sourceforge.net/gpsim.html>])
+AC_INIT([gpsim], [0.28.90], [<http://gpsim.sourceforge.net/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE
