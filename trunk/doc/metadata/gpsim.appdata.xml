@@ -28,21 +28,13 @@
  </description>
  <url type="homepage">http://gpsim.sourceforge.net</url>
  <screenshots> 
- <screenshot>
-   <image>http://gpsim.sourceforge.net/screenshots/control.png</image>
-   <caption>Control panel for gpsim operation</caption>
+ <screenshot type="default">
+   <image>https://a.fsdn.com/con/app/proj/gpsim/screenshots/control_source.png</image>
+   <caption>Control and Source Windows</caption>
  </screenshot>
  <screenshot>
-   <image>http://gpsim.sourceforge.net/screenshots/registerview.png</image>
-   <caption>Register view window showing register and ram contents</caption>
- </screenshot>
- <screenshot>
-   <image>http://gpsim.sourceforge.net/screenshots/breadboard.png</image>
-   <caption>Breadboard window showing components, connections and drive states</caption>
- </screenshot>
- <screenshot>
-   <image>http://gpsim.sourceforge.net/screenshots/source_browser.png</image>
-   <caption>Source Browser window showing PIC instructions</caption>
+   <image>https://a.fsdn.com/con/app/proj/gpsim/screenshots/breadboard_register.png</image>
+   <caption>Breadboard and Source  Windows</caption>
  </screenshot>
  </screenshots>
  <updatecontact>gpsim-devel_at_lists.sourceforge.net</updatecontact>
