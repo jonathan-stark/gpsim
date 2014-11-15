@@ -1,3 +1,12 @@
+2014-11-16 Roy Rankin <rrankin@ihug.com.au>
+	* doc/Makefile.am doc/metadata/gpsim.appdata.xml:
+	- Add metadata - Feature Request # 36
+	* extras/graphic_lcd/examples/sed1520/glcd_test.asm
+	  extras/graphic_lcd/examples/ssd0323/glcd_test.asm:
+	- Replace __CONFIG to assemble with current gputils
+	* modules/stimuli.cc regression/Makefile.am:
+	- fix infinite loop bug # 188
+
 2014-11-13 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac: Set version to 0.28.90 for development
 	* doc/Makefile.am doc/metadata/gpsim.appdata.xml
