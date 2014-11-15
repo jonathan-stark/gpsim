@@ -514,7 +514,16 @@ File Stimulus\n\
     char fname[20] = "";
     m_filename->get(fname, 20);
     if (fname[0])
+    {
       m_fp = new ifstream(fname);
+      if (m_fp->fail())
+      {
+          printf( "Warning can't open Stimulus file %s\n", fname);
+          delete m_fp;
+          m_fp = NULL;
+          return;
+      }
+    }
 
     // Set the first breakpoint
     parseLine(true);
