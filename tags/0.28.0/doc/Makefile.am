@@ -11,6 +11,11 @@ EXTRA_DIST = \
 	screenshots/scope1.png \
 	screenshots/scope2.png  \
 	screenshots/source_browser.png \
+	screenshots/control_source.png \
+	screenshots/breadboard_register.png \
+	metadata/gpsim.desktop \
+	metadata/gpsim.appdata.xml \
+	metadata/gpsim.png \
 	makefile.mingw \
 	gpsim.lyx \
 	gpsim.pdf \
