@@ -315,7 +315,8 @@ void CSimulationContext::NotifyUserCanceled() {
     m_pbUserCanceled = NULL;
     return;
   }
-  if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
+  if(CSimulationContext::GetContext()->GetActiveCPU() && 
+      CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
     == eSM_RUNNING) {
     // If we get a CTRL->C while processing a command file
     // we should probably stop the command file processing.
