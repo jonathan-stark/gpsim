@@ -1,3 +1,9 @@
+2014-11-19 Roy Rankin <rrankin@ihug.com.au>
+	* autogen.sh doc/gpsim_svn.html: add script to build configure command
+	* doc/metadata/gpsim.png: Use icon from website
+	* regression/analog_stim/p12f1822.asm: terminate if .sig files missing
+	* src/sim_context.cc: fix ^c sigsegv if no file loaded - patches #39
+
 2014-11-16 Roy Rankin <rrankin@ihug.com.au>
 	* doc/Makefile.am doc/metadata/gpsim.appdata.xml:
 	- Add metadata - Feature Request # 36

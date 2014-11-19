@@ -44,6 +44,7 @@ STARTUP	code	0x0000
 
    .sim "node na3"
    .sim "attach na3 S2.pin porta3"
+   .sim "break c 0x10000"
 
 ;--------------------------------------------------------
 ; code
