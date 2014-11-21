@@ -182,6 +182,7 @@ public:
   unsigned int mclr_pin;
 
   INTCON_14_PIR          intcon_reg;
+  OPTION_REG_2		 option_reg;
   BSR			 bsr;
   PCON			 pcon;
   WDTCON		 wdtcon;
@@ -210,7 +211,9 @@ public:
   virtual void create_symbols();
   virtual void create_sfr_map();
   virtual void interrupt();
-  virtual bool exit_wdt_sleep() {return wdt_sleep;}
+  virtual bool exit_wdt_sleep() {return wdt_flag & 2;}
+  virtual void enter_sleep();
+  virtual void exit_sleep();
   virtual void reset(RESET_TYPE r);
   virtual void create_config_memory();
   virtual bool set_config_word(unsigned int address,unsigned int cfg_word);
@@ -233,7 +236,7 @@ public:
   virtual unsigned int Wget();
 
 protected:
-  bool		wdt_sleep;	// if true wdt will interupt in sleep
+  unsigned int wdt_flag;
 };
 
 #define cpu14e ( (_14bit_e_processor *)cpu)

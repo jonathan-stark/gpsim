@@ -33,17 +33,28 @@ bug report</a> when using the SVN.
 </p>
 <h2> Getting the source</h2>
 <p>
+To create a local only copy of the latest gpsim sources from the SVN repository run the following command:
 </p>
 <pre>
-$ mkdir gpsim # or whatever directory name you prefer
-$ cd gpsim
-$ svn checkout svn://svn.code.sf.net/p/gpsim/code/trunk .
+$ svn checkout svn://svn.code.sf.net/p/gpsim/code/trunk gpsim-code
 </pre>
-Note, don't forget the '.' at the end of the last command! If you did,
-then the code will get placed into a directory named gpsim/trunk. Also,
-note that svn is chunky around the edges; you'll need about 45M of disc
-space to get a copy of the repository. Actually, the 'trunk' is where
-the latest code is stored. The whole repository is a third of a gig!
+<p>
+Where gpsim-code can be changed to any directory name you wish. 
+You'll need about 45M of disc
+space to get a copy of the repository. 
+</p>
+<p></p>
+<h2>Getting updates from SVN</h2>
+<p>
+If one of the developers makes a change to SVN and you just want to update your
+local copy, then all you need to do is this:
+</p>
+<pre>svn update<br /></pre>
+<p>
+The 'update' command will compare your local copy with the master SVN copy and
+then update yours with the differences. It's a whole faster than re-downloading
+everything.
+</p>
 <p></p>
 <h2>Compiling your SVN copy the first time</h2>
 <p>When you get the code from SVN this first time, you'll have to go through a
@@ -92,24 +103,13 @@ add a path to it. This is done by placing adding the path to the file /etc/ld.so
 </p>
 <pre> $ su # become root<br /> # edit /etc/ld.so.conf by adding the line /usr/local/lib to it<br /> # cat /etc/ld.so.conf<br />include ld.so.conf.d/*.conf<br />/usr/X11R6/lib<br />/usr/X11R6/lib64<br />/usr/lib/mysql<br />/usr/lib64/mysql<br />/usr/local/lib<br /> # /sbin/ldconfig # refresh the cached library search paths<br /> # exit<br /></pre>
 <p></p>
-<h2>Getting updates from SVN</h2>
-<p>
-If one of the developers makes a change to SVN and you just want to update your
-local copy, then all you need to do is this:
-</p>
-<pre>svn update<br /></pre>
-<p>
-The 'update' command will compare your local copy with the master SVN copy and
-then update yours with the differences. It's a whole faster than re-downloading
-everything.
-</p>
 <h2>Links</h2>
 <p>
 <a href="gpsim.html">gpsim</a>
 </p>
 <p>
-<a href="https://sourceforge.net/p/gpsim/code/HEAD/tree/trunk/">gpsim's
-SVN repository</a>
+<a href="https://sourceforge.net/p/gpsim/code/HEAD/tree/trunk/">
+gpsim's online SVN repository browser</a>
 </p>
 <p>
 <a href="http://sourceforge.net/">SourceForge</a>

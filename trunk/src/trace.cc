@@ -960,7 +960,7 @@ void Trace::showInfo()
 unsigned int Trace::type(unsigned int index)
 {
   unsigned int traceType = operator[](index) & TYPE_MASK;
-  unsigned int cycleType = traceType & (CYCLE_COUNTER_LO | CYCLE_COUNTER_HI);
+  unsigned int cycleType = traceType & (CYCLE_COUNTER_LO | CYCLE_COUNTER_MI);
 
   return cycleType ? cycleType : traceType;
 
@@ -975,100 +975,62 @@ unsigned int Trace::type(unsigned int index)
 //        *cvt_cycle - a pointer to where the cycle will be decoded
 //                     if the trace entry is a cycle trace.
 // RETURN: 0 - trace is not a cycle counter
-//         1 - trace is the high integer of a cycle trace
+//         1 - trace is the middle or high integer of a cycle trace
 //         2 - trace is the low integer of a cycle trace
 
 int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
 {
 
-  if(!(get(index) & (CYCLE_COUNTER_LO | CYCLE_COUNTER_HI)))
+  if(!(get(index) & (CYCLE_COUNTER_LO | CYCLE_COUNTER_MI)))
     return 0;
 
   // Cycle counter
 
-  // A cycle counter occupies two consecutive trace buffer entries.
+  // A cycle counter occupies three consecutive trace buffer entries.
   // We have to determine if the current entry (pointed to by index) is
   // the high or low integer of the cycle counter.
   //
   // The upper two bits of the trace are used to decode the two 32-bit
   // integers that comprise the cycle counter. The encoding algorithm is
   // optimized for speed:
-  // CYCLE_COUNTER_LO is defined as 1<<31
-  // CYCLE_COUNTER_HI is defined as 1<<30
+  // CYCLE_COUNTER_LO is defined as 2<<30
+  // CYCLE_COUNTER_MI is defined as 1<<30
+  // CYCLE_COUNTER_HI is defined as 3<<30
   //
-  //   trace[i] = low 32 bits of cycle counter | CYCLE_COUNTER_LO
-  //   trace[i+1] = upper 32 bits of "    " | CYCLE_COUNTER_HI | bit 31 of cycle counter
+  //   trace[i  ] = low 24 bits of cycle counter | CYCLE_COUNTER_LO
+  //   trace[i+1] = middle 24 bits of "    " | CYCLE_COUNTER_MI
+  //   trace[i+2] = upper  16 bits of "    " | CYCLE_COUNTER_HI
   //
-  // The low 32-bits are always saved in the trace buffer with the msb (CYCLE_COUNTER_LO)
-  // set. However, notice that this bit may've already been set prior to calling trace().
-  // So we need to make sure that we don't lose it. This is done by copying it along
-  // with the high 32-bits of the cycle counter into the next trace buffer location. The
-  // upper 2 bits of the cycle counter are assumed to always be zero (if they're not, gpsim
-  // has been running for a loooonnnggg time!). Bit 30 (CYCLE_COUNTER_HIGH) is always
-  // set in the high 32 bit trace. While bit 31 gets the copy of bit 31 that was over
-  // written in the low 32 bit trace.
-  //
-  // Here are some examples:
-  //                                                upper 2 bits
-  //    cycle counter    |  trace[i]    trace[i+1]    [i]   [i+1]
-  //---------------------+----------------------------------------
-  //         0x12345678  |  0x92345678  0x40000000    10     01
-  //         0x44445555  |  0xc4445555  0x40000000    11     01
-  // 0x1111222233334444  |  0xb3334444  0x51112222    10     01
-  //         0x9999aaaa  |  0x9999aaaa  0xc0000000    10     11
-  //         0xccccdddd  |  0xccccdddd  0xc0000000    11     11
-  //         0xccccddde  |  0xccccddde  0xc0000000    11     11
-  //
+  // The low 24-bits are always saved in the trace buffer with the msb (CYCLE_COUNTER_LO)
+  // set.
   // Looking at the upper two bits of trace buffer, we can make these
   // observations:
   //
   // 00 - not a cycle counter trace
   // 10 - current index points at the low int of a cycle counter
-  // 01 - current index points at the high int of a cycle counter
-  // 11 - if traces on either side of the current index are the same
-  //      then the current index points to a low int else it points to a high int
+  // 01 - current index points at the middle int of a cycle counter
+  // 11 - current index points at the high int of a cycle counter
 
   int j = index;                         // Assume that the index is pointing to the low int.
-  int k = (j + 1) & TRACE_BUFFER_MASK;   // and that the next entry is the high int.
+  int k = (j + 1) & TRACE_BUFFER_MASK;   // and that the next entry is the middle int.
+  int l = (j + 2) & TRACE_BUFFER_MASK;   // and that the next entry is the high int.
 
   if( (get(j) & CYCLE_COUNTER_LO) &&
-      (get(k) & CYCLE_COUNTER_HI) )
+      (get(k) & CYCLE_COUNTER_MI) &&
+      (get(l) & CYCLE_COUNTER_HI) )
     {
-      if(get(j) & CYCLE_COUNTER_HI)
-        {
-          // The upper two bits of the current trace are set. This means that
-          // the trace is either the high 32 bits or the low 32 bits of the cycle
-          // counter. This ambiguity is resolved by examining the trace buffer on
-          // either side of the current index. If the entry immediately proceeding
-          // this one is not a cycle counter trace, then we know that we're pointing
-          // at the low 32 bits. If the proceeding entry IS a cycle counter trace then
-          // we have two consecutive cycle traces (we already know that the entry
-          // immediately following the current trace index is a cycle counter trace).
-          // Now we know that if  have consecutive cycle traces, then they differ by one
-          // count. We only need to look at the low 32 bits of these consecutive
-          // traces to ascertain this.
-          int i = (index - 1) &  TRACE_BUFFER_MASK;   // previous index
-          if( (get(i) & (CYCLE_COUNTER_HI | CYCLE_COUNTER_LO)) &&
-              (((get(k) - get(i)) & 0x7fffffff) == 1) )
-            return 1;
-
-        }
-
-      // The current index points to the low int and the next entry is
-      // the high int.
       // extract the ~64bit cycle counter from the trace buffer.
       if(cvt_cycle) {
-        *cvt_cycle = get(k)&0x3fffffff;
-        *cvt_cycle = (*cvt_cycle << 32) |
-          ((get(j)&0x7fffffff) | (get(k)&0x80000000 ));
+        *cvt_cycle = get(l)&0xffff;
+        *cvt_cycle = (*cvt_cycle << 16) | (get(k) & 0xffffff);
+        *cvt_cycle = (*cvt_cycle << 24) | (get(j) & 0xffffff);
       }
 
       return 2;
 
     }
 
-  //printf("trace error??? in cycle trace\n");
-
+  Dprintf(("trace index %d does not point to lower part (0x%lx)\n", j, get(j)));
   return 1;
 }
 
@@ -1133,7 +1095,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       break;
       */
     default:
-      if(type(index) != CYCLE_COUNTER_HI) {
+      if ((type(index) != (unsigned) CYCLE_COUNTER_HI) && (type(index) != CYCLE_COUNTER_MI)) {
         map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(index));
 
         if(tti != trace_map.end()) {
@@ -1194,11 +1156,12 @@ int Trace::dump(int n, FILE *out_stream)
     // there's a global constructor initialization race condition.
     pCycleTrace = new CycleTraceType(2);
     trace_map[CYCLE_COUNTER_LO] = pCycleTrace;
+    trace_map[CYCLE_COUNTER_MI] = pCycleTrace;
     trace_map[CYCLE_COUNTER_HI] = pCycleTrace;
   }
 
   unsigned int frames = n+1;
-  unsigned int frame_start = tbi(trace_index-2);
+  unsigned int frame_start = tbi(trace_index-3);
   guint64 cycle=0;
 
   if(trace.is_cycle_trace(frame_start,&cycle) !=  2)
@@ -1664,7 +1627,7 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1677,7 +1640,7 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1692,7 +1655,7 @@ void TraceLog::register_write(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1705,7 +1668,7 @@ void TraceLog::register_write(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1719,7 +1682,7 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1732,7 +1695,7 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%lx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1747,7 +1710,7 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%lx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%llx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1760,7 +1723,7 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%lx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%llx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }

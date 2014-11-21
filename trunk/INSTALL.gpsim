@@ -243,6 +243,6 @@ for details on how to build and install gpsim Under Windows.
 CVS is no longer supported. 
 
 See http://gpsim.sourceforge.net/gpsim_cvs.html for instructions on
-how to retrieve gpsim from SVN.
+how to retrieve and build gpsim from SVN repository.
 
 

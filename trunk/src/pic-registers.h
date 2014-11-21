@@ -102,5 +102,14 @@ enum
 
 };
 
+// For use on 14bit enhanced cores
+class OPTION_REG_2 : public OPTION_REG
+{
+public:
+  OPTION_REG_2(Processor *pCpu, const char *pName, const char *pDesc=0);
+
+  virtual void put(unsigned int new_value);
+  virtual void initialize();
+};
 
 #endif
