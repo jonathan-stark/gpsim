@@ -1,3 +1,11 @@
+2014-11-22 Roy Rankin <rrankin@ihug.com.au>
+	* INSTALL.gpsim doc/gpsim_svn.html: Revise install documentation
+	* src/14bit-processors.cc src/14bit-processors.h src/p1xf1xxx.cc
+	  src/pic-registers.cc src/pic-registers.h: Watchdog fixes for the
+	  14bit enhanced cores - patch 41
+	* src/trace.cc src/trace.h: Trace dump for a large cycle counter -
+	  patch 42
+
 2014-11-19 Roy Rankin <rrankin@ihug.com.au>
 	* autogen.sh doc/gpsim_svn.html: add script to build configure command
 	* doc/metadata/gpsim.png: Use icon from website

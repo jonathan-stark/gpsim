@@ -325,7 +325,7 @@ P12F1822::P12F1822(const char *_name, const char *desc)
   m_daccon1 = new DACCON1(this, "daccon1", "DAC Voltage reference register 1", 0x1f, m_daccon0);
   m_cpu_temp = new CPU_Temp("cpu_temperature", 30., "CPU die temperature");
 
-  tmr0.set_cpu(this, m_porta, 4, option_reg);
+  tmr0.set_cpu(this, m_porta, 4, &option_reg);
   tmr0.start(0);
   tmr0.set_t1gcon(&t1con_g.t1gcon);
   cpscon1.m_cpscon0 = &cpscon0;
@@ -484,7 +484,7 @@ void P12F1822::create_sfr_map()
   add_sfr_register(m_trisa, 0x8c, RegisterValue(0x3f,0));
 
   pcon.valid_bits = 0xcf;
-  add_sfr_register(option_reg,  0x95, RegisterValue(0xff,0));
+  add_sfr_register(&option_reg, 0x95, RegisterValue(0xff,0));
   add_sfr_register(&osctune,    0x98, RegisterValue(0,0));
   add_sfr_register(&osccon,     0x99, RegisterValue(0x38,0));
   add_sfr_register(&oscstat,    0x9a, RegisterValue(0,0));
@@ -729,9 +729,8 @@ void  P12F1822::create(int ram_top, int eeprom_size)
 //-------------------------------------------------------------------
 void P12F1822::enter_sleep()
 {
-    tmr0.sleep();
     tmr1l.sleep();
-    pic_processor::enter_sleep();
+    _14bit_e_processor::enter_sleep();
 }
 
 //-------------------------------------------------------------------
@@ -739,13 +738,11 @@ void P12F1822::exit_sleep()
 {
     if (m_ActivityState == ePASleeping)
     {
-	tmr0.wake();
 	tmr1l.wake();
         osccon.wake();
-	pic_processor::exit_sleep();
+	_14bit_e_processor::exit_sleep();
     }
 }
-
 //-------------------------------------------------------------------
 void P12F1822::option_new_bits_6_7(unsigned int bits)
 {
@@ -931,7 +928,7 @@ P16F178x::P16F178x(const char *_name, const char *desc)
   m_cpu_temp = new CPU_Temp("cpu_temperature", 30., "CPU die temperature");
 
 
-  tmr0.set_cpu(this, m_porta, 4, option_reg);
+  tmr0.set_cpu(this, m_porta, 4, &option_reg);
   tmr0.start(0);
   tmr0.set_t1gcon(&t1con_g.t1gcon);
   set_mclr_pin(1);
@@ -1141,7 +1138,7 @@ void P16F178x::create_sfr_map()
     add_sfr_register(m_trise, 0x90, RegisterValue(0x08,0));
 
   pcon.valid_bits = 0xcf;
-  add_sfr_register(option_reg,  0x95, RegisterValue(0xff,0));
+  add_sfr_register(&option_reg, 0x95, RegisterValue(0xff,0));
   add_sfr_register(&osctune,    0x98, RegisterValue(0,0));
   add_sfr_register(&osccon,     0x99, RegisterValue(0x38,0));
   add_sfr_register(&oscstat,    0x9a, RegisterValue(0,0));
@@ -1419,9 +1416,8 @@ void  P16F178x::create(int ram_top, int eeprom_size)
 //-------------------------------------------------------------------
 void P16F178x::enter_sleep()
 {
-    tmr0.sleep();
     tmr1l.sleep();
-    pic_processor::enter_sleep();
+    _14bit_e_processor::enter_sleep();
 }
 
 //-------------------------------------------------------------------
@@ -1429,10 +1425,9 @@ void P16F178x::exit_sleep()
 {
     if (m_ActivityState == ePASleeping)
     {
-	tmr0.wake();
 	tmr1l.wake();
         osccon.wake();
-	pic_processor::exit_sleep();
+	_14bit_e_processor::exit_sleep();
     }
 }
 

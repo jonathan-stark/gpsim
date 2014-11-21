@@ -314,6 +314,7 @@ _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
   : _14bit_processor(_name,_desc),
     mclr_pin(4),
     intcon_reg(this,"intcon","Interrupt Control"),
+    option_reg(this,"option_reg","Option Register"),
     bsr(this, "bsr", "Bank Select Register"),
     pcon(this, "pcon", "Power Control Register", 0xcf),
     wdtcon(this, "wdtcon", "WDT Control", 0x3f),
@@ -393,6 +394,8 @@ void _14bit_e_processor::create_sfr_map()
   add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
   add_sfr_register(&pcon,   0x96, RegisterValue(0x0c,0),"pcon");
+  wdt.set_postscale(0);
+  wdt.set_timeout(1./32000.);
   add_sfr_register(&wdtcon,   0x97, RegisterValue(0x16,0),"wdtcon");
 
 
@@ -416,8 +419,7 @@ void _14bit_e_processor::create_sfr_map()
       alias_file_registers(0x00,0x0b,bank*0x80); // Duplicate core registers
       alias_file_registers(0x70,0x7f,bank*0x80); // Duplicate shadow ram
   }
-  stack->stack_mask = 15; // ehanced has stack 16 high
-
+  stack->stack_mask = 15; // enhanced has stack 16 high
 
 }
 //-------------------------------------------------------------------
@@ -485,6 +487,29 @@ void _14bit_e_processor::interrupt ()
   pc->interrupt(INTERRUPT_VECTOR);
 
 }
+
+//-------------------------------------------------------------------
+void _14bit_e_processor::enter_sleep()
+{
+    tmr0.sleep();
+    if (wdt_flag == 2)		// WDT is suspended during sleep
+	wdt.initialize(false);
+    pic_processor::enter_sleep();
+}
+
+ //-------------------------------------------------------------------
+void _14bit_e_processor::exit_sleep()
+{
+  if (m_ActivityState == ePASleeping)
+  {
+    tmr0.wake();
+    if (wdt_flag == 2)
+	wdt.initialize(true);
+    pic_processor::exit_sleep();
+  }
+
+}
+
 //========================================================================
 //
 // Configuration Memory word 1for the enhanced 14 bit processors
@@ -543,14 +568,14 @@ bool _14bit_e_processor::set_config_word(unsigned int address,unsigned int cfg_w
 
     if(address == 0x8007) // Config Word 1
     {
-	unsigned int wdt_flag = (cfg_word & (WDTEN0|WDTEN1));
+	wdt_flag = (cfg_word & (WDTEN0|WDTEN1)) >> 3;
         Dprintf((" cfg_word %x MCLRE %x\n", cfg_word, cfg_word & MCLRE));
         if ((cfg_word & MCLRE) == MCLRE)
             assignMCLRPin(mclr_pin);   
         else
             unassignMCLRPin();
-	wdt_sleep = (wdt_flag == WDTEN1)?false:true; // will WDT interrupt sleep
-        wdt.initialize(wdt_flag & WDTEN1);
+
+        wdt.initialize(wdt_flag & 2);
         oscillator_select(cfg_word, (cfg_word & NOT_CLKOUTEN) != NOT_CLKOUTEN);
     }
     else if (address == 0x8008)
