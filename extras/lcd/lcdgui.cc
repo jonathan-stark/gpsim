@@ -375,14 +375,14 @@ void LcdDisplay::CreateGraphics (void)
     }
     gtk_container_add (GTK_CONTAINER (frame), darea);
 
-    gtk_signal_connect (GTK_OBJECT (darea),
+    g_signal_connect (darea,
                         "expose_event",
-                        GTK_SIGNAL_FUNC (lcd_expose_event),
+                        G_CALLBACK (lcd_expose_event),
                         this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-    gtk_signal_connect (GTK_OBJECT (darea),
+    g_signal_connect (darea,
                         "button_press_event",
-                        GTK_SIGNAL_FUNC (cursor_event),
+                        G_CALLBACK (cursor_event),
                         NULL);
 
     gtk_widget_show (darea);

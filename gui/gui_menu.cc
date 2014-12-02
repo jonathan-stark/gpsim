@@ -89,8 +89,8 @@ show_message (const char *title, const char *message)
 
   button = gtk_button_new_with_label ("close");
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-                             GTK_SIGNAL_FUNC(gtk_widget_destroy),
+  g_signal_connect_swapped (button, "clicked",
+                             G_CALLBACK(gtk_widget_destroy),
                              GTK_OBJECT (window));
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->action_area), button, TRUE, TRUE, 0);
@@ -335,9 +335,9 @@ ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
   gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
   gtk_widget_show(colorButton);
 
-  gtk_signal_connect (GTK_OBJECT(colorButton),
+  g_signal_connect (colorButton,
                       "color-set",
-                      GTK_SIGNAL_FUNC(setColor_cb),
+                      G_CALLBACK(setColor_cb),
                       this);
   const int cBORDER = 10; // pixels
   GtkWidget *label       = gtk_label_new(colorName);
@@ -388,9 +388,9 @@ MarginButton::MarginButton(GtkWidget *pParent, const char *pName,
                                 bState);
   gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 10);
 
-  gtk_signal_connect (GTK_OBJECT(m_button),
+  g_signal_connect (m_button,
                       "toggled",
-                      GTK_SIGNAL_FUNC(toggle_cb),
+                      G_CALLBACK(toggle_cb),
                       this);
 }
 //------------------------------------------------------------------------
@@ -425,9 +425,9 @@ TabButton::TabButton(GtkWidget *pParent, GtkWidget *pButton,
 {
   gtk_box_pack_start (GTK_BOX (pParent), m_button, FALSE, TRUE, 5);
 
-  gtk_signal_connect (GTK_OBJECT(m_button),
+  g_signal_connect (m_button,
                       "toggled",
-                      GTK_SIGNAL_FUNC(toggle_cb),
+                      G_CALLBACK(toggle_cb),
                       this);
 }
 //------------------------------------------------------------------------
@@ -460,9 +460,9 @@ FontSelection::FontSelection (GtkWidget *pParent,
   gtk_box_pack_start (GTK_BOX(hbox),m_fontButton,FALSE, FALSE, 0);
   gtk_widget_show(m_fontButton);
 
-  gtk_signal_connect (GTK_OBJECT(m_fontButton),
+  g_signal_connect (m_fontButton,
                       "font-set",
-                      GTK_SIGNAL_FUNC(setFont_cb),
+                      G_CALLBACK(setFont_cb),
                       this);
 
   const char *fontName = "font";
@@ -761,8 +761,8 @@ gpsimGuiPreferences::gpsimGuiPreferences()
 
   button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-                             GTK_SIGNAL_FUNC(gpsimGuiPreferences::cancel_cb),
+  g_signal_connect_swapped (button, "clicked",
+                             G_CALLBACK(gpsimGuiPreferences::cancel_cb),
                              this);
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
@@ -771,8 +771,8 @@ gpsimGuiPreferences::gpsimGuiPreferences()
 
   button = gtk_button_new_from_stock (GTK_STOCK_APPLY);
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-                             GTK_SIGNAL_FUNC(gpsimGuiPreferences::apply_cb),
+  g_signal_connect_swapped (button, "clicked",
+                             G_CALLBACK(gpsimGuiPreferences::apply_cb),
                              this);
 
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
@@ -850,24 +850,24 @@ fileopen_dialog(gpointer             callback_data,
 
     gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
-                        "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+    g_signal_connect (GTK_FILE_SELECTION (window)->ok_button,
+                        "clicked", G_CALLBACK(file_selection_ok),
                         window);
-    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-                               "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
+    g_signal_connect_swapped (GTK_FILE_SELECTION (window)->cancel_button,
+                               "clicked", G_CALLBACK(gtk_widget_hide),
                                GTK_OBJECT (window));
 
     button = gtk_button_new_with_label ("Hide Fileops");
-    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                        (GtkSignalFunc) file_selection_hide_fileops,
+    g_signal_connect (button, "clicked",
+                        G_CALLBACK(file_selection_hide_fileops),
                         (gpointer) window);
     gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area),
                         button, FALSE, FALSE, 0);
     gtk_widget_show (button);
 
     button = gtk_button_new_with_label ("Show Fileops");
-    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                        (GtkSignalFunc) gtk_file_selection_show_fileop_buttons,
+    g_signal_connect (button, "clicked",
+                        G_CALLBACK(gtk_file_selection_show_fileop_buttons),
                         (gpointer) window);
     gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area),
                         button, FALSE, FALSE, 0);
@@ -1273,7 +1273,7 @@ cbTimeFormatPopup(GtkWidget *widget, GdkEventButton *event, TimeWidget *tw)
                    3, event->time);
     // It looks like we need it to avoid a selection in the entry.
     // For this we tell the entry to stop reporting this event.
-    gtk_signal_emit_stop_by_name(GTK_OBJECT(tw->entry),"button_press_event");
+    g_signal_stop_emission_by_name(tw->entry, "button_press_event");
   }
   return FALSE;
 }
@@ -1289,8 +1289,8 @@ void TimeFormatter::AddToMenu(GtkWidget *menu,
                               const char*menu_text)
 {
   GtkWidget *item = gtk_menu_item_new_with_label(menu_text);
-  gtk_signal_connect(GTK_OBJECT(item),"activate",
-                     (GtkSignalFunc) cbTimeFormatActivated,
+  g_signal_connect(item, "activate",
+                     G_CALLBACK(cbTimeFormatActivated),
                      this);
   gtk_widget_show(item);
   gtk_menu_append(GTK_MENU(menu),item);
@@ -1320,9 +1320,9 @@ void TimeWidget::Create(GtkWidget *container)
   new TimeCyclesDec(this,menu);
 
   // Associate a callback with the user button-click actions
-  gtk_signal_connect(GTK_OBJECT(entry),
+  g_signal_connect(entry,
                      "button_press_event",
-                     (GtkSignalFunc) cbTimeFormatPopup,
+                     G_CALLBACK(cbTimeFormatPopup),
                      this);
 }
 
@@ -1505,8 +1505,8 @@ void MainWindow::Create ()
   gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
 
 
-  gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
-                      GTK_SIGNAL_FUNC (dispatcher_delete_event),
+  g_signal_connect (dispatcher_window, "delete-event",
+                      G_CALLBACK(dispatcher_delete_event),
                       0);
 
 #if GTK_MAJOR_VERSION >= 2
@@ -1542,33 +1542,33 @@ void MainWindow::Create ()
 
   // Buttons
   button = gtk_button_new_with_label ("step");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) stepbutton_cb, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(stepbutton_cb), 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   button = gtk_button_new_with_label ("over");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) overbutton_cb, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(overbutton_cb), 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   button = gtk_button_new_with_label ("finish");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) finishbutton_cb, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(finishbutton_cb), 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   button = gtk_button_new_with_label ("run");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) runbutton_cb, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(runbutton_cb), 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   button = gtk_button_new_with_label ("stop");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) stopbutton_cb, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(stopbutton_cb), 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   button = gtk_button_new_with_label ("reset");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) resetbutton_cb, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(resetbutton_cb), 0);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
 
@@ -1610,8 +1610,8 @@ void MainWindow::Create ()
 
   gtk_combo_box_set_active(GTK_COMBO_BOX(update_rate_menu), umi->menu_index);
 
-  gtk_signal_connect(GTK_OBJECT(update_rate_menu),"changed",
-                     (GtkSignalFunc) gui_update_cb,
+  g_signal_connect(update_rate_menu, "changed",
+                     G_CALLBACK(gui_update_cb),
                      (gpointer)update_rate_menu);
 
   gtk_box_pack_start (GTK_BOX (buttonbox), frame, FALSE, FALSE, 5);
@@ -1632,8 +1632,8 @@ void MainWindow::Create ()
   separator = gtk_hseparator_new ();
   gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
   button = gtk_button_new_with_label ("Quit gpsim");
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-                     (GtkSignalFunc) do_quit_app, 0);
+  g_signal_connect(button, "clicked",
+                     G_CALLBACK(do_quit_app), 0);
 
   gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
   gtk_widget_show_all (dispatcher_window);

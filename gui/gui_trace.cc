@@ -254,8 +254,8 @@ void Trace_Window::Build(void)
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
 
-  gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-                     GTK_SIGNAL_FUNC(delete_event), this);
+  g_signal_connect(window, "delete_event",
+                     G_CALLBACK(delete_event), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
@@ -280,8 +280,8 @@ void Trace_Window::Build(void)
   column_width = 3 * char_width + 6;
 RRR*/
 
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK(gui_object_configure_event), this);
 
 
 

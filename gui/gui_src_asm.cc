@@ -666,10 +666,10 @@ void SearchDialog::Build()
 
   m_Window = gtk_dialog_new();
 
-  gtk_signal_connect(GTK_OBJECT(m_Window),
-    "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-  gtk_signal_connect_object(GTK_OBJECT(m_Window),
-    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),
+  g_signal_connect(m_Window,
+    "configure_event", G_CALLBACK (configure_event), 0);
+  g_signal_connect_swapped(m_Window,
+    "delete_event", G_CALLBACK (gtk_widget_hide),
     GTK_OBJECT(m_Window));
 
   gtk_window_set_title(GTK_WINDOW(m_Window),"Find");
@@ -687,8 +687,8 @@ void SearchDialog::Build()
   gtk_box_pack_start(GTK_BOX(hbox),m_Entry,
     TRUE,TRUE,5);
   gtk_combo_disable_activate(GTK_COMBO(m_Entry));
-  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(m_Entry)->entry),"activate",
-    GTK_SIGNAL_FUNC(find_cb),this);
+  g_signal_connect(GTK_COMBO(m_Entry)->entry, "activate",
+    G_CALLBACK (find_cb), this);
 
   hbox = gtk_hbox_new(FALSE,15);
   gtk_box_pack_start(GTK_BOX(GTK_DIALOG(m_Window)->vbox),hbox,
@@ -706,22 +706,22 @@ void SearchDialog::Build()
   button = gtk_button_new_with_label("Find");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-    GTK_SIGNAL_FUNC(find_cb),this);
+  g_signal_connect(button, "clicked",
+    G_CALLBACK (find_cb), this);
   GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
   gtk_widget_grab_default(button);
 
   button = gtk_button_new_with_label("Clear");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-    GTK_SIGNAL_FUNC(find_clear_cb),this);
+  g_signal_connect(button, "clicked",
+    G_CALLBACK (find_clear_cb), this);
 
   button = gtk_button_new_with_label("Close");
   gtk_widget_show(button);
   gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(m_Window)->action_area),button);
-  gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(m_Window));
+  g_signal_connect_swapped(button, "clicked",
+    G_CALLBACK (gtk_widget_hide), GTK_OBJECT(m_Window));
 
   m_bIsBuilt = true;
 }
@@ -795,7 +795,7 @@ TextStyle::TextStyle (const char *cpName,
     "background-gdk", mBG.CurrentColor(),NULL);
 
   g_signal_connect (G_OBJECT (m_pTag), "event",
-    GTK_SIGNAL_FUNC(TagEvent),
+    G_CALLBACK(TagEvent),
     this);
 }
 
@@ -1530,8 +1530,8 @@ SourceWindow::BuildPopupMenu()
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
     item=gtk_menu_item_new_with_label(menu_items[i].name);
     menu_items[i].item=item;
-    gtk_signal_connect(GTK_OBJECT(item),"activate",
-      (GtkSignalFunc) PopupMenuHandler,
+    g_signal_connect(item, "activate",
+      G_CALLBACK (PopupMenuHandler),
       &menu_items[i]);
 
     gtk_widget_show(item);
@@ -1545,8 +1545,8 @@ SourceWindow::BuildPopupMenu()
   for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
     item=gtk_menu_item_new_with_label(submenu_items[i].name);
     submenu_items[i].item=item;
-    gtk_signal_connect(GTK_OBJECT(item),"activate",
-      (GtkSignalFunc) PopupMenuHandler,
+    g_signal_connect(item, "activate",
+      G_CALLBACK (PopupMenuHandler),
       &submenu_items[i]);
 
     GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
@@ -1584,12 +1584,12 @@ void SourceWindow::Build()
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  g_signal_connect(GTK_OBJECT(window),"key_press_event",
-    (GtkSignalFunc) KeyPressHandler,
+  g_signal_connect(window,"key_press_event",
+    G_CALLBACK (KeyPressHandler),
     (gpointer) this);
 
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-    GTK_SIGNAL_FUNC(DeleteEventHandler),
+  g_signal_connect (window, "delete_event",
+    G_CALLBACK (DeleteEventHandler),
     (gpointer) this);
 
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -1602,8 +1602,8 @@ void SourceWindow::Build()
 
   m_Notebook = gtk_notebook_new();
   m_currentPage = 0;
-  gtk_signal_connect (GTK_OBJECT (m_Notebook), "switch-page",
-    GTK_SIGNAL_FUNC(cb_notebook_switchpage),
+  g_signal_connect (m_Notebook, "switch-page",
+    G_CALLBACK (cb_notebook_switchpage),
     (gpointer) this);
 
   gtk_notebook_set_tab_pos((GtkNotebook*)m_Notebook, GTK_POS_LEFT);
@@ -3098,8 +3098,8 @@ SourceBrowserAsm_Window::BuildPopupMenu(GtkWidget *sheet, SourceBrowserAsm_Windo
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
     item=gtk_menu_item_new_with_label(menu_items[i].name);
     menu_items[i].item=item;
-    gtk_signal_connect(GTK_OBJECT(item),"activate",
-      (GtkSignalFunc) PopupMenuHandler,
+    g_signal_connect(item, "activate",
+      G_CALLBACK (PopupMenuHandler),
       &menu_items[i]);
 
     gtk_widget_show(item);
@@ -3113,8 +3113,8 @@ SourceBrowserAsm_Window::BuildPopupMenu(GtkWidget *sheet, SourceBrowserAsm_Windo
   for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
     item=gtk_menu_item_new_with_label(submenu_items[i].name);
     submenu_items[i].item=item;
-    gtk_signal_connect(GTK_OBJECT(item),"activate",
-      (GtkSignalFunc) PopupMenuHandler,
+    g_signal_connect(item, "activate",
+      G_CALLBACK (PopupMenuHandler),
       &submenu_items[i]);
 
     GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
@@ -3293,7 +3293,7 @@ gint SourceBrowserAsm_Window::sigh_button_event(
 
     // override pages[id].source_text's handler
     // is there a better way? FIXME
-    gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->SrcPages[id].source_text),"button_press_event");
+    g_signal_stop_emission_by_name(sbaw->SrcPages[id].source_text, "button_press_event");
 
     return 1;
   }
@@ -3479,21 +3479,21 @@ int SourceBrowserAsm_Window::add_page(
 
   gtk_widget_set_style(GTK_WIDGET(sbaw->SrcPages[id].source_text),style);
 
-  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_text), "button_press_event",
-    GTK_SIGNAL_FUNC(sigh_button_event), sbaw);
+  g_signal_connect(sbaw->SrcPages[id].source_text, "button_press_event",
+    G_CALLBACK (sigh_button_event), sbaw);
   gtk_box_pack_start_defaults(GTK_BOX(hbox), sbaw->SrcPages[id].source_text);
 
   gtk_box_pack_start(GTK_BOX(hbox), vscrollbar,
     FALSE,FALSE, 0);
-  gtk_signal_connect(GTK_OBJECT(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj),
-    "value_changed",GTK_SIGNAL_FUNC(text_adj_cb),sbaw->SrcPages[id].source_layout_adj);
+  g_signal_connect(GTK_TEXT(sbaw->SrcPages[id].source_text)->vadj,
+    "value_changed", G_CALLBACK (text_adj_cb), sbaw->SrcPages[id].source_layout_adj);
 
-  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_layout),"motion-notify-event",
-    GTK_SIGNAL_FUNC(marker_cb),sbaw);
-  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_layout),"button_press_event",
-    GTK_SIGNAL_FUNC(marker_cb),sbaw);
-  gtk_signal_connect(GTK_OBJECT(sbaw->SrcPages[id].source_layout),"button_release_event",
-    GTK_SIGNAL_FUNC(marker_cb),sbaw);
+  g_signal_connect(sbaw->SrcPages[id].source_layout, "motion-notify-event",
+    G_CALLBACK (marker_cb), sbaw);
+  g_signal_connect(sbaw->SrcPages[id].source_layout, "button_press_event",
+    G_CALLBACK (marker_cb), sbaw);
+  g_signal_connect(sbaw->SrcPages[id].source_layout, "button_release_event",
+    G_CALLBACK (marker_cb), sbaw);
 
   // display everything, so that gtk_notebook_get_current_page() works
   GTKWAIT;
@@ -4066,10 +4066,10 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
   {
     dialog = gtk_dialog_new();
     gtk_window_set_title (GTK_WINDOW (dialog), "Source browser settings");
-    gtk_signal_connect(GTK_OBJECT(dialog),
-      "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect_object(GTK_OBJECT(dialog),
-      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+    g_signal_connect(dialog,
+      "configure_event", G_CALLBACK (configure_event), 0);
+    g_signal_connect_swapped(dialog,
+      "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
 
     // Source font
@@ -4090,8 +4090,8 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(hbox), button,
       FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-      GTK_SIGNAL_FUNC(DialogFontSelect::DialogRun),
+    g_signal_connect(button,"clicked",
+      G_CALLBACK (DialogFontSelect::DialogRun),
       (gpointer)sourcefontstringentry);
 
 
@@ -4112,8 +4112,8 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(hbox), button,
       FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-      GTK_SIGNAL_FUNC(DialogFontSelect::DialogRun),
+    g_signal_connect(button, "clicked",
+      G_CALLBACK (DialogFontSelect::DialogRun),
       (gpointer)commentfontstringentry);
 
 
@@ -4213,10 +4213,10 @@ int gui_message(const char *message)
   {
     dialog = gtk_dialog_new();
 
-    gtk_signal_connect(GTK_OBJECT(dialog),
-      "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect_object(GTK_OBJECT(dialog),
-      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+    g_signal_connect(dialog,
+      "configure_event", G_CALLBACK (configure_event), 0);
+    g_signal_connect_swapped(dialog,
+      "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
     hbox = gtk_hbox_new(0,0);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
@@ -4225,8 +4225,8 @@ int gui_message(const char *message)
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
       FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-      GTK_SIGNAL_FUNC(message_close_cb),(gpointer)dialog);
+    g_signal_connect(button, "clicked",
+      G_CALLBACK(message_close_cb), (gpointer)dialog);
     GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
     gtk_widget_grab_default(button);
 
@@ -4272,10 +4272,10 @@ int gui_question(const char *question, const char *a, const char *b)
   if(dialog==0)
   {
     dialog = gtk_dialog_new();
-    gtk_signal_connect(GTK_OBJECT(dialog),
-      "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect_object(GTK_OBJECT(dialog),
-      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+    g_signal_connect(dialog,
+      "configure_event", G_CALLBACK(configure_event), 0);
+    g_signal_connect_swapped(dialog,
+      "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
     hbox = gtk_hbox_new(0,0);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
@@ -4284,8 +4284,8 @@ int gui_question(const char *question, const char *a, const char *b)
     gtk_widget_show(abutton);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), abutton,
       FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(abutton),"clicked",
-      GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+    g_signal_connect(abutton, "clicked",
+      G_CALLBACK(a_cb), (gpointer)&retval);
     GTK_WIDGET_SET_FLAGS (abutton, GTK_CAN_DEFAULT);
     gtk_widget_grab_default(abutton);
 
@@ -4293,8 +4293,8 @@ int gui_question(const char *question, const char *a, const char *b)
     gtk_widget_show(bbutton);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), bbutton,
       FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(bbutton),"clicked",
-      GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+    g_signal_connect(bbutton,"clicked",
+      G_CALLBACK(b_cb), (gpointer)&retval);
 
     label=gtk_label_new(question);
     gtk_box_pack_start(GTK_BOX(hbox), label,

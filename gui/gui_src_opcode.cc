@@ -330,8 +330,8 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
   for (i=0; i < (sizeof(sheet_menu_items)/sizeof(sheet_menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(sheet_menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) popup_activated,
+      g_signal_connect(item,"activate",
+                         G_CALLBACK (popup_activated),
                          &sheet_menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
@@ -349,8 +349,8 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
         item=gtk_radio_menu_item_new_with_label(group, sheet_submenu_items[i].name);
 
         group=gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
-        gtk_signal_connect(GTK_OBJECT(item),"activate",
-                           (GtkSignalFunc) popup_activated,
+        g_signal_connect (item, "activate",
+                           G_CALLBACK (popup_activated),
                            &sheet_submenu_items[i]);
 
         GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
@@ -397,8 +397,8 @@ build_menu_for_clist(SourceBrowserOpcode_Window *sbow)
   for (i=0; i < (sizeof(clist_menu_items)/sizeof(clist_menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(clist_menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) popup_activated,
+      g_signal_connect (item, "activate",
+                         G_CALLBACK (popup_activated),
                          &clist_menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
@@ -737,10 +737,10 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
     {
         dialog = gtk_dialog_new();
         gtk_window_set_title (GTK_WINDOW (dialog), "Opcode browser settings");
-        gtk_signal_connect(GTK_OBJECT(dialog),
-                           "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-        gtk_signal_connect_object(GTK_OBJECT(dialog),
-                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+        g_signal_connect (dialog,
+                           "configure_event", G_CALLBACK (configure_event), 0);
+        g_signal_connect_swapped(dialog,
+                                  "delete_event", G_CALLBACK (gtk_widget_hide), GTK_OBJECT(dialog));
 
 
         // Normal font
@@ -759,8 +759,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(hbox), button,
                            FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
+        g_signal_connect (button, "clicked",
+                           G_CALLBACK(font_dialog_browse), (gpointer)normalfontstringentry);
 
 
         // Breakpoint font
@@ -779,8 +779,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(hbox), button,
                            FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)breakpointfontstringentry);
+        g_signal_connect(button, "clicked",
+                           G_CALLBACK (font_dialog_browse), (gpointer)breakpointfontstringentry);
 
 
         // PC font
@@ -799,8 +799,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(hbox), button,
                            FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)pcfontstringentry);
+        g_signal_connect (button, "clicked",
+                           G_CALLBACK (font_dialog_browse), (gpointer)pcfontstringentry);
 
 
         // OK button
@@ -808,8 +808,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                            FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+        g_signal_connect (button, "clicked",
+                           G_CALLBACK (settingsok_cb), (gpointer)dialog);
     }
 
     gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), sbow->normalfont_string);
@@ -1523,8 +1523,8 @@ void SourceBrowserOpcode_Window::Build(void)
   /* Add a signal handler for button press events. This will capture
    * commands for setting and/or clearing break points
    */
-  gtk_signal_connect(GTK_OBJECT(clist),"button_press_event",
-                     (GtkSignalFunc) button_press,
+  g_signal_connect (clist,"button_press_event",
+                     G_CALLBACK (button_press),
                      (gpointer) this);
 
 
@@ -1637,27 +1637,27 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_sheet_set_row_titles_width(GTK_SHEET(sheet), column_width);
 
 
-  gtk_signal_connect(GTK_OBJECT(sheet),
+  g_signal_connect(sheet,
                      "button_press_event",
-                     (GtkSignalFunc) button_press,
+                     G_CALLBACK (button_press),
                      this);
 
-  gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(sheet))),
-                     "changed", (GtkSignalFunc)show_entry, this);
+  g_signal_connect(gtk_sheet_get_entry(GTK_SHEET(sheet)),
+                     "changed", G_CALLBACK (show_entry), this);
 
-  gtk_signal_connect(GTK_OBJECT(sheet),
-                     "activate", (GtkSignalFunc)activate_sheet_cell,
+  g_signal_connect(sheet,
+                     "activate", G_CALLBACK (activate_sheet_cell),
                      (gpointer) this);
 
-  gtk_signal_connect(GTK_OBJECT(entry),
-                     "changed", (GtkSignalFunc)show_sheet_entry, this);
+  g_signal_connect(entry,
+                     "changed", G_CALLBACK (show_sheet_entry), this);
 
-  gtk_signal_connect(GTK_OBJECT(entry),
-                     "activate", (GtkSignalFunc)activate_sheet_entry,
+  g_signal_connect(entry,
+                     "activate", G_CALLBACK (activate_sheet_entry),
                      this);
-  gtk_signal_connect(GTK_OBJECT(sheet),
+  g_signal_connect(sheet,
                      "set_cell",
-                     (GtkSignalFunc) parse_numbers,
+                     G_CALLBACK (parse_numbers),
                      this);
   /////////////////////////////////////////////////////////////////
 
@@ -1667,8 +1667,8 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_widget_show(scrolled_win);
   gtk_widget_show(sheet);
 
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK (gui_object_configure_event), this);
 
   gtk_widget_show(window);
 

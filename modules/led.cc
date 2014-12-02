@@ -487,14 +487,14 @@ namespace Leds {
                           110);
     gtk_container_add (GTK_CONTAINER (vbox), darea);
 
-    gtk_signal_connect (GTK_OBJECT (darea),
+    g_signal_connect (darea,
                         "expose_event",
-                        GTK_SIGNAL_FUNC (led7_expose_event),
+                        G_CALLBACK(led7_expose_event),
                         this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-    gtk_signal_connect (GTK_OBJECT (darea),
+    g_signal_connect (darea,
                         "button_press_event",
-                        GTK_SIGNAL_FUNC (cursor_event),
+                        G_CALLBACK(cursor_event),
                         NULL);
 
     gtk_widget_show (darea);
@@ -957,9 +957,9 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
     gtk_widget_set_usize (darea,
                           w_height,
                           w_width);
-    gtk_signal_connect (GTK_OBJECT (darea),
+    g_signal_connect (darea,
                         "expose_event",
-                        GTK_SIGNAL_FUNC (led_expose_event),
+                        G_CALLBACK(led_expose_event),
                         this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_widget_show (darea);

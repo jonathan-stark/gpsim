@@ -657,8 +657,8 @@ Two port switch\n\
 
     m_button = GTK_TOGGLE_BUTTON(gtk_toggle_button_new_with_label ((char*)sw->name().c_str()));
     gtk_container_set_border_width (GTK_CONTAINER (m_button), 1);
-    gtk_signal_connect (GTK_OBJECT (m_button), "toggled",
-                        GTK_SIGNAL_FUNC (toggle_cb), (gpointer)sw);
+    g_signal_connect (m_button, "toggled",
+                        G_CALLBACK(toggle_cb), (gpointer)sw);
     gtk_widget_show(GTK_WIDGET(m_button));
     gtk_box_pack_start (GTK_BOX (box1), GTK_WIDGET(m_button), FALSE, FALSE, 0);
 

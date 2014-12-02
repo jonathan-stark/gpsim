@@ -118,10 +118,10 @@ void Encoder::create_widget(Encoder *enc)
   gtk_container_set_border_width (GTK_CONTAINER (buttonl), 5);
   gtk_container_set_border_width (GTK_CONTAINER (buttonr), 5);
 
-  gtk_signal_connect (GTK_OBJECT (buttonl), "pressed",			    
-		      GTK_SIGNAL_FUNC (ccw_cb), (gpointer)enc);
-  gtk_signal_connect (GTK_OBJECT (buttonr), "pressed",			    
-		      GTK_SIGNAL_FUNC (cw_cb), (gpointer)enc);
+  g_signal_connect (buttonl, "pressed",			    
+		      G_CALLBACK(ccw_cb), (gpointer)enc);
+  g_signal_connect (buttonr, "pressed",			    
+		      G_CALLBACK(cw_cb), (gpointer)enc);
 	
 		
   gtk_widget_show(buttonl);

@@ -459,8 +459,8 @@ int gui_get_value(const char *prompt)
       gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
       //        gtk_signal_connect(GTK_OBJECT(dialog),
       //                           "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-      gtk_signal_connect_object(GTK_OBJECT(dialog),
-                                      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+      g_signal_connect_swapped(dialog,
+                                      "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
       label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
       gtk_widget_show(label);
@@ -474,15 +474,15 @@ int gui_get_value(const char *prompt)
       gtk_widget_show(button);
       gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                                 FALSE,FALSE,10);
-      gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                                GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+      g_signal_connect(button, "clicked",
+                                G_CALLBACK(a_cb), (gpointer)&retval);
 
       button = gtk_button_new_with_label("Cancel");
       gtk_widget_show(button);
       gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                                 FALSE,FALSE,10);
-      gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                                GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+      g_signal_connect(button, "clicked",
+                                G_CALLBACK(b_cb), (gpointer)&retval);
 
       label=gtk_label_new(prompt);
       gtk_widget_show(label);
@@ -541,8 +541,8 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
         gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
 //      gtk_signal_connect(GTK_OBJECT(dialog),
 //                         "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-        gtk_signal_connect_object(GTK_OBJECT(dialog),
-                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+        g_signal_connect_swapped(dialog,
+                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
         label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
         gtk_widget_show(label);
@@ -552,15 +552,15 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                            FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+        g_signal_connect(button, "clicked",
+                           G_CALLBACK(a_cb), (gpointer)&retval);
 
         button = gtk_button_new_with_label("Cancel");
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                            FALSE,FALSE,10);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+        g_signal_connect(button, "clicked",
+                           G_CALLBACK(b_cb), (gpointer)&retval);
 
         // Value 1
         hbox1 = gtk_hbox_new(0,0);
@@ -699,17 +699,17 @@ static char *gui_get_log_settings(const char **filename, int *mode)
 
         gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-        gtk_signal_connect_object(GTK_OBJECT(window),
-                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
+        g_signal_connect_swapped(window,
+                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(window));
 //      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
 //                                 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
 //                                 GTK_OBJECT(window));
 
-        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
-                            "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+        g_signal_connect (GTK_FILE_SELECTION (window)->ok_button,
+                            "clicked", G_CALLBACK(file_selection_ok),
                             window);
-        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-                            "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
+        g_signal_connect (GTK_FILE_SELECTION (window)->cancel_button,
+                            "clicked", G_CALLBACK(file_selection_cancel),
                             window);
 
         hbox = gtk_hbox_new(0,0);
@@ -734,15 +734,15 @@ static char *gui_get_log_settings(const char **filename, int *mode)
         menu=gtk_menu_new();
 
         item=gtk_menu_item_new_with_label("ASCII");
-        gtk_signal_connect(GTK_OBJECT(item),"activate",
-                           (GtkSignalFunc) modepopup_activated,
+        g_signal_connect(item, "activate",
+                           G_CALLBACK (modepopup_activated),
                            (gpointer)"ASCII");
 //      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
         gtk_widget_show(item);
         gtk_menu_append(GTK_MENU(menu),item);
         item=gtk_menu_item_new_with_label("LXT");
-        gtk_signal_connect(GTK_OBJECT(item),"activate",
-                           (GtkSignalFunc) modepopup_activated,
+        g_signal_connect(item, "activate",
+                           G_CALLBACK (modepopup_activated),
                            (gpointer)"LXT");
 //      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
         gtk_widget_show(item);
@@ -913,8 +913,8 @@ build_menu(Register_Window *rw)
   for (i=0; i < (int)(sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) popup_activated,
+      g_signal_connect(item, "activate",
+                         G_CALLBACK (popup_activated),
                          &menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
@@ -1256,10 +1256,10 @@ int Register_Window::SettingsDialog()
   {
     dialog = gtk_dialog_new();
     gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
-    gtk_signal_connect(GTK_OBJECT(dialog),
-                       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect_object(GTK_OBJECT(dialog),
-                              "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+    g_signal_connect(dialog,
+                       "configure_event", G_CALLBACK(configure_event), 0);
+    g_signal_connect_swapped(dialog,
+                              "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
 
     // Normal font
@@ -1278,8 +1278,8 @@ int Register_Window::SettingsDialog()
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(hbox), button,
                        FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                       GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
+    g_signal_connect(button, "clicked",
+                       G_CALLBACK(font_dialog_browse), (gpointer)normalfontstringentry);
 
 
     // OK button
@@ -1287,8 +1287,8 @@ int Register_Window::SettingsDialog()
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                        FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                       GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+    g_signal_connect(button, "clicked",
+                       G_CALLBACK(settingsok_cb), (gpointer)dialog);
   }
 
   gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), normalfont_string);
@@ -2191,11 +2191,11 @@ void Register_Window::Build()
       }
   }
   UpdateStyle();
-  gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-                     GTK_SIGNAL_FUNC(delete_event), this);
+  g_signal_connect(window, "delete_event",
+                     G_CALLBACK(delete_event), this);
 
-  gtk_signal_connect(GTK_OBJECT (window), "show",
-                  GTK_SIGNAL_FUNC(show_event), this);
+  g_signal_connect(window, "show",
+                  G_CALLBACK(show_event), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
@@ -2213,47 +2213,47 @@ void Register_Window::Build()
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
 
-  gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(register_sheet))),
-                     "changed", (GtkSignalFunc)show_entry, this);
+  g_signal_connect(gtk_sheet_get_entry(GTK_SHEET(register_sheet)),
+                     "changed", G_CALLBACK(show_entry), this);
 
-  gtk_signal_connect(GTK_OBJECT(register_sheet),
-                     "activate", (GtkSignalFunc)activate_sheet_cell,
+  g_signal_connect(register_sheet,
+                     "activate", G_CALLBACK(activate_sheet_cell),
                      this);
 
-  gtk_signal_connect(GTK_OBJECT(entry),
-                     "changed", (GtkSignalFunc)show_sheet_entry, this);
+  g_signal_connect(entry,
+                     "changed", G_CALLBACK(show_sheet_entry), this);
 
-  gtk_signal_connect(GTK_OBJECT(entry),
-                     "activate", (GtkSignalFunc)activate_sheet_entry,
+  g_signal_connect(entry,
+                     "activate", G_CALLBACK(activate_sheet_entry),
                      this);
 
-  gtk_signal_connect(GTK_OBJECT(register_sheet),
+  g_signal_connect(register_sheet,
                      "key_press_event",
-                     (GtkSignalFunc) clipboard_handler,
+                     G_CALLBACK(clipboard_handler),
                      0);
 
-  gtk_signal_connect(GTK_OBJECT(register_sheet),
+  g_signal_connect(register_sheet,
                      "resize_range",
-                     (GtkSignalFunc) resize_handler,
+                     G_CALLBACK(resize_handler),
                      this);
 
-  gtk_signal_connect(GTK_OBJECT(register_sheet),
+  g_signal_connect(register_sheet,
                      "move_range",
-                     (GtkSignalFunc) move_handler,
+                     G_CALLBACK(move_handler),
                      this);
 
-  gtk_signal_connect(GTK_OBJECT(register_sheet),
+  g_signal_connect(register_sheet,
                      "button_press_event",
-                     (GtkSignalFunc) do_popup,
+                     G_CALLBACK(do_popup),
                      this);
 
-  gtk_signal_connect(GTK_OBJECT(register_sheet),
+  g_signal_connect(register_sheet,
                      "set_cell",
-                     (GtkSignalFunc) set_cell,
+                     G_CALLBACK(set_cell),
                      this);
 
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK(gui_object_configure_event),
                            this);
 
   SetRegisterSize();

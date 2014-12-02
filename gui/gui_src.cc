@@ -182,8 +182,8 @@ void SourceBrowser_Window::Create(void)
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC(delete_event),
+  g_signal_connect (window, "delete_event",
+                      G_CALLBACK(delete_event),
                       (gpointer) this);
 
   // FIXME - populate the KeyMap map with source browser functions. This should
@@ -210,8 +210,8 @@ void SourceBrowser_Window::Create(void)
   /* Add a signal handler for key press events. This will capture
    * key commands for single stepping, running, etc.
    */
-  gtk_signal_connect(GTK_OBJECT(window),"key_press_event",
-                     (GtkSignalFunc) key_press,
+  g_signal_connect(window, "key_press_event",
+                     G_CALLBACK(key_press),
                      (gpointer) this);
 
 

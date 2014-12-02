@@ -558,8 +558,8 @@ exestats_build_menu(Profile_Window *pw)
   for (i=0; i < (sizeof(exestats_menu_items)/sizeof(exestats_menu_items[0])) ; i++){
       exestats_menu_items[i].item=item=gtk_menu_item_new_with_label(exestats_menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) exestats_popup_activated,
+      g_signal_connect(item, "activate",
+                         G_CALLBACK (exestats_popup_activated),
                          &exestats_menu_items[i]);
 
       gtk_widget_show(item);
@@ -1567,8 +1567,8 @@ build_menu(Profile_Window *pw)
   for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
       range_menu_items[i].item=item=gtk_menu_item_new_with_label(range_menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) popup_activated,
+      g_signal_connect(item, "activate",
+                         G_CALLBACK (popup_activated),
                          &range_menu_items[i]);
 
       gtk_widget_show(item);
@@ -2377,8 +2377,8 @@ void Profile_Window::Build(void)
   GtkWidget *scrolled_window;
 
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-                     GTK_SIGNAL_FUNC(delete_event), this);
+  g_signal_connect(window, "delete_event",
+                     G_CALLBACK (delete_event), this);
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0);
@@ -2446,15 +2446,15 @@ void Profile_Window::Build(void)
 
   range_popup_menu=build_menu(this);
 
-  gtk_signal_connect(GTK_OBJECT(profile_range_clist),
+  g_signal_connect(profile_range_clist,
                      "button_press_event",
-                     (GtkSignalFunc) do_popup,
+                     G_CALLBACK (do_popup),
                      this);
-  gtk_signal_connect(GTK_OBJECT(profile_range_clist),"key_press_event",
-                     (GtkSignalFunc) key_press,
+  g_signal_connect(profile_range_clist, "key_press_event",
+                     G_CALLBACK (key_press),
                      (gpointer) this);
-  gtk_signal_connect(GTK_OBJECT(profile_range_clist),"select_row",
-                     (GtkSignalFunc)profile_range_list_row_selected,this);
+  g_signal_connect(profile_range_clist, "select_row",
+                     G_CALLBACK (profile_range_list_row_selected), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
@@ -2526,9 +2526,9 @@ void Profile_Window::Build(void)
   GTK_WIDGET_UNSET_FLAGS(profile_exestats_clist,GTK_CAN_DEFAULT);
 
   exestats_popup_menu=exestats_build_menu(this);
-  gtk_signal_connect(GTK_OBJECT(profile_exestats_clist),
+  g_signal_connect(profile_exestats_clist,
                      "button_press_event",
-                     (GtkSignalFunc) exestats_do_popup,
+                     G_CALLBACK (exestats_do_popup),
                      this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
@@ -2550,8 +2550,8 @@ void Profile_Window::Build(void)
 
   normal_style = gtk_style_new ();
 
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK (gui_object_configure_event),this);
 
 
 

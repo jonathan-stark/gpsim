@@ -289,14 +289,14 @@ void Stack_Window::Build(void)
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-                      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
-  gtk_signal_connect_after(GTK_OBJECT(window), "button_press_event",
-                           GTK_SIGNAL_FUNC(sigh_button_event), this);
+  g_signal_connect (window, "destroy",
+                      G_CALLBACK(gtk_widget_destroyed), &window);
+  g_signal_connect (window, "delete_event",
+                      G_CALLBACK(delete_event), (gpointer)this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK(gui_object_configure_event), this);
+  g_signal_connect_after(window, "button_press_event",
+                           G_CALLBACK(sigh_button_event), this);
 
   stack_clist=gtk_clist_new_with_titles(COLUMNS,(gchar **)stack_titles);
 
@@ -308,10 +308,10 @@ void Stack_Window::Build(void)
 
   gtk_clist_set_selection_mode (GTK_CLIST(stack_clist), GTK_SELECTION_BROWSE);
 
-  gtk_signal_connect(GTK_OBJECT(stack_clist),"click_column",
-                     (GtkSignalFunc)stack_click_column,0);
-  gtk_signal_connect(GTK_OBJECT(stack_clist),"select_row",
-                     (GtkSignalFunc)stack_list_row_selected,this);
+  g_signal_connect(stack_clist, "click_column",
+                     G_CALLBACK(stack_click_column), 0);
+  g_signal_connect(stack_clist, "select_row",
+                     G_CALLBACK(stack_list_row_selected), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_window);

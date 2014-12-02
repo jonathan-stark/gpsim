@@ -190,8 +190,8 @@ RegisterLabeledEntry::RegisterLabeledEntry(GtkWidget *box,
     if(!isEditable)
       gtk_entry_set_editable(GTK_ENTRY(entry),0);
 
-    gtk_signal_connect(GTK_OBJECT(entry), "activate",
-		       GTK_SIGNAL_FUNC(LabeledEntry_callback),
+    g_signal_connect(entry, "activate",
+		       G_CALLBACK(LabeledEntry_callback),
 		       this);
 
 

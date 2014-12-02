@@ -1778,8 +1778,8 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
                                              GTK_STOCK_CANCEL,
                                              GTK_RESPONSE_CANCEL,
                                              NULL);
-        gtk_signal_connect_object(GTK_OBJECT(dialog),
-                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+        g_signal_connect_swapped(dialog,
+                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
 
         label=gtk_label_new("Enter string:");
         gtk_widget_show(label);
@@ -1799,9 +1799,9 @@ const char *gui_get_string(const char *prompt, const char *initial_text)
         gtk_widget_show(entry);
         gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE,FALSE,20);
         GTK_WIDGET_SET_FLAGS (entry, GTK_CAN_FOCUS);
-        gtk_signal_connect(GTK_OBJECT(entry),
+        g_signal_connect(entry,
                            "activate",
-                           (GtkSignalFunc)a_cb,
+                           G_CALLBACK(a_cb),
                            (gpointer)dialog);
 
     }
@@ -2401,14 +2401,14 @@ static const char *gui_get_filename(const char *filename)
 
         gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-        gtk_signal_connect_object(GTK_OBJECT(window),
-                                  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
+        g_signal_connect_swapped(window,
+                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(window));
 
-        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
-                            "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+        g_signal_connect (GTK_FILE_SELECTION (window)->ok_button,
+                            "clicked", G_CALLBACK(file_selection_ok),
                             window);
-        gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-                            "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
+        g_signal_connect (GTK_FILE_SELECTION (window)->cancel_button,
+                            "clicked", G_CALLBACK(file_selection_cancel),
                             window);
     }
 
@@ -2678,15 +2678,15 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
   gtk_widget_set_events(m_pinDrawingArea,
                         gtk_widget_get_events(m_pinDrawingArea)|
                         GDK_BUTTON_PRESS_MASK);
-  gtk_signal_connect(GTK_OBJECT(m_pinDrawingArea),
+  g_signal_connect(m_pinDrawingArea,
                      "button_press_event",
-                     (GtkSignalFunc) button,
+                     G_CALLBACK(button),
                      this);
 
   gtk_drawing_area_size(GTK_DRAWING_AREA(m_pinDrawingArea),m_width,m_height);
-  gtk_signal_connect(GTK_OBJECT(m_pinDrawingArea),
+  g_signal_connect(m_pinDrawingArea,
                      "expose_event",
-                     (GtkSignalFunc) expose_pin,
+                     G_CALLBACK(expose_pin),
                      this);
 
 
@@ -3362,9 +3362,9 @@ void GuiModule::BuildReferenceDesignator()
 {
   createLabel(&m_name_widget, &m_name_pixmap, m_bbw->window, m_bbw->pinname_gc,
               m_module->name().c_str(),m_bbw->pinnamefont);
-  gtk_signal_connect(GTK_OBJECT(m_name_widget),
+  g_signal_connect(m_name_widget,
                      "expose_event",
-                     (GtkSignalFunc) name_expose,
+                     G_CALLBACK(name_expose),
                      this);
 
 
@@ -3465,9 +3465,9 @@ void GuiModule::Build()
     gtk_drawing_area_size(GTK_DRAWING_AREA(m_pinLabel_widget),m_width,m_height);
     gtk_widget_show_all (m_pinLabel_widget);
     DrawCaseOutline(m_pinLabel_widget);
-    gtk_signal_connect(GTK_OBJECT(m_pinLabel_widget),
+    g_signal_connect(m_pinLabel_widget,
                          "expose_event",
-                         (GtkSignalFunc) module_expose,
+                         G_CALLBACK(module_expose),
                          this);
     gtk_widget_show(m_pinLabel_widget);
 
@@ -3879,9 +3879,9 @@ GtkWidget* Breadboard_Window::add_button(const char *label, const char *name,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 0);
-  gtk_signal_connect(GTK_OBJECT(button),
+  g_signal_connect(button,
                      "clicked",
-                     f,
+                     G_CALLBACK(f),
                      this);
 
   return button;
@@ -4209,9 +4209,9 @@ void Breadboard_Window::Build(void)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (attribute_entry);
   gtk_box_pack_start (GTK_BOX (hbox9), attribute_entry, FALSE, FALSE, 0);
-  gtk_signal_connect(GTK_OBJECT(attribute_entry),
+  g_signal_connect(attribute_entry,
                   "activate",
-                  (GtkSignalFunc) settings_set_cb,
+                  G_CALLBACK(settings_set_cb),
                   this);
 
   add_button("Set","attribute_button", (GtkSignalFunc) settings_set_cb, hbox9);
@@ -4245,22 +4245,22 @@ void Breadboard_Window::Build(void)
                         GDK_BUTTON_PRESS_MASK |
                         GDK_BUTTON_MOTION_MASK |
                         GDK_BUTTON_RELEASE_MASK);
-  gtk_signal_connect(GTK_OBJECT(layout),"motion-notify-event",
-                     GTK_SIGNAL_FUNC(pointer_cb),this);
-  gtk_signal_connect(GTK_OBJECT(layout),"button_press_event",
-                     GTK_SIGNAL_FUNC(pointer_cb),this);
-  gtk_signal_connect(GTK_OBJECT(layout),"button_release_event",
-                     GTK_SIGNAL_FUNC(pointer_cb),this);
-  gtk_signal_connect(GTK_OBJECT(layout),"expose_event",
-                     (GtkSignalFunc) layout_expose,this);
+  g_signal_connect(layout, "motion-notify-event",
+                     G_CALLBACK(pointer_cb), this);
+  g_signal_connect(layout, "button_press_event",
+                     G_CALLBACK(pointer_cb), this);
+  g_signal_connect(layout, "button_release_event",
+                     G_CALLBACK(pointer_cb), this);
+  g_signal_connect(layout, "expose_event",
+                     G_CALLBACK(layout_expose), this);
 
   GtkAdjustment *xadj, *yadj;
   xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(layout));
   yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(layout));
-  gtk_signal_connect(GTK_OBJECT(xadj),"value_changed",
-                     (GtkSignalFunc) layout_adj_changed,this);
-  gtk_signal_connect(GTK_OBJECT(yadj),"value_changed",
-                     (GtkSignalFunc) layout_adj_changed,this);
+  g_signal_connect(xadj, "value_changed",
+                     G_CALLBACK(layout_adj_changed), this);
+  g_signal_connect(yadj, "value_changed",
+                     G_CALLBACK(layout_adj_changed), this);
 
   gtk_widget_set_app_paintable(layout, TRUE);
   gtk_widget_show (layout);
@@ -4273,10 +4273,10 @@ void Breadboard_Window::Build(void)
 
   //  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
   //                         GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect (window, "delete_event",
+                      G_CALLBACK(delete_event), (gpointer)this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK(gui_object_configure_event), this);
 
 
   gtk_widget_realize(window);
