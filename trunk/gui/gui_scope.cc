@@ -1346,12 +1346,12 @@ void Scope_Window::Build()
 
 
 
-  gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-                     GTK_SIGNAL_FUNC(delete_event), this);
+  g_signal_connect(window, "delete_event",
+                     G_CALLBACK(delete_event), this);
 
-  gtk_signal_connect (GTK_OBJECT (window),
+  g_signal_connect (window,
                       "expose_event",
-                      GTK_SIGNAL_FUNC (Scope_Window_expose_event),
+                      G_CALLBACK(Scope_Window_expose_event),
                       this);
 
 #if 0
@@ -1439,8 +1439,8 @@ void Scope_Window::Build()
 
   m_phScrollBar = gtk_hscrollbar_new(GTK_ADJUSTMENT(m_hAdj));
   gtk_box_pack_start_defaults(GTK_BOX(pvbox),m_phScrollBar);
-  gtk_signal_connect(m_hAdj,"value-changed",
-                     (GtkSignalFunc) hAdjVChange, this);
+  g_signal_connect(m_hAdj, "value-changed",
+                     G_CALLBACK(hAdjVChange), this);
 
   // Add the drawing areas to the panes
   gtk_paned_add1(GTK_PANED(m_pHpaned), signalDrawingArea);
@@ -1478,9 +1478,9 @@ void Scope_Window::Build()
                       new PixMap(waveDrawingArea->window, 100, waveHeight, yoffset));
   }
 
-  gtk_signal_connect (GTK_OBJECT (waveDrawingArea),
+  g_signal_connect (waveDrawingArea,
                       "expose_event",
-                      GTK_SIGNAL_FUNC (DrawingArea_expose_event),
+                      G_CALLBACK(DrawingArea_expose_event),
                       this);
 
   KeyMap['z'] = new ZoomInEvent();
@@ -1492,31 +1492,31 @@ void Scope_Window::Build()
   /* Add a signal handler for key press events. This will capture
    * key commands for single stepping, running, etc.
    */
-  gtk_signal_connect(GTK_OBJECT(waveDrawingArea),
+  g_signal_connect(waveDrawingArea,
                      "key_press_event",
-                     (GtkSignalFunc) key_press,
+                     G_CALLBACK(key_press),
                      (gpointer) this);
 
-  gtk_signal_connect(GTK_OBJECT(waveDrawingArea),
+  g_signal_connect(waveDrawingArea,
                      "button_press_event",
-                     (GtkSignalFunc) button_press,
+                     G_CALLBACK(button_press),
                      (gpointer) this);
 
-  gtk_signal_connect(GTK_OBJECT(waveDrawingArea),
+  g_signal_connect(waveDrawingArea,
                      "key_release_event",
-                     (GtkSignalFunc) key_release,
+                     G_CALLBACK(key_release),
                      (gpointer) this);
-  gtk_signal_connect(GTK_OBJECT(waveDrawingArea),
+  g_signal_connect(waveDrawingArea,
                      "scroll-event",
-                     (GtkSignalFunc) scroll_event,
+                     G_CALLBACK(scroll_event),
                      (gpointer) this);
   GTK_WIDGET_SET_FLAGS( waveDrawingArea,
                         GTK_CAN_FOCUS );
 
 
-  gtk_signal_connect(GTK_OBJECT(signalDrawingArea),
+  g_signal_connect(signalDrawingArea,
                      "button_press_event",
-                     (GtkSignalFunc) signalButtonPress,
+                     G_CALLBACK(signalButtonPress),
                      (gpointer) this);
 
   gtk_widget_show_all (window);
@@ -1534,9 +1534,9 @@ void Scope_Window::Build()
                  GTK_WIDGET(m_entry->m_entry),
                  0,0);
 
-  gtk_signal_connect(GTK_OBJECT(m_entry->m_entry),
+  g_signal_connect(m_entry->m_entry,
                      "key_press_event",
-                     (GtkSignalFunc) signalEntryKeyPress,
+                     G_CALLBACK(signalEntryKeyPress),
                      (gpointer) this);
 
 }

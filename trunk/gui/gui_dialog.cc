@@ -70,8 +70,8 @@ void create_labeled_boxes(GtkWidget *box, const char **labels, int num_labels)
                 gtk_widget_show (label);
 
                 entry = gtk_entry_new ();
-                gtk_signal_connect(GTK_OBJECT(entry), "activate",
-                                   GTK_SIGNAL_FUNC(enter_callback),
+                g_signal_connect(entry, "activate",
+                                   G_CALLBACK(enter_callback),
                                    entry);
                 gtk_entry_set_text (GTK_ENTRY (entry), "0x18");
 
@@ -141,8 +141,8 @@ fill_range (void)
     {
       dialog_window = gtk_dialog_new ();
 
-      gtk_signal_connect (GTK_OBJECT (dialog_window), "destroy",
-                          GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+      g_signal_connect (dialog_window, "destroy",
+                          G_CALLBACK(gtk_widget_destroyed),
                           &dialog_window);
 
       gtk_window_set_title (GTK_WINDOW (dialog_window), "Fill Range");
@@ -157,8 +157,8 @@ fill_range (void)
       create_labeled_boxes( hbox, labels,  num_labels);
 
       button = gtk_button_new_with_label ("OK");
-      gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                          GTK_SIGNAL_FUNC (cancel_dialog),
+      g_signal_connect (button, "clicked",
+                          G_CALLBACK(cancel_dialog),
                           &label);
       GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
       gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog_window)->action_area),
@@ -167,8 +167,8 @@ fill_range (void)
       gtk_widget_show (button);
 
       button = gtk_button_new_with_label ("Cancel");
-      gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                          GTK_SIGNAL_FUNC (cancel_dialog),
+      g_signal_connect (button, "clicked",
+                          G_CALLBACK(cancel_dialog),
                           &label);
       GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
       gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog_window)->action_area),

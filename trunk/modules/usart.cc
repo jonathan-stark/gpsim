@@ -1077,7 +1077,7 @@ key_press(GtkWidget *widget,
 {
         unsigned int c = key->keyval;
 
-        gtk_signal_emit_stop_by_name (GTK_OBJECT (widget), "key_press_event");
+        g_signal_stop_emission_by_name (widget, "key_press_event");
         if(c == 0xffe3 || c == 0xffe4) // key is left or right ctrl
         {
             ctl = true;
@@ -1193,15 +1193,15 @@ void USARTModule::CreateGraphics()
 
     gtk_widget_add_events(window, GDK_KEY_RELEASE_MASK);
 
-    gtk_signal_connect(GTK_OBJECT(text),"key_press_event",
-                       (GtkSignalFunc) key_press,
+    g_signal_connect(text, "key_press_event",
+                       G_CALLBACK(key_press),
                        this);
-    gtk_signal_connect(GTK_OBJECT(text),"key_release_event",
-                       (GtkSignalFunc) key_release,
+    g_signal_connect(text, "key_release_event",
+                       G_CALLBACK(key_release),
                        this);
 
-    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-                        GTK_SIGNAL_FUNC (gtk_widget_destroy), window);
+    g_signal_connect (window, "destroy",
+                        G_CALLBACK(gtk_widget_destroy), window);
 
     gtk_widget_show_all(window);
 

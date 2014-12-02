@@ -135,10 +135,10 @@ void PushButton::create_widget(PushButton *pb)
   button = gtk_button_new_with_label ((char*)pb->name().c_str());
   gtk_container_set_border_width (GTK_CONTAINER (button), 5);
 
-  gtk_signal_connect (GTK_OBJECT (button), "pressed",			    
-		      GTK_SIGNAL_FUNC (press_cb), (gpointer)pb);
-  gtk_signal_connect (GTK_OBJECT (button), "released",			    
-		      GTK_SIGNAL_FUNC (released_cb), (gpointer)pb);
+  g_signal_connect (button, "pressed",			    
+		      G_CALLBACK(press_cb), (gpointer)pb);
+  g_signal_connect (button, "released",			    
+		      G_CALLBACK(released_cb), (gpointer)pb);
 	
 		
   gtk_widget_show(button);

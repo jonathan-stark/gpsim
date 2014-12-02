@@ -8,7 +8,7 @@ include ../make.regression
 SCRIPT = 16f631.lkr
 
 all : nwdt_16f631.cod wdt_16f677.cod p16f690.cod epwm.cod \
-	wdt_16f685.cod eusart.cod 
+	wdt_16f685.cod eusart.cod eusart_690.cod
 
 nwdt_16f631.cod: nwdt_16f631.o $(SCRIPT)
 	gplink --map  -s $(SCRIPT) -o nwdt_16f631.cod nwdt_16f631.o
@@ -24,6 +24,9 @@ p16f690.cod: p16f690.o $(SCRIPT)
 
 eusart.cod: eusart.o $(SCRIPT)
 	gplink --map  -s $(SCRIPT) -o eusart.cod eusart.o
+
+eusart_690.cod: eusart_690.o $(SCRIPT)
+	gplink --map  -s $(SCRIPT) -o eusart_690.cod eusart_690.o
 
 epwm.cod: epwm.o $(SCRIPT)
 	gplink --map  -s $(SCRIPT) -o epwm.cod epwm.o

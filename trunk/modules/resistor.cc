@@ -291,8 +291,8 @@ void PullupResistor::build_window(void)
   gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
       
   button = gtk_button_new_with_label (name().c_str());
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-		     (GtkSignalFunc) pu_cb, (gpointer)this);
+  g_signal_connect(button, "clicked",
+		     G_CALLBACK(pu_cb), (gpointer)this);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
   gtk_widget_show_all (pu_window);

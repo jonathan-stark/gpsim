@@ -160,9 +160,9 @@ Video::Video(const char *_name) : Module(_name)
   gtk_window_set_default_size(GTK_WINDOW(window), XRES,YRES);
   gtk_window_set_title(GTK_WINDOW(window), "Video");
   da = gtk_drawing_area_new();
-  gtk_signal_connect(GTK_OBJECT(da),
+  g_signal_connect(da,
 		     "expose_event",
-		     (GtkSignalFunc) expose,
+		     G_CALLBACK(expose),
 		     this);
   
   gtk_container_add(GTK_CONTAINER(window), da);

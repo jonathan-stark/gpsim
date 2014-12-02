@@ -338,8 +338,8 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 
     gtk_container_set_border_width(GTK_CONTAINER(dialog),30);
 
-    gtk_signal_connect_object(GTK_OBJECT(dialog),
-                              "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
+    g_signal_connect_swapped(dialog,
+                              "delete_event", G_CALLBACK(gtk_widget_destroy), GTK_OBJECT(dialog));
 
     for(i=0;i<COLUMNS;i++)
       if (coldata[i].isValid()) {
@@ -347,16 +347,16 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].isVisible);
         gtk_widget_show(button);
         gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
-        gtk_signal_connect(GTK_OBJECT(button),"clicked",
-                           GTK_SIGNAL_FUNC(set_column),(gpointer)&coldata[i]);
+        g_signal_connect(button,"clicked",
+                           G_CALLBACK(set_column), (gpointer)&coldata[i]);
       }
 
     button = gtk_button_new_with_label("OK");
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
                        FALSE,FALSE,10);
-    gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-                              GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
+    g_signal_connect_swapped(button, "clicked",
+                              G_CALLBACK(gtk_widget_destroy), GTK_OBJECT(dialog));
     GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
     gtk_widget_grab_default(button);
 
@@ -391,8 +391,8 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) popup_activated,
+      g_signal_connect(item, "activate",
+                         G_CALLBACK(popup_activated),
                          &menu_items[i]);
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
@@ -796,10 +796,10 @@ void Watch_Window::Build(void)
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect (window, "delete_event",
+                      G_CALLBACK(delete_event), (gpointer)this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK(gui_object_configure_event), this);
 
   watch_clist = gtk_clist_new_with_titles(COLUMNS,(gchar **)watch_titles);
 
@@ -818,19 +818,19 @@ void Watch_Window::Build(void)
 
   gtk_clist_set_selection_mode (GTK_CLIST(watch_clist), GTK_SELECTION_BROWSE);
 
-  gtk_signal_connect(GTK_OBJECT(watch_clist),"click_column",
-                     (GtkSignalFunc)watch_click_column,0);
-  gtk_signal_connect(GTK_OBJECT(watch_clist),"select_row",
-                     (GtkSignalFunc)watch_list_row_selected,this);
-  gtk_signal_connect(GTK_OBJECT(watch_clist),"unselect_row",
-                     (GtkSignalFunc)unselect_row,this);
+  g_signal_connect(watch_clist, "click_column",
+                     G_CALLBACK(watch_click_column), 0);
+  g_signal_connect(watch_clist, "select_row",
+                     G_CALLBACK(watch_list_row_selected), this);
+  g_signal_connect(watch_clist, "unselect_row",
+                     G_CALLBACK(unselect_row), this);
 
-  gtk_signal_connect(GTK_OBJECT(watch_clist),
+  g_signal_connect(watch_clist,
                      "button_press_event",
-                     (GtkSignalFunc) do_popup,
+                     G_CALLBACK(do_popup),
                      this);
-  gtk_signal_connect(GTK_OBJECT(window),"key_press_event",
-                     (GtkSignalFunc) key_press,
+  g_signal_connect(window, "key_press_event",
+                     G_CALLBACK(key_press),
                      (gpointer) this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);

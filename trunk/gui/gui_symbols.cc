@@ -166,8 +166,8 @@ build_menu(GtkWidget *sheet, Symbol_Window *sw)
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-                         (GtkSignalFunc) popup_activated,
+      g_signal_connect (item, "activate",
+                         G_CALLBACK (popup_activated),
                          &menu_items[i]);
 
       gtk_widget_show(item);
@@ -653,8 +653,8 @@ void Symbol_Window::Build(void)
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
+  g_signal_connect (window, "delete_event",
+                      G_CALLBACK (delete_event), (gpointer)this);
 
   symbol_clist=gtk_clist_new_with_titles(3,(gchar **)symbol_titles);
 
@@ -669,15 +669,15 @@ void Symbol_Window::Build(void)
   gtk_clist_set_compare_func(GTK_CLIST(symbol_clist),
                              (GtkCListCompareFunc)symbol_compare_func);
 
-  gtk_signal_connect(GTK_OBJECT(symbol_clist),"click_column",
-                     (GtkSignalFunc)symbol_click_column,0);
-  gtk_signal_connect(GTK_OBJECT(symbol_clist),"select_row",
-                     (GtkSignalFunc)symbol_list_row_selected,this);
-  gtk_signal_connect(GTK_OBJECT(symbol_clist),"unselect_row",
-                     (GtkSignalFunc)unselect_row,this);
-  gtk_signal_connect(GTK_OBJECT(symbol_clist),
+  g_signal_connect(symbol_clist, "click_column",
+                     G_CALLBACK (symbol_click_column), 0);
+  g_signal_connect(symbol_clist, "select_row",
+                     G_CALLBACK (symbol_list_row_selected), this);
+  g_signal_connect(symbol_clist, "unselect_row",
+                     G_CALLBACK (unselect_row), this);
+  g_signal_connect(symbol_clist,
                      "button_press_event",
-                     (GtkSignalFunc) do_popup,
+                     G_CALLBACK (do_popup),
                      this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
@@ -701,8 +701,8 @@ void Symbol_Window::Build(void)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), FALSE);
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
-  gtk_signal_connect (GTK_OBJECT (addressesbutton), "toggled",
-                      GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)this);
+  g_signal_connect (addressesbutton, "toggled",
+                      G_CALLBACK (toggle_addresses), (gpointer)this);
 
 
   constantsbutton = gtk_check_button_new_with_label ("constants");
@@ -711,8 +711,8 @@ void Symbol_Window::Build(void)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), FALSE);
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
-  gtk_signal_connect (GTK_OBJECT (constantsbutton), "toggled",
-                      GTK_SIGNAL_FUNC (toggle_constants), (gpointer)this);
+  g_signal_connect (constantsbutton, "toggled",
+                      G_CALLBACK (toggle_constants), (gpointer)this);
 
 
   registersbutton = gtk_check_button_new_with_label ("registers");
@@ -721,11 +721,11 @@ void Symbol_Window::Build(void)
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), FALSE);
   else
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
-  gtk_signal_connect (GTK_OBJECT (registersbutton), "toggled",
-                      GTK_SIGNAL_FUNC (toggle_registers), (gpointer)this);
+  g_signal_connect (registersbutton, "toggled",
+                      G_CALLBACK (toggle_registers), (gpointer)this);
 
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-                           GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect_after(window, "configure_event",
+                           G_CALLBACK (gui_object_configure_event), this);
 
 
   gtk_widget_show_all (window);

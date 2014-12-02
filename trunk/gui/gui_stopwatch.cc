@@ -253,10 +253,10 @@ void StopWatch_Window::Build(void)
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
-  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  g_signal_connect (window, "delete_event",
+		      G_CALLBACK(delete_event), (gpointer)this);
+  g_signal_connect_after(window, "configure_event",
+			   G_CALLBACK(gui_object_configure_event), this);
 
   vbox = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox);
@@ -289,8 +289,8 @@ void StopWatch_Window::Build(void)
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_signal_connect(GTK_OBJECT(entry), "changed",
-		     (GtkSignalFunc)cyclechanged,this);
+  g_signal_connect(entry, "changed",
+		     G_CALLBACK(cyclechanged), this);
 
   timeentry = entry = gtk_entry_new ();
   gtk_widget_show (entry);
@@ -324,15 +324,15 @@ void StopWatch_Window::Build(void)
   gtk_widget_show (menuitem);
   gtk_menu_append (GTK_MENU (optionmenu_menu), menuitem);
   gtk_object_set_data(GTK_OBJECT(menuitem), "sww", this);
-  gtk_signal_connect(GTK_OBJECT(menuitem),"activate",
-		     (GtkSignalFunc) modepopup_activated,
+  g_signal_connect(menuitem, "activate",
+		     G_CALLBACK(modepopup_activated),
 		     (gpointer)"+");
   menuitem = gtk_menu_item_new_with_label ("Down");
   gtk_widget_show (menuitem);
   gtk_menu_append (GTK_MENU (optionmenu_menu), menuitem);
   gtk_object_set_data(GTK_OBJECT(menuitem), "sww", this);
-  gtk_signal_connect(GTK_OBJECT(menuitem),"activate",
-		     (GtkSignalFunc) modepopup_activated,
+  g_signal_connect(menuitem, "activate",
+		     G_CALLBACK(modepopup_activated),
 		     (gpointer)"-");
   gtk_option_menu_set_menu (GTK_OPTION_MENU (optionmenu), optionmenu_menu);
 
@@ -349,8 +349,8 @@ void StopWatch_Window::Build(void)
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 3, 4,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_signal_connect(GTK_OBJECT(entry), "changed",
-		     (GtkSignalFunc)offsetchanged,this);
+  g_signal_connect(entry, "changed",
+		     G_CALLBACK(offsetchanged), this);
 
   label = gtk_label_new ("Rollover");
   gtk_widget_show (label);
@@ -363,14 +363,14 @@ void StopWatch_Window::Build(void)
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 5, 6,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_signal_connect(GTK_OBJECT(entry), "changed",
-		     (GtkSignalFunc)rolloverchanged,this);
+  g_signal_connect(entry, "changed",
+		     G_CALLBACK(rolloverchanged), this);
 
   button = gtk_button_new_with_label ("Zero");
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 4);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(zero_cb),this);
+  g_signal_connect(button, "clicked",
+		     G_CALLBACK(zero_cb), this);
 
 
 
