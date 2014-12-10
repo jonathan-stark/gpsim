@@ -30,8 +30,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <string.h>
 
 #include <assert.h>
@@ -45,88 +45,48 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_stack.h"
 #include "gui_src.h"
 
-struct stack_entry {
-    unsigned int depth;           // index in stack array
-    unsigned int retaddress;      // last known return address
+enum {
+  COLUMN_DEPTH,
+  COLUMN_RETADDRESS,
+  N_COLUMNS
 };
 
 #define COLUMNS 2
-#define DEPTHCOL 0
-#define RETADDRCOL 1
-static const gchar *stack_titles[COLUMNS]={"depth", "return address"};
 
 /*
  */
-static gint sigh_button_event(GtkWidget *widget,
-                       GdkEventButton *event,
-                       Stack_Window *sw)
+static void sigh_button_event(
+  GtkTreeView *treeview,
+  GtkTreePath *path,
+  GtkTreeViewColumn *col,
+  Stack_Window *sw)
 {
-  struct stack_entry *entry;
-  assert(event&&sw);
+  assert(sw);
 
   if(!sw->gp || !sw->gp->cpu)
-    return 0;
+    return;
 
-  if(event->type==GDK_2BUTTON_PRESS &&
-     event->button==1) {
-
-    int row=sw->current_row;
-
-    entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
-
-    if(entry)
-      sw->gp->cpu->pma->toggle_break_at_address(entry->retaddress);
-
-    return 1;
-
+  GtkTreeModel *model = gtk_tree_view_get_model(treeview);
+  GtkTreeIter iter;
+  if (gtk_tree_model_get_iter(model, &iter, path)) {
+    gint retaddress;
+    gtk_tree_model_get(model, &iter, gint(COLUMN_RETADDRESS), &retaddress, -1);
+    sw->gp->cpu->pma->toggle_break_at_address(retaddress);
   }
-
-  return 0;
 }
 
-static gint stack_list_row_selected(GtkCList *stacklist,gint row, gint column,GdkEvent *event, Stack_Window *sw)
+static void stack_list_row_selected(GtkTreeSelection *selection, Stack_Window *sw)
 {
-    struct stack_entry *entry;
+  GtkTreeIter iter;
+  GtkTreeModel *model;
 
-    sw->current_row=row;
-    sw->current_column=column;
+  if (gtk_tree_selection_get_selected(selection, &model, &iter)) {
+    gint retaddress;
+    gtk_tree_model_get(model, &iter, gint(COLUMN_RETADDRESS), &retaddress, -1);
 
-    entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
-
-    if(!entry)
-        return TRUE;
-
-    sw->gp->source_browser->SelectAddress(entry->retaddress);
-    sw->gp->program_memory->SelectAddress(entry->retaddress);
-
-    return 0;
-}
-
-static void stack_click_column(GtkCList *clist, int column)
-{
-    static int last_col=-1;
-    static GtkSortType last_sort_type=GTK_SORT_DESCENDING;
-
-    if(last_col==-1)
-        last_col=column;
-
-    if(last_col == column)
-    {
-        if(last_sort_type==GTK_SORT_DESCENDING)
-        {
-            gtk_clist_set_sort_type(clist,GTK_SORT_ASCENDING);
-            last_sort_type=GTK_SORT_ASCENDING;
-        }
-        else
-        {
-            gtk_clist_set_sort_type(clist,GTK_SORT_DESCENDING);
-            last_sort_type=GTK_SORT_DESCENDING;
-        }
-    }
-
-    gtk_clist_set_sort_column(clist,column);
-    gtk_clist_sort(clist);
-    last_col=column;
+    sw->gp->source_browser->SelectAddress(retaddress);
+    sw->gp->program_memory->SelectAddress(retaddress);
+  }
 }
 
 static int delete_event(GtkWidget *widget,
@@ -190,21 +150,10 @@ static int get_closest_label(Stack_Window *sw,
 
 void Stack_Window::Update(void)
 {
-  int i=0;
   int nrofentries;
-  //unsigned int pic_id;
-  char depth_string[64];
-  char retaddress_string[64];
-  char labelname[64];
-  int labeloffset;
-  char *entry[COLUMNS]={depth_string,retaddress_string};
-  unsigned int retaddress;
-  struct stack_entry *stack_entry;
 
   if(!gp || !enabled)
     return;
-
-  //pic_id = gp->pic_id;
 
   pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
   if(!pic)
@@ -216,61 +165,63 @@ void Stack_Window::Update(void)
   if (nrofentries && ((nrofentries-1) > (int)pic->stack->stack_mask))
 	return;
 
-  if(last_stacklen!=nrofentries) {
-
-    // stack has changed, update stack clist
-
-    gtk_clist_freeze (GTK_CLIST (stack_clist));
-
-    while(last_stacklen!=nrofentries) {
-
-
-      if(last_stacklen>nrofentries) {
-
-        // Stack has shrunk
-
-        // remove row 0
-        stack_entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(stack_clist), 0);
-        free(stack_entry);
-        gtk_clist_remove(GTK_CLIST(stack_clist),0);
-
-        last_stacklen--;
-      } else {
-
-        // stack has grown
-
-        strcpy(depth_string,"");
-        retaddress=pic->stack->contents[last_stacklen & pic->stack->stack_mask];
-
-        if(get_closest_label(this,retaddress,labelname,&labeloffset))
-          sprintf(retaddress_string,"0x%04x (%s+%d)",retaddress,labelname,labeloffset);
-        else
-          sprintf(retaddress_string,"0x%04x",retaddress);
-
-        gtk_clist_insert (GTK_CLIST(stack_clist),
-                          0,
-                          entry);
-
-        // FIXME this memory is never freed?
-        stack_entry = (struct stack_entry*) malloc(sizeof(struct stack_entry));
-        stack_entry->retaddress=retaddress;
-        stack_entry->depth=i;
-
-        gtk_clist_set_row_data(GTK_CLIST(stack_clist), 0, (gpointer)stack_entry);
-        last_stacklen++;
-      }
+  // Do if stack has shrunk
+  for ( ; last_stacklen > nrofentries; --last_stacklen) {
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(stack_list), &iter)) {
+      gtk_list_store_remove(stack_list, &iter);
     }
-
-    // update depth column
-    for(i=0;i<nrofentries;i++)
-      {
-        sprintf(depth_string,"#%d",i);
-        gtk_clist_set_text (GTK_CLIST(stack_clist),i,0,depth_string);
-      }
-
-    gtk_clist_thaw (GTK_CLIST (stack_clist));
-
   }
+
+  // Do if stack has grown
+  for ( ; last_stacklen < nrofentries; ++last_stacklen) {
+    GtkTreeIter iter;
+    gint retaddress = pic->stack->contents[last_stacklen & pic->stack->stack_mask];
+
+    gtk_list_store_prepend(stack_list, &iter);
+    gtk_list_store_set(stack_list, &iter,
+      gint(COLUMN_DEPTH), last_stacklen,
+      gint(COLUMN_RETADDRESS), retaddress,
+      -1);
+  }
+}
+
+static void depth_cell_data_function(
+  GtkTreeViewColumn *col,
+  GtkCellRenderer *renderer,
+  GtkTreeModel *model,
+  GtkTreeIter *iter,
+  gpointer user_data)
+{
+  gint depth;
+  gchar buf[64];
+
+  gtk_tree_model_get(model, iter, COLUMN_DEPTH, &depth, -1);
+  g_snprintf(buf, sizeof(buf), "#%d", depth);
+  g_object_set(renderer, "text", buf, NULL);
+}
+
+static void retaddr_cell_data_function(
+  GtkTreeViewColumn *col,
+  GtkCellRenderer *renderer,
+  GtkTreeModel *model,
+  GtkTreeIter *iter,
+  gpointer user_data)
+{
+  gint addr;
+  gchar buf[64];
+  char labelname[64];
+  int labeloffset;
+  Stack_Window *sw;
+  sw = static_cast<Stack_Window *>(user_data);
+
+  gtk_tree_model_get(model, iter, COLUMN_RETADDRESS, &addr, -1);
+  if (get_closest_label(sw, addr, labelname, &labeloffset))
+    g_snprintf(buf, sizeof(buf), "0x%04x (%s+%d)", addr, labelname, labeloffset);
+  else
+    g_snprintf(buf, sizeof(buf), "0x%04x", addr);
+
+  g_object_set(renderer, "text", buf, NULL);
 }
 
 void Stack_Window::Build(void)
@@ -295,37 +246,51 @@ void Stack_Window::Build(void)
                       G_CALLBACK(delete_event), (gpointer)this);
   g_signal_connect_after(window, "configure_event",
                            G_CALLBACK(gui_object_configure_event), this);
-  g_signal_connect_after(window, "button_press_event",
-                           G_CALLBACK(sigh_button_event), this);
 
-  stack_clist=gtk_clist_new_with_titles(COLUMNS,(gchar **)stack_titles);
+  stack_list = gtk_list_store_new(gint(N_COLUMNS), G_TYPE_INT, G_TYPE_INT);
+  sort_stack_list = gtk_tree_model_sort_new_with_model(GTK_TREE_MODEL(stack_list));
+  tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(sort_stack_list));
+  g_object_unref(stack_list);
+  g_object_unref(sort_stack_list);
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(stack_clist, gtk_widget_get_style(stack_clist));
-  gtk_widget_show(stack_clist);
+  GtkTreeViewColumn *col;
+  GtkCellRenderer *renderer;
 
+  col = gtk_tree_view_column_new();
+  gtk_tree_view_column_set_title(col, "depth");
+  gtk_tree_view_column_set_sort_indicator(col, TRUE);
+  gtk_tree_view_column_set_sort_column_id(col, gint(COLUMN_DEPTH));
+  gtk_tree_view_append_column(GTK_TREE_VIEW(tree), col);
+  renderer = gtk_cell_renderer_text_new();
+  gtk_tree_view_column_pack_start(col, renderer, TRUE);
+  gtk_tree_view_column_set_cell_data_func(col, renderer, depth_cell_data_function, NULL, NULL);
 
-  gtk_clist_set_selection_mode (GTK_CLIST(stack_clist), GTK_SELECTION_BROWSE);
+  col = gtk_tree_view_column_new();
+  gtk_tree_view_column_set_title(col, "return address");
+  gtk_tree_view_column_set_sort_indicator(col, TRUE);
+  gtk_tree_view_column_set_sort_column_id(col, gint(COLUMN_RETADDRESS));
+  gtk_tree_view_append_column(GTK_TREE_VIEW(tree), col);
+  renderer = gtk_cell_renderer_text_new();
+  gtk_tree_view_column_pack_start(col, renderer, TRUE);
+  gtk_tree_view_column_set_cell_data_func(col, renderer, retaddr_cell_data_function, this, NULL);
 
-  g_signal_connect(stack_clist, "click_column",
-                     G_CALLBACK(stack_click_column), 0);
-  g_signal_connect(stack_clist, "select_row",
-                     G_CALLBACK(stack_list_row_selected), this);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+  gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
+
+  g_signal_connect(selection, "changed", G_CALLBACK(stack_list_row_selected), this);
+  g_signal_connect(tree, "row-activated", G_CALLBACK(sigh_button_event), this);
 
   scrolled_window=gtk_scrolled_window_new(0, 0);
-  gtk_widget_show(scrolled_window);
 
   vbox = gtk_vbox_new(FALSE,1);
-  gtk_widget_show(vbox);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), stack_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), tree);
 
   gtk_container_add(GTK_CONTAINER(window),vbox);
 
   gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
 
-  gtk_widget_show (window);
+  gtk_widget_show_all (window);
 
 
   bIsBuilt = true;
@@ -356,7 +321,6 @@ Stack_Window::Stack_Window(GUI_Processor *_gp)
   window = 0;
 
   last_stacklen=0;
-  current_row=0;
 
   get_config();
 

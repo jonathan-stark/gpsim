@@ -30,20 +30,15 @@ class Stack_Window : public GUI_Object
  public:
 
   int last_stacklen;
-    
-  int current_row;
-  int current_column;
-
-  GtkWidget *stack_clist;
-
 
   Stack_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
 
+  GtkListStore *stack_list;
+  GtkTreeModel *sort_stack_list;
+  GtkWidget *tree;
 };
-
-
 
 
 #endif //__GUI_STACK_H__
