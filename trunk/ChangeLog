@@ -1,3 +1,7 @@
+2014-12-10 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_stack.cc gui/gui_stack.h: Replace GtkCList with GtkTreeView
+	  patch #44
+
 2014-12-02 Roy Rankin <rrankin@ihug.com.au>
 	* extras/graphic_lcd/src/glcd_100X32_sed1520.cc
 	  extras/graphic_lcd/src/osram.cc extras/lcd/lcdgui.cc
