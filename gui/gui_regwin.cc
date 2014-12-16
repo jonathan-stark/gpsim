@@ -643,136 +643,52 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
     return;
 }
 
-
-static const char *file_selection_name;
-static int filemode;
-static int fs_done;
-
-static void
-file_selection_ok (GtkWidget        *w,
-                   GtkFileSelection *fs)
+// Select logging file.
+// Returns pointer to file name. This needs to be freed with g_free()
+// Can return the optional mode
+static char *gui_get_log_settings(int *mode)
 {
-    file_selection_name=gtk_file_selection_get_filename (fs);
-    fs_done=1;
-}
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Log settings",
+    NULL,
+    GTK_FILE_CHOOSER_ACTION_SAVE,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+    NULL);
 
-static void
-file_selection_cancel (GtkWidget        *w,
-                       GtkFileSelection *fs)
-{
-    file_selection_name=0;
-    fs_done=1;
-}
+  gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 
-static void
-modepopup_activated(GtkWidget *widget, gpointer data)
-{
-  Dprintf((" modepopup_activated\n"));
+  // FIXME: Should use GtkComboBoxText when we switch to v2.24
+  GtkWidget *combo_text;
 
-    char *modestring;
+  if (mode) {
+    combo_text = gtk_combo_box_new_text();
+    gtk_combo_box_append_text(GTK_COMBO_BOX(combo_text), "ASCII");
+    gtk_combo_box_append_text(GTK_COMBO_BOX(combo_text), "LXT");
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combo_text), 0);
 
-    modestring=(char*)data;
+    GtkWidget *hbox = gtk_hbox_new(FALSE, 12);
+    GtkWidget *label = gtk_label_new("File format:");
+    gtk_misc_set_alignment(GTK_MISC(label), 1.0, 0.5);
+    gtk_box_pack_start(GTK_BOX(hbox), label, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(hbox), combo_text, FALSE, FALSE, 0);
 
-    if(!strcmp(modestring,"ASCII"))
-        filemode=TRACE_FILE_FORMAT_ASCII;
-    if(!strcmp(modestring,"LXT"))
-        filemode=TRACE_FILE_FORMAT_LXT;
-}
+    gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), hbox);
 
-static char *gui_get_log_settings(const char **filename, int *mode)
-{
-    static GtkWidget *window = 0;
+    gtk_widget_show_all(hbox);
+  }
 
-    GtkWidget *hbox, *optionmenu, *label;
-
-    GtkWidget *menu;
-    GtkWidget *item;
-
-    const char *prompt="Log settings";
-
-    if (!window)
-    {
-
-        window = gtk_file_selection_new (prompt);
-
-        gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
-
-        gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
-
-        g_signal_connect_swapped(window,
-                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(window));
-//      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//                                 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-//                                 GTK_OBJECT(window));
-
-        g_signal_connect (GTK_FILE_SELECTION (window)->ok_button,
-                            "clicked", G_CALLBACK(file_selection_ok),
-                            window);
-        g_signal_connect (GTK_FILE_SELECTION (window)->cancel_button,
-                            "clicked", G_CALLBACK(file_selection_cancel),
-                            window);
-
-        hbox = gtk_hbox_new(0,0);
-        gtk_widget_show(hbox);
-
-        gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION (window)->action_area),
-                         hbox,
-                         FALSE,FALSE,20);
-
-        label = gtk_label_new("File format:");
-        gtk_box_pack_start(GTK_BOX(hbox),
-                         label,
-                         FALSE,FALSE,20);
-        gtk_widget_show(label);
-
-        optionmenu = gtk_option_menu_new();
-        gtk_widget_show(optionmenu);
-        gtk_box_pack_end(GTK_BOX(hbox),
-                         optionmenu,
-                         FALSE,FALSE,20);
-
-        menu=gtk_menu_new();
-
-        item=gtk_menu_item_new_with_label("ASCII");
-        g_signal_connect(item, "activate",
-                           G_CALLBACK (modepopup_activated),
-                           (gpointer)"ASCII");
-//      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
-        gtk_widget_show(item);
-        gtk_menu_append(GTK_MENU(menu),item);
-        item=gtk_menu_item_new_with_label("LXT");
-        g_signal_connect(item, "activate",
-                           G_CALLBACK (modepopup_activated),
-                           (gpointer)"LXT");
-//      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
-        gtk_widget_show(item);
-        gtk_menu_append(GTK_MENU(menu),item);
-
-        gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), menu);
-
+  char *file = NULL;
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (mode) {
+      gint position = gtk_combo_box_get_active(GTK_COMBO_BOX(combo_text));
+      if (position == 0) *mode = TRACE_FILE_FORMAT_ASCII;
+      if (position == 1) *mode = TRACE_FILE_FORMAT_LXT;
     }
+  }
+  gtk_widget_destroy(dialog);
 
-    file_selection_name=0;
-    gtk_widget_show_now(window);
-
-    fs_done=0;
-    file_selection_name=0;
-    gtk_grab_add(window);
-    while(!fs_done && GTK_WIDGET_VISIBLE(window))
-        gtk_main_iteration();
-    gtk_grab_remove(window);
-
-    gtk_widget_hide(window);
-
-    if(file_selection_name==0)
-    {
-        *filename=0;
-        return 0;
-    }
-
-    *filename=file_selection_name;
-    *mode=filemode;
-    return 0;
+  return file;
 }
 
 // called when user has selected a menu item
@@ -786,7 +702,7 @@ popup_activated(GtkWidget *widget, gpointer data)
   GtkSheetRange range;
   unsigned int address;
   int value, mask;
-  const char *filename;
+  char *filename;
   int mode;
 
   Dprintf((" popup_activated\n"));
@@ -868,9 +784,10 @@ popup_activated(GtkWidget *widget, gpointer data)
         return;
         break;
       case MENU_LOG_SETTINGS:
-        gui_get_log_settings(&filename, &mode);
-        if(filename!=0)
+        filename = gui_get_log_settings(&mode);
+        if (filename)
           GetTraceLog().enable_logging(filename,mode);
+        g_free(filename);
         return;
         break;
 
@@ -1200,11 +1117,7 @@ void Register_Window::UpdateStyle()
 //------------------------------------------------------------------------
 int Register_Window::LoadStyles()
 {
-#if GTK_MAJOR_VERSION >= 2
   normalfont = pango_font_description_from_string(normalfont_string);
-#else
-  normalfont=gdk_fontset_load (normalfont_string);
-#endif
 
   if(!normalfont)
   {
@@ -1213,7 +1126,6 @@ int Register_Window::LoadStyles()
     return 0;
   }
 
-#if GTK_MAJOR_VERSION >= 2
   {
     PangoRectangle rect;
     PangoLayout *layout;
@@ -1226,10 +1138,6 @@ int Register_Window::LoadStyles()
     char_height = PANGO_PIXELS(rect.height + (rect.height<<1))>>1;
     g_object_unref(G_OBJECT(layout));
   }
-
-#else
-  char_width = gdk_string_width (normalfont,"9");
-#endif
 
   return 1;
 }
@@ -1296,13 +1204,7 @@ int Register_Window::SettingsDialog()
   gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
   gtk_widget_show_now(dialog);
 
-
-
-#if GTK_MAJOR_VERSION >= 2
   PangoFontDescription *font=0;
-#else
-  GdkFont *font=0;
-#endif
 
   while(fonts_ok!=1)
   {
@@ -1315,21 +1217,14 @@ int Register_Window::SettingsDialog()
     fonts_ok=0;
 
     strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-#if GTK_MAJOR_VERSION >= 2
+
     if((font=pango_font_description_from_string(fontname))==0)
-#else
-      if((font=gdk_fontset_load(fontname))==0)
-#endif
         {
           if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
             break;
         }
       else
         {
-#if GTK_MAJOR_VERSION >= 2
-#else
-          gdk_font_unref(font);
-#endif
           strcpy(normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
           config_set_string(name(),"normalfont",normalfont_string);
           fonts_ok++;
@@ -1362,17 +1257,14 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
   if(key->state & GDK_CONTROL_MASK || key->keyval==GDK_Control_L ||
      key->keyval==GDK_Control_R){
     if((key->keyval=='c' || key->keyval == 'C') && sheet->state != GTK_STATE_NORMAL){
-#if GTK_MAJOR_VERSION >= 2
+
       /*
         --- tsd - commented out because this function
         is not defined in the official gtkextra-2.0 release.
       if (gtk_sheet_in_clip(sheet))
         gtk_sheet_unclip_range(sheet);
       */
-#else
-      if(GTK_SHEET_IN_CLIP(sheet))
-        gtk_sheet_unclip_range(sheet);
-#endif
+
       gtk_sheet_clip_range(sheet, &sheet->range);
     }
     if(key->keyval=='x' || key->keyval == 'X')
@@ -2169,11 +2061,7 @@ void Register_Window::Build()
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   /**************************** load fonts *********************************/
-#if GTK_MAJOR_VERSION >= 2
 #define DEFAULT_NORMALFONT "Monospace 10"
-#else
-#define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
-#endif
   strcpy(normalfont_string,DEFAULT_NORMALFONT);
   if(config_get_string(name(),"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
@@ -2201,11 +2089,7 @@ void Register_Window::Build()
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(register_sheet));
 
-#if GTK_MAJOR_VERSION >= 2
   GTK_SHEET_CLIP_TEXT(register_sheet);
-#else
-  GTK_SHEET_SET_FLAGS(register_sheet, GTK_SHEET_CLIP_TEXT);
-#endif
 
   gtk_widget_show(GTK_WIDGET(register_sheet));
 

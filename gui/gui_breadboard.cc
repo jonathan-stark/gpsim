@@ -1619,16 +1619,8 @@ static void pointer_cb(GtkWidget *w,
 {
     static int x,y;
 
-    x = (int) (event->x
-#if GTK_MAJOR_VERSION < 2
-        + bbw->hadj->value
-#endif
-        );
-    y = (int) (event->y
-#if GTK_MAJOR_VERSION < 2
-        + bbw->vadj->value
-#endif
-        );
+    x = (int) (event->x);
+    y = (int) (event->y);
 
     switch(event->type)
     {
@@ -2366,73 +2358,28 @@ static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
-static const char *file_selection_name;
-static int fs_done;
 
-static void
-file_selection_ok (GtkWidget        *w,
-                   GtkFileSelection *fs)
+// Returns a file name which must be freed with g_free() or NULL
+static char *gui_get_filename(const char *filename)
 {
-  file_selection_name=gtk_file_selection_get_filename (fs);
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Log settings",
+    NULL,
+    GTK_FILE_CHOOSER_ACTION_SAVE,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+    NULL);
 
-  fs_done=1;
-}
+  gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+  gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
 
-static void
-file_selection_cancel (GtkWidget        *w,
-                       GtkFileSelection *fs)
-{
-    file_selection_name=0;
-    fs_done=1;
-}
+  char *file = NULL;
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+  }
 
-static const char *gui_get_filename(const char *filename)
-{
-    static GtkWidget *window = 0;
+  gtk_widget_destroy(dialog);
 
-    const char *prompt="Log settings";
-
-    if (!window)
-    {
-
-        window = gtk_file_selection_new (prompt);
-
-        gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
-
-        gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
-
-        g_signal_connect_swapped(window,
-                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(window));
-
-        g_signal_connect (GTK_FILE_SELECTION (window)->ok_button,
-                            "clicked", G_CALLBACK(file_selection_ok),
-                            window);
-        g_signal_connect (GTK_FILE_SELECTION (window)->cancel_button,
-                            "clicked", G_CALLBACK(file_selection_cancel),
-                            window);
-    }
-
-    gtk_file_selection_set_filename(GTK_FILE_SELECTION (window),
-                                    filename);
-
-    file_selection_name=0;
-    gtk_widget_show_now(window);
-
-    fs_done=0;
-    file_selection_name=0;
-    gtk_grab_add(window);
-    while(!fs_done && GTK_WIDGET_VISIBLE(window))
-        gtk_main_iteration();
-    gtk_grab_remove(window);
-
-    gtk_widget_hide(window);
-
-    if(file_selection_name==0)
-    {
-        return 0;
-    }
-
-    return file_selection_name;
+  return file;
 }
 
 static FILE *fo;
@@ -2463,16 +2410,17 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     GList *module_iterator;
     Module *m;
     SymbolTable_t *st;
-    const char *filename;
 
-    filename = gui_get_filename("netlist.stc");
-    if(filename == NULL)
-        filename="/tmp/foo.stc";
+    char *filename = gui_get_filename("netlist.stc");
+    if(!filename)
+        return;
     if ((fo = fopen(filename, "w")) == NULL)
     {
         perror(filename);
+        g_free(filename);
         return;
     }
+    g_free(filename);
 
     fprintf(fo, "\n# This file was written by gpsim.\n");
     fprintf(fo, "\n# You can use this file for example like this:");
@@ -2874,11 +2822,7 @@ void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
   if(*name && m_bbw ) {
 
     gdk_draw_text(module_pixmap,
-#if GTK_MAJOR_VERSION >= 2
                   gdk_font_from_description(m_bbw->pinnamefont),
-#else
-                  m_bbw->pinnamefont,
-#endif
                   m_bbw->pinname_gc,
                   m_label_x,
                   m_label_y,
@@ -2914,11 +2858,7 @@ int GuiPin::DrawGUIlabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
                         m_height);
 
     gdk_draw_text(module_pixmap,
-#if GTK_MAJOR_VERSION >= 2
                   gdk_font_from_description(m_bbw->pinnamefont),
-#else
-                  m_bbw->pinnamefont,
-#endif
                   m_bbw->pinname_gc,
                   m_label_x,
                   m_label_y,
@@ -3824,11 +3764,7 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
                     bbw->window->style->white_gc,
                     bbw->layout_pixmap,
                     xoffset, yoffset,
-#if GTK_MAJOR_VERSION >= 2
                     xoffset, yoffset,
-#else
-                    0, 0,
-#endif
                     bbw->layout->allocation.width,
                     bbw->layout->allocation.height);
 }
@@ -4286,13 +4222,9 @@ void Breadboard_Window::Build(void)
   case_gc=gdk_gc_new(window->window);
   gdk_gc_set_line_attributes(case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
-#if GTK_MAJOR_VERSION >= 2
   pinstatefont = pango_font_description_from_string("Courier Bold 8");
   pinnamefont = pango_font_description_from_string("Courier Bold 8");
-#else
-  pinstatefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
-  pinnamefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
-#endif
+
   pinline_gc=gdk_gc_new(window->window);
   g_assert(pinline_gc!=0);
   gdk_gc_set_line_attributes(pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
@@ -4302,11 +4234,7 @@ void Breadboard_Window::Build(void)
                                       LAYOUTSIZE_Y,
                                       -1);
 
-#if GTK_MAJOR_VERSION >= 2
   pinnameheight = gdk_string_height (gdk_font_from_description(pinnamefont),"9y");
-#else
-  pinnameheight = gdk_string_height (pinnamefont,"9y");
-#endif
 
   if(pinspacing<pinnameheight)
     pinspacing=pinnameheight+2;

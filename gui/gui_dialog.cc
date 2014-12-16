@@ -75,15 +75,10 @@ void create_labeled_boxes(GtkWidget *box, const char **labels, int num_labels)
                                    entry);
                 gtk_entry_set_text (GTK_ENTRY (entry), "0x18");
 
-#if GTK_MAJOR_VERSION >= 2
                 gtk_widget_set_usize (entry,
                                       gdk_string_width(gtk_style_get_font(entry->style),
                                       "9999")+6, -1);
-#else
-                gtk_widget_set_usize (entry,
-                                      gdk_string_width (entry->style->font, "9999")+6,
-                                      -1);
-#endif
+
                 gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
                 gtk_widget_show (entry);
 

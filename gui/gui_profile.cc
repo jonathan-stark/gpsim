@@ -370,13 +370,9 @@ file_selection_ok (GtkWidget        *w,
     const char *file;
 
     file=gtk_file_selection_get_filename (fs);
-#if GTK_MAJOR_VERSION >= 2
+
     gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), (char *)file,
                               GTK_PLOT_PORTRAIT, 0, GTK_PLOT_LETTER);
-#else
-    gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), (char *)file, 0, 0,
-                              GTK_PLOT_LETTER);
-#endif
 
     gtk_widget_hide (GTK_WIDGET (fs));
 }
@@ -388,13 +384,10 @@ print_plot (Profile_Window *pw)
     char cmd[200];
 
     file=tempnam("/tmp","gpsimplot");
-#if GTK_MAJOR_VERSION >= 2
+
     gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file,
                               GTK_PLOT_PORTRAIT, 0, GTK_PLOT_LETTER);
-#else
-    gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file, 0, 0,
-                              GTK_PLOT_LETTER);
-#endif
+
     sprintf(cmd,"lpr %s",file);
     system(cmd);
     remove(file);
@@ -868,16 +861,11 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
                              GTK_PLOT_SYMBOL_NONE,
                              GTK_PLOT_SYMBOL_FILLED,
                              0, 4.0, &color1,&color2);
-#if GTK_MAJOR_VERSION >= 2
+
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
                                       GTK_PLOT_LINE_NONE,
                                       GDK_CAP_BUTT, GDK_JOIN_MITER,
                                       5, &color2);
-#else
-    gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-                                      GTK_PLOT_LINE_NONE,
-                                      5, &color2);
-#endif
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 
@@ -1190,16 +1178,11 @@ int plot_routine_histogram(Profile_Window *pw)
                              GTK_PLOT_SYMBOL_NONE,
                              GTK_PLOT_SYMBOL_FILLED,
                              0, 4.0, &color1,&color2);
-#if GTK_MAJOR_VERSION >= 2
+
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
                                       GTK_PLOT_LINE_NONE,
                                       GDK_CAP_BUTT, GDK_JOIN_MITER,
                                       5, &color2);
-#else
-    gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-                                      GTK_PLOT_LINE_NONE,
-                                      5, &color2);
-#endif
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 

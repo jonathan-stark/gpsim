@@ -63,37 +63,30 @@ GTK=
 GDK=
 GLIB=
 
-AC_PATH_PROG(PKGCONFIG, pkg-config, no, ${PATH})
-
-if test $PKGCONFIG = "no"; then
-  AC_MSG_ERROR(Cannot find pkg-config)
-fi
+PKG_PROG_PKG_CONFIG()
 
 if test "$use_gui" = "no"; then
   dnl glib2 checks
 
-  X_LDFLAGS=`$PKGCONFIG --libs glib-2.0 gthread-2.0 gmodule-2.0`
-  X_CFLAGS=`$PKGCONFIG --cflags glib-2.0`
+  PKG_CHECK_MODULES(P_GLIB, [glib-2.0 gthread-2.0 gmodule-2.0])
+  X_LDFLAGS=$P_GLIB_LIBS
+  X_CFLAGS=$P_GLIB_CFLAGS
   Y_LDFLAGS=
   Y_CFLAGS=
 else
   dnl gtk2 checks
 
-  GTKEXTRAMOD="gtkextra-2.0"
-  $PKGCONFIG --exists $GTKEXTRAMOD
-  if test $? != 0; then
-    GTKEXTRAMOD="gtkextra-3.0"
-    $PKGCONFIG --exists $GTKEXTRAMOD
-    if test $? != 0; then
-      AC_MSG_ERROR(Cannot find gtkextra-2.0 or gtkextra-3.0 package)
-    fi
-  fi
+  PKG_CHECK_MODULES(GTKEXTRAMOD, gtkextra-2.0, ,
+    [PKG_CHECK_MODULES(GTKEXTRAMOD, gtkextra-3.0, ,
+      [AC_MSG_ERROR(Cannot find gtkextra-2.0 or gtkextra-3.0 package)])]
+  )
 
-  X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
-  X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
-  Y_LDFLAGS=`$PKGCONFIG --libs $GTKEXTRAMOD`
-  Y_CFLAGS=`$PKGCONFIG --cflags $GTKEXTRAMOD`
-  GTK_VERSION_T=`$PKGCONFIG --modversion gtk+-2.0`
+  PKG_CHECK_MODULES(P_GTK, [gtk+-2.0 >= 2.8 gthread-2.0])
+  X_LDFLAGS=$P_GTK_LIBS
+  X_CFLAGS=$P_GTK_CFLAGS
+  Y_LDFLAGS=$GTKEXTRAMOD_LIBS
+  Y_CFLAGS=$GTKEXTRAMOD_CFLAGS
+  GTK_VERSION_T=`$PKG_CONFIG --modversion gtk+-2.0`
   echo linking with gtk-$GTK_VERSION_T
   AC_DEFINE_UNQUOTED([GTK_VERSION],"$GTK_VERSION_T",[gtk version])
 fi

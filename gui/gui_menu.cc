@@ -802,79 +802,35 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 //========================================================================
-void
-file_selection_hide_fileops (GtkWidget *widget,
-                             GtkFileSelection *fs)
-{
-  gtk_file_selection_hide_fileop_buttons (fs);
-}
 
 extern int gui_message(const char *message);
-
-void
-file_selection_ok (GtkWidget        *w,
-                   GtkFileSelection *fs)
-{
-
-  const char *file;
-  char msg[200];
-
-  if(gpGuiProcessor)
-  {
-    file=gtk_file_selection_get_filename (fs);
-    if(!gpsim_open(gpGuiProcessor->cpu, file, 0, 0))
-    {
-      sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
-      gui_message(msg);
-    }
-  }
-  gtk_widget_hide (GTK_WIDGET (fs));
-}
-
-extern int gui_question(char *question, char *a, char *b);
 
 static GtkItemFactoryCallback
 fileopen_dialog(gpointer             callback_data,
               guint                callback_action,
               GtkWidget           *widget)
 {
-  static GtkWidget *window = 0;
-  GtkWidget *button;
+  GtkWidget *dialog = gtk_file_chooser_dialog_new("Open file",
+    NULL,
+    GTK_FILE_CHOOSER_ACTION_OPEN,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+    NULL);
 
-  if (!window)
-  {
-
-    window = gtk_file_selection_new ("file selection dialog");
-
-    gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
-
-    gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
-
-    g_signal_connect (GTK_FILE_SELECTION (window)->ok_button,
-                        "clicked", G_CALLBACK(file_selection_ok),
-                        window);
-    g_signal_connect_swapped (GTK_FILE_SELECTION (window)->cancel_button,
-                               "clicked", G_CALLBACK(gtk_widget_hide),
-                               GTK_OBJECT (window));
-
-    button = gtk_button_new_with_label ("Hide Fileops");
-    g_signal_connect (button, "clicked",
-                        G_CALLBACK(file_selection_hide_fileops),
-                        (gpointer) window);
-    gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area),
-                        button, FALSE, FALSE, 0);
-    gtk_widget_show (button);
-
-    button = gtk_button_new_with_label ("Show Fileops");
-    g_signal_connect (button, "clicked",
-                        G_CALLBACK(gtk_file_selection_show_fileop_buttons),
-                        (gpointer) window);
-    gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area),
-                        button, FALSE, FALSE, 0);
-    gtk_widget_show (button);
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (!gpsim_open(gpGuiProcessor->cpu, filename, 0, 0)) {
+      gchar *msg = g_strdup_printf(
+        "Open failed. Could not open \"%s\"", filename);
+      gui_message(msg);
+      g_free(msg);
+    }
+    g_free(filename);
   }
-    gtk_widget_show (window);
-    return 0;
+
+  gtk_widget_destroy(dialog);
+
+  return 0;
 }
 
 
@@ -1509,11 +1465,8 @@ void MainWindow::Create ()
                       G_CALLBACK(dispatcher_delete_event),
                       0);
 
-#if GTK_MAJOR_VERSION >= 2
   accel_group = gtk_accel_group_new();
-#else
-  accel_group = gtk_accel_group_get_default ();
-#endif
+
   item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
   gtk_object_set_data_full (GTK_OBJECT (dispatcher_window),
                             "<main>",

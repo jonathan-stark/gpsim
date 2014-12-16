@@ -91,20 +91,16 @@ extern bool gUsingThreads(); // in ../src/interface.cc
 // debug
 static void gtl()
 {
-#if GLIB_MAJOR_VERSION >= 2
 #ifdef GPSIM_THREAD
   if(gUsingThreads())
     gdk_threads_leave ();
 #endif
-#endif
 }
 static void gte()
 {
-#if GLIB_MAJOR_VERSION >= 2
 #ifdef GPSIM_THREAD
   if(gUsingThreads())
     gdk_threads_enter ();
-#endif
 #endif
 }
 
@@ -205,12 +201,10 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 
 }
 
-#if GLIB_MAJOR_VERSION >= 2
 #ifdef GPSIM_THREAD
 // thread variables.
 static GMutex *muSimStopMutex=0;
 static GCond  *cvSimStopCondition=0;
-#endif
 #endif
 
 extern int gui_animate_delay; // in milliseconds
@@ -220,7 +214,6 @@ static GUI_Processor *lgp=0;
 static void *SimulationHasStopped( void *ptr )
 {
 
-#if GLIB_MAJOR_VERSION >= 2
 #ifdef GPSIM_THREAD
   while(1) {
     if(gUsingThreads()) {
@@ -228,7 +221,7 @@ static void *SimulationHasStopped( void *ptr )
       g_cond_wait(cvSimStopCondition, muSimStopMutex);
     }
 #endif
-#endif
+
     if(lgp) {
       GTKWAIT;
 
@@ -253,14 +246,12 @@ static void *SimulationHasStopped( void *ptr )
 
     dispatch_Update();
 
-#if GLIB_MAJOR_VERSION >= 2
 #ifdef GPSIM_THREAD
     if(gUsingThreads()) 
       g_mutex_unlock(muSimStopMutex);
     else
       return 0;
   }
-#endif
 #endif
   return 0;
 
@@ -277,7 +268,6 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
   if(callback_data) {
     
     lgp = (GUI_Processor *) callback_data;
-#if GLIB_MAJOR_VERSION >= 2
 #ifdef GPSIM_THREAD
 
     if(gUsingThreads()) {
@@ -285,7 +275,6 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
       g_cond_signal(cvSimStopCondition);
       g_mutex_unlock(muSimStopMutex);
     } else
-#endif
 #endif
     ::SimulationHasStopped(0);
 
@@ -388,7 +377,6 @@ void GUI_Interface::Update(gpointer object)
 /*------------------------------------------------------------------
  * 
  */
-#if GTK_MAJOR_VERSION >= 2
 int gStringWidth(PangoFontDescription *font, const char *str)
 {
   return (font && str) ? gdk_string_width (gdk_font_from_description(font),str) : 0;
@@ -401,16 +389,6 @@ GdkFont *gFontFromDescription(PangoFontDescription *font)
 {
   return (font ? gdk_font_from_description(font) : 0);
 }
-#else
-int gStringWidth(GdkFont *font, const char *str)
-{
-  return (font && str) ? gdk_string_width (font,str) : 0;
-}
-int gStringHeight(GdkFont *font, const char *str)
-{
-  return (font && str) ? gdk_string_height (font,str) : 0;
-}
-#endif
 
 
 /*------------------------------------------------------------------
@@ -451,7 +429,6 @@ int gui_init (int argc, char **argv)
   settings = new SettingsReg("gpsim");
 #endif
 
-#if GLIB_MAJOR_VERSION >= 2
 // This code is not currently used
 #ifdef GPSIM_THREAD
   if(gUsingThreads()) {
@@ -474,7 +451,6 @@ int gui_init (int argc, char **argv)
     g_mutex_unlock(muSimStopMutex);
   }
 #endif // GPSIM_THREAD
-#endif
 
   if (!gtk_init_check (&argc, &argv))
   {

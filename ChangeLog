@@ -1,3 +1,14 @@
+2014-12-15 Errol van de l'Isle <evandel@cix.co.uk>
+	* modules/logic.cc, gui/gui_dialog.cc, gui/gui_regwin.h,
+	  gui/gui_menu.cc, gui/gui_breadboard.h, gui/gui_src.h,
+	  gui/gui_breadboard.cc, gui/gui_trace.cc, gui/gui_main.cc,
+	  gui/gui_statusbar.cc, gui/gui_regwin.cc, gui/gui_src_asm.cc,
+	  gui/gui.h, gui/gui_profile.cc,
+	  gui/gui_src_opcode.cc: Remove conditional GTK 1 code
+	* gui/gui_menu.cc, gui/breadboard.cc, gui/gui_regwin.cc, configure.ac:
+	- Replace GtkFileSelector with GtkFileChooserDialog and add checks
+	  for GTK v2.8 or above
+
 2014-12-10 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_stack.cc gui/gui_stack.h: Replace GtkCList with GtkTreeView
 	  patch #44
