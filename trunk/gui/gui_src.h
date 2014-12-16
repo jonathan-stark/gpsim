@@ -563,15 +563,10 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 
   // Font strings
   char normalfont_string[256];
-#if GTK_MAJOR_VERSION >= 2
+
   PangoFontDescription *normalPFD;
   PangoFontDescription *current_line_numberPFD;
   PangoFontDescription *breakpoint_line_numberPFD;
-#else
-  GdkFont *normalfont;
-  GdkFont *current_line_numberfont;
-  GdkFont *breakpoint_line_numberfont;
-#endif
 
   char breakpointfont_string[256];
   char pcfont_string[256];

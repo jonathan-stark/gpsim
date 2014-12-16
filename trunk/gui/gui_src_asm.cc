@@ -4132,52 +4132,34 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
   while(fonts_ok!=2)
   {
     char fontname[256];
-#if GTK_MAJOR_VERSION >= 2
     PangoFontDescription *font;
-#else
-    GdkFont *font;
-#endif
 
     gtk_dialog_run (GTK_DIALOG (dialog));
     fonts_ok=0;
 
     strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-#if GTK_MAJOR_VERSION >= 2
+
     if((font=pango_font_description_from_string(fontname))==0)
-#else
-    if((font=gdk_fontset_load(fontname))==0)
-#endif
     {
       if(gui_question("Sourcefont did not load!","Try again","Ignore/Cancel")==FALSE)
         break;
     }
     else
     {
-#if GTK_MAJOR_VERSION >= 2
-#else
-      gdk_font_unref(font);
-#endif
       strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
       config_set_string(sbaw->name(),"sourcefont",sbaw->sourcefont_string);
       fonts_ok++;
     }
 
     strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-#if GTK_MAJOR_VERSION >= 2
+
     if((font=pango_font_description_from_string(fontname))==0)
-#else
-    if((font=gdk_fontset_load(fontname))==0)
-#endif
     {
       if(gui_question("Commentfont did not load!","Try again","Ignore/Cancel")==FALSE)
         break;
     }
     else
     {
-#if GTK_MAJOR_VERSION >= 2
-#else
-      gdk_font_unref(font);
-#endif
       strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
       config_set_string(sbaw->name(),"commentfont",sbaw->commentfont_string);
       fonts_ok++;

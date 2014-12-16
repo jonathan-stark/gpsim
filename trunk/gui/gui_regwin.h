@@ -43,11 +43,8 @@ class Register_Window : public GUI_Object
   int row_to_address[MAX_ROWS];
 
   char normalfont_string[256];
-#if GTK_MAJOR_VERSION >= 2
   PangoFontDescription *normalfont;
-#else
-  GdkFont *normalfont;
-#endif
+
   GtkStyle *current_line_number_style;
   GtkStyle *breakpoint_line_number_style;
 

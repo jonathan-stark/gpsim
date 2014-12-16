@@ -236,13 +236,9 @@ class Breadboard_Window : public GUI_Object
 {
 public:
 
-#if GTK_MAJOR_VERSION >= 2
   PangoFontDescription *pinstatefont;
   PangoFontDescription *pinnamefont;
-#else
-  GdkFont *pinstatefont;
-  GdkFont *pinnamefont;
-#endif
+
   int pinnameheight;
 
   GtkWidget *layout;

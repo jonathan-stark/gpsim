@@ -117,9 +117,6 @@ LabeledEntry::LabeledEntry(void)
 {
   label = 0;
 }
-#if GTK_MAJOR_VERSION < 2
-#define gtk_style_get_font(X) X->font
-#endif
 
 void LabeledEntry::Create(GtkWidget *box,
 			  char *clabel, 
@@ -468,10 +465,6 @@ LabeledEntry::~LabeledEntry() {
   gtk_widget_destroy(entry);
   gtk_widget_destroy(label);
 }
-
-#if GTK_MAJOR_VERSION < 2
-#define gtk_style_get_font(X) X->font
-#endif
 
 void LabeledEntry::Create(GtkWidget *box,
 			  char *clabel, 

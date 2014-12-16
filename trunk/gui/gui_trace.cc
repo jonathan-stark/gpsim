@@ -272,11 +272,9 @@ void Trace_Window::Build(void)
 
 /* RRR
   normal_style = gtk_style_new ();
-#if GTK_MAJOR_VERSION >= 2
+
   char_width = gdk_string_width(gtk_style_get_font(normal_style), "9");
-#else
-  char_width = gdk_string_width(normal_style->font, "9");
-#endif
+
   column_width = 3 * char_width + 6;
 RRR*/
 
