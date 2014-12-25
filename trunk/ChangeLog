@@ -1,4 +1,7 @@
 2014-12-25 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_dialog.cc, gui/gui_scope.cc : Dead code removal
+
+2014-12-25 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui.h, gui/gui_breadboard.cc, gui/gui_breadboard.h,
 	  gui/gui_menu.cc, gui/gui_object.cc, gui/gui_object.h,
 	  gui/gui_profile.cc, gui/gui_profile.h, gui/gui_regwin.cc,
