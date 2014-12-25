@@ -53,6 +53,11 @@ class Symbol_Window : public GUI_Object
   void NewSymbols(void);
   void SelectSymbolName(char *name);
 
+protected:
+  virtual const char *name();
+
+public:
+  const char *name_pub() {return name();}
 };
 
 

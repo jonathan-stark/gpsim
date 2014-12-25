@@ -2185,14 +2185,17 @@ Register_Window::Register_Window(GUI_Processor *_gp)
     row_to_address[i]=-1;
 }
 
+const char *RAM_RegisterWindow::name()
+{
+  return "register_viewer_ram";
+}
 
 RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
   Register_Window(_gp)
 {
-  menu = "<main>/Windows/Ram";
+  menu = "/menu/Windows/Ram";
   type = REGISTER_RAM;
 
-  set_name("register_viewer_ram");
   // Add a status bar
   sbw = new StatusBar_Window();
 
@@ -2226,13 +2229,16 @@ void RAM_RegisterWindow::Update()
     sbw->Update();
 }
 
+const char *EEPROM_RegisterWindow::name()
+{
+  return "register_viewer_eeprom";
+}
+
 EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
   Register_Window(_gp)
 {
-  menu = "<main>/Windows/EEPROM";
+  menu = "/menu/Windows/EEPROM";
   type = REGISTER_EEPROM;
-
-  set_name("register_viewer_eeprom");
 
   get_config();
 

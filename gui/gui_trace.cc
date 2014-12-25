@@ -306,6 +306,11 @@ RRR*/
 
 }
 
+const char *Trace_Window::name()
+{
+  return "trace";
+}
+
 //------------------------------------------------------------------------
 //
 //
@@ -315,10 +320,9 @@ RRR*/
 Trace_Window::Trace_Window(GUI_Processor *_gp)
 {
 
-  menu = "<main>/Windows/Trace";
+  menu = "/menu/Windows/Trace";
 
   gp = _gp;
-  set_name("trace");
   window = 0;
   wc = WC_data;
   wt = WT_trace_window;

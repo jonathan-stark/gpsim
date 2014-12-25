@@ -1632,6 +1632,11 @@ void Scope_Window::UpdateMarker(gdouble x, gdouble y, guint button, guint state)
 
 }
 
+const char *Scope_Window::name()
+{
+  return "scope";
+}
+
 Scope_Window::Scope_Window(GUI_Processor *_gp)
   : m_pHpaned(0), m_phScrollBar(0), m_PixmapWidth(1024),
     m_MajorTicks(32), m_MinorTicks(256),
@@ -1643,8 +1648,7 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
   wc = WC_data;
   wt = WT_scope_window;
 
-  menu = "<main>/Windows/Scope";
-  set_name("scope");
+  menu = "/menu/Windows/Scope";
 
   get_config();
 

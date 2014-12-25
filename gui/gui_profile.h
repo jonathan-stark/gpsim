@@ -69,6 +69,8 @@ class Profile_Window : public GUI_Object
   virtual void StopExe(int address);
   virtual void StartExe(int address);
 
+protected:
+  virtual const char *name();
 };
 
 

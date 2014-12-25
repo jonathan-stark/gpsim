@@ -301,6 +301,11 @@ void Stack_Window::Build(void)
 
 }
 
+const char *Stack_Window::name()
+{
+  return "stack_viewer";
+}
+
 //------------------------------------------------------------------------
 // Create
 //
@@ -308,19 +313,17 @@ void Stack_Window::Build(void)
 
 
 Stack_Window::Stack_Window(GUI_Processor *_gp)
+  : last_stacklen(0)
 {
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
-  menu = "<main>/Windows/Stack";
+  menu = "/menu/Windows/Stack";
 
   gp = _gp;
-  set_name("stack_viewer");
   wc = WC_data;
   wt = WT_stack_window;
   window = 0;
-
-  last_stacklen=0;
 
   get_config();
 

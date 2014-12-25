@@ -125,6 +125,9 @@ private:
   bool m_bFrozen;
 
   SignalNameEntry *m_entry;
+
+protected:
+  virtual const char *name();
 };
 
 

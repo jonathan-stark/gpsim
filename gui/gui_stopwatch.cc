@@ -158,11 +158,11 @@ modepopup_activated(GtkWidget *widget, gpointer data)
   {
   case '+':
     sww->count_dir=1;
-    config_set_variable(sww->name(),"count_dir",sww->count_dir);
+    config_set_variable(sww->name_pub(),"count_dir",sww->count_dir);
     break;
   case '-':
     sww->count_dir=-1;
-    config_set_variable(sww->name(),"count_dir",sww->count_dir);
+    config_set_variable(sww->name_pub(),"count_dir",sww->count_dir);
     break;
   default:
     assert(0);
@@ -230,7 +230,7 @@ rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 	if(v!=sww->rollover)
 	{
             sww->rollover=v;
-	    config_set_string(sww->name(),"rollover",text);
+	    config_set_string(sww->name_pub(),"rollover",text);
 	    sww->Update();
 	}
     }
@@ -383,6 +383,11 @@ void StopWatch_Window::Build(void)
   Update();   
 }
 
+const char *StopWatch_Window::name()
+{
+  return "stopwatch_viewer";
+}
+
 //------------------------------------------------------------------------
 // 
 //
@@ -390,10 +395,9 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
 {
   char *string;
 
-  menu = "<main>/Windows/Stopwatch";
+  menu = "/menu/Windows/Stopwatch";
 
   gp = _gp;
-  set_name("stopwatch_viewer");
   wc = WC_data;
   wt = WT_stopwatch_window;
   window = 0;

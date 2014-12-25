@@ -610,7 +610,7 @@ static void
 toggle_addresses (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_addresses = !sw->filter_addresses;
-    config_set_variable(sw->name(), "filter_addresses", sw->filter_addresses);
+    config_set_variable(sw->name_pub(), "filter_addresses", sw->filter_addresses);
     sw->Update();
 }
 
@@ -618,7 +618,7 @@ static void
 toggle_constants (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_constants = !sw->filter_constants;
-    config_set_variable(sw->name(), "filter_constants", sw->filter_constants);
+    config_set_variable(sw->name_pub(), "filter_constants", sw->filter_constants);
     sw->Update();
 }
 
@@ -626,7 +626,7 @@ static void
 toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_registers = !sw->filter_registers;
-    config_set_variable(sw->name(), "filter_registers", sw->filter_registers);
+    config_set_variable(sw->name_pub(), "filter_registers", sw->filter_registers);
     sw->Update();
 }
 
@@ -742,6 +742,10 @@ void Symbol_Window::Build(void)
 
 }
 
+const char *Symbol_Window::name()
+{
+  return "symbol_viewer";
+}
 
 Symbol_Window::Symbol_Window(GUI_Processor *_gp)
 {
@@ -751,10 +755,9 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-  menu = "<main>/Windows/Symbols";
+  menu = "/menu/Windows/Symbols";
 
   gp = _gp;
-  set_name("symbol_viewer");
   wc = WC_misc;
   wt = WT_symbol_window;
   window = 0;

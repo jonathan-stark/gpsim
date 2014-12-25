@@ -59,6 +59,8 @@ class Trace_Window : public GUI_Object
   virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *gp);
 
+protected:
+  virtual const char *name();
 };
 
 

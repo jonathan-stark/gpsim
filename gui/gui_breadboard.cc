@@ -4298,12 +4298,15 @@ void Breadboard_Window::Build(void)
   Update();
 }
 
+const char *Breadboard_Window::name()
+{
+  return "pinout";
+}
 
 Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
 {
-  menu = "<main>/Windows/Breadboard";
+  menu = "/menu/Windows/Breadboard";
 
-  set_name("pinout");
   wc = WC_misc;
   wt = WT_breadboard_window;
   window = 0;

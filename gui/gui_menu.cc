@@ -22,10 +22,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#ifdef DOING_GNOME
-#include <gnome.h>
-#endif
-
 #include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -57,13 +53,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../cli/input.h"  // for gpsim_open()
 #include "../src/gpsim_interface.h"
 
-typedef struct _note_book_item
-{
-  gchar        *name;
-  GtkSignalFunc func;
-} NotebookItem;
 
-GtkItemFactory *item_factory=0;
+GtkUIManager *ui;
 
 extern GUI_Processor *gpGuiProcessor;
 
@@ -74,54 +65,24 @@ do_quit_app(GtkWidget *widget)
 }
 
 
-static void
-show_message (const char *title, const char *message)
-{
-  GtkWidget *window;
-  GtkWidget *label;
-  GtkWidget *button;
-
-  window = gtk_dialog_new ();
-
-  gtk_window_set_title (GTK_WINDOW (window), title);
-  gtk_container_set_border_width (GTK_CONTAINER (window), 0);
-
-
-  button = gtk_button_new_with_label ("close");
-  gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  g_signal_connect_swapped (button, "clicked",
-                             G_CALLBACK(gtk_widget_destroy),
-                             GTK_OBJECT (window));
-  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-  gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->action_area), button, TRUE, TRUE, 0);
-  gtk_widget_grab_default(button);
-  gtk_widget_show(button);
-
-
-  label = gtk_label_new (message);
-  gtk_misc_set_padding (GTK_MISC (label), 10, 10);
-  gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->vbox), label, TRUE, TRUE, 0);
-
-  gtk_widget_show (label);
-  gtk_widget_show (window);
-
-  gtk_grab_add (window);
-
-}
 //========================================================================
 static void
-about_cb (gpointer             callback_data,
-          guint                callback_action,
-          GtkWidget           *widget)
+about_cb(GtkAction *action, gpointer user_data)
 {
+  static const gchar *authors[] = {
+    "Scott Dattalo - <scott@dattalo.com>",
+    "Ralf Forsberg - <rfg@home.se>",
+    "Borut Ra" "\xc5\xbe" "em - <borut.razem@gmail.com>",
+    NULL
+  };
 
-  show_message(  "The GNUPIC Simulator - " VERSION, "A simulator for Microchip PIC microcontrollers.\n"
-                 "by T. Scott Dattalo - mailto:scott@dattalo.com\n"
-                 "   Ralf Forsberg - mailto:rfg@home.se\n"
-                 "   Borut Ra" "\xc5\xbe" "em - mailto:borut.razem@gmail.com\n\n"
-                 "gpsim homepage: http://gpsim.sourceforge.net/gpsim.html\n"
-                 "gpsimWin32: http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html\n");
-
+  gtk_show_about_dialog(NULL,
+    "authors", authors,
+    "comments", "A simulator for Microchip PIC microcontrollers.",
+    "version", VERSION,
+    "website", "http://gpsim.sourceforge.net/gpsim.html",
+    "program-name", "The GNUPIC Simulator",
+    NULL);
 }
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -281,45 +242,35 @@ public:
   gpsimGuiPreferences();
   ~gpsimGuiPreferences();
 
-  static void setup (gpointer             callback_data,
-                     guint                callback_action,
-                     GtkWidget           *widget);
+  static void setup (GtkAction *action, gpointer user_data);
 
 
 private:
   SourceBrowserPreferences *m_SourceBrowser;
 
-  static gint cancel_cb (gpsimGuiPreferences *Self);
-  static gint apply_cb  (gpsimGuiPreferences *Self);
+  static void response_cb(GtkDialog *dialog, gint response_id,
+    gpsimGuiPreferences *Self);
   void apply() { m_SourceBrowser->apply();}
   void cancel() { m_SourceBrowser->cancel();}
   GtkWidget *window;
 };
-static GtkWidget *LocalWindow=0;
 
 
-void gpsimGuiPreferences::setup (gpointer             callback_data,
-                                 guint                callback_action,
-                                 GtkWidget           *widget)
+void gpsimGuiPreferences::setup (GtkAction *action, gpointer user_data)
 {
   new gpsimGuiPreferences();
 }
 
-
-gint gpsimGuiPreferences::cancel_cb (gpsimGuiPreferences  *Self)
+void gpsimGuiPreferences::response_cb(GtkDialog *dialog, gint response_id,
+  gpsimGuiPreferences *Self)
 {
-
-  Self->cancel();
+  if (response_id == gint(GTK_RESPONSE_CANCEL))
+    Self->cancel();
+  if (response_id == gint(GTK_RESPONSE_APPLY))
+    Self->apply();
   delete Self;
-  return TRUE;
 }
-gint gpsimGuiPreferences::apply_cb  (gpsimGuiPreferences *Self)
-{
 
-  Self->apply();
-  delete Self;
-  return TRUE;
-}
 
 //------------------------------------------------------------------------
 // ColorButton Constructor
@@ -738,50 +689,21 @@ int SourceBrowserPreferences::getOpcode(int address)
 //========================================================================
 gpsimGuiPreferences::gpsimGuiPreferences()
 {
-  GtkWidget *button;
+  window = gtk_dialog_new_with_buttons("Source Browser configuration",
+    NULL,
+    GTK_DIALOG_MODAL,
+    GTK_STOCK_CANCEL, gint(GTK_RESPONSE_CANCEL),
+    GTK_STOCK_APPLY, gint(GTK_RESPONSE_APPLY),
+    NULL);
 
-  LocalWindow = gtk_dialog_new ();
-  window = LocalWindow;
-  gtk_widget_show (window);
+  g_signal_connect(window, "response",
+    G_CALLBACK(gpsimGuiPreferences::response_cb), this);
 
-  gtk_window_set_title (GTK_WINDOW (window), "Source Browser configuration");
-  gtk_container_set_border_width (GTK_CONTAINER (window), 0);
+  GtkWidget *box = gtk_dialog_get_content_area(GTK_DIALOG(window));
 
-  GtkWidget *vbox = GTK_DIALOG (window)->vbox;
+  m_SourceBrowser = new SourceBrowserPreferences(box);
 
-  m_SourceBrowser = new SourceBrowserPreferences(vbox);
-  gtk_widget_show_all(vbox);
-
-
-
-  // Cancel and Apply buttons
-
-  GtkWidget *buttonBox = gtk_hbutton_box_new();
-  gtk_box_pack_start (GTK_BOX (vbox), buttonBox, TRUE, TRUE, 0);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-  gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  g_signal_connect_swapped (button, "clicked",
-                             G_CALLBACK(gpsimGuiPreferences::cancel_cb),
-                             this);
-  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-
-  gtk_box_pack_start (GTK_BOX (buttonBox), button, TRUE, TRUE, 0);
-  gtk_widget_grab_default(button);
-
-  button = gtk_button_new_from_stock (GTK_STOCK_APPLY);
-  gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  g_signal_connect_swapped (button, "clicked",
-                             G_CALLBACK(gpsimGuiPreferences::apply_cb),
-                             this);
-
-  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-  gtk_box_pack_start (GTK_BOX (buttonBox), button, TRUE, TRUE, 0);
-  gtk_widget_show_all(buttonBox);
-
-
-  gtk_widget_show (window);
-
+  gtk_widget_show_all(window);
 }
 
 gpsimGuiPreferences::~gpsimGuiPreferences()
@@ -805,10 +727,8 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
 
 extern int gui_message(const char *message);
 
-static GtkItemFactoryCallback
-fileopen_dialog(gpointer             callback_data,
-              guint                callback_action,
-              GtkWidget           *widget)
+static void
+fileopen_dialog(GtkAction *action, gpointer user_data)
 {
   GtkWidget *dialog = gtk_file_chooser_dialog_new("Open file",
     NULL,
@@ -829,71 +749,45 @@ fileopen_dialog(gpointer             callback_data,
   }
 
   gtk_widget_destroy(dialog);
-
-  return 0;
 }
 
 
 
 
 // Menuhandler for Windows menu buttons
-static GtkItemFactoryCallback
-toggle_window (gpointer             callback_data,
-              guint                callback_action,
-              GtkWidget           *widget)
+static void
+toggle_window(GtkToggleAction *action, gpointer user_data)
 {
-  GtkWidget *menu_item = 0;
+  if (gpGuiProcessor) {
+    std::string item = gtk_action_get_name(GTK_ACTION(action));
+    gboolean view_state = gtk_toggle_action_get_active(action);
 
-  menu_item = gtk_item_factory_get_item (item_factory,
-                                         gtk_item_factory_path_from_widget (widget));
-  if(gpGuiProcessor && menu_item) {
-
-    int view_state =  GTK_CHECK_MENU_ITEM(menu_item)->active ? VIEW_SHOW : VIEW_HIDE;
-
-    switch(callback_action) {
-    case WT_opcode_source_window:
+    if (item == "Program memory") {
       gpGuiProcessor->program_memory->ChangeView(view_state);
-      break;
-    case WT_asm_source_window:
+    } else if (item == "Source") {
       gpGuiProcessor->source_browser->ChangeView(view_state);
-      break;
-    case WT_register_window:
+    } else if (item == "Ram") {
       gpGuiProcessor->regwin_ram->ChangeView(view_state);
-      break;
-    case WT_eeprom_window:
+    } else if (item == "EEPROM") {
       gpGuiProcessor->regwin_eeprom->ChangeView(view_state);
-      break;
-    case WT_watch_window:
+    } else if (item == "Watch") {
       gpGuiProcessor->watch_window->ChangeView(view_state);
-      break;
-    case WT_symbol_window:
+    } else if (item == "Symbols") {
       gpGuiProcessor->symbol_window->ChangeView(view_state);
-      break;
-    case WT_breadboard_window:
+    } else if (item == "Breadboard") {
       gpGuiProcessor->breadboard_window->ChangeView(view_state);
-      break;
-    case WT_stack_window:
+    } else if (item == "Stack") {
       gpGuiProcessor->stack_window->ChangeView(view_state);
-      break;
-    case WT_trace_window:
+    } else if (item == "Trace") {
       gpGuiProcessor->trace_window->ChangeView(view_state);
-      break;
-    case WT_profile_window:
+    } else if (item == "Profile") {
       gpGuiProcessor->profile_window->ChangeView(view_state);
-      break;
-    case WT_stopwatch_window:
+    } else if (item == "Stopwatch") {
       gpGuiProcessor->stopwatch_window->ChangeView(view_state);
-      break;
-    case WT_scope_window:
+    } else if (item == "Scope") {
       gpGuiProcessor->scope_window->ChangeView(view_state);
-      //cout << " The Scope is disabled right now\n";
-      break;
-    default:
-      puts("unknown menu action");
     }
-
   }
-  return 0;
 }
 
 //========================================================================
@@ -1105,7 +999,7 @@ public:
     double time_db = 0.;
     if(gpGuiProcessor && gpGuiProcessor->cpu)
         time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e6;
-    snprintf(buf,size, "%19.2f us",time_db);
+    g_snprintf(buf,size, "%19.2f us",time_db);
   }
 };
 
@@ -1124,7 +1018,7 @@ public:
     double time_db = 0.;
   if(gpGuiProcessor && gpGuiProcessor->cpu)
         time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get() * 1e3;
-    snprintf(buf,size, "%19.3f ms",time_db);
+    g_snprintf(buf,size, "%19.3f ms",time_db);
   }
 };
 
@@ -1143,7 +1037,7 @@ public:
     double time_db = 0.;
   if(gpGuiProcessor && gpGuiProcessor->cpu)
        time_db = gpGuiProcessor->cpu->get_InstPeriod() * get_cycles().get();
-    snprintf(buf,size, "%19.3f Sec",time_db);
+    g_snprintf(buf,size, "%19.3f Sec",time_db);
   }
 };
 
@@ -1169,7 +1063,7 @@ public:
     v-=mm*60.0;
     ss=(int)v;
     cc=(int)((v-ss)*100.0);
-    snprintf(buf,size,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
+    g_snprintf(buf,size,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
   }
 };
 
@@ -1185,7 +1079,7 @@ public:
 
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"0x%016" PRINTF_GINT64_MODIFIER "x",get_cycles().get());
+    g_snprintf(buf,size,"0x%016" PRINTF_GINT64_MODIFIER "x",get_cycles().get());
   }
 };
 
@@ -1201,7 +1095,7 @@ public:
 
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"%016" PRINTF_GINT64_MODIFIER "d",get_cycles().get());
+    g_snprintf(buf,size,"%016" PRINTF_GINT64_MODIFIER "d",get_cycles().get());
   }
 };
 
@@ -1320,67 +1214,65 @@ static int dispatcher_delete_event(GtkWidget *widget,
     return 0;
 }
 
-static GtkItemFactoryCallback
-gtk_ifactory_cb (gpointer             callback_data,
-                 guint                callback_action,
-                 GtkWidget           *widget)
-{
-  g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
-    return 0;
-}
-
-#define TOGGLE_WINDOW (GtkItemFactoryCallback)toggle_window
-
-static GtkItemFactoryEntry menu_items[] =
-{
-  { (gchar *)"/_File",            0,         0,        0, (gchar *)"<Branch>" },
-  { (gchar *)"/File/tearoff1",    0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, (gchar *)"<Tearoff>" },
-  //{ (gchar *)"/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { (gchar *)"/File/_Open",       (gchar *)"<control>O", (GtkItemFactoryCallback)fileopen_dialog,       0 },
-  //{ (gchar *)"/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //{ (gchar *)"/File/Save _As...", 0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { (gchar *)"/File/sep1",        0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, (gchar *)"<Separator>" },
-  { (gchar *)"/File/_Quit",       (gchar *)"<control>Q", (GtkItemFactoryCallback)do_quit_app,         0 },
-
-  //  { (gchar *)"/_Processor",           0,       0,               0, "<Branch>" },
-  //  { (gchar *)"/_Processor/New",   0,       (GtkItemFactoryCallback)new_processor_dialog,       0 },
-  //  { (gchar *)"/_Processor/Delete",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //  { (gchar *)"/_Processor/Switch",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-
-
-  //  { (gchar *)"/_Break",       0, 0,               0, "<Branch>" },
-  //  { (gchar *)"/_Break/Set",       0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //  { (gchar *)"/_Break/Clear",     0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-
-  { (gchar *)"/_Windows",     0, 0,       0, (gchar *)"<Branch>" },
-  { (gchar *)"/Windows/Program _memory", 0, TOGGLE_WINDOW,WT_opcode_source_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/_Source",         0, TOGGLE_WINDOW,WT_asm_source_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/sep1",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,(gchar *)"<Separator>"  },
-  { (gchar *)"/Windows/_Ram",            0, TOGGLE_WINDOW,WT_register_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/_EEPROM",         0, TOGGLE_WINDOW,WT_eeprom_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/_Watch",          0, TOGGLE_WINDOW,WT_watch_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/Sta_ck",          0, TOGGLE_WINDOW,WT_stack_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/sep2",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,(gchar *)"<Separator>"  },
-  { (gchar *)"/Windows/Symbo_ls",        0, TOGGLE_WINDOW,WT_symbol_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/_Breadboard",     0, TOGGLE_WINDOW,WT_breadboard_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/sep3",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,(gchar *)"<Separator>"  },
-  { (gchar *)"/Windows/_Trace",          0, TOGGLE_WINDOW,WT_trace_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/Pro_file",        0, TOGGLE_WINDOW,WT_profile_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,(gchar *)"<ToggleItem>" },
-  { (gchar *)"/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,(gchar *)"<ToggleItem>" },
-
-#if defined(NEW_SOURCE_BROWSER)
-  { (gchar *)"/_Edit",     0, 0,       0, (gchar *)"<Branch>" },
-  { (gchar *)"/Edit/Preferences",        0, (GtkItemFactoryCallback)gpsimGuiPreferences::setup, 0 },
-#endif
-
-  { (gchar *)"/_Help",            0,         0,                     0, (gchar *)"<LastBranch>" },
-  { (gchar *)"/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },
-
+static const GtkActionEntry entries[] = {
+  {"FileMenu", NULL, "_File"},
+  {"Open", GTK_STOCK_OPEN, "_Open", "<control>O", NULL, G_CALLBACK(fileopen_dialog)},
+  {"Quit", GTK_STOCK_QUIT, "_Quit", "<control>Q", "Quit", G_CALLBACK(do_quit_app)},
+  {"Windows", NULL, "_Windows"},
+  {"Edit", NULL, "_Edit"},
+  {"Preferences", GTK_STOCK_PREFERENCES, "Preferences", NULL, NULL, G_CALLBACK(gpsimGuiPreferences::setup)},
+  {"Help", NULL, "_Help"},
+  {"About", GTK_STOCK_ABOUT, "_About", NULL, NULL, G_CALLBACK(about_cb)}
 };
 
-static int nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
+static const GtkToggleActionEntry toggle_entries[] = {
+  {"Program memory", NULL, "Program _memory", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Source", NULL, "_Source", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Ram", NULL, "_Ram", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"EEPROM", NULL, "_EEPROM", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Watch", NULL, "_Watch", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Stack", NULL, "Sta_ck", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Symbols", NULL, "Symbo_ls", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Breadboard", NULL, "_Breadboard", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Trace", NULL, "_Trace", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Profile", NULL, "Pro_file", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Stopwatch", NULL, "St_opwatch", NULL, NULL, G_CALLBACK(toggle_window)},
+  {"Scope", NULL, "Sco_pe", NULL, NULL, G_CALLBACK(toggle_window)}
+};
 
+static const gchar *ui_info =
+"<ui>"
+"  <menubar name='menu'>"
+"    <menu action='FileMenu'>"
+"      <menuitem action='Open'/>"
+"      <separator/>"
+"      <menuitem action='Quit'/>"
+"    </menu>"
+"    <menu action='Windows'>"
+"      <menuitem action='Program memory'/>"
+"      <menuitem action='Source'/>"
+"      <separator/>"
+"      <menuitem action='Ram'/>"
+"      <menuitem action='EEPROM'/>"
+"      <menuitem action='Watch'/>"
+"      <menuitem action='Stack'/>"
+"      <separator/>"
+"      <menuitem action='Symbols'/>"
+"      <menuitem action='Breadboard'/>"
+"      <separator/>"
+"      <menuitem action='Trace'/>"
+"      <menuitem action='Profile'/>"
+"      <menuitem action='Stopwatch'/>"
+"      <menuitem action='Scope'/>"
+"    </menu>"
+"    <menu action='Edit'>"
+"      <menuitem action='Preferences'/>"
+"    </menu>"
+"    <menu action='Help'>"
+"      <menuitem action='About'/>"
+"    </menu>"
+"  </menubar>"
+"</ui>";
 
 GtkWidget *dispatcher_window = 0;
 //========================================================================
@@ -1439,8 +1331,6 @@ void MainWindow::Create ()
   GtkWidget *separator;
   GtkWidget *button;
   GtkWidget *frame;
-  GtkAccelGroup *accel_group;
-
   int x,y,width,height;
 
   GtkWidget *update_rate_menu;
@@ -1457,23 +1347,29 @@ void MainWindow::Create ()
     width=1;
   if(!config_get_variable("dispatcher", "height", &height))
     height=1;
-  gtk_window_set_default_size(GTK_WINDOW(dispatcher_window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
+  gtk_window_resize(GTK_WINDOW(dispatcher_window), width, height);
+  gtk_window_move(GTK_WINDOW(dispatcher_window), x, y);
 
 
   g_signal_connect (dispatcher_window, "delete-event",
                       G_CALLBACK(dispatcher_delete_event),
                       0);
 
-  accel_group = gtk_accel_group_new();
+  GtkActionGroup *actions = gtk_action_group_new("Actions");
+  gtk_action_group_add_actions(actions, entries, G_N_ELEMENTS(entries), NULL);
+  gtk_action_group_add_toggle_actions(actions, toggle_entries,
+    G_N_ELEMENTS(toggle_entries), NULL);
 
-  item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-  gtk_object_set_data_full (GTK_OBJECT (dispatcher_window),
-                            "<main>",
-                            item_factory,
-                            (GtkDestroyNotify) gtk_object_unref);
-  //      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
-  gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, 0);
+  ui = gtk_ui_manager_new();
+  gtk_ui_manager_insert_action_group(ui, actions, 0);
+  g_object_unref(actions);
+  gtk_window_add_accel_group(GTK_WINDOW(dispatcher_window),
+    gtk_ui_manager_get_accel_group(ui));
+
+  if (!gtk_ui_manager_add_ui_from_string(ui, ui_info, -1, NULL)) {
+    g_error("building menus failed");
+  }
+
   gtk_window_set_title (GTK_WINDOW (dispatcher_window),
                         VERSION);
   gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
@@ -1482,7 +1378,7 @@ void MainWindow::Create ()
   gtk_container_add (GTK_CONTAINER (dispatcher_window), box1);
 
   gtk_box_pack_start (GTK_BOX (box1),
-                      gtk_item_factory_get_widget (item_factory, "<main>"),
+                      gtk_ui_manager_get_widget(ui, "/menu"),
                       FALSE, FALSE, 0);
 
 

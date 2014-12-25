@@ -103,6 +103,8 @@ class RAM_RegisterWindow : public Register_Window
 
   StatusBar_Window *sbw;
 
+protected:
+  virtual const char *name();
 };
 
 class EEPROM_RegisterWindow : public Register_Window
@@ -111,6 +113,8 @@ class EEPROM_RegisterWindow : public Register_Window
   EEPROM_RegisterWindow(GUI_Processor *gp);
   virtual void NewProcessor(GUI_Processor *gp);
 
+protected:
+  virtual const char *name();
 };
 
 

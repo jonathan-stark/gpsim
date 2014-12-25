@@ -289,6 +289,9 @@ public:
   GtkWidget *add_button(const char *label, const char *name,
 			GtkSignalFunc f, GtkWidget *box);
 
+protected:
+  virtual const char *name();
+
 private:
   GuiModule *m_MainCpuModule;
 };
