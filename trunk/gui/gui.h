@@ -240,7 +240,7 @@ public:
 // External references and function prototypes
 //
 
-extern GtkItemFactory *item_factory;
+extern GtkUIManager *ui;
 extern GUI_Processor *gpGuiProcessor;
 
 void exit_gpsim(void);

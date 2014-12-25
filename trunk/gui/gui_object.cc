@@ -24,10 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#ifdef DOING_GNOME
-#include <gnome.h>
-#endif
-
 #include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -42,20 +38,9 @@ Boston, MA 02111-1307, USA.  */
 
 
 GUI_Object::GUI_Object(void)
+  : gp(0), window(0), wc(WC_misc), wt(WT_INVALID), menu(0),
+  x(0), y(0), width(100), height(100), bIsBuilt(false)
 {
-
-
-  gp = 0;
-
-  wc = WC_misc;
-  wt = WT_INVALID;
-  bIsBuilt = false;
-  window = 0;
-  menu = 0;
-
-  x=0; y=0;
-  width = 100;
-  height = 100;
 }
 
 GUI_Object::~GUI_Object(void)
@@ -70,59 +55,27 @@ int GUI_Object::Create(GUI_Processor *_gp)
   return 0;
 }
 
-char *GUI_Object::name(void)
+const char *GUI_Object::name(void)
 {
-  static char p[128];
-  size_t len = string::npos;
-  if(len > (1+sizeof(p)))
-    len = sizeof(p)-1;
-
-  p[name_str.copy(p,len)] = 0;
-
-  return p;
-}
-
-void GUI_Object::set_name(const char *new_name)
-{
-  if(new_name)
-    name_str = string(new_name);
-  else
-    name_str = string("no_name");
-
-}
-
-void GUI_Object::set_name(string &new_name)
-{
-  name_str = new_name;
+  return 0;
 }
 
 void GUI_Object::UpdateMenuItem(void)
 {
-  GtkWidget *menu_item;
-
-  if(menu) {
-
-    menu_item = gtk_item_factory_get_item (item_factory,menu);
-
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),enabled);
-  } else {
-    //printf("GUI_Object::UpdateMenuItem(void) -- 0 menu\n");
-    ;
+  if (menu) {
+    GtkAction *menu_item = gtk_ui_manager_get_action(ui, menu);
+    gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(menu_item), enabled);
   }
-
-
 }
+
 void GUI_Object::Update(void)
 {
   printf("GUI_Object::Update - shouldn't be called\n");
 }
 
-void GUI_Object::ChangeView (int view_state)
+void GUI_Object::ChangeView(gboolean view_state)
 {
-  if( (view_state==VIEW_SHOW) || (window==0) ||
-      ((view_state==VIEW_TOGGLE) &&
-       !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
-      ) {
+  if (view_state) {
 
     if(!bIsBuilt) {
 
@@ -131,27 +84,26 @@ void GUI_Object::ChangeView (int view_state)
         set_default_config();
       }
 
-      enabled=1;
+      enabled = TRUE;
 
       Build();
 
     } else {
       // hmm, this call shouldn't be necessary, but I (Scott) found that
       // in GTK+ 2.2.1 under Linux that it is.
-      gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+      gtk_window_move(GTK_WINDOW(window), x, y);
       gtk_widget_show(window);
 
-      enabled=1;
+      enabled = TRUE;
 
       // Update the config database
       set_config();
 
     }
 
-  }
-  else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(window))) {
+  } else if (window && gtk_widget_get_visible(window)) {
 
-    enabled=0;
+    enabled = FALSE;
 
     // Update the config database
     set_config();
@@ -171,7 +123,7 @@ void GUI_Object::Build(void)
 
 int GUI_Object::get_config(void)
 {
-  char *pName = name();
+  const char *pName = name();
 
   if(!pName)
     return 0;
@@ -233,14 +185,14 @@ int GUI_Object::set_config(void)
 {
   check();
 
-  char *pName = name();
+  const char *pName = name();
 
   if(!pName)
     return 0;
 
   if(window) {
-    gdk_window_get_root_origin(window->window,&x,&y);
-    gdk_window_get_size(window->window,&width,&height);
+    gtk_window_get_position(GTK_WINDOW(window), &x, &y);
+    gtk_window_get_size(GTK_WINDOW(window), &width, &height);
   }
 
   config_set_variable(pName, "enabled", ((enabled) ? 1 : 0) );

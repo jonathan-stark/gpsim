@@ -268,21 +268,21 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
     case MENU_ASCII_1BYTE:
       popup_sbow->ascii_mode=0;
-      config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
+      config_set_variable(popup_sbow->name_pub(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 16*char_width + 6);
       for(i=0;i<pm_size/16;i++)
         update_ascii(popup_sbow,i);
       break;
     case MENU_ASCII_2BYTEMSB:
       popup_sbow->ascii_mode=1;
-      config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
+      config_set_variable(popup_sbow->name_pub(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
       for(i=0;i<pm_size/16;i++)
         update_ascii(popup_sbow,i);
       break;
     case MENU_ASCII_2BYTELSB:
       popup_sbow->ascii_mode=2;
-      config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
+      config_set_variable(popup_sbow->name_pub(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
       for(i=0;i<pm_size/16;i++)
         update_ascii(popup_sbow,i);
@@ -823,7 +823,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 			
             	strcpy(sbow->normalfont_string,
 			fontname);
-            	config_set_string(sbow->name(),"normalfont",sbow->normalfont_string);
+            	config_set_string(sbow->name_pub(),"normalfont",sbow->normalfont_string);
 		change = true;
 	    }
             fonts_ok++;
@@ -844,7 +844,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	    {
                 strcpy(sbow->breakpointfont_string,
 			gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-                config_set_string(sbow->name(),"breakpointfont",sbow->breakpointfont_string);
+                config_set_string(sbow->name_pub(),"breakpointfont",sbow->breakpointfont_string);
 		change = true;
 	    }
             fonts_ok++;
@@ -865,7 +865,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	    {
                 strcpy(sbow->pcfont_string,
 			gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
-                config_set_string(sbow->name(),"pcfont",sbow->pcfont_string);
+                config_set_string(sbow->name_pub(),"pcfont",sbow->pcfont_string);
 		change = true;
 	    }
             fonts_ok++;
@@ -1595,6 +1595,11 @@ void SourceBrowserOpcode_Window::Build(void)
   UpdateMenuItem();
 }
 
+const char *SourceBrowserOpcode_Window::name()
+{
+  return "program_memory";
+}
+
 SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 {
   static const gchar *titles[] =
@@ -1610,7 +1615,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   current_line_number_style = 0;
   breakpoint_line_number_style = 0;
 
-  menu = "<main>/Windows/Program memory";
+  menu = "/menu/Windows/Program memory";
 
   window = 0;
   pma =0;
@@ -1621,7 +1626,6 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 
 
   gp = _gp;
-  set_name("program_memory");
   wc = WC_source;
   wt = WT_opcode_source_window;
 

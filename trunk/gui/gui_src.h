@@ -300,6 +300,7 @@ private:
                                     guint            page_num,
                                     SourceWindow     *pSW);
 
+  std::string m_name;
 
 protected:
   void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
@@ -315,7 +316,10 @@ protected:
 
   SourceBrowserParent_Window *m_pParent;
 
+  virtual const char *name();
 
+public:
+  const char *name_pub() {return name();}
 };
 
 // #endif
@@ -547,7 +551,11 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
                            SourceBrowserAsm_Window *sbaw);
   static void remove_all_points(SourceBrowserAsm_Window *sbaw);
 
+protected:
+  virtual const char *name();
 
+private:
+  std::string m_name;
 };
 
 //
@@ -604,6 +612,11 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   virtual void UpdateLine(int address);
   virtual void Fill();
 
+protected:
+  virtual const char *name();
+
+public:
+  const char *name_pub() {return name();}
 };
 
 
@@ -674,6 +687,8 @@ class SourceBrowserParent_Window : public GUI_Object
   // FIXME - change these items to list objects
   SourceBuffer **ppSourceBuffers;
 
+protected:
+  virtual const char *name();
 };
 
 

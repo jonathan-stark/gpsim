@@ -978,6 +978,12 @@ GtkTextBuffer *NSourcePage::buffer()
 {
   return m_pBuffer ? m_pBuffer->getBuffer() : 0;
 }
+
+const char *SourceWindow::name()
+{
+  return m_name.c_str();
+}
+
 //------------------------------------------------------------------------
 SourceWindow::SourceWindow(GUI_Processor *pgp,
                            SourceBrowserParent_Window *pParent,
@@ -1000,9 +1006,9 @@ SourceWindow::SourceWindow(GUI_Processor *pgp,
   m_LineAtButtonClick = -1;
 
   if (newName)
-    set_name(newName);
+    m_name = newName;
   else
-    set_name("source_browser");
+    m_name = "source_browser";
 
   wc = WC_source;
   wt = WT_SourceWindow;
@@ -1668,7 +1674,7 @@ void SourceWindow::Build()
 
   bIsBuilt = true;
 
-  menu = "<main>/Windows/Source";
+  menu = "/menu/Windows/Source";
   gtk_window_set_title (GTK_WINDOW (window), "Source Browser");
   UpdateMenuItem();
   if(m_bLoadSource) {
@@ -4147,7 +4153,7 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
     else
     {
       strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-      config_set_string(sbaw->name(),"sourcefont",sbaw->sourcefont_string);
+      config_set_string(sbaw->name_pub(),"sourcefont",sbaw->sourcefont_string);
       fonts_ok++;
     }
 
@@ -4161,7 +4167,7 @@ static int settings_dialog(SOURCE_WINDOW *sbaw)
     else
     {
       strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-      config_set_string(sbaw->name(),"commentfont",sbaw->commentfont_string);
+      config_set_string(sbaw->name_pub(),"commentfont",sbaw->commentfont_string);
       fonts_ok++;
     }
   }
@@ -4536,6 +4542,11 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
     status_bar->NewProcessor(gp, pma);
 }
 
+const char *SourceBrowserAsm_Window::name()
+{
+  return m_name.c_str();
+}
+
 SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)
 {
   m_SourceWindowIndex = m_SourceWindowCount;
@@ -4546,9 +4557,9 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
   pma = 0;
 
   if(new_name)
-    set_name(new_name);
+    m_name = new_name;
   else
-    set_name("source_browser");
+    m_name = "source_browser";
 
   wc = WC_source;
   wt = WT_asm_source_window;
@@ -4592,6 +4603,11 @@ GList * SourceBrowserAsm_Window::s_global_sa_xlate_list[SBAW_NRFILES];
 int     SourceBrowserAsm_Window::s_totallinesheight[SBAW_NRFILES];
 int SourceBrowserAsm_Window::m_SourceWindowCount = 0;
 
+const char *SourceBrowserParent_Window::name()
+{
+  return "source_browser_parent";
+}
+
 //========================================================================
 //
 // SourceBrowserParent_Window
@@ -4604,7 +4620,6 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
 {
 
   gp = _gp;
-  set_name("source_browser_parent");
 
   pma = 0;
   m_TabType = GTK_POS_BOTTOM;

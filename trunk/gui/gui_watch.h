@@ -70,6 +70,12 @@ class Watch_Window : public  GUI_Object
   void         ReadSymbolList();
   void         WriteSymbolList();
   void         DeleteSymbolList();
+
+protected:
+  virtual const char *name();
+
+public:
+  const char *name_pub() {return name();}
 };
 
 

@@ -66,15 +66,13 @@ class GUI_Object {
 
   GUI_Object(void);
   virtual ~GUI_Object(void);
-  virtual void ChangeView(int view_state);
+  virtual void ChangeView(gboolean view_state);
 
   int get_config(void);
   void check(void);
   int set_default_config(void);
   virtual int set_config(void);
-  char *name(void);
-  void set_name(const char * new_name);
-  void set_name(string &new_name);
+
   virtual void Build(void);
   virtual int Create(GUI_Processor *_gp);
   virtual void UpdateMenuItem(void);
@@ -83,9 +81,11 @@ class GUI_Object {
     {
       gp = _gp;
     }
- private:
-  string name_str;
 
+protected:
+  virtual const char *name();
+
+private:
 };
 
 

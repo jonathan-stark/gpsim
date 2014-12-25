@@ -142,7 +142,7 @@ void ColumnData::Show()
   if (ww) {
     int show = isVisible & (bIsValid ? 1 : 0);
     gtk_clist_set_column_visibility(GTK_CLIST(ww->watch_clist),column,show);
-    config_set_variable(ww->name(), (gchar *)watch_titles[column],show);
+    config_set_variable(ww->name_pub(), (gchar *)watch_titles[column],show);
   }
 }
 bool ColumnData::isValid()
@@ -858,6 +858,10 @@ void Watch_Window::Build(void)
 
 }
 
+const char *Watch_Window::name()
+{
+  return "watch_viewer";
+}
 
 Watch_Window::Watch_Window(GUI_Processor *_gp)
 {
@@ -866,9 +870,8 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
-  menu = "<main>/Windows/Watch";
+  menu = "/menu/Windows/Watch";
 
-  set_name("watch_viewer");
   wc = WC_data;
   wt = WT_watch_window;
   window = 0;

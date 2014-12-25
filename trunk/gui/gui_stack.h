@@ -38,6 +38,9 @@ class Stack_Window : public GUI_Object
   GtkListStore *stack_list;
   GtkTreeModel *sort_stack_list;
   GtkWidget *tree;
+
+protected:
+  virtual const char *name();
 };
 
 

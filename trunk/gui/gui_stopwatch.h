@@ -64,6 +64,12 @@ class StopWatch_Window : public GUI_Object
 
 private:
   int from_update;
+
+protected:
+  virtual const char *name();
+
+public:
+  const char *name_pub() {return name();}
 };
 
 

@@ -2554,13 +2554,17 @@ void Profile_Window::Build(void)
 
 }
 
+const char *Profile_Window::name()
+{
+  return "profile";
+}
+
 Profile_Window::Profile_Window(GUI_Processor *_gp)
 {
 
-  menu = "<main>/Windows/Profile";
+  menu = "/menu/Windows/Profile";
 
   gp = _gp;
-  set_name("profile");
   window = 0;
   wc = WC_data;
   wt = WT_profile_window;
