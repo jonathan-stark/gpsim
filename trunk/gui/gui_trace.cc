@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <string.h>
 
 #include <assert.h>
@@ -42,7 +43,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_trace.h"
 
 #define MAXTRACES  100
-#define TRACE_COLUMNS    2
+#define TRACE_STRING 100
 
 typedef enum {
     MENU_BREAK_CLEAR,
@@ -53,18 +54,10 @@ typedef enum {
     MENU_ADD_WATCH,
 } menu_id;
 
-static const gchar *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
-
 // gui trace flags:
 #define GTF_ENABLE_XREF_UPDATES    (1<<0)
 
-guint64 row_to_cycle[MAXTRACES];
-
-
-//RRR static GtkStyle *normal_style;
-
-//struct TraceMapping trace_map[MAXTRACES];
-
+enum {CYCLE_COLUMN, TRACE_COLUMN, N_COLUMNS};
 
 //========================================================================
 
@@ -81,16 +74,7 @@ public:
 
   void Update(int new_value)
   {
-
-#define TRACE_STRING 100
-
-    GtkCList *clist;
-
-    char cycle_string[TRACE_STRING];
-    char trace_string[TRACE_STRING];
-    char *entry[TRACE_COLUMNS]={cycle_string,trace_string};
-
-    Trace_Window *tw  = (Trace_Window *) (parent_window);
+    Trace_Window *tw  = static_cast<Trace_Window *>(parent_window);
 
     if(!tw  || !tw->enabled)
       return;
@@ -105,9 +89,7 @@ public:
     if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
       return;
 
-    strncpy(trace_string,get_trace().string_buffer,TRACE_STRING);
-
-    if(trace_string[0] && (get_trace().string_cycle>=tw->last_cycle)) {
+    if (get_trace().string_buffer[0] && (get_trace().string_cycle >= tw->last_cycle)) {
       tw->last_cycle = get_trace().string_cycle;
       tw->trace_map[tw->trace_map_index].cycle = get_trace().string_cycle;
       tw->trace_map[tw->trace_map_index].simulation_trace_index = get_trace().string_index;
@@ -116,14 +98,19 @@ public:
       if(++tw->trace_map_index >= MAXTRACES)
         tw->trace_map_index = 0;
 
-      clist=GTK_CLIST(tw->trace_clist);
+      GtkListStore *list = tw->trace_list;
+      GtkTreeIter iter;
 
-      sprintf(cycle_string,"0x%016" PRINTF_GINT64_MODIFIER "x", get_trace().string_cycle);
+      gtk_list_store_append(list, &iter);
+      gtk_list_store_set(list, &iter,
+        CYCLE_COLUMN, guint64(get_trace().string_cycle),
+        TRACE_COLUMN, get_trace().string_buffer,
+        -1);
 
-      gtk_clist_append  (clist, entry);
-
-      if(clist->rows>MAXTRACES)
-        gtk_clist_remove(clist,0);
+      if (gtk_tree_model_iter_n_children(GTK_TREE_MODEL(list), NULL) > MAXTRACES) {
+        gtk_tree_model_get_iter_first(GTK_TREE_MODEL(list), &iter);
+        gtk_list_store_remove(list, &iter);
+      }
 
     }
 
@@ -162,11 +149,6 @@ void Trace_Window::Update(void)
       return;
   }
 
-  // Get a convenient pointer to the gtk_clist that the trace is in.
-  trace_clist=GTK_CLIST(trace_clist);
-
-  gtk_clist_freeze(trace_clist);
-
   trace_flags |= GTF_ENABLE_XREF_UPDATES;
   if(get_cycles().get()-last_cycle>=MAXTRACES)
     // redraw the whole thing
@@ -177,8 +159,6 @@ void Trace_Window::Update(void)
 
   trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
   last_cycle = get_cycles().get();
-  gtk_clist_thaw(trace_clist);
-
 }
 
 
@@ -218,80 +198,78 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
+void Trace_Window::cycle_cell_data_function(
+  GtkTreeViewColumn *col,
+  GtkCellRenderer *renderer,
+  GtkTreeModel *model,
+  GtkTreeIter *iter,
+  gpointer user_data)
+{
+  guint64 cycle;
+  gchar buf[TRACE_STRING];
+
+  gtk_tree_model_get(model, iter, gint(CYCLE_COLUMN), &cycle, -1);
+  g_snprintf(buf, sizeof(buf),"0x%016" PRINTF_GINT64_MODIFIER "x", cycle);
+  g_object_set(renderer, "text", buf, NULL);
+}
+
 void Trace_Window::Build(void)
 {
   if(bIsBuilt)
     return;
-  GtkWidget *main_vbox;
-  GtkWidget *scrolled_window;
 
-  gint i;
-  //RRR gint column_width,char_width;
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-  window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-  main_vbox=gtk_vbox_new(FALSE,1);
-  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0);
+  GtkWidget *main_vbox = gtk_vbox_new(FALSE, 1);
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
-  gtk_widget_show(main_vbox);
 
   gtk_window_set_title(GTK_WINDOW(window), "trace viewer");
 
-  // Trace clist
-  trace_clist=GTK_CLIST(gtk_clist_new_with_titles(TRACE_COLUMNS,(gchar **)trace_titles));
+  // Trace list
+  trace_list = gtk_list_store_new(N_COLUMNS, G_TYPE_UINT64, G_TYPE_STRING);
+  GtkWidget *trace_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(trace_list));
+  g_object_unref(trace_list);
 
+  GtkTreeViewColumn *col;
+  GtkCellRenderer *renderer;
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(GTK_WIDGET(trace_clist), 
-	gtk_widget_get_style(GTK_WIDGET(trace_clist)));
-  gtk_clist_set_column_auto_resize(trace_clist,0,TRUE);
+  renderer = gtk_cell_renderer_text_new();
+  col = gtk_tree_view_column_new_with_attributes("Cycle", renderer,
+    "text", CYCLE_COLUMN,
+    NULL);
+  gtk_tree_view_column_set_cell_data_func(col, renderer,
+    Trace_Window::cycle_cell_data_function, NULL, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(trace_view), col);
 
-  GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);
+  renderer = gtk_cell_renderer_text_new();
+  col = gtk_tree_view_column_new_with_attributes("Trace", renderer,
+    "text", gint(TRACE_COLUMN),
+    NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(trace_view), col);
 
-  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_default_size(GTK_WINDOW(window), width, height);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
 
   g_signal_connect(window, "delete_event",
                      G_CALLBACK(delete_event), this);
 
-  scrolled_window=gtk_scrolled_window_new(0, 0);
+  GtkWidget *scrolled_window = gtk_scrolled_window_new(0, 0);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(trace_clist));
-
-  gtk_widget_show(GTK_WIDGET(trace_clist));
-  gtk_widget_show(scrolled_window);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(trace_view));
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
-  ///////////////////////////////////////////////////
-  ///////////////////////////////////////////////////
-
-
-
-/* RRR
-  normal_style = gtk_style_new ();
-
-  char_width = gdk_string_width(gtk_style_get_font(normal_style), "9");
-
-  column_width = 3 * char_width + 6;
-RRR*/
 
   g_signal_connect_after(window, "configure_event",
                            G_CALLBACK(gui_object_configure_event), this);
 
 
 
-  gtk_widget_show (window);
+  gtk_widget_show_all(window);
 
   if(!trace_map) {
-    trace_map = (struct TraceMapping *)malloc(MAXTRACES * sizeof(struct TraceMapping));
-
-    for(i=0; i<MAXTRACES; i++) {
-      trace_map[i].cycle = 0;
-      trace_map[i].simulation_trace_index = 0;
-    }
+    trace_map = new TraceMapping[MAXTRACES];
     trace_map_index = 0;
   }
 
@@ -318,17 +296,13 @@ const char *Trace_Window::name()
 
 
 Trace_Window::Trace_Window(GUI_Processor *_gp)
+  : trace_flags(0), trace_map(0)
 {
-
   menu = "/menu/Windows/Trace";
 
   gp = _gp;
-  window = 0;
   wc = WC_data;
   wt = WT_trace_window;
-  trace_map = 0;
-
-  trace_flags = 0;
 
   get_config();
 

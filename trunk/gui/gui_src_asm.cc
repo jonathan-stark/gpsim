@@ -1968,13 +1968,13 @@ void NSourcePage::setSource()
   PageMap[m_view] = this;
 
   g_signal_connect(GTK_OBJECT(m_view),"key_press_event",
-    (GtkSignalFunc) KeyPressHandler,
+    G_CALLBACK(KeyPressHandler),
     (gpointer) m_Parent);
   g_signal_connect(GTK_OBJECT(m_view),"button_press_event",
-    (GtkSignalFunc) ButtonPressHandler,
+    G_CALLBACK(ButtonPressHandler),
     (gpointer) m_Parent);
   g_signal_connect(GTK_OBJECT(m_view),"expose_event",
-    (GtkSignalFunc) ViewExposeEventHandler,
+    G_CALLBACK(ViewExposeEventHandler),
     (gpointer) m_Parent);
 
   GtkWidget *pSW = gtk_scrolled_window_new (0,0);

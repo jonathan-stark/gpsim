@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 //
 
 struct TraceMapping {
-
+  TraceMapping() : cycle(0), simulation_trace_index(0) {}
   guint64 cycle;
   int simulation_trace_index;
 };
@@ -35,7 +35,7 @@ class Trace_Window : public GUI_Object
 {
  public:
 
-  GtkCList *trace_clist;
+  GtkListStore *trace_list;
   guint64   last_cycle;   // The cycle of the last trace in the window.
 
   GtkWidget *location;
@@ -61,6 +61,11 @@ class Trace_Window : public GUI_Object
 
 protected:
   virtual const char *name();
+
+private:
+  static void cycle_cell_data_function(GtkTreeViewColumn *col,
+    GtkCellRenderer *renderer, GtkTreeModel *model,
+    GtkTreeIter *iter, gpointer user_data);
 };
 
 

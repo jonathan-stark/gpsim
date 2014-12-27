@@ -287,7 +287,7 @@ public:
   virtual void NodeConfigurationChanged(Stimulus_Node *node);
 
   GtkWidget *add_button(const char *label, const char *name,
-			GtkSignalFunc f, GtkWidget *box);
+			GCallback f, GtkWidget *box);
 
 protected:
   virtual const char *name();
