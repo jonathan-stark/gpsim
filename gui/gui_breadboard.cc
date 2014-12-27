@@ -3806,7 +3806,7 @@ static GtkWidget *bb_hbox(GtkWidget *window, const char *name)
 }
 
 GtkWidget* Breadboard_Window::add_button(const char *label, const char *name,
-                                         GtkSignalFunc f, GtkWidget *box)
+                                         GCallback f, GtkWidget *box)
 {
 
   GtkWidget *button = gtk_button_new_with_label (label);
@@ -3943,15 +3943,15 @@ void Breadboard_Window::Build(void)
   hbox12 = bb_hbox(window, "hbox12");
   gtk_box_pack_start (GTK_BOX (vbox13), hbox12, FALSE, FALSE, 0);
 
-  add_button("Add node","button5", (GtkSignalFunc) add_new_snode, hbox12);
-  add_button("Add module","button6", (GtkSignalFunc) add_module, hbox12);
-  add_button("Add library","button7", (GtkSignalFunc) add_library, hbox12);
+  add_button("Add node","button5", G_CALLBACK(add_new_snode), hbox12);
+  add_button("Add module","button6", G_CALLBACK(add_module), hbox12);
+  add_button("Add library","button7", G_CALLBACK(add_library), hbox12);
 
   hbox15 = bb_hbox(window, "hbox15");
   gtk_box_pack_start (GTK_BOX (vbox13), hbox15, FALSE, FALSE, 0);
 
-  add_button("Trace all","button25", (GtkSignalFunc) trace_all, hbox15);
-  add_button("Clear traces","button26", (GtkSignalFunc) clear_traces, hbox15);
+  add_button("Trace all","button25", G_CALLBACK(trace_all), hbox15);
+  add_button("Clear traces","button26", G_CALLBACK(clear_traces), hbox15);
 
 
 
@@ -4059,8 +4059,8 @@ void Breadboard_Window::Build(void)
   hbox10 = bb_hbox(window, "hbox10");
   gtk_box_pack_start (GTK_BOX (vbox11), hbox10, FALSE, FALSE, 0);
 
-  add_button("Remove stimulus","rsb", (GtkSignalFunc) remove_node_stimulus, hbox10);
-  add_button("Remove node","rnb", (GtkSignalFunc) remove_node, hbox10);
+  add_button("Remove stimulus","rsb", G_CALLBACK(remove_node_stimulus), hbox10);
+  add_button("Remove node","rnb", G_CALLBACK(remove_node), hbox10);
 
   stimulus_frame = gtk_frame_new ("Stimulus settings");
   gtk_widget_ref (stimulus_frame);
@@ -4084,7 +4084,7 @@ void Breadboard_Window::Build(void)
   hbox13 = bb_hbox(window, "hbox13");
   gtk_box_pack_start (GTK_BOX (vbox14), hbox13, FALSE, FALSE, 0);
 
-  add_button("Connect stimulus to node","sanb", (GtkSignalFunc) stimulus_add_node, hbox13);
+  add_button("Connect stimulus to node","sanb", G_CALLBACK(stimulus_add_node), hbox13);
 
 
 
@@ -4150,13 +4150,13 @@ void Breadboard_Window::Build(void)
                   G_CALLBACK(settings_set_cb),
                   this);
 
-  add_button("Set","attribute_button", (GtkSignalFunc) settings_set_cb, hbox9);
+  add_button("Set","attribute_button", G_CALLBACK(settings_set_cb), hbox9);
 
   hbox14 = bb_hbox(window, "hbox14");
   gtk_box_pack_start (GTK_BOX (vbox10), hbox14, FALSE, FALSE, 0);
 
-  add_button("Remove module","remove_module_button", (GtkSignalFunc) remove_module, hbox14);
-  add_button("Save Configuration ...","save_stc_button", (GtkSignalFunc) save_stc, vbox9);
+  add_button("Remove module","remove_module_button", G_CALLBACK(remove_module), hbox14);
+  add_button("Save Configuration ...","save_stc_button", G_CALLBACK(save_stc), vbox9);
 
   scrolledwindow5 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow5);
