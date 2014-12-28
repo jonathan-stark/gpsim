@@ -1,3 +1,8 @@
+2014-12-28 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_stopwatch.cc, gui/gui_stopwatch.h
+	: Replaced GtkOptionMenu with GTK 2 equivalent. Various code clean up.
+	  Required GTK version now 2.24
+
 2014-12-27 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_breadboard.cc, gui/gui_breadboard.h, gui/gui_src_asm.cc
 	: Clean up last usage of GtkSignalFunc

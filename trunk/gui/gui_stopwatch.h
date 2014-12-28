@@ -40,6 +40,8 @@ class StopWatch_Window : public GUI_Object
   GtkWidget *offsetentry;
   GtkWidget *rolloverentry;
 
+  GtkWidget *option_menu;
+
   StopWatch_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
@@ -62,14 +64,18 @@ class StopWatch_Window : public GUI_Object
     return from_update != 0;
   }
 
+  // Signal call-backs
+  static void modepopup_activated(GtkWidget *widget, StopWatch_Window *sww);
+  static int delete_event(GtkWidget *widget, GdkEvent  *event, StopWatch_Window *sww);
+  static void zero_cb(GtkWidget *w, StopWatch_Window *sww);
+  static void cyclechanged(GtkWidget *widget, StopWatch_Window *sww);
+  static void offsetchanged(GtkWidget *widget, StopWatch_Window *sww);
+  static void rolloverchanged(GtkWidget *widget, StopWatch_Window *sww);
 private:
   int from_update;
 
 protected:
   virtual const char *name();
-
-public:
-  const char *name_pub() {return name();}
 };
 
 

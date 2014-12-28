@@ -81,7 +81,7 @@ else
       [AC_MSG_ERROR(Cannot find gtkextra-2.0 or gtkextra-3.0 package)])]
   )
 
-  PKG_CHECK_MODULES(P_GTK, [gtk+-2.0 >= 2.18 gthread-2.0])
+  PKG_CHECK_MODULES(P_GTK, [gtk+-2.0 >= 2.24 gthread-2.0])
   X_LDFLAGS=$P_GTK_LIBS
   X_CFLAGS=$P_GTK_CFLAGS
   Y_LDFLAGS=$GTKEXTRAMOD_LIBS
