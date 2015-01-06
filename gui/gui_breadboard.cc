@@ -19,8 +19,6 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#define GTK_ENABLE_BROKEN
-
 #include "../config.h"
 #ifdef HAVE_GUI
 
@@ -30,12 +28,14 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <gtk/gtk.h>
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <math.h>
 #include <assert.h>
 
 
 #include <iostream>
 #include <iomanip>
+#include <string>
 #include <typeinfo>
 
 #include "../src/modules.h"
@@ -101,7 +101,7 @@ public:
 
   void Update(int new_value)
   {
-    Breadboard_Window *bbw  = (Breadboard_Window *) (parent_window);
+    Breadboard_Window *bbw  = static_cast<Breadboard_Window *>(parent_window);
 
     bbw->Update();
 
@@ -657,12 +657,10 @@ static void draw_nodes(Breadboard_Window *bbw)
 
     GList *iter;
 
-    gdk_draw_rectangle (bbw->layout_pixmap,
-                        bbw->window->style->bg_gc[GTK_WIDGET_STATE (bbw->window)],
-                        TRUE,
-                        0, 0,
-                        LAYOUTSIZE_X,
-                        LAYOUTSIZE_Y);
+  gdk_draw_rectangle(bbw->layout_pixmap,
+    gtk_widget_get_style(bbw->window)->bg_gc[gtk_widget_get_state(bbw->window)],
+    TRUE,
+    0, 0, LAYOUTSIZE_X, LAYOUTSIZE_Y);
 
     iter = nodepath_list;
 
@@ -987,7 +985,6 @@ static void path_copy_and_cat(path **pat, path **source)
  */
 static void trace_node(struct gui_node *gn)
 {
-    GuiPin *p;
     Breadboard_Window *bbw;
     stimulus *stimulus;
     GList *pinlist=0;
@@ -1004,7 +1001,7 @@ static void trace_node(struct gui_node *gn)
     // Make a glist of all gui_pins in the node
     while(stimulus!=0)
     {
-        p = find_gui_pin(bbw, stimulus);
+        GuiPin *p = find_gui_pin(bbw, stimulus);
 
 	if (p)
 	{
@@ -1028,16 +1025,15 @@ static void trace_node(struct gui_node *gn)
     for(i=0;i<nr_of_nodes;i++)
     {
         GuiPin *pi, *pj;
-        GList *li, *lj;
+        GList *li = g_list_nth(pinlist,i);
 
-        li = g_list_nth(pinlist,i);
         assert(li!=0);
         pi = static_cast<GuiPin*>(li->data);
 
         fflush(stdout);
         for(j=i+1;j<nr_of_nodes;j++)
         {
-            lj = g_list_nth(pinlist,j);
+            GList *lj = g_list_nth(pinlist,j);
             assert(lj!=0);
             pj = static_cast<GuiPin*>(lj->data);
 
@@ -1176,20 +1172,19 @@ static gboolean expose_pin(GtkWidget *widget,
                        GdkEventExpose *event,
                        GuiPin *p)
 {
-
-    if(p->pixmap==0)
-    {
-        puts("bbw.c: no pixmap1!");
-        return 0;
-    }
-
-    gdk_draw_pixmap(widget->window,
-                    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-                    p->pixmap,
-                    event->area.x, event->area.y,
-                    event->area.x, event->area.y,
-                    event->area.width, event->area.height);
+  if (!p->pixmap) {
+    puts("bbw.c: no pixmap1!");
     return 0;
+  }
+
+  gdk_draw_pixmap(gtk_widget_get_window(widget),
+    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
+    p->pixmap,
+    event->area.x, event->area.y,
+    event->area.x, event->area.y,
+    event->area.width, event->area.height);
+
+  return 0;
 }
 
 static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
@@ -1206,16 +1201,15 @@ static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
     gtk_widget_show(pin->bbw()->stimulus_frame);
     gtk_widget_hide(pin->bbw()->node_frame);
     gtk_widget_hide(pin->bbw()->module_frame);
-    gtk_widget_hide(pin->bbw()->pic_frame);
 
     if(pin->getIOpin()) {
-      snprintf(string,sizeof(string),"Stimulus %s",pin->getIOpin()->name().c_str());
+      g_snprintf(string, sizeof(string), "Stimulus %s", pin->getIOpin()->name().c_str());
       pString = string;
 
       if(pin->getSnode()!=0)
-        snprintf(text,sizeof(text),"Connected to node %s", pin->getSnode()->name().c_str());
+        g_snprintf(text, sizeof(text), "Connected to node %s", pin->getSnode()->name().c_str());
       else
-        snprintf(text,sizeof(text),"Not connected");
+        g_snprintf(text, sizeof(text), "Not connected");
       pText = text;
     }
 
@@ -1227,17 +1221,15 @@ static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
 
 static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 {
-
-    char name[STRING_SIZE];
     stimulus *stimulus;
-    char str[STRING_SIZE];
     GtkListStore *list_store;
 
 //    printf("treeselect_node %p\n",gui_node);
 
     if(gui_node->node!=0)
     {
-        snprintf(str,sizeof(str),"Node %s",gui_node->node->name().c_str());
+      char str[STRING_SIZE];
+        g_snprintf(str, sizeof(str), "Node %s", gui_node->node->name().c_str());
         gtk_frame_set_label(GTK_FRAME(gui_node->bbw->node_frame),str);
 
         gtk_widget_show(gui_node->bbw->node_frame);
@@ -1248,7 +1240,6 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     }
     gtk_widget_hide(gui_node->bbw->stimulus_frame);
     gtk_widget_hide(gui_node->bbw->module_frame);
-    gtk_widget_hide(gui_node->bbw->pic_frame);
 
     // Clear node_clist
     g_object_get(gui_node->bbw->node_clist, "model", &list_store, NULL);
@@ -1263,10 +1254,8 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
         {
             GtkTreeIter iter;
 
-            strncpy(name, stimulus->name().c_str(), sizeof(name));
-
             gtk_list_store_append(list_store, &iter);
-            gtk_list_store_set(list_store, &iter, 0, name, 1, stimulus, -1);
+            gtk_list_store_set(list_store, &iter, 0, stimulus->name().c_str(), 1, stimulus, -1);
 
             stimulus = stimulus->next;
         }
@@ -1341,11 +1330,11 @@ static void settings_clist_cb(GtkTreeSelection *selection,
 
         if (mod_name)
         {
-            sprintf(str,"%s.%s = %s",mod_name, attr->name().c_str(),val);
+            g_snprintf(str, sizeof(str), "%s.%s = %s", mod_name, attr->name().c_str(), val);
         }
         else
         {
-            sprintf(str,"%s = %s",attr->name().c_str(),val);
+            g_snprintf(str, sizeof(str), "%s = %s", attr->name().c_str(), val);
         }
         gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
 }
@@ -1362,7 +1351,7 @@ static void settings_set_cb(GtkWidget *button,
 
         // Check the entry.
         entry_string=gtk_entry_get_text(GTK_ENTRY(bbw->attribute_entry));
-        sscanf(entry_string,"%s = %s",attribute_name, attribute_newval);
+        sscanf(entry_string, "%255s = %255s", attribute_name, attribute_newval);
 
         printf("change attribute \"%s\" to \"%s\"\n",attribute_name, attribute_newval);
 
@@ -1415,8 +1404,8 @@ static void clistOneAttribute(const SymbolEntry_t &sym)
 
       pVal->get(attribute_value, sizeof(attribute_value));
 
-      sprintf(attribute_string,"%s = %s",
-                pVal->name().c_str(),attribute_value);
+      g_snprintf(attribute_string, sizeof(attribute_string), "%s = %s",
+                pVal->name().c_str(), attribute_value);
 
       g_object_get(attribute_clist, "model", &list_store, NULL);
       gtk_list_store_append(list_store, &iter);
@@ -1438,10 +1427,10 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
 {
   char buffer[STRING_SIZE];
 
-  snprintf(buffer,sizeof(buffer),"%s settings",p->module()->name().c_str());
+  g_snprintf(buffer, sizeof(buffer), "%s settings", p->module()->name().c_str());
   gtk_frame_set_label(GTK_FRAME(p->bbw()->module_frame),buffer);
 
-  if( !GTK_WIDGET_VISIBLE(GTK_TREE_VIEW(p->bbw()->attribute_clist)))
+  if (!gtk_widget_get_visible(p->bbw()->attribute_clist))
     return;
 
   // clear clist
@@ -1463,7 +1452,6 @@ static void treeselect_module(GtkItem *item, GuiModule *p)
 
     gtk_widget_hide(p->bbw()->stimulus_frame);
     gtk_widget_hide(p->bbw()->node_frame);
-    gtk_widget_hide(p->bbw()->pic_frame);
 
     gtk_widget_show(p->bbw()->module_frame);
 
@@ -1571,7 +1559,7 @@ double GuiModule::Distance(int px, int py)
 static GuiModule *find_closest_module(Breadboard_Window *bbw, int x, int y)
 {
   GuiModule *closest=0;
-  double distance, min_distance=1000000;
+  double min_distance=1000000;
 
   GList *mi = bbw->modules;
 
@@ -1579,7 +1567,7 @@ static GuiModule *find_closest_module(Breadboard_Window *bbw, int x, int y)
 
     GuiModule *p = static_cast<GuiModule *>(mi->data);
 
-    distance = p->Distance(x,y);
+    double distance = p->Distance(x,y);
     if(distance<min_distance) {
       closest = p;
       min_distance = distance;
@@ -1599,10 +1587,10 @@ static int grab_next_module=0;
 void grab_module(GuiModule *p)
 {
     dragged_module = p;
-    gdk_pointer_grab(p->bbw()->layout->window,
+    gdk_pointer_grab(gtk_widget_get_window(p->bbw()->layout),
                      TRUE,
                      (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
-                     p->bbw()->layout->window,
+                     gtk_widget_get_window(p->bbw()->layout),
                      0,
                      GDK_CURRENT_TIME);
 
@@ -1647,10 +1635,10 @@ static void pointer_cb(GtkWidget *w,
             dragged_module = find_closest_module(bbw, x, y);
             if (0 != dragged_module)
             {
-              gdk_pointer_grab(w->window,
+              gdk_pointer_grab(gtk_widget_get_window(w),
                               TRUE,
                               (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
-                              w->window,
+                              gtk_widget_get_window(w),
                               0,
                               GDK_CURRENT_TIME);
               treeselect_module(0,dragged_module);
@@ -1747,84 +1735,47 @@ static void a_cb(GtkWidget *w, GtkDialog *dialog)
     gtk_dialog_response (dialog, GTK_RESPONSE_ACCEPT);
 }
 // used for reading a value from user when break on value is requested
-const char *gui_get_string(const char *prompt, const char *initial_text)
+static std::string gui_get_string(const char *prompt, const char *initial_text)
 {
-    static GtkWidget *dialog=0;
-    static GtkWidget *label;
-    static GtkWidget *entry;
-    static int retval;
-    GtkWidget *hbox;
+  GtkWidget *dialog = gtk_dialog_new_with_buttons("enter value",
+    NULL,
+    GTK_DIALOG_MODAL,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    GTK_STOCK_OK, GTK_RESPONSE_ACCEPT,
+    NULL);
 
+  GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 12);
+  GtkWidget *label = gtk_label_new("Enter string:");
+  GtkWidget *label2 = gtk_label_new(prompt);
+  GtkWidget *entry = gtk_entry_new();
+  gtk_entry_set_text(GTK_ENTRY(entry), initial_text);
+  gtk_widget_grab_focus(entry);
+  g_signal_connect(entry, "activate", G_CALLBACK(a_cb), (gpointer)dialog);
 
-    const char *string;
+  gtk_box_pack_start(GTK_BOX(content_area), label, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(content_area), hbox, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), label2, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
 
-    retval=-1;
+  gtk_widget_show_all(dialog);
+  gint retval = gtk_dialog_run(GTK_DIALOG(dialog));
 
-    if(dialog==0)
-    {
-        dialog = gtk_dialog_new_with_buttons("enter value",
-                                             NULL,
-                                             GTK_DIALOG_MODAL,
-                                             GTK_STOCK_OK,
-                                             GTK_RESPONSE_ACCEPT,
-                                             GTK_STOCK_CANCEL,
-                                             GTK_RESPONSE_CANCEL,
-                                             NULL);
-        g_signal_connect_swapped(dialog,
-                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
+  std::string string;
+  if (retval == GTK_RESPONSE_ACCEPT)
+    string = gtk_entry_get_text(GTK_ENTRY(entry));
 
-        label=gtk_label_new("Enter string:");
-        gtk_widget_show(label);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+  gtk_widget_destroy(dialog);
 
-        hbox = gtk_hbox_new(0,0);
-        gtk_widget_show(hbox);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-
-        
-        label=gtk_label_new(prompt);
-        gtk_widget_show(label);
-        gtk_box_pack_start(GTK_BOX(hbox), label,
-                           FALSE,FALSE, 20);
-
-        entry=gtk_entry_new();
-        gtk_widget_show(entry);
-        gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE,FALSE,20);
-        GTK_WIDGET_SET_FLAGS (entry, GTK_CAN_FOCUS);
-        g_signal_connect(entry,
-                           "activate",
-                           G_CALLBACK(a_cb),
-                           (gpointer)dialog);
-
-    }
-    else
-    {
-        gtk_label_set_text(GTK_LABEL(label),prompt);
-    }
-
-    gtk_entry_set_text(GTK_ENTRY(entry), initial_text);
-
-    gtk_widget_show(dialog);
-
-    gtk_widget_grab_focus (entry);
-
-    retval = gtk_dialog_run ((GtkDialog*) dialog);
-    gtk_widget_hide (dialog);
-    
-    if(retval==GTK_RESPONSE_ACCEPT)
-        string=gtk_entry_get_text(GTK_ENTRY(entry));
-    else
-        string=0;
-
-    return string;
+  return string;
 }
 
 static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
 {
-    const char *node_name = gui_get_string("Node name","");
+  std::string node_name = gui_get_string("Node name", "");
 
-    if(node_name !=0)
-        new Stimulus_Node(node_name);
+  if(!node_name.empty())
+    new Stimulus_Node(node_name.c_str());
 }
 
 
@@ -1854,47 +1805,25 @@ static void select_module_ok_cb(GtkTreeView *tree_view,
                   GtkTreeViewColumn *column,
                   GtkDialog *dialog)
 {
-    int col;
-    char *module_type;
-    GtkTreeModel *model;
-    GtkTreeIter iter;
-    
-    model = gtk_tree_view_get_model (tree_view);
-
-    g_object_get (column, "sort-column-id", &col, NULL);
-    
-    if (col > 2) // only column 1 & 2 is valid
-        col = 0;
-        
-    gtk_tree_model_get_iter (model, &iter, path);
-    gtk_tree_model_get (model, &iter, col, &module_type, -1);
-    
-    g_object_set_data (G_OBJECT (dialog), "module_type", module_type);
-    
     gtk_dialog_response (dialog, GTK_RESPONSE_ACCEPT);
 }
 
-static void copy_tree_to_clist(GtkTreeModel *model,
-                                     GtkWidget *clist)
+static void copy_tree_to_clist(GtkTreeModel *model, GtkListStore *list_store)
 {
     struct gui_node *gn;
-    char name[STRING_SIZE];
-    GtkListStore *list_store;
     GtkTreeIter node_iter, iter, new_iter;
 
     gtk_tree_model_get_iter_first (model, &node_iter);
     gtk_tree_model_iter_n_children (model, &node_iter);
     gtk_tree_model_iter_children (model, &iter, &node_iter);
-    g_object_get(clist, "model", &list_store, NULL);
     
     do
     {
         gtk_tree_model_get (model, &iter, 1, &gn, -1);
-        
-        strcpy(name,gn->node->name().c_str());
-        
+   
         gtk_list_store_append(list_store, &new_iter);
-        gtk_list_store_set(list_store, &new_iter, 0, name, 1, (gpointer) gn->node, -1);
+        gtk_list_store_set(list_store, &new_iter,
+          0, gn->node->name().c_str(), 1, (gpointer) gn->node, -1);
         
         if (!iter.stamp)
             break;
@@ -1903,152 +1832,99 @@ static void copy_tree_to_clist(GtkTreeModel *model,
 
 static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 {
-    static GtkWidget *dialog;
-    static GtkWidget *node_clist;
-    static GtkListStore *list_store;
-    GtkCellRenderer *renderer;
+  GtkWidget *dialog = gtk_dialog_new_with_buttons("Select node to connect to",
+    GTK_WINDOW(bbw->window),
+    GTK_DIALOG_MODAL,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    NULL);
 
-    Stimulus_Node *snode=0;
+  GtkWidget *vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *scrolledwindow = gtk_scrolled_window_new (0, 0);
+  gtk_box_pack_start(GTK_BOX(vbox), scrolledwindow, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW (scrolledwindow),
+    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-    GtkWidget *vbox;
-    GtkWidget *scrolledwindow;
+  GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+  GtkListStore *list_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
+  GtkWidget *node_list = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
+  g_object_unref(list_store);
+  gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(node_list), FALSE);
+  gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(node_list),
+    0, "Nodes", renderer, "text", 0, NULL);
+  gtk_container_add(GTK_CONTAINER(scrolledwindow), node_list);
 
-    if(dialog==0)
-    {
+  gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
 
-        // Build window
-        dialog = gtk_dialog_new_with_buttons("Select node to connect to",
-                                             (GtkWindow*)bbw->window,
-                                             GTK_DIALOG_MODAL,
-                                             GTK_STOCK_CANCEL,
-                                             GTK_RESPONSE_CANCEL,
-                                             NULL);
+  copy_tree_to_clist(
+    gtk_tree_view_get_model((GtkTreeView*) bbw->tree),
+    list_store);
 
-        vbox = GTK_DIALOG(dialog)->vbox;
+  g_signal_connect(node_list, "row-activated",
+    G_CALLBACK(select_node_ok_cb), dialog);
 
-        scrolledwindow = gtk_scrolled_window_new (0, 0);
-        gtk_widget_show (scrolledwindow);
-        gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
-        gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_widget_show_all(dialog);
+  int resp = gtk_dialog_run((GtkDialog*)dialog);
 
-        renderer = gtk_cell_renderer_text_new();
-        list_store = gtk_list_store_new(2, G_TYPE_STRING, G_TYPE_POINTER);
-        node_clist = gtk_tree_view_new();
-        gtk_tree_view_insert_column_with_attributes((GtkTreeView*) node_clist,
-                                                    0, "Nodes",
-                                                    renderer,
-                                                    "text", 0,
-                                                    NULL);
-        g_object_set(node_clist,
-                     "model", list_store,
-                     "headers-visible", FALSE,
-                     NULL);
+  Stimulus_Node *snode = static_cast<Stimulus_Node*>(g_object_get_data((GObject*) dialog, "snode"));
 
-        gtk_widget_show (node_clist);
-        gtk_container_add (GTK_CONTAINER(scrolledwindow), node_clist);
+  gtk_widget_destroy(dialog);
 
-        g_signal_connect(node_clist,
-                         "row-activated",
-                         (GCallback) select_node_ok_cb,
-                         dialog);
-
-        gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
-    }
-    gtk_list_store_clear(list_store);
-
-    // Add all nodes
-    copy_tree_to_clist (
-            gtk_tree_view_get_model ((GtkTreeView*) bbw->tree),
-            node_clist
-    );
-
-    int resp = gtk_dialog_run((GtkDialog*)dialog);
-    snode = (Stimulus_Node*) g_object_get_data ((GObject*) dialog, "snode");
-    gtk_widget_hide (dialog);
-
-    if (resp == GTK_RESPONSE_CANCEL)
-        return 0;
-
+  if (resp == GTK_RESPONSE_ACCEPT)
     return snode;
+
+  return 0;
 }
 
-static char *select_module_dialog(Breadboard_Window *bbw)
+static std::string select_module_dialog(Breadboard_Window *bbw)
 {
-    static GtkWidget *dialog;
-    static GtkWidget *module_clist;
-    static GtkListStore *list_store;
-    GtkCellRenderer *renderer;
-    GtkTreeViewColumn *column;
-    int width;
+  GtkWidget *dialog = gtk_dialog_new_with_buttons("Select module to load",
+    GTK_WINDOW(bbw->window), GTK_DIALOG_MODAL,
+    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+    NULL);
 
-    GtkWidget *vbox;
-    GtkWidget *scrolledwindow;
+  GtkWidget *vbox = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    const gchar *module_clist_titles[]={"Name1","Name2", "Library"};
+  GtkWidget *scrolledwindow = gtk_scrolled_window_new(0, 0);
+  gtk_box_pack_start(GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledwindow),
+    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-    if(dialog==0)
-    {
-        // Build window
-        dialog = gtk_dialog_new_with_buttons("Select module to load",
-                                             (GtkWindow*) bbw->window,
-                                             GTK_DIALOG_MODAL,
-                                             GTK_STOCK_CANCEL,
-                                             GTK_RESPONSE_CANCEL,
-                                             NULL);
-
-        vbox = GTK_DIALOG(dialog)->vbox;
-
-        scrolledwindow = gtk_scrolled_window_new (0, 0);
-        gtk_widget_show (scrolledwindow);
-        gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
-        gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
-        int n_columns;
+  const gchar *module_clist_titles[] = {"Name1","Name2", "Library"};
+ 
 #ifdef OLD_MODULE_LIBRARY
-        n_columns = 2;
-        list_store = gtk_list_store_new(n_columns + 1,
-                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-        width = 220;
+  int n_columns = 2;
+  GtkListStore *list_store = gtk_list_store_new(n_columns + 1,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+  int width = 220;
 #else
-        n_columns = 3;
-        list_store = gtk_list_store_new(n_columns + 1,
-                G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-        width = 320;
+  int n_columns = 3;
+  GtkListStore *list_store = gtk_list_store_new(n_columns + 1,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+  int width = 320;
 #endif
-        module_clist = gtk_tree_view_new();
-        for (int col=0; col<n_columns; col++) {
-            renderer = gtk_cell_renderer_text_new();
-            column = gtk_tree_view_column_new_with_attributes(
-                    module_clist_titles[col],
-                    renderer,
-                    "text", col,
-                    NULL
-            );
-            g_object_set(column,
-                         "resizable", TRUE,
-                         "sort-indicator", TRUE,
-                         "sort-column-id", col,
-                         NULL);
-            gtk_tree_view_append_column((GtkTreeView*) module_clist, column);
-        }
-        g_object_set(module_clist,
-                     "model", list_store,
-                     NULL);
 
+  GtkWidget *module_clist = gtk_tree_view_new_with_model(GTK_TREE_MODEL(list_store));
+  g_object_unref(list_store);
+  for (int col = 0; col < n_columns; ++col) {
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
+      module_clist_titles[col], renderer,
+      "text", col, NULL);
+    g_object_set(column,
+      "resizable", TRUE,
+      "sort-indicator", TRUE,
+      "sort-column-id", col,
+      NULL);
+    gtk_tree_view_append_column((GtkTreeView*) module_clist, column);
+  }
 
-        gtk_widget_show (module_clist);
-        gtk_container_add (GTK_CONTAINER(scrolledwindow), module_clist);
+  gtk_container_add (GTK_CONTAINER(scrolledwindow), module_clist);
 
-        g_signal_connect(module_clist,
-                         "row-activated",
-                         (GCallback) select_module_ok_cb,
-                         dialog);
+  g_signal_connect(module_clist, "row-activated",
+    G_CALLBACK(select_module_ok_cb), dialog);
 
-        gtk_window_set_default_size(GTK_WINDOW(dialog), width, 400);
-    }
+  gtk_window_set_default_size(GTK_WINDOW(dialog), width, 400);
 
-    gtk_list_store_clear(list_store);
-    
 #ifdef OLD_MODULE_LIBRARY
     ModuleLibrary::FileList::iterator  mi;
     ModuleLibrary::FileList::iterator  itFileListEnd(ModuleLibrary::GetFileList().end());
@@ -2071,11 +1947,10 @@ static char *select_module_dialog(Breadboard_Window *bbw)
           char name[STRING_SIZE];
           char library[STRING_SIZE];
           char *text[2]={name, library};
-          int row;
           GtkTreeIter iter;
 
-          strncpy(name,pFileTypes[i].names[0], STRING_SIZE);
-          strncpy(library,t->name(), STRING_SIZE);
+          g_strlcpy(name, pFileTypes[i].names[0], STRING_SIZE);
+          g_strlcpy(library, t->name(), STRING_SIZE);
 
           gtk_list_store_append(list_store, &iter);
           gtk_list_store_set(list_store, &iter,
@@ -2122,17 +1997,29 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     }
 #endif
 
-  char *str;
-  int resp;
-  
-  resp = gtk_dialog_run((GtkDialog*)dialog);
-  gtk_widget_hide (dialog);
-  
-  if (resp == GTK_RESPONSE_CANCEL)
-    return 0;
-  
-  str = (char*) g_object_get_data((GObject*)dialog, "module_type");
-  return str;
+  gtk_widget_show_all(dialog);
+  int resp = gtk_dialog_run((GtkDialog*)dialog);
+
+  if (resp == GTK_RESPONSE_ACCEPT) {
+    GtkTreeIter iter;
+    GtkTreeSelection *sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(module_clist));
+    if (!gtk_tree_selection_get_selected(sel, NULL, &iter)) {
+      gtk_widget_destroy(dialog);
+      return "";
+    }
+
+    gchar *s;
+    gtk_tree_model_get(GTK_TREE_MODEL(list_store), &iter, 0, &s, -1);
+    std::string str = s;
+    g_free(s);
+    gtk_widget_destroy(dialog);
+
+    return str;
+  }
+
+  gtk_widget_destroy(dialog);
+
+  return "";
 }
 
 #if 0
@@ -2217,49 +2104,33 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 
 static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 {
-
+  std::string library_name
+    = gui_get_string("Module library name (e.g. libgpsim_modules)","");
 #ifdef OLD_MODULE_LIBRARY
-    const char *library_name;
-
-    library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
-    if(library_name)
-      ModuleLibrary::LoadFile(library_name);
+    if(!library_name.empty())
+      ModuleLibrary::LoadFile(library_name.c_str());
 #else
-    const char *library_name;
-
-    library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
-    if(library_name)
-    {
-        string lib_name = library_name;
-        ModuleLibrary::LoadFile(lib_name);
+    if(!library_name.empty()) {
+        ModuleLibrary::LoadFile(library_name);
     }
 #endif
 }
 
 static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 {
+  std::string module_type = select_module_dialog(bbw);
 
-    char *module_type;
-    const char *module_name;
-
-    module_type = select_module_dialog(bbw);
-
-    if(module_type!=0)
-    {
-        module_name = gui_get_string("Module name", module_type);
+  if (!module_type.empty()) {
+        std::string module_name = gui_get_string("Module name", module_type.c_str());
         grab_next_module = 1;
-        if(module_name != 0)
+        if(!module_name.empty())
 #ifdef OLD_MODULE_LIBRARY
-          ModuleLibrary::NewObject(module_type, module_name);
+          ModuleLibrary::NewObject(module_type.c_str(), module_name.c_str());
 #else
         {
-            string mName = module_type;
-            string refDes = module_name;
-
-            if(!ModuleLibrary::InstantiateObject(mName,refDes))
+            if(!ModuleLibrary::InstantiateObject(module_type, module_name))
                 fprintf(stderr, "Module load of %s %s failed\n",
-                        module_type, module_name);
-	    g_free((void *)module_name);
+                        module_type.c_str(), module_name.c_str());
         }
 #endif
     }
@@ -2309,7 +2180,6 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     bbw->modules=g_list_remove(bbw->modules, bbw->selected_module);
 
     gtk_widget_hide(bbw->module_frame);
-    gtk_widget_hide(bbw->pic_frame);
 
     free(bbw->selected_module);
 
@@ -2335,7 +2205,6 @@ static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
     gtk_widget_hide(bbw->node_frame);
     gtk_widget_hide(bbw->stimulus_frame);
     gtk_widget_hide(bbw->module_frame);
-    gtk_widget_hide(bbw->pic_frame);
 }
 
 static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
@@ -2409,7 +2278,6 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
     GList *module_iterator;
     Module *m;
-    SymbolTable_t *st;
 
     char *filename = gui_get_filename("netlist.stc");
     if(!filename)
@@ -2476,10 +2344,9 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
       p = static_cast<GuiModule*>( module_iterator->data);
 
-      list <Value *> :: iterator attribute_iterator;
       m = p->module();
 
-      st = &m->getSymbolTable();
+      SymbolTable_t *st = &m->getSymbolTable();
 
       Processor *cpu;
       cpu=dynamic_cast<Processor*>(m);
@@ -2507,10 +2374,9 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     // Save nodes and connections
     fprintf(fo, "\n\n# Connections:\n");
 
-    GList *list;
-    for(int i = 0; (list = g_list_nth(bbw->nodes,i)); i++)
+    for(GList *list = bbw->nodes; list; list = g_list_next(list))
     {
-        Stimulus_Node *node = (Stimulus_Node *)list->data;
+        Stimulus_Node *node = static_cast<Stimulus_Node *>(list->data);
         stimulus *stimulus;
 
         fprintf(fo, "node %s\n",node->name().c_str());
@@ -2639,7 +2505,7 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
 
 
   // Create pixmap for holding the pin graphics.
-  pixmap = gdk_pixmap_new(m_bbw->window->window,
+  pixmap = gdk_pixmap_new(gtk_widget_get_window(m_bbw->window),
                           m_width,
                           m_height,
                           -1);
@@ -2735,12 +2601,10 @@ void GuiPin::Draw()
   y = m_height/2;
 
   // Clear pixmap
-  gdk_draw_rectangle (pixmap,
-                      m_bbw->window->style->bg_gc[GTK_WIDGET_STATE (m_pinDrawingArea)],
-                      TRUE,
-                      0, 0,
-                      m_width,
-                      m_height);
+  gdk_draw_rectangle(pixmap,
+    gtk_widget_get_style(m_bbw->window)->bg_gc[gtk_widget_get_state(m_pinDrawingArea)],
+      TRUE,
+      0, 0, m_width, m_height);
 
 
   if(type==PIN_OTHER)
@@ -2792,13 +2656,12 @@ void GuiPin::Draw()
   gdk_draw_line(pixmap,gc,
                 pointx,y,wingx,y-wingheight);
 
-  if(m_pinDrawingArea->window!=0)
-    gdk_draw_pixmap(m_pinDrawingArea->window,
-                    m_pinDrawingArea->style->fg_gc[GTK_WIDGET_STATE (m_pinDrawingArea)],
-                    pixmap,
-                    0, 0,
-                    0, 0,
-                    m_width, m_height);
+  GdkWindow *gdk_win = gtk_widget_get_window(m_pinDrawingArea);
+  if(gdk_win)
+    gdk_draw_pixmap(gdk_win,
+      gtk_widget_get_style(m_pinDrawingArea)->fg_gc[gtk_widget_get_state(m_pinDrawingArea)],
+      pixmap,
+      0, 0, 0, 0, m_width, m_height);
 }
 //------------------------------------------------------------------------
 
@@ -2838,24 +2701,19 @@ void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
 int GuiPin::DrawGUIlabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
 {
   IOPIN *iopin = getIOpin();
-  const char *name;
-  int orient;
 
-
-  name = iopin ? iopin->GUIname().c_str() : "";
+  const char *name = iopin ? iopin->GUIname().c_str() : "";
   if(*name && m_bbw && iopin->is_newGUIname()) {
     iopin->clr_is_newGUIname();
 
-    orient = (m_label_x <= LABELPAD+CASELINEWIDTH)?0:2; // Left or Right label?
+    int orient = (m_label_x <= LABELPAD+CASELINEWIDTH)?0:2; // Left or Right label?
 
     // Clear label area
-    gdk_draw_rectangle (module_pixmap,
-                        m_bbw->window->style->white_gc,
-                        TRUE,
-                        m_label_x,
-                        m_label_y-m_height+CASEOFFSET,
-                        pinnameWidths[orient],
-                        m_height);
+    gdk_draw_rectangle(module_pixmap,
+      gtk_widget_get_style(m_bbw->window)->white_gc,
+      TRUE,
+      m_label_x, m_label_y-m_height+CASEOFFSET,
+      pinnameWidths[orient], m_height);
 
     gdk_draw_text(module_pixmap,
                   gdk_font_from_description(m_bbw->pinnamefont),
@@ -2893,12 +2751,13 @@ static gboolean name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule 
         return 0;
     }
 
-    gdk_draw_pixmap(widget->window,
-                    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-                    p->name_pixmap(),
-                    event->area.x, event->area.y,
-                    event->area.x, event->area.y,
-                    event->area.width, event->area.height);
+  gdk_draw_pixmap(gtk_widget_get_window(widget),
+    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
+    p->name_pixmap(),
+    event->area.x, event->area.y,
+    event->area.x, event->area.y,
+    event->area.width, event->area.height);
+
     return 0;
 }
 
@@ -2911,13 +2770,14 @@ static gboolean module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModul
         return 0;
     }
 
-    gdk_draw_pixmap(widget->window,
-                    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-                    p->module_pixmap(),
-                    event->area.x, event->area.y,
-                    event->area.x, event->area.y,
-                    event->area.width, event->area.height);
-    return 0;
+  gdk_draw_pixmap(gtk_widget_get_window(widget),
+    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
+    p->module_pixmap(),
+    event->area.x, event->area.y,
+    event->area.x, event->area.y,
+    event->area.width, event->area.height);
+
+  return 0;
 }
 
 void GuiModule::Draw()
@@ -2958,10 +2818,6 @@ void GuiModule::Update()
   gdk_pixmap_unref(m_name_pixmap);
   gtk_widget_destroy(m_name_widget);
 
-  // Remove from gtk-tree
-  gtk_tree_item_remove_subtree(GTK_TREE_ITEM(m_tree_item));
-  gtk_widget_destroy(m_tree_item);
-
   // Remove module from list
   m_bbw->modules=g_list_remove(m_bbw->modules, this);
 
@@ -2982,15 +2838,14 @@ void GuiModule::UpdatePins()
     pin->Update();
     pin_iter = pin_iter->next;
   }
-  if (change && m_pinLabel_widget->window)  // Pin label changed, Draw Labels
-  {
 
-      gdk_draw_pixmap(m_pinLabel_widget->window,
-          m_pinLabel_widget->style->fg_gc[GTK_WIDGET_STATE (m_pinLabel_widget)],
-          m_module_pixmap,
-          0, 0,
-          0, 0,
-          m_width, m_height);
+  GdkWindow *gdk_win = gtk_widget_get_window(m_pinLabel_widget);
+  if (change && gdk_win)  // Pin label changed, Draw Labels
+  {
+    gdk_draw_pixmap(gdk_win,
+      gtk_widget_get_style(m_pinLabel_widget)->fg_gc[gtk_widget_get_state(m_pinLabel_widget)],
+      m_module_pixmap,
+      0, 0, 0, 0, m_width, m_height);
   }
 
 }
@@ -3021,14 +2876,10 @@ void PositionAttribute::set(Value *v)
 //------------------------------------------------------------------------
 void GuiModule::DrawCaseOutline(GtkWidget *da)
 {
-#if GTK_CHECK_VERSION(2,8,7)
-
-  gdk_draw_rectangle (m_module_pixmap,
-                      m_bbw->window->style->bg_gc[GTK_WIDGET_STATE (m_bbw->window)],
-                      TRUE,
-                      0, 0,
-                      m_width,
-                      m_height);
+  gdk_draw_rectangle(m_module_pixmap,
+    gtk_widget_get_style(m_bbw->window)->bg_gc[gtk_widget_get_state(m_bbw->window)],
+    TRUE,
+    0, 0, m_width, m_height);
 
   cairo_t *cr = gdk_cairo_create (m_module_pixmap);
 
@@ -3038,28 +2889,7 @@ void GuiModule::DrawCaseOutline(GtkWidget *da)
   cairo_set_source_rgb (cr, 0, 0, 0);
   cairo_stroke (cr);
 
-
-#else
-
-  gdk_draw_rectangle (m_module_pixmap,
-                      m_bbw->window->style->white_gc,
-                      TRUE,
-                      CASEOFFSET, CASEOFFSET,
-                      m_width-CASEOFFSET,
-                      m_height-CASEOFFSET);
-
-
-  // Draw case outline
-  gdk_gc_set_foreground(m_bbw->case_gc,&black_color);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,CASEOFFSET,CASEOFFSET,
-                m_width-CASEOFFSET,CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,m_width-CASEOFFSET,CASEOFFSET,
-                m_width-CASEOFFSET,m_height-CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,CASEOFFSET,m_height-CASEOFFSET,
-                m_width-CASEOFFSET,m_height-CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,CASEOFFSET,CASEOFFSET,
-                CASEOFFSET,m_height-CASEOFFSET);
-#endif
+  cairo_destroy(cr);
 }
 //------------------------------------------------------------------------
 
@@ -3175,10 +3005,10 @@ void GuiModule::AddPinGeometry(GuiPin *pin)
       // FIXME
 
       printf("################### Error:\n");
-      printf("Number of pins %d\n",m_module->package->number_of_pins);
+      printf("Number of pins %u\n", m_module->package->number_of_pins);
       printf("pin_position %f\n",pin_position);
       printf("pin_position2 %f\n",m_module->package->get_pin_position(pin_number));
-      printf("pin_number %d\n",pin_number);
+      printf("pin_number %u\n", pin_number);
       assert(0);
     }
   }
@@ -3281,16 +3111,15 @@ static void createLabel(GtkWidget **da,
   int width  = gStringWidth(font,text);
 
   gtk_drawing_area_size(GTK_DRAWING_AREA(*da),width,height);
-  *pixmap = gdk_pixmap_new(parent->window,
+  *pixmap = gdk_pixmap_new(gtk_widget_get_window(parent),
                            width,
                            height,
                            -1);
-  gdk_draw_rectangle (*pixmap,
-                      parent->style->bg_gc[GTK_WIDGET_STATE (*da)],
-                      TRUE,
-                      0, 0,
-                      width,
-                      height);
+  gdk_draw_rectangle(*pixmap,
+    gtk_widget_get_style(parent)->bg_gc[gtk_widget_get_state(*da)],
+    TRUE,
+    0, 0, width, height);
+
   gdk_draw_text(*pixmap,
                 gFontFromDescription(font),
                 gc,
@@ -3397,7 +3226,7 @@ void GuiModule::Build()
 
     m_height+=2*CASELINEWIDTH+2*LABELPAD;
 
-    m_module_pixmap = gdk_pixmap_new(m_bbw->window->window,
+    m_module_pixmap = gdk_pixmap_new(gtk_widget_get_window(m_bbw->window),
                                      m_width,
                                      m_height,
                                      -1);
@@ -3480,23 +3309,13 @@ void GuiModule::Build()
 //========================================================================
 
 GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
-  :  GuiBreadBoardObject(_bbw,0,0), m_module(_module)
+  : GuiBreadBoardObject(_bbw,0,0), m_module(_module), m_module_widget(0),
+    m_pinLabel_widget(0), m_module_x(0), m_module_y(0), m_name_widget(0),
+    m_pin_count(0), m_module_pixmap(0), m_name_pixmap(0), m_pins(0)
 {
-  m_pinLabel_widget=0;
-  m_module_widget=0;
-  m_module_x = 0;
-  m_module_y = 0;
-  m_name_widget=0;
   m_width=0;
   m_height=0;
-  m_pin_count=0;
 
-  m_module_pixmap=0;
-  m_name_pixmap=0;
-
-  m_tree_item=0;
-
-  m_pins=0;
   pinnameWidths[0] = 0;
   pinnameWidths[1] = 0;
   pinnameWidths[2] = 0;
@@ -3525,14 +3344,11 @@ GuiDipModule::GuiDipModule(Module *_module, Breadboard_Window *_bbw)
 
 void GuiDipModule::DrawCaseOutline(GtkWidget *da)
 {
-#if GTK_CHECK_VERSION(2,8,7)
-
-  gdk_draw_rectangle (m_module_pixmap,
-                      m_bbw->window->style->bg_gc[GTK_WIDGET_STATE (m_bbw->window)],
-                      TRUE,
-                      0, 0,
-                      m_width,
-                      m_height);
+  gdk_draw_rectangle(m_module_pixmap,
+    gtk_widget_get_style(m_bbw->window)->bg_gc[gtk_widget_get_state(m_bbw->window)],
+    TRUE,
+    0, 0,
+    m_width, m_height);
 
   cairo_t *cr = gdk_cairo_create (m_module_pixmap);
 
@@ -3549,37 +3365,7 @@ void GuiDipModule::DrawCaseOutline(GtkWidget *da)
   cairo_set_source_rgb (cr, 0, 0, 0);
   cairo_stroke (cr);
 
-
-#else
-
-  gdk_draw_rectangle (m_module_pixmap,
-                      m_bbw->window->style->white_gc,
-                      TRUE,
-                      CASEOFFSET, CASEOFFSET,
-                      m_width-CASEOFFSET,
-                      m_height-CASEOFFSET);
-
-
-
-  // Draw case outline
-  gdk_gc_set_foreground(m_bbw->case_gc,&black_color);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,CASEOFFSET,CASEOFFSET,
-                m_width/2-FOORADIUS,CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,m_width-CASEOFFSET,CASEOFFSET,
-                m_width/2+FOORADIUS,CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,m_width-CASEOFFSET,CASEOFFSET,
-                m_width-CASEOFFSET,m_height-CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,CASEOFFSET,m_height-CASEOFFSET,
-                m_width-CASEOFFSET,m_height-CASEOFFSET);
-  gdk_draw_line(m_module_pixmap,m_bbw->case_gc,CASEOFFSET,CASEOFFSET,
-                CASEOFFSET,m_height-CASEOFFSET);
-  gdk_draw_arc(m_module_pixmap,m_bbw->window->style->bg_gc[GTK_WIDGET_STATE (da)],
-               TRUE,m_width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,
-               180*64,180*64);
-  gdk_draw_arc(m_module_pixmap,m_bbw->case_gc,FALSE,m_width/2-FOORADIUS,CASEOFFSET-FOORADIUS,
-               2*FOORADIUS,2*FOORADIUS,180*64,180*64);
-
-#endif
+  cairo_destroy(cr);
 }
 
 //========================================================================
@@ -3593,7 +3379,7 @@ void Breadboard_Window::Update(void)
     return;
 
 
-  if(!GTK_WIDGET_VISIBLE(window))
+  if(!gtk_widget_get_visible(window))
     return;
 
   iter=modules;
@@ -3743,30 +3529,32 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 
 static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 {
-    if(GTK_LAYOUT (bbw->layout)->bin_window==0)
-        return;
+  GdkWindow *bin_win = gtk_layout_get_bin_window(GTK_LAYOUT(bbw->layout));
 
-    if(bbw->layout_pixmap==0)
-    {
-        puts("bbw.c: no pixmap4!");
-        return;
-    }
+  if (!bin_win)
+    return;
 
-    int xoffset=0, yoffset=0;
+  if (!bbw->layout_pixmap) {
+    puts("bbw.c: no pixmap4!");
+    return;
+  }
 
-    GtkAdjustment *xadj, *yadj;
-    xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(bbw->layout));
-    yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(bbw->layout));
-    xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
-    yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
+  GtkAdjustment *xadj = gtk_layout_get_hadjustment(GTK_LAYOUT(bbw->layout));
+  GtkAdjustment *yadj = gtk_layout_get_vadjustment(GTK_LAYOUT(bbw->layout));
+   
+  int xoffset = (int) gtk_adjustment_get_value(GTK_ADJUSTMENT(xadj));
+  int yoffset = (int) gtk_adjustment_get_value(GTK_ADJUSTMENT(yadj));
 
-    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
-                    bbw->window->style->white_gc,
-                    bbw->layout_pixmap,
-                    xoffset, yoffset,
-                    xoffset, yoffset,
-                    bbw->layout->allocation.width,
-                    bbw->layout->allocation.height);
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(bbw->layout, &allocation);
+
+  gdk_draw_pixmap(bin_win,
+    gtk_widget_get_style(bbw->window)->white_gc,
+    bbw->layout_pixmap,
+    xoffset, yoffset,
+    xoffset, yoffset,
+    allocation.width,
+    allocation.height);
 }
 
 static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
@@ -3835,16 +3623,9 @@ void Breadboard_Window::Build(void)
   GtkWidget *vbox9;
   GtkWidget *vbox13;
   GtkWidget *scrolledwindow4;
-  GtkWidget *viewport9;
   GtkWidget *tree1;
   GtkWidget *hbox12;
   GtkWidget *hbox15;
-  GtkWidget *vbox12;
-  GtkWidget *scrolledwindow3;
-  GtkWidget *viewport8;
-  GtkWidget *hbox11;
-  GtkWidget *pic_settings_entry;
-  GtkWidget *pic_settings_button;
 
   GtkWidget *vbox11;
   GtkWidget *scrolledwindow2;
@@ -3913,12 +3694,6 @@ void Breadboard_Window::Build(void)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow4),
                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  viewport9 = gtk_viewport_new (0, 0);
-  gtk_widget_ref (viewport9);
-  g_object_set_data_full (G_OBJECT (window), "viewport9", viewport9,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (viewport9);
-
   renderer = gtk_cell_renderer_text_new ();
   tree_store = gtk_tree_store_new (2, G_TYPE_STRING, G_TYPE_POINTER);
   tree = tree1 = gtk_tree_view_new_with_model ((GtkTreeModel*) tree_store);
@@ -3952,64 +3727,6 @@ void Breadboard_Window::Build(void)
 
   add_button("Trace all","button25", G_CALLBACK(trace_all), hbox15);
   add_button("Clear traces","button26", G_CALLBACK(clear_traces), hbox15);
-
-
-
-
-  pic_frame = gtk_frame_new ("PIC settings");
-  gtk_widget_ref (pic_frame);
-  g_object_set_data_full (G_OBJECT (window), "pic_frame", pic_frame,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  //  gtk_widget_show (pic_frame);
-  gtk_box_pack_start (GTK_BOX (vbox9), pic_frame, TRUE, TRUE, 0);
-  vbox12 = bb_vbox(window, "vbox12");
-  gtk_container_add (GTK_CONTAINER (pic_frame), vbox12);
-
-  scrolledwindow3 = gtk_scrolled_window_new (0, 0);
-  gtk_widget_ref (scrolledwindow3);
-  g_object_set_data_full (G_OBJECT (window), "scrolledwindow3", scrolledwindow3,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (scrolledwindow3);
-  gtk_box_pack_start (GTK_BOX (vbox12), scrolledwindow3, TRUE, TRUE, 0);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow3), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
-  viewport8 = gtk_viewport_new (0, 0);
-  gtk_widget_ref (viewport8);
-  g_object_set_data_full (G_OBJECT (window), "viewport8", viewport8,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (viewport8);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow3), viewport8);
-
-  pic_settings_clist = gtk_clist_new (1);
-
-
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(pic_settings_clist, gtk_widget_get_style(pic_settings_clist));
-  gtk_widget_ref (pic_settings_clist);
-  g_object_set_data_full (G_OBJECT (window), "pic_settings_clist", pic_settings_clist,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pic_settings_clist);
-  gtk_container_add (GTK_CONTAINER (viewport8), pic_settings_clist);
-
-  hbox11 = bb_hbox(window, "hbox11");
-  gtk_box_pack_start (GTK_BOX (vbox12), hbox11, FALSE, FALSE, 0);
-
-  pic_settings_entry = gtk_entry_new ();
-  gtk_widget_ref (pic_settings_entry);
-  g_object_set_data_full (G_OBJECT (window), "pic_settings_entry", pic_settings_entry,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pic_settings_entry);
-  gtk_box_pack_start (GTK_BOX (hbox11), pic_settings_entry, FALSE, FALSE, 0);
-
-  pic_settings_button = gtk_button_new_with_label ("Set");
-  gtk_widget_ref (pic_settings_button);
-  g_object_set_data_full (G_OBJECT (window), "pic_settings_button", pic_settings_button,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pic_settings_button);
-  gtk_box_pack_start (GTK_BOX (hbox11), pic_settings_button, FALSE, FALSE, 0);
-
-
 
 
 
@@ -4174,8 +3891,7 @@ void Breadboard_Window::Build(void)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_container_add (GTK_CONTAINER (scrolledwindow5), layout);
   gtk_layout_set_size (GTK_LAYOUT (layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
-  GTK_ADJUSTMENT (GTK_LAYOUT (layout)->hadjustment)->step_increment = 10;
-  GTK_ADJUSTMENT (GTK_LAYOUT (layout)->vadjustment)->step_increment = 10;
+
   gtk_widget_set_events(layout,
                         gtk_widget_get_events(layout)|
                         GDK_BUTTON_PRESS_MASK |
@@ -4190,9 +3906,11 @@ void Breadboard_Window::Build(void)
   g_signal_connect(layout, "expose_event",
                      G_CALLBACK(layout_expose), this);
 
-  GtkAdjustment *xadj, *yadj;
-  xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(layout));
-  yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(layout));
+  GtkAdjustment *xadj = gtk_layout_get_hadjustment(GTK_LAYOUT(layout));
+  gtk_adjustment_set_step_increment(xadj, 10.0);
+  GtkAdjustment *yadj = gtk_layout_get_vadjustment(GTK_LAYOUT(layout));
+  gtk_adjustment_set_step_increment(yadj, 10.0);
+
   g_signal_connect(xadj, "value_changed",
                      G_CALLBACK(layout_adj_changed), this);
   g_signal_connect(yadj, "value_changed",
@@ -4217,19 +3935,21 @@ void Breadboard_Window::Build(void)
 
   gtk_widget_realize(window);
 
-  pinname_gc=gdk_gc_new(window->window);
+  GdkWindow *win_gdk_window = gtk_widget_get_window(window);
 
-  case_gc=gdk_gc_new(window->window);
+  pinname_gc=gdk_gc_new(win_gdk_window);
+
+  case_gc=gdk_gc_new(win_gdk_window);
   gdk_gc_set_line_attributes(case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
   pinstatefont = pango_font_description_from_string("Courier Bold 8");
   pinnamefont = pango_font_description_from_string("Courier Bold 8");
 
-  pinline_gc=gdk_gc_new(window->window);
-  g_assert(pinline_gc!=0);
+  pinline_gc=gdk_gc_new(win_gdk_window);
+
   gdk_gc_set_line_attributes(pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
-  layout_pixmap = gdk_pixmap_new(window->window,
+  layout_pixmap = gdk_pixmap_new(win_gdk_window,
                                       LAYOUTSIZE_X,
                                       LAYOUTSIZE_Y,
                                       -1);
@@ -4260,9 +3980,8 @@ void Breadboard_Window::Build(void)
   node_iter = &iter;
 
   // Handle nodes added before breadboard GUI enabled
-  GList *list;
-  for(int i = 0; (list = g_list_nth(nodes,i)); i++)
-        NodeConfigurationChanged((Stimulus_Node *)(list->data));
+  for(GList *list = nodes; list; list = g_list_next(list))
+        NodeConfigurationChanged(static_cast<Stimulus_Node *>(list->data));
 
   bIsBuilt = true;
 
@@ -4293,6 +4012,7 @@ void Breadboard_Window::Build(void)
     }
   }
   */
+  //gtk_widget_show_all(window);
   gtk_widget_show(window);
 
   Update();
@@ -4304,38 +4024,16 @@ const char *Breadboard_Window::name()
 }
 
 Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
+  : pinstatefont(0), pinnamefont(0), pinname_gc(0), pinline_gc(0),
+    case_gc(0), modules(0), nodes(0), node_clist(0),
+    stimulus_settings_label(0), stimulus_add_node_button(0),
+    layout_pixmap(0), hadj(0), vadj(0), node_iter(0),
+    selected_pin(0), selected_node(0), selected_module(0)
 {
   menu = "/menu/Windows/Breadboard";
 
   wc = WC_misc;
   wt = WT_breadboard_window;
-  window = 0;
-
-  pinstatefont = 0;
-  pinnamefont = 0;
-  pinname_gc = 0;
-  pinline_gc = 0;
-  case_gc = 0;
-  node_iter = 0;
-
-  modules=0;
-  nodes = 0;
-
-  node_clist=0;
-
-  stimulus_settings_label=0;
-
-  stimulus_add_node_button=0;
-
-  selected_node=0;
-  selected_pin=0;
-  selected_module=0;
-
-  hadj = 0;
-  vadj = 0;
-
-  layout_pixmap=0;
-
   gp = _gp;
 
   if(!get_config())

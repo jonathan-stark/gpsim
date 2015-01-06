@@ -185,7 +185,6 @@ public:
   GtkWidget *module_widget() { return m_module_widget; }
   GtkWidget *pinLabel_widget() { return m_pinLabel_widget; }
   GtkWidget *name_widget() { return m_name_widget; }
-  GtkWidget *tree_item() { return m_tree_item; }
   GdkPixmap *module_pixmap() { return m_module_pixmap; }
   GdkPixmap *name_pixmap() { return m_name_pixmap; }
 
@@ -206,11 +205,7 @@ protected:
   GdkPixmap *m_module_pixmap;
   GdkPixmap *m_name_pixmap;
 
-  GtkWidget *m_tree_item;
-
   GList *m_pins;
-
-
 };
 
 class GuiDipModule : public GuiModule
@@ -257,7 +252,6 @@ public:
   GtkWidget *module_frame;
   GtkWidget *stimulus_frame;
 
-  GtkWidget *pic_settings_clist;
   GtkWidget *attribute_clist;
   GtkWidget *attribute_entry;
   GtkWidget *attribute_button;

@@ -1,3 +1,9 @@
+2015-01-06 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_breadboard.cc, gui/gui_breadboard.h
+	: Removed unused GtkCList, removed some dead code, modified to
+	  compile with -DGSEAL_ENABLE. Some code tidy up using checks from
+	  cppcheck.
+
 2014-12-28 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_stopwatch.cc, gui/gui_stopwatch.h
 	: Replaced GtkOptionMenu with GTK 2 equivalent. Various code clean up.
