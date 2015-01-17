@@ -29,14 +29,11 @@ Boston, MA 02111-1307, USA.  */
 class Symbol_Window : public GUI_Object
 {
  public:
-
-  GtkWidget *symbol_clist;
-  GList *symbols;
+  GtkWidget *symbol_view;
+  GtkListStore *symbol_list;
     
   GtkWidget *popup_menu;
   
-  int current_row;
-
   int filter_addresses;
   int filter_constants;
   int filter_registers;
@@ -51,13 +48,23 @@ class Symbol_Window : public GUI_Object
   virtual void Build(void);
   virtual void Update(void);
   void NewSymbols(void);
-  void SelectSymbolName(char *name);
+  void SelectSymbolName(const char *name);
 
 protected:
   virtual const char *name();
 
-public:
-  const char *name_pub() {return name();}
+  // Signals
+  static void toggle_addresses (GtkToggleButton *button, Symbol_Window *sw);
+  static void toggle_constants (GtkToggleButton *button, Symbol_Window *sw);
+  static void toggle_registers (GtkToggleButton *button, Symbol_Window *sw);
+  static gboolean do_popup(GtkWidget *widget, GdkEventButton *event, Symbol_Window *sw);
+  static void symbol_list_row_selected(GtkTreeSelection *treeselection,
+    gpointer user_data);
+  static gboolean delete_event(GtkWidget *widget, GdkEvent  *event,
+    Symbol_Window *sw);
+
+  GtkWidget *build_menu(GtkWidget *sheet);
+  void do_symbol_select(Value *e);
 };
 
 
