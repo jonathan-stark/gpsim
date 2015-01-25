@@ -189,7 +189,7 @@ public:
   int            m_marginWidth;
 private:
   SourceWindow  *m_Parent;
-  char          *m_cpFont;
+  std::string   m_cpFont;
   GtkWidget     *m_pContainer;
   GtkTextView   *m_view;
 };
@@ -242,8 +242,8 @@ public:
   gint switch_page_cb(guint newPage);
 
   // Font strings
-  char commentfont_string[256];
-  char sourcefont_string[256];
+  std::string commentfont_string;
+  std::string sourcefont_string;
 
   GtkStyle *symbol_text_style;       // for symbols in .asm display
   GtkStyle *label_text_style;        // for label in .asm display
@@ -376,32 +376,12 @@ private:
 };
 
 class BreakPointList {
- public:
-
-  GList *iter;
-
-  BreakPointList(void);
+private:
+  std::list<BreakPointInfo *> iter;
+public:
+  BreakPointList();
   void Remove(int);
   void Add(int, GtkWidget *,GtkWidget *,int);
-};
-
-
-class PixmapObject {
-public:
-  PixmapObject(void)
-   {
-     mask = 0;
-     pixmap = 0;
-     widget = 0;
-   }
-
-  void CreateFromXPM(GdkWindow *window,
-                      GdkColor *transparent_color,
-                      gchar **data);
-
-  GdkBitmap *mask;
-  GdkPixmap *pixmap;
-  GtkWidget *widget;
 };
 
 //
@@ -500,7 +480,6 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GdkPixmap *pixmap_profile_start;
   GdkPixmap *pixmap_profile_stop;
 
-  PixmapObject canbreak;
   static int s_totallinesheight[SBAW_NRFILES];
 
   int m_bSourceLoaded;
@@ -537,9 +516,6 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   BreakPointInfo *getBPatLine(int id, unsigned int line);
   BreakPointInfo *getBPatPixel(int id, int pixel);
   BreakPointInfo *getBPatIndex(int id, int index);
-
-  static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw);
-  static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw);
 
   // Popup Menu
   GtkWidget *     BuildPopupMenu(GtkWidget *sheet,
@@ -619,11 +595,6 @@ public:
   const char *name_pub() {return name();}
 };
 
-
-
-#define SOURCE_WINDOW SourceWindow
-
-
 //
 // The Source Browser Child window.
 //
@@ -650,8 +621,8 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void ChangeView(int view_state);
   virtual int set_config();
 
-  SOURCE_WINDOW *getChild(int);
-  list<SOURCE_WINDOW *> children;
+  SourceWindow *getChild(int);
+  list<SourceWindow *> children;
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
 
@@ -682,7 +653,7 @@ class SourceBrowserParent_Window : public GUI_Object
 
   SourcePageMargin m_margin;
   int m_TabType;
-  char *m_FontDescription;
+  std::string m_FontDescription;
 
   // FIXME - change these items to list objects
   SourceBuffer **ppSourceBuffers;

@@ -1,4 +1,10 @@
 2015-01-17 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_src_asm.cc gui/gui_src.h
+	: Remove usage of GtkPixmap. Modified to compile with -DGSEAL_ENABLE.
+	  Various code tidy ups, removed some dead code. Modified the find and
+	  font dialogs.
+
+2015-01-17 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_symbols.cc, gui/gui_symbols.h
 	: Replace GtkCList with tree view
 
