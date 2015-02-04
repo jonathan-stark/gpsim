@@ -211,7 +211,9 @@ public:
   virtual void create_symbols();
   virtual void create_sfr_map();
   virtual void interrupt();
-  virtual bool exit_wdt_sleep() {return wdt_flag & 2;}
+  virtual bool exit_wdt_sleep();
+  virtual bool swdten_active() {return(wdt_flag == 1);} // WDTCON can enable WDT
+
   virtual void enter_sleep();
   virtual void exit_sleep();
   virtual void reset(RESET_TYPE r);

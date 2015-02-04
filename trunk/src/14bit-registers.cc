@@ -308,7 +308,7 @@ void  OSCCON::put(unsigned int new_value)
 // Clock is stable
 void OSCCON_2::callback()
 {
-    unsigned int mask = 0;
+    unsigned int add_bits = 0;
     unsigned int val;
 
     if (!oscstat) return;
@@ -317,25 +317,25 @@ void OSCCON_2::callback()
     switch(mode)
     {
     case LF:
-	mask = OSCSTAT::LFIOFR;
+	add_bits = OSCSTAT::LFIOFR;
 	break;
 
     case MF:
-	mask = OSCSTAT::MFIOFR;
+	add_bits = OSCSTAT::MFIOFR;
 	break;
 
     case HF:
-	mask = OSCSTAT::HFIOFL | OSCSTAT::HFIOFR;
+	add_bits = OSCSTAT::HFIOFL | OSCSTAT::HFIOFR  | OSCSTAT::HFIOFS;
 	break;
 
     case PLL:
-	mask = OSCSTAT::PLLR;
+	add_bits = OSCSTAT::PLLR;
 	break;
 
     case T1OSC:
 	break;
     }
-    val |= mask;
+    val |= add_bits;
     oscstat->value.put(val);
 }
 bool OSCCON_2::set_rc_frequency()
@@ -575,7 +575,8 @@ void WDTCON::put(unsigned int new_value)
 
   if (valid_bits > 1)
       cpu_pic->wdt.set_prescale(masked_value >> 1);
-  cpu_pic->wdt.swdten((masked_value & SWDTEN) == SWDTEN);
+  if (cpu_pic->swdten_active())
+      cpu_pic->wdt.swdten((masked_value & SWDTEN) == SWDTEN);
 }
 void WDTCON::reset(RESET_TYPE r)
 {

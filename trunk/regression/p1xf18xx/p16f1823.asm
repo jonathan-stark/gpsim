@@ -139,6 +139,10 @@ start
 	;set clock to 16 Mhz
 	BANKSEL OSCCON
 	bsf 	OSCCON,6
+	btfss	OSCSTAT,HFIOFL
+	goto	$-1
+   .assert "(oscstat & 0x19) == 0x19,  \"*** FAILED 16f1823 HFIO bit error\""
+	nop
 	call	cap_sense
 	BANKSEL FVRCON
 	; Enable Core Temp, high range, FVR AD 2.048v 

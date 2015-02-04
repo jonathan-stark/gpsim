@@ -7,7 +7,8 @@ include ../make.regression
 
 all :   wdt_16f88.cod nwdt_16f88.cod wdt_16f628.cod nwdt_16f628.cod \
 	wdt_16c64.cod nwdt_16c64.cod wdt_18f452.cod nwdt_18f452.cod \
-	wdt_10f200.cod nwdt_16f648a.cod wdt_18f4620.cod nwdt_18f4620.cod
+	wdt_10f200.cod nwdt_16f648a.cod wdt_18f4620.cod \
+	nwdt_18f4620.cod pwdt_16f1823.cod nwdt_16f1823.cod
 
 
 p%.cod : p%.o
@@ -17,6 +18,9 @@ wdt_%.cod : wdt_%.o
 	gplink --map -s $*.lkr -o $@  $<
 
 nwdt_%.cod : nwdt_%.o
+	gplink --map -s $*.lkr -o $@  $<
+
+pwdt_%.cod : pwdt_%.o
 	gplink --map -s $*.lkr -o $@  $<
 
 
