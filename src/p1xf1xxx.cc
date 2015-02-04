@@ -422,6 +422,7 @@ P12F1822::~P12F1822()
     remove_sfr_register(&ccp1as);
     remove_sfr_register(&pstr1con);
     remove_sfr_register(&osctune);
+    remove_sfr_register(&option_reg);
     remove_sfr_register(&osccon);
     remove_sfr_register(&oscstat);
 
@@ -1067,6 +1068,7 @@ P16F178x::~P16F178x()
     remove_sfr_register(&ccp1as);
     remove_sfr_register(&pstr1con);
     remove_sfr_register(&osctune);
+    remove_sfr_register(&option_reg);
     remove_sfr_register(&osccon);
     remove_sfr_register(&oscstat);
 

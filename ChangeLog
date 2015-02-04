@@ -1,3 +1,18 @@
+2015-02-05 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-registers.cc src/14bit-processors.cc src/14bit-processors.h
+	  src/pic-processor.h
+	: Bug 190 - Enhanced processors not setting HFIOFS bit of OSCSTAT
+	  Bug 191 - Enhanced midrange chips reset from software enabled watchdog
+	  while sleeping
+	* regression/p1xf18xx/p16f1823.asm
+	: test setting HFIOFS bit of OSCSTAT
+	* src/14bit-registers.cc
+	* regression/run_regression.sh regression/wdt/16f1823.lkr
+	  regression/wdt/Makefile regression/wdt/nwdt_16f1823.asm
+	  regression/wdt/pwdt_16f1823.asm
+	: Add 16f1823 WDT regression tests
+	* src/p1xf1xxx.cc: Delete option_reg in destructor
+
 2015-01-17 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_src_asm.cc gui/gui_src.h
 	: Remove usage of GtkPixmap. Modified to compile with -DGSEAL_ENABLE.

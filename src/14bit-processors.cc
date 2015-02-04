@@ -498,6 +498,11 @@ void _14bit_e_processor::enter_sleep()
 }
 
  //-------------------------------------------------------------------
+bool _14bit_e_processor::exit_wdt_sleep()
+{
+    return true;
+}
+ //-------------------------------------------------------------------
 void _14bit_e_processor::exit_sleep()
 {
   if (m_ActivityState == ePASleeping)
