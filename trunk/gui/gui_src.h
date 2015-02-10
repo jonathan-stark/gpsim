@@ -541,36 +541,39 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 {
  public:
 
-  GtkWidget *clist;
+  GtkListStore *list;
+  GtkWidget *tree;
 
   unsigned int current_address;   // current PC
 
   // Font strings
-  char normalfont_string[256];
+  std::string normalfont_string;
 
   PangoFontDescription *normalPFD;
   PangoFontDescription *current_line_numberPFD;
   PangoFontDescription *breakpoint_line_numberPFD;
 
-  char breakpointfont_string[256];
-  char pcfont_string[256];
+  std::string breakpointfont_string;
+  std::string pcfont_string;
+
   GtkStyle *normal_style;
   GtkStyle *current_line_number_style;
   GtkStyle *breakpoint_line_number_style;
+
   GdkColor pm_has_changed_color;
   GdkColor normal_pm_bg_color;
   GdkColor breakpoint_color;
-
-  const gchar **column_titles; //
-  int  columns;         //
 
   GtkWidget *notebook;
   GtkWidget *sheet;
   GtkWidget *entry;
   GtkWidget *label;
-  //    GtkWidget *pcwidget;
+
   GtkWidget *sheet_popup_menu;
-  GtkWidget *clist_popup_menu;
+  GtkWidget *list_popup_menu;
+
+  GdkPixbuf *break_pix;
+  GdkPixbuf *pc_pix;
 
   unsigned int ascii_mode; // 0, 1 or 2 equals
   // one byte/cell,
@@ -580,7 +583,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   unsigned int *memory;
 
   SourceBrowserOpcode_Window(GUI_Processor *gp);
-  virtual void Build(void);
+  virtual void Build();
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
@@ -588,11 +591,25 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   virtual void UpdateLine(int address);
   virtual void Fill();
 
+  void update_ascii(gint row);
+  void load_styles();
+  void settings_dialog();
+
 protected:
   virtual const char *name();
 
-public:
-  const char *name_pub() {return name();}
+private:
+  GtkWidget *build_menu_for_sheet();
+  GtkWidget *build_menu_for_list();
+
+  void update_values(int address);
+  void update_styles(int address);
+  void update(int address);
+
+  static void popup_activated(GtkWidget *widget, gpointer data);
+  static void cell_renderer(GtkTreeViewColumn *tree_column,
+    GtkCellRenderer *cell, GtkTreeModel *tree_model,
+    GtkTreeIter *iter, gpointer data);
 };
 
 //
