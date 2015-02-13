@@ -1014,7 +1014,7 @@ unsigned int Indirect_Addressing14::get()
     else if (fsr_adj >= 0x2000 && fsr_adj < 0x29b0) // Linear GPR region
     {
 	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
-	unsigned int low_bits = ((fsr_adj & 0xff) % 0x50) + 0x20;
+	unsigned int low_bits = ((fsr_adj & 0xfff) % 0x50) + 0x20;
         return(cpu_pic->registers[bank * 0x80 + low_bits]->get()); 
     }
     else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory

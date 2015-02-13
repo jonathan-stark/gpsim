@@ -41,13 +41,34 @@ License along with this library; if not, see
 #define Dprintf(arg) {}
 #endif
 
+class TMR0_Interface : public Interface
+{
+  public:
+
+    TMR0_Interface(TMR0 *_tmr0) : Interface((gpointer *)_tmr0)
+    {
+        tmr0 = _tmr0;
+    }
+     virtual void SimulationHasStopped (gpointer object)
+    {
+        tmr0->update();
+    }
+    virtual void Update  (gpointer object)
+    {
+        SimulationHasStopped(object);
+    }
+
+  private:
+        TMR0 *tmr0;
+};
+
 
 //--------------------------------------------------
 // member functions for the TMR0 base class
 //--------------------------------------------------
 TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc),
-    m_pOptionReg(0), m_t1gcon(0), t0xcs(false)
+    m_pOptionReg(0), m_t1gcon(0), t0xcs(false), tmr0_interface(0)
 {
   value.put(0);
   synchronized_cycle=0;
@@ -150,6 +171,11 @@ void TMR0::start(int restart_value, int sync)
       get_cycles().set_break(fc, this);
 
     future_cycle = fc;
+    if (tmr0_interface == 0)
+    {
+	tmr0_interface = new TMR0_Interface(this);
+	get_interface().prepend_interface(tmr0_interface);
+    }
 
     Dprintf(("last_cycle:0x%"PRINTF_GINT64_MODIFIER"x future_cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle,future_cycle));
 

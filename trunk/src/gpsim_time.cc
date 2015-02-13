@@ -641,7 +641,10 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
 	}
 
       l2->next = l1->next;
-      l2->next->prev = l2;
+      if (l2->next)
+      {
+          l2->next->prev = l2;
+      }
       l1->next = l2;
       l2->prev = l1;
 

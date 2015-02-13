@@ -27,6 +27,7 @@ License along with this library; if not, see
 #include "breakpoints.h"
 #include "ioports.h"
 #include "ssp.h"
+#include "interface.h"
 
 class TMRL;
 class TMRH;
@@ -37,6 +38,7 @@ class PWM1CON;
 class ADCON0;
 class PIR_SET;
 class InterruptSource;
+class TMR1_Interface;
 
 class _14bit_processor;
 
@@ -543,6 +545,7 @@ public:
   virtual void increment();   // Used when TMR1 is attached to an external clock
 
 private:
+  TMR1_Interface *tmr1_interface;
   char m_cState;
   bool m_GateState;		// Only changes state if setGatepin() has been called
   bool m_compare_GateState;
