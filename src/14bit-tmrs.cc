@@ -42,6 +42,7 @@ License along with this library; if not, see
 #define Dprintf(arg) {}
 #endif
 
+
 //--------------------------------------------------
 // CCPRL
 //--------------------------------------------------
@@ -1009,6 +1010,26 @@ bool CCPCON::test_compare_mode()
 }
 
 
+class TMR1_Interface : public Interface
+{
+  public:
+
+    TMR1_Interface(TMRL *_tmr1) : Interface((gpointer *)_tmr1)
+    {
+	tmr1 = _tmr1;
+    }
+     virtual void SimulationHasStopped (gpointer object)
+    {
+	tmr1->current_value();
+    }
+    virtual void Update  (gpointer object)
+    {
+	SimulationHasStopped(object);
+    }
+
+  private:
+	TMRL *tmr1;
+};
 
 // Attribute for frequency of external Timer1 oscillator
 class TMR1_Freq_Attribute : public Float
@@ -1454,7 +1475,7 @@ TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     m_cState('?'), m_GateState(false), m_compare_GateState(true),
     m_io_GateState(true), m_bExtClkEnabled(false), 
-    m_sleeping(false), m_t1gss(true), m_Interrupt(0)
+    m_sleeping(false), m_t1gss(true), m_Interrupt(0), tmr1_interface(0)
 {
 
   value.put(0);
@@ -1807,6 +1828,13 @@ void TMRL::update()
 	get_cycles().set_break(fc, this);
 
       future_cycle = fc;
+
+      // Setup to update for GUI breaks
+      if (tmr1_interface == 0)
+      {
+  	tmr1_interface = new TMR1_Interface(this);
+  	get_interface().prepend_interface(tmr1_interface);
+      }
     }
   else
     {
@@ -1878,8 +1906,10 @@ unsigned int TMRL::get_value()
 //
 void TMRL::current_value()
 {
-  if(future_cycle == 0)
-    value_16bit = tmrh->value.get() * 256 + value.get();
+  if (!tmrh)
+    return;
+  if (future_cycle == 0)
+      value_16bit = tmrh->value.get() * 256 + value.get();
   else
   {
     value_16bit = (guint64)((get_cycles().get() - last_cycle)/ 

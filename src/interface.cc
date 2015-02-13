@@ -503,6 +503,18 @@ unsigned int  gpsimInterface::add_interface  (Interface *new_interface)
 
   return interface_seq_number;
 }
+unsigned int  gpsimInterface::prepend_interface  (Interface *new_interface)
+{
+
+  interface_seq_number++;
+
+  new_interface->set_id(interface_seq_number);
+
+  gi.interfaces = g_slist_prepend(gi.interfaces, new_interface);
+
+
+  return interface_seq_number;
+}
 
 unsigned int  gpsimInterface::add_socket_interface  (Interface *new_interface)
 {

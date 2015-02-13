@@ -1,3 +1,12 @@
+2015-02-13 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-registers.cc
+	: Bug 192 - Linear Address Calculation Bug on Enhanced Midrange
+	* src/gpsim_time.cc
+	: Bug 193 - Crash when simulation mode set to "update gui every cycle"
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/gpsim_interface.h
+	  src/interface.cc src/tmr0.cc src/tmr0.h
+	: Feature 38 - Update timer register values in GUI
+
 2015-02-10 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_src.h gui/gui_src_opcode.cc
 	: Replace usage of GtkCList. Due to styles being done differently on a

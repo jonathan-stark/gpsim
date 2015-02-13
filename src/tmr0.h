@@ -22,6 +22,9 @@ License along with this library; if not, see
 #define __TMR0_H__
 
 #include "ioports.h"
+#include "interface.h"
+
+class TMR0_Interface;
 
 class T1GCON;
 //---------------------------------------------------------
@@ -84,6 +87,7 @@ private:
   bool 		m_bLastClockedState;
   T1GCON 	*m_t1gcon;
   bool		t0xcs;			//  clock source is the capacitive sensing oscillator
+  TMR0_Interface *tmr0_interface;
 };
 
 #endif

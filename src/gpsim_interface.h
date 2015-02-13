@@ -180,6 +180,7 @@ public:
   guint64 get_update_rate();
 
   unsigned int add_interface(Interface *new_interface);
+  unsigned int prepend_interface(Interface *new_interface);
   unsigned int add_socket_interface(Interface *new_interface);
   Interface *get_socket_interface() { return socket_interface;}
   void remove_interface(unsigned int interface_id);
