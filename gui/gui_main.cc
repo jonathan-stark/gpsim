@@ -400,20 +400,20 @@ void quit_gui(void)
   if(!get_interface().bUsingGUI())
     return;
 
-    int x,y,width,height;
+  int x, y, width, height;
 
-    gdk_window_get_root_origin(dispatcher_window->window,&x,&y);
-    gdk_window_get_size(dispatcher_window->window,&width,&height);
+  gtk_window_get_position(GTK_WINDOW(dispatcher_window), &x, &y);
+  gtk_window_get_size(GTK_WINDOW(dispatcher_window), &width, &height);
 
-    config_set_variable("dispatcher", "enable", 1);
-    config_set_variable("dispatcher", "x", x);
-    config_set_variable("dispatcher", "y", y);
-    config_set_variable("dispatcher", "width", width);
-    config_set_variable("dispatcher", "height", height);
+  config_set_variable("dispatcher", "enable", 1);
+  config_set_variable("dispatcher", "x", x);
+  config_set_variable("dispatcher", "y", y);
+  config_set_variable("dispatcher", "width", width);
+  config_set_variable("dispatcher", "height", height);
 
-    get_interface().remove_interface(interface_id);
+  get_interface().remove_interface(interface_id);
 
-    gtk_main_quit();
+  gtk_main_quit();
 }
 
 /*------------------------------------------------------------------

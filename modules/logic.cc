@@ -363,20 +363,19 @@ static gboolean expose(GtkWidget *widget,
                 GdkEventExpose *event,
                 LogicGate *lg)
 {
-        if(lg->pixmap==0)
-        {
-                puts("LogicGate has no pixmap");
-                return 0;
-        }
+  if(lg->pixmap==0) {
+    puts("LogicGate has no pixmap");
+    return 0;
+  }
 
-        gdk_draw_pixmap(widget->window,
-                        widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-                        lg->pixmap,
-                        event->area.x, event->area.y,
-                        event->area.x, event->area.y,
-                        event->area.width, event->area.height);
+  gdk_draw_pixmap(gtk_widget_get_window(widget),
+    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
+    lg->pixmap,
+    event->area.x, event->area.y,
+    event->area.x, event->area.y,
+    event->area.width, event->area.height);
 
-        return 0;
+  return 0;
 }
 
 GtkWidget *LogicGate::create_pixmap(gchar **pixmap_data)

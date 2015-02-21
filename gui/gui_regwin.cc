@@ -147,10 +147,6 @@ static menu_item menu_items[] = {
     {"Settings...", MENU_SETTINGS}
 };
 
-extern int font_dialog_browse(GtkWidget *w, gpointer user_data);
-static int dlg_x=200, dlg_y=200;
-
-
 // Used only in popup menus
 Register_Window *popup_rw;
 
@@ -431,216 +427,115 @@ gtk_sheet_REALLY_set_row_height(GtkSheet *sheet, gint row, gint height)
 
 //========================================================================
 // get_value
-static void a_cb(GtkWidget *w, gpointer user_data)
-{
-    *(int*)user_data=TRUE;
-//    gtk_main_quit();
-}
-static void b_cb(GtkWidget *w, gpointer user_data)
-{
-    *(int*)user_data=FALSE;
-//    gtk_main_quit();
-}
 // used for reading a value from user when break on value is requested
 int gui_get_value(const char *prompt)
 {
-    static GtkWidget *dialog=0;
-    static GtkWidget *label;
-    static GtkWidget *entry;
-    GtkWidget *button;
-    GtkWidget *hbox;
+  GtkWidget *dialog;
 
-    int retval=-1;
+  dialog = gtk_dialog_new_with_buttons("enter value",
+    NULL,
+    GTK_DIALOG_MODAL,
+    "_Cancel", GTK_RESPONSE_CANCEL,
+    "_OK", GTK_RESPONSE_OK,
+    NULL);
 
-    int value;
+  GtkWidget *area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *label = gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
 
-    if(dialog==0) {
-      dialog = gtk_dialog_new();
-      gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
-      //        gtk_signal_connect(GTK_OBJECT(dialog),
-      //                           "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-      g_signal_connect_swapped(dialog,
-                                      "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
+  gtk_box_pack_start(GTK_BOX(area), label, FALSE, FALSE, 18);
 
-      label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
-      gtk_widget_show(label);
-      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 6);
+  gtk_box_pack_start(GTK_BOX(area), hbox, FALSE, FALSE, 18);
+  label = gtk_label_new(prompt);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  GtkWidget *entry = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
 
-      hbox = gtk_hbox_new(0,0);
-      gtk_widget_show(hbox);
-      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+  gtk_widget_show_all(dialog);
 
-      button = gtk_button_new_with_label("OK");
-      gtk_widget_show(button);
-      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                                FALSE,FALSE,10);
-      g_signal_connect(button, "clicked",
-                                G_CALLBACK(a_cb), (gpointer)&retval);
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
+    return -1;
+  }
 
-      button = gtk_button_new_with_label("Cancel");
-      gtk_widget_show(button);
-      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                                FALSE,FALSE,10);
-      g_signal_connect(button, "clicked",
-                                G_CALLBACK(b_cb), (gpointer)&retval);
+  const gchar *entry_text;
+  char *end;
+  int value;
 
-      label=gtk_label_new(prompt);
-      gtk_widget_show(label);
-      gtk_box_pack_start(GTK_BOX(hbox), label,
-                                FALSE,FALSE, 20);
+  entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
+  value = strtoul(entry_text, &end, 0);
 
-      entry=gtk_entry_new();
-      gtk_widget_show(entry);
-      gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE,FALSE,20);
-    }
-    else {
-      gtk_label_set_text(GTK_LABEL(label),prompt);
-    }
+  gtk_widget_destroy(dialog);
 
-//    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
-
-    gtk_grab_add(dialog);
-    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-      gtk_main_iteration();
-    gtk_grab_remove(dialog);
-
-    gtk_widget_hide(dialog);
-
-    if(retval==(int)TRUE)
-    {
-      char *end;
-      const gchar *entry_text;
-      entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
-      value = strtoul(entry_text,&end,0);
-      if(*entry_text!='\0' && *end=='\0')
-        return value;
-      else
-        return -1;
-    }
-
+  if (*entry_text != '\0' && *end == '\0')
+    return value;
+  else
     return -1;
 }
 
 // used for reading a value from user when break on value is requested
 void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int *value2)
 {
-    static GtkWidget *dialog=0;
-    GtkWidget *button;
-    GtkWidget *hbox1, *hbox2;
-    static GtkWidget *label1, *label2, *label;
-    static GtkWidget *entry1, *entry2;
+  GtkWidget *dialog;
 
-    int value;
+  dialog = gtk_dialog_new_with_buttons("enter values",
+    NULL,
+    GTK_DIALOG_MODAL,
+    "_Cancel", GTK_RESPONSE_CANCEL,
+    "_OK", GTK_RESPONSE_OK,
+    NULL);
 
-    int retval=-1;
+  GtkWidget *area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  GtkWidget *label = gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
+  gtk_box_pack_start(GTK_BOX(area), label, FALSE, FALSE, 18);
 
-    if(dialog==0)
-    {
-        dialog = gtk_dialog_new();
-        gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
-//      gtk_signal_connect(GTK_OBJECT(dialog),
-//                         "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-        g_signal_connect_swapped(dialog,
-                                  "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
+  GtkWidget *hbox, *entry1, *entry2;
 
-        label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
-        gtk_widget_show(label);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+  hbox = gtk_hbox_new(FALSE, 6);
+  gtk_box_pack_start(GTK_BOX(area), hbox, FALSE, FALSE, 18);
+  label = gtk_label_new(prompt1);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  entry1 = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(hbox), entry1, FALSE, FALSE, 0);
 
-        button = gtk_button_new_with_label("OK");
-        gtk_widget_show(button);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                           FALSE,FALSE,10);
-        g_signal_connect(button, "clicked",
-                           G_CALLBACK(a_cb), (gpointer)&retval);
+  hbox = gtk_hbox_new(FALSE, 6);
+  gtk_box_pack_start(GTK_BOX(area), hbox, FALSE, FALSE, 18);
+  label = gtk_label_new(prompt2);
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  entry2 = gtk_entry_new();
+  gtk_box_pack_start(GTK_BOX(hbox), entry2, FALSE, FALSE, 0);
 
-        button = gtk_button_new_with_label("Cancel");
-        gtk_widget_show(button);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                           FALSE,FALSE,10);
-        g_signal_connect(button, "clicked",
-                           G_CALLBACK(b_cb), (gpointer)&retval);
+  gtk_widget_show_all(dialog);
 
-        // Value 1
-        hbox1 = gtk_hbox_new(0,0);
-        gtk_widget_show(hbox1);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox1,FALSE,FALSE,20);
-
-        label1=gtk_label_new(prompt1);
-        gtk_widget_show(label1);
-        gtk_box_pack_start(GTK_BOX(hbox1), label1,
-                           FALSE,FALSE, 20);
-
-        entry1=gtk_entry_new();
-        gtk_widget_show(entry1);
-        gtk_box_pack_start(GTK_BOX(hbox1), entry1,FALSE,FALSE,20);
-
-        // Value 2
-        hbox2 = gtk_hbox_new(0,0);
-        gtk_widget_show(hbox2);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox2,FALSE,FALSE,20);
-
-        label2=gtk_label_new(prompt2);
-        gtk_widget_show(label2);
-        gtk_box_pack_start(GTK_BOX(hbox2), label2,
-                           FALSE,FALSE, 20);
-
-        entry2=gtk_entry_new();
-        gtk_widget_show(entry2);
-        gtk_box_pack_start(GTK_BOX(hbox2), entry2,FALSE,FALSE,20);
-
-    }
-    else
-    {
-        gtk_label_set_text(GTK_LABEL(label1),prompt1);
-        gtk_label_set_text(GTK_LABEL(label2),prompt2);
-    }
-
-//    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
-
-    gtk_grab_add(dialog);
-    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-      gtk_main_iteration();
-    gtk_grab_remove(dialog);
-
-    gtk_widget_hide(dialog);
-
-    if(retval==(int)TRUE)
-    {
-      // "Ok"
-
-      char *end;
-      const gchar *entry_text;
-
-      entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
-      value = strtoul(entry_text,&end,0);
-      if(*entry_text=='\0' || *end!='\0')
-      {
-          *value1=-1;
-          *value2=-1;
-          return;
-      }
-      *value1=value;
-
-      entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
-      value = strtoul(entry_text,&end,0);
-      if(*entry_text=='\0' || *end!='\0')
-      {
-        *value1=-1;
-        *value2=-1;
-        return;
-      }
-      *value2=value;
-      return;
-    }
-
-    // "Cancel"
-
-    *value1=-1;
-    *value2=-1;
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK) {
+    *value1 = -1;
+    *value2 = -1;
+    gtk_widget_destroy(dialog);
     return;
+  }
+
+  char *end;
+  const gchar *entry_text;
+  int value;
+
+  entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
+  value = strtoul(entry_text, &end, 0);
+  if (*entry_text == '\0' || *end != '\0') {
+    *value1 = -1;
+    *value2 = -1;
+    gtk_widget_destroy(dialog);
+  }
+  *value1 = value;
+
+  entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
+  value = strtoul(entry_text, &end, 0);
+  if (*entry_text == '\0' || *end != '\0') {
+    *value1 = -1;
+    *value2 = -1;
+    gtk_widget_destroy(dialog);
+  }
+  *value2 = value;
+  gtk_widget_destroy(dialog);
 }
 
 // Select logging file.
@@ -821,26 +716,18 @@ build_menu(Register_Window *rw)
 
   menu=gtk_menu_new();
 
-
-  item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), item);
-  gtk_widget_show (item);
-
-
   for (i=0; i < (int)(sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(menu_items[i].name);
 
       g_signal_connect(item, "activate",
                          G_CALLBACK (popup_activated),
                          &menu_items[i]);
-      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
       if(rw->type == REGISTER_EEPROM
          && menu_items[i].id!=MENU_ADD_WATCH
          &&menu_items[i].id!=MENU_SETTINGS)
       {
-          GTK_WIDGET_UNSET_FLAGS (item,
-                                  GTK_SENSITIVE | GTK_CAN_FOCUS);
+        gtk_widget_set_sensitive(item, FALSE);
       }
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
@@ -1069,16 +956,6 @@ void Register_Window::UpdateLabelEntry()
   UpdateEntry();
 }
 
-static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
-{
-
-  if(widget->window==0)
-    return 0;
-
-  gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
-  return 0; // what should be returned?, FIXME
-}
-
 //------------------------------------------------------------------------
 void Register_Window::UpdateStyle()
 {
@@ -1143,104 +1020,50 @@ int Register_Window::LoadStyles()
 }
 
 /********************** Settings dialog ***************************/
-static int settings_active;
-static void settingsok_cb(GtkWidget *w, gpointer user_data)
-{
-  if(settings_active)
-    settings_active=0;
-}
 
 int Register_Window::SettingsDialog()
 {
-  static GtkWidget *dialog=0;    // fixme
-  GtkWidget *button;
-  GtkWidget *hbox;
-  static GtkWidget *normalfontstringentry;   //fixme
-  GtkWidget *label;
-  int fonts_ok=0;
+  GtkWidget *dialog;
 
+  dialog = gtk_dialog_new_with_buttons("Register window settings",
+    NULL,
+    GTK_DIALOG_MODAL,
+    "_Cancel", GTK_RESPONSE_CANCEL,
+    "_OK", GTK_RESPONSE_OK,
+    NULL);
 
-  if(!dialog)
-  {
-    dialog = gtk_dialog_new();
-    gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
-    g_signal_connect(dialog,
-                       "configure_event", G_CALLBACK(configure_event), 0);
-    g_signal_connect_swapped(dialog,
-                              "delete_event", G_CALLBACK(gtk_widget_hide), GTK_OBJECT(dialog));
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 6);
+  GtkWidget *area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+  gtk_box_pack_start(GTK_BOX(area), hbox, FALSE, FALSE, 18);
 
+  GtkWidget *label = gtk_label_new("Normal font:");
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-    // Normal font
-    hbox = gtk_hbox_new(0,0);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-    gtk_widget_show(hbox);
-    label=gtk_label_new("Normal font:");
-    gtk_box_pack_start(GTK_BOX(hbox), label,
-                       FALSE,FALSE, 20);
-    gtk_widget_show(label);
-    normalfontstringentry=gtk_entry_new();
-    gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
-                       TRUE, TRUE, 0);
-    gtk_widget_show(normalfontstringentry);
-    button = gtk_button_new_with_label("Browse...");
-    gtk_widget_show(button);
-    gtk_box_pack_start(GTK_BOX(hbox), button,
-                       FALSE,FALSE,10);
-    g_signal_connect(button, "clicked",
-                       G_CALLBACK(font_dialog_browse), (gpointer)normalfontstringentry);
+  GtkWidget *font_btn = gtk_font_button_new_with_font(normalfont_string);
+  gtk_box_pack_start(GTK_BOX(hbox), font_btn, FALSE, FALSE, 0);
 
+  gtk_widget_show_all(dialog);
 
-    // OK button
-    button = gtk_button_new_with_label("OK");
-    gtk_widget_show(button);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                       FALSE,FALSE,10);
-    g_signal_connect(button, "clicked",
-                       G_CALLBACK(settingsok_cb), (gpointer)dialog);
-  }
-
-  gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), normalfont_string);
-
-  gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-  gtk_widget_show_now(dialog);
-
-  PangoFontDescription *font=0;
-
-  while(fonts_ok!=1)
-  {
-    char fontname[256];
-
-    settings_active=1;
-    while(settings_active)
-      gtk_main_iteration();
-
-    fonts_ok=0;
-
-    strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-
-    if((font=pango_font_description_from_string(fontname))==0)
-        {
-          if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
-            break;
-        }
-      else
-        {
-          strcpy(normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-          config_set_string(name(),"normalfont",normalfont_string);
-          fonts_ok++;
-        }
-  }
-
-  if(!LoadStyles())
-  {
-    printf("no font is available\n");
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK) {
+    gtk_widget_destroy(dialog);
     return 0;
   }
 
-  gtk_sheet_freeze(register_sheet);
-  UpdateStyle();
-  gtk_sheet_thaw(register_sheet);
-  gtk_widget_hide(dialog);
+  PangoFontDescription *font;
+  const gchar *font_name = gtk_font_button_get_font_name(GTK_FONT_BUTTON(font_btn));
+  font = pango_font_description_from_string(font_name);
+
+  if (font) {
+    pango_font_description_free(font);
+    strcpy(normalfont_string, font_name);
+    config_set_string(name(), "normalfont", normalfont_string);
+
+    gtk_sheet_freeze(register_sheet);
+    UpdateStyle();
+    gtk_sheet_thaw(register_sheet);
+  }
+
+  gtk_widget_destroy(dialog);
 
   return 0;
 }
@@ -1358,7 +1181,7 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
       return;
     }
 
-  if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
+  if(!gtk_widget_has_focus(widget)) return;
 
   sheet=GTK_SHEET(rw->register_sheet);
   sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
@@ -1423,7 +1246,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
         return;
     }
 
-    if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
+    if(!gtk_widget_has_focus(widget)) return;
 
     rw->UpdateEntry();
 
@@ -1558,7 +1381,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
   gtk_widget_size_request(rw->location, &request);
   gtk_widget_set_usize(rw->location, 160, request.height);
   gtk_box_pack_start(GTK_BOX(status_box), rw->location, FALSE, TRUE, 0);
-  GTK_WIDGET_SET_FLAGS(rw->location,GTK_CAN_DEFAULT);
+  gtk_widget_set_can_default(rw->location, TRUE);
   gtk_widget_show(rw->location);
 
   rw->entry=gtk_entry_new();
@@ -1745,7 +1568,7 @@ void Register_Window::Update()
   if(!enabled)
     return;
 
-  if(!GTK_WIDGET_VISIBLE(window))
+  if(!gtk_widget_get_visible(window))
     return;
 
   if(!registers_loaded)

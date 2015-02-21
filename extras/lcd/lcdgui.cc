@@ -118,7 +118,7 @@ LcdFont::LcdFont (gint characters,  GtkWidget *parent_window, LcdDisplay *lcdP)
 
   num_elements = characters;
   pixmaps = (GdkPixmap **)malloc( sizeof (GdkPixmap *) * num_elements);
-  mywindow = parent_window->window;
+  mywindow = gtk_widget_get_window(parent_window);
 
   for(i=0; i<num_elements; i++) {
 
@@ -201,8 +201,11 @@ lcd_expose_event (GtkWidget *widget,
 
   lcdP = (LcdDisplay *)user_data;
 
-  max_width = widget->allocation.width;
-  max_height = widget->allocation.height;
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
+
+  max_width = allocation.width;
+  max_height = allocation.height;
 
   lcdP->update(widget,max_width,max_height);
 
@@ -220,8 +223,8 @@ void LcdDisplay::update(  GtkWidget *widget,
   guint i,j;
 
 
-  drawable = widget->window;
-  lcd_gc = gdk_gc_new(widget->window);
+  drawable = gtk_widget_get_window(widget);
+  lcd_gc = gdk_gc_new(drawable);
   gdk_gc_set_foreground(lcd_gc,dot_color);
 
   w_width = new_width;
@@ -250,11 +253,12 @@ void LcdDisplay::update(  GtkWidget *widget,
   gint ch = get_char_height();
   gint border = get_border();
 
+  GdkWindow *Gwindow = gtk_widget_get_window(widget);
 
   if (!(disp_type & TWO_ROWS_IN_ONE)) {
     for(j=0; j<rows; j++)
       for(i=0; i<cols; i++)
-        gdk_draw_pixmap (widget->window,lcd_gc,get_pixmap(j,i),
+        gdk_draw_pixmap (Gwindow, lcd_gc,get_pixmap(j,i),
                          0,0,
                          border+i*cw, border+j*(ch+border),
                          cw,ch);
@@ -263,7 +267,7 @@ void LcdDisplay::update(  GtkWidget *widget,
     guint pos;
     for(pos=0,j=0; j<rows; j++)
       for(i=0; i<cols; pos++,i++)
-        gdk_draw_pixmap (widget->window,lcd_gc,get_pixmap(j,i),
+        gdk_draw_pixmap (Gwindow, lcd_gc,get_pixmap(j,i),
                          0,0,
                          border+pos*cw, border,
                          cw,ch);
@@ -388,7 +392,7 @@ void LcdDisplay::CreateGraphics (void)
     gtk_widget_show (darea);
 
     dot_color = NewColor(0x7800,0xa800,0x7800);
-    gc = gdk_gc_new(darea->window);
+    gc = gdk_gc_new(gtk_widget_get_window(darea));
     g_assert(gc!= (GdkGC*)NULL);
 
     gtk_widget_show_all (window);

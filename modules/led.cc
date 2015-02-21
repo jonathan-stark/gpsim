@@ -168,14 +168,15 @@ namespace Leds {
 
     w_width = new_width;
     w_height = new_height;
-    GdkDrawable *drawable = widget->window;
 
-    if(!GTK_WIDGET_REALIZED(widget))
+    if(!gtk_widget_get_realized(widget))
       return;
+
+    GdkDrawable *drawable = gtk_widget_get_window(widget);
 
     if(segment_gc==NULL)
       {
-        segment_gc = gdk_gc_new(darea->window);
+        segment_gc = gdk_gc_new(gtk_widget_get_window(darea));
         gdk_gc_set_line_attributes(segment_gc,
                                    5,
                                    GDK_LINE_SOLID,
@@ -255,8 +256,10 @@ namespace Leds {
     // de-reference the user_data into an led object
     led = (Led_7Segments *)user_data;
 
-    max_width = widget->allocation.width;
-    max_height = widget->allocation.height;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+    max_width = allocation.width;
+    max_height = allocation.height;
 
     led->update(widget,max_width,max_height);
 
@@ -836,14 +839,15 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
 
     w_width = new_width;
     w_height = new_height;
-    GdkDrawable *drawable = widget->window;
 
-    if(!GTK_WIDGET_REALIZED(widget))
+    if(!gtk_widget_get_realized(widget))
       return;
+
+    GdkDrawable *drawable = gtk_widget_get_window(widget);
 
     if(gc==NULL)
       {
-        gc = gdk_gc_new(darea->window);
+        gc = gdk_gc_new(gtk_widget_get_window(darea));
         gdk_gc_set_line_attributes(gc,
                                    5,
                                    GDK_LINE_SOLID,
@@ -934,8 +938,11 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
     // de-reference the user_data into an led object
     led = (Led *)user_data;
 
-    max_width = widget->allocation.width;
-    max_height = widget->allocation.height;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+
+    max_width = allocation.width;
+    max_height = allocation.height;
 
     led->update(widget,max_width,max_height);
 

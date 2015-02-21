@@ -275,17 +275,12 @@ void SourceBrowser_Window::SelectAddress(Value *addrSym)
 
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go)
 {
-//    struct gui_config_winattr winattr;
+  gtk_window_get_position(GTK_WINDOW(widget), &go->x, &go->y);
+  gtk_window_get_size(GTK_WINDOW(widget), &go->width, &go->height);
 
-    if(widget->window==0)
-        return 0;
+  go->set_config();
 
-    gdk_window_get_root_origin(widget->window,&go->x,&go->y);
-    gdk_window_get_size(widget->window,&go->width,&go->height);
-
-    go->set_config();
-
-    return 0; // what should be returned?, FIXME
+  return 0; // what should be returned?, FIXME
 }
 
 #endif // HAVE_GUI

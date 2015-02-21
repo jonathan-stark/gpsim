@@ -89,9 +89,10 @@ void gLCD::clear()
 
 void gLCD::refresh()
 {
-  gdk_draw_rgb_image (m_darea->window, m_darea->style->fg_gc[GTK_STATE_NORMAL],
-                      0, 0, (m_nColumns+2*m_border)*m_xPixel, (m_nRows+2*m_border)*m_yPixel,
-                      GDK_RGB_DITHER_MAX, rgbbuf, (m_nColumns+2*m_border)*m_xPixel *3);
+  gdk_draw_rgb_image (gtk_widget_get_window(m_darea),
+    gtk_widget_get_style(m_darea)->fg_gc[GTK_STATE_NORMAL],
+    0, 0, (m_nColumns+2*m_border)*m_xPixel, (m_nRows+2*m_border)*m_yPixel,
+    GDK_RGB_DITHER_MAX, rgbbuf, (m_nColumns+2*m_border)*m_xPixel *3);
 
 }
 

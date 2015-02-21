@@ -325,44 +325,35 @@ popup_activated(GtkWidget *widget, gpointer data)
 static void set_column(GtkCheckButton *button, ColumnData *coldata)
 {
   if (coldata)
-    coldata->SetVisibility(button->toggle_button.active != 0);
+    coldata->SetVisibility(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) != 0);
 }
 
 static void select_columns(Watch_Window *ww, GtkWidget *clist)
 {
-    GtkWidget *dialog=0;
-    GtkWidget *button;
-    unsigned int i;
+  GtkWidget *dialog;
 
-    dialog = gtk_dialog_new();
+  dialog = gtk_dialog_new_with_buttons("", NULL,
+    GTK_DIALOG_MODAL,
+    "_Close", GTK_RESPONSE_CLOSE,
+    NULL);
 
-    gtk_container_set_border_width(GTK_CONTAINER(dialog),30);
+  GtkWidget *area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
 
-    g_signal_connect_swapped(dialog,
-                              "delete_event", G_CALLBACK(gtk_widget_destroy), GTK_OBJECT(dialog));
+  gtk_container_set_border_width(GTK_CONTAINER(dialog), 30);
 
-    for(i=0;i<COLUMNS;i++)
-      if (coldata[i].isValid()) {
-        button=gtk_check_button_new_with_label((gchar *)watch_titles[i]);
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].isVisible);
-        gtk_widget_show(button);
-        gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
-        g_signal_connect(button,"clicked",
-                           G_CALLBACK(set_column), (gpointer)&coldata[i]);
-      }
+  for (size_t i = 0; i < COLUMNS; ++i) {
+    if (coldata[i].isValid()) {
+      GtkWidget *button = gtk_check_button_new_with_label((gchar *)watch_titles[i]);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), coldata[i].isVisible);
+      gtk_box_pack_start(GTK_BOX(area), button, FALSE, FALSE, 0);
+      g_signal_connect(button, "clicked",
+                         G_CALLBACK(set_column), (gpointer)&coldata[i]);
+    }
+  }
 
-    button = gtk_button_new_with_label("OK");
-    gtk_widget_show(button);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-                       FALSE,FALSE,10);
-    g_signal_connect_swapped(button, "clicked",
-                              G_CALLBACK(gtk_widget_destroy), GTK_OBJECT(dialog));
-    GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
-    gtk_widget_grab_default(button);
-
-    gtk_widget_show(dialog);
-
-    return;
+  gtk_widget_show_all(dialog);
+  gtk_dialog_run(GTK_DIALOG(dialog));
+  gtk_widget_destroy(dialog);
 }
 
 // helper function, called from do_popup

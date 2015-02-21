@@ -177,22 +177,24 @@ Video::Video(const char *_name) : Module(_name)
   gdk_colormap_alloc_color(colormap, &black_color, FALSE, TRUE);
   gdk_colormap_alloc_color(colormap, &white_color, FALSE, TRUE);
   gdk_colormap_alloc_color(colormap, &grey_color, FALSE, TRUE);
+
+  GdkWindow *Gwindow = gtk_widget_get_window(window);
   
-  black_gc = gdk_gc_new(window->window);
+  black_gc = gdk_gc_new(Gwindow);
   gdk_gc_set_foreground(black_gc, &black_color);
   
-  white_gc = gdk_gc_new(window->window);
+  white_gc = gdk_gc_new(Gwindow);
   gdk_gc_set_foreground(white_gc, &white_color);
 
-  grey_gc = gdk_gc_new(window->window);
+  grey_gc = gdk_gc_new(Gwindow);
   gdk_gc_set_foreground(grey_gc, &grey_color);
 
-  pixmap = gdk_pixmap_new(window->window,
+  pixmap = gdk_pixmap_new(Gwindow,
 		  XRES,
 		  YRES,
 		  -1);
   gdk_draw_rectangle (pixmap,
-		      da->style->bg_gc[GTK_WIDGET_STATE (da)],
+		      gtk_widget_get_style(da)->bg_gc[gtk_widget_get_state(da)],
 		      TRUE,
 		      0, 0,
 		      XRES,
@@ -365,8 +367,8 @@ guint64 Video::us_to_cycles(guint64 us)
 
 void Video::refresh(void)
 {
-    gdk_draw_pixmap(da->window,
-		    da->style->fg_gc[GTK_WIDGET_STATE (da)],
+    gdk_draw_pixmap(gtk_widget_get_window(da),
+		    gtk_widget_get_style(da)->fg_gc[gtk_widget_get_state(da)],
 		    pixmap,
 		    0,0,
 		    0,0,

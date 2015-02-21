@@ -238,7 +238,7 @@ void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 {
 
   if (!m_plcd) {
-    if (!darea || !darea->window)
+    if (!darea || !gtk_widget_get_window(darea))
       return;
 
     m_plcd = new gLCD(darea, m_nColumns, m_nRows, 3, 3, 1);

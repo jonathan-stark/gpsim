@@ -2392,8 +2392,6 @@ void Profile_Window::Build(void)
   gtk_clist_set_compare_func(GTK_CLIST(profile_clist),
                              (GtkCListCompareFunc)profile_compare_func);
 
-  GTK_WIDGET_UNSET_FLAGS(profile_clist,GTK_CAN_DEFAULT);
-
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_clist));
@@ -2424,8 +2422,6 @@ void Profile_Window::Build(void)
   gtk_clist_set_sort_type (profile_range_clist,GTK_SORT_DESCENDING);
   gtk_clist_set_compare_func(GTK_CLIST(profile_range_clist),
                              (GtkCListCompareFunc)profile_compare_func);
-
-  GTK_WIDGET_UNSET_FLAGS(profile_range_clist,GTK_CAN_DEFAULT);
 
   range_popup_menu=build_menu(this);
 
@@ -2470,8 +2466,6 @@ void Profile_Window::Build(void)
   gtk_clist_set_compare_func(profile_register_clist,
                              (GtkCListCompareFunc)profile_compare_func);
 
-  GTK_WIDGET_UNSET_FLAGS(profile_register_clist,GTK_CAN_DEFAULT);
-
   scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_register_clist));
@@ -2505,8 +2499,6 @@ void Profile_Window::Build(void)
   gtk_clist_set_column_auto_resize(profile_exestats_clist,6,TRUE);
   gtk_clist_set_column_auto_resize(profile_exestats_clist,7,TRUE);
   gtk_clist_set_column_auto_resize(profile_exestats_clist,8,TRUE);
-
-  GTK_WIDGET_UNSET_FLAGS(profile_exestats_clist,GTK_CAN_DEFAULT);
 
   exestats_popup_menu=exestats_build_menu(this);
   g_signal_connect(profile_exestats_clist,
