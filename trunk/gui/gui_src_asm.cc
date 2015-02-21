@@ -3883,52 +3883,6 @@ static int load_fonts(SourceWindow *sbaw)
   return 1;
 }
 
-/*************** Font selection dialog *********************/
-class DialogFontSelect {
-public:
-  static gint  DialogRun(GtkWidget *w, gpointer user_data);
-
-  static GtkWidget *m_pFontSelDialog;
-};
-
-GtkWidget * DialogFontSelect::m_pFontSelDialog = NULL;
-
-gint DialogFontSelect::DialogRun(GtkWidget *w, gpointer user_data)
-{
-  GtkEntry *entry=GTK_ENTRY(user_data);
-  const char *fontstring;
-  gchar *fontname;
-
-  if(m_pFontSelDialog==0)
-  {
-
-    m_pFontSelDialog=gtk_font_selection_dialog_new("Select font");
-  }
-
-    fontstring=gtk_entry_get_text(entry);
-    gtk_font_selection_dialog_set_font_name(
-		(GtkFontSelectionDialog *) m_pFontSelDialog, fontstring);
-
-  gint result = gtk_dialog_run (GTK_DIALOG (m_pFontSelDialog));
-  switch (result) {
-  case GTK_RESPONSE_OK:
-    fontname=gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(m_pFontSelDialog));
-    gtk_widget_hide(m_pFontSelDialog);
-    gtk_entry_set_text(entry,fontname);
-    g_free(fontname);
-    break;
-  default:
-      break;
-  }
-  gtk_widget_hide(m_pFontSelDialog);
-  return result;
-}
-
-// To give access to reg and opcode windows
-int font_dialog_browse(GtkWidget *w, gpointer user_data) {
-  return DialogFontSelect::DialogRun(w, user_data);
-}
-
 /********************** Settings dialog ***************************/
 static void settings_dialog(SourceWindow *sbaw)
 {

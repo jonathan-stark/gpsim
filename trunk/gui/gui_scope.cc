@@ -156,10 +156,6 @@ PixMap::PixMap(GdkDrawable *pParent, gint w, gint h, gint y)
 
 GtkWidget *waveDrawingArea=0;
 GtkWidget *signalDrawingArea=0;
-// use this if signalDrawingArea is just a drawing area
-//#define SignalWindow signalDrawingArea->window
-// use this if signalDrawingArea is a layout widget
-#define SignalWindow GTK_LAYOUT (signalDrawingArea)->bin_window
 
 GdkGC *drawing_gc=0;         // Line styles, etc.
 GdkGC *highDensity_gc=0;     // Line styles, etc.
@@ -714,17 +710,17 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
   m_start = uiStart;
   m_stop  = uiEnd;
 
+  GtkStyle *style = gtk_widget_get_style(waveDrawingArea);
   gdk_draw_rectangle (m_wavePixmap->pixmap(),
-                      waveDrawingArea->style->black_gc,
+                      style->black_gc,
                       TRUE,
                       0, 0,
                       m_wavePixmap->width,
                       m_wavePixmap->height);
 
-
+  style = gtk_widget_get_style(signalDrawingArea);
   gdk_draw_rectangle (m_signalPixmap->pixmap(),
-                      signalDrawingArea->style->bg_gc[GTK_STATE_NORMAL],
-                      //signalDrawingArea->style->black_gc,
+                      style->bg_gc[GTK_STATE_NORMAL],
                       TRUE,
                       0, 0,
                       m_signalPixmap->width,
@@ -737,7 +733,7 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
                                 &text_height);
     Dprintf(("signal name update:%s\n",pango_layout_get_text(m_layout)));
     gdk_draw_layout (GDK_DRAWABLE(m_signalPixmap->pixmap()),
-                     signalDrawingArea->style->fg_gc[GTK_STATE_NORMAL],
+                     style->fg_gc[GTK_STATE_NORMAL],
                      0,
                      (m_signalPixmap->height-text_height)/2,
                      m_layout);
@@ -825,15 +821,16 @@ void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
   m_start = uiStart;
   m_stop  = uiEnd;
 
+  GtkStyle *style = gtk_widget_get_style(waveDrawingArea);
   gdk_draw_rectangle (m_wavePixmap->pixmap(),
-                      waveDrawingArea->style->bg_gc[GTK_STATE_NORMAL],
+                      style->bg_gc[GTK_STATE_NORMAL],
                       TRUE,
                       0, 0,
                       m_wavePixmap->width,
                       m_wavePixmap->height);
 
   gdk_draw_rectangle (m_signalPixmap->pixmap(),
-                      signalDrawingArea->style->bg_gc[GTK_STATE_NORMAL],
+                      style->bg_gc[GTK_STATE_NORMAL],
                       TRUE,
                       0, 0,
                       m_signalPixmap->width,
@@ -867,7 +864,7 @@ void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
       x = ((x+text_width) > m_wavePixmap->width) ? (x-text_width) : x;
 
       gdk_draw_layout (GDK_DRAWABLE(m_wavePixmap->pixmap()),
-                       waveDrawingArea->style->fg_gc[GTK_STATE_NORMAL],
+                       style->fg_gc[GTK_STATE_NORMAL],
                        x,
                        (m_wavePixmap->height-text_height)/2,
                        m_TicText);
@@ -1129,8 +1126,11 @@ GtkObject *m_hAdj=0;
 
 int Scope_Window::waveXoffset()
 {
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(m_pHpaned, &allocation);
+
   return (int)((m_PixmapWidth -
-                (m_pHpaned->allocation.width - gtk_paned_get_position(GTK_PANED(m_pHpaned))))
+                (allocation.width - gtk_paned_get_position(GTK_PANED(m_pHpaned))))
                *gNormalizedHorizontalPosition);
 }
 
@@ -1143,8 +1143,9 @@ void Scope_Window::Expose(WaveBase *wf)
 
   PixMap *pm = wf->wavePixmap();
 
-  gdk_draw_pixmap(waveDrawingArea->window,
-                  waveDrawingArea->style->fg_gc[GTK_STATE_NORMAL],
+  GtkStyle *style = gtk_widget_get_style(waveDrawingArea);
+  gdk_draw_pixmap(gtk_widget_get_window(waveDrawingArea),
+                  style->fg_gc[GTK_STATE_NORMAL],
                   pm->pixmap(),
                   xoffset,0,      // source
                   0,pm->yoffset,  // destination
@@ -1157,9 +1158,9 @@ void Scope_Window::Expose(WaveBase *wf)
   // show the pixmap with the signal name:
 
   if (!m_entry->isSelected(wf)) {
-
-    gdk_draw_pixmap(SignalWindow,
-                    signalDrawingArea->style->fg_gc[GTK_STATE_NORMAL],
+    style = gtk_widget_get_style(signalDrawingArea);
+    gdk_draw_pixmap(gtk_layout_get_bin_window(GTK_LAYOUT(signalDrawingArea)),
+                    style->fg_gc[GTK_STATE_NORMAL],
                     pm->pixmap(),
                     0,0,            // source
                     0,pm->yoffset,  // destination
@@ -1190,11 +1191,11 @@ static void ScrollChildren(GtkScrolledWindow *scrolledwindow,
 static void hAdjVChange(GtkAdjustment *pAdj,
                         gpointer       user_data)
 {
-
-  gdouble width = pAdj->upper - pAdj->lower - pAdj->page_size;
-  gNormalizedHorizontalPosition = pAdj->value/ (width ? width : 1.0);
-
+  gdouble width = gtk_adjustment_get_upper(pAdj)
+    - gtk_adjustment_get_lower(pAdj) - gtk_adjustment_get_page_size(pAdj);
+  gNormalizedHorizontalPosition = gtk_adjustment_get_value(pAdj) / (width ? width : 1.0);
 }
+
 static gint
 button_press(GtkWidget *widget,
              GdkEventButton *pEventButton,
@@ -1445,32 +1446,35 @@ void Scope_Window::Build()
   gtk_widget_show(waveDrawingArea);
   gtk_widget_show(signalDrawingArea);
 
+  GdkWindow *Gwindow = gtk_widget_get_window(waveDrawingArea);
+
   // Graphics Context:
-  drawing_gc = gdk_gc_new(waveDrawingArea->window);
-  grid_gc = gdk_gc_new(waveDrawingArea->window);
-  highDensity_gc = gdk_gc_new(waveDrawingArea->window);
-  leftMarker_gc = gdk_gc_new(waveDrawingArea->window);
+  drawing_gc = gdk_gc_new(Gwindow);
+  grid_gc = gdk_gc_new(Gwindow);
+  highDensity_gc = gdk_gc_new(Gwindow);
+  leftMarker_gc = gdk_gc_new(Gwindow);
 
   gdk_gc_set_foreground(grid_gc,&grid_line_color);
   gdk_gc_set_foreground(drawing_gc,&signal_line_color);
   gdk_gc_set_foreground(highDensity_gc,&highDensity_line_color);
   gdk_gc_set_foreground(leftMarker_gc,&highDensity_line_color);
   gdk_gc_set_function(leftMarker_gc,GDK_XOR);
-  text_gc = waveDrawingArea->style->white_gc;
+
+  text_gc = gtk_widget_get_style(waveDrawingArea)->white_gc;
 
   guint64 start,stop;
   gridPoints(&start,&stop);
 
   int timeHeight = 15;
-  m_TimeAxis->Build(new PixMap(waveDrawingArea->window, m_PixmapWidth, timeHeight, 0),
-                    new PixMap(waveDrawingArea->window, 100, timeHeight, 0));
+  m_TimeAxis->Build(new PixMap(Gwindow, m_PixmapWidth, timeHeight, 0),
+                    new PixMap(Gwindow, 100, timeHeight, 0));
   m_TimeAxis->Update(start,stop);
 
   for(int i=0; i<nSignals; i++) {
     int waveHeight=20;
     int yoffset = timeHeight +i*waveHeight;
-    signals[i]->Build(new PixMap(waveDrawingArea->window, m_PixmapWidth, waveHeight, yoffset),
-                      new PixMap(waveDrawingArea->window, 100, waveHeight, yoffset));
+    signals[i]->Build(new PixMap(Gwindow, m_PixmapWidth, waveHeight, yoffset),
+                      new PixMap(Gwindow, 100, waveHeight, yoffset));
   }
 
   g_signal_connect (waveDrawingArea,
@@ -1505,9 +1509,7 @@ void Scope_Window::Build()
                      "scroll-event",
                      G_CALLBACK(scroll_event),
                      (gpointer) this);
-  GTK_WIDGET_SET_FLAGS( waveDrawingArea,
-                        GTK_CAN_FOCUS );
-
+  gtk_widget_set_can_focus(waveDrawingArea, TRUE);
 
   g_signal_connect(signalDrawingArea,
                      "button_press_event",
@@ -1520,8 +1522,10 @@ void Scope_Window::Build()
 
   UpdateMenuItem();
 
-  aw = window->allocation.width;
-  ah = window->allocation.height;
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(window, &allocation);
+  aw = allocation.width;
+  ah = allocation.height;
 
   m_entry = new SignalNameEntry(this, GTK_ENTRY(gtk_entry_new ()));
 
@@ -1596,10 +1600,11 @@ void Scope_Window::Update()
 
   // Markers
   int xpos = mapTimeToPixel(m_Markers[eLeftButton]->getVal()) + waveXoffset();
-  if (xpos)
-    gdk_draw_line(waveDrawingArea->window,leftMarker_gc,
+  if (xpos) {
+    gdk_draw_line(gtk_widget_get_window(waveDrawingArea), leftMarker_gc,
                   xpos, 0,
                   xpos, 1000);
+  }
   /*
   cout << "Left marker pos="<<dec<<xpos
        <<" time=" <<m_Markers[eLeftButton]->getVal()

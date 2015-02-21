@@ -376,7 +376,7 @@ namespace OSRAM
   {
 
     if (!m_plcd) {
-      if (!darea || !darea->window)
+      if (!darea || !gtk_widget_get_window(darea))
         return;
 
       //m_plcd = new gLCD(GDK_DRAWABLE(darea->window), m_nColumns, m_nRows, 3, 3);
