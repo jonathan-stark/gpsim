@@ -59,6 +59,7 @@ Module_Types available_modules[] =
 {
 #ifdef HAVE_GUI
   { {"lcd_display", "lcd_2X20"}, LcdDisplay::construct},
+  { {"lcd_20x4", "lcd_20x4"}, LcdDisplay20x4::construct},
   { {"lcd_dt161A",  "lcd_2X8"},  LcdDisplayDisplaytech161A::construct},
 #endif
 

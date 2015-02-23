@@ -1,5 +1,5 @@
 #define FONT_LEN 256
-_5X7 test[FONT_LEN] = {
+_5X8 test[FONT_LEN] = {
  { /* 0 */
   "     ",
   "     ",

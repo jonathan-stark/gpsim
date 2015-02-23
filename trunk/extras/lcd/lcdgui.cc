@@ -42,7 +42,7 @@ Boston, MA 02111-1307, USA.  */
  * lcd pixel.)
  */
 
-gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
+gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X8 *ch )
 {
 
   guint i,j,k,rows,cols,m,ii,jj,colors;
@@ -51,7 +51,7 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
   gchar **xpm_template;
 
   // total rows in the xpm
-  rows = 9 + lcdP->dots.y * lcdP->pixels.y;
+  rows = 6 + lcdP->dots.y * lcdP->pixels.y;
   cols = 1 + lcdP->dots.x * lcdP->pixels.x;
 
   xpm_template = (char **)malloc(rows * sizeof(gchar *));
@@ -133,10 +133,10 @@ LcdFont::LcdFont (gint characters,  GtkWidget *parent_window, LcdDisplay *lcdP)
   }
 }
 
-void LcdFont::update_pixmap(int pos, _5X7 *tempchar, LcdDisplay *lcdP)
+void LcdFont::update_pixmap(int pos, _5X8 *tempchar, LcdDisplay *lcdP)
 {
     if (pixmaps[pos]) {
-      g_free(pixmaps[pos]);
+      g_object_unref(pixmaps[pos]);
       pixmaps[pos] = NULL;
     }
     pixmaps[pos] = gdk_pixmap_create_from_xpm_d (
@@ -154,13 +154,13 @@ GdkPixmap *LcdFont::getPixMap(unsigned int index)
 void LcdDisplay::update_cgram_pixmaps()
 {
   int i, j, k;
-  _5X7 tempchar;
+  _5X8 tempchar;
 
   if (fontP == NULL)
     return;
 
   for (i = 0; i < CGRAM_SIZE / 8; i++) {
-    for (j = 0; j < 7; j++) {
+    for (j = 0; j < 8; j++) {
       for (k = 0; k < 5; k++) {
         if (m_hd44780->getCGRam(8 * i + j) & (1 << (4 - k)))
           tempchar[j][k] = '.';
@@ -170,15 +170,16 @@ void LcdDisplay::update_cgram_pixmaps()
       tempchar[j][5] = 0;
     }
     fontP->update_pixmap(i, &tempchar, this);
+    fontP->update_pixmap(i+8, &tempchar, this);
 
   }
-  cgram_updated = false;
+  m_hd44780->setCGRamupdate(false);
 }
 
 GdkPixmap *LcdDisplay::get_pixmap(gint row, gint col)
 {
 
-  if (cgram_updated)
+  if (m_hd44780->CGRamupdate())
     update_cgram_pixmaps();
 
   return fontP ? fontP->getPixMap(m_hd44780->getDDRam(row,col))  : 0;
@@ -255,12 +256,13 @@ void LcdDisplay::update(  GtkWidget *widget,
 
   GdkWindow *Gwindow = gtk_widget_get_window(widget);
 
+
   if (!(disp_type & TWO_ROWS_IN_ONE)) {
     for(j=0; j<rows; j++)
       for(i=0; i<cols; i++)
         gdk_draw_pixmap (Gwindow, lcd_gc,get_pixmap(j,i),
                          0,0,
-                         border+i*cw, border+j*(ch+border),
+                         border+i*cw, border+j*(ch),
                          cw,ch);
   }
   else {
@@ -402,20 +404,9 @@ void LcdDisplay::CreateGraphics (void)
 
 }
 
-void LcdDisplay::move_cursor(unsigned int new_row, unsigned int new_column)
-{
-
-  if( new_row < rows && new_column < cols ) {
-    cursor.row = new_row;
-    cursor.col = new_column;
-  }
-  m_hd44780->moveCursor(new_row, new_column);
-
-}
 
 void LcdDisplay::clear_display(void)
 {
   m_hd44780->clearDisplay();
-  m_hd44780->moveCursor(0,0);
 }
 #endif //HAVE_GUI

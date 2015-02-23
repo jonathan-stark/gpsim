@@ -411,6 +411,17 @@ class P18F2520 : public P18F2x21
   virtual unsigned int last_actual_register () const { return 0x05FF;};
 };
 
+class P18F2620 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2620_;};
+  P18F2620(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 0x8000; };
+  virtual unsigned int last_actual_register () const { return 0x0F7F;};
+};
+
 
 
 class P18F4x21 : public P18F2x21

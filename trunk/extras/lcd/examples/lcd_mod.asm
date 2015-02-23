@@ -9,7 +9,9 @@
 
 ;LCD Module DDRAM Address is formed by adding the row and column EQU
 SCR_ROW0                EQU     0x00    ;Row 0 starts at LCD DDRAM Address 0
-SCR_ROW1                EQU     0x40    ;Row 1     "            "          0x40
+SCR_ROW1                EQU     0x40    ;Row 1     "            "          64
+SCR_ROW2                EQU     0x14    ;Row 2     "            "          20
+SCR_ROW3                EQU     0x54    ;Row 3     "            "          84
 
 SCR_COL0                EQU     0x00
 
@@ -68,6 +70,12 @@ Main
 
         CALL    LCD_INITIALIZE
 
+	movlw	0
+	call	createChar
+	movlw	1
+	call	createChar
+	movlw	2
+	call	createChar
 t1
 ;        CALL    LCD_CLEAR_SCREEN
 
@@ -89,6 +97,21 @@ t1
 	movlw	1
 	call	write_string
 
+	;; write another string, but to row 2
+	movlw	LCD_CMD_SET_DDRAM | SCR_ROW2 | SCR_COL0
+	call	LCD_WRITE_CMD
+
+	movlw	2
+	call	write_string
+
+	;; write another string, but to row 3
+	movlw	LCD_CMD_SET_DDRAM | SCR_ROW3 | SCR_COL0
+	call	LCD_WRITE_CMD
+
+	movlw	3
+	call	write_string
+
+	call LCD_DELAY
 	goto	t1
 
 
@@ -120,5 +143,6 @@ cr2     CLRF    INDF            ;Clear reg
 
         include "lcd.asm"
         include "screen.asm"
+	include "icons.inc"
 
         END

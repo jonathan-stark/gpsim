@@ -140,7 +140,7 @@ private:
 //------------------------------------------------------------------------
 //
 LCD_InputPin::LCD_InputPin (LcdDisplay *pLCD, const char *pinName, ePins pin)
-  : IO_bi_directional(pinName), m_pLCD(pLCD), m_pin(pin)
+  : IO_bi_directional(pinName), m_pLCD(pLCD), m_pin(pin),m_cDrivenState(0)
 {
 
 }
@@ -390,7 +390,7 @@ Module * LcdDisplay::construct(const char *new_name=NULL)
   lcdP->create_iopin_map();
 
 
-  lcdP->set_pixel_resolution(5,7);
+  lcdP->set_pixel_resolution(5,8);
   lcdP->set_crt_resolution(3,3);
   lcdP->set_contrast(1.0);
 
@@ -545,4 +545,45 @@ LcdDisplayDisplaytech161A::LcdDisplayDisplaytech161A(const char *pN, int aRows, 
 LcdDisplayDisplaytech161A::~LcdDisplayDisplaytech161A()
 {
 }
+//-----------------------------------------------------------------
+// HD44780 controller with 20x2 display
+// 
+
+Module * LcdDisplay20x2::construct(const char *new_name=NULL)
+{
+
+  if (verbose)
+     cout << " LCD 20x2 display constructor\n";
+
+  LcdDisplay20x2 *lcdP = (LcdDisplay20x2 *)new LcdDisplay(new_name,2,20);
+  lcdP->create_iopin_map();
+
+
+  lcdP->set_pixel_resolution(5,8);
+  lcdP->set_crt_resolution(3,3);
+  lcdP->set_contrast(1.0);
+  return lcdP;
+
+}
+//-----------------------------------------------------------------
+// HD44780 controller with 20x4 display
+// 
+
+Module * LcdDisplay20x4::construct(const char *new_name=NULL)
+{
+
+  if (verbose)
+     cout << " LCD 20x4 display constructor\n";
+
+  LcdDisplay20x4 *lcdP = (LcdDisplay20x4 *)new LcdDisplay(new_name,4,20);
+  lcdP->create_iopin_map();
+
+
+  lcdP->set_pixel_resolution(5,8);
+  lcdP->set_crt_resolution(3,3);
+  lcdP->set_contrast(1.0);
+  return lcdP;
+
+}
+
 #endif //HVAE_GUI

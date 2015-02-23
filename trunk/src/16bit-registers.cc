@@ -797,27 +797,29 @@ void T0CON::put(unsigned int new_value)
   //trace.register_write(address,value.get());
   value.put(new_value);
 
-  if( (value.get() ^ old_value) & (T08BIT | TMR0ON)) {
-    cpu16->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
+  if (new_value == old_value)
+	return;
 
-    if(value.get() & TMR0ON) {
-      unsigned int initialTmr0value = (cpu16->tmr0l.value.get() & 0xff) |
-	( ((value.get() & T08BIT)==0) ? ((cpu16->tmr0l.value.get() & 0xff)<<8) : 0);
-      cpu16->tmr0l.start(initialTmr0value);
-    } else
-      cpu16->tmr0l.stop();
+  // new_prescale causes issues in 16 bit mode, so save current tmr0l and
+  // tmr0h values , call new_prescale (if required), and then restart timer
+  // using saved values
+  //
+  unsigned int initialTmr0value = (cpu16->tmr0l.value.get() & 0xff) |
+        (( (value.get() & T08BIT)) ? 0: ((cpu16->tmr0h.value.get() & 0xff)<<8));
 
-  } 
 
+  cpu16->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
 
   // %%%FIX ME%%% - can changing the state of TOSE cause the timer to
   // increment if tmr0 is being clocked by an external clock?
-
-  // Now check the rest of the tmr0 bits.
+  // 
   if( (value.get() ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
     cpu16->tmr0l.new_prescale();
 
-  //cout <<"T0CON::put - new val 0x" << hex << value.get() <<'\n';
+  if(value.get() & TMR0ON) {
+      cpu16->tmr0l.start(initialTmr0value);
+  } else
+      cpu16->tmr0l.stop();
 }
 
 //--------------------------------------------------
@@ -922,6 +924,7 @@ void TMR0_16::put_value(unsigned int new_value)
 {
   value.put(new_value & 0xff);
   value16 = (new_value & 0xff) | (tmr0h ? (tmr0h->get_value()<<8)  : 0);
+
   if(t0con->value.get() & T0CON::TMR0ON) {
     if(t0con->value.get() & T0CON::T08BIT)
       TMR0::put_value(new_value);

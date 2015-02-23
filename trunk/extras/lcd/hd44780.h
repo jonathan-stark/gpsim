@@ -90,11 +90,14 @@ public:
   bool bSmallFontMode() {return !m_bFontMode; }
   bool bDisplayOn() {return m_bDisplayOn; }
   bool bDisplayOff() {return !m_bDisplayOn; }
+  bool CGRamupdate() {return m_CGRamupdate;}
+  void setCGRamupdate(bool state) { m_CGRamupdate = state;}
 
 
-  // Memory in a HD44780U is organized in 2x40 bytes of display RAM,
+  // Memory in a HD44780U 128 bytes of display RAM,
   // and 64 bytes of character RAM
-#define DDRAM_SIZE 80
+#define DDRAM_SIZE 0x80
+#define DDRAM_MASK (DDRAM_SIZE - 1)
 #define CGRAM_ADDR_BITS 6
 #define CGRAM_SIZE (1 << CGRAM_ADDR_BITS)
 #define CGRAM_MASK (CGRAM_SIZE - 1)
@@ -105,7 +108,6 @@ public:
   void writeDDRamAddress(int addr);
 
   void clearDisplay();
-  void moveCursor(int new_row, int new_column);
 
   void test();
 protected:
@@ -136,15 +138,15 @@ private: //Data
 
   /// Display Data RAM
   unsigned char m_DDRam[DDRAM_SIZE];
-  struct sCur{
-    unsigned int row;
-    unsigned int col;
-  } m_DDRamCursor;
+  unsigned char m_DDRamAdd;
 
   /// Character Generator RAM
   unsigned char m_CGRam[CGRAM_SIZE];
-  char m_CGRamCursor;
+  unsigned char m_CGRamAdd;
   bool m_bInCGRam;           // true when a write to CGRAM is selected
+  bool m_CGRamupdate;
+
+  int row_offset[4];		// support up to 4 rows
 
 
   /// Debug
