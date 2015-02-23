@@ -2122,6 +2122,39 @@ Processor * P18F2520::construct(const char *name)
 }
 
 
+//------------------------------------------------------------------------
+//
+// P18F2620
+// 
+
+P18F2620::P18F2620(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F2620 constructor, type = " << isa() << '\n';
+
+}
+
+
+Processor * P18F2620::construct(const char *name)
+{
+
+  P18F2620 *p = new P18F2620(name);
+
+  if(verbose)
+    cout << " 18F2620 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F2620 construct completed\n";
+  return p;
+}
+
+
 
 //========================================================================
 //

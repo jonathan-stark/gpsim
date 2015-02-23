@@ -62,7 +62,6 @@ class TMR0_Interface : public Interface
         TMR0 *tmr0;
 };
 
-
 //--------------------------------------------------
 // member functions for the TMR0 base class
 //--------------------------------------------------
@@ -140,7 +139,7 @@ void TMR0::stop()
 void TMR0::start(int restart_value, int sync)
 {
 
-  Dprintf(("restart_value=%d sync=%d\n",restart_value, sync));
+  Dprintf(("restart_value=%d(0x%x) sync=%d\n",restart_value, restart_value, sync));
 
   state |= RUNNING;          // the timer is on
 
@@ -161,6 +160,7 @@ void TMR0::start(int restart_value, int sync)
   
     last_cycle = (restart_value % max_counts()) * prescale;
     last_cycle = synchronized_cycle - last_cycle;
+
 
     guint64 fc = last_cycle + max_counts() * prescale;
 
@@ -370,19 +370,6 @@ void TMR0::new_prescale()
       prescale = 1 << get_prescale();
       prescale_counter = prescale;
 
-      // cout << " new prescale " << prescale;
-
-      // Now compute the 'last_cycle' as though if TMR0 had been running on the 
-      // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
-      // cycle counter when tmr0 last rolled over.
-
-      /*
-      last_cycle = value.get() * prescale;
-      last_cycle = synchronized_cycle - last_cycle;
-
-      if(get_cycles().get() <= synchronized_cycle)
-	last_cycle += (synchronized_cycle - get_cycles().get());
-      */
 
       last_cycle = value.get() * prescale;
       last_cycle = get_cycles().get() - last_cycle;

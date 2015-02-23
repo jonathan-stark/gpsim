@@ -60,6 +60,7 @@ public:
 
 
 typedef char _5X7 [7][6];
+typedef char _5X8 [8][6];
 
 class LcdFont 
 {
@@ -71,7 +72,7 @@ public:
   //CreateFont(GtkWidget *, LcdDisplay *);
 
   LcdFont(gint, GtkWidget *, LcdDisplay *);
-  void update_pixmap(int, _5X7 *, LcdDisplay *);
+  void update_pixmap(int, _5X8 *, LcdDisplay *);
   GdkPixmap *getPixMap(unsigned int);
 };
 
@@ -163,7 +164,6 @@ public:
   };
 
   SMObject(char *_nameP) {
-    cout << "SMObject constructor\n";
     if(_nameP)
       nameP = strdup(_nameP);
     else
@@ -360,6 +360,22 @@ protected:
 
 };
 
+class LcdDisplay20x2 : public LcdDisplay
+{
+  public:
+
+  // Inheritance from Module class
+  const virtual char *type(void) { return ("lcd_20x2"); };
+  static Module *construct(const char *new_name);
+};
+class LcdDisplay20x4 : public LcdDisplay
+{
+
+  public:
+  // Inheritance from Module class
+  const virtual char *type(void) { return ("lcd_20x4"); };
+  static Module *construct(const char *new_name);
+};
 class LcdDisplayDisplaytech161A : public LcdDisplay
 {
 public:

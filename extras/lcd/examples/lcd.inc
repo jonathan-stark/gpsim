@@ -94,3 +94,4 @@ LCD_SCROLL              EQU     0x01    ;s=1
 ;LCD Command "Set Display Data RAM Address" = 10000000
 
 LCD_CMD_SET_DDRAM       EQU     0x80
+LCD_CMD_SET_CGRAM	EQU	0x40

@@ -199,13 +199,19 @@ HD44780::HD44780()
     m_bCursorBlink(false),// no cursor blink
     m_bCursorOn(false),   // cursor is off
     m_busyTimer(new HD44780Busy()),
-    m_CGRamCursor(0),
-    m_bInCGRam(false)
+    m_CGRamAdd(0),
+    m_bInCGRam(false),
+    m_CGRamupdate(false)
 {
 
   memset(&m_CGRam[0], 0xff, sizeof(m_CGRam));
   memset(&m_DDRam[0], 0xff, sizeof(m_DDRam)/2);
   memset(&m_DDRam[DDRAM_SIZE/2], 0, sizeof(m_DDRam)/2);
+  row_offset[0] = 0;
+  row_offset[1] = 0x40;
+  row_offset[2] = 0x14;
+  row_offset[3] = 0x54;
+  
 
 }
 
@@ -267,7 +273,7 @@ void HD44780::setE(bool newE)
 // data bus to determine how the pins should be driven
 void HD44780::driveDataBus(unsigned int d)
 {
-  Dprintf(("driveDataBus 0x%02x\n",d));
+ //RRR Dprintf(("driveDataBus 0x%02x\n",d));
   m_dataBus = d;
 }
 
@@ -278,7 +284,12 @@ void HD44780::driveDataBus(unsigned int d)
 void HD44780::advanceColumnAddress()
 {
   if (b8BitMode() || m_bDataBusPhase)
-    m_DDRamCursor.col = (m_DDRamCursor.col+1) % 40;
+  {
+    if (m_bInCGRam)
+	m_CGRamAdd = (m_CGRamAdd + 1) & CGRAM_MASK;
+    else
+	m_DDRamAdd = (m_DDRamAdd + 1) & DDRAM_MASK;
+  }
 }
 //------------------------------------------------------------------------
 // phasedDataWrite - returns true if a write operation complements. The data
@@ -310,24 +321,33 @@ bool HD44780::phasedDataWrite(unsigned int &data)
 }
 
 //------------------------------------------------------------------------
-// storeData - write a byte to the DDRAM
+// storeData - write a byte to the DDRAM or CGRAM
 //
 void HD44780::storeData()
 {
   unsigned int d;
 
   if (phasedDataWrite(d)) {
-    unsigned int ddram_address = (m_DDRamCursor.row ? 40 : 0) + (m_DDRamCursor.col % 40);
-    m_DDRam[ddram_address] = d;
+    if (m_bInCGRam)
+    {
+	m_CGRam[m_CGRamAdd] = d;
+	m_CGRamupdate = true;
+    }
+    else
+    {
+        m_DDRam[m_DDRamAdd] = d;
+    }
   }
 }
 //------------------------------------------------------------------------
 // getData - get a byte from tehe DDRAM
 unsigned int HD44780::getData()
 {
-  unsigned int ddram_address = (m_DDRamCursor.row ? 40 : 0) + (m_DDRamCursor.col % 40);
 
-  return  m_DDRam[ddram_address];
+  if (m_bInCGRam)
+     return m_CGRam[m_CGRamAdd];
+  else
+     return  m_DDRam[m_CGRamAdd];
 }
 
 
@@ -344,12 +364,12 @@ void HD44780::executeCommand()
   Dprintf(("Execute Command:0x%d\n",command));
   if( (command & LCD_MASK_SET_DDRAM) ==  LCD_CMD_SET_DDRAM) {
     Dprintf(("LCD_CMD_SET_DDRAM\n"));
-    writeDDRamAddress(command & 0x7f);
+    writeDDRamAddress(command & DDRAM_MASK);
     m_busyTimer->set(39e-6);	// busy for 39 usec after set DDRAM addr
   }
   else if( (command & LCD_MASK_SET_CGRAM) ==  LCD_CMD_SET_CGRAM) {
     Dprintf(("LCD_CMD_SET_CGRAM\n"));
-    writeCGRamAddress(command & 0x3f);
+    writeCGRamAddress(command & CGRAM_MASK);
   }
   else if( (command & LCD_MASK_FUNC_SET) == LCD_CMD_FUNC_SET) {
 
@@ -414,7 +434,7 @@ void HD44780::executeCommand()
   }
   else if( (command & LCD_MASK_CURSOR_HOME) ==  LCD_CMD_CURSOR_HOME) {
     Dprintf(("LCD_CMD_CURSOR_HOME\n"));
-    moveCursor(0,0);
+    m_DDRamAdd = 0;
   }
   else if( (command & LCD_MASK_CLEAR_DISPLAY) == LCD_CMD_CLEAR_DISPLAY) {
     Dprintf(("LCD_CMD_CLEAR_DISPLAY\n"));
@@ -448,8 +468,13 @@ unsigned int HD44780::getStatus()
 {
   unsigned short status;
 
-  status = ( m_DDRamCursor.row ? 0x40 : 0) |  m_DDRamCursor.col;
-  status |= (m_busyTimer->isBusy() ? 0x80 : 0);
+  if (m_bInCGRam)
+	status = m_CGRamAdd;
+  else
+	status = m_DDRamAdd;
+
+  if (m_busyTimer->isBusy())
+	status |= 0x80;
 
   return dataPhase(status);
 }
@@ -476,20 +501,24 @@ void HD44780::writeDDRamAddress(int data)
   //of these can be displayed in a 2x20 display.
   //
 
-  data &= 0x7f;
+  data &= DDRAM_MASK;
 
-  m_DDRamCursor.col = (data & 0x3f) % 40;
-  m_DDRamCursor.row = (data & 0x40) ? 1 : 0;
+  m_DDRamAdd = data;
 
   m_bInCGRam = false;
 
 }
 unsigned char HD44780::getDDRam(unsigned int r, unsigned int c)
 {
-  if ( r>=2 || c>=40)
+  int add;
+  if ( r>=4)
+  {
+    fprintf(stderr, "%s row %d not supported\n", __FUNCTION__, r);
     return 0;
+  }
+  add = row_offset[r] + c;
 
-  return m_DDRam[r*40 + c];
+  return m_DDRam[add & DDRAM_MASK];
 }
 
 //------------------------------------------------------------------------
@@ -497,7 +526,7 @@ void HD44780::writeCGRamAddress(int data)
 {
   data &= CGRAM_MASK;
 
-  m_CGRamCursor = data;
+  m_CGRamAdd = data;
   m_bInCGRam = true;
 }
 
@@ -505,13 +534,7 @@ void HD44780::writeCGRamAddress(int data)
 void HD44780::clearDisplay()
 {
   memset(&m_DDRam[0], ' ', sizeof(m_DDRam));
-}
-
-//------------------------------------------------------------------------
-void HD44780::moveCursor(int new_row, int new_column)
-{
-  m_DDRamCursor.row = new_row;
-  m_DDRamCursor.col = new_column;
+  m_DDRamAdd = 0;
 }
 
 
@@ -526,9 +549,9 @@ void HD44780::debugChipState(const char *pCFrom)
 	 (b8BitMode() ? 8 : 4),
 	 (b1LineMode() ? 1 : 2),
 	 (bDisplayOn() ? "ON" : "OFF"));
-  printf(" DDRam Cursor row:%d col:%d  CGRam Cursor:%d\n",
-	 m_DDRamCursor.row, m_DDRamCursor.col,
-	 m_CGRamCursor);
+  printf(" DDRam Address:0x%02x  CGRam Address:0x%02x CGRam active %d\n",
+	 m_DDRamAdd,
+	 m_CGRamAdd, m_bInCGRam);
 
 #endif
 }
@@ -610,7 +633,7 @@ void HD44780::test()
   printf("DDRam contents:\n");
   for(i=0; i<DDRAM_SIZE; i++) {
 
-    char ch = getDDRam(i>=40 ? 1 : 0, i % 40);
+    char ch = m_DDRam[i];
     if (i == 40)
       printf("\n");
     printf("%c",(ch>=0x20 ? ch : '.'));

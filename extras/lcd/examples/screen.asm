@@ -384,7 +384,7 @@ ws2
 	movwf	PCL
 
 
-WS_TABLE_MASK  equ	1   ; This should equal 2^number of strings
+WS_TABLE_MASK  equ	3   ; This should equal 2^number of strings
 
 ; The first part of the table contains pointers to the start of the 
 ; strings. Note that each string has a two word pointer for the low
@@ -397,6 +397,14 @@ ws_table:
 	retlw	LOW(string1)
 	retlw	HIGH(string1)
 
+	retlw	LOW(string2)
+	retlw	HIGH(string2)
+
+	retlw	LOW(string3)
+	retlw	HIGH(string3)
+
 
 string0:	dt	"GPSIM WROTE THIS",0
-string1:	dt	"A STRING ON ROW 2",0
+string1:	dt	"A STRING ON ROW 2 ", 8 ,0
+string2:	dt	"If we have row 3 ", 9, 0
+string3:	dt	"and row 4 ", 2 ,0

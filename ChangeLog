@@ -1,3 +1,24 @@
+2015-02-23 Roy Rankin <rrankin@ihug.com.au>
+	* src/tmr0.cc src/16bit-registers.cc
+	: Bug 194 - P18 processor TMR0 may ignore TMR0H 
+	* src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
+	: Feature 39 - Add p18f2620 processor (work in progress)
+	* extras/lcd/examples/icons.inc
+	  extras/lcd/examples/lcd.inc
+	  extras/lcd/examples/lcd_mod.asm
+	  extras/lcd/examples/lcd_mod.stc
+	  extras/lcd/examples/lcd_mod20x4.stc
+	  extras/lcd/examples/screen.asm
+	  extras/lcd/hd44780.cc
+	  extras/lcd/hd44780.h
+	  extras/lcd/lcd.cc
+	  extras/lcd/lcd.h
+	  extras/lcd/lcdfont.h
+	  extras/lcd/lcdgui.cc
+	  extras/lcd/module_manager.cc
+	: Add 20x4 lCD display and CGRam support as 1st step for feature 
+	  request 40 - 20x4 LCD with I2C interface
+
 2015-02-21 Errol van de l'Isle <evandel@cix.co.uk>
 	* extras/graphic_lcd/src/glcd.cc
 	  extras/graphic_lcd/src/glcd_100x32_sed1520.cc
