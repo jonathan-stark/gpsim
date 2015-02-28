@@ -242,8 +242,8 @@ public:
   GdkGC *pinline_gc;
   GdkGC *case_gc;
 
-  GList *modules;
-  GList *nodes;
+  std::vector<GuiModule *> modules;
+  std::vector<Stimulus_Node *> nodes;
 
   GtkWidget *tree;
 

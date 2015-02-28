@@ -19,21 +19,17 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include "../config.h"
 #ifdef HAVE_GUI
-
-#ifdef DOING_GNOME
-#include <gnome.h>
-#endif
 
 #include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
+#include <cstring>
 
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
@@ -54,15 +50,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui_processor.h"
 
-void create_dispatcher (void);
+void create_dispatcher ();
 
-GUI_Processor::GUI_Processor(void)
+GUI_Processor::GUI_Processor()
+  : cpu(0), m_pGUIRamRegisters(0), m_pGUIEEPromRegisters(0)
 {
-
-  cpu = 0;
-  m_pGUIRamRegisters = 0;
-  m_pGUIEEPromRegisters = 0;
-
   create_dispatcher();
 
   regwin_ram =  new  RAM_RegisterWindow(this);
@@ -79,15 +71,14 @@ GUI_Processor::GUI_Processor(void)
   scope_window = new  Scope_Window(this);
 }
 
-void GUI_Processor::SetCPU(Processor *new_cpu) {
+void GUI_Processor::SetCPU(Processor *new_cpu)
+{
   cpu = new_cpu;
-  if(m_pGUIRamRegisters) {
-    delete m_pGUIRamRegisters;
-  }
+
+  delete m_pGUIRamRegisters;
   m_pGUIRamRegisters = new GUIRegisterList(&new_cpu->rma);
-  if(m_pGUIEEPromRegisters) {
-    delete m_pGUIEEPromRegisters;
-  }
+
+  delete m_pGUIEEPromRegisters;
   m_pGUIEEPromRegisters = new GUIRegisterList(&new_cpu->ema);
 }
 

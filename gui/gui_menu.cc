@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
+#include <cstring>
 
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
@@ -87,12 +87,6 @@ about_cb(GtkAction *action, gpointer user_data)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-#if defined(NEW_SOURCE_BROWSER)
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 //========================================================================
 //
@@ -290,9 +284,9 @@ ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
                       "color-set",
                       G_CALLBACK(setColor_cb),
                       this);
-  const int cBORDER = 10; // pixels
+
   GtkWidget *label       = gtk_label_new(colorName);
-  gtk_box_pack_start (GTK_BOX(hbox),label,FALSE,FALSE, cBORDER);
+  gtk_box_pack_start (GTK_BOX(hbox),label,FALSE,FALSE, 10);
   gtk_widget_show (label);
 
   gtk_widget_show (hbox);
@@ -348,7 +342,6 @@ MarginButton::MarginButton(GtkWidget *pParent, const char *pName,
 void MarginButton::toggle_cb(GtkToggleButton *widget,
                              MarginButton    *This)
 {
-  //  This->m_pStyle->setFG(&newColor);
   This->set_active();
 }
 void MarginButton::set_active()
@@ -385,7 +378,6 @@ TabButton::TabButton(GtkWidget *pParent, GtkWidget *pButton,
 void TabButton::toggle_cb(GtkToggleButton *widget,
                           TabButton    *This)
 {
-  //  This->m_pStyle->setFG(&newColor);
   This->set_active();
 }
 void TabButton::set_active()
@@ -416,10 +408,8 @@ FontSelection::FontSelection (GtkWidget *pParent,
                       G_CALLBACK(setFont_cb),
                       this);
 
-  const char *fontName = "font";
-  const int cBORDER = 10; // pixels
-  GtkWidget *label       = gtk_label_new(fontName);
-  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
+  GtkWidget *label = gtk_label_new("font");
+  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, 10);
   gtk_widget_show (label);
 
   gtk_widget_show (hbox);
@@ -436,45 +426,6 @@ void FontSelection::setFont()
 }
 
 //------------------------------------------------------------------------
-#if 0 // defined but not used
-static bool isButtonEvent (GdkEventType type)
-{
-  return
-    type == GDK_BUTTON_PRESS ||
-    type == GDK_2BUTTON_PRESS ||
-    type == GDK_3BUTTON_PRESS ||
-    type == GDK_BUTTON_RELEASE;
-
-}
-
-static gboolean    TagEvent  (GtkTextTag *texttag,
-                       GObject *arg1,
-                       GdkEvent *event,
-                       GtkTextIter *arg2,
-                       gpointer user_data)
-{
-  printf("Received tag event signal Tag:%p arg1:%p Event:%p iter:%p user:%p %08X Line:%d\n",
-         texttag, arg1,event,arg2, user_data, event->type, gtk_text_iter_get_line(arg2));
-
-  if (isButtonEvent(event->type)) {
-    GdkEventButton *evtButton = (GdkEventButton *) event;
-
-    printf("Button Event: button:%d  modifier:%d coords(%g,%g)\n",
-           evtButton->button, evtButton->state, evtButton->x,evtButton->y);
-    // If the right mouse button is pressed then suppress the GTK pop up menu.
-    if (evtButton->button == 3)
-      return TRUE;
-  }
-  return FALSE;
-}
-//------------------------------------------------------------------------
-
-static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescription,
-                                      const char *fontName  )
-{
-}
-#endif
-
 
 void SourceBrowserPreferences::toggleBreak(int line)
 {
@@ -608,14 +559,10 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     pages[id]->m_pBuffer->parseLine( "Label:  ADDWF  Variable,F  ; Comment",1);
 
     gtk_widget_show_all(frame);
-#if 1
+
     label = gtk_label_new("file2.asm");
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),emptyBox,label);
-
-#endif
-
-
 
   }
 
@@ -714,11 +661,6 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
 
   delete m_SourceBrowser;
 }
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-#endif //if defined(NEW_SOURCE_BROWSER)
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -905,7 +847,7 @@ UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
   if(!menu)
     menu = gtk_menu_new();
 
-  gtk_combo_box_append_text (GTK_COMBO_BOX(parent), label);
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(parent), label);
 
   menu_index = seq_no;
   seq_no++;
@@ -1143,7 +1085,7 @@ void TimeFormatter::AddToMenu(GtkWidget *menu,
                      G_CALLBACK(cbTimeFormatActivated),
                      this);
   gtk_widget_show(item);
-  gtk_menu_append(GTK_MENU(menu),item);
+  gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
 }
 
 void TimeWidget::Create(GtkWidget *container)
@@ -1155,10 +1097,6 @@ void TimeWidget::Create(GtkWidget *container)
   SetEntryWidth(18);
 
   menu = gtk_menu_new();
-  GtkWidget *item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), item);
-  gtk_widget_show (item);
-
 
   // Create an entry for each item in the formatter pop up window.
 
@@ -1293,8 +1231,8 @@ public:
 MainWindow TheWindow;
 
 MainWindow::MainWindow()
+  : timeW(0)
 {
-  timeW=0;
 }
 
 void MainWindow::Update()
@@ -1437,7 +1375,7 @@ void MainWindow::Create ()
   //
   cout << "SimulationMode:"<<SimulationMode<<endl;
 
-  update_rate_menu = gtk_combo_box_new_text();
+  update_rate_menu = gtk_combo_box_text_new();
   gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
 
   new UpdateRateMenuItem(update_rate_menu,'5',"Without gui (fastest simulation)",0);

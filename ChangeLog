@@ -1,3 +1,18 @@
+2015-02-28 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_src.h gui_src_asm.cc
+	: Correct usage of signal "switch-page"
+	* gui/gui_watch.cc gui/gui_watch.h
+	: Replaced GList with std::vector<>
+	* modules/usart.cc modules/usart.h
+	: Removed definition of GTK_ENABLE_BROKEN
+	* gui/gui_statusbar.cc gui/gui_statusbar.h gui/gui.h
+	: Removed commented out dead code and code tidy up
+	* gui/gui_processor.cc gui_processor.h gui_menu.cc
+	: Remove conditional on NEW_SOURCE_BROWSER and code tidy.
+	* gui/breadboard.cc
+	: Made two globals variables local and used C++ style allocations not C
+	  Convert two GList to a std::vector<>
+
 2015-02-23 Roy Rankin <rrankin@ihug.com.au>
 	* src/tmr0.cc src/16bit-registers.cc
 	: Bug 194 - P18 processor TMR0 may ignore TMR0H 
