@@ -44,7 +44,7 @@ class Watch_Window : public  GUI_Object
 {
  public:
 
-  GList *watches;
+  std::vector<WatchEntry *> watches;
 
   int current_row;
   int current_column;

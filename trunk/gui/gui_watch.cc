@@ -157,10 +157,15 @@ void ColumnData::SetValidity(bool newValid)
 
 void Watch_Window::ClearWatch(WatchEntry *entry)
 {
-  gtk_clist_remove(GTK_CLIST(watch_clist),current_row);
-  watches=g_list_remove(watches,entry);
+  gtk_clist_remove(GTK_CLIST(watch_clist), current_row);
+
+  std::vector<WatchEntry *>::iterator iter =
+    std::find(watches.begin(), watches.end(), entry);
+  if (iter != watches.end()) {
+    watches.erase(iter);
+  }
   entry->Clear_xref();
-  free(entry);
+  delete entry;
 }
 
 void Watch_Window::UpdateMenus(void)
@@ -201,12 +206,12 @@ void Watch_Window::WriteSymbolList()
   // delete previous list
   DeleteSymbolList();
   // write the current list
-  WatchEntry *entry;
-  guint uSize = g_list_length(watches);
+
+  guint uSize = watches.size();
   char cwv[100];
-  for (guint i = 0; i<uSize; i++) {
-    snprintf(cwv, sizeof(cwv), "WV%d",i);
-    entry = (WatchEntry*) g_list_nth_data(watches, i);
+  for (guint i = 0; i < uSize; i++) {
+    g_snprintf(cwv, sizeof(cwv), "WV%d",i);
+    WatchEntry *entry = watches[i];
     if (entry && entry->pRegister)
       config_set_string(name(), cwv, entry->pRegister->name().c_str());
   }
@@ -608,20 +613,15 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 
 void Watch_Window::Update()
 {
-  GList *iter;
-  WatchEntry *entry;
   int clist_frozen=0;
 
-  iter=watches;
-
-  while(iter) {
-
-    entry=(WatchEntry*)iter->data;
+  std::vector<WatchEntry *>::iterator iter = watches.begin();
+  for ( ; iter != watches.end(); ++iter) {
+    WatchEntry *entry = *iter;
     if (entry)
       UpdateWatch(entry);
-
-    iter=iter->next;
   }
+
   if(clist_frozen)
     gtk_clist_thaw(GTK_CLIST(watch_clist));
 }
@@ -693,7 +693,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
 
   gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
 
-  watches = g_list_append(watches, (gpointer)watch_entry);
+  watches.push_back(watch_entry);
 
   UpdateWatch(watch_entry);
 
@@ -744,24 +744,17 @@ void Watch_Window::NewProcessor(GUI_Processor *_gp)
 
 void Watch_Window::ClearWatches(void)
 {
-  GList *iter;
-  WatchEntry *entry;
-  int row;
+  std::vector<WatchEntry *>::iterator iter = watches.begin();
+  for ( ; iter != watches.end(); ++iter) {
+    WatchEntry *entry = *iter;
+    int row = gtk_clist_find_row_from_data(GTK_CLIST(watch_clist), entry);
+    gtk_clist_remove(GTK_CLIST(watch_clist), row);
 
-  iter=watches;
-
-  while(iter) {
-
-    entry=(WatchEntry*)iter->data;
-    row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
-    gtk_clist_remove(GTK_CLIST(watch_clist),row);
     entry->Clear_xref();
-    free(entry);
-    iter=iter->next;
+    delete entry;
   }
 
-  while( (watches=g_list_remove_link(watches,watches))!=0)
-    ;
+  watches.clear();
 }
 
 //------------------------------------------------------------------------
@@ -855,6 +848,7 @@ const char *Watch_Window::name()
 }
 
 Watch_Window::Watch_Window(GUI_Processor *_gp)
+  : current_row(0)
 {
   unsigned int i;
 
@@ -865,10 +859,6 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
 
   wc = WC_data;
   wt = WT_watch_window;
-  window = 0;
-
-  watches=0;
-  current_row=0;
 
   gp = _gp;
 

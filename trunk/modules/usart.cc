@@ -46,7 +46,6 @@ License along with this library; if not, see
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
-#define GTK_ENABLE_BROKEN
 #include <gtk/gtk.h>
 #endif
 

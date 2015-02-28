@@ -128,11 +128,8 @@ public:
   virtual void Update()=0;
   virtual void Create(bool isEditable=true);
   void SetEntryWidth(int string_width);
-  void AssignParent(GUI_Object *);
 
-  GUI_Object *parent;
   GtkWidget *entry;
-
 };
 
 //========================================================================
@@ -145,15 +142,15 @@ class LabeledEntry : public EntryWidget {
 public:
   GtkWidget *label;
 
-  LabeledEntry(void);
+  LabeledEntry();
 
   virtual ~LabeledEntry()
   {
   }
 
-  void Create(GtkWidget *box,char *clabel, int string_width, bool isEditable);
-  void NewLabel(char *clabel);
-  virtual void Update(void);
+  void Create(GtkWidget *box, const char *clabel, int string_width, bool isEditable);
+  void NewLabel(const char *clabel);
+  virtual void Update();
   virtual void put_value(unsigned int);
 
 };
@@ -162,15 +159,15 @@ class RegisterLabeledEntry : public LabeledEntry {
 public:
 
   Register *reg;
-  char *pCellFormat;
+  char pCellFormat[10];
 
   RegisterLabeledEntry(GtkWidget *,Register *,bool);
 
-	virtual ~RegisterLabeledEntry(){}
+  virtual ~RegisterLabeledEntry(){}
 
   virtual void put_value(unsigned int);
   void AssignRegister(Register *new_reg);
-  virtual void Update(void);
+  virtual void Update();
 
 };
 

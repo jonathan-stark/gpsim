@@ -1222,12 +1222,10 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
   return 0;
 }
 //------------------------------------------------------------------------
-gint SourceWindow::cb_notebook_switchpage (GtkNotebook     *notebook,
-                                    GtkNotebookPage *page,
-                                    guint            page_num,
-                                    SourceWindow     *pSW)
+void SourceWindow::cb_notebook_switchpage(GtkNotebook *notebook,
+  gpointer page, guint page_num, SourceWindow *pSW)
 {
-  return pSW->switch_page_cb(page_num);
+  pSW->switch_page_cb(page_num);
 }
 
 gint SourceWindow::switch_page_cb(guint newPage)
@@ -3069,15 +3067,11 @@ void SourceBrowserAsm_Window::remove_all_points(
   sbaw->notify_stop_list.Remove();
 }
 
-gint SourceBrowserAsm_Window::switch_page_cb(
-                            GtkNotebook     *notebook,
-                            GtkNotebookPage *page,
-                            guint            page_num,
-                            SourceBrowserAsm_Window *sbaw)
+void SourceBrowserAsm_Window::switch_page_cb(GtkNotebook *notebook,
+  gpointer page, guint page_num, SourceBrowserAsm_Window *sbaw)
 {
   if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
-    return 1;
-
+    return;
 
   if(sbaw->current_page!=page_num) {
 
@@ -3102,7 +3096,6 @@ gint SourceBrowserAsm_Window::switch_page_cb(
     for(unsigned int uPMIndex=0; uPMIndex < uPMMaxIndex; uPMIndex++)
       sbaw->UpdateLine(sbaw->gp->cpu->map_pm_index2address(uPMIndex));
   }
-  return 1;
 }
 
 /*

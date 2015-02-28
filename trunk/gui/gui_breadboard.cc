@@ -713,7 +713,6 @@ static void draw_nodes(Breadboard_Window *bbw)
 static void update_board_matrix(Breadboard_Window *bbw)
 {
     int x,y, width, height;
-    GList *mi;
     int i;
 
     // Clear first.
@@ -737,10 +736,10 @@ static void update_board_matrix(Breadboard_Window *bbw)
 
 
     // Loop all modules, and put its package and pins to board_matrix
-    mi = bbw->modules;
-    while(mi!=0) {
+    std::vector<GuiModule *>::iterator mi = bbw->modules.begin();
+    for ( ; mi != bbw->modules.end(); ++mi) {
 
-      GuiModule *p = static_cast<GuiModule*>(mi->data);
+      GuiModule *p = *mi;
 
       if(p && p->IsBuilt()) {
         x=p->x();
@@ -801,7 +800,6 @@ static void update_board_matrix(Breadboard_Window *bbw)
             }
         }
       }
-      mi=mi->next;
     }
 
     clear_nodes(bbw);
@@ -847,13 +845,8 @@ static void add_path_to_matrix(path *pat)
 
 static GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin);
 
-#define MAX_PATHS 32
-
-static path *shortest_path[100][100];//[MAX_PATHS]=0;
+static path *shortest_path[100][100];
 static int pathlen[100][100];
-
-static int *permutations;
-static int *shortest_permutation;
 
 #include <algorithm>
 
@@ -985,12 +978,14 @@ static void path_copy_and_cat(path **pat, path **source)
  */
 static void trace_node(struct gui_node *gn)
 {
-    Breadboard_Window *bbw;
-    stimulus *stimulus;
-    GList *pinlist=0;
-    int nr_of_nodes=0;
-    int i,j;
-    int didnt_work=0;
+  Breadboard_Window *bbw;
+  stimulus *stimulus;
+  GList *pinlist=0;
+  int nr_of_nodes=0;
+  int i,j;
+  int didnt_work=0;
+  int *permutations;
+  int *shortest_permutation;
 
     point start={-1,-1},end;
 
@@ -1016,8 +1011,8 @@ static void trace_node(struct gui_node *gn)
     // Allocate an array of shortest_paths, indexed with 2x glist position.
 //FIXME   shortest_path = (path***) malloc(nr_of_nodes*nr_of_nodes*sizeof(path*));
 
-    permutations = (int*)malloc(sizeof(int)*nr_of_nodes);
-    shortest_permutation = (int*)malloc(sizeof(int)*nr_of_nodes);
+    permutations = new int[nr_of_nodes];
+    shortest_permutation = new int[nr_of_nodes];
     for(i=0;i<nr_of_nodes;i++)
         permutations[i]=i;
 
@@ -1068,8 +1063,8 @@ static void trace_node(struct gui_node *gn)
         for(i=0;i<nr_of_nodes;i++)
             for(j=i+1;j<nr_of_nodes;j++)
                 clear_path(&shortest_path[i][j]);
-        free(permutations);
-        free(shortest_permutation);
+        delete[] permutations;
+        delete[] shortest_permutation;
         g_list_free(pinlist);
         return;
     }
@@ -1115,8 +1110,8 @@ static void trace_node(struct gui_node *gn)
     for(i=0;i<nr_of_nodes;i++)
         for(j=i+1;j<nr_of_nodes;j++)
             clear_path(&shortest_path[i][j]);
-    free(permutations);
-    free(shortest_permutation);
+    delete[] permutations;
+    delete[] shortest_permutation;
 
         if(nodepath!=0)
         {
@@ -1132,15 +1127,12 @@ static void trace_node(struct gui_node *gn)
 
 GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 {
+  std::vector<GuiModule *>::iterator iter = bbw->modules.begin();
 
-  GList *iter = bbw->modules;
+  for ( ; iter != bbw->modules.end(); ++iter) {
+    GuiModule *m = *iter;
 
-  while(iter) {
-
-    GuiModule *m = static_cast<GuiModule *>(iter->data);
-
-    int i;
-    for(i=1;i<=m->module()->get_pin_count();i++) {
+    for (int i = 1; i <= m->module()->get_pin_count(); ++i) {
 
       stimulus *p;
 
@@ -1155,17 +1147,10 @@ GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
           return static_cast<GuiPin*>(e->data);
         }
     }
-
-    iter = iter->next;
   }
 
   return 0;
 }
-
-
-
-
-
 
 
 static gboolean expose_pin(GtkWidget *widget,
@@ -1558,22 +1543,19 @@ double GuiModule::Distance(int px, int py)
 
 static GuiModule *find_closest_module(Breadboard_Window *bbw, int x, int y)
 {
-  GuiModule *closest=0;
-  double min_distance=1000000;
+  GuiModule *closest = 0;
+  double min_distance = 1000000;
 
-  GList *mi = bbw->modules;
+  std::vector<GuiModule *>::iterator mi = bbw->modules.begin();
 
-  while(mi) {
+  for ( ; mi != bbw->modules.end(); ++mi) {
 
-    GuiModule *p = static_cast<GuiModule *>(mi->data);
-
+    GuiModule *p = *mi;
     double distance = p->Distance(x,y);
-    if(distance<min_distance) {
+    if (distance < min_distance) {
       closest = p;
       min_distance = distance;
     }
-
-    mi=mi->next;
   }
 
   return closest;
@@ -1931,7 +1913,7 @@ static std::string select_module_dialog(Breadboard_Window *bbw)
     // Add all modules
     for (mi = ModuleLibrary::GetFileList().begin();
          mi != itFileListEnd;
-         mi++)
+         ++mi)
     {
 
       ModuleLibrary::File *t = *mi;
@@ -2177,7 +2159,10 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     gtk_tree_store_remove ((GtkTreeStore*) model, &iter);
     
     // Remove from local list of modules
-    bbw->modules=g_list_remove(bbw->modules, bbw->selected_module);
+    std::vector<GuiModule *>::iterator mi =
+      std::find(bbw->modules.begin(), bbw->modules.end(), bbw->selected_module);
+    if (mi != bbw->modules.end())
+      bbw->modules.erase(mi);
 
     gtk_widget_hide(bbw->module_frame);
 
@@ -2276,7 +2261,6 @@ static void OneAttribute(const SymbolEntry_t &sym)
 //////////////////////////////////////////////////////////////////
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
-    GList *module_iterator;
     Module *m;
 
     char *filename = gui_get_filename("netlist.stc");
@@ -2315,7 +2299,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
           // Add all modules
     for (mi = ModuleLibrary::GetFileList().begin();
               mi != ModuleLibrary::GetFileList().end();
-              mi++)
+              ++mi)
     {
 
       ModuleLibrary::File *t = *mi;
@@ -2337,12 +2321,10 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
     // Save modules
     fprintf(fo, "\n\n# Modules:\n");
-    module_iterator = bbw->modules;
-    while(module_iterator!=0)
+    std::vector<GuiModule *>::iterator module_iterator = bbw->modules.begin();
+    for ( ; module_iterator != bbw->modules.end(); ++module_iterator)
     {
-      GuiModule *p;
-
-      p = static_cast<GuiModule*>( module_iterator->data);
+      GuiModule *p = *module_iterator;
 
       m = p->module();
 
@@ -2368,15 +2350,15 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       mod_name = m->name().c_str();
       st->ForEachSymbolTable(OneAttribute);
       fprintf(fo, "\n");
-      module_iterator=module_iterator->next;
     }
 
     // Save nodes and connections
     fprintf(fo, "\n\n# Connections:\n");
 
-    for(GList *list = bbw->nodes; list; list = g_list_next(list))
+    std::vector<Stimulus_Node *>::iterator list = bbw->nodes.begin();
+    for ( ; list != bbw->nodes.end(); ++list)
     {
-        Stimulus_Node *node = static_cast<Stimulus_Node *>(list->data);
+        Stimulus_Node *node = *list;
         stimulus *stimulus;
 
         fprintf(fo, "node %s\n",node->name().c_str());
@@ -2819,7 +2801,10 @@ void GuiModule::Update()
   gtk_widget_destroy(m_name_widget);
 
   // Remove module from list
-  m_bbw->modules=g_list_remove(m_bbw->modules, this);
+  std::vector<GuiModule *>::iterator iter =
+    std::find(m_bbw->modules.begin(), m_bbw->modules.end(), this);
+  if (iter != m_bbw->modules.end())
+    m_bbw->modules.erase(iter);
 
   // rebuild module
   Build();
@@ -3322,7 +3307,7 @@ GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   pinnameWidths[3] = 0;
 
   if(m_bbw) {
-    m_bbw->modules=g_list_append(m_bbw->modules, this);
+    m_bbw->modules.push_back(this);
 
     if (m_module) {
       Value *xpos = dynamic_cast<Value*> (m_module->findSymbol("xpos"));
@@ -3371,7 +3356,6 @@ void GuiDipModule::DrawCaseOutline(GtkWidget *da)
 //========================================================================
 void Breadboard_Window::Update(void)
 {
-  GList *iter;
   int x,y;
 
   // loop all modules and look for changes
@@ -3382,10 +3366,10 @@ void Breadboard_Window::Update(void)
   if(!gtk_widget_get_visible(window))
     return;
 
-  iter=modules;
-  while(iter!=0) {
+  std::vector<GuiModule *>::iterator iter = modules.begin();
+  for ( ; iter != modules.end(); ++iter) {
 
-    GuiModule *p = static_cast<GuiModule *>(iter->data);
+    GuiModule *p = *iter;
 
     if(p->IsBuilt()) {
 
@@ -3412,9 +3396,7 @@ void Breadboard_Window::Update(void)
         Update();
 
     }
-    iter = iter->next;
   }
-
 }
 
 static int delete_event(GtkWidget *widget,
@@ -3496,9 +3478,8 @@ void Breadboard_Window::NewModule(Module *module)
 /* When a stimulus is being connected or disconnected, or a new node is created */
 void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 {
-
-  if(!g_list_find(nodes, node))
-        nodes = g_list_append(nodes, node);
+  if (std::find(nodes.begin(), nodes.end(), node) == nodes.end())
+    nodes.push_back(node);
 
   if (!node_iter)
     return;
@@ -3980,8 +3961,9 @@ void Breadboard_Window::Build(void)
   node_iter = &iter;
 
   // Handle nodes added before breadboard GUI enabled
-  for(GList *list = nodes; list; list = g_list_next(list))
-        NodeConfigurationChanged(static_cast<Stimulus_Node *>(list->data));
+  std::vector<Stimulus_Node *>::iterator list = nodes.begin();
+  for ( ; list != nodes.end(); ++list)
+        NodeConfigurationChanged(*list);
 
   bIsBuilt = true;
 
@@ -4025,7 +4007,7 @@ const char *Breadboard_Window::name()
 
 Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   : pinstatefont(0), pinnamefont(0), pinname_gc(0), pinline_gc(0),
-    case_gc(0), modules(0), nodes(0), node_clist(0),
+    case_gc(0), node_clist(0),
     stimulus_settings_label(0), stimulus_add_node_button(0),
     layout_pixmap(0), hadj(0), vadj(0), node_iter(0),
     selected_pin(0), selected_node(0), selected_module(0)

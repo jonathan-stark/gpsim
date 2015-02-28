@@ -295,8 +295,8 @@ private:
   static int DeleteEventHandler(GtkWidget *widget,
                 GdkEvent  *event,
                 SourceWindow *sw);
-  static gint cb_notebook_switchpage (GtkNotebook     *notebook,
-                                    GtkNotebookPage *page,
+  static void cb_notebook_switchpage(GtkNotebook    *notebook,
+                                    gpointer         page,
                                     guint            page_num,
                                     SourceWindow     *pSW);
 
@@ -521,8 +521,8 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GtkWidget *     BuildPopupMenu(GtkWidget *sheet,
                                  SourceBrowserAsm_Window *sbaw);
   static void     PopupMenuHandler(GtkWidget *widget, gpointer data);
-  static gint switch_page_cb(GtkNotebook     *notebook,
-                           GtkNotebookPage *page,
+  static void switch_page_cb(GtkNotebook     *notebook,
+                           gpointer         page,
                            guint            page_num,
                            SourceBrowserAsm_Window *sbaw);
   static void remove_all_points(SourceBrowserAsm_Window *sbaw);
