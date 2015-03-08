@@ -43,14 +43,20 @@ class Profile_Window : public GUI_Object
 
   int program;    // if non-zero window has program
 
-  GtkCList *profile_clist;
-  GtkCList *profile_range_clist;
-  GtkCList *profile_register_clist;
-  GtkCList *profile_exestats_clist;
-  GList *profile_list;
-  GList *profile_range_list;
-  GList *profile_register_list;
-  GList *profile_exestats_list;
+  GtkListStore *profile_list;
+  GtkWidget *profile_tree;
+
+  GtkListStore *profile_range_list;
+  GtkWidget *profile_range_tree;
+
+  GtkListStore *profile_register_list;
+  GtkWidget *profile_register_tree;
+
+  GtkListStore *profile_exestats_list;
+  GtkWidget *profile_exestats_tree;
+
+//  GList *profile_range_list;
+
   GtkWidget *notebook;
   gint range_current_row;
   GtkWidget *exestats_popup_menu;

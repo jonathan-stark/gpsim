@@ -22,14 +22,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SRC_H__
 #define __GUI_SRC_H__
 
-
 // forward references
-class SourceBrowserAsm_Window;
 class SourceBrowserParent_Window;
 class StatusBar_Window;
 class Value;
-class SourceBrowserParent_Window;
-
 class SourceWindow;
 
 enum eSourceFileType {
@@ -252,13 +248,6 @@ public:
   GtkStyle *comment_text_style;      // for comments in .asm display
   GtkStyle *default_text_style;      // the rest
 
-  GdkFont  *symbol_font;             // for symbols in .asm display
-  GdkFont  *label_font;              // for label in .asm display
-  GdkFont  *instruction_font;        // for instruction in .asm display
-  GdkFont  *number_font;             // for numbers in .asm display
-  GdkFont  *comment_font;            // for comments in .asm display
-  GdkFont  *default_font;            // the rest
-
   // do we need this:
   bool m_bLoadSource;
   bool m_bSourceLoaded;
@@ -322,12 +311,6 @@ public:
   const char *name_pub() {return name();}
 };
 
-// #endif
-
-
-
-
-
 class SourceBrowser_Window : public GUI_Object {
  public:
   GtkWidget *vbox;               // for children to put widgets in
@@ -350,38 +333,6 @@ class SourceBrowser_Window : public GUI_Object {
   virtual void CloseSource(void){};
   virtual void NewSource(GUI_Processor *gp){};
 
-};
-
-
-class BreakPointInfo {
-public:
-  BreakPointInfo(int _address, int _line, int _index, int _pos);
-  BreakPointInfo(BreakPointInfo & Dup);
-  ~BreakPointInfo();
-  void Set(GtkWidget *, GdkPixmap *, GdkBitmap *);
-  void Clear(GtkWidget *, GdkPixmap *, GdkBitmap *);
-  void setBreakWidget(GtkWidget *);
-  void setCanBreakWidget(GtkWidget *);
-  int getLine() { return line; }
-  GtkWidget *getBreakWidget() { return break_widget;}
-  GtkWidget *getCanBreakWidget() { return canbreak_widget;}
-  int address;
-  int pos;
-  int index;           // gtktext index to start of line
-private:
-  unsigned int line;            // line number, first line eq. 0
-  GtkWidget *break_widget;      // breakpoint widget on this line.
-  GtkWidget *canbreak_widget;   // 'can break' widget on this line.
-
-};
-
-class BreakPointList {
-private:
-  std::list<BreakPointInfo *> iter;
-public:
-  BreakPointList();
-  void Remove(int);
-  void Add(int, GtkWidget *,GtkWidget *,int);
 };
 
 //
@@ -412,126 +363,6 @@ class SourcePage
   }
 
   void Close(void);
-};
-
-//
-// The Source Assembler Browser
-//
-class SourceBrowserAsm_Window :public  SourceBrowser_Window
-{
- public:
-
-  // Something to set a debugger condition on when I want
-  // to debug a specific source window.
-  static int      m_SourceWindowCount;
-  int             m_SourceWindowIndex;
-
-  BreakPointList  breakpoints;
-  BreakPointList  notify_start_list;
-  BreakPointList  notify_stop_list;
-
-  // Where the source is stored:
-
-  int add_page(SourceBrowserAsm_Window *sbaw, int file_id);
-  SourcePage SrcPages[SBAW_NRFILES];
-  static bool bGlobalInitialized;
-  static GList *s_global_sa_xlate_list[SBAW_NRFILES];
-  GList *sa_xlate_list[SBAW_NRFILES];
-  static gint sigh_button_event(
-    GtkWidget *widget,
-    GdkEventButton *event,
-    SourceBrowserAsm_Window *sbaw);
-
-  int layout_offset;
-
-
-  // Font strings
-  char commentfont_string[256];
-  char sourcefont_string[256];
-
-  GtkWidget *popup_menu;
-
-  BreakPointInfo *menu_data;  // used by menu callbacks
-
-  GdkBitmap *pc_mask;
-  GdkBitmap *bp_mask;
-  GdkBitmap *canbp_mask;
-  GdkBitmap *startp_mask;
-  GdkBitmap *stopp_mask;
-  GtkWidget *notebook;
-
-  GtkStyle *symbol_text_style;       // for symbols in .asm display
-  GtkStyle *label_text_style;        // for label in .asm display
-  GtkStyle *instruction_text_style;  // for instruction in .asm display
-  GtkStyle *number_text_style;       // for numbers in .asm display
-  GtkStyle *comment_text_style;      // for comments in .asm display
-  GtkStyle *default_text_style;      // the rest
-
-  GdkFont  *symbol_font;             // for symbols in .asm display
-  GdkFont  *label_font;              // for label in .asm display
-  GdkFont  *instruction_font;        // for instruction in .asm display
-  GdkFont  *number_font;             // for numbers in .asm display
-  GdkFont  *comment_font;            // for comments in .asm display
-  GdkFont  *default_font;            // the rest
-
-  GdkPixmap *pixmap_pc;
-  GdkPixmap *pixmap_break;
-  GdkPixmap *pixmap_canbreak;
-  GdkPixmap *pixmap_profile_start;
-  GdkPixmap *pixmap_profile_stop;
-
-  static int s_totallinesheight[SBAW_NRFILES];
-
-  int m_bSourceLoaded;
-
-  int m_bLoadSource;
-  unsigned int current_page;        //Shadows the notebook->current_page;
-
-  SourceBrowserParent_Window *parent;
-
-  SourceBrowserAsm_Window(GUI_Processor *gp,char* new_name);
-  virtual void SelectAddress(int address);
-  virtual void SelectAddress(Value *);
-  virtual void SetPC(int address);
-  virtual void CloseSource(void);
-  virtual void NewSource(GUI_Processor *gp);
-  virtual void Update(void);
-  virtual void UpdateLine(int address);
-  virtual void SetText(int id, int file_id, FileContext *fc);
-  void ParseSourceToFormattedText(
-    int id,
-    int &totallinesheight,
-    bool &instruction_done,
-    char *text_buffer,
-    int &cblock,
-    int &index,
-    int &line,
-    FileContext::Cache &FileCache,
-    Processor *cpu,
-    GtkWidget *pSourceWindow,
-    FileContext *fc,
-    int file_id  );
-
-  void DetermineBreakinfos(int id);
-  BreakPointInfo *getBPatLine(int id, unsigned int line);
-  BreakPointInfo *getBPatPixel(int id, int pixel);
-  BreakPointInfo *getBPatIndex(int id, int index);
-
-  // Popup Menu
-  GtkWidget *     BuildPopupMenu(GtkWidget *sheet,
-                                 SourceBrowserAsm_Window *sbaw);
-  static void     PopupMenuHandler(GtkWidget *widget, gpointer data);
-  static void switch_page_cb(GtkNotebook     *notebook,
-                           gpointer         page,
-                           guint            page_num,
-                           SourceBrowserAsm_Window *sbaw);
-  static void remove_all_points(SourceBrowserAsm_Window *sbaw);
-
-protected:
-  virtual const char *name();
-
-private:
-  std::string m_name;
 };
 
 //

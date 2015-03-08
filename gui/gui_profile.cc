@@ -19,10 +19,10 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+#include <cerrno>
 
 #include "../config.h"
 
@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <math.h>
 
-#include <assert.h>
+#include <cassert>
 
 #include "../src/sim_context.h"
 #include "../src/interface.h"
@@ -60,17 +60,43 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkplotps.h>
 #include <gtkextra/gtkplotprint.h>
 
-#define PROFILE_COLUMNS    3
-static const gchar *profile_titles[PROFILE_COLUMNS]={"Address", "Cycles","Instruction"};
+enum {
+  PROFILE_ADDRESS,
+  PROFILE_CYCLES,
+  PROFILE_INSTRUCTION,
+  PROFILE_DATA,
+  PROFILE_COLUMNS
+};
 
-#define PROFILE_RANGE_COLUMNS    3
-static const gchar *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Cycles"};
+enum {
+  PROFILE_RANGE_SADDRESS,
+  PROFILE_RANGE_EADDRESS,
+  PROFILE_RANGE_CYCLES,
+  PROFILE_RANGE_DATA,
+  PROFILE_RANGE_COLUMNS
+};
 
-#define PROFILE_REGISTER_COLUMNS    4
-static const gchar *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
+enum {
+  PROFILE_REGISTER_ADDRESS,
+  PROFILE_REGISTER_REGISTER,
+  PROFILE_REGISTER_READ,
+  PROFILE_REGISTER_WRITE,
+  PROFILE_REGISTER_DATA,
+  PROFILE_REGISTER_COLUMNS
+};
 
-#define PROFILE_EXESTATS_COLUMNS    9
-static const gchar *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
+enum {
+  PROFILE_EXESTATS_FADDRESS,
+  PROFILE_EXESTATS_TADDRESS,
+  PROFILE_EXESTATS_EXECUTIONS,
+  PROFILE_EXESTATS_MIN,
+  PROFILE_EXESTATS_MAX,
+  PROFILE_EXESTATS_MEDIAN,
+  PROFILE_EXESTATS_AVERAGE,
+  PROFILE_EXESTATS_STDDEV,
+  PROFILE_EXESTATS_TOTAL,
+  PROFILE_EXESTATS_COLUMNS
+};
 
 struct profile_entry {
     unsigned int address;
@@ -129,8 +155,6 @@ static menu_item exestats_menu_items[] = {
 
 extern int gui_message(const char *message);
 
-static GtkStyle *normal_style;
-
 int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpoints);
 int plot_routine_histogram(Profile_Window *pw);
 float calculate_stddev(GList *start, GList *stop, float average);
@@ -151,11 +175,15 @@ public:
 };
 
 //========================================================================
-static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
+static void remove_entry(Profile_Window *pw, GtkTreeIter *iter)
 {
-    gtk_clist_remove(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
-    pw->profile_range_list=g_list_remove(pw->profile_range_list,entry);
-    free(entry);
+  gpointer e;
+  gtk_tree_model_get(GTK_TREE_MODEL(pw->profile_range_list),
+    iter, PROFILE_RANGE_DATA, &e, -1);
+  struct profile_range_entry *entry = (struct profile_range_entry *) e;
+
+  gtk_list_store_remove(pw->profile_range_list, iter);
+  free(entry);
 }
 
 #if 0 // defined but not used
@@ -531,8 +559,6 @@ exestats_build_menu(Profile_Window *pw)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  unsigned int i;
-
 
   if(pw==0)
   {
@@ -544,11 +570,7 @@ exestats_build_menu(Profile_Window *pw)
 
   menu=gtk_menu_new();
 
-  item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), item);
-  gtk_widget_show (item);
-
-  for (i=0; i < (sizeof(exestats_menu_items)/sizeof(exestats_menu_items[0])) ; i++){
+  for (size_t i = 0; i < G_N_ELEMENTS(exestats_menu_items) ; ++i) {
       exestats_menu_items[i].item=item=gtk_menu_item_new_with_label(exestats_menu_items[i].name);
 
       g_signal_connect(item, "activate",
@@ -556,7 +578,7 @@ exestats_build_menu(Profile_Window *pw)
                          &exestats_menu_items[i]);
 
       gtk_widget_show(item);
-      gtk_menu_append(GTK_MENU(menu),item);
+      gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
   }
 
   return menu;
@@ -1454,74 +1476,40 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 static void update_menus(Profile_Window *pw)
 {
-    GtkWidget *item;
-    struct profile_entry *entry;
-    unsigned int i;
+  GtkTreeSelection *selection
+    = gtk_tree_view_get_selection(GTK_TREE_VIEW(pw->profile_range_tree));
+  gboolean selected = gtk_tree_selection_get_selected(selection, NULL, NULL);
 
-    for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
-        item=range_menu_items[i].item;
-//      if(range_menu_items[i].id!=MENU_ADD_GROUP)
-        {
-            if(pw)
-            {
-                entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
-                if(range_menu_items[i].id!=MENU_ADD_GROUP &&
-                   range_menu_items[i].id!=MENU_ADD_ALL_LABELS &&
-                   range_menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
-                   range_menu_items[i].id!=MENU_PLOT &&
-                   entry==0)
-                    gtk_widget_set_sensitive (item, FALSE);
-                else
-                    gtk_widget_set_sensitive (item, TRUE);
-            }
-            else
-            {
-                gtk_widget_set_sensitive (item, FALSE);
-            }
-        }
-    }
+  for (size_t i = 0; i < G_N_ELEMENTS(range_menu_items) ; ++i) {
+    GtkWidget *item = range_menu_items[i].item;
+    if (range_menu_items[i].id != MENU_ADD_GROUP &&
+      range_menu_items[i].id != MENU_ADD_ALL_LABELS &&
+      range_menu_items[i].id != MENU_ADD_FUNCTION_LABELS &&
+      range_menu_items[i].id != MENU_PLOT && !selected)
+       gtk_widget_set_sensitive (item, FALSE);
+    else
+       gtk_widget_set_sensitive (item, TRUE);
+  }
 }
 
-static gint
+static gboolean
 key_press(GtkWidget *widget,
           GdkEventKey *key,
           gpointer data)
 {
+  Profile_Window *pw = static_cast<Profile_Window *>(data);
 
-  struct profile_range_entry *entry;
-  Profile_Window *pw = (Profile_Window *) data;
+  GtkTreeIter iter;
+  GtkTreeSelection *selection
+    = gtk_tree_view_get_selection(GTK_TREE_VIEW(pw->profile_range_tree));
 
-  if(!pw) return(FALSE);
-  if(!pw->gp) return(FALSE);
-  if(!pw->gp->cpu) return(FALSE);
-
-  switch(key->keyval) {
-
-  case GDK_Delete:
-      entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
-      if(entry!=0)
-          remove_entry(pw,(struct profile_entry *)entry);
-      break;
+  if (gtk_tree_selection_get_selected(selection, NULL, &iter)) {
+    if (key->keyval == GDK_KEY_Delete) {
+      remove_entry(pw, &iter);
+    }
   }
+
   return TRUE;
-}
-
-static gint profile_range_list_row_selected(GtkCList *profilelist,gint row, gint column,GdkEvent *event, Profile_Window *pw)
-{
-    struct profile_range_entry *entry;
-    //    int bit;
-
-    pw->range_current_row=row;
-//    pw->current_column=column;
-
-    entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_clist), row);
-
-    if(!entry)
-        return TRUE;
-
-    update_menus(pw);
-
-    return 0;
 }
 
 // called from do_popup
@@ -1530,8 +1518,6 @@ build_menu(Profile_Window *pw)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  unsigned int i;
-
 
   if(!pw)
   {
@@ -1541,21 +1527,17 @@ build_menu(Profile_Window *pw)
 
   popup_pw = pw;
 
-  menu=gtk_menu_new();
+  menu = gtk_menu_new();
 
-  item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), item);
-  gtk_widget_show (item);
+  for (size_t i = 0; i < G_N_ELEMENTS(range_menu_items) ; ++i) {
+    range_menu_items[i].item = item
+      = gtk_menu_item_new_with_label(range_menu_items[i].name);
 
-  for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
-      range_menu_items[i].item=item=gtk_menu_item_new_with_label(range_menu_items[i].name);
+    g_signal_connect(item, "activate", G_CALLBACK (popup_activated),
+      &range_menu_items[i]);
 
-      g_signal_connect(item, "activate",
-                         G_CALLBACK (popup_activated),
-                         &range_menu_items[i]);
-
-      gtk_widget_show(item);
-      gtk_menu_append(GTK_MENU(menu),item);
+    gtk_widget_show(item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
   }
 
   update_menus(pw);
@@ -1564,11 +1546,10 @@ build_menu(Profile_Window *pw)
 }
 
 // button press handler
-static gint
+static gboolean
 do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
 {
-
-    GtkWidget *popup;
+  GtkWidget *popup;
 
   if(widget==0 || event==0 || pw==0)
   {
@@ -1579,73 +1560,12 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
   popup=pw->range_popup_menu;
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
-
+      update_menus(pw);
       gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
                      3, event->time);
     }
     return FALSE;
 }
-
-/*
- the function comparing rows of profile list for sorting
- FIXME this can be improved. When we have equal cells in sort_column
- of the two rows, compare another column instead of returning 'match'.
- */
-static gint
-profile_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
-{
-    char *text1, *text2;
-    long val1, val2;
-    GtkCListRow *row1 = (GtkCListRow *) ptr1;
-    GtkCListRow *row2 = (GtkCListRow *) ptr2;
-//    char *p;
-
-    switch (row1->cell[clist->sort_column].type)
-    {
-    case GTK_CELL_TEXT:
-        text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
-        break;
-    case GTK_CELL_PIXTEXT:
-        text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
-        break;
-    default:
-        assert(0);
-        break;
-    }
-
-    switch (row2->cell[clist->sort_column].type)
-    {
-    case GTK_CELL_TEXT:
-        text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
-        break;
-    case GTK_CELL_PIXTEXT:
-        text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
-        break;
-    default:
-        assert(0);
-        break;
-    }
-
-    if (!text2)
-        assert(0);
-    //  return (text1 != 0);
-
-    if (!text1)
-        assert(0);
-    //  return -1;
-
-    if(1==sscanf(text1,"%li",&val1))
-    {
-        if(1==sscanf(text2,"%li",&val2))
-        {
-//          printf("Value %d %d\n",val1,val2);
-            return val1-val2;
-        }
-    }
-    return strcmp(text1,text2);
-}
-
-
 
 gint histogram_list_compare_func_cycles(gconstpointer a, gconstpointer b)
 {
@@ -1817,11 +1737,8 @@ float calculate_stddev(GList *start, GList *stop, float average)
 
 void Profile_Window::Update()
 {
-
   unsigned int i;
-
   char count_string[100];
-  GList *iter;
 
   if(!enabled)
     return;
@@ -1832,109 +1749,84 @@ void Profile_Window::Update()
   }
 
   // Update profile list
-  iter=profile_list;
-  while(iter)
-  {
-      struct profile_entry *entry;
+  GtkTreeIter titer;
+  if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(profile_list), &titer)) {
+    do {
+      gpointer e;
+      gtk_tree_model_get(GTK_TREE_MODEL(profile_list), &titer,
+        PROFILE_DATA, &e, -1);
+      struct profile_entry *entry = (struct profile_entry *) e;
+
       guint64 count;
-
-      entry=(struct profile_entry*)iter->data;
-
-      count=gp->cpu->cycles_used(gp->cpu->map_pm_address2index(entry->address));
-
-      if(entry->last_count!=count)
-      {
-        int row;
-
-        entry->last_count=count;
-        row=gtk_clist_find_row_from_data(GTK_CLIST(profile_clist),entry);
-        if(row==-1)
-        {
-          break;
-        }
-
-        sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count);
-        gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
+      count = gp->cpu->cycles_used(gp->cpu->map_pm_address2index(entry->address));
+      if (entry->last_count != count) {
+        entry->last_count = count;
+        g_snprintf(count_string, sizeof(count_string),
+          "0x%" PRINTF_GINT64_MODIFIER "x", count);
+        gtk_list_store_set(profile_list, &titer,
+          PROFILE_CYCLES, count_string, -1);
       }
-      iter=iter->next;
+    } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(profile_list), &titer));
   }
-  gtk_clist_sort(profile_clist);
-
 
   // Update range list
-  iter=profile_range_list;
 
-  while(iter)
-  {
-      struct profile_range_entry *range_entry;
-      guint64 count;
-      range_entry=(struct profile_range_entry*)iter->data;
+  if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(profile_range_list), &titer)) {
+    do {
+      gpointer e;
+      gtk_tree_model_get(GTK_TREE_MODEL(profile_range_list), &titer,
+        PROFILE_RANGE_DATA, &e, -1);
+      struct profile_range_entry *range_entry
+        = (struct profile_range_entry *) e;
 
-      count=0;
-      for(i=range_entry->startaddress;i<range_entry->endaddress;i++)
-      {
-        count+=gp->cpu->cycles_used(i);
+      guint64 count = 0;
+      for (i = range_entry->startaddress; i < range_entry->endaddress; ++i) {
+        count += gp->cpu->cycles_used(i);
       }
-
-      if(range_entry->last_count!=count)
-      {
-          int row;
-
-          range_entry->last_count=count;
-          row=gtk_clist_find_row_from_data(GTK_CLIST(profile_range_clist),range_entry);
-          if(row==-1)
-          {
-              break;
-          }
-
-          sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count);
-          gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
+      if (range_entry->last_count != count) {
+        range_entry->last_count = count;
+        sprintf(count_string, "0x%" PRINTF_GINT64_MODIFIER "x", count);
+        gtk_list_store_set(profile_range_list, &titer,
+          PROFILE_RANGE_CYCLES, count_string, -1);
       }
-      iter=iter->next;
+    } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(profile_range_list), &titer));
   }
-  gtk_clist_sort(profile_range_clist);
 
   // Update register list
-  iter=profile_register_list;
 
-  while(iter)
-  {
-      struct profile_register_entry *register_entry;
-      guint64 count_read, count_write;
-
-      register_entry=(struct profile_register_entry*)iter->data;
+  if (gtk_tree_model_get_iter_first(GTK_TREE_MODEL(profile_register_list), &titer)) {
+    do {
+      gpointer e;
+      gtk_tree_model_get(GTK_TREE_MODEL(profile_register_list), &titer,
+        PROFILE_REGISTER_DATA, &e, -1);
+      struct profile_register_entry *register_entry
+        = (struct profile_register_entry *) e;
 
       Register *reg = gp->cpu->rma.get_register(register_entry->address);
-      count_read  = reg->read_access_count;
-      count_write = reg->write_access_count;
+      guint64 count_read  = reg->read_access_count;
+      guint64 count_write = reg->write_access_count;
 
-      if(register_entry->last_count_read!=count_read||
-         register_entry->last_count_write!=count_write)
-      {
-          int row;
+      if (register_entry->last_count_read != count_read ||
+        register_entry->last_count_write != count_write) {
 
-          register_entry->last_count_read=count_read;
-          register_entry->last_count_write=count_write;
-          row=gtk_clist_find_row_from_data(GTK_CLIST(profile_register_clist),register_entry);
-          if(row==-1)
-          {
-              break;
-          }
+        register_entry->last_count_read = count_read;
+        register_entry->last_count_write = count_write;
 
-          sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count_read);
-          gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,2,count_string);
-          sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",count_write);
-          gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,3,count_string);
+        sprintf(count_string, "0x%" PRINTF_GINT64_MODIFIER "x", count_read);
+        gtk_list_store_set(profile_register_list, &titer,
+          PROFILE_REGISTER_READ, count_string, -1);
+        sprintf(count_string, "0x%" PRINTF_GINT64_MODIFIER "x", count_write);
+        gtk_list_store_set(profile_register_list, &titer,
+          PROFILE_REGISTER_WRITE, count_string, -1);
       }
-      iter=iter->next;
+    } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(profile_register_list), &titer));
   }
 
   // Update cummulative statistics list
   histogram_profile_list = g_list_sort(histogram_profile_list,
                                            histogram_list_compare_func);
-  // Remove all of clist (for now)
-  gtk_clist_freeze(GTK_CLIST(profile_exestats_clist));
-  gtk_clist_clear(GTK_CLIST(profile_exestats_clist));
+  // Remove all of list (for now)
+  gtk_list_store_clear(profile_exestats_list);
   if(histogram_profile_list!=0)
   {
       struct cycle_histogram_counter *chc;
@@ -1945,26 +1837,11 @@ void Profile_Window::Update()
       GList *list_start=0, *list_end=0;
         char fromaddress_string[100]="";
         char toaddress_string[100]="";
-        char executions_string[100]="";
-        char min_string[100]="";
-        char max_string[100]="";
         char median_string[100]="";
         char average_string[100]="";
         char stddev_string[100]="";
-        char total_string[100]="";
-        char *entry[PROFILE_EXESTATS_COLUMNS]={
-            fromaddress_string,
-            toaddress_string,
-            executions_string,
-            min_string,
-            max_string,
-            median_string,
-            average_string,
-            stddev_string,
-            total_string
-        };
 
-        iter=histogram_profile_list;
+        GList *iter=histogram_profile_list;
         list_start = iter;
       while(iter!=0)
       {
@@ -1990,14 +1867,22 @@ void Profile_Window::Update()
                   // We have data, display it.
                   sprintf(fromaddress_string,"0x%04x",start);
                   sprintf(toaddress_string,"0x%04x",stop);
-                  sprintf(executions_string,"%d",count_sum);
-                  sprintf(min_string,"%ld",(long)min);
-                  sprintf(max_string,"%ld",(long)max);
                   sprintf(median_string,"%.1f", calculate_median(list_start,list_end));
                   sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
                   sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
-                  sprintf(total_string,"%d",(int)cycles_sum);
-                  gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
+                  GtkTreeIter titer;
+                  gtk_list_store_append(profile_exestats_list, &titer);
+                  gtk_list_store_set(profile_exestats_list, &titer,
+                    PROFILE_EXESTATS_FADDRESS, fromaddress_string,
+                    PROFILE_EXESTATS_TADDRESS, toaddress_string,
+                    PROFILE_EXESTATS_EXECUTIONS, count_sum,
+                    PROFILE_EXESTATS_MIN, min,
+                    PROFILE_EXESTATS_MAX, max,
+                    PROFILE_EXESTATS_MEDIAN, median_string,
+                    PROFILE_EXESTATS_AVERAGE, average_string,
+                    PROFILE_EXESTATS_STDDEV, stddev_string,
+                    PROFILE_EXESTATS_TOTAL, cycles_sum,
+                    -1);
               }
 
               // Start new calculation
@@ -2017,17 +1902,24 @@ void Profile_Window::Update()
 
       sprintf(fromaddress_string,"0x%04x",start);
       sprintf(toaddress_string,"0x%04x",stop);
-      sprintf(executions_string,"%d",count_sum);
-      sprintf(min_string,"%ld",(long)min);
-      sprintf(max_string,"%ld",(long)max);
       sprintf(median_string,"%.1f", calculate_median(list_start,list_end));
       sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
       sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
-      sprintf(total_string,"%d",(int)cycles_sum);
-      gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
-  }
-  gtk_clist_thaw(GTK_CLIST(profile_exestats_clist));
 
+      GtkTreeIter titer;
+      gtk_list_store_append(profile_exestats_list, &titer);
+      gtk_list_store_set(profile_exestats_list, &titer,
+        PROFILE_EXESTATS_FADDRESS, fromaddress_string,
+        PROFILE_EXESTATS_TADDRESS, toaddress_string,
+        PROFILE_EXESTATS_EXECUTIONS, count_sum,
+        PROFILE_EXESTATS_MIN, min,
+        PROFILE_EXESTATS_MAX, max,
+        PROFILE_EXESTATS_MEDIAN, median_string,
+        PROFILE_EXESTATS_AVERAGE, average_string,
+        PROFILE_EXESTATS_STDDEV, stddev_string,
+        PROFILE_EXESTATS_TOTAL, cycles_sum,
+        -1);
+  }
 }
 
 #define END_OF_TIME 0xFFFFFFFFFFFFFFFFULL
@@ -2208,7 +2100,6 @@ void Profile_Window::StopExe(int address)
 
 void Profile_Window::NewProgram(GUI_Processor *_gp)
 {
-  int row;
   unsigned int uPMIndex;
 
   if(!_gp)
@@ -2227,55 +2118,42 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
   profile_keeper.enable_profiling();
 
   // Instruction clist
-  gtk_clist_freeze(profile_clist);
   Processor *pProcessor = gp->cpu;
   ProgramMemoryAccess *pPMA = pProcessor->pma;
-  for(uPMIndex=0; uPMIndex < pProcessor->program_memory_size(); uPMIndex++) {
+  for (uPMIndex = 0; uPMIndex < pProcessor->program_memory_size(); uPMIndex++) {
 
-    struct profile_entry *profile_entry;
-    char address_string[100];
-    char instruction_string[100];
-    char count_string[100];
-    char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
     guint64 cycles;
     instruction * pInstruction = pProcessor->pma->getFromIndex(uPMIndex);
     unsigned int uAddress = pProcessor->map_pm_index2address(uPMIndex);
     if(pPMA->hasValid_opcode_at_index(uPMIndex)) {
+      struct profile_entry *profile_entry;
+      char address_string[100];
+      char count_string[100];
 
-      sprintf(address_string, "0x%04x",uAddress);
-      strcpy(instruction_string, pInstruction->name().c_str());
+      sprintf(address_string, "0x%04x", uAddress);
 
-      cycles=pProcessor->cycles_used(uPMIndex);
-      sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x",cycles);
-
-      row=gtk_clist_append(GTK_CLIST(profile_clist), entry);
+      cycles = pProcessor->cycles_used(uPMIndex);
+      sprintf(count_string,"0x%" PRINTF_GINT64_MODIFIER "x", cycles);
 
       // FIXME this memory is never freed?
-      profile_entry = (struct profile_entry*)malloc(sizeof(struct profile_entry));
-      profile_entry->address=uAddress;
-      profile_entry->last_count=cycles;
+      profile_entry = new struct profile_entry;
+      profile_entry->address = uAddress;
+      profile_entry->last_count = cycles;
 
-      gtk_clist_set_row_data(GTK_CLIST(profile_clist), row, (gpointer)profile_entry);
+      GtkTreeIter iter;
+      gtk_list_store_append(profile_list, &iter);
 
-      profile_list = g_list_append(profile_list, (gpointer)profile_entry);
+      gtk_list_store_set(profile_list, &iter,
+        PROFILE_ADDRESS, address_string,
+        PROFILE_CYCLES, count_string,
+        PROFILE_INSTRUCTION, pInstruction->name().c_str(),
+        PROFILE_DATA, profile_entry,
+        -1);
     }
   }
-  gtk_clist_thaw(profile_clist);
 
-  // Register clist
-  gtk_clist_freeze(profile_register_clist);
-  for(unsigned int i=0; i < pProcessor->rma.get_size(); i++) {
-
-    struct profile_register_entry *profile_register_entry;
-    char address_string[100];
-    char count_string_read[100];
-    char count_string_write[100];
-    char register_string[100];
-    char *entry_register[PROFILE_REGISTER_COLUMNS]={address_string,register_string,count_string_read,count_string_write};
-    guint64 read_cycles;
-    guint64 write_cycles;
-    char *name;
-
+  // Register list
+  for(unsigned int i = 0; i < pProcessor->rma.get_size(); i++) {
     Register *reg = pProcessor->rma.get_register(i);
 
     //
@@ -2287,33 +2165,35 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
           &&
        !((reg->isa() == Register::SFR_REGISTER) || (i != reg->address)) ) {
 
-        sprintf(address_string,"0x%04x",i);
-        name = (char*)reg->name().c_str();
-        if(name==0)
-          name = address_string;
-        strcpy(register_string, name);
+        struct profile_register_entry *profile_register_entry;
+        char address_string[100];
+        char count_string_read[100];
+        char count_string_write[100];
+        sprintf(address_string, "0x%04x", i);
 
-        read_cycles=reg->read_access_count;
-        sprintf(count_string_read,"0x%" PRINTF_GINT64_MODIFIER "x",read_cycles);
+        guint64 read_cycles = reg->read_access_count;
+        sprintf(count_string_read, "0x%" PRINTF_GINT64_MODIFIER "x", read_cycles);
 
-        write_cycles=reg->write_access_count;
-        sprintf(count_string_write,"0x%" PRINTF_GINT64_MODIFIER "x",write_cycles);
-
-        row=gtk_clist_append(GTK_CLIST(profile_register_clist), entry_register);
+        guint64 write_cycles = reg->write_access_count;
+        sprintf(count_string_write, "0x%" PRINTF_GINT64_MODIFIER "x", write_cycles);
 
         // FIXME this memory is never freed?
-        profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
-        profile_register_entry->address=i;
+        profile_register_entry = new struct profile_register_entry;
+        profile_register_entry->address = i;
         profile_register_entry->last_count_read = read_cycles;
         profile_register_entry->last_count_write = write_cycles;
 
-        gtk_clist_set_row_data(GTK_CLIST(profile_register_clist), row, (gpointer)profile_register_entry);
+        GtkTreeIter iter;
+        gtk_list_store_append(profile_register_list, &iter);
 
-        profile_register_list = g_list_append(profile_register_list, (gpointer)profile_register_entry);
-      }
+        gtk_list_store_set(profile_register_list, &iter,
+          PROFILE_REGISTER_ADDRESS, address_string,
+          PROFILE_REGISTER_REGISTER, reg->name().c_str(),
+          PROFILE_REGISTER_READ, count_string_read,
+          PROFILE_REGISTER_WRITE, count_string_write,
+          PROFILE_REGISTER_DATA, profile_register_entry, -1);
+    }
   }
-  gtk_clist_thaw(profile_register_clist);
-
 }
 
 /*****************************************************************
@@ -2376,27 +2256,35 @@ void Profile_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (main_vbox), notebook, TRUE, TRUE, 0);
 
 
-  // Instruction profile clist
-  profile_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_COLUMNS, (gchar **)profile_titles));
+  GtkCellRenderer *renderer;
+  GtkTreeViewColumn *column;
 
+  // Instruction profile list
+  profile_list = gtk_list_store_new(PROFILE_COLUMNS,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(GTK_WIDGET(profile_clist), 
-	gtk_widget_get_style(GTK_WIDGET(profile_clist)));
+  profile_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(profile_list));
 
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),0,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),1,TRUE);
-//  gtk_clist_set_sort_column (pw->profile_clist,1);
-//  gtk_clist_set_sort_type (pw->profile_clist,GTK_SORT_DESCENDING);
-  gtk_clist_set_compare_func(GTK_CLIST(profile_clist),
-                             (GtkCListCompareFunc)profile_compare_func);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Address",
+    renderer, "text", PROFILE_ADDRESS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_tree), column);
 
-  scrolled_window=gtk_scrolled_window_new(0, 0);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Cycles",
+    renderer, "text", PROFILE_CYCLES, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_tree), column);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_clist));
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Instruction",
+    renderer, "text", PROFILE_INSTRUCTION, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_tree), column);
 
-  gtk_widget_show(GTK_WIDGET(profile_clist));
+  scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_tree);
+
+  gtk_widget_show(profile_tree);
 
   gtk_widget_show(scrolled_window);
 
@@ -2408,38 +2296,39 @@ void Profile_Window::Build(void)
 
 
   // Instruction range profile clist
-  profile_range_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,(gchar **)profile_range_titles));
+  profile_range_list = gtk_list_store_new(PROFILE_RANGE_COLUMNS,
+    	G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 
+  profile_range_tree
+    = gtk_tree_view_new_with_model(GTK_TREE_MODEL(profile_range_list));
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(GTK_WIDGET(profile_range_clist), 
-	gtk_widget_get_style(GTK_WIDGET(profile_range_clist)));
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Start address",
+    renderer, "text", PROFILE_RANGE_SADDRESS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_range_tree), column);
 
-  gtk_clist_set_column_auto_resize(profile_range_clist,0,TRUE);
-  gtk_clist_set_column_auto_resize(profile_range_clist,1,TRUE);
-  gtk_clist_set_sort_column (profile_range_clist,2);
-  gtk_clist_set_sort_type (profile_range_clist,GTK_SORT_DESCENDING);
-  gtk_clist_set_compare_func(GTK_CLIST(profile_range_clist),
-                             (GtkCListCompareFunc)profile_compare_func);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("End address",
+    renderer, "text", PROFILE_RANGE_EADDRESS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_range_tree), column);
 
-  range_popup_menu=build_menu(this);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Cycles",
+    renderer, "text", PROFILE_RANGE_CYCLES, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_range_tree), column);
 
-  g_signal_connect(profile_range_clist,
-                     "button_press_event",
-                     G_CALLBACK (do_popup),
-                     this);
-  g_signal_connect(profile_range_clist, "key_press_event",
-                     G_CALLBACK (key_press),
-                     (gpointer) this);
-  g_signal_connect(profile_range_clist, "select_row",
-                     G_CALLBACK (profile_range_list_row_selected), this);
+  range_popup_menu = build_menu(this);
 
-  scrolled_window=gtk_scrolled_window_new(0, 0);
+  g_signal_connect(profile_range_tree, "button_press_event",
+    G_CALLBACK (do_popup), this);
+  g_signal_connect(profile_range_tree, "key_press_event",
+    G_CALLBACK (key_press), this);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_range_clist));
+  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_widget_show(GTK_WIDGET(profile_range_clist));
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_range_tree);
+
+  gtk_widget_show(profile_range_tree);
 
   gtk_widget_show(scrolled_window);
 
@@ -2450,27 +2339,38 @@ void Profile_Window::Build(void)
 
 
   // Register profile clist
-  profile_register_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS, (gchar **)profile_register_titles));
+  profile_register_list = gtk_list_store_new(PROFILE_REGISTER_COLUMNS,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+    G_TYPE_POINTER);
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(GTK_WIDGET(profile_register_clist), 
-	gtk_widget_get_style(GTK_WIDGET(profile_register_clist)));
+  profile_register_tree
+    = gtk_tree_view_new_with_model(GTK_TREE_MODEL(profile_register_list));
 
-  gtk_clist_set_column_auto_resize(profile_register_clist,0,TRUE);
-  gtk_clist_set_column_auto_resize(profile_register_clist,1,TRUE);
-  gtk_clist_set_column_auto_resize(profile_register_clist,2,TRUE);
-  gtk_clist_set_column_auto_resize(profile_register_clist,3,TRUE);
-//  gtk_clist_set_sort_column (pw->profile_register_clist,1);
-//  gtk_clist_set_sort_type (pw->profile_register_clist,GTK_SORT_DESCENDING);
-  gtk_clist_set_compare_func(profile_register_clist,
-                             (GtkCListCompareFunc)profile_compare_func);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Address",
+    renderer, "text", PROFILE_REGISTER_ADDRESS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_register_tree), column);
 
-  scrolled_window=gtk_scrolled_window_new(0, 0);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Register",
+    renderer, "text", PROFILE_REGISTER_REGISTER, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_register_tree), column);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_register_clist));
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Read count",
+    renderer, "text", PROFILE_REGISTER_READ, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_register_tree), column);
 
-  gtk_widget_show(GTK_WIDGET(profile_register_clist));
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Write count",
+    renderer, "text", PROFILE_REGISTER_WRITE, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_register_tree), column);
+
+  scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_register_tree);
+
+  gtk_widget_show(profile_register_tree);
 
   gtk_widget_show(scrolled_window);
 
@@ -2478,39 +2378,69 @@ void Profile_Window::Build(void)
   label=gtk_label_new("Register profile");
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),scrolled_window,label);
 
-  ///////////////////////////////////////////////////
-
 
   // Execution time statistics tab
-  profile_exestats_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS, (gchar **)profile_exestats_titles));
+  profile_exestats_list = gtk_list_store_new(PROFILE_EXESTATS_COLUMNS,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_UINT64, G_TYPE_UINT64,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT64);
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(GTK_WIDGET(profile_exestats_clist), 
-	gtk_widget_get_style(GTK_WIDGET(profile_exestats_clist)));
+  profile_exestats_tree
+    = gtk_tree_view_new_with_model(GTK_TREE_MODEL(profile_exestats_list));
 
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("From address",
+    renderer, "text", PROFILE_EXESTATS_FADDRESS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
 
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,0,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,1,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,2,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,3,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,4,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,5,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,6,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,7,TRUE);
-  gtk_clist_set_column_auto_resize(profile_exestats_clist,8,TRUE);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("To address",
+    renderer, "text", PROFILE_EXESTATS_TADDRESS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
 
-  exestats_popup_menu=exestats_build_menu(this);
-  g_signal_connect(profile_exestats_clist,
-                     "button_press_event",
-                     G_CALLBACK (exestats_do_popup),
-                     this);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Executions",
+    renderer, "text", PROFILE_EXESTATS_EXECUTIONS, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
 
-  scrolled_window=gtk_scrolled_window_new(0, 0);
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Min",
+    renderer, "text", PROFILE_EXESTATS_MIN, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_exestats_clist));
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Max",
+    renderer, "text", PROFILE_EXESTATS_MAX, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
 
-  gtk_widget_show(GTK_WIDGET(profile_exestats_clist));
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Median",
+    renderer, "text", PROFILE_EXESTATS_MEDIAN, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
+
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Average",
+    renderer, "text", PROFILE_EXESTATS_AVERAGE, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
+
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Std. Dev.",
+    renderer, "text", PROFILE_EXESTATS_STDDEV, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
+
+  renderer = gtk_cell_renderer_text_new();
+  column = gtk_tree_view_column_new_with_attributes("Total",
+    renderer, "text", PROFILE_EXESTATS_TOTAL, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(profile_exestats_tree), column);
+
+  exestats_popup_menu = exestats_build_menu(this);
+  g_signal_connect(profile_exestats_tree, "button_press_event",
+    G_CALLBACK (exestats_do_popup), this);
+
+  scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_exestats_tree);
+
+  gtk_widget_show(profile_exestats_tree);
 
   gtk_widget_show(scrolled_window);
 
@@ -2519,11 +2449,9 @@ void Profile_Window::Build(void)
   ///////////////////////////////////////////////////
 
 
-  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
-
-  normal_style = gtk_style_new ();
+  gtk_window_set_default_size(GTK_WINDOW(window), width, height);
+  gtk_window_move(GTK_WINDOW(window), x, y);
+  gtk_window_set_wmclass(GTK_WINDOW(window), name(), "Gpsim");
 
   g_signal_connect_after(window, "configure_event",
                            G_CALLBACK (gui_object_configure_event),this);
@@ -2552,28 +2480,22 @@ const char *Profile_Window::name()
 }
 
 Profile_Window::Profile_Window(GUI_Processor *_gp)
+  : program(0)
 {
-
   menu = "/menu/Windows/Profile";
 
   gp = _gp;
-  window = 0;
+
   wc = WC_data;
   wt = WT_profile_window;
 
-  profile_list=0;
-  profile_range_list=0;
-  profile_register_list=0;
   histogram_profile_list=0;
   range_current_row = 0;
-
-  program=0;
 
   get_config();
 
   if(enabled)
       Build();
-
 }
 
 

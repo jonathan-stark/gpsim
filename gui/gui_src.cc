@@ -19,9 +19,9 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
 #include <typeinfo>
 
 #include "../config.h"
@@ -32,7 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
+#include <cstring>
 
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
@@ -41,7 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 #include "gui_src.h"
 
-#include <assert.h>
+#include <cassert>
 #include <map>
 
 
@@ -179,7 +179,7 @@ void SourceBrowser_Window::Create(void)
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   g_signal_connect (window, "delete_event",
@@ -273,14 +273,14 @@ void SourceBrowser_Window::SelectAddress(Value *addrSym)
 }
 
 
-gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go)
+gboolean gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go)
 {
   gtk_window_get_position(GTK_WINDOW(widget), &go->x, &go->y);
   gtk_window_get_size(GTK_WINDOW(widget), &go->width, &go->height);
 
   go->set_config();
 
-  return 0; // what should be returned?, FIXME
+  return FALSE;
 }
 
 #endif // HAVE_GUI

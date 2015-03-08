@@ -237,7 +237,7 @@ void Stack_Window::Build(void)
   gtk_window_set_title(GTK_WINDOW(window), "Stack Viewer");
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   g_signal_connect (window, "destroy",
@@ -288,7 +288,7 @@ void Stack_Window::Build(void)
 
   gtk_container_add(GTK_CONTAINER(window),vbox);
 
-  gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
+  gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, TRUE, TRUE, 0);
 
   gtk_widget_show_all (window);
 

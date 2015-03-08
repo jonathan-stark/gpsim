@@ -20,39 +20,14 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdio>
 
 #include "../config.h"
 
 #ifdef HAVE_GUI
 
-#include <unistd.h>
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
-#include <glib.h>
-#include <string.h>
-
-#include <gtkextra/gtkbordercombo.h>
-#include <gtkextra/gtkcolorcombo.h>
-#include <gtkextra/gtksheet.h>
-
 #include "gui.h"
-#include "gui_breadboard.h"
-#include "gui_processor.h"
-#include "gui_profile.h"
-#include "gui_register.h"
-#include "gui_regwin.h"
-#include "gui_scope.h"
 #include "gui_src.h"
-#include "gui_stack.h"
-#include "gui_stopwatch.h"
-#include "gui_symbols.h"
-#include "gui_trace.h"
-#include "gui_watch.h"
-#include "gui_statusbar.h"
 
 class linkXREF : public CrossReferenceToGUI
 {
@@ -89,9 +64,8 @@ public:
 
 void link_src_to_gpsim(GUI_Processor *gp)
 {
-  int i,*address,pm_size;
+  int i, *address, pm_size;
   linkXREF *cross_reference;
-
 
   if(gp) {
 
@@ -104,16 +78,14 @@ void link_src_to_gpsim(GUI_Processor *gp)
     }
 
     for(i=0; i < pm_size; i++) {
-
       cross_reference = new linkXREF();
-      //cross_reference->parent_window_type = WT_asm_source_window;
-      //cross_reference->parent_window = (gpointer) gp;
-      cross_reference-> gp = gp;
-      address = (int *) malloc(sizeof(int *));
+
+      cross_reference->gp = gp;
+      address = new int;
       *address = gp->cpu->map_pm_index2address(i);
 
       cross_reference->data = (gpointer) address;
-      gp->cpu->pma->assign_xref(*address,(gpointer) cross_reference);
+      gp->cpu->pma->assign_xref(*address, (gpointer) cross_reference);
     }
   }
 }
