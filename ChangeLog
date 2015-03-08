@@ -1,3 +1,15 @@
+2015-03-08 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_profile.cc gui/gui_profile.h
+	: Remove unused global style, replaced all GtkCList with
+	  GtkListStore/GtkTreeView and removed the need for some GLists
+	* gui/gui_src.h gui/gui_src_asm.cc
+	: Removed classes BreakPointInfo, BreakPointList,
+	  SourceBrowserAsm_Window which are not used and replaced other
+	  deprecated code.
+	* gui/gui.h gui/gui_break.cc gui/gui_regwin.cc gui/gui_src.cc
+	  gui/gui_stack.cc gui_symbols.cc
+	: Replaced deprecated GTK+ calls
+
 2015-02-28 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_src.h gui_src_asm.cc
 	: Correct usage of signal "switch-page"
