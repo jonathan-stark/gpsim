@@ -552,13 +552,12 @@ static char *gui_get_log_settings(int *mode)
 
   gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 
-  // FIXME: Should use GtkComboBoxText when we switch to v2.24
   GtkWidget *combo_text;
 
   if (mode) {
-    combo_text = gtk_combo_box_new_text();
-    gtk_combo_box_append_text(GTK_COMBO_BOX(combo_text), "ASCII");
-    gtk_combo_box_append_text(GTK_COMBO_BOX(combo_text), "LXT");
+    combo_text = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_text), "ASCII");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_text), "LXT");
     gtk_combo_box_set_active(GTK_COMBO_BOX(combo_text), 0);
 
     GtkWidget *hbox = gtk_hbox_new(FALSE, 12);
@@ -730,7 +729,7 @@ build_menu(Register_Window *rw)
         gtk_widget_set_sensitive(item, FALSE);
       }
       gtk_widget_show(item);
-      gtk_menu_append(GTK_MENU(menu),item);
+      gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
   }
 
   return menu;
@@ -903,14 +902,14 @@ void Register_Window::UpdateLabel()
 
     if(col > -1 && row > -1) {
       if(col >= REGISTERS_PER_ROW)
-        gtk_label_set(GTK_LABEL(location), "  ascii  ");
+        gtk_label_set_text(GTK_LABEL(location), "  ascii  ");
       else {
 
         GUIRegister *reg = getRegister(row,col);
 
         const char *n = reg ? reg->name() : "INVALID_REGISTER";
 
-        gtk_label_set(GTK_LABEL(location), n);
+        gtk_label_set_text(GTK_LABEL(location), n);
       }
     }
   }
@@ -1079,7 +1078,7 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
 
   if(key->state & GDK_CONTROL_MASK || key->keyval==GDK_Control_L ||
      key->keyval==GDK_Control_R){
-    if((key->keyval=='c' || key->keyval == 'C') && sheet->state != GTK_STATE_NORMAL){
+    if((key->keyval=='c' || key->keyval == 'C') && sheet->state != gint(GTK_STATE_NORMAL)){
 
       /*
         --- tsd - commented out because this function
@@ -1276,10 +1275,10 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
 
   if(reg && reg->bIsValid() )
     // enable editing valid cells
-    gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 1);
+    gtk_editable_set_editable(GTK_EDITABLE(gtk_sheet_get_entry(rw->register_sheet)), TRUE);
   else
     // disable editing invalid cells
-    gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
+    gtk_editable_set_editable(GTK_EDITABLE(gtk_sheet_get_entry(rw->register_sheet)), FALSE);
 
 
   rw->UpdateLabelEntry();
@@ -1379,7 +1378,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 
   rw->location=gtk_label_new("");
   gtk_widget_size_request(rw->location, &request);
-  gtk_widget_set_usize(rw->location, 160, request.height);
+  gtk_widget_set_size_request(rw->location, 160, request.height);
   gtk_box_pack_start(GTK_BOX(status_box), rw->location, FALSE, TRUE, 0);
   gtk_widget_set_can_default(rw->location, TRUE);
   gtk_widget_show(rw->location);
@@ -1880,7 +1879,7 @@ void Register_Window::Build()
   build_entry_bar(main_vbox,this);
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   /**************************** load fonts *********************************/

@@ -122,7 +122,7 @@ Symbol_Window::build_menu(GtkWidget *sheet)
 
   GtkWidget *menu = gtk_menu_new();
 
-  for (size_t i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+  for (size_t i=0; i < G_N_ELEMENTS(menu_items); ++i){
     GtkWidget *item = gtk_menu_item_new_with_label(menu_items[i].name);
     menu_items[i].item = item ;
 
@@ -131,7 +131,7 @@ Symbol_Window::build_menu(GtkWidget *sheet)
                          &menu_items[i]);
 
     gtk_widget_show(item);
-    gtk_menu_append(GTK_MENU(menu),item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu),item);
   }
 
   return menu;

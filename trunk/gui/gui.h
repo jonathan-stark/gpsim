@@ -257,7 +257,7 @@ int config_get_string(const char *module, const char *entry, char **string);
 int config_set_string(const char *module, const char *entry, const char *string);
 int config_remove(const char *module, const char *entry);
 
-gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
+gboolean gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 
 
 void ProfileWindow_notify_start_callback(Profile_Window *pw);
