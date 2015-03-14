@@ -1340,7 +1340,7 @@ void Scope_Window::Build()
   gtk_window_set_title(GTK_WINDOW(window), "Scope");
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
 
   g_signal_connect(window, "delete_event",
                      G_CALLBACK(delete_event), this);
@@ -1397,7 +1397,7 @@ void Scope_Window::Build()
   gint dawidth  = 400;
   gint daheight = 100;
 
-  gtk_widget_set_usize (waveDrawingArea,dawidth,daheight);
+  gtk_widget_set_size_request(waveDrawingArea, dawidth, daheight);
   gtk_widget_set_events (waveDrawingArea,
                          GDK_EXPOSURE_MASK |
                          GDK_BUTTON_PRESS_MASK |
@@ -1405,7 +1405,7 @@ void Scope_Window::Build()
                          GDK_KEY_RELEASE_MASK  );
 
   signalDrawingArea = gtk_layout_new (NULL, NULL);
-  gtk_widget_set_usize (signalDrawingArea,100,daheight);
+  gtk_widget_set_size_request(signalDrawingArea, 100, daheight);
   gtk_widget_set_events (signalDrawingArea,
                          GDK_EXPOSURE_MASK |
                          GDK_BUTTON_PRESS_MASK |
@@ -1422,7 +1422,7 @@ void Scope_Window::Build()
   m_pHpaned = gtk_hpaned_new ();
   gtk_widget_show (m_pHpaned);
 
-  gtk_box_pack_start_defaults (GTK_BOX (pvbox), m_pHpaned);
+  gtk_box_pack_start(GTK_BOX (pvbox), m_pHpaned, TRUE, TRUE, 0);
 
 
   m_hAdj = gtk_adjustment_new
@@ -1434,7 +1434,7 @@ void Scope_Window::Build()
      m_PixmapWidth/5.0); // page_size
 
   m_phScrollBar = gtk_hscrollbar_new(GTK_ADJUSTMENT(m_hAdj));
-  gtk_box_pack_start_defaults(GTK_BOX(pvbox),m_phScrollBar);
+  gtk_box_pack_start(GTK_BOX(pvbox), m_phScrollBar, TRUE, TRUE, 0);
   g_signal_connect(m_hAdj, "value-changed",
                      G_CALLBACK(hAdjVChange), this);
 

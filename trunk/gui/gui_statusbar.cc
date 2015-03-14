@@ -293,7 +293,6 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
     StatusBarXREF *cross_reference;
 
     cross_reference = new StatusBarXREF();
-    cross_reference->parent_window_type =   WT_status_bar;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) this;
   

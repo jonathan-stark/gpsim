@@ -182,7 +182,6 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
     return;
 
   cross_reference = new TraceXREF();
-  cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = 0;
   if(get_trace().xref)

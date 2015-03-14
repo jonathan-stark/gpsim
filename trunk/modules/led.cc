@@ -485,9 +485,7 @@ namespace Leds {
 
     darea = gtk_drawing_area_new ();
 
-    gtk_widget_set_usize (darea,
-                          100,
-                          110);
+    gtk_widget_set_size_request(darea, 100, 110);
     gtk_container_add (GTK_CONTAINER (vbox), darea);
 
     g_signal_connect (darea,
@@ -961,9 +959,7 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
     w_height=20;
     w_width=20;
 
-    gtk_widget_set_usize (darea,
-                          w_height,
-                          w_width);
+    gtk_widget_set_size_request(darea, w_height, w_width);
     g_signal_connect (darea,
                         "expose_event",
                         G_CALLBACK(led_expose_event),

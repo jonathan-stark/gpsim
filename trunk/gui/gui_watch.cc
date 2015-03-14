@@ -19,21 +19,17 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
-
-#include <assert.h>
+#include <cstring>
 
 #include "../src/interface.h"
 #include "../src/cmd_gpsim.h"
@@ -44,34 +40,32 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
-#define NAMECOL 0
-#define DECIMALCOL 2
-#define HEXCOL 3
-#define ASCIICOL 4
-#define BITCOL 5
-#define LASTCOL BITCOL
+enum {
+  NAMECOL,
+  ADDRESSCOL,
+  DECIMALCOL,
+  HEXCOL,
+  ASCIICOL,
+  BITCOL,
+  ENTRYCOL,
+  N_COLUMNS
+};
 
 static const gchar *watch_titles[]={"name","address","dec","hex","ascii","bits"};
 
 #define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
-class ColumnData
-{
+class ColumnData {
 public:
-  int column;
-  int isVisible;
-  bool bIsValid;
-  Watch_Window *ww;
-
+  ColumnData(GtkTreeViewColumn *_tc, int col, bool visible);
   void SetVisibility(bool bVisibility);
-  void SetValidity(bool );
-  bool isValid();
-  void Show();
-  ColumnData();
-} coldata[COLUMNS];
+  bool GetVisibility() { return isVisible;}
 
-static void select_columns(Watch_Window *ww, GtkWidget *clist);
-
+private:
+  GtkTreeViewColumn *tc;
+  int column;
+  bool isVisible;
+};
 
 typedef enum {
     MENU_REMOVE,
@@ -88,10 +82,9 @@ typedef enum {
 typedef struct _menu_item {
     const char *name;
     menu_id id;
-    GtkWidget *item;
 } menu_item;
 
-static menu_item menu_items[] = {
+static const menu_item menu_items[] = {
     {"Remove watch", MENU_REMOVE},
     {"Set value...", MENU_SET_VALUE},
     {"Clear breakpoints", MENU_BREAK_CLEAR},
@@ -102,86 +95,85 @@ static menu_item menu_items[] = {
     {"Columns...", MENU_COLUMNS},
 };
 
-// Used only in popup menus
-Watch_Window *popup_ww;
-
 //========================================================================
 
 class WatchWindowXREF : public CrossReferenceToGUI
 {
 public:
-
-  void Update(int new_value)
-  {
-
-    Watch_Window *ww  = (Watch_Window *) (parent_window);
-    if (ww)
-      ww->UpdateWatch((WatchEntry *)data);
-
-  }
+  virtual ~WatchWindowXREF();
+  void Update(int new_value);
 };
 
+WatchWindowXREF::~WatchWindowXREF()
+{
+  gtk_tree_row_reference_free(static_cast<GtkTreeRowReference *>(data));
+}
+
+void WatchWindowXREF::Update(int new_value)
+{
+  Watch_Window *ww  = static_cast<Watch_Window *>(parent_window);
+  if (ww) {
+    GtkTreePath *path
+      = gtk_tree_row_reference_get_path(static_cast<GtkTreeRowReference *>(data));
+    GtkTreeIter iter;
+    if (gtk_tree_model_get_iter(GTK_TREE_MODEL(ww->watch_list), &iter, path))
+      ww->UpdateWatch(&iter);
+  }
+}
+
 //========================================================================
-WatchEntry::WatchEntry()
-  : cpu(0)
+WatchEntry::WatchEntry(REGISTER_TYPE _type, Register *_pRegister)
+  : cpu(0), type(_type), pRegister(_pRegister)
 {
 }
-//========================================================================
-ColumnData::ColumnData()
-  : isVisible(1), bIsValid(true), ww(0)
+
+WatchEntry::~WatchEntry()
 {
+  Clear_xref();
+}
+
+//========================================================================
+ColumnData::ColumnData(GtkTreeViewColumn *_tc, int col, bool visible)
+  : tc(_tc), column(col), isVisible(visible)
+{
+  int show = isVisible;
+  gtk_tree_view_column_set_visible(tc, show);
 }
 
 void ColumnData::SetVisibility(bool bVisibility)
 {
-  isVisible = bVisibility ? 1 : 0;
-  Show();
+  isVisible = bVisibility;
+  int show = isVisible;
+  gtk_tree_view_column_set_visible(tc, show);
 }
-void ColumnData::Show()
-{
-  if (ww) {
-    int show = isVisible & (bIsValid ? 1 : 0);
-    gtk_clist_set_column_visibility(GTK_CLIST(ww->watch_clist),column,show);
-    config_set_variable(ww->name_pub(), (gchar *)watch_titles[column],show);
-  }
-}
-bool ColumnData::isValid()
-{
-  return bIsValid;
-}
-void ColumnData::SetValidity(bool newValid)
-{
-  bIsValid = newValid;
-}
+
 //========================================================================
 
-void Watch_Window::ClearWatch(WatchEntry *entry)
+void Watch_Window::ClearWatch(GtkTreeIter *iter)
 {
-  gtk_clist_remove(GTK_CLIST(watch_clist), current_row);
+  WatchEntry *entry;
 
-  std::vector<WatchEntry *>::iterator iter =
-    std::find(watches.begin(), watches.end(), entry);
-  if (iter != watches.end()) {
-    watches.erase(iter);
-  }
-  entry->Clear_xref();
+  gtk_tree_model_get(GTK_TREE_MODEL(watch_list), iter, ENTRYCOL, &entry, -1);
   delete entry;
+  gtk_list_store_remove(watch_list, iter);
 }
 
 void Watch_Window::UpdateMenus(void)
 {
-  GtkWidget *item;
+  GtkTreeSelection *sel =
+    gtk_tree_view_get_selection(GTK_TREE_VIEW(watch_tree));
+  GtkTreeIter iter;
+  gboolean selected = gtk_tree_selection_get_selected(sel, NULL, &iter);
   WatchEntry *entry;
+  if (selected) {
+    gtk_tree_model_get(GTK_TREE_MODEL(watch_list), &iter, ENTRYCOL, &entry, -1);
+  }
 
-  unsigned int i;
-
-  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++) {
-    item=menu_items[i].item;
-    if(menu_items[i].id!=MENU_COLUMNS) {
-
-      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(watch_clist),current_row);
+  for (size_t i = 0; i < G_N_ELEMENTS(menu_items); ++i) {
+    GtkWidget *item = popup_items[i];
+    if (menu_items[i].id != MENU_COLUMNS) {
       if(menu_items[i].id!=MENU_COLUMNS &&
-          (entry==0 ||
+          (!selected ||
           (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
           (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
           (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
@@ -201,28 +193,38 @@ int Watch_Window::set_config(void) {
   return iRet;
 }
 
+gboolean Watch_Window::do_symbol_write(GtkTreeModel *model, GtkTreePath *path,
+  GtkTreeIter *iter, gpointer data)
+{
+  Watch_Window *ww = static_cast<Watch_Window *>(data);
+  WatchEntry *entry;
+  gtk_tree_model_get(GTK_TREE_MODEL(ww->watch_list), iter, ENTRYCOL, &entry, -1);
+
+  if (entry && entry->pRegister) {
+    char cwv[100];
+    g_snprintf(cwv, sizeof(cwv), "WV%d", ww->count);
+    config_set_string(ww->name(), cwv, entry->pRegister->name().c_str());
+  }
+
+  ww->count += 1;
+
+  return FALSE;
+}
+
 void Watch_Window::WriteSymbolList()
 {
   // delete previous list
   DeleteSymbolList();
   // write the current list
-
-  guint uSize = watches.size();
-  char cwv[100];
-  for (guint i = 0; i < uSize; i++) {
-    g_snprintf(cwv, sizeof(cwv), "WV%d",i);
-    WatchEntry *entry = watches[i];
-    if (entry && entry->pRegister)
-      config_set_string(name(), cwv, entry->pRegister->name().c_str());
-  }
-
+  count = 0;
+  gtk_tree_model_foreach(GTK_TREE_MODEL(watch_list), do_symbol_write, this);
 }
 
-void Watch_Window::DeleteSymbolList() {
-  int i=0;
+void Watch_Window::DeleteSymbolList()
+{
   char cwv[100];
-  while (i<1000) {
-    snprintf(cwv, sizeof(cwv), "WV%d",i++);
+  for (int i = 0; i < 1000; ++i) {
+    g_snprintf(cwv, sizeof(cwv), "WV%d", i);
     if (config_remove(name(), cwv) == 0 ) {
       break;
     }
@@ -232,11 +234,10 @@ void Watch_Window::DeleteSymbolList() {
 void Watch_Window::ReadSymbolList()
 {
   // now read symbols watched from a prior simulation session
-  int i=0;
   char cwv[100];
   char *vname;
-  while (i<1000) {
-    snprintf(cwv, sizeof(cwv), "WV%d",i++);
+  for (int i = 0; i < 1000; ++i) {
+    g_snprintf(cwv, sizeof(cwv), "WV%d", i);
     vname = 0;
     if (config_get_string(name(), cwv, &vname) ) {
       Value *val = globalSymbolTable().findValue(vname);
@@ -248,46 +249,37 @@ void Watch_Window::ReadSymbolList()
   }
 }
 
-static void unselect_row(GtkCList *clist,
-                         gint row,
-                         gint column,
-                         GdkEvent *event,
-                         Watch_Window *ww)
-{
-  ww->UpdateMenus();
-}
-
 // called when user has selected a menu item
-static void
-popup_activated(GtkWidget *widget, gpointer data)
+void Watch_Window::popup_activated(GtkWidget *widget, gpointer data)
 {
-  menu_item *item;
-
-  WatchEntry *entry;
+  Watch_Window *ww = static_cast<Watch_Window *>(data);
+  WatchEntry *entry = NULL;
 
   int value;
 
-  if(widget==0 || data==0)
-    {
-      printf("Warning popup_activated(%p,%p)\n",widget,data);
-      return;
-    }
+  GtkTreeSelection *sel
+    = gtk_tree_view_get_selection(GTK_TREE_VIEW(ww->watch_tree));
+  GtkTreeIter iter;
+  gboolean selected = gtk_tree_selection_get_selected(sel, NULL, &iter);
 
-  item = (menu_item *)data;
+  if (selected) {
+    gtk_tree_model_get(GTK_TREE_MODEL(ww->watch_list), &iter, ENTRYCOL, &entry, -1);
+  }
 
-  entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
+  int id = GPOINTER_TO_SIZE(g_object_get_data(G_OBJECT(widget), "id"));
 
-  if(entry==0 && item->id!=MENU_COLUMNS)
+  if (id == MENU_COLUMNS) {
+    ww->select_columns();
+    return;
+  }
+
+  if (!entry || !entry->cpu)
     return;
 
-  if(!entry || !entry->cpu)
-    return;
-
-  switch(item->id)
+  switch(id)
     {
     case MENU_REMOVE:
-      popup_ww->ClearWatch(entry);
-      //remove_entry(popup_ww,entry);
+      ww->ClearWatch(&iter);
       break;
     case MENU_SET_VALUE:
       value = gui_get_value("value:");
@@ -316,28 +308,28 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_BREAK_CLEAR:
       get_bp().clear_all_register(entry->cpu,entry->address);
       break;
-    case MENU_COLUMNS:
-      select_columns(popup_ww, popup_ww->watch_clist);
-      break;
     default:
-      puts("Unhandled menuitem?");
       break;
     }
 }
 
 //------------------------------------------------------------
 // call back function to toggle column visibility in the configuration popup
-static void set_column(GtkCheckButton *button, ColumnData *coldata)
+void Watch_Window::set_column(GtkCheckButton *button, Watch_Window *ww)
 {
-  if (coldata)
-    coldata->SetVisibility(gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)) != 0);
+  int id = GPOINTER_TO_SIZE(g_object_get_data(G_OBJECT(button), "id"));
+  gboolean vis = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button));
+
+  ww->coldata[id].SetVisibility(vis != 0);
+
+  config_set_variable(ww->name(), watch_titles[id], vis);
 }
 
-static void select_columns(Watch_Window *ww, GtkWidget *clist)
+void Watch_Window::select_columns()
 {
   GtkWidget *dialog;
 
-  dialog = gtk_dialog_new_with_buttons("", NULL,
+  dialog = gtk_dialog_new_with_buttons("", GTK_WINDOW(window),
     GTK_DIALOG_MODAL,
     "_Close", GTK_RESPONSE_CLOSE,
     NULL);
@@ -347,13 +339,12 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
   gtk_container_set_border_width(GTK_CONTAINER(dialog), 30);
 
   for (size_t i = 0; i < COLUMNS; ++i) {
-    if (coldata[i].isValid()) {
-      GtkWidget *button = gtk_check_button_new_with_label((gchar *)watch_titles[i]);
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), coldata[i].isVisible);
-      gtk_box_pack_start(GTK_BOX(area), button, FALSE, FALSE, 0);
-      g_signal_connect(button, "clicked",
-                         G_CALLBACK(set_column), (gpointer)&coldata[i]);
-    }
+    GtkWidget *button = gtk_check_button_new_with_label((gchar *)watch_titles[i]);
+    g_object_set_data(G_OBJECT(button), "id", GSIZE_TO_POINTER(i));
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),
+      coldata[i].GetVisibility());
+    gtk_box_pack_start(GTK_BOX(area), button, FALSE, FALSE, 0);
+    g_signal_connect(button, "clicked", G_CALLBACK(set_column), this);
   }
 
   gtk_widget_show_all(dialog);
@@ -362,86 +353,37 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 }
 
 // helper function, called from do_popup
-static GtkWidget *
-build_menu(GtkWidget *sheet, Watch_Window *ww)
+void Watch_Window::build_menu()
 {
-  GtkWidget *menu;
-  GtkWidget *item;
-  unsigned int i;
+  GtkWidget *menu = gtk_menu_new();
+  popup_menu = menu;
 
+  popup_items.reserve(G_N_ELEMENTS(menu_items));
+  for (size_t i = 0; i < G_N_ELEMENTS(menu_items); ++i) {
+    GtkWidget *item = gtk_menu_item_new_with_label(menu_items[i].name);
+    popup_items.push_back(item);
+    g_object_set_data(G_OBJECT(item), "id", GSIZE_TO_POINTER(i));
 
-  if(sheet==0 || ww==0)
-  {
-      printf("Warning build_menu(%p,%p)\n",sheet,ww);
-      return 0;
+    g_signal_connect(item, "activate", G_CALLBACK(popup_activated), this);
+    gtk_widget_show(item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
   }
 
-  popup_ww = ww;
-
-  menu=gtk_menu_new();
-
-  item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), item);
-  gtk_widget_show (item);
-
-  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-      menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
-
-      g_signal_connect(item, "activate",
-                         G_CALLBACK(popup_activated),
-                         &menu_items[i]);
-      gtk_widget_show(item);
-      gtk_menu_append(GTK_MENU(menu),item);
-  }
-
-  ww->UpdateMenus();
-
-  return menu;
+  UpdateMenus();
 }
 
 // button press handler
-static gint
-do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
+gboolean Watch_Window::do_popup(GtkWidget *widget, GdkEventButton *event,
+  Watch_Window *ww)
 {
+  GtkWidget *popup = ww->popup_menu;
 
-  GtkWidget *popup;
+  if  ((event->type == GDK_BUTTON_PRESS) &&  (event->button == 3)) {
+    gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0, 3, event->time);
+    return TRUE;
+  }
 
-  if(widget==0 || event==0 || ww==0)
-    {
-      printf("Warning do_popup(%p,%p,%p)\n",widget,event,ww);
-      return 0;
-    }
-
-  popup=ww->popup_menu;
-
-  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
-    gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-                   3, event->time);
-
-  /*
-  WatchEntry *entry;
-
-  if(event->type==GDK_2BUTTON_PRESS &&
-     event->button==1)
-    {
-      int column=ww->current_column;
-      int row=ww->current_row;
-
-      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
-
-      if(column>=MSBCOL && column<=LSBCOL) {
-
-        int value;  // , bit;
-        printf("column %d\n",column);
-        // Toggle the bit.
-        value = entry->get_value();
-
-        value ^= (1<< (15-(column-MSBCOL)));
-        entry->put_value(value);
-      }
-    }
-  */
-  return 0;
+  return FALSE;
 }
 
 static gint
@@ -449,76 +391,41 @@ key_press(GtkWidget *widget,
           GdkEventKey *key,
           gpointer data)
 {
+  Watch_Window *ww = static_cast<Watch_Window *>(data);
 
-  WatchEntry *entry;
-  Watch_Window *ww = (Watch_Window *) data;
-
-  if(!ww) return(FALSE);
-  if(!ww->gp) return(FALSE);
-  if(!ww->gp->cpu) return(FALSE);
+  if (!ww || !ww->gp || !ww->gp->cpu) return FALSE;
 
   switch(key->keyval) {
 
-  case GDK_Delete:
-      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
-      if(entry!=0)
-          ww->ClearWatch(entry);
-      break;
+  case GDK_KEY_Delete:
+    GtkTreeSelection *sel
+      = gtk_tree_view_get_selection(GTK_TREE_VIEW(ww->watch_tree));
+    GtkTreeIter iter;
+    if (gtk_tree_selection_get_selected(sel, NULL, &iter))
+      ww->ClearWatch(&iter);
+    break;
   }
   return TRUE;
 }
 
-static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,GdkEvent *event, Watch_Window *ww)
+void Watch_Window::watch_list_row_selected(GtkTreeSelection *sel, Watch_Window *ww)
 {
   WatchEntry *entry;
-  GUI_Processor *gp;
+  GUI_Processor *gp = ww->gp;
 
-  ww->current_row=row;
-  ww->current_column=column;
+  GtkTreeIter iter;
 
-  gp=ww->gp;
+  if (!gtk_tree_selection_get_selected(sel, NULL, &iter))
+    return;
 
-  entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
+  gtk_tree_model_get(GTK_TREE_MODEL(ww->watch_list), &iter, ENTRYCOL, &entry, -1);
 
-  if(!entry)
-    return TRUE;
-
-  if(entry->type==REGISTER_RAM)
+  if (entry->type == REGISTER_RAM)
     gp->regwin_ram->SelectRegister(entry->address);
-  else if(entry->type==REGISTER_EEPROM)
+  else if (entry->type == REGISTER_EEPROM)
     gp->regwin_eeprom->SelectRegister(entry->address);
 
-
   ww->UpdateMenus();
-
-  return 0;
-}
-
-static void watch_click_column(GtkCList *clist, int column)
-{
-    static int last_col=-1;
-    static GtkSortType last_sort_type=GTK_SORT_DESCENDING;
-
-    if(last_col==-1)
-        last_col=column;
-
-    if(last_col == column)
-    {
-        if(last_sort_type==GTK_SORT_DESCENDING)
-        {
-            gtk_clist_set_sort_type(clist,GTK_SORT_ASCENDING);
-            last_sort_type=GTK_SORT_ASCENDING;
-        }
-        else
-        {
-            gtk_clist_set_sort_type(clist,GTK_SORT_DESCENDING);
-            last_sort_type=GTK_SORT_DESCENDING;
-        }
-    }
-
-    gtk_clist_set_sort_column(clist,column);
-    gtk_clist_sort(clist);
-    last_col=column;
 }
 
 static int delete_event(GtkWidget *widget,
@@ -539,24 +446,18 @@ static int delete_event(GtkWidget *widget,
 // If the value has changed, then each of the value fields are refreshed.
 // Then the foreground and background are refreshed.
 
-void Watch_Window::UpdateWatch(WatchEntry *entry)
+void Watch_Window::UpdateWatch(GtkTreeIter *iter)
 {
-  int row;
-  row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
-  if(row==-1)
-    return;
+  WatchEntry *entry;
+  gtk_tree_model_get(GTK_TREE_MODEL(watch_list), iter, ENTRYCOL, &entry, -1);
 
   RegisterValue rvNewValue = entry->getRV();
-
 
   // If the value has not changed, then simply update the foreground and background
   // colors and return.
 
   if (entry->get_shadow() == rvNewValue) {
-    gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.normal_fg());
-    gtk_clist_set_background(GTK_CLIST(watch_clist),
-                             row,
-                             (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
+    // Disable colour change for now
     return;
   }
 
@@ -574,36 +475,33 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
     uBitmask = entry->cpu->register_mask();
   }
 
-  char str[80];
+  char str[80] = "?";
 
-  if(rvNewValue.init & uBitmask) {
-    strcpy(str, "?");
-  }
-  else
-    sprintf(str,"%d", rvNewValue.data);
-
-  gtk_clist_set_text(GTK_CLIST(watch_clist), row, DECIMALCOL, str);
+  if (!(rvNewValue.init & uBitmask))
+    g_snprintf(str, sizeof(str), "%d", rvNewValue.data);
 
   // Hexadecimal representation:
-  rvMaskedNewValue.toString(str, 80);
-  gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
+  char hStr[80];
+  rvMaskedNewValue.toString(hStr, 80);
 
   // ASCII representation
-  str[0] = ( rvNewValue.data>0x20 && rvNewValue.data<0x7F ) ? rvNewValue.data : 0;
-  str[1] = 0;
-  gtk_clist_set_text(GTK_CLIST(watch_clist), row, ASCIICOL, str);
+  char aStr[2];
+  aStr[0] = ( rvNewValue.data>0x20 && rvNewValue.data<0x7F ) ? rvNewValue.data : 0;
+  aStr[1] = 0;
 
   // Bit representation
   char sBits[25];
-  rvNewValue.toBitStr(sBits, 25, entry->cpu->register_mask(),
-                               NULL);
-  gtk_clist_set_text(GTK_CLIST(watch_clist), row, BITCOL, sBits);
+  rvNewValue.toBitStr(sBits, 25, entry->cpu->register_mask(), NULL);
+
+  gtk_list_store_set(watch_list, iter,
+    DECIMALCOL, str,
+    HEXCOL, hStr,
+    ASCIICOL, aStr,
+    BITCOL, sBits,
+    -1);
 
   // Set foreground and background colors
-  gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.item_has_changed());
-  gtk_clist_set_background(GTK_CLIST(watch_clist), row,
-                           (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
-
+  // Diable colour change for now
 }
 
 //------------------------------------------------------------------------
@@ -611,102 +509,67 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 //
 //
 
+static gboolean do_an_update(GtkTreeModel *model, GtkTreePath *path,
+  GtkTreeIter *iter, gpointer data)
+{
+  Watch_Window *ww = static_cast<Watch_Window *>(data);
+  ww->UpdateWatch(iter);
+
+  return FALSE;
+}
+
 void Watch_Window::Update()
 {
-  int clist_frozen=0;
-
-  std::vector<WatchEntry *>::iterator iter = watches.begin();
-  for ( ; iter != watches.end(); ++iter) {
-    WatchEntry *entry = *iter;
-    if (entry)
-      UpdateWatch(entry);
-  }
-
-  if(clist_frozen)
-    gtk_clist_thaw(GTK_CLIST(watch_clist));
+  gtk_tree_model_foreach(GTK_TREE_MODEL(watch_list),
+     do_an_update, this);
 }
-//------------------------------------------------------------------------
-/*
-void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
+
+void Watch_Window::Add(REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
 {
-  if(!gp || !gp->cpu || !reg || !reg->bIsValid())
-    return;
-  Register *cpu_reg = reg->get_register();
-  register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(
-    cpu_reg->address);
-  Add(type, reg, pRegSym);
-}
-*/
-
-void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
-{
-  char vname[50], addressstring[50], empty[] = "";
-  char *entry[COLUMNS]={vname, addressstring, empty, empty, empty, empty};
-  int row;
-  WatchWindowXREF *cross_reference;
-
-  WatchEntry *watch_entry;
-
   if(!gp || !gp->cpu || !reg || !reg->bIsValid())
     return;
 
   if(!enabled)
     Build();
 
-
   pReg = pReg ? pReg : reg->get_register();
   if (!pReg)
     return;
-  strncpy(vname,pReg?pReg->name().c_str():"NULLREG",sizeof(vname));
-
-  /*
-  if(pRegSym == 0) {
-    cpu_reg = reg->get_register();
-    strncpy(vname,cpu_reg->name().c_str(),sizeof(vname));
-  }
-  else {
-    cpu_reg = pRegSym->getReg();
-    strncpy(vname,pRegSym->name().c_str(),sizeof(vname));
-  }
-  */
 
   unsigned int uAddrMask = 0;
   unsigned int uLastAddr = gp->cpu->register_memory_size() - 1;
-  while(uLastAddr) {
+  while (uLastAddr) {
     uLastAddr>>=4;
     uAddrMask<<=4;
     uAddrMask |= 0xf;
   }
-  strcpy(addressstring,
-         GetUserInterface().FormatProgramAddress(pReg->getAddress(),
-                                                 uAddrMask, IUserInterface::eHex));
 
-  gtk_clist_freeze(GTK_CLIST(watch_clist));
-  row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
-
-  watch_entry = new WatchEntry();
+  WatchEntry *watch_entry = new WatchEntry(type, pReg);
   watch_entry->address=reg->address;
-  watch_entry->pRegister = pReg;
   watch_entry->cpu = gp->cpu;
-  watch_entry->type=type;
   watch_entry->rma = reg->rma;
 
-  gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
+  GtkTreeIter iter;
+  gtk_list_store_append(watch_list, &iter);
+  gtk_list_store_set(watch_list, &iter,
+    NAMECOL, pReg ? pReg->name().c_str() : "NULLREG",
+    ADDRESSCOL, GetUserInterface().FormatProgramAddress(pReg->getAddress(),
+      uAddrMask, IUserInterface::eHex),
+    ENTRYCOL, gpointer(watch_entry),
+    -1);
 
-  watches.push_back(watch_entry);
+  UpdateWatch(&iter);
 
-  UpdateWatch(watch_entry);
-
-  cross_reference = new WatchWindowXREF();
-  cross_reference->parent_window_type = WT_watch_window;
+  GtkTreePath *path = gtk_tree_model_get_path(GTK_TREE_MODEL(watch_list), &iter);
+  WatchWindowXREF *cross_reference = new WatchWindowXREF();
   cross_reference->parent_window = (gpointer) this;
-  cross_reference->data = (gpointer) watch_entry;
+  cross_reference->data =
+    (gpointer) gtk_tree_row_reference_new(GTK_TREE_MODEL(watch_list), path);
+  gtk_tree_path_free(path);
 
   watch_entry->Assign_xref(cross_reference);
-  gtk_clist_thaw(GTK_CLIST(watch_clist));
 
   UpdateMenus();
-
 }
 
 //---
@@ -737,25 +600,6 @@ void Watch_Window::NewProcessor(GUI_Processor *_gp)
 
   ReadSymbolList();
 }
-//------------------------------------------------------------------------
-// ClearWatches
-//
-//
-
-void Watch_Window::ClearWatches(void)
-{
-  std::vector<WatchEntry *>::iterator iter = watches.begin();
-  for ( ; iter != watches.end(); ++iter) {
-    WatchEntry *entry = *iter;
-    int row = gtk_clist_find_row_from_data(GTK_CLIST(watch_clist), entry);
-    gtk_clist_remove(GTK_CLIST(watch_clist), row);
-
-    entry->Clear_xref();
-    delete entry;
-  }
-
-  watches.clear();
-}
 
 //------------------------------------------------------------------------
 // Build
@@ -770,14 +614,12 @@ void Watch_Window::Build(void)
   GtkWidget *vbox;
   GtkWidget *scrolled_window;
 
-  int i;
-
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   gtk_window_set_title(GTK_WINDOW(window), "Watch Viewer");
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   g_signal_connect (window, "delete_event",
@@ -785,53 +627,60 @@ void Watch_Window::Build(void)
   g_signal_connect_after(window, "configure_event",
                            G_CALLBACK(gui_object_configure_event), this);
 
-  watch_clist = gtk_clist_new_with_titles(COLUMNS,(gchar **)watch_titles);
+  watch_list = gtk_list_store_new(N_COLUMNS,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+    G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_POINTER);
 
-//  The following line is silly but it stops GTK printing an assert
-//  in Fedora 19 with Adwaita theme
-  gtk_widget_set_style(watch_clist, gtk_widget_get_style(watch_clist));
-  gtk_widget_show(watch_clist);
+  watch_tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(watch_list));
 
-  for(i=0;i<LASTCOL;i++) {
-    //gtk_clist_set_column_auto_resize(GTK_CLIST(watch_clist),i,TRUE);
-    gtk_clist_set_column_resizeable(GTK_CLIST(watch_clist),i,TRUE);
-    coldata[i].ww = this;
-    coldata[i].column = i;
-    coldata[i].Show();
+  coldata.reserve(COLUMNS);
+
+  for (size_t i = 0; i < COLUMNS; i++) {
+    GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+    GtkTreeViewColumn *column = gtk_tree_view_column_new_with_attributes(
+      watch_titles[i], renderer, "text", int(i), NULL);
+    gtk_tree_view_column_set_resizable(column, TRUE);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(watch_tree), column);
+
+    int vis;
+    if (!config_get_variable(name(), (gchar *)watch_titles[i], &vis))
+      config_set_variable(name(), (gchar *)watch_titles[i], 1);
+
+    coldata.push_back(ColumnData(column, i, vis));
   }
 
-  gtk_clist_set_selection_mode (GTK_CLIST(watch_clist), GTK_SELECTION_BROWSE);
+  {
+    // Fix a db error in previous versions of gpsim
+    int j;
+    while (config_get_variable(name(),"hex",&j))
+      config_remove(name(), "hex");
 
-  g_signal_connect(watch_clist, "click_column",
-                     G_CALLBACK(watch_click_column), 0);
-  g_signal_connect(watch_clist, "select_row",
-                     G_CALLBACK(watch_list_row_selected), this);
-  g_signal_connect(watch_clist, "unselect_row",
-                     G_CALLBACK(unselect_row), this);
+    const int hexIndex=3;
+    config_set_variable(name(),(gchar *)watch_titles[hexIndex],coldata[hexIndex].GetVisibility());
+  }
 
-  g_signal_connect(watch_clist,
-                     "button_press_event",
-                     G_CALLBACK(do_popup),
-                     this);
-  g_signal_connect(window, "key_press_event",
-                     G_CALLBACK(key_press),
-                     (gpointer) this);
+  // TODO:No column sorting for now
 
-  scrolled_window=gtk_scrolled_window_new(0, 0);
-  gtk_widget_show(scrolled_window);
+  GtkTreeSelection *sel =
+    gtk_tree_view_get_selection(GTK_TREE_VIEW(watch_tree));
+  g_signal_connect(sel, "changed", G_CALLBACK(watch_list_row_selected), this);
 
-  vbox = gtk_vbox_new(FALSE,1);
-  gtk_widget_show(vbox);
+  g_signal_connect(watch_tree, "button_press_event", G_CALLBACK(do_popup), this);
+  g_signal_connect(watch_tree, "key_press_event", G_CALLBACK(key_press), this);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), watch_clist);
+  scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+
+  vbox = gtk_vbox_new(FALSE, 0);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), watch_tree);
 
   gtk_container_add(GTK_CONTAINER(window),vbox);
 
-  gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
+  gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, TRUE, TRUE, 0);
 
-  popup_menu=build_menu(window,this);
+  build_menu();
 
-  gtk_widget_show (window);
+  gtk_widget_show_all(window);
 
 
   enabled=1;
@@ -848,13 +697,7 @@ const char *Watch_Window::name()
 }
 
 Watch_Window::Watch_Window(GUI_Processor *_gp)
-  : current_row(0)
 {
-  unsigned int i;
-
-#define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
-#define MAXCOLS  (REGISTERS_PER_ROW+1)
-
   menu = "/menu/Windows/Watch";
 
   wc = WC_data;
@@ -864,25 +707,8 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
 
   get_config();
 
-  for(i=0;i<COLUMNS;i++) {
-
-    if (!config_get_variable(name(),(gchar *)watch_titles[i],&coldata[i].isVisible))
-      config_set_variable(name(),(gchar *)watch_titles[i],1);
-  }
-
-  {
-    // Fix a db error in previous versions of gpsim
-    int j;
-    while (config_get_variable(name(),"hex",&j))
-      config_remove(name(), "hex");
-
-    const int hexIndex=3;
-    config_set_variable(name(),(gchar *)watch_titles[hexIndex],coldata[hexIndex].isVisible);
-  }
-
   if(enabled)
     Build();
-
 }
 
 #endif // HAVE_GUI
