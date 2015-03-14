@@ -396,7 +396,7 @@ GtkWidget *LogicGate::create_pixmap(gchar **pixmap_data)
     gdk_drawable_get_size(pixmap,&width,&height);
 
     da = gtk_drawing_area_new();
-    gtk_drawing_area_size(GTK_DRAWING_AREA(da),width,height);
+    gtk_widget_set_size_request(da, width, height);
     g_signal_connect(da, "expose_event",
                 G_CALLBACK(expose), this);
     return da;

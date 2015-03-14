@@ -26,16 +26,18 @@ Boston, MA 02111-1307, USA.  */
 
 class WatchEntry : public GUIRegister {
 public:
+  WatchEntry(REGISTER_TYPE _type, Register *_pRegister);
+  virtual ~WatchEntry();
 
   Processor *cpu;
   REGISTER_TYPE type;
   //register_symbol *pRegSymbol;
   Register *pRegister;
-  WatchEntry();
 };
 
 
 class Value;
+class ColumnData;
 
 //
 // The watch window
@@ -43,22 +45,14 @@ class Value;
 class Watch_Window : public  GUI_Object
 {
  public:
-
-  std::vector<WatchEntry *> watches;
-
-  int current_row;
-  int current_column;
-    
-  GtkWidget *watch_clist;
-  GtkWidget *popup_menu;
+  GtkListStore *watch_list;
+  GtkWidget *watch_tree;
 
   Watch_Window(GUI_Processor *gp);
-  virtual void Build(void);
-  virtual void ClearWatches(void);
-  virtual void ClearWatch(WatchEntry *entry);
-  virtual void UpdateWatch(WatchEntry *entry);
-  //virtual void Add(REGISTER_TYPE type,GUIRegister *reg);
-  //virtual void Add(REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym);
+  virtual void Build();
+  virtual void ClearWatch(GtkTreeIter *iter);
+  virtual void UpdateWatch(GtkTreeIter *iter);
+
   virtual void Add(REGISTER_TYPE type, GUIRegister *reg, Register * pReg=0);
   virtual void Add(Value *);
   virtual void Update();
@@ -66,7 +60,7 @@ class Watch_Window : public  GUI_Object
   virtual void NewProcessor(GUI_Processor *gp);
 
   // Override set_config() to save variable list on app exit
-  virtual int set_config(void);
+  virtual int set_config();
   void         ReadSymbolList();
   void         WriteSymbolList();
   void         DeleteSymbolList();
@@ -74,8 +68,23 @@ class Watch_Window : public  GUI_Object
 protected:
   virtual const char *name();
 
-public:
-  const char *name_pub() {return name();}
+private:
+  void build_menu();
+
+  static void popup_activated(GtkWidget *widget, gpointer data);
+  static gboolean do_popup(GtkWidget *widget, GdkEventButton *event,
+    Watch_Window *ww);
+  static void set_column(GtkCheckButton *button, Watch_Window *ww);
+  void select_columns();
+  static gboolean do_symbol_write(GtkTreeModel *model, GtkTreePath *path,
+    GtkTreeIter *iter, gpointer data);
+  static void watch_list_row_selected(GtkTreeSelection *sel, Watch_Window *ww);
+
+  int count;
+
+  GtkWidget *popup_menu;
+  std::vector<GtkWidget *> popup_items;
+  std::vector<ColumnData> coldata;
 };
 
 

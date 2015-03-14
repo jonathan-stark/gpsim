@@ -99,7 +99,6 @@ enum window_category {
 
 class CrossReferenceToGUI {
 public:
-  enum window_types parent_window_type;
   gpointer     parent_window;
   gpointer     data;
 

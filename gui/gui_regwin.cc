@@ -1748,7 +1748,6 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
        */
 
       cross_reference = new RegisterWindowXREF();
-      cross_reference->parent_window_type =   WT_register_window;
       cross_reference->parent_window = (gpointer) this;
       cross_reference->data = (gpointer) pGReg;
       pGReg->Assign_xref(cross_reference);

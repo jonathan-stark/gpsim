@@ -2479,7 +2479,7 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
                      G_CALLBACK(button),
                      this);
 
-  gtk_drawing_area_size(GTK_DRAWING_AREA(m_pinDrawingArea),m_width,m_height);
+  gtk_widget_set_size_request(m_pinDrawingArea, m_width, m_height);
   g_signal_connect(m_pinDrawingArea,
                      "expose_event",
                      G_CALLBACK(expose_pin),
@@ -2777,7 +2777,7 @@ void GuiModule::Update()
 
   GList *pin_iter;
 
-  gtk_widget_ref(m_pinLabel_widget);
+  g_object_ref(m_pinLabel_widget);
   gtk_container_remove(GTK_CONTAINER(m_bbw->layout),m_pinLabel_widget);
 
   // Delete the static module pixmap if there is no widget
@@ -2809,7 +2809,7 @@ void GuiModule::Update()
   // rebuild module
   Build();
 
-  gtk_widget_unref(m_pinLabel_widget);
+  g_object_unref(m_pinLabel_widget);
 }
 
 void GuiModule::UpdatePins()
@@ -2889,7 +2889,6 @@ void GuiModule::AddPin(unsigned int pin_number)
   if(iopin) {
     // Create xref
     cross_reference = new BreadBoardXREF();
-    cross_reference->parent_window_type = WT_breadboard_window;
     cross_reference->parent_window = (gpointer) m_bbw;
     cross_reference->data = (gpointer) 0;
     iopin->add_xref(cross_reference);
@@ -3095,7 +3094,7 @@ static void createLabel(GtkWidget **da,
   int height = gStringHeight(font,text);
   int width  = gStringWidth(font,text);
 
-  gtk_drawing_area_size(GTK_DRAWING_AREA(*da),width,height);
+  gtk_widget_set_size_request(*da, width, height);
   *pixmap = gdk_pixmap_new(gtk_widget_get_window(parent),
                            width,
                            height,
@@ -3216,7 +3215,7 @@ void GuiModule::Build()
                                      m_height,
                                      -1);
     m_pinLabel_widget = gtk_drawing_area_new();
-    gtk_drawing_area_size(GTK_DRAWING_AREA(m_pinLabel_widget),m_width,m_height);
+    gtk_widget_set_size_request(m_pinLabel_widget, m_width, m_height);
     gtk_widget_show_all (m_pinLabel_widget);
     DrawCaseOutline(m_pinLabel_widget);
     g_signal_connect(m_pinLabel_widget,
@@ -3240,7 +3239,6 @@ void GuiModule::Build()
 
   // Create xref
   cross_reference = new BreadBoardXREF();
-  cross_reference->parent_window_type = WT_breadboard_window;
   cross_reference->parent_window = (gpointer) m_bbw;
   cross_reference->data = (gpointer) 0;
   m_module->xref->_add(cross_reference);
@@ -3555,9 +3553,9 @@ static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboa
 static GtkWidget *bb_vbox(GtkWidget *window, const char *name)
 {
   GtkWidget *vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox);
+  g_object_ref(vbox);
   g_object_set_data_full (G_OBJECT (window), name, vbox,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (vbox);
 
   return vbox;
@@ -3566,9 +3564,9 @@ static GtkWidget *bb_vbox(GtkWidget *window, const char *name)
 static GtkWidget *bb_hbox(GtkWidget *window, const char *name)
 {
   GtkWidget *hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_ref (hbox);
+  g_object_ref(hbox);
   g_object_set_data_full (G_OBJECT (window), name, hbox,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hbox);
 
   return hbox;
@@ -3579,9 +3577,9 @@ GtkWidget* Breadboard_Window::add_button(const char *label, const char *name,
 {
 
   GtkWidget *button = gtk_button_new_with_label (label);
-  gtk_widget_ref (button);
+  g_object_ref(button);
   g_object_set_data_full (G_OBJECT (window), name, button,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 0);
   g_signal_connect(button,
@@ -3652,9 +3650,9 @@ void Breadboard_Window::Build(void)
   //
 
   hpaned1 = gtk_hpaned_new ();
-  gtk_widget_ref (hpaned1);
+  g_object_ref(hpaned1);
   g_object_set_data_full (G_OBJECT (window), "hpaned1", hpaned1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (hpaned1);
   gtk_container_add (GTK_CONTAINER (window), hpaned1);
   gtk_paned_set_position (GTK_PANED (hpaned1), 196);
@@ -3667,9 +3665,9 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox9), vbox13, TRUE, TRUE, 2);
 
   scrolledwindow4 = gtk_scrolled_window_new (0, 0);
-  gtk_widget_ref (scrolledwindow4);
+  g_object_ref(scrolledwindow4);
   g_object_set_data_full (G_OBJECT (window), "scrolledwindow4", scrolledwindow4,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (scrolledwindow4);
   gtk_box_pack_start (GTK_BOX (vbox13), scrolledwindow4, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow4),
@@ -3690,9 +3688,9 @@ void Breadboard_Window::Build(void)
   g_signal_connect (gtk_tree_view_get_selection ((GtkTreeView*) tree1),
                     "changed", (GCallback) treeselect_cb,
                     NULL);
-  gtk_widget_ref (tree1);
+  g_object_ref(tree1);
   g_object_set_data_full (G_OBJECT (window), "tree1", tree1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (tree1);
   gtk_container_add (GTK_CONTAINER (scrolledwindow4), tree1);
 
@@ -3712,31 +3710,31 @@ void Breadboard_Window::Build(void)
 
 
   node_frame = gtk_frame_new ("Node connections");
-  gtk_widget_ref (node_frame);
+  g_object_ref(node_frame);
   g_object_set_data_full (G_OBJECT (window), "node_frame", node_frame,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   //  gtk_widget_show (node_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), node_frame, TRUE, TRUE, 0);
 
   vbox11 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox11);
+  g_object_ref(vbox11);
   g_object_set_data_full (G_OBJECT (window), "vbox11", vbox11,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (vbox11);
   gtk_container_add (GTK_CONTAINER (node_frame), vbox11);
 
   scrolledwindow2 = gtk_scrolled_window_new (0, 0);
-  gtk_widget_ref (scrolledwindow2);
+  g_object_ref(scrolledwindow2);
   g_object_set_data_full (G_OBJECT (window), "scrolledwindow2", scrolledwindow2,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (scrolledwindow2);
   gtk_box_pack_start (GTK_BOX (vbox11), scrolledwindow2, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow2), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   viewport7 = gtk_viewport_new (0, 0);
-  gtk_widget_ref (viewport7);
+  g_object_ref(viewport7);
   g_object_set_data_full (G_OBJECT (window), "viewport7", viewport7,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (viewport7);
   gtk_container_add (GTK_CONTAINER (scrolledwindow2), viewport7);
 
@@ -3748,9 +3746,9 @@ void Breadboard_Window::Build(void)
                                               "text", 0, NULL);
   g_object_set(node_clist, "headers-visible", FALSE, NULL);
 
-  gtk_widget_ref (node_clist);
+  g_object_ref(node_clist);
   g_object_set_data_full (G_OBJECT (window), "node_clist", node_clist,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (node_clist);
   gtk_container_add (GTK_CONTAINER (viewport7), node_clist);
 
@@ -3761,16 +3759,16 @@ void Breadboard_Window::Build(void)
   add_button("Remove node","rnb", G_CALLBACK(remove_node), hbox10);
 
   stimulus_frame = gtk_frame_new ("Stimulus settings");
-  gtk_widget_ref (stimulus_frame);
+  g_object_ref(stimulus_frame);
   g_object_set_data_full (G_OBJECT (window), "stimulus_frame", stimulus_frame,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   //  gtk_widget_show (stimulus_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), stimulus_frame, FALSE, FALSE, 0);
 
   vbox14 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox14);
+  g_object_ref(vbox14);
   g_object_set_data_full (G_OBJECT (window), "vbox14", vbox14,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (vbox14);
   gtk_container_add (GTK_CONTAINER (stimulus_frame), vbox14);
 
@@ -3788,31 +3786,31 @@ void Breadboard_Window::Build(void)
 
 
   module_frame = gtk_frame_new ("Module settings");
-  gtk_widget_ref (module_frame);
+  g_object_ref (module_frame);
   g_object_set_data_full (G_OBJECT (window), "module_frame", module_frame,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   //  gtk_widget_show (module_frame);
   gtk_box_pack_start (GTK_BOX (vbox9), module_frame, TRUE, TRUE, 0);
 
   vbox10 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox10);
+  g_object_ref(vbox10);
   g_object_set_data_full (G_OBJECT (window), "vbox10", vbox10,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (vbox10);
   gtk_container_add (GTK_CONTAINER (module_frame), vbox10);
 
   scrolledwindow1 = gtk_scrolled_window_new (0, 0);
-  gtk_widget_ref (scrolledwindow1);
+  g_object_ref(scrolledwindow1);
   g_object_set_data_full (G_OBJECT (window), "scrolledwindow1", scrolledwindow1,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (scrolledwindow1);
   gtk_box_pack_start (GTK_BOX (vbox10), scrolledwindow1, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   viewport6 = gtk_viewport_new (0, 0);
-  gtk_widget_ref (viewport6);
+  g_object_ref(viewport6);
   g_object_set_data_full (G_OBJECT (window), "viewport6", viewport6,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (viewport6);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), viewport6);
 
@@ -3838,9 +3836,9 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox10), hbox9, FALSE, FALSE, 0);
 
   attribute_entry = gtk_entry_new ();
-  gtk_widget_ref (attribute_entry);
+  g_object_ref(attribute_entry);
   g_object_set_data_full (G_OBJECT (window), "attribute_entry", attribute_entry,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (attribute_entry);
   gtk_box_pack_start (GTK_BOX (hbox9), attribute_entry, FALSE, FALSE, 0);
   g_signal_connect(attribute_entry,
@@ -3857,9 +3855,9 @@ void Breadboard_Window::Build(void)
   add_button("Save Configuration ...","save_stc_button", G_CALLBACK(save_stc), vbox9);
 
   scrolledwindow5 = gtk_scrolled_window_new (0, 0);
-  gtk_widget_ref (scrolledwindow5);
+  g_object_ref(scrolledwindow5);
   g_object_set_data_full (G_OBJECT (window), "scrolledwindow5", scrolledwindow5,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_widget_show (scrolledwindow5);
   gtk_paned_pack2 (GTK_PANED (hpaned1), scrolledwindow5, TRUE, TRUE);
 
@@ -3867,9 +3865,9 @@ void Breadboard_Window::Build(void)
   hadj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(scrolledwindow5));
 
   layout = gtk_layout_new (hadj, vadj);
-  gtk_widget_ref (layout);
+  g_object_ref(layout);
   g_object_set_data_full (G_OBJECT (window), "layout", layout,
-                            (GtkDestroyNotify) gtk_widget_unref);
+                            (GDestroyNotify) g_object_unref);
   gtk_container_add (GTK_CONTAINER (scrolledwindow5), layout);
   gtk_layout_set_size (GTK_LAYOUT (layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
 
@@ -3903,7 +3901,7 @@ void Breadboard_Window::Build(void)
 
   //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   //  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",

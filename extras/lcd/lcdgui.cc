@@ -370,12 +370,12 @@ void LcdDisplay::CreateGraphics (void)
 
     darea = gtk_drawing_area_new ();
     if (!(disp_type & TWO_ROWS_IN_ONE)) {
-      gtk_widget_set_usize (darea,
+      gtk_widget_set_size_request(darea,
                             cols*get_char_width()+2*get_border(),
                             rows*(get_char_height()+get_border())+get_border());
     }
     else {
-      gtk_widget_set_usize (darea,
+      gtk_widget_set_size_request(darea,
                             rows*cols*get_char_width()+2*get_border(),
                             get_char_height()+2*get_border());
     }

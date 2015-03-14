@@ -2201,8 +2201,6 @@ void SourceWindow::NewSource(GUI_Processor *gp)
   */
   if(pProc->pc) {
     SourceXREF *cross_reference = new SourceXREF();
-
-    cross_reference->parent_window_type =   WT_asm_source_window;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) 0;
 

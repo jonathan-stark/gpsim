@@ -442,9 +442,8 @@ namespace OSRAM
 
       darea = gtk_drawing_area_new ();
 
-      gtk_widget_set_usize (darea,
-                            (m_nColumns+3)*pixelScale, (m_nRows+3)*pixelScale
-                            );
+      gtk_widget_set_size_request(darea,
+                            (m_nColumns+3)*pixelScale, (m_nRows+3)*pixelScale);
       gtk_container_add (GTK_CONTAINER (frame), darea);
 
       g_signal_connect (darea,

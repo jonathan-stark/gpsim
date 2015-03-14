@@ -1114,7 +1114,6 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     SourceOpcodeXREF *cross_reference;
 
     cross_reference = new SourceOpcodeXREF();
-    cross_reference->parent_window_type =   WT_status_bar;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) this;
 

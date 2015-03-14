@@ -227,7 +227,7 @@ void StopWatch_Window::Build(void)
   gtk_window_set_title(GTK_WINDOW(window), "StopWatch");
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   g_signal_connect (window, "delete_event",
@@ -264,14 +264,14 @@ void StopWatch_Window::Build(void)
     G_CALLBACK(StopWatch_Window::cyclechanged), this);
 
   timeentry = entry = gtk_entry_new ();
-  gtk_entry_set_editable(GTK_ENTRY(entry),0);
+  gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
   gtk_widget_set_sensitive(entry, FALSE);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
   frequencyentry = entry = gtk_entry_new ();
-  gtk_entry_set_editable(GTK_ENTRY(entry),0);
+  gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
   gtk_widget_set_sensitive(entry, FALSE);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),

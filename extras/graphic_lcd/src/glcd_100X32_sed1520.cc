@@ -293,9 +293,7 @@ void gLCD_100X32_SED1520::create_widget()
 
     darea = gtk_drawing_area_new ();
 
-    gtk_widget_set_usize (darea,
-			  (m_nColumns+4)*3, (m_nRows+4)*3
-			  );
+    gtk_widget_set_size_request(darea, (m_nColumns+4)*3, (m_nRows+4)*3);
     gtk_container_add (GTK_CONTAINER (frame), darea);
 
     g_signal_connect (darea,
