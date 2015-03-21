@@ -23,14 +23,14 @@ Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_GUI
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <gtk/gtk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <math.h>
-#include <assert.h>
+#include <cmath>
+#include <cassert>
 
 
 #include <iostream>
@@ -64,7 +64,6 @@ Boston, MA 02111-1307, USA.  */
 static GdkColor high_output_color;
 static GdkColor low_output_color;
 static GdkColor black_color;
-static GdkColor gray_color;
 
 #define PINLENGTH (4*PINLINEWIDTH)
 
@@ -213,16 +212,16 @@ static void inline prepend_point_to_path(path **pat, point p)
     if(add_point)*/
 //    {
         // Lots and lots of mallocs, FIXME
-        new_point = (path*)malloc(sizeof(path));
-        new_point->p=p;
+        new_point = new path;
+        new_point->p = p;
         new_point->next = *pat;
-        if((*pat)!=0)
+        if((*pat) != 0)
         {
             dir = calculate_route_direction(p, (*pat)->p);
-            if((*pat)->dir==R_NONE)
-                (*pat)->dir=dir;
+            if ((*pat)->dir == R_NONE)
+                (*pat)->dir = dir;
         }
-        new_point->dir=dir;
+        new_point->dir = dir;
         *pat = new_point;
 //    }
 }
@@ -230,24 +229,22 @@ static void inline prepend_point_to_path(path **pat, point p)
 // Free all memory in pat
 static void clear_path(path **pat)
 {
+  path *next;
 
-    path *current_path, *next;
+  if (*pat==0)
+    return;
 
-    if(*pat==0)
-        return;
+  path *current_path = *pat;
 
-    current_path = *pat;
+  *pat = 0;
 
-    *pat = 0;
+  while(current_path!=0) {
+    next = current_path->next;
 
-    while(current_path!=0)
-    {
-        next = current_path->next;
+    delete current_path;
 
-        free(current_path);
-
-        current_path = next;
-    }
+    current_path = next;
+  }
 }
 
 #if 0
@@ -626,27 +623,18 @@ static void draw_board_matrix(Breadboard_Window *bbw)
 }
 #endif
 
-static GList *nodepath_list;
+static std::vector<path *> nodepath_list;
 
 // Draw nodes in nodepath_list to layout_pixmap
 static void clear_nodes(Breadboard_Window *bbw)
 {
+  std::vector<path *>::iterator iter = nodepath_list.begin();
+  for ( ; iter != nodepath_list.end(); ++iter) {
+    path *nodepath = *iter;
 
-    GList *iter;
-    path *nodepath;
-
-    iter = nodepath_list;
-    while(iter!=0)
-    {
-        nodepath = (path*)iter->data;
-
-        clear_path(&nodepath);
-
-        nodepath_list = g_list_remove(nodepath_list, iter->data);
-
-        iter=nodepath_list;
-    }
-
+    clear_path(&nodepath);
+  }
+  nodepath_list.clear();
 }
 
 static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw);
@@ -654,56 +642,47 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw);
 // Draw node in nodepath_list to layout_pixmap
 static void draw_nodes(Breadboard_Window *bbw)
 {
-
-    GList *iter;
-
   gdk_draw_rectangle(bbw->layout_pixmap,
     gtk_widget_get_style(bbw->window)->bg_gc[gtk_widget_get_state(bbw->window)],
     TRUE,
     0, 0, LAYOUTSIZE_X, LAYOUTSIZE_Y);
 
-    iter = nodepath_list;
+  std::vector<path *>::iterator iter = nodepath_list.begin();
 
-    while(iter!=0) {
+  for ( ; iter != nodepath_list.end(); ++iter) {
+    int last_x, last_y;
+    path *current_path;
 
-      int last_x, last_y;
-      path *current_path;
+    path *nodepath = *iter;
 
+    current_path = nodepath;
 
-      path *nodepath;
-      nodepath = (path*)iter->data;
+    last_x = current_path->p.x*ROUTE_RES;
+    last_y = current_path->p.y*ROUTE_RES;
 
-      current_path = nodepath;
+    current_path=current_path->next;
 
-      last_x = current_path->p.x*ROUTE_RES;
-      last_y = current_path->p.y*ROUTE_RES;
+    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
 
-      current_path=current_path->next;
+    while(current_path!=0) {
+      int x,y;
 
-      gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
+      x=current_path->p.x*ROUTE_RES;
+      y=current_path->p.y*ROUTE_RES;
 
-      while(current_path!=0)
-        {
-          int x,y;
+      gdk_draw_line(bbw->layout_pixmap,
+                    bbw->pinline_gc,
+                    last_x,last_y,
+                    x,y);
 
-          x=current_path->p.x*ROUTE_RES;
-          y=current_path->p.y*ROUTE_RES;
+      last_x=x;
+      last_y=y;
 
-          gdk_draw_line(bbw->layout_pixmap,
-                        bbw->pinline_gc,
-                        last_x,last_y,
-                        x,y);
-
-          last_x=x;
-          last_y=y;
-
-          current_path = current_path->next;
-        }
-      iter=iter->next;
+      current_path = current_path->next;
     }
+  }
 
-
-    layout_adj_changed(0,bbw);
+  layout_adj_changed(0,bbw);
 }
 
 
@@ -759,13 +738,10 @@ static void update_board_matrix(Breadboard_Window *bbw)
 
         // Draw barriers around pins so the tracker can only get in
         // straigt to the pin and not from the side.
-        for(i=1;i<=p->pin_count();i++) {
+        for (i = 1; i <= p->pin_count(); i++) {
+          std::vector<GuiPin *> *e = p->pins();
 
-          GList *e;
-
-          e = g_list_nth(p->pins(), i-1);
-
-          GuiPin *gp = static_cast<GuiPin*>(e->data);
+          GuiPin *gp = (*e)[i - 1];
 
           switch(gp->orientation)
             {
@@ -954,7 +930,7 @@ static void path_copy_and_cat(path **pat, path **source)
     while(sourceiter!=0)
     {
 
-        dest = (path*) malloc(sizeof(path));
+        dest = new path;
         memcpy(dest, sourceiter, sizeof(path));
         dest->next=0;
 
@@ -979,120 +955,95 @@ static void path_copy_and_cat(path **pat, path **source)
 static void trace_node(struct gui_node *gn)
 {
   Breadboard_Window *bbw;
-  stimulus *stimulus;
-  GList *pinlist=0;
-  int nr_of_nodes=0;
-  int i,j;
   int didnt_work=0;
-  int *permutations;
-  int *shortest_permutation;
 
-    point start={-1,-1},end;
+  point start = {-1, -1}, end;
 
-    bbw=gn->bbw;
+  bbw = gn->bbw;
 
-    stimulus = gn->node->stimuli;
+  stimulus *stimulus = gn->node->stimuli;
 
+  std::vector<GuiPin *> pinlist;
     // Make a glist of all gui_pins in the node
-    while(stimulus!=0)
-    {
-        GuiPin *p = find_gui_pin(bbw, stimulus);
+  while (stimulus) {
+    GuiPin *p = find_gui_pin(bbw, stimulus);
 
-	if (p)
-	{
-
-            pinlist = g_list_append(pinlist, p);
-            nr_of_nodes++;
-	}
-
-        stimulus=stimulus->next;
+    if (p) {
+      pinlist.push_back(p);
     }
+
+    stimulus = stimulus->next;
+  }
 
     // Allocate an array of shortest_paths, indexed with 2x glist position.
 //FIXME   shortest_path = (path***) malloc(nr_of_nodes*nr_of_nodes*sizeof(path*));
 
-    permutations = new int[nr_of_nodes];
-    shortest_permutation = new int[nr_of_nodes];
-    for(i=0;i<nr_of_nodes;i++)
-        permutations[i]=i;
+  int *permutations = new int[pinlist.size()];
+  int *shortest_permutation = new int[pinlist.size()];
+  for (size_t i = 0; i < pinlist.size(); i++)
+    permutations[i] = i;
 
     // Trace between all stimulus, and store the distances in the array.
-    for(i=0;i<nr_of_nodes;i++)
-    {
-        GuiPin *pi, *pj;
-        GList *li = g_list_nth(pinlist,i);
+  for (size_t i = 0; i < pinlist.size(); i++) {
+    GuiPin *pi = pinlist[i];
 
-        assert(li!=0);
-        pi = static_cast<GuiPin*>(li->data);
+    for (size_t j = i + 1; j < pinlist.size(); j++) {
+      GuiPin *pj = pinlist[j];
 
-        fflush(stdout);
-        for(j=i+1;j<nr_of_nodes;j++)
-        {
-            GList *lj = g_list_nth(pinlist,j);
-            assert(lj!=0);
-            pj = static_cast<GuiPin*>(lj->data);
+      start.x = pi->x() / ROUTE_RES;
+      start.y = pi->y() / ROUTE_RES;
 
-            start.x=pi->x()/ROUTE_RES;
-            start.y=pi->y()/ROUTE_RES;
-
-            end.x=pj->x()/ROUTE_RES;
-            end.y=pj->y()/ROUTE_RES;
+      end.x = pj->x() / ROUTE_RES;
+      end.y = pj->y() / ROUTE_RES;
 
 //          printf("Tracing from %d,%d to %d,%d\n",start.x,start.y,end.x,end.y);
-            maxdepth=abs(start.x-end.x)+abs(start.y-end.y);
-            maxdepth=maxdepth*2+100; // Twice the distance, and 5 turns
+      maxdepth = abs(start.x - end.x) + abs(start.y - end.y);
+      maxdepth = maxdepth * 2 + 100; // Twice the distance, and 5 turns
 //          printf("Trying maxdepth %d\n",maxdepth);
-            trace_two_points(&shortest_path[i][j], start, end,0,R_UP);
-            if(shortest_path[i][j]==0)
-            {
-                printf("\n### Couldn't trace from pin %s to pin %s!\n",
-                       pi->getIOpin()->name().c_str(),
-                       pj->getIOpin()->name().c_str());
-                didnt_work=1;
-            }
-            pathlen[i][j]=maxdepth;
+      trace_two_points(&shortest_path[i][j], start, end,0,R_UP);
+      if (shortest_path[i][j] == 0) {
+        printf("\n### Couldn't trace from pin %s to pin %s!\n",
+          pi->getIOpin()->name().c_str(),
+          pj->getIOpin()->name().c_str());
+        didnt_work=1;
+      }
+      pathlen[i][j] = maxdepth;
 
-            pathlen[j][i]=maxdepth;
-            shortest_path[j][i]=shortest_path[i][j];
-        }
+      pathlen[j][i] = maxdepth;
+      shortest_path[j][i] = shortest_path[i][j];
     }
+  }
 
-    if(didnt_work)
-    {
-        printf("\n###### Couldn't trace node %s!\n",gn->node->name().c_str());
-        for(i=0;i<nr_of_nodes;i++)
-            for(j=i+1;j<nr_of_nodes;j++)
-                clear_path(&shortest_path[i][j]);
-        delete[] permutations;
-        delete[] shortest_permutation;
-        g_list_free(pinlist);
-        return;
-    }
+  if (didnt_work) {
+    printf("\n###### Couldn't trace node %s!\n",gn->node->name().c_str());
+    for (size_t i = 0; i < pinlist.size(); i++)
+      for (size_t j = i + 1; j < pinlist.size(); j++)
+        clear_path(&shortest_path[i][j]);
+    delete[] permutations;
+    delete[] shortest_permutation;
+    return;
+  }
 
     // Find the combination that produces the shortest node.
-    int minlen = 100000;
-    do
-    {
-        int sum=0;
+  int minlen = 100000;
+  do {
+    int sum=0;
 
 //      printf("%d ",permutations[0]);
-        for(i=0;i<nr_of_nodes-1;i++)
-        {
+    for (size_t i = 0; i < pinlist.size() - 1; i++) {
 //          printf("%d ",permutations[i+1]);
-            sum+=pathlen[permutations[i]][permutations[i+1]];
-        }
+      sum += pathlen[permutations[i]][permutations[i+1]];
+    }
 //      printf("length %d\n",sum);
 
-        if(sum < minlen)
-        {
-            minlen=sum;
-            for(i=0;i<nr_of_nodes;i++)
-            {
-                shortest_permutation[i]=permutations[i];
-            }
-        }
+    if (sum < minlen) {
+      minlen = sum;
+      for (size_t i = 0; i < pinlist.size(); i++) {
+        shortest_permutation[i] = permutations[i];
+      }
+    }
         // Fixme, I'd rather use next_combination().
-    } while ( next_permutation( permutations, permutations+nr_of_nodes ) );
+  } while ( next_permutation( permutations, permutations + pinlist.size()));
 
 //    printf(" : Length %d\n", minlen);
 //    for(i=0;i<nr_of_nodes;i++)
@@ -1101,26 +1052,24 @@ static void trace_node(struct gui_node *gn)
 //    }
     //puts("");
 
-    path *nodepath=0;
-    for(i=0;i<nr_of_nodes-1;i++)
-    {
-        path_copy_and_cat(&nodepath,&shortest_path[shortest_permutation[i]][shortest_permutation[i+1]]);
-    }
+  path *nodepath = 0;
+  for (size_t i = 0; i < pinlist.size() - 1; i++) {
+    path_copy_and_cat(&nodepath,&shortest_path[shortest_permutation[i]][shortest_permutation[i+1]]);
+  }
 
-    for(i=0;i<nr_of_nodes;i++)
-        for(j=i+1;j<nr_of_nodes;j++)
-            clear_path(&shortest_path[i][j]);
-    delete[] permutations;
-    delete[] shortest_permutation;
+  for (size_t i = 0; i < pinlist.size(); i++)
+    for (size_t j = i + 1; j < pinlist.size(); j++)
+      clear_path(&shortest_path[i][j]);
+  delete[] permutations;
+  delete[] shortest_permutation;
 
-        if(nodepath!=0)
-        {
+  if (nodepath!=0) {
 //          compress_path(&nodepath);
 
-            add_path_to_matrix(nodepath);
+    add_path_to_matrix(nodepath);
 
-            nodepath_list = g_list_append(nodepath_list, nodepath);
-        }
+    nodepath_list.push_back(nodepath);
+  }
 }
 
 
@@ -1136,38 +1085,13 @@ GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 
       stimulus *p;
 
-      p=m->module()->get_pin(i);
+      p = m->module()->get_pin(i);
 
-      if(p == pin)
-        {
-          GList *e;
-
-          e = g_list_nth(m->pins(), i-1);
-
-          return static_cast<GuiPin*>(e->data);
-        }
+      if (p == pin) {
+        return (*m->pins())[i - 1];
+      }
     }
   }
-
-  return 0;
-}
-
-
-static gboolean expose_pin(GtkWidget *widget,
-                       GdkEventExpose *event,
-                       GuiPin *p)
-{
-  if (!p->pixmap) {
-    puts("bbw.c: no pixmap1!");
-    return 0;
-  }
-
-  gdk_draw_pixmap(gtk_widget_get_window(widget),
-    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
-    p->pixmap,
-    event->area.x, event->area.y,
-    event->area.x, event->area.y,
-    event->area.width, event->area.height);
 
   return 0;
 }
@@ -1402,10 +1326,9 @@ static void clistOneAttribute(const SymbolEntry_t &sym)
 
 static void buildCLISTAttribute(const SymbolTableEntry_t &st)
 {
-  if (strcmp(st.first.c_str(), mod_name) == 0)
-  {
-      if(verbose)cout << " gui Module Attribute Window: " << st.first << endl;
-      (st.second)->ForEachSymbolTable(clistOneAttribute);
+  if (st.first == mod_name) {
+    if (verbose) cout << " gui Module Attribute Window: " << st.first << endl;
+    (st.second)->ForEachSymbolTable(clistOneAttribute);
   }
 }
 static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
@@ -1449,8 +1372,6 @@ static void treeselect_module(GtkItem *item, GuiModule *p)
 
 void GuiModule::SetPosition(int nx, int ny)
 {
-  GList *piniter;
-
   nx=nx-nx%pinspacing;
   ny=ny-ny%pinspacing;
 
@@ -1479,10 +1400,10 @@ void GuiModule::SetPosition(int nx, int ny)
     gtk_layout_move(GTK_LAYOUT(m_bbw->layout), m_name_widget, m_x, m_y-20);
 
     // Position pins
-    piniter = m_pins;
-    while(piniter!=0) {
+    std::vector<GuiPin *>::iterator piniter = m_pins.begin();
+    for ( ; piniter != m_pins.end(); ++piniter) {
 
-      GuiPin *pin = static_cast<GuiPin *>(piniter->data);
+      GuiPin *pin = *piniter;
 
       if(pin->orientation==RIGHT)
         pin->SetPosition(m_x + pin->module_x()+PINLENGTH,m_y + pin->module_y() + pin->height()/2);
@@ -1491,10 +1412,7 @@ void GuiModule::SetPosition(int nx, int ny)
 
       gtk_layout_move(GTK_LAYOUT(m_bbw->layout),
                       pin->m_pinDrawingArea,m_x+pin->module_x(),m_y+pin->module_y());
-
-      piniter = piniter->next;
     }
-
   }
 }
 
@@ -2120,22 +2038,19 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 
 static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
 {
-    GList *pin_iter;
-
     delete(bbw->selected_module->module());
 
     // FIXME the rest should be as callback from src
 
 
     // Remove pins
-    pin_iter=bbw->selected_module->pins();
-    while(pin_iter!=0)
-    {
-        GuiPin *pin = static_cast<GuiPin*>(pin_iter->data);
+    std::vector<GuiPin *> *e = bbw->selected_module->pins();
+
+    std::vector<GuiPin *>::iterator pin_iter = e->begin();
+    for ( ; pin_iter != e->end(); ++pin_iter) {
+        GuiPin *pin = *pin_iter;
 
         gtk_widget_destroy(GTK_WIDGET(pin->m_pinDrawingArea));
-
-        pin_iter = pin_iter->next;
     }
 
     // Remove widget
@@ -2166,7 +2081,7 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
 
     gtk_widget_hide(bbw->module_frame);
 
-    free(bbw->selected_module);
+    delete bbw->selected_module;
 
     bbw->selected_module=0;
 }
@@ -2185,7 +2100,7 @@ static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
     gtk_tree_store_remove ((GtkTreeStore*) model, &iter);
     
     g_object_set_data (G_OBJECT (bbw->tree), gn->node->name().c_str(), NULL);
-    g_free(gn);
+    delete gn;
     
     gtk_widget_hide(bbw->node_frame);
     gtk_widget_hide(bbw->stimulus_frame);
@@ -2206,8 +2121,6 @@ static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
     bbw->selected_node->node->detach_stimulus(s);
 
     gtk_list_store_remove ((GtkListStore*) model, &iter);
-
-    bbw->selected_node->selected_row=-1;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -2453,8 +2366,6 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
 
   orientation = LEFT;
 
-  gc=m_bbw->pinline_gc;
-
   if(iopin) {
     value=iopin->getState();
     direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
@@ -2485,19 +2396,7 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
                      G_CALLBACK(expose_pin),
                      this);
 
-
-  // Create pixmap for holding the pin graphics.
-  pixmap = gdk_pixmap_new(gtk_widget_get_window(m_bbw->window),
-                          m_width,
-                          m_height,
-                          -1);
-
-  // Draw pin
-  //  Draw();
-
   gtk_widget_show(m_pinDrawingArea);
-
-
 }
 
 const char *GuiPin::pinName()
@@ -2527,9 +2426,8 @@ void GuiPin::Update()
       Draw();
     }
   }
-
-
 }
+
 //------------------------------------------------------------------------
 void GuiPin::toggleState()
 {
@@ -2562,90 +2460,81 @@ void GuiPin::toggleState()
 //
 void GuiPin::Draw()
 {
+  GdkWindow *gdk_win = gtk_widget_get_window(m_pinDrawingArea);
+  if (!gdk_win)
+    return;
+
+  gdk_window_invalidate_rect(gdk_win, NULL, FALSE);
+}
+
+gboolean GuiPin::expose_pin(GtkWidget *widget, GdkEventExpose *event, GuiPin *p)
+{
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 
   int pointx;
   int wingheight, wingx;
   int casex, endx;
-  int y;
 
-  switch(orientation)
-    {
-    case LEFT:
-      casex = m_width;
-      endx = 0;
-      break;
-    default:
-      casex = 0;
-      endx = m_width;
-      break;
-    }
+  switch (p->orientation) {
+  case LEFT:
+    casex = p->m_width;
+    endx = 0;
+    break;
+  default:
+    casex = 0;
+    endx = p->m_width;
+    break;
+  }
 
-  y = m_height/2;
+  int y = p->m_height / 2;
 
-  // Clear pixmap
-  gdk_draw_rectangle(pixmap,
-    gtk_widget_get_style(m_bbw->window)->bg_gc[gtk_widget_get_state(m_pinDrawingArea)],
-      TRUE,
-      0, 0, m_width, m_height);
-
-
-  if(type==PIN_OTHER)
-    gdk_gc_set_foreground(gc,&black_color);
-  else
-    gdk_gc_set_foreground(gc,getState() ? &high_output_color:&low_output_color);
+  if (p->type != PIN_OTHER)
+    gdk_cairo_set_source_color(cr, p->getState() ? &high_output_color : &low_output_color);
 
   // Draw actual pin
-  gdk_draw_line(pixmap,gc,
-                casex,y,endx,y);
+  cairo_set_line_width(cr, PINLINEWIDTH);
+  cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 
-  if(type==PIN_OTHER)
-    return;
+  cairo_move_to(cr, casex, y);
+  cairo_line_to(cr, endx, y);
+  cairo_stroke(cr);
+
+  if (p->type == PIN_OTHER) {
+    cairo_destroy(cr);
+    return FALSE;
+  }
 
   // Draw direction arrow
-  wingheight=m_height/3;
+  wingheight = p->m_height / 3;
 
-  if(casex>endx)
-    {
-      if(direction==PIN_OUTPUT)
-        {
-          pointx = endx + PINLENGTH/3;
-          wingx=endx+(PINLENGTH*2)/3;
-        }
-      else
-        {
-          pointx = endx + (PINLENGTH*2)/3;
-          wingx=endx+PINLENGTH/3;
-        }
+  if (casex > endx) {
+    if (p->direction == PIN_OUTPUT) {
+      pointx = endx + PINLENGTH /3;
+      wingx = endx + (PINLENGTH * 2) / 3;
+    } else {
+      pointx = endx + (PINLENGTH * 2) / 3;
+      wingx = endx + PINLENGTH / 3;
     }
-  else
-    {
-      if(direction==PIN_OUTPUT)
-        {
-          pointx = casex + (PINLENGTH*2)/3;
-          wingx=casex+PINLENGTH/3;
-        }
-      else
-        {
-          pointx = casex + PINLENGTH/3;
-          wingx=casex+(PINLENGTH*2)/3;
-        }
+  } else {
+    if (p->direction == PIN_OUTPUT) {
+      pointx = casex + (PINLENGTH * 2) / 3;
+      wingx = casex + PINLENGTH / 3;
+    } else {
+      pointx = casex + PINLENGTH / 3;
+      wingx = casex + (PINLENGTH * 2) / 3;
     }
-
+  }
 
   // Draw an arrow poining at (endx,endy)
-  gdk_draw_line(pixmap,gc,
-                pointx,y,wingx,y+wingheight);
-  gdk_draw_line(pixmap,gc,
-                pointx,y,wingx,y-wingheight);
+  cairo_move_to(cr, wingx, wingheight + y);
+  cairo_line_to(cr, pointx, y);
+  cairo_line_to(cr, wingx, wingheight - y);
 
-  GdkWindow *gdk_win = gtk_widget_get_window(m_pinDrawingArea);
-  if(gdk_win)
-    gdk_draw_pixmap(gdk_win,
-      gtk_widget_get_style(m_pinDrawingArea)->fg_gc[gtk_widget_get_state(m_pinDrawingArea)],
-      pixmap,
-      0, 0, 0, 0, m_width, m_height);
+  cairo_stroke(cr);
+  cairo_destroy(cr);
+
+  return FALSE;
 }
-//------------------------------------------------------------------------
 
 void GuiPin::SetLabelPosition(int x, int y)
 {
@@ -2720,46 +2609,40 @@ void GuiPin::Destroy()
   if(xref)
     getIOpin()->remove_xref(xref);
 
-  gdk_pixmap_unref(pixmap);
   gtk_widget_destroy(m_pinDrawingArea);
 }
 
 //------------------------------------------------------------------------
 static gboolean name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 {
-    if(p->name_pixmap()==0)
-    {
-        puts("bbw.c: no pixmap2!");
-        return 0;
-    }
+  if (!p->name_pixmap()) {
+    puts("bbw.c: no pixmap2!");
+    return FALSE;
+  }
 
-  gdk_draw_pixmap(gtk_widget_get_window(widget),
-    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
-    p->name_pixmap(),
-    event->area.x, event->area.y,
-    event->area.x, event->area.y,
-    event->area.width, event->area.height);
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 
-    return 0;
+  gdk_cairo_set_source_pixmap(cr, p->name_pixmap(), 0.0, 0.0);
+  cairo_paint(cr);
+  cairo_destroy(cr);
+
+  return FALSE;
 }
 
 static gboolean module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 {
+  if (!p->module_pixmap()) {
+    puts("bbw.c: no pixmap3!");
+    return 0;
+  }
 
-    if(p->module_pixmap()==0)
-    {
-        puts("bbw.c: no pixmap3!");
-        return 0;
-    }
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 
-  gdk_draw_pixmap(gtk_widget_get_window(widget),
-    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
-    p->module_pixmap(),
-    event->area.x, event->area.y,
-    event->area.x, event->area.y,
-    event->area.width, event->area.height);
+  gdk_cairo_set_source_pixmap(cr, p->module_pixmap(), 0.0, 0.0);
+  cairo_paint(cr);
+  cairo_destroy(cr);
 
-  return 0;
+  return FALSE;
 }
 
 void GuiModule::Draw()
@@ -2774,9 +2657,6 @@ void GuiModule::Destroy()
 
 void GuiModule::Update()
 {
-
-  GList *pin_iter;
-
   g_object_ref(m_pinLabel_widget);
   gtk_container_remove(GTK_CONTAINER(m_bbw->layout),m_pinLabel_widget);
 
@@ -2784,20 +2664,20 @@ void GuiModule::Update()
   // in the module.
   if(m_module->get_widget()==0)
     {
-      gdk_pixmap_unref(m_module_pixmap);
+      g_object_unref(m_module_pixmap);
       gtk_widget_destroy(m_pinLabel_widget);
     }
 
   // Delete the pins
-  pin_iter=m_pins;
-  while(pin_iter!=NULL) {
-    GuiPin *pin = static_cast<GuiPin*>(pin_iter->data);
+  std::vector<GuiPin *>::iterator pin_iter = m_pins.begin();
+
+  for ( ; pin_iter != m_pins.end(); ++pin_iter) {
+    GuiPin *pin = *pin_iter;
     pin->Destroy();
-    pin_iter=pin_iter->next;
   }
 
   // Destroy name widget
-  gdk_pixmap_unref(m_name_pixmap);
+  g_object_unref(m_name_pixmap);
   gtk_widget_destroy(m_name_widget);
 
   // Remove module from list
@@ -2815,13 +2695,12 @@ void GuiModule::Update()
 void GuiModule::UpdatePins()
 {
   int change = 0;
-  GList *pin_iter;
-  pin_iter=m_pins;
-  while(pin_iter!=0) {
-    GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
-    change = pin->DrawGUIlabel(m_module_pixmap, pinnameWidths)?1:change;
+  std::vector<GuiPin *>::iterator pin_iter = m_pins.begin();
+
+  for ( ; pin_iter != m_pins.end(); ++pin_iter) {
+    GuiPin *pin = *pin_iter;
+    change = pin->DrawGUIlabel(m_module_pixmap, pinnameWidths) ? 1 : change;
     pin->Update();
-    pin_iter = pin_iter->next;
   }
 
   GdkWindow *gdk_win = gtk_widget_get_window(m_pinLabel_widget);
@@ -2883,21 +2762,19 @@ static float hackPackageHeight=0.0;
 
 void GuiModule::AddPin(unsigned int pin_number)
 {
-
   IOPIN *iopin = m_module->get_pin(pin_number);
   BreadBoardXREF *cross_reference = 0;
   if(iopin) {
     // Create xref
     cross_reference = new BreadBoardXREF();
     cross_reference->parent_window = (gpointer) m_bbw;
-    cross_reference->data = (gpointer) 0;
+    cross_reference->data = NULL;
     iopin->add_xref(cross_reference);
   }
 
   GuiPin *pin = new GuiPin(m_bbw, this, m_module->package, pin_number);
   pin->addXref(cross_reference);
-  m_pins = g_list_append(m_pins, pin);
-
+  m_pins.push_back(pin);
 }
 
 void GuiModule::AddPinGeometry(GuiPin *pin)
@@ -3004,84 +2881,6 @@ void GuiModule::AddPinGeometry(GuiPin *pin)
 
 }
 
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-// experimental
-//
-
-#if 0//GTK_CHECK_VERSION(2,8,7)
-
-
-static void CairoExperiment(Breadboard_Window *m_bbw,GdkPixmap *pixmap)
-{
-
-  static bool bThrough = false;
-  if (bThrough)
-    return;
-
-  cairo_t *cr = gdk_cairo_create (pixmap);
-
-
-  gdk_gc_set_foreground(m_bbw->case_gc,&black_color);
-  //gdk_draw_line(pixmap,m_bbw->case_gc, 10,10,  40,40);
-
-
-  double xc = 50;
-  double yc = 50;
-  double radius = 30;
-  double angle1 = 45.0  * (M_PI/180.0);  /* angles are specified */
-  double angle2 = 180.0 * (M_PI/180.0);  /* in radians           */
-
-  /*
-  cairo_arc (cr, xc, yc, radius, angle1, angle2);
-  cairo_stroke (cr);
-
-  cairo_set_source_rgba (cr, 1,0.2,0.2,0.6);
-  cairo_arc (cr, xc, yc, 5, 0, 2*M_PI);
-  cairo_fill (cr);
-
-  cairo_set_line_width (cr, 1);
-  cairo_arc (cr, xc, yc, radius, angle1, angle1);
-  cairo_line_to (cr, xc, yc);
-  cairo_arc (cr, xc, yc, radius, angle2, angle2);
-  cairo_line_to (cr, xc, yc);
-  */
-  cairo_scale (cr, 100, 100);
-  cairo_set_line_width (cr, 0.04);
-
-  cairo_move_to (cr, 0.4, 0.1);
-  cairo_line_to (cr, 0.1, 0.1);
-  cairo_line_to (cr, 0.1, 0.8);
-  cairo_line_to (cr, 0.8, 0.8);
-  cairo_line_to (cr, 0.8, 0.1);
-  cairo_line_to (cr, 0.55, 0.1);
-
-  cairo_curve_to (cr, 0.45, 0.15, 0.55, 0.15, 0.45, 0.1);
-
-  /*
-  cairo_move_to (cr, 0.5, 0.1);
-  cairo_line_to (cr, 0.9, 0.9);
-  cairo_rel_line_to (cr, -0.4, 0.0);
-  cairo_curve_to (cr, 0.2, 0.9, 0.2, 0.5, 0.5, 0.5);
-  */
-
-  cairo_close_path (cr);
-
-
-  cairo_set_source_rgb (cr, 0, 0, 1);
-  cairo_fill_preserve (cr);
-  cairo_set_source_rgb (cr, 0, 0, 0);
-  cairo_stroke (cr);
-  //cairo_stroke (cr);
-
-  bThrough=true;
-
-}
-
-#endif
-
-// end experimental
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
 static void createLabel(GtkWidget **da,
                         GdkPixmap **pixmap,
                         GtkWidget *parent,
@@ -3091,8 +2890,8 @@ static void createLabel(GtkWidget **da,
 {
   *da = gtk_drawing_area_new();
 
-  int height = gStringHeight(font,text);
-  int width  = gStringWidth(font,text);
+  int height = gdk_string_height(gdk_font_from_description(font), text);
+  int width  = gdk_string_width(gdk_font_from_description(font), text);
 
   gtk_widget_set_size_request(*da, width, height);
   *pixmap = gdk_pixmap_new(gtk_widget_get_window(parent),
@@ -3105,7 +2904,7 @@ static void createLabel(GtkWidget **da,
     0, 0, width, height);
 
   gdk_draw_text(*pixmap,
-                gFontFromDescription(font),
+                gdk_font_from_description(font),
                 gc,
                 0,height,
                 text,strlen(text));
@@ -3115,12 +2914,9 @@ void GuiModule::BuildReferenceDesignator()
 {
   createLabel(&m_name_widget, &m_name_pixmap, m_bbw->window, m_bbw->pinname_gc,
               m_module->name().c_str(),m_bbw->pinnamefont);
-  g_signal_connect(m_name_widget,
-                     "expose_event",
-                     G_CALLBACK(name_expose),
-                     this);
 
-
+  g_signal_connect(m_name_widget, "expose_event",
+    G_CALLBACK(name_expose), this);
 }
 
 //------------------------------------------------------------------------
@@ -3148,8 +2944,7 @@ void GuiModule::Build()
 
   m_module_widget = (GtkWidget *)m_module->get_widget();
 
-  m_pins=0;
-  m_pin_count=m_module->get_pin_count();
+  m_pin_count = m_module->get_pin_count();
 
   /*
   Value *xpos = m_module->get_attribute("xpos", false);
@@ -3189,7 +2984,7 @@ void GuiModule::Build()
     const char *name = m_module->get_pin_name(i).c_str();
 
     if(name && pPinGeometry->m_bShowPinname)
-      w = gStringWidth(m_bbw->pinnamefont, name);
+      w = gdk_string_width(gdk_font_from_description(m_bbw->pinnamefont), name);
 
     if(w > pinnameWidths[pPinGeometry->m_orientation])
       pinnameWidths[pPinGeometry->m_orientation]= w;
@@ -3250,17 +3045,18 @@ void GuiModule::Build()
   gtk_widget_show(m_name_widget);
 
 
-  GList *pin_iter;
-  pin_iter=m_pins;
-  while(pin_iter!=0) {
-    GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
+  std::vector<GuiPin *>::iterator pin_iter = m_pins.begin();
+
+  for ( ; pin_iter != m_pins.end(); ++pin_iter) {
+    GuiPin *pin = *pin_iter;
     AddPinGeometry(pin);
     if (m_module_pixmap)
-        pin->DrawLabel(m_module_pixmap);
+      pin->DrawLabel(m_module_pixmap);
+
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout),pin->m_pinDrawingArea,0,0);
 
     // Add pin to tree
-    const char *name=pin->pinName();
+    const char *name = pin->pinName();
     if(name) {
       gtk_tree_store_append (tree_store, &pin_titer, &module_titer);
       gtk_tree_store_set (tree_store, &pin_titer,
@@ -3268,8 +3064,6 @@ void GuiModule::Build()
                           1, pin,
                           -1);
     }
-
-    pin_iter = pin_iter->next;
   }
 
 
@@ -3294,7 +3088,7 @@ void GuiModule::Build()
 GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   : GuiBreadBoardObject(_bbw,0,0), m_module(_module), m_module_widget(0),
     m_pinLabel_widget(0), m_module_x(0), m_module_y(0), m_name_widget(0),
-    m_pin_count(0), m_module_pixmap(0), m_name_pixmap(0), m_pins(0)
+    m_pin_count(0), m_module_pixmap(0), m_name_pixmap(0)
 {
   m_width=0;
   m_height=0;
@@ -3487,13 +3281,13 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
   
   g_object_get (tree, "model", &tree_store, NULL);
 
-  if(gn==0) {
+  if (!gn) {
     GtkTreeIter parent_iter, iter;
 
-    gn = (struct gui_node *) malloc(sizeof(*gn));
+    gn = new gui_node;
 
-    gn->bbw=this;
-    gn->node=node;
+    gn->bbw = this;
+    gn->node = node;
 
     g_object_set_data(G_OBJECT(tree), node->name().c_str(), gn);
     gtk_tree_model_get_iter_first ((GtkTreeModel*) tree_store, &parent_iter);
@@ -3538,16 +3332,14 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 
 static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
 {
-
-    if(bbw->layout_pixmap==0)
-    {
-        puts("bbw.c: no pixmap5!");
-        return 0;
-    }
-
-    layout_adj_changed(widget, bbw);
-
+  if (!bbw->layout_pixmap) {
+    puts("bbw.c: no pixmap5!");
     return 0;
+  }
+
+  layout_adj_changed(widget, bbw);
+
+  return 0;
 }
 
 static GtkWidget *bb_vbox(GtkWidget *window, const char *name)
@@ -3630,7 +3422,6 @@ void Breadboard_Window::Build(void)
   gdk_color_parse("red",&high_output_color);
   gdk_color_parse("green",&low_output_color);
   gdk_color_parse("black",&black_color);
-  gdk_color_parse("gray",&gray_color);
 
   gdk_colormap_alloc_color(colormap, &high_output_color,FALSE,TRUE);
   gdk_colormap_alloc_color(colormap, &low_output_color,FALSE,TRUE);
@@ -3947,7 +3738,7 @@ void Breadboard_Window::Build(void)
 
   struct gui_node *gn;
 
-  gn = (struct gui_node *) malloc(sizeof(*gn));
+  gn = new gui_node;
   gn->bbw=this;
   gn->node=0; // indicates that this is the root node.
   GtkTreeIter iter;

@@ -2014,10 +2014,8 @@ public:
 
         if(iter==0) {
 
-          // Else malloc a new struct, fill with values and add (sorted) to list
-          struct cycle_histogram_counter *chc;
-
-          chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
+          // Else create a new struct, fill with values and add (sorted) to list
+          struct cycle_histogram_counter *chc = new cycle_histogram_counter;
           chc->start_address=startaddress;
           chc->stop_address=stopaddress;
           chc->histo_cycles=cycles;

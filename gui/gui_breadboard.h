@@ -122,8 +122,6 @@ public:
   const char *pinName();
 
   GtkWidget *m_pinDrawingArea;
-  GdkPixmap *pixmap;
-  GdkGC *gc;
 
   eDirection direction;
   eOrientation orientation;
@@ -143,6 +141,10 @@ protected:
   int    m_label_y;
 
   int    m_pkgPinNumber;    // 
+
+private:
+  static gboolean expose_pin(GtkWidget *widget, GdkEventExpose *event,
+    GuiPin *p);
 };
 
 
@@ -180,7 +182,7 @@ public:
   void BuildReferenceDesignator();
 
   int pin_count() { return m_pin_count; }
-  GList * pins() { return m_pins; }
+  std::vector<GuiPin *> * pins() { return &m_pins; }
   Module *module() { return m_module; }
   GtkWidget *module_widget() { return m_module_widget; }
   GtkWidget *pinLabel_widget() { return m_pinLabel_widget; }
@@ -205,7 +207,7 @@ protected:
   GdkPixmap *m_module_pixmap;
   GdkPixmap *m_name_pixmap;
 
-  GList *m_pins;
+  std::vector<GuiPin *> m_pins;
 };
 
 class GuiDipModule : public GuiModule
@@ -220,9 +222,6 @@ struct gui_node
     Breadboard_Window *bbw;
     Stimulus_Node *node;
     GtkWidget *tree_item;
-    int selected_row;
-
-    GList *pins;
 };
 
 

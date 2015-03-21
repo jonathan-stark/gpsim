@@ -86,7 +86,7 @@ class Register_Window : public GUI_Object
  private:
   // Formatting
   int register_size;    // The size (in bytes) of a single register
-  char *pCellFormat;    // dynamically created format string
+  char pCellFormat[12]; // format string
   int char_width;       // nominal character width.
   int char_height;      // nominal character height
   int chars_per_column; // width of 1 column
