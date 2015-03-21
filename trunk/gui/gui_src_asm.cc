@@ -1912,13 +1912,6 @@ void NSourcePage::updateMargin(int y1, int y2)
 
   GdkWindow *win = gtk_text_view_get_window (text_view, GTK_TEXT_WINDOW_LEFT);
 
-  if (y1 < 0) {
-    gint width;
-    y1 = 0;
-    gdk_window_get_size(win,&width,&y2);
-    Dprintf((" updateMargin updating whole margin y1=%d y2=%d\n",y1,y2));
-  }
-
   /* get the line numbers and y coordinates. */
   gtk_source_view_get_lines (text_view,
     y1,

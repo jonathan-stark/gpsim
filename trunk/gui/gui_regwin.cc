@@ -1614,10 +1614,6 @@ void Register_Window::SetRegisterSize()
 
   chars_per_column = 1 + 2*register_size;
 
-  if(pCellFormat)
-    free(pCellFormat);
-
-  pCellFormat = (char *) malloc(10 * sizeof(char));
   sprintf(pCellFormat,"%%0%dx",register_size*2);
 
   if(register_sheet) {
@@ -1990,10 +1986,8 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   int i;
 
   gp = _gp;
-  window = 0;
   wc = WC_data;
   wt = WT_register_window;
-  pCellFormat = 0;
   char_width = 0;
   chars_per_column = 3; // assume byte-sized registers
   register_sheet = NULL;

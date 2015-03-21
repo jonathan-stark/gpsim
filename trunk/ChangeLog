@@ -1,3 +1,9 @@
+2015-03-21 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui.h gui/gui_breadboard.cc gui/gui_breadboard.h
+	  gui/gui_main.cc gui/gui_profile.cc  gui/gui_regwin.cc
+	  gui/gui_regwin.h gui/gui_src_asm.cc
+	: Replace some deprecated GDK calls and code clean up
+
 2015-03-14 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_watch.cc gui/watch.h
 	: Replace the GtkCList with GtkListStore/GtkTreeView
