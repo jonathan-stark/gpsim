@@ -217,7 +217,8 @@ void Watch_Window::WriteSymbolList()
   DeleteSymbolList();
   // write the current list
   count = 0;
-  gtk_tree_model_foreach(GTK_TREE_MODEL(watch_list), do_symbol_write, this);
+  if (watch_list)
+      gtk_tree_model_foreach(GTK_TREE_MODEL(watch_list), do_symbol_write, this);
 }
 
 void Watch_Window::DeleteSymbolList()
@@ -520,8 +521,8 @@ static gboolean do_an_update(GtkTreeModel *model, GtkTreePath *path,
 
 void Watch_Window::Update()
 {
-  gtk_tree_model_foreach(GTK_TREE_MODEL(watch_list),
-     do_an_update, this);
+  if (watch_list)
+      gtk_tree_model_foreach(GTK_TREE_MODEL(watch_list), do_an_update, this);
 }
 
 void Watch_Window::Add(REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
