@@ -1,3 +1,7 @@
+2015-03-23 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_watch.cc: fix gtk_tree_model_foreach assert
+	* src/14bit-tmrs.cc: fix debug print format warning
+
 2015-03-21 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui.h gui/gui_breadboard.cc gui/gui_breadboard.h
 	  gui/gui_main.cc gui/gui_profile.cc  gui/gui_regwin.cc

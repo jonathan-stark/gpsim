@@ -1473,9 +1473,10 @@ public:
 //--------------------------------------------------
 TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
+    tmr1_interface(0),
     m_cState('?'), m_GateState(false), m_compare_GateState(true),
     m_io_GateState(true), m_bExtClkEnabled(false), 
-    m_sleeping(false), m_t1gss(true), m_Interrupt(0), tmr1_interface(0)
+    m_sleeping(false), m_t1gss(true), m_Interrupt(0)
 {
 
   value.put(0);
@@ -2621,7 +2622,7 @@ void TMR2::new_pr2(unsigned int new_value)
 
       guint64 fc = last_cycle;
       Dprintf(( "   cur_break = 0x%X,  new_break = 0x%X,  now = 0x%X\n", cur_break, new_break, now_cycle ));
-      Dprintf(( "   last_cycle = 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
+      Dprintf(( "   last_cycle = 0x%" PRINTF_GINT64_MODIFIER "X\n", fc ));
 
       /*
 	PR2 change cases
@@ -2641,7 +2642,7 @@ void TMR2::new_pr2(unsigned int new_value)
         // set break to when TMR2 will overflow
 	last_update |= TMR2_WRAP;
         fc += 0x100 * prescale;
-        Dprintf(( "   now > new, set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
+        Dprintf(( "   now > new, set future_cycle to 0x%" PRINTF_GINT64_MODIFIER "X\n", fc ));
         get_cycles().reassign_break(future_cycle, fc, this);
         future_cycle = fc;
       }
@@ -2649,7 +2650,7 @@ void TMR2::new_pr2(unsigned int new_value)
 	       new_break < cur_break)		// new break less than current
       {
 	fc += new_break * prescale;
-        Dprintf(( "   new<break, set future_cycle to 0x%" PRINTF_INT64_MODIFIER "X\n", fc ));
+        Dprintf(( "   new<break, set future_cycle to 0x%" PRINTF_GINT64_MODIFIER "X\n", fc ));
 	if ( cur_break != break_value )
             last_update = TMR2_PR2_UPDATE;      // RP : fix bug 3092906
         get_cycles().reassign_break(future_cycle, fc, this);
