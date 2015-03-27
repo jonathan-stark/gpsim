@@ -73,8 +73,12 @@ exit_int:
 ; Interrupt from porta state change
 raif_int
         incf    aint_cnt,F
-	movf	PORTA,W		; reading ports should clear RAIF
-  .assert "(intcon & 1) == 0, \"***FAILED p16f676 RAIF clear on read porta\""
+	bcf	INTCON,RAIF
+  .assert "(intcon & 1) == 1, \"***FAILED p16f676 RAIF not cleared with match condition\""
+	nop 
+	movf	PORTA,W		; reading ports should clear match condition
+	bcf	INTCON,RAIF
+  .assert "(intcon & 1) == 0, \"***FAILED p16f676 RAIF is clear\""
 	nop 
         goto    exit_int
 

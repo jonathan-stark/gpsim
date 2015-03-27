@@ -43,7 +43,7 @@ License along with this library; if not, see
 //--------------------------------------------------
 INTCON::INTCON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    interrupt_trace(0),in_interrupt(0)
+    interrupt_trace(0),in_interrupt(0), portGReg(0)
 {
 }
 
@@ -55,6 +55,20 @@ void INTCON::set_T0IF()
 
 }
 
+void INTCON::set_rbif(bool b)
+{
+    bool current = (value.get() & RBIF) == RBIF;
+
+    if (b && !current)
+      put(value.get() | RBIF);
+    if (!b && current)
+    {
+      put(value.get() & ~RBIF);
+      if (portGReg)		// check if IOC match condition still exists
+	portGReg->setIOCif();
+    }
+}
+
 void INTCON::put(unsigned int new_value)
 {
   Dprintf((" INTCON::%s\n",__FUNCTION__));
@@ -64,8 +78,14 @@ void INTCON::put(unsigned int new_value)
 
 void INTCON::put_value(unsigned int new_value)
 {
+  unsigned int diff = new_value ^ value.get();
   Dprintf((" INTCON::%s value %02x\n",__FUNCTION__, new_value));
   value.put(new_value);
+
+  // If we are clearing RBIF and we are using simple IOC, reset RBIF if
+  // port miss-match still exists 
+  if ((diff & RBIF) && !(new_value & RBIF) && portGReg)
+	portGReg->setIOCif();
 
   // Now let's see if there's a pending interrupt
   // The INTCON bits are:
@@ -171,6 +191,7 @@ INTCON_14_PIR::INTCON_14_PIR(Processor *pCpu, const char *pName, const char *pDe
 
 void INTCON_14_PIR::put_value(unsigned int new_value)
 {
+  unsigned int diff = new_value ^ value.get();
 
   value.put(new_value);
   // Now let's see if there's a pending interrupt
@@ -183,6 +204,11 @@ void INTCON_14_PIR::put_value(unsigned int new_value)
   // there's an interrupt pending.
   // note: bit6 is not handled here because it is processor
   // dependent (e.g. EEIE for x84 and ADIE for x7x).
+
+  // If we are clearing IOCIF and we are using simple IOC, reset IOCIF if
+  // port miss-match still exists 
+  if ((diff & IOCIF) && !(new_value & IOCIF) && portGReg)
+	portGReg->setIOCif();
 
   if(value.get() & GIE  &&  !in_interrupt &&
      ( ((value.get()>>3) & value.get() & (T0IF | INTF | IOCIF)) ||
@@ -232,6 +258,7 @@ void INTCON_14_PIR::aocxf_val(IOCxF *ptr, unsigned int val)
 	}
 	set_rbif(sum);
 }
+
 void INTCON_14_PIR::set_rbif(bool b)
   {
     bool current = (value.get() & IOCIF) == IOCIF;

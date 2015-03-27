@@ -26,8 +26,10 @@ License along with this library; if not, see
 #include "gpsim_classes.h"
 #include "registers.h"
 #include "breakpoints.h"
+#include "pic-ioports.h"
 
 class IOCxF;
+class PicPortGRegister;
 //---------------------------------------------------------
 // INTCON - Interrupt control register
 
@@ -72,14 +74,7 @@ enum
   */
   virtual void peripheral_interrupt ( bool hi_pri = false );
 
-  virtual void set_rbif(bool b)
-  {
-    bool current = (value.get() & RBIF) == RBIF;
-    if (b && !current)
-      put(value.get() | RBIF);
-    if (!b && current)
-      put(value.get() & ~RBIF);
-  }
+  virtual void set_rbif(bool b);
 
   inline void set_intf(bool b)
   {
@@ -88,6 +83,7 @@ enum
       put(value.get() | INTF);
     if (!b && current)
       put(value.get() & ~INTF);
+
  }
 
   inline void set_t0if()
@@ -110,10 +106,16 @@ enum
       put(value.get() | T0IE);
     }
 
+  void set_portGReg(  PicPortGRegister *_portGReg)
+  {
+	portGReg = _portGReg;
+  }
   virtual int check_peripheral_interrupt()=0;
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual void aocxf_val(IOCxF *, unsigned int val){}
+
+  PicPortGRegister *portGReg;
 
 };
 

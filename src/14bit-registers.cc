@@ -165,7 +165,7 @@ void  BSR::put_value(unsigned int new_value)
 void  IOCxF::put(unsigned int new_value)
 {
   unsigned int masked_value = new_value & mValidBits;
-  Dprintf((" %s value %x add %x\n", name().c_str(), new_value, new_value&valid_bits));
+  Dprintf((" %s value %x masked %x\n", name().c_str(), new_value, masked_value));
 
   get_trace().raw(write_trace.get() | value.get());
   value.put(masked_value);

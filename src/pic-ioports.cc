@@ -273,7 +273,7 @@ void PicPortBRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
 
-  m_pIntcon->set_rbif(false);
+  //fprintf(stderr, "PicPortBRegister::put()\n");
 
 //  unsigned int diff = mEnableMask & (new_value ^ value.data);
 //RRR  if(diff) {
@@ -286,13 +286,15 @@ void PicPortBRegister::put(unsigned int new_value)
     // to its proper value.
     updatePort();
 //RRR  }
+  lastDrivenValue = rvDrivenValue;
 
 }
 
 unsigned int PicPortBRegister::get()
 {
-  m_pIntcon->set_rbif(false);
+  //fprintf(stderr, "PicPortBRegister::get()\n");
 
+  lastDrivenValue = rvDrivenValue;
   return mOutputMask & rvDrivenValue.data;
 }
 
@@ -306,7 +308,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 
   // interrupt bit 0 on specified edge 
   bool bNewValue = new3State=='1' || new3State=='W';
-  RegisterValue lastDrivenValue = rvDrivenValue;
+  lastDrivenValue = rvDrivenValue;
   PortRegister::setbit(bit_number, new3State);
 
   if (m_pIntcon3)
@@ -471,7 +473,26 @@ void PicPortBRegister::setIntEdge(bool bNewIntEdge)
   m_bIntEdge = bNewIntEdge;
 }
 
+PicPortGRegister::PicPortGRegister(Processor *pCpu, const char *pName, const char *pDesc,
+                   INTCON *pIntcon, IOC *pIoc,
+                   unsigned int numIopins, unsigned int enableMask)
+	: PicPortBRegister(pCpu, pName, pDesc, pIntcon, numIopins, enableMask),
+	m_pIntcon(pIntcon), m_pIoc(pIoc)
+{
+      m_pIntcon->set_portGReg(this);
+}
 // set_rbif involves RBIF,RBIE in INTCON which are the same bits as GPIF,GPIE
+void PicPortGRegister::setIOCif()
+{
+ // interrupt and exit sleep for level change on bits where IOC set
+    int bitMask = m_pIoc->get_value();
+
+
+    if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get_value() & bitMask ) {
+      cpu_pic->exit_sleep();
+      m_pIntcon->set_rbif(true);
+    }
+}
 void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
 {
   // interrupt bit 2 on specified edge 
@@ -480,19 +501,16 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
       && (bNewValue == m_bIntEdge))
     m_pIntcon->set_intf(true);
 
-    RegisterValue lastDrivenValue = rvDrivenValue;
+    lastDrivenValue = rvDrivenValue;
     PortRegister::setbit(bit_number, new3State);
-
+   
+    setIOCif();
  // interrupt and exit sleep for level change on bits where IOC set
     int bitMask = m_pIoc->get_value() & (1 << bit_number);
 
    if (verbose)
        printf("PicPortGRegister::setbit() bit=%d,val=%c IOC_bit=%x\n",bit_number,new3State, bitMask);
 
-    if ( (lastDrivenValue.data ^ rvDrivenValue.data) & m_tris->get_value() & bitMask ) {
-      cpu_pic->exit_sleep();
-      m_pIntcon->set_rbif(true);
-    }
 }
 void PicPortIOCRegister::setbit(unsigned int bit_number, char new3State)
 {
