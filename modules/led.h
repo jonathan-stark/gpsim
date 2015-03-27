@@ -78,8 +78,8 @@ namespace Leds {
 
   // define a point
   typedef struct {
-    float x;
-    float y;
+    double x;
+    double y;
   } XfPoint;
 
 #define MAX_PTS         6       /* max # of pts per segment polygon */
@@ -102,37 +102,12 @@ namespace Leds {
   class Led_7Segments : public Module, public Led_base, public TriggerObject
   {
   public:
-
-    struct {
-      GdkPoint p[7];  // Segments 
-    } segments[7];
-
-    GdkPoint offset;
-    int height,
-      slant,
-      segment_thickness;
-
-    float sxw;
-
-    float               angle;          // rise over run 
-    float               width_factor;   // ratio of digit to segment width 
-    float               small_ratio;    // ratio of small to large digits
-    float               sec_gap;        // gap between normal digits and 
-    // seconds, as ratio to digit width 
-    float               space_factor;   /* ratio of digit width to border sp.*/
-
-
     guint w_width;
     guint w_height;
 
     segment_pts seg_pts;
 
     GtkWidget *darea;
-    GdkGC *segment_gc;
-
-    GdkColor led_segment_on_color;
-    GdkColor led_segment_off_color;
-    GdkColor led_background_color;
 
     Led_7Segments(const char *);
     ~Led_7Segments();  
@@ -155,6 +130,9 @@ namespace Leds {
     const virtual char *type() { return ("led_7segments"); };
     static Module *construct(const char *new_name);
   private:
+    static gboolean led7_expose_event(GtkWidget *widget, GdkEvent *event,
+      gpointer user_data);
+
     //unsigned int m_segmentStates;
     Led_Input **m_pins;
     int m_nPins;
@@ -173,7 +151,7 @@ namespace Leds {
   public:
 
     GtkWidget *darea;
-    GdkGC *gc;
+
     GdkColor led_on_color[BLUE+1];
     GdkColor led_segment_off_color;
     int w_width, w_height;
@@ -203,6 +181,9 @@ namespace Leds {
     
 
   private:
+    static gboolean led_expose_event(GtkWidget *widget, GdkEvent *event,
+      gpointer user_data);
+
     Led_Input *m_pin;
     Colors on_color;
     ColorAttribute *m_colorAttribute;

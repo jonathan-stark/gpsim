@@ -1,3 +1,8 @@
+2015-03-27 Errol van de l'Isle <evandel@cix.co.uk>
+	* modules/led.cc modules/led.h modules/logic.cc modules/logic.h
+	  modules/video.cc modules/video.h
+	: Replace deprecated GDK calls and code clean up
+
 2015-03-27 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f676/reset.asm regression/p16f684/reset.asm 
 	  regression/p16f84/reset.asm src/14bit-registers.cc src/intcon.cc 

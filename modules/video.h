@@ -78,27 +78,25 @@ public:
 
   GtkWidget *window;
   GtkWidget *da;
-  GdkGC *white_gc, *black_gc, *grey_gc;
-  GdkPixmap *pixmap;
+  cairo_surface_t *image;
+
   int line_nr;
   int last_line_nr;
 
-  GdkColor black_color, grey_color, white_color;
-  
   Video(const char *);
-  ~Video(void);
+  ~Video();
 
   // Inheritances from the Package class
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
 
-  virtual void update_state(void);
-  virtual int get_num_of_pins(void) {return 2;};
-  void copy_scanline_to_pixmap(void);
-  int check_for_vrt1(void);
-  int check_for_vrt2(void);
+  virtual void update_state();
+  virtual int get_num_of_pins() {return 2;};
+  void copy_scanline_to_pixmap();
+  int check_for_vrt1();
+  int check_for_vrt2();
   guint64 cycles_to_us(guint64 cycles);
   guint64 us_to_cycles(guint64 cycles);
-  void refresh(void);
+  void refresh();
   static Module *construct(const char *new_name);
 
 private:

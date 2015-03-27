@@ -64,8 +64,7 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <errno.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <iostream>
 #include <typeinfo>
@@ -74,7 +73,7 @@ License along with this library; if not, see
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
-#include <math.h>
+#include <cmath>
 
 #include "../src/gpsim_interface.h"
 #include "../src/gpsim_time.h"
@@ -156,115 +155,59 @@ namespace Leds {
 
   }
 
-  void Led_7Segments::update(  GtkWidget *widget,
-                               guint new_width,
-                               guint new_height)
-  {
+void Led_7Segments::update(GtkWidget *widget, guint new_width, guint new_height)
+{
+  if(!get_interface().bUsingGUI())
+    return;
 
-    guint i;
-
-    if(!get_interface().bUsingGUI())
-      return;
-
-    w_width = new_width;
-    w_height = new_height;
-
-    if(!gtk_widget_get_realized(widget))
-      return;
-
-    GdkDrawable *drawable = gtk_widget_get_window(widget);
-
-    if(segment_gc==NULL)
-      {
-        segment_gc = gdk_gc_new(gtk_widget_get_window(darea));
-        gdk_gc_set_line_attributes(segment_gc,
-                                   5,
-                                   GDK_LINE_SOLID,
-                                   GDK_CAP_ROUND,
-                                   GDK_JOIN_ROUND);
-        g_assert(segment_gc!=NULL);
-      }
+  gtk_widget_queue_draw(widget);
+}
 
 
-    // not a very O-O way of doing it... but here we go directly
-    // to the I/O port and get the values of the segments
-    int segment_states = getPinState();
+gboolean Led_7Segments::led7_expose_event(GtkWidget *widget, GdkEvent *event,
+  gpointer user_data)
+{
+  Led_7Segments *led = static_cast<Led_7Segments *>(user_data);
 
-    GdkGC *gc = segment_gc;
+  g_return_val_if_fail (widget != NULL, TRUE);
+  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
 
-    gdk_gc_set_foreground(gc,
-                          &led_background_color);
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
+  guint max_width = allocation.width;
+  guint max_height = allocation.height;
 
-    gdk_draw_rectangle (drawable, gc,
-                        TRUE,
-                        0,
-                        0,
-                        w_width,
-                        w_height);
+  // not a very O-O way of doing it... but here we go directly
+  // to the I/O port and get the values of the segments
+  int segment_states = led->getPinState();
 
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 
-    // cout << "expose led, segment states = " << segment_states << '\n';
+  cairo_rectangle(cr, 0.0, 0.0, max_width, max_height);
+  cairo_fill(cr);
 
-    if( (segment_states & 1) == 0) {
-      // common cathode, cathode must be low to turn
-      //digits on.
-
-      gdk_gc_set_foreground(gc,&led_segment_on_color);
-
-      for(i=0; i<7; i++) {
-        if(segment_states & (2<<i))
-          gdk_draw_polygon ( drawable,
-                             gc,
-                             TRUE,
-                             segments[i].p,
-                             6);
-
-
-      }
+  for (size_t i = 0; i < 7; ++i) {
+    // common cathode, cathode must be low to turn
+    //digits on.
+    if ((segment_states & 1) == 0 && segment_states & (2 << i)) {
+      cairo_set_source_rgb(cr, 0.75, 0.0, 0.0);
+    } else {
+      cairo_set_source_rgb(cr, 0.25, 0.0, 0.0);
     }
 
-    gdk_gc_set_foreground(gc,&led_segment_off_color);
-
-    // turn off the segments that aren't being driven.
-
-    for(i=0; i<7; i++) {
-      if((segment_states & (2<<i)) == 0)
-        gdk_draw_polygon ( drawable,
-                           gc,
-                           TRUE,
-                           segments[i].p,
-                           6);
-
+    XfPoint *pts = &(led->seg_pts[i][0]);
+    cairo_move_to(cr, pts[0].x, pts[0].y);
+    for (size_t j = 1; j < MAX_PTS; ++j) {
+      cairo_line_to(cr, pts[j].x, pts[j].y);
     }
+    cairo_line_to(cr, pts[0].x, pts[0].y);
+    cairo_fill(cr);
   }
 
+  cairo_destroy(cr);
 
-  static gint
-  led7_expose_event (GtkWidget *widget,
-                     GdkEvent  *event,
-                     gpointer   user_data)
-  {
-
-
-    Led_7Segments *led;
-    guint max_width;
-    guint max_height;
-
-    g_return_val_if_fail (widget != NULL, TRUE);
-    g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
-
-    // de-reference the user_data into an led object
-    led = (Led_7Segments *)user_data;
-
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(widget, &allocation);
-    max_width = allocation.width;
-    max_height = allocation.height;
-
-    led->update(widget,max_width,max_height);
-
-    return TRUE;
-  }
+  return TRUE;
+}
 
   static gint
   cursor_event (GtkWidget          *widget,
@@ -293,8 +236,8 @@ namespace Leds {
   // This routine will calculate what those points should be and
   // store them an arrary.
 
-  void Led_7Segments::build_segments( int w, int h)
-  {
+void Led_7Segments::build_segments( int w, int h)
+{
     XfPoint *pts;
     float spacer, hskip, fslope, bslope, midpt, seg_width, segxw;
     float invcosphi, invsinphi, invcospsi, invsinpsi, slope;
@@ -307,21 +250,21 @@ namespace Leds {
 
     // Hard code the display parameters...
 
-    space_factor = (float)0.13;
-    width_factor = (float)0.13;
-    sxw = (float)0.13;
-    angle = 6;
+    float space_factor = 0.13;
+    float width_factor = 0.13;
+    float sxw = 0.13;
+    float angle = 6;
 
     /* define various useful constants */
 
     segxw = sxw * w;
     slope = angle;
     seg_width = width_factor * w;
-    spacer = (float)w * space_factor;
-    hskip = (float)(seg_width * 0.125);
+    spacer = w * space_factor;
+    hskip = seg_width * 0.125;
     fslope = 1 / (segxw/seg_width + 1/slope);
     bslope = -1 / (segxw/seg_width - 1/slope);
-    midpt = (float)h / 2;
+    midpt = h / 2;
 
     /* define some trigonometric values */
     /*  phi is the forward angle separating two segments;
@@ -450,85 +393,22 @@ namespace Leds {
     pts[3].x = seg_pts[BOTTOM][2].x + 2 * dx5;
     pts[4].x = seg_pts[BOTTOM][1].x + dx4 + dx2;
     pts[5].x = seg_pts[MIDDLE][3].x - 2 * dx1;
+}
 
-    // Convert the floating point points into integers.
-    int i,j;
-    for(i=0; i<NUM_SEGS; i++) {
+void Led_7Segments::build_window()
+{
+  darea = gtk_drawing_area_new();
 
-      for(j=0; j<MAX_PTS; j++) {
+  gtk_widget_set_size_request(darea, 100, 110);
 
-        segments[i].p[j].x = (int)seg_pts[i][j].x;
-        segments[i].p[j].y = (int)seg_pts[i][j].y;
-      }
-    }
+  g_signal_connect(darea, "expose_event", G_CALLBACK(led7_expose_event), this);
+  gtk_widget_set_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+  g_signal_connect(darea, "button_press_event", G_CALLBACK(cursor_event), NULL);
 
-  }
+  gtk_widget_show(darea);
 
-  void Led_7Segments::build_window()
-  {
-    GtkWidget *main_vbox;
-    GtkWidget *vbox;
-
-    main_vbox = gtk_vbox_new (FALSE, 5);
-    gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
-
-    vbox =
-      gtk_widget_new (gtk_vbox_get_type (),
-                      "GtkBox::homogeneous", FALSE,
-                      //"GtkBox::spacing", 5,
-                      //"GtkContainer::border_width", 10,
-                      "GtkWidget::parent", main_vbox,
-                      "GtkWidget::visible", TRUE,
-                      NULL);
-    gtk_widget_show(vbox);
-
-
-    darea = gtk_drawing_area_new ();
-
-    gtk_widget_set_size_request(darea, 100, 110);
-    gtk_container_add (GTK_CONTAINER (vbox), darea);
-
-    g_signal_connect (darea,
-                        "expose_event",
-                        G_CALLBACK(led7_expose_event),
-                        this);
-    gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-    g_signal_connect (darea,
-                        "button_press_event",
-                        G_CALLBACK(cursor_event),
-                        NULL);
-
-    gtk_widget_show (darea);
-
-    set_widget(main_vbox);
-
-    segment_gc=NULL;
-
-    // The 'on' color is bright red
-    led_segment_on_color.red = 0xc000;
-    led_segment_on_color.green = 0x0000;
-    led_segment_on_color.blue = 0x0000;
-
-    gdk_colormap_alloc_color(gdk_colormap_get_system(), &led_segment_on_color, FALSE, TRUE);
-
-    // The `off' color is dark red
-    led_segment_off_color.red = 0x4000;
-    led_segment_off_color.green = 0x0000;
-    led_segment_off_color.blue = 0x0000;
-
-    gdk_colormap_alloc_color(gdk_colormap_get_system(), &led_segment_off_color, FALSE, TRUE);
-
-    // The background is black like my coffee
-    led_background_color.red = 0x0000;
-    led_background_color.green = 0x0000;
-    led_background_color.blue = 0x0000;
-
-    gdk_colormap_alloc_color(gdk_colormap_get_system(), &led_background_color, FALSE, TRUE);
-
-    //  }
-
-
-  }
+  set_widget(darea);
+}
 
   //--------------------------------------------------------------
 
@@ -546,14 +426,9 @@ namespace Leds {
     create_iopin_map();
   }
 
-  Led_7Segments::~Led_7Segments()
-  {
-    /* Deleted elsewhere RRR
-    for (int i=0; i<8; i++)
-      delete m_pins[i];
-    delete [] m_pins;
-   */
-  }
+Led_7Segments::~Led_7Segments()
+{
+}
 
   //--------------------------------------------------------------
   // create_iopin_map
@@ -598,19 +473,17 @@ namespace Leds {
   }
 
   //--------------------------------------------------------------
-  unsigned int Led_7Segments::getPinState()
-  {
-    unsigned int s=0;
-    double delta_v;
+unsigned int Led_7Segments::getPinState()
+{
+  unsigned int s = 0;
 
-
-    for (int i=1; i<8; i++)
-    {
-      delta_v = m_pins[i]->get_nodeVoltage() -m_pins[0]->get_nodeVoltage();
-      s = (s>>1) | (delta_v > 1.5 ? 0x80 : 0);
-    }
-    return s;
+  for (int i = 1; i < 8; i++) {
+    double delta_v = m_pins[i]->get_nodeVoltage() - m_pins[0]->get_nodeVoltage();
+    s = (s >> 1) | (delta_v > 1.5 ? 0x80 : 0);
   }
+
+  return s;
+}
 
   //--------------------------------------------------------------
   // construct
@@ -648,7 +521,7 @@ void ColorAttribute::set(Value *v)
   {
      char buff[20];
 
-     v->get((char *)buff, sizeof(buff));
+     v->get(buff, sizeof(buff));
      set(buff);
   }
   else
@@ -677,23 +550,23 @@ void ColorAttribute::get(char *return_str, int len)
     switch(m_led->get_on_color())
     {
     case RED:
-        strncpy(return_str, "red", len);
+        g_strlcpy(return_str, "red", len);
         break;
 
     case ORANGE:
-        strncpy(return_str, "orange", len);
+        g_strlcpy(return_str, "orange", len);
         break;
 
     case GREEN:
-        strncpy(return_str, "green", len);
+        g_strlcpy(return_str, "green", len);
         break;
 
     case YELLOW:
-        strncpy(return_str, "yellow", len);
+        g_strlcpy(return_str, "yellow", len);
         break;
 
     case BLUE:
-        strncpy(return_str, "blue", len);
+        g_strlcpy(return_str, "blue", len);
         break;
 
     }
@@ -756,7 +629,7 @@ void ActiveStateAttribute::set(Value *v)
   {
      char buff[20];
 
-     v->get((char *)buff, sizeof(buff));
+     v->get(buff, sizeof(buff));
      set(buff);
   }
   else
@@ -785,11 +658,11 @@ void ActiveStateAttribute::get(char *return_str, int len)
     switch(m_led->get_the_activestate())
     {
     case HIGH:
-        strncpy(return_str, "high", len);
+        g_strlcpy(return_str, "high", len);
         break;
 
     case LOW:
-        strncpy(return_str, "low", len);
+        g_strlcpy(return_str, "low", len);
         break;
     }
   }
@@ -828,79 +701,24 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
     update();
 
   }
-  void Led::update(  GtkWidget *widget,
-                     guint new_width,
-                     guint new_height)
-  {
-    if(!get_interface().bUsingGUI())
-      return;
 
-    w_width = new_width;
-    w_height = new_height;
+void Led::update(GtkWidget *widget, guint new_width, guint new_height)
+{
+  if (!get_interface().bUsingGUI())
+    return;
 
-    if(!gtk_widget_get_realized(widget))
-      return;
+  gtk_widget_queue_draw(widget);
+}
 
-    GdkDrawable *drawable = gtk_widget_get_window(widget);
-
-    if(gc==NULL)
-      {
-        gc = gdk_gc_new(gtk_widget_get_window(darea));
-        gdk_gc_set_line_attributes(gc,
-                                   5,
-                                   GDK_LINE_SOLID,
-                                   GDK_CAP_ROUND,
-                                   GDK_JOIN_ROUND);
-        g_assert(gc!=NULL);
-      }
-
-
-    gdk_gc_set_foreground(gc,&led_segment_off_color);
-    gdk_draw_rectangle (drawable, gc,
-                        TRUE,
-                        0,
-                        0,
-                        w_width,
-                        w_height);
-
-    // Led is on when DrivenState=TRUE in current HIGH active state OR
-    // when DrivenState=FALSE in current LOW active state.
-    double delta_v ;
-    if (get_the_activestate() == HIGH)
-	delta_v = m_pin->get_nodeVoltage() - m_pin->get_Vth();
-    else
-	delta_v = m_pin->get_Vth() - m_pin->get_nodeVoltage();
-/*
-    if((m_pin->getDrivenState() && get_the_activestate()==HIGH) ||
-       (!m_pin->getDrivenState() && get_the_activestate()==LOW)) {
-*/
-    if (delta_v > 1.5)
-    {
-        gdk_gc_set_foreground(gc,&led_on_color[on_color]);
-        gdk_draw_arc(drawable, gc,
-                   TRUE,
-                   0,
-                   0,
-                   w_width,
-                   w_height,
-                   0,64*360);
+void Led::set_on_color(Colors color)
+{
+  if (color != on_color) {
+    on_color = color;
+    if (get_interface().bUsingGUI()) {
+      update();
     }
   }
-
-  void Led::set_on_color(Colors color)
-  {
-        if (color != on_color)
-        {
-            on_color = color;
-            if (get_interface().bUsingGUI() )
-            {
-                if (!led_on_color[color].pixel) // color not allocated
-                        gdk_colormap_alloc_color(gdk_colormap_get_system(),
-                                            &led_on_color[color], FALSE, TRUE);
-                update();
-            }
-        }
-  }
+}
 
   void Led::set_the_activestate(ActiveStates activestate)
   {
@@ -919,115 +737,104 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
   }
 
 
-  static gint
-  led_expose_event (GtkWidget *widget,
-                    GdkEvent  *event,
-                    gpointer   user_data)
-  {
+gboolean Led::led_expose_event(GtkWidget *widget, GdkEvent *event,
+  gpointer user_data)
+{
+  Led *led = static_cast<Led *>(user_data);
 
+  g_return_val_if_fail (widget != NULL, TRUE);
+  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
 
-    Led *led;
-    guint max_width;
-    guint max_height;
+  GtkAllocation allocation;
+  gtk_widget_get_allocation(widget, &allocation);
 
-    g_return_val_if_fail (widget != NULL, TRUE);
-    g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+  guint max_width = allocation.width;
+  guint max_height = allocation.height;
 
-    // de-reference the user_data into an led object
-    led = (Led *)user_data;
+  led->update(widget,max_width,max_height);
 
-    GtkAllocation allocation;
-    gtk_widget_get_allocation(widget, &allocation);
+  GdkWindow *gdk_win = gtk_widget_get_window(widget);
+  cairo_t *cr = gdk_cairo_create(gdk_win);
 
-    max_width = allocation.width;
-    max_height = allocation.height;
+  // Led is on when DrivenState=TRUE in current HIGH active state OR
+  // when DrivenState=FALSE in current LOW active state.
+  double delta_v ;
+  if (led->get_the_activestate() == HIGH)
+    delta_v = led->m_pin->get_nodeVoltage() - led->m_pin->get_Vth();
+  else
+    delta_v = led->m_pin->get_Vth() - led->m_pin->get_nodeVoltage();
 
-    led->update(widget,max_width,max_height);
-
-    return TRUE;
+  if (delta_v > 1.5) {
+    gdk_cairo_set_source_color(cr, &led->led_on_color[led->on_color]);
+  } else {
+    gdk_cairo_set_source_color(cr, &led->led_segment_off_color);
   }
 
-  void Led::build_window()
-  {
-    GtkWidget *main_vbox;
+  cairo_arc(cr, max_width / 2, max_height / 2, max_width / 2, 0.0, 2 * G_PI);
+  cairo_fill(cr);
 
-    main_vbox = gtk_vbox_new (FALSE, 5);
-    gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
+  cairo_destroy(cr);
 
-    darea = gtk_drawing_area_new ();
+  return FALSE;
+}
 
-    w_height=20;
-    w_width=20;
+void Led::build_window()
+{
+  darea = gtk_drawing_area_new ();
 
-    gtk_widget_set_size_request(darea, w_height, w_width);
-    g_signal_connect (darea,
-                        "expose_event",
-                        G_CALLBACK(led_expose_event),
-                        this);
-    gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-    gtk_widget_show (darea);
+  w_height=20;
+  w_width=20;
 
-    set_widget(darea);
+  gtk_widget_set_size_request(darea, w_height, w_width);
+  g_signal_connect (darea,
+                      "expose_event",
+                      G_CALLBACK(led_expose_event),
+                      this);
+  gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+  gtk_widget_show (darea);
 
-    gc=NULL;
+  set_widget(darea);
 
-    // The default 'on' color is bright red
+  // The default 'on' color is bright red
 
-    for(int i = RED; i <= BLUE; i++ )
-        led_on_color[i].pixel = 0;
+  gdk_color_parse("red3", &led_on_color[RED]);
+  gdk_color_parse("orange", &led_on_color[ORANGE]);
+  gdk_color_parse("green", &led_on_color[GREEN]);
+  gdk_color_parse("yellow", &led_on_color[YELLOW]);
+  gdk_color_parse("blue", &led_on_color[BLUE]);
 
-    gdk_color_parse("red3", &led_on_color[RED]);
-    gdk_color_parse("orange", &led_on_color[ORANGE]);
-    gdk_color_parse("green", &led_on_color[GREEN]);
-    gdk_color_parse("yellow", &led_on_color[YELLOW]);
-    gdk_color_parse("blue", &led_on_color[BLUE]);
-
-    GdkColormap *colormap = gdk_colormap_get_system();
-
-    for(int i = RED; i <= BLUE; i++ )
-        gdk_colormap_alloc_color(colormap, &led_on_color[i], FALSE, TRUE);
-
-    // The `off' color is dark red
-    led_segment_off_color.red = 0x4000;
-    led_segment_off_color.green = 0x0000;
-    led_segment_off_color.blue = 0x0000;
-
-    gdk_colormap_alloc_color(colormap, &led_segment_off_color, FALSE, TRUE);
-  }
+  // The `off' color is dark red
+  led_segment_off_color.red = 0x4000;
+  led_segment_off_color.green = 0x0000;
+  led_segment_off_color.blue = 0x0000;
+}
 
   //--------------------------------------------------------------
 
-  Led::Led(const char *name) : Module(name, "Simple LED")
-  {
+Led::Led(const char *name)
+  : Module(name, "Simple LED"), on_color(RED), the_activestate(HIGH)
+{
+  create_iopin_map();
+  // the following will load the driver of the input as would a real
+  // LED
+  m_pin->set_Zth(150.);
+  m_pin->set_Vth(0.);
+  if (get_interface().bUsingGUI())
+    build_window();
 
-    create_iopin_map();
-    // the following will load the driver of the input as would a real
-    // LED
-    m_pin->set_Zth(150.);
-    m_pin->set_Vth(0.);
-    if(get_interface().bUsingGUI())
-      build_window();
+  m_colorAttribute = new ColorAttribute(this);
+  addSymbol(m_colorAttribute);
+  m_activestateAttribute = new ActiveStateAttribute(this);
+  addSymbol(m_activestateAttribute);
+  led_interface = new LED_Interface(this);
+  get_interface().add_interface(led_interface);
+  callback();
+}
 
-
-    on_color = RED;
-    m_colorAttribute = new ColorAttribute(this);
-    addSymbol(m_colorAttribute);
-    the_activestate = HIGH;
-    m_activestateAttribute = new ActiveStateAttribute(this);
-    addSymbol(m_activestateAttribute);
-    led_interface = new LED_Interface(this);
-    get_interface().add_interface(led_interface);
-    callback();
-  }
-
-  Led::~Led()
-  {
-
-    delete m_colorAttribute;
-    /* deleted elsewhere RRR
-    delete m_pin;
-    */
-  }
+Led::~Led()
+{
+  delete m_colorAttribute;
+}
 
   //--------------------------------------------------------------
   // create_iopin_map
