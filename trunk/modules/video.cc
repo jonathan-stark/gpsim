@@ -35,10 +35,9 @@ sync	lume	result
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <errno.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
-#include <assert.h>
+#include <cassert>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
@@ -116,39 +115,32 @@ void IOPIN_Monitor::setDrivenState( bool new_state)
   }
 }
 
-
-/*
-static void gui_update(gpointer callback_data)
-{
-    Video *video;
-    video = (Video*)callback_data;
-    video->refresh();
-}
-*/
-
 static void expose(GtkWidget *widget,
 		   GdkEventExpose *event,
 		   Video *video)
 {
-    video->refresh();
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+
+  cairo_set_source_surface(cr, video->image, 0.0, 0.0);
+  cairo_paint(cr);
+  cairo_destroy(cr);
 }
+
 /*************************************************************
 *
 *  Video class
 */
 
-Video::Video(const char *_name) : Module(_name)
+Video::Video(const char *_name)
+  : Module(_name), sync_time(0), scanline(0),
+    line_nr(0), last_line_nr(0)
 {
      sync_pin = new IOPIN_Monitor(this,(name() + ".sync").c_str());
      lume_pin = new IOPIN_Monitor(this,(name() + ".lume").c_str());
 
   //cout << "Video base class constructor\n";
-  sync_time=0;
-  scanline=0;
-  line_nr=0;
-  last_line_nr=0;
-  memset(line,0x80,XRES);
-  memset(shadow,0x42,XRES*YRES); // initalize shadow to invalid values
+  memset(line, 0x80, XRES);
+  memset(shadow, 0x42, XRES * YRES); // initalize shadow to invalid values
 
   //  cpu = get_processor(1);
   cpu = get_active_cpu();  //FIXME
@@ -160,61 +152,21 @@ Video::Video(const char *_name) : Module(_name)
   gtk_window_set_default_size(GTK_WINDOW(window), XRES,YRES);
   gtk_window_set_title(GTK_WINDOW(window), "Video");
   da = gtk_drawing_area_new();
-  g_signal_connect(da,
-		     "expose_event",
-		     G_CALLBACK(expose),
-		     this);
+  g_signal_connect(da, "expose_event", G_CALLBACK(expose), this);
   
   gtk_container_add(GTK_CONTAINER(window), da);
   gtk_widget_show_all(window);
-  
-  GdkColormap *colormap = gdk_colormap_get_system();
-  
-  gdk_color_parse("black", &black_color);
-  gdk_color_parse("white", &white_color);
-  gdk_color_parse("grey", &grey_color);
 
-  gdk_colormap_alloc_color(colormap, &black_color, FALSE, TRUE);
-  gdk_colormap_alloc_color(colormap, &white_color, FALSE, TRUE);
-  gdk_colormap_alloc_color(colormap, &grey_color, FALSE, TRUE);
-
-  GdkWindow *Gwindow = gtk_widget_get_window(window);
-  
-  black_gc = gdk_gc_new(Gwindow);
-  gdk_gc_set_foreground(black_gc, &black_color);
-  
-  white_gc = gdk_gc_new(Gwindow);
-  gdk_gc_set_foreground(white_gc, &white_color);
-
-  grey_gc = gdk_gc_new(Gwindow);
-  gdk_gc_set_foreground(grey_gc, &grey_color);
-
-  pixmap = gdk_pixmap_new(Gwindow,
-		  XRES,
-		  YRES,
-		  -1);
-  gdk_draw_rectangle (pixmap,
-		      gtk_widget_get_style(da)->bg_gc[gtk_widget_get_state(da)],
-		      TRUE,
-		      0, 0,
-		      XRES,
-		      YRES);
-
-  //  interface_id = gpsim_register_interface((gpointer)this);
-  //  gpsim_register_simulation_has_stopped(interface_id, gui_update);
-
-
+  image = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, XRES, YRES);
 }
 
-Video::~Video(void)
+Video::~Video()
 {
+  cairo_surface_destroy(image);
+  gtk_widget_destroy(window);
 
-    //cout << "Video base class destructor\n";
-
-    gtk_widget_destroy(window);
-
-    delete sync_pin;
-    delete lume_pin;
+  delete sync_pin;
+  delete lume_pin;
 }
 
 //--------------------------------------------------------------
@@ -223,7 +175,7 @@ Video::~Video(void)
 //  This is where the information for the Module's package is defined.
 // Specifically, the I/O pins of the module are created.
 
-void Video::create_iopin_map(void)
+void Video::create_iopin_map()
 {
   // Create an I/O port to which the I/O pins can interface
   //   The module I/O pins are treated in a similar manner to
@@ -279,17 +231,22 @@ Module * Video::construct(const char *_new_name)
 static int screen_y_from_line(int line)
 {
   int y;
-  if(line<313)
-    y=line*2;
+  if (line < 313)
+    y = line * 2;
   else
-    y=(line-313)*2+1;
+    y = (line - 313) * 2 + 1;
   return y;
 }
 
-void Video::copy_scanline_to_pixmap(void)
+void Video::copy_scanline_to_pixmap()
 {
   int i, y;
   int last=line[0];
+
+  cairo_t *cr = cairo_create(image);
+
+  cairo_set_line_width(cr, 1.0);
+  cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 
   // Clear any skipped lines.
   if(last_line_nr>line_nr)
@@ -302,7 +259,10 @@ void Video::copy_scanline_to_pixmap(void)
       for(i=0;i<XRES;i++)
         shadow[i][l]=0;
       y=screen_y_from_line(l);
-      gdk_draw_line(pixmap, black_gc, 0, y, XRES-1, y);
+
+      cairo_move_to(cr, 0.0, y);
+      cairo_line_to(cr, XRES - 1, y);
+      cairo_stroke(cr);
     }
   }
   last_line_nr=line_nr;
@@ -318,31 +278,40 @@ void Video::copy_scanline_to_pixmap(void)
   // Get screen y position
   y=screen_y_from_line(line_nr);
 
+  cairo_surface_flush(image);
+  unsigned char *data = cairo_image_surface_get_data(image);
+  int stride = cairo_image_surface_get_stride(image);
+
   // Draw changes compared to shadow
-  for(i=1;i<XRES;i++)
+  for(i = 1;i < XRES; i++)
     {
-      if(line[i]==shadow[i][line_nr])
+      if (line[i] == shadow[i][line_nr])
         continue;
-      shadow[i][line_nr]=line[i];
+      shadow[i][line_nr] = line[i];
 
-      if(line_nr<313)
-	y=line_nr*2;
+      if (line_nr < 313)
+	y = line_nr * 2;
       else
-	y=(line_nr-313)*2+1;
+	y = (line_nr - 313) * 2 + 1;
 
-      if(line[i]>=4)
+      guint32 *p = (guint32 *) (data + (i + y * stride));
+
+      if (line[i] >= 4)
 	{
-	  gdk_draw_point(pixmap, white_gc, i, y);
+          *p = 0x00ffffff;
 	}
-      else if(line[i]>2)
+      else if (line[i] > 2)
 	{
-	  gdk_draw_point(pixmap, grey_gc, i, y);
+          *p = 0x007f7f7f;
 	}
       else
 	{
-	  gdk_draw_point(pixmap, black_gc, i, y);
+          *p = 0x00000000;
 	}
     }
+
+  cairo_surface_mark_dirty(image);
+  cairo_destroy(cr);
 }
 
 guint64 Video::cycles_to_us(guint64 cycles)
@@ -365,17 +334,12 @@ guint64 Video::us_to_cycles(guint64 us)
   return (guint64) ret;
 }
 
-void Video::refresh(void)
+void Video::refresh()
 {
-    gdk_draw_pixmap(gtk_widget_get_window(da),
-		    gtk_widget_get_style(da)->fg_gc[gtk_widget_get_state(da)],
-		    pixmap,
-		    0,0,
-		    0,0,
-		    XRES,YRES);
+  gdk_window_invalidate_rect(gtk_widget_get_window(da), NULL, FALSE);
 }
 
-void Video::update_state(void)
+void Video::update_state()
 {
   guint64 cycletime;
   guint64 index;

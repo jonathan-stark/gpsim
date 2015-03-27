@@ -193,8 +193,7 @@ static const gchar * not_pixmap[] = {
 " ..............................."};
 #endif
 
-#include <errno.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 
 
@@ -265,12 +264,14 @@ LogicGate::LogicGate(const char *name, const char *desc)
     pOutputPin(0)
 {
 #ifdef HAVE_GUI
-  pixmap=0;
+  pixbuf = NULL;
 #endif
 }
 
 LogicGate::~LogicGate()
 {
+  if (pixbuf)
+    g_object_unref(pixbuf);
 }
 
 //--------------------------------------------------------------
@@ -363,43 +364,31 @@ static gboolean expose(GtkWidget *widget,
                 GdkEventExpose *event,
                 LogicGate *lg)
 {
-  if(lg->pixmap==0) {
+  if (!lg->pixbuf) {
     puts("LogicGate has no pixmap");
     return 0;
   }
 
-  gdk_draw_pixmap(gtk_widget_get_window(widget),
-    gtk_widget_get_style(widget)->fg_gc[gtk_widget_get_state(widget)],
-    lg->pixmap,
-    event->area.x, event->area.y,
-    event->area.x, event->area.y,
-    event->area.width, event->area.height);
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+
+  gdk_cairo_set_source_pixbuf(cr, lg->pixbuf, 0.0, 0.0);
+  cairo_paint(cr);
+  cairo_destroy(cr);
 
   return 0;
 }
 
-GtkWidget *LogicGate::create_pixmap(gchar **pixmap_data)
+GtkWidget *LogicGate::create_pixmap(const gchar **pixmap_data)
 {
-    GtkStyle *style;
-    GdkBitmap *mask;
-    GtkWidget *da;
-    int width,height;
+  pixbuf = gdk_pixbuf_new_from_xpm_data(pixmap_data);
+  int width = gdk_pixbuf_get_width(pixbuf);
+  int height = gdk_pixbuf_get_height(pixbuf);
 
-    style = gtk_style_new();
+  GtkWidget *da = gtk_drawing_area_new();
+  gtk_widget_set_size_request(da, width, height);
+  g_signal_connect(da, "expose_event", G_CALLBACK(expose), this);
 
-    pixmap = gdk_pixmap_colormap_create_from_xpm_d(NULL,
-                                                   gdk_colormap_get_system(),
-                                                   &mask,
-                                                   &style->bg[GTK_STATE_NORMAL],
-                                                   pixmap_data);
-
-    gdk_drawable_get_size(pixmap,&width,&height);
-
-    da = gtk_drawing_area_new();
-    gtk_widget_set_size_request(da, width, height);
-    g_signal_connect(da, "expose_event",
-                G_CALLBACK(expose), this);
-    return da;
+  return da;
 }
 #endif
 
@@ -423,7 +412,7 @@ AND2Gate::AND2Gate(const char *name) : ANDGate(name, "And2Gate")
 {
 #ifdef HAVE_GUI
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap((gchar **)and2_pixmap));
+    set_widget(create_pixmap(and2_pixmap));
 #endif
 
 }
@@ -448,7 +437,7 @@ OR2Gate::OR2Gate(const char *name) : ORGate(name, "OR2Gate")
 #ifdef HAVE_GUI
 
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap((gchar **)or2_pixmap));
+    set_widget(create_pixmap(or2_pixmap));
 #endif
 }
 OR2Gate::~OR2Gate()
@@ -496,7 +485,7 @@ NOTGate::NOTGate(const char *name) : LogicGate(name, "NOTGate")
 #ifdef HAVE_GUI
 
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap((gchar **)not_pixmap));
+    set_widget(create_pixmap(not_pixmap));
 #endif
 }
 NOTGate::~NOTGate()
@@ -520,7 +509,7 @@ XOR2Gate::XOR2Gate(const char *name) : XORGate(name, "XOR2Gate")
 #ifdef HAVE_GUI
 
   if(get_interface().bUsingGUI())
-    set_widget(create_pixmap((gchar **)xor2_pixmap));
+    set_widget(create_pixmap(xor2_pixmap));
 #endif
 }
 XOR2Gate::~XOR2Gate()
