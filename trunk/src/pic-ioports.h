@@ -94,6 +94,7 @@ protected:
   INTCON  *m_pIntcon;
   INTCON2  *m_pIntcon2;
   INTCON3  *m_pIntcon3;
+  RegisterValue lastDrivenValue;
 };
 
 class IOC;
@@ -114,13 +115,11 @@ public:
 
   PicPortGRegister(Processor *pCpu, const char *pName, const char *pDesc,
                    INTCON *pIntcon, IOC *pIoc,
-                   unsigned int numIopins, unsigned int enableMask=0x3f)
-	: PicPortBRegister(pCpu, pName, pDesc, pIntcon, numIopins, enableMask),
-	m_pIntcon(pIntcon), m_pIoc(pIoc)
-  {
-  }
+                   unsigned int numIopins, unsigned int enableMask=0x3f);
 
   virtual void setbit(unsigned int bit_number, char new3State);
+  virtual void setIOCif();
+
 };
 class PicPortIOCRegister : public PicPortBRegister
 {

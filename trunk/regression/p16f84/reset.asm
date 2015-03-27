@@ -129,6 +129,7 @@ check_rbi:
 ;        bsf     temp5,1         ;Set a flag to indicate rb4-7 int occured
         bcf     INTCON,RBIF
 	movf	PORTB,w
+        bcf     INTCON,RBIF
         
 check_int:
         btfsc   INTCON,INTF
@@ -227,11 +228,12 @@ PowerOnReset:
         skpnz
          goto   done
 
-        movf    PORTB,W         ;Clear RBIF
-  .assert "(intcon&1)==0, \"*** FAILED to clear INTCON\""
+        movf    PORTB,W         ;Clear miss-match, if any
+	bcf	INTCON, RBIF
+  .assert "(intcon&1)==0, \"*** FAILED p16f84 to clear INTCON\""
         nop
 
-  .assert "resetCounter==1,\"*** FAILED Power On Reset\""
+  .assert "resetCounter==1,\"*** FAILED p16f84 Power On Reset\""
 	MOVLW	eRSTSequence_PowerOnReset
 	MOVWF	ResetSequence
 	CLRWDT
@@ -252,7 +254,7 @@ PowerOnReset:
 ;========================================================================
 AwakeWDT:
 
-  .assert "resetCounter==2,\"*** FAILED WDT Reset\""
+  .assert "resetCounter==2,\"*** FAILED WDT Reset p16f84\""
 	MOVLW	eRSTSequence_AwakeWDT
 	MOVWF	ResetSequence
 
@@ -270,7 +272,7 @@ here:   goto    here
 ;========================================================================
 WDTTimeOut:
 
-  .assert "resetCounter==3,\"*** FAILED WDT timeout\""
+  .assert "resetCounter==3,\"*** FAILED WDT timeout p16f84\""
 	MOVLW	eRSTSequence_WDTTimeOut
 	MOVWF	ResetSequence
 
@@ -298,7 +300,7 @@ WDTTimeOut:
 ;
 ;========================================================================
 AwakeIO:
-  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change\""
+  .assert "resetCounter==4,\"*** FAILED Wakeup on I/O pin change p16f84\""
 	MOVLW	eRSTSequence_AwakeIO
 	MOVWF	ResetSequence
 
@@ -319,7 +321,7 @@ AwakeIO:
 ;
 ;========================================================================
 AwakeMCLR:
-  .assert "resetCounter==5,\"*** FAILED /MCLR Reset\""
+  .assert "resetCounter==5,\"*** FAILED /MCLR Reset p16f84\""
 
 	MOVLW	eRSTSequence_AwakeMCLR
 	MOVWF	ResetSequence

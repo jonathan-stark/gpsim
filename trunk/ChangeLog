@@ -1,3 +1,9 @@
+2015-03-27 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p16f676/reset.asm regression/p16f684/reset.asm 
+	  regression/p16f84/reset.asm src/14bit-registers.cc src/intcon.cc 
+	  src/intcon.h src/pic-ioports.cc src/pic-ioports.h
+	: Bug 195 - Writing to an IOC IO port should not clear interrupt flag 
+
 2015-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_watch.cc: fix gtk_tree_model_foreach assert
 	* src/14bit-tmrs.cc: fix debug print format warning
