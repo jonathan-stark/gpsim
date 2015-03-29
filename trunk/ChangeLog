@@ -1,3 +1,8 @@
+2015-03-29 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.c
+	: Fix core dump when "Trace all" button used in Breadboard,
+	  regression from svn 2309
+
 2015-03-27 Errol van de l'Isle <evandel@cix.co.uk>
 	* modules/led.cc modules/led.h modules/logic.cc modules/logic.h
 	  modules/video.cc modules/video.h
