@@ -980,14 +980,14 @@ static void trace_node(struct gui_node *gn)
 
   int *permutations = new int[pinlist.size()];
   int *shortest_permutation = new int[pinlist.size()];
-  for (size_t i = 0; i < pinlist.size(); i++)
+  for (int i = 0; i < (int)pinlist.size(); i++)
     permutations[i] = i;
 
     // Trace between all stimulus, and store the distances in the array.
-  for (size_t i = 0; i < pinlist.size(); i++) {
+  for (int i = 0; i < (int)pinlist.size(); i++) {
     GuiPin *pi = pinlist[i];
 
-    for (size_t j = i + 1; j < pinlist.size(); j++) {
+    for (int j = i + 1; j < (int)pinlist.size(); j++) {
       GuiPin *pj = pinlist[j];
 
       start.x = pi->x() / ROUTE_RES;
@@ -1016,8 +1016,8 @@ static void trace_node(struct gui_node *gn)
 
   if (didnt_work) {
     printf("\n###### Couldn't trace node %s!\n",gn->node->name().c_str());
-    for (size_t i = 0; i < pinlist.size(); i++)
-      for (size_t j = i + 1; j < pinlist.size(); j++)
+    for (int i = 0; i < (int)pinlist.size(); i++)
+      for (int j = i + 1; j < (int)pinlist.size(); j++)
         clear_path(&shortest_path[i][j]);
     delete[] permutations;
     delete[] shortest_permutation;
@@ -1029,16 +1029,17 @@ static void trace_node(struct gui_node *gn)
   do {
     int sum=0;
 
-//      printf("%d ",permutations[0]);
-    for (size_t i = 0; i < pinlist.size() - 1; i++) {
-//          printf("%d ",permutations[i+1]);
+//      printf(" size %ld permutations[0] %d ",pinlist.size(), permutations[0]);
+    for (int i = 0; i < (int)pinlist.size() - 1; i++) {
+//         printf("%d-%d ",i, permutations[i+1]);
+//	  fflush(stdout);
       sum += pathlen[permutations[i]][permutations[i+1]];
     }
 //      printf("length %d\n",sum);
 
     if (sum < minlen) {
       minlen = sum;
-      for (size_t i = 0; i < pinlist.size(); i++) {
+      for (int i = 0; i < (int)pinlist.size(); i++) {
         shortest_permutation[i] = permutations[i];
       }
     }
@@ -1053,12 +1054,12 @@ static void trace_node(struct gui_node *gn)
     //puts("");
 
   path *nodepath = 0;
-  for (size_t i = 0; i < pinlist.size() - 1; i++) {
+  for (int i = 0; i < (int)pinlist.size() - 1; i++) {
     path_copy_and_cat(&nodepath,&shortest_path[shortest_permutation[i]][shortest_permutation[i+1]]);
   }
 
-  for (size_t i = 0; i < pinlist.size(); i++)
-    for (size_t j = i + 1; j < pinlist.size(); j++)
+  for (int i = 0; i < (int)pinlist.size(); i++)
+    for (int j = i + 1; j < (int)pinlist.size(); j++)
       clear_path(&shortest_path[i][j]);
   delete[] permutations;
   delete[] shortest_permutation;
