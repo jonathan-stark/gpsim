@@ -109,6 +109,20 @@ public:
 };
 //========================================================================
 
+
+
+BB_ModuleLabel::BB_ModuleLabel(const std::string &text, PangoFontDescription *font)
+{
+  m_label = gtk_label_new(text.c_str());
+  gtk_widget_modify_font(m_label, font);
+  gtk_widget_show(m_label);
+}
+
+BB_ModuleLabel::~BB_ModuleLabel()
+{
+  gtk_widget_destroy(m_label);
+}
+
 /* Check the flags in board_matrix to see if we are allowed to
    route horizontally here */
 static inline int allow_horiz(point &p)
@@ -1398,7 +1412,7 @@ void GuiModule::SetPosition(int nx, int ny)
                       m_y + m_module_y);
 
     // Position module_name
-    gtk_layout_move(GTK_LAYOUT(m_bbw->layout), m_name_widget, m_x, m_y-20);
+    gtk_layout_move(GTK_LAYOUT(m_bbw->layout), m_name_widget->gobj(), m_x, m_y-20);
 
     // Position pins
     std::vector<GuiPin *>::iterator piniter = m_pins.begin();
@@ -2614,21 +2628,6 @@ void GuiPin::Destroy()
 }
 
 //------------------------------------------------------------------------
-static gboolean name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
-{
-  if (!p->name_pixmap()) {
-    puts("bbw.c: no pixmap2!");
-    return FALSE;
-  }
-
-  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
-
-  gdk_cairo_set_source_pixmap(cr, p->name_pixmap(), 0.0, 0.0);
-  cairo_paint(cr);
-  cairo_destroy(cr);
-
-  return FALSE;
-}
 
 static gboolean module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 {
@@ -2678,8 +2677,7 @@ void GuiModule::Update()
   }
 
   // Destroy name widget
-  g_object_unref(m_name_pixmap);
-  gtk_widget_destroy(m_name_widget);
+  delete m_name_widget;
 
   // Remove module from list
   std::vector<GuiModule *>::iterator iter =
@@ -2882,44 +2880,6 @@ void GuiModule::AddPinGeometry(GuiPin *pin)
 
 }
 
-static void createLabel(GtkWidget **da,
-                        GdkPixmap **pixmap,
-                        GtkWidget *parent,
-                        GdkGC *gc,
-                        const char *text,
-                        PangoFontDescription *font)
-{
-  *da = gtk_drawing_area_new();
-
-  int height = gdk_string_height(gdk_font_from_description(font), text);
-  int width  = gdk_string_width(gdk_font_from_description(font), text);
-
-  gtk_widget_set_size_request(*da, width, height);
-  *pixmap = gdk_pixmap_new(gtk_widget_get_window(parent),
-                           width,
-                           height,
-                           -1);
-  gdk_draw_rectangle(*pixmap,
-    gtk_widget_get_style(parent)->bg_gc[gtk_widget_get_state(*da)],
-    TRUE,
-    0, 0, width, height);
-
-  gdk_draw_text(*pixmap,
-                gdk_font_from_description(font),
-                gc,
-                0,height,
-                text,strlen(text));
-
-}
-void GuiModule::BuildReferenceDesignator()
-{
-  createLabel(&m_name_widget, &m_name_pixmap, m_bbw->window, m_bbw->pinname_gc,
-              m_module->name().c_str(),m_bbw->pinnamefont);
-
-  g_signal_connect(m_name_widget, "expose_event",
-    G_CALLBACK(name_expose), this);
-}
-
 //------------------------------------------------------------------------
 void GuiModule::Build()
 {
@@ -3042,8 +3002,7 @@ void GuiModule::Build()
 
 
   // Create name_widget
-  BuildReferenceDesignator();
-  gtk_widget_show(m_name_widget);
+  m_name_widget = new BB_ModuleLabel(m_module->name(), m_bbw->pinnamefont);
 
 
   std::vector<GuiPin *>::iterator pin_iter = m_pins.begin();
@@ -3072,7 +3031,7 @@ void GuiModule::Build()
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_pinLabel_widget, 0, 0);
   if (m_module_widget)
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_module_widget, 0, 0);
-  gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_name_widget, 0,0);
+  gtk_layout_put(GTK_LAYOUT(m_bbw->layout), m_name_widget->gobj(), 0,0);
 
   SetPosition(nx, ny);
 
@@ -3089,7 +3048,7 @@ void GuiModule::Build()
 GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   : GuiBreadBoardObject(_bbw,0,0), m_module(_module), m_module_widget(0),
     m_pinLabel_widget(0), m_module_x(0), m_module_y(0), m_name_widget(0),
-    m_pin_count(0), m_module_pixmap(0), m_name_pixmap(0)
+    m_pin_count(0), m_module_pixmap(0)
 {
   m_width=0;
   m_height=0;
