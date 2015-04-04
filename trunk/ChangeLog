@@ -1,3 +1,7 @@
+2015-04-04 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_breadboard.cc gui/gui_breadboard.h
+	: Replace deprecated GDK calls for displaying module name
+
 2015-03-29 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.c
 	: Fix core dump when "Trace all" button used in Breadboard,

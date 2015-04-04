@@ -150,6 +150,17 @@ private:
 
 enum module_type {PIC_MODULE, EXTERNAL_MODULE};
 
+class BB_ModuleLabel {
+public:
+  BB_ModuleLabel(const std::string &text, PangoFontDescription *font);
+  ~BB_ModuleLabel();
+
+  GtkWidget *gobj() {return m_label;}
+
+private:
+  GtkWidget *m_label;
+};
+
 //------------------------------------------------------------------------
 // GuiModule
 // 
@@ -179,16 +190,13 @@ public:
   virtual void AddPin(unsigned int);
   virtual void AddPinGeometry(GuiPin *);
 
-  void BuildReferenceDesignator();
-
   int pin_count() { return m_pin_count; }
   std::vector<GuiPin *> * pins() { return &m_pins; }
   Module *module() { return m_module; }
   GtkWidget *module_widget() { return m_module_widget; }
   GtkWidget *pinLabel_widget() { return m_pinLabel_widget; }
-  GtkWidget *name_widget() { return m_name_widget; }
+  GtkWidget *name_widget() { return m_name_widget->gobj(); }
   GdkPixmap *module_pixmap() { return m_module_pixmap; }
-  GdkPixmap *name_pixmap() { return m_name_pixmap; }
 
 protected:
 
@@ -199,13 +207,12 @@ protected:
   int        m_module_y;       /* GuiBreadBoardObject. Their purpose is to allow clients to 
 				* reposition a customly created module_widget */
 
-  GtkWidget *m_name_widget;    // Name of widget, positioned above module_widget.
+  BB_ModuleLabel *m_name_widget;    // Name of widget, positioned above module_widget.
 
   int pinnameWidths[4];
   int m_pin_count;
 
   GdkPixmap *m_module_pixmap;
-  GdkPixmap *m_name_pixmap;
 
   std::vector<GuiPin *> m_pins;
 };
