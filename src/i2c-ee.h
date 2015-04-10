@@ -31,8 +31,8 @@ class Register;
 class RegisterCollection;
 class pic_processor;
 class I2C_EE;
-class I2C_EE_SCL;
-class I2C_EE_SDA;
+class I2C_SLAVE_SCL;
+class I2C_SLAVE_SDA;
 class Stimulus_Node;
 
 //------------------------------------------------------------------------
@@ -50,7 +50,48 @@ class PromAddress : public Value
 };
 
 
-class I2C_EE :  public TriggerObject
+class i2c_slave
+{
+
+  public:
+    i2c_slave();
+    ~i2c_slave();
+    void new_sda_edge(bool direction);
+    void new_scl_edge(bool direction);
+    bool shift_read_bit ( bool x );
+    bool shift_write_bit ();
+    virtual bool match_address();
+    virtual void put_data(unsigned int data){}
+    virtual unsigned int get_data(){return 0;}
+    virtual void slave_transmit(bool yes){}
+
+    I2C_SLAVE_SCL	*scl;	// I2C clock
+    I2C_SLAVE_SDA	*sda;	// I2C data
+    unsigned int i2c_slave_address;
+
+  protected:
+
+    bool    nxtbit;
+    unsigned int bit_count;  // Current bit number for either Tx or Rx
+    unsigned int xfr_data;  // latched data from I2C.
+
+
+  enum {
+    IDLE=0,
+    START,
+    RX_I2C_ADD,
+    ACK_I2C_ADD,
+    RX_DATA,
+    ACK_RX,
+    ACK_WR,
+    WRPEND,
+    ACK_RD,
+    TX_DATA
+  } bus_state;
+
+
+};
+class I2C_EE :  public i2c_slave, public TriggerObject
 {
 public:
 
@@ -68,13 +109,15 @@ public:
   virtual void start_write();
   virtual void write_busy();
   virtual void write_is_complete();
+  virtual void put_data(unsigned int data);
+  virtual unsigned int get_data();
+  virtual void slave_transmit(bool);
+  virtual bool match_address();
 
   virtual Register *get_register(unsigned int address);
   inline int register_size() {return rom_data_size; }
   inline void set_register_size(int bytes) { rom_data_size = bytes; }
 
-  virtual void new_scl_edge ( bool direction );
-  virtual void new_sda_edge ( bool direction );
   virtual void attach ( Stimulus_Node *_scl, Stimulus_Node *_sda );
   virtual void set_chipselect(unsigned int _chipselect); 
 
@@ -84,19 +127,14 @@ public:
 
   void dump();
 
-  I2C_EE_SCL * scl;        // I2C clock
-  I2C_EE_SDA * sda;        // I2C data
 
 protected:
-  bool shift_read_bit ( bool x );
-  bool shift_write_bit ();
-  virtual bool processCommand(unsigned int cmd);
 
   Register **rom;          //  The data area.
   RegisterCollection *m_UiAccessOfRom; // User access to the rom.
   unsigned int rom_size;
   int	rom_data_size;	   // width of data in bytes
-  unsigned int xfr_addr,xfr_data;  // latched adr and data from I2C.
+  unsigned int xfr_addr;  // latched adr from I2C.
   unsigned int write_page_off;	// offset into current write page
   unsigned int write_page_size; // max number of writes in one block
   unsigned int bit_count;  // Current bit number for either Tx or Rx
@@ -111,21 +149,13 @@ protected:
   bool ee_busy;            // true if a write is in progress.
   bool nxtbit;
 
-
   enum {
-    IDLE=0,
-    START,
-    RX_CMD,
-    ACK_CMD,
-    RX_ADDR,
-    RX_ADDR2,
-    ACK_ADDR,
-    RX_DATA,
-    ACK_WR,
-    WRPEND,
-    ACK_RD,
-    TX_DATA
-  } bus_state;
+     RX_EE_ADDR = 1,
+     RX_EE_DATA,
+     TX_EE_DATA
+  } io_state;
+
+
 
 private:
   // Is this even used?

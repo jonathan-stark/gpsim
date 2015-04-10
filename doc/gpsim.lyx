@@ -1,5 +1,5 @@
-#LyX 1.6.8 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
 \begin_document
 \begin_header
 \textclass book
@@ -9,28 +9,54 @@
  {\usepackage{textcomp}}{}
 \end_preamble
 \use_default_options false
+\maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding default
+\fontencoding global
 \font_roman times
 \font_sans default
 \font_typewriter default
+\font_math auto
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
-
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize 10
 \spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
-\use_amsmath 1
-\use_esint 0
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 0
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
 \cite_engine basic
+\cite_engine_type default
+\biblio_style plain
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin -0.5cm
 \topmargin 0.5cm
 \rightmargin 0.5cm
@@ -45,8 +71,9 @@
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -133,7 +160,7 @@ gpsim's executable is created in a manner that's consistent with much of
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
-<features>
+<features rotate="0" tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top" width="0pt">
 <row>
@@ -484,7 +511,7 @@ help
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="27" columns="2">
-<features>
+<features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -513,7 +540,7 @@ summary
 
 \begin_layout Plain Layout
 attach
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -543,7 +570,7 @@ Attach stimuli to nodes
 
 \begin_layout Plain Layout
 break
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -573,7 +600,7 @@ Set a break point
 
 \begin_layout Plain Layout
 bus
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -603,7 +630,7 @@ Add or display node busses
 
 \begin_layout Plain Layout
 clear
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -633,7 +660,7 @@ Remove a break point
 
 \begin_layout Plain Layout
 disassemble
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -663,7 +690,7 @@ Disassemble the current cpu
 
 \begin_layout Plain Layout
 dump
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -693,7 +720,7 @@ Display either the RAM or EEPROM
 
 \begin_layout Plain Layout
 frequency
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -723,7 +750,7 @@ Set processor frequency
 
 \begin_layout Plain Layout
 help
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -753,7 +780,7 @@ Type help "command" for more help on a command
 
 \begin_layout Plain Layout
 icd
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -783,7 +810,7 @@ In Circuit Debugger support.
 
 \begin_layout Plain Layout
 list
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -813,7 +840,7 @@ Display source and list files
 
 \begin_layout Plain Layout
 load
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -843,7 +870,7 @@ Load either a hex or command file
 
 \begin_layout Plain Layout
 log
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -873,7 +900,7 @@ Log/record events to a file
 
 \begin_layout Plain Layout
 node
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -903,7 +930,7 @@ Add or display stimulus nodes
 
 \begin_layout Plain Layout
 module
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -942,7 +969,7 @@ Select & Display modules
 
 \begin_layout Plain Layout
 processor
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -972,7 +999,7 @@ Add/list processors
 
 \begin_layout Plain Layout
 quit
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1031,7 +1058,7 @@ Reset all or parts of the simulation
 
 \begin_layout Plain Layout
 run
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1061,7 +1088,7 @@ Execute the pic program
 
 \begin_layout Plain Layout
 set
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1100,7 +1127,7 @@ display and control gpsim behavior flags
 
 \begin_layout Plain Layout
 step
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1130,7 +1157,7 @@ Execute one or more instructions
 
 \begin_layout Plain Layout
 stimulus
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1160,7 +1187,7 @@ Create a stimulus
 
 \begin_layout Plain Layout
 stopwatch
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1199,7 +1226,7 @@ Measure time between events
 
 \begin_layout Plain Layout
 symbol
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1229,7 +1256,7 @@ Add/list symbols
 
 \begin_layout Plain Layout
 trace
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1259,7 +1286,7 @@ Dump the trace history
 
 \begin_layout Plain Layout
 version
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1289,7 +1316,7 @@ Display gpsim's version
 
 \begin_layout Plain Layout
 x
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1333,7 +1360,7 @@ The built in 'help' command provides additional online information.
 
 \begin_layout Section
 attach
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1363,7 +1390,7 @@ Attach is used to define connections between one or more stimulus and a
 Attach_pointN can have one of the following formats
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 pin(<number>) or pin(<symbol>) 
 \end_layout
@@ -1383,7 +1410,7 @@ This refers to a pin of the current active CPU.
 \end_layout
 
 \end_deeper
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 <connection> or pin(<connection>) 
 \end_layout
@@ -1454,7 +1481,7 @@ Example
 
 \begin_layout Section
 break
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1713,7 +1740,7 @@ The cycle counter is gpsim's time keeper.
 
 \begin_layout Section
 clear
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1760,7 +1787,7 @@ A break point disable/enable feature has been discussed and may be added
 
 \begin_layout Section
 disassemble
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1850,7 +1877,7 @@ disassemble
 
 \begin_layout Section
 dump
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1903,7 +1930,7 @@ See the 'x' command for examining and modifying individual registers.
 
 \begin_layout Section
 echo
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1922,7 +1949,7 @@ The echo command is used like a print statement within configuration files.
 
 \begin_layout Section
 frequency
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1946,7 +1973,7 @@ This command sets the oscillator frequency.
 
 \begin_layout Section
 help
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -1975,7 +2002,7 @@ By itself, help will display all of the commands along with a brief description
 
 \begin_layout Section
 icd
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2002,7 +2029,7 @@ The open command is used to enable ICD mode and specify the serial port
 
 \begin_layout Section
 list 
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2045,7 +2072,7 @@ Line numbers are relative to the line of the PC.
 
 \begin_layout Section
 load
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2114,7 +2141,7 @@ This command loads the contents of either a processor's EEPROM or an EEPROM
 
 \begin_layout Section
 macros
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2346,7 +2373,7 @@ endm
 
 \begin_layout Section
 module
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2558,7 +2585,7 @@ Dumping modules and listing the pins is not yet implemented.
 
 \begin_layout Section
 node
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2613,7 +2640,7 @@ node n1 n2 n3  // create and add 3 new nodes to the list
 
 \begin_layout Section
 processor
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2695,7 +2722,7 @@ processor p16c65         // Create one with no name.
 
 \begin_layout Section
 quit
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2713,7 +2740,7 @@ Quit gpsim.
 
 \begin_layout Section
 run
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2732,7 +2759,7 @@ Start (or continue) simulation.
 
 \begin_layout Section
 step
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2773,7 +2800,7 @@ over
 
 \begin_layout Section
 symbol
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2802,7 +2829,7 @@ symbol
 
 \begin_layout Section
 stimulus
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -2837,9 +2864,9 @@ Note that in most cases it is easier to create a stimulus file then to type
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
-<features islongtable="true" firstHeadEmpty="true" headBottomDL="true">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<features rotate="0" islongtable="true" firstHeadEmpty="true" headBottomDL="true" longtabularalignment="center">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row endhead="true" endfirsthead="true">
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -3126,7 +3153,7 @@ reference "cha:Simulating-the-Real"
 
 \begin_layout Section
 stopwatch
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -3206,7 +3233,7 @@ stopwatch
 
 \begin_layout Section
 trace
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -3247,7 +3274,7 @@ Display gpsim's version.
 
 \begin_layout Section
 x
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -3359,17 +3386,17 @@ Main window
 Menus
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 File->Open .stc or .cod files.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 File->Quit Quit gpsim
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Windows->* Open/Close the windows.
 \end_layout
@@ -3382,32 +3409,32 @@ Buttons
 (These are also found as keyboard bindings in the source windows.)
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Step Step one instruction
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Over Step until pc is after next instruction
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Finish Run to return address
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Run Run continuously
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Stop Stop execution
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Reset Reset CPU
 \end_layout
@@ -3420,7 +3447,7 @@ Simulation mode
 This controls how gpsim simulates, and how the GUI updates.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 0000000.00.0000
 Never Don't ever update the GUI when simulating.
  This is the fastest mode.
@@ -3428,7 +3455,7 @@ Never Don't ever update the GUI when simulating.
   interface.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 0000000.00.0000
 x
 \begin_inset space ~
@@ -3437,7 +3464,7 @@ x
 cycles Update the GUI every x cycles simulated.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 0000000.00.0000
 every
 \begin_inset space ~
@@ -3447,7 +3474,7 @@ cycle Update the GUI every cycle.
  (you see everything, if you have filled up on coffee :-)
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 0000000.00.0000
 x
 \begin_inset space ~
@@ -3460,7 +3487,7 @@ ms
 animate Here you can slow down simulation with a delay between every cycle.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 0000000.00.0000
 realtime This will make gpsim try to synchronize simulation speed with wall
  clock time.
@@ -3512,7 +3539,7 @@ A right button click on the source pops up a menu with six items (the word
  on when right mouse button was clicked.):
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 
 \series bold
@@ -3523,7 +3550,7 @@ Menu
 item Description
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Find
 \begin_inset space ~
@@ -3533,7 +3560,7 @@ PC This menu item will find the PC and changed page tab and scroll the source
  view to the current PC.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Run
 \begin_inset space ~
@@ -3543,7 +3570,7 @@ here This sets a breakpoint 'here' and starts running until a breakpoint
  is hit.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Move
 \begin_inset space ~
@@ -3556,7 +3583,7 @@ PC
 here This simply changes PC to the address that line 'here' in source has.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Breakpoint
 \begin_inset space ~
@@ -3565,7 +3592,7 @@ Breakpoint
 here Set a breakpoint 'here'.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Profile
 \begin_inset space ~
@@ -3578,7 +3605,7 @@ start
 here Set a start marker for routine profiling here.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Profile
 \begin_inset space ~
@@ -3592,7 +3619,7 @@ here Set a stop marker.
  (See the section for the profiling window.)
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Select
 \begin_inset space ~
@@ -3623,7 +3650,7 @@ If it's a constant, address, register or ioport, it is selected in the symbol
 \end_layout
 
 \end_deeper
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Find
 \begin_inset space ~
@@ -3634,12 +3661,12 @@ text This opens up a search dialog.
  and the source in that page is used.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Settings A dialog with which you can change the fonts used.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000.0000
 Controls A submenu containing the simulation commands.
  (these are also found as keyboard bindings (recommended), or in the main
@@ -3650,39 +3677,39 @@ Controls A submenu containing the simulation commands.
 These are the keyboard bindings:
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 
 \series bold
 Key command
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 s,S,F7 Step one instruction.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 o,O,F8 Step over instruction
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 r,R,F9 Run continuously.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 Escape Stop simulation.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 f,F Run to return address
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 1..9 Step n instructions
 \end_layout
@@ -4124,7 +4151,7 @@ Here you can group ranges of instruction into one entry.
 The right click menu contains:
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Remove
 \begin_inset space ~
@@ -4133,7 +4160,7 @@ Remove
 range Remove an entry.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Add
 \begin_inset space ~
@@ -4143,7 +4170,7 @@ range...
  Open a dialog from where you can add a range of instructions as an entry.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Add
 \begin_inset space ~
@@ -4156,7 +4183,7 @@ all
 labels Add all code labels as ranges.
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00000000.00.0000
 Snapshot
 \begin_inset space ~
@@ -4299,22 +4326,22 @@ Once the data are captured, the scope window display may need to be altered
  In the GUI, the following keys can be used:
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 z Zoom In
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 Z Zoom out
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 l Pan left
 \end_layout
 
-\begin_layout List
+\begin_layout Labeling
 \labelwidthstring 00.00.0000
 r Pan right
 \end_layout
@@ -4817,7 +4844,7 @@ Inspecting the current state of your program is sometimes insufficient to
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="2">
-<features>
+<features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -5193,12 +5220,12 @@ Each trace frame begins with a new simulation cycle.
 \begin_layout LyX-Code
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="5">
-<features>
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" usebox="none">
 \begin_inset Text
@@ -5365,7 +5392,7 @@ name "cha:Simulating-the-Real"
 \end_inset
 
 Simulating the Real World: Stimuli
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -5547,7 +5574,7 @@ Here's a list of the types of I/O pin stimuli that are supported:
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
-<features>
+<features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -5692,7 +5719,7 @@ Asynchronous stimuli are analog or digital stimuli that can change states
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
-<features>
+<features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -6064,7 +6091,7 @@ They may be right, it depends on execution order, which is subtle.
 
 \begin_layout Chapter
 Modules
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6239,9 +6266,9 @@ gpsim provides a library of useful modules for simulation.
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="20" columns="2">
-<features>
-<column alignment="center" valignment="top" width="0">
-<column alignment="center" valignment="top" width="0">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
 <row>
 <cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
@@ -6417,6 +6444,26 @@ I2C-EEPROM256K
 
 \begin_layout Plain Layout
 A 32k byte I2C serial EEPROM like the 24LC256.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+i2c2par
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+A slave I2C device with an 8 bit I/O port
 \end_layout
 
 \end_inset
@@ -6622,26 +6669,6 @@ A 74xx595 serial-in-parallel-out shift register
 \end_inset
 </cell>
 </row>
-<row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-Encoder
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-</row>
 </lyxtabular>
 
 \end_inset
@@ -6651,7 +6678,7 @@ Encoder
 
 \begin_layout Subsection
 USART
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6768,7 +6795,7 @@ I/O Pins
 
 \begin_layout Subsection
 Logic
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6805,7 +6832,7 @@ FIXME There should be attributes to specify the switching characteristics.
 
 \begin_layout Subsection*
 and2
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6835,7 +6862,7 @@ I/O pins
 
 \begin_layout Subsection*
 or2
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6861,7 +6888,7 @@ or2
 
 \begin_layout Subsection*
 xor2
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6887,7 +6914,7 @@ xor2
 
 \begin_layout Subsection*
 not
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6909,7 +6936,7 @@ not
 
 \begin_layout Subsection*
 TTL377
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6946,7 +6973,7 @@ The TTL377 module simulates an 8-bit parallel latch with output enable.
 
 \begin_layout Subsection*
 TTL165
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -6996,7 +7023,7 @@ The TTL165 module simulates an 8-bit parallel input serial output shift
 
 \begin_layout Subsection*
 TTL595
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7046,7 +7073,7 @@ The TTL595 module simulates an 8-bit serial input parallel output shift
 
 \begin_layout Subsection
 I2C EEPROM
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7142,7 +7169,7 @@ name "sub:Switches-&-Resistors"
 \end_inset
 
 Switches
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7152,7 +7179,7 @@ Switches
 \end_inset
 
  & Resistors
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7232,7 +7259,7 @@ I/O Pins
 
 \begin_layout Subsection
 Voltage Sources
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7242,7 +7269,7 @@ Voltage Sources
 \end_inset
 
 , Resistors
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7252,7 +7279,7 @@ Resistors
 \end_inset
 
 , and Capacitors
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7304,7 +7331,7 @@ I/O Pins
 
 \begin_layout Subsection
 LED_7SEGMENTS
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7314,7 +7341,7 @@ status collapsed
 \end_inset
 
  and LED
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7431,6 +7458,61 @@ I/O Pin
 .in - drives LED
 \end_layout
 
+\begin_layout Subsection
+I2C slave to Parallel port
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+i2c2par
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The i2c2par is a 7 bit address I2C module with an 8 bit I/O port.
+ The direction of the I/O port is determined from I2C R/
+\begin_inset Formula $\bar{W}$
+\end_inset
+
+ bit.
+ When R/
+\begin_inset Formula $\bar{W}$
+\end_inset
+
+ is zero the I/O port outputs the data sent by the master device.
+ Otherwise the port is set as an input port and when the master device requests
+ data, the port is read and transmitted to the master.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+.Slave_Address - I2C 7 bit device address
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.p0..7 - I/O pins
+\end_layout
+
+\begin_layout Standard
+.SDA - I2C serial data
+\end_layout
+
+\begin_layout Standard
+.SCL - I2c serial clock
+\end_layout
+
 \begin_layout Section
 Third Party Modules
 \end_layout
@@ -7443,7 +7525,7 @@ In addition to the standard modules, third are separately distribute gpsim
 
 \begin_layout Subsection
 Character LCD - HD44780
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7456,12 +7538,126 @@ HD44780
 \end_layout
 
 \begin_layout Standard
-This module emulates the ubiquitous HD44780 character LCDs.
+The library libgpsim_lcd contines several LCD display formats using the
+ HD44780 controller.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features rotate="0" tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_display
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+20 col 2 row LCD
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_20x4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+20 col 4 row LCD
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_dt161A
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16 col 1 row LCD
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.DC - Data / command select
+\end_layout
+
+\begin_layout Standard
+.RW - Read/Write select
+\end_layout
+
+\begin_layout Standard
+.E - start data read/write
+\end_layout
+
+\begin_layout Standard
+.d0-7 - data bus
 \end_layout
 
 \begin_layout Subsection
 Graphic LCD - SED1530
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7480,7 +7676,7 @@ This module emulates a 100X32 pixel graphics LCD based on dual SED1350
 
 \begin_layout Subsection
 64 x 8, Serial, I2C Real-Time Clock - DS1307
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7499,7 +7695,7 @@ This module emulates the Dallas Semiconductor DS1307 Real-Time clock which
 
 \begin_layout Subsection
 High-Precision 1-Wire Digital Thermometer - DS1820
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7512,13 +7708,13 @@ DS1820
 \end_layout
 
 \begin_layout Standard
-This module emulates the DS1820 High-Precision 1-Wire Digital Thermometer.
-This devices uses a single-wire bus interface.
+This module emulates the DS1820 High-Precision 1-Wire Digital Thermometer.This
+ devices uses a single-wire bus interface.
 \end_layout
 
 \begin_layout Subsection
 Temperature and humidity sensor - DHT11
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -7531,8 +7727,8 @@ DHT11
 \end_layout
 
 \begin_layout Standard
-This module emulates the DHT11 temperature and humidity sensor.
-This devices uses a single-wire two-way serial interface.
+This module emulates the DHT11 temperature and humidity sensor.This devices
+ uses a single-wire two-way serial interface.
 \end_layout
 
 \begin_layout Section
@@ -7890,7 +8086,7 @@ Don't use these registers and program words:
 
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="3">
-<features>
+<features rotate="0" tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
@@ -8304,7 +8500,7 @@ gpsim is written mostly in C++.
 
 \begin_layout Section
 Instructions
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -8374,7 +8570,7 @@ The program_memory array in gpsim is always an array of instructions.
 
 \begin_layout Section
 General File Registers
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -8819,7 +9015,7 @@ The source of this document is gpsim.lyx.
 \begin_layout Standard
 This document is free software; you can redistribute it and/or modify it
  under the terms of the 
-\begin_inset Index
+\begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
@@ -8889,6 +9085,7 @@ target "http://www.gnu.org/licenses/lgpl-2.1.html"
 \start_of_appendix
 \begin_inset CommandInset index_print
 LatexCommand printindex
+type "idx"
 
 \end_inset
 

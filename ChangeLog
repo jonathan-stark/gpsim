@@ -1,3 +1,10 @@
+2015-04-10 Roy Rankin <rrankin@ihug.com.au>
+	* doc/gpsim.lyx modules/Makefile.am modules/gpsim_modules.cc 
+	  modules/i2c2par.cc modules/i2c2par.h
+	: add I2C to 8 bit bus modules for feature request # 40
+	* src/i2c-ee.cc src/i2c-ee.h
+	: rewrite to make I2C slave code sharable via class i2c_slave
+
 2015-04-04 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_breadboard.cc gui/gui_breadboard.h
 	: Replace deprecated GDK calls for displaying module name

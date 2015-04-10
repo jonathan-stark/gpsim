@@ -18,7 +18,8 @@ libgpsim_modules_la_SOURCES = \
 	stimuli.h stimuli.cc \
 	ttl.cc ttl.h \
 	video.cc video.h \
-	i2c.cc i2c.h
+	i2c.cc i2c.h \
+	i2c2par.cc i2c2par.h
  # TSD - removed 17APR06 #PGS added back
 ##	paraface.cc paraface.h \  # TSD - removed 16APR06
 
