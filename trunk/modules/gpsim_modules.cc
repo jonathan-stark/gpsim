@@ -68,6 +68,7 @@ support:
 #include "ttl.h"
 #include "i2c-eeprom.h"
 #include "i2c.h"
+#include "i2c2par.h"
 
 
 Module_Types available_modules[] =
@@ -128,6 +129,7 @@ Module_Types available_modules[] =
   { {"I2C-EEPROM16k", "e24xx16b"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_16k},
   { {"I2C-EEPROM256k", "e24xx256"}, I2C_EEPROM_Modules::I2C_EE_Module::construct_256k},
   { {"i2cmaster", "I2CMaster"},   I2C_Module::I2CMaster::construct },
+  { {"i2c2par", "I2C2PAR"},   I2C2PAR_Modules::i2c2par::construct },
 
   // No more modules
   { {0,0},0}
