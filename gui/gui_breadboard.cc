@@ -34,20 +34,20 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <iostream>
-#include <iomanip>
 #include <string>
 #include <typeinfo>
 
 #include "../src/modules.h"
 #include "../src/stimuli.h"
-#include "../src/pic-processor.h"
+#include "../src/processor.h"
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
 #include "../src/value.h"
 #include "../src/errors.h"
 #include "../src/packages.h"
 
-#include <vector>
+#include <map>
+#include <utility>
 
 #include "gui.h"
 #include "gui_breadboard.h"
@@ -63,7 +63,6 @@ Boston, MA 02111-1307, USA.  */
 
 static GdkColor high_output_color;
 static GdkColor low_output_color;
-static GdkColor black_color;
 
 #define PINLENGTH (4*PINLINEWIDTH)
 
@@ -639,8 +638,8 @@ static void draw_board_matrix(Breadboard_Window *bbw)
 
 static std::vector<path *> nodepath_list;
 
-// Draw nodes in nodepath_list to layout_pixmap
-static void clear_nodes(Breadboard_Window *bbw)
+// Clear nodes in nodepath_list
+void Breadboard_Window::clear_nodes()
 {
   std::vector<path *>::iterator iter = nodepath_list.begin();
   for ( ; iter != nodepath_list.end(); ++iter) {
@@ -651,59 +650,53 @@ static void clear_nodes(Breadboard_Window *bbw)
   nodepath_list.clear();
 }
 
-static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw);
-
-// Draw node in nodepath_list to layout_pixmap
-static void draw_nodes(Breadboard_Window *bbw)
+// Draw node in nodepath_list
+void Breadboard_Window::draw_nodes()
 {
-  gdk_draw_rectangle(bbw->layout_pixmap,
-    gtk_widget_get_style(bbw->window)->bg_gc[gtk_widget_get_state(bbw->window)],
-    TRUE,
-    0, 0, LAYOUTSIZE_X, LAYOUTSIZE_Y);
+  gtk_widget_queue_draw(layout);
+}
+
+gboolean Breadboard_Window::layout_expose(GtkWidget *widget,
+  GdkEventExpose *event, Breadboard_Window *bbw)
+{
+  cairo_t *cr = gdk_cairo_create(gtk_layout_get_bin_window(GTK_LAYOUT(bbw->layout)));
+
+  cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+  cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+  cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 
   std::vector<path *>::iterator iter = nodepath_list.begin();
 
   for ( ; iter != nodepath_list.end(); ++iter) {
-    int last_x, last_y;
-    path *current_path;
-
     path *nodepath = *iter;
 
-    current_path = nodepath;
+    path *current_path = nodepath;
 
-    last_x = current_path->p.x*ROUTE_RES;
-    last_y = current_path->p.y*ROUTE_RES;
+    int last_x = current_path->p.x * ROUTE_RES;
+    int last_y = current_path->p.y * ROUTE_RES;
+    cairo_move_to(cr, last_x, last_y);
 
-    current_path=current_path->next;
+    current_path = current_path->next;
 
-    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
+    while (current_path) {
+      int x = current_path->p.x * ROUTE_RES;
+      int y = current_path->p.y * ROUTE_RES;
 
-    while(current_path!=0) {
-      int x,y;
-
-      x=current_path->p.x*ROUTE_RES;
-      y=current_path->p.y*ROUTE_RES;
-
-      gdk_draw_line(bbw->layout_pixmap,
-                    bbw->pinline_gc,
-                    last_x,last_y,
-                    x,y);
-
-      last_x=x;
-      last_y=y;
+      cairo_line_to(cr, x, y);
 
       current_path = current_path->next;
     }
   }
+  cairo_stroke(cr);
 
-  layout_adj_changed(0,bbw);
+  cairo_destroy(cr);
+
+  return FALSE;
 }
-
-
 
 // Here we fill board_matrix with module packages, so that trace_two_points
 // know not to trace over them.
-static void update_board_matrix(Breadboard_Window *bbw)
+void Breadboard_Window::update_board_matrix()
 {
     int x,y, width, height;
     int i;
@@ -729,8 +722,8 @@ static void update_board_matrix(Breadboard_Window *bbw)
 
 
     // Loop all modules, and put its package and pins to board_matrix
-    std::vector<GuiModule *>::iterator mi = bbw->modules.begin();
-    for ( ; mi != bbw->modules.end(); ++mi) {
+    std::vector<GuiModule *>::iterator mi = modules.begin();
+    for ( ; mi != modules.end(); ++mi) {
 
       GuiModule *p = *mi;
 
@@ -792,8 +785,8 @@ static void update_board_matrix(Breadboard_Window *bbw)
       }
     }
 
-    clear_nodes(bbw);
-    draw_nodes(bbw);
+    clear_nodes();
+    draw_nodes();
 }
 
 // Add path to board_matrix. This will make trace_two_point to not trace
@@ -1511,8 +1504,8 @@ void grab_module(GuiModule *p)
 
     treeselect_module(0,dragged_module);
     dragging = 1;
-    clear_nodes(p->bbw());
-    draw_nodes(p->bbw());
+    p->bbw()->clear_nodes();
+    p->bbw()->draw_nodes();
     gtk_widget_set_app_paintable(p->bbw()->layout, FALSE);
 }
 
@@ -1542,7 +1535,7 @@ static void pointer_cb(GtkWidget *w,
                 dragging = 0;
                 gtk_widget_set_app_paintable(bbw->layout, TRUE);
                 grab_next_module=0;
-                update_board_matrix(bbw);
+                bbw->update_board_matrix();
             }
         }
         else
@@ -1558,8 +1551,8 @@ static void pointer_cb(GtkWidget *w,
                               GDK_CURRENT_TIME);
               treeselect_module(0,dragged_module);
               dragging = 1;
-              clear_nodes(bbw);
-              draw_nodes(bbw);
+              bbw->clear_nodes();
+              bbw->draw_nodes();
               gtk_widget_set_app_paintable(bbw->layout, FALSE);
             }
         }
@@ -1570,10 +1563,10 @@ static void pointer_cb(GtkWidget *w,
         if(dragging)
         {
             gdk_pointer_ungrab(GDK_CURRENT_TIME);
-            update_board_matrix(bbw);
+            bbw->update_board_matrix();
             dragging = 0;
             gtk_widget_set_app_paintable(bbw->layout, TRUE);
-            update_board_matrix(bbw);
+            bbw->update_board_matrix();
             UpdateModuleFrame(dragged_module, bbw);
         }
         break;
@@ -1633,7 +1626,7 @@ static gint button(GtkWidget *widget,
 	if (gn)
 	{
             trace_node(gn);
-            draw_nodes(gn->bbw);
+            gn->bbw->draw_nodes();
 	}
       }
       return 1;
@@ -2311,8 +2304,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
 static void clear_traces(GtkWidget *button, Breadboard_Window *bbw)
 {
-
-    update_board_matrix(bbw);
+  bbw->update_board_matrix();
 }
 
 static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
@@ -2321,7 +2313,7 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
     GtkTreeModel *model;
     GtkTreeIter p_iter, c_iter;
     
-    update_board_matrix(bbw);
+    bbw->update_board_matrix();
 
     if ((model = gtk_tree_view_get_model ((GtkTreeView*) bbw->tree)) == NULL)
 	return;
@@ -2336,7 +2328,7 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
         trace_node(gn);
     } while (gtk_tree_model_iter_next (model, &c_iter));    
 
-    draw_nodes(bbw);
+    bbw->draw_nodes();
 
     if (verbose)
         puts("Trace all is done.");
@@ -3037,7 +3029,7 @@ void GuiModule::Build()
 
   m_bIsBuilt = true;
 
-  update_board_matrix(m_bbw);
+  m_bbw->update_board_matrix();
 
 }
 
@@ -3136,7 +3128,7 @@ void Breadboard_Window::Update(void)
       if(p->x()!=x || p->y()!=y) {
         // If so, move the module
         p->SetPosition(x, y);
-        update_board_matrix(p->bbw());
+        p->bbw()->update_board_matrix();
       }
 
       // Check if pins have changed state
@@ -3260,48 +3252,6 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
   }
 }
 
-static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
-{
-  GdkWindow *bin_win = gtk_layout_get_bin_window(GTK_LAYOUT(bbw->layout));
-
-  if (!bin_win)
-    return;
-
-  if (!bbw->layout_pixmap) {
-    puts("bbw.c: no pixmap4!");
-    return;
-  }
-
-  GtkAdjustment *xadj = gtk_layout_get_hadjustment(GTK_LAYOUT(bbw->layout));
-  GtkAdjustment *yadj = gtk_layout_get_vadjustment(GTK_LAYOUT(bbw->layout));
-   
-  int xoffset = (int) gtk_adjustment_get_value(GTK_ADJUSTMENT(xadj));
-  int yoffset = (int) gtk_adjustment_get_value(GTK_ADJUSTMENT(yadj));
-
-  GtkAllocation allocation;
-  gtk_widget_get_allocation(bbw->layout, &allocation);
-
-  gdk_draw_pixmap(bin_win,
-    gtk_widget_get_style(bbw->window)->white_gc,
-    bbw->layout_pixmap,
-    xoffset, yoffset,
-    xoffset, yoffset,
-    allocation.width,
-    allocation.height);
-}
-
-static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
-{
-  if (!bbw->layout_pixmap) {
-    puts("bbw.c: no pixmap5!");
-    return 0;
-  }
-
-  layout_adj_changed(widget, bbw);
-
-  return 0;
-}
-
 static GtkWidget *bb_vbox(GtkWidget *window, const char *name)
 {
   GtkWidget *vbox = gtk_vbox_new (FALSE, 0);
@@ -3381,12 +3331,9 @@ void Breadboard_Window::Build(void)
 
   gdk_color_parse("red",&high_output_color);
   gdk_color_parse("green",&low_output_color);
-  gdk_color_parse("black",&black_color);
 
   gdk_colormap_alloc_color(colormap, &high_output_color,FALSE,TRUE);
   gdk_colormap_alloc_color(colormap, &low_output_color,FALSE,TRUE);
-  gdk_colormap_alloc_color(colormap, &black_color,FALSE,TRUE);
-
 
   //
   // Top level window
@@ -3641,11 +3588,6 @@ void Breadboard_Window::Build(void)
   GtkAdjustment *yadj = gtk_layout_get_vadjustment(GTK_LAYOUT(layout));
   gtk_adjustment_set_step_increment(yadj, 10.0);
 
-  g_signal_connect(xadj, "value_changed",
-                     G_CALLBACK(layout_adj_changed), this);
-  g_signal_connect(yadj, "value_changed",
-                     G_CALLBACK(layout_adj_changed), this);
-
   gtk_widget_set_app_paintable(layout, TRUE);
   gtk_widget_show (layout);
 
@@ -3669,20 +3611,8 @@ void Breadboard_Window::Build(void)
 
   pinname_gc=gdk_gc_new(win_gdk_window);
 
-  case_gc=gdk_gc_new(win_gdk_window);
-  gdk_gc_set_line_attributes(case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-
   pinstatefont = pango_font_description_from_string("Courier Bold 8");
   pinnamefont = pango_font_description_from_string("Courier Bold 8");
-
-  pinline_gc=gdk_gc_new(win_gdk_window);
-
-  gdk_gc_set_line_attributes(pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-
-  layout_pixmap = gdk_pixmap_new(win_gdk_window,
-                                      LAYOUTSIZE_X,
-                                      LAYOUTSIZE_Y,
-                                      -1);
 
   pinnameheight = gdk_string_height (gdk_font_from_description(pinnamefont),"9y");
 
@@ -3718,7 +3648,7 @@ void Breadboard_Window::Build(void)
 
   UpdateMenuItem();
 
-  draw_nodes(this);
+  draw_nodes();
   // cout << "FIXME gui_breadboard.cc " << __FUNCTION__ << endl;
   /*
   // Loop module list
@@ -3755,10 +3685,9 @@ const char *Breadboard_Window::name()
 }
 
 Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
-  : pinstatefont(0), pinnamefont(0), pinname_gc(0), pinline_gc(0),
-    case_gc(0), node_clist(0),
+  : pinstatefont(0), pinnamefont(0), pinname_gc(0), node_clist(0),
     stimulus_settings_label(0), stimulus_add_node_button(0),
-    layout_pixmap(0), hadj(0), vadj(0), node_iter(0),
+    hadj(0), vadj(0), node_iter(0),
     selected_pin(0), selected_node(0), selected_module(0)
 {
   menu = "/menu/Windows/Breadboard";

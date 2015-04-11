@@ -23,7 +23,15 @@ Boston, MA 02111-1307, USA.  */
 #define __GUI_BREADBOARD_H__
 
 #include "../src/packages.h"
+#include "../src/stimuli.h"
+#include "gui_object.h"
 
+#include <string>
+#include <vector>
+
+class CrossReferenceToGUI;
+class GUI_Processor;
+class Module;
 
 //
 // The Breadboard window data
@@ -245,8 +253,6 @@ public:
   GtkWidget *layout;
 
   GdkGC *pinname_gc;
-  GdkGC *pinline_gc;
-  GdkGC *case_gc;
 
   std::vector<GuiModule *> modules;
   std::vector<Stimulus_Node *> nodes;
@@ -268,8 +274,6 @@ public:
 
   GtkWidget *stimulus_add_node_button;
 
-  GdkPixmap *layout_pixmap;
-
   GtkAdjustment *hadj, *vadj;
   
   GtkTreeIter *node_iter;
@@ -278,13 +282,17 @@ public:
   struct gui_node *selected_node;
   GuiModule *selected_module;
 
-
   Breadboard_Window(GUI_Processor *gp);
+
   virtual void Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void Update(void);
   virtual void NewModule(Module *module);
   virtual void NodeConfigurationChanged(Stimulus_Node *node);
+
+  void draw_nodes();
+  void update_board_matrix();
+  void clear_nodes();
 
   GtkWidget *add_button(const char *label, const char *name,
 			GCallback f, GtkWidget *box);
@@ -294,6 +302,9 @@ protected:
 
 private:
   GuiModule *m_MainCpuModule;
+
+  static gboolean layout_expose(GtkWidget *widget,
+    GdkEventExpose *event, Breadboard_Window *bbw);
 };
 
 

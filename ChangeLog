@@ -1,3 +1,7 @@
+2015-04-11 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_breadboard.cc gui/gui_breadboard.h
+	: Traces are now drawn using Cairo instead of deprecated GDK calls
+
 2015-04-10 Roy Rankin <rrankin@ihug.com.au>
 	* doc/gpsim.lyx modules/Makefile.am modules/gpsim_modules.cc 
 	  modules/i2c2par.cc modules/i2c2par.h
