@@ -866,6 +866,10 @@ void CCPCON::put(unsigned int new_value)
   if (!ccprl || !tmr2)
     return;
 
+  // Return if no change other than possibly the duty cycle 
+  if (((new_value ^ old_value) & ~(CCPY|CCPX)) == 0)
+    return;
+
   bool oldbInEn  = m_bInputEnabled;
   bool oldbOutEn = m_bOutputEnabled;
 
