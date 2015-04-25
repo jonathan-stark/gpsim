@@ -1,3 +1,7 @@
+2015-04-25 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_breadboard.h gui/gui_breadboard.cc
+	: All drawing now done with Cairo. Fix memory leak, some code tidy up
+
 2015-04-13 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc
 	: Fix bug # 196 - PWM glitch when writing to CCPCON 

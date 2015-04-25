@@ -45,17 +45,18 @@ typedef enum {PIN_DIGITAL, PIN_ANALOG, PIN_OTHER} pintype;
 
 // Routing types
 typedef enum {R_NONE,R_LEFT, R_RIGHT, R_UP, R_DOWN} route_direction;
-typedef struct
-{
-    int x;
-    int y;
-} point;
-typedef struct _path
-{
-    point p;
-    route_direction dir;
-    struct _path *next;
-} path;
+class point {
+public:
+  int x;
+  int y;
+};
+
+class path {
+public:
+  point p;
+  route_direction dir;
+  path *next;
+};
 // End routing types
 
 
@@ -119,8 +120,8 @@ public:
   void SetLabelPosition(int x, int y);
   int label_x() { return m_label_x; }
   int label_y() { return m_label_y; }
-  int DrawGUIlabel(GdkPixmap *pix_map,  int pinnameWidths[]);
-  void DrawLabel(GdkPixmap *pix_map);
+  bool DrawGUIlabel();
+  void DrawLabel(cairo_t *cr);
 
   void SetOrientation(eOrientation o) { orientation = o; }
 
@@ -193,7 +194,7 @@ public:
   virtual void Build();
   virtual void Draw();
   virtual void Destroy();
-  virtual void DrawCaseOutline(GtkWidget *);
+  virtual void DrawCaseOutline(cairo_t *);
 
   virtual void AddPin(unsigned int);
   virtual void AddPinGeometry(GuiPin *);
@@ -204,7 +205,6 @@ public:
   GtkWidget *module_widget() { return m_module_widget; }
   GtkWidget *pinLabel_widget() { return m_pinLabel_widget; }
   GtkWidget *name_widget() { return m_name_widget->gobj(); }
-  GdkPixmap *module_pixmap() { return m_module_pixmap; }
 
 protected:
 
@@ -220,16 +220,17 @@ protected:
   int pinnameWidths[4];
   int m_pin_count;
 
-  GdkPixmap *m_module_pixmap;
-
   std::vector<GuiPin *> m_pins;
+
+private:
+  static gboolean module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p);
 };
 
 class GuiDipModule : public GuiModule
 {
 public:
   GuiDipModule(Module *, Breadboard_Window *);
-  virtual void DrawCaseOutline(GtkWidget *);
+  virtual void DrawCaseOutline(cairo_t *);
 };
 
 struct gui_node
@@ -251,8 +252,6 @@ public:
   int pinnameheight;
 
   GtkWidget *layout;
-
-  GdkGC *pinname_gc;
 
   std::vector<GuiModule *> modules;
   std::vector<Stimulus_Node *> nodes;
