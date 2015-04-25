@@ -51,6 +51,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 #include "gui_breadboard.h"
+#include "gui_processor.h"
 
 #define PINLINEWIDTH 3
 #define CASELINEWIDTH 4
@@ -145,23 +146,6 @@ static inline int allow_vert(point &p)
 static inline route_direction calculate_route_direction(point s, point e)
 {
     if(abs(s.x-e.x) > abs(s.y-e.y))
-    {
-        // Left or right
-        if(s.x<e.x)
-            return R_RIGHT;
-        return R_LEFT;
-    }
-    if(s.y<e.y)
-        return R_UP;
-    return R_DOWN;
-}
-
-// Return right/left/up/down if the endpoint is straight ahead in that dir.
-static inline route_direction calculate_route_direction_exact(point s, point e)
-{
-    if(s.x!=e.x && s.y!=e.y)
-        return R_NONE;
-    if(s.y==e.y)
     {
         // Left or right
         if(s.x<e.x)
@@ -537,104 +521,6 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
 //    }
     return FALSE;
 }
-#if 0 // enable for debug
-// print huge ascii picture of the board_matrix for debugging
-void print_matrix(void)
-{
-    int x,y;
-
-    for(y=YSIZE-1;y>=0;y--)
-    {
-        for(x=0;x<XSIZE;x++)
-        {
-            if(board_matrix[x][y]==0)
-                putchar('.');
-            else if(board_matrix[x][y]==(HMASK|VMASK))
-                putchar('X');
-            else if(board_matrix[x][y]==HMASK)
-                putchar('-');
-            else if(board_matrix[x][y]==VMASK)
-                putchar('|');
-            else// if(isalnum(board_matrix[x][y]))
-                putchar(board_matrix[x][y]);
-            //                  else
-            //                          assert(0);
-        }
-        putchar('\r');
-        putchar('\n');
-    }
-}
-
-// Debug. Draw routing constraints. FIXME draw from board_matrix instead.
-static void draw_board_matrix(Breadboard_Window *bbw)
-{
-    int x,y, width, height;
-    GList *mi;
-    int i;
-
-    // Loop all modules
-    mi = bbw->modules;
-    while(mi!=0)
-    {
-        GuiModule *p = static_cast<GuiModule*>(mi->data);
-        if(p->IsBuilt()) {
-        x=p->x;
-        y=p->y/*-PINLENGTH*/;
-        width=p->width/*+PINLENGTH*/;
-        height=p->height/*+PINLENGTH*/;
-
-        // Debug. This shows the boxes that limits traceing.
-        gdk_draw_rectangle(bbw->layout_pixmap,
-                           bbw->case_gc,0,
-                           x,y,width,height);
-        //printf("%dx%d @ %d,%d with %d pins\n",width,height,x,y,p->module->get_pin_count());
-
-        // Draw barriers around pins so the tracker can only get in
-        // straigt to the pin and not from the side.
-        for(i=1;i<=p->module()->get_pin_count();i++)
-        {
-
-            GList *e;
-
-            e = g_list_nth(p->pins(), i-1);
-
-            GuiPin *gp = static_cast<GuiPin*>(e->data);
-
-            switch(gp->orientation)
-            {
-            case LEFT:
-                y=p->y+gp->y;
-                gdk_draw_line(bbw->layout_pixmap,
-                              bbw->case_gc,
-                              p->x+gp->x-PINLENGTH,y,
-                              p->x+gp->x+gp->width,y);
-                y=p->y+gp->y+gp->height;
-                gdk_draw_line(bbw->layout_pixmap,
-                              bbw->case_gc,
-                              p->x+gp->x-PINLENGTH,y,
-                              p->x+gp->x+gp->width,y);
-                break;
-            case RIGHT:
-                y=p->y+gp->y;
-                gdk_draw_line(bbw->layout_pixmap,
-                              bbw->case_gc,
-                              p->x+gp->x,y,
-                              p->x+gp->x+gp->width+PINLENGTH,y);
-                y=p->y+gp->y+gp->height;
-                gdk_draw_line(bbw->layout_pixmap,
-                              bbw->case_gc,
-                              p->x+gp->x,y,
-                              p->x+gp->x+gp->width+PINLENGTH,y);
-                break;
-            default:
-                assert(0);
-            }
-        }
-        }
-        mi=mi->next;
-    }
-}
-#endif
 
 static std::vector<path *> nodepath_list;
 
@@ -938,8 +824,8 @@ static void path_copy_and_cat(path **pat, path **source)
     {
 
         dest = new path;
-        memcpy(dest, sourceiter, sizeof(path));
-        dest->next=0;
+        dest = sourceiter;
+        dest->next = 0;
 
         if(*pat==0)
             *pat=dest;
@@ -1181,48 +1067,42 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     gui_node->bbw->selected_node = gui_node;
 }
 
-static void treeselect_cb (GtkTreeSelection *selection,
+static void treeselect_cb(GtkTreeSelection *selection,
                            gpointer user_data)
 {
-    GtkTreeModel *model;
-    GtkTreeIter first_iter, iter;
-    GtkTreePath *path;
-    char *spath;
+  GtkTreeModel *model;
+  GtkTreeIter iter;
     
-    gtk_tree_selection_get_selected (selection, &model, &iter);
+  gtk_tree_selection_get_selected(selection, &model, &iter);
     
-    if (!iter.stamp)
-        return;
+  if (!iter.stamp)
+    return;
     
-    gtk_tree_model_get_iter_first (model, &first_iter);
-    path = gtk_tree_model_get_path (model, &iter);
+  GtkTreePath *path = gtk_tree_model_get_path(model, &iter);
     
-    spath = gtk_tree_path_to_string (path);
+  gchar *spath = gtk_tree_path_to_string(path);
     
-    if (spath[0] == '0')
-    {
-        struct gui_node *gn;
-        gtk_tree_model_get (model, &iter, 1, &gn, -1);
-        if (strlen (spath) > 1)
-            treeselect_node (NULL, gn);
-        else
-            gtk_widget_hide (gn->bbw->node_frame);
-    }
+  if (spath[0] == '0') {
+    struct gui_node *gn;
+    gtk_tree_model_get (model, &iter, 1, &gn, -1);
+    if (strlen (spath) > 1)
+      treeselect_node (NULL, gn);
     else
-    {
-        if (strlen (spath) > 1)
-        {
-            GuiPin *gp;
-            gtk_tree_model_get (model, &iter, 1, &gp, -1);
-            treeselect_stimulus (NULL, gp);
-        }
-        else
-        {
-            GuiModule *module;
-            gtk_tree_model_get (model, &iter, 1, &module, -1);
-            treeselect_module (NULL, module);
-        }
+      gtk_widget_hide (gn->bbw->node_frame);
+  } else {
+    if (strlen (spath) > 1) {
+      GuiPin *gp;
+      gtk_tree_model_get (model, &iter, 1, &gp, -1);
+      treeselect_stimulus (NULL, gp);
+    } else {
+      GuiModule *module;
+      gtk_tree_model_get (model, &iter, 1, &module, -1);
+      treeselect_module (NULL, module);
     }
+  }
+
+  g_free(spath);
+  gtk_tree_path_free(path);
 }
 
 static const char *mod_name;
@@ -2553,57 +2433,35 @@ void GuiPin::SetLabelPosition(int x, int y)
 // GuiPin::DrawLabel() - draw the label for a single pin
 //
 //
-void GuiPin::DrawLabel(GdkPixmap *module_pixmap)
+void GuiPin::DrawLabel(cairo_t *cr)
 {
-  const char *name;
   IOPIN *iopin = getIOpin();
 
-
-  name = iopin ? iopin->name().c_str() : "";
-  if(*name && m_bbw ) {
-
-    gdk_draw_text(module_pixmap,
-                  gdk_font_from_description(m_bbw->pinnamefont),
-                  m_bbw->pinname_gc,
-                  m_label_x,
-                  m_label_y,
-                  name,strlen(name));
-
-
+  const char *name = iopin ? iopin->name().c_str() : "";
+  if (*name && m_bbw) {
+    PangoLayout *layout = pango_cairo_create_layout(cr);
+    pango_layout_set_font_description(layout, m_bbw->pinnamefont);
+    pango_layout_set_text(layout, name, -1);
+    pango_cairo_update_layout(cr, layout);
+    cairo_move_to(cr, m_label_x,
+      m_label_y - pango_layout_get_baseline(layout) / PANGO_SCALE);
+    pango_cairo_show_layout(cr, layout);
+    g_object_unref(layout);
   }
 }
 //------------------------------------------------------------------------
-// GuiPin::DrawGUIlabel() - Erase label and change to that set by newGUIname
+// GuiPin::DrawGUIlabel() - Gte it pin has changed since last access
 //
 //
-int GuiPin::DrawGUIlabel(GdkPixmap *module_pixmap,  int pinnameWidths[])
+bool GuiPin::DrawGUIlabel()
 {
   IOPIN *iopin = getIOpin();
 
-  const char *name = iopin ? iopin->GUIname().c_str() : "";
-  if(*name && m_bbw && iopin->is_newGUIname()) {
+  if (iopin && iopin->is_newGUIname()) {
     iopin->clr_is_newGUIname();
-
-    int orient = (m_label_x <= LABELPAD+CASELINEWIDTH)?0:2; // Left or Right label?
-
-    // Clear label area
-    gdk_draw_rectangle(module_pixmap,
-      gtk_widget_get_style(m_bbw->window)->white_gc,
-      TRUE,
-      m_label_x, m_label_y-m_height+CASEOFFSET,
-      pinnameWidths[orient], m_height);
-
-    gdk_draw_text(module_pixmap,
-                  gdk_font_from_description(m_bbw->pinnamefont),
-                  m_bbw->pinname_gc,
-                  m_label_x,
-                  m_label_y,
-                  name,strlen(name));
-
-
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 //------------------------------------------------------------------------
 void GuiPin::addXref(CrossReferenceToGUI *newXref)
@@ -2621,17 +2479,20 @@ void GuiPin::Destroy()
 
 //------------------------------------------------------------------------
 
-static gboolean module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
+gboolean GuiModule::module_expose(GtkWidget *widget,
+  GdkEventExpose *event, GuiModule *p)
 {
-  if (!p->module_pixmap()) {
-    puts("bbw.c: no pixmap3!");
-    return 0;
-  }
-
   cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 
-  gdk_cairo_set_source_pixmap(cr, p->module_pixmap(), 0.0, 0.0);
-  cairo_paint(cr);
+  p->DrawCaseOutline(cr);
+
+  std::vector<GuiPin *>::iterator pin_iter = p->m_pins.begin();
+
+  for ( ; pin_iter != p->m_pins.end(); ++pin_iter) {
+    GuiPin *pin = *pin_iter;
+    pin->DrawLabel(cr);
+  }
+
   cairo_destroy(cr);
 
   return FALSE;
@@ -2656,7 +2517,6 @@ void GuiModule::Update()
   // in the module.
   if(m_module->get_widget()==0)
     {
-      g_object_unref(m_module_pixmap);
       gtk_widget_destroy(m_pinLabel_widget);
     }
 
@@ -2685,24 +2545,18 @@ void GuiModule::Update()
 
 void GuiModule::UpdatePins()
 {
-  int change = 0;
+  bool change = false;
   std::vector<GuiPin *>::iterator pin_iter = m_pins.begin();
 
   for ( ; pin_iter != m_pins.end(); ++pin_iter) {
     GuiPin *pin = *pin_iter;
-    change = pin->DrawGUIlabel(m_module_pixmap, pinnameWidths) ? 1 : change;
+    change |= pin->DrawGUIlabel();
     pin->Update();
   }
 
-  GdkWindow *gdk_win = gtk_widget_get_window(m_pinLabel_widget);
-  if (change && gdk_win)  // Pin label changed, Draw Labels
-  {
-    gdk_draw_pixmap(gdk_win,
-      gtk_widget_get_style(m_pinLabel_widget)->fg_gc[gtk_widget_get_state(m_pinLabel_widget)],
-      m_module_pixmap,
-      0, 0, 0, 0, m_width, m_height);
+  if (change) {
+    gtk_widget_queue_draw(m_pinLabel_widget);
   }
-
 }
 //========================================================================
 //========================================================================
@@ -2729,22 +2583,13 @@ void PositionAttribute::set(Value *v)
 }
 
 //------------------------------------------------------------------------
-void GuiModule::DrawCaseOutline(GtkWidget *da)
+void GuiModule::DrawCaseOutline(cairo_t *cr)
 {
-  gdk_draw_rectangle(m_module_pixmap,
-    gtk_widget_get_style(m_bbw->window)->bg_gc[gtk_widget_get_state(m_bbw->window)],
-    TRUE,
-    0, 0, m_width, m_height);
-
-  cairo_t *cr = gdk_cairo_create (m_module_pixmap);
-
   cairo_rectangle(cr, CASEOFFSET,CASEOFFSET, m_width-2*CASEOFFSET, m_height-2*CASEOFFSET);
   cairo_set_source_rgb (cr, 1, 1, 1);
   cairo_fill_preserve (cr);
   cairo_set_source_rgb (cr, 0, 0, 0);
   cairo_stroke (cr);
-
-  cairo_destroy(cr);
 }
 //------------------------------------------------------------------------
 
@@ -2881,8 +2726,6 @@ void GuiModule::Build()
   if(!m_bbw->enabled)
     return;
 
-
-  int i;
   int nx, ny;
 
   BreadBoardXREF *cross_reference;
@@ -2921,23 +2764,24 @@ void GuiModule::Build()
 
   // Find the length of the longest pin name in each direction
   // The directions are in the order of left, up , right, down.
-  int pinmax_x = 0;
-  int pinmax_y = 0;
-  for(i=1;i<=m_pin_count;i++) {
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(m_bbw->window));
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+  pango_layout_set_font_description(layout, m_bbw->pinnamefont);
+
+  for (int i = 1; i <= m_pin_count; i++) {
 
     PinGeometry *pPinGeometry = m_module->package->getPinGeometry(i);
 
     pPinGeometry->convertToNew();
-    if (pPinGeometry->bNew) {
-      pinmax_x = pinmax_x < pPinGeometry->m_x ? pinmax_x : ((int) pPinGeometry->m_x);
-      pinmax_y = pinmax_y < pPinGeometry->m_y ? pinmax_y : ((int) pPinGeometry->m_y);
+
+    int w = 0;
+    std::string name = m_module->get_pin_name(i);
+
+    if (!name.empty() && pPinGeometry->m_bShowPinname) {
+      pango_layout_set_text(layout, name.c_str(), -1);
+      pango_layout_get_size(layout, &w, NULL);
+      w /= PANGO_SCALE;
     }
-
-    int w=0;
-    const char *name = m_module->get_pin_name(i).c_str();
-
-    if(name && pPinGeometry->m_bShowPinname)
-      w = gdk_string_width(gdk_font_from_description(m_bbw->pinnamefont), name);
 
     if(w > pinnameWidths[pPinGeometry->m_orientation])
       pinnameWidths[pPinGeometry->m_orientation]= w;
@@ -2945,6 +2789,9 @@ void GuiModule::Build()
     AddPin(i);
 
   }
+  g_object_unref(layout);
+  cairo_destroy(cr);
+
   if(!m_module_widget) {
 
     // Create a static representation.
@@ -2958,21 +2805,13 @@ void GuiModule::Build()
 
     m_height+=2*CASELINEWIDTH+2*LABELPAD;
 
-    m_module_pixmap = gdk_pixmap_new(gtk_widget_get_window(m_bbw->window),
-                                     m_width,
-                                     m_height,
-                                     -1);
     m_pinLabel_widget = gtk_drawing_area_new();
     gtk_widget_set_size_request(m_pinLabel_widget, m_width, m_height);
     gtk_widget_show_all (m_pinLabel_widget);
-    DrawCaseOutline(m_pinLabel_widget);
-    g_signal_connect(m_pinLabel_widget,
-                         "expose_event",
-                         G_CALLBACK(module_expose),
-                         this);
+
+    g_signal_connect(m_pinLabel_widget, "expose_event",
+      G_CALLBACK(module_expose), this);
     gtk_widget_show(m_pinLabel_widget);
-
-
   } else {
     // Get the [from the module] provided widget's size
     GtkRequisition req;
@@ -3002,8 +2841,6 @@ void GuiModule::Build()
   for ( ; pin_iter != m_pins.end(); ++pin_iter) {
     GuiPin *pin = *pin_iter;
     AddPinGeometry(pin);
-    if (m_module_pixmap)
-      pin->DrawLabel(m_module_pixmap);
 
     gtk_layout_put(GTK_LAYOUT(m_bbw->layout),pin->m_pinDrawingArea,0,0);
 
@@ -3030,7 +2867,6 @@ void GuiModule::Build()
   m_bIsBuilt = true;
 
   m_bbw->update_board_matrix();
-
 }
 
 
@@ -3040,7 +2876,7 @@ void GuiModule::Build()
 GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   : GuiBreadBoardObject(_bbw,0,0), m_module(_module), m_module_widget(0),
     m_pinLabel_widget(0), m_module_x(0), m_module_y(0), m_name_widget(0),
-    m_pin_count(0), m_module_pixmap(0)
+    m_pin_count(0)
 {
   m_width=0;
   m_height=0;
@@ -3057,8 +2893,8 @@ GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
       Value *xpos = dynamic_cast<Value*> (m_module->findSymbol("xpos"));
       Value *ypos = dynamic_cast<Value*> (m_module->findSymbol("xpos"));
       if(!xpos || !ypos) {
-        xpos = new PositionAttribute(m_bbw,"xpos",(double)80);
-        ypos = new PositionAttribute(m_bbw,"ypos",(double)80);
+        xpos = new PositionAttribute(m_bbw, "xpos", 80.0);
+        ypos = new PositionAttribute(m_bbw, "ypos", 80.0);
         m_module->addSymbol(xpos);
         m_module->addSymbol(ypos);
       }
@@ -3071,16 +2907,8 @@ GuiDipModule::GuiDipModule(Module *_module, Breadboard_Window *_bbw)
 {
 }
 
-void GuiDipModule::DrawCaseOutline(GtkWidget *da)
+void GuiDipModule::DrawCaseOutline(cairo_t *cr)
 {
-  gdk_draw_rectangle(m_module_pixmap,
-    gtk_widget_get_style(m_bbw->window)->bg_gc[gtk_widget_get_state(m_bbw->window)],
-    TRUE,
-    0, 0,
-    m_width, m_height);
-
-  cairo_t *cr = gdk_cairo_create (m_module_pixmap);
-
   cairo_line_to (cr, CASEOFFSET, CASEOFFSET);
   cairo_line_to (cr, CASEOFFSET, m_height-2*CASEOFFSET);
   cairo_line_to (cr, m_width-CASEOFFSET, m_height-2*CASEOFFSET);
@@ -3093,8 +2921,6 @@ void GuiDipModule::DrawCaseOutline(GtkWidget *da)
   cairo_fill_preserve (cr);
   cairo_set_source_rgb (cr, 0, 0, 0);
   cairo_stroke (cr);
-
-  cairo_destroy(cr);
 }
 
 //========================================================================
@@ -3154,19 +2980,6 @@ static int delete_event(GtkWidget *widget,
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
-  // Create a Gui representation (note that this memory is
-  // placed onto the 'modules' list.
-  /*
-  Value *xpos = gp->cpu->get_attribute("xpos", false);
-  Value *ypos = gp->cpu->get_attribute("ypos", false);
-  if(!xpos || !ypos) {
-    xpos = new PositionAttribute(this,"xpos",(double)80);
-    ypos = new PositionAttribute(this,"ypos",(double)80);
-    gp->cpu->add_attribute(xpos);
-    gp->cpu->add_attribute(ypos);
-  }
-  */
-
   m_MainCpuModule = new GuiDipModule(gp->cpu, this);
 
   if(!enabled)
@@ -3183,28 +2996,6 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 /* When a module is created */
 void Breadboard_Window::NewModule(Module *module)
 {
-  // If the xpos and ypos attributes does not exist, then create them.
-  static int sx=80;
-  static int sy=280;
-  /*
-  Value *xpos = module->get_attribute("xpos", false);
-  Value *ypos = module->get_attribute("ypos", false);
-  if(!xpos || !ypos) {
-    xpos = new PositionAttribute(this,"xpos",(double)sx);
-    ypos = new PositionAttribute(this,"ypos",(double)sy);
-    module->add_attribute(xpos);
-    module->add_attribute(ypos);
-  }
-  */
-  sy+=100;
-  if(sy>LAYOUTSIZE_Y)
-  {
-        sy=0;
-        sx+=100;
-        if(sx>LAYOUTSIZE_X)
-                sx=50;
-  }
-
   GuiModule *p=new GuiModule(module, this);
 
   if(!enabled)
@@ -3591,14 +3382,10 @@ void Breadboard_Window::Build(void)
   gtk_widget_set_app_paintable(layout, TRUE);
   gtk_widget_show (layout);
 
-
-  //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
-  //  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-  //                         GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   g_signal_connect (window, "delete_event",
                       G_CALLBACK(delete_event), (gpointer)this);
   g_signal_connect_after(window, "configure_event",
@@ -3607,14 +3394,17 @@ void Breadboard_Window::Build(void)
 
   gtk_widget_realize(window);
 
-  GdkWindow *win_gdk_window = gtk_widget_get_window(window);
-
-  pinname_gc=gdk_gc_new(win_gdk_window);
-
   pinstatefont = pango_font_description_from_string("Courier Bold 8");
   pinnamefont = pango_font_description_from_string("Courier Bold 8");
 
-  pinnameheight = gdk_string_height (gdk_font_from_description(pinnamefont),"9y");
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(window));
+  PangoLayout *layout = pango_cairo_create_layout(cr);
+  pango_layout_set_font_description(layout, pinnamefont);
+  pango_layout_set_text(layout, "9y", -1);
+  pango_layout_get_size(layout, NULL, &pinnameheight);
+  pinnameheight /= PANGO_SCALE;
+  g_object_unref(layout);
+  cairo_destroy(cr);
 
   if(pinspacing<pinnameheight)
     pinspacing=pinnameheight+2;
@@ -3626,9 +3416,7 @@ void Breadboard_Window::Build(void)
     }
 
 
-  struct gui_node *gn;
-
-  gn = new gui_node;
+  struct gui_node *gn = new gui_node;
   gn->bbw=this;
   gn->node=0; // indicates that this is the root node.
   GtkTreeIter iter;
@@ -3685,7 +3473,7 @@ const char *Breadboard_Window::name()
 }
 
 Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
-  : pinstatefont(0), pinnamefont(0), pinname_gc(0), node_clist(0),
+  : pinstatefont(0), pinnamefont(0), node_clist(0),
     stimulus_settings_label(0), stimulus_add_node_button(0),
     hadj(0), vadj(0), node_iter(0),
     selected_pin(0), selected_node(0), selected_module(0)
@@ -3699,11 +3487,8 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   if(!get_config())
     printf("warning: %s\n",__FUNCTION__);
 
-  //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
-
   if(enabled)
     Build();
-
 }
 
 #endif // HAVE_GUI
