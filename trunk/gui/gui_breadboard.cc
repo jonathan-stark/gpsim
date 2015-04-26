@@ -824,7 +824,7 @@ static void path_copy_and_cat(path **pat, path **source)
     {
 
         dest = new path;
-        dest = sourceiter;
+        memcpy(dest, sourceiter, sizeof(path));
         dest->next = 0;
 
         if(*pat==0)
@@ -3401,7 +3401,7 @@ void Breadboard_Window::Build(void)
   PangoLayout *layout = pango_cairo_create_layout(cr);
   pango_layout_set_font_description(layout, pinnamefont);
   pango_layout_set_text(layout, "9y", -1);
-  pango_layout_get_size(layout, NULL, &pinnameheight);
+  pango_layout_get_size(layout, &pinnameheight, NULL);
   pinnameheight /= PANGO_SCALE;
   g_object_unref(layout);
   cairo_destroy(cr);
