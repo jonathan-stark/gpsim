@@ -22,7 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __LCD_H__
 #define __LCD_H__
 
-//#include "state_machine.h"
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <src/stimuli.h>
 #include <src/ioports.h>
@@ -62,18 +64,18 @@ public:
 typedef char _5X7 [7][6];
 typedef char _5X8 [8][6];
 
-class LcdFont 
-{
+class LcdFont {
 public:
-  gint num_elements;
-  GdkPixmap **pixmaps;
-  GdkWindow *mywindow;	// stashed to allow font regenaration
-
-  //CreateFont(GtkWidget *, LcdDisplay *);
-
   LcdFont(gint, GtkWidget *, LcdDisplay *);
+  ~LcdFont();
+
   void update_pixmap(int, _5X8 *, LcdDisplay *);
-  GdkPixmap *getPixMap(unsigned int);
+  cairo_surface_t *getPixMap(unsigned int);
+private:
+  GdkWindow *mywindow;	// stashed to allow font regenaration
+  std::vector<cairo_surface_t *> pixmaps;
+
+  cairo_surface_t *create_image(LcdDisplay *lcdP, _5X8 *ch);
 };
 
 //------------------------------------------------------------------------
@@ -151,54 +153,6 @@ enum ControlLineEvent {
   DataChange,
   BAD_EVENT
 };
-
-
-class SMObject
-{
-
-public:
-  char *nameP;            // Object name
-
-  SMObject(void) {
-    nameP = NULL;
-  };
-
-  SMObject(char *_nameP) {
-    if(_nameP)
-      nameP = strdup(_nameP);
-    else
-      nameP = NULL;
-  };
-
-  ~SMObject(void) {
-    if(nameP)
-      free(nameP);
-  };
-
-  const char *get_name(void) { return nameP; };
-  void new_name(char *nP) {
-    if(nameP)
-      free(nameP);
-    nameP = strdup(nP);
-  };
-
-};
-
-
-class SMEvent : public SMObject
-{
-public:
-  ControlLineEvent e;
-  SMEvent(ControlLineEvent _e,char *_nameP): SMObject(_nameP) {e = _e;};
-  SMEvent(char *_nameP=NULL) : SMObject(_nameP) {e = BAD_EVENT;};
-  void init(ControlLineEvent _e,char *_nameP) {
-    e = _e;
-    new_name(_nameP);
-  };
-
-};
-
-
   
 //
 //     State Machine States
@@ -233,7 +187,7 @@ public:
 #define CURSOR_ON_FLAG          (1<<4)
 #define BLINK_ON_FLAG           (1<<5)
 
-  LCD_Interface *interface;
+  std::auto_ptr<LCD_Interface> interface;
 
   State current_state, previous_state;
   ControlLineEvent last_event;
@@ -241,8 +195,6 @@ public:
   int data_latch;
   int data_latch_phase;
   int debug;
-
-  SMEvent ControlEvents[8];
 
   struct {
     int row;
@@ -252,8 +204,6 @@ public:
   //
   // Here's the graphical portion
   //
-
-  GdkGC *gc;
 
   guint rows,cols;   // e.g. 2x20 would be 2 rows, 20 columns
 #define TWO_ROWS_IN_ONE 1
@@ -271,13 +221,8 @@ public:
 
   gfloat contrast;  // pixel on/off ratio
 
-  LcdFont *fontP;
+  std::auto_ptr<LcdFont> fontP;
 
-  GdkColor
-    *dot_color;     // LCD pixel color (controlled by contrast)
-
-  //gint **ch_data;
-  gchar *title;
   GtkWidget *window;
   GtkWidget *darea;
   gint w_width,w_height;
@@ -306,84 +251,85 @@ public:
     contrast = _contrast;
   };
 
-  gint get_char_width(void) {
+  gint get_char_width() {
     return (1+dots.x * pixels.x);
   };
 
-  gint get_char_height(void) {
+  gint get_char_height() {
     return (dots.y * pixels.y);
   };
 
-  gint get_border(void) {
+  gint get_border() {
     return 5;
   };
 
-  GdkPixmap *get_pixmap(gint row, gint col);
+  cairo_surface_t *get_pixmap(gint row, gint col);
 
   void move_cursor(unsigned int new_row, unsigned int new_column);
-  void clear_display(void);
   void write_data(int new_data);
 
   LcdDisplay(const char *, int aRows, int aCols, unsigned aType=0);
   ~LcdDisplay();
 
 
-  void CreateGraphics (void);
+  void CreateGraphics();
   //void InitStateMachine(void);
   //void test(void);
-  void build_window( void );
-  void update(void);
-  void update( GtkWidget *drawable,   
-	       guint max_width,
-	       guint max_height);
-  void update_cgram_pixmaps(void);
+  void build_window();
+  void update();
+  void update(cairo_t *cr);
+  void update_cgram_pixmaps();
 
   // Inheritances from the Package class
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
 
   // Inheritance from Module class
-  const virtual char *type(void) { return ("lcd_display"); };
+  const virtual char *type() { return ("lcd_display"); };
   static Module *construct(const char *new_name);
   void testHD44780();
   bool dataBusDirection();
   void UpdatePinState(ePins, char);
 protected:
 
-  LCD_InputPin *m_E;
-  LCD_InputPin *m_RW;
-  LCD_InputPin *m_DC;
-  PortRegister *m_dataBus;
+  std::auto_ptr<LCD_InputPin> m_E;
+  std::auto_ptr<LCD_InputPin> m_RW;
+  std::auto_ptr<LCD_InputPin> m_DC;
+  std::auto_ptr<PortRegister> m_dataBus;
 
-  HD44780 *m_hd44780;
+  std::auto_ptr<HD44780> m_hd44780;
   unsigned int m_controlState;
   bool cgram_updated;
-
 };
 
-class LcdDisplay20x2 : public LcdDisplay
-{
+class LcdDisplay20x2 : public LcdDisplay {
   public:
+  LcdDisplay20x2(const char *_name, int _rows, int _cols, unsigned int _type = 0)
+    : LcdDisplay(_name, _rows, _cols) {}
+  ~LcdDisplay20x2() {}
 
   // Inheritance from Module class
-  const virtual char *type(void) { return ("lcd_20x2"); };
+  const virtual char *type() { return ("lcd_20x2"); };
   static Module *construct(const char *new_name);
 };
-class LcdDisplay20x4 : public LcdDisplay
-{
 
+class LcdDisplay20x4 : public LcdDisplay {
   public:
+  LcdDisplay20x4(const char *_name, int _rows, int _cols, unsigned int _type = 0)
+    : LcdDisplay(_name, _rows, _cols) {}
+  ~LcdDisplay20x4() {}
+
   // Inheritance from Module class
-  const virtual char *type(void) { return ("lcd_20x4"); };
+  const virtual char *type() { return ("lcd_20x4"); };
   static Module *construct(const char *new_name);
 };
-class LcdDisplayDisplaytech161A : public LcdDisplay
-{
+
+class LcdDisplayDisplaytech161A : public LcdDisplay {
 public:
   LcdDisplayDisplaytech161A(const char *, int aRows, int aCols, unsigned aType);
   ~LcdDisplayDisplaytech161A();
 
   // Inheritance from Module class
-  const virtual char *type(void) { return ("lcd_dt161A"); };
+  const virtual char *type() { return ("lcd_dt161A"); };
   static Module *construct(const char *new_name);
 
 };

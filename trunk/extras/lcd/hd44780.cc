@@ -21,23 +21,10 @@ Boston, MA 02111-1307, USA.  */
 
 #define IN_MODULE
 
-#include <time.h>
-#include <stdio.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-#include <iostream>
-
 #include "config.h"
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
-
 
 #include <src/packages.h>
 #include <src/stimuli.h>
@@ -192,13 +179,16 @@ HD44780::HD44780()
     m_controlState(0),
     m_chipState(ePowerON),
     m_dataBus(0),
+    m_phasedData(0),
     m_bBitMode(true),    // 8-bit mode
     m_bLineMode(false),  // 1-line mode
     m_bFontMode(false),  // small font
     m_bDisplayOn(false), // display is off
     m_bCursorBlink(false),// no cursor blink
     m_bCursorOn(false),   // cursor is off
+    m_bDataBusPhase(false),
     m_busyTimer(new HD44780Busy()),
+    m_DDRamAdd(0),
     m_CGRamAdd(0),
     m_bInCGRam(false),
     m_CGRamupdate(false)
@@ -513,7 +503,7 @@ unsigned char HD44780::getDDRam(unsigned int r, unsigned int c)
   int add;
   if ( r>=4)
   {
-    fprintf(stderr, "%s row %d not supported\n", __FUNCTION__, r);
+    fprintf(stderr, "%s row %u not supported\n", __FUNCTION__, r);
     return 0;
   }
   add = row_offset[r] + c;

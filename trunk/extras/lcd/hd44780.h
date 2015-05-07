@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __HD44780_H__
 #define __HD44780_H__
 
+#include <memory>
 
 //========================================================================
 //
@@ -134,7 +135,7 @@ private: //Data
   ///  m_bDataPhase is true if this is the first phase, false for the second.
   bool m_bDataBusPhase;
 
-  HD44780Busy *m_busyTimer;
+  std::auto_ptr<HD44780Busy> m_busyTimer;
 
   /// Display Data RAM
   unsigned char m_DDRam[DDRAM_SIZE];

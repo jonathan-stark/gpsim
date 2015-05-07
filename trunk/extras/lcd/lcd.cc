@@ -52,11 +52,6 @@ Boston, MA 02111-1307, USA.  */
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-#include <iostream>
-
 #include "config.h"
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
@@ -207,8 +202,8 @@ int LcdWriteTT::dump_raw(unsigned tbi, char *buf, int bufsize)
 
   unsigned int tv = gTrace->get(tbi);
 
-  int m = snprintf(buf, bufsize," LCD Write 0x%08x", tv);
-  if(m>0)
+  int m = g_snprintf(buf, bufsize, " LCD Write 0x%08x", tv);
+  if (m < bufsize)
     n += m;
 
   return n;
@@ -238,8 +233,8 @@ int LcdReadTT::dump_raw(unsigned tbi, char *buf, int bufsize)
 
   unsigned int tv = gTrace->get(tbi);
 
-  int m = snprintf(buf, bufsize," LCD Read 0x%08x", tv);
-  if(m>0)
+  int m = g_snprintf(buf, bufsize, " LCD Read 0x%08x", tv);
+  if (m < bufsize)
     n += m;
 
   return n;
@@ -265,22 +260,22 @@ LCD_Interface::LCD_Interface(LcdDisplay *_lcd) : Interface ( (gpointer *) _lcd)
 
 void LCD_Interface::SimulationHasStopped (gpointer)
 {
-  if(lcd)
-    ((LcdDisplay *)lcd)->update();
+  if (lcd)
+    lcd->update();
 }
 
 void LCD_Interface::Update (gpointer)
 {
-  if(lcd)
-    ((LcdDisplay *)lcd)->update();
+  if (lcd)
+    lcd->update();
 }
 
 
 //---------------------------------------------------------------
 
-void LcdDisplay::update(void)
+void LcdDisplay::update()
 {
-  update(darea, w_width,w_height);
+  gtk_widget_queue_draw(darea);
 }
 
 
@@ -328,14 +323,14 @@ void LcdDisplay::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  m_E  = new LCD_InputPin(this, (name() + ".E").c_str(),eE);
-  m_RW = new LCD_InputPin(this, (name() + ".RW").c_str(),eRW);
-  m_DC = new LCD_InputPin(this, (name() + ".DC").c_str(),eDC);
+  m_E  = std::auto_ptr<LCD_InputPin> (new LCD_InputPin(this, (name() + ".E").c_str(),eE));
+  m_RW = std::auto_ptr<LCD_InputPin> (new LCD_InputPin(this, (name() + ".RW").c_str(),eRW));
+  m_DC = std::auto_ptr<LCD_InputPin> (new LCD_InputPin(this, (name() + ".DC").c_str(),eDC));
 
   // Control
-  assign_pin(4, m_DC);
-  assign_pin(5, m_RW);
-  assign_pin(6, m_E);
+  assign_pin(4, m_DC.get());
+  assign_pin(5, m_RW.get());
+  assign_pin(6, m_E.get());
 
   assign_pin( 7, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
   assign_pin( 8, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
@@ -384,73 +379,48 @@ TraceType *LcdDisplay::getReadTT()
 
 Module * LcdDisplay::construct(const char *new_name=NULL)
 {
-
   LcdDisplay *lcdP = new LcdDisplay(new_name,2,20);
 
-  lcdP->create_iopin_map();
-
-
   lcdP->set_pixel_resolution(5,8);
-  lcdP->set_crt_resolution(3,3);
-  lcdP->set_contrast(1.0);
-
-  //lcdP->testHD44780();
 
   return lcdP;
-
 }
 
 LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
-  : m_controlState(0)
+  : interface(new LCD_Interface(this)), data_latch(0), data_latch_phase(1),
+    debug(0), rows(aRows), cols(aCols), disp_type(aType), contrast(1.0),
+    fontP(NULL), readTT(new LcdReadTT(this,1)), writeTT(new LcdWriteTT(this,1)),
+    m_dataBus(new PortRegister(this, "data", "LCD Data Port", 8, 0)),
+    m_hd44780(new HD44780), m_controlState(0), cgram_updated(false)
 {
-
   if (verbose)
      cout << "LcdDisplay constructor\n";
   new_name(_name);
 
-  m_hd44780 = new HD44780();
-
-
   //  mode_flag = _8BIT_MODE_FLAG;
-  data_latch = 0;
-  data_latch_phase = 1;
+
   last_event = eWC;
 
-  disp_type=aType;
   set_pixel_resolution();
   set_crt_resolution();
-  set_contrast();
 
-  rows = aRows;
-  cols = aCols;
   cursor.row = 0;
   cursor.col = 0;
 
-  cgram_updated = FALSE;
-
-  // The font is created dynamically later on.
-  fontP = NULL;
-
   // If you want to get diagnostic info, change debug to non-zero.
-  debug = 0;
   if (getenv("GPSIM_LCD_DEBUG"))
     debug = atoi(getenv("GPSIM_LCD_DEBUG"));
 
   gTrace = &get_trace();
-  writeTT = new LcdWriteTT(this,1);
-  readTT = new LcdReadTT(this,1);
 
-  interface = new LCD_Interface(this);
-  get_interface().add_interface(interface);
+  get_interface().add_interface(interface.get());
 
-  m_dataBus = new PortRegister(this, "data", "LCD Data Port", 8, 0);
-  addSymbol(m_dataBus);
+  addSymbol(m_dataBus.get());
   m_dataBus->setEnableMask(0xff);
-
 
   CreateGraphics();
 
-
+  create_iopin_map();
 }
 
 LcdDisplay::~LcdDisplay()
@@ -458,18 +428,9 @@ LcdDisplay::~LcdDisplay()
   if (verbose)
       cout << "LcdDisplay destructor\n";
 
-  //gpsim_unregister_interface(interface_id);
-  delete m_dataBus;
-  delete m_E;
-  delete m_DC;
-  delete m_RW;
-
-  delete interface;
-
   gtk_widget_destroy(window);
 
   // FIXME free all data...
-
 }
 
 //------------------------------------------------------------------------
@@ -516,8 +477,7 @@ void LcdDisplay::UpdatePinState(ePins pin, char cState)
 //------------------------------------------------------------------------
 void LcdDisplay::testHD44780()
 {
-  if (m_hd44780)
-    m_hd44780->test();
+  m_hd44780->test();
 }
 //-----------------------------------------------------------------
 // Displaytech 161A, added by Salvador E. Tropea <set@computer.org>
@@ -525,15 +485,11 @@ void LcdDisplay::testHD44780()
 
 Module * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
 {
-
   if (verbose)
      cout << " LCD 161A display constructor\n";
 
   LcdDisplayDisplaytech161A *lcdP = new LcdDisplayDisplaytech161A(new_name,2,8,TWO_ROWS_IN_ONE);
-  lcdP->new_name((char*)new_name);
-  lcdP->create_iopin_map();
   return lcdP;
-
 }
 
 LcdDisplayDisplaytech161A::LcdDisplayDisplaytech161A(const char *pN, int aRows, int aCols,
@@ -551,39 +507,30 @@ LcdDisplayDisplaytech161A::~LcdDisplayDisplaytech161A()
 
 Module * LcdDisplay20x2::construct(const char *new_name=NULL)
 {
-
   if (verbose)
      cout << " LCD 20x2 display constructor\n";
 
-  LcdDisplay20x2 *lcdP = (LcdDisplay20x2 *)new LcdDisplay(new_name,2,20);
-  lcdP->create_iopin_map();
-
+  LcdDisplay20x2 *lcdP = new LcdDisplay20x2(new_name, 2, 20);
 
   lcdP->set_pixel_resolution(5,8);
-  lcdP->set_crt_resolution(3,3);
-  lcdP->set_contrast(1.0);
-  return lcdP;
 
+  return lcdP;
 }
+
 //-----------------------------------------------------------------
 // HD44780 controller with 20x4 display
 // 
 
 Module * LcdDisplay20x4::construct(const char *new_name=NULL)
 {
-
   if (verbose)
      cout << " LCD 20x4 display constructor\n";
 
-  LcdDisplay20x4 *lcdP = (LcdDisplay20x4 *)new LcdDisplay(new_name,4,20);
-  lcdP->create_iopin_map();
-
+  LcdDisplay20x4 *lcdP = new LcdDisplay20x4(new_name, 4, 20);
 
   lcdP->set_pixel_resolution(5,8);
-  lcdP->set_crt_resolution(3,3);
-  lcdP->set_contrast(1.0);
-  return lcdP;
 
+  return lcdP;
 }
 
 #endif //HVAE_GUI
