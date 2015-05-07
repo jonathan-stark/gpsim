@@ -29,81 +29,34 @@ Boston, MA 02111-1307, USA.  */
 #include "lcdfont.h"
 #include "hd44780.h"
 
-/****************************************************************
- * CreateXPMdataFromLCDdata -
- *
- * It'd probably be easier to just create pixmaps straight from
- * xpm maps. However, that would confine the lcd characters to
- * just one size. This routine will take an lcd character (that
- * is defined somewhat like a bitmap) and create a pixmap. The
- * size of the pixmap is determined by the size that display
- * requires for each cell. (For example, on displays with a 5x7
- * cell, the lcd display will map several crt pixels into one
- * lcd pixel.)
- */
-
-gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X8 *ch )
+cairo_surface_t *LcdFont::create_image(LcdDisplay *lcdP, _5X8 *ch)
 {
+  int rows = 6 + lcdP->dots.y * lcdP->pixels.y;
+  int cols = 1 + lcdP->dots.x * lcdP->pixels.x;
 
-  guint i,j,k,rows,cols,m,ii,jj,colors;
-  guint bc,pc;
-  char buffer[256];
-  gchar **xpm_template;
+  cairo_surface_t *image = gdk_window_create_similar_surface(mywindow,
+    CAIRO_CONTENT_COLOR_ALPHA, cols, rows);
 
-  // total rows in the xpm
-  rows = 6 + lcdP->dots.y * lcdP->pixels.y;
-  cols = 1 + lcdP->dots.x * lcdP->pixels.x;
-
-  xpm_template = (char **)malloc(rows * sizeof(gchar *));
-
-  colors = 3;
-  sprintf(buffer, "%d %d %d 1", cols, 1+lcdP->dots.y * lcdP->pixels.y,
-          colors);
-  xpm_template[0] = (gchar *)strdup(buffer);
-  xpm_template[1] = (gchar *)strdup("  c None");
-  xpm_template[2] = (gchar *)strdup("B c #113311");
-  xpm_template[3] = (gchar *)strdup("G c #668866");
-  //  xpm_template[4] = (gchar *)strdup("Q c #789878");
-
-  for(i=4; i<rows; i++) {
-    xpm_template[i] = (gchar *)malloc(cols+1);
-    memset(xpm_template[i], ' ', cols);
-    xpm_template[i][cols] = 0;
-    //xpm_template[i] = (gchar *)strdup("                ");
-  }
-
-  for(j=0; j<(guint)lcdP->dots.y; j++) {
-
-    k = 5 + lcdP->pixels.y*j;
-
-
-    for(i=0; i<(guint)lcdP->dots.x; i++) {
-      pc = (ch[0][j][i] == '.') ? 'B' : ' ';
-      bc = (ch[0][j][i] == '.') ? 'G' : ' ';
-
-      //m = i*lcdP->pixels.y;
-      m = i*lcdP->pixels.x;
-
-      for(jj=k; jj<k+lcdP->pixels.y-1; jj++) {
-
-        xpm_template[jj][m] = bc;
-        for(ii=m+1; ii<m+lcdP->pixels.x; ii++)
-          xpm_template[jj][ii] = pc;
+  cairo_t *cr = cairo_create(image);
+  cairo_set_line_width(cr, .5);
+  for (int j = 0; j < lcdP->dots.y; j++) {
+    for (int i = 0; i < lcdP->dots.x; i++) {
+      if (ch[0][j][i] == '.') {
+        double y = 5 + lcdP->pixels.y * j;
+        double x = i * lcdP->pixels.x;
+        cairo_set_source_rgb(cr, double(0x11) / 255, double(0x33) / 255, double(0x11)/255);
+        cairo_rectangle(cr, x, y, lcdP->pixels.x, lcdP->pixels.y);
+        cairo_fill_preserve(cr);
+        cairo_set_source_rgb(cr, double(0x66) / 255, double(0x88) / 255, double(0x66)/255);
+        cairo_stroke(cr);
       }
-      for(ii=m; ii<m+lcdP->pixels.x; ii++)
-        xpm_template[k+lcdP->pixels.y-1][ii] = bc;
     }
-
-    //if we want to have the right edge a different color...
-    //for(jj=k; jj<k+3; jj++)
-    //  xpm_template[jj][5*3] = ' ';
-
-
   }
 
-  return xpm_template;
-}
+  cairo_destroy(cr);
 
+  return image;
+}
 
 /***************************************************************
  * CreateFont
@@ -112,43 +65,41 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X8 *ch )
  *
  */
 
-LcdFont::LcdFont (gint characters,  GtkWidget *parent_window, LcdDisplay *lcdP)
+LcdFont::LcdFont(gint characters, GtkWidget *parent_window, LcdDisplay *lcdP)
 {
-  gint i;
+  pixmaps.reserve(characters);
 
-  num_elements = characters;
-  pixmaps = (GdkPixmap **)malloc( sizeof (GdkPixmap *) * num_elements);
   mywindow = gtk_widget_get_window(parent_window);
 
-  for(i=0; i<num_elements; i++) {
-
-    if(strlen(test[i][0]) < 5)
-      pixmaps[i] = NULL;
+  for (gint i = 0; i < characters; i++) {
+    if (strlen(test[i][0]) < 5)
+      pixmaps.push_back(NULL);
     else
-      pixmaps[i] = gdk_pixmap_create_from_xpm_d (
-                                 mywindow,
-                                 NULL,
-                                 lcdP->dot_color,
-                                 CreateXPMdataFromLCDdata(lcdP,&test[i]));
+      pixmaps.push_back(create_image(lcdP, &test[i]));
+  }
+}
+
+LcdFont::~LcdFont()
+{
+  for (size_t i = 0; i < pixmaps.size(); ++i) {
+    if (pixmaps[i]) {
+      cairo_surface_destroy(pixmaps[i]);
+    }
   }
 }
 
 void LcdFont::update_pixmap(int pos, _5X8 *tempchar, LcdDisplay *lcdP)
 {
-    if (pixmaps[pos]) {
-      g_object_unref(pixmaps[pos]);
-      pixmaps[pos] = NULL;
-    }
-    pixmaps[pos] = gdk_pixmap_create_from_xpm_d (
-                               mywindow,
-                               NULL,
-                               lcdP->dot_color,
-                               CreateXPMdataFromLCDdata(lcdP, tempchar));
+  if (pixmaps[pos]) {
+    cairo_surface_destroy(pixmaps[pos]);
+    pixmaps[pos] = NULL;
+  }
+  pixmaps[pos] = create_image(lcdP, tempchar);
 }
 
-GdkPixmap *LcdFont::getPixMap(unsigned int index)
+cairo_surface_t *LcdFont::getPixMap(unsigned int index)
 {
-  return ( (index < (unsigned int)num_elements) && pixmaps[index]) ? pixmaps[index] : pixmaps[0];
+  return ( (index < pixmaps.size()) && pixmaps[index]) ? pixmaps[index] : pixmaps[0];
 }
 
 void LcdDisplay::update_cgram_pixmaps()
@@ -156,7 +107,7 @@ void LcdDisplay::update_cgram_pixmaps()
   int i, j, k;
   _5X8 tempchar;
 
-  if (fontP == NULL)
+  if (fontP.get() == NULL)
     return;
 
   for (i = 0; i < CGRAM_SIZE / 8; i++) {
@@ -176,103 +127,66 @@ void LcdDisplay::update_cgram_pixmaps()
   m_hd44780->setCGRamupdate(false);
 }
 
-GdkPixmap *LcdDisplay::get_pixmap(gint row, gint col)
+cairo_surface_t *LcdDisplay::get_pixmap(gint row, gint col)
 {
 
   if (m_hd44780->CGRamupdate())
     update_cgram_pixmaps();
 
-  return fontP ? fontP->getPixMap(m_hd44780->getDDRam(row,col))  : 0;
+  return fontP.get() ? fontP->getPixMap(m_hd44780->getDDRam(row,col)) : 0;
 }
 
 
-static gint
+static gboolean
 lcd_expose_event (GtkWidget *widget,
                   GdkEvent  *event,
                   gpointer   user_data)
 {
+  LcdDisplay *lcdP = static_cast<LcdDisplay *>(user_data);
+  // If there is no font, then go create it.
 
-  LcdDisplay *lcdP;
-  guint max_width;
-  guint max_height;
-
-
-  g_return_val_if_fail (widget != NULL, TRUE);
-  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
-
-  lcdP = (LcdDisplay *)user_data;
-
+  if (!lcdP->fontP.get()) {
+    lcdP->fontP = std::auto_ptr<LcdFont>(new LcdFont(FONT_LEN, widget, lcdP));
+  }
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);
 
-  max_width = allocation.width;
-  max_height = allocation.height;
+  lcdP->w_width = allocation.width;
+  lcdP->w_height = allocation.height;
 
-  lcdP->update(widget,max_width,max_height);
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+  lcdP->update(cr);
+  cairo_destroy(cr);
 
-  return TRUE;
+  return FALSE;
 }
 
-void LcdDisplay::update(  GtkWidget *widget,
-                             guint new_width,
-                             guint new_height)
+void LcdDisplay::update(cairo_t *cr)
 {
-
-
-  GdkDrawable *drawable;
-  GdkGC *lcd_gc;
   guint i,j;
 
-
-  drawable = gtk_widget_get_window(widget);
-  lcd_gc = gdk_gc_new(drawable);
-  gdk_gc_set_foreground(lcd_gc,dot_color);
-
-  w_width = new_width;
-  w_height = new_height;
-
-  gdk_draw_rectangle (drawable, lcd_gc,
-                      TRUE,
-                      0,
-                      0,
-                      w_width,
-                      w_height);
-
-
-  // Don't display anything if the display is disabled
-  //if(display_is_off())
-  //  return;
-
-  // If there is no font, then go create it.
-
-  if(!fontP) {
-    fontP = new LcdFont(FONT_LEN,widget,this);
-    //CreateFont(widget,this); //,xpm_test);
-  }
+  cairo_set_source_rgb(cr,
+    double(0x78) / 255, double(0xa8) / 255, double(0x78) / 255);
+  cairo_rectangle(cr, 0.0, 0.0, w_width, w_height);
+  cairo_fill(cr);
 
   gint cw = get_char_width();
   gint ch = get_char_height();
   gint border = get_border();
 
-  GdkWindow *Gwindow = gtk_widget_get_window(widget);
-
-
   if (!(disp_type & TWO_ROWS_IN_ONE)) {
     for(j=0; j<rows; j++)
-      for(i=0; i<cols; i++)
-        gdk_draw_pixmap (Gwindow, lcd_gc,get_pixmap(j,i),
-                         0,0,
-                         border+i*cw, border+j*(ch),
-                         cw,ch);
-  }
-  else {
+      for(i=0; i<cols; i++) {
+        cairo_set_source_surface(cr, get_pixmap(j, i), border + i * cw, border + j * (ch));
+        cairo_paint(cr);
+      }
+  } else {
     guint pos;
     for(pos=0,j=0; j<rows; j++)
-      for(i=0; i<cols; pos++,i++)
-        gdk_draw_pixmap (Gwindow, lcd_gc,get_pixmap(j,i),
-                         0,0,
-                         border+pos*cw, border,
-                         cw,ch);
+      for(i=0; i<cols; pos++,i++) {
+        cairo_set_source_surface(cr, get_pixmap(j, i), border + pos * cw, border);
+        cairo_paint(cr);
+      }
   }
 }
 
@@ -291,63 +205,32 @@ cursor_event (GtkWidget          *widget,
   return FALSE;
 }
 
-
-GdkColor *NewColor(gint32 red, gint32 green, gint32 blue)
-{
-  GdkColor *c = (GdkColor *) g_malloc(sizeof(GdkColor));
-
-
-  c->red = red;
-  c->green = green;
-  c->blue = blue;
-
-  gdk_colormap_alloc_color(gdk_colormap_get_system(), c, FALSE, TRUE);
-
-  return c;
-
-}
-
-
 /**********************************************************
  *
  *
  */
 
-void LcdDisplay::CreateGraphics (void)
+void LcdDisplay::CreateGraphics()
 {
-
-//  GtkWidget *window;
-  GtkWidget *main_vbox;
-  GtkWidget *frame;
-  GtkWidget *vbox;
-  char buf[48];
-
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  if(window) {
-
+  if (window) {
+    char title[128];
 
     gtk_window_set_wmclass(GTK_WINDOW(window),type(),"Gpsim");
-    //
-    //   Allocate memory for the LCD font.
-    //
 
-    sprintf(buf,"%d X %d",rows,cols);
+    g_snprintf(title, sizeof(title), "%d X %d", rows, cols);
     if (disp_type & TWO_ROWS_IN_ONE)
-      strcat(buf," (in one row)");
-    title = (gchar *)strdup(buf);
+      g_strlcat(title, " (in one row)", sizeof(title));
 
     gtk_widget_realize (window);
 
     gtk_window_set_title(GTK_WINDOW(window), "LCD");
 
-//    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-//                      GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
-
-    main_vbox = gtk_vbox_new (FALSE, 5);
+    GtkWidget *main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
     gtk_container_add (GTK_CONTAINER (window), main_vbox);
 
-    vbox =
+    GtkWidget *vbox =
       gtk_widget_new (gtk_vbox_get_type (),
                       "GtkBox::homogeneous", FALSE,
                       //"GtkBox::spacing", 5,
@@ -357,7 +240,7 @@ void LcdDisplay::CreateGraphics (void)
                       NULL);
 
 
-    frame =
+    GtkWidget *frame =
       gtk_widget_new (gtk_frame_get_type (),
                       "GtkFrame::shadow", GTK_SHADOW_ETCHED_IN,
                       "GtkFrame::label_xalign", 0.5,
@@ -385,28 +268,15 @@ void LcdDisplay::CreateGraphics (void)
                         "expose_event",
                         G_CALLBACK (lcd_expose_event),
                         this);
-    gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+    gtk_widget_add_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     g_signal_connect (darea,
                         "button_press_event",
                         G_CALLBACK (cursor_event),
                         NULL);
 
-    gtk_widget_show (darea);
-
-    dot_color = NewColor(0x7800,0xa800,0x7800);
-    gc = gdk_gc_new(gtk_widget_get_window(darea));
-    g_assert(gc!= (GdkGC*)NULL);
-
     gtk_widget_show_all (window);
 
   }
-
-
 }
 
-
-void LcdDisplay::clear_display(void)
-{
-  m_hd44780->clearDisplay();
-}
 #endif //HAVE_GUI

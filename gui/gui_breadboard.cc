@@ -3360,11 +3360,8 @@ void Breadboard_Window::Build(void)
   gtk_container_add (GTK_CONTAINER (scrolledwindow5), layout);
   gtk_layout_set_size (GTK_LAYOUT (layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
 
-  gtk_widget_set_events(layout,
-                        gtk_widget_get_events(layout)|
-                        GDK_BUTTON_PRESS_MASK |
-                        GDK_BUTTON_MOTION_MASK |
-                        GDK_BUTTON_RELEASE_MASK);
+  gtk_widget_add_events(layout,
+    GDK_BUTTON_PRESS_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON_RELEASE_MASK);
   g_signal_connect(layout, "motion-notify-event",
                      G_CALLBACK(pointer_cb), this);
   g_signal_connect(layout, "button_press_event",

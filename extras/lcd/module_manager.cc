@@ -45,8 +45,7 @@ support:
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <iostream>
-#include <stdio.h>
+#include <cstdio>
 #include <glib.h>
 #include <src/modules.h>
 #include "config.h"

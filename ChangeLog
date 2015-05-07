@@ -1,3 +1,9 @@
+2015-05-07 Errol van de l'Isle <evandel@cix.co.uk>
+	* extras/lcd/Makefile.am extras/lcd/hd44780.cc extras/lcd/hd44780.h
+	  extras/lcd/lcd.cc extras/lcd/lcd.h extras/lcd/lcdgui.cc
+	  extras/lcd/module_manager.cc gui/gui_breadboard.cc
+	: Do drawing in the LCD module with Cairo. Clean up resource mangement
+
 2015-04-26 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_beradboard.cc
 	: Correct crash introduced in svn 2319
