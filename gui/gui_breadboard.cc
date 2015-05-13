@@ -2437,8 +2437,12 @@ void GuiPin::DrawLabel(cairo_t *cr)
 {
   IOPIN *iopin = getIOpin();
 
-  const char *name = iopin ? iopin->name().c_str() : "";
-  if (*name && m_bbw) {
+  if (!iopin || !m_bbw) return;
+
+  const char *name = iopin->GUIname().empty()
+    ? iopin->name().c_str() : iopin->GUIname().c_str();
+
+  if (*name) {
     PangoLayout *layout = pango_cairo_create_layout(cr);
     pango_layout_set_font_description(layout, m_bbw->pinnamefont);
     pango_layout_set_text(layout, name, -1);

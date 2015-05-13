@@ -1,3 +1,7 @@
+2015-05-13 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_breadboard.cc
+	: Fixed regression. Now correcly shows the alternative pin name
+
 2015-05-07 Errol van de l'Isle <evandel@cix.co.uk>
 	* extras/lcd/Makefile.am extras/lcd/hd44780.cc extras/lcd/hd44780.h
 	  extras/lcd/lcd.cc extras/lcd/lcd.h extras/lcd/lcdgui.cc
