@@ -1105,8 +1105,6 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
   if(!bIsBuilt)
     Build();
 
-  assert(wt==WT_opcode_source_window);
-
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
@@ -1140,8 +1138,6 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   if(!bIsBuilt)
     Build();
-
-  assert(wt==WT_opcode_source_window);
 
   pma = gp->cpu->pma;
 
@@ -1442,8 +1438,6 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   status_bar = 0;
 
   gp = _gp;
-  wc = WC_source;
-  wt = WT_opcode_source_window;
 
   break_pix = gdk_pixbuf_new_from_xpm_data(break_xpm);
   pc_pix = gdk_pixbuf_new_from_xpm_data(pc_xpm);

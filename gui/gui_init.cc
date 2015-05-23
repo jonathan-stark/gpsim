@@ -20,29 +20,12 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
-#include <gtk/gtk.h>
+// FIXME: This file should be removed as the function is not used
 
-#include <gdk/gdktypes.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
-
-#include <gtkextra/gtkbordercombo.h>
-#include <gtkextra/gtkcolorcombo.h>
-#include <gtkextra/gtksheet.h>
-
-
-#include "gui.h"
-
-void gui_styles_init(void)
+void gui_styles_init()
 {
 }
 #endif // HAVE_GUI

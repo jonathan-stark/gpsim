@@ -52,7 +52,7 @@ TODO:
 #include "../src/bitlog.h"
 #include "../src/symbol.h"
 
-//#define DEBUG
+#include "../src/pic-processor.h"
 
 #include "gui_scope.h"
 
@@ -1645,8 +1645,6 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
 
   gp = _gp;
   window = 0;
-  wc = WC_data;
-  wt = WT_scope_window;
 
   menu = "/menu/Windows/Scope";
 

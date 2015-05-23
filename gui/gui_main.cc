@@ -21,19 +21,13 @@ Boston, MA 02111-1307, USA.  */
 
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <clocale>
 
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
-
-#include <gdk/gdktypes.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
 
 #include "../src/gpsim_def.h"
 #include "../src/gpsim_interface.h"
@@ -48,7 +42,6 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_scope.h"
 #include "gui_src.h"
 #include "gui_stack.h"
-#include "gui_statusbar.h"
 #include "gui_stopwatch.h"
 #include "gui_symbols.h"
 #include "gui_trace.h"
@@ -82,27 +75,6 @@ Settings *settings;
 
 extern GtkWidget *dispatcher_window;
 extern void dispatch_Update();
-
-//------------------------------------------------------------------------
-// 
-extern bool gUsingThreads(); // in ../src/interface.cc
-
-//------------------------------------------------------------------------
-// debug
-static void gtl()
-{
-#ifdef GPSIM_THREAD
-  if(gUsingThreads())
-    gdk_threads_leave ();
-#endif
-}
-static void gte()
-{
-#ifdef GPSIM_THREAD
-  if(gUsingThreads())
-    gdk_threads_enter ();
-#endif
-}
 
 //------------------------------------------------------------------------
 void CrossReferenceToGUI::Update(int new_value)
@@ -180,13 +152,9 @@ GUI_Interface::~GUI_Interface()
 
 void GUI_Interface::UpdateObject(gpointer gui_xref,int new_value)
 {
-
-  gte ();
-  CrossReferenceToGUI  *xref = (CrossReferenceToGUI *)gui_xref;
+  CrossReferenceToGUI  *xref = static_cast<CrossReferenceToGUI *>(gui_xref);
   xref->Update(new_value);
-  gtl ();
-
-}
+ }
 
 /*------------------------------------------------------------------
  * RemoveObject
@@ -195,17 +163,9 @@ void GUI_Interface::UpdateObject(gpointer gui_xref,int new_value)
 
 void GUI_Interface::RemoveObject(gpointer gui_xref)
 {
-
-  CrossReferenceToGUI  *xref = (CrossReferenceToGUI *)gui_xref;
+  CrossReferenceToGUI  *xref = static_cast<CrossReferenceToGUI *>(gui_xref);
   xref->Remove();
-
 }
-
-#ifdef GPSIM_THREAD
-// thread variables.
-static GMutex *muSimStopMutex=0;
-static GCond  *cvSimStopCondition=0;
-#endif
 
 extern int gui_animate_delay; // in milliseconds
 
@@ -213,15 +173,6 @@ static GUI_Processor *lgp=0;
 
 static void *SimulationHasStopped( void *ptr )
 {
-
-#ifdef GPSIM_THREAD
-  while(1) {
-    if(gUsingThreads()) {
-      g_mutex_lock(muSimStopMutex);
-      g_cond_wait(cvSimStopCondition, muSimStopMutex);
-    }
-#endif
-
     if(lgp) {
       GTKWAIT;
 
@@ -236,23 +187,13 @@ static void *SimulationHasStopped( void *ptr )
       lgp->profile_window->Update();
       lgp->stopwatch_window->Update();
       lgp->scope_window->Update();
-
-
-      
     }
     
     if(gui_animate_delay!=0)
-          usleep(1000*gui_animate_delay);
+          g_usleep(1000*gui_animate_delay);
 
     dispatch_Update();
 
-#ifdef GPSIM_THREAD
-    if(gUsingThreads()) 
-      g_mutex_unlock(muSimStopMutex);
-    else
-      return 0;
-  }
-#endif
   return 0;
 
 }
@@ -266,18 +207,7 @@ static void *SimulationHasStopped( void *ptr )
 void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
   if(callback_data) {
-    
-    lgp = (GUI_Processor *) callback_data;
-#ifdef GPSIM_THREAD
-
-    if(gUsingThreads()) {
-      g_mutex_lock(muSimStopMutex);
-      g_cond_signal(cvSimStopCondition);
-      g_mutex_unlock(muSimStopMutex);
-    } else
-#endif
     ::SimulationHasStopped(0);
-
   }
 }
 
@@ -297,8 +227,6 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
   // Create a gui representation of the new processor
 
   if(gp) {
-    gte ();
-
     gp->SetCPU(new_cpu);
 
     gui_processors = g_slist_append(gui_processors,gp);
@@ -317,7 +245,6 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     //gp->scope_window->NewProcessor(gp);
 
     Dprintf((" New processor has been added"));
-    gtl ();
   }
 
 }
@@ -350,8 +277,6 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
 {
 
   if(gp) {
-    gte ();
-
     gp->regwin_eeprom->NewProcessor(gp);
       
     gp->source_browser->CloseSource();
@@ -361,8 +286,6 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
     gp->profile_window->NewProgram(gp);
     gp->watch_window->NewProcessor(gp);
     link_src_to_gpsim( gp);
-    gtl ();
-
   }
 }
 
@@ -410,29 +333,6 @@ int gui_init (int argc, char **argv)
   settings = new SettingsReg("gpsim");
 #endif
 
-// This code is not currently used
-#ifdef GPSIM_THREAD
-  if(gUsingThreads()) {
-
-    GThread          *Thread1;
-    GError           *err1 = NULL ;
-  
-    muSimStopMutex     = g_mutex_new ();
-    cvSimStopCondition = g_cond_new ();
-    g_mutex_lock(muSimStopMutex);
-
-    if( (Thread1 = g_thread_create((GThreadFunc)SimulationHasStopped, 
-				   (void *)0, 
-				   TRUE, 
-				   &err1)) == NULL)
-      {
-	printf("Thread create failed: %s!!\n", err1->message );
-	g_error_free ( err1 ) ;
-      }
-    g_mutex_unlock(muSimStopMutex);
-  }
-#endif // GPSIM_THREAD
-
   if (!gtk_init_check (&argc, &argv))
   {
       return -1;
@@ -441,19 +341,15 @@ int gui_init (int argc, char **argv)
   // standardize IO format ref bug 1832702
   setlocale(LC_NUMERIC, "C");
 
-  gte();
   gpGuiProcessor = new GUI_Processor();
   interface_id = get_interface().add_interface(new GUI_Interface(gpGuiProcessor));
-  gtl();
 
   return(0);
 }
 
 void gui_main(void)
 {
-  gte ();
   gtk_main ();
-  gtl ();
 }
 
 #endif //HAVE_GUI

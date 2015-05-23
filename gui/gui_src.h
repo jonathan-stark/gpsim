@@ -205,7 +205,7 @@ public:
 
 
   void set_pma(ProgramMemoryAccess *new_pma);
-  void Create(void);
+
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
   virtual void Update();

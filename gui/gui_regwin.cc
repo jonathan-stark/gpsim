@@ -1986,8 +1986,6 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   int i;
 
   gp = _gp;
-  wc = WC_data;
-  wt = WT_register_window;
   char_width = 0;
   chars_per_column = 3; // assume byte-sized registers
   register_sheet = NULL;

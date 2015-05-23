@@ -431,8 +431,6 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   menu = "/menu/Windows/Symbols";
 
   gp = _gp;
-  wc = WC_misc;
-  wt = WT_symbol_window;
 
   get_config();
 

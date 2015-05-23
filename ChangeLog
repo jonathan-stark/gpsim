@@ -1,3 +1,18 @@
+2015-05-23 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_init.cc
+	: Removed header dependencies and marked as should be removed
+	* gui/gui_main.cc
+	: Removed threading code, this style of threading is deprecated in
+	  GTK+ v3.6 and does not work under MS Windows.
+	* gui/gui.h gui/gui_breadboard.cc gui/gui_object.cc gui/gui_object.h
+	  gui/gui_profile.cc gui/gui_regwin.cc gui/gui_regwin.h
+	  gui/gui_scope.cc gui/gui_src.cc gui/gui_src_asm.cc
+	  gui/gui_src_opcode.cc gui/gui_stack.cc gui/gui_stopwatch.cc
+	  gui/gui_symbols.cc gui/gui_trace.cc gui/gui_watch.cc
+	: Change GUI_Object to an abstract type, error checking now at
+	  compile time not just run time. Removed un-used variable "wt"
+	  and partially used variable "wc" from GUI_Object.
+
 2015-05-13 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_breadboard.cc
 	: Fixed regression. Now correcly shows the alternative pin name

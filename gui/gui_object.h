@@ -22,9 +22,6 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_OBJECT_H__
 #define __GUI_OBJECT_H__
 
-//#include "gui.h"
-
-
 //
 // Forward reference
 //
@@ -45,8 +42,6 @@ class GUI_Object {
   GUI_Processor *gp;
 
   GtkWidget *window;
-  enum window_category wc;
-  enum window_types wt;
 
   const char *menu;
 
@@ -64,26 +59,25 @@ class GUI_Object {
 #define VIEW_SHOW 1
 #define VIEW_TOGGLE 2
 
-  GUI_Object(void);
-  virtual ~GUI_Object(void);
+  GUI_Object();
+  virtual ~GUI_Object();
   virtual void ChangeView(gboolean view_state);
 
-  int get_config(void);
-  void check(void);
-  int set_default_config(void);
-  virtual int set_config(void);
+  int get_config();
+  void check();
+  int set_default_config();
+  virtual int set_config();
 
-  virtual void Build(void);
-  virtual int Create(GUI_Processor *_gp);
-  virtual void UpdateMenuItem(void);
-  virtual void Update(void);
+  virtual void Build() = 0;
+  virtual void UpdateMenuItem();
+  virtual void Update() = 0;
   virtual void NewProcessor(GUI_Processor *_gp)
     {
       gp = _gp;
     }
 
 protected:
-  virtual const char *name();
+  virtual const char *name() = 0;
 
 private:
 };

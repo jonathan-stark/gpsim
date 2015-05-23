@@ -19,58 +19,65 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
 
+#include "gui_object.h"
+#include "settings.h"
 
-#include "gui.h"
+extern GtkUIManager *ui;
 
-#include "gui_callbacks.h"
+//------------------------------------------------------------------------
+// Helper functions for setting and retrieving variables stored in
+// gpsim configuration file.
 
+extern Settings *settings;
 
-GUI_Object::GUI_Object(void)
-  : gp(0), window(0), wc(WC_misc), wt(WT_INVALID), menu(0),
-  x(0), y(0), width(100), height(100), bIsBuilt(false)
+int config_set_string(const char *module, const char *entry, const char *str)
+{
+  return settings->set(module, entry, str);
+}
+
+int config_set_variable(const char *module, const char *entry, int value)
+{
+  return settings->set(module, entry, value);
+}
+
+int config_get_variable(const char *module, const char *entry, int *value)
+{
+  return settings->get(module, entry, value);
+}
+
+int config_get_string(const char *module, const char *entry, char **str)
+{
+  return settings->get(module, entry, str);
+}
+
+int config_remove(const char *module, const char *entry)
+{
+  return settings->remove(module, entry);
+}
+
+GUI_Object::GUI_Object()
+  : gp(0), window(0), menu(0), x(0), y(0), width(100), height(100),
+    enabled(0), bIsBuilt(false)
 {
 }
 
-GUI_Object::~GUI_Object(void)
+GUI_Object::~GUI_Object()
 {
 
 }
 
-int GUI_Object::Create(GUI_Processor *_gp)
-{
-  printf("GUI_Object::Create  !!! \n");
-
-  return 0;
-}
-
-const char *GUI_Object::name(void)
-{
-  return 0;
-}
-
-void GUI_Object::UpdateMenuItem(void)
+void GUI_Object::UpdateMenuItem()
 {
   if (menu) {
     GtkAction *menu_item = gtk_ui_manager_get_action(ui, menu);
     gtk_toggle_action_set_active(GTK_TOGGLE_ACTION(menu_item), enabled);
   }
-}
-
-void GUI_Object::Update(void)
-{
-  printf("GUI_Object::Update - shouldn't be called\n");
 }
 
 void GUI_Object::ChangeView(gboolean view_state)
@@ -80,7 +87,7 @@ void GUI_Object::ChangeView(gboolean view_state)
     if(!bIsBuilt) {
 
       if(!get_config()) {
-        printf("warning %s\n",__FUNCTION__);
+        g_print("warning %s\n",__FUNCTION__);
         set_default_config();
       }
 
@@ -115,22 +122,12 @@ void GUI_Object::ChangeView(gboolean view_state)
   UpdateMenuItem();
 }
 
-
-void GUI_Object::Build(void)
-{
-  cout << " GUI_Object::Build() should not be called\n";
-}
-
-int GUI_Object::get_config(void)
+int GUI_Object::get_config()
 {
   const char *pName = name();
 
   if(!pName)
     return 0;
-  /*
-  if(!config_get_variable(pName, "x", &x))
-    printf("get_config %s failed\n",pName);
-  */
 
   if(!config_get_variable(pName, "enabled", &enabled))
     enabled=0;
@@ -149,7 +146,7 @@ int GUI_Object::get_config(void)
 }
 
 
-void GUI_Object::check(void)
+void GUI_Object::check()
 {
 #define MAX_REASONABLE   2000
 
@@ -162,7 +159,7 @@ void GUI_Object::check(void)
 
 }
 
-int GUI_Object::set_default_config(void)
+int GUI_Object::set_default_config()
 {
   static int defaultX = 100;
   static int defaultY = 100;
@@ -176,12 +173,11 @@ int GUI_Object::set_default_config(void)
   width = 100;
   height = 100;
 
-  printf("set_default_config\n");
   return 1;
 }
 
 
-int GUI_Object::set_config(void)
+int GUI_Object::set_config()
 {
   check();
 
@@ -201,36 +197,6 @@ int GUI_Object::set_config(void)
   config_set_variable(pName, "width", width);
   config_set_variable(pName, "height", height);
   return 1;
-}
-
-
-//------------------------------------------------------------------------
-// Helper functions for setting and retrieving variables stored in
-// gpsim configuration file.
-
-int config_set_string(const char *module, const char *entry, const char *str)
-{
-  return settings->set(module, entry, str);
-}
-
-int config_set_variable(const char *module, const char *entry, int value)
-{
-  return settings->set(module, entry, value);
-}
-
-int config_get_variable(const char *module, const char *entry, int *value)
-{
-  return settings->get(module, entry, value);
-}
-
-int config_get_string(const char *module, const char *entry, char **str)
-{
-  return settings->get(module, entry, str);
-}
-
-int config_remove(const char *module, const char *entry)
-{
-  return settings->remove(module, entry);
 }
 
 #endif  // HAVE_GUI

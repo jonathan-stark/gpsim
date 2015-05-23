@@ -935,9 +935,6 @@ SourceWindow::SourceWindow(GUI_Processor *pgp,
   else
     m_name = "source_browser";
 
-  wc = WC_source;
-  wt = WT_SourceWindow;
-
   mProgramCounter.bIsActive = false;
 
   pages = new NSourcePage *[SBAW_NRFILES];
@@ -1640,10 +1637,6 @@ void SourceWindow::set_pma(ProgramMemoryAccess *new_pma)
     status_bar->NewProcessor(gp, pma);
 }
 
-void SourceWindow::Create(void)
-{
-  Dprintf((" \n"));
-}
 void SourceWindow::SelectAddress(int address)
 {
   Dprintf((" \n"));
@@ -2180,8 +2173,6 @@ void SourceWindow::NewSource(GUI_Processor *gp)
 
   if(!pma)
     pma = pProc->pma;
-
-  assert(wt==WT_SourceWindow);
 
   CloseSource();
 

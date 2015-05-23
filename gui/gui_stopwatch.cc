@@ -346,8 +346,6 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   menu = "/menu/Windows/Stopwatch";
 
   gp = _gp;
-  wc = WC_data;
-  wt = WT_stopwatch_window;
 
   get_config();
   if(config_get_string(name(),"rollover",&string))

@@ -2484,9 +2484,6 @@ Profile_Window::Profile_Window(GUI_Processor *_gp)
 
   gp = _gp;
 
-  wc = WC_data;
-  wt = WT_profile_window;
-
   histogram_profile_list=0;
   range_current_row = 0;
 

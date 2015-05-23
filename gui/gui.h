@@ -27,16 +27,9 @@ Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_GUI
 
 #include <cstdio>
-#include <unistd.h>
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <assert.h>
-#include <gtkextra/gtksheet.h>
-#include "../src/interface.h"
-#include "../src/gpsim_def.h"
-#include "../src/modules.h"
 #include "../src/processor.h"
-#include "../src/pic-processor.h"
 #include "settings.h"
 
 #define SBAW_NRFILES 100 // Max number of source files
@@ -53,39 +46,6 @@ Boston, MA 02111-1307, USA.  */
 //
 // Create structures to generically access the pic-processor
 //
-
-//
-// Here's a list of all the types of windows that are supported
-//
-
-enum window_types {
-  WT_INVALID = 0,
-  WT_opcode_source_window=1,
-  WT_asm_source_window,
-  WT_register_window,
-  WT_eeprom_window,
-  WT_watch_window,
-  WT_symbol_window,
-  WT_breadboard_window,
-  WT_stack_window,
-  WT_trace_window,
-  WT_profile_window,
-  WT_stopwatch_window,
-  WT_scope_window,
-  WT_status_bar,
-  WT_sfr_window,
-  WT_list_source_window,
-  WT_SourceWindow
-};
-
-//
-// Here's a list of all the categories of windows that are supported
-//
-enum window_category {
-  WC_misc,
-  WC_source,
-  WC_data
-};
 
 //
 // This structure will cross reference the data in the simulator

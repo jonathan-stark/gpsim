@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/sim_context.h"
 #include "../src/interface.h"
-
+#include "../src/pic-processor.h"
 #include "../src/symbol.h"
 
 #include "gui.h"
@@ -321,8 +321,6 @@ Stack_Window::Stack_Window(GUI_Processor *_gp)
   menu = "/menu/Windows/Stack";
 
   gp = _gp;
-  wc = WC_data;
-  wt = WT_stack_window;
   window = 0;
 
   get_config();
