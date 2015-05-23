@@ -124,15 +124,6 @@ key_press(GtkWidget *widget,
   if(!sbw->gp) return(FALSE);
   if(!sbw->gp->cpu) return(FALSE);
 
-  // fix this
-  if(sbw->wt == WT_opcode_source_window)
-  {
-      SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
-
-      if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
-          return FALSE;
-
-  }
 
   KeyEvent *pKE = KeyMap[key->keyval];
   if(pKE)

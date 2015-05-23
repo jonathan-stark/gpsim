@@ -300,8 +300,6 @@ Trace_Window::Trace_Window(GUI_Processor *_gp)
   menu = "/menu/Windows/Trace";
 
   gp = _gp;
-  wc = WC_data;
-  wt = WT_trace_window;
 
   get_config();
 

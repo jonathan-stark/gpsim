@@ -3481,8 +3481,6 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
 {
   menu = "/menu/Windows/Breadboard";
 
-  wc = WC_misc;
-  wt = WT_breadboard_window;
   gp = _gp;
 
   if(!get_config())
