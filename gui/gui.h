@@ -62,12 +62,13 @@ public:
   gpointer     parent_window;
   gpointer     data;
 
+  CrossReferenceToGUI();
   virtual ~CrossReferenceToGUI()
   {
   }
 
-  virtual void Update(int new_value);
-  virtual void Remove(void);
+  virtual void Update(int new_value) = 0;
+  virtual void Remove();
 };
 
 

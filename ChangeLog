@@ -1,3 +1,11 @@
+2015-05-27 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_main.cc
+	: Fix display update from error introduced in svn 2323
+	* gui/gui_scope.cc gui/gui_scope.cc
+	: Cleaned up code to prepare for removing GDK deprecated calls
+	* gui/gui.h gui_break.cc gui_regwin.cc
+	: Change CrossReferenceToGUI class to a pure calls
+
 2015-05-23 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_init.cc
 	: Removed header dependencies and marked as should be removed

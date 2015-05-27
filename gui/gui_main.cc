@@ -19,9 +19,6 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-
-
-#include <cstdio>
 #include <clocale>
 
 #include "../config.h"
@@ -29,15 +26,12 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
-#include "../src/gpsim_def.h"
 #include "../src/gpsim_interface.h"
 
 #include "gui.h"
 #include "gui_breadboard.h"
-#include "gui_interface.h"
 #include "gui_processor.h"
 #include "gui_profile.h"
-#include "gui_register.h"
 #include "gui_regwin.h"
 #include "gui_scope.h"
 #include "gui_src.h"
@@ -77,14 +71,13 @@ extern GtkWidget *dispatcher_window;
 extern void dispatch_Update();
 
 //------------------------------------------------------------------------
-void CrossReferenceToGUI::Update(int new_value)
+
+CrossReferenceToGUI::CrossReferenceToGUI()
 {
-  printf("CrossReferenceToGUI::Update shouldn't be called!\n");
 }
 
-void CrossReferenceToGUI::Remove(void)
+void CrossReferenceToGUI::Remove()
 {
-  printf("CrossReferenceToGUI::Remove shouldn't be called!\n");
 }
 
 //------------------------------------------------------------------------
@@ -169,36 +162,6 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 
 extern int gui_animate_delay; // in milliseconds
 
-static GUI_Processor *lgp=0;
-
-static void *SimulationHasStopped( void *ptr )
-{
-    if(lgp) {
-      GTKWAIT;
-
-      lgp->regwin_ram->Update();
-      lgp->regwin_eeprom->Update();
-      lgp->program_memory->Update();
-      lgp->source_browser->Update();
-      lgp->watch_window->Update();
-      lgp->stack_window->Update();
-      lgp->breadboard_window->Update();
-      lgp->trace_window->Update();
-      lgp->profile_window->Update();
-      lgp->stopwatch_window->Update();
-      lgp->scope_window->Update();
-    }
-    
-    if(gui_animate_delay!=0)
-          g_usleep(1000*gui_animate_delay);
-
-    dispatch_Update();
-
-  return 0;
-
-}
-
-
 /*------------------------------------------------------------------
  * SimulationHasStopped
  *
@@ -207,7 +170,27 @@ static void *SimulationHasStopped( void *ptr )
 void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
   if(callback_data) {
-    ::SimulationHasStopped(0);
+    GUI_Processor *lgp = (GUI_Processor *) callback_data;
+
+    while (gtk_events_pending())
+      gtk_main_iteration();
+
+    lgp->regwin_ram->Update();
+    lgp->regwin_eeprom->Update();
+    lgp->program_memory->Update();
+    lgp->source_browser->Update();
+    lgp->watch_window->Update();
+    lgp->stack_window->Update();
+    lgp->breadboard_window->Update();
+    lgp->trace_window->Update();
+    lgp->profile_window->Update();
+    lgp->stopwatch_window->Update();
+    lgp->scope_window->Update();
+      
+    if (gui_animate_delay!=0)
+      g_usleep(1000 * gui_animate_delay);
+
+    dispatch_Update();
   }
 }
 
@@ -347,7 +330,7 @@ int gui_init (int argc, char **argv)
   return(0);
 }
 
-void gui_main(void)
+void gui_main()
 {
   gtk_main ();
 }
