@@ -35,7 +35,7 @@ public:
 
   GUI_Processor *gp;
   
-  void Update(int new_value)
+  virtual void Update(int new_value)
   {
     int address;
 

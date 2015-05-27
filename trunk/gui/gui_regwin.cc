@@ -343,7 +343,7 @@ class RegisterWindowXREF : public CrossReferenceToGUI
 {
 public:
 
-  void Update(int new_value)
+  virtual void Update(int new_value)
   {
     GUIRegister *reg;
     Register_Window *rw;
@@ -366,7 +366,6 @@ public:
 
     rw->UpdateASCII(reg->row);
   }
-
 };
 
 

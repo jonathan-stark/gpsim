@@ -22,20 +22,24 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SCOPE_H__
 #define __GUI_SCOPE_H__
 
-#include "gui.h"
+#include <vector>
+#include "gui_object.h"
 
+class GUI_Processor;
 class TimeMarker;
 class ZoomAttribute;
 class PanAttribute;
 class WaveBase;
 class Waveform;
-class Signal;
 class SignalNameEntry;
+class TimeAxis;
 
 class GridPointMapping
 {
 public:
   GridPointMapping(int nPointsToMap);
+  ~GridPointMapping();
+
   int     pixel(int index) { return (index<m_nPoints)? m_pixel[index] : 0;}
   guint64 cycle(int index) { return (index<m_nPoints)? m_cycle[index] : 0;}
   int sze() { return m_nPoints; }
@@ -55,9 +59,8 @@ class Scope_Window : public GUI_Object
 public:
 
   Scope_Window(GUI_Processor *gp);
-  virtual void Build(void);
-  virtual void Update(void);
-  void UpdateMarker(gdouble x, gdouble y, guint button, guint state);
+  virtual void Build();
+  virtual void Update();
 
   void Expose(WaveBase *);
 
@@ -70,9 +73,6 @@ public:
   /// getSpan - returns time span currently cached (essentially tStop-tStart).
   gdouble getSpan();
 
-  /// mapPixelToTime - convert a pixel horizontal offset to time
-  guint64 mapPixelToTime(int pixel);
-
   /// mapTimeToPixel - convert time to a pixel horizontal offset.
   int mapTimeToPixel(guint64 time);
 
@@ -80,7 +80,7 @@ public:
   GridPointMapping &MinorTicks() { return m_MinorTicks; }
 
   void refreshSignalNameGraphics();
-  void refreshWaveFormGraphics();
+
 private:
   /// Signals for the scope window
   static gint signalButtonPress(GtkWidget *,GdkEventButton *, Scope_Window *sw);
@@ -125,6 +125,8 @@ private:
   bool m_bFrozen;
 
   SignalNameEntry *m_entry;
+  TimeAxis *m_TimeAxis;
+  std::vector<Waveform *> signals;
 
 protected:
   virtual const char *name();
