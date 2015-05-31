@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SYMBOLS_H__
 #define __GUI_SYMBOLS_H__
 
+#include "gui_object.h"
+
+class GUI_Processor;
 
 //
 // The symbol window

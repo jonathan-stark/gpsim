@@ -21,9 +21,10 @@ License along with this library; if not, see
 #ifndef __ttl_H__
 #define __ttl_H__
 
-#include "../src/stimuli.h"
-#include "../src/ioports.h"
 #include "../src/modules.h"
+
+class IOPIN;
+class IO_bi_directional;
 
 namespace TTL {
   //------------------------------------------------------------------------

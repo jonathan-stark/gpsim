@@ -20,8 +20,6 @@ License along with this library; if not, see
 */
 
 
-#include <stdio.h>
-
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
@@ -31,11 +29,9 @@ class Processor;
 #include "../src/i2c-ee.h"
 #include "i2c-eeprom.h"
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
-#include "../src/value.h"
 #include "../src/packages.h"
-#include "../src/gpsim_interface.h"
+
+#include <string>
 
 namespace I2C_EEPROM_Modules {
 

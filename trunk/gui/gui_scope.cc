@@ -155,7 +155,6 @@ GtkWidget *signalDrawingArea=0;
 
 GdkGC *drawing_gc=0;         // Line styles, etc.
 GdkGC *highDensity_gc=0;     // Line styles, etc.
-GdkGC *text_gc=0;            // signal names
 GdkGC *grid_gc=0;            // Grid color
 GdkGC *leftMarker_gc=0;      // Marker style & color
 
@@ -193,27 +192,22 @@ public:
   }
 
   virtual void Update(guint64 start=0, guint64 stop=0)=0;
-  virtual void Build(PixMap *pWavePixmap, PixMap *pSignalPixmap);
+  virtual void Build(PixMap *pWavePixmap);
 
   void setPixmaps(GdkPixmap *, GdkPixmap *);
   PixMap *wavePixmap() { return m_wavePixmap; }
-  PixMap *signalPixmap() { return m_signalPixmap;}
-  const char *get_text();
+  const char *get_text() { return m_label_name.c_str(); }
   virtual void setSource(const char *) { }
 
 protected:
 
   Scope_Window *sw;          // Parent
-  bool isBuilt;              // True after the gui has been built.
   guint64 m_start;           // Start time of plotted waveform
   guint64 m_stop;            // Stop time of plotted waveform
   PixMap *m_wavePixmap;      // The Waveform is rendered in this pixmap.
-  PixMap *m_signalPixmap;    // The signal name is rendered in this pixmap.
-  PangoLayout *m_layout;     // Pango layout for rendering signal name
-
-
-
+  std::string m_label_name;
 };
+
 /***********************************************************************
   TimeAxis - A special 'Waveform' for plotting the time
  */
@@ -226,7 +220,7 @@ public:
   {
   }
 
-  virtual void Build(PixMap *pWavePixmap, PixMap *pSignalPixmap);
+  virtual void Build(PixMap *pWavePixmap);
   virtual void Update(guint64 start=0, guint64 stop=0);
 
 protected:
@@ -248,7 +242,7 @@ public:
   }
 
   virtual void Update(guint64 start=0, guint64 stop=0);
-  virtual void Build(PixMap *pWavePixmap, PixMap *pSignalPixmap);
+  virtual void Build(PixMap *pWavePixmap);
 
   void SearchAndPlot(timeMap &left, timeMap &right);
   void setData(char c);
@@ -434,15 +428,12 @@ void WaveformSink::setSinkState(char c)
 //************************************************************************
 WaveBase::WaveBase(Scope_Window *parent, const char *name)
   : sw(parent),
-    isBuilt(false),
     m_start(1), m_stop(1),
-    m_wavePixmap(0),
-    m_signalPixmap(0),
-    m_layout(0)
+    m_wavePixmap(0)
 {
 
 }
-void WaveBase::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
+void WaveBase::Build(PixMap *pWavePixmap)
 {
 
   if (m_wavePixmap && m_wavePixmap->pixmap())
@@ -450,20 +441,7 @@ void WaveBase::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
 
   m_wavePixmap = pWavePixmap;
 
-  if (m_signalPixmap && m_signalPixmap->pixmap())
-    gdk_pixmap_unref(m_signalPixmap->pixmap());
-
-  m_signalPixmap = pSignalPixmap;
-
-  m_layout = gtk_widget_create_pango_layout (GTK_WIDGET (signalDrawingArea), "");
-
-  isBuilt = true;
   Update(0,0);
-}
-
-const char *WaveBase::get_text()
-{
-  return m_layout ? pango_layout_get_text(m_layout) : 0;
 }
 
 //************************************************************************
@@ -476,9 +454,9 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
   m_logger.event('0');
 }
 
-void Waveform::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
+void Waveform::Build(PixMap *pWavePixmap)
 {
-  WaveBase::Build(pWavePixmap, pSignalPixmap);
+  WaveBase::Build(pWavePixmap);
   updateLayout();
 }
 void Waveform::setData(char c)
@@ -488,11 +466,9 @@ void Waveform::setData(char c)
 
 void Waveform::updateLayout()
 {
-  if (m_layout) {
-    char buffer[100];
-    m_pSourceName.get(buffer, sizeof(buffer));
-    pango_layout_set_text(m_layout,buffer,-1);
-  }
+  char buffer[100];
+  m_pSourceName.get(buffer, sizeof(buffer));
+  m_label_name = buffer;
 }
 
 void Waveform::setSource(const char *sourceName)
@@ -618,9 +594,6 @@ void Waveform::SearchAndPlot(timeMap &left, timeMap &right)
 
 void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 {
-  if(!isBuilt)
-    return;
-
   if(!m_wavePixmap) {
     g_print("%s pixmap is NULL\n", __FUNCTION__);
     return;
@@ -643,26 +616,7 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
                       m_wavePixmap->width,
                       m_wavePixmap->height);
 
-  style = gtk_widget_get_style(signalDrawingArea);
-  gdk_draw_rectangle (m_signalPixmap->pixmap(),
-                      style->bg_gc[GTK_STATE_NORMAL],
-                      TRUE,
-                      0, 0,
-                      m_signalPixmap->width,
-                      m_signalPixmap->height);
-  if (m_layout) {
-    updateLayout();
-    int text_height=0;
-    pango_layout_get_pixel_size(m_layout,
-                                NULL,
-                                &text_height);
-    Dprintf(("signal name update:%s\n",pango_layout_get_text(m_layout)));
-    gdk_draw_layout (GDK_DRAWABLE(m_signalPixmap->pixmap()),
-                     style->fg_gc[GTK_STATE_NORMAL],
-                     0,
-                     (m_signalPixmap->height-text_height)/2,
-                     m_layout);
-  }
+  updateLayout();
 
   //
   // Draw Vertical Grid Lines:
@@ -729,9 +683,6 @@ TimeAxis::TimeAxis(Scope_Window *parent, const char *name)
 
 void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
 {
-  if(!isBuilt)
-    return;
-
   if(!m_wavePixmap) {
     g_print("%s pixmap is NULL\n", __FUNCTION__);
     return;
@@ -753,13 +704,6 @@ void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
                       0, 0,
                       m_wavePixmap->width,
                       m_wavePixmap->height);
-
-  gdk_draw_rectangle (m_signalPixmap->pixmap(),
-                      style->bg_gc[GTK_STATE_NORMAL],
-                      TRUE,
-                      0, 0,
-                      m_signalPixmap->width,
-                      m_signalPixmap->height);
 
   //
   // Draw Major Ticks:
@@ -820,9 +764,9 @@ void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
 
 
 
-void TimeAxis::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
+void TimeAxis::Build(PixMap *pWavePixmap)
 {
-  WaveBase::Build(pWavePixmap, pSignalPixmap);
+  WaveBase::Build(pWavePixmap);
   // Invalidate the start time after the build.
   // This is for the case where the scope window gets opened after
   // the simulation has already been started.
@@ -831,7 +775,7 @@ void TimeAxis::Build(PixMap *pWavePixmap, PixMap *pSignalPixmap)
   if (m_layout)
     pango_layout_set_text(m_layout,"Time", -1);
   */
-  m_TicText = gtk_widget_create_pango_layout (GTK_WIDGET (waveDrawingArea), "");
+  m_TicText = gtk_widget_create_pango_layout (GTK_WIDGET (waveDrawingArea), NULL);
 
 }
 
@@ -854,19 +798,6 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-static gint Scope_Window_expose_event (GtkWidget *widget,
-                                       GdkEventExpose  *event,
-                                      Scope_Window   *sw)
-{
-  Dprintf(( " %s\n",__FUNCTION__));
-
-  if(sw) {
-    sw->refreshSignalNameGraphics();
-
-  }
-
-  return FALSE;
-}
 static gint DrawingArea_expose_event (GtkWidget *widget,
                                       GdkEventExpose *event,
                                       Scope_Window   *sw)
@@ -954,17 +885,6 @@ WaveBase *SignalNameEntry::getSelected()
 }
 
 //========================================================================
-void Scope_Window::refreshSignalNameGraphics()
-{
-  GTKWAIT;
-
-  Expose(m_TimeAxis);
-
-  for (size_t i = 0; i < signals.size(); i++)
-    Expose(signals[i]);
-}
-
-//========================================================================
 void Scope_Window::gridPoints(guint64 *uiStart, guint64 *uiEnd)
 {
   guint64 start = m_Markers[eStart]->getVal();
@@ -1040,9 +960,6 @@ void Scope_Window::gridPoints(guint64 *uiStart, guint64 *uiEnd)
 }
 
 static gdouble gNormalizedHorizontalPosition=0.0;
-static GtkWidget *pvbox=0;
-GtkObject *m_hAdj=0;
-
 
 int Scope_Window::waveXoffset()
 {
@@ -1070,22 +987,6 @@ void Scope_Window::Expose(WaveBase *wf)
                   xoffset,0,      // source
                   0,pm->yoffset,  // destination
                   pm->width,pm->height);
-
-  pm = wf->signalPixmap();
-
-  // If the Waveform is selected for editing, then there's a gtk_entry
-  // widget exposed showing the signal name. If we're not editing, then
-  // show the pixmap with the signal name:
-
-  if (!m_entry->isSelected(wf)) {
-    style = gtk_widget_get_style(signalDrawingArea);
-    gdk_draw_pixmap(gtk_layout_get_bin_window(GTK_LAYOUT(signalDrawingArea)),
-                    style->fg_gc[GTK_STATE_NORMAL],
-                    pm->pixmap(),
-                    0,0,            // source
-                    0,pm->yoffset,  // destination
-                    pm->width,pm->height);
-  }
 }
 
 static void hAdjVChange(GtkAdjustment *pAdj,
@@ -1144,7 +1045,7 @@ bool Scope_Window::selectSignalName(int y)
     bRet = endSignalNameSelection(true);
 
   if (bRet)
-    refreshSignalNameGraphics();
+    gtk_widget_queue_draw(signalDrawingArea);
 
   return bRet;
 }
@@ -1182,6 +1083,29 @@ gint Scope_Window::signalButtonPress(GtkWidget *widget,
 
   return TRUE;
 }
+
+gboolean Scope_Window::signal_name_expose(GtkWidget *widget,
+  GdkEventExpose *event, Scope_Window *sw)
+{
+  cairo_t *cr = gdk_cairo_create(gtk_layout_get_bin_window(GTK_LAYOUT(widget)));
+  std::vector<Waveform *>::iterator i = sw->signals.begin();
+  PangoLayout *layout = gtk_widget_create_pango_layout(widget, NULL);
+  for ( ; i != sw->signals.end(); ++i) {
+    if (!sw->m_entry->isSelected(*i)) {
+      Waveform *p  = *i;
+      double yoffset = p->wavePixmap()->yoffset;
+      pango_layout_set_text(layout, p->get_text(), -1);
+      cairo_move_to(cr, 0.0, yoffset);
+      pango_cairo_update_layout(cr, layout);
+      pango_cairo_show_layout(cr, layout);
+    }
+  }
+  g_object_unref(layout);
+  cairo_destroy(cr);
+
+  return TRUE;
+}
+
 //------------------------------------------------------------------------
 //
 // Scope_Window member functions
@@ -1217,11 +1141,6 @@ void Scope_Window::Build()
 
   g_signal_connect(window, "delete_event",
                      G_CALLBACK(delete_event), this);
-
-  g_signal_connect (window,
-                      "expose_event",
-                      G_CALLBACK(Scope_Window_expose_event),
-                      this);
 
   //
   // Define the drawing colors
@@ -1267,7 +1186,7 @@ void Scope_Window::Build()
 
 
 
-  pvbox = gtk_vbox_new(FALSE,0);
+  GtkWidget *pvbox = gtk_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (window), pvbox);
 
 
@@ -1297,8 +1216,6 @@ void Scope_Window::Build()
   gtk_paned_set_position(GTK_PANED(m_pHpaned),50);
 
   gtk_widget_show(waveDrawingArea);
-  gtk_widget_show(signalDrawingArea);
-
   GdkWindow *Gwindow = gtk_widget_get_window(waveDrawingArea);
 
   // Graphics Context:
@@ -1313,27 +1230,26 @@ void Scope_Window::Build()
   gdk_gc_set_foreground(leftMarker_gc,&highDensity_line_color);
   gdk_gc_set_function(leftMarker_gc,GDK_XOR);
 
-  text_gc = gtk_widget_get_style(waveDrawingArea)->white_gc;
-
   guint64 start,stop;
   gridPoints(&start,&stop);
 
   int timeHeight = 15;
-  m_TimeAxis->Build(new PixMap(Gwindow, m_PixmapWidth, timeHeight, 0),
-                    new PixMap(Gwindow, 100, timeHeight, 0));
+  m_TimeAxis->Build(new PixMap(Gwindow, m_PixmapWidth, timeHeight, 0));
   m_TimeAxis->Update(start,stop);
 
   for(size_t i = 0; i < signals.size(); i++) {
     int waveHeight=20;
     int yoffset = timeHeight +i*waveHeight;
-    signals[i]->Build(new PixMap(Gwindow, m_PixmapWidth, waveHeight, yoffset),
-                      new PixMap(Gwindow, 100, waveHeight, yoffset));
+    signals[i]->Build(new PixMap(Gwindow, m_PixmapWidth, waveHeight, yoffset));
   }
 
   g_signal_connect (waveDrawingArea,
-                      "expose_event",
+                      "expose-event",
                       G_CALLBACK(DrawingArea_expose_event),
                       this);
+
+  g_signal_connect(signalDrawingArea, "expose-event",
+    G_CALLBACK(signal_name_expose), this);
 
   KeyMap['z'] = new ZoomInEvent();
   KeyMap['Z'] = new ZoomOutEvent();
@@ -1405,8 +1321,8 @@ void Scope_Window::Update()
   g_object_set(G_OBJECT(m_hAdj),
                "page-size", m_PixmapWidth * 200.0/dspan,
                NULL);
-  gtk_widget_queue_draw (m_phScrollBar);
-
+  gtk_widget_queue_draw(m_phScrollBar);
+  gtk_widget_queue_draw(signalDrawingArea);
 
   m_TimeAxis->Update(start,stop);
   Expose(m_TimeAxis);

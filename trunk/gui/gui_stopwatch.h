@@ -22,6 +22,11 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_STOPWATCH_H__
 #define __GUI_STOPWATCH_H__
 
+#include "gui_object.h"
+#include <cassert>
+
+class GUI_Processor;
+
 //
 // The stopwatch window
 //

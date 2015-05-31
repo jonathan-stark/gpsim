@@ -20,22 +20,21 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cerrno>
 
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
-#include <glib.h>
-#include <string.h>
 
-#include <gtkextra/gtkbordercombo.h>
-#include <gtkextra/gtkcolorcombo.h>
+#include <glib.h>
+#include <cstring>
+
+#include <string>
+
 #include <gtkextra/gtksheet.h>
 
 extern int gui_question(const char *question, const char *a, const char *b);
@@ -44,8 +43,6 @@ extern int gui_question(const char *question, const char *a, const char *b);
 #include "gui_src.h"
 #include "../xpms/break.xpm"
 #include "../xpms/pc.xpm"
-
-#include <assert.h>
 
 #define OPCODES_PER_ROW 16
 

@@ -22,17 +22,12 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
 #include <glib.h>
+
 #include <cstring>
-
-#include <gtkextra/gtkbordercombo.h>
-#include <gtkextra/gtkcolorcombo.h>
-#include <gtkextra/gtksheet.h>
-
+#include <string>
 
 #include "gui.h"
 #include "preferences.h"
@@ -823,10 +818,7 @@ gui_update_cb(GtkWidget *widget, gpointer data)
   gint index = combo_box ? gtk_combo_box_get_active(combo_box) : 0;
 
   UpdateRateMenuItem *umi = UpdateRateMenuItemIndexed[index];
-  if (umi)
-    umi->Select();
-  else
-    cout << "Error UpdateRateMenuItem bad index:" << index << endl;
+  umi->Select();
 }
 
 UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
@@ -874,11 +866,6 @@ void UpdateRateMenuItem::Select()
     gpGuiProcessor->cpu->pma->stop();
 
   config_set_variable("dispatcher", "SimulationMode", id);
-
-  if (0)
-    cout << "Update gui refresh: " << hex << update_rate
-         << " ID:" << id << "Seq no:" << menu_index
-         << endl;
 }
 
 
@@ -1373,7 +1360,6 @@ void MainWindow::Create ()
   //
   // Gui Update Rate
   //
-  cout << "SimulationMode:"<<SimulationMode<<endl;
 
   update_rate_menu = gtk_combo_box_text_new();
   gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
@@ -1391,8 +1377,6 @@ void MainWindow::Create ()
 
   UpdateRateMenuItem *umi = UpdateRateMenuItemMap[SimulationMode];
 
-  if(!umi)
-    cout << "error selecting update rate menu\n";
   umi->Select();
 
   gtk_combo_box_set_active(GTK_COMBO_BOX(update_rate_menu), umi->menu_index);

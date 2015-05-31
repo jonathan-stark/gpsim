@@ -25,14 +25,10 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
-#include "../src/trace.h"
-#include "../src/interface.h"
-
 #include <gtk/gtk.h>
 
+#include <../src/modules.h>
+#include <../src/trigger.h>
 
 namespace Leds {
 

@@ -31,8 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "src/trigger.h"
 #include "src/i2c-ee.h"
 
-class I2C_SLAVE_SCL;
-class I2C_SLAVE_SDA;
+
 class IOPort;
 class AddAttribute;
 namespace I2C2PAR_Modules {

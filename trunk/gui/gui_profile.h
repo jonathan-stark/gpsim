@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_PROFILE_H__
 #define __GUI_PROFILE_H__
 
+#include "gui_object.h"
+
+class GUI_Processor;
 
 //
 // The profile window
@@ -68,8 +71,8 @@ class Profile_Window : public GUI_Object
   GList *histogram_profile_list;
 
   Profile_Window(GUI_Processor *gp);
-  virtual void Build(void);
-  virtual void Update(void);
+  virtual void Build();
+  virtual void Update();
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void NewProgram(GUI_Processor *gp);
   virtual void StopExe(int address);

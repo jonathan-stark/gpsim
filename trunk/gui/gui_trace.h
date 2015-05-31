@@ -21,6 +21,11 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef __GUI_TRACE_H__
 #define __GUI_TRACE_H__
+
+#include "gui_object.h"
+
+class GUI_Processor;
+
 //
 // The trace window 
 //

@@ -36,7 +36,7 @@ sync	lume	result
 #define IN_MODULE
 
 #include <cstdlib>
-#include <string>
+#include <cstring>
 #include <cassert>
 
 #include "../config.h"    // get the definition for HAVE_GUI
@@ -45,9 +45,7 @@ sync	lume	result
 #include <gtk/gtk.h>
 
 #include "../src/gpsim_interface.h"
-#include "../src/gpsim_time.h"
 #include "../src/processor.h"
-#include "../src/packages.h"
 
 #include "video.h"
 

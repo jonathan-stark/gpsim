@@ -20,30 +20,18 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include <cstdio>
-#include <cstdlib>
-#include <cerrno>
 #include <typeinfo>
 
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <cstring>
-
-#include <gtkextra/gtkbordercombo.h>
-#include <gtkextra/gtkcolorcombo.h>
-#include <gtkextra/gtksheet.h>
 
 #include "gui.h"
 #include "gui_src.h"
-
-#include <cassert>
-#include <map>
-
 
 class StepEvent : public KeyEvent
 {

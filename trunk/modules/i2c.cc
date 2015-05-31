@@ -183,8 +183,10 @@ License along with this library; if not, see
 
 
 #include <iostream>
-#include <stdio.h>
-#include <math.h>
+#include <string>
+
+#include <cstdio>
+#include <cmath>
 
 #include "../src/stimuli.h"
 #include "../src/modules.h"

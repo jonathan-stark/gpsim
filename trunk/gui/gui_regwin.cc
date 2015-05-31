@@ -23,19 +23,15 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <typeinfo>
 
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
 #include <string.h>
-
-#include <assert.h>
 
 #include "../src/interface.h"
 #include "../src/trace.h"

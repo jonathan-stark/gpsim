@@ -39,10 +39,7 @@ License along with this library; if not, see
 #define IN_MODULE
 #define DEFAULT_BAUD    9600
 
-#include <errno.h>
-#include <stdlib.h>
 #include <string>
-#include <math.h>  // for floor()
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
@@ -55,13 +52,7 @@ License along with this library; if not, see
 #include <cstdio>
 #include "../src/value.h"
 #include "../src/modules.h"
-#include "../src/packages.h"
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
-#include "../src/interface.h"
-#include "../src/pir.h"
-#include "../src/trace.h"
 #include "../src/uart.h"
 
 

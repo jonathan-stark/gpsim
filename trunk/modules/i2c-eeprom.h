@@ -27,8 +27,6 @@ License along with this library; if not, see
 #define IN_MODULE
 
 #include "../src/modules.h"
-#include "../src/ioports.h"
-#include "../src/stimuli.h"
 
 class I2C_EE;
 class PromAddress;

@@ -21,8 +21,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include <cstdio>
 #include <cstdlib>
-#include <ctime>
-#include <cerrno>
 
 #include "../config.h"
 
@@ -30,12 +28,10 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
 #include <math.h>
 
 #include <cassert>

@@ -26,14 +26,13 @@ License along with this library; if not, see
 #define IN_MODULE
 
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
 #include "../src/modules.h"
 
 #include <gtk/gtk.h>
 
 class Video;
 class Video_Interface;
+class Processor;
 
 /*********************************************************
  *

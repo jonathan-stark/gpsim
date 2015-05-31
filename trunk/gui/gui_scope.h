@@ -79,12 +79,12 @@ public:
   GridPointMapping &MajorTicks() { return m_MajorTicks; }
   GridPointMapping &MinorTicks() { return m_MinorTicks; }
 
-  void refreshSignalNameGraphics();
-
 private:
   /// Signals for the scope window
   static gint signalButtonPress(GtkWidget *,GdkEventButton *, Scope_Window *sw);
   static gint signalEntryKeyPress(GtkEntry *, GdkEventKey *, Scope_Window *sw);
+  static gboolean signal_name_expose(GtkWidget *widget,
+    GdkEventExpose *event, Scope_Window *sw);
 
   /// selectSignalName - begin the signal name editing mode
   /// returns true if selection state has changed.
@@ -124,6 +124,7 @@ private:
 
   bool m_bFrozen;
 
+  GtkObject *m_hAdj;
   SignalNameEntry *m_entry;
   TimeAxis *m_TimeAxis;
   std::vector<Waveform *> signals;

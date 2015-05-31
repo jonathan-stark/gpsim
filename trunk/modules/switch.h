@@ -27,7 +27,6 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include "../src/stimuli.h"
 #include "../src/modules.h"
 
 #ifdef HAVE_GUI

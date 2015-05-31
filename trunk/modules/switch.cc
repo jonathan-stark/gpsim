@@ -30,21 +30,14 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <time.h>
-#include <stdio.h>
+#include <cstdio>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <assert.h>
 #include <typeinfo>
 
-#include <errno.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cassert>
 #include <string>
 #include <iostream>
-#include <math.h>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 
@@ -54,10 +47,7 @@ License along with this library; if not, see
 
 #include "../src/packages.h"
 #include "../src/stimuli.h"
-#include "../src/symbol.h"
 #include "../src/gpsim_interface.h"
-#include "../src/gpsim_time.h"
-
 
 #include "switch.h"
 

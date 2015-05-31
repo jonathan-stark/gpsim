@@ -45,7 +45,9 @@ support:
 #define IN_MODULE
 
 #include <iostream>
-#include <stdio.h>
+#include <cstring>
+
+#include <cstdio>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 

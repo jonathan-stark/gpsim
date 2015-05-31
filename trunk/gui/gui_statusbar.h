@@ -23,13 +23,14 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_STATUSBAR_H__
 #define __GUI_STATUSBAR_H__
 
-#include "gui.h"
+#include <vector>
 
 
 class RegisterLabeledEntry;	// in gui_statusbar.cc
 class CyclesLabeledEntry;	// in gui_statusbar.cc
 class TimeLabeledEntry;		// in gui_statusbar.cc
 class MemoryAccess;		// in src/processor.h
+class GUI_Processor;
 
 //
 // The Status Bar window 

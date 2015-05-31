@@ -200,7 +200,6 @@ static const gchar * not_pixmap[] = {
 #include "logic.h"
 #include "../src/packages.h"
 #include "../src/gpsim_interface.h"
-#include "../src/attributes.h"
 
 //--------------------------------------------------------------
 // Led_Input
