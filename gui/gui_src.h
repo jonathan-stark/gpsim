@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SRC_H__
 #define __GUI_SRC_H__
 
+#include <list>
+#include <string>
+
 // forward references
 class SourceBrowserParent_Window;
 class StatusBar_Window;

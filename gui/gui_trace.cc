@@ -19,22 +19,13 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-
 #include "../config.h"
 #ifdef HAVE_GUI
 
-#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
-#include <gdk/gdkkeysyms.h>
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <string.h>
-
-#include <assert.h>
 
 #include "../src/interface.h"
 #include "../src/trace.h"
@@ -145,7 +136,7 @@ void Trace_Window::Update(void)
 
   if(!gp || !gp->cpu)
   {
-      puts("Warning gp or gp->cpu == NULL in TraceWindow_update");
+      g_print("Warning gp or gp->cpu == NULL in TraceWindow_update");
       return;
   }
 

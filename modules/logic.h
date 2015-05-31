@@ -26,8 +26,6 @@ License along with this library; if not, see
 #define IN_MODULE
 
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
 #include "../src/modules.h"
 
 #ifdef HAVE_GUI
@@ -35,9 +33,6 @@ License along with this library; if not, see
 #endif
 
 class LogicGate;
-class ANDGate;
-class AND2Gate;
-
 
 /*********************************************************
  *

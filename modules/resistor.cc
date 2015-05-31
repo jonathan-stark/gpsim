@@ -34,8 +34,7 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 //#define IN_MODULE
 
-#include <errno.h>
-#include <stdlib.h>
+#include <iostream>
 #include <string>
 
 #include "../config.h"
@@ -46,8 +45,6 @@ License along with this library; if not, see
 
 #include "resistor.h"
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
 #include "../src/value.h"
 #include "../src/gpsim_interface.h"
 

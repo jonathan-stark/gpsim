@@ -29,18 +29,8 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <time.h>
-#include <stdio.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-#include <iostream>
-#include <assert.h>
+#include <cstdio>
+#include <cassert>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
@@ -48,7 +38,7 @@ License along with this library; if not, see
 #include <gtk/gtk.h>
 #include "../src/gpsim_time.h"
 #include "../src/packages.h"
-
+#include "../src/stimuli.h"
 #include "encoder.h"
 
 #define PIN_A	(0x01)
@@ -227,8 +217,6 @@ Encoder::callback()
 	    toggle_a();
 	    rs = rot_detent;
 	    break;
-	default:
-	    abort();
     }
 }
 

@@ -29,9 +29,11 @@ License along with this library; if not, see
 #include "../src/stimuli.h"
 #include "../src/modules.h"
 #include "module_attribute.h"
-#include <list>
 
-class Register;
+#include <iosfwd>
+#include <list>
+#include <string>
+
 class PicPortRegister;
 class PicTrisRegister;
 class PicLatchRegister;

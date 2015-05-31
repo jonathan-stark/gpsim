@@ -28,23 +28,12 @@ License along with this library; if not, see
 /* IN_MODULE should be defined for modules */
 #define IN_MODULE
 
-#include <time.h>
-#include <stdio.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-#include <iostream>
-
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
 
+#include "../src/stimuli.h"
 #include "../src/packages.h"
 #include "push_button.h"
 

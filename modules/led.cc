@@ -65,7 +65,7 @@ License along with this library; if not, see
 #define IN_MODULE
 
 #include <cstdlib>
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <typeinfo>
 
@@ -75,6 +75,8 @@ License along with this library; if not, see
 #include <gtk/gtk.h>
 #include <cmath>
 
+#include "../src/stimuli.h"
+#include "../src/value.h"
 #include "../src/gpsim_interface.h"
 #include "../src/gpsim_time.h"
 

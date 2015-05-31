@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     connected to the processor via the 2 pin I2C bus.
 */
 
-#include <stdio.h>
+#include <cstdio>
 
 //#define DEBUG
 #if defined(DEBUG)

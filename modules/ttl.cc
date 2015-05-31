@@ -32,10 +32,9 @@ License along with this library; if not, see
 
 #include "ttl.h"
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
-#include "../src/value.h"
 #include "../src/packages.h"
+
+#include <string>
 
 namespace TTL
 {

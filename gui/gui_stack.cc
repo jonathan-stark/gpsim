@@ -20,10 +20,7 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <typeinfo>
+#include <cstdio>
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -32,9 +29,8 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
-#include <string.h>
 
-#include <assert.h>
+#include <cassert>
 
 #include "../src/sim_context.h"
 #include "../src/interface.h"
@@ -134,7 +130,7 @@ static int get_closest_label(Stack_Window *sw,
   }
 #endif
    if(verbose)
-       cout << "FIXME gui_stack.cc get closest label\n";
+       g_print("FIXME gui_stack.cc get closest label\n");
   if(closest_symbol) {
     strcpy(name,closest_symbol->name().data());
     int i;
@@ -315,13 +311,9 @@ const char *Stack_Window::name()
 Stack_Window::Stack_Window(GUI_Processor *_gp)
   : last_stacklen(0)
 {
-#define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
-#define MAXCOLS  (REGISTERS_PER_ROW+1)
-
   menu = "/menu/Windows/Stack";
 
   gp = _gp;
-  window = 0;
 
   get_config();
 

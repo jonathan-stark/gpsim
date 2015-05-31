@@ -23,10 +23,12 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_REGWIN_H__
 #define __GUI_REGWIN_H__
 
+#include "gui_object.h"
 #include "gui_register.h"
 #include <gtkextra/gtkextra.h>
 
 class StatusBar_Window;
+class GUI_Processor;
 
 //======================================================================
 // The register window 
