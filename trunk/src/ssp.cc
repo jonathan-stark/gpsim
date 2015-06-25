@@ -706,6 +706,8 @@ SSP_MODULE::SSP_MODULE(Processor *pCpu)
     sspstat(pCpu,this),
     sspcon2(pCpu,this),
     sspadd(pCpu,this),
+    m_ssp_if(0),
+    m_bcl_if(0),
     m_pirset(0),
     m_spi(0),
     m_i2c(0),
@@ -756,6 +758,8 @@ SSP_MODULE::~SSP_MODULE()
 	delete m_spi;
 	delete m_i2c;
     }
+    if (m_ssp_if) delete m_ssp_if;
+    if (m_bcl_if) delete m_bcl_if;
 }
 
 SSP1_MODULE::SSP1_MODULE(Processor *pCpu) : 
@@ -2049,6 +2053,18 @@ void SSP_MODULE::initialize(
   }
 
 
+}
+// this allows backward compatibility
+void SSP_MODULE::set_sspif()
+{
+    if (m_ssp_if) m_ssp_if->Trigger();
+    else m_pirset->set_sspif();
+}
+// this allows backward compatibility
+void SSP_MODULE::set_bclif()
+{
+    if (m_bcl_if) m_bcl_if->Trigger();
+    else m_pirset->set_bclif();
 }
 void SSP_MODULE::ckpSPI(unsigned int value)
 {

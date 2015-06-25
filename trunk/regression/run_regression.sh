@@ -114,13 +114,7 @@ ${RT} p18f sim_extended_instructions
 
 ${RT} p18f sim_reset
 
-${RT} comparator sim_628
-
-${RT} comparator sim_877a
-
-${RT} comparator sim_882
-
-${RT} comparator sim_10f204
+${RT} comparator sim
 
 ${RT} a2d sim_p16c71
 

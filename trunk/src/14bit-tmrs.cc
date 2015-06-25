@@ -75,11 +75,9 @@ void CCPRL::capture_tmr()
   tmrl->get_low_and_high();
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   value.put(tmrl->value.get());
 
   trace.raw(ccprh->write_trace.get() | ccprh->value.get());
-  //trace.register_write(ccprh->address,ccprh->value.get());
   ccprh->value.put(tmrl->tmrh->value.get());
 
   int c = value.get() + 256*ccprh->value.get();
@@ -181,7 +179,6 @@ unsigned int CCPRH::get()
   //cout << "CCPRH get\n";
 
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address, read_value);
   return value.get();
 }
 
@@ -670,10 +667,10 @@ void CCPCON::drive_bridge(int level, int new_value)
       switch((new_value & (P1M1|P1M0))>>6) // ECCP bridge mode
       {
 	    case 0:	// Single
-		Dprintf(("Single bridge pstrcon=0x%x\n", pstrcon_value));
+		Dprintf(("Single bridge %s pstrcon=0x%x\n", name().c_str(), pstrcon_value));
 		for (int i = 0; i <4; i++)
 		{
-		    if (pstrcon_value & (1<<i))
+		    if (pstrcon_value & (1<<i) && m_PinModule[i])
 		    {
 			m_PinModule[i]->setSource(m_source[i]);
 			source_active[i] = true;
@@ -694,15 +691,21 @@ void CCPCON::drive_bridge(int level, int new_value)
 		break;
 	
 	    case 2:	// Half-Bridge
-		Dprintf(("half-bridge\n"));
+		Dprintf(("half-bridge %s\n", name().c_str()));
 		m_PinModule[0]->setSource(m_source[0]);
 		source_active[0] = true;
 		m_PinModule[1]->setSource(m_source[1]);
 		source_active[1] = true;
-		m_PinModule[2]->setSource(0);
-		source_active[2] = false;
-		m_PinModule[3]->setSource(0);
-		source_active[3] = false;
+                if (m_PinModule[2])
+                {
+                    m_PinModule[2]->setSource(0);
+                    source_active[2] = false;
+                }
+                if (m_PinModule[3])
+                {
+                    m_PinModule[3]->setSource(0);
+                    source_active[3] = false;
+                }
 		delay_source0 = false;
 		delay_source1 = false;
 		// FIXME need to add deadband
@@ -747,55 +750,81 @@ void CCPCON::drive_bridge(int level, int new_value)
 		break;
 	
 	    case 1:	// Full bidge Forward
-		Dprintf(("full-bridge, forward\n"));
-		m_PinModule[0]->setSource(m_source[0]);
-		m_PinModule[1]->setSource(m_source[1]);
-		m_PinModule[2]->setSource(m_source[2]);
-		m_PinModule[3]->setSource(m_source[3]);
-		source_active[0] = true;
-		source_active[1] = true;
-		source_active[2] = true;
-		source_active[3] = true;
-		// P1D toggles
-		if (level && ccprl->ccprh->pwm_value)
-          	    m_source[3]->setState(active_high[3]?'1':'0');
-		else
-          	    m_source[3]->setState(active_high[3]?'0':'1');
-		// P1A High (if active high)
-          	m_source[0]->setState(active_high[0]?'1':'0');
-		// P1B, P1C low (if active high)
-          	m_source[1]->setState(active_high[1]?'0':'1');
-          	m_source[2]->setState(active_high[2]?'0':'1');
-    		m_PinModule[0]->updatePinModule();
-    		m_PinModule[1]->updatePinModule();
-    		m_PinModule[2]->updatePinModule();
-    		m_PinModule[3]->updatePinModule();
+		Dprintf(("full-bridge %s, forward\n", name().c_str()));
+		if (m_PinModule[0])
+		{
+		    m_PinModule[0]->setSource(m_source[0]);
+		    source_active[0] = true;
+		    // P1A High (if active high)
+          	    m_source[0]->setState(active_high[0]?'1':'0');
+    		    m_PinModule[0]->updatePinModule();
+		}
+		if (m_PinModule[1])
+		{
+		    m_PinModule[1]->setSource(m_source[1]);
+		    source_active[1] = true;
+		    // P1B, P1C low (if active high)
+          	    m_source[1]->setState(active_high[1]?'0':'1');
+    		    m_PinModule[1]->updatePinModule();
+		}
+		if (m_PinModule[2])
+		{
+		    m_PinModule[2]->setSource(m_source[2]);
+		    source_active[2] = true;
+		    // P1B, P1C low (if active high)
+          	    m_source[2]->setState(active_high[2]?'0':'1');
+    		    m_PinModule[2]->updatePinModule();
+		}
+		if (m_PinModule[3])
+		{
+		    m_PinModule[3]->setSource(m_source[3]);
+		    source_active[3] = true;
+		    // P1D toggles
+		    if (level && ccprl->ccprh->pwm_value)
+          	        m_source[3]->setState(active_high[3]?'1':'0');
+		    else
+          	        m_source[3]->setState(active_high[3]?'0':'1');
+    		    m_PinModule[3]->updatePinModule();
+		}
 		break;
 	
 	    case 3:	// Full bridge reverse
-		Dprintf(("full-bridge reverse\n"));
-		m_PinModule[0]->setSource(m_source[0]);
-		m_PinModule[1]->setSource(m_source[1]);
-		m_PinModule[2]->setSource(m_source[2]);
-		m_PinModule[3]->setSource(m_source[3]);
-		source_active[0] = true;
-		source_active[1] = true;
-		source_active[2] = true;
-		source_active[3] = true;
-		// P1B toggles
-		if (level && ccprl->ccprh->pwm_value)
-          	    m_source[1]->setState(active_high[1]?'1':'0');
-		else
-          	    m_source[1]->setState(active_high[1]?'0':'1');
-		// P1C High (if active high)
-          	m_source[2]->setState(active_high[2]?'1':'0');
-		// P1A, P1D low (if active high)
-          	m_source[0]->setState(active_high[0]?'0':'1');
-          	m_source[3]->setState(active_high[3]?'0':'1');
-    		m_PinModule[0]->updatePinModule();
-    		m_PinModule[1]->updatePinModule();
-    		m_PinModule[2]->updatePinModule();
-    		m_PinModule[3]->updatePinModule();
+		Dprintf(("full-bridge reverse %s\n", name().c_str()));
+		if (m_PinModule[0])
+		{
+		    m_PinModule[0]->setSource(m_source[0]);
+		    source_active[0] = true;
+		    // P1A, P1D low (if active high)
+          	    m_source[0]->setState(active_high[0]?'0':'1');
+    		    m_PinModule[0]->updatePinModule();
+		}
+		if (m_PinModule[1])
+		{
+		    m_PinModule[1]->setSource(m_source[1]);
+		    source_active[1] = true;
+		    // P1B toggles
+		    if (level && ccprl->ccprh->pwm_value)
+          	        m_source[1]->setState(active_high[1]?'1':'0');
+		    else
+          	        m_source[1]->setState(active_high[1]?'0':'1');
+    		    m_PinModule[1]->updatePinModule();
+		}
+		if (m_PinModule[2])
+		{
+		    m_PinModule[2]->setSource(m_source[2]);
+		    source_active[2] = true;
+		    // P1C High (if active high)
+          	    m_source[2]->setState(active_high[2]?'1':'0');
+    		    m_PinModule[2]->updatePinModule();
+		}
+		if (m_PinModule[3])
+		{
+		    m_PinModule[3]->setSource(m_source[3]);
+		    source_active[3] = true;
+		    // P1A, P1D low (if active high)
+          	    m_source[3]->setState(active_high[3]?'0':'1');
+    		    m_PinModule[3]->updatePinModule();
+		}
 		break;
 
 	    default:
@@ -1074,7 +1103,6 @@ T1CON::T1CON(Processor *pCpu, const char *pName, const char *pDesc)
 {
 
   pCpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768.));
-  new_name("T1CON");
 
 }
 T1CON::~T1CON()
@@ -1086,7 +1114,6 @@ void T1CON::put(unsigned int new_value)
 {
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   unsigned int diff = value.get() ^ new_value;
   value.put(new_value);
@@ -1107,7 +1134,6 @@ void T1CON::put(unsigned int new_value)
 unsigned int T1CON::get()
 {
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
   return(value.get());
 }
 
@@ -1136,10 +1162,10 @@ public:
   {
   }
 
-  virtual void release() { }
+  virtual void release() {delete this; }
   virtual void setSinkState(char new3State)
   {
-    m_t1gcon->IO_gate( new3State=='1' || new3State=='W');
+    m_t1gcon->PIN_gate( new3State=='1' || new3State=='W');
   }
 private:
   T1GCON *m_t1gcon;
@@ -1147,19 +1173,30 @@ private:
 
 T1GCON::T1GCON(Processor *pCpu, const char *pName, const char *pDesc, T1CON_G *_t1con_g)
   : sfr_register(pCpu, pName, pDesc), sink(0), write_mask(0xfb), tmrl(0),
-    t1con_g(_t1con_g),
-    IO_gate_state(false), T0_gate_state(false), CM1_gate_state(false),
+    t1con_g(_t1con_g), m_Interrupt(0),
+    PIN_gate_state(false), T0_gate_state(false), CM1_gate_state(false),
     CM2_gate_state(false), last_t1g_in(false), gate_pin(0)
 {
 }
 
 T1GCON::~T1GCON()
 {
-    if(sink)
-    {
-	delete sink;
-    }
+    if (m_Interrupt)
+       m_Interrupt->release();
 }
+
+bool T1GCON::tmr1_isON()
+{
+    if (t1con_g)
+	return t1con_g->get_tmr1on();
+
+    if (tmrl->t1con)
+	return tmrl->t1con->get_tmr1on();
+
+    cerr << "Error " << name() << " get_tmr1on() not found\n";
+    return false;
+}
+
 
 void T1GCON::put(unsigned int new_value)
 {
@@ -1168,7 +1205,7 @@ void T1GCON::put(unsigned int new_value)
   unsigned int diff = new_value ^ old_value;
   bool t1ggo = new_value & T1GGO;
 
-  assert(pir_set);
+  assert(m_Interrupt);
   assert(tmrl);
 
   if (!diff) return;
@@ -1176,43 +1213,53 @@ void T1GCON::put(unsigned int new_value)
   value.put(new_value);
 
 
-  if (diff & (T1GSS1 | T1GSS0 | T1GPOL))
+  if (diff & (T1GSS1 | T1GSS0 | T1GPOL | TMR1GE))
   {
       switch(new_value & (T1GSS1 | T1GSS0))
       {
       case 0:
-	IO_gate(IO_gate_state);
+	new_gate(PIN_gate_state);
 	break;
 
       case 1:
-	T0_gate(T0_gate_state);
+	new_gate(T0_gate_state);
 	break;
 
       case 2:
-	CM1_gate(CM1_gate_state);
+	new_gate(CM1_gate_state);
 	break;
 
       case 3:
-	CM2_gate(CM2_gate_state);
+	new_gate(CM2_gate_state);
 	break;
       }
       // Dont't allow gate change to clear new T1GG0
       if((diff & T1GGO) && t1ggo)
 	value.put(value.get() | T1GGO);
   }
+  // T1GGO  set and Single pulse mode
+  if ((diff & T1GGO) && (value.get() & (T1GGO | T1GSPM)))
+  {
+        //tmrl->IO_gate(true);
+	if (value.get() & T1GVAL)
+	{
+	    value.put(value.get() & ~T1GVAL);
+	    //tmrl->IO_gate(true);
+	    tmrl->IO_gate(false);
+	}
+  }
   if (diff & T1GTM)
   {
-	if ((value.get() & T1GTM) && t1con_g->get_tmr1on()) // T1GTM going high, set t1g_in to 0
+	if ((value.get() & T1GTM)) // T1GTM going high, set t1g_in to 0
 	{
 	   if(value.get() & T1GVAL)
 	   {
-		value.put(value.get() & ~(T1GVAL|T1GGO));
-		pir_set->set_tmr1gif();
-		tmrl->IO_gate(false); // Counting should be stopped
+		value.put(value.get() & ~(T1GVAL));
+		m_Interrupt->Trigger();
 	   }
+	   tmrl->IO_gate(false); // Counting should be stopped
 	}
   }
-
   tmrl->update();
 }
 
@@ -1237,9 +1284,9 @@ void T1GCON::setGatepin(PinModule *pin)
 
 // The following 4 functions are called on a state change.
 // They pass the state to new_gate if that input is selected.
-void T1GCON::IO_gate(bool state)
+void T1GCON::PIN_gate(bool state)
 {
-    IO_gate_state = state;
+    PIN_gate_state = state;
     if((value.get() & (T1GSS0|T1GSS1)) == 0)
 	new_gate(state);
 }
@@ -1249,17 +1296,30 @@ void T1GCON::T0_gate(bool state)
     if((value.get() & (T1GSS0|T1GSS1)) == 1)
 	new_gate(state);
 }
+// T[246] = PR[246]
+// overloads T0_gate_state
+void T1GCON::T2_gate(bool state)
+{
+    T0_gate_state = state;
+    if((value.get() & (T1GSS0|T1GSS1)) == 1)
+	new_gate(state);
+}
 void T1GCON::CM1_gate(bool state)
 {
     CM1_gate_state = state;
     if((value.get() & (T1GSS0|T1GSS1)) == 2)
+    {
 	new_gate(state);
+    }
 }
 void T1GCON::CM2_gate(bool state)
 {
     CM2_gate_state = state;
+
     if((value.get() & (T1GSS0|T1GSS1)) == 3)
+    {
 	new_gate(state);
+    }
 }
 void T1GCON::new_gate(bool state)
 {
@@ -1270,11 +1330,12 @@ void T1GCON::new_gate(bool state)
     unsigned int reg_value = value.get();
 
     
-    if (t1g_in == last_t1g_in) // no state change, do nothing
+    if ((t1g_in == last_t1g_in) && (t1g_in == t1g_val)) // no state change, do nothing
     {
   //  	tmrl->IO_gate(t1g_val);
 	return;
     }
+
 
     last_t1g_in = t1g_in;
 
@@ -1285,7 +1346,10 @@ void T1GCON::new_gate(bool state)
 	{
 	    t1g_val = ! t1g_val;		// t1gval changes state
 	}
-	t1g_in = !t1g_val;
+	else
+	{
+	    return;
+	}
     }
     else	// Gate directly in control
     {
@@ -1297,11 +1361,14 @@ void T1GCON::new_gate(bool state)
 	if (!(reg_value & T1GGO))  // do nothing if T1GGO clear
 	    return;
 
-	if (!t1g_in)		// End of gate
+	if (!t1g_val)		// End of gate
 	{
 	    reg_value &= ~T1GGO;  //set done
 	}
-	t1g_val = t1g_in;
+	else			// Start of gate
+	{
+	}
+	//t1g_val = t1g_in;
     }
 
     
@@ -1313,16 +1380,12 @@ void T1GCON::new_gate(bool state)
     {
 	if (reg_value & T1GVAL)	// interrupt on T1GVAL negative edge 
 	{
-	    pir_set->set_tmr1gif();
-
+	    m_Interrupt->Trigger();
 	}
 	reg_value &= ~T1GVAL;
     }
 
     value.put(reg_value);
-	    
-	    
-    // get_t1GINV is set to true so t1g_val active high works OK
     tmrl->IO_gate(t1g_val);
 }
 
@@ -1349,7 +1412,6 @@ void T1CON_G::put(unsigned int new_value)
 {
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   unsigned int diff = value.get() ^ new_value;
   value.put(new_value);
@@ -1389,7 +1451,6 @@ TMRH::TMRH(Processor *pCpu, const char *pName, const char *pDesc)
 void TMRH::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   if(!tmrl)
   {
     value.put(new_value & 0xff);
@@ -1677,7 +1738,6 @@ void TMRL::increment()
     // get the up-to-date values;
 
     trace.raw(write_trace.get() | value.get());
-    //trace.register_write(address,value.get());
     current_value();
 
     value_16bit = 0xffff & ( value_16bit + 1);
@@ -1699,7 +1759,7 @@ void TMRL::on_or_off(int new_state)
 
   if(new_state) {
 
-    Dprintf(("TMR1 is being turned on\n"));
+    Dprintf(("%s is being turned on\n", name().c_str()));
 
     // turn on the timer
 
@@ -1713,7 +1773,7 @@ void TMRL::on_or_off(int new_state)
   }
   else {
 
-    Dprintf(("TMR1 is being turned off\n"));
+    Dprintf(("%s is being turned off\n", name().c_str()));
 
     // turn off the timer and save the current value
     current_value();
@@ -1734,13 +1794,16 @@ void TMRL::on_or_off(int new_state)
 void TMRL::update()
 {
 
-  Dprintf(("TMR1 %s update 0x%"PRINTF_GINT64_MODIFIER"x\n",name().c_str(), get_cycles().get()));
-
-  // The second part of the if will always be true unless TMR1 Gate enable
-  // pin has been defined by a call to TMRL::setGatepin()
-  //
+  Dprintf(("TMR1 %s update now=0x%"PRINTF_GINT64_MODIFIER"x\n",name().c_str(), get_cycles().get()));
+  // if t1con->get_t1GINV() is false, timer can run if m_GateState == 0
+     
   bool gate = t1con->get_t1GINV() ? m_GateState : !m_GateState;
   Dprintf(("TMRL::update gate %d GateState %d inv %d get_tmr1on %x tmr1GE %x tmr1cs %x t1oscen %x\n", gate, m_GateState, t1con->get_t1GINV(), t1con->get_tmr1on(), t1con->get_tmr1GE(), t1con->get_tmr1cs(), t1con->get_t1oscen()));
+  /* When tmr1 is on, and t1con->get_tmr1GE() is true, 
+     gate == 1 allows timer to run, gate == 0 stops timer.
+     However, if t1con->get_tmr1GE() is false gate has no
+     effect on timer running or not.
+  */
   if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? gate : true)) 
   {
     switch(t1con->get_tmr1cs())
@@ -1858,7 +1921,6 @@ void TMRL::put(unsigned int new_value)
 
   set_ext_scale();
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
 
   if (!tmrh || !t1con)
@@ -2145,7 +2207,6 @@ void PR2::put(unsigned int new_value)
 {
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   Dprintf(("PR2:: put %x\n", new_value));
 
   if(value.get() != new_value)
@@ -2199,8 +2260,9 @@ TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
     prescale(1),
     prescale_counter(0),
     last_cycle(0),
-    pr2(0), pir_set(0), t2con(0), ssp_module(0)
+    pr2(0), pir_set(0), t2con(0), m_txgcon(0), m_Interrupt(0)
 {
+  ssp_module[0] = ssp_module[1] = 0;
   value.put(0);
   future_cycle = 0;
   for ( int cc=0; cc<MAX_PWM_CHANS; cc++ )
@@ -2231,6 +2293,22 @@ bool TMR2::add_ccp ( CCPCON * _ccp )
     if ( ccp[cc] == 0 || ccp[cc] == _ccp )
     {
         ccp[cc] = _ccp;
+        return true;
+    }
+  }
+  return false;
+}
+
+bool TMR2::rm_ccp ( CCPCON * _ccp )
+{
+  int cc;
+
+  for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+  {
+    if ( ccp[cc] == _ccp )
+    {
+        ccp[cc] = 0;
+	printf("%s rm_ccp %d %s\n", name().c_str(), cc, _ccp->name().c_str());
         return true;
     }
   }
@@ -2281,21 +2359,14 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
     {
       //cout << "TMR2:  pwm mode with ccp1. duty cycle = " << hex << dc << '\n';
       duty_cycle[cc] = dc;
-
-      // Update the cycle break if this is the first time to go into pwm mode
-      if ( (pwm_mode & modeMask) == 0 )
-      {
-	pwm_mode |= modeMask;
-//wait for next TMR2 update	  update();	
-      }
-      
-      found = true;
+      pwm_mode |= modeMask;
+      return;
     }
     modeMask <<= 1;
   }
   if ( ! found )
   {
-    cout << "TMR2: error bad ccpxcon address while in pwm_dc()\n";
+    cout << name() <<": error bad ccpxcon address while in pwm_dc()\n";
     cout << "ccp_address = " << ccp_address << " expected one of";
     for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
       if ( ccp[cc] )
@@ -2375,9 +2446,11 @@ void TMR2::update(int ut)
       {
         if ( pwm_mode & ut & modeMask )
         {
-          // We are in pwm mode... So let's see what happens first: a pr2 compare
-          // or a duty cycle compare. The duty cycle is 10-bits, but the two
-          // least significant match against the prescaler rather than TMR2.
+          /* We are in pwm mode... So let's see what happens first: a pr2 
+	     compare or a duty cycle compare. The duty cycle is 10-bits, 
+	     but the two least significant match against the prescaler 
+	     rather than TMR2.
+	  */
 
           if ( (duty_cycle[cc] > (value.get()*4) ) && ( duty_cycle[cc] < break_value*4 ) )
 	  {
@@ -2429,7 +2502,6 @@ void TMR2::put(unsigned int new_value)
 
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   value.put(new_value & 0xff);
 
@@ -2515,7 +2587,6 @@ unsigned int TMR2::get()
     }
 
   trace.raw(read_trace.get() | value.get());
-  // trace.register_read(address, value.get());
   return(value.get());
   
 }
@@ -2703,13 +2774,14 @@ void TMR2::callback()
       {
         int modeMask = TMR2_PWM1_UPDATE;
 
-        for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
+        for ( cc=0; cc<MAX_PWM_CHANS && last_update; cc++ )
         {
           if ( last_update & modeMask )
 	  {
 	    // duty cycle match
-	    //cout << "TMR2: duty cycle match for pwm" << cc+1 << "\n";
+	    //cout << name() << ": duty cycle match for pwm" << cc+1 << "\n";
 	    update_state &= (~modeMask);
+            last_update &= ~modeMask;
 	    if ( ccp[cc] )      // shouldn't be needed
                 ccp[cc]->pwm_match(0);
             else
@@ -2727,12 +2799,20 @@ void TMR2::callback()
 	// This (implicitly) resets the timer to zero:
 	last_cycle = get_cycles().get();
 
-        if (ssp_module)
-             ssp_module->tmr2_clock();
+        if (ssp_module[0])
+             ssp_module[0]->tmr2_clock();
+        if (ssp_module[1])
+             ssp_module[1]->tmr2_clock();
+	if (m_txgcon)	// toggle T2_gate, if present
+	{
+	    m_txgcon->T2_gate(1);
+	    m_txgcon->T2_gate(0);
+	}
 
         for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
         {
-          if ( ccp[cc] && ( ccp[cc]->value.get() & CCPCON::PWM0 ) == CCPCON::PWM0 )
+          if ( ccp[cc] && 
+		( ccp[cc]->value.get() & (CCPCON::PWM0 | CCPCON::PWM1 )))
 	  {
              ccp[cc]->pwm_match(1);
 	  }
@@ -2741,7 +2821,11 @@ void TMR2::callback()
 	if(--post_scale < 0)
         {
           //cout << "setting IF\n";
-          pir_set->set_tmr2if();
+          if (pir_set)
+              pir_set->set_tmr2if();
+          else if (m_Interrupt) // for multiple T2 (T2, T4, T6)
+              m_Interrupt->Trigger();
+
           post_scale = t2con->get_post_scale();
         }
 

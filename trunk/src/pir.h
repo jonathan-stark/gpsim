@@ -57,6 +57,7 @@ public:
   virtual void set_c2if(){fprintf(stderr, "RRR set_c2if FIX\n");}
   virtual void set_c3if(){fprintf(stderr, "RRR set_c3if FIX\n");}
   virtual void set_c4if(){fprintf(stderr, "RRR set_c4if FIX\n");}
+  virtual void set_c5if(){fprintf(stderr, "RRR set_c5if FIX\n");}
   virtual void set_eccp1if(){}
   virtual void set_eeif(){}
   virtual void set_errif(){}
@@ -103,8 +104,15 @@ public:
   void set_ipr(sfr_register *);
 
 };
-//---------------------------------------------------------
+/*---------------------------------------------------------
 // InterruptSource
+
+  this is an alternative to the set_xxif method which
+  a> is becoming unwieldly
+  b> removes hard coding to allow multiple instantiation of classes
+     with different interrupts
+
+*/
 
 class InterruptSource
 {
@@ -345,9 +353,13 @@ enum
     ECCP1IF = 1<<0,             /* only on the PIC18F4xx devices */
     TMR3IF  = 1<<1,
     LVDIF   = 1<<2,
+    HLVDIF  = 1<<2,		/* 18f26k22 */ 
     BCLIF   = 1<<3,
     EEIF    = 1<<4,
-    CMIF    = 1<<6              /* PIC16F87xA, PIC18F4xx devices */
+    C2IF    = 1<<5,		/* 18f26k22 */
+    C1IF    = 1<<6,		/* 18f26k22 */
+    CMIF    = 1<<6,              /* PIC16F87xA, PIC18F4xx devices */
+    OSCGIF  = 1<<7		/* 18f26k22 */
 };
 
   virtual void set_eccp1if()
@@ -574,7 +586,82 @@ enum
          INTCON *, PIE *);
 };
 
+class PIR3v3 : public PIR
+{
+public:
 
+enum
+{
+    TMR1GIF  = 1<<0,
+    TMR3GIF  = 1<<1,
+    TMR5GIF  = 1<<2,
+    CTMUIF   = 1<<3,
+    TX2IF    = 1<<4,
+    RC2IF    = 1<<5,
+    BCL2IF   = 1<<6,
+    SSP2IF   = 1<<7
+};
+  PIR3v3(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
+
+
+/*---------------------------------------------------------
+ PIR2 Peripheral Interrupt register # 2
+
+ This is version 1 of the PIR4 register - as seen on the 18f26k22
+*/
+
+class PIR4v1: public PIR
+{
+public:
+
+enum
+{
+    CCP3IF  = 1<<0,
+    CCP4IF  = 1<<1,
+    CCP5IF  = 1<<2,
+};
+  virtual void set_ccp3if()
+    {
+      put(get() | CCP3IF);
+    }
+  virtual void set_ccp4if()
+    {
+      put(get() | CCP4IF);
+    }
+  virtual void set_ccp5if()
+    {
+      put(get() | CCP5IF);
+    }
+  PIR4v1(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
+class PIR5v1: public PIR
+{
+public:
+
+enum
+{
+    TMR4IF  = 1<<0,
+    TMR5IF  = 1<<1,
+    TMR6IF  = 1<<2,
+};
+  virtual void set_tmr4if()
+    {
+      put(get() | TMR4IF);
+    }
+  virtual void set_tmr5if()
+    {
+      put(get() | TMR5IF);
+    }
+  virtual void set_tmr6if()
+    {
+      put(get() | TMR6IF);
+    }
+  PIR5v1(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
 /*
  * PIR_SET defines an interface to some common interrupt capabilities.
  * PIR_SET is a pure virtual class - you must instantiate a more specific
@@ -766,12 +853,12 @@ private:
 };
 
 
-// Supports 1, 2 or 3 version 2 Pir registers
+// Supports 1, 2 ,3, 4 or 5 Pir registers
 
 class PIR_SET_2 : public PIR_SET
 {
  public:
-  PIR_SET_2() { pir1 = 0; pir2 = 0; pir3 = 0;}
+  PIR_SET_2() { pir1 = 0; pir2 = 0; pir3 = 0; pir4 = 0; pir5 = 0;}
 
   virtual ~PIR_SET_2()
   {
@@ -780,6 +867,8 @@ class PIR_SET_2 : public PIR_SET
   void set_pir1(PIR *p1) { pir1 = p1; }
   void set_pir2(PIR *p2) { pir2 = p2; }
   void set_pir3(PIR *p3) { pir3 = p3; }
+  void set_pir4(PIR *p4) { pir4 = p4; }
+  void set_pir5(PIR *p5) { pir5 = p5; }
 
   virtual int interrupt_status() {
     assert(pir1 != 0);
@@ -788,6 +877,10 @@ class PIR_SET_2 : public PIR_SET
         result |= pir2->interrupt_status();
     if ( pir3 != 0 )
         result |= pir3->interrupt_status();
+    if ( pir4 != 0 )
+        result |= pir4->interrupt_status();
+    if ( pir5 != 0 )
+        result |= pir5->interrupt_status();
     return result; 
   }
 
@@ -917,6 +1010,8 @@ private:
   PIR   *pir1;
   PIR   *pir2;
   PIR   *pir3;
+  PIR   *pir4;
+  PIR   *pir5;
 };
 
 

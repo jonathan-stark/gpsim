@@ -432,6 +432,7 @@ void Register::new_name(string &new_name)
       return;
     }
 
+    name_str = new_name;
     if (cpu) {
       addName(new_name);
       cpu->addSymbol(this, &new_name);

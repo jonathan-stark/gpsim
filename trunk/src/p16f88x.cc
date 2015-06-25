@@ -1,6 +1,6 @@
 /*
  *
-   Copyright (C) 2010 Roy R. Rankin
+   Copyright (C) 2010,2015 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -124,9 +124,7 @@ P16F88x::P16F88x(const char *_name, const char *desc)
     osctune(this, "osctune", "OSC Tune"),
     wdtcon(this, "wdtcon", "WDT Control", 1),
     usart(this),
-    cm1con0(this, "cm1con0", "Comparator 1 Control Register"),
-    cm2con0(this, "cm2con0", "Comparator 2 Control Register"),
-    cm2con1(this, "cm2con1", "Comparator 2 Control Register"),
+    comparator(this),
     vrcon(this, "vrcon", "Voltage Reference Control Register"),
     srcon(this, "srcon", "SR Latch Control Resgister"),
     ansel(this,"ansel", "Analog Select"),
@@ -158,6 +156,13 @@ P16F88x::P16F88x(const char *_name, const char *desc)
 
   tmr0.set_cpu(this, m_porta, 4, option_reg);
   tmr0.start(0);
+  comparator.cmxcon0[0] = new CMxCON0_V2(this, "cm1con0", 
+        " Comparator C1 Control Register 0", 0, &comparator);
+  comparator.cmxcon0[1] = new CMxCON0_V2(this, "cm2con0", 
+        " Comparator C2 Control Register 0", 1, &comparator);
+  comparator.cmxcon1[0] = new CM2CON1_V3(this, "cm2con1", 
+        " Comparator C1 Control Register 1", 0, &comparator);
+  comparator.cmxcon1[1] = comparator.cmxcon1[0];
 
 }
 
@@ -194,9 +199,6 @@ P16F88x::~P16F88x()
   remove_sfr_register(&usart.spbrg);
   remove_sfr_register(&usart.spbrgh);
   remove_sfr_register(&usart.baudcon);
-  remove_sfr_register(&cm1con0);
-  remove_sfr_register(&cm2con0);
-  remove_sfr_register(&cm2con1);
   remove_sfr_register(&vrcon);
   remove_sfr_register(&srcon);
   remove_sfr_register(&wdtcon);
@@ -227,6 +229,10 @@ P16F88x::~P16F88x()
   }
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
+  delete_sfr_register(comparator.cmxcon0[0]);
+  delete_sfr_register(comparator.cmxcon0[1]);
+  delete_sfr_register(comparator.cmxcon1[1]);
+
   delete_sfr_register(m_porta);
   delete_sfr_register(m_trisa);
   delete_sfr_register(m_portb);
@@ -350,17 +356,12 @@ void P16F88x::create_sfr_map()
   add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
   usart.set_eusart(true);
-  cm1con0.setpins( &(*m_porta)[0], &(*m_porta)[1], &(*m_portb)[3],
-        &(*m_portb)[1], &(*m_porta)[3], &(*m_porta)[4]);
-  cm2con0.setpins( &(*m_porta)[0], &(*m_porta)[1], &(*m_portb)[3],
-        &(*m_portb)[1], &(*m_porta)[2], &(*m_porta)[5]);
-  cm1con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon, &eccpas);
-  cm2con0.link_registers(get_pir_set(), &cm2con1, &vrcon, &srcon, &eccpas);
-  cm2con0.set_tmrl(&tmr1l);
-  cm2con1.link_cm12con0(&cm1con0, &cm2con0);
-  add_sfr_register(&cm1con0, 0x107, RegisterValue(0,0),"cm1con0");
-  add_sfr_register(&cm2con0, 0x108, RegisterValue(0,0),"cm2con0");
-  add_sfr_register(&cm2con1, 0x109, RegisterValue(0,0),"cm2con1");
+  comparator.assign_tmr1l(&tmr1l);
+  comparator.cmxcon1[1]->set_vrcon(&vrcon);
+
+  add_sfr_register(comparator.cmxcon0[0], 0x107, RegisterValue(0,0), "cm1con0");
+  add_sfr_register(comparator.cmxcon0[1], 0x108, RegisterValue(0,0), "cm2con0");
+  add_sfr_register(comparator.cmxcon1[1], 0x109, RegisterValue(2,0), "cm2con1");
   add_sfr_register(&vrcon, 0x97, RegisterValue(0,0),"vrcon");
   add_sfr_register(&srcon, 0x185, RegisterValue(0,0),"srcon");
 
@@ -434,7 +435,7 @@ void P16F88x::create_sfr_map()
     add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
     add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
     add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
-    tmr2.ssp_module = &ssp;
+    tmr2.ssp_module[0] = &ssp;
 
     ssp.initialize(
 		get_pir_set(),    // PIR
@@ -480,6 +481,17 @@ void P16F88x::create_sfr_map()
     pir1->set_pie(&pie1);
   }
   pie1.setPir(pir1);
+
+  comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[4], &(*m_porta)[5]);
+  comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[0], &(*m_porta)[1], 
+                                        &(*m_portb)[3],&(*m_portb)[1]);
+  comparator.cmxcon1[0]->set_INpinPos(&(*m_porta)[3], &(*m_porta)[2]);
+  comparator.cmxcon1[0]->setBitMask(0x33);
+  comparator.cmxcon0[0]->setBitMask(0xb7);
+  comparator.cmxcon0[0]->setIntSrc(new InterruptSource(pir2, PIR2v2::C1IF));
+  comparator.cmxcon0[1]->setBitMask(0xb7);
+  comparator.cmxcon0[1]->setIntSrc(new InterruptSource(pir2, PIR2v2::C2IF));
+
 
 }
 
@@ -1117,9 +1129,7 @@ P16F631::P16F631(const char *_name, const char *desc)
     vrcon(this, "vrcon", "Voltage Reference Control Register"),
     srcon(this, "srcon", "SR Latch Control Resgister"),
     ansel(this,"ansel", "Analog Select"),
-    cm1con0(this, "cm1con0", "Comparator 1 Control Register"),
-    cm2con0(this, "cm2con0", "Comparator 2 Control Register"),
-    cm2con1(this, "cm2con1", "Comparator 2 Control Register"),
+    comparator(this),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
 
@@ -1150,6 +1160,13 @@ P16F631::P16F631(const char *_name, const char *desc)
   m_portc = new PicPortRegister(this,"portc","",8,0xff);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false);
 
+  comparator.cmxcon0[0] = new CMxCON0_V2(this, "cm1con0", 
+        " Comparator C1 Control Register 0", 0, &comparator);
+  comparator.cmxcon0[1] = new CMxCON0_V2(this, "cm2con0", 
+        " Comparator C2 Control Register 0", 1, &comparator);
+  comparator.cmxcon1[0] = new CM2CON1_V4(this, "cm2con1", 
+        " Comparator C1 Control Register 1", 0, &comparator);
+  comparator.cmxcon1[1] = comparator.cmxcon1[0];
 
 }
 
@@ -1160,15 +1177,16 @@ P16F631::~P16F631()
 
   unassignMCLRPin();
   delete_file_registers(0x40, 0x7f);
+  delete_sfr_register(comparator.cmxcon0[0]);
+  delete_sfr_register(comparator.cmxcon0[1]);
+  delete_sfr_register(comparator.cmxcon1[1]);
+
   remove_sfr_register(get_eeprom()->get_reg_eedata());
   remove_sfr_register(get_eeprom()->get_reg_eeadr());
   remove_sfr_register(get_eeprom()->get_reg_eecon1());
   remove_sfr_register(get_eeprom()->get_reg_eecon2());
   remove_sfr_register(&tmr0);
   remove_sfr_register(&vrcon);
-  remove_sfr_register(&cm1con0);
-  remove_sfr_register(&cm2con0);
-  remove_sfr_register(&cm2con1);
   remove_sfr_register(&ansel);
   remove_sfr_register(&srcon);
   remove_sfr_register(&tmr1l);
@@ -1328,19 +1346,24 @@ void P16F631::create_sfr_map()
   add_sfr_register(&pcon, 0x8e, RegisterValue(0,0));
   add_sfr_register(&wdtcon, 0x97, RegisterValue(0x08,0));
   add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0));
-  cm1con0.setpins( &(*m_porta)[1], &(*m_portc)[1], &(*m_portc)[2],
-	&(*m_portc)[3], &(*m_porta)[0], &(*m_porta)[2]);
-  cm2con0.setpins( &(*m_porta)[1], &(*m_portc)[1], &(*m_portc)[2],
-	&(*m_portc)[3], &(*m_portc)[0], &(*m_portc)[4]);
-  cm1con0.link_registers(get_pir_set(), &cm2con1, (VRCON *)&vrcon, &srcon, NULL);
-  cm2con0.link_registers(get_pir_set(), &cm2con1, (VRCON *)&vrcon, &srcon, NULL);
-  cm2con0.set_tmrl(&tmr1l);
-  cm2con1.link_cm12con0((CM1CON0 *)&cm1con0, (CM2CON0 *)&cm2con0);
 
   add_sfr_register(&vrcon, 0x118, RegisterValue(0,0),"vrcon");
-  add_sfr_register(&cm1con0, 0x119, RegisterValue(0,0),"cm1con0");
-  add_sfr_register(&cm2con0, 0x11a, RegisterValue(0,0),"cm2con0");
-  add_sfr_register(&cm2con1, 0x11b, RegisterValue(0,0),"cm2con1");
+  add_sfr_register(comparator.cmxcon0[0], 0x119, RegisterValue(0,0), "cm1con0");
+  add_sfr_register(comparator.cmxcon0[1], 0x11a, RegisterValue(0,0), "cm2con0");
+  add_sfr_register(comparator.cmxcon1[1], 0x11b, RegisterValue(2,0), "cm2con1");
+  comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[2], &(*m_portc)[4]);
+  comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[1], &(*m_portc)[1], 
+				&(*m_portc)[2], &(*m_portc)[3]);
+  comparator.cmxcon1[0]->set_INpinPos(&(*m_porta)[0], &(*m_portc)[0]);
+  comparator.cmxcon1[0]->setBitMask(0x03);
+  comparator.cmxcon0[0]->setBitMask(0xb7);
+  comparator.cmxcon0[0]->setIntSrc(new InterruptSource(pir2, PIR2v2::C1IF));
+  comparator.cmxcon0[1]->setBitMask(0xb7);
+  comparator.cmxcon0[1]->setIntSrc(new InterruptSource(pir2, PIR2v2::C2IF));
+  comparator.cmxcon1[0]->set_vrcon(&vrcon);
+  comparator.cmxcon1[1] = comparator.cmxcon1[0];
+  comparator.assign_tmr1l(&tmr1l);
+
   add_sfr_register(&ansel, 0x11e, RegisterValue(0xff,0));
   add_sfr_register(&srcon, 0x19e, RegisterValue(0,0),"srcon");
 
@@ -1744,27 +1767,30 @@ void P16F684::create_sfr_map()
 
   // Link the comparator and voltage ref to porta
   comparator.initialize(&pir_set_def, NULL, 
-	&(*m_porta)[0], &(*m_porta)[1], 
-	&(*m_portc)[0], &(*m_portc)[1], 
-	&(*m_porta)[2], &(*m_portc)[4]);
+	&(*m_porta)[0], &(*m_porta)[1],  	// AN0 AN1
+	0, 0,
+	&(*m_porta)[2], &(*m_portc)[4]);	//OUT0 OUT1
+
+  comparator.cmcon.setINpin(2, &(*m_portc)[0], "an4"); //AN4
+  comparator.cmcon.setINpin(3, &(*m_portc)[1], "an5"); //AN5
 
   comparator.cmcon.set_tmrl(&tmr1l);
   comparator.cmcon1.set_tmrl(&tmr1l);
 
   comparator.cmcon.set_configuration(1, 0, AN0, AN1, AN0, AN1, ZERO);
   comparator.cmcon.set_configuration(2, 0, AN2, AN3, AN2, AN3, ZERO);
-  comparator.cmcon.set_configuration(1, 1, AN0, AN3, AN1, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(2, 1, AN2, AN3, AN2, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 1, AN1, AN2, AN0, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(2, 1, AN3, AN2, AN3, AN2, NO_OUT);
   comparator.cmcon.set_configuration(1, 2, AN1, VREF, AN0, VREF, NO_OUT);
   comparator.cmcon.set_configuration(2, 2, AN3, VREF, AN2, VREF, NO_OUT);
-  comparator.cmcon.set_configuration(1, 3, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(2, 3, AN2, AN3, AN2, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(1, 4, AN0, AN1, AN0, AN1, NO_OUT);
-  comparator.cmcon.set_configuration(2, 4, AN2, AN3, AN2, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN1, AN2, AN1, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(2, 3, AN3, AN2, AN3, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 4, AN1, AN0, AN1, AN0, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN3, AN2, AN3, AN2, NO_OUT);
   comparator.cmcon.set_configuration(1, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon.set_configuration(2, 5, AN2, AN3, AN2, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(1, 6, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon.set_configuration(2, 6, AN2, AN3, AN2, AN3, OUT1);
+  comparator.cmcon.set_configuration(2, 5, AN3, AN2, AN3, AN2, NO_OUT);
+  comparator.cmcon.set_configuration(1, 6, AN1, AN2, AN1, AN2, OUT0);
+  comparator.cmcon.set_configuration(2, 6, AN3, AN2, AN3, AN2, OUT1);
   comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   comparator.vrcon.setValidBits(0xaf); 
@@ -2346,7 +2372,7 @@ void P16F690::create_sfr_map()
 
   P16F685::create_sfr_map();
 
-  tmr2.ssp_module = &ssp;
+  tmr2.ssp_module[0] = &ssp;
   eccpas.setIOpin(0, 0, &(*m_portb)[0]);
   eccpas.link_registers(&pwm1con, &ccp1con);
 

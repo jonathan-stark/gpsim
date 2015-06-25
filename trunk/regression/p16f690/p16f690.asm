@@ -308,7 +308,7 @@ test_compare:
 	movwf   CM2CON1		; test writable bits
 	movlw	0x03
 	movwf	ANSEL		;Inputs analog
-  .assert "cm2con1 == 0x33, \"FAILED 16f690 cm2con1 writable bits\""
+  .assert "cm2con1 == 0x03, \"FAILED 16f690 cm2con1 writable bits\""
 	nop
         clrf	CM2CON1
 	bsf	CM1CON0,C1POL	; toggle ouput polarity, not ON

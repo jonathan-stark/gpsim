@@ -96,7 +96,7 @@ public:
   PIR1v2       pir1;
   sfr_register ipr1;
   sfr_register ipr2;
-  T1CON        t1con;
+  T1CON        *t1con;
   PIE          pie1;
   PIR2v2       *pir2;
   PIE          pie2;
@@ -113,7 +113,7 @@ public:
   CCPRH        ccpr2h;
   TMRL         tmr3l;
   TMRH         tmr3h;
-  T3CON        t3con;
+  T3CON        *t3con;
   PIR_SET_2    pir_set_def;
 
   OSCCON       osccon;
@@ -140,6 +140,8 @@ public:
   // Some configuration stuff for stripping down where needed
   virtual bool HasPortC(void) { return true; };
   virtual bool HasCCP2(void) { return true; };
+  virtual bool MovedReg() { return false;}
+  virtual bool T3HasCCP() { return true;}
 
   virtual void create_symbols();
 
@@ -296,11 +298,45 @@ public:
 
     if (m_pCpu)
     {
-	m_pCpu->osc_mode(v & ( FOSC3 | FOSC2 | FOSC1 | FOSC0));
+	//m_pCpu->osc_mode(v & ( FOSC3 | FOSC2 | FOSC1 | FOSC0));
+	m_pCpu->osc_mode(v);
     }
   }
 
   virtual string toString();
+
+};
+class Config3H : public ConfigWord 
+{
+
+public:
+  Config3H(_16bit_processor *pCpu, unsigned int addr, unsigned int def_val)
+    : ConfigWord("CONFIG3H", def_val, "Configuration Register 3 High", pCpu, addr)
+  {
+	set(def_val);
+  }
+
+  virtual void set(gint64 v)
+  {
+    Integer::set(v);
+
+    printf("RRR Config3H m_pCpu=%p v=0x%lx\n", m_pCpu, v);
+    if (m_pCpu)
+    {
+	m_pCpu->set_config3h(v);
+    }
+  }
+
+  virtual string toString()
+  {
+       gint64 i64;
+       get(i64);
+
+        if (m_pCpu)
+	  return(m_pCpu->string_config3h(i64));
+	else
+	   return string ("m_PCpu not defined");
+  }
 
 };
 

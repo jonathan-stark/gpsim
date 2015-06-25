@@ -83,9 +83,12 @@ public:
 	RUNNING = 1,
 	SLEEPING = 2
   };
+
+protected:
+  T1GCON 	*m_t1gcon;
+
 private:
   bool 		m_bLastClockedState;
-  T1GCON 	*m_t1gcon;
   bool		t0xcs;			//  clock source is the capacitive sensing oscillator
   TMR0_Interface *tmr0_interface;
 };

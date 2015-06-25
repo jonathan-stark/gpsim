@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2008 Roy R Rankin
+   Copyright (C) 2008,2015 Roy R Rankin
    Copyright (C) 2006 T. Scott Dattalo
 
 This file is part of the libgpsim library of gpsim
@@ -44,8 +44,9 @@ static PinModule AnInvalidAnalogInput;
 //
 ADCON0_V2::ADCON0_V2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    adres(0), adresl(0), adcon1(0), adcon2(0), intcon(0), pir1v2(0), ad_state(AD_IDLE),
-    channel_mask(15)
+    adres(0), adresl(0), adcon1(0), adcon2(0), intcon(0), pir1v2(0), 
+    ad_state(AD_IDLE), channel_mask(15), ctmu_stim(0), a2d_sample_cap(0),
+    active_stim(-1)
 {
 }
 
@@ -184,6 +185,17 @@ void ADCON0_V2::put(unsigned int new_value)
   value.put(new_value);
   if(new_value & ADON) {
     // The A/D converter is being turned on (or maybe left on)
+    if (ctmu_stim)
+    {
+      // deal with ctmu stimulus for channel change or ON/OFF 
+      if ((old_value ^ new_value) & (ADON|CHS0|CHS1|CHS2|CHS3))
+      {
+        if (new_value & ADON)		// A/D is on
+	    attach_ctmu_stim();
+	else if(!(new_value & ADON))	// A/D is off
+	    detach_ctmu_stim();
+      }
+    }
 
     if((new_value & ~old_value) & GO) {
 
@@ -196,6 +208,18 @@ void ADCON0_V2::put(unsigned int new_value)
   } else
     stop_conversion();
 
+}
+void ADCON0_V2::set_ctmu_stim(stimulus *_ctmu_stim)
+{
+    ctmu_stim = _ctmu_stim;
+    // this is required for CTMU module to work as expected
+    if (a2d_sample_cap == 0)
+    {
+	a2d_sample_cap = new stimulus("a2d_sample_cap", 2.5, 1e10);
+	a2d_sample_cap->set_Cth(5e-12);	// 5 pF
+    }
+    if (value.get() & ADON)
+	attach_ctmu_stim();
 }
 
 void ADCON0_V2::put_conversion(void)
@@ -242,7 +266,7 @@ void ADCON0_V2::callback(void)
 {
   int channel;
 
-  Dprintf((" ADCON0_V2 Callback: 0x%"PRINTF_INT64_MODIFIER"x\n",get_cycles().get()));
+  Dprintf((" ADCON0_V2 Callback: 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
 
   //
   // The a/d converter is simulated with a state machine.
@@ -256,6 +280,7 @@ void ADCON0_V2::callback(void)
 
     case AD_ACQUIRING:
       channel = (value.get() >> 2) & channel_mask;
+
 
       m_dSampledVoltage = adcon1->getChannelVoltage(channel);
       m_dSampledVrefHi  = adcon1->getVrefHi();
@@ -296,6 +321,39 @@ void ADCON0_V2::set_interrupt(void)
 
 }
 
+void ADCON0_V2::detach_ctmu_stim()
+{
+    if (active_stim >=0 && ctmu_stim)
+    {
+	PinModule *pm=adcon1->get_A2Dpin(active_stim);
+        if (pm && pm->getPin().snode && ctmu_stim)
+        {
+	    pm->getPin().snode->detach_stimulus(ctmu_stim);
+	    pm->getPin().snode->detach_stimulus(a2d_sample_cap);
+	    pm->getPin().snode->update();
+        }
+    }
+    active_stim = -1;
+}
+void ADCON0_V2::attach_ctmu_stim()
+{
+    int channel = (value.get() >> 2) & channel_mask;
+    if (channel == active_stim)
+	return;
+    else if (active_stim >= 0)
+	detach_ctmu_stim();
+
+    PinModule *pm=adcon1->get_A2Dpin(channel);
+
+    if (pm && pm->getPin().snode && ctmu_stim)
+    {
+	pm->getPin().snode->attach_stimulus(ctmu_stim);
+	pm->getPin().snode->attach_stimulus(a2d_sample_cap);
+	pm->getPin().snode->update();
+	active_stim = channel;
+    }
+
+}
 
 
 //------------------------------------------------------
@@ -504,26 +562,38 @@ void ADCON1_V2::setIOPin(unsigned int channel, PinModule *newPin)
 
 
 //------------------------------------------------------
+PinModule *ADCON1_V2::get_A2Dpin(unsigned int channel)
+{
+    if ( (1<<channel) & get_adc_configmask(value.data) ) 
+    {
+      PinModule *pm = m_AnalogPins[channel];
+      if (pm != &AnInvalidAnalogInput)
+	return pm;
+      cout << "ADCON1_V2::getChannelVoltage channel " << channel <<
+                " not analog\n";
+    }
+    return 0;
+}
+
+//------------------------------------------------------
 double ADCON1_V2::getChannelVoltage(unsigned int channel)
 {
   double voltage=0.0;
-  if(channel <= m_nAnalogChannels) {
-    if ( (1<<channel) & get_adc_configmask(value.data) ) {
-      PinModule *pm = m_AnalogPins[channel];
-      if (pm != &AnInvalidAnalogInput)
+
+  if (channel <= m_nAnalogChannels)
+  {
+      PinModule *pm = get_A2Dpin(channel);
+      if (pm)
+      {
+	  if (pm->getPin().snode) pm->getPin().snode->update();
           voltage = pm->getPin().get_nodeVoltage();
+      }
       else
       {
         cout << "ADCON1_V2::getChannelVoltage channel " << channel <<
                 " not a valid pin\n";
         voltage = 0.;
       }
-    }
-    else
-    {
-        cout << "ADCON1_V2::getChannelVoltage channel " << channel <<
-                " not analog\n";
-    }
   }
   else
   {
@@ -579,3 +649,294 @@ bool ADCON2_V2::get_adfm()
 {
    return((value.get() & ADFM) == ADFM);
 }
+
+ADCON1_2B::ADCON1_2B(Processor *pCpu, const char *pName, const char *pDesc) :
+    ADCON1_V2(pCpu, pName, pDesc), Vctmu(0.0), Vdac(0.0), Vfvr_buf2(0)
+{
+}
+
+//------------------------------------------------------
+PinModule *ADCON1_2B::get_A2Dpin(unsigned int channel)
+{
+    if(channel <= m_nAnalogChannels)
+    {
+        PinModule *pm = m_AnalogPins[channel];
+        if (pm != &AnInvalidAnalogInput)
+	    return pm;
+        cout << "ADCON1_V2::getChannelVoltage channel " << channel <<
+                " not analog\n";
+    }
+    return 0;
+}
+double ADCON1_2B::getChannelVoltage(unsigned int channel)
+{
+    double voltage=0.0;
+
+    if(channel <= m_nAnalogChannels)
+    {
+	 PinModule *pm = get_A2Dpin(channel);
+         if (pm)
+             voltage = pm->getPin().get_nodeVoltage();
+         else
+         {
+            cout << "ADCON1_2B::getChannelVoltage channel " << channel <<
+                " not valid for A2D\n";
+	 }
+     }
+     else if (channel == CTMU)
+	voltage = Vctmu;
+     else if (channel == DAC)
+     {
+	voltage = Vdac;
+     }
+     else if (channel == FVR_BUF2)
+	voltage = Vfvr_buf2;
+     else
+     {
+            cout << "ADCON1_2B::getChannelVoltage channel " << channel <<
+                " not valid for A2D\n";
+     }
+     return voltage;
+}
+double ADCON1_2B::getVrefHi()
+{
+    assert(m_vrefHiChan >= 0);    // m_vrefHiChan has not been set
+
+    switch (value.data & (PVCFG1 | PVCFG0))
+    {
+    case 0:			// use Vdd
+    case (PVCFG1 | PVCFG0):	// reserved use Vdd
+	return ((Processor *)cpu)->get_Vdd();
+	break;
+
+    case PVCFG0:		// use external pin Vref+
+	return(getChannelVoltage(m_vrefHiChan));
+	break;
+
+    case PVCFG1:		// use FVR buf2
+	return Vfvr_buf2;
+	break;
+    }
+    return 0.0;
+}
+double ADCON1_2B::getVrefLo()
+{
+    assert(m_vrefLoChan >= 0);    // m_vrefLoChan has not been set
+
+    // external pin Vref- ?
+    if ((value.data & (NVCFG1 | NVCFG0)) == NVCFG1)
+	    return getChannelVoltage(m_vrefLoChan);
+
+    // else AVss (0)
+    return 0.0;
+}
+
+void ADCON1_2B::put(unsigned int new_value)
+{
+
+    trace.raw(write_trace.get() | value.get());
+    value.put(new_value);
+
+}
+ANSEL_2B::ANSEL_2B(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc), mask(0)
+{
+    for(int i=0; i<8; i++)
+    {
+	analog_channel[i] = -1;
+ 	m_AnalogPins[i] = &AnInvalidAnalogInput;
+    }
+}
+
+void ANSEL_2B::put(unsigned int new_value)
+{
+    trace.raw(write_trace.get() | value.get());
+    put_value(new_value);
+}
+
+void ANSEL_2B::put_value(unsigned int new_value)
+{
+    char newname[20];
+    new_value &= mask;
+    unsigned int diff = value.get() ^ new_value;
+
+    value.put(new_value);
+
+    for(int i = 0; i < 8; i++)
+    {
+	if (((1<<i) & diff) && (m_AnalogPins[i] != &AnInvalidAnalogInput))
+	{
+	    if (new_value & (1<<i))
+	    {
+		sprintf(newname, "an%d", analog_channel[i]);
+		m_AnalogPins[i]->AnalogReq(this, true, newname);
+	    }
+	    else
+	    {
+		m_AnalogPins[i]->AnalogReq(this, false, m_AnalogPins[i]->getPin().name().c_str());
+
+	    }
+	}
+    }
+}
+void ANSEL_2B::setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1)
+{
+    char newname[20];
+    unsigned int pin = port->getPinNumber();
+   m_AnalogPins[pin] = port;
+   analog_channel[pin] = channel;
+   adcon1->setIOPin(channel, port);
+   mask |= 1<<pin;
+   if ((1<<pin) & value.get())
+   {
+	sprintf(newname, "an%d", channel);
+	m_AnalogPins[pin]->AnalogReq(this, true, newname);
+   }
+}
+//
+//--------------------------------------------------
+// member functions for the FVRCON_V2 class
+// with one set of gains and FVRST set after delay
+//--------------------------------------------------
+//
+FVRCON_V2::FVRCON_V2(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask)
+  : sfr_register(pCpu, pName, pDesc), future_cycle(0),
+	adcon1(0), daccon0(0), cmModule(0), cpscon0(0)
+{
+    mask_writable = bitMask;
+}
+
+void  FVRCON_V2::put(unsigned int new_value)
+{
+  unsigned int masked_value = (new_value & mask_writable);
+  trace.raw(write_trace.get() | value.get());
+
+  put_value(masked_value);
+}
+
+void  FVRCON_V2::put_value(unsigned int new_value)
+{
+
+  unsigned int diff = value.get() ^ new_value;
+
+  if (diff)
+  {
+	if (diff &  FVREN)
+	    new_value &= ~FVRRDY;	// Clear FVRRDY regardless of ON or OFF
+	if (new_value & FVREN)	// Enable ON?
+	{
+	    future_cycle = get_cycles().get() + 25e-6 /get_cycles().seconds_per_cycle();
+	    get_cycles().set_break(future_cycle, this);
+	}
+	else if (future_cycle)
+	{
+	    get_cycles().clear_break(this);
+            future_cycle = 0;
+	}
+  }
+	    
+  value.put(new_value);
+  compute_FVR(new_value);
+
+  update();
+}
+
+// Set FVRRDY bit after timeout
+void FVRCON_V2::callback()
+{
+    future_cycle = 0;
+    put_value(value.get() | FVRRDY);
+}
+    
+
+
+double FVRCON_V2::compute_FVR(unsigned int fvrcon)
+{
+    double ret = -1.;
+
+    if (fvrcon & FVRRDY)
+    {
+
+        switch(fvrcon & (FVRS0 | FVRS1))
+        {
+	case 0:		// output is off
+	    ret = 0.0;
+	    break;
+
+	case FVRS0:	// Gain = 1
+	    ret = 1.024;
+	    break;
+	
+	case FVRS1:	// Gain = 2
+	    ret = 2.048;
+	    break;
+
+	case (FVRS0|FVRS1): // Gain = 4
+	    ret = 4.096;
+	    break;
+	}
+    }
+    if (ret > ((Processor *)cpu)->get_Vdd())
+    {
+	cerr << "warning FVRCON FVRAD > Vdd\n";
+	ret = -1.;
+    }
+    for (unsigned int i= 0; i < daccon0_list.size(); i++)
+    {
+        daccon0_list[i]->set_FVR_CDA_volt(ret);
+    }
+    if(adcon1)adcon1->setVoltRef(ret);
+    if(cmModule) cmModule->set_FVR_volt(ret);
+    if(cpscon0) cpscon0->set_FVR_volt(ret);
+    return ret;
+}
+
+void  DACCON0_V2::compute_dac(unsigned int value)
+{
+    double Vhigh = get_Vhigh(value);
+    double Vlow = 0.;
+    double Vout;
+
+    if(value & DACEN)	// DAC is enabled
+    {
+        Dprintf(("DACCON0_V2::compute_dac Vhigh %.2f daccon1_reg %x\n", Vhigh, daccon1_reg));
+	Vout = (Vhigh - Vlow) * daccon1_reg/bit_resolution - Vlow;
+    }
+    else if (value & DACLPS)
+	Vout = Vhigh;
+    else
+	Vout = Vlow;
+    Dprintf(("DACCON0_V2::compute_dac value=%x Vout=%.2f adcon1 %p\n", value, Vout, adcon1));
+
+    set_dacoutpin(value & DACOE, 0, Vout);
+	
+    if (verbose)
+        printf("%s-%d adcon1 %p FVRCDA_AD_chan %d Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
+    if(adcon1) adcon1->update_dac(Vout);
+    if(cmModule) cmModule->set_DAC_volt(Vout);
+    if(cpscon0) cpscon0->set_DAC_volt(Vout);
+}
+double DACCON0_V2::get_Vhigh(unsigned int value)
+{
+    unsigned int mode = (value & (DACPSS0|DACPSS1)) >> 2;
+    switch(mode)
+    {
+    case 0:	// Vdd
+	return ((Processor *)cpu)->get_Vdd();
+
+    case 1:	// Vref+ pin, get is from A2D setup
+        if(adcon1)
+	    return(adcon1->getChannelVoltage(adcon1->getVrefHiChan()));
+	cerr << "ERROR DACCON0 DACPSS=01b adcon1 not set\n";
+	return 0.;
+
+    case 2:	// Fixed Voltage Reference
+	return FVR_CDA_volt;
+
+    case 3:	// Reserved value
+	cerr << "ERROR DACCON0 DACPSS=11b is reserved value\n";
+	return 0.;
+
+    }
+    return 0.;	// cant get here
+} 

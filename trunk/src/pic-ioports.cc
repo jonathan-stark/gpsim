@@ -526,7 +526,8 @@ void PicPortIOCRegister::setbit(unsigned int bit_number, char new3State)
 	{
           cpu_pic->exit_sleep();
           m_pIntcon->set_rbif(true);
-	  m_Iocaf->put(m_Iocaf->get_value() | (1 << bit_number));
+	  if (m_Iocaf)
+	      m_Iocaf->put(m_Iocaf->get_value() | (1 << bit_number));
 	}
     }
     else if ( newDrivenValue < lastDrivenValue) // negative edge
@@ -535,7 +536,8 @@ void PicPortIOCRegister::setbit(unsigned int bit_number, char new3State)
 	{
           cpu_pic->exit_sleep();
           m_pIntcon->set_rbif(true);
-	  m_Iocaf->put(m_Iocaf->get_value() | (1 << bit_number));
+	  if (m_Iocaf)
+	      m_Iocaf->put(m_Iocaf->get_value() | (1 << bit_number));
 	}
     }
 }

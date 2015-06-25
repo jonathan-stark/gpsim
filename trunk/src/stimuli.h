@@ -459,7 +459,7 @@ public:
                     double _ZthWeak = 1e6,
                     double _ZthFloating = 1e7,
                     double _VthIn = 0.3,
-                    double _ZthIn = 1e8);
+                    double _ZthIn = 1e10);
   virtual double get_Zth();
   virtual double get_Vth();
   virtual double get_VthIn() { return VthIn;}

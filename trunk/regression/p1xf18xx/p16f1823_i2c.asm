@@ -205,7 +205,7 @@ I2CSendResult
 	nop
   .assert "(pir2 & 0x08) == 0x00, \"FAILED Start BCL1IF clear\""
 	nop
-  .assert "(sspstat & 0x3f) == 0x08, \"FAILED Start S bit set\""
+  .assert "(ssp1stat & 0x3f) == 0x08, \"FAILED Start S bit set\""
 	nop
 
 	banksel PIR1
@@ -222,7 +222,7 @@ I2CSendResult
 	nop
   .assert "(pir2 & 0x08) == 0x00, \"FAILED RStart BCL1IF clear\""
 	nop
-  .assert "(sspstat & 0x3f) == 0x08, \"FAILED RStart S bit set\""
+  .assert "(ssp1stat & 0x3f) == 0x08, \"FAILED RStart S bit set\""
 	nop
 
 	banksel PIR1
@@ -239,7 +239,7 @@ I2CSendResult
 	nop
   .assert "(pir2 & 0x08) == 0x00, \"FAILED ACKEN BCL1IF clear\""
 	nop
-  .assert "(sspstat & 0x3f) == 0x08, \"FAILED ACKEN S bit set\""
+  .assert "(ssp1stat & 0x3f) == 0x08, \"FAILED ACKEN S bit set\""
 	nop
 	bcf	SSPCON2,ACKDT
 
@@ -261,7 +261,7 @@ I2CSendResult
 	nop
   .assert "(pir2 & 0x08) == 0x00, \"FAILED RStart BCL1IF clear\""
 	nop
-  .assert "(sspstat & 0x3f) == 0x08, \"FAILED RStart S bit set\""
+  .assert "(ssp1stat & 0x3f) == 0x08, \"FAILED RStart S bit set\""
 	nop
 
 	banksel PIR1
@@ -278,7 +278,7 @@ I2CSendResult
 	nop
   .assert "(pir2 & 0x08) == 0x00, \"FAILED Stop BCL1IF clear\""
 	nop
-  .assert "(sspstat & 0x3f) == 0x10, \"FAILED Stop P bit set\""
+  .assert "(ssp1stat & 0x3f) == 0x10, \"FAILED Stop P bit set\""
 	nop
 
 	return
@@ -316,16 +316,16 @@ write_eeprom_address
 	goto	$-1	
 	movlw	0xa0		; write command to eeprom
 	call	I2C_send_w
-  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write command to eeprom ACK\""
+  .assert "(ssp1con2 & 0x40) == 0x00, \"FAILED write command to eeprom ACK\""
 	nop
-  .assert "(sspstat & 0x01) == 0x00, \"FAILED write to eeprom BF clear\""
+  .assert "(ssp1stat & 0x01) == 0x00, \"FAILED write to eeprom BF clear\""
 	nop
 
 	banksel PIR1
 	bcf	PIR1,SSP1IF
 	movlw	0x00		; write eeprom address
 	call	I2C_send_w
-  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write address to eeprom ACK\""
+  .assert "(ssp1con2 & 0x40) == 0x00, \"FAILED write address to eeprom ACK\""
 	nop
 	return
 
@@ -335,14 +335,14 @@ write_eeprom
 	bcf	PIR1,SSP1IF
 	movlw	0x80		; write data1
 	call	I2C_send_w
-  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data1 to eeprom ACK\""
+  .assert "(ssp1con2 & 0x40) == 0x00, \"FAILED write data1 to eeprom ACK\""
 	nop
 
 	banksel PIR1
 	bcf	PIR1,SSP1IF
 	movlw	0x81		; write data2
 	call	I2C_send_w
-  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
+  .assert "(ssp1con2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
 	nop
 	nop
 	call I2C_stop
@@ -354,14 +354,14 @@ clr_eeprom
 	bcf	PIR1,SSP1IF
 	movlw	0x00		; write data1
 	call	I2C_send_w
-  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data1 to eeprom ACK\""
+  .assert "(ssp1con2 & 0x40) == 0x00, \"FAILED write data1 to eeprom ACK\""
 	nop
 
 	banksel PIR1
 	bcf	PIR1,SSP1IF
 	movlw	0x00		; write data2
 	call	I2C_send_w
-  .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
+  .assert "(ssp1con2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
 	nop
 	nop
 	call I2C_stop
@@ -385,7 +385,7 @@ read_eeprom
 	btfsc	SSPSTAT,R_NOT_W	; also R_W == 0
 	goto	$-1
 
-  .assert "(sspstat & 0x01) == 0x00, \"FAILED address/read to eeprom BF clear\""
+  .assert "(ssp1stat & 0x01) == 0x00, \"FAILED address/read to eeprom BF clear\""
 	nop
 
 	banksel PIR1
@@ -399,7 +399,7 @@ read_eeprom
 	nop
   .assert "(pir2 & 0x08) == 0x00, \"FAILED RCEN BCL1IF clear\""
 	nop
-  .assert "(sspstat & 0x01) == 0x01, \"FAILED RCEN BF set\""
+  .assert "(ssp1stat & 0x01) == 0x01, \"FAILED RCEN BF set\""
 	nop
 	banksel SSPBUF
 	movf	SSPBUF,W

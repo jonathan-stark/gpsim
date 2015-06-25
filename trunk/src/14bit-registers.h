@@ -652,6 +652,8 @@ class OSCTUNE : public  sfr_register
     TUN3 = 1<<3,
     TUN4 = 1<<4,
     TUN5 = 1<<5,
+    PLLEN= 1<<6,
+    INTSRC=1<<7 
   };
   OSCCON *osccon;
                                                                                 
@@ -698,7 +700,8 @@ class OSCCON : public  sfr_register,  public TriggerObject
     OSTS = 1<<3,
     IRCF0 = 1<<4,
     IRCF1 = 1<<5,
-    IRCF2 = 1<<6
+    IRCF2 = 1<<6,
+    IDLEN = 1<<7
   };
                                                                                 
   OSCCON(Processor *pCpu, const char *pName, const char *pDesc)

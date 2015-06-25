@@ -154,7 +154,7 @@ void P16F62x::create_sfr_map()
   comparator.cmcon.set_configuration(1, 2, AN0, VREF, AN3, VREF, NO_OUT);
   comparator.cmcon.set_configuration(2, 2, AN1, VREF, AN2, VREF, NO_OUT);
   comparator.cmcon.set_configuration(1, 3, AN0, AN2, AN0, AN2, NO_OUT);
-  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN2, NO_OUT);
   comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
   comparator.cmcon.set_configuration(2, 4, AN1, AN2, AN1, AN2, NO_OUT);
   comparator.cmcon.set_configuration(1, 5, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);

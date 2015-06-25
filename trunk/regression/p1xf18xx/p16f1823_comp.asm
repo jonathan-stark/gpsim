@@ -1,6 +1,6 @@
 ;
 ; 
-; Copyright (c) 2013 Roy Rankin
+; Copyright (c) 2015 Roy Rankin
 ;
 ; This file is part of the gpsim regression tests
 ; 
@@ -145,6 +145,7 @@ test_sr:
 	movlw	(1<<SRSC1E)|(1<<SRRC2E)
 	movwf	SRCON1
 	BANKSEL	CM1CON0
+	bsf	CM1CON0,C1ON	; turn on CM1
 	; toggle CM1
 	bsf 	CM1CON0,C1POL
     .assert "(porta&0x04) == 0x04, \"*** FAILED 16f1823 CM1 set SR latch\""
@@ -314,22 +315,23 @@ test_spm
 
 test_compar:
 	BANKSEL CM1CON0
+  .assert "cm1con0 == 0x04, \"FAILED 16f1823 cm1con0 unexpected init value\""
+	nop
+  .assert "cm2con0 == 0x04, \"FAILED 16f1823 cm2con0 unexpected init value\""
+	nop
+  .assert "cm1con1 == 0x00, \"FAILED 16f1823 cm1con1 unexpected init value\""
+	nop
+  .assert "cm2con1 == 0x00, \"FAILED 16f1823 cm2con1 unexpected init value\""
+	nop
 	movlw	0xff
 	movwf   CM2CON1		; test writable bits
   .assert "cm2con1 == 0xf3, \"FAILED 16f1823 cm2con1 writable bits\""
 	nop
-        clrf	CM2CON1
-	bsf 	CM2CON1,0	; CM2 use portc1 for in-
-
-	bcf 	CM1CON0,C1POL	; wake up CM1, bug ?
-  .assert "cmout == 3, \"FAILED 16f1823 cmout active\""
+	movlw	(1<<C2NCH0)	; CM2 use CN12N1- (portc1), C2N+, no intterupts
+	movwf	CM2CON1
+  .assert "cmout == 0, \"FAILED 16f1823 cmout default 0\""
 	nop
-	bsf 	CM1CON0,C1POL	; toggle ouput polarity, not ON
-  .assert "cm1con0 == 0x14, \"FAILED 16f1823 cm1con0 off toggle\""
-	nop
-  .assert "cmout == 0x02, \"FAILED 16f1823 cmout mirror C1OUT\""
-	nop
-
+        call 	off_pol
 	movlw 	(1<<C1ON)	; Enable Comparator use C1IN+, C12IN0
 	movwf	CM1CON0
   .assert "cm1con0  == 0xC0, \"FAILED 16f1823 cm1con0 ON=1 C1OUT=1\""
@@ -337,20 +339,20 @@ test_compar:
 	bsf 	CM1CON0,C1POL	; toggle ouput polarity
   .assert "cm1con0  == 0x90, \"FAILED 16f1823 cm1con0 ON=1 POL=1 C1OUT=0\""
 	nop
-	bsf 	CM2CON0,C2POL	; toggle ouput polarity, not ON
-  .assert "cm2con0 == 0x14, \"FAILED 16f1823 cm2con0 ON=0 POL=1\""
-	nop
-  .assert "cmout == 0x00, \"FAILED 16f1823 cm2con1 mirror C1OUT\""
-	nop
 	bsf 	CM1CON0,C1OE	; C1OUT to RA2
-   .assert "(porta & 0x04) == 0x00, \"FAILED 16f1823 compare RA2 not low\""
+   .assert "(porta & 0x04) == 0x00, \"FAILED 16f1823 CM1 C1OUT not low\""
 	nop 
 	bcf 	CM1CON0,C1POL	; toggle ouput polarity
-   .assert "(porta & 0x04) == 0x04, \"FAILED 16f1823 compare RA2 not high\""
+   .assert "(porta & 0x04) == 0x04, \"FAILED 16f1823 CM1 C1OUT(RA2) not high\""
 	nop
-	bsf 	CM2CON0,C2OE	; C2OUT to RC4
-   .assert "(portc & 0x10) == 0x00, \"FAILED 16f1823 compare RC4 not low\""
-	nop 
+	; turn on CM2
+	movlw 	(1<<C2ON)|(1<<C2OE)	; Enable Comparator use C2IN+, C12IN0
+	movwf	CM2CON0
+   .assert "(portc & 0x10) == 0x10, \"FAILED 16f1823 CM1 C2OUT(RC4) high\""
+	nop
+	bsf	CM2CON0,C2POL
+   .assert "(portc & 0x10) == 0x00, \"FAILED 16f1823 CM1 C2OUT(RC4) low\""
+	nop
 	; Test change in voltage detected
    .command "V3.voltage = 2.0"
 	nop
@@ -383,6 +385,25 @@ test_compar:
 	nop
 	return
 
+off_pol:
+	return
+
+dummy:
+	bsf	CM1CON0,C1POL
+  .assert "cmout == 1, \"FAILED 16f1823 cmout CM1 off C1POL=1\""
+	nop
+  .assert "cm1con0 == 0x54, \"FAILED 16f1823 cm1con0 CM1 off C1POL=1\""
+	nop
+	bsf	CM2CON0,C2POL
+  .assert "cmout == 3, \"FAILED 16f1823 cmout CM2 off C2POL=1\""
+	nop
+  .assert "cm2con0 == 0x54, \"FAILED 16f1823 cm2con0 CM2 off C2POL=1\""
+	nop
+
+	bsf 	CM2CON0,C2OE	; C2OUT to RC4
+   .assert "(portc & 0x10) == 0x10, \"FAILED 16f1823 CM2 C2OUT not high ON=0, POL=1\""
+	nop 
+	return
 
 
 interrupt:

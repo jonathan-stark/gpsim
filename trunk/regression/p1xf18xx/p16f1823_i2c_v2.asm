@@ -518,7 +518,7 @@ poll_ready:
     I2C_WR 8, IO_buf
     call    TxmtStopBit     ; Issue a stop bit to end transmission
     movf    Bus_Status,W
-  .assert "(W&0xc3) == 0x00, \"*** FAILED I2C write status DHEN=1 AHEN=1\""
+  .assert "(W & 0xc3) == 0x00, \"*** FAILED I2C write status DHEN=1 AHEN=1\""
     nop
 
   .assert "\"*** PASSED 16f1823 I2C test\""
