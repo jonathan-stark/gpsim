@@ -500,7 +500,9 @@ void P12F1822::create_sfr_map()
   tmr1h.tmrl  = &tmr1l;
   t1con_g.tmrl  = &tmr1l;
   t1con_g.t1gcon.set_tmrl(&tmr1l);
-  t1con_g.t1gcon.set_pir_set(get_pir_set());
+  t1con_g.t1gcon.setInterruptSource(new InterruptSource(pir1, PIR1v1822::TMR1IF));
+
+  
 
   tmr1l.setIOpin(&(*m_porta)[5]);
   t1con_g.t1gcon.setGatepin(&(*m_porta)[3]);
@@ -567,7 +569,7 @@ void P12F1822::create_sfr_map()
   add_sfr_register(m_iocaf, 0x393, RegisterValue(0,0),"iocaf");
   m_iocaf->set_intcon(intcon);
 
-  tmr2.ssp_module = &ssp;
+  tmr2.ssp_module[0] = &ssp;
 
     ssp.initialize(
 	get_pir_set(),    // PIR
@@ -642,6 +644,7 @@ void P12F1822::create_sfr_map()
     comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[1], &(*m_porta)[4]);
     comparator.cmxcon1[0]->set_INpinPos(&(*m_porta)[0]);
     comparator.cmxcon0[0]->setBitMask(0xf7);
+    comparator.cmxcon0[0]->setIntSrc(new InterruptSource(pir2, (1<<5)));
     comparator.cmxcon1[0]->setBitMask(0xf1);
     comparator.assign_pir_set(get_pir_set());
     comparator.assign_t1gcon(&t1con_g.t1gcon);
@@ -1155,7 +1158,7 @@ void P16F178x::create_sfr_map()
   tmr1h.tmrl  = &tmr1l;
   t1con_g.tmrl  = &tmr1l;
   t1con_g.t1gcon.set_tmrl(&tmr1l);
-  t1con_g.t1gcon.set_pir_set(get_pir_set());
+  t1con_g.t1gcon.setInterruptSource(new InterruptSource(pir1, PIR1v1822::TMR1IF));
 
   tmr1l.setIOpin(&(*m_porta)[5]);
   t1con_g.t1gcon.setGatepin(&(*m_porta)[3]);
@@ -1254,7 +1257,7 @@ void P16F178x::create_sfr_map()
     add_sfr_register(m_dac4con0, 0x595, RegisterValue(0x00,0));
     add_sfr_register(m_dac4con1, 0x596, RegisterValue(0x00,0));
 
-  tmr2.ssp_module = &ssp;
+  tmr2.ssp_module[0] = &ssp;
 
     ssp.initialize(
 	get_pir_set(),    // PIR
@@ -1346,8 +1349,11 @@ void P16F178x::create_sfr_map()
     comparator.cmxcon1[1]->set_OUTpin(&(*m_porta)[5]);
     comparator.cmxcon1[2]->set_OUTpin(&(*m_portb)[5]);
     comparator.cmxcon0[0]->setBitMask(0xbf);
+    comparator.cmxcon0[0]->setIntSrc(new InterruptSource(pir2, (1<<5)));
     comparator.cmxcon0[1]->setBitMask(0xbf);
+    comparator.cmxcon0[1]->setIntSrc(new InterruptSource(pir2, (1<<6)));
     comparator.cmxcon0[2]->setBitMask(0xbf);
+    comparator.cmxcon0[2]->setIntSrc(new InterruptSource(pir2, (1<<1)));
     comparator.cmxcon1[0]->setBitMask(0xff);
     comparator.cmxcon1[1]->setBitMask(0xff);
     comparator.cmxcon1[2]->setBitMask(0xff);
@@ -1688,6 +1694,7 @@ void P16F1788::create_sfr_map()
     comparator.cmxcon1[3]->set_INpinPos(&(*m_porta)[2], &(*m_portb)[6]);
     comparator.cmxcon1[3]->set_OUTpin(&(*m_portc)[7]);
     comparator.cmxcon0[3]->setBitMask(0xbf);
+    comparator.cmxcon0[3]->setIntSrc(new InterruptSource(pir2, (1<<2)));
     comparator.cmxcon1[3]->setBitMask(0xff);
 
 }
@@ -1822,13 +1829,17 @@ void P16F1823::create_sfr_map()
     apfcon.set_pins(5, &(*m_portc)[3], &(*m_porta)[3]); //SSP SS
     apfcon.set_pins(6, &(*m_portc)[2], &(*m_porta)[4]); //SSP SDO
     apfcon.set_pins(7, &(*m_portc)[5], &(*m_porta)[1]); //USART RX Pin
-    comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[1], &(*m_portc)[1],  &(*m_portc)[2],  &(*m_portc)[3]);
-    comparator.cmxcon1[1]->set_INpinNeg(&(*m_porta)[1], &(*m_portc)[1],  &(*m_portc)[2],  &(*m_portc)[3]);
+    comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[1], &(*m_portc)[1],
+					  &(*m_portc)[2],  &(*m_portc)[3]);
+    comparator.cmxcon1[1]->set_INpinNeg(&(*m_porta)[1], &(*m_portc)[1],
+					  &(*m_portc)[2],  &(*m_portc)[3]);
     comparator.cmxcon1[1]->set_INpinPos(&(*m_portc)[0]);
     comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[2]);
     comparator.cmxcon1[1]->set_OUTpin(&(*m_portc)[4]);
     comparator.cmxcon0[0]->setBitMask(0xf7);
+    comparator.cmxcon0[0]->setIntSrc(new InterruptSource(pir2, (1<<5)));
     comparator.cmxcon0[1]->setBitMask(0xf7);
+    comparator.cmxcon0[1]->setIntSrc(new InterruptSource(pir2, (1<<6)));
     comparator.cmxcon1[0]->setBitMask(0xf3);
     comparator.cmxcon1[1]->setBitMask(0xf3);
 

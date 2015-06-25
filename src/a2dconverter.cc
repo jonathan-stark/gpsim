@@ -1167,7 +1167,6 @@ double FVRCON::compute_FVR_CDA(unsigned int fvrcon)
     {
 	daccon0_list[i]->set_FVR_CDA_volt(ret);
     }
-//RRR    if(daccon0) daccon0->set_FVR_CDA_volt(ret);
     if(cmModule) cmModule->set_FVR_volt(ret);
     if(cpscon0) cpscon0->set_FVR_volt(ret);
     return ret;
@@ -1313,10 +1312,8 @@ DACCON1::DACCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned
 
 void  DACCON1::put(unsigned int new_value)
 {
-  unsigned int masked_value = (new_value & bit_mask);
   trace.raw(write_trace.get() | value.get());
-  value.put(masked_value);
-  if (daccon0) daccon0->set_dcaccon1_reg(masked_value);
+  put_value(new_value);
 }
 
 void  DACCON1::put_value(unsigned int new_value)

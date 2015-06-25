@@ -31,10 +31,15 @@ License along with this library; if not, see
 #include "stimuli.h"
 #include "symbol.h"
 
-#define MCLRE (1<<7)
+/* Config Word defines */
+#define MCLRE 	(1<<7)
+#define P2BMX 	(1<<5)
+#define T3CMX	(1<<4)
+#define HFOFST	(1<<3)
 #define LPT1OSC (1<<2)
-#define PBADEN (1<<1)
-#define CCP2MX (1<<0)
+#define CCP3MX 	(1<<2)
+#define PBADEN 	(1<<1)
+#define CCP2MX 	(1<<0)
 
 
 /**
@@ -1609,6 +1614,7 @@ void P18F1220::osc_mode(unsigned int value)
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
   
+  value &= (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   set_int_osc(false);
   if (pin_Number < 253)
   {
@@ -1888,8 +1894,8 @@ void P18F2x21::create_sfr_map()
 
   // Link the comparator and voltage ref to porta
   comparator.initialize(&pir_set_def, &(*m_porta)[2], &(*m_porta)[0], 
-	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
-	&(*m_porta)[4]);
+	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[4],
+	&(*m_porta)[5]);
 
   comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
   comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
@@ -1930,6 +1936,7 @@ void P18F2x21::osc_mode(unsigned int value)
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
   
+  value &= (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   set_int_osc(false);
   if (pin_Number < 253)
   {
@@ -2155,7 +2162,6 @@ Processor * P18F2620::construct(const char *name)
 }
 
 
-
 //========================================================================
 //
 // Pic 18F4x21
@@ -2368,8 +2374,8 @@ void P18F4x21::create_sfr_map()
 
   // Link the comparator and voltage ref to porta
   comparator.initialize(&pir_set_def, &(*m_porta)[2], &(*m_porta)[0], 
-	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
-	&(*m_porta)[4]);
+	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[4],
+	&(*m_porta)[5]);
 
   comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
   comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
@@ -2844,6 +2850,8 @@ void P18F6x20::create_sfr_map()
   add_sfr_register(&pir3,	  0xfa4,porv,"pir3");
   add_sfr_register(&ipr3,	  0xfa5,porv,"ipr3");
 
+
+
   add_sfr_register(pspcon,       0xfb0,RegisterValue(0x00,0));
 
   // cout << "Assign ADC pins to " << adcon1 << "\n";
@@ -2865,25 +2873,32 @@ void P18F6x20::create_sfr_map()
 */
 
 
-  // Link the comparator and voltage ref to porta
-  comparator.initialize(&pir_set_def, &(*m_porta)[2], &(*m_porta)[0], 
-	&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[3], &(*m_porta)[3],
-	&(*m_porta)[4]);
+  // Link the comparator and voltage ref to portf
+  comparator.initialize(&pir_set_def, &(*m_portf)[5], 
+	0, 0, 0, 0,
+	&(*m_portf)[2], &(*m_portf)[1]);
 
-  comparator.cmcon.set_configuration(1, 0, AN0, AN3, AN0, AN3, ZERO);
-  comparator.cmcon.set_configuration(2, 0, AN1, AN2, AN1, AN2, ZERO);
-  comparator.cmcon.set_configuration(1, 1, AN0, AN3, AN0, AN3, OUT0);
+  // set anx for input pins
+  comparator.cmcon.setINpin(0, &(*m_portf)[6], "an11");
+  comparator.cmcon.setINpin(1, &(*m_portf)[5], "an10");
+  comparator.cmcon.setINpin(2, &(*m_portf)[4], "an9");
+  comparator.cmcon.setINpin(3, &(*m_portf)[3], "an8");
+
+
+  comparator.cmcon.set_configuration(1, 0, AN0, AN1, AN0, AN1, ZERO);
+  comparator.cmcon.set_configuration(2, 0, AN2, AN3, AN2, AN3, ZERO);
+  comparator.cmcon.set_configuration(1, 1, AN0, AN1, AN0, AN1, OUT0);
   comparator.cmcon.set_configuration(2, 1, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
-  comparator.cmcon.set_configuration(1, 2, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(2, 2, AN1, AN2, AN1, AN2, NO_OUT);
-  comparator.cmcon.set_configuration(1, 3, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon.set_configuration(2, 3, AN1, AN2, AN1, AN2, OUT1);
-  comparator.cmcon.set_configuration(1, 4, AN0, AN3, AN0, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(2, 4, AN1, AN3, AN1, AN3, NO_OUT);
-  comparator.cmcon.set_configuration(1, 5, AN0, AN3, AN0, AN3, OUT0);
-  comparator.cmcon.set_configuration(2, 5, AN1, AN3, AN1, AN3, OUT1);
-  comparator.cmcon.set_configuration(1, 6, AN0, VREF, AN3, VREF, NO_OUT);
-  comparator.cmcon.set_configuration(2, 6, AN1, VREF, AN2, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(1, 2, AN0, AN1, AN0, AN1, NO_OUT);
+  comparator.cmcon.set_configuration(2, 2, AN2, AN3, AN2, AN3, NO_OUT);
+  comparator.cmcon.set_configuration(1, 3, AN0, AN1, AN0, AN1, OUT0);
+  comparator.cmcon.set_configuration(2, 3, AN2, AN3, AN2, AN3, OUT1);
+  comparator.cmcon.set_configuration(1, 4, AN0, AN1, AN0, AN1, NO_OUT);
+  comparator.cmcon.set_configuration(2, 4, AN2, AN1, AN2, AN1, NO_OUT);
+  comparator.cmcon.set_configuration(1, 5, AN0, AN1, AN0, AN1, OUT0);
+  comparator.cmcon.set_configuration(2, 5, AN2, AN1, AN2, AN1, OUT1);
+  comparator.cmcon.set_configuration(1, 6, AN0, VREF, AN1, VREF, NO_OUT);
+  comparator.cmcon.set_configuration(2, 6, AN2, VREF, AN3, VREF, NO_OUT);
   comparator.cmcon.set_configuration(1, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
   comparator.cmcon.set_configuration(2, 7, NO_IN, NO_IN, NO_IN, NO_IN, ZERO);
 

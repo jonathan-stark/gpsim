@@ -1,3 +1,62 @@
+2015-06-25 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_watch.cc: initialize variable watch_list
+	* regression/comparator/Makefile 
+	  regression/comparator/compar_2321.asm
+	  regression/comparator/compar_628.asm 
+	  regression/comparator/compar_6520.asm
+	  regression/comparator/compar_873a.asm
+	  regression/comparator/compar_877a.asm
+	  regression/comparator/compar_882.asm
+	  regression/p16f684/Makefile
+	  regression/p16f684/compar_684.asm
+	  regression/p16f690/p16f690.asm
+	  regression/p1xf18xx/Makefile
+	  regression/p1xf18xx/p16f1823_comp.asm
+	  regression/run_regression.sh
+	: Improve comparator regression tests
+	* regression/p1xf18xx/p16f1823_i2c.asm
+	  regression/p1xf18xx/p16f1823_i2c_v2.asm
+	  regression/p1xf18xx/p16f1823_spi.asm
+	: fix variable names in asserts
+	* src/14bit-registers.h
+	: define aditional OSCCON and OSCTUNE bits
+	* src/14bit-tmrs.cc src/14bit-tmrs.h
+	: Allow timer classes to be used more than once
+	* src/16bit-processors.cc src/16bit-processors.h
+	: change t1con and t3con to pointers so they can be redefine if required
+
+	* src/16bit-registers.cc src/16bit-registers.h
+	: add OSCCON2 and OSCCON_HS classes
+	* src/16bit-tmrs.cc src/16bit-tmrs.h
+	: Timers 1,3,5
+	* src/a2d_v2.cc src/a2d_v2.h src/a2dconverter.cc src/a2dconverter.h
+	  src/p1xf1xxx.cc
+	: improve inheratance structure
+	* src/comparator.cc src/comparator.h src/p16f88x.cc src/p16f88x.h
+	: restructure for up to 4 comparators 
+	* src/p16f62x.cc
+	: Fix Bug 199 	p16f627,8 comparator error mode 3
+	* src/p16x6x.cc
+	: Allow multiple SSP modules to connect to tmr2
+	* src/p18x.cc
+	: Fix bug 198 - p18f6620 comparator pins wrong
+	  Fix bug 197 	Bad comparator output pin on p18f2x21 based processors
+	* src/p18x.h : fix 2620 register size
+	* src/pic-ioports.cc src/pic-ioports.h
+	: make IOCxF optional in  PicPortIOCRegister
+	* src/pic-processor.cc src/pic-processor.h
+	: allow for secondary oscillator
+	* src/pir.cc src/pir.h
+	: add support for PIR4, PIR5 registers
+	* src/registers.cc
+	: Fix register naming
+	* src/ssp.cc src/ssp.h
+	: Allow multiple SSP modules using flexable pir registers
+	* src/stimuli.h
+	: Increase input impedance
+	* src/tmr0.h
+	: make m_t1gcon useable by derrived classes
+
 2015-05-31 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_scope.cc gui/gui_scope.h
 	: Draw signal names using Cairo

@@ -23,6 +23,7 @@ License along with this library; if not, see
 #define __COMPARATOR_H__
 
 #include "14bit-tmrs.h"
+#include <math.h>
 
 /***************************************************************************
  *
@@ -186,7 +187,7 @@ class CMCON : public sfr_register
     };
 
 
-  virtual void setINpin(int i, PinModule *);
+  virtual void setINpin(int i, PinModule *, const char *an);
   virtual void setOUTpin(int i, PinModule *);
   virtual void assign_pir_set(PIR_SET *new_pir_set);
   virtual unsigned int get();
@@ -208,6 +209,7 @@ protected:
   PinModule *cm_input[4];
   PinModule *cm_output[2];
   char *cm_input_pin[4];
+  char *cm_an[4];
   char *cm_output_pin[2];
   CMSignalSource *cm_source[2];
   unsigned int m_CMval[2];
@@ -304,113 +306,60 @@ class CM2CON1 : public sfr_register
 };
 
 class CM12SignalSource;
-/*
- * CM12CON0 is common support for CM1CON0 AND CM2CON0
- */
-class CM12CON0 : public sfr_register
-{
- public:
 
-
-  VRCON *m_vrcon;
-  enum CM12CON0_bits
-    {
-      CH0 = 1<<0,	// Channel select bit 0
-      CH1 = 1<<1,	// Channel select bit 1
-      R   = 1<<2,	// Reference select bit (non-inverting input)
-      POL = 1<<4,	// Output polarity select bit
-      OE  = 1<<5,	// Output enable
-      OUT = 1<<6,	// Output bit 
-      ON  = 1<<7,	// Enable bit
-    };
-
-
-  virtual void put(unsigned int);
-  virtual unsigned int get();
-  virtual void setpins(PinModule * c12in0, PinModule * c12in1,
-	PinModule * c12in2, PinModule * c12in3, PinModule * cinPlus,
-	PinModule * cout);
-  virtual void state_change(unsigned int cmcon_val) { cout << "CM12CON:state_change should not be called\n"; }
-  virtual double CVref() { cout << "CM12CON:CVref should not be called\n"; return(0.);}
- 
-  virtual void link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
-	VRCON *_vrcon, SRCON *_srcon, ECCPAS *_eccpas);
-
-
-  void set_tmrl(TMRL *arg) { m_tmrl = arg; }
-  void releasePin();
-
-  CM12CON0(Processor *pCpu, const char *pName, const char *pDesc);
-  ~CM12CON0();
-
-protected:
-  friend class CM1CON0_2;
-  friend class CM1CON0;
-  friend class CM2CON1;
-  friend class CM2CON0;
-
-  PinModule 	*cm_input[5];
-  PinModule 	*cm_output;
-  CM12SignalSource *cm_source;
-  CM2CON1 	*m_cm2con1;
-  SRCON 	*m_srcon;
-  PIR_SET 	*pir_set;
-  TMRL 		*m_tmrl;
-  CM_stimulus 	*cm_stimulus[2];
-  Stimulus_Node *cm_snode[2];
-  ECCPAS 	*m_eccpas;
-  CM_stimulus 	*cm_cvref;
-  CM_stimulus 	*cm_v06ref;
-
-};
-
-class CM1CON0 : public CM12CON0
-{
- public:
-  CM1CON0(Processor *pCpu, const char *pName, const char *pDesc) :
-	CM12CON0(pCpu, pName, pDesc) {}
-  ~CM1CON0(){}
-
-  virtual void state_change(unsigned int cmcon_val);
-  virtual double CVref();
-
-};
-class CM2CON0 : public CM12CON0
-{
- public:
-  CM2CON0(Processor *pCpu, const char *pName, const char *pDesc) :
-	CM12CON0(pCpu, pName, pDesc) {}
-  ~CM2CON0() {}
-
-  virtual void state_change(unsigned int cmcon_val);
-  virtual double CVref();
-};
-class CM1CON0_2 : public CM12CON0
-{
- public:
-  CM1CON0_2(Processor *pCpu, const char *pName, const char *pDesc) :
-	CM12CON0(pCpu, pName, pDesc) {}
-  ~CM1CON0_2();
-
-  virtual void state_change(unsigned int cmcon_val);
-  virtual double CVref();
-};
-class CM2CON0_2 : public CM12CON0
-{
- public:
-  CM2CON0_2(Processor *pCpu, const char *pName, const char *pDesc) :
-	CM12CON0(pCpu, pName, pDesc) {}
-  ~CM2CON0_2() {}
-
-  virtual void state_change(unsigned int cmcon_val);
-  virtual double CVref();
-};
 // The following classes are for comparators which have 3 registers
 //
 class CMxCON1;
 class ComparatorModule2;
 
-class CMxCON0 : public sfr_register
+class CMxCON0_base : public sfr_register
+{
+public:
+
+    enum {
+	ON = 1<<7,
+	OE = 1<<5
+    };
+    virtual unsigned int get();
+    virtual double get_Vpos(){return 0.;}
+    virtual double get_Vneg(){return 0.;}
+    virtual void put(unsigned int)  { cout << "Help\n";}
+//    virtual int get(){return 0;}
+    virtual void setBitMask(unsigned int bm) { mValidBits = bm; }
+    virtual void setIntSrc(InterruptSource *_IntSrc) { IntSrc = _IntSrc;}
+    virtual double CVref(){return 0.;}
+    virtual void notify(){;}
+    virtual bool output_active() { return value.get() & (ON | OE); }
+    virtual double get_hysteresis(){ return 0.;}
+    virtual bool output_high() { return false;}
+    virtual void set_output(bool output) { ;}
+    virtual bool is_on(){return false;}
+    virtual bool out_invert(){ return true;}
+
+  CMxCON0_base(Processor *pCpu, const char *pName, const char *pDesc,
+	unsigned int _cm, ComparatorModule2 *cmModule);
+  ~CMxCON0_base();
+
+
+  unsigned int mValidBits;
+  PinModule     *cm_input[5];
+  PinModule     *cm_output;
+  CM2CON1       *m_cm2con1;
+  SRCON         *m_srcon;
+//  PIR_SET       *pir_set;
+  InterruptSource *IntSrc;
+//  TMRL          *m_tmrl;
+  CM_stimulus   *cm_stimulus[2];
+  Stimulus_Node *cm_snode[2];
+  ECCPAS        *m_eccpas;
+  unsigned int      cm;	// comparator number
+  CMxCON1	    *m_cmxcon1;
+  ComparatorModule2 *m_cmModule;
+  PeripheralSignalSource *cm_source;
+
+};
+
+class CMxCON0 : public CMxCON0_base
 {
  public:
 
@@ -429,18 +378,89 @@ class CMxCON0 : public sfr_register
   CMxCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int x, ComparatorModule2 *);
   ~CMxCON0();
   void put(unsigned int);
-  unsigned int  get();
+  virtual double get_Vpos();
+  virtual double get_Vneg();
   void setBitMask(unsigned int bm) { mValidBits = bm; }
+  virtual bool is_on() { return (value.get() & CxON);}
+  virtual bool out_invert() { return value.get() & CxPOL;}
+  virtual double get_hysteresis();
+  virtual void set_output(bool output);
+  virtual bool output_high() { return value.get() & CxOUT; }
+};
+
+class CMxCON0_V2 : public CMxCON0_base
+{
+ public:
+
+  enum 
+    {
+      CxCH0 = 1<<0,	// Channel select bit 0
+      CxCH1 = 1<<1,	// Channel select bit 1
+      CxR   = 1<<2,	// Reference select bit (non-inverting input)
+      CxPOL = 1<<4,	// Output polarity select bit
+      CxOE  = 1<<5,	// Output enable
+      CxOUT = 1<<6,	// Output bit 
+      CxON  = 1<<7,	// Enable bit
+      NEG	= 0,
+      POS	= 1,
+    };
+
+  CMxCON0_V2(Processor *pCpu, const char *pName, const char *pDesc, 
+	unsigned int _cm, ComparatorModule2 *cmModule);
+  ~CMxCON0_V2();
+  virtual void put(unsigned int);
+  virtual double get_Vpos();
+  virtual double get_Vneg();
+  void setBitMask(unsigned int bm) { mValidBits = bm; }
+  virtual bool is_on() { return (value.get() & CxON);}
+  virtual bool out_invert() { return value.get() & CxPOL;}
+  virtual double get_hysteresis();
+  virtual void set_output(bool output);
+  virtual bool output_high() { return value.get() & CxOUT; }
+
+  PinModule		*stimulus_pin[2];
+};
+
+class CMxCON1_base : public sfr_register
+{
+ public:
+
+    enum {
+      NEG	= 0,
+      POS	= 1
+
+    };
+  CMxCON1_base(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _cm, ComparatorModule2 *);
+  ~CMxCON1_base();
+
+  void setBitMask(unsigned int bm) { mValidBits = bm; }
+  PinModule *output_pin(int cm=0) { return cm_output[cm]; }
+  virtual void put(unsigned int new_value){}
+  virtual double get_Vpos(unsigned int arg=0, unsigned int arg2=0){ return 0.;}
+  virtual double get_Vneg(unsigned int arg=0, unsigned int arg2=0){ return 0.;}
+  virtual void setPinStimulus(PinModule *, bool);
+  virtual void set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, 
+		PinModule *pin_cm2=0,  PinModule *pin_cm3=0,  
+		PinModule *pin_cm4=0);
+  virtual void set_OUTpin(PinModule *pin_cm0, PinModule *pin_cm1=0);
+  virtual void set_INpinPos(PinModule *pin_cm0, PinModule *pin_cm1=0);
+  virtual bool hyst_active(unsigned int cm) { return false;}
+  virtual void set_vrcon(VRCON *vrcon) {;}
+  virtual void set_vrcon(VRCON_2 *vrcon) {;}
+  virtual void tmr_gate(unsigned int cm, bool output) {;}
 
 protected:
 
   unsigned int cm;	// comparator number
-  CMxCON1	*m_cmxcon1;
-  ComparatorModule2 *m_cmModule;
-  PeripheralSignalSource *cm_source;
+  CM_stimulus 		*cm_stimulus[2];
+  PinModule		*stimulus_pin[2];
+  ComparatorModule2 	*m_cmModule;
+  PinModule 		*cm_inputNeg[5];
+  PinModule 		*cm_inputPos[2];
+  PinModule 		*cm_output[2];
 };
 // CMxCON1 only uses 1 0r 2 of Negative select bits and 2 Positive select bits
-class CMxCON1 : public sfr_register
+class CMxCON1 : public CMxCON1_base
 {
  public:
 
@@ -455,33 +475,108 @@ class CMxCON1 : public sfr_register
       CxINTN 	= 1<<6,	//  Interrupt on Negative Going Edge Enable bits
       CxINTP  	= 1<<7,	//  Interrupt on Positive Going Edge Enable bits
       CxNMASK = (CxNCH0 | CxNCH1 | CxNCH2),
-      CxPMASK = (CxPCH0 | CxPCH1 | CxPCH2),
-      NEG	= 0,
-      POS	= 1,
-
+      CxPMASK = (CxPCH0 | CxPCH1 | CxPCH2)
     };
   CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _x, ComparatorModule2 *);
   ~CMxCON1();
 
-  void setBitMask(unsigned int bm) { mValidBits = bm; }
-  void put(unsigned int new_value);
-  double get_Vpos();
-  double get_Vneg();
-  void setPinStimulus(PinModule *, bool);
-  void set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, PinModule *pin_cm2=0,  PinModule *pin_cm3=0,  PinModule *pin_cm4=0);
-  void set_OUTpin(PinModule *pin_cm0);
-  void set_INpinPos(PinModule *pin_cm0, PinModule *pin_cm1=0);
-  PinModule *output_pin() { return cm_output; }
+  virtual void put(unsigned int new_value);
+  virtual double get_Vpos(unsigned int arg=0, unsigned int arg2=0);
+  virtual double get_Vneg(unsigned int arg=0, unsigned int arg2 = 0);
+
+};
+
+/*  two comparators with common CM2CON1 and no COUT register, hyteresis, 
+    C1, C2 possible T1,3,5  gate, FVR or  DAC for voltage reference,
+    used by 18f26k22.
+*/
+class CM2CON1_V2 : public CMxCON1_base
+{
+ public:
+
+  enum 
+    {
+	C2SYNC = 1<<0,
+	C1SYNC = 1<<1,
+	C2HYS  = 1<<2,
+	C1HYS  = 1<<3,
+	C2RSEL = 1<<4,
+	C1RSEL = 1<<5,
+	MC2OUT = 1<<6,
+	MC1OUT = 1<<7
+    };
+
+
+  CM2CON1_V2(Processor *pCpu, const char *pName, const char *pDesc, 
+		unsigned int _cm, ComparatorModule2 * cmModule) : 
+		CMxCON1_base(pCpu, pName, pDesc, _cm, cmModule){}
+  ~CM2CON1_V2(){}
+  virtual void put(unsigned int new_value);
+  virtual double get_Vpos(unsigned int cm, unsigned int cmxcon0);
+  virtual double get_Vneg(unsigned int cm, unsigned int cmxcon0);
+  virtual bool hyst_active(unsigned int cm);
+  virtual void tmr_gate(unsigned int cm, bool output);
+
+};
+/*  two comparators, no hyteresis, cm2con1 controls t1 gate,
+    C2 possible T1 gate, vrcon for voltage reference
+    used by 16f882.
+*/
+    
+class CM2CON1_V3 : public CMxCON1_base
+{
+ public:
+
+  enum 
+    {
+	C2SYNC = 1<<0,
+	T1GSS  = 1<<1,
+	C2RSEL = 1<<4,
+	C1RSEL = 1<<5,
+	MC2OUT = 1<<6,
+	MC1OUT = 1<<7
+    };
+
+
+  CM2CON1_V3(Processor *pCpu, const char *pName, const char *pDesc, 
+		unsigned int _cm, ComparatorModule2 * cmModule) : 
+		CMxCON1_base(pCpu, pName, pDesc, _cm, cmModule), m_vrcon(0){}
+  ~CM2CON1_V3(){}
+  virtual void put(unsigned int new_value);
+  virtual double get_Vpos(unsigned int cm, unsigned int cmxcon0);
+  virtual double get_Vneg(unsigned int cm, unsigned int cmxcon0);
+  virtual bool hyst_active(unsigned int cm) { return false;}
+  void set_vrcon(VRCON * _vrcon) { m_vrcon = _vrcon; }
+  virtual void tmr_gate(unsigned int cm, bool output);
 
 protected:
+  VRCON 	*m_vrcon;
 
-  unsigned int cm;	// comparator number
-  CM_stimulus 		*cm_stimulus[2];
-  PinModule		*stimulus_pin[2];
-  PinModule 		*cm_inputNeg[5];
-  PinModule 		*cm_inputPos[2];
-  PinModule 		*cm_output;
-  ComparatorModule2 	*m_cmModule;
+};
+/*  two comparators, no hyteresis, cm2con1 controls t1 gate,
+    C2 possible T1 gate, VRCON for voltage reference
+    Like CM2CON1_V3 without C1RSEL, C2RSEL
+    used by 16f690.
+*/
+    
+class CM2CON1_V4 : public CM2CON1_V3
+{
+ public:
+
+
+  CM2CON1_V4(Processor *pCpu, const char *pName, const char *pDesc, 
+		unsigned int _cm, ComparatorModule2 * cmModule) ; 
+  ~CM2CON1_V4();
+  virtual void put(unsigned int new_value);
+  virtual double get_Vpos(unsigned int cm, unsigned int cmxcon0);
+  void set_vrcon(VRCON_2 * _vrcon) { m_vrcon = _vrcon; }
+
+protected:
+  VRCON_2 	*m_vrcon;
+  CM_stimulus 	*cm1_cvref;
+  CM_stimulus 	*cm1_v06ref;
+  CM_stimulus 	*cm2_cvref;
+  CM_stimulus 	*cm2_v06ref;
 };
 class CMOUT : public sfr_register
 {
@@ -510,19 +605,39 @@ class ComparatorModule2
   void set_cmout(unsigned int bit, bool value);
   void set_if(unsigned int);
   void assign_pir_set(PIR_SET *new_pir_set){ pir_set = new_pir_set;}
-  void assign_t1gcon(T1GCON *_t1gcon) { t1gcon = _t1gcon;}
+  void assign_tmr1l(TMRL *t1, TMRL *t3 = 0, TMRL *t5 = 0) 
+  { 
+	tmr1l[0] = t1;
+	tmr1l[1] = t3;
+	tmr1l[2] = t5;
+  }
+  void assign_t1gcon(T1GCON *t1g, T1GCON *t3g = 0, T1GCON *t5g = 0) 
+  { 
+	t1gcon[0] = t1g;
+	t1gcon[1] = t3g;
+	t1gcon[2] = t5g;
+  }
   void assign_sr_module(SR_MODULE *_sr_module) { sr_module = _sr_module;}
 
-  CMxCON0	*cmxcon0[4];
-  CMxCON1 	*cmxcon1[4];
+  void assign_eccpsas(ECCPAS *a1, ECCPAS *a2=0, ECCPAS *a3=0)
+  {
+	eccpas[0] = a1;
+	eccpas[1] = a2;
+	eccpas[2] = a3;
+  }
+
+
+  CMxCON0_base 	*cmxcon0[4];
+  CMxCON1_base 	*cmxcon1[4];
   CMOUT		*cmout;
 
 //protected:
   double 	DAC_voltage;
   double 	FVR_voltage;
   PIR_SET 	*pir_set;
-  T1GCON	*t1gcon;
+  TMRL		*tmr1l[3];
+  T1GCON	*t1gcon[3];
   SR_MODULE	*sr_module;
-
+  ECCPAS 	*eccpas[3];
 };
 #endif // __COMPARATOR_H__

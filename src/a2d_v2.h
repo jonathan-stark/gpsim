@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
-   Copyright (C) 2008 Roy R Rankin
+   Copyright (C) 2008,2015 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -24,6 +24,8 @@ License along with this library; if not, see
 #ifndef __A2D_V2_H__
 #define __A2D_v2_H__
 
+#include "comparator.h"
+#include "a2dconverter.h"
 #include "registers.h"
 #include "trigger.h"
 #include "intcon.h"
@@ -63,9 +65,10 @@ public:
 	
   void setChannelConfiguration(unsigned int cfg, unsigned int bitMask);
 
-  double getChannelVoltage(unsigned int channel);
-  double getVrefHi();
-  double getVrefLo();
+  virtual PinModule *get_A2Dpin(unsigned int channel);
+  virtual double getChannelVoltage(unsigned int channel);
+  virtual double getVrefHi();
+  virtual double getVrefLo();
   void 	 setVrefHiChannel(unsigned int channel);
   void 	 setVrefLoChannel(unsigned int channel);
 
@@ -74,8 +77,12 @@ public:
   void setIOPin(unsigned int, PinModule *);
   void setAdcon0(ADCON0_V2 *adcon0){ m_adcon0 = adcon0;}
   virtual unsigned int get_adc_configmask(unsigned int); 
+  virtual void setVoltRef(double x) {;}
+  virtual int getVrefHiChan() { return m_vrefHiChan;}
+  virtual int getVrefLoChan() { return m_vrefLoChan;}
 
 private:
+protected:
   PinModule **m_AnalogPins;
   unsigned int m_nAnalogChannels;
   unsigned int mValidCfgBits;
@@ -172,28 +179,134 @@ public:
   void setA2DBits(unsigned int);
   void setChannel_Mask(unsigned int ch_mask) { channel_mask = ch_mask; }
   void setRCtime(double);
+  void set_ctmu_stim(stimulus *_ctmu_stim);
+  void attach_ctmu_stim();
+  void detach_ctmu_stim();
 
 private:
 
-  sfr_register *adres;
-  sfr_register *adresl;
-  ADCON1_V2    *adcon1;
-  ADCON2_V2    *adcon2;
-  INTCON       *intcon;
-  PIR1v2       *pir1v2;
+  sfr_register  *adres;
+  sfr_register  *adresl;
+  ADCON1_V2     *adcon1;
+  ADCON2_V2     *adcon2;
+  INTCON        *intcon;
+  PIR1v2        *pir1v2;
 
-  double m_dSampledVoltage;
-  double m_dSampledVrefHi;
-  double m_dSampledVrefLo;
-  double m_RCtime;
-  unsigned int m_A2DScale;
-  unsigned int m_nBits;
-  guint64 future_cycle;
-  unsigned int ad_state;
-  unsigned int Tad;
-  unsigned int Tacq;
-  unsigned int channel_mask;
+  double 	m_dSampledVoltage;
+  double 	m_dSampledVrefHi;
+  double 	m_dSampledVrefLo;
+  double 	m_RCtime;
+  unsigned int 	m_A2DScale;
+  unsigned int 	m_nBits;
+  guint64 	future_cycle;
+  unsigned int 	ad_state;
+  unsigned int 	Tad;
+  unsigned int 	Tacq;
+  unsigned int 	channel_mask;
+  stimulus     	*ctmu_stim;
+  stimulus	*a2d_sample_cap;
+  int		active_stim;	// channel with active stimulus
+};
+
+// Channels defined in ANSEL rather than ADCON1
+class ADCON1_2B : public ADCON1_V2
+{
+public:
+
+    enum
+    {
+       NVCFG0 =  1<<0,	// Negative Voltage Reference Configuration bits
+       NVCFG1 =  1<<1,
+       PVCFG0 =  1<<2,	// Positive Voltage Reference Configuration bits
+       PVCFG1 =  1<<3,
+       TRIGSEL = 1<<7,	// Special Trigger Select bit
+
+       // the following are special A/D channels
+       CTMU = 0x1d,
+       DAC  = 0x1e,
+       FVR_BUF2 = 0x1f
+    };
+
+    ADCON1_2B(Processor *pCpu, const char *pName, const char *pDesc);
+    virtual double getChannelVoltage(unsigned int channel);
+    virtual void put(unsigned int new_value);
+    virtual double getVrefHi();
+    virtual double getVrefLo();
+    void update_ctmu(double _Vctmu) { Vctmu = _Vctmu;}
+    void update_dac(double _Vdac) { Vdac = _Vdac;}
+    virtual void setVoltRef(double _Vfvr_buf2) { Vfvr_buf2 = _Vfvr_buf2;}
+    virtual PinModule *get_A2Dpin(unsigned int channel);
+
+private:
+    double Vctmu;
+    double Vdac;
+    double Vfvr_buf2;
+    
+};
+
+class ANSEL_2B :  public sfr_register
+{
+
+public:
+
+  ANSEL_2B(Processor *pCpu, const char *pName, const char *pDesc);
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  void setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1);
+
+private:
+   PinModule *m_AnalogPins[8];
+   int  analog_channel[8];
+   unsigned int mask;
+};
+
+class FVRCON_V2 : public sfr_register, public TriggerObject
+{
+public:
+
+  enum 
+  {
+	FVRS0   = 1<<4,
+	FVRS1   = 1<<5,
+	FVRRDY	= 1<<6,
+	FVREN	= 1<<7,
+  };
+  FVRCON_V2(Processor *, const char *pName, const char *pDesc=0, unsigned int bitMask= 0xf0);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  void set_adcon1(ADCON1_V2 *_adcon1) { adcon1 = _adcon1;}
+  void set_cmModule(ComparatorModule2 *_cmModule) { cmModule = _cmModule;}
+  void set_daccon0(DACCON0 *_daccon0) { daccon0_list.push_back(_daccon0);}
+  void set_cpscon0(CPSCON0 *_cpscon0) { cpscon0 = _cpscon0;}
+private:
+  unsigned int mask_writable;
+  virtual void callback();
+  guint64  future_cycle;
+  double compute_FVR(unsigned int);
+  ADCON1_V2 *adcon1;
+  DACCON0 *daccon0;
+  vector<DACCON0 *> daccon0_list;
+  ComparatorModule2 *cmModule;
+  CPSCON0 *cpscon0;
 };
 
 
+class DACCON0_V2 : public DACCON0
+{
+
+public:
+
+   DACCON0_V2(Processor *pCpu, const char *pName, const char *pDesc=0, 
+	unsigned int bitMask= 0xe6, unsigned int bit_res = 32) :
+	DACCON0(pCpu, pName, pDesc, bitMask, bit_res)
+   { adcon1 = 0;}
+
+
+  virtual void set_adcon1(ADCON1_2B *_adcon1) { adcon1 = _adcon1;}
+  virtual void compute_dac(unsigned int value);
+  virtual double  get_Vhigh(unsigned int value);
+
+private:
+  ADCON1_2B     *adcon1;
+};
 #endif // __A2D_V2_H__

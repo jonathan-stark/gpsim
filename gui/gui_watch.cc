@@ -702,6 +702,7 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
   menu = "/menu/Windows/Watch";
 
   gp = _gp;
+  watch_list = 0;
 
   get_config();
 

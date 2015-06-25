@@ -264,7 +264,7 @@ void P16X6X_processor::create_sfr_map()
     add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
     add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
     add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
-    tmr2.ssp_module = &ssp;
+    tmr2.ssp_module[0] = &ssp;
   }
 
   add_sfr_register(&ccpr1l,  0x15, RegisterValue(0,0));

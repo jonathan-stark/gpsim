@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2010	   Roy Rankin
+   Copyright (C) 2010,2015	   Roy Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -22,13 +22,6 @@ License along with this library; if not, see
 #define __P16F88X_H__
 
 #include "p16x6x.h"
-
-/*
-#include "pir.h"
-#include "eeprom.h"
-#include "comparator.h"
-#include "a2dconverter.h"
-*/
 
 
 /***************************************************************************
@@ -82,9 +75,7 @@ public:
   OSCTUNE      osctune;
   WDTCON       wdtcon;
   USART_MODULE usart;
-  CM1CON0 cm1con0;
-  CM2CON0 cm2con0;
-  CM2CON1 cm2con1;
+  ComparatorModule2 comparator;
   VRCON   vrcon;
   SRCON   srcon;
   ANSEL  ansel;
@@ -244,9 +235,7 @@ public:
   VRCON_2   vrcon;
   SRCON   srcon;
   ANSEL  ansel;
-  CM1CON0_2 cm1con0;
-  CM2CON0_2 cm2con0;
-  CM2CON1 cm2con1;
+  ComparatorModule2 comparator;
   ADCON0_12F  adcon0;
   ADCON1_16F  adcon1;
 
@@ -256,7 +245,6 @@ public:
   PIR2v3 *pir2_3_reg;
 
   INTCON_14_PIR    intcon_reg;
-//  ComparatorModule comparator;
   PIR_SET_2    pir_set_2_def;
   WPU              *m_wpua;
   WPU              *m_wpub;

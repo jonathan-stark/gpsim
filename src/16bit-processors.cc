@@ -235,7 +235,6 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     pir1(this,"pir1","Peripheral Interrupt Register",0,0),
     ipr1(this, "ipr1", "Interrupt Priorities"),
     ipr2(this, "ipr2", "Interrupt Priorities"),
-    t1con(this, "t1con", "TMR1 Control"),
     pie1(this, "pie1", "Peripheral Interrupt Enable"),
     pie2(this, "pie2", "Peripheral Interrupt Enable"),
     t2con(this, "t2con", "TMR2 Control"),
@@ -251,7 +250,6 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     ccpr2h(this, "ccpr2h", "Capture Compare 2 High"),
     tmr3l(this, "tmr3l", "TMR3 Low"),
     tmr3h(this, "tmr3h", "TMR3 High"),
-    t3con(this, "t3con", "TMR3 Control"),
 
     osccon(this, "osccon", "OSC Control"),
     lvdcon(this, "lvdcon", "LVD Control"),
@@ -295,6 +293,8 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_latc  = new PicLatchRegister(this,"latc","", m_portc);
   pir2 = new  PIR2v2(this,"pir2","Peripheral Interrupt Register",0,0);
 
+  t1con = new T1CON(this, "t1con", "TMR1 Control");
+  t3con = new T3CON(this, "t3con", "TMR3 Control");
   //tmr0l.set_cpu(this, m_porta, 4, option_reg);
   //tmr0l.start(0);
   m_porta->addSink(&tmr0l,4);
@@ -348,7 +348,7 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&usart.spbrg);
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
-  remove_sfr_register(&t3con);
+  remove_sfr_register(t3con);
   remove_sfr_register(&tmr3l);
   remove_sfr_register(&tmr3h);
 
@@ -372,10 +372,15 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&ssp.sspadd);
   remove_sfr_register(&ssp.sspbuf);
 
+
+  if (!MovedReg())
+  {
   remove_sfr_register(&t2con);
   remove_sfr_register(&pr2);
   remove_sfr_register(&tmr2);
-  remove_sfr_register(&t1con);
+  }
+
+  remove_sfr_register(t1con);
   remove_sfr_register(&tmr1l);
   remove_sfr_register(&tmr1h);
 
@@ -504,7 +509,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(usart.rcreg,     0xfae,porv,"rcreg");
   add_sfr_register(&usart.spbrg,    0xfaf,porv,"spbrg");
 
-  add_sfr_register(&t3con,	  0xfb1,porv,"t3con");
+  add_sfr_register(t3con,	  0xfb1,porv);
   add_sfr_register(&tmr3l,	  0xfb2,porv,"tmr3l");
   add_sfr_register(&tmr3h,	  0xfb3,porv,"tmr3h");
 
@@ -526,12 +531,14 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ssp.sspstat,  0xfc7,porv,"sspstat");
   add_sfr_register(&ssp.sspadd,   0xfc8,porv,"sspadd");
   add_sfr_register(&ssp.sspbuf,   0xfc9,porv,"sspbuf");
-
+  if (!MovedReg())
+  {
   add_sfr_register(&t2con,	  0xfca,porv,"t2con");
   add_sfr_register(&pr2,	  0xfcb,RegisterValue(0xff,0),"pr2");
   add_sfr_register(&tmr2,	  0xfcc,porv,"tmr2");
+  }
 
-  add_sfr_register(&t1con,	  0xfcd,porv,"t1con");
+  add_sfr_register(t1con,	  0xfcd,porv,"t1con");
   add_sfr_register(&tmr1l,	  0xfce,porv,"tmr1l");
   add_sfr_register(&tmr1h,	  0xfcf,porv,"tmr1h");
 
@@ -620,16 +627,16 @@ void _16bit_processor :: create_sfr_map()
   // Initialize all of the register cross linkages
   pir_set_def.set_pir1(&pir1);
 
-  tmr2.ssp_module = &ssp;
+  tmr2.ssp_module[0] = &ssp;
 
   tmr1l.tmrh   = &tmr1h;
-  tmr1l.t1con  = &t1con;
+  tmr1l.t1con  = t1con;
   tmr1l.setInterruptSource(new InterruptSource(&pir1, PIR1v1::TMR1IF));
 //  tmr1l.ccpcon = &ccp1con;
 
   tmr1h.tmrl  = &tmr1l;
 
-  t1con.tmrl  = &tmr1l;
+  t1con->tmrl  = &tmr1l;
 
   t2con.tmr2  = &tmr2;
   tmr2.pir_set = &pir_set_def; //get_pir_set();
@@ -641,16 +648,19 @@ void _16bit_processor :: create_sfr_map()
 
 
   tmr3l.tmrh  = &tmr3h;
-  tmr3l.t1con = &t3con;
+  tmr3l.t1con = t3con;
 //  tmr3l.ccpcon = &ccp1con;
 
   tmr3h.tmrl  = &tmr3l;
 
-  t3con.tmrl  = &tmr3l;
-  t3con.tmr1l = &tmr1l;
-  t3con.ccpr1l = &ccpr1l;
-  t3con.ccpr2l = &ccpr2l;
-  t3con.t1con = &t1con;
+  t3con->tmrl  = &tmr3l;
+  if (T3HasCCP())
+  {
+    t3con->tmr1l = &tmr1l;
+    t3con->ccpr1l = &ccpr1l;
+    t3con->ccpr2l = &ccpr2l;
+    t3con->t1con = t1con;
+  }
 
   ccp1con.setCrosslinks(&ccpr1l, &pir1, PIR1v2::CCP1IF, &tmr2);
   ccp1con.setIOpin(&((*m_portc)[2]));

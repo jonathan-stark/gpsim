@@ -1,7 +1,7 @@
 /*
         
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006,2010,2013 Roy R. Rankin
+   Copyright (C) 2006,2010,2013,2015 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -60,10 +60,10 @@ void ComparatorModule::initialize( PIR_SET *pir_set,
 {
   //  cmcon = new CMCON;
   cmcon.assign_pir_set(pir_set);
-  cmcon.setINpin(0, pin_cm0);
-  cmcon.setINpin(1, pin_cm1);
-  cmcon.setINpin(2, pin_cm2);
-  cmcon.setINpin(3, pin_cm3);
+  cmcon.setINpin(0, pin_cm0, "an0");
+  cmcon.setINpin(1, pin_cm1, "an1");
+  cmcon.setINpin(2, pin_cm2, "an2");
+  cmcon.setINpin(3, pin_cm3, "an3");
   cmcon.setOUTpin(0, pin_cm4);
   cmcon.setOUTpin(1, pin_cm5);
   vrcon.setIOpin(pin_vr0);
@@ -105,35 +105,6 @@ private:
 //--------------------------------------------------
 //
 //--------------------------------------------------
-class CM12CON0;
-
-class CM12SignalSource : public SignalControl
-{
-public:
-  CM12SignalSource( CM12CON0 *_cm12con0)
-    : m_state('0'), m_cm12con0(_cm12con0)
-  {
-  }
-  ~CM12SignalSource()
-  {
-//    cout << "deleting CMsignal source " << this << endl;
-  }
-  virtual void release()
-  {
-    m_cm12con0->releasePin();
-  }
-  virtual char getState()
-  {
-    return m_state;
-  }
-  void putState(bool new_val)
-  {
-        m_state = new_val?'1':'0';
-  }
-private:
-  char m_state;
-  CM12CON0 *m_cm12con0;
-};
 
 CM_stimulus::CM_stimulus(CMCON * arg, const char *cPname,double _Vth, double _Zth)
   : stimulus(cPname, _Vth, _Zth)
@@ -233,11 +204,12 @@ void CMCON::releasePin(int i)
     cm_output[i] = 0;
     cm_source[i] = 0;
 }
-void CMCON::setINpin(int i, PinModule *newPinModule)
+void CMCON::setINpin(int i, PinModule *newPinModule, const char *an)
 {
     if (newPinModule == NULL) return;
     cm_input[i] = newPinModule;
     cm_input_pin[i] = strdup(newPinModule->getPin().name().c_str());
+    cm_an[i] = strdup(an);
 }
 void CMCON::setOUTpin(int i, PinModule *newPinModule)
 {
@@ -372,7 +344,7 @@ void CMCON::put(unsigned int new_value)
      for(int j = 0; j < 4; j++)
      {
         configuration >>= CFG_SHIFT;
-        if ((configuration & CFG_MASK) < 4)
+        if ((configuration & CFG_MASK) < 6)
                 in_mask |= (1 << (configuration & CFG_MASK));
      }
   }
@@ -409,9 +381,12 @@ void CMCON::put(unsigned int new_value)
   }
   //
   // setup inputs
-  for(i = 0; i < 4 && cm_input[i]; i++)
+  for(i = 0; i < 4 ; i++)
   {
+     if (cm_input[i])
+     {
         const char *name = cm_input[i]->getPin().GUIname().c_str();
+
 
         if (cm_input[i]->getPin().snode)
         {
@@ -423,14 +398,9 @@ void CMCON::put(unsigned int new_value)
         // rewrite GUI name as required
         if (in_mask & (1 << i) )
         {
-            char newname[20];
-
-            if (strncmp(name, "an", 2))
-            {
-                sprintf(newname, "an%d", i);
-                cm_input[i]->AnalogReq(this, true, newname);
-            }
+	    cm_input[i]->AnalogReq(this, true, cm_an[i]);
         }
+
         else
         {
 
@@ -438,7 +408,7 @@ void CMCON::put(unsigned int new_value)
 	    cm_input[i]->AnalogReq(this, false, cm_input[i]->getPin().name().c_str());
 
         }
-
+     }
    }
 
   // if only one comparator,  mask C2INV
@@ -488,259 +458,13 @@ void SRCON::put(unsigned int new_value)
   value.put(new_value & writable_bits);
 
 }
-CM2CON1::CM2CON1(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc)
-{
-    writable_bits = C1RSEL | C2RSEL | T1GSS | C2SYNC;
-}
-void CM2CON1::link_cm12con0(CM1CON0 *_cm1con0, CM2CON0 *_cm2con0)
-{
-	m_cm1con0 = _cm1con0;
-	m_cm2con0 = _cm2con0;
-}
-void CM2CON1::put(unsigned int new_value)
-{
-  unsigned int old_value = value.get();
-  trace.raw(write_trace.get() | value.get());
-  value.put(new_value & writable_bits);
-  if (((new_value ^ old_value) & C1RSEL) && m_cm1con0)
-	m_cm1con0->get();
-  if (((new_value ^ old_value) & C2RSEL) && m_cm2con0)
-	m_cm2con0->get();
 
-  if (m_cm2con0->m_tmrl)
-	m_cm2con0->m_tmrl->set_T1GSS((new_value & T1GSS) == T1GSS);
-
-
-}
-
-
-void CM1CON0::state_change(unsigned int cmcon_val)
-{
-   if (!cm_stimulus[0])
-   {
-        cm_stimulus[0] = new CM_stimulus((CMCON *)this, "cm1_stimulus_1", 0, 1e12);
-        cm_stimulus[1] = new CM_stimulus((CMCON *)this, "cm1_stimulus_2", 0, 1e12);
-   }
-   if (value.get() ^ cmcon_val) // change of state
-   {
-
-	// Mirror C1OUT in CM2CON1::MC1OUT
-	if (cmcon_val & OUT)
-	{
-	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC1OUT);
-	    if (m_srcon->value.get() & SRCON::C1SEN)
-	    {
-		m_srcon->set = TRUE;
-		if (!m_srcon->reset)
-		    m_srcon->SR_Q = TRUE;
-	    }
-	}
-	else
-	{
-	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC1OUT);
-	    if (m_srcon->value.get() & SRCON::C1SEN)
-	    {
-		m_srcon->set = FALSE;
-	    }
-	}
-	if (m_eccpas) m_eccpas->c1_output(cmcon_val & OUT);
-
-        // Generate interupt ?
-        if (pir_set)
-	{
-                pir_set->set_c1if();
-	}
-   }
-   if (cmcon_val & OE)	// output pin enabled
-   {
-    if (!(m_srcon->value.get() & SRCON::SR0)) //SRCON select comparator output
-    {
-        cm_source->putState((cmcon_val & OUT) != 0);
-     }
-     else	// RS latch output
-     {
-        cm_source->putState(m_srcon->SR_Q);
-     }
-     cm_output->updatePinModule();
-     update();
-    }
-}
-double CM1CON0::CVref()
-{
-
-	if (m_cm2con1->value.get() & CM2CON1::C1RSEL)
-	    return(m_vrcon->get_Vref());
-	else
-	    return(0.6);
-}
-void CM2CON0::state_change(unsigned int cmcon_val)
-{
-
-   if (value.get() ^ cmcon_val) // change of state
-   {
-	// Mirror C2OUT in CM2CON1::MC2OUT
-	if (cmcon_val & OUT)
-	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC2OUT);
-	else
-	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC2OUT);
-        // Generate interupt ?
-        if (pir_set)
-                pir_set->set_c2if();
-   }
-   if (m_tmrl)
-   {
-	m_tmrl->compare_gate((cmcon_val & OUT) == OUT);
-   }
-  
-   if (m_eccpas) m_eccpas->c2_output(cmcon_val & OUT);
-
-   if (cmcon_val & OE)	// output pin enabled
-   {
-    if (!(m_srcon->value.get() & SRCON::SR1)) //SRCON select comparator output
-    {
-        cm_source->putState((cmcon_val & OUT) != 0);
-     }
-     else	// RS latch output
-     {
-        cm_source->putState(!m_srcon->SR_Q);
-     }
-     cm_output->updatePinModule();
-     update();
-    }
-}
-double CM2CON0::CVref()
-{
-
-	if (m_cm2con1->value.get() & CM2CON1::C2RSEL)
-	    return(m_vrcon->get_Vref());
-	else
-	    return(0.6);
-}
-
-CM1CON0_2::~CM1CON0_2()
-{
-  if (cm_stimulus[0]) delete cm_stimulus[0]; 
-  if (cm_stimulus[1]) delete cm_stimulus[1]; 
-  cm_stimulus[0] = 0;
-  cm_stimulus[1] = 0;
-  if (cm_cvref) delete cm_cvref;
-  if (cm_v06ref) delete cm_v06ref;
-}
-void CM1CON0_2::state_change(unsigned int cmcon_val)
-{
-   if (!cm_stimulus[0])
-   {
-        cm_stimulus[0] = new CM_stimulus((CMCON *)this, "cm1_stimulus_1", 0, 1e12);
-        cm_stimulus[1] = new CM_stimulus((CMCON *)this, "cm1_stimulus_2", 0, 1e12);
-        cm_cvref = new CM_stimulus((CMCON *)this, "cm1_cvref", 0, 1e12);
-        cm_v06ref = new CM_stimulus((CMCON *)this, "cm1_v06ref", 0, 1e12);
-	((Processor *)cpu)->CVREF->attach_stimulus(cm_cvref);
-	((Processor *)cpu)->V06REF->attach_stimulus(cm_v06ref);
-   }
-   if (value.get() ^ cmcon_val) // change of state
-   {
-
-	// Mirror C1OUT in CM2CON1::MC1OUT
-	if (cmcon_val & OUT)
-	{
-	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC1OUT);
-	    if (m_srcon->value.get() & SRCON::C1SEN)
-	    {
-		m_srcon->set = TRUE;
-		if (!m_srcon->reset)
-		    m_srcon->SR_Q = TRUE;
-	    }
-	}
-	else
-	{
-	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC1OUT);
-	    if (m_srcon->value.get() & SRCON::C1SEN)
-	    {
-		m_srcon->set = FALSE;
-	    }
-	}
-	if (m_eccpas) m_eccpas->c1_output(cmcon_val & OUT);
-
-        // Generate interupt ?
-        if (pir_set)
-	{
-                pir_set->set_c1if();
-	}
-   }
-   if (cmcon_val & OE)	// output pin enabled
-   {
-    if (!(m_srcon->value.get() & SRCON::SR0)) //SRCON select comparator output
-    {
-        cm_source->putState((cmcon_val & OUT) != 0);
-     }
-     else	// RS latch output
-     {
-        cm_source->putState(m_srcon->SR_Q);
-     }
-     cm_output->updatePinModule();
-     update();
-    }
-}
-double CM1CON0_2::CVref()
-{
-
-   	Dprintf(("%x vrcon %x CVREF %.1f V06REF %.1f\n", 
-	    m_vrcon->value.get(), ((Processor *)cpu)->CVREF->get_nodeVoltage(),
-            ((Processor *)cpu)->V06REF->get_nodeVoltage()));
-	if (m_vrcon->value.get() & VRCON_2::C1VREN)
-	    return(((Processor *)cpu)->CVREF->get_nodeVoltage());
-	else
-	    return(((Processor *)cpu)->V06REF->get_nodeVoltage());
-}
-
-void CM2CON0_2::state_change(unsigned int cmcon_val)
-{
-   if (value.get() ^ cmcon_val) // change of state
-   {
-	// Mirror C2OUT in CM2CON1::MC2OUT
-	if (cmcon_val & OUT)
-	    m_cm2con1->value.put(m_cm2con1->value.get() | CM2CON1::MC2OUT);
-	else
-	    m_cm2con1->value.put(m_cm2con1->value.get() & ~CM2CON1::MC2OUT);
-        // Generate interupt ?
-        if (pir_set)
-                pir_set->set_c2if();
-   }
-   if (m_tmrl)
-   {
-	m_tmrl->compare_gate((cmcon_val & OUT) == OUT);
-   }
-  
-   if (m_eccpas) m_eccpas->c2_output(cmcon_val & OUT);
-
-   if (cmcon_val & OE)	// output pin enabled
-   {
-    if (!(m_srcon->value.get() & SRCON::SR1)) //SRCON select comparator output
-    {
-        cm_source->putState((cmcon_val & OUT) != 0);
-     }
-     else	// RS latch output
-     {
-        cm_source->putState(!m_srcon->SR_Q);
-     }
-     cm_output->updatePinModule();
-     update();
-    }
-}
-double CM2CON0_2::CVref()
-{
-
-	if (m_vrcon->value.get() & VRCON_2::C2VREN)
-	    return(((Processor *)cpu)->CVREF->get_nodeVoltage());
-	else
-	    return(((Processor *)cpu)->V06REF->get_nodeVoltage());
-}
-
-CM12CON0::CM12CON0(Processor *pCpu, const char *pName, const char *pDesc)
+CMxCON0_base::CMxCON0_base(Processor *pCpu, const char *pName, 
+	const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
   : sfr_register(pCpu, pName, pDesc),
-    m_vrcon(0), m_cm2con1(0), m_srcon(0),
-    pir_set(0), m_tmrl(0)
+    m_cm2con1(0), m_srcon(0),
+    IntSrc(0),
+    cm(_cm), m_cmModule(cmModule), cm_source(0)
 {
   value.put(0);
   cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=cm_input[4]=0;
@@ -750,157 +474,45 @@ CM12CON0::CM12CON0(Processor *pCpu, const char *pName, const char *pDesc)
   cm_snode[0]=cm_snode[1]=0;
 }
 
-CM12CON0::~CM12CON0()
+CMxCON0_base::~CMxCON0_base()
 {
 
 
-  if ((value.get() & (ON | OE)) && cm_output) cm_output->setSource(0);
+  if (output_active() && cm_output) cm_output->setSource(0);
   if (cm_source) delete cm_source;
   if ((!cm_snode[0]) && cm_stimulus[0]) delete cm_stimulus[0];
   if ((!cm_snode[1]) && cm_stimulus[1]) delete cm_stimulus[1];
+  if (IntSrc) delete IntSrc;
 
 }
-void CM12CON0::put(unsigned int new_value)
+
+
+//
+// evaluate inputs and determine output
+//
+unsigned int CMxCON0_base::get()
 {
-  unsigned int old_val = value.get();
-
-  if (verbose)
-      cout << "CM12CON0::put(new_value) =" << hex << new_value << endl;
-
-  if (new_value & (ON | OE))
-  	cm_output->setSource(cm_source);
-  else
-   	cm_output->setSource(0);
-  // ON/OFF or channel change
-  if ((old_val ^ (new_value & 0xf7)) & ( ON | R | CH1 | CH0))
-  {
-	if (new_value & ON)
-	{
-	    int channel = new_value & (CH1 | CH0);
-	    if ( !(new_value & R))	// Monitor input for CIN+
-	    {
-		if (cm_snode[0] == NULL)
-		{
-		    cm_snode[0] = cm_input[4]->getPin().snode;
-		    if (cm_snode[0]) cm_snode[0]->attach_stimulus(cm_stimulus[0]);
-		}
-			
-	    }
-	    else if (cm_snode[0] != NULL) // Using CVref so turn off monitoring
-	    {
-		cm_snode[0]->detach_stimulus(cm_stimulus[0]);
-		cm_snode[0] = NULL;
-	    }
-	    if (cm_snode[1] == NULL) // No CIN- monitoring active
-	    {
-		cm_snode[1] = cm_input[channel]->getPin().snode;
-		if (cm_snode[1]) cm_snode[1]->attach_stimulus(cm_stimulus[1]);
-	    }
-	    // Change CIN- monitoring if on differnt pin
-	    else if (cm_snode[1] != cm_input[channel]->getPin().snode)
-	    {
-		cm_snode[1]->detach_stimulus(cm_stimulus[1]);
-		cm_snode[1] = cm_input[channel]->getPin().snode;
-		if (cm_snode[1]) cm_snode[1]->attach_stimulus(cm_stimulus[1]);
-	    }
-	    
-	}
-	else // turning off, stop all monitoring of pins
-	{
-	    if (cm_snode[0] != NULL)
-	    {
-		cm_snode[0]->detach_stimulus(cm_stimulus[0]);
-                cm_snode[0] = NULL;
-            }
-	    if (cm_snode[1] != NULL)
-	    {
-		cm_snode[1]->detach_stimulus(cm_stimulus[1]);
-                cm_snode[1] = NULL;
-	    }
-	}
-
-  }
-
-  trace.raw(write_trace.get() | value.get());
-  value.put(new_value & 0xf7);
-
-  get();        // update comparator values
-
-}
-/*
-**      get()
-**              read the comparator inputs and set C2OUT and C1OUT
-**              as required. Also drive output pins if required.
-*/
-unsigned int CM12CON0::get()
-{
-    unsigned int cmcon_val = value.get();
-    bool out_true;
-    if (cmcon_val & ON)
+    bool output;
+    
+    if (! is_on())
     {
-        double Vhigh;
-        double Vlow;
-	Vlow = cm_input[cmcon_val & 0x3]->getPin().get_nodeVoltage();
-	if (cmcon_val & R) // use Cvref
-	{
-		Vhigh = CVref();
-	}
-	else	// use cin+
-	{
-	    Vhigh = cm_input[4]->getPin().get_nodeVoltage();
-	}
-    	Dprintf(("Vhigh %.1f Vlow %.1f\n", Vhigh, Vlow));
-	out_true = Vhigh > Vlow;
-
-	out_true ^= ((cmcon_val & POL) == POL);
+	// need to test what happens in a real device RRR
+	//output = out_invert()?true:false;
+	output = false;
     }
-    else	// If not on, output same as POL
-    {
-	//out_true = ((cmcon_val & POL) == POL);
-	out_true = false;
-    }
-    if (out_true)
-	cmcon_val |= OUT;
     else
-	cmcon_val &= ~OUT;
-
-   state_change(cmcon_val);
-   value.put(cmcon_val);
-   return(cmcon_val);
-}
-void CM12CON0::setpins(PinModule * c12in0, PinModule * c12in1,
-        PinModule * c12in2, PinModule * c12in3,
-        PinModule * cinPlus, PinModule * cout)
-{
-   // Multiplexed in - pins
-   cm_input[0] = c12in0;
-   cm_input[1] = c12in1;
-   cm_input[2] = c12in2;
-   cm_input[3] = c12in3;
-
-   // one in + pin
-   cm_input[4] = cinPlus;
-
-   // one output pin
-   cm_output = cout;
-   if (! cm_source)
-	cm_source = new CM12SignalSource(this);
-} 
-
-void CM12CON0::releasePin()
-{
-    if (cm_source) delete cm_source;
-    cm_source = 0;
-    cm_output = 0;
-}
-void CM12CON0::link_registers(PIR_SET *new_pir_set, CM2CON1 *_cm2con1,
-        VRCON *_vrcon, SRCON *_srcon, ECCPAS *_eccpas)
-{
-	pir_set = new_pir_set;
-	m_cm2con1 = _cm2con1;
-	m_vrcon = _vrcon;
-	m_srcon = _srcon;
-	m_eccpas = _eccpas;
+    {
+        double Vpos = get_Vpos();
+        double Vneg = get_Vneg();
+	output = output_high();
+	if (fabs(Vpos - Vneg) > get_hysteresis())
+	{
+            output = Vpos > Vneg;
+	    if (out_invert()) output = !output;
+	}
+    }
+    set_output(output);
+    return(value.get());
 }
 
 //--------------------------------------------------
@@ -1099,22 +711,25 @@ void VRCON_2::put(unsigned int new_value)
 }
 
 
-CMxCON0::CMxCON0(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
-  : sfr_register(pCpu, pName, pDesc),
-  cm(_cm), m_cmModule(cmModule), cm_source(0)
+CMxCON0::CMxCON0(Processor *pCpu, const char *pName, 
+	const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
+  : CMxCON0_base(pCpu, pName, pDesc, _cm, cmModule)
 {
 }
 CMxCON0::~CMxCON0()
 {
-    if (cm_source)
-	delete cm_source;
 }
 
 void CMxCON0::put(unsigned int new_value)
 {
   unsigned int old_value = value.get();
-  new_value &= mValidBits;
-  unsigned int diff = new_value ^ old_value;
+  unsigned int diff = (new_value ^ old_value) & mValidBits;
+
+  // assume masked bits are read-only
+  new_value = (new_value & mValidBits) | (old_value & ~mValidBits);
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
 
   if (diff == 0)
   {
@@ -1122,65 +737,50 @@ void CMxCON0::put(unsigned int new_value)
      return;
   }
 
-  trace.raw(write_trace.get() | value.get());
-  value.put(new_value);
   if (diff & CxOE)
   {
-      PinModule *out_pin = m_cmModule->cmxcon1[cm]->output_pin();
+      cm_output = m_cmModule->cmxcon1[cm]->output_pin();
       if(new_value & CxOE)
       {
 	  char name[20];
           if ( ! cm_source)
-                cm_source = new PeripheralSignalSource(out_pin);
+                cm_source = new PeripheralSignalSource(cm_output);
 
 	  sprintf(name, "c%dout", cm+1);
-	  assert(out_pin);
-	  out_pin->getPin().newGUIname(name);
-          out_pin->setSource(cm_source);
+	  assert(cm_output);
+	  cm_output->getPin().newGUIname(name);
+          cm_output->setSource(cm_source);
       }
       else if (cm_source)	// Enable output enable turned off
       {
-	    out_pin->getPin().newGUIname(out_pin->getPin().name().c_str());
-            out_pin->setSource(0);
+	    cm_output->getPin().newGUIname(cm_output->getPin().name().c_str());
+            cm_output->setSource(0);
       }
   }
   get();
 }
-//
-// evaluate inputs and determine output
-//
-unsigned int CMxCON0::get()
+double CMxCON0::get_hysteresis()
 {
-    bool output;
-    unsigned int cmxcon0 = value.get();
-    double Vpos = m_cmModule->cmxcon1[cm]->get_Vpos();
-    double Vneg = m_cmModule->cmxcon1[cm]->get_Vneg();
-    bool old_out = cmxcon0 & CxOUT;
-    
-    if (! cmxcon0 & CxON)
-	output = false;
+    double ret = 0.;
+    if (value.get() & CxHYS)
+	ret = 0.05;
+    return ret;
+}
 
-    else if (cmxcon0 & CxHYS)
-    {
-    	bool cxout = cmxcon0 & CxOUT;
-    	if (cmxcon0 & CxPOL) cxout = !cxout;
-    	    output = cxout;
-    	if (cxout && (Vpos + 0.05) < Vneg)
-    	   output = false;
-    	else if (!cout && Vpos > (Vneg + 0.05))
-    	   output = true;
-    }
-    else
-    {
-        output = Vpos > Vneg;
-    }
-    if (cmxcon0 & CxPOL) output = !output;
+double CMxCON0::get_Vpos() { return m_cmModule->cmxcon1[cm]->get_Vpos(); }
+double CMxCON0::get_Vneg() { return m_cmModule->cmxcon1[cm]->get_Vneg(); }
+
+void CMxCON0::set_output(bool output)
+{
+
+    unsigned int cmxcon0 = value.get();
+    bool old_out = cmxcon0 & CxOUT;
 
     if(output)
 	cmxcon0 |= CxOUT;
     else
 	cmxcon0 &= ~CxOUT;
-    Dprintf(("cm%d Vpos %.2f Vneg %.2f POL %d output %d cmxcon0=%x\n", cm+1, Vpos, Vneg, (bool)(cmxcon0 & CxPOL), output, cmxcon0));
+	Dprintf(("cm%d POL %d output %d cmxcon0=%x old_out %d\n", cm+1, (bool)(cmxcon0 & CxPOL), output, cmxcon0, old_out));
     value.put(cmxcon0);
     m_cmModule->set_cmout(cm, output);
     if (cmxcon0 & CxOE)
@@ -1192,17 +792,320 @@ unsigned int CMxCON0::get()
     {
 	// Positive going edge, set interrupt ? 
 	if (output && (m_cmModule->cmxcon1[cm]->value.get() & CMxCON1::CxINTP))
-	    m_cmModule->set_if(cm);
+	    IntSrc->Trigger();
 
 	// Negative going edge, set interrupt ? 
 	if (!output && (m_cmModule->cmxcon1[cm]->value.get() & CMxCON1::CxINTN))
-	    m_cmModule->set_if(cm);
+	    IntSrc->Trigger();
     }
-    return cmxcon0;
 }
 
+void CMxCON0_V2::put(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  unsigned int diff = (new_value ^ old_value) & mValidBits;
+
+  if (verbose)
+      cout << name() << " put(new_value) =" << hex << new_value << endl;
+
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+
+  // assume masked bits are read-only
+
+  if (diff == 0)
+  {
+     get(); 
+     return;
+  }
+
+  if ((new_value ^ old_value) & CxR)
+	m_cmModule->cmxcon0[0]->get();
+
+  if (diff & CxOE)
+  {
+      cm_output = m_cmModule->cmxcon1[cm]->output_pin(cm);
+      if(new_value & CxOE)
+      {
+	  char name[20];
+          if ( ! cm_source)
+                cm_source = new PeripheralSignalSource(cm_output);
+
+	  sprintf(name, "c%dout", cm+1);
+	  assert(cm_output);
+	  cm_output->getPin().newGUIname(name);
+          cm_output->setSource(cm_source);
+      }
+      else if (cm_source)	// Enable output enable turned off
+      {
+	    cm_output->getPin().newGUIname(cm_output->getPin().name().c_str());
+            cm_output->setSource(0);
+      }
+  }
+  get();
+}
+void CMxCON0_V2::set_output(bool output)
+{
+    unsigned int cmxcon0 = value.get();
+    unsigned int cmxcon1 = m_cmModule->cmxcon1[cm]->value.get();
+    bool old_out = cmxcon0 & CxOUT;
+
+    if(output)
+    {
+	cmxcon0 |= CxOUT;
+	cmxcon1 |= ((cm==0)? CM2CON1_V2::MC1OUT : CM2CON1_V2::MC2OUT);
+    }
+    else
+    {
+	cmxcon0 &= ~CxOUT;
+	cmxcon1 &= ~((cm==0)? CM2CON1_V2::MC1OUT : CM2CON1_V2::MC2OUT);
+    }
+	Dprintf(("cm%d POL %d output %d cmxcon0=%x old_out %d\n", cm+1, (bool)(cmxcon0 & CxPOL), output, cmxcon0, old_out));
+    value.put(cmxcon0);
+    m_cmModule->cmxcon1[cm]->value.put(cmxcon1);
+    m_cmModule->set_cmout(cm, output);
+    if (cmxcon0 & CxOE)
+    {
+        cm_source->putState(output?'1':'0');
+        m_cmModule->cmxcon1[cm]->output_pin(cm)->updatePinModule();
+    }
+    if (old_out != output) // state change
+    {
+	m_cmModule->cmxcon1[cm]->tmr_gate(cm, output);
+	// Positive going edge, set interrupt ? 
+	if (output)
+	    IntSrc->Trigger();
+    }
+}
+
+double CMxCON0_V2::get_hysteresis()
+{
+    double hyst_volt = 0.;
+
+    if ( m_cmModule->cmxcon1[cm]->hyst_active(cm))
+    {
+            hyst_volt =  0.05; // assume 50 mv hysteresis
+    }
+
+    return hyst_volt;
+}
+CMxCON0_V2::CMxCON0_V2(Processor *pCpu, const char *pName, 
+	const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
+  : CMxCON0_base(pCpu, pName, pDesc, _cm, cmModule)
+{
+}
+CMxCON0_V2::~CMxCON0_V2()
+{
+}
+double CMxCON0_V2::get_Vpos() 
+{ 
+    return m_cmModule->cmxcon1[cm]->get_Vpos(cm, value.get()); 
+}
+double CMxCON0_V2::get_Vneg() 
+{ 
+    return m_cmModule->cmxcon1[cm]->get_Vneg(cm, value.get()); 
+}
+
+void CM2CON1_V4::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & mValidBits);
+
+  if (m_cmModule->tmr1l[0])
+	m_cmModule->tmr1l[0]->set_T1GSS((new_value & T1GSS) == T1GSS);
+
+
+}
+double CM2CON1_V4::get_Vpos(unsigned int cm, unsigned int cmxcon0)
+{
+    double Voltage = 0.0;
+
+
+    assert(m_vrcon);
+    if (cmxcon0 & CMxCON0_V2::CxR) // use Vref defined in cm2con1
+    {
+	if ((cm == 0 && (m_vrcon->value.get() & VRCON_2::C1VREN)) ||
+	    (cm == 1 && (m_vrcon->value.get() & VRCON_2::C2VREN)))
+	{
+	    Voltage = ((Processor *)cpu)->CVREF->get_nodeVoltage();
+	    
+        }
+	else
+	    Voltage = ((Processor *)cpu)->V06REF->get_nodeVoltage();
+    }
+    else		// use CM1IN+ or CM2IN+
+    {
+        if (!stimulus_pin[POS])
+	    setPinStimulus(cm_inputPos[cm], POS);
+        Voltage =  cm_inputPos[cm]->getPin().get_nodeVoltage();
+    }
+    return Voltage;
+}
+  CM2CON1_V4::CM2CON1_V4(Processor *pCpu, const char *pName, const char *pDesc,
+                unsigned int _cm, ComparatorModule2 * cmModule) :
+                CM2CON1_V3(pCpu, pName, pDesc, _cm, cmModule),
+                m_vrcon(0) 
+  {
+        cm1_cvref = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[0], "cm1_cvref", 0, 1e12);
+        cm1_v06ref = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[0], "cm1_v06ref", 0, 1e12);
+        cm2_cvref = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[1], "cm2_cvref", 0, 1e12);
+        cm2_v06ref = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[1], "cm2_v06ref", 0, 1e12);
+	((Processor *)cpu)->CVREF->attach_stimulus(cm1_cvref);
+	((Processor *)cpu)->V06REF->attach_stimulus(cm1_v06ref);
+	((Processor *)cpu)->CVREF->attach_stimulus(cm2_cvref);
+	((Processor *)cpu)->V06REF->attach_stimulus(cm2_v06ref);
+  }
+  CM2CON1_V4::~CM2CON1_V4()
+  {
+	((Processor *)cpu)->CVREF->detach_stimulus(cm1_cvref);
+	((Processor *)cpu)->V06REF->detach_stimulus(cm1_v06ref);
+	((Processor *)cpu)->CVREF->detach_stimulus(cm2_cvref);
+	((Processor *)cpu)->V06REF->detach_stimulus(cm2_v06ref);
+	delete cm1_cvref;
+	delete cm1_v06ref;
+	delete cm2_cvref;
+	delete cm2_v06ref;
+  }
+
+void CM2CON1_V3::put(unsigned int new_value)
+{
+  unsigned int old_value = value.get();
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value & mValidBits);
+  if ((new_value ^ old_value) & C1RSEL)
+	m_cmModule->cmxcon0[0]->get();
+  if ((new_value ^ old_value) & C2RSEL)
+	m_cmModule->cmxcon0[1]->get();
+
+  if (m_cmModule->tmr1l[0])
+	m_cmModule->tmr1l[0]->set_T1GSS((new_value & T1GSS) == T1GSS);
+
+
+}
+double CM2CON1_V3::get_Vpos(unsigned int cm, unsigned int cmxcon0)
+{
+    double Voltage = 0.0;
+    unsigned int cmxcon1 = value.get();
+
+
+    assert(m_vrcon);
+    if (cmxcon0 & CMxCON0_V2::CxR) // use Vref defined in cm2con1
+    {
+	if ((cm == 0 && (cmxcon1 & C1RSEL)) |
+	    (cm == 1 && (cmxcon1 & C2RSEL)))
+	{
+	    Voltage =  m_vrcon->get_Vref();
+	}
+	else 
+	{
+	    Voltage =  0.6;
+	}
+    }
+    else		// use CM1IN+ or CM2IN+
+    {
+        if (!stimulus_pin[POS])
+	    setPinStimulus(cm_inputPos[cm], POS);
+        Voltage =  cm_inputPos[cm]->getPin().get_nodeVoltage();
+    }
+    return Voltage;
+}
+
+double CM2CON1_V3::get_Vneg(unsigned int cm, unsigned int cmxcon0)
+{
+    unsigned int cxNchan = cmxcon0 & (CMxCON0_V2::CxCH0 | CMxCON0_V2::CxCH1);
+    if (!stimulus_pin[NEG])
+	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+    return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
+}
+void CM2CON1_V2::put(unsigned int new_value)
+{
+    unsigned int old_value = value.get();
+    new_value &= mValidBits;
+    unsigned int diff = old_value ^ new_value;
+    trace.raw(write_trace.get() | value.get());
+    value.put(new_value);
+    if (diff & (C1RSEL | C1HYS))
+	m_cmModule->cmxcon0[0]->get();
+    if (diff & (C2RSEL | C2HYS))
+	m_cmModule->cmxcon0[1]->get();
+}
+void CM2CON1_V3::tmr_gate(unsigned int cm, bool output)
+{
+    if (cm == 1 && m_cmModule->tmr1l[0]) //CM2
+    {
+	m_cmModule->tmr1l[0]->compare_gate(output);
+    }
+}
+double CM2CON1_V2::get_Vpos(unsigned int cm, unsigned int cmxcon0)
+{
+    double Voltage = 0.0;
+    unsigned int cmxcon1 = value.get();
+
+
+    if (cmxcon0 & CMxCON0_V2::CxR) // use Vref defined in cm2con1
+    {
+	if ((cm == 0 && (cmxcon1 & C1RSEL)) |
+	    (cm == 1 && (cmxcon1 & C2RSEL)))
+	{
+	    Voltage =  m_cmModule->FVR_voltage;
+	}
+	else 
+	{
+	    Voltage =  m_cmModule->DAC_voltage;
+	}
+    }
+    else		// use CM1IN+ or CM2IN+
+    {
+        if (!stimulus_pin[POS])
+	    setPinStimulus(cm_inputPos[cm], POS);
+        Voltage =  cm_inputPos[cm]->getPin().get_nodeVoltage();
+    }
+    return Voltage;
+}
+
+double CM2CON1_V2::get_Vneg(unsigned int cm, unsigned int cmxcon0)
+{
+    unsigned int cxNchan = cmxcon0 & (CMxCON0_V2::CxCH0 | CMxCON0_V2::CxCH1);
+    if (!stimulus_pin[NEG])
+	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+    return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
+}
+
+bool CM2CON1_V2::hyst_active(unsigned int cm)
+{
+     bool hyst = false;
+
+     if (cm == 0)
+	hyst = value.get() & C1HYS;
+     else if (cm == 1)
+	hyst = value.get() & C2HYS;
+
+     return hyst;
+}
+void CM2CON1_V2::tmr_gate(unsigned int cm, bool output)
+{
+   for (int i=0; i < 3; i++)
+   {
+	if (m_cmModule->t1gcon[i])
+	{
+	    if (cm == 0)  // CM1
+		m_cmModule->t1gcon[i]->CM1_gate(output);
+	    else if (cm == 1) //CM2
+		m_cmModule->t1gcon[i]->CM2_gate(output);
+	}
+    }
+}
 
 CMxCON1::CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
+  : CMxCON1_base(pCpu, pName, pDesc, _cm, cmModule)
+{
+}
+
+CMxCON1::~CMxCON1()
+{
+}
+CMxCON1_base::CMxCON1_base(Processor *pCpu, const char *pName, 
+	const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
   : sfr_register(pCpu, pName, pDesc),
   cm(_cm), m_cmModule(cmModule)
 {
@@ -1213,23 +1116,25 @@ CMxCON1::CMxCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned
     for(int i = 0; i<5; i++)
 	cm_inputNeg[i] = 0;
     for(int i = 0; i<2; i++)
+    {
 	cm_inputPos[i] = 0;
-    cm_output = 0;
+        cm_output[i] = 0;
+    }
 }
 
-CMxCON1::~CMxCON1()
+CMxCON1_base::~CMxCON1_base()
 {
     delete cm_stimulus[NEG];
     delete cm_stimulus[POS];
 }
-double CMxCON1::get_Vneg()
+double CMxCON1::get_Vneg(unsigned int arg, unsigned int arg2)
 {
     unsigned int cxNchan = value.get() & CxNMASK;
     if (!stimulus_pin[NEG])
 	setPinStimulus(cm_inputNeg[cxNchan], NEG);
     return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
 }
-double CMxCON1::get_Vpos()
+double CMxCON1::get_Vpos(unsigned int arg, unsigned int arg2)
 {
     unsigned int cxPchan = (value.get() & CxPMASK) >> 3;
     double	Voltage;
@@ -1266,7 +1171,7 @@ double CMxCON1::get_Vpos()
 // pin may be 0 in which case a current stimulus, if any, will be detached
 // pol is either the enum POS or NEG
 //
-void CMxCON1::setPinStimulus(PinModule *pin, bool pol)
+void CMxCON1_base::setPinStimulus(PinModule *pin, bool pol)
 {
 	if (pin == stimulus_pin[pol]) return;
 
@@ -1309,12 +1214,13 @@ void CMxCON1::put(unsigned int new_value)
     m_cmModule->run_get(cm);
 }
 
-void CMxCON1::set_OUTpin(PinModule *pin_cm0)
+void CMxCON1_base::set_OUTpin(PinModule *pin_cm0, PinModule *pin_cm1)
 {
-    cm_output = pin_cm0;
+    cm_output[0] = pin_cm0;
+    cm_output[1] = pin_cm1;
 }
 
-void CMxCON1::set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, PinModule *pin_cm2,  PinModule *pin_cm3,  PinModule *pin_cm4)
+void CMxCON1_base::set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, PinModule *pin_cm2,  PinModule *pin_cm3,  PinModule *pin_cm4)
 {
     cm_inputNeg[0] = pin_cm0;
     cm_inputNeg[1] = pin_cm1;
@@ -1322,7 +1228,7 @@ void CMxCON1::set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, PinModule *pi
     cm_inputNeg[3] = pin_cm3;
     cm_inputNeg[4] = pin_cm4;
 }
-void CMxCON1::set_INpinPos(PinModule *pin_cm0, PinModule *pin_cm1)
+void CMxCON1_base::set_INpinPos(PinModule *pin_cm0, PinModule *pin_cm1)
 {
     cm_inputPos[0] = pin_cm0;
     cm_inputPos[1] = pin_cm1;
@@ -1336,18 +1242,13 @@ ComparatorModule2::ComparatorModule2(Processor *pCpu)
 	cmxcon1[i] = 0;
     }
     cmout = 0;
-    t1gcon = 0;
-
+    t1gcon[0] = t1gcon[1] = t1gcon[2] = 0;
+    tmr1l[0] = tmr1l[1] = tmr1l[2] = 0;
+    eccpas[0] = eccpas[1] = eccpas[2] = 0;
+    sr_module = 0;
 }
 ComparatorModule2::~ComparatorModule2()
 {
-    for(int i = 0; i < 4; i++)
-    {
-	if (cmxcon0[i])
-	    delete cmxcon0[i];
-	if (cmxcon1[i])
-	    delete cmxcon1[i];
-    }
     if (cmout)
 	delete cmout;
 }
@@ -1357,28 +1258,41 @@ ComparatorModule2::~ComparatorModule2()
 //
 void ComparatorModule2::set_cmout(unsigned int bit, bool value)
 {
-    if (value)
-        cmout->value.put(cmout->value.get() | (1<<bit));
-    else
-        cmout->value.put(cmout->value.get() & ~(1<<bit));
+    int i;
+
+    if (cmout)
+    {
+        if (value)
+            cmout->value.put(cmout->value.get() | (1<<bit));
+        else
+            cmout->value.put(cmout->value.get() & ~(1<<bit));
+    }
 
     switch(bit)
     {
     case 0:		//CM1
-    	if (t1gcon)
-    	    t1gcon->CM1_gate(value);
+	for(i=0; i < 3; i++)
+	{
+    	   if (t1gcon[i]) t1gcon[i]->CM1_gate(value);
+	   if (eccpas[i]) eccpas[i]->c1_output(value);
+	}
+
     	if (sr_module)
     	    sr_module->syncC1out(value);
     	break;
 
     case 1:		//CM2
-        if (t1gcon)
-	    t1gcon->CM2_gate(value);
+	for(i=0; i < 3; i++)
+	{
+    	   if (t1gcon[i]) t1gcon[i]->CM2_gate(value);
+	   if (eccpas[i]) eccpas[i]->c2_output(value);
+	}
+
     	if (sr_module)
     	    sr_module->syncC2out(value);
     	break;
 
-    default:	//Do nonthing other CMs
+    default:	//Do nothing other CMs
     	break;
     }
 }

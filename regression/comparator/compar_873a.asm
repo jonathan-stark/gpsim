@@ -58,8 +58,8 @@ INT_VECTOR   CODE    0x004               ; interrupt vector location
         swapf   STATUS,W
         movwf   status_temp
 
-       btfsc   PIR1,CMIF 
-         btfss  PIE1,CMIE
+       btfsc   PIR2,CMIF 
+         btfss  PIE2,CMIE
 	goto exit_int
 
 	goto done1
@@ -83,7 +83,7 @@ start
 ;
   .assert "cmcon == 0x07, \"FAILED 16f873A CMCON POR\""	; Rest value
 	nop
-	bcf	PIR1,CMIF
+	bcf	PIR2,CMIF
 	BSF	STATUS,RP0
 	movlw	0x06
 	movwf	ADCON1
@@ -107,34 +107,34 @@ start
 	BCF 	STATUS,RP0
   .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 16f873A m6 C1OUT=1 C2OUT=1\""
 	nop
-  .assert "(pir1 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
 	nop
-	bcf	PIR1,CMIF
-  .assert "(pir1 & 0x40) == 0x00, \"FAILED 16f873A CMIF=0\""
+	bcf	PIR2,CMIF
+  .assert "(pir2 & 0x40) == 0x00, \"FAILED 16f873A CMIF=0\""
 	nop
 	bsf	PORTB,0			; drive comp 1 input high
   .assert "(cmcon & 0xc0) == 0x80, \"FAILED 16f873A m6 C1OUT=0 C2OUT=1\""
         nop
-  .assert "(pir1 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
 	nop
-	bcf	PIR1,CMIF
+	bcf	PIR2,CMIF
 	bsf	STATUS,RP0
 	bsf	CMCON,C1INV		; invert output
 	bsf	CMCON,C2INV
 	bcf	STATUS,RP0
   .assert "(cmcon & 0xc0) == 0x40, \"FAILED 16f873A m6 invert C1OUT=1 C2OUT=0\""
 	nop
-  .assert "(pir1 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
 	nop
 
-	bcf	PIR1,CMIF
+	bcf	PIR2,CMIF
 	bsf	PORTB,1			; drive comp 2 input high
 	bcf	PORTB,0			; drive comp 1 input low
   .assert "(cmcon & 0xc0) == 0x80, \"FAILED 16f873A m6 new inputs C1OUT=0 C2OUT=1\""
 	nop
-  .assert "(pir1 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
 	nop
-	bcf	PIR1,CMIF
+	bcf	PIR2,CMIF
 
         movlw	0x06		; comparater mux reference normal output
 	bsf	STATUS,RP0
@@ -143,11 +143,11 @@ start
 	bcf	STATUS,RP0
   .assert "(cmcon & 0xc0) == 0x40, \"FAILED 16f873A m6 invert normal C1OUT=1 C2OUT=0\""
 	nop
-  .assert "(pir1 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f873A CMIF=1\""
 	nop
-	bcf	PIR1,CMIF
+	bcf	PIR2,CMIF
 	bsf	STATUS,RP0
-	bsf	PIE1,CMIE	; enable Comparator interupts
+	bsf	PIE2,CMIE	; enable Comparator interupts
 	bcf	STATUS,RP0
 	bsf	INTCON,PEIE	; enable Periperal inturrupts
 	bsf	INTCON,GIE	; and globale interupts

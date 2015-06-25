@@ -132,7 +132,7 @@ start:
     movlw	0xff
     BANKSEL	SSPSTAT	
     movwf	SSPSTAT
-  .assert "sspstat == 0xC0, \"SPI sspstat only SMP, CKE writable\""
+  .assert "ssp1stat == 0xC0, \"SPI sspstat only SMP, CKE writable\""
     nop
     clrf	SSPSTAT
 
@@ -151,11 +151,11 @@ loop:
     btfss	PIR1,SSP1IF
     goto	loop
 
-  .assert "(sspstat & 1) == 1, \"FAILED MSSP SPI Master BF not set\""
+  .assert "(ssp1stat & 1) == 1, \"FAILED MSSP SPI Master BF not set\""
     nop
     BANKSEL	SSPBUF
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED MSSP SPI Master BF not cleared\""
+  .assert "(ssp1stat & 1) == 0, \"FAILED MSSP SPI Master BF not cleared\""
     nop
   .assert "W == 0x54, \"FAILED MSSP SPI Master wrong data\""
     nop
@@ -181,10 +181,10 @@ loop:
     bcf		DRV_CLOCK
     BANKSEL	SSPBUF
     movwf	SSPBUF	; test WCOL set
-  .assert "(sspcon & 0x80) == 0x80, \"FAILED MSSP SPI WCOL set\""
+  .assert "(ssp1con & 0x80) == 0x80, \"FAILED MSSP SPI WCOL set\""
     nop
     bcf		SSPCON1,WCOL	; clear WCOL bit
-  .assert "(sspcon & 0x80) == 0x00, \"FAILED MSSP SPI WCOL was cleared\""
+  .assert "(ssp1con & 0x80) == 0x00, \"FAILED MSSP SPI WCOL was cleared\""
     nop
     clrf	loopcnt
     BANKSEL	PORTA
@@ -210,7 +210,7 @@ loop4:
     bcf		DRV_CLOCK
     decfsz	loopcnt,F
     goto	loop4
-  .assert "(sspcon & 0x40) == 0x40, \"FAILED MSSP SPI SSPOV\""
+  .assert "(ssp1con & 0x40) == 0x40, \"FAILED MSSP SPI SSPOV\""
     nop
 
 ;
@@ -240,11 +240,11 @@ loop3:
     btfss	PIR1,SSP1IF
     goto	loop3
 
-  .assert "(sspstat & 1) == 1, \"FAILED MSSP SPI Master TMR2, BF not set\""
+  .assert "(ssp1stat & 1) == 1, \"FAILED MSSP SPI Master TMR2, BF not set\""
     nop
     BANKSEL	SSPBUF
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED MSSP SPI Master TMR2, BF not cleared\""
+  .assert "(ssp1stat & 1) == 0, \"FAILED MSSP SPI Master TMR2, BF not cleared\""
     nop
   .assert "W == 0x54, \"FAILED MSSP SPI Master TMR2 wrong data\""
     nop
@@ -264,11 +264,11 @@ loop5:
     btfss	PIR1,SSP1IF
     goto	loop5
 
-  .assert "(sspstat & 1) == 1, \"FAILED MSSP SPI Master BF not set\""
+  .assert "(ssp1stat & 1) == 1, \"FAILED MSSP SPI Master BF not set\""
     nop
     BANKSEL	SSPBUF
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED MSSP SPI Master BF not cleared\""
+  .assert "(ssp1stat & 1) == 0, \"FAILED MSSP SPI Master BF not cleared\""
     nop
   .assert "W == 0x36, \"FAILED MSSP SPI Master (CKP) wrong data\""
     nop
@@ -292,7 +292,7 @@ loop5:
     btfss	PIR1,SSP1IF
     goto	$-1
 
-  .assert "(sspstat & 1) == 0, \"FAILED MSSP SPI Master BF not set BOEN=1\""
+  .assert "(ssp1stat & 1) == 0, \"FAILED MSSP SPI Master BF not set BOEN=1\""
     nop
     BANKSEL	SSPBUF
     movf	SSPBUF,W

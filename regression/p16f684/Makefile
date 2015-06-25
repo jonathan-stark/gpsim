@@ -40,7 +40,7 @@ sim_reset: reset.cod
 	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<
 
 sim_compar_684: compar_684.cod
-	$(GPSIM) -i -I $(STARTUP_STC) -D STC=compar_684.stc
+	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<
 
 sim_nwdt_16f684: nwdt_16f684.cod
 	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<

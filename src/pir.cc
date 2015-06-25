@@ -462,3 +462,24 @@ PIR3v2::PIR3v2(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_in
     WAKIF | IRXIF;
   writable_bits = valid_bits;
 }
+
+PIR3v3::PIR3v3(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  valid_bits = TMR3GIF | TMR5GIF | TMR1GIF | CTMUIF | TX2IF | RC2IF 
+	| BCL2IF | SSP2IF;
+  writable_bits = valid_bits;
+}
+
+PIR4v1::PIR4v1(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  valid_bits = CCP3IF | CCP4IF | CCP5IF ;
+  writable_bits = CCP3IF | CCP4IF | CCP5IF;
+}
+PIR5v1::PIR5v1(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  valid_bits = TMR4IF | TMR5IF | TMR6IF ;
+  writable_bits = TMR4IF | TMR5IF | TMR6IF ;
+}

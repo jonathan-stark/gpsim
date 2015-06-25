@@ -121,7 +121,7 @@ test_tot1:
 	bcf	CM2CON1,T1GSS	; T1 gate source is SYNCC2OUT
 	movlw 	(1<<C2ON)|(1<<C2R)	; Enable Comparator use C2VRef, C12IN0
 	movwf	CM2CON0
-	bsf	CM2CON0,C1POL	; toggle ouput polarity,
+	bsf	CM2CON0,C2POL	; Set ouput polarity to 1,
 	BANKSEL	TMR1L
 	movf	TMR1L,W		; is Timer 1 running ?
 	nop
@@ -137,7 +137,7 @@ test_tot1:
   .assert "W != 0, \"FAILED T1 gate invert\""
 	nop
 	BANKSEL CM2CON0
-	bcf	CM2CON0,C1POL	; toggle comparator ouput polarity,
+	bcf	CM2CON0,C2POL	; set comparator ouput polarity to 0,
 	BANKSEL	TMR1L
 	movf	TMR1L,W		; is Timer 1 running ?
 	nop

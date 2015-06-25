@@ -251,6 +251,7 @@ public:
   void setIOpin(PinModule *p1, PinModule *p2=0, PinModule *p3=0, PinModule *p4=0);
   void setIOPin1(PinModule *p1);
   void setIOPin2(PinModule *p2);
+  void set_tmr2(TMR2 *_tmr2) { tmr2 = _tmr2;}
 
   PSTRCON *pstrcon;
   PWM1CON *pwm1con;
@@ -368,21 +369,26 @@ public:
 	TMR1GE  = 1<<7,		// Gate Enable bit
   };
 
+  
   void put(unsigned int new_value);
   virtual void setGatepin(PinModule *);
-  virtual void IO_gate(bool);
+  virtual void PIN_gate(bool);
   virtual void T0_gate(bool);
+  virtual void T2_gate(bool);
   virtual void CM1_gate(bool);
   virtual void CM2_gate(bool);
   virtual void new_gate(bool);
   void set_WRmask(unsigned int mask) { write_mask = mask;}
   void set_tmrl(TMRL *_tmrl) { tmrl = _tmrl;}
-  void set_pir_set(PIR_SET *_pir_set) { pir_set = _pir_set;}
+  virtual void setInterruptSource(InterruptSource * _int) 
+	{ m_Interrupt = _int;}
+  virtual InterruptSource * getInterruptSource() { return m_Interrupt; }
   virtual bool get_tmr1GE()
     {
       return(value.get() & TMR1GE);
     }
   bool get_t1GPOL() { return (value.get() & T1GPOL); }
+  virtual bool tmr1_isON();
   
 
   T1GCON(Processor *pCpu, const char *pName, const char *pDesc=0, T1CON_G *t1con_g=0);
@@ -394,9 +400,9 @@ private:
   unsigned int 	write_mask;
   TMRL		*tmrl;
   T1CON_G	*t1con_g;
-  PIR_SET 	*pir_set;
-  bool 		IO_gate_state;
-  bool 		T0_gate_state;
+  InterruptSource *m_Interrupt;
+  bool 		PIN_gate_state;
+  bool 		T0_gate_state; // can also be Tx = PRx where x=2,4,6
   bool 		CM1_gate_state;
   bool 		CM2_gate_state;
   bool 		last_t1g_in;
@@ -668,16 +674,15 @@ public:
     prescale_counter,
     break_value,
     duty_cycle[MAX_PWM_CHANS];     /* for ccp channels */
-  int
-    post_scale;
-  guint64
-    last_cycle,
-    future_cycle;
+  int 		post_scale;
+  guint64	last_cycle;
+  guint64	future_cycle;
 
-  PR2  *pr2;
-  PIR_SET *pir_set;
-  T2CON *t2con;
-  SSP_MODULE *ssp_module;
+  PR2  		*pr2;
+  PIR_SET 	*pir_set;
+  T2CON 	*t2con;
+  SSP_MODULE	*ssp_module[2];
+  T1GCON	*m_txgcon;
 
   virtual void callback();
   virtual void callback_print();
@@ -694,8 +699,13 @@ public:
   void pwm_dc(unsigned int dc, unsigned int ccp_address);
   void stop_pwm(unsigned int ccp_address);
   virtual unsigned int get_value();
+  virtual void setInterruptSource(InterruptSource * _int) 
+	{ m_Interrupt = _int;}
+  virtual InterruptSource * getInterruptSource() { return m_Interrupt; }
 
   bool add_ccp ( CCPCON * _ccp );
+  bool rm_ccp(CCPCON *_ccp);
+  InterruptSource *m_Interrupt;
 };
 
 

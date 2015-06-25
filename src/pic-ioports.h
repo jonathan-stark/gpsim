@@ -126,9 +126,9 @@ class PicPortIOCRegister : public PicPortBRegister
  
 public:
   INTCON *m_pIntcon;
-  IOC	*m_Iocap;
-  IOC	*m_Iocan;
-  IOCxF	*m_Iocaf;
+  IOC    *m_Iocap;	// pins which can cause interrupts on positive edge
+  IOC    *m_Iocan;	// pins which can cause interrupts on negative edge
+  IOCxF  *m_Iocaf;	// which pins triggered interrupt
 
   PicPortIOCRegister(Processor *pCpu, const char *pName, const char *pDesc,
                    INTCON *pIntcon, IOC *pIocap, IOC *pIocan, IOCxF *pIocaf,

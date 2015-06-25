@@ -151,9 +151,10 @@ enum PROCESSOR_TYPE
   _P18F2221_,
   _P18F2321_,
   _P18F2420_,
+  _P18F2455_,
   _P18F2520_,
   _P18F2550_,
-  _P18F2455_,
+  _P18F26K22_,
   _P18F2620_,
   _P18F4221_,
   _P18F4321_,
@@ -416,6 +417,9 @@ public:
   virtual void assignMCLRPin(int pkgPinNumber);
   virtual void unassignMCLRPin();
   virtual void osc_mode(unsigned int );
+  virtual void set_config3h(gint64 x){;}
+  virtual string string_config3h(gint64 x){return string("fix string_config3h");}
+
 
   // Activity States reflect what the processor is currently doing
   // (The breakpoint class formally implemented this functionality).
@@ -432,11 +436,11 @@ public:
   virtual ~pic_processor();
 
   void set_osc_pin_Number(unsigned int i, unsigned int val, PinModule *pm)
-        {osc_pin_Number[i] = val; m_osc_Monitor[i] = pm;}
+        {if (i < 4){osc_pin_Number[i] = val; m_osc_Monitor[i] = pm;}}
   unsigned char get_osc_pin_Number(unsigned int i)
-        {return osc_pin_Number[i];}
+        {return (i<4)?osc_pin_Number[i]:253;}
   PinModule * get_osc_PinMonitor(unsigned int i)
-	{ return m_osc_Monitor[i]; }
+	{ return (i<4)?m_osc_Monitor[i]:0; }
 
 
   void set_clk_pin(unsigned int pkg_Pin_Number,
@@ -476,8 +480,8 @@ protected:
   int   m_MCLR_pin;
   PinMonitor *m_MCLRMonitor;
   string m_mclr_pin_name;
-  unsigned char osc_pin_Number[2];
-  PinModule *m_osc_Monitor[2];
+  unsigned char osc_pin_Number[4];
+  PinModule *m_osc_Monitor[4];
   bool internal_osc;	// internal RC oscilator enabled on Config Word
   bool PPLx4;		// 4x PPL enabled on Config Word
 

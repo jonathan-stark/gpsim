@@ -489,53 +489,6 @@ public:
 };
 
 //-------------------------------------------------------------------
-#if 0
-
-class TABLAT : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-
-};
-
-class TABPTRL : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-
-};
-
-class TABPTRH : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-
-};
-
-class TABPTRU : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get();
-  unsigned int get_value();
-
-};
-
-#endif
 
 class TBL_MODULE
 {
@@ -547,12 +500,6 @@ public:
 
   _16bit_processor *cpu;
 
-#if 0
-  TABLAT    tablat;
-  TABPTRL   tabptrl;
-  TABPTRH   tabptrh;
-  TABPTRU   tabptru;
-#endif
   sfr_register   tablat,
                  tabptrl,
                  tabptrh,
@@ -592,4 +539,35 @@ public:
   LVDCON(Processor *, const char *pName, const char *pDesc=0);
 };
 
-#endif
+class OSCCON2 : public  sfr_register
+{
+ public:
+  void put(unsigned int new_value);
+  OSCCON2(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc) {}
+
+
+  enum
+  {
+	LFIOFS  = 1<<0,		// LFINTOSC Frequency Stable bit
+	MFIOFS  = 1<<1,		// MFINTOSC Frequency Stable bit
+	PRISD   = 1<<2,		// Primary Oscillator Drive Circuit Shutdown bit
+	SOSCGO  = 1<<3,		// Secondary Oscillator Start Control bit
+	MFIOSEL = 1<<4,		// MFINTOSC Select bit
+	SOSCRUN = 1<<6,		// SOSC Run Status bit
+	PLLRDY  = 1<<7		// PLL Run Status bit
+  };
+};
+/* RC clock 16Mhz with pll to 64Mhz
+ */
+class OSCCON_HS : public OSCCON
+{
+ public:
+   virtual bool set_rc_frequency();
+
+   OSCCON_HS(Processor *pCpu, const char *pName, const char *pDesc) :
+       OSCCON(pCpu, pName, pDesc), osccon2(0){}
+
+   OSCCON2  *osccon2;
+};
+#endif // __16_BIT_REGISTERS_H__

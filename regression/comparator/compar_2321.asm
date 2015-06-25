@@ -5,10 +5,11 @@
    ;;  comparator module of the processor
 
 
-	list    p=16f877a               ; list directive to define processor
-	include <p16f877a.inc>           ; processor specific variable definitions
+	list    p=18f2321               ; list directive to define processor
+	include <p18f2321.inc>           ; processor specific variable definitions
         include <coff.inc>              ; Grab some useful macros
 
+        CONFIG  OSC=INTIO2
 
 ;------------------------------------------------------------------------
 ; gpsim command
@@ -28,7 +29,7 @@ CMODE7                         EQU     H'0007'
 
 ;----------------------------------------------------------------------
 ;----------------------------------------------------------------------
-GPR_DATA                UDATA_SHR 
+GPR_DATA                UDATA_SHR 0
 temp            RES     1
 
 w_temp          RES     1
@@ -42,9 +43,7 @@ cmp_int		RES	1
 ;   ********************* RESET VECTOR LOCATION  ********************
 ;----------------------------------------------------------------------
 RESET_VECTOR  CODE    0x000              ; processor reset vector
-        movlw  high  start               ; load upper byte of 'start' label
-        movwf  PCLATH                    ; initialize PCLATH
-	goto	start			; go to beginning of program
+	bra	start			; go to beginning of program
 
 
 ;------------------------------------------------------------------------
@@ -53,7 +52,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 ;
 ;------------------------------------------------------------------------
                                                                                 
-INT_VECTOR   CODE    0x004               ; interrupt vector location
+INT_VECTOR   CODE    0x008               ; interrupt vector location
                                                                                 
         movwf   w_temp
         swapf   STATUS,W
@@ -84,8 +83,8 @@ MAIN    CODE
 start
 
   .sim "module library libgpsim_modules"
-  .sim "p16f877a.xpos = 60"
-  .sim "p16f877a.ypos = 84"
+  .sim "p18f2321.xpos = 60"
+  .sim "p18f2321.ypos = 84"
 
   .sim "module load pullup C1P"
   .sim "C1P.capacitance = 0"
@@ -124,14 +123,12 @@ start
   .sim "node c2n"
   .sim "attach c2n C2N.pin porta1"
 
-  .assert "cmcon == 0x07, \"FAILED 16f877a CMCON POR\""	; Rest value
+  .assert "cmcon == 0x07, \"FAILED 18f2321 CMCON POR\""	; Rest value
 	nop
-	BANKSEL PIR2
 	clrf	PIR2
         movlw	CMODE7		; turn off comparator 
-	BANKSEL CMCON
         movwf	CMCON
-	movlw	0x07
+	movlw	0xff
 	movwf	ADCON1		; analog off all channels
 	movlw	0x0f		; RA0-RA3 are inputs
 	movwf	TRISA
@@ -178,7 +175,7 @@ start
 	call	mux_vref
 	nop
 
-  .assert  "\"*** PASSED Comparator on 16f877a\""
+  .assert  "\"*** PASSED Comparator on 18f2321\""
 	goto	$
 
 
@@ -188,22 +185,22 @@ c1_out:
 ;	C1IN+ (1.0) thus C1 out=0
 ;	C2in- (2.0) 
 ;	C2IN+ (2.8) but C2 off so out=0
-  .assert "(cmcon & 0xc0) == 0x00, \"*** FAILED 16f877a c1_out, c1out=0\""
+  .assert "(cmcon & 0xc0) == 0x00, \"*** FAILED 18f2321 c1_out, c1out=0\""
 	nop
-  .assert "(porta & 0x30) == 0x00, \"*** FAILED 16f877a c1_out, OUT1=0 OUT2=0\""
+  .assert "(porta & 0x30) == 0x00, \"*** FAILED 18f2321 c1_out, OUT1=0 OUT2=0\""
 	nop
 	bsf	CMCON,C1INV
-  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 16f877a c1_out, c1out=1\""
+  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 18f2321 c1_out, c1out=1\""
 	nop
-  .assert "(porta & 0x30) == 0x10, \"*** FAILED 16f877a c1_out, OUT1=1 OUT2=0\""
+  .assert "(porta & 0x30) == 0x10, \"*** FAILED 18f2321 c1_out, OUT1=1 OUT2=0\""
 	nop
 ;	C1IN- (2.5)
 ;	C1IN+ (3.1) C1+ > C1- with invert thus C1 out=0
   .command "C1P.voltage = 3.1"
 	nop
-  .assert "(cmcon & 0xc0) == 0x00, \"*** FAILED 16f877a c1_out INVERT , c1out=0\""
+  .assert "(cmcon & 0xc0) == 0x00, \"*** FAILED 18f2321 c1_out INVERT , c1out=0\""
 	nop
-  .assert "(porta & 0x30) == 0x00, \"*** FAILED 16f877a c1_out, INVERT OUT1=0 OUT2=0\""
+  .assert "(porta & 0x30) == 0x00, \"*** FAILED 18f2321 c1_out, INVERT OUT1=0 OUT2=0\""
 	nop
 
 	return
@@ -226,16 +223,16 @@ ind_comp:
   .command "C1N.voltage = 2.1"
 	nop
 
-  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 16f877a 2 ind comp CIS=0 C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 18f2321 2 ind comp CIS=0 C1OUT=1 C2OUT=1\""
 	nop
 	bsf	CMCON,CIS
-  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 16f877a 2 ind comp CIS=1 C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 18f2321 2 ind comp CIS=1 C1OUT=1 C2OUT=1\""
 	nop
 ;	C2+ < C2- C2 out=0
   .command "C2P.voltage = 1.4"
 	nop
 	nop
-  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 16f877a 2 ind comp C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 18f2321 2 ind comp C1OUT=1 C2OUT=0\""
 	nop
 ;	C1+ < C1- C1 out=0
 ;	C2+ > C2- C2 out=1
@@ -243,13 +240,13 @@ ind_comp:
 	nop
   .command "C2P.voltage = 2.5"
 	nop
-  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 16f877a 2 ind comp C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 18f2321 2 ind comp C1OUT=0 C2OUT=1\""
 	nop
 ;		both low
 ;	C2+ < C2- C2 out=0
   .command "C2P.voltage = 1.4"
 	nop
-  .assert "(cmcon & 0xc0) == 0x00, \"FAILED 16f877a 2 ind comp  C1OUT=0 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x00, \"FAILED 18f2321 2 ind comp  C1OUT=0 C2OUT=0\""
 	nop
 	return
 
@@ -270,22 +267,22 @@ ind_comp_out:
   .command "C1N.voltage = 2.1"
 	nop
 
-  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 16f877a ind_comp_out CIS=0 C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 18f2321 ind_comp_out CIS=0 C1OUT=1 C2OUT=1\""
 	nop
-  .assert "(porta & 0x30) == 0x30, \"*** FAILED 16f877a ind_comp_out CIS=0 port C1OUT=1 C2OUT=1\""
+  .assert "(porta & 0x30) == 0x30, \"*** FAILED 18f2321 ind_comp_out CIS=0 port C1OUT=1 C2OUT=1\""
 	nop
 	bsf	CMCON,CIS
-  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 16f877a ind_comp_out CIS=1 C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 18f2321 ind_comp_out CIS=1 C1OUT=1 C2OUT=1\""
 	nop
-  .assert "(porta & 0x30) == 0x30, \"*** FAILED 16f877a ind_comp_out CIS=1 port C1OUT=1 C2OUT=1\""
+  .assert "(porta & 0x30) == 0x30, \"*** FAILED 18f2321 ind_comp_out CIS=1 port C1OUT=1 C2OUT=1\""
 	nop
 ;	C2+ < C2- C2 out=0
   .command "C2P.voltage = 1.4"
 	nop
 	nop
-  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 16f877a ind_comp_out C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 18f2321 ind_comp_out C1OUT=1 C2OUT=0\""
 	nop
-  .assert "(porta & 0x30) == 0x10, \"*** FAILED 16f877a ind_comp_out port C1OUT=1 C2OUT=0\""
+  .assert "(porta & 0x30) == 0x10, \"*** FAILED 18f2321 ind_comp_out port C1OUT=1 C2OUT=0\""
 	nop
 ;	C1+ < C1- C1 out=0
 ;	C2+ > C2- C2 out=1
@@ -293,17 +290,17 @@ ind_comp_out:
 	nop
   .command "C2P.voltage = 2.5"
 	nop
-  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 16f877a ind_comp_out C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 18f2321 ind_comp_out C1OUT=0 C2OUT=1\""
 	nop
-  .assert "(porta & 0x30) == 0x20, \"*** FAILED 16f877a ind_comp_out port C1OUT=0 C2OUT=1\""
+  .assert "(porta & 0x30) == 0x20, \"*** FAILED 18f2321 ind_comp_out port C1OUT=0 C2OUT=1\""
 	nop
 ;		both low
 ;	C2+ < C2- C2 out=0
   .command "C2P.voltage = 1.4"
 	nop
-  .assert "(cmcon & 0xc0) == 0x00, \"*** FAILED 16f877a ind_comp_out  C1OUT=0 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x00, \"*** FAILED 18f2321 ind_comp_out  C1OUT=0 C2OUT=0\""
 	nop
-  .assert "(porta & 0x30) == 0x00, \"*** FAILED 16f877a ind_comp_out port C1OUT=0 C2OUT=0\""
+  .assert "(porta & 0x30) == 0x00, \"*** FAILED 18f2321 ind_comp_out port C1OUT=0 C2OUT=0\""
 	nop
 	return
 
@@ -324,44 +321,42 @@ mux_vref:
 	; C2IN- = 2.0 + = 2.29  out = 1
 	movlw	0xAB		; enable Vref 11 low range 2.29v
 	movwf	CVRCON
-  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 16f877a mux with vref C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 18f2321 mux with vref C1OUT=0 C2OUT=1\""
 	nop
-  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f877a mux with vref CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 18f2321 mux with vref CMIF=1\""
 	nop
-	BANKSEL PIR2
 	clrf	PIR2
 	movlw	0x8B		; enable Vref 11 high range 2.92v
         BANKSEL CVRCON
 	movwf	CVRCON
 	; C1IN- = 2.5 + = 2.92	out = 1
 	; C2IN- = 2.0 + = 2.92  out = 1
-  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 16f877a mux with vref C1OUT=1 C2OUT=1\"" 
+  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 18f2321 mux with vref C1OUT=1 C2OUT=1\"" 
 	nop
+	movlw   0x03
+	movwf	TRISC
 
-  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 16f877a mux with vref C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"FAILED 18f2321 mux with vref C1OUT=1 C2OUT=1\""
 	nop
-  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f877a CMIF=1\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 18f2321 CMIF=1\""
 	nop
-	BANKSEL PIR2
 	bcf	PIR2,CMIF
-  .assert "(pir2 & 0x40) == 0x00, \"FAILED 16f877a CMIF=0\""
+  .assert "(pir2 & 0x40) == 0x00, \"FAILED 18f2321 CMIF=0\""
 	nop
   .command "C1N.voltage = 3.0"	; drive comp1 low (C1IN- > Vref)
 	nop
-  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 16f877a mux with vref C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 18f2321 mux with vref C1OUT=0 C2OUT=1\""
         nop
-  .assert "(pir2 & 0x40) == 0x40, \"FAILED 16f877a CMIF=1 C1 change\""
+  .assert "(pir2 & 0x40) == 0x40, \"FAILED 18f2321 CMIF=1 C1 change\""
 	nop
 	bcf	PIR2,CMIF
-	BANKSEL CMCON
 	bsf	CMCON,C1INV		; invert output
 	bsf	CMCON,C2INV
-  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 16f877a mux with vref invert C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 18f2321 mux with vref invert C1OUT=1 C2OUT=0\""
 	nop
   .assert "(pir2 & 0x40) == 0x40, \"FAILED 40f2321 CMIF=1\""
 	nop
 
-	BANKSEL PIR2
 	bcf	PIR2,CMIF
   .command "C2N.voltage = 3.5"		; C2IN- > Vref
 	nop
@@ -369,32 +364,28 @@ mux_vref:
 	nop
   .command "C1P.voltage = 3.1"		; C1IN+ > Vref
 	nop
-  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 16f877a mux with vref new inputs C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"FAILED 18f2321 mux with vref new inputs C1OUT=0 C2OUT=1\""
 	nop
   .assert "(pir2 & 0x40) == 0x40, \"FAILED 40f2321 mux with vref CMIF=1 C1, C2 change\""
 	nop
-	BANKSEL CMCON
 	bsf	CMCON,CIS	; switch pins
-  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 16f877a mux with vref new inputs C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 18f2321 mux with vref new inputs C1OUT=1 C2OUT=0\""
 	nop
 
  	movlw	0xc7		; clear invert, CIS bits
 	andwf	CMCON,F
-  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 16f877a mux with vref invert normal C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"FAILED 18f2321 mux with vref invert normal C1OUT=1 C2OUT=0\""
 	nop
-	BANKSEL PIR2
 	clrf	PIR2
 	clrf	cmp_int
-	BANKSEL PIE2
 	bsf	PIE2,CMIE	; enable Comparator interrupts
 	bsf	INTCON,PEIE	; enable Peripheral interrupts
 	bsf	INTCON,GIE	; and global interrupts
-  	BANKSEL CMCON
 	bsf	CMCON,C1INV	; generate an interrupt
 	btfsc	cmp_int,0
 	goto	done1
         nop
-  .assert  "\"*** FAILED Comparator no interrupt 16f877a\""
+  .assert  "\"*** FAILED Comparator no interrupt 18f2321\""
 	nop
 	goto	$
 done1:
@@ -415,10 +406,10 @@ ref_com:
   .command "C1N.voltage = 3.1"
 	nop
 
-  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 16f877a ref_com CIS=0 C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 18f2321 ref_com CIS=0 C1OUT=0 C2OUT=1\""
 	nop
 	bsf	CMCON,CIS
-  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 16f877a ref_com CIS=1 C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 18f2321 ref_com CIS=1 C1OUT=0 C2OUT=1\""
 	nop
 ;	C2+ > C1- C1 out=1
 ;	C2+ < C2- C2 out=0
@@ -426,13 +417,13 @@ ref_com:
 	nop
   .command "C2N.voltage = 2.7"
 	nop
-  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 16f877a ref_com C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 18f2321 ref_com C1OUT=1 C2OUT=0\""
 	nop
 ;	C2+ > C1- C1 out=1
 ;	C2+ > C2- C2 out=1
   .command "C2N.voltage = 2.3"
 	nop
-  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 16f877a ref_com C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 18f2321 ref_com C1OUT=1 C2OUT=1\""
 	nop
 	return
 ;
@@ -451,14 +442,14 @@ ref_com_out:
   .command "C1N.voltage = 3.1"
 	nop
 
-  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 16f877a ref_com_out CIS=0 C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 18f2321 ref_com_out CIS=0 C1OUT=0 C2OUT=1\""
 	nop
-  .assert "(porta & 0x30) == 0x20, \"*** FAILED 16f877a ref_com_out CIS=0 port C1OUT=0 C2OUT=1\""
+  .assert "(porta & 0x30) == 0x20, \"*** FAILED 18f2321 ref_com_out CIS=0 port C1OUT=0 C2OUT=1\""
 	nop
 	bsf	CMCON,CIS
-  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 16f877a ref_com_out CIS=1 C1OUT=0 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0x80, \"*** FAILED 18f2321 ref_com_out CIS=1 C1OUT=0 C2OUT=1\""
 	nop
-  .assert "(porta & 0x30) == 0x20, \"*** FAILED 16f877a ref_com_out CIS=1 port C1OUT=0 C2OUT=1\""
+  .assert "(porta & 0x30) == 0x20, \"*** FAILED 18f2321 ref_com_out CIS=1 port C1OUT=0 C2OUT=1\""
 	nop
 ;	C2+ > C1- C1 out=1
 ;	C2+ < C2- C2 out=0
@@ -466,17 +457,17 @@ ref_com_out:
 	nop
   .command "C2N.voltage = 2.7"
 	nop
-  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 16f877a ref_com_out C1OUT=1 C2OUT=0\""
+  .assert "(cmcon & 0xc0) == 0x40, \"*** FAILED 18f2321 ref_com_out C1OUT=1 C2OUT=0\""
 	nop
-  .assert "(porta & 0x30) == 0x10, \"*** FAILED 16f877a ref_com_out CIS=0 port C1OUT=1 C2OUT=0\""
+  .assert "(porta & 0x30) == 0x10, \"*** FAILED 18f2321 ref_com_out CIS=0 port C1OUT=1 C2OUT=0\""
 	nop
 ;	C2+ > C1- C1 out=1
 ;	C2+ > C2- C2 out=1
   .command "C2N.voltage = 2.3"
 	nop
-  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 16f877a ref_com_out C1OUT=1 C2OUT=1\""
+  .assert "(cmcon & 0xc0) == 0xc0, \"*** FAILED 18f2321 ref_com_out C1OUT=1 C2OUT=1\""
 	nop
-  .assert "(porta & 0x30) == 0x30, \"*** FAILED 16f877a ref_com_out port C1OUT=1 C2OUT=1\""
+  .assert "(porta & 0x30) == 0x30, \"*** FAILED 18f2321 ref_com_out port C1OUT=1 C2OUT=1\""
 	nop
 	return
   end

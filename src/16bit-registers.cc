@@ -891,6 +891,13 @@ unsigned int TMR0_16::get_prescale()
 void TMR0_16::set_t0if()
 {
   intcon->set_t0if();
+  if (m_t1gcon)
+  {
+      m_t1gcon->T0_gate(true);
+      // Spec sheet does not indicate when the overflow signal
+      // is cleared, so I am assuming it is just a pulse. RRR
+      m_t1gcon->T0_gate(false);
+  }
 }
 
 bool TMR0_16::get_t0cs()
@@ -1261,151 +1268,89 @@ LVDCON::LVDCON(Processor *pCpu, const char *pName, const char *pDesc)
 }
 
 
-#if 0
-//-------------------------------------------------------------------
-//
-// PORTC16
-//-------------------------------------------------------------------
-
-
-PORTC16::PORTC16()
+bool OSCCON_HS::set_rc_frequency()
 {
-  usart = 0;
-  ccp1con = 0;
-}
+  double base_frequency = 31.e3;
+  bool config_pplx4 = cpu_pic->get_pplx4_osc();
+  bool osccon_pplx4 = (osctune)?osctune->value.get() & OSCTUNE::PLLEN:0;
+  //bool mfiosel	    = (osccon2)?osccon2->value.get() & OSCCON2::MFIOSEL:0;
+  //bool intsrc       = (osctune)?osctune->value.get() & OSCTUNE::INTSRC:0;
 
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-unsigned int PORTC16::get()
-{
-  unsigned int old_value;
 
-  old_value = value.get();
+  if (!cpu_pic->get_int_osc())
+     return false;
 
-  IOPORT::get();
-
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  // 
-  if( ccp1con && (diff & CCP1) ) {
-    ccp1con->new_edge(value.get() & CCP1);
-  }
-  // if this cpu has a usart and there's been a change detected on
-  // the RX pin, then we need to notify the usart
-  if( usart && (diff & RX))
-    usart->new_rx_edge(value.get() & RX);
-
-  return(value.get());
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTC16::setbit(unsigned int bit_number, bool new_value)
-{
-
-  unsigned int old_value = value.get();
-
-  //cout << "PORTC16::setbit() bit " << bit_number << " to " << new_value << '\n';
-
-  IOPORT::setbit( bit_number,  new_value);
-
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  if(ccp1con && ( diff & CCP1) ) {
-    ccp1con->new_edge(value.get() & CCP1);
-  }
-
-  if( usart && (diff & RX))
-    usart->new_rx_edge(value.get() & RX);
-
-}
-
-//-------------------------------------------------------------------
-//  PORTC16::put(unsigned int new_value)
-//
-//  inputs:  new_value - here's where the I/O port is written (e.g.
-//                       gpsim is executing a MOVWF IOPORT,F instruction.)
-//  returns: none
-//
-//  The I/O Port is updated with the new value. If there are any stimuli
-// attached to the I/O pins then they will be updated as well.
-// This is the same as PIC_IOPORT::put(), but check for the transmit
-// enable bit of the usart in addition to the TRISC register.
-//
-//-------------------------------------------------------------------
-
-void PORTC16::put(unsigned int new_value)
-{
-  if(new_value > 255)
-    cout << "PORTC16::put value >255\n";
-  // The I/O Ports have an internal latch that holds the state of the last
-  // write, even if the I/O pins are configured as inputs. If the tris port
-  // changes an I/O pin from an input to an output, then the contents of this
-  // internal latch will be placed onto the external I/O pin.
-
-  internal_latch = new_value;
-
-  // update only those bits that are really outputs
-  int mack_value = tris->value.get();
-  if (usart && usart->txsta.get() & _TXSTA::TXEN)
-      mack_value |= 1 << 6;
-
-  trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
-  value.put((new_value & ~mack_value) | (value.get() & mack_value));
-
-  // Update the stimuli - if there are any
-  if(stimulus_mask)
-    update_stimuli();
-
-}
-
-//-------------------------------------------------------------------
-// PORTC16::update_pin_directions(unsigned int new_tris)
-//
-//  Whenever a new value is written to a tris register, then we need
-// to update the stimuli associated with the I/O pins. This is true
-// even if the I/O pin are not connected to external stimuli (like a
-// square wave). An example scenario would be like changing a port b
-// pin from an output that's driving low to an input. If there's no
-// stimulus attached to the port b I/O pin then the pull up (if enabled)
-// will pull the I/O pin high.
-// This is the same as PIC_IOPORT::update_pin_directions(), but check for the
-// transmit enable bit of the usart in addition to the TRISC register.
-//
-//-------------------------------------------------------------------
-void PORTC16::update_pin_directions(unsigned int new_tris)
-{
-
-  if(!tris)
-    return;
-
-  unsigned int diff = tris->value.get() ^ new_tris;
-
-  if (usart && usart->txsta.get() & _TXSTA::TXEN)
-      diff &= ~(1 << 6); // don't update TX pin if TXEN
-
-  if(diff)
+    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+    switch (new_IRCF)
     {
-      // Update the I/O port value to that of the internal latch
-      value.put((value.get() & ~diff) | (internal_latch & diff));
-
-      // Go through and update the direction of the I/O pins
-      int i,m;
-      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
-	if(m & diff & valid_iopins)
-	  {
-	  pins[i]->update_direction(m & (~new_tris));
-	  //cout << __FUNCTION__ << " name " << pins[i]->name() << " pin number " << i << '\n';
-	  }
-      // Now, update the nodes to which the(se) pin(s) may be attached
-
-      guint64 time = get_cycles().get();
-      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
-	if(stimulus_mask & m & diff)
-          if(pins[i]->snode!=0)
-            pins[i]->snode->update(time);
-    }
+    case 0:
+	base_frequency = 31.e3;
+	break;
+	
+    case 1:
+	base_frequency = 125e3;
+	break;
+	
+    case 2:
+	base_frequency = 250e3;
+	break;
+	
+    case 3:
+	base_frequency = 1e6;
+	break;
+	
+    case 4:
+	base_frequency = 2e6;
+	break;
+	
+    case 5:
+	if (osccon_pplx4 || config_pplx4)
+	{
+	    base_frequency = 16e6;
+	}
+	else
+	{
+	    base_frequency = 4e6;
+	}
+	break;
+	
+    case 6:
+	if (osccon_pplx4 || config_pplx4)
+	{
+	    base_frequency = 32e6;
+	}
+	else
+	{
+	    base_frequency = 8e6;
+	}
+	break;
+	
+    case 7:
+	if (osccon_pplx4 || config_pplx4)
+	{
+	    base_frequency = 64e6;
+	}
+	else
+	{
+	    base_frequency = 16e6;
+	}
+	break;
+   }
+   if (osctune)
+   {
+       int tune;
+       unsigned int osctune_value = osctune->value.get();
+       tune = osctune_value & (OSCTUNE::TUN5-1);
+       tune = (OSCTUNE::TUN5 & osctune_value) ? -tune : tune;
+       base_frequency *= 1. + 0.125 * tune / 31.;
+   }
+   cpu_pic->set_frequency(base_frequency);
+   if ((bool)verbose)
+   {
+	cout << "set_rc_frequency() : osccon=" << hex << value.get();
+	if (osctune)
+	    cout << " osctune=" << osctune->value.get();
+	cout << " new frequency=" << base_frequency << endl;
+   }
+   return true;
 }
-
-#endif // 0

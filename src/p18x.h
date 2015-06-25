@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2010 Roy R Rankin
+   Copyright (C) 2010,2015 Roy R Rankin
 
 
 This file is part of the libgpsim library of gpsim
@@ -419,7 +419,16 @@ class P18F2620 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x8000; };
-  virtual unsigned int last_actual_register () const { return 0x0F7F;};
+  virtual unsigned int last_actual_register () const { return 0x0EFF;};
+};
+
+class RegZero : public Register
+{
+public:
+   RegZero(Module *_cpu, const char *_name=0, const char *desc=0): 
+	Register(_cpu, _name, desc) {}
+   virtual void put(unsigned int new_value) { value.put(0);}
+   virtual void put_value(unsigned int new_value) { value.put(0);}
 };
 
 

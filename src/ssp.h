@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998,1999 T. Scott Dattalo
-		 2006	Roy R Rankin
+		 2006,2015 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -393,8 +393,12 @@ class SSP_MODULE
   virtual void Sck_toggle();
   virtual void putStateSDO(char _state);
   virtual void putStateSCK(char _state);
-  virtual void set_sspif() { m_pirset->set_sspif();}
-  virtual void set_bclif() { m_pirset->set_bclif();}
+  virtual void mk_ssp_int(PIR *reg, unsigned int bit) 
+		{ m_ssp_if = new InterruptSource(reg, bit);}
+  virtual void mk_bcl_int(PIR *reg, unsigned int bit)
+		{ m_bcl_if = new InterruptSource(reg, bit);}
+  virtual void set_sspif();
+  virtual void set_bclif();
   virtual void startSSP(unsigned int value);
   virtual void stopSSP(unsigned int value);
   virtual void changeSSP(unsigned int new_value, unsigned int old_value);
@@ -418,6 +422,8 @@ class SSP_MODULE
   virtual void releaseSCKpin();
 
 protected:
+  InterruptSource *m_ssp_if;
+  InterruptSource *m_bcl_if;
   PIR_SET   *m_pirset;
   SPI 	    *m_spi;
   I2C 	    *m_i2c;

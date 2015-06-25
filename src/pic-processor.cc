@@ -1125,7 +1125,8 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
   GetTraceLog().switch_cpus(this);
   m_pResetTT = new ResetTraceType(this);
   m_pInterruptTT = new InterruptTraceType(this);
-
+  for(int i = 0; i < 4; i++)
+	osc_pin_Number[i] = 254;
 }
 //-------------------------------------------------------------------
 pic_processor::~pic_processor()
@@ -1248,6 +1249,7 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
       registers[addr] = reg;
       registers[addr]->address = addr;
       registers[addr]->alias_mask = 0;
+
       if(new_name)
         registers[addr]->new_name(new_name);
 
