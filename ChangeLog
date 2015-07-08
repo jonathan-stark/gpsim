@@ -1,3 +1,8 @@
+2015-07-08 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui.h gui/gui_scope.h gui/gui_scope.cc
+	: Replace all deprecated GDK drawing with Cairo drawing and some code
+	  clean up.
+
 2015-06-25 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_watch.cc: initialize variable watch_list
 	* regression/comparator/Makefile 

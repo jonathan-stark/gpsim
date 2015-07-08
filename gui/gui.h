@@ -189,8 +189,8 @@ public:
   {
   }
 
-  virtual void press(gpointer data = 0) = 0;
-  virtual void release(gpointer data = 0) = 0;
+  virtual void press(gpointer data = 0) {};
+  virtual void release(gpointer data = 0) {};
 };
 
 //

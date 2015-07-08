@@ -27,14 +27,6 @@ gpsim_la - plug in.
 
 */
 
-/*
-
-TODO:
-
- -- Scopewindow is emitting an expose event each time a waveform is drawn.
-
-*/
-
 #include "../config.h"
 #ifdef HAVE_GUI
 
@@ -47,6 +39,7 @@ TODO:
 #include "../src/symbol.h"
 #include "../src/value.h"
 #include "../src/stimuli.h"
+#include "../src/gpsim_object.h"
 
 #include <cassert>
 #include <cstdio>
@@ -56,8 +49,7 @@ TODO:
 #include "gui.h"
 #include "gui_scope.h"
 
-static GdkColor signal_line_color,grid_line_color,grid_v_line_color;
-static GdkColor highDensity_line_color;
+static GdkColor signal_line_color, grid_line_color;
 
 class WaveformSink;
 class Waveform;
@@ -131,52 +123,9 @@ private:
 
 /***********************************************************************
  */
-class PixMap
-{
-public:
-  PixMap(GdkDrawable *pParent, gint w, gint h, gint y);
-  GdkPixmap *pixmap() { return m_pixmap; }
-  gint width;
-  gint height;
-  gint yoffset;  //
-protected:
-  GdkPixmap *m_pixmap;
-};
-
-PixMap::PixMap(GdkDrawable *pParent, gint w, gint h, gint y)
-  : width(w), height(h), yoffset(y)
-{
-  m_pixmap = gdk_pixmap_new(pParent, width, height, -1);
-
-}
 
 GtkWidget *waveDrawingArea=0;
 GtkWidget *signalDrawingArea=0;
-
-GdkGC *drawing_gc=0;         // Line styles, etc.
-GdkGC *highDensity_gc=0;     // Line styles, etc.
-GdkGC *grid_gc=0;            // Grid color
-GdkGC *leftMarker_gc=0;      // Marker style & color
-
-/***********************************************************************
-  SignalNameEntry - a class to control gui editing of signal names
- */
-class SignalNameEntry
-{
-public:
-  SignalNameEntry(Scope_Window *parent,GtkEntry *);
-
-
-  bool Select(WaveBase *);
-  bool unSelect();
-  bool isSelected(WaveBase *);
-  WaveBase *getSelected();
-  GtkEntry *m_entry;
-protected:
-  Scope_Window *m_parent;
-  WaveBase *m_selectedWave;
-
-};
 
 /***********************************************************************
   Wavebase class
@@ -192,11 +141,10 @@ public:
   }
 
   virtual void Update(guint64 start=0, guint64 stop=0)=0;
-  virtual void Build(PixMap *pWavePixmap);
+  virtual void Build(gint w, gint h, gint y);
 
-  void setPixmaps(GdkPixmap *, GdkPixmap *);
-  PixMap *wavePixmap() { return m_wavePixmap; }
   const char *get_text() { return m_label_name.c_str(); }
+  gint get_yoffset() { return yoffset; }
   virtual void setSource(const char *) { }
 
 protected:
@@ -204,7 +152,11 @@ protected:
   Scope_Window *sw;          // Parent
   guint64 m_start;           // Start time of plotted waveform
   guint64 m_stop;            // Stop time of plotted waveform
-  PixMap *m_wavePixmap;      // The Waveform is rendered in this pixmap.
+
+  gint width;
+  gint height;
+  gint yoffset;
+
   std::string m_label_name;
 };
 
@@ -220,10 +172,10 @@ public:
   {
   }
 
-  virtual void Build(PixMap *pWavePixmap);
+  virtual void Build(gint w, gint h, gint y);
   virtual void Update(guint64 start=0, guint64 stop=0);
-
-protected:
+  void draw(cairo_t *cr);
+private:
   PangoLayout *m_TicText;
 };
 
@@ -242,14 +194,16 @@ public:
   }
 
   virtual void Update(guint64 start=0, guint64 stop=0);
-  virtual void Build(PixMap *pWavePixmap);
+  virtual void Build(gint w, gint h, gint y);
+  void draw(cairo_t *cr);
 
-  void SearchAndPlot(timeMap &left, timeMap &right);
   void setData(char c);
   virtual void setSource(const char *);
-  void updateLayout();
+
 protected:
-  void PlotTo(timeMap &left, timeMap &right);
+  void PlotTo(cairo_t *cr, timeMap &left, timeMap &right);
+  void SearchAndPlot(cairo_t *cr, timeMap &left, timeMap &right);
+  void updateLayout();
 
   PinMonitor *m_ppm;
   WaveformSink *m_pSink;
@@ -274,6 +228,23 @@ protected:
   Waveform *m_pWaveform;
 };
 
+//
+// SignalNameEntry - a class to control gui editing of signal names
+//
+class SignalNameEntry
+{
+public:
+  SignalNameEntry();
+  ~SignalNameEntry();
+
+  bool Select(WaveBase *);
+  bool unSelect();
+  bool isSelected(WaveBase *pWave) { return pWave == m_selectedWave; }
+  WaveBase *getSelected() { return m_selectedWave; }
+  GtkWidget *m_entry;
+protected:
+  WaveBase *m_selectedWave;
+};
 
 //========================================================================
 class ZoomInEvent : public KeyEvent
@@ -283,13 +254,12 @@ public:
   {
   }
 
-  void press(gpointer data)
+  virtual void press(gpointer data)
   {
     Scope_Window *sw = static_cast<Scope_Window *>(data);
     if (sw)
       sw->zoom(2);
   }
-  void release(gpointer data) {}
 };
 //========================================================================
 class ZoomOutEvent : public KeyEvent
@@ -299,13 +269,12 @@ public:
   {
   }
 
-  void press(gpointer data)
+  virtual void press(gpointer data)
   {
     Scope_Window *sw = static_cast<Scope_Window *>(data);
     if (sw)
       sw->zoom(-2);
   }
-  void release(gpointer data) {}
 };
 
 //========================================================================
@@ -316,13 +285,12 @@ public:
   {
   }
 
-  void press(gpointer data)
+  virtual void press(gpointer data)
   {
     Scope_Window *sw = static_cast<Scope_Window *>(data);
     if (sw)
       sw->pan(-( (gint64) sw->getSpan()/4));
   }
-  void release(gpointer data) {}
 };
 //========================================================================
 class PanRightEvent : public KeyEvent
@@ -332,30 +300,25 @@ public:
   {
   }
 
-  void press(gpointer data)
+  virtual void press(gpointer data)
   {
     Scope_Window *sw = static_cast<Scope_Window *>(data);
     if (sw)
       sw->pan( (gint64) sw->getSpan()/4);
   }
-  void release(gpointer data) {}
 };
 
 //========================================================================
 
-static map<guint, KeyEvent *> KeyMap;
-
-static gint
-key_press(GtkWidget *widget,
-          GdkEventKey *key,
-          gpointer data)
+gboolean Scope_Window::key_press(GtkWidget *widget, GdkEventKey *key,
+  Scope_Window *sw)
 {
-  Dprintf (("press 0x%x\n",key->keyval));
+  Dprintf (("press 0x%x\n", key->keyval));
 
-  KeyEvent *pKE = KeyMap[key->keyval];
+  KeyEvent *pKE = sw->KeyMap[key->keyval];
   if(pKE)
     {
-      pKE->press(data);
+      pKE->press(sw);
       return TRUE;
     }
 
@@ -427,19 +390,16 @@ void WaveformSink::setSinkState(char c)
 
 //************************************************************************
 WaveBase::WaveBase(Scope_Window *parent, const char *name)
-  : sw(parent),
-    m_start(1), m_stop(1),
-    m_wavePixmap(0)
+  : sw(parent), m_start(1), m_stop(1)
 {
 
 }
-void WaveBase::Build(PixMap *pWavePixmap)
+
+void WaveBase::Build(gint w, gint h, gint y)
 {
-
-  if (m_wavePixmap && m_wavePixmap->pixmap())
-    gdk_pixmap_unref(m_wavePixmap->pixmap());
-
-  m_wavePixmap = pWavePixmap;
+  width = w;
+  height = h;
+  yoffset = y;
 
   Update(0,0);
 }
@@ -454,9 +414,9 @@ Waveform::Waveform(Scope_Window *parent, const char *name)
   m_logger.event('0');
 }
 
-void Waveform::Build(PixMap *pWavePixmap)
+void Waveform::Build(gint w, gint h, gint y)
 {
-  WaveBase::Build(pWavePixmap);
+  WaveBase::Build(w, h, y);
   updateLayout();
 }
 void Waveform::setData(char c)
@@ -488,16 +448,17 @@ void Waveform::setSource(const char *sourceName)
     // Invalidate wave area.
     m_start = m_stop = 1;
     Update(0,0);
-    if (sw)
-      sw->Expose(this);
-
+    if (sw) {
+      gtk_widget_queue_draw(signalDrawingArea);
+      gtk_widget_queue_draw(waveDrawingArea);
+    }
   } else if(sourceName)
      printf("'%s' is not a valid source for the scope\n",sourceName);
 }
 
 //----------------------------------------
 //
-void Waveform::PlotTo(timeMap &left, timeMap &right)
+void Waveform::PlotTo(cairo_t *cr, timeMap &left, timeMap &right)
 {
   // Event(s) has(have) been found.
   // The plotting region has been subdivided as finely as possible
@@ -505,51 +466,43 @@ void Waveform::PlotTo(timeMap &left, timeMap &right)
   // First draw a horizontal line from the last known event to here:
 
 
-  gdk_draw_line(m_wavePixmap->pixmap(),drawing_gc,
-                m_last.pos, m_last.event,   // last point drawn
-                right.pos,  m_last.event);  // right most point of this region.
+  cairo_move_to(cr, m_last.pos, m_last.event + yoffset);
+  cairo_line_to(cr, right.pos, m_last.event + yoffset);
 
   // Now draw a vertical line for the event
 
-  int nextEvent = (m_logger.get_state(right.eventIndex) == '1') ? 1 : (m_wavePixmap->height-3);
+  int nextEvent = (m_logger.get_state(right.eventIndex) == '1')
+    ? 1 : (height - 3);
 
   // Draw a thicker line if there is more than one event.
-  unsigned int nEvents = m_logger.get_nEvents(left.eventIndex,right.eventIndex);
-  if (nEvents>1) {
+  unsigned int nEvents = m_logger.get_nEvents(left.eventIndex, right.eventIndex);
+  if (nEvents > 1) {
+    cairo_save(cr);
+    guint16 c = (nEvents < 4) ? (0x4000 * nEvents + 0x8000) : 0xffff;
 
-    guint16 c = (nEvents < 4) ? (0x4000*nEvents+0x8000) : 0xffff;
-
-    if (c != highDensity_line_color.blue) {
-      gdk_colormap_free_colors(gdk_colormap_get_system(),
-                               &highDensity_line_color,
-                               1);
-      // variations of yellow
-      highDensity_line_color.green = 0xffff;
-      highDensity_line_color.red = 0xffff;
-      highDensity_line_color.blue = c;
-
-      gdk_colormap_alloc_color(gdk_colormap_get_system(), &highDensity_line_color, TRUE, TRUE);
-
-      gdk_gc_set_foreground(highDensity_gc,&highDensity_line_color);
-
+    if (left.pos != right.pos) {
+      cairo_move_to(cr, left.pos, 1 + yoffset);
+      cairo_line_to(cr, left.pos, height - 3 + yoffset);
+      cairo_stroke(cr);
     }
+    // variations of yellow
+    cairo_set_source_rgb(cr, 1.0, 1.0, double(c) / 65535.0);
 
-    gdk_draw_line(m_wavePixmap->pixmap(),highDensity_gc,
-                  right.pos, 1,
-                  right.pos, m_wavePixmap->height-3);
-    if (left.pos != right.pos)
-      gdk_draw_line(m_wavePixmap->pixmap(),highDensity_gc,
-                    left.pos, 1,
-                    left.pos, m_wavePixmap->height-3);
-  } else
-    gdk_draw_line(m_wavePixmap->pixmap(),drawing_gc,
-                  right.pos, m_last.event,    // last point drawn
-                  right.pos, nextEvent); // next event
+    cairo_move_to(cr, right.pos, 1 + yoffset);
+    cairo_line_to(cr, right.pos, height - 3 + yoffset);
+
+    cairo_stroke(cr);
+    cairo_restore(cr);
+  } else {
+    cairo_move_to(cr, right.pos, m_last.event + yoffset);
+    cairo_line_to(cr, right.pos, nextEvent + yoffset);
+  }
+  cairo_stroke(cr);
 
   m_last = right;
   m_last.event = nextEvent;
-
 }
+
 //----------------------------------------
 //
 // Waveform SearchAndPlot
@@ -559,7 +512,7 @@ void Waveform::PlotTo(timeMap &left, timeMap &right)
 // be divided no smaller.
 //
 
-void Waveform::SearchAndPlot(timeMap &left, timeMap &right)
+void Waveform::SearchAndPlot(cairo_t *cr, timeMap &left, timeMap &right)
 {
   if (right.eventIndex == left.eventIndex)
     // The time span cannot be divided any smaller.
@@ -568,7 +521,7 @@ void Waveform::SearchAndPlot(timeMap &left, timeMap &right)
     // m_last = left;
     ;
   else if (left.pos+1 >= right.pos)
-    PlotTo(left,right);
+    PlotTo(cr, left,right);
   else {
     // the subdivided region is larger than 1-pixel wide
     // and there is at least one event. So subdivide even smaller
@@ -580,8 +533,8 @@ void Waveform::SearchAndPlot(timeMap &left, timeMap &right)
     mid.pos  = (left.pos  + right.pos)  / 2;
     mid.eventIndex = m_logger.get_index ((guint64)mid.time);
 
-    SearchAndPlot(left, mid);
-    SearchAndPlot(mid, right);
+    SearchAndPlot(cr, left, mid);
+    SearchAndPlot(cr, mid, right);
 
   }
 
@@ -594,11 +547,6 @@ void Waveform::SearchAndPlot(timeMap &left, timeMap &right)
 
 void Waveform::Update(guint64 uiStart, guint64 uiEnd)
 {
-  if(!m_wavePixmap) {
-    g_print("%s pixmap is NULL\n", __FUNCTION__);
-    return;
-  }
-
   if (uiEnd == 0)
     uiEnd = get_cycles().get();
 
@@ -608,66 +556,58 @@ void Waveform::Update(guint64 uiStart, guint64 uiEnd)
   m_start = uiStart;
   m_stop  = uiEnd;
 
-  GtkStyle *style = gtk_widget_get_style(waveDrawingArea);
-  gdk_draw_rectangle (m_wavePixmap->pixmap(),
-                      style->black_gc,
-                      TRUE,
-                      0, 0,
-                      m_wavePixmap->width,
-                      m_wavePixmap->height);
-
   updateLayout();
+}
 
-  //
-  // Draw Vertical Grid Lines:
-  //
+void Waveform::draw(cairo_t *cr)
+{
+  cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+  cairo_rectangle(cr, 0.0, yoffset, width, yoffset + height);
+  cairo_fill(cr);
 
-  int i;
-  for (i=0; i<sw->MajorTicks().sze(); i++) {
+  // Draw vertical grid lines
 
+  gdk_cairo_set_source_color(cr, &grid_line_color);
+  for (int i = 0; i < sw->MajorTicks().sze(); ++i) {
     int x = sw->MajorTicks().pixel(i);
 
-    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
-                  x,1,
-                  x,m_wavePixmap->height-1);
+    cairo_move_to(cr, x, yoffset + 1);
+    cairo_line_to(cr, x, yoffset + height - 1);
   }
 
-  //
-  // Draw Horizontal Grid Lines:
-  //
-  gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
-                0,m_wavePixmap->height-1,
-                m_wavePixmap->width,m_wavePixmap->height-1);
+  // Draw horizontal grid lines
+
+  cairo_move_to(cr, 0.0, yoffset + height - 1);
+  cairo_line_to(cr, width, yoffset + height - 1);
+
+  cairo_stroke(cr);
 
   if (m_stop == 0)
     return;
 
-  // Draw Signals:
-
+  // Draw signal
   timeMap left;
   timeMap right;
 
   left.pos = 0;
   left.time = m_start;
   left.eventIndex = m_logger.get_index(m_start);
-  left.event = (m_logger.get_state(left.eventIndex) == '1') ? 1 : (m_wavePixmap->height-3);
+  left.event = (m_logger.get_state(left.eventIndex) == '1') ? 1 : (height - 3);
 
   m_last = left;
 
-  right.pos = m_wavePixmap->width;
+  right.pos = width;
   right.time = m_stop;
   right.eventIndex = m_logger.get_index(m_stop);
 
-
-  SearchAndPlot(left,right);
-  if (right.pos > m_last.pos)
-    gdk_draw_line(m_wavePixmap->pixmap(),drawing_gc,
-                  m_last.pos, m_last.event,   // last point drawn
-                  right.pos,  m_last.event);  // right most point
-
-
+  gdk_cairo_set_source_color(cr, &signal_line_color);
+  SearchAndPlot(cr, left, right);
+  if (right.pos > m_last.pos) {
+    cairo_move_to(cr, m_last.pos, yoffset + m_last.event);
+    cairo_line_to(cr, right.pos, yoffset + m_last.event);
+    cairo_stroke(cr);
+  }
 }
-
 
 //========================================================================
 TimeAxis::TimeAxis(Scope_Window *parent, const char *name)
@@ -683,11 +623,6 @@ TimeAxis::TimeAxis(Scope_Window *parent, const char *name)
 
 void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
 {
-  if(!m_wavePixmap) {
-    g_print("%s pixmap is NULL\n", __FUNCTION__);
-    return;
-  }
-
   if (uiEnd == 0)
     uiEnd = get_cycles().get();
 
@@ -696,77 +631,11 @@ void TimeAxis::Update(guint64 uiStart, guint64 uiEnd)
 
   m_start = uiStart;
   m_stop  = uiEnd;
-
-  GtkStyle *style = gtk_widget_get_style(waveDrawingArea);
-  gdk_draw_rectangle (m_wavePixmap->pixmap(),
-                      style->bg_gc[GTK_STATE_NORMAL],
-                      TRUE,
-                      0, 0,
-                      m_wavePixmap->width,
-                      m_wavePixmap->height);
-
-  //
-  // Draw Major Ticks:
-  //
-  int i;
-  for (i=0; i<sw->MajorTicks().sze(); i++) {
-
-    int x = sw->MajorTicks().pixel(i);
-
-    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
-                  x,m_wavePixmap->height-3,
-                  x,m_wavePixmap->height-1);
-
-    if (m_TicText) {
-      char buff[100];
-      g_snprintf(buff, sizeof(buff),"%" PRINTF_GINT64_MODIFIER "d", sw->MajorTicks().cycle(i));
-      pango_layout_set_text(m_TicText, buff, -1);
-
-      int text_height=0;
-      int text_width=0;
-
-      pango_layout_get_pixel_size(m_TicText,
-                                  &text_width,
-                                  &text_height);
-      text_width /= 2;
-      x = ((x-text_width) < 0) ? 0 : (x-text_width);
-      x = ((x+text_width) > m_wavePixmap->width) ? (x-text_width) : x;
-
-      gdk_draw_layout (GDK_DRAWABLE(m_wavePixmap->pixmap()),
-                       style->fg_gc[GTK_STATE_NORMAL],
-                       x,
-                       (m_wavePixmap->height-text_height)/2,
-                       m_TicText);
-
-      }
-
-  }
-
-  //
-  // Draw Minor Ticks:
-  //
-  for (i=0; i<sw->MinorTicks().sze(); i++) {
-
-    int x = sw->MinorTicks().pixel(i);
-
-    gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
-                  x,m_wavePixmap->height-3,
-                  x,m_wavePixmap->height-1);
-  }
-  //
-  // Draw Horizontal Grid Lines:
-  //
-  gdk_draw_line(m_wavePixmap->pixmap(),grid_gc,
-                0,m_wavePixmap->height-1,
-                m_wavePixmap->width,m_wavePixmap->height-1);
-
 }
 
-
-
-void TimeAxis::Build(PixMap *pWavePixmap)
+void TimeAxis::Build(gint w, gint h, gint y)
 {
-  WaveBase::Build(pWavePixmap);
+  WaveBase::Build(w, h, y);
   // Invalidate the start time after the build.
   // This is for the case where the scope window gets opened after
   // the simulation has already been started.
@@ -798,18 +667,6 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-static gint DrawingArea_expose_event (GtkWidget *widget,
-                                      GdkEventExpose *event,
-                                      Scope_Window   *sw)
-{
-  Dprintf(( " %s\n",__FUNCTION__));
-
-  if(sw)
-    sw->Update();
-
-  return FALSE;
-}
-
 //------------------------------------------------------------------------
 class TimeMarker : public Integer
 {
@@ -834,32 +691,33 @@ void TimeMarker::set(gint64 i)
 
 //========================================================================
 GridPointMapping::GridPointMapping(int nPointsToMap)
-  : m_pointsAllocated(nPointsToMap), m_nPoints(0),
-    m_pixel(new int[nPointsToMap]), m_cycle(new guint64[nPointsToMap])
+  : m_nPoints(0), m_pixel(nPointsToMap), m_cycle(nPointsToMap)
 {
 }
 
 GridPointMapping::~GridPointMapping()
 {
-  delete[] m_cycle;
-  delete[] m_pixel;
 }
 
 //========================================================================
 // SignalNameEntry
-SignalNameEntry::SignalNameEntry(Scope_Window *parent,GtkEntry *entry)
-  : m_entry(entry), m_parent(parent), m_selectedWave(0)
+SignalNameEntry::SignalNameEntry()
+  : m_selectedWave(0)
 {
-  gtk_widget_hide (GTK_WIDGET(m_entry));
+  m_entry = gtk_entry_new();
 }
+
+SignalNameEntry::~SignalNameEntry()
+{
+  gtk_widget_destroy(m_entry);
+}
+
 bool SignalNameEntry::Select(WaveBase *pWave)
 {
-
   if (pWave) {
-    gtk_entry_set_text (GTK_ENTRY(m_entry),
-                        pWave->get_text());
-    gtk_widget_show (GTK_WIDGET(m_entry));
-    gtk_widget_grab_focus (GTK_WIDGET(m_entry));
+    gtk_entry_set_text(GTK_ENTRY(m_entry), pWave->get_text());
+    gtk_widget_show(m_entry);
+    gtk_widget_grab_focus(m_entry);
 
     m_selectedWave = pWave;
     return true;
@@ -870,18 +728,9 @@ bool SignalNameEntry::Select(WaveBase *pWave)
 
 bool SignalNameEntry::unSelect()
 {
-  gtk_widget_hide (GTK_WIDGET(m_entry));
+  gtk_widget_hide(m_entry);
   m_selectedWave = 0;
   return false;
-}
-bool SignalNameEntry::isSelected(WaveBase *pWave)
-{
-  return pWave == m_selectedWave;
-}
-
-WaveBase *SignalNameEntry::getSelected()
-{
-  return m_selectedWave;
 }
 
 //========================================================================
@@ -971,24 +820,9 @@ int Scope_Window::waveXoffset()
                *gNormalizedHorizontalPosition);
 }
 
-void Scope_Window::Expose(WaveBase *wf)
-{
-  if(!wf || !waveDrawingArea)
-    return;
-
-  int xoffset = waveXoffset();
-
-  PixMap *pm = wf->wavePixmap();
-
-  GtkStyle *style = gtk_widget_get_style(waveDrawingArea);
-  gdk_draw_pixmap(gtk_widget_get_window(waveDrawingArea),
-                  style->fg_gc[GTK_STATE_NORMAL],
-                  pm->pixmap(),
-                  xoffset,0,      // source
-                  0,pm->yoffset,  // destination
-                  pm->width,pm->height);
-}
-
+// TODO: Pan GUI widget is disabled for now.
+// Work must be done to do this correctly and add zoom widgets
+#if 0
 static void hAdjVChange(GtkAdjustment *pAdj,
                         gpointer       user_data)
 {
@@ -996,6 +830,7 @@ static void hAdjVChange(GtkAdjustment *pAdj,
     - gtk_adjustment_get_lower(pAdj) - gtk_adjustment_get_page_size(pAdj);
   gNormalizedHorizontalPosition = gtk_adjustment_get_value(pAdj) / (width ? width : 1.0);
 }
+#endif
 
 bool Scope_Window::endSignalNameSelection(bool bAccept)
 {
@@ -1006,7 +841,7 @@ bool Scope_Window::endSignalNameSelection(bool bAccept)
   if (pwf) {
 
     if (bAccept)
-      pwf->setSource(gtk_entry_get_text(m_entry->m_entry));
+      pwf->setSource(gtk_entry_get_text(GTK_ENTRY(m_entry->m_entry)));
 
     m_entry->Select(0);
 
@@ -1033,12 +868,8 @@ bool Scope_Window::selectSignalName(int y)
 
     m_entry->unSelect();
 
-    PixMap *pm = signals[y]->wavePixmap();
-
-    if (pm)
-      gtk_layout_move(GTK_LAYOUT(signalDrawingArea),
-                      GTK_WIDGET(m_entry->m_entry),
-                      0,pm->yoffset-2);
+    gtk_layout_move(GTK_LAYOUT(signalDrawingArea), m_entry->m_entry,
+      0, signals[y]->get_yoffset() - 2);
     bRet = m_entry->Select(signals[y]);
 
   } else
@@ -1093,7 +924,7 @@ gboolean Scope_Window::signal_name_expose(GtkWidget *widget,
   for ( ; i != sw->signals.end(); ++i) {
     if (!sw->m_entry->isSelected(*i)) {
       Waveform *p  = *i;
-      double yoffset = p->wavePixmap()->yoffset;
+      double yoffset = p->get_yoffset();
       pango_layout_set_text(layout, p->get_text(), -1);
       cairo_move_to(cr, 0.0, yoffset);
       pango_cairo_update_layout(cr, layout);
@@ -1103,6 +934,67 @@ gboolean Scope_Window::signal_name_expose(GtkWidget *widget,
   g_object_unref(layout);
   cairo_destroy(cr);
 
+  return TRUE;
+}
+
+void TimeAxis::draw(cairo_t *cr)
+{
+  // Draw major ticks
+  for (int i = 0; i < sw->MajorTicks().sze(); ++i) {
+    gdk_cairo_set_source_color(cr, &grid_line_color);
+    int x = sw->MajorTicks().pixel(i);
+    cairo_move_to(cr, x, height - 3);
+    cairo_line_to(cr, x, height - 1);
+
+    char buff[100];
+    g_snprintf(buff, sizeof(buff),"%" PRINTF_GINT64_MODIFIER "d", sw->MajorTicks().cycle(i));
+    pango_layout_set_text(m_TicText, buff, -1);
+
+    int text_height;
+    int text_width;
+
+    pango_layout_get_pixel_size(m_TicText, &text_width, &text_height);
+    text_width /= 2;
+    x = ((x - text_width) < 0) ? 0 : (x - text_width);
+    x = ((x + text_width) > width) ? (x - text_width) : x;
+    cairo_move_to(cr, x, (height - text_height)/2);
+    pango_cairo_update_layout(cr, m_TicText);
+    pango_cairo_show_layout(cr, m_TicText);
+  }
+
+  gdk_cairo_set_source_color(cr, &grid_line_color);
+  // Draw minor ticks
+  for (int i = 0; i < sw->MinorTicks().sze(); ++i) {
+    double x = sw->MinorTicks().pixel(i);
+    cairo_move_to(cr, x, height - 3);
+    cairo_line_to(cr, x, height - 1);
+  }
+  // Draw horizontal grid line
+  cairo_move_to(cr, 0.0, height - 1);
+  cairo_line_to(cr, width, height - 1);
+
+  cairo_stroke(cr);
+}
+
+gboolean Scope_Window::signal_expose(GtkWidget *widget,
+  GdkEventExpose *event, Scope_Window *sw)
+{
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+
+  sw->m_TimeAxis->draw(cr);
+  std::vector<Waveform *>::iterator i = sw->signals.begin();
+  for (; i != sw->signals.end(); ++i) {
+    (*i)->draw(cr);
+  }
+  
+  double xpos = sw->mapTimeToPixel(sw->m_Markers[eLeftButton]->getVal()
+    + sw->waveXoffset());
+  cairo_move_to(cr, xpos, 0.0);
+  cairo_line_to(cr, xpos, 1000.0);
+  cairo_stroke(cr);
+
+  cairo_destroy(cr);
+ 
   return TRUE;
 }
 
@@ -1124,15 +1016,9 @@ gboolean Scope_Window::signal_name_expose(GtkWidget *widget,
 
 void Scope_Window::Build()
 {
-
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   if (!window)
     return;
-
-
-  // The "realize" operation creates basic resources like GC's etc. that
-  // are referenced below. Without this call, those resources will be NULL.
-  gtk_widget_realize (window);
 
   gtk_window_set_title(GTK_WINDOW(window), "Scope");
 
@@ -1150,52 +1036,34 @@ void Scope_Window::Build()
   signal_line_color.red = 0xff00;
   signal_line_color.green = 0x0000;
   signal_line_color.blue = 0x0000;
-  gdk_colormap_alloc_color(gdk_colormap_get_system(), &signal_line_color, FALSE, TRUE);
+
   // The grid color is bright green
   grid_line_color.red = 0x4000;
   grid_line_color.green = 0x4000;
   grid_line_color.blue = 0x4000;
-  gdk_colormap_alloc_color(gdk_colormap_get_system(), &grid_line_color, FALSE, TRUE);
-  // The vertical grid color is dark green
-  grid_v_line_color.red = 0x0000;
-  grid_v_line_color.green = 0x2200;
-  grid_v_line_color.blue = 0x0000;
-  gdk_colormap_alloc_color(gdk_colormap_get_system(), &grid_v_line_color, FALSE, TRUE);
-  // The vertical grid color is dark green
-  highDensity_line_color.red = 0xff00;
-  highDensity_line_color.green = 0xff00;
-  highDensity_line_color.blue = 0xff00;
-  gdk_colormap_alloc_color(gdk_colormap_get_system(), &highDensity_line_color, TRUE, TRUE);
 
-
-  waveDrawingArea = gtk_drawing_area_new ();
+  waveDrawingArea = gtk_drawing_area_new();
   gint dawidth  = 400;
   gint daheight = 100;
 
   gtk_widget_set_size_request(waveDrawingArea, dawidth, daheight);
-  gtk_widget_set_events (waveDrawingArea,
+  gtk_widget_set_events(waveDrawingArea,
                          GDK_EXPOSURE_MASK |
                          GDK_KEY_PRESS_MASK );
 
-  signalDrawingArea = gtk_layout_new (NULL, NULL);
+  signalDrawingArea = gtk_layout_new(NULL, NULL);
   gtk_widget_set_size_request(signalDrawingArea, 100, daheight);
-  gtk_widget_set_events (signalDrawingArea,
+  gtk_widget_set_events(signalDrawingArea,
                          GDK_EXPOSURE_MASK |
                          GDK_BUTTON_PRESS_MASK |
                          GDK_KEY_PRESS_MASK );
 
-
-
   GtkWidget *pvbox = gtk_vbox_new(FALSE,0);
   gtk_container_add (GTK_CONTAINER (window), pvbox);
 
-
-
-  m_pHpaned = gtk_hpaned_new ();
-  gtk_widget_show (m_pHpaned);
+  m_pHpaned = gtk_hpaned_new();
 
   gtk_box_pack_start(GTK_BOX (pvbox), m_pHpaned, TRUE, TRUE, 0);
-
 
   m_hAdj = gtk_adjustment_new
     (0.0,    // value
@@ -1206,47 +1074,35 @@ void Scope_Window::Build()
      m_PixmapWidth/5.0); // page_size
 
   m_phScrollBar = gtk_hscrollbar_new(GTK_ADJUSTMENT(m_hAdj));
+// TODO: Pan GUI widget is disabled for now.
+// Work must be done to do this correctly and add zoom widgets
+#if 0
   gtk_box_pack_start(GTK_BOX(pvbox), m_phScrollBar, TRUE, TRUE, 0);
   g_signal_connect(m_hAdj, "value-changed",
                      G_CALLBACK(hAdjVChange), this);
-
-  // Add the drawing areas to the panes
+#endif
+  // Add the drawing areas to theUnread panes
   gtk_paned_add1(GTK_PANED(m_pHpaned), signalDrawingArea);
   gtk_paned_add2(GTK_PANED(m_pHpaned), waveDrawingArea);
   gtk_paned_set_position(GTK_PANED(m_pHpaned),50);
-
-  gtk_widget_show(waveDrawingArea);
-  GdkWindow *Gwindow = gtk_widget_get_window(waveDrawingArea);
-
-  // Graphics Context:
-  drawing_gc = gdk_gc_new(Gwindow);
-  grid_gc = gdk_gc_new(Gwindow);
-  highDensity_gc = gdk_gc_new(Gwindow);
-  leftMarker_gc = gdk_gc_new(Gwindow);
-
-  gdk_gc_set_foreground(grid_gc,&grid_line_color);
-  gdk_gc_set_foreground(drawing_gc,&signal_line_color);
-  gdk_gc_set_foreground(highDensity_gc,&highDensity_line_color);
-  gdk_gc_set_foreground(leftMarker_gc,&highDensity_line_color);
-  gdk_gc_set_function(leftMarker_gc,GDK_XOR);
 
   guint64 start,stop;
   gridPoints(&start,&stop);
 
   int timeHeight = 15;
-  m_TimeAxis->Build(new PixMap(Gwindow, m_PixmapWidth, timeHeight, 0));
+  m_TimeAxis->Build(m_PixmapWidth, timeHeight, 0);
   m_TimeAxis->Update(start,stop);
 
-  for(size_t i = 0; i < signals.size(); i++) {
-    int waveHeight=20;
-    int yoffset = timeHeight +i*waveHeight;
-    signals[i]->Build(new PixMap(Gwindow, m_PixmapWidth, waveHeight, yoffset));
+  std::vector<Waveform *>::iterator i = signals.begin();
+  int yoffset = timeHeight;
+  for (; i != signals.end(); ++i) {
+    const int waveHeight = 20;
+    yoffset += waveHeight;
+    (*i)->Build(m_PixmapWidth, waveHeight, yoffset);
   }
 
-  g_signal_connect (waveDrawingArea,
-                      "expose-event",
-                      G_CALLBACK(DrawingArea_expose_event),
-                      this);
+  g_signal_connect(waveDrawingArea, "expose-event", G_CALLBACK(signal_expose),
+    this);
 
   g_signal_connect(signalDrawingArea, "expose-event",
     G_CALLBACK(signal_name_expose), this);
@@ -1272,23 +1128,22 @@ void Scope_Window::Build()
                      G_CALLBACK(signalButtonPress),
                      (gpointer) this);
 
-  gtk_widget_show_all (window);
-
   bIsBuilt = true;
 
   UpdateMenuItem();
 
-  m_entry = new SignalNameEntry(this, GTK_ENTRY(gtk_entry_new ()));
+  gtk_widget_show_all(window);
+
+  m_entry = new SignalNameEntry();
 
   gtk_layout_put(GTK_LAYOUT(signalDrawingArea),
-                 GTK_WIDGET(m_entry->m_entry),
+                 m_entry->m_entry,
                  0,0);
 
   g_signal_connect(m_entry->m_entry,
                      "key_press_event",
                      G_CALLBACK(signalEntryKeyPress),
                      (gpointer) this);
-
 }
 
 
@@ -1321,32 +1176,18 @@ void Scope_Window::Update()
   g_object_set(G_OBJECT(m_hAdj),
                "page-size", m_PixmapWidth * 200.0/dspan,
                NULL);
-  gtk_widget_queue_draw(m_phScrollBar);
   gtk_widget_queue_draw(signalDrawingArea);
+  gtk_widget_queue_draw(waveDrawingArea);
 
   m_TimeAxis->Update(start,stop);
-  Expose(m_TimeAxis);
 
-  for (size_t i = 0; i < signals.size(); i++) {
-    if(signals[i]) {
-      signals[i]->Update(start,stop);
-      Expose(signals[i]);
-    }
-
+  std::vector<Waveform *>::iterator i = signals.begin();
+  for ( ; i != signals.end(); ++i) {
+      (*i)->Update(start,stop);
   }
-
-  // Markers
-  int xpos = mapTimeToPixel(m_Markers[eLeftButton]->getVal()) + waveXoffset();
-  if (xpos) {
-    gdk_draw_line(gtk_widget_get_window(waveDrawingArea), leftMarker_gc,
-                  xpos, 0,
-                  xpos, 1000);
-  }
-
-  gtk_widget_show_all(window);
 
   if (m_entry->isSelected(0)) {
-    gtk_widget_hide (GTK_WIDGET(m_entry->m_entry));
+    gtk_widget_hide(m_entry->m_entry);
   }
 
 }
@@ -1449,23 +1290,15 @@ void Scope_Window::zoom(int i)
 
 void Scope_Window::pan(int i)
 {
-
-  gint64 start = i+(gint64) m_Markers[eStart]->getVal();
+  gint64 start = i + (gint64) m_Markers[eStart]->getVal();
   gint64 stop  = (gint64) m_Markers[eStop]->getVal();
   gint64 now  = (gint64) get_cycles().get();
 
-  if (start < 0)
-    return;
-
-  if (!stop)
-    return;
-
-  if ((stop+i) > now)
+  if (start < 0 || !stop || ((stop + i) > now))
     return;
 
   m_Markers[eStart]->set(start);
-  m_Markers[eStop]->set(stop+i);
-
+  m_Markers[eStop]->set(stop + i);
 }
 
 gdouble Scope_Window::getSpan()

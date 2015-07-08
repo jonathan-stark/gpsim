@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SCOPE_H__
 #define __GUI_SCOPE_H__
 
+#include <valarray>
 #include <vector>
 #include "gui_object.h"
 
@@ -29,7 +30,6 @@ class GUI_Processor;
 class TimeMarker;
 class ZoomAttribute;
 class PanAttribute;
-class WaveBase;
 class Waveform;
 class SignalNameEntry;
 class TimeAxis;
@@ -44,11 +44,9 @@ public:
   guint64 cycle(int index) { return (index<m_nPoints)? m_cycle[index] : 0;}
   int sze() { return m_nPoints; }
 
-  int      m_pointsAllocated;
   int      m_nPoints;
-  int     *m_pixel;
-  guint64 *m_cycle;
-  
+  std::valarray<int> m_pixel;
+  std::valarray<guint64> m_cycle;
 };
 //
 // The Scope Window
@@ -61,8 +59,6 @@ public:
   Scope_Window(GUI_Processor *gp);
   virtual void Build();
   virtual void Update();
-
-  void Expose(WaveBase *);
 
   /// zoom - positive values mean zoom in, negative values mean zoom out
   void zoom(int);
@@ -85,6 +81,10 @@ private:
   static gint signalEntryKeyPress(GtkEntry *, GdkEventKey *, Scope_Window *sw);
   static gboolean signal_name_expose(GtkWidget *widget,
     GdkEventExpose *event, Scope_Window *sw);
+  static gboolean signal_expose(GtkWidget *widget,
+   GdkEventExpose *event, Scope_Window *sw);
+  static gboolean key_press(GtkWidget *widget, GdkEventKey *key,
+    Scope_Window *sw);
 
   /// selectSignalName - begin the signal name editing mode
   /// returns true if selection state has changed.
@@ -128,6 +128,7 @@ private:
   SignalNameEntry *m_entry;
   TimeAxis *m_TimeAxis;
   std::vector<Waveform *> signals;
+  std::map<guint, KeyEvent *> KeyMap;
 
 protected:
   virtual const char *name();
