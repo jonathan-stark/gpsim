@@ -89,9 +89,8 @@ public:
   guint64 future_cycle;     // cycles when next callback expected
 
   double initial_voltage;   // node voltage at the instant of change
-  double finalVoltage;      // Target voltage when settling
+  double DCVoltage;      // Target voltage when settling
 
-  unsigned int min_time_constant;   // time constant(in cycles) longer than this induce settling
   bool bSettling;           // true when the voltage is settling 
   stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
   int nStimuli;             // number of stimuli attached to this node.
@@ -109,8 +108,6 @@ public:
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
 
-  void time_constant(double new_tc);
-
   // When a node is given a name, it is also added to the symbol
   // table. If bClearableSymbol is true, then the symbol can be
   // automatically removed when the symbol table is cleared.
@@ -124,11 +121,13 @@ public:
 
   // factory function
   static Stimulus_Node * construct(const char * psName);
+  virtual string toString();
 
 protected:
   void update(guint64 current_time); // deprecated
   void refresh();
   void updateStimuli();
+  guint64 calc_settlingTimeStep();
 
   guint64 settlingTimeStep;
 
@@ -396,6 +395,7 @@ class IOPIN : public stimulus
   virtual bool getState();
   virtual void putState(bool new_dstate);
   virtual void putState(double new_Vth);
+  virtual void set_digital_threshold(double vdd);
 
   virtual void set_ZthWeak(double Z) { ZthWeak=Z;}
   virtual double get_ZthWeak() { return ZthWeak;}
@@ -446,6 +446,8 @@ protected:
   // units are volts.
   double l2h_threshold;
   double h2l_threshold;
+  double Vdrive_high;
+  double Vdrive_low;
 
 };
 
