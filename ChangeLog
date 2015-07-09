@@ -1,4 +1,12 @@
 2015-07-09 Roy Rankin <rrankin@ihug.com.au>
+	* regression/a2d/16c71.lkr regression/a2d/16f819.lkr
+          regression/a2d/16f871.lkr regression/a2d/16f873a.lkr 
+	  regression/a2d/16f874a.lkr regression/a2d/16f88.lkr
+          regression/a2d/18f1220.lkr regression/a2d/18f4321.lkr
+          regression/a2d/18f452.lkr regression/a2d/Makefile
+	: Remove outdated gputil link files
+
+2015-07-09 Roy Rankin <rrankin@ihug.com.au>
 	* stimuli.h simuli.cc 
 	: Feature 44 Entering node name into cli should show attached stimului
 	  Refine node RC voltage vs time calculation
