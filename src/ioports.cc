@@ -689,6 +689,7 @@ void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 	    Dprintf(("PinModule::UpAnalogCnt up %s  newname=%s mask=%x\n", getPin().name().c_str(), newname, mask));
 	    getPin().newGUIname(newname);
 	    getPin().set_is_analog(true);
+	    getPin().set_Cth(5e-12);		// add analog pin input capacitance
  	}
     }
     else if (!analog && m_analog_active[index])  // release register request 
@@ -703,6 +704,7 @@ void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 	    m_port->setOutputMask(mask);
 	    getPin().newGUIname(newname);
 	    getPin().set_is_analog(false);
+	    getPin().set_Cth(0.);
 	}
     }
 }

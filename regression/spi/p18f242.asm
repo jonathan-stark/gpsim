@@ -147,10 +147,10 @@ loop:
     bsf		DRV_CLOCK
     bcf		DRV_CLOCK
     movwf	SSPBUF	; test WCOL set
-  .assert "(sspcon & 0x80) == 0x80, \"FAILED MSSP SPI WCOL set\""
+  .assert "(sspcon1 & 0x80) == 0x80, \"FAILED MSSP SPI WCOL set\""
     nop
     bcf		SSPCON1,WCOL	; clear WCOL bit
-  .assert "(sspcon & 0x80) == 0x00, \"FAILED MSSP SPI WCOL was cleared\""
+  .assert "(sspcon1 & 0x80) == 0x00, \"FAILED MSSP SPI WCOL was cleared\""
     nop
     clrf	loopcnt
 loop2:
@@ -173,7 +173,7 @@ loop4:
     bcf		DRV_CLOCK
     decfsz	loopcnt,F
     goto	loop4
-  .assert "(sspcon & 0x40) == 0x40, \"FAILED MSSP SPI SSPOV\""
+  .assert "(sspcon1 & 0x40) == 0x40, \"FAILED MSSP SPI SSPOV\""
     nop
 
 ;

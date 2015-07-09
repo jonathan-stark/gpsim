@@ -136,7 +136,7 @@ exit_int:
 ;----------------------------------------------------------------------
 MAIN    CODE
 start
-	;set clock to 16 Mhz
+	;set clock to 16 MHz
 	BANKSEL OSCCON
 	bsf 	OSCCON,6
 	btfss	OSCSTAT,HFIOFL
@@ -286,13 +286,35 @@ sr_test:
 
 	return
 
-; Test Capacitor sense functionallity
+; Test Capacitor sense functionality
 cap_sense:
+	; Measure capacitor sense with 20pF + 5pF for analog pin
+	; The time to charge a capacitor with a current source is
+	; t = CV/I
+	; for this test C = 25pF V = 3.8V I = 18 uA so t = 5.28 uSec
+	; for 16MHz clock that is 21 instruction cycles
+	; T0 run from Fosc/4
+	BANKSEL OPTION_REG
+	bcf	OPTION_REG,TMR0CS
 	BANKSEL CPSCON0
-	bsf 	CPSCON1,2
-	; low range
-	movlw	0x84
+	; CPS uses channel 4
+	movlw	(1<<CPSCH2)
+	movwf	CPSCON1
+	; turn capacitance sense on, 18 uA, Internal volt ref
+	movlw	(1<<CPSON)|(1<<CPSRNG1)|(1<<CPSRNG0)
 	movwf	CPSCON0
+	clrf 	TMR0
+	btfss	CPSCON0,CPSOUT
+	goto	$-1
+   .assert "(tmr0 >= 21 && tmr0 < 25), \"*** FAILED 16f1823 CPSCON TMR1 Counting\""
+	nop
+	; set tmr0 for RA4/T0CKI, but CPS not feeding clock
+	BANKSEL OPTION_REG
+	bsf	OPTION_REG,TMR0CS
+
+	BANKSEL TMR0
+	movlw	0x00
+	movwf	TMR0
 	; DAC non-idle output (0.16V)
 	BANKSEL DACCON0
 	movlw	(1<<DACEN)
@@ -302,20 +324,19 @@ cap_sense:
   	; FVR = 4.065 
 	movlw	(1<<FVREN)|(1<<CDAFVR1)|(1<<CDAFVR0)
 	movwf	FVRCON
-	BANKSEL T1CON
-	;; connect t1 to cap sense oscillator
-	movlw	(1<<TMR1CS1)|(1<<TMR1CS0)|(1<<TMR1ON)
-	movwf	T1CON
-	movlw	0x80
-	movwf	TMR0
+  .assert "tmr0 == 0x00, \"*** FAILED 16f1823 CPSCON TMR0 Counting without T0XCS\""
+	nop
 	BANKSEL CPSCON0
+	; Test T0 incrementing due to CPS and use T1 to measure time
+	; t = 25pF * (4.065 - 0.16) / 30 uA = 3.254 uSec per slope
+	;  or 26.04 cycles (16MHz)
+	; So T1 at /8 = 0x341
+	; turn capaitance sense on, in high range 30 uA to T0
 	movlw	(1<<CPSON)|(1<<CPSRM)|(1<<CPSRNG1)|(1<<T0XCS)
 	movwf	CPSCON0
-  	bcf 	INTCON,T0IF
-  	btfss	INTCON,T0IF
-	goto	$-1
-  .assert "tmr1l == 0x80, \"*** FAILED 16f1823 CPSCON TMR1 Counting\""
-	nop
+;  	bcf 	INTCON,T0IF
+;  	btfss	INTCON,T0IF
+;	goto	$-1
 	; clear t1 and set clock = Fosc/4, prescale 1:8
  	clrf 	TMR1L
 	movlw	(1<<T1CKPS1)|(1<<T1CKPS0)|(1<<TMR1ON)
@@ -323,15 +344,17 @@ cap_sense:
   	bcf 	INTCON,T0IF
   	btfss	INTCON,T0IF
 	goto	$-1
-	movf	TMR1L,W
+    .assert "tmr1l == 0x40 && tmr1h == 3,\"*** FAILED p16f1823 CPS with 25pF\""
+	nop
+    ; Add 5pF cap period should increase (frequency decrease) by ratio 30/25
+    .command "V1.capacitance = 25e-12"
+	nop
 	clrf 	TMR1L
 	clrf 	TMR1H
-    .command "V1.capacitance = 30e-12"
-	nop
   	bcf 	INTCON,T0IF
   	btfss	INTCON,T0IF
 	goto	$-1
-    .assert "tmr1l == 0 && tmr1h == 4,\"*** FAILED p16f1823 capacitace shift\""
+    .assert "tmr1l == 0x00 && tmr1h == 4,\"*** FAILED p16f1823 capacitance shift\""
 	nop
 	clrf	CPSCON0
 	clrf 	T1CON
@@ -393,7 +416,7 @@ test_dac:
 test_eerom:
   ;
   ;	test can write and read to all 128 eeprom locations
-  ;	using intterupts
+  ;	using interrupts
         clrf    adr_cnt
         clrf    data_cnt
 ;  setup interrupts
@@ -657,7 +680,7 @@ read_config_data:
 	movlw	0x01              ;
 	movwf	EEADRL            ; Store LSB of address
 	bsf 	EECON1, WREN  	   ;Enable writes
-	bcf 	INTCON,GIE	   ; disable interupts
+	bcf 	INTCON,GIE	   ; disable interrupts
         movlw	0x55               ;Magic sequence to enable eeprom write
         movwf	EECON2
         movlw	0xaa

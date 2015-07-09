@@ -40,6 +40,7 @@ class FileContext;
 class FileContextList;
 class ProgramMemoryCollection;
 class CPU_Freq;
+class CPU_Vdd;
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
@@ -329,6 +330,17 @@ private:
   int list_file_id;
 };
 
+class CPU_Vdd : public Float
+{
+public:
+  CPU_Vdd(Processor * _cpu, double freq); //const char *_name, double newValue, const char *desc);
+
+  virtual void set(double d);
+
+private:
+  Processor * cpu;
+};
+
 //------------------------------------------------------------------------
 //
 /// Processor - a generic base class for processors supported by gpsim
@@ -350,7 +362,7 @@ public:
   unsigned int clocks_per_inst;
 
   /// Supply voltage
-  double Vdd;
+ // double Vdd;
 
   /// Stimulus nodes for CVREF and V06REF
   Stimulus_Node         *CVREF;
@@ -601,8 +613,9 @@ public:
   
   virtual void reset(RESET_TYPE r) = 0;
 
-  virtual double get_Vdd() { return Vdd; }
-  virtual void set_Vdd(double v) { Vdd = v; }
+  virtual double get_Vdd() { return m_vdd->getVal(); }
+  virtual void set_Vdd(double v) {m_vdd->set(v); }
+  virtual void update_vdd();
 
   //
   // Debugging - used to view the state of the processor (or whatever).
@@ -621,6 +634,7 @@ public:
   Processor(const char *_name=0, const char *desc=0);
   virtual ~Processor();
 
+  CPU_Vdd   *m_vdd;
 private:
 
   CPU_Freq *mFrequency;
