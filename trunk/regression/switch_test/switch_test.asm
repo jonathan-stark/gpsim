@@ -158,7 +158,9 @@ start
    .assert "(portc & 3) == 0, \"SW open, both sides 0\"" 
 	nop
 
-	BSF	PORTB,0
+	bsf	PORTB,0
+        call    sdelay
+	nop
 
    .assert "(portc & 3) == 1, \"SW open, drive high\""	; drive side only high
 	nop
@@ -167,6 +169,7 @@ start
    ; R=145, C=4.2e-6 TC=6.11e-4 or 1527 cycles 0-2 volts requires 0.51 Tc
    .command "SW1.state=true"
 	nop
+        nop
 
 	; portc0 should be same as portc1
    .assert "(portc & 3) == 0, \"SW1 closed, cap holds low\""	
@@ -230,16 +233,29 @@ start
 
 	BCF	PORTB,0
 
-   .assert "(portc & 3) == 2, \" SW1 open driving low\""
+	; C = 0.2 uF R = 150 so time constant = 30 uS
+	; allow 77 uS (10Mhz clock) for portc0 to settle
+	movlw	0x40
+	movwf   temp1
+        decfsz  temp1,f
+         goto   $-1
 	nop
 
-        movlw   0x29	; delay 52,480 cycles
+;  C = 4 uF R = 5000 so time constant = 20 mS 
+;  for Fosc = 10MHz clock = 50,000 instuction cycles
+;  require ~ 2 time constants to reach low state
+
+
+   .assert "(portc & 3) == 2, \" SW1 open driving low\""
+	nop
+        movlw   0x29    ; delay 52,480 cycles
+
 	call	delay
 
    .assert "(portc & 3) == 2, \"SW1 open float still high\""
 	nop
 
-	movlw   0x31	; delay another 62,720 cycles
+	movlw   0x31    ; delay another 62,720 cycles
 	call	delay
 	nop
 
@@ -365,6 +381,14 @@ delay_loop
          goto   $+2
         decfsz  temp2,f
          goto   delay_loop
+        return
+
+sdelay		; delay about 100 cycles or  40 us at 10 Mhz
+        clrwdt
+	movlw	0x20
+	movwf   temp1
+        decfsz  temp1,f
+         goto   $-1
         return
 
 

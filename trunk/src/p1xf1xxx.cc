@@ -478,7 +478,7 @@ void P12F1822::create_sfr_map()
   add_sfr_register(&tmr2,   0x1a, RegisterValue(0,0));
   add_sfr_register(&pr2,    0x1b, RegisterValue(0,0));
   add_sfr_register(&t2con,  0x1c, RegisterValue(0,0));
-  add_sfr_register(&cpscon0,  0x1e, RegisterValue(0,0));
+  add_sfr_register(&cpscon0,  0x1e, RegisterValue(0,0), "cpscon0");
   add_sfr_register(&cpscon1,  0x1f, RegisterValue(0,0));
 
 

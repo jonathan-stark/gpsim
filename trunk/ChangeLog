@@ -1,3 +1,18 @@
+2015-07-09 Roy Rankin <rrankin@ihug.com.au>
+	* stimuli.h simuli.cc 
+	: Feature 44 Entering node name into cli should show attached stimului
+	  Refine node RC voltage vs time calculation
+	* stimuli.h simuli.cc src/processor.h src/processor.cc 
+	  src/modules.h src/modules.cc 
+	: Feature 43 	Allow setting of Vdd on processors
+	* src/ioports.cc 
+	: feature 42 	Analog inputs should have about 5pF capacitance
+	* src/p1xf1xxx.cc 
+	: Fix cpscon0 register name (was cpscon)
+        * regression/a2d/p16c71.asm regression/p1xf18xx/p16f1823.asm 
+	  regression/switch_test/switch_test.asm regression/spi/p18f242.asm
+	: adjust regression tests for above changes
+
 2015-07-08 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui.h gui/gui_scope.h gui/gui_scope.cc
 	: Replace all deprecated GDK drawing with Cairo drawing and some code

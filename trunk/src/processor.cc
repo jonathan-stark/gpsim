@@ -105,6 +105,20 @@ void CPU_Freq::set(double d)
     pCpu->wdt.update();
 }
 
+
+CPU_Vdd::CPU_Vdd(Processor * _cpu, double vdd)
+  : Float("Vdd", vdd , "Processor supply voltage"),
+    cpu(_cpu)
+{
+}
+
+void CPU_Vdd::set(double d)
+{
+  Float::set ( d );
+  if ( cpu )
+    cpu->update_vdd();
+}
+
 //------------------------------------------------------------------------
 //
 // Processor - Constructor
@@ -129,7 +143,6 @@ Processor::Processor(const char *_name, const char *_desc)
 
   set_ClockCycles_per_Instruction(4);
   update_cps();
-  set_Vdd(5.0);
   setWarnMode(true);
   setSafeMode(true);
   setUnknownMode(true);
@@ -154,6 +167,8 @@ Processor::Processor(const char *_name, const char *_desc)
   addSymbol(m_pUnknownMode = new UnknownModeAttribute(this));
   addSymbol(m_pBreakOnReset = new BreakOnResetAttribute(this));
 
+  m_vdd = new CPU_Vdd(this, 5.0);
+  addSymbol(m_vdd);
   m_pbBreakOnInvalidRegisterRead = new Boolean("BreakOnInvalidRegisterRead",
     true, "Halt simulation when an invalid register is read from.");
   addSymbol(m_pbBreakOnInvalidRegisterRead);
@@ -161,6 +176,7 @@ Processor::Processor(const char *_name, const char *_desc)
   m_pbBreakOnInvalidRegisterWrite = new Boolean("BreakOnInvalidRegisterWrite",
     true, "Halt simulation when an invalid register is written to.");
   addSymbol(m_pbBreakOnInvalidRegisterWrite);
+  set_Vdd(5.0);
 }
 
 
@@ -1096,6 +1112,21 @@ void Processor::load_state(FILE *fp)
 
   cout << "Not implemented\n";
 }
+
+/* If Vdd is changed, fix up the digital high low thresholds */
+void Processor::update_vdd()
+{
+    IOPIN *pin;
+    for(int i=1; i <= get_pin_count(); i++)
+    {
+	pin = get_pin(i);
+	if (pin)
+	{
+	    pin->set_digital_threshold(get_Vdd());
+	}
+    }
+}
+
 //-------------------------------------------------------------------
 int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 {

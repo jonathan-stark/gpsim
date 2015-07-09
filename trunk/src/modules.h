@@ -110,6 +110,8 @@ public:
   virtual IOPIN *get_pin(unsigned int pin_number);
   virtual void assign_pin(unsigned int pin_number, IOPIN *pin);
   virtual void create_pkg(unsigned int number_of_pins);
+  virtual double get_Vdd() { return Vdd; }
+  virtual void set_Vdd(double v) { Vdd = v; }
 
   /// Symbols
   /// Each module has its own symbol table. The global symbol
@@ -182,6 +184,7 @@ private:
   map<string ,ModuleScript *> m_scripts;
 
 protected:
+  double	Vdd;
   char *version;
   SymbolTable_t mSymbolTable;
 };

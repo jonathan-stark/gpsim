@@ -231,6 +231,7 @@ Module::Module(const char *_name, const char *desc)
 
   package = 0;
   interface = 0;
+  Vdd = 5.0;
 
   // Derived modules should assign more reasonable values for this.
   version = 0;
