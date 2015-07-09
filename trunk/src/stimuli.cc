@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006 Roy R Rankin
+   Copyright (C) 2006,2015 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -83,7 +83,7 @@ void Stimulus_Node::new_name(string &rName, bool bClearableSymbol)
 
 double Stimulus_Node::get_nodeVoltage()
 {
-  if (future_cycle) // RC calculation in progress, get current value
+  if (future_cycle > cap_start_cycle) // RC calculation in progress, get current value
     callback();
   return(voltage);
 }
@@ -108,7 +108,17 @@ void dump_stimulus_list(void)
   }
   */
 }
+string Stimulus_Node::toString()
+{
+	string out = name() + " : " + showType();
 
+	for(stimulus *pt = stimuli; pt; pt = pt->next)
+	{
+		out += "\n\n " + pt->name() + pt->toString();
+        }
+	
+	return out;
+}
 
 //========================================================================
 
@@ -126,8 +136,7 @@ Stimulus_Node::Stimulus_Node(const char *n)
   cap_start_cycle = 0;
   future_cycle = 0;
   initial_voltage = 0.0;
-  finalVoltage = 0.0;
-  min_time_constant = 1000; // in cycles
+  DCVoltage = 0.0;
   bSettling = false;  
   stimuli = 0;
   nStimuli = 0;
@@ -308,7 +317,7 @@ void Stimulus_Node::refresh()
 
     case 1:
       // Only one stimulus is attached.
-      finalVoltage = sptr->get_Vth();   // RP - was just voltage
+      DCVoltage = sptr->get_Vth();   // RP - was just voltage
       Zth =  sptr->get_Zth();
       break;
 
@@ -324,7 +333,7 @@ void Stimulus_Node::refresh()
       double V2,Z2,C2;
       sptr->getThevenin(V1,Z1,C1);
       sptr2->getThevenin(V2,Z2,C2);
-      finalVoltage = (V1*Z2  + V2*Z1) / (Z1+Z2);
+      DCVoltage = (V1*Z2  + V2*Z1) / (Z1+Z2);
       Zth = Z1*Z2/(Z1+Z2);
       Cth = C1+C2;
       
@@ -350,7 +359,7 @@ void Stimulus_Node::refresh()
 
       double conductance=0.0;	// Thevenin conductance.
       Cth=0;
-      finalVoltage=0.0; 
+      DCVoltage=0.0; 
 
       //cout << "multi-node summing:\n";
       while(sptr) {
@@ -365,25 +374,24 @@ void Stimulus_Node::refresh()
         */
 
         double Cs = 1 / Z1;
-        finalVoltage += V1 * Cs;
+        DCVoltage += V1 * Cs;
         conductance += Cs;
         Cth += C1;
         sptr = sptr->next;
       }
       Zth = 1.0/conductance;
-      finalVoltage *= Zth;
+      DCVoltage *= Zth;
       }
     }
 
     current_time_constant = Cth * Zth;
-    if(((guint64)(current_time_constant*get_cycles().instruction_cps()) 
-      < min_time_constant) 
-      ||
-      (fabs(finalVoltage - voltage) < minThreshold))
+    Dprintf(("%s DCVoltage %.3f voltage %.3f Cth=%.2e Zth=%2e time_constant %fsec or %"PRINTF_GINT64_MODIFIER"d cycles now=%"PRINTF_GINT64_MODIFIER"d \n",name().c_str(), DCVoltage, voltage, Cth, Zth, current_time_constant, (guint64)(current_time_constant*get_cycles().instruction_cps()), get_cycles().get()));
+    if (((guint64)(current_time_constant*get_cycles().instruction_cps()) < 5) ||
+      (fabs(DCVoltage - voltage) < minThreshold))
     {
       if (verbose)
         cout << "Stimulus_Node::refresh " << name() << " use DC " <<
-		finalVoltage << " as current_time_constant=" <<
+		DCVoltage << " as current_time_constant=" <<
           current_time_constant << endl;
 
       if (future_cycle)	// callback is active
@@ -391,38 +399,63 @@ void Stimulus_Node::refresh()
 	get_cycles().clear_break(this);
       }
 
-      voltage = finalVoltage;
+      voltage = DCVoltage;
       future_cycle = 0;
 
-    } else {
-	settlingTimeStep = (guint64) (0.11 * 
-	  get_cycles().instruction_cps() * current_time_constant);
+    } 
+    else 
+    {
+	settlingTimeStep = calc_settlingTimeStep();
 	voltage = initial_voltage;
 
         if (verbose)
 	  cout << "Stimulus_Node::refresh " << name() << " settlingTimeStep=" 
 	    << settlingTimeStep << " voltage=" << voltage << " Finalvoltage=" 
-	    << finalVoltage << endl;
+	    << DCVoltage << endl;
   /*
 	If future_cycle is not 0 we are in the middle of an RC
 	calculation, but an input condition has changed.
   */
 
-      if (future_cycle)
+      if (future_cycle && (get_cycles().get() > cap_start_cycle))
       {
 	callback();
       }
       else
       {
+	if (future_cycle) get_cycles().clear_break(this);
 	cap_start_cycle = get_cycles().get(); 
         future_cycle = cap_start_cycle + settlingTimeStep;
         get_cycles().set_break(future_cycle,this);
+#ifdef DEBUG
+        get_cycles().dump_breakpoints();
+#endif
       }
     }
 
   }
 
 
+}
+guint64 Stimulus_Node::calc_settlingTimeStep()
+{
+	/* Select a time interval where the voltage does not change more
+	   than about 0.125 volts in each step(unless timestep < 1).
+	   First we calculate dt_dv = CR/V with dt in cpu cycles to
+	   determine settling time step
+	*/
+	guint64 TimeStep;
+	double dv = fabs(DCVoltage - voltage);
+	// avoid divide by zero
+	if (dv < 0.000001)
+	    dv = 0.000001;
+        double dt_dv = get_cycles().instruction_cps()*current_time_constant/dv;
+	TimeStep = (guint64) (0.125 * dt_dv);
+	TimeStep = (TimeStep) ? TimeStep : 1;
+
+	Dprintf(("%s dt_dv = %.2f TimeStep 0x%"PRINTF_GINT64_MODIFIER"x now 0x%"PRINTF_GINT64_MODIFIER"x\n", __FUNCTION__, dt_dv, TimeStep, get_cycles().get()));
+
+	return(TimeStep);
 }
 
 //------------------------------------------------------------------------
@@ -478,26 +511,33 @@ void Stimulus_Node::callback()
       Time_Step = (get_cycles().get() - cap_start_cycle)/
         (get_cycles().instruction_cps()*current_time_constant);
       expz = exp(-Time_Step);
-      voltage = finalVoltage* (1.-expz) + voltage * expz;
+      voltage = DCVoltage - (DCVoltage - voltage)*expz;
 
       if (verbose)
   	cout << "\tVoltage was " << initial_voltage << "V now "
           << voltage << "V\n";
 
-      if (fabs(finalVoltage - voltage) < minThreshold) {
-    	voltage = finalVoltage;
+      if (fabs(DCVoltage - voltage) < minThreshold) {
+    	voltage = DCVoltage;
+	if (future_cycle)
+	    get_cycles().clear_break(this);
         future_cycle = 0;
 	if (verbose)
           cout << "\t" << name() << 
-	    " Final voltage " << finalVoltage << " reached at " 
+	    " Final voltage " << DCVoltage << " reached at " 
 	    << get_cycles().get() << " cycles\n";
+          Dprintf(("%s DC Voltage %.2f reached at 0x%"PRINTF_GINT64_MODIFIER"x cycles\n", name().c_str(), DCVoltage, get_cycles().get()));
       } 
       else if(get_cycles().get() >= future_cycle) // got here via break
       {
-        settlingTimeStep  = (guint64) (1.5 * settlingTimeStep);
+	settlingTimeStep = calc_settlingTimeStep();
         cap_start_cycle = get_cycles().get();
+	get_cycles().clear_break(this);
 	future_cycle = cap_start_cycle + settlingTimeStep;
     	get_cycles().set_break(future_cycle, this);
+#ifdef DEBUG
+	get_cycles().dump_breakpoints();
+#endif
         if (verbose)
 	  cout << "\tBreak reached at " << cap_start_cycle << 
 	    " cycles, next break set for " 
@@ -523,11 +563,6 @@ void Stimulus_Node::callback_print()
 {
   cout << "Node: " << name() ;
   TriggerObject::callback_print();
-}
-//------------------------------------------------------------------------
-void Stimulus_Node::time_constant(double new_tc)
-{
-  min_time_constant = (unsigned int)(new_tc*get_cycles().instruction_cps());
 }
 
 //------------------------------------------------------------------------
@@ -897,13 +932,22 @@ IOPIN::IOPIN(const char *_name,
     m_monitor(0),
     ZthWeak(_ZthWeak), ZthFloating(_ZthFloating),
     l2h_threshold(2.0),       // PICs are CMOS and use CMOS-like thresholds
-    h2l_threshold(1.0)
+    h2l_threshold(1.0),
+    Vdrive_high(4.4),
+    Vdrive_low(0.6)
 {
   if(verbose)
     cout << "IOPIN default constructor\n";
   is_analog = false;
 }
 
+void IOPIN::set_digital_threshold(double vdd)
+{
+    set_l2h_threshold(vdd > 4.5 ? 2.0 : 0.25 * vdd + 0.8);
+    set_h2l_threshold(vdd > 4.5 ? 0.8 : 0.15 * vdd);
+    Vdrive_high = vdd - 0.6;
+    Vdrive_low = 0.6;
+}
 void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
 {
   if (m_monitor && new_pinMonitor)
@@ -970,7 +1014,7 @@ void IOPIN::putState(bool new_state)
 {
   if(new_state != bDrivingState) {
     bDrivingState = new_state;
-    Vth = bDrivingState ? 5.0 : 0.3;
+    Vth = bDrivingState ? Vdrive_high : Vdrive_low;
     
     if(verbose & 1)
       cout << name()<< " putState= " 
