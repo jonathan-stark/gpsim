@@ -27,8 +27,8 @@ License along with this library; if not, see
 
 #include <gtk/gtk.h>
 
-#include <../src/modules.h>
-#include <../src/trigger.h>
+#include "../src/modules.h"
+#include "../src/trigger.h"
 
 namespace Leds {
 

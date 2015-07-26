@@ -53,6 +53,7 @@ src_OBJECTS =			\
 	cmd_manager.o		\
 	cod.o			\
 	comparator.o		\
+	ctmu.o			\
 	eeprom.o		\
 	errors.o		\
 	expr.o			\

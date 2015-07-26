@@ -1,3 +1,8 @@
+2015-07-27 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim/makefile.mingw modules/led.h modules/makefile.mingw
+	  src/gpsim_interface.h src/makefile.mingw src/modules.h
+	: Fixes for windows build
+
 2015-07-26 Roy Rankin <rrankin@ihug.com.au>
 	* doc/screenshots/breadboard_register.png
 	  doc/screenshots/control_source.png

@@ -87,6 +87,16 @@ public:
 };
 
 
+/*
+ * interface is a Module class member variable in gpsim,
+ * in WIN32 Platform SDK it is a macro, defined in BaseTypes.h
+ * the WIN32 Platform SDK definition should be undefined
+ */
+
+#ifdef interface
+#undef interface
+#endif
+
 //------------------------------------------------------------------------
 //
 /// Module - Base class for all gpsim behavior models.

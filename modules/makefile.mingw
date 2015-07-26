@@ -20,7 +20,7 @@ LIBS = 	-L $(POPT_PATH)/lib -l popt \
 	-L $(GLIB_PATH)/lib -l glib-2.0 -l gobject-2.0 \
 	../src/libgpsim.a
 
-INCLUDES = -I ../plat/win32 \
+INCLUDES = -I .. -I ../plat/win32 \
 	-I $(GLIB_PATH)/include/glib-2.0 -I $(GLIB_PATH)/lib/glib-2.0/include \
 	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
 	-I $(ATK_PATH)/include/atk-1.0 \
@@ -38,6 +38,7 @@ modules_OBJECTS =		\
 	gpsim_modules.o		\
 	encoder.o		\
 	i2c.o			\
+	i2c2par.o		\
 	i2c-eeprom.o		\
 	led.o			\
 	logic.o			\
