@@ -26,27 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <src/stimuli.h>
 #include <src/ioports.h>
-#include <src/packages.h>
-#include <src/symbol.h>
-#include <src/trace.h>
-#include <src/gpsim_interface.h>
 
-
-#define DEBUG
-#if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
-#else
-#define Dprintf(arg) {}
-#endif
-
-
-//========================================================================
-//
-// Describe the intent.....
-//
-//========================================================================
-
-
+#include <cassert>
 
 //------------------------------------------------------------------------
 // I/O pins for the graphic LCD
@@ -164,11 +145,7 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
 
   create_iopin_map();
 
-  m_plcd = 0;
-
   create_widget();
-
-  printf ("gLCD_100X32_SED1520 constructor this=%p\n",this);
 }
 
 gLCD_100X32_SED1520::~gLCD_100X32_SED1520()
@@ -224,102 +201,68 @@ void gLCD_100X32_SED1520::create_iopin_map()
 
 }
 
-static gboolean lcd_expose_event(GtkWidget *widget,
+gboolean gLCD_100X32_SED1520::lcd_expose_event(GtkWidget *widget,
 				 GdkEventExpose *event,
 				 gLCD_100X32_SED1520 *pLCD)
 {
-  //printf ("Expose event widget %p pLCD  %p\n",widget,pLCD);
-  pLCD->Update(widget);
+  cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+  pLCD->m_plcd->clear(cr);
+  for (unsigned int i = 0; i < pLCD->m_nColumns; ++i) {
+
+    unsigned sedIndex = i < 50 ? i : (i - 50);
+
+    SED1520 *sed = i < 50 ? pLCD->m_sed1 : pLCD->m_sed2;
+
+    for (unsigned int j = 0; j < pLCD->m_nRows / 8; ++j) {
+
+      unsigned int row = 8 * j;
+      unsigned displayByte = (*sed)[sedIndex + ((j & 3) * 80)];
+
+      for (unsigned int b = 0; b < 8; b++ , displayByte >>= 1)
+	if (displayByte & 1)
+	  pLCD->m_plcd->setPixel(cr, i, row + b);
+    }
+
+  } 
+  cairo_destroy(cr);
   return TRUE;
 }
 
 //------------------------------------------------------------------------
 void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 {
-
-  if (!m_plcd) {
-    if (!darea || !gtk_widget_get_window(darea))
-      return;
-
-    m_plcd = new gLCD(darea, m_nColumns, m_nRows, 3, 3, 1);
-
-    printf("m_plcd %p\n",m_plcd);
-  }
-
-  assert (m_plcd !=0);
-
-  m_plcd->clear();
-
-  for (unsigned int i=0; i<m_nColumns; i++) {
-
-    unsigned sedIndex = i < 50 ? i : (i-50);
-
-    SED1520 *sed = i<50 ? m_sed1 : m_sed2;
-
-    for (unsigned int j=0; j<m_nRows/8; j++) {
-
-      unsigned int row = 8*j;
-      unsigned displayByte = (*sed)[sedIndex + ((j&3)*80)];
-
-      for (unsigned int b=0; b < 8; b++ , displayByte>>=1)
-	if (displayByte & 1)
-	  m_plcd->setPixel(i,row+b);
-    }
-
-  }
-  m_plcd->refresh();
+  gtk_widget_queue_draw(darea);
 }
 
 //------------------------------------------------------------------------
 void gLCD_100X32_SED1520::create_widget()
 {
-
 #if IN_BREADBOARD==1
-  window = gtk_vbox_new (FALSE, 0);
+  window = gtk_vbox_new(FALSE, 0);
 #else
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  if(window) {
-    //gtk_window_set_wmclass(GTK_WINDOW(window),type(),"Gpsim");
-    gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
-    gtk_widget_realize (window);
-    gtk_window_set_title(GTK_WINDOW(window), "LCD");
-  }
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
+  gtk_window_set_title(GTK_WINDOW(window), "LCD");
 #endif
 
-  if(window) {
+  GtkWidget *frame = gtk_frame_new("gLCD_100X32");
+  gtk_container_add(GTK_CONTAINER(window), frame);
 
-    GtkWidget *frame = gtk_frame_new ("gLCD_100X32");
-    gtk_container_add (GTK_CONTAINER (window), frame);
+  darea = gtk_drawing_area_new();
 
-    darea = gtk_drawing_area_new ();
+  gtk_widget_set_size_request(darea, (m_nColumns+4)*3, (m_nRows+4)*3);
+  gtk_container_add(GTK_CONTAINER(frame), darea);
 
-    gtk_widget_set_size_request(darea, (m_nColumns+4)*3, (m_nRows+4)*3);
-    gtk_container_add (GTK_CONTAINER (frame), darea);
+  g_signal_connect(darea, "expose_event", G_CALLBACK(lcd_expose_event), this);
 
-    g_signal_connect (darea,
-			"expose_event",
-			G_CALLBACK (lcd_expose_event),
-			this);
-
-    gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-
-    /*
-    gtk_signal_connect (GTK_OBJECT (darea),
-			"button_press_event",
-			GTK_SIGNAL_FUNC (cursor_event),
-			NULL);
-    */
-
-    gtk_widget_show (frame);
-    gtk_widget_show (darea);
-
-    gtk_widget_show (window);
+  gtk_widget_set_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+  gtk_widget_show_all(window);
 
 #if IN_BREADBOARD==1
-    set_widget(window);
+  set_widget(window);
 #endif
-  }
 
+  m_plcd = new gLCD(m_nColumns, m_nRows, 3, 3, 1);
 }
 
 //------------------------------------------------------------------------

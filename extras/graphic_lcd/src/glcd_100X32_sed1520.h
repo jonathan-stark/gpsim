@@ -29,8 +29,7 @@ Boston, MA 02111-1307, USA.  */
 class SED1520;
 class LCD_InputPin;
 class PortRegister;
-class LCD_Interface;
-class gLCD;
+class Module;
 
 enum ePins {
   eA0,
@@ -62,6 +61,8 @@ private:
   SED1520      *m_sed1;
   SED1520      *m_sed2;
 
+  static gboolean lcd_expose_event(GtkWidget *widget, GdkEventExpose *event,
+    gLCD_100X32_SED1520 *pLCD);
 };
 
 #endif //__GLCD_100X32_SED1520_H__

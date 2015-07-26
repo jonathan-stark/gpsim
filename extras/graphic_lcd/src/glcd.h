@@ -29,10 +29,12 @@ Boston, MA 02111-1307, USA.  */
 
 #define IN_BREADBOARD 0
 
-struct LCDColor
-{
-  guchar r,g,b;
+class LCDColor {
+public:
+  LCDColor() : r(0.0), g(0.0), b(0.0) {}
+  double r, g, b;
 };
+
 //========================================================================
 // gLCD - graphic LCD
 //
@@ -43,8 +45,7 @@ struct LCDColor
 class gLCD
 {
 public:
-  gLCD(GtkWidget *darea, //GdkDrawable *parent, 
-       unsigned int cols, 
+  gLCD(unsigned int cols, 
        unsigned int rows,
        unsigned int pixel_size_x,
        unsigned int pixel_size_y,
@@ -53,18 +54,12 @@ public:
        );
   ~gLCD();
 
-  void refresh();
-  void clear();
-  void setPixel(unsigned int col, unsigned int row);
-  void setPixel(unsigned int col, unsigned int row, unsigned int colorIdx);
-  void setColor(unsigned int colorIdx, guchar r, guchar g, guchar b);
+  void clear(cairo_t *cr);
+  void setPixel(cairo_t *cr, unsigned int col, unsigned int row);
+  void setPixel(cairo_t *cr, unsigned int col, unsigned int row, unsigned int colorIdx);
+  void setColor(unsigned int colorIdx, double r, double g, double b);
 
 protected:
-  GtkWidget    *m_darea;         // Drawable containing the graphic
-
-  // LCD graphics are rendered here. 
-  guchar *rgbbuf;
-
   unsigned int  m_nColumns;
   unsigned int  m_nRows;
   unsigned int  m_border;
@@ -78,7 +73,7 @@ protected:
   LCDColor *m_Colors;
   unsigned int m_nColors;
 
-  void setPixel(unsigned int col, unsigned int row, guchar r, guchar g, guchar b);
+  void setPixel(cairo_t *cr, unsigned int col, unsigned int row, double r, double g, double b);
 
 };
 
@@ -113,6 +108,7 @@ public:
 
   gLCD_Module(const char *new_name, const char *desc,
               unsigned int nCols, unsigned int nRows);
+  virtual ~gLCD_Module();
   virtual void Update(GtkWidget *pw =0);
 
 protected:

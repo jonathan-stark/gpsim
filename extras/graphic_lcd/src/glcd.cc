@@ -23,135 +23,83 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_GUI
 
-
 #include "glcd.h"
 #include <src/trace.h>
 
 //------------------------------------------------------------------------
-gLCD::gLCD(GtkWidget *darea,
-	   unsigned int cols,
+gLCD::gLCD(unsigned int cols,
 	   unsigned int rows,
 	   unsigned int pixel_size_x,
 	   unsigned int pixel_size_y,
            unsigned int pixel_gap,
            unsigned int nColors
 	   )
-  : m_darea(darea), //m_parent(parent),
-    m_nColumns(cols), m_nRows(rows), m_border(3),
+  : m_nColumns(cols), m_nRows(rows), m_border(3),
     m_xPixel(pixel_size_x), m_yPixel(pixel_size_y),
-    m_pixelGap(pixel_gap),
-    m_nColors(nColors)
+    m_pixelGap(pixel_gap)
 {
-
-  printf("gLCD constructor %p, m_nColumns:%d, m_nRows:%d\n",this,m_nColumns,m_nRows);
-
-  //g_assert(m_parent != NULL);
-  g_assert(m_darea != NULL);
-
-  // Allocate an RGB buffer for rendering the LCD screen.
-  rgbbuf = new guchar[(m_nColumns+m_border*2)*m_xPixel * 
-                      (m_nRows+m_border*2)*m_yPixel * 
-                      3];
-
+  m_nColors = nColors < 2 ? 2 : nColors;
   m_Colors = new LCDColor[m_nColors];
-  memset ((void *)m_Colors, 0, m_nColors*sizeof(LCDColor));
 
-  if (m_nColors > 0)
-    setColor(0, 0x78,0xa8,0x78);
-
-  if (m_nColors > 1)
-    setColor(1, 0x11,0x33,0x11);
+  setColor(0, double(0x78) / 255.0, double(0xa8) / 255.0, double(0x78) / 255.0);
+  setColor(1, double(0x11) / 255.0, double(0x33) / 255.0, double(0x11) / 255.0);
 }
 
 gLCD::~gLCD()
 {
-  delete [] rgbbuf;
+  delete [] m_Colors;
 }
 
-void gLCD::clear()
+void gLCD::clear(cairo_t *cr)
 {
-  unsigned int sz = m_xPixel*(m_nColumns+2*m_border) * m_yPixel*(m_nRows+2*m_border);
-  guchar *pos = rgbbuf;
+  double r = m_Colors[0].r;
+  double g = m_Colors[0].g;
+  double b = m_Colors[0].b;
 
-  guchar r = m_nColors > 0 ? m_Colors[0].r : 0x78;
-  guchar g = m_nColors > 0 ? m_Colors[0].g : 0xa8;
-  guchar b = m_nColors > 0 ? m_Colors[0].b : 0x78;
-
-  for (unsigned int i=0; i<sz; i++) {
-
-    *pos++ = r;
-    *pos++ = g;
-    *pos++ = b;
-    
-  }
-    
+  cairo_set_source_rgb(cr, r, g, b);
+  cairo_rectangle(cr, 0.0, 0.0,
+    m_xPixel * (m_nColumns + 2 * m_border), m_yPixel * (m_nRows + 2 * m_border));
+  cairo_fill(cr);
 }
 
-void gLCD::refresh()
+void gLCD::setPixel(cairo_t *cr, unsigned int col, unsigned int row, double r, double g, double b)
 {
-  gdk_draw_rgb_image (gtk_widget_get_window(m_darea),
-    gtk_widget_get_style(m_darea)->fg_gc[GTK_STATE_NORMAL],
-    0, 0, (m_nColumns+2*m_border)*m_xPixel, (m_nRows+2*m_border)*m_yPixel,
-    GDK_RGB_DITHER_MAX, rgbbuf, (m_nColumns+2*m_border)*m_xPixel *3);
+  double x = (col + m_border) * m_xPixel;
+  double y = (row + m_border) * m_yPixel;
 
+  double px = m_xPixel - m_pixelGap;
+  double py = m_yPixel - m_pixelGap;
+
+  cairo_set_source_rgb(cr, r, g, b);
+  cairo_set_line_width(cr, 0.5);
+  cairo_rectangle(cr, x, y, px, py);
+  cairo_fill(cr);
 }
 
-void gLCD::setPixel(unsigned int col, unsigned int row, guchar r, guchar g, guchar b)
-{
-  int x = (col + m_border) * m_xPixel;
-  int y = (row + m_border) * m_yPixel;
-
-  // L = length of a row of pixels
-  int L = (m_nColumns+2*m_border)*m_xPixel;
-  unsigned int px = m_xPixel-m_pixelGap;
-  unsigned int py = m_yPixel-m_pixelGap;
-
-  for (unsigned int j=0; j<py; j++) {
-
-    y = (row + m_border) * m_yPixel+j;
-    guchar *pos = &rgbbuf[3* (y*L + x)];
-
-    for (unsigned int i=0; i<px; i++) {
-      /*
-      if (*pos != r) 
-        printf ("   x:%d y:%d r:%d g:%d b:%d\n",x,y,r,g,b);
-      */
-      *pos++ = r;
-      *pos++ = g;
-      *pos++ = b;
-    }
-  }
-
-}
-
-void gLCD::setPixel(unsigned int col, unsigned int row)
+void gLCD::setPixel(cairo_t *cr, unsigned int col, unsigned int row)
 {
   if (col < m_nColumns && row < m_nRows) {
+    double r = m_Colors[1].r;
+    double g = m_Colors[1].g;
+    double b = m_Colors[1].b;
 
-    guchar r = m_nColors > 1 ? m_Colors[1].r : 0x11;
-    guchar g = m_nColors > 1 ? m_Colors[1].g : 0x33;
-    guchar b = m_nColors > 1 ? m_Colors[1].b : 0x11;
-
-    setPixel(col, row, r,g,b);
+    setPixel(cr, col, row, r, g, b);
   }
 }
 
 
-void gLCD::setPixel(unsigned int col, unsigned int row, unsigned int colorIdx)
+void gLCD::setPixel(cairo_t *cr, unsigned int col, unsigned int row, unsigned int colorIdx)
 {
   if (colorIdx < m_nColors)
-    setPixel(col, row, m_Colors[colorIdx].r,m_Colors[colorIdx].g,m_Colors[colorIdx].b);
+    setPixel(cr, col, row, m_Colors[colorIdx].r, m_Colors[colorIdx].g, m_Colors[colorIdx].b);
 }
 
-void gLCD::setColor(unsigned int colorIdx, guchar r, guchar g, guchar b)
+void gLCD::setColor(unsigned int colorIdx, double r, double g, double b)
 {
-
   if (colorIdx < m_nColors) {
-
     m_Colors[colorIdx].r = r;
     m_Colors[colorIdx].g = g;
     m_Colors[colorIdx].b = b;
-
   }
 }
 
@@ -198,6 +146,11 @@ gLCD_Module::gLCD_Module(const char *new_name, const char *desc,
   get_interface().add_interface(interface);
 #endif
 
+}
+
+gLCD_Module::~gLCD_Module()
+{
+  delete m_plcd;
 }
 
 void gLCD_Module::Update(GtkWidget *pw)
