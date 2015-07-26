@@ -21,6 +21,7 @@ libgpsim_la_SOURCES = \
 	attributes.cc \
 	a2dconverter.cc \
 	a2d_v2.cc \
+	ctmu.cc \
 	bitlog.cc \
 	bit.cc \
 	bytelog.cc \
@@ -100,6 +101,7 @@ gpsiminclude_HEADERS = \
 	16bit-tmrs.h \
 	a2dconverter.h \
 	a2d_v2.h \
+	ctmu.h \
 	attributes.h \
 	bit.h \
 	bitlog.h \

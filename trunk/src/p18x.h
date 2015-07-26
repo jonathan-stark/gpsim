@@ -29,6 +29,7 @@ License along with this library; if not, see
 #include "pir.h"
 #include "comparator.h"
 #include "spp.h"
+#include "ctmu.h"
 
 class PicPortRegister;
 class PicTrisRegister;
@@ -130,6 +131,7 @@ class P18C442 : public P18C4x2
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual unsigned int last_actual_register () const { return 0x01FF;};
 
 };
@@ -155,6 +157,7 @@ class P18F242 : public P18C242
   static Processor *construct(const char *name);
   void create();
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual unsigned int IdentMemorySize() const { return 4; }
 
   virtual void set_eeprom(EEPROM *ep) {
@@ -254,6 +257,7 @@ class P18F1220 : public  _16bit_v2_adc
   void create();
   virtual void create_iopin_map();
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual void osc_mode(unsigned int value);
   virtual unsigned int last_actual_register () const { return 0x00FF;};
 
@@ -267,6 +271,7 @@ class P18F1220 : public  _16bit_v2_adc
   }
   virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
   virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
+  virtual unsigned int get_device_id() { return (0x07 << 8)|(0x7 <<5); }
 };
 
 
@@ -279,6 +284,7 @@ class P18F1320 : public P18F1220
   void create();
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int get_device_id() { return (0x07 << 8)|(0x6 <<5); }
 
 };
 
@@ -337,6 +343,7 @@ class P18F2221 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x800; };
+  virtual unsigned int get_device_id() { return (0x21 << 8)|(0x3 <<5); }
 };
 
 class P18F2321 : public P18F2x21
@@ -347,6 +354,7 @@ class P18F2321 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual unsigned int get_device_id() { return (0x21 << 8)|(0x1 <<5); }
 };
 
 class P18F2420 : public P18F2x21
@@ -357,7 +365,9 @@ class P18F2420 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual unsigned int last_actual_register () const { return 0x02FF;};
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x6 <<5); }
 };
 
 class P18F2455 : public P18F2x21
@@ -377,6 +387,7 @@ class P18F2455 : public P18F2x21
   virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 0x3000; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
+  virtual unsigned int get_device_id() { return (0x12 << 8)|(0x3 <<5); }
 
 };
 
@@ -397,6 +408,7 @@ class P18F2550 : public P18F2x21
   virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 16384; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
+  virtual unsigned int get_device_id() { return (0x12 << 8)|(0x2 <<5); }
 
 };
 
@@ -409,6 +421,7 @@ class P18F2520 : public P18F2x21
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
   virtual unsigned int last_actual_register () const { return 0x05FF;};
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x4 <<5); }
 };
 
 class P18F2620 : public P18F2x21
@@ -419,7 +432,8 @@ class P18F2620 : public P18F2x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x8000; };
-  virtual unsigned int last_actual_register () const { return 0x0EFF;};
+  virtual unsigned int last_actual_register () const { return 0x0F7F;};
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x4 <<5); }
 };
 
 class RegZero : public Register
@@ -429,6 +443,115 @@ public:
 	Register(_cpu, _name, desc) {}
    virtual void put(unsigned int new_value) { value.put(0);}
    virtual void put_value(unsigned int new_value) { value.put(0);}
+};
+
+class P18F26K22 : public _16bit_processor
+{
+ public:
+
+  PicPortRegister  *m_porte;
+  PicTrisRegister  *m_trise;
+  PicLatchRegister *m_late;
+
+
+  OSCCON_HS	osccon;
+  ADCON0_V2	adcon0;
+  ADCON1_2B	adcon1;
+  ADCON2_V2	adcon2;
+  FVRCON_V2	vrefcon0;
+  DACCON0_V2	vrefcon1;
+  DACCON1	vrefcon2;
+  ECCPAS        eccp1as;
+  ECCPAS        eccp2as;
+  ECCPAS        eccp3as;
+  PWM1CON       pwm1con;
+  PWM1CON       pwm2con;
+  PWM1CON       pwm3con;
+  OSCTUNE      osctune;
+
+  T1GCON	t1gcon;
+  T5CON		*t3con2;
+  T1GCON 	t3gcon;
+  TMRL		tmr5l;
+  TMRH		tmr5h;
+  T5CON		*t5con;
+  T1GCON	t5gcon;
+  T2CON        t4con;
+  PR2          pr4;
+  TMR2         tmr4;
+  T2CON        t6con;
+  PR2          pr6;
+  TMR2         tmr6;
+  PIR3v3       pir3;
+  PIE          pie3;
+  PIR4v1       pir4;
+  PIE          pie4;
+  PIR5v1       pir5;
+  PIE          pie5;
+  sfr_register ipr3;
+  sfr_register ipr4;
+  sfr_register ipr5;
+  CCPCON       ccp3con;
+  CCPRL        ccpr3l;
+  CCPRH        ccpr3h;
+  CCPCON       ccp4con;
+  CCPRL        ccpr4l;
+  CCPRH        ccpr4h;
+  CCPCON       ccp5con;
+  CCPRL        ccpr5l;
+  CCPRH        ccpr5h;
+  USART_MODULE         usart2;
+  ComparatorModule2 comparator;
+  sfr_register pmd0;
+  sfr_register pmd1;
+  sfr_register pmd2;
+  ANSEL_2B	ansela;
+  ANSEL_2B	anselb;
+  ANSEL_2B	anselc;
+  IOC		slrcon;  // using IOC for it's mask this register is a NOP in gpsim
+  CCPTMRS	ccptmrs;
+  PSTRCON	pstr1con;
+  PSTRCON	pstr2con;
+  PSTRCON	pstr3con;
+  SR_MODULE	sr_module;
+  SSP1_MODULE   ssp1;
+  SSP1_MODULE   ssp2;
+  CTMU		ctmu;
+  HLVDCON	hlvdcon;
+
+  WPU		*wpub;
+  IOC		*iocb;
+  virtual bool HasCCP2(void) { return false; }; // at wrong address
+  virtual bool MovedReg() { return true;}
+  virtual PROCESSOR_TYPE isa(){return _P18F26K22_;};
+  P18F26K22(const char *_name=0, const char *desc=0);
+  ~P18F26K22();
+  static Processor *construct(const char *name);
+
+  virtual PROCESSOR_TYPE base_isa(){return _PIC18_PROCESSOR_;};
+  virtual unsigned int access_gprs() { return 0x60; };
+  virtual unsigned int program_memory_size() const { return 0x8000; };
+  virtual unsigned int last_actual_register () const { return 0x0F37;};
+  virtual unsigned int eeprom_memory_size() const { return 1024; };
+  virtual void create_iopin_map();
+  virtual void create_sfr_map();
+  virtual void osc_mode(unsigned int value);
+  virtual void set_config3h(gint64 x);
+  virtual string string_config3h(gint64 x)
+	{return string("fix string_config3h");}
+  virtual unsigned int get_device_id() { return (0x54 << 8)|(0x3 <<5); }
+
+
+  void create();
+  virtual void update_vdd();
+
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
+   assert(0);
+  }
+  virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
+  virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
 };
 
 
@@ -463,6 +586,7 @@ class P18F4221 : public P18F4x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x800; };
+  virtual unsigned int get_device_id() { return (0x21 << 8)|(0x2 <<5); }
 };
 
 class P18F4321 : public P18F4x21
@@ -473,6 +597,7 @@ class P18F4321 : public P18F4x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual unsigned int get_device_id() { return (0x21 << 8)|(0x0 <<5); }
 };
 
 class P18F4420 : public P18F4x21
@@ -483,6 +608,7 @@ class P18F4420 : public P18F4x21
   static Processor *construct(const char *name);
 
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x2 <<5); }
 };
 
 class P18F4455 : public P18F4x21
@@ -508,6 +634,7 @@ class P18F4455 : public P18F4x21
   virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 0x3000; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
+  virtual unsigned int get_device_id() { return (0x12 << 8)|(0x1 <<5); }
 
 };
 
@@ -534,6 +661,7 @@ class P18F4550 : public P18F4x21
   virtual unsigned int access_gprs() { return 0x60; };  // USB peripheral moves access split
   virtual unsigned int program_memory_size() const { return 16384; };
   virtual unsigned int last_actual_register () const { return 0x07FF;};
+  virtual unsigned int get_device_id() { return (0x12 << 8)|(0x0 <<5); }
 
 };
 
@@ -546,6 +674,7 @@ class P18F4520 : public P18F4x21
 
   virtual unsigned int program_memory_size() const { return 0x4000; };
   virtual unsigned int last_actual_register () const { return 0x05FF;};
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x0 <<5); }
 };
 
 
@@ -568,6 +697,7 @@ class P18F4620 : public P18F4x21
   virtual unsigned int program_memory_size() const { return 0x8000; };
   virtual unsigned int eeprom_memory_size() const { return 1024; };
   virtual unsigned int last_actual_register () const { return 0x0F7F;};
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x4 <<5); }
 };
 
 
@@ -656,6 +786,7 @@ class P18F6520 : public P18F6x20
 
 //  virtual unsigned int program_memory_size() const { return 0x4000; };
   virtual unsigned int bugs() { return BUG_DAW; };
+  virtual unsigned int get_device_id() { return (0x0b << 8)|(0x1 <<5); }
 };
 
 #endif

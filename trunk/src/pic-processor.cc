@@ -380,6 +380,8 @@ ProcessorConstructor pP18F2550(P18F2550::construct,
                               "__18F2550",  "pic18f2550",   "p18f2550", "18f2550");
 ProcessorConstructor pP18F2620(P18F2620::construct,
                               "__18F2620",  "pic18f2620",   "p18f2620", "18f2620");
+ProcessorConstructor pP18F26K22(P18F26K22::construct,
+                              "__18F26K22",  "pic18f26k22",   "p18f26k22", "18f26k22");
 ProcessorConstructor pP18F4221(P18F4221::construct,
                               "__18F4221",  "pic18f4221",   "p18f4221", "18f4221");
 ProcessorConstructor pP18F4321(P18F4321::construct,
@@ -1195,7 +1197,6 @@ void pic_processor::create ()
 
   register_bank = &registers[0];  // Define the active register bank
 
-  Vdd = 5.0;                      // Assume 5.0 volt power supply
 
   if(pma) {
     m_PCHelper = new PCHelper(this,pma);
@@ -1711,7 +1712,9 @@ void WDT::clear()
 void WDT::callback_print()
 {
 
-  cout << "WDT\n";
+  cout <<  name() << " has callback, ID = " << CallBackID << '\n';
+
+ // cout << "WDT\n";
 }
 
 

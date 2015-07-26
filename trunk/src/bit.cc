@@ -170,7 +170,7 @@ void test_bits()
   pr("d",d);
   pr("c=a&b&d ->c",c);
 
-  c = !a & !b;
+  c = (!a) & (!b);
   pr("c=!a & !b ->c",c);
 
   a.set(true,false);

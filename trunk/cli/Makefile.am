@@ -55,9 +55,11 @@ libgpsimcli_la_LIBADD = @X_LDFLAGS@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../
 
 
 .yy.cc:
+	rm -f $*.h
 	$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $*.cc y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
 
 .yy.h:
+	rm -f $*.h
 	$(am__skipyacc) $(SHELL) $(YLWRAP) $< y.tab.c $*.cc y.tab.h $*.h y.output $*.output -- $(YACCCOMPILE)
 
 EXTRA_DIST = scan.h parse.h  makefile.mingw

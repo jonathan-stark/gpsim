@@ -37,6 +37,8 @@ License along with this library; if not, see
 #include "stimuli.h"
 #include "14bit-tmrs.h"
 #include "comparator.h"
+#include "a2d_v2.h"
+#include "ctmu.h"
 
 //#define DEBUG
 #if defined(DEBUG)
@@ -118,9 +120,12 @@ CM_stimulus::~CM_stimulus()
 
 void   CM_stimulus::set_nodeVoltage(double v)
 {
-	Dprintf(("set_nodeVoltage =%.1f\n", v));
+    if (nodeVoltage != v)
+    {
         nodeVoltage = v;
+	Dprintf(("set_nodeVoltage %s _cmcon %p %s v=%.2f\n", name().c_str(), _cmcon, _cmcon->name().c_str(), v));
         _cmcon->get();  // recalculate comparator values
+    }
 }
 
 
@@ -233,13 +238,14 @@ double CMCON::comp_voltage(int ind, int invert)
         break;
 
     case NO_IN:
-        Voltage = invert ? 5. : 0.;
+        Voltage = invert ? cpu->get_Vdd() : 0.;
         break;
 
     default:
         Voltage = cm_input[ind]->getPin().get_nodeVoltage();
         break;
     }
+    Dprintf(("CMCON::comp_voltage ind=%d %.2f %s\n", ind, Voltage, (ind==VREF)?"Vref":cm_input[ind]->getPin().name().c_str()));
     return Voltage;
 }
 /*
@@ -387,7 +393,6 @@ void CMCON::put(unsigned int new_value)
      {
         const char *name = cm_input[i]->getPin().GUIname().c_str();
 
-
         if (cm_input[i]->getPin().snode)
         {
             if (in_mask & (1 << i))
@@ -510,6 +515,7 @@ unsigned int CMxCON0_base::get()
             output = Vpos > Vneg;
 	    if (out_invert()) output = !output;
 	}
+	Dprintf(("%s ON Vpos %.2f Vneg %.2f output %d invert %d\n", name().c_str(), Vpos, Vneg, output, out_invert()));
     }
     set_output(output);
     return(value.get());
@@ -818,9 +824,16 @@ void CMxCON0_V2::put(unsigned int new_value)
      get(); 
      return;
   }
-
-  if ((new_value ^ old_value) & CxR)
-	m_cmModule->cmxcon0[0]->get();
+  if ((diff & CxON) && !(new_value & CxON)) // turning off
+  {
+	cm_output = m_cmModule->cmxcon1[cm]->output_pin(cm);
+	cm_output->getPin().newGUIname(cm_output->getPin().name().c_str());
+        cm_output->setSource(0);
+	// remove stimulus from input pins
+	m_cmModule->cmxcon1[0]->setPinStimulus(0, POS+cm*2);
+	m_cmModule->cmxcon1[0]->setPinStimulus(0, NEG+cm*2);
+	return;
+  }
 
   if (diff & CxOE)
   {
@@ -897,6 +910,8 @@ CMxCON0_V2::CMxCON0_V2(Processor *pCpu, const char *pName,
 CMxCON0_V2::~CMxCON0_V2()
 {
 }
+
+
 double CMxCON0_V2::get_Vpos() 
 { 
     return m_cmModule->cmxcon1[cm]->get_Vpos(cm, value.get()); 
@@ -928,16 +943,21 @@ double CM2CON1_V4::get_Vpos(unsigned int cm, unsigned int cmxcon0)
 	    (cm == 1 && (m_vrcon->value.get() & VRCON_2::C2VREN)))
 	{
 	    Voltage = ((Processor *)cpu)->CVREF->get_nodeVoltage();
+	    Dprintf(("%s CVref %.2f\n", __FUNCTION__, Voltage));
 	    
         }
 	else
+	{
 	    Voltage = ((Processor *)cpu)->V06REF->get_nodeVoltage();
+	    Dprintf(("%s cm%d V06ref %.2f\n", __FUNCTION__, cm+1, Voltage));
+	}
     }
     else		// use CM1IN+ or CM2IN+
     {
         if (!stimulus_pin[POS])
 	    setPinStimulus(cm_inputPos[cm], POS);
         Voltage =  cm_inputPos[cm]->getPin().get_nodeVoltage();
+        Dprintf(("%s cm%d %s %.2f\n", __FUNCTION__, cm+1, cm_inputPos[cm]->getPin().name().c_str(), Voltage));
     }
     return Voltage;
 }
@@ -987,7 +1007,6 @@ double CM2CON1_V3::get_Vpos(unsigned int cm, unsigned int cmxcon0)
     double Voltage = 0.0;
     unsigned int cmxcon1 = value.get();
 
-
     assert(m_vrcon);
     if (cmxcon0 & CMxCON0_V2::CxR) // use Vref defined in cm2con1
     {
@@ -995,17 +1014,20 @@ double CM2CON1_V3::get_Vpos(unsigned int cm, unsigned int cmxcon0)
 	    (cm == 1 && (cmxcon1 & C2RSEL)))
 	{
 	    Voltage =  m_vrcon->get_Vref();
+	    Dprintf(("%s cm%d Vref %.2f\n", __FUNCTION__, cm+1, Voltage));
 	}
 	else 
 	{
 	    Voltage =  0.6;
+	    Dprintf(("%s cm%d Absref %.2f\n", __FUNCTION__, cm+1, Voltage));
 	}
     }
     else		// use CM1IN+ or CM2IN+
     {
-        if (!stimulus_pin[POS])
+        if (stimulus_pin[POS] != cm_inputPos[cm])
 	    setPinStimulus(cm_inputPos[cm], POS);
         Voltage =  cm_inputPos[cm]->getPin().get_nodeVoltage();
+        Dprintf(("%s cm%d %s %.2f\n", __FUNCTION__, cm+1, cm_inputPos[cm]->getPin().name().c_str(), Voltage));
     }
     return Voltage;
 }
@@ -1013,10 +1035,14 @@ double CM2CON1_V3::get_Vpos(unsigned int cm, unsigned int cmxcon0)
 double CM2CON1_V3::get_Vneg(unsigned int cm, unsigned int cmxcon0)
 {
     unsigned int cxNchan = cmxcon0 & (CMxCON0_V2::CxCH0 | CMxCON0_V2::CxCH1);
-    if (!stimulus_pin[NEG])
+    if (stimulus_pin[NEG] != cm_inputNeg[cxNchan])
 	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+    Dprintf(("%s cm%d pin %d %s %.2f\n", __FUNCTION__, cm+1, cxNchan, cm_inputNeg[cxNchan]->getPin().name().c_str(), cm_inputNeg[cxNchan]->getPin().get_nodeVoltage()));
     return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
 }
+//*************************************************************
+// CM2CON1_V2
+
 void CM2CON1_V2::put(unsigned int new_value)
 {
     unsigned int old_value = value.get();
@@ -1033,9 +1059,25 @@ void CM2CON1_V3::tmr_gate(unsigned int cm, bool output)
 {
     if (cm == 1 && m_cmModule->tmr1l[0]) //CM2
     {
+	Dprintf(("CM2CON1_V3::tmr_gate cm%d output=%d\n", cm+1, output));
 	m_cmModule->tmr1l[0]->compare_gate(output);
     }
 }
+CM2CON1_V2::CM2CON1_V2(Processor *pCpu, const char *pName, 
+        const char *pDesc, ComparatorModule2 * cmModule):
+	CMxCON1_base(pCpu, pName, pDesc, 0, cmModule),
+        ctmu_stim(0), ctmu_attached(false)
+{
+	assert(m_cmModule->cmxcon0[1]);
+     cm_stimulus[2] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[1], "cm_stimulus_2-", 0, 1e12);
+     cm_stimulus[3] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[1], "cm_stimulus_2+", 0, 1e12);
+
+     ctmu_stimulus_pin = 0;
+}
+CM2CON1_V2::~CM2CON1_V2() 
+{
+}
+
 double CM2CON1_V2::get_Vpos(unsigned int cm, unsigned int cmxcon0)
 {
     double Voltage = 0.0;
@@ -1048,17 +1090,20 @@ double CM2CON1_V2::get_Vpos(unsigned int cm, unsigned int cmxcon0)
 	    (cm == 1 && (cmxcon1 & C2RSEL)))
 	{
 	    Voltage =  m_cmModule->FVR_voltage;
+	    Dprintf(("%s cm%d FVR %.2f\n", __FUNCTION__, cm+1, Voltage));
 	}
 	else 
 	{
 	    Voltage =  m_cmModule->DAC_voltage;
+	    Dprintf(("%s cm%d DAC %.2f\n", __FUNCTION__, cm+1, Voltage));
 	}
     }
     else		// use CM1IN+ or CM2IN+
     {
-        if (!stimulus_pin[POS])
-	    setPinStimulus(cm_inputPos[cm], POS);
+        if (stimulus_pin[POS+cm*2] != cm_inputPos[cm])
+	    setPinStimulus(cm_inputPos[cm], POS+cm*2);
         Voltage =  cm_inputPos[cm]->getPin().get_nodeVoltage();
+    	Dprintf(("%s cm%d %s %.2f\n", __FUNCTION__, cm+1, cm_inputPos[cm]->getPin().name().c_str(), Voltage));
     }
     return Voltage;
 }
@@ -1066,8 +1111,11 @@ double CM2CON1_V2::get_Vpos(unsigned int cm, unsigned int cmxcon0)
 double CM2CON1_V2::get_Vneg(unsigned int cm, unsigned int cmxcon0)
 {
     unsigned int cxNchan = cmxcon0 & (CMxCON0_V2::CxCH0 | CMxCON0_V2::CxCH1);
-    if (!stimulus_pin[NEG])
-	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+    if (stimulus_pin[NEG+cm*2] != cm_inputNeg[cxNchan])
+	setPinStimulus(cm_inputNeg[cxNchan], NEG+cm*2);
+    if (cm_inputNeg[cxNchan]->getPin().snode)
+	cm_inputNeg[cxNchan]->getPin().snode->update();
+    Dprintf(("%s cm%d pin %d %s %.2f\n", __FUNCTION__, cm+1, cxNchan, cm_inputNeg[cxNchan]->getPin().name().c_str(), cm_inputNeg[cxNchan]->getPin().get_nodeVoltage()));
     return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
 }
 
@@ -1084,6 +1132,7 @@ bool CM2CON1_V2::hyst_active(unsigned int cm)
 }
 void CM2CON1_V2::tmr_gate(unsigned int cm, bool output)
 {
+   Dprintf(("CM2CON1_V2::tmr_gate cm%d output %d\n", cm+1, output));
    for (int i=0; i < 3; i++)
    {
 	if (m_cmModule->t1gcon[i])
@@ -1093,6 +1142,50 @@ void CM2CON1_V2::tmr_gate(unsigned int cm, bool output)
 	    else if (cm == 1) //CM2
 		m_cmModule->t1gcon[i]->CM2_gate(output);
 	}
+    }
+}
+
+void CM2CON1_V2::set_ctmu_stim(stimulus *_ctmu_stim, CTMU *_ctmu_module)
+{
+    if (_ctmu_stim)
+    {
+	if (!m_cmModule->ctmu_module)
+	    m_cmModule->ctmu_module = _ctmu_module;
+	ctmu_stim = _ctmu_stim;
+	attach_ctmu_stim();
+    }
+    else
+    {
+	detach_ctmu_stim();
+	ctmu_stim = 0;
+    }
+}
+void CM2CON1_V2::attach_ctmu_stim()
+{
+    if (!cm_inputNeg[1])
+    {
+	fprintf(stderr, "ERROR CM2CON1_V2::attach_ctmu_stim C12IN1- not defined\n");
+	return;
+    }
+    if (!(cm_inputNeg[1]->getPin().snode))
+    {
+	printf("Warning CM2CON1_V2::attach_ctmu_stim %s has no node attached CTMU will not work properly\n", cm_inputNeg[1]->getPin().name().c_str());
+	return;
+    }
+    if (ctmu_stim)
+    {
+	cm_inputNeg[1]->getPin().snode->attach_stimulus(ctmu_stim);
+	cm_inputNeg[1]->getPin().snode->update();
+        ctmu_attached = true;
+    }
+}
+void CM2CON1_V2::detach_ctmu_stim()
+{
+    if (ctmu_attached)
+    {
+	cm_inputNeg[1]->getPin().snode->detach_stimulus(ctmu_stim);
+	cm_inputNeg[1]->getPin().snode->update();
+	ctmu_attached = false;
     }
 }
 
@@ -1109,6 +1202,8 @@ CMxCON1_base::CMxCON1_base(Processor *pCpu, const char *pName,
   : sfr_register(pCpu, pName, pDesc),
   cm(_cm), m_cmModule(cmModule)
 {
+     
+     assert(m_cmModule->cmxcon0[cm]);
      cm_stimulus[NEG] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[cm], "cm_stimulus_-", 0, 1e12);
      cm_stimulus[POS] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[cm], "cm_stimulus_+", 0, 1e12);
      stimulus_pin[NEG] = 0;
@@ -1120,6 +1215,7 @@ CMxCON1_base::CMxCON1_base(Processor *pCpu, const char *pName,
 	cm_inputPos[i] = 0;
         cm_output[i] = 0;
     }
+    ctmu_stimulus_pin = 0;
 }
 
 CMxCON1_base::~CMxCON1_base()
@@ -1132,8 +1228,12 @@ double CMxCON1::get_Vneg(unsigned int arg, unsigned int arg2)
     unsigned int cxNchan = value.get() & CxNMASK;
     if (!stimulus_pin[NEG])
 	setPinStimulus(cm_inputNeg[cxNchan], NEG);
+    if (cm_inputNeg[cxNchan]->getPin().snode)
+	cm_inputNeg[cxNchan]->getPin().snode->update();
+    Dprintf(("%s pin %d %s %.2f\n", __FUNCTION__, cxNchan, cm_inputNeg[cxNchan]->getPin().name().c_str(), cm_inputNeg[cxNchan]->getPin().get_nodeVoltage()));
     return cm_inputNeg[cxNchan]->getPin().get_nodeVoltage();
 }
+
 double CMxCON1::get_Vpos(unsigned int arg, unsigned int arg2)
 {
     unsigned int cxPchan = (value.get() & CxPMASK) >> 3;
@@ -1142,23 +1242,27 @@ double CMxCON1::get_Vpos(unsigned int arg, unsigned int arg2)
     switch(cxPchan)
     {
     case 0:
-	if (!stimulus_pin[POS])
+	if (stimulus_pin[POS] != cm_inputPos[cxPchan])
 	    setPinStimulus(cm_inputPos[cxPchan], POS);
 	Voltage = cm_inputPos[cxPchan]->getPin().get_nodeVoltage();
+        Dprintf(("%s %s %s v=%.2f\n", name().c_str(), __FUNCTION__, cm_inputPos[cxPchan]->getPin().name().c_str(), Voltage));
 	break;
 
     case 2:
 	Voltage = m_cmModule->DAC_voltage;
+        Dprintf(("%s %s %s v=%.2f\n", name().c_str(), __FUNCTION__, "DAC", Voltage));
 	break;
 
     case 4:
 	Voltage = m_cmModule->FVR_voltage;
+        Dprintf(("%s %s %s v=%.2f\n", name().c_str(), __FUNCTION__, "FVR", Voltage));
 	break;
 
     default:
 	printf("CMxCON1::get_Vpos unexpected Pchan %x\n", cxPchan);
     case 6:
 	Voltage = 0.;
+        Dprintf(("%s %s %s v=%.2f\n", name().c_str(), __FUNCTION__, "AGND", Voltage));
 	break;
     }
     return Voltage;
@@ -1171,7 +1275,7 @@ double CMxCON1::get_Vpos(unsigned int arg, unsigned int arg2)
 // pin may be 0 in which case a current stimulus, if any, will be detached
 // pol is either the enum POS or NEG
 //
-void CMxCON1_base::setPinStimulus(PinModule *pin, bool pol)
+void CMxCON1_base::setPinStimulus(PinModule *pin, int pol)
 {
 	if (pin == stimulus_pin[pol]) return;
 
@@ -1183,7 +1287,6 @@ void CMxCON1_base::setPinStimulus(PinModule *pin, bool pol)
 	if (pin && pin->getPin().snode)
 	{
 	    stimulus_pin[pol] = pin;
-
             (stimulus_pin[pol]->getPin().snode)->attach_stimulus(cm_stimulus[pol]);
 	}
 }
@@ -1246,9 +1349,19 @@ ComparatorModule2::ComparatorModule2(Processor *pCpu)
     tmr1l[0] = tmr1l[1] = tmr1l[2] = 0;
     eccpas[0] = eccpas[1] = eccpas[2] = 0;
     sr_module = 0;
+    ctmu_module = 0;
 }
 ComparatorModule2::~ComparatorModule2()
 {
+    for(int i = 0; i < 4; i++)
+    {
+	if (cmxcon0[i])
+	    delete cmxcon0[i];
+	if (cmxcon1[i])
+	    delete cmxcon1[i];
+	if (i < 3 && cmxcon1[i] == cmxcon1[i+1])
+	    cmxcon1[i+1] = 0;
+    }
     if (cmout)
 	delete cmout;
 }
@@ -1290,6 +1403,8 @@ void ComparatorModule2::set_cmout(unsigned int bit, bool value)
 
     	if (sr_module)
     	    sr_module->syncC2out(value);
+    	if (ctmu_module)
+    	    ctmu_module->syncC2out(value);
     	break;
 
     default:	//Do nothing other CMs
@@ -1308,6 +1423,7 @@ void ComparatorModule2::set_DAC_volt(double _volt)
 void ComparatorModule2::set_FVR_volt(double _volt)
 {
 	FVR_voltage = _volt;
+        Dprintf(("ComparatorModule2::set_FVR_volt %.2f\n", FVR_voltage));
 	for (int i=0; i < 4; i++)
 	{
 	    if (cmxcon0[i]) cmxcon0[i]->get();

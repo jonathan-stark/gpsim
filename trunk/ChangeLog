@@ -1,3 +1,31 @@
+2015-07-26 Roy Rankin <rrankin@ihug.com.au>
+	* src/pic-processor.cc src/p18x.h src/p18x.cc
+	  regression/a2d/Makefile regression/a2d/p18f26k22.asm
+	  regression/ccp/Makefile regression/ccp/pwm_26k22.asm
+	  regression/comparator/Makefile regression/comparator/compar_26k22.asm
+	  regression/tmr1_16bit/Makefile regression/tmr1_16bit/tmr1_18f26k22.asm
+	  regression/epwm/p18f26k22.asm regression/p18f26k22/Makefile
+	  regression/p18f26k22/ctmu_26k22.asm regression/p18f26k22/tbl_26k22.asm
+	  regression/p18f26k22/hlvd_26k22.asm 
+	: feature 46 - Add p18f26k22 Processor
+	* gpsim/main.cc gui/gui_scope.cc gui/gui.h
+	: fix scope error messages 
+	* cli/Makefile.am
+	: fix continual rebuild of parse.cc
+	* src/14bit-registers.cc src/14bit-registers.h
+	: add CPSCON0::callback_print() function
+	* src/16bit-processors.cc src/16bit-processors.h
+	  src/16bit-registers.h src/16bit-registers.cc
+	: Bug 200 - tblptrx registers miss named
+	  Feature 45 -	P18 processors do not return devid
+	  Add HLVDCON class
+	* src/bit.cc : fix compiler warning
+	* src/comparator.cc src/comparator.h src/ctmu.cc src/ctmu.h
+	  src/Makefile.am src/a2d_v2.h src/a2d_v2.cc src/p16f88x.cc
+	: Add ctmu class for p18f26k22
+	* src/eeprom.h src/eeprom.cc
+	: changes to integrate eeprom with TBL
+
 2015-07-09 Roy Rankin <rrankin@ihug.com.au>
 	* regression/a2d/16c71.lkr regression/a2d/16f819.lkr
           regression/a2d/16f871.lkr regression/a2d/16f873a.lkr 

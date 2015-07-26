@@ -11,12 +11,14 @@ fi
 
 case "$1" in
     *clean)
-        DIRS='breakpoints instructions_12bit instructions_14bit instructions_16bit 
-node_test p16f84 p18f452_ports p16f628 digital_stim analog_stim p12ce518 eeprom_wide 
-interrupts_14bit macro_test logic_test resistor usart_test txisr_test 
-tmr0_16bit tmr1_16bit tmr3_16bit 
-switch_test p18f comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
-p12c509 wdt p12f675 p16f676 p16f690 p16f684 p1xf18xx'
+        DIRS='breakpoints instructions_12bit instructions_14bit 
+		instructions_16bit node_test p16f84 p18f452_ports 
+		p16f628 digital_stim analog_stim p12ce518 eeprom_wide epwm
+		interrupts_14bit macro_test logic_test resistor usart_test 
+	        txisr_test tmr0_16bit tmr1_16bit tmr3_16bit switch_test p18f 
+		comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
+		p12c509 wdt p12f675 p16f676 p16f690 p16f684 p1xf18xx
+		p18f26k22'
 
         echo ${DIRS}
         for i in ${DIRS} ; do
@@ -136,6 +138,8 @@ ${RT} a2d sim_p18f1220
 
 ${RT} a2d sim_p10f222
 
+${RT} a2d sim_p18f26k22
+
 ${RT} psp sim_p18f452
 
 ${RT} psp sim_p18f6520
@@ -153,6 +157,10 @@ ${RT} ccp sim_ccp_819
 ${RT} ccp sim_pwm_877a
 
 ${RT} ccp sim_pwm_6520
+
+${RT} ccp sim_pwm_26k22
+
+${RT} epwm sim
 
 ${RT} ccp_628 sim
 
@@ -222,3 +230,5 @@ ${RT}       p1xf18xx sim_p16f1823_comp
 ${RT}       p1xf18xx sim_p16f1823_i2c
 ${RT}       p1xf18xx sim_p16f1823_i2c_v2
 ${RT}       p1xf18xx sim_p16f1823_spi
+
+${RT}	p18f26k22 sim

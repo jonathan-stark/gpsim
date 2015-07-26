@@ -448,9 +448,12 @@ void Waveform::setSource(const char *sourceName)
     // Invalidate wave area.
     m_start = m_stop = 1;
     Update(0,0);
+
     if (sw) {
-      gtk_widget_queue_draw(signalDrawingArea);
-      gtk_widget_queue_draw(waveDrawingArea);
+      if (signalDrawingArea)
+          gtk_widget_queue_draw(signalDrawingArea);
+      if (waveDrawingArea)
+          gtk_widget_queue_draw(waveDrawingArea);
     }
   } else if(sourceName)
      printf("'%s' is not a valid source for the scope\n",sourceName);

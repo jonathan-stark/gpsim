@@ -427,9 +427,9 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&prodh);
 
   remove_sfr_register(&tbl.tablat);
-  remove_sfr_register(&tbl.tabptrl);
-  remove_sfr_register(&tbl.tabptrh);
-  remove_sfr_register(&tbl.tabptru);
+  remove_sfr_register(&tbl.tblptrl);
+  remove_sfr_register(&tbl.tblptrh);
+  remove_sfr_register(&tbl.tblptru);
   remove_sfr_register(&pclatu);
 
   Stack16 *stack16 = static_cast<Stack16 *>(stack);
@@ -447,7 +447,6 @@ void _16bit_processor :: delete_sfr_map()
         remove_sfr_register(e->get_reg_eeadrh());
     remove_sfr_register(e->get_reg_eecon1());
     remove_sfr_register(e->get_reg_eecon2());
-    delete e;
   }
   delete_sfr_register(m_porta);
   delete_sfr_register(m_lata);
@@ -545,7 +544,6 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&rcon,	  0xfd0,RegisterValue(0x1c,0),"rcon");
   add_sfr_register(&wdtcon,	  0xfd1,porv,"wdtcon");
   add_sfr_register(&lvdcon,	  0xfd2,porv,"lvdcon");
-//RRR  add_sfr_register(&osccon,	  0xfd3,porv,"osccon");
   // 0x4 is not defined
   add_sfr_register(&t0con,	  0xfd5,RegisterValue(0xff,0),"t0con");
   add_sfr_register(&tmr0l,	  0xfd6,porv,"tmr0l");
@@ -592,9 +590,9 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&prodh, 0xff4, porv,"prodh");
 
   add_sfr_register(&tbl.tablat,  0xff5, porv,"tablat");
-  add_sfr_register(&tbl.tabptrl, 0xff6, porv,"tabptrl");
-  add_sfr_register(&tbl.tabptrh, 0xff7, porv,"tabptrh");
-  add_sfr_register(&tbl.tabptru, 0xff8, porv,"tabptru");
+  add_sfr_register(&tbl.tblptrl, 0xff6, porv,"tblptrl");
+  add_sfr_register(&tbl.tblptrh, 0xff7, porv,"tblptrh");
+  add_sfr_register(&tbl.tblptru, 0xff8, porv,"tblptru");
 
   if(pcl)
     delete pcl;
@@ -838,12 +836,13 @@ unsigned int _16bit_processor::get_program_memory_at_address(unsigned int addres
   if( uIndex < IdentMemorySize() )
     return idloc[uIndex];
 
-  static const unsigned int DEVID1 = 0x3ffffe;
-  static const unsigned int DEVID2 = 0x3fffff;
-  if (address == DEVID1)
-    return 0;
-  if (address == DEVID2)
-    return 0;
+//  static const unsigned int DEVID1 = 0x3ffffe;
+ // static const unsigned int DEVID2 = 0x3fffff;
+#define  DEVID1 0x3ffffe
+  if ((address & DEVID1) == DEVID1)
+  {
+	return get_device_id();
+  }
 
   return 0xffffffff;
 }
@@ -855,6 +854,7 @@ unsigned int _16bit_processor::get_config_word(unsigned int address)
     return 0xffffffff;
 
   address -= CONFIG1L;
+
 
   if (m_configMemory) {
     address &= 0xfffe; // Clear LSB

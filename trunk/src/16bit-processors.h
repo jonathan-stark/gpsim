@@ -187,6 +187,7 @@ public:
   virtual int  map_pm_index2address(int index) const {return index*2;};
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   virtual unsigned int get_config_word(unsigned int address);
+  virtual unsigned int get_device_id() { return 0;}
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual unsigned int configMemorySize() { return CONFIG7H-CONFIG1L+1; }
   virtual unsigned int IdentMemorySize() const { return 4; }    // four words default (18F)
@@ -320,7 +321,6 @@ public:
   {
     Integer::set(v);
 
-    printf("RRR Config3H m_pCpu=%p v=0x%lx\n", m_pCpu, v);
     if (m_pCpu)
     {
 	m_pCpu->set_config3h(v);

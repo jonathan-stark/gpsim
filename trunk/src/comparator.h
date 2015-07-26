@@ -47,6 +47,8 @@ class TMRL;
 	AN1,
 	AN2,
 	AN3,
+	AN4,
+	AN5,
 	VREF = 6,	// use reference voltage
 	NO_IN = 7	// no input port
    };
@@ -149,6 +151,22 @@ class CM_stimulus : public stimulus
      virtual void   set_nodeVoltage(double v);
 
 };
+class CM2CON1_V2;
+
+class CMv2_stimulus : public stimulus
+{
+   public:
+
+	CMv2_stimulus(CM2CON1_V2 *arg, const char *n=0,
+           double _Vth=0.0, double _Zth=1e12
+           );
+	~CMv2_stimulus();
+
+    CM2CON1_V2 *_cm2con1;
+
+     virtual void   set_nodeVoltage(double v);
+
+};
 class CMCON1 : public sfr_register
 {
  public:
@@ -215,7 +233,7 @@ protected:
   unsigned int m_CMval[2];
   PIR_SET *pir_set;
   TMRL *m_tmrl;
-  CM_stimulus *cm_stimulus[4];
+  CM_stimulus *cm_stimulus[6];
   ECCPAS 	*m_eccpas;
 
   static const int cMaxConfigurations=8;
@@ -438,7 +456,7 @@ class CMxCON1_base : public sfr_register
   virtual void put(unsigned int new_value){}
   virtual double get_Vpos(unsigned int arg=0, unsigned int arg2=0){ return 0.;}
   virtual double get_Vneg(unsigned int arg=0, unsigned int arg2=0){ return 0.;}
-  virtual void setPinStimulus(PinModule *, bool);
+  virtual void setPinStimulus(PinModule *, int);
   virtual void set_INpinNeg(PinModule *pin_cm0, PinModule *pin_cm1, 
 		PinModule *pin_cm2=0,  PinModule *pin_cm3=0,  
 		PinModule *pin_cm4=0);
@@ -452,12 +470,13 @@ class CMxCON1_base : public sfr_register
 protected:
 
   unsigned int cm;	// comparator number
-  CM_stimulus 		*cm_stimulus[2];
-  PinModule		*stimulus_pin[2];
-  ComparatorModule2 	*m_cmModule;
-  PinModule 		*cm_inputNeg[5];
-  PinModule 		*cm_inputPos[2];
-  PinModule 		*cm_output[2];
+  CM_stimulus 	    *cm_stimulus[4];     // stimuli to monitor input pin
+  PinModule	    *stimulus_pin[4];    // monitor stimulus loaded on this pin
+  PinModule	    *ctmu_stimulus_pin;  // ctmu stimulus pin
+  ComparatorModule2 *m_cmModule;
+  PinModule 	    *cm_inputNeg[5];
+  PinModule 	    *cm_inputPos[2];
+  PinModule 	    *cm_output[2];
 };
 // CMxCON1 only uses 1 0r 2 of Negative select bits and 2 Positive select bits
 class CMxCON1 : public CMxCON1_base
@@ -486,6 +505,7 @@ class CMxCON1 : public CMxCON1_base
 
 };
 
+class CTMU;
 /*  two comparators with common CM2CON1 and no COUT register, hyteresis, 
     C1, C2 possible T1,3,5  gate, FVR or  DAC for voltage reference,
     used by 18f26k22.
@@ -508,15 +528,22 @@ class CM2CON1_V2 : public CMxCON1_base
 
 
   CM2CON1_V2(Processor *pCpu, const char *pName, const char *pDesc, 
-		unsigned int _cm, ComparatorModule2 * cmModule) : 
-		CMxCON1_base(pCpu, pName, pDesc, _cm, cmModule){}
-  ~CM2CON1_V2(){}
+		ComparatorModule2 * cmModule);
+  ~CM2CON1_V2();
+  
   virtual void put(unsigned int new_value);
   virtual double get_Vpos(unsigned int cm, unsigned int cmxcon0);
   virtual double get_Vneg(unsigned int cm, unsigned int cmxcon0);
   virtual bool hyst_active(unsigned int cm);
   virtual void tmr_gate(unsigned int cm, bool output);
+  void set_ctmu_stim(stimulus *_ctmu_stim, CTMU *_ctmu_module);
+  void attach_ctmu_stim();
+  void detach_ctmu_stim();
 
+private:
+  stimulus          *ctmu_stim;
+  stimulus          *comp_input_cap;
+  bool	            ctmu_attached;
 };
 /*  two comparators, no hyteresis, cm2con1 controls t1 gate,
     C2 possible T1 gate, vrcon for voltage reference
@@ -638,6 +665,7 @@ class ComparatorModule2
   TMRL		*tmr1l[3];
   T1GCON	*t1gcon[3];
   SR_MODULE	*sr_module;
+  CTMU		*ctmu_module;
   ECCPAS 	*eccpas[3];
 };
 #endif // __COMPARATOR_H__

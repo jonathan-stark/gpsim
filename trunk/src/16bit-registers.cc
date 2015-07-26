@@ -566,6 +566,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
 
 
   value = ( (new_address | cpu_pic->get_pclath_branching_modpcl() )>>1);
+
   if (value >= memory_size)
 	value -= memory_size;
 
@@ -1146,11 +1147,11 @@ void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 //-------------------------------------------------------------------
 
 TBL_MODULE::TBL_MODULE(_16bit_processor *pCpu)
-  : cpu(pCpu),
+  : EEPROM_EXTND(pCpu, 0), cpu(pCpu),
     tablat(pCpu,"tablat"),
-    tabptrl(pCpu,"tabptrl"),
-    tabptrh(pCpu,"tabptrh"),
-    tabptru(pCpu,"tabptru")
+    tblptrl(pCpu,"tblptrl"),
+    tblptrh(pCpu,"tblptrh"),
+    tblptru(pCpu,"tblptru")
 {
 }
 
@@ -1175,17 +1176,17 @@ TBL_MODULE::TBL_MODULE(_16bit_processor *pCpu)
 void TBL_MODULE::increment()
 {
 
-  if(tabptrl.value.get() >= 0xff) {
-    tabptrl.put(0);
-    if(tabptrh.value.get() >= 0xff) {
-      tabptrh.put(0);
-      tabptru.put(tabptru.value.get() + 1);
+  if(tblptrl.value.get() >= 0xff) {
+    tblptrl.put(0);
+    if(tblptrh.value.get() >= 0xff) {
+      tblptrh.put(0);
+      tblptru.put(tblptru.value.get() + 1);
     } else {
-      tabptrh.put(tabptrh.value.get() + 1);
+      tblptrh.put(tblptrh.value.get() + 1);
     }
   }
   else
-    tabptrl.put(tabptrl.value.get() + 1);
+    tblptrl.put(tblptrl.value.get() + 1);
 
 
 }
@@ -1194,33 +1195,36 @@ void TBL_MODULE::increment()
 void TBL_MODULE::decrement()
 {
 
-  if(tabptrl.value.get() == 0) {
-    tabptrl.put(0xff);
-    if(tabptrh.value.get() == 0) {
-      tabptrh.put(0xff);
-      tabptru.put(tabptru.value.get() - 1);
+  if(tblptrl.value.get() == 0) {
+    tblptrl.put(0xff);
+    if(tblptrh.value.get() == 0) {
+      tblptrh.put(0xff);
+      tblptru.put(tblptru.value.get() - 1);
     } else {
-      tabptrh.put(tabptrh.value.get() - 1);
+      tblptrh.put(tblptrh.value.get() - 1);
     }
   }
   else
-    tabptrl.put(tabptrl.value.get() - 1);
+    tblptrl.put(tblptrl.value.get() - 1);
 
 }
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void TBL_MODULE::read()
 {
-  unsigned int tabptr,opcode;
+  unsigned int tblptr,opcode;
 
-  tabptr = 
-    ( (tabptru.value.get() & 0xff) << 16 ) |
-    ( (tabptrh.value.get() & 0xff) << 8 )  |
-    ( (tabptrl.value.get() & 0xff) << 0 );
+  // tblptr is 12 bit address pointer
+  tblptr = 
+    ( (tblptru.value.get() & 0xff) << 16 ) |
+    ( (tblptrh.value.get() & 0xff) << 8 )  |
+    ( (tblptrl.value.get() & 0xff) << 0 );
 
-  opcode = cpu_pic->pma->get_rom(tabptr & 0xfffffe);
+  // read 16 bits of program memory from even address
+  opcode = cpu_pic->pma->get_rom(tblptr & 0xfffffe);
 
-  if(tabptr & 1)
+  // return high or low byte depending on lsb of address
+  if(tblptr & 1)
     {
       tablat.put((opcode >> 8) & 0xff);
       internal_latch = (internal_latch & 0x00ff) | (opcode & 0xff00);
@@ -1237,28 +1241,61 @@ void TBL_MODULE::read()
 void TBL_MODULE::write()
 {
 
-  unsigned int tabptr;
+  unsigned int tblptr;
+  unsigned int latch_index;
+  unsigned int *pt;
 
-  tabptr = 
-    ( (tabptru.value.get() & 0xff) << 16 ) |
-    ( (tabptrh.value.get() & 0xff) << 8 )  |
-    ( (tabptrl.value.get() & 0xff) << 0 );
+  tblptr = 
+    ( (tblptru.value.get() & 0xff) << 16 ) |
+    ( (tblptrh.value.get() & 0xff) << 8 )  |
+    ( (tblptrl.value.get() & 0xff) << 0 );
 
-  if(tabptr & 1)
+  latch_index = (tblptr >> 1) % num_write_latches;
+  pt = &write_latches[latch_index];
+
+  if(tblptr & 1)
     {
-      // Long write
-      internal_latch = (internal_latch & 0x00ff) | ((tablat.value.get()<<8) & 0xff00);
-      cpu_pic->pma->put_opcode_start(tabptr & 0xfffffe, internal_latch);
+      *pt = (*pt & 0x00ff) | ((tablat.value.get()<<8) & 0xff00);
     }
   else
     {
-      // Short Write
-      internal_latch = (internal_latch & 0xff00) | (tablat.value.get() & 0x00ff);
+      *pt = (*pt & 0xff00) | (tablat.value.get() & 0x00ff);
     }
+}
+
+void TBL_MODULE::start_write()
+{
+  eecon1.value.put( eecon1.value.get()  | eecon1.WRERR);
+
+  if (eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS))
+  {
+
+      int index;
+      wr_adr  =
+          ( (tblptru.value.get() & 0xff) << 16 ) |
+          ( (tblptrh.value.get() & 0xff) << 8 )  |
+          ( (tblptrl.value.get() & 0xff) << 0 );
+      wr_adr = cpu->map_pm_address2index(wr_adr);
+      index = wr_adr % num_write_latches;
+      wr_data = write_latches[index];
+
+      eecon2.start_write();
+
+      // stop execution fo 2 ms
+      get_cycles().set_break(get_cycles().get() + (guint64)(.002*get_cycles().instruction_cps()), this);
+      bp.set_pm_write();
+      cpu_pic->pm_write();
+  }
+  else
+  {
+      get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
+      wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
+      wr_data = eedata.value.get() + (eedatah.value.get() << 8);
+      eecon2.start_write();
+  }
 
 
 }
-
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 LVDCON::LVDCON(Processor *pCpu, const char *pName, const char *pDesc)
@@ -1354,3 +1391,118 @@ bool OSCCON_HS::set_rc_frequency()
    }
    return true;
 }
+/*******************************************************************
+	HLVDCON - High/Low-Voltage Detect Module
+*/
+
+HLVD_stimulus::HLVD_stimulus(HLVDCON *_hlvd, const char *cPname):
+  stimulus(cPname, 2.5, 1e12), hlvd(_hlvd)
+{}
+HLVD_stimulus::~HLVD_stimulus() {}
+void HLVD_stimulus::set_nodeVoltage(double v)
+{
+    nodeVoltage = v;
+    hlvd->check_hlvd();
+}
+
+HLVDCON::HLVDCON(Processor *pCpu, const char *pName, const char *pDesc) :
+	sfr_register(pCpu, pName, pDesc), hlvdin(0), hlvdin_stimulus(0),
+	stimulus_active(false),write_mask(0x9f), IntSrc(0)
+  {}
+HLVDCON::~HLVDCON()
+{
+    if (IntSrc)
+	delete IntSrc;
+}
+
+void HLVDCON::put(unsigned int new_value)
+{
+    double tivrst = 20e-6;	// typical time for IVR stable
+    unsigned int diff = value.get() ^ new_value;
+    trace.raw(write_trace.get() | value.get());
+
+    if (!diff) return;
+
+    if (diff & HLVDEN) 
+    {
+        if (new_value & HLVDEN)	// Turning on
+	{
+	    // wait tivrst before doing anything
+	    value.put(new_value & write_mask);
+	    get_cycles().set_break(
+		get_cycles().get() + tivrst * get_cycles().instruction_cps(),
+		this);
+	    return;
+	}
+	else	// Turning off
+	{
+	    value.put(new_value & write_mask);
+	    if (stimulus_active)
+	    {
+	        hlvdin->getPin().snode->detach_stimulus(hlvdin_stimulus);
+	        stimulus_active = false;
+            }
+	    return;
+        }
+    }
+    value.put((new_value & write_mask) | (value.get() & ~write_mask));
+    if (!(value.get() & IRVST))		// Just return if voltage not stable
+        return;
+    check_hlvd();
+
+}
+void HLVDCON::callback()
+{
+	unsigned int reg = value.get();
+
+	reg |= (BGVST | IRVST);
+	value.put(reg);
+	check_hlvd();
+}
+
+double hldv_volts[] = { 1.84, 2.07, 2.28, 2.44, 2.54, 2.74, 2.87, 3.01,
+			3.30, 3.48, 3.69, 3.91, 4.15, 4.41, 4.74};
+void HLVDCON::check_hlvd()
+{
+    unsigned int reg = value.get();
+
+    assert(IntSrc);
+    assert(hlvdin);
+    if (!(reg & IRVST))
+	return;
+    if ((reg & HLVDL_MASK) == HLVDL_MASK)	// using HLVDIN pin
+    {
+	if (!hlvdin_stimulus)
+	    hlvdin_stimulus = new HLVD_stimulus(this, "hlvd_stim");
+
+        if (!stimulus_active && hlvdin->getPin().snode)
+	{
+	    hlvdin->getPin().snode->attach_stimulus(hlvdin_stimulus);
+	    stimulus_active = true;
+	    hlvdin->getPin().snode->update();
+	}
+	double voltage = hlvdin->getPin().get_nodeVoltage();
+	// High voltage trip ?
+	if ((reg & VDIRMAG) && (voltage >= 1.024))
+	{
+	       IntSrc->Trigger();
+	}
+
+	// Low voltage trip ?
+	else if (!(reg & VDIRMAG) && (voltage <= 1.024))
+	       IntSrc->Trigger();
+    }
+    else	// Voltage divider on Vdd
+    {
+	double voltage = hldv_volts[reg & HLVDL_MASK];
+	Processor *Cpu = (Processor *)cpu;
+	if ((reg & VDIRMAG) && (Cpu->get_Vdd() >= voltage))
+	       IntSrc->Trigger();
+	else if (!(reg & VDIRMAG) && (Cpu->get_Vdd() <= voltage))
+	       IntSrc->Trigger();
+    }
+}
+
+
+
+    

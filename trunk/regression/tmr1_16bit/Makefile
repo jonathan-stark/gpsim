@@ -1,18 +1,10 @@
 include ../make.regression
 
 
-SCRIPT = 18f452.lkr
+all : tmr1_16bit.cod  tmr1_18f2620.cod tmr1_18f26k22.cod
 
-PROJECT = tmr1_16bit
-OBJECTS =  $(PROJECT).o 
-OUTPUT = $(PROJECT).hex
-COD = $(PROJECT).cod
-STC = $(PROJECT).stc
+%.cod : %.o
+	gplink --map  -o $@  $<
 
-all : $(OUTPUT)
 
-$(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
-	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
-
-sim: $(COD)
-	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<
+sim: sim_tmr1_16bit sim_tmr1_18f2620 sim_tmr1_18f26k22

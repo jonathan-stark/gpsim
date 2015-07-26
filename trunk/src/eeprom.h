@@ -245,6 +245,7 @@ public:
   virtual void start_write();
   virtual void write_is_complete();
   virtual void callback();
+  virtual void set_pir(PIR *pir) {m_pir = pir;}
 
   inline virtual EEADR *get_reg_eeadrh() { return (rom_size>256) ? (&eeadrh) : 0; }
   virtual void initialize(unsigned int new_rom_size);
@@ -286,11 +287,12 @@ public:
   EEPROM_EXTND(Processor *pCpu, PIR *);
   ~EEPROM_EXTND();
 
+  inline virtual EEADR *get_reg_eeadrh() { return (has_eeadrh) ? (&eeadrh) : 0; }
   virtual void start_write();
   virtual void start_program_memory_read();  
   virtual void callback();
   virtual void callback_print(){ cout << " EEPROM_EXTND\n";}
-  void	initialize(unsigned int new_rom_size, int block_size, int num_latches, unsigned int cfg_word_base);
+  void	initialize(unsigned int new_rom_size, int block_size, int num_latches, unsigned int cfg_word_base, bool _has_eeadrh = true);
   void	  set_prog_wp(unsigned int adr) { prog_wp = adr;}
 
 #define LATCH_MT 0x7fff
@@ -301,6 +303,7 @@ protected:
    unsigned int *write_latches;
    unsigned int config_word_base;
    unsigned int prog_wp;	// program memory below this address is write protected
+   bool		has_eeadrh;
 
 };
 

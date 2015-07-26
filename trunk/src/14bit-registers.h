@@ -867,6 +867,7 @@ class CPSCON1;
 class T1CON_G;
 class CPS_stimulus;
 
+// Capacitance Sensing Control Register 0
 class CPSCON0  : public  sfr_register,  public TriggerObject
 {
 
@@ -888,6 +889,7 @@ public:
   void set_DAC_volt(double);
   void set_FVR_volt(double);
   void callback();
+  virtual void callback_print();
 
   CPSCON0(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~CPSCON0();
@@ -905,6 +907,7 @@ private:
   CPS_stimulus  *cps_stimulus;
 
 };
+// Capacitance Sensing Control Register 1
 class CPSCON1  : public  sfr_register
 {
 
