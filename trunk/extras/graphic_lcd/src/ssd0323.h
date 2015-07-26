@@ -97,8 +97,8 @@ private:
   unsigned int m_expectedCommandWords;
   unsigned char cmdWords[20];
 
-  // Display ram
-  unsigned int m_ram[128*80/2];
+  // Display ram + one for bad memory access
+  unsigned int m_ram[(128*80/2) + 1];
 
   // State information
   unsigned int m_colAddr;

@@ -23,43 +23,17 @@ Boston, MA 02111-1307, USA.  */
 
 #define IN_MODULE
 
-#include <time.h>
-#include <stdio.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-#include <iostream>
-
-#include <gtk/gtk.h>
-
-
-#include <src/packages.h>
-#include <src/stimuli.h>
-#include <src/symbol.h>
-#include <src/gpsim_interface.h>
-
+#include <cstdio>
+#include <cstdlib>
 
 #include "sed1520.h"
 
-
-#define DEBUG
-#if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
-#else
-#define Dprintf(arg) {}
-#endif
-
 //------------------------------------------------------------------------
 SED1520::SED1520()
-  : m_bE(true), m_controlState(0),
+  : m_bE(true), m_controlState(0), m_dataBus(0),
     m_page(0), m_columnAddress(0)
 {
-
+  randomizeRAM();
 }
 
 //------------------------------------------------------------------------
@@ -178,7 +152,7 @@ void SED1520::randomizeRAM()
 unsigned int &SED1520::prBadRam(unsigned int index)
 {
   static unsigned int si;
-  printf("WARNING SED1520 - illegal RAM access index=%d\n",index);
+  printf("WARNING SED1520 - illegal RAM access index=%u\n",index);
   return si;
 }
 #endif // HAVE_GUI

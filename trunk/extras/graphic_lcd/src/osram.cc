@@ -27,18 +27,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include <src/stimuli.h>
 #include <src/ioports.h>
-#include <src/packages.h>
-#include <src/symbol.h>
 #include <src/trace.h>
-#include <src/gpsim_interface.h>
 
-
-#define DEBUG
-#if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
-#else
-#define Dprintf(arg) {}
-#endif
+#include <cassert>
+#include <string>
 
 namespace OSRAM
 {
@@ -342,12 +334,7 @@ namespace OSRAM
 
     create_iopin_map();
 
-    m_plcd = 0;
-
     //create_widget();
-
-    printf ("OSRAM PK27_Series constructor this=%p\n",this);
-
   }
 
 
@@ -356,15 +343,34 @@ namespace OSRAM
   //------------------------------------------------------------------------
   PK27_Series::~PK27_Series()
   {
+    delete m_pSSD0323;
+    delete m_dataBus;
+    delete m_CS;
+    delete m_RES;
+    delete m_DC;
+    delete m_E;
+    delete m_RW;
+    delete m_BS1;
+    delete m_BS2;
+    delete m_state;
   }
 
 
-  static gboolean lcd_expose_event(GtkWidget *widget,
+  gboolean PK27_Series::lcd_expose_event(GtkWidget *widget,
                                    GdkEventExpose *event,
                                    PK27_Series *pLCD)
   {
-    printf ("Expose event widget %p pLCD  %p\n",widget,pLCD);
-    pLCD->Update(widget);
+    cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
+    pLCD->m_plcd->clear(cr);
+    for (unsigned int row = 0; row < pLCD->m_nRows; ++row) {
+      for (unsigned int i = 0; i < pLCD->m_nColumns / 2; ++i) {
+
+        unsigned int displayByte = (*(pLCD->m_pSSD0323))[i + 64 * row];
+        for (unsigned int b = 0; b < 2; b++, displayByte <<= 4)
+          pLCD->m_plcd->setPixel(cr, 2 * i + b, row, (displayByte >> 4) & 0xf);
+      }
+    }
+    cairo_destroy(cr);
     return TRUE;
   }
 
@@ -374,46 +380,7 @@ namespace OSRAM
   const int pixelScale = 2;
   void PK27_Series::Update(GtkWidget *widget)
   {
-
-    if (!m_plcd) {
-      if (!darea || !gtk_widget_get_window(darea))
-        return;
-
-      //m_plcd = new gLCD(GDK_DRAWABLE(darea->window), m_nColumns, m_nRows, 3, 3);
-      m_plcd = new gLCD(darea, m_nColumns, m_nRows, pixelScale, pixelScale, 0, 16);
-
-      for (int i=0; i<16; i++) {
-        unsigned int c = (255*i) / 16;
-        m_plcd->setColor(i, c,c,0);
-      }
-      printf("m_plcd %p\n",m_plcd);
-
-      m_plcd->clear();
-
-      for (int j=0; j<31; j++) {
-        for (int i=0; i<32; i++)
-          m_plcd->setPixel(j,i,j/2);
-      }
-
-    }
-
-    assert (m_plcd !=0);
-
-    m_plcd->clear();
-    /**/
-
-    for (unsigned int row=0; row<m_nRows; row++) {
-      for (unsigned int i=0; i<m_nColumns/2; i++) {
-
-        unsigned int displayByte = (*m_pSSD0323)[i + 64*row];
-        for (unsigned int b=0; b < 2; b++ , displayByte<<=4)
-          m_plcd->setPixel(2*i+b,row,(displayByte>>4)&0xf);
-      }
-
-    }
-
-
-    m_plcd->refresh();
+    gtk_widget_queue_draw(darea);
   }
 
   //------------------------------------------------------------------------
@@ -422,54 +389,36 @@ namespace OSRAM
 #define IN_BREADBOARD 0
   void PK27_Series::create_widget()
   {
-
 #if IN_BREADBOARD==1
-    window = gtk_vbox_new (FALSE, 0);
+    window = gtk_vbox_new(FALSE, 0);
 #else
-    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    if(window) {
-      //gtk_window_set_wmclass(GTK_WINDOW(window),type(),"Gpsim");
-      gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
-      gtk_widget_realize (window);
-      gtk_window_set_title(GTK_WINDOW(window), "LCD");
-    }
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
+    gtk_window_set_title(GTK_WINDOW(window), "LCD");
 #endif
+    GtkWidget *frame = gtk_frame_new("OSRAM PK27_Series");
+    gtk_container_add(GTK_CONTAINER(window), frame);
 
-    if(window) {
+    darea = gtk_drawing_area_new();
 
-      GtkWidget *frame = gtk_frame_new ("OSRAM PK27_Series");
-      gtk_container_add (GTK_CONTAINER (window), frame);
+    gtk_widget_set_size_request(darea,
+                          (m_nColumns+3)*pixelScale, (m_nRows+3)*pixelScale);
+    gtk_container_add(GTK_CONTAINER(frame), darea);
 
-      darea = gtk_drawing_area_new ();
+    g_signal_connect(darea, "expose_event", G_CALLBACK(lcd_expose_event), this);
 
-      gtk_widget_set_size_request(darea,
-                            (m_nColumns+3)*pixelScale, (m_nRows+3)*pixelScale);
-      gtk_container_add (GTK_CONTAINER (frame), darea);
-
-      g_signal_connect (darea,
-                          "expose_event",
-                          G_CALLBACK (lcd_expose_event),
-                          this);
-
-      gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-
-      /*
-        gtk_signal_connect (GTK_OBJECT (darea),
-        "button_press_event",
-        GTK_SIGNAL_FUNC (cursor_event),
-        NULL);
-      */
-
-      gtk_widget_show (frame);
-      gtk_widget_show (darea);
-
-      gtk_widget_show (window);
+    gtk_widget_set_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+    gtk_widget_show_all(window);
 
 #if IN_BREADBOARD==1
-      set_widget(window);
+    set_widget(window);
 #endif
-    }
 
+    m_plcd = new gLCD(m_nColumns, m_nRows, pixelScale, pixelScale, 0, 16);
+    for (int i = 0; i < 16; ++i) {
+      double c = double(i) / 16.0;
+      m_plcd->setColor(i, c, c, 0.0);
+    }
   }
 
 
@@ -492,11 +441,9 @@ namespace OSRAM
     assign_pin(13,m_E);
 
     // Add the individual io pins to the data bus.
-    IO_bi_directional *pD0;
-    IO_bi_directional *pD1;
 
-    assign_pin(12, m_dataBus->addPin(pD0 = new IO_bi_directional((name() + ".d0").c_str()),0));
-    assign_pin(11, m_dataBus->addPin(pD1 = new IO_bi_directional((name() + ".d1").c_str()),1));
+    assign_pin(12, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
+    assign_pin(11, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
     assign_pin(10, m_dataBus->addPin(new IO_bi_directional((name() + ".d2").c_str()),2));
     assign_pin( 9, m_dataBus->addPin(new IO_bi_directional((name() + ".d3").c_str()),3));
     assign_pin( 8, m_dataBus->addPin(new IO_bi_directional((name() + ".d4").c_str()),4));

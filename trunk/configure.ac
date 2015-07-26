@@ -13,6 +13,25 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
+dnl --enable-leak-sanitize : Turn on memory leak detection
+dnl The default is off
+dnl X86-64 Linux GCC 4.8+ CLang only
+
+AC_ARG_ENABLE(leak-sanitize,
+    [  --enable-leak-sanitize    Enable memory leak debugging],
+     [case "${enableval}" in
+      yes) use_leak_sanitize=yes ;;
+      no) use_leak_sanitize=no ;;
+      *) AC_MSG_ERROR(bad value ${enableval} for --enable-leak-sanitize) ;;
+    esac],[use_leak_sanitize=no])
+
+if test "$use_leak_sanitize" = "yes"; then
+    echo enabling memory leak debugging
+    LD_SANITIZE="-fsanitize=leak"
+else
+    LD_SANITIZE=""
+fi
+
 dnl --disable-gui : turn off gui support (cli only)
 dnl    The default is to have the gui.
 
@@ -170,7 +189,7 @@ esac
 
 CFLAGS="${CFLAGS} ${AM_CFLAGS}"
 CXXFLAGS="${CXXFLAGS} ${AM_CXXFLAGS}"
-LDFLAGS="${LDFLAGS} ${AM_LDFLAGS}"
+LDFLAGS="${LDFLAGS} ${AM_LDFLAGS} ${LD_SANITIZE}"
 
 # Host filesystem options
 case "${host}" in

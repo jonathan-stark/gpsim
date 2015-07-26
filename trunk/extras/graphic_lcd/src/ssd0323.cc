@@ -23,26 +23,8 @@ Boston, MA 02111-1307, USA.  */
 
 #define IN_MODULE
 
-#include <time.h>
-#include <stdio.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-#include <iostream>
-using namespace std;
-
-#include <gtk/gtk.h>
-
-
-#include <src/packages.h>
-#include <src/stimuli.h>
-#include <src/symbol.h>
-#include <src/gpsim_interface.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "ssd0323.h"
 
@@ -54,6 +36,7 @@ using namespace std;
 #define Dprintf(arg) {}
 #endif
 
+#define UNIT_TESTING 0
 
 //========================================================================
 //
@@ -73,7 +56,9 @@ using namespace std;
 //------------------------------------------------------------------------
 //------------------------------------------------------------------------
 
+#if UNIT_TESTING == 1
 void unitTest(SSD0323 *pSSD0323);
+#endif
 
 SSD0323::SSD0323()
   : m_controlState(0),
@@ -83,19 +68,14 @@ SSD0323::SSD0323()
     m_SPIData(0),
     m_commandIndex(0),
     m_expectedCommandWords(0),
-    m_colAddr(0), m_rowAddr(0)
+    m_colAddr(0), m_rowAddr(0),
+    m_colStartAddr(0), m_colEndAddr(0x3f),
+    m_rowStartAddr(0), m_rowEndAddr(0x4f),
+    m_Remap(0), m_ContrastControl(0x40)
 {
-  m_colStartAddr = 0;
-  m_colEndAddr = 0x3f;
-
-  m_rowStartAddr = 0;
-  m_rowEndAddr = 0x4f;
-
-  m_Remap = 0;
-
-  m_ContrastControl = 0x40;
-
+#if UNIT_TESTING == 1
   unitTest(this);
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -332,7 +312,7 @@ void SSD0323::storeData()
 {
   m_ram[m_rowAddr*64 + m_colAddr] = m_dataBus;
 
-  Dprintf((" data:0x%02x  row:%d col:%d\n",m_dataBus,m_rowAddr,m_colAddr ));
+  Dprintf((" data:0x%02x  row:%u col:%u\n",m_dataBus,m_rowAddr,m_colAddr ));
 
   const int incMode = 4;
   if (m_Remap & incMode)
@@ -397,11 +377,11 @@ void SSD0323::executeCommand()
   m_commandIndex = (m_commandIndex+1)&0xf;
   if (m_commandIndex > sizeof (cmdWords)) {
     m_commandIndex = 0;
-    cout << "Warning: SSD0323::executeCommand() - command buffer overflow\n";
+    printf("Warning: SSD0323::executeCommand() - command buffer overflow\n");
     return;
   }
 
-  cout << __FUNCTION__ << ":data=0x"<<hex << m_dataBus<<endl;
+  printf("%s:data=0x%x\n", __FUNCTION__, m_dataBus);
       // decode the command 
   if (m_commandIndex == 1) {
     switch (m_dataBus) {
@@ -465,7 +445,7 @@ void SSD0323::executeCommand()
       m_expectedCommandWords = 9;
       break;
     default:
-      cout << "Warning: SSD received bad command 0x" <<hex << m_dataBus<< endl;
+      printf("Warning: SSD received bad command 0x%x\n", m_dataBus);
     }
 
   }
@@ -473,7 +453,7 @@ void SSD0323::executeCommand()
   if (m_commandIndex == m_expectedCommandWords) {
 
     unsigned int i = cmdWords[0];
-    cout << "SSD0323 - executing command:0x"<<hex<< i <<endl;
+    printf("SSD0323 - executing command:0x%x\n", i);
     switch (cmdWords[0]) {
 
       // 1-word commands
@@ -546,7 +526,7 @@ void SSD0323::executeCommand()
       m_expectedCommandWords = 16;
       break;
     default:
-      cout << "Warning: SSD received bad command 0x" <<hex << m_dataBus<< endl;
+      printf("Warning: SSD received bad command 0x%x\n", m_dataBus);
     }
 
     m_commandIndex = 0;
@@ -588,9 +568,8 @@ void SSD0323::randomizeRAM()
 // to the RAM
 unsigned int &SSD0323::prBadRam(unsigned int index)
 {
-  static unsigned int si;
-  printf("WARNING SSD0323 - illegal RAM access index=%d\n",index);
-  return si;
+  printf("WARNING SSD0323 - illegal RAM access index=%u\n",index);
+  return m_ram[(128*80/2)];
 }
 
 
@@ -612,8 +591,6 @@ void SSD0323::showState()
 
 }
 
-
-#define UNIT_TESTING 1
 #if UNIT_TESTING == 1
 
 //========================================================================
@@ -637,7 +614,7 @@ void WriteData(unsigned int d)
 
 void unitTest(SSD0323 *pSSD0323)
 {
-  cout << "Running SSD0323 unit test\n";
+  printf("Running SSD0323 unit test\n");
   p_gSSD0323 = pSSD0323;
 
   // Column Address

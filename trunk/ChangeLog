@@ -1,3 +1,18 @@
+2015-07-26 Errol van de l'Isle <evandel@cix.co.uk>
+	* configure.ac
+	: Add option for leak testing (X86-64 gcc or clang only)
+	*  extras/graphic_lcd/src/glcd.cc
+	   extras/graphic_lcd/src/glcd.h
+	   extras/graphic_lcd/src/glcd_100X32_sed1520.cc
+	   extras/graphic_lcd/src/glcd_100X32_sed1520.h
+	   extras/graphic_lcd/src/gpsim_modules.cc
+	   extras/graphic_lcd/src/osram.cc
+	   extras/graphic_lcd/src/osram.h
+	   extras/graphic_lcd/src/sed1520.cc
+	   extras/graphic_lcd/src/ssd0323.cc
+	   extras/graphic_lcd/src/ssd0323.h
+	: Do all drawing with Cairo instead of deprecated GDK.
+
 2015-07-26 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-processor.cc src/p18x.h src/p18x.cc
 	  regression/a2d/Makefile regression/a2d/p18f26k22.asm

@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 #include "glcd.h"
 
 class SSD0323;
+class Module;
+class PortRegister;
 
 // gpsim graphics LCD modules for OSRAM Pictivia(tm) OLED Displays
 namespace OSRAM {
@@ -60,10 +62,8 @@ namespace OSRAM {
     SSD0323 *m_pSSD0323;
 
     StateAttribute *m_state;
-
-    /*
-      PortRegister *m_dataBus;
-    */
+    static gboolean lcd_expose_event(GtkWidget *widget, GdkEventExpose *event,
+      PK27_Series *pLCD);
   };
 
 } // End of OSRAM namespace
