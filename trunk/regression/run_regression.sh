@@ -150,6 +150,8 @@ ${RT} ttl sim_ttl377
 
 ${RT} ttl sim_ttl165
 
+${RT} ttl sim_ttl595
+
 ${RT} ccp sim_ccp_877a
 
 ${RT} ccp sim_ccp_819

@@ -1,3 +1,18 @@
+2015-07-26 Roy Rankin <rrankin@ihug.com.au>
+	* doc/screenshots/breadboard_register.png
+	  doc/screenshots/control_source.png
+	: new screendump files
+	* regression/a2d/10f222.lkr regression/ccp/16f819.lkr 
+	  regression/ccp/16f877a.lkr regression/ccp/18f6520.lkr
+	  regression/comparator/10f204.lkr regression/comparator/16f628.lkr
+	  regression/comparator/16f873a.lkr regression/comparator/16f877a.lkr
+	  regression/comparator/16f882.lkr regression/tmr1_16bit/18f452.lkr
+	  regression/ttl/18f452.lkr
+	: Remove gputil link files
+	* regression/run_regression.sh regression/tmr1_16bit/tmr1_18f2620.asm
+	  regression/ttl/Makefile regression/ttl/ttl595.asm
+	: add new regression tests
+
 2015-07-26 Errol van de l'Isle <evandel@cix.co.uk>
 	* configure.ac
 	: Add option for leak testing (X86-64 gcc or clang only)
