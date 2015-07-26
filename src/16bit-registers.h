@@ -36,6 +36,8 @@ class InvalidRegister;   // Forward reference
 #include "a2dconverter.h"
 #include "ssp.h"
 #include "rcon.h"
+#include "eeprom.h"
+
 #define _16BIT_REGISTER_MASK   0xfff
 
 class _16bit_processor;
@@ -490,7 +492,7 @@ public:
 
 //-------------------------------------------------------------------
 
-class TBL_MODULE
+class TBL_MODULE : public EEPROM_EXTND
 {
 public:
   TBL_MODULE(_16bit_processor *pCpu);
@@ -501,14 +503,16 @@ public:
   _16bit_processor *cpu;
 
   sfr_register   tablat,
-                 tabptrl,
-                 tabptrh,
-                 tabptru;
+                 tblptrl,
+                 tblptrh,
+                 tblptru;
+
 
   void increment();
   void decrement();
   void read();
   void write();
+  virtual void start_write();
   //void initialize(_16bit_processor *);
 };
 
@@ -569,5 +573,52 @@ class OSCCON_HS : public OSCCON
        OSCCON(pCpu, pName, pDesc), osccon2(0){}
 
    OSCCON2  *osccon2;
+};
+/*
+   High/Low-Voltage Detect Module
+*/
+class HLVDCON;
+
+class HLVD_stimulus : public stimulus
+{
+public:
+    HLVD_stimulus(HLVDCON *_hlvd, const char *n=0);
+    ~HLVD_stimulus();
+    virtual void   set_nodeVoltage(double v);
+private:
+  HLVDCON *hlvd;
+};
+
+class HLVDCON : public  sfr_register, public TriggerObject
+{
+ public:
+  enum
+  {
+	VDIRMAG = 1<<7,  // Voltage Direction Magnitude Select bit
+	BGVST   = 1<<6,  // Band Gap Reference Voltages Stable Status Flag bit
+	IRVST   = 1<<5,  // Internal Reference Voltage Stable Flag bit
+	HLVDEN  = 1<<4,  // High/Low-Voltage Detect Power Enable bit
+	HLVDL3  = 1<<3,  // Voltage Detection Level bits
+	HLVDL2  = 1<<2,  // Voltage Detection Level bits
+	HLVDL1  = 1<<1,  // Voltage Detection Level bits
+	HLVDL0  = 1<<0,  // Voltage Detection Level bits
+	HLVDL_MASK = 0xf
+   };
+  HLVDCON(Processor *pCpu, const char *pName, const char *pDesc);
+  ~HLVDCON();
+  void put(unsigned int new_value);
+  virtual void callback_print(){cout <<  name() << " has callback, ID = " << CallBackID << '\n';}
+  void callback();
+  void set_hlvdin(PinModule *_hlvdin){ hlvdin = _hlvdin;}
+  void check_hlvd();
+  virtual void setIntSrc(InterruptSource *_IntSrc) { IntSrc = _IntSrc;}
+
+
+private:
+  PinModule	   *hlvdin;
+  HLVD_stimulus    *hlvdin_stimulus;
+  bool		   stimulus_active;
+  unsigned int     write_mask;
+  InterruptSource *IntSrc;
 };
 #endif // __16_BIT_REGISTERS_H__

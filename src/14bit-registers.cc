@@ -1757,6 +1757,7 @@ void CPSCON0::calculate_freq()
 	period = 1;
     }
     guint64 fc = get_cycles().get() + period;
+
     if (future_cycle > get_cycles().get())
     {
 	get_cycles().reassign_break(future_cycle, fc, this);
@@ -1767,6 +1768,10 @@ void CPSCON0::calculate_freq()
     future_cycle = fc;
 }
 
+void CPSCON0::callback_print()
+{
+    cout <<  name() << " has callback, ID = " << CallBackID << '\n';
+}
 void CPSCON0::callback()
 {
     Dprintf(("now=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));

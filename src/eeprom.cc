@@ -50,7 +50,7 @@ using namespace std;
 //
 // EEPROM related registers
 
-//#define DEBUG
+#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
@@ -69,13 +69,13 @@ void EECON1::put(unsigned int new_value)
   //cout << "EECON1::put new_value " << hex << new_value << "  valid_bits " << valid_bits << '\n';
   //Dprintf(("new_value %x valid_bits %x\n", new_value, valid_bits));
   if(new_value & WREN)
-    {
+  {
       if(eeprom->get_reg_eecon2()->is_unarmed())
-        {
+      {
           eeprom->get_reg_eecon2()->unready();
           value.put(value.get() | WREN);
 
-        }
+      }
 
       // WREN is true and EECON2 is armed (which means that we've passed through here
       // once before with WREN true). Initiate an eeprom write only if WR is true and
@@ -94,9 +94,9 @@ void EECON1::put(unsigned int new_value)
 
       //    else cout << "EECON1: write ignored " << new_value << "  (WREN is probably already set)\n";
 
-    }
+  }
   else
-    {
+  {
       // WREN is low so inhibit further eeprom writes:
 
       if ( ! eeprom->get_reg_eecon2()->is_writing() )
@@ -105,7 +105,7 @@ void EECON1::put(unsigned int new_value)
         }
       //cout << "EECON1: write is disabled\n";
 
-    }
+  }
 
   value.put((value.get() & (RD | WR)) | new_value);
 
@@ -117,7 +117,10 @@ void EECON1::put(unsigned int new_value)
         eeprom->start_program_memory_read();
         //cout << "eestate " << eeprom->eecon2->eestate << '\n';
         // read program memory
-  } else {
+      } 
+      else 
+      {
+
         //eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
         eeprom->get_reg_eecon2()->read();
         eeprom->callback();
@@ -161,8 +164,6 @@ void EECON2::put(unsigned int new_value)
     {
       eestate = EENOT_READY;
     }
-
-
 }
 
 unsigned int EECON2::get()
@@ -732,7 +733,8 @@ void EEPROM_EXTND::initialize(
 		unsigned int new_rom_size,
 		int block_size, 
 	 	int num_latches, 
-		unsigned int cfg_word_base)
+		unsigned int cfg_word_base,
+		bool _has_eeadrh)
 
 {
    EEPROM_WIDE::initialize(new_rom_size);
@@ -745,6 +747,7 @@ void EEPROM_EXTND::initialize(
 	write_latches[i] = LATCH_MT;
 
     config_word_base = cfg_word_base;
+    has_eeadrh = _has_eeadrh;
 }
 
 void EEPROM_EXTND::start_program_memory_read()
@@ -759,19 +762,23 @@ void EEPROM_EXTND::start_program_memory_read()
 void EEPROM_EXTND::start_write()
 {
   eecon1.value.put( eecon1.value.get()  | eecon1.WRERR);
-
-  if (eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS))
-  {
-      get_cycles().set_break(get_cycles().get() + 1, this);
-      cpu_pic->pc->increment();
-  }
-  else
-      get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
-
   wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
   wr_data = eedata.value.get() + (eedatah.value.get() << 8);
 
   eecon2.start_write();
+
+  if (eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS))
+  {
+      // stop execution fo 2 ms
+      get_cycles().set_break(get_cycles().get() + (guint64)(.002*get_cycles().instruction_cps()), this);
+      cpu_pic->pc->increment();
+            bp.set_pm_write();
+      cpu_pic->pm_write();
+
+  }
+  else
+      get_cycles().set_break(get_cycles().get() + EPROM_WRITE_TIME, this);
+
 }
 
 
@@ -781,6 +788,7 @@ void EEPROM_EXTND::callback()
    bool write_error = false;
   //cout << "eeprom call back\n";
 
+  bp.clear_pm_write(); 
 
   switch(eecon2.get_eestate()) {
   case EECON2::EEREAD:
@@ -823,6 +831,7 @@ void EEPROM_EXTND::callback()
     switch(eecon1.value.get() & (EECON1::EEPGD|EECON1::CFGS|EECON1::LWLO|EECON1::FREE))
     {
     case EECON1::EEPGD:	// write program memory
+	bp.clear_pm_write();
 	index = wr_adr & (num_write_latches - 1);
         wr_adr &= ~(num_write_latches - 1);
 	write_latches[index] = wr_data;
@@ -832,7 +841,7 @@ void EEPROM_EXTND::callback()
 	    {
 		if (write_latches[i] != LATCH_MT)
 		{
-		    cpu->init_program_memory(wr_adr+i, write_latches[i]);
+		    cpu->init_program_memory(cpu->map_pm_index2address(wr_adr+i), write_latches[i]);
 		    write_latches[i] = LATCH_MT;
 		}
 	    }
@@ -845,8 +854,6 @@ void EEPROM_EXTND::callback()
 	    bp.halt();
 	    gi.simulation_has_stopped();
 	}
-	// execution stalls for 2ms
-	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::EEPGD|EECON1::LWLO:	// write to latches
@@ -890,15 +897,12 @@ void EEPROM_EXTND::callback()
 	    }
 	} 
 
-	// execution stalls for 2ms
-	get_cycles().clear_break(get_cycles().get());    
-	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::CFGS|EECON1::FREE:	// free Configuration memory row
 	// This row erase simply skips non-existant or write protected
 	// configuration words
-	wr_adr &= ~(erase_block_size);
+	wr_adr &= ~(erase_block_size-1);
 	for(int i = 0; i < erase_block_size; i++)
 	{
 	    unsigned int cfg_add = config_word_base | (wr_adr+i);
@@ -909,16 +913,15 @@ void EEPROM_EXTND::callback()
 		cpu->set_config_word(cfg_add, 0);
 	    }
 	}
-	// execution stalls for 2ms
-	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::EEPGD|EECON1::FREE:	// free program memory row
-	wr_adr &= ~(erase_block_size);
+	wr_adr &= ~(erase_block_size-1);
         if (wr_adr >= prog_wp)
 	{
 	    for(int i = 0; i < erase_block_size; i++)
-		cpu->erase_program_memory(wr_adr+i);
+		//cpu->erase_program_memory(cpu->map_pm_index2address(wr_adr+i));
+		cpu->init_program_memory(cpu->map_pm_index2address(wr_adr+i), 0);
 	}
 	else
 	{
@@ -927,8 +930,6 @@ void EEPROM_EXTND::callback()
 	    bp.halt();
 	    gi.simulation_has_stopped();
 	}
-	// execution stalls for 2ms
-	get_cycles().advance((int)(cpu->get_frequency()*.002/4));
 	break;
 
     case EECON1::LWLO:	// LWLO ignored to eeprom

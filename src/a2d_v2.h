@@ -167,6 +167,7 @@ public:
   void stop_conversion();
   virtual void set_interrupt();
   virtual void callback();
+  virtual void callback_print() {cout <<  name() << " has callback, ID = " << CallBackID << '\n';}
   void put(unsigned int new_value);
   void put_conversion();
 
@@ -204,7 +205,6 @@ private:
   unsigned int 	Tacq;
   unsigned int 	channel_mask;
   stimulus     	*ctmu_stim;
-  stimulus	*a2d_sample_cap;
   int		active_stim;	// channel with active stimulus
 };
 
@@ -236,6 +236,8 @@ public:
     void update_dac(double _Vdac) { Vdac = _Vdac;}
     virtual void setVoltRef(double _Vfvr_buf2) { Vfvr_buf2 = _Vfvr_buf2;}
     virtual PinModule *get_A2Dpin(unsigned int channel);
+    virtual void ctmu_trigger();
+    virtual void ccp_trigger();
 
 private:
     double Vctmu;
@@ -281,6 +283,7 @@ public:
 private:
   unsigned int mask_writable;
   virtual void callback();
+  virtual void callback_print() {cout <<  name() << " has callback, ID = " << CallBackID << '\n';}
   guint64  future_cycle;
   double compute_FVR(unsigned int);
   ADCON1_V2 *adcon1;

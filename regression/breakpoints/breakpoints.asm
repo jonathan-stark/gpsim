@@ -67,6 +67,7 @@ done:
   ; If no expression is specified, then break unconditionally
 
   .assert  "\"*** PASSED breakpoint test\""
+	nop
         goto    done
 
 

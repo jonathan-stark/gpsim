@@ -229,9 +229,9 @@ P16F88x::~P16F88x()
   }
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
-  delete_sfr_register(comparator.cmxcon0[0]);
-  delete_sfr_register(comparator.cmxcon0[1]);
-  delete_sfr_register(comparator.cmxcon1[1]);
+  remove_sfr_register(comparator.cmxcon0[0]);
+  remove_sfr_register(comparator.cmxcon0[1]);
+  remove_sfr_register(comparator.cmxcon1[1]);
 
   delete_sfr_register(m_porta);
   delete_sfr_register(m_trisa);
@@ -1177,9 +1177,9 @@ P16F631::~P16F631()
 
   unassignMCLRPin();
   delete_file_registers(0x40, 0x7f);
-  delete_sfr_register(comparator.cmxcon0[0]);
-  delete_sfr_register(comparator.cmxcon0[1]);
-  delete_sfr_register(comparator.cmxcon1[1]);
+  remove_sfr_register(comparator.cmxcon0[0]);
+  remove_sfr_register(comparator.cmxcon0[1]);
+  remove_sfr_register(comparator.cmxcon1[1]);
 
   remove_sfr_register(get_eeprom()->get_reg_eedata());
   remove_sfr_register(get_eeprom()->get_reg_eeadr());

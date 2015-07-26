@@ -341,6 +341,18 @@ main (int argc, char *argv[])
     // and with out the -i option.
     get_interface().setGUImode(bUseGUI);
   }
+  else
+  {
+	// so scope setup does not cause error when -i is used
+	globalSymbolTable().addSymbol(new String("scope.ch0",""));
+	globalSymbolTable().addSymbol(new String("scope.ch1",""));
+	globalSymbolTable().addSymbol(new String("scope.ch2",""));
+	globalSymbolTable().addSymbol(new String("scope.ch3",""));
+	globalSymbolTable().addSymbol(new String("scope.ch4",""));
+	globalSymbolTable().addSymbol(new String("scope.ch5",""));
+	globalSymbolTable().addSymbol(new String("scope.ch6",""));
+	globalSymbolTable().addSymbol(new String("scope.ch7",""));
+  }	
 #endif
 
 

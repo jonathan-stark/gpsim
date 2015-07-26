@@ -34,8 +34,9 @@ Boston, MA 02111-1307, USA.  */
 
 #define SBAW_NRFILES 100 // Max number of source files
 
+//#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif

@@ -45,7 +45,7 @@ static PinModule AnInvalidAnalogInput;
 ADCON0_V2::ADCON0_V2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     adres(0), adresl(0), adcon1(0), adcon2(0), intcon(0), pir1v2(0), 
-    ad_state(AD_IDLE), channel_mask(15), ctmu_stim(0), a2d_sample_cap(0),
+    ad_state(AD_IDLE), channel_mask(15), ctmu_stim(0), 
     active_stim(-1)
 {
 }
@@ -212,12 +212,6 @@ void ADCON0_V2::put(unsigned int new_value)
 void ADCON0_V2::set_ctmu_stim(stimulus *_ctmu_stim)
 {
     ctmu_stim = _ctmu_stim;
-    // this is required for CTMU module to work as expected
-    if (a2d_sample_cap == 0)
-    {
-	a2d_sample_cap = new stimulus("a2d_sample_cap", 2.5, 1e10);
-	a2d_sample_cap->set_Cth(5e-12);	// 5 pF
-    }
     if (value.get() & ADON)
 	attach_ctmu_stim();
 }
@@ -329,12 +323,15 @@ void ADCON0_V2::detach_ctmu_stim()
         if (pm && pm->getPin().snode && ctmu_stim)
         {
 	    pm->getPin().snode->detach_stimulus(ctmu_stim);
-	    pm->getPin().snode->detach_stimulus(a2d_sample_cap);
 	    pm->getPin().snode->update();
         }
     }
     active_stim = -1;
 }
+/* Move ctmu_stim onto currently selected A/D channel input pin.
+   if channel has not changed, just return.
+   Stimulus can only be attached if pin is connected to a node.
+*/
 void ADCON0_V2::attach_ctmu_stim()
 {
     int channel = (value.get() >> 2) & channel_mask;
@@ -345,14 +342,19 @@ void ADCON0_V2::attach_ctmu_stim()
 
     PinModule *pm=adcon1->get_A2Dpin(channel);
 
-    if (pm && pm->getPin().snode && ctmu_stim)
+    if (pm)
     {
-	pm->getPin().snode->attach_stimulus(ctmu_stim);
-	pm->getPin().snode->attach_stimulus(a2d_sample_cap);
-	pm->getPin().snode->update();
-	active_stim = channel;
+        if (!(pm->getPin().snode))
+        {
+            printf("Warning ADCON0_V2::attach_ctmu_stim %s has no node attached CTMU will not work properly\n", pm->getPin().name().c_str());
+        }
+        else if (ctmu_stim)
+        {
+            pm->getPin().snode->attach_stimulus(ctmu_stim);
+            pm->getPin().snode->update();
+            active_stim = channel;
+        }
     }
-
 }
 
 
@@ -738,6 +740,34 @@ void ADCON1_2B::put(unsigned int new_value)
     value.put(new_value);
 
 }
+
+// Special trigger from ctmu module
+void ADCON1_2B::ctmu_trigger()
+{
+    if (value.data & TRIGSEL)	// special trigger from CTMU active?
+    {
+	assert(m_adcon0);
+	unsigned int value = m_adcon0->value.data;
+        if ((value & ADCON0_V2::ADON))
+	{
+            value |= ADCON0_V2::GO;
+	    m_adcon0->put(value);
+        }
+    }
+}
+// Special trigger from cpp module
+void ADCON1_2B::ccp_trigger()
+{
+    if (!(value.data & TRIGSEL))	// special trigger from ccp active?
+    {
+	unsigned int value = m_adcon0->value.data;
+        if ((value & ADCON0_V2::ADON))
+	{
+            value |= ADCON0_V2::GO;
+	    m_adcon0->put(value);
+        }
+    }
+}
 ANSEL_2B::ANSEL_2B(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc), mask(0)
 {
@@ -878,7 +908,8 @@ double FVRCON_V2::compute_FVR(unsigned int fvrcon)
     }
     if (ret > ((Processor *)cpu)->get_Vdd())
     {
-	cerr << "warning FVRCON FVRAD > Vdd\n";
+	cerr << "warning FVRCON FVRAD("<< ret <<") > Vdd(" 
+		<<((Processor *)cpu)->get_Vdd() << ")\n";
 	ret = -1.;
     }
     for (unsigned int i= 0; i < daccon0_list.size(); i++)
