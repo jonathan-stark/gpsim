@@ -14,7 +14,7 @@ include ../plat/win32/make.mingw
 LIBS = -l wsock32 \
 	-L $(READLINE_PATH)/lib -l readline.dll \
 	-L $(POPT_PATH)/lib -l popt \
-	-L $(PANGO_PATH)/lib -l pango-1.0 \
+	-L $(PANGO_PATH)/lib -l pango-1.0 -l pangocairo-1.0 \
 	-L $(CAIRO_PATH)/lib -l cairo \
 	-L $(GDK_PIXBUF_PATH)/lib -l gdk_pixbuf-2.0 \
 	-L $(GTK_PATH)/lib -l gtk-win32-2.0 -l gdk_pixbuf-2.0 -l gdk-win32-2.0 \

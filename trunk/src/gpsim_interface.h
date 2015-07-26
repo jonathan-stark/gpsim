@@ -260,7 +260,6 @@ class ISimConsole;
 #define CMD_ERR_NOTIMPLEMENTED        6
 
 #define GPSIM_GETCOMMANDHANDLER "GetCommandHandler"
-typedef ICommandHandler * (*PFNGETCOMMANDHANDLER)(void);
 
 class ICommandHandler {
 public:
