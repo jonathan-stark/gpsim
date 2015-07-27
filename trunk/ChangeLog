@@ -1,4 +1,17 @@
 2015-07-27 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac makefile.mingw extras/Makefile.am extras/i2c2par
+	  extras/i2c2par/Makefile extras/i2c2par/Makefile.am 
+	  extras/i2c2par/examples extras/i2c2par/examples/Makefile 
+	  extras/i2c2par/examples/Makefile.am extras/i2c2par/examples/i2c2par.asm
+	  extras/i2c2par/i2c2par.cc extras/i2c2par/i2c2par.h
+	  extras/i2c2par/makefile.mingw extras/i2c2par/module_manager.cc
+	: Feature 40 - Add support for 20x4 lcd module with I2C interface
+	* extras/lcd/makefile.mingw extras/dht11/makefile.mingw
+	  extras/ds1307/makefile.mingw extras/ds1820/makefile.mingw
+	  extras/graphic_lcd/src/makefile.mingw
+	: More Fixes for windows build
+
+2015-07-27 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/makefile.mingw modules/led.h modules/makefile.mingw
 	  src/gpsim_interface.h src/makefile.mingw src/modules.h
 	: Fixes for windows build

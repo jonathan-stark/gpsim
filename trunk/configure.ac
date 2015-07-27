@@ -233,6 +233,8 @@ AC_CONFIG_FILES([Makefile
 		 extras/ds1307/examples/Makefile
 		 extras/dht11/Makefile
 		 extras/dht11/examples/Makefile
+		 extras/i2c2par/Makefile
+		 extras/i2c2par/examples/Makefile
                  regression/Makefile
                  src/Makefile
                  src/dspic/Makefile
