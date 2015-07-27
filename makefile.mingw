@@ -39,12 +39,12 @@ depend:
 
 .PHONY: extras extras-usart-con extras-graphic-lcd extras-lcd
 
-EXTRAS=extras/graphic_lcd/src extras/lcd extras/ds1307 extras/ds1820 extras/dht11
+EXTRAS=extras/graphic_lcd/src extras/lcd extras/ds1307 extras/ds1820 extras/dht11 extras/i2c2par
 
 include/gpsim:
 	mkdir -p include; ln -s ../src include/gpsim
 
-extras: include/gpsim extras-graphic-lcd extras-lcd extras-ds1307 extras-ds1820 extras-dht11
+extras: include/gpsim extras-graphic-lcd extras-lcd extras-ds1307 extras-ds1820 extras-dht11 extras-i2c2par
 
 extras-graphic-lcd:
 	export GPSIM_DEF_PATH=../../../plat/win32; \
@@ -70,6 +70,11 @@ extras-dht11:
 	export GPSIM_DEF_PATH=../../plat/win32; \
 	export GPSIM_LIB_PATH=../../src; \
 	$(MAKE) -C extras/dht11 -f makefile.mingw
+
+extras-i2c2par:
+	export GPSIM_DEF_PATH=../../plat/win32; \
+	export GPSIM_LIB_PATH=../../src; \
+	$(MAKE) -C extras/i2c2par -f makefile.mingw
 
 clean-extras:
 	for D in $(EXTRAS); do $(MAKE) -C $$D -f makefile.mingw clean; done; \

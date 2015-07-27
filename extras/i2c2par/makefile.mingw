@@ -34,15 +34,15 @@ INCLUDES = -I $(BASE) -I $(BASE)/include \
 
 DEFINES += -DHAVE_GUI
 
-all:				\
-	libgpsim_dht11.dll 
+all :				\
+	libgpsim_i2c2par.dll 
 
-libgpsim_dht11_OBJECTS =	\
-	dht11.o			\
+libgpsim_i2c2par_OBJECTS =		\
+	i2c2par.o		\
 	module_manager.o
 
 ################ The modules DLL
 
-libgpsim_dht11.dll : $(libgpsim_dht11_OBJECTS)
-	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_dht11.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_dht11_OBJECTS) $(LIBS)
+libgpsim_i2c2par.dll : $(libgpsim_i2c2par_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_i2c2par.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_i2c2par_OBJECTS) $(LIBS)
 
