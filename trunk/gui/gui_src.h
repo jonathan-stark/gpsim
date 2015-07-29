@@ -31,17 +31,6 @@ class StatusBar_Window;
 class Value;
 class SourceWindow;
 
-enum eSourceFileType {
-  eUnknownSource=0, // Unknown File type
-  eAsmSource,       // Assembly source files
-  eCSource,         // C source files
-  eJalSource,       // JAL source files
-  eListSource,      // List files
-  eAsmIncSource,    // Include files for assembly
-  eCIncSource,      // Include files for C
-  eHexSource        // Hex files
-};
-
 //========================================================================
 class ColorHolder
 {
@@ -102,13 +91,10 @@ public:
   GtkTextBuffer *getBuffer();
   SourceBrowserParent_Window *m_pParent;
   FileContext   *m_pFC;
-  eSourceFileType getSrcType();
-  void setSrcType(eSourceFileType);
 
   bool IsParsed();
   void parse();
 private:
-  eSourceFileType m_SourceFile_t;
   bool m_bParsed;
   GtkTextBuffer *m_buffer;
 };
@@ -167,12 +153,11 @@ public:
   void Close(void);
   void setFont(const char *);
   void setSource();
-  bool bHasSource();
 
   FileContext *getFC();
 
   // callbacks
-  static gint KeyPressHandler(GtkTextView *pView,
+  static gboolean KeyPressHandler(GtkTextView *pView,
                 GdkEventKey *key,
                 SourceWindow *pSW);
   static gint ButtonPressHandler(GtkTextView *pView,
@@ -281,7 +266,7 @@ private:
                                gpointer data);
 
   // Callbacks
-  static gint KeyPressHandler(GtkWidget *widget,
+  static gboolean KeyPressHandler(GtkWidget *widget,
                 GdkEventKey *key,
                 SourceWindow *pSW);
   static int DeleteEventHandler(GtkWidget *widget,
@@ -325,15 +310,15 @@ class SourceBrowser_Window : public GUI_Object {
 
   void set_pma(ProgramMemoryAccess *new_pma);
 
-  void Create(void);
+  void Create();
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SetTitle();
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
-  virtual void Update(void);
+  virtual void Update();
   virtual void UpdateLine(int address);
   virtual void SetPC(int address);
-  virtual void CloseSource(void){};
+  virtual void CloseSource(){};
   virtual void NewSource(GUI_Processor *gp){};
 
 };
@@ -355,7 +340,7 @@ class SourcePage
   GtkWidget *notebook;   // parent
   GtkWidget *notebook_child;
 
-  SourcePage(void) {
+  SourcePage() {
     source_layout_adj = 0;
     source_layout = 0;
     source_text = 0;
@@ -365,7 +350,6 @@ class SourcePage
     notebook = 0;
   }
 
-  void Close(void);
 };
 
 //
@@ -460,19 +444,18 @@ class SourceBrowserParent_Window : public GUI_Object
  public:
 
   SourceBrowserParent_Window(GUI_Processor *gp);
-  virtual void Build(void);
+  virtual void Build();
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
-  virtual void Update(void);
+  virtual void Update();
   virtual void UpdateLine(int address);
   virtual void SetPC(int address);
-  virtual void CloseSource(void);
+  virtual void CloseSource();
   virtual void NewSource(GUI_Processor *gp);
   virtual void ChangeView(int view_state);
   virtual int set_config();
 
-  SourceWindow *getChild(int);
   list<SourceWindow *> children;
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.

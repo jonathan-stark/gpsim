@@ -48,6 +48,25 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/fopen-path.h"
 
+//======================================================================
+//
+// When a user right-clicks in the source browser, a menu will popup.
+// There can only be one menu active at any given time.
+
+
+//
+//  'aPopupMenu' pointer is a local pointer to a GtkMenu.
+//
+
+static GtkWidget *aPopupMenu;
+
+//
+// 'pViewContainingPopup' is a pointer to the GtkTextView that was active
+// when the popup menu was opened.
+//
+
+static GtkTextView *pViewContainingPopup;
+
 extern int gui_question(const char *question, const char *a, const char *b);
 
 static int load_fonts(SourceWindow *sbaw);
@@ -77,7 +96,7 @@ public:
       sbaw->SetPC(new_value);
   }
 
-  void Remove(void) {}
+  void Remove() {}
 };
 
 
@@ -151,11 +170,17 @@ gtk_source_view_get_lines(GtkTextView  *text_view,
 
 //------------------------------------------------------------------------
 //
-gint
+gboolean
 NSourcePage::KeyPressHandler(GtkTextView *pView,
                GdkEventKey *key,
                SourceWindow *pSW)
 {
+  guint modifiers = gtk_accelerator_get_default_mod_mask();
+
+  if ((key->state & modifiers) != 0) {
+    return FALSE;
+  }
+
   GtkTextBuffer *pBuffer = gtk_text_view_get_buffer(pView);
   GtkTextMark *pMark = gtk_text_buffer_get_insert(pBuffer);
   GtkTextIter iter;
@@ -222,13 +247,25 @@ NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
 }
 //------------------------------------------------------------------------
 //
-gint
+gboolean
 SourceWindow::KeyPressHandler(GtkWidget *widget,
           GdkEventKey *key,
           SourceWindow *pSW)
 {
   if (!pSW || !key)
     return FALSE;
+
+  guint modifiers = gtk_accelerator_get_default_mod_mask();
+  if ((key->state & modifiers) == GDK_CONTROL_MASK && key->keyval == 'f') {
+    NSourcePage *page = pSW->pages[pSW->m_currentPage];
+    pViewContainingPopup = page->getView();
+    pSW->findText();
+    return TRUE;
+  }
+
+  if ((key->state & modifiers) != 0) {
+    return FALSE;
+  }
 
   switch (key->keyval) {
   case '1':
@@ -244,24 +281,24 @@ SourceWindow::KeyPressHandler(GtkWidget *widget,
     break;
   case 's':
   case 'S':
-  case GDK_F7:
+  case GDK_KEY_F7:
     pSW->step();
     break;
   case 'o':
   case 'O':
-  case GDK_F8:
+  case GDK_KEY_F8:
     pSW->step_over();
     break;
   case 'r':
   case 'R':
-  case GDK_F9:
+  case GDK_KEY_F9:
     pSW->run();
     break;
   case 'f':
   case 'F':
     pSW->finish();
     break;
-  case GDK_Escape:
+  case GDK_KEY_Escape:
     pSW->stop();
     break;
   default:
@@ -271,26 +308,6 @@ SourceWindow::KeyPressHandler(GtkWidget *widget,
   return TRUE;
 
 }
-
-//======================================================================
-//
-// When a user right-clicks in the source browser, a menu will popup.
-// There can only be one menu active at any given time.
-
-
-//
-//  'aPopupMenu' pointer is a local pointer to a GtkMenu.
-//
-
-static GtkWidget *aPopupMenu=0;
-
-//
-// 'pViewContainingPopup' is a pointer to the GtkTextView that was active
-// when the popup menu was opened.
-//
-
-static GtkTextView *pViewContainingPopup=0;
-
 
 typedef enum {
   MENU_FIND_TEXT,
@@ -566,6 +583,8 @@ protected:
 
   static void response(GtkDialog *dialog, gint response, SearchDialog *sd);
   static void activate(GtkEntry *entry, SearchDialog *sd);
+  static void icon_press(GtkEntry *entry, GtkEntryIconPosition icon_pos,
+  GdkEvent *event, gpointer user_data);
 };
 
 //------------------------------------------------------------------------
@@ -573,14 +592,10 @@ SearchDialog::SearchDialog()
 : m_bFound(false), m_bLooped(false), m_iStart(0), m_iLast(0), m_iLastID(-1),
   m_pSourceWindow(0)
 {
-  GtkWidget *hbox;
-  GtkWidget *label;
-
   m_Window = gtk_dialog_new_with_buttons(
     "Find", NULL,
     GtkDialogFlags(0),
     "_Find", 1,
-    "Clear", 2,
     "_Close", GTK_RESPONSE_CLOSE,
     NULL);
 
@@ -592,39 +607,40 @@ SearchDialog::SearchDialog()
     "delete_event", G_CALLBACK (gtk_widget_hide),
     GTK_OBJECT(m_Window));
 
-  hbox = gtk_hbox_new(FALSE, 6);
-  gtk_widget_show(hbox);
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 6);
   gtk_box_pack_start(GTK_BOX(content_area), hbox,
     FALSE, TRUE, 0);
-  label = gtk_label_new("Find:");
-  gtk_widget_show(label);
-  gtk_box_pack_start(GTK_BOX(hbox), label,
-    FALSE, FALSE, 0);
+  GtkWidget *label = gtk_label_new("Find:");
+  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   m_Entry = gtk_entry_new();
-  gtk_widget_show(m_Entry);
-  gtk_box_pack_start(GTK_BOX(hbox), m_Entry,
-    TRUE, TRUE, 0);
-
+  gtk_box_pack_start(GTK_BOX(hbox), m_Entry, TRUE, TRUE, 0);
+  gtk_widget_grab_focus(m_Entry);
+  gtk_entry_set_icon_from_stock(GTK_ENTRY(m_Entry), GTK_ENTRY_ICON_PRIMARY,
+    GTK_STOCK_FIND);
+  gtk_entry_set_icon_from_stock(GTK_ENTRY(m_Entry), GTK_ENTRY_ICON_SECONDARY,
+    GTK_STOCK_CLEAR);
+  gtk_entry_set_icon_activatable(GTK_ENTRY(m_Entry), GTK_ENTRY_ICON_SECONDARY,
+    TRUE);
+  gtk_entry_set_icon_sensitive(GTK_ENTRY(m_Entry), GTK_ENTRY_ICON_SECONDARY,
+    TRUE);
+  gtk_entry_set_icon_tooltip_text(GTK_ENTRY(m_Entry), GTK_ENTRY_ICON_SECONDARY,
+    "Clear text");
   g_signal_connect(m_Entry, "activate", G_CALLBACK(activate), this);
+  g_signal_connect(m_Entry, "icon-press", G_CALLBACK(icon_press), NULL);
 
   hbox = gtk_hbox_new(FALSE, 6);
-  gtk_box_pack_start(GTK_BOX(content_area), hbox,
-    FALSE, TRUE, 0);
-  gtk_widget_show(hbox);
+  gtk_box_pack_start(GTK_BOX(content_area), hbox, FALSE, TRUE, 0);
   m_CaseButton = gtk_check_button_new_with_label("Case Sensitive");
-  gtk_widget_show(m_CaseButton);
-  gtk_box_pack_start(GTK_BOX(hbox), m_CaseButton,
-    FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), m_CaseButton, FALSE, FALSE, 0);
   m_BackButton = gtk_check_button_new_with_label("Find Backwards");
-  gtk_widget_show(m_BackButton);
-  gtk_box_pack_start(GTK_BOX(hbox), m_BackButton,
-    FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(hbox), m_BackButton, FALSE, FALSE, 0);
 }
 
 bool SearchDialog::bDirection()
 {
   return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_BackButton)) == TRUE;
 }
+
 bool SearchDialog::bCase()
 {
   return gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(m_CaseButton)) == TRUE;
@@ -645,9 +661,6 @@ void SearchDialog::response(GtkDialog *dialog, gint response, SearchDialog *sd)
       sd->find(p);
     }
     break;
-  case 2:
-    gtk_entry_set_text(GTK_ENTRY(sd->m_Entry), "");
-    break;
   default:
     gtk_widget_hide(GTK_WIDGET(dialog));
   }
@@ -659,17 +672,22 @@ void SearchDialog::activate(GtkEntry *entry, SearchDialog *sd)
   sd->find(p);
 }
 
+void SearchDialog::icon_press(GtkEntry *entry, GtkEntryIconPosition icon_pos,
+  GdkEvent *event, gpointer user_data)
+{
+  gtk_entry_set_text(entry, "");
+}
+
 void SearchDialog::Show(SourceWindow *pSourceWindow)
 {
   m_pSourceWindow = pSourceWindow;
   m_iStart = 0;
 
-  gtk_widget_show(m_Window);
+  gtk_widget_show_all(m_Window);
 }
 
 //------------------------------------------------------------------------
 ColorHolder::ColorHolder (const char *pcColor)
-/*  : m_cpCurr(0), m_cpTemp(0) */
 {
   if (pcColor) {
     gdk_color_parse(pcColor, &mCurrentColor);
@@ -768,8 +786,7 @@ SourcePageMargin::SourcePageMargin()
 SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
                            SourceBrowserParent_Window *pParent)
 
-                           :  m_pParent(pParent), m_pFC(pFC), m_SourceFile_t(eUnknownSource),
-                           m_bParsed(false)
+                           :  m_pParent(pParent), m_pFC(pFC), m_bParsed(false)
 {
 
   assert(pTagTable);
@@ -779,17 +796,6 @@ SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
   assert(m_buffer);
 
 }
-//------------------------------------------------------------------------
-
-eSourceFileType SourceBuffer::getSrcType()
-{
-  return m_SourceFile_t;
-}
-void SourceBuffer::setSrcType(eSourceFileType new_SrcType)
-{
-  m_SourceFile_t = new_SrcType;
-}
-
 
 //------------------------------------------------------------------------
 // addTagRange(TextStyle *pStyle,int start_index, int end_index)
@@ -1820,10 +1826,7 @@ SourceWindow *NSourcePage::getParent()
 }
 
 //------------------------------------------------------------------------
-bool NSourcePage::bHasSource()
-{
-  return m_pBuffer != 0;
-}
+
 FileContext * NSourcePage::getFC()
 {
   return m_pBuffer ? m_pBuffer->m_pFC : 0;
@@ -2132,7 +2135,7 @@ void SourceWindow::SetPC(int address)
   }
 }
 
-void SourceWindow::CloseSource(void)
+void SourceWindow::CloseSource()
 {
   Dprintf((" \n"));
 }
@@ -2275,27 +2278,6 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
 // Everything below is in the process of being deprecated...
 //
 //########################################################################
-
-
-void SourcePage::Close(void)
-{
-  if(notebook != NULL && notebook_child != NULL)
-  {
-    int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child);
-    gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
-    // JRH - looks like gtk_notebook_remove_page() is also
-    //       deallocating notebook_chile.
-    // gtk_widget_destroy(notebook_child);
-    // this is all that is needed to destroy all child widgets
-    // of notebook_child.
-    notebook_child=0;
-    source_layout_adj = 0;
-    source_layout = 0;
-    source_text = 0;
-    pageindex_to_fileid = INVALID_VALUE;
-    source_pcwidget = 0;
-  }
-}
 
 static int load_fonts(SourceWindow *sbaw)
 {
@@ -2537,15 +2519,7 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   children.push_back(new SourceWindow(_gp,this,true));
 }
 
-SourceWindow *SourceBrowserParent_Window::getChild(int n)
-{
-  list <SourceWindow *> :: iterator sbaw_iterator;
-  sbaw_iterator = children.begin();
-
-  return (sbaw_iterator != children.end()) ? *sbaw_iterator : 0;
-}
-
-void SourceBrowserParent_Window::Build(void)
+void SourceBrowserParent_Window::Build()
 {
   list <SourceWindow *> :: iterator sbaw_iterator;
 
@@ -2617,7 +2591,7 @@ void SourceBrowserParent_Window::SelectAddress(Value *addrSym)
     (*sbaw_iterator)->SelectAddress(addrSym);
 }
 
-void SourceBrowserParent_Window::Update(void)
+void SourceBrowserParent_Window::Update()
 {
   list <SourceWindow *> :: iterator sbaw_iterator;
 
@@ -2647,7 +2621,7 @@ void SourceBrowserParent_Window::SetPC(int address)
     (*sbaw_iterator)->SetPC(address);
 }
 
-void SourceBrowserParent_Window::CloseSource(void)
+void SourceBrowserParent_Window::CloseSource()
 {
   list <SourceWindow *> :: iterator sbaw_iterator;
 

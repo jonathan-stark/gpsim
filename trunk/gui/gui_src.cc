@@ -38,7 +38,7 @@ class StepEvent : public KeyEvent
 public:
   void press(gpointer data)
   {
-    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
     if(sbw && sbw->pma)
         sbw->pma->step(1);
   }
@@ -50,7 +50,7 @@ class StepOverEvent : public KeyEvent
 public:
   void press(gpointer data)
   {
-    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
     if(sbw && sbw->pma)
       // Step Over Next instruction, or hll statement
       sbw->pma->step_over();
@@ -78,7 +78,7 @@ class StopEvent : public KeyEvent
 public:
   void press(gpointer data)
   {
-    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
     if(sbw && sbw->pma)
       sbw->pma->stop();
   }
@@ -90,7 +90,7 @@ class FinishEvent : public KeyEvent
 public:
   void press(gpointer data)
   {
-    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
     if(sbw && sbw->pma)
       sbw->pma->finish();
   }
@@ -106,7 +106,7 @@ key_press(GtkWidget *widget,
           gpointer data)
 {
 
-  SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+  SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
 
   if(!sbw) return(FALSE);
   if(!sbw->gp) return(FALSE);
@@ -142,7 +142,7 @@ void SourceBrowser_Window::UpdateLine(int address)
   printf("%s shouldn't be called \n",__FUNCTION__);
 
 }
-void SourceBrowser_Window::Update(void)
+void SourceBrowser_Window::Update()
 {
   if(!gp || !gp->cpu)
     return;
@@ -151,7 +151,7 @@ void SourceBrowser_Window::Update(void)
 }
 
 
-void SourceBrowser_Window::Create(void)
+void SourceBrowser_Window::Create()
 {
   last_simulation_mode = eSM_INITIAL;
 
@@ -170,18 +170,18 @@ void SourceBrowser_Window::Create(void)
 
   KeyMap['s'] = new StepEvent();
   KeyMap['S'] = KeyMap['s'];
-  KeyMap[GDK_F7] = KeyMap['s'];
+  KeyMap[GDK_KEY_F7] = KeyMap['s'];
 
   KeyMap['o'] = new StepOverEvent();
   KeyMap['O'] = KeyMap['o'];
   KeyMap['n'] = KeyMap['o'];
-  KeyMap[GDK_F8] = KeyMap['o'];
+  KeyMap[GDK_KEY_F8] = KeyMap['o'];
 
   KeyMap['r'] = new RunEvent();
   KeyMap['R'] = KeyMap['r'];
-  KeyMap[GDK_F9] = KeyMap['r'];
+  KeyMap[GDK_KEY_F9] = KeyMap['r'];
 
-  KeyMap[GDK_Escape] = new StopEvent();
+  KeyMap[GDK_KEY_Escape] = new StopEvent();
 
   KeyMap['f'] = new FinishEvent();
   KeyMap['F'] = KeyMap['f'];
@@ -204,8 +204,6 @@ void SourceBrowser_Window::Create(void)
 }
 
 void SourceBrowser_Window::SetTitle() {
-  char buffer[256];
-
   if (gp->cpu == NULL || pma == NULL) {
       return;
   }
@@ -218,16 +216,18 @@ void SourceBrowser_Window::SetTitle() {
     sLastPmaName == pma->name()) {
       return;
   }
+
   last_simulation_mode = gp->cpu->simulation_mode;
   const char * sStatus;
   if (gp->cpu->simulation_mode == eSM_RUNNING)
     sStatus = "Run";
   else // if (gp->cpu->simulation_mode == eSM_STOPPED)
     sStatus = "Stopped";
-  sprintf(buffer,"Source Browser: [%s] %s", sStatus, pma != NULL ?
-    pma->name().c_str() : "" );
+  char *buffer = g_strdup_printf(buffer,
+    "Source Browser: [%s] %s", sStatus, pma->name().c_str());
   sLastPmaName = pma->name();
   gtk_window_set_title (GTK_WINDOW (window), buffer);
+  g_free(buffer);
 }
 
 void SourceBrowser_Window::NewProcessor(GUI_Processor *gp)

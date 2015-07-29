@@ -1,3 +1,10 @@
+2015-07-26 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_src.cc gui/gui_src.h gui/gui_src_asm.cc
+	: Feature 41
+	  In the source browser the find dialog now has a keyboard shortcut
+	  with improvments to the dialog. Improved keyboard keypress detection
+	  as keyboard modifiers not correctly detected.
+
 2015-07-27 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac makefile.mingw extras/Makefile.am extras/i2c2par
 	  extras/i2c2par/Makefile extras/i2c2par/Makefile.am 
