@@ -40,7 +40,7 @@ License along with this library; if not, see
 
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("0x%06X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+#define Dprintf(arg) {printf("0x%06"PRINTF_GINT64_MODIFIER"X %s() ",cycles.get(),__FUNCTION__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
@@ -1195,7 +1195,7 @@ Stack::Stack(Processor *pCpu) : cpu(pCpu)
 {
 
   stack_warnings_flag = 0;   // Do not display over/under flow stack warnings
-  break_on_overflow = 0;     // Do not break if the stack over flows
+  break_on_overflow = true;     // Do not break if the stack over flows
   break_on_underflow = 0;    // Do not break if the stack under flows
   stack_mask = 7;            // Assume a 14 bit core.
   pointer = 0;
@@ -1215,28 +1215,29 @@ Stack::Stack(Processor *pCpu) : cpu(pCpu)
 
 bool Stack::push(unsigned int address)
 {
-  Dprintf(("pointer=%d address0x%x\n",pointer,address));
+  Dprintf(("pointer=%d address 0x%x\n",pointer,address));
   // Write the address at the current point location. Note that the '& stack_mask'
   // implicitly handles the stack wrap around.
 
   
-  contents[pointer & stack_mask] = address;
-
   // If the stack pointer is too big, then the stack has definitely over flowed.
   // However, some pic programs take advantage of this 'feature', so provide a means
   // for them to ignore the warnings.
 
-  if(pointer++ >= (int)stack_mask) {
+  if(pointer > (int)stack_mask) {
 	stack_overflow();
 	return false;
   }
+  contents[pointer++ & stack_mask] = address;
+
   return true;
 
 }
 bool Stack::stack_overflow()
 {
+    Dprintf(("stack_warnings_flag=%d break_on_overflow=%d\n", stack_warnings_flag,break_on_overflow));
     if(stack_warnings_flag || break_on_overflow)
-      cout << "stack overflow ";
+      cout << "stack overflow \n";
     if(break_on_overflow)
       bp.halt();
     return true;
@@ -1257,7 +1258,7 @@ unsigned int Stack::pop()
   }
 
 
-  Dprintf(("pointer=%d address0x%x\n",pointer,contents[pointer & stack_mask]));
+  Dprintf(("pointer=%d address 0x%x\n",pointer,contents[pointer & stack_mask]));
 
   return(contents[pointer & stack_mask]);
 }
@@ -1363,7 +1364,7 @@ void Stack14E::reset(RESET_TYPE r)
     else
 	contents[pointer-1] = contents[stack_mask];
   
-    Dprintf((" pointer %x\n", pointer));
+    Dprintf((" pointer 0x%x\n", pointer));
     stkptr.put(pointer-1);
 }
 
@@ -1857,7 +1858,7 @@ CPS_stimulus::CPS_stimulus(CPSCON0 * arg, const char *cPname,double _Vth, double
 void   CPS_stimulus::set_nodeVoltage(double v)
 {
 	Dprintf(("set_nodeVoltage =%.1f\n", v));
- 	nodeVoltage = v;;
+ 	nodeVoltage = v;
 	m_cpscon0->calculate_freq();
 }
 	
