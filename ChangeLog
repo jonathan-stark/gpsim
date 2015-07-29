@@ -1,3 +1,9 @@
+2015-07-29 Roy Rankin <rrankin@ihug.com.au>
+	* extras/i2c2par/Makefile extras/i2c2par/examples/Makefile
+	: remove from svn control
+	* src/14bit-registers.cc
+	: bug 201 - Nested CALL causes loop in p10f202
+
 2015-07-26 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_src.cc gui/gui_src.h gui/gui_src_asm.cc
 	: Feature 41
