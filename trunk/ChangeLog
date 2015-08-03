@@ -1,4 +1,8 @@
 2015-08-03 Roy Rankin <rrankin@ihug.com.au>
+	* modules/ttl.cc modules/ttl.h
+	: bug 204 - tt595 Qs output lags by one SCK clock
+
+2015-08-03 Roy Rankin <rrankin@ihug.com.au>
 	* src/gpsim_time.cc src/gpsim_time.h
 	: bug 202 - too many breaks
 
