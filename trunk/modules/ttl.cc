@@ -36,6 +36,14 @@ License along with this library; if not, see
 
 #include <string>
 
+#define DEBUG
+#if defined(DEBUG)
+#include "../config.h"
+#define Dprintf(arg) {printf("%s:%d %s ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 namespace TTL
 {
 
@@ -313,6 +321,7 @@ TTL595::TTL595(const char *_name)
 void TTL595::setClock(bool bNewClock)
 {
   // Clock shifts the shift register on rising edge, if MR pin is high
+  Dprintf(("bNewClock %d m_bClock %d reset %d Ds %d\n", bNewClock, m_bClock, m_reset->getDrivenState(), m_Ds->getDrivenState()));
   if (bNewClock && !m_bClock && m_reset->getDrivenState())
   {
     // Move the shift register left and out.
@@ -339,6 +348,8 @@ void TTL595::setReset(bool bNewReset)
 
 void TTL595::setStrobe(bool bNewStrobe)
 {
+
+  Dprintf(("bNewStrobe %d m_bStrobe %d\n", bNewStrobe, m_bStrobe));
   // Strobe copies the contents of the shift register into the outputs
   if (bNewStrobe && !m_bStrobe) {
     update_state();
@@ -350,6 +361,7 @@ void TTL595::update_state()
 {
   for (int i=0, ss=sreg; i<8; i++,ss>>=1)
     m_Q[i]->putState((bool) (ss&1));
+  Dprintf(("sreg=0x%x\n", sreg));
 }
 
 void TTL595::create_iopin_map()

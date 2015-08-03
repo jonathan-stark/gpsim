@@ -213,7 +213,7 @@ void TriggerObject::callback()
 
 void TriggerObject::callback_print()
 {
-  cout << " has callback, ID =  " << CallBackID << '\n';
+  cout << " has callback, ID =  0x" << CallBackID << '\n';
 }
 
 void  TriggerObject::clear_trigger()

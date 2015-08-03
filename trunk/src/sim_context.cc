@@ -137,11 +137,13 @@ Processor * CSimulationContext::SetProcessorByType(const char * processor_type,
   cout << __FUNCTION__ << " FIXME \n";
   // GetSymbolTable().Reinitialize();
 
+  printf("RRR CSimulationContext::SetProcessorByType type=%s name %s \n", processor_type, processor_new_name);
   if(processor_list.end() == it) {
     p = add_processor(processor_type,processor_new_name);
   }
   else {
     p = it->second;
+    printf("\tRRR it->second %p\n", p);
     delete p;
     p = add_processor(processor_type,processor_new_name);
 //    p->init
@@ -208,6 +210,8 @@ int CSimulationContext::LoadProgram(const char *filename,
 				    const char *pProcessorName)
 {
   bool bReturn = false;
+
+  printf("RRR CSimulationContext::LoadProgram file %s proc %s ppProc %p pProcessorName %s\n", filename, pProcessorType, ppProcessor, pProcessorName);
   Processor *pProcessor;
   FILE * pFile = fopen_path (filename, "rb");
   if(pFile == NULL) {

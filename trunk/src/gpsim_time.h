@@ -80,6 +80,7 @@ public:
   Cycle_Counter_breakpoint_list *getPrev();
   void clear();
   void invoke();
+  Cycle_Counter_breakpoint_list();
   
 };
 
@@ -87,7 +88,7 @@ class Cycle_Counter
 {
 public:
 
-#define BREAK_ARRAY_SIZE  32
+#define BREAK_ARRAY_SIZE  4
 #define BREAK_ARRAY_MASK  (BREAK_ARRAY_SIZE -1)
   // Largest cycle counter value
 
@@ -103,6 +104,7 @@ public:
   bool bSynchronous; // a flag that's true when the time per counter tick is constant
 
   Cycle_Counter();
+  ~Cycle_Counter();
   void preset(guint64 new_value);     // not used currently.
 
   /*
