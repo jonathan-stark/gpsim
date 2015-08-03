@@ -1,3 +1,7 @@
+2015-08-03 Roy Rankin <rrankin@ihug.com.au>
+	* src/gpsim_time.cc src/gpsim_time.h
+	: bug 202 - too many breaks
+
 2015-07-29 Roy Rankin <rrankin@ihug.com.au>
 	* extras/i2c2par/Makefile extras/i2c2par/examples/Makefile
 	: remove from svn control

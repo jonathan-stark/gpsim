@@ -95,6 +95,13 @@ StopWatch *stop_watch;
 */
 
 
+Cycle_Counter_breakpoint_list::Cycle_Counter_breakpoint_list()
+{
+  next = 0;
+  prev = 0 ;
+  f = 0;
+  bActive = false;
+}
 Cycle_Counter_breakpoint_list *Cycle_Counter_breakpoint_list::getNext()
 {
   return next;
@@ -182,6 +189,13 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
       cout << " does not have callback\n";
 #endif
 
+    l2 = &inactive;
+    if (l2->next == 0)
+    {
+	l2->next = new Cycle_Counter_breakpoint_list;
+	l2->next->prev = l2;
+    }
+
 
     if(inactive.next == 0) {
 
@@ -198,7 +212,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
 
       // place the break point into the sorted break list
 
-      bool break_set = 0;
+      bool break_set = false;
 
       while( (l1->next) && !break_set) {
 
@@ -206,7 +220,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
 	// one we wish to set, then we found the insertion point.
 	// Otherwise 
 	if(l1->next->break_value >= future_cycle)
-	  break_set = 1;
+	  break_set = true;
 	else
 	  l1 = l1->next;
 
@@ -298,11 +312,9 @@ void Cycle_Counter::clear_break(TriggerObject *f)
   // Now move the break to the inactive list.
 
   l1 = inactive.next;
-  if(!l1) 
-    return;
+  inactive.next = l2;
 
   l2->next = l1;
-  inactive.next = l2;
 
   break_on_this =  active.next ? active.next->break_value : 0;
 
@@ -755,6 +767,31 @@ void Cycle_Counter::dump_breakpoints(void)
 }
 
 
+Cycle_Counter::~Cycle_Counter(void)
+{
+  Cycle_Counter_breakpoint_list  *l1, *l2;
+  int cactive, cinactive;
+  cactive = cinactive = 0;
+
+  l1 = (&active)->next;
+  while(l1)
+  {
+	cactive++;
+	l2 = l1->next;
+	l1->next = 0;
+	delete l1;
+	l1 = l2;
+  }
+  l1 = (&inactive)->next;
+  while(l1)
+  {
+	cinactive++;
+	l2 = l1->next;
+	l1->next = 0;
+	delete l1;
+	l1 = l2;
+  }
+} 
 Cycle_Counter::Cycle_Counter(void)
 {
   value         = 0;
@@ -768,16 +805,6 @@ Cycle_Counter::Cycle_Counter(void)
   inactive.next = 0;
   inactive.prev = 0;
 
-  Cycle_Counter_breakpoint_list  *l1 = &inactive;
-
-  for(int i=0; i<BREAK_ARRAY_SIZE; i++)
-    {
-      l1->next = new Cycle_Counter_breakpoint_list;
-      l1->next->prev = l1;
-
-      l1 = l1->next;
-    }
-  l1->next = 0;
 
 }
 

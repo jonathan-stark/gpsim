@@ -122,8 +122,15 @@ unsigned short get_short_int( char * buff)
 
 void PicCodProgramFileType::read_block(char * block, int block_number)
 {
-  fseek(codefile, block_number * COD_BLOCK_SIZE, SEEK_SET);
+  if (fseek(codefile, block_number * COD_BLOCK_SIZE, SEEK_SET))
+  {
+      fprintf(stderr, "PicCodProgramFileType::read_block fseek error byte %ld\n",
+	(size_t) block_number * COD_BLOCK_SIZE);
+	return;
+  } 
   size_t n = fread(block, 1, COD_BLOCK_SIZE, codefile);
+  if (n == 0 && feof(codefile))
+       return;
   assert(COD_BLOCK_SIZE == n);
 }
 

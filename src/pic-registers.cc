@@ -99,7 +99,7 @@ void Program_Counter::increment()
   if (value == memory_size) // Some processors start at highest memory and roll over
   {
 	
-        printf("%s PC=0x%x >= memory size 0x%x\n", __FUNCTION__, value, memory_size);
+        printf("%s PC=0x%x == memory size 0x%x\n", __FUNCTION__, value, memory_size);
 	value = 0;
   }
   else if (value > memory_size) // assume this is a mistake
