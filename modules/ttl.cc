@@ -36,7 +36,7 @@ License along with this library; if not, see
 
 #include <string>
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #include "../config.h"
 #define Dprintf(arg) {printf("%s:%d %s ",__FILE__,__LINE__,__FUNCTION__); printf arg; }

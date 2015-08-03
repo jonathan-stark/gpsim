@@ -38,7 +38,7 @@ License along with this library; if not, see
 #include "xref.h"
 #define PCLATH_MASK              0x1f
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("0x%06"PRINTF_GINT64_MODIFIER"X %s() ",cycles.get(),__FUNCTION__); printf arg; }
 #else
