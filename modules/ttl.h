@@ -22,6 +22,7 @@ License along with this library; if not, see
 #define __ttl_H__
 
 #include "../src/modules.h"
+#include "../src/trigger.h"
 
 class IOPIN;
 class IO_bi_directional;
@@ -78,7 +79,7 @@ namespace TTL {
     IO_bi_directional **m_Q;
   };
 
-  class TTL595 : public TTLbase
+  class TTL595 : public TTLbase, public TriggerObject
   {
   public:
 
@@ -91,6 +92,8 @@ namespace TTL {
     virtual void setEnable(bool);
     virtual void setReset(bool);
     virtual void update_state();
+    virtual void callback();
+    virtual void callback_print();
   protected:
     bool    m_bStrobe;
     Clock  *m_clock;

@@ -33,6 +33,7 @@ License along with this library; if not, see
 #include "ttl.h"
 #include "../src/stimuli.h"
 #include "../src/packages.h"
+#include "../src/gpsim_time.h"
 
 #include <string>
 
@@ -325,10 +326,11 @@ void TTL595::setClock(bool bNewClock)
   if (bNewClock && !m_bClock && m_reset->getDrivenState())
   {
     // Move the shift register left and out.
-    m_Qs->putState ( (sreg & 0x80)!=0 );
     sreg <<= 1;
     if ( m_Ds->getDrivenState() )
       sreg |= 0x01;
+    Dprintf(("%s sreg=%x now=0x%lx bNewClock %d m_bClock %d\n", name().c_str(), sreg, get_cycles().get(), bNewClock,m_bClock));
+    get_cycles().set_break(get_cycles().get() + 1, this);
   }
   m_bClock = bNewClock;
 }
@@ -364,6 +366,15 @@ void TTL595::update_state()
   Dprintf(("sreg=0x%x\n", sreg));
 }
 
+void TTL595::callback_print()
+{
+    cout << "TTL595 " << name() << " CallBack ID 0x" << hex << CallBackID << '\n';
+}
+void TTL595::callback()
+{
+    Dprintf(("%s %s now=0x%lx\n", __FUNCTION__, name().c_str(), get_cycles().get()));
+    m_Qs->putState ( (sreg & 0x80)!=0 );
+}
 void TTL595::create_iopin_map()
 {
   package = new Package(16);
