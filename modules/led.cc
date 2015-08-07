@@ -67,6 +67,7 @@ License along with this library; if not, see
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <string>
 #include <typeinfo>
 
 #include "../config.h"    // get the definition for HAVE_GUI
@@ -78,7 +79,6 @@ License along with this library; if not, see
 #include "../src/stimuli.h"
 #include "../src/value.h"
 #include "../src/gpsim_interface.h"
-#include "../src/gpsim_time.h"
 
 #include "led.h"
 #include "../src/packages.h"
@@ -95,25 +95,23 @@ namespace Leds {
   {
   private:
     Led_base *led;
-    int lastport;
 
   public:
 
-    virtual void SimulationHasStopped (gpointer object)
+    virtual void SimulationHasStopped(gpointer object)
     {
-      GuiUpdate(object);
+      Update(object);
     }
-    virtual void GuiUpdate  (gpointer object)
+    virtual void Update(gpointer object)
     {
       if(led)
         led->update();
     }
 
 
-    LED_Interface(Led_base *_led) : Interface((gpointer *) _led)
+    LED_Interface(Led_base *_led)
+    : Interface((gpointer *) _led), led(_led)
     {
-      led = _led;
-      lastport = -1;
     }
 
   };
@@ -122,7 +120,7 @@ namespace Leds {
   class Led_Input : public IOPIN
   {
   public:
-    Led_Input(const char *n, Led_base *pParent);
+    Led_Input(const std::string &n, Led_base *pParent);
 
     virtual void setDrivenState(bool);
 
@@ -133,8 +131,8 @@ namespace Leds {
 
   //------------------------------------------------------------------------
   //
-  Led_Input::Led_Input(const char *n, Led_base *pParent)
-    : IOPIN(n), m_pParent(pParent)
+  Led_Input::Led_Input(const std::string &n, Led_base *pParent)
+    : IOPIN(n.c_str()), m_pParent(pParent)
   {
   }
 
@@ -144,27 +142,11 @@ namespace Leds {
   }
 
   //------------------------------------------------------------------------
-  void Led_7Segments::update()
-  {
-    update(darea, w_width,w_height);
-  }
-
-  void Led_7Segments::callback()
-  {
-
-    get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
-    update();
-
-  }
-
-void Led_7Segments::update(GtkWidget *widget, guint new_width, guint new_height)
+void Led_7Segments::update()
 {
-  if(!get_interface().bUsingGUI())
-    return;
-
-  gtk_widget_queue_draw(widget);
+  if(get_interface().bUsingGUI())
+    gtk_widget_queue_draw(darea);
 }
-
 
 gboolean Led_7Segments::led7_expose_event(GtkWidget *widget, GdkEvent *event,
   gpointer user_data)
@@ -188,7 +170,7 @@ gboolean Led_7Segments::led7_expose_event(GtkWidget *widget, GdkEvent *event,
   cairo_rectangle(cr, 0.0, 0.0, max_width, max_height);
   cairo_fill(cr);
 
-  for (size_t i = 0; i < 7; ++i) {
+  for (int i = 0; i < 7; ++i) {
     // common cathode, cathode must be low to turn
     //digits on.
     if ((segment_states & 1) == 0 && segment_states & (2 << i)) {
@@ -199,7 +181,7 @@ gboolean Led_7Segments::led7_expose_event(GtkWidget *widget, GdkEvent *event,
 
     XfPoint *pts = &(led->seg_pts[i][0]);
     cairo_move_to(cr, pts[0].x, pts[0].y);
-    for (size_t j = 1; j < MAX_PTS; ++j) {
+    for (int j = 1; j < MAX_PTS; ++j) {
       cairo_line_to(cr, pts[j].x, pts[j].y);
     }
     cairo_line_to(cr, pts[0].x, pts[0].y);
@@ -210,21 +192,6 @@ gboolean Led_7Segments::led7_expose_event(GtkWidget *widget, GdkEvent *event,
 
   return TRUE;
 }
-
-  static gint
-  cursor_event (GtkWidget          *widget,
-                GdkEvent           *event,
-                gpointer  *user_data)
-  {
-    if ((event->type == GDK_BUTTON_PRESS) &&
-        ((event->button.button == 1) ||
-         (event->button.button == 3)))
-      {
-        return TRUE;
-      }
-
-    return FALSE;
-  }
 
   //-------------------------------------------------------------------
   // build_segments
@@ -299,13 +266,7 @@ void Led_7Segments::build_segments( int w, int h)
 
     xfactor = w - 2 * spacer - h / slope - segxw;
 
-    /*
-      cout << "temp_xpts[2] " << temp_xpts[2] << '\n';
-      cout << "dx3 " << dx3 << '\n';
-      cout << "fslope " << fslope << '\n';
-    */
-
-    /* calculate the digit positions */
+    // calculate the digit positions
 
     pts = seg_pts[TOP];
     pts[0].y = pts[1].y = 0;
@@ -404,8 +365,7 @@ void Led_7Segments::build_window()
   gtk_widget_set_size_request(darea, 100, 110);
 
   g_signal_connect(darea, "expose_event", G_CALLBACK(led7_expose_event), this);
-  gtk_widget_set_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
-  g_signal_connect(darea, "button_press_event", G_CALLBACK(cursor_event), NULL);
+  gtk_widget_set_events(darea, GDK_EXPOSURE_MASK);
 
   gtk_widget_show(darea);
 
@@ -424,12 +384,13 @@ void Led_7Segments::build_window()
 
     led_interface = new LED_Interface(this);
     get_interface().add_interface(led_interface);
-    callback();
+
     create_iopin_map();
   }
 
 Led_7Segments::~Led_7Segments()
 {
+  gtk_widget_destroy(darea);
 }
 
   //--------------------------------------------------------------
@@ -461,16 +422,14 @@ Led_7Segments::~Led_7Segments()
     //   the bit positions as LED.seg0, LED.seg1, ..., where LED is the
     //   user-assigned name of the 7-segment LED
 
-    m_pins[0] = new Led_Input( (name() + ".cc").c_str(), this);
+    m_pins[0] = new Led_Input(name() + ".cc", this);
     int i;
     char ch;
-    for (ch='0',i = 1; i<8; i++,ch++)
-      m_pins[i] = new Led_Input((name() + ".seg"+ch).c_str(), this);
+    for (ch = '0', i = 1; i < 8; i++, ch++)
+      m_pins[i] = new Led_Input(name() + ".seg" + ch, this);
 
     for (i=0; i<8; i++)
       assign_pin(i+1,m_pins[i]);
-
-    //initializeAttributes();
 
   }
 
@@ -492,11 +451,7 @@ unsigned int Led_7Segments::getPinState()
 
   Module * Led_7Segments::construct(const char *_new_name=0)
   {
-
-    Led_7Segments *l7sP = new Led_7Segments(_new_name) ;
-
-    return l7sP;
-
+    return new Led_7Segments(_new_name);
   }
 
 
@@ -577,34 +532,26 @@ void ColorAttribute::get(char *return_str, int len)
 
 bool ColorAttribute::Parse(const char *pValue, Colors &bValue)
 {
+  std::string s(pValue);
 
+  if (s == "red") {
+    bValue = RED;
+    return true;
+  } else if (s == "orange") {
+    bValue = ORANGE;
+    return true;
+  } else if (s == "green") {
+    bValue = GREEN;
+    return true;
+  } else if (s == "yellow") {
+    bValue = YELLOW;
+    return true;
+  } else if (s == "blue") {
+    bValue = BLUE;
+    return true;
+  }
 
-    if(strncmp("red", pValue, sizeof("red")) == 0)
-    {
-        bValue = RED;
-        return true;
-    }
-    else if (strncmp("orange", pValue, sizeof("orange")) == 0)
-    {
-        bValue = ORANGE;
-        return true;
-    }
-    else if (strncmp("green", pValue, sizeof("green")) == 0)
-    {
-        bValue = GREEN;
-        return true;
-    }
-    else if (strncmp("yellow", pValue, sizeof("yellow")) == 0)
-    {
-        bValue = YELLOW;
-        return true;
-    }
-    else if (strncmp("blue", pValue, sizeof("blue")) == 0)
-    {
-        bValue = BLUE;
-        return true;
-    }
-    return false;
+  return false;
 }
 
 
@@ -691,25 +638,10 @@ bool ActiveStateAttribute::Parse(const char *pValue, ActiveStates &bValue)
   //-------------------------------------------------------------
   // Led (simple)
   //-------------------------------------------------------------
-  void Led::update()
-  {
-    update(darea, w_width,w_height);
-  }
-
-  void Led::callback()
-  {
-
-    get_cycles().set_break_delta( get_interface().get_update_rate()+1, this);
-    update();
-
-  }
-
-void Led::update(GtkWidget *widget, guint new_width, guint new_height)
+void Led::update()
 {
-  if (!get_interface().bUsingGUI())
-    return;
-
-  gtk_widget_queue_draw(widget);
+  if (get_interface().bUsingGUI())
+    gtk_widget_queue_draw(darea);
 }
 
 void Led::set_on_color(Colors color)
@@ -753,8 +685,6 @@ gboolean Led::led_expose_event(GtkWidget *widget, GdkEvent *event,
   guint max_width = allocation.width;
   guint max_height = allocation.height;
 
-  led->update(widget,max_width,max_height);
-
   GdkWindow *gdk_win = gtk_widget_get_window(widget);
   cairo_t *cr = gdk_cairo_create(gdk_win);
 
@@ -792,7 +722,7 @@ void Led::build_window()
                       "expose_event",
                       G_CALLBACK(led_expose_event),
                       this);
-  gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+  gtk_widget_set_events (darea, GDK_EXPOSURE_MASK);
   gtk_widget_show (darea);
 
   set_widget(darea);
@@ -830,12 +760,14 @@ Led::Led(const char *name)
   addSymbol(m_activestateAttribute);
   led_interface = new LED_Interface(this);
   get_interface().add_interface(led_interface);
-  callback();
 }
 
 Led::~Led()
 {
+  delete m_activestateAttribute;
+  delete led_interface;
   delete m_colorAttribute;
+  gtk_widget_destroy(darea);
 }
 
   //--------------------------------------------------------------
@@ -855,9 +787,9 @@ Led::~Led()
 
     // Define the LED Cathode. (The anode is implicitly tied to VCC)
 
-    m_pin = new Led_Input((name() + ".in").c_str(), this);
+    m_pin = new Led_Input(name() + ".in", this);
     assign_pin(1, m_pin);
-    //initializeAttributes();
+
   }
 
   //--------------------------------------------------------------
@@ -865,11 +797,7 @@ Led::~Led()
 
   Module * Led::construct(const char *_new_name=0)
   {
-
-    Led *ledP = new Led(_new_name);
-
-    return ledP;
-
+    return new Led(_new_name);
   }
 
 }
