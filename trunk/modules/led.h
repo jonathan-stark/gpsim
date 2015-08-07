@@ -28,7 +28,6 @@ License along with this library; if not, see
 #include <gtk/gtk.h>
 
 #include "../src/modules.h"
-#include "../src/trigger.h"
 
 namespace Leds {
 
@@ -53,18 +52,14 @@ namespace Leds {
   //------------------------------------------------------------------------
   // LED base class
 
-  class Led_base //: public Module
+  class Led_base
   {
   public:
-    virtual ~Led_base()
-    {
-    }
+    virtual ~Led_base() {}
 
     virtual void build_window() = 0;
     virtual void update() = 0;
-    virtual void update( GtkWidget *drawable,   
-                         guint max_width,
-                         guint max_height) = 0;
+
     LED_Interface *led_interface;
   };
 
@@ -95,7 +90,7 @@ namespace Leds {
 
   typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
 
-  class Led_7Segments : public Module, public Led_base, public TriggerObject
+  class Led_7Segments : public Module, public Led_base
   {
   public:
     guint w_width;
@@ -108,15 +103,10 @@ namespace Leds {
     Led_7Segments(const char *);
     ~Led_7Segments();  
 
-
     void build_segments( int w, int h);
 
-    virtual void callback();
     virtual void build_window();
     virtual void update();
-    virtual void update( GtkWidget *drawable,   
-                         guint max_width,
-                         guint max_height);
     unsigned int getPinState();
 
     // Inheritances from the Package class
@@ -142,7 +132,7 @@ namespace Leds {
 
   class ActiveStateAttribute;
 
-  class Led: public Module, public Led_base, public TriggerObject
+  class Led: public Module, public Led_base
   {
   public:
 
@@ -152,17 +142,11 @@ namespace Leds {
     GdkColor led_segment_off_color;
     int w_width, w_height;
 
-    gpointer cbp;  // cycle break point pointer (need to delete in destructor)
-
     Led(const char *);
     ~Led();
 
-    virtual void callback();
     virtual void build_window();
     virtual void update();
-    virtual void update( GtkWidget *drawable,   
-                         guint max_width,
-                         guint max_height);
 
     // Inheritances from the Package class
     virtual void create_iopin_map();
@@ -174,7 +158,6 @@ namespace Leds {
     void set_on_color(Colors color);
     ActiveStates get_the_activestate() { return the_activestate; }
     void set_the_activestate(ActiveStates activestate);
-    
 
   private:
     static gboolean led_expose_event(GtkWidget *widget, GdkEvent *event,

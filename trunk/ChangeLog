@@ -1,3 +1,7 @@
+2015-08-07 Errol van de l'Isle <evandel@cix.co.uk>
+	* modules/led.cc modules/led.h
+	: bug 203 - led module looping
+
 2015-08-03 Roy Rankin <rrankin@ihug.com.au>
 	* modules/ttl.cc modules/ttl.h
 	: bug 204 - tt595 Qs output lags by one SCK clock
