@@ -1017,6 +1017,7 @@ public:
     void	setState(char);
     void	Qoutput();
     void	NQoutput();
+    void	releasePin(int);
 
 protected:
 
@@ -1037,6 +1038,8 @@ protected:
     SRinSink	*m_SRinSink;
     PeripheralSignalSource *m_SRQsource;
     PeripheralSignalSource *m_SRNQsource;
+    bool                    m_SRQsource_active;
+    bool                    m_SRNQsource_active;
 };
 
 #endif

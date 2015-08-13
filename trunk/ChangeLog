@@ -1,3 +1,11 @@
+2015-08-13 Roy Rankin <rrankin@ihug.com.au>
+	* modules/ttl.cc src/14bit-registers.cc src/14bit-registers.h 
+	  src/14bit-tmrs.cc src/16bit-registers.cc src/16bit-tmrs.h 
+	  src/comparator.cc src/comparator.h src/ctmu.h src/i2c-ee.cc 
+	  src/ioports.cc src/p12x.cc src/p18x.cc src/pic-processor.cc 
+	  src/pic-processor.h src/ssp.cc src/uart.cc
+	: Fix memory error reported by Valgrind
+
 2015-08-07 Errol van de l'Isle <evandel@cix.co.uk>
 	* modules/led.cc modules/led.h
 	: bug 203 - led module looping

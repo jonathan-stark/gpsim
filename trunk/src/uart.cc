@@ -56,7 +56,7 @@ public:
   }
   virtual void release()
   {
-    delete this;
+    m_txsta->releasePin();
   }
 private:
   _TXSTA *m_txsta;
@@ -73,7 +73,6 @@ public:
   virtual void release() 
   { 
 	m_txsta->releasePin();
-	delete this; 
   }
 private:
   _TXSTA *m_txsta;
@@ -273,13 +272,9 @@ void _TXSTA::releasePin()
 
     if (m_PinModule && SourceActive)
     {
-	m_PinModule->setSource(0);
 	m_PinModule->setControl(0);
 	SourceActive = false;
     }
-    m_PinModule = 0;
-    m_control = 0;
-    m_source = 0;
 }
 //-----------------------------------------------------------
 // TXSTA - putTXState - update the state of the TX output pin

@@ -59,7 +59,6 @@ enum
 
   virtual unsigned int get_prescale()
   {
-     printf("RRR T5CON::get_prescale %d\n", (value.get() &(TxCKPS0 | TxCKPS1)) >> 4);
       return(((value.get() &(TxCKPS0 | TxCKPS1)) >> 4) );
   }
 

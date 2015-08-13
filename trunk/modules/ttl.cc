@@ -286,7 +286,7 @@ Module *TTL595::construct(const char *_new_name)
 
 
 TTL595::TTL595(const char *_name)
-  : TTLbase(_name, "TTL595 - Octal Shift Register"), sreg(0)
+  : TTLbase(_name, "TTL595 - Octal Shift Register"),  m_bStrobe(false), sreg(0)
 {
 
   m_Q = new IO_bi_directional *[8];

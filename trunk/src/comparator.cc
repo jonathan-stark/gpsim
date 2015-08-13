@@ -107,6 +107,27 @@ private:
 //--------------------------------------------------
 //
 //--------------------------------------------------
+class CMxSignalSource : public PeripheralSignalSource
+{
+public:
+  CMxSignalSource(PinModule *_pin, CMxCON0_base *_cmcon)
+    : PeripheralSignalSource(_pin),  m_cmcon(_cmcon)
+  {
+  }
+  ~CMxSignalSource()
+  {
+//    cout << "deleting CMsignal source " << this << endl;
+  }
+  virtual void release()
+  {
+    m_cmcon->releasePin();
+  }
+private:
+  CMxCON0_base * m_cmcon;
+};
+//--------------------------------------------------
+//
+//--------------------------------------------------
 
 CM_stimulus::CM_stimulus(CMCON * arg, const char *cPname,double _Vth, double _Zth)
   : stimulus(cPname, _Vth, _Zth)
@@ -171,6 +192,7 @@ CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
   cm_output_pin[0]=cm_output_pin[1]=0;
   cm_source[0]=cm_source[1]=0;
   cm_stimulus[0]=cm_stimulus[1]=cm_stimulus[2]=cm_stimulus[3]=0;
+  cm_source_active[0]=cm_source_active[1] = false;
   
 }
 
@@ -187,7 +209,7 @@ CMCON::~CMCON()
 	    
 	    // Our Source active so port still defined if cm_output defined,
 	    // set default source.
-	    if (cfg == i && cm_output[i])
+	    if (cfg == i && cm_output[i] && cm_source_active[i])
 		cm_output[i]->setSource(0);
 	    delete cm_source[i];
 	}
@@ -204,10 +226,7 @@ CMCON::~CMCON()
 
 void CMCON::releasePin(int i)
 {
-    if (cm_output[i]) cm_output[i]->setSource(0);
-    if (cm_source[i]) delete cm_source[i];
-    cm_output[i] = 0;
-    cm_source[i] = 0;
+    cm_source_active[i] = false;
 }
 void CMCON::setINpin(int i, PinModule *newPinModule, const char *an)
 {
@@ -378,8 +397,9 @@ void CMCON::put(unsigned int new_value)
 	  sprintf(name, "c%dout", i+1);
 	  cm_output[i]->getPin().newGUIname(name);
           cm_output[i]->setSource(cm_source[i]);
+	  cm_source_active[i] = true;
       }
-      else if (cm_source[i])
+      else if (cm_source_active[i])
       {
 	    cm_output[i]->getPin().newGUIname(cm_output[i]->getPin().name().c_str());
             cm_output[i]->setSource(0);
@@ -467,14 +487,13 @@ void SRCON::put(unsigned int new_value)
 CMxCON0_base::CMxCON0_base(Processor *pCpu, const char *pName, 
 	const char *pDesc, unsigned int _cm, ComparatorModule2 *cmModule)
   : sfr_register(pCpu, pName, pDesc),
+    cm_output(0),
     m_cm2con1(0), m_srcon(0),
     IntSrc(0),
-    cm(_cm), m_cmModule(cmModule), cm_source(0)
+    cm(_cm), m_cmModule(cmModule), cm_source(0), cm_source_active(false)
 {
   value.put(0);
   cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=cm_input[4]=0;
-  cm_output = 0;
-  cm_source=0;
   cm_stimulus[0]=cm_stimulus[1]=0;
   cm_snode[0]=cm_snode[1]=0;
 }
@@ -483,7 +502,7 @@ CMxCON0_base::~CMxCON0_base()
 {
 
 
-  if (output_active() && cm_output) cm_output->setSource(0);
+  if (cm_source_active && cm_output) cm_output->setSource(0);
   if (cm_source) delete cm_source;
   if ((!cm_snode[0]) && cm_stimulus[0]) delete cm_stimulus[0];
   if ((!cm_snode[1]) && cm_stimulus[1]) delete cm_stimulus[1];
@@ -750,14 +769,15 @@ void CMxCON0::put(unsigned int new_value)
       {
 	  char name[20];
           if ( ! cm_source)
-                cm_source = new PeripheralSignalSource(cm_output);
+                cm_source = new CMxSignalSource(cm_output, this);
 
 	  sprintf(name, "c%dout", cm+1);
 	  assert(cm_output);
 	  cm_output->getPin().newGUIname(name);
           cm_output->setSource(cm_source);
+	  cm_source_active = true;
       }
-      else if (cm_source)	// Enable output enable turned off
+      else if (cm_source_active)	// Enable output enable turned off
       {
 	    cm_output->getPin().newGUIname(cm_output->getPin().name().c_str());
             cm_output->setSource(0);
@@ -842,14 +862,15 @@ void CMxCON0_V2::put(unsigned int new_value)
       {
 	  char name[20];
           if ( ! cm_source)
-                cm_source = new PeripheralSignalSource(cm_output);
+                cm_source = new CMxSignalSource(cm_output, this);
 
 	  sprintf(name, "c%dout", cm+1);
 	  assert(cm_output);
 	  cm_output->getPin().newGUIname(name);
           cm_output->setSource(cm_source);
+	  cm_source_active = true;
       }
-      else if (cm_source)	// Enable output enable turned off
+      else if (cm_source_active)	// Enable output enable turned off
       {
 	    cm_output->getPin().newGUIname(cm_output->getPin().name().c_str());
             cm_output->setSource(0);
@@ -1206,12 +1227,12 @@ CMxCON1_base::CMxCON1_base(Processor *pCpu, const char *pName,
      assert(m_cmModule->cmxcon0[cm]);
      cm_stimulus[NEG] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[cm], "cm_stimulus_-", 0, 1e12);
      cm_stimulus[POS] = new CM_stimulus((CMCON *)m_cmModule->cmxcon0[cm], "cm_stimulus_+", 0, 1e12);
-     stimulus_pin[NEG] = 0;
-     stimulus_pin[POS] = 0;
     for(int i = 0; i<5; i++)
 	cm_inputNeg[i] = 0;
     for(int i = 0; i<2; i++)
     {
+	stimulus_pin[i] = 0;
+	stimulus_pin[i+2] = 0;
 	cm_inputPos[i] = 0;
         cm_output[i] = 0;
     }

@@ -1078,7 +1078,7 @@ public:
   {
     return m_cmcon0->getState();
   }
-  virtual void release() { delete this; }
+  virtual void release() { }
 private:
   CMCON0 *m_cmcon0;
 };

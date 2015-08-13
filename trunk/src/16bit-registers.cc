@@ -1310,9 +1310,6 @@ bool OSCCON_HS::set_rc_frequency()
   double base_frequency = 31.e3;
   bool config_pplx4 = cpu_pic->get_pplx4_osc();
   bool osccon_pplx4 = (osctune)?osctune->value.get() & OSCTUNE::PLLEN:0;
-  //bool mfiosel	    = (osccon2)?osccon2->value.get() & OSCCON2::MFIOSEL:0;
-  //bool intsrc       = (osctune)?osctune->value.get() & OSCTUNE::INTSRC:0;
-
 
   if (!cpu_pic->get_int_osc())
      return false;
@@ -1397,8 +1394,11 @@ bool OSCCON_HS::set_rc_frequency()
 
 HLVD_stimulus::HLVD_stimulus(HLVDCON *_hlvd, const char *cPname):
   stimulus(cPname, 2.5, 1e12), hlvd(_hlvd)
-{}
-HLVD_stimulus::~HLVD_stimulus() {}
+{
+}
+HLVD_stimulus::~HLVD_stimulus() 
+{
+}
 void HLVD_stimulus::set_nodeVoltage(double v)
 {
     nodeVoltage = v;
@@ -1413,6 +1413,13 @@ HLVDCON::~HLVDCON()
 {
     if (IntSrc)
 	delete IntSrc;
+    if (stimulus_active)
+    {
+        hlvdin->getPin().snode->detach_stimulus(hlvdin_stimulus);
+        stimulus_active = false;
+     }
+     if (hlvdin_stimulus)
+	delete hlvdin_stimulus;
 }
 
 void HLVDCON::put(unsigned int new_value)
