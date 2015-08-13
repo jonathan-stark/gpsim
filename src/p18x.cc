@@ -2253,6 +2253,8 @@ P18F26K22::P18F26K22(const char *_name, const char *desc)
   if(verbose)
     cout << "18F26K22 constructor, type = " << isa() << '\n';
 
+  delete pir2;
+  pir2 = (PIR2v2 *)(new PIR2v4(this, "pir2" , "Peripheral Interrupt Register",0,0  ));
   wpub = new WPU(this, "wpub", "Weak Pull-Up Portb Register", m_portb, 0xff);
   iocb = new IOC(this, "iocb", "Interrupt-On-Change Portb Control Register", 0xf0);
   m_porte = new PicPortRegister(this,"porte","",8,0xFF);
@@ -2436,8 +2438,6 @@ void P18F26K22::create()
   if(verbose)
     cout << "P18F26K22::create\n";
 
-  delete pir2;
-  pir2 = (PIR2v2 *)(new PIR2v4(this, "pir2" , "Peripheral Interrupt Register",0,0  ));
   tbl.initialize ( eeprom_memory_size(), 32, 4, CONFIG1L);
   tbl.set_intcon(&intcon);
   set_eeprom_pir(&tbl);

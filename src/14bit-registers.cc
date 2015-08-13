@@ -1949,19 +1949,43 @@ private:
   SR_MODULE *sr_module;
 };
 
+class SRnSource : public PeripheralSignalSource
+{
+
+public:
+
+  SRnSource(PinModule *_pin, SR_MODULE *_sr_module, int _index) :
+	PeripheralSignalSource(_pin), sr_module(_sr_module),
+	index(_index)
+  { ;}
+  virtual void release() { sr_module->releasePin(index); }
+private:
+  SR_MODULE *sr_module;
+  int       index;
+};
+
+enum {
+	SRQ = 0,
+	SRNQ
+};
 SR_MODULE::SR_MODULE(Processor *_cpu) :
     srcon0(_cpu, "srcon0", "SR Latch Control 0 Register", this),
     srcon1(_cpu, "srcon1", "SR Latch Control 1 Register", this),
     cpu(_cpu), future_cycle(0), state_set(false), state_reset(false),
     state_Q(false), srclk(0), syncc1out(false), syncc2out(false),
     SRI_pin(0), SRQ_pin(0), SRNQ_pin(0), m_SRinSink(0),
-    m_SRQsource(0), m_SRNQsource(0)
+    m_SRQsource(0), m_SRNQsource(0), m_SRQsource_active(false),
+    m_SRNQsource_active(false)
 {
 }
 SR_MODULE::~SR_MODULE()
 {
+    if (m_SRQsource_active)
+	SRQ_pin->setSource(0);
     if ( m_SRQsource)
 	delete  m_SRQsource;
+    if (m_SRNQsource_active)
+	SRNQ_pin->setSource(0);
     if ( m_SRNQsource)
 	delete  m_SRNQsource;
 }
@@ -2128,10 +2152,11 @@ void SR_MODULE::Qoutput()
 	(SRCON0::SRLEN | SRCON0::SRQEN))
     {
 	if (!m_SRQsource)
-	    m_SRQsource = new PeripheralSignalSource(SRQ_pin);
+	    m_SRQsource = new SRnSource(SRQ_pin, this, SRQ);
 
 	SRQ_pin->setSource(m_SRQsource);
 	SRQ_pin->getPin().newGUIname("SRQ");
+	m_SRQsource_active = true;
     }
     else
     {
@@ -2150,10 +2175,11 @@ void SR_MODULE::NQoutput()
 	(SRCON0::SRLEN | SRCON0::SRNQEN))
     {
 	if (!m_SRNQsource)
-	    m_SRNQsource = new PeripheralSignalSource(SRNQ_pin);
+	    m_SRNQsource = new SRnSource(SRNQ_pin, this, SRNQ);
 
 	SRNQ_pin->setSource(m_SRNQsource);
 	SRNQ_pin->getPin().newGUIname("SRNQ");
+	m_SRNQsource_active = true;
     }
     else
     {
@@ -2164,3 +2190,18 @@ void SR_MODULE::NQoutput()
 	}
     }
 }
+
+void SR_MODULE::releasePin(int index)
+{
+    switch(index)
+    {
+    case SRQ:
+	m_SRQsource_active = false;
+	break;
+
+    case SRNQ:
+	m_SRNQsource_active = false;
+	break;
+    }
+}
+

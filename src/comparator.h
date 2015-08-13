@@ -37,6 +37,7 @@ License along with this library; if not, see
 #define CFG_SHIFT 3
 
 class CMSignalSource;
+class CMxSignalSource;
 class VRSignalSource;
 class CMCON;
 class TMRL;
@@ -230,6 +231,7 @@ protected:
   char *cm_an[4];
   char *cm_output_pin[2];
   CMSignalSource *cm_source[2];
+  bool	cm_source_active[2];
   unsigned int m_CMval[2];
   PIR_SET *pir_set;
   TMRL *m_tmrl;
@@ -353,6 +355,7 @@ public:
     virtual void set_output(bool output) { ;}
     virtual bool is_on(){return false;}
     virtual bool out_invert(){ return true;}
+    virtual void releasePin(){ cm_source_active = false;}
 
   CMxCON0_base(Processor *pCpu, const char *pName, const char *pDesc,
 	unsigned int _cm, ComparatorModule2 *cmModule);
@@ -373,7 +376,8 @@ public:
   unsigned int      cm;	// comparator number
   CMxCON1	    *m_cmxcon1;
   ComparatorModule2 *m_cmModule;
-  PeripheralSignalSource *cm_source;
+  CMxSignalSource   *cm_source;
+  bool              cm_source_active;
 
 };
 

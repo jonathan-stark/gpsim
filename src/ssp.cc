@@ -2124,8 +2124,6 @@ void SSP_MODULE::stopSSP(unsigned int old_value)
         m_spi->stop_transfer();
         m_sck->setSource(0);
         m_sdo->setSource(0);
-	m_sdo_active = false;
-	m_sck_active = false;
 	m_ss->getPin().newGUIname(m_ss->getPin().name().c_str());
 	m_sdo->getPin().newGUIname(m_sdo->getPin().name().c_str());
 	m_sdi->getPin().newGUIname(m_sdi->getPin().name().c_str());
@@ -2289,32 +2287,19 @@ void SSP_MODULE::changeSSP(unsigned int new_value, unsigned int old_value)
 
 void SSP_MODULE::releaseSDIpin()
 {
-    if (m_sdi)
-    {
-	m_sdi_active = false;
-	delete m_SdiSource;
-	m_SdiSource = 0;
-    }
-    m_sdi = 0;
+    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
+    m_sdi_active = false;
 }
 
 void SSP_MODULE::releaseSDOpin()
 {
-    if (m_sdo)
-    {
-	delete m_SdoSource;
-	m_SdoSource = 0;
-    }
-    m_sdo = 0;
+    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
+    m_sdo_active = false;
 }
 void SSP_MODULE::releaseSCKpin()
 {
-    if (m_sck)
-    {
-	delete m_SckSource;
-	m_SckSource = 0;
-    }
-    m_sck = 0;
+    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
+    m_sck_active = false;
 }
 
 
@@ -2322,12 +2307,11 @@ void SSP_MODULE::releaseSCKpin()
 
 void SSP_MODULE::releaseSCLpin()
 {
+    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
     if (m_sck)
     {
 	m_sck->setSource(0);
 	m_sck_active = false;
-	delete m_SckSource;
-	m_SckSource = 0;
     }
     m_sck = 0;
 }

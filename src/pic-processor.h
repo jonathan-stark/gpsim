@@ -484,6 +484,8 @@ protected:
   PinModule *m_osc_Monitor[4];
   bool internal_osc;	// internal RC oscilator enabled on Config Word
   bool PPLx4;		// 4x PPL enabled on Config Word
+  PeripheralSignalSource *clksource;
+  SignalControl *clkcontrol;
 
 };
 

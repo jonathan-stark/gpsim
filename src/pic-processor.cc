@@ -1101,7 +1101,8 @@ pic_processor::pic_processor(const char *_name, const char *_desc)
     Wreg(0), pcl(0), pclath(0),m_PCHelper(0),
     tmr0(this,"tmr0","Timer 0"),
     m_configMemory(0),
-    m_MCLR(0), m_MCLR_Save(0), m_MCLRMonitor(0)
+    m_MCLR(0), m_MCLR_Save(0), m_MCLRMonitor(0),
+    PPLx4(false), clksource(0), clkcontrol(0)
 {
 
 
@@ -1167,6 +1168,9 @@ pic_processor::~pic_processor()
     m_MCLR_Save->setMonitor(0);
   if (m_MCLRMonitor)
     delete m_MCLRMonitor;
+
+  if (clksource) delete clksource;
+  if (clkcontrol) delete clkcontrol;
 
 }
 //-------------------------------------------------------------------
@@ -1901,7 +1905,7 @@ public:
   IO_SignalControl(char _dir){ direction = _dir; }
   ~IO_SignalControl(){}
   virtual char getState() { return direction; }
-  virtual void release() {delete this;}
+  virtual void release() {}
   void setState(char _dir) { direction = _dir; }
 private:
   char direction;
@@ -1918,8 +1922,6 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
                 PicTrisRegister *m_tris,
                 PicLatchRegister *m_lat)
 {
-  IO_SignalControl *clksource;
-  IO_SignalControl *clkcontrol;
 
   IOPIN *m_pin = package->get_pin(pkg_Pin_Number);
   if (name)
@@ -1938,8 +1940,11 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
 	    if (m_lat)
 		m_lat->setEnableMask(mask);
 	}
-	clksource = new IO_SignalControl('0');
-	clkcontrol = new IO_SignalControl(in ? '1' : '0');
+	if (!clksource)
+	{
+	    clksource = new  PeripheralSignalSource(PinMod);
+	    clkcontrol = new IO_SignalControl(in ? '1' : '0');
+	}
     	PinMod->setSource(clksource);
     	PinMod->setControl(clkcontrol);
  	PinMod->updatePinModule();
@@ -1966,11 +1971,7 @@ void pic_processor::clr_clk_pin(unsigned int pkg_Pin_Number,
 	    if (m_lat)
 		m_lat->setEnableMask(mask);
 	}
-	if (PinMod->getActiveSource())
-	    delete (PinMod->getActiveSource());
     	PinMod->setSource(0);
-	if (PinMod->getActiveControl())
-	    delete (PinMod->getActiveControl());
     	PinMod->setControl(0);
  	PinMod->updatePinModule();
   }

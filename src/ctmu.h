@@ -113,7 +113,6 @@ public:
   virtual double get_Vth() 
   { 
         double max_volt = cpu->get_Vdd() - 0.6;
-	printf("RRR ctmu_stimulus nodevoltage %.2f Vdd %.2f\n", get_nodeVoltage(), cpu->get_Vdd());
         if (get_nodeVoltage() >= max_volt)
 	    return max_volt;
 	return Vth; 

@@ -39,8 +39,12 @@ License along with this library; if not, see
 #else
 #define Dprintf(arg) {}
 #endif
-//#define D2printf(arg) {printf("%s:%d-%s ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+//#define D2
+#ifdef D2
+#define D2printf(arg) {fprintf(stderr, "%s:%d-%s ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
 #define D2printf(arg) {}
+#endif
 
 //--------------------------------------------------
 // 
@@ -130,8 +134,7 @@ public:
   virtual void release()
   {
     if (verbose)
-       cout << "Deleting SignalSource 0x" << hex << this << endl;
-    delete this;
+       cout << "Releasing  SignalSource 0x" << hex << this << endl;
   }
 
   char getState()
@@ -449,7 +452,7 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
 
 PinModule::~PinModule()
 {
-  if (m_pin)
+  if (m_pin && (m_activeSource != m_defaultSource))
     D2printf(("Pin %s sources active %p default %p\n", m_pin->name().c_str(), m_activeSource, m_defaultSource));
   if (m_activeSource && (m_activeSource != m_defaultSource)) {
     //cout << __FUNCTION__ << " deleting active source:"<<m_activeSource<<endl;
@@ -460,6 +463,7 @@ PinModule::~PinModule()
   if (m_defaultSource)
   {
     m_defaultSource->release();
+    delete m_defaultSource;
     m_defaultSource = 0;
   }
 
@@ -576,6 +580,9 @@ void PinModule::setDefaultSource(SignalControl *newDefaultSource)
 }
 void PinModule::setSource(SignalControl *newSource)
 {
+  D2printf(("setSource new %p old %p default %p\n", newSource, m_activeSource, m_defaultSource));
+  if (m_activeSource && newSource != m_activeSource)
+	m_activeSource->release();
   m_activeSource = newSource ? newSource : m_defaultSource;
 }
 

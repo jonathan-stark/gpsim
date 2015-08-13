@@ -151,6 +151,8 @@ i2c_slave::i2c_slave()
     sda = new I2C_SLAVE_SDA(this, "SDL");
 
     bus_state = IDLE;
+    bit_count = 0;
+    xfr_data = 0;
 }
 
 i2c_slave::~i2c_slave() 

@@ -544,16 +544,7 @@ void CCPCON::releaseSink()
 }
 void CCPCON::releasePins(int i)
 {
-    if (m_PinModule[i])
-    {
-	if (m_source[i])
-	{
-	    delete m_source[i];
-	    m_source[i] = 0;
-	}
-
-	m_PinModule[i] = 0;
-    }
+    source_active[i] = false;
 }
 
 void CCPCON::pwm_match(int level)
@@ -577,6 +568,7 @@ void CCPCON::pwm_match(int level)
             if(m_PinModule[i])
 	    {
 		 m_PinModule[i]->setControl(0); //restore default pin direction
+		 source_active[i] = false;
         	 m_PinModule[i]->updatePinModule();
 	    }
 	  }
@@ -2308,7 +2300,6 @@ bool TMR2::rm_ccp ( CCPCON * _ccp )
     if ( ccp[cc] == _ccp )
     {
         ccp[cc] = 0;
-	printf("%s rm_ccp %d %s\n", name().c_str(), cc, _ccp->name().c_str());
         return true;
     }
   }
