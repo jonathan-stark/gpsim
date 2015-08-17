@@ -2715,7 +2715,6 @@ void P18F26K22::osc_mode(unsigned int value)
 
 void P18F26K22::update_vdd()
 {
-    cout <<__PRETTY_FUNCTION__ << endl;
     hlvdcon.check_hlvd();
     Processor::update_vdd();
 }

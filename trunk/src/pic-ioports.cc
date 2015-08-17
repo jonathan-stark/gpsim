@@ -271,12 +271,10 @@ PicPortBRegister::~PicPortBRegister()
 
 void PicPortBRegister::put(unsigned int new_value)
 {
-  trace.raw(write_trace.get() | value.data);
+    trace.raw(write_trace.get() | value.data);
 
-  //fprintf(stderr, "PicPortBRegister::put()\n");
 
 //  unsigned int diff = mEnableMask & (new_value ^ value.data);
-//RRR  if(diff) {
     drivingValue = new_value & mEnableMask;
     value.data = drivingValue;
     // If no stimuli are connected to the Port pins, then the driving
@@ -285,14 +283,12 @@ void PicPortBRegister::put(unsigned int new_value)
     // this port, then the call to updatePort() will update 'drivenValue'
     // to its proper value.
     updatePort();
-//RRR  }
-  lastDrivenValue = rvDrivenValue;
+    lastDrivenValue = rvDrivenValue;
 
 }
 
 unsigned int PicPortBRegister::get()
 {
-  //fprintf(stderr, "PicPortBRegister::get()\n");
 
   lastDrivenValue = rvDrivenValue;
   return mOutputMask & rvDrivenValue.data;

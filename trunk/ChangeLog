@@ -1,3 +1,11 @@
+2015-08-17 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac
+	: Change release to 0.29.0
+	* gui/gui_src.cc
+	: Fix compiler warning
+	* src/p18x.cc src/pic-ioports.cc src/ssp.cc
+	: Remove debug output
+
 2015-08-13 Roy Rankin <rrankin@ihug.com.au>
 	* modules/ttl.cc src/14bit-registers.cc src/14bit-registers.h 
 	  src/14bit-tmrs.cc src/16bit-registers.cc src/16bit-tmrs.h 
