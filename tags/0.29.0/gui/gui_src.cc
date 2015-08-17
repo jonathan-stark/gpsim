@@ -1,0 +1,267 @@
+/*
+   Copyright (C) 1998,1999,2000,2001
+   T. Scott Dattalo and Ralf Forsberg
+
+This file is part of gpsim.
+
+gpsim is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+gpsim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with gpsim; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+#include <cstdio>
+#include <typeinfo>
+
+#include "../config.h"
+#ifdef HAVE_GUI
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
+#include <glib.h>
+
+#include "gui.h"
+#include "gui_src.h"
+
+class StepEvent : public KeyEvent
+{
+public:
+  void press(gpointer data)
+  {
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
+    if(sbw && sbw->pma)
+        sbw->pma->step(1);
+  }
+  void release(gpointer data) {}
+};
+
+class StepOverEvent : public KeyEvent
+{
+public:
+  void press(gpointer data)
+  {
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
+    if(sbw && sbw->pma)
+      // Step Over Next instruction, or hll statement
+      sbw->pma->step_over();
+  }
+  void release(gpointer data) {}
+};
+
+class RunEvent : public KeyEvent
+{
+public:
+  void press(gpointer data)
+  {
+    /*
+    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    if(sbw && sbw->pma)
+      sbw->pma->run();
+    */
+    get_interface().start_simulation();
+  }
+  void release(gpointer data) {}
+};
+
+class StopEvent : public KeyEvent
+{
+public:
+  void press(gpointer data)
+  {
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
+    if(sbw && sbw->pma)
+      sbw->pma->stop();
+  }
+  void release(gpointer data) {}
+};
+
+class FinishEvent : public KeyEvent
+{
+public:
+  void press(gpointer data)
+  {
+    SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
+    if(sbw && sbw->pma)
+      sbw->pma->finish();
+  }
+  void release(gpointer data) {}
+};
+
+static map<guint, KeyEvent *> KeyMap;
+
+
+static gint
+key_press(GtkWidget *widget,
+          GdkEventKey *key,
+          gpointer data)
+{
+
+  SourceBrowser_Window *sbw = static_cast<SourceBrowser_Window *>(data);
+
+  if(!sbw) return(FALSE);
+  if(!sbw->gp) return(FALSE);
+  if(!sbw->gp->cpu) return(FALSE);
+
+
+  KeyEvent *pKE = KeyMap[key->keyval];
+  if(pKE)
+    {
+      pKE->press(data);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+static int delete_event(GtkWidget *widget,
+                        GdkEvent  *event,
+                        SourceBrowser_Window *sbw)
+{
+    sbw->ChangeView(VIEW_HIDE);
+    return TRUE;
+}
+
+
+void SourceBrowser_Window::SetPC(int address)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
+
+}
+void SourceBrowser_Window::UpdateLine(int address)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
+
+}
+void SourceBrowser_Window::Update()
+{
+  if(!gp || !gp->cpu)
+    return;
+
+  SetPC(gp->cpu->pma->get_PC());
+}
+
+
+void SourceBrowser_Window::Create()
+{
+  last_simulation_mode = eSM_INITIAL;
+
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_window_move(GTK_WINDOW(window), x, y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
+
+  g_signal_connect (window, "delete_event",
+                      G_CALLBACK(delete_event),
+                      (gpointer) this);
+
+  // FIXME - populate the KeyMap map with source browser functions. This should
+  // FIXME   probably go into some kind of configuration file.
+
+  KeyMap['s'] = new StepEvent();
+  KeyMap['S'] = KeyMap['s'];
+  KeyMap[GDK_KEY_F7] = KeyMap['s'];
+
+  KeyMap['o'] = new StepOverEvent();
+  KeyMap['O'] = KeyMap['o'];
+  KeyMap['n'] = KeyMap['o'];
+  KeyMap[GDK_KEY_F8] = KeyMap['o'];
+
+  KeyMap['r'] = new RunEvent();
+  KeyMap['R'] = KeyMap['r'];
+  KeyMap[GDK_KEY_F9] = KeyMap['r'];
+
+  KeyMap[GDK_KEY_Escape] = new StopEvent();
+
+  KeyMap['f'] = new FinishEvent();
+  KeyMap['F'] = KeyMap['f'];
+
+  /* Add a signal handler for key press events. This will capture
+   * key commands for single stepping, running, etc.
+   */
+  g_signal_connect(window, "key_press_event",
+                     G_CALLBACK(key_press),
+                     (gpointer) this);
+
+
+
+  gtk_container_set_border_width (GTK_CONTAINER (window), 0);
+
+  vbox = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show(vbox);
+  gtk_container_add (GTK_CONTAINER (window), vbox);
+
+}
+
+void SourceBrowser_Window::SetTitle() {
+  char *buffer = 0;
+  if (gp->cpu == NULL || pma == NULL) {
+      return;
+  }
+
+  if (last_simulation_mode != eSM_INITIAL &&
+    ((last_simulation_mode == eSM_RUNNING &&
+    gp->cpu->simulation_mode == eSM_RUNNING) ||
+    (last_simulation_mode != eSM_RUNNING &&
+    gp->cpu->simulation_mode != eSM_RUNNING)) &&
+    sLastPmaName == pma->name()) {
+      return;
+  }
+
+  last_simulation_mode = gp->cpu->simulation_mode;
+  const char * sStatus;
+  if (gp->cpu->simulation_mode == eSM_RUNNING)
+    sStatus = "Run";
+  else // if (gp->cpu->simulation_mode == eSM_STOPPED)
+    sStatus = "Stopped";
+
+  buffer = g_strdup_printf(buffer,
+    "Source Browser: [%s] %s", sStatus, pma->name().c_str());
+  sLastPmaName = pma->name();
+  gtk_window_set_title (GTK_WINDOW (window), buffer);
+  g_free(buffer);
+}
+
+void SourceBrowser_Window::NewProcessor(GUI_Processor *gp)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
+}
+void SourceBrowser_Window::SelectAddress(int address)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
+}
+void SourceBrowser_Window::SelectAddress(Value *addrSym)
+{
+
+  if(typeid(*addrSym) == typeid(LineNumberSymbol) ||
+     typeid(*addrSym) == typeid(AddressSymbol)) {
+
+    int i;
+    addrSym->get(i);
+    SelectAddress(i);
+  }
+
+}
+
+
+gboolean gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go)
+{
+  gtk_window_get_position(GTK_WINDOW(widget), &go->x, &go->y);
+  gtk_window_get_size(GTK_WINDOW(widget), &go->width, &go->height);
+
+  go->set_config();
+
+  return FALSE;
+}
+
+#endif // HAVE_GUI
