@@ -2287,18 +2287,15 @@ void SSP_MODULE::changeSSP(unsigned int new_value, unsigned int old_value)
 
 void SSP_MODULE::releaseSDIpin()
 {
-    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
     m_sdi_active = false;
 }
 
 void SSP_MODULE::releaseSDOpin()
 {
-    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
     m_sdo_active = false;
 }
 void SSP_MODULE::releaseSCKpin()
 {
-    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
     m_sck_active = false;
 }
 
@@ -2307,7 +2304,6 @@ void SSP_MODULE::releaseSCKpin()
 
 void SSP_MODULE::releaseSCLpin()
 {
-    fprintf(stderr, "SSP_MODULE::%s\n", __FUNCTION__);
     if (m_sck)
     {
 	m_sck->setSource(0);

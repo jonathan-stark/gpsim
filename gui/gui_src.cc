@@ -204,6 +204,7 @@ void SourceBrowser_Window::Create()
 }
 
 void SourceBrowser_Window::SetTitle() {
+  char *buffer = 0;
   if (gp->cpu == NULL || pma == NULL) {
       return;
   }
@@ -223,7 +224,8 @@ void SourceBrowser_Window::SetTitle() {
     sStatus = "Run";
   else // if (gp->cpu->simulation_mode == eSM_STOPPED)
     sStatus = "Stopped";
-  char *buffer = g_strdup_printf(buffer,
+
+  buffer = g_strdup_printf(buffer,
     "Source Browser: [%s] %s", sStatus, pma->name().c_str());
   sLastPmaName = pma->name();
   gtk_window_set_title (GTK_WINDOW (window), buffer);
