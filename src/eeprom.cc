@@ -600,7 +600,7 @@ void EEPROM_WIDE::callback()
       	eedata.value.put(rom[eeadr.value.get()]->get());
       else
       {
-        cout << "WIDE_EEPROM read adrress is out of range " << hex << eeadr.value.get() << '\n';
+        cout << "WIDE_EEPROM read address is out of range " << hex << eeadr.value.get() << '\n';
         bp.halt();
       }
     }
@@ -667,7 +667,7 @@ void EEPROM_PIR::callback()
       	eedata.value.put(rom[get_address()]->get());
       else
       {
-        cout << "LONG_EEPROM read adrress is out of range " << hex << eeadr.value.get()  + (eeadrh.value.get() << 8) << '\n';
+        cout << "LONG_EEPROM read address is out of range " << hex << eeadr.value.get()  + (eeadrh.value.get() << 8) << '\n';
         bp.halt();
       }
     }
@@ -817,7 +817,7 @@ void EEPROM_EXTND::callback()
       	eedata.value.put(rom[eeadr.value.get()]->get());
       else
       {
-        cout << "EXTND_EEPROM read adrress is out of range " << hex << eeadr.value.get() << '\n';
+        cout << "EXTND_EEPROM read address is out of range " << hex << eeadr.value.get() << '\n';
         bp.halt();
       }
     }

@@ -55,6 +55,7 @@ class P16F871 : public P16C64   // The 74 has too much RAM and too many CCPs
 
   virtual PROCESSOR_TYPE isa(){return _P16F871_;};
   virtual unsigned int program_memory_size() const { return 0x0800; };
+  virtual unsigned int eeprom_memory_size() const { return 64; };
   virtual void create_symbols();
   void create_sfr_map();
   void create();
@@ -105,6 +106,7 @@ class P16F873 : public P16C73
     // use set_eeprom_wide as P16F873 expect a wide EEPROM
     assert(0);
   }
+  virtual unsigned int eeprom_memory_size() const { return 128; };
   virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
     eeprom = ep;
   }
@@ -153,6 +155,7 @@ class P16F876 : public P16C73
     // use set_eeprom_wide as P16F873 expect a wide EEPROM
     assert(0);
   }
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
     eeprom = ep;
   }
@@ -165,6 +168,7 @@ class P16F876A : public P16F873A
   ComparatorModule comparator;
   virtual PROCESSOR_TYPE isa(){return _P16F876A_;};
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
 
   void create_sfr_map();
   void create();
@@ -196,6 +200,7 @@ public:
   ~P16F874();
   static Processor *construct(const char *name);
 
+  virtual unsigned int eeprom_memory_size() const { return 128; };
   virtual void set_eeprom(EEPROM *ep) {
     // use set_eeprom_wide as P16F873 expect a wide EEPROM
     assert(0);
@@ -212,6 +217,7 @@ class P16F877 : public P16F874
 public:
   virtual PROCESSOR_TYPE isa(){return _P16F877_;};
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual void create_symbols();
   void create_sfr_map();
   void create();
@@ -230,6 +236,7 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P16F874A_;};
   virtual unsigned int program_memory_size() const { return 0x1000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual void create_symbols();
   void create_sfr_map();
   void create();
@@ -247,6 +254,7 @@ public:
   ComparatorModule comparator;
   virtual PROCESSOR_TYPE isa(){return _P16F877A_;};
   virtual unsigned int program_memory_size() const { return 0x2000; };
+  virtual unsigned int eeprom_memory_size() const { return 256; };
   virtual void create_symbols();
   void create_sfr_map();
   void create();
