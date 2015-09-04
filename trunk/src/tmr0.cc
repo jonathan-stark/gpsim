@@ -218,7 +218,7 @@ void TMR0::increment()
     {
       trace.raw(write_trace.get() | value.get());
       prescale_counter = prescale;
-      if(value.get() == 255)
+      if(value.get() >= (max_counts()-1))
 	{
 	  //cout << "TMR0 rollover because of external clock ";
 	  value.put(0);
@@ -265,18 +265,25 @@ unsigned int TMR0::get_value()
 
   int new_value = (int )((get_cycles().get() - last_cycle)/ prescale);
 
-  //  if(new_value == 256) {
+  if (new_value == (int)max_counts())
+  {
     // tmr0 is about to roll over. However, the user code
     // has requested the current value before the callback function
-    // has been invoked. S0 just return 0.
+    // has been invoked. So do callback and return 0.
+     if (future_cycle)
+     {
+	future_cycle = 0;
+        get_cycles().clear_break(this);
+        callback();
+     }
+     new_value = 0;
+  }
 
-  //    new_value = 0;
 
-  //  }
 
-  if (new_value > 255)
+  if (new_value >= (int)max_counts())
     {
-      cout << "TMR0: bug TMR0 is larger than 255...\n";
+      cout << "TMR0: bug TMR0 is larger than " <<  max_counts() - 1  << "...\n";
       cout << "cycles.value = " << get_cycles().get() <<
 	"  last_cycle = " << last_cycle <<
 	"  prescale = "  << prescale << 

@@ -1,3 +1,11 @@
+2015-09-04 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac
+	: Change release to 0.29.1
+	* src/eeprom.cc src/p16f87x.cc src/p16f87x.h
+	: bug 207 	Wrong EEPROM size (16f876/876a/877/877a)
+	* src/tmr0.cc
+	: bug 205 	TMR0: bug TMR0 is larger than 255
+
 2015-08-17 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac
 	: Change release to 0.29.0

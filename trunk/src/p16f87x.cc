@@ -194,7 +194,7 @@ void P16F871::create()
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
-  e->initialize(64);
+  e->initialize(eeprom_memory_size());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -390,7 +390,7 @@ void P16F873::create()
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
-  e->initialize(128);
+  e->initialize(eeprom_memory_size());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -659,7 +659,7 @@ void P16F876::create()
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
-  e->initialize(128);
+  e->initialize(eeprom_memory_size());
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
 
@@ -874,7 +874,7 @@ void P16F874::create()
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
-  e->initialize(128);
+  e->initialize(eeprom_memory_size());
 
   e->set_intcon(&intcon_reg);
   set_eeprom_wide(e);
