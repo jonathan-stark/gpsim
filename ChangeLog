@@ -1,3 +1,7 @@
+2015-09-07 Roy Rankin <rrankin@ihug.com.au>
+	* doc/gpsim.html doc/gpsim.lyx
+	: Update documentation
+
 2015-09-04 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac
 	: Change release to 0.29.1
