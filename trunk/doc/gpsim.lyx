@@ -317,12 +317,7 @@ RPMs
 \end_layout
 
 \begin_layout Standard
-gpsim is also distributed in RPM form.
- In recent versions, there are two RPMs: gpsim-devel and gpsim.
- Both of these must be installed.
- There is also a RPM for the source code.
- This can be used to build a binary RPM unique to your system.
- Please see the latest INSTALL and README for the most up to date information.
+gpsim is also available in RPM form from linux distributions such as Fedora.
 \end_layout
 
 \begin_layout Subsection
@@ -330,22 +325,41 @@ Windows
 \end_layout
 
 \begin_layout Standard
-gpsim runs on Windows too.
- Borut Razem maintains the gpsim Windows web site:
+Gpsim runs on Windows too.
+  Both release and snapshot gpsim apps can be installed and run on windows
+  machines.
+\end_layout
+
+\begin_layout Standard
+The release version of the gpsim apps are generated on each new release
+ of gpsim.
+  These can be downloaded from the following web site:
+\end_layout
+
+\begin_layout Quote
+https://sourceforge.net/projects/gpsim/files/gpsim-win32/
+\end_layout
+
+\begin_layout Standard
+The snapshot versions are generated from time to time from the then current
+ source code and will contain bug fixes and new features added since the
+ last release.
+ These versions should work, but are not given the extra testing of a new
+ release.
+  Snapshots can be downloaded from:
+\end_layout
+
+\begin_layout Quote
+https://sourceforge.net/projects/gpsim/files/snapshot_builds/gpsim-win32/
+\end_layout
+
+\begin_layout Standard
+If you wish to build your own windows version of gpsim, the late  Borut
+ Razem has documented the process which can be found at this location:
 \end_layout
 
 \begin_layout Quote
 http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html
-\end_layout
-
-\begin_layout Standard
-You can find detailed instructions there for installing gpsim and its  dependenc
-ies.
- Snap shots can be found:
-\end_layout
-
-\begin_layout Quote
-http://gpsim.sourceforge.net/snap.php
 \end_layout
 
 \begin_layout Section
@@ -1642,7 +1656,7 @@ func_end
 \end_layout
 
 \begin_layout LyX-Code
-break w temp1 (pc >= func_start && pc < func_end)
+break w temp1, (pc >= func_start && pc < func_end)
 \end_layout
 
 \begin_layout Standard
@@ -1660,7 +1674,7 @@ Another situation is one where you wish to trap writes to a variable only
 \end_layout
 
 \begin_layout LyX-Code
-break w temp1 (CurTask & 0x0f != 0b101)
+break w temp1, (CurTask & 0x0f != 0b101)
 \end_layout
 
 \begin_layout Standard
@@ -3712,6 +3726,11 @@ f,F Run to return address
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
 1..9 Step n instructions
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+ctrl-f Find text
 \end_layout
 
 \begin_layout Subsection
