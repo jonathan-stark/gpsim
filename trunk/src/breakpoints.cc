@@ -1525,7 +1525,7 @@ BreakpointRegister_Value(Processor *_cpu,
 }
 BreakpointRegister_Value::~BreakpointRegister_Value()
 {
-  cout << __FUNCTION__ << " destructor\n";
+//  cout << __FUNCTION__ << " destructor\n";
 }
 
 bool BreakpointRegister_Value::IsEqualsBreakCondition(unsigned int uRegValue,

@@ -115,7 +115,8 @@ void cmd_break::list(guint64 value)
   if(value == CMDBREAK_BAD_BREAK_NUMBER)
     get_bp().dump();
   else
-    get_bp().dump1((unsigned int)value);
+    if(!get_bp().dump1((unsigned int)value))
+	printf("%d: break not found at given break point number\n", (unsigned int)value);
 }
 
 const char *TOO_FEW_ARGS="missing register or location\n";
@@ -210,6 +211,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
 
   if (bpn<0) {
 
+
     // We failed to set a break point from the first expression. 
     // It may be that we have a type of break point that is not supported
     // by the expression code.
@@ -243,6 +245,39 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
 
 }
 
+#include <typeinfo>
+
+// set_break_EQ(cmd_options *co, 
+//           Expression *pExpr1,
+//           Expression *pExpr2)
+//
+// Extract symbol from pExpr1 for break point.
+// for case "break [crw] REGISTER == expr" 
+unsigned int cmd_break::set_break_EQ(cmd_options *co, 
+				  Expression *pExpr1,
+				  Expression *pExpr2)
+{
+    Expression *all;
+    Expression *sym = 0;
+
+    if (typeid(*pExpr1) == typeid(LiteralSymbol))
+	sym = pExpr1;
+    else 
+	sym = ((BinaryOperator *)pExpr1)->getLeft();
+    
+
+    if (sym)
+    {
+       all = new OpEq(pExpr1, pExpr2);
+       int bpn = sym->set_break(MapBreakActions(co->value), 
+		    gpsimObject::eActionHalt, all);
+	return bpn;
+     }
+     else
+	fprintf(stderr, "cmd_break::%s symbol not defined\n", __FUNCTION__);
+
+    return 0;
+}
 //------------------------------------------------------------------------
 // set_break(cmd_options *co, 
 //           Expression *pExpr1,

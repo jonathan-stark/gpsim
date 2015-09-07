@@ -1,4 +1,8 @@
 2015-09-07 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_break.cc cli/cmd_break.h cli/parse.yy src/breakpoints.cc
+	: bug 206 	Break command problems
+
+2015-09-07 Roy Rankin <rrankin@ihug.com.au>
 	* doc/gpsim.html doc/gpsim.lyx
 	: Update documentation
 

@@ -283,13 +283,13 @@ extern int yylex(YYSTYPE* lvalP);
 
 // Here are token definitions for expression operators
 %nonassoc COLON_T
+%left     EQ_T NE_T
 %left     PLUS_T MINUS_T XOR_T OR_T AND_T
 %left     MPY_T DIV_T
 %left     SHL_T SHR_T
 
 %left     LOR_T
 %left     LAND_T
-%left     EQ_T NE_T
 %left     LT_T LE_T GT_T GE_T MIN_T MAX_T ABS_T
 
 %nonassoc IND_T
@@ -419,7 +419,9 @@ log_cmd
 
 
 break_set 
-          : BREAK bit_flag expr_list          {$$=c_break.set_break($2,$3);}
+	  : BREAK bit_flag expr EQ_T expr 
+					{$$=c_break.set_break_EQ($2,$3, $5);}
+          | BREAK bit_flag expr_list          {$$=c_break.set_break($2,$3);}
           | BREAK bit_flag                    {$$=c_break.set_break($2);}
           | BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
           ;
