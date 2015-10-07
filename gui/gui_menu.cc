@@ -662,7 +662,7 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
 
 //========================================================================
 
-extern int gui_message(const char *message);
+void gui_message(const char *message);
 
 static void
 fileopen_dialog(GtkAction *action, gpointer user_data)

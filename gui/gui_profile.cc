@@ -149,7 +149,7 @@ static menu_item exestats_menu_items[] = {
 };
 
 
-extern int gui_message(const char *message);
+void gui_message(const char *message);
 
 int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpoints);
 int plot_routine_histogram(Profile_Window *pw);

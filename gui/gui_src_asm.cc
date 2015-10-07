@@ -2377,7 +2377,7 @@ static void settings_dialog(SourceWindow *sbaw)
 
 /*********************** gui message dialog *************************/
 
-int gui_message(const char *message)
+void gui_message(const char *message)
 {
   GtkWidget *dialog = gtk_dialog_new_with_buttons(
     "", NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -2391,8 +2391,7 @@ int gui_message(const char *message)
 
   gtk_widget_show_all(dialog);
   gtk_dialog_run(GTK_DIALOG(dialog));
-
-  return 0;
+  gtk_widget_destroy(dialog);
 }
 
 // gui question dialog
