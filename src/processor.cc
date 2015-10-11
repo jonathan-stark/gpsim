@@ -136,6 +136,7 @@ Processor::Processor(const char *_name, const char *_desc)
 
   m_pConstructorObject = 0;
   m_Capabilities = 0;
+  m_ProgramMemoryAllocationSize = 0;
   if(verbose)
     cout << "processor constructor\n";
 
@@ -180,7 +181,6 @@ Processor::Processor(const char *_name, const char *_desc)
 }
 
 
-static unsigned int  m_ProgramMemoryAllocationSize = 0;
 
 //-------------------------------------------------------------------
 Processor::~Processor()
@@ -206,9 +206,14 @@ Processor::~Processor()
 
   destroyProgramMemoryAccess(pma);
 
+
   for (unsigned int i = 0; i < m_ProgramMemoryAllocationSize; i++)
+  {
     if (program_memory[i] != &bad_instruction)
+    {
       delete program_memory[i];
+    }
+  }
 
   delete []program_memory;
 

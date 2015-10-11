@@ -1,3 +1,21 @@
+2015-10-11 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_break.cc
+	: improve error message
+	* cli/input.cc
+	: add verbose output
+	* gui/gui_breadboard.cc
+	: trace nodes
+	: gui/gui_src_asm.cc
+	* cntl-F in src window when no code loaded causes sigsegv
+        * src/cod.cc src/cod.h
+	: improve error handling when opening code files
+        * src/processor.cc src/processor.h
+	: move m_ProgramMemoryAllocationSize into Processor class
+	* src/breakpoints.cc src/expr.cc src/operator.cc
+	: better handle error conditions
+	* src/fopen-path.cc
+	: handle invalid file names
+
 2015-08-07 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui_menu.cc gui_profile.cc gui_src_asm.cc
 	: Fixed error in gui_message(), resource not destroyed.

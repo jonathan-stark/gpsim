@@ -258,6 +258,8 @@ SourceWindow::KeyPressHandler(GtkWidget *widget,
   guint modifiers = gtk_accelerator_get_default_mod_mask();
   if ((key->state & modifiers) == GDK_CONTROL_MASK && key->keyval == 'f') {
     NSourcePage *page = pSW->pages[pSW->m_currentPage];
+    if (!page)
+        return FALSE;
     pViewContainingPopup = page->getView();
     pSW->findText();
     return TRUE;

@@ -116,7 +116,7 @@ void cmd_break::list(guint64 value)
     get_bp().dump();
   else
     if(!get_bp().dump1((unsigned int)value))
-	printf("%d: break not found at given break point number\n", (unsigned int)value);
+	printf("break not found at given break point number %d (0x%x)\n", (unsigned int)value, (unsigned int)value);
 }
 
 const char *TOO_FEW_ARGS="missing register or location\n";

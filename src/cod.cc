@@ -120,18 +120,25 @@ unsigned short get_short_int( char * buff)
   return ( (unsigned char)buff[0] + ((unsigned char)buff[1] << 8));
 }
 
-void PicCodProgramFileType::read_block(char * block, int block_number)
+int PicCodProgramFileType::read_block(char * block, int block_number)
 {
   if (fseek(codefile, block_number * COD_BLOCK_SIZE, SEEK_SET))
   {
       fprintf(stderr, "PicCodProgramFileType::read_block fseek error byte %ld\n",
 	(size_t) block_number * COD_BLOCK_SIZE);
-	return;
+	return ERR_BAD_FILE;
   } 
   size_t n = fread(block, 1, COD_BLOCK_SIZE, codefile);
   if (n == 0 && feof(codefile))
-       return;
-  assert(COD_BLOCK_SIZE == n);
+       return SUCCESS;
+  if (n == 0 && ferror(codefile))
+  {
+	perror("PicCodProgramFileType::read_block fread error ");
+        return ERR_BAD_FILE;
+  }
+  if (COD_BLOCK_SIZE != n)
+     return ERR_BAD_FILE;
+  return SUCCESS;
 }
 
 unsigned int get_be_int( char * buff)
@@ -685,28 +692,32 @@ void delete_block(Block *b)
  * read_directory - read the directory block(s) in the .cod file
  */
 
-void PicCodProgramFileType::read_directory(void)
+int PicCodProgramFileType::read_directory(void)
 {
   DirBlockInfo *dbi;
+  int ret;
 
   create_block(&main_dir.dir);
-  read_block(main_dir.dir.block, 0);
+  if ((ret = read_block(main_dir.dir.block, 0)) != SUCCESS)
+	return ret;
 
   dbi = &main_dir;
 
   do {
     int next_dir_block = get_short_int(&dbi->dir.block[COD_DIR_NEXTDIR]);
+  
 
     if(next_dir_block) {
       dbi->next_dir_block_info = (DirBlockInfo *)malloc(sizeof(DirBlockInfo));
       dbi = dbi->next_dir_block_info;
       create_block(&dbi->dir);
-      read_block(dbi->dir.block, next_dir_block);
+      ret = read_block(dbi->dir.block, next_dir_block);
     } else {
       dbi->next_dir_block_info = 0;
-      return;
+      return ret;
     }
   } while(1);
+  return ERR_BAD_FILE;	// should not get here
 }
 
 void PicCodProgramFileType::delete_directory(void)
@@ -722,6 +733,7 @@ void PicCodProgramFileType::delete_directory(void)
       delete_block(&dbi->dir);
       free(dbi);
   }
+  main_dir.next_dir_block_info = 0;
   delete_block(&main_dir.dir);
 }
 
@@ -729,25 +741,28 @@ int PicCodProgramFileType::check_for_gputils(char *block)
 {
   int iReturn = SUCCESS;
   char buffer[256];
-  int have_gputils = 0;
 
   if((iReturn = get_string(buffer,&block[COD_DIR_COMPILER - 1],12)) != SUCCESS) {
     goto _Cleanup;
   }
 
+
   if ((strcmp("gpasm",buffer) == 0) || (strcmp("gplink",buffer) == 0)) {
     if(verbose)
       cout << "Have gputils\n";
-    have_gputils = 1;
 
     if((iReturn = get_string(buffer,&block[COD_DIR_VERSION - 1],19)) != SUCCESS) {
       goto _Cleanup;
     }
 
     int major=0, minor=0, micro=0;
+#ifdef RRR
     if (isdigit(buffer[0])) {
       // Extract version numbers in new gputils format
       sscanf(&buffer[0],"%d.%d.%d",&major,&minor,&micro);
+#endif
+    if (sscanf(&buffer[0],"%d.%d.%d",&major,&minor,&micro) >= 2)
+    {
 
       if(verbose)
         cout << "gputils version major "<< major << " minor " << minor << " micro " << micro << endl;
@@ -755,22 +770,30 @@ int PicCodProgramFileType::check_for_gputils(char *block)
       // if gputils version is greater than or equal to 0.13.0, then gputils
       // is considered "recent"
       if ((major >= 1) || ( minor >= 13))
+      {
         gputils_recent = 1;
+        if(verbose)
+            cout << "good, you have a recent version of gputils\n";
+      }
+      else
+      {
+    	cout << "Warning, you need to upgrade to gputils-0.13.0 or higher\n";
+    	cout << "(Your assembler version is  " << buffer << ")\n";
+        gputils_recent = 0;
+      }
 
     } else {
+    	cout << "Warning, you need to upgrade to gputils-0.13.0 or higher\n";
+	cout << "Invalid version format\n";
       // version number in old gputils format, so it can't be recent
-      gputils_recent = 0;
     }
 
   }
-
-  if(have_gputils && gputils_recent) {
-    if(verbose)
-      cout << "good, you have a recent version of gputils\n";
-  }  else {
-    cout << "Warning, you need to upgrade to gputils-0.13.0 or higher\n";
-    cout << "(Your assembler version is  " << buffer << ")\n";
+  else
+  {
+	cout << "File not from gputils\n";
   }
+
 _Cleanup:
   return iReturn;
 }
@@ -938,7 +961,8 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
 
   /* Start off by reading the directory block */
 
-  read_directory();
+  if ((error_code = read_directory()) != SUCCESS)
+    goto _Cleanup;
 
   // Perform a series of integrity checks
 
