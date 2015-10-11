@@ -620,6 +620,8 @@ gpsim_read (char *buf, unsigned max_size)
 
 
   LLInput *d = Stack ? Stack->GetNext() : 0;
+  if (Stack && verbose)
+	Stack->print();
 
   if (!d || !d->data) {
   if(verbose&4)
@@ -632,7 +634,7 @@ gpsim_read (char *buf, unsigned max_size)
 
   char *cPstr = d->data;
   unsigned int count = strlen(cPstr);
-  count = (count < max_size) ? count : max_size;
+  count = (count < max_size) ? count : max_size-1;
 
   strncpy(buf, cPstr, count);
   buf[count] = 0;

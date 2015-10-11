@@ -638,6 +638,7 @@ public:
 private:
 
   CPU_Freq *mFrequency;
+  unsigned int  m_ProgramMemoryAllocationSize;
 
   // Simulation modes
   bool bSafeMode;

@@ -135,7 +135,7 @@ private:
   FILE *  open_a_file(char **filename);
   void    set_lstname(const char *filename);
 
-  void    read_directory(void);
+  int     read_directory(void);
   int     check_for_gputils(char *block);
   void    read_hex_from_cod( Processor *cpu );
   void    read_line_numbers_from_cod(Processor *cpu);
@@ -144,7 +144,7 @@ private:
   int     read_src_files_from_cod(Processor *cpu);
 
   int     get_string(char *dest, char *src, size_t len);
-  void    read_block(char * block, int block_number);
+  int    read_block(char * block, int block_number);
 
   void    read_symbols( Processor *cpu );
   void    read_hll_line_numbers_from_asm(Processor *cpu);

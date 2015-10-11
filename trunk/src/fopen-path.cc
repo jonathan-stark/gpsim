@@ -31,6 +31,7 @@ License along with this library; if not, see
 #include <string>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h> 
 
 #include "../config.h"
 #include "gpsim_def.h"
@@ -175,6 +176,7 @@ void set_search_path (const char *path)
 //	PATH2/src/pic/foo.inc, PATH2/pic/foo.inc, PATH2/foo.inc
 //	...
 // It also converts back slashes to forward slashes (for MPLAB compatibility)
+
 FILE *fopen_path(const char *filename, const char *perms)
 {
   FILE *fp;
@@ -182,21 +184,40 @@ FILE *fopen_path(const char *filename, const char *perms)
   char **pathStr;			// path pointer
   int	ii;				// loop counter
   char	*cp;				// for string walking
-  char	nameBuff[256];			// where to build new filename
+  char	*nameBuff=0;			// where to build new filename
+  long maxpath;
 
-  assert (strlen (filename) <= (sizeof (nameBuff) - 1));
-  strcpy (nameBuff, filename);
+#if defined(_WIN32)
+  maxpath = MAX_PATH;
+#else
+  if ((maxpath = pathconf(filename, _PC_PATH_MAX)) < 0)
+	return 0;
+#endif
+
+  if (strlen(filename) >= (unsigned int)maxpath)
+  {
+	errno = ENAMETOOLONG;
+        return 0;
+  }
+
+  nameBuff = (char *)malloc(maxpath);
+  strncpy(nameBuff, filename, maxpath);
+  nameBuff[maxpath-1] = 0;
+
+ 
   for (cp = nameBuff; *cp; ++cp) {	// convert DOS slash to Unix slash
       if ('\\' == *cp) *cp = '/';
   }
 
   fp = fopen (nameBuff, perms);		// first try absolute path
-  if (0 != fp) {
+  if (fp) {
       if (verbose) printf ("Found %s as %s\n", filename, nameBuff);
+      free(nameBuff);
       return fp;
   }
 					// check along each directory
   for (pathStr = searchPath, ii=0;
+
        ii < searchPathCount;
        ++ii, ++pathStr) {
 					// check each subdir in path
@@ -204,20 +225,23 @@ FILE *fopen_path(const char *filename, const char *perms)
            fileStr && *fileStr;
            fileStr = strpbrk (fileStr+1, "/\\")) {
         strcpy (nameBuff, *pathStr);
-        strcat (nameBuff, fileStr);
-        assert (strlen (nameBuff) <= (sizeof (nameBuff) - 1));
-        for (cp = nameBuff; *cp; ++cp) { // convert DOS slash to Unix slash
-          if ('\\' == *cp)
-            *cp = '/';
-        }
-	if (verbose) {
-	  printf ("Trying to open %s\n", nameBuff);
-	}
-        fp = fopen (nameBuff, perms);	// try it
-        if (0 != fp) {
-          if (verbose)
-            printf ("Found %s as %s\n", filename, nameBuff);
-          return fp;
+        if (strlen(nameBuff) + strlen(fileStr) < (unsigned int)maxpath)
+        {
+          strcat (nameBuff, fileStr);
+          for (cp = nameBuff; *cp; ++cp) { // convert DOS slash to Unix slash
+            if ('\\' == *cp)
+              *cp = '/';
+          }
+  	if (verbose) {
+  	  printf ("Trying to open %s\n", nameBuff);
+  	}
+          fp = fopen (nameBuff, perms);	// try it
+          if (0 != fp) {
+            if (verbose)
+              printf ("Found %s as %s\n", filename, nameBuff);
+            free(nameBuff);
+            return fp;
+          }
         }
       }
   }
@@ -231,5 +255,6 @@ FILE *fopen_path(const char *filename, const char *perms)
       printf ("\n");
   }
 
+  free(nameBuff);
   return 0;
 }

@@ -715,10 +715,13 @@ OpIndirect::~OpIndirect()
 Value* OpIndirect::applyOp(Value* operand)
 {
   Value* rVal=0;
+  Register *pReg = 0;
+
   if (isInteger(operand)) {
     Integer* iOp = (Integer*)(operand);
     // hmm ... what about ema? Need a different indirection operator?
-    Register *pReg = get_active_cpu()->rma.get_register(*iOp);
+    if (get_active_cpu())
+        pReg = get_active_cpu()->rma.get_register(*iOp);
     if(pReg) {
       rVal = new Integer(pReg->get());
     }

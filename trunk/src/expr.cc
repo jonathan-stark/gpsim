@@ -102,7 +102,7 @@ Value* LiteralInteger::evaluate()
 
 string LiteralInteger::toString()
 {
-  return value->toString();
+  return value->toString("0x%x");
 }
 
 int LiteralInteger::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *expr)

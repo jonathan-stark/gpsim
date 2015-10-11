@@ -1389,6 +1389,8 @@ void grab_module(GuiModule *p)
     gtk_widget_set_app_paintable(p->bbw()->layout, FALSE);
 }
 
+static void trace_all(GtkWidget *, Breadboard_Window *);
+
 static void pointer_cb(GtkWidget *w,
                        GdkEventButton *event,
                        Breadboard_Window *bbw)
@@ -1446,7 +1448,7 @@ static void pointer_cb(GtkWidget *w,
             bbw->update_board_matrix();
             dragging = 0;
             gtk_widget_set_app_paintable(bbw->layout, TRUE);
-            bbw->update_board_matrix();
+            trace_all(NULL, bbw);
             UpdateModuleFrame(dragged_module, bbw);
         }
         break;

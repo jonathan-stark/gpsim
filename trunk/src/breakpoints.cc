@@ -312,9 +312,18 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt, gpsimObject::Object
   // If there was no register passed in as an input and we failed to compile
   // the expression (and hence unable to extract a register from the expression)
   // then don't set a break.
+  if (!pReg && !pRegInExpr)
+  {
+     fprintf(stderr, "set_break failed - no register given and expression compile failed\n");
+     return -1;
+  }
   pReg = pReg ? pReg : pRegInExpr;
-  if (!pReg)
-    return -1;
+
+  if (pReg->address == AN_INVALID_ADDRESS)
+  {
+      fprintf(stderr, "set_break failed - invalid address\n");
+      return -1;
+  }
 
   if (bt ==  gpsimObject::eBreakWrite) {
     if (bCompiledExpression) {
