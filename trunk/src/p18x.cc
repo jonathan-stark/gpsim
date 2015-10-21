@@ -2310,12 +2310,11 @@ P18F26K22::P18F26K22(const char *_name, const char *desc)
   ctmu.set_IOpins(&(*m_portb)[2],&(*m_portb)[3], &(*m_portc)[2]);
   hlvdcon.setIntSrc(new InterruptSource(pir2, PIR2v2::HLVDIF));
   hlvdcon.set_hlvdin(&(*m_porta)[5]);
-
-  
 }
 
 P18F26K22::~P18F26K22()
 {
+    delete ctmu.ctmu_stim;
     delete_sfr_register(m_porte);
     delete_sfr_register(m_late);
     delete_sfr_register(m_trise);
@@ -2372,8 +2371,8 @@ P18F26K22::~P18F26K22()
     remove_sfr_register(&ansela);
     remove_sfr_register(&anselb);
     remove_sfr_register(&anselc);
-    remove_sfr_register(wpub);
-    remove_sfr_register(iocb);
+    delete_sfr_register(wpub);
+    delete_sfr_register(iocb);
     remove_sfr_register(&slrcon);
     remove_sfr_register(&ccptmrs.ccptmrs1);
     remove_sfr_register(&ccptmrs.ccptmrs0);
@@ -2413,21 +2412,21 @@ P18F26K22::~P18F26K22()
     remove_sfr_register(&ssp2.sspcon);
     remove_sfr_register(&ssp2.sspcon2);
     remove_sfr_register(&ssp2.ssp1con3);
-    remove_sfr_register(ctmu.ctmuconh);
-    remove_sfr_register(ctmu.ctmuconl);
-    remove_sfr_register(ctmu.ctmuicon);
+    delete_sfr_register(ctmu.ctmuconh);
+    delete_sfr_register(ctmu.ctmuconl);
+    delete_sfr_register(ctmu.ctmuicon);
     remove_sfr_register(&hlvdcon);
 
 
-    delete_file_registers(0xf3b, 0xf3c, true);
-    delete_file_registers(0xf83, 0xf83, true);
-    delete_file_registers(0xf85, 0xf88, true);
-    delete_file_registers(0xf8c, 0xf91, true);
-    delete_file_registers(0xf95, 0xf95, true);
-    delete_file_registers(0xf97, 0xf9a, true);
-    delete_file_registers(0xf9d, 0xf9e, true);
-    delete_file_registers(0xfb5, 0xfb5, true);
-    delete_file_registers(0xfd4, 0xfd4, true);
+    delete_file_registers(0xf3b, 0xf3c, false);
+    delete_file_registers(0xf83, 0xf83, false);
+    delete_file_registers(0xf85, 0xf88, false);
+    delete_file_registers(0xf8c, 0xf91, false);
+    delete_file_registers(0xf95, 0xf95, false);
+    delete_file_registers(0xf97, 0xf9a, false);
+    //delete_file_registers(0xf9d, 0xf9e, false);
+    delete_file_registers(0xfb5, 0xfb5, false);
+    delete_file_registers(0xfd4, 0xfd4, false);
 }
 
 void P18F26K22::create()

@@ -58,20 +58,17 @@ Boston, MA 02111-1307, USA.  */
 // to reference it. The simulator keeps a linked listed of pointers
 // to all instances of these graphical representations
 
-class CrossReferenceToGUI {
+class CrossReferenceToGUI : public XrefObject
+{
 public:
   gpointer     parent_window;
-  gpointer     data;
 
   CrossReferenceToGUI();
-  virtual ~CrossReferenceToGUI()
-  {
-  }
+  ~CrossReferenceToGUI();
 
   virtual void Update(int new_value) = 0;
   virtual void Remove();
 };
-
 
 #include "gui_object.h"
 #include "gui_processor.h"

@@ -194,6 +194,7 @@ Processor::~Processor()
   deleteSymbol(m_pUnknownMode);
   deleteSymbol(m_pBreakOnReset);
   deleteSymbol(mFrequency);
+  deleteSymbol(m_vdd);
 
   delete interface;
 
@@ -2002,7 +2003,6 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
                                old_inst->get_hll_src_line(),
                                old_inst->get_hll_file_id());
 
-  //new_inst->xref = old_inst->xref;
 
   if(b)
     b->setReplaced(new_inst);
@@ -2011,7 +2011,6 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
 
   cpu->program_memory[uIndex]->setModified(true);
 
-  //if(cpu->program_memory[addr]->xref)
   cpu->program_memory[uIndex]->update();
 
   delete(old_inst);
@@ -2019,12 +2018,17 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
 
 //--------------------------------------------------------------------------
 
-void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
+void  ProgramMemoryAccess::assign_xref(unsigned int address, XrefObject * xref)
 {
 
   instruction &q = *getFromAddress(address);
   if(q.isa()==instruction::INVALID_INSTRUCTION)
+  {
+    delete (int *)xref->data;
+    delete xref;
     return;
+   }
+
 
   q.add_xref(xref);
 }

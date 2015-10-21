@@ -401,6 +401,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   unsigned int *memory;
 
   SourceBrowserOpcode_Window(GUI_Processor *gp);
+  ~SourceBrowserOpcode_Window();
   virtual void Build();
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);

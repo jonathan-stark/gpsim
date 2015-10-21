@@ -64,7 +64,7 @@ public:
 
 void link_src_to_gpsim(GUI_Processor *gp)
 {
-  int i, *address, pm_size;
+  int i, *address = 0, pm_size;
   linkXREF *cross_reference;
 
   if(gp) {
@@ -84,8 +84,8 @@ void link_src_to_gpsim(GUI_Processor *gp)
       address = new int;
       *address = gp->cpu->map_pm_index2address(i);
 
-      cross_reference->data = (gpointer) address;
-      gp->cpu->pma->assign_xref(*address, (gpointer) cross_reference);
+      cross_reference->data = (gpsimObject*) address;
+      gp->cpu->pma->assign_xref(*address, (CrossReferenceToGUI *) cross_reference);
     }
   }
 }

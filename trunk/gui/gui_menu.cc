@@ -1213,6 +1213,7 @@ public:
   void Create();
 
   MainWindow();
+  ~MainWindow();
 };
 
 MainWindow TheWindow;
@@ -1222,6 +1223,13 @@ MainWindow::MainWindow()
 {
 }
 
+MainWindow::~MainWindow()
+{
+    for(int i = 0; i < UpdateRateMenuItem::seq_no; i++)
+    {
+	delete UpdateRateMenuItemIndexed[i];
+    }
+}
 void MainWindow::Update()
 {
   if(timeW)

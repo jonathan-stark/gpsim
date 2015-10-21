@@ -221,6 +221,10 @@ CMCON::~CMCON()
   free(cm_input_pin[0]);  free(cm_input_pin[1]);
   free(cm_input_pin[2]);  free(cm_input_pin[3]);
   free(cm_output_pin[0]); free(cm_output_pin[1]);
+  free(cm_an[0]); 
+  free(cm_an[1]); 
+  free(cm_an[2]); 
+  free(cm_an[3]); 
 }
 
 
@@ -1097,6 +1101,8 @@ CM2CON1_V2::CM2CON1_V2(Processor *pCpu, const char *pName,
 }
 CM2CON1_V2::~CM2CON1_V2() 
 {
+    delete cm_stimulus[2];
+    delete cm_stimulus[3];
 }
 
 double CM2CON1_V2::get_Vpos(unsigned int cm, unsigned int cmxcon0)

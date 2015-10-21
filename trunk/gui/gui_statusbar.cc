@@ -290,7 +290,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 
     cross_reference = new StatusBarXREF();
     cross_reference->parent_window = (gpointer) this;
-    cross_reference->data = (gpointer) this;
+    cross_reference->data = (gpsimObject *) this;
   
     pPC->add_xref((gpointer) cross_reference);
 

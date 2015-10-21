@@ -793,7 +793,6 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  GtkSheet *sheet;
  GtkEntry *sheet_entry;
 
- //RRRint row,col;
 
  if(widget==0|| sbow==0)
   {
@@ -806,7 +805,6 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  sheet=GTK_SHEET(sbow->sheet);
  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
- //RRRrow=sheet->active_cell.row; col=sheet->active_cell.col;
 
  if((text=gtk_entry_get_text (GTK_ENTRY(sbow->entry))))
      gtk_entry_set_text(sheet_entry, text);
@@ -1110,7 +1108,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 
     cross_reference = new SourceOpcodeXREF();
     cross_reference->parent_window = (gpointer) this;
-    cross_reference->data = (gpointer) this;
+    cross_reference->data = (gpsimObject *) this;
 
     gp->cpu->pc->add_xref((gpointer) cross_reference);
 
@@ -1449,4 +1447,13 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
     Build();
 }
 
+SourceBrowserOpcode_Window::~SourceBrowserOpcode_Window()
+{
+    if (breakpoint_line_numberPFD)
+	pango_font_description_free(breakpoint_line_numberPFD);
+    if (current_line_numberPFD)
+	pango_font_description_free(current_line_numberPFD);
+    if (normalPFD)
+	pango_font_description_free(normalPFD);
+}
 #endif // HAVE_GUI

@@ -341,14 +341,14 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&pir1);
   remove_sfr_register(&ipr1);
   remove_sfr_register(&pie2);
-  remove_sfr_register(pir2);
+  delete_sfr_register(pir2);
   remove_sfr_register(&ipr2);
   remove_sfr_register(&usart.rcsta);
   remove_sfr_register(&usart.txsta);
   remove_sfr_register(&usart.spbrg);
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
-  remove_sfr_register(t3con);
+  delete_sfr_register(t3con);
   remove_sfr_register(&tmr3l);
   remove_sfr_register(&tmr3h);
 
@@ -380,7 +380,7 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&tmr2);
   }
 
-  remove_sfr_register(t1con);
+  delete_sfr_register(t1con);
   remove_sfr_register(&tmr1l);
   remove_sfr_register(&tmr1h);
 

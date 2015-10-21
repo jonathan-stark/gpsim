@@ -56,6 +56,8 @@ void cmd_clear::clear(Expression *expr)
 {
 
   if(expr) {
+   try
+   {
 
     Value *v = expr->evaluate();
     if(v) {
@@ -76,7 +78,17 @@ void cmd_clear::clear(Expression *expr)
         get_bp().clear((unsigned int)i);
       }
       delete v;
+     }
     }
+    catch  (Error *err)
+    {
+        if (err)
+        {
+            cerr << "***ERROR cmd_clear " << err->toString() << endl;
+            delete err;
+        }
+    }
+
     delete expr;
   }
 

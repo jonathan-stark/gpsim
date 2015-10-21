@@ -103,6 +103,19 @@ instruction::instruction(Processor *pProcessor,
 instruction::~instruction()
 {
   // cout << __FUNCTION__<<endl;
+
+  XrefObject *pt_xref; 
+  XrefObject *pt = xref();
+  if (pt)
+  {
+      while((pt_xref = (XrefObject *)pt->first_xref()))
+      {
+	pt->clear(pt_xref);
+	delete (int *)pt_xref->data;
+	delete pt_xref;
+      }
+  }
+
   if (cpu)
     cpu->deleteSymbol(pLineSymbol);
 }

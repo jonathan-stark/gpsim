@@ -106,7 +106,7 @@ public:
 
 WatchWindowXREF::~WatchWindowXREF()
 {
-  gtk_tree_row_reference_free(static_cast<GtkTreeRowReference *>(data));
+  gtk_tree_row_reference_free(static_cast<GtkTreeRowReference *>((void *)data));
 }
 
 void WatchWindowXREF::Update(int new_value)
@@ -114,7 +114,7 @@ void WatchWindowXREF::Update(int new_value)
   Watch_Window *ww  = static_cast<Watch_Window *>(parent_window);
   if (ww) {
     GtkTreePath *path
-      = gtk_tree_row_reference_get_path(static_cast<GtkTreeRowReference *>(data));
+      = gtk_tree_row_reference_get_path(static_cast<GtkTreeRowReference *>((void *)data));
     GtkTreeIter iter;
     if (gtk_tree_model_get_iter(GTK_TREE_MODEL(ww->watch_list), &iter, path))
       ww->UpdateWatch(&iter);
@@ -565,7 +565,7 @@ void Watch_Window::Add(REGISTER_TYPE type, GUIRegister *reg, Register * pReg)
   WatchWindowXREF *cross_reference = new WatchWindowXREF();
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data =
-    (gpointer) gtk_tree_row_reference_new(GTK_TREE_MODEL(watch_list), path);
+    (gpsimObject *) gtk_tree_row_reference_new(GTK_TREE_MODEL(watch_list), path);
   gtk_tree_path_free(path);
 
   watch_entry->Assign_xref(cross_reference);
