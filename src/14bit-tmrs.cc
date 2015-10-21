@@ -2260,6 +2260,11 @@ TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
   for ( int cc=0; cc<MAX_PWM_CHANS; cc++ )
       ccp[cc] = 0;
 }
+TMR2::~TMR2()
+{
+  if (m_Interrupt)
+    m_Interrupt->release();
+}
 
 void TMR2::callback_print() 
 {

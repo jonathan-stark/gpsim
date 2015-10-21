@@ -30,15 +30,16 @@ class gpsimObject;
 
 class XrefObject {
  private:
-  gpsimObject *data;
   list<void*> xrefs;
  public:
+  gpsimObject *data;
   XrefObject();
   XrefObject(gpsimObject *value);
   virtual ~XrefObject();
     
   virtual void _add(void *xref);
   virtual void clear(void *xref);
+  virtual void *first_xref();
   virtual void _update();
   virtual int get_val(void);
   virtual void assign_data(gpsimObject *);

@@ -71,6 +71,21 @@ Program_Counter::~Program_Counter()
 {
   if (cpu)
     cpu->removeSymbol(this);
+
+  XrefObject *pt_xref;
+  XrefObject *pt = xref();
+  if (pt)
+  {
+      while((pt_xref = (XrefObject *)pt->first_xref()))
+      {
+        pt->clear(pt_xref);
+        if (pt_xref->data)
+            delete (int *)pt_xref->data;
+        delete pt_xref;
+      }
+  }
+
+
   delete m_pPCTraceType;
 }
 

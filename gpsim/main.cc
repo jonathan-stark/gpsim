@@ -155,6 +155,9 @@ struct poptOption optionsTable[] = {
   POPT_TABLEEND
 };
 
+String *scope[8];
+bool bUseGUI = true;    // assume that we want to use the gui
+
 void welcome(void)
 {
   printf("\ngpsim - the GNUPIC simulator\nversion: %s %s\n",
@@ -165,6 +168,16 @@ void welcome(void)
 void exit_gpsim(int ret)
 {
   exit_cli();
+#ifdef HAVE_GUI
+  if(!bUseGUI) 
+#endif
+  {
+
+      for(int i = 0; i < 8; i++)
+      {
+         delete scope[i];
+      }
+  }
   exit(ret);
 }
 
@@ -174,7 +187,6 @@ main (int argc, char *argv[])
   bool bEcho = false;
   bool bSourceEnabled = true;
   int c, usage = 0;
-  bool bUseGUI = true;    // assume that we want to use the gui
   char command_str[256];
   char *hex_name = NULL;
   poptContext optCon;     // context for parsing command-line options
@@ -342,18 +354,17 @@ main (int argc, char *argv[])
     get_interface().setGUImode(bUseGUI);
   }
   else
+#endif
   {
 	// so scope setup does not cause error when -i is used
-	globalSymbolTable().addSymbol(new String("scope.ch0",""));
-	globalSymbolTable().addSymbol(new String("scope.ch1",""));
-	globalSymbolTable().addSymbol(new String("scope.ch2",""));
-	globalSymbolTable().addSymbol(new String("scope.ch3",""));
-	globalSymbolTable().addSymbol(new String("scope.ch4",""));
-	globalSymbolTable().addSymbol(new String("scope.ch5",""));
-	globalSymbolTable().addSymbol(new String("scope.ch6",""));
-	globalSymbolTable().addSymbol(new String("scope.ch7",""));
+        for(int i = 0; i < 8; i++)
+        {
+	    char buf[10];
+	    sprintf(buf, "scope.ch%d", i);
+	    scope[i] = new String(buf, "");
+	    globalSymbolTable().addSymbol(scope[i]);
+        }
   }	
-#endif
 
 
   AddModulePathFromFilePath(argv[0]);

@@ -72,7 +72,11 @@ extern void dispatch_Update();
 
 //------------------------------------------------------------------------
 
-CrossReferenceToGUI::CrossReferenceToGUI()
+CrossReferenceToGUI::CrossReferenceToGUI() : XrefObject()
+{
+}
+
+CrossReferenceToGUI::~CrossReferenceToGUI()
 {
 }
 

@@ -131,9 +131,8 @@ Value::~Value()
 }
 void Value::update()
 {
-  if (!_xref)
-     _xref = new XrefObject();
-  _xref->_update();
+  if (_xref)
+      _xref->_update();
 }
 
 void Value::add_xref(void *an_xref)

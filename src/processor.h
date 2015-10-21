@@ -42,6 +42,7 @@ class ProgramMemoryCollection;
 class CPU_Freq;
 class CPU_Vdd;
 
+
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
 /// access to memory. For the PIC, this class is extended by
@@ -106,7 +107,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   void put_opcode_start(unsigned int addr, unsigned int new_opcode);
 
   // Assign a cross reference object to an instruction 
-  void assign_xref(unsigned int address, gpointer cross_reference);
+  void assign_xref(unsigned int address, XrefObject * cross_reference);
 
   virtual void callback(void);
   void init(Processor *);

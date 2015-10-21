@@ -687,6 +687,7 @@ public:
   virtual void callback();
   virtual void callback_print();
   TMR2(Processor *pCpu, const char *pName, const char *pDesc=0);
+  ~TMR2();
 
   void put(unsigned int new_value);
   unsigned int get();

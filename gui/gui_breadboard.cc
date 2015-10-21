@@ -2833,7 +2833,7 @@ void GuiModule::Build()
   // Create xref
   cross_reference = new BreadBoardXREF();
   cross_reference->parent_window = (gpointer) m_bbw;
-  cross_reference->data = (gpointer) 0;
+  cross_reference->data =  0;
   m_module->xref->_add(cross_reference);
 
 

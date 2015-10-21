@@ -38,17 +38,29 @@ XrefObject::~XrefObject()
     list<void*>::iterator ioi;
 
     ioi=xrefs.begin();
-    for(;ioi!=xrefs.end();ioi++) {
-        //gi.remove_object(*ioi);
-      // Fixme - deleting the memory here causes SEGV because
-      // the objects being cross referenced were new'd outside
-      // of the context of this class.
-      // delete *ioi;
+
+    while((ioi=xrefs.begin()) != xrefs.end())
+    {
+      XrefObject *xref = (XrefObject *) *ioi;
+      clear(xref);
+      delete xref;
     }
-    while(!xrefs.empty())
-	xrefs.pop_back();
+    return;
+
 }
 
+void *XrefObject::first_xref()
+{
+    list<void*>::iterator ioi;
+
+    if (!xrefs.empty())
+    {
+      ioi=xrefs.begin();
+      return(*ioi);
+    }
+    else
+      return 0;
+}
 void XrefObject::_add(void *xref)
 {
   xrefs.push_back(xref);

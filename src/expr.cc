@@ -64,6 +64,7 @@ LiteralBoolean::LiteralBoolean(Boolean* value_)
 
 LiteralBoolean::~LiteralBoolean()
 {
+    delete value;
 }
 
 Value* LiteralBoolean::evaluate()
