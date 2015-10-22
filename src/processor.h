@@ -526,6 +526,7 @@ public:
   virtual void finish(void) = 0;
 
   virtual void sleep(void) {};
+  virtual void exit_sleep() {cerr << "RRR exit_sleep\n";}
   virtual void step(unsigned int steps,bool refresh=true) = 0;
   virtual void step_over(bool refresh=true);
   virtual void step_one(bool refresh=true) = 0;
@@ -636,6 +637,11 @@ public:
   virtual ~Processor();
 
   CPU_Vdd   *m_vdd;
+  phaseExecute1Cycle	*mExecute1Cycle;
+  ClockPhase 		*mCurrentPhase;
+  phaseExecute2ndHalf 	*mExecute2ndHalf;     // misnomer - should be 2-cycle
+  phaseCaptureInterrupt	*mCaptureInterrupt;
+  phaseIdle 		*mIdle;
 private:
 
   CPU_Freq *mFrequency;
@@ -652,6 +658,7 @@ private:
   Boolean *m_pSafeMode;
   Boolean *m_pUnknownMode;
   Boolean *m_pBreakOnReset;
+
 
 };
 

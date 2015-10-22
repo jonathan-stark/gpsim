@@ -36,6 +36,7 @@ License along with this library; if not, see
 */
 
 class Processor;
+//RRRclass pic_processor;
 class ClockPhase
 {
 public:
@@ -86,6 +87,17 @@ public:
 protected:
   unsigned int m_uiPC;
 };
+class phaseCaptureInterrupt : public ProcessorPhase
+{
+public:
+  phaseCaptureInterrupt(Processor *pcpu);
+  ~phaseCaptureInterrupt();
+  virtual ClockPhase *advance();
+  void firstHalf();
+protected:
+  ClockPhase *m_pCurrentPhase;
+  ClockPhase *m_pNextNextPhase;
+};
 
 // phaseIdle - when a processor is idle, the current
 // clock source can be handled by this class.
@@ -98,13 +110,6 @@ public:
   virtual ClockPhase *advance();
 protected:
 };
-
-////// TEMPORARY ////////
-// These will be moved into the Processor class.
-extern ClockPhase *mCurrentPhase;
-extern phaseExecute1Cycle *mExecute1Cycle;
-extern phaseExecute2ndHalf *mExecute2ndHalf;
-extern phaseIdle *mIdle;
 
 
 #endif  //if !defined(__CLOCK_PHASE_H__)

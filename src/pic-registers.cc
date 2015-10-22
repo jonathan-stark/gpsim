@@ -130,7 +130,7 @@ void Program_Counter::increment()
 
   cpu_pic->pcl->value.put(value & 0xff);
 
-  mCurrentPhase->setNextPhase(mExecute1Cycle);
+  cpu_pic->mCurrentPhase->setNextPhase(cpu_pic->mExecute1Cycle);
 }
 
 //--------------------------------------------------
@@ -153,7 +153,7 @@ void Program_Counter::skip()
     bp.halt();
   }
   else
-    mExecute2ndHalf->firstHalf( value + 2);
+    cpu_pic->mExecute2ndHalf->firstHalf( value + 2);
 
 }
 
@@ -194,14 +194,14 @@ ClockPhase *phaseExecute2ndHalf::firstHalf(unsigned int uiPC)
   Dprintf(("first half of 2 cycle instruction new PC=0x%x\n",uiPC));
   ((pic_processor *)m_pcpu)->pc->value = uiPC;
   ((pic_processor *)m_pcpu)->pcl->value.put(uiPC&0xff);
-  mCurrentPhase->setNextPhase(this);
+  m_pcpu->mCurrentPhase->setNextPhase(this);
   return this;
 }
 
 ClockPhase *phaseExecute2ndHalf::advance()
 {
   Dprintf(("second half of 2 cycle instruction\n"));
-  mCurrentPhase->setNextPhase(mExecute1Cycle);
+  m_pcpu->mCurrentPhase->setNextPhase(m_pcpu->mExecute1Cycle);
   get_cycles().increment();
   return m_pNextPhase;
 }
@@ -229,7 +229,7 @@ void Program_Counter::jump(unsigned int new_address)
     bp.halt();
   }
   else
-    mExecute2ndHalf->firstHalf(new_address);
+    cpu_pic->mExecute2ndHalf->firstHalf(new_address);
 
 }
 
@@ -250,7 +250,7 @@ void Program_Counter::interrupt(unsigned int new_address)
     bp.halt();
   }
   else
-    mExecute2ndHalf->firstHalf(new_address);
+    cpu_pic->mExecute2ndHalf->firstHalf(new_address);
 
 }
 
@@ -289,7 +289,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
   // the instruction (i.e. via the ::increment() method). The second cycle occurs
   // here:
 
-  mExecute2ndHalf->advance();
+  cpu_pic->mExecute2ndHalf->advance();
 }
 
 //--------------------------------------------------
@@ -309,7 +309,7 @@ void Program_Counter::new_address(unsigned int new_address)
     bp.halt();
   }
   else
-    mExecute2ndHalf->firstHalf(new_address);
+    cpu_pic->mExecute2ndHalf->firstHalf(new_address);
 }
 
 //--------------------------------------------------
@@ -361,7 +361,7 @@ void Program_Counter::reset()
   //trace.program_counter(value);  //FIXME
   value = reset_address;
   value = (value >= memory_size) ? value - memory_size : value;
-  mExecute2ndHalf->firstHalf(value);
+  cpu_pic->mExecute2ndHalf->firstHalf(value);
 }
 
 

@@ -581,7 +581,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // the instruction (i.e. via the ::increment() method). The second cycle occurs
   // here:
 
-  mExecute2ndHalf->advance();
+  cpu_pic->mExecute2ndHalf->advance();
 }
 
 //--------------------------------------------------
