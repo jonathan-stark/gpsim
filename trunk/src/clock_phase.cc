@@ -101,3 +101,73 @@ ClockPhase *phaseIdle::advance()
   get_cycles().increment();
   return m_pNextPhase;
 }
+#if 0
+const char* phaseDesc(ClockPhase *pPhase)
+{
+  if (pPhase == mIdle)
+    return ("mIdle");
+  if (pPhase == mExecute1Cycle)
+    return ("mExecute1Cycle");
+  if (pPhase == mExecute2ndHalf)
+    return ("mExecute2ndHalf");
+  if (pPhase == mCaptureInterrupt)
+    return ("mCaptureInterrupt");
+  return "unknown phase";
+}
+#endif
+
+
+phaseCaptureInterrupt::phaseCaptureInterrupt(Processor *pcpu)
+  :  ProcessorPhase(pcpu), m_pCurrentPhase(0),m_pNextNextPhase(0)
+{
+}
+phaseCaptureInterrupt::~phaseCaptureInterrupt()
+{}
+#define Rprintf(arg) {printf("0x%06X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+ClockPhase *phaseCaptureInterrupt::advance()
+{
+
+  //Rprintf (("phaseCaptureInterrupt\n"));
+  if (m_pNextPhase == m_pcpu->mExecute2ndHalf)
+    m_pNextPhase->advance();
+
+  if (m_pCurrentPhase == m_pcpu->mIdle) { // Interrupted sleep
+
+    // complete sleeping phase
+    m_pNextPhase = m_pNextNextPhase->advance();
+    
+    if (m_pNextPhase == m_pcpu->mIdle)
+    {
+        m_pNextPhase = m_pcpu->mExecute1Cycle;
+	do 
+	{
+	    m_pNextPhase = m_pcpu->mExecute1Cycle->advance();
+	}while (m_pNextPhase != m_pcpu->mExecute1Cycle);
+    }
+    m_pcpu->mCurrentPhase = this;
+    if (bp.global_break)
+	m_pNextNextPhase = m_pNextPhase;
+    else
+      m_pCurrentPhase = NULL;
+    
+    m_pcpu->exit_sleep();
+    return this;
+  }
+
+  m_pcpu->interrupt();
+
+  return m_pNextPhase;
+}
+
+void phaseCaptureInterrupt::firstHalf()
+{
+  m_pCurrentPhase = m_pcpu->mCurrentPhase;
+
+  m_pNextPhase = this;
+  m_pNextNextPhase = m_pcpu->mCurrentPhase->getNextPhase();
+  m_pcpu->mCurrentPhase->setNextPhase(this);
+  m_pcpu->mCurrentPhase = this;
+}
+
+
+
