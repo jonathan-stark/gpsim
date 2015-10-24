@@ -1,3 +1,8 @@
+2015-10-24 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_menu.cc
+	: Modified file selector to enable the selction of the processor for
+	  .hex files
+
 2015-10-22 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-registers.cc src/clock_phase.cc src/clock_phase.h
 	  src/pic-processor.cc src/pic-registers.cc src/processor.h

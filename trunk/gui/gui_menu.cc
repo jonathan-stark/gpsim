@@ -47,7 +47,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../cli/input.h"  // for gpsim_open()
 #include "../src/gpsim_interface.h"
-
+#include "../src/processor.h"
 
 GtkUIManager *ui;
 
@@ -664,6 +664,40 @@ gpsimGuiPreferences::~gpsimGuiPreferences()
 
 void gui_message(const char *message);
 
+static void update_preview(GtkFileChooser *file_chooser, gpointer data)
+{
+  gchar *file = gtk_file_chooser_get_preview_filename(file_chooser);
+  gboolean show = FALSE;
+  if (file) {
+    size_t len = strlen(file);
+    if (len >= 4) {
+      gchar *p = file + len - 4;
+      if (!strcmp(p, ".hex") || !strcmp(p, ".HEX")) {
+        show = TRUE;
+      }
+    }
+  }
+  g_free(file);
+  gtk_file_chooser_set_preview_widget_active(file_chooser, show);
+}
+
+static void file_selection_changed(GtkTreeSelection *sel, gpointer data)
+{
+  GtkTreeIter iter;
+  GtkTreeModel *model;
+  gchar *processor;
+  gchar **d = (gchar **)data;
+
+  if (gtk_tree_selection_get_selected(sel, &model, &iter)) {
+    gtk_tree_model_get (model, &iter, 0, &processor, -1);
+    gchar *p = *d;
+    if (p) {
+      g_free(p);
+    }
+    *d = processor;
+  }
+}
+
 static void
 fileopen_dialog(GtkAction *action, gpointer user_data)
 {
@@ -674,9 +708,75 @@ fileopen_dialog(GtkAction *action, gpointer user_data)
     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
     NULL);
 
+  GtkFileFilter *filter = gtk_file_filter_new();
+  gtk_file_filter_set_name(filter, "Gpsim");
+  gtk_file_filter_add_pattern(filter, "*.cod");
+  gtk_file_filter_add_pattern(filter, "*.COD");
+  gtk_file_filter_add_pattern(filter, "*.stc");
+  gtk_file_filter_add_pattern(filter, "*.STC");
+  gtk_file_filter_add_pattern(filter, "*.hex");
+  gtk_file_filter_add_pattern(filter, "*.HEX");
+
+  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+
+  filter = gtk_file_filter_new();
+  gtk_file_filter_add_pattern(filter, "*");
+  gtk_file_filter_set_name(filter, "All files");
+
+  gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+
+  GtkListStore *pic_list = gtk_list_store_new(1, G_TYPE_STRING);
+
+  ProcessorConstructorList::iterator processor_iterator;
+  ProcessorConstructorList *pl = ProcessorConstructor::GetList();
+  for (processor_iterator = pl->begin(); processor_iterator != pl->end();
+    ++processor_iterator) {
+    ProcessorConstructor *p = *processor_iterator;
+    GtkTreeIter iter;
+    gtk_list_store_append(pic_list, &iter);
+    gtk_list_store_set(pic_list, &iter, 0, p->names[1], -1);
+  }
+
+  GtkWidget *scroll_window = gtk_scrolled_window_new(NULL, NULL);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll_window),
+    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+  GtkWidget *tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(pic_list));
+
+  gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(tree), TRUE);
+  GtkCellRenderer *renderer = gtk_cell_renderer_text_new();
+  GtkTreeViewColumn *column
+    = gtk_tree_view_column_new_with_attributes("Processor", renderer, "text",
+    0, NULL);
+  gtk_tree_view_append_column(GTK_TREE_VIEW(tree), column);
+
+  gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree), TRUE);
+  GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+  
+  gtk_container_add(GTK_CONTAINER(scroll_window), tree);
+
+  gtk_widget_show_all(scroll_window);
+
+  gchar *processor = NULL;
+
+  gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), scroll_window);
+  gtk_file_chooser_set_use_preview_label(GTK_FILE_CHOOSER(dialog), FALSE);
+  g_signal_connect(selection, "changed", G_CALLBACK(file_selection_changed), (gpointer)&processor);
+  g_signal_connect(dialog, "update-preview", G_CALLBACK(update_preview), NULL);
+
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
     char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-    if (!gpsim_open(gpGuiProcessor->cpu, filename, 0, 0)) {
+    gchar *use_processor = NULL;
+    if (filename) {
+      size_t len = strlen(filename);
+      if (len >= 4) {
+        gchar *p = filename + len - 4;
+        if (!strcmp(p, ".hex") || !strcmp(p, ".HEX")) {
+          use_processor = processor;
+        }
+      }
+    }
+    if (!gpsim_open(gpGuiProcessor->cpu, filename, use_processor, 0)) {
       gchar *msg = g_strdup_printf(
         "Open failed. Could not open \"%s\"", filename);
       gui_message(msg);
@@ -685,6 +785,9 @@ fileopen_dialog(GtkAction *action, gpointer user_data)
     g_free(filename);
   }
 
+  g_free(processor);
+  g_object_unref(pic_list);
+  gtk_widget_destroy(tree);
   gtk_widget_destroy(dialog);
 }
 
