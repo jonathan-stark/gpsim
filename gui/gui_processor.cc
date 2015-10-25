@@ -42,7 +42,7 @@ Boston, MA 02111-1307, USA.  */
 void create_dispatcher ();
 
 GUI_Processor::GUI_Processor()
-  : cpu(0), m_pGUIRamRegisters(0), m_pGUIEEPromRegisters(0)
+  : source_window(0), cpu(0), m_pGUIRamRegisters(0), m_pGUIEEPromRegisters(0)
 {
   create_dispatcher();
 

@@ -124,9 +124,7 @@ public:
   virtual ~RegisterLabeledEntry(){}
 
   virtual void put_value(unsigned int);
-  void AssignRegister(Register *new_reg);
   virtual void Update();
-
 };
 
 class CyclesLabeledEntry : public LabeledEntry {

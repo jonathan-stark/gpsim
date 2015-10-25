@@ -31,20 +31,20 @@ using namespace std;
 class Operator : public Expression {
   
  public:  
-  Operator(string newOpString)
+  Operator(std::string newOpString)
+    : opString(newOpString)
+  {}
+
+  virtual ~Operator()
     {
-      opString = newOpString;
     }
-  virtual ~Operator(void)
+  std::string showOp()
     {
-    }
-  string showOp()
-    {
-      return(opString);
+      return opString;
     }
 
  private:
-  string opString;
+  std::string opString;
 };
 
 

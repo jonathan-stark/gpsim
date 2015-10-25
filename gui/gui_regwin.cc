@@ -31,7 +31,6 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
-#include <string.h>
 
 #include "../src/interface.h"
 #include "../src/trace.h"
@@ -69,57 +68,6 @@ typedef enum {
     MENU_LOG_WRITE_VALUE,
     MENU_REGWIN_REFRESH,
 } menu_id;
-
-
-/////////////////////
-/////
-/////  Experimental code to test an object oriented way of implementing menus
-/////
-/////////////////////
-class MenuItem {
-private:
-  char *name;
-  menu_id id;
-
-public:
-  virtual ~MenuItem()
-  {
-  }
-
-  virtual void execute()=0;
-};
-
-class RegWindowMenuItem : public MenuItem {
-public:
-  virtual ~RegWindowMenuItem()
-  {
-  }
-
-private:
- Register_Window *rw;
-};
-
-class Menu_BreakClear : public RegWindowMenuItem {
-public:
-  virtual ~Menu_BreakClear()
-  {
-  }
-
-  virtual void execute() {
-    printf("BreakClear");
-  }
-} BreakClear;
-
-MenuItem *__menu_items[] = {
-  &BreakClear
-};
-
-/////////////////////
-/////
-/////  End of experimental code
-/////
-/////////////////////
-
 
 typedef struct _menu_item {
     const char *name;
@@ -271,37 +219,25 @@ bool GUIRegister::hasBreak()
   return false;
 }
 
-char *GUIRegister::name()
+std::string GUIRegister::name()
 {
-
-  static char buffer[128];
+  std::string buffer;
 
   Register *reg = get_register();
   if (!reg) {
-    sprintf(buffer,"NULL");
-    return buffer;
+    return "NULL";
   }
 
   //register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(reg->address);
 
-  if(!reg || reg->isa()==Register::INVALID_REGISTER)
-    return 0;
+  if (!reg || reg->isa() == Register::INVALID_REGISTER)
+    return "";
 
-  // FIXME -- potential buffer overflow...
-  if(bIsAliased)
-    sprintf(buffer,"alias (%s)", reg->name().c_str());
+  if (bIsAliased)
+    buffer = "alias (" + reg->name() + ")";
   else
-    sprintf(buffer,"%s", reg->name().c_str());
+    buffer = reg->name();
 
-  /*  else {
-    if(pRegSym == 0) {
-      strcpy(buffer,reg->name().c_str());
-    }
-    else {
-      strcpy(buffer,pRegSym->name().c_str());
-    }
-  }
-  */
   return buffer;
 }
 
@@ -320,9 +256,9 @@ bool GUIRegister::bIsSFR()
 }
 
 GUIRegister::GUIRegister()
+  : rma(0), address(0), row(0), col(0), register_size(0),
+    bUpdateFull(false), bIsAliased(false), xref(0)    
 {
-  rma = 0;
-  xref = 0;
 }
 
 GUIRegister::~GUIRegister()
@@ -696,8 +632,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 static GtkWidget *
 build_menu(Register_Window *rw)
 {
-  GtkWidget *menu;
-  GtkWidget *item;
 //  GtkAccelGroup *accel_group;
   int i;
 
@@ -708,10 +642,10 @@ build_menu(Register_Window *rw)
       return 0;
   }
 
-  menu=gtk_menu_new();
+  GtkWidget *menu = gtk_menu_new();
 
   for (i=0; i < (int)(sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-      item=gtk_menu_item_new_with_label(menu_items[i].name);
+      GtkWidget *item = gtk_menu_item_new_with_label(menu_items[i].name);
 
       g_signal_connect(item, "activate",
                          G_CALLBACK (popup_activated),
@@ -734,19 +668,13 @@ build_menu(Register_Window *rw)
 static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 {
-
-  GtkWidget *popup;
-  //    GdkModifierType mods;
-
-  popup=rw->popup_menu;
-
   if(widget==0 || event==0 || rw==0)
     {
       printf("Warning do_popup(%p,%p,%p)\n",widget,event,rw);
       return 0;
     }
 
-  GTK_SHEET(widget);
+  GtkWidget *popup = rw->popup_menu;
 
   if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
@@ -781,7 +709,7 @@ static unsigned long get_number_in_string(const char *number_string)
 
   retval = strtoul(number_string, &bad_position, current_base);
 
-  if( strlen(bad_position) )
+  if (*bad_position != '\0')
     errno = EINVAL;  /* string contains an invalid number */
 
   return(retval);
@@ -825,7 +753,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
   text = gtk_entry_get_text(GTK_ENTRY(sheet_entry));
 
   errno = 0;
-  if(text!=0 && strlen(text)>0)
+  if (*text != '\0')
     n = get_number_in_string(text);
   else
     errno = ERANGE;
@@ -902,9 +830,9 @@ void Register_Window::UpdateLabel()
 
         GUIRegister *reg = getRegister(row,col);
 
-        const char *n = reg ? reg->name() : "INVALID_REGISTER";
+        std::string n = reg ? reg->name() : "INVALID_REGISTER";
 
-        gtk_label_set_text(GTK_LABEL(location), n);
+        gtk_label_set_text(GTK_LABEL(location), n.c_str());
       }
     }
   }
@@ -919,22 +847,19 @@ void Register_Window::UpdateEntry()
 {
   gint row, col;
 
-  const char *text;
-  GtkWidget * sheet_entry;
-
-  if(register_sheet != 0) {
-    sheet_entry = gtk_sheet_get_entry(register_sheet);
+  if (register_sheet != 0) {
+    GtkWidget *sheet_entry = gtk_sheet_get_entry(register_sheet);
     gtk_sheet_get_active_cell(register_sheet, &row, &col);
 
-    if(row_to_address[row] < 0)
+    if (row_to_address[row] < 0)
       return;
 
     GUIRegister *reg = getRegister(row,col);
 
     if(reg && reg->bIsValid() )
     {
-      if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
-          gtk_entry_set_text(GTK_ENTRY(entry), text);
+      const char *text = gtk_entry_get_text(GTK_ENTRY(sheet_entry));
+      gtk_entry_set_text(GTK_ENTRY(entry), text);
     }
   }
 }
@@ -988,7 +913,7 @@ void Register_Window::UpdateStyle()
 //------------------------------------------------------------------------
 int Register_Window::LoadStyles()
 {
-  normalfont = pango_font_description_from_string(normalfont_string);
+  normalfont = pango_font_description_from_string(normalfont_string.c_str());
 
   if(!normalfont)
   {
@@ -1033,7 +958,7 @@ int Register_Window::SettingsDialog()
   GtkWidget *label = gtk_label_new("Normal font:");
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-  GtkWidget *font_btn = gtk_font_button_new_with_font(normalfont_string);
+  GtkWidget *font_btn = gtk_font_button_new_with_font(normalfont_string.c_str());
   gtk_box_pack_start(GTK_BOX(hbox), font_btn, FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
@@ -1049,8 +974,8 @@ int Register_Window::SettingsDialog()
 
   if (font) {
     pango_font_description_free(font);
-    strcpy(normalfont_string, font_name);
-    config_set_string(name(), "normalfont", normalfont_string);
+    normalfont_string = font_name;
+    config_set_string(name(), "normalfont", normalfont_string.c_str());
 
     gtk_sheet_freeze(register_sheet);
     UpdateStyle();
@@ -1163,10 +1088,6 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 {
   Dprintf((" show_sheet_entry\n"));
 
-  const char *text;
-  GtkSheet *sheet;
-  GtkEntry *sheet_entry;
-
   int row,col;
 
   if(!widget || !rw)
@@ -1177,18 +1098,19 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 
   if(!gtk_widget_has_focus(widget)) return;
 
-  sheet=GTK_SHEET(rw->register_sheet);
-  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
+  GtkSheet *sheet = GTK_SHEET(rw->register_sheet);
+  GtkEntry *sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
   //row=sheet->active_cell.row; col=sheet->active_cell.col;
   gtk_sheet_get_active_cell(sheet, &row, &col);
 
   GUIRegister *reg = rw->getRegister(row,col);
 
-  if(reg && reg->bIsValid() )
-    if((text=gtk_entry_get_text (GTK_ENTRY(rw->entry))) && sheet_entry)
+  if (reg && reg->bIsValid()) {
+    const char *text = gtk_entry_get_text(GTK_ENTRY(rw->entry));
+    if (sheet_entry)
       gtk_entry_set_text(sheet_entry, text);
-
+  }
 }
 
 /* when we have new data in the entry above the sheet, we
@@ -1510,7 +1432,7 @@ gboolean Register_Window::UpdateRegisterCell(int reg_number)
     if(new_value.data==INVALID_VALUE) {
 
       guiReg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
-      sprintf (name, "??");
+      g_snprintf(name, sizeof(name), "??");
     } else {
 
       // the register has changed since last update
@@ -1609,16 +1531,13 @@ void Register_Window::SetRegisterSize()
 
   chars_per_column = 1 + 2*register_size;
 
-  sprintf(pCellFormat,"%%0%dx",register_size*2);
+  g_snprintf(pCellFormat, sizeof(pCellFormat), "%%0%dx", register_size * 2);
 
   if(register_sheet) {
-
-    int i;
-    char buffer[10];
-
     // Column labels
-    for(i=0; i<register_sheet->maxcol; i++){
-      sprintf(buffer,"%02x",i);
+    for (int i = 0; i < register_sheet->maxcol; i++) {
+      char buffer[10];
+      g_snprintf(buffer, sizeof(buffer), "%02x", i);
       gtk_sheet_column_button_add_label(register_sheet, i, buffer);
       gtk_sheet_set_column_title(register_sheet, i, buffer);
       gtk_sheet_set_column_width (register_sheet, i, column_width(i));
@@ -1626,10 +1545,10 @@ void Register_Window::SetRegisterSize()
 
 
     // ASCII column
-    i = REGISTERS_PER_ROW;
-    sprintf(buffer,"ASCII");
-    gtk_sheet_column_button_add_label(register_sheet, i, buffer);
-    gtk_sheet_set_column_title(register_sheet, i, buffer);
+    int i = REGISTERS_PER_ROW;
+    const char *ascii = "ASCII";
+    gtk_sheet_column_button_add_label(register_sheet, i, ascii);
+    gtk_sheet_set_column_title(register_sheet, i, ascii);
 
     gtk_sheet_set_column_width (register_sheet, i, column_width(i));
 
@@ -1752,7 +1671,9 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
           gtk_sheet_REALLY_set_row_height (register_sheet, j, row_height(0));
         }
 
-        sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
+        g_snprintf(row_label, sizeof(row_label),
+          "%x0", reg_number / REGISTERS_PER_ROW);
+
         gtk_sheet_row_button_add_label(register_sheet, j, row_label);
         gtk_sheet_set_row_title(register_sheet, j, row_label);
 
@@ -1874,16 +1795,16 @@ void Register_Window::Build()
 
   /**************************** load fonts *********************************/
 #define DEFAULT_NORMALFONT "Monospace 10"
-  strcpy(normalfont_string,DEFAULT_NORMALFONT);
+  normalfont_string = DEFAULT_NORMALFONT;
   if(config_get_string(name(),"normalfont",&fontstring))
-      strcpy(normalfont_string,fontstring);
+      normalfont_string = fontstring;
 
   while(!LoadStyles())
   {
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
       {
-      strcpy(normalfont_string,DEFAULT_NORMALFONT);
-      config_set_string(name(),"normalfont",normalfont_string);
+      normalfont_string = DEFAULT_NORMALFONT;
+      config_set_string(name(),"normalfont", normalfont_string.c_str());
       }
       else
       {
@@ -1958,8 +1879,6 @@ void Register_Window::Build()
 
   gtk_widget_grab_default(location);
 
-  //  GTKWAIT;
-
   bIsBuilt = true;
 
   NewProcessor(gp);
@@ -1977,20 +1896,16 @@ Register_Window::Register_Window()
 }
 
 Register_Window::Register_Window(GUI_Processor *_gp)
+  : normalfont(0), current_line_number_style(0), breakpoint_line_number_style(0),
+    registers(0), register_sheet(NULL), rma(0), entry(0), location(0),
+    popup_menu(0), registers_loaded(0), register_size(0),
+    char_width(0), char_height(0), chars_per_column(3)
+    
 {
-  int i;
-
   gp = _gp;
-  char_width = 0;
-  chars_per_column = 3; // assume byte-sized registers
-  register_sheet = NULL;
 
-  registers_loaded=0;
-
-  registers = 0;
-
-  for(i=0;i<MAX_REGISTERS/REGISTERS_PER_ROW;i++)
-    row_to_address[i]=-1;
+  for(int i = 0; i < MAX_REGISTERS / REGISTERS_PER_ROW; ++i)
+    row_to_address[i] = -1;
 }
 
 const char *RAM_RegisterWindow::name()

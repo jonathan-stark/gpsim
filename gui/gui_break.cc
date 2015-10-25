@@ -64,24 +64,21 @@ public:
 
 void link_src_to_gpsim(GUI_Processor *gp)
 {
-  int i, *address = 0, pm_size;
-  linkXREF *cross_reference;
-
   if(gp) {
 
     // Create a cross reference between the pic's program memory and the gui.
-    pm_size =  gp->cpu->program_memory_size();
+    int pm_size =  gp->cpu->program_memory_size();
 
     if(verbose) {
       printf("link_src_to_gpsim\n");
       printf(" processor pma = %d\n",pm_size);
     }
 
-    for(i=0; i < pm_size; i++) {
-      cross_reference = new linkXREF();
+    for(int i = 0; i < pm_size; i++) {
+      linkXREF *cross_reference = new linkXREF();
 
       cross_reference->gp = gp;
-      address = new int;
+      int *address = new int;
       *address = gp->cpu->map_pm_index2address(i);
 
       cross_reference->data = (gpsimObject*) address;

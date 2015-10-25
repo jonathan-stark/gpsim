@@ -27,6 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_register.h"
 #include <gtkextra/gtkextra.h>
 
+#include <string>
+
 class StatusBar_Window;
 class GUI_Processor;
 
@@ -44,7 +46,7 @@ class Register_Window : public GUI_Object
   // first cell in the given row.
   int row_to_address[MAX_ROWS];
 
-  char normalfont_string[256];
+  std::string normalfont_string;
   PangoFontDescription *normalfont;
 
   GtkStyle *current_line_number_style;

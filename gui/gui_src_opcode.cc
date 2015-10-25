@@ -737,10 +737,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
   if(!sbow || !sbow->gp || !sbow->gp->cpu || !widget)
     return;
 
-  GtkSheet *sheet;
-  const gchar *text;
-
-  sheet=GTK_SHEET(widget);
+  GtkSheet *sheet = GTK_SHEET(widget);
 
   if(row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0)
@@ -758,7 +755,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
       int reg = row*16+col;
       unsigned int n=0;
 
-      text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
+      const char *text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
 
       errno = 0;
       if (*text)
