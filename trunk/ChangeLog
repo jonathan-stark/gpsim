@@ -1,3 +1,11 @@
+2015-10-25 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui.h gui/gui_break.cc gui/gui_main.cc gui/gui_processor.cc
+	  gui/gui_profile.cc gui/gui_profile.h gui/gui_register.h
+	  gui/gui_regwin.cc gui/gui_regwin.h gui/gui_src_opcode.cc
+	  gui/gui_statusbar.cc gui/gui_symbols.cc gui/gui_symbols.h
+	  src/ValueCollections.h src/operator.h src/packages.h src/ui.h
+	: Fix minor errors and remove dead code found with static analysis.
+
 2015-10-24 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_menu.cc
 	: Modified file selector to enable the selction of the processor for

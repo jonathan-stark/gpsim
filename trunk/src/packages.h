@@ -58,7 +58,9 @@ enum PACKAGE_PIN_ERRORS
 // a graphical representation of the pin.
 struct PinGeometry
 {
-  PinGeometry() : pin_position(0.0), bNew(false), m_bShowPinname(false) {}
+  PinGeometry() : pin_position(0.0), bNew(false),
+  m_x(0.0), m_y(0.0), m_orientation(0), m_bShowPinname(false) {}
+
   void convertToNew(); // transition from old to new style
 
   float pin_position;

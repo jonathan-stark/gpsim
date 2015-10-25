@@ -229,7 +229,7 @@ public:
     } else {
 
       char szIndex[10];
-      sprintf(szIndex, "%d", uIndex);
+      sprintf(szIndex, "%u", uIndex);
       string sMsg("invalid array index of ");
       sMsg.append(szIndex);
       throw Error(sMsg);
@@ -277,7 +277,6 @@ public:
     // the value in aValue. aList is used to record an
     // appropriate label for one or more elements.
     for(it = itLastEqualed = m_Array.begin(); it != itEnd; ++it) {
-      ostringstream sIndex;
       if(*(_CT*)(*itLastEqualed) != *(_CT*)(*it)) {
         PushValue(iFirstIndex, iCurrentIndex - 1,
                   *itLastEqualed, aList, aValue);

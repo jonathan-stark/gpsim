@@ -174,7 +174,7 @@ extern int gui_animate_delay; // in milliseconds
 void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
   if(callback_data) {
-    GUI_Processor *lgp = (GUI_Processor *) callback_data;
+    GUI_Processor *lgp = static_cast<GUI_Processor *>(callback_data);
 
     while (gtk_events_pending())
       gtk_main_iteration();

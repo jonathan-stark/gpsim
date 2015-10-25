@@ -34,6 +34,8 @@ public:
     eOct,
   };
 
+  IUserInterface() : m_uVerbose(0) {}
+
   virtual ~IUserInterface()
   {
   }

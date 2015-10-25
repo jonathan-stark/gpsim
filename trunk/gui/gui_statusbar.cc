@@ -45,7 +45,7 @@ public:
 
     StatusBar_Window *sbw;
 
-    sbw  = (StatusBar_Window *) (parent_window);
+    sbw  = static_cast<StatusBar_Window *>(parent_window);
     sbw->Update();
 
   }
@@ -176,27 +176,13 @@ void RegisterLabeledEntry::put_value(unsigned int new_value)
 
 void RegisterLabeledEntry::Update()
 {
-  char buffer[32];
-
   if (reg) {
-
+    char buffer[32];
     unsigned int value = reg->get_value();
 
     g_snprintf(buffer, sizeof(buffer), pCellFormat, value);
 
     gtk_entry_set_text (GTK_ENTRY (entry), buffer);
-
-  }
-}
-void RegisterLabeledEntry::AssignRegister(Register *new_reg)
-{
-  reg = new_reg;
-
-  if(reg) {
-    g_snprintf(pCellFormat, sizeof(pCellFormat), "0x%%0%dx", reg->register_size()*2);
-
-    NewLabel(reg->name().c_str());
-    SetEntryWidth(2 + reg->register_size()*2);
   }
 }
 
@@ -280,12 +266,13 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
    * send information back to the gui
    */
 
-  Program_Counter * pPC;
   ProgramMemoryAccess* pPMA;
   pPMA = dynamic_cast<ProgramMemoryAccess*>(ma);
 
   if(gp->cpu && gp->cpu->pc) {
-    pPC = pPMA == NULL ? gp->cpu->pc : pPMA->GetProgramCounter();
+    Program_Counter *pPC =
+      pPMA == NULL ? gp->cpu->pc : pPMA->GetProgramCounter();
+
     StatusBarXREF *cross_reference;
 
     cross_reference = new StatusBarXREF();

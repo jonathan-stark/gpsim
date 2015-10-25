@@ -201,7 +201,7 @@ static void updateSymbolTables(const SymbolTableEntry_t &st)
   (st.second)->ForEachSymbolTable(updateOneSymbol);
 }
 
-void Symbol_Window::Update(void)
+void Symbol_Window::Update()
 {
   load_symbols=1;
 
@@ -251,12 +251,7 @@ void Symbol_Window::symbol_list_row_selected(GtkTreeSelection *treeselection,
   sw->do_symbol_select(e);
 }
 
-void Symbol_Window::SelectSymbolName(const char *symbol_name)
-{
-  cout << "SelectSymbolName is broken\n";
-}
-
-void Symbol_Window::NewSymbols(void)
+void Symbol_Window::NewSymbols()
 {
   Update();
 }
@@ -297,7 +292,7 @@ Symbol_Window::toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
 // Build
 //
 
-void Symbol_Window::Build(void)
+void Symbol_Window::Build()
 {
   if(bIsBuilt)
     return;

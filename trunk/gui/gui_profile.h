@@ -24,6 +24,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui_object.h"
 
+#include <gtk/gtk.h>
+
 class GUI_Processor;
 
 //
@@ -57,8 +59,6 @@ class Profile_Window : public GUI_Object
 
   GtkListStore *profile_exestats_list;
   GtkWidget *profile_exestats_tree;
-
-//  GList *profile_range_list;
 
   GtkWidget *notebook;
   gint range_current_row;

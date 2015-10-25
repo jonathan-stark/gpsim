@@ -23,6 +23,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_REGISTER_H__
 #define __GUI_REGISTER_H__
 
+#include <string>
+
 //========================================================================
 //
 // A GUI register is a shadow of a register in a simulated cpu (or module).
@@ -80,7 +82,7 @@ class GUIRegister {
   void Clear_xref(void);
   void Assign_xref(CrossReferenceToGUI *);
 
-  char *name(void);
+  std::string name();
 
   GUIRegister();
   ~GUIRegister();

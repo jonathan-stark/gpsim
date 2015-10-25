@@ -48,10 +48,9 @@ class Symbol_Window : public GUI_Object
   int load_symbols;
 
   Symbol_Window(GUI_Processor *gp);
-  virtual void Build(void);
-  virtual void Update(void);
-  void NewSymbols(void);
-  void SelectSymbolName(const char *name);
+  virtual void Build();
+  virtual void Update();
+  void NewSymbols();
 
 protected:
   virtual const char *name();
