@@ -25,10 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <vector>
 
-
 class RegisterLabeledEntry;	// in gui_statusbar.cc
-class CyclesLabeledEntry;	// in gui_statusbar.cc
-class TimeLabeledEntry;		// in gui_statusbar.cc
 class MemoryAccess;		// in src/processor.h
 class GUI_Processor;
 
@@ -38,23 +35,16 @@ class GUI_Processor;
 
 class StatusBar_Window {
  public:
-  GUI_Processor *gp;
+  StatusBar_Window(GtkWidget *vbox_main);
 
-  CyclesLabeledEntry *cpu_cycles;
-  TimeLabeledEntry *time;
-  std::vector<RegisterLabeledEntry *> entries;
-
-  StatusBar_Window();
   void NewProcessor(GUI_Processor *_gp, MemoryAccess *);
-  void Create(GtkWidget *vbox_main);
   void Update();
 
-
 private:
+  GUI_Processor *gp;
   MemoryAccess *ma;
-  bool created;
   GtkWidget *hbox;
-
+  std::vector<RegisterLabeledEntry *> entries;
 };
 
 #endif //__GUI_STATUSBAR_H__

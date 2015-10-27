@@ -29,7 +29,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include <string>
 
-class StatusBar_Window;
 class GUI_Processor;
 
 //======================================================================
@@ -104,8 +103,6 @@ class RAM_RegisterWindow : public Register_Window
   RAM_RegisterWindow(GUI_Processor *gp);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void Update();
-
-  StatusBar_Window *sbw;
 
 protected:
   virtual const char *name();

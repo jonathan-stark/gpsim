@@ -1528,12 +1528,7 @@ void SourceWindow::Build()
   gtk_notebook_set_scrollable ((GtkNotebook*)m_Notebook, TRUE);
   gtk_box_pack_start (GTK_BOX (vbox), m_Notebook, TRUE, TRUE, 0);
 
-  status_bar = new StatusBar_Window();
-
-  if(status_bar) {
-    Dprintf ((" creating status bar\n"));
-    status_bar->Create(vbox);
-  }
+  status_bar = new StatusBar_Window(vbox);
 
   gtk_widget_show_all(window);
   gtk_widget_show_all(vbox);

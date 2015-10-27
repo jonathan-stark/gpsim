@@ -73,51 +73,35 @@ static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
 
 //========================================================================
 EntryWidget::EntryWidget()
-  : entry(0)
+{
+  entry = gtk_entry_new();
+  gtk_widget_show(entry);
+}
+
+EntryWidget::~EntryWidget()
 {
 }
 
 void EntryWidget::SetEntryWidth(int string_width)
 {
-  if(entry)
-    gtk_entry_set_width_chars(GTK_ENTRY (entry), string_width);
+  gtk_entry_set_width_chars(GTK_ENTRY(entry), string_width);
 }
 
-void EntryWidget::Create(bool isEditable)
+void EntryWidget::set_editable(bool Editable)
 {
-  entry = gtk_entry_new();
-  if (!isEditable)
-    gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
-  gtk_widget_show(entry);
+  gtk_editable_set_editable(GTK_EDITABLE(entry), Editable ? TRUE : FALSE);
 }
 
 //========================================================================
 
 
-LabeledEntry::LabeledEntry()
-  : label(0)
+LabeledEntry::LabeledEntry(GtkWidget *box, const char *clabel)
 {
-}
+  label = gtk_label_new(clabel);
+  gtk_box_pack_start(GTK_BOX(box), label, FALSE, FALSE, 0);
+  gtk_widget_show(label);
 
-void LabeledEntry::Create(GtkWidget *box,
-			  const char *clabel, 
-			  int string_width,
-			  bool isEditable=true)
-{
-  label = gtk_label_new (clabel);
-    
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_widget_set_size_request (label, 0, 15);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (label);
-
-  EntryWidget::Create(isEditable);
-
-  gtk_entry_set_text (GTK_ENTRY (entry), "----");
-
-  SetEntryWidth(string_width);
-
-  gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(box), entry, FALSE, FALSE, 0);
 }
 
 void LabeledEntry::Update()
@@ -129,70 +113,44 @@ void LabeledEntry::put_value(unsigned int new_value)
 
 }
 
-void LabeledEntry::NewLabel(const char *clabel)
-{
-  if (label)
-    gtk_label_set_text(GTK_LABEL(label), clabel);
-}
 //------------------------------------------------------------------------
 RegisterLabeledEntry::RegisterLabeledEntry(GtkWidget *box,
 					   Register *new_reg,
-					   bool isEditable=true) 
- : LabeledEntry()
+					   bool isEditable=false) 
+ : LabeledEntry(box, new_reg->name().c_str()), reg(new_reg)
 {
-  reg = new_reg;
+  g_snprintf(pCellFormat, sizeof(pCellFormat), "0x%%0%dx",reg->register_size()*2);
 
-  if(reg) {
-    g_snprintf(pCellFormat, sizeof(pCellFormat), "0x%%0%dx",reg->register_size()*2);
+  SetEntryWidth(2 + reg->register_size() * 2);
+  Update();
 
-    label = (GtkWidget *)gtk_label_new (reg->name().c_str());
-    
-    gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-    gtk_widget_show (label);
+  set_editable(isEditable);
 
-    entry = gtk_entry_new ();
-    SetEntryWidth(2 + reg->register_size()*2);
-    Update();
+  g_signal_connect(entry, "activate", G_CALLBACK(LabeledEntry_callback), this);
+}
 
-    gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
-
-    gtk_widget_show (entry);
-
-    if (!isEditable)
-      gtk_editable_set_editable(GTK_EDITABLE(entry), FALSE);
-
-    g_signal_connect(entry, "activate",
-		       G_CALLBACK(LabeledEntry_callback),
-		       this);
-  }
+RegisterLabeledEntry::~RegisterLabeledEntry()
+{
 }
 
 void RegisterLabeledEntry::put_value(unsigned int new_value)
 {
-  if(reg)
-    reg->put_value(new_value);
+  reg->put_value(new_value);
 }
 
 void RegisterLabeledEntry::Update()
 {
-  if (reg) {
-    char buffer[32];
-    unsigned int value = reg->get_value();
+  char buffer[32];
+  unsigned int value = reg->get_value();
 
-    g_snprintf(buffer, sizeof(buffer), pCellFormat, value);
+  g_snprintf(buffer, sizeof(buffer), pCellFormat, value);
 
-    gtk_entry_set_text (GTK_ENTRY (entry), buffer);
-  }
+  gtk_entry_set_text(GTK_ENTRY(entry), buffer);
 }
 
 //------------------------------------------------------------------------
 void StatusBar_Window::Update()
 {
-
-  if (!created)
-      return;
-
   //update the displayed values
 
   if(!gp || !gp->cpu)
@@ -205,35 +163,6 @@ void StatusBar_Window::Update()
       iRLE != entries.end();
       ++iRLE)
     (*iRLE)->Update();
-}
-
-
-/*
- * CreateStatusBar
- *
- * Create the status bar at the bottom of the window
- * 
- *
- * vbox_main - The box to which we will append.
- *
- */ 
-
-
-
-void StatusBar_Window::Create(GtkWidget *vbox_main)
-{
-
-  if(created)
-    return;
-  Dprintf((" %s\n",__FUNCTION__));
-
-  /* --- Put up h-box --- */
-  gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
-
-  created = true;
-
-
 }
 
 /*  NewProcessor
@@ -287,11 +216,13 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 
 }
 
-StatusBar_Window::StatusBar_Window()
-  : gp(0), cpu_cycles(0), time(0), ma(0), created(false)
+StatusBar_Window::StatusBar_Window(GtkWidget *vbox_main)
+  : gp(0), ma(0)
 {
   /* --- Create h-box for holding the status line --- */
-  hbox = gtk_hbox_new (FALSE, 0);
+  hbox = gtk_hbox_new(FALSE, 0);
+  gtk_box_pack_end(GTK_BOX(vbox_main), hbox, FALSE, FALSE, 0);
+  gtk_widget_show(hbox);
 }
 
 #endif // HAVE_GUI
