@@ -1180,7 +1180,7 @@ void TimeFormatter::AddToMenu(GtkWidget *menu,
 
 void TimeWidget::Create(GtkWidget *container)
 {
-  EntryWidget::Create(false);
+  set_editable(false);
 
   gtk_container_add(GTK_CONTAINER(container),entry);
 

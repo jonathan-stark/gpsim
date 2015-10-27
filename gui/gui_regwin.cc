@@ -39,7 +39,6 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 #include "preferences.h"
 #include "gui_register.h"
-#include "gui_statusbar.h"
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
@@ -1771,11 +1770,6 @@ void Register_Window::Build()
   {
     register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [RAM]"));
     gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
-    // Add a status bar
-
-    RAM_RegisterWindow *rrw = dynamic_cast<RAM_RegisterWindow *>(this);
-    if(rrw && rrw->sbw)
-      rrw->sbw->Create(main_vbox);
   }
   else
   {
@@ -1919,9 +1913,6 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
   menu = "/menu/Windows/Ram";
   type = REGISTER_RAM;
 
-  // Add a status bar
-  sbw = new StatusBar_Window();
-
   get_config();
 
   if(enabled)
@@ -1931,7 +1922,6 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 
 void RAM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
 {
-
   if(!_gp || !_gp->cpu)
     return;
 
@@ -1940,16 +1930,11 @@ void RAM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
   Dprintf((" RAM_RegisterWindow::NewProcessor rma=%p\n",rma));
 
   Register_Window::NewProcessor(_gp);
-  if(sbw)
-    sbw->NewProcessor(_gp, rma);
-
 }
 
 void RAM_RegisterWindow::Update()
 {
   Register_Window::Update();
-  if(sbw)
-    sbw->Update();
 }
 
 const char *EEPROM_RegisterWindow::name()

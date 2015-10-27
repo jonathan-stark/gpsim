@@ -78,13 +78,10 @@ class EntryWidget
 {
 public:
   EntryWidget();
-
-  virtual ~EntryWidget()
-  {
-  }
+  virtual ~EntryWidget();
 
   virtual void Update()=0;
-  virtual void Create(bool isEditable=true);
+  virtual void set_editable(bool Editable = true);
   void SetEntryWidth(int string_width);
 
   GtkWidget *entry;
@@ -98,80 +95,29 @@ public:
 
 class LabeledEntry : public EntryWidget {
 public:
-  GtkWidget *label;
-
-  LabeledEntry();
+  LabeledEntry(GtkWidget *box, const char *clabel);
 
   virtual ~LabeledEntry()
   {
   }
 
-  void Create(GtkWidget *box, const char *clabel, int string_width, bool isEditable);
-  void NewLabel(const char *clabel);
   virtual void Update();
   virtual void put_value(unsigned int);
 
+private:
+  GtkWidget *label;
 };
 
 class RegisterLabeledEntry : public LabeledEntry {
 public:
-
-  Register *reg;
-  char pCellFormat[10];
-
-  RegisterLabeledEntry(GtkWidget *,Register *,bool);
-
-  virtual ~RegisterLabeledEntry(){}
+  RegisterLabeledEntry(GtkWidget *, Register *, bool);
+  virtual ~RegisterLabeledEntry();
 
   virtual void put_value(unsigned int);
   virtual void Update();
-};
-
-class CyclesLabeledEntry : public LabeledEntry {
-public:
-
-  CyclesLabeledEntry();
-
-  virtual ~CyclesLabeledEntry()
-  {
-  }
-
-  virtual void Update(void);
-};
-
-
-typedef enum {
-  MENU_TIME_USECONDS,
-  MENU_TIME_MSECONDS,
-  MENU_TIME_SECONDS,
-  MENU_TIME_HHMMSS
-} time_menu_id;
-
-typedef struct _time_menu_item {
-  const char *name;
-  time_menu_id id;
-} time_menu_item;
-
-class TimeLabeledEntry : public LabeledEntry
-{
-public:
-  TimeLabeledEntry();
-
-  virtual ~TimeLabeledEntry()
-  {
-  }
-
-  virtual void Update(void);
-  GtkWidget *build_menu();
-
-  void set_time_format(time_menu_id id)
-  {
-    time_format = id;
-  }
-
-  GtkWidget *menu;
-  time_menu_id time_format;
-
+private:
+  Register *reg;
+  char pCellFormat[10];
 };
 
 //------------------------------------------------------------------------
