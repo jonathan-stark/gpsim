@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <string>
 #include <iostream>
+#include <memory>
 
 #ifndef _WIN32
 #include <pthread.h>
@@ -1212,10 +1213,10 @@ static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition
 
   std::cout << " SourceServer accepting new client connect\n";
 
-  SocketBase *client = s->Accept();
+  std::auto_ptr<SocketBase> client(s->Accept());
   std::cout << " SourceServer accepted connection\n";
 
-  if(!client)
+  if(!client.get())
     return FALSE;
 
   int bytes= recv(client->getSocket(),
