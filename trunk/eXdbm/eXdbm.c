@@ -226,6 +226,7 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
  DbmDbList->dblist[temp_id].filename = (char *) malloc(sizeof(char)* (strlen(filename)+1));
   if(DbmDbList->dblist[temp_id].filename == NULL) {
     RaiseError(DBM_ALLOC);
+    fclose(f);
     return(-1);
   }
 
@@ -562,7 +563,10 @@ int eXdbmReloadDatabase(DB_ID *dbid, int update)
 
   ret = eXdbmCloseDatabase(*dbid, update);
 
-  if(ret == -1) return(-1);
+  if(ret == -1) {
+    free(filename);
+    return(-1);
+  }
 
   /* then, reopen it */
 

@@ -1,4 +1,8 @@
 2015-10-27 Errol van de l'Isle <evandel@cix.co.uk>
+	* cli/socket.cc eXdbm/eXdbm.c
+	: Fix resource & memory leaks found with static analysis.
+
+2015-10-27 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui.h gui/gui_menu.cc gui/gui_regwin.cc gui/gui_regwin.h
 	  gui/gui_src_asm.cc gui/gui_statusbar.cc gui/gui_statusbar.h
 	: Improve register status bar code & remove it from the RAM window
