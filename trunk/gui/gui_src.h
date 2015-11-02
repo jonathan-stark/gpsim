@@ -22,8 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SRC_H__
 #define __GUI_SRC_H__
 
-#include <list>
+#include <map>
 #include <string>
+#include <vector>
 
 // forward references
 class SourceBrowserParent_Window;
@@ -59,9 +60,7 @@ public:
              const char *pFGColor,
              const char *pBGColor);
 
-  virtual ~TextStyle()
-  {
-  }
+  ~TextStyle();
 
   GtkTextTag *tag() { return m_pTag; }
 
@@ -69,8 +68,6 @@ public:
   void revert();  // Remove a change the user has made
 
   void setFG(GdkColor *pNewColor);
-
-  virtual void doubleClickEvent(GtkTextIter *);
 
   ColorHolder  mFG;  // Foreground color
   ColorHolder  mBG;  // Background color
@@ -206,7 +203,7 @@ public:
   virtual int getAddress(NSourcePage *pPage, int line);
   virtual bool bAddressHasBreak(int address);
   virtual int getOpcode(int address);
-  int  AddPage(SourceBuffer *pSourceBuffer, const char *fName);
+  int  AddPage(SourceBuffer *pSourceBuffer, const std::string &fName);
   void step(int n=1);
   void step_over();
   void stop();
@@ -224,17 +221,6 @@ public:
   SourcePageMargin &margin();
   const char *getFont();
   gint switch_page_cb(guint newPage);
-
-  // Font strings
-  std::string commentfont_string;
-  std::string sourcefont_string;
-
-  GtkStyle *symbol_text_style;       // for symbols in .asm display
-  GtkStyle *label_text_style;        // for label in .asm display
-  GtkStyle *instruction_text_style;  // for instruction in .asm display
-  GtkStyle *number_text_style;       // for numbers in .asm display
-  GtkStyle *comment_text_style;      // for comments in .asm display
-  GtkStyle *default_text_style;      // the rest
 
   // do we need this:
   bool m_bLoadSource;
@@ -280,12 +266,10 @@ private:
   std::string m_name;
 
 protected:
-  void set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style);
   void addTagRange(NSourcePage *pPage, TextStyle *,
                    int start_index, int end_index);
 
-  // FIXME - change these items to list objects
-  NSourcePage **pages;
+  std::map<int, NSourcePage *> pages;
 
   GtkWidget *m_Notebook;
 
@@ -320,35 +304,6 @@ class SourceBrowser_Window : public GUI_Object {
   virtual void SetPC(int address);
   virtual void CloseSource(){};
   virtual void NewSource(GUI_Processor *gp){};
-
-};
-
-//
-// Source page
-//
-
-class SourcePage
-{
- public:
-
-
-  GtkAdjustment *source_layout_adj;
-  GtkWidget *source_layout;
-  GtkWidget *source_text;
-  int 	    pageindex_to_fileid;
-  GtkWidget *source_pcwidget;
-  GtkWidget *notebook;   // parent
-  GtkWidget *notebook_child;
-
-  SourcePage() {
-    source_layout_adj = 0;
-    source_layout = 0;
-    source_text = 0;
-    pageindex_to_fileid = INVALID_VALUE;
-    source_pcwidget = 0;
-    notebook_child = 0;
-    notebook = 0;
-  }
 
 };
 
@@ -457,7 +412,7 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void ChangeView(int view_state);
   virtual int set_config();
 
-  list<SourceWindow *> children;
+  std::vector<SourceWindow *> children;
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
 
@@ -484,14 +439,12 @@ class SourceBrowserParent_Window : public GUI_Object
   TextStyle *mBreakpointTag;   // for breakpoints
   TextStyle *mNoBreakpointTag;
   TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
-  GtkStyle  *mBreakStyle;
 
   SourcePageMargin m_margin;
   int m_TabType;
   std::string m_FontDescription;
 
-  // FIXME - change these items to list objects
-  SourceBuffer **ppSourceBuffers;
+  std::vector<SourceBuffer *> ppSourceBuffers;
 
 protected:
   virtual const char *name();

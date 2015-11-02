@@ -67,10 +67,6 @@ static GtkWidget *aPopupMenu;
 
 static GtkTextView *pViewContainingPopup;
 
-extern int gui_question(const char *question, const char *a, const char *b);
-
-static int load_fonts(SourceWindow *sbaw);
-
 //------------------------------------------------------------------------
 //
 static char *strReverse(const char *start, char *dest, int nChars)
@@ -324,7 +320,6 @@ typedef enum {
   MENU_STOP,
   MENU_FINISH,
   MENU_RESET,
-  MENU_SETTINGS,
   MENU_PROFILE_START_HERE,
   MENU_PROFILE_STOP_HERE,
   MENU_ADD_TO_WATCH,
@@ -345,7 +340,6 @@ static const menu_item menu_items[] = {
   {"Profile stop here", MENU_PROFILE_STOP_HERE},
   {"Add to watch",    MENU_ADD_TO_WATCH},
   {"Find text...",    MENU_FIND_TEXT},
-  {"Settings...",     MENU_SETTINGS},
 };
 
 static const menu_item submenu_items[] = {
@@ -500,8 +494,6 @@ static gboolean TagEvent (GtkTextTag *texttag,
 
     if (event->type == GDK_2BUTTON_PRESS  && evtButton->button == 1) {
       Dprintf (("Double click left mouse\n"));
-      if (pTextStyle)
-        pTextStyle->doubleClickEvent(arg2);
 
       gint signal_id =  g_signal_lookup ("button_press_event",
         G_TYPE_FROM_INSTANCE(arg1));
@@ -748,6 +740,11 @@ TextStyle::TextStyle (const char *cpName,
     this);
 }
 
+TextStyle::~TextStyle()
+{
+  g_object_unref(m_pTag);
+}
+
 void TextStyle::setFG(GdkColor *pNewColor)
 {
   if (mFG.set(pNewColor,true)) {
@@ -756,10 +753,7 @@ void TextStyle::setFG(GdkColor *pNewColor)
   }
 }
 //------------------------------------------------------------------------
-void TextStyle::doubleClickEvent(GtkTextIter *pIter)
-{
 
-}
 void TextStyle::apply()
 {
   mFG.apply();
@@ -940,11 +934,6 @@ SourceWindow::SourceWindow(GUI_Processor *pgp,
 
   mProgramCounter.bIsActive = false;
 
-  pages = new NSourcePage *[SBAW_NRFILES];
-  for (int i=0; i<SBAW_NRFILES; i++)
-    pages[i] = 0;
-
-
   if (bUseConfig) {
     get_config();
 
@@ -992,19 +981,6 @@ void SourceWindow::reset()
     gp->cpu->reset(POR_RESET);
 }
 
-//------------------------------------------------------------------------
-void SourceWindow::set_style_colors(const char *fg_color, const char *bg_color, GtkStyle **style)
-{
-  GdkColor text_fg;
-  GdkColor text_bg;
-
-  gdk_color_parse(fg_color, &text_fg);
-  gdk_color_parse(bg_color, &text_bg);
-  *style = gtk_style_new();
-  (*style)->base[GTK_STATE_NORMAL] = text_bg;
-  (*style)->fg[GTK_STATE_NORMAL] = text_fg;
-
-}
 //------------------------------------------------------------------------
 // toggleBreak
 //
@@ -1257,8 +1233,6 @@ void NSourcePage::invalidateView()
 
 }
 
-static void settings_dialog(SourceWindow *sbaw);
-
 //------------------------------------------------------------------------
 static Register *findRegister(string text)
 {
@@ -1302,9 +1276,6 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
 
   switch (GPOINTER_TO_SIZE(data)) {
 
-  case MENU_SETTINGS:
-    settings_dialog(pSW);
-    break;
   case MENU_FIND_TEXT:
     pSW->findText();
     break;
@@ -1486,8 +1457,6 @@ SourceWindow::BuildPopupMenu()
 //
 void SourceWindow::Build()
 {
-  char *fontstring;
-
   Dprintf((" \n"));
 
   if(bIsBuilt)
@@ -1536,41 +1505,6 @@ void SourceWindow::Build()
 
 
   aPopupMenu = BuildPopupMenu();
-
-  set_style_colors("black", "white", &default_text_style);
-  set_style_colors("dark green", "white", &symbol_text_style);
-  set_style_colors("orange", "white", &label_text_style);
-  set_style_colors("red", "white", &instruction_text_style);
-  set_style_colors("blue", "white", &number_text_style);
-  set_style_colors("dim gray", "white", &comment_text_style);
-
-#define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
-#define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
-
-  if(config_get_string(name(),"commentfont",&fontstring))
-    commentfont_string = fontstring;
-  else
-    commentfont_string = DEFAULT_COMMENTFONT;
-
-  if(config_get_string(name(),"sourcefont",&fontstring))
-    sourcefont_string = fontstring;
-  else
-    sourcefont_string = DEFAULT_SOURCEFONT;
-
-  while(!load_fonts(this)) {
-
-    if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
-    {
-      sourcefont_string = DEFAULT_SOURCEFONT;
-      commentfont_string = DEFAULT_COMMENTFONT;
-      config_set_string(name(), "sourcefont", sourcefont_string.c_str());
-      config_set_string(name(), "commentfont", commentfont_string.c_str());
-    }
-    else
-    {
-      settings_dialog(this);
-    }
-  }
 
   bIsBuilt = true;
 
@@ -1670,7 +1604,7 @@ void SourceWindow::Update()
     if (m_Notebook) {
       gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
 
-      if (currPage>=0 && currPage < SBAW_NRFILES) {
+      if (currPage >= 0) {
         pages[currPage]->setSource();
         pages[currPage]->setFont(m_pParent->getFont());
       }
@@ -1698,7 +1632,7 @@ void SourceWindow::UpdateLine(int address)
     return;
 
   gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
-  if (currPage < 0 || currPage > SBAW_NRFILES)
+  if (currPage < 0)
       return;
 
   NSourcePage *pPage = pages[currPage];
@@ -2040,7 +1974,7 @@ void SourceWindow::SetPC(int address)
     gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook)) :
   -1;
 
-  if (currPage>=0 && currPage < SBAW_NRFILES)
+  if (currPage >= 0)
     pages[currPage]->setSource();
 
   // Get the file id associated with the program counter address
@@ -2056,11 +1990,15 @@ void SourceWindow::SetPC(int address)
     id = currPage;
     PCline = pma->getFromAddress(address)->get_lst_line();
   } else {
-    for (id=0; id<SBAW_NRFILES; id++)
-      if(pages[id] && pages[id]->m_fileid == sbawFileId)
+    std::map<int, NSourcePage *>::iterator i = pages.begin();
+    for ( ; i != pages.end(); ++i) {
+      if (i->second->m_fileid == sbawFileId) {
+        id = i->first;
         break;
+      }
+    }
 
-    if (id >= SBAW_NRFILES)
+    if (id < 0)
       return;   // page was not found.
 
     // Switch to the source browser page that contains the program counter.
@@ -2077,8 +2015,10 @@ void SourceWindow::SetPC(int address)
   bool bFirstUpdate=true;
   if (mProgramCounter.bIsActive) {
     bFirstUpdate=false;
-  } else
-    GTKWAIT;
+  } else {
+    while (gtk_events_pending())
+      gtk_main_iteration();
+  }
 
   mProgramCounter.page = id;
   mProgramCounter.line = PCline;
@@ -2150,8 +2090,6 @@ void SourceWindow::NewSource(GUI_Processor *gp)
 {
   Dprintf((" \n"));
 
-  int i;
-
   unsigned int address;
 
   if(!gp || !gp->cpu || !gp->cpu->pma)
@@ -2190,11 +2128,11 @@ void SourceWindow::NewSource(GUI_Processor *gp)
   }
 
 
-  i=0;
-  while (m_pParent->ppSourceBuffers[i]) {
-
-    AddPage(m_pParent->ppSourceBuffers[i]);
-    i++;
+  std::vector<SourceBuffer *>::iterator i = m_pParent->ppSourceBuffers.begin();
+  std::vector<SourceBuffer *>::iterator iend = m_pParent->ppSourceBuffers.end();
+ 
+  for ( ; i != iend; ++i) {
+    AddPage(*i);
   }
 
   m_bSourceLoaded = 1;
@@ -2227,149 +2165,32 @@ void SourceWindow::NewSource(GUI_Processor *gp)
 int SourceWindow::AddPage(SourceBuffer *pSourceBuffer)
 {
   if (pSourceBuffer && pSourceBuffer->m_pFC)
-    return AddPage(pSourceBuffer,  pSourceBuffer->m_pFC->name().c_str());
+    return AddPage(pSourceBuffer,  pSourceBuffer->m_pFC->name());
   return -1;
 }
 
-int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const char *fName)
+int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const std::string &fName)
 {
-
   if (!bIsBuilt || !pSourceBuffer)
     return -1;
 
-  GTKWAIT;
-
   GtkWidget *label;
 
-  std::string str = fName;
-  size_t pos = str.find_last_of("/\\");
+  size_t pos = fName.find_last_of("/\\");
   if (pos != std::string::npos)
-    str = str.substr(pos + 1);
-
-  label = gtk_label_new(str.c_str());
+    label = gtk_label_new(fName.substr(pos + 1).c_str());
+  else
+    label = gtk_label_new(fName.c_str());
 
   GtkWidget *pFrame = gtk_frame_new(NULL);
 
-  gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),pFrame,label);
+  int id = gtk_notebook_append_page(GTK_NOTEBOOK(m_Notebook),pFrame,label);
 
-  int id = gtk_notebook_page_num(GTK_NOTEBOOK(m_Notebook),pFrame);
-
-  assert(id<SBAW_NRFILES && id >=0);
-
-  NSourcePage *page = new NSourcePage(this, pSourceBuffer, id,pFrame);
-
-  pages[id] = page;
-
-  //page->setSource();
+  pages[id] = new NSourcePage(this, pSourceBuffer, id, pFrame);
 
   gtk_widget_show_all(pFrame);
 
   return id;
-
-}
-
-
-
-//########################################################################
-//
-// Everything below is in the process of being deprecated...
-//
-//########################################################################
-
-static int load_fonts(SourceWindow *sbaw)
-{
-  sbaw->comment_text_style->font_desc
-    = pango_font_description_from_string(sbaw->commentfont_string.c_str());
-  sbaw->default_text_style->font_desc
-    = pango_font_description_from_string(sbaw->sourcefont_string.c_str());
-  sbaw->label_text_style->font_desc
-    = pango_font_description_from_string(sbaw->sourcefont_string.c_str());
-  sbaw->symbol_text_style->font_desc
-    = pango_font_description_from_string(sbaw->sourcefont_string.c_str());
-  sbaw->instruction_text_style->font_desc
-    = pango_font_description_from_string(sbaw->sourcefont_string.c_str());
-  sbaw->number_text_style->font_desc
-    = pango_font_description_from_string(sbaw->sourcefont_string.c_str());
-
-  if (!sbaw->comment_text_style->font_desc)
-    return 0;
-  if (!sbaw->default_text_style->font_desc)
-    return 0;
-
-  return 1;
-}
-
-/********************** Settings dialog ***************************/
-static void settings_dialog(SourceWindow *sbaw)
-{
-  GtkWidget *dialog = gtk_dialog_new_with_buttons(
-    "Source browser settings",
-    GTK_WINDOW(sbaw->window),
-    GTK_DIALOG_DESTROY_WITH_PARENT,
-    "_Cancel", GTK_RESPONSE_CANCEL,
-    "_OK", GTK_RESPONSE_OK,
-    NULL
-    );
-
-  GtkWidget *content = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
-
-  GtkWidget *table = gtk_table_new(2, 2, FALSE);
-  gtk_table_set_row_spacings(GTK_TABLE(table), 6);
-  gtk_table_set_col_spacings(GTK_TABLE(table), 12);
-  gtk_box_pack_start(GTK_BOX(content), table, FALSE, FALSE, 0);
-
-  GtkWidget *label;
-
-  // Source font
-  label = gtk_label_new("Font for source");
-  gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 0, 1);
-  GtkWidget *source_font_btn
-    = gtk_font_button_new_with_font(sbaw->sourcefont_string.c_str());
-  gtk_table_attach_defaults(GTK_TABLE(table), source_font_btn, 1, 2, 0, 1);
-
-  // Comment font
-  label = gtk_label_new("Font for comments");
-  gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, 1, 2);
-  GtkWidget *comment_font_btn = gtk_font_button_new_with_font(sbaw->commentfont_string.c_str());
-  gtk_table_attach_defaults(GTK_TABLE(table), comment_font_btn, 1, 2, 1, 2);
-
-  gtk_widget_show_all(dialog);
-
-  int fonts_ok;
-  do {
-    fonts_ok = 0;
-    if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK)
-      break;
-
-    const gchar *fontname;
-    PangoFontDescription *font;
-
-    fontname = gtk_font_button_get_font_name(GTK_FONT_BUTTON(source_font_btn));
-    if ((font = pango_font_description_from_string(fontname))) {
-      pango_font_description_free(font);
-      sbaw->sourcefont_string = fontname;
-      config_set_string(sbaw->name_pub(), "sourcefont", sbaw->sourcefont_string.c_str());
-      fonts_ok++;
-    } else {
-      if (gui_question("Source font did not load!", "Try again", "Ignore/Cancel") == FALSE)
-        break;
-    }
-
-    fontname = gtk_font_button_get_font_name(GTK_FONT_BUTTON(comment_font_btn));
-    if ((font = pango_font_description_from_string(fontname))) {
-      pango_font_description_free(font);
-      sbaw->commentfont_string = fontname;
-      config_set_string(sbaw->name_pub(), "commentfont", sbaw->commentfont_string.c_str());
-      fonts_ok++;
-    } else {
-      if (gui_question("Comment font did not load!", "Try again", "Ignore/Cancel") == FALSE)
-        break;
-    }
-  } while (fonts_ok != 2);
-
-  gtk_widget_destroy(dialog);
-
-  load_fonts(sbaw);
 }
 
 /*********************** gui message dialog *************************/
@@ -2509,32 +2330,24 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   else
     setFont("Serif 8");
 
-  ppSourceBuffers = new SourceBuffer *[SBAW_NRFILES];
-  for (int i=0; i<SBAW_NRFILES; i++)
-    ppSourceBuffers[i] = 0;
-  children.push_back(new SourceWindow(_gp,this,true));
+  children.push_back(new SourceWindow(_gp, this, true));
 }
 
 void SourceBrowserParent_Window::Build()
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end();++sbaw_iterator)
     (*sbaw_iterator)->Build();
 
   UpdateMenuItem();
-
 }
 
 void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
-  list <ProgramMemoryAccess *> :: iterator pma_iterator;
-
-  sbaw_iterator = children.begin();
-  pma_iterator = gp->cpu->pma_context.begin();
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
+  std::list <ProgramMemoryAccess *>::iterator pma_iterator
+    = gp->cpu->pma_context.begin();
 
   CreateSourceBuffers(gp);
 
@@ -2569,92 +2382,74 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 
 void SourceBrowserParent_Window::SelectAddress(int address)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->SelectAddress(address);
 }
 
 void SourceBrowserParent_Window::SelectAddress(Value *addrSym)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->SelectAddress(addrSym);
 }
 
 void SourceBrowserParent_Window::Update()
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->Update();
 }
 
 void SourceBrowserParent_Window::UpdateLine(int address)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->UpdateLine(address);
 }
 
 void SourceBrowserParent_Window::SetPC(int address)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->SetPC(address);
 }
 
 void SourceBrowserParent_Window::CloseSource()
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->CloseSource();
 }
 
 void SourceBrowserParent_Window::NewSource(GUI_Processor *gp)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
   CreateSourceBuffers(gp);
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->NewSource(gp);
 }
 
 void SourceBrowserParent_Window::ChangeView(int view_state)
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->ChangeView(view_state);
 }
 
 int SourceBrowserParent_Window::set_config()
 {
-  list <SourceWindow *> :: iterator sbaw_iterator;
+  std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
 
-  for (sbaw_iterator = children.begin();
-    sbaw_iterator != children.end();
-    ++sbaw_iterator)
+  for ( ; sbaw_iterator != children.end(); ++sbaw_iterator)
     (*sbaw_iterator)->set_config();
 
   const char *sName = "source_config";
@@ -2832,18 +2627,17 @@ void SourceBrowserParent_Window::CreateSourceBuffers(GUI_Processor *gp)
 
     for(int i = 0; i<pProc->files.nsrc_files(); i++) {
       FileContext *fc = pProc->files[i];
-      const char *file_name = fc->name().c_str();
-      int iNameLength = strlen(file_name);
 
-      if(strcmp(file_name+iNameLength-4,".cod")
-        && strcmp(file_name+iNameLength-4,".COD")
-        && (i < SBAW_NRFILES) )
-        ppSourceBuffers[i] = new SourceBuffer(mpTagTable, fc, this);
+      int pos = fc->name().size() - 4;
+      if (pos > 0 && fc->name().compare(pos, 4, ".cod")
+        && fc->name().compare(pos, 4, ".COD")) {
 
-      else {
+        ppSourceBuffers.push_back(new SourceBuffer(mpTagTable, fc, this));
+
+      } else {
         if(verbose)
           printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
-          file_name);
+          fc->name().c_str());
       }
     }
 
