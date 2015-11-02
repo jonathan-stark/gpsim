@@ -32,16 +32,12 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/processor.h"
 #include "settings.h"
 
-#define SBAW_NRFILES 100 // Max number of source files
-
 //#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
-
-#define GTKWAIT { while(gtk_events_pending()) gtk_main_iteration(); }
 
 //------------------------------------------------------------
 //
@@ -142,13 +138,7 @@ public:
 extern GtkUIManager *ui;
 extern GUI_Processor *gpGuiProcessor;
 
-void exit_gpsim(void);
-
-void update_menu_item(GUI_Object *_this);
-
-
-void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value);
-
+void exit_gpsim();
 
 // Configuration -- records window states.
 extern Settings *settings;
@@ -161,9 +151,6 @@ int config_remove(const char *module, const char *entry);
 
 gboolean gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 
-
-void ProfileWindow_notify_start_callback(Profile_Window *pw);
-void ProfileWindow_notify_stop_callback(Profile_Window *pw);
 int gui_get_value(const char *prompt);
 
 #endif // __GUI_H__

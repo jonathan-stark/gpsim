@@ -1,3 +1,7 @@
+2015-11-02 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui.h gui/gui_src.h gui/gui_src_asm.cc
+	: Remove limit on number of source files. Removed unused and deprecated code.
+
 2015-10-27 Errol van de l'Isle <evandel@cix.co.uk>
 	* cli/socket.cc eXdbm/eXdbm.c
 	: Fix resource & memory leaks found with static analysis.
