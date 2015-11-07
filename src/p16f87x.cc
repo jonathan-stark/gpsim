@@ -92,6 +92,7 @@ void P16F871::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
@@ -304,6 +305,7 @@ void P16F873::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
@@ -571,6 +573,7 @@ void P16F876::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
@@ -790,6 +793,7 @@ void P16F874::create_sfr_map()
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 

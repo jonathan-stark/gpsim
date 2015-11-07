@@ -77,6 +77,7 @@ public:
     SSPM_I2Cslave_7bitaddr = 0x6,
     SSPM_I2Cslave_10bitaddr = 0x7,
     SSPM_MSSPI2Cmaster = 0x8,
+    SSPM_LoadMaskFunction = 0x9,
     SSPM_I2Cfirmwaremaster = 0xb,
     SSPM_I2Cslave_7bitaddr_ints = 0xe,
     SSPM_I2Cslave_10bitaddr_ints = 0xf,
@@ -172,18 +173,6 @@ class _SSP1CON3 : public sfr_register
 private:
   SSP1_MODULE   *m_sspmod;
 };
-class _SSP1MSK : public sfr_register
-{
- public:
-
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  _SSP1MSK(Processor *pCpu, SSP1_MODULE *);
-
-private:
-  SSP1_MODULE   *m_sspmod;
-};
 
 class _SSPSTAT : public sfr_register
 {
@@ -237,6 +226,14 @@ private:
   bool m_bIsFull;
 };
 
+class _SSPMSK : public sfr_register
+{
+ public: 
+  _SSPMSK(Processor *pCpu, const char *_name);
+
+  virtual void put(unsigned int new_value);
+};
+
 class _SSPADD : public sfr_register
 {
  public: 
@@ -244,6 +241,7 @@ class _SSPADD : public sfr_register
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+  virtual unsigned int get();
 private:
   SSP_MODULE   *m_sspmod;
 };
@@ -321,6 +319,7 @@ class I2C: public  TriggerObject
   virtual void bus_collide();
   virtual void slave_command();
   virtual bool end_ack();
+  virtual bool match_address(unsigned int sspsr);
 
 
 protected:
@@ -351,14 +350,13 @@ class I2C_1: public  I2C
  public:
   SSP_MODULE *m_sspmod;
   _SSP1CON3  *m_sspcon3;
-  _SSP1MSK   *m_ssp1msk;
 
 
   virtual void clock(bool);
   virtual void sda(bool);
   virtual void bus_collide();
 
-  I2C_1(SSP_MODULE *, _SSPCON *, _SSPSTAT *, _SSPBUF *, _SSPCON2 *, _SSPADD *, _SSP1CON3 *,_SSP1MSK *);
+  I2C_1(SSP_MODULE *, _SSPCON *, _SSPSTAT *, _SSPBUF *, _SSPCON2 *, _SSPADD *, _SSP1CON3 *);
 };
 class SSP_MODULE 
 {
@@ -370,6 +368,7 @@ class SSP_MODULE
 
   // set to NULL for BSSP (It doesn't have this register)
   _SSPADD   sspadd;
+  _SSPMSK   *sspmsk;
 
   SSP_MODULE(Processor *);
   virtual ~SSP_MODULE();
@@ -454,10 +453,9 @@ class SSP1_MODULE : public SSP_MODULE //MSSP1
 {
  public:
   SSP1_MODULE(Processor *);
-  ~SSP1_MODULE(){};
+  ~SSP1_MODULE();
 
    _SSP1CON3  	ssp1con3;
-   _SSP1MSK	ssp1msk;
 
   virtual void initialize(PIR_SET *ps,
 		  PinModule *_SckPin,

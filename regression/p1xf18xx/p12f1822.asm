@@ -366,7 +366,7 @@ read_config_data:
 	nop
 	nop
 	bsf      INTCON,GIE        ; Restore interrupts
-   .assert "eedatah == 0x27 && eedata == 0x00, \"*** FAILED 12f1822 Device ID\""
+   .assert "eedath == 0x27 && eedatl == 0x00, \"*** FAILED 12f1822 Device ID\""
         nop
 
   ; test write

@@ -346,7 +346,9 @@ public:
                        );
 
   void add_sfr_register(Register *reg, unsigned int addr,
-                        RegisterValue por_value=RegisterValue(0,0),const char *new_name=0);
+                        RegisterValue por_value=RegisterValue(0,0),
+			const char *new_name=0,
+			bool warn_dup = true);
   void delete_sfr_register(Register *pReg);
   void remove_sfr_register(Register *pReg);
 

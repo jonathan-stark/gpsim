@@ -234,3 +234,5 @@ ${RT}       p1xf18xx sim_p16f1823_i2c_v2
 ${RT}       p1xf18xx sim_p16f1823_spi
 
 ${RT}	p18f26k22 sim
+${RT}	p16f88x sim
+grep ERR */*log

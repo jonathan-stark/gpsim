@@ -256,35 +256,45 @@ L_psaInitComplete:
 	NOP
 
   .assert "tmr0l == (((tmr0Lo+256)>>psa)&0xff)"
+	nop
 
   ; now for some bigger delays.
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+2*251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+3*251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+4*251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+5*251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+6*251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+7*251)>>psa)&0xff)"
+	nop
 
-	DELAY  251
+	DELAY  250
   .assert "tmr0l == (((tmr0Lo+256+8*251)>>psa)&0xff)"
+	nop
 
-	DELAY  8191
+	DELAY  8190
   .assert "tmr0l == (((tmr0Lo+256+8*251+8191)>>psa)&0xff)"
+	nop
 
 	INCF	psa,F
 	btfss	psa,3
