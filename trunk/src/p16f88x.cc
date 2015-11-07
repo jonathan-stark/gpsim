@@ -221,12 +221,10 @@ P16F88x::~P16F88x()
   remove_sfr_register(&pstrcon);
   remove_sfr_register(&eccpas);
   remove_sfr_register(&ssp.sspcon2);
-  if (hasSSP()) {
-    remove_sfr_register(&ssp.sspbuf);
-    remove_sfr_register(&ssp.sspcon);
-    remove_sfr_register(&ssp.sspadd);
-    remove_sfr_register(&ssp.sspstat);
-  }
+  remove_sfr_register(&ssp.sspbuf);
+  remove_sfr_register(&ssp.sspcon);
+  remove_sfr_register(&ssp.sspadd);
+  remove_sfr_register(&ssp.sspstat);
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
   remove_sfr_register(comparator.cmxcon0[0]);
@@ -322,11 +320,14 @@ void P16F88x::create_sfr_map()
   add_sfr_register(&pr2,    0x92, RegisterValue(0xff,0));
 
 
+  get_eeprom()->get_reg_eedata()->new_name("eedat");
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
   add_sfr_register(get_eeprom()->get_reg_eedatah(),  0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x10f);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
+  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
 
   alias_file_registers(0x0a,0x0b,0x080);
@@ -429,15 +430,16 @@ void P16F88x::create_sfr_map()
   add_sfr_register(&eccpas, 0x9c, RegisterValue(0,0));
   eccpas.setIOpin(0, 0, &(*m_portb)[0]);
   eccpas.link_registers(&pwm1con, &ccp1con);
-  add_sfr_register(&ssp.sspcon2,  0x91, RegisterValue(0,0) ,"sspcon2");
-  if (hasSSP()) {
-    add_sfr_register(&ssp.sspbuf,  0x13, RegisterValue(0,0),"sspbuf");
-    add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
-    add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
-    add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
-    tmr2.ssp_module[0] = &ssp;
+  ssp.sspmsk = new _SSPMSK(this, "ssp1msk");
+  add_sfr_register(&ssp.sspbuf,  0x13, RegisterValue(0,0),"sspbuf");
+  add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
+  add_sfr_register(&ssp.sspcon2,  0x91, RegisterValue(0,0),"sspcon2");
+  add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
+  add_sfr_register(ssp.sspmsk,  0x93, RegisterValue(0xff,0), "sspmsk", false);
+  add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
+  tmr2.ssp_module[0] = &ssp;
 
-    ssp.initialize(
+  ssp.initialize(
 		get_pir_set(),    // PIR
                 &(*m_portc)[3],   // SCK
                 &(*m_porta)[5],   // SS
@@ -446,7 +448,6 @@ void P16F88x::create_sfr_map()
                 m_trisc,          // i2c tris port
 		SSP_TYPE_SSP
 	);
-  }
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con;
   tmr1h.tmrl  = &tmr1l;
@@ -1400,6 +1401,7 @@ void P16F631::create_sfr_map()
   pie1.setPir(pir1);
   pie2.setPir(pir2);
 
+  get_eeprom()->get_reg_eedata()->new_name("eedat");
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));

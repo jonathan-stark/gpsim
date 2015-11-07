@@ -50,7 +50,7 @@ using namespace std;
 //
 // EEPROM related registers
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else

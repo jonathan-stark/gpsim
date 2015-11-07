@@ -1139,7 +1139,9 @@ void pic_processor::create ()
 // FIXME parent's constructor.
 
 void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
-                                     RegisterValue por_value, const char *new_name)
+                                     RegisterValue por_value, 
+				     const char *new_name,
+				     bool warn_dup)
 {
 
   reg->set_cpu(this);
@@ -1148,27 +1150,26 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
       if (registers[addr]) 
       {
 	if (registers[addr]->isa() == Register::INVALID_REGISTER)
+	{
 	  delete registers[addr];
-	else
+          registers[addr] = reg;
+	}
+	else if (warn_dup)
 	    printf("%s 0x%x Already register %s\n", __FUNCTION__, addr, registers[addr]->name().c_str());
       }
-#ifdef DEBUG
-      if (addr == 0xfa1)
-      {
-	printf("DEBUG trace 0x%x\n", addr);
-      }
-#endif
-      registers[addr] = reg;
-      registers[addr]->address = addr;
-      registers[addr]->alias_mask = 0;
+      else
+          registers[addr] = reg;
+
+      reg->address = addr;
+      reg->alias_mask = 0;
 
       if(new_name)
-        registers[addr]->new_name(new_name);
+        reg->new_name(new_name);
 
       RegisterValue rv = getWriteTT(addr);
-      registers[addr]->set_write_trace(rv);
+      reg->set_write_trace(rv);
       rv = getReadTT(addr);
-      registers[addr]->set_read_trace(rv);
+      reg->set_read_trace(rv);
     }
 
   reg->value       = por_value;

@@ -2400,14 +2400,14 @@ P18F26K22::~P18F26K22()
     remove_sfr_register(&usart2.baudcon);
     remove_sfr_register(&ssp1.sspbuf);
     remove_sfr_register(&ssp1.sspadd);
-    remove_sfr_register(&ssp1.ssp1msk);
+    remove_sfr_register(ssp1.sspmsk);
     remove_sfr_register(&ssp1.sspstat);
     remove_sfr_register(&ssp1.sspcon);
     remove_sfr_register(&ssp1.sspcon2);
     remove_sfr_register(&ssp1.ssp1con3);
     remove_sfr_register(&ssp2.sspbuf);
     remove_sfr_register(&ssp2.sspadd);
-    remove_sfr_register(&ssp2.ssp1msk);
+    remove_sfr_register(ssp2.sspmsk);
     remove_sfr_register(&ssp2.sspstat);
     remove_sfr_register(&ssp2.sspcon);
     remove_sfr_register(&ssp2.sspcon2);
@@ -2464,7 +2464,7 @@ void P18F26K22::create()
 
   add_sfr_register(&t1gcon,     0xfcc, porv, "t1gcon");
   add_sfr_register(&ssp1.ssp1con3, 0xfcb, RegisterValue(0,0),"ssp1con3");
-  add_sfr_register(&ssp1.ssp1msk, 0xfca, RegisterValue(0xff,0),"ssp1msk");
+  add_sfr_register(ssp1.sspmsk, 0xfca, RegisterValue(0xff,0),"ssp1msk");
   add_sfr_register(&ssp1.sspbuf,  0xfc9, RegisterValue(0,0),"ssp1buf");
   add_sfr_register(&ssp1.sspadd,  0xfc8, RegisterValue(0,0),"ssp1add");
   add_sfr_register(&ssp1.sspstat, 0xfc7, RegisterValue(0,0),"ssp1stat");
@@ -2505,7 +2505,7 @@ void P18F26K22::create()
   add_sfr_register(&ssp2.sspstat, 0xf6d, RegisterValue(0,0),"ssp2stat");
   add_sfr_register(&ssp2.sspcon,  0xf6c, RegisterValue(0,0),"ssp2con");
   add_sfr_register(&ssp2.sspcon2, 0xf6b, RegisterValue(0,0),"ssp2con2");
-  add_sfr_register(&ssp2.ssp1msk, 0xf6a, RegisterValue(0xff,0),"ssp2msk");
+  add_sfr_register(ssp2.sspmsk, 0xf6a, RegisterValue(0xff,0),"ssp2msk");
   add_sfr_register(&ssp2.ssp1con3, 0xf69, RegisterValue(0,0),"ssp2con3");
   add_sfr_register(&ccpr2h,     0xf68, porv, "ccpr2h");
   add_sfr_register(&ccpr2l,     0xf67, porv, "ccpr2l");

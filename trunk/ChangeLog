@@ -1,3 +1,22 @@
+2015-11-07 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p16f88x regression/p16f88x/Makefile 
+	  regression/p16f88x/comparator.asm regression/p16f88x/epwm.asm 
+	  regression/p16f88x/eusart.asm regression/p16f88x/i2c.asm
+	  regression/p16f88x/i2c_low.inc regression/p16f88x/i2c_slave.asm
+	  regression/p16f88x/p16f882.asm regression/p16f88x/p16f883.asm
+	  regression/p16f88x/p16f886.asm regression/p16f88x/p16f887.asm
+          regression/run_regression.sh regression/p16f88x/a2d.asm
+	: Add p16f88x regressions test
+	* regression/p1xf18xx/p12f1822.asm regression/p1xf18xx/p16f1823.asm
+          src/p16f87x.cc src/p16f88x.cc
+	* regression/tmr0_16bit/tmr0_16bit.asm
+	: add nops after assert's
+	* src/eeprom.cc
+	: turn off debug
+	* src/p18x.cc src/p1xf1xxx.cc src/pic-processor.cc src/pic-processor.h
+	  src/ssp.cc src/ssp.h src/p16f88x.cc
+	: Add SSP registers to 16f88x and consolidate sspmsk code
+
 2015-11-02 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui.h gui/gui_src.h gui/gui_src_asm.cc
 	: Remove limit on number of source files. Removed unused and deprecated code.

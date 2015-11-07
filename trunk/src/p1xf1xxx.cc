@@ -374,7 +374,7 @@ P12F1822::~P12F1822()
     remove_sfr_register(&cpscon1);
     remove_sfr_register(&ssp.sspbuf);
     remove_sfr_register(&ssp.sspadd);
-    remove_sfr_register(&ssp.ssp1msk);
+    remove_sfr_register(ssp.sspmsk);
     remove_sfr_register(&ssp.sspstat);
     remove_sfr_register(&ssp.sspcon);
     remove_sfr_register(&ssp.sspcon2);
@@ -410,7 +410,7 @@ P12F1822::~P12F1822()
     remove_sfr_register(&usart.baudcon);
     remove_sfr_register(&ssp.sspbuf);
     remove_sfr_register(&ssp.sspadd);
-    remove_sfr_register(&ssp.ssp1msk);
+    remove_sfr_register(ssp.sspmsk);
     remove_sfr_register(&ssp.sspstat);
     remove_sfr_register(&ssp.sspcon);
     remove_sfr_register(&ssp.sspcon2);
@@ -537,6 +537,8 @@ void P12F1822::create_sfr_map()
   add_sfr_register(&ansela,   0x18c, RegisterValue(0x17,0));
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x191);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x192);
+  get_eeprom()->get_reg_eedata()->new_name("eedatl");
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x193);
   add_sfr_register(get_eeprom()->get_reg_eedatah(),  0x194);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x195, RegisterValue(0,0));
@@ -552,7 +554,7 @@ void P12F1822::create_sfr_map()
   add_sfr_register(m_wpua,       0x20c, RegisterValue(0x3f,0),"wpua");
   add_sfr_register(&ssp.sspbuf,  0x211, RegisterValue(0,0),"ssp1buf");
   add_sfr_register(&ssp.sspadd,  0x212, RegisterValue(0,0),"ssp1add");
-  add_sfr_register(&ssp.ssp1msk, 0x213, RegisterValue(0xff,0),"ssp1msk");
+  add_sfr_register(ssp.sspmsk, 0x213, RegisterValue(0xff,0),"ssp1msk");
   add_sfr_register(&ssp.sspstat, 0x214, RegisterValue(0,0),"ssp1stat");
   add_sfr_register(&ssp.sspcon,  0x215, RegisterValue(0,0),"ssp1con");
   add_sfr_register(&ssp.sspcon2, 0x216, RegisterValue(0,0),"ssp1con2");
@@ -1020,7 +1022,7 @@ P16F178x::~P16F178x()
     remove_sfr_register(&t2con);
     remove_sfr_register(&ssp.sspbuf);
     remove_sfr_register(&ssp.sspadd);
-    remove_sfr_register(&ssp.ssp1msk);
+    remove_sfr_register(ssp.sspmsk);
     remove_sfr_register(&ssp.sspstat);
     remove_sfr_register(&ssp.sspcon);
     remove_sfr_register(&ssp.sspcon2);
@@ -1059,7 +1061,7 @@ P16F178x::~P16F178x()
     remove_sfr_register(&usart.baudcon);
     remove_sfr_register(&ssp.sspbuf);
     remove_sfr_register(&ssp.sspadd);
-    remove_sfr_register(&ssp.ssp1msk);
+    remove_sfr_register(ssp.sspmsk);
     remove_sfr_register(&ssp.sspstat);
     remove_sfr_register(&ssp.sspcon);
     remove_sfr_register(&ssp.sspcon2);
@@ -1200,6 +1202,8 @@ void P16F178x::create_sfr_map()
     add_sfr_register(&ansela,   0x18c, RegisterValue(0x17,0));
     add_sfr_register(&anselb,   0x18d, RegisterValue(0x7f,0));
     add_sfr_register(&anselc,   0x18e, RegisterValue(0xff,0));
+  get_eeprom()->get_reg_eedata()->new_name("eedatl");
+  get_eeprom()->get_reg_eedatah()->new_name("eedath");
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x191);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x192);
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x193);
@@ -1221,7 +1225,7 @@ void P16F178x::create_sfr_map()
 
   add_sfr_register(&ssp.sspbuf,  0x211, RegisterValue(0,0),"ssp1buf");
   add_sfr_register(&ssp.sspadd,  0x212, RegisterValue(0,0),"ssp1add");
-  add_sfr_register(&ssp.ssp1msk, 0x213, RegisterValue(0xff,0),"ssp1msk");
+  add_sfr_register(ssp.sspmsk, 0x213, RegisterValue(0xff,0),"ssp1msk");
   add_sfr_register(&ssp.sspstat, 0x214, RegisterValue(0,0),"ssp1stat");
   add_sfr_register(&ssp.sspcon,  0x215, RegisterValue(0,0),"ssp1con");
   add_sfr_register(&ssp.sspcon2, 0x216, RegisterValue(0,0),"ssp1con2");
