@@ -128,7 +128,6 @@ private:
   SignalNameEntry *m_entry;
   TimeAxis *m_TimeAxis;
   std::vector<Waveform *> signals;
-  std::map<guint, KeyEvent *> KeyMap;
 
 protected:
   virtual const char *name();

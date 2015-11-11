@@ -2243,9 +2243,6 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
     SetTitle();
   }
-
-  if(status_bar)
-    status_bar->NewProcessor(gp, pma);
 }
 
 const char *SourceBrowserParent_Window::name()

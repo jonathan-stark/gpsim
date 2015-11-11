@@ -247,82 +247,30 @@ protected:
 };
 
 //========================================================================
-class ZoomInEvent : public KeyEvent
-{
-public:
-  virtual ~ZoomInEvent()
-  {
-  }
-
-  virtual void press(gpointer data)
-  {
-    Scope_Window *sw = static_cast<Scope_Window *>(data);
-    if (sw)
-      sw->zoom(2);
-  }
-};
-//========================================================================
-class ZoomOutEvent : public KeyEvent
-{
-public:
-  virtual ~ZoomOutEvent()
-  {
-  }
-
-  virtual void press(gpointer data)
-  {
-    Scope_Window *sw = static_cast<Scope_Window *>(data);
-    if (sw)
-      sw->zoom(-2);
-  }
-};
-
-//========================================================================
-class PanLeftEvent : public KeyEvent
-{
-public:
-  virtual ~PanLeftEvent()
-  {
-  }
-
-  virtual void press(gpointer data)
-  {
-    Scope_Window *sw = static_cast<Scope_Window *>(data);
-    if (sw)
-      sw->pan(-( (gint64) sw->getSpan()/4));
-  }
-};
-//========================================================================
-class PanRightEvent : public KeyEvent
-{
-public:
-  virtual ~PanRightEvent()
-  {
-  }
-
-  virtual void press(gpointer data)
-  {
-    Scope_Window *sw = static_cast<Scope_Window *>(data);
-    if (sw)
-      sw->pan( (gint64) sw->getSpan()/4);
-  }
-};
-
-//========================================================================
 
 gboolean Scope_Window::key_press(GtkWidget *widget, GdkEventKey *key,
   Scope_Window *sw)
 {
   Dprintf (("press 0x%x\n", key->keyval));
 
-  KeyEvent *pKE = sw->KeyMap[key->keyval];
-  if(pKE)
-    {
-      pKE->press(sw);
-      return TRUE;
-    }
+  switch (key->keyval) {
+  case 'z':
+    sw->zoom(2);
+    break;
+  case 'Z':
+    sw->zoom(-2);
+    break;
+  case 'l':
+    sw->pan(-( (gint64) sw->getSpan()/4));
+    break;
+  case 'r':
+    sw->pan( (gint64) sw->getSpan()/4);
+    break;
+  default:
+    return FALSE;
+  }
 
-  return FALSE;
+  return TRUE;
 }
 
 //========================================================================
@@ -1109,12 +1057,6 @@ void Scope_Window::Build()
 
   g_signal_connect(signalDrawingArea, "expose-event",
     G_CALLBACK(signal_name_expose), this);
-
-  KeyMap['z'] = new ZoomInEvent();
-  KeyMap['Z'] = new ZoomOutEvent();
-  KeyMap['l'] = new PanLeftEvent();
-  KeyMap['r'] = new PanRightEvent();
-
 
   /* Add a signal handler for key press events. This will capture
    * key commands for single stepping, running, etc.

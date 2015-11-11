@@ -1427,7 +1427,6 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   menu = "/menu/Windows/Program memory";
 
   pma =0;
-  status_bar = 0;
 
   gp = _gp;
 

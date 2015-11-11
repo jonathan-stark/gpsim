@@ -22,6 +22,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_SRC_H__
 #define __GUI_SRC_H__
 
+#include "../src/processor.h"
+#include "gui_object.h"
+#include "gui_processor.h"
+
 #include <map>
 #include <string>
 #include <vector>
@@ -288,20 +292,19 @@ class SourceBrowser_Window : public GUI_Object {
   GtkWidget *vbox;               // for children to put widgets in
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
-  StatusBar_Window *status_bar;  // display's PC, status, etc.
   SIMULATION_MODES last_simulation_mode;
-  string sLastPmaName;
+  std::string sLastPmaName;
 
   void set_pma(ProgramMemoryAccess *new_pma);
 
   void Create();
-  virtual void NewProcessor(GUI_Processor *gp);
+  virtual void NewProcessor(GUI_Processor *gp) = 0;
   virtual void SetTitle();
-  virtual void SelectAddress(int address);
+  virtual void SelectAddress(int address) = 0;
   virtual void SelectAddress(Value *);
   virtual void Update();
-  virtual void UpdateLine(int address);
-  virtual void SetPC(int address);
+  virtual void UpdateLine(int address) = 0;
+  virtual void SetPC(int address) = 0;
   virtual void CloseSource(){};
   virtual void NewSource(GUI_Processor *gp){};
 
@@ -455,4 +458,3 @@ protected:
 
 
 #endif // __GUI_SRC_H__
-
