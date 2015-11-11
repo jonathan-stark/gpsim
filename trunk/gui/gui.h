@@ -116,21 +116,6 @@ private:
   char pCellFormat[10];
 };
 
-//------------------------------------------------------------------------
-// The KeyEvent class is used for key mapping (e.g. mapping the 's'
-// key to step)
-
-class KeyEvent
-{
-public:
-  virtual ~KeyEvent()
-  {
-  }
-
-  virtual void press(gpointer data = 0) {};
-  virtual void release(gpointer data = 0) {};
-};
-
 //
 // External references and function prototypes
 //

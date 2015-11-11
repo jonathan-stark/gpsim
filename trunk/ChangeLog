@@ -1,3 +1,8 @@
+2015-11-11 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui.h gui/gui_scope.cc gui/gui_scope.h gui/gui_src.cc
+	  gui/gui_src.h gui/gui_src_asm.cc gui/gui_src_opcode.cc
+	: Simplified keyboard handling
+
 2015-11-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f88x regression/p16f88x/Makefile 
 	  regression/p16f88x/comparator.asm regression/p16f88x/epwm.asm 
