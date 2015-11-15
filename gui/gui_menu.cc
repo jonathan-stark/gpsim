@@ -23,10 +23,10 @@ Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include <glib.h>
 
 #include <cstring>
+#include <memory>
 #include <string>
 
 #include "gui.h"
@@ -96,18 +96,20 @@ class ColorButton
 {
 public:
   ColorButton (GtkWidget *pParent,
-               TextStyle *pStyle,
+               GtkTextTag *pStyle,
                const char *label,
                SourceBrowserPreferences *
                );
+  ~ColorButton();
+
+  void cancel();
+private:
   static void setColor_cb(GtkColorButton *widget,
                           ColorButton    *This);
-  void apply();
-  void cancel();
-  TextStyle *m_pStyle;
-private:
+
+  GtkTextTag *m_pStyle;
+  GdkColor *old_color;
   SourceBrowserPreferences *m_prefs;
-  const char *m_label;
 };
 
 //========================================================================
@@ -203,25 +205,25 @@ public:
   const char *getFont();
 private:
 
-  ColorButton *m_LabelColor;
-  ColorButton *m_MnemonicColor;
-  ColorButton *m_SymbolColor;
-  ColorButton *m_CommentColor;
-  ColorButton *m_ConstantColor;
+  std::auto_ptr<ColorButton> m_LabelColor;
+  std::auto_ptr<ColorButton> m_MnemonicColor;
+  std::auto_ptr<ColorButton> m_SymbolColor;
+  std::auto_ptr<ColorButton> m_CommentColor;
+  std::auto_ptr<ColorButton> m_ConstantColor;
 
-  MarginButton *m_LineNumbers;
-  MarginButton *m_Addresses;
-  MarginButton *m_Opcodes;
+  std::auto_ptr<MarginButton> m_LineNumbers;
+  std::auto_ptr<MarginButton> m_Addresses;
+  std::auto_ptr<MarginButton> m_Opcodes;
 
   int m_currentTabPosition;
   int m_originalTabPosition;
-  TabButton    *m_Up;
-  TabButton    *m_Left;
-  TabButton    *m_Down;
-  TabButton    *m_Right;
-  TabButton    *m_None;
+  std::auto_ptr<TabButton> m_Up;
+  std::auto_ptr<TabButton> m_Left;
+  std::auto_ptr<TabButton> m_Down;
+  std::auto_ptr<TabButton> m_Right;
+  std::auto_ptr<TabButton> m_None;
 
-  FontSelection *m_FontSelector;
+  std::auto_ptr<FontSelection> m_FontSelector;
 };
 
 //------------------------------------------------------------------------
@@ -235,6 +237,8 @@ public:
 
 
 private:
+  gpsimGuiPreferences(const gpsimGuiPreferences&);  // Non-copiable
+
   SourceBrowserPreferences *m_SourceBrowser;
 
   static void response_cb(GtkDialog *dialog, gint response_id,
@@ -263,17 +267,18 @@ void gpsimGuiPreferences::response_cb(GtkDialog *dialog, gint response_id,
 
 //------------------------------------------------------------------------
 // ColorButton Constructor
-ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
-                         const char *colorName,SourceBrowserPreferences *prefs)
-  : m_pStyle(pStyle),m_prefs(prefs), m_label(colorName)
+ColorButton::ColorButton(GtkWidget *pParent, GtkTextTag *pStyle,
+                         const char *colorName, SourceBrowserPreferences *prefs)
+  : m_pStyle(pStyle),m_prefs(prefs)
 {
   GtkWidget *hbox        = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
 
-  GtkWidget *colorButton = gtk_color_button_new_with_color (pStyle->mFG.CurrentColor());
-  gtk_color_button_set_title (GTK_COLOR_BUTTON(colorButton), colorName);
-  gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
-  gtk_widget_show(colorButton);
+  g_object_get(m_pStyle, "foreground-gdk", &old_color, NULL);
+
+  GtkWidget *colorButton = gtk_color_button_new_with_color(old_color);
+  gtk_color_button_set_title(GTK_COLOR_BUTTON(colorButton), colorName);
+  gtk_box_pack_start(GTK_BOX(hbox), colorButton, FALSE, FALSE, 0);
 
   g_signal_connect (colorButton,
                       "color-set",
@@ -282,9 +287,13 @@ ColorButton::ColorButton(GtkWidget *pParent, TextStyle *pStyle,
 
   GtkWidget *label       = gtk_label_new(colorName);
   gtk_box_pack_start (GTK_BOX(hbox),label,FALSE,FALSE, 10);
-  gtk_widget_show (label);
 
-  gtk_widget_show (hbox);
+  gtk_widget_show_all(hbox);
+}
+
+ColorButton::~ColorButton()
+{
+  gdk_color_free(old_color);
 }
 
 //------------------------------------------------------------------------
@@ -293,16 +302,12 @@ void ColorButton::setColor_cb(GtkColorButton *widget,
 {
   GdkColor newColor;
   gtk_color_button_get_color (widget, &newColor);
-  This->m_pStyle->setFG(&newColor);
+  g_object_set(This->m_pStyle, "foreground-gdk", &newColor, NULL);
 }
 
-void ColorButton::apply()
-{
-  m_pStyle->apply();
-}
 void ColorButton::cancel()
 {
-  m_pStyle->revert();
+  g_object_set(m_pStyle, "foreground-gdk", old_color, NULL);
 }
 
 //------------------------------------------------------------------------
@@ -460,25 +465,27 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *colorVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
-    m_LabelColor    = new ColorButton(colorVbox,
-                                      m_pParent->mLabel,
-                                      "Label", this);
-    m_MnemonicColor = new ColorButton(colorVbox,
-                                      m_pParent->mMnemonic,
-                                      "Mnemonic", this);
-    m_SymbolColor   = new ColorButton(colorVbox,
-                                      m_pParent->mSymbol,
-                                      "Symbols", this);
-    m_ConstantColor = new ColorButton(colorVbox,
-                                      m_pParent->mConstant,
-                                      "Constants", this);
-    m_CommentColor  = new ColorButton(colorVbox,
-                                      m_pParent->mComment,
-                                      "Comments", this);
+    GtkTextTagTable *tag_table = m_pParent->getTagTable();
+
+    m_LabelColor    = std::auto_ptr<ColorButton>(
+      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Label"),
+      "Label", this));
+    m_MnemonicColor = std::auto_ptr<ColorButton>(
+      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Mnemonic"),
+      "Mnemonic", this));
+    m_SymbolColor   = std::auto_ptr<ColorButton>(
+      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Symbols"),
+      "Symbols", this));
+    m_ConstantColor = std::auto_ptr<ColorButton>(
+      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Constants"),
+      "Constants", this));
+    m_CommentColor  = std::auto_ptr<ColorButton>(
+      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Comments"),
+      "Comments", this));
 
     // Font selector
-    //preferences_AddFontSelect(GTK_WIDGET(vbox), "Font Selector", "font");
-    m_FontSelector = new FontSelection(vbox,this);
+    m_FontSelector = std::auto_ptr<FontSelection>(
+      new FontSelection(vbox, this));
 
     label = gtk_label_new("Font");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox,label);
@@ -502,15 +509,20 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *tabVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (tabFrame), tabVbox);
 
-    m_Up    = new TabButton(tabVbox, radioUp, GTK_POS_TOP, this);
-    m_Left  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"left"),
-                           GTK_POS_LEFT, this);
-    m_Down  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"down"),
-                           GTK_POS_BOTTOM, this);
-    m_Right = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"right"),
-                           GTK_POS_RIGHT, this);
-    m_None  = new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"none"),
-                           -1, this);
+    m_Up    = std::auto_ptr<TabButton>(
+      new TabButton(tabVbox, radioUp, GTK_POS_TOP, this));
+    m_Left  = std::auto_ptr<TabButton>(
+      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"left"),
+      GTK_POS_LEFT, this));
+    m_Down  = std::auto_ptr<TabButton>(
+      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"down"),
+      GTK_POS_BOTTOM, this));
+    m_Right = std::auto_ptr<TabButton>(
+      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"right"),
+      GTK_POS_RIGHT, this));
+    m_None  = std::auto_ptr<TabButton>(
+      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"none"),
+      -1, this));
 
 
     // Source browser margin
@@ -519,12 +531,14 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *marginVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (marginFrame), marginVbox);
 
-    m_LineNumbers = new MarginButton(marginVbox, "Line Numbers",
-                                     MarginButton::eLineNumbers, this);
-    m_Addresses   = new MarginButton(marginVbox, "Addresses",
-                                     MarginButton::eAddresses, this);
-    m_Opcodes     = new MarginButton(marginVbox, "Opcodes",
-                                     MarginButton::eOpcodes, this);
+    m_LineNumbers = std::auto_ptr<MarginButton>(
+      new MarginButton(marginVbox, "Line Numbers",
+      MarginButton::eLineNumbers, this));
+    m_Addresses   = std::auto_ptr<MarginButton>(
+      new MarginButton(marginVbox, "Addresses",
+      MarginButton::eAddresses, this));
+    m_Opcodes     = std::auto_ptr<MarginButton>(
+      new MarginButton(marginVbox, "Opcodes", MarginButton::eOpcodes, this));
 
     label = gtk_label_new("Margins");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
@@ -536,7 +550,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
 
     GtkWidget *frame = gtk_frame_new ("Sample");
-    gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (pParent), frame, TRUE, TRUE, 0);
 
     m_Notebook = gtk_notebook_new();
     //m_currentTabPosition = m_pParent->getTabPosition();
@@ -547,11 +561,11 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     bIsBuilt = true;
 
-    int id = AddPage (pBuffer, "file1.asm");
+    AddPage (pBuffer, "file1.asm");
 
-    pages[id]->m_pBuffer->parseLine( "        MOVLW   0x34       ; Comment",1);
-    pages[id]->m_pBuffer->parseLine( "; Comment only",1);
-    pages[id]->m_pBuffer->parseLine( "Label:  ADDWF  Variable,F  ; Comment",1);
+    pBuffer->parseLine( "        MOVLW   0x34       ; Comment\n",1);
+    pBuffer->parseLine( "; Comment only\n",1);
+    pBuffer->parseLine( "Label:  ADDWF  Variable,F  ; Comment\n",1);
 
     gtk_widget_show_all(frame);
 
@@ -590,12 +604,6 @@ const char *SourceBrowserPreferences::getFont()
 
 void SourceBrowserPreferences::apply()
 {
-  m_LabelColor->apply();
-  m_MnemonicColor->apply();
-  m_SymbolColor->apply();
-  m_ConstantColor->apply();
-  m_CommentColor->apply();
-
   m_pParent->setTabPosition(m_currentTabPosition);
 }
 
