@@ -37,58 +37,14 @@ class Value;
 class SourceWindow;
 
 //========================================================================
-class ColorHolder
-{
-public:
-  ColorHolder (const char *pcColor);
-
-
-  bool set(GdkColor *pNewColor, bool saveOld);
-  char *get(char *, int );
-  void apply();
-  bool revert();
-  GdkColor *CurrentColor();
-protected:
-  GdkColor mCurrentColor, mSaveColor;
-};
-//========================================================================
-// TextStyle
-//
-// A TextSyle is wrapper around a GtkTextTag and provides a simple way
-// to change the text foreground and background colors. Also, color
-// editing is supported.
-class TextStyle
-{
-public:
-  TextStyle (const char *pName,
-             const char *pFGColor,
-             const char *pBGColor);
-
-  ~TextStyle();
-
-  GtkTextTag *tag() { return m_pTag; }
-
-  void apply();   // Permanently apply a change that the user has made.
-  void revert();  // Remove a change the user has made
-
-  void setFG(GdkColor *pNewColor);
-
-  ColorHolder  mFG;  // Foreground color
-  ColorHolder  mBG;  // Background color
-
-protected:
-  GtkTextTag *m_pTag;
-};
-
-//========================================================================
 class SourceBuffer
 {
 public:
   SourceBuffer(GtkTextTagTable *,FileContext *,SourceBrowserParent_Window *);
   void parseLine(const char*, int parseStyle);
 
-  void addTagRange(TextStyle *,
-                   int start_index, int end_index);
+  void addTagRange(const char *pStyle, int start_index, int end_index);
+
   GtkTextBuffer *getBuffer();
   SourceBrowserParent_Window *m_pParent;
   FileContext   *m_pFC;
@@ -151,32 +107,29 @@ public:
   void invalidateView();
   void updateMargin(int y1, int y2);
 
-  void Close(void);
+  void Close();
   void setFont(const char *);
-  void setSource();
 
   FileContext *getFC();
 
-  // callbacks
-  static gboolean KeyPressHandler(GtkTextView *pView,
-                GdkEventKey *key,
-                SourceWindow *pSW);
-  static gint ButtonPressHandler(GtkTextView *pView,
-                  GdkEventButton *pButton,
-                  SourceWindow *pSW);
-  static gint ViewExposeEventHandler(GtkTextView *pView,
-                GdkEventExpose *pEvent,
-                SourceWindow *pSW);
+  unsigned int get_file_id() { return m_fileid; }
+  int get_margin_width() { return m_marginWidth; }
 
-
-  unsigned int   m_fileid;
-  SourceBuffer  *m_pBuffer;
-  int            m_marginWidth;
 private:
-  SourceWindow  *m_Parent;
-  std::string   m_cpFont;
-  GtkWidget     *m_pContainer;
+  // callbacks
+  static gboolean KeyPressHandler(GtkTextView *pView, GdkEventKey *key,
+    NSourcePage *page);
+  static gint ButtonPressHandler(GtkTextView *pView, GdkEventButton *pButton,
+    NSourcePage *pPage);
+  static gint ViewExposeEventHandler(GtkTextView *pView, GdkEventExpose *pEvent,
+    NSourcePage *pPage);
+
   GtkTextView   *m_view;
+  SourceBuffer  *m_pBuffer;
+  SourceWindow  *m_Parent;
+  unsigned int   m_fileid;
+  int            m_marginWidth;
+  std::string    m_cpFont;
 };
 
 class SearchDialog;
@@ -270,9 +223,6 @@ private:
   std::string m_name;
 
 protected:
-  void addTagRange(NSourcePage *pPage, TextStyle *,
-                   int start_index, int end_index);
-
   std::map<int, NSourcePage *> pages;
 
   GtkWidget *m_Notebook;
@@ -401,8 +351,8 @@ private:
 class SourceBrowserParent_Window : public GUI_Object
 {
  public:
-
   SourceBrowserParent_Window(GUI_Processor *gp);
+
   virtual void Build();
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
@@ -415,38 +365,30 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void ChangeView(int view_state);
   virtual int set_config();
 
-  std::vector<SourceWindow *> children;
-
-  ProgramMemoryAccess *pma;      // pointer to the processor's pma.
-
   GtkTextTagTable *getTagTable() { return mpTagTable; }
   void CreateSourceBuffers(GUI_Processor *gp);
-  //void parseLine(gpsimTextBuffer *pBuffer, const char*, int parseStyle);
+
   void parseSource(SourceBuffer *pBuffer,FileContext *pFC);
   SourcePageMargin &margin();
   void setTabPosition(int tt);
   int getTabPosition() { return m_TabType; }
   void setFont(const char *);
   const char *getFont();
-  //protected:
+
+private:
+  gchar *get_color_string(const char *tag_name);
 
   GtkTextTagTable *mpTagTable;
+  std::vector<SourceWindow *> children;
 
-  TextStyle *mLabel;       // for label in .asm display
-  TextStyle *mMnemonic;    // for instruction in .asm display
-  TextStyle *mSymbol;      // for symbols in .asm display
-  TextStyle *mComment;     // for comments in .asm display
-  TextStyle *mConstant;    // for numbers in .asm display
-  TextStyle *mDefault;     // for everything else.
+  ProgramMemoryAccess *pma;      // pointer to the processor's pma.
 
-  TextStyle *mBreakpointTag;   // for breakpoints
-  TextStyle *mNoBreakpointTag;
-  TextStyle *mCurrentLineTag;  // Highlights the line at the PC.
-
+private:
   SourcePageMargin m_margin;
   int m_TabType;
   std::string m_FontDescription;
 
+public:
   std::vector<SourceBuffer *> ppSourceBuffers;
 
 protected:

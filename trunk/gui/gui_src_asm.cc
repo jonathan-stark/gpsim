@@ -104,11 +104,6 @@ public:
 #define BP_START  (MARGIN_WIDTH - PC_PIXEL_SIZE-BP_PIXEL_SIZE)
 
 
-
-static map<GtkTextView*, NSourcePage *> PageMap;
-
-
-
 /* This function is taken from gtk+/tests/testtext.c */
 static void
 gtk_source_view_get_lines(GtkTextView  *text_view,
@@ -167,9 +162,8 @@ gtk_source_view_get_lines(GtkTextView  *text_view,
 //------------------------------------------------------------------------
 //
 gboolean
-NSourcePage::KeyPressHandler(GtkTextView *pView,
-               GdkEventKey *key,
-               SourceWindow *pSW)
+NSourcePage::KeyPressHandler(GtkTextView *pView, GdkEventKey *key,
+  NSourcePage *page)
 {
   guint modifiers = gtk_accelerator_get_default_mod_mask();
 
@@ -183,14 +177,12 @@ NSourcePage::KeyPressHandler(GtkTextView *pView,
   gtk_text_buffer_get_iter_at_mark (pBuffer, &iter, pMark);
   int line = gtk_text_iter_get_line (&iter);
 
-  NSourcePage *page = PageMap[pView];
-
   Dprintf(("Received key press for view. line=%d page%p\n",line,page));
 
   switch (key->keyval) {
   case 'b':
   case 'B':
-    pSW->toggleBreak(page,line);
+    page->m_Parent->toggleBreak(page, line);
     break;
   default:
     return FALSE;
@@ -200,11 +192,9 @@ NSourcePage::KeyPressHandler(GtkTextView *pView,
 }
 
 gint
-NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
-            GdkEventExpose *pEvent,
-            SourceWindow *pSW)
+NSourcePage::ViewExposeEventHandler(GtkTextView *pView, GdkEventExpose *pEvent,
+  NSourcePage *pPage)
 {
-
   if (pEvent->window == gtk_text_view_get_window (pView,
     GTK_TEXT_WINDOW_LEFT))
   {
@@ -212,12 +202,8 @@ NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
     //event_handled = TRUE;
     Dprintf(("Expose event for view margin %p\n",pSW));
 
-
     gint y1 = pEvent->area.y;
     gint y2 = y1 + pEvent->area.height;
-
-    NSourcePage *pPage = PageMap[pView];
-
 
     gtk_text_view_window_to_buffer_coords (pView,
       GTK_TEXT_WINDOW_LEFT,
@@ -241,6 +227,7 @@ NSourcePage::ViewExposeEventHandler(GtkTextView *pView,
   }
   return FALSE;
 }
+
 //------------------------------------------------------------------------
 //
 gboolean
@@ -356,42 +343,48 @@ static const menu_item submenu_items[] = {
 // ButtonPressHandler
 // Event handler for text view mouse clicks.
 gint
-NSourcePage::ButtonPressHandler(GtkTextView *pView,
-                  GdkEventButton *pButton,
-                  SourceWindow *pSW)
+NSourcePage::ButtonPressHandler(GtkTextView *pView, GdkEventButton *pButton,
+  NSourcePage *pPage)
 {
+
   if (pButton->window == gtk_text_view_get_window (pView,
     GTK_TEXT_WINDOW_LEFT))
   {
     // Margin
-    NSourcePage *pPage = PageMap[pView];
-    gint x = (gint) pButton->x;
-    gint y = (gint) pButton->y;
+    gint y;
 
     gtk_text_view_window_to_buffer_coords (pView,
       GTK_TEXT_WINDOW_LEFT,
-      x,
-      y,
-      &x,
+      (gint) pButton->x,
+      (gint) pButton->y,
+      NULL,
       &y);
     GtkTextIter iter;
-    gint line;
+
     gtk_text_view_get_line_at_y (pView, &iter, y, NULL);
-    line = gtk_text_iter_get_line (&iter);
-    pSW->toggleBreak(pPage, line);
+    gint line = gtk_text_iter_get_line (&iter);
+    pPage->m_Parent->toggleBreak(pPage, line);
 
   } else {
     // Text (i.e. not the margin
-    if (pButton->button == 3) {
+    if (pButton->button == 3 && aPopupMenu && GTK_IS_TEXT_VIEW(pView)) {
+      GtkTextIter iter;
+      gint y;
 
-      if (aPopupMenu) {
-        if (GTK_IS_TEXT_VIEW(pView))
-          pViewContainingPopup = pView;
+      pViewContainingPopup = pView;
+      gtk_text_view_window_to_buffer_coords(pView,
+        GTK_TEXT_WINDOW_LEFT,
+        (gint) pButton->x,
+        (gint) pButton->y,
+        NULL,
+        &y);
 
-        gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
-          3, pButton->time);
-      }
+      gtk_text_view_get_line_at_y(pView, &iter, y, NULL);
+      pPage->getParent()->m_LineAtButtonClick = gtk_text_iter_get_line(&iter);
 
+      gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
+        3, pButton->time);
+      gtk_text_buffer_place_cursor(gtk_text_view_get_buffer(pView), &iter);
       return TRUE;
     }
 
@@ -431,17 +424,33 @@ static int isWhiteSpace(const char *cP)
   return i;
 }
 
-static int isHexNumber(const char *cP)
+static int isHexNumber(const char *c)
 {
-  int i=0;
-  if ((*cP == '0' && toupper(cP[1])=='X') ||
-    (*cP == '$')) {
-      i = (*cP=='0') ? 2 : 1;
+  const char *start = c;
 
-      while (isxdigit(cP[i]))
-        i++;
-    }
-    return i;
+  if (*c == '0') {
+    ++c;
+    if (*c == 'x' || *c == 'X')
+      ++c;
+    else
+      return 1;
+  } else if (*c == '$') {
+    ++c;
+  } else if (*c == 'H') {
+    ++c;
+    if (*c == '\'')
+      ++c;
+    else
+      return 0;
+  }
+
+  if (!isxdigit(*c))
+    return 0;
+
+  while (isxdigit(*c)) {
+    ++c;
+  }
+  return c - start;
 }
 static int isNumber(const char *cP)
 {
@@ -467,91 +476,6 @@ static int isComment(const char *cP)
 }
 
 //------------------------------------------------------------------------
-static bool isButtonEvent (GdkEventType type)
-{
-  return
-    type == GDK_BUTTON_PRESS ||
-    type == GDK_2BUTTON_PRESS ||
-    type == GDK_3BUTTON_PRESS ||
-    type == GDK_BUTTON_RELEASE;
-
-}
-
-//------------------------------------------------------------------------
-static gboolean TagEvent (GtkTextTag *texttag,
-                          GObject *arg1,
-                          GdkEvent *event,
-                          GtkTextIter *arg2,
-                          TextStyle *pTextStyle)
-{
-  /*
-  static int seq=0;
-  printf("Received tag event signal Tag:%p arg1:%p seq %d Event:%p iter:%p user:%p %08X Line:%d\n",
-  texttag, arg1,seq++,event,arg2, pTextStyle, event->type, gtk_text_iter_get_line(arg2));
-  */
-  if (isButtonEvent(event->type)) {
-    GdkEventButton *evtButton = (GdkEventButton *) event;
-
-    if (event->type == GDK_2BUTTON_PRESS  && evtButton->button == 1) {
-      Dprintf (("Double click left mouse\n"));
-
-      gint signal_id =  g_signal_lookup ("button_press_event",
-        G_TYPE_FROM_INSTANCE(arg1));
-
-      GSignalQuery query;
-      g_signal_query (signal_id, &query);
-
-      Dprintf (("Signal id=%d name=%s n_params=%d\n",signal_id,query.signal_name,
-        query.n_params));
-
-      GtkWidget *toplevel = gtk_widget_get_toplevel (GTK_WIDGET (arg1));
-      gboolean b=FALSE;
-      if (gtk_widget_is_toplevel(toplevel)) {
-        //g_signal_emit_by_name (toplevel, "button_press_event",evtButton,&b);
-        g_signal_emit_by_name (GTK_WIDGET (arg1), "button_press_event",evtButton,&b);
-      } else
-        printf("TagEvent: arg1 is not toplevel\n");
-
-    }
-    /*
-    printf("Button Event: button:%d  modifier:%d coords(%g,%g)\n",
-    evtButton->button, evtButton->state, evtButton->x,evtButton->y);
-    */
-    // If the right mouse button is pressed then suppress the GTK pop up menu.
-    if (evtButton->button == 3) {
-
-      if (aPopupMenu) {
-        if (GTK_IS_TEXT_VIEW(arg1)) {
-          pViewContainingPopup = GTK_TEXT_VIEW(arg1);
-          NSourcePage *pPage = PageMap[pViewContainingPopup];
-          gint x = (gint) evtButton->x;
-          gint y = (gint) evtButton->y;
-
-          gtk_text_view_window_to_buffer_coords (pViewContainingPopup,
-            GTK_TEXT_WINDOW_LEFT,
-            x,
-            y,
-            &x,
-            &y);
-          GtkTextIter iter;
-          gtk_text_view_get_line_at_y (pViewContainingPopup, &iter, y, NULL);
-          pPage->getParent()->m_LineAtButtonClick =
-            gtk_text_iter_get_line (&iter);
-
-        }
-        gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
-          3, evtButton->time);
-      }
-
-      return TRUE;
-    }
-
-    return FALSE;
-  }
-  return FALSE;
-}
-
-//------------------------------------------------------------------------
 class SearchDialog
 {
 public:
@@ -559,7 +483,7 @@ public:
   void Show(SourceWindow *);
   bool bDirection();
   bool bCase();
-protected:
+private:
   bool m_bFound;
   bool m_bLooped;
   int  m_iStart;
@@ -680,97 +604,6 @@ void SearchDialog::Show(SourceWindow *pSourceWindow)
   gtk_widget_show_all(m_Window);
 }
 
-//------------------------------------------------------------------------
-ColorHolder::ColorHolder (const char *pcColor)
-{
-  if (pcColor) {
-    gdk_color_parse(pcColor, &mCurrentColor);
-    mSaveColor  = mCurrentColor;
-  }
-
-}
-bool ColorHolder::set(GdkColor *pNewColor, bool saveOld)
-{
-  if (!saveOld)
-    mSaveColor  = *pNewColor;
-
-  if (!gdk_color_equal(pNewColor,&mCurrentColor)) {
-    mCurrentColor = *pNewColor;
-    return true;
-  }
-
-  return false;
-}
-char *ColorHolder::get(char *cParr, int size)
-{
-  if (cParr)
-    g_snprintf(cParr, size, "#%04X%04X%04X",
-      mCurrentColor.red, mCurrentColor.green, mCurrentColor.blue);
-  return cParr;
-}
-
-void ColorHolder::apply()
-{
-  mSaveColor = mCurrentColor;
-}
-bool ColorHolder::revert()
-{
-  return set(&mSaveColor,true);
-}
-GdkColor *ColorHolder::CurrentColor()
-{
-  return &mCurrentColor;
-}
-
-//------------------------------------------------------------------------
-TextStyle::TextStyle (const char *cpName,
-                      const char *pFGColor,
-                      const char *pBGColor)
-                      : mFG(pFGColor), mBG(pBGColor)
-{
-
-  m_pTag = gtk_text_tag_new(cpName);
-
-  g_object_set(G_OBJECT (m_pTag),
-    "foreground-gdk", mFG.CurrentColor(),
-    "background-gdk", mBG.CurrentColor(),NULL);
-
-  g_signal_connect (G_OBJECT (m_pTag), "event",
-    G_CALLBACK(TagEvent),
-    this);
-}
-
-TextStyle::~TextStyle()
-{
-  g_object_unref(m_pTag);
-}
-
-void TextStyle::setFG(GdkColor *pNewColor)
-{
-  if (mFG.set(pNewColor,true)) {
-    g_object_set(G_OBJECT (m_pTag),
-      "foreground-gdk", mFG.CurrentColor(),NULL);
-  }
-}
-//------------------------------------------------------------------------
-
-void TextStyle::apply()
-{
-  mFG.apply();
-  mBG.apply();
-}
-void TextStyle::revert()
-{
-  if (mBG.revert())
-    g_object_set(G_OBJECT (m_pTag),
-    "background-gdk", mBG.CurrentColor(),NULL);
-
-  if (mFG.revert())
-    g_object_set(G_OBJECT (m_pTag),
-    "foreground-gdk", mFG.CurrentColor(),NULL);
-
-}
-
 //========================================================================
 //========================================================================
 SourcePageMargin::SourcePageMargin()
@@ -793,16 +626,11 @@ SourceBuffer::SourceBuffer(GtkTextTagTable *pTagTable, FileContext *pFC,
 
 }
 
-//------------------------------------------------------------------------
-// addTagRange(TextStyle *pStyle,int start_index, int end_index)
-//
 // Addtag range applies the tag state to a range of text in the buffer
 // using a given text style (i.e. the style contains a gtkTextTag)
-
-void SourceBuffer::addTagRange(TextStyle *pStyle,
+void SourceBuffer::addTagRange(const char *pStyle,
                                int start_index, int end_index)
 {
-
   if (!pStyle)
     return;
 
@@ -811,7 +639,7 @@ void SourceBuffer::addTagRange(TextStyle *pStyle,
   gtk_text_buffer_get_iter_at_offset (m_buffer, &start, start_index);
   gtk_text_buffer_get_iter_at_offset (m_buffer, &end, end_index);
 
-  gtk_text_buffer_apply_tag (m_buffer, pStyle->tag(), &start, &end);
+  gtk_text_buffer_apply_tag_by_name(m_buffer, pStyle, &start, &end);
 }
 
 //------------------------------------------------------------------------
@@ -823,7 +651,7 @@ bool SourceBuffer::IsParsed()
 //------------------------------------------------------------------------
 void SourceBuffer::parse()
 {
-  if (IsParsed() || !m_pParent)
+  if (IsParsed() || !m_pParent || !m_pFC)
     return;
 
   Dprintf(("parsing source buffer %s\n",m_pFC->name().c_str()));
@@ -831,82 +659,11 @@ void SourceBuffer::parse()
   m_bParsed = true;
 
 }
+
 GtkTextBuffer *SourceBuffer::getBuffer()
 {
   parse();
   return m_buffer;
-}
-
-//------------------------------------------------------------------------
-//
-/*
-void SourceBuffer::setBreak(int line)
-{
-Dprintf ((" setBreak line %d\n",line));
-
-GtkTextIter iBegin, iEnd;
-gtk_text_buffer_get_iter_at_line_offset
-(m_buffer,
-&iBegin,
-line,
-STROFFSET_OF_OPCODE);
-gtk_text_buffer_get_iter_at_line_offset
-(m_buffer,
-&iEnd,
-line,
-STROFFSET_OF_OPCODE+STRLEN_OF_OPCODE);
-
-gtk_text_buffer_apply_tag (m_buffer,
-m_pParent->mBreakpointTag->tag(),
-&iBegin,
-&iEnd);
-
-}
-*/
-//------------------------------------------------------------------------
-/*
-void SourceBuffer::clearBreak(int line)
-{
-Dprintf ((" clearBreak line %d\n",line));
-
-GtkTextIter iBegin, iEnd;
-gtk_text_buffer_get_iter_at_line_offset
-(m_buffer,
-&iBegin,
-line,
-STROFFSET_OF_OPCODE);
-gtk_text_buffer_get_iter_at_line_offset
-(m_buffer,
-&iEnd,
-line,
-STROFFSET_OF_OPCODE+STRLEN_OF_OPCODE);
-
-gtk_text_buffer_remove_tag (m_buffer,
-m_pParent->mBreakpointTag->tag(),
-&iBegin,
-&iEnd);
-}
-*/
-
-
-//========================================================================
-NSourcePage::NSourcePage(SourceWindow *pParent,
-                         SourceBuffer *pBuffer,
-                         int file_id,
-                         GtkWidget *pContainer)
-                         : m_fileid(file_id),
-                         m_pBuffer(pBuffer),
-                         m_marginWidth(0),
-                         m_Parent(pParent),
-                         m_pContainer(pContainer),
-                         m_view(0)
-{
-}
-
-
-GtkTextBuffer *NSourcePage::buffer()
-{
-  return m_pBuffer ? m_pBuffer->getBuffer() : 0;
 }
 
 const char *SourceWindow::name()
@@ -1063,7 +820,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
 
   //printf("findText %s view:%p\n",pattern,pViewContainingPopup);
 
-  NSourcePage *pPage = PageMap[pViewContainingPopup];
+  NSourcePage *pPage = pages[gtk_notebook_get_current_page(GTK_NOTEBOOK(m_Notebook))];
 
   if (!pPage)
     return 0;
@@ -1201,36 +958,16 @@ gint SourceWindow::switch_page_cb(guint newPage)
 
     NSourcePage *pPage = pages[m_currentPage];
 
-    if (!pPage || !gp->cpu->files[pPage->m_fileid])
+    if (!pPage || !gp->cpu->files[pPage->get_file_id()])
       return TRUE;
-    if(gp->cpu->files[pPage->m_fileid]->IsHLL())
+    if(gp->cpu->files[pPage->get_file_id()]->IsHLL())
       pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
     else
       pma->set_hll_mode(ProgramMemoryAccess::ASM_MODE);
-    pPage->setSource();
     pPage->invalidateView();
 
   }
   return TRUE;
-}
-//------------------------------------------------------------------------
-//
-void NSourcePage::invalidateView()
-{
-  if (m_view) {
-    GdkRectangle vRect;
-
-    vRect.x=0;
-    vRect.y=0;
-    vRect.width=100;
-    vRect.height=100;
-    gdk_window_invalidate_rect
-      (gtk_text_view_get_window (m_view,
-                                 GTK_TEXT_WINDOW_LEFT),
-                                 &vRect,
-                                 TRUE);
-  }
-
 }
 
 //------------------------------------------------------------------------
@@ -1252,6 +989,7 @@ static Register *findRegister(string text)
 void
 SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
 {
+  SourceWindow *This = static_cast<SourceWindow *>(data);
   unsigned int address;
 
   SourceWindow *pSW = 0;
@@ -1265,7 +1003,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
     printf("Warning popup without a textview\n");
   } else {
 
-    pPage = PageMap[pViewContainingPopup];
+    pPage = This->pages[gtk_notebook_get_current_page(GTK_NOTEBOOK(This->m_Notebook))];
     pSW = pPage ? pPage->getParent() : 0;
   }
 
@@ -1274,7 +1012,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
     return;
   }
 
-  switch (GPOINTER_TO_SIZE(data)) {
+  switch (GPOINTER_TO_SIZE(g_object_get_data(G_OBJECT(widget), "item"))) {
 
   case MENU_FIND_TEXT:
     pSW->findText();
@@ -1286,7 +1024,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_MOVE_PC:
     if(-1 != pSW->m_LineAtButtonClick) {
       address = pSW->pma->find_closest_address_to_line(
-        pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
+        pPage->get_file_id(), pSW->m_LineAtButtonClick + 1);
       if(address!=INVALID_VALUE) {
         pSW->pma->set_PC(address);
         pSW->SetPC(pSW->pma->get_PC());
@@ -1297,7 +1035,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_RUN_HERE:
     if(-1 != pSW->m_LineAtButtonClick) {
       address = pSW->pma->find_closest_address_to_line(
-          pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
+          pPage->get_file_id(), pSW->m_LineAtButtonClick + 1);
       if(address!=INVALID_VALUE) {
         pSW->gp->cpu->run_to_address(address);
         pSW->SetPC(pSW->pma->get_PC());     // RP - update GUI after running
@@ -1313,7 +1051,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_PROFILE_START_HERE:
     if(-1 != pSW->m_LineAtButtonClick) {
       address = pSW->pma->find_closest_address_to_line(
-        pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
+        pPage->get_file_id(), pSW->m_LineAtButtonClick + 1);
 
       pSW->gp->profile_window->StartExe(address);
     }
@@ -1322,7 +1060,7 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
   case MENU_PROFILE_STOP_HERE:
     if(-1 != pSW->m_LineAtButtonClick) {
       address = pSW->pma->find_closest_address_to_line(
-        pPage->m_fileid,pSW->m_LineAtButtonClick + 1);
+        pPage->get_file_id(), pSW->m_LineAtButtonClick + 1);
 
       pSW->gp->profile_window->StopExe(address);
     }
@@ -1424,8 +1162,9 @@ SourceWindow::BuildPopupMenu()
   menu = gtk_menu_new();
   for (i = 0; i < G_N_ELEMENTS(menu_items); ++i) {
     item = gtk_menu_item_new_with_label(menu_items[i].name);
+    g_object_set_data(G_OBJECT(item), "item", GSIZE_TO_POINTER(menu_items[i].id));
     g_signal_connect(item, "activate",
-      G_CALLBACK(PopupMenuHandler), GSIZE_TO_POINTER(menu_items[i].id));
+      G_CALLBACK(PopupMenuHandler), this);
 
     gtk_widget_show(item);
     gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
@@ -1435,8 +1174,9 @@ SourceWindow::BuildPopupMenu()
 
   for (i = 0; i < G_N_ELEMENTS(submenu_items); ++i) {
     item = gtk_menu_item_new_with_label(submenu_items[i].name);
+    g_object_set_data(G_OBJECT(item), "item", GSIZE_TO_POINTER(submenu_items[i].id));
     g_signal_connect(item, "activate",
-      G_CALLBACK (PopupMenuHandler), GSIZE_TO_POINTER(submenu_items[i].id));
+      G_CALLBACK (PopupMenuHandler), this);
 
     gtk_widget_set_can_focus(item, TRUE);
 
@@ -1605,7 +1345,6 @@ void SourceWindow::Update()
       gint currPage = gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook));
 
       if (currPage >= 0) {
-        pages[currPage]->setSource();
         pages[currPage]->setFont(m_pParent->getFont());
       }
     }
@@ -1640,9 +1379,6 @@ void SourceWindow::UpdateLine(int address)
   if (!pPage)
     return;
 
-  pPage->setSource();
-
-
   int line = (pPage->getFC()->IsList()) ?
     pma->getFromAddress(address)->get_lst_line() :
   pma->get_src_line(address);
@@ -1663,7 +1399,7 @@ void SourceWindow::UpdateLine(int address)
     &iBegin,
     &y,
     &h);
-  if (pPage->m_marginWidth) {
+  if (pPage->get_margin_width()) {
 
     GdkRectangle vRect;
 
@@ -1677,7 +1413,7 @@ void SourceWindow::UpdateLine(int address)
 
     vRect.x=0;
     vRect.y=y;
-    vRect.width=pPage->m_marginWidth;
+    vRect.width = pPage->get_margin_width();
     vRect.height=h;
 
     Dprintf((" UpdateLine line=%d invalidating region %d,%d  %d,%d\n",line,0,y,vRect.width,h));
@@ -1750,39 +1486,15 @@ bool SourcePageMargin::formatMargin(char *str, int len, int line, int addr, int 
 
   return false;
 }
-//------------------------------------------------------------------------
-SourceWindow *NSourcePage::getParent()
+
+//========================================================================
+NSourcePage::NSourcePage(SourceWindow *pParent, SourceBuffer *pBuffer,
+  int file_id, GtkWidget *pContainer)
+
+  : m_pBuffer(pBuffer), m_Parent(pParent), m_fileid(file_id), m_marginWidth(0)
 {
-  return m_Parent;
-}
-
-//------------------------------------------------------------------------
-
-FileContext * NSourcePage::getFC()
-{
-  return m_pBuffer ? m_pBuffer->m_pFC : 0;
-}
-
-//------------------------------------------------------------------------
-GtkTextView *NSourcePage::getView()
-{
-  setSource();
-  return m_view;
-}
-
-//------------------------------------------------------------------------
-void NSourcePage::setSource()
-{
-  Dprintf((" \n"));
-
-  if (!m_pBuffer)
+  if (!m_pBuffer || !pContainer || !m_Parent)
     return;
-  if (m_view)
-    return;
-  if (!m_pContainer)
-    return;
-
-  Dprintf(("SetSource fileid %u\n",m_fileid));
 
   m_pBuffer->parse();
 
@@ -1792,24 +1504,21 @@ void NSourcePage::setSource()
     GTK_TEXT_WINDOW_LEFT,
     MARGIN_WIDTH);
 
-  PageMap[m_view] = this;
+  g_signal_connect(GTK_OBJECT(m_view), "key_press_event",
+    G_CALLBACK(KeyPressHandler), this);
 
-  g_signal_connect(GTK_OBJECT(m_view),"key_press_event",
-    G_CALLBACK(KeyPressHandler),
-    (gpointer) m_Parent);
-  g_signal_connect(GTK_OBJECT(m_view),"button_press_event",
-    G_CALLBACK(ButtonPressHandler),
-    (gpointer) m_Parent);
-  g_signal_connect(GTK_OBJECT(m_view),"expose_event",
-    G_CALLBACK(ViewExposeEventHandler),
-    (gpointer) m_Parent);
+  g_signal_connect(GTK_OBJECT(m_view), "button_press_event",
+    G_CALLBACK(ButtonPressHandler), this);
+
+  g_signal_connect(GTK_OBJECT(m_view), "expose_event",
+    G_CALLBACK(ViewExposeEventHandler), this);
 
   GtkWidget *pSW = gtk_scrolled_window_new (0,0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (pSW),
     GTK_POLICY_AUTOMATIC,
     GTK_POLICY_AUTOMATIC);
 
-  gtk_container_add (GTK_CONTAINER (m_pContainer), pSW);
+  gtk_container_add (GTK_CONTAINER (pContainer), pSW);
   gtk_container_add (GTK_CONTAINER (pSW), GTK_WIDGET(m_view));
 
   gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
@@ -1817,8 +1526,46 @@ void NSourcePage::setSource()
 
   setFont(m_Parent->getFont());
 
-  gtk_widget_show_all(m_pContainer);
+  gtk_widget_show_all(pContainer);
+}
 
+void NSourcePage::invalidateView()
+{
+  if (m_view) {
+    GdkRectangle vRect;
+
+    vRect.x=0;
+    vRect.y=0;
+    vRect.width=100;
+    vRect.height=100;
+    gdk_window_invalidate_rect
+      (gtk_text_view_get_window (m_view,
+                                 GTK_TEXT_WINDOW_LEFT),
+                                 &vRect,
+                                 TRUE);
+  }
+
+}
+
+SourceWindow *NSourcePage::getParent()
+{
+  return m_Parent;
+}
+
+GtkTextBuffer *NSourcePage::buffer()
+{
+  return m_pBuffer ? m_pBuffer->getBuffer() : 0;
+}
+
+FileContext * NSourcePage::getFC()
+{
+  return m_pBuffer ? m_pBuffer->m_pFC : 0;
+}
+
+//------------------------------------------------------------------------
+GtkTextView *NSourcePage::getView()
+{
+  return m_view;
 }
 
 //------------------------------------------------------------------------
@@ -1974,9 +1721,6 @@ void SourceWindow::SetPC(int address)
     gtk_notebook_get_current_page (GTK_NOTEBOOK(m_Notebook)) :
   -1;
 
-  if (currPage >= 0)
-    pages[currPage]->setSource();
-
   // Get the file id associated with the program counter address
   unsigned int sbawFileId  = pma->get_file_id(address);
   if(sbawFileId == 0xffffffff)
@@ -1992,7 +1736,7 @@ void SourceWindow::SetPC(int address)
   } else {
     std::map<int, NSourcePage *>::iterator i = pages.begin();
     for ( ; i != pages.end(); ++i) {
-      if (i->second->m_fileid == sbawFileId) {
+      if (i->second->get_file_id() == sbawFileId) {
         id = i->first;
         break;
       }
@@ -2062,10 +1806,10 @@ void SourceWindow::SetPC(int address)
   }
 
   // If there is a margin, then invalidate it so gtk will go off and redraw it.
-  if (pages[id]->m_marginWidth) {
+  if (pages[id]->get_margin_width()) {
     vRect.x=0;
     vRect.y=0;
-    vRect.width=pages[id]->m_marginWidth;
+    vRect.width = pages[id]->get_margin_width();
     // Send an expose event to repaint the whole margin
     gdk_window_invalidate_rect
       (win, &vRect, TRUE);
@@ -2176,7 +1920,7 @@ int SourceWindow::AddPage(SourceBuffer *pSourceBuffer, const std::string &fName)
 
   GtkWidget *label;
 
-  size_t pos = fName.find_last_of("/\\");
+  std::string::size_type pos = fName.find_last_of("/\\");
   if (pos != std::string::npos)
     label = gtk_label_new(fName.substr(pos + 1).c_str());
   else
@@ -2269,31 +2013,38 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
 
   const char *sName = "source_config";
   char *fg=0;
+  GdkColor color;
+  GtkTextTag *tag;
 
-  mLabel    = new TextStyle("Label",
-    config_get_string(sName, "label_fg", &fg) ? fg : "orange",
-    "white");
+  tag = gtk_text_tag_new("Label");
+  gdk_color_parse(config_get_string(sName, "label_fg", &fg)
+    ? fg : "orange" , &color);
+  g_object_set(tag, "foreground-gdk", &color, NULL);
+  gtk_text_tag_table_add(mpTagTable, tag);
 
-  fg=0;
-  mMnemonic = new TextStyle("Mnemonic",
-    config_get_string(sName, "mnemonic_fg", &fg) ? fg : "red",
-    "white");
-  fg=0;
-  mSymbol   = new TextStyle("Symbols",
-    config_get_string(sName, "symbol_fg", &fg) ? fg : "dark green",
-    "white");
-  fg=0;
-  mComment  = new TextStyle("Comments",
-    config_get_string(sName, "comment_fg", &fg) ? fg : "dim gray",
-    "white");
-  fg=0;
-  mConstant = new TextStyle("Constants",
-    config_get_string(sName, "constant_fg", &fg) ? fg : "blue",
-    "white");
-  fg=0;
-  mDefault  = new TextStyle("Default",
-    "black",
-    "white");
+  tag = gtk_text_tag_new("Mnemonic");
+  gdk_color_parse(config_get_string(sName, "mnemonic_fg", &fg)
+    ? fg : "red" , &color);
+  g_object_set(tag, "foreground-gdk", &color, NULL);
+  gtk_text_tag_table_add(mpTagTable, tag);
+
+  tag = gtk_text_tag_new("Symbols");
+  gdk_color_parse(config_get_string(sName, "symbol_fg", &fg)
+    ? fg : "dark green" , &color);
+  g_object_set(tag, "foreground-gdk", &color, NULL);
+  gtk_text_tag_table_add(mpTagTable, tag);
+
+  tag = gtk_text_tag_new("Comments");
+  gdk_color_parse(config_get_string(sName, "comment_fg", &fg)
+    ? fg : "dim gray" , &color);
+  g_object_set(tag, "foreground-gdk", &color, NULL);
+  gtk_text_tag_table_add(mpTagTable, tag);
+
+  tag = gtk_text_tag_new("Constants");
+  gdk_color_parse(config_get_string(sName, "constant_fg", &fg)
+    ? fg : "blue" , &color);
+  g_object_set(tag, "foreground-gdk", &color, NULL);
+  gtk_text_tag_table_add(mpTagTable, tag);
 
   if (!config_get_variable(sName, "tab_position", &m_TabType))
     m_TabType = GTK_POS_LEFT;
@@ -2306,21 +2057,6 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
 
   config_get_variable(sName, "opcodes", &b);
   margin().enableOpcodes(b!=0);
-
-  mBreakpointTag   = new TextStyle("BreakPoint","black", "red");
-  mNoBreakpointTag = new TextStyle("NoBreakPoint","black", "white");
-  mCurrentLineTag  = new TextStyle("CurrentLine","black", "light green");
-
-  gtk_text_tag_table_add (mpTagTable, mLabel->tag());
-  gtk_text_tag_table_add (mpTagTable, mMnemonic->tag());
-  gtk_text_tag_table_add (mpTagTable, mSymbol->tag());
-  gtk_text_tag_table_add (mpTagTable, mComment->tag());
-  gtk_text_tag_table_add (mpTagTable, mConstant->tag());
-  gtk_text_tag_table_add (mpTagTable, mDefault->tag());
-
-  gtk_text_tag_table_add (mpTagTable, mBreakpointTag->tag());
-  gtk_text_tag_table_add (mpTagTable, mNoBreakpointTag->tag());
-  gtk_text_tag_table_add (mpTagTable, mCurrentLineTag->tag());
 
   if (config_get_string(sName, "font", &fg))
     setFont(fg);
@@ -2442,6 +2178,16 @@ void SourceBrowserParent_Window::ChangeView(int view_state)
     (*sbaw_iterator)->ChangeView(view_state);
 }
 
+gchar *SourceBrowserParent_Window::get_color_string(const char *tag_name)
+{
+  GdkColor *gdk_color;
+  g_object_get(gtk_text_tag_table_lookup(mpTagTable, tag_name),
+    "foreground-gdk", &gdk_color, NULL);
+  gchar *color_string = gdk_color_to_string(gdk_color);
+  gdk_color_free(gdk_color);
+  return color_string;
+}
+
 int SourceBrowserParent_Window::set_config()
 {
   std::vector<SourceWindow *>::iterator sbaw_iterator = children.begin();
@@ -2450,12 +2196,23 @@ int SourceBrowserParent_Window::set_config()
     (*sbaw_iterator)->set_config();
 
   const char *sName = "source_config";
-  char buff[100];
-  config_set_string(sName,"mnemonic_fg",mMnemonic->mFG.get(buff, sizeof(buff)));
-  config_set_string(sName,"label_fg",mLabel->mFG.get(buff, sizeof(buff)));
-  config_set_string(sName,"symbol_fg",mSymbol->mFG.get(buff, sizeof(buff)));
-  config_set_string(sName,"comment_fg",mComment->mFG.get(buff, sizeof(buff)));
-  config_set_string(sName,"constant_fg",mConstant->mFG.get(buff, sizeof(buff)));
+  char *buff;
+
+  buff = get_color_string("Mnemonic");
+  config_set_string(sName,"mnemonic_fg", buff);
+  g_free(buff);
+  buff = get_color_string("Label");
+  config_set_string(sName,"label_fg", buff);
+  g_free(buff);
+  buff = get_color_string("Symbols");
+  config_set_string(sName,"symbol_fg", buff);
+  g_free(buff);
+  buff = get_color_string("Comments");
+  config_set_string(sName,"comment_fg", buff);
+  g_free(buff);
+  buff = get_color_string("Constants");
+  config_set_string(sName,"constant_fg", buff);
+  g_free(buff);
 
   config_set_string(sName,"font", getFont());
 
@@ -2487,7 +2244,7 @@ void SourceBuffer::parseLine(const char *cP,
   gtk_text_buffer_insert (pTextBuffer, &iEnd, cP, -1);
 
   if (parseStyle<0) {
-    addTagRange(m_pParent->mComment,offset,offset + strlen(cP));
+    addTagRange("Comments", offset, offset + strlen(cP));
     return;
   }
 
@@ -2496,7 +2253,7 @@ void SourceBuffer::parseLine(const char *cP,
   bool bHaveMnemonic = false;
 
   if (i != (j = isString(cP))) {
-    addTagRange(m_pParent->mLabel,i+offset,j+offset);
+    addTagRange("Label", i + offset, j + offset);
     i=j;
   }
 
@@ -2506,16 +2263,16 @@ void SourceBuffer::parseLine(const char *cP,
       i += j;
     } else if ( (j=isString(&cP[i])) != 0) {
       if (bHaveMnemonic)
-        addTagRange(m_pParent->mSymbol,i+offset,i+j+offset);
+        addTagRange("Symbols", i + offset, i + j + offset);
       else
-        addTagRange(m_pParent->mMnemonic,i+offset,i+j+offset);
+        addTagRange("Mnemonic", i + offset, i + j + offset);
       bHaveMnemonic = true;
       i += j;
     } else if ( (j=isNumber(&cP[i])) != 0) {
-      addTagRange(m_pParent->mConstant,i+offset,i+j+offset);
+      addTagRange("Constants", i + offset, i + j + offset);
       i += j;
     } else if ( (j=isComment(&cP[i])) != 0) {
-      addTagRange(m_pParent->mComment,i+offset,i+j+offset);
+      addTagRange("Comments", i + offset, i + j + offset);
       i += j;
       return;
     } else
@@ -2562,7 +2319,7 @@ void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *
 
     int address;
     // The syntax highlighting doesn't work on list files or hll files
-    address = pFC->IsList()||pFC->IsHLL() ? -1 : gp->cpu->pma->find_address_from_line(pFC,line);
+    address = pFC->IsList()||pFC->IsHLL() ? -1 : 1;//gp->cpu->pma->find_address_from_line(pFC,line);
 
     // check if text_buffer in uft8 character set
     if (!g_utf8_validate(text_buffer, -1, NULL))
