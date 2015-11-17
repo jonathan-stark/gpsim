@@ -4,15 +4,12 @@
 /*****************************************************************
  * The primordial Assembler Error class.
  */
-AnError::AnError(string severity, string errMsg)
+AnError::AnError(std::string _severity, std::string _errMsg)
+  : severity(_severity), errMsg(_errMsg)
 {
   // Pretty gross, but the lexer makes sure that this global
   // always describes the current source line.
   //this->sourceRef = thisLine;
-
-  this->severity = severity;
-  this->errMsg = errMsg;
-
 }
 
 AnError::~AnError()

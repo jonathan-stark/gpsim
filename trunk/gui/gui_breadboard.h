@@ -293,13 +293,17 @@ public:
   void update_board_matrix();
   void clear_nodes();
 
-  GtkWidget *add_button(const char *label, const char *name,
-			GCallback f, GtkWidget *box);
-
 protected:
   virtual const char *name();
 
 private:
+  void trace_all();
+  GtkWidget *add_button(const char *label, GCallback f, GtkWidget *box);
+
+  static void pointer_cb(GtkWidget *w, GdkEventButton *event,
+    Breadboard_Window *bbw);
+
+  GtkWidget *status_line;
   GuiModule *m_MainCpuModule;
 
   static gboolean layout_expose(GtkWidget *widget,

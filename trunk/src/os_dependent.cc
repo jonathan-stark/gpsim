@@ -342,7 +342,7 @@ void * load_library(const char *library_name, const char **pszError)
       CFileSearchPath::iterator itSearchPath;
       for (itSearchPath = asDllSearchPath.begin();
 	   itSearchPath != asDllSearchPath.end();
-	   itSearchPath++) {
+	   ++itSearchPath) {
 	sPath = *itSearchPath + sFile;
 
 	handle = sLoad(sPath.c_str());
