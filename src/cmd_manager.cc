@@ -49,7 +49,7 @@ void CCommandManager::ListToConsole() {
   ISimConsole &console = GetConsole();
   List::iterator it;
   List::iterator itEnd = m_HandlerList.end();
-  for(it = m_HandlerList.begin( ); it != itEnd; it++) {
+  for(it = m_HandlerList.begin( ); it != itEnd; ++it) {
     console.Printf("%s\n", (*it)->GetName());
   }
 }

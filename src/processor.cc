@@ -2391,7 +2391,7 @@ string ProcessorConstructorList::DisplayString(void)
 
   for (processor_iterator = pl->begin();
        processor_iterator != pl->end();
-       processor_iterator++) {
+       ++processor_iterator) {
 
     p = *processor_iterator;
 
@@ -2432,8 +2432,8 @@ string ProcessorConstructorList::DisplayString(void)
 //------------------------------------------------------------------------
 
 FileContext::FileContext(string &new_name)
+  : name_str(new_name)
 {
-  name_str = new_name;
   fptr = NULL;
   m_uiMaxLine = 0;
   m_bIsList = false;
@@ -2441,8 +2441,8 @@ FileContext::FileContext(string &new_name)
 }
 
 FileContext::FileContext(const char *new_name)
+  : name_str(new_name)
 {
-  name_str = string(new_name);
   fptr = NULL;
   m_uiMaxLine = 0;
   m_bIsList = false;
@@ -2593,7 +2593,7 @@ FileContextList::~FileContextList(void)
 {
   FileContextList::iterator it;
   FileContextList::iterator itEnd = end();
-  for (it = begin(); it != itEnd; it++)
+  for (it = begin(); it != itEnd; ++it)
     it->close();
 }
 

@@ -57,7 +57,7 @@ void IIndexedCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
   Value * pValue = pExpr->evaluate();
 //    _CT * pCTValue = dynamic_cast<_CT*>(pValue);
 //    if(pCTValue != NULL) {
-    for(it = pIndexers->begin(); it != itEnd; it++) {
+    for(it = pIndexers->begin(); it != itEnd; ++it) {
       Value * pIndex = (*it)->evaluate();
       Integer *pIntIndex = dynamic_cast<Integer*>(pIndex);
       if(pIntIndex != NULL) {
@@ -120,7 +120,7 @@ string IIndexedCollection::toString(ExprList_t* pIndexerExprs) {
     else {
       ExprList_t::iterator it;
       ExprList_t::iterator itEnd = pIndexerExprs->end();
-      for(it = pIndexerExprs->begin(); it != itEnd; it++) {
+      for(it = pIndexerExprs->begin(); it != itEnd; ++it) {
         Value * pIndex = (*it)->evaluate();
         AbstractRange *pRange = dynamic_cast<AbstractRange*>(pIndex);
         if(pRange) {
@@ -220,7 +220,7 @@ string IIndexedCollection::toString(int iColumnWidth, vector<string> &asIndexes,
   // Dump the consolidated element list
   for(itElement = asIndexes.begin(), itValue = asValue.begin();
       itElement != itElementEnd;
-      itElement++, itValue++) {
+      ++itElement, ++itValue) {
     sOut.width(iColumnWidth);
     sOut.setf(ios_base::left);
     sOut << (*itElement);

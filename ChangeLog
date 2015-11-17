@@ -1,3 +1,10 @@
+2015-11-17 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/ValueCollections.cc src/cmd_manager.cc src/errors.cc
+	  src/os_dependent.cc src/processor.cc src/value.cc
+	: Minor optimisations, found during static analysis of code
+	* gui/gui_breadboard.cc gui/gui_breadboard.h
+	: Removed trace buttons, added status line to show if the trace failed
+
 2015-11-15 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_menu.cc gui/gui_src.h gui/gui_src_asm.cc
 	: Fix memory leaks. Refactor source browser

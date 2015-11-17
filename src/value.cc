@@ -80,7 +80,7 @@ char * UnquoteString(char * pBuffer) {
 string &toupper(string & sStr) {
   string::iterator it;
   string::iterator itEnd = sStr.end();
-  for(it = sStr.begin(); it != itEnd; it++) {
+  for(it = sStr.begin(); it != itEnd; ++it) {
     if(isalpha(*it)) {
       *it = toupper((int)*it);
     }
