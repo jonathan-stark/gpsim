@@ -1,3 +1,15 @@
+2015-11-19 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_break.cc cli/cmd_break.h
+	: undo fix for for bug 206
+	* cli/parse.yy src/expr.cc
+	: improve error processing and undo fix for bug 206 
+	* cli/scan.ll
+	: Allow [dD]'nn' decimal values
+	* doc/gpsim.lyx
+	: Correct documentation errors
+	* src/breakpoints.cc
+	: new fix for bug 206
+
 2015-11-17 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/ValueCollections.cc src/cmd_manager.cc src/errors.cc
 	  src/os_dependent.cc src/processor.cc src/value.cc

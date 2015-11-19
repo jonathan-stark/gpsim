@@ -1688,7 +1688,7 @@ This example breaks only if the hex digit 'C' is written to the upper nibble
 \end_layout
 
 \begin_layout LyX-Code
-break w temp1 & 0b11110000 == 0b11000000
+break w (temp1 & 0b11110000) == 0b11000000
 \end_layout
 
 \begin_layout Subsubsection
@@ -2667,7 +2667,7 @@ processor
 \end_layout
 
 \begin_layout LyX-Code
-processor [new_processor_type [new_processor_name]] | [list] | [dump] 
+processor [new_processor_type [new_processor_name]] | [list] | [pins] 
 \end_layout
 
 \begin_layout Standard
