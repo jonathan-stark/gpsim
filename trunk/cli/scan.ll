@@ -222,6 +222,7 @@ INDEXERLEFT    (\[)
 INDEXERRIGHT    (\])
 EXPON   ([DdEe][+-]?{D}+)
 DEC     ({D}+)
+DEC2    ([dD]\'{D}+\')
 HEX1    ((0[Xx])[0-9a-fA-F]+)
 HEX2    ("$"[0-9a-fA-F]+)
 FLOAT   (({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
@@ -332,6 +333,7 @@ abort_gpsim_now {
 {BIN1}              {return(process_intLiteral(yylvalP,&yytext[2], 2));}
 {BIN2}              {return(process_intLiteral(yylvalP,&yytext[2], 2));}
 {DEC}               {return(process_intLiteral(yylvalP,&yytext[0], 10));}
+{DEC2}              {return(process_intLiteral(yylvalP,&yytext[2], 10));}
 {HEX1}              {return(process_intLiteral(yylvalP,&yytext[2], 16));}
 {HEX2}              {return(process_intLiteral(yylvalP,&yytext[1], 16));}
 {FLOAT}             {return process_floatLiteral(yylvalP,yytext);}
@@ -711,18 +713,20 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 static int process_intLiteral(YYSTYPE* yylvalP, char *buffer, int conversionBase)
 {
   char c;
+  char *pt = buffer;
   gint64 literalValue=0;
   gint64 nxtDigit;
 
-  while (*buffer) {
-    c = toupper(*buffer++);
+  while (*pt) {
+    c = toupper(*pt++);
 
     nxtDigit = (c) <= '9' ? c-'0' : c-'A'+10;
     if ((nxtDigit >= conversionBase) || (nxtDigit<0)) {
-      /* If the next digit exceeds the base, then it's an error unless
-         this is a binary conversion and the character is a single quote */
-      if(!(conversionBase == 2 && c == '\''))
+      if(!(c == '\''))
+      {
+	cout << "Error conversion to integer " << buffer << endl;
         literalValue = 0;
+      }
       break;
     }
 

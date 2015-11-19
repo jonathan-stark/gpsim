@@ -103,7 +103,8 @@ Value* LiteralInteger::evaluate()
 
 string LiteralInteger::toString()
 {
-  return value->toString("0x%x");
+  //return value->toString("0x%x");
+  return value->toString();
 }
 
 int LiteralInteger::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Expression *expr)
@@ -179,7 +180,16 @@ string LiteralString::toString()
 LiteralSymbol::LiteralSymbol(gpsimObject *_sym)
 {
   sym = dynamic_cast<Value *>(_sym);
-  assert(sym != 0);
+  if (!sym)
+  {
+      string s;
+      if (_sym)
+        s = "literal symbol '" + _sym->name() + "' does not have a value";
+      else
+        s = "NULL pointer to literal symbol"; 
+    
+      throw new Error(s);
+  }
 }
 
 LiteralSymbol::~LiteralSymbol()
@@ -188,7 +198,10 @@ LiteralSymbol::~LiteralSymbol()
 
 Value* LiteralSymbol::evaluate()
 {
-  return  sym->evaluate();
+  if (sym)
+    return  sym->evaluate();
+
+  return 0;
 }
 
 Value *LiteralSymbol::GetSymbol()

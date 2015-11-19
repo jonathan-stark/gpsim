@@ -245,39 +245,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
 
 }
 
-#include <typeinfo>
 
-// set_break_EQ(cmd_options *co, 
-//           Expression *pExpr1,
-//           Expression *pExpr2)
-//
-// Extract symbol from pExpr1 for break point.
-// for case "break [crw] REGISTER == expr" 
-unsigned int cmd_break::set_break_EQ(cmd_options *co, 
-				  Expression *pExpr1,
-				  Expression *pExpr2)
-{
-    Expression *all;
-    Expression *sym = 0;
-
-    if (typeid(*pExpr1) == typeid(LiteralSymbol))
-	sym = pExpr1;
-    else 
-	sym = ((BinaryOperator *)pExpr1)->getLeft();
-    
-
-    if (sym)
-    {
-       all = new OpEq(pExpr1, pExpr2);
-       int bpn = sym->set_break(MapBreakActions(co->value), 
-		    gpsimObject::eActionHalt, all);
-	return bpn;
-     }
-     else
-	fprintf(stderr, "cmd_break::%s symbol not defined\n", __FUNCTION__);
-
-    return 0;
-}
 //------------------------------------------------------------------------
 // set_break(cmd_options *co, 
 //           Expression *pExpr1,

@@ -259,11 +259,12 @@ int Breakpoints::set_break(gpsimObject::ObjectBreakTypes bt, gpsimObject::Object
 	dynamic_cast<LiteralSymbol*>(pLeftOp->getLeft()) : 
 	dynamic_cast<LiteralSymbol*>(pCompareExpr->getLeft());
 
-      //register_symbol *pRegSym = pLeftSymbol ? 
-      // dynamic_cast<register_symbol*>(pLeftSymbol->GetSymbol()) : 0;
 
-      // pRegInExpr = pRegSym ? pRegSym->getReg() : 0;
-      pRegInExpr = pLeftSymbol ? dynamic_cast<Register*>(pLeftSymbol) : 0;
+      Register *pRegSym = pLeftSymbol ? 
+       dynamic_cast<Register *>(pLeftSymbol->GetSymbol()) : 0;
+
+      pRegInExpr = pRegSym ? pRegSym->getReg() : 0;
+      //pRegInExpr = pLeftSymbol ? dynamic_cast<Register*>(pLeftSymbol) : 0;
 
       if (!pRegInExpr) {
 	// Legacy code... try to cast the left most integer into a register.

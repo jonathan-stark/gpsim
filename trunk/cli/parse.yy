@@ -91,10 +91,18 @@ void FlushLexerBuffer();
 
 void yyerror(const char *message)
 {
-  printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
   const char *last = GetLastFullCommand();
   if (last)
-    printf(" Last command: %s\n", last);
+  {
+     int n = strlen(last);
+     char *pt = strdup(last);
+     if (n > 0 && *(pt+n-1) == '\n')
+	*(pt+n-1) = 0;
+     printf("***ERROR: %s while parsing:\n\t'%s'\n",message, pt);
+     free(pt);
+  }
+  else
+      printf("***ERROR: %s \n",message);
   init_cmd_state();
   // JRH - I added this hoping that it is an appropriate
   //       place to clear the lexer buffer. An example of
@@ -283,13 +291,13 @@ extern int yylex(YYSTYPE* lvalP);
 
 // Here are token definitions for expression operators
 %nonassoc COLON_T
-%left     EQ_T NE_T
 %left     PLUS_T MINUS_T XOR_T OR_T AND_T
 %left     MPY_T DIV_T
 %left     SHL_T SHR_T
 
 %left     LOR_T
 %left     LAND_T
+%left     EQ_T NE_T
 %left     LT_T LE_T GT_T GE_T MIN_T MAX_T ABS_T
 
 %nonassoc IND_T
@@ -406,9 +414,15 @@ attach_cmd
           ;
 
 break_cmd
-          : BREAK                             {c_break.list();}
-          | BREAK LITERAL_INT_T               {c_break.list($2->getVal());delete $2;}
-          | break_set                         {  }
+          : BREAK                      {c_break.list();}
+          | BREAK LITERAL_INT_T        {c_break.list($2->getVal());delete $2;}
+          | break_set                  {  
+					  int n = $1;
+					  if (n < 0)
+					  {
+					     yyerror("Breakpoint not set");
+					  }
+				       }
           ;
 
 log_cmd
@@ -419,11 +433,9 @@ log_cmd
 
 
 break_set 
-	  : BREAK bit_flag expr EQ_T expr 
-					{$$=c_break.set_break_EQ($2,$3, $5);}
-          | BREAK bit_flag expr_list          {$$=c_break.set_break($2,$3);}
-          | BREAK bit_flag                    {$$=c_break.set_break($2);}
-          | BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
+          : BREAK bit_flag expr_list     { $$=c_break.set_break($2,$3);}
+          | BREAK bit_flag                {$$=c_break.set_break($2);}
+          | BREAK SYMBOL_T                {$$=c_break.set_break($2);}
           ;
 
 bus_cmd
@@ -696,7 +708,17 @@ set_cmd
 
 step_cmd
           : STEP                        {step.step(1);}
-          | STEP expr                   {step.step($2);}
+          | STEP expr                   {
+					    if ($2)
+					    {
+					    int i=toInt($2);
+					    delete $2; 
+				            if (i >=1)
+						step.step(i);
+					    else
+						yyerror("Invalid value");
+					    }
+					}
           | STEP bit_flag               {step.over();}
           ;
 
@@ -1070,7 +1092,20 @@ literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}
         | LITERAL_BOOL_T                {$$ = new LiteralBoolean($1);}
         | LITERAL_STRING_T              {$$ = new LiteralString($1);}
         | LITERAL_FLOAT_T               {$$ = new LiteralFloat($1);}
-        | SYMBOL_T                      {$$ = new LiteralSymbol($1);}
+        | SYMBOL_T                      {
+					  try {
+					  $$ = new LiteralSymbol($1);
+					  }
+  					  catch (Error *err) {
+    					    if(err)
+					    {
+					      yyerror(err->toString().c_str());
+    					      delete err;
+					     }
+				    	     delete $1;
+					     YYERROR;
+  					   }
+					}
         | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T   {$$ = new IndexedSymbol($1,$3);} 
         | LITERAL_ARRAY_T               {$$ = new LiteralArray($1); }
         ;
