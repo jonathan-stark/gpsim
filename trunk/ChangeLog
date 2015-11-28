@@ -1,4 +1,8 @@
 2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
+	* doc/gpsim.lyx
+	: Update documentation
+
+2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_src.h gui/gui_src_opcode.cc
 	: Major re-write of the opcode window. Simplefied the font handling,
 	  removed broken options. Improved redraw speed and gave it a similar

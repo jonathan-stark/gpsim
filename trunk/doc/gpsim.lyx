@@ -3757,11 +3757,12 @@ Double click on a line to toggle breakpoints.
 \end_layout
 
 \begin_layout Itemize
-Use the same keyboard commands as the in the source browser.
+Right click to get a menu where the breakpoint can be set or cleared on
+ the selected line.
 \end_layout
 
 \begin_layout Itemize
-Right click to get a menu where you can change the fonts.
+Under 'Settings' you can change the font.
 \end_layout
 
 \begin_layout Subsubsection*
@@ -3776,28 +3777,15 @@ Here the program memory is ordered as columns of sixteen memory cells per
 
 \begin_layout Standard
 The seventeenth column contains an ASCII representation of the program memory.
- You can configure this column to use one of three different modes:
-\end_layout
-
-\begin_layout Itemize
-One byte per cell
-\end_layout
-
-\begin_layout Itemize
-Two bytes per cell, MSB first.
-\end_layout
-
-\begin_layout Itemize
-Two bytes per cell, LSB first.
 \end_layout
 
 \begin_layout Standard
-You can change fonts with the menu item 'Settings'.
+You can change font with the menu item 'Settings'.
 \end_layout
 
 \begin_layout Standard
-You can set breakpoints on one or more (drag the mouse to select more cells)
- addresses with the right click menu.
+The breakpoints can be set or cleared on one or more (drag the mouse to
+ select more cells) addresses with the right click menu.
 \end_layout
 
 \begin_layout Section
