@@ -1,3 +1,9 @@
+2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_src.h gui/gui_src_opcode.cc
+	: Major re-write of the opcode window. Simplefied the font handling,
+	  removed broken options. Improved redraw speed and gave it a similar
+	  look to the RAM & EPROM windows.
+
 2015-11-19 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_break.cc cli/cmd_break.h
 	: undo fix for for bug 206

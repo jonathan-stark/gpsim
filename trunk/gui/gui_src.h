@@ -266,48 +266,6 @@ class SourceBrowser_Window : public GUI_Object {
 class SourceBrowserOpcode_Window : public SourceBrowser_Window
 {
  public:
-
-  GtkListStore *list;
-  GtkWidget *tree;
-
-  unsigned int current_address;   // current PC
-
-  // Font strings
-  std::string normalfont_string;
-
-  PangoFontDescription *normalPFD;
-  PangoFontDescription *current_line_numberPFD;
-  PangoFontDescription *breakpoint_line_numberPFD;
-
-  std::string breakpointfont_string;
-  std::string pcfont_string;
-
-  GtkStyle *normal_style;
-  GtkStyle *current_line_number_style;
-  GtkStyle *breakpoint_line_number_style;
-
-  GdkColor pm_has_changed_color;
-  GdkColor normal_pm_bg_color;
-  GdkColor breakpoint_color;
-
-  GtkWidget *notebook;
-  GtkWidget *sheet;
-  GtkWidget *entry;
-  GtkWidget *label;
-
-  GtkWidget *sheet_popup_menu;
-  GtkWidget *list_popup_menu;
-
-  GdkPixbuf *break_pix;
-  GdkPixbuf *pc_pix;
-
-  unsigned int ascii_mode; // 0, 1 or 2 equals
-  // one byte/cell,
-  // two bytes/cell MSB first
-  // two bytes/cell LSB first
-
-  unsigned int *memory;
-
   SourceBrowserOpcode_Window(GUI_Processor *gp);
   ~SourceBrowserOpcode_Window();
   virtual void Build();
@@ -332,11 +290,44 @@ private:
   void update_values(int address);
   void update_styles(int address);
   void update(int address);
+  void update_label(int address);
 
-  static void popup_activated(GtkWidget *widget, gpointer data);
+  void do_popup_menu(GtkWidget *my_widget, GdkEventButton *event);
+
+  static void popup_activated(GtkWidget *widget, SourceBrowserOpcode_Window *sbow);
   static void cell_renderer(GtkTreeViewColumn *tree_column,
     GtkCellRenderer *cell, GtkTreeModel *tree_model,
     GtkTreeIter *iter, gpointer data);
+  static void show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow);
+  static gint activate_sheet_cell(GtkWidget *widget,
+    gint row, gint column, SourceBrowserOpcode_Window *sbow);
+  static gint button_press(GtkWidget *widget, GdkEventButton *event,
+    SourceBrowserOpcode_Window *sbow);
+  static gboolean popup_menu_handler(GtkWidget *widget,
+    SourceBrowserOpcode_Window *sbw);
+  static void row_selected(GtkTreeView *tree_view, GtkTreePath *path,
+    GtkTreeViewColumn *column, SourceBrowserOpcode_Window *sbow);
+
+  GtkListStore *list;
+  GtkWidget *tree;
+
+  unsigned int current_address;   // current PC
+
+  std::string normalfont_string;
+  PangoFontDescription *normalPFD;
+
+  GtkWidget *notebook;
+  GtkWidget *sheet;
+  GtkWidget *entry;
+  GtkWidget *label;
+
+  GtkWidget *sheet_popup_menu;
+  GtkWidget *list_popup_menu;
+
+  GdkPixbuf *break_pix;
+  GdkPixbuf *pc_pix;
+
+  unsigned int *memory;
 };
 
 //
