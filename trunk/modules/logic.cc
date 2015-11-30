@@ -37,6 +37,7 @@ In here you'll find some simple logic devices:
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
+#include <iostream>
 
 /* XPM */
 static const gchar * and2_pixmap[] = {

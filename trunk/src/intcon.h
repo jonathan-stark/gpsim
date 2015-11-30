@@ -21,7 +21,6 @@ License along with this library; if not, see
 
 #ifndef INTCON_H
 #define INTCON_H
-#include <iostream>		// for cout used in breakpoints.h
 
 #include "gpsim_classes.h"
 #include "registers.h"

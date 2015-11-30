@@ -60,6 +60,7 @@ Boston, MA 02111-1307, USA.  */
 #include "lcd.h"
 #include <src/gpsim_time.h>
 
+#include <iostream>
 
 Trace *gTrace=0;                // Points to gpsim's global trace object.
 

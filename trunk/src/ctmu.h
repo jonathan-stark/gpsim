@@ -21,9 +21,6 @@ License along with this library; if not, see
 #ifndef __CTMU_H__
 #define __CTMU_H__
 
-#include <iostream>
-#include <stdio.h>
-
 #include "trace.h"
 
 

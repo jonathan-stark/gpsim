@@ -31,6 +31,7 @@ License along with this library; if not, see
 
 #include <cstdio>
 #include <cassert>
+#include <iostream>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI

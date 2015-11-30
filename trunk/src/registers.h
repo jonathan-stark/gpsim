@@ -21,9 +21,6 @@ License along with this library; if not, see
 #ifndef __REGISTERS_H__
 #define __REGISTERS_H__
 
-#include <stdio.h>
-#include <iostream>
-#include <iomanip>
 #include <glib.h>
 
 class symbol;

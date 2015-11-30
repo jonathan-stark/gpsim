@@ -1,4 +1,17 @@
 2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
+	* extras/lcd/hd44780.cc extras/lcd/lcd.cc gui/gui_symbols.cc
+	  modules/encoder.cc modules/logic.cc modules/stimuli.cc
+	  modules/ttl.cc src/ValueCollections.cc src/ValueCollections.h
+	  src/attributes.cc src/bitlog.cc src/breakpoints.h
+	  src/comparator.h src/ctmu.h src/eeprom.h src/intcon.cc
+	  src/intcon.h src/interface.cc src/pic-processor.h
+	  src/processor.cc src/processor.h src/registers.cc
+	  src/registers.h src/stimuli.cc src/stimuli.h src/ui.cc
+	: Removed unnecessary use of #include <iostream> from headers.
+	  This leads to some code bloat with GCC for units that do not need
+	  iostream.
+
+2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
 	* doc/gpsim.lyx
 	: Update documentation
 

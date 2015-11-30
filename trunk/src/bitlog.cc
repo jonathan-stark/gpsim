@@ -21,6 +21,8 @@ License along with this library; if not, see
 #include "bitlog.h"
 #include "../src/gpsim_time.h"
 
+#include <iostream>
+
 BoolEventLogger::BoolEventLogger(unsigned int _max_events)
   : max_events(_max_events)
 {
