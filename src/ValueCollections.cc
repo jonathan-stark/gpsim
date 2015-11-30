@@ -22,6 +22,9 @@ License along with this library; if not, see
 #include "symbol.h"
 #include "registers.h"
 
+//#include <iostream>
+#include <sstream>
+
 IIndexedCollection::IIndexedCollection(const char *pName, 
 				       const char *pDesc,
 				       int iAddressRadix) 

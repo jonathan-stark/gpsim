@@ -21,8 +21,7 @@ License along with this library; if not, see
 
 #include <stdio.h>
 #include <iostream>
-#include <iomanip>
-
+#include <sstream>
 
 #include "../config.h"
 #include "xref.h"

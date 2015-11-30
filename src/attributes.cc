@@ -25,6 +25,8 @@ License along with this library; if not, see
 #include "protocol.h"
 #include "../config.h"
 
+#include <iostream>
+
 //========================================================================
 // Attribute wrappers
 //

@@ -1,7 +1,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
-
+#include <iostream>
 
 #include "cmd_gpsim.h"
 #include "sim_context.h"

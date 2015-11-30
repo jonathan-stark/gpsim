@@ -23,6 +23,7 @@ License along with this library; if not, see
 #define __COMPARATOR_H__
 
 #include "14bit-tmrs.h"
+#include <cstdio>
 #include <math.h>
 
 /***************************************************************************
@@ -210,7 +211,7 @@ class CMCON : public sfr_register
   virtual void setOUTpin(int i, PinModule *);
   virtual void assign_pir_set(PIR_SET *new_pir_set);
   virtual unsigned int get();
-  virtual void rename_pins(unsigned int) { cout << "CMCON::rename_pins() should not be called\n";}
+  virtual void rename_pins(unsigned int) { puts("CMCON::rename_pins() should not be called");}
   virtual void put(unsigned int);
   virtual void set_configuration(int comp, int mode, int il1, int ih1, int il2, int ih2, int out);
   virtual double comp_voltage(int ind, int invert);
@@ -343,7 +344,7 @@ public:
     virtual unsigned int get();
     virtual double get_Vpos(){return 0.;}
     virtual double get_Vneg(){return 0.;}
-    virtual void put(unsigned int)  { cout << "Help\n";}
+    virtual void put(unsigned int)  { puts("Help");}
 //    virtual int get(){return 0;}
     virtual void setBitMask(unsigned int bm) { mValidBits = bm; }
     virtual void setIntSrc(InterruptSource *_IntSrc) { IntSrc = _IntSrc;}

@@ -35,6 +35,7 @@ License along with this library; if not, see
 #include "../src/packages.h"
 #include "../src/gpsim_time.h"
 
+#include <iostream>
 #include <string>
 
 //#define DEBUG

@@ -36,6 +36,7 @@ License along with this library; if not, see
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <sstream>
 #include <cstdio>
 
 #include "../config.h"

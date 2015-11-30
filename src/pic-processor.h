@@ -23,6 +23,7 @@ License along with this library; if not, see
 #define __PIC_PROCESSORS_H__
 #include <glib.h>
 #include <stdio.h>
+#include <iostream>
 
 #include "gpsim_classes.h"
 #include "modules.h"

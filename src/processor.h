@@ -22,6 +22,7 @@ License along with this library; if not, see
 #define __PROCESSOR_H__
 #include <glib.h>
 
+#include <cstdio>
 #include <vector>
 #include <list>
 #include <map>
@@ -526,7 +527,7 @@ public:
   virtual void finish(void) = 0;
 
   virtual void sleep(void) {};
-  virtual void exit_sleep() {cerr << "RRR exit_sleep\n";}
+  virtual void exit_sleep() {fputs("RRR exit_sleep\n", stderr);}
   virtual void step(unsigned int steps,bool refresh=true) = 0;
   virtual void step_over(bool refresh=true);
   virtual void step_one(bool refresh=true) = 0;

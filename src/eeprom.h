@@ -29,6 +29,8 @@ License along with this library; if not, see
 #include "registers.h"
 #include "breakpoints.h"
 
+#include <cstdio>
+
 class pic_processor;
 class EEPROM;
 class PIR_SET;
@@ -174,7 +176,7 @@ public:
   virtual void set_intcon(INTCON *ic);
 
   virtual void callback();
-  virtual void callback_print(){ cout << " EEPROM\n";}
+  virtual void callback_print(){ puts(" EEPROM");}
   virtual void start_write();
   virtual void write_is_complete();
   virtual void start_program_memory_read();  
@@ -249,7 +251,7 @@ public:
 
   inline virtual EEADR *get_reg_eeadrh() { return (rom_size>256) ? (&eeadrh) : 0; }
   virtual void initialize(unsigned int new_rom_size);
-  virtual void callback_print(){ cout << " EEPROM_PIR\n";}
+  virtual void callback_print(){ puts(" EEPROM_PIR");}
 
 protected:
   PIR *m_pir;
@@ -270,7 +272,7 @@ public:
 
   virtual void start_write();
   virtual void callback();
-  virtual void callback_print(){ cout << " EEPROM_WIDE\n";}
+  virtual void callback_print(){ puts(" EEPROM_WIDE");}
   virtual void start_program_memory_read();
   virtual void initialize(unsigned int new_rom_size);
 
@@ -291,7 +293,7 @@ public:
   virtual void start_write();
   virtual void start_program_memory_read();  
   virtual void callback();
-  virtual void callback_print(){ cout << " EEPROM_EXTND\n";}
+  virtual void callback_print(){ puts(" EEPROM_EXTND");}
   void	initialize(unsigned int new_rom_size, int block_size, int num_latches, unsigned int cfg_word_base, bool _has_eeadrh = true);
   void	  set_prog_wp(unsigned int adr) { prog_wp = adr;}
 

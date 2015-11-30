@@ -77,6 +77,8 @@ License along with this library; if not, see
 #include <cstdio>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
+#include <iostream>
 
 #include "../config.h"
 #include "../src/gpsim_time.h"

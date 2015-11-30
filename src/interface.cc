@@ -47,6 +47,8 @@ License along with this library; if not, see
 #include "cmd_manager.h"
 #include "clock_phase.h"
 
+#include <iostream>
+
 extern Integer *verbosity;  // in ../src/init.cc
 
 // Flag to tell us when all of the init stuff is done.

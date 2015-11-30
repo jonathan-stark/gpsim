@@ -22,7 +22,7 @@ License along with this library; if not, see
 
 #include <stdio.h>
 #include <ctype.h>
-#include <errno.h>
+#include <iostream>
 #include <stdlib.h>
 #include <string>
 #include <list>

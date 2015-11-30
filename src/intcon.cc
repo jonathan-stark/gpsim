@@ -31,6 +31,9 @@ License along with this library; if not, see
 #include "16bit-registers.h"
 #include "16bit-processors.h"
 #include "breakpoints.h"
+
+#include <iostream>
+
 //#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }

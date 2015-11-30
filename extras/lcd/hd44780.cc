@@ -34,6 +34,9 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "hd44780.h"
+
+#include <iostream>
+
 //#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }

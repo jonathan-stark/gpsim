@@ -21,7 +21,7 @@ License along with this library; if not, see
 
 #ifndef __STIMULI_H__
 #define __STIMULI_H__
-#include <iostream>
+
 #include <string>
 #include <glib.h>
 using namespace std;

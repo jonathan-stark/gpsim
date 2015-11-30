@@ -27,8 +27,6 @@ This file originated by J.R. Heisey
 
 #include <glib.h>
 #include <vector>
-#include <iostream>
-#include <sstream>
 #include <algorithm>
 #include <cstdio>
 

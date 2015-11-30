@@ -22,8 +22,6 @@ License along with this library; if not, see
 #ifndef  __BREAKPOINTS_H__
 #define  __BREAKPOINTS_H__
 
-#include  <iostream>
-#include <iomanip>
 #include <glib.h>
 #include <string>
 #include "trigger.h"
