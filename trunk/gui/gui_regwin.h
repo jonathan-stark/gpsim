@@ -87,6 +87,12 @@ class Register_Window : public GUI_Object
   Register_Window();
 
  private:
+  GtkWidget *build_menu();
+  void do_popup(GtkWidget *widget, GdkEventButton *event);
+  static gboolean button_press(GtkWidget *widget, GdkEventButton *event,
+    Register_Window *rw);
+  static gboolean popup_menu_handler(GtkWidget *widget, Register_Window *rw);
+
   // Formatting
   int register_size;    // The size (in bytes) of a single register
   char pCellFormat[12]; // format string

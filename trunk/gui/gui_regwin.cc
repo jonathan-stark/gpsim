@@ -22,13 +22,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 
 #include "../config.h"
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
 
@@ -70,10 +68,10 @@ typedef enum {
 
 typedef struct _menu_item {
     const char *name;
-    menu_id id;
+    const menu_id id;
 } menu_item;
 
-static menu_item menu_items[] = {
+static const menu_item menu_items[] = {
     {"Clear breakpoints", MENU_BREAK_CLEAR},
     {"Set break on read", MENU_BREAK_READ},
     {"Set break on write", MENU_BREAK_WRITE},
@@ -89,9 +87,6 @@ static menu_item menu_items[] = {
     {"Refresh", MENU_REGWIN_REFRESH},
     {"Settings...", MENU_SETTINGS}
 };
-
-// Used only in popup menus
-Register_Window *popup_rw;
 
 //========================================================================
 //
@@ -517,11 +512,10 @@ static char *gui_get_log_settings(int *mode)
 
 // called when user has selected a menu item
 static void
-popup_activated(GtkWidget *widget, gpointer data)
+popup_activated(GtkWidget *widget, Register_Window *rw)
 {
   GtkSheet *sheet;
 
-  menu_item *item;
   int i,j;
   GtkSheetRange range;
   unsigned int address;
@@ -531,80 +525,74 @@ popup_activated(GtkWidget *widget, gpointer data)
 
   Dprintf((" popup_activated\n"));
 
-  if(widget==0 || data==0)
-    {
-      printf("Warning popup_activated(%p,%p)\n",widget,data);
-      return;
-    }
-  if(!popup_rw || !popup_rw->gp || !popup_rw->gp->cpu) {
+  if (!rw->gp || !rw->gp->cpu) {
     printf(" no cpu\n");
     return;
   }
 
-  item = (menu_item *)data;
-  sheet=GTK_SHEET(popup_rw->register_sheet);
+  sheet = GTK_SHEET(rw->register_sheet);
   range = sheet->range;
+  gsize item = GPOINTER_TO_SIZE(g_object_get_data(G_OBJECT(widget), "item"));
 
+  for (j = range.row0; j <= range.rowi; j++)
+    for (i = range.col0; i <= range.coli; i++) {
 
-  for(j=range.row0;j<=range.rowi;j++)
-    for(i=range.col0;i<=range.coli;i++) {
-
-      address=popup_rw->row_to_address[j]+i;
-      switch(item->id) {
+      address = rw->row_to_address[j] + i;
+      switch (item) {
       case MENU_BREAK_READ:
-        get_bp().set_read_break(popup_rw->gp->cpu, address);
+        get_bp().set_read_break(rw->gp->cpu, address);
         break;
 
       case MENU_BREAK_WRITE:
-        get_bp().set_write_break(popup_rw->gp->cpu, address);
+        get_bp().set_write_break(rw->gp->cpu, address);
         break;
       case MENU_BREAK_ON_CHANGE:
-        get_bp().set_change_break(popup_rw->gp->cpu, address);
+        get_bp().set_change_break(rw->gp->cpu, address);
         break;
       case MENU_BREAK_READ_VALUE:
         value = gui_get_value("value to read for breakpoint:");
         if(value<0)
           break; // Cancel
-        get_bp().set_read_value_break(popup_rw->gp->cpu,address,value);
+        get_bp().set_read_value_break(rw->gp->cpu,address,value);
         break;
       case MENU_BREAK_WRITE_VALUE:
         value = gui_get_value("value to write for breakpoint:");
         if(value<0)
           break; // Cancel
-        get_bp().set_write_value_break(popup_rw->gp->cpu,address,value);
+        get_bp().set_write_value_break(rw->gp->cpu,address,value);
         break;
       case MENU_BREAK_CLEAR:
-        get_bp().clear_all_register(popup_rw->gp->cpu,address);
+        get_bp().clear_all_register(rw->gp->cpu,address);
         break;
       case MENU_ADD_WATCH:
-        popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers->Get(address));
+        rw->gp->watch_window->Add(rw->type, rw->registers->Get(address));
         break;
       case MENU_LOG_READ:
         GetTraceLog().enable_logging();
         // FIXME the register type is ignored here (and in all other cases
         // where we're logging -- it's assumed that the register address is
         // for ram, even if in fact the user requests eeprom.
-        get_bp().set_notify_read(popup_rw->gp->cpu,address);
+        get_bp().set_notify_read(rw->gp->cpu,address);
         break;
       case MENU_LOG_WRITE:
-        get_bp().set_notify_write(popup_rw->gp->cpu,address);
+        get_bp().set_notify_write(rw->gp->cpu,address);
         break;
       case MENU_LOG_READ_VALUE:
         gui_get_2values("Value that the read must match for logging it:", &value,
                         "Bitmask that specifies the bits to bother about:", &mask);
         if(value<0)
           break; // Cancel
-        get_bp().set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
+        get_bp().set_notify_read_value(rw->gp->cpu,address, value, mask);
         break;
       case MENU_LOG_WRITE_VALUE:
         gui_get_2values("Value that the write must match for logging it:", &value,
                         "Bitmask that specifies the bits to bother about:", &mask);
         if(value<0)
           break; // Cancel
-        get_bp().set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
+        get_bp().set_notify_write_value(rw->gp->cpu,address, value, mask);
         break;
       case MENU_SETTINGS:
-        popup_rw->SettingsDialog();
+        rw->SettingsDialog();
         return;
         break;
       case MENU_LOG_SETTINGS:
@@ -616,7 +604,7 @@ popup_activated(GtkWidget *widget, gpointer data)
         break;
 
       case MENU_REGWIN_REFRESH:
-        popup_rw->Update();
+        rw->Update();
         return;
         break;
       default:
@@ -628,90 +616,67 @@ popup_activated(GtkWidget *widget, gpointer data)
 }
 
 
-static GtkWidget *
-build_menu(Register_Window *rw)
+GtkWidget *Register_Window::build_menu()
 {
-//  GtkAccelGroup *accel_group;
-  int i;
-
-
-  if(rw==0)
-  {
-      printf("Warning build_menu(%p)\n",rw);
-      return 0;
-  }
-
   GtkWidget *menu = gtk_menu_new();
 
-  for (i=0; i < (int)(sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-      GtkWidget *item = gtk_menu_item_new_with_label(menu_items[i].name);
+  for (gsize i = 0; i < G_N_ELEMENTS(menu_items); i++) {
+    GtkWidget *item = gtk_menu_item_new_with_label(menu_items[i].name);
 
-      g_signal_connect(item, "activate",
-                         G_CALLBACK (popup_activated),
-                         &menu_items[i]);
+    g_signal_connect(item, "activate", G_CALLBACK (popup_activated), this);
+    g_object_set_data(G_OBJECT(item), "item",
+      GSIZE_TO_POINTER(menu_items[i].id));
 
-      if(rw->type == REGISTER_EEPROM
-         && menu_items[i].id!=MENU_ADD_WATCH
-         &&menu_items[i].id!=MENU_SETTINGS)
-      {
-        gtk_widget_set_sensitive(item, FALSE);
-      }
-      gtk_widget_show(item);
-      gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
+    if (type == REGISTER_EEPROM
+       && menu_items[i].id!=MENU_ADD_WATCH
+       &&menu_items[i].id!=MENU_SETTINGS)
+    {
+      gtk_widget_set_sensitive(item, FALSE);
+    }
+    gtk_widget_show(item);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item);
   }
 
   return menu;
 }
 
 // button press handler
-static gint
-do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
+void Register_Window::do_popup(GtkWidget *widget, GdkEventButton *event)
 {
-  if(widget==0 || event==0 || rw==0)
-    {
-      printf("Warning do_popup(%p,%p,%p)\n",widget,event,rw);
-      return 0;
-    }
+  int button, event_time;
 
-  GtkWidget *popup = rw->popup_menu;
+  if (event) {
+    button = event->button;
+    event_time = event->time;
+  } else {
+    button = 0;
+    event_time = gtk_get_current_event_time();
+  }
+  gtk_menu_popup(GTK_MENU(popup_menu), 0, 0, 0, 0,
+    button, event_time);
+}
 
-  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
-    {
+// button press signal handler (static)
 
-      popup_rw = rw;
+gboolean Register_Window::button_press(GtkWidget *widget,
+  GdkEventButton *event, Register_Window *rw)
+{
+  if (event->button == 3 && event->type == GDK_BUTTON_PRESS) {
+    rw->do_popup(widget, event);
+    return TRUE;
+  }
 
-      gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-                     3, event->time);
-    }
   return FALSE;
 }
 
-// The following routine will convert the first number it finds in
-// a string to an unsigned long integer. All of the hard work is done
-// in the library function strtoul (string to unsigned long).
+// Popup menu keyboard signal handler (static)
 
-static unsigned long get_number_in_string(const char *number_string)
+gboolean
+Register_Window::popup_menu_handler(GtkWidget *widget,
+  Register_Window *rw)
 {
-  unsigned long retval = 0;
-  char *bad_position;
-  int current_base = 16;
-
-  if(number_string==0)
-  {
-      printf("Warning get_number_in_string(%p)\n",number_string);
-      errno = EINVAL;
-      return (unsigned long)-1;
-  }
-
-
-  errno = 0;
-
-  retval = strtoul(number_string, &bad_position, current_base);
-
-  if (*bad_position != '\0')
-    errno = EINVAL;  /* string contains an invalid number */
-
-  return(retval);
+  rw->do_popup(widget, NULL);
+  return TRUE;
 }
 
 // when a new cell is selected, we write changes in
@@ -751,25 +716,16 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   text = gtk_entry_get_text(GTK_ENTRY(sheet_entry));
 
-  errno = 0;
-  if (*text != '\0')
-    n = get_number_in_string(text);
-  else
-    errno = ERANGE;
+  char *bad_position;
+  n = strtoul(text, &bad_position, 16);
 
-  if(errno != 0)
-    {
-      n = reg->get_value();
-      reg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
-    }
-
-  // n is the value in the sheet cell
-
-  if(errno != EINVAL && n != (int) reg->get_shadow().data)
-    {
-      reg->put_value(n & gpGuiProcessor->cpu->register_mask());
-      rw->UpdateASCII(row);
-    }
+  if (*bad_position == '\0') {
+    n = reg->get_value();
+    reg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
+  } else if (n != (int) reg->get_shadow().data) {
+    reg->put_value(n & gpGuiProcessor->cpu->register_mask());
+    rw->UpdateASCII(row);
+  }
 
 }
 
@@ -1779,7 +1735,7 @@ void Register_Window::Build()
   //gtk_sheet_hide_column_titles(register_sheet);
   //gtk_sheet_hide_row_titles(register_sheet);
   /* create popupmenu */
-  popup_menu=build_menu(this);
+  popup_menu=build_menu();
 
   build_entry_bar(main_vbox,this);
 
@@ -1853,10 +1809,10 @@ void Register_Window::Build()
                      G_CALLBACK(move_handler),
                      this);
 
-  g_signal_connect(register_sheet,
-                     "button_press_event",
-                     G_CALLBACK(do_popup),
-                     this);
+  g_signal_connect(register_sheet, "button_press_event",
+    G_CALLBACK(button_press), this);
+  g_signal_connect(register_sheet, "popup-menu", G_CALLBACK(popup_menu_handler),
+    this);
 
   g_signal_connect(register_sheet,
                      "set_cell",

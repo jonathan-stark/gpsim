@@ -1,4 +1,9 @@
 2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_main.cc gui/gui_menu.cc gui/gui_regwin.cc gui/gui_regwin.h
+	  gui/gui_stopwatch.cc gui/gui_stopwatch.h
+	: Reduce the number of global variables
+
+2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
 	* extras/lcd/hd44780.cc extras/lcd/lcd.cc gui/gui_symbols.cc
 	  modules/encoder.cc modules/logic.cc modules/stimuli.cc
 	  modules/ttl.cc src/ValueCollections.cc src/ValueCollections.h

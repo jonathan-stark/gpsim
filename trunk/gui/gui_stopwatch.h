@@ -48,22 +48,22 @@ class StopWatch_Window : public GUI_Object
   GtkWidget *option_menu;
 
   StopWatch_Window(GUI_Processor *gp);
-  virtual void Build(void);
-  virtual void Update(void);
+  virtual void Build();
+  virtual void Update();
 
-  void EnterUpdate(void)
+  void EnterUpdate()
   {
     assert(from_update >= 0);
     ++from_update;
   }
 
-  void ExitUpdate(void)
+  void ExitUpdate()
   {
     assert(from_update > 0);
     --from_update;
   }
 
-  bool IsUpdate(void) const
+  bool IsUpdate() const
   {
     assert(from_update >= 0);
     return from_update != 0;
@@ -78,6 +78,7 @@ class StopWatch_Window : public GUI_Object
   static void rolloverchanged(GtkWidget *widget, StopWatch_Window *sww);
 private:
   int from_update;
+  long long cyclecounter_last;
 
 protected:
   virtual const char *name();
