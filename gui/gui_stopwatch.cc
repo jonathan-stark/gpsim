@@ -25,7 +25,6 @@ Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
-#include <gdk/gdk.h>
 #include <glib.h>
 #include <glib/gprintf.h>
 
@@ -40,10 +39,9 @@ int StopWatch_Window::delete_event(GtkWidget *widget,
 }
 
 
-void StopWatch_Window::Update(void)
+void StopWatch_Window::Update()
 {
   long long _cyclecounter;
-  static long long cyclecounter_last;
   double timevalue;
 
   char frequencystring[100];
@@ -206,7 +204,7 @@ StopWatch_Window::rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 }
 
 
-void StopWatch_Window::Build(void)
+void StopWatch_Window::Build()
 {
   if(bIsBuilt)
     return;
@@ -331,7 +329,7 @@ const char *StopWatch_Window::name()
 //
 StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   : count_dir(1), rollover(1000000), cyclecounter(0),
-    offset(0), from_update(0)
+    offset(0), from_update(0), cyclecounter_last(0)
 {
   char *string;
 

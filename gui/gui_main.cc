@@ -62,7 +62,6 @@ void link_src_to_gpsim(GUI_Processor *gp);
  */
 
 GUI_Processor *gpGuiProcessor=0;
-GSList *gui_processors=0;
 unsigned int interface_id=0;
 
 Settings *settings;
@@ -215,8 +214,6 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
 
   if(gp) {
     gp->SetCPU(new_cpu);
-
-    gui_processors = g_slist_append(gui_processors,gp);
 
     gp->regwin_ram->NewProcessor(gp);
 // RRR    gp->program_memory->NewProcessor(gp);

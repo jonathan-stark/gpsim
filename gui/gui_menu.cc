@@ -61,16 +61,16 @@ do_quit_app(GtkWidget *widget)
 
 
 //========================================================================
+static const gchar * const authors[] = {
+  "Scott Dattalo - <scott@dattalo.com>",
+  "Ralf Forsberg - <rfg@home.se>",
+  "Borut Ra" "\xc5\xbe" "em - <borut.razem@gmail.com>",
+  NULL
+};
+
 static void
 about_cb(GtkAction *action, gpointer user_data)
 {
-  static const gchar *authors[] = {
-    "Scott Dattalo - <scott@dattalo.com>",
-    "Ralf Forsberg - <rfg@home.se>",
-    "Borut Ra" "\xc5\xbe" "em - <borut.razem@gmail.com>",
-    NULL
-  };
-
   gtk_show_about_dialog(NULL,
     "authors", authors,
     "comments", "A simulator for Microchip PIC microcontrollers.",
@@ -897,40 +897,19 @@ int gui_animate_delay; // in milliseconds
 
 class UpdateRateMenuItem {
 public:
-
-  char id;
-  int menu_index;
-  bool bRealTime;
-  bool bWithGui;
-  bool bAnimate;
-
-  int update_rate;
-
   UpdateRateMenuItem(GtkWidget *,char, const char *, int update_rate=0, bool _bRealTime=false, bool _bWithGui=false);
 
   void Select();
-  static GtkWidget *menu;
-  static int seq_no;
+
+private:
+  int update_rate;
+public:
+  char id;
+private:
+  bool bAnimate;
+  bool bRealTime;
+  bool bWithGui;
 };
-//========================================================================
-// UpdateRateMenuItem members
-
-GtkWidget * UpdateRateMenuItem::menu = 0;
-int UpdateRateMenuItem::seq_no=0;
-
-map<guint, UpdateRateMenuItem*> UpdateRateMenuItemMap;
-map<guint, UpdateRateMenuItem*> UpdateRateMenuItemIndexed;
-
-
-static void
-gui_update_cb(GtkWidget *widget, gpointer data)
-{
-  GtkComboBox *combo_box = GTK_COMBO_BOX(widget);
-  gint index = combo_box ? gtk_combo_box_get_active(combo_box) : 0;
-
-  UpdateRateMenuItem *umi = UpdateRateMenuItemIndexed[index];
-  umi->Select();
-}
 
 UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
                                        char _id,
@@ -938,26 +917,15 @@ UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
                                        int _update_rate,
                                        bool _bRealTime,
                                        bool _bWithGui)
-  : id(_id), bRealTime(_bRealTime), bWithGui(_bWithGui), update_rate(_update_rate)
+  : update_rate(_update_rate), id(_id), bRealTime(_bRealTime), bWithGui(_bWithGui)
 {
-
-  if(update_rate <0) {
+  if (update_rate < 0) {
     bAnimate = true;
     update_rate = -update_rate;
   } else
     bAnimate = false;
 
-  if(!menu)
-    menu = gtk_menu_new();
-
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(parent), label);
-
-  menu_index = seq_no;
-  seq_no++;
-
-  UpdateRateMenuItemMap[id] = this;
-  UpdateRateMenuItemIndexed[menu_index] = this;
-
 }
 
 void UpdateRateMenuItem::Select()
@@ -1317,58 +1285,39 @@ GtkWidget *dispatcher_window = 0;
 class MainWindow
 {
 public:
-
-  TimeWidget   *timeW;
-
   void Update();
-  void Create();
 
   MainWindow();
   ~MainWindow();
+
+private:
+  static void gui_update_cb(GtkWidget *widget, gpointer data);
+
+  TimeWidget timeW;
+  std::vector<UpdateRateMenuItem> rate_menu_items;
 };
 
-MainWindow TheWindow;
-
-MainWindow::MainWindow()
-  : timeW(0)
-{
-}
+MainWindow * TheWindow;
 
 MainWindow::~MainWindow()
 {
-    for(int i = 0; i < UpdateRateMenuItem::seq_no; i++)
-    {
-	delete UpdateRateMenuItemIndexed[i];
-    }
 }
+
 void MainWindow::Update()
 {
-  if(timeW)
-   timeW->Update();
+   timeW.Update();
 }
 
-
-//========================================================================
-//========================================================================
-
-void dispatch_Update()
+void MainWindow::gui_update_cb(GtkWidget *widget, gpointer data)
 {
-  if(!dispatcher_window)
-    return;
+  gint index = gtk_combo_box_get_active(GTK_COMBO_BOX(widget));
+  MainWindow *main_window = static_cast<MainWindow *>(data);
 
-  if(gpGuiProcessor && gpGuiProcessor->cpu) {
-
-    TheWindow.Update();
-
-  }
+  main_window->rate_menu_items[index].Select();
 }
 
-void MainWindow::Create ()
+MainWindow::MainWindow()
 {
-
-  if (dispatcher_window)
-    return;
-
   GtkWidget *box1;
 
   GtkWidget *buttonbox;
@@ -1474,7 +1423,6 @@ void MainWindow::Create ()
     {
       SimulationMode='4';
     }
-  //  set_simulation_mode(SimulationMode);
 
   //
   // Gui Update Rate
@@ -1483,26 +1431,35 @@ void MainWindow::Create ()
   update_rate_menu = gtk_combo_box_text_new();
   gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
 
-  new UpdateRateMenuItem(update_rate_menu,'5',"Without gui (fastest simulation)",0);
-  new UpdateRateMenuItem(update_rate_menu,'4',"2000000 cycles/gui update",2000000);
-  new UpdateRateMenuItem(update_rate_menu,'3',"100000 cycles/gui update",100000);
-  new UpdateRateMenuItem(update_rate_menu,'2',"1000 cycles/gui update",1000);
-  new UpdateRateMenuItem(update_rate_menu,'1',"Update gui every cycle",1);
-  new UpdateRateMenuItem(update_rate_menu,'b',"100ms animate",-100);
-  new UpdateRateMenuItem(update_rate_menu,'c',"300ms animate",-300);
-  new UpdateRateMenuItem(update_rate_menu,'d',"700ms animate",-700);
-  new UpdateRateMenuItem(update_rate_menu,'r',"Realtime without gui",0,true);
-  new UpdateRateMenuItem(update_rate_menu,'R',"Realtime with gui",0,true,true);
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'5',"Without gui (fastest simulation)",0));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'4',"2000000 cycles/gui update",2000000));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'3',"100000 cycles/gui update",100000));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'2',"1000 cycles/gui update",1000));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'1',"Update gui every cycle",1));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'b',"100ms animate",-100));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'c',"300ms animate",-300));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'d',"700ms animate",-700));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'r',"Realtime without gui",0,true));
+  rate_menu_items.push_back(
+    UpdateRateMenuItem(update_rate_menu,'R',"Realtime with gui",0,true,true));
 
-  UpdateRateMenuItem *umi = UpdateRateMenuItemMap[SimulationMode];
+  for (size_t i = 0 ; i < rate_menu_items.size(); ++i) {
+    if (rate_menu_items[i].id == SimulationMode) {
+      rate_menu_items[i].Select();
+      gtk_combo_box_set_active(GTK_COMBO_BOX(update_rate_menu), i);
+    }
+  }
 
-  umi->Select();
-
-  gtk_combo_box_set_active(GTK_COMBO_BOX(update_rate_menu), umi->menu_index);
-
-  g_signal_connect(update_rate_menu, "changed",
-                     G_CALLBACK(gui_update_cb),
-                     (gpointer)update_rate_menu);
+  g_signal_connect(update_rate_menu, "changed", G_CALLBACK(gui_update_cb), this);
 
   gtk_box_pack_start (GTK_BOX (buttonbox), frame, FALSE, FALSE, 5);
 
@@ -1513,9 +1470,8 @@ void MainWindow::Create ()
   frame = gtk_frame_new("Simulation Time");
   gtk_box_pack_start (GTK_BOX (buttonbox), frame, FALSE, FALSE, 5);
 
-  timeW = new TimeWidget();
-  timeW->Create(frame);
-  timeW->Update();
+  timeW.Create(frame);
+  timeW.Update();
 
   //gtk_box_pack_start (GTK_BOX (buttonbox), frame, TRUE, TRUE, 5);
 
@@ -1527,15 +1483,21 @@ void MainWindow::Create ()
 
   gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
   gtk_widget_show_all (dispatcher_window);
-
-
 }
 
 //========================================================================
 
 void create_dispatcher ()
 {
-  TheWindow.Create();
+  if (!TheWindow)
+    TheWindow = new MainWindow;
+}
+
+void dispatch_Update()
+{
+  if (TheWindow && gpGuiProcessor && gpGuiProcessor->cpu) {
+    TheWindow->Update();
+  }
 }
 
 #endif // HAVE_GUI
