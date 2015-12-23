@@ -111,7 +111,8 @@ class PicPortGRegister : public PicPortBRegister
  
 public:
   INTCON *m_pIntcon;
-  IOC	*m_pIoc;
+  IOC	 *m_pIoc;
+  unsigned int intf_bit;	// port bit that can trigger intf interrupt
 
   PicPortGRegister(Processor *pCpu, const char *pName, const char *pDesc,
                    INTCON *pIntcon, IOC *pIoc,

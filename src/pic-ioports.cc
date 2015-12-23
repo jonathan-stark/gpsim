@@ -473,7 +473,7 @@ PicPortGRegister::PicPortGRegister(Processor *pCpu, const char *pName, const cha
                    INTCON *pIntcon, IOC *pIoc,
                    unsigned int numIopins, unsigned int enableMask)
 	: PicPortBRegister(pCpu, pName, pDesc, pIntcon, numIopins, enableMask),
-	m_pIntcon(pIntcon), m_pIoc(pIoc)
+	m_pIntcon(pIntcon), m_pIoc(pIoc), intf_bit(2)
 {
       m_pIntcon->set_portGReg(this);
 }
@@ -491,11 +491,14 @@ void PicPortGRegister::setIOCif()
 }
 void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
 {
-  // interrupt bit 2 on specified edge 
+  // interrupt bit intf_bit (default 2)  on specified edge 
+  bool bOldValue = (rvDrivenValue.data & (1<<intf_bit));
   bool bNewValue = new3State=='1' || new3State=='W';
-  if (bit_number == 2 && (((rvDrivenValue.data&4)==4)!=m_bIntEdge) 
+  if (bit_number == intf_bit && (bOldValue != m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
-    m_pIntcon->set_intf(true);
+  {
+     m_pIntcon->set_intf(true);
+  }
 
     lastDrivenValue = rvDrivenValue;
     PortRegister::setbit(bit_number, new3State);

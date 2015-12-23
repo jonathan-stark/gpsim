@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006,2009,2010,2013 Roy R Rankin
+   Copyright (C) 2006,2009,2010,2013,2015 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -330,7 +330,7 @@ void CCPCON::setIOPin2(PinModule *p2)
 void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4)
 {
   Dprintf(("%s::setIOpin %s\n", name().c_str(), (p1 && &(p1->getPin())) ? p1->getPin().name().c_str():"unknown"));
-  if (!&(p1->getPin()))
+  if (p1 && !&(p1->getPin()))
   {
 	Dprintf(("FIXME %s::setIOpin called where p1 has unassigned pin\n", name().c_str()));
 	return;
@@ -370,7 +370,7 @@ void CCPCON::setIOpin(PinModule *p1, PinModule *p2, PinModule *p3, PinModule *p4
 
 }
 
-void CCPCON::setCrosslinks ( CCPRL *_ccprl, PIR *_pir, unsigned int _mask, 
+void CCPCON::setCrosslinks ( CCPRL *_ccprl, PIR *_pir, unsigned int _mask,
                              TMR2 *_tmr2, ECCPAS *_eccpas )
 {
   ccprl = _ccprl;
@@ -550,7 +550,7 @@ void CCPCON::releasePins(int i)
 void CCPCON::pwm_match(int level)
 {
   unsigned int new_value = value.get();
-  Dprintf(("%s::pwm_match() level=%d\n", name().c_str(), level));
+  Dprintf(("%s::pwm_match() level=%d now=0x%"PRINTF_GINT64_MODIFIER"x\n", name().c_str(), level, get_cycles().get()));
 
 
   // if the level is 1, then tmr2 == pr2 and the pwm cycle
@@ -1034,6 +1034,36 @@ bool CCPCON::test_compare_mode()
   return false;
 }
 
+TRISCCP::TRISCCP(Processor *pCpu, const char *pName, const char *pDesc) :
+	sfr_register(pCpu, pName), first(true)
+{
+}
+void TRISCCP::put(unsigned int new_value)
+{
+  if (first)
+  {
+      first = false;
+      cout << name() << " not implemented, if required, file feature request\n";
+  }
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+}
+
+DATACCP::DATACCP(Processor *pCpu, const char *pName, const char *pDesc) :
+	sfr_register(pCpu, pName), first(true)
+{
+}
+
+void DATACCP::put(unsigned int new_value)
+{
+  if (first)
+  {
+      first = false;
+      cout << name() << " not implemented, if required, file feature request\n";
+  }
+  trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
+}
 
 class TMR1_Interface : public Interface
 {
