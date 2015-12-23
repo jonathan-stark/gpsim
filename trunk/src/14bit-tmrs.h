@@ -223,12 +223,12 @@ public:
     CAP_RISING_EDGE16 = 7,
     COM_SET_OUT = 8,
     COM_CLEAR_OUT = 9,
-    COM_INTERRUPT = 10,
-    COM_TRIGGER = 11,
-    PWM0 = 12,
-    PWM1 = 13,
-    PWM2 = 14,
-    PWM3 = 15
+    COM_INTERRUPT = 0xa,
+    COM_TRIGGER = 0xb,
+    PWM0 = 0xc,
+    PWM1 = 0xd,
+    PWM2 = 0xe,
+    PWM3 = 0xf
   };
 
   void setBitMask(unsigned int bv) { mValidBits = bv; }
@@ -278,6 +278,34 @@ protected:
   ADCON0  *adcon0;
   unsigned int pir_mask;
 
+};
+class TRISCCP : public sfr_register
+{
+public:
+
+  TRISCCP(Processor *pCpu, const char *pName, const char *pDesc=0);
+  enum
+  {
+	TT1CK = 1<<0,
+	TCCP  = 1<<2
+  };
+  void put(unsigned int value);
+private:
+  bool first;
+};
+class DATACCP : public sfr_register
+{
+public:
+  DATACCP(Processor *pCpu, const char *pName, const char *pDesc=0);
+  enum
+  {
+	TT1CK = 1<<0,
+	DCCP  = 1<<2
+  };
+  void put(unsigned int value);
+private:
+  bool first;
+	
 };
 
 

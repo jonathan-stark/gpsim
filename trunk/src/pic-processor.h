@@ -107,6 +107,7 @@ enum PROCESSOR_TYPE
   _P16C74_,
   _P16F73_,
   _P16F74_,
+  _P16F716_,
   _P16F87_,
   _P16F88_,
   _P16F818_,
