@@ -505,7 +505,8 @@ void process_command_file(const char * file_name, bool bCanChangeDirectory)
       strncpy(directory,file_name,dir_path_end-file_name);
       directory[dir_path_end-file_name]=0;
       printf("directory is \"%s\"\n",directory);
-      chdir(directory);
+      if(chdir(directory) < 0)
+          perror(directory);
       file_name=dir_path_end+1;
       printf("file_name is \"%s\"\n",file_name);
   }
@@ -554,10 +555,10 @@ void process_command_file(const char * file_name, bool bCanChangeDirectory)
       cout << file_name;
       cout << endl;
       char cw[_MAX_PATH];
-      GETCWD(cw, _MAX_PATH);
-      cout << "current working directory is ";
-      cout << cw;
-      cout << endl;
+      if (GETCWD(cw, _MAX_PATH) == 0)
+	perror("getcwd()");
+      else
+          cout << "current working directory is " << cw << endl;
 
     }
 

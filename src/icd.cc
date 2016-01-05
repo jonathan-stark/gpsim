@@ -280,7 +280,11 @@ static int icd_write(const char *s)
   if(icd_fd<0)
     return -1;
 
-  write(icd_fd,s,  strlen(s));   /* Error checking ... */
+  if (write(icd_fd,s,  strlen(s)) < 0)
+  {
+      perror("icd_write: ");
+      return -1;
+  }
 
   return 1;
 }
@@ -367,7 +371,11 @@ static int icd_baudrate_init()
     if(icd_fd<0) return 0;
 
     while(tries) {
-        write(icd_fd,"U",1);
+        if (write(icd_fd,"U",1) != 1)
+        {
+	    perror("icd_baudrate_init() write: ");
+	    return 0;
+        }
 
         if(read(icd_fd,&ch,1) > 0) {
             rts_clear();

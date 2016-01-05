@@ -189,6 +189,7 @@ CMCON::CMCON(Processor *pCpu, const char *pName, const char *pDesc)
   cm_input[0]=cm_input[1]=cm_input[2]=cm_input[3]=0;
   cm_output[0] = cm_output[1] = 0;
   cm_input_pin[0]=cm_input_pin[1]=cm_input_pin[2]=cm_input_pin[3]=0;
+  cm_an[0] = cm_an[1] = cm_an[2] = cm_an[3] = 0;
   cm_output_pin[0]=cm_output_pin[1]=0;
   cm_source[0]=cm_source[1]=0;
   cm_stimulus[0]=cm_stimulus[1]=cm_stimulus[2]=cm_stimulus[3]=0;
@@ -214,17 +215,14 @@ CMCON::~CMCON()
 	    delete cm_source[i];
 	}
   }
-  if (cm_stimulus[0]) delete cm_stimulus[0];
-  if (cm_stimulus[1]) delete cm_stimulus[1];
-  if (cm_stimulus[2]) delete cm_stimulus[2];
-  if (cm_stimulus[3]) delete cm_stimulus[3];
-  free(cm_input_pin[0]);  free(cm_input_pin[1]);
-  free(cm_input_pin[2]);  free(cm_input_pin[3]);
-  free(cm_output_pin[0]); free(cm_output_pin[1]);
-  free(cm_an[0]); 
-  free(cm_an[1]); 
-  free(cm_an[2]); 
-  free(cm_an[3]); 
+  for (int i = 0; i < 4; i++)
+  {
+      if (cm_stimulus[i]) delete cm_stimulus[i];
+      if (cm_input_pin[i]) free(cm_input_pin[i]);
+      if (cm_an[i]) free(cm_an[i]);
+  }
+  if (cm_output_pin[0]) free(cm_output_pin[0]);
+  if (cm_output_pin[1]) free(cm_output_pin[1]);
 }
 
 

@@ -215,10 +215,12 @@ int CSimulationContext::LoadProgram(const char *filename,
     char cw[_MAX_PATH];
 
     perror((string("failed to open program file ") + filename).c_str());
-    getcwd(cw, sizeof(cw));
-    cerr << "current working directory is ";
-    cerr << cw;
-    cerr << endl;
+    if (!getcwd(cw, sizeof(cw)))
+        perror("getcwd failed: ");
+    else
+    {
+        cerr << "current working directory is " << cw << endl;
+    }
     return false;
   }
   if(pProcessorType != NULL) {
