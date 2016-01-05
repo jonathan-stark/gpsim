@@ -94,7 +94,8 @@ IntelHexProgramFileType::getbyte (FILE * file)
   unsigned char byte;
   unsigned int data;
 
-  fscanf (file, "%02x", &data);
+  if (fscanf (file, "%02x", &data) != 1)
+    return 0;
 
   byte = data & 0xff;
   checksum += byte;		/* all the bytes are used in the checksum */

@@ -1,3 +1,9 @@
+2016-01-05 Roy Rankin <rrankin@ihug.com.au>
+	* cli/input.cc src/hexutils.cc src/icd.cc src/sim_context.cc
+	: Fix unused results warnings
+	* src/comparator.cc
+	: Fix free cm_an in CMCON destructor
+
 2015-12-23 Roy Rankin <rrankin@ihug.com.au>
 	* src/pic-ioports.cc src/pic-ioports.h
 	: PicPortGRegister generalize intf bit
