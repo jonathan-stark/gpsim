@@ -823,6 +823,24 @@ void ANSEL_2B::setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1
 	m_AnalogPins[pin]->AnalogReq(this, true, newname);
    }
 }
+ANSEL_2A::ANSEL_2A(Processor *pCpu, const char *pName, const char *pDesc)
+  : ANSEL_2B(pCpu, pName, pDesc)
+{
+}
+void ANSEL_2A::setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1)
+{
+    char newname[20];
+    unsigned int bit = channel & 7;
+   m_AnalogPins[bit] = port;
+   analog_channel[bit] = channel;
+   adcon1->setIOPin(channel, port);
+   mask |= 1<<bit;
+   if ((1<<bit) & value.get())
+   {
+	sprintf(newname, "an%d", channel);
+	m_AnalogPins[bit]->AnalogReq(this, true, newname);
+   }
+}
 //
 //--------------------------------------------------
 // member functions for the FVRCON_V2 class

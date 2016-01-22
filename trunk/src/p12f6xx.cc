@@ -528,7 +528,7 @@ P12F683::P12F683(const char *_name, const char *desc)
     ccpr1l(this, "ccpr1l", "Capture Compare 1 Low"),
     ccpr1h(this, "ccpr1h", "Capture Compare 1 High"),
     wdtcon(this, "wdtcon", "WDT Control", 0x1f),
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     osctune(this, "osctune", "OSC Tune")
 
 {
@@ -549,7 +549,7 @@ P12F683::~P12F683()
   remove_sfr_register(&ccpr1h);
   remove_sfr_register(&ccp1con);
   remove_sfr_register(&wdtcon);
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&osctune);
   remove_sfr_register(&comparator.cmcon1);
 }
@@ -558,7 +558,7 @@ void  P12F683::create(int _ram_top, int eeprom_size)
 {
 
   P12F629::create(0, eeprom_size);
-
+  osccon = new OSCCON(this, "osccon", "OSC Control");
   add_file_registers(0x20, 0x6f, 0);
   add_file_registers(0xa0, 0xbf, 0);
   add_file_registers(0x70, 0x7f, 0x80);
@@ -579,12 +579,12 @@ void P12F683::create_sfr_map()
   add_sfr_register(&ccpr1h,  0x14, RegisterValue(0,0));
   add_sfr_register(&ccp1con, 0x15, RegisterValue(0,0));
   add_sfr_register(&wdtcon, 0x18, RegisterValue(0x08,0),"wdtcon");
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
+  add_sfr_register(osccon, 0x8f, RegisterValue(0,0),"osccon");
   remove_sfr_register(&osccal);
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
-  osccon.set_osctune(&osctune);
-  osctune.set_osccon(&osccon);
+  osccon->set_osctune(&osctune);
+  osctune.set_osccon(osccon);
 
 
 

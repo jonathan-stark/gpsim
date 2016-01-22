@@ -120,7 +120,7 @@ P16F88x::P16F88x(const char *_name, const char *desc)
     ccpr2h(this, "ccpr2h", "Capture Compare 2 High"),
     pcon(this, "pcon", "pcon"),
     ssp(this),
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     osctune(this, "osctune", "OSC Tune"),
     wdtcon(this, "wdtcon", "WDT Control", 1),
     usart(this),
@@ -192,7 +192,7 @@ P16F88x::~P16F88x()
   delete get_eeprom();
 
   remove_sfr_register(&intcon_reg);
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&osctune);
   remove_sfr_register(&usart.rcsta);
   remove_sfr_register(&usart.txsta);
@@ -339,11 +339,11 @@ void P16F88x::create_sfr_map()
   intcon_reg.set_pir_set(get_pir_set());
 
 
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0),"osccon");
+  add_sfr_register(osccon, 0x8f, RegisterValue(0x60,0),"osccon");
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
-  osccon.set_osctune(&osctune);
-  osctune.set_osccon(&osccon);
+  osccon->set_osctune(&osctune);
+  osctune.set_osccon(osccon);
 
   usart.initialize(pir1,&(*m_portc)[6], &(*m_portc)[7],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
@@ -633,6 +633,7 @@ void  P16F88x::create(int eesize)
   create_iopin_map();
 
   _14bit_processor::create();
+  osccon = new OSCCON(this, "osccon", "OSC Control");
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
@@ -1126,7 +1127,7 @@ P16F631::P16F631(const char *_name, const char *desc)
     osctune(this, "osctune", "OSC Tune"),
     pcon(this, "pcon", "pcon"),
     wdtcon(this, "wdtcon", "WDT Control", 0x1f),
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     vrcon(this, "vrcon", "Voltage Reference Control Register"),
     srcon(this, "srcon", "SR Latch Control Resgister"),
     ansel(this,"ansel", "Analog Select"),
@@ -1195,7 +1196,7 @@ P16F631::~P16F631()
   remove_sfr_register(&t1con);
   remove_sfr_register(&pcon);
   remove_sfr_register(&wdtcon);
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&pie1);
   remove_sfr_register(&pie2);
   remove_sfr_register(&intcon_reg);
@@ -1271,6 +1272,7 @@ void P16F631::create(int eesize)
    create_iopin_map();
 
    _14bit_processor::create();
+   osccon = new OSCCON(this, "osccon", "OSC Control");
 
    e = new EEPROM_WIDE(this,pir2);
    e->initialize(eesize);
@@ -1346,7 +1348,7 @@ void P16F631::create_sfr_map()
   add_sfr_register(&t1con, 0x10, RegisterValue(0,0));
   add_sfr_register(&pcon, 0x8e, RegisterValue(0,0));
   add_sfr_register(&wdtcon, 0x97, RegisterValue(0x08,0));
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0));
+  add_sfr_register(osccon, 0x8f, RegisterValue(0x60,0));
 
   add_sfr_register(&vrcon, 0x118, RegisterValue(0,0),"vrcon");
   add_sfr_register(comparator.cmxcon0[0], 0x119, RegisterValue(0,0), "cm1con0");
@@ -1412,8 +1414,8 @@ void P16F631::create_sfr_map()
   add_sfr_register(m_iocb, 0x116, RegisterValue(0,0),"iocb");
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
-  osccon.set_osctune(&osctune);
-  osctune.set_osccon(&osccon);
+  osccon->set_osctune(&osctune);
+  osctune.set_osccon(osccon);
 
 }
 //-------------------------------------------------------------------
@@ -1493,7 +1495,7 @@ bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
 	case 4: // INTOSC
             (m_porta->getPin(5))->newGUIname("porta5");
              set_int_osc(true);
-	    osccon.set_rc_frequency();
+	    osccon->set_rc_frequency();
 	    break;
 
 	case 6: //RC oscillator: I/O on RA4 pin, RC on RA5
@@ -1536,7 +1538,7 @@ P16F684::P16F684(const char *_name, const char *desc)
     osctune(this, "osctune", "OSC Tune"),
     pcon(this, "pcon", "pcon"),
     wdtcon(this, "wdtcon", "WDT Control", 0x1f),
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     ansel(this,"ansel", "Analog Select"),
     adcon0(this,"adcon0", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"),
@@ -1605,7 +1607,7 @@ P16F684::~P16F684()
   remove_sfr_register(&adcon0);
   remove_sfr_register(&pie1);
   remove_sfr_register(&pcon);
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&osctune);
   remove_sfr_register(&ansel);
   remove_sfr_register(&pr2);
@@ -1678,6 +1680,8 @@ void P16F684::create(int eesize)
 
    _14bit_processor::create();
 
+   osccon = new OSCCON(this, "osccon", "OSC Control");
+
    e = new EEPROM_WIDE(this,pir1);
    e->initialize(eesize);
    e->set_intcon(&intcon_reg);
@@ -1749,7 +1753,7 @@ void P16F684::create_sfr_map()
 
   add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
   add_sfr_register(&pcon, 0x8e, RegisterValue(0,0));
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0x60,0));
+  add_sfr_register(osccon, 0x8f, RegisterValue(0x60,0));
 
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
   add_sfr_register(&ansel, 0x91, RegisterValue(0xff,0));
@@ -1855,8 +1859,8 @@ void P16F684::create_sfr_map()
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
-  osccon.set_osctune(&osctune);
-  osctune.set_osccon(&osccon);
+  osccon->set_osctune(&osctune);
+  osctune.set_osccon(osccon);
 
 }
 //-------------------------------------------------------------------
@@ -1935,7 +1939,7 @@ bool P16F684::set_config_word(unsigned int address, unsigned int cfg_word)
 	case 4: // INTOSC
             (m_porta->getPin(5))->newGUIname("porta5");
              set_int_osc(true);
-	    osccon.set_rc_frequency();
+	    osccon->set_rc_frequency();
 	    break;
 
 	case 6: //RC oscillator: I/O on RA4 pin, RC on RA5

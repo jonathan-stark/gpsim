@@ -1338,38 +1338,19 @@ bool OSCCON_HS::set_rc_frequency()
 	break;
 	
     case 5:
-	if (osccon_pplx4 || config_pplx4)
-	{
-	    base_frequency = 16e6;
-	}
-	else
-	{
-	    base_frequency = 4e6;
-	}
+	base_frequency = 4e6;
 	break;
 	
     case 6:
-	if (osccon_pplx4 || config_pplx4)
-	{
-	    base_frequency = 32e6;
-	}
-	else
-	{
-	    base_frequency = 8e6;
-	}
+	base_frequency = 8e6;
 	break;
 	
     case 7:
-	if (osccon_pplx4 || config_pplx4)
-	{
-	    base_frequency = 64e6;
-	}
-	else
-	{
-	    base_frequency = 16e6;
-	}
+        base_frequency = 16e6;
 	break;
    }
+   if ( (new_IRCF>=minValPLL) && (osccon_pplx4 || config_pplx4) )
+       base_frequency *= 4;
    if (osctune)
    {
        int tune;
@@ -1388,6 +1369,8 @@ bool OSCCON_HS::set_rc_frequency()
    }
    return true;
 }
+
+
 /*******************************************************************
 	HLVDCON - High/Low-Voltage Detect Module
 */

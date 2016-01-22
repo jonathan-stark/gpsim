@@ -59,6 +59,7 @@ License along with this library; if not, see
 #include "p17c75x.h"
 #endif
 #include "p18x.h"
+#include "p18fk.h"
 #include "icd.h"
 
 #include "fopen-path.h"
@@ -275,6 +276,8 @@ ProcessorConstructor pP18F1220(P18F1220::construct,
                               "__18F1220",  "pic18f1220",   "p18f1220", "18f1220");
 ProcessorConstructor pP18F1320(P18F1320::construct,
                               "__18F1320",  "pic18f1320",   "p18f1320", "18f1320");
+ProcessorConstructor pP18F14K22(P18F14K22::construct,
+                              "__18F14K22", "pic18f14k22",  "p18f14k22", "18f14k22");
 ProcessorConstructor pP18F2221(P18F2221::construct,
                               "__18F2221",  "pic18f2221",   "p18f2221", "18f2221");
 ProcessorConstructor pP18F2321(P18F2321::construct,
@@ -290,7 +293,7 @@ ProcessorConstructor pP18F2550(P18F2550::construct,
 ProcessorConstructor pP18F2620(P18F2620::construct,
                               "__18F2620",  "pic18f2620",   "p18f2620", "18f2620");
 ProcessorConstructor pP18F26K22(P18F26K22::construct,
-                              "__18F26K22",  "pic18f26k22",   "p18f26k22", "18f26k22");
+                              "__18F26K22", "pic18f26k22",  "p18f26k22", "18f26k22");
 ProcessorConstructor pP18F4221(P18F4221::construct,
                               "__18F4221",  "pic18f4221",   "p18f4221", "18f4221");
 ProcessorConstructor pP18F4321(P18F4321::construct,

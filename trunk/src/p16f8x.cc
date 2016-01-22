@@ -93,7 +93,7 @@ public:
 P16F8x::P16F8x(const char *_name, const char *desc)
   : P16X6X_processor(_name,desc),
     wdtcon(this, "wdtcon", "WDT Control", 0x1f),
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     osctune(this, "osctune", "OSC Tune"),
     usart(this),
     comparator(this)
@@ -126,7 +126,7 @@ P16F8x::~P16F8x()
   delete_sfr_register(usart.txreg);
   delete_sfr_register(usart.rcreg);
   delete get_eeprom();
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&osctune);
   remove_sfr_register(&pie2);
 }
@@ -213,11 +213,11 @@ void P16F8x::create_sfr_map()
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
 
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
+  add_sfr_register(osccon, 0x8f, RegisterValue(0,0),"osccon");
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
-  osccon.set_osctune(&osctune);
-  osctune.set_osccon(&osccon);
+  osccon->set_osctune(&osctune);
+  osctune.set_osccon(osccon);
 
   usart.initialize(pir1,&(*m_portb)[5], &(*m_portb)[2],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
@@ -387,8 +387,9 @@ void  P16F8x::create(int eesize)
   set_hasSSP();
   create_iopin_map();
 
-
   _14bit_processor::create();
+
+  osccon = new OSCCON(this, "osccon", "OSC Control");
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
@@ -414,7 +415,7 @@ P16F81x::P16F81x(const char *_name, const char *desc)
     adcon1(this,"adcon1", "A2D Control 1"),
     adresh(this,"adresh", "A2D Result High"),
     adresl(this,"adresl", "A2D Result Low"),
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     osctune(this, "osctune", "OSC Tune")
 {
   pir1_2_reg = new PIR1v2(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
@@ -427,7 +428,7 @@ P16F81x::P16F81x(const char *_name, const char *desc)
 
 P16F81x::~P16F81x()
 {
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&osctune);
   remove_sfr_register(&adresl);
   remove_sfr_register(&adresh);
@@ -526,11 +527,11 @@ void P16F81x::create_sfr_map()
   intcon_reg.set_pir_set(get_pir_set());
 
 
-  add_sfr_register(&osccon, 0x8f, RegisterValue(0,0),"osccon");
+  add_sfr_register(osccon, 0x8f, RegisterValue(0,0),"osccon");
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
-  osccon.set_osctune(&osctune);
-  osctune.set_osccon(&osccon);
+  osccon->set_osctune(&osctune);
+  osctune.set_osccon(osccon);
 
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
   add_sfr_register(&adresh,  0x1e, RegisterValue(0,0));
@@ -726,6 +727,7 @@ void  P16F81x::create(int eesize)
 
   _14bit_processor::create();
 
+   osccon = new OSCCON(this, "osccon", "OSC Control");
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);

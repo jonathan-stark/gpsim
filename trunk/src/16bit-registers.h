@@ -562,6 +562,7 @@ class OSCCON2 : public  sfr_register
 	PLLRDY  = 1<<7		// PLL Run Status bit
   };
 };
+
 /* RC clock 16Mhz with pll to 64Mhz
  */
 class OSCCON_HS : public OSCCON
@@ -570,9 +571,11 @@ class OSCCON_HS : public OSCCON
    virtual bool set_rc_frequency();
 
    OSCCON_HS(Processor *pCpu, const char *pName, const char *pDesc) :
-       OSCCON(pCpu, pName, pDesc), osccon2(0){}
+       OSCCON(pCpu, pName, pDesc), osccon2(0), minValPLL(5) {}
 
    OSCCON2  *osccon2;
+
+   unsigned char minValPLL;
 };
 /*
    High/Low-Voltage Detect Module

@@ -48,7 +48,7 @@ public:
   PIR_SET_2 pir_set_2_def;
 
   WDTCON       wdtcon;
-  OSCCON       osccon;
+  OSCCON       *osccon;
   OSCTUNE      osctune;
 
 
@@ -103,7 +103,7 @@ public:
   sfr_register  adresh;
   sfr_register  adresl;
 
-  OSCCON       osccon;
+  OSCCON       *osccon;
   OSCTUNE      osctune;
 
 

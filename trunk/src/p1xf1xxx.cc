@@ -299,7 +299,7 @@ P12F1822::P12F1822(const char *_name, const char *desc)
     adcon1(this,"adcon1", "A2D Control 1"),
     adresh(this,"adresh", "A2D Result High"),
     adresl(this,"adresl", "A2D Result Low"),
-    osccon(this, "osccon", "Oscillator Control Register"),
+    osccon(0),
     osctune(this, "osctune", "Oscillator Tunning Register"),
     oscstat(this, "oscstat", "Oscillator Status Register"),
     wdtcon(this, "wdtcon", "Watch dog timer control", 0x3f),
@@ -423,7 +423,7 @@ P12F1822::~P12F1822()
     remove_sfr_register(&pstr1con);
     remove_sfr_register(&osctune);
     remove_sfr_register(&option_reg);
-    remove_sfr_register(&osccon);
+    remove_sfr_register(osccon);
     remove_sfr_register(&oscstat);
 
     remove_sfr_register(comparator.cmxcon0[0]); 
@@ -487,7 +487,7 @@ void P12F1822::create_sfr_map()
   pcon.valid_bits = 0xcf;
   add_sfr_register(&option_reg, 0x95, RegisterValue(0xff,0));
   add_sfr_register(&osctune,    0x98, RegisterValue(0,0));
-  add_sfr_register(&osccon,     0x99, RegisterValue(0x38,0));
+  add_sfr_register(osccon,     0x99, RegisterValue(0x38,0));
   add_sfr_register(&oscstat,    0x9a, RegisterValue(0,0));
 
   intcon_reg.set_pir_set(get_pir_set());
@@ -672,9 +672,9 @@ void P12F1822::create_sfr_map()
 
     sr_module.setPins(&(*m_porta)[1], &(*m_porta)[2], &(*m_porta)[5]);
 
-    osccon.set_osctune(&osctune);
-    osccon.set_oscstat(&oscstat);
-    osctune.set_osccon((OSCCON *)&osccon);
+    osccon->set_osctune(&osctune);
+    osccon->set_oscstat(&oscstat);
+    osctune.set_osccon((OSCCON *)osccon);
 }
 
 //-------------------------------------------------------------------
@@ -717,8 +717,9 @@ void  P12F1822::create(int ram_top, int eeprom_size)
   e = new EEPROM_EXTND(this, pir2);
   set_eeprom(e);
 
+  osccon = new OSCCON_2(this, "osccon", "Oscillator Control Register");
+ 
   pic_processor::create();
-
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
   e->set_intcon(intcon);
@@ -745,7 +746,7 @@ void P12F1822::exit_sleep()
     if (m_ActivityState == ePASleeping)
     {
 	tmr1l.wake();
-        osccon.wake();
+        osccon->wake();
 	_14bit_e_processor::exit_sleep();
     }
 }
@@ -761,7 +762,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
 {
     unsigned int mask = 0x1f;
 
-    osccon.set_config(cfg_word1 & (FOSC0|FOSC1|FOSC2), cfg_word1 & IESO);
+    osccon->set_config(cfg_word1 & (FOSC0|FOSC1|FOSC2), cfg_word1 & IESO);
     set_int_osc(false);
     switch(cfg_word1 & (FOSC0|FOSC1|FOSC2))
     {
@@ -882,7 +883,7 @@ P16F178x::P16F178x(const char *_name, const char *desc)
     adcon2(this,"adcon2", "A2D Control 2"),
     adresh(this,"adresh", "A2D Result High"),
     adresl(this,"adresl", "A2D Result Low"),
-    osccon(this, "osccon", "Oscillator Control Register"),
+    osccon(0),
     osctune(this, "osctune", "Oscillator Tunning Register"),
     oscstat(this, "oscstat", "Oscillator Status Register"),
     wdtcon(this, "wdtcon", "Watch dog timer control", 0x3f),
@@ -1074,7 +1075,7 @@ P16F178x::~P16F178x()
     remove_sfr_register(&pstr1con);
     remove_sfr_register(&osctune);
     remove_sfr_register(&option_reg);
-    remove_sfr_register(&osccon);
+    remove_sfr_register(osccon);
     remove_sfr_register(&oscstat);
 
     remove_sfr_register(comparator.cmxcon0[0]); 
@@ -1147,7 +1148,7 @@ void P16F178x::create_sfr_map()
   pcon.valid_bits = 0xcf;
   add_sfr_register(&option_reg, 0x95, RegisterValue(0xff,0));
   add_sfr_register(&osctune,    0x98, RegisterValue(0,0));
-  add_sfr_register(&osccon,     0x99, RegisterValue(0x38,0));
+  add_sfr_register(osccon,     0x99, RegisterValue(0x38,0));
   add_sfr_register(&oscstat,    0x9a, RegisterValue(0,0));
 
   intcon_reg.set_pir_set(get_pir_set());
@@ -1391,9 +1392,9 @@ void P16F178x::create_sfr_map()
     m_dac4con0->setDACOUT(&(*m_porta)[4], &(*m_portb)[7]);
 
 
-    osccon.set_osctune(&osctune);
-    osccon.set_oscstat(&oscstat);
-    osctune.set_osccon((OSCCON *)&osccon);
+    osccon->set_osctune(&osctune);
+    osccon->set_oscstat(&oscstat);
+    osctune.set_osccon((OSCCON *)osccon);
 }
 
 //-------------------------------------------------------------------
@@ -1414,8 +1415,9 @@ void  P16F178x::create(int ram_top, int eeprom_size)
   e = new EEPROM_EXTND(this, pir2);
   set_eeprom(e);
 
+  osccon = new OSCCON_2(this, "osccon", "Oscillator Control Register");
+ 
   pic_processor::create();
-
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
   e->set_intcon(intcon);
@@ -1438,7 +1440,7 @@ void P16F178x::exit_sleep()
     if (m_ActivityState == ePASleeping)
     {
 	tmr1l.wake();
-        osccon.wake();
+        osccon->wake();
 	_14bit_e_processor::exit_sleep();
     }
 }
@@ -1455,7 +1457,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
 {
     unsigned int mask = m_porta->getEnableMask();
 
-    osccon.set_config(cfg_word1 & (FOSC0|FOSC1|FOSC2), cfg_word1 & IESO);
+    osccon->set_config(cfg_word1 & (FOSC0|FOSC1|FOSC2), cfg_word1 & IESO);
     set_int_osc(false);
     switch(cfg_word1 & (FOSC0|FOSC1|FOSC2))
     {
@@ -1779,8 +1781,9 @@ void  P16F1823::create(int ram_top, int eeprom_size)
   e = new EEPROM_EXTND(this, pir2);
   set_eeprom(e);
 
+  osccon = new OSCCON_2(this, "osccon", "Oscillator Control Register");
+ 
   pic_processor::create();
-
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
   e->set_intcon(intcon);
