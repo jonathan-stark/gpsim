@@ -111,7 +111,7 @@ public:
   CCPRL   ccpr1l;
   CCPRH   ccpr1h;
   WDTCON  wdtcon;
-  OSCCON  osccon;
+  OSCCON  *osccon;
   OSCTUNE  osctune;
 
 

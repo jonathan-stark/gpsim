@@ -246,6 +246,7 @@ private:
     
 };
 
+// ANSEL register for ADCv2B with an ANSEL per I/O port
 class ANSEL_2B :  public sfr_register
 {
 
@@ -256,10 +257,19 @@ public:
   void put_value(unsigned int new_value);
   void setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1);
 
-private:
+protected:
    PinModule *m_AnalogPins[8];
    int  analog_channel[8];
    unsigned int mask;
+};
+
+// ANSEL register for ADCv2 on devices where the ANSEL is mapped by ADC chan
+class ANSEL_2A :  public ANSEL_2B
+{
+public:
+
+  ANSEL_2A(Processor *pCpu, const char *pName, const char *pDesc);
+  void setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1);
 };
 
 class FVRCON_V2 : public sfr_register, public TriggerObject

@@ -251,7 +251,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
     tmr3l(this, "tmr3l", "TMR3 Low"),
     tmr3h(this, "tmr3h", "TMR3 High"),
 
-    osccon(this, "osccon", "OSC Control"),
+    osccon(0),
     lvdcon(this, "lvdcon", "LVD Control"),
     wdtcon(this, "wdtcon", "WDT Control", 1),
     prodh(this, "prodh", "Product High"),
@@ -387,7 +387,7 @@ void _16bit_processor :: delete_sfr_map()
   remove_sfr_register(&rcon);
   remove_sfr_register(&wdtcon);
   remove_sfr_register(&lvdcon);
-  remove_sfr_register(&osccon);
+  remove_sfr_register(osccon);
   remove_sfr_register(&t0con);
   remove_sfr_register(&tmr0l);
   remove_sfr_register(&tmr0h);
@@ -532,9 +532,9 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ssp.sspbuf,   0xfc9,porv,"sspbuf");
   if (!MovedReg())
   {
-  add_sfr_register(&t2con,	  0xfca,porv,"t2con");
-  add_sfr_register(&pr2,	  0xfcb,RegisterValue(0xff,0),"pr2");
-  add_sfr_register(&tmr2,	  0xfcc,porv,"tmr2");
+    add_sfr_register(&t2con,	  0xfca,porv,"t2con");
+    add_sfr_register(&pr2,	  0xfcb,RegisterValue(0xff,0),"pr2");
+    add_sfr_register(&tmr2,	  0xfcc,porv,"tmr2");
   }
 
   add_sfr_register(t1con,	  0xfcd,porv,"t1con");
@@ -544,7 +544,9 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&rcon,	  0xfd0,RegisterValue(0x1c,0),"rcon");
   add_sfr_register(&wdtcon,	  0xfd1,porv,"wdtcon");
   add_sfr_register(&lvdcon,	  0xfd2,porv,"lvdcon");
-  // 0x4 is not defined
+
+  add_sfr_register( osccon,	  0xfd3,RegisterValue(0x40,0),"osccon");
+
   add_sfr_register(&t0con,	  0xfd5,RegisterValue(0xff,0),"t0con");
   add_sfr_register(&tmr0l,	  0xfd6,porv,"tmr0l");
   add_sfr_register(&tmr0h,	  0xfd7,porv,"tmr0h");
@@ -715,6 +717,7 @@ void _16bit_processor :: create ()
   ind2.init(this);
   */
   pic_processor::create();
+  osccon = getOSCCON();
   create_sfr_map();
 
   tmr0l.initialize();
@@ -731,9 +734,8 @@ void _16bit_processor :: create ()
     pma->SpecialRegisters.push_back(&bsr);
     rma.SpecialRegisters.push_back(&bsr);
   }
-
-
 }
+
 
 //
 // create_symbols

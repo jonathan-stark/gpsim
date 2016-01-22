@@ -494,31 +494,33 @@ void PicPortGRegister::setbit(unsigned int bit_number, char new3State)
   // interrupt bit intf_bit (default 2)  on specified edge 
   bool bOldValue = (rvDrivenValue.data & (1<<intf_bit));
   bool bNewValue = new3State=='1' || new3State=='W';
-  if (bit_number == intf_bit && (bOldValue != m_bIntEdge) 
+    if (bit_number == intf_bit && (bOldValue != m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
-  {
-     m_pIntcon->set_intf(true);
-  }
+    {
+        m_pIntcon->set_intf(true);
+    }
 
     lastDrivenValue = rvDrivenValue;
     PortRegister::setbit(bit_number, new3State);
    
     setIOCif();
- // interrupt and exit sleep for level change on bits where IOC set
+    // interrupt and exit sleep for level change on bits where IOC set
     int bitMask = m_pIoc->get_value() & (1 << bit_number);
 
-   if (verbose)
-       printf("PicPortGRegister::setbit() bit=%d,val=%c IOC_bit=%x\n",bit_number,new3State, bitMask);
+    if (verbose)
+        printf("PicPortGRegister::setbit() bit=%d,val=%c IOC_bit=%x\n",bit_number,new3State, bitMask);
 
 }
+
+
 void PicPortIOCRegister::setbit(unsigned int bit_number, char new3State)
 {
     int lastDrivenValue = rvDrivenValue.data & (1 << bit_number);
     PortRegister::setbit(bit_number, new3State);
     int newDrivenValue = rvDrivenValue.data & (1 << bit_number);
 
-   if (verbose)
-       printf("PicPortIOCRegister::setbit() bit=%d,val=%c IOC_+=%x IOC_-=%x\n",bit_number,new3State, m_Iocap->get_value() & (1<<bit_number), m_Iocan->get_value() & (1<<bit_number));
+    if (verbose)
+        printf("PicPortIOCRegister::setbit() bit=%d,val=%c IOC_+=%x IOC_-=%x\n",bit_number,new3State, m_Iocap->get_value() & (1<<bit_number), m_Iocan->get_value() & (1<<bit_number));
     if ( newDrivenValue > lastDrivenValue) // positive edge
     {
 	if ( m_tris->get_value() & (m_Iocap->get_value() & (1 << bit_number)))

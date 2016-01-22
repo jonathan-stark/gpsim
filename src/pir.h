@@ -356,10 +356,10 @@ enum
     HLVDIF  = 1<<2,		/* 18f26k22 */ 
     BCLIF   = 1<<3,
     EEIF    = 1<<4,
-    C2IF    = 1<<5,		/* 18f26k22 */
-    C1IF    = 1<<6,		/* 18f26k22 */
+    C2IF    = 1<<5,		/* 18f14k22 */
+    C1IF    = 1<<6,		/* 18f14k22 */
     CMIF    = 1<<6,              /* PIC16F87xA, PIC18F4xx devices */
-    OSCGIF  = 1<<7		/* 18f26k22 */
+    OSCFIF  = 1<<7		/* 18f14k22 */
 };
 
   virtual void set_eccp1if()
@@ -475,7 +475,7 @@ enum
 
 
 //---------------------------------------------------------
-// PIR2 Peripheral Interrupt register # 3
+// PIR3 Peripheral Interrupt register # 3
 //
 // This is version 1 of the PIR3 register - as seen on the 18F6520 devices
 
@@ -521,7 +521,7 @@ enum
 };
 
 //---------------------------------------------------------
-// PIR2 Peripheral Interrupt register # 3
+// PIR3 Peripheral Interrupt register # 3
 //
 // This is version 2 of the PIR3 register - as seen on the 18F248 devices
 // Perhaps other devices too - it contains bits for the CAN device

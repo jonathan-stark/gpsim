@@ -116,7 +116,7 @@ public:
   T3CON        *t3con;
   PIR_SET_2    pir_set_def;
 
-  OSCCON       osccon;
+  OSCCON      *osccon;
   LVDCON       lvdcon;
   WDTCON       wdtcon;
 
@@ -142,6 +142,8 @@ public:
   virtual bool HasCCP2(void) { return true; };
   virtual bool MovedReg() { return false;}
   virtual bool T3HasCCP() { return true;}
+
+  virtual OSCCON * getOSCCON(void)	{ return new OSCCON(this, "osccon", "OSC Control"); }
 
   virtual void create_symbols();
 

@@ -71,7 +71,7 @@ public:
   PIR2v3 *pir2_2_reg;
   PIR_SET_2 pir_set_2_def;
 
-  OSCCON       osccon;
+  OSCCON       *osccon;
   OSCTUNE      osctune;
   WDTCON       wdtcon;
   USART_MODULE usart;
@@ -231,7 +231,7 @@ public:
   OSCTUNE  osctune;
   PCON    pcon;
   WDTCON  wdtcon;
-  OSCCON  osccon;
+  OSCCON  *osccon;
   VRCON_2   vrcon;
   SRCON   srcon;
   ANSEL  ansel;
@@ -399,7 +399,7 @@ public:
   OSCTUNE  osctune;
   PCON    pcon;
   WDTCON  wdtcon;
-  OSCCON  osccon;
+  OSCCON  *osccon;
   ANSEL  ansel;
   ADCON0_12F  adcon0;
   ADCON1_16F  adcon1;

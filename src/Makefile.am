@@ -57,6 +57,7 @@ libgpsim_la_SOURCES = \
 	p16x6x.cc \
 	p17c75x.cc \
 	p18x.cc \
+	p18fk.cc \
 	packages.cc \
 	pic-processor.cc \
 	pic-registers.cc \

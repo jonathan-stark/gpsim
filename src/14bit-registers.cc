@@ -283,9 +283,9 @@ bool OSCCON::set_rc_frequency()
    }
    return true;
 }
+
 void  OSCCON::put(unsigned int new_value)
 {
-  
   unsigned int new_IRCF = (new_value & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
   unsigned int old_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
   trace.raw(write_trace.get() | value.get());
@@ -293,6 +293,7 @@ void  OSCCON::put(unsigned int new_value)
 
   if (set_rc_frequency())  // using internal RC Oscillator
   {
+      //printf ( "OSCCON::put(%02X) IRCF(%d)->%d\n", new_value, old_IRCF, new_IRCF );
 	if (old_IRCF == 0 && new_IRCF != 0) // Allow 4 ms to stabalise
 	{
 	    guint64 settle;
@@ -303,8 +304,10 @@ void  OSCCON::put(unsigned int new_value)
 	}
 	else
 	    new_value |= IOFS;
+        value.put(new_value);
   }
 }
+
 // Clock is stable
 void OSCCON_2::callback()
 {

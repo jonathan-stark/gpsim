@@ -70,7 +70,7 @@ public:
   ADCON1_16F 	adcon1;
   sfr_register  adresh;
   sfr_register  adresl;
-  OSCCON_2  	osccon;
+  OSCCON_2  	*osccon;
   OSCTUNE 	osctune;
   OSCSTAT 	oscstat;
   //OSCCAL  osccal;
@@ -154,7 +154,7 @@ public:
   ADCON2_DIF	adcon2;
   sfr_register  adresh;
   sfr_register  adresl;
-  OSCCON_2  	osccon;
+  OSCCON_2  	*osccon;
   OSCTUNE 	osctune;
   OSCSTAT 	oscstat;
   //OSCCAL  osccal;
