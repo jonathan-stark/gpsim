@@ -251,7 +251,7 @@ bool GUIRegister::bIsSFR()
 
 GUIRegister::GUIRegister()
   : rma(0), address(0), row(0), col(0), register_size(0),
-    bUpdateFull(false), bIsAliased(false), xref(0)    
+    bUpdateFull(false), bIsAliased(false), xref(0)
 {
 }
 
@@ -374,6 +374,7 @@ int gui_get_value(const char *prompt)
   label = gtk_label_new(prompt);
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   GtkWidget *entry = gtk_entry_new();
+  gtk_entry_set_max_length(GTK_ENTRY(entry), 8);
   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
@@ -383,19 +384,16 @@ int gui_get_value(const char *prompt)
     return -1;
   }
 
-  const gchar *entry_text;
-  char *end;
-  int value;
+  const gchar *entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
 
-  entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
-  value = strtoul(entry_text, &end, 0);
-
-  gtk_widget_destroy(dialog);
-
-  if (*entry_text != '\0' && *end == '\0')
-    return value;
-  else
+  if (*entry_text == '\0') {
+    gtk_widget_destroy(dialog);
     return -1;
+  }
+  // Should not overflow as input is limited to 8 chracters
+  int value = strtoul(entry_text, NULL, 0);
+  gtk_widget_destroy(dialog);
+  return value;
 }
 
 // used for reading a value from user when break on value is requested
@@ -421,6 +419,7 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
   label = gtk_label_new(prompt1);
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   entry1 = gtk_entry_new();
+  gtk_entry_set_max_length(GTK_ENTRY(entry1), 8);
   gtk_box_pack_start(GTK_BOX(hbox), entry1, FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE, 6);
@@ -428,6 +427,7 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
   label = gtk_label_new(prompt2);
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   entry2 = gtk_entry_new();
+  gtk_entry_set_max_length(GTK_ENTRY(entry2), 8);
   gtk_box_pack_start(GTK_BOX(hbox), entry2, FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
@@ -439,13 +439,12 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
     return;
   }
 
-  char *end;
   const gchar *entry_text;
   int value;
 
   entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
-  value = strtoul(entry_text, &end, 0);
-  if (*entry_text == '\0' || *end != '\0') {
+  value = strtoul(entry_text, NULL, 0);
+  if (*entry_text == '\0') {
     *value1 = -1;
     *value2 = -1;
     gtk_widget_destroy(dialog);
@@ -453,8 +452,8 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
   *value1 = value;
 
   entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
-  value = strtoul(entry_text, &end, 0);
-  if (*entry_text == '\0' || *end != '\0') {
+  value = strtoul(entry_text, NULL, 0);
+  if (*entry_text == '\0') {
     *value1 = -1;
     *value2 = -1;
     gtk_widget_destroy(dialog);
@@ -716,10 +715,9 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   text = gtk_entry_get_text(GTK_ENTRY(sheet_entry));
 
-  char *bad_position;
-  n = strtoul(text, &bad_position, 16);
+  n = strtoul(text, NULL, 16);
 
-  if (*bad_position == '\0') {
+  if (*text == '\0') {
     n = reg->get_value();
     reg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
   } else if (n != (int) reg->get_shadow().data) {
@@ -1256,6 +1254,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
   gtk_widget_show(rw->location);
 
   rw->entry=gtk_entry_new();
+  gtk_entry_set_max_length(GTK_ENTRY(rw->entry), 8);
   gtk_box_pack_start(GTK_BOX(status_box), rw->entry,
                      TRUE, TRUE, 0);
   gtk_widget_show(rw->entry);
@@ -1319,7 +1318,7 @@ gboolean Register_Window::UpdateRegisterCell(int reg_number)
   if((unsigned int)reg_number >= guiReg->rma->get_size())
     return 0;
 
-  
+
   range.row0=guiReg->row;
   range.rowi=guiReg->row;
   range.col0=guiReg->col;
@@ -1356,7 +1355,7 @@ gboolean Register_Window::UpdateRegisterCell(int reg_number)
     // else the register is invalid and out of the register sheet
 
 
-    //if(new_value != last_value) 
+    //if(new_value != last_value)
     if(guiReg->hasChanged(new_value)) {
 
       guiReg->put_shadow(new_value);
@@ -1850,7 +1849,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
     registers(0), register_sheet(NULL), rma(0), entry(0), location(0),
     popup_menu(0), registers_loaded(0), register_size(0),
     char_width(0), char_height(0), chars_per_column(3)
-    
+
 {
   gp = _gp;
 

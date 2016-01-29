@@ -1,3 +1,9 @@
+2016-01-29 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_src_opcode.cc
+	: Fix build with gtk extra 2
+	* gui/gui_regwin.cc
+	: Bug 216 - Fix numerical inputs
+
 2016-01-19 Rob Pearce <rob@fairview.ukfsn.org>
 	* src/16bit-processors.cc src/16bit-processors.h src/16bit-registers.cc
 	  src/p12f6xx.cc src/p12f6xx.h src/p16f88x.cc src/p16f88x.h
@@ -25,7 +31,7 @@
 	: add dummy registers triscpp, dataccp
 	* src/pic-processor.cc src/pic-processor.h src/p16x7x.cc src/p16x7x.h
         : Bug 212 - add 16f716, fix package 16c712, 16c716
-	
+
 2015-11-28 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_main.cc gui/gui_menu.cc gui/gui_regwin.cc gui/gui_regwin.h
 	  gui/gui_stopwatch.cc gui/gui_stopwatch.h
@@ -58,7 +64,7 @@
 	* cli/cmd_break.cc cli/cmd_break.h
 	: undo fix for for bug 206
 	* cli/parse.yy src/expr.cc
-	: improve error processing and undo fix for bug 206 
+	: improve error processing and undo fix for bug 206
 	* cli/scan.ll
 	: Allow [dD]'nn' decimal values
 	* doc/gpsim.lyx
@@ -83,8 +89,8 @@
 	: Simplified keyboard handling
 
 2015-11-07 Roy Rankin <rrankin@ihug.com.au>
-	* regression/p16f88x regression/p16f88x/Makefile 
-	  regression/p16f88x/comparator.asm regression/p16f88x/epwm.asm 
+	* regression/p16f88x regression/p16f88x/Makefile
+	  regression/p16f88x/comparator.asm regression/p16f88x/epwm.asm
 	  regression/p16f88x/eusart.asm regression/p16f88x/i2c.asm
 	  regression/p16f88x/i2c_low.inc regression/p16f88x/i2c_slave.asm
 	  regression/p16f88x/p16f882.asm regression/p16f88x/p16f883.asm
@@ -193,10 +199,10 @@
 	: Remove debug output
 
 2015-08-13 Roy Rankin <rrankin@ihug.com.au>
-	* modules/ttl.cc src/14bit-registers.cc src/14bit-registers.h 
-	  src/14bit-tmrs.cc src/16bit-registers.cc src/16bit-tmrs.h 
-	  src/comparator.cc src/comparator.h src/ctmu.h src/i2c-ee.cc 
-	  src/ioports.cc src/p12x.cc src/p18x.cc src/pic-processor.cc 
+	* modules/ttl.cc src/14bit-registers.cc src/14bit-registers.h
+	  src/14bit-tmrs.cc src/16bit-registers.cc src/16bit-tmrs.h
+	  src/comparator.cc src/comparator.h src/ctmu.h src/i2c-ee.cc
+	  src/ioports.cc src/p12x.cc src/p18x.cc src/pic-processor.cc
 	  src/pic-processor.h src/ssp.cc src/uart.cc
 	: Fix memory error reported by Valgrind
 
@@ -227,8 +233,8 @@
 
 2015-07-27 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac makefile.mingw extras/Makefile.am extras/i2c2par
-	  extras/i2c2par/Makefile extras/i2c2par/Makefile.am 
-	  extras/i2c2par/examples extras/i2c2par/examples/Makefile 
+	  extras/i2c2par/Makefile extras/i2c2par/Makefile.am
+	  extras/i2c2par/examples extras/i2c2par/examples/Makefile
 	  extras/i2c2par/examples/Makefile.am extras/i2c2par/examples/i2c2par.asm
 	  extras/i2c2par/i2c2par.cc extras/i2c2par/i2c2par.h
 	  extras/i2c2par/makefile.mingw extras/i2c2par/module_manager.cc
@@ -247,7 +253,7 @@
 	* doc/screenshots/breadboard_register.png
 	  doc/screenshots/control_source.png
 	: new screendump files
-	* regression/a2d/10f222.lkr regression/ccp/16f819.lkr 
+	* regression/a2d/10f222.lkr regression/ccp/16f819.lkr
 	  regression/ccp/16f877a.lkr regression/ccp/18f6520.lkr
 	  regression/comparator/10f204.lkr regression/comparator/16f628.lkr
 	  regression/comparator/16f873a.lkr regression/comparator/16f877a.lkr
@@ -281,10 +287,10 @@
 	  regression/tmr1_16bit/Makefile regression/tmr1_16bit/tmr1_18f26k22.asm
 	  regression/epwm/p18f26k22.asm regression/p18f26k22/Makefile
 	  regression/p18f26k22/ctmu_26k22.asm regression/p18f26k22/tbl_26k22.asm
-	  regression/p18f26k22/hlvd_26k22.asm 
+	  regression/p18f26k22/hlvd_26k22.asm
 	: feature 46 - Add p18f26k22 Processor
 	* gpsim/main.cc gui/gui_scope.cc gui/gui.h
-	: fix scope error messages 
+	: fix scope error messages
 	* cli/Makefile.am
 	: fix continual rebuild of parse.cc
 	* src/14bit-registers.cc src/14bit-registers.h
@@ -303,24 +309,24 @@
 
 2015-07-09 Roy Rankin <rrankin@ihug.com.au>
 	* regression/a2d/16c71.lkr regression/a2d/16f819.lkr
-          regression/a2d/16f871.lkr regression/a2d/16f873a.lkr 
+          regression/a2d/16f871.lkr regression/a2d/16f873a.lkr
 	  regression/a2d/16f874a.lkr regression/a2d/16f88.lkr
           regression/a2d/18f1220.lkr regression/a2d/18f4321.lkr
           regression/a2d/18f452.lkr regression/a2d/Makefile
 	: Remove outdated gputil link files
 
 2015-07-09 Roy Rankin <rrankin@ihug.com.au>
-	* stimuli.h simuli.cc 
+	* stimuli.h simuli.cc
 	: Feature 44 Entering node name into cli should show attached stimului
 	  Refine node RC voltage vs time calculation
-	* stimuli.h simuli.cc src/processor.h src/processor.cc 
-	  src/modules.h src/modules.cc 
+	* stimuli.h simuli.cc src/processor.h src/processor.cc
+	  src/modules.h src/modules.cc
 	: Feature 43 	Allow setting of Vdd on processors
-	* src/ioports.cc 
+	* src/ioports.cc
 	: feature 42 	Analog inputs should have about 5pF capacitance
-	* src/p1xf1xxx.cc 
+	* src/p1xf1xxx.cc
 	: Fix cpscon0 register name (was cpscon)
-        * regression/a2d/p16c71.asm regression/p1xf18xx/p16f1823.asm 
+        * regression/a2d/p16c71.asm regression/p1xf18xx/p16f1823.asm
 	  regression/switch_test/switch_test.asm regression/spi/p18f242.asm
 	: adjust regression tests for above changes
 
@@ -331,9 +337,9 @@
 
 2015-06-25 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_watch.cc: initialize variable watch_list
-	* regression/comparator/Makefile 
+	* regression/comparator/Makefile
 	  regression/comparator/compar_2321.asm
-	  regression/comparator/compar_628.asm 
+	  regression/comparator/compar_628.asm
 	  regression/comparator/compar_6520.asm
 	  regression/comparator/compar_873a.asm
 	  regression/comparator/compar_877a.asm
@@ -364,7 +370,7 @@
 	  src/p1xf1xxx.cc
 	: improve inheratance structure
 	* src/comparator.cc src/comparator.h src/p16f88x.cc src/p16f88x.h
-	: restructure for up to 4 comparators 
+	: restructure for up to 4 comparators
 	* src/p16f62x.cc
 	: Fix Bug 199 	p16f627,8 comparator error mode 3
 	* src/p16x6x.cc
@@ -451,14 +457,14 @@
 
 2015-04-13 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc
-	: Fix bug # 196 - PWM glitch when writing to CCPCON 
+	: Fix bug # 196 - PWM glitch when writing to CCPCON
 
 2015-04-11 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_breadboard.cc gui/gui_breadboard.h
 	: Traces are now drawn using Cairo instead of deprecated GDK calls
 
 2015-04-10 Roy Rankin <rrankin@ihug.com.au>
-	* doc/gpsim.lyx modules/Makefile.am modules/gpsim_modules.cc 
+	* doc/gpsim.lyx modules/Makefile.am modules/gpsim_modules.cc
 	  modules/i2c2par.cc modules/i2c2par.h
 	: add I2C to 8 bit bus modules for feature request # 40
 	* src/i2c-ee.cc src/i2c-ee.h
@@ -479,10 +485,10 @@
 	: Replace deprecated GDK calls and code clean up
 
 2015-03-27 Roy Rankin <rrankin@ihug.com.au>
-	* regression/p16f676/reset.asm regression/p16f684/reset.asm 
-	  regression/p16f84/reset.asm src/14bit-registers.cc src/intcon.cc 
+	* regression/p16f676/reset.asm regression/p16f684/reset.asm
+	  regression/p16f84/reset.asm src/14bit-registers.cc src/intcon.cc
 	  src/intcon.h src/pic-ioports.cc src/pic-ioports.h
-	: Bug 195 - Writing to an IOC IO port should not clear interrupt flag 
+	: Bug 195 - Writing to an IOC IO port should not clear interrupt flag
 
 2015-03-23 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_watch.cc: fix gtk_tree_model_foreach assert
@@ -534,7 +540,7 @@
 
 2015-02-23 Roy Rankin <rrankin@ihug.com.au>
 	* src/tmr0.cc src/16bit-registers.cc
-	: Bug 194 - P18 processor TMR0 may ignore TMR0H 
+	: Bug 194 - P18 processor TMR0 may ignore TMR0H
 	* src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
 	: Feature 39 - Add p18f2620 processor (work in progress)
 	* extras/lcd/examples/icons.inc
@@ -550,7 +556,7 @@
 	  extras/lcd/lcdfont.h
 	  extras/lcd/lcdgui.cc
 	  extras/lcd/module_manager.cc
-	: Add 20x4 lCD display and CGRam support as 1st step for feature 
+	: Add 20x4 lCD display and CGRam support as 1st step for feature
 	  request 40 - 20x4 LCD with I2C interface
 
 2015-02-21 Errol van de l'Isle <evandel@cix.co.uk>
@@ -713,7 +719,7 @@
 	* cli/cmd_quit.cc: q short command for quit - Feature Request 35
 	* gui/gui_breadboard.cc: fix coredump bug #187
 	* regression/interrupts_14bit/Makefile
-	  regression/interrupts_14bit/int_sleep.asm 
+	  regression/interrupts_14bit/int_sleep.asm
 	  regression/p16f676/reset.asm regression/p16f684/reset.asm
 	  src/pic-processor.cc: fix sleep interrupt, revisit patch #19
 	* src/14bit-processors.cc: Remove dead code
@@ -736,11 +742,11 @@
         * plat/win32/make.mingw: set compiler for fedora 21 mingw
 	* gui/gui_regwin.cc: remove disabled code, do not delete invalid
 	  register instances on class destructor
-	* gui/gui_src.h gui/gui_src_asm.cc: rename SourcePage array from pages 
+	* gui/gui_src.h gui/gui_src_asm.cc: rename SourcePage array from pages
 	  to Srcpages to avoid confusuion with NSourcePage pointer called pages
 	* src/modules.cc src/pic-processor.cc src/trace.cc:
 	- better cleanup on  class removal
-	* src/value.cc src/value.h src/xref.cc src/registers.cc 
+	* src/value.cc src/value.h src/xref.cc src/registers.cc
 	  src/pic-registers.cc:
 	- make _xref found in class value a pointer
 
@@ -749,7 +755,7 @@
 	- include files in distribution tar ball
 	* extras/dht11/makefile.mingw extras/ds1307/makefile.mingw
 	  extras/ds1820/makefile.mingw extras/graphic_lcd/src/makefile.mingw
-	  extras/lcd/makefile.mingw: 
+	  extras/lcd/makefile.mingw:
 	-  compiler determined from plat/win32/make.mingw
 	* makefile.mingw plat/win32/gpsim.nsi:
 	- Add new extra devices
@@ -784,8 +790,8 @@
 	  module drive pin as voltage
 	* regression/analog_stim/12f1822.lkr regression/analog_stim/Makefile
 	  regression/analog_stim/p12f1822.asm
-	  regression/analog_stim/stim_an.sig 
-	  regression/analog_stim/stim_clk.sig: 
+	  regression/analog_stim/stim_an.sig
+	  regression/analog_stim/stim_clk.sig:
 	- Regression tests for for the analogue stimulus.
 
 2014-09-22 Roy Rankin <rrankin@ihug.com.au>
@@ -798,7 +804,7 @@
 	* configure.ac extras/Makefile.am extras/dht11/AUTHORS
 	  extras/dht11/Makefile.am extras/dht11/README extras/dht11/dht11.cc
 	  extras/dht11/dht11.h extras/dht11/examples
-	  extras/dht11/examples/16f627_g.lkr 
+	  extras/dht11/examples/16f627_g.lkr
 	  extras/dht11/examples/Makefile.am extras/dht11/examples/README
 	  extras/dht11/examples/dht11_example.asm
 	  extras/dht11/module_manager.cc: Add dht11 module - feature # 34
@@ -860,11 +866,11 @@
 	* gui/gui_stopwatch.cc: replace obsolete gtk_object_get_data function
 	* regression/p1xf18xx/Makefile regression/p1xf18xx/p12f1822_usart.asm
 	  regression/run_regressionj.sh: Add 12f1822 usart regression test
-	* src/p1xf1xxx.cc src/p1xf1xxx.h src/Makefile.am: 
+	* src/p1xf1xxx.cc src/p1xf1xxx.h src/Makefile.am:
 	- rename of files src/p12f182x.cc and src/p12f182x.h
 	- Fix PIR1 part of bug #170
 	- Fix weak pull-up on 12f1822 RA3 bug #169
-	* src/14bit-processors.cc src/14bit-processors.h: 
+	* src/14bit-processors.cc src/14bit-processors.h:
 	- fix mcrl pin on extended processors
 	* src/a2dconverter.cc: allow for no adcon1 register
 	* src/p16f87x.cc: Delete all 16f877 registers
@@ -901,8 +907,8 @@
 2014-05-09 Roy Rankin <rrankin@ihug.com.au>
 	* modules/usart.cc: Correct baud rate after CPU frequency change
 	  Bug 167
-	* src/14bit-registers.cc: change OSCCON base frequency from 
-	  31.25 to 31 KHz 
+	* src/14bit-registers.cc: change OSCCON base frequency from
+	  31.25 to 31 KHz
 	* src/p16f88x.cc src/16bit-processors.cc src/p18x.cc src/p18x.h:
 	- Fix default value of OSCCON - Bug 166
 	* src/p12x.cc src/p12x.h src/pic-processor.cc src/pic-processor.h:
@@ -1057,7 +1063,7 @@
 	  src/pic-processor.h src/processor.cc src/psp.cc src/psp.h
 	  src/ssp.cc src/ssp.h src/stimuli.cc src/trace.cc src/trigger.cc
 	  src/uart.cc src/uart.h :
-	- Fix uninitialized variables, access of freed variables, 
+	- Fix uninitialized variables, access of freed variables,
 	  proper delete types, processor classes cleanup on exit
 	* src/pic-ioports.cc src/pic-ioports.h :
 	- Allow always 1 bits in TRIS, don't trace internal reads of TRIS
@@ -1068,9 +1074,9 @@
 	  registers
 	* configure.ac extras/ds1820/Makefile.am
 	  extras/ds1820/examples/Makefile.am :
-	- Fixes for make dist 
+	- Fixes for make dist
 	* src/registers.cc src/registers.h :
-	- Make AN_INVALID_ADDRESS globally available 
+	- Make AN_INVALID_ADDRESS globally available
 
 
 2013-06-30 Borut Razem <borutr@users.sourceforge.net>
@@ -1080,7 +1086,7 @@
 2013-06-30 Roy Rankin <rrankin@ihug.com.au>
 	* cli/socket.cc eXdbm/eXdbm.c eXdbm/misc.c eXdbm/parse.c
 	  extras/graphic_lcd/src/glcd.cc gui/gui_regwin.cc
-	  gui/gui_scope.cc gui/gui_src.cc gui/gui_src_asm.cc 
+	  gui/gui_scope.cc gui/gui_src.cc gui/gui_src_asm.cc
 	  gui/gui_src_opcode.cc gui/gui_trace.cc gui/gui_watch.cc
 	  src/attributes.cc src/bitlog.cc src/hexutils.cc src/i2c-ee.cc:
 	- Fix compiler warnnings
@@ -1099,14 +1105,14 @@
 	  src/16bit-processors.cc src/pic-instructions.cc:
 	- remove redundant field added in last patch to WREG, BSR and PCLATH
 	  registers
-	* src/processor.cc: 
+	* src/processor.cc:
 	- Speed-up start by skipping resets on alias register memory locations
 
 2013-06-29 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_dump.cc src/icd.cc src/p16f88x.cc src/p16x6x.cc
 	  src/12bit-processors.cc src/p12f182x.cc src/p12f6xx.cc src/p12x.cc:
 	- rename W Wreg
-	* src/14bit-processors.cc src/14bit-processors.h src/pic-processor.cc 
+	* src/14bit-processors.cc src/14bit-processors.h src/pic-processor.cc
 	  src/pic-processor.h src/14bit-registers.cc src/14bit-registers.h
 	  src/14bit-instructions.cc src/16bit-instructions.cc
 	  src/pic-instructions.cc src/16bit-processors.cc src/16bit-registers.cc
@@ -1142,7 +1148,7 @@
 2013-06-21 Roy Rankin <rrankin@ihug.com.au>
 	* modules/resistor.cc: Update stimulus node on all property changes
 	* src/14bit-instructions.h: Update copyright
-	* src/14bit-registers.cc src/14bit-registers.h: 
+	* src/14bit-registers.cc src/14bit-registers.h:
 	- Add CPSCON classes for capacitor sensor module
 	* src/14bit-tmrs.cc src/14bit-tmrs.h: Add support for capacitor sensor
 	* src/a2dconverter.cc src/a2dconverter.h: FVR connect to capacitor sensor
@@ -1151,7 +1157,7 @@
 
 2013-06-17 Roy Rankin <rrankin@ihug.com.au>
 	* regression/i2c/p16f819.asm: Don't overwrite registers
-	* regression/instructions_16bit/instructions_16bit.asm: 
+	* regression/instructions_16bit/instructions_16bit.asm:
 	- test subwfb and movlb instructions
 	* cli/cmd_load.cc: error message on missing file
 	* gui/gui_stopwatch.cc: use units for frequency
@@ -1159,10 +1165,10 @@
 	* src/14bit-processors.cc src/14bit-processors.h: Add CPU Temp
 	* src/a2d_v2.h: add comment
 	* src/14bit-registers.cc src/14bit-registers.h src/tmr0.cc src/tmr0.h
-	  src/14bit-tmrs.cc src/14bit-tmrs.h 
+	  src/14bit-tmrs.cc src/14bit-tmrs.h
 	  src/a2dconverter.cc src/a2dconverter.h src/stimuli.h
 	  src/comparator.cc src/comparator.h src/ssp.cc src/ssp.h
-	  src/p12f182x.cc src/p12f182x.h: 
+	  src/p12f182x.cc src/p12f182x.h:
 	- add or fix DAC, A2D, Comparator, T0, Tmr1, APFCON, SSP, USART, OSCCON
 	* src/p12x.cc src/i2c-ee.cc: compile clean-up
 	* src/pic-processor.h: Phase lock * 4 oscilator
@@ -1201,7 +1207,7 @@
 
 2013-05-04 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_profile.cc: compiler warning cleanup
-	* regression/p18f/extended_instructions.asm src/16bit-hexdecode.cc 
+	* regression/p18f/extended_instructions.asm src/16bit-hexdecode.cc
 	  src/16bit-instructions.cc src/16bit-instructions.h
 	  src/16bit-processors.cc src/16bit-processors.h
 	  src/p18x.cc:
@@ -1219,7 +1225,7 @@
 	  pic-ioports.h pic-processor.cc pic-processor.h:
 	- Add 14bit enhanced base class _14bit_e_processor
 	* intcon.cc breakpoints.cc interface.cc: Fix compiler warnings
-	* p12f182x.cc p12f182x.h Makefile.am: 
+	* p12f182x.cc p12f182x.h Makefile.am:
 	- add p12f1822 processor(incomplete)
 	* gpsim_classes.h 12bit-processors.cc trace.cc: New stack with reset
 	* processor.cc processor.h eeprom.cc eeprom.h: New eeprom class
