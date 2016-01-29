@@ -703,7 +703,7 @@ void SourceBrowserOpcode_Window::Fill()
     g_snprintf(oc_buf, sizeof(oc_buf), "%04X", opcode);
     filter(mn_buf,
            gp->cpu->pma->get_opcode_name(address, buf, sizeof(buf)));
- 
+
     if(GTK_SHEET(sheet)->maxrow < i/16)
     {
         int j = i/16;
@@ -967,8 +967,10 @@ void SourceBrowserOpcode_Window::Build()
   scrolled_win=gtk_scrolled_window_new(0, 0);
   gtk_box_pack_start(GTK_BOX(vbox), scrolled_win, TRUE, TRUE, 0);
 
+  GtkSheetRange sheet_range = {0, 0, 16, 0};
+
   sheet=gtk_sheet_new(1,17,"where does this string go?");
-  gtk_sheet_set_entry_editable(GTK_SHEET(sheet), FALSE);
+  gtk_sheet_range_set_editable(GTK_SHEET(sheet), &sheet_range, FALSE);
   gtk_container_add(GTK_CONTAINER(scrolled_win), sheet);
 
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
