@@ -1090,7 +1090,7 @@ class TMR1_Interface : public Interface
 class TMR1_Freq_Attribute : public Float
 {
 public:
-  TMR1_Freq_Attribute(Processor * _cpu, double freq); 
+  TMR1_Freq_Attribute(Processor * _cpu, double freq, const char *name = "tmr1_freq"); 
 
   virtual void set(double d);
   double get_freq();
@@ -1099,11 +1099,12 @@ private:
   Processor * cpu;
 };
 
-TMR1_Freq_Attribute::TMR1_Freq_Attribute(Processor * _cpu, double freq)
-  : Float("tmr1_freq",freq, " Tmr1 oscillator frequency."),
+TMR1_Freq_Attribute::TMR1_Freq_Attribute(Processor * _cpu, double freq, const char *name)
+  : Float(name, freq, " Tmr oscillator frequency."),
     cpu(_cpu)
 {
 }
+
 
 double TMR1_Freq_Attribute::get_freq()
 {
@@ -1121,15 +1122,19 @@ void TMR1_Freq_Attribute::set(double d)
 //--------------------------------------------------
 T1CON::T1CON(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    tmrl(0)
+    tmrl(0), cpu(pCpu)
 {
 
-  pCpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768.));
+  char freq_name[] = "tmr1_freq";
+  if (*(pName+1) >= '1' && *(pName+1) <= '9')
+	freq_name[3] = *(pName+1);
+  cpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768., freq_name));
 
 }
 T1CON::~T1CON()
 {
-    delete freq_attribute;
+        cpu->removeSymbol(freq_attribute);
+        delete freq_attribute;
 }
 
 void T1CON::put(unsigned int new_value)
@@ -1421,7 +1426,6 @@ T1CON_G::T1CON_G(Processor *pCpu, const char *pName, const char *pDesc)
     t1gcon(pCpu, "t1gcon", "TM1 Gate Control Register", this)
 {
 
-  pCpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768.));
   new_name("T1CON");
 
 }
@@ -1466,7 +1470,6 @@ TMRH::TMRH(Processor *pCpu, const char *pName, const char *pDesc)
 {
 
   value.put(0);
-  new_name("TMRH");
 
 }
 

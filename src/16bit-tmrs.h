@@ -42,8 +42,6 @@ enum
   TMRxCS1  = 1<<7,
 };
 
-//  TMRL  *tmrl;
-  //RRRTMR1_Freq_Attribute *freq_attribute;
 
   T5CON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~T5CON();

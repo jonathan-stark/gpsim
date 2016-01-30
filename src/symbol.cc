@@ -63,6 +63,13 @@ int SymbolTable_t::addSymbol(gpsimObject *pSym, string *ps_AliasedName)
       operator[](*ps_AliasedName) = pSym;
       return 1;
     }
+    else if (pSym != sti->second)
+    {
+      
+	cout << "SymbolTable_t::addSymbol " << *ps_AliasedName << " exists " << pSym << " " << sti->second << "\n";
+	return 0;
+    }
+
   }
   return 0;
 }

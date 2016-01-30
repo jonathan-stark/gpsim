@@ -41,13 +41,10 @@ T5CON::T5CON(Processor *pCpu, const char *pName, const char *pDesc)
   : T1CON(pCpu, pName, pDesc)
 {
 
-//  pCpu->addSymbol(freq_attribute = new TMR1_Freq_Attribute(pCpu, 32768.));
-//  new_name("T1CON");
 
 }
 T5CON::~T5CON()
 {
- //   delete freq_attribute;
 }
 
 void T5CON::put(unsigned int new_value)
