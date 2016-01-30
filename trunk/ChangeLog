@@ -1,3 +1,10 @@
+2016-01-30 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/16bit-tmrs.cc
+	  src/16bit-tmrs.h src/p18fk.cc
+	: bug 215 Issues with tmr1_freq
+	* src/symbol.cc
+	: Print message when adding same name symbol with different value
+
 2016-01-29 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_src_opcode.cc
 	: Fix build with gtk extra 2

@@ -332,6 +332,7 @@ enum
 
   TMRL  *tmrl;
   TMR1_Freq_Attribute *freq_attribute;
+  Processor *cpu;
 
   T1CON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~T1CON();

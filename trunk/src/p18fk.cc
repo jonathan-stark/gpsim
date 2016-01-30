@@ -599,6 +599,8 @@ P18F26K22::P18F26K22(const char *_name, const char *desc)
   m_trise = new PicTrisRegister(this,"trise","", m_porte, false);
   m_late  = new PicLatchRegister(this,"late","",m_porte);
   delete t1con;
+  removeSymbol("tmr3_freq");
+  
   t1con = new T5CON(this, "t1con", "Timer 1 Control Register");
   t3con2 = new T5CON(this, "t3con", "Timer 3 Control Register");
   t5con = new T5CON(this, "t5con", "Timer 5 Control Register"); 
