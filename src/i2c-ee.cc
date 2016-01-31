@@ -148,7 +148,7 @@ public:
 i2c_slave::i2c_slave()
 {
     scl = new I2C_SLAVE_SCL(this, "SCL");
-    sda = new I2C_SLAVE_SDA(this, "SDL");
+    sda = new I2C_SLAVE_SDA(this, "SDA");
 
     bus_state = IDLE;
     bit_count = 0;
@@ -157,8 +157,8 @@ i2c_slave::i2c_slave()
 
 i2c_slave::~i2c_slave() 
 {
-	delete sda;
-	delete scl;
+	if (sda) delete sda;
+	if (scl) delete scl;
 }
 void i2c_slave::new_scl_edge(bool direction)
 {

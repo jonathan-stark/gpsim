@@ -24,10 +24,12 @@ License along with this library; if not, see
 #include <iomanip>
 #include <string>
 #include <assert.h>
+#include <string.h>
 
 #include "../config.h"
 #include "cmd_gpsim.h"
 #include "ioports.h"
+#include "modules.h"
 #include "trace.h"
 
 #include "stimuli.h"
@@ -185,6 +187,16 @@ PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
     mValidBits = (1<<numIopins)-1; // ugh.
 }
 
+IOPIN * PortRegister::addPin(Module *mod, IOPIN *iopin, unsigned int iPinNumber)
+{
+    mod->addSymbol(iopin);
+    return PortModule::addPin(iopin, iPinNumber);
+}
+IOPIN * PortRegister::addPin(IOPIN *iopin, unsigned int iPinNumber)
+{
+    cpu->addSymbol(iopin);
+    return PortModule::addPin(iopin, iPinNumber);
+}
 void PortRegister::setEnableMask(unsigned int newEnableMask)
 {
   Dprintf (( "PortRegister::setEnableMask for %s to %02X\n", 
@@ -705,11 +717,13 @@ void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 	m_analog_active[index] = false;
  	if (total_cnt == 1)
         {
+	    const char *pt;
 	    unsigned int mask = m_port->getOutputMask();
 	    mask |= (1 << getPinNumber());
 	    Dprintf(("PinModule::UpAnalogCnt down %s  newname=%s mask=%x\n", getPin().name().c_str(), newname, mask));
 	    m_port->setOutputMask(mask);
-	    getPin().newGUIname(newname);
+	    pt = strchr(newname, '.');
+	    getPin().newGUIname(pt?pt+1:newname);
 	    getPin().set_is_analog(false);
 	    getPin().set_Cth(0.);
 	}

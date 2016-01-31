@@ -205,6 +205,7 @@ public:
 
   IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
 
+
   /// getPin -- an I/O pin accessor. This returns the I/O pin at a particular
   ///           bit position.
 
@@ -329,6 +330,8 @@ public:
   virtual unsigned int getDriving();
   virtual void setbit(unsigned int bit_number, char new_value);
   virtual void setEnableMask(unsigned int nEnableMask);
+  IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
+  IOPIN         *addPin(Module *mod, IOPIN *pin, unsigned int iPinNumber);
 
   unsigned int getEnableMask()
   {
