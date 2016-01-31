@@ -23,6 +23,7 @@
 	__CONFIG _CP_OFF & _DEBUG_OFF & _WRT_OFF & _CPD_OFF  & _LVP_OFF  & _PWRTE_ON & _BODEN_ON & _WDT_OFF & _HS_OSC
 
 	errorlevel	-302
+        radix dec
 
 
 variables	UDATA 0x30
@@ -32,6 +33,7 @@ temp2           RES     1
 status_temp	RES	1
 w_temp		RES	1
 
+  global time
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
 ;----------------------------------------------------------------------
@@ -54,7 +56,7 @@ INT_VECTOR   CODE    0x004               ; interrupt vector location
         btfsc   INTCON,RBIF
             goto rb_int
 
-        .assert "\"***FAILED p16f676 unexpected interrupt\""
+        .assert "\"***FAILED ds1307 unexpected interrupt\""
         nop
 rb_int
 	nop
@@ -73,6 +75,7 @@ exit_int:
 MAIN	CODE
 start	
    .sim "module lib libgpsim_modules"
+   .sim "module lib libgpsim_extras"
    .sim "module lib libgpsim_ds1307"
    .sim "module load ds1307 ee"
    .sim "module load pu pu1"
@@ -107,19 +110,63 @@ start
 	movwf	time+0xb
 	movwf	time+0xe
 	nop
-loop:
 	call	is_ready
 	call	read_ds1307
-	sleep
+; Current date and time startting in ram location 30
+;	sleep
 	nop
-	goto loop
         call	I2CSendResult
 	call	write_eeprom
 	call	is_ready
 	call	read_ds1307
+; 02/05/10 19:59:12 starting in ram location 30
+   .assert "time == 0x30, \"*** FAILED ds1307 day 10's\""
+        nop
+	BANKSEL time
+	movf	time+1,W
+   .assert "W == 0x33, \"*** FAILED ds1307 day 1's\""
+        nop
+	movf	time+3,W
+   .assert "W == 0x30, \"*** FAILED ds1307 month 10's\""
+        nop
+	movf	time+4,W
+   .assert "W == 0x35, \"*** FAILED ds1307 month 1's\""
+        nop
+	movf	time+6,W
+   .assert "W == 0x31, \"*** FAILED ds1307 year 10's\""
+        nop
+	movf	time+7,W
+   .assert "W == 0x30, \"*** FAILED ds1307 year 1's\""
+        nop
+	movf	time+9,W
+   .assert "W == 0x31, \"*** FAILED ds1307 hour 10's\""
+        nop
+	movf	time+10,W
+   .assert "W == 0x39, \"*** FAILED ds1307 hour 1's\""
+        nop
+	movf	time+12,W
+   .assert "W == 0x35, \"*** FAILED ds1307 min 10's\""
+        nop
+	movf	time+13,W
+   .assert "W == 0x39, \"*** FAILED ds1307 min 1's\""
+        nop
+	movf	time+15,W
+   .assert "W == 0x31, \"*** FAILED ds1307 sec 10's\""
+        nop
+	movf	time+16,W
+   .assert "W == 0x32, \"*** FAILED ds1307 sec 1's\""
+        nop
+	sleep
+	nop
 
-	goto $
   .command "dump e ee dump.hex"
+        nop
+
+	call	is_ready
+	call	read_ds1307
+	BANKSEL time
+	movf	time+16,W
+   .assert "W == 0x33, \"*** FAILED ds1307 sec 1's after 1 sec\""
         nop
 
   .assert "\"*** PASSED p16f876a I2C test\""
@@ -352,20 +399,20 @@ write_eeprom
 	call 	write_eeprom_address
 	banksel PIR1
 	bcf	PIR1,SSPIF
-	movlw	0x59		; write seconds 12
+	movlw	0x12		; write seconds 12
 	call	I2C_send_w
   .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data1 to eeprom ACK\""
 	nop
 
 	banksel PIR1
 	bcf	PIR1,SSPIF
-	movlw	0x59		; write minutes 10
+	movlw	0x59		; write minutes 59
 	call	I2C_send_w
   .assert "(sspcon2 & 0x40) == 0x00, \"FAILED write data2 to eeprom ACK\""
 	nop
 	banksel PIR1
 	bcf	PIR1,SSPIF
-	movlw	0x59		; write hours 19 24 hour
+	movlw	0x19|0x40	; write hours 19 and 24 hour format
 	call	I2C_send_w
 	nop
 	banksel PIR1

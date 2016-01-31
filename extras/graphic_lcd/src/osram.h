@@ -58,6 +58,7 @@ namespace OSRAM {
     SSD0323_InputPin *m_RW;
     SSD0323_InputPin *m_BS1;
     SSD0323_InputPin *m_BS2;
+    IO_bi_directional *io_bus[8];
 
     SSD0323 *m_pSSD0323;
 

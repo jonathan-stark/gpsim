@@ -27,15 +27,15 @@ Boston, MA 02111-1307, USA.  */
 #include "glcd.h"
 
 class SED1520;
-class LCD_InputPin;
+class gLCD_InputPin;
 class PortRegister;
 class Module;
 
-enum ePins {
-  eA0,
-  eE1,
-  eE2,
-  eRW
+enum enPins {
+  enA0,
+  enE1,
+  enE2,
+  enRW
 };
 
 class gLCD_100X32_SED1520 : public gLCD_Module
@@ -47,16 +47,16 @@ public:
   static Module *construct(const char *new_name);
   bool dataBusDirection();
   void Update(GtkWidget *pw =0);
-  void UpdatePinState(ePins, char);
+  void UpdatePinState(enPins, char);
   void create_iopin_map();
   void create_widget();
 private:
 
   PortRegister *m_dataBus;
-  LCD_InputPin *m_A0;
-  LCD_InputPin *m_E1;
-  LCD_InputPin *m_E2;
-  LCD_InputPin *m_RW;
+  gLCD_InputPin *m_A0;
+  gLCD_InputPin *m_E1;
+  gLCD_InputPin *m_E2;
+  gLCD_InputPin *m_RW;
 
   SED1520      *m_sed1;
   SED1520      *m_sed2;

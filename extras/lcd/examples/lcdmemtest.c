@@ -1,7 +1,12 @@
+#ifdef EEE
 #include <pic.h>
 #include "delay.h"
+#endif
+#include <pic16f873.h>
 
+#ifdef RRR
 __CONFIG(LVPDIS & BOREN & PWRTEN & WDTDIS & HS);
+#endif
 
 /*
  *	lcdmemtest.c

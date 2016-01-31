@@ -1,22 +1,12 @@
 # Makefile for the LCD module
 # 
 
-AM_CPPFLAGS = @X_CFLAGS@
-
-lib_LTLIBRARIES = libgpsim_lcd.la
-
-libgpsim_lcd_la_SOURCES = \
-	lcdgui.cc module_manager.cc lcd.cc hd44780.cc lcd.h hd44780.h
-
-libgpsim_lcd_la_LDFLAGS =  @X_LDFLAGS@
-
-
-
 EXTRA_DIST = lcd.gif caps.pl lcd.xpm lcdfont.h lcdfont.inc README \
-	makefile.mingw t.gif
+	hd44780.h  lcdfont.h  lcd.h \
+	t.gif examples/Makefile examples/lcd.inc \
+	examples/lcd.asm examples/screen.inc examples/screen.asm \
+	examples/lcd_mod20x4.stc examples/lcd_mod.stc examples/README
 
 
-SUBDIRS = examples
+SUBDIRS = 
 
-
-CFLAGS = @CFLAGS@

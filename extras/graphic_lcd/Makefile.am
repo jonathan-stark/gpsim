@@ -1,5 +1,4 @@
 
-SUBDIRS = src
 
 EXTRA_DIST = \
 	examples/sed1520/18f452.lkr examples/sed1520/bitmaps.asm \
@@ -18,4 +17,7 @@ EXTRA_DIST = \
 	utils/custom.png utils/fontimage.png utils/gpsim1.png \
 	utils/konqueror16X16.png utils/konqueror3.png \
 	utils/konqueror.png utils/pngtopic.c utils/README \
-	doc/mgls10032a.pdf doc/sed1520.pdf
+	doc/mgls10032a.pdf doc/sed1520.pdf \
+	src/glcd_100X32_sed1520.h  src/osram.h src/ssd0323.h \
+	src/glcd.h src/sed1520.h
+

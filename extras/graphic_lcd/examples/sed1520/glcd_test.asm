@@ -72,7 +72,7 @@ start
    ;; Define the simulation environment.
    ;;
 
-   .sim "module library libgpsim_graphicLCD"
+   .sim "module library libgpsim_extras"
    .sim "module library libgpsim_modules"
 
    .sim "module load LCD100X32 LCD"
@@ -161,12 +161,17 @@ LL
 	MOVWF	PixelX
 	CLRF	PixelY
 
+    .assert "\"Press run for next test\""
+	nop
+
 	RCALL	LCD_ClearScreen
 
 	MOVLW	1
 	RCALL	LCD_putBitMap
 	RCALL	LCD_RefreshDisplay
 
+    .assert "\"Press run for next test\""
+	nop
 	RCALL	LCD_ClearScreen
 
 	CLRF	PixelX
@@ -183,6 +188,8 @@ LL
 	RCALL	LCD_putBitMap
 	RCALL	LCD_RefreshDisplay
 
+    .assert "\"Press run to repeat test\""
+	nop
 	bra	loop
 
 	nop

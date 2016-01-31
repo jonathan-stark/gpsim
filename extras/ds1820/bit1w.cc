@@ -22,20 +22,19 @@ bool debug = false;
 LowLevel1W::LowLevel1W(const char *name, const char *desc):
     Module(name, desc), cicluReper(0), lastValue(true), 
     lastTimeout(false),
-    pin("pin", *this),
     state(&LowLevel1W::idle), ignoreCallback(false), bit_break(0)
 {
-    if(name) {
-        int nlen = strlen(name) + 10;
-        char tempName[nlen];
-        snprintf(tempName, nlen, "%s.pin", name);
-        pin.new_name(tempName);
-    }
+    pin = new Pin1W("pin", *this);
+    addSymbol(pin);
     create_pkg(1);
-    assign_pin(1, &pin);
-    pin.putState(false);
-    pin.update_direction(IOPIN::DIR_INPUT, true);
+    assign_pin(1, pin);
+    pin->putState(false);
+    pin->update_direction(IOPIN::DIR_INPUT, true);
     change(true);
+}
+LowLevel1W::~LowLevel1W()
+{
+    removeSymbol(pin);
 }
 
 void LowLevel1W::callback() {
@@ -46,7 +45,7 @@ void LowLevel1W::change(bool pinChange) {
     if (ignoreCallback) return;
     guint64  ciclu = get_cycles().get();
     bool bitValue = false;
-    switch(pin.getBitChar()) {
+    switch(pin->getBitChar()) {
     case 'Z':
     case '1':
     case 'x':
@@ -91,7 +90,7 @@ void LowLevel1W::idle(bool input, bool isTimeout) {
         if (verbose) cout << name() << " ===write0" << endl;
         state = &LowLevel1W::inWritting0;
         cicluReper = get_cycles().get(0.000040);
-        pin.update_direction(IOPIN::DIR_OUTPUT, true);
+        pin->update_direction(IOPIN::DIR_OUTPUT, true);
         return;
 
     case READ:
@@ -137,7 +136,7 @@ void LowLevel1W::inPresencePulse(bool input, bool isTimeout) {
     cout << name() << " "<< __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
     state = &LowLevel1W::endPresencePulse;
-    pin.update_direction(IOPIN::DIR_OUTPUT, true);
+    pin->update_direction(IOPIN::DIR_OUTPUT, true);
     cicluReper = get_cycles().get(0.0002);
 }
 
@@ -145,7 +144,7 @@ void LowLevel1W::endPresencePulse(bool input, bool isTimeout) {
   if(debug)
     cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
-    pin.update_direction(IOPIN::DIR_INPUT, true);
+    pin->update_direction(IOPIN::DIR_INPUT, true);
     state = &LowLevel1W::waitIdle;
     cicluReper = get_cycles().get(0.00002);
 }
@@ -162,7 +161,7 @@ void LowLevel1W::inWritting0(bool input, bool isTimeout) {
     cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
     state = &LowLevel1W::finalizeBit;
-    pin.update_direction(IOPIN::DIR_INPUT, true);
+    pin->update_direction(IOPIN::DIR_INPUT, true);
     //cicluReper = get_cycles().get(0.00006);
     cicluReper = get_cycles().get(0.0000050);
 }

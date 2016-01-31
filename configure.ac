@@ -5,7 +5,7 @@ AC_PREREQ(2.57)
 AC_INIT([gpsim], [0.29.1], [<http://gpsim.sourceforge.net/gpsim.html>])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADER([config.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -150,8 +150,8 @@ AC_TYPE_SIGNAL
 # Checks for library functions.
 AC_FUNC_ALLOCA
 AC_PROG_GCC_TRADITIONAL
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
+#AC_FUNC_MALLOC
+#AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor gethostbyname gethostname gettimeofday memset pow select socket sqrt strcasecmp strchr strdup strerror strncasecmp strndup strpbrk strrchr strstr strtoul])
@@ -223,18 +223,12 @@ AC_CONFIG_FILES([Makefile
                  gui/Makefile
                  modules/Makefile
 		 extras/Makefile
-		 extras/graphic_lcd/Makefile
-		 extras/graphic_lcd/src/Makefile
 		 extras/lcd/Makefile
-		 extras/lcd/examples/Makefile
-		 extras/ds1820/Makefile
-		 extras/ds1820/examples/Makefile
-		 extras/ds1307/Makefile
-		 extras/ds1307/examples/Makefile
 		 extras/dht11/Makefile
-		 extras/dht11/examples/Makefile
-		 extras/i2c2par/Makefile
-		 extras/i2c2par/examples/Makefile
+		 extras/ds1820/Makefile
+		 extras/ds1307/Makefile
+		 extras/solar/Makefile
+		 extras/graphic_lcd/Makefile
                  regression/Makefile
                  src/Makefile
                  src/dspic/Makefile

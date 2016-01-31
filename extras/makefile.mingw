@@ -3,7 +3,7 @@
 
 ## Use: make -f makefile.mingw
 
-BASE = ../..
+BASE = ..
 TOP = $(BASE)/..
 
 ifndef GPSIM_DEF_PATH
@@ -30,19 +30,25 @@ INCLUDES = -I $(BASE) -I $(BASE)/include \
 	-I $(GTK_PATH)/include/gtk-2.0 -I $(GTK_PATH)/lib/gtk-2.0/include \
 	-I $(PANGO_PATH)/include/pango-1.0 -I $(ATK_PATH)/include/atk-1.0 \
 	-I $(CAIRO_PATH)/include/cairo \
+        -I dht11/  -I ds1820/ -I solar/ -I lcd/ -Igraphic_lcd/src -I ds1307 \
 	-I $(GDK_PIXBUF_PATH)/include/gdk-pixbuf-2.0
 
 DEFINES += -DHAVE_GUI
 
 all:				\
-	libgpsim_dht11.dll 
+	libgpsim_extras.dll 
 
-libgpsim_dht11_OBJECTS =	\
-	dht11.o			\
+libgpsim_extras_OBJECTS =	\
+	dht11/dht11.o ds1820/ds1820.o ds1820/rom1w.o ds1820/bit1w.o \
+        solar/solar.o lcd/lcd.o lcd/lcdgui.o lcd/hd44780.o \
+        graphic_lcd/src/glcd_100X32_sed1520.o graphic_lcd/src/glcd.o \
+        graphic_lcd/src/osram.o graphic_lcd/src/sed1520.o \
+        graphic_lcd/src/ssd0323.o \
+        ds1307/ds1307.o \
 	module_manager.o
 
 ################ The modules DLL
 
-libgpsim_dht11.dll : $(libgpsim_dht11_OBJECTS)
-	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_dht11.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_dht11_OBJECTS) $(LIBS)
+libgpsim_extras.dll : $(libgpsim_extras_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_extras.dll $(GPSIM_DEF_PATH)/modules.def $(libgpsim_extras_OBJECTS) $(LIBS)
 

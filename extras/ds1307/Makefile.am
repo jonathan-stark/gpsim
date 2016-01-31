@@ -1,21 +1,12 @@
 # Makefile for the DS1307 module
+# make in .. directory
 # 
 
-AM_CPPFLAGS = @X_CFLAGS@
-
-lib_LTLIBRARIES = libgpsim_ds1307.la
-
-libgpsim_ds1307_la_SOURCES = \
-	module_manager.cc ds1307.cc
-
-libgpsim_ds1307_la_LDFLAGS =  @X_LDFLAGS@
 
 
+EXTRA_DIST = ds1307.h ChangeLog examples/README \
+	     examples/ds1307.asm  examples/i2c_low.inc  examples/Makefile
 
-EXTRA_DIST = ds1307.h ChangeLog makefile.mingw
+SUBDIRS = 
 
 
-SUBDIRS = examples
-
-
-CFLAGS = @CFLAGS@

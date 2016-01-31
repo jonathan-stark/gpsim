@@ -32,16 +32,16 @@ Boston, MA 02111-1307, USA.  */
 //------------------------------------------------------------------------
 // I/O pins for the graphic LCD
 //------------------------------------------------------------------------
-// The LCD_InputPin is the base class for the E1, E2, RW and A0
+// The gLCD_InputPin is the base class for the E1, E2, RW and A0
 // pins. This class is derived from the IO_bi_directional class,
 // although the pins are never driven as outputs. The setDrivenState
 // method is overridden to capture when this pin is driven.
 
-class LCD_InputPin : public IO_bi_directional
+class gLCD_InputPin : public IO_bi_directional
 {
 public:
 
-  LCD_InputPin (gLCD_100X32_SED1520 *, const char *pinName, ePins pin);
+  gLCD_InputPin (gLCD_100X32_SED1520 *, const char *pinName, enPins pin);
 
   // Capture when a node drives this pin.
   virtual void setDrivenState(bool new_dstate);
@@ -59,21 +59,21 @@ private:
   }
 
   gLCD_100X32_SED1520 *m_pLCD;
-  ePins m_pin;
+  enPins m_pin;
   char m_cDrivenState;
 };
 
 
 //------------------------------------------------------------------------
 //
-LCD_InputPin::LCD_InputPin (gLCD_100X32_SED1520 *pLCD , const char *pinName, ePins pin)
+gLCD_InputPin::gLCD_InputPin (gLCD_100X32_SED1520 *pLCD , const char *pinName, enPins pin)
   : IO_bi_directional(pinName), m_pLCD(pLCD), m_pin(pin), m_cDrivenState('Z')
 {
   assert(m_pLCD);
 }
 
 
-void LCD_InputPin::setDrivenState(bool new_dstate)
+void gLCD_InputPin::setDrivenState(bool new_dstate)
 {
   IO_bi_directional::setDrivenState(new_dstate);
   char cState = getBitChar();
@@ -86,10 +86,10 @@ void LCD_InputPin::setDrivenState(bool new_dstate)
 //------------------------------------------------------------------------
 //
 
-class LCDSignalControl : public SignalControl
+class gLCDSignalControl : public SignalControl
 {
 public:
-  LCDSignalControl(gLCD_100X32_SED1520 *pLCD)
+  gLCDSignalControl(gLCD_100X32_SED1520 *pLCD)
     : m_pLCD(pLCD)
   {
     assert(m_pLCD);
@@ -132,10 +132,15 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
   addSymbol(m_dataBus);
   m_dataBus->setEnableMask(0xff);
 
-  m_A0      = new LCD_InputPin(this,(name() + ".a0").c_str(),eA0);
-  m_E1      = new LCD_InputPin(this,(name() + ".e1").c_str(),eE1);
-  m_E2      = new LCD_InputPin(this,(name() + ".e2").c_str(),eE2);
-  m_RW      = new LCD_InputPin(this,(name() + ".rw").c_str(),eRW);
+  m_A0      = new gLCD_InputPin(this, "a0", enA0);
+  m_E1      = new gLCD_InputPin(this, "e1", enE1);
+  m_E2      = new gLCD_InputPin(this, "e2", enE2);
+  m_RW      = new gLCD_InputPin(this, "rw", enRW);
+
+  addSymbol(m_A0);
+  addSymbol(m_E1);
+  addSymbol(m_E2);
+  addSymbol(m_RW);
 
   m_sed1    = new SED1520();
   m_sed2    = new SED1520();
@@ -151,13 +156,14 @@ gLCD_100X32_SED1520::gLCD_100X32_SED1520(const char *_new_name)
 gLCD_100X32_SED1520::~gLCD_100X32_SED1520()
 {
   delete m_dataBus;
-  delete m_A0;
-  delete m_E1;
-  delete m_E2;
-  delete m_RW;
+  removeSymbol(m_A0);
+  removeSymbol(m_E1);
+  removeSymbol(m_E2);
+  removeSymbol(m_RW);
 
   delete m_sed1;
   delete m_sed2;
+  gtk_widget_destroy(darea);
 }
 
 
@@ -169,14 +175,14 @@ void gLCD_100X32_SED1520::create_iopin_map()
 
   // Add the individual io pins to the data bus.
 
-  assign_pin( 9, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
-  assign_pin(10, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
-  assign_pin(11, m_dataBus->addPin(new IO_bi_directional((name() + ".d2").c_str()),2));
-  assign_pin(12, m_dataBus->addPin(new IO_bi_directional((name() + ".d3").c_str()),3));
-  assign_pin(13, m_dataBus->addPin(new IO_bi_directional((name() + ".d4").c_str()),4));
-  assign_pin(14, m_dataBus->addPin(new IO_bi_directional((name() + ".d5").c_str()),5));
-  assign_pin(15, m_dataBus->addPin(new IO_bi_directional((name() + ".d6").c_str()),6));
-  assign_pin(16, m_dataBus->addPin(new IO_bi_directional((name() + ".d7").c_str()),7));
+  assign_pin( 9, m_dataBus->addPin(new IO_bi_directional( "d0"), 0));
+  assign_pin(10, m_dataBus->addPin(new IO_bi_directional( "d1"), 1));
+  assign_pin(11, m_dataBus->addPin(new IO_bi_directional( "d2"), 2));
+  assign_pin(12, m_dataBus->addPin(new IO_bi_directional( "d3"), 3));
+  assign_pin(13, m_dataBus->addPin(new IO_bi_directional( "d4"), 4));
+  assign_pin(14, m_dataBus->addPin(new IO_bi_directional( "d5"), 5));
+  assign_pin(15, m_dataBus->addPin(new IO_bi_directional( "d6"), 6));
+  assign_pin(16, m_dataBus->addPin(new IO_bi_directional( "d7"), 7));
 
   // Provide a SignalControl object that the dataBus port can query
   // to determine which direction to drive the data bus.
@@ -184,7 +190,7 @@ void gLCD_100X32_SED1520::create_iopin_map()
   //  But in summary, when an I/O port updates its I/O pins, it will
   //  query the pin drive direction via the SignalControl object. )
 
-  SignalControl *pPortDirectionControl = new LCDSignalControl(this);
+  SignalControl *pPortDirectionControl = new gLCDSignalControl(this);
   for (int i=0; i<8; i++)
     (*m_dataBus)[i].setControl(pPortDirectionControl);
 
@@ -192,12 +198,6 @@ void gLCD_100X32_SED1520::create_iopin_map()
   assign_pin( 5, m_RW);
   assign_pin( 6, m_E1);
   assign_pin( 7, m_E2);
-
-#if IN_BREADBOARD==1
-  // Place pins along the left side of the package
-  for (int i=1; i<=18; i++)
-    package->setPinGeometry(i, 0.0, i*12.0, 0, true);
-#endif
 
 }
 
@@ -237,13 +237,9 @@ void gLCD_100X32_SED1520::Update(GtkWidget *widget)
 //------------------------------------------------------------------------
 void gLCD_100X32_SED1520::create_widget()
 {
-#if IN_BREADBOARD==1
-  window = gtk_vbox_new(FALSE, 0);
-#else
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
   gtk_window_set_title(GTK_WINDOW(window), "LCD");
-#endif
 
   GtkWidget *frame = gtk_frame_new("gLCD_100X32");
   gtk_container_add(GTK_CONTAINER(window), frame);
@@ -257,17 +253,12 @@ void gLCD_100X32_SED1520::create_widget()
 
   gtk_widget_set_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
   gtk_widget_show_all(window);
-
-#if IN_BREADBOARD==1
-  set_widget(window);
-#endif
-
   m_plcd = new gLCD(m_nColumns, m_nRows, 3, 3, 1);
 }
 
 //------------------------------------------------------------------------
 
-void gLCD_100X32_SED1520::UpdatePinState(ePins pin, char cState)
+void gLCD_100X32_SED1520::UpdatePinState(enPins pin, char cState)
 {
 
   // One of the control lines has changed states. So refresh the
@@ -282,17 +273,17 @@ void gLCD_100X32_SED1520::UpdatePinState(ePins pin, char cState)
 
   bool bState = (cState =='1') || (cState =='W');
   switch (pin) {
-  case eA0:
+  case enA0:
     m_sed1->setA0(bState);
     m_sed2->setA0(bState);
     break;
-  case eE1:
+  case enE1:
     m_sed1->setE(bState);
     break;
-  case eE2:
+  case enE2:
     m_sed2->setE(bState);
     break;
-  case eRW:
+  case enRW:
     m_sed1->setRW(bState);
     m_sed2->setRW(bState);
     break;

@@ -83,9 +83,10 @@ enum {
 class dht11Module::Pin : public IO_open_collector
 {
   public:
-    Pin(dht11Module* new_parent) : IO_open_collector((new_parent->name() + ".data").c_str())
+    Pin(dht11Module* new_parent) : IO_open_collector("data")
     {
       parent = new_parent;
+      parent->addSymbol(this);
       lastState = true;
       lastLowTransition = 0;
       bDrivingState = true;

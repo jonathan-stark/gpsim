@@ -55,6 +55,7 @@ class HD44780
 
 public:
   HD44780();
+  ~HD44780();
 
   void setDC(bool);
   void setE(bool);

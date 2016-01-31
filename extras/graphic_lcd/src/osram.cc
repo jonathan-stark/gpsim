@@ -317,13 +317,21 @@ namespace OSRAM
     addSymbol(m_dataBus);
     m_dataBus->setEnableMask(0xff);
 
-    m_CS      = new SSD0323_CSPin(m_pSSD0323, m_dataBus, (name() + ".cs").c_str());
-    m_RES     = new SSD0323_RESPin(m_pSSD0323, m_dataBus, (name() + ".res").c_str());
-    m_DC      = new SSD0323_DCPin(m_pSSD0323, m_dataBus, (name() + ".dc").c_str());
-    m_E       = new SSD0323_EPin(m_pSSD0323, m_dataBus, (name() + ".e").c_str());
-    m_RW      = new SSD0323_RWPin(m_pSSD0323, m_dataBus, (name() + ".rw").c_str());
-    m_BS1     = new SSD0323_BSPin(m_pSSD0323, m_dataBus, (name() + ".bs1").c_str(),1);
-    m_BS2     = new SSD0323_BSPin(m_pSSD0323, m_dataBus, (name() + ".bs2").c_str(),2);
+    m_CS      = new SSD0323_CSPin(m_pSSD0323, m_dataBus, "cs");
+    m_RES     = new SSD0323_RESPin(m_pSSD0323, m_dataBus, "res");
+    m_DC      = new SSD0323_DCPin(m_pSSD0323, m_dataBus, "dc");
+    m_E       = new SSD0323_EPin(m_pSSD0323, m_dataBus, "e");
+    m_RW      = new SSD0323_RWPin(m_pSSD0323, m_dataBus, "rw");
+    m_BS1     = new SSD0323_BSPin(m_pSSD0323, m_dataBus, "bs1",1);
+    m_BS2     = new SSD0323_BSPin(m_pSSD0323, m_dataBus, "bs2",2);
+
+    addSymbol(m_CS);
+    addSymbol(m_RES);
+    addSymbol(m_DC);
+    addSymbol(m_E);
+    addSymbol(m_RW);
+    addSymbol(m_BS1);
+    addSymbol(m_BS2);
 
     m_state   = new StateAttribute(m_pSSD0323);
     addSymbol(m_state);
@@ -343,15 +351,18 @@ namespace OSRAM
   //------------------------------------------------------------------------
   PK27_Series::~PK27_Series()
   {
+    removeSymbol(m_CS);
+    removeSymbol(m_RES);
+    removeSymbol(m_DC);
+    removeSymbol(m_E);
+    removeSymbol(m_RW);
+    removeSymbol(m_BS1);
+    removeSymbol(m_BS2);
+    removeSymbol(m_state);
+    gtk_widget_destroy(darea);
+
     delete m_pSSD0323;
     delete m_dataBus;
-    delete m_CS;
-    delete m_RES;
-    delete m_DC;
-    delete m_E;
-    delete m_RW;
-    delete m_BS1;
-    delete m_BS2;
     delete m_state;
   }
 
@@ -386,16 +397,11 @@ namespace OSRAM
   //------------------------------------------------------------------------
   // PK27_Series::create_widget
   //------------------------------------------------------------------------
-#define IN_BREADBOARD 0
   void PK27_Series::create_widget()
   {
-#if IN_BREADBOARD==1
-    window = gtk_vbox_new(FALSE, 0);
-#else
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_wmclass(GTK_WINDOW(window),"glcd","Gpsim");
     gtk_window_set_title(GTK_WINDOW(window), "LCD");
-#endif
     GtkWidget *frame = gtk_frame_new("OSRAM PK27_Series");
     gtk_container_add(GTK_CONTAINER(window), frame);
 
@@ -409,10 +415,6 @@ namespace OSRAM
 
     gtk_widget_set_events(darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_widget_show_all(window);
-
-#if IN_BREADBOARD==1
-    set_widget(window);
-#endif
 
     m_plcd = new gLCD(m_nColumns, m_nRows, pixelScale, pixelScale, 0, 16);
     for (int i = 0; i < 16; ++i) {
@@ -442,14 +444,15 @@ namespace OSRAM
 
     // Add the individual io pins to the data bus.
 
-    assign_pin(12, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
-    assign_pin(11, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
-    assign_pin(10, m_dataBus->addPin(new IO_bi_directional((name() + ".d2").c_str()),2));
-    assign_pin( 9, m_dataBus->addPin(new IO_bi_directional((name() + ".d3").c_str()),3));
-    assign_pin( 8, m_dataBus->addPin(new IO_bi_directional((name() + ".d4").c_str()),4));
-    assign_pin( 7, m_dataBus->addPin(new IO_bi_directional((name() + ".d5").c_str()),5));
-    assign_pin( 6, m_dataBus->addPin(new IO_bi_directional((name() + ".d6").c_str()),6));
-    assign_pin( 5, m_dataBus->addPin(new IO_bi_directional((name() + ".d7").c_str()),7));
+    char text[] = "d0";
+    
+    for(int i = 0; i < 8; i++)
+    {
+	text[1] = '0' + i;
+	io_bus[i] = new IO_bi_directional(text);
+	addSymbol(io_bus[i]);
+	assign_pin(12-i, m_dataBus->addPin(io_bus[i], i));
+    }
 
     m_dataBus->addSink(new SSD_SPISignalSink(m_pSSD0323, true),0);  // SPI CLK
     m_dataBus->addSink(new SSD_SPISignalSink(m_pSSD0323, false),1); // SPI Data
@@ -463,14 +466,6 @@ namespace OSRAM
     SignalControl *pPortDirectionControl = new LCDSignalControl(this);
     for (int i=0; i<8; i++)
       (*m_dataBus)[i].setControl(pPortDirectionControl);
-
-
-#if IN_BREADBOARD==1
-    // Place pins along the left side of the package
-    for (int i=1; i<=30; i++)
-      package->setPinGeometry(i, 0.0, i*12.0, 0, true);
-#endif
-
   }
 
   bool PK27_Series::dataBusDirection()

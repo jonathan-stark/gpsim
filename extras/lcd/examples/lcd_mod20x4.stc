@@ -13,7 +13,8 @@ set verbose 0
 # gpsim) 2) or the path to library is not available (see the documentation
 # on modules). 
 
-module library libgpsim_lcd
+#module library libgpsim_lcd
+module library libgpsim_extras
 
 # display all of the modules that are in the library:
 # module list
@@ -35,20 +36,20 @@ node nDC
 # node d1
 # node d2
 # node d3
-node d4
-node d5
-node d6
-node d7
+node n_d4
+node n_d5
+node n_d6
+node n_d7
 
 
 attach nE portb3 lcd1.E
 attach nRW portb2 lcd1.RW
 attach nDC portb1 lcd1.DC
 
-# 4-bit mode - only the upper half of the data
+# 4-bit mode - only the upper half of the n_data
 # bus needs to be connected.
 
-attach d4 portb4 lcd1.d4
-attach d5 portb5 lcd1.d5
-attach d6 portb6 lcd1.d6
-attach d7 portb7 lcd1.d7
+attach n_d4 portb4 lcd1.d4
+attach n_d5 portb5 lcd1.d5
+attach n_d6 portb6 lcd1.d6
+attach n_d7 portb7 lcd1.d7

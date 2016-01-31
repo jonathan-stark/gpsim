@@ -25,28 +25,28 @@ led2.xpos = 60
 led2.ypos = 48
 
 # Connections:
-node cc
-attach cc porta0 led1.cc
+node cA
+attach cA porta0 led1.cc
 
-node seg0
-attach seg0 portb0 led1.seg0 led2.in
+node Seg0
+attach Seg0 portb0 led1.seg0 led2.in
 
-node seg1
-attach seg1 portb1 led1.seg1
+node Seg1
+attach Seg1 portb1 led1.seg1
 
-node seg2
-attach seg2 portb2 led1.seg2
+node Seg2
+attach Seg2 portb2 led1.seg2
 
-node seg3
-attach seg3 portb3 led1.seg3
+node Seg3
+attach Seg3 portb3 led1.seg3
 
-node seg4
-attach seg4 portb4 led1.seg4
+node Seg4
+attach Seg4 portb4 led1.seg4
 
-node seg5
-attach seg5 portb5 led1.seg5
+node Seg5
+attach Seg5 portb5 led1.seg5
 
-node seg6
-attach seg6 portb6 led1.seg6
+node Seg6
+attach Seg6 portb6 led1.seg6
 
 # End.
