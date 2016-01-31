@@ -73,19 +73,18 @@ exit_int:
 MAIN	CODE
 start	
    .sim "module lib libgpsim_modules"
-   .sim "module lib libgpsim_i2c2par"
+;   .sim "module lib libgpsim_i2c2par"
    .sim "module load i2c2par ee"
    .sim "module load pu pu1"
    .sim "module load pu pu2"
-   .sim "module load pu pu3"
    .sim "node n1"
    .sim "attach n1 portc4 pu1.pin portb4 ee.SDA" ; SDA
    .sim "node n2"
    .sim "attach n2 portc3 pu2.pin portb1 ee.SCL" ; SCL
    .sim "pu1.xpos = 240."
    .sim "pu1.ypos = 336."
-   .sim "pu2.xpos = 216."
-   .sim "pu2.ypos = 24."
+   .sim "pu2.xpos = 168."
+   .sim "pu2.ypos = 36."
    .sim "ee.xpos = 48."
    .sim "ee.ypos = 180."
    .sim "p16f876a.xpos = 240."

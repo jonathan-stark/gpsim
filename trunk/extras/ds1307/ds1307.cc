@@ -53,31 +53,15 @@ I2C_RTC::I2C_RTC(Processor *pCpu, unsigned int _rom_size,
          _addr_bytes,  _CSmask, _BSmask,  _BSshift)
 {
     pEE = (DS1307_Modules::ds1307 *)pCpu;
+    i2c_slave_address = 0xd0;
 }
 
-bool I2C_RTC::processCommand(unsigned int command)
+bool I2C_RTC::match_address()
 {
-  if ((command & 0xfe) == 0xd0 ) {
-    m_command = command;
-    return true;
-  }
-  return false;
+    Dprintf(("match_address I2C got address=0x%x (w=%d) want 0x%x\n", (xfr_data & 0xfe), (xfr_data & 0x01), i2c_slave_address));
+        return((xfr_data & 0xfe) == i2c_slave_address);
 }
-void I2C_RTC::start_write()
-{
-    unsigned int addr = xfr_addr + write_page_off;
-    if (addr == 0)
-    {
-        Dprintf(("Calling secWritten  data=%x\n", xfr_data));
-        pEE->secWritten(xfr_data);
-    }
-    else if (addr == 7)
-    {
-        Dprintf(("Calling ControlWritten  data=%x\n", xfr_data));
-        pEE->controlWritten(xfr_data);
-    }
-    rom[addr]->put ( xfr_data );
-}
+
 
 class SQW_PIN : public IO_open_collector
 {
@@ -116,9 +100,13 @@ namespace DS1307_Modules {
   }
   ds1307::~ds1307() 
   {
+    removeSymbol(m_sqw);
+    removeSymbol((IOPIN *)(m_eeprom->sda));
+    removeSymbol((IOPIN *)(m_eeprom->scl));
+    m_eeprom->sda = 0;
+    m_eeprom->scl = 0;
     delete att_eeprom;
     delete m_eeprom;
-    delete m_sqw;
   }
 
   Module *ds1307::construct_ds1307(const char *_new_name)
@@ -172,16 +160,12 @@ namespace DS1307_Modules {
 
   void ds1307::create_iopin_map()
   {
-        string pinName;
 
-	pinName = name() + ".SQW";
+        m_sqw = new SQW_PIN("SQW");
+	addSymbol(m_sqw);
+	addSymbol((IOPIN *)(m_eeprom->sda));
+	addSymbol((IOPIN *)(m_eeprom->scl));
 
-        m_sqw = new SQW_PIN(pinName.c_str());
-
-	pinName = name() + ".SDA";
-	((IOPIN *)(m_eeprom->sda))->new_name(pinName.c_str());
-	pinName = name() + ".SCL";
-	((IOPIN *)(m_eeprom->scl))->new_name(pinName.c_str());
 
 	package = new Package(8);
 	package->assign_pin( 1, 0);

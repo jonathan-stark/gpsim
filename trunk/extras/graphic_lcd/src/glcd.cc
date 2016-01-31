@@ -141,15 +141,13 @@ gLCD_Module::gLCD_Module(const char *new_name, const char *desc,
   : Module(new_name,desc),
     window(0),darea(0),m_plcd(0),m_nColumns(nCols), m_nRows(nRows)
 {
-#if IN_BREADBOARD==0
-  interface = new gLCD_Interface(this);
-  get_interface().add_interface(interface);
-#endif
+  interface_seq_no = get_interface().add_interface(new gLCD_Interface(this));
 
 }
 
 gLCD_Module::~gLCD_Module()
 {
+  get_interface().remove_interface(interface_seq_no);
   delete m_plcd;
 }
 

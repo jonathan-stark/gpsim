@@ -107,7 +107,7 @@ start
    .sim "DHTPull.xpos = 228.0"
    .sim "DHTPull.ypos = 340.0"
 
-   .sim "module library libgpsim_dht11"
+   .sim "module library libgpsim_extras"
    .sim "module load dht11 D1"
    .sim "node dhtdata"
    .sim "attach dhtdata portb5 D1.data DHTPull.pin"

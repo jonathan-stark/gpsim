@@ -104,7 +104,7 @@ exit_int:
 MAIN	CODE
 start	
    .sim "module lib libgpsim_modules"
-   .sim "module lib libgpsim_ds1820"
+   .sim "module lib libgpsim_extras"
    .sim "module load ds1820 temp1"
    .sim "module load ds1820 temp2"
    .sim "module load pu pu1"
@@ -256,7 +256,7 @@ eeprom2scratch
 	movwf	count_per_c
 	call	get_byte
 	movwf	crc
-  .assert "Th==20,\"Th 20\""
+  .assert "Th==30,\"Th 30\""
 	nop
  .assert "Tl==0xfb, \"Tl -5\""
 	nop

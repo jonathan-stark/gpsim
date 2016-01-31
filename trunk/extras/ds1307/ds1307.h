@@ -96,8 +96,7 @@ class I2C_RTC : public I2C_EE
         );
   virtual ~I2C_RTC(){}
 protected:
-  virtual bool processCommand(unsigned int cmd);
-  virtual void start_write();
+  virtual bool match_address();
   DS1307_Modules::ds1307 *pEE;
 
 };

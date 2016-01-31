@@ -3,6 +3,7 @@
         radix   dec
 ;********************************************************************************
         include "p16c64.inc"
+	include <coff.inc>
   __CONFIG _CP_OFF & _PWRTE_ON & _WDT_OFF& _HS_OSC
 
 
@@ -111,6 +112,10 @@ t1
 	movlw	3
 	call	write_string
 
+  .assert "\"Check if display OK\""
+	nop
+	call LCD_DELAY
+	call LCD_DELAY
 	call LCD_DELAY
 	goto	t1
 

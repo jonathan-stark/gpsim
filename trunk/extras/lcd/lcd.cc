@@ -280,22 +280,6 @@ void LcdDisplay::update()
 }
 
 
-#if 0   // defined but not used
-static gint
-cursor_event (GtkWidget          *widget,
-	      GdkEvent           *event,
-	      gpointer  *user_data)
-{
-  if ((event->type == GDK_BUTTON_PRESS) &&
-      ((event->button.button == 1) ||
-       (event->button.button == 3)))
-    {
-      return TRUE;
-    }
-
-  return FALSE;
-}
-#endif
 
 
 //--------------------------------------------------------------
@@ -324,23 +308,28 @@ void LcdDisplay::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  m_E  = std::auto_ptr<LCD_InputPin> (new LCD_InputPin(this, (name() + ".E").c_str(),eE));
-  m_RW = std::auto_ptr<LCD_InputPin> (new LCD_InputPin(this, (name() + ".RW").c_str(),eRW));
-  m_DC = std::auto_ptr<LCD_InputPin> (new LCD_InputPin(this, (name() + ".DC").c_str(),eDC));
+  m_E  = new LCD_InputPin(this, "E", eE);
+  m_RW = new LCD_InputPin(this, "RW", eRW);
+  m_DC = new LCD_InputPin(this, "DC", eDC);
+
+  addSymbol(m_E);
+  addSymbol(m_RW);
+  addSymbol(m_DC);
 
   // Control
-  assign_pin(4, m_DC.get());
-  assign_pin(5, m_RW.get());
-  assign_pin(6, m_E.get());
+  assign_pin(4, m_DC);
+  assign_pin(5, m_RW);
+  assign_pin(6, m_E);
 
-  assign_pin( 7, m_dataBus->addPin(new IO_bi_directional((name() + ".d0").c_str()),0));
-  assign_pin( 8, m_dataBus->addPin(new IO_bi_directional((name() + ".d1").c_str()),1));
-  assign_pin( 9, m_dataBus->addPin(new IO_bi_directional((name() + ".d2").c_str()),2));
-  assign_pin(10, m_dataBus->addPin(new IO_bi_directional((name() + ".d3").c_str()),3));
-  assign_pin(11, m_dataBus->addPin(new IO_bi_directional((name() + ".d4").c_str()),4));
-  assign_pin(12, m_dataBus->addPin(new IO_bi_directional((name() + ".d5").c_str()),5));
-  assign_pin(13, m_dataBus->addPin(new IO_bi_directional((name() + ".d6").c_str()),6));
-  assign_pin(14, m_dataBus->addPin(new IO_bi_directional((name() + ".d7").c_str()),7));
+  char text[] = "d0";
+  for(int i = 0; i<8; i++)
+  {
+      text[1] = '0' + i;
+      lcd_bus[i] = new IO_bi_directional(text);
+      addSymbol(lcd_bus[i]);
+      assign_pin(i+7, m_dataBus->addPin(lcd_bus[i], i));
+  }
+
 
   // Provide a SignalControl object that the dataBus port can query
   // to determine which direction to drive the data bus.
@@ -388,7 +377,7 @@ Module * LcdDisplay::construct(const char *new_name=NULL)
 }
 
 LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
-  : interface(new LCD_Interface(this)), data_latch(0), data_latch_phase(1),
+  : Module(_name), data_latch(0), data_latch_phase(1),
     debug(0), rows(aRows), cols(aCols), disp_type(aType), contrast(1.0),
     fontP(NULL), readTT(new LcdReadTT(this,1)), writeTT(new LcdWriteTT(this,1)),
     m_dataBus(new PortRegister(this, "data", "LCD Data Port", 8, 0)),
@@ -414,7 +403,7 @@ LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
 
   gTrace = &get_trace();
 
-  get_interface().add_interface(interface.get());
+  interface_seq_number = get_interface().add_interface(new LCD_Interface(this));
 
   addSymbol(m_dataBus.get());
   m_dataBus->setEnableMask(0xff);
@@ -429,9 +418,18 @@ LcdDisplay::~LcdDisplay()
   if (verbose)
       cout << "LcdDisplay destructor\n";
 
+  removeSymbol(m_E);
+  removeSymbol(m_RW);
+  removeSymbol(m_DC);
+  for(int i = 0; i<8; i++)
+  {
+      removeSymbol(lcd_bus[i]);
+  }
+  removeSymbol(m_dataBus.get());
+
+  get_interface().remove_interface(interface_seq_number);
   gtk_widget_destroy(window);
 
-  // FIXME free all data...
 }
 
 //------------------------------------------------------------------------

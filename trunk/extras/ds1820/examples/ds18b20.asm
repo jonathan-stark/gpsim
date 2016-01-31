@@ -105,7 +105,7 @@ exit_int:
 MAIN	CODE
 start	
    .sim "module lib libgpsim_modules"
-   .sim "module lib libgpsim_ds1820"
+   .sim "module lib libgpsim_extras"
    .sim "module load ds18b20 temp1"
    .sim "module load ds18b20 temp2"
    .sim "module load pu pu1"
@@ -136,7 +136,7 @@ start
 	call	searchRom
 	call	read_rom
 	call	check_power
-   .assert "W==0x00,\"DS1820 temp1 parasite power\""
+   .assert "W==0x00,\"DS18B20 temp1 parasite power\""
 	nop
 	call	power_on_val
 	call	read_temp
@@ -151,10 +151,10 @@ two
    .command "attach n1 temp2.pin"
 	nop
 
- 	incf	dev_select,F		; search for second ds1820
+ 	incf	dev_select,F		; search for second ds18b20
  	call	searchRom
  	call	check_power
-   .assert "W==0x80,\"DS1820 temp2 external power\""
+   .assert "W==0x80,\"DS18B20 temp2 external power\""
  	nop
 	call	power_on_val
 	call	read_temp
@@ -167,7 +167,7 @@ two
 	call	eeprom2scratch
 	call	scratch2eeprom
 
-  .assert "\"*** PASSED p16f1823 DS1820 test\""
+  .assert "\"*** PASSED p16f1823 DS18B20 test\""
 	nop
 	goto $
 
@@ -457,7 +457,7 @@ ds1820init:				; DS1820 init sequence
 	banksel DS_PORT
 	call	Delay70us
 	movf	DS_PORT,W
-    .assert "(W & 1)==0,\"DS1820, no presents pulse\""
+    .assert "(W & 1)==0,\"DS18B20, no presents pulse\""
 	nop
 	call	Delay500us
 	return

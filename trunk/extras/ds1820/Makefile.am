@@ -1,19 +1,9 @@
 # Makefile for the DS1820 module
 # 
 
-AM_CPPFLAGS = @X_CFLAGS@
 
-lib_LTLIBRARIES = libgpsim_ds1820.la
+EXTRA_DIST = ds1820.h bit1w.h  rom1w.h examples/README \
+	     examples/ds1820.asm  examples/ds18b20.asm  examples/Makefile  
 
-libgpsim_ds1820_la_SOURCES = \
-	module_manager.cc ds1820.cc bit1w.cc rom1w.cc
+SUBDIRS = 
 
-libgpsim_ds1820_la_LDFLAGS =  @X_LDFLAGS@
-
-
-
-EXTRA_DIST = ds1820.h makefile.mingw bit1w.h  rom1w.h
-
-SUBDIRS = examples
-
-CFLAGS = @CFLAGS@

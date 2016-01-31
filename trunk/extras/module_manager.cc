@@ -52,10 +52,32 @@ support:
 #include "config.h"
 
 #include "dht11.h"
+#include "ds1820.h"
+#include "ds1307.h"
+#include "solar.h"
+#ifdef HAVE_GUI
+#include "lcd.h"
+#include "glcd_100X32_sed1520.h"
+#include "osram.h"
+#endif
+
 
 Module_Types available_modules[] =
 {
-  { {"dht11", "dht11"}, dht11Module::construct},
+    { {"dht11", "dht11"}, dht11Module::construct},
+    { {"DS1307", "ds1307"}, DS1307_Modules::ds1307::construct_ds1307},
+    { {"DS1820", "ds1820"}, DS1820_Modules::DS1820::construct},
+    { {"DS18S20", "ds18s20"}, DS1820_Modules::DS1820::construct},
+    { {"DS18B20", "ds18b20"}, DS1820_Modules::DS1820::constructB},
+#ifdef HAVE_GUI
+  { {"lcd_display", "lcd_2X20"}, LcdDisplay::construct},
+  { {"lcd_20x4", "lcd_20x4"}, LcdDisplay20x4::construct},
+  { {"lcd_dt161A",  "lcd_2X8"},  LcdDisplayDisplaytech161A::construct},
+  { {"LCD100X32", "LCD100X32"},   gLCD_100X32_SED1520::construct },
+  { {"OSRAM128X64", "OSRAM128X64"},   OSRAM::PK27_Series::construct },
+#endif
+    { {"Solar", "Solar"}, SolarModule::construct},
+    
 
   // No more modules
   { {NULL, NULL}, NULL}

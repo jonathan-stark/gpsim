@@ -1,5 +1,5 @@
 	list	p=16c84
-	__config _wdt_off & _rc_osc
+	__config _WDT_OFF & _RC_OSC
 
 include "p16c84.inc"
 
@@ -8,18 +8,18 @@ include "p16c84.inc"
 	
 	org	4
 start
-	bsf     status,rp0
-	clrf portb
-	bcf     status,rp0
+	bsf     STATUS,RP0
+	clrf PORTB
+	bcf     STATUS,RP0
 
 	
-   	; Every write to portb updates the parallel port data
+   	; Every write to PORTB updates the parallel port data
 
-	; When the parallel port status lines change, the
+	; When the parallel port STATUS lines change, the
 	; change will be seen on porta
 
 begin
-	incf portb,f	
+	incf PORTB,f	
 	goto begin
 
 	end

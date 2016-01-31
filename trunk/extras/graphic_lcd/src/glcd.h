@@ -118,7 +118,7 @@ protected:
   gLCD         *m_plcd;
   unsigned int  m_nColumns;
   unsigned int  m_nRows;
-  gLCD_Interface *interface;
+  unsigned int interface_seq_no;
 
 };
 

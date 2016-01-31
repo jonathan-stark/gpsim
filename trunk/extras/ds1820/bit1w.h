@@ -48,8 +48,9 @@ private:
             IO_bi_directional::setDrivenState(new_state);
             to.change(true);
         }
-    } pin;
+    };
 
+    Pin1W *pin;
     virtual void gotReset() = 0;
     virtual NextAction gotBitStart() = 0;
     virtual void readBit(bool value) = 0;
@@ -74,6 +75,7 @@ private:
 public:
     guint64 bit_break;
     LowLevel1W(const char *name, const char *desc);
+    ~LowLevel1W();
     virtual void callback();
 };
 

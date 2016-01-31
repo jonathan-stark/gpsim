@@ -73,7 +73,7 @@ start
    ;; Define the simulation environment.
    ;;
 
-   .sim "module library libgpsim_graphicLCD"
+   .sim "module library libgpsim_extras"
    .sim "module library libgpsim_modules"
 
    .sim "module load OSRAM128X64 LCD"
@@ -95,6 +95,8 @@ start
    .sim "module load pulldown RBS2"
   endif
 
+   .sim "node nBS1"
+   .sim "node nBS2"
    .sim "attach nBS2 RBS2.pin LCD.bs2"
    .sim "attach nBS1 RBS1.pin LCD.bs1"
 
@@ -102,8 +104,6 @@ start
   if InterfaceMode == Mode6800 || InterfaceMode == Mode8080
    .sim "node nE"
    .sim "node nRW"
-   .sim "node nBS1"
-   .sim "node nBS2"
 
    .sim "attach nE  porte0 LCD.e"
    .sim "attach nRW porte1 LCD.rw"
@@ -233,6 +233,8 @@ LL
 	MOVWF	PixelX
 	CLRF	PixelY
 
+   .assert "\"Press run for next test\""
+	nop
 	RCALL	LCD_ClearScreen
 
 	MOVLW	1
@@ -240,6 +242,8 @@ LL
 	RCALL	LCD_RefreshEntireDisplay
         CLRWDT
 
+   .assert "\"Press run for next test\""
+	nop
 	RCALL	LCD_ClearScreen
 
 	CLRF	PixelX
@@ -260,6 +264,8 @@ LL
 	MOVWF	PixelY
         CLRF    PixelX
 
+   .assert "\"Press run for next test\""
+	nop
 	RCALL	LCD_ClearScreen
 	RCALL	LCD_RefreshEntireDisplay
         CLRWDT
@@ -287,6 +293,7 @@ LL
         rcall   BitMapGrayscaleTest
 
   .assert "\" Stop test \""
+	nop
 	bra	loop
 
 
