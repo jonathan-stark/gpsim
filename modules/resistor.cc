@@ -213,7 +213,8 @@ PullupResistor::PullupResistor(const char *init_name, const char * desc, float v
     s.append(".pin");
   }
 
-  res = new IO_bi_directional_pu(s.c_str());
+  //rRRres = new IO_bi_directional_pu(s.c_str());
+  res = new IO_bi_directional_pu("pin");
   res->set_Vpullup(vinit);
 
 
@@ -239,6 +240,7 @@ pullup resistor or generic voltage source\n\
   cattr = new CapacitanceAttribute(this);
   vattr = new VoltageAttribute(this);
 
+  addSymbol(res);
   addSymbol(attr);
   addSymbol(cattr);
   addSymbol(vattr);

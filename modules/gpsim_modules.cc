@@ -66,7 +66,7 @@ support:
 #include "video.h"
 #include "encoder.h"
 #endif
-#include "stimuli.h"
+#include "m_stimuli.h"
 #include "ttl.h"
 #include "i2c-eeprom.h"
 #include "i2c.h"

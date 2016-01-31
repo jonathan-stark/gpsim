@@ -1,3 +1,14 @@
+2016-01-31 Roy Rankin <rrankin@ihug.com.au>
+	* modules/Makefile.am modules/makefile.mingw modules/m_stimuli.cc 
+	  modules/m_stimuli.h modules/stimuli.cc modules/stimuli.h
+	: rename stimuli file for gdb as same file name used in src
+	* modules/encoder.cc modules/gpsim_modules.cc modules/i2c-eeprom.cc
+	  modules/i2c.cc modules/i2c2par.cc modules/i2c2par.h modules/led.cc
+	  modules/led.h modules/logic.cc modules/logic.h modules/push_button.cc
+	  modules/resistor.cc modules/switch.cc modules/ttl.cc modules/ttl.h
+	  modules/usart.cc modules/usart.h modules/video.cc
+	: Fix memory issues on module removal (bug 214), seperate module symbol space
+
 2016-01-30 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc src/14bit-tmrs.h src/16bit-tmrs.cc
 	  src/16bit-tmrs.h src/p18fk.cc

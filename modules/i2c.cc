@@ -484,15 +484,12 @@ namespace I2C_Module {
     tClkToSample = 10;
 
 
-    string sName;
 
-    sName = _name;
-    sName += ".scl";
-    m_pSCL = new I2C_SCL_PIN(this, sName.c_str());
+    m_pSCL = new I2C_SCL_PIN(this, "scl");
+    addSymbol(m_pSCL);
 
-    sName = _name;
-    sName += ".sda";
-    m_pSDA = new I2C_SDA_PIN(this, sName.c_str());
+    m_pSDA = new I2C_SDA_PIN(this, "sda");
+    addSymbol(m_pSDA);
 
     mTxByte     = new I2C_TxBuffer(this);
     mTxReady    = new I2C_TxReady(this);
@@ -519,6 +516,26 @@ namespace I2C_Module {
 
   I2CMaster::~I2CMaster()
   {
+    removeSymbol(mTxByte);
+    removeSymbol(mTxReady);
+    removeSymbol(mRxByte);
+    removeSymbol(mRxSequence);
+    removeSymbol(mSend7BitAddress);
+    removeSymbol(mStop);
+    removeSymbol(mAddress);
+    removeSymbol(mDebug);
+    removeSymbol(m_pSCL);
+    removeSymbol(m_pSDA);
+
+
+    delete mTxByte;
+    delete mTxReady;
+    delete mRxByte;
+    delete mRxSequence;
+    delete mSend7BitAddress;
+    delete mStop;
+    delete mAddress;
+    delete mDebug;
   }
 
   void I2CMaster::startIdle()

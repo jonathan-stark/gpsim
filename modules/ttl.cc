@@ -196,26 +196,39 @@ TTL377::TTL377(const char *_name)
   m_Q = new IO_bi_directional *[8];
 
   char pName[4];
-  pName[0] = '.';
-  pName[3] = 0;
+  pName[2] = 0;
   int i;
   string sPinName;
   for (i=0; i<8; i++) {
-    pName[1] = 'D';
-    pName[2] = '0' + i;
-    sPinName = name() + pName;
-    m_D[i] = new IOPIN(sPinName.c_str());
+    pName[0] = 'D';
+    pName[1] = '0' + i;
+    m_D[i] = new IOPIN(pName);
+    addSymbol(m_D[i]);
 
-    pName[1] = 'Q';
-    sPinName = name() + pName;
-    m_Q[i] = new IO_bi_directional(sPinName.c_str());
+    pName[0] = 'Q';
+    m_Q[i] = new IO_bi_directional(pName);
+    addSymbol(m_Q[i]);
     m_Q[i]->setDriving(true);
   }
 
-  sPinName = name() + ".E";
-  m_enable = new Enable(sPinName.c_str(),this);
-  sPinName = name() + ".CP";
-  m_clock  = new Clock(sPinName.c_str(),this);
+  m_enable = new Enable("E",this);
+  addSymbol(m_enable);
+  m_clock  = new Clock("CP",this);
+  addSymbol(m_clock);
+}
+
+TTL377::~TTL377()
+{
+    printf("RRR TTL377::~TTL377()");
+    for (int i = 0; i < 8; i++)
+    {
+	removeSymbol(m_D[i]);
+	removeSymbol(m_Q[i]);
+    }
+    delete [] m_D;
+    delete [] m_Q;
+    removeSymbol(m_enable);
+    removeSymbol(m_clock);
 }
 
 void TTL377::setClock(bool bNewClock)
@@ -292,32 +305,43 @@ TTL595::TTL595(const char *_name)
 
   m_Q = new IO_bi_directional *[8];
 
-  char pName[4];
-  pName[0] = '.';
-  pName[3] = 0;
+  char pName[4] = "Q0";
   int i;
-  string sPinName;
   for (i=0; i<8; i++) {
-    pName[1] = 'Q';
-    pName[2] = '0' + i;
-    sPinName = name() + pName;
-    m_Q[i] = new IO_bi_directional(sPinName.c_str());
+    pName[1] = '0' + i;
+    m_Q[i] = new IO_bi_directional(pName);
+    addSymbol(m_Q[i]);
     m_Q[i]->setDriving(true);
   }
 
-  sPinName = name() + ".Ds";
-  m_Ds = new IOPIN(sPinName.c_str());
-  sPinName = name() + ".Qs";
-  m_Qs = new IO_bi_directional(sPinName.c_str());
+  m_Ds = new IOPIN("Ds");
+  addSymbol(m_Ds);
+  m_Qs = new IO_bi_directional("Qs");
+  addSymbol(m_Qs);
   m_Qs->setDriving(true);
-  sPinName = name() + ".OE";
-  m_enable = new Enable(sPinName.c_str(),this);
-  sPinName = name() + ".SCK";
-  m_clock  = new Clock(sPinName.c_str(),this);
-  sPinName = name() + ".RCK";
-  m_strobe = new Strobe(sPinName.c_str(),this);
-  sPinName = name() + ".MR";
-  m_reset  = new Reset(sPinName.c_str(),this);
+  m_enable = new Enable("OE",this);
+  addSymbol(m_enable);
+  m_clock  = new Clock("SCK",this);
+  addSymbol(m_clock);
+  m_strobe = new Strobe("RCK",this);
+  addSymbol(m_strobe);
+  m_reset  = new Reset("MR",this);
+  addSymbol(m_reset);
+}
+
+TTL595::~TTL595()
+{
+    for(int i = 0; i < 8; i++)
+    {
+        removeSymbol(m_Q[i]);
+    }
+    delete [] m_Q;
+    removeSymbol(m_Ds);
+    removeSymbol(m_Qs);
+    removeSymbol(m_enable);
+    removeSymbol(m_clock);
+    removeSymbol(m_strobe);
+    removeSymbol(m_reset);
 }
 
 void TTL595::setClock(bool bNewClock)
@@ -422,34 +446,44 @@ TTL165::TTL165(const char *_name)
 
   m_D = new IOPIN *[8];
 
-  char pName[4];
-  pName[0] = '.';
-  pName[3] = 0;
+  char pName[4] = "D0";
   int i;
-  string sPinName;
   for (i=0; i<8; i++) {
-    pName[1] = 'D';
-    pName[2] = '0' + i;
-    sPinName = name() + pName;
-    m_D[i] = new IOPIN(sPinName.c_str());
+    pName[1] = '0' + i;
+    m_D[i] = new IOPIN(pName);
+    addSymbol(m_D[i]);
   }
 
-  sPinName = name() + ".Ds";
-  m_Ds = new IOPIN(sPinName.c_str());
-  sPinName = name() + ".Q7";
-  m_Q = new IO_bi_directional(sPinName.c_str());
+  m_Ds = new IOPIN("Ds");
+  addSymbol(m_Ds);
+  m_Q = new IO_bi_directional("Q7");
+  addSymbol(m_Q);
   m_Q->setDriving(true);
-  sPinName = name() + ".nQ7";
-  m_Qbar = new IO_bi_directional(sPinName.c_str());
+  m_Qbar = new IO_bi_directional("nQ7");
+  addSymbol(m_Qbar);
   m_Qbar->setDriving(true);
-  sPinName = name() + ".CE";
-  m_enable = new Enable(sPinName.c_str(),this);
-  sPinName = name() + ".CP";
-  m_clock  = new Clock(sPinName.c_str(),this);
-  sPinName = name() + ".PL";
-  m_strobe = new Strobe(sPinName.c_str(),this);
+  m_enable = new Enable("CE", this);
+  addSymbol(m_enable);
+  m_clock  = new Clock("CP",this);
+  addSymbol(m_clock);
+  m_strobe = new Strobe("PL",this);
+  addSymbol(m_strobe);
 }
 
+TTL165::~TTL165()
+{
+    for(int i = 0; i < 8; i++)
+    {
+	removeSymbol(m_D[i]);
+    }
+    delete [] m_D;
+    removeSymbol(m_Ds);
+    removeSymbol(m_Q);
+    removeSymbol(m_Qbar);
+    removeSymbol(m_enable);
+    removeSymbol(m_clock);
+    removeSymbol(m_strobe);
+}
 
 void TTL165::setClock(bool bNewClock)
 {

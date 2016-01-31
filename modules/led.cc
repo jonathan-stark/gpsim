@@ -123,6 +123,7 @@ namespace Leds {
     Led_Input(const std::string &n, Led_base *pParent);
 
     virtual void setDrivenState(bool);
+    virtual void get(char *return_str, int len);
 
   private:
     Led_base *m_pParent;
@@ -139,6 +140,12 @@ namespace Leds {
   void Led_Input::setDrivenState(bool bNewState)
   {
     IOPIN::setDrivenState(bNewState);
+  }
+
+  void Led_Input::get(char *return_str, int len)
+  {
+      if (return_str)
+	strncpy(return_str, IOPIN::getState()?"1": "0", len);
   }
 
   //------------------------------------------------------------------------
@@ -382,15 +389,17 @@ void Led_7Segments::build_window()
       build_window();
     }
 
-    led_interface = new LED_Interface(this);
-    get_interface().add_interface(led_interface);
+    interface_seq_no = get_interface().add_interface(new LED_Interface(this));
 
     create_iopin_map();
   }
 
 Led_7Segments::~Led_7Segments()
 {
-  gtk_widget_destroy(darea);
+  for(int i = 0; i < 8; i++)
+      removeSymbol(m_pins[i]);
+  get_interface().remove_interface(interface_seq_no);
+  //RRRgtk_widget_destroy(darea);
 }
 
   //--------------------------------------------------------------
@@ -409,7 +418,6 @@ Led_7Segments::~Led_7Segments()
     //   The 7-segment LED has 8 pins
 
     create_pkg(8);
-    m_pins = new Led_Input *[8];
 
     float ypos = 6.0;
     for (int i = 1; i <= 8; i++)
@@ -422,14 +430,17 @@ Led_7Segments::~Led_7Segments()
     //   the bit positions as LED.seg0, LED.seg1, ..., where LED is the
     //   user-assigned name of the 7-segment LED
 
-    m_pins[0] = new Led_Input(name() + ".cc", this);
+    m_pins[0] = new Led_Input("cc", this);
+    addSymbol(m_pins[0]);
+    assign_pin(1, m_pins[0]);
     int i;
     char ch;
     for (ch = '0', i = 1; i < 8; i++, ch++)
-      m_pins[i] = new Led_Input(name() + ".seg" + ch, this);
-
-    for (i=0; i<8; i++)
-      assign_pin(i+1,m_pins[i]);
+    {
+      m_pins[i] = new Led_Input((string)"seg" + ch, this);
+      addSymbol(m_pins[i]);
+      assign_pin(i+1, m_pins[i]);
+    }
 
   }
 
@@ -758,16 +769,22 @@ Led::Led(const char *name)
   addSymbol(m_colorAttribute);
   m_activestateAttribute = new ActiveStateAttribute(this);
   addSymbol(m_activestateAttribute);
-  led_interface = new LED_Interface(this);
-  get_interface().add_interface(led_interface);
+  interface_seq_no = get_interface().add_interface(new LED_Interface(this));
 }
 
 Led::~Led()
 {
+  removeSymbol(m_pin);
+  removeSymbol(m_colorAttribute);
+  removeSymbol(m_activestateAttribute);
+  get_interface().remove_interface(interface_seq_no);
+/*
+  if (darea)
+    gtk_widget_destroy(darea);
+  darea = 0;
+*/
   delete m_activestateAttribute;
-  delete led_interface;
   delete m_colorAttribute;
-  gtk_widget_destroy(darea);
 }
 
   //--------------------------------------------------------------
@@ -787,7 +804,8 @@ Led::~Led()
 
     // Define the LED Cathode. (The anode is implicitly tied to VCC)
 
-    m_pin = new Led_Input(name() + ".in", this);
+    m_pin = new Led_Input("in", this);
+    addSymbol(m_pin);
     assign_pin(1, m_pin);
 
   }

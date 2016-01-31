@@ -82,7 +82,7 @@ License along with this library; if not, see
 
 #include "../config.h"
 #include "../src/gpsim_time.h"
-#include "stimuli.h"
+#include "m_stimuli.h"
 #include "../src/pic-ioports.h"
 #include "../src/symbol.h"
 #include "../src/trace.h"
@@ -181,10 +181,16 @@ namespace ExtendedStimuli {
     : Module(_name,_desc)
   {
     // The I/O pin
-    m_pin = new IO_bi_directional((name() + ".pin").c_str());
+    m_pin = new IO_bi_directional("pin");
     m_pin->set_is_analog(true);
     m_pin->set_Zth(0.01);
     m_pin->update_direction(IOPIN::DIR_OUTPUT, true);
+    addSymbol(m_pin);
+  }
+
+  StimulusBase::~StimulusBase()
+  {
+      removeSymbol(m_pin);
   }
 
   void StimulusBase::putState(double new_Vth)
@@ -646,10 +652,9 @@ File Recorder\n\
     // Position pin on left side of package
     package->set_pin_position(1,0.5);
 
-    string pinname(_name);
-    pinname += ".pin";
-    m_pin = new Recorder_Input(pinname.c_str(), this);
+    m_pin = new Recorder_Input("pin", this);
     assign_pin(1, m_pin);
+    addSymbol(m_pin);
 
     // Attribute for the recorder.
     m_filename = new FileNameAttribute<FileRecorder>(this);
@@ -660,7 +665,7 @@ File Recorder\n\
 
   FileRecorder::~FileRecorder()
   {
-    delete m_pin;
+    removeSymbol(m_pin);
     if (m_fp)
       delete m_fp;
   }
@@ -779,7 +784,7 @@ File Recorder\n\
   class PortPullupRegister : public sfr_register
   {
   public:
-    PortPullupRegister(const char *_name,
+    PortPullupRegister(Module *mod, const char *_name,
                        PicPortRegister *_port,
                        unsigned int enableMask);
     ~PortPullupRegister() {}
@@ -789,10 +794,10 @@ File Recorder\n\
     unsigned int m_EnableMask;
   };
 
-  PortPullupRegister::PortPullupRegister(const char *_name,
+  PortPullupRegister::PortPullupRegister(Module *mod, const char *_name,
                                          PicPortRegister *_port,
                                          unsigned int enableMask)
-    : sfr_register(0,_name,"Port Pullup"),m_port(_port),m_EnableMask(enableMask)
+    : sfr_register(mod ,_name,"Port Pullup"),m_port(_port),m_EnableMask(enableMask)
   {
     new_name(_name);
     value = RegisterValue(0,~enableMask);
@@ -843,10 +848,10 @@ Port Stimulus\n\
 "),
       m_nPins(nPins)
   {
-    mPort   = new PicPortRegister(0,(name()+".port").c_str(),"",m_nPins,(1<<m_nPins)-1);
-    mTris   = new PicTrisRegister(0,(name()+".tris").c_str(),"",mPort,true,(1<<m_nPins)-1);
-    mLatch  = new PicLatchRegister(0,(name()+".lat").c_str(),"",mPort,(1<<m_nPins)-1);
-    mPullup = new PortPullupRegister((name()+".pullup").c_str(),mPort,(1<<m_nPins)-1);
+    mPort   = new PicPortRegister((Processor *)this,"port","",m_nPins,(1<<m_nPins)-1);
+    mTris   = new PicTrisRegister((Processor *)this, "tris","",mPort,true,(1<<m_nPins)-1);
+    mLatch  = new PicLatchRegister((Processor *)this,"lat","",mPort,(1<<m_nPins)-1);
+    mPullup = new PortPullupRegister(this, "pullup",mPort,(1<<m_nPins)-1);
 
     mPortAddress = new RegisterAddressAttribute(mPort, "portAdr","Port register address");
     mTrisAddress = new RegisterAddressAttribute(mTris, "trisAdr","Tris register address");
@@ -910,9 +915,10 @@ Port Stimulus\n\
 
       IO_bi_directional *ppin;
 
-      ppin = new IO_bi_directional_pu((name() + ".p" + pinNumber).c_str());
+      //ppin = new IO_bi_directional_pu((name() + ".p" + pinNumber).c_str());
+      ppin = new IO_bi_directional_pu(((string)"p" + pinNumber).c_str());
       ppin->update_direction(IOPIN::DIR_OUTPUT,true);
-      assign_pin(i+1, mPort->addPin(ppin,i));
+      assign_pin(i+1, mPort->addPin(this, ppin,i));
     }
   }
 

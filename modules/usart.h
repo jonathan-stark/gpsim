@@ -44,6 +44,9 @@ class TxBaudRateAttribute;
 class TxBuffer;
 class RxBuffer;
 class Boolean;
+class USART_TXPIN;
+class USART_RXPIN;
+class USART_IO;
 
 class USARTModule : public Module
 {
@@ -82,6 +85,10 @@ private:
 
   RCREG *m_rcreg;
   TXREG *m_txreg;
+  USART_TXPIN *txpin;
+  USART_RXPIN *rxpin;
+  USART_IO    *cts;
+  USART_IO    *rts;
 
   unsigned char * m_TxFIFO;
   int m_FifoLen;

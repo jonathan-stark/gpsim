@@ -61,6 +61,7 @@ namespace ExtendedStimuli {
   {
   public:
     StimulusBase(const char *_name, const char *_desc);
+    ~StimulusBase();
     virtual void callback_print();
     void create_iopin_map();
     void putState(double new_Vth);

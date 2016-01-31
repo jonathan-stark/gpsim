@@ -55,6 +55,7 @@ namespace I2C2PAR_Modules {
   protected:
 
     AddAttribute *Addattr;
+    IO_bi_directional_pu **pins;
   };
 
   

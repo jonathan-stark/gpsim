@@ -88,7 +88,8 @@ void PushButton::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  pshb_pin = new IO_bi_directional((name() + ".out").c_str());
+  pshb_pin = new IO_bi_directional("out");
+  addSymbol(pshb_pin);
 
   assign_pin(1, pshb_pin);
   package->set_pin_position(1,2.5); // Position pin on middle right side of package
@@ -158,6 +159,6 @@ PushButton::PushButton(const char * _name) : Module(_name, "PushButton")
 
 PushButton::~PushButton(void)
 {
-  delete pshb_pin;
+  removeSymbol(pshb_pin);
 }
 #endif // HAVE_GUI

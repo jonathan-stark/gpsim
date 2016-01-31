@@ -60,7 +60,7 @@ namespace Leds {
     virtual void build_window() = 0;
     virtual void update() = 0;
 
-    LED_Interface *led_interface;
+    unsigned int interface_seq_no;
   };
 
 
@@ -120,7 +120,7 @@ namespace Leds {
       gpointer user_data);
 
     //unsigned int m_segmentStates;
-    Led_Input **m_pins;
+    Led_Input *m_pins[8];
     int m_nPins;
 
   };

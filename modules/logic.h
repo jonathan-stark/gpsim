@@ -52,11 +52,14 @@ private:
 public:
 
   virtual void setDrivenState( bool new_state);
+//RRR  virtual void get(char *return_str, int len);
 
   Logic_Input (LogicGate *parent, unsigned int b, const char *opt_name=0)
     : IOPIN(opt_name), LGParent(parent), m_iobit(b)
     {
     }
+
+
 
 };
 
@@ -66,6 +69,8 @@ private:
   LogicGate *LGParent;
   unsigned int m_iobit;
 public:
+
+//RRR  virtual void get(char *return_str, int len);
 
   Logic_Output (LogicGate *parent, unsigned int b,const char *opt_name=0)
     : IO_bi_directional(opt_name), LGParent(parent), m_iobit(b)

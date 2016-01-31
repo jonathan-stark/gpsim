@@ -113,9 +113,6 @@ public:
 
     usart = _usart;
 
-    string n(usart->name());
-    n = n + ".RXPIN";
-    new_name(n.c_str());
 
     // Let the pin think it's in the high state. If this is wrong,
     // then the I/O pin driving it will correct it. (Starting off
@@ -160,23 +157,16 @@ public:
 
 class USART_TXPIN : public IO_bi_directional
 {
-private:
-  USART_TXPIN() {
-  }
 public:
 
   USARTModule *usart;
 
   USART_TXPIN (USARTModule *_usart,
-               const char *opt_name=NULL)
+               const char *opt_name=NULL) : IO_bi_directional(opt_name)
   {
 
     usart = _usart;
 
-    string n(usart->name());
-    n = n + ".TXPIN";
-    IO_bi_directional(n.c_str());
-    new_name(n.c_str());
     bDrivingState = true;
     update_direction(1,true);   // Make the TX pin an output.
 
@@ -306,20 +296,13 @@ private:
 
 
   virtual void callback(void) {
-    if(0) {
-      cout << " usart module TXREG::" << __FUNCTION__ << "\n";
-    }
+  Dprintf((" usart module TXREG time:0x%"PRINTF_GINT64_MODIFIER"x=%"PRINTF_GINT64_MODIFIER"d txr=0x%x bit_count=%d\n", get_cycles().get(), get_cycles().get(), txr, bit_count));
 
     last_time = get_cycles().get();
     start_time = last_time;
 
     if(txpin) {
       txpin->putState((txr & 1) ? true : false);
-      if (0)
-      {
-          cout << "usart tx module sent a " << (txr&1) <<
-                " bit count " << bit_count << '\n';
-      }
     }
 
     if(bit_count) {
@@ -524,7 +507,7 @@ RCREG::RCREG(USARTModule *pUsart)
 void RCREG::callback()
 {
 
-  Dprintf((" usart module RCREG time:0x%"PRINTF_GINT64_MODIFIER"x=%"PRINTF_GINT64_MODIFIER"d\n", get_cycles().get(), get_cycles().get()));
+  Dprintf((" usart module RCREG time:0x%"PRINTF_GINT64_MODIFIER"x=%"PRINTF_GINT64_MODIFIER"d state=0x%x\n", get_cycles().get(), get_cycles().get(), receive_state));
 
 
   switch(receive_state) {
@@ -660,10 +643,6 @@ public:
              unsigned int b,
              const char *opt_name ) : IO_bi_directional_pu(opt_name) {
     usart = _usart;
-
-    string n(usart->name());
-    n = n + "." + opt_name;
-    new_name(n.c_str());
 
     bDrivenState = true;
     update_direction(0,true);   // Make the RX pin an input.
@@ -898,14 +877,21 @@ void USARTModule::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  USART_TXPIN *txpin = new USART_TXPIN(this, "TXPIN");
-  USART_RXPIN *rxpin = new USART_RXPIN(this, "RXPIN");
+  txpin = new USART_TXPIN(this, "TXPIN");
+  rxpin = new USART_RXPIN(this, "RXPIN");
+  cts = new USART_IO(this, 2, "CTS");
+  rts = new USART_IO(this, 3, "RTS");
+
+  addSymbol(rxpin);
+  addSymbol(txpin);
+  addSymbol(cts);
+  addSymbol(rts);
 
 
   assign_pin(1, txpin);
   assign_pin(2, rxpin);
-  assign_pin(3, new USART_IO(this, 2, "CTS"));
-  assign_pin(4, new USART_IO(this, 3, "RTS"));
+  assign_pin(3, cts);
+  assign_pin(4, rts);
 
   // Complete the usart initialization
 
@@ -943,6 +929,10 @@ USARTModule::USARTModule(const char *_name) : Module(_name, "USART")
   m_FifoHead = m_FifoTail = 0;
 #endif
 
+  txpin = 0;
+  rxpin = 0;
+  cts = 0;
+  rts = 0;
   m_rcreg = new RCREG(this);
   m_txreg = new TXREG;
 
@@ -989,8 +979,10 @@ USARTModule::~USARTModule()
         gtk_widget_destroy(window);
 #endif
 
+
 #ifdef HAVE_TXFIFO
-    delete m_TxFIFO;
+    fprintf(stderr, "RRR m_TxFIFO %p\n", m_TxFIFO);
+    delete [] m_TxFIFO;
 #endif
 
     removeSymbol(m_RxBaud);
@@ -1001,6 +993,10 @@ USARTModule::~USARTModule()
     removeSymbol(m_ShowHex);
     removeSymbol(m_loop);
     removeSymbol(m_console);
+    removeSymbol(txpin);
+    removeSymbol(rxpin);
+    removeSymbol(cts);
+    removeSymbol(rts);
 
     delete m_rcreg;
     delete m_txreg;
@@ -1012,6 +1008,12 @@ USARTModule::~USARTModule()
     delete m_ShowHex;
     delete m_loop;
     delete m_console;
+/*
+    delete txpin;
+    delete rxpin;
+    delete cts;
+    delete rts;
+*/
 }
 
 //--------------------------------------------------------------
