@@ -72,10 +72,12 @@ void Encoder::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  a_pin = new IO_bi_directional((name() + ".a").c_str());
+  a_pin = new IO_bi_directional("a");
+  addSymbol(a_pin);
   assign_pin(1, a_pin);
   package->set_pin_position(1,(float)0.0);
-  b_pin = new IO_bi_directional((name() + ".b").c_str());
+  b_pin = new IO_bi_directional("b");
+  addSymbol(b_pin);
   assign_pin(2, b_pin);
   package->set_pin_position(2,(float)0.9999);
 }

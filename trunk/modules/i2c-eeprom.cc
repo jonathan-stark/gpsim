@@ -68,8 +68,16 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
 
   I2C_EE_Module::~I2C_EE_Module()
   {
-    delete att_eeprom;
-    delete m_eeprom;
+     removeSymbol(m_wp);
+     removeSymbol(m_A[0]);
+     removeSymbol(m_A[1]);
+     removeSymbol(m_A[2]);
+     removeSymbol((IOPIN *)(m_eeprom->sda));
+     removeSymbol((IOPIN *)(m_eeprom->scl));
+     m_eeprom->sda = 0;
+     m_eeprom->scl = 0;
+     delete att_eeprom;
+     delete m_eeprom;
   }
 
 
@@ -125,21 +133,17 @@ void I2C_ENABLE::setDrivenState(bool bNewState)
 
   void I2C_EE_Module::create_iopin_map()
   {
-        string pinName;
+	m_wp  =  new I2C_ENABLE("WP", 0, this);
+	addSymbol(m_wp);
+	m_A[0] = new I2C_ENABLE("A0", 1, this);
+	addSymbol(m_A[0]);
+	m_A[1] = new I2C_ENABLE("A1", 2, this);
+	addSymbol(m_A[1]);
+	m_A[2] = new I2C_ENABLE("A2", 3, this);
+	addSymbol(m_A[2]);
 
-	pinName = name() + ".WP";
-	m_wp  =  new I2C_ENABLE(pinName.c_str(), 0, this);
-	pinName = name() + ".A0";
-	m_A[0] = new I2C_ENABLE(pinName.c_str(), 1, this);
-	pinName = name() + ".A1";
-	m_A[1] = new I2C_ENABLE(pinName.c_str(), 2, this);
-	pinName = name() + ".A2";
-	m_A[2] = new I2C_ENABLE(pinName.c_str(), 3, this);
-
-	pinName = name() + ".SDA";
-	((IOPIN *)(m_eeprom->sda))->new_name(pinName.c_str());
-	pinName = name() + ".SCL";
-	((IOPIN *)(m_eeprom->scl))->new_name(pinName.c_str());
+        addSymbol((IOPIN *)(m_eeprom->sda));
+        addSymbol((IOPIN *)(m_eeprom->scl));
 
 	package = new Package(8);
 	package->assign_pin( 1, m_A[0]);

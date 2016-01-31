@@ -133,8 +133,10 @@ Video::Video(const char *_name)
   : Module(_name), sync_time(0), scanline(0),
     line_nr(0), last_line_nr(0)
 {
-     sync_pin = new IOPIN_Monitor(this,(name() + ".sync").c_str());
-     lume_pin = new IOPIN_Monitor(this,(name() + ".lume").c_str());
+     sync_pin = new IOPIN_Monitor(this,"sync");
+     lume_pin = new IOPIN_Monitor(this,"lume");
+     addSymbol(sync_pin);
+     addSymbol(lume_pin);
 
   //cout << "Video base class constructor\n";
   memset(line, 0x80, XRES);
@@ -163,8 +165,8 @@ Video::~Video()
   cairo_surface_destroy(image);
   gtk_widget_destroy(window);
 
-  delete sync_pin;
-  delete lume_pin;
+  removeSymbol(sync_pin);
+  removeSymbol(lume_pin);
 }
 
 //--------------------------------------------------------------

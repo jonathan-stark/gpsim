@@ -228,6 +228,19 @@ void Logic_Input::setDrivenState( bool new_state)
   }
 }
 
+#ifdef RRR
+void Logic_Input::get(char *return_str, int len)
+{
+      if (return_str)
+        strncpy(return_str, IOPIN::getState()?"1": "0", len);
+}
+void Logic_Output::get(char *return_str, int len)
+{
+      if (return_str)
+        strncpy(return_str, IOPIN::getDrivingState()?"1": "0", len);
+}
+#endif
+
 
 ANDGate::ANDGate(const char *name, const char *desc)
   : LogicGate(name, desc)
@@ -323,7 +336,9 @@ void LogicGate::create_iopin_map()
 
   string outname = name() + ".out";
 
-  pOutputPin = new Logic_Output(this, OUTPUT_BITPOSITION, outname.c_str());
+  //RRRpOutputPin = new Logic_Output(this, OUTPUT_BITPOSITION, outname.c_str());
+  pOutputPin = new Logic_Output(this, OUTPUT_BITPOSITION, "out");
+  addSymbol(pOutputPin);
   pOutputPin->update_direction(1,true);  // make the bidirectional an output
 
   // Position pin on middle right side of package
@@ -340,7 +355,8 @@ void LogicGate::create_iopin_map()
   string inname;
   for(i=j=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
     char pin_number = i-j +'0';
-    inname = name() + ".in" + pin_number;
+    //RRRinname = name() + ".in" + pin_number;
+    inname = (string)"in" + pin_number;
     //p[2] = i-j +'0';
     LIP = new Logic_Input(this, i-INPUT_FIRST_BITPOSITION,inname.c_str());
     pInputPins[i-INPUT_FIRST_BITPOSITION] = LIP;
@@ -349,6 +365,7 @@ void LogicGate::create_iopin_map()
       package->set_pin_position(i+1, 0.5); // Left side of package
     else
       package->set_pin_position(i+1, (float)((i-INPUT_FIRST_BITPOSITION)*0.9999)); // Left side of package
+    addSymbol(LIP);
     assign_pin(i+1, LIP );       //  Pin numbers begin at 1
   }
 

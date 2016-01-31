@@ -436,11 +436,11 @@ void SwitchAttribute::get(char *return_str, int len)
     //   need to reference these newly created I/O pins (like
     //   below) then we can call the member function 'get_pin'.
 
-    string nameA = name() + ".A";
-    m_pinA = new SwitchPin(this,nameA.c_str());
+    m_pinA = new SwitchPin(this,"A");
+    addSymbol(m_pinA);
 
-    string nameB = name() + ".B";
-    m_pinB = new SwitchPin(this,nameB.c_str());
+    m_pinB = new SwitchPin(this,"B");
+    addSymbol(m_pinB);
 
     assign_pin(1, m_pinA);
     assign_pin(2, m_pinB);
@@ -520,9 +520,15 @@ void SwitchAttribute::get(char *return_str, int len)
     removeSymbol(m_aState);
     removeSymbol(m_Zopen);
     removeSymbol(m_Zclosed);
+    removeSymbol(m_pinA);
+    removeSymbol(m_pinB);
     delete m_Zclosed;
     delete m_Zopen;
     delete m_aState;
+/*
+    delete m_pinA;
+    delete m_pinB;
+*/
   }
 
   /*

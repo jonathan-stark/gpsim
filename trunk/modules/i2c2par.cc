@@ -148,6 +148,17 @@ namespace I2C2PAR_Modules {
   {
 	delete io_port;
 	delete Addattr;
+        for(int i = 0; i<8; i++)
+        {
+	    removeSymbol(pins[i]);
+	}
+	delete [] pins;
+	removeSymbol((IOPIN *)scl);
+	removeSymbol((IOPIN *)sda);
+	// set sda, scl to zero as package deletes them, 
+	// thus stopping ~i2c_slave from trying to delete them also
+	sda = 0;
+	scl = 0;
   }
 
 
@@ -189,39 +200,22 @@ namespace I2C2PAR_Modules {
 
   void i2c2par::create_iopin_map()
   {
-        string pinName;
 
+        pins = new IO_bi_directional_pu *[8];
+        char pin_name[] = "p0";
 
-	pinName = name() + ".SDA";
-	((IOPIN *)(sda))->new_name(pinName.c_str());
-	pinName = name() + ".SCL";
-	((IOPIN *)(scl))->new_name(pinName.c_str());
+	addSymbol((IOPIN *)sda);
+	addSymbol((IOPIN *)scl);
 
 	package = new Package(10);
-        pinName = name() + ".p0";
-	package->assign_pin( 1, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),0));
-        pinName = name() + ".p1";
-	package->assign_pin( 2, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),1));
-        pinName = name() + ".p2";
-	package->assign_pin( 3, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),2));
-        pinName = name() + ".p3";
-	package->assign_pin( 4, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),3));
-        pinName = name() + ".p4";
-	package->assign_pin( 7, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),4));
-        pinName = name() + ".p5";
-	package->assign_pin( 8, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),5));
-        pinName = name() + ".p6";
-	package->assign_pin( 9, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),6));
-        pinName = name() + ".p7";
-	package->assign_pin( 10, io_port->addPin(
-		new IO_bi_directional_pu(pinName.c_str()),7));
+
+        for (int i = 0; i < 8; i++)
+        {
+	    pin_name[1] = '0' + i;
+            pins[i] = new IO_bi_directional_pu(pin_name);
+	    package->assign_pin( i<4 ? i+1 : i+3, io_port->addPin(pins[i], i));
+	    addSymbol(pins[i]);
+        }
 	package->assign_pin( 5, (IOPIN *)(sda));
 	package->assign_pin( 6, (IOPIN *)(scl));
 

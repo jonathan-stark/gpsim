@@ -66,6 +66,7 @@ namespace TTL {
   public:
 
     TTL377(const char *_name);
+    ~TTL377();
     static Module *construct(const char *new_name=NULL);
 
     virtual void create_iopin_map();
@@ -84,6 +85,7 @@ namespace TTL {
   public:
 
     TTL595(const char *_name);
+    ~TTL595();
     static Module *construct(const char *new_name=NULL);
 
     virtual void create_iopin_map();
@@ -111,6 +113,7 @@ namespace TTL {
   public:
 
     TTL165(const char *_name);
+    ~TTL165();
     static Module *construct(const char *new_name=NULL);
 
     virtual void create_iopin_map();
