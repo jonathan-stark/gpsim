@@ -276,6 +276,7 @@ protected:
 
 
   int bits_transfered;
+  Processor *cpu;
 };
 
 class SPI_1: public  SPI
@@ -343,6 +344,7 @@ protected:
   int 	bits_transfered;
   int   phase;
   guint64 future_cycle;
+  Processor *cpu;
 };
 
 class I2C_1: public  I2C
@@ -420,6 +422,7 @@ class SSP_MODULE
   virtual void releaseSSpin();
   virtual void releaseSCKpin();
 
+  Processor *cpu;
 protected:
   InterruptSource *m_ssp_if;
   InterruptSource *m_bcl_if;

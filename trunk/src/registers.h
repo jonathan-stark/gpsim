@@ -452,6 +452,7 @@ public:
   virtual void computed_goto(unsigned int new_value);
   virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+  virtual void get(char *buffer, int buf_size);
   virtual unsigned int get_value()
   {
     return value;
@@ -524,6 +525,7 @@ public:
                      Register   **ppRegisters,
                      unsigned int uiSize);
   ~RegisterCollection();
+  virtual void get(char *return_str, int len);
   virtual unsigned int GetSize();
   virtual Value &GetAt(unsigned int uIndex, Value *pValue=0);
   virtual void SetAt(unsigned int uIndex, Value *pValue);

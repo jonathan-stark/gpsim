@@ -33,14 +33,21 @@ License along with this library; if not, see
 
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#define Dprintf(arg) {printf("%s:%d-%s() %s ",__FILE__,__LINE__,__FUNCTION__,cpu->name().c_str()); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
-#if defined(PROTO)
-#define I2Cproto(arg) {printf("I2C %d ", __LINE__); printf arg;}
+//#define I2C_PROTO
+#if defined(I2C_PROTO)
+#define I2Cproto(arg) {printf("I2C %s %d ",cpu->name().c_str(), __LINE__); printf arg;}
 #else
 #define I2Cproto(arg) {}
+#endif
+//#define SPI_PROTO
+#if defined(SPI_PROTO)
+#define SPIproto(arg) {printf("SPI %s %d ", cpu->name().c_str(), __LINE__); printf arg;}
+#else
+#define SPIproto(arg) {}
 #endif
 
 //#warning only supports SPI mode.
@@ -502,6 +509,7 @@ SPI::SPI(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat, _SSPBUF *_s
     m_sspstat = _sspstat;
     m_sspbuf = _sspbuf;
     m_state = eIDLE;
+    cpu = m_sspmod->cpu;
 }
 
 void SPI::clock( bool ClockState )
@@ -534,6 +542,7 @@ void SPI::clock( bool ClockState )
   }
 
   if( m_state == eIDLE ){
+    SPIproto(("Idle clock %d CKE %d CKP %d onbeat %d\n", ClockState, (sspstat_val & _SSPSTAT::CKE), (sspcon_val & _SSPCON::CKP), onbeat));
     if( sspstat_val & _SSPSTAT::CKE ) 
     {
       // FIX: I have NOT verified that PICs actually behave like this.
@@ -543,7 +552,7 @@ void SPI::clock( bool ClockState )
     else if( onbeat ) 
     {
       // FIX: I have NOT verified that PICs actually behave like this.
-      cout << "SSP: Ignoring clock transition to neutral in state IDLE." << endl;
+      cout << "SSP: " << cpu->name() << " Ignoring clock transition to neutral in state IDLE." << endl;
       return;
     }
     else 
@@ -552,6 +561,7 @@ void SPI::clock( bool ClockState )
         // while idle in master mode.
       if (verbose)
       	cout << "SPI clock called start_transfer\n";
+      SPIproto(("Clock called start transfer\n"));
       start_transfer();
     }
 
@@ -567,7 +577,8 @@ void SPI::clock( bool ClockState )
       if (m_sspmod->get_SDI_State())
 	m_SSPsr |= 1;
       if (verbose)
-      	cout << "SSP: SPI Received bit = " << (m_SSPsr & 1) << ". (SMP=0)" << endl;
+      	cout << "SSP: SPI Received bit = " << (m_SSPsr & 1) << ". onbeat(SMP=0)" << endl;
+      SPIproto(("In Bit %d byte count=%d onbeat m_SSPsr=0x%02x\n", (m_SSPsr & 1), bits_transfered+1, m_SSPsr));
     }
   } else {
     // off beat: data is shifted out, data is read in if SMP = 1
@@ -577,13 +588,15 @@ void SPI::clock( bool ClockState )
       if (m_sspmod->get_SDI_State())
 	m_SSPsr |= 1;
       if (verbose)
-      	cout << "SSP: SPI Received bit = " << (m_SSPsr & 1) << ". (SMP=1)" << endl;
+      	cout << "SSP: SPI Received bit = " << (m_SSPsr & 1) << ". offbeat(SMP=1)" << endl;
+      SPIproto(("In Bit %d byte count=%d offbeat\n", (m_SSPsr & 1), bits_transfered+1));
     }
 	
     char nextSDO = (m_SSPsr&(1<<7)) ? '1' : '0';
     m_sspmod->putStateSDO(nextSDO);
     if (verbose)
       cout << "SSP: SPI Sent bit = " << nextSDO << "."  << endl;
+    SPIproto(("\tSent bit %c m_SSPsr 0x%x\n", nextSDO, m_SSPsr));
   }
 
   bool bSSPCONValue = (sspcon_val & _SSPCON::CKP) ? true : false;
@@ -639,6 +652,8 @@ void SPI::callback()
 
   if (verbose)
     cout << "SPI callback m_state=" << m_state << endl;
+
+  SPIproto(("callback m_state=%d\n", m_state));
 
   switch( m_state ) {
   case eIDLE:
@@ -762,6 +777,7 @@ SSP_MODULE::SSP_MODULE(Processor *pCpu)
     sspcon2(pCpu,this),
     sspadd(pCpu,this),
     sspmsk(0),
+    cpu(pCpu),
     m_ssp_if(0),
     m_bcl_if(0),
     m_pirset(0),
@@ -896,14 +912,20 @@ void SPI::newSSPBUF(unsigned int newTxByte)
 {
   Dprintf(("enabled %d state %d\n", m_sspcon->isSSPEnabled(), m_state));
   if (m_sspcon->isSSPEnabled()) {
-    if (m_state == eIDLE) {
-	m_SSPsr = newTxByte;
+    if (m_state == eIDLE || bits_transfered == 0) {
+        m_SSPsr = newTxByte;
+	SPIproto(("newSSPBUF send 0x%02x\n", m_SSPsr));
 	start_transfer();
     } else {
       // Collision
+      SPIproto(("newSSPBUF 0x%02x collision\n", m_SSPsr));
       m_sspcon->setWCOL();
     }
   } 
+  else
+  {
+	SPIproto(("newSSPBUF !SSPenabled m_SSPsr 0x%02x\n", m_SSPsr));
+  }
 }
 void SPI::start_transfer()
 {
@@ -939,6 +961,9 @@ void SPI::start_transfer()
     break;
   case _SSPCON::SSPM_SPIslave:
     // I don't do any thing until first clock edge
+    SPIproto(("SSPM_SPIslave start_transfer 0x%02x\n", m_SSPsr)); 
+    if( sspstat_val & _SSPSTAT::CKE )
+      m_sspmod->putStateSDO((m_SSPsr &(1<<7)) ? '1' : '0');
     break;
   default:
     cout << "start_transfer: The selected SPI mode is unimplemented. mode=" << hex
@@ -954,15 +979,18 @@ void SPI::stop_transfer()
   if( m_state == eACTIVE ) {
     if( bits_transfered == 8 && !m_sspbuf->isFull() )
     {
+        m_SSPsr &= 0xff;
         if (verbose)
-            cout << "SPI: Stoping transfer. Normal finish. Setting sspif and BF\n";
+            cout << "SPI: Stoping transfer. Normal finish. Setting sspif and BF got=" << (m_SSPsr & 0xff) << endl;
+        SPIproto(("Stoping transfer. Normal finish. Setting sspif and BF got=0x%02x\n" , (m_SSPsr & 0xff)));
 	m_sspbuf->put_value(m_SSPsr & 0xff);
 	m_sspbuf->setFullFlag(true);
         m_sspmod->set_sspif();
 	m_sspstat->put_value(m_sspstat->value.get() | _SSPSTAT::BF);
     } else if( bits_transfered == 8 && m_sspbuf->isFull() ) {
-      if (verbose)
-          cout << "SPI: Stopping transfer. SSPBUF Overflow setting SSPOV." << endl;
+        if (verbose)
+            cout << "SPI: Stopping transfer. SSPBUF Overflow setting SSPOV." << endl;
+        SPIproto(("Stopping transfer. SSPBUF Overflow setting SSPOV.\n"));
         m_sspcon->setSSPOV();
         m_sspmod->set_sspif();      // The real PIC sets sspif even with overflow
     } else {
@@ -972,6 +1000,7 @@ void SPI::stop_transfer()
   } else {
     if (verbose)
       cout << "SSP: Stopping transfer. State != ACTIVE." << endl;
+    SPIproto(("Stopping transfer. State != ACTIVE."));
   }
 
   m_state = eIDLE;
@@ -989,6 +1018,7 @@ I2C::I2C(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat,
     m_sspadd = _sspadd;
     future_cycle = 0;
     i2c_state = eIDLE;
+    cpu = m_sspmod->cpu;
 }
 
 I2C_1::I2C_1(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat, 
@@ -1007,7 +1037,7 @@ void I2C::set_idle()
 }
 bool I2C::isIdle()
 {
-    return(i2c_state == eIDLE); //RRR
+    return(i2c_state == eIDLE); 
     return(
 	(m_sspstat->value.get() & _SSPSTAT::RW) == 0 &&
 	(m_sspcon2->value.get() & 
@@ -1302,7 +1332,7 @@ void I2C::clock(bool clock_state)
 		}
 		else
 		{
-		    I2Cproto(("address not a match\n"));
+		    I2Cproto(("address not a match sspsr=0x%02x\n",m_SSPsr));
       		    set_idle();
 		    return;
     		}
@@ -2275,8 +2305,9 @@ void SSP_MODULE::putStateSCK(char _state)
 void SSP_MODULE::startSSP(unsigned int value)
 {
     if (verbose)
-      cout << "SSP: SPI turned on" << endl;
+      cout << "SSP: SPI turning on" << endl;
     Dprintf(("SSP_MODULE cmd %x\n", value &  _SSPCON::SSPM_mask ));
+    SPIproto(("SSP_MODULE cmd %x\n", value &  _SSPCON::SSPM_mask ));
     sspbuf.setFullFlag(false);
     if (! m_sink_set)
     {
@@ -2288,6 +2319,7 @@ void SSP_MODULE::startSSP(unsigned int value)
 	if (m_sck) 
 	{
 	   m_sck->addSink(m_SCL_Sink);
+	   m_SCL_State = m_sck->getPin().getState();
 	}
         if (m_ss)
 	{
@@ -2343,6 +2375,7 @@ void SSP_MODULE::startSSP(unsigned int value)
 	     m_sck->getPin().newGUIname("SCK");
 
 	if (m_SdoSource) m_SdoSource->putState('0'); // BUG, required to put SDO in know state
+	newSSPBUF(sspbuf.get_value());
 	break;
 
       case _SSPCON::SSPM_I2Cslave_7bitaddr:
@@ -2501,6 +2534,8 @@ void SSP_MODULE::SDI_SinkState(char new3State)
 void SSP_MODULE::SCL_SinkState(char new3State)
 {
   bool new_SCL_State = (new3State == '1' || new3State == 'W');
+
+  SPIproto(("SCL_SinkState new %d old %d enabled %d m_SS_State %d\n", new_SCL_State, m_SCL_State, sspcon.isSSPEnabled(), m_SS_State));
  
   if (new_SCL_State == m_SCL_State)
 	return;
@@ -2581,7 +2616,15 @@ void SSP_MODULE::SS_SinkState(char new3State)
   // If SS goes high in the middle of an SPI transfer while in slave_SS mode,
   // transfer is aborted unless BSSP which streches the clocking
 
+#ifdef SPI_PROTO
 
+  if (sspcon.isSSPEnabled() && 
+	((sspcon.value.get() & _SSPCON::SSPM_mask) == _SSPCON::SSPM_SPIslaveSS)
+     )
+  {
+	SPIproto(("SS State change to %d\n", m_SS_State));
+  }
+#endif
   if (!sspcon.isSSPEnabled() || 
 	! m_SS_State ||
 	(sspcon.value.get() & _SSPCON::SSPM_mask) != _SSPCON::SSPM_SPIslaveSS ||

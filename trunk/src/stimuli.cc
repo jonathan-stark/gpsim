@@ -48,7 +48,7 @@ License along with this library; if not, see
 #endif
 
 static char num_nodes = 'a';
-static char num_stimuli = 'a';
+static int num_stimuli = 1;
 void  gpsim_set_break_delta(guint64 delta, TriggerObject *f=0);
 
 
@@ -573,11 +573,6 @@ stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
     Cth(0.0), // Farads
     nodeVoltage(0.0) // volts
 {
-  /*
-  if(cPname && *cPname)
-    new_name(cPname,false);
-  */
-  globalSymbolTable().addSymbol(this);
 }
 void stimulus::new_name(const char *cPname, bool bClearableSymbol)
 {
@@ -965,6 +960,16 @@ IOPIN::~IOPIN()
 }
 
 
+void IOPIN::get(char *return_str, int len)
+{
+    if (return_str)
+    {
+        if (get_direction() == DIR_OUTPUT)
+            strncpy(return_str, IOPIN::getDrivingState()?"1": "0", len);
+        else
+            strncpy(return_str, IOPIN::getState()?"1": "0", len);
+    }
+}
 void IOPIN::attach(Stimulus_Node *s)
 {
   snode = s;
@@ -1510,15 +1515,27 @@ ValueStimulus::ValueStimulus(const char *n)
   current = 0;
 
   if(n)
+  {
+      printf("RRR Stimulus::ValueStimulus %s\n", n);
     new_name(n,false);
+  }
   else
     {
       char name_str[100];
       snprintf(name_str,sizeof(name_str),"s%d_asynchronous_stimulus",num_stimuli);
+      printf("RRR Stimulus::ValueStimulus %s\n", name_str);
       num_stimuli++;
       new_name(name_str,false);
     }
 
+}
+void ValueStimulus::get(char *return_str, int len)
+{
+    if (return_str)
+    {
+	double  d = get_Vth();
+	snprintf(return_str,len,"%.2fV",d);
+    }
 }
 
 ValueStimulus::~ValueStimulus()

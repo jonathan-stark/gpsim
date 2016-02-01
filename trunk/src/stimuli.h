@@ -396,6 +396,7 @@ class IOPIN : public stimulus
   virtual void putState(bool new_dstate);
   virtual void putState(double new_Vth);
   virtual void set_digital_threshold(double vdd);
+  virtual void get(char *return_str, int len);
 
   virtual void set_ZthWeak(double Z) { ZthWeak=Z;}
   virtual double get_ZthWeak() { return ZthWeak;}
@@ -587,6 +588,7 @@ public:
   virtual void callback();
   virtual void put_data(ValueStimulusData &data_point);
   virtual void put_initial_state(Value *);
+  virtual void get(char *return_str, int len);
 
   virtual double get_Vth();
   virtual void start();
