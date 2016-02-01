@@ -1616,6 +1616,7 @@ public:
   virtual unsigned int GetLowerBound();
   virtual unsigned int GetUpperBound();
   virtual bool bIsIndexInRange(unsigned int uIndex);
+  virtual void get(char *return_str, int len);
 private:
   Processor *   m_pProcessor;
   ProgramMemoryAccess   *m_pPma;
@@ -1640,6 +1641,10 @@ ProgramMemoryCollection::~ProgramMemoryCollection()
     m_pProcessor->removeSymbol(this);
 }
 
+void ProgramMemoryCollection::get(char *return_str, int len)
+{
+    if (return_str) strncpy(return_str, "", len);
+}
 unsigned int ProgramMemoryCollection::GetSize()
 {
   return m_pProcessor->program_memory_size();

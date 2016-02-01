@@ -381,13 +381,13 @@ void _16bit_processor :: delete_sfr_map()
   }
 
   delete_sfr_register(t1con);
+  delete_sfr_register(osccon);
   remove_sfr_register(&tmr1l);
   remove_sfr_register(&tmr1h);
 
   remove_sfr_register(&rcon);
   remove_sfr_register(&wdtcon);
   remove_sfr_register(&lvdcon);
-  remove_sfr_register(osccon);
   remove_sfr_register(&t0con);
   remove_sfr_register(&tmr0l);
   remove_sfr_register(&tmr0h);

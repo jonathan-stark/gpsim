@@ -697,6 +697,7 @@ void pic_processor::save_state()
 // run  -- Begin simulating and don't stop until there is a break.
 //
 
+
 void pic_processor::run (bool refresh)
 {
   if(simulation_mode != eSM_STOPPED) {
@@ -711,7 +712,7 @@ void pic_processor::run (bool refresh)
   // then ignore it.
 
   if(realtime_mode)
-    realtime_cbp.start(active_cpu);
+    realtime_cbp.start(this);
 
   simulation_start_cycle = get_cycles().get();
   bp.clear_global();
@@ -726,22 +727,6 @@ void pic_processor::run (bool refresh)
   if(realtime_mode)
     realtime_cbp.stop();
 
-    /* FIXME
-    if(bp.have_pm_write())
-      pm_write();
-    */
-
-    /*
-    if(bp.have_socket_break()) {
-      cout << " socket break point \n";
-      Interface *i = gi.get_socket_interface();
-      if (i)
-        i->Update(0);
-      bp.clear_socket_break();
-    }
-    */
-
-    //} while(!bp.global_break);
 
 
   bp.clear_global();
@@ -1751,6 +1736,7 @@ void pic_processor::createMCLRPin(int pkgPinNumber)
   if(package) {
     m_MCLR = new IO_open_collector("MCLR");
     package->assign_pin(pkgPinNumber,m_MCLR);
+    addSymbol(m_MCLR);
 
     m_MCLRMonitor = new MCLRPinMonitor(this);
     m_MCLR->setMonitor(m_MCLRMonitor);
@@ -1771,6 +1757,7 @@ void pic_processor::assignMCLRPin(int pkgPinNumber)
     {
 	m_MCLR_pin = pkgPinNumber;
     	m_MCLR = new IO_open_collector("MCLR");
+	addSymbol(m_MCLR);
 	m_MCLR_Save = package->get_pin(pkgPinNumber);
     	package->assign_pin(pkgPinNumber,m_MCLR, false);
 
@@ -1794,13 +1781,17 @@ void pic_processor::unassignMCLRPin()
   
     if (package && m_MCLR_Save)
     {
-
+        size_t l = m_MCLR_Save->name().find_first_of('.');
 	package->assign_pin(m_MCLR_pin,m_MCLR_Save, false);
-        m_MCLR_Save->newGUIname(m_MCLR_Save->name().c_str());
+
+	if (l == string::npos)
+            m_MCLR_Save->newGUIname(m_MCLR_Save->name().c_str());
+	else
+            m_MCLR_Save->newGUIname(m_MCLR_Save->name().substr(l+1).c_str());
 	if (m_MCLR)
 	{
 	    m_MCLR->setMonitor(0);
-	    delete m_MCLR;
+	    deleteSymbol(m_MCLR);
 	    m_MCLR = NULL;
 	    if (m_MCLRMonitor)
 	    {

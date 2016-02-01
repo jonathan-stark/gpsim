@@ -178,6 +178,11 @@ void Program_Counter::set(Value *v)
     put_value ( i );
 }
 
+void Program_Counter::get(char *buffer, int buf_size)
+{
+    if (buffer)
+	snprintf(buffer, buf_size, "%d (0x%x)", value, value);
+}
 
 //========================================================================
 

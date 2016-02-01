@@ -562,6 +562,14 @@ RegisterCollection:: ~RegisterCollection()
     m_pProcessor->removeSymbol(this);
 }
 
+// Displays in symbol GUI
+void RegisterCollection::get(char *return_str, int len)
+{
+    if (return_str)
+    {
+	strncpy(return_str, "", len);
+    }
+}
 unsigned int RegisterCollection::GetSize() {
   return m_uSize;
 }

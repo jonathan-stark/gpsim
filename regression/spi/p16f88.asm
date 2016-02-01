@@ -116,7 +116,7 @@ start:
     bcf		DRV_SS_TRIS
     movlw	0xff
     movwf	SSPSTAT
-  .assert "sspstat == 0xC0, \"SPI sspstat only SMP, CKE writable\""
+  .assert "sspstat == 0xC0, \"*** FAILED p16f88 SPI sspstat only SMP, CKE writable\""
     clrf	SSPSTAT
 
     BANKSEL	SSPCON
@@ -135,12 +135,12 @@ loop:
     btfss	PIR1,SSPIF
     goto	loop
 
-  .assert "(sspstat & 1) == 1, \"FAILED SSP SPI Master BF not set\""
+  .assert "(sspstat & 1) == 1, \"*** FAILED p16f88 SSP SPI Master BF not set\""
     nop
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED SSP SPI Master BF not cleared\""
+  .assert "(sspstat & 1) == 0, \"*** FAILED p16f88 SSP SPI Master BF not cleared\""
     nop
-  .assert "W == 0x54, \"FAILED SSP SPI Master wrong data\""
+  .assert "W == 0x54, \"*** FAILED p16f88 SSP SPI Master wrong data\""
     nop
 
 ;
@@ -152,6 +152,7 @@ loop:
     bsf		SCK_TRIS	; SCK
     bsf		SS_TRIS 	; SS
     bcf  STATUS,RP0	; bank 0
+    bcf		DRV_SS
     bcf		DRV_CLOCK
     movlw	0x24	; SSPEN | SPI slave mode SS enable
     movwf	SSPCON
@@ -161,12 +162,13 @@ loop:
     bsf		DRV_CLOCK
     bcf		DRV_CLOCK
     movwf	SSPBUF	; test WCOL set
-  .assert "(sspcon & 0x80) == 0x80, \"SSP SPI WCOL set\""
+  .assert "(sspcon & 0x80) == 0x80, \"***FAILED p16f88 SSP SPI WCOL set\""
     nop
     bcf		SSPCON,WCOL	; clear WCOL bit
-  .assert "(sspcon & 0x80) == 0x00, \"SSP SPI WCOL was cleared\""
+  .assert "(sspcon & 0x80) == 0x00, \"***FAILED p16f88 SSP SPI WCOL was cleared\""
     nop
     ; SS is high, so transfer should not happen
+    bsf		DRV_SS
     movlw	0x0a
     movwf	loopcnt
 
@@ -176,7 +178,7 @@ ss_loop:
     decfsz	loopcnt
     goto	ss_loop
 
-  .assert "(pir1 & 0x08) == 0, \"FAILED SSP SPI slave with SS\""
+  .assert "(pir1 & 0x08) == 0, \"*** FAILED p16f88 SSP SPI slave with SS\""
     nop
     bcf		DRV_SS		; clear SS
     
@@ -190,7 +192,7 @@ loop2:
     goto	loop2
 
     movf	SSPBUF,W
-  .assert "W == 0x54, \"FAILED SSP SPI Slave data\""
+  .assert "W == 0x54, \"*** FAILED p16f88 SSP SPI Slave data\""
     nop
 ;
 ;	Test Slave receive overrun
@@ -202,7 +204,7 @@ loop4:
     bcf		DRV_CLOCK
     decfsz	loopcnt,F
     goto	loop4
-  .assert "(sspcon & 0x40) == 0x40, \"FAILED SSP SPI SSPOV\""
+  .assert "(sspcon & 0x40) == 0x40, \"*** FAILED p16f88 SSP SPI SSPOV\""
     nop
 
 ;
@@ -229,12 +231,12 @@ loop3:
     btfss	PIR1,SSPIF
     goto	loop3
 
-  .assert "(sspstat & 1) == 1, \"FAILED SSP SPI Master TMR2, BF not set\""
+  .assert "(sspstat & 1) == 1, \"*** FAILED p16f88 SSP SPI Master TMR2, BF not set\""
     nop
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED SSP SPI Master TMR2, BF not cleared\""
+  .assert "(sspstat & 1) == 0, \"*** FAILED p16f88 SSP SPI Master TMR2, BF not cleared\""
     nop
-  .assert "W == 0x54, \"FAILED SSP SPI Master TMR2 wrong data\""
+  .assert "W == 0x54, \"*** FAILED p16f88 SSP SPI Master TMR2 wrong data\""
     nop
 
   .assert "\"*** PASSED 16f88 SSP SPI test\""

@@ -1,3 +1,17 @@
+2016-02-01 Roy Rankin <rrankin@ihug.com.au>
+	* src/ssp.cc src/ssp.h regression/spi/p16c62.asm
+          regression/spi/p16f88.asm
+	: Add SPI proto trace 
+        * src/16bit-processors.cc
+	: delete osccon when processor closes
+	* src/stimuli.cc src/stimuli.h src/processor.cc
+	  src/registers.cc src/registers.h
+	: fix address/value column in symbol GUI
+        * src/pic-processor.cc
+	: mclr pin name in processor symbol space
+	* regression/p16f873/p16f873.asm
+	: Fine tune interrupt handling
+
 2016-01-31 Roy Rankin <rrankin@ihug.com.au>
 	* src/i2c-ee.cc src/ioports.cc src/ioports.h
 	: support for separate symbol space
