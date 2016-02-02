@@ -1,7 +1,12 @@
+2016-02-02 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_regwin.cc
+	: Bug fixes + patch from Rob Pearce.
+	  Added some input sanitization (feature 49)
+
 2016-02-01 Roy Rankin <rrankin@ihug.com.au>
 	* src/ssp.cc src/ssp.h regression/spi/p16c62.asm
           regression/spi/p16f88.asm
-	: Add SPI proto trace 
+	: Add SPI proto trace
         * src/16bit-processors.cc
 	: delete osccon when processor closes
 	* src/stimuli.cc src/stimuli.h src/processor.cc
@@ -17,7 +22,7 @@
 	: support for separate symbol space
 
 2016-01-31 Roy Rankin <rrankin@ihug.com.au>
-	* modules/Makefile.am modules/makefile.mingw modules/m_stimuli.cc 
+	* modules/Makefile.am modules/makefile.mingw modules/m_stimuli.cc
 	  modules/m_stimuli.h modules/stimuli.cc modules/stimuli.h
 	: rename stimuli file for gdb as same file name used in src
 	* modules/encoder.cc modules/gpsim_modules.cc modules/i2c-eeprom.cc
@@ -25,7 +30,7 @@
 	  modules/led.h modules/logic.cc modules/logic.h modules/push_button.cc
 	  modules/resistor.cc modules/switch.cc modules/ttl.cc modules/ttl.h
 	  modules/usart.cc modules/usart.h modules/video.cc
-	: Fix memory issues on module removal (bug 214), 
+	: Fix memory issues on module removal (bug 214),
 	  separate module symbol space
 
 2016-01-30 Roy Rankin <rrankin@ihug.com.au>

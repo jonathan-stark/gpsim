@@ -350,6 +350,61 @@ gtk_sheet_REALLY_set_row_height(GtkSheet *sheet, gint row, gint height)
   sheet->row[row].height = height;
 }
 
+// Sanatize the numeric text input
+// Only checks that the input is less that 0xffff
+
+static void sanatize_numeric(GtkEditable *editable, gchar *new_text,
+  gint new_text_length, gint *position, gpointer user_data)
+{
+  bool ok = true;
+  char *current_text = gtk_editable_get_chars(editable, 0, -1);
+  std::string text(current_text);
+  text.insert(*position, new_text);
+  g_free(current_text);
+
+  if (text != "0x" && text != "0X") {
+    char *end_char;
+    unsigned long value = strtoul(text.c_str(), &end_char, 0);
+    if (value > 0xffff || *end_char != '\0')
+      ok = false;
+  }
+
+  if (ok) {
+    g_signal_handlers_block_by_func(G_OBJECT(editable),
+      gpointer(sanatize_numeric), user_data);
+    gtk_editable_insert_text(editable, new_text, new_text_length, position);
+    g_signal_handlers_unblock_by_func(G_OBJECT(editable),
+      gpointer(sanatize_numeric), user_data);
+  }
+
+  g_signal_stop_emission_by_name(G_OBJECT(editable), "insert-text");
+}
+
+static void sanatize_numeric_0x(GtkEditable *editable, gchar *new_text,
+  gint new_text_length, gint *position, gpointer user_data)
+{
+  bool ok = true;
+  char *current_text = gtk_editable_get_chars(editable, 0, -1);
+  std::string text(current_text);
+  text.insert(*position, new_text);
+  g_free(current_text);
+
+  char *end_char;
+  unsigned long value = strtoul(text.c_str(), &end_char, 16);
+  if (value > 0xffff || *end_char != '\0')
+    ok = false;
+
+  if (ok) {
+    g_signal_handlers_block_by_func(G_OBJECT(editable),
+      gpointer(sanatize_numeric_0x), user_data);
+    gtk_editable_insert_text(editable, new_text, new_text_length, position);
+    g_signal_handlers_unblock_by_func(G_OBJECT(editable),
+      gpointer(sanatize_numeric_0x), user_data);
+  }
+
+  g_signal_stop_emission_by_name(G_OBJECT(editable), "insert-text");
+}
+
 //========================================================================
 // get_value
 // used for reading a value from user when break on value is requested
@@ -374,7 +429,7 @@ int gui_get_value(const char *prompt)
   label = gtk_label_new(prompt);
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   GtkWidget *entry = gtk_entry_new();
-  gtk_entry_set_max_length(GTK_ENTRY(entry), 8);
+  g_signal_connect(entry, "insert-text", G_CALLBACK(sanatize_numeric), NULL);
   gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
@@ -390,7 +445,7 @@ int gui_get_value(const char *prompt)
     gtk_widget_destroy(dialog);
     return -1;
   }
-  // Should not overflow as input is limited to 8 chracters
+
   int value = strtoul(entry_text, NULL, 0);
   gtk_widget_destroy(dialog);
   return value;
@@ -399,9 +454,7 @@ int gui_get_value(const char *prompt)
 // used for reading a value from user when break on value is requested
 void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int *value2)
 {
-  GtkWidget *dialog;
-
-  dialog = gtk_dialog_new_with_buttons("enter values",
+  GtkWidget *dialog = gtk_dialog_new_with_buttons("enter values",
     NULL,
     GTK_DIALOG_MODAL,
     "_Cancel", GTK_RESPONSE_CANCEL,
@@ -419,7 +472,7 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
   label = gtk_label_new(prompt1);
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   entry1 = gtk_entry_new();
-  gtk_entry_set_max_length(GTK_ENTRY(entry1), 8);
+  g_signal_connect(entry1, "insert-text", G_CALLBACK(sanatize_numeric), NULL);
   gtk_box_pack_start(GTK_BOX(hbox), entry1, FALSE, FALSE, 0);
 
   hbox = gtk_hbox_new(FALSE, 6);
@@ -427,7 +480,7 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
   label = gtk_label_new(prompt2);
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
   entry2 = gtk_entry_new();
-  gtk_entry_set_max_length(GTK_ENTRY(entry2), 8);
+  g_signal_connect(entry2, "insert-text", G_CALLBACK(sanatize_numeric), NULL);
   gtk_box_pack_start(GTK_BOX(hbox), entry2, FALSE, FALSE, 0);
 
   gtk_widget_show_all(dialog);
@@ -440,25 +493,24 @@ void gui_get_2values(const char *prompt1, int *value1, const char *prompt2, int 
   }
 
   const gchar *entry_text;
-  int value;
 
   entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
-  value = strtoul(entry_text, NULL, 0);
   if (*entry_text == '\0') {
     *value1 = -1;
     *value2 = -1;
     gtk_widget_destroy(dialog);
+    return;
   }
-  *value1 = value;
+  *value1 = strtoul(entry_text, NULL, 0);
 
   entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
-  value = strtoul(entry_text, NULL, 0);
   if (*entry_text == '\0') {
     *value1 = -1;
     *value2 = -1;
     gtk_widget_destroy(dialog);
+    return;
   }
-  *value2 = value;
+  *value2 = strtoul(entry_text, NULL, 0);
   gtk_widget_destroy(dialog);
 }
 
@@ -1121,6 +1173,38 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 
 }
 
+/*
+ we get here when the entry widget loses focus. If it's been edited we
+ need to call set_cell to update the register.
+ */
+static void
+leave_entry(GtkSheet *sheet, GdkEvent *event, Register_Window *rw)
+{
+  Dprintf (( "leave_entry(%p,%p,%p)\n", sheet, event, rw ));
+
+  gint row, column;
+
+  if ( sheet==0 || rw==0 )
+  {
+      printf("Warning leave_entry(%p,%p)\n",sheet,rw);
+      return;
+  }
+
+  //sheet=GTK_SHEET(rw->register_sheet);
+  //row=sheet->active_cell.row; col=sheet->active_cell.col;
+  gtk_sheet_get_active_cell(sheet, &row, &column);
+
+  Dprintf(("  - sheet=%p, active cell (%d,%d)\n", sheet, row, column ));
+
+  if ( row <= sheet->maxrow && row >= 0 &&
+       column <= sheet->maxcol && column >= 0 )
+  {
+    // so we use set_cell() to write the changes from the sheet cell to gpsim
+    set_cell(GTK_WIDGET(sheet),row,column,rw);
+    rw->UpdateASCII(row);
+  }
+}
+
 /* when the sheet cursor has activated a new cell, we set the
    label and entry above the sheet
  */
@@ -1253,8 +1337,8 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
   gtk_widget_set_can_default(rw->location, TRUE);
   gtk_widget_show(rw->location);
 
-  rw->entry=gtk_entry_new();
-  gtk_entry_set_max_length(GTK_ENTRY(rw->entry), 8);
+  rw->entry = gtk_entry_new();
+  g_signal_connect(rw->entry, "insert-text", G_CALLBACK(sanatize_numeric_0x), NULL);
   gtk_box_pack_start(GTK_BOX(status_box), rw->entry,
                      TRUE, TRUE, 0);
   gtk_widget_show(rw->entry);
@@ -1779,6 +1863,9 @@ void Register_Window::Build()
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
 
+  // RP - I think this is wrong. The sheet's entry widget seems to get
+  // replaced every time a new cell is selected, so this signal can't
+  // work. Should it be hooked to the "changed" signal of the whole sheet?
   g_signal_connect(gtk_sheet_get_entry(GTK_SHEET(register_sheet)),
                      "changed", G_CALLBACK(show_entry), this);
 
@@ -1797,6 +1884,11 @@ void Register_Window::Build()
                      "key_press_event",
                      G_CALLBACK(clipboard_handler),
                      0);
+
+   g_signal_connect(register_sheet,
+                     "entry-focus-out",
+                     G_CALLBACK(leave_entry),
+                     this);
 
   g_signal_connect(register_sheet,
                      "resize_range",
