@@ -31,12 +31,6 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
 
-#include <cstring>
-#include <cctype>
-
-#include <list>
-#include <string>
-
 #include "gui.h"
 #include "gui_src.h"
 #include "gui_profile.h"
@@ -45,6 +39,12 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_watch.h"
 
 #include <cassert>
+#include <cctype>
+#include <cstring>
+
+#include <algorithm>
+#include <list>
+#include <string>
 
 #include "../src/fopen-path.h"
 
@@ -384,7 +384,14 @@ NSourcePage::ButtonPressHandler(GtkTextView *pView, GdkEventButton *pButton,
 
       gtk_menu_popup(GTK_MENU(aPopupMenu), 0, 0, 0, 0,
         3, pButton->time);
-      gtk_text_buffer_place_cursor(gtk_text_view_get_buffer(pView), &iter);
+
+      GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(pView);
+      gboolean selected = gtk_text_buffer_get_has_selection(text_buffer);
+
+      // Move cursor if no text is selected
+      if (!selected) {
+        gtk_text_buffer_place_cursor(text_buffer, &iter);
+      }
       return TRUE;
     }
 
@@ -484,11 +491,7 @@ public:
   bool bDirection();
   bool bCase();
 private:
-  bool m_bFound;
-  bool m_bLooped;
   int  m_iStart;
-  int  m_iLast;
-  int  m_iLastID;
 
   GtkWidget   *m_Window;           // The Search Dialog Window
   GtkWidget   *m_Entry;            // Widget that holds the search text.
@@ -507,8 +510,7 @@ private:
 
 //------------------------------------------------------------------------
 SearchDialog::SearchDialog()
-: m_bFound(false), m_bLooped(false), m_iStart(0), m_iLast(0), m_iLastID(-1),
-  m_pSourceWindow(0)
+: m_iStart(0), m_pSourceWindow(0)
 {
   m_Window = gtk_dialog_new_with_buttons(
     "Find", NULL,
@@ -884,7 +886,7 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
 
   while (totalLines--) {
 
-    const char *str = gtk_text_buffer_get_text(pPage->buffer(),
+    char *str = gtk_text_buffer_get_text(pPage->buffer(),
       &iStart, &iEnd, FALSE);
     unsigned int srcLen = strlen(str);
 
@@ -919,8 +921,11 @@ int SourceWindow::findText(const char *pText, int start, bool bDirection, bool b
       gtk_text_buffer_select_range (pPage->buffer(),
         &iStart,
         &iEnd);
+
+      g_free(str);
       return gtk_text_iter_get_offset(bDirection ? &iEnd : &iStart);
     }
+    g_free(str);
 
     // Now we'll search whole lines.
     offset = 0;
@@ -1067,80 +1072,54 @@ SourceWindow::PopupMenuHandler(GtkWidget *widget, gpointer data)
     break;
 
   case MENU_SELECT_SYMBOL:
-  case MENU_ADD_TO_WATCH: {
+  case MENU_ADD_TO_WATCH:
+  {
     GtkTextBuffer *pBuffer = pPage->buffer();
     GtkTextIter itBegin, itEnd;
-    if(gtk_text_buffer_get_selection_bounds(
-         pBuffer, &itBegin, &itEnd) ) {
+    if (gtk_text_buffer_get_selection_bounds(pBuffer, &itBegin, &itEnd)) {
       gchar *text = gtk_text_buffer_get_text(pBuffer, &itBegin, &itEnd, FALSE);
-      if(text != 0) {
-        TrimWhiteSpaceFromString(text);
 
-        if(text[0] != 0) {
-          //register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
-          /*
-          if(pReg == NULL) {
-            // We also try upper case.
-            string sName(text);
-            toupper(sName);
-            pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
-          }
-          if(pReg == NULL) {
-            // We also try with a '_' prefix.
-            string sName("_");
-            sName.append(text);
-            pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
-            if(pReg == NULL) {
-              // We also try upper case.
-              toupper(sName);
-              pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
-            }
-          }
-          */
-          Register *pReg = findRegister(string(text));
+      TrimWhiteSpaceFromString(text);
 
-          if(!pReg) {
-            GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(pSW->window),
-            GTK_DIALOG_MODAL,
-            GTK_MESSAGE_WARNING,
-            GTK_BUTTONS_OK,
-            "The symbol '%s' does not exist as a register symbol.\n"
-            "Only register based symbols may be added to the Watch window.",
-            text);
-            gtk_dialog_run (GTK_DIALOG (dialog));
-            gtk_widget_destroy (dialog);
-          }
-          else {
-            pSW->gp->watch_window->Add(pReg);
-          }
+      if (text[0] != '\0') {
+        Register *pReg = findRegister(std::string(text));
+
+        if(!pReg) {
+          GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(pSW->window),
+          GTK_DIALOG_MODAL,
+          GTK_MESSAGE_WARNING,
+          GTK_BUTTONS_OK,
+          "The symbol '%s' does not exist as a register symbol.\n"
+          "Only register based symbols may be added to the Watch window.",
+          text);
+          gtk_dialog_run (GTK_DIALOG (dialog));
+          gtk_widget_destroy (dialog);
+        } else {
+          pSW->gp->watch_window->Add(pReg);
         }
+
       }
+      g_free(text);
     }
     }
     break;
   case MENU_STEP:
-    if (pSW)
-      pSW->step();
+    pSW->step();
     break;
   case MENU_STEP_OVER:
-    if (pSW)
-      pSW->step_over();
+    pSW->step_over();
     break;
   case MENU_RUN:
-    if (pSW)
-      pSW->run();
+    pSW->run();
     break;
   case MENU_STOP:
-    if (pSW)
-      pSW->stop();
+    pSW->stop();
     break;
   case MENU_RESET:
-    if (pSW)
-      pSW->reset();
+    pSW->reset();
     break;
   case MENU_FINISH:
-    if (pSW)
-      pSW->finish();
+    pSW->finish();
     break;
   default:
     puts("Unhandled menuitem?");
@@ -1874,7 +1853,7 @@ void SourceWindow::NewSource(GUI_Processor *gp)
 
   std::vector<SourceBuffer *>::iterator i = m_pParent->ppSourceBuffers.begin();
   std::vector<SourceBuffer *>::iterator iend = m_pParent->ppSourceBuffers.end();
- 
+
   for ( ; i != iend; ++i) {
     AddPage(*i);
   }
@@ -1970,7 +1949,7 @@ int gui_question(const char *question, const char *a, const char *b)
   GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
   GtkWidget *label = gtk_label_new(question);
   gtk_container_add(GTK_CONTAINER(content_area), label);
-  
+
   gtk_widget_show_all(dialog);
   int retval = gtk_dialog_run(GTK_DIALOG(dialog));
 
@@ -2329,7 +2308,7 @@ void SourceBrowserParent_Window::parseSource(SourceBuffer *pBuffer,FileContext *
 
 	// try to convert to uft8 using current locale
 	// if we succeed, do normal processing on converted text
-	if ((new_buffer = g_locale_to_utf8((const gchar *)text_buffer, 
+	if ((new_buffer = g_locale_to_utf8((const gchar *)text_buffer,
 		-1, &bytes_read, &bytes_written, NULL)))
 	{
         	pBuffer->parseLine(new_buffer,address);
