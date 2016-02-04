@@ -435,6 +435,7 @@ P12F1822::~P12F1822()
     delete_sfr_register(pir2);
     delete e;
     delete m_cpu_temp;
+    delete osccon;
 }
 Processor * P12F1822::construct(const char *name)
 {
@@ -854,6 +855,33 @@ void P12F1822::program_memory_wp(unsigned int mode)
 	    break;
 	}
 
+}
+//========================================================================
+Processor * P12F1840::construct(const char *name)
+{
+
+  P12F1840 *p = new P12F1840(name);
+
+  p->create(0x7f, 256);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+P12F1840::P12F1840(const char *_name, const char *desc) :
+	P12F1822(_name, desc)
+{
+}
+P12F1840::~P12F1840()
+{
+  delete_file_registers(0xc0, 0xef, 0x00);
+  delete_file_registers(0x120, 0x16f, 0x00);
+}
+void  P12F1840::create(int ram_top, int eeprom_size)
+{
+  P12F1822::create(ram_top, eeprom_size);
+  add_file_registers(0xc0, 0xef, 0x00);
+  add_file_registers(0x120, 0x16f, 0x00);
 }
 //========================================================================
 

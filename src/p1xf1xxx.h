@@ -105,9 +105,9 @@ public:
 
   virtual PROCESSOR_TYPE isa(){return _P12F1822_;};
 
- P12F1822(const char *_name=0, const char *desc=0);
-  ~P12F1822();
   static Processor *construct(const char *name);
+  P12F1822(const char *_name=0, const char *desc=0);
+  ~P12F1822();
   virtual void create_sfr_map();
   virtual void create_symbols();
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
@@ -124,6 +124,15 @@ public:
 
 };
 
+class P12F1840 : public P12F1822
+{
+public:
+  static Processor *construct(const char *name);
+  virtual unsigned int program_memory_size() const { return 4096; }
+  virtual void create(int ram_top, int eeprom_size);
+  P12F1840(const char *_name=0, const char *desc=0);
+  ~P12F1840();
+};
 class P16F178x : public _14bit_e_processor
 {
 public:

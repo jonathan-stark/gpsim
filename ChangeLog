@@ -1,3 +1,14 @@
+2016-02-04 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p1xf18xx/12f1822_g.lkr
+	  regression/p1xf18xx/16f1788_g.lkr
+	  regression/p1xf18xx/16f1823_g.lkr
+	  regression/p1xf18xx/Makefile
+	  regression/p1xf18xx/p12f1840.asm
+	: Add basic p12f1840 test, cleanup Makefile 
+	* src/p1xf1xxx.cc src/p1xf1xxx.h src/pic-processor.cc
+	  src/pic-processor.h
+	: Feature 51 - Add p12f1840 processor
+
 2016-02-02 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_regwin.cc
 	: Bug fixes + patch from Rob Pearce.
