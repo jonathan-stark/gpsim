@@ -132,6 +132,8 @@ public:
   virtual void create(int ram_top, int eeprom_size);
   P12F1840(const char *_name=0, const char *desc=0);
   ~P12F1840();
+
+  sfr_register *vrefcon;
 };
 class P16F178x : public _14bit_e_processor
 {
@@ -270,5 +272,14 @@ public:
   PicTrisRegister  *m_trisc;
   PicLatchRegister *m_latc;
   WPU              *m_wpuc;
+};
+class P16F1825 : public P16F1823
+{
+public:
+  static Processor *construct(const char *name);
+  virtual unsigned int program_memory_size() const { return 8*1024; }
+  virtual void create(int ram_top, int eeprom_size);
+  P16F1825(const char *_name=0, const char *desc=0);
+  ~P16F1825();
 };
 #endif //__P1xF1xxx_H__

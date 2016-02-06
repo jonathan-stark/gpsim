@@ -876,12 +876,19 @@ P12F1840::~P12F1840()
 {
   delete_file_registers(0xc0, 0xef, 0x00);
   delete_file_registers(0x120, 0x16f, 0x00);
+  delete_sfr_register(vrefcon);
 }
 void  P12F1840::create(int ram_top, int eeprom_size)
 {
   P12F1822::create(ram_top, eeprom_size);
   add_file_registers(0xc0, 0xef, 0x00);
   add_file_registers(0x120, 0x16f, 0x00);
+  // Set DeviceID
+  if (m_configMemory && m_configMemory->getConfigWord(6))
+      m_configMemory->getConfigWord(6)->set(0x1b80);
+  vrefcon = new sfr_register(this, "vrefcon",
+		"Voltage Regulator Control Register"); 
+  add_sfr_register(vrefcon, 0x197, RegisterValue(0x01,0));
 }
 //========================================================================
 
@@ -1885,4 +1892,50 @@ void P16F1823::create_sfr_map()
     cpscon0.set_pin(7, &(*m_portc)[3]);
     sr_module.srcon1.set_ValidBits(0xff);
     sr_module.setPins(&(*m_porta)[1], &(*m_porta)[2], &(*m_portc)[4]);
+}
+//========================================================================
+Processor * P16F1825::construct(const char *name)
+{
+
+  P16F1825 *p = new P16F1825(name);
+
+  p->create(0x7f, 256);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+P16F1825::P16F1825(const char *_name, const char *desc) :
+	P16F1823(_name, desc)
+{
+}
+P16F1825::~P16F1825()
+{
+  delete_file_registers(0xc0, 0xef);
+  delete_file_registers(0x120, 0x16f);
+  delete_file_registers(0x1a0, 0x1ef);
+  delete_file_registers(0x220, 0x26f);
+  delete_file_registers(0x2a0, 0x2ef);
+  delete_file_registers(0x320, 0x32f);
+  delete_file_registers(0x420, 0x46f);
+  delete_file_registers(0x4a0, 0x4ef);
+  delete_file_registers(0x520, 0x56f);
+  delete_file_registers(0x5a0, 0x5ef);
+}
+void  P16F1825::create(int ram_top, int eeprom_size)
+{
+  P16F1823::create(ram_top, eeprom_size);
+  add_file_registers(0xc0, 0xef, 0x00);
+  add_file_registers(0x120, 0x16f, 0x00);
+  add_file_registers(0x1a0, 0x1ef, 0x00);
+  add_file_registers(0x220, 0x26f, 0x00);
+  add_file_registers(0x2a0, 0x2ef, 0x00);
+  add_file_registers(0x320, 0x32f, 0x00);
+  add_file_registers(0x420, 0x46f, 0x00);
+  add_file_registers(0x4a0, 0x4ef, 0x00);
+  add_file_registers(0x520, 0x56f, 0x00);
+  add_file_registers(0x5a0, 0x5ef, 0x00);
+  // Set DeviceID
+  if (m_configMemory && m_configMemory->getConfigWord(6))
+      m_configMemory->getConfigWord(6)->set(0x2760);
 }
