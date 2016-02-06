@@ -366,7 +366,7 @@ read_config_data:
 	nop
 	nop
 	bsf      INTCON,GIE        ; Restore interrupts
-   .assert "eedath == 0x27 && eedatl == 0x00, \"*** FAILED 12f1840 Device ID\""
+   .assert "eedath == 0x1b && eedatl == 0x80, \"*** FAILED 12f1840 Device ID\""
         nop
 
   ; test write
@@ -389,7 +389,7 @@ read_config_data:
 	BANKSEL PIR2
 	btfss 	PIR2,EEIF
         goto    $-1
-  .assert "UserID2 == 0x2700, \"*** FAILED 12f1840 write to UserID2\""
+  .assert "UserID2 == 0x1b80, \"*** FAILED 12f1840 write to UserID2\""
         nop
 	return
 

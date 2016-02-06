@@ -5,7 +5,7 @@
 include ../make.regression
 
 
-all :   p12f1822.cod  p16f1788_comp.cod p16f1823.cod p16f1823_spi.cod p16f1823_i2c.cod p16f1823_i2c_v2.cod p16f1823_comp.cod p16f1788.cod p12f1822_usart.cod p12f1840.cod
+all :   p12f1822.cod  p16f1788_comp.cod p16f1823.cod p16f1823_spi.cod p16f1823_i2c.cod p16f1823_i2c_v2.cod p16f1823_comp.cod p16f1788.cod p12f1822_usart.cod p12f1840.cod p16f1825.cod
 
 p16f1823_i2c_v2.o : p16f1823_i2c_v2.asm i2c_low.inc
 
