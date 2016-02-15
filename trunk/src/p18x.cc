@@ -167,7 +167,8 @@ void P18C2x2::create()
 
   create_iopin_map();
   _16bit_compat_adc::create();
-  add_sfr_register(osccon, 0xfd3, RegisterValue(0x00,0), "osccon");
+  osccon->value = RegisterValue(0x00,0);
+  osccon->por_value = RegisterValue(0x00,0);
   init_pir2(pir2, PIR2v2::TMR3IF);
 
 }
@@ -355,7 +356,8 @@ void P18C4x2::create()
   create_iopin_map();
 
   _16bit_compat_adc::create();
-  add_sfr_register(osccon, 0xfd3, RegisterValue(0x00,0), "osccon");
+  osccon->value = RegisterValue(0x00,0);
+  osccon->por_value = RegisterValue(0x00,0);
 
 }
 //------------------------------------------------------------------------
@@ -1477,7 +1479,8 @@ void P18F1220::create()
 
   _16bit_processor::create();
   _16bit_v2_adc::create(7);
-  add_sfr_register(osccon, 0xfd3, RegisterValue(0x00,0), "osccon");
+  osccon->value = RegisterValue(0x00,0);
+  osccon->por_value = RegisterValue(0x00,0);
   usart.txsta.setIOpin(&(*m_portb)[1]);
   usart.rcsta.setIOpin(&(*m_portb)[4]);
   adcon1->setIOPin(4, &(*m_portb)[0]);
@@ -1699,7 +1702,6 @@ void P18F2x21::create()
   create_iopin_map();
 
   _16bit_processor::create();
-  add_sfr_register(osccon, 0xfd3, RegisterValue(0x40,0), "osccon");
 
   m_configMemory->addConfigWord(CONFIG3H-CONFIG1L,new Config3H_2x21(this, CONFIG3H, 0x83));
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x07));
@@ -2157,7 +2159,6 @@ void P18F4x21::create()
 
   add_sfr_register(&pwm1con, 0xfb7, RegisterValue(0,0));
   add_sfr_register(&eccpas, 0xfb6, RegisterValue(0,0));
-  add_sfr_register(osccon, 0xfd3, RegisterValue(0x40,0), "osccon");
   eccpas.setIOpin(0, 0, &(*m_portb)[0]);
   eccpas.link_registers(&pwm1con, &ccp1con);
   comparator.cmcon.set_eccpas(&eccpas);
@@ -2552,7 +2553,6 @@ void P18F6x20::create()
   create_iopin_map();
 
   _16bit_processor::create();
-  add_sfr_register(osccon, 0xfd3, RegisterValue(0x40,0), "osccon");
 
   m_configMemory->addConfigWord(CONFIG1H-CONFIG1L,new Config1H_4bits(this, CONFIG1H, 0x27));
   init_pir2(pir2, PIR2v2::TMR3IF);
