@@ -718,6 +718,7 @@ public:
   TMR2(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~TMR2();
 
+  virtual unsigned int max_counts() {return 256;};
   void put(unsigned int new_value);
   unsigned int get();
   void on_or_off(int new_state);

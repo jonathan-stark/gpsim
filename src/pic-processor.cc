@@ -1149,7 +1149,7 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
           registers[addr] = reg;
 	}
 	else if (warn_dup)
-	    printf("%s 0x%x Already register %s\n", __FUNCTION__, addr, registers[addr]->name().c_str());
+	    printf("%s %s 0x%x Already register %s\n", __FUNCTION__, name().c_str(), addr, registers[addr]->name().c_str());
       }
       else
           registers[addr] = reg;

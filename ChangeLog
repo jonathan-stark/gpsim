@@ -1,3 +1,9 @@
+2016-02-15 Roy Rankin <rrankin@ihug.com.au>
+	 * src/14bit-tmrs.cc src/14bit-tmrs.h
+	 : Bug #219 TMR2 can exceed 255 after changing prescale bits of T2CON 
+	 * src/p18x.cc src/pic-processor.cc
+	 : regression causing add_sfr_register to be called twice for osccon
+
 2016-02-06 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p1xf18xx/Makefile regression/p1xf18xx/p12f1840.asm
 	  regression/p1xf18xx/p16f1825.asm src/p1xf1xxx.cc src/p1xf1xxx.h

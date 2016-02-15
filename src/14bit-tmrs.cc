@@ -2005,7 +2005,12 @@ void TMRL::current_value()
   else
   {
     value_16bit = (guint64)((get_cycles().get() - last_cycle)/ 
-		(prescale* ext_scale)) & 0xffff;
+		(prescale* ext_scale));
+
+
+    if (value_16bit > 0x10000)
+	cerr << "overflow TMRL " << name() << " " << value_16bit << endl;
+	
     value.put(value_16bit & 0xff);
     tmrh->value.put((value_16bit>>8) & 0xff);
   }
@@ -2195,6 +2200,7 @@ void TMRL::sleep()
     m_sleeping = true;
     Dprintf(("TMRL::sleep t1sysc %d\n", t1con->get_t1sync()));
     // If tmr1 is running off Fosc/4 or Fosc this assumes Fosc stops during sleep
+
     if (  t1con->get_tmr1on() && t1con->get_tmr1cs() < 2)
     {
       if (future_cycle)
@@ -2501,9 +2507,10 @@ void TMR2::update(int ut)
         modeMask <<= 1;
       }
 
-      if(fc < future_cycle)
+      if(fc < future_cycle && verbose & 0x04)
         cout << "TMR2: update note: new breakpoint=" << hex << fc <<
-           " before old breakpoint " << future_cycle << endl;
+           " before old breakpoint " << future_cycle << 
+	    " now " << get_cycles().get() << endl;
 
       if (fc != future_cycle)
       {
@@ -2514,7 +2521,7 @@ void TMR2::update(int ut)
     }
     else
     {
-      cout << "TMR2 BUG!! tmr2 is on but has no cycle_break set on it\n";
+      cerr << "TMR2 BUG!! tmr2 is on but has no cycle_break set on it\n";
     }
   }
   else
@@ -2656,16 +2663,6 @@ void TMR2::new_pre_post_scale()
       // which means there's a cycle break point set on TMR2 that needs to
       // be moved to a new cycle.
 
-      // Get the current value of TMR2
-      ///value = (cycles.value - last_cycle)/prescale;
-
-      current_value();
-
-      //cout << "cycles " << cycles.value.lo  << " old prescale " << prescale;
-
-
-      //cout << " prescale " << prescale;
-
 
       if (prescale != old_prescale)	// prescaler value change
       {
@@ -2768,11 +2765,27 @@ void TMR2::current_value()
 {
   unsigned int tmr2_val = (get_cycles().get() - last_cycle)/ prescale;
 
-  value.put(tmr2_val & 0xff);
-
-  if(tmr2_val > 0x100)	// Can get to 0x100 during transition
+  if (tmr2_val == max_counts())
   {
-   cout << "TMR2 BUG!! value = " << tmr2_val << " which is greater than 0xff\n";
+    // tmr2 is about to roll over. However, the user code
+    // has requested the current value before the callback function
+    // has been invoked. So do callback and return 0.
+     if (future_cycle)
+     {
+        future_cycle = 0;
+        get_cycles().clear_break(this);
+        callback();
+     }
+     tmr2_val = 0;
+  }
+
+  value.put(tmr2_val & (max_counts() - 1));
+
+
+  if(tmr2_val >= max_counts())	// Can get to max_counts  during transition
+  {
+   cerr << "TMR2 BUG!! value = 0x" << tmr2_val << " which is greater than 0x";
+   cerr << max_counts() << endl;
   }
 }
 
