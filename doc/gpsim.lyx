@@ -2115,17 +2115,27 @@ The syntax for loading program files is:
 \end_layout
 
 \begin_layout LyX-Code
-load [processortype] programfile
+load [processortype] programfile [label]
 \end_layout
 
 \begin_layout Standard
-gpsim will automatically determine if the file is a .hex or .cod file.
+Gpsim will automatically determine if the file is a .hex or .cod file.
  The optional 
 \emph on
 processortype
 \emph default
- is needed if a .hex file is loaded and processor is not yet defined.
- It also allows one to override the processor specified in a .cod file.
+ is needed if a .hex file is being loaded and the processor type 
+ is not yet defined.
+\end_layout
+\begin_layout Standard
+The optional 
+\emph on
+label
+\emph default
+ is used to identify the processor module on the breadboard 
+ and as the prefix in the symbol table.
+ If a label is not given then the processor type is used for this
+ functionality. 
 \end_layout
 
 \begin_layout LyX-Code
