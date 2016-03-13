@@ -1,3 +1,7 @@
+2016-03-15 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_load.cc doc/gpsim.lyx
+	: Bug #220 Make documentation more clear for processor loading
+
 2016-02-15 Roy Rankin <rrankin@ihug.com.au>
 	 * src/14bit-tmrs.cc src/14bit-tmrs.h
 	 : Bug #219 TMR2 can exceed 255 after changing prescale bits of T2CON 

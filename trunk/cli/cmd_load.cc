@@ -67,25 +67,29 @@ cmd_load::cmd_load()
 
   brief_doc = string("Load either a program or command file");
 
-  long_doc = string ("load [processortype] programfile \
-\nload [i] cmdfile.stc\
+  long_doc = string ("    load programfile.cod [label] \
+\n    load processortype programfile.hex [label] \
+\n    load [i] cmdfile.stc\
 \n\n\tLoad either a program or command file. Program files may be in\
-\n\thex or cod (symbol) file format.\
-\n\t(Byte Craft's .cod files are the only program files with symbols\
-\n\tthat are recognized.)\
+\n\thex or cod (symbol) file format, however, a cod file is required for\
+\n\tfull Gpsim functionality.\
+\n\t(Gputil .cod files are the only program files with symbols\
+\n\tthat are supported.)\
 \n\
-\n\t  processortype - (optional) Name of the processor type simulation\
-\n\t                  to load the program file.\
-\n\t                  Ignored if the processor command has been previous\
-\n\t                  used.\
-\n\t  codfile       - a hex or cod formatted file. Cod is often called\
+\n\t  processortype - Name of the processor type simulation for .hex file\
+\n\t                  used. (e.g. p16f88)\
+\n\t  programfile   - a hex or cod formatted file. Cod is often called\
 \n\t                  a symbol file.\
-\n\t  cmdfile.stc   - a gpsim command file. Must have an .stc extension.\
+\n\t  label         - optional field used to identify processor on\
+\n\t                  breadboard and symbol table prefix.\
+\n\t                  If not supplied processor type is used.\
+\n\t  cmdfile       - a gpsim command file. Must have an .stc extension\
+\n\t                  unless the 'i' option is used.\
 \n\
 \n\t By default, .stc files residing in other directories will change\
-\n\t the working directory. The 'i' option overides that behavior. \
+\n\t the working directory. The 'i' option overrides that behavior. \
 \n\
-\nload e module_name hexfile\
+\n    load e module_name hexfile\
 \n\
 \n\t This command loads the contents of either a module or processor\
 \n\t EEPROM from an Intel hex format file. The address of the first\
