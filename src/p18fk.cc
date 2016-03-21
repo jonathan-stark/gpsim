@@ -1140,8 +1140,14 @@ void P18F26K22::create_sfr_map()
   ccpr5h.ccprl  = &ccpr5l;
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
-  add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh");
-  add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon");
+  usart.txsta.new_name("txsta1");
+  usart.txreg->new_name("txreg1");
+  usart.rcsta.new_name("rcsta1");
+  usart.rcreg->new_name("rcreg1");
+  usart.mk_rcif_int(&pir1, PIR1v2::RCIF);
+  usart.mk_txif_int(&pir1, PIR1v2::TXIF);
+  add_sfr_register(&usart.spbrgh,   0xfb0,porv,"spbrgh1");
+  add_sfr_register(&usart.baudcon,  0xfb8,porv,"baudcon1");
   usart.set_eusart(true);
   init_pir2(pir2, PIR2v4::TMR3IF); 
   tmr3l.setIOpin(&(*m_portc)[0]);
@@ -1177,7 +1183,6 @@ void P18F26K22::create_sfr_map()
   t5con->tmrl  = &tmr5l;
   ((T5CON *)t3con2)->t1gcon = &t3gcon;
   ((T5CON *)t5con)->t1gcon = &t5gcon;
-  tmr3l.setInterruptSource(new InterruptSource(pir2, PIR2v2::TMR3IF));
   tmr5l.setInterruptSource(new InterruptSource(&pir5, PIR5v1::TMR5IF));
   tmr5l.tmrh = &tmr5h;
   tmr5h.tmrl  = &tmr5l;
@@ -1197,6 +1202,8 @@ void P18F26K22::create_sfr_map()
   add_sfr_register(&usart2.spbrg,    0xf75, porv, "spbrg2");
   add_sfr_register(&usart2.spbrgh,   0xf76, porv, "spbrgh2");
 
+  usart2.mk_rcif_int(&pir3, PIR3v1::RCIF);
+  usart2.mk_txif_int(&pir3, PIR3v1::TXIF);
   tmr2.ssp_module[0] = &ssp1;
   tmr2.ssp_module[1] = &ssp2;
 
