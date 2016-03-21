@@ -498,7 +498,12 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ipr2,	  0xfa2,porv,"ipr2");
 
 
-  usart.initialize(&pir1,&(*m_portc)[6], &(*m_portc)[7],
+  if ( HasPortC() )
+      usart.initialize(&pir1,&(*m_portc)[6], &(*m_portc)[7],
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+                   new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
+  else
+      usart.initialize(&pir1,0, 0,
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 

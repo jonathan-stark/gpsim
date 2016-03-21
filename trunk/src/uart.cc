@@ -31,6 +31,8 @@ License along with this library; if not, see
 #define p_cpu ((Processor *)cpu)
 
 
+// defining EUSART_PIN  causes TX pin direction to be set for EUSART devices
+//#define EUSART_PIN 
 //#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
@@ -41,6 +43,7 @@ License along with this library; if not, see
 //--------------------------------------------------
 //
 //--------------------------------------------------
+// Drive output for TX pin
 class TXSignalSource : public SignalControl
 {
 public:
@@ -62,6 +65,7 @@ private:
   _TXSTA *m_txsta;
 };
 
+// Set TX pin to output
 class TXSignalControl : public SignalControl
 {
 public:
@@ -79,10 +83,51 @@ private:
 
 };
 
+// set Synchronous DT pin direction
+class RCSignalControl : public SignalControl
+{
+public:
+  RCSignalControl(_RCSTA *_rcsta) 
+     : m_rcsta(_rcsta)
+  { }
+  ~RCSignalControl() { }
+  virtual char getState() { return '0'; }
+  //virtual char getState() { return m_rcsta->getDir(); }
+  virtual void release() 
+  { 
+	m_rcsta->releasePin();
+  }
+private:
+  _RCSTA *m_rcsta;
+
+};
+// Drive date of DT  pin when transmitting
+class RCSignalSource : public SignalControl
+{
+public:
+  RCSignalSource(_RCSTA *_rcsta)
+    : m_rcsta(_rcsta)
+  {
+    assert(m_rcsta);
+  }
+  ~RCSignalSource() { }
+  virtual char getState()
+  {
+    return m_rcsta->getState();
+  }
+  virtual void release()
+  {
+    m_rcsta->releasePin();
+  }
+private:
+  _RCSTA *m_rcsta;
+};
+
 //--------------------------------------------------
 //
 //--------------------------------------------------
 
+// Report state changes on incoming RX pin
 class RXSignalSink : public SignalSink
 {
 public:
@@ -93,7 +138,28 @@ public:
   }
 
   virtual void setSinkState(char new3State) { m_rcsta->setState(new3State); }
-  virtual void release() { delete this; }
+  virtual void release() {delete this; }
+private:
+  _RCSTA *m_rcsta;
+};
+
+//--------------------------------------------------
+//
+//--------------------------------------------------
+
+// Report state changes on incoming Clock pin for Synchronous slave mode
+class CLKSignalSink : public SignalSink
+{
+public:
+  CLKSignalSink(_RCSTA *_rcsta)
+    : m_rcsta(_rcsta)
+  {
+    assert(_rcsta);
+  }
+
+  virtual void setSinkState(char new3State) { m_rcsta->clock_edge(new3State); }
+//  virtual void release() { delete this; }
+  virtual void release() {delete this; }
 private:
   _RCSTA *m_rcsta;
 };
@@ -104,13 +170,27 @@ _RCSTA::_RCSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
     txsta(0),
     state(_RCSTA::RCSTA_DISABLED),
     mUSART(pUSART),
-    m_PinModule(0), m_sink(0), m_cRxState('?')
+    m_PinModule(0), m_sink(0), m_cRxState('?'),
+    SourceActive(false), m_control(0), m_source(0), m_DTdirection('0'),
+    old_clock_state('?')
 {
   assert(mUSART);
 }
 
 _RCSTA::~_RCSTA()
 {
+    if (SourceActive && m_PinModule)
+    {
+        m_PinModule->setSource(0);
+        m_PinModule->setControl(0);
+    }
+
+    if (m_control)
+    {
+        delete m_source;
+        delete m_control;
+    }
+
 }
 
 //-----------------------------------------------------------
@@ -164,7 +244,7 @@ _BAUDCON::_BAUDCON(Processor *pCpu, const char *pName, const char *pDesc)
 _SPBRG::_SPBRG(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     txsta(0), rcsta(0), brgh(0), baudcon(0), start_cycle(0), last_cycle(0),
-    future_cycle(0), skip(0)
+    future_cycle(0), running(false), skip(0)
 {
 }
 
@@ -191,6 +271,8 @@ void _TXREG::put(unsigned int new_value)
   value.put(new_value & 0xff);
 
   Dprintf(("txreg just got a new value:0x%x\n",new_value));
+  assert(m_txsta);
+  assert(m_rcsta);
 
   // The transmit register has data,
   // so clear the TXIF flag
@@ -198,19 +280,21 @@ void _TXREG::put(unsigned int new_value)
   full = true;
   get_cycles().set_break(get_cycles().get() + 1, this);
 
-  if(m_txsta &&
-     ( (m_txsta->value.get() & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN)))
-    {
+  if(m_txsta->bTRMT() && m_txsta->bTXEN())
+  {
       // If the transmit buffer is empty and the transmitter is enabled
       // then transmit this new data now...
 
-      if ( m_txsta->value.get() & _TXSTA::SENDB )   // %%%FIXME - better in start_transmitting?
-        m_txsta->transmit_break();
-      else
-        m_txsta->start_transmitting();
-
       get_cycles().set_break(get_cycles().get() + 2, this);
-    }
+      if (m_txsta->bSYNC())
+          m_rcsta->sync_start_transmitting();
+      else
+          m_txsta->start_transmitting();
+  }
+  else if(m_txsta->bTRMT() && m_txsta->bSYNC())
+  {
+	m_txsta->value.put(m_txsta->value.get() & ~ _TXSTA::TRMT);
+  }
 
 }
 
@@ -252,19 +336,87 @@ void _TXSTA::setIOpin(PinModule *newPinModule)
       m_source = new TXSignalSource(this);
       m_control = new TXSignalControl(this);
   }
-  else if (m_PinModule)
+  else if (m_PinModule)	// disconnect old pin
   {
-	m_PinModule->setSource(0);
-	m_PinModule->setControl(0);
+      disableTXPin();
   }
 
   m_PinModule = newPinModule;
-  if(value.get() & TXEN && m_PinModule)
+  if(bTXEN() && rcsta->bSPEN())
   {
+      enableTXPin();
+  }
+}
+
+void _TXSTA::disableTXPin()
+{
+
+    if (m_PinModule)
+    {
+        m_PinModule->setSource(0);
+        m_PinModule->setControl(0);
+	m_PinModule->getPin().newGUIname(m_PinModule->getPin().name().c_str());
+	if (m_clkSink) 
+        {
+            m_PinModule->removeSink(m_clkSink);
+	    m_clkSink->release();
+	    m_clkSink = 0;
+        }
+    }
+}
+void _TXSTA::enableTXPin()
+{
+  char out;
+  assert(m_PinModule);
+
+  if (m_PinModule && !SourceActive)
+  {
+	char reg_no = *(name().c_str() + 5);
+	if (bSYNC())
+	{
+	    char ck[4] = "CK";
+	    if (reg_no)
+	    {
+		ck[2] = reg_no;
+		ck[3] = 0;
+            }
+            m_PinModule->getPin().newGUIname(ck);
+	    out = '0';
+	    if (!bCSRC())	// slave clock
+	    {
+                if (!m_clkSink)
+                {
+                    m_clkSink = new CLKSignalSink(rcsta);
+		    m_PinModule->addSink(m_clkSink);
+                    rcsta->set_old_clock_state(m_PinModule->getPin().getState());
+                }
+                mUSART->emptyTX();
+	        return;
+	    }
+        }
+	else
+	{
+	    char tx[4] = "TX";
+	    if (reg_no)
+	    {
+		tx[2] = reg_no;
+		tx[3] = 0;
+            }
+            m_PinModule->getPin().newGUIname(tx);
+	    out = '1';
+	}
         m_PinModule->setSource(m_source);
+#ifdef EUSART_PIN 
+	if(mUSART->IsEUSART())
+            m_PinModule->setControl(m_control);
+#else
         m_PinModule->setControl(m_control);
+#endif
+        putTXState(out);
         SourceActive = true;
   }
+
+  mUSART->emptyTX();
 }
 
 void _TXSTA::releasePin()
@@ -272,6 +424,7 @@ void _TXSTA::releasePin()
 
     if (m_PinModule && SourceActive)
     {
+	m_PinModule->getPin().newGUIname(m_PinModule->getPin().name().c_str());
 	m_PinModule->setControl(0);
 	SourceActive = false;
     }
@@ -282,8 +435,9 @@ void _TXSTA::releasePin()
 
 void _TXSTA::putTXState(char newTXState)
 {
-
   m_cTxState = bInvertPin ? newTXState ^ 1 : newTXState;
+
+
 
   if (m_PinModule)
     m_PinModule->updatePinModule();
@@ -315,9 +469,10 @@ void _TXSTA::put(unsigned int new_value)
   // The TRMT bit is controlled entirely by hardware.
   // It is high if the TSR has any data.
 
-  value.put((new_value & ~TRMT) | ( (bit_count) ? 0 : TRMT));
+  //RRRvalue.put((new_value & ~TRMT) | ( (bit_count) ? 0 : TRMT));
+  value.put((new_value & ~TRMT) | (old_value & TRMT));
 
-  Dprintf((" TXSTA value=0x%x\n",value.get()));
+  Dprintf(("%s TXSTA value=0x%x\n",name().c_str(), value.get()));
 
 
   if( (old_value ^ value.get()) & TXEN) {
@@ -332,22 +487,22 @@ void _TXSTA::put(unsigned int new_value)
 
     if(value.get() & TXEN) {
       Dprintf(("TXSTA - enabling transmitter\n"));
-      if (m_PinModule) {
-        m_PinModule->setSource(m_source);
-// all set diection ? RRR        if(mUSART->IsEUSART()) // EUSART can configure input as output for transmit
-          m_PinModule->setControl(m_control);
-	  SourceActive = true;
+      if (rcsta->bSPEN()) {
+
+	if (bSYNC() && ! bTRMT() && !rcsta->bSREN() && !rcsta->bCREN())
+        {
+	    // need to check bTRMT before calling enableTXPin
+	    enableTXPin();
+	    rcsta->sync_start_transmitting();
+        }
+        else
+	    enableTXPin();
       }
-      mUSART->emptyTX();
     } else {
       stop_transmitting();
-      if (m_PinModule) {
-        m_PinModule->setSource(0);
-	SourceActive = false;
-        if(mUSART->IsEUSART())
-          m_PinModule->setControl(0);
+      mUSART->full();         // Turn off TXIF
+      disableTXPin();
 	
-      }
     }
   }
 }
@@ -427,9 +582,14 @@ void _TXSTA::start_transmitting()
 
   // The start bit, which is always low, occupies bit position
   // zero. The next 8 bits come from the txreg.
+  assert(txreg);
   if(!txreg)
     return;
-
+  if (value.get() & SENDB)
+  {
+      transmit_break();
+      return;
+  }
   tsr = txreg->value.get() << 1;
 
   // Is this a 9-bit data transmission?
@@ -506,6 +666,8 @@ void _TXSTA::transmit_a_bit()
 
 }
 
+
+
 void _TXSTA::callback()
 {
   Dprintf(("TXSTA callback - time:%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
@@ -577,67 +739,182 @@ void _TXSTA::callback_print()
 void _RCSTA::put(unsigned int new_value)
 {
   unsigned int diff;
+  unsigned int readonly = value.get() & (RX9D | OERR | FERR);
 
   diff = new_value ^ value.get();
   trace.raw(write_trace.get() | value.get());
-  value.put( ( value.get() & (RX9D | OERR | FERR) )   |  (new_value & ~(RX9D | OERR | FERR)));
-
-  if(!txsta || !txsta->txreg)
-    return;
-  // First check whether or not the serial port is being enabled
-  if(diff & SPEN) {
-
-    if(value.get() & SPEN) {
-      spbrg->start();
-      // Make the tx line high when the serial port is enabled.
-      txsta->putTXState('1');
-      mUSART->emptyTX();
-    } else {
-
-      // Completely disable the usart:
-
-      txsta->stop_transmitting();
-      mUSART->full();         // Turn off TXIF
-      stop_receiving();
-
-      return;
-    }
-
+  assert(txsta);
+  assert(txsta->txreg);
+  assert(rcreg);
+  // If SPEN being turned off, clear all readonly bits
+  if (diff & SPEN && !(new_value & SPEN))
+  {
+      readonly = 0;
+      // clear receive stack (and rxif)
+      rcreg->pop();
+      rcreg->pop();
   }
+  // if CREN is being cleared, make sure OERR is clear
+  else if (diff & CREN && !(new_value & CREN))
+      readonly &= (RX9D | FERR);
+  value.put( readonly   |  (new_value & ~(RX9D | OERR | FERR)));
 
-  if(!(txsta->value.get() & _TXSTA::SYNC)) {
+  if (!txsta->bSYNC()) // Asynchronous case
+  {
+      if (diff & (SPEN | CREN)) // RX status change
+      {
+	  if ((value.get() & (SPEN | CREN)) == (SPEN | CREN))
+          {
+	      enableRCPin();
+	      if (txsta->bTXEN()) txsta->enableTXPin();
+	      spbrg->start();
+	      start_receiving();
+	      // If the rx line is low, then go ahead and start receiving now.
+              if (m_cRxState == '0' || m_cRxState == 'w')
+                  receive_start_bit();
+	      // Clear overrun error when turning on RX
+	      value.put( value.get() & (~OERR) );
+	  }
+	  else 		// RX off, check TX
+	  {
+	      if (m_PinModule)
+	          m_PinModule->getPin().newGUIname(
+				m_PinModule->getPin().name().c_str());
+	      stop_receiving();
+	      state = RCSTA_DISABLED;
 
-    // Asynchronous receive.
-    if( (value.get() & (SPEN | CREN)) == (SPEN | CREN) ) {
-
-      // The receiver is enabled. Now check to see if that just happened
-
-      if(diff & (SPEN | CREN)) {
-
-        // The serial port has just been enabled.
-        start_receiving();
-
-        // If the rx line is low, then go ahead and start receiving now.
-        //if(uart_port && !uart_port->get_bit(rx_bit))
-        if (m_cRxState == '0' || m_cRxState == 'w')
-          receive_start_bit();
+	      if (bSPEN())	// RX off but TX may still be active
+	      {
+		  if (txsta->bTXEN()) 		//TX output active
+		      txsta->enableTXPin();
+		  else				// TX off
+		      txsta->disableTXPin();
+	      }
+	      return;
+	  }
       }
+  }
+  else    				// synchronous case
+  {
 
-      // Clear overrun error on CREN enabling
-      if ( diff & CREN )
-         value.put( value.get() & (~OERR) );
+      if (diff & RX9)
+      {
+          if (bRX9())
+              bit_count = 9;
+          else
+              bit_count = 8;
+      }
+      if (diff & (SPEN | CREN | SREN )) // RX status change
+      {
+	  // Synchronous transmit (SREN & CREN == 0)
+	  if ((value.get() & (SPEN | SREN | CREN)) == SPEN)
+	  {
+	      enableRCPin(OUT);
+	      if (txsta->bTXEN()) txsta->enableTXPin();
+	      return;
+	  }
+	  // Synchronous receive (SREN | CREN != 0)
+	  else if (value.get() & (SPEN))
+          {
+	      enableRCPin(IN);
+	      txsta->enableTXPin();
+	      rsr = 0;
+	      if (bRX9())
+	          bit_count = 9;
+              else
+	          bit_count = 8;
+	      if (txsta->bCSRC()) // Master mode
+	      {
+                sync_next_clock_edge_high = true;
+                txsta->putTXState('0');  // clock low
+		callback();
+	      }
 
-    } else {
-      // The serial port is not enabled.
-
-      state = RCSTA_DISABLED;
-    }
-
-  } else
-    cout << "not doing syncronous receptions yet\n";
+	      return;
+	  }
+          else	// turn off UART
+          {
+	      if (m_PinModule)
+              {
+	          m_PinModule->getPin().newGUIname(
+				m_PinModule->getPin().name().c_str());
+		  if (m_sink) 
+                  {
+                      m_PinModule->removeSink(m_sink);
+                      m_sink->release();
+		      m_sink = 0;
+                  }
+              }
+	      txsta->disableTXPin();
+	  }
+      }
+  }
 
 }
 
+void _RCSTA::enableRCPin(char direction)
+{
+  if (m_PinModule)
+  {
+      char reg_no = *(name().c_str() + 5);
+      if (txsta->bSYNC()) // Synchronous case
+      {
+	  if (!m_source)
+	  {
+	      m_source = new RCSignalSource(this);
+	      m_control = new RCSignalControl(this);
+	  }
+	  if (direction == OUT)
+	  {
+	      m_DTdirection = '0';
+              if (SourceActive == false)
+	      {
+	          m_PinModule->setSource(m_source);
+                  m_PinModule->setControl(m_control);
+                  SourceActive = true;
+              }
+	      putRCState('0');
+	  }
+	  else
+	  {
+	      m_DTdirection = '1';
+	      if (SourceActive == true)
+	      {
+	          m_PinModule->setSource(0);
+                  m_PinModule->setControl(0);
+	      	  m_PinModule->updatePinModule();
+	      }
+	  }
+          char dt[4] = "DT";
+	  dt[2] = reg_no;
+	  dt[3] = 0;
+	  m_PinModule->getPin().newGUIname(dt);
+
+      }
+      else		// Asynchronous case
+      {
+          char rx[4] = "RX";
+	  rx[2] = reg_no;
+	  rx[3] = 0;
+	  m_PinModule->getPin().newGUIname(rx);
+      }
+     
+  }
+
+}
+void _RCSTA::disableRCPin()
+{
+}
+void _RCSTA::releasePin()
+{
+
+    if (m_PinModule && SourceActive)
+    {
+	m_PinModule->getPin().newGUIname(m_PinModule->getPin().name().c_str());
+	m_PinModule->setControl(0);
+	SourceActive = false;
+    }
+}
 void _RCSTA::put_value(unsigned int new_value)
 {
 
@@ -647,6 +924,21 @@ void _RCSTA::put_value(unsigned int new_value)
 }
 
 //-----------------------------------------------------------
+// RCSTA - putRCState - update the state of the DTx output pin
+//                      only used for Synchronous mode
+//
+
+void _RCSTA::putRCState(char newRCState)
+{
+
+  bInvertPin = mUSART->baudcon.rxdtp();
+  m_cTxState = bInvertPin ? newRCState ^ 1 : newRCState;
+
+  if (m_PinModule)
+    m_PinModule->updatePinModule();
+
+}
+//-----------------------------------------------------------
 // RCSTA - setIOpin - assign the I/O pin associated with the
 // the receiver.
 
@@ -655,14 +947,22 @@ void _RCSTA::setIOpin(PinModule *newPinModule)
 {
   if (m_sink) {
     if (m_PinModule)
+    {
       m_PinModule->removeSink(m_sink);
+      if(value.get() & SPEN)
+          m_PinModule->getPin().newGUIname(m_PinModule->getPin().name().c_str());
+    }
   }
   else
-      m_sink = new RXSignalSink(this);
+    m_sink = new RXSignalSink(this);
 
   m_PinModule = newPinModule;
   if (m_PinModule)
+  {
     m_PinModule->addSink(m_sink);
+    old_clock_state = m_PinModule->getPin().getState();
+    if(value.get() & SPEN) m_PinModule->getPin().newGUIname("RX/DT");
+  }
 
 }
 
@@ -676,12 +976,102 @@ void _RCSTA::setIOpin(PinModule *newPinModule)
 
 void _RCSTA::setState(char new_RxState)
 {
-  Dprintf((" setState:%c\n",new_RxState));
+  Dprintf((" %s setState:%c\n",name().c_str(), new_RxState));
 
   m_cRxState = new_RxState;
 
   if( (state == RCSTA_WAITING_FOR_START) && (m_cRxState =='0' || m_cRxState=='w'))
     receive_start_bit();
+
+}
+//  Transmit in synchronous mode
+//
+void _RCSTA::sync_start_transmitting()
+{
+    assert(txreg);
+
+    rsr = txreg->value.get();
+    if (txsta->bTX9())
+    {
+        rsr |= (txsta->bTX9D() << 8);
+        bit_count = 9;
+    }
+    else
+         bit_count = 8;
+    txsta->value.put(txsta->value.get() & ~ _TXSTA::TRMT);
+    if (txsta->bCSRC())
+    {
+        sync_next_clock_edge_high = true;
+        txsta->putTXState('0');		// clock low
+        callback();
+    }
+}
+void _RCSTA::set_old_clock_state(char new3State)
+{
+    bool state = (new3State == '1' || new3State == 'W');
+    state = mUSART->baudcon.txckp() ? !state : state;
+    old_clock_state = state;
+}
+void _RCSTA::clock_edge(char new3State)
+{
+    bool state = (new3State == '1' || new3State == 'W');
+
+    // invert clock, if requested 
+    state = mUSART->baudcon.txckp() ? !state : state;
+    if (old_clock_state == state) return;
+    old_clock_state = state;
+    if (value.get() & SPEN)
+    {
+	// Transmitting ?
+	if ((value.get() & ( CREN | SREN)) == 0)
+        {
+	    if (state)	// clock high, output data
+	    {
+		if (bit_count)
+		{
+		    putRCState(rsr&1 ? '1' : '0');
+	            rsr >>= 1;
+		    bit_count--;
+		}
+	    }
+            else
+            {
+              if(mUSART->bIsTXempty())
+	      {
+                   txsta->value.put(txsta->value.get() | _TXSTA::TRMT);
+	      }
+              else
+              {
+                  sync_start_transmitting();
+                  mUSART->emptyTX();
+              }
+            }
+        }
+        else		// receiving
+        {
+	    if (!state) // read data as clock goes low
+	    {
+		bool data = m_PinModule->getPin().getState();
+		data = mUSART->baudcon.rxdtp() ? !data : data;
+		
+		if (bRX9())
+		    rsr |= data << 9;
+                else
+		    rsr |= data << 8;
+		   
+		rsr >>= 1;
+		if (--bit_count == 0)
+	        {
+		    rcreg->push(rsr);
+		    if (bRX9())
+		        bit_count = 9;
+                    else
+		        bit_count = 8;
+		    rsr = 0;
+	        }
+	    }
+        }
+    }
 
 }
 //-----------------------------------------------------------
@@ -699,7 +1089,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  Dprintf(("receive_a_bit state:%d bit:%d time:0x%"PRINTF_GINT64_MODIFIER"x\n",state,bit,get_cycles().get()));
+  Dprintf(("%s receive_a_bit state:%d bit:%d time:0x%"PRINTF_GINT64_MODIFIER"x\n",name().c_str(), state,bit,get_cycles().get()));
 
   if( state == RCSTA_MAYBE_START) {
     if (bit)
@@ -724,9 +1114,9 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
       // copy the rsr to the fifo
       if(rcreg)
-        rcreg->push( rsr & 0xff);
+        rcreg->push( rsr & 0x1ff);
 
-      Dprintf(("_RCSTA::receive_a_bit received 0x%02X\n",rsr & 0xff));
+      Dprintf(("%s _RCSTA::receive_a_bit received 0x%02X\n",name().c_str(), rsr & 0x1ff));
 
     } else {
       //no stop bit; framing error
@@ -734,7 +1124,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
       // copy the rsr to the fifo
       if(rcreg)
-        rcreg->push( rsr & 0xff);
+        rcreg->push( rsr & 0x1ff);
     }
     // If we're continuously receiving, then set up for the next byte.
     // FIXME -- may want to set a half bit delay before re-starting...
@@ -768,7 +1158,7 @@ void _RCSTA::stop_receiving()
 
 void _RCSTA::start_receiving()
 {
-  Dprintf(("The USART is starting to receive data\n"));
+  Dprintf(("%s The USART is starting to receive data\n", name().c_str()));
 
   rsr = 0;
   sample = 0;
@@ -796,7 +1186,7 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 }
 void _RCSTA::receive_start_bit()
 {
-  Dprintf(("USART received a start bit\n"));
+  Dprintf(("%s USART received a start bit\n", name().c_str()));
 
   if((value.get() & (CREN | SREN)) == 0) {
     Dprintf(("  but not enabled\n"));
@@ -817,60 +1207,135 @@ void _RCSTA::receive_start_bit()
 void _RCSTA::callback()
 {
 
-  Dprintf(("RCSTA callback. time:0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+  //RRR Dprintf(("RCSTA callback. %s time:0x%"PRINTF_GINT64_MODIFIER"x\n", name().c_str(), get_cycles().get()));
 
-  // A bit is sampled 3 times.
+  if (txsta->bSYNC())	// Synchronous mode RX/DT is data, TX/CK is clock
+  {
 
-  switch(sample_state) {
-  case RCSTA_WAITING_MID1:
-    if (m_cRxState == '1' || m_cRxState == 'W')
-      sample++;
-
-    if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-      set_callback_break(BRGH_SECOND_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE);
-    else
-      set_callback_break(BRGL_SECOND_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE);
-
-    sample_state = RCSTA_WAITING_MID2;
-
-    break;
-
-  case RCSTA_WAITING_MID2:
-    if (m_cRxState == '1' || m_cRxState == 'W')
-      sample++;
-
-    if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-      set_callback_break(BRGH_THIRD_MID_SAMPLE - BRGH_SECOND_MID_SAMPLE);
-    else
-      set_callback_break(BRGL_THIRD_MID_SAMPLE - BRGL_SECOND_MID_SAMPLE);
-
-    sample_state = RCSTA_WAITING_MID3;
-
-    break;
-
-  case RCSTA_WAITING_MID3:
-    if (m_cRxState == '1' || m_cRxState == 'W')
-      sample++;
-
-    receive_a_bit( (sample>=2));
-    sample = 0;
-
-    // If this wasn't the last bit then go ahead and set a break for the next bit.
-    if(state==RCSTA_RECEIVING) {
-      if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-        set_callback_break(TOTAL_SAMPLE_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
-      else
-        set_callback_break(TOTAL_SAMPLE_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
-
-      sample_state = RCSTA_WAITING_MID1;
-    }
-
-    break;
-
-  default:
-    //cout << "Error RCSTA callback with bad state\n";
-    // The receiver was probably disabled in the middle of a reception.
-    ;
+      if (sync_next_clock_edge_high)	// + edge of clock
+      {
+	  sync_next_clock_edge_high = false;
+          txsta->putTXState('1');	// Clock high
+	  // Transmit
+	  if ((value.get() & (SPEN | SREN | CREN)) == SPEN)
+          {
+              if (bit_count)
+              {
+                  putRCState(rsr&1 ? '1' : '0');
+                  rsr >>= 1;
+                  bit_count--;
+              }
+          }
+      }
+      else	// - clock edge
+      {
+	  sync_next_clock_edge_high = true;
+          txsta->putTXState('0');	//clock low
+          // Receive Master mode
+          if ((value.get() & (SPEN | SREN | CREN)) != SPEN)
+          {
+		
+                if (value.get() & OERR)
+                    return;
+                bool data = m_PinModule->getPin().getState();
+                data = mUSART->baudcon.rxdtp() ? !data : data;
+		if (bRX9())
+                    rsr |= data << 9;
+                else
+                    rsr |= data << 8;
+                rsr >>= 1;
+                if (--bit_count == 0)
+                {
+                    rcreg->push(rsr);
+		    if (bRX9())
+		        bit_count = 9;
+                    else
+		        bit_count = 8;
+                    rsr = 0;
+                    value.put(value.get() & ~SREN);
+		    if ((value.get() & (SPEN | SREN | CREN)) == SPEN )
+		    {
+	                 enableRCPin(OUT);
+                        return;
+		    }
+                }
+          }
+          else		// Transmit, clock low
+          {
+              if (bit_count == 0 && !mUSART->bIsTXempty())
+              {
+                  sync_start_transmitting();
+                  mUSART->emptyTX();
+                  return;
+              }
+              else if(bit_count == 0 && mUSART->bIsTXempty())
+              {
+                   txsta->value.put(txsta->value.get() | _TXSTA::TRMT);
+                   putRCState('0');
+                   return;
+              }
+          }
+      }
+      if (cpu && (value.get() & SPEN))
+      {
+	  future_cycle = get_cycles().get() + spbrg->get_cycles_per_tick();
+          get_cycles().set_break(future_cycle, this);
+      }
+  }
+  else
+  {
+      // A bit is sampled 3 times.
+      switch(sample_state) {
+      case RCSTA_WAITING_MID1:
+        if (m_cRxState == '1' || m_cRxState == 'W')
+          sample++;
+    
+        if(txsta && (txsta->value.get() & _TXSTA::BRGH))
+          set_callback_break(BRGH_SECOND_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE);
+        else
+          set_callback_break(BRGL_SECOND_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE);
+    
+        sample_state = RCSTA_WAITING_MID2;
+    
+        break;
+    
+      case RCSTA_WAITING_MID2:
+        if (m_cRxState == '1' || m_cRxState == 'W')
+          sample++;
+    
+        if(txsta && (txsta->value.get() & _TXSTA::BRGH))
+          set_callback_break(BRGH_THIRD_MID_SAMPLE - BRGH_SECOND_MID_SAMPLE);
+        else
+          set_callback_break(BRGL_THIRD_MID_SAMPLE - BRGL_SECOND_MID_SAMPLE);
+    
+        sample_state = RCSTA_WAITING_MID3;
+    
+        break;
+    
+      case RCSTA_WAITING_MID3:
+        if (m_cRxState == '1' || m_cRxState == 'W')
+          sample++;
+    
+        receive_a_bit( (sample>=2));
+        sample = 0;
+    
+        // If this wasn't the last bit then go ahead and set a break for the next bit.
+        if(state==RCSTA_RECEIVING) {
+          if(txsta && (txsta->value.get() & _TXSTA::BRGH))
+            set_callback_break(TOTAL_SAMPLE_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
+          else
+            set_callback_break(TOTAL_SAMPLE_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
+    
+          sample_state = RCSTA_WAITING_MID1;
+        }
+    
+        break;
+    
+      default:
+        //cout << "Error RCSTA callback with bad state\n";
+        // The receiver was probably disabled in the middle of a reception.
+        ;
+      }
   }
 
 }
@@ -893,14 +1358,23 @@ void _RCREG::push(unsigned int new_value)
     if (m_rcsta)
       m_rcsta->overrun();
 
-    Dprintf(("receive overrun\n"));
+    Dprintf(("%s receive overrun\n", name().c_str()));
 
   } else {
 
-    Dprintf(("pushing uart reception onto rcreg stack, value received=0x%x\n",new_value));
+    Dprintf(("%s pushing uart reception onto rcreg stack, value received=0x%x\n",name().c_str(), new_value));
     fifo_sp++;
     oldest_value = value.get();
-    value.put(new_value);
+    value.put(new_value & 0xff);
+    if (m_rcsta)
+    {
+	unsigned int rcsta = m_rcsta->value.get();
+	if (new_value & 0x100)
+	    rcsta |= _RCSTA::RX9D;
+        else
+	    rcsta &= ~ _RCSTA::RX9D;
+        m_rcsta->value.put(rcsta);
+    }
   }
 
   mUSART->set_rcif();
@@ -914,7 +1388,18 @@ void _RCREG::pop()
     return;
 
   if(--fifo_sp == 1)
-    value.put(oldest_value);
+  {
+    value.put(oldest_value & 0xff);
+    if (m_rcsta)
+    {
+	unsigned int rcsta = m_rcsta->value.get();
+	if (oldest_value & 0x100)
+	    rcsta |= _RCSTA::RX9D;
+        else
+	    rcsta &= ~ _RCSTA::RX9D;
+        m_rcsta->value.put(rcsta);
+    }
+  }
 
   if(fifo_sp == 0)
     mUSART->clear_rcif();
@@ -955,7 +1440,7 @@ void _SPBRG::get_next_cycle_break()
   {
     if (future_cycle <= get_cycles().get())
     {
-	Dprintf(("future %"PRINTF_GINT64_MODIFIER"d <= now %"PRINTF_GINT64_MODIFIER"d\n", future_cycle, get_cycles().get()));
+	Dprintf(("%s future %"PRINTF_GINT64_MODIFIER"d <= now %"PRINTF_GINT64_MODIFIER"d\n", name().c_str(), future_cycle, get_cycles().get()));
 	last_cycle = get_cycles().get();
 	future_cycle = last_cycle + get_cycles_per_tick();
     }
@@ -969,7 +1454,7 @@ void _SPBRG::get_next_cycle_break()
 unsigned int _SPBRG::get_cycles_per_tick()
 {
     unsigned int cpi = (cpu) ? p_cpu->get_ClockCycles_per_Instruction() : 4;
-    unsigned int brgval, cpt;
+    unsigned int brgval, cpt, ret;
 
     if ( baudcon && baudcon->brg16() )
     {
@@ -985,7 +1470,9 @@ unsigned int _SPBRG::get_cycles_per_tick()
     if ( txsta && (txsta->value.get() & _TXSTA::SYNC) )
     {
       // Synchronous mode - divisor is always 4
-      cpt = 4;
+      // However, code wants two transitions per bit 
+      // to generate clock for master mode, so use 2 
+      cpt = 2;
     }
     else
     {
@@ -996,17 +1483,23 @@ unsigned int _SPBRG::get_cycles_per_tick()
         }
     }
 
-    return ((brgval+1)*cpt)/cpi;
+    ret = ((brgval+1)*cpt)/cpi;
+    ret = ret ? ret : 1;
+    return ret;
 }
 
 void _SPBRG::start()
 {
+  
 
+  if (running)
+     return;
   if(! skip  || get_cycles().get() >= skip) {
     if(cpu)
       last_cycle = get_cycles().get();
     skip = 0;
   }
+  running = true;
 
   start_cycle = last_cycle;
 
@@ -1022,7 +1515,7 @@ void _SPBRG::put(unsigned int new_value)
 
   Dprintf((" SPBRG value=0x%x\n",value.get()));
   //Prevent updating last_cycle until all current breakpoints have expired
-  //Otehrwise we see that rx/tx persiods get screwed up from now until future_cycle
+  //Otherwise we see that rx/tx periods get screwed up from now until future_cycle
   future_cycle = last_cycle + get_cycles_per_tick();
   skip = future_cycle;
   Dprintf((" SPBRG value=0x%x skip=0x%"PRINTF_GINT64_MODIFIER"x last=0x%"PRINTF_GINT64_MODIFIER"x cycles/tick=0x%x\n",value.get(), skip, last_cycle, get_cycles_per_tick()));
@@ -1122,14 +1615,18 @@ void _SPBRG::callback()
 
   //Dprintf(("SPBRG rollover at cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle));
 
-  if(rcsta && (rcsta->value.get() & _RCSTA::SPEN))
-    {
+  if((rcsta && rcsta->bSPEN()) || (txsta && txsta->bTXEN()))
+  {
 
       // If the serial port is enabled, then set another
       // break point for the next clock edge.
       get_next_cycle_break();
 
-    }
+  }
+  else
+  {
+      running = false;
+  }
 }
 
 //-----------------------------------------------------------
@@ -1157,7 +1654,7 @@ void _BAUDCON::put(unsigned int new_value)
 
   value.put(new_value);
 
-  Dprintf((" BAUDCON value=0x%x\n",value.get()));
+  Dprintf(("%s BAUDCON value=0x%x\n",name().c_str(), value.get()));
 
 
   if( (old_value ^ value.get()) & TXCKP) {
@@ -1183,12 +1680,15 @@ void USART_MODULE::initialize(PIR *_pir,
   spbrg.rcsta = &rcsta;
 
   txreg = _txreg;
+ 
+  txreg->assign_rcsta(&rcsta);
   txreg->assign_txsta(&txsta);
 
   rcreg = _rcreg;
   rcreg->assign_rcsta(&rcsta);
 
   txsta.txreg = txreg;
+  txsta.rcsta = &rcsta;
   txsta.spbrg = &spbrg;
   txsta.bit_count = 0;
   txsta.setIOpin(tx_pin);
@@ -1196,8 +1696,8 @@ void USART_MODULE::initialize(PIR *_pir,
   rcsta.rcreg = rcreg;
   rcsta.spbrg = &spbrg;
   rcsta.txsta = &txsta;
+  rcsta.txreg = txreg;
   rcsta.setIOpin(rx_pin);
-
 }
 
 void USART_MODULE::set_TXpin(PinModule *tx_pin)
@@ -1210,34 +1710,52 @@ void USART_MODULE::set_RXpin(PinModule *rx_pin)
 }
 bool USART_MODULE::bIsTXempty()
 {
+  if (m_txif)
+      return m_txif->Get();
   return pir ? pir->get_txif() : true;
 }
 void USART_MODULE::emptyTX()
 {
-  Dprintf(("usart::empty - setting TXIF\n"));
-  if (rcsta.bSPEN() && txsta.bTXEN() && pir)
-    pir->set_txif();
+  Dprintf(("usart::empty - setting TXIF %s\n", txsta.name().c_str()));
+
+  if (txsta.bTXEN())
+  {
+    if (m_txif) 
+	m_txif->Trigger();
+    else if (pir)
+        pir->set_txif();
+    else
+	assert(pir);
+  }
 
 }
 
 void USART_MODULE::full()
 {
-  Dprintf(("txreg::full - clearing TXIF\n"));
-  if(pir)
+  Dprintf((" txreg::full - clearing TXIF\n"));
+  if (m_txif)
+      m_txif->Clear();
+  else if(pir)
     pir->clear_txif();
+  else
+	assert(pir);
 }
 
 void USART_MODULE::set_rcif()
 {
   Dprintf((" - setting RCIF\n"));
-  if(pir)
+  if (m_rcif)
+      m_rcif->Trigger();
+  else if(pir)
     pir->set_rcif();
 }
 
 void USART_MODULE::clear_rcif()
 {
   Dprintf((" - clearing RCIF\n"));
-  if(pir)
+  if (m_rcif)
+	m_rcif->Clear();
+  else if(pir)
     pir->clear_rcif();
 }
 
@@ -1248,10 +1766,16 @@ USART_MODULE::USART_MODULE(Processor *pCpu)
     spbrg(pCpu,"","Serial Port Baud Rate Generator"),
     spbrgh(pCpu,"spbrgh","Serial Port Baud Rate high byte"),
     baudcon(pCpu,"baudcon","Serial Port Baud Rate Control"),
-    is_eusart(false)
+    is_eusart(false), m_rcif(0), m_txif(0)
 {
     baudcon.txsta = &txsta;
     baudcon.rcsta = &rcsta;
+}
+
+USART_MODULE::~USART_MODULE()
+{
+    if (m_rcif) delete m_rcif;
+    if (m_txif) delete m_txif;
 }
 
 //--------------------------------------------------

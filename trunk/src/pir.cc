@@ -66,7 +66,9 @@ void PIR::set_ipr(sfr_register *_ipr)
 
 void PIR::setInterrupt(unsigned int bitMask)
 {
-  put(value.get() | bitMask);
+  value.put(value.get() | bitMask);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
 }
 
 
@@ -104,6 +106,11 @@ InterruptSource::InterruptSource(PIR *_pir, unsigned int bitMask)
 void InterruptSource::Trigger()
 {
   m_pir->setInterrupt(m_bitMask);
+}
+
+void InterruptSource::Clear()
+{
+  m_pir->value.put(m_pir->value.get() & ~m_bitMask);
 }
 
 

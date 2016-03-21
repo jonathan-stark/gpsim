@@ -40,12 +40,15 @@ class _BAUDCON;
 class  _14bit_processor;
 
 class RXSignalSink;
+class CLKSignalSink;
 class TXSignalSource;
 class TXSignalControl;
+class RCSignalSource;
+class RCSignalControl;
 class USART_MODULE;
 
 
-
+// USART Data Transmit Register
 class _TXREG : public sfr_register, public TriggerObject
 {
  public:
@@ -55,20 +58,24 @@ class _TXREG : public sfr_register, public TriggerObject
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
   virtual void assign_txsta(_TXSTA *new_txsta) { m_txsta = new_txsta; };
+  virtual void assign_rcsta(_RCSTA *new_rcsta) { m_rcsta = new_rcsta; };
   virtual void callback();
   virtual void callback_print();
 
 private:
   _TXSTA  *m_txsta;
+  _RCSTA  *m_rcsta;
   USART_MODULE *mUSART;
   bool full;
 };
 
+// Transmit Status and Control register
 class _TXSTA : public sfr_register, public TriggerObject
 {
 public:
   _TXREG  *txreg;
   _SPBRG  *spbrg;
+  _RCSTA  *rcsta;
 
   unsigned int tsr;
   unsigned int bit_count;
@@ -98,10 +105,18 @@ public:
   virtual void callback_print();
   virtual char getState();
 
+  virtual void enableTXPin();
+  virtual void disableTXPin();
   virtual void setIOpin(PinModule *);
+  virtual PinModule *getIOpin() { return m_PinModule; }
   virtual void putTXState(char newTXState);
 
   bool bTXEN() { return (value.get() & TXEN) != 0; }
+  bool bSYNC() { return (value.get() & SYNC) != 0; }
+  bool bTRMT() { return (value.get() & TRMT) != 0; }
+  bool bCSRC() { return (value.get() & CSRC) != 0; }
+  bool bTX9() { return (value.get() & TX9) != 0; }
+  int  bTX9D() { return (value.get() & TX9D) ? 1 : 0; }
   
   void set_pin_pol ( bool invert ) { bInvertPin = invert; };
   void releasePin();
@@ -111,11 +126,13 @@ protected:
   PinModule *m_PinModule;
   TXSignalSource *m_source;
   TXSignalControl *m_control;
+  CLKSignalSink   *m_clkSink;
   bool		SourceActive;
   char m_cTxState;
   bool bInvertPin;
 };
 
+// USART Data Receive Register
 class _RCREG : public sfr_register
 {
  public:
@@ -139,6 +156,7 @@ private:
   _RCSTA  *m_rcsta;
 };
 
+// Receive Status and Control Register
 class _RCSTA : public sfr_register, public TriggerObject
 {
 
@@ -181,7 +199,9 @@ class _RCSTA : public sfr_register, public TriggerObject
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
   _TXSTA  *txsta;
+  _TXREG  *txreg;
 
+  bool sync_next_clock_edge_high;
   unsigned int rsr;
   unsigned int bit_count;
   unsigned int rx_bit;
@@ -201,20 +221,45 @@ class _RCSTA : public sfr_register, public TriggerObject
   virtual void callback();
   virtual void callback_print();
   void setState(char new_RxState);
-  bool bSPEN() { return (value.get() & SPEN) != 0; }
+//RRR  char getDir() { return m_DTdirection;}
+  bool bSPEN() { return (value.get() & SPEN); }
+  bool bSREN() { return (value.get() & SREN); }
+  bool bCREN() { return (value.get() & CREN); }
+  bool bRX9()  { return (value.get() & RX9); }
   virtual void setIOpin(PinModule *);
   bool rc_is_idle(void) { return ( state <= RCSTA_WAITING_FOR_START ); };
+  virtual void enableRCPin(char direction = OUT);
+  virtual void disableRCPin();
+  void releasePin();
+  virtual char getState() { return m_cTxState;}
+  virtual void putRCState(char newRCState);
+  virtual void sync_start_transmitting();
+  virtual void clock_edge(char new3State);
+  void set_old_clock_state(char new3State);
+  
 
 protected:
+  enum {
+	OUT,
+	IN
+  };
   void set_callback_break(unsigned int spbrg_edge);
 
-  USART_MODULE *mUSART;
-  PinModule *m_PinModule;
-  RXSignalSink *m_sink;
-  char m_cRxState;
+  USART_MODULE  *mUSART;
+  PinModule     *m_PinModule;
+  RXSignalSink  *m_sink;
+  char          m_cRxState;
+  bool		SourceActive;
+  RCSignalControl *m_control;
+  RCSignalSource  *m_source;
+  char          m_cTxState;
+  char		m_DTdirection;
+  bool          bInvertPin;
+  bool		old_clock_state;
 };
 
 
+// BAUD Rate Control Register
 class _BAUDCON : public sfr_register
 {
  public:
@@ -238,10 +283,13 @@ class _BAUDCON : public sfr_register
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
   bool brg16(void) { return ( value.get() & BRG16 ) != 0; };
+  bool txckp() { return ( value.get() & TXCKP) != 0; }
+  bool rxdtp() { return ( value.get() & RXDTP) != 0; }
 
 // private:
 };
 
+// USART Baud Rate Generator, High Byte
 class _SPBRGH : public sfr_register
 {
  public:
@@ -255,6 +303,7 @@ class _SPBRGH : public sfr_register
   _SPBRG   *m_spbrg;
 };
 
+// USART Baud Rate Generator, Low Byte
 class _SPBRG : public sfr_register, public TriggerObject
 {
  public:
@@ -267,6 +316,8 @@ class _SPBRG : public sfr_register, public TriggerObject
     start_cycle,   // The cycle the SPBRG was started
     last_cycle,    // The cycle when the spbrg clock last changed
     future_cycle;  // The next cycle spbrg is predicted to change
+
+  bool running;
 
   _SPBRG(Processor *pCpu, const char *pName, const char *pDesc);
 
@@ -307,6 +358,7 @@ public:
   _BAUDCON baudcon;
 
   USART_MODULE(Processor *pCpu);
+  ~USART_MODULE();
 
   void initialize(PIR *, 
 		  PinModule *tx_pin, PinModule *rx_pin,
@@ -319,11 +371,17 @@ public:
   void full();
   void set_rcif();
   void clear_rcif();
+  void mk_rcif_int(PIR *reg, unsigned int bit)
+		{ m_rcif = new InterruptSource(reg, bit);}
+  void mk_txif_int(PIR *reg, unsigned int bit)
+		{ m_txif = new InterruptSource(reg, bit);}
   bool IsEUSART ( void ) { return is_eusart; };
   void set_eusart ( bool is_it );
 
  private:
   bool is_eusart;
+  InterruptSource *m_rcif;
+  InterruptSource *m_txif;
 };
 
 

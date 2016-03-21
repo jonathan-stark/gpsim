@@ -119,6 +119,8 @@ class InterruptSource
 public:
   InterruptSource(PIR *_pir, unsigned int bitMask);
   void Trigger();
+  void Clear();
+  unsigned int Get() { return m_pir->value.get() & m_bitMask;} 
   void release(); // called when source is no longer needed.
 private:
   PIR *m_pir;
