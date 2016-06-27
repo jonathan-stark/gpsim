@@ -471,6 +471,7 @@ class SSP1_MODULE : public SSP_MODULE //MSSP1
    void set_sckPin(PinModule *_sckPin);
    void set_sdiPin(PinModule *_sdiPin);
    void set_sdoPin(PinModule *_sdoPin);
+   PinModule *get_sdoPin() { return m_sdo;}
    void set_ssPin(PinModule *_ssPin);
    void set_tris(PicTrisRegister *_i2ctris) { m_i2c_tris = _i2ctris;}
   virtual void changeSSP(unsigned int new_value, unsigned int old_value);

@@ -1,3 +1,7 @@
+2016-06-28 Roy Rankin <rrankin@ihug.com.au>
+	* src/ssp.h src/ssp.cc
+	: Bug #221 When selecting I2C, SSx pin may change name in breadboard 
+
 2016-03-22 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p18f26k22/Makefile regression/p18f26k22/sync_26k22.asm
 	  src/16bit-processors.cc src/p18fk.cc src/pir.cc src/pir.h

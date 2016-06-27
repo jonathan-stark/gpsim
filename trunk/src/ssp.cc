@@ -2305,7 +2305,7 @@ void SSP_MODULE::putStateSCK(char _state)
 void SSP_MODULE::startSSP(unsigned int value)
 {
     if (verbose)
-      cout << "SSP: SPI turning on" << endl;
+      cout << "SSP: SPI turning on 0x" <<hex << value << endl;
     Dprintf(("SSP_MODULE cmd %x\n", value &  _SSPCON::SSPM_mask ));
     SPIproto(("SSP_MODULE cmd %x\n", value &  _SSPCON::SSPM_mask ));
     sspbuf.setFullFlag(false);
@@ -2332,7 +2332,7 @@ void SSP_MODULE::startSSP(unsigned int value)
     {
 	if ((value & _SSPCON::SSPM_mask) ==  _SSPCON::SSPM_SPIslaveSS)
 		m_ss->getPin().newGUIname("SS");
-	else
+	else if (m_ss->getPin().GUIname() == string("SS"))
 		m_ss->getPin().newGUIname(m_ss->getPin().name().c_str());
     }
     switch( value & _SSPCON::SSPM_mask ) {
