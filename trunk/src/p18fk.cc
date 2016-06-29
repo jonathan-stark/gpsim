@@ -315,7 +315,7 @@ void P18F14K22::osc_mode(unsigned int value)
   unsigned int mode = value & (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   unsigned int pin_Number0 =  get_osc_pin_Number(0);
   unsigned int pin_Number1 =  get_osc_pin_Number(1);
-  bool  pllen = value & 0x10;
+  bool  pllen = value & PLLCFG;
 
   if (mode == 0x8 || mode == 0x9)
       set_int_osc(true);
@@ -1019,6 +1019,8 @@ void P18F26K22::osc_mode(unsigned int value)
   unsigned int pin_Number1 =  get_osc_pin_Number(1);
 
   
+  set_pplx4_osc(value & PLLCFG);
+
   if (mode == 0x8 || mode == 0x9)
       set_int_osc(true);
   else
@@ -1041,17 +1043,33 @@ void P18F26K22::osc_mode(unsigned int value)
     }
     break;
   }
-  if (mode != 0x9 && mode != 0x8 && pin_Number0 < 253) // not internal OSC, set OSC1
+  if (pin_Number0 < 253)
   {
+     if (mode != 0x9 && mode != 0x8 ) // not internal OSC, set OSC1
+     {
         set_clk_pin(pin_Number0, get_osc_PinMonitor(0) , "OSC1", 
 	    true, m_porta, m_trisa, m_lata);
+     }
+     else
+     {
+        clr_clk_pin(pin_Number0, get_osc_PinMonitor(0),
+              m_porta, m_trisa, m_lata);
+     }
+
   }
-  if (mode < 4 && pin_Number1 < 253)
+  if (pin_Number1 < 253)
   {
+      if (mode < 4)
+      {
         set_clk_pin(pin_Number1, get_osc_PinMonitor(1) , "OSC2", 
 	    true, m_porta, m_trisa, m_lata);
-  }
-  
+      }
+      else
+      {
+	       clr_clk_pin(pin_Number1, get_osc_PinMonitor(1),
+              m_porta, m_trisa, m_lata);
+      }
+  }  
 }
 
 void P18F26K22::update_vdd()

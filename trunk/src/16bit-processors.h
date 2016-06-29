@@ -252,6 +252,7 @@ public:
 #define FOSC2   (1<<2)
 // FOSC3 may not be used
 #define FOSC3   (1<<3)
+#define PLLCFG  (1<<4)
 #define OSCEN   (1<<5)
 
 //------------------------------------------------------------------------
