@@ -1213,10 +1213,10 @@ static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition
 
   std::cout << " SourceServer accepting new client connect\n";
 
-  std::auto_ptr<SocketBase> client(s->Accept());
+  SocketBase *client = s->Accept();
   std::cout << " SourceServer accepted connection\n";
 
-  if(!client.get())
+  if(!client)
     return FALSE;
 
   int bytes= recv(client->getSocket(),

@@ -1805,8 +1805,8 @@ P18F2x21::P18F2x21(const char *_name, const char *desc)
     osctune(this, "osctune", "OSC Tune"),
     comparator(this)
 {
-  if(verbose)
-    cout << "18F2x21 constructor, type = " << isa() << '\n';
+    if(verbose)
+      cout << "18F2x21 constructor, type = " << isa() << '\n';
 
     m_porte = new PicPortRegister(this,"porte","",8,0x08);
     // No TRIS register for port E on 28-pin devices

@@ -76,8 +76,8 @@ void LowLevel1W::change(bool pinChange) {
 }
 
 void LowLevel1W::idle(bool input, bool isTimeout) {
-  if(debug && !isTimeout)
-    cout <<name() << " idle input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug && !isTimeout)
+      cout <<name() << " idle input="<<input <<" timout="<<isTimeout<<endl;
     if (input) return;
     switch(gotBitStart()) {
     case WRITE1:
@@ -112,8 +112,8 @@ void LowLevel1W::idle(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::inResetPulse(bool input, bool isTimeout) {
-  if(debug)
-    cout <<name() << " inResetPulse input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout <<name() << " inResetPulse input="<<input <<" timout="<<isTimeout<<endl;
     if (input) {
         state = &LowLevel1W::idle;
         return;
@@ -123,8 +123,8 @@ void LowLevel1W::inResetPulse(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::endResetPulse(bool input, bool isTimeout) {
-  if(debug)
-    cout << name() << " "<<__FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout << name() << " "<<__FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!input) return;
     gotReset();
     state = &LowLevel1W::inPresencePulse;
@@ -132,7 +132,7 @@ void LowLevel1W::endResetPulse(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::inPresencePulse(bool input, bool isTimeout) {
-  if(debug)
+    if(debug)
     cout << name() << " "<< __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
     state = &LowLevel1W::endPresencePulse;
@@ -141,8 +141,8 @@ void LowLevel1W::inPresencePulse(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::endPresencePulse(bool input, bool isTimeout) {
-  if(debug)
-    cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
     pin->update_direction(IOPIN::DIR_INPUT, true);
     state = &LowLevel1W::waitIdle;
@@ -150,15 +150,15 @@ void LowLevel1W::endPresencePulse(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::waitIdle(bool input, bool isTimeout) {
-  if(debug)
-     cout << name() << "waitIdle input=" <<input <<" timeout="<<isTimeout<<endl;
+    if(debug)
+      cout << name() << "waitIdle input=" <<input <<" timeout="<<isTimeout<<endl;
     if (!input) return;
     state = &LowLevel1W::idle;
 }
 
 void LowLevel1W::inWritting0(bool input, bool isTimeout) {
-  if(debug)
-    cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
     state = &LowLevel1W::finalizeBit;
     pin->update_direction(IOPIN::DIR_INPUT, true);
@@ -167,8 +167,8 @@ void LowLevel1W::inWritting0(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::inWritting1(bool input, bool isTimeout) {
-  if(debug)
-    cout <<name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout <<name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (!isTimeout) return;
     if(!input) // OOPS either a reset or bus collision
     {
@@ -182,8 +182,8 @@ void LowLevel1W::inWritting1(bool input, bool isTimeout) {
 }
 
 void LowLevel1W::inReading(bool input, bool isTimeout) {
-  if(debug)
-    cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout << name() << " " << __FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (input) {
         readBit(true);
         state = &LowLevel1W::idle;
@@ -199,8 +199,8 @@ void LowLevel1W::inReading(bool input, bool isTimeout) {
 
 // Wait for a 1 then go to idle
 void LowLevel1W::finalizeBit(bool input, bool isTimeout) {
-  if(debug)
-    cout << name() << " " <<__FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
+    if(debug)
+      cout << name() << " " <<__FUNCTION__ << "  input="<<input <<" timout="<<isTimeout<<endl;
     if (input) {
         state = &LowLevel1W::idle;
 	if (bit_remaining() == 0)  gotBitStart();

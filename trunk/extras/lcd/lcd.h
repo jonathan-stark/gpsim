@@ -220,7 +220,7 @@ public:
 
   gfloat contrast;  // pixel on/off ratio
 
-  std::auto_ptr<LcdFont> fontP;
+  LcdFont *fontP;
 
   GtkWidget *window;
   GtkWidget *darea;
@@ -293,10 +293,10 @@ protected:
   LCD_InputPin * m_E;
   LCD_InputPin * m_RW;
   LCD_InputPin * m_DC;
-  std::auto_ptr<PortRegister> m_dataBus;
+  PortRegister *m_dataBus;
   IO_bi_directional *lcd_bus[8];
 
-  std::auto_ptr<HD44780> m_hd44780;
+  HD44780 *m_hd44780;
   unsigned int m_controlState;
   bool cgram_updated;
   unsigned int interface_seq_number;

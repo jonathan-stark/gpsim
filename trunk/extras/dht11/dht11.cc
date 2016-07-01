@@ -110,7 +110,7 @@ class dht11Module::Pin : public IO_open_collector
       guint64 now = get_cycles().get();
 
       Dprintf(("Times: instruction-cps=%lf seconds-per-cycle=%lf\n", get_cycles().instruction_cps(), get_cycles().seconds_per_cycle()));
-      Dprintf(("dht11 Pin/set_nodeVoltage %lf / %d at %"PRINTF_GINT64_MODIFIER"d\n", newvolts, newState, now));
+      Dprintf(("dht11 Pin/set_nodeVoltage %lf / %d at %" PRINTF_GINT64_MODIFIER "d\n", newvolts, newState, now));
 
       if (lastState != newState) {
         if (lastState && !newState) {
@@ -121,7 +121,7 @@ class dht11Module::Pin : public IO_open_collector
           /* Low->High transition */
           guint64 delta = now - lastLowTransition;
           double delta_s = delta*get_cycles().seconds_per_cycle();
-          Dprintf(("dht11 l->h low period=%"PRINTF_GINT64_MODIFIER"d=%lf s\n", delta, delta_s));
+          Dprintf(("dht11 l->h low period=%" PRINTF_GINT64_MODIFIER "d=%lf s\n", delta, delta_s));
 
           if (delta_s > host_start_sig_len) {
             parent->start();
@@ -205,7 +205,7 @@ void dht11Module::callback_end(void)
 // Gets called on 'set_break' timeouts
 void dht11Module::callback(void)
 {
-  Dprintf(("at %"PRINTF_GINT64_MODIFIER"d in 0x%x\n", get_cycles().get(), state));
+  Dprintf(("at %" PRINTF_GINT64_MODIFIER "d in 0x%x\n", get_cycles().get(), state));
 
   /* Handle the intro sequence separately */
   if ((state & 0xf0) == STATE_INTRO) {
@@ -284,7 +284,7 @@ void dht11Module::set_state_callback(guint8 new_state, double delay_us, bool lev
   guint64 now = get_cycles().get();
   guint64 future_time;
   future_time = now+1+((delay_us/1000000.0)*get_cycles().instruction_cps());
-  Dprintf(("State: %d->%d wait %lf s pin->%d now=%"PRINTF_GINT64_MODIFIER"d future=%"PRINTF_GINT64_MODIFIER"d\n", state, new_state, delay_us, level, now, future_time));
+  Dprintf(("State: %d->%d wait %lf s pin->%d now=%" PRINTF_GINT64_MODIFIER "d future=%" PRINTF_GINT64_MODIFIER "d\n", state, new_state, delay_us, level, now, future_time));
 
   state = new_state;
   

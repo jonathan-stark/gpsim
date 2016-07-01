@@ -129,8 +129,8 @@ private:
 
 void PicPortRegister::setTris(PicTrisRegister *new_tris)
 {
-  if (!m_tris)
-    m_tris = new_tris;
+    if (!m_tris)
+      m_tris = new_tris;
 
     unsigned int mask = getEnableMask();
     for (unsigned int i=0, m = 1; i<mNumIopins; i++, m <<= 1) {
@@ -585,8 +585,8 @@ unsigned int PicPSP_PortRegister::get()
 
 void PicPSP_PortRegister::setTris(PicTrisRegister *new_tris)
 {
-  if (!m_tris)
-    m_tris = new_tris;
+    if (!m_tris)
+      m_tris = new_tris;
 
     unsigned int mask = getEnableMask();
     for (unsigned int i=0, m = 1; i<mNumIopins; i++, m <<= 1) {

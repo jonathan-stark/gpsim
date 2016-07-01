@@ -20,8 +20,7 @@ failures        RES     1
 
   GLOBAL done, temp
 
-IDLOCS  CODE
-	db	"ID"	; This is the id locations
+ IDLOCS "ID"
 
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************

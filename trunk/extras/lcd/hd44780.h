@@ -136,7 +136,7 @@ private: //Data
   ///  m_bDataPhase is true if this is the first phase, false for the second.
   bool m_bDataBusPhase;
 
-  std::auto_ptr<HD44780Busy> m_busyTimer;
+  HD44780Busy *m_busyTimer;
 
   /// Display Data RAM
   unsigned char m_DDRam[DDRAM_SIZE];

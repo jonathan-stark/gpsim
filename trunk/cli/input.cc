@@ -625,8 +625,8 @@ gpsim_read (char *buf, unsigned max_size)
 	Stack->print();
 
   if (!d || !d->data) {
-  if(verbose&4)
-    cout <<"gpsim_read -- no more data\n";
+    if(verbose&4)
+      cout <<"gpsim_read -- no more data\n";
     return 0;
   }
 

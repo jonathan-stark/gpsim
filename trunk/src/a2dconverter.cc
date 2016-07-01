@@ -116,7 +116,7 @@ void ADCON0::setA2DBits(unsigned int nBits)
 void ADCON0::start_conversion(void)
 {
 
-  Dprintf(("starting A/D conversion at 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get() ));
+  Dprintf(("starting A/D conversion at 0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get() ));
 
   if(!(value.get() & ADON) ) {
     Dprintf((" A/D converter is disabled\n"));
@@ -260,7 +260,7 @@ void ADCON0::callback(void)
 {
   int channel;
 
-  Dprintf((" ADCON0 Callback: 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+  Dprintf((" ADCON0 Callback: 0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
 
   //
   // The a/d converter is simulated with a state machine. 

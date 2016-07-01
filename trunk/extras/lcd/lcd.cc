@@ -380,12 +380,14 @@ LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
   : Module(_name), data_latch(0), data_latch_phase(1),
     debug(0), rows(aRows), cols(aCols), disp_type(aType), contrast(1.0),
     fontP(NULL), readTT(new LcdReadTT(this,1)), writeTT(new LcdWriteTT(this,1)),
-    m_dataBus(new PortRegister(this, "data", "LCD Data Port", 8, 0)),
-    m_hd44780(new HD44780), m_controlState(0), cgram_updated(false)
+    m_controlState(0), cgram_updated(false)
 {
   if (verbose)
      cout << "LcdDisplay constructor\n";
   new_name(_name);
+
+  m_dataBus = new PortRegister(this, "data", "LCD Data Port", 8, 0);
+  m_hd44780 = new HD44780();
 
   //  mode_flag = _8BIT_MODE_FLAG;
 
@@ -405,7 +407,7 @@ LcdDisplay::LcdDisplay(const char *_name, int aRows, int aCols, unsigned aType)
 
   interface_seq_number = get_interface().add_interface(new LCD_Interface(this));
 
-  addSymbol(m_dataBus.get());
+  addSymbol(m_dataBus);
   m_dataBus->setEnableMask(0xff);
 
   CreateGraphics();
@@ -418,6 +420,7 @@ LcdDisplay::~LcdDisplay()
   if (verbose)
       cout << "LcdDisplay destructor\n";
 
+
   removeSymbol(m_E);
   removeSymbol(m_RW);
   removeSymbol(m_DC);
@@ -425,10 +428,14 @@ LcdDisplay::~LcdDisplay()
   {
       removeSymbol(lcd_bus[i]);
   }
-  removeSymbol(m_dataBus.get());
+  removeSymbol(m_dataBus);
+  delete m_dataBus;
+  delete m_hd44780;
 
   get_interface().remove_interface(interface_seq_number);
   gtk_widget_destroy(window);
+  if (fontP)
+      delete fontP;
 
 }
 

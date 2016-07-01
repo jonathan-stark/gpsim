@@ -40,7 +40,7 @@ License along with this library; if not, see
 
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("0x%06"PRINTF_GINT64_MODIFIER"X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+#define Dprintf(arg) {printf("0x%06" PRINTF_GINT64_MODIFIER" X %s() ",cycles.get(),__FUNCTION__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
@@ -1778,7 +1778,7 @@ void CPSCON0::callback_print()
 }
 void CPSCON0::callback()
 {
-    Dprintf(("now=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+    Dprintf(("now=0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
 
     if (!(value.get() & CPSON))
 	return;

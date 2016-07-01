@@ -260,7 +260,7 @@ void ADCON0_V2::callback(void)
 {
   int channel;
 
-  Dprintf((" ADCON0_V2 Callback: 0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+  Dprintf((" ADCON0_V2 Callback: 0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
 
   //
   // The a/d converter is simulated with a state machine.
