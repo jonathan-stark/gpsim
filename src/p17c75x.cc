@@ -317,16 +317,7 @@ void P17C75x::create_symbols()
     cout << "p17c75x create symbols\n";
 
 
-    return;
-/*
-  symbol_table.add_ioport(portb->cpu, portb);
-  symbol_table.add_ioport(porta->cpu, porta);
-  symbol_table.add_ioport(portc->cpu, portc);
-  symbol_table.add_ioport(portd->cpu, portd);
-  symbol_table.add_ioport(porte->cpu, porte);
-  symbol_table.add_ioport(portf->cpu, portf);
-  symbol_table.add_ioport(portg->cpu, portg);
-*/
+  return;
 }
 
 void P17C75x::create_sfr_map()

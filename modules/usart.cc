@@ -296,7 +296,7 @@ private:
 
 
   virtual void callback(void) {
-  Dprintf((" usart module TXREG time:0x%"PRINTF_GINT64_MODIFIER"x=%"PRINTF_GINT64_MODIFIER"d txr=0x%x bit_count=%d\n", get_cycles().get(), get_cycles().get(), txr, bit_count));
+  Dprintf((" usart module TXREG time:0x%" PRINTF_GINT64_MODIFIER "x=%" PRINTF_GINT64_MODIFIER "d txr=0x%x bit_count=%d\n", get_cycles().get(), get_cycles().get(), txr, bit_count));
 
     last_time = get_cycles().get();
     start_time = last_time;
@@ -507,7 +507,7 @@ RCREG::RCREG(USARTModule *pUsart)
 void RCREG::callback()
 {
 
-  Dprintf((" usart module RCREG time:0x%"PRINTF_GINT64_MODIFIER"x=%"PRINTF_GINT64_MODIFIER"d state=0x%x\n", get_cycles().get(), get_cycles().get(), receive_state));
+  Dprintf((" usart module RCREG time:0x%" PRINTF_GINT64_MODIFIER "x=%" PRINTF_GINT64_MODIFIER "d state=0x%x\n", get_cycles().get(), get_cycles().get(), receive_state));
 
 
   switch(receive_state) {
@@ -582,7 +582,7 @@ void RCREG::start()
     get_cycles().set_break(future_time, this);
   }
 
-  Dprintf((" usart module RCREG current cycle=0x%"PRINTF_GINT64_MODIFIER"x future_cycle=0x%"PRINTF_GINT64_MODIFIER"x\n", get_cycles().get(),future_time));
+  Dprintf((" usart module RCREG current cycle=0x%" PRINTF_GINT64_MODIFIER "x future_cycle=0x%" PRINTF_GINT64_MODIFIER "x\n", get_cycles().get(),future_time));
 }
 
 //------------------------------------------------------------------------
@@ -607,7 +607,7 @@ void RCREG::new_rx_edge(bool bit)
     case RS_WAITING_FOR_START:
       if(bIsLow(currentRXState)) {
         start();
-        Dprintf(("Start bit at t=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+        Dprintf(("Start bit at t=0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
       }
 
       break;

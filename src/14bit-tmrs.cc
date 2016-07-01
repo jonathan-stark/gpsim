@@ -550,7 +550,7 @@ void CCPCON::releasePins(int i)
 void CCPCON::pwm_match(int level)
 {
   unsigned int new_value = value.get();
-  Dprintf(("%s::pwm_match() level=%d now=0x%"PRINTF_GINT64_MODIFIER"x\n", name().c_str(), level, get_cycles().get()));
+  Dprintf(("%s::pwm_match() level=%d now=0x%" PRINTF_GINT64_MODIFIER "x\n", name().c_str(), level, get_cycles().get()));
 
 
   // if the level is 1, then tmr2 == pr2 and the pwm cycle
@@ -1819,7 +1819,7 @@ void TMRL::on_or_off(int new_state)
 void TMRL::update()
 {
 
-  Dprintf(("TMR1 %s update now=0x%"PRINTF_GINT64_MODIFIER"x\n",name().c_str(), get_cycles().get()));
+  Dprintf(("TMR1 %s update now=0x%" PRINTF_GINT64_MODIFIER "x\n",name().c_str(), get_cycles().get()));
   // if t1con->get_t1GINV() is false, timer can run if m_GateState == 0
      
   bool gate = t1con->get_t1GINV() ? m_GateState : !m_GateState;

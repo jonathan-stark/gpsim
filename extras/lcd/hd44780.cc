@@ -190,12 +190,14 @@ HD44780::HD44780()
     m_bCursorBlink(false),// no cursor blink
     m_bCursorOn(false),   // cursor is off
     m_bDataBusPhase(false),
-    m_busyTimer(new HD44780Busy()),
     m_DDRamAdd(0),
     m_CGRamAdd(0),
     m_bInCGRam(false),
     m_CGRamupdate(false)
 {
+
+  
+  m_busyTimer = new HD44780Busy();
 
   memset(&m_CGRam[0], 0xff, sizeof(m_CGRam));
   memset(&m_DDRam[0], 0xff, sizeof(m_DDRam)/2);
@@ -209,7 +211,7 @@ HD44780::HD44780()
 }
 HD44780::~HD44780()
 {
-    fprintf(stderr, "RRR HD44780::~HD44780()\n");
+    delete m_busyTimer;
 }
 
 //------------------------------------------------------------------------

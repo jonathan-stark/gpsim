@@ -385,7 +385,7 @@ void Stimulus_Node::refresh()
     }
 
     current_time_constant = Cth * Zth;
-    Dprintf(("%s DCVoltage %.3f voltage %.3f Cth=%.2e Zth=%2e time_constant %fsec or %"PRINTF_GINT64_MODIFIER"d cycles now=%"PRINTF_GINT64_MODIFIER"d \n",name().c_str(), DCVoltage, voltage, Cth, Zth, current_time_constant, (guint64)(current_time_constant*get_cycles().instruction_cps()), get_cycles().get()));
+    Dprintf(("%s DCVoltage %.3f voltage %.3f Cth=%.2e Zth=%2e time_constant %fsec or %" PRINTF_GINT64_MODIFIER "d cycles now=%" PRINTF_GINT64_MODIFIER "d \n",name().c_str(), DCVoltage, voltage, Cth, Zth, current_time_constant, (guint64)(current_time_constant*get_cycles().instruction_cps()), get_cycles().get()));
     if (((guint64)(current_time_constant*get_cycles().instruction_cps()) < 5) ||
       (fabs(DCVoltage - voltage) < minThreshold))
     {
@@ -453,7 +453,7 @@ guint64 Stimulus_Node::calc_settlingTimeStep()
 	TimeStep = (guint64) (0.125 * dt_dv);
 	TimeStep = (TimeStep) ? TimeStep : 1;
 
-	Dprintf(("%s dt_dv = %.2f TimeStep 0x%"PRINTF_GINT64_MODIFIER"x now 0x%"PRINTF_GINT64_MODIFIER"x\n", __FUNCTION__, dt_dv, TimeStep, get_cycles().get()));
+	Dprintf(("%s dt_dv = %.2f TimeStep 0x%" PRINTF_GINT64_MODIFIER "x now 0x%" PRINTF_GINT64_MODIFIER "x\n", __FUNCTION__, dt_dv, TimeStep, get_cycles().get()));
 
 	return(TimeStep);
 }
@@ -526,7 +526,7 @@ void Stimulus_Node::callback()
           cout << "\t" << name() << 
 	    " Final voltage " << DCVoltage << " reached at " 
 	    << get_cycles().get() << " cycles\n";
-          Dprintf(("%s DC Voltage %.2f reached at 0x%"PRINTF_GINT64_MODIFIER"x cycles\n", name().c_str(), DCVoltage, get_cycles().get()));
+          Dprintf(("%s DC Voltage %.2f reached at 0x%" PRINTF_GINT64_MODIFIER "x cycles\n", name().c_str(), DCVoltage, get_cycles().get()));
       } 
       else if(get_cycles().get() >= future_cycle) // got here via break
       {

@@ -107,7 +107,7 @@ void LcdDisplay::update_cgram_pixmaps()
   int i, j, k;
   _5X8 tempchar;
 
-  if (fontP.get() == NULL)
+  if (fontP == NULL)
     return;
 
   for (i = 0; i < CGRAM_SIZE / 8; i++) {
@@ -133,7 +133,7 @@ cairo_surface_t *LcdDisplay::get_pixmap(gint row, gint col)
   if (m_hd44780->CGRamupdate())
     update_cgram_pixmaps();
 
-  return fontP.get() ? fontP->getPixMap(m_hd44780->getDDRam(row,col)) : 0;
+  return fontP ? fontP->getPixMap(m_hd44780->getDDRam(row,col)) : 0;
 }
 
 
@@ -145,8 +145,8 @@ lcd_expose_event (GtkWidget *widget,
   LcdDisplay *lcdP = static_cast<LcdDisplay *>(user_data);
   // If there is no font, then go create it.
 
-  if (!lcdP->fontP.get()) {
-    lcdP->fontP = std::auto_ptr<LcdFont>(new LcdFont(FONT_LEN, widget, lcdP));
+  if (!lcdP->fontP) {
+    lcdP->fontP = new LcdFont(FONT_LEN, widget, lcdP);
   }
   GtkAllocation allocation;
   gtk_widget_get_allocation(widget, &allocation);

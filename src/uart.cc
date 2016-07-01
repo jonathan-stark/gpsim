@@ -308,7 +308,7 @@ void _TXREG::put_value(unsigned int new_value)
 
 void _TXREG::callback()
 {
-  Dprintf(("TXREG callback - time:%"PRINTF_GINT64_MODIFIER"x full %d\n",get_cycles().get(), full));
+  Dprintf(("TXREG callback - time:%" PRINTF_GINT64_MODIFIER "x full %d\n",get_cycles().get(), full));
   if (full)
   {
     mUSART->full();
@@ -654,7 +654,7 @@ void _TXSTA::transmit_a_bit()
 
   if(bit_count) {
 
-    Dprintf(("Transmit bit #%x: bit val:%d time:0x%"PRINTF_GINT64_MODIFIER"x\n",bit_count, (tsr&1), get_cycles().get()));
+    Dprintf(("Transmit bit #%x: bit val:%d time:0x%" PRINTF_GINT64_MODIFIER "x\n",bit_count, (tsr&1), get_cycles().get()));
 
     putTXState(tsr&1 ? '1' : '0');
 
@@ -670,7 +670,7 @@ void _TXSTA::transmit_a_bit()
 
 void _TXSTA::callback()
 {
-  Dprintf(("TXSTA callback - time:%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+  Dprintf(("TXSTA callback - time:%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
 
   transmit_a_bit();
 
@@ -1089,7 +1089,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  Dprintf(("%s receive_a_bit state:%d bit:%d time:0x%"PRINTF_GINT64_MODIFIER"x\n",name().c_str(), state,bit,get_cycles().get()));
+  Dprintf(("%s receive_a_bit state:%d bit:%d time:0x%" PRINTF_GINT64_MODIFIER "x\n",name().c_str(), state,bit,get_cycles().get()));
 
   if( state == RCSTA_MAYBE_START) {
     if (bit)
@@ -1207,7 +1207,7 @@ void _RCSTA::receive_start_bit()
 void _RCSTA::callback()
 {
 
-  //RRR Dprintf(("RCSTA callback. %s time:0x%"PRINTF_GINT64_MODIFIER"x\n", name().c_str(), get_cycles().get()));
+  //RRR Dprintf(("RCSTA callback. %s time:0x%" PRINTF_GINT64_MODIFIER "x\n", name().c_str(), get_cycles().get()));
 
   if (txsta->bSYNC())	// Synchronous mode RX/DT is data, TX/CK is clock
   {
@@ -1440,14 +1440,14 @@ void _SPBRG::get_next_cycle_break()
   {
     if (future_cycle <= get_cycles().get())
     {
-	Dprintf(("%s future %"PRINTF_GINT64_MODIFIER"d <= now %"PRINTF_GINT64_MODIFIER"d\n", name().c_str(), future_cycle, get_cycles().get()));
+	Dprintf(("%s future %" PRINTF_GINT64_MODIFIER "d <= now %" PRINTF_GINT64_MODIFIER "d\n", name().c_str(), future_cycle, get_cycles().get()));
 	last_cycle = get_cycles().get();
 	future_cycle = last_cycle + get_cycles_per_tick();
     }
     get_cycles().set_break(future_cycle, this);
   }
 
-  //Dprintf(("SPBRG::callback next break at 0x%"PRINTF_GINT64_MODIFIER"x\n",future_cycle));
+  //Dprintf(("SPBRG::callback next break at 0x%" PRINTF_GINT64_MODIFIER "x\n",future_cycle));
 
 }
 
@@ -1505,7 +1505,7 @@ void _SPBRG::start()
 
   get_next_cycle_break();
 
-  Dprintf((" SPBRG::start   last_cycle:0x%"PRINTF_GINT64_MODIFIER"x: future_cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle,future_cycle));
+  Dprintf((" SPBRG::start   last_cycle:0x%" PRINTF_GINT64_MODIFIER "x: future_cycle:0x%" PRINTF_GINT64_MODIFIER "x\n",last_cycle,future_cycle));
 }
 
 void _SPBRG::put(unsigned int new_value)
@@ -1518,7 +1518,7 @@ void _SPBRG::put(unsigned int new_value)
   //Otherwise we see that rx/tx periods get screwed up from now until future_cycle
   future_cycle = last_cycle + get_cycles_per_tick();
   skip = future_cycle;
-  Dprintf((" SPBRG value=0x%x skip=0x%"PRINTF_GINT64_MODIFIER"x last=0x%"PRINTF_GINT64_MODIFIER"x cycles/tick=0x%x\n",value.get(), skip, last_cycle, get_cycles_per_tick()));
+  Dprintf((" SPBRG value=0x%x skip=0x%" PRINTF_GINT64_MODIFIER "x last=0x%" PRINTF_GINT64_MODIFIER "x cycles/tick=0x%x\n",value.get(), skip, last_cycle, get_cycles_per_tick()));
 }
 
 void _SPBRG::put_value(unsigned int new_value)
@@ -1606,14 +1606,14 @@ void _SPBRG::callback()
 
   if (skip)
   {
-  Dprintf((" SPBRG skip=0x%"PRINTF_GINT64_MODIFIER"x, cycle=0x%"PRINTF_GINT64_MODIFIER"x\n", skip, get_cycles().get()));
+  Dprintf((" SPBRG skip=0x%" PRINTF_GINT64_MODIFIER "x, cycle=0x%" PRINTF_GINT64_MODIFIER "x\n", skip, get_cycles().get()));
   }
   if(! skip  || get_cycles().get() >= skip) {
     last_cycle = get_cycles().get();
     skip = 0;
   }
 
-  //Dprintf(("SPBRG rollover at cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle));
+  //Dprintf(("SPBRG rollover at cycle:0x%" PRINTF_GINT64_MODIFIER "x\n",last_cycle));
 
   if((rcsta && rcsta->bSPEN()) || (txsta && txsta->bTXEN()))
   {

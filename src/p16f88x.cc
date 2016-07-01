@@ -1555,7 +1555,7 @@ P16F684::P16F684(const char *_name, const char *desc)
   if(verbose)
     cout << "P16F684 constructor, type = " << isa() << '\n';
 
-    pir1_3_reg = new PIR1v3(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
+  pir1_3_reg = new PIR1v3(this,"pir1","Peripheral Interrupt Register",&intcon_reg,&pie1);
   pir1 = pir1_3_reg;
   pir1->valid_bits = pir1->writable_bits = 0xff;
 

@@ -177,7 +177,7 @@ void TMR0::start(int restart_value, int sync)
 	get_interface().prepend_interface(tmr0_interface);
     }
 
-    Dprintf(("last_cycle:0x%"PRINTF_GINT64_MODIFIER"x future_cycle:0x%"PRINTF_GINT64_MODIFIER"x\n",last_cycle,future_cycle));
+    Dprintf(("last_cycle:0x%" PRINTF_GINT64_MODIFIER "x future_cycle:0x%" PRINTF_GINT64_MODIFIER "x\n",last_cycle,future_cycle));
 
   }
 
@@ -429,7 +429,7 @@ void TMR0::set_t0if()
 void TMR0::callback()
 {
 
-  Dprintf(("now=0x%"PRINTF_GINT64_MODIFIER"x\n",get_cycles().get()));
+  Dprintf(("now=0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
 
   if((state & RUNNING) == 0) {
 

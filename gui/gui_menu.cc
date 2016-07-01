@@ -189,6 +189,7 @@ class SourceBrowserPreferences : public SourceWindow
 {
 public:
   SourceBrowserPreferences(GtkWidget *pParent);
+  ~SourceBrowserPreferences();
 
   void apply();
   void cancel();
@@ -205,25 +206,25 @@ public:
   const char *getFont();
 private:
 
-  std::auto_ptr<ColorButton> m_LabelColor;
-  std::auto_ptr<ColorButton> m_MnemonicColor;
-  std::auto_ptr<ColorButton> m_SymbolColor;
-  std::auto_ptr<ColorButton> m_CommentColor;
-  std::auto_ptr<ColorButton> m_ConstantColor;
+  ColorButton * m_LabelColor;
+  ColorButton * m_MnemonicColor;
+  ColorButton * m_SymbolColor;
+  ColorButton * m_CommentColor;
+  ColorButton * m_ConstantColor;
 
-  std::auto_ptr<MarginButton> m_LineNumbers;
-  std::auto_ptr<MarginButton> m_Addresses;
-  std::auto_ptr<MarginButton> m_Opcodes;
+  MarginButton * m_LineNumbers;
+  MarginButton * m_Addresses;
+  MarginButton * m_Opcodes;
 
   int m_currentTabPosition;
   int m_originalTabPosition;
-  std::auto_ptr<TabButton> m_Up;
-  std::auto_ptr<TabButton> m_Left;
-  std::auto_ptr<TabButton> m_Down;
-  std::auto_ptr<TabButton> m_Right;
-  std::auto_ptr<TabButton> m_None;
+  TabButton *m_Up;
+  TabButton *m_Left;
+  TabButton *m_Down;
+  TabButton *m_Right;
+  TabButton *m_None;
 
-  std::auto_ptr<FontSelection> m_FontSelector;
+  FontSelection  *m_FontSelector;
 };
 
 //------------------------------------------------------------------------
@@ -467,25 +468,24 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     GtkTextTagTable *tag_table = m_pParent->getTagTable();
 
-    m_LabelColor    = std::auto_ptr<ColorButton>(
-      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Label"),
-      "Label", this));
-    m_MnemonicColor = std::auto_ptr<ColorButton>(
-      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Mnemonic"),
-      "Mnemonic", this));
-    m_SymbolColor   = std::auto_ptr<ColorButton>(
-      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Symbols"),
-      "Symbols", this));
-    m_ConstantColor = std::auto_ptr<ColorButton>(
-      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Constants"),
-      "Constants", this));
-    m_CommentColor  = std::auto_ptr<ColorButton>(
-      new ColorButton(colorVbox, gtk_text_tag_table_lookup(tag_table, "Comments"),
-      "Comments", this));
+    m_LabelColor    = new ColorButton(colorVbox, 
+			gtk_text_tag_table_lookup(tag_table, "Label"),
+      			"Label", this);
+    m_MnemonicColor = new ColorButton(colorVbox, 
+			gtk_text_tag_table_lookup(tag_table, "Mnemonic"),
+      			"Mnemonic", this);
+    m_SymbolColor   = new ColorButton(colorVbox, 
+			gtk_text_tag_table_lookup(tag_table, "Symbols"),
+      			"Symbols", this);
+    m_ConstantColor = new ColorButton(colorVbox, 
+			gtk_text_tag_table_lookup(tag_table, "Constants"),
+      			"Constants", this);
+    m_CommentColor  = new ColorButton(colorVbox, 
+			gtk_text_tag_table_lookup(tag_table, "Comments"),
+      			"Comments", this);
 
     // Font selector
-    m_FontSelector = std::auto_ptr<FontSelection>(
-      new FontSelection(vbox, this));
+    m_FontSelector = new FontSelection(vbox, this);
 
     label = gtk_label_new("Font");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox,label);
@@ -509,20 +509,19 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *tabVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (tabFrame), tabVbox);
 
-    m_Up    = std::auto_ptr<TabButton>(
-      new TabButton(tabVbox, radioUp, GTK_POS_TOP, this));
-    m_Left  = std::auto_ptr<TabButton>(
-      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"left"),
-      GTK_POS_LEFT, this));
-    m_Down  = std::auto_ptr<TabButton>(
-      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"down"),
-      GTK_POS_BOTTOM, this));
-    m_Right = std::auto_ptr<TabButton>(
-      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"right"),
-      GTK_POS_RIGHT, this));
-    m_None  = std::auto_ptr<TabButton>(
-      new TabButton(tabVbox, gtk_radio_button_new_with_label_from_widget (rb,"none"),
-      -1, this));
+    m_Up    = new TabButton(tabVbox, radioUp, GTK_POS_TOP, this);
+    m_Left  = new TabButton(tabVbox, 
+		gtk_radio_button_new_with_label_from_widget (rb,"left"),
+      		GTK_POS_LEFT, this);
+    m_Down  = new TabButton(tabVbox, 
+		gtk_radio_button_new_with_label_from_widget (rb,"down"),
+      		GTK_POS_BOTTOM, this);
+    m_Right = new TabButton(tabVbox, 
+		gtk_radio_button_new_with_label_from_widget (rb,"right"),
+      		GTK_POS_RIGHT, this);
+    m_None  = new TabButton(tabVbox, 
+		gtk_radio_button_new_with_label_from_widget (rb,"none"),
+      		-1, this);
 
 
     // Source browser margin
@@ -531,14 +530,12 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *marginVbox = gtk_vbox_new(0,0);
     gtk_container_add (GTK_CONTAINER (marginFrame), marginVbox);
 
-    m_LineNumbers = std::auto_ptr<MarginButton>(
-      new MarginButton(marginVbox, "Line Numbers",
-      MarginButton::eLineNumbers, this));
-    m_Addresses   = std::auto_ptr<MarginButton>(
-      new MarginButton(marginVbox, "Addresses",
-      MarginButton::eAddresses, this));
-    m_Opcodes     = std::auto_ptr<MarginButton>(
-      new MarginButton(marginVbox, "Opcodes", MarginButton::eOpcodes, this));
+    m_LineNumbers = new MarginButton(marginVbox, "Line Numbers",
+      			MarginButton::eLineNumbers, this);
+    m_Addresses   = new MarginButton(marginVbox, "Addresses",
+      			MarginButton::eAddresses, this);
+    m_Opcodes     = new MarginButton(marginVbox, "Opcodes", 
+			MarginButton::eOpcodes, this);
 
     label = gtk_label_new("Margins");
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
@@ -577,6 +574,24 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   gtk_widget_show_all(notebook);
 
+}
+SourceBrowserPreferences::~SourceBrowserPreferences()
+{
+  delete m_Left;
+  delete m_Down;
+  delete m_Right;
+  delete m_None;
+  delete m_Up;
+  delete  m_LabelColor;
+  delete  m_MnemonicColor;
+  delete  m_SymbolColor;
+  delete  m_CommentColor;
+  delete  m_ConstantColor;
+
+  delete  m_LineNumbers;
+  delete  m_Addresses;
+  delete  m_Opcodes;
+  delete  m_FontSelector;
 }
 
 void SourceBrowserPreferences::setTabPosition(int tabPosition)
