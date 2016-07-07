@@ -1,3 +1,19 @@
+2016-07-07 Roy Rankin <rrankin@ihug.com.au>
+	* regression/instructions_16bit/instructions_16bit.asm
+	: Fix assemble error with gputils < 1.4.0
+
+2016-07-01 Roy Rankin <rrankin@ihug.com.au>
+	* cli/input.cc cli/socket.cc extras/dht11/dht11.cc
+	  extras/ds1820/bit1w.cc extras/lcd/hd44780.cc extras/lcd/hd44780.h
+	  extras/lcd/lcd.cc extras/lcd/lcd.h extras/lcd/lcdgui.cc
+	  gui/gui_menu.cc modules/usart.cc src/14bit-registers.cc
+	  src/14bit-tmrs.cc src/a2d_v2.cc src/a2dconverter.cc src/icd.cc
+	  src/p16f88x.cc src/p17c75x.cc src/p18x.cc src/pic-ioports.cc
+	  src/pic-registers.cc src/stimuli.cc src/tmr0.cc src/uart.cc
+	: Fix GCC 6.1.1 warning messages
+	* regression/instructions_16bit/instructions_16bit.asm
+	: Fix assemble error with gputils 1.4.2
+
 2016-06-30 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.h src/p18fk.cc
 	: Bug #222 breadboard issue with 18f26k22 clock pin labels 
