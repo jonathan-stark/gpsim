@@ -20,7 +20,15 @@ failures        RES     1
 
   GLOBAL done, temp
 
+ifndef __IDLOCS_START
+; The following warning can be ignored the line is used where gpasm < 1.4.0
+; Warning[205] Found directive in column 1: "IDLOCS"
+
+IDLOCS CODE
+  db      "ID"
+else
  IDLOCS "ID"
+endif
 
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
