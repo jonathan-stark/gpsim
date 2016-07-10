@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui_object.h"
 #include "gui_register.h"
-#include <gtkextra/gtkextra.h>
+#include "gtkextra/gtksheet.h"
 
 #include <string>
 
