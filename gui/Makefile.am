@@ -15,7 +15,11 @@ libgpsimgui_la_SOURCES =  gui_break.cc gui_callbacks.cc gui_dialog.cc gui_init.c
 	gui_scope.h gui_src.h gui_stack.h gui_statusbar.h gui_stopwatch.h \
 	gui_symbols.h gui_trace.h gui_watch.h \
 	preferences.cc preferences.h \
-	settings.h settings_exdbm.h
+	settings.h settings_exdbm.h \
+	gtkextra/gtkextra-marshal.c gtkextra/gtkextra-marshal.h \
+	gtkextra/gtkitementry.c gtkextra/gtkitementry.h \
+	gtkextra/gtksheet.c gtkextra/gtksheet.h \
+	gtkextra/gtkextra.c gtkextra/gtkextrafeatures.h
 
 libgpsimgui_la_LIBADD = @X_LDFLAGS@ @Y_LDFLAGS@ @GTK@ @GDK@ @GLIB@ @LIBREADLINE@ ../eXdbm/libgpsim_eXdbm.la ../src/libgpsim.la ../cli/libgpsimcli.la
 
@@ -24,4 +28,4 @@ pixmapdir = $(datadir)/gpsim
 AM_CFLAGS =
 AM_CXXFLAGS =
 
-EXTRA_DIST = makefile.mingw
+EXTRA_DIST = makefile.mingw gtkextra/COPYING

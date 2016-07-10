@@ -34,10 +34,10 @@ In here you'll find some simple logic devices:
 #define IN_MODULE
 
 #include "../config.h"    // get the definition for HAVE_GUI
+#include <iostream>
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
-#include <iostream>
 
 /* XPM */
 static const gchar * and2_pixmap[] = {
@@ -213,8 +213,8 @@ void Logic_Input::setDrivenState( bool new_state)
 {
 
   if(verbose)
-    cout << name()<< " setDrivenState= "
-         << (new_state ? "high" : "low") << endl;
+    std::cout << name()<< " setDrivenState= "
+         << (new_state ? "high" : "low") << std::endl;
 
   if(new_state != getDrivenState()) {
 
@@ -283,8 +283,10 @@ LogicGate::LogicGate(const char *name, const char *desc)
 
 LogicGate::~LogicGate()
 {
+#ifdef HAVE_GUI
   if (pixbuf)
     g_object_unref(pixbuf);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -513,7 +515,7 @@ NOTGate::~NOTGate()
 void NOTGate::update_state()
 {
   if (verbose)
-    cout << name() << " update_state\n";
+    std::cout << name() << " update_state\n";
   pOutputPin->putState((input_state & input_bit_mask) == 0);
 }
 

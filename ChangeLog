@@ -1,3 +1,19 @@
+2016-07-10 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/Makefile.am gui/gtkextra gui/gtkextra/COPYING
+	  gui/gtkextra/README.gpsim
+	  gui/gtkextra/gtkextra-marshal.c
+	  gui/gtkextra/gtkextra-marshal.h
+	  gui/gtkextra/gtkextra.c
+	  gui/gtkextra/gtkextrafeatures.h
+	  gui/gtkextra/gtkitementry.c
+	  gui/gtkextra/gtkitementry.h
+	  gui/gtkextra/gtksheet.c
+	  gui/gtkextra/gtksheet.h
+	  gui/gui_regwin.h
+	  gui/gui_symbols.cc
+	  modules/logic.cc
+	: Include GtkSheet from GtkExtra to remove external dependedncy on it.
+
 2016-07-07 Roy Rankin <rrankin@ihug.com.au>
 	* regression/instructions_16bit/instructions_16bit.asm
 	: Fix assemble error with gputils < 1.4.0
@@ -16,11 +32,11 @@
 
 2016-06-30 Roy Rankin <rrankin@ihug.com.au>
 	* src/16bit-processors.h src/p18fk.cc
-	: Bug #222 breadboard issue with 18f26k22 clock pin labels 
+	: Bug #222 breadboard issue with 18f26k22 clock pin labels
 
 2016-06-28 Roy Rankin <rrankin@ihug.com.au>
 	* src/ssp.h src/ssp.cc
-	: Bug #221 When selecting I2C, SSx pin may change name in breadboard 
+	: Bug #221 When selecting I2C, SSx pin may change name in breadboard
 
 2016-03-22 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p18f26k22/Makefile regression/p18f26k22/sync_26k22.asm
@@ -35,7 +51,7 @@
 
 2016-02-15 Roy Rankin <rrankin@ihug.com.au>
 	 * src/14bit-tmrs.cc src/14bit-tmrs.h
-	 : Bug #219 TMR2 can exceed 255 after changing prescale bits of T2CON 
+	 : Bug #219 TMR2 can exceed 255 after changing prescale bits of T2CON
 	 * src/p18x.cc src/pic-processor.cc
 	 : regression causing add_sfr_register to be called twice for osccon
 
