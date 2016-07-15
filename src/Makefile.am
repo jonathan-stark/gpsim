@@ -82,6 +82,7 @@ libgpsim_la_SOURCES = \
 	psp.cc \
 	xref.cc \
 	spp.cc \
+	dsm_module.cc \
 	icd.cc \
 	expr.cc	\
 	operator.cc \
@@ -142,6 +143,7 @@ gpsiminclude_HEADERS = \
 	p16f87x.h \
 	p17c75x.h \
 	p18x.h \
+	p18fk.h \
 	packages.h \
 	pic-instructions.h \
 	pic-packages.h \
@@ -172,6 +174,7 @@ gpsiminclude_HEADERS = \
 	ssp.h \
 	psp.h \
 	spp.h \
+        dsm_module.h \
 	errors.h \
 	expr.h \
 	ui.h \

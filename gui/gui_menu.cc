@@ -1185,8 +1185,8 @@ void TimeWidget::Create(GtkWidget *container)
   new TimeMilliSeconds(this,menu);
   new TimeSeconds(this,menu);
   new TimeHHMMSS(this,menu);
-  NewFormat(new TimeCyclesHex(this,menu));
-  new TimeCyclesDec(this,menu);
+  new TimeCyclesHex(this,menu);
+  NewFormat(new TimeCyclesDec(this,menu));
 
   // Associate a callback with the user button-click actions
   g_signal_connect(entry,
