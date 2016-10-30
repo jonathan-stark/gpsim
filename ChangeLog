@@ -1,3 +1,9 @@
+2016-10-31 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.cc gui/gui_breadboard.h
+	: bug #223 sigsegv in gui_breadboard.cc:646
+	* src/dsm_module.cc src/dsm_module.h
+	: Data Signal Modulator (in developement)
+
 2016-07-15 Roy Rankin <rrankin@ihug.com.au>
 	* extras/dht11/examples/Makefile extras/ds1820/examples/Makefile
 	  src/Makefile.am
