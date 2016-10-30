@@ -282,6 +282,7 @@ public:
   GuiModule *selected_module;
 
   Breadboard_Window(GUI_Processor *gp);
+  ~Breadboard_Window();
 
   virtual void Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
@@ -293,17 +294,17 @@ public:
   void update_board_matrix();
   void clear_nodes();
 
+  GtkWidget *status_line;
 protected:
   virtual const char *name();
 
 private:
-  void trace_all();
+
   GtkWidget *add_button(const char *label, GCallback f, GtkWidget *box);
 
   static void pointer_cb(GtkWidget *w, GdkEventButton *event,
     Breadboard_Window *bbw);
 
-  GtkWidget *status_line;
   GuiModule *m_MainCpuModule;
 
   static gboolean layout_expose(GtkWidget *widget,

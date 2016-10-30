@@ -89,7 +89,12 @@ static void treeselect_module(GtkItem *item, GuiModule *p);
 /*
  board matrix contains information about how a track can be routed.
  */
-static unsigned char board_matrix[XSIZE][YSIZE];
+static unsigned char *board_matrix;
+// mask_matrix is used by trace_two_poins to know where is has been, and
+// how quickly it came here. (depth is stored here if lower)
+static unsigned short *mask_matrix;
+static unsigned int xsize;
+static unsigned int ysize;
 
 
 //========================================================================
@@ -123,23 +128,50 @@ BB_ModuleLabel::~BB_ModuleLabel()
   gtk_widget_destroy(m_label);
 }
 
+static inline unsigned char *board_matrix_pt(unsigned int x, unsigned int y)
+{
+    if (x < xsize && y < ysize)
+    {
+        return board_matrix + y*xsize + x;
+    }
+    else
+    {
+        return  NULL;
+    }
+}
+
+static inline unsigned short *mask_matrix_pt(unsigned int x, unsigned int y)
+{
+    if (x < xsize && y < ysize)
+    {
+        return mask_matrix + (y*xsize + x);
+    }
+    else
+    {
+        return  NULL;
+    }
+}
+
 /* Check the flags in board_matrix to see if we are allowed to
    route horizontally here */
 static inline int allow_horiz(point &p)
 {
-  if(board_matrix[p.x][p.y] & HMASK)
-    return FALSE;
-  return TRUE;
+  unsigned char *pt = board_matrix_pt(p.x, p.y);
+
+  if (pt && ! (*pt & HMASK))
+	return TRUE;
+  return FALSE;
 }
 
 /* Check the flags in board_matrix to see if we are allowed to
    route vertically here */
 static inline int allow_vert(point &p)
 {
-  if(board_matrix[p.x][p.y] & VMASK)
-    return FALSE;
+  unsigned char *pt = board_matrix_pt(p.x, p.y);
 
-  return TRUE;
+  if (pt && ! (*pt & VMASK))
+	return TRUE;
+  return FALSE;
 }
 
 // Find the direction to go to get from s to e if there are no obstacles.
@@ -290,10 +322,6 @@ static void compress_path(path **pat)
 }
 #endif
 
-// mask_matrix is used by trace_two_poins to know where is has been, and
-// how quickly it came here. (depth is stored here if lower)
-static unsigned short mask_matrix[XSIZE][YSIZE];
-
 // maxdepth is shortest path from start to end
 static unsigned short maxdepth;
 
@@ -322,9 +350,9 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
         int x,y;
         // Initialize mask_matrix and maxdepth
         //maxdepth=500;
-        for(x=0;x<XSIZE;x++)
-            for(y=0;y<YSIZE;y++)
-                mask_matrix[x][y]=maxdepth;
+        for(x=0;x<(int)xsize;x++)
+            for(y=0;y<(int)ysize;y++)
+                *mask_matrix_pt(x, y) = maxdepth;
 
         clear_path(pat);
         calls=0;
@@ -337,7 +365,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
     ////////////////////////////////////////
     if(depth>maxdepth)
         return FALSE;
-    if(depth>mask_matrix[p.x][p.y])
+    if(depth>*mask_matrix_pt(p.x, p.y))
         return FALSE;
     if(abs(p.x-end.x)+abs(p.y-end.y)+depth>maxdepth)
         return FALSE;
@@ -360,7 +388,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
     }
 
     // Store new (closer) depth in mask_matrix.
-    mask_matrix[p.x][p.y]=depth;
+    *mask_matrix_pt(p.x, p.y) = depth;
 
     // Find the general direction we want to go
     dir = calculate_route_direction(p,end);
@@ -587,23 +615,32 @@ void Breadboard_Window::update_board_matrix()
     int x,y, width, height;
     int i;
 
-    // Clear first.
-    for(y=YSIZE-1;y>=0;y--)
+    gtk_window_get_size(GTK_WINDOW(window), &width, &height);
+    if (width/ROUTE_RES > (int)xsize || height/ROUTE_RES > (int)ysize)
     {
-        for(x=0;x<XSIZE;x++)
-            board_matrix[x][y]=0;
+        xsize = width/ROUTE_RES;
+        ysize = height/ROUTE_RES;
+        board_matrix  = (unsigned char *)realloc(board_matrix, xsize*ysize);
+        mask_matrix  = (unsigned short *)realloc(mask_matrix, xsize*ysize*sizeof(unsigned short));
+    }
+
+    // Clear first.
+    for(y=ysize-1;y>=0;y--)
+    {
+        for(x=0; x < (int)xsize; x++)
+            *board_matrix_pt(x, y) = 0;
     }
 
     // Mark board outline, so we limit traces here
-    for(x=0;x<XSIZE;x++)
+    for(x=0; x < (int)xsize; x++)
     {
-        board_matrix[x][0]=(HMASK|VMASK);
-        board_matrix[x][YSIZE-1]=(HMASK|VMASK);
+        *board_matrix_pt(x, 0) = (HMASK|VMASK);
+        *board_matrix_pt(x, ysize-1) = (HMASK|VMASK);
     }
-    for(y=0;y<YSIZE;y++)
+    for(y=0; y < (int)ysize; y++)
     {
-        board_matrix[0][y]=(HMASK|VMASK);
-        board_matrix[XSIZE-1][y]=(HMASK|VMASK);
+        *board_matrix_pt(0, y) = (HMASK|VMASK);
+        *board_matrix_pt(xsize-1, y) = (HMASK|VMASK);
     }
 
 
@@ -620,13 +657,16 @@ void Breadboard_Window::update_board_matrix()
         height=p->height();
 
         for(y = p->y() - ROUTE_RES;
-            y < p->y() + height + ROUTE_RES && y/ROUTE_RES < YSIZE;
+            y < p->y() + height + ROUTE_RES && y/ROUTE_RES < (int)ysize;
             y += ROUTE_RES)
         {
           for(x = p->x();
-              x < p->x() + width && x/ROUTE_RES<XSIZE;
+              x < p->x() + width && x/ROUTE_RES < (int)xsize;
               x += ROUTE_RES)
-                board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+          {
+               unsigned char *pt = board_matrix_pt(x/ROUTE_RES, y/ROUTE_RES);
+               if(pt) *pt = (HMASK|VMASK);
+          }
         }
 
         // Draw barriers around pins so the tracker can only get in
@@ -643,13 +683,19 @@ void Breadboard_Window::update_board_matrix()
               for(x = gp->x() -  PINLENGTH;
                   x < gp->x() + gp->width();
                   x += ROUTE_RES)
-                board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+              {
+                unsigned char *pt = board_matrix_pt(x/ROUTE_RES, y/ROUTE_RES);
+                if (pt) *pt = (HMASK|VMASK);
+              }
 
               y = gp->y() + gp->height() / 2;
               for(x = gp->x() -  PINLENGTH;
                   x < gp->x() + gp->width();
                   x += ROUTE_RES)
-                board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+              {
+                unsigned char *pt = board_matrix_pt(x/ROUTE_RES, y/ROUTE_RES);
+                if (pt) *pt = (HMASK|VMASK);
+              }
               break;
 
             case RIGHT:
@@ -657,12 +703,18 @@ void Breadboard_Window::update_board_matrix()
               for(x = gp->x() - PINLENGTH;
                   x < gp->x() + gp->width();
                   x += ROUTE_RES)
-                board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+	      {
+                unsigned char *pt = board_matrix_pt(x/ROUTE_RES, y/ROUTE_RES);
+                if (pt) *pt = (HMASK|VMASK);
+               }
               y = gp->y() + gp->height() / 2;
               for(x = gp->x() - PINLENGTH;
                   x < gp->x() + gp->width();
                   x += ROUTE_RES)
-                board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+	      {
+                unsigned char *pt = board_matrix_pt(x/ROUTE_RES, y/ROUTE_RES);
+                if (pt) *pt = (HMASK|VMASK);
+              }
               break;
             default:
               assert(0);
@@ -680,6 +732,7 @@ void Breadboard_Window::update_board_matrix()
 static void add_path_to_matrix(path *pat)
 {
     int x=-1, y=-1;
+    unsigned char *pt;
     if(pat!=0)
     {
         x=pat->p.x;
@@ -688,10 +741,11 @@ static void add_path_to_matrix(path *pat)
     }
     while(pat!=0)
     {
-        if(pat->dir==R_LEFT || pat->dir==R_RIGHT)
-            board_matrix[x][y]|=HMASK;
-        if(pat->dir==R_DOWN || pat->dir==R_UP)
-            board_matrix[x][y]|=VMASK;
+	pt = board_matrix_pt(x, y);
+        if(pt && (pat->dir==R_LEFT || pat->dir==R_RIGHT))
+            *pt |= HMASK;
+        if(pt && (pat->dir==R_DOWN || pat->dir==R_UP))
+            *pt |= VMASK;
         while(x!=pat->p.x || y!=pat->p.y)
         {
             if(x<pat->p.x)
@@ -702,10 +756,11 @@ static void add_path_to_matrix(path *pat)
                 y++;
             if(y>pat->p.y)
                 y--;
-            if(pat->dir==R_LEFT || pat->dir==R_RIGHT)
-                board_matrix[x][y]|=HMASK;
-            if(pat->dir==R_DOWN || pat->dir==R_UP)
-                board_matrix[x][y]|=VMASK;
+	    pt = board_matrix_pt(x, y);
+            if(pt && (pat->dir==R_LEFT || pat->dir==R_RIGHT))
+                *pt |= HMASK;
+            if(pt && (pat->dir==R_DOWN || pat->dir==R_UP))
+                *pt |= VMASK;
         }
 
         pat = pat->next;
@@ -1373,6 +1428,7 @@ static GuiModule *find_closest_module(Breadboard_Window *bbw, int x, int y)
 // FIXME
 static GuiModule *dragged_module=0;
 static int dragging=0;
+static int all_trace = 0;
 static int grab_next_module=0;
 
 void grab_module(GuiModule *p)
@@ -1392,6 +1448,7 @@ void grab_module(GuiModule *p)
     gtk_widget_set_app_paintable(p->bbw()->layout, FALSE);
 }
 
+static void trace_all(GtkWidget *button, Breadboard_Window *bbw);
 void Breadboard_Window::pointer_cb(GtkWidget *w,
                        GdkEventButton *event,
                        Breadboard_Window *bbw)
@@ -1449,7 +1506,8 @@ void Breadboard_Window::pointer_cb(GtkWidget *w,
             bbw->update_board_matrix();
             dragging = 0;
             gtk_widget_set_app_paintable(bbw->layout, TRUE);
-            bbw->trace_all();
+	    if (all_trace)
+                 trace_all(w, bbw);
             UpdateModuleFrame(dragged_module, bbw);
         }
         break;
@@ -1604,21 +1662,27 @@ static void copy_tree_to_clist(GtkTreeModel *model, GtkListStore *list_store)
     struct gui_node *gn;
     GtkTreeIter node_iter, iter, new_iter;
 
-    gtk_tree_model_get_iter_first (model, &node_iter);
-    gtk_tree_model_iter_n_children (model, &node_iter);
-    gtk_tree_model_iter_children (model, &iter, &node_iter);
-    
-    do
+    fprintf(stderr, "RRR copy_tree_to_clist model %p list_store %p\n", model, list_store);
+    if (gtk_tree_model_get_iter_first (model, &node_iter))
     {
-        gtk_tree_model_get (model, &iter, 1, &gn, -1);
-   
-        gtk_list_store_append(list_store, &new_iter);
-        gtk_list_store_set(list_store, &new_iter,
-          0, gn->node->name().c_str(), 1, (gpointer) gn->node, -1);
-        
-        if (!iter.stamp)
-            break;
-    } while (gtk_tree_model_iter_next (model, &iter));
+	fprintf(stderr, "RRR node_iter %p\n", &node_iter);
+        if (gtk_tree_model_iter_n_children (model, &node_iter) > 0)
+        {
+            gtk_tree_model_iter_children (model, &iter, &node_iter);
+            
+            do
+            {
+                gtk_tree_model_get (model, &iter, 1, &gn, -1);
+           
+                gtk_list_store_append(list_store, &new_iter);
+                gtk_list_store_set(list_store, &new_iter,
+                  0, gn->node->name().c_str(), 1, (gpointer) gn->node, -1);
+                
+                if (!iter.stamp)
+                    break;
+            } while (gtk_tree_model_iter_next (model, &iter));
+	}
+    }
 }
 
 static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
@@ -2185,16 +2249,21 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
 }
 
-void Breadboard_Window::trace_all()
+static void clear_traces(GtkWidget *button, Breadboard_Window *bbw)
+{
+  all_trace = 0;
+  bbw->update_board_matrix();
+}
+static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
 {
     struct gui_node *gn;
     GtkTreeModel *model;
     GtkTreeIter p_iter, c_iter;
     bool did_work = true;
     
-    update_board_matrix();
+    bbw->update_board_matrix();
 
-    if ((model = gtk_tree_view_get_model ((GtkTreeView*) tree)) == NULL)
+    if ((model = gtk_tree_view_get_model ((GtkTreeView*) bbw->tree)) == NULL)
 	return;
     if(!gtk_tree_model_get_iter_first (model, &p_iter))
 	return;
@@ -2208,12 +2277,13 @@ void Breadboard_Window::trace_all()
           did_work = false;
     } while (gtk_tree_model_iter_next (model, &c_iter));    
 
-    draw_nodes();
+    bbw->draw_nodes();
     if (!did_work)
-      gtk_label_set_text(GTK_LABEL(status_line), "Can not trace all nodes");
+      gtk_label_set_text(GTK_LABEL(bbw->status_line), "Can not trace all nodes");
     else
-      gtk_label_set_text(GTK_LABEL(status_line), "");
+      gtk_label_set_text(GTK_LABEL(bbw->status_line), "");
 
+    all_trace = 1;
     if (verbose)
         puts("Trace all is done.");
 }
@@ -3186,8 +3256,15 @@ void Breadboard_Window::Build(void)
   add_button("Add module", G_CALLBACK(add_module), hbox12);
   add_button("Add library", G_CALLBACK(add_library), hbox12);
 
+  
+
   hbox15 = bb_hbox(window);
   gtk_box_pack_start (GTK_BOX (vbox13), hbox15, FALSE, FALSE, 0);
+
+  add_button("Trace all", G_CALLBACK(trace_all), hbox15);
+  add_button("Clear traces", G_CALLBACK(clear_traces), hbox15);
+
+
 
   node_frame = gtk_frame_new ("Node connections");
   gtk_box_pack_start (GTK_BOX (vbox9), node_frame, TRUE, TRUE, 0);
@@ -3323,7 +3400,14 @@ void Breadboard_Window::Build(void)
 
   gtk_widget_set_app_paintable(layout, TRUE);
   gtk_widget_show (layout);
+  unsigned int rrx, rry;
 
+  gtk_layout_get_size(GTK_LAYOUT(layout), &rrx, &rry);
+
+  xsize = ((width < LAYOUTSIZE_X)?LAYOUTSIZE_X:width)/ROUTE_RES;
+  ysize = ((height < LAYOUTSIZE_Y)?LAYOUTSIZE_Y:height)/ROUTE_RES;
+  board_matrix = (unsigned char *)malloc(xsize*ysize);
+  mask_matrix = (unsigned short *)realloc(NULL, xsize*ysize*sizeof(unsigned short));
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_window_move(GTK_WINDOW(window), x, y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
@@ -3340,12 +3424,12 @@ void Breadboard_Window::Build(void)
   pinnamefont = pango_font_description_from_string("Courier Bold 8");
 
   cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(window));
-  PangoLayout *layout = pango_cairo_create_layout(cr);
-  pango_layout_set_font_description(layout, pinnamefont);
-  pango_layout_set_text(layout, "9y", -1);
-  pango_layout_get_size(layout, &pinnameheight, NULL);
+  PangoLayout *pang_layout = pango_cairo_create_layout(cr);
+  pango_layout_set_font_description(pang_layout, pinnamefont);
+  pango_layout_set_text(pang_layout, "9y", -1);
+  pango_layout_get_size(pang_layout, &pinnameheight, NULL);
   pinnameheight /= PANGO_SCALE;
-  g_object_unref(layout);
+  g_object_unref(pang_layout);
   cairo_destroy(cr);
 
   if(pinspacing<pinnameheight)
@@ -3414,6 +3498,16 @@ const char *Breadboard_Window::name()
   return "pinout";
 }
 
+Breadboard_Window::~Breadboard_Window()
+{
+   if (mask_matrix)
+       free(mask_matrix);
+   if (board_matrix)
+	free(board_matrix);
+   mask_matrix = 0;
+   board_matrix = 0;
+}
+
 Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   : pinstatefont(0), pinnamefont(0), node_clist(0),
     stimulus_settings_label(0), stimulus_add_node_button(0),
@@ -3421,6 +3515,8 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
     selected_pin(0), selected_node(0), selected_module(0)
 {
   menu = "/menu/Windows/Breadboard";
+  mask_matrix = 0;
+  board_matrix = 0;
 
   gp = _gp;
 
