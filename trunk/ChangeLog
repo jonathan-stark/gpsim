@@ -1,3 +1,8 @@
+2016-11-10 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/ioports.h gui/gtkextra/gtksheets.c
+	: Remove possible buffer over flows
+	* cli/cmd_dump.cc src/program_files.cc src/sim_context.cc
+	: Minor loop optimization
 2016-10-31 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc gui/gui_breadboard.h
 	: bug #223 sigsegv in gui_breadboard.cc:646

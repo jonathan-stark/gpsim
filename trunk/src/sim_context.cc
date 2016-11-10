@@ -269,7 +269,7 @@ void CSimulationContext::dump_processor_list(void)
   CProcessorList::iterator processor_iterator; 
   for (processor_iterator = processor_list.begin();
        processor_iterator != processor_list.end(); 
-       processor_iterator++) {
+       ++processor_iterator) {
       CProcessorList::value_type vt = *processor_iterator;
       Processor *p = vt.second;
       cout << p->name() << '\n';
@@ -358,7 +358,7 @@ CSimulationContext::CProcessorList::findByType(const key_type& _Keyval) {
   // we found above.
   iterator it;
   iterator itEnd = end();
-  for(it = begin(); it != itEnd; it++) {
+  for(it = begin(); it != itEnd; ++it) {
     if(it->second->m_pConstructorObject == pc) {
       return it;
     }

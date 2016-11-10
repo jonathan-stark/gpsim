@@ -94,7 +94,7 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
   iterator itLast;
   iterator itEnd = end();
   int iReturn = ProgramFileType::SUCCESS;
-  for(it = begin(); it != itEnd; it++) {
+  for(it = begin(); it != itEnd; ++it) {
     itLast = it;
     fseek(pFile, 0, SEEK_SET);
     //get_symbol_table().clear();

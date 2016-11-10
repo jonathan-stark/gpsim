@@ -309,8 +309,8 @@ private:
   PortModule   *m_port;
   unsigned int  m_pinNumber;
   bool          m_bForcedUpdate;
-  Register     *m_analog_reg[ANALOG_TABLE_SIZE];	
-  bool		m_analog_active[ANALOG_TABLE_SIZE];
+  Register     *m_analog_reg[ANALOG_TABLE_SIZE + 1];	
+  bool		m_analog_active[ANALOG_TABLE_SIZE + 1];
 };
 
 
