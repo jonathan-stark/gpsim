@@ -6398,7 +6398,6 @@ gtk_sheet_button_draw (GtkSheet *sheet, gint row, gint column)
   gint len = 0;
   gchar *line = 0;
   gchar *words = 0;
-  gchar label[10];
   PangoAlignment align = PANGO_ALIGN_LEFT;
   gboolean rtl;
 
@@ -6538,8 +6537,9 @@ gtk_sheet_button_draw (GtkSheet *sheet, gint row, gint column)
     }else{
            PangoLayout *layout = NULL;
            gint real_x = x, real_y = y;
+           gchar *label;
 
-           sprintf(label,"%d",index);
+           label = g_strdup_printf("%d",index);
            text_width = STRING_WIDTH(GTK_WIDGET(sheet), GTK_WIDGET(sheet)->style->font_desc, label);
 
            layout = gtk_widget_create_pango_layout (GTK_WIDGET(sheet), label);
@@ -6569,6 +6569,7 @@ gtk_sheet_button_draw (GtkSheet *sheet, gint row, gint column)
                              real_x, real_y,
                              layout);
            g_object_unref(G_OBJECT(layout));
+           g_free(label);
     }
 
     gdk_gc_set_clip_rectangle(GTK_WIDGET(sheet)->style->fg_gc[button->state],

@@ -89,11 +89,11 @@ void cmd_dump::dump_sfrs(void)
   list <ProgramMemoryAccess *> :: iterator itPMA;
 
   itPMA = cpu->pma_context.begin();
-  for(; itPMA != cpu->pma_context.end(); itPMA++) {
+  for(; itPMA != cpu->pma_context.end(); ++itPMA) {
     list<Register *>::iterator itReg;
     for(itReg = (*itPMA)->SpecialRegisters.begin();
         itReg != (*itPMA)->SpecialRegisters.end();
-        itReg++) {
+        ++itReg) {
       uToDisplayCount++;
       RegListToDisplay.push_back(*itReg);
     }
