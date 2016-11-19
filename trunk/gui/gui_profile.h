@@ -44,15 +44,11 @@ struct cycle_histogram_counter{
 
 class Profile_Window : public GUI_Object
 {
- public:
-
+public:
   int program;    // if non-zero window has program
 
   GtkListStore *profile_list;
   GtkWidget *profile_tree;
-
-  GtkListStore *profile_range_list;
-  GtkWidget *profile_range_tree;
 
   GtkListStore *profile_register_list;
   GtkWidget *profile_register_tree;
@@ -61,11 +57,6 @@ class Profile_Window : public GUI_Object
   GtkWidget *profile_exestats_tree;
 
   GtkWidget *notebook;
-  gint range_current_row;
-  GtkWidget *exestats_popup_menu;
-  GtkWidget *range_popup_menu;
-  GtkWidget *plot_popup_menu;
-  GtkWidget *plot_canvas;
 
   // List of cycle_count structs
   GList *histogram_profile_list;
@@ -81,8 +72,6 @@ class Profile_Window : public GUI_Object
 protected:
   virtual const char *name();
 };
-
-
 
 #endif // __GUI_PROFILE_H__
 

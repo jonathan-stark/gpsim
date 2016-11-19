@@ -1,3 +1,9 @@
+2016-11-19 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_profile.h gui/gui_profile.cc
+	: Removed unreachable code leaving stubs so that profiling information
+	can be added at a later date. Current and previous code is unable
+	to extract profiling information.
+
 2016-11-10 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/ioports.h gui/gtkextra/gtksheets.c
 	: Remove possible buffer over flows
