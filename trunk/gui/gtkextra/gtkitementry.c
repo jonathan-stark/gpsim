@@ -1426,7 +1426,6 @@ static void
 gtk_entry_draw_text (GtkEntry *entry)
 {
   GtkWidget *widget;
-  PangoLayoutLine *line;
 
   if (!entry->visible && entry->invisible_char == 0)
     return;
@@ -1463,7 +1462,7 @@ gtk_entry_draw_text (GtkEntry *entry)
 	  GdkGC *text_gc;
 	  GdkGC *selection_gc;
 
-          line = pango_layout_get_lines (layout)->data;
+          PangoLayoutLine *line = pango_layout_get_lines (layout)->data;
 
 	  pango_layout_line_get_x_ranges (line, start_index, end_index, &ranges, &n_ranges);
 
@@ -1689,7 +1688,7 @@ gtk_entry_draw_cursor (GtkEntry  *entry,
       gint xoffset = INNER_BORDER - entry->scroll_offset;
       gint strong_x, weak_x;
       gint text_area_height;
-      GtkTextDirection dir1 = GTK_TEXT_DIR_NONE;
+      GtkTextDirection dir1;
       GtkTextDirection dir2 = GTK_TEXT_DIR_NONE;
       gint x1 = 0;
       gint x2 = 0;
@@ -1770,13 +1769,12 @@ gtk_entry_get_cursor_locations (GtkEntry   *entry,
 				gint       *weak_x)
 {
   PangoLayout *layout = gtk_entry_ensure_layout (entry, TRUE);
-  const gchar *text;
   PangoRectangle strong_pos, weak_pos;
   gint index;
 
   if (type == CURSOR_STANDARD)
     {
-      text = pango_layout_get_text (layout);
+      const gchar *text = pango_layout_get_text (layout);
       index = g_utf8_offset_to_pointer (text, entry->current_pos + entry->preedit_cursor) - text;
     }
   else /* type == CURSOR_DND */

@@ -2054,7 +2054,7 @@ gtk_sheet_select_row (GtkSheet * sheet,
      gtk_sheet_real_unselect_range(sheet, NULL);
   else
   {
-     gboolean veto = TRUE;
+     gboolean veto;
      veto = gtk_sheet_deactivate_cell(sheet);
      if(!veto) return;
   }
@@ -2088,7 +2088,7 @@ gtk_sheet_select_column (GtkSheet * sheet,
      gtk_sheet_real_unselect_range(sheet, NULL);
   else
   {
-     gboolean veto = TRUE;
+     gboolean veto;
      veto = gtk_sheet_deactivate_cell(sheet);
      if(!veto) return;
   }
@@ -2588,7 +2588,6 @@ gtk_sheet_realize (GtkWidget * widget)
   GdkGCValues values, auxvalues;
   GdkColormap *colormap;
   gchar *name;
-  GtkSheetChild *child;
   GList *children;
 
   g_return_if_fail (widget != NULL);
@@ -2732,7 +2731,7 @@ gtk_sheet_realize (GtkWidget * widget)
   children = sheet->children;
   while(children)
     {
-      child = children->data;
+      GtkSheetChild *child = children->data;
       children = children->next;
 
       gtk_sheet_realize_child(sheet, child);
@@ -2819,7 +2818,6 @@ static void
 gtk_sheet_map (GtkWidget * widget)
 {
   GtkSheet *sheet;
-  GtkSheetChild *child;
   GList *children;
 
   g_return_if_fail (widget != NULL);
@@ -2870,7 +2868,7 @@ gtk_sheet_map (GtkWidget * widget)
       children = sheet->children;
       while (children)
       {
-        child = children->data;
+        GtkSheetChild *child = children->data;
         children = children->next;
 
         if (GTK_WIDGET_VISIBLE (child->widget) &&
@@ -2887,7 +2885,6 @@ static void
 gtk_sheet_unmap (GtkWidget * widget)
 {
   GtkSheet *sheet;
-  GtkSheetChild *child;
   GList *children;
 
   g_return_if_fail (widget != NULL);
@@ -2915,7 +2912,7 @@ gtk_sheet_unmap (GtkWidget * widget)
       children = sheet->children;
       while (children)
         {
-          child = children->data;
+          GtkSheetChild *child = children->data;
           children = children->next;
 
           if (GTK_WIDGET_VISIBLE (child->widget) &&
@@ -3320,11 +3317,12 @@ gtk_sheet_range_draw(GtkSheet *sheet, const GtkSheetRange *range)
         sheet->data[i] && sheet->data[i][j])
                   gtk_sheet_cell_draw_label (sheet, i, j);
 
- for(i=drawing_range.row0; i<=drawing_range.rowi; i++)
+ for(i=drawing_range.row0; i<=drawing_range.rowi; i++) {
   for(j=drawing_range.coli+1; j<=sheet->column[drawing_range.coli].right_text_column; j++)
      if(i<=sheet->maxallocrow && j<=sheet->maxalloccol &&
         sheet->data[i] && sheet->data[i][j])
                   gtk_sheet_cell_draw_label (sheet, i, j);
+ }
 
   gtk_sheet_draw_backing_pixmap(sheet, drawing_range);
 
@@ -4059,7 +4057,6 @@ gtk_sheet_activate_cell(GtkSheet *sheet, gint row, gint col)
 static void
 gtk_sheet_show_active_cell(GtkSheet *sheet)
 {
- GtkSheetCell *cell;
  GtkEntry *sheet_entry;
  GtkSheetCellAttr attributes;
  gchar *text = NULL;
@@ -4095,7 +4092,7 @@ gtk_sheet_show_active_cell(GtkSheet *sheet)
  if(row <= sheet->maxallocrow && col <= sheet->maxalloccol) {
    if(sheet->data[row]) {
 	   if(sheet->data[row][col]) {
-	     cell = sheet->data[row][col];
+	     GtkSheetCell *cell = sheet->data[row][col];
 	     if(cell->text)
 	       text = g_strdup(cell->text);
 	   }
@@ -4393,7 +4390,7 @@ gtk_sheet_new_selection(GtkSheet *sheet, GtkSheetRange *range)
        mask2 = i==new_range.rowi ? mask2+2 : mask2;
        mask2 = j==new_range.col0 ? mask2+4 : mask2;
        mask2 = j==new_range.coli ? mask2+8 : mask2;
-       if(mask2!=mask1 || (mask2==mask1 && state!=GTK_STATE_SELECTED)){
+       if (mask2 != mask1 || state != GTK_STATE_SELECTED) {
          x=COLUMN_LEFT_XPIXEL(sheet,j);
          y=ROW_TOP_YPIXEL(sheet, i);
          width=sheet->column[j].width;
@@ -4666,7 +4663,7 @@ gtk_sheet_select_range(GtkSheet * sheet, const GtkSheetRange *range)
        gtk_sheet_real_unselect_range(sheet, NULL);
   else
   {
-     gboolean veto = TRUE;
+     gboolean veto;
      veto = gtk_sheet_deactivate_cell(sheet);
      if(!veto) return;
   }
@@ -5800,7 +5797,6 @@ gtk_sheet_size_request (GtkWidget * widget,
 {
   GtkSheet *sheet;
   GList *children;
-  GtkSheetChild *child;
   GtkRequisition child_requisition;
 
   g_return_if_fail (widget != NULL);
@@ -5834,7 +5830,7 @@ gtk_sheet_size_request (GtkWidget * widget,
   children = sheet->children;
   while (children)
   {
-    child = children->data;
+    GtkSheetChild *child = children->data;
     children = children->next;
 
     gtk_widget_size_request(child->widget, &child_requisition);
@@ -6396,8 +6392,6 @@ gtk_sheet_button_draw (GtkSheet *sheet, gint row, gint column)
   gboolean is_sensitive = FALSE;
   gint state = 0;
   gint len = 0;
-  gchar *line = 0;
-  gchar *words = 0;
   PangoAlignment align = PANGO_ALIGN_LEFT;
   gboolean rtl;
 
@@ -6483,8 +6477,8 @@ gtk_sheet_button_draw (GtkSheet *sheet, gint row, gint column)
            PangoLayout *layout = NULL;
            gint real_x = x, real_y = y;
 
-           words=button->label;
-           line = g_new(gchar, 1);
+           gchar *words=button->label;
+           gchar *line = g_new(gchar, 1);
            line[0]='\0';
 
            while(words && *words != '\0'){
@@ -7168,7 +7162,6 @@ void
 gtk_sheet_insert_rows(GtkSheet *sheet, guint row, guint nrows)
 {
  GList *children;
- GtkSheetChild *child;
 
  g_return_if_fail (sheet != NULL);
  g_return_if_fail (GTK_IS_SHEET (sheet));
@@ -7181,7 +7174,7 @@ gtk_sheet_insert_rows(GtkSheet *sheet, guint row, guint nrows)
  children = sheet->children;
  while(children)
    {
-     child = (GtkSheetChild *)children->data;
+     GtkSheetChild *child = (GtkSheetChild *)children->data;
 
      if(child->attached_to_cell)
         if(child->row >= row) child->row += nrows;
@@ -7205,7 +7198,6 @@ void
 gtk_sheet_insert_columns(GtkSheet *sheet, guint col, guint ncols)
 {
  GList *children;
- GtkSheetChild *child;
 
  g_return_if_fail (sheet != NULL);
  g_return_if_fail (GTK_IS_SHEET (sheet));
@@ -7218,7 +7210,7 @@ gtk_sheet_insert_columns(GtkSheet *sheet, guint col, guint ncols)
  children = sheet->children;
  while(children)
    {
-     child = (GtkSheetChild *)children->data;
+     GtkSheetChild *child = (GtkSheetChild *)children->data;
 
      if(child->attached_to_cell)
         if(child->col >= col) child->col += ncols;
@@ -7676,8 +7668,6 @@ gtk_sheet_set_cell_attributes(GtkSheet *sheet, gint row, gint col, GtkSheetCellA
 gboolean
 gtk_sheet_get_attributes(GtkSheet *sheet, gint row, gint col, GtkSheetCellAttr *attributes)
 {
- GtkSheetCell **cell = NULL;
-
  g_return_val_if_fail (sheet != NULL, FALSE);
  g_return_val_if_fail (GTK_IS_SHEET (sheet), FALSE);
 
@@ -7689,6 +7679,7 @@ gtk_sheet_get_attributes(GtkSheet *sheet, gint row, gint col, GtkSheetCellAttr *
  }
 
  if(row <= sheet->maxallocrow && col <= sheet->maxalloccol){
+    GtkSheetCell **cell = NULL;
     if(sheet->data[row] && sheet->data[row][col])
                                     cell = &sheet->data[row][col];
     if(cell == NULL || *cell == NULL){
@@ -7834,7 +7825,6 @@ AddRow(GtkSheet *tbl, gint nrows)
 static gint
 InsertRow(GtkSheet *tbl, gint row, gint nrows)
 {
-  GtkSheetCell **pp;
   gint i,j;
   GtkSheetCell **auxdata;
   GtkSheetRow auxrow;
@@ -7856,6 +7846,7 @@ InsertRow(GtkSheet *tbl, gint row, gint nrows)
     GrowSheet(tbl,nrows,0);
 
     for(i=tbl->maxallocrow; i>=row+nrows; i--){
+      GtkSheetCell **pp;
       auxdata = tbl->data[i];
       tbl->data[i]=tbl->data[i-nrows];
 
@@ -8428,7 +8419,6 @@ gtk_sheet_column_size_request   (GtkSheet *sheet,
 void
 gtk_sheet_move_child(GtkSheet *sheet, GtkWidget *widget, gint x, gint y)
 {
-  GtkSheetChild *child;
   GList *children;
 
   g_return_if_fail(sheet != NULL);
@@ -8437,7 +8427,7 @@ gtk_sheet_move_child(GtkSheet *sheet, GtkWidget *widget, gint x, gint y)
   children = sheet->children;
   while(children)
     {
-       child = children->data;
+       GtkSheetChild *child = children->data;
 
        if(child->widget == widget){
          child->x = x;
@@ -8534,9 +8524,7 @@ gtk_sheet_position_child(GtkSheet *sheet, GtkSheetChild *child)
    }
    else
    {
-      child_allocation.x = child->x + sheet->hoffset + xoffset;
       child_allocation.x = child->x + xoffset;
-      child_allocation.y = child->y + sheet->voffset + yoffset;
       child_allocation.y = child->y + yoffset;
       child_allocation.width = child_requisition.width;
       child_allocation.height = child_requisition.height;
@@ -8553,7 +8541,6 @@ gtk_sheet_forall (GtkContainer *container,
                   gpointer      callback_data)
 {
   GtkSheet *sheet;
-  GtkSheetChild *child;
   GList *children;
 
   g_return_if_fail (GTK_IS_SHEET (container));
@@ -8563,7 +8550,7 @@ gtk_sheet_forall (GtkContainer *container,
   children = sheet->children;
   while (children)
     {
-      child = children->data;
+      GtkSheetChild *child = children->data;
       children = children->next;
 
       (* callback) (child->widget, callback_data);
@@ -8579,13 +8566,12 @@ static void
 gtk_sheet_position_children(GtkSheet *sheet)
 {
   GList *children;
-  GtkSheetChild *child;
 
   children = sheet->children;
 
   while(children)
    {
-     child = (GtkSheetChild *)children->data;
+     GtkSheetChild *child = (GtkSheetChild *)children->data;
 
      if(child->col !=-1 && child->row != -1)
            gtk_sheet_position_child(sheet, child);

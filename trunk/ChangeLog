@@ -1,3 +1,7 @@
+2016-11-24 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gtkextra/gtkitementry.c gui/gtkextra/gtksheet.c gui/gui_regwin.cc
+	: Fix some minor issues with gtk extra
+
 2016-11-19 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_profile.h gui/gui_profile.cc
 	: Removed unreachable code leaving stubs so that profiling information

@@ -1173,38 +1173,6 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 
 }
 
-/*
- we get here when the entry widget loses focus. If it's been edited we
- need to call set_cell to update the register.
- */
-static void
-leave_entry(GtkSheet *sheet, GdkEvent *event, Register_Window *rw)
-{
-  Dprintf (( "leave_entry(%p,%p,%p)\n", sheet, event, rw ));
-
-  gint row, column;
-
-  if ( sheet==0 || rw==0 )
-  {
-      printf("Warning leave_entry(%p,%p)\n",sheet,rw);
-      return;
-  }
-
-  //sheet=GTK_SHEET(rw->register_sheet);
-  //row=sheet->active_cell.row; col=sheet->active_cell.col;
-  gtk_sheet_get_active_cell(sheet, &row, &column);
-
-  Dprintf(("  - sheet=%p, active cell (%d,%d)\n", sheet, row, column ));
-
-  if ( row <= sheet->maxrow && row >= 0 &&
-       column <= sheet->maxcol && column >= 0 )
-  {
-    // so we use set_cell() to write the changes from the sheet cell to gpsim
-    set_cell(GTK_WIDGET(sheet),row,column,rw);
-    rw->UpdateASCII(row);
-  }
-}
-
 /* when the sheet cursor has activated a new cell, we set the
    label and entry above the sheet
  */
@@ -1884,11 +1852,6 @@ void Register_Window::Build()
                      "key_press_event",
                      G_CALLBACK(clipboard_handler),
                      0);
-
-   g_signal_connect(register_sheet,
-                     "entry-focus-out",
-                     G_CALLBACK(leave_entry),
-                     this);
 
   g_signal_connect(register_sheet,
                      "resize_range",
