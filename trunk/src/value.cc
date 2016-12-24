@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -432,9 +432,8 @@ string AbstractRange::toString()
 {
   char buff[256];
 
-  string str = "";
+  snprintf(buff, sizeof(buff), "%u:%u", left, right);
 
-  snprintf(buff,sizeof(buff),"%d:%d",left,right);
   return (string(buff));
 }
 
@@ -442,7 +441,7 @@ string AbstractRange::toString(const char* format)
 {
   char cvtBuf[1024];
 
-  sprintf(cvtBuf, format, left, right);
+  snprintf(cvtBuf, sizeof(cvtBuf), format, left, right);
   return (string(&cvtBuf[0]));
 }
 
@@ -450,7 +449,7 @@ char *AbstractRange::toString(char *return_str, int len)
 {
   if(return_str) {
 
-    snprintf(return_str,len,"%d:%d",left,right);
+    snprintf(return_str, len, "%u:%u", left, right);
   }
 
   return return_str;

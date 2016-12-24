@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -104,7 +104,7 @@ instruction::~instruction()
 {
   // cout << __FUNCTION__<<endl;
 
-  XrefObject *pt_xref; 
+  XrefObject *pt_xref;
   XrefObject *pt = xref();
   if (pt)
   {
@@ -410,7 +410,7 @@ char * Bit_op::name(char *return_str,int len)
         cout << "Bit_op::name %%% FIX ME %%% treating 17x as 18x\n";
     case _PIC18_PROCESSOR_:
       bit = ((opcode >> 9) & 7);
-      snprintf(return_str,len,"%s\t%s,%d,%c",
+      snprintf(return_str,len,"%s\t%s,%u,%c",
                gpsimObject::name().c_str(),
                reg->name().c_str(),
                bit,
@@ -434,7 +434,7 @@ char * Bit_op::name(char *return_str,int len)
     }
 
 
-  snprintf(return_str,len,"%s\t%s,%d",
+  snprintf(return_str,len,"%s\t%s,%u",
            gpsimObject::name().c_str(),
            reg->name().c_str(),
            bit);
@@ -592,11 +592,11 @@ void ADDWFC::execute()
   unsigned int new_value,src_value,w_value;
 
   source = ((!access) ?
-	    cpu_pic->registers[register_address] 
+	    cpu_pic->registers[register_address]
 	    :
 	    cpu_pic->register_bank[register_address] );
 
-  new_value = (src_value = source->get()) + 
+  new_value = (src_value = source->get()) +
     (w_value = cpu_pic->Wget()) +
     ((cpu_pic->status->value.get() & STATUS_C) ? 1 : 0);
 
@@ -682,14 +682,14 @@ void ASRF::execute()
   unsigned int new_value,src_value, carry, msb;
 
   source = ((!access) ?
-	    cpu_pic->registers[register_address] 
+	    cpu_pic->registers[register_address]
 	    :
 	    cpu_pic->register_bank[register_address] );
 
   carry = (src_value = source->get()) & 1;
   msb = src_value & 0x80;
   new_value = ((src_value & 0xff) >> 1) | msb;
-  
+
   // Store the result
 
   if(destination)
@@ -755,7 +755,7 @@ char * BRA::name(char *return_str,int len)
 
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  gpsimObject::name().c_str(),
-	  (opcode & 0x100) ? '-' : '+', 
+	  (opcode & 0x100) ? '-' : '+',
 	  (destination_index & 0x1ff)<<1,
 	  absolute_destination_index<<1);
 
@@ -784,7 +784,7 @@ char * BRW::name(char *return_str,int len)
 
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  gpsimObject::name().c_str(),
-	  (opcode & 0x100) ? '-' : '+', 
+	  (opcode & 0x100) ? '-' : '+',
 	  (destination_index & 0x1ff)<<1,
 	  absolute_destination_index<<1);
 
@@ -1273,13 +1273,13 @@ void LSLF::execute()
   unsigned int new_value,src_value, carry;
 
   source = ((!access) ?
-	    cpu_pic->registers[register_address] 
+	    cpu_pic->registers[register_address]
 	    :
 	    cpu_pic->register_bank[register_address] );
 
   carry = (src_value = source->get()) & 0x80;
   new_value = (src_value << 1) & 0xff;
-  
+
   // Store the result
 
   if(destination)
@@ -1309,13 +1309,13 @@ void LSRF::execute()
   unsigned int new_value,src_value, carry;
 
   source = ((!access) ?
-	    cpu_pic->registers[register_address] 
+	    cpu_pic->registers[register_address]
 	    :
 	    cpu_pic->register_bank[register_address] );
 
   carry = (src_value = source->get()) & 1;
   new_value = (src_value & 0xff) >> 1;
-  
+
   // Store the result
 
   if(destination)
@@ -1355,10 +1355,10 @@ void MOVLP::execute()
 char * MOVLP::name(char *return_str, int len)
 {
 
-  
-  snprintf(return_str,len,"%s\t%d",
+
+  snprintf(return_str, len, "%s\t%u",
            gpsimObject::name().c_str(),
-           L&0x7f);
+           L & 0x7f);
 
   return(return_str);
 }
@@ -1444,7 +1444,7 @@ void MOVWF::execute()
 char * MOVWF::name(char *return_str, int len)
 {
 
-  
+
   source = get_cpu()->registers[register_address];
   if (access)
 	source = cpu_pic->register_bank[register_address];
@@ -1657,7 +1657,7 @@ void SUBWFB::execute()
   unsigned int new_value,src_value,w_value;
 
   source = ((!access) ?
-	    cpu_pic->registers[register_address] 
+	    cpu_pic->registers[register_address]
 	    :
 	    cpu_pic->register_bank[register_address] );
 

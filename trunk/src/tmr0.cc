@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -135,7 +135,7 @@ void TMR0::stop()
 
   }
 }
-  
+
 void TMR0::start(int restart_value, int sync)
 {
 
@@ -157,7 +157,7 @@ void TMR0::start(int restart_value, int sync)
   } else {
 
     synchronized_cycle = get_cycles().get() + sync;
-  
+
     last_cycle = (restart_value % max_counts()) * prescale;
     last_cycle = synchronized_cycle - last_cycle;
 
@@ -199,7 +199,7 @@ void TMR0::clear_trigger()
 
 unsigned int TMR0::get_prescale()
 {
-  Dprintf(("OPTION::PSA=%d\n", m_pOptionReg->get_psa()));
+  Dprintf(("OPTION::PSA=%u\n", m_pOptionReg->get_psa()));
 
   //return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
   return (m_pOptionReg->get_psa()  ? 0 : (1+m_pOptionReg->get_prescale()));
@@ -286,7 +286,7 @@ unsigned int TMR0::get_value()
       cout << "TMR0: bug TMR0 is larger than " <<  max_counts() - 1  << "...\n";
       cout << "cycles.value = " << get_cycles().get() <<
 	"  last_cycle = " << last_cycle <<
-	"  prescale = "  << prescale << 
+	"  prescale = "  << prescale <<
 	"  calculated value = " << new_value << '\n';
 
       // cop out. tmr0 has a bug. So rather than annoy
@@ -300,7 +300,7 @@ unsigned int TMR0::get_value()
 
   value.put(new_value);
   return(value.get());
-  
+
 }
 
 unsigned int TMR0::get()
@@ -364,7 +364,7 @@ void TMR0::new_prescale()
         cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
         cout << "   last_cycle = 0x" << hex << last_cycle << endl;
         cout << "   cpu cycle = 0x" << hex << (get_cycles().get()) << endl;
-      
+
         cout << "   prescale = 0x" << hex << prescale << endl;
 
       }
@@ -478,7 +478,7 @@ void TMR0::sleep()
 {
 
     if(verbose)
-	printf("TMR0::sleep state=%d\n", state);
+	printf("TMR0::sleep state=%u\n", state);
 
     if((state & RUNNING))
     {
@@ -490,7 +490,7 @@ void TMR0::sleep()
 void TMR0::wake()
 {
     if(verbose)
-	printf("TMR0::wake state=%d\n", state);
+	printf("TMR0::wake state=%u\n", state);
 
     if ((state & SLEEPING))
     {
@@ -501,6 +501,6 @@ void TMR0::wake()
 	}
 	else
 	    state &= ~SLEEPING;
-	
+
     }
 }

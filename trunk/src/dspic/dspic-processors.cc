@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -66,7 +66,7 @@ namespace dspic {
   //-------------------------------------------------------------------
   //
   // create
-  // 
+  //
   // Build the basic dsPicProcessor elements.
 
   void dsPicProcessor::create()
@@ -82,7 +82,7 @@ namespace dspic {
 
   //-------------------------------------------------------------------
   //
-  void dsPicProcessor::add_sfr_register(dspic_registers::dsPicRegister *pReg, 
+  void dsPicProcessor::add_sfr_register(dspic_registers::dsPicRegister *pReg,
 					unsigned int addr, const char *pName,
 					RegisterValue *rv
 					)
@@ -158,7 +158,7 @@ namespace dspic {
 
     for (j=0; j<16; j++) {
       char buff[16];
-      snprintf(buff, 16, "W%d",j);
+      snprintf(buff, 16, "W%u", j);
       // add_sfr_register(&W[j], j*2, buff,&porv);
     }
 
@@ -173,9 +173,9 @@ namespace dspic {
   {
     unsigned int unBytes = nBytes;
     for (unsigned int i =0; i<unBytes; i+=4)
-      Processor::init_program_memory_at_index(uIndex/2 + (i/4), 
+      Processor::init_program_memory_at_index(uIndex/2 + (i/4),
 					      (((unsigned int)bytes[i+0])<<0)  |
-					      (((unsigned int)bytes[i+1])<<8)  | 
+					      (((unsigned int)bytes[i+1])<<8)  |
 					      (((unsigned int)bytes[i+2])<<16));
 
 

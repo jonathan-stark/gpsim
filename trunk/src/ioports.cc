@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -49,7 +49,7 @@ License along with this library; if not, see
 #endif
 
 //--------------------------------------------------
-// 
+//
 //--------------------------------------------------
 SignalControl::~SignalControl()
 {
@@ -107,7 +107,7 @@ void PeripheralSignalSource::toggle()
 // The ioport infrastructure for gpsim is provided here. The class
 // taxonomy for the IOPORT class is:
 //
-//  file_register 
+//  file_register
 //     |-> sfr_register
 //            |-> IOPORT
 //                  |-> PORTA
@@ -116,7 +116,7 @@ void PeripheralSignalSource::toggle()
 //                  |-> PORTD
 //                  |-> PORTE
 //                  |-> PORTF
-// 
+//
 // Each I/O port has an associated array of I/O pins which provide an
 // interface to the virtual external world of the stimuli.
 //
@@ -141,7 +141,7 @@ public:
 
   char getState()
   {
-    // return m_register ? 
+    // return m_register ?
     //  (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
     char r = m_register ? (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
     /**/
@@ -166,7 +166,7 @@ PortSink::PortSink(PortRegister *portReg, unsigned int iobit)
 
 void PortSink::setSinkState(char cNewSinkState)
 {
-  Dprintf((" PortSink::setSinkState:bit=%d,val=%c\n",m_iobit,cNewSinkState));
+  Dprintf((" PortSink::setSinkState:bit=%u,val=%c\n", m_iobit, cNewSinkState));
 
   m_PortRegister->setbit(m_iobit,cNewSinkState);
 }
@@ -180,7 +180,7 @@ PortRegister::PortRegister(Module *pCpu, const char *pName, const char *pDesc,
                            unsigned int numIopins, unsigned int _mask)
   : sfr_register(pCpu, pName, pDesc),
     PortModule(numIopins),
-    mEnableMask(_mask),  
+    mEnableMask(_mask),
     drivingValue(0), rvDrivenValue(0,0)
 
 {
@@ -199,16 +199,16 @@ IOPIN * PortRegister::addPin(IOPIN *iopin, unsigned int iPinNumber)
 }
 void PortRegister::setEnableMask(unsigned int newEnableMask)
 {
-  Dprintf (( "PortRegister::setEnableMask for %s to %02X\n", 
+  Dprintf (( "PortRegister::setEnableMask for %s to %02X\n",
              name_str.c_str(), newEnableMask ));
   mOutputMask = newEnableMask;
   //unsigned int maskDiff = getEnableMask() ^ newEnableMask;
   unsigned int oldEnableMask = getEnableMask();
 
   for (unsigned int i=0, m=1; i<mNumIopins; i++, m<<= 1)
-    if ((newEnableMask & m) && ! (oldEnableMask & m )) 
+    if ((newEnableMask & m) && ! (oldEnableMask & m ))
     {
-      PinModule *pmP = PortModule::getIOpins(i); 
+      PinModule *pmP = PortModule::getIOpins(i);
       if (!pmP)
       {
           pmP = new PinModule(this,i);
@@ -248,9 +248,9 @@ void PortRegister::put_value(unsigned int new_value)
     // value and the driven value are the same. If there are external
     // stimuli (or perhaps internal peripherals) overdriving or overriding
     // this port, then the call to updatePort() will update 'drivenValue'
-    // to its proper value. In either case, calling updatePort ensures 
+    // to its proper value. In either case, calling updatePort ensures
     // the drivenValue is updated properly
-    
+
     updatePort();
   }
 }
@@ -283,7 +283,7 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
 #endif
 
 
-    Dprintf(("PortRegister::setbit() %s bit=%d,val=%c\n",name().c_str(), bit_number,new3State));
+    Dprintf(("PortRegister::setbit() %s bit=%u,val=%c\n",name().c_str(), bit_number,new3State));
 
     if (new3State=='1' || new3State=='W') {
       rvDrivenValue.data |= (1<<bit_number);
@@ -291,13 +291,13 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
     } else if (new3State=='0' || new3State=='w') {
       rvDrivenValue.data &= ~(1<<bit_number);
       rvDrivenValue.init &= ~(1<<bit_number);
-    } else 
+    } else
       // Not a 0 or 1, so it must be unknown.
       rvDrivenValue.init |= (1<<bit_number);
 
     value = rvDrivenValue;
   } else {
-    Dprintf(("PortRegister::::setbit() %s INVALID BIT bit=%d mask=0x%x\n",
+    Dprintf(("PortRegister::::setbit() %s INVALID BIT bit=%u mask=0x%x\n",
 	     name().c_str(), bit_number, mValidBits));
 
   }
@@ -370,7 +370,7 @@ PinModule * PortModule::getIOpins(unsigned int iPinNumber)
 
 void PortModule::updatePort()
 {
-  for (unsigned int i=0; i<mNumIopins; i++) 
+  for (unsigned int i=0; i<mNumIopins; i++)
   {
     if (iopins[i] != &AnInvalidPinModule)
       iopins[i]->updatePinModule();
@@ -378,7 +378,7 @@ void PortModule::updatePort()
 }
 void PortModule::updateUI()
 {
-  // hmmm nothing 
+  // hmmm nothing
 }
 
 void PortModule::updatePin(unsigned int iPinNumber)
@@ -411,7 +411,7 @@ IOPIN *PortModule::addPin(IOPIN *new_pin, unsigned int iPinNumber)
   }
   else
   {
-	printf("PortModule::addPin ERROR pin %d > %d\n", iPinNumber, mNumIopins);
+	printf("PortModule::addPin ERROR pin %u > %u\n", iPinNumber, mNumIopins);
   }
   return new_pin;
 }
@@ -453,7 +453,7 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
     m_cLastSourceState('?'), m_cLastPullupControlState('?'),
     m_defaultSource(0), m_activeSource(0),
     m_defaultControl(0), m_activeControl(0),
-    m_defaultPullupControl(0), m_activePullupControl(0), 
+    m_defaultPullupControl(0), m_activePullupControl(0),
     m_pin(_pin), m_port(_port), m_pinNumber(_pinNumber),
     m_bForcedUpdate(false)
 {
@@ -484,7 +484,7 @@ PinModule::~PinModule()
     m_activeControl->release();
     m_activeControl = m_defaultControl;
   }
-  
+
   if (m_defaultControl)
   {
     m_defaultControl->release();
@@ -529,7 +529,7 @@ void PinModule::updatePinModule()
 
   char cCurrentControlState = getControlState();
   unsigned int old_dir = m_pin->get_direction();
-  unsigned int new_dir = (cCurrentControlState=='1') ? IOPIN::DIR_INPUT : 
+  unsigned int new_dir = (cCurrentControlState=='1') ? IOPIN::DIR_INPUT :
 		IOPIN::DIR_OUTPUT;
 
 
@@ -553,7 +553,7 @@ void PinModule::updatePinModule()
     m_cLastPullupControlState = cCurrentPullupControlState;
     m_pin->update_pullup(m_cLastPullupControlState,false);
     bStateChange = true;
-  }  
+  }
 
   if (bStateChange) {
 
@@ -659,16 +659,16 @@ void PinModule::updateUI()
 //	AnalogReq is called by modules such as ADC and Comparator
 //	to set or release a pin to/from analog mode. When a pin is in
 //	analog mode the TRIS register is still active and output pins
-//	are still driven high or low, but reads of the port register 
+//	are still driven high or low, but reads of the port register
 //	return 0 for the pin. When a pin mode is changes the breadboard
 //	name of the pin is changed to newname.
 //
-//	A table of each calling module is kept as a module may 
+//	A table of each calling module is kept as a module may
 //	request analog mode after another has. The pin is put in
-//	analog mode when the first module requests it (up=true) 
-//	and is taken out of analog mode when all modules have 
+//	analog mode when the first module requests it (up=true)
+//	and is taken out of analog mode when all modules have
 //	requested analog mode to be released (up=false);
-//	
+//
 void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 {
     int i, index;
@@ -677,7 +677,7 @@ void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
     if (!m_port) return;
 
     // is the calling register in the table and what is the current
-    // count of modules requesting analog mode    
+    // count of modules requesting analog mode
 
     for(i=0, index=-1; i < ANALOG_TABLE_SIZE && m_analog_reg[i]; i++)
     {
@@ -711,7 +711,7 @@ void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 	    getPin().set_Cth(5e-12);		// add analog pin input capacitance
  	}
     }
-    else if (!analog && m_analog_active[index])  // release register request 
+    else if (!analog && m_analog_active[index])  // release register request
 						 // for analog pin
     {
 	m_analog_active[index] = false;
@@ -744,7 +744,7 @@ void PinModule::AnalogReq(Register * reg, bool analog, const char *newname)
 //
 //  This member function will update each node that is attached to the
 //  iopins of this port. If there are no pins attached, 0 is returned.
-//  
+//
 //
 //-------------------------------------------------------------------
 int IOPORT::update_stimuli(void)
@@ -777,7 +777,7 @@ double IOPORT::get_bit_voltage(unsigned int bit_number)
 
 
   return v;
-}      
+}
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -806,7 +806,7 @@ unsigned int IOPORT::get_value(void)
   // Update the stimuli - if there are any
 
   unsigned int current_value = value.get();
-  
+
   unsigned int i=0;
   unsigned int m=1;
 
@@ -849,8 +849,8 @@ unsigned int IOPORT::get(void)
 //-------------------------------------------------------------------
 //  IOPORT::put(unsigned int new_value)
 //
-//  inputs:  new_value - 
-//                       
+//  inputs:  new_value -
+//
 //  returns: none
 //
 //  The I/O Port is updated with the new value. If there are any stimuli
@@ -894,15 +894,15 @@ void IOPORT::put(unsigned int new_value)
 //
 //  When there's a gui initiated change to the IO port, we'll pass
 // though here. There are three things that we do. First, we update
-// the I/O port the way the gui asks us. Note however, that it's 
+// the I/O port the way the gui asks us. Note however, that it's
 // possible that the gui's requested will go un-honored (if for example,
 // we try to force an output to change states or if there's a stimulus
-// driving the bus already). 
+// driving the bus already).
 //   Next, after updating the IO port (and all of it's connected stimuli),
 // we'll call the gui to update its windows. This is done through the
 // xref->update call.
 //   Finally, we'll check all of the I/O pins that have changed as a
-// result of the IO port update and individually call each of their 
+// result of the IO port update and individually call each of their
 // cross references.
 //
 //-------------------------------------------------------------------
@@ -912,16 +912,16 @@ void IOPORT::put_value(unsigned int new_value)
   unsigned int old_value = value.get();
   unsigned int diff;
 
- 
+
   value.put(new_value);
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
 
-  
+
   update();
-  
+
   // Find the pins that have changed states
   diff = (old_value ^ value.get()) & valid_iopins;
 
@@ -988,7 +988,7 @@ IOPIN *IOPORT::addPin(IOPIN * new_pin, unsigned int bit_position)
     pins[bit_position] = new_pin;
 
   else
-    cout << "Warning: iopin pin number ("<<bit_position 
+    cout << "Warning: iopin pin number ("<<bit_position
 	 <<") is invalid for " << name() << ". Max iopins " << num_iopins << '\n';
 
   if(verbose)
@@ -1010,7 +1010,7 @@ void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
     pins[bit_position] = new_pin;
 
   else
-    cout << "Warning: iopin pin number ("<<bit_position 
+    cout << "Warning: iopin pin number ("<<bit_position
 	 <<") is invalid for " << name() << ". Max iopins " << num_iopins << '\n';
 
   if(verbose)
@@ -1028,7 +1028,7 @@ void IOPORT::attach_stimulus(stimulus *new_stimulus, unsigned int bit_position)
 
     if(pins[bit_position]->snode == 0)
       {
-	// If this I/O pin is not attached to a node yet, 
+	// If this I/O pin is not attached to a node yet,
 	// then create a node and attach it.
 
 	pins[bit_position]->snode = new Stimulus_Node();
@@ -1060,7 +1060,7 @@ void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 //-------------------------------------------------------------------
 // trace_register_write
 //   - a wrapper for trace.register_write
-// This provides an option for IOPORTs derived from the IOPORT class 
+// This provides an option for IOPORTs derived from the IOPORT class
 // to override the behavior of IOPORT traces.
 //-------------------------------------------------------------------
 void IOPORT::trace_register_write(void)

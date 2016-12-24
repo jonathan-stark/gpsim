@@ -10,6 +10,7 @@
 #ifndef __FreeBSD__
 #include <stdint.h>
 #endif
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
@@ -57,13 +58,13 @@ static const struct option long_options[] = {
 };
 static const struct option *longopts = long_options;
 
-  
+
 static int usage(void) {
   printf("Usage: rs232-gen [-h] [-o file] [-b baud] [-f freq] [-n name]\n"
          "                 <-d [+]cycle:hex,hex,hex...> <...>\n"
          "  -o  --output       Output file     (default=%s)\n"
-         "  -b  --baud         Baud rate       (default=%u)\n"
-         "  -f  --frequency    Pic frequency   (default=%u)\n"
+         "  -b  --baud         Baud rate       (default=%d)\n"
+         "  -f  --frequency    Pic frequency   (default=%d)\n"
          "  -n  --name         Stimulus name   (default=%s)\n"
          "  -d  --data         Data to be sent and when\n"
          "  -c  --char         Data restricted to printable characters\n"
@@ -86,21 +87,22 @@ static void parse_defaults(void) {
   strcpy(name, DEF_NAME);
   baud = DEF_BAUD;
   frequency = DEF_FREQ;
- 
+
   return;
 } /* parse_defaults() */
 
 
 static int parse_data(char *str, int type) {
   int64_t offset = 0;
-  int val, i = 0, j = 0;
+  unsigned int val;
+  int i = 0, j = 0;
   char *ptr;
 
   while ((data[i].size != -1) && (i < MAX_DATA))
     i++;
 
   if (i == MAX_DATA) {
-    fprintf(stderr, "Error: Too many data segments (>%u)\n", MAX_DATA);
+    fprintf(stderr, "Error: Too many data segments (>%d)\n", MAX_DATA);
     return 1;
   }
 
@@ -120,7 +122,7 @@ static int parse_data(char *str, int type) {
    *
    * To make life easier data can be entered in two ways.
    *
-   * 1) As binary hex data seperated by commas 
+   * 1) As binary hex data seperated by commas
    *    e.g. -d 1000:0x01,0x02,0x03,0x04,0x05...
    *
    * 2) As printable characters strung together in a string
@@ -130,7 +132,7 @@ static int parse_data(char *str, int type) {
     do {
       ptr = ptr + 1;
       sscanf(ptr, "0x%X", &val);
-      data[i].data[j] = val & 0xFF;  
+      data[i].data[j] = val & 0xFF;
       j++;
     } while ((ptr = strchr(ptr, ',')) != NULL);
 
@@ -148,11 +150,11 @@ static int parse_data(char *str, int type) {
 
   return 0;
 } /* parse_data() */
- 
- 
+
+
 static int parse_args(int argc, char *argv[]) {
   int rc, c, longindex;
- 
+
   opterr = 0;
   while ((c = getopt_long(argc, argv, OPT_STR, longopts, &longindex)) != -1) {
     switch (c) {
@@ -174,14 +176,14 @@ static int parse_args(int argc, char *argv[]) {
       default:   return !usage();
     }
   }
- 
+
   return 0;
 } /* parse_args() */
 
 
 static int output_file(void) {
   int bit, mask, i = 0, j;
-  int64_t val, pad; 
+  long long val, pad;
   FILE *fp;
 
   if ((fp = fopen(out_file, "w")) == 0) {

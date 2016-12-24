@@ -1,3 +1,16 @@
+2016-12-24 Errol van de l'Isle <evandel@cix.co.uk>
+	* cli/cmd_break.cc cli/socket.cc extras/lcd/hd44780.cc
+	extras/rs232-gen/rs232-gen.c modules/i2c.cc src/14bit-instructions.cc
+	src/14bit-registers.cc src/14bit-tmrs.cc src/16bit-instructions.cc
+	src/ValueCollections.h src/a2d_v2.cc src/a2dconverter.cc
+	src/breakpoints.cc src/comparator.cc src/dsm_module.cc
+	src/dspic/dspic-processors.cc src/expr.cc src/i2c-ee.cc src/icd.cc
+	src/ioports.cc src/p1xf1xxx.cc src/pic-instructions.cc
+	src/pic-ioports.cc src/processor.cc src/ssp.cc src/tmr0.cc src/trace.cc
+	src/trigger.cc src/uart.cc src/value.cc
+	: Correct the usage of printf and scanf type functions, enforceing
+	the correct signed and data widths.
+
 2016-11-24 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gtkextra/gtkitementry.c gui/gtkextra/gtksheet.c gui/gui_regwin.cc
 	: Fix some minor issues with gtk extra

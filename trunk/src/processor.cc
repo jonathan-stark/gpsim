@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -382,17 +382,17 @@ void Processor::delete_invalid_registers ()
 
   for (i = 0; i < rma.get_size(); i++) {
    // cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" << registers[i] << endl;
-	
+
     InvalidRegister *pReg = dynamic_cast<InvalidRegister *> (registers[i]);
     if (pReg) {
       delete registers[i];
       registers[i]= 0;
-      
+
     }
     else if (registers[i])
    {
       char reg_name[11];
-      cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" << 
+      cout << __FUNCTION__ << "  reg: 0x"<<hex << i << " ptr:" <<
 	registers[i] ;
       cout.flush();
       strncpy(reg_name, registers[i]->name().c_str(), 10);
@@ -430,8 +430,8 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
     if (registers[j] && (registers[j]->isa() == Register::INVALID_REGISTER))
 	delete registers[j];
     else if (registers[j])
-	cout << __FUNCTION__ << " Already register " << registers[j]->name() 
-		<< " at 0x" << hex << j <<endl; 
+	cout << __FUNCTION__ << " Already register " << registers[j]->name()
+		<< " at 0x" << hex << j <<endl;
 
     //The default register name is simply its address
     snprintf (str, sizeof(str), "REG%03X", j);
@@ -562,7 +562,7 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 //
 // The purpose of this member function is to allocate memory for the
 // pic's code space. The 'memory_size' parameter tells how much memory
-// is to be allocated 
+// is to be allocated
 //
 //  The following is not correct for 18f2455 and 18f4455 processors
 //  so test has been disabled (RRR)
@@ -657,7 +657,7 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
 //erase_program_memory(unsigned int address)
 //
 //	Checks if a program memory location contains an instruction
-//	and deletes it if it does. 
+//	and deletes it if it does.
 //
 void Processor::erase_program_memory(unsigned int address)
 {
@@ -681,7 +681,7 @@ void Processor::erase_program_memory(unsigned int address)
     cout << "Erase Program memory\n";
     cout << "Warning::Out of range address " << hex << address << endl;
     cout << "Max allowed address is 0x" << hex << (program_address_limit()-1) << '\n';
-  
+
   }
 
 
@@ -830,8 +830,8 @@ void Processor::read_src_files(void)
 
     while(fc->gets(buf,sizeof(buf))) {
 
-      int address;
-      int opcode;
+      unsigned int address;
+      unsigned int opcode;
 
       if (sscanf(buf,"%x   %x",&address, &opcode) == 2) {
         unsigned int uIndex = map_pm_address2index(address);

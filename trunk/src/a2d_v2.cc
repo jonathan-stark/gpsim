@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -44,8 +44,8 @@ static PinModule AnInvalidAnalogInput;
 //
 ADCON0_V2::ADCON0_V2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    adres(0), adresl(0), adcon1(0), adcon2(0), intcon(0), pir1v2(0), 
-    ad_state(AD_IDLE), channel_mask(15), ctmu_stim(0), 
+    adres(0), adresl(0), adcon1(0), adcon2(0), intcon(0), pir1v2(0),
+    ad_state(AD_IDLE), channel_mask(15), ctmu_stim(0),
     active_stim(-1)
 {
 }
@@ -130,7 +130,7 @@ void ADCON0_V2::start_conversion(void)
   Tad = adcon2->get_tad();
   Tacq = adcon2->get_nacq();
 
-  Dprintf(("\tTad = %d Tacq = %d\n", Tad, Tacq));
+  Dprintf(("\tTad = %u Tacq = %u\n", Tad, Tacq));
 
   if (Tad == 0) // RC time source
   {
@@ -187,7 +187,7 @@ void ADCON0_V2::put(unsigned int new_value)
     // The A/D converter is being turned on (or maybe left on)
     if (ctmu_stim)
     {
-      // deal with ctmu stimulus for channel change or ON/OFF 
+      // deal with ctmu stimulus for channel change or ON/OFF
       if ((old_value ^ new_value) & (ADON|CHS0|CHS1|CHS2|CHS3))
       {
         if (new_value & ADON)		// A/D is on
@@ -227,13 +227,13 @@ void ADCON0_V2::put_conversion(void)
 
   unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage + 0.5);
 
-  Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
+  Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%u normV:%g\n",
            m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
 
   if (verbose)
         printf ("result=0x%02x\n", converted);
 
-  Dprintf(("%d-bit result 0x%x\n", m_nBits, converted));
+  Dprintf(("%u-bit result 0x%x\n", m_nBits, converted));
 
   if(adresl) {   // non-null for more than 8 bit conversion
 
@@ -286,7 +286,7 @@ void ADCON0_V2::callback(void)
       future_cycle = get_cycles().get() + ((m_nBits + 1) * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
       if (verbose)
-        printf("A/D %d bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
+        printf("A/D %u bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
             channel,m_dSampledVoltage,m_dSampledVrefHi,m_dSampledVrefLo);
 
       ad_state = AD_CONVERTING;
@@ -397,14 +397,14 @@ void ADCON1_V2::put(unsigned int new_value)
 
 	    if (new_mask & (1<<i))
 	    {
-	      sprintf(newname, "an%d", i);
+	      snprintf(newname, sizeof(newname), "an%u", i);
 	      m_AnalogPins[i]->AnalogReq(this, true, newname);
 	    }
 	    else
 	    {
 	      m_AnalogPins[i]->AnalogReq(this, false, m_AnalogPins[i]->getPin().name().c_str());
 	    }
-          }  
+          }
 	}
 	mIoMask = new_mask;
 	value.put(new_value);
@@ -554,11 +554,11 @@ void ADCON1_V2::setIOPin(unsigned int channel, PinModule *newPin)
       m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
     m_AnalogPins[channel] = newPin;
   } else {
-    printf("WARNING %s channel %d, cannot set IOpin\n",__FUNCTION__, channel);
+    printf("WARNING %s channel %u, cannot set IOpin\n",__FUNCTION__, channel);
     if (m_AnalogPins[channel] != &AnInvalidAnalogInput)
         printf("Pin Already assigned\n");
     else if (channel > m_nAnalogChannels)
-        printf("channel %d >= number of channels %d\n", channel,  m_nAnalogChannels);
+        printf("channel %u >= number of channels %u\n", channel,  m_nAnalogChannels);
   }
 }
 
@@ -566,7 +566,7 @@ void ADCON1_V2::setIOPin(unsigned int channel, PinModule *newPin)
 //------------------------------------------------------
 PinModule *ADCON1_V2::get_A2Dpin(unsigned int channel)
 {
-    if ( (1<<channel) & get_adc_configmask(value.data) ) 
+    if ( (1<<channel) & get_adc_configmask(value.data) )
     {
       PinModule *pm = m_AnalogPins[channel];
       if (pm != &AnInvalidAnalogInput)
@@ -819,7 +819,7 @@ void ANSEL_2B::setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1
    mask |= 1<<pin;
    if ((1<<pin) & value.get())
    {
-	sprintf(newname, "an%d", channel);
+	snprintf(newname, sizeof(newname), "an%u", channel);
 	m_AnalogPins[pin]->AnalogReq(this, true, newname);
    }
 }
@@ -837,7 +837,7 @@ void ANSEL_2A::setIOPin(unsigned int channel, PinModule *port, ADCON1_2B *adcon1
    mask |= 1<<bit;
    if ((1<<bit) & value.get())
    {
-	sprintf(newname, "an%d", channel);
+	snprintf(newname, sizeof(newname), "an%u", channel);
 	m_AnalogPins[bit]->AnalogReq(this, true, newname);
    }
 }
@@ -882,7 +882,7 @@ void  FVRCON_V2::put_value(unsigned int new_value)
             future_cycle = 0;
 	}
   }
-	    
+
   value.put(new_value);
   compute_FVR(new_value);
 
@@ -895,7 +895,7 @@ void FVRCON_V2::callback()
     future_cycle = 0;
     put_value(value.get() | FVRRDY);
 }
-    
+
 
 
 double FVRCON_V2::compute_FVR(unsigned int fvrcon)
@@ -914,7 +914,7 @@ double FVRCON_V2::compute_FVR(unsigned int fvrcon)
 	case FVRS0:	// Gain = 1
 	    ret = 1.024;
 	    break;
-	
+
 	case FVRS1:	// Gain = 2
 	    ret = 2.048;
 	    break;
@@ -926,7 +926,7 @@ double FVRCON_V2::compute_FVR(unsigned int fvrcon)
     }
     if (ret > ((Processor *)cpu)->get_Vdd())
     {
-	cerr << "warning FVRCON FVRAD("<< ret <<") > Vdd(" 
+	cerr << "warning FVRCON FVRAD("<< ret <<") > Vdd("
 		<<((Processor *)cpu)->get_Vdd() << ")\n";
 	ret = -1.;
     }
@@ -958,9 +958,9 @@ void  DACCON0_V2::compute_dac(unsigned int value)
     Dprintf(("DACCON0_V2::compute_dac value=%x Vout=%.2f adcon1 %p\n", value, Vout, adcon1));
 
     set_dacoutpin(value & DACOE, 0, Vout);
-	
+
     if (verbose)
-        printf("%s-%d adcon1 %p FVRCDA_AD_chan %d Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
+        printf("%s-%d adcon1 %p FVRCDA_AD_chan %u Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
     if(adcon1) adcon1->update_dac(Vout);
     if(cmModule) cmModule->set_DAC_volt(Vout);
     if(cpscon0) cpscon0->set_DAC_volt(Vout);

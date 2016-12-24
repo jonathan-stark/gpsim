@@ -174,7 +174,7 @@ string LiteralString::toString()
  *
  * The literal symbol is a thin 'literal' wrapper for the symbol class.
  * The command line parser uses LiteralSymbol whenever an expression
- * encounters a symbol. 
+ * encounters a symbol.
  */
 
 LiteralSymbol::LiteralSymbol(gpsimObject *_sym)
@@ -186,8 +186,8 @@ LiteralSymbol::LiteralSymbol(gpsimObject *_sym)
       if (_sym)
         s = "literal symbol '" + _sym->name() + "' does not have a value";
       else
-        s = "NULL pointer to literal symbol"; 
-    
+        s = "NULL pointer to literal symbol";
+
       throw new Error(s);
   }
 }
@@ -282,7 +282,7 @@ string IndexedSymbol::toString() {
  *
  * The literal symbol is a thin 'literal' wrapper for the symbol class.
  * The command line parser uses RegisterExpression whenever an expression
- * encounters a symbol. 
+ * encounters a symbol.
  */
 
 RegisterExpression::RegisterExpression(unsigned int uAddress)
@@ -301,9 +301,9 @@ Value* RegisterExpression::evaluate()
     return new Integer(pReg->get_value());
   }
   else {
-    static char sFormat[] = "reg(%d) is not a valid register";
+    static char sFormat[] = "reg(%u) is not a valid register";
     char sBuffer[sizeof(sFormat) + 10];
-    sprintf(sBuffer, sFormat, m_uAddress);
+    snprintf(sBuffer, sizeof(sBuffer), sFormat, m_uAddress);
     throw Error(string(sBuffer));
   }
 }
@@ -311,6 +311,6 @@ Value* RegisterExpression::evaluate()
 string RegisterExpression::toString()
 {
   char sBuffer[10];
-  sprintf(sBuffer, "%d", m_uAddress);
+  snprintf(sBuffer, sizeof(sBuffer), "%u", m_uAddress);
   return string(sBuffer);
 }

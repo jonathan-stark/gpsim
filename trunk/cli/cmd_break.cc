@@ -59,7 +59,7 @@ static cmd_options cmd_break_options[] =
 
 cmd_break::cmd_break()
   : command("break", "br")
-{ 
+{
   brief_doc = string("Set a break point");
 
   long_doc = string ("The 'break' command can be used to examine or set breakpoints.\n"
@@ -106,7 +106,7 @@ cmd_break::cmd_break()
                      "\tbreak c 1000000    # break on the one million'th cycle\n"
                      );
 
-  op = cmd_break_options; 
+  op = cmd_break_options;
 }
 
 
@@ -116,7 +116,7 @@ void cmd_break::list(guint64 value)
     get_bp().dump();
   else
     if(!get_bp().dump1((unsigned int)value))
-	printf("break not found at given break point number %d (0x%x)\n", (unsigned int)value, (unsigned int)value);
+	printf("break not found at given break point number %u (0x%x)\n", (unsigned int)value, (unsigned int)value);
 }
 
 const char *TOO_FEW_ARGS="missing register or location\n";
@@ -202,7 +202,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
 
   // See if the expression supports break points. If it does, the break points
   // will get set and the expressions deleted.
-  int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value), 
+  int bpn = pFirst ? pFirst->set_break(MapBreakActions(co->value),
 				       (bLog ? gpsimObject::eActionLog : gpsimObject::eActionHalt),
 				       pSecond) : -1;
   if (bpn == -1 && co->value!=CYCLE)
@@ -212,7 +212,7 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
   if (bpn<0) {
 
 
-    // We failed to set a break point from the first expression. 
+    // We failed to set a break point from the first expression.
     // It may be that we have a type of break point that is not supported
     // by the expression code.
 
@@ -247,13 +247,13 @@ unsigned int cmd_break::set_break(cmd_options *co, ExprList_t *pEL, bool bLog)
 
 
 //------------------------------------------------------------------------
-// set_break(cmd_options *co, 
+// set_break(cmd_options *co,
 //           Expression *pExpr1,
 //           Expression *pExpr2)
 //
 // Given two expressions, this function will call the set
 
-unsigned int cmd_break::set_break(cmd_options *co, 
+unsigned int cmd_break::set_break(cmd_options *co,
 				  Expression *pExpr1,
 				  Expression *pExpr2,
 				  bool bLog)
@@ -271,7 +271,7 @@ unsigned int cmd_break::set_break(cmd_options *co,
 
   // See if the expression supports break points. If it does, the break points
   // will get set and the expressions deleted.
-  int i = pExpr1 ? pExpr1->set_break(MapBreakActions(co->value), 
+  int i = pExpr1 ? pExpr1->set_break(MapBreakActions(co->value),
 				     (bLog ? gpsimObject::eActionLog : gpsimObject::eActionHalt), pExpr2) : -1;
   if (i>=0) {
     get_bp().dump1(i);
@@ -355,7 +355,7 @@ unsigned int cmd_break::set_break(int bit_flag, bool bLog)
 
   return b;
 }
- // attribute breakpoints 	 
+ // attribute breakpoints
 unsigned int cmd_break::set_break(gpsimObject *v)
 {
   if (v)

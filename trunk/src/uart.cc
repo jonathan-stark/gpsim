@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -32,7 +32,7 @@ License along with this library; if not, see
 
 
 // defining EUSART_PIN  causes TX pin direction to be set for EUSART devices
-//#define EUSART_PIN 
+//#define EUSART_PIN
 //#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
@@ -69,13 +69,13 @@ private:
 class TXSignalControl : public SignalControl
 {
 public:
-  TXSignalControl(_TXSTA *_txsta) 
+  TXSignalControl(_TXSTA *_txsta)
      : m_txsta(_txsta)
   { }
   ~TXSignalControl() { }
   virtual char getState() { return '0'; }
-  virtual void release() 
-  { 
+  virtual void release()
+  {
 	m_txsta->releasePin();
   }
 private:
@@ -87,14 +87,14 @@ private:
 class RCSignalControl : public SignalControl
 {
 public:
-  RCSignalControl(_RCSTA *_rcsta) 
+  RCSignalControl(_RCSTA *_rcsta)
      : m_rcsta(_rcsta)
   { }
   ~RCSignalControl() { }
   virtual char getState() { return '0'; }
   //virtual char getState() { return m_rcsta->getDir(); }
-  virtual void release() 
-  { 
+  virtual void release()
+  {
 	m_rcsta->releasePin();
   }
 private:
@@ -198,7 +198,7 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
   : sfr_register(pCpu, pName, pDesc), txreg(0), spbrg(0),
     mUSART(pUSART),
     m_PinModule(0),
-    m_source(0), 
+    m_source(0),
     m_control(0),
     SourceActive(false),
     m_cTxState('?'),
@@ -209,7 +209,7 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
 
 _TXSTA::~_TXSTA()
 {
-    if (SourceActive && m_PinModule) 
+    if (SourceActive && m_PinModule)
     {
         m_PinModule->setSource(0);
         m_PinModule->setControl(0);
@@ -258,7 +258,7 @@ _SPBRGH::_SPBRGH(Processor *pCpu, const char *pName, const char *pDesc)
 // TXREG - USART Transmit Register
 //
 // writing to this register causes the PIR1::TXIF bit to clear.
-// my reading of the spec is this happens at the end of the next pic 
+// my reading of the spec is this happens at the end of the next pic
 // instruction. If the shift register is empty the bit will then be set
 // one pic instruction later. Otherwise the bit is set when the shift
 // register empties.  RRR 10/2014
@@ -313,7 +313,7 @@ void _TXREG::callback()
   {
     mUSART->full();
     full = false;
-  }   
+  }
   else
   {
     mUSART->emptyTX();
@@ -356,7 +356,7 @@ void _TXSTA::disableTXPin()
         m_PinModule->setSource(0);
         m_PinModule->setControl(0);
 	m_PinModule->getPin().newGUIname(m_PinModule->getPin().name().c_str());
-	if (m_clkSink) 
+	if (m_clkSink)
         {
             m_PinModule->removeSink(m_clkSink);
 	    m_clkSink->release();
@@ -406,7 +406,7 @@ void _TXSTA::enableTXPin()
 	    out = '1';
 	}
         m_PinModule->setSource(m_source);
-#ifdef EUSART_PIN 
+#ifdef EUSART_PIN
 	if(mUSART->IsEUSART())
             m_PinModule->setControl(m_control);
 #else
@@ -502,7 +502,7 @@ void _TXSTA::put(unsigned int new_value)
       stop_transmitting();
       mUSART->full();         // Turn off TXIF
       disableTXPin();
-	
+
     }
   }
 }
@@ -654,7 +654,8 @@ void _TXSTA::transmit_a_bit()
 
   if(bit_count) {
 
-    Dprintf(("Transmit bit #%x: bit val:%d time:0x%" PRINTF_GINT64_MODIFIER "x\n",bit_count, (tsr&1), get_cycles().get()));
+    Dprintf(("Transmit bit #%x: bit val:%u time:0x%" PRINTF_GINT64_MODIFIER "x\n",
+      bit_count, (tsr & 1), get_cycles().get()));
 
     putTXState(tsr&1 ? '1' : '0');
 
@@ -838,7 +839,7 @@ void _RCSTA::put(unsigned int new_value)
               {
 	          m_PinModule->getPin().newGUIname(
 				m_PinModule->getPin().name().c_str());
-		  if (m_sink) 
+		  if (m_sink)
                   {
                       m_PinModule->removeSink(m_sink);
                       m_sink->release();
@@ -898,7 +899,7 @@ void _RCSTA::enableRCPin(char direction)
 	  rx[3] = 0;
 	  m_PinModule->getPin().newGUIname(rx);
       }
-     
+
   }
 
 }
@@ -1016,7 +1017,7 @@ void _RCSTA::clock_edge(char new3State)
 {
     bool state = (new3State == '1' || new3State == 'W');
 
-    // invert clock, if requested 
+    // invert clock, if requested
     state = mUSART->baudcon.txckp() ? !state : state;
     if (old_clock_state == state) return;
     old_clock_state = state;
@@ -1053,12 +1054,12 @@ void _RCSTA::clock_edge(char new3State)
 	    {
 		bool data = m_PinModule->getPin().getState();
 		data = mUSART->baudcon.rxdtp() ? !data : data;
-		
+
 		if (bRX9())
 		    rsr |= data << 9;
                 else
 		    rsr |= data << 8;
-		   
+
 		rsr >>= 1;
 		if (--bit_count == 0)
 	        {
@@ -1089,7 +1090,8 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  Dprintf(("%s receive_a_bit state:%d bit:%d time:0x%" PRINTF_GINT64_MODIFIER "x\n",name().c_str(), state,bit,get_cycles().get()));
+  Dprintf(("%s receive_a_bit state:%u bit:%u time:0x%" PRINTF_GINT64_MODIFIER "x\n",
+    name().c_str(), state, bit, get_cycles().get()));
 
   if( state == RCSTA_MAYBE_START) {
     if (bit)
@@ -1234,7 +1236,7 @@ void _RCSTA::callback()
           // Receive Master mode
           if ((value.get() & (SPEN | SREN | CREN)) != SPEN)
           {
-		
+
                 if (value.get() & OERR)
                     return;
                 bool data = m_PinModule->getPin().getState();
@@ -1289,48 +1291,48 @@ void _RCSTA::callback()
       case RCSTA_WAITING_MID1:
         if (m_cRxState == '1' || m_cRxState == 'W')
           sample++;
-    
+
         if(txsta && (txsta->value.get() & _TXSTA::BRGH))
           set_callback_break(BRGH_SECOND_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE);
         else
           set_callback_break(BRGL_SECOND_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE);
-    
+
         sample_state = RCSTA_WAITING_MID2;
-    
+
         break;
-    
+
       case RCSTA_WAITING_MID2:
         if (m_cRxState == '1' || m_cRxState == 'W')
           sample++;
-    
+
         if(txsta && (txsta->value.get() & _TXSTA::BRGH))
           set_callback_break(BRGH_THIRD_MID_SAMPLE - BRGH_SECOND_MID_SAMPLE);
         else
           set_callback_break(BRGL_THIRD_MID_SAMPLE - BRGL_SECOND_MID_SAMPLE);
-    
+
         sample_state = RCSTA_WAITING_MID3;
-    
+
         break;
-    
+
       case RCSTA_WAITING_MID3:
         if (m_cRxState == '1' || m_cRxState == 'W')
           sample++;
-    
+
         receive_a_bit( (sample>=2));
         sample = 0;
-    
+
         // If this wasn't the last bit then go ahead and set a break for the next bit.
         if(state==RCSTA_RECEIVING) {
           if(txsta && (txsta->value.get() & _TXSTA::BRGH))
             set_callback_break(TOTAL_SAMPLE_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
           else
             set_callback_break(TOTAL_SAMPLE_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
-    
+
           sample_state = RCSTA_WAITING_MID1;
         }
-    
+
         break;
-    
+
       default:
         //cout << "Error RCSTA callback with bad state\n";
         // The receiver was probably disabled in the middle of a reception.
@@ -1470,8 +1472,8 @@ unsigned int _SPBRG::get_cycles_per_tick()
     if ( txsta && (txsta->value.get() & _TXSTA::SYNC) )
     {
       // Synchronous mode - divisor is always 4
-      // However, code wants two transitions per bit 
-      // to generate clock for master mode, so use 2 
+      // However, code wants two transitions per bit
+      // to generate clock for master mode, so use 2
       cpt = 2;
     }
     else
@@ -1490,7 +1492,7 @@ unsigned int _SPBRG::get_cycles_per_tick()
 
 void _SPBRG::start()
 {
-  
+
 
   if (running)
      return;
@@ -1680,7 +1682,7 @@ void USART_MODULE::initialize(PIR *_pir,
   spbrg.rcsta = &rcsta;
 
   txreg = _txreg;
- 
+
   txreg->assign_rcsta(&rcsta);
   txreg->assign_txsta(&txsta);
 
@@ -1720,7 +1722,7 @@ void USART_MODULE::emptyTX()
 
   if (txsta.bTXEN())
   {
-    if (m_txif) 
+    if (m_txif)
 	m_txif->Trigger();
     else if (pir)
         pir->set_txif();
