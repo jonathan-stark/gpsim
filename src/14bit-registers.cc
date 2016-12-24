@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -40,7 +40,7 @@ License along with this library; if not, see
 
 //#define DEBUG
 #if defined(DEBUG)
-#define Dprintf(arg) {printf("0x%06" PRINTF_GINT64_MODIFIER" X %s() ",cycles.get(),__FUNCTION__); printf arg; }
+#define Dprintf(arg) {printf("0x%06" PRINTF_GINT64_MODIFIER "X %s() ", cycles.get(), __FUNCTION__); printf arg; }
 #else
 #define Dprintf(arg) {}
 #endif
@@ -62,7 +62,7 @@ pic_processor *temp_cpu;
 // we'd like the gui to be notified of all of the cascaded
 // changes. So rather than burden the real-time simulation
 // with notifying the gui, I decided to create the 'put_value'
-// function instead. 
+// function instead.
 //   Since this is a virtual function, derived classes have
 // the option to override the default behavior.
 //
@@ -236,31 +236,31 @@ bool OSCCON::set_rc_frequency()
     case 0:
 	base_frequency = 31.e3;
 	break;
-	
+
     case 1:
 	base_frequency = 125e3;
 	break;
-	
+
     case 2:
 	base_frequency = 250e3;
 	break;
-	
+
     case 3:
 	base_frequency = 500e3;
 	break;
-	
+
     case 4:
 	base_frequency = 1e6;
 	break;
-	
+
     case 5:
 	base_frequency = 2e6;
 	break;
-	
+
     case 6:
 	base_frequency = 4e6;
 	break;
-	
+
     case 7:
 	base_frequency = 8e6;
 	break;
@@ -362,7 +362,7 @@ bool OSCCON_2::set_rc_frequency()
 	{
 	    mode = OST;
         }
-  
+
   }
 
 
@@ -394,62 +394,62 @@ bool OSCCON_2::set_rc_frequency()
 	mode = MF;
 	base_frequency = 31.25e3;
 	break;
-	
+
     case 3:
 	mode = HF;
 	base_frequency = 31.25e3;
 	break;
-	
+
     case 4:
 	mode = MF;
 	base_frequency = 62.5e3;
 	break;
-	
+
     case 5:
 	mode = MF;
 	base_frequency = 125e3;
 	break;
-	
+
     case 6:
 	mode = MF;
 	base_frequency = 250e3;
 	break;
-	
+
     case 7:
 	mode = MF;
 	base_frequency = 500e3;
 	break;
-	
+
     case 8:
 	mode = HF;
 	base_frequency = 125e3;
 	break;
-	
+
     case 9:
 	mode = HF;
 	base_frequency = 250e3;
 	break;
-	
+
     case 10:
 	mode = HF;
 	base_frequency = 500e3;
 	break;
-	
+
     case 11:
 	mode = HF;
 	base_frequency = 1e6;
 	break;
-	
+
     case 12:
 	mode = HF;
 	base_frequency = 2e6;
 	break;
-	
+
     case 13:
 	mode = HF;
 	base_frequency = 4e6;
 	break;
-	
+
     case 14:
 	// The treatment for PPL based on Fig 5-1 of P12f1822 ref manual
 	if (osccon_pplx4 || config_pplx4)
@@ -463,7 +463,7 @@ bool OSCCON_2::set_rc_frequency()
 	   base_frequency = 8e6;
 	}
 	break;
-	
+
     case 15:
 	mode = HF;
 	base_frequency = 16e6;
@@ -494,7 +494,7 @@ void  OSCCON_2::put_value(unsigned int new_value)
 }
 void  OSCCON_2::put(unsigned int new_value)
 {
-  
+
   unsigned int old_value = value.get();
   unsigned int oscstat_reg = 0;
   unsigned int oscstat_new = 0;
@@ -504,7 +504,7 @@ void  OSCCON_2::put(unsigned int new_value)
   if (old_value == new_value) return;
 
   assert(oscstat);
-  
+
   oscstat_reg = oscstat->value.get();
   oscstat_new = oscstat_reg;
 	if (((new_value & (SCS0 | SCS1))==0) && !cpu_pic->get_int_osc())
@@ -512,7 +512,7 @@ void  OSCCON_2::put(unsigned int new_value)
 	else
 		oscstat_new &= ~OSCSTAT::OSTS;
 
-  
+
 
   if (set_rc_frequency())  // using internal RC Oscillator
 	set_callback();
@@ -786,7 +786,7 @@ void INDF::initialize()
   default:
     cout << " BUG - invalid processor type INDF::initialize\n";
   }
-    
+
 
 }
 void INDF::put(unsigned int new_value)
@@ -794,7 +794,7 @@ void INDF::put(unsigned int new_value)
 
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-  int reg = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value + 
+  int reg = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value +
 	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
@@ -819,9 +819,9 @@ void INDF::put_value(unsigned int new_value)
   put(new_value);
 
   update();
-  int r = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value + 
+  int r = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value +
 	   (((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2));
-  if(r & fsr_mask) 
+  if(r & fsr_mask)
     cpu_pic->registers[r]->update();
 
 }
@@ -891,7 +891,7 @@ unsigned int PCL::get_value()
 }
 //------------------------------------------------------------
 // PCL reset
-// 
+//
 void PCL::reset(RESET_TYPE r)
 {
   trace.raw(write_trace.get() | value.get());
@@ -937,7 +937,7 @@ unsigned int PCLATH::get()
 // member functions for the PCON base class
 //--------------------------------------------------
 //
-PCON::PCON(Processor *pCpu, const char *pName, const char *pDesc, 
+PCON::PCON(Processor *pCpu, const char *pName, const char *pDesc,
 	unsigned int bitMask)
   : sfr_register(pCpu, pName, pDesc)
 {
@@ -988,7 +988,7 @@ void Indirect_Addressing14::put(unsigned int new_value)
 	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
 	unsigned int low_bits = ((fsr_adj & 0xfff) % 0x50) + 0x20;
         Dprintf(("fsr_adj %x bank %x low_bits %x add %x\n", fsr_adj, bank, low_bits, (bank*0x80 + low_bits)));
-        cpu_pic->registers[bank * 0x80 + low_bits]->put(new_value); 
+        cpu_pic->registers[bank * 0x80 + low_bits]->put(new_value);
     }
     else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
     {
@@ -1018,7 +1018,7 @@ unsigned int Indirect_Addressing14::get()
     {
 	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
 	unsigned int low_bits = ((fsr_adj & 0xfff) % 0x50) + 0x20;
-        return(cpu_pic->registers[bank * 0x80 + low_bits]->get()); 
+        return(cpu_pic->registers[bank * 0x80 + low_bits]->get());
     }
     else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
     {
@@ -1047,7 +1047,7 @@ unsigned int Indirect_Addressing14::get_value()
     {
 	if(is_indirect_register(fsr_adj))
 	    return 0;
-	
+
 	return cpu_pic->registers[fsr_adj]->get_value();
     }
     else if (fsr_adj >= 0x2000 && fsr_adj < 0x29b0) // Linear GPR region
@@ -1055,7 +1055,7 @@ unsigned int Indirect_Addressing14::get_value()
 	unsigned int bank = (fsr_adj & 0xfff) / 0x50;
 	unsigned int low_bits = ((fsr_adj & 0xfff) % 0x50) + 0x20;
 
-        return(cpu_pic->registers[bank * 0x80 + low_bits]->get_value()); 
+        return(cpu_pic->registers[bank * 0x80 + low_bits]->get_value());
     }
     else if (fsr_adj >= 0x8000 && fsr_adj <= 0xffff) // program memory
     {
@@ -1082,7 +1082,7 @@ void Indirect_Addressing14::put_fsr(unsigned int new_fsr)
 
 /*
  * update_fsr_value - This routine is called by the FSRL and FSRH
- * classes. It's purpose is to update the 16-bit 
+ * classes. It's purpose is to update the 16-bit
  * address formed by the concatenation of FSRL and FSRH.
  *
  */
@@ -1214,7 +1214,7 @@ Stack::Stack(Processor *pCpu) : cpu(pCpu)
 // Stack::push
 //
 // push the passed address onto the stack by storing it at the current
-// 
+//
 
 bool Stack::push(unsigned int address)
 {
@@ -1222,7 +1222,7 @@ bool Stack::push(unsigned int address)
   // Write the address at the current point location. Note that the '& stack_mask'
   // implicitly handles the stack wrap around.
 
-  
+
   // If the stack pointer is too big, then the stack has definitely over flowed.
   // However, some pic programs take advantage of this 'feature', so provide a means
   // for them to ignore the warnings.
@@ -1270,7 +1270,7 @@ bool Stack::stack_underflow()
     pointer = 0;
     if(stack_warnings_flag || break_on_underflow)
       cout << "stack underflow ";
-    if(break_on_underflow) 
+    if(break_on_underflow)
       bp.halt();
     return true;
 }
@@ -1335,7 +1335,7 @@ void Stack::put_tos(unsigned int new_tos)
 // stack with 16 slots can hold 16 values. The other implementaion
 // of the stack hold n-1 values for an n slot stack.
 // This stack also supports stkptr, tosl, and tosh like the 16bit
-// (p18) processors 
+// (p18) processors
 Stack14E::Stack14E(Processor *pCpu) : Stack(pCpu),
     stkptr(pCpu, "stkptr", "Stack pointer"),
     tosl(pCpu, "tosl", "Top of Stack low byte"),
@@ -1352,7 +1352,7 @@ Stack14E::Stack14E(Processor *pCpu) : Stack(pCpu),
 Stack14E::~Stack14E()
 {
   pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
-  if (pCpu) 
+  if (pCpu)
   {
     pCpu->remove_sfr_register(&stkptr);
     pCpu->remove_sfr_register(&tosl);
@@ -1366,7 +1366,7 @@ void Stack14E::reset(RESET_TYPE r)
 	contents[stack_mask] = 0;
     else
 	contents[pointer-1] = contents[stack_mask];
-  
+
     Dprintf((" pointer 0x%x\n", pointer));
     stkptr.put(pointer-1);
 }
@@ -1379,7 +1379,7 @@ bool Stack14E::push(unsigned int address)
 
   if(pointer == NO_ENTRY)
 	pointer = 0;
-  
+
   contents[pointer & stack_mask] = address;
 
   // If the stack pointer is too big, then the stack has definitely over flowed.
@@ -1405,14 +1405,14 @@ unsigned int  Stack14E::pop()
     ret = contents[pointer];
     if (pointer <= 0)
 	pointer = NO_ENTRY;
-    
+
     stkptr.put(pointer-1);
     return(ret);
 }
 bool Stack14E::stack_overflow()
 {
     cpu14e->pcon.put(cpu14e->pcon.get() | PCON::STKOVF);
-    if(STVREN) 
+    if(STVREN)
     {
 	cpu->reset(STKOVF_RESET);
 	return false;
@@ -1427,7 +1427,7 @@ bool Stack14E::stack_underflow()
 {
     Dprintf((" cpu %p STVREN %d\n", cpu, STVREN));
     cpu14e->pcon.put(cpu14e->pcon.get() | PCON::STKUNF);
-    if(STVREN) 
+    if(STVREN)
     {
 	cpu->reset(STKUNF_RESET);
     	return false;
@@ -1548,7 +1548,7 @@ public:
 class WTraceType : public ProcessorTraceType
 {
 public:
-  WTraceType(Processor *_cpu, 
+  WTraceType(Processor *_cpu,
 	     unsigned int s)
     : ProcessorTraceType(_cpu,s,"W reg")
   {}
@@ -1559,7 +1559,7 @@ public:
 
 
 //========================================================================
-WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv) 
+WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv)
   : RegisterWriteTraceObject(_cpu,0,trv)
 {
   pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
@@ -1583,7 +1583,7 @@ void WWriteTraceObject::print(FILE *fp)
 }
 
 //========================================================================
-WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv) 
+WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv)
   : RegisterReadTraceObject(_cpu,0,trv)
 {
   pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
@@ -1613,7 +1613,7 @@ TraceObject * WTraceType::decode(unsigned int tbi)
   RegisterValue rv = RegisterValue(tv & 0xff,0);
   TraceObject *wto;
 
-  if (tv & (1<<22)) 
+  if (tv & (1<<22))
     wto = new WReadTraceObject(cpu, rv);
   else
     wto = new WWriteTraceObject(cpu, rv);
@@ -1752,7 +1752,7 @@ void CPSCON0::calculate_freq()
     {
 	deltat = (p_cpu->get_Vdd() - 1.2) * cap / current;
     }
- 
+
     period = (p_cpu->get_frequency() * deltat + 2) / 4;
 
     if (period <= 0)
@@ -1786,17 +1786,17 @@ void CPSCON0::callback()
     if (value.get() & CPSOUT) // High to low transition
     {
 	value.put(value.get() & ~CPSOUT);
-	if (m_tmr0 && (value.get() & T0XCS) && 
+	if (m_tmr0 && (value.get() & T0XCS) &&
 	    m_tmr0->get_t0se() && m_tmr0->get_t0cs())
 	{
 		m_tmr0->increment();
 	}
-		
+
     }
     else			// Low to high transition
     {
 	value.put(value.get() | CPSOUT);
-	if (m_tmr0 && (value.get() & T0XCS) && 
+	if (m_tmr0 && (value.get() & T0XCS) &&
 	    !m_tmr0->get_t0se() && m_tmr0->get_t0cs())
 	{
 		m_tmr0->increment();
@@ -1864,7 +1864,7 @@ void   CPS_stimulus::set_nodeVoltage(double v)
  	nodeVoltage = v;
 	m_cpscon0->calculate_freq();
 }
-	
+
 void CPSCON1::put(unsigned int new_value)
 {
     unsigned int masked_value = new_value & mValidBits;
@@ -1930,7 +1930,7 @@ void SRCON1::put(unsigned int new_value)
     {
 	if (!(new_value & (SRRCKE | SRSCKE)))	// all clocks off
 	    m_sr_module->clock_disable(); // turn off clock
-	else 
+	else
 	    m_sr_module->clock_enable(); // turn on clock
     }
     m_sr_module->update();
@@ -2069,7 +2069,7 @@ void SR_MODULE::clock_diff(unsigned int _srclk)
 
     clock_disable();
 
-    if (srcon1.value.get() & (SRCON1::SRSCKE | SRCON1::SRRCKE)) 
+    if (srcon1.value.get() & (SRCON1::SRSCKE | SRCON1::SRRCKE))
     {
 	clock_enable();
     }
@@ -2174,7 +2174,7 @@ void SR_MODULE::Qoutput()
 // This is only call if SRLEN OR SRNQEN has changed
 void SR_MODULE::NQoutput()
 {
-    if ((srcon0.value.get() & (SRCON0::SRLEN | SRCON0::SRNQEN)) == 
+    if ((srcon0.value.get() & (SRCON0::SRLEN | SRCON0::SRNQEN)) ==
 	(SRCON0::SRLEN | SRCON0::SRNQEN))
     {
 	if (!m_SRNQsource)

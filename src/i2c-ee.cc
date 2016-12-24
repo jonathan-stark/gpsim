@@ -16,7 +16,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -82,10 +82,10 @@ public:
 
    	 // Make the pin an output.
         update_direction(IO_bi_directional::DIR_OUTPUT,true);
-    
+
     };
 
-  void setDrivenState(bool new_dstate) 
+  void setDrivenState(bool new_dstate)
   {
 
     bool diff = new_dstate ^ bDrivenState;
@@ -96,8 +96,8 @@ public:
       pEE->new_sda_edge(new_dstate);
     }
   }
-    void setDrivingState(bool new_state) 
-    {    
+    void setDrivingState(bool new_state)
+    {
 	bDrivingState = new_state;
 	bDrivenState = new_state;
 
@@ -106,7 +106,7 @@ public:
 
     }
 };
-    
+
 
 class I2C_SLAVE_SCL : public IO_open_collector
 {
@@ -121,7 +121,7 @@ public:
 
    	 // Make the pin an output.
         update_direction(IO_bi_directional::DIR_OUTPUT,true);
-    
+
     };
 
   void setDrivenState(bool new_state)
@@ -135,8 +135,8 @@ public:
       pEE->new_scl_edge(bDrivenState);
     }
   }
-    void setDrivingState(bool new_state) 
-    {    
+    void setDrivingState(bool new_state)
+    {
 	bDrivingState = new_state;
 	bDrivenState = new_state;
 
@@ -155,7 +155,7 @@ i2c_slave::i2c_slave()
     xfr_data = 0;
 }
 
-i2c_slave::~i2c_slave() 
+i2c_slave::~i2c_slave()
 {
 	if (sda) delete sda;
 	if (scl) delete scl;
@@ -188,10 +188,11 @@ void i2c_slave::new_scl_edge(bool direction)
             case RX_I2C_ADD :
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
-                    Vprintf(("%s : got i2c address :0x%x r/w %d ", __FUNCTION__, xfr_data>>1, xfr_data&1));
+                    Vprintf(("%s : got i2c address :0x%x r/w %u ", __FUNCTION__,
+                      xfr_data >> 1, xfr_data & 1));
                     if (match_address())
                     {
-			
+
                         bus_state = ACK_I2C_ADD;
                         Vprintf((" - OK\n"));
                         // Acknowledge the command by pulling SDA low.
@@ -209,7 +210,7 @@ void i2c_slave::new_scl_edge(bool direction)
             case ACK_I2C_ADD :
                 sda->setDrivingState ( true );
                 // Check the R/W bit of the address byte
-                
+
                 if ( xfr_data & 0x01 )
                 {
                     // master is reading, we transmit
@@ -240,7 +241,7 @@ void i2c_slave::new_scl_edge(bool direction)
                 }
                 break;
 
-	    case ACK_RX : 
+	    case ACK_RX :
                 sda->setDrivingState ( true );
                 bus_state = RX_DATA;
                 bit_count = 0;
@@ -344,7 +345,9 @@ bool i2c_slave::shift_write_bit ()
 
     bit_count--;
     bit = ( xfr_data >> bit_count ) & 1;
-    Dprintf(("I2c_slave : send bit %d = %d\n",bit_count, bit));
+    Dprintf(("I2c_slave : send bit %u = %c\n", bit_count,
+      bit ? '1' : '0'));
+
     return bit;
 }
 
@@ -451,7 +454,7 @@ void I2C_EE::put_data(unsigned int data)
          xfr_addr = ((xfr_addr << 8) | data ) % rom_size;
 	 if (--m_addr_cnt == 0)
          {
-            
+
               write_page_off = xfr_addr % write_page_size;
               xfr_addr -= write_page_off;
               Vprintf(("I2C_EE : address set to 0x%x page offset 0x%x data:0x%x\n",
@@ -482,14 +485,14 @@ void I2C_EE::put_data(unsigned int data)
 
 unsigned int I2C_EE::get_data()
 {
-    
+
     unsigned int data = rom[xfr_addr]->get();
 
     xfr_addr = (xfr_addr + 1) % rom_size;
     return (data);
 }
-    
-        
+
+
 
 // Bit 0 is write protect, 1-3 is A0 - A2
 void I2C_EE::set_chipselect(unsigned int _cs)

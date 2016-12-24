@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -80,7 +80,7 @@ void BreakTraceObject::print(FILE *fp)
   if (bpo)
     bpo->print();
   else
-    fprintf(fp,"%d\n", m_bpn);
+    fprintf(fp,"%u\n", m_bpn);
 }
 
 
@@ -109,7 +109,7 @@ int BreakTraceType::dump_raw(Trace *pTrace,unsigned tbi, char *buf, int bufsize)
   Breakpoints::BreakStatus *bs = bp.get(bpn);
 
   TriggerObject *bpo = bs ? bs->bpo : 0;
-  int m = snprintf(buf, bufsize, "  BREAK: #%d %s",
+  int m = snprintf(buf, bufsize, "  BREAK: #%u %s",
 	       bpn, (bpo ? bpo->bpName() : ""));
   m = m>0 ? m : 0;
   buf += m;
@@ -262,7 +262,7 @@ int TriggerObject::printExpression(char *pBuf, int szBuf)
 
 int TriggerObject::printTraced(Trace *pTrace, unsigned int tbi,
 			       char *pBuf, int szBuf)
-			       
+
 {
   return 0;
 }

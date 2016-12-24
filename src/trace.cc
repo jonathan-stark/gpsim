@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -30,7 +30,7 @@ License along with this library; if not, see
 #include "trace_orb.h"
 #include "xref.h"
 
-#define NEWTRACE 
+#define NEWTRACE
 
 //#define DEBUG
 #if defined(DEBUG)
@@ -345,7 +345,7 @@ void Trace::deleteTraceFrame()
 
   for(tfIter = traceFrames.begin();
       tfIter != traceFrames.end();
-      ++tfIter) 
+      ++tfIter)
   {
       TraceFrame *tf = *tfIter;
       delete tf;
@@ -1030,7 +1030,7 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
 
     }
 
-  Dprintf(("trace index %d does not point to lower part (0x%lx)\n", j, get(j)));
+  Dprintf(("trace index %d does not point to lower part (0x%x)\n", j, get(j)));
   return 1;
 }
 

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -121,7 +121,7 @@ void CCPRL::start_pwm_mode()
 }
 void CCPRL::stop_pwm_mode()
 {
-  //cout << "CCPRL: stopping pwm mode\n"; 
+  //cout << "CCPRL: stopping pwm mode\n";
 
   ccprh->pwm_mode = 0;
 }
@@ -183,7 +183,7 @@ unsigned int CCPRH::get()
 }
 
 //--------------------------------------------------
-// 
+//
 //--------------------------------------------------
 class CCPSignalSource : public SignalControl
 {
@@ -263,8 +263,8 @@ CCPCON::CCPCON(Processor *pCpu, const char *pName, const char *pDesc)
     mValidBits = 0x3f;
 }
 
-CCPCON::~CCPCON() 
-{ 
+CCPCON::~CCPCON()
+{
 
 
     for(int i = 0; i<4; i++)
@@ -392,7 +392,7 @@ char CCPCON::getState()
 
 void CCPCON::new_edge(unsigned int level)
 {
-  Dprintf(("%s::new_edge() level=%d\n",name().c_str(), level));
+  Dprintf(("%s::new_edge() level=%u\n",name().c_str(), level));
 
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -561,7 +561,7 @@ void CCPCON::pwm_match(int level)
       // Auto shutdown comes off at start of PWM if ECCPASE clear
       if (bridge_shutdown && (!eccpas || !(eccpas->get_value() & ECCPAS::ECCPASE)))
       {
-          Dprintf(("bridge_shutdown=%d eccpas=%p ECCPAS=%x\n", bridge_shutdown, eccpas, 
+          Dprintf(("bridge_shutdown=%d eccpas=%p ECCPAS=%x\n", bridge_shutdown, eccpas,
 		eccpas ? eccpas->get_value() & ECCPAS::ECCPASE: 0));
 	  for(int i = 0; i < 4; i++)
 	  {
@@ -587,16 +587,16 @@ void CCPCON::pwm_match(int level)
         m_source[0]->setState(level ? '1' : '0');
         m_PinModule[0]->setSource(m_source[0]);
 	source_active[0] = true;
-    
-    
+
+
         if(level && !ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
             m_source[0]->setState('0');
 
         m_PinModule[0]->updatePinModule();
-    
+
         //cout << "iopin should change\n";
     }
-  }  
+  }
   else	// EPWM
   {
 
@@ -629,28 +629,28 @@ void CCPCON::drive_bridge(int level, int new_value)
 	active_high[2] = true;
 	active_high[3] = true;
     	break;
-    
+
         case PWM1:	// P1A P1C active high P1B P1D active low
 	active_high[0] = true;
 	active_high[1] = false;
 	active_high[2] = true;
 	active_high[3] = false;
     	break;
-    
-        case PWM2: 	// P1A P1C active low P1B P1D active high 
+
+        case PWM2: 	// P1A P1C active low P1B P1D active high
 	active_high[0] = false;
 	active_high[1] = true;
 	active_high[2] = false;
 	active_high[3] = true;
     	break;
-    
+
         case PWM3:	// //P1A, P1C, P1B, P1D active low
 	active_high[0] = false;
 	active_high[1] = false;
 	active_high[2] = false;
 	active_high[3] = false;
     	break;
-    
+
         default:
             cout << "not pwm mode. bug?\n";
     	return;
@@ -681,7 +681,7 @@ void CCPCON::drive_bridge(int level, int new_value)
 		    }
 		}
 		break;
-	
+
 	    case 2:	// Half-Bridge
 		Dprintf(("half-bridge %s\n", name().c_str()));
 		m_PinModule[0]->setSource(m_source[0]);
@@ -702,8 +702,8 @@ void CCPCON::drive_bridge(int level, int new_value)
 		delay_source1 = false;
 		// FIXME need to add deadband
 		// follow level except where duty cycle = 0
-		pwm_width = level ? 
-			ccprl->ccprh->pwm_value : 
+		pwm_width = level ?
+			ccprl->ccprh->pwm_value :
 			((tmr2->pr2->value.get()+1)*4)-ccprl->ccprh->pwm_value;
 		if (!(level^active_high[0]) && ccprl->ccprh->pwm_value)
 		{
@@ -740,7 +740,7 @@ void CCPCON::drive_bridge(int level, int new_value)
     		m_PinModule[0]->updatePinModule();
     		m_PinModule[1]->updatePinModule();
 		break;
-	
+
 	    case 1:	// Full bidge Forward
 		Dprintf(("full-bridge %s, forward\n", name().c_str()));
 		if (m_PinModule[0])
@@ -779,7 +779,7 @@ void CCPCON::drive_bridge(int level, int new_value)
     		    m_PinModule[3]->updatePinModule();
 		}
 		break;
-	
+
 	    case 3:	// Full bridge reverse
 		Dprintf(("full-bridge reverse %s\n", name().c_str()));
 		if (m_PinModule[0])
@@ -823,7 +823,7 @@ void CCPCON::drive_bridge(int level, int new_value)
 		printf("%s::pwm_match impossible ECCP bridge mode\n", name().c_str());
 		break;
        }
-	
+
 }
 //
 // Set PWM bridge into shutdown mode
@@ -879,7 +879,7 @@ void CCPCON::put(unsigned int new_value)
 
   unsigned int old_value =  value.get();
   new_value &= mValidBits;
-  
+
   Dprintf(("%s::put() new_value=0x%x\n",name().c_str(), new_value));
   trace.raw(write_trace.get() | value.get());
 
@@ -887,7 +887,7 @@ void CCPCON::put(unsigned int new_value)
   if (!ccprl || !tmr2)
     return;
 
-  // Return if no change other than possibly the duty cycle 
+  // Return if no change other than possibly the duty cycle
   if (((new_value ^ old_value) & ~(CCPY|CCPX)) == 0)
     return;
 
@@ -1021,14 +1021,14 @@ bool CCPCON::test_compare_mode()
     case PWM1:
     case PWM2:
     case PWM3:
-      return false;  
+      return false;
       break;
 
     case COM_SET_OUT:
     case COM_CLEAR_OUT:
     case COM_INTERRUPT:
     case COM_TRIGGER:
-      return true;  
+      return true;
       break;
   }
   return false;
@@ -1090,7 +1090,7 @@ class TMR1_Interface : public Interface
 class TMR1_Freq_Attribute : public Float
 {
 public:
-  TMR1_Freq_Attribute(Processor * _cpu, double freq, const char *name = "tmr1_freq"); 
+  TMR1_Freq_Attribute(Processor * _cpu, double freq, const char *name = "tmr1_freq");
 
   virtual void set(double d);
   double get_freq();
@@ -1292,11 +1292,11 @@ void T1GCON::put(unsigned int new_value)
 
 void T1GCON::setGatepin(PinModule *pin)
 {
-    
+
 
     if (pin != gate_pin)
     {
-        if(sink) 
+        if(sink)
 	{
 	    gate_pin->removeSink(sink);
         }
@@ -1352,11 +1352,11 @@ void T1GCON::new_gate(bool state)
 {
     // TMR1 counts when state low (unless t1gpol is set)
     // t1g_in is inverted as per XOR in spec sheet flow chart
-    bool t1g_in = (!get_t1GPOL()) ^ state ; 
+    bool t1g_in = (!get_t1GPOL()) ^ state ;
     bool t1g_val = value.get() & T1GVAL;
     unsigned int reg_value = value.get();
 
-    
+
     if ((t1g_in == last_t1g_in) && (t1g_in == t1g_val)) // no state change, do nothing
     {
   //  	tmrl->IO_gate(t1g_val);
@@ -1398,14 +1398,14 @@ void T1GCON::new_gate(bool state)
 	//t1g_val = t1g_in;
     }
 
-    
+
     if (t1g_val)
     {
 	reg_value |= T1GVAL;
     }
     else
     {
-	if (reg_value & T1GVAL)	// interrupt on T1GVAL negative edge 
+	if (reg_value & T1GVAL)	// interrupt on T1GVAL negative edge
 	{
 	    m_Interrupt->Trigger();
 	}
@@ -1485,8 +1485,8 @@ void TMRH::put(unsigned int new_value)
   tmrl->set_ext_scale();
   value.put(new_value & 0xff);
   tmrl->synchronized_cycle = get_cycles().get();
-  tmrl->last_cycle = tmrl->synchronized_cycle 
-	- (gint64)((tmrl->value.get() + (value.get()<<8) 
+  tmrl->last_cycle = tmrl->synchronized_cycle
+	- (gint64)((tmrl->value.get() + (value.get()<<8)
 	* tmrl->prescale * tmrl->ext_scale) +0.5);
 
   if(tmrl->t1con->get_tmr1on())
@@ -1517,7 +1517,7 @@ unsigned int TMRH::get_value()
   tmrl->current_value();
 
   return(value.get());
-  
+
 }
 
 
@@ -1565,7 +1565,7 @@ TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     tmr1_interface(0),
     m_cState('?'), m_GateState(false), m_compare_GateState(true),
-    m_io_GateState(true), m_bExtClkEnabled(false), 
+    m_io_GateState(true), m_bExtClkEnabled(false),
     m_sleeping(false), m_t1gss(true), m_Interrupt(0)
 {
 
@@ -1593,9 +1593,9 @@ TMRL::~TMRL()
  * instruction cycle rate
  *
  * If tmr1cs = 1 Fosc is 4 x normal speed so reduce ticks by 1/4
- */ 
-void TMRL::set_ext_scale() 
-{ 
+ */
+void TMRL::set_ext_scale()
+{
     current_value();
     if (t1con->get_t1oscen()  && (t1con->get_tmr1cs() == 2)) // external clock
     {
@@ -1705,7 +1705,7 @@ void TMRL::compare_gate(bool state)
   if (!m_t1gss && m_GateState != state)
   {
     m_GateState = state;
-    
+
     Dprintf(("TMRL::compare_gate state %d \n", state));
 
     if (t1con->get_tmr1GE())
@@ -1721,7 +1721,7 @@ void TMRL::IO_gate(bool state)
   if (m_t1gss && (m_GateState != state))
   {
     m_GateState = state;
-    
+
     Dprintf(("TMRL::IO_gate state %d \n", state));
 
     if (t1con->get_tmr1GE())
@@ -1759,7 +1759,7 @@ void TMRL::increment()
   if (!t1con->get_tmr1on())
 	return;
 
-    // If TMRH/TMRL have been manually changed, we'll want to 
+    // If TMRH/TMRL have been manually changed, we'll want to
     // get the up-to-date values;
 
     trace.raw(write_trace.get() | value.get());
@@ -1821,15 +1821,15 @@ void TMRL::update()
 
   Dprintf(("TMR1 %s update now=0x%" PRINTF_GINT64_MODIFIER "x\n",name().c_str(), get_cycles().get()));
   // if t1con->get_t1GINV() is false, timer can run if m_GateState == 0
-     
+
   bool gate = t1con->get_t1GINV() ? m_GateState : !m_GateState;
   Dprintf(("TMRL::update gate %d GateState %d inv %d get_tmr1on %x tmr1GE %x tmr1cs %x t1oscen %x\n", gate, m_GateState, t1con->get_t1GINV(), t1con->get_tmr1on(), t1con->get_tmr1GE(), t1con->get_tmr1cs(), t1con->get_t1oscen()));
-  /* When tmr1 is on, and t1con->get_tmr1GE() is true, 
+  /* When tmr1 is on, and t1con->get_tmr1GE() is true,
      gate == 1 allows timer to run, gate == 0 stops timer.
      However, if t1con->get_tmr1GE() is false gate has no
      effect on timer running or not.
   */
-  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? gate : true)) 
+  if(t1con->get_tmr1on() && (t1con->get_tmr1GE() ? gate : true))
   {
     switch(t1con->get_tmr1cs())
     {
@@ -1847,9 +1847,9 @@ void TMRL::update()
 	/*
 	 external timer1 clock runs off a crystal which is typically
 	 32768 Hz and is independant on the instruction clock, but
-	 gpsim runs on the instruction clock. Ext_scale is the ratio 
+	 gpsim runs on the instruction clock. Ext_scale is the ratio
 	 of these two clocks so the breakpoint can be adjusted to be
-	 triggered at the correct time. 
+	 triggered at the correct time.
 	*/
 	      if(verbose & 0x4)
 		cout << "Tmr1 External clock\n";
@@ -1878,7 +1878,7 @@ void TMRL::update()
      set_ext_scale();
 
 
-      // Note, unlike TMR0, anytime something is written to TMRL, the 
+      // Note, unlike TMR0, anytime something is written to TMRL, the
       // prescaler is unaffected on the P18 processors. However, it is
       // reset on the p16f88 processor, which is how the current code
       // works. This only effects the external drive mode.
@@ -1892,7 +1892,7 @@ void TMRL::update()
       synchronized_cycle = get_cycles().get();
 
 
-      last_cycle = synchronized_cycle  
+      last_cycle = synchronized_cycle
 			- (gint64)(value_16bit *( prescale * ext_scale) + 0.5);
 
 
@@ -1912,7 +1912,7 @@ void TMRL::update()
       if(verbose & 0x4)
         cout << "TMR1 now at " << value_16bit << ", next event at " << break_value << '\n';
 
-      guint64 fc = get_cycles().get() 
+      guint64 fc = get_cycles().get()
 		+ (guint64)((break_value - value_16bit) * prescale * ext_scale);
 
       if(future_cycle)
@@ -1937,7 +1937,7 @@ void TMRL::update()
         current_value();
         get_cycles().clear_break(this);
 	future_cycle = 0;
-      } 
+      }
     }
 }
 
@@ -1952,7 +1952,7 @@ void TMRL::put(unsigned int new_value)
     return;
 
   synchronized_cycle = get_cycles().get();
-  last_cycle = synchronized_cycle - (gint64)(( value.get() 
+  last_cycle = synchronized_cycle - (gint64)(( value.get()
 	+ (tmrh->value.get()<<8)) * prescale * ext_scale + 0.5);
 
   current_value();
@@ -1986,7 +1986,7 @@ unsigned int TMRL::get_value()
 }
 
 //%%%FIXME%%% inline this
-// if break inactive (future_cycle == 0), just read the TMR1H and TMR1L 
+// if break inactive (future_cycle == 0), just read the TMR1H and TMR1L
 // registers otherwise compute what the register should be and then
 // update TMR1H and TMR1L.
 // RP: Using future_cycle here is not strictly right. What we really want is
@@ -2004,13 +2004,13 @@ void TMRL::current_value()
       value_16bit = tmrh->value.get() * 256 + value.get();
   else
   {
-    value_16bit = (guint64)((get_cycles().get() - last_cycle)/ 
+    value_16bit = (guint64)((get_cycles().get() - last_cycle)/
 		(prescale* ext_scale));
 
 
     if (value_16bit > 0x10000)
 	cerr << "overflow TMRL " << name() << " " << value_16bit << endl;
-	
+
     value.put(value_16bit & 0xff);
     tmrh->value.put((value_16bit>>8) & 0xff);
   }
@@ -2030,7 +2030,7 @@ unsigned int TMRL::get_low_and_high()
   trace.raw(tmrh->read_trace.get() | tmrh->value.get());
 
   return(value_16bit);
-  
+
 }
 
 // set m_bExtClkEnable is tmr1 is being clocked by an external stimulus
@@ -2100,9 +2100,9 @@ void TMRL::new_clock_source()
 }
 
 //
-// clear_timer - This is called by either the CCP or PWM modules to 
+// clear_timer - This is called by either the CCP or PWM modules to
 // reset the timer to zero. This is rather easy since the current TMR
-// value is always referenced to the cpu cycle counter. 
+// value is always referenced to the cpu cycle counter.
 //
 
 void TMRL::clear_timer()
@@ -2208,7 +2208,7 @@ void TMRL::sleep()
         current_value();
         get_cycles().clear_break(this);
 	future_cycle = 0;
-      } 
+      }
     }
 }
 
@@ -2269,7 +2269,7 @@ void T2CON::put(unsigned int new_value)
   value.put(new_value);
 
   if (tmr2) {
-    
+
     tmr2->new_pre_post_scale();
 
     if( diff & TMR2ON)
@@ -2305,7 +2305,7 @@ TMR2::~TMR2()
     m_Interrupt->release();
 }
 
-void TMR2::callback_print() 
+void TMR2::callback_print()
 {
   cout << "TMR2 " << name() << " CallBack ID " << CallBackID << '\n';
 }
@@ -2378,9 +2378,9 @@ void TMR2::on_or_off(int new_state)
 }
 
 //
-// pwm_dc - 
+// pwm_dc -
 //
-//  
+//
 
 void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
 {
@@ -2437,11 +2437,11 @@ void TMR2::stop_pwm(unsigned int ccp_address)
 }
 
 //
-// update 
+// update
 //  This member function will determine if/when there is a TMR2 break point
 // that needs to be set and will set/move it if so.
 //  There are two different types of break sources:
-//     1) TMR2 matching PR2 
+//     1) TMR2 matching PR2
 //     2) TMR2 matching one of the ccp registers in pwm mode
 //
 
@@ -2481,9 +2481,9 @@ void TMR2::update(int ut)
       {
         if ( pwm_mode & ut & modeMask )
         {
-          /* We are in pwm mode... So let's see what happens first: a pr2 
-	     compare or a duty cycle compare. The duty cycle is 10-bits, 
-	     but the two least significant match against the prescaler 
+          /* We are in pwm mode... So let's see what happens first: a pr2
+	     compare or a duty cycle compare. The duty cycle is 10-bits,
+	     but the two least significant match against the prescaler
 	     rather than TMR2.
 	  */
 
@@ -2491,7 +2491,7 @@ void TMR2::update(int ut)
 	  {
             guint64 nc = last_cycle + ( duty_cycle[cc] * prescale ) / 4;
 
-	    // cout << "TMR2:PWM" << cc+1 << " update at " << hex << nc << 
+	    // cout << "TMR2:PWM" << cc+1 << " update at " << hex << nc <<
             //         ", dc=" << duty_cycle[cc] << "\n";
             if ( nc < fc )      /// @bug not robust against wrap-around of guint64
             {
@@ -2501,7 +2501,7 @@ void TMR2::update(int ut)
             else if ( nc == fc )
             {
               last_update |= modeMask;
-            }  
+            }
 	  }
         }
         modeMask <<= 1;
@@ -2509,7 +2509,7 @@ void TMR2::update(int ut)
 
       if(fc < future_cycle && verbose & 0x04)
         cout << "TMR2: update note: new breakpoint=" << hex << fc <<
-           " before old breakpoint " << future_cycle << 
+           " before old breakpoint " << future_cycle <<
 	    " now " << get_cycles().get() << endl;
 
       if (fc != future_cycle)
@@ -2559,7 +2559,7 @@ void TMR2::put(unsigned int new_value)
 
       last_cycle = current_cycle - shift;
       unsigned int now = (current_cycle - last_cycle);
-      
+
 //      printf ( "   value now is 0x%X\n", now );
 
       guint64 fc;
@@ -2572,7 +2572,7 @@ void TMR2::put(unsigned int new_value)
 		Assume TMR2 must count up to 0xff, roll-over and then
 		we are back in business. High CCP outputs stay high.
 	   3> TMR2 is now less than PR2 but greater than a CCP duty cycle point.
-		The CCP output stays as the duty cycle comparator does not 
+		The CCP output stays as the duty cycle comparator does not
 		match on this cycle.
       */
 
@@ -2604,9 +2604,9 @@ void TMR2::put(unsigned int new_value)
 
 
 
-     /* 
-	'clear' the post scale counter. (I've actually implemented the 
-	post scale counter as a count-down counter, so 'clearing it' 
+     /*
+	'clear' the post scale counter. (I've actually implemented the
+	post scale counter as a count-down counter, so 'clearing it'
 	means resetting it to the starting point.
      */
       if (t2con)
@@ -2624,7 +2624,7 @@ unsigned int TMR2::get()
 
   trace.raw(read_trace.get() | value.get());
   return(value.get());
-  
+
 }
 
 unsigned int TMR2::get_value()
@@ -2636,7 +2636,7 @@ unsigned int TMR2::get_value()
     }
 
   return(value.get());
-  
+
 }
 void TMR2::new_pre_post_scale()
 {
@@ -2694,7 +2694,7 @@ void TMR2::new_pre_post_scale()
       {
 	cout << "Warning TMR2 turned on with TMR2 greater than PR2\n";
 	// this will cause TMR2 to wrap
-        future_cycle  = get_cycles().get() + 
+        future_cycle  = get_cycles().get() +
 		(1 + pr2->value.get() + (0x100 -  value.get())) * prescale;
         get_cycles().set_break(future_cycle, this);
       }
@@ -2711,7 +2711,7 @@ void TMR2::new_pre_post_scale()
 
 void TMR2::new_pr2(unsigned int new_value)
 {
-  Dprintf(("TMR2::new_pr2 on=%d\n", t2con->get_tmr2on()));
+  Dprintf(("TMR2::new_pr2 on=%u\n", t2con->get_tmr2on()));
 
   if(t2con->get_tmr2on())
     {
@@ -2795,18 +2795,18 @@ void TMR2::current_value()
 
 void TMR2::callback()
 {
-  int cc;  
+  int cc;
 
   //cout<<"TMR2 callback cycle: " << hex << cycles.value << '\n';
 
-  // If tmr2 is still enabled, then set up for the next break. 
+  // If tmr2 is still enabled, then set up for the next break.
   // If tmr2 was disabled then ignore this break point.
   if(t2con->get_tmr2on())
     {
 
       // What caused the callback: PR2 match or duty cyle match ?
 
-      if (last_update & TMR2_WRAP) // TMR2 > PR2 
+      if (last_update & TMR2_WRAP) // TMR2 > PR2
       {
 	last_update &= ~TMR2_WRAP;
 	// This (implicitly) resets the timer to zero:
@@ -2853,7 +2853,7 @@ void TMR2::callback()
 
         for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
         {
-          if ( ccp[cc] && 
+          if ( ccp[cc] &&
 		( ccp[cc]->value.get() & (CCPCON::PWM0 | CCPCON::PWM1 )))
 	  {
              ccp[cc]->pwm_match(1);
@@ -2885,7 +2885,7 @@ void TMR2::callback()
 //------------------------------------------------------------------------
 // TMR2_MODULE
 //
-// 
+//
 
 TMR2_MODULE::TMR2_MODULE()
 {
@@ -2935,7 +2935,7 @@ private:
 //--------------------------------------------------
 ECCPAS::ECCPAS(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
-    pwm1con(0), ccp1con(0), 
+    pwm1con(0), ccp1con(0),
     m_PinModule(0)
 {
     trig_state[0] = trig_state[1] = trig_state[2] = false;

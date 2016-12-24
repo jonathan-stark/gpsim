@@ -781,7 +781,7 @@ void SocketBase::ParseObject()
     break;
 
   default:
-    printf("Invalid object type: %d\n",ObjectType);
+    printf("Invalid object type: %u\n", ObjectType);
     Send("-");
 
   }

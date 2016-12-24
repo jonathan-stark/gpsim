@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -279,7 +279,7 @@ PIR3v178x(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon,
 
 
 P12F1822::P12F1822(const char *_name, const char *desc)
-  : _14bit_e_processor(_name,desc), 
+  : _14bit_e_processor(_name,desc),
     comparator(this),
     pie1(this,"PIE1", "Peripheral Interrupt Enable"),
     pie2(this,"PIE2", "Peripheral Interrupt Enable"),
@@ -426,9 +426,9 @@ P12F1822::~P12F1822()
     remove_sfr_register(osccon);
     remove_sfr_register(&oscstat);
 
-    remove_sfr_register(comparator.cmxcon0[0]); 
-    remove_sfr_register(comparator.cmxcon1[0]); 
-    remove_sfr_register(comparator.cmout); 
+    remove_sfr_register(comparator.cmxcon0[0]);
+    remove_sfr_register(comparator.cmxcon1[0]);
+    remove_sfr_register(comparator.cmout);
     delete_sfr_register(usart.rcreg);
     delete_sfr_register(usart.txreg);
     delete_sfr_register(pir1);
@@ -497,13 +497,13 @@ void P12F1822::create_sfr_map()
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con_g;
   tmr1l.setInterruptSource(new InterruptSource(pir1, PIR1v1::TMR1IF));
-  
+
   tmr1h.tmrl  = &tmr1l;
   t1con_g.tmrl  = &tmr1l;
   t1con_g.t1gcon.set_tmrl(&tmr1l);
   t1con_g.t1gcon.setInterruptSource(new InterruptSource(pir1, PIR1v1822::TMR1IF));
 
-  
+
 
   tmr1l.setIOpin(&(*m_porta)[5]);
   t1con_g.t1gcon.setGatepin(&(*m_porta)[3]);
@@ -519,15 +519,15 @@ void P12F1822::create_sfr_map()
   usart.initialize(pir1,
 	&(*m_porta)[0], // TX pin
 	&(*m_porta)[1], // RX pin
-	new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+	new _TXREG(this,"txreg", "USART Transmit Register", &usart),
         new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   usart.set_eusart(true);
 
   add_sfr_register(m_lata,    0x10c);
-  add_sfr_register(comparator.cmxcon0[0], 0x111, RegisterValue(0x04,0)); 
-  add_sfr_register(comparator.cmxcon1[0], 0x112, RegisterValue(0x00,0)); 
-  add_sfr_register(comparator.cmout,      0x115, RegisterValue(0x00,0)); 
+  add_sfr_register(comparator.cmxcon0[0], 0x111, RegisterValue(0x04,0));
+  add_sfr_register(comparator.cmxcon1[0], 0x112, RegisterValue(0x00,0));
+  add_sfr_register(comparator.cmout,      0x115, RegisterValue(0x00,0));
   add_sfr_register(&borcon,   0x116, RegisterValue(0x80,0));
   add_sfr_register(&fvrcon,   0x117, RegisterValue(0x00,0));
   add_sfr_register(m_daccon0, 0x118, RegisterValue(0x00,0));
@@ -633,7 +633,7 @@ void P12F1822::create_sfr_map()
     adcon0.setChannel_shift(2);
     adcon0.setGo(1);
 
-    adcon1.setAdcon0(&adcon0); 
+    adcon1.setAdcon0(&adcon0);
     adcon1.setNumberOfChannels(32); // not all channels are used
     adcon1.setIOPin(0, &(*m_porta)[0]);
     adcon1.setIOPin(1, &(*m_porta)[1]);
@@ -719,7 +719,7 @@ void  P12F1822::create(int ram_top, int eeprom_size)
   set_eeprom(e);
 
   osccon = new OSCCON_2(this, "osccon", "Oscillator Control Register");
- 
+
   pic_processor::create();
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
@@ -755,8 +755,8 @@ void P12F1822::exit_sleep()
 void P12F1822::option_new_bits_6_7(unsigned int bits)
 {
 	Dprintf(("P12F1822::option_new_bits_6_7 bits=%x\n", bits));
-    m_porta->setIntEdge ( (bits & OPTION_REG::BIT6) == OPTION_REG::BIT6); 
-    m_wpua->set_wpu_pu ( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7); 
+    m_porta->setIntEdge ( (bits & OPTION_REG::BIT6) == OPTION_REG::BIT6);
+    m_wpua->set_wpu_pu ( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7);
 }
 
 void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
@@ -768,7 +768,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
     switch(cfg_word1 & (FOSC0|FOSC1|FOSC2))
     {
     case 0:	//LP oscillator: low power crystal
-    case 1:	//XT oscillator: Crystal/resonator 
+    case 1:	//XT oscillator: Crystal/resonator
     case 2:	//HS oscillator: High-speed crystal/resonator
         (m_porta->getPin(4))->newGUIname("OSC2");
         (m_porta->getPin(5))->newGUIname("OSC1");
@@ -779,7 +779,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
     case 3:	//EXTRC oscillator External RC circuit connected to CLKIN pin
         (m_porta->getPin(5))->newGUIname("CLKIN");
 	mask = 0x1f;
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(4))->newGUIname("CLKOUT");
 	    mask = 0x0f;
@@ -789,7 +789,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
     case 4:	//INTOSC oscillator: I/O function on CLKIN pin
         set_int_osc(true);
 	mask = 0x3f;
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(4))->newGUIname("CLKOUT");
 	    mask = 0x2f;
@@ -799,7 +799,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
 
     case 5:	//ECL: External Clock, Low-Power mode (0-0.5 MHz): on CLKIN pin
 	mask = 0x1f;
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(4))->newGUIname("CLKOUT");
 	    mask = 0x0f;
@@ -809,7 +809,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
 
     case 6:	//ECM: External Clock, Medium-Power mode (0.5-4 MHz): on CLKIN pin
 	mask = 0x1f;
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(4))->newGUIname("CLKOUT");
 	    mask = 0x0f;
@@ -819,7 +819,7 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
 
     case 7:	//ECH: External Clock, High-Power mode (4-32 MHz): on CLKIN pin
 	mask = 0x1f;
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(4))->newGUIname("CLKOUT");
 	    mask = 0x0f;
@@ -851,7 +851,7 @@ void P12F1822::program_memory_wp(unsigned int mode)
 	    break;
 
 	default:
-	    printf("%s unexpected mode %d\n", __FUNCTION__, mode);
+	    printf("%s unexpected mode %u\n", __FUNCTION__, mode);
 	    break;
 	}
 
@@ -887,14 +887,14 @@ void  P12F1840::create(int ram_top, int eeprom_size)
   if (m_configMemory && m_configMemory->getConfigWord(6))
       m_configMemory->getConfigWord(6)->set(0x1b80);
   vrefcon = new sfr_register(this, "vrefcon",
-		"Voltage Regulator Control Register"); 
+		"Voltage Regulator Control Register");
   add_sfr_register(vrefcon, 0x197, RegisterValue(0x01,0));
 }
 //========================================================================
 
 
 P16F178x::P16F178x(const char *_name, const char *desc)
-  : _14bit_e_processor(_name,desc), 
+  : _14bit_e_processor(_name,desc),
     comparator(this),
     pie1(this,"pie1", "Peripheral Interrupt Enable"),
     pie2(this,"pie2", "Peripheral Interrupt Enable"),
@@ -1113,13 +1113,13 @@ P16F178x::~P16F178x()
     remove_sfr_register(osccon);
     remove_sfr_register(&oscstat);
 
-    remove_sfr_register(comparator.cmxcon0[0]); 
-    remove_sfr_register(comparator.cmxcon1[0]); 
-    remove_sfr_register(comparator.cmout); 
-    remove_sfr_register(comparator.cmxcon0[1]); 
-    remove_sfr_register(comparator.cmxcon1[1]); 
-    remove_sfr_register(comparator.cmxcon0[2]); 
-    remove_sfr_register(comparator.cmxcon1[2]); 
+    remove_sfr_register(comparator.cmxcon0[0]);
+    remove_sfr_register(comparator.cmxcon1[0]);
+    remove_sfr_register(comparator.cmout);
+    remove_sfr_register(comparator.cmxcon0[1]);
+    remove_sfr_register(comparator.cmxcon1[1]);
+    remove_sfr_register(comparator.cmxcon0[2]);
+    remove_sfr_register(comparator.cmxcon1[2]);
     delete_sfr_register(usart.rcreg);
     delete_sfr_register(usart.txreg);
     delete_sfr_register(pir1);
@@ -1192,7 +1192,7 @@ void P16F178x::create_sfr_map()
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con_g;
   tmr1l.setInterruptSource(new InterruptSource(pir1, PIR1v1::TMR1IF));
-  
+
   tmr1h.tmrl  = &tmr1l;
   t1con_g.tmrl  = &tmr1l;
   t1con_g.t1gcon.set_tmrl(&tmr1l);
@@ -1214,7 +1214,7 @@ void P16F178x::create_sfr_map()
   usart.initialize(pir1,
 	&(*m_porta)[0], // TX pin
 	&(*m_porta)[1], // RX pin
-	new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+	new _TXREG(this,"txreg", "USART Transmit Register", &usart),
         new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   usart.set_eusart(true);
@@ -1222,19 +1222,19 @@ void P16F178x::create_sfr_map()
     add_sfr_register(m_lata,    0x10c);
     add_sfr_register(m_latb, 0x10d);
     add_sfr_register(m_latc, 0x10e);
-    add_sfr_register(comparator.cmxcon0[0], 0x111, RegisterValue(0x04,0)); 
-    add_sfr_register(comparator.cmxcon1[0], 0x112, RegisterValue(0x00,0)); 
-    add_sfr_register(comparator.cmxcon0[1], 0x113, RegisterValue(0x04,0)); 
-    add_sfr_register(comparator.cmxcon1[1], 0x114, RegisterValue(0x00,0)); 
-    add_sfr_register(comparator.cmout,      0x115, RegisterValue(0x00,0)); 
+    add_sfr_register(comparator.cmxcon0[0], 0x111, RegisterValue(0x04,0));
+    add_sfr_register(comparator.cmxcon1[0], 0x112, RegisterValue(0x00,0));
+    add_sfr_register(comparator.cmxcon0[1], 0x113, RegisterValue(0x04,0));
+    add_sfr_register(comparator.cmxcon1[1], 0x114, RegisterValue(0x00,0));
+    add_sfr_register(comparator.cmout,      0x115, RegisterValue(0x00,0));
     add_sfr_register(&borcon,   0x116, RegisterValue(0x80,0));
     add_sfr_register(&fvrcon,   0x117, RegisterValue(0x00,0));
     add_sfr_register(m_daccon0, 0x118, RegisterValue(0x00,0));
     add_sfr_register(m_daccon1, 0x119, RegisterValue(0x00,0));
     add_sfr_register(&apfcon2 ,  0x11c, RegisterValue(0x00,0));
     add_sfr_register(&apfcon1 ,  0x11d, RegisterValue(0x00,0));
-    add_sfr_register(comparator.cmxcon0[2], 0x11e, RegisterValue(0x04,0)); 
-    add_sfr_register(comparator.cmxcon1[2], 0x11f, RegisterValue(0x00,0)); 
+    add_sfr_register(comparator.cmxcon0[2], 0x11e, RegisterValue(0x04,0));
+    add_sfr_register(comparator.cmxcon1[2], 0x11f, RegisterValue(0x00,0));
     add_sfr_register(&ansela,   0x18c, RegisterValue(0x17,0));
     add_sfr_register(&anselb,   0x18d, RegisterValue(0x7f,0));
     add_sfr_register(&anselc,   0x18e, RegisterValue(0xff,0));
@@ -1367,7 +1367,7 @@ void P16F178x::create_sfr_map()
     adcon0.setChannel_shift(2);
     adcon0.setGo(1);
 
-    adcon1.setAdcon0(&adcon0); 
+    adcon1.setAdcon0(&adcon0);
     adcon1.setNumberOfChannels(32); // not all channels are used
     adcon1.setIOPin(0, &(*m_porta)[0]);
     adcon1.setIOPin(1, &(*m_porta)[1]);
@@ -1451,7 +1451,7 @@ void  P16F178x::create(int ram_top, int eeprom_size)
   set_eeprom(e);
 
   osccon = new OSCCON_2(this, "osccon", "Oscillator Control Register");
- 
+
   pic_processor::create();
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
@@ -1484,8 +1484,8 @@ void P16F178x::exit_sleep()
 void P16F178x::option_new_bits_6_7(unsigned int bits)
 {
 	Dprintf(("P16F178x::option_new_bits_6_7 bits=%x\n", bits));
-    m_porta->setIntEdge ( (bits & OPTION_REG::BIT6) == OPTION_REG::BIT6); 
-    m_wpua->set_wpu_pu ( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7); 
+    m_porta->setIntEdge ( (bits & OPTION_REG::BIT6) == OPTION_REG::BIT6);
+    m_wpua->set_wpu_pu ( (bits & OPTION_REG::BIT7) != OPTION_REG::BIT7);
 }
 
 void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
@@ -1497,7 +1497,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
     switch(cfg_word1 & (FOSC0|FOSC1|FOSC2))
     {
     case 0:	//LP oscillator: low power crystal
-    case 1:	//XT oscillator: Crystal/resonator 
+    case 1:	//XT oscillator: Crystal/resonator
     case 2:	//HS oscillator: High-speed crystal/resonator
         (m_porta->getPin(6))->newGUIname("OSC2");
         (m_porta->getPin(7))->newGUIname("OSC1");
@@ -1508,7 +1508,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
     case 3:	//EXTRC oscillator External RC circuit connected to CLKIN pin
         (m_porta->getPin(7))->newGUIname("CLKIN");
 	mask &= 0x7f;
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(6))->newGUIname("CLKOUT");
 	    mask &= 0xbf;
@@ -1522,7 +1522,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
 
     case 4:	//INTOSC oscillator: I/O function on CLKIN pin
         set_int_osc(true);
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(6))->newGUIname("CLKOUT");
 	    mask &= 0xbf;
@@ -1537,7 +1537,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
 	break;
 
     case 5:	//ECL: External Clock, Low-Power mode (0-0.5 MHz): on CLKIN pin
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(6))->newGUIname("CLKOUT");
 	    mask &= 0xbf;
@@ -1552,7 +1552,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
 	break;
 
     case 6:	//ECM: External Clock, Medium-Power mode (0.5-4 MHz): on CLKIN pin
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(6))->newGUIname("CLKOUT");
 	    mask &= 0xbf;
@@ -1567,7 +1567,7 @@ void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
 	break;
 
     case 7:	//ECH: External Clock, High-Power mode (4-32 MHz): on CLKIN pin
-	if(clkout) 
+	if(clkout)
 	{
 	    (m_porta->getPin(6))->newGUIname("CLKOUT");
 	    mask &= 0xbf;
@@ -1605,7 +1605,7 @@ void P16F178x::program_memory_wp(unsigned int mode)
 	    break;
 
 	default:
-	    printf("%s unexpected mode %d\n", __FUNCTION__, mode);
+	    printf("%s unexpected mode %u\n", __FUNCTION__, mode);
 	    break;
 	}
 
@@ -1614,16 +1614,16 @@ void P16F178x::program_memory_wp(unsigned int mode)
 
 
 P16F1788::P16F1788(const char *_name, const char *desc)
-  : P16F178x(_name,desc) 
+  : P16F178x(_name,desc)
 {
   comparator.cmxcon0[3] = new CMxCON0(this, "cm4con0", " Comparator C4 Control Register 0", 3, &comparator);
   comparator.cmxcon1[3] = new CMxCON1(this, "cm4con1", " Comparator C4 Control Register 1", 3, &comparator);
-   
+
 }
 P16F1788::~P16F1788()
 {
-    remove_sfr_register(comparator.cmxcon0[3]); 
-    remove_sfr_register(comparator.cmxcon1[3]); 
+    remove_sfr_register(comparator.cmxcon0[3]);
+    remove_sfr_register(comparator.cmxcon1[3]);
 }
 void P16F1788::create_iopin_map()
 {
@@ -1701,8 +1701,8 @@ void P16F1788::create_sfr_map()
 
 
 
-    add_sfr_register(comparator.cmxcon0[3], 0x11a, RegisterValue(0x04,0)); 
-    add_sfr_register(comparator.cmxcon1[3], 0x11b, RegisterValue(0x00,0)); 
+    add_sfr_register(comparator.cmxcon0[3], 0x11a, RegisterValue(0x04,0));
+    add_sfr_register(comparator.cmxcon1[3], 0x11b, RegisterValue(0x00,0));
 
     adcon1.setIOPin(12, &(*m_portb)[0]);
     adcon1.setIOPin(10, &(*m_portb)[1]);
@@ -1743,10 +1743,10 @@ void P16F1788::create_sfr_map()
 
 
 P16F1823::P16F1823(const char *_name, const char *desc)
-  : P12F1822(_name,desc), 
+  : P12F1822(_name,desc),
     anselc(this, "anselc", "Analog Select port c")
 {
-   
+
   m_portc = new PicPortBRegister(this,"portc","", intcon, 8,0x3f);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false, 0x3f);
   m_latc  = new PicLatchRegister(this,"latc","",m_portc, 0x3f);
@@ -1762,8 +1762,8 @@ P16F1823::~P16F1823()
     delete_sfr_register(m_portc);
     delete_sfr_register(m_trisc);
     delete_sfr_register(m_latc);
-    remove_sfr_register(comparator.cmxcon0[1]); 
-    remove_sfr_register(comparator.cmxcon1[1]); 
+    remove_sfr_register(comparator.cmxcon0[1]);
+    remove_sfr_register(comparator.cmxcon1[1]);
     delete_sfr_register(m_wpuc);
     remove_sfr_register(&anselc);
 }
@@ -1817,7 +1817,7 @@ void  P16F1823::create(int ram_top, int eeprom_size)
   set_eeprom(e);
 
   osccon = new OSCCON_2(this, "osccon", "Oscillator Control Register");
- 
+
   pic_processor::create();
 
   e->initialize(eeprom_size, 16, 16, 0x8000);
@@ -1838,8 +1838,8 @@ void P16F1823::create_sfr_map()
     add_sfr_register(m_portc, 0x0e);
     add_sfr_register(m_trisc, 0x8e, RegisterValue(0x3f,0));
     add_sfr_register(m_latc, 0x10e);
-    add_sfr_register(comparator.cmxcon0[1], 0x113, RegisterValue(0x04,0)); 
-    add_sfr_register(comparator.cmxcon1[1], 0x114, RegisterValue(0x00,0)); 
+    add_sfr_register(comparator.cmxcon0[1], 0x113, RegisterValue(0x04,0));
+    add_sfr_register(comparator.cmxcon1[1], 0x114, RegisterValue(0x00,0));
     add_sfr_register(&anselc, 0x18e, RegisterValue(0x0f,0));
     add_sfr_register(m_wpuc, 0x20e, RegisterValue(0x3f,0),"wpuc");
 

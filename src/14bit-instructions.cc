@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -60,7 +60,7 @@ ADDFSR::ADDFSR(Processor *new_cpu, unsigned int new_opcode, const char *pName, u
 char *ADDFSR::name(char *return_str,int len)
 {
 
-  snprintf(return_str,len,"%s\t%d,0x%x",
+  snprintf(return_str,len,"%s\t%u,0x%x",
 	   gpsimObject::name().c_str(),
 	   m_fsr,
 	   m_lit);
@@ -107,7 +107,7 @@ MOVIW::MOVIW(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
       m_lit = opcode & 0x3f;
       if (m_lit & 0x20) m_lit -= 0x40;
       m_op = DELTA;
-      Dprintf((" shift op %x fsr %d data %d raw %d\n", opcode>>6, m_fsr, m_lit, opcode &0x3f));
+      Dprintf((" shift op %x fsr %u data %d raw %u\n", opcode >> 6, m_fsr, m_lit, opcode & 0x3f));
 
   }
   else
@@ -136,32 +136,32 @@ char *MOVIW::name(char *return_str,int len)
   switch(m_op)
   {
   case PREINC:
-	snprintf(return_str,len,"%s\t++FSR%d",
+	snprintf(return_str,len,"%s\t++FSR%u",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case PREDEC:
-	snprintf(return_str,len,"%s\t--FSR%d",
+	snprintf(return_str,len,"%s\t--FSR%u",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case POSTINC:
-	snprintf(return_str,len,"%s\tFSR%d++",
+	snprintf(return_str,len,"%s\tFSR%u++",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case POSTDEC:
-	snprintf(return_str,len,"%s\tFSR%d--",
+	snprintf(return_str,len,"%s\tFSR%u--",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case DELTA:
-	snprintf(return_str,len,"%s\t%d[FSR%d]",
-	   gpsimObject::name().c_str(), m_lit, 
+	snprintf(return_str,len,"%s\t%d[FSR%u]",
+	   gpsimObject::name().c_str(), m_lit,
 	   m_fsr);
 	break;
   }
@@ -217,7 +217,7 @@ MOVWI::MOVWI(Processor *new_cpu, unsigned int new_opcode, unsigned int address)
       m_lit = opcode & 0x3f;
       if (m_lit & 0x20) m_lit -= 0x40;
       m_op = DELTA;
-      Dprintf((" shift op %x fsr %d data %d\n", opcode>>6, m_fsr, m_lit));
+      Dprintf((" shift op %x fsr %u data %d\n", opcode>>6, m_fsr, m_lit));
 
   }
   else
@@ -246,32 +246,32 @@ char *MOVWI::name(char *return_str,int len)
   switch(m_op)
   {
   case PREINC:
-	snprintf(return_str,len,"%s\t++FSR%d",
+	snprintf(return_str,len,"%s\t++FSR%u",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case PREDEC:
-	snprintf(return_str,len,"%s\t--FSR%d",
+	snprintf(return_str,len,"%s\t--FSR%u",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case POSTINC:
-	snprintf(return_str,len,"%s\tFSR%d++",
+	snprintf(return_str,len,"%s\tFSR%u++",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case POSTDEC:
-	snprintf(return_str,len,"%s\tFSR%d--",
+	snprintf(return_str,len,"%s\tFSR%u--",
 	   gpsimObject::name().c_str(),
 	   m_fsr);
 	break;
 
   case DELTA:
-	snprintf(return_str,len,"%s\t%d[FSR%d]",
-	   gpsimObject::name().c_str(), m_lit, 
+	snprintf(return_str,len,"%s\t%d[FSR%u]",
+	   gpsimObject::name().c_str(), m_lit,
 	   m_fsr);
 	break;
   }
@@ -304,7 +304,7 @@ void MOVWI::execute()
   }
   else if (m_op == DELTA)
   {
-    Dprintf((" DELTA fsr %d delta %d\n", m_fsr, m_lit));
+    Dprintf((" DELTA fsr %u delta %d\n", m_fsr, m_lit));
     ia->fsr_delta = m_lit;
     ia->indf.put(cpu14->Wget());
   }
@@ -350,7 +350,7 @@ void RETFIE::execute(void)
   cpu14->pc->new_address(cpu14->stack->pop());
   cpu14->intcon->in_interrupt = false;
   // test for pending intterrupts
-  cpu14->intcon->put_value(cpu14->intcon->value.get()); 
+  cpu14->intcon->put_value(cpu14->intcon->value.get());
   if(cpu_pic->base_isa() == _14BIT_E_PROCESSOR_)
   {
 	cpu14e->status->put(cpu14e->status_shad.get());

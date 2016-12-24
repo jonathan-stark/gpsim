@@ -196,7 +196,7 @@ HD44780::HD44780()
     m_CGRamupdate(false)
 {
 
-  
+
   m_busyTimer = new HD44780Busy();
 
   memset(&m_CGRam[0], 0xff, sizeof(m_CGRam));
@@ -206,7 +206,7 @@ HD44780::HD44780()
   row_offset[1] = 0x40;
   row_offset[2] = 0x14;
   row_offset[3] = 0x54;
-  
+
 
 }
 HD44780::~HD44780()
@@ -257,7 +257,7 @@ void HD44780::setE(bool newE)
       executeCommand();
       break;
     default:
-      Dprintf((" unhandled control state:%d\n",m_controlState));
+      Dprintf((" unhandled control state:%u\n", m_controlState));
     }
   }
 
@@ -359,7 +359,7 @@ void HD44780::executeCommand()
   //
   // Determine the command type
   //
-  Dprintf(("Execute Command:0x%d\n",command));
+  Dprintf(("Execute Command:0x%u\n", command));
   if( (command & LCD_MASK_SET_DDRAM) ==  LCD_CMD_SET_DDRAM) {
     Dprintf(("LCD_CMD_SET_DDRAM\n"));
     writeDDRamAddress(command & DDRAM_MASK);
@@ -541,8 +541,8 @@ void HD44780::debugChipState(const char *pCFrom)
 {
 #ifdef DEBUG
   printf("Chip state from %s\n",pCFrom);
-  printf(" ControlState: %d  dataBus:0x%x phase:%d\n",
-	 m_controlState,m_dataBus,m_bDataBusPhase);
+  printf(" ControlState: %u  dataBus:0x%x phase:%d\n",
+	 m_controlState, m_dataBus, m_bDataBusPhase);
   printf(" Mode: %dbit %dLine Display-%s\n",
 	 (b8BitMode() ? 8 : 4),
 	 (b1LineMode() ? 1 : 2),

@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -127,7 +127,7 @@ void ADCON0::start_conversion(void)
   guint64 fc = get_cycles().get() + (2 * Tad) /
 		p_cpu->get_ClockCycles_per_Instruction();
 
-  Dprintf(("ad_state %d fc %lx now %lx\n", ad_state, fc, get_cycles().get()))
+  Dprintf(("ad_state %u fc %lx now %lx\n", ad_state, fc, get_cycles().get()))
   if(ad_state != AD_IDLE)
     {
       // The A/D converter is either 'converting' or 'acquiring'
@@ -157,7 +157,7 @@ void ADCON0::stop_conversion(void)
 void ADCON0::set_Tad(unsigned int new_value)
 {
   // Get the A/D Conversion Clock Select bits
-  // 
+  //
   // This switch case will get the ADCS bits and set the Tad, or The A/D
   // converter clock period. Tad is the number of the oscillator periods
   //  rather instruction cycle periods. ADCS2 only exists on some processors,
@@ -196,7 +196,7 @@ void ADCON0::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   set_Tad(new_value);
-    
+
   unsigned int old_value=value.get();
   // SET: Reflect it first!
   value.put(new_value);
@@ -221,19 +221,19 @@ void ADCON0::put_conversion(void)
   double dRefSep = m_dSampledVrefHi - m_dSampledVrefLo;
   double dNormalizedVoltage;
 
-  dNormalizedVoltage = (dRefSep>0.0) ? 
+  dNormalizedVoltage = (dRefSep>0.0) ?
     (m_dSampledVoltage - m_dSampledVrefLo)/dRefSep : 0.0;
   dNormalizedVoltage = dNormalizedVoltage>1.0 ? 1.0 : dNormalizedVoltage;
 
   unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage + 0.5);
 
-  Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
+  Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%u normV:%g\n",
 	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
 
   if (verbose)
 	printf ("result=0x%02x\n", converted);
 
-  Dprintf(("%d-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
+  Dprintf(("%u-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
 
   if(adresl) {   // non-null for more than 8 bit conversion
 
@@ -263,8 +263,8 @@ void ADCON0::callback(void)
   Dprintf((" ADCON0 Callback: 0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
 
   //
-  // The a/d converter is simulated with a state machine. 
-  // 
+  // The a/d converter is simulated with a state machine.
+  //
 
   switch(ad_state)
     {
@@ -286,9 +286,9 @@ void ADCON0::callback(void)
       future_cycle = get_cycles().get() + (m_nBits * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
       if (verbose)
-	printf("A/D %d bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
+	printf("A/D %u bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
 	    channel,m_dSampledVoltage,m_dSampledVrefHi,m_dSampledVrefLo);
-      
+
       ad_state = AD_CONVERTING;
 
       break;
@@ -307,7 +307,7 @@ void ADCON0::callback(void)
 }
 
 //------------------------------------------------------
-// If the ADIF bit is in the PIR1 register, call setPir() 
+// If the ADIF bit is in the PIR1 register, call setPir()
 // in the ADC setup. Otherwise, ADIF is assumed to be in
 // the ADCON0 register
 //
@@ -344,7 +344,7 @@ void ADCON0_DIF::put(unsigned int new_value)
       setA2DBits(12);
 
   set_Tad(new_value);
-    
+
   unsigned int old_value=value.get();
   // SET: Reflect it first!
   value.put(new_value);
@@ -389,7 +389,7 @@ void ADCON0_DIF::put_conversion(void)
   if (verbose)
 	printf ("result=0x%02x\n", converted);
 
-  Dprintf(("%d-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
+  Dprintf(("%u-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
 
     if(!get_ADFM()) { // signed
 
@@ -453,7 +453,7 @@ void ADCON1_16F::put_value(unsigned int new_value)
 }
 double ADCON1_16F::getVrefLo()
 {
-	if (ADNREF & value.get()) 
+	if (ADNREF & value.get())
 	{
 
   	    if (Vreflo_position[cfg_index] < m_nAnalogChannels)
@@ -477,7 +477,7 @@ double ADCON1_16F::getVrefHi()
 	case 1:
 	    cerr << "WARNING reserved value for ADPREF\n";
 	    return -1.;
- 	   
+
 	case 2:
   	    if (Vrefhi_position[cfg_index] < m_nAnalogChannels)
     		return getChannelVoltage(Vrefhi_position[cfg_index]);
@@ -490,7 +490,7 @@ double ADCON1_16F::getVrefHi()
 	    cerr << "WARNING FVR_chan not set\n";
 	    return -1.;
 	};
-	    
+
   }
   if (Vrefhi_position[cfg_index] < m_nAnalogChannels)
     return getChannelVoltage(Vrefhi_position[cfg_index]);
@@ -504,7 +504,7 @@ ADCON1::ADCON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     valid_bits(0xff), adfm(false),
     m_AnalogPins(0),  m_voltageRef(0), m_nAnalogChannels(0),
-    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), cfg_index(0), 
+    mValidCfgBits(0), mCfgBitShift(0), mIoMask(0), cfg_index(0),
     m_ad_in_ctl(0)
 {
   for (int i=0; i<(int)cMaxConfigurations; i++) {
@@ -521,11 +521,11 @@ ADCON1::~ADCON1()
   {
     if (m_ad_in_ctl)
     {
-	for (unsigned int i = 0; i < m_nAnalogChannels; i++)	
+	for (unsigned int i = 0; i < m_nAnalogChannels; i++)
 	    m_AnalogPins[i]->setControl(0);
 	delete m_ad_in_ctl;
     }
-	
+
     delete [] m_AnalogPins;
   }
 }
@@ -551,7 +551,7 @@ void ADCON1::setADCnames()
     unsigned int new_mask = m_configuration_bits[cfg_index];
     unsigned int diff = mIoMask ^ new_mask;
 
-    Dprintf (( "ADCON1::setADCnames - cfg_index=%d new_mask %02X channels %d\n",
+    Dprintf (( "ADCON1::setADCnames - cfg_index=%u new_mask %02X channels %u\n",
                cfg_index, new_mask, m_nAnalogChannels ));
 
     char newname[20];
@@ -564,12 +564,12 @@ void ADCON1::setADCnames()
 
         if (new_mask & (1<<i))
         {
-          sprintf(newname, "an%d", i);
+          snprintf(newname, sizeof(newname), "an%u", i);
           m_AnalogPins[i]->AnalogReq(this, true, newname);
         }
         else
           m_AnalogPins[i]->AnalogReq(this, false, m_AnalogPins[i]->getPin().name().c_str());
-      }  
+      }
     }
     mIoMask = new_mask;
 }
@@ -588,7 +588,7 @@ void ADCON1::setADCnames()
  * */
 void ADCON1::setChannelConfiguration(unsigned int cfg, unsigned int bitMask)
 {
-  if (cfg < cMaxConfigurations) 
+  if (cfg < cMaxConfigurations)
     m_configuration_bits[cfg] = bitMask;
 }
 
@@ -600,7 +600,7 @@ unsigned int ADCON1::getVrefLoChannel(unsigned int cfg)
 }
 unsigned int ADCON1::getVrefHiChannel(unsigned int cfg)
 {
-  Dprintf(("ADCON1::getVrefHiChannel cfg=%d %d\n", cfg, Vrefhi_position[cfg]));
+  Dprintf(("ADCON1::getVrefHiChannel cfg=%u %u\n", cfg, Vrefhi_position[cfg]));
   if (cfg < cMaxConfigurations)
     return(Vrefhi_position[cfg]);
   return(0xffff);
@@ -612,8 +612,8 @@ unsigned int ADCON1::getVrefHiChannel(unsigned int cfg)
  */
 void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
 {
-  
-  if (cfg < cMaxConfigurations) 
+
+  if (cfg < cMaxConfigurations)
     Vreflo_position[cfg] = channel;
 }
 
@@ -623,7 +623,7 @@ void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
  */
 void ADCON1::setVrefHiConfiguration(unsigned int cfg, unsigned int channel)
 {
-  if (cfg < cMaxConfigurations) 
+  if (cfg < cMaxConfigurations)
     Vrefhi_position[cfg] = channel;
 }
 
@@ -668,7 +668,7 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
  * 	The register is first anded with mask and then shifted
  * 	right shift bits. The result being either PCFG or VCFG
  * 	depending on the type of a2d being used.
- */ 
+ */
 void ADCON1::setValidCfgBits(unsigned int mask, unsigned int shift)
 {
     mValidCfgBits = mask;
@@ -690,12 +690,12 @@ int ADCON1::get_cfg(unsigned int reg)
  */
 void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
 {
-  if (channel < m_nAnalogChannels && 
+  if (channel < m_nAnalogChannels &&
       m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
     m_AnalogPins[channel] = newPin;
   } else {
-    printf("%s:%d WARNING invalid channel number config for ADCON1 %d num %d\n",__FILE__,__LINE__, channel, m_nAnalogChannels);
-   
+    printf("%s:%d WARNING invalid channel number config for ADCON1 %u num %u\n",__FILE__,__LINE__, channel, m_nAnalogChannels);
+
   }
 }
 
@@ -708,7 +708,7 @@ void ADCON1::setVoltRef(unsigned int channel, float value)
     }
     else
     {
-	printf("ADCON1::%s invalid channel number %d\n", __FUNCTION__, channel);
+	printf("ADCON1::%s invalid channel number %u\n", __FUNCTION__, channel);
     }
 }
 
@@ -727,14 +727,14 @@ double ADCON1::getChannelVoltage(unsigned int channel)
       }
       else
       {
-	cerr << "ADCON1::getChannelVoltage channel " << channel << 
+	cerr << "ADCON1::getChannelVoltage channel " << channel <<
 		" not valid analog input\n";
 	cerr << "Please raise a Gpsim bug report\n";
       }
     }
     else	// use voltage reference
     {
-	Dprintf(("ADCON1::getChannelVoltage channel=%d voltage %f\n", \
+	Dprintf(("ADCON1::getChannelVoltage channel=%u voltage %f\n", \
 		channel, m_voltageRef[channel]));
 	voltage = m_voltageRef[channel];
 	if (voltage < 0.0)
@@ -777,14 +777,14 @@ double ADCON1::getVrefLo()
 //
 void ADCON1::set_channel_in(unsigned int channel, bool on)
 {
-    Dprintf(("channel=%d on=%d m_ad_in_ctl=%p\n", channel, on, m_ad_in_ctl));
+    Dprintf(("channel=%u on=%d m_ad_in_ctl=%p\n", channel, on, m_ad_in_ctl));
 
     if (on && (m_ad_in_ctl == NULL))
 	m_ad_in_ctl = new AD_IN_SignalControl();
 
-    if (on) 
+    if (on)
 	m_AnalogPins[channel]->setControl(m_ad_in_ctl);
-    else   
+    else
 	m_AnalogPins[channel]->setControl(0);
 
     m_AnalogPins[channel]->updatePinModule();
@@ -913,14 +913,14 @@ ADCON0_10::ADCON0_10(Processor *pCpu, const char *pName, const char *pDesc)
 {
   GO_bit = GO;	//ADCON0 and ADCON0_10 have GO flag at different bit
   // It should take 13 CPU instructions to complete conversion
-  // Tad of 6 completes in 15 
+  // Tad of 6 completes in 15
   Tad = 6;
 }
 void ADCON0_10::put(unsigned int new_value)
 {
   unsigned int old_value=value.get();
  /* On first call of this function old_value has already been set to
- *  it's default value, but we want to call set_channel_in. First 
+ *  it's default value, but we want to call set_channel_in. First
  *  gives us a way to do this.
  */
   static bool first = true;
@@ -928,11 +928,11 @@ void ADCON0_10::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
 
   Dprintf(("ADCON0_10::put new_value=0x%02x old_value=0x%02x\n", new_value, old_value));
-  
+
   if ((new_value ^ old_value) & ANS0 || first)
-	adcon1->set_channel_in(0, (new_value & ANS0) == ANS0); 
+	adcon1->set_channel_in(0, (new_value & ANS0) == ANS0);
   if ((new_value ^ old_value) & ANS1 || first )
-	adcon1->set_channel_in(1, (new_value & ANS1) == ANS1); 
+	adcon1->set_channel_in(1, (new_value & ANS1) == ANS1);
 
   first = false;
 
@@ -975,16 +975,16 @@ void ADCON0_12F::put(unsigned int new_value)
   unsigned int old_value=value.get();
   new_value &= valid_bits;	// clear unused bits
  /* On first call of this function old_value has already been set to
- *  it's default value, but we want to call set_channel_in. First 
+ *  it's default value, but we want to call set_channel_in. First
  *  gives us a way to do this.
  */
 
   trace.raw(write_trace.get() | value.get());
 
   Dprintf(("ADCON0_12F::put new_value=0x%02x old_value=0x%02x\n", new_value, old_value));
-  // tell adcon1 to use Vref 
+  // tell adcon1 to use Vref
   adcon1->set_cfg_index((new_value & VCFG) ? 2: 0);
-  
+
 
   // If ADON is clear GO cannot be set
   if ((new_value & ADON) != ADON)
@@ -1044,7 +1044,7 @@ void ANSEL_12F::set_tad(unsigned int new_value)
       break;
 
     }
-   Dprintf(("ANSEL_12F::set_tad %x Tad=%d\n", new_value, Tad));
+   Dprintf(("ANSEL_12F::set_tad %x Tad=%u\n", new_value, Tad));
   adcon0->set_Tad(Tad);
 
 }
@@ -1054,7 +1054,7 @@ void ANSEL_12F::put(unsigned int new_value)
   unsigned int i;
   unsigned int mask;
 
-  Dprintf(("ANSEL_12F::put %x cfgmax %d\n", new_value, cfgmax));
+  Dprintf(("ANSEL_12F::put %x cfgmax %u\n", new_value, cfgmax));
   trace.raw(write_trace.get() | value.get());
   /*
 	Generate ChannelConfiguration from ansel register
@@ -1126,7 +1126,7 @@ double FVRCON::compute_VTemp(unsigned int fvrcon)
     double Vt;	//Transister junction threshold voltage at core temperature
 
     if((fvrcon & TSEN) && cpu14e->m_cpu_temp)
-    { 
+    {
         Vt = 0.659 - ( cpu14e->m_cpu_temp->getVal() + 40.) * 0.00132;
 	ret = ((Processor *)cpu)->get_Vdd() - ((fvrcon&TSRNG)?4.:2.) * Vt;
 	if (ret < 0.)
@@ -1226,9 +1226,9 @@ void  DACCON0::compute_dac(unsigned int value)
 
     set_dacoutpin(value & DACOE, 0, Vout);
     set_dacoutpin(value & DACOE2, 1, Vout);
-	
+
     if (verbose)
-        printf("%s-%d adcon1 %p FVRCDA_AD_chan %d Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
+        printf("%s-%d adcon1 %p FVRCDA_AD_chan %u Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
     if(adcon1) adcon1->setVoltRef(FVRCDA_AD_chan, Vout);
     if(cmModule) cmModule->set_DAC_volt(Vout);
     if(cpscon0) cpscon0->set_DAC_volt(Vout);
@@ -1277,7 +1277,7 @@ void DACCON0::set_dacoutpin(bool output_enabled, int chan, double Vout)
 	out_pin->updateNode();
     }
 }
- 	
+
 double DACCON0::get_Vhigh(unsigned int value)
 {
     unsigned int mode = (value & (DACPSS0|DACPSS1)) >> 2;
@@ -1301,8 +1301,8 @@ double DACCON0::get_Vhigh(unsigned int value)
 
     }
     return 0.;	// cant get here
-} 
-	
+}
+
 
 DACCON1::DACCON1(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask, DACCON0 *_daccon0)
   : sfr_register(pCpu, pName, pDesc),

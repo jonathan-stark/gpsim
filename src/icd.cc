@@ -407,25 +407,25 @@ char *icd_target(void)
     } else {
         switch(type) {
         case 0x68:
-            sprintf(return_string,"16F870 rev %d",rev);
+            sprintf(return_string,"16F870 rev %u",rev);
             break;
         case 0x69:
-            sprintf(return_string,"16F871 rev %d",rev);
+            sprintf(return_string,"16F871 rev %u",rev);
             break;
         case 0x47:
-            sprintf(return_string,"16F872 rev %d",rev);
+            sprintf(return_string,"16F872 rev %u",rev);
             break;
         case 0x4B:
-            sprintf(return_string,"16F873 rev %d",rev);
+            sprintf(return_string,"16F873 rev %u",rev);
             break;
         case 0x49:
-            sprintf(return_string,"16F874 rev %d",rev);
+            sprintf(return_string,"16F874 rev %u",rev);
             break;
         case 0x4F:
-            sprintf(return_string,"16F876 rev %d",rev);
+            sprintf(return_string,"16F876 rev %u",rev);
             break;
         case 0x4D:
-            sprintf(return_string,"16F877 rev %d",rev);
+            sprintf(return_string,"16F877 rev %u",rev);
             break;
 
         default:

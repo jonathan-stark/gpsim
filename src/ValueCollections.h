@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 /*
@@ -43,20 +43,20 @@ This file originated by J.R. Heisey
     an array at gpsim runtime. These arrays are only definable
     at gpsim compile time.
 
-    Values based on the class Value type are implemented via the 
+    Values based on the class Value type are implemented via the
     template class IndexedCollection. The first class Value based
     array is implemented by CIndexedIntegerCollection.
-    
+
     The CIndexedIntegerCollection class provides its own storage
     for the Integer values and is best used for Integer array based
     attributes.
 
     To derive your own arrays you will primarily need to derive from
     IIndexedCollection and define implementations for all the pure
-    virutal functions. 
-    
+    virutal functions.
+
     I (JR) have provided an example of an array implementation as an example.
-    The class RegisterCollection is declared in register.h and is 
+    The class RegisterCollection is declared in register.h and is
     an example of how to expose data values that are not based on
     the Value class. The RegisterCollection exposes a gpsim command
     prompt array variable called ramData that exposes the data value
@@ -69,7 +69,7 @@ This file originated by J.R. Heisey
 
     You may also type 'ramData[expr_list]' where expr_list are one or
     more expressions delimited by commas.
-    all of the 
+    all of the
       ConsolidateValues()
 
 
@@ -177,7 +177,7 @@ public:
     char szIndex[12];
     for(unsigned int uIndex = 0; uIndex < uSize; uIndex++) {
       sName = pName;
-      sprintf(szIndex, "[%d]", uIndex + m_uLower);
+      snprintf(szIndex, sizeof(szIndex), "[%u]", uIndex + m_uLower);
       sName.append(szIndex);
       // Hmm... Do we really want to create new object for every array entry?
       m_Array.push_back(new _CT(sName.c_str(), stDefValue, pDesc));
@@ -256,7 +256,7 @@ public:
 //    }
     else {
       string sMsg;
-      sMsg = "Indexer expression does not evaluate to an Integer for " + name(); 
+      sMsg = "Indexer expression does not evaluate to an Integer for " + name();
       throw Error(sMsg);
     }
   }
@@ -269,7 +269,7 @@ public:
     typename VectorType::iterator itEnd = m_Array.end();
     unsigned int iCurrentIndex = m_uLower, iFirstIndex = m_uLower;
     itLastEqualed = itEnd;
-    // The purpose of the two loops it to collapse consecutive 
+    // The purpose of the two loops it to collapse consecutive
     // elements of equal value onto one display line.
     // This loop examines every element's value and records
     // the value in aValue. aList is used to record an
@@ -292,7 +292,7 @@ public:
       iColumnWidth = max(iColumnWidth, (int)aList.back().size());
     }
   }
-  
+
   unsigned int GetLowerBound() {
      return m_uLower;
   }

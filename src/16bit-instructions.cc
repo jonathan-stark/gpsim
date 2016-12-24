@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -53,7 +53,7 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
     case  _PIC18_PROCESSOR_:
       destination_index = (new_opcode & 0xff)+1;
       absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
- 
+
       if(new_opcode & 0x80)
         {
           absolute_destination_index -= 0x100;
@@ -76,7 +76,7 @@ char *Branching::name(char *return_str, int len)
 
   snprintf(return_str, len,"%s\t$%c0x%x\t;(0x%x)",
 	   gpsimObject::name().c_str(),
-	   (opcode & 0x80) ? '-' : '+', 
+	   (opcode & 0x80) ? '-' : '+',
 	   (destination_index & 0x7f)<<1,
 	   absolute_destination_index<<1);
 
@@ -85,7 +85,7 @@ char *Branching::name(char *return_str, int len)
 }
 
 //--------------------------------------------------
-multi_word_instruction::multi_word_instruction(Processor *new_cpu, 
+multi_word_instruction::multi_word_instruction(Processor *new_cpu,
 					       unsigned int new_opcode, unsigned int address)
   : instruction(new_cpu,  new_opcode,address),
     word2_opcode(0),
@@ -105,7 +105,7 @@ void multi_word_branch::runtime_initialize()
     {
       word2_opcode = cpu16->program_memory[PMindex+1]->get_opcode();
 
-      if((word2_opcode & 0xf000) != 0xf000) 
+      if((word2_opcode & 0xf000) != 0xf000)
 	{
 	  cout << "16bit-instructions.cc multiword instruction error\n";
 	  return;
@@ -158,7 +158,7 @@ void ADDULNK::execute()
   }
   else
   {
-      printf("Error %s extended instruction not supported, check XINST\n", 
+      printf("Error %s extended instruction not supported, check XINST\n",
 	(opcode&0x100)?"SUBULNK":"ADDULNK");
       bp.halt();
   }
@@ -196,7 +196,7 @@ ADDFSR16::ADDFSR16(Processor *new_cpu, unsigned int new_opcode, const char *pNam
 char *ADDFSR16::name(char *return_str,int len)
 {
 
-  snprintf(return_str,len,"%s\t%d,0x%x",
+  snprintf(return_str,len,"%s\t%u,0x%x",
 	   gpsimObject::name().c_str(),
 	   m_fsr,
 	   m_lit);
@@ -220,11 +220,11 @@ void ADDFSR16::execute()
   }
   else
   {
-      printf("Error %s extended instruction not supported, check XINST\n", 
+      printf("Error %s extended instruction not supported, check XINST\n",
 	(opcode&0x100)?"SUBFSR":"ADDFSR");
       bp.halt();
   }
-  
+
   cpu16->pc->increment();
 }
 
@@ -242,10 +242,10 @@ void CALLW16::execute()
       {
           cpu16->pc->jump(0);
       }
-  } 
+  }
   else
   {
-      printf("Error %s extended instruction not supported, check XINST\n", 
+      printf("Error %s extended instruction not supported, check XINST\n",
 	"CALLW");
       bp.halt();
   }
@@ -275,7 +275,7 @@ void PUSHL::execute()
   }
   else
   {
-      printf("Error %s extended instruction not supported, check XINST\n", 
+      printf("Error %s extended instruction not supported, check XINST\n",
 	"PUSHL");
       bp.halt();
   }
@@ -307,7 +307,7 @@ void MOVSF::runtime_initialize()
     {
       word2_opcode = cpu_pic->program_memory[PMindex+1]->get_opcode();
 
-      if((word2_opcode & 0xf000) != 0xf000) 
+      if((word2_opcode & 0xf000) != 0xf000)
 	{
 	  cout << "16bit-instructions.cc MOVSF error\n";
 	  return;
@@ -354,7 +354,7 @@ void MOVSF::execute()
       cpu16->pc->skip();
 
       unsigned int destination_addr =
-    	(opcode & 0x80) ? 
+    	(opcode & 0x80) ?
     	  cpu16->ind2.plusk_fsr_value(destination)
     	  :
     	  destination;
@@ -362,7 +362,7 @@ void MOVSF::execute()
   }
   else
   {
-      printf("Error %s extended instruction not supported, check XINST\n", 
+      printf("Error %s extended instruction not supported, check XINST\n",
 	(opcode & 0x80)?"MOVSS":"MOVSF");
       bp.halt();
   }
@@ -429,7 +429,7 @@ void ADDWFC16::execute()
   else
       source = cpu_pic->registers[register_address];
 
-  new_value = (src_value = source->get()) + 
+  new_value = (src_value = source->get()) +
     (w_value = cpu16->Wget()) +
     ((cpu16->status->value.get() & STATUS_C) ? 1 : 0);
 
@@ -641,7 +641,7 @@ char * BRA16::name(char *return_str,int len)
 
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  gpsimObject::name().c_str(),
-	  (opcode & 0x400) ? '-' : '+', 
+	  (opcode & 0x400) ? '-' : '+',
 	  (destination_index & 0x7ff)<<1,
 	  absolute_destination_index<<1);
 
@@ -1249,7 +1249,7 @@ char *LCALL16::name(char  *return_str,int len)
 LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : multi_word_instruction(new_cpu, new_opcode, address)
 {
-  
+
   PMaddress = cpu16->getCurrentDisasmAddress();
   PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
@@ -1283,7 +1283,7 @@ void LFSR::runtime_initialize()
     {
       word2_opcode = cpu_pic->program_memory[PMindex+1]->get_opcode();
 
-      if((word2_opcode & 0xff00) != 0xf000) 
+      if((word2_opcode & 0xff00) != 0xf000)
 	{
 	  cout << "16bit-instructions.cc LFSR error\n";
 	  return;
@@ -1302,7 +1302,7 @@ char *LFSR::name(char *return_str,int len)
   if(!initialized)
     runtime_initialize();
 
-  snprintf(return_str,len,"%s\t%d,0x%x",
+  snprintf(return_str,len,"%s\t%u,0x%x",
 	   gpsimObject::name().c_str(),
 	   fsr,
 	   k);
@@ -1372,7 +1372,7 @@ void MOVFF::runtime_initialize()
     {
       word2_opcode = cpu_pic->program_memory[PMindex+1]->get_opcode();
 
-      if((word2_opcode & 0xf000) != 0xf000) 
+      if((word2_opcode & 0xf000) != 0xf000)
 	{
 	  cout << "16bit-instructions.cc MOVFF error\n";
 	  return;
@@ -1430,7 +1430,7 @@ void MOVFP::runtime_initialize()
 //      {
 //        word2_opcode = cpu_pic->program_memory[address+1]->get_opcode();
 
-//        if((word2_opcode & 0xf000) != 0xf000) 
+//        if((word2_opcode & 0xf000) != 0xf000)
 //  	{
 //  	  cout << "16bit-instructions.cc MOVFP error\n";
 //  	  return;
@@ -1536,7 +1536,7 @@ void MOVPF::runtime_initialize()
 //      {
 //        word2_opcode = cpu_pic->program_memory[address+1]->get_opcode();
 
-//        if((word2_opcode & 0xf000) != 0xf000) 
+//        if((word2_opcode & 0xf000) != 0xf000)
 //  	{
 //  	  cout << "16bit-instructions.cc MOVFP error\n";
 //  	  return;
@@ -1668,7 +1668,7 @@ void MULWF::execute()
       source = cpu_pic->registers[register_address];
 
   //It's not necessary to '&' the get()'s with 0xff, but it doesn't
-  //hurt either. 
+  //hurt either.
   value = (0xff & cpu16->Wget()) * (0xff & source->get());
 
   cpu16->prodl.put(value &0xff);
@@ -1794,7 +1794,7 @@ char * RCALL::name(char *return_str,int len)
 
   snprintf(return_str,len,"%s\t$%c0x%x\t;(0x%05x)",
 	   gpsimObject::name().c_str(),
-	   (destination_index < 0) ? '-' : '+', 
+	   (destination_index < 0) ? '-' : '+',
 	   (destination_index & 0x7ff)<<1,
 	   absolute_destination_index<<1);
 
