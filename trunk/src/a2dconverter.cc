@@ -1247,8 +1247,8 @@ void DACCON0::set_dacoutpin(bool output_enabled, int chan, double Vout)
     {
 	if (!Pin_Active[chan])	// DACOUT going to active
 	{
-	    string pin_name = name().substr(0, 4);
-	    if (pin_name.find("dacc", 0) == 0)
+	    std::string pin_name = name().substr(0, 4);
+	    if (pin_name == "dacc")
 		pin_name = "dacout";
 	    else if (chan == 0)
 	        pin_name += "-1";

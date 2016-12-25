@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -226,20 +226,10 @@ void ModuleLibrary::ListLoadableModules()
  */
 
 Module::Module(const char *_name, const char *desc)
-  : gpsimObject(_name, desc)
+  : gpsimObject(_name, desc), package(0), interface(0),
+  simulation_mode(eSM_STOPPED), widget(0), Vdd(5.0), version(0)
 {
-
-  package = 0;
-  interface = 0;
-  Vdd = 5.0;
-
-  // Derived modules should assign more reasonable values for this.
-  version = 0;
-
   xref = new XrefObject;
-
-  simulation_mode = eSM_STOPPED;
-  widget = 0;
 
   if (_name) {
     // If there is a module symbol already with this

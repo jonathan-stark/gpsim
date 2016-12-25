@@ -1,3 +1,10 @@
+2016-12-25 Errol van de l'Isle <evandel@cix.co.uk>
+	* cli/cmd_macro.cc cli/cmd_module.cc cli/input.cc modules/i2c.cc
+	  src/a2dconverter.cc src/errors.cc src/errors.h src/modules.cc
+	  src/modules.h src/operator.cc src/operator.h src/registers.cc
+	  src/ssp.cc
+	: Minor optimisations
+
 2016-12-24 Errol van de l'Isle <evandel@cix.co.uk>
 	* cli/cmd_break.cc cli/socket.cc extras/lcd/hd44780.cc
 	extras/rs232-gen/rs232-gen.c modules/i2c.cc src/14bit-instructions.cc

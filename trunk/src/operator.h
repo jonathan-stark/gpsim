@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -29,9 +29,9 @@ using namespace std;
 
 
 class Operator : public Expression {
-  
- public:  
-  Operator(std::string newOpString)
+
+ public:
+  Operator(const std::string & newOpString)
     : opString(newOpString)
   {}
 
@@ -49,9 +49,9 @@ class Operator : public Expression {
 
 
 class BinaryOperator : public Operator {
-  
- public:  
-  BinaryOperator(string opString, Expression* leftExpr, Expression* rightExpr);
+
+ public:
+  BinaryOperator(const std::string & opString, Expression* leftExpr, Expression* rightExpr);
   virtual ~BinaryOperator();
   virtual Value* shortCircuit(Value* leftValue);
   virtual Value* applyOp(Value* leftValue, Value* rightValue)=0;
@@ -71,9 +71,9 @@ class BinaryOperator : public Operator {
 };
 
 class UnaryOperator : public Operator {
-  
- public:  
-  UnaryOperator(string opString, Expression* expr);
+
+ public:
+  UnaryOperator(const std::string & opString, Expression* expr);
   virtual ~UnaryOperator();
   virtual Value* applyOp(Value* value)=0;
 
@@ -99,7 +99,7 @@ public:
     eOpLt,
     eOpNe
   };
-  ComparisonOperator(string opString, Expression*, Expression*);
+  ComparisonOperator(const std::string & opString, Expression*, Expression*);
   virtual ~ComparisonOperator();
   virtual Value* applyOp(Value* leftValue, Value* rightValue);
 

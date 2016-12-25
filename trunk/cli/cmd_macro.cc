@@ -84,25 +84,20 @@ void Macro::add_body(const char *new_line)
 //----------------------------------------
 // invoke()
 //
-// Invoke a macro by copying its body to the lexer input 
-// stream. 
+// Invoke a macro by copying its body to the lexer input
+// stream.
 void Macro::invoke()
 {
   list <string> :: iterator si;
 
   start_new_input_stream();
 
-  if(body.size()) {
-
-    for(si = body.begin();
-	si != body.end();
-	++si)
-      add_string_to_input_buffer( (*si).c_str(), this);
-  }
+  for(si = body.begin(); si != body.end(); ++si)
+    add_string_to_input_buffer( (*si).c_str(), this);
 
   add_string_to_input_buffer("endm\n", this);
-
 }
+
 //----------------------------------------
 // substituteParameter(const string &s, string &replaced)
 //
@@ -118,7 +113,7 @@ void Macro::invoke()
 int Macro::substituteParameter(const string &s, string &replaced)
 {
 
-  if(arguments.size()) {
+  if (!arguments.empty()) {
 
     list <string> :: iterator asi;
     list <string> :: iterator psi;
@@ -127,7 +122,7 @@ int Macro::substituteParameter(const string &s, string &replaced)
 	asi != arguments.end();
 	++asi, ++psi)
       if(*asi == s) {
-	
+
 	replaced = *psi;
 
 	if(verbose&4)
@@ -176,33 +171,19 @@ void Macro::add_parameter(const char *s)
 //
 void Macro::print()
 {
-  cout << name() << " macro ";
+  std::cout << name() << " macro ";
 
-  list <string> :: iterator si;
+  std::list <string> :: iterator si;
 
-  if(arguments.size()) {
+  for (si = arguments.begin(); si != arguments.end(); ++si)
+    std::cout << *si << " ";
 
-    for(si = arguments.begin();
-	si != arguments.end();
-	++si)
-      cout << *si << " ";
+  std::cout << std::endl;
 
-  }
+  for (si = body.begin(); si != body.end(); ++si)
+    std::cout << "  " << *si;
 
-  cout << endl;
-
-
-  if(body.size()) {
-
-    for(si = body.begin();
-	si != body.end();
-	++si)
-      cout << "  " << *si;
-
-  }
-
-  cout << "endm\n";
-
+  std::cout << "endm\n";
 }
 
 // hack....
@@ -230,7 +211,7 @@ static cmd_options cmd_macro_options[] =
 
 cmd_macro::cmd_macro()
   : command("macro",0)
-{ 
+{
 
   brief_doc = string("macro definition and listing");
 
@@ -252,7 +233,7 @@ cmd_macro::cmd_macro()
 		       " (note that the parameters must be separated by commas)\n"
 );
 
-  op = cmd_macro_options; 
+  op = cmd_macro_options;
 }
 
 
@@ -260,7 +241,7 @@ void cmd_macro::list()
 {
   if(macro_map.size()) {
     map<const string, Macro *>::iterator mi;
-    for (mi=macro_map.begin(); mi!=macro_map.end(); ++mi) 
+    for (mi=macro_map.begin(); mi!=macro_map.end(); ++mi)
 
       mi->second->print();
   } else

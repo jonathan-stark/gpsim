@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -86,7 +86,7 @@ char * RegisterValue::toString(char *str, int len, int regsize) const
 // The purpose of this routine is to convert a string of bitnames into
 // an array of names. The string is formatted like:
 //
-//  b1.b2.b3 
+//  b1.b2.b3
 //
 // In other words, a period is the delimeter between the names.
 // This gets converted to:
@@ -94,12 +94,12 @@ char * RegisterValue::toString(char *str, int len, int regsize) const
 //  b1
 //  b2
 //  b2
-// 
+//
 // INPUTS
 //  n - number of names
 //  in - input string formatted as described
 //  in2 - if 'in' is NULL, then all 'n' names will be 'in2'
-//  
+//
 // OUTPUTS
 //  out - an array to hold the strings.
 //
@@ -137,14 +137,14 @@ static void SplitBitString(int n, const char **out, char *in, const char *in2)
 //
 // Given a pointer to a string, this function will convert a register
 // value into a string of ASCII characters. If no names are given
-// for the bits, then the default values of 'H', 'L', and '?' are 
+// for the bits, then the default values of 'H', 'L', and '?' are
 // used for high, low and undefined.
 //
 // The input 'BitPos' is a bit mask that has a bit set for each bit that
 // the user wishes to display.
 //
 
-char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos, 
+char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 			       const char *cByteSeparator,
 			       const char *HiBitNames,
 			       const char *LoBitNames,
@@ -185,8 +185,8 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
       const char *H = HiNames[i];
       const char *L = LoNames[i];
       const char *U = UndefNames[i];
-      
-      const char *c = (init & mask) ?  U : 
+
+      const char *c = (init & mask) ?  U :
 	((data & mask) ? H : L);
 
       strncpy(dest, c, len);
@@ -215,7 +215,7 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
   free(cHi);
   free(cLo);
   free(cUn);
-    
+
   return s;
 }
 
@@ -224,18 +224,14 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 // Member functions for the file_register base class
 //--------------------------------------------------
 //
+// For now, initialize the register with valid data and set that data equal to 0.
+// Eventually, the initial value will be marked as 'uninitialized.
+
 Register::Register(Module *_cpu, const char *pName, const char *pDesc)
-  : Value(pName,pDesc,_cpu),
+  : Value(pName,pDesc,_cpu), value(RegisterValue(0, 0)),
     address(AN_INVALID_ADDRESS),
-    alias_mask(0), m_replaced(0)
+    alias_mask(0), por_value(RegisterValue(0, 0)), m_replaced(0)
 {
-
-  // For now, initialize the register with valid data and set that data equal to 0.
-  // Eventually, the initial value will be marked as 'uninitialized.
-
-  value = RegisterValue(0,0);
-  por_value = RegisterValue(0,0);
-
   set_xref(new XrefObject(this));
   read_access_count=0;
   write_access_count=0;
@@ -267,7 +263,7 @@ int Register::clear_break()
 //  Return the contents of the file register.
 // (note - breakpoints on file register reads
 //  are not checked here. Instead, a breakpoint
-//  object replaces those instances of file 
+//  object replaces those instances of file
 //  registers for which we wish to monitor.
 //  So a file_register::get call will invoke
 //  the breakpoint::get member function. Depending
@@ -338,7 +334,7 @@ void Register::setbit(unsigned int bit_number, bool new_value)
 // we'd like the gui to be notified of all of the cascaded
 // changes. So rather than burden the real-time simulation
 // with notifying the gui, I decided to create the 'put_value'
-// function instead. 
+// function instead.
 //   Since this is a virtual function, derived classes have
 // the option to override the default behavior.
 //
@@ -376,7 +372,7 @@ void Register::put_value(unsigned int new_value)
 //////////////////////////////////////////////////////////////
 
 unsigned int Register::register_size () const
-{ 
+{
   Processor *pProc = Value::get_cpu();
   return pProc == 0 ? 1 : pProc->register_size();
 }
@@ -386,7 +382,7 @@ unsigned int Register::register_size () const
 // set_write_trace
 // set_read_trace
 //
-// These functions initialize the trace type to be used for 
+// These functions initialize the trace type to be used for
 // register reads and writes.
 //
 void Register::set_write_trace(RegisterValue &rv)
@@ -436,13 +432,13 @@ void Register::new_name(string &new_name)
       addName(new_name);
       cpu->addSymbol(this, &new_name);
     }
-    
+
   }
 }
 //------------------------------------------------------------------------
 // set -- assgin the value of some other object to this Register
 //
-// This is used (primarily) during Register stimuli processing. If 
+// This is used (primarily) during Register stimuli processing. If
 // a register stimulus is attached to this register, then it will
 // call ::set() and supply a Value pointer.
 
@@ -462,11 +458,11 @@ void Register::set(Value * pVal)
 //------------------------------------------------------------------------
 // copy - create a new Value object that's a 'copy' of this object
 //
-// We really don't perform a true copy. Instead, an Integer object 
-// is created containing the same numeric value of this object. 
+// We really don't perform a true copy. Instead, an Integer object
+// is created containing the same numeric value of this object.
 // This code is called during expression parsing. *NOTE* this copied
 // object can be assigned a new value, however that value will not
-// propagate to the Register! 
+// propagate to the Register!
 
 Value *Register::copy()
 {
@@ -480,7 +476,7 @@ void Register::get(gint64 &i)
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
-sfr_register::sfr_register(Module *pCpu, const char *pName, const char *pDesc) 
+sfr_register::sfr_register(Module *pCpu, const char *pName, const char *pDesc)
   : Register(pCpu,pName,pDesc), wdtr_value(0,0)
 {}
 
@@ -494,7 +490,7 @@ void sfr_register::reset(RESET_TYPE r)
 
   case WDT_RESET:
     // Most registers simply retain their value across WDT resets.
-    //putRV(wdtr_value); 
+    //putRV(wdtr_value);
     break;
   default:
     break;
@@ -513,7 +509,7 @@ void InvalidRegister::put(unsigned int new_value)
   cout << "attempt write to invalid file register\n";
 
   if (address != AN_INVALID_ADDRESS)
-    cout << "    address 0x" << hex << address << ','; 
+    cout << "    address 0x" << hex << address << ',';
   cout << "   value 0x" << hex << new_value << endl;
 
   if(((Processor*)cpu)->getBreakOnInvalidRegisterWrite()) {
@@ -528,7 +524,7 @@ unsigned int InvalidRegister::get()
 {
   cout << "attempt read from invalid file register\n";
   if (address != AN_INVALID_ADDRESS)
-    cout << "    address 0x" << hex << address << endl; 
+    cout << "    address 0x" << hex << address << endl;
 
   trace.raw(read_trace.get() | value.get());
   if(((Processor*)cpu)->getBreakOnInvalidRegisterRead()) {
@@ -539,15 +535,15 @@ unsigned int InvalidRegister::get()
 }
 
 
-InvalidRegister::InvalidRegister(Processor *pCpu, const char *pName, const char *pDesc) 
+InvalidRegister::InvalidRegister(Processor *pCpu, const char *pName, const char *pDesc)
   : Register(pCpu,pName,pDesc)
 {}
 
-RegisterCollection::RegisterCollection (Processor   *pProcessor, 
+RegisterCollection::RegisterCollection (Processor   *pProcessor,
 					const char  *pC_collection_name,
 					Register   **ppRegisters,
 					unsigned int uiSize) :
-  IIndexedCollection(16), m_ReturnValue(0) 
+  IIndexedCollection(16), m_ReturnValue(0)
 {
   m_pProcessor = pProcessor;
   gpsimObject::new_name(pC_collection_name);
@@ -584,7 +580,7 @@ Value &RegisterCollection::GetAt(unsigned int uIndex, Value *) {
   if (m_pProcessor)
       sIndex << m_pProcessor->name() << "." ;
 
-  sIndex << Value::name() << "[" 
+  sIndex << Value::name() << "["
 	  << hex << m_szPrefix << uIndex << "]" << '\000';
   m_ReturnValue.new_name(sIndex.str().c_str());
   return m_ReturnValue;

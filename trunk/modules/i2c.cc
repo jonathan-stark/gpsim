@@ -475,8 +475,6 @@ namespace I2C_Module {
       m_MSBmask(1<<8)
   {
 
-    m_uState = eI2CIdle;
-
     // Transmit and Receive propogation delays
     // The units are simulation cycles.
 

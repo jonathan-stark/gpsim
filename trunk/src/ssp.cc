@@ -503,12 +503,12 @@ unsigned int  _SSPADD::get()
 
 
 SPI::SPI(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat, _SSPBUF *_sspbuf)
+  : m_state(eIDLE)
 {
     m_sspmod = _ssp_mod;
     m_sspcon = _sspcon;
     m_sspstat = _sspstat;
     m_sspbuf = _sspbuf;
-    m_state = eIDLE;
     cpu = m_sspmod->cpu;
 }
 
@@ -1009,6 +1009,7 @@ void SPI::stop_transfer()
 
 I2C::I2C(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat,
 	_SSPBUF *_sspbuf, _SSPCON2 *_sspcon2, _SSPADD *_sspadd)
+  : i2c_state(eIDLE)
 {
     m_sspmod = _ssp_mod;
     m_sspcon = _sspcon;
@@ -1017,7 +1018,7 @@ I2C::I2C(SSP_MODULE *_ssp_mod, _SSPCON *_sspcon, _SSPSTAT *_sspstat,
     m_sspcon2 = _sspcon2;
     m_sspadd = _sspadd;
     future_cycle = 0;
-    i2c_state = eIDLE;
+
     cpu = m_sspmod->cpu;
 }
 
