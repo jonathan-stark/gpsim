@@ -27,8 +27,8 @@ static bool isBoolean(Value *v)
   return false;
 }
 
-BinaryOperator::BinaryOperator(string  opString, 
-			       Expression* _leftExpr, 
+BinaryOperator::BinaryOperator(const std::string  & opString,
+			       Expression* _leftExpr,
 			       Expression* _rightExpr) : Operator(opString)
 {
   leftExpr = _leftExpr;
@@ -89,7 +89,7 @@ Expression *BinaryOperator::getRight() {
 /*****************************************************************
  * The basic unary operator class.
  */
-UnaryOperator::UnaryOperator(string theOpString, Expression* expr_)
+UnaryOperator::UnaryOperator(const std::string & theOpString, Expression* expr_)
   : Operator(theOpString)
 {
   expr = expr_;
@@ -142,10 +142,10 @@ Value* UnaryOperator::evaluate()
 /*****************************************************************
  * Comparison operators
  */
-ComparisonOperator::ComparisonOperator(string opString, 
+ComparisonOperator::ComparisonOperator(const std::string &opString,
 				       Expression* leftExpr,
 				       Expression* rightExpr)
-  : BinaryOperator(opString,leftExpr,rightExpr), 
+  : BinaryOperator(opString,leftExpr,rightExpr),
     bLess(false), bEqual(false), bGreater(false)
 {
 }
@@ -165,8 +165,8 @@ int ComparisonOperator::set_break(ObjectBreakTypes bt, ObjectActionTypes at, Exp
 }
 
 /******************************************************************************
- Operator: AbstractRange 
- 
+ Operator: AbstractRange
+
  *****************************************************************************/
 OpAbstractRange::OpAbstractRange(Expression *lVal, Expression *rVal)
   : BinaryOperator(":", lVal, rVal)
@@ -185,10 +185,10 @@ Value* OpAbstractRange::applyOp(Value* lVal, Value* rVal)
 
   Integer* lInteger = Integer::typeCheck(lVal, showOp());
   Integer* rInteger = Integer::typeCheck(rVal, showOp());
-  
+
   int left = (int)lInteger->getVal();
   int right = (int)rInteger->getVal();
-  
+
   result = new AbstractRange(left, right);
   return(result);
 }
@@ -662,8 +662,8 @@ OpOnescomp::~OpOnescomp()
 Value* OpOnescomp::applyOp(Value* operand)
 {
   Integer* op;
-  
-  op = Integer::typeCheck(operand, showOp());  
+
+  op = Integer::typeCheck(operand, showOp());
   return new Integer(~ op->getVal() );
 }
 

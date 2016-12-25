@@ -56,7 +56,7 @@ static cmd_options cmd_module_options[] =
 
 cmd_module::cmd_module()
   : command("module","mod")
-{ 
+{
 
   brief_doc = string("Select & Display modules");
 
@@ -97,7 +97,7 @@ cmd_module::cmd_module()
     "\tmodule load pullup R1       // and another.\n"
 );
 
-  op = cmd_module_options; 
+  op = cmd_module_options;
 }
 
 static void dumpModules(const SymbolTableEntry_t &st)
@@ -143,7 +143,7 @@ void cmd_module::module(cmd_options *opt)
 
 }
 
-void cmd_module::module(cmd_options_str *cos, 
+void cmd_module::module(cmd_options_str *cos,
 			list <string> *strs)
 {
   //  const int cMAX_PARAMETERS=2;
@@ -160,19 +160,18 @@ void cmd_module::module(cmd_options_str *cos,
     nStrings = strs->size();
 
     si = strs->begin();
-    if(strs->size() >= 1) {
+    if (nStrings >= 1) {
       s1 = *si;
-    
-      if(strs->size() >= 2) {
+
+      if (nStrings >= 2) {
         ++si;
         s2 = *si;
       }
     }
-
   }
 
   // Now choose the specific command based on the input parameters
-  
+
   if(nStrings==0)
     module(cos);
   else if(nStrings==1)
@@ -252,7 +251,7 @@ void  cmd_module::module(cmd_options_str *cos, const char *op1)
     {
 
     case CMD_MOD_LOAD:
-      // Load a module from (an already loaded) library 
+      // Load a module from (an already loaded) library
 #ifdef OLD_MODULE_LIBRARY
       if(ModuleLibrary::NewObject(cos->str,  op1) == NULL) {
         GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
@@ -263,7 +262,7 @@ void  cmd_module::module(cmd_options_str *cos, const char *op1)
         string refDes(op1);
         if(!ModuleLibrary::InstantiateObject(mName,refDes))
           GetUserInterface().DisplayMessage("module type %s not created\n", cos->str);
-      }        
+      }
 #endif
 
       break;

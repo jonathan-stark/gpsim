@@ -899,7 +899,7 @@ void initialize_readline (void)
 
   const char *prompt = get_interface().bUsingGUI() ? gpsim_prompt : gpsim_cli_prompt;
 
- 
+
 #ifdef HAVE_READLINE
   // Lets us have a gpsim section to .inputrc
   // JRH - not tested
@@ -981,7 +981,7 @@ int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
   if (verbose & 4)
     cout << "GCLICommandHandler::Execute Script:" << endl;
 
-  if (script.size() == 0)
+  if (script.empty())
     return CMD_ERR_OK;
 
   // We need to execute the script now. There may be other commands

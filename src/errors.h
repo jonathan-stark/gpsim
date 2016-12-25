@@ -9,7 +9,7 @@ using namespace std;
 //*****************************************************************
 class AnError : public gpsimObject {
  public:
-  AnError(string severity, string errMsg);
+  AnError(const std::string &severity, const std::string &errMsg);
   virtual ~AnError();
 
   string toString();
@@ -23,7 +23,7 @@ class AnError : public gpsimObject {
 //*****************************************************************
 class Error : public AnError {
  public:
-  Error(string errMsg);
+  Error(const std::string &errMsg);
   virtual ~Error();
 
   static int count;
@@ -32,15 +32,16 @@ class Error : public AnError {
 //*****************************************************************
 class FatalError : public AnError {
  public:
-  FatalError(string errMsg);
+  FatalError(const std::string &errMsg);
   virtual ~FatalError();
 };
 
 //*****************************************************************
 class TypeMismatch : public Error {
  public:
-  TypeMismatch(string theOperator, string expectedType, string observedType);
-  TypeMismatch(string theOperator, string observedType);
+  TypeMismatch(const std::string &theOperator, const std::string &expectedType,
+    const std::string &observedType);
+  TypeMismatch(const std::string &theOperator, const std::string &observedType);
   virtual ~TypeMismatch();
 };
 

@@ -4,7 +4,7 @@
 /*****************************************************************
  * The primordial Assembler Error class.
  */
-AnError::AnError(std::string _severity, std::string _errMsg)
+AnError::AnError(const std::string & _severity, const std::string & _errMsg)
   : severity(_severity), errMsg(_errMsg)
 {
   // Pretty gross, but the lexer makes sure that this global
@@ -34,7 +34,7 @@ string AnError::get_errMsg()
  */
 int Error::count;
 
-Error::Error(string errMsg)
+Error::Error(const std::string & errMsg)
   : AnError(string("ERROR"), errMsg)
 {
 }
@@ -47,7 +47,7 @@ Error::~Error()
 /*****************************************************************
  * Generate assembler errors of severity "FATAL_ERROR"
  */
-FatalError::FatalError(string errMsg)
+FatalError::FatalError(const std::string & errMsg)
   : AnError(string("FATAL_ERROR"), errMsg)
 {
 }
@@ -61,7 +61,8 @@ FatalError::~FatalError()
  * Generate a generic Type Mismatch error of the "expected xx,
  * observed yy" variety.
  */
-TypeMismatch::TypeMismatch(string theOperator, string expectedType, string observedType)
+TypeMismatch::TypeMismatch(const std::string &theOperator,
+  const std::string &expectedType, const std::string &observedType)
   : Error(" Type mismatch for " + theOperator + " operator. Type expected " + expectedType
           + ", found " + observedType)
 {
@@ -72,7 +73,8 @@ TypeMismatch::TypeMismatch(string theOperator, string expectedType, string obser
  * Generate a generic Type Mismatch error of the "operator x
  * cannot be applied to type y" variety.
  */
-TypeMismatch::TypeMismatch(string theOperator, string observedType)
+TypeMismatch::TypeMismatch(const std::string &theOperator,
+  const std::string &observedType)
   : Error("Operator <" + theOperator + "> cannot be applied to type "
           + observedType)
 {
