@@ -16,7 +16,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -92,9 +92,10 @@ public:
              " WDTEN=%d - WDT is %s\n"
              " PWRTEN=%d - Power up timer is %s\n",
              i,
-             i&(FOSC0|FOSC1), (i&FOSC0 ? (i&FOSC1 ? "EXTRC":"XT"):(i&FOSC1 ? "INTRC":"LP")),
-             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
-             (i&PWRTEN?1:0), ((i&PWRTEN) ? "disabled" : "enabled"));
+             i & (FOSC0 | FOSC1),
+             ((i & FOSC0) ? ((i & FOSC1) ? "EXTRC":"XT") :((i & FOSC1) ? "INTRC":"LP")),
+             ((i & WDTEN) ? 1 : 0), ((i & WDTEN) ? "enabled" : "disabled"),
+             ((i & PWRTEN) ? 1 : 0), ((i & PWRTEN) ? "disabled" : "enabled"));
 
     return string(buff);
   }
@@ -523,9 +524,9 @@ class Config_E : public ConfigWord
 {
 public:
   Config_E(_14bit_e_processor *pCpu, const char *name, unsigned int address, bool EEw=false)
-    : ConfigWord(name, 0x3fff, "Configuration Word", pCpu, address, EEw) 
+    : ConfigWord(name, 0x3fff, "Configuration Word", pCpu, address, EEw)
   {
-    if (m_pCpu) 
+    if (m_pCpu)
     {
 	m_pCpu->set_config_word(address, 0x3fff);
     }
@@ -576,7 +577,7 @@ bool _14bit_e_processor::set_config_word(unsigned int address,unsigned int cfg_w
 	wdt_flag = (cfg_word & (WDTEN0|WDTEN1)) >> 3;
         Dprintf((" cfg_word %x MCLRE %x\n", cfg_word, cfg_word & MCLRE));
         if ((cfg_word & MCLRE) == MCLRE)
-            assignMCLRPin(mclr_pin);   
+            assignMCLRPin(mclr_pin);
         else
             unassignMCLRPin();
 

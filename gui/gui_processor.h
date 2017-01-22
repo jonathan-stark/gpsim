@@ -50,7 +50,6 @@ class GUI_Processor {
  public:
 
   GUI_Processor();
-  GUI_Processor(const GUI_Processor&);  // Mark non-copiable
 
   void SetCPU(Processor *new_cpu);
 
@@ -73,6 +72,8 @@ class GUI_Processor {
 
   GUIRegisterList * m_pGUIRamRegisters;
   GUIRegisterList * m_pGUIEEPromRegisters;
+private:
+  GUI_Processor(const GUI_Processor&);  // Mark non-copiable
 };
 
 

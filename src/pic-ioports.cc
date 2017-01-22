@@ -188,9 +188,9 @@ char PicTrisRegister::get3StateBit(unsigned int bitMask)
   if (!enabled)
     return '1';
 
-  return (rv.init&enabled) ? '?' : (rv.data&enabled ? '1': '0');
-
+  return (rv.init & enabled) ? '?' : ((rv.data & enabled) ? '1': '0');
 }
+
 void PicTrisRegister::reset(RESET_TYPE r)
 {
   if (!(m_bIgnoreWDTResets && r==WDT_RESET))

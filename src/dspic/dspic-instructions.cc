@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -305,14 +305,14 @@ namespace dspic_instructions
   //--------------------------------------------------
   const RegisterValue AddressingMode::m_unknown = RegisterValue(0,0xffff);
 
-  AddressingMode::AddressingMode(dspic::dsPicProcessor *cpu, 
+  AddressingMode::AddressingMode(dspic::dsPicProcessor *cpu,
 				 unsigned int addr)
     : m_cpu(cpu), m_addr(addr)
 
   {
   }
-  AddressingMode * AddressingMode::construct(dspic::dsPicProcessor *new_cpu, 
-					    unsigned int new_mode, 
+  AddressingMode * AddressingMode::construct(dspic::dsPicProcessor *new_cpu,
+					    unsigned int new_mode,
 					    unsigned int addr)
   {
 
@@ -345,7 +345,7 @@ namespace dspic_instructions
   //--------------------------------------------------
 
 
-  LiteralAddressingMode::LiteralAddressingMode(dspic::dsPicProcessor *cpu, 
+  LiteralAddressingMode::LiteralAddressingMode(dspic::dsPicProcessor *cpu,
 					       unsigned int addr)
     : AddressingMode(cpu, addr),
       m_rv(addr,0)
@@ -358,7 +358,7 @@ namespace dspic_instructions
     return buff;
   }
   //--------------------------------------------------
-  RegisterAddressingMode::RegisterAddressingMode(dspic::dsPicProcessor *cpu, 
+  RegisterAddressingMode::RegisterAddressingMode(dspic::dsPicProcessor *cpu,
 						 unsigned int addr,
 						 const char *cPformat)
     : AddressingMode(cpu, addr&0xf),
@@ -374,7 +374,7 @@ namespace dspic_instructions
   }
 
   //--------------------------------------------------
-  RegDirectAddrMode::RegDirectAddrMode(dspic::dsPicProcessor *cpu, 
+  RegDirectAddrMode::RegDirectAddrMode(dspic::dsPicProcessor *cpu,
 				       unsigned int addr)
     : RegisterAddressingMode(cpu, addr,"%s")
   {
@@ -389,7 +389,7 @@ namespace dspic_instructions
   }
 
   //--------------------------------------------------
-  RegIndirectAddrMode::RegIndirectAddrMode(dspic::dsPicProcessor *cpu, 
+  RegIndirectAddrMode::RegIndirectAddrMode(dspic::dsPicProcessor *cpu,
 					   unsigned int addr)
     : RegisterAddressingMode(cpu, addr,"[%s]")
   {
@@ -406,7 +406,7 @@ namespace dspic_instructions
       m_cpu->registers[rv.data]->putRV(n_rv);
   }
   //--------------------------------------------------
-  RegIndirectPostDecAddrMode::RegIndirectPostDecAddrMode(dspic::dsPicProcessor *cpu, 
+  RegIndirectPostDecAddrMode::RegIndirectPostDecAddrMode(dspic::dsPicProcessor *cpu,
 							 unsigned int addr)
     : RegisterAddressingMode(cpu, addr,"[%s--]")
   {
@@ -428,7 +428,7 @@ namespace dspic_instructions
     m_cpu->registers[m_addr]->putRV(rv);
   }
   //--------------------------------------------------
-  RegIndirectPostIncAddrMode::RegIndirectPostIncAddrMode(dspic::dsPicProcessor *cpu, 
+  RegIndirectPostIncAddrMode::RegIndirectPostIncAddrMode(dspic::dsPicProcessor *cpu,
 							 unsigned int addr)
     : RegisterAddressingMode(cpu, addr,"[%s++]")
   {
@@ -450,7 +450,7 @@ namespace dspic_instructions
     m_cpu->registers[m_addr]->putRV(rv);
   }
   //--------------------------------------------------
-  RegIndirectPreDecAddrMode::RegIndirectPreDecAddrMode(dspic::dsPicProcessor *cpu, 
+  RegIndirectPreDecAddrMode::RegIndirectPreDecAddrMode(dspic::dsPicProcessor *cpu,
 						       unsigned int addr)
     : RegisterAddressingMode(cpu, addr,"[--%s]")
   {
@@ -472,7 +472,7 @@ namespace dspic_instructions
       m_cpu->registers[rv.data]->putRV(n_rv);
   }
   //--------------------------------------------------
-  RegIndirectPreIncAddrMode::RegIndirectPreIncAddrMode(dspic::dsPicProcessor *cpu, 
+  RegIndirectPreIncAddrMode::RegIndirectPreIncAddrMode(dspic::dsPicProcessor *cpu,
 						       unsigned int addr)
     : RegisterAddressingMode(cpu, addr,"[++%s]")
   {
@@ -494,7 +494,7 @@ namespace dspic_instructions
       m_cpu->registers[rv.data]->putRV(n_rv);
   }
   //--------------------------------------------------
-  MultiWordInstruction::MultiWordInstruction(Processor *new_cpu, 
+  MultiWordInstruction::MultiWordInstruction(Processor *new_cpu,
 						 unsigned int new_opcode,
 						 unsigned int addr)
     : instruction(new_cpu, new_opcode, addr),
@@ -504,7 +504,7 @@ namespace dspic_instructions
 
 
   //--------------------------------------------------
-  MultiWordBranch::MultiWordBranch(Processor *new_cpu, 
+  MultiWordBranch::MultiWordBranch(Processor *new_cpu,
 				       unsigned int new_opcode,
 				       unsigned int addr)
     : MultiWordInstruction(new_cpu, new_opcode, addr)
@@ -514,7 +514,7 @@ namespace dspic_instructions
   void MultiWordBranch::runtime_initialize()
   {
     if(cpu_dsPic->program_memory[PMindex+1] != &cpu_dsPic->bad_instruction) {
-  
+
       word2_opcode = cpu_dsPic->program_memory[PMindex+1]->get_opcode();
 
       cpu_dsPic->program_memory[PMindex+1]->
@@ -540,14 +540,14 @@ namespace dspic_instructions
 
 
   //--------------------------------------------------
-  LiteralBranch::LiteralBranch(Processor *new_cpu, 
+  LiteralBranch::LiteralBranch(Processor *new_cpu,
 			       unsigned int new_opcode,
 			       unsigned int addr,
 			       const char *_name)
     : instruction(new_cpu, new_opcode, addr), mcP_conditionName("")
   {
     new_name(_name);
-    unsigned int signExtendedOffset = 
+    unsigned int signExtendedOffset =
       ((new_opcode&0xffff)<<1) | ((new_opcode & (1<<15)) ? 0xfffe0000 : 0);
     m_destination = (addr + 2 + signExtendedOffset) & 0xfffffe;
   }
@@ -558,18 +558,18 @@ namespace dspic_instructions
 
       int offset= (((sign=='-') ?
 		    ((opcode^0xffff)+1) : opcode) << 1) & 0x1fffe;
-      
-      snprintf(buff, len, "%s\t%s#0x%06x\t; $%c0x%x", 
+
+      snprintf(buff, len, "%s\t%s#0x%06x\t; $%c0x%x",
 	       instruction::name().c_str(),
 	       mcP_conditionName,
-	       m_destination, 
+	       m_destination,
 	       sign, offset);
     }
     return buff;
   }
 
   //--------------------------------------------------
-  ImmediateInstruction::ImmediateInstruction(Processor *new_cpu, 
+  ImmediateInstruction::ImmediateInstruction(Processor *new_cpu,
 					     unsigned int new_opcode,
 					     unsigned int addr)
     : instruction(new_cpu, new_opcode, addr), m_L(new_opcode & 0xfffe)
@@ -584,7 +584,7 @@ namespace dspic_instructions
   }
 
   //--------------------------------------------------
-  RegisterInstruction::RegisterInstruction(Processor *new_cpu, 
+  RegisterInstruction::RegisterInstruction(Processor *new_cpu,
 					   unsigned int new_opcode,
 					   unsigned int addr,
 					   const char *_name)
@@ -597,7 +597,7 @@ namespace dspic_instructions
   //--------------------------------------------------
   //--------------------------------------------------
   RegisterToRegisterInstruction::RegisterToRegisterInstruction
-  (Processor *new_cpu, 
+  (Processor *new_cpu,
    unsigned int new_opcode,
    unsigned int addr,
    const char *_name,
@@ -612,7 +612,7 @@ namespace dspic_instructions
       m_base =  new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
       m_destination = new RegDirectAddrMode(cpu_dsPic,opcode & 0xf);
       m_source = new LiteralAddressingMode(cpu_dsPic,
-					   (opcode>>4) & (opcode & (1<<14) ? 0xff: 0x3ff));
+		(opcode >> 4) & ((opcode & (1 << 14)) ? 0xff : 0x3ff));
       break;
     case eRegisterIndirect:
       m_base = new RegDirectAddrMode(cpu_dsPic, (opcode>>15) & 0xf);
@@ -639,7 +639,7 @@ namespace dspic_instructions
 
     switch(m_addrMode) {
     case eRegisterDirect:
-      snprintf(buff, len, "%s%s\t%s, %s", 
+      snprintf(buff, len, "%s%s\t%s, %s",
 	       instruction::name().c_str(),
 	       (m_bByteOperation ? ".b" :""),
 	       m_source->name(cpBase,sizeof(cpBase)),
@@ -647,7 +647,7 @@ namespace dspic_instructions
 	       );
       break;
     case eRegisterIndirect:
-      snprintf(buff, len, "%s%s\t%s,%s,%s", 
+      snprintf(buff, len, "%s%s\t%s,%s,%s",
 	       instruction::name().c_str(),
 	       (m_bByteOperation ? ".b" :""),
 	       m_base->name(cpBase,sizeof(cpBase)),
@@ -663,8 +663,8 @@ namespace dspic_instructions
   }
   //--------------------------------------------------
 
-  ADDR::ADDR (Processor *new_cpu, 
-	      unsigned int new_opcode, 
+  ADDR::ADDR (Processor *new_cpu,
+	      unsigned int new_opcode,
 	      unsigned int addr,
 	      eAddressingModes addrMode)
     : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"add",addrMode)
@@ -682,11 +682,11 @@ namespace dspic_instructions
 
     m_destination->put(resRV);
 
-    unsigned flags = 
+    unsigned flags =
       ((resRV.data & 0xffff  )  ? 0  : eZ) |
       ((resRV.data & 0x10000 )  ? eC : 0) |
       (((resRV.data ^ baseRV.data ^ srcRV.data)&0x10) ? eDC : 0) |
-      ((((resRV.data & ~baseRV.data & ~srcRV.data) | 
+      ((((resRV.data & ~baseRV.data & ~srcRV.data) |
 	 (~resRV.data & baseRV.data & srcRV.data)) & 0x8000) ? eOV : 0) |
       ((resRV.data & 0x8000 )  ? eN : 0);
 
@@ -844,7 +844,7 @@ namespace dspic_instructions
 
   void BRA::execute()
   {
-    if (m_condition) 
+    if (m_condition)
       cpu_dsPic->pc->jump(m_destination>>1);
     else
       cpu_dsPic->pc->increment();
@@ -1297,8 +1297,8 @@ namespace dspic_instructions
 
   //--------------------------------------------------
 
-  MOV::MOV (Processor *new_cpu, 
-	    unsigned int new_opcode, 
+  MOV::MOV (Processor *new_cpu,
+	    unsigned int new_opcode,
 	    unsigned int addr,
 	    eAddressingModes addrMode)
     : RegisterToRegisterInstruction(new_cpu, new_opcode, addr,"mov",addrMode)
@@ -1317,11 +1317,11 @@ namespace dspic_instructions
 
     m_destination->put(resRV);
 
-    unsigned flags = 
+    unsigned flags =
       ((resRV.data & 0xffff  )  ? 0  : eZ) |
       ((resRV.data & 0x10000 )  ? eC : 0) |
       (((resRV.data ^ baseRV.data ^ srcRV.data)&0x10) ? eDC : 0) |
-      ((((resRV.data & ~baseRV.data & ~srcRV.data) | 
+      ((((resRV.data & ~baseRV.data & ~srcRV.data) |
 	 (~resRV.data & baseRV.data & srcRV.data)) & 0x8000) ? eOV : 0) |
       ((resRV.data & 0x8000 )  ? eN : 0);
 

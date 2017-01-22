@@ -1,4 +1,10 @@
 2017-01-22 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/14bit-processors.cc src/14bit-registers.h src/16bit-processors.cc
+	  src/bit.cc src/dspic/dspic-instructions.cc src/p12x.cc
+	  src/pic-ioports.cc src/registers.h src/uart.cc gui/gui_processor.h
+	: Clarify calculation precedence for '&' and '?'.
+
+2017-01-22 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_breadboard.cc gui/gui_breadboard.h gui/gui_main.cc
 	  gui/gui_menu.cc gui/gui_processor.h gui/gui_profile.h
 	  gui/gui_register.h gui/gui_regwin.cc gui/gui_regwin.h

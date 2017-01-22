@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -96,10 +96,11 @@ public:
              " CP=%d - Code protect is %s\n"
              " MCLRE=%d - /MCLR is %s",
              i,
-             i&(FOSC0|FOSC1), (i&FOSC0 ? (i&FOSC1 ? "EXTRC":"XT"):(i&FOSC1 ? "INTRC":"LP")),
-             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
-             (i&CP?1:0), ((i&CP) ? "enabled" : "disabled"),
-             (i&MCLRE?1:0), ((i&MCLRE) ? "enabled" : "disabled"));
+             i & (FOSC0 | FOSC1),
+             ((i & FOSC0) ? ((i & FOSC1) ? "EXTRC" : "XT") : ((i & FOSC1) ? "INTRC" : "LP")),
+             ((i & WDTEN) ? 1 : 0), ((i & WDTEN) ? "enabled" : "disabled"),
+             ((i & CP) ? 1 : 0), ((i & CP) ? "enabled" : "disabled"),
+             ((i & MCLRE) ? 1 : 0), ((i & MCLRE) ? "enabled" : "disabled"));
     return string(buff);
   }
 private:
@@ -119,7 +120,7 @@ void  P12_OSCCON::put(unsigned int new_value)
 
   if ((new_value ^ old) & 0xfe && m_CPU)
   	m_CPU->freqCalibration();
-	
+
 }
 
 //========================================================================
@@ -159,13 +160,13 @@ P12bitBase::P12bitBase(const char *_name, const char *desc)
     m_tris(0),
     osccal(this,"osccal","Oscillator Calibration")
 {
-  
+
   configWord = 0;
   set_frequency(4e6);
   if(config_modes)
     config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 |
       config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
-   
+
 }
 
 P12bitBase::~P12bitBase()
@@ -633,7 +634,7 @@ void P12CE518::tris_instruction(unsigned int tris_register)
 
 
 // freqCalibrate modifies the internal RC frequency
-// this version is for the 12CE518 and 12CE519 Processors but would also 
+// this version is for the 12CE518 and 12CE519 Processors but would also
 // be correct for 12C508A/C509A/CR509A
 // the spec sheet does not indicate the range or step size of corrections
 // so this is based on +/- 12.5 % as per 16f88
@@ -767,7 +768,7 @@ void GPIO::setPullUp ( bool bNewPU , bool mclr)
   // In the following do not change pullup state of internal pins
   unsigned int mask = getEnableMask() & 0x3f;
 
-  
+
   // If mclr active do not change pullup on gpio3
   if (mclr) mask &= 0x37;
 
@@ -902,7 +903,7 @@ void P10F200::updateGP2Source()
 
 }
 // freqCalibrate modifies the internal RC frequency
-// this version is for the 10F2xx Processors 
+// this version is for the 10F2xx Processors
 // the spec sheet does not indicate the range or step size of corrections
 // so this is based on +/- 12.5 % as per 16f88
 void  P10F200::freqCalibration()
@@ -1124,7 +1125,7 @@ CMCON0::CMCON0(P10F204 *pCpu, const char *pName, const char *pDesc,
 
   active_source = false;
   active_control = false;
-  
+
 
   CInP->addSink(m_PosInput);
   CInM->addSink(m_NegInput);
@@ -1249,7 +1250,7 @@ void P10F204::updateGP2Source()
     pmGP2->setSource(m_cmcon0->getSource());
     cout << "comparator is controlling the output of GPIO2\n";
     pmGP2->getPin().newGUIname("COUT");
-  } 
+  }
   else if(option_reg->get() & OPTION_REG::T0CS)
   {
     printf("OPTION_REG::T0CS forcing GPIO2 as input, TRIS disabled\n");
@@ -1258,7 +1259,7 @@ void P10F204::updateGP2Source()
     pmGP2->getPin().newGUIname("T0CS");
   }
   else {
-  
+
     pmGP2->setControl(0);
     pmGP2->setSource(0);
     pmGP2->getPin().newGUIname("gpio2");
@@ -1342,7 +1343,7 @@ void P10F220::enter_sleep()
   _12bit_processor::enter_sleep();
 
   status->put( status->get() & ~STATUS_GPWUF);
-  val = (adcon0.get() & ~(ADCON0_10::ADON|ADCON0_10::GO)) 
+  val = (adcon0.get() & ~(ADCON0_10::ADON|ADCON0_10::GO))
   	| ADCON0_10::CHS1 | ADCON0_10::CHS0;
   adcon0.put(val);
 }
@@ -1350,7 +1351,7 @@ void P10F220::exit_sleep()
 {
 
   _12bit_processor::exit_sleep();
-  
+
   adcon0.put(adcon0.get() | ADCON0_10::ANS1 | ADCON0_10::ANS0);
 }
 void  P10F220::setConfigWord(unsigned int val, unsigned int diff)
@@ -1477,17 +1478,17 @@ public:
         break;
     }
 
-    snprintf(buff,sizeof(buff),
+    snprintf(buff, sizeof(buff),
              "$%3x\n"
              " FOSC=%d - Clk source = %s\n"
              " WDTEN=%d - WDT is %s\n"
              " CP=%d - Code protect is %s\n"
              " MCLRE=%d - /MCLR is %s",
              i,
-             i&(FOSC0|FOSC1), src,
-             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
-             (i&CP?1:0), ((i&CP) ? "enabled" : "disabled"),
-             (i&MCLRE?1:0), ((i&MCLRE) ? "enabled" : "disabled"));
+             i & (FOSC0 | FOSC1), src,
+             ((i & WDTEN) ? 1 : 0), ((i & WDTEN) ? "enabled" : "disabled"),
+             ((i & CP) ? 1 : 0), ((i & CP) ? "enabled" : "disabled"),
+             ((i & MCLRE) ? 1 : 0), ((i & MCLRE) ? "enabled" : "disabled"));
     return string(buff);
   }
 private:
