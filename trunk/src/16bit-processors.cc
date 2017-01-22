@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -37,7 +37,7 @@ License along with this library; if not, see
 //------------------------------------------------------------------------
 // Configuration bits
 //
-// The 16bit-core PIC devices contain configuration memory starting at 
+// The 16bit-core PIC devices contain configuration memory starting at
 // address 0x300000.
 //
 
@@ -66,8 +66,8 @@ License along with this library; if not, see
              " FOSC=%d - Clk source = %s\n"
              " OSCEN=%d - Oscillator switching is %s\n",
              i,
-             i&(FOSC0|FOSC1|FOSC2), OSCdesc[i&(FOSC0|FOSC1|FOSC2)],
-             (i&OSCEN?1:0), ((i&OSCEN) ? "disabled" : "enabled"));
+             i & (FOSC0 | FOSC1 | FOSC2), OSCdesc[i & (FOSC0 | FOSC1 | FOSC2)],
+             ((i & OSCEN) ? 1 : 0), ((i & OSCEN) ? "disabled" : "enabled"));
 
     return string(buff);
   }
@@ -104,15 +104,15 @@ License along with this library; if not, see
              " FOSC=%d - Clk source = %s\n"
              " OSCEN=%d - Oscillator switching is %s\n",
              i,
-             i&(FOSC0|FOSC1|FOSC2|FOSC3), OSCdesc[i&(FOSC0|FOSC1|FOSC2|FOSC3)],
-             (i&OSCEN?1:0), ((i&OSCEN) ? "disabled" : "enabled"));
+             i & (FOSC0 | FOSC1 | FOSC2 | FOSC3), OSCdesc[i & (FOSC0 | FOSC1 | FOSC2 | FOSC3)],
+             ((i & OSCEN) ? 1 : 0), ((i & OSCEN) ? "disabled" : "enabled"));
 
     return string(buff);
   }
 //------------------------------------------------------------------------
-// Config2H - default 
-//  The default Config2H register controls the 18F series WDT. 
-class Config2H : public ConfigWord 
+// Config2H - default
+//  The default Config2H register controls the 18F series WDT.
+class Config2H : public ConfigWord
 {
 #define WDTEN   (1<<0)
 #define WDTPS0  (1<<1)
@@ -148,7 +148,7 @@ public:
              "$%04x\n"
              " WDTEN=%d - WDT is %s, prescale=1:%d\n",
              i,
-             (i&WDTEN?1:0), ((i&WDTEN) ? "enabled" : "disabled"),
+             ((i & WDTEN) ? 1 : 0), ((i & WDTEN) ? "enabled" : "disabled"),
              1 << (i & (WDTPS0 | WDTPS1 | WDTPS2)>>1));
 
     return string(buff);
@@ -156,9 +156,9 @@ public:
 };
 
 //------------------------------------------------------------------------
-// Config4L - default 
-//  The default Config4L register controls the 18F series WDT. 
-class Config4L : public ConfigWord 
+// Config4L - default
+//  The default Config4L register controls the 18F series WDT.
+class Config4L : public ConfigWord
 {
 #define STKVREN  (1<<0)
 #define LVP	(1<<2)
@@ -199,8 +199,8 @@ public:
              "$%04x\n"
              " STVREN=%d - BBSIZE=%x XINST=%d\n",
              i,
-             (i&STKVREN?1:0), (i & (BBSIZ1 | BBSIZ0))>>4,
-	     (i&XINST?1:0));
+             ((i & STKVREN) ? 1 : 0), (i & (BBSIZ1 | BBSIZ0)) >> 4,
+	     ((i & XINST) ? 1 : 0));
 
     return string(buff);
   }
@@ -282,7 +282,7 @@ _16bit_processor::_16bit_processor(const char *_name, const char *desc)
   m_lata  = new PicLatchRegister(this,"lata","", m_porta);
   m_lata->setEnableMask(0x7f);
 
-  m_portb = new PicPortBRegister(this,"portb","", &intcon, 8,0xff, 
+  m_portb = new PicPortBRegister(this,"portb","", &intcon, 8,0xff,
 	&intcon2, &intcon3);
   m_portb->assignRBPUSink(7,&intcon2);
   m_trisb = new PicTrisRegister(this,"trisb","", m_portb, false);
@@ -500,11 +500,11 @@ void _16bit_processor :: create_sfr_map()
 
   if ( HasPortC() )
       usart.initialize(&pir1,&(*m_portc)[6], &(*m_portc)[7],
-		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
   else
       usart.initialize(&pir1,0, 0,
-		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
+		   new _TXREG(this,"txreg", "USART Transmit Register", &usart),
                    new _RCREG(this,"rcreg", "USART Receiver Register", &usart));
 
   add_sfr_register(&usart.rcsta,    0xfab,porv,"rcsta");
@@ -687,9 +687,9 @@ void _16bit_processor :: create_sfr_map()
 }
 
 void _16bit_processor::init_pir2(PIR *pir2, unsigned int bitMask)
-{ 
+{
   RegisterValue porv(0,0);
-  
+
   tmr3l.setInterruptSource(new InterruptSource(pir2, bitMask));
   pir_set_def.set_pir2(pir2);
   pir2->set_intcon(&intcon);
@@ -703,7 +703,7 @@ void _16bit_processor::init_pir2(PIR *pir2, unsigned int bitMask)
 
 //-------------------------------------------------------------------
 //
-// 
+//
 //    create
 //
 //  The purpose of this member function is to 'create' those things
@@ -746,7 +746,7 @@ void _16bit_processor :: create ()
 // create_symbols
 //
 //  Create symbols for a generic 16-bit core. This allows symbolic
-// access to the pic. (e.g. It makes it possible to access the 
+// access to the pic. (e.g. It makes it possible to access the
 // status register by name instead of by its address.)
 //
 
@@ -759,7 +759,7 @@ void _16bit_processor::create_symbols ()
 //-------------------------------------------------------------------
 // void _16bit_processor::interrupt ()
 //
-//  When the virtual function cpu->interrupt() is called during 
+//  When the virtual function cpu->interrupt() is called during
 // pic_processor::run() AND the cpu gpsim is simulating is an 18cxxx
 // device then we end up here. For an interrupt to have occured,
 // the interrupt processing logic must have just ran. One of the
@@ -770,7 +770,7 @@ void _16bit_processor::create_symbols ()
 //-------------------------------------------------------------------
 void _16bit_processor::interrupt ()
 {
-  
+
   bp.clear_interrupt();
 
   stack->push(pc->value);
@@ -832,7 +832,7 @@ unsigned int _16bit_processor::get_program_memory_at_address(unsigned int addres
 {
   unsigned int uIndex = map_pm_address2index(address);
 
-  
+
   if (uIndex < program_memory_size())
     return  program_memory[uIndex] ? program_memory[uIndex]->get_opcode() : 0xffffffff;
 
@@ -932,13 +932,13 @@ void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int va
   else if( (address>= 0x200000) && (address < 0x200008) ) {
     idloc[(address - 0x200000) >> 1] = value;
   }
- 
+
 }
 void _16bit_processor::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
-  
+
   if (pin_Number < 253)
   {
 	m_pin = package->get_pin(pin_Number);
@@ -964,7 +964,7 @@ void _16bit_processor::osc_mode(unsigned int value)
 		m_porta, m_trisa, m_lata);
 	}
   }
-  
+
 }
 //-------------------------------------------------------------------
 //
@@ -1016,7 +1016,7 @@ void _16bit_compat_adc :: a2d_compat()
   adcon0->setChannel_Mask(7); // Greater than 4 channels
   adcon0->setA2DBits(10);
 
-  adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+  adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 |
 			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
 
   adcon1->setChannelConfiguration(0, 0xff);
@@ -1060,7 +1060,7 @@ void _16bit_compat_adc :: a2d_compat()
   adcon1->setIOPin(4, &(*m_porta)[5]);
 
 }
-_16bit_compat_adc::_16bit_compat_adc(const char *_name, const char *desc) 
+_16bit_compat_adc::_16bit_compat_adc(const char *_name, const char *desc)
 	: _16bit_processor(_name, desc), adcon0(0), adcon1(0)
 {
 }
@@ -1095,10 +1095,10 @@ void _16bit_v2_adc::create(int nChannels)
     adcon0->setChannel_Mask(0xf); // upto 16 channels
     adcon0->setA2DBits(10);
 
-    adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+    adcon1->setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 |
 			 ADCON1::PCFG2 | ADCON1::PCFG3,0);
 
-    adcon1->setNumberOfChannels(nChannels);	
+    adcon1->setNumberOfChannels(nChannels);
     adcon1->setChanTable(0x1fff, 0x1fff, 0x1fff, 0x0fff,
         0x07ff, 0x03ff, 0x01ff, 0x00ff, 0x007f, 0x003f,
         0x001f, 0x000f, 0x0007, 0x0003, 0x0001, 0x0000);
@@ -1113,7 +1113,7 @@ void _16bit_v2_adc::create(int nChannels)
 
 
 }
-_16bit_v2_adc::_16bit_v2_adc(const char *_name, const char *desc) 
+_16bit_v2_adc::_16bit_v2_adc(const char *_name, const char *desc)
 	: _16bit_processor(_name, desc), adcon0(0), adcon1(0), adcon2(0)
 {
 }

@@ -1,7 +1,7 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
    Copyright (C) 2013 Roy R. Rankin
-		 
+
 
 This file is part of the libgpsim library of gpsim
 
@@ -16,7 +16,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -101,7 +101,7 @@ public:
   unsigned int valid_bits;
   unsigned int register_page_bits;   /* Only used by the 12-bit core to define
                                         the valid paging bits in the FSR. */
-  FSR_12(Processor *, const char *pName, 
+  FSR_12(Processor *, const char *pName,
          unsigned int _register_page_bits, unsigned int _valid_bits);
 
   virtual void put(unsigned int new_value);
@@ -196,7 +196,7 @@ public:
   {
     get_trace().raw(write_trace.get() | value.get());
 
-    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |  
+    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? STATUS_C : 0)   |
 	      (((new_value ^ src1 ^ src2)&0x10) ? STATUS_DC : 0));
@@ -208,7 +208,7 @@ public:
 
     get_trace().raw(write_trace.get() | value.get());
 
-    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |  
+    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? 0 : STATUS_C)   |
 	      (((new_value ^ src1 ^ src2)&0x10) ? 0 : STATUS_DC));
@@ -223,7 +223,7 @@ public:
     {
         get_trace().raw(write_trace.get() | value.get());
         value.put((value.get() & ~STATUS_PD) | ((new_pd) ? STATUS_PD : 0));
-    }  
+    }
 }
 
   inline unsigned int get_PD()
@@ -265,7 +265,7 @@ public:
   void put_N_Z(unsigned int new_value)
   {
     get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~(STATUS_Z | STATUS_N)) | 
+    value.put((value.get() & ~(STATUS_Z | STATUS_N)) |
 	      ((new_value & 0xff )  ? 0 : STATUS_Z)   |
 	      ((new_value & 0x80) ? STATUS_N : 0));
   }
@@ -273,7 +273,7 @@ public:
   void put_Z_C_N(unsigned int new_value)
   {
     get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~(STATUS_Z | STATUS_C | STATUS_N)) | 
+    value.put((value.get() & ~(STATUS_Z | STATUS_C | STATUS_N)) |
 	      ((new_value & 0xff )  ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? STATUS_C : 0)   |
 	      ((new_value & 0x80) ? STATUS_N : 0));
@@ -282,18 +282,18 @@ public:
   inline void put_Z_C_DC_OV_N(unsigned int new_value, unsigned int src1, unsigned int src2)
   {
     get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |  
+    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |
 	      ((new_value & 0xff )  ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? STATUS_C : 0)   |
 	      (((new_value ^ src1 ^ src2)&0x10) ? STATUS_DC : 0) |
-	      ((new_value ^ src1) & 0x80 ? STATUS_OV : 0) |
+	      (((new_value ^ src1) & 0x80) ? STATUS_OV : 0) |
 	      ((new_value & 0x80) ? STATUS_N : 0));
   }
 
   inline void put_Z_C_DC_OV_N_for_sub(unsigned int new_value, unsigned int src1, unsigned int src2)
   {
     get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |  
+    value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? 0 : STATUS_C)   |
 	      (((new_value ^ src1 ^ src2)&0x10) ? 0 : STATUS_DC) |
@@ -305,7 +305,7 @@ public:
   void put_FSR0_mode(unsigned int new_value)
   {
     get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~(STATUS_FSR0_MODE)) | 
+    value.put((value.get() & ~(STATUS_FSR0_MODE)) |
 	      (new_value & 0x03 ));
   }
 
@@ -318,7 +318,7 @@ public:
   void put_FSR1_mode(unsigned int new_value)
   {
     get_trace().raw(write_trace.get() | value.get());
-    value.put((value.get() & ~(STATUS_FSR1_MODE)) | 
+    value.put((value.get() & ~(STATUS_FSR1_MODE)) |
 	      (new_value & 0x03 ));
   }
 
@@ -341,7 +341,7 @@ public:
 class Stack
 {
 public:
-  unsigned int contents[32];       /* the stack array */ 
+  unsigned int contents[32];       /* the stack array */
   int pointer;                     /* the stack pointer */
   unsigned int stack_mask;         /* 1 for 12bit, 7 for 14bit, 31 for 16bit */
   bool stack_warnings_flag;        /* Should over/under flow warnings be printed? */
@@ -354,7 +354,7 @@ public:
   virtual bool stack_overflow();
   virtual bool stack_underflow();
   virtual unsigned int pop();
-  virtual void reset(RESET_TYPE r) {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
+  virtual void reset(RESET_TYPE r) {pointer = 0;};  // %%% FIX ME %%% reset may need to change
   // because I'm not sure how the stack is affected by a reset.
   virtual bool set_break_on_overflow(bool clear_or_set);
   virtual bool set_break_on_underflow(bool clear_or_set);
@@ -393,7 +393,7 @@ public:
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
-      
+
 };
 
 class TOSH : public sfr_register
@@ -407,7 +407,7 @@ public:
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get();
   virtual unsigned int get_value();
-      
+
 };
 //
 // Stack for enhanced 14 bit porcessors
@@ -466,7 +466,7 @@ public:
 };
 
 //---------------------------------------------------------
-// 
+//
 // Indirect_Addressing
 //
 // This class coordinates the indirect addressing on the 18cxxx
@@ -476,7 +476,7 @@ public:
 // in the Indirect_Addressing class. So accessing these registers
 // is the same as accessing any register: through the core cpu's
 // register memory. The only difference for these registers is that
-// the 
+// the
 
 class Indirect_Addressing14;   // Forward reference
 
@@ -501,7 +501,7 @@ class FSRH14 : public sfr_register
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-      
+
 protected:
   Indirect_Addressing14  *iam;
 };
@@ -515,7 +515,7 @@ class INDF14 : public sfr_register
   void put_value(unsigned int new_value);
   unsigned int get();
   unsigned int get_value();
-      
+
 protected:
   Indirect_Addressing14  *iam;
 };
@@ -534,7 +534,7 @@ public:
 			       * write operations on the indirect registers
 			       * eg. btg POSTINC1,4 . The post increment must
 			       * occur after the bit is toggled and not during
-			       * the read operation that's determining the 
+			       * the read operation that's determining the
 			       * current state.
 			       */
   int     fsr_delta;          /* If there's a pending update to the fsr register
@@ -542,7 +542,7 @@ public:
 			       * stored here.
 			       */
   guint64 current_cycle;      /* Stores the cpu cycle when the fsr was last
-			       * changed. 
+			       * changed.
 			       */
   FSRL14    fsrl;
   FSRH14    fsrh;
@@ -620,7 +620,7 @@ class PCON : public sfr_register
   enum {
     BOR = 1<<0,   // clear on Brown Out Reset
     POR = 1<<1,    // clear on Power On Reset
-    RI  = 1<<2,	   // clear on Reset instruction 
+    RI  = 1<<2,	   // clear on Reset instruction
     RMCLR = 1<<3,  // clear if hardware MCLR occurs
     SBOREN = 1<<4, //  Software BOR Enable bit
     ULPWUE = 1<<5,  // Ultra Low-Power Wake-up Enable bit
@@ -632,7 +632,7 @@ class PCON : public sfr_register
 
   void put(unsigned int new_value);
 
-  PCON(Processor *, const char *pName, const char *pDesc=0, 
+  PCON(Processor *, const char *pName, const char *pDesc=0,
 			unsigned int bitMask=0x03);
 };
 
@@ -644,7 +644,7 @@ class OSCTUNE : public  sfr_register
   void put(unsigned int new_value);
   virtual void set_osccon(OSCCON *new_osccon) { osccon = new_osccon;}
   unsigned int valid_bits;
-                                                                                
+
   enum {
     TUN0 = 1<<0,
     TUN1 = 1<<1,
@@ -653,10 +653,10 @@ class OSCTUNE : public  sfr_register
     TUN4 = 1<<4,
     TUN5 = 1<<5,
     PLLEN= 1<<6,
-    INTSRC=1<<7 
+    INTSRC=1<<7
   };
   OSCCON *osccon;
-                                                                                
+
   OSCTUNE(Processor *pCpu, const char *pName, const char *pDesc)
     : sfr_register(pCpu,pName,pDesc), valid_bits(6), osccon(0)
   {
@@ -675,11 +675,11 @@ class OSCCAL : public  sfr_register
   void put(unsigned int new_value);
   void set_freq(float base_freq);
   float base_freq;
-                                                                                
+
   OSCCAL(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bitMask)
     : sfr_register(pCpu,pName,pDesc), base_freq(0.)
   {
-      mValidBits=bitMask;  // Can't use initialiser for parent class members 
+      mValidBits=bitMask;  // Can't use initialiser for parent class members
   }
 };
 
@@ -692,7 +692,7 @@ class OSCCON : public  sfr_register,  public TriggerObject
   virtual void set_osctune(OSCTUNE *new_osctune) { osctune = new_osctune;}
   unsigned int valid_bits;
   OSCTUNE *osctune;
-                                                                                
+
   enum {
     SCS0 = 1<<0,
     SCS1 = 1<<1,
@@ -703,7 +703,7 @@ class OSCCON : public  sfr_register,  public TriggerObject
     IRCF2 = 1<<6,
     IDLEN = 1<<7
   };
-                                                                                
+
   OSCCON(Processor *pCpu, const char *pName, const char *pDesc)
     : sfr_register(pCpu,pName,pDesc), valid_bits(7), osctune(0)
   {
@@ -760,7 +760,7 @@ class OSCCON_2 : public  sfr_register,  public TriggerObject
 	OST,	// use on startup timer
 	PLL = 0x10
   };
-                                                                                
+
   enum {
     SCS0   = 1<<0,
     SCS1   = 1<<1,
@@ -770,9 +770,9 @@ class OSCCON_2 : public  sfr_register,  public TriggerObject
     IRCF3  = 1<<6,
     SPLLEN = 1<<7
   };
-                                                                                
+
   OSCCON_2(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), valid_bits(0xfb), 
+    : sfr_register(pCpu,pName,pDesc), valid_bits(0xfb),
 	next_callback(0), osctune(0), oscstat(0)
   {
   }
@@ -781,9 +781,9 @@ class OSCCON_2 : public  sfr_register,  public TriggerObject
 class WDTCON : public  sfr_register
 {
  public:
-                                                                                
+
   unsigned int valid_bits;
-                                                                                
+
   enum {
     WDTPS3 = 1<<4,
     WDTPS2 = 1<<3,
@@ -791,14 +791,14 @@ class WDTCON : public  sfr_register
     WDTPS0 = 1<<1,
     SWDTEN = 1<<0
   };
-                                                                                
+
   WDTCON(Processor *pCpu, const char *pName, const char *pDesc, unsigned int bits)
     : sfr_register(pCpu,pName,pDesc), valid_bits(bits)
   {
   }
   virtual void put(unsigned int new_value);
   virtual void reset(RESET_TYPE r);
-                                                                                
+
 };
 
 
@@ -859,7 +859,7 @@ public:
   WPU(Processor *pCpu, const char *pName, const char *pDesc, PicPortRegister* gpio, unsigned int mask=0x37)
     : sfr_register(pCpu,pName,pDesc), wpu_gpio(gpio), wpu_pu(false)
   {
-      mValidBits=mask;  // Can't use initialiser for parent class members 
+      mValidBits=mask;  // Can't use initialiser for parent class members
   }
 };
 
@@ -877,7 +877,7 @@ public:
 	T0XCS	= 1<<0,		// Timer0 External Clock Source Select bit
 	CPSOUT	= 1<<1,		// Capacitive Sensing Oscillator Status bit
 	CPSRNG0	= 1<<2,		// Capacitive Sensing Current Range bits
-	CPSRNG1	= 1<<3,		
+	CPSRNG1	= 1<<3,
 	CPSRM	= 1<<6,		// Capacitive Sensing Reference Mode bit
 	CPSON	= 1<<7		// CPS Module Enable bit
 	};

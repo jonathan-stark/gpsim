@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -27,8 +27,8 @@ License along with this library; if not, see
 
 Bit::Bit(RegisterValue &rv, unsigned int bit_mask)
 {
-  d = rv.get() & bit_mask ? true : false;
-  i = rv.geti() & bit_mask ? false : true;
+  d = (rv.get() & bit_mask) ? true : false;
+  i = (rv.geti() & bit_mask) ? false : true;
 }
 
 

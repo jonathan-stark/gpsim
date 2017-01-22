@@ -650,21 +650,18 @@ void _TXSTA::transmit_break()
 
 void _TXSTA::transmit_a_bit()
 {
-
-
   if(bit_count) {
 
     Dprintf(("Transmit bit #%x: bit val:%u time:0x%" PRINTF_GINT64_MODIFIER "x\n",
       bit_count, (tsr & 1), get_cycles().get()));
 
-    putTXState(tsr&1 ? '1' : '0');
+    putTXState((tsr & 1) ? '1' : '0');
 
     tsr >>= 1;
 
     --bit_count;
 
   }
-
 }
 
 
@@ -1030,7 +1027,7 @@ void _RCSTA::clock_edge(char new3State)
 	    {
 		if (bit_count)
 		{
-		    putRCState(rsr&1 ? '1' : '0');
+		    putRCState((rsr & 1) ? '1' : '0');
 	            rsr >>= 1;
 		    bit_count--;
 		}
@@ -1223,7 +1220,7 @@ void _RCSTA::callback()
           {
               if (bit_count)
               {
-                  putRCState(rsr&1 ? '1' : '0');
+                  putRCState((rsr & 1) ? '1' : '0');
                   rsr >>= 1;
                   bit_count--;
               }

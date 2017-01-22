@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -56,12 +56,12 @@ public:
     init = 0xff;  // assume 8-bit wide, uninitialized registers
   }
 
-  RegisterValue(unsigned int d, unsigned int i) : 
+  RegisterValue(unsigned int d, unsigned int i) :
     data(d), init(i)
   {
   }
 
-  RegisterValue(const RegisterValue &value) : 
+  RegisterValue(const RegisterValue &value) :
   data(value.data), init(value.init)
   {
   }
@@ -126,7 +126,7 @@ public:
       init >>= val;
   }
   char * toString(char *str, int len, int regsize=2) const;
-  char * toBitStr(char *s, int len, unsigned int BitPos, 
+  char * toBitStr(char *s, int len, unsigned int BitPos,
                   const char *ByteSeparator="_",
                   const char *HiBitNames=0,
                   const char *LoBitNames=0,
@@ -139,7 +139,7 @@ public:
 /// Register - base class for gpsim registers.
 /// The Register class is used by processors and modules to
 /// to create memory maps and special function registers.
-/// 
+///
 
 class Register : public Value
 {
@@ -162,7 +162,7 @@ public:
   // this file register appears. The assumption (that is true so
   // far for all pic architectures) is that the aliased register
   // locations differ by one bit. For example, the status register
-  // appears at addresses 0x03 and 0x83 in the 14-bit core. 
+  // appears at addresses 0x03 and 0x83 in the 14-bit core.
   // Consequently, alias_mask = 0x80 and address (above) is equal
   // to 0x03.
 
@@ -202,10 +202,10 @@ public:
   virtual unsigned int get();
 
   /// put - method for writing a new value to the register.
-  
+
   virtual void put(unsigned int new_value);
 
-  
+
   /// put_value - is the same as put(), but some extra stuff like
   /// interfacing to the gui is done. (It's more efficient than
   /// burdening the run time performance with (unnecessary) gui
@@ -221,7 +221,7 @@ public:
   /// getRV - get the whole register value - including the info
   /// of the three-state bits.
 
-  virtual RegisterValue getRV() 
+  virtual RegisterValue getRV()
   {
     value.data = get();
     return value;
@@ -229,10 +229,10 @@ public:
 
   /// putRV - write a new value to the register.
   /// \deprecated {use SimPutAsRegisterValue()}
-  /// 
+  ///
 
   virtual void putRV(RegisterValue rv)
-  { 
+  {
     value.init = rv.init;
     put(rv.data);
   }
@@ -244,12 +244,12 @@ public:
   /// up the trace buffer
 
   virtual RegisterValue getRV_notrace()
-  { 
+  {
     value.data = value.get();
     return value;
   }
   virtual void putRV_notrace(RegisterValue rv)
-  { 
+  {
     value.init = rv.init;
     put_value(rv.data);
   }
@@ -280,7 +280,7 @@ public:
   }
 
   /// get3StateBit - returns the 3-state value of a bit
-  /// if a bit is known then a '1' or '0' is returned else, 
+  /// if a bit is known then a '1' or '0' is returned else,
   /// a '?' is returned. No check is performed to ensure
   /// that only a single bit is checked, thus it's possible
   /// to get the state of a group of bits using this method.
@@ -288,7 +288,7 @@ public:
   virtual char get3StateBit(unsigned int bitMask)
   {
     RegisterValue rv = getRV_notrace();
-    return (rv.init&bitMask) ? '?' : (rv.data&bitMask ? '1':'0');
+    return (rv.init & bitMask) ? '?' : ((rv.data & bitMask) ? '1' : '0');
   }
   /// In the Register class, the 'Register *get()' returns a
   /// pointer to itself. Derived classes may return something
@@ -299,20 +299,20 @@ public:
   {
     return this;
   }
-  
+
   virtual REGISTER_TYPES isa() {return GENERIC_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
 
-   
+
   /// The setbit function is not really intended for general purpose
   /// registers. Instead, it is a place holder which is over-ridden
   /// by the IO ports.
-  
+
   virtual void setbit(unsigned int bit_number, bool new_value);
 
-  
+
   ///  like setbit, getbit is used mainly for breakpoints.
-  
+
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
 
@@ -320,7 +320,7 @@ public:
   ///  Breakpoint objects will overload this function and return true.
 
   virtual bool hasBreak()
-  { 
+  {
     return false;
   }
 
@@ -350,7 +350,7 @@ public:
     convert value to a string:
    */
   virtual char * toString(char *str, int len);
-  virtual char * toBitStr(char *s, int len); 
+  virtual char * toBitStr(char *s, int len);
   virtual string &baseName()
   {
     return name_str;
@@ -372,7 +372,7 @@ public:
 
 protected:
   // A pointer to the register that this register replaces.
-  // This is used primarily by the breakpoint code. 
+  // This is used primarily by the breakpoint code.
   Register *m_replaced;
 
 };
@@ -411,7 +411,7 @@ public:
 
   virtual void reset(RESET_TYPE r);
 
-  // The assign and release BitSink methods don't do anything 
+  // The assign and release BitSink methods don't do anything
   // unless derived classes redefine them. Their intent is to
   // provide an interface to the BitSink design - a design that
   // allows clients to be notified when bits change states.
@@ -430,7 +430,7 @@ class Program_Counter : public Value
 {
 public:
   unsigned int value;              /* pc's current value */
-  unsigned int memory_size; 
+  unsigned int memory_size;
   unsigned int pclath_mask;        /* pclath confines PC to banks */
   unsigned int instruction_phase;
   unsigned int trace_state;        /* used while reconstructing the trace history */
@@ -484,19 +484,19 @@ public:
   }
 
   virtual void set_phase(int phase)
-  { 
+  {
     instruction_phase = phase;
   }
-  virtual int get_phase() 
+  virtual int get_phase()
   {
-    return instruction_phase; 
+    return instruction_phase;
   }
-  
+
   void set_reset_address(unsigned int _reset_address)
   {
     reset_address = _reset_address;
   }
-  unsigned int get_reset_address() 
+  unsigned int get_reset_address()
   {
     return reset_address;
   }
@@ -513,14 +513,14 @@ public:
 protected:
   unsigned int reset_address;      /* Value pc gets at reset */
   PCTraceType *m_pPCTraceType;
-  
+
 };
 
 // Used in the command prompt interface
-class RegisterCollection : public IIndexedCollection 
+class RegisterCollection : public IIndexedCollection
 {
 public:
-  RegisterCollection(Processor *pProcessor, 
+  RegisterCollection(Processor *pProcessor,
                      const char *collection_name,
                      Register   **ppRegisters,
                      unsigned int uiSize);
@@ -552,7 +552,7 @@ private:
 //
 // A client wishing to be notified whenever an SFR bit changes states
 // will create a BitSink object and pass its pointer to the SFR. The
-// client will also tell the SFR which bit this applies to. Now, when 
+// client will also tell the SFR which bit this applies to. Now, when
 // the bit changes states in the SFR, the SFR will call the setSink()
 // method.
 
