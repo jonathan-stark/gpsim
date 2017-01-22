@@ -1,3 +1,13 @@
+2017-01-22 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_breadboard.cc gui/gui_breadboard.h gui/gui_main.cc
+	  gui/gui_menu.cc gui/gui_processor.h gui/gui_profile.h
+	  gui/gui_register.h gui/gui_regwin.cc gui/gui_regwin.h
+	  gui/gui_scope.cc gui/gui_scope.h gui/gui_src.h
+	  gui/gui_stack.h gui/gui_statusbar.h gui/gui_stopwatch.h
+	  gui/gui_symbols.h gui/gui_trace.h gui/gui_watch.h
+	  gui/settings_exdbm.h
+	: Some code tidy
+
 2016-12-25 Errol van de l'Isle <evandel@cix.co.uk>
 	* cli/cmd_macro.cc cli/cmd_module.cc cli/input.cc modules/i2c.cc
 	  src/a2dconverter.cc src/errors.cc src/errors.h src/modules.cc

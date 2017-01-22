@@ -48,7 +48,7 @@ class Watch_Window : public  GUI_Object
   GtkListStore *watch_list;
   GtkWidget *watch_tree;
 
-  Watch_Window(GUI_Processor *gp);
+  explicit Watch_Window(GUI_Processor *gp);
   virtual void Build();
   virtual void ClearWatch(GtkTreeIter *iter);
   virtual void UpdateWatch(GtkTreeIter *iter);

@@ -266,7 +266,7 @@ class SourceBrowser_Window : public GUI_Object {
 class SourceBrowserOpcode_Window : public SourceBrowser_Window
 {
  public:
-  SourceBrowserOpcode_Window(GUI_Processor *gp);
+  explicit SourceBrowserOpcode_Window(GUI_Processor *gp);
   ~SourceBrowserOpcode_Window();
   virtual void Build();
   virtual void NewProcessor(GUI_Processor *gp);
@@ -342,7 +342,7 @@ private:
 class SourceBrowserParent_Window : public GUI_Object
 {
  public:
-  SourceBrowserParent_Window(GUI_Processor *gp);
+  explicit SourceBrowserParent_Window(GUI_Processor *gp);
 
   virtual void Build();
   virtual void NewProcessor(GUI_Processor *gp);

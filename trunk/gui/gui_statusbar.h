@@ -30,12 +30,12 @@ class MemoryAccess;		// in src/processor.h
 class GUI_Processor;
 
 //
-// The Status Bar window 
+// The Status Bar window
 //
 
 class StatusBar_Window {
  public:
-  StatusBar_Window(GtkWidget *vbox_main);
+  explicit StatusBar_Window(GtkWidget *vbox_main);
 
   void NewProcessor(GUI_Processor *_gp, MemoryAccess *);
   void Update();

@@ -37,7 +37,7 @@ class TimeAxis;
 class GridPointMapping
 {
 public:
-  GridPointMapping(int nPointsToMap);
+  explicit GridPointMapping(int nPointsToMap);
   ~GridPointMapping();
 
   int     pixel(int index) { return (index<m_nPoints)? m_pixel[index] : 0;}
@@ -56,7 +56,7 @@ class Scope_Window : public GUI_Object
 {
 public:
 
-  Scope_Window(GUI_Processor *gp);
+  explicit Scope_Window(GUI_Processor *gp);
   virtual void Build();
   virtual void Update();
 
@@ -113,7 +113,7 @@ private:
   ZoomAttribute *m_zoom;
   PanAttribute  *m_pan;
 
-  GtkWidget *m_pHpaned;     /* The signal names and waves are rendered 
+  GtkWidget *m_pHpaned;     /* The signal names and waves are rendered
 			       in a horizontal pane */
   GtkWidget *m_phScrollBar; // scroll bar for the waves
 

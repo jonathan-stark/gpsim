@@ -31,7 +31,7 @@ class Stack_Window : public GUI_Object
 
   int last_stacklen;
 
-  Stack_Window(GUI_Processor *gp);
+  explicit Stack_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
 

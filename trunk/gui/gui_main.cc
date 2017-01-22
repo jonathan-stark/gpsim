@@ -57,7 +57,7 @@ extern int gui_animate_delay; // in milliseconds
 void init_link_to_gpsim(GUI_Processor *gp);
 void link_src_to_gpsim(GUI_Processor *gp);
 
-/* 
+/*
  * --- Global variables
  */
 
@@ -104,7 +104,7 @@ public:
 
   virtual ~GUI_Interface();
 
-  GUI_Interface(GUI_Processor *_gp);
+  explicit GUI_Interface(GUI_Processor *_gp);
 
 };
 
@@ -138,7 +138,7 @@ GUI_Interface::~GUI_Interface()
  * UpdateObject
  *
  * Each 'thing' that the gui displays about a simulated pic has an
- * associated cross reference structure. Sometimes these 'things' 
+ * associated cross reference structure. Sometimes these 'things'
  * displayed in more than one place (like the status register).
  * Each graphical instance has its own structure. All of the structures
  * pertaining to the same pic object (again, like the status register)
@@ -189,7 +189,7 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     lgp->profile_window->Update();
     lgp->stopwatch_window->Update();
     lgp->scope_window->Update();
-      
+
     if (gui_animate_delay!=0)
       g_usleep(1000 * gui_animate_delay);
 
@@ -199,7 +199,7 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 
 
 /*------------------------------------------------------------------
- * NewProcessor - Add a new processor 
+ * NewProcessor - Add a new processor
  *
  * This routine adds another processor to the list of currently
  * simulated processors (as of 0.0.14 though, you're still limited
@@ -262,7 +262,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
 
   if(gp) {
     gp->regwin_eeprom->NewProcessor(gp);
-      
+
     gp->source_browser->CloseSource();
     gp->source_browser->NewSource(gp);
     gp->symbol_window->NewSymbols();

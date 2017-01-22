@@ -32,10 +32,12 @@ Boston, MA 02111-1307, USA.  */
 class GUI_Processor;
 
 //======================================================================
-// The register window 
+// The register window
 //
 #define REGISTERS_PER_ROW    16
 #define MAX_ROWS ((MAX_REGISTERS)/(REGISTERS_PER_ROW))
+
+// Base class for RAM_RegisterWindow and EEPROM_RegisterWindow
 
 class Register_Window : public GUI_Object
 {
@@ -56,7 +58,7 @@ class Register_Window : public GUI_Object
   GtkSheet *register_sheet;
 
   RegisterMemoryAccess *rma;  // Apointer to the Processor's rma or ema.
-    
+
   GtkWidget *entry;
   GtkWidget *location;
   GtkWidget *popup_menu;
@@ -83,8 +85,8 @@ class Register_Window : public GUI_Object
   int column_width(int col);
   int row_height(int row);
 
-  Register_Window(GUI_Processor *gp);
-  Register_Window();
+protected:
+  Register_Window(GUI_Processor *gp, REGISTER_TYPE type);
 
  private:
   GtkWidget *build_menu();
@@ -95,7 +97,6 @@ class Register_Window : public GUI_Object
 
   // Formatting
   int register_size;    // The size (in bytes) of a single register
-  char pCellFormat[12]; // format string
   int char_width;       // nominal character width.
   int char_height;      // nominal character height
   int chars_per_column; // width of 1 column
@@ -106,7 +107,7 @@ class Register_Window : public GUI_Object
 class RAM_RegisterWindow : public Register_Window
 {
  public:
-  RAM_RegisterWindow(GUI_Processor *gp);
+  explicit RAM_RegisterWindow(GUI_Processor *gp);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void Update();
 
@@ -117,7 +118,7 @@ protected:
 class EEPROM_RegisterWindow : public Register_Window
 {
  public:
-  EEPROM_RegisterWindow(GUI_Processor *gp);
+  explicit EEPROM_RegisterWindow(GUI_Processor *gp);
   virtual void NewProcessor(GUI_Processor *gp);
 
 protected:

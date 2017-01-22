@@ -29,7 +29,7 @@ extern "C" {
 class SettingsEXdbm: public Settings
 {
 public:
-  SettingsEXdbm(const char *appl_name);
+  explicit SettingsEXdbm(const char *appl_name);
   virtual bool set(const char *module, const char *entry, const char *str);
   virtual bool set(const char *module, const char *entry, int value);
   virtual bool get(const char *module, const char *entry, char **str);

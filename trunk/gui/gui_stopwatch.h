@@ -47,7 +47,7 @@ class StopWatch_Window : public GUI_Object
 
   GtkWidget *option_menu;
 
-  StopWatch_Window(GUI_Processor *gp);
+  explicit StopWatch_Window(GUI_Processor *gp);
   virtual void Build();
   virtual void Update();
 

@@ -20,9 +20,6 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "../config.h"
 #ifdef HAVE_GUI
 
@@ -40,6 +37,8 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
+#include <algorithm>
+#include <stdio.h>
 
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1
@@ -148,36 +147,32 @@ RegisterValue GUIRegister::getRV()
   return RegisterValue(0,0);
 }
 
-char * GUIRegister::getValueAsString(char *str, int len, char *pFormat,
-                                     RegisterValue value)
+char * GUIRegister::getValueAsString(char *str, int len, RegisterValue value)
 {
-
-  if(!str || !len)
+  if (!str || len <= 0)
     return 0;
 
-  if(bIsValid()) {
+  if (bIsValid()) {
 
-    char hex2ascii[] = "0123456789ABCDEF";
-    int i;
-    int min = (len < register_size*2) ? len : register_size*2;
+    const char hex2ascii[] = "0123456789ABCDEF";
+    const int min = (len < register_size * 2) ? len : register_size * 2;
 
-    if(value.data == INVALID_VALUE)
+    if (value.data == INVALID_VALUE)
       value.init = 0xfffffff;
 
-    for(i=0; i < min; i++) {
-      if(value.init & 0x0f)
-        str[min-i-1] = '?';
+    for (int i = 0; i < min; i++) {
+      if (value.init & 0x0f)
+        str[min - i - 1] = '?';
       else
-        str[min-i-1] = hex2ascii[value.data & 0x0f];
+        str[min - i - 1] = hex2ascii[value.data & 0x0f];
       value >>= 4;
     }
     str[min] = 0;
 
   } else
-    *str = 0;
+    *str = '\0';
 
   return str;
-
 }
 
 bool GUIRegister::hasChanged(RegisterValue &current_value) const
@@ -215,8 +210,6 @@ bool GUIRegister::hasBreak()
 
 std::string GUIRegister::name()
 {
-  std::string buffer;
-
   Register *reg = get_register();
   if (!reg) {
     return "NULL";
@@ -227,6 +220,7 @@ std::string GUIRegister::name()
   if (!reg || reg->isa() == Register::INVALID_REGISTER)
     return "";
 
+  std::string buffer;
   if (bIsAliased)
     buffer = "alias (" + reg->name() + ")";
   else
@@ -1397,7 +1391,7 @@ gboolean Register_Window::UpdateRegisterCell(int reg_number)
 
     if(guiReg->row<=register_sheet->maxrow) {
 
-      guiReg->getValueAsString(name,sizeof(name),pCellFormat, new_value);
+      guiReg->getValueAsString(name, sizeof(name), new_value);
 
       gtk_sheet_set_cell(GTK_SHEET(register_sheet),
                          guiReg->row,
@@ -1443,8 +1437,7 @@ gboolean Register_Window::UpdateRegisterCell(int reg_number)
 
       // the register has changed since last update
       guiReg->put_shadow(new_value);
-      guiReg->getValueAsString(name,sizeof(name),pCellFormat, new_value);
-      //sprintf (name, pCellFormat, new_value.data);
+      guiReg->getValueAsString(name, sizeof(name), new_value);
     }
 
     gtk_sheet_set_cell(GTK_SHEET(register_sheet),
@@ -1530,14 +1523,12 @@ void Register_Window::Update()
 //------------------------------------------------------------------------
 void Register_Window::SetRegisterSize()
 {
-  if(gp && gp->cpu)
+  if (gp && gp->cpu)
     register_size = gp->cpu->register_size();
   else
     register_size = 1;
 
   chars_per_column = 1 + 2*register_size;
-
-  g_snprintf(pCellFormat, sizeof(pCellFormat), "%%0%dx", register_size * 2);
 
   if(register_sheet) {
     // Column labels
@@ -1762,7 +1753,7 @@ void Register_Window::Build()
 
   char *fontstring;
 
-  if(window!=0) {
+  if (!window) {
     gtk_widget_destroy(window);
   }
 
@@ -1892,15 +1883,10 @@ void Register_Window::Build()
 }
 
 //------------------------------------------------------------------------
-Register_Window::Register_Window()
-{
-  register_sheet = NULL;
-  printf("WARNING: calling default constructor: %s\n",__FUNCTION__);
 
-}
-
-Register_Window::Register_Window(GUI_Processor *_gp)
+Register_Window::Register_Window(GUI_Processor *_gp, REGISTER_TYPE _type)
   : normalfont(0), current_line_number_style(0), breakpoint_line_number_style(0),
+    type(_type),
     registers(0), register_sheet(NULL), rma(0), entry(0), location(0),
     popup_menu(0), registers_loaded(0), register_size(0),
     char_width(0), char_height(0), chars_per_column(3)
@@ -1908,8 +1894,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
 {
   gp = _gp;
 
-  for(int i = 0; i < MAX_REGISTERS / REGISTERS_PER_ROW; ++i)
-    row_to_address[i] = -1;
+  std::fill_n(row_to_address, sizeof(row_to_address), -1);
 }
 
 const char *RAM_RegisterWindow::name()
@@ -1918,10 +1903,9 @@ const char *RAM_RegisterWindow::name()
 }
 
 RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
-  Register_Window(_gp)
+  Register_Window(_gp, REGISTER_RAM)
 {
   menu = "/menu/Windows/Ram";
-  type = REGISTER_RAM;
 
   get_config();
 
@@ -1953,10 +1937,9 @@ const char *EEPROM_RegisterWindow::name()
 }
 
 EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
-  Register_Window(_gp)
+  Register_Window(_gp, REGISTER_EEPROM)
 {
   menu = "/menu/Windows/EEPROM";
-  type = REGISTER_EEPROM;
 
   get_config();
 
@@ -1967,7 +1950,6 @@ EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
 
 void EEPROM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
 {
-
   if(!_gp || !_gp->cpu)
     return;
 

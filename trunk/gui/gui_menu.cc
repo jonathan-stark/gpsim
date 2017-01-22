@@ -109,7 +109,6 @@ private:
 
   GtkTextTag *m_pStyle;
   GdkColor *old_color;
-  SourceBrowserPreferences *m_prefs;
 };
 
 //========================================================================
@@ -188,7 +187,7 @@ private:
 class SourceBrowserPreferences : public SourceWindow
 {
 public:
-  SourceBrowserPreferences(GtkWidget *pParent);
+  explicit SourceBrowserPreferences(GtkWidget *pParent);
   ~SourceBrowserPreferences();
 
   void apply();
@@ -270,7 +269,7 @@ void gpsimGuiPreferences::response_cb(GtkDialog *dialog, gint response_id,
 // ColorButton Constructor
 ColorButton::ColorButton(GtkWidget *pParent, GtkTextTag *pStyle,
                          const char *colorName, SourceBrowserPreferences *prefs)
-  : m_pStyle(pStyle),m_prefs(prefs)
+  : m_pStyle(pStyle)
 {
   GtkWidget *hbox        = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
@@ -468,19 +467,19 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     GtkTextTagTable *tag_table = m_pParent->getTagTable();
 
-    m_LabelColor    = new ColorButton(colorVbox, 
+    m_LabelColor    = new ColorButton(colorVbox,
 			gtk_text_tag_table_lookup(tag_table, "Label"),
       			"Label", this);
-    m_MnemonicColor = new ColorButton(colorVbox, 
+    m_MnemonicColor = new ColorButton(colorVbox,
 			gtk_text_tag_table_lookup(tag_table, "Mnemonic"),
       			"Mnemonic", this);
-    m_SymbolColor   = new ColorButton(colorVbox, 
+    m_SymbolColor   = new ColorButton(colorVbox,
 			gtk_text_tag_table_lookup(tag_table, "Symbols"),
       			"Symbols", this);
-    m_ConstantColor = new ColorButton(colorVbox, 
+    m_ConstantColor = new ColorButton(colorVbox,
 			gtk_text_tag_table_lookup(tag_table, "Constants"),
       			"Constants", this);
-    m_CommentColor  = new ColorButton(colorVbox, 
+    m_CommentColor  = new ColorButton(colorVbox,
 			gtk_text_tag_table_lookup(tag_table, "Comments"),
       			"Comments", this);
 
@@ -510,16 +509,16 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_container_add (GTK_CONTAINER (tabFrame), tabVbox);
 
     m_Up    = new TabButton(tabVbox, radioUp, GTK_POS_TOP, this);
-    m_Left  = new TabButton(tabVbox, 
+    m_Left  = new TabButton(tabVbox,
 		gtk_radio_button_new_with_label_from_widget (rb,"left"),
       		GTK_POS_LEFT, this);
-    m_Down  = new TabButton(tabVbox, 
+    m_Down  = new TabButton(tabVbox,
 		gtk_radio_button_new_with_label_from_widget (rb,"down"),
       		GTK_POS_BOTTOM, this);
-    m_Right = new TabButton(tabVbox, 
+    m_Right = new TabButton(tabVbox,
 		gtk_radio_button_new_with_label_from_widget (rb,"right"),
       		GTK_POS_RIGHT, this);
-    m_None  = new TabButton(tabVbox, 
+    m_None  = new TabButton(tabVbox,
 		gtk_radio_button_new_with_label_from_widget (rb,"none"),
       		-1, this);
 
@@ -534,7 +533,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
       			MarginButton::eLineNumbers, this);
     m_Addresses   = new MarginButton(marginVbox, "Addresses",
       			MarginButton::eAddresses, this);
-    m_Opcodes     = new MarginButton(marginVbox, "Opcodes", 
+    m_Opcodes     = new MarginButton(marginVbox, "Opcodes",
 			MarginButton::eOpcodes, this);
 
     label = gtk_label_new("Margins");
@@ -775,7 +774,7 @@ fileopen_dialog(GtkAction *action, gpointer user_data)
 
   gtk_tree_view_set_enable_search(GTK_TREE_VIEW(tree), TRUE);
   GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
-  
+
   gtk_container_add(GTK_CONTAINER(scroll_window), tree);
 
   gtk_widget_show_all(scroll_window);

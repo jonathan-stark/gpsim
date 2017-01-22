@@ -101,7 +101,7 @@ private:
 class ZoomAttribute : public Integer
 {
 public:
-  ZoomAttribute(Scope_Window *);
+  explicit ZoomAttribute(Scope_Window *);
   virtual void set(gint64 i);
 
 private:
@@ -114,7 +114,7 @@ private:
 class PanAttribute : public Integer
 {
 public:
-  PanAttribute(Scope_Window *);
+  explicit PanAttribute(Scope_Window *);
   virtual void set(gint64 i);
 
 private:
@@ -220,7 +220,7 @@ protected:
 class WaveformSink : public SignalSink
 {
 public:
-  WaveformSink(Waveform *pParent);
+  explicit WaveformSink(Waveform *pParent);
   virtual void setSinkState(char);
   virtual void release() {}
 
@@ -937,7 +937,7 @@ gboolean Scope_Window::signal_expose(GtkWidget *widget,
   for (; i != sw->signals.end(); ++i) {
     (*i)->draw(cr);
   }
-  
+
   double xpos = sw->mapTimeToPixel(sw->m_Markers[eLeftButton]->getVal()
     + sw->waveXoffset());
   cairo_move_to(cr, xpos, 0.0);
@@ -945,7 +945,7 @@ gboolean Scope_Window::signal_expose(GtkWidget *widget,
   cairo_stroke(cr);
 
   cairo_destroy(cr);
- 
+
   return TRUE;
 }
 
