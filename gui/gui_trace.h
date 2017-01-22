@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 class GUI_Processor;
 
 //
-// The trace window 
+// The trace window
 //
 
 struct TraceMapping {
@@ -59,7 +59,7 @@ class Trace_Window : public GUI_Object
   int trace_map_index;
 
 
-  Trace_Window(GUI_Processor *gp);
+  explicit Trace_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *gp);

@@ -732,7 +732,6 @@ void Breadboard_Window::update_board_matrix()
 static void add_path_to_matrix(path *pat)
 {
     int x=-1, y=-1;
-    unsigned char *pt;
     if(pat!=0)
     {
         x=pat->p.x;
@@ -741,7 +740,7 @@ static void add_path_to_matrix(path *pat)
     }
     while(pat!=0)
     {
-	pt = board_matrix_pt(x, y);
+        unsigned char *pt = board_matrix_pt(x, y);
         if(pt && (pat->dir==R_LEFT || pat->dir==R_RIGHT))
             *pt |= HMASK;
         if(pt && (pat->dir==R_DOWN || pat->dir==R_UP))
@@ -1130,16 +1129,16 @@ static void treeselect_cb(GtkTreeSelection *selection,
 {
   GtkTreeModel *model;
   GtkTreeIter iter;
-    
+
   gtk_tree_selection_get_selected(selection, &model, &iter);
-    
+
   if (!iter.stamp)
     return;
-    
+
   GtkTreePath *path = gtk_tree_model_get_path(model, &iter);
-    
+
   gchar *spath = gtk_tree_path_to_string(path);
-    
+
   if (spath[0] == '0') {
     struct gui_node *gn;
     gtk_tree_model_get (model, &iter, 1, &gn, -1);
@@ -1175,7 +1174,7 @@ static void settings_clist_cb(GtkTreeSelection *selection,
         char val[256];
         GtkTreeIter iter;
         GtkTreeModel *model;
-        
+
         gtk_tree_selection_get_selected (selection, &model, &iter);
         if (!iter.stamp) // check if iter is valid
             return;
@@ -1638,14 +1637,14 @@ static void select_node_ok_cb(GtkTreeView *tree_view,
     Stimulus_Node* snode;
     GtkTreeModel *model;
     GtkTreeIter iter;
-    
+
     model = gtk_tree_view_get_model (tree_view);
-        
+
     gtk_tree_model_get_iter (model, &iter, path);
     gtk_tree_model_get (model, &iter, 1, &snode, -1);
-    
+
     g_object_set_data ((GObject*)dialog, "snode", snode);
-    
+
     gtk_dialog_response(dialog, GTK_RESPONSE_ACCEPT);
 }
 
@@ -1669,15 +1668,15 @@ static void copy_tree_to_clist(GtkTreeModel *model, GtkListStore *list_store)
         if (gtk_tree_model_iter_n_children (model, &node_iter) > 0)
         {
             gtk_tree_model_iter_children (model, &iter, &node_iter);
-            
+
             do
             {
                 gtk_tree_model_get (model, &iter, 1, &gn, -1);
-           
+
                 gtk_list_store_append(list_store, &new_iter);
                 gtk_list_store_set(list_store, &new_iter,
                   0, gn->node->name().c_str(), 1, (gpointer) gn->node, -1);
-                
+
                 if (!iter.stamp)
                     break;
             } while (gtk_tree_model_iter_next (model, &iter));
@@ -1745,7 +1744,7 @@ static std::string select_module_dialog(Breadboard_Window *bbw)
     GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   const gchar *module_clist_titles[] = {"Name1","Name2", "Library"};
- 
+
 #ifdef OLD_MODULE_LIBRARY
   int n_columns = 2;
   GtkListStore *list_store = gtk_list_store_new(n_columns + 1,
@@ -1829,12 +1828,12 @@ static std::string select_module_dialog(Breadboard_Window *bbw)
         ++mti)
     {
           const char *text[3];
-          
+
           Module_Types * (*get_mod_list)(void) = mti->second->mod_list();
           Module_Types *pLibModList = get_mod_list();
 
           text[2] = mti->second->user_name().c_str();
-          
+
           if(pLibModList)
               for(Module_Types *pModTypes = pLibModList;  pModTypes->names[0]; pModTypes++) {
                 GtkTreeIter iter;
@@ -2022,12 +2021,12 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     GtkTreeModel *model;
     GtkTreeSelection *selection;
     GtkTreeIter iter;
-    
+
     selection = gtk_tree_view_get_selection ((GtkTreeView*) bbw->tree);
     gtk_tree_selection_get_selected (selection, &model, &iter);
     gtk_tree_store_set ((GtkTreeStore*) model, &iter, 1, NULL, -1);
     gtk_tree_store_remove ((GtkTreeStore*) model, &iter);
-    
+
     // Remove from local list of modules
     std::vector<GuiModule *>::iterator mi =
       std::find(bbw->modules.begin(), bbw->modules.end(), bbw->selected_module);
@@ -2047,16 +2046,16 @@ static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
     GtkTreeModel *model;
     GtkTreeSelection *selection;
     struct gui_node *gn;
-    
+
     selection = gtk_tree_view_get_selection ((GtkTreeView*) bbw->tree);
     gtk_tree_selection_get_selected (selection, &model, &iter);
     gtk_tree_model_get (model, &iter, 1, &gn, -1);
-    
+
     gtk_tree_store_remove ((GtkTreeStore*) model, &iter);
-    
+
     g_object_set_data (G_OBJECT (bbw->tree), gn->node->name().c_str(), NULL);
     delete gn;
-    
+
     gtk_widget_hide(bbw->node_frame);
     gtk_widget_hide(bbw->stimulus_frame);
     gtk_widget_hide(bbw->module_frame);
@@ -2068,7 +2067,7 @@ static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
     GtkTreeSelection *selection;
     GtkTreeModel *model;
     GtkTreeIter iter;
-    
+
     selection = gtk_tree_view_get_selection ((GtkTreeView*) bbw->node_clist);
     gtk_tree_selection_get_selected (selection, &model, &iter);
     gtk_tree_model_get (model, &iter, 1, &s, -1);
@@ -2260,7 +2259,7 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
     GtkTreeModel *model;
     GtkTreeIter p_iter, c_iter;
     bool did_work = true;
-    
+
     bbw->update_board_matrix();
 
     if ((model = gtk_tree_view_get_model ((GtkTreeView*) bbw->tree)) == NULL)
@@ -2269,13 +2268,13 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
 	return;
     if (!gtk_tree_model_iter_children (model, &c_iter, &p_iter))
 	return;
-    
+
     do
     {
         gtk_tree_model_get (model, &c_iter, 1, &gn, -1);
         if (!trace_node(gn))
           did_work = false;
-    } while (gtk_tree_model_iter_next (model, &c_iter));    
+    } while (gtk_tree_model_iter_next (model, &c_iter));
 
     bbw->draw_nodes();
     if (!did_work)
@@ -2830,7 +2829,7 @@ void GuiModule::Build()
 
   GtkTreeIter module_titer, pin_titer;
   GtkTreeStore *tree_store;
-  
+
   g_object_get (m_bbw->tree, "model", &tree_store, NULL);
   gtk_tree_store_append (tree_store, &module_titer, NULL);
   gtk_tree_store_set (tree_store, &module_titer,
@@ -3099,7 +3098,7 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 
   struct gui_node *gn = (struct gui_node*) g_object_get_data (G_OBJECT (tree), node->name().c_str());
   GtkTreeStore *tree_store;
-  
+
   g_object_get (tree, "model", &tree_store, NULL);
 
   if (!gn) {
@@ -3178,7 +3177,7 @@ void Breadboard_Window::Build(void)
   GtkWidget *hbox9;
   GtkWidget *hbox14;
   GtkWidget *scrolledwindow5;
-  
+
   GtkCellRenderer *renderer;
   GtkListStore *list_store;
   GtkTreeStore *tree_store;
@@ -3256,7 +3255,7 @@ void Breadboard_Window::Build(void)
   add_button("Add module", G_CALLBACK(add_module), hbox12);
   add_button("Add library", G_CALLBACK(add_library), hbox12);
 
-  
+
 
   hbox15 = bb_hbox(window);
   gtk_box_pack_start (GTK_BOX (vbox13), hbox15, FALSE, FALSE, 0);

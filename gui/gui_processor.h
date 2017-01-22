@@ -50,6 +50,8 @@ class GUI_Processor {
  public:
 
   GUI_Processor();
+  GUI_Processor(const GUI_Processor&);  // Mark non-copiable
+
   void SetCPU(Processor *new_cpu);
 
   RAM_RegisterWindow *regwin_ram;

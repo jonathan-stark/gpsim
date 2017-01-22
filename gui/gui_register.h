@@ -23,12 +23,13 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_REGISTER_H__
 #define __GUI_REGISTER_H__
 
+#include "gui.h"
 #include <string>
 
 //========================================================================
 //
 // A GUI register is a shadow of a register in a simulated cpu (or module).
-// 
+//
 //
 // FIXME -- why not just derive from the Register base class?
 
@@ -36,7 +37,7 @@ class GUIRegister {
  public:
   RegisterMemoryAccess *rma;  // Pointer to the rma that controls this register.
   int address;                // index in rma register array.
-  
+
   int row;             // row & col in register window
   int col;
   RegisterValue shadow;// value displayed in register window.
@@ -46,7 +47,7 @@ class GUIRegister {
   int register_size;   // The size (in bytes) of a single register
   bool bUpdateFull;    // true if a full update needs to be performed
 
-  bool bIsAliased;     // true if this register is aliased 
+  bool bIsAliased;     // true if this register is aliased
                        // and this instance is not the base.
 
   bool bIsValid(void); // true if this register is a valid one (i.e.
@@ -60,7 +61,7 @@ class GUIRegister {
 
   CrossReferenceToGUI *xref;
 
-  char *getValueAsString(char *, int, char *format, RegisterValue value);
+  char *getValueAsString(char *, int,  RegisterValue value);
 
   void put_value(unsigned int new_value);
   unsigned int get_value(void);
@@ -93,7 +94,7 @@ class GUIRegister {
 
 class GUIRegisterList {
 public:
-  GUIRegisterList(RegisterMemoryAccess *pRMA);
+  explicit GUIRegisterList(RegisterMemoryAccess *pRMA);
   ~GUIRegisterList();
   RegisterMemoryAccess *m_pRMA;  // Apointer to the Processor's rma or ema.
   GUIRegister * m_paRegisters[MAX_REGISTERS];

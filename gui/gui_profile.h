@@ -61,7 +61,7 @@ public:
   // List of cycle_count structs
   GList *histogram_profile_list;
 
-  Profile_Window(GUI_Processor *gp);
+  explicit Profile_Window(GUI_Processor *gp);
   virtual void Build();
   virtual void Update();
   virtual void NewProcessor(GUI_Processor *gp);

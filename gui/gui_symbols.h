@@ -34,9 +34,9 @@ class Symbol_Window : public GUI_Object
  public:
   GtkWidget *symbol_view;
   GtkListStore *symbol_list;
-    
+
   GtkWidget *popup_menu;
-  
+
   int filter_addresses;
   int filter_constants;
   int filter_registers;
@@ -47,7 +47,7 @@ class Symbol_Window : public GUI_Object
 
   int load_symbols;
 
-  Symbol_Window(GUI_Processor *gp);
+  explicit Symbol_Window(GUI_Processor *gp);
   virtual void Build();
   virtual void Update();
   void NewSymbols();

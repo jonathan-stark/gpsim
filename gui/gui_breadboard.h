@@ -78,7 +78,7 @@ public:
   virtual void Update()=0;
   virtual void Destroy()=0;
 
-  
+
   bool IsBuilt() { return m_bIsBuilt;}
   Breadboard_Window *bbw() { return m_bbw;}
   void SetPosition(int x, int y);
@@ -92,7 +92,7 @@ protected:
 
   int    m_x;               // Position in layout widget
   int    m_y;               // Position in layout widget
-  int    m_width;           // 
+  int    m_width;           //
   int    m_height;          //
   bool   m_bIsBuilt;        // True after the object gets displayed.
 };
@@ -149,7 +149,7 @@ protected:
   int    m_label_x;         // Pin Label coordinates (within parent module).
   int    m_label_y;
 
-  int    m_pkgPinNumber;    // 
+  int    m_pkgPinNumber;    //
 
 private:
   static gboolean expose_pin(GtkWidget *widget, GdkEventExpose *event,
@@ -172,10 +172,10 @@ private:
 
 //------------------------------------------------------------------------
 // GuiModule
-// 
+//
 // The GuiModule holds the graphics for a gpsim module that is displayed in
 // the bread board window. The GuiModule serves as the link between the gui
-// and the simulation engine. In other words, the GuiModule provides an 
+// and the simulation engine. In other words, the GuiModule provides an
 // interface through which the simulation engine may be accessed.
 //
 // All GuiModules have a one-to-one with a gpsim Module. (see src/modules.h)
@@ -211,8 +211,8 @@ protected:
   Module    *m_module;
   GtkWidget *m_module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap
   GtkWidget *m_pinLabel_widget;// A drawing area for pin labels.
-  int        m_module_x;       // These coordinates are an offset from m_x and m_y defined in  
-  int        m_module_y;       /* GuiBreadBoardObject. Their purpose is to allow clients to 
+  int        m_module_x;       // These coordinates are an offset from m_x and m_y defined in
+  int        m_module_y;       /* GuiBreadBoardObject. Their purpose is to allow clients to
 				* reposition a customly created module_widget */
 
   BB_ModuleLabel *m_name_widget;    // Name of widget, positioned above module_widget.
@@ -274,14 +274,14 @@ public:
   GtkWidget *stimulus_add_node_button;
 
   GtkAdjustment *hadj, *vadj;
-  
+
   GtkTreeIter *node_iter;
 
   GuiPin *selected_pin;
   struct gui_node *selected_node;
   GuiModule *selected_module;
 
-  Breadboard_Window(GUI_Processor *gp);
+  explicit Breadboard_Window(GUI_Processor *gp);
   ~Breadboard_Window();
 
   virtual void Build(void);
