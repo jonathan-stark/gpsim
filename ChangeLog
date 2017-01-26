@@ -1,3 +1,7 @@
+2017-01-26 Errol van de l'Isle <evandel@cix.co.uk>
+	* gui/gui_regwin.cc
+	: Correct error in svn r2392
+
 2017-01-22 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/14bit-processors.cc src/14bit-registers.h src/16bit-processors.cc
 	  src/bit.cc src/dspic/dspic-instructions.cc src/p12x.cc
