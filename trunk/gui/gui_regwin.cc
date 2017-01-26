@@ -1753,7 +1753,7 @@ void Register_Window::Build()
 
   char *fontstring;
 
-  if (!window) {
+  if (window) {
     gtk_widget_destroy(window);
   }
 
@@ -1894,7 +1894,7 @@ Register_Window::Register_Window(GUI_Processor *_gp, REGISTER_TYPE _type)
 {
   gp = _gp;
 
-  std::fill_n(row_to_address, sizeof(row_to_address), -1);
+  std::fill_n(row_to_address, MAX_ROWS, -1);
 }
 
 const char *RAM_RegisterWindow::name()
