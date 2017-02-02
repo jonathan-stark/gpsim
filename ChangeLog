@@ -1,4 +1,8 @@
 2017-01-26 Errol van de l'Isle <evandel@cix.co.uk>
+	* configure.ac
+	: Add extra gcc and clang run time sanitization build options
+
+2017-01-26 Errol van de l'Isle <evandel@cix.co.uk>
 	* gui/gui_regwin.cc
 	: Correct error in svn r2392
 
