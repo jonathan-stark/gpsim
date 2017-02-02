@@ -32,6 +32,44 @@ else
     LD_SANITIZE=""
 fi
 
+dnl --enable-address-sanitize : Turn on memory error detection
+dnl The default is off
+dnl X86-64 Linux GCC 4.8+ CLang only
+
+AC_ARG_ENABLE(address-sanitize,
+    [  --enable-address-sanitize    Enable memory error debugging],
+     [case "${enableval}" in
+      yes) use_address_sanitize=yes ;;
+      no) use_address_sanitize=no ;;
+      *) AC_MSG_ERROR(bad value ${enableval} for --enable-address-sanitize) ;;
+    esac],[use_address_sanitize=no])
+
+if test "$use_address_sanitize" = "yes"; then
+    echo enabling memory address debugging
+    LD_ADDRESS="-fsanitize=address"
+else
+    LD_ADDRESS=""
+fi
+
+dnl --enable-undefined-sanitize : Turn on undefined behavior detection
+dnl The default is off
+dnl X86-64 Linux GCC 4.8+ CLang only
+
+AC_ARG_ENABLE(undefined-sanitize,
+    [  --enable-undefined-sanitize    Enable undefined behavior detection],
+     [case "${enableval}" in
+      yes) use_undefined_sanitize=yes ;;
+      no) use_undefined_sanitize=no ;;
+      *) AC_MSG_ERROR(bad value ${enableval} for --enable-undefined-sanitize) ;;
+    esac],[use_undefined_sanitize=no])
+
+if test "$use_undefined_sanitize" = "yes"; then
+    echo enabling undefined behavior detection
+    LD_UNDEFINED="-fsanitize=undefined"
+else
+    LD_UNDEFINED=""
+fi
+
 dnl --disable-gui : turn off gui support (cli only)
 dnl    The default is to have the gui.
 
@@ -186,9 +224,9 @@ case "${host}" in
     ;;
 esac
 
-CFLAGS="${CFLAGS} ${AM_CFLAGS}"
-CXXFLAGS="${CXXFLAGS} ${AM_CXXFLAGS}"
-LDFLAGS="${LDFLAGS} ${AM_LDFLAGS} ${LD_SANITIZE}"
+CFLAGS="${CFLAGS} ${AM_CFLAGS} ${LD_SANITIZE} ${LD_ADDRESS} ${LD_UNDEFINED}"
+CXXFLAGS="${CXXFLAGS} ${AM_CXXFLAGS} ${LD_SANITIZE} ${LD_ADDRESS} ${LD_UNDEFINED}"
+LDFLAGS="${LDFLAGS} ${AM_LDFLAGS} ${LD_SANITIZE} ${LD_ADDRESS} ${LD_UNDEFINED}"
 
 # Host filesystem options
 case "${host}" in
