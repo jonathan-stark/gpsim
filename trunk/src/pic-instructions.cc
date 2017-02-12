@@ -766,15 +766,15 @@ char * BRA::name(char *return_str,int len)
 BRW::BRW (Processor *new_cpu, unsigned int new_opcode, unsigned int address)
   : instruction(new_cpu, new_opcode, address)
 {
-  destination_index = cpu_pic->Wget();
-  absolute_destination_index = address + destination_index;
+  current_address = address;
 
   new_name("brw");
 }
 
 void BRW::execute()
 {
-  cpu_pic->pc->jump(absolute_destination_index);
+  destination_index = cpu_pic->Wget();
+  cpu_pic->pc->jump(current_address + destination_index +1);
 
 }
 
@@ -785,8 +785,8 @@ char * BRW::name(char *return_str,int len)
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  gpsimObject::name().c_str(),
 	  (opcode & 0x100) ? '-' : '+',
-	  (destination_index & 0x1ff)<<1,
-	  absolute_destination_index<<1);
+	  (destination_index & 0x1ff),
+	  current_address + destination_index +1);
 
   return(return_str);
 }
