@@ -70,7 +70,7 @@ bool SettingsEXdbm::set(const char *module, const char *entry, const char *str)
   DB_LIST list;
 
   list = eXdbmGetList(dbid, 0, (char *)module);
-  if (list == false)
+  if (!list)
   {
     ret = eXdbmCreateList(dbid, 0, (char *)module, 0);
     if(ret == -1)
@@ -80,7 +80,7 @@ bool SettingsEXdbm::set(const char *module, const char *entry, const char *str)
     }
 
     list = eXdbmGetList(dbid, 0, (char *)module);
-    if (list == 0)
+    if (!list)
     {
       puts(eXdbmGetErrorString(eXdbmGetLastError()));
       return false;
@@ -120,7 +120,7 @@ bool SettingsEXdbm::set(const char *module, const char *entry, int value)
     return false;
 
   list = eXdbmGetList(dbid, 0, (char *)module);
-  if (list == 0)
+  if (!list)
   {
     ret = eXdbmCreateList(dbid, 0, (char *)module, 0);
     if (ret == -1)
@@ -130,7 +130,7 @@ bool SettingsEXdbm::set(const char *module, const char *entry, int value)
     }
 
     list = eXdbmGetList(dbid, 0, (char *)module);
-    if (list == 0)
+    if (!list)
     {
       puts(eXdbmGetErrorString(eXdbmGetLastError()));
       return false;
@@ -167,7 +167,7 @@ bool SettingsEXdbm::get(const char *module, const char *entry, char **str)
   DB_LIST list;
 
   list = eXdbmGetList(dbid, 0, (char *)module);
-  if (list == 0)
+  if (!list)
     return false;
 
   // We have the list
@@ -185,7 +185,7 @@ bool SettingsEXdbm::get(const char *module, const char *entry, int *value)
   DB_LIST list;
 
   list = eXdbmGetList(dbid, 0, (char *)module);
-  if (list == 0)
+  if (!list)
     return false;
 
   // We have the list
@@ -202,7 +202,7 @@ bool SettingsEXdbm::remove(const char *module, const char *entry)
   DB_LIST list;
 
   list = eXdbmGetList(dbid, 0, (char *)module);
-  if (list == false)
+  if (!list)
   {
     ret = eXdbmCreateList(dbid, 0, (char *)module, 0);
     if(ret == -1)
@@ -212,7 +212,7 @@ bool SettingsEXdbm::remove(const char *module, const char *entry)
     }
 
     list = eXdbmGetList(dbid, 0, (char *)module);
-    if (list == 0)
+    if (!list)
     {
       puts(eXdbmGetErrorString(eXdbmGetLastError()));
       return false;
