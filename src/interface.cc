@@ -14,14 +14,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
 //-------------------------------------------------------------------
 //                     interface.cc
 //
-// interface.cc provides a layer of code on top of the simulator 
+// interface.cc provides a layer of code on top of the simulator
 // portion of gpsim. It's purpose is to provide an abstract interface
 // that hides the details of the simulator. Currently only the gui
 // interfaces to gpsim through this layer. However, since the simulator
@@ -33,7 +33,7 @@ License along with this library; if not, see
 #include <stdio.h>
 
 #include "../config.h"
-#define GPSIM_VERSION VERSION 
+#define GPSIM_VERSION VERSION
 #include "gpsim_def.h"
 
 #include "sim_context.h"
@@ -153,7 +153,7 @@ Interface::Interface(gpointer new_object)
 //
 // The gpsimInterface class contains a singly-linked-list of Interface objects.
 // Interface objects are structures that primarily contain pointers to a whole
-// bunch of functions. The purpose is to have some external entity, like the 
+// bunch of functions. The purpose is to have some external entity, like the
 // gui code, define where these functions point. gpsim will then use these
 // functions as a means of notifying the gui when something has changed.
 // In addition to the gui, this class also provides the support for interfacing
@@ -298,7 +298,6 @@ void gpsimInterface::simulation_has_stopped (void)
 
 }
 
-#if GLIB_MAJOR_VERSION >= 2
 // This code is not used anywhere, but uses currently depreciated calls RRR
 #ifdef GPSIM_THREAD
 
@@ -338,9 +337,9 @@ void start_run_thread(void)
 
   GError    *err = NULL ;
 
-  if( g_thread_create((GThreadFunc)run_thread, 
-		      (void *)0, 
-		      TRUE, 
+  if( g_thread_create((GThreadFunc)run_thread,
+		      (void *)0,
+		      TRUE,
 		      &err) == NULL)
   {
     printf("Thread create failed: %s!!\n", err->message );
@@ -352,9 +351,6 @@ void start_run_thread(void)
   std::cout << " started thread\n";
 }
 #endif //GPSIM_THREAD
-#endif //GLIB_MAJOR_VERSION >= 2
-
-
 
 //========================================================================
 //
@@ -368,7 +364,7 @@ void gpsimInterface::start_simulation (double duration)
     cout << "running...\n";
     cpu->run(true);
     mbSimulating = false;
-    trace.dump_last_instruction(); 
+    trace.dump_last_instruction();
     simulation_has_stopped();
   }
 
@@ -522,7 +518,7 @@ unsigned int  gpsimInterface::add_socket_interface  (Interface *new_interface)
 {
   if(!socket_interface)
     return add_interface(new_interface);
-  
+
   return 0;
 }
 
@@ -565,7 +561,7 @@ void  gpsimInterface::set_update_rate  (guint64 _update_rate)
         get_cycles().reassign_break(future_cycle, fc, this);
       else
         get_cycles().set_break(fc, this);
-  
+
       future_cycle = fc;
     }
   }
@@ -602,7 +598,7 @@ const char *get_dir_delim(const char *path)
 // of functions called TraceDisplayXXX() the conditionally
 // display message depending on the verbose flags.
 // I'll leave this it as it for now because I'm in the middle
-// of making the src project its own DLL on windows and I have 
+// of making the src project its own DLL on windows and I have
 // enough changes for now.
 // Replaced the int verbose = 0; with GlobalVerbosityAccessor verbose.
 // GlobalVerbosityAccessor that has overridden operators for 'if(verbose)'
