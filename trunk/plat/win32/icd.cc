@@ -2,17 +2,17 @@
    Copyright (C) 2003 BorutRazem
 
 This is based on the program icdprog 0.3 made by Geir Thomassen
-   
+
 gpsim is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2, or (at your option)
 any later version.
-   
+
 gpsim is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-   
+
 You should have received a copy of the GNU General Public License
 along with gpasm; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -34,13 +34,13 @@ bool get_use_icd() {
   return false;
 }
 
-char *icd_target(void)
+const char *icd_target()
 {
     return "no target";
 }
 
 
-char *icd_version(void)
+const char *icd_version()
 {
     return "%0.00.00";
 }

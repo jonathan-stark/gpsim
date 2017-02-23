@@ -268,7 +268,6 @@ void catch_control_c(int sig)
 
 void initialize_threads(void)
 {
-#if GLIB_MAJOR_VERSION >= 2
   if( !g_thread_supported() )
   {
 #if GLIB_MINOR_VERSION < 32
@@ -278,8 +277,6 @@ void initialize_threads(void)
     gdk_threads_init();
 #endif
   }
-
-#endif
 }
 
 void initialize_signals(void)
@@ -877,11 +874,7 @@ static int gpsim_rl_getc(FILE *in)
   gchar buf[6];
   gsize bytes_read;
 
-#if GLIB_MAJOR_VERSION >= 2
   g_io_channel_read_chars(channel, buf, 1, &bytes_read, NULL);
-#else
-  g_io_channel_read(channel, buf, 1, &bytes_read);
-#endif
   return buf[0];
   // JRH, 7-1-2005 - I tried this but am not comfortable that it
   // is working as I intended.
@@ -916,11 +909,6 @@ void initialize_readline (void)
 #endif
 
 #ifdef _WIN32
-#if GLIB_MAJOR_VERSION < 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 6)
-  /* set console to raw mode */
-  win32_set_is_readable(channel);
-#endif
-
   // The channel is not readable if it is a redirected
   // standard input, in which case we will not be getting
   // any keypress events.

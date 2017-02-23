@@ -28,7 +28,6 @@ extern "C" {
 #endif
 
 bool win32_fd_to_raw(int fd);
-void win32_set_is_readable(GIOChannel *channel);
 
 #ifdef __cplusplus
 }

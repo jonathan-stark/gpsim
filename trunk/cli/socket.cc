@@ -495,13 +495,11 @@ void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition
     GIOChannel *channel = g_io_channel_unix_new(my_socket->getSocket());
     GIOCondition condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
-#if GLIB_MAJOR_VERSION >= 2
     GError *err = NULL;
 
     g_io_channel_set_encoding (channel, NULL, &err);
 #if !defined _WIN32 || defined _DEBUG
         g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
-#endif
 #endif
 
     g_io_add_watch(channel,
@@ -1035,9 +1033,6 @@ void start_server(void)
 }
 #else   // if USE_THREADS
 
-
-#if GLIB_MAJOR_VERSION >= 2
-
 static void debugPrintChannelStatus(GIOStatus stat)
 {
   switch (stat) {
@@ -1073,7 +1068,6 @@ static void debugPrintCondition(GIOCondition cond)
     std::cout << "  G_IO_NVAL\n";
 }
 #endif
-#endif
 
 /*========================================================================
   server_callback ()
@@ -1102,12 +1096,11 @@ static gboolean server_callback(GIOChannel *channel,
   if(condition & G_IO_HUP) {
     std::cout<< "client has gone away\n";
 
-#if GLIB_MAJOR_VERSION >= 2
     GError *err=NULL;
     GIOStatus stat = g_io_channel_shutdown(channel, TRUE, &err);
     std::cout << "channel status " << hex << stat << "  " ;
     debugPrintChannelStatus(stat);
-#endif
+
     delete s;
 
     return FALSE;
@@ -1118,8 +1111,6 @@ static gboolean server_callback(GIOChannel *channel,
 
     s->packet->prepare();
     memset(s->packet->rxBuff(), 0, 256);
-
-#if GLIB_MAJOR_VERSION >= 2
 
     GError *err=NULL;
     gsize b;
@@ -1138,11 +1129,6 @@ static gboolean server_callback(GIOChannel *channel,
     if(err) {
       std::cout << "GError:" << err->message << endl;
     }
-
-
-#else
-    g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
-#endif
 
     if(bytes_read) {
       if(get_interface().bSimulating()) {
@@ -1188,14 +1174,12 @@ static gboolean sink_server_accept(GIOChannel *channel, GIOCondition condition, 
   GIOChannel *new_channel = g_io_channel_unix_new(client->getSocket());
   GIOCondition new_condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
-#if GLIB_MAJOR_VERSION >= 2
   GError *err = NULL;
 
   g_io_channel_set_encoding (channel, NULL, &err);
 #if !defined _WIN32 || defined _DEBUG
   //stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
   g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
-#endif
 #endif
 
   g_io_add_watch(new_channel,

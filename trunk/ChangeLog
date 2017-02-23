@@ -1,10 +1,17 @@
+2017-02-23 Errol van de l'Isle <evandel@cix.co.uk>
+	* cli/input.cc cli/socket.cc plat/win32/fd2raw.cpp plat/win32/fd2raw.h
+	  plat/win32/icd.cc plat/win32/unistd.h src/icd.h src/interface.cc
+	  autoconf.ac
+	: Set the minimum GLib version to version 2.26 and remove checks for
+	  versions lower than this.
+
 2017-02-18 Roy Rankin <rrankin@ihug.com.au>
 	* gui/settings_exdbm.cc
 	: fix error detected by gcc-7
 
 2017-02-12 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-instructions.h src/pic-instructions.cc
-	: Bug #224 14bits Enhanced Instruction BRW not working 
+	: Bug #224 14bits Enhanced Instruction BRW not working
 
 2017-01-26 Errol van de l'Isle <evandel@cix.co.uk>
 	* configure.ac

@@ -23,7 +23,7 @@ Declarations, missing in MSVC header files,
 normaly defined in <unistd.h>
 */
 
-#ifndef __UNISDT_H
+#ifndef __UNISTD_H
 #define __UNISTD_H
 
 #ifdef __cplusplus

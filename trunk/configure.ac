@@ -125,7 +125,7 @@ PKG_PROG_PKG_CONFIG()
 if test "$use_gui" = "no"; then
   dnl glib2 checks
 
-  PKG_CHECK_MODULES(P_GLIB, [glib-2.0 gthread-2.0 gmodule-2.0])
+  PKG_CHECK_MODULES(P_GLIB, [glib-2.0 >= 2.26 gthread-2.0 gmodule-2.0])
   X_LDFLAGS=$P_GLIB_LIBS
   X_CFLAGS=$P_GLIB_CFLAGS
   Y_LDFLAGS=
@@ -137,7 +137,7 @@ else
 #    [PKG_CHECK_MODULES(GTKEXTRAMOD, gtkextra-3.0, ,
 #      [AC_MSG_ERROR(Cannot find gtkextra-2.0 or gtkextra-3.0 package)])])
 
-  PKG_CHECK_MODULES(P_GTK, [gtk+-2.0 >= 2.24 gthread-2.0])
+  PKG_CHECK_MODULES(P_GTK, [gtk+-2.0 >= 2.24 glib-2.0 >= 2.26 gthread-2.0])
   X_LDFLAGS=$P_GTK_LIBS
   X_CFLAGS=$P_GTK_CFLAGS
 #  Y_LDFLAGS=$GTKEXTRAMOD_LIBS
