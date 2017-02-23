@@ -1,4 +1,8 @@
 2017-02-23 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/icd.cc
+	: Fix build error.
+
+2017-02-23 Errol van de l'Isle <evandel@cix.co.uk>
 	* cli/input.cc cli/socket.cc plat/win32/fd2raw.cpp plat/win32/fd2raw.h
 	  plat/win32/icd.cc plat/win32/unistd.h src/icd.h src/interface.cc
 	  autoconf.ac

@@ -391,7 +391,7 @@ static int icd_baudrate_init()
     return 0;
 }
 
-char *icd_target(void)
+const char *icd_target(void)
 {
     static char return_string[256];
     unsigned int dev_id, type,rev;
@@ -659,7 +659,7 @@ int icd_detected(void)
     return 0;
 }
 
-char *icd_version(void)
+const char *icd_version(void)
 {
     static char ret[256];
     unsigned int ver1,ver2;
