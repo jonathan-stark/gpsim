@@ -1,3 +1,7 @@
+2017-03-11 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/value.h src/value.cc
+	: Change internals of class String to use std::string instead of char *
+
 2017-02-23 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/icd.cc
 	: Fix build error.

@@ -1240,107 +1240,80 @@ bool Float::operator<(Value *rv)
  */
 String::String(const char *newValue)
 {
-  if(newValue)
-    value = strdup(newValue);
-  else
-    value = 0;
+  if (newValue)
+    value = newValue;
 }
 
 String::String(const char *newValue, size_t len)
 {
-  if (newValue) {
-    value = (char *)malloc(len + 1);
-    strncpy(value, newValue, len);
-    value[len] = '\0';
-  }
-  else
-    value = 0;
+  if (newValue)
+    value.assign(newValue, len);
 }
 
-String::String(const char *_name, const char *newValue,const char *_desc)
-  : Value(_name,_desc)
+String::String(const char *_name, const char *newValue, const char *_desc)
+  : Value(_name, _desc)
 {
-  if(newValue)
-    value = strdup(newValue);
-  else
-    value = 0;
+  if (newValue)
+    value = newValue;
 }
-
 
 String::~String()
 {
-  if(value)
-    free(value);
 }
 
-string String::toString()
+std::string String::toString()
 {
-  if(value)
-    return string(value);
-  else
-    return string("");
+  return value;
 }
 
 char *String::toString(char *return_str, int len)
 {
-  if(return_str) {
-
-    if(value)
-      snprintf(return_str,len,"%s",value);
-    else
-      *return_str = 0;
-  }
+  if (return_str)
+    snprintf(return_str, len, "%s", value.c_str());
 
   return return_str;
 }
 
 void String::set(Value *v)
 {
-  char buf[1024];
-
-  if(v) {
-    v->get(buf, sizeof(buf));
-    set(buf);
+  if (v) {
+    std::string buf = v->toString();
+    set(buf.c_str());
   }
 }
 
+// TODO: is this meant to do something
 void String::set(Packet &p)
 {
   cout << " fixme String::set(Packet &) is not implemented\n";
 }
 
-void String::set(const char *s,int len)
+// TODO: was len meant to do anything
+void String::set(const char *s, int len)
 {
-  if(value)
-    free(value);
-  if(s)
-    value = strdup(s);
-  else
-    value = 0;
+  if (s)
+    value = s;
 }
+
 void String::get(char *buf, int len)
 {
-  if(buf && value) {
-    strncpy(buf,value,len);
-  }
-  else if(buf) {
-    buf[0] = 0;
-  }
+  if (buf)
+    snprintf(buf, len, "%s", value.c_str());
 }
 
 void String::get(Packet &p)
 {
-  p.EncodeString(value);
+  p.EncodeString(value.c_str());
 }
 
 const char *String::getVal()
 {
-  return value;
+  return value.c_str();
 }
 
 Value *String::copy()
 {
-  return new String(value);
+  return new String(value.c_str());
 }
 
 //------------------------------------------------------------------------
