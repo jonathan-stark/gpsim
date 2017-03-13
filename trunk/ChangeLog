@@ -1,4 +1,8 @@
 2017-03-13 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/trace.h
+	: Fix integer to bool  logic
+
+2017-03-13 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/14bit-registers.h src/bitlog.h src/breakpoints.h
 	  src/clock_phase.h src/errors.h src/expr.h src/gpsim_interface.h
 	  src/gpsim_object.h src/ioports.h src/modules.h src/operator.h

@@ -37,10 +37,8 @@ extern "C"
 
 class Processor;
 class Trace;
-
-
-
 class TraceFrame;
+
 //========================================================================
 // A 'TraceObject' is created when the contents of the Trace buffer are
 // displayed. The TraceObjects are placed into TraceFrames, and eventually
@@ -187,7 +185,6 @@ public:
 class TraceType
 {
 public:
-
 
   TraceType(unsigned int nTraceEntries, const char *desc);
 
@@ -370,7 +367,6 @@ public:
   unsigned int m_uiTT;
 };
 
-
 //========================================================================
 // TraceFrame
 //
@@ -388,7 +384,7 @@ public:
   virtual ~TraceFrame();
   virtual void add(TraceObject *to);
   virtual void print(FILE *);
-  virtual void update_state(void);
+  virtual void update_state();
 };
 
 //-----------------------------------------------------------
@@ -432,7 +428,6 @@ class Trace
     CYCLE_COUNTER_HI   = (0xC0<<24)
   };
 
-
 #define    TRACE_BUFFER_SIZE  (1<<12)
 #define    TRACE_BUFFER_MASK  (TRACE_BUFFER_SIZE-1)
 #define    TRACE_BUFFER_NEAR_FULL  (TRACE_BUFFER_SIZE * 3 /4)
@@ -463,8 +458,8 @@ class Trace
   unsigned int lastTraceType;
   unsigned int lastSubTraceType;
 
-  Trace (void);
-  ~Trace(void);
+  Trace();
+  ~Trace();
 
   // trace raw allows any value to be written to the trace buffer.
   // This is useful for modules that wish to trace things, but do
@@ -495,14 +490,14 @@ class Trace
     trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_HI | (cc>>48));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  inline bool near_full(void) {
+  inline bool near_full() {
     return (trace_index > TRACE_BUFFER_NEAR_FULL);
   }
 
   void switch_cpus(Processor *new_cpu) {cpu = new_cpu;};
 
   int  dump (int n=0, FILE *out_stream=0);
-  void dump_last_instruction(void);
+  void dump_last_instruction();
   int  dump1(unsigned int,char *, int);
   void dump_raw(int n);
 
@@ -524,7 +519,6 @@ class Trace
     // Looks like the range straddles the roll over boundary.
     return (i >= low || i <= high);
   }
-
 
   // get() return the trace entry at 'index'
   inline unsigned int operator [] (unsigned int index)
@@ -555,7 +549,7 @@ class Trace
   // Trace frame manipulation
   void addFrame(TraceFrame *newFrame);
   void addToCurrentFrame(TraceObject *to);
-  void deleteTraceFrame(void);
+  void deleteTraceFrame();
   void printTraceFrame(FILE *);
 
   // Display information about allocated traces.
@@ -565,13 +559,13 @@ class Trace
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access trace object directly!
-LIBGPSIM_EXPORT Trace & get_trace(void);
+LIBGPSIM_EXPORT Trace & get_trace();
 #else
 // we are in gpsim: use of get_trace() is recommended,
 // even if trace object can be accessed directly.
 extern Trace trace;
 
-inline Trace &get_trace(void)
+inline Trace &get_trace()
 {
   return trace;
 }
@@ -596,17 +590,17 @@ public:
   struct lt_trace *lxtp;
   struct lt_symbol *symp;
 
-  TraceLog(void);
-  ~TraceLog(void);
+  TraceLog();
+  ~TraceLog();
 
-  virtual void callback(void);
+  virtual void callback();
   void enable_logging(const char *new_filename=0, int format=TRACE_FILE_FORMAT_ASCII);
-  void disable_logging(void);
+  void disable_logging();
   void switch_cpus(Processor *new_cpu);
   void open_logfile(const char *new_fname, int format);
-  void close_logfile(void);
-  void write_logfile(void);
-  void status(void);
+  void close_logfile();
+  void write_logfile();
+  void status();
 
   void lxt_trace(unsigned int address, unsigned int value, guint64 cc);
 
@@ -619,13 +613,13 @@ public:
 
 #if defined(_WIN32)
 // we are in a module: don't access trace_log object directly!
-LIBGPSIM_EXPORT TraceLog & GetTraceLog(void);
+LIBGPSIM_EXPORT TraceLog & GetTraceLog();
 #else
 // we are in gpsim: use of GetTraceLog() is recommended,
 // even if trace_log object can be accessed directly.
 extern TraceLog trace_log;
 
-inline TraceLog &GetTraceLog(void)
+inline TraceLog &GetTraceLog()
 {
   return trace_log;
 }
@@ -642,13 +636,13 @@ public:
   unsigned int instruction_address;
   unsigned int trace_pc_value;
 
-  ProfileKeeper(void);
-  ~ProfileKeeper(void);
+  ProfileKeeper();
+  ~ProfileKeeper();
 
-  void catchup(void);
-  virtual void callback(void);
-  void enable_profiling(void);
-  void disable_profiling(void);
+  void catchup();
+  virtual void callback();
+  void enable_profiling();
+  void disable_profiling();
   void switch_cpus(Processor *new_cpu);
 
 };
@@ -713,23 +707,21 @@ public:
   bool     bActive;             // True if the buffer is enabled for storing.
   bool     bFull;               // True if the buffer has been filled.
 
-
   BoolEventBuffer(bool _initial_state, guint32 _max_events = 4096);
-  ~BoolEventBuffer(void);
+  ~BoolEventBuffer();
   unsigned int get_index(guint64 event_time);
   void activate(bool _initial_state);
-  void deactivate(void);
-  void callback(void);
-  void callback_print(void);
+  void deactivate();
+  void callback();
+  void callback_print();
   inline bool event(bool state);
 
-
-  inline bool isActive(void)
+  inline bool isActive()
   {
     return bActive;
   }
 
-  inline bool isFull(void)
+  inline bool isFull()
   {
     return (index < max_events);
   }
@@ -741,14 +733,12 @@ public:
     buffer a specific event is stored. (e.g. The start bit
     of a usart bit stream.)
    */
-  inline unsigned int get_index(void) {
+  inline unsigned int get_index() {
     return index;
   }
 
-
   bool get_event(int index) {
-
-    return (index & 1)^bInitialState;
+    return bool(index & 1) ^ bInitialState;
   }
 
   bool get_state(guint64 event_time) {
@@ -758,7 +748,6 @@ public:
   int get_edges(guint64 start_time, guint64 end_time) {
     return ( get_index(end_time) - get_index(start_time) );
   }
-
 };
 
 #endif
