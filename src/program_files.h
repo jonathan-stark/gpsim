@@ -33,9 +33,9 @@ public:
    *  to determine processor type, allocate the processor object and
    *  load the program into the processor object.
    *  Returns: Processor object in pProcessor
-   *  
+   *
    */
-  virtual int  LoadProgramFile(Processor **ppProcessor, 
+  virtual int  LoadProgramFile(Processor **ppProcessor,
                                const char *pFilename, FILE *pFile,
                                const char *pProcessorName) = 0;
   virtual void DisplayError(int iError, const char *pProgFilename,
@@ -51,7 +51,7 @@ public:
 
   static ProgramFileTypeList *s_ProgramFileTypeList;
   virtual bool LoadProgramFile(Processor **pProcessor,
-                               const char *pFilename, FILE *pFile, 
+                               const char *pFilename, FILE *pFile,
                                const char *pProcessorName=0);
   bool IsErrorDisplayableInLoop(int iError);
 };
@@ -67,7 +67,7 @@ protected:
   char m_Buffer[m_iBufferSize];
   FILE * m_pFile;
 public:
-  ProgramFileBuf(FILE * pFile);
+  explicit ProgramFileBuf(FILE * pFile);
 protected:
   virtual int_type underflow( );
   virtual streamsize xsgetn(
@@ -78,7 +78,7 @@ class ProgramFileStream : public std::istream {
 protected:
   ProgramFileBuf m_buf;
 public:
-  ProgramFileStream(FILE * pFile) : std::istream(&m_buf),
+  explicit ProgramFileStream(FILE * pFile) : std::istream(&m_buf),
     m_buf(pFile) {
   }
 };

@@ -164,7 +164,7 @@ protected:
 class ValueWrapper : public Value
 {
 public:
-  ValueWrapper(Value *pCopy);
+  explicit ValueWrapper(Value *pCopy);
   virtual ~ValueWrapper();
 
   virtual unsigned int get_leftVal();
@@ -206,7 +206,7 @@ class Boolean : public Value {
 
 public:
 
-  Boolean(bool newValue);
+  explicit Boolean(bool newValue);
   Boolean(const char *_name, bool newValue, const char *desc=0);
   static bool Parse(const char *pValue, bool &bValue);
   static Boolean * NewObject(const char *_name, const char *pValue, const char *desc);
@@ -266,7 +266,7 @@ class Integer : public Value {
 public:
 
   Integer(const Integer &new_value);
-  Integer(gint64 new_value);
+  explicit Integer(gint64 new_value);
   Integer(const char *_name, gint64 new_value, const char *desc=0);
   static bool       Parse(const char *pValue, gint64 &iValue);
   static Integer *  NewObject(const char *_name, const char *pValue, const char *desc);
@@ -428,7 +428,7 @@ class Float : public Value {
 
 public:
 
-  Float(double newValue = 0.0);
+  explicit Float(double newValue = 0.0);
   Float(const char *_name, double newValue, const char *desc=0);
   static bool Parse(const char *pValue, double &fValue);
   static Float * NewObject(const char *_name, const char *pValue, const char *desc);
@@ -504,7 +504,7 @@ class String : public Value {
 
 public:
 
-  String(const char *newValue);
+  explicit String(const char *newValue);
   String(const char *newValue, size_t len);
   String(const char *_name, const char *newValue, const char *desc = 0);
   virtual ~String();

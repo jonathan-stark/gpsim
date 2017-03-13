@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -42,7 +42,7 @@ public:
   virtual string toString();
   virtual Value* evaluate();
   virtual int set_break(ObjectBreakTypes bt=eBreakAny,
-                        ObjectActionTypes at=eActionHalt, 
+                        ObjectActionTypes at=eActionHalt,
                         Expression *expr=0);
 };
 
@@ -84,7 +84,7 @@ public:
 
   /*
    * Not all instructions derived from the instruction
-   * class use these constants... 
+   * class use these constants...
    */
 
   enum
@@ -163,10 +163,10 @@ protected:
 class AliasedInstruction : public instruction
 {
 public:
-  AliasedInstruction(instruction *);
+  explicit AliasedInstruction(instruction *);
   AliasedInstruction();
-  AliasedInstruction(Processor *pProcessor, 
-		     unsigned int uOpCode, 
+  AliasedInstruction(Processor *pProcessor,
+		     unsigned int uOpCode,
 		     unsigned int uAddrOfInstr);
   ~AliasedInstruction();
   void setReplaced(instruction *);
@@ -195,7 +195,6 @@ public:
 
 protected:
   instruction *m_replaced;
-
 };
 
 //---------------------------------------------------------

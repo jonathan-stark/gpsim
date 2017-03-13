@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -47,7 +47,7 @@ extern void dump_stimulus_list(void);
 
 /****************************************************************************
  *
- * Include file support stimuli. 
+ * Include file support stimuli.
  *
  *       stimulus             TriggerObject
  *       |  \                      /
@@ -91,11 +91,11 @@ public:
   double initial_voltage;   // node voltage at the instant of change
   double DCVoltage;      // Target voltage when settling
 
-  bool bSettling;           // true when the voltage is settling 
+  bool bSettling;           // true when the voltage is settling
   stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
   int nStimuli;             // number of stimuli attached to this node.
 
-  Stimulus_Node(const char *n = 0);
+  explicit Stimulus_Node(const char *n = 0);
   virtual ~Stimulus_Node();
 
   void   set_nodeVoltage(double v);
@@ -186,7 +186,7 @@ public:
   // Control the driving state, i.e. the state this stimulus wishes to drive
   virtual bool getDrivingState(void) {return bDrivingState;};
   virtual void setDrivingState(bool new_dstate) { bDrivingState = new_dstate;};
-  virtual void setDrivingState(char new3State) 
+  virtual void setDrivingState(char new3State)
   { bDrivingState = new3State=='1';};
 
   // Control the driven state, i.e. the state some external node wishes to
@@ -324,8 +324,8 @@ public:
 ///------------------------------------------------------------
 /// The PinMonitor class allows other objects to be notified whenever
 /// a Pin changes states.
-/// (Note: In older versions of gpsim, iopins notified the Port registers 
-/// in which they were contained by direcly calling the register setbit() 
+/// (Note: In older versions of gpsim, iopins notified the Port registers
+/// in which they were contained by direcly calling the register setbit()
 /// method. This is deprecated - and eventually will cause compile time errors.)
 class PinMonitor
 {
@@ -374,7 +374,7 @@ class IOPIN : public stimulus
 
 
   IOPIN(const char *n=0,
-        double _Vth=5.0, 
+        double _Vth=5.0,
         double _Zth=1e8,
         double _ZthWeak = 1e6,
         double _ZthFloating = 1e7
@@ -438,7 +438,7 @@ protected:
 
   PinMonitor *m_monitor;
 
-  // When connected to a node, these are thresholds used to determine whether 
+  // When connected to a node, these are thresholds used to determine whether
   // we're being driven by a weak driver or not.
   double ZthWeak;
   double ZthFloating;
@@ -457,7 +457,7 @@ class IO_bi_directional : public IOPIN
 public:
 
   IO_bi_directional(const char *n=0,
-                    double _Vth=5.0, 
+                    double _Vth=5.0,
                     double _Zth=150,
                     double _ZthWeak = 1e6,
                     double _ZthFloating = 1e7,
@@ -496,7 +496,7 @@ class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
   IO_bi_directional_pu(const char *n=0,
-                       double _Vth=5.0, 
+                       double _Vth=5.0,
                        double _Zth=150,
                        double _ZthWeak = 1e6,
                        double _ZthFloating = 1e7,
@@ -527,7 +527,7 @@ protected:
 class IO_open_collector : public IO_bi_directional_pu
 {
 public:
-  IO_open_collector(const char *n=0);
+  explicit IO_open_collector(const char *n = 0);
   virtual double get_Vth();
   virtual double get_Zth();
   virtual char getBitChar();
@@ -537,7 +537,7 @@ class square_wave : public source_stimulus
 {
 public:
 
-  square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, const char *n=0); 
+  square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, const char *n=0);
 
   virtual double get_Vth();
 
@@ -550,7 +550,7 @@ public:
 
   double m1,b1,m2,b2;
 
-  triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, const char *n=0); 
+  triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, const char *n=0);
 
   virtual double get_Vth();
 
@@ -593,7 +593,7 @@ public:
   virtual double get_Vth();
   virtual void start();
 
-  ValueStimulus(const char*n=0);
+  explicit ValueStimulus(const char *n = 0);
   virtual ~ValueStimulus();
   virtual void show();
 
@@ -605,8 +605,7 @@ class AttributeStimulus : public ValueStimulus
 {
   Value    *attr;
 public:
-
-  AttributeStimulus(const char *n=0);
+  explicit AttributeStimulus(const char *n = 0);
   // virtual ~AttributeStimulus();
 
   virtual void callback();

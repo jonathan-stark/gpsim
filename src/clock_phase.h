@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -58,7 +58,7 @@ protected:
 class ProcessorPhase : public ClockPhase
 {
 public:
-  ProcessorPhase(Processor *pcpu);
+  explicit ProcessorPhase(Processor *pcpu);
   virtual ~ProcessorPhase();
 protected:
   Processor *m_pcpu;
@@ -66,13 +66,13 @@ protected:
 
 /*
   The Execute 1 Cycle class is a Processor Phase class designed to
-  execute a single instruction. 
+  execute a single instruction.
 
 */
 class phaseExecute1Cycle : public ProcessorPhase
 {
 public:
-  phaseExecute1Cycle(Processor *pcpu);
+  explicit phaseExecute1Cycle(Processor *pcpu);
   virtual ~phaseExecute1Cycle();
   virtual ClockPhase *advance();
 };
@@ -80,17 +80,18 @@ public:
 class phaseExecute2ndHalf : public ProcessorPhase
 {
 public:
-  phaseExecute2ndHalf(Processor *pcpu);
+  explicit phaseExecute2ndHalf(Processor *pcpu);
   virtual ~phaseExecute2ndHalf();
   virtual ClockPhase *advance();
   ClockPhase *firstHalf(unsigned int uiPC);
 protected:
   unsigned int m_uiPC;
 };
+
 class phaseCaptureInterrupt : public ProcessorPhase
 {
 public:
-  phaseCaptureInterrupt(Processor *pcpu);
+  explicit phaseCaptureInterrupt(Processor *pcpu);
   ~phaseCaptureInterrupt();
   virtual ClockPhase *advance();
   void firstHalf();
@@ -105,7 +106,7 @@ protected:
 class phaseIdle : public ProcessorPhase
 {
 public:
-  phaseIdle(Processor *pcpu);
+  explicit phaseIdle(Processor *pcpu);
   virtual ~phaseIdle();
   virtual ClockPhase *advance();
 protected:

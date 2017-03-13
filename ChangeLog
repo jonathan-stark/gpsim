@@ -1,3 +1,12 @@
+2017-03-13 Errol van de l'Isle <evandel@cix.co.uk>
+	* src/14bit-registers.h src/bitlog.h src/breakpoints.h
+	  src/clock_phase.h src/errors.h src/expr.h src/gpsim_interface.h
+	  src/gpsim_object.h src/ioports.h src/modules.h src/operator.h
+	  src/packages.h src/pic-instructions.h src/processor.h
+	  src/program_files.h src/stimuli.h src/trace.h
+	  src/trigger.h src/value.h src/xref.h
+	: code review, make signle argument constrctors explicit.
+
 2017-03-11 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/value.h src/value.cc
 	: Change internals of class String to use std::string instead of char *

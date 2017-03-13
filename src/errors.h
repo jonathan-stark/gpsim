@@ -23,7 +23,7 @@ class AnError : public gpsimObject {
 //*****************************************************************
 class Error : public AnError {
  public:
-  Error(const std::string &errMsg);
+  explicit Error(const std::string &errMsg);
   virtual ~Error();
 
   static int count;
@@ -32,7 +32,7 @@ class Error : public AnError {
 //*****************************************************************
 class FatalError : public AnError {
  public:
-  FatalError(const std::string &errMsg);
+  explicit FatalError(const std::string &errMsg);
   virtual ~FatalError();
 };
 

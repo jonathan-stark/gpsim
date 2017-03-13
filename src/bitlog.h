@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -40,14 +40,14 @@ class Cycle_Counter;
  * even ones.
  *
  * No effort is made to compress the 64-bit time entries into smaller
- * values. Consequently, a large amount of space is wasted. 
+ * values. Consequently, a large amount of space is wasted.
  *
- * Repeated events are not logged. E.g.. if two 1's are logged, the 
+ * Repeated events are not logged. E.g.. if two 1's are logged, the
  * second one is ignored.
- * 
+ *
  * The total number of events is defined when the class is instantiated.
  * The only requirement is that the number of events be an even power
- * of 2. A check for this is made, and 
+ * of 2. A check for this is made, and
  */
 
 class BoolEventLogger {
@@ -60,7 +60,7 @@ private:
 
 public:
 
-  BoolEventLogger(unsigned int _max_events = 4096);
+  explicit BoolEventLogger(unsigned int _max_events = 4096);
 
   void event(bool state);
   /*
@@ -84,7 +84,7 @@ public:
   unsigned int get_index(guint64 event_time);
 
   void dump(int start_index, int end_index=-1);
-  void dump_ASCII_art(guint64 time_step, 
+  void dump_ASCII_art(guint64 time_step,
 		      guint64 start_time,
 		      int end_index=-1);
 
@@ -93,7 +93,7 @@ public:
     return index & 1;
   }
 
-  bool get_state(guint64 event_time) 
+  bool get_state(guint64 event_time)
   {
     return (get_index(event_time) & 1) ? true : false;
   }
@@ -121,9 +121,9 @@ public:
  * at which it occurred. Event states are 'chars' so it is up to the
  * client of this class to interpret what the events mean.
  *
- * Repeated events are not logged. E.g.. if two 1's are logged, the 
+ * Repeated events are not logged. E.g.. if two 1's are logged, the
  * second one is ignored.
- * 
+ *
  */
 
 class ThreeStateEventLogger {
@@ -137,7 +137,7 @@ private:
   bool           bHaveEvents;       // True if any events have been acquired
 public:
 
-  ThreeStateEventLogger(unsigned int _max_events = 4096);
+  explicit ThreeStateEventLogger(unsigned int _max_events = 4096);
 
   /// Log an Event
   void event(char state);
@@ -154,7 +154,7 @@ public:
     return pEventBuffer[index & max_events];
   }
 
-  char get_state(guint64 event_time) 
+  char get_state(guint64 event_time)
   {
     return get_state(get_index(event_time));
   }
@@ -164,7 +164,7 @@ public:
     return pTimeBuffer[index & max_events];
   }
   void dump(int start_index, int end_index=-1);
-  void dump_ASCII_art(guint64 time_step, 
+  void dump_ASCII_art(guint64 time_step,
 		      guint64 start_time,
 		      int end_index=-1);
 

@@ -181,7 +181,7 @@ private:
   // Storage for scripts specifically associated with this module.
   class ModuleScript {
   public:
-    ModuleScript(string &name_);
+    explicit ModuleScript(std::string &name_);
     ~ModuleScript();
     void add_command(string &command);
     void run(ICommandHandler *);

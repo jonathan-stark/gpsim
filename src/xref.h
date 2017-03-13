@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -34,9 +34,9 @@ class XrefObject {
  public:
   gpsimObject *data;
   XrefObject();
-  XrefObject(gpsimObject *value);
+  explicit XrefObject(gpsimObject *value);
   virtual ~XrefObject();
-    
+
   virtual void _add(void *xref);
   virtual void clear(void *xref);
   virtual void *first_xref();

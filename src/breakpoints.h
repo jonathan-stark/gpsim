@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -61,12 +61,12 @@ public:
   virtual void print();
   virtual int  printTraced(Trace *pTrace, unsigned int tbi,
 			   char *pBuf, int szBuf);
-			   
+
   virtual void clear();
   virtual char const * bpName() { return "Execution"; }
 
-  Breakpoint_Instruction(Processor *new_cpu, 
-			 unsigned int new_address, 
+  Breakpoint_Instruction(Processor *new_cpu,
+			 unsigned int new_address,
 			 unsigned int bp);
   virtual ~Breakpoint_Instruction();
 
@@ -81,9 +81,9 @@ class Notify_Instruction : public Breakpoint_Instruction
 {
   TriggerObject *callback;
  public:
-  Notify_Instruction(Processor *cpu, 
-		     unsigned int address, 
-		     unsigned int bp, 
+  Notify_Instruction(Processor *cpu,
+		     unsigned int address,
+		     unsigned int bp,
 		     TriggerObject *cb);
   virtual ~Notify_Instruction();
   virtual enum INSTRUCTION_TYPES isa() {return NOTIFY_INSTRUCTION;};
@@ -95,9 +95,9 @@ class Notify_Instruction : public Breakpoint_Instruction
 class Profile_Start_Instruction : public Notify_Instruction
 {
  public:
-  Profile_Start_Instruction(Processor *cpu, 
-			    unsigned int address, 
-			    unsigned int bp, 
+  Profile_Start_Instruction(Processor *cpu,
+			    unsigned int address,
+			    unsigned int bp,
 			    TriggerObject *cb);
   virtual enum INSTRUCTION_TYPES isa() {return PROFILE_START_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Start"; }
@@ -106,9 +106,9 @@ class Profile_Start_Instruction : public Notify_Instruction
 class Profile_Stop_Instruction : public Notify_Instruction
 {
  public:
-  Profile_Stop_Instruction(Processor *cpu, 
-			   unsigned int address, 
-			   unsigned int bp, 
+  Profile_Stop_Instruction(Processor *cpu,
+			   unsigned int address,
+			   unsigned int bp,
 			   TriggerObject *cb);
   virtual enum INSTRUCTION_TYPES isa() {return PROFILE_STOP_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Stop"; }
@@ -116,7 +116,7 @@ class Profile_Stop_Instruction : public Notify_Instruction
 
 //
 // Assertions
-// 
+//
 // Assertions are like breakpoints except that they're conditional.
 // For example, a user may wish to verify that the proper register
 // bank is selected while a variable is accessed.
@@ -154,8 +154,8 @@ class RegisterAssertion : public Breakpoint_Instruction
   static bool IsAssertionLessThenEqualsBreakCondition(unsigned int uRegValue,
       unsigned int uRegMask, unsigned int uRegTestValue);
 
-  RegisterAssertion(Processor *new_cpu, 
-		    unsigned int instAddress, 
+  RegisterAssertion(Processor *new_cpu,
+		    unsigned int instAddress,
 		    unsigned int bp,
 		    unsigned int _regAddress,
 		    unsigned int _regMask,
@@ -163,8 +163,8 @@ class RegisterAssertion : public Breakpoint_Instruction
 		    bool bPostAssertion=false
 		    );
 
-  RegisterAssertion(Processor *new_cpu, 
-		    unsigned int instAddress, 
+  RegisterAssertion(Processor *new_cpu,
+		    unsigned int instAddress,
 		    unsigned int bp,
 		    unsigned int _regAddress,
 		    unsigned int _regMask,
@@ -248,7 +248,7 @@ public:
 
   class iterator {
   public:
-    iterator(int index) : iIndex(index) { }
+    explicit iterator(int index) : iIndex(index) { }
     int iIndex;
     iterator & operator++(int) {
       iIndex++;
@@ -285,36 +285,36 @@ public:
 
   Breakpoints();
   int set_breakpoint(BREAKPOINT_TYPES,Processor *,
-		     unsigned int, 
+		     unsigned int,
 		     unsigned int,
 		     TriggerObject *f = 0);
 
   int set_breakpoint(TriggerObject *,Processor *, Expression *pExpr=0);
 
   int set_execution_break(Processor *cpu, unsigned int address, Expression *pExpr=0);
-  int set_notify_break(Processor *cpu, 
-				unsigned int address, 
+  int set_notify_break(Processor *cpu,
+				unsigned int address,
 				TriggerObject *cb);
-  int set_profile_start_break(Processor *cpu, 
-				       unsigned int address, 
+  int set_profile_start_break(Processor *cpu,
+				       unsigned int address,
 				       TriggerObject *f1 = 0);
-  int set_profile_stop_break(Processor *cpu, 
-				      unsigned int address, 
+  int set_profile_stop_break(Processor *cpu,
+				      unsigned int address,
 				      TriggerObject *f1 = 0);
   int set_read_break(Processor *cpu, unsigned int register_number);
   int set_write_break(Processor *cpu, unsigned int register_number);
-  int set_read_value_break(Processor *cpu, 
-				    unsigned int register_number, 
-				    unsigned int value, 
+  int set_read_value_break(Processor *cpu,
+				    unsigned int register_number,
+				    unsigned int value,
 				    unsigned int mask=0xff);
   int set_write_value_break(Processor *cpu,
 				    unsigned int register_number,
 				    unsigned int value,
 				    unsigned int mask=0xff);
-  int set_read_value_break(Processor *cpu, 
-            unsigned int register_number, 
+  int set_read_value_break(Processor *cpu,
+            unsigned int register_number,
             unsigned int op,
-            unsigned int value, 
+            unsigned int value,
             unsigned int mask=0xff);
   int set_write_value_break(Processor *cpu,
             unsigned int register_number,
@@ -341,56 +341,56 @@ public:
 			    unsigned int register_number,
 			    unsigned int value,
 			    unsigned int mask=0xff);
-  int set_notify_write_value(Processor *cpu, 
+  int set_notify_write_value(Processor *cpu,
 				      unsigned int register_number,
-				      unsigned int value, 
+				      unsigned int value,
 				      unsigned int mask=0xff);
   bool set_expression(unsigned bp_number, Expression *pExpr);
 
   inline void clear_global() {global_break = GLOBAL_CLEAR;};
   inline void set_logging() { global_break |= GLOBAL_LOG; }
   void halt();
-  inline bool have_halt() 
-    { 
+  inline bool have_halt()
+    {
       return( (global_break & GLOBAL_STOP_RUNNING) != 0 );
     }
-  inline void clear_halt() 
+  inline void clear_halt()
     {
       global_break &= ~GLOBAL_STOP_RUNNING;
     }
-  inline bool have_interrupt() 
-    { 
+  inline bool have_interrupt()
+    {
       return( (global_break & GLOBAL_INTERRUPT) != 0 );
     }
-  inline void clear_interrupt() 
+  inline void clear_interrupt()
     {
       global_break &= ~GLOBAL_INTERRUPT;
     }
-  inline void set_interrupt() 
+  inline void set_interrupt()
     {
       global_break |= GLOBAL_INTERRUPT;
     }
-  inline bool have_sleep() 
-    { 
+  inline bool have_sleep()
+    {
       return( (global_break & GLOBAL_SLEEP) != 0 );
     }
-  inline void clear_sleep() 
+  inline void clear_sleep()
     {
       global_break &= ~GLOBAL_SLEEP;
     }
-  inline void set_sleep() 
+  inline void set_sleep()
     {
       global_break |= GLOBAL_SLEEP;
     }
-  inline bool have_pm_write() 
-    { 
+  inline bool have_pm_write()
+    {
       return( (global_break & GLOBAL_PM_WRITE) != 0 );
     }
-  inline void clear_pm_write() 
+  inline void clear_pm_write()
     {
       global_break &= ~GLOBAL_PM_WRITE;
     }
-  inline void set_pm_write() 
+  inline void set_pm_write()
     {
       global_break |= GLOBAL_PM_WRITE;
     }
@@ -419,14 +419,14 @@ public:
   void clear_all_set_by_user(Processor *c);
   void clear_all_register(Processor *c,gint64  address=-1);
   void initialize_breakpoints(unsigned int memory_size);
-  instruction *find_previous(Processor *cpu, 
-			     unsigned int address, 
+  instruction *find_previous(Processor *cpu,
+			     unsigned int address,
 			     instruction *_this);
   int find_free();
 };
 
 //
-// BreakPointRegister 
+// BreakPointRegister
 //
 //  This class serves as the base class for register break point and logging
 // classes. Register breakpoints are handled by replacing a register object
@@ -483,10 +483,10 @@ public:
   unsigned int m_uDefRegMask;
   string m_sOperator;
 
-  BreakpointRegister_Value(Processor *_cpu, 
-        int _repl, 
-        int bp, 
-        unsigned int bv, 
+  BreakpointRegister_Value(Processor *_cpu,
+        int _repl,
+        int bp,
+        unsigned int bv,
         unsigned int _operator,
         unsigned int bm );
 
@@ -579,9 +579,9 @@ public:
 class Break_register_read_value : public BreakpointRegister_Value
 {
 public:
-  Break_register_read_value(Processor *_cpu, 
-			    int _repl, 
-			    int bp, 
+  Break_register_read_value(Processor *_cpu,
+			    int _repl,
+			    int bp,
 			    unsigned int bv,
                             unsigned int _operator,
 			    unsigned int bm );
@@ -602,10 +602,10 @@ public:
 class Break_register_write_value : public BreakpointRegister_Value
 {
 public:
-  Break_register_write_value(Processor *_cpu, 
-			     int _repl, 
-			     int bp, 
-			     unsigned int bv, 
+  Break_register_write_value(Processor *_cpu,
+			     int _repl,
+			     int bp,
+			     unsigned int bv,
 			     unsigned int _operator,
 			     unsigned int bm );
   virtual ~Break_register_write_value();
@@ -625,8 +625,8 @@ class CommandAssertion : public Breakpoint_Instruction
 public:
   bool bPostAssertion; // True if assertion is checked after instruction simulates.
 
-  CommandAssertion(Processor *new_cpu, 
-                   unsigned int instAddress, 
+  CommandAssertion(Processor *new_cpu,
+                   unsigned int instAddress,
                    unsigned int bp,
                    const char *_command,
                    bool bPostAssertion
@@ -671,9 +671,9 @@ public:
 class Log_Register_Read_value : public  Break_register_read_value
 {
 public:
-  Log_Register_Read_value(Processor *_cpu, 
-			  int _repl, 
-			  int bp, 
+  Log_Register_Read_value(Processor *_cpu,
+			  int _repl,
+			  int bp,
 			  unsigned int bv,
 			  unsigned int _operator,
 			  unsigned int bm ) :
@@ -686,10 +686,10 @@ public:
 class Log_Register_Write_value : public Break_register_write_value
 {
 public:
-  Log_Register_Write_value(Processor *_cpu, 
-			     int _repl, 
-			     int bp, 
-			     unsigned int bv, 
+  Log_Register_Write_value(Processor *_cpu,
+			     int _repl,
+			     int bp,
+			     unsigned int bv,
 			     unsigned int _operator,
 			     unsigned int bm ) :
     Break_register_write_value(_cpu,  _repl, bp, bv, _operator,bm ) { };

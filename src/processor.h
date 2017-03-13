@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -53,7 +53,7 @@ class MemoryAccess :  public TriggerObject, public gpsimObject
 {
 public:
 
-  MemoryAccess(Processor *new_cpu);
+  explicit MemoryAccess(Processor *new_cpu);
   ~MemoryAccess();
 
   virtual Processor *get_cpu(void);
@@ -68,7 +68,7 @@ protected:
 
 //---------------------------------------------------------
 /// The ProgramMemoryAccess class is the interface used
-/// by objects other than the simulator to manipulate the 
+/// by objects other than the simulator to manipulate the
 /// pic's program memory. For example, the breakpoint class
 /// modifies program memory when break points are set or
 /// cleared. The modification goes through here.
@@ -84,7 +84,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   };
 
 
-  ProgramMemoryAccess(Processor *new_cpu);
+  explicit ProgramMemoryAccess(Processor *new_cpu);
   ~ProgramMemoryAccess();
 
   virtual void putToAddress(unsigned int addr, instruction *new_instruction);
@@ -107,7 +107,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   // is called.
   void put_opcode_start(unsigned int addr, unsigned int new_opcode);
 
-  // Assign a cross reference object to an instruction 
+  // Assign a cross reference object to an instruction
   void assign_xref(unsigned int address, XrefObject * cross_reference);
 
   virtual void callback(void);
@@ -126,7 +126,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   virtual void stop(void);
   virtual void finish(void);
 
-  // isModified -- returns true if the program at the address has been modified 
+  // isModified -- returns true if the program at the address has been modified
   // (this is only valid for those processor capable of writing to their own
   // program memory)
   bool isModified(unsigned int address);
@@ -138,7 +138,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   virtual int  find_address_from_line(FileContext *fc, int src_line);
   //virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
 
-  // Given an address to an instruction, find the source line that 
+  // Given an address to an instruction, find the source line that
   // created it:
 
   int get_src_line(unsigned int address);
@@ -170,9 +170,9 @@ class ProgramMemoryAccess :  public MemoryAccess
                                         enum instruction::INSTRUCTION_TYPES type);
   virtual void toggle_break_at_address(unsigned int address);
   virtual void set_break_at_line(unsigned int file_id, unsigned int src_line);
-  virtual void clear_break_at_line(unsigned int file_id, 
+  virtual void clear_break_at_line(unsigned int file_id,
                                    unsigned int src_line);
-  virtual void toggle_break_at_line(unsigned int file_id, 
+  virtual void toggle_break_at_line(unsigned int file_id,
                                     unsigned int src_line);
 
   void set_hll_mode(unsigned int);
@@ -183,7 +183,7 @@ private:
   ProgramMemoryCollection *m_pRomCollection;
   unsigned int
     _address,
-    _opcode, 
+    _opcode,
     _state;
 
 
@@ -202,14 +202,14 @@ private:
 
 //---------------------------------------------------------
 /// The RegisterMemoryAccess class is the interface used
-/// by objects other than the simulator to manipulate the 
+/// by objects other than the simulator to manipulate the
 /// cpu's register memory.
 
 class RegisterMemoryAccess : public MemoryAccess
 {
  public:
-  
-  RegisterMemoryAccess(Processor *pCpu);
+
+  explicit RegisterMemoryAccess(Processor *pCpu);
   virtual ~RegisterMemoryAccess();
   virtual Register *get_register(unsigned int address);
   unsigned int get_size(void) { return nRegisters; }
@@ -228,14 +228,14 @@ class RegisterMemoryAccess : public MemoryAccess
   unsigned int nRegisters;
   bool initialized;
   Register **registers;       // Pointer to the array of registers.
-                              // 
+                              //
 
 };
 
 //------------------------------------------------------------------------
 //
 /// FileContext - Maintain state information about files.
-/// The state of each source file for a processor is recorded in the 
+/// The state of each source file for a processor is recorded in the
 /// FileContext class. Clients can query information like the name
 /// of the source file or the line number responsible for generating
 /// a specific instruction.
@@ -246,7 +246,7 @@ private:
   string name_str;           // File name
   FILE   *fptr;              // File ptr when the file is opened
   vector<int> line_seek;     // A vector of file offsets to the start of lines
-  vector<int> pm_address;    // A vector of program memory addresses for lines 
+  vector<int> pm_address;    // A vector of program memory addresses for lines
   unsigned int m_uiMaxLine;  // number of lines in the file
 
   friend class FileContextList;
@@ -261,8 +261,8 @@ public:
   typedef vector<gpsimObject*> Cache;
   Cache m_cache;
 
-  FileContext(string &new_name);
-  FileContext(const char *new_name);
+  explicit FileContext(std::string &new_name);
+  explicit FileContext(const char *new_name);
   ~FileContext();
 
   void ReadSource();
@@ -292,7 +292,7 @@ public:
 //
 // FileContextList - a vector of FileContext objects.
 //
-// 
+//
 class FileContextList : private vector<FileContext>
 {
 public:
@@ -316,7 +316,7 @@ public:
     return list_file_id;
   }
 
-  int nsrc_files(void) 
+  int nsrc_files(void)
   {
     return (int) size();
   }
@@ -354,8 +354,8 @@ public:
 
   /// Load the source code for this processor. The pProcessorName
   /// is an optional name that a user can assign to the processor.
-  virtual bool LoadProgramFile(const char *hex_file, 
-                               FILE *pFile, 
+  virtual bool LoadProgramFile(const char *hex_file,
+                               FILE *pFile,
                                const char *pProcessorName) = 0;
   /// The source files for this processor.
   FileContextList files;
@@ -442,13 +442,13 @@ public:
 
   void create_invalid_registers ();
   void delete_invalid_registers ();
-  void add_file_registers(unsigned int start_address, 
-                          unsigned int end_address, 
+  void add_file_registers(unsigned int start_address,
+                          unsigned int end_address,
                           unsigned int alias_offset);
-  void delete_file_registers(unsigned int start_address, 
+  void delete_file_registers(unsigned int start_address,
                              unsigned int end_address, bool bRemoveWithoutDelete=false);
-  void alias_file_registers(unsigned int start_address, 
-                            unsigned int end_address, 
+  void alias_file_registers(unsigned int start_address,
+                            unsigned int end_address,
                             unsigned int alias_offset);
   virtual int  map_rm_address2index(int address) {return address;};
   virtual int  map_rm_index2address(int index) {return index;};
@@ -468,7 +468,7 @@ public:
   virtual void erase_program_memory(unsigned int address);
   virtual void init_program_memory_at_index(unsigned int address,
     unsigned int value);
-  virtual void init_program_memory_at_index(unsigned int address, 
+  virtual void init_program_memory_at_index(unsigned int address,
                                             const unsigned char *, int nBytes);
   virtual unsigned int program_memory_size(void) const {return 0;};
   virtual unsigned int program_address_limit(void) const {
@@ -476,7 +476,7 @@ public:
   };
   virtual unsigned int get_program_memory_at_address(unsigned int address);
   void build_program_memory(unsigned int *memory,
-                            unsigned int minaddr, 
+                            unsigned int minaddr,
                             unsigned int maxaddr);
 
   virtual int  map_pm_address2index(int address) const {return address;};
@@ -508,7 +508,7 @@ public:
   //virtual void initializeAttributes();
 
   //
-  // Processor State 
+  // Processor State
   //
   // copy the entire processor state to a file
   virtual void save_state(FILE *);
@@ -548,12 +548,12 @@ public:
   virtual bool getSafeMode() { return bSafeMode; }
 
   /// setUnknownMode - when true, gpsim will implement three-state logic
-  /// for data. When false, unkown data are treated as zeros. 
+  /// for data. When false, unkown data are treated as zeros.
   virtual void setUnknownMode(bool);
   virtual bool getUnknownMode() { return bUnknownMode; }
 
   /// setBreakOnReset - when true, gpsim will implement three-state logic
-  /// for data. When false, unkown data are treated as zeros. 
+  /// for data. When false, unkown data are treated as zeros.
   virtual void setBreakOnReset(bool);
   virtual bool getBreakOnReset() { return bBreakOnReset; }
 
@@ -579,9 +579,9 @@ public:
   void set_frequency(double f);
   virtual double get_frequency();
 
-  void set_ClockCycles_per_Instruction(unsigned int cpi) 
+  void set_ClockCycles_per_Instruction(unsigned int cpi)
   { clocks_per_inst = cpi; }
-  unsigned int get_ClockCycles_per_Instruction(void) 
+  unsigned int get_ClockCycles_per_Instruction(void)
   {
     return clocks_per_inst;
   }
@@ -595,11 +595,11 @@ public:
     return get_OSCperiod() * get_ClockCycles_per_Instruction();
   }
 
-  virtual void disassemble (signed int start_address, 
+  virtual void disassemble (signed int start_address,
                             signed int end_address);
-  virtual void list(unsigned int file_id, 
-                    unsigned int pcval, 
-                    int start_line, 
+  virtual void list(unsigned int file_id,
+                    unsigned int pcval,
+                    int start_line,
                     int end_line);
 
   // Configuration control
@@ -612,8 +612,8 @@ public:
 
   //
   // Processor reset
-  // 
-  
+  //
+
   virtual void reset(RESET_TYPE r) = 0;
 
   virtual double get_Vdd() { return m_vdd->getVal(); }
@@ -673,12 +673,12 @@ private:
 // grouped together in the ProcessConstructor class. Within the class
 // is a static STL list<> object that holds an instance of a
 // ProcessorConstructor for each gpsim supported processor. Whenever
-// the user selects a processor to simulate, the find() member 
+// the user selects a processor to simulate, the find() member
 // function will search through the list and find the one that matches
 // the user supplied ASCII string.
 //
 // Why have this class?
-// The idea behind this class is that a ProcessorConstructor object 
+// The idea behind this class is that a ProcessorConstructor object
 // can be instantiated for each processor and that instantiation will
 // place the object into list of processors. Prior to gpsim-0.21, a
 // giant array held the list of all available processors. However,
@@ -707,12 +707,12 @@ public:
 
 
   //------------------------------------------------------------
-  // contructor -- 
+  // contructor --
   //
   ProcessorConstructor(
        tCpuContructor    _cpu_constructor,
-                         const char *name1, 
-                         const char *name2, 
+                         const char *name1,
+                         const char *name2,
                          const char *name3=0,
                          const char *name4=0);
 
