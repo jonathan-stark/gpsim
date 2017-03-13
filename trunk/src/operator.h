@@ -29,9 +29,8 @@ using namespace std;
 
 
 class Operator : public Expression {
-
  public:
-  Operator(const std::string & newOpString)
+  explicit Operator(const std::string & newOpString)
     : opString(newOpString)
   {}
 
@@ -49,7 +48,6 @@ class Operator : public Expression {
 
 
 class BinaryOperator : public Operator {
-
  public:
   BinaryOperator(const std::string & opString, Expression* leftExpr, Expression* rightExpr);
   virtual ~BinaryOperator();
@@ -67,11 +65,9 @@ class BinaryOperator : public Operator {
   Expression* leftExpr;
   Expression* rightExpr;
   Value* value;
-
 };
 
 class UnaryOperator : public Operator {
-
  public:
   UnaryOperator(const std::string & opString, Expression* expr);
   virtual ~UnaryOperator();
@@ -86,7 +82,6 @@ class UnaryOperator : public Operator {
  protected:
   Expression*  expr;
   Value* value;
-
 };
 
 class ComparisonOperator : public BinaryOperator {
@@ -127,17 +122,14 @@ public:
 
 //-----------------------------------------------------------------
 class OpAdd : public BinaryOperator {
-
 public:
   OpAdd(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpAdd();
   virtual Value* applyOp(Value* leftValue, Value* rightValue);
-
 };
 
 //-----------------------------------------------------------------
 class OpAnd : public BinaryOperator {
-
 public:
   OpAnd(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpAnd();
@@ -155,7 +147,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpEq : public ComparisonOperator {
-
 public:
   OpEq(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpEq();
@@ -164,7 +155,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpGe : public ComparisonOperator {
-
 public:
   OpGe(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpGe();
@@ -173,7 +163,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpGt : public ComparisonOperator {
-
 public:
   OpGt(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpGt();
@@ -182,7 +171,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpLe : public ComparisonOperator {
-
 public:
   OpLe(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpLe();
@@ -191,7 +179,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpLogicalAnd : public BinaryOperator {
-
 public:
   OpLogicalAnd(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpLogicalAnd();
@@ -200,7 +187,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpLogicalOr : public BinaryOperator {
-
 public:
   OpLogicalOr(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpLogicalOr();
@@ -209,7 +195,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpLt : public ComparisonOperator {
-
 public:
   OpLt(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpLt();
@@ -218,7 +203,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpMpy : public BinaryOperator {
-
 public:
   OpMpy(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpMpy();
@@ -227,7 +211,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpNe : public ComparisonOperator {
-
 public:
   OpNe(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpNe();
@@ -236,7 +219,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpOr : public BinaryOperator {
-
 public:
   OpOr(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpOr();
@@ -245,7 +227,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpShl : public BinaryOperator {
-
 public:
   OpShl(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpShl();
@@ -254,7 +235,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpShr : public BinaryOperator {
-
 public:
   OpShr(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpShr();
@@ -263,7 +243,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpSub : public BinaryOperator {
-
 public:
   OpSub(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpSub();
@@ -272,7 +251,6 @@ public:
 
 //-----------------------------------------------------------------
 class OpXor : public BinaryOperator {
-
 public:
   OpXor(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpXor();
@@ -287,54 +265,48 @@ public:
 
 // -----------------------------------------------------------------
 class OpLogicalNot : public UnaryOperator {
-
 public:
-  OpLogicalNot(Expression* expr);
+  explicit OpLogicalNot(Expression* expr);
   virtual ~OpLogicalNot();
   Value* applyOp(Value* value);
 };
 
 // -----------------------------------------------------------------
 class OpNegate : public UnaryOperator {
-
 public:
-  OpNegate(Expression* expr);
+  explicit OpNegate(Expression* expr);
   virtual ~OpNegate();
   Value* applyOp(Value* value);
 };
 
 // -----------------------------------------------------------------
 class OpOnescomp : public UnaryOperator {
-
 public:
-  OpOnescomp(Expression* expr);
+  explicit OpOnescomp(Expression* expr);
   virtual ~OpOnescomp();
   Value* applyOp(Value* value);
 };
 
 // -----------------------------------------------------------------
 class OpPlus : public UnaryOperator {
-
 public:
-  OpPlus(Expression* expr);
+  explicit OpPlus(Expression* expr);
   virtual ~OpPlus();
   Value* applyOp(Value* value);
 };
 
 // -----------------------------------------------------------------
 class OpIndirect : public UnaryOperator {
-
 public:
-  OpIndirect(Expression* expr);
+  explicit OpIndirect(Expression* expr);
   virtual ~OpIndirect();
   Value* applyOp(Value* value);
 };
 
 // -----------------------------------------------------------------
 class OpAddressOf : public UnaryOperator {
-
 public:
-  OpAddressOf(Expression* expr);
+  explicit OpAddressOf(Expression* expr);
   virtual ~OpAddressOf();
   Value* evaluate();
   Value* applyOp(Value* value);

@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -54,7 +54,7 @@ enum PACKAGE_PIN_ERRORS
   E_PIN_OUT_OF_RANGE,
   E_PIN_EXISTS
 };
-// The PinGeometry holds information the gui can query to build 
+// The PinGeometry holds information the gui can query to build
 // a graphical representation of the pin.
 struct PinGeometry
 {
@@ -77,12 +77,10 @@ struct PinGeometry
 class Package
 {
 public:
-
   unsigned int number_of_pins;
 
-
-  Package(void);
-  Package(unsigned int number_of_pins);
+  Package();
+  explicit Package(unsigned int number_of_pins);
   virtual ~Package();
 
   void assign_pin(unsigned int pin_number, IOPIN *pin, bool warn=true);
@@ -114,7 +112,7 @@ protected:
 
   IOPIN **pins;  /* An array containing all of the package's pins. The index
 		  * into the array is the package's pin #. If pins[i] is NULL
-		  * then there's gpsim does not provide any resources for 
+		  * then there's gpsim does not provide any resources for
 		  * simulating the pin.
 		  */
 

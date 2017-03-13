@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -37,7 +37,7 @@ class Trace;
 // The TriggerObject is something that gets evaluated. If it evaluates
 // to true then a TriggerAction is invoked.
 // Most breakpoints are simple and don't need this complexity. For example,
-// an execution breakpoint only needs to halt simulation whenever it's 
+// an execution breakpoint only needs to halt simulation whenever it's
 // encountered. But gpsim defines the TriggerObject to be something like
 // 'if address is executed' and the TriggerAction to be 'halt simulation'.
 // However this design accomodates much more complicated situations. For
@@ -48,7 +48,7 @@ class Trace;
 // break w reg(42) (reg(42) == 0) && (STATUS & GIE == 0)
 //
 // In this case, the compound expression gets associated with write operations
-// to register 42. 
+// to register 42.
 
 class TriggerAction
 {
@@ -63,7 +63,7 @@ public:
 class SimpleTriggerAction : public TriggerAction
 {
 public:
-  SimpleTriggerAction(TriggerObject *_to);
+  explicit SimpleTriggerAction(TriggerObject *_to);
   virtual void action();
 protected:
   TriggerObject *to;
@@ -73,10 +73,10 @@ protected:
 // TriggerObject - a base class for handling all of gpsim's breakpoints.
 //
 // The TriggerObject class is designed to be part of a multiple inheritance
-// class heirarchy. Its main function is to provide an interface to the 
+// class heirarchy. Its main function is to provide an interface to the
 // breakpoint functionality.
 //
-// 
+//
 
 class TriggerObject
 {
@@ -98,7 +98,7 @@ class TriggerObject
   virtual void callback_print();
 
   // clear_trigger is invoked when the breakpoint associated with
-  // this object is cleared. 
+  // this object is cleared.
   virtual void clear_trigger();
 
   // Will search for a place to store this break point.
@@ -138,7 +138,7 @@ class TriggerObject
   virtual void new_message(string &);
 
   TriggerObject();
-  TriggerObject(TriggerAction *);
+  explicit TriggerObject(TriggerAction *);
   // Virtual destructor place holder
   virtual ~TriggerObject();
 protected:
@@ -149,7 +149,7 @@ private:
   Expression *m_PExpr;
   string m_sMessage;
 
-  // When the TriggerObject becomes true, then the TriggerAction is 
+  // When the TriggerObject becomes true, then the TriggerAction is
   // evaluated. E.g. If the trigger object is an execution breakpoint,
   // then whenever the PC == break address, the Breakpoint_Instruction
   // class (which is derived from this class) will invoke action->evaluate()

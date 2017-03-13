@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -130,7 +130,7 @@ public:
 
   unsigned int get_id(void) { return interface_id;};
   void set_id(unsigned int new_id) { interface_id = new_id;};
-  Interface(gpointer new_object=NULL);
+  explicit Interface(gpointer new_object = NULL);
 };
 
 
@@ -227,14 +227,10 @@ class Module;
 
 class ModuleInterface
 {
-
  public:
   Module *module;  // The module we're interfacing with.
 
-
-  ModuleInterface(Module *new_module);
-
-
+  explicit ModuleInterface(Module *new_module);
 };
 
 //------------------------------------------------------------------------
@@ -244,9 +240,7 @@ class Processor;
 class ProcessorInterface : public ModuleInterface
 {
  public:
-
-  ProcessorInterface(Processor *cpu);
-
+  explicit ProcessorInterface(Processor *cpu);
 };
 
 class ISimConsole;

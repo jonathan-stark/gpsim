@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -33,10 +33,10 @@ class PinModule;
 ///
 /// I/O ports
 ///
-/// An I/O port is collection of I/O pins. For a PIC processor, these 
+/// An I/O port is collection of I/O pins. For a PIC processor, these
 /// are the PORTA, PORTB, etc, registers. gpsim models I/O ports in
 /// a similar way it models other registers; there's a base class from
-/// which all specific I/O ports are derived. However, I/O ports are 
+/// which all specific I/O ports are derived. However, I/O ports are
 /// special in that they're an interface between a processor's core
 /// and the outside world. The requirements vary wildly from one processor
 /// to the next; in fact they even vary dynamically within one processor.
@@ -55,8 +55,8 @@ class PinModule;
 ///    Select  ======+
 ///                +-|-+  Outgoing
 ///    Source1 ===>| M |  data
-///    Source2 ===>| U |=============+    
-///    SourceN ===>| X |             |    
+///    Source2 ===>| U |=============+
+///    SourceN ===>| X |             |
 ///                +---+             |    +-------+
 ///    Control                       +===>| IOPIN |
 ///    Select  ======+                    |       |
@@ -103,10 +103,10 @@ class PinModule;
 
 ///------------------------------------------------------------
 ///
-/// SignalControl  - A pure virtual class that defines the interface for 
+/// SignalControl  - A pure virtual class that defines the interface for
 /// a signal control. The I/O Pin Modules will query the source's state
-/// via SignalControl. The control is usually used to control the I/O pin 
-/// direction (i.e. whether it's an input or output...), drive value, 
+/// via SignalControl. The control is usually used to control the I/O pin
+/// direction (i.e. whether it's an input or output...), drive value,
 /// pullup state, etc.
 /// When a Pin Module is through with the SignalControl, it will call
 /// the release() method. This is primarily used to delete the SignalControl
@@ -127,7 +127,7 @@ public:
 class PeripheralSignalSource : public SignalControl
 {
 public:
-  PeripheralSignalSource(PinModule *_pin);
+  explicit PeripheralSignalSource(PinModule *_pin);
   virtual ~PeripheralSignalSource();
   virtual void release();
 
@@ -154,8 +154,7 @@ private:
 class PortModule
 {
 public:
-
-  PortModule(unsigned int numIopins);
+  explicit PortModule(unsigned int numIopins);
   virtual ~PortModule();
 
   /// updatePort -- loop through update all I/O pins
@@ -178,7 +177,7 @@ public:
   ///      Most of the low level I/O pin related processing will be handled
   ///      here. The PortModule per-pin helper methods below essentially
   ///      call methods in the PinModule to do the dirty work.
-  ///      Each bit position can have only one PinModule. If multiple 
+  ///      Each bit position can have only one PinModule. If multiple
   ///      modules are added, only the first will be used and the others
   ///      will be ignored.
 
@@ -220,9 +219,9 @@ public:
 
   // set/get OutputMask which controls bits returned on I/O
   // port register get() call. Used to return 0 for  analog pins
-  virtual void setOutputMask (unsigned int OutputMask) 
+  virtual void setOutputMask (unsigned int OutputMask)
 	{ mOutputMask = OutputMask;}
-  virtual unsigned int getOutputMask () 
+  virtual unsigned int getOutputMask ()
 	{ return(mOutputMask);}
 protected:
   unsigned int mNumIopins;
@@ -241,9 +240,9 @@ private:
 /// I/O is one where there is a single data source, data sink and
 /// control, like say the GPIO pin on a small PIC. A complex pin
 /// is one that is multiplexed with peripherals.
-/// 
-/// The parent class 'PinMonitor', allows the PinModule to be 
-/// registered with the I/O pin. In other words, when the I/O pin 
+///
+/// The parent class 'PinMonitor', allows the PinModule to be
+/// registered with the I/O pin. In other words, when the I/O pin
 /// changes state, the PinModule will be notified.
 #define ANALOG_TABLE_SIZE 3
 
@@ -254,8 +253,8 @@ public:
   PinModule(PortModule *, unsigned int _pinNumber, IOPIN *new_pin=0);
   virtual ~PinModule();
 
-  /// updatePinModule -- The low level I/O pin state is resolved here 
-  /// by examining the direction and state of the I/O pin. 
+  /// updatePinModule -- The low level I/O pin state is resolved here
+  /// by examining the direction and state of the I/O pin.
 
   void updatePinModule();
 
@@ -266,7 +265,7 @@ public:
   void refreshPinOnUpdate(bool bForcedUpdate);
 
   void setPin(IOPIN *);
-  void clrPin() { m_pin = NULL; } 
+  void clrPin() { m_pin = NULL; }
   void setDefaultSource(SignalControl *);
   void setSource(SignalControl *);
   void setDefaultControl(SignalControl *);
@@ -286,7 +285,7 @@ public:
 
   IOPIN &getPin() { return *m_pin;}
 
-  /// 
+  ///
   virtual void setDrivenState(char);
   virtual void setDrivingState(char);
   virtual void set_nodeVoltage(double);
@@ -309,7 +308,7 @@ private:
   PortModule   *m_port;
   unsigned int  m_pinNumber;
   bool          m_bForcedUpdate;
-  Register     *m_analog_reg[ANALOG_TABLE_SIZE + 1];	
+  Register     *m_analog_reg[ANALOG_TABLE_SIZE + 1];
   bool		m_analog_active[ANALOG_TABLE_SIZE + 1];
 };
 
@@ -370,7 +369,7 @@ class IOPORT : public sfr_register
 {
 public:
 
-  IOPORT(unsigned int _num_iopins=8);
+  explicit IOPORT(unsigned int _num_iopins = 8);
   ~IOPORT();
 
   IOPIN *addPin(IOPIN *, unsigned int iPinNumber);
@@ -399,18 +398,18 @@ protected:
 
 
 
-  unsigned int 
+  unsigned int
     valid_iopins,   // A mask that for those ports that don't have all 8 io bits.
     stimulus_mask,  // A mask indicating which io bits have a stimulus.
-    internal_latch, // 
+    internal_latch, //
     num_iopins;     // Number of I/O pins attached to this port
 
 
 
 
-  // Deprecated functions of the IOPORT class 
+  // Deprecated functions of the IOPORT class
 
-  /// Stimuli 
+  /// Stimuli
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);

@@ -348,7 +348,7 @@ public:
   bool break_on_overflow;          /* Should over flow cause a break? */
   bool break_on_underflow;         /* Should under flow cause a break? */
 
-  Stack(Processor *);
+  explicit Stack(Processor *);
   virtual ~Stack() {}
   virtual bool push(unsigned int);
   virtual bool stack_overflow();
@@ -419,7 +419,7 @@ public:
   TOSL   tosl;
   TOSH   tosh;
 
-  Stack14E(Processor *);
+  explicit Stack14E(Processor *);
   ~Stack14E();
 
   virtual void reset(RESET_TYPE r);
@@ -999,7 +999,7 @@ class SR_MODULE: public TriggerObject
 
 public:
 
-    SR_MODULE(Processor *);
+    explicit SR_MODULE(Processor *);
     ~SR_MODULE();
 
     void	update();

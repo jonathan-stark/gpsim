@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -30,7 +30,7 @@ class BreakType;
 class Expression;
 
 /// gpsimObject - base class for most of gpsim's objects
-/// 
+///
 
 class gpsimObject {
  public:
@@ -58,7 +58,7 @@ class gpsimObject {
   virtual unsigned int get_value();
 
 
-  /// description - get a description of this object. If the object has 
+  /// description - get a description of this object. If the object has
   /// a name, then 'help value_name' at the command line will display
   /// the description.
 
@@ -112,7 +112,7 @@ protected:
 class BreakType
 {
 public:
-  BreakType(int _type) 
+  explicit BreakType(int _type)
     : m_type(_type)
   {
   }
@@ -128,4 +128,5 @@ public:
 protected:
   int m_type;
 };
+
 #endif //  __GPSIM_OBJECT_H__

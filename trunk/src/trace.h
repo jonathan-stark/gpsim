@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -77,7 +77,7 @@ public:
 class InvalidTraceObject : public TraceObject
 {
 public:
-  InvalidTraceObject(int type);
+  explicit InvalidTraceObject(int type);
 
   virtual ~InvalidTraceObject()
   {
@@ -250,7 +250,7 @@ protected:
 class CycleTraceType : public TraceType
 {
 public:
-  CycleTraceType(unsigned int nTraceEntries);
+  explicit CycleTraceType(unsigned int nTraceEntries);
 
   virtual ~CycleTraceType()
   {
@@ -357,7 +357,7 @@ protected:
 class ResetTraceType : public ProcessorTraceType
 {
 public:
-  ResetTraceType(Processor *_cpu);
+  explicit ResetTraceType(Processor *_cpu);
 
   virtual ~ResetTraceType()
   {
