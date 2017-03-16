@@ -620,8 +620,14 @@ void Breadboard_Window::update_board_matrix()
     {
         xsize = width/ROUTE_RES;
         ysize = height/ROUTE_RES;
-        board_matrix  = (unsigned char *)realloc(board_matrix, xsize*ysize);
-        mask_matrix  = (unsigned short *)realloc(mask_matrix, xsize*ysize*sizeof(unsigned short));
+        void *realloc_temp = realloc(board_matrix, xsize * ysize);
+        if (realloc_temp) {
+          board_matrix  = (unsigned char *)realloc_temp;
+        }
+        realloc_temp = realloc(mask_matrix, xsize * ysize * sizeof(unsigned short));
+        if (realloc_temp) {
+          mask_matrix  = (unsigned short *)realloc_temp;
+        }
     }
 
     // Clear first.

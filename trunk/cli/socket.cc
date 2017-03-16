@@ -211,7 +211,7 @@ bool ParseSocketLink(Packet *buffer, SocketLink **);
 class SocketInterface : public Interface
 {
 private:
-  Socket *sock;
+//  Socket *sock;
 
 public:
 
@@ -512,13 +512,11 @@ void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition
 
 void Socket::Close(SocketBase **sock)
 {
-  if (sock && *sock)
+  if (sock && *sock) {
     (*sock)->Close();
-
-  *sock = 0;
-
+    *sock = 0;
+  }
 }
-
 
 void Socket::Bind()
 {
@@ -819,7 +817,7 @@ void SocketBase::Service()
 // Socket Interface
 
 SocketInterface::SocketInterface(Socket *new_socket)
-  : sock(new_socket)
+//  : sock(new_socket)
 {
 }
 void SocketInterface::SimulationHasStopped (gpointer object)
@@ -1220,6 +1218,8 @@ static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition
   client->Service();
 
   std::cout << " SourceServer serviced client\n";
+
+  // FIXME: SocketBase *client goes out of scope almost certainly leaking resources.
 
   return TRUE;
 }
