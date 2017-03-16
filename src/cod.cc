@@ -15,7 +15,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -127,7 +127,7 @@ int PicCodProgramFileType::read_block(char * block, int block_number)
       fprintf(stderr, "PicCodProgramFileType::read_block fseek error byte %ld\n",
 	(size_t) block_number * COD_BLOCK_SIZE);
 	return ERR_BAD_FILE;
-  } 
+  }
   size_t n = fread(block, 1, COD_BLOCK_SIZE, codefile);
   if (n == 0 && feof(codefile))
        return SUCCESS;
@@ -705,7 +705,7 @@ int PicCodProgramFileType::read_directory(void)
 
   do {
     int next_dir_block = get_short_int(&dbi->dir.block[COD_DIR_NEXTDIR]);
-  
+
 
     if(next_dir_block) {
       dbi->next_dir_block_info = (DirBlockInfo *)malloc(sizeof(DirBlockInfo));
@@ -756,11 +756,7 @@ int PicCodProgramFileType::check_for_gputils(char *block)
     }
 
     int major=0, minor=0, micro=0;
-#ifdef RRR
-    if (isdigit(buffer[0])) {
-      // Extract version numbers in new gputils format
-      sscanf(&buffer[0],"%d.%d.%d",&major,&minor,&micro);
-#endif
+
     if (sscanf(&buffer[0],"%d.%d.%d",&major,&minor,&micro) >= 2)
     {
 
@@ -823,7 +819,7 @@ void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 		if(!cpu->files[file_index]->name().compare(cpu->files[file_index]->name().length()-4,4,".asm")) {
 			int current_hll_file_id;
 			int asmsrc_line;
-	
+
 			// Loop through the whole .asm file and look for any line markers
 			cpu->files[file_index]->rewind();
 			asmsrc_line=0;

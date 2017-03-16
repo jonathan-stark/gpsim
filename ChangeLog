@@ -1,3 +1,9 @@
+2017-03-16 Errol van de l'Isle <evandel@cix.co.uk>
+	* cli/socket.cc examples/scripts/client3.cc src/cod.cc src/lxt_write.c
+	: Correct some undefined behaviour
+	* gui/gui_breadboard.cc
+	: Fix memory reallocation error
+
 2017-03-13 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/trace.h
 	: Fix integer to bool  logic

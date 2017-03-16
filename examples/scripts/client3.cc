@@ -93,11 +93,11 @@ void *thread1(void *ignored)
   for(unsigned int i=0; i<128; i++) {
     printf("t1 query link\n");
     sock->WriteToLinkUInt32(h_reg1, i);
-    printf("t1 query link got %d\n",i);
+    printf("t1 query link got %u\n", i);
     if(! sock->QueryLinkUInt32(h_reg1,reg1) )
       printf("failed to decode reg1\n");
     if(i != reg1) {
-      printf("t1 failed expected %d, but got %d\n",i,reg1);
+      printf("t1 failed expected %u, but got %u\n", i, reg1);
       bPassed = false;
       break;
     }
@@ -107,12 +107,12 @@ void *thread1(void *ignored)
   */
 
   sock->RemoveLink(h_reg1);
-  
+
   sock->WriteSymbolUInt32("sim.verbosity",1);
 
   delete sock;
 
-  if(bPassed) 
+  if(bPassed)
     printf("The simulation passed!\n");
   else
     printf("The simulation failed\n");
@@ -176,12 +176,12 @@ void *thread2(void *ignored)
   for(unsigned int i=0; i<128; i++) {
     printf("t2 query link\n");
     sock->WriteToLinkUInt32(h_reg2, i);
-    printf("t2 query link got %d\n",i);
+    printf("t2 query link got %u\n", i);
     if(! sock->QueryLinkUInt32(h_reg2,reg2) )
       printf("failed to decode reg2\n");
 
     if(i != reg2) {
-      printf("t2 failed expected %d, but got %d\n",i,reg2);
+      printf("t2 failed expected %u, but got %u\n", i, reg2);
       bPassed = false;
       break;
     }
@@ -192,12 +192,12 @@ void *thread2(void *ignored)
   */
 
   sock->RemoveLink(h_reg2);
-  
+
   sock->WriteSymbolUInt32("sim.verbosity",1);
 
   delete sock;
 
-  if(bPassed) 
+  if(bPassed)
     printf("The simulation passed!\n");
   else
     printf("The simulation failed\n");
@@ -214,24 +214,22 @@ void *thread3(void *ignored)
   printf( "thread3 running\n");
 
   ClientSocketInterface *sock=sock3;
-  if(!sock)
+  if (!sock)
     exit(1);
 
-  int i;
-  while(i++<4)
+  int i = 0;
+  while (i++<4)
     sleep(1);
 
-  if(sock->CreateCallbackLink(0x1000)) {
+  if (sock->CreateCallbackLink(0x1000)) {
     printf("created callback link\n");
   }
 
-  while(1) {
-
-    printf("thread 3 received%s\n",sock->Receive());
+  while (1) {
+    printf("thread 3 received%s\n", sock->Receive());
   }
 
   printf("thread 3 is complete\n");
-
 }
 
 void start_threads(void)
@@ -255,7 +253,7 @@ void start_threads(void)
 
 //========================================================================
 //
-// 
+//
 //
 int main(int argc, char **argv)
 {
