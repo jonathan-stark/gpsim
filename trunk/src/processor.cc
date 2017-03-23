@@ -29,10 +29,8 @@ License along with this library; if not, see
 #include <stdio.h>
 #ifdef _WIN32
 #include "uxtime.h"
-#else
-#include <sys/time.h>
 #endif
-#include <time.h>
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -1673,24 +1671,22 @@ void ProgramMemoryCollection::SetAt(unsigned int uAddress, Value *pValue)
 }
 
 void ProgramMemoryCollection::ConsolidateValues(int &iColumnWidth,
-                                           vector<string> &aList,
-                                           vector<string> &aValue)
+                                           std::vector<string> &aList,
+                                           std::vector<string> &aValue)
 {
   unsigned int  uFirstAddress = 0;
   unsigned int  uAddress;
   //Register *    pReg = m_ppRegisters[0];
   //Integer       uLastValue(pReg->getRV_notrace().data);
   Integer uLastValue(m_pPma->get_opcode(0));
-  uLastValue.setBitmask((1<<(m_pProcessor->opcode_size()*8)) - 1);
+  uLastValue.setBitmask((1 << (m_pProcessor->opcode_size() * 8)) - 1);
 
   unsigned int uSize = GetSize();
 
-  for(uAddress = 0; uAddress < uSize; uAddress++) {
-    ostringstream sIndex;
-
+  for (uAddress = 0; uAddress < uSize; uAddress++) {
     unsigned int ui_opcode = m_pPma->get_opcode(uAddress);
 
-    if((unsigned int)uLastValue != ui_opcode) {
+    if ((unsigned int)uLastValue != ui_opcode) {
       PushValue(uFirstAddress, uAddress,
                 &uLastValue, aList, aValue);
       iColumnWidth = max(iColumnWidth, (int)aList.back().size());
@@ -1700,7 +1696,7 @@ void ProgramMemoryCollection::ConsolidateValues(int &iColumnWidth,
   }
   uAddress--;
   // Record the last set of elements
-  if(uFirstAddress <= uAddress) {
+  if (uFirstAddress <= uAddress) {
     PushValue(uFirstAddress, uAddress,
               &uLastValue, aList, aValue);
     iColumnWidth = max(iColumnWidth, (int)aList.back().size());
@@ -2694,9 +2690,10 @@ extern void EnsureTrailingFolderDelimiter(string &sPath);
 extern void SplitPathAndFile(string &sSource, string &sFolder, string &sFile);
 
 //----------------------------------------
-void FileContextList::SetSourcePath(const char *pPath) {
-  string sPath(pPath);
-  string sFolder, sFile;
+void FileContextList::SetSourcePath(const char *pPath)
+{
+  std::string sPath(pPath);
+  std::string sFile;
   SplitPathAndFile(sPath, sSourcePath, sFile);
   EnsureTrailingFolderDelimiter(sSourcePath);
 }
