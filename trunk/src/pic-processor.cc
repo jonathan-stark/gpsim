@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -33,7 +33,6 @@ License along with this library; if not, see
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <map>
 
 #include "../config.h"
 
@@ -590,9 +589,9 @@ public:
     // We just hit the break point. A few moments ago we
     // grabbed a snap shot of the system time and the simulated
     // pic's time. Now we're going to compare the two deltas and
-    // see how well they've tracked. 
+    // see how well they've tracked.
     //
-    // If the host is running faster than the PIC, we'll put the 
+    // If the host is running faster than the PIC, we'll put the
     // host to sleep briefly.
     //
     // If the host is running slower than the PIC, lengthen the
@@ -1133,7 +1132,7 @@ void pic_processor::create ()
 // FIXME parent's constructor.
 
 void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
-                                     RegisterValue por_value, 
+                                     RegisterValue por_value,
 				     const char *new_name,
 				     bool warn_dup)
 {
@@ -1141,7 +1140,7 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
   reg->set_cpu(this);
   if(addr < register_memory_size())
     {
-      if (registers[addr]) 
+      if (registers[addr])
       {
 	if (registers[addr]->isa() == Register::INVALID_REGISTER)
 	{
@@ -1181,7 +1180,6 @@ void pic_processor::delete_sfr_register(Register *pReg)
 {
 
   if (pReg) {
-
     unsigned int a = pReg->getAddress();
 
     if (0)
@@ -1191,10 +1189,7 @@ void pic_processor::delete_sfr_register(Register *pReg)
       delete_file_registers(a,a);
     else
       delete pReg;
-
-    pReg = 0;
   }
-
 }
 
 //-------------------------------------------------------------------
@@ -1307,7 +1302,7 @@ unsigned int pic_processor::get_config_word(unsigned int address)
 
 int pic_processor::get_config_index(unsigned int address)
 {
-  
+
   if (m_configMemory)
   {
 
@@ -1322,7 +1317,7 @@ int pic_processor::get_config_index(unsigned int address)
 	}
      }
   }
- 
+
   return -1;
 }
 
@@ -1772,8 +1767,8 @@ void pic_processor::assignMCLRPin(int pkgPinNumber)
     else if (m_MCLR != package->get_pin(pkgPinNumber))
     {
 
-        cout << "BUG?: assigning multiple MCLR pins: " 
-	<< dec << pkgPinNumber << " " << __FILE__ <<  " " 
+        cout << "BUG?: assigning multiple MCLR pins: "
+	<< dec << pkgPinNumber << " " << __FILE__ <<  " "
 	<< __LINE__ << endl;
     }
   }
@@ -1782,7 +1777,7 @@ void pic_processor::assignMCLRPin(int pkgPinNumber)
 // This function sets the pin currently set as MCLR back to its original function
 void pic_processor::unassignMCLRPin()
 {
-  
+
     if (package && m_MCLR_Save)
     {
         size_t l = m_MCLR_Save->name().find_first_of('.');
@@ -1822,8 +1817,8 @@ private:
 // This function sets a label on a pin and if PinMod is defined
 // removes its control from it's port register
 //
-void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number, 
-		PinModule *PinMod, 
+void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
+		PinModule *PinMod,
 		const char * name,
 		bool in,
                 PicPortRegister *m_port,
@@ -1859,7 +1854,7 @@ void pic_processor::set_clk_pin(unsigned int pkg_Pin_Number,
   }
 }
 // This function reverses the effects of the previous function
-void pic_processor::clr_clk_pin(unsigned int pkg_Pin_Number, 
+void pic_processor::clr_clk_pin(unsigned int pkg_Pin_Number,
 		PinModule *PinMod,
 		PicPortRegister *m_port,
 		PicTrisRegister *m_tris,
@@ -1889,7 +1884,7 @@ void pic_processor::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
-  
+
   if (pin_Number < 253)
   {
 	m_pin = package->get_pin(pin_Number);
@@ -1912,7 +1907,7 @@ void pic_processor::osc_mode(unsigned int value)
 	    clr_clk_pin(pin_Number, m_osc_Monitor[1]);
 	}
   }
-  
+
 }
 void pic_processor::Wput(unsigned int value)
 {

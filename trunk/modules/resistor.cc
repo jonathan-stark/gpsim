@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -56,7 +56,7 @@ public:
   PullupResistor *pur;
 
 
-  ResistanceAttribute(PullupResistor *ppur) 
+  ResistanceAttribute(PullupResistor *ppur)
     : Float("resistance",0.0,"resistance value of the pullup"),
       pur(ppur)
   {
@@ -91,7 +91,7 @@ public:
   PullupResistor *pur;
 
 
-  CapacitanceAttribute(PullupResistor *ppur) 
+  CapacitanceAttribute(PullupResistor *ppur)
     : Float("capacitance",0.0,"pin capacitance of pullup resistor"),
       pur(ppur)
   {
@@ -126,7 +126,7 @@ public:
   PullupResistor *pur;
 
 
-  VoltageAttribute(PullupResistor *ppur) 
+  VoltageAttribute(PullupResistor *ppur)
     : Float("voltage",0.0,"Voltage of pullup resistor"),
       pur(ppur)
   {
@@ -152,7 +152,7 @@ public:
 };
 
 //--------------------------------------------------------------
-// PullupResistor::create_iopin_map 
+// PullupResistor::create_iopin_map
 //
 
 void PullupResistor::create_iopin_map(void)
@@ -200,7 +200,7 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 }
 
 //--------------------------------------------------------------
-PullupResistor::PullupResistor(const char *init_name, const char * desc, float vinit) : 
+PullupResistor::PullupResistor(const char *init_name, const char * desc, float vinit) :
 	Module(init_name, desc)
 {
   string s;
@@ -288,7 +288,7 @@ void PullupResistor::build_window(void)
   gtk_container_add (GTK_CONTAINER (pu_window), buttonbox);
 
   gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
-      
+
   button = gtk_button_new_with_label (name().c_str());
   g_signal_connect(button, "clicked",
 		     G_CALLBACK(pu_cb), (gpointer)this);

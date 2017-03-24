@@ -140,8 +140,8 @@ static int parse_data(char *str, int type) {
   } else {
     if (type == CHAR_FLAG) {
       ptr = ptr + 1;
-      strcpy(data[i].data, ptr);
-      data[i].size = strlen(data[i].data);
+      strcpy((char *)data[i].data, ptr);
+      data[i].size = strlen((char *)data[i].data);
     } else {
       fprintf(stderr, "Error: Unknown data type %d\n", type);
       return 1;
@@ -246,7 +246,7 @@ static int output_file(void) {
 
 
 int main(int argc, char *argv[]) {
-  int rc, i;
+  int rc;
 
   parse_defaults();
   if ((rc = parse_args(argc, argv)) != 0)

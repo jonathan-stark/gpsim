@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -50,7 +50,7 @@ class VSscaleAttribute : public Float {
 public:
   SolarModule *pur;
 
-  VSscaleAttribute(SolarModule *ppur) 
+  VSscaleAttribute(SolarModule *ppur)
     : Float("VSscale",0.0,"Solar Panel Voltage scale factor"),
       pur(ppur)
   {
@@ -58,7 +58,7 @@ public:
       Float::set(pur->VSscale);
   }
 
-  virtual void set(double r) 
+  virtual void set(double r)
   {
     Float::set(r);
 
@@ -76,7 +76,7 @@ class inductorAttribute : public Float {
 public:
   SolarModule *pur;
 
-  inductorAttribute(SolarModule *ppur) 
+  inductorAttribute(SolarModule *ppur)
     : Float("inductor",0.0,"Buck converter inductor"),
       pur(ppur)
   {
@@ -84,7 +84,7 @@ public:
       Float::set(pur->inductor);
   }
 
-  virtual void set(double r) 
+  virtual void set(double r)
   {
     Float::set(r);
 
@@ -102,7 +102,7 @@ class VBscaleAttribute : public Float {
 public:
   SolarModule *pur;
 
-  VBscaleAttribute(SolarModule *ppur) 
+  VBscaleAttribute(SolarModule *ppur)
     : Float("VBscale",0.0,"Battery Voltage scale factor"),
       pur(ppur)
   {
@@ -110,7 +110,7 @@ public:
       Float::set(pur->VBscale);
   }
 
-  virtual void set(double r) 
+  virtual void set(double r)
   {
     Float::set(r);
 
@@ -128,7 +128,7 @@ class AscaleAttribute : public Float {
 public:
   SolarModule *pur;
 
-  AscaleAttribute(SolarModule *ppur) 
+  AscaleAttribute(SolarModule *ppur)
     : Float("Ascale",0.0,"panel current scale factor"),
       pur(ppur)
   {
@@ -136,7 +136,7 @@ public:
       Float::set(pur->Ascale);
   }
 
-  virtual void set(double r) 
+  virtual void set(double r)
   {
     Float::set(r);
 
@@ -154,7 +154,7 @@ class AoffAttribute : public Float {
 public:
   SolarModule *pur;
 
-  AoffAttribute(SolarModule *ppur) 
+  AoffAttribute(SolarModule *ppur)
     : Float("Aoffset",0.0,"panel zero current Voltage"),
       pur(ppur)
   {
@@ -162,7 +162,7 @@ public:
       Float::set(pur->Aoffset);
   }
 
-  virtual void set(double r) 
+  virtual void set(double r)
   {
     Float::set(r);
 
@@ -180,7 +180,7 @@ class DOCAttribute : public Float {
 public:
   SolarModule *pur;
 
-  DOCAttribute(SolarModule *ppur) 
+  DOCAttribute(SolarModule *ppur)
     : Float("BDOC",0.0,"Battery degree of charge"),
       pur(ppur)
   {
@@ -188,7 +188,7 @@ public:
       Float::set(pur->BDOC);
   }
 
-  virtual void set(double r) 
+  virtual void set(double r)
   {
     Float::set(r);
 
@@ -202,7 +202,7 @@ public:
 
 
 //--------------------------------------------------------------
-// SolarModule::create_iopin_map 
+// SolarModule::create_iopin_map
 //
 
 class PCM : public IOPIN
@@ -310,7 +310,7 @@ void SolarModule::setPcm(bool bNewState)
 	Thigh = now - start_cycle;
 	Solar_panel(Thigh * get_cycles().seconds_per_cycle());
     }
-	
+
 }
 
 void SolarModule::create_iopin_map(void)
@@ -354,7 +354,7 @@ Module * SolarModule::construct(const char *_new_name)
 
 
 //--------------------------------------------------------------
-SolarModule::SolarModule(const char *init_name, const char * desc) : 
+SolarModule::SolarModule(const char *init_name, const char * desc) :
 	Module(init_name, desc), Voc(21.60), Isc(1.27), Vmp(17.3), Imp(1.16),
 	Rbat(1.5), cap_mah(20.), enabled(false)
 {
@@ -493,14 +493,14 @@ void SolarModule::pvi_init()
 // pvi_init() must first be call to compute r0-r3 and v0-v3
 // this model follows the work of Mohamed Azab in "Improved Circuit Model
 // of Photovoltaic Array" in International Journal of Electrical Power
-// and Energy Systems Engineering 2:3 2009 
+// and Energy Systems Engineering 2:3 2009
 double SolarModule::pvi(double volts)
 {
     double di0, di1, di2, di3;
 
 	if (volts >= Voc)
 	    return 0;
-        di0 = di1 = di2 = di3 = 0.;
+        di1 = di2 = di3 = 0.0;
         di0 = volts / r0;
         if (volts > v1)
         {
@@ -554,7 +554,7 @@ void SolarModule::set_BDOC(double soc)
 
 double SolarModule::battery_voltage(double soc)
 {
-    static double bat_soc[] = { 6., 11.51, 11.66, 11.81, 11.96, 12.10, 12.24, 
+    static double bat_soc[] = { 6., 11.51, 11.66, 11.81, 11.96, 12.10, 12.24,
 		12.37, 12.50, 12.62, 12.7, 13.5};
 
     int i1, i2;
@@ -593,7 +593,7 @@ double SolarModule::battery_voltage(double soc)
  *	         maximum power point lies.
  *	         This region is a hystorises region of the computation.
  *	         If the initial voltage is less than Vmppt we use the region
- *	         1 algorithm unless we go into region 2 in which case we 
+ *	         1 algorithm unless we go into region 2 in which case we
  *	         change to that algorithm. Comversly if the inital voltage
  *	         for the interations is greater than Vmppt we use the region 2
  *	         algorithm unless we go into region 1 in which case we change
@@ -608,7 +608,7 @@ void SolarModule::Solar_panel(double Ton)
 	guint64 cycle_off;
 
     Rbat = 0.0005*exp(0.11*BDOC);
-    // The following is an estimate of the average current 
+    // The following is an estimate of the average current
     // through an inductor when a constant voltage is applied
 
     if (Ton)
@@ -687,7 +687,7 @@ void SolarModule::Solar_panel(double Ton)
 	Vsp = Voc;
 	Isp = 0.;
     }
-		
+
   if (Ton)
       cycle_off = 2200;
   else
@@ -721,7 +721,7 @@ void SolarModule::Solar_panel(double Ton)
       future_cycle = cycle_off + get_cycles().get();
       get_cycles().set_break(future_cycle, this);
   }
-      
+
 }
 
 void SolarModule::callback()
@@ -749,7 +749,7 @@ void SolarModule::build_window(void)
   gtk_container_add (GTK_CONTAINER (pu_window), buttonbox);
 
   gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
-      
+
   button = gtk_button_new_with_label (name().c_str());
   g_signal_connect(button, "clicked",
 		     G_CALLBACK(pu_cb), (gpointer)this);

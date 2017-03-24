@@ -153,7 +153,7 @@ void cmd_module::module(cmd_options_str *cos,
   //  evaluate(eList, parameters, &nParameters);
 
   list <string> :: iterator si;
-  string s1, s2;
+  std::string s1;
   int nStrings = 0;
 
   if (strs) {
@@ -165,7 +165,6 @@ void cmd_module::module(cmd_options_str *cos,
 
       if (nStrings >= 2) {
         ++si;
-        s2 = *si;
       }
     }
   }
@@ -186,7 +185,6 @@ void cmd_module::module(cmd_options_str *cos,
   //  module(cos, (char*)s1.c_str(), (char*)s2.c_str(), parameters[0]);
   else
     cout << "module command error\n";
-
 }
 
 

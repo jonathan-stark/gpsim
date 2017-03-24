@@ -15,14 +15,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
 //
 // fopen-path.cc
 //
-// Modified version of fopen, that searches a path.  
+// Modified version of fopen, that searches a path.
 // Technically this is a c++ file, but it should work in C too.
 // The functions use a C calling convention for compatibility.
 
@@ -31,7 +31,7 @@ License along with this library; if not, see
 #include <string>
 #include <string.h>
 #include <assert.h>
-#include <unistd.h> 
+#include <unistd.h>
 
 #include "../config.h"
 #include "gpsim_def.h"
@@ -42,10 +42,10 @@ License along with this library; if not, see
 static char **searchPath = 0;
 static int searchPathCount = 0;
 
-class CSourceSearchPath : public String 
+class CSourceSearchPath : public String
 {
 public:
-        CSourceSearchPath() : String("SourcePath", NULL, "Search path for source files") 
+        CSourceSearchPath() : String("SourcePath", NULL, "Search path for source files")
         {
         }
   virtual void set(const char *cP,int len=0) {
@@ -73,7 +73,6 @@ public:
 
   char *toString(char *return_str, int len)
   {
-    string sPath;
     for (int iIndex = 0;
         iIndex < searchPathCount && len < 0;
         ++iIndex) {
@@ -89,7 +88,7 @@ public:
 };
 
 ///
-/// InitSourceSearchSymbol 
+/// InitSourceSearchSymbol
 /// Used to initialize the CSourceSearchPath during startup.
 /// The symbol table will delete the CSourceSearchPath
 /// object so CSourceSearchPath cannot be static.
@@ -140,7 +139,7 @@ void set_search_path (const char *path)
     for (cp = path, pathStr = searchPath, ii = 0, tp = strchr (path, ':');
 	       (0 != tp) && (ii < pathLen);
 	       ++ii) {
-	
+
       assert ((0 != cp) && (0 != tp));
       if (tp == cp) {               // treat empty path as "."
 	        *pathStr = strdup (".");  // allocate, in case we free later
@@ -204,7 +203,7 @@ FILE *fopen_path(const char *filename, const char *perms)
   strncpy(nameBuff, filename, maxpath);
   nameBuff[maxpath-1] = 0;
 
- 
+
   for (cp = nameBuff; *cp; ++cp) {	// convert DOS slash to Unix slash
       if ('\\' == *cp) *cp = '/';
   }
