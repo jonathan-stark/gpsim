@@ -340,8 +340,7 @@ void Trace::deleteTraceFrame()
 {
   if (!current_frame)
     return;
-  list <TraceFrame *> :: iterator tfIter;
-  list <TraceObject *> :: reverse_iterator toIter;
+  std::list <TraceFrame *> :: iterator tfIter;
 
   for(tfIter = traceFrames.begin();
       tfIter != traceFrames.end();

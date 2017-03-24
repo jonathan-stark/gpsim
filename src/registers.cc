@@ -601,14 +601,14 @@ void RegisterCollection::SetAt(unsigned int uIndex, Value *pValue)  {
 
 void RegisterCollection::ConsolidateValues(int &iColumnWidth,
                                            vector<string> &aList,
-                                           vector<string> &aValue) {
+                                           vector<string> &aValue)
+{
   unsigned int  uFirstIndex = 0;
   unsigned int  uIndex;
   Register *    pReg = m_ppRegisters[0];
   Integer       uLastValue(pReg->getRV_notrace().data);
   uLastValue.setBitmask(m_pProcessor->register_mask());
   for(uIndex = 0; uIndex < m_uSize; uIndex++) {
-    ostringstream sIndex;
     pReg = m_ppRegisters[uIndex];
     RegisterValue rvValue = pReg->getRV_notrace();
     if((unsigned int)uLastValue != rvValue.data) {

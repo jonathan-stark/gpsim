@@ -1,4 +1,11 @@
 2017-03-23 Errol van de l'Isle <evandel@cix.co.uk>
+	* cli/cmd_module.cc cli/input.cc extras/rs232-gen/rs232-gen.c
+	  extras/solar/solar.cc modules/paraface.cc modules/resistor.cc
+	  modules/ttl.cc src/fopen-path.cc src/pic-processor.cc
+	  src/registers.cc src/trace.cc
+	: Remove unused variables
+
+2017-03-23 Errol van de l'Isle <evandel@cix.co.uk>
 	* src/processor.cc
 	: Removed unused variables
 

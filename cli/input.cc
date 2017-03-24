@@ -930,13 +930,14 @@ void initialize_readline (void)
 
 #if defined(HAVE_READLINE) && defined(HAVE_PERL)
 // JRH - An experiment
-void EnableKeypressHook(bool bEnable) {
-  if(bEnable) {
+void EnableKeypressHook(bool bEnable)
+{
+  if (bEnable) {
     g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
   }
   else {
 //    g_source_remove_by_funcs_user_data(keypressed, NULL);
-    bEnable = g_source_remove(g_iWatchSourceID);
+    g_source_remove(g_iWatchSourceID);
     g_io_channel_unref(channel);
   }
 }

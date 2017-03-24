@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, see 
+License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
@@ -64,7 +64,7 @@ TTLbase::~TTLbase()
 //------------------------------------------------------------------------
 // Some edge-sensitive pins
 //
-// 
+//
 
 //------------------------------------------------------------
 // Clock
@@ -174,7 +174,7 @@ void Reset::setDrivenState(bool bNewState)
 //------------------------------------------------------------------------
 // TTL377 - Octal Latch
 //
-// 
+//
 
 Module *TTL377::construct(const char *_new_name)
 {
@@ -198,7 +198,7 @@ TTL377::TTL377(const char *_name)
   char pName[4];
   pName[2] = 0;
   int i;
-  string sPinName;
+
   for (i=0; i<8; i++) {
     pName[0] = 'D';
     pName[1] = '0' + i;
@@ -250,9 +250,9 @@ void TTL377::update_state()
   bool state[8];
   // Copy the inputs to the outputs through an intermediary to simulate
   // the simultaneous action of the real part.
-  for (i=0; i<8; i++) 
+  for (i=0; i<8; i++)
     state[i]=m_D[i]->getDrivenState();
-  for (i=0; i<8; i++) 
+  for (i=0; i<8; i++)
     m_Q[i]->putState(state[i]);
 }
 
@@ -278,14 +278,14 @@ void TTL377::create_iopin_map()
   package->assign_pin(17, m_D[6]);
   package->assign_pin(18, m_D[7]);
   package->assign_pin(19, m_Q[7]);
-  
+
 }
 
 
 //------------------------------------------------------------------------
 // TTL595 - Octal shift register
 //
-// 
+//
 
 Module *TTL595::construct(const char *_new_name)
 {
@@ -363,7 +363,7 @@ void TTL595::setClock(bool bNewClock)
 void TTL595::setEnable(bool bNewEnable)
 {
   // This is the output enable pin on this device
-  for (int i=0; i<8; i++) 
+  for (int i=0; i<8; i++)
     m_Q[i]->update_direction(!bNewEnable,true);
 }
 
@@ -425,7 +425,7 @@ void TTL595::create_iopin_map()
 //------------------------------------------------------------------------
 // TTL165 - 8-bit parallel to serial shift register
 //
-// 
+//
 
 Module *TTL165::construct(const char *_new_name)
 {
@@ -440,7 +440,7 @@ Module *TTL165::construct(const char *_new_name)
 
 
 TTL165::TTL165(const char *_name)
-  : TTLbase(_name, "TTL165 - PISO Shift Register"), 
+  : TTLbase(_name, "TTL165 - PISO Shift Register"),
      m_bStrobe(false), sreg(0)
 {
 
