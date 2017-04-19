@@ -1,3 +1,7 @@
+2017-04-19 Roy Rankin <rrankin@ihug.com.au>
+	* src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
+	: Feature request #55 Add P18f2525 processor 
+
 2017-03-23 Errol van de l'Isle <evandel@cix.co.uk>
 	* cli/cmd_module.cc cli/input.cc extras/rs232-gen/rs232-gen.c
 	  extras/solar/solar.cc modules/paraface.cc modules/resistor.cc

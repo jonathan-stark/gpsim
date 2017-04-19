@@ -424,6 +424,18 @@ class P18F2520 : public P18F2x21
   virtual unsigned int get_device_id() { return (0x0c << 8)|(0x4 <<5); }
 };
 
+class P18F2525 : public P18F2x21
+{
+ public:
+  virtual PROCESSOR_TYPE isa(){return _P18F2525_;};
+  P18F2525(const char *_name=0, const char *desc=0);
+  static Processor *construct(const char *name);
+
+  virtual unsigned int program_memory_size() const { return 24576; };
+  virtual unsigned int last_actual_register () const { return 0x05FF;};
+  virtual unsigned int get_device_id() { return (0x0c << 8)|(0x6 <<5); }
+};
+
 class P18F2620 : public P18F2x21
 {
  public:

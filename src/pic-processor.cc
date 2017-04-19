@@ -291,6 +291,8 @@ ProcessorConstructor pP18F2455(P18F2455::construct,
                               "__18F2455",  "pic18f2455",   "p18f2455", "18f2455");
 ProcessorConstructor pP18F2520(P18F2520::construct,
                               "__18F2520",  "pic18f2520",   "p18f2520", "18f2520");
+ProcessorConstructor pP18F2525(P18F2525::construct,
+                              "__18F2525",  "pic18f2525",   "p18f2525", "18f2525");
 ProcessorConstructor pP18F2550(P18F2550::construct,
                               "__18F2550",  "pic18f2550",   "p18f2550", "18f2550");
 ProcessorConstructor pP18F2620(P18F2620::construct,
