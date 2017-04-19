@@ -2092,6 +2092,38 @@ Processor * P18F2520::construct(const char *name)
   return p;
 }
 
+//------------------------------------------------------------------------
+//
+// P18F2525
+// 
+
+P18F2525::P18F2525(const char *_name, const char *desc)
+  : P18F2x21(_name,desc)
+{
+
+  if(verbose)
+    cout << "18F2525 constructor, type = " << isa() << '\n';
+
+}
+
+
+Processor * P18F2525::construct(const char *name)
+{
+
+  P18F2525 *p = new P18F2525(name);
+
+  if(verbose)
+    cout << " 18F2525 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+
+  if(verbose&2)
+    cout << " 18F2525 construct completed\n";
+  return p;
+}
+
 
 //------------------------------------------------------------------------
 //
