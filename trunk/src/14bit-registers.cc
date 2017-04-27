@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998-2000 Scott Dattalo
-   Copyright (C) 2013	Roy R. Rankin
+   Copyright (C) 2013-2017 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -43,6 +43,14 @@ License along with this library; if not, see
 #define Dprintf(arg) {printf("0x%06" PRINTF_GINT64_MODIFIER "X %s() ", cycles.get(), __FUNCTION__); printf arg; }
 #else
 #define Dprintf(arg) {}
+#endif
+
+// Debug OSCCON
+#define CDEBUG
+#if defined(CDEBUG)
+#define CDprintf(arg) {printf("0x%06" PRINTF_GINT64_MODIFIER "X %s() ", cycles.get(), __FUNCTION__); printf arg; }
+#else
+#define CDprintf(arg) {}
 #endif
 
 pic_processor *temp_cpu;
@@ -220,17 +228,169 @@ void  OSCTUNE::put(unsigned int new_value)
 // Clock is stable
 void OSCCON::callback()
 {
-    value.put(value.get() | IOFS);
+    unsigned int new_value = value.get();
+
+    if (future_cycle <= get_cycles().get())
+        future_cycle = 0;
+    CDprintf(("OSCCON clock_state=%d\n", clock_state));
+    switch(clock_state)
+    {
+    case OST:
+      CDprintf(("OSCCON switch clock\n"));
+      if (has_iofs_bit)
+            new_value &= ~IOFS;
+      else
+            new_value &= ~(HTS|LTS);
+      new_value |= OSTS;
+      value.put(new_value);
+      clock_state = EXCSTABLE;
+      cpu_pic->set_RCfreq_active(false);
+      return;
+
+    case LFINTOSC:
+      if (has_iofs_bit)
+	new_value |= IOFS;
+      else
+      {
+        new_value &= ~HTS;
+        new_value |= LTS;
+      }
+      value.put(new_value);
+      CDprintf(("OSCCON HF osccon=0x%x\n", value.get()));
+      return;
+
+    case HFINTOSC:
+      if (!has_iofs_bit) new_value &= ~LTS;
+      new_value |= HTS;
+      value.put(new_value);
+      CDprintf(("OSCCON HF osccon=0x%x\n", value.get()));
+      return;
+
+    case INTOSC:
+      new_value |= IOFS;
+      value.put(new_value);
+      return;
+
+    case EXCSTABLE:
+      if (!has_iofs_bit) new_value &= ~LTS;
+      new_value &= ~HTS;
+      value.put(new_value);
+      return;
+
+    default:
+      fprintf(stderr, "OSCCON::callback unexpexted clock state %d\n", clock_state);
+      return;
+    }
 }
-bool OSCCON::set_rc_frequency()
+
+// Is internal RC clock selected?
+bool OSCCON::internal_RC()
 {
-  double base_frequency = 31.e3;
+    unsigned int scs = (value.get() & (SCS0|SCS1)) & write_mask;
+    bool ret = false;
+    if (scs == 0 && config_irc)
+	ret = true;
+    else if ((SCS1 & write_mask) && scs == 2)	// using SCS1 and SCS0
+	ret = true;
+    else if (scs == 1)
+	ret = true;
 
+    return ret;
+}
 
-  if (!cpu_pic->get_int_osc())
-     return false;
+void OSCCON::reset(RESET_TYPE r)
+{
 
-    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+  switch(r) {
+  case POR_RESET:
+
+    value.put(por_value.data);
+    por_wake();
+    break;
+
+  default:
+    CDprintf(("OSCCON default %x\n", r));
+    break;
+  }
+}
+
+void OSCCON::wake()
+{
+    bool two_speed_clock = config_xosc  && config_ieso;
+    bool int_rc=internal_RC();
+    CDprintf(("OSCCON config_ieso %d int RC %d two_speed_clock=%d cpu=%s\n", config_ieso, int_rc, two_speed_clock, cpu_pic->name().c_str()));
+    por_wake();
+}
+
+void OSCCON::por_wake()
+{
+    bool two_speed_clock = config_xosc  && config_ieso;
+    unsigned int new_value = value.get();
+
+    CDprintf(("OSCCON config_xosc=%d config_ieso=%d\n", config_xosc,config_ieso));
+
+    CDprintf(("OSCCON POR two_speed_clock=%d f=%4.1e osccon=0x%x por_value=0x%x\n", two_speed_clock, cpu_pic->get_frequency(), new_value, por_value.data));
+
+    if (future_cycle)
+    {
+        get_cycles().clear_break(future_cycle);
+	future_cycle = 0;
+    }
+    // internal RC osc
+    if (internal_RC())
+    {
+        if (has_iofs_bit)
+        {
+	    new_value &= ~IOFS;
+	    clock_state = INTOSC;
+        }
+        else if (new_value & (IRCF0 | IRCF1 | IRCF2 )) 
+        {
+	    new_value &= ~(HTS|LTS);
+	    clock_state = HFINTOSC;
+        }
+	else
+        {
+	    new_value &= ~(HTS|LTS);
+	    clock_state = LFINTOSC;
+        }
+        new_value |= OSTS;
+        value.put(new_value);
+	CDprintf(("OSCCON internal RC clock_state %d osccon %x\n", clock_state, new_value));
+//RRR	set_rc_frequency();
+	if (future_cycle)
+	    get_cycles().clear_break(future_cycle);
+	future_cycle = get_cycles().get() + irc_por_time();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+    if (two_speed_clock)
+    {
+        if (has_iofs_bit)
+	    new_value &= ~(IOFS | OSTS);
+	else
+	    new_value &= ~( HTS | LTS | OSTS);
+        value.put(new_value);
+	set_rc_frequency(true);
+        CDprintf(("OSCCON  2 speed, set osccon 0x%x \n", value.get()));
+        clock_state = OST;
+        future_cycle = 1024 + get_cycles().get();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+}
+/*
+ * 
+ *
+ */
+bool OSCCON::set_rc_frequency(bool override)
+{
+    double base_frequency = 31.e3;
+    unsigned int old_clock_state = clock_state;
+
+    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2 )) >> 4;
+    if (!internal_RC() && !override) return false;
+
     switch (new_IRCF)
     {
     case 0:
@@ -273,7 +433,39 @@ bool OSCCON::set_rc_frequency()
        tune = (OSCTUNE::TUN5 & osctune_value) ? -tune : tune;
        base_frequency *= 1. + 0.125 * tune / 31.;
    }
-   cpu_pic->set_frequency(base_frequency);
+   cpu_pic->set_RCfreq_active(true);
+   cpu_pic->set_frequency_rc(base_frequency);
+   clock_state = new_IRCF ? HFINTOSC : LFINTOSC;
+   if (old_clock_state != clock_state)
+   {
+	if ((old_clock_state == LFINTOSC) && clock_state != LFINTOSC)
+	{
+	    if (has_iofs_bit)
+	       value.put(value.get() & ~(IOFS));
+	    else
+	       value.put(value.get() & ~(LTS|HTS));
+	    if (future_cycle) get_cycles().clear_break(future_cycle);
+
+            future_cycle = get_cycles().get() + irc_lh_time();
+	    get_cycles().set_break(future_cycle, this);
+	    CDprintf(("OSCCON future_cycle %" PRINTF_GINT64_MODIFIER "d now %" PRINTF_GINT64_MODIFIER "d\n", future_cycle, get_cycles().get()));
+	}
+	else
+	{
+/*RRR
+	    unsigned int current = value.get();
+	    if (clock_state == HFINTOSC)
+	    {
+		if (has_iofs_bit) current &= ~LTS;
+		current |= HTS;
+		value.put(current);
+	    }
+*/
+	    callback();
+	}
+   }
+   CDprintf(("OSCCON new_ircf %d  %4.1f \n", new_IRCF, cpu_pic->get_frequency()));
+
    if ((bool)verbose)
    {
 	cout << "set_rc_frequency() : osccon=" << hex << value.get();
@@ -286,26 +478,68 @@ bool OSCCON::set_rc_frequency()
 
 void  OSCCON::put(unsigned int new_value)
 {
-  unsigned int new_IRCF = (new_value & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
-  unsigned int old_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
-  trace.raw(write_trace.get() | value.get());
+  unsigned int org_value = value.get();
+  new_value = (new_value & write_mask) | (org_value & ~write_mask);
   value.put(new_value);
+  unsigned int diff = (new_value ^ org_value);
+  trace.raw(write_trace.get() | org_value);
+  value.put(new_value);
+  CDprintf(("OSCCON org_value=0x%02x new_value=0x%02x diff=0x%02x state %d\n", 
+	org_value, new_value, diff, clock_state));
+  if (diff == 0) return;
 
-  if (set_rc_frequency())  // using internal RC Oscillator
+  if(internal_RC())
   {
-      //printf ( "OSCCON::put(%02X) IRCF(%d)->%d\n", new_value, old_IRCF, new_IRCF );
-	if (old_IRCF == 0 && new_IRCF != 0) // Allow 4 ms to stabalise
-	{
-	    guint64 settle;
+      unsigned int old_clock_state = clock_state;
 
-	    settle = (guint64) (get_cycles().instruction_cps() * 4e-3);
-	    get_cycles().set_break(get_cycles().get() + settle, this);
-	    new_value &= ~ IOFS;
-	}
-	else
-	    new_value |= IOFS;
-        value.put(new_value);
+      if ((diff & (IRCF0 | IRCF1 | IRCF2))) // freq change 
+      {
+          set_rc_frequency();
+          CDprintf(("OSCCON change of IRCF old_clock %d new_clock %d\n", old_clock_state, clock_state));
+      }
+	// switching to intrc
+      else if (diff & (SCS0 | SCS1)) // still OK if SCS1 is non-writtabe LTS
+      {
+ 	  set_rc_frequency(true);
+	  CDprintf(("OSCCON diff 0x%x old_clock_state %d clock_state %d\n", (diff & (SCS0 | SCS1)), old_clock_state, clock_state));
+      }
   }
+  else  // not Internal RC clock
+  {
+	clock_state = EXCSTABLE;
+   	cpu_pic->set_RCfreq_active(false);
+	callback();
+      CDprintf(("OSCCON not RC osccon=0x%x\n", new_value));
+  }
+}
+
+// Time required for stable clock after transition between high and low
+// irc frequencies 
+guint64 OSCCON::irc_lh_time()
+{
+    guint64 delay = (get_cycles().instruction_cps() * 1e-6) + 1;
+    printf("RRR delay = %" PRINTF_GINT64_MODIFIER "d cps=%.0f\n", delay, get_cycles().instruction_cps());
+    return delay;
+}
+// Time required for stable irc clock after POR
+guint64 OSCCON::irc_por_time()
+{
+    return (guint64) 2;
+}
+
+guint64 OSCCON_1::irc_lh_time()
+{
+    guint64 delay = get_cycles().instruction_cps() * 4e-3;
+    printf("RRR cps %.0f\n", get_cycles().instruction_cps());
+    CDprintf(("OSCCON_1 LH irc time 4ms %" PRINTF_GINT64_MODIFIER "d cycles\n", delay));
+    return delay;
+}
+// Time required for stable irc clock after POR (4 ms)
+guint64 OSCCON_1::irc_por_time()
+{
+    guint64 delay = get_cycles().instruction_cps() * 4e-3;
+    CDprintf(("OSCCON_1 POR irc time 4ms %" PRINTF_GINT64_MODIFIER "d cycles\n", delay));
+    return delay;
 }
 
 // Clock is stable
@@ -314,25 +548,37 @@ void OSCCON_2::callback()
     unsigned int add_bits = 0;
     unsigned int val;
 
+    future_cycle = 0;
+
     if (!oscstat) return;
 
     val = oscstat->value.get();
-    switch(mode)
-    {
-    case LF:
-	add_bits = OSCSTAT::LFIOFR;
-	break;
 
-    case MF:
-	add_bits = OSCSTAT::MFIOFR;
-	break;
+    CDprintf(("OSCCON_2 oscstat = 0x%x\n", val));
 
-    case HF:
-	add_bits = OSCSTAT::HFIOFL | OSCSTAT::HFIOFR  | OSCSTAT::HFIOFS;
-	break;
-
-    case PLL:
+    if (clock_state & PLL)
 	add_bits = OSCSTAT::PLLR;
+
+    switch(clock_state & ~PLL)
+    {
+    case OST:
+	add_bits = OSCSTAT::OSTS;
+	cpu_pic->set_RCfreq_active(false);
+	break;
+
+    case LFINTOSC:
+	add_bits = OSCSTAT::LFIOFR;
+	val &= ~(OSCSTAT::HFIOFL | OSCSTAT::HFIOFR  | OSCSTAT::HFIOFS | OSCSTAT::MFIOFR);
+	break;
+
+    case MFINTOSC:
+	add_bits = OSCSTAT::MFIOFR;
+	val &= ~(OSCSTAT::HFIOFL | OSCSTAT::HFIOFR  | OSCSTAT::HFIOFS | OSCSTAT::LFIOFR);
+	break;
+
+    case HFINTOSC:
+	add_bits = OSCSTAT::HFIOFL | OSCSTAT::HFIOFR  | OSCSTAT::HFIOFS;
+	val &= ~(OSCSTAT::MFIOFR | OSCSTAT::LFIOFR);
 	break;
 
     case T1OSC:
@@ -341,45 +587,48 @@ void OSCCON_2::callback()
     val |= add_bits;
     oscstat->value.put(val);
 }
-bool OSCCON_2::set_rc_frequency()
+bool OSCCON_2::set_rc_frequency(bool override)
 {
   double base_frequency = 31.25e3;
   unsigned int sys_clock = value.get() & (SCS0 | SCS1);
   bool osccon_pplx4 = value.get() & SPLLEN;
   bool config_pplx4 = cpu_pic->get_pplx4_osc();
 
+  CDprintf(("OSCCON_2 new_IRCF 0x%x\n", (value.get() & ( IRCF0 | IRCF1 | IRCF2 |IRCF3)) >> 3));
 
 
-  if (sys_clock == 0 && config_fosc != 4) // Not internal oscillator
+
+  if ((sys_clock == 0) && !config_irc) // Not internal oscillator
   {
-	if (config_fosc >= 3) // always run at full speed
+	if (!config_xosc ) // always run at full speed
 	{
+	
   	    unsigned int oscstat_reg = (oscstat->value.get() & 0x1f);
 	    oscstat->value.put(oscstat_reg | OSCSTAT::OSTS);
-	    mode = EC;
+	    clock_state = EC;
 	}
 	else if (config_ieso) // internal/external switchover
 	{
-	    mode = OST;
+	    clock_state = OST;
         }
 
   }
 
 
-  if((osccon_pplx4 && !config_pplx4) && sys_clock == 0)\
+  if((osccon_pplx4 && !config_pplx4) && sys_clock == 0)
   {
-	mode |= PLL;
+	clock_state |= PLL;
 	return true;
   }
-  if (!cpu_pic->get_int_osc() && (sys_clock == 0))
+  if (!cpu_pic->get_int_osc() && (sys_clock == 0) && !override)
      return false;
 
   if (sys_clock == 1) // T1OSC
   {
 	base_frequency = 32.e3;
-	mode = T1OSC;
+	clock_state = T1OSC;
   }
-  else if (sys_clock > 1 || config_fosc == 4)
+  else if (sys_clock > 1 || config_irc || override)
   {
     unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2 |IRCF3)) >> 3;
     switch (new_IRCF)
@@ -387,66 +636,66 @@ bool OSCCON_2::set_rc_frequency()
     case 0:
     case 1:
 	base_frequency = 30.e3;
-	mode = LF;
+	clock_state = LFINTOSC;
 	break;
 
     case 2:
-	mode = MF;
+	clock_state = MFINTOSC;
 	base_frequency = 31.25e3;
 	break;
 
     case 3:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 31.25e3;
 	break;
 
     case 4:
-	mode = MF;
+	clock_state = HFINTOSC;
 	base_frequency = 62.5e3;
 	break;
 
     case 5:
-	mode = MF;
+	clock_state = HFINTOSC;
 	base_frequency = 125e3;
 	break;
 
     case 6:
-	mode = MF;
+	clock_state = HFINTOSC;
 	base_frequency = 250e3;
 	break;
 
     case 7:
-	mode = MF;
+	clock_state = HFINTOSC;
 	base_frequency = 500e3;
 	break;
 
     case 8:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 125e3;
 	break;
 
     case 9:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 250e3;
 	break;
 
     case 10:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 500e3;
 	break;
 
     case 11:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 1e6;
 	break;
 
     case 12:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 2e6;
 	break;
 
     case 13:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 4e6;
 	break;
 
@@ -454,20 +703,21 @@ bool OSCCON_2::set_rc_frequency()
 	// The treatment for PPL based on Fig 5-1 of P12f1822 ref manual
 	if (osccon_pplx4 || config_pplx4)
 	{
-	   mode = PLL;
+	   clock_state = PLL;
 	   base_frequency = 32e6;
 	}
 	else
 	{
-	   mode = HF;
+	   clock_state = HFINTOSC;
 	   base_frequency = 8e6;
 	}
 	break;
 
     case 15:
-	mode = HF;
+	clock_state = HFINTOSC;
 	base_frequency = 16e6;
 	break;
+    }
    }
    if (osctune)
    {
@@ -477,8 +727,8 @@ bool OSCCON_2::set_rc_frequency()
        tune = (OSCTUNE::TUN5 & osctune_value) ? -tune : tune;
        base_frequency *= 1. + 0.125 * tune / 31.;
    }
-  }
-   cpu_pic->set_frequency(base_frequency);
+   cpu_pic->set_RCfreq_active(true);
+   cpu_pic->set_frequency_rc(base_frequency);
    if ((bool)verbose)
    {
 	cout << "set_rc_frequency() : osccon=" << hex << value.get();
@@ -488,14 +738,55 @@ bool OSCCON_2::set_rc_frequency()
    }
    return true;
 }
+
+void OSCCON_2::por_wake()
+{
+    bool two_speed_clock = config_xosc  && config_ieso;
+
+    CDprintf(("OSCCON_2 two_speed_clock=%d f=%4.1e\n", two_speed_clock, cpu_pic->get_frequency()));
+
+    if (future_cycle)
+    {
+        get_cycles().clear_break(future_cycle);
+	future_cycle = 0;
+	clock_state = UNDEF;
+    }
+    // internal RC osc
+    if (internal_RC())
+    {
+	CDprintf(("OSCCON_2 internal RC clock_state %d\n", clock_state));
+        oscstat->value.put(OSCSTAT::OSTS);
+	set_rc_frequency();
+	future_cycle = get_cycles().get() + irc_por_time();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+    if (two_speed_clock)
+    {
+	bool config_pplx4 = cpu_pic->get_pplx4_osc();
+        oscstat->value.put(0);
+        set_rc_frequency(true);
+        clock_state = OST;
+        if (config_pplx4)
+	     clock_state |= PLL;
+        CDprintf(("OSCCON_2  2 speed, set osccon 0x%x \n", value.get()));
+        future_cycle = 1024 + get_cycles().get();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+    oscstat->value.put(0);
+}
 void  OSCCON_2::put_value(unsigned int new_value)
 {
-	value.put(new_value);
+	
+    CDprintf(("OSCCON_2 0x%x\n", new_value));
+    value.put(new_value);
 }
 void  OSCCON_2::put(unsigned int new_value)
 {
 
   unsigned int old_value = value.get();
+  new_value = (new_value & write_mask);
   unsigned int oscstat_reg = 0;
   unsigned int oscstat_new = 0;
   trace.raw(write_trace.get() | value.get());
@@ -512,62 +803,270 @@ void  OSCCON_2::put(unsigned int new_value)
 	else
 		oscstat_new &= ~OSCSTAT::OSTS;
 
+  CDprintf(("OSCCON_2 0x%x\n", new_value));
 
 
   if (set_rc_frequency())  // using internal RC Oscillator
 	set_callback();
 }
-void OSCCON_2::set_config(unsigned int cfg_fosc, bool cfg_ieso)
-{
-    config_fosc = cfg_fosc;
-    config_ieso = cfg_ieso;
 
-}
-void OSCCON_2::wake()
-{
-}
 void OSCCON_2::set_callback()
 {
 	unsigned int oscstat_reg = oscstat->value.get();;
 	unsigned int oscstat_new = oscstat_reg;
 	guint64 settle = 0;
 
-	switch(mode&~PLL)
+        CDprintf(("OSCCON_2 clock_state 0x%x\n", clock_state));
+
+	switch(clock_state &~ PLL)
 	{
-	case LF:
+	case LFINTOSC:
 		oscstat_new &= ~(OSCSTAT::OSTS | OSCSTAT::PLLR | OSCSTAT::T1OSCR);
 		settle = get_cycles().get() + 2;
 		break;
 
-	case MF:
+	case MFINTOSC:
 		oscstat_new &= ~(OSCSTAT::OSTS | OSCSTAT::PLLR | OSCSTAT::T1OSCR);
 		settle = get_cycles().get(2e-6); // 2us settle time
 		break;
 
-	case HF:
+	case HFINTOSC:
 		oscstat_new &= ~(OSCSTAT::OSTS | OSCSTAT::PLLR | OSCSTAT::T1OSCR);
 		settle = get_cycles().get(2e-6); // 2us settle time
+		CDprintf(("OSCCON_2 settle %" PRINTF_GINT64_MODIFIER "d\n", settle));
 		break;
 
 	case T1OSC:
 		settle = get_cycles().get() + 1024/4;
 		break;
 	}
-  	if((mode & PLL) && (oscstat_reg & OSCSTAT::PLLR) == 0)
+  	if((clock_state & PLL) && (oscstat_reg & OSCSTAT::PLLR) == 0)
 		settle = get_cycles().get(2e-3); // 2ms
 
 	if (settle)
 	{
-		if (next_callback > get_cycles().get())
-		    get_cycles().clear_break(next_callback);
+		settle += get_cycles().get();
+		if (future_cycle > get_cycles().get())
+		    get_cycles().clear_break(future_cycle);
 
 	        get_cycles().set_break(settle, this);
-		next_callback = settle;
+		future_cycle = settle;
 	}
 	if(oscstat && (oscstat_new != oscstat_reg))
 		oscstat->put(oscstat_new);
 }
 
+void OSCCON2::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  new_value = (new_value & write_mask) | (new_value & ~write_mask);
+  value.put(new_value);
+  assert(osccon);
+  osccon->set_rc_frequency();
+}
+
+void OSCCON_HS::callback()
+{
+    assert(osccon2);
+    unsigned int val_osccon2 = osccon2->value.get();
+    unsigned int val_osccon = value.get();
+
+    if (future_cycle <= get_cycles().get())
+        future_cycle = 0;
+    CDprintf(("OSCCON_HS clock_state=%d osccon=0x%x osccon2=0x%x\n", clock_state, val_osccon, val_osccon2));
+    switch(clock_state)
+    {
+   case OST:
+	val_osccon &= ~ HFIOFS;
+	val_osccon |= OSTS;
+	val_osccon2 &= ~(OSCCON2::LFIOFS | OSCCON2::MFIOFS);
+        cpu_pic->set_RCfreq_active(false);
+	clock_state = EXCSTABLE;
+        break;
+
+    case LFINTOSC:
+	val_osccon &= ~HFIOFS;
+	val_osccon2 &= ~OSCCON2::MFIOFS;
+	val_osccon2 |= OSCCON2::LFIOFS;
+        break;
+        
+    case MFINTOSC:
+	val_osccon &= ~HFIOFS;
+	val_osccon2 &= ~OSCCON2::LFIOFS;
+	val_osccon2 |= OSCCON2::MFIOFS;
+        break;
+        
+    case HFINTOSC:
+	val_osccon |= HFIOFS;
+	val_osccon2 &= ~(OSCCON2::LFIOFS|OSCCON2::MFIOFS);
+        break; 
+
+    case T1OSC:
+        break;
+
+    case EXCSTABLE:
+	val_osccon &= ~HFIOFS;
+	val_osccon |= OSTS;
+	val_osccon2 &= ~(OSCCON2::LFIOFS|OSCCON2::MFIOFS);
+	break;
+    }
+    value.put(val_osccon);
+    CDprintf(("OSCCON_HS osccon 0x%x val_osccon 0x%x\n", value.get(), val_osccon));
+    osccon2->value.put(val_osccon2);
+}
+bool OSCCON_HS::set_rc_frequency(bool override)
+{
+  double base_frequency = 31.e3;
+  bool config_pplx4 = cpu_pic->get_pplx4_osc();
+  bool osccon_pplx4 = (osctune)?osctune->value.get() & OSCTUNE::PLLEN:0;
+  bool intsrc	    = (osctune) ? osctune->value.get() & OSCTUNE::INTSRC : false;
+  bool mfiosel	    = (osccon2) ? osccon2->value.get() & OSCCON2::MFIOSEL : false;
+
+  unsigned int old_clock_state = clock_state;
+
+  
+  CDprintf(("OSCCON_HS override=%d int_osc=%d osccon=0x%x\n", override, cpu_pic->get_int_osc(), value.get()));
+  if (!cpu_pic->get_int_osc() && !(value.get() & SCS1) && !override)
+     return false;
+
+
+    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+    switch (new_IRCF)
+    {
+    case 0:
+	base_frequency = 31.e3;
+        if (mfiosel)
+            clock_state = intsrc ? MFINTOSC : LFINTOSC;
+	else
+            clock_state = intsrc ? HFINTOSC : LFINTOSC;
+	break;
+	
+    case 1:
+	clock_state = mfiosel ? MFINTOSC : HFINTOSC;
+	base_frequency = 125e3;
+	break;
+	
+    case 2:
+	clock_state = mfiosel ? MFINTOSC : HFINTOSC;
+	base_frequency = 250e3;
+	break;
+	
+    case 3:
+	clock_state = HFINTOSC;
+	base_frequency = 1e6;
+	break;
+	
+    case 4:
+	clock_state = HFINTOSC;
+	base_frequency = 2e6;
+	break;
+	
+    case 5:
+	clock_state = HFINTOSC;
+	base_frequency = 4e6;
+	break;
+	
+    case 6:
+	clock_state = HFINTOSC;
+	base_frequency = 8e6;
+	break;
+	
+    case 7:
+	clock_state = HFINTOSC;
+        base_frequency = 16e6;
+	break;
+   }
+   if ( (new_IRCF>=minValPLL) && (osccon_pplx4 || config_pplx4) )
+       base_frequency *= 4;
+   if (osctune)
+   {
+       int tune;
+       unsigned int osctune_value = osctune->value.get();
+       tune = osctune_value & (OSCTUNE::TUN5-1);
+       tune = (OSCTUNE::TUN5 & osctune_value) ? -tune : tune;
+       base_frequency *= 1. + 0.125 * tune / 31.;
+   }
+   cpu_pic->set_frequency_rc(base_frequency);
+   if (cpu_pic->get_int_osc() || (value.get() & SCS1))
+   {
+       CDprintf(("OSCCON_HS clock_state %d->%d f=%.1e osccon=0x%x\n", old_clock_state, clock_state, base_frequency, value.get()));
+       cpu_pic->set_RCfreq_active(true);
+       if (old_clock_state != clock_state)
+       {
+	    if ((old_clock_state == LFINTOSC) && clock_state != LFINTOSC)
+	    {
+	    	if (future_cycle) get_cycles().clear_break(future_cycle);
+
+            	future_cycle = get_cycles().get() + irc_lh_time();
+		get_cycles().set_break(future_cycle, this);
+		CDprintf(("OSCCON_HS future_cycle %" PRINTF_GINT64_MODIFIER "d now %" PRINTF_GINT64_MODIFIER "d\n", future_cycle, get_cycles().get()));
+	    }
+	    else
+		callback();
+	}
+   }
+   if ((bool)verbose)
+   {
+	cout << "set_rc_frequency() : osccon=" << hex << value.get();
+	if (osctune)
+	    cout << " osctune=" << osctune->value.get();
+	cout << " new frequency=" << base_frequency << endl;
+   }
+   return true;
+}
+// Is internal RC clock selected?
+bool OSCCON_HS::internal_RC()
+{
+    bool ret = false;
+    if ((value.get() & SCS1) || config_irc)
+        ret = true;
+
+    return ret;
+}
+
+void OSCCON_HS::por_wake()
+{
+    bool two_speed_clock = config_xosc  && config_ieso;
+    unsigned int val_osccon2 = osccon2->value.get();
+    unsigned int val_osccon = value.get();
+
+    CDprintf(("OSCCON_HS config_xosc=%d config_ieso=%d\n", config_xosc,config_ieso));
+
+    CDprintf(("OSCCON_HS POR two_speed_clock=%d f=%4.1e osccon=0x%x por_value=0x%x\n", two_speed_clock, cpu_pic->get_frequency(), val_osccon, por_value.data));
+
+    if (future_cycle)
+    {
+        get_cycles().clear_break(future_cycle);
+	future_cycle = 0;
+    }
+    // internal RC osc
+    if (internal_RC())
+    {
+	CDprintf(("OSCCON_HS internal RC clock_state %d osccon %x osccon2 %x\n", clock_state, val_osccon, val_osccon2));
+	set_rc_frequency();
+	if (future_cycle)
+	    get_cycles().clear_break(future_cycle);
+	future_cycle = get_cycles().get() + irc_por_time();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+    if (two_speed_clock)
+    {
+	val_osccon &= ~ (HFIOFS | OSTS);
+	val_osccon2 &= ~(OSCCON2::LFIOFS | OSCCON2::MFIOFS);
+        value.put(val_osccon);
+        osccon2->value.put(val_osccon2);
+	set_rc_frequency(true);
+	cpu_pic->set_RCfreq_active(true);
+        CDprintf(("OSCCON_HS 2 speed, set osccon 0x%x \n", value.get()));
+	if (future_cycle)
+	    get_cycles().clear_break(future_cycle);
+        clock_state = OST;
+        future_cycle = 1024 + get_cycles().get();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+}
 void WDTCON::put(unsigned int new_value)
 {
   unsigned int masked_value = new_value & valid_bits;

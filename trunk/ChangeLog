@@ -13,6 +13,7 @@
 	  src/16bit-processors.h src/16bit-registers.cc src/16bit-registers.h
 	  src/p16f88x.cc src/p16f8x.cc src/p16f8x.h src/p18fk.cc src/p18fk.h
 	  src/p18x.cc src/p18x.h src/processor.cc src/processor.h
+	  src/14bit-registers.cc
 	: Bug #226 OSCCON not setting LTS bit for p16f685, 2 clock startup
 	* src/p1xf1xxx.cc src/p1xf1xxx.h
 	: Add DSM functionality
