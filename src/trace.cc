@@ -1626,7 +1626,7 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1639,7 +1639,7 @@ void TraceLog::register_read(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1654,7 +1654,7 @@ void TraceLog::register_write(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1667,7 +1667,7 @@ void TraceLog::register_write(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1681,7 +1681,7 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1694,7 +1694,7 @@ void TraceLog::register_read_value(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%llx %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%02x) value 0x%02x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }
@@ -1709,7 +1709,7 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
   switch(file_format)
     {
     case TRACE_FILE_FORMAT_ASCII:
-      Dprintf(("cycle=%llx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
 #ifdef NEWTRACE
       bp.set_logging();
       return;
@@ -1722,7 +1722,7 @@ void TraceLog::register_write_value(Register *pReg, guint64 cc)
       break;
 
     case TRACE_FILE_FORMAT_LXT:
-      Dprintf(("LXT cycle=%llx %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
+      Dprintf(("LXT cycle=%" PRINTF_GINT64_MODIFIER "x %s(0x%x) value %x\n", cc, pReg->name().c_str(), pReg->getAddress(), pReg->get_value()));
       lxt_trace(pReg->getAddress(), pReg->get_value(), cc);
       break;
     }

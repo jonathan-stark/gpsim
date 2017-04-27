@@ -1445,6 +1445,7 @@ bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
     CFG_FOSC2 = 1<<2,
     CFG_WDTE  = 1<<3,
     CFG_MCLRE = 1<<5,
+    CFG_IESO  = 1<<10,
   };
 
   
@@ -1473,7 +1474,16 @@ bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
 	//
         (&(*m_porta)[4])->AnalogReq((Register *)this, false, "porta4");
 	valid_pins |= 0x20;
-       	switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) 
+
+        unsigned int fosc = cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2);
+        if (osccon)
+        {
+            osccon->set_config_xosc(fosc < 3);
+            osccon->set_config_irc(fosc == 4 || fosc == 5);
+	    osccon->set_config_ieso(cfg_word & CFG_IESO);
+        }
+
+       	switch(fosc)
 	{
 
        	case 0:  // LP oscillator: low power crystal is on RA4 and RA5
@@ -1496,6 +1506,7 @@ bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
             (m_porta->getPin(5))->newGUIname("porta5");
              set_int_osc(true);
 	    osccon->set_rc_frequency();
+            printf("\tRRR P16F631::set_config_word osccon=0x%x\n",  osccon->value.get());
 	    break;
 
 	case 6: //RC oscillator: I/O on RA4 pin, RC on RA5
@@ -1889,11 +1900,19 @@ bool P16F684::set_config_word(unsigned int address, unsigned int cfg_word)
     CFG_FOSC2 = 1<<2,
     CFG_WDTE  = 1<<3,
     CFG_MCLRE = 1<<5,
+    CFG_IESO  = 1<<11,
   };
 
   
    if(address == config_word_address())
     {
+       	config_clock_mode = (cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)); 
+        if (osccon)
+        {
+            osccon->set_config_xosc(config_clock_mode < 3);
+            osccon->set_config_irc(config_clock_mode == 4 || config_clock_mode == 5);
+            osccon->set_config_ieso(cfg_word & CFG_IESO);
+	}
        unsigned int valid_pins = m_porta->getEnableMask();
 
         if ((cfg_word & CFG_MCLRE) == CFG_MCLRE)
@@ -1917,7 +1936,7 @@ bool P16F684::set_config_word(unsigned int address, unsigned int cfg_word)
 	//
         (&(*m_porta)[4])->AnalogReq((Register *)this, false, "porta4");
 	valid_pins |= 0x20;
-       	switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) 
+       	switch(config_clock_mode) 
 	{
 
        	case 0:  // LP oscillator: low power crystal is on RA4 and RA5

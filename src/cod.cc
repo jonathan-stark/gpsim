@@ -124,8 +124,8 @@ int PicCodProgramFileType::read_block(char * block, int block_number)
 {
   if (fseek(codefile, block_number * COD_BLOCK_SIZE, SEEK_SET))
   {
-      fprintf(stderr, "PicCodProgramFileType::read_block fseek error byte %ld\n",
-	(size_t) block_number * COD_BLOCK_SIZE);
+      fprintf(stderr, "PicCodProgramFileType::read_block fseek error byte %" PRINTF_GINT64_MODIFIER "d\n",
+	(gint64) block_number * COD_BLOCK_SIZE);
 	return ERR_BAD_FILE;
   }
   size_t n = fread(block, 1, COD_BLOCK_SIZE, codefile);

@@ -31,6 +31,8 @@ License along with this library; if not, see
 #include "spp.h"
 #include "ctmu.h"
 
+#define IESO (1<<12)
+
 class PicPortRegister;
 class PicTrisRegister;
 class PicLatchRegister;

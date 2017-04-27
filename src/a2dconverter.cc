@@ -127,7 +127,7 @@ void ADCON0::start_conversion(void)
   guint64 fc = get_cycles().get() + (2 * Tad) /
 		p_cpu->get_ClockCycles_per_Instruction();
 
-  Dprintf(("ad_state %u fc %lx now %lx\n", ad_state, fc, get_cycles().get()))
+  Dprintf(("ad_state %u fc %" PRINTF_GINT64_MODIFIER "x now %" PRINTF_GINT64_MODIFIER "x\n", ad_state, fc, get_cycles().get()))
   if(ad_state != AD_IDLE)
     {
       // The A/D converter is either 'converting' or 'acquiring'

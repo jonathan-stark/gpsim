@@ -16,7 +16,7 @@ include <coff.inc>
   .direct "C", x
   endm
 
-   __CONFIG  _CONFIG1, _CP_OFF & _WDT_OFF & _INTRC_IO & _MCLR_OFF
+   __CONFIG  _CONFIG1, _CP_OFF & _WDT_OFF & _FOSC_EXTRCIO  & _MCLR_OFF
    __CONFIG  _CONFIG2, _IESO_OFF & _FCMEN_OFF
 
    cblock 0x20

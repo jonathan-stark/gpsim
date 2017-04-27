@@ -31,6 +31,11 @@ License along with this library; if not, see
 #include "spp.h"
 #include "ctmu.h"
 
+#ifdef IESO
+#undef IESO
+#endif
+#define IESO  (1<<7)
+
 class PicPortRegister;
 class PicTrisRegister;
 class PicLatchRegister;
@@ -173,6 +178,7 @@ class P18F26K22 : public _16bit_processor
   SSP1_MODULE   ssp2;
   CTMU		ctmu;
   HLVDCON	hlvdcon;
+  OSCCON2	osccon2;
 
   WPU		*wpub;
   IOC		*iocb;

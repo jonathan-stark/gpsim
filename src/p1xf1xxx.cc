@@ -311,7 +311,7 @@ P12F1822::P12F1822(const char *_name, const char *desc)
     pstr1con(this, "pstr1con", "Pulse Sterring Control Register"),
     cpscon0(this, "cpscon0", " Capacitive Sensing Control Register 0"),
     cpscon1(this, "cpscon1", " Capacitive Sensing Control Register 1"),
-    sr_module(this)
+    sr_module(this), dsm_module(this)
 
 
 {
@@ -433,6 +433,10 @@ P12F1822::~P12F1822()
     delete_sfr_register(usart.txreg);
     delete_sfr_register(pir1);
     delete_sfr_register(pir2);
+    remove_sfr_register(&dsm_module.mdcon);
+    remove_sfr_register(&dsm_module.mdsrc);
+    remove_sfr_register(&dsm_module.mdcarl);
+    remove_sfr_register(&dsm_module.mdcarh);
     delete e;
     delete m_cpu_temp;
     delete osccon;
@@ -571,6 +575,10 @@ void P12F1822::create_sfr_map()
   add_sfr_register(m_iocan, 0x392, RegisterValue(0,0),"iocan");
   add_sfr_register(m_iocaf, 0x393, RegisterValue(0,0),"iocaf");
   m_iocaf->set_intcon(intcon);
+  add_sfr_register(&dsm_module.mdcon, 0x39c, RegisterValue(0x20,0));
+  add_sfr_register(&dsm_module.mdsrc, 0x39d, RegisterValue(0x00,0));
+  add_sfr_register(&dsm_module.mdcarl, 0x39e, RegisterValue(0x00,0));
+  add_sfr_register(&dsm_module.mdcarh, 0x39f, RegisterValue(0x00,0));
 
   tmr2.ssp_module[0] = &ssp;
 
@@ -676,6 +684,8 @@ void P12F1822::create_sfr_map()
     osccon->set_osctune(&osctune);
     osccon->set_oscstat(&oscstat);
     osctune.set_osccon((OSCCON *)osccon);
+    osccon->write_mask = 0xfb;
+    dsm_module.usart_mod = &usart;
 }
 
 //-------------------------------------------------------------------
@@ -728,7 +738,11 @@ void  P12F1822::create(int ram_top, int eeprom_size)
 
   add_file_registers(0x20, ram_top, 0x00);
   _14bit_e_processor::create_sfr_map();
-  P12F1822::create_sfr_map();
+  create_sfr_map();
+  dsm_module.setOUTpin(&(*m_porta)[0]);
+  dsm_module.setMINpin(&(*m_porta)[1]);
+  dsm_module.setCIN1pin(&(*m_porta)[2]);
+  dsm_module.setCIN2pin(&(*m_porta)[4]);
   // Set DeviceID
   if (m_configMemory && m_configMemory->getConfigWord(6))
       m_configMemory->getConfigWord(6)->set(0x2700);
@@ -763,9 +777,13 @@ void P12F1822::oscillator_select(unsigned int cfg_word1, bool clkout)
 {
     unsigned int mask = 0x1f;
 
-    osccon->set_config(cfg_word1 & (FOSC0|FOSC1|FOSC2), cfg_word1 & IESO);
+    unsigned int fosc = cfg_word1 & (FOSC0|FOSC1|FOSC2);
+
+    osccon->set_config_irc(fosc == 4);
+    osccon->set_config_xosc(fosc < 3);
+    osccon->set_config_ieso(cfg_word1 & IESO);
     set_int_osc(false);
-    switch(cfg_word1 & (FOSC0|FOSC1|FOSC2))
+    switch(fosc)
     {
     case 0:	//LP oscillator: low power crystal
     case 1:	//XT oscillator: Crystal/resonator
@@ -1430,6 +1448,7 @@ void P16F178x::create_sfr_map()
     osccon->set_osctune(&osctune);
     osccon->set_oscstat(&oscstat);
     osctune.set_osccon((OSCCON *)osccon);
+    osccon->write_mask = 0xfb;
 }
 
 //-------------------------------------------------------------------
@@ -1491,10 +1510,13 @@ void P16F178x::option_new_bits_6_7(unsigned int bits)
 void P16F178x::oscillator_select(unsigned int cfg_word1, bool clkout)
 {
     unsigned int mask = m_porta->getEnableMask();
+    unsigned int fosc = cfg_word1 & (FOSC0|FOSC1|FOSC2);
 
-    osccon->set_config(cfg_word1 & (FOSC0|FOSC1|FOSC2), cfg_word1 & IESO);
+    osccon->set_config_irc(fosc == 4);
+    osccon->set_config_xosc(fosc < 3);
+    osccon->set_config_ieso(cfg_word1 & IESO);
     set_int_osc(false);
-    switch(cfg_word1 & (FOSC0|FOSC1|FOSC2))
+    switch(fosc)
     {
     case 0:	//LP oscillator: low power crystal
     case 1:	//XT oscillator: Crystal/resonator
@@ -1827,7 +1849,11 @@ void  P16F1823::create(int ram_top, int eeprom_size)
   add_file_registers(0x20, ram_top, 0x00);
   _14bit_e_processor::create_sfr_map();
   P12F1822::create_sfr_map();
-  P16F1823::create_sfr_map();
+  create_sfr_map();
+  dsm_module.setOUTpin(&(*m_portc)[4]);
+  dsm_module.setMINpin(&(*m_portc)[3]);
+  dsm_module.setCIN1pin(&(*m_portc)[2]);
+  dsm_module.setCIN2pin(&(*m_portc)[5]);
   // Set DeviceID
   if (m_configMemory && m_configMemory->getConfigWord(6))
       m_configMemory->getConfigWord(6)->set(0x2720);
@@ -1935,6 +1961,7 @@ void  P16F1825::create(int ram_top, int eeprom_size)
   add_file_registers(0x4a0, 0x4ef, 0x00);
   add_file_registers(0x520, 0x56f, 0x00);
   add_file_registers(0x5a0, 0x5ef, 0x00);
+
   // Set DeviceID
   if (m_configMemory && m_configMemory->getConfigWord(6))
       m_configMemory->getConfigWord(6)->set(0x2760);

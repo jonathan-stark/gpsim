@@ -254,6 +254,7 @@ public:
 #define FOSC3   (1<<3)
 #define PLLCFG  (1<<4)
 #define OSCEN   (1<<5)
+//RRR#define IESO    (1<<7)
 
 //------------------------------------------------------------------------
 // Config1H - default 3 bits FOSC
@@ -275,7 +276,8 @@ public:
 
     if (m_pCpu)
     {
-	m_pCpu->osc_mode(v & ( FOSC2 | FOSC1 | FOSC0));
+	//RRRm_pCpu->osc_mode(v & ( FOSC2 | FOSC1 | FOSC0));
+	m_pCpu->osc_mode(v);
     }
   }
 

@@ -123,8 +123,8 @@ private:
   double Vsolar;	// Present panel output voltage
   double Asolar;	// Present panel output current
   double VBterm;	// Present Baterry terminal voltage 
-  long   Tperiod;	// cycles PWM period
-  long   Thigh;		// cycles PWM high
+  gint64  Tperiod;	// cycles PWM period
+  gint64  Thigh;	// cycles PWM high
   guint64 start_cycle;  //    
 
 

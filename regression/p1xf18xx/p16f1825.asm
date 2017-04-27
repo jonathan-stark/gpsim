@@ -141,7 +141,7 @@ start
 	bsf 	OSCCON,6
 	btfss	OSCSTAT,HFIOFL
 	goto	$-1
-   .assert "(oscstat & 0x19) == 0x19,  \"*** FAILED 16f1825 HFIO bit error\""
+   .assert "(oscstat & 0x1f) == 0x19,  \"*** FAILED 16f1825 HFIO bit error\""
 	nop
 	call	cap_sense
 	BANKSEL FVRCON

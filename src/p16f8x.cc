@@ -218,6 +218,8 @@ void P16F8x::create_sfr_map()
 
   osccon->set_osctune(&osctune);
   osctune.set_osccon(osccon);
+  osccon->write_mask = 0x73;
+  osccon->has_iofs_bit = true;
 
   usart.initialize(pir1,&(*m_portb)[5], &(*m_portb)[2],
 		   new _TXREG(this,"txreg", "USART Transmit Register", &usart), 
@@ -280,8 +282,11 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     CFG_FOSC1 = 1<<1,
     CFG_FOSC2 = 1<<4,
     CFG_MCLRE = 1<<5,
-    CFG_CCPMX = 1<<12
+    CFG_CCPMX = 1<<12,
+    CFG2_IESO = 1<<1
   };
+
+  unsigned int fosc;
 
   // Let the base class do most of the work:
 
@@ -290,15 +295,22 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
     pic_processor::set_config_word(address, cfg_word);
 
     if (verbose)
-        cout << "p16f88 0x" << hex << address << " setting config word 0x" << cfg_word << '\n';
+        cout << "p16f8x 0x" << hex << address << " setting config word 0x" << cfg_word << '\n';
 
 
     unsigned int valid_pins = m_porta->getEnableMask();
 
     set_int_osc(false);
     // Careful these bits not adjacent
-    switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) {
-
+    fosc = ((cfg_word & CFG_FOSC2) >> 2) | (cfg_word & (CFG_FOSC0 | CFG_FOSC1));
+    if (osccon) 
+    {
+	osccon->set_config_xosc(fosc < 3);
+	osccon->set_config_irc(fosc == 4 || fosc == 5);
+    }
+    printf("RRR 16f8x cfg_word 0x%x fosc %d osccon %p\n", cfg_word, fosc, osccon);
+    switch(fosc)
+    {
     case 0:  // LP oscillator: low power crystal is on RA6 and RA7
     case 1:     // XT oscillator: crystal/resonator is on RA6 and RA7
     case 2:     // HS oscillator: crystal/resonator is on RA6 and RA7
@@ -306,31 +318,31 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 	(m_porta->getPin(7))->newGUIname("OSC1");
 	break;
 
-    case 0x13:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
-	(m_porta->getPin(6))->newGUIname("CLKOUT");
-	(m_porta->getPin(7))->newGUIname("OSC1");
-	break;
-
     case 3:     // EC:  RA6 is an I/O, RA7 is a CLKIN
-    case 0x12:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
+    case 6:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
         (m_porta->getPin(6))->newGUIname("porta6");
         (m_porta->getPin(7))->newGUIname("CLKIN");
         valid_pins =  (valid_pins & 0x7f)|0x40;
         break;
 
-    case 0x10:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+    case 4:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
         set_int_osc(true);
         (m_porta->getPin(6))->newGUIname("porta6");
         (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins |= 0xc0;
         break;
 
-    case 0x11:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+    case 5:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
         set_int_osc(true);
 	(m_porta->getPin(6))->newGUIname("CLKOUT");
         (m_porta->getPin(7))->newGUIname("porta7");
         valid_pins = (valid_pins & 0xbf)|0x80;
         break;
+
+    case 7:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
+	(m_porta->getPin(6))->newGUIname("CLKOUT");
+	(m_porta->getPin(7))->newGUIname("OSC1");
+	break;
 
     }
 
@@ -360,7 +372,9 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
   }
   else if (address == 0x2008 )
   {
-    cout << "p16f88 0x" << hex << address << " config word 0x" << cfg_word << '\n';
+    cout << "p16f8x 0x" << hex << address << " config word 0x" << cfg_word << '\n';
+    if (osccon) osccon->set_config_ieso(cfg_word & CFG2_IESO);
+    return true;
   }
 
   return false;
@@ -389,7 +403,7 @@ void  P16F8x::create(int eesize)
 
   _14bit_processor::create();
 
-  osccon = new OSCCON(this, "osccon", "OSC Control");
+  osccon = new OSCCON_1(this, "osccon", "OSC Control");
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);
@@ -407,6 +421,17 @@ void  P16F8x::create(int eesize)
   P16F8x::create_sfr_map();
 
 }
+
+void P16F8x::exit_sleep()
+{
+    if (m_ActivityState == ePASleeping)
+    {
+        tmr1l.wake();
+        osccon->wake();
+        _14bit_processor::exit_sleep();
+    }
+}
+
 //========================================================================
 
 P16F81x::P16F81x(const char *_name, const char *desc)
@@ -531,6 +556,7 @@ void P16F81x::create_sfr_map()
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
 
   osccon->set_osctune(&osctune);
+  osccon->write_mask = 0x70;
   osctune.set_osccon(osccon);
 
   add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
@@ -727,7 +753,7 @@ void  P16F81x::create(int eesize)
 
   _14bit_processor::create();
 
-   osccon = new OSCCON(this, "osccon", "OSC Control");
+   osccon = new OSCCON_1(this, "osccon", "OSC Control");
 
   EEPROM_WIDE *e;
   e = new EEPROM_WIDE(this,pir2);

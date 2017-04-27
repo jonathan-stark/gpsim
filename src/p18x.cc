@@ -1481,6 +1481,7 @@ void P18F1220::create()
   _16bit_v2_adc::create(7);
   osccon->value = RegisterValue(0x00,0);
   osccon->por_value = RegisterValue(0x00,0);
+  osccon->has_iofs_bit = true;
   usart.txsta.setIOpin(&(*m_portb)[1]);
   usart.rcsta.setIOpin(&(*m_portb)[4]);
   adcon1->setIOPin(4, &(*m_portb)[0]);
@@ -1579,7 +1580,15 @@ void P18F1220::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
+  unsigned int fosc = value & (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   
+ if (osccon)
+  {
+      osccon->set_config_irc(fosc >= 8 && fosc <= 9);
+      osccon->set_config_xosc(fosc > 9 || fosc < 3 || fosc == 6);
+      osccon->set_config_ieso(value & IESO);
+  }
+
   value &= (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   set_int_osc(false);
   if (pin_Number < 253)
@@ -1852,6 +1861,7 @@ void P18F2x21::create_sfr_map()
 
   add_sfr_register(&osctune,      0xf9b,porv);
   osccon->set_osctune(&osctune);
+  osccon->has_iofs_bit = true;
   osctune.set_osccon(osccon);
 
   // rest of configuration in parent class
@@ -1899,7 +1909,16 @@ void P18F2x21::osc_mode(unsigned int value)
 {
   IOPIN *m_pin;
   unsigned int pin_Number =  get_osc_pin_Number(0);
+  unsigned int fosc = value & (FOSC3 | FOSC2 | FOSC1 | FOSC0);
+
+  if (osccon)
+  {
+      osccon->set_config_irc(fosc >= 8 && fosc <= 11);
+      osccon->set_config_xosc(fosc > 11 || fosc < 4);
+      osccon->set_config_ieso(value & IESO);
+  }
   
+  printf("RRR P18F2x21::osc_mode value 0x%x %p\n", value, osccon);
   value &= (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   set_int_osc(false);
   if (pin_Number < 253)

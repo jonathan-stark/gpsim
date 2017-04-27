@@ -12,14 +12,14 @@
 	include <p16f687.inc>
 	include <coff.inc>
 
- __CONFIG _WDT_OFF  & _INTRC_OSC_NOCLKOUT
+ __CONFIG _WDT_OFF  & _FOSC_HS & _IESO_ON
 
 
         errorlevel -302 
 	radix dec
-
+;	in following equation 100000 if Fosc/100, 48 is baud/100
 BAUDHI  equ     ((100000/4)/48)-1
-BAUDLO  equ     129
+BAUDLO  equ     ((100000/16)/48)-1
 
 
 ;----------------------------------------------------------------------
@@ -115,6 +115,7 @@ start
 
    .sim "U1.txbaud = 4800"
    .sim "U1.rxbaud = 4800"
+
    .sim "U1.loop = true"
 
 	;; USART Initialization
@@ -122,6 +123,17 @@ start
 	;; Turn on the high baud rate (BRGH), disable the transmitter,
 	;; disable synchronous mode.
 	;;
+
+	BANKSEL OSCCON
+	.assert "p16f687.frequency == 4000000., \"FALIED 16f687 default frequency\""
+	nop
+	btfss	OSCCON,OSTS	; wait for hs to be active with 2 speed start
+	goto	$-1
+	.assert "cycles > 1014 && cycles <1028, \"FALIED 16f687 2 speed start\""
+	nop
+	.assert "p16f687.frequency == 10000000., \"FALIED 16f687  HS frequency\""
+	nop
+
 	
 	clrf	STATUS
 
@@ -239,15 +251,15 @@ start
         btfss   TXSTA,TRMT ;Wait 'til through transmitting
          goto    $-1
 ;
-;  At 9600 baud each bit takes 0.104 msec. TRMT will be low > 9 bits 
-;  and < 10 bits or between 0.9375 and 1.041 msec.
-;  with oscillator at 20MHz and TMR0 / 64 expect between 73 and 81
+;  At 4800 baud each bit takes 0.208 msec. TRMT will be low > 9 bits 
+;  and < 10 bits or between 1.87  and 2.08  msec.
+;  with oscillator at 10MHz and TMR0 / 64 expect between 73 and 81
 ;  TMR0 cycles.
 
 	BANKSEL TMR0
 	movf	TMR0,W
 
-  .assert "tmr0 > 73 && tmr0 < 81, \"*** FAILED baud rate\""
+  .assert "tmr0 > 73 && tmr0 <= 81, \"*** FAILED baud rate\""
 	nop
 	clrf	rxFlag
         call rx_loop

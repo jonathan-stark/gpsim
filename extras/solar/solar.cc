@@ -295,7 +295,7 @@ void SolarModule::setPcm(bool bNewState)
 	    start_cycle = now;
 	    if (duty != duty_last)
 	    {
-	        printf("%ld cycles  %2ld/%2ld Duty %2d F=%.2fkHz Vsp %.2f Isp %.2f Pout %5.2f Vbat %.2f\n", now, Thigh, Tperiod, duty, freq/1000., Vsp, Isp, Vsp*Isp, VbatOC + Isp*Rbat);
+	        printf("%" PRINTF_GINT64_MODIFIER "d cycles  %2" PRINTF_GINT64_MODIFIER "d/%2" PRINTF_GINT64_MODIFIER "d Duty %2d F=%.2fkHz Vsp %.2f Isp %.2f Pout %5.2f Vbat %.2f\n", now, Thigh, Tperiod, duty, freq/1000., Vsp, Isp, Vsp*Isp, VbatOC + Isp*Rbat);
 		duty_last = duty;
 	    }
 	}
