@@ -235,8 +235,17 @@ start
 	.assert "p16f690.frequency == 4000000., \"FALIED 16f690 default frequency\""
 	nop
 	BANKSEL OSCCON
+	clrf	OSCCON		; set 31 kHz
+	.assert "(osccon & 6) == 2, \"FALIED 16f690 osccon just after h to l change\""
+	nop
 	movlw	0x70
-	movwf	OSCCON
+	movwf	OSCCON		; set 8 MHz
+	.assert "(osccon & 6) == 0, \"FALIED 16f690 osccon just after l to h change\""
+	nop
+	nop
+	nop
+	.assert "(osccon & 6) == 4, \"FALIED 16f690 osccon 1us after l to h change\""
+	nop
 	.assert "p16f690.frequency == 8000000., \"FALIED 16f690 max internal oscilator frequency\""
 	nop
 
@@ -308,38 +317,38 @@ test_compare:
 	movwf   CM2CON1		; test writable bits
 	movlw	0x03
 	movwf	ANSEL		;Inputs analog
-  .assert "cm2con1 == 0x03, \"FAILED 16f690 cm2con1 writable bits\""
+  .assert "cm2con1 == 0x03, \"*** FAILED 16f690 cm2con1 writable bits\""
 	nop
         clrf	CM2CON1
 	bsf	CM1CON0,C1POL	; toggle ouput polarity, not ON
 	bsf	CM1CON0,C1OE	; C1OUT t0 RA2
-  .assert "cm1con0 == 0x30, \"FAILED 16f690 cm1con0 off toggle\""
+  .assert "cm1con0 == 0x30, \"*** FAILED 16f690 cm1con0 off toggle\""
 	nop
-  .assert "cm2con1 == 0x00, \"FAILED 16f690 cm2con1 mirror C1OUT\""
+  .assert "cm2con1 == 0x00, \"*** FAILED 16f690 cm2con1 mirror C1OUT\""
 	nop
 
 	movlw 	(1<<C1ON)	; Enable Comparator use C1IN+, C12IN0
 	movwf	CM1CON0
-  .assert "cm1con0 == 0x80, \"FAILED 16f690 cm1con0 ON=1\""
+  .assert "cm1con0 == 0x80, \"*** FAILED 16f690 cm1con0 ON=1\""
 	nop
 	bsf	CM1CON0,C1POL	; toggle ouput polarity
-  .assert "cm1con0 == 0xd0, \"FAILED 16f690 cm1con0 ON=1 POL=1\""
+  .assert "cm1con0 == 0xd0, \"*** FAILED 16f690 cm1con0 ON=1 POL=1\""
 	nop
 	bsf	CM2CON0,C1POL	; toggle ouput polarity, not ON
-  .assert "cm2con0 == 0x10, \"FAILED 16f690 cm2con0 ON=0 POL=1\""
+  .assert "cm2con0 == 0x10, \"*** FAILED 16f690 cm2con0 ON=0 POL=1\""
 	nop
-  .assert "cm2con1 == 0x80, \"FAILED 16f690 cm2con1 mirror C2OUT\""
+  .assert "cm2con1 == 0x80, \"*** FAILED 16f690 cm2con1 mirror C2OUT\""
 	nop
 	bsf	CM1CON0,C1OE	; C1OUT t0 RA2
-   .assert "(porta & 0x04) == 0x04, \"FAILED 16f690 compare RA2 not high\""
+   .assert "(porta & 0x04) == 0x04, \"*** FAILED 16f690 compare RA2 not high\""
 	nop 
 	bcf	CM1CON0,C1POL	; toggle ouput polarity
-   .assert "(porta & 0x04) == 0x00, \"FAILED 16f690 compare RA2 not low\""
+   .assert "(porta & 0x04) == 0x00, \"*** FAILED 16f690 compare RA2 not low\""
 	nop
 	; Test change in voltage detected
    .command "R1.voltage = 3.0"
 	nop
-   .assert "(porta & 0x04) == 0x04, \"FAILED 16f690 compare RA2 not high\""
+   .assert "(porta & 0x04) == 0x04, \"*** FAILED 16f690 compare RA2 not high\""
 	nop
 	BANKSEL VRCON		
 	movlw	0x0f
@@ -347,12 +356,12 @@ test_compare:
 	bsf	VRCON,VP6EN	; turn on 0.6 Volt reference
 	BANKSEL CM1CON0
 	bsf	CM1CON0,C1R	; C1IN+ is voltage reference
-   .assert "(porta & 0x04) == 0x00, \"FAILED 16f690 compare RA2 not low vref=0.6\""
+   .assert "(porta & 0x04) == 0x00, \"*** FAILED 16f690 compare RA2 not low vref=0.6\""
 	nop
 	BANKSEL VRCON
 	bsf	VRCON,C1VREN	; C1IN+ is CVREF
 	
-   .assert "(porta & 0x04) == 0x04, \"FAILED 16f690 compare RA2 not high vref=CVREF\""
+   .assert "(porta & 0x04) == 0x04, \"*** FAILED 16f690 compare RA2 not high vref=CVREF\""
 	nop
 	BANKSEL CM1CON0
 	nop
@@ -658,7 +667,7 @@ test_eusart:
 	movwf   SPBRG
 
 
-  .assert "(portb & 0x80) == 0x80, \"FAILED: TX bit initilized as high\""
+  .assert "(portb & 0x80) == 0x80, \"*** FAILED: TX bit initilized as high\""
 	nop
 	clrf	tx_ptr
 			
@@ -862,12 +871,12 @@ test_ssp:
     btfss	PIR1,SSPIF
     goto	$-1
 
-  .assert "(sspstat & 1) == 1, \"FAILED BSSP SPI Master BF not set\""
+  .assert "(sspstat & 1) == 1, \"*** FAILED BSSP SPI Master BF not set\""
     nop
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED BSSP SPI Master BF not cleared\""
+  .assert "(sspstat & 1) == 0, \"*** FAILED BSSP SPI Master BF not cleared\""
     nop
-  .assert "W == 0x54, \"FAILED BSSP SPI Master wrong data\""
+  .assert "W == 0x54, \"*** FAILED BSSP SPI Master wrong data\""
     nop
 
 ;
@@ -890,10 +899,10 @@ test_ssp:
     bsf		DRV_CLOCK
     bcf		DRV_CLOCK
     movwf	SSPBUF	; test WCOL set
-  .assert "(sspcon & 0x80) == 0x80, \"FAILED BSSP SPI WCOL set\""
+  .assert "(sspcon & 0x80) == 0x80, \"*** FAILED BSSP SPI WCOL set\""
     nop
     bcf		SSPCON,WCOL	; clear WCOL bit
-  .assert "(sspcon & 0x80) == 0x00, \"FAILED BSSP SPI WCOL was cleared\""
+  .assert "(sspcon & 0x80) == 0x00, \"*** FAILED BSSP SPI WCOL was cleared\""
     nop
     clrf	loopcnt
 loop2:
@@ -904,7 +913,7 @@ loop2:
     goto	loop2
 
     movf	SSPBUF,W
-  .assert "W == 0x54, \"FAILED BSSP SPI Slave data\""
+  .assert "W == 0x54, \"*** FAILED BSSP SPI Slave data\""
     nop
 ;
 ;	Test Slave receive overrun
@@ -916,7 +925,7 @@ loop4:
     bcf		DRV_CLOCK
     decfsz	loopcnt,F
     goto	loop4
-  .assert "(sspcon & 0x40) == 0x40, \"FAILED BSSP SPI SSPOV\""
+  .assert "(sspcon & 0x40) == 0x40, \"*** FAILED BSSP SPI SSPOV\""
     nop
 
 ;
@@ -943,12 +952,12 @@ loop3:
     btfss	PIR1,SSPIF
     goto	loop3
 
-  .assert "(sspstat & 1) == 1, \"FAILED BSSP SPI Master TMR2, BF not set\""
+  .assert "(sspstat & 1) == 1, \"*** FAILED BSSP SPI Master TMR2, BF not set\""
     nop
     movf	SSPBUF,W
-  .assert "(sspstat & 1) == 0, \"FAILED BSSP SPI Master TMR2, BF not cleared\""
+  .assert "(sspstat & 1) == 0, \"*** FAILED BSSP SPI Master TMR2, BF not cleared\""
     nop
-  .assert "W == 0x54, \"FAILED BSSP SPI Master TMR2 wrong data\""
+  .assert "W == 0x54, \"*** FAILED BSSP SPI Master TMR2 wrong data\""
     nop
 
     return

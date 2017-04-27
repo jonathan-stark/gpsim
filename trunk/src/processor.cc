@@ -83,20 +83,43 @@ public:
   CPU_Freq(Processor * _cpu, double freq); //const char *_name, double newValue, const char *desc);
 
   virtual void set(double d);
+  void set_rc_freq(double d);
+  virtual void get(double &);
+  void set_rc_active(bool _use_rc_freq) { use_rc_freq = _use_rc_freq;}
+  
 
 private:
   Processor * cpu;
+  double 	RCfreq;
+  bool		use_rc_freq;
 };
 
 CPU_Freq::CPU_Freq(Processor * _cpu, double freq)
   : Float("frequency",freq, " oscillator frequency."),
-    cpu(_cpu)
+    cpu(_cpu), use_rc_freq(false)
 {
 }
 
+void CPU_Freq::set_rc_freq(double d)
+{
+   RCfreq = d;
+}
+void CPU_Freq::get(double &d)
+{
+    if (use_rc_freq)
+	d = RCfreq;
+    else
+    {
+        double x;
+        Float::get(x);
+        d = x;
+    }
+}
+       
 void CPU_Freq::set(double d)
 {
   pic_processor *pCpu = dynamic_cast<pic_processor *>(cpu);
+
   Float::set ( d );
   if ( cpu )
     cpu->update_cps();
@@ -245,10 +268,23 @@ void Processor::setBreakOnReset(bool newBreakOnReset)
 //------------------------------------------------------------------------
 // Attributes
 
+
+void Processor::set_RCfreq_active(bool state)
+{
+    if (mFrequency)
+        mFrequency->set_rc_active(state);
+    update_cps();
+}
 void Processor::set_frequency(double f)
 {
   if(mFrequency)
     mFrequency->set(f);
+  update_cps();
+}
+void Processor::set_frequency_rc(double f)
+{
+  if(mFrequency)
+    mFrequency->set_rc_freq(f);
   update_cps();
 }
 double Processor::get_frequency()
@@ -257,7 +293,6 @@ double Processor::get_frequency()
 
   if(mFrequency)
     mFrequency->get(d);
-
   return d;
 }
 

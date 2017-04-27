@@ -10,6 +10,7 @@
 #include "comparator.h"
 #include "a2dconverter.h"
 #include "pic-ioports.h"
+#include "dsm_module.h"
 
 #define FOSC0 (1<<0)
 #define FOSC1 (1<<1)
@@ -96,6 +97,7 @@ public:
   PicLatchRegister *m_lata;
   DACCON0	   *m_daccon0;
   DACCON1	   *m_daccon1;
+  DSM_MODULE       dsm_module;
 
   virtual PIR *get_pir2() { return (NULL); }
   virtual PIR *get_pir1() { return (pir1); }

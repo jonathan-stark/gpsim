@@ -213,6 +213,7 @@ ${RT} p16f676 sim_p16f676
 ${RT} p16f676 sim_reset
 ${RT} p16f690 sim_epwm 
 ${RT} p16f690 sim_eusart 
+${RT} p16f690 sim_eusart_690 
 ${RT} p16f690 sim_nwdt_16f631
 ${RT} p16f690 sim_p16f690
 ${RT} p16f690 sim_wdt_16f677

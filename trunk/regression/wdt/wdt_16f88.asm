@@ -33,8 +33,9 @@ include <coff.inc>
 	ORG	0
 
   .sim "p16f88.BreakOnReset = false"
-  .sim "break c 0x10000"
+  .sim "break c 0x100000"
   .sim "p16f88.frequency=10000"
+  .sim "symbol cycleCounter=0"
 
 ; are we seeing a WDT reset?
 
@@ -46,6 +47,45 @@ include <coff.inc>
 ;	(on real device may be soon as 0.9 sec)
 ;	In the following test WDT should be longer then delay1, but shorter
 ;	than twice delay1. The clrwdt thus prevents the WDT from going off.
+
+        BANKSEL	OSCCON
+	movlw	0xff
+	movwf	OSCCON
+   .assert "osccon == 0x73, \"*** FAILED 18f88 osccon writable bits\""
+	nop
+	bcf	OSCCON,SCS0
+	movlw	0x72	; set RC clock 8MHz
+	movwf	OSCCON
+   .assert "osccon == 0x76, \"*** FAILED 18f88 osccon IOFS OK\""
+	nop
+	movlw   0x12    ; set RC clock 125 kHz
+	movwf	OSCCON
+	sleep
+	nop
+	nop
+    .command "cycleCounter = cycles"
+	nop
+	btfss	OSCCON,IOFS	; wait for stable
+	goto	$-1
+    ; at 125 kHz 4ms delay = 125 cycles
+    .assert "((cycles - cycleCounter) >= 125) && ((cycles - cycleCounter) <= 129), \"*** FAILED 16f88 RC stable delay from sleep\""
+	nop
+	movlw	0x02	; set RC clock 31 kHz
+	movwf	OSCCON
+   .assert "osccon == 0x0e, \"*** FAILED 18f88 osccon IOFS OK high to low\""
+	nop
+	bsf	OSCCON,IRCF2	; set RC clock 1MHz  
+    .command "cycleCounter = cycles"
+	nop
+	btfss	OSCCON,IOFS	; wait for stable
+	goto	$-1
+    ; at 1MHz 4ms delay = 1000 cycles
+    .assert "((cycles - cycleCounter) >= 1000) && ((cycles - cycleCounter) <= 1004), \"*** FAILED 16f88 RC stable delay low to high\""
+	nop
+	bcf	OSCCON,SCS1 	; turn off RC clock
+    .assert "p16f88.frequency == 10000.,\"*** FAILED 18f88 frequency \""
+	nop
+
 
 	call	delay1
         clrwdt

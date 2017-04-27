@@ -317,6 +317,7 @@ void P18F14K22::osc_mode(unsigned int value)
   unsigned int pin_Number1 =  get_osc_pin_Number(1);
   bool  pllen = value & PLLCFG;
 
+  printf("RRR P18F14K22::osc_mode 0x%x osccon=%p\n", value, osccon);
   if (mode == 0x8 || mode == 0x9)
       set_int_osc(true);
   else
@@ -410,6 +411,7 @@ void P18F14K22::create_sfr_map()
   add_sfr_register(&osctune,      0xf9b,porv);
   osccon->set_osctune(&osctune);
   osctune.set_osccon(osccon);
+ 
 
   comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[2], &(*m_porta)[4]);
   comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[1], &(*m_portc)[1],
@@ -585,7 +587,9 @@ P18F26K22::P18F26K22(const char *_name, const char *desc)
     ssp1(this),
     ssp2(this),
     ctmu(this),
-    hlvdcon(this, "hlvdcon", "High/Low-Voltage Detect Register")
+    hlvdcon(this, "hlvdcon", "High/Low-Voltage Detect Register"),
+    osccon2(this, "osccon2", "Oscillator Control Register 2")
+
 {
 
   if(verbose)
@@ -756,6 +760,7 @@ P18F26K22::~P18F26K22()
     delete_sfr_register(ctmu.ctmuconl);
     delete_sfr_register(ctmu.ctmuicon);
     remove_sfr_register(&hlvdcon);
+    remove_sfr_register(&osccon2);
 
 
     delete_file_registers(0xf3b, 0xf3c, false);
@@ -792,6 +797,7 @@ void P18F26K22::create()
   remove_sfr_register(&ssp.sspstat);
   remove_sfr_register(&ssp.sspadd);
   remove_sfr_register(&ssp.sspbuf);
+  remove_sfr_register(&lvdcon);
 
   set_osc_pin_Number(0, 9, &(*m_porta)[7]);
   set_osc_pin_Number(1,10, &(*m_porta)[6]);
@@ -802,6 +808,9 @@ void P18F26K22::create()
 
 
 //  add_sfr_register(osccon,     0xfd3, RegisterValue(0x30,0), "osccon");
+  add_sfr_register(&osccon2, 0xfd2, RegisterValue(0x04,0), "osccon2");
+  ((OSCCON_HS *)osccon)->osccon2 = &osccon2;
+  osccon->write_mask = 0xf3;
   osccon->por_value = RegisterValue(0x30,0);
 
   add_sfr_register(&t1gcon,     0xfcc, porv, "t1gcon");
@@ -984,6 +993,8 @@ void P18F26K22::create()
   anselc.setIOPin(18, &(*m_portc)[6], &adcon1);
   anselc.setIOPin(19, &(*m_portc)[7], &adcon1);
 
+  osccon->write_mask = 0xf3;
+
 
 }
 void P18F26K22::set_config3h(gint64 value)
@@ -1022,9 +1033,21 @@ void P18F26K22::osc_mode(unsigned int value)
   set_pplx4_osc(value & PLLCFG);
 
   if (mode == 0x8 || mode == 0x9)
+  {
+      if (osccon) osccon->set_config_irc(true);
       set_int_osc(true);
+  }
   else
+  {
       set_int_osc(false);
+      if (osccon) osccon->set_config_irc(false);
+  }
+
+  if (osccon)
+  {
+	osccon->set_config_ieso(value & IESO);
+	osccon->set_config_xosc(mode < 4);
+  }
 
   switch(mode)
   {
@@ -1115,6 +1138,7 @@ void P18F26K22::create_sfr_map()
   add_sfr_register(&osctune,      0xf9b,porv);
   osccon->set_osctune(&osctune);
   osctune.set_osccon(osccon);
+  osccon2.set_osccon(osccon);
 
   comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[4], &(*m_porta)[5]);
   comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[0], &(*m_porta)[1], 

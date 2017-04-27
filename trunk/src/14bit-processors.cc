@@ -105,7 +105,10 @@ public:
 
 //-------------------------------------------------------------------
 _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
-  : pic_processor(_name,_desc), intcon(0), has_SSP(false)
+  : pic_processor(_name,_desc), intcon(0),
+    two_speed_clock(false), config_clock_mode(0),
+    has_SSP(false)
+
 {
   pc = new Program_Counter("pc", "Program Counter", this);
   pc->set_trace_command(); //trace.allocateTraceType(new PCTraceType(this,1)));
@@ -204,6 +207,7 @@ bool _14bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
   if((address == config_word_address()) && config_modes) {
 
     config_word = cfg_word;
+    oscillator_select(cfg_word, false);
 
     if (m_configMemory && m_configMemory->getConfigWord(0))
       m_configMemory->getConfigWord(0)->set((int)cfg_word);
@@ -215,6 +219,13 @@ bool _14bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
 
 }
 
+// The working version of oscillator_select should be called at a higher level
+// where the IO pins are defined
+//
+void _14bit_processor::oscillator_select(unsigned int mode, bool not_clkout)
+{
+//    printf("Error _14bit_processor::oscillator_select called\n");
+}
 //-------------------------------------------------------------------
 void _14bit_processor::enter_sleep()
 {

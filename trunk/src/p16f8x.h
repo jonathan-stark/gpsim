@@ -48,7 +48,7 @@ public:
   PIR_SET_2 pir_set_2_def;
 
   WDTCON       wdtcon;
-  OSCCON       *osccon;
+  OSCCON_1     *osccon;
   OSCTUNE      osctune;
 
 
@@ -73,6 +73,7 @@ public:
   virtual void create(int eesize);
   virtual void create_iopin_map();
   virtual void create_config_memory();
+  virtual void exit_sleep();
 
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as P16F8x expects to have a PIR capable EEPROM
@@ -103,7 +104,7 @@ public:
   sfr_register  adresh;
   sfr_register  adresl;
 
-  OSCCON       *osccon;
+  OSCCON_1       *osccon;
   OSCTUNE      osctune;
 
 

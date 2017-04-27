@@ -543,40 +543,7 @@ public:
   LVDCON(Processor *, const char *pName, const char *pDesc=0);
 };
 
-class OSCCON2 : public  sfr_register
-{
- public:
-  void put(unsigned int new_value);
-  OSCCON2(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc) {}
 
-
-  enum
-  {
-	LFIOFS  = 1<<0,		// LFINTOSC Frequency Stable bit
-	MFIOFS  = 1<<1,		// MFINTOSC Frequency Stable bit
-	PRISD   = 1<<2,		// Primary Oscillator Drive Circuit Shutdown bit
-	SOSCGO  = 1<<3,		// Secondary Oscillator Start Control bit
-	MFIOSEL = 1<<4,		// MFINTOSC Select bit
-	SOSCRUN = 1<<6,		// SOSC Run Status bit
-	PLLRDY  = 1<<7		// PLL Run Status bit
-  };
-};
-
-/* RC clock 16Mhz with pll to 64Mhz
- */
-class OSCCON_HS : public OSCCON
-{
- public:
-   virtual bool set_rc_frequency();
-
-   OSCCON_HS(Processor *pCpu, const char *pName, const char *pDesc) :
-       OSCCON(pCpu, pName, pDesc), osccon2(0), minValPLL(5) {}
-
-   OSCCON2  *osccon2;
-
-   unsigned char minValPLL;
-};
 /*
    High/Low-Voltage Detect Module
 */

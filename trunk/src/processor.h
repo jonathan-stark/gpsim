@@ -577,6 +577,8 @@ public:
   //
 
   void set_frequency(double f);
+  void set_frequency_rc(double f);
+  void set_RCfreq_active(bool);
   virtual double get_frequency();
 
   void set_ClockCycles_per_Instruction(unsigned int cpi)

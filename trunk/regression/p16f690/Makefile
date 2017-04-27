@@ -32,7 +32,7 @@ epwm.cod: epwm.o $(SCRIPT)
 	gplink --map  -s $(SCRIPT) -o epwm.cod epwm.o
 
 sim: sim_epwm sim_eusart sim_p16f690 sim_nwdt_16f631 sim_wdt_16f677 \
-	sim_wdt_16f685
+	sim_wdt_16f685 sim_eusart_690
 
 sim_epwm: epwm.cod
 	$(GPSIM) -i -I $(STARTUP_STC) -D STC=$<

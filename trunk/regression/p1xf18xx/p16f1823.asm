@@ -136,12 +136,16 @@ exit_int:
 ;----------------------------------------------------------------------
 MAIN    CODE
 start
-	;set clock to 16 MHz
+   .assert "p16f1823.frequency == 500000., \"FALIED 16F1823 POR clock 500kHz\""
+	nop
+
 	BANKSEL OSCCON
-	bsf 	OSCCON,6
+	bsf 	OSCCON,6	;set clock to 16 MHz
 	btfss	OSCSTAT,HFIOFL
 	goto	$-1
-   .assert "(oscstat & 0x19) == 0x19,  \"*** FAILED 16f1823 HFIO bit error\""
+   .assert "(oscstat & 0x1f) == 0x19,  \"*** FAILED 16f1823 HFIO bit error\""
+	nop
+   .assert "p16f1823.frequency == 16000000., \"FALIED 16F1823 RC clock 16MHz\""
 	nop
 	call	cap_sense
 	BANKSEL FVRCON

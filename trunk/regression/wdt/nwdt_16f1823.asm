@@ -39,6 +39,14 @@ include <coff.inc>
 	btfss	STATUS,NOT_TO
 	goto	wdt_reset
 
+	BANKSEL	OSCCON
+   .assert "osccon == 0x38, \"*** FAILED p16f1823 osccon pow value\""
+	nop
+	movlw	0xff
+	movwf	OSCCON
+   .assert "osccon == 0xfb, \"*** FAILED p16f1823 osccon write mask\""
+	nop
+
 	; WDT should not go off, delay past time WDT would be expected to go off
 	call delay1
 	call delay1

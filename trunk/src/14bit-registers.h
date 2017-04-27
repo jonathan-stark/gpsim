@@ -686,16 +686,49 @@ class OSCCAL : public  sfr_register
 class OSCCON : public  sfr_register,  public TriggerObject
 {
  public:
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   virtual void callback();
-  virtual bool set_rc_frequency();
+  virtual bool set_rc_frequency(bool override=false);
   virtual void set_osctune(OSCTUNE *new_osctune) { osctune = new_osctune;}
-  unsigned int valid_bits;
+  virtual void set_config_irc(unsigned int cfg_irc){config_irc = cfg_irc;}
+  virtual void set_config_xosc(unsigned int cfg_xosc){config_xosc = cfg_xosc;}
+  virtual void set_config_ieso(unsigned int cfg_ieso){config_ieso = cfg_ieso;}
+  virtual void reset(RESET_TYPE r);
+  virtual void  wake();
+  virtual void por_wake();
+  virtual bool internal_RC();
+  virtual void clear_irc_stable_bits() { value.put(value.get() & ~(HTS|LTS));}
+  virtual guint64 irc_por_time(); // time to stable intrc after power on reset
+  virtual guint64 irc_lh_time(); // time to stable intrc after tran low to high range
+  unsigned int write_mask;
+  unsigned int clock_state;
+  guint64      future_cycle;
+  bool         config_irc;     // FOSC bits select internal RC oscillator
+  bool         config_ieso;    //internal/external switchover bit from config word
+  bool         config_xosc;    // FOSC bits select crystal/resonator
+  bool         has_iofs_bit;
+  
   OSCTUNE *osctune;
+
+  enum MODE
+  {
+	UNDEF = 0,
+        EXCSTABLE, 	// external source
+        LFINTOSC,       // Low Freq RC osc
+	MFINTOSC,	// Med Freq rc osc
+        HFINTOSC,       // High Freq RC osc
+        INTOSC,         // IOFS set
+	T1OSC,		// T1 OSC
+	EC,		// external clock, always stable
+        OST,      	// startup
+	PLL = 0x10
+  };   
 
   enum {
     SCS0 = 1<<0,
     SCS1 = 1<<1,
+    LTS  = 1<<1,
+    HTS  = 1<<2,
     IOFS = 1<<2,
     OSTS = 1<<3,
     IRCF0 = 1<<4,
@@ -705,11 +738,89 @@ class OSCCON : public  sfr_register,  public TriggerObject
   };
 
   OSCCON(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), valid_bits(7), osctune(0)
+    : sfr_register(pCpu,pName,pDesc), write_mask(0x71), 
+	clock_state(OST), future_cycle(0), config_irc(false), config_ieso(true),
+	config_xosc(false), has_iofs_bit(false), osctune(0)
   {
   }
 };
 
+/* OSCCON_1 IOFS bit takes 4 ms to stablize
+ */
+
+class OSCCON_1 : public OSCCON
+{
+
+public:
+
+
+//  virtual void callback();
+//  virtual void put(unsigned int new_value);
+  virtual guint64 irc_por_time(); // time to stable intrc after power on reset
+  virtual guint64 irc_lh_time();
+
+  OSCCON_1(Processor *pCpu, const char *pName, const char *pDesc)
+    : OSCCON(pCpu,pName,pDesc)
+  {
+  }
+};
+
+
+class OSCCON2 : public  sfr_register
+{
+ public:
+  void put(unsigned int new_value);
+  void set_osccon(OSCCON *new_osccon) { osccon = new_osccon;}
+  OSCCON2(Processor *pCpu, const char *pName, const char *pDesc)
+    : sfr_register(pCpu,pName,pDesc) , write_mask(0x1c), osccon(0)
+	{;}
+
+
+  unsigned int write_mask;
+  enum
+  {
+	LFIOFS  = 1<<0,		// LFINTOSC Frequency Stable bit
+	MFIOFS  = 1<<1,		// MFINTOSC Frequency Stable bit
+	PRISD   = 1<<2,		// Primary Oscillator Drive Circuit Shutdown bit
+	SOSCGO  = 1<<3,		// Secondary Oscillator Start Control bit
+	MFIOSEL = 1<<4,		// MFINTOSC Select bit
+	SOSCRUN = 1<<6,		// SOSC Run Status bit
+	PLLRDY  = 1<<7		// PLL Run Status bit
+  };
+
+  OSCCON  *osccon;
+
+};
+
+/* RC clock 16Mhz with pll to 64Mhz
+ */
+class OSCCON_HS : public OSCCON
+{
+ public:
+   virtual bool set_rc_frequency(bool override=false);
+   virtual bool internal_RC();
+   virtual void callback();
+   virtual void por_wake();
+
+   OSCCON_HS(Processor *pCpu, const char *pName, const char *pDesc) :
+       OSCCON(pCpu, pName, pDesc), osccon2(0), minValPLL(5) {}
+
+   OSCCON2  *osccon2;
+
+   enum {
+	SCS0  	= 1<<0,
+	SCS1 	= 1<<1,
+	HFIOFS 	= 1<<2,
+	OSTS	= 1<<3,
+	IRCF0	= 1<<4,
+	IRCF1	= 1<<5,
+	IRCF2	= 1<<6,
+	IDLEN	= 1<<7
+   };
+
+
+   unsigned char minValPLL;
+};
 
 class OSCSTAT : public  sfr_register
 {
@@ -730,36 +841,20 @@ class OSCSTAT : public  sfr_register
   OSCSTAT(Processor *pCpu, const char *pName, const char *pDesc)
     : sfr_register(pCpu,pName,pDesc) {}
 };
-class OSCCON_2 : public  sfr_register,  public TriggerObject
+/*
+ * OSC status in OSCSTAT register
+ */
+class OSCCON_2 : public  OSCCON
 {
  public:
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   void put_value(unsigned int new_value);
-  virtual void callback();
-  virtual bool set_rc_frequency();
-  virtual void set_osctune(OSCTUNE *new_osctune) { osctune = new_osctune;}
-  virtual void set_oscstat(OSCSTAT *_oscstat) { oscstat = _oscstat;}
-  virtual void set_config(unsigned int cfg_fosc, bool cfg_ieso);
-  virtual void set_callback();
-  virtual void wake();
-  unsigned int 	valid_bits;
-  unsigned int 	mode;
-  guint64	next_callback;
-  OSCTUNE 	*osctune;
+  virtual void  callback();
+  virtual bool  set_rc_frequency(bool override = false);
+  virtual void  set_oscstat(OSCSTAT *_oscstat) { oscstat = _oscstat;}
+  virtual void  set_callback();
+  virtual void  por_wake();
   OSCSTAT 	*oscstat;
-  unsigned int  config_fosc;	// FOSC bits from config word
-  bool		config_ieso;	//internal/external switchover bit from config word
-
-  enum MODE
-  {
-	LF = 0,
-	MF,
-	HF,
-	T1OSC,
-	EC,	// external clock, always stable
-	OST,	// use on startup timer
-	PLL = 0x10
-  };
 
   enum {
     SCS0   = 1<<0,
@@ -772,8 +867,9 @@ class OSCCON_2 : public  sfr_register,  public TriggerObject
   };
 
   OSCCON_2(Processor *pCpu, const char *pName, const char *pDesc)
-    : sfr_register(pCpu,pName,pDesc), valid_bits(0xfb),
-	next_callback(0), osctune(0), oscstat(0)
+    : OSCCON(pCpu,pName,pDesc),
+       oscstat(0)
+
   {
   }
 };

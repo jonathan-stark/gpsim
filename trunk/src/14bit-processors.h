@@ -81,6 +81,7 @@ public:
 
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   virtual void create_config_memory();
+  virtual void oscillator_select(unsigned int mode, bool clkout);
 
   // Return the portion of pclath that is used during branching instructions
   virtual unsigned int get_pclath_branching_jump()
@@ -115,6 +116,9 @@ public:
 
   _14bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_14bit_processor();
+  bool          two_speed_clock;
+  unsigned int  config_clock_mode;
+
 
 protected:
   bool		has_SSP;

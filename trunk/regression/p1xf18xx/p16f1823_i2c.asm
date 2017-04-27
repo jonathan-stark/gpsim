@@ -22,7 +22,7 @@
         include <coff.inc>
 
 
-        __CONFIG _CONFIG1, _CP_OFF & _WDTE_ON &  _FOSC_INTOSC & _PWRTE_ON &  _BOREN_OFF & _MCLRE_OFF & _CLKOUTEN_OFF
+        __CONFIG _CONFIG1, _CP_OFF & _WDTE_ON &  _FOSC_HS & _PWRTE_ON &  _BOREN_OFF & _MCLRE_OFF & _CLKOUTEN_OFF & _IESO_ON
 
 
 #define SCL_PIN 0
@@ -53,6 +53,7 @@ PROG1 	CODE
 
 ;
 start	
+   .sim "p16f1823.frequency = 20000000."
    .sim "break c 0x100000"
    .sim "module lib libgpsim_modules"
    .sim "module load e24xx024 ee"
@@ -159,7 +160,17 @@ ProgInit
 	clrf	TRISA
  ;	clrf	TRISC
 	bsf	_SDA_DRIVE
+
+	banksel OSCSTAT
+   .assert "p16f1823.frequency == 500000., \"FALIED 16F1823 POR 2 speed clock 500kHz\""
+	nop
+	btfss	OSCSTAT,OSTS
+	goto	$-1
+   .assert "p16f1823.frequency == 20000000., \"FALIED 16F1823 after 2 speed clock 20MHz\""
+	nop
 	
+   .assert "(oscstat & 0x1f) == 0x00,  \"*** FAILED 16f1823 OSCSTAT bit error\""
+	nop
 
 
 	banksel	SSPADD

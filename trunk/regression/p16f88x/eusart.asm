@@ -291,7 +291,7 @@ start
 	nop
 
 done:
-  .assert  "\"*** PASSED E-Usart on 116f884\""
+  .assert  "\"*** PASSED p16f884 E-Usart\""
 	goto $
 
 
