@@ -1,6 +1,6 @@
 2017-04-27 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f690/Makefile regression/p16f690/eusart.asm
-	   regression/run_regression.sh
+	   regression/run_regression.sh regression/p16f690/eusart_690.asm
 	: Add 690 eusart test
 	* regression/p16f690/p16f690.asm regression/p18f26k22/Makefile
 	  regression/p18f26k22/osccon_26k22.asm regression/p1xf18xx/p16f1823.asm
