@@ -194,7 +194,8 @@ public:
       CHS1 = 1<<4,
       CHS2 = 1<<5,
       ADCS0 = 1<<6,
-      ADCS1 = 1<<7
+      ADCS1 = 1<<7,
+
     };
 
   enum AD_states
@@ -234,6 +235,7 @@ public:
 
   void setValidBits(unsigned int mask) { valid_bits = mask;}
 
+
 private:
 
   friend class ADCON0_10;
@@ -261,6 +263,33 @@ private:
   unsigned int valid_bits;
 };
 
+
+class ADCON0_91X : public ADCON0
+{
+public:
+  enum
+    {
+      ADON = 1<<0,
+      GO   = 1<<1,
+      CHS0 = 1<<2,
+      CHS1 = 1<<3,
+      CHS2 = 1<<4,
+      VCFG0 = 1<<5,	// P16f91x
+      VCFG1 = 1<<6,	// P16f91x
+      ADFM  = 1<<7,	// P16f91x
+
+    };
+
+  ADCON0_91X(Processor *pCpu, const char *pName, const char *pDesc) : ADCON0(pCpu, pName, pDesc){};
+  virtual bool get_ADFM() { return value.get() & ADFM; }
+  virtual double getVrefHi();
+  virtual double getVrefLo();
+
+  unsigned int Vrefhi_position;
+  unsigned int Vreflo_position;
+
+
+};
 
 class ADCON2_DIF;
 /* A/D converter with 12 or 10 bit differential input with ADCON2

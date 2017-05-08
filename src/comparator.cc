@@ -251,22 +251,35 @@ void CMCON::assign_pir_set(PIR_SET *new_pir_set)
 double CMCON::comp_voltage(int ind, int invert)
 {
     double Voltage;
+    const char *name;
+
 
     switch(ind)
     {
+    case V06:
+	Voltage = 0.6;
+	name = "V0.6";
+	break;
+
     case VREF:
         Voltage = _vrcon->get_Vref();
+	name = "Vref";
         break;
 
     case NO_IN:
         Voltage = invert ? cpu->get_Vdd() : 0.;
+	name = "No_IN";
         break;
 
     default:
         Voltage = cm_input[ind]->getPin().get_nodeVoltage();
+	name = cm_input[ind]->getPin().name().c_str();
         break;
     }
-    Dprintf(("CMCON::comp_voltage ind=%d %.2f %s\n", ind, Voltage, (ind==VREF)?"Vref":cm_input[ind]->getPin().name().c_str()));
+    if (name)	// this is just to avoid a compiler warning
+    {
+    Dprintf(("CMCON::comp_voltage ind=%d IN%c %.2f %s\n", ind, invert?'-':'+', Voltage, name));
+    }
     return Voltage;
 }
 /*
@@ -290,6 +303,7 @@ unsigned int CMCON::get()
         int output_bit = (i == 0) ? C1OUT : C2OUT;
         int shift = (cmcon_val & CIS) ? CFG_SHIFT : CFG_SHIFT*3;
 
+
         if ((m_configuration_bits[i][mode] & CFG_MASK) != ZERO)
         {
             Vhigh = comp_voltage(
@@ -303,6 +317,7 @@ unsigned int CMCON::get()
                 out_true = (cmcon_val & invert_bit)?false:true;
             else
                 out_true = (cmcon_val & invert_bit)?true:false;
+
 
             if (out_true)
                 cmcon_val |= output_bit;
@@ -334,13 +349,13 @@ unsigned int CMCON::get()
 	}
         // Generate interupt ?
         if (pir_set)
-	{
-	    if (diff & C1OUT)
+        {
+    	   if (diff & C1OUT)
                 pir_set->set_c1if();
-
-	    if (diff & C2OUT)
+    
+    	   if (diff & C2OUT)
                 pir_set->set_c2if();
-	}
+        }
    }
    if (m_tmrl)
 	m_tmrl->compare_gate((cmcon_val & C1OUT) == C1OUT);
@@ -448,7 +463,7 @@ void CMCON::put(unsigned int new_value)
 }
 //------------------------------------------------------------------------
 CMCON1::CMCON1(Processor *pCpu, const char *pName, const char *pDesc)
-  : sfr_register(pCpu, pName, pDesc), m_tmrl(0)
+  : sfr_register(pCpu, pName, pDesc), m_tmrl(0), valid_bits(0x3)
 {
 }
 CMCON1::~CMCON1() {}
@@ -463,7 +478,7 @@ void CMCON1::put(unsigned int new_value)
   m_tmrl->set_T1GSS(new_value & T1GSS);
 
   trace.raw(write_trace.get() | value.get());
-  value.put(new_value);
+  value.put(new_value & valid_bits);
 }
 //------------------------------------------------------------------------
 SRCON::SRCON(Processor *pCpu, const char *pName, const char *pDesc)

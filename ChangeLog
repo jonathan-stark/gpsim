@@ -1,3 +1,18 @@
+2017-05-08 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p16f91x/Makefile regression/p16f91x/ccp_917.asm
+	  regression/p16f91x/compar_917.asm regression/p16f91x/i2c_low.inc
+	  regression/p16f91x/i2c_slave.asm regression/p16f91x/p16f913.asm
+	  regression/p16f91x/p16f914.asm regression/p16f91x/p16f916.asm
+	  regression/p16f91x/p16f917.asm regression/p16f91x/pwm_914.asm
+	  regression/p16f91x/usart_917.asm regression/p18f26k22/osccon_26k22.asm
+	  regression/run_regression.sh src/14bit-processors.cc 
+	  src/14bit-registers.cc src/14bit-registers.h src/Makefile.am
+	  src/a2dconverter.cc src/a2dconverter.h src/comparator.cc src/comparator.h
+	  src/eeprom.cc src/lcd_module.cc src/lcd_module.h src/p16f91x.cc 
+	  src/p16f91x.h src/pic-processor.cc src/pic-processor.h src/pir.cc
+	  src/pir.h
+	: Add P16f91x processors (LCD functionality pending)
+
 2017-04-27 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f690/Makefile regression/p16f690/eusart.asm
 	   regression/run_regression.sh regression/p16f690/eusart_690.asm

@@ -314,6 +314,44 @@ public:
          INTCON *, PIE *);
 };
 
+//---------------------------------------------------------
+// PIR1 Peripheral Interrupt register # 1
+//
+// This is version 4 of the PIR1 register - as seen on the p16f91x devices
+
+class PIR1v4 : public PIR
+{
+public:
+
+  enum {
+    TMR1IF  = 1<<0,
+    TMR2IF  = 1<<1,
+    CCP1IF  = 1<<2,
+    SSPIF   = 1<<3,
+    TXIF    = 1<<4,
+    RCIF    = 1<<5,
+    ADIF    = 1<<6,
+    EEIF    = 1<<7
+  };
+ 
+  virtual void set_tmr1if(){ put(get() | TMR1IF); }
+  virtual void set_tmr2if(){ put(get() | TMR2IF); }
+  virtual void set_ccpif() { put(get() | CCP1IF); }
+  virtual void set_sspif() { put(get() | SSPIF); }
+  virtual void set_txif();
+  virtual void set_rcif();
+  virtual void clear_txif();
+  virtual void clear_rcif();
+  virtual unsigned int get_txif() { return value.get() & TXIF; }
+  virtual unsigned int get_rcif() { return value.get() & RCIF; }
+  virtual void set_adif() { put(get() | ADIF); }
+  virtual void set_eeif() { put(get() | EEIF); }
+
+ 
+  PIR1v4(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
+
 
 
 //---------------------------------------------------------
@@ -475,6 +513,35 @@ enum
          INTCON *, PIE *);
 };
 
+//---------------------------------------------------------
+// PIR2 Peripheral Interrupt register 
+//
+// This is version 5 of the PIR2 register - as seen on the p16f91x devices
+
+class PIR2v5 : public PIR
+{
+public:
+
+  enum {
+    
+    CCP2IF  = 1<<0,
+    LVDIF   = 1<<2,
+    LCDIF   = 1<<4,
+    C1IF    = 1<<5,
+    C2IF    = 1<<6,
+    OSFIF   = 1<<7
+  };
+ 
+  virtual void set_ccp2if() { put(get() | CCP2IF); }
+  virtual void set_lvdif() { put(get() | LVDIF); }
+  virtual void set_lcdif() { put(get() | LCDIF); }
+  virtual void set_c1if() { put(get() | C1IF); }
+  virtual void set_c2if() { put(get() | C2IF); }
+  virtual void set_osfif() { put(get() | OSFIF); }
+
+  PIR2v5(Processor *pCpu, const char *pName, const char *pDesc,
+         INTCON *, PIE *);
+};
 
 //---------------------------------------------------------
 // PIR3 Peripheral Interrupt register # 3

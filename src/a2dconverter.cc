@@ -326,6 +326,20 @@ void ADCON0::set_interrupt(void)
 
 }
 
+double ADCON0_91X::getVrefHi()
+{
+    if (value.get() & VCFG0)
+	return getChannelVoltage(Vrefhi_position);
+    else
+	return ((Processor *)cpu)->get_Vdd();
+}
+double ADCON0_91X::getVrefLo()
+{
+    if (value.get() & VCFG1)
+	return getChannelVoltage(Vreflo_position);
+    else
+	return 0.;
+}
 
 //------------------------------------------------------
 // ADCON0

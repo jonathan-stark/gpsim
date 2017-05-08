@@ -18,7 +18,7 @@ case "$1" in
 	        txisr_test tmr0_16bit tmr1_16bit tmr3_16bit switch_test p18f 
 		comparator a2d psp ttl ccp ccp_628 wavegen spi i2c port_stim 
 		p12c509 wdt p12f675 p16f676 p16f690 p16f684 p1xf18xx
-		p18f26k22'
+		p18f26k22 p16f91x'
 
         echo ${DIRS}
         for i in ${DIRS} ; do
@@ -236,4 +236,5 @@ ${RT}       p1xf18xx sim_p16f1823_spi
 
 ${RT}	p18f26k22 sim
 ${RT}	p16f88x sim
+${RT}	p16f91x sim
 grep ERR */*log

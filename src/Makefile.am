@@ -41,6 +41,7 @@ libgpsim_la_SOURCES = \
 	intcon.cc \
 	interface.cc \
 	ioports.cc \
+	lcd_module.cc \
 	lxt_write.c \
 	modules.cc \
 	os_dependent.cc \
@@ -55,6 +56,7 @@ libgpsim_la_SOURCES = \
 	p16x7x.cc \
 	p16x5x.cc \
 	p16x6x.cc \
+	p16f91x.cc \
 	p17c75x.cc \
 	p18x.cc \
 	p18fk.cc \
@@ -127,6 +129,7 @@ gpsiminclude_HEADERS = \
 	intcon.h \
 	interface.h \
 	ioports.h \
+        lcd_module.h \
 	lxt_write.h \
 	modules.h \
 	operator.h \
@@ -141,6 +144,7 @@ gpsiminclude_HEADERS = \
 	p16f8x.h \
 	p16f88x.h \
 	p16f87x.h \
+	p16f91x.h \
 	p17c75x.h \
 	p18x.h \
 	p18fk.h \

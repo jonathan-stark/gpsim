@@ -67,7 +67,7 @@ void EECON1::put(unsigned int new_value)
   new_value &= valid_bits;
 
   //cout << "EECON1::put new_value " << hex << new_value << "  valid_bits " << valid_bits << '\n';
-  //Dprintf(("new_value %x valid_bits %x\n", new_value, valid_bits));
+  Dprintf(("new_value %x valid_bits %x\n", new_value, valid_bits));
   if(new_value & WREN)
   {
       if(eeprom->get_reg_eecon2()->is_unarmed())
@@ -111,7 +111,7 @@ void EECON1::put(unsigned int new_value)
 
   if ( (value.get() & RD) && !( value.get() & WR) )
   {
-      //Dprintf(("RD true WR false EEPGD|CFFS %x\n", value.get() & (EEPGD|CFGS)));
+      Dprintf(("RD true WR false EEPGD|CFFS %x\n", value.get() & (EEPGD|CFGS)));
       if(value.get() & (EEPGD|CFGS)) {
         eeprom->get_reg_eecon2()->read();
         eeprom->start_program_memory_read();
@@ -262,6 +262,7 @@ void EEPROM_PIR::write_is_complete()
 
   eecon1.value.put( eecon1.value.get()  & (~eecon1.WR));
 
+  Dprintf(("eecon1 0x%x\n", eecon1.value.get()));
   m_pir->set_eeif();
 }
 
@@ -582,6 +583,7 @@ void EEPROM_WIDE::callback()
 {
   //cout << "eeprom call back\n";
 
+ Dprintf(("state 0x%x\n", eecon2.get_eestate()));
 
   switch(eecon2.get_eestate()) {
   case EECON2::EEREAD:
@@ -611,12 +613,14 @@ void EEPROM_WIDE::callback()
   case EECON2::EEWRITE_IN_PROGRESS:
     //cout << "eewrite\n";
 
+    Dprintf(("EEWRITE_IN_PROGRESS eecon1 %x\n", eecon1.value.get()));
     if(eecon1.value.get() & EECON1::EEPGD) // write program memory
     {
         cpu->init_program_memory_at_index(wr_adr, wr_data);
     }
-    else                                  // read eeprom memory
+    else                                  // write eeprom memory
     {
+        Dprintf(("wr_adr 0x%x rom_size 0x%x data 0x%x\n", wr_adr, rom_size, wr_data));
         if(wr_adr < rom_size)
         {
            rom[wr_adr]->value.put(wr_data);

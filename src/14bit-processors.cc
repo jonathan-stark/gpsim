@@ -203,6 +203,7 @@ void _14bit_processor::create_config_memory()
 
 bool _14bit_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 {
+  printf("RRR _14bit_processor::set_config_word address=0x%x cfg_word=%x\n", address, cfg_word);
 
   if((address == config_word_address()) && config_modes) {
 

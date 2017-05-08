@@ -51,6 +51,7 @@ License along with this library; if not, see
 #include "p16f87x.h"
 #include "p16x6x.h"
 #include "p16x7x.h"
+#include "p16f91x.h"
 #include "p12x.h"
 #include "p12f6xx.h"
 #include "p1xf1xxx.h"
@@ -233,6 +234,14 @@ ProcessorConstructor pP16F876A(P16F876A::construct ,
                        "__16F876a",  "pic16f876a",   "p16f876a", "16f876a");
 ProcessorConstructor pP16F877A(P16F877A::construct ,
                        "__16F877a",  "pic16f877a",   "p16f877a", "16f877a");
+ProcessorConstructor pP16F913(P16F913::construct ,
+                       "__16F913",  "pic16f913",   "p16f913", "16f913");
+ProcessorConstructor pP16F914(P16F914::construct ,
+                       "__16F914",  "pic16f914",   "p16f914", "16f914");
+ProcessorConstructor pP16F916(P16F916::construct ,
+                       "__16F916",  "pic16f916",   "p16f916", "16f916");
+ProcessorConstructor pP16F917(P16F917::construct ,
+                       "__16F917",  "pic16f917",   "p16f917", "16f917");
 ProcessorConstructor pP16F1788(P16F1788::construct ,
                        "__16F1788", "pic16f1788", "p16f1788", "16f1788");
 ProcessorConstructor pP16F1823(P16F1823::construct ,
@@ -1274,6 +1283,7 @@ bool pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 {
 
   int i = get_config_index(address);
+
 
   if ( i >= 0)
   {

@@ -314,6 +314,39 @@ void PIR1v3::set_c2if(void)
 }
 
 //------------------------------------------------------------------------
+
+PIR1v4::PIR1v4(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  writable_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | ADIF | EEIF;
+  valid_bits = 0xff;
+}
+void PIR1v4::set_txif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | TXIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR1v4::clear_txif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() & ~TXIF);
+}
+
+void PIR1v4::set_rcif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() | RCIF);
+  if( value.get() & pie->value.get() )
+    setPeripheralInterrupt();
+}
+void PIR1v4::clear_rcif(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  value.put(value.get() & ~RCIF);
+}
+//------------------------------------------------------------------------
 PIR2v1::PIR2v1(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
   : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
 {
@@ -419,6 +452,12 @@ void PIR2v4::set_bclif(void)
   value.put(value.get() | BCLIF);
   if( value.get() & pie->value.get() )
     setPeripheralInterrupt();
+}
+PIR2v5::PIR2v5(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, PIE *_pie)
+  : PIR(pCpu,pName,pDesc,_intcon, _pie,0)
+{
+  valid_bits = OSFIF | LVDIF | LCDIF | C1IF | C2IF |CCP2IF;
+  writable_bits = valid_bits;
 }
 //------------------------------------------------------------------------
 
