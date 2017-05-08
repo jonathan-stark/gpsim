@@ -46,7 +46,7 @@ License along with this library; if not, see
 #endif
 
 // Debug OSCCON
-#define CDEBUG
+//#define CDEBUG
 #if defined(CDEBUG)
 #define CDprintf(arg) {printf("0x%06" PRINTF_GINT64_MODIFIER "X %s() ", cycles.get(), __FUNCTION__); printf arg; }
 #else
@@ -295,6 +295,7 @@ bool OSCCON::internal_RC()
     else if (scs == 1)
 	ret = true;
 
+    CDprintf(("OSCCON internal_RC ret %d osccon=0x%x\n", ret, value.get()));
     return ret;
 }
 
@@ -316,9 +317,7 @@ void OSCCON::reset(RESET_TYPE r)
 
 void OSCCON::wake()
 {
-    bool two_speed_clock = config_xosc  && config_ieso;
-    bool int_rc=internal_RC();
-    CDprintf(("OSCCON config_ieso %d int RC %d two_speed_clock=%d cpu=%s\n", config_ieso, int_rc, two_speed_clock, cpu_pic->name().c_str()));
+    CDprintf(("OSCCON config_ieso %d int RC %d two_speed_clock=%d cpu=%s\n", config_ieso, internal_RC(), (config_xosc  && config_ieso), cpu_pic->name().c_str()));
     por_wake();
 }
 
@@ -490,7 +489,9 @@ void  OSCCON::put(unsigned int new_value)
 
   if(internal_RC())
   {
+#ifdef CDEBUG
       unsigned int old_clock_state = clock_state;
+#endif
 
       if ((diff & (IRCF0 | IRCF1 | IRCF2))) // freq change 
       {
@@ -2706,4 +2707,49 @@ void SR_MODULE::releasePin(int index)
 	break;
     }
 }
+
+//-------------------------------------------------------------------
+LVDCON_14::LVDCON_14(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName,pDesc),
+    write_mask(0x17), IntSrc(0)
+{
+}
+
+double ldv_volts[] = {1.9, 2.0, 2.1, 2.2, 2.3, 4.0, 4.2, 4.5}; 
+
+void LVDCON_14::check_lvd()
+{
+    unsigned int reg = value.get();
+    if (!(reg & IRVST))
+        return;
+
+    double voltage = ldv_volts[reg & (LVDL0|LVDL1|LVDL2)];
+    Processor *Cpu = (Processor *)cpu;
+    if (Cpu->get_Vdd() <= voltage)
+        IntSrc->Trigger();
+}
+void LVDCON_14::callback()
+{
+    value.put(value.get() | IRVST);
+    check_lvd();
+}
+void LVDCON_14::put(unsigned int new_value)
+{
+    new_value &= write_mask;
+    unsigned int diff = value.get() ^ new_value;
+    if (!diff) return;
+    trace.raw(write_trace.get() | value.get());
+    value.put(new_value);
+
+    if ((diff & LVDEN) && (new_value & LVDEN)) // Turning on
+    {
+     // wait before doing anything
+        get_cycles().set_break(
+            get_cycles().get() + 50e-6 * get_cycles().instruction_cps(),
+            this);
+    }
+    return;
+  
+}
+
 

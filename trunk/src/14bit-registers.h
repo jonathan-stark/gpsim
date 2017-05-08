@@ -37,6 +37,7 @@ class _14bit_processor;
 
 #include "rcon.h"
 #include "intcon.h"
+#include "pir.h"
 
 class stimulus;  // forward reference
 class IOPIN;
@@ -1138,4 +1139,25 @@ protected:
     bool                    m_SRNQsource_active;
 };
 
+class LVDCON_14 : public  sfr_register, public TriggerObject
+{
+public:
+  unsigned int valid_bits;
+
+  enum {
+    LVDL0 = 1<<0,
+    LVDL1 = 1<<1,
+    LVDL2 = 1<<2,
+    LVDEN = 1<<4,
+    IRVST = 1<<5,
+  };
+
+  LVDCON_14(Processor *, const char *pName, const char *pDesc=0);
+  void check_lvd();
+  unsigned int 	write_mask;
+  InterruptSource *IntSrc;
+  void callback();
+  void put(unsigned int new_value);
+  virtual void setIntSrc(InterruptSource *_IntSrc) { IntSrc = _IntSrc;}
+};
 #endif

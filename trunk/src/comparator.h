@@ -34,8 +34,8 @@ License along with this library; if not, see
  *
  ***************************************************************************/
 
-#define CFG_MASK 0x7
-#define CFG_SHIFT 3
+#define CFG_MASK 0xf
+#define CFG_SHIFT 4
 
 class CMSignalSource;
 class CMxSignalSource;
@@ -52,8 +52,9 @@ class TMRL;
 	AN4,
 	AN5,
 	VREF = 6,	// use reference voltage
-	NO_IN = 7	// no input port
-   };
+	NO_IN = 7,	// no input port
+  	V06 = 8		// Reference voltage 0.6 
+  };
   enum compare_outputs
    {
 	OUT0 = 0,
@@ -185,6 +186,7 @@ class CMCON1 : public sfr_register
 
  private:
   TMRL *m_tmrl;
+  unsigned int		valid_bits;
 
 };
 
@@ -242,7 +244,7 @@ protected:
   static const int cMaxConfigurations=8;
   static const int cMaxComparators=2;
 
-  unsigned int m_configuration_bits[cMaxComparators][cMaxConfigurations];
+  uint32_t m_configuration_bits[cMaxComparators][cMaxConfigurations];
 
 };
 
