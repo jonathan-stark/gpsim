@@ -289,7 +289,6 @@ void gpsimInterface::simulation_has_stopped (void)
 
     if(interface_list->data) {
       Interface *an_interface = (Interface *)(interface_list->data);
-
       an_interface->SimulationHasStopped(an_interface->objectPTR);
     }
 

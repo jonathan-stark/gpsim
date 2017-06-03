@@ -125,6 +125,8 @@ start:
 
    .sim "node na4"
    .sim "attach na4 V4.pin porta2"
+        BANKSEL LCDCON
+	bcf	LCDCON,VLCDEN
 
 	call test_eerom
 

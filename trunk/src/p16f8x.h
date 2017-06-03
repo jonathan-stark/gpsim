@@ -73,6 +73,7 @@ public:
   virtual void create(int eesize);
   virtual void create_iopin_map();
   virtual void create_config_memory();
+  virtual void enter_sleep();
   virtual void exit_sleep();
 
   virtual void set_eeprom(EEPROM *ep) {

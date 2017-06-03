@@ -695,7 +695,8 @@ class OSCCON : public  sfr_register,  public TriggerObject
   virtual void set_config_xosc(unsigned int cfg_xosc){config_xosc = cfg_xosc;}
   virtual void set_config_ieso(unsigned int cfg_ieso){config_ieso = cfg_ieso;}
   virtual void reset(RESET_TYPE r);
-  virtual void  wake();
+  virtual void sleep();
+  virtual void wake();
   virtual void por_wake();
   virtual bool internal_RC();
   virtual void clear_irc_stable_bits() { value.put(value.get() & ~(HTS|LTS));}
@@ -708,6 +709,7 @@ class OSCCON : public  sfr_register,  public TriggerObject
   bool         config_ieso;    //internal/external switchover bit from config word
   bool         config_xosc;    // FOSC bits select crystal/resonator
   bool         has_iofs_bit;
+  bool	       is_sleeping;
   
   OSCTUNE *osctune;
 
@@ -741,7 +743,7 @@ class OSCCON : public  sfr_register,  public TriggerObject
   OSCCON(Processor *pCpu, const char *pName, const char *pDesc)
     : sfr_register(pCpu,pName,pDesc), write_mask(0x71), 
 	clock_state(OST), future_cycle(0), config_irc(false), config_ieso(true),
-	config_xosc(false), has_iofs_bit(false), osctune(0)
+	config_xosc(false), has_iofs_bit(false), is_sleeping(false), osctune(0)
   {
   }
 };

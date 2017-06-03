@@ -54,6 +54,7 @@ src_OBJECTS =			\
 	cod.o			\
 	comparator.o		\
 	ctmu.o			\
+	dsm_module.o		\
 	eeprom.o		\
 	errors.o		\
 	expr.o			\
@@ -67,6 +68,7 @@ src_OBJECTS =			\
 	intcon.o		\
 	interface.o		\
 	ioports.o		\
+	lcd_module.o		\
 	lxt_write.o		\
 	modules.o		\
 	operator.o		\
@@ -82,7 +84,9 @@ src_OBJECTS =			\
 	p16f88x.o		\
 	p16x8x.o		\
 	p16f8x.o		\
+	p16f91x.o		\
 	p17c75x.o		\
+	p18fk.o			\
 	p18x.o			\
 	packages.o		\
 	pic-instructions.o	\

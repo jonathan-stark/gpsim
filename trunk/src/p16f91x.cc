@@ -169,8 +169,8 @@ P16F91X::~P16F91X ()
   remove_sfr_register(&lvdcon);
   delete_sfr_register(lcd_module.lcdcon);
   delete_sfr_register(lcd_module.lcdps);
-  delete_sfr_register(lcd_module.lcdsen[0]);
-  delete_sfr_register(lcd_module.lcdsen[1]);
+  delete_sfr_register(lcd_module.lcdSEn[0]);
+  delete_sfr_register(lcd_module.lcdSEn[1]);
   delete_sfr_register(lcd_module.lcddatax[0]);
   delete_sfr_register(lcd_module.lcddatax[1]);
   delete_sfr_register(lcd_module.lcddatax[3]);
@@ -274,7 +274,7 @@ void P16F91X::create_sfr_map()
 
   add_sfr_register(m_porta, 0x05);
   add_sfr_register(m_portb, 0x06);
-  add_sfr_register(m_wpub, 0x95, RegisterValue(0xf0,0),"wpub");
+  add_sfr_register(m_wpub, 0x95, RegisterValue(0xff,0),"wpub");
   add_sfr_register(m_iocb, 0x96, RegisterValue(0xff,0),"iocb");
 
   alias_file_registers(0x06, 0x06, 0x100);
@@ -327,10 +327,9 @@ void P16F91X::create_sfr_map()
   add_sfr_register(&osctune, 0x90, RegisterValue(0,0),"osctune");
   add_sfr_register(&wdtcon, 0x105, RegisterValue(0x08,0),"wdtcon");
 
-  add_sfr_register(lcd_module.lcdcon, 0x107, RegisterValue(0x13,0));
   add_sfr_register(lcd_module.lcdps, 0x108, RegisterValue(0x0,0));
-  add_sfr_register(lcd_module.lcdsen[0], 0x11c, RegisterValue(0x0,0));
-  add_sfr_register(lcd_module.lcdsen[1], 0x11d, RegisterValue(0x0,0));
+  add_sfr_register(lcd_module.lcdSEn[0], 0x11c, RegisterValue(0x0,0));
+  add_sfr_register(lcd_module.lcdSEn[1], 0x11d, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[0], 0x110, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[1], 0x111, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[3], 0x113, RegisterValue(0x0,0));
@@ -339,7 +338,20 @@ void P16F91X::create_sfr_map()
   add_sfr_register(lcd_module.lcddatax[7], 0x117, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[9], 0x119, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[10], 0x11a, RegisterValue(0x0,0));
+  add_sfr_register(lcd_module.lcdcon, 0x107, RegisterValue(0x13,0));
 
+  lcd_module.set_Vlcd(&(*m_portc)[0], &(*m_portc)[1], &(*m_portc)[2]);
+  lcd_module.set_LCDsegn(0, &(*m_portb)[0], &(*m_portb)[1], 
+			&(*m_portb)[2], &(*m_portb)[3]);
+  lcd_module.set_LCDsegn(4, &(*m_porta)[4], &(*m_porta)[5], 
+			&(*m_portc)[3], &(*m_porta)[1]);
+  lcd_module.set_LCDsegn(8, &(*m_portc)[7], &(*m_portc)[6], 
+			&(*m_portc)[4], &(*m_portc)[5]);
+  lcd_module.set_LCDsegn(12, &(*m_porta)[0], &(*m_portb)[7], 
+			&(*m_portb)[6], &(*m_porta)[3]);
+
+  lcd_module.setIntSrc(new InterruptSource(pir2, (1<<4)));
+  lcd_module.set_t1con(&t1con);
   osccon->set_osctune(&osctune);
   osctune.set_osccon(osccon);
 
@@ -508,6 +520,27 @@ void P16F91X::update_vdd()
 
 }
 //-------------------------------------------------------------------
+void P16F91X::enter_sleep()
+{
+    tmr1l.sleep();
+    lcd_module.sleep();
+    osccon->sleep();
+    _14bit_processor::enter_sleep();
+}
+
+//-------------------------------------------------------------------
+void P16F91X::exit_sleep()
+{
+    if (m_ActivityState == ePASleeping)
+    {
+        tmr1l.wake();
+	lcd_module.wake();
+        osccon->wake();
+        _14bit_processor::exit_sleep();
+    }
+}
+
+//-------------------------------------------------------------------
 
 void P16F91X_40::create_iopin_map(void)
 {
@@ -611,11 +644,17 @@ void P16F91X_40::create_sfr_map()
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  add_sfr_register(lcd_module.lcdsen[2], 0x11e, RegisterValue(0x0,0));
+  add_sfr_register(lcd_module.lcdSEn[2], 0x11e, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[2], 0x112, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[5], 0x115, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[8], 0x118, RegisterValue(0x0,0));
   add_sfr_register(lcd_module.lcddatax[11], 0x11b, RegisterValue(0x0,0));
+  lcd_module.set_LCDcom(&(*m_portb)[4], &(*m_portb)[5], 
+			&(*m_porta)[2], &(*m_portd)[0]);
+  lcd_module.set_LCDsegn(16, &(*m_portd)[3], &(*m_portd)[4], 
+			&(*m_portd)[5], &(*m_portd)[6]);
+  lcd_module.set_LCDsegn(20, &(*m_portd)[7], &(*m_porte)[0], 
+			&(*m_porte)[1], &(*m_porte)[2]);
 }
 
 void P16F91X_40::create()
@@ -660,7 +699,7 @@ P16F91X_40::~P16F91X_40()
     delete_sfr_register(lcd_module.lcddatax[5]);
     delete_sfr_register(lcd_module.lcddatax[8]);
     delete_sfr_register(lcd_module.lcddatax[11]);
-    delete_sfr_register(lcd_module.lcdsen[2]);
+    delete_sfr_register(lcd_module.lcdSEn[2]);
     remove_sfr_register(&ccp2con);
     remove_sfr_register(&ccpr2h);
     remove_sfr_register(&ccpr2l);
@@ -740,6 +779,8 @@ void P16F91X_28::create_sfr_map()
   ansel.setAdcon1(&adcon1);
   ansel.setValidBits(0x1f);
   ansel.config(0x1f, 0);
+  lcd_module.set_LCDcom(&(*m_portb)[4], &(*m_portb)[5], 
+			&(*m_porta)[2], &(*m_porta)[3]);
 }
 
 void P16F91X_28::create()

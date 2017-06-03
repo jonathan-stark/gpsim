@@ -752,6 +752,7 @@ void  P12F1822::create(int ram_top, int eeprom_size)
 void P12F1822::enter_sleep()
 {
     tmr1l.sleep();
+    osccon->sleep();
     _14bit_e_processor::enter_sleep();
 }
 
@@ -1485,6 +1486,7 @@ void  P16F178x::create(int ram_top, int eeprom_size)
 void P16F178x::enter_sleep()
 {
     tmr1l.sleep();
+    osccon->sleep();
     _14bit_e_processor::enter_sleep();
 }
 

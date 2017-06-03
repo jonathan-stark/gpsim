@@ -1,3 +1,29 @@
+2017-06-01 Roy Rankin <rrankin@ihug.com.au>
+	* src/makefile.mingw plat/win32/gpsim.nsi extras/makefile.mingw
+	  gpsim/makefile.mingw gui/makefile.mingw plat/win32/make.mingw
+	  extras/ds1307/examples/Makefile extras/Makefile.am 
+	  src/uart.cc src/uart.h
+	: Fix windows build
+	* extras/lcd/Makefile.am extras/lcd/examples/lcd_916.asm
+	  extras/lcd/examples/lcd_917.asm extras/lcd/examples/p16c64.inc
+	  extras/lcd/examples/p16c84.inc extras/lcd/raw_lcd.cc
+	  extras/lcd/raw_lcd.h extras/module_manager.cc
+	: Add 7 segment LCD display
+	* src/a2d_v2.cc src/a2dconverter.cc
+	: Improve debugging
+	* src/interface.cc
+	: remove blank line
+	* src/lcd_module.cc src/lcd_module.h src/p16f91x.cc src/p16f91x.h
+	  src/14bit-tmrs.cc src/14bit-tmrs.h regression/p16f91x/Makefile
+	  regression/p16f91x/p16f913.asm
+	: Implement LCD module
+	* src/p16f88x.cc
+	: fix 16f685 program memory r/w
+	* src/p16f8x.cc src/p16f8x.h src/14bit-registers.cc
+	  src/14bit-registers.h src/p1xf1xxx.cc 
+	  regression/p18f26k22/osccon_26k22.asm
+	: Fix osccon wake issue
+
 2017-05-08 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p16f91x/Makefile regression/p16f91x/ccp_917.asm
 	  regression/p16f91x/compar_917.asm regression/p16f91x/i2c_low.inc

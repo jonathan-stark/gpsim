@@ -286,7 +286,7 @@ void ADCON0_V2::callback(void)
       future_cycle = get_cycles().get() + ((m_nBits + 1) * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
       if (verbose)
-        printf("A/D %u bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
+        printf("A/D %u bits channel:%d Vin=%.2g Refhi=%.2g Reflo=%.2g ", m_nBits,
             channel,m_dSampledVoltage,m_dSampledVrefHi,m_dSampledVrefLo);
 
       ad_state = AD_CONVERTING;

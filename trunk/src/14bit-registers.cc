@@ -315,8 +315,16 @@ void OSCCON::reset(RESET_TYPE r)
   }
 }
 
+void OSCCON::sleep()
+{
+    is_sleeping = true;
+}
+
 void OSCCON::wake()
 {
+    if (!is_sleeping)
+	return;
+    is_sleeping = false;
     CDprintf(("OSCCON config_ieso %d int RC %d two_speed_clock=%d cpu=%s\n", config_ieso, internal_RC(), (config_xosc  && config_ieso), cpu_pic->name().c_str()));
     por_wake();
 }

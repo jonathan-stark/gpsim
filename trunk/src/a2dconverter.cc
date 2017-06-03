@@ -227,7 +227,8 @@ void ADCON0::put_conversion(void)
 
   unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage + 0.5);
 
-  Dprintf(("put_conversion: Vrefhi:%g Vreflo:%g conversion:%u normV:%g\n",
+
+  Dprintf(("put_conversion: Vrefhi:%.4f Vreflo:%.4f conversion:%u normV:%f\n",
 	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
 
   if (verbose)
@@ -286,7 +287,7 @@ void ADCON0::callback(void)
       future_cycle = get_cycles().get() + (m_nBits * Tad)/p_cpu->get_ClockCycles_per_Instruction();
       get_cycles().set_break(future_cycle, this);
       if (verbose)
-	printf("A/D %u bits channel:%d Vin=%g Refhi=%g Reflo=%g ", m_nBits,
+	printf("A/D %u bits channel:%d Vin=%.4f Refhi=%.4f Reflo=%.4f ", m_nBits,
 	    channel,m_dSampledVoltage,m_dSampledVrefHi,m_dSampledVrefLo);
 
       ad_state = AD_CONVERTING;

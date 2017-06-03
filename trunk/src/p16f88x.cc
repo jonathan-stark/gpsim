@@ -2189,8 +2189,12 @@ void P16F685::create_sfr_map()
   P16F677::create_sfr_map();
 
 
-  add_sfr_register(get_eeprom()->get_reg_eedatah(),  0x10e);
+  add_sfr_register(get_eeprom()->get_reg_eedatah(),  0x10e );
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),   0x10f);
+
+  // Enable program memory reads and writes.
+  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
+
 
   add_sfr_register(&tmr2,   0x11, RegisterValue(0,0));
   add_sfr_register(&t2con,  0x12, RegisterValue(0,0));

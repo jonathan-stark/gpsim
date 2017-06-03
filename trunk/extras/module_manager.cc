@@ -57,6 +57,7 @@ support:
 #include "solar.h"
 #ifdef HAVE_GUI
 #include "lcd.h"
+#include "raw_lcd.h"
 #include "glcd_100X32_sed1520.h"
 #include "osram.h"
 #endif
@@ -75,6 +76,7 @@ Module_Types available_modules[] =
   { {"lcd_dt161A",  "lcd_2X8"},  LcdDisplayDisplaytech161A::construct},
   { {"LCD100X32", "LCD100X32"},   gLCD_100X32_SED1520::construct },
   { {"OSRAM128X64", "OSRAM128X64"},   OSRAM::PK27_Series::construct },
+  { {"lcd_7Seg",  "lcd_7seg"},  LCD_7Segments::construct},
 #endif
     { {"Solar", "Solar"}, SolarModule::construct},
     

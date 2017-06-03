@@ -40,7 +40,7 @@ all:				\
 
 libgpsim_extras_OBJECTS =	\
 	dht11/dht11.o ds1820/ds1820.o ds1820/rom1w.o ds1820/bit1w.o \
-        solar/solar.o lcd/lcd.o lcd/lcdgui.o lcd/hd44780.o \
+        solar/solar.o lcd/lcd.o lcd/lcdgui.o lcd/hd44780.o lcd/raw_lcd.o \
         graphic_lcd/src/glcd_100X32_sed1520.o graphic_lcd/src/glcd.o \
         graphic_lcd/src/osram.o graphic_lcd/src/sed1520.o \
         graphic_lcd/src/ssd0323.o \

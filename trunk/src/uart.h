@@ -228,7 +228,7 @@ class _RCSTA : public sfr_register, public TriggerObject
   bool bRX9()  { return (value.get() & RX9); }
   virtual void setIOpin(PinModule *);
   bool rc_is_idle(void) { return ( state <= RCSTA_WAITING_FOR_START ); };
-  virtual void enableRCPin(char direction = OUT);
+  virtual void enableRCPin(char direction = DIR_OUT);
   virtual void disableRCPin();
   void releasePin();
   virtual char getState() { return m_cTxState;}
@@ -240,8 +240,8 @@ class _RCSTA : public sfr_register, public TriggerObject
 
 protected:
   enum {
-	OUT,
-	IN
+	DIR_OUT,
+	DIR_IN
   };
   void set_callback_break(unsigned int spbrg_edge);
 

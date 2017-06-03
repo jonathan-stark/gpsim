@@ -2,7 +2,7 @@ include ../make.regression
 
 
 
-all :  p16f917.cod  p16f916.cod p16f914.cod p16f913.cod compar_917.cod i2c_slave.cod  ccp_917.cod usart_917.cod pwm_914.cod
+all :  p16f917.cod  p16f916.cod p16f914.cod p16f913.cod compar_917.cod i2c_slave.cod  ccp_917.cod usart_917.cod pwm_914.cod 
 
 %.cod : %.o
 	gplink --map  -q -o $@ $<

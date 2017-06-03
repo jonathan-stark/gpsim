@@ -18,8 +18,7 @@ LIBS = -l wsock32 \
 	-L $(CAIRO_PATH)/lib -l cairo \
 	-L $(GDK_PIXBUF_PATH)/lib -l gdk_pixbuf-2.0 \
 	-L $(GTK_PATH)/lib -l gtk-win32-2.0 -l gdk_pixbuf-2.0 -l gdk-win32-2.0 \
-	-L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0 \
-	$(GTKEXTRA_PATH)/lib/libgtkextra-win32-2.1_dll.a
+	-L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0
 
 gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a
 
