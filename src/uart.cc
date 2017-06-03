@@ -807,14 +807,14 @@ void _RCSTA::put(unsigned int new_value)
 	  // Synchronous transmit (SREN & CREN == 0)
 	  if ((value.get() & (SPEN | SREN | CREN)) == SPEN)
 	  {
-	      enableRCPin(OUT);
+	      enableRCPin(DIR_OUT);
 	      if (txsta->bTXEN()) txsta->enableTXPin();
 	      return;
 	  }
 	  // Synchronous receive (SREN | CREN != 0)
 	  else if (value.get() & (SPEN))
           {
-	      enableRCPin(IN);
+	      enableRCPin(DIR_IN);
 	      txsta->enableTXPin();
 	      rsr = 0;
 	      if (bRX9())
@@ -862,7 +862,7 @@ void _RCSTA::enableRCPin(char direction)
 	      m_source = new RCSignalSource(this);
 	      m_control = new RCSignalControl(this);
 	  }
-	  if (direction == OUT)
+	  if (direction == DIR_OUT)
 	  {
 	      m_DTdirection = '0';
               if (SourceActive == false)
@@ -1254,7 +1254,7 @@ void _RCSTA::callback()
                     value.put(value.get() & ~SREN);
 		    if ((value.get() & (SPEN | SREN | CREN)) == SPEN )
 		    {
-	                 enableRCPin(OUT);
+	                 enableRCPin(DIR_OUT);
                         return;
 		    }
                 }

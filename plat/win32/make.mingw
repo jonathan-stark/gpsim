@@ -38,7 +38,6 @@ CAIRO_PATH = $(TOP)/cairo
 PANGO_PATH = $(TOP)/pango
 ATK_PATH = $(TOP)/atk
 POPT_PATH = $(TOP)/popt
-GTKEXTRA_PATH = $(TOP)/gtkextra-2
 READLINE_PATH = $(TOP)/readline
 PTHREAD_PATH = $(TOP)/pthreads
 GDK_PIXBUF_PATH = $(TOP)/gdk-pixbuf

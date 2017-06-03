@@ -1170,6 +1170,10 @@ unsigned int T1CON::get_prescale()
 }
 
 
+double T1CON::t1osc()
+{
+    return (value.get() & T1OSCEN) ? freq_attribute->get_freq() : 0.;
+}
 //--------------------------------------------------
 //
 //--------------------------------------------------

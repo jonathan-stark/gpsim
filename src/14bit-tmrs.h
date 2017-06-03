@@ -374,6 +374,8 @@ enum
     }
   virtual void put(unsigned int new_value);
 
+  double t1osc();
+
 };
 
 

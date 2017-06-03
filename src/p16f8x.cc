@@ -422,6 +422,14 @@ void  P16F8x::create(int eesize)
 
 }
 
+void P16F8x::enter_sleep()
+{
+    tmr1l.sleep();
+    osccon->sleep();
+    _14bit_processor::enter_sleep();
+}
+
+
 void P16F8x::exit_sleep()
 {
     if (m_ActivityState == ePASleeping)

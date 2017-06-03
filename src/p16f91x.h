@@ -105,6 +105,8 @@ public:
   virtual EEPROM_WIDE *get_eeprom() { return ((EEPROM_WIDE *)eeprom); }
   virtual void update_vdd();
   virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual void enter_sleep();
+  virtual void exit_sleep();
 };
 
 
