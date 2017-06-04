@@ -1085,6 +1085,31 @@ static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
     pin->bbw()->selected_pin = pin;
 }
 
+static stimulus  *stim;
+static string module_name;
+static string full_name;
+static void dumpStimulus(const SymbolEntry_t &sym)
+{
+  stimulus *ps = dynamic_cast<stimulus *>(sym.second);
+
+  if (ps == stim) { 
+    full_name = module_name + "." + ps->name();
+  }
+}
+
+static void scanModules(const SymbolTableEntry_t &st)
+{
+  module_name = st.first;
+  (st.second)->ForEachSymbolTable(dumpStimulus);
+}
+
+static const char * stim_full_name(stimulus *stimulus)
+{
+    stim = stimulus;
+    globalSymbolTable().SymbolTable::ForEachModule(scanModules);
+    return full_name.c_str();
+}
+
 static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 {
     stimulus *stimulus;
@@ -1120,8 +1145,9 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
         {
             GtkTreeIter iter;
 
+   printf("RRR treeselect_node %s\n", stimulus->name().c_str());
             gtk_list_store_append(list_store, &iter);
-            gtk_list_store_set(list_store, &iter, 0, stimulus->name().c_str(), 1, stimulus, -1);
+            gtk_list_store_set(list_store, &iter, 0, stim_full_name(stimulus), 1, stimulus, -1);
 
             stimulus = stimulus->next;
         }
@@ -2241,7 +2267,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
             fprintf(fo, "attach %s",node->name().c_str());
 
             for (stimulus = node->stimuli; stimulus; stimulus = stimulus->next)
-                fprintf(fo, " %s",stimulus->name().c_str());
+                fprintf(fo, " %s",stim_full_name(stimulus));
         }
         fprintf(fo, "\n\n");
     }

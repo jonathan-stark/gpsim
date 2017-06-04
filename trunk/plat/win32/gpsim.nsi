@@ -323,6 +323,7 @@ Section "gpim" SEC01
   File "${GPSIM_ROOT}\extras\lcd\examples\README"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd.asm"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd.inc"
+  File "${GPSIM_ROOT}\extras\lcd\examples\icons.inc"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd_916.asm"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd_917.asm"
   File "${GPSIM_ROOT}\extras\lcd\examples\lcd_mod.asm"

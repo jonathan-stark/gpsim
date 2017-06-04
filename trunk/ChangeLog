@@ -1,3 +1,11 @@
+2017-06-04 Roy Rankin <rrankin@ihug.com.au>
+	* cli/cmd_stimulus.cc gui/gui_breadboard.cc
+	: give full name for stimulus
+	* cli/scan.ll
+	: allow \"text\" as well as "text"
+	* extras/lcd/Makefile.am plat/win32/gpsim.nsi
+	: fixes for win32 build
+
 2017-06-01 Roy Rankin <rrankin@ihug.com.au>
 	* src/makefile.mingw plat/win32/gpsim.nsi extras/makefile.mingw
 	  gpsim/makefile.mingw gui/makefile.mingw plat/win32/make.mingw

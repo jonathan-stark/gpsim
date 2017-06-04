@@ -159,12 +159,14 @@ cmd_stimulus::cmd_stimulus()
 
 }
 
+static string table_name;
 
 void dumpStimulus(const SymbolEntry_t &sym)
 {
   stimulus *ps = dynamic_cast<stimulus *>(sym.second);
 
   if (ps) {
+    cout << table_name << ".";
     cout << ps->name();
     ps->show();
     cout << endl;
@@ -174,6 +176,7 @@ void dumpStimulus(const SymbolEntry_t &sym)
 void dumpStimuli(const SymbolTableEntry_t &st)
 {
   cout << " Symbol Table: " << st.first << endl;
+   table_name = st.first;
   (st.second)->ForEachSymbolTable(dumpStimulus);
 }
 
