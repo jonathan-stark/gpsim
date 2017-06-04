@@ -231,6 +231,7 @@ BIN2    ([bB]\'[01]+\')
 SHELLCHAR (^[!])
 SHELLLINE   ({SHELLCHAR}.*)
 QUOTEDTOKEN (("\"".*\")|("\'".*'))
+QUOTEDTOKEN2 (([\\]"\"".*\")|([\\]"\'".*'))
 
 
 %{
@@ -347,6 +348,7 @@ abort_gpsim_now {
 
 ^[!].*              {return(process_shellLine(yylvalP,&yytext[1]));}
 {QUOTEDTOKEN}       {return(process_quotedStringLiteral(yylvalP,&yytext[1]));}
+{QUOTEDTOKEN2}       {return(process_quotedStringLiteral(yylvalP,&yytext[2]));}
 
 
 %{
@@ -796,10 +798,13 @@ static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
 
 static int process_quotedStringLiteral(YYSTYPE* yylvalP, char *buffer)
 {
-  char * pCloseQuote = strchr(buffer, '\"');
+
+  char * pCloseQuote = strrchr(buffer, '\"');
   if(pCloseQuote == NULL)
-    pCloseQuote = strchr(buffer, '\'');
+    pCloseQuote = strrchr(buffer, '\'');
   *pCloseQuote = 0;
+  if (*(pCloseQuote-1) == '\\')
+      *(pCloseQuote-1) = 0;
   yylvalP->String_P = new String(buffer);
   return(recognize(LITERAL_STRING_T, "string literal"));
 }
