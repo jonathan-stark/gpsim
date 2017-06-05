@@ -981,7 +981,6 @@ USARTModule::~USARTModule()
 
 
 #ifdef HAVE_TXFIFO
-    fprintf(stderr, "RRR m_TxFIFO %p\n", m_TxFIFO);
     delete [] m_TxFIFO;
 #endif
 

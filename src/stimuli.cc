@@ -1516,14 +1516,12 @@ ValueStimulus::ValueStimulus(const char *n)
 
   if(n)
   {
-      printf("RRR Stimulus::ValueStimulus %s\n", n);
     new_name(n,false);
   }
   else
     {
       char name_str[100];
       snprintf(name_str,sizeof(name_str),"s%d_asynchronous_stimulus",num_stimuli);
-      printf("RRR Stimulus::ValueStimulus %s\n", name_str);
       num_stimuli++;
       new_name(name_str,false);
     }

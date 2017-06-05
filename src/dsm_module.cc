@@ -7,8 +7,7 @@ public:
     minSink(DSM_MODULE *dsm) : m_dsm(dsm) {}
     virtual void setSinkState(char new3State)
 		{ m_dsm->minEdge(new3State);}
-    //virtual void release() { delete this; printf("RRR release minSink\n");}
-    virtual void release() { printf("RRR release minSink %p\n", this);}
+    virtual void release() {}
 private:
     DSM_MODULE *m_dsm;
 };
@@ -19,7 +18,7 @@ public:
     carhSink(DSM_MODULE *dsm) : m_dsm(dsm) {}
     virtual void setSinkState(char new3State)
 		{ m_dsm->carhEdge(new3State);}
-    virtual void release() { delete this; printf("RRR release carhSink\n");}
+    virtual void release() { delete this;}
 private:
     DSM_MODULE *m_dsm;
 };
@@ -30,7 +29,7 @@ public:
     carlSink(DSM_MODULE *dsm) : m_dsm(dsm) {}
     virtual void setSinkState(char new3State)
 		{ m_dsm->carlEdge(new3State);}
-    virtual void release() { delete this; printf("RRR release carlSink\n");}
+    virtual void release() { delete this;}
 private:
     DSM_MODULE *m_dsm;
 };
@@ -40,7 +39,7 @@ class MDoutSignalSource : public SignalControl
 public:
     MDoutSignalSource(DSM_MODULE *dsm) : m_dsm(dsm) {}
     virtual char getState() { return m_dsm->mdout; }
-    virtual void release() { printf("RRR release MDoutSignalSource\n");}
+    virtual void release() {}
 private:
     DSM_MODULE *m_dsm;
 
@@ -123,11 +122,7 @@ void DSM_MODULE::dsm_logic(bool carl_neg_edge, bool carh_neg_edge)
     }
 
     out = outl || outh;
-    printf ("RRR outl %d outh %d mdmin_state %d  mdcarl_state %d mdcarh_state %d\n",
-	outl, outh, mdmin_state, mdcarl_state, mdcarh_state);
     out = (con_reg & MDOPOL)? !out : out;
-    printf("\tRRR RRR DSM_MODULE::dsm_logic MDOPOL %d out %d\n",
-      (con_reg & MDOPOL) == MDOPOL, out);
     if (out)
     {
 	con_reg |= MDOUT;
@@ -148,7 +143,6 @@ void DSM_MODULE::putMDout(bool out)
 
 void DSM_MODULE::releaseMDout()
 {
-   printf("RRR DSM_MODULE::releaseMDout out_source=%p\n", out_source);
    if (out_source)
    {
     //   m_mdout->setSource(0);
@@ -160,7 +154,6 @@ void DSM_MODULE::releaseMDout()
 void DSM_MODULE::new_mdcon(unsigned int old_value, unsigned int new_value)
 {
 
-   printf("RRR DSM_MODULE::new_mdcon old %x 0x%x\n", old_value, new_value);
    if (((old_value ^ new_value) & MDOE) && m_mdout)
    {
        if (new_value & MDOE)
@@ -169,14 +162,12 @@ void DSM_MODULE::new_mdcon(unsigned int old_value, unsigned int new_value)
 	  if (!out_source)
 	  {
 	      out_source = new MDoutSignalSource(this);
-	      fprintf(stderr, "RRR DSM_MODULE::new_mdcon out_source=%p\n", out_source);
 	  }
 	  m_mdout->setSource(out_source);
        }
        else
        {
 	  m_mdout->setSource(0);
-	  fprintf(stderr, "RRR out_source=%p\n", out_source);
 	  out_source = 0;
 	  m_mdout->getPin().newGUIname(m_mdout->getPin().name().c_str());
        }
@@ -227,7 +218,6 @@ void DSM_MODULE::setModSrc(unsigned int new_value, unsigned int diff)
 	    if (!m_minSink) m_minSink = new minSink(this);
 	    m_mdmin->addSink(m_minSink);
 	    m_mdmin->getPin().newGUIname("MDMIN");
-	    printf("RRR setModSrc state %d\n", m_mdmin->getPin().getState());
 	    mdmin_state = m_mdmin->getPin().getState();
 	    break;
 
@@ -252,7 +242,6 @@ void DSM_MODULE::setModSrc(unsigned int new_value, unsigned int diff)
             {
 	  	if (diff & MDMSODIS)
                 {
-		    printf("RRR MDSRC new_value 0x%x\n", new_value);
                     if (new_value & MDMSODIS)
                     {
                         if (!dsmSrc_pin) dsmSrc_pin = usart_mod->txsta.getIOpin();
@@ -265,7 +254,6 @@ void DSM_MODULE::setModSrc(unsigned int new_value, unsigned int diff)
 			if (!m_minSink) m_minSink = new minSink(this);
 			monitor_mod->addSink(m_minSink);
 			usart_mod->txsta.setIOpin(monitor_mod);
-	printf("RRR usart_mod mdmin_state %d new %d\n", mdmin_state, monitor_mod->getPin().getState());
 			//mdmin_state = monitor_mod->getPin().getState();
 		    }
 		    else
@@ -276,10 +264,8 @@ void DSM_MODULE::setModSrc(unsigned int new_value, unsigned int diff)
 		    }
 
 		}
-		printf("RRR usart_mod %s monitor_mod %s mdstate %d \n", dsmSrc_pin->getPin().GUIname().c_str(), monitor_mod->getPin().GUIname().c_str(), mdmin_state);
 	        if (new_value & MDMSODIS)
                 {
-		    printf("RRR MDSRC MDMSODIS set\n");
                 }
                 else
                 {
@@ -300,7 +286,6 @@ void DSM_MODULE::setModSrc(unsigned int new_value, unsigned int diff)
 void DSM_MODULE::minEdge(char new3State)
 {
    bool old = mdmin_state;
-   printf("RRR DSM_MODULE::minEdge new3State %c old %d\n", new3State, mdmin_state);
    mdmin_state = (new3State == '1' || new3State == 'W');
    if (old != mdmin_state)
 	dsm_logic(false, false);
@@ -309,7 +294,6 @@ void DSM_MODULE::minEdge(char new3State)
 void DSM_MODULE::new_mdsrc(unsigned int old_value, unsigned int new_value)
 {
     unsigned int diff = new_value ^ old_value;
-    printf("RRR DSM_MODULE::new_mdsrc 0x%x diff 0x%x\n", new_value, diff);
     if (!diff) return;
     if (diff & 0x0f)
     {
@@ -328,7 +312,6 @@ void DSM_MODULE::new_mdcarh(unsigned int old_value, unsigned int new_value)
 {
     unsigned int diff = new_value ^ old_value;
     bool old = mdcarh_state;
-   printf("RRR DSM_MODULE::new_mdcarh 0x%x\n", new_value);
     if (!diff) return;
     if (diff & 0x0f)
     { // change carrier high source, first remove old source
@@ -353,7 +336,6 @@ void DSM_MODULE::new_mdcarh(unsigned int old_value, unsigned int new_value)
 	{
 	case 0:		// Vss
 	    mdcarh_state = false;
-	    printf("RRR mdcarh Vss ");
 	    break;
 
 	case 1:       //  MDCIN1 port pin
@@ -361,7 +343,6 @@ void DSM_MODULE::new_mdcarh(unsigned int old_value, unsigned int new_value)
 	    if (!m_carhSink) m_carhSink = new carhSink(this);
 	    m_mdcin1->addSink(m_carhSink);
 	    mdcarh_state = m_mdcin1->getPin().getState();
-	    printf("RRR mdcarh setcin1 ");
 	    break;
 
 
@@ -370,19 +351,16 @@ void DSM_MODULE::new_mdcarh(unsigned int old_value, unsigned int new_value)
 	    if (!m_carhSink) m_carhSink = new carhSink(this);
 	    m_mdcin2->addSink(m_carhSink);
 	    mdcarh_state = m_mdcin2->getPin().getState();
-	    printf("RRR mdcarh setcin2 state ");
 	    break;
 
 	default:
 	    break;
 	}
         mdcarh_state = (new_value & MDCHPOL) ? ! mdcarh_state : mdcarh_state;
-        printf("%d RRR\n", mdcarh_state);
     }
     else if (diff & MDCHPOL)
     {
 	mdcarh_state =  ! mdcarh_state;
-        printf("mdcarh pol change old %d %d RRR\n", old, mdcarh_state);
     }
     if (diff & MDCHODIS)  // Change Source Output Disable bit
     {
@@ -399,7 +377,6 @@ void DSM_MODULE::carhEdge(char new3State)
    unsigned int old_state = mdcarh_state;
    mdcarh_state = (new3State == '1' || new3State == 'W');
    mdcarh_state = (mdcarh.get_value() & MDCHPOL) ? ! mdcarh_state : mdcarh_state;
-   printf("RRR DSM_MODULE::carhEdge %c newState %d old %u\n", new3State, mdcarh_state, old_state);
    if (old_state != mdcarh_state)
 	dsm_logic(old_state, false);	// Old_state == true on falling edge
 }
@@ -407,7 +384,6 @@ void DSM_MODULE::new_mdcarl(unsigned int old_value, unsigned int new_value)
 {
    unsigned int diff = new_value ^ old_value;
    bool old = mdcarl_state;
-   printf("RRR DSM_MODULE::new_mdcarl 0x%x\n", new_value);
     if (diff & 0x0f)
     {
         // change carrier low source, first remove old source
@@ -427,7 +403,6 @@ void DSM_MODULE::new_mdcarl(unsigned int old_value, unsigned int new_value)
 	{
 	case 0:		// Vss
 	    mdcarl_state =  false;
-	    printf("RRR mdcarl Vss state ");
 	    break;
 
 	case 1:       //  MDCIN1 port pin
@@ -436,19 +411,16 @@ void DSM_MODULE::new_mdcarl(unsigned int old_value, unsigned int new_value)
 	    if (!m_carlSink) m_carlSink = new carlSink(this);
 	    m_mdcin1->addSink(m_carlSink);
 	    mdcarl_state = m_mdcin1->getPin().getState();
-	    printf("RRR mdcarl setcin1 state ");
 	    break;
 
 	default:
 	    break;
 	}
         mdcarl_state = (new_value & MDCLPOL) ? ! mdcarl_state : mdcarl_state;
-        printf("%d RRR \n", mdcarl_state);
     }
     else if (diff & MDCLPOL)
     {
 	mdcarl_state = ! mdcarl_state;
-        printf("mdcarl pol change old %d %d RRR\n", old, mdcarl_state);
     }
     else // Change Source Output Disable bit
     {
@@ -462,7 +434,6 @@ void DSM_MODULE::carlEdge(char new3State)
    bool old_state = mdcarl_state;
    mdcarl_state = (new3State == '1' || new3State == 'W');
    mdcarl_state = (mdcarl.get_value() & MDCLPOL) ? ! mdcarl_state : mdcarl_state;
-   printf("RRR DSM_MODULE::carlEdge new3State %d old %d\n", mdcarl_state, old_state);
    if (old_state != mdcarl_state)
 	dsm_logic(false, old_state);  // old_state true on falling edge
 }
@@ -482,7 +453,6 @@ void _MDCON::put_value(unsigned int new_value)
 {
   unsigned int old_value = value.get();
   new_value &= (mask | DSM_MODULE::MDOUT);
-  printf("RRR _MDCON::put_value  new %x\n",  new_value);
   value.put(new_value);
   mDSM->new_mdcon(old_value, new_value);
 
@@ -502,7 +472,6 @@ void _MDSRC::put(unsigned int new_value)
 void _MDSRC::put_value(unsigned int new_value)
 {
   unsigned int old_value = value.get();
-  printf("RRR _MDSRC::put_value  new %x\n",  new_value);
   value.put(new_value);
   mDSM->new_mdsrc(old_value, new_value);
 }
@@ -522,7 +491,6 @@ void _MDCARH::put(unsigned int new_value)
 void _MDCARH::put_value(unsigned int new_value)
 {
   unsigned int old_value = value.get();
-  printf("RRR _MDCARH::put_value  new %x\n",  new_value);
   value.put(new_value);
   mDSM->new_mdcarh(old_value, new_value);
 }
@@ -540,7 +508,6 @@ void _MDCARL::put(unsigned int new_value)
 void _MDCARL::put_value(unsigned int new_value)
 {
   unsigned int old_value = value.get();
-  printf("RRR _MDCARL::put_value  new %x\n",  new_value);
   value.put(new_value);
   mDSM->new_mdcarl(old_value, new_value);
 }

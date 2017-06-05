@@ -317,7 +317,6 @@ void P18F14K22::osc_mode(unsigned int value)
   unsigned int pin_Number1 =  get_osc_pin_Number(1);
   bool  pllen = value & PLLCFG;
 
-  printf("RRR P18F14K22::osc_mode 0x%x osccon=%p\n", value, osccon);
   if (mode == 0x8 || mode == 0x9)
       set_int_osc(true);
   else

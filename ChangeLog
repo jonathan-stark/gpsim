@@ -1,3 +1,11 @@
+2017-06-05 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gui_breadboard.cc
+	: fix default filename for "Save Configuration"
+	* modules/ttl.cc modules/usart.cc src/14bit-processors.cc
+	  src/14bit-registers.cc src/dsm_module.cc src/p16f88x.cc
+	  src/p16f8x.cc src/p18fk.cc src/p18x.cc src/stimuli.cc
+	: Remove debug printf statements
+
 2017-06-04 Roy Rankin <rrankin@ihug.com.au>
 	* cli/cmd_stimulus.cc gui/gui_breadboard.cc
 	: give full name for stimulus

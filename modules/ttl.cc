@@ -219,7 +219,6 @@ TTL377::TTL377(const char *_name)
 
 TTL377::~TTL377()
 {
-    printf("RRR TTL377::~TTL377()");
     for (int i = 0; i < 8; i++)
     {
 	removeSymbol(m_D[i]);
