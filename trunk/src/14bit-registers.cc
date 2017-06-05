@@ -527,7 +527,6 @@ void  OSCCON::put(unsigned int new_value)
 guint64 OSCCON::irc_lh_time()
 {
     guint64 delay = (get_cycles().instruction_cps() * 1e-6) + 1;
-    printf("RRR delay = %" PRINTF_GINT64_MODIFIER "d cps=%.0f\n", delay, get_cycles().instruction_cps());
     return delay;
 }
 // Time required for stable irc clock after POR
@@ -539,7 +538,6 @@ guint64 OSCCON::irc_por_time()
 guint64 OSCCON_1::irc_lh_time()
 {
     guint64 delay = get_cycles().instruction_cps() * 4e-3;
-    printf("RRR cps %.0f\n", get_cycles().instruction_cps());
     CDprintf(("OSCCON_1 LH irc time 4ms %" PRINTF_GINT64_MODIFIER "d cycles\n", delay));
     return delay;
 }

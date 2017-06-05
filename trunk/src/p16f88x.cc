@@ -1506,7 +1506,6 @@ bool P16F631::set_config_word(unsigned int address, unsigned int cfg_word)
             (m_porta->getPin(5))->newGUIname("porta5");
              set_int_osc(true);
 	    osccon->set_rc_frequency();
-            printf("\tRRR P16F631::set_config_word osccon=0x%x\n",  osccon->value.get());
 	    break;
 
 	case 6: //RC oscillator: I/O on RA4 pin, RC on RA5

@@ -1145,7 +1145,6 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
         {
             GtkTreeIter iter;
 
-   printf("RRR treeselect_node %s\n", stimulus->name().c_str());
             gtk_list_store_append(list_store, &iter);
             gtk_list_store_set(list_store, &iter, 0, stim_full_name(stimulus), 1, stimulus, -1);
 
@@ -1693,10 +1692,8 @@ static void copy_tree_to_clist(GtkTreeModel *model, GtkListStore *list_store)
     struct gui_node *gn;
     GtkTreeIter node_iter, iter, new_iter;
 
-    fprintf(stderr, "RRR copy_tree_to_clist model %p list_store %p\n", model, list_store);
     if (gtk_tree_model_get_iter_first (model, &node_iter))
     {
-	fprintf(stderr, "RRR node_iter %p\n", &node_iter);
         if (gtk_tree_model_iter_n_children (model, &node_iter) > 0)
         {
             gtk_tree_model_iter_children (model, &iter, &node_iter);
@@ -2123,7 +2120,18 @@ static char *gui_get_filename(const char *filename)
     NULL);
 
   gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
-  gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
+
+  if (filename)
+  {
+     gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), filename);
+  }
+  else
+  {
+      gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (dialog), ".");
+      gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (dialog), "netlist.stc");
+  }
+
+
 
   char *file = NULL;
   if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
@@ -2155,14 +2163,15 @@ static void OneAttribute(const SymbolEntry_t &sym)
       }
 }
 
-
+static char *stc_file = 0;
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
     Module *m;
 
-    char *filename = gui_get_filename("netlist.stc");
+    char *filename = gui_get_filename(stc_file);
+
     if(!filename)
         return;
     if ((fo = fopen(filename, "w")) == NULL)
@@ -2171,6 +2180,8 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
         g_free(filename);
         return;
     }
+    if (stc_file) free(stc_file);
+    stc_file = strdup(filename);
     g_free(filename);
 
     fprintf(fo, "\n# This file was written by gpsim.\n");
@@ -2237,14 +2248,6 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
                 m->type(),
                 m->name().c_str());
       }
-/*
-      else
-      {
-        fprintf(fo, "processor %s %s\n",
-        m->type(),
-        m->name().c_str());
-      }
-*/
 
       mod_name = m->name().c_str();
       st->ForEachSymbolTable(OneAttribute);

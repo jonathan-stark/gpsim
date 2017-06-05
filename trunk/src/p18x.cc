@@ -1918,7 +1918,6 @@ void P18F2x21::osc_mode(unsigned int value)
       osccon->set_config_ieso(value & IESO);
   }
   
-  printf("RRR P18F2x21::osc_mode value 0x%x %p\n", value, osccon);
   value &= (FOSC3 | FOSC2 | FOSC1 | FOSC0);
   set_int_osc(false);
   if (pin_Number < 253)

@@ -308,7 +308,6 @@ bool P16F8x::set_config_word(unsigned int address, unsigned int cfg_word)
 	osccon->set_config_xosc(fosc < 3);
 	osccon->set_config_irc(fosc == 4 || fosc == 5);
     }
-    printf("RRR 16f8x cfg_word 0x%x fosc %d osccon %p\n", cfg_word, fosc, osccon);
     switch(fosc)
     {
     case 0:  // LP oscillator: low power crystal is on RA6 and RA7
