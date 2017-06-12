@@ -734,7 +734,7 @@ Processor * P18F442::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
-// P18F258
+// P18F248
 // 
 
 P18F248::P18F248(const char *_name, const char *desc)
@@ -772,7 +772,45 @@ Processor * P18F248::construct(const char *name)
 
 //------------------------------------------------------------------------
 //
-// P18F458
+// P18F258
+// 
+
+P18F258::P18F258(const char *_name, const char *desc)
+  : P18F252(_name,desc)
+{
+
+  if(verbose)
+    cout << "18f258 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F258::create()
+{
+
+  if(verbose)
+    cout << " 18f258 create \n";
+
+  P18F252::create();
+}
+
+Processor * P18F258::construct(const char *name)
+{
+
+  P18F258 *p = new P18F258(name);
+
+  if(verbose)
+    cout << " 18F258 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+  return p;
+}
+
+
+//------------------------------------------------------------------------
+//
+// P18F448
 // 
 
 P18F448::P18F448(const char *_name, const char *desc)
@@ -838,6 +876,44 @@ Processor * P18F452::construct(const char *name)
 
   if(verbose)
     cout << " 18F452 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_symbols();
+  return p;
+}
+
+
+//------------------------------------------------------------------------
+//
+// P18F458
+// 
+
+P18F458::P18F458(const char *_name, const char *desc)
+  : P18F452(_name,desc)
+{
+
+  if(verbose)
+    cout << "18f458 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F458::create()
+{
+
+  if(verbose)
+    cout << " 18f458 create \n";
+
+  P18F452::create();
+}
+
+Processor * P18F458::construct(const char *name)
+{
+
+  P18F458 *p = new P18F458(name);
+
+  if(verbose)
+    cout << " 18F458 construct\n";
 
   p->create();
   p->create_invalid_registers();

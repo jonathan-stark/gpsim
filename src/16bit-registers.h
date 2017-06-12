@@ -287,6 +287,7 @@ public:
   virtual void computed_goto(unsigned int new_value);
   //virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+  virtual void update_pcl();
   virtual unsigned int get_value();
   //virtual unsigned int get_next();
 

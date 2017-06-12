@@ -1,7 +1,9 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass book
 \begin_preamble
 % added by lyx2lyx for converted index entries
@@ -14,16 +16,16 @@
 \language_package default
 \inputencoding default
 \fontencoding global
-\font_roman times
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -160,7 +162,7 @@ gpsim's executable is created in a manner that's consistent with much of
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="left" valignment="top" width="0pt">
 <column alignment="left" valignment="top" width="0pt">
 <row>
@@ -525,7 +527,7 @@ help
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="27" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -1407,6 +1409,10 @@ Attach_pointN can have one of the following formats
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
 pin(<number>) or pin(<symbol>) 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1427,6 +1433,10 @@ This refers to a pin of the current active CPU.
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
 <connection> or pin(<connection>) 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2124,18 +2134,19 @@ Gpsim will automatically determine if the file is a .hex or .cod file.
 \emph on
 processortype
 \emph default
- is needed if a .hex file is being loaded and the processor type 
- is not yet defined.
+ is needed if a .hex file is being loaded and the processor type  is not
+ yet defined.
 \end_layout
+
 \begin_layout Standard
 The optional 
 \emph on
 label
 \emph default
- is used to identify the processor module on the breadboard 
- and as the prefix in the symbol table.
- If a label is not given then the processor type is used for this
- functionality. 
+ is used to identify the processor module on the breadboard  and as the
+ prefix in the symbol table.
+ If a label is not given then the processor type is used for this functionality.
+ 
 \end_layout
 
 \begin_layout LyX-Code
@@ -2888,7 +2899,7 @@ Note that in most cases it is easier to create a stimulus file then to type
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
-<features rotate="0" islongtable="true" firstHeadEmpty="true" headBottomDL="true" longtabularalignment="center">
+<features islongtable="true" firstHeadEmpty="true" headBottomDL="true" longtabularalignment="center">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <row endhead="true" endfirsthead="true">
@@ -3656,6 +3667,10 @@ symbol.
  it is found it is selected in the symbol window.
  Depending of type of symbol other things are also done, the same thing
  as when selecting a symbol in the symbol window: 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -4627,7 +4642,7 @@ In this example, the
  attribute (see section 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "sub:Switches-&-Resistors"
+reference "subsec:Switches-&-Resistors"
 
 \end_inset
 
@@ -4861,7 +4876,7 @@ Inspecting the current state of your program is sometimes insufficient to
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="13" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -5237,7 +5252,7 @@ Each trace frame begins with a new simulation cycle.
 \begin_layout LyX-Code
 \begin_inset Tabular
 <lyxtabular version="3" rows="2" columns="5">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -5591,7 +5606,7 @@ Here's a list of the types of I/O pin stimuli that are supported:
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="5" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -5736,7 +5751,7 @@ Asynchronous stimuli are analog or digital stimuli that can change states
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <row>
@@ -6065,7 +6080,7 @@ PullDown
 \end_layout
 
 \begin_layout Section
-Limitations of the Simulus Mechanism
+Limitations of the Stimulus Mechanism
 \end_layout
 
 \begin_layout Standard
@@ -6283,7 +6298,7 @@ gpsim provides a library of useful modules for simulation.
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="20" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <row>
@@ -7181,7 +7196,7 @@ I/O Pins
 \begin_layout Subsection
 \begin_inset CommandInset label
 LatexCommand label
-name "sub:Switches-&-Resistors"
+name "subsec:Switches-&-Resistors"
 
 \end_inset
 
@@ -7531,13 +7546,533 @@ I/O Pins
 \end_layout
 
 \begin_layout Section
-Third Party Modules
+Extras Modules
 \end_layout
 
 \begin_layout Standard
-In addition to the standard modules, third are separately distribute gpsim
- modules.
+In addition to the standard modules, modules largely supplied by third parties
+ are supplied in the libgpsim_extras library.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="13" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Alias
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dht11
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+dht11
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Temperature and humidity sensor 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DS1307
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ds1307
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64 x 8, Serial, I2C Real-Time Clock
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DS1820
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ds1820
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+High-Precision 1-Wire Digital Thermometer
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DS18S20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ds18s20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+High-Precision 1-Wire Digital Thermometer
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+DS18B20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ds18b20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+High-Precision 1-Wire Digital Thermometer
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_display
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_2X20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD - HD44780 2X20
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_20x4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_20x4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD - HD44780 4x20
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_dt161A
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_2X8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD - HD44780 2x8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD100X32
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD100X32
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD - SED1530 100x32
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OSRAM128X64
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OSRAM128X64
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD - SSD0323 128x64
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_7Seg 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+lcd_7seg
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+LCD - 7 segment no controler
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Solar
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Solar
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Solar Panel, Controler, Battery
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Temperature and humidity sensor - DHT11
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+DHT11
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This module emulates the DHT11 temperature/humidity sensor using a single-wire
+ interface.
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+temperature - Temperature degree C * 100
+\end_layout
+
+\begin_layout Standard
+humidity - Relative humidity % * 100
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.pin - Serial I/O pin
+\end_layout
+
+\begin_layout Subsection
+64 x 8, Serial, I2C Real-Time Clock - DS1307
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+DS1307
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This module emulates the Dallas Semiconductor DS1307 Real-Time clock which
+ also has 56 x 8 eeprom memory and connects via an I2C serial bus.
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.SDA - Serial Data Line I/O pin
+\end_layout
+
+\begin_layout Standard
+.SCL - Serial Clock Line I/O pin
+\end_layout
+
+\begin_layout Standard
+.SQW - Square Wave Output
+\end_layout
+
+\begin_layout Subsection
+High-Precision 1-Wire Digital Thermometer - DS1820 Family
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+DS1820 Family
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These modules emulate the DS1820, DS18S20 and DS18B20 High-Precision 1-Wire
+ Digital Thermometers.These devices uses a single-wire bus interface.
+\end_layout
+
+\begin_layout Subsubsection*
+Attributes
+\end_layout
+
+\begin_layout Standard
+ROMCode - Device ROM code
+\end_layout
+
+\begin_layout Standard
+temperature - Temperature of device
+\end_layout
+
+\begin_layout Standard
+powered - Device is self powered
+\end_layout
+
+\begin_layout Standard
+alarm_th - Temperature high alarm register
+\end_layout
+
+\begin_layout Standard
+alarm_tl - Temperature low alarm register
+\end_layout
+
+\begin_layout Standard
+config_register - Value of configuration register (ds18B20 only) 
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.pin - Serial I/O pin
 \end_layout
 
 \begin_layout Subsection
@@ -7555,14 +8090,14 @@ HD44780
 \end_layout
 
 \begin_layout Standard
-The library libgpsim_lcd contines several LCD display formats using the
+The library libgpsim_lcd contains several LCD display formats using the
  HD44780 controller.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="2">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <row>
@@ -7692,12 +8227,12 @@ This module emulates a 100X32 pixel graphics LCD based on dual SED1350
 \end_layout
 
 \begin_layout Subsection
-64 x 8, Serial, I2C Real-Time Clock - DS1307
+LCD_7Seg
 \begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
-DS1307
+LCD_7Seg
 \end_layout
 
 \end_inset
@@ -7706,17 +8241,58 @@ DS1307
 \end_layout
 
 \begin_layout Standard
-This module emulates the Dallas Semiconductor DS1307 Real-Time clock which
- also has 56 x 8 eeprom memory and connects via an I2C serial bus.
+A 7 segment LCD display without a controller.
+ If common > 2.5V, (cc- segn) > 1.4V segment is on otherwise segment is off.
+ 
+\end_layout
+
+\begin_layout Standard
+The segments are numbered as per the following figure.
+\end_layout
+
+\begin_layout LyX-Code
+   ___
+\end_layout
+
+\begin_layout LyX-Code
+5 | 0 | 1
+\end_layout
+
+\begin_layout LyX-Code
+   ___
+\end_layout
+
+\begin_layout LyX-Code
+4 | 6 | 2
+\end_layout
+
+\begin_layout LyX-Code
+   ___
+\end_layout
+
+\begin_layout LyX-Code
+    3
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.cc - common
+\end_layout
+
+\begin_layout Standard
+.seg0-6 - 7 segment drives
 \end_layout
 
 \begin_layout Subsection
-High-Precision 1-Wire Digital Thermometer - DS1820
+Solar
 \begin_inset Index idx
 status collapsed
 
 \begin_layout Plain Layout
-DS1820
+Solar
 \end_layout
 
 \end_inset
@@ -7725,27 +8301,60 @@ DS1820
 \end_layout
 
 \begin_layout Standard
-This module emulates the DS1820 High-Precision 1-Wire Digital Thermometer.This
- devices uses a single-wire bus interface.
+This module emulates a 20 Watt solar panel, a 20mah battery, and a PWM controler
+ for testing control strategies for the controler.
 \end_layout
 
-\begin_layout Subsection
-Temperature and humidity sensor - DHT11
-\begin_inset Index idx
-status collapsed
-
-\begin_layout Plain Layout
-DHT11
-\end_layout
-
-\end_inset
-
-
+\begin_layout Subsubsection*
+Attributes
 \end_layout
 
 \begin_layout Standard
-This module emulates the DHT11 temperature and humidity sensor.This devices
- uses a single-wire two-way serial interface.
+Aoffset - Voltage on Asol pin for zero panel current
+\end_layout
+
+\begin_layout Standard
+Ascale - Voltage/Amp panel current scale factor for Asol
+\end_layout
+
+\begin_layout Standard
+VSscale - scale factor for Vsol pin
+\end_layout
+
+\begin_layout Standard
+VBscale - scale factor for Vbat pin
+\end_layout
+
+\begin_layout Standard
+inductor - controler inductor size in Henries
+\end_layout
+
+\begin_layout Standard
+BDOC - Battery degree of charge %
+\end_layout
+
+\begin_layout Subsubsection*
+I/O Pins
+\end_layout
+
+\begin_layout Standard
+.Vsol - Solar Panel output Voltage
+\end_layout
+
+\begin_layout Standard
+.Asol - Solar Panel output current
+\end_layout
+
+\begin_layout Standard
+.Vbat - Battery Voltage
+\end_layout
+
+\begin_layout Standard
+.PWM - Pulse Width Modulation signal 
+\end_layout
+
+\begin_layout Standard
+.OK - PWM is enabled
 \end_layout
 
 \begin_layout Section
@@ -7785,7 +8394,7 @@ get_mod_list
 
 .
  All gpsim module libraries must declare this function.
- You can copy the required template from the gpsim source -- probably one
+ You can copy the required template from the gpsim source – probably one
  of the 
 \begin_inset Quotes eld
 \end_inset
@@ -8103,7 +8712,7 @@ Don't use these registers and program words:
 
 \begin_inset Tabular
 <lyxtabular version="3" rows="4" columns="3">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
 <column alignment="center" valignment="top" width="0pt">
@@ -8363,7 +8972,7 @@ examples/modules
  Finally, as described in chapter 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "cha:Regression-Tests"
+reference "Regression-Tests"
 
 \end_inset
 
