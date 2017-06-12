@@ -194,16 +194,7 @@ Section "gpim" SEC01
   File "${PKG_ROOT}\bin\libwinpthread-1.dll"
   File "${PKG_ROOT}\bin\readline5.dll"
   File "${PKG_ROOT}\bin\zlib1.dll"
-
-  ; ============================================================================
-  ; Windows 2000 support 
-  ; ============================================================================
-  ${If} ${IsWin2000}
-    ; Install the OldCigarettes Windows 2000 XP API Wrapper
-    SetOutPath "$INSTDIR\bin"
-    File "${PKG_ROOT}\bin\ws2_32.dll"
-    CopyFiles "$SYSDIR\ws2_32.dll" "$INSTDIR\bin\ws2_32_org.dll"
-  ${EndIf}
+  File "${PKG_ROOT}\bin\ws2_32.dll"
 
   SetOutPath "$INSTDIR\doc"
   File "${GPSIM_ROOT}\doc\gpsim.lyx"
@@ -490,10 +481,7 @@ Section Uninstall
   Delete "$INSTDIR\ChangeLog.txt"
 
   Delete "$INSTDIR\bin\libgpsim_modules.dll"
-
-  Delete "$INSTDIR\bin\libgpsim_graphicLCD.dll"
-  Delete "$INSTDIR\bin\libgpsim_lcd.dll"
-  Delete "$INSTDIR\bin\libgpsim_ds1307.dll"
+  Delete "$INSTDIR\bin\libgpsim_extras.dll"
   
   Delete "$INSTDIR\examples\12bit\*.*"
   Delete "$INSTDIR\examples\14bit\*.*"
@@ -524,6 +512,9 @@ Section Uninstall
   Delete "$INSTDIR\extras\rs232-gen\*.*"
   Delete "$INSTDIR\extras\ds1307\examples\*.*"
   Delete "$INSTDIR\extras\ds1307\*.*"
+  Delete "$INSTDIR\extras\ds1820\examples\*.*"
+  Delete "$INSTDIR\extras\ds1820\examples\*"
+  Delete "$INSTDIR\extras\ds1820\*.*"
   
   Delete "$INSTDIR\extras\dht11\examples\*.*"
   Delete "$INSTDIR\extras\dht11\examples\README"
@@ -572,6 +563,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\libgthread-2.0-0.dll"
   Delete "$INSTDIR\bin\libgtk-win32-2.0-0.dll"
   Delete "$INSTDIR\bin\intl.dll"
+  Delete "$INSTDIR\bin\gtkextra-win32-2.1.dll"
   Delete "$INSTDIR\bin\libpango-1.0-0.dll"
   Delete "$INSTDIR\bin\libpangocairo-1.0-0.dll"
   Delete "$INSTDIR\bin\libpangoft2-1.0-0.dll"
@@ -583,14 +575,9 @@ Section Uninstall
   Delete "$INSTDIR\bin\libwinpthread-1.dll"
   Delete "$INSTDIR\bin\readline5.dll"
   Delete "$INSTDIR\bin\zlib1.dll"
+  Delete "$INSTDIR\bin\libgcc_s_sjlj-1.dll"
+  Delete "$INSTDIR\bin\ws2_32.dll"
 
-  ; ============================================================================
-  ; Windows 2000 support 
-  ; ============================================================================
-  ${If} ${IsWin2000}
-    Delete "$INSTDIR\bin\ws2_32.dll"
-    Delete "$INSTDIR\bin\ws2_32_org.dll"
-  ${EndIf}
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"
@@ -642,6 +629,10 @@ Section Uninstall
   RMDir "$INSTDIR\extras\rs232-gen"
   RMDir "$INSTDIR\extras\ds1307\examples"
   RMDir "$INSTDIR\extras\ds1307"
+  RMDir "$INSTDIR\extras\ds1820\examples"
+  RMDir "$INSTDIR\extras\ds1820"
+  RMDir "$INSTDIR\extras\dht11\examples"
+  RMDir "$INSTDIR\extras\dht11"
   RMDir "$INSTDIR\extras"
 
   RMDir "$INSTDIR\include\gpsim"

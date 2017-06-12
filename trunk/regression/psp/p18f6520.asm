@@ -43,6 +43,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
 	;; 
 	;; Interrupt
 	;; 
+INT_VECTOR   CODE    0x008               ; interrupt vector location
 	movwf	w_temp
 	swapf	STATUS,W
 	movwf	status_temp

@@ -35,6 +35,8 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
         goto   start                     ; go to beginning of program
 
 
+INT_VECTOR   CODE    0x004               ; interrupt vector location
+	nop
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
 ;----------------------------------------------------------------------

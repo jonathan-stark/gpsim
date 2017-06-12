@@ -1,3 +1,42 @@
+2017-06-12 Roy Rankin <rrankin@ihug.com.au>
+	* configure.ac
+	: Change to release 0.30.0
+	* extras/i2c2par extras/i2c2par/Makefile.am extras/i2c2par/examples
+	  extras/i2c2par/examples/Makefile.am extras/i2c2par/examples/i2c2par.asm
+	  extras/i2c2par/i2c2par.cc extras/i2c2par/i2c2par.h 
+	  extras/i2c2par/makefile.mingw extras/i2c2par/module_manager.cc
+	: Delete i2c2par source in extras as it is already included
+	* extras/lcd/raw_lcd.cc extras/lcd/raw_lcd.h
+	: Catch changes on cc pin
+	* plat/win32/gpsim.nsi
+	: Fix windows cleanup
+	* extras/lcd/examples/lcd_916.asm extras/lcd/examples/lcd_917.asm
+	  extras/lcd/examples/lcd_mod.asm regression/a2d/p16c71.asm 
+	  regression/a2d/p16f819.asm regression/a2d/p16f871.asm
+	  regression/a2d/p16f873a.asm regression/a2d/p16f874a.asm
+	  regression/a2d/p16f88.asm regression/ccp/pwm_877a.asm 
+	  regression/comparator/compar_882.asm regression/epwm/p16f882.asm 
+	  regression/epwm/p16f887.asm regression/epwm/p18f1220.asm
+	  regression/epwm/p18f2321.asm regression/epwm/p18f26k22.asm
+	  regression/epwm/p18f4321.asm regression/i2c/p16f819.asm 
+	  regression/i2c/p16f88.asm 
+	  regression/instructions_14bit/instructions_14bit.asm 
+	  regression/logic_test/logic_test.asm regression/node_test/node_test.asm 
+	  regression/p16f684/a2d_684.asm regression/p16f684/epwm.asm 
+	  regression/p16f690/epwm.asm regression/p16f84/p16f84.asm 
+	  regression/p16f88x/a2d.asm regression/p16f88x/comparator.asm 
+	  regression/p16f88x/epwm.asm regression/p16f88x/i2c_slave.asm 
+	  regression/p16f88x/p16f882.asm regression/p16f88x/p16f883.asm 
+	  regression/p16f88x/p16f886.asm regression/p16f88x/p16f887.asm 
+	  regression/p16f91x/i2c_slave.asm regression/p16f91x/p16f913.asm 
+	  regression/p16f91x/p16f914.asm regression/p16f91x/p16f916.asm 
+	  regression/p16f91x/p16f917.asm regression/p16f91x/pwm_914.asm 
+	  regression/p1xf18xx/p16f1823_spi.asm regression/psp/p16f871.asm 
+	  regression/psp/p18f452.asm regression/psp/p18f6520.asm 
+	  regression/register_stim/register_stim.asm 
+	  regression/resistor/resistor.asm regression/switch_test/switch_test.asm
+	: Align interrupt code
+
 2017-06-10 Roy Rankin <rrankin@ihug.com.au>
 	* PROCESSORS doc/gpsim.html src/p18x.cc src/p18x.h src/pic-processor.cc 
 	  src/pic-processor.h

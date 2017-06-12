@@ -1,7 +1,8 @@
 /*
+   Copyright (C) 2017 Roy R. Rankin
    Copyright (C) 2000 T. Scott Dattalo
 
-This file is part of the libgpsim_modules library of gpsim
+This file is part of the libgpsim_extras library of gpsim
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -72,6 +73,13 @@ License along with this library; if not, see
 
 #include "../config.h"    // get the definition for HAVE_GUI
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
 #include <cmath>
@@ -79,6 +87,7 @@ License along with this library; if not, see
 #include "../src/stimuli.h"
 #include "../src/value.h"
 #include "../src/gpsim_interface.h"
+#include "../src/gpsim_time.h"
 
 #include "raw_lcd.h"
 #include "../src/packages.h"
@@ -116,37 +125,6 @@ License along with this library; if not, see
   };
 
 
-  class RAW_LCD_Input : public IOPIN
-  {
-  public:
-    RAW_LCD_Input(const std::string &n, RAW_LCD_base *pParent);
-
-    virtual void setDrivenState(bool);
-    virtual void get(char *return_str, int len);
-
-  private:
-    RAW_LCD_base *m_pParent;
-  };
-
-
-  //------------------------------------------------------------------------
-  //
-  RAW_LCD_Input::RAW_LCD_Input(const std::string &n, RAW_LCD_base *pParent)
-    : IOPIN(n.c_str()), m_pParent(pParent)
-  {
-	set_Vth(0.);
-  }
-
-  void RAW_LCD_Input::setDrivenState(bool bNewState)
-  {
-    IOPIN::setDrivenState(bNewState);
-  }
-
-  void RAW_LCD_Input::get(char *return_str, int len)
-  {
-      if (return_str)
-	strncpy(return_str, IOPIN::getState()?"1": "0", len);
-  }
 
   //------------------------------------------------------------------------
 void LCD_7Segments::update()
@@ -159,6 +137,7 @@ gboolean LCD_7Segments::lcd7_expose_event(GtkWidget *widget, GdkEvent *event,
   gpointer user_data)
 {
   LCD_7Segments *lcd = static_cast<LCD_7Segments *>(user_data);
+  unsigned int segment_states;
 
 
   g_return_val_if_fail (widget != NULL, TRUE);
@@ -171,7 +150,10 @@ gboolean LCD_7Segments::lcd7_expose_event(GtkWidget *widget, GdkEvent *event,
 
   // not a very O-O way of doing it... but here we go directly
   // to the I/O port and get the values of the segments
-  int segment_states = lcd->getPinState();
+  lcd->set_cc_stimulus();
+
+
+  segment_states =  lcd->segments;
 
   cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(widget));
 
@@ -380,7 +362,8 @@ void LCD_7Segments::build_window()
 
   //--------------------------------------------------------------
 
-  LCD_7Segments::LCD_7Segments(const char *name) : Module(name, "7 Segment LCD")
+  LCD_7Segments::LCD_7Segments(const char *name) : Module(name, "7 Segment LCD"),
+	cc_stimulus(0)
   {
 
     segments = 0;
@@ -395,10 +378,18 @@ void LCD_7Segments::build_window()
 
 LCD_7Segments::~LCD_7Segments()
 {
+
+  if (m_pins[0]->snode)
+  {
+      (m_pins[0]->snode)->detach_stimulus(cc_stimulus);
+      delete cc_stimulus;
+  }
   for(int i = 0; i < 8; i++)
+  {
       removeSymbol(m_pins[i]);
+      delete m_pins[i];
+  }
   get_interface().remove_interface(interface_seq_no);
-  //RRRgtk_widget_destroy(darea);
 }
 
   //--------------------------------------------------------------
@@ -429,38 +420,49 @@ LCD_7Segments::~LCD_7Segments()
     //   the bit positions as LCD.seg0, LCD.seg1, ..., where LCD is the
     //   user-assigned name of the 7-segment LCD
 
-    m_pins[0] = new RAW_LCD_Input("cc", this);
+    m_pins[0] = new IOPIN("cc", 0.0);
     addSymbol(m_pins[0]);
     assign_pin(1, m_pins[0]);
     int i;
     char ch;
     for (ch = '0', i = 1; i < 8; i++, ch++)
     {
-      m_pins[i] = new RAW_LCD_Input((string)"seg" + ch, this);
+      char seg_name[] = "seg0";
+      seg_name[3] = ch;
+      //m_pins[i] = new PinModule(seg_name, 0.0);
+      m_pins[i] = new IOPIN(seg_name, 0.0);
       addSymbol(m_pins[i]);
       assign_pin(i+1, m_pins[i]);
     }
-
   }
 
-  //--------------------------------------------------------------
-unsigned int LCD_7Segments::getPinState()
+void LCD_7Segments::new_cc_voltage(double Vcc)
 {
-  unsigned int s = segments;
-
-
-  if (m_pins[0]->get_nodeVoltage() > 2.5)
+  unsigned int s = 0;
+  if (Vcc > 2.5)
   {
-      s = 0;
       for (int i = 1; i < 8; i++) {
-          double delta_v = m_pins[i]->get_nodeVoltage() - m_pins[0]->get_nodeVoltage();
-          delta_v = fabs(delta_v);
+          double delta_v = Vcc - m_pins[i]->get_nodeVoltage();
           s = (s >> 1) | (delta_v > 1.5 ? 0x80 : 0);
       }
-      segments = s;
+      if (s != segments)
+      {
+          segments = s;
+	  lcd7_expose_event(darea, 0, this);
+      }
   }
+}
 
-  return s;
+  //--------------------------------------------------------------
+void LCD_7Segments::set_cc_stimulus()
+{
+
+  if (m_pins[0]->snode && ! cc_stimulus)
+  {
+	
+      cc_stimulus = new CC_stimulus(this, "cc_stimulus", 0, 1e12);
+      (m_pins[0]->snode)->attach_stimulus(cc_stimulus);
+  }
 }
 
   //--------------------------------------------------------------
@@ -470,6 +472,39 @@ unsigned int LCD_7Segments::getPinState()
   {
     return new LCD_7Segments(_new_name);
   }
+
+CC_stimulus::CC_stimulus(LCD_7Segments * arg, const char *cPname,double _Vth, double _Zth)
+  : stimulus(cPname, _Vth, _Zth), future_cycle(0)
+{
+        _lcd_7seg = arg;
+}
+
+CC_stimulus::~CC_stimulus()
+{
+}
+
+void   CC_stimulus::set_nodeVoltage(double v)
+{
+    if (nodeVoltage != v)
+    {
+        nodeVoltage = v;
+
+        if (future_cycle)
+	    get_cycles().clear_break(future_cycle);
+
+	future_cycle = get_cycles().get(2e-3); // 2ms
+        get_cycles().set_break(future_cycle, this);
+    }
+}
+
+void   CC_stimulus::callback()
+{
+	Dprintf(("callback %s\n", name().c_str()));
+	future_cycle = 0;
+        Dprintf(("set_nodeVoltage %s _lcd_7seg %p %s v=%.2f\n", name().c_str(), _lcd_7seg, _lcd_7seg->name().c_str(), nodeVoltage));
+        _lcd_7seg->new_cc_voltage(nodeVoltage);
+}
+
 
 
 #endif //HAVE_GUI

@@ -38,9 +38,11 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
         movwf  PCLATH                    ; initialize PCLATH
         goto   start                     ; go to beginning of program
 
+
 	;; 
 	;; Interrupt
-	;; 
+	;;
+INT_VECTOR   CODE    0x004               ; interrupt vector location 
 	movwf	w_temp
 	swapf	STATUS,W
 	movwf	status_temp

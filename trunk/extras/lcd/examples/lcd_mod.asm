@@ -42,10 +42,13 @@ END_OF_RAM_HI   equ  0xbf
         include "lcd.inc"
         include "screen.inc"
 
-	org	0
+RESET_VECTOR  CODE    0x000              ; processor reset vector
+	goto	main
 
+INT_VECTOR   CODE    0x004               ; interrupt vector location
+	nop
 ;***********************************************************************
-Main
+main
 
 
         BCF     STATUS,RP0      ;Point to BANK 0

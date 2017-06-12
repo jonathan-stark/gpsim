@@ -29,7 +29,25 @@ License along with this library; if not, see
 #include <gtk/gtk.h>
 
 
-  class RAW_LCD_Input;
+  class LCD_7Segments;
+
+class CC_stimulus : public stimulus, TriggerObject
+{
+   public:
+
+        CC_stimulus(LCD_7Segments *arg, const char *name=0,
+           double _Vth=0.0, double _Zth=1e12
+           );
+        ~CC_stimulus();
+
+    LCD_7Segments *_lcd_7seg;
+
+     virtual void   set_nodeVoltage(double v);
+     virtual void callback();
+     guint64 future_cycle;
+
+};
+
   //------------------------------------------------------------------------
   // RAW_LCD base class
 
@@ -88,7 +106,8 @@ License along with this library; if not, see
 
     virtual void build_window();
     virtual void update();
-    unsigned int getPinState();
+    void set_cc_stimulus();
+    void new_cc_voltage(double Vcc);
 
     // Inheritances from the Package class
     virtual void create_iopin_map();
@@ -101,9 +120,11 @@ License along with this library; if not, see
       gpointer user_data);
 
     //unsigned int m_segmentStates;
-    RAW_LCD_Input *m_pins[8];
+    //PinModule *m_pins[8];
+    IOPIN *m_pins[8];
     int m_nPins;
     unsigned int segments;
+    CC_stimulus *cc_stimulus;
 
   };
 
