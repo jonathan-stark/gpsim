@@ -46,6 +46,7 @@ RESET_VECTOR  CODE    0x000              ; processor reset vector
         movwf  PCLATH                    ; initialize PCLATH
         goto   start                     ; go to beginning of program
 
+INT_VECTOR   CODE    0x004               ; interrupt vector location
 	;; 
 	;; Interrupt
 	;; 
@@ -76,7 +77,7 @@ lcd_int:
 tmr1_int:
 	bcf	PIR1,TMR1IF
 	BANKSEL TMR1H
-	movlw	0xf0
+	movlw	0xfc
 	movwf	TMR1H
 	goto	exit_int
 
