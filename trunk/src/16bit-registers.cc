@@ -570,8 +570,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   if (value >= memory_size)
 	value -= memory_size;
 
-  // see Update pcl comment in Program_Counter::increment()
-  cpu_pic->pcl->value.put((value<<1) & 0xff);
+  update_pcl();
 
   // The instruction modifying the PCL will also increment the program counter.
   // So, pre-compensate the increment with a decrement:
@@ -621,6 +620,15 @@ unsigned int Program_Counter16::get_value()
   return value << 1;
 }
 
+//--------------------------------------------------
+// update_pcl - Updates the PCL from within the Program_Counter class.
+//   
+ 
+void Program_Counter16::update_pcl()
+{
+  // For 16 bit devices the PCL will be Program_Counter*2
+  cpu_pic->pcl->value.put((value<<1) & 0xff);
+}
 
 //------------------------------------------------
 // TOSU

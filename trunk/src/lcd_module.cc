@@ -264,7 +264,7 @@ void LCD_MODULE::sleep()
     // Stop during sleep
     if ((con_reg & LCDCON::SLPEN) || !(con_reg & (LCDCON::CS0 | LCDCON::CS1)))
     {
-	Dprintf(("LCD_MODULE::sleep() stop during sleep fc=%ld now=%ld\n", future_cycle, get_cycles().get()));
+	Dprintf(("LCD_MODULE::sleep() stop during sleep fc=%" PRINTF_GINT64_MODIFIER "d now=%" PRINTF_GINT64_MODIFIER "d\n", future_cycle, get_cycles().get()));
         if (future_cycle >= get_cycles().get())
         {
             get_cycles().clear_break(future_cycle);
@@ -300,7 +300,7 @@ void LCD_MODULE::wake()
 
     is_sleeping = false;
 
-    Dprintf(("LCD_MODULE::wake() fc=%ld\n", future_cycle));
+    Dprintf(("LCD_MODULE::wake() fc=%" PRINTF_GINT64_MODIFIER "d\n", future_cycle));
     // Stop during sleep
     if ((con_reg & LCDCON::SLPEN) || !(con_reg & (LCDCON::CS0 | LCDCON::CS1)))
     {
@@ -489,7 +489,7 @@ void LCD_MODULE::stop_clock()
 }
 void LCD_MODULE::callback()
 {
-   Dprintf(("LCD_MODULE::callback() %ld phase=%d bias_now=%d\n", future_cycle, phase,  bias_now));
+   Dprintf(("LCD_MODULE::callback() %" PRINTF_GINT64_MODIFIER "d phase=%d bias_now=%d\n", future_cycle, phase,  bias_now));
 
     drive_lcd();
 
@@ -542,9 +542,9 @@ void LCD_MODULE::drive_lcd()
     for(int l=0; l <= mux_now; l++) // scan across com related output
     {
 
-	int index= (map_com[l] & mask)>> shift;
+	unsigned int index= (map_com[l] & mask)>> shift;
 	com_volt[l] = vlcd[index];
-	Dprintf(("com%d mask %lo index %d %.1f\n", l, mask, index, com_volt[l]));
+	Dprintf(("com%d mask %" PRINTF_GINT64_MODIFIER "o index %d %.1f\n", l, mask, index, com_volt[l]));
         LCDcom[l]->getPin().putState(com_volt[l]);
     }
 
@@ -554,7 +554,7 @@ void LCD_MODULE::drive_lcd()
         subphase =  phase / 2;
     double Von = vlcd[(map_on & mask) >> shift];
     double Voff = vlcd[(map_off & mask) >> shift];
-    Dprintf(("phase %d mask %lo subphase %d\n",phase, mask, subphase));
+    Dprintf(("phase %d mask %" PRINTF_GINT64_MODIFIER "o subphase %d\n",phase, mask, subphase));
     for(int k = 0; (k < 3) && lcdSEn[k]; k++)
     {
         unsigned int enable = lcdSEn[k]->value.get();

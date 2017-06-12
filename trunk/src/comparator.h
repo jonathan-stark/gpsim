@@ -244,7 +244,7 @@ protected:
   static const int cMaxConfigurations=8;
   static const int cMaxComparators=2;
 
-  uint32_t m_configuration_bits[cMaxComparators][cMaxConfigurations];
+  guint32 m_configuration_bits[cMaxComparators][cMaxConfigurations];
 
 };
 

@@ -123,14 +123,30 @@ void Program_Counter::increment()
         bp.halt();
   }
 
+  // Update PCL sfr to reflect current PC
+  update_pcl();
+
+  cpu_pic->mCurrentPhase->setNextPhase(cpu_pic->mExecute1Cycle);
+}
+
+//--------------------------------------------------
+// update_pcl - Updates the PCL from within the Program_Counter class.
+// There is a separate method for this as the Program_Counter counts
+// instructions (words) while the PCL can also point to bytes on
+// 16 bit devices. So the PCL on 16-bit devices is always the double
+// as the current Program_Counter
+//   
+
+void Program_Counter::update_pcl()
+{
+  // For 12/14 bit devices the PCL will simply get set to the
+  // current "value" of Program_Counter
+
   // Update pcl. Note that we don't want to pcl.put() because that 
   // will trigger a break point if there's one set on pcl. (A read/write
   // break point on pcl should not be triggered by advancing the program
   // counter).
-
   cpu_pic->pcl->value.put(value & 0xff);
-
-  cpu_pic->mCurrentPhase->setNextPhase(cpu_pic->mExecute1Cycle);
 }
 
 //--------------------------------------------------
@@ -198,7 +214,7 @@ ClockPhase *phaseExecute2ndHalf::firstHalf(unsigned int uiPC)
 {
   Dprintf(("first half of 2 cycle instruction new PC=0x%x\n",uiPC));
   ((pic_processor *)m_pcpu)->pc->value = uiPC;
-  ((pic_processor *)m_pcpu)->pcl->value.put(uiPC&0xff);
+  ((pic_processor *)m_pcpu)->pc->update_pcl();
   m_pcpu->mCurrentPhase->setNextPhase(this);
   return this;
 }
@@ -282,9 +298,10 @@ void Program_Counter::computed_goto(unsigned int new_address)
     bp.halt();
   }
 
-  // see Update pcl comment in Program_Counter::increment()
-
-  cpu_pic->pcl->value.put(value & 0xff);
+  // Update PCL. As this is different for 12/14 and 16 bit devices
+  // this will get handled by a method on its own so it is possible
+  // to cope with different mappings PC-->PCL (direct, <<1, etc.)
+  update_pcl();
 
   // The instruction modifying the PCL will also increment the program counter.
   // So, pre-compensate the increment with a decrement:

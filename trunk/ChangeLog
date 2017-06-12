@@ -1,3 +1,16 @@
+2017-06-10 Roy Rankin <rrankin@ihug.com.au>
+	* PROCESSORS doc/gpsim.html src/p18x.cc src/p18x.h src/pic-processor.cc 
+	  src/pic-processor.h
+	: patch #46 Support for 18F258/18F458 
+	* src/16bit-registers.h src/pic-registers.cc src/registers.h
+	:  bug #229 PCL of 16-bit devices isn't shown properly in RAM view
+	* src/comparator.h
+	: bug #227 Compile error
+	* doc/gpsim.lyx
+	: Update extras module section
+	* src/lcd_module.cc
+	: Fix debug print formats for 32 bit systems
+
 2017-06-05 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gui_breadboard.cc
 	: fix default filename for "Save Configuration"
