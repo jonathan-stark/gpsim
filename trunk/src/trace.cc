@@ -817,7 +817,8 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
 
   PCTraceObject *pcto = new PCTraceObject(cpu, tv);
 
-  if((tv & (3<<22)) == (1<<22))
+  // If this was a branch (i.e. tv bits 17:16 == 01), it took two cycles
+  if((tv & (3<<16)) == (1<<16))
     trace.current_cycle_time -= 2;
   else
     trace.current_cycle_time -= 1;
