@@ -60,7 +60,7 @@ License along with this library; if not, see
 class Config12F6 : public ConfigWord
 {
 public:
-  Config12F6(P12F629 *pCpu)
+  Config12F6(pic_processor  *pCpu)
     : ConfigWord("CONFIG12F6", 0x3fff, "Configuration Word", pCpu, 0x2007)
   {
     Dprintf(("Config12F6::Config12F6 %p\n", m_pCpu));
@@ -83,6 +83,8 @@ public:
 	TMR1IF 	= 1 << 0,
 	TMR2IF  = 1 << 1,	//For 12F683
 	CMIF	= 1 << 3,
+	CLC1IF  = 1 << 3,	// For 10F32x
+	NCO1IF  = 1 << 4,	// For 10F32x
 	ADIF	= 1 << 6,
 	EEIF	= 1 << 7
   };
@@ -109,6 +111,22 @@ PIR1v12f(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, 
   {
     trace.raw(write_trace.get() | value.get());
     value.put(value.get() | CMIF);
+    if( value.get() & pie->value.get() )
+      setPeripheralInterrupt();
+  }
+
+  virtual void set_clc1if()
+  {
+    trace.raw(write_trace.get() | value.get());
+    value.put(value.get() | CLC1IF);
+    if( value.get() & pie->value.get() )
+      setPeripheralInterrupt();
+  }
+
+  virtual void set_nco1if()
+  {
+    trace.raw(write_trace.get() | value.get());
+    value.put(value.get() | NCO1IF);
     if( value.get() & pie->value.get() )
       setPeripheralInterrupt();
   }
@@ -201,6 +219,7 @@ P12F629::P12F629(const char *_name, const char *desc)
   m_wpu = new WPU(this, "wpu", "Weak Pull-up Register", m_gpio, 0x37);
 
   pir1 = new PIR1v12f(this,"pir1","Peripheral Interrupt Register",&intcon_reg, &pie1);
+
 
   tmr0.set_cpu(this, m_gpio, 4, option_reg);
   tmr0.start(0);
@@ -587,9 +606,6 @@ void P12F683::create_sfr_map()
   osctune.set_osccon(osccon);
 
 
-
-
-
   t2con.tmr2  = &tmr2;
   tmr2.pir_set   = get_pir_set();
   tmr2.pr2    = &pr2;
@@ -609,5 +625,377 @@ void P12F683::create_sfr_map()
   comparator.cmcon1.set_tmrl(&tmr1l);
   add_sfr_register(&comparator.cmcon1, 0x1a, RegisterValue(2,0),"cmcon1");
   wdt.set_timeout(1./31000.);
+
+}
+P10F32X::P10F32X(const char *_name, const char *desc)
+  : _14bit_processor(_name,desc), 
+    intcon_reg(this,"intcon","Interrupt Control"),
+    pie1(this,"PIE1", "Peripheral Interrupt Enable"),
+    t2con(this, "t2con", "TMR2 Control"),
+    tmr2(this, "tmr2", "TMR2 Register"),
+    pr2(this, "pr2", "Timer2 Period Register"),
+    pcon(this, "pcon", "pcon"),
+    ansela(this,"ansela", "Analog Select"),
+    fvrcon(this, "fvrcon", "Voltage reference control register", 0xf3, 0x00),
+    borcon(this, "borcon", "Brown-out reset control register"),
+    wdtcon(this, "wdtcon", "WDT Control", 0x3f),
+    adcon0(this,"adcon", "A2D Control 0"),
+    adcon1(this,"adcon1", "A2D Control 1"), // virtual register
+    adres(this,"adres", "A2D Result Low"),
+    pwm1con(this, "pwm1con", "PWM CONTROL REGISTER 1"),
+    pwm1dcl(this, "pwm1dcl", "PWM DUTY CYCLE LOW BITS"),
+    pwm1dch(this, "pwm1dch", "PWM DUTY CYCLE HIGH BITS"),
+    pwm2con(this, "pwm2con", "PWM CONTROL REGISTER 2"),
+    pwm2dcl(this, "pwm2dcl", "PWM DUTY CYCLE LOW BITS"),
+    pwm2dch(this, "pwm2dch", "PWM DUTY CYCLE HIGH BITS"),
+    pm_rw(this)
+
+{
+  m_iocaf = new IOCxF(this, "iocaf", "Interrupt-On-Change flag Register", 0x0f);
+  m_iocap = new IOC(this, "iocap", "Interrupt-On-Change positive edge", 0x0f);
+  m_iocan = new IOC(this, "iocan", "Interrupt-On-Change negative edge", 0x0f);
+  m_porta = new PicPortIOCRegister(this,"porta","", &intcon_reg, m_iocap, m_iocan, m_iocaf, 8,0x0f);
+
+  m_trisa = new PicTrisRegister(this,"trisa","", m_porta, false, 0x07);
+  m_lata  = new PicLatchRegister(this,"lata","",m_porta, 0x07);
+  m_wpu = new WPU(this, "wpua", "Weak Pull-up Register", m_porta, 0x0f);
+
+  pir1 = new PIR1v12f(this,"pir1","Peripheral Interrupt Register",&intcon_reg, &pie1);
+  pir1->valid_bits |= PIR1v12f::TMR2IF|PIR1v12f::NCO1IF;
+  pir1->valid_bits &= ~(PIR1v12f::EEIF|PIR1v12f::TMR1IF);
+  pir1->writable_bits = pir1->valid_bits;
+  m_cpu_temp = new CPU_Temp("cpu_temperature", 30., "CPU die temperature");
+  osccon = new OSCCON_HS2(this, "osccon", "Oscillator Control Register");
+  tmr0.set_cpu(this, m_porta, 3, option_reg);
+  tmr0.start(0);
+
+
+/*
+  if(config_modes)
+    config_modes->valid_bits = ConfigMode::CM_FOSC0 | ConfigMode::CM_FOSC1 | 
+      ConfigMode::CM_FOSC1x | ConfigMode::CM_WDTE | ConfigMode::CM_PWRTE;
+*/
+
+}
+
+P10F32X::~P10F32X()
+{
+
+  delete_file_registers(0x40, ram_top);
+  remove_sfr_register(&tmr2);
+  remove_sfr_register(&t2con);
+  remove_sfr_register(&pr2);
+  remove_sfr_register(&pcon);
+  remove_sfr_register(&intcon_reg);
+  remove_sfr_register(&pie1);
+  remove_sfr_register(&ansela);
+  remove_sfr_register(&fvrcon);
+  remove_sfr_register(&tmr0);
+  remove_sfr_register(&borcon);
+  remove_sfr_register(&wdtcon);
+  remove_sfr_register(&adcon0);
+  remove_sfr_register(&adcon1);
+  remove_sfr_register(&adres);
+  remove_sfr_register(&pwm1dcl);
+  remove_sfr_register(&pwm1dch);
+  remove_sfr_register(&pwm1con);
+  remove_sfr_register(&pwm2dcl);
+  remove_sfr_register(&pwm2dch);
+  remove_sfr_register(&pwm2con);
+  remove_sfr_register(pm_rw.get_reg_pmadr());
+  remove_sfr_register(pm_rw.get_reg_pmadrh());
+  remove_sfr_register(pm_rw.get_reg_pmdata());
+  remove_sfr_register(pm_rw.get_reg_pmdath());
+  remove_sfr_register(pm_rw.get_reg_pmcon1_rw());
+  remove_sfr_register(pm_rw.get_reg_pmcon2());
+
+
+
+  delete_sfr_register(m_porta);
+  delete_sfr_register(m_trisa);
+  delete_sfr_register(m_lata);
+  delete_sfr_register(m_wpu);
+  delete_sfr_register(m_iocaf);
+  delete_sfr_register(m_iocap);
+  delete_sfr_register(m_iocan);
+  delete_sfr_register(pir1);
+  delete_sfr_register(osccon);
+  delete m_cpu_temp;
+}
+
+void  P10F32X::create()
+{
+
+  ram_top = 0x7f;
+  P10F32X::create_iopin_map();
+
+  _14bit_processor::create();
+
+  status->write_mask &= ~0xe0; // IRP RP0 RP1 read only
+  add_file_registers(0x40, ram_top, 0x00);
+  P10F32X::create_sfr_map();
+}
+void P10F32X::option_new_bits_6_7(unsigned int bits)
+{
+  Dprintf(("P10F32X::option_new_bits_6_7 bits=%x\n", bits));
+  m_porta->setIntEdge ( (bits & OPTION_REG::BIT6));
+  m_wpu->set_wpu_pu ( !(bits & OPTION_REG::BIT7));
+}
+void P10F32X::create_symbols()
+{
+  pic_processor::create_symbols();
+  addSymbol(Wreg);
+
+}
+
+void P10F32X::create_sfr_map()
+{
+  pir_set_def.set_pir1(pir1);
+
+  add_sfr_register(indf,    0x00);
+
+  add_sfr_register(&tmr0,   0x01, RegisterValue(0xff,0));
+  add_sfr_register(option_reg,  0x0e, RegisterValue(0xff,0));
+
+  add_sfr_register(pcl,     0x02, RegisterValue(0,0));
+  add_sfr_register(status,  0x03, RegisterValue(0x18,0));
+  add_sfr_register(fsr,     0x04);
+  add_sfr_register(m_porta,  0x05, RegisterValue(0x0,0));
+  add_sfr_register(m_trisa,  0x06, RegisterValue(0x0f,0));
+  add_sfr_register(m_lata,  0x07, RegisterValue(0x00,0));
+  add_sfr_register(&ansela, 0x08, RegisterValue(0x07,0));
+  add_sfr_register(m_wpu, 0x09, RegisterValue(0x0f,0),"wpu");
+
+
+  add_sfr_register(pclath,  0x0a, RegisterValue(0,0));
+
+  add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
+
+  intcon = &intcon_reg;
+  intcon_reg.set_pir_set(get_pir_set());
+
+  add_sfr_register(pir1,   0x0c, RegisterValue(0,0),"pir1");
+
+  add_sfr_register(&pie1,   0x0d, RegisterValue(0,0));
+  add_sfr_register(&pcon,   0x0f, RegisterValue(0,0),"pcon");
+  add_sfr_register(osccon,   0x10, RegisterValue(0x60,0));
+  add_sfr_register(&tmr2,     0x11, RegisterValue(0,0));
+  add_sfr_register(&pr2,      0x12, RegisterValue(0xff,0));
+  add_sfr_register(&t2con,    0x13, RegisterValue(0,0));
+  add_sfr_register(&pwm1dcl,  0x14, RegisterValue(0,0));
+  add_sfr_register(&pwm1dch,  0x15, RegisterValue(0,0));
+  add_sfr_register(&pwm1con,  0x16, RegisterValue(0,0));
+  add_sfr_register(&pwm2dcl,  0x17, RegisterValue(0,0));
+  add_sfr_register(&pwm2dch,  0x18, RegisterValue(0,0));
+  add_sfr_register(&pwm2con,  0x19, RegisterValue(0,0));
+  add_sfr_register(m_iocap,   0x1a, RegisterValue(0,0));
+  add_sfr_register(m_iocan,   0x1b, RegisterValue(0,0));
+  add_sfr_register(m_iocaf,   0x1c, RegisterValue(0,0));
+  add_sfr_register(&fvrcon,   0x1d, RegisterValue(0,0));
+  add_sfr_register(&adres,    0x1e, RegisterValue(0,0));
+  add_sfr_register(&adcon0,   0x1f, RegisterValue(0,0));
+  add_sfr_register(pm_rw.get_reg_pmadr(),  0x20 );
+  add_sfr_register(pm_rw.get_reg_pmadrh(), 0x21 );
+  add_sfr_register(pm_rw.get_reg_pmdata(), 0x22 );
+  add_sfr_register(pm_rw.get_reg_pmdath(), 0x23 );
+  add_sfr_register(pm_rw.get_reg_pmcon1_rw(), 0x24 );
+  add_sfr_register(pm_rw.get_reg_pmcon2(), 0x25 );
+
+  add_sfr_register(&wdtcon,   0x30, RegisterValue(0x16,0));
+  add_sfr_register(&borcon,   0x3f, RegisterValue(0x80,0));
+  if (pir1) {
+    pir1->set_intcon(&intcon_reg);
+    pir1->set_pie(&pie1);
+  }
+  pie1.setPir(pir1);
+  ansela.setValidBits(0x07);
+  ansela.setAdcon1(&adcon1);
+  ansela.config(7, 0);
+  adcon1.setNumberOfChannels(8);
+  adcon0.setAdres(&adres);
+  adcon0.setAdcon1(&adcon1);
+  adcon0.setIntcon(&intcon_reg);
+  adcon0.setA2DBits(8);
+  adcon0.setPir(pir1);
+  adcon0.setChannel_Mask(7);
+  adcon0.setChannel_shift(2);
+
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+
+  fvrcon.set_adcon1(&adcon1);
+  fvrcon.set_VTemp_AD_chan(6);
+  fvrcon.set_FVRAD_AD_chan(7);
+  t2con.tmr2  = &tmr2;
+  tmr2.pir_set   = get_pir_set();
+  tmr2.pr2    = &pr2;
+  tmr2.t2con  = &t2con;
+  tmr2.add_ccp ( &pwm1con );
+  tmr2.add_ccp ( &pwm2con );
+  pr2.tmr2    = &tmr2;
+
+  pwm1con.set_pwmdc(&pwm1dcl, &pwm1dch);
+  pwm1con.setIOPin1(&(*m_porta)[0]);
+  pwm1con.set_tmr2(&tmr2);
+  pwm2con.set_pwmdc(&pwm2dcl, &pwm2dch);
+  pwm2con.setIOPin1(&(*m_porta)[1]);
+  pwm2con.set_tmr2(&tmr2);
+
+}
+void P10F32X::create_iopin_map()
+{
+
+  package = new Package(8);
+  if(!package)
+    return;
+
+  // Now Create the package and place the I/O pins
+
+  package->assign_pin( 5, m_porta->addPin(new IO_bi_directional_pu("ra0"),0));
+  package->assign_pin( 4, m_porta->addPin(new IO_bi_directional_pu("ra1"),1));
+  package->assign_pin( 3, m_porta->addPin(new IO_bi_directional_pu("ra2"),2));
+  package->assign_pin( 8, m_porta->addPin(new IO_bi_directional_pu("ra3"),3));
+
+  package->assign_pin( 1, 0);
+  package->assign_pin( 2, 0);
+  package->assign_pin( 6, 0);
+  package->assign_pin( 7, 0);
+
+
+}
+void P10F32X::create_config_memory()
+{
+  m_configMemory = new ConfigMemory(this,1);
+  m_configMemory->addConfigWord(0,new Config12F6(this));
+
+};
+
+class MCLRPinMonitor;
+
+bool P10F32X::set_config_word(unsigned int address,unsigned int cfg_word)
+{
+  enum {
+    FOSC  = 1<<0,
+    BOREN  = 1<<1,
+    BOREN1  = 1<<2,
+    WDTEN0  = 1<<3,
+    WDTEN1  = 1<<4,
+    MCLRE  = 1<<6,
+    CP     = 1<<7,
+    LVP    = 1<<8,
+
+  };
+
+
+    Dprintf(("P10F32X::set_config_word address 0x%x cfg=0x%x\n", address, cfg_word));
+    if(address == config_word_address())
+    {
+        if ((cfg_word & MCLRE))
+	    assignMCLRPin(8);	// package pin 8
+        else
+	    unassignMCLRPin();
+     
+        wdt_flag = (cfg_word & (WDTEN0|WDTEN1)) >> 3;
+ 	wdt.set_timeout(1./31000.);
+	wdt.initialize(wdt_flag & 2, false);
+
+        if (cfg_word & FOSC) // EC on CLKIN
+	{
+	    m_porta->getPin(1)->newGUIname("CKIN");
+	    set_int_osc(false);
+	}
+	else		     // INTRC
+	{
+	    m_porta->getPin(1)->newGUIname(m_porta->getPin(1)->name().c_str());
+	    set_int_osc(true);
+	    osccon->set_rc_frequency();
+	}
+       
+
+	return(_14bit_processor::set_config_word(address, cfg_word));
+	
+    }
+    return false;
+}
+//-------------------------------------------------------------------
+void P10F32X::enter_sleep()
+{
+    tmr0.sleep();
+    if (wdt_flag == 2)          // WDT is suspended during sleep
+        wdt.initialize(false);
+    pic_processor::enter_sleep();
+}
+void P10F32X::exit_sleep()
+{
+  if (m_ActivityState == ePASleeping)
+  {
+    tmr0.wake();
+    if (wdt_flag == 2)
+        wdt.initialize(true);
+    pic_processor::exit_sleep();
+  }
+
+}
+
+
+
+P10F320::P10F320(const char *_name, const char *desc)
+  : P10F32X(_name,desc) 
+{
+}
+P10F320::~P10F320()
+{
+}
+Processor * P10F320::construct(const char *name)
+{
+
+  P10F320 *p = new P10F320(name);
+
+  p->create();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+Processor * P10LF320::construct(const char *name)
+{
+
+  P10LF320 *p = new P10LF320(name);
+
+  p->create();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+P10F322::P10F322(const char *_name, const char *desc)
+  : P10F32X(_name,desc) 
+{
+}
+P10F322::~P10F322()
+{
+}
+Processor * P10F322::construct(const char *name)
+{
+
+  P10F322 *p = new P10F322(name);
+
+  p->create();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+Processor * P10LF322::construct(const char *name)
+{
+
+  P10LF322 *p = new P10LF322(name);
+
+  p->create();
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
 
 }

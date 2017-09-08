@@ -29,6 +29,7 @@ License along with this library; if not, see
 #include "eeprom.h"
 #include "comparator.h"
 #include "a2dconverter.h"
+#include "pm_rd.h"
 
 class WPU;
 class IOC;
@@ -126,4 +127,105 @@ public:
   virtual void create_sfr_map();
 };
 
+class P10F32X : public _14bit_processor
+{
+public:
+  INTCON_14_PIR    intcon_reg;
+  PIR_SET_1 pir_set_def;
+  PIE     pie1;
+  PIR    *pir1;
+  T2CON   t2con;
+  TMR2    tmr2;
+  PR2     pr2;
+  PCON    pcon;
+  ANSEL_P ansela;
+  FVRCON  fvrcon;
+  BORCON  borcon;
+  WDTCON  wdtcon;
+  OSCCON  *osccon;
+  ADCON0_32X  adcon0;
+  ADCON1  adcon1;
+  sfr_register  adres;
+    PWMxCON       pwm1con;
+  sfr_register  pwm1dcl;
+  sfr_register  pwm1dch;
+  PWMxCON       pwm2con;
+  sfr_register  pwm2dcl;
+  sfr_register  pwm2dch;
+  PM_RW		pm_rw;
+
+
+  PicPortIOCRegister  *m_porta;
+  PicTrisRegister  *m_trisa;
+  PicLatchRegister *m_lata;
+  WPU		   *m_wpu;
+  IOC              *m_iocap;
+  IOC              *m_iocan;
+  IOCxF            *m_iocaf;
+
+  virtual PIR *get_pir2() { return (NULL); }
+  virtual PIR *get_pir1() { return (pir1); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_def); }
+
+
+  P10F32X(const char *_name=0, const char *desc=0);
+  ~P10F32X();
+  virtual void option_new_bits_6_7(unsigned int bits);
+  virtual void create_symbols();
+  virtual void create_sfr_map();
+  virtual void create_iopin_map();
+  virtual void create();
+  virtual void create_config_memory();
+  virtual bool set_config_word(unsigned int address,unsigned int cfg_word);
+  virtual bool swdten_active() {return(wdt_flag == 1);} // WDTCON can enable WDT
+  virtual void enter_sleep();
+  virtual void exit_sleep();
+/*
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+*/
+
+};
+
+class P10F320 : public P10F32X
+{
+public:
+  P10F320(const char *_name=0, const char *desc=0);
+  ~P10F320();
+  virtual PROCESSOR_TYPE isa(){return _P10F320_;};
+  static Processor *construct(const char *name);
+  virtual unsigned int register_memory_size () const { return 0x80; }
+  virtual unsigned int program_memory_size() const { return 0x100; }
+  //RRRvirtual void create();
+  virtual unsigned int get_device_id() { return(0x29 << 8)|(0x5 <<5);}
+};
+class P10LF320 : public P10F320
+{
+public:
+  P10LF320(const char *_name=0, const char *desc=0) : P10F320(_name,desc){;}
+  ~P10LF320(){;}
+  virtual PROCESSOR_TYPE isa(){return _P10LF320_;};
+  static Processor *construct(const char *name);
+  virtual unsigned int get_device_id() { return(0x29 << 8)|(0x7 <<5);}
+};
+class P10F322 : public P10F32X
+{
+public:
+  P10F322(const char *_name=0, const char *desc=0);
+  ~P10F322();
+  virtual PROCESSOR_TYPE isa(){return _P10F322_;};
+  static Processor *construct(const char *name);
+  virtual unsigned int register_memory_size () const { return 0x80; }
+  virtual unsigned int program_memory_size() const { return 0x200; }
+  //RRRvirtual void create();
+  virtual unsigned int get_device_id() { return(0x29 << 8)|(0x4 <<5);}
+};
+class P10LF322 : public P10F322
+{
+public:
+  P10LF322(const char *_name=0, const char *desc=0) : P10F322(_name,desc){;}
+  ~P10LF322(){;}
+  virtual PROCESSOR_TYPE isa(){return _P10LF322_;};
+  static Processor *construct(const char *name);
+  virtual unsigned int get_device_id() { return(0x29 << 8)|(0x6 <<5);}
+};
 #endif

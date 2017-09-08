@@ -240,6 +240,7 @@ private:
 
   friend class ADCON0_10;
   friend class ADCON0_12F;
+  friend class ADCON0_32X;
   friend class ADCON0_DIF;
 
   sfr_register *adres;
@@ -255,7 +256,6 @@ private:
   unsigned int m_nBits;
   guint64 future_cycle;
   unsigned int ad_state;
-  unsigned int Tad_2;
   unsigned int Tad;
   unsigned int channel_mask;
   unsigned int channel_shift;
@@ -448,6 +448,30 @@ public:
   virtual bool get_ADFM() { return(value.get() & ADFM); }
   virtual void set_Tad(unsigned int _tad) { Tad = _tad; }
   ADCON0_12F(Processor *pCpu, const char *pName, const char *pDesc);
+private:
+  AD_IN_SignalControl ad_pin_input;
+};
+//---------------------------------------------------------
+// ADCON0_32X register for 10f320 A2D
+//
+
+class ADCON0_32X : public ADCON0
+{
+public:
+
+  enum
+    {
+      ADON = 1<<0,
+      GO   = 1<<1,
+      CHS0 = 1<<2,
+      CHS1 = 1<<3,
+      CHS2 = 1<<4,
+      ADCS0 = 1<<5,
+      ADCS1 = 1<<6,
+      ADCS2 = 1<<7,
+    };
+  void put(unsigned int new_value);
+  ADCON0_32X(Processor *pCpu, const char *pName, const char *pDesc);
 private:
   AD_IN_SignalControl ad_pin_input;
 };

@@ -57,6 +57,10 @@ enum PROCESSOR_TYPE
   _P10F206_,
   _P10F220_,
   _P10F222_,
+  _P10F320_,
+  _P10LF320_,
+  _P10F322_,
+  _P10LF322_,
   _P12C508_,
   _P12C509_,
   _P12F508_,
@@ -261,7 +265,7 @@ class WDT : public TriggerObject, public gpsimObject
 public:
   WDT(pic_processor *, double _timeout);
   void put(unsigned int new_value);
-  virtual void initialize(bool enable);
+  virtual void initialize(bool enable, bool _use_t0_prescale = true);
   virtual void swdten(bool enable);
   void set_timeout(double);
   virtual void set_prescale(unsigned int);
@@ -288,6 +292,7 @@ protected:
   bool   wdte;
   bool   warned;
   bool   cfgw_enable;  // Enabled from Configureation word
+  bool   use_t0_prescale;
 
 
 };

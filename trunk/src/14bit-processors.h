@@ -45,6 +45,12 @@ class PinMonitor;
 extern instruction *disasm14 (_14bit_processor *cpu,unsigned int inst, unsigned int address);
 extern instruction *disasm14E (_14bit_e_processor *cpu,unsigned int inst, unsigned int address);
 
+class CPU_Temp : public Float
+{
+public:
+  CPU_Temp(const char  *_name, double temp, const char *desc) : Float(_name, temp, desc) {}
+};
+
 
 
 class _14bit_processor : public pic_processor
@@ -113,17 +119,22 @@ public:
   virtual void exit_sleep();
   virtual bool hasSSP() {return has_SSP;}
   virtual void set_hasSSP() { has_SSP = true;}
+  virtual unsigned int get_device_id() { return 0xffffffff;}
+  virtual unsigned int get_user_ids(unsigned int index) { return 0xffffffff;}
+
 
   _14bit_processor(const char *_name=0, const char *desc=0);
   virtual ~_14bit_processor();
   bool          two_speed_clock;
   unsigned int  config_clock_mode;
+  CPU_Temp      *m_cpu_temp;
 
 
 protected:
   bool		has_SSP;
   OPTION_REG   *option_reg;
   unsigned int  ram_top;
+  unsigned int wdt_flag;
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)
@@ -172,11 +183,6 @@ public:
   virtual void option_new_bits_6_7(unsigned int bits);
 };
 
-class CPU_Temp : public Float
-{
-public:
-  CPU_Temp(const char  *_name, double temp, const char *desc) : Float(_name, temp, desc) {}
-};
 
 // 14 bit processors with extended instructions
 //
@@ -200,7 +206,6 @@ public:
   sfr_register		 fsr0h_shad;
   sfr_register		 fsr1l_shad;
   sfr_register		 fsr1h_shad;
-  CPU_Temp         	*m_cpu_temp;
 
   void set_mclr_pin(unsigned int pin) { mclr_pin = pin;}
   virtual PROCESSOR_TYPE isa(){return _14BIT_PROCESSOR_;};

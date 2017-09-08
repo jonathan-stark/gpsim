@@ -107,6 +107,7 @@ public:
 _14bit_processor::_14bit_processor(const char *_name, const char *_desc)
   : pic_processor(_name,_desc), intcon(0),
     two_speed_clock(false), config_clock_mode(0),
+    m_cpu_temp(0),
     has_SSP(false)
 
 {
@@ -188,6 +189,14 @@ unsigned int _14bit_processor::get_program_memory_at_address(unsigned int addres
 
   if (uIndex < program_memory_size())
     return  program_memory[uIndex] ? program_memory[uIndex]->get_opcode() : 0xffffffff;
+
+  if (address >= 0x2000 && address < 0x2006)
+  {
+      return get_user_ids(address - 0x2000);
+  }
+
+  if (uIndex == 0x2006)
+      return get_device_id(); 
 
   return get_config_word(address);
 }
@@ -339,8 +348,7 @@ _14bit_e_processor::_14bit_e_processor(const char *_name, const char *_desc)
     fsr0l_shad(this, "fsr0l_shad", "fsr0l shadow register"),
     fsr0h_shad(this, "fsr0h_shad", "fsr0h shadow register"),
     fsr1l_shad(this, "fsr1l_shad", "fsr1l shadow register"),
-    fsr1h_shad(this, "fsr1h_shad", "fsr1h shadow register"),
-    m_cpu_temp(0)
+    fsr1h_shad(this, "fsr1h_shad", "fsr1h shadow register")
 {
   delete stack;
   stack = new Stack14E(this);

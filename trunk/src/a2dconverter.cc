@@ -1,6 +1,6 @@
 /*
    Copyright (C) 2006 T. Scott Dattalo
-   Copyright (C) 2009, 2013 Roy R. Rankin
+   Copyright (C) 2009, 2013, 2017 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -31,7 +31,7 @@ License along with this library; if not, see
 
 static PinModule AnInvalidAnalogInput;
 
-//#define DEBUG
+#define DEBUG
 #if defined(DEBUG)
 #include "../config.h"
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }
@@ -126,6 +126,7 @@ void ADCON0::start_conversion(void)
 
   guint64 fc = get_cycles().get() + (2 * Tad) /
 		p_cpu->get_ClockCycles_per_Instruction();
+
 
   Dprintf(("ad_state %u fc %" PRINTF_GINT64_MODIFIER "x now %" PRINTF_GINT64_MODIFIER "x\n", ad_state, fc, get_cycles().get()))
   if(ad_state != AD_IDLE)
@@ -903,6 +904,7 @@ void ANSEL_P::put(unsigned int new_value)
   }
   mask = cfg_mask;
 
+
   if (ansel)
   {
       mask |= ansel->get_mask();
@@ -1087,6 +1089,74 @@ void ANSEL_12F::put(unsigned int new_value)
   adcon1->setADCnames();
 }
 
+//------------------------------------------------------
+// ADCON0_32X used in 10f32x. Uses ADCON1 as virtual rather than physical
+// register
+//
+ADCON0_32X::ADCON0_32X(Processor *pCpu, const char *pName, const char *pDesc)
+  : ADCON0(pCpu, pName, pDesc)
+{
+  GO_bit = GO;	//ADCON0 and ADCON0_10 have GO flag at different bit
+  valid_bits = 0xff;
+}
+
+
+
+void ADCON0_32X::put(unsigned int new_value)
+{
+  unsigned int old_value=value.get();
+  new_value &= valid_bits;	// clear unused bits
+ /* On first call of this function old_value has already been set to
+ *  it's default value, but we want to call set_channel_in. First
+ *  gives us a way to do this.
+ */
+
+  trace.raw(write_trace.get() | value.get());
+
+  Dprintf(("ADCON0_32X::put new_value=0x%02x old_value=0x%02x\n", new_value, old_value));
+  // tell adcon1 to use Vref
+  //RRR adcon1->set_cfg_index((new_value & VCFG) ? 2: 0);
+
+  switch(new_value & (ADCS0|ADCS1|ADCS2))
+  {
+  case (ADCS0|ADCS1):
+  case 0:
+	Tad = 2;
+	break;
+
+  case ADCS0:
+	Tad = 8;
+	break;
+
+  case ADCS1:
+	Tad = 32;
+	break;
+  }
+  if (new_value & ADCS2)
+	Tad *= 2;
+
+
+  // If ADON is clear GO cannot be set
+  if ((new_value & ADON) != ADON)
+	new_value &= ~GO_bit;
+
+
+  // SET: Reflect it first!
+  value.put(new_value);
+  if(new_value & ADON) {
+    // The A/D converter is being turned on (or maybe left on)
+
+    if((new_value & ~old_value) & GO_bit) {
+      if (verbose)
+	printf("starting A2D conversion\n");
+      // The 'GO' bit is being turned on, which is request to initiate
+      // and A/D conversion
+      start_conversion();
+    }
+  } else
+    stop_conversion();
+
+}
 // catch stimulus and set channel voltage
 //
 a2d_stimulus::a2d_stimulus(ADCON1 * arg, int chan, const char *cPname,double _Vth, double _Zth)
@@ -1140,9 +1210,9 @@ double FVRCON::compute_VTemp(unsigned int fvrcon)
     double ret = -1.;
     double Vt;	//Transister junction threshold voltage at core temperature
 
-    if((fvrcon & TSEN) && cpu14e->m_cpu_temp)
+    if((fvrcon & TSEN) && cpu14->m_cpu_temp)
     {
-        Vt = 0.659 - ( cpu14e->m_cpu_temp->getVal() + 40.) * 0.00132;
+        Vt = 0.659 - ( cpu14->m_cpu_temp->getVal() + 40.) * 0.00132;
 	ret = ((Processor *)cpu)->get_Vdd() - ((fvrcon&TSRNG)?4.:2.) * Vt;
 	if (ret < 0.)
 	{
