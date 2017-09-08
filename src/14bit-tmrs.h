@@ -232,12 +232,12 @@ public:
   };
 
   void setBitMask(unsigned int bv) { mValidBits = bv; }
-  void new_edge(unsigned int level);
+  virtual void new_edge(unsigned int level);
   void compare_match();
-  void pwm_match(int new_state);
+  virtual void pwm_match(int new_state);
   void drive_bridge(int level, int new_value);
   void shutdown_bridge(int eccpas);
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   char getState();
   bool test_compare_mode();
   void callback();
@@ -252,6 +252,9 @@ public:
   void setIOPin1(PinModule *p1);
   void setIOPin2(PinModule *p2);
   void set_tmr2(TMR2 *_tmr2) { tmr2 = _tmr2;}
+  virtual bool is_pwm() { return value.get() & (PWM0 | PWM1);}
+  virtual unsigned int pwm_latch_value()
+    {return ((value.get()>>4) & 3) | 4*ccprl->value.get();}
 
   PSTRCON *pstrcon;
   PWM1CON *pwm1con;
@@ -279,6 +282,32 @@ protected:
   unsigned int pir_mask;
 
 };
+
+class PWMxCON : public CCPCON
+{
+public:
+  enum {
+          PWMxEN = 1<<7,
+          PWMxOE = 1<<6,
+          PWMxOUT = 1<<5,
+          PWMxPOL = 1<<4
+  };
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual void pwm_match(int level);
+  virtual bool is_pwm() { return true;}
+  virtual void new_edge(unsigned int level){;}
+  virtual unsigned int pwm_latch_value()
+    {return (pwmdch->value.get() << 2) + (pwmdcl->value.get()>>6);}
+  void set_pwmdc(sfr_register *_pwmdcl, sfr_register *_pwmdch)
+    { pwmdcl = _pwmdcl; pwmdch = _pwmdch;}
+  PWMxCON(Processor *pCpu, const char *pName, const char *pDesc=0);
+
+private:
+    sfr_register *pwmdcl;
+    sfr_register *pwmdch;
+};
+
 class TRISCCP : public sfr_register
 {
 public:

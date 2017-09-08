@@ -824,6 +824,30 @@ class OSCCON_HS : public OSCCON
 
    unsigned char minValPLL;
 };
+/* RC clock 16Mhz with no SCS0 or osccon2
+ */
+class OSCCON_HS2 : public OSCCON
+{
+ public:
+   virtual void put(unsigned int new_value);
+   virtual bool set_rc_frequency(bool override=false);
+   virtual bool internal_RC();
+   virtual void callback();
+   virtual void por_wake();
+
+   OSCCON_HS2(Processor *pCpu, const char *pName, const char *pDesc) :
+       OSCCON(pCpu, pName, pDesc) { write_mask = 0x70;}
+
+
+   enum {
+	HFIOFS  = 1<<0,
+	LFIOFR 	= 1<<1,
+	HFIOFR	= 1<<3,
+	IRCF0	= 1<<4,
+	IRCF1	= 1<<5,
+	IRCF2	= 1<<6,
+   };
+};
 
 class OSCSTAT : public  sfr_register
 {

@@ -1043,10 +1043,10 @@ bool I2C::isIdle()
 	(m_sspstat->value.get() & _SSPSTAT::RW) == 0 &&
 	(m_sspcon2->value.get() &
 	   (
-	     _SSPCON2::ACKEN ||
-	     _SSPCON2::RCEN ||
-	     _SSPCON2::PEN ||
-	     _SSPCON2::RSEN ||
+	     _SSPCON2::ACKEN |
+	     _SSPCON2::RCEN |
+	     _SSPCON2::PEN |
+	     _SSPCON2::RSEN |
 	     _SSPCON2::SEN
 	   )) == 0
 	);

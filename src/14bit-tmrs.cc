@@ -1,6 +1,6 @@
 /*
    Copyright (C) 1998 T. Scott Dattalo
-   Copyright (C) 2006,2009,2010,2013,2015 Roy R Rankin
+   Copyright (C) 2006,2009,2010,2013,2015,2017 Roy R Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -550,7 +550,7 @@ void CCPCON::releasePins(int i)
 void CCPCON::pwm_match(int level)
 {
   unsigned int new_value = value.get();
-  Dprintf(("%s::pwm_match() level=%d now=0x%" PRINTF_GINT64_MODIFIER "x\n", name().c_str(), level, get_cycles().get()));
+  Dprintf(("%s::pwm_match() level=%d pwm1con = %p now=0x%" PRINTF_GINT64_MODIFIER "x\n", name().c_str(), level, pwm1con, get_cycles().get()));
 
 
   // if the level is 1, then tmr2 == pr2 and the pwm cycle
@@ -575,8 +575,7 @@ void CCPCON::pwm_match(int level)
 	  bridge_shutdown = false;
       }
 
-      ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
-      tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
+      tmr2->pwm_dc(pwm_latch_value(), address);
       ccprl->ccprh->put_value(ccprl->value.get());
   }
   if( !pwm1con) { // simple PWM
@@ -589,7 +588,7 @@ void CCPCON::pwm_match(int level)
 	source_active[0] = true;
 
 
-        if(level && !ccprl->ccprh->pwm_value)  // if duty cycle == 0 output stays low
+        if(level && !pwm_latch_value())  // if duty cycle == 0 output stays low
             m_source[0]->setState('0');
 
         m_PinModule[0]->updatePinModule();
@@ -667,7 +666,7 @@ void CCPCON::drive_bridge(int level, int new_value)
 			m_PinModule[i]->setSource(m_source[i]);
 			source_active[i] = true;
 			// follow level except where duty cycle = 0
-			if (level && ccprl->ccprh->pwm_value)
+			if (level && pwm_latch_value())
           		    m_source[i]->setState(active_high[i]?'1':'0');
 			else
           		    m_source[i]->setState(active_high[i]?'0':'1');
@@ -703,9 +702,9 @@ void CCPCON::drive_bridge(int level, int new_value)
 		// FIXME need to add deadband
 		// follow level except where duty cycle = 0
 		pwm_width = level ?
-			ccprl->ccprh->pwm_value :
-			((tmr2->pr2->value.get()+1)*4)-ccprl->ccprh->pwm_value;
-		if (!(level^active_high[0]) && ccprl->ccprh->pwm_value)
+			pwm_latch_value() :
+			((tmr2->pr2->value.get()+1)*4)-pwm_latch_value();
+		if (!(level^active_high[0]) && pwm_latch_value())
 		{
 		    // No delay, change state
 		    if (delay == 0)
@@ -721,7 +720,7 @@ void CCPCON::drive_bridge(int level, int new_value)
 		{
        		    m_source[0]->setState('0');
 		}
-		if (!(level^active_high[1]) && ccprl->ccprh->pwm_value)
+		if (!(level^active_high[1]) && pwm_latch_value())
 		{
        		    m_source[1]->setState('0');
 		}
@@ -772,7 +771,7 @@ void CCPCON::drive_bridge(int level, int new_value)
 		    m_PinModule[3]->setSource(m_source[3]);
 		    source_active[3] = true;
 		    // P1D toggles
-		    if (level && ccprl->ccprh->pwm_value)
+		    if (level && pwm_latch_value())
           	        m_source[3]->setState(active_high[3]?'1':'0');
 		    else
           	        m_source[3]->setState(active_high[3]?'0':'1');
@@ -795,7 +794,7 @@ void CCPCON::drive_bridge(int level, int new_value)
 		    m_PinModule[1]->setSource(m_source[1]);
 		    source_active[1] = true;
 		    // P1B toggles
-		    if (level && ccprl->ccprh->pwm_value)
+		    if (level && pwm_latch_value())
           	        m_source[1]->setState(active_high[1]?'1':'0');
 		    else
           	        m_source[1]->setState(active_high[1]?'0':'1');
@@ -967,7 +966,7 @@ void CCPCON::put(unsigned int new_value)
       ccprl->stop_compare_mode();
 /* do this when TMR2 == PR2
       ccprl->start_pwm_mode();
-      tmr2->pwm_dc( ccprl->ccprh->pwm_value, address);
+      tmr2->pwm_dc( pwm_latch_value(), address);
 */
       m_bInputEnabled = false;
       m_bOutputEnabled = false;	// this is done in pwm_match
@@ -977,7 +976,8 @@ void CCPCON::put(unsigned int new_value)
 	Dprintf(("full bridge repeat old=0x%x new=%x\n", old_value, new_value));
       }
       else
-          pwm_match(2);
+          pwm_match(0);
+          //RRRpwm_match(2);
       return;
       break;
 
@@ -1033,6 +1033,83 @@ bool CCPCON::test_compare_mode()
   }
   return false;
 }
+
+PWMxCON::PWMxCON(Processor *pCpu, const char *pName, const char *pDesc)
+  : CCPCON(pCpu, pName, pDesc),
+	pwmdcl(0), pwmdch(0)
+{
+	mValidBits = 0xd0;
+}
+void PWMxCON::put(unsigned int new_value)
+{
+	new_value &= mValidBits;
+	put_value(new_value);
+}
+
+void PWMxCON::put_value(unsigned int new_value)
+{
+	unsigned int diff = value.get() ^ new_value;
+	Dprintf(("PWMxCON::put %s new 0x%x diff 0x%x\n", name().c_str(), new_value, diff));
+	if (!diff) return;
+	trace.raw(write_trace.get() | value.get());
+	value.put(new_value);
+	if (diff & PWMxEN)
+	{
+	    if (new_value & PWMxEN) // Turn on PWM
+	    {
+		    pwm_match(0);
+	    }
+	    else			// Turn off PWM
+	    {
+		    tmr2->stop_pwm(address);
+	    }
+	}
+}
+/*
+ * level == 0 duty cycle match
+ * level == 1 tmr2 == PR2
+ * level == 2 
+ */
+void PWMxCON::pwm_match(int level)
+{
+	unsigned int reg = value.get();
+
+	if (!(reg & PWMxEN))
+	    return;
+
+        Dprintf(("%s::pwm_match() level=%d now=%" PRINTF_GINT64_MODIFIER "d\n", name().c_str(), level, get_cycles().get()));
+
+	if (level == 1)
+	{
+	     tmr2->pwm_dc(pwm_latch_value(), address);
+	     if(!pwm_latch_value()) // if duty cycle == 0 output stays low
+    		     level = 0;
+
+	}
+	if (reg & PWMxPOL)	// inverse output
+	{
+	    level = level ? 0 : 1;
+	    Dprintf(("invert output\n"));
+	}
+	if (level) 
+	    reg |= PWMxOUT;
+	else
+	    reg &= ~PWMxOUT;
+	Dprintf(("reg 0x%x old 0x%x\n", reg, value.get()));
+	if (reg != value.get())
+	    put_value(reg);
+	if (reg & PWMxOE)
+	{
+            m_cOutputState = level ? '1' : '0';
+            m_source[0]->setState(level ? '1' : '0');
+            m_PinModule[0]->setSource(m_source[0]);
+	    m_PinModule[0]->updatePinModule();
+            source_active[0] = true;
+	    Dprintf(("PWMxOE level %c\n", m_cOutputState));
+	}
+}
+
+
 
 TRISCCP::TRISCCP(Processor *pCpu, const char *pName, const char *pDesc) :
 	sfr_register(pCpu, pName), first(true)
@@ -1626,7 +1703,6 @@ void TMRL::release()
 void TMRL::setIOpin(PinModule *extClkSource)
 {
   Dprintf(("%s::setIOpin %s\n", name().c_str(), extClkSource?extClkSource->getPin().name().c_str():""));
-  Dprintf(("TMRL::setIOpin\n"));
 
   if (extClkSource)
     extClkSource->addSink(this);
@@ -2382,7 +2458,7 @@ void TMR2::on_or_off(int new_state)
 }
 
 //
-// pwm_dc -
+// pwm_dc - set PWM duty cycle
 //
 //
 
@@ -2397,6 +2473,7 @@ void TMR2::pwm_dc(unsigned int dc, unsigned int ccp_address)
     if ( ccp[cc] && ( ccp_address == ccp[cc]->address ) )
     {
       //cout << "TMR2:  pwm mode with ccp1. duty cycle = " << hex << dc << '\n';
+      Dprintf(("TMR2::pwm_dc duty cycle 0x%x ccp_addres 0x%x\n", dc, ccp_address));
       duty_cycle[cc] = dc;
       pwm_mode |= modeMask;
       return;
@@ -2857,8 +2934,8 @@ void TMR2::callback()
 
         for ( cc=0; cc<MAX_PWM_CHANS; cc++ )
         {
-          if ( ccp[cc] &&
-		( ccp[cc]->value.get() & (CCPCON::PWM0 | CCPCON::PWM1 )))
+	  // RRR FIX
+          if ( ccp[cc] &&  ccp[cc]->is_pwm())
 	  {
              ccp[cc]->pwm_match(1);
 	  }

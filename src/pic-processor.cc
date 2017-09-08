@@ -92,6 +92,14 @@ ProcessorConstructor pP10F220(P10F220::construct ,
                               "__10F220",   "pic10f220",    "p10f220",  "10f220");
 ProcessorConstructor pP10F222(P10F222::construct ,
                               "__10F222",   "pic10f222",    "p10f222",  "10f222");
+ProcessorConstructor pP10F320(P10F320::construct ,
+                              "__10F320",   "pic10f320",    "p10f320",  "10f320");
+ProcessorConstructor pP10LF320(P10LF320::construct ,
+                              "__10LF320",   "pic10lf320",    "p10lf320",  "10lf320");
+ProcessorConstructor pP10F322(P10F322::construct ,
+                              "__10F322",   "pic10f322",    "p10f322",  "10f322");
+ProcessorConstructor pP10LF322(P10LF322::construct ,
+                              "__10LF322",   "pic10lf322",    "p10lf322",  "10lf322");
 ProcessorConstructor pP12C508(P12C508::construct ,
                               "__12C508",   "pic12c508",    "p12c508",  "12c508");
 ProcessorConstructor pP12C509(P12C509::construct ,
@@ -1104,6 +1112,7 @@ void pic_processor::create ()
 
   init_register_memory (register_memory_size());
 
+
   // Now, initialize the core stuff:
   pc->set_cpu(this);
 
@@ -1452,8 +1461,12 @@ void WDT::update()
     // FIXME - the WDT should not be tied to the instruction counter...
     guint64 delta_cycles;
 
+    if (!use_t0_prescale)
+	postscale = 1;
+
 
     delta_cycles = (guint64)(postscale*prescale*timeout/get_cycles().seconds_per_cycle());
+
 
    if (verbose)
    {
@@ -1541,10 +1554,11 @@ void WDT::set_prescale(unsigned int newPrescale)
     update();
   }
 }
-void WDT::initialize(bool enable)
+void WDT::initialize(bool enable, bool _use_t0_prescale)
 {
   wdte = enable;
   cfgw_enable = enable;
+  use_t0_prescale = _use_t0_prescale;
   warned = 0;
 
   if(verbose)

@@ -1074,6 +1074,168 @@ void OSCCON_HS::por_wake()
         return;
     }
 }
+
+void  OSCCON_HS2::put(unsigned int new_value)
+{
+  unsigned int org_value = value.get();
+  new_value = (new_value & write_mask) | (org_value & ~write_mask);
+  value.put(new_value);
+  unsigned int diff = (new_value ^ org_value);
+  trace.raw(write_trace.get() | org_value);
+  value.put(new_value);
+  CDprintf(("OSCCON org_value=0x%02x new_value=0x%02x diff=0x%02x state %d\n", 
+	org_value, new_value, diff, clock_state));
+  if (diff == 0) return;
+
+  if(internal_RC())
+  {
+#ifdef CDEBUG
+      unsigned int old_clock_state = clock_state;
+#endif
+
+      if ((diff & (IRCF0 | IRCF1 | IRCF2))) // freq change 
+      {
+          set_rc_frequency();
+          CDprintf(("OSCCON_HS2 change of IRCF old_clock %d new_clock %d\n", old_clock_state, clock_state));
+      }
+  }
+}
+bool OSCCON_HS2::set_rc_frequency(bool override)
+{
+  double base_frequency = 31.e3;
+
+  unsigned int old_clock_state = clock_state;
+
+  
+  CDprintf(("OSCCON_HS2 override=%d int_osc=%d osccon=0x%x\n", override, cpu_pic->get_int_osc(), value.get()));
+  if (!cpu_pic->get_int_osc()  && !override)
+     return false;
+
+
+    unsigned int new_IRCF = (value.get() & ( IRCF0 | IRCF1 | IRCF2)) >> 4;
+    switch (new_IRCF)
+    {
+    case 0:
+	base_frequency = 31.e3;
+	clock_state = LFINTOSC;
+	break;
+	
+    case 1:
+	clock_state = HFINTOSC;
+	base_frequency = 250e3;
+	break;
+	
+   
+    case 2:
+	clock_state = HFINTOSC;
+	base_frequency = 500e3;
+	break;
+	
+   
+    case 3:
+	clock_state = HFINTOSC;
+	base_frequency = 1e6;
+	break;
+	
+    case 4:
+	clock_state = HFINTOSC;
+	base_frequency = 2e6;
+	break;
+	
+    case 5:
+	clock_state = HFINTOSC;
+	base_frequency = 4e6;
+	break;
+	
+    case 6:
+	clock_state = HFINTOSC;
+	base_frequency = 8e6;
+	break;
+	
+    case 7:
+	clock_state = HFINTOSC;
+        base_frequency = 16e6;
+	break;
+   }
+   cpu_pic->set_frequency_rc(base_frequency);
+   if (cpu_pic->get_int_osc())
+   {
+       CDprintf(("OSCCON_HS2 clock_state %d->%d f=%.1e osccon=0x%x\n", old_clock_state, clock_state, base_frequency, value.get()));
+       cpu_pic->set_RCfreq_active(true);
+       if (old_clock_state != clock_state)
+       {
+	    if ((old_clock_state == LFINTOSC) && clock_state != LFINTOSC)
+	    {
+	    	if (future_cycle) get_cycles().clear_break(future_cycle);
+
+            	future_cycle = get_cycles().get() + irc_lh_time();
+		get_cycles().set_break(future_cycle, this);
+		CDprintf(("OSCCON_HS2 future_cycle %" PRINTF_GINT64_MODIFIER "d now %" PRINTF_GINT64_MODIFIER "d\n", future_cycle, get_cycles().get()));
+	    }
+	    else
+		callback();
+	}
+   }
+   if ((bool)verbose)
+   {
+	cout << "set_rc_frequency() : osccon=" << hex << value.get();
+	if (osctune)
+	    cout << " osctune=" << osctune->value.get();
+	cout << " new frequency=" << base_frequency << endl;
+   }
+   return true;
+}
+// Is internal RC clock selected?
+bool OSCCON_HS2::internal_RC()
+{
+    return cpu_pic->get_int_osc();
+}
+
+void OSCCON_HS2::callback()
+{
+    unsigned int val_osccon = value.get() & write_mask;
+
+    if (future_cycle <= get_cycles().get())
+        future_cycle = 0;
+    CDprintf(("OSCCON_HS2 clock_state=%d osccon=0x%x val_osccon=0x%x\n", clock_state, value.get(), val_osccon));
+    switch(clock_state)
+    {
+    case LFINTOSC:
+	val_osccon |= LFIOFR;
+        break;
+        
+    case HFINTOSC:
+	val_osccon |= HFIOFS|HFIOFR;
+        break; 
+
+    }
+    value.put(val_osccon);
+    CDprintf(("OSCCON_HS2 osccon 0x%x val_osccon 0x%x\n", value.get(), val_osccon));
+}
+void OSCCON_HS2::por_wake()
+{
+
+    CDprintf(("OSCCON_HS2 config_xosc=%d config_ieso=%d\n", config_xosc,config_ieso));
+
+    CDprintf(("OSCCON_HS2 POR  f=%4.1e osccon=0x%x por_value=0x%x\n", cpu_pic->get_frequency(), value.get(), por_value.data));
+
+    if (future_cycle)
+    {
+        get_cycles().clear_break(future_cycle);
+	future_cycle = 0;
+    }
+    // internal RC osc
+    if (internal_RC())
+    {
+	CDprintf(("OSCCON_HS2internal RC clock_state %d osccon %x \n", clock_state, val_osccon));
+	set_rc_frequency();
+	if (future_cycle)
+	    get_cycles().clear_break(future_cycle);
+	future_cycle = get_cycles().get() + irc_por_time();
+        get_cycles().set_break(future_cycle, this);
+        return;
+    }
+}
 void WDTCON::put(unsigned int new_value)
 {
   unsigned int masked_value = new_value & valid_bits;
