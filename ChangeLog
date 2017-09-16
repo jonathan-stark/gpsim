@@ -1,3 +1,9 @@
+2017-09-16 Roy Rankin <rrankin@ihug.com.au>
+	* src/uart.cc
+	: Fix Bug #230 PIC12F1822: RS232 Tx doesn't work unless Rx also enabled 
+	* src/a2dconverter.cc
+	: Turn off debug output
+
 2017-09-08 Roy Rankin <rrankin@ihug.com.au>
 	* regression/p10f32x regression/p10f32x/Makefile 
 	  regression/p10f32x/p10f320.asm src/14bit-processors.cc 
@@ -7,7 +13,7 @@
           src/pic-processor.h src/pm_rd.cc src/pm_rd.h
 	: Add P10[L]F32x processors - partial functionality
         * src/ssp.cc
-	: Correct syntex
+	: Correct syntax
 
 2017-07-09 Roy Rankin <rrankin@ihug.com.au>
 	* configure.ac
