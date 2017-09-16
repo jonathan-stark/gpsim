@@ -31,7 +31,7 @@ License along with this library; if not, see
 
 static PinModule AnInvalidAnalogInput;
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #include "../config.h"
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }

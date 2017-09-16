@@ -761,7 +761,12 @@ void _RCSTA::put(unsigned int new_value)
   {
       if (diff & (SPEN | CREN)) // RX status change
       {
-	  if ((value.get() & (SPEN | CREN)) == (SPEN | CREN))
+	  if ((value.get() & (SPEN | CREN)) == SPEN )
+	  {
+	      if (txsta->bTXEN()) txsta->enableTXPin();
+	      spbrg->start();
+	  }
+	  else if ((value.get() & (SPEN | CREN)) == (SPEN | CREN))
           {
 	      enableRCPin();
 	      if (txsta->bTXEN()) txsta->enableTXPin();
@@ -1206,7 +1211,7 @@ void _RCSTA::receive_start_bit()
 void _RCSTA::callback()
 {
 
-  //RRR Dprintf(("RCSTA callback. %s time:0x%" PRINTF_GINT64_MODIFIER "x\n", name().c_str(), get_cycles().get()));
+  Dprintf(("RCSTA callback. %s time:0x%" PRINTF_GINT64_MODIFIER "x\n", name().c_str(), get_cycles().get()));
 
   if (txsta->bSYNC())	// Synchronous mode RX/DT is data, TX/CK is clock
   {
@@ -1435,6 +1440,7 @@ void _SPBRG::get_next_cycle_break()
 {
   future_cycle = last_cycle + get_cycles_per_tick();
 
+
   if(cpu)
   {
     if (future_cycle <= get_cycles().get())
@@ -1595,7 +1601,6 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
   // There's a chance that a SPBRG break point exists on the current
   // cpu cycle, but has not yet been serviced.
   guint64 cycle = (get_cycles().get() == future_cycle) ? future_cycle : last_cycle;
-
 
   return ( edges_from_now * get_cycles_per_tick() + cycle );
 }
