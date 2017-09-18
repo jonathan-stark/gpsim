@@ -1,3 +1,7 @@
+2017-09-18 Roy Rankin <rrankin@ihug.com.au>
+	* modules/i2c2par.cc
+	: Fix Bug #231 i2c2par: Non-default slave addresses not honoured 
+
 2017-09-16 Roy Rankin <rrankin@ihug.com.au>
 	* src/uart.cc
 	: Fix Bug #230 PIC12F1822: RS232 Tx doesn't work unless Rx also enabled 

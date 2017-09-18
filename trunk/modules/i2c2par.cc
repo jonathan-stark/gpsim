@@ -59,9 +59,12 @@ public:
     AddAttribute(I2C2PAR_Modules::i2c2par *_i2cpt) : 
 	Integer("Slave_Address", 0x27, "I2C Slave Address"), i2cpt(_i2cpt)
     {
+	gint64 v;
+	Integer::get(v);
+	set(v);
 
     }
-    virtual void set(int v)
+    virtual void set(gint64 v)
     {
 	Integer::set(v);
 	if (i2cpt)
@@ -142,7 +145,7 @@ namespace I2C2PAR_Modules {
     io_port = new IOPort(8);
     Addattr = new AddAttribute(this);
     addSymbol(Addattr);
-    Addattr->set(0x27);
+    //Addattr->set(0x27);
   }
   i2c2par::~i2c2par() 
   {
