@@ -1,3 +1,7 @@
+2017-09-20 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.cc src/14bit-tmrs.h
+	: update tmr2 when required for GUI
+
 2017-09-18 Roy Rankin <rrankin@ihug.com.au>
 	* modules/i2c2par.cc
 	: Fix Bug #231 i2c2par: Non-default slave addresses not honoured 

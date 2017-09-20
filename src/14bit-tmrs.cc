@@ -1667,6 +1667,8 @@ TMRL::~TMRL()
 {
   if (m_Interrupt)
     m_Interrupt->release();
+  if (tmr1_interface)
+	delete tmr1_interface;
 }
 /*
  * If we are similating an external RTC crystal for timer1,
@@ -2363,6 +2365,28 @@ void T2CON::put(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the TMR2 base class
 //--------------------------------------------------
+class TMR2_Interface : public Interface
+{
+  public:
+
+    TMR2_Interface(TMR2 *_tmr2) : Interface((gpointer *)_tmr2)
+    {
+	tmr2 = _tmr2;
+    }
+     virtual void SimulationHasStopped (gpointer object)
+    {
+	tmr2->current_value();
+    }
+    virtual void Update  (gpointer object)
+    {
+	SimulationHasStopped(object);
+    }
+
+  private:
+	TMR2 *tmr2;
+};
+
+
 TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc),
     pwm_mode(0),
@@ -2371,7 +2395,8 @@ TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
     prescale(1),
     prescale_counter(0),
     last_cycle(0),
-    pr2(0), pir_set(0), t2con(0), m_txgcon(0), m_Interrupt(0)
+    pr2(0), pir_set(0), t2con(0), m_txgcon(0), m_Interrupt(0),
+    tmr2_interface(0)
 {
   ssp_module[0] = ssp_module[1] = 0;
   value.put(0);
@@ -2383,7 +2408,10 @@ TMR2::~TMR2()
 {
   if (m_Interrupt)
     m_Interrupt->release();
+  if (tmr2_interface)
+	delete tmr2_interface;
 }
+
 
 void TMR2::callback_print()
 {
@@ -2446,6 +2474,12 @@ void TMR2::on_or_off(int new_state)
 
     last_cycle = get_cycles().get() - value.get()*prescale;
     update();
+    if (tmr2_interface == 0)
+    {
+        tmr2_interface = new TMR2_Interface(this);
+        get_interface().prepend_interface(tmr2_interface);
+    }
+
   }
   else {
 
@@ -2845,6 +2879,10 @@ void TMR2::new_pr2(unsigned int new_value)
 void TMR2::current_value()
 {
   unsigned int tmr2_val = (get_cycles().get() - last_cycle)/ prescale;
+  if (future_cycle)
+	tmr2_val = (get_cycles().get() - last_cycle)/ prescale;
+  else
+	tmr2_val = value.get();
 
   if (tmr2_val == max_counts())
   {
