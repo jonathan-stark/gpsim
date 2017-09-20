@@ -704,6 +704,7 @@ enum
 };
 
 #define MAX_PWM_CHANS   5
+class TMR2_Interface;
 
 //---------------------------------------------------------
 // TMR2 - Timer
@@ -768,6 +769,7 @@ public:
   bool add_ccp ( CCPCON * _ccp );
   bool rm_ccp(CCPCON *_ccp);
   InterruptSource *m_Interrupt;
+  TMR2_Interface *tmr2_interface;
 };
 
 
