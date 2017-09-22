@@ -1,7 +1,7 @@
 /*
    Copyright (C) 1998-2003 Scott Dattalo
                  2003 Mike Durian
-                 2006 Roy Rankin
+                 2006,2017 Roy Rankin
                  2006 David Barnett
 
 This file is part of the libgpsim library of gpsim
