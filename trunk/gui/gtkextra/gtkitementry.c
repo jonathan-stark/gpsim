@@ -779,7 +779,7 @@ gtk_entry_real_insert_text (GtkEditable *editable,
   entry->text_length += n_chars;
 
   /* NUL terminate for safety and convenience */
-  entry->text[ientry->item_n_bytes] = '\0';
+  entry->text[entry->text_length] = '\0';
 
   if (entry->current_pos > *position)
     entry->current_pos += n_chars;

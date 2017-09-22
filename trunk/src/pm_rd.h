@@ -111,7 +111,7 @@ enum STATES
 
   PMCON2(Processor *pCpu, PM_RW *pRW)
     : sfr_register(pCpu, "pmcon2", "Program Memory Read Write Control 2"),
-    pm_rw(pRW), lock1(false)  {;}
+    pm_rw(pRW), lock1(false), state(WAITING)  {;}
 
 
   void put(unsigned int new_value);

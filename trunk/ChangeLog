@@ -1,3 +1,9 @@
+2017-09-22 Roy Rankin <rrankin@ihug.com.au>
+	* gui/gtkextra/gtkitementry.c
+	: Fix write to invalid address
+	* src/pm_rd.cc src/pm_rd.h
+	: Fix uninitialized variable
+
 2017-09-20 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc src/14bit-tmrs.h
 	: update tmr2 when required for GUI
