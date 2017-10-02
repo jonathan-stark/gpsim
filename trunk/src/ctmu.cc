@@ -26,7 +26,7 @@ License along with this library; if not, see
 
 #include "ctmu.h"
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #include "../config.h"
 #define Dprintf(arg) {printf("%s:%d ",__FILE__,__LINE__); printf arg; }

@@ -30,6 +30,7 @@ libgpsim_la_SOURCES = \
 	cod.cc \
 	comparator.cc \
 	cmd_manager.cc \
+	cwg.cc \
 	eeprom.cc \
 	errors.cc \
 	i2c-ee.cc \
@@ -44,6 +45,7 @@ libgpsim_la_SOURCES = \
 	lcd_module.cc \
 	lxt_write.c \
 	modules.cc \
+	nco.cc \
 	os_dependent.cc \
 	p1xf1xxx.cc \
 	p12f6xx.cc \
@@ -116,6 +118,7 @@ gpsiminclude_HEADERS = \
 	cmd_manager.h \
 	cod.h \
 	comparator.h \
+	cwg.h \
 	eeprom.h \
 	exports.h \
 	hexutils.h \
@@ -132,6 +135,7 @@ gpsiminclude_HEADERS = \
         lcd_module.h \
 	lxt_write.h \
 	modules.h \
+	nco.h \
 	operator.h \
 	p12f6xx.h \
 	p12x.h \

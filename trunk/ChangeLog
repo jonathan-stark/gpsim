@@ -1,3 +1,14 @@
+2017-10-02 Roy Rankin <rrankin@ihug.com.au>
+	* gpsim/main.cc
+	: Fix core dump
+	* regression/p10f32x/Makefile regression/p10f32x/p10f320.asm 
+	  regression/p10f32x/p10f320_cwg.asm regression/p10f32x/p10f320_nco.asm
+	  regression/run_regression.sh src/14bit-tmrs.cc src/14bit-tmrs.h
+	  src/Makefile.am src/ctmu.cc src/cwg.cc src/cwg.h src/nco.cc src/nco.h
+	  src/p12f6xx.cc src/p12f6xx.h src/pir.h
+	: Add Complementary Waveform Generator (CWG) and 
+	  Numerically Controlled Oscillator (NCOx) to p10f32x 
+
 2017-09-22 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gtkextra/gtkitementry.c
 	: Fix write to invalid address

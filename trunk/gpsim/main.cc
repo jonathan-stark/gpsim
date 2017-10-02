@@ -270,7 +270,7 @@ main (int argc, char *argv[])
         break;
 
       case 'e':
-        if(strcmp(sExitOn, "onbreak") == 0) {
+        if(sExitOn && strcmp(sExitOn, "onbreak") == 0) {
           get_bp().EnableExitOnBreak(true);
         }
         else {

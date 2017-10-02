@@ -1034,9 +1034,9 @@ bool CCPCON::test_compare_mode()
   return false;
 }
 
-PWMxCON::PWMxCON(Processor *pCpu, const char *pName, const char *pDesc)
+PWMxCON::PWMxCON(Processor *pCpu, const char *pName, const char *pDesc, char _index)
   : CCPCON(pCpu, pName, pDesc),
-	pwmdcl(0), pwmdch(0)
+	pwmdcl(0), pwmdch(0), m_cwg(0), index(_index)
 {
 	mValidBits = 0xd0;
 }
@@ -1098,6 +1098,7 @@ void PWMxCON::pwm_match(int level)
 	Dprintf(("reg 0x%x old 0x%x\n", reg, value.get()));
 	if (reg != value.get())
 	    put_value(reg);
+	if (m_cwg) m_cwg->out_pwm(level, index);
 	if (reg & PWMxOE)
 	{
             m_cOutputState = level ? '1' : '0';
@@ -2379,7 +2380,8 @@ class TMR2_Interface : public Interface
     }
     virtual void Update  (gpointer object)
     {
-	SimulationHasStopped(object);
+	tmr2->current_value();
+	//SimulationHasStopped(object);
     }
 
   private:
@@ -2474,11 +2476,13 @@ void TMR2::on_or_off(int new_state)
 
     last_cycle = get_cycles().get() - value.get()*prescale;
     update();
+/*
     if (tmr2_interface == 0)
     {
         tmr2_interface = new TMR2_Interface(this);
         get_interface().prepend_interface(tmr2_interface);
     }
+*/
 
   }
   else {
