@@ -4,7 +4,8 @@
    ;; 
    ;;  Tests performed:
    ;;
-   ;;  - Verify that the PORTB internal pull-ups work
+   ;;  Program flash read/write
+   ;;  A2D and PWM
    ;;     
 
 
@@ -363,7 +364,7 @@ FAILED:
   .assert  "\"*** FAILED 10f320 test\""
 	INCF	failures,F
 done:
-  .assert  "\"*** PASSED 10f320 test\""
+  .assert  "\"*** PASSED 10f320 A2D, PWM test\""
 	GOTO	$
 
 

@@ -79,6 +79,7 @@ public:
   virtual void set_txif(){}
   virtual void set_wakif(){}
   virtual void set_usbif(){}
+  virtual void set_nco1if() { fprintf(stderr, "set_nco1if() FIX\n");}
 
   virtual unsigned int get_txif() { return 0;}
   virtual unsigned int get_rcif() { return 0;}
@@ -797,6 +798,8 @@ public:
   virtual void set_tmr1gif() {}
   virtual void set_tmr2if() {}
   virtual void set_adif() {}
+
+  virtual void set_nco1if() { printf("RRR bad set_nco1if() \n");}
 };
 
 

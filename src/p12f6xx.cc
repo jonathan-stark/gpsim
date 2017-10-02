@@ -125,8 +125,12 @@ PIR1v12f(Processor *pCpu, const char *pName, const char *pDesc,INTCON *_intcon, 
 
   virtual void set_nco1if()
   {
-    trace.raw(write_trace.get() | value.get());
-    value.put(value.get() | NCO1IF);
+    unsigned int pievalue = value.get();
+    if (!(pievalue & NCO1IF))
+    {
+        trace.raw(write_trace.get() | pievalue);
+        value.put(pievalue | NCO1IF);
+    }
     if( value.get() & pie->value.get() )
       setPeripheralInterrupt();
   }
@@ -642,13 +646,13 @@ P10F32X::P10F32X(const char *_name, const char *desc)
     adcon0(this,"adcon", "A2D Control 0"),
     adcon1(this,"adcon1", "A2D Control 1"), // virtual register
     adres(this,"adres", "A2D Result Low"),
-    pwm1con(this, "pwm1con", "PWM CONTROL REGISTER 1"),
+    pwm1con(this, "pwm1con", "PWM CONTROL REGISTER 1", 1),
     pwm1dcl(this, "pwm1dcl", "PWM DUTY CYCLE LOW BITS"),
     pwm1dch(this, "pwm1dch", "PWM DUTY CYCLE HIGH BITS"),
-    pwm2con(this, "pwm2con", "PWM CONTROL REGISTER 2"),
+    pwm2con(this, "pwm2con", "PWM CONTROL REGISTER 2", 2),
     pwm2dcl(this, "pwm2dcl", "PWM DUTY CYCLE LOW BITS"),
     pwm2dch(this, "pwm2dch", "PWM DUTY CYCLE HIGH BITS"),
-    pm_rw(this)
+    pm_rw(this), cwg(this), nco(this)
 
 {
   m_iocaf = new IOCxF(this, "iocaf", "Interrupt-On-Change flag Register", 0x0f);
@@ -668,14 +672,6 @@ P10F32X::P10F32X(const char *_name, const char *desc)
   osccon = new OSCCON_HS2(this, "osccon", "Oscillator Control Register");
   tmr0.set_cpu(this, m_porta, 3, option_reg);
   tmr0.start(0);
-
-
-/*
-  if(config_modes)
-    config_modes->valid_bits = ConfigMode::CM_FOSC0 | ConfigMode::CM_FOSC1 | 
-      ConfigMode::CM_FOSC1x | ConfigMode::CM_WDTE | ConfigMode::CM_PWRTE;
-*/
-
 }
 
 P10F32X::~P10F32X()
@@ -708,6 +704,18 @@ P10F32X::~P10F32X()
   remove_sfr_register(pm_rw.get_reg_pmdath());
   remove_sfr_register(pm_rw.get_reg_pmcon1_rw());
   remove_sfr_register(pm_rw.get_reg_pmcon2());
+  remove_sfr_register(&nco.nco1accl);
+  remove_sfr_register(&nco.nco1acch);
+  remove_sfr_register(&nco.nco1accu);
+  remove_sfr_register(&nco.nco1incl);
+  remove_sfr_register(&nco.nco1inch);
+  remove_sfr_register(&nco.nco1con);
+  remove_sfr_register(&nco.nco1clk);
+  remove_sfr_register(&cwg.cwg1con0);
+  remove_sfr_register(&cwg.cwg1con1);
+  remove_sfr_register(&cwg.cwg1con2);
+  remove_sfr_register(&cwg.cwg1dbr);
+  remove_sfr_register(&cwg.cwg1dbf);
 
 
 
@@ -800,8 +808,20 @@ void P10F32X::create_sfr_map()
   add_sfr_register(pm_rw.get_reg_pmdath(), 0x23 );
   add_sfr_register(pm_rw.get_reg_pmcon1_rw(), 0x24 );
   add_sfr_register(pm_rw.get_reg_pmcon2(), 0x25 );
+  add_sfr_register(&nco.nco1accl, 0x27, RegisterValue(0,0));
+  add_sfr_register(&nco.nco1acch, 0x28, RegisterValue(0,0));
+  add_sfr_register(&nco.nco1accu, 0x29, RegisterValue(0,0));
+  add_sfr_register(&nco.nco1incl, 0x2a, RegisterValue(1,0));
+  add_sfr_register(&nco.nco1inch, 0x2b, RegisterValue(0,0));
+  add_sfr_register(&nco.nco1con,  0x2d, RegisterValue(0,0));
+  add_sfr_register(&nco.nco1clk,  0x2e, RegisterValue(0,0));
 
   add_sfr_register(&wdtcon,   0x30, RegisterValue(0x16,0));
+  add_sfr_register(&cwg.cwg1con0, 0x39, RegisterValue(0,0)); 
+  add_sfr_register(&cwg.cwg1con1, 0x3a); 
+  add_sfr_register(&cwg.cwg1con2, 0x3b); 
+  add_sfr_register(&cwg.cwg1dbr, 0x3c); 
+  add_sfr_register(&cwg.cwg1dbf, 0x3d); 
   add_sfr_register(&borcon,   0x3f, RegisterValue(0x80,0));
   if (pir1) {
     pir1->set_intcon(&intcon_reg);
@@ -838,9 +858,16 @@ void P10F32X::create_sfr_map()
   pwm1con.set_pwmdc(&pwm1dcl, &pwm1dch);
   pwm1con.setIOPin1(&(*m_porta)[0]);
   pwm1con.set_tmr2(&tmr2);
+  pwm1con.set_cwg(&cwg);
   pwm2con.set_pwmdc(&pwm2dcl, &pwm2dch);
   pwm2con.setIOPin1(&(*m_porta)[1]);
   pwm2con.set_tmr2(&tmr2);
+  pwm2con.set_cwg(&cwg);
+
+  cwg.set_IOpins(&(*m_porta)[0], &(*m_porta)[1], &(*m_porta)[2]);
+
+  nco.setIOpins(&(*m_porta)[1], &(*m_porta)[2]);
+  nco.pir = pir1;
 
 }
 void P10F32X::create_iopin_map()

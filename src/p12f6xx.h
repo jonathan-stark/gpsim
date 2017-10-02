@@ -30,6 +30,8 @@ License along with this library; if not, see
 #include "comparator.h"
 #include "a2dconverter.h"
 #include "pm_rd.h"
+#include "cwg.h"
+#include "nco.h"
 
 class WPU;
 class IOC;
@@ -153,7 +155,8 @@ public:
   sfr_register  pwm2dcl;
   sfr_register  pwm2dch;
   PM_RW		pm_rw;
-
+  CWG		cwg;
+  NCO		nco;
 
   PicPortIOCRegister  *m_porta;
   PicTrisRegister  *m_trisa;

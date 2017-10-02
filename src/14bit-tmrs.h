@@ -28,6 +28,7 @@ License along with this library; if not, see
 #include "ioports.h"
 #include "ssp.h"
 #include "interface.h"
+#include "cwg.h"
 
 class TMRL;
 class TMRH;
@@ -39,6 +40,7 @@ class ADCON0;
 class PIR_SET;
 class InterruptSource;
 class TMR1_Interface;
+class CWG;
 
 class _14bit_processor;
 
@@ -301,11 +303,14 @@ public:
     {return (pwmdch->value.get() << 2) + (pwmdcl->value.get()>>6);}
   void set_pwmdc(sfr_register *_pwmdcl, sfr_register *_pwmdch)
     { pwmdcl = _pwmdcl; pwmdch = _pwmdch;}
-  PWMxCON(Processor *pCpu, const char *pName, const char *pDesc=0);
+  PWMxCON(Processor *pCpu, const char *pName, const char *pDesc=0, char _index=1);
+  void set_cwg(CWG *_cwg) { m_cwg = _cwg;}
 
 private:
     sfr_register *pwmdcl;
     sfr_register *pwmdch;
+    CWG		  *m_cwg;
+    char	  index;
 };
 
 class TRISCCP : public sfr_register
