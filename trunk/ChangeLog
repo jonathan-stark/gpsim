@@ -1,3 +1,7 @@
+2017-10-15 Roy Rankin <rrankin@ihug.com.au>
+	* src/ssp.cc src/ssp.h
+	: bug #232 pic12f1822: I2C reads not working 
+
 2017-10-02 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/main.cc
 	: Fix core dump

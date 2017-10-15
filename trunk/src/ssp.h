@@ -321,6 +321,7 @@ class I2C: public  TriggerObject
   virtual void slave_command();
   virtual bool end_ack();
   virtual bool match_address(unsigned int sspsr);
+  virtual bool do_stop_sspif();
 
 
 protected:
@@ -355,8 +356,9 @@ class I2C_1: public  I2C
 
 
   virtual void clock(bool);
-  virtual void sda(bool);
   virtual void bus_collide();
+  virtual bool do_stop_sspif();
+  
 
   I2C_1(SSP_MODULE *, _SSPCON *, _SSPSTAT *, _SSPBUF *, _SSPCON2 *, _SSPADD *, _SSP1CON3 *);
 };
