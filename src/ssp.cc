@@ -1038,8 +1038,8 @@ void I2C::set_idle()
 }
 bool I2C::isIdle()
 {
-    return(i2c_state == eIDLE);
-    return(
+    if (i2c_state == eIDLE) return true;
+    if(
 	(m_sspstat->value.get() & _SSPSTAT::RW) == 0 &&
 	(m_sspcon2->value.get() &
 	   (
@@ -1049,7 +1049,11 @@ bool I2C::isIdle()
 	     _SSPCON2::RSEN |
 	     _SSPCON2::SEN
 	   )) == 0
-	);
+	)
+    {
+	set_idle();
+    }
+    return(i2c_state == eIDLE);
 }
 bool I2C::rx_byte()
 {
@@ -1186,9 +1190,15 @@ void I2C::callback()
 		        " clock=" << get_cycles().get() << endl;
 		}
 		if (n_ack)
+		{
 		    m_sspcon2->put_value(m_sspcon2->value.get() | _SSPCON2::ACKSTAT);
+		    I2Cproto(("NACK\n"));
+		}
 		else
+		{
 		    m_sspcon2->put_value(m_sspcon2->value.get() & ~_SSPCON2::ACKSTAT);
+		    I2Cproto(("ACK\n"));
+		}
 		m_sspstat->put_value(m_sspstat->value.get() & ~_SSPSTAT::RW);
 		m_sspmod->set_sspif();
 		set_idle();
@@ -1893,21 +1903,29 @@ void I2C::newSSPBUF(unsigned int newTxByte)
 }
 void I2C::sda(bool data_val)
 {
+    if ((i2c_state == CLK_TX_BYTE) || (i2c_state == CLK_RX_BYTE) ||
+	(i2c_state == CLK_ACKEN) || (i2c_state == CLK_RSTART))
+    {
+	return;
+    }
     if (m_sspmod->get_SCL_State())	// Clock is high
     {
     	unsigned int stat_val = m_sspstat->value.get();
 	unsigned int sspm = (m_sspcon->value.get() & _SSPCON::SSPM_mask);
 	if (data_val)	// Data going high - STOP
 	{
+	    if (do_stop_sspif()) m_sspmod->set_sspif();
     	    stat_val = (stat_val & _SSPSTAT::BF) | _SSPSTAT::P;
-	    if (! future_cycle)
+	    if (! future_cycle && i2c_state != eIDLE)
 	    	set_idle();
 
 	    if (verbose)
 		cout << "I2C::sda got STOP future_cycle=" << future_cycle <<  endl;
+	    I2Cproto(("I2C::sda got STOP i2c_state=%d\n", i2c_state));
  	}
 	else		// Data going low - START
 	{
+	    I2Cproto(("I2C::sda got START i2c_state=%d\n", i2c_state));
 	    switch (i2c_state)
 	    {
 	    case CLK_STOP:
@@ -1936,8 +1954,8 @@ void I2C::sda(bool data_val)
 		break;
 
 	    default:
+		I2Cproto(("%s i2c_state was %d now RX_CMD\n", __FUNCTION__, i2c_state));
 		i2c_state = RX_CMD;
-		I2Cproto(("%s i2c_state = RX_CMD\n", __FUNCTION__));
 		break;
 	    }
     	    stat_val = (stat_val & _SSPSTAT::BF) | _SSPSTAT::S;
@@ -1965,98 +1983,13 @@ void I2C::sda(bool data_val)
 	}
     }
 }
-// uses sspcon3
-void I2C_1::sda(bool data_val)
+bool I2C::do_stop_sspif()
 {
-    if (m_sspmod->get_SCL_State())	// Clock is high
-    {
-    	unsigned int stat_val = m_sspstat->value.get();
-    	unsigned int con3_val = m_sspcon3->value.get();
-	unsigned int sspm = (m_sspcon->value.get() & _SSPCON::SSPM_mask);
-	if (data_val)	// Data going high - STOP
-	{
-    	    stat_val = (stat_val & _SSPSTAT::BF) | _SSPSTAT::P;
-	    if (! future_cycle)
-	    	set_idle();
-
-	    if(con3_val & _SSP1CON3::PCIE &&
-		(sspm == _SSPCON::SSPM_I2Cslave_7bitaddr ||
-	         sspm == _SSPCON::SSPM_I2Cslave_10bitaddr))
-	    {
-	        m_sspmod->set_sspif();
-	    }
-	    if (sspm == _SSPCON::SSPM_I2Cslave_7bitaddr_ints ||
-	        sspm == _SSPCON::SSPM_I2Cslave_10bitaddr_ints)
-	    {
-	        m_sspmod->set_sspif();
-	    }
-	    if (verbose)
-		cout << "I2C::sda got STOP future_cycle=" << future_cycle <<  endl;
- 	}
-	else		// Data going low - START
-	{
-	    switch (i2c_state)
-	    {
-	    case CLK_STOP:
-		break;
-
-	    case CLK_START:
-		if (phase == 0)
-		{
-		    guint64 fc = get_cycles().get() +
-			((m_sspadd->get() &0x7f)/ 2) + 1;
-
-		    if (future_cycle)
-		    {
-			phase++;
-			if (verbose)
-			  cout << "I2C::sda BUS_CHECK fc=" << fc << " future_cycle=" << future_cycle << endl;
-		    	get_cycles().reassign_break(future_cycle, fc, this);
-		    	future_cycle = fc;
-		    }
-		    else
-		    {
-		    	get_cycles().set_break(fc, this);
-		    	future_cycle = fc;
-		    }
-		}
-		break;
-
-	    default:
-		i2c_state = RX_CMD;
-		I2Cproto(("%s i2c_state = RX_CMD\n", __FUNCTION__));
-		break;
-	    }
-    	    stat_val = (stat_val & _SSPSTAT::BF) | _SSPSTAT::S;
-	    bits_transfered = 0;
-	    m_SSPsr = 0;
-	    if(con3_val & _SSP1CON3::SCIE &&
-		(sspm == _SSPCON::SSPM_I2Cslave_7bitaddr ||
-	         sspm == _SSPCON::SSPM_I2Cslave_10bitaddr))
-	    {
-	        m_sspmod->set_sspif();
-	    }
-	    if (verbose)
-		cout << "I2C::sda got START ";
-	}
-	m_sspstat->put_value(stat_val);
-
-	// interrupt ?
-	if (sspm == _SSPCON::SSPM_I2Cslave_7bitaddr_ints ||
-	    sspm == _SSPCON::SSPM_I2Cslave_10bitaddr_ints)
-	{
-	    m_sspmod->set_sspif();
-	}
-    }
-    else	// clock low
-    {
-	if (i2c_state == CLK_STOP)
-	{
-	    if (verbose)
-	        cout << "I2C::sda CLK_STOP SDA low CLOCK low\n";
-//	    setBRG();
-	}
-    }
+    return (false);
+}
+bool I2C_1::do_stop_sspif()
+{
+    return ( (m_sspcon3->value.get() &_SSP1CON3::PCIE)); 
 }
 /*
 	master mode, begin reading a byte
