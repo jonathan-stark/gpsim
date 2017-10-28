@@ -684,10 +684,10 @@ enum
 
   inline unsigned int get_post_scale()
     {
-      return( (value.get() & (TOUTPS0 | TOUTPS1 | TOUTPS2 | TOUTPS3)) >> 3 );
+      return( ((value.get() & (TOUTPS0 | TOUTPS1 | TOUTPS2 | TOUTPS3)) >> 3));
     }
 
-  inline unsigned int get_pre_scale()
+  virtual unsigned int get_pre_scale()
     {
       //  ps1:ps0 prescale
       //   0   0     1
@@ -708,6 +708,45 @@ enum
 
 };
 
+//---------------------------------------------------------
+// T2CON_64 - Timer 2 control register with prescale including 64
+
+class T2CON_64 : public T2CON
+{
+public:
+  T2CON_64(Processor *pCpu, const char *pName, const char *pDesc=0)
+    : T2CON(pCpu, pName, pDesc)
+  {
+  }
+  virtual unsigned int get_pre_scale()
+  {
+      //  ps1:ps0 prescale
+      //   0   0      1
+      //   0   1      4
+      //   1   0     16
+      //   1   1     64
+
+     switch(value.get() & ( T2CKPS1 |  T2CKPS0))
+     {
+	case 0:
+		return 1;
+		break;
+
+	case 1:
+		return 4;
+		break;
+
+	case 2:
+		return 16;
+		break;
+
+	case 3:
+		return 64;
+		break;
+    }
+    return 1;	// just to shutup compiler
+  }
+};
 #define MAX_PWM_CHANS   5
 class TMR2_Interface;
 

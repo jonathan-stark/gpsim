@@ -1,3 +1,10 @@
+2017-10-28 Roy Rankin <rrankin@ihug.com.au>
+	* regression/ccp/pwm_26k22.asm regression/ccp/pwm_6520.asm
+	  regression/ccp/pwm_877a.asm
+	: improve messages for failed asserts
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/p1xf1xxx.h
+	: bug #233 T2 on p12f1822 can have prescale of 64
+
 2017-10-15 Roy Rankin <rrankin@ihug.com.au>
 	* src/ssp.cc src/ssp.h
 	: bug #232 pic12f1822: I2C reads not working 
