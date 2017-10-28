@@ -55,7 +55,7 @@ public:
   PIR    *pir1;
   PIE     pie2;
   PIR    *pir2;
-  T2CON	  t2con;
+  T2CON_64  t2con;
   PR2	  pr2;
   TMR2    tmr2;
   T1CON_G   t1con_g;
@@ -148,7 +148,7 @@ public:
   PIR    *pir2;
   PIE     pie3;
   PIR    *pir3;
-  T2CON	  t2con;
+  T2CON_64	  t2con;
   PR2	  pr2;
   TMR2    tmr2;
   T1CON_G   t1con_g;

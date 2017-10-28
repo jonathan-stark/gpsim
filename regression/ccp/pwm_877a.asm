@@ -48,7 +48,7 @@ INT_VECTOR   CODE    0x004               ; interrupt vector location
 
 	bcf	STATUS,RP0	;adcon0 is in bank 0
 
-  .assert "\"FAILED 16F877a unexpected interrupt\""
+  .assert "\"*** FAILED pwm_877a unexpected interrupt\""
 	nop
 
 check:
@@ -90,7 +90,7 @@ start:
     movwf  T2CON
     movlw  0x2C		 ; PWM mode, 2 LSbs of Duty cycle = 00
     movwf  CCP2CON       ;
-  .assert "ccpr1l != ccpr1h, \"CCPR1H before TRM2 reset\""
+  .assert "ccpr1l != ccpr1h, \"*** FAILED pwm_877a CCPR1H before TRM2 reset\""
     nop
 ;
 ; The CCP1 interrupt is disabled,
@@ -101,20 +101,20 @@ PWM_Period_Match
     goto   PWM_Period_Match
     clrf   TMR0
 
-  .assert "ccpr1l == ccpr1h, \"CCPR1H loaded from CCPR1H\""
+  .assert "ccpr1l == ccpr1h, \"*** FAILED pwm_877a CCPR1H loaded from CCPR1H\""
     nop
 
-  .assert "(portc & 0x6) == 0x6, \"CCP1, CCP2 are high\""
+  .assert "(portc & 0x6) == 0x6, \"*** FAILED pwm_877a CCP1, CCP2 are high\""
    nop
    ; loop until CCP2 goes low
    btfsc  PORTC,1
    goto   $-1
-  .assert "tmr0 == 0x0f, \"CCP2 duty cycle\""
+  .assert "tmr0 == 0x0f, \"*** FAILED pwm_877a CCP2 duty cycle\""
    nop
    ; loop until CCP1 goes low
    btfsc  PORTC,2
    goto   $-1
-  .assert "tmr0 == 0x1f, \"CCP1 duty cycle\""
+  .assert "tmr0 == 0x1f, \"*** FAILED pwm_877a CCP1 duty cycle\""
    nop
 ;
 ; Wait for end of PWM cycle
@@ -122,7 +122,7 @@ PWM_Period_Match
     bcf    PIR1, TMR2IF
     btfss  PIR1, TMR2IF
     goto   $-1
-  .assert "tmr0 == 0x2f, \"TMR2 period\""
+  .assert "tmr0 == 0x2f, \"*** FAILED pwm_877a TMR2 period\""
    nop
 ;
 ; Increase  TMR2 but less than first duty cycle
@@ -136,13 +136,13 @@ PWM_Period_Match
     btfsc   PORTC,2
     goto    $-1
 
-  .assert "(portc & 0x6) == 0x0, \"TMR2 put, only change period\""
+  .assert "(portc & 0x6) == 0x0, \"*** FAILED pwm_877a TMR2 put, only change period\""
     nop
 
     bcf    PIR1, TMR2IF
     btfss  PIR1, TMR2IF
     goto   $-1
-  .assert "tmr0 == 0x23, \"TMR2 put, only change period\""
+  .assert "tmr0 == 0x23, \"*** FAILED pwm_877a TMR2 put, only change period\""
     nop
 ;
 ; Increase  TMR2 between first and second duty cycle
@@ -156,13 +156,13 @@ PWM_Period_Match
     btfsc   PORTC,2
     goto    $-1
 
-  .assert "(portc & 0x6) == 0x2, \"TMR2 put, between duty cycles\""
+  .assert "(portc & 0x6) == 0x2, \"*** FAILED pwm_877a TMR2 put, between duty cycles\""
     nop
 
     bcf    PIR1, TMR2IF
     btfss  PIR1, TMR2IF
     goto   $-1
-  .assert "tmr0 == 0x13, \"TMR2 put, between duty cycles\""
+  .assert "tmr0 == 0x13, \"*** FAILED pwm_877a TMR2 put, between duty cycles\""
     nop
 ;
 ;  in this test TMR2 > PR2, expect TMR2 to wrap around
@@ -179,14 +179,14 @@ PWM_Period_Match
    ; loop until CCP1 goes low
     btfsc  PORTC,2
     goto   $-1
-  .assert "tmr0 == 0x77, \"CCP1 duty cycle after wrap\""
+  .assert "tmr0 == 0x77, \"*** FAILED pwm_877a CCP1 duty cycle after wrap\""
     nop
 
     bcf    PIR1, TMR2IF
     btfss  PIR1, TMR2IF
     goto   $-1
 
-  .assert "tmr0 == 0x80, \"TMR2 > PR2 causes wrap\""
+  .assert "tmr0 == 0x80, \"*** FAILED pwm_877a TMR2 > PR2 causes wrap\""
     nop
 
 ;
@@ -197,12 +197,12 @@ PWM_Period_Match
    ; loop until CCP2 goes low
    btfsc  PORTC,1
    goto   $-1
-  .assert "tmr0 == 0x07, \"CCP2 duty cycle PR2 to 0x20\""
+  .assert "tmr0 == 0x07, \"*** FAILED pwm_877a CCP2 duty cycle PR2 to 0x20\""
    nop
    ; loop until CCP1 goes low
    btfsc  PORTC,2
    goto   $-1
-  .assert "tmr0 == 0x0f, \"CCP1 duty cycle PR2 to 0x20\""
+  .assert "tmr0 == 0x0f, \"*** FAILED pwm_877a CCP1 duty cycle PR2 to 0x20\""
    nop
     bsf    STATUS, RP0   ;  Bank1
     movlw  0x20
@@ -214,7 +214,7 @@ PWM_Period_Match
     bcf    PIR1, TMR2IF
     btfss  PIR1, TMR2IF
     goto   $-1
-  .assert "tmr0 == 0x10, \"TMR2 period PR2 to 0x20\""
+  .assert "tmr0 == 0x10, \"*** FAILED pwm_877a TMR2 period PR2 to 0x20\""
    nop
 
 ;
@@ -225,12 +225,12 @@ PWM_Period_Match
    ; loop until CCP2 goes low
    btfsc  PORTC,1
    goto   $-1
-  .assert "tmr0 == 0x07, \"CCP2 duty cycle PR2 to 0x10\""
+  .assert "tmr0 == 0x07, \"*** FAILED pwm_877a CCP2 duty cycle PR2 to 0x10\""
    nop
    ; loop until CCP1 goes low
    btfsc  PORTC,2
    goto   $-1
-  .assert "tmr0 == 0x0f, \"CCP1 duty cycle PR2 to 0x10\""
+  .assert "tmr0 == 0x0f, \"*** FAILED pwm_877a CCP1 duty cycle PR2 to 0x10\""
    nop
     bsf    STATUS, RP0   ;  Bank1
     movlw  0x10
@@ -242,7 +242,7 @@ PWM_Period_Match
     bcf    PIR1, TMR2IF
     btfss  PIR1, TMR2IF
     goto   $-1
-  .assert "tmr0 == 0x88, \"TMR2 period PR2 to 0x10 wraps\""
+  .assert "tmr0 == 0x88, \"*** FAILED pwm_877a TMR2 period PR2 to 0x10 wraps\""
    nop
 
     clrf  CCP1CON       ; turn off PWM

@@ -2381,7 +2381,6 @@ class TMR2_Interface : public Interface
     virtual void Update  (gpointer object)
     {
 	tmr2->current_value();
-	//SimulationHasStopped(object);
     }
 
   private:
@@ -2476,14 +2475,11 @@ void TMR2::on_or_off(int new_state)
 
     last_cycle = get_cycles().get() - value.get()*prescale;
     update();
-/*
     if (tmr2_interface == 0)
     {
         tmr2_interface = new TMR2_Interface(this);
         get_interface().prepend_interface(tmr2_interface);
     }
-*/
-
   }
   else {
 
