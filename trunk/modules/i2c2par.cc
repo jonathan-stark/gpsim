@@ -168,24 +168,24 @@ namespace I2C2PAR_Modules {
 
   void i2c2par::put_data(unsigned int data)
   {
+       Dprintf(("i2c2par::put_data() 0x%x\n", data));
        io_port->put(data);
   }
 
   unsigned int i2c2par::get_data()
   {
+	Dprintf(("i2c2par::get_data() 0x%x\n", io_port->get()));
 	return(io_port->get());
   }
 
-  void i2c2par::slave_transmit(bool yes)
+  void i2c2par::slave_transmit(bool input)
   {
-      if (yes)
-          io_port->update_pin_directions(IOPIN::DIR_INPUT);
-      else
-          io_port->update_pin_directions(IOPIN::DIR_OUTPUT);
+      io_port->update_pin_directions(input == false);
   }
 
   bool i2c2par::match_address()
   {
+	Dprintf(("i2c2par::match_address() 0x%x\n", xfr_data));
 	return((xfr_data & 0xfe) == i2c_slave_address);
   }
 

@@ -322,6 +322,10 @@ class I2C: public  TriggerObject
   virtual bool end_ack();
   virtual bool match_address(unsigned int sspsr);
   virtual bool do_stop_sspif();
+  bool		scl_clock_high();
+  bool		scl_neg_tran();
+  bool		scl_pos_tran();
+  bool		scl_clock_low();
 
 
 protected:
@@ -338,7 +342,8 @@ protected:
     CLK_ACKEN,
     CLK_RSTART,
     CLK_STOP,
-    CLK_START
+    CLK_START,
+    CLK_RX_ACK
   } i2c_state;
 
 

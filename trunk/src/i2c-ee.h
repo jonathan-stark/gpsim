@@ -50,7 +50,7 @@ class PromAddress : public Value
 };
 
 
-class i2c_slave
+class i2c_slave : public TriggerObject
 {
 
   public:
@@ -64,14 +64,18 @@ class i2c_slave
     virtual void put_data(unsigned int data){}
     virtual unsigned int get_data(){return 0;}
     virtual void slave_transmit(bool yes){}
+    const char * state_name();
 
     I2C_SLAVE_SCL	*scl;	// I2C clock
     I2C_SLAVE_SDA	*sda;	// I2C data
     unsigned int i2c_slave_address;
+    virtual void callback();
 
   protected:
 
+    bool    scl_high;
     bool    nxtbit;
+    bool    r_w;
     unsigned int bit_count;  // Current bit number for either Tx or Rx
     unsigned int xfr_data;  // latched data from I2C.
 
@@ -91,7 +95,7 @@ class i2c_slave
 
 
 };
-class I2C_EE :  public i2c_slave, public TriggerObject
+class I2C_EE :  public i2c_slave//RRR, public TriggerObject
 {
 public:
 
@@ -104,7 +108,7 @@ public:
   void reset(RESET_TYPE);
   void debug();
 
-  virtual void callback();
+//  virtual void callback();
   virtual void callback_print();
   virtual void start_write();
   virtual void write_busy();

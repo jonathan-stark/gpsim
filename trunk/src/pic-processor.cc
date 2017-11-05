@@ -121,9 +121,13 @@ ProcessorConstructor pP12F675(P12F675::construct ,
 ProcessorConstructor pP12F683(P12F683::construct ,
                               "__12F683",   "pic12f683",    "p12f683",  "12f683");
 ProcessorConstructor pP12F1822(P12F1822::construct ,
-                              "__12F1822", "pic12f1822", "p12f1822", "12f1822");
+                          "__12F1822", "pic12f1822", "p12f1822", "12f1822");
+ProcessorConstructor pP12LF1822(P12LF1822::construct ,
+                          "__12LF1822", "pic12lf1822", "p12lf1822", "12lf1822");
 ProcessorConstructor pP12F1840(P12F1840::construct ,
-                              "__12F1840", "pic12f1840", "p12f1840", "12f1840");
+                          "__12F1840", "pic12f1840", "p12f1840", "12f1840");
+ProcessorConstructor pP12LF1840(P12LF1840::construct ,
+                          "__12LF1840", "pic12lf1840", "p12lf1840", "12lf1840");
 ProcessorConstructor pP16C54(P16C54::construct ,
                              "__16C54",     "pic16c54",     "p16c54",   "16c54");
 ProcessorConstructor pP16C55(P16C55::construct ,
@@ -252,10 +256,16 @@ ProcessorConstructor pP16F917(P16F917::construct ,
                        "__16F917",  "pic16f917",   "p16f917", "16f917");
 ProcessorConstructor pP16F1788(P16F1788::construct ,
                        "__16F1788", "pic16f1788", "p16f1788", "16f1788");
+ProcessorConstructor pP16LF1788(P16LF1788::construct ,
+                       "__16LF1788", "pic16lf1788", "p16lf1788", "16lf1788");
 ProcessorConstructor pP16F1823(P16F1823::construct ,
                        "__16F1823", "pic16f1823", "p16f1823", "16f1823");
+ProcessorConstructor pP16LF1823(P16LF1823::construct ,
+                       "__16LF1823", "pic16lf1823", "p16lf1823", "16lf1823");
 ProcessorConstructor pP16F1825(P16F1825::construct ,
                        "__16F1825", "pic16f1825", "p16f1825", "16f1825");
+ProcessorConstructor pP16LF1825(P16F1825::construct ,
+                       "__16LF1825", "pic16lf1825", "p16lf1825", "16lf1825");
 #ifdef P17C7XX  // code no longer works
 ProcessorConstructor pP17C7xx(P17C7xx::construct ,
                               "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx");

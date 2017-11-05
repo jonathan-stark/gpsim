@@ -1,3 +1,17 @@
+2017-11-05 Roy Rankin <rrankin@ihug.com.au>
+	* regression/p16f91x/i2c_slave.asm
+	: SCL scope chan 0, SDA scope chan 1
+	* regression/p1xf18xx/p16f1823_i2c.asm
+	: Improve failed assert messages
+	* src/p1xf1xxx.cc src/p1xf1xxx.h src/pic-processor.cc
+	  src/pic-processor.h
+	: Add processors p12lf1822, p12lf1840, p16lf1788, p16lf1823, p16lf1825
+	* src/processor.cc
+	: Fix uninitialized variables
+	* modules/i2c2par.cc modules/i2c2par.h src/i2c-ee.cc src/i2c-ee.h
+	  src/ssp.cc src/ssp.h
+	: I2C - move data transitions off clock edge
+
 2017-10-28 Roy Rankin <rrankin@ihug.com.au>
 	* regression/ccp/pwm_26k22.asm regression/ccp/pwm_6520.asm
 	  regression/ccp/pwm_877a.asm

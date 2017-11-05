@@ -409,8 +409,8 @@ start:
    .sim "node n4"
    .sim "node n5"
    .sim "node n6"
-   .sim "scope.ch0 = \"portc4\""
-   .sim "scope.ch1 = \"portc3\""
+   .sim "scope.ch0 = \"portc3\""
+   .sim "scope.ch1 = \"portc4\""
 
 
     bsf  STATUS,RP0	; bank 1

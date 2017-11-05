@@ -101,6 +101,11 @@ public:
 	bDrivingState = new_state;
 	bDrivenState = new_state;
 
+	if (!new_state)
+	    update_direction(IO_bi_directional::DIR_OUTPUT,true);
+	else
+	    update_direction(IO_bi_directional::DIR_INPUT,true);
+
     	if(snode)
       	  snode->update();
 
@@ -120,7 +125,7 @@ public:
     	bDrivenState = true;
 
    	 // Make the pin an output.
-        update_direction(IO_bi_directional::DIR_OUTPUT,true);
+        update_direction(IO_bi_directional::DIR_INPUT,true);
 
     };
 
@@ -160,43 +165,36 @@ i2c_slave::~i2c_slave()
 	if (sda) delete sda;
 	if (scl) delete scl;
 }
-void i2c_slave::new_scl_edge(bool direction)
+void i2c_slave::new_scl_edge(bool level)
 {
-      //Vprintf(("%s direction:%d\n", __FUNCTION__, direction));
-      if (direction)
-      {
-	  // Rising edge
-	  nxtbit = sda->getDrivenState();
-	  //Vprintf(("%s Rising edge, data=%d\n", __FUNCTION__, nxtbit));
-      }
-      else
-      {
+    scl_high = level;
+    get_cycles().set_break(get_cycles().get() + 1, this);
+    if (!level)	//SCL goes low
+    {
+	if (bus_state == RX_DATA && bit_count == 0)
+	{
+	    sda->setDrivingState (true);  // Master drives bus
+	}
+    }
+}
 
-        // Falling edge
-        //cout << "I2C_EE SCL : Falling edge\n";
+void i2c_slave::callback()
+{
+    if (scl_high)	// read data from master
+    {
         switch ( bus_state )
         {
-            case IDLE :
-                sda->setDrivingState ( true );
-                break;
-
-            case START :
-                sda->setDrivingState ( true );
-                bus_state = RX_I2C_ADD;
-                break;
-
-            case RX_I2C_ADD :
+            case RX_I2C_ADD :	// Read address, send ACK to master if us
                 if ( shift_read_bit ( sda->getDrivenState() ) )
                 {
-                    Vprintf(("%s : got i2c address :0x%x r/w %u ", __FUNCTION__,
+                    Vprintf(("%s : got i2c address 0x%x r/w %u ", __FUNCTION__,
                       xfr_data >> 1, xfr_data & 1));
                     if (match_address())
                     {
 
                         bus_state = ACK_I2C_ADD;
+			r_w = xfr_data & 1;
                         Vprintf((" - OK\n"));
-                        // Acknowledge the command by pulling SDA low.
-                        sda->setDrivingState ( false );
                     }
                     else
                     {
@@ -207,18 +205,38 @@ void i2c_slave::new_scl_edge(bool direction)
                 }
                 break;
 
-            case ACK_I2C_ADD :
-                sda->setDrivingState ( true );
-                // Check the R/W bit of the address byte
+            case RX_DATA :	// read data from master, send ACK when complete
+                if ( shift_read_bit ( sda->getDrivenState() ) )
+                {
+                    //start_write();
+                    Vprintf(("%s : data set to 0x%x\n", __FUNCTION__, xfr_data));
+		    put_data(xfr_data);
+                    bus_state = ACK_RX;
+                }
+                break;
 
-                if ( xfr_data & 0x01 )
+
+            case ACK_RD :	// read ACK/NACK from master
+                if ( sda->getDrivenState() == false ) // ACK
+                {
+                    // The master has asserted ACK, so we send another byte
+                    bus_state = TX_DATA;
+                    bit_count = 8;
+		    xfr_data = get_data();
+                }
+                else					// NACK
+                {
+                    bus_state = IDLE;   // Terminate writes to master
+                }
+                break;
+
+            case ACK_WR :	// slave sent ACK/NACK
+                if (r_w)
                 {
                     // master is reading, we transmit
                     bus_state = TX_DATA;
                     bit_count = 8;
 		    xfr_data = get_data();
-                    sda->setDrivingState ( shift_write_bit() );
-		    slave_transmit(true);
                 }
 	        else
                 {
@@ -226,43 +244,40 @@ void i2c_slave::new_scl_edge(bool direction)
                     bus_state = RX_DATA;
                     bit_count = 0;
                     xfr_data = 0;
+                }
+		break;
+
+            case ACK_RX :	// ACK being read by master
+		bus_state = RX_DATA;
+                bit_count = 0;
+                xfr_data = 0;
+		break;
+
+	default:
+		break;
+		
+	}
+    }
+    else	// SCL low, put data on bus for master (if required)
+    {
+	switch ( bus_state )
+        {
+            case ACK_I2C_ADD :		// after address ACK start to send data
+                sda->setDrivingState ( false );  // send ACK
+		bus_state = ACK_WR;
+                // Check the R/W bit of the address byte
+
+                if ( xfr_data & 0x01 )
+                {
+		    slave_transmit(true);
+                }
+	        else
+                {
 		    slave_transmit(false);
                 }
                 break;
 
-            case RX_DATA :
-                if ( shift_read_bit ( sda->getDrivenState() ) )
-                {
-                    //start_write();
-                    Vprintf(("%s : data set to 0x%x\n", __FUNCTION__, xfr_data));
-		    put_data(xfr_data);
-                    sda->setDrivingState ( false );
-                    bus_state = ACK_RX;
-                }
-                break;
-
-	    case ACK_RX :
-                sda->setDrivingState ( true );
-                bus_state = RX_DATA;
-                bit_count = 0;
-                xfr_data = 0;
-                break;
-
-            case ACK_WR :
-                sda->setDrivingState ( true );
-                bus_state = WRPEND;
-                break;
-
-            case WRPEND :
-                // We were about to do the write but got more data instead
-                // of the expected stop bit
-                xfr_data = sda->getDrivenState();
-                bit_count = 1;
-                bus_state = RX_DATA;
-                Vprintf(("i2c_slave : write postponed by extra data\n"));
-                break;
-
-            case TX_DATA :
+            case TX_DATA :	// send data to master
                 if ( bit_count == 0 )
                 {
                     sda->setDrivingState ( true );     // Release the bus
@@ -274,36 +289,23 @@ void i2c_slave::new_scl_edge(bool direction)
                 }
                 break;
 
-            case ACK_RD :
-                if ( sda->getDrivenState() == false )
-                {
-                    // The master has asserted ACK, so we send another byte
-                    bus_state = TX_DATA;
-                    bit_count = 8;
-		    xfr_data = get_data();
-                    sda->setDrivingState ( shift_write_bit() );
-                }
-                else
-                {
-                    bus_state = IDLE;   // Actually a limbo state
-                }
-                break;
+            case ACK_RX :	// Send ACK read data
+		sda->setDrivingState (false);
+		break;
 
-            default :
-		fprintf(stderr, "%s:%s ERROR unexpected state %d\n", __FILE__, __FUNCTION__, bus_state);
-                sda->setDrivingState ( true );     // Release the bus
-                break;
-        }
+	    default:
+		break;
+	}
     }
 }
 
 void i2c_slave::new_sda_edge(bool direction)
 {
  //     Vprintf(("i2c_slave::new_sda_edge direction:%d\n", direction));
-      if (scl->getDrivenState())
+      if (scl->getDrivenState())	// SCL high
       {
         int curBusState = bus_state;
-        if ( direction )
+        if ( direction )	// SDA high
         {
 	    /* stop bit */
             Vprintf(("i2c_slave : Rising edge in SCL high => stop bit\n"));
@@ -319,12 +321,15 @@ void i2c_slave::new_sda_edge(bool direction)
 	{
 	    /* start bit */
             Vprintf(("i2c_slave : Falling edge in SCL high => start bit\n"));
-	    bus_state = START;
+	    if (bus_state == IDLE)
+		bus_state = RX_I2C_ADD;
+	    else
+	        bus_state = START;
 	    bit_count = 0;
 	    xfr_data = 0;
 	}
 	if (bus_state != curBusState)
-	    Vprintf(("i2c_slave::new_sda_edge() new bus state = %d\n",bus_state));
+	    Vprintf(("i2c_slave::new_sda_edge() new bus state = %s\n",state_name()));
      }
 
 }
@@ -353,7 +358,48 @@ bool i2c_slave::shift_write_bit ()
 
 bool i2c_slave::match_address()
 {
-	return((xfr_data & 0xfe) == i2c_slave_address);
+	if((xfr_data & 0xfe) == i2c_slave_address)
+	{
+	    r_w = xfr_data & 1;
+	    return true;
+        }
+	return false;
+}
+const char * i2c_slave::state_name()
+{
+  switch (bus_state) {
+  case IDLE:
+    return "IDLE";
+    break;
+  case START:
+    return "START";
+    break;
+  case RX_I2C_ADD:
+    return "RX_I2C_ADD";
+    break;
+  case ACK_I2C_ADD:
+    return "ACK_I2C_ADD";
+    break;
+  case RX_DATA:
+    return "RX_DATA";
+    break;
+  case ACK_WR:
+    return "ACK_WR";
+    break;
+  case ACK_RX:
+    return "ACK_RX";
+    break;
+  case WRPEND:
+    return "WRPEND";
+    break;
+  case ACK_RD:
+    return "ACK_RD";
+    break;
+  case TX_DATA:
+    return "TX_DATA";
+    break;
+  }
+  return "UNKNOWN";
 }
 //----------------------------------------------------------
 //
@@ -507,41 +553,8 @@ void I2C_EE::debug()
   if (!scl || !sda || !rom)
     return;
 
-  const char *cPBusState=0;
-  switch (bus_state) {
-  case IDLE:
-    cPBusState = "IDLE";
-    break;
-  case START:
-    cPBusState = "START";
-    break;
-  case RX_I2C_ADD:
-    cPBusState = "RX_I2C_ADD";
-    break;
-  case ACK_I2C_ADD:
-    cPBusState = "ACK_I2C_ADD";
-    break;
-  case RX_DATA:
-    cPBusState = "RX_DATA";
-    break;
-  case ACK_WR:
-    cPBusState = "ACK_WR";
-    break;
-  case ACK_RX:
-    cPBusState = "ACK_RX";
-    break;
-  case WRPEND:
-    cPBusState = "WRPEND";
-    break;
-  case ACK_RD:
-    cPBusState = "ACK_RD";
-    break;
-  case TX_DATA:
-    cPBusState = "TX_DATA";
-    break;
-  }
 
-  cout << "I2C EEPROM: current state="<<cPBusState<<endl;
+  cout << "I2C EEPROM: current state="<<state_name()<<endl;
   cout << " t=0x"<< hex <<get_cycles().get() << endl;
   cout << "  scl drivenState="  << scl->getDrivenState()
        << " drivingState=" << scl->getDrivingState()
@@ -608,12 +621,14 @@ void I2C_EE::write_is_complete()
 
 
 
+/* RRR
 void I2C_EE::callback()
 {
 
   ee_busy = false;
   Vprintf(("I2C_EE::callback() - write cycle is complete\n"));
 }
+*/
 
 void I2C_EE::callback_print()
 {

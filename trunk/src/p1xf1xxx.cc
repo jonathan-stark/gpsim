@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2013,2014 Roy R. Rankin
+   Copyright (C) 2013,2014,2017 Roy R. Rankin
 
 This file is part of the libgpsim library of gpsim
 
@@ -23,9 +23,11 @@ License along with this library; if not, see
 // p1xf1xxx
 //
 //  This file supports:
-//    PIC12F1822
-//    PIC16F1823
-//    PIC16F1788
+//    PIC12[L]F1822
+//    PIC12[L]F1840
+//    PIC16[L]F1823
+//    PIC16[L]F1825
+//    PIC16[L]F1788
 //
 //Note: All these  processors have extended 14bit instructions
 
@@ -446,7 +448,7 @@ Processor * P12F1822::construct(const char *name)
 
   P12F1822 *p = new P12F1822(name);
 
-  p->create(0x7f, 256);
+  p->create(0x7f, 256, 0x2700);
   p->create_invalid_registers ();
   p->create_symbols();
   return p;
@@ -720,7 +722,7 @@ void P12F1822::create_iopin_map()
 
 
 
-void  P12F1822::create(int ram_top, int eeprom_size)
+void  P12F1822::create(int ram_top, int eeprom_size, int dev_id)
 {
 
   create_iopin_map();
@@ -745,7 +747,7 @@ void  P12F1822::create(int ram_top, int eeprom_size)
   dsm_module.setCIN2pin(&(*m_porta)[4]);
   // Set DeviceID
   if (m_configMemory && m_configMemory->getConfigWord(6))
-      m_configMemory->getConfigWord(6)->set(0x2700);
+      m_configMemory->getConfigWord(6)->set(dev_id);
 }
 
 //-------------------------------------------------------------------
@@ -876,12 +878,40 @@ void P12F1822::program_memory_wp(unsigned int mode)
 
 }
 //========================================================================
+
+
+P12LF1822::P12LF1822(const char *_name, const char *desc)
+  : P12F1822(_name,desc)
+{}
+
+
+P12LF1822::~P12LF1822()
+{}
+
+
+Processor * P12LF1822::construct(const char *name)
+{
+
+  P12LF1822 *p = new P12LF1822(name);
+
+  p->create(0x7f, 256, 0x2800);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+}
+
+void  P12LF1822::create(int ram_top, int eeprom_size, int dev_id)
+{
+  P12F1822::create(ram_top, eeprom_size, dev_id);
+}
+
+//========================================================================
 Processor * P12F1840::construct(const char *name)
 {
 
   P12F1840 *p = new P12F1840(name);
 
-  p->create(0x7f, 256);
+  p->create(0x7f, 256, 0x1b80);
   p->create_invalid_registers ();
   p->create_symbols();
   return p;
@@ -897,17 +927,38 @@ P12F1840::~P12F1840()
   delete_file_registers(0x120, 0x16f, 0x00);
   delete_sfr_register(vrefcon);
 }
-void  P12F1840::create(int ram_top, int eeprom_size)
+void  P12F1840::create(int ram_top, int eeprom_size, int dev_id)
 {
-  P12F1822::create(ram_top, eeprom_size);
+  P12F1822::create(ram_top, eeprom_size, 0x1b80);
   add_file_registers(0xc0, 0xef, 0x00);
   add_file_registers(0x120, 0x16f, 0x00);
-  // Set DeviceID
-  if (m_configMemory && m_configMemory->getConfigWord(6))
-      m_configMemory->getConfigWord(6)->set(0x1b80);
+
   vrefcon = new sfr_register(this, "vrefcon",
 		"Voltage Regulator Control Register");
   add_sfr_register(vrefcon, 0x197, RegisterValue(0x01,0));
+}
+//========================================================================
+Processor * P12LF1840::construct(const char *name)
+{
+
+  P12LF1840 *p = new P12LF1840(name);
+
+  p->create(0x7f, 256, 0x1b80);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+P12LF1840::P12LF1840(const char *_name, const char *desc) :
+	P12F1840(_name, desc)
+{
+}
+P12LF1840::~P12LF1840()
+{
+}
+void  P12LF1840::create(int ram_top, int eeprom_size, int dev_id)
+{
+  P12F1840::create(ram_top, eeprom_size, 0x1bc0);
 }
 //========================================================================
 
@@ -1699,7 +1750,7 @@ Processor * P16F1788::construct(const char *name)
 
   P16F1788 *p = new P16F1788(name);
 
-  p->create(2048, 256);
+  p->create(2048, 256, 0x302b);
 
   p->create_invalid_registers ();
   p->create_symbols();
@@ -1708,7 +1759,7 @@ Processor * P16F1788::construct(const char *name)
 }
 
 
-void  P16F1788::create(int ram_top, int eeprom_size)
+void  P16F1788::create(int ram_top, int eeprom_size, int dev_id)
 {
 
   ram_size = ram_top;
@@ -1717,7 +1768,7 @@ void  P16F1788::create(int ram_top, int eeprom_size)
   create_sfr_map();
   // Set DeviceID
   if (m_configMemory && m_configMemory->getConfigWord(6))
-      m_configMemory->getConfigWord(6)->set(0x302b);
+      m_configMemory->getConfigWord(6)->set(dev_id);
 
 }
 void P16F1788::create_sfr_map()
@@ -1761,6 +1812,31 @@ void P16F1788::create_sfr_map()
     comparator.cmxcon0[3]->setBitMask(0xbf);
     comparator.cmxcon0[3]->setIntSrc(new InterruptSource(pir2, (1<<2)));
     comparator.cmxcon1[3]->setBitMask(0xff);
+
+}
+P16LF1788::P16LF1788(const char *_name, const char *desc)
+  : P16F1788(_name,desc)
+{
+}
+P16LF1788::~P16LF1788()
+{
+}
+Processor * P16LF1788::construct(const char *name)
+{
+
+  P16LF1788 *p = new P16LF1788(name);
+
+  p->create(2048, 256, 0x302d);
+
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+void  P16LF1788::create(int ram_top, int eeprom_size, int dev_id)
+{
+
+  P16F1788::create(ram_top, eeprom_size, dev_id);
 
 }
 //========================================================================
@@ -1825,7 +1901,7 @@ Processor * P16F1823::construct(const char *name)
 
   P16F1823 *p = new P16F1823(name);
 
-  p->create(0x7f, 256);
+  p->create(0x7f, 256, 0x2720);
   p->create_invalid_registers ();
   p->create_symbols();
   return p;
@@ -1833,7 +1909,7 @@ Processor * P16F1823::construct(const char *name)
 }
 
 
-void  P16F1823::create(int ram_top, int eeprom_size)
+void  P16F1823::create(int ram_top, int eeprom_size, int dev_id)
 {
 
   create_iopin_map();
@@ -1858,7 +1934,7 @@ void  P16F1823::create(int ram_top, int eeprom_size)
   dsm_module.setCIN2pin(&(*m_portc)[5]);
   // Set DeviceID
   if (m_configMemory && m_configMemory->getConfigWord(6))
-      m_configMemory->getConfigWord(6)->set(0x2720);
+      m_configMemory->getConfigWord(6)->set(dev_id);
 
 }
 void P16F1823::create_sfr_map()
@@ -1922,12 +1998,41 @@ void P16F1823::create_sfr_map()
     sr_module.setPins(&(*m_porta)[1], &(*m_porta)[2], &(*m_portc)[4]);
 }
 //========================================================================
+
+
+P16LF1823::P16LF1823(const char *_name, const char *desc)
+  : P16F1823(_name,desc)
+{
+}
+P16LF1823::~P16LF1823()
+{
+}
+
+void  P16LF1823::create(int ram_top, int eeprom_size, int dev_id)
+{
+
+  P16F1823::create(ram_top, eeprom_size, dev_id);
+}
+
+Processor * P16LF1823::construct(const char *name)
+{
+
+  P16LF1823 *p = new P16LF1823(name);
+
+  p->create(0x7f, 256, 0x2820);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+
+//========================================================================
 Processor * P16F1825::construct(const char *name)
 {
 
   P16F1825 *p = new P16F1825(name);
 
-  p->create(0x7f, 256);
+  p->create(0x7f, 256, 0x2760);
   p->create_invalid_registers ();
   p->create_symbols();
   return p;
@@ -1950,9 +2055,9 @@ P16F1825::~P16F1825()
   delete_file_registers(0x520, 0x56f);
   delete_file_registers(0x5a0, 0x5ef);
 }
-void  P16F1825::create(int ram_top, int eeprom_size)
+void  P16F1825::create(int ram_top, int eeprom_size, int dev_id)
 {
-  P16F1823::create(ram_top, eeprom_size);
+  P16F1823::create(ram_top, eeprom_size, dev_id);
   add_file_registers(0xc0, 0xef, 0x00);
   add_file_registers(0x120, 0x16f, 0x00);
   add_file_registers(0x1a0, 0x1ef, 0x00);
@@ -1963,8 +2068,27 @@ void  P16F1825::create(int ram_top, int eeprom_size)
   add_file_registers(0x4a0, 0x4ef, 0x00);
   add_file_registers(0x520, 0x56f, 0x00);
   add_file_registers(0x5a0, 0x5ef, 0x00);
+}
+//========================================================================
+Processor * P16LF1825::construct(const char *name)
+{
 
-  // Set DeviceID
-  if (m_configMemory && m_configMemory->getConfigWord(6))
-      m_configMemory->getConfigWord(6)->set(0x2760);
+  P16LF1825 *p = new P16LF1825(name);
+
+  p->create(0x7f, 256, 0x2860);
+  p->create_invalid_registers ();
+  p->create_symbols();
+  return p;
+
+}
+P16LF1825::P16LF1825(const char *_name, const char *desc) :
+	P16F1825(_name, desc)
+{
+}
+P16LF1825::~P16LF1825()
+{
+}
+void  P16LF1825::create(int ram_top, int eeprom_size, int dev_id)
+{
+  P16F1825::create(ram_top, eeprom_size, dev_id);
 }

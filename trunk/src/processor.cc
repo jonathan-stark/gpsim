@@ -96,7 +96,7 @@ private:
 
 CPU_Freq::CPU_Freq(Processor * _cpu, double freq)
   : Float("frequency",freq, " oscillator frequency."),
-    cpu(_cpu), use_rc_freq(false)
+    cpu(_cpu), RCfreq(0.), use_rc_freq(false)
 {
 }
 
@@ -152,7 +152,8 @@ Processor::Processor(const char *_name, const char *_desc)
     rma(this),
     ema(this),
     pc(0),
-    bad_instruction(0, 0x3fff, 0)
+    bad_instruction(0, 0x3fff, 0),
+    mFrequency(0)
 {
   registers = 0;
 
@@ -680,10 +681,10 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
     //program_memory[uIndex]->add_line_number_symbol();
   }
   else if (set_config_word(address, value))
-    ;
+  {
+  }
   else
     set_out_of_range_pm(address,value);  // could be e2prom
-
 
 }
 //-------------------------------------------------------------------
