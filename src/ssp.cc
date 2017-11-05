@@ -1071,6 +1071,166 @@ bool I2C::rx_byte()
     }
     return(false);
 }
+/*
+    Called during phase 0
+    SCL goes high
+*/
+bool I2C::scl_pos_tran()
+{
+	
+    return true;
+}
+/*
+    Called during phase 1
+    SCL is high, data can be read and STOP, START transitions
+*/
+bool I2C::scl_clock_high()
+{
+    if (i2c_state == CLK_STOP)
+    {
+	setBRG();
+	m_sspmod->setSDA(true);
+	return false;
+    }
+    else if (i2c_state == CLK_RSTART)
+    {
+	m_sspmod->setSDA(true);
+    }
+    else if (i2c_state == CLK_START)
+    {
+	m_sspmod->setSDA(false);
+    }
+    else if (i2c_state == CLK_RX_ACK)
+    {
+            bool n_ack = m_sspmod->get_SDI_State();
+            if (verbose & 2)
+            {
+                cout << "I2C::scl_clock_high CLK_TX_ACK _ACK=" << n_ack <<
+                        " clock=" << get_cycles().get() << endl;
+            }
+	    
+            if (n_ack)
+                m_sspcon2->put_value(m_sspcon2->value.get() | _SSPCON2::ACKSTAT);
+            else
+                m_sspcon2->put_value(m_sspcon2->value.get() & ~_SSPCON2::ACKSTAT);
+    }
+    else if (i2c_state == CLK_RX_BYTE)
+    {
+	if (bits_transfered < 8)
+	{
+	    m_SSPsr = (m_SSPsr << 1) | (m_sspmod->get_SDI_State()?1:0);
+	    bits_transfered++;
+	}
+    }
+    return true;
+}
+/*
+    Called during phase 2
+    SCL is going low
+*/
+	
+bool I2C::scl_neg_tran()
+{
+    if (i2c_state == CLK_STOP)
+    {
+	// Check SCL and SDI still high
+	if (m_sspmod->get_SCL_State() && m_sspmod->get_SDI_State())
+        {
+	    unsigned int sspstat = m_sspstat->value.get() & (_SSPSTAT::SMP | _SSPSTAT::CKE);
+	    sspstat |= _SSPSTAT::P;
+	    m_sspstat->value.put(sspstat);
+	    if (verbose & 2)
+	        cout << "I2C::scl_neg_tran stop finish\n";
+	    m_sspmod->set_sspif();
+	}
+	else
+	{
+	    if (verbose & 2)
+	        cout << "I2C::scl_neg_tran stop fail\n";
+ 	    m_sspmod->set_bclif();
+	
+	}
+	set_idle();
+	m_sspcon2->value.put(m_sspcon2->value.get() & ~_SSPCON2::PEN );
+	return false;
+    }
+    else if (i2c_state == CLK_START)
+    {
+	m_sspcon2->value.put(m_sspcon2->value.get() &
+		~(_SSPCON2::SEN | _SSPCON2::RSEN));
+	if (m_sspmod->get_SCL_State() && !m_sspmod->get_SDI_State())
+	{
+	    m_sspmod->setSCL(false);
+	    m_sspmod->set_sspif();
+	}
+	else
+	{
+	    m_sspmod->setSDA(true);
+	    m_sspmod->set_bclif();
+	}
+        set_idle();
+	return false;
+    }
+    return true;
+}
+/*
+    Called during phase 3
+    SCL is low, data should be put on the bus in this phase
+*/
+bool I2C::scl_clock_low()
+{
+    if (i2c_state == CLK_RSTART)
+    {
+	i2c_state = CLK_START;
+    }
+    else if (i2c_state == CLK_ACKEN)
+    {
+       	m_sspcon2->value.put( m_sspcon2->value.get() & ~(_SSPCON2::ACKEN ));
+        m_sspmod->set_sspif();
+	set_idle();
+	return false;
+    }
+    else if (i2c_state == CLK_RX_ACK)
+    {
+        m_sspstat->put_value(m_sspstat->value.get() & ~_SSPSTAT::RW);
+        m_sspmod->set_sspif();
+        set_idle();
+        return false;
+    }
+    else if (i2c_state == CLK_TX_BYTE)
+    {
+	bits_transfered++;
+        if (bits_transfered < 8)
+        {
+            m_SSPsr <<= 1;
+            m_sspmod->setSDA((m_SSPsr & 0x80) == 0x80);
+        }
+	else if(bits_transfered == 8)
+	{
+            m_sspstat->put_value(m_sspstat->value.get() & ~_SSPSTAT::BF);
+            if (verbose & 2)
+                cout << "I2C::scl_clock_low CLK_TX_BYTE sent\n";
+	    i2c_state = CLK_RX_ACK;
+	}
+    }
+    else if (i2c_state == CLK_RX_BYTE)
+    {
+	if(bits_transfered == 8)
+	{
+            m_sspstat->put_value(m_sspstat->value.get() & ~_SSPSTAT::RW);
+            m_sspcon2->put_value(m_sspcon2->value.get() & ~_SSPCON2::RCEN);
+            if (verbose & 2)
+               cout << "CLK_RX_BYTE got byte=" << hex << m_SSPsr << endl;
+             m_sspmod->SaveSSPsr(m_SSPsr & 0xff);
+
+            m_sspmod->set_sspif();
+            set_idle();
+            return false;
+	}
+    }
+
+    return true;
+}
 void I2C::callback()
 {
 
@@ -1079,11 +1239,43 @@ void I2C::callback()
         cout << "I2C::callback i2c_state " << i2c_state << " phase=" << phase <<endl;
     if (future_cycle != get_cycles().get())
     {
-	cout << "I2C program error future_cycle=" << future_cycle << " now="
+	cout << "I2C callback - program error future_cycle=" << future_cycle << " now="
 		<< get_cycles().get() << " i2c_state=" << i2c_state << endl;
     }
 
     future_cycle = 0;
+    if (i2c_state == eIDLE) return;
+    switch (phase)
+    {
+    case 0:		// SCL goes high
+	if(scl_pos_tran())
+        {
+	    setBRG();
+	    m_sspmod->setSCL(true);
+        }
+	break;
+
+    case 1:		// SCL low get data (or STOP, START) from SDA bus
+        if(scl_clock_high())
+	    setBRG();
+	break;
+
+    case 2:		// SCL goes low
+	if(scl_neg_tran())
+        {
+	    setBRG();
+	    m_sspmod->setSCL(false);
+        }
+	break;
+
+    case 3:		// put data on SDA bus
+	if(scl_clock_low())
+	    setBRG();
+	break;
+    }
+    phase = (phase + 1) % 4;
+    return;
+
     switch(i2c_state)
     {
     case CLK_ACKEN:
@@ -1228,12 +1420,17 @@ void I2C::callback()
 }
 void I2C::clock(bool clock_state)
 {
-  unsigned int sspcon_val = m_sspcon->value.get();
-  unsigned int sspstat_val = m_sspstat->value.get();
+    unsigned int sspcon_val = m_sspcon->value.get();
+    unsigned int sspstat_val = m_sspstat->value.get();
+
+    if ((sspcon_val & _SSPCON::SSPM_mask) == _SSPCON::SSPM_MSSPI2Cmaster)
+	return;
+
     if (verbose & 2)
         cout << "I2C::clock  SCL=" << clock_state << " SDI=" <<
 	    m_sspmod->get_SDI_State() << " i2c_state=" << i2c_state <<
 	    " phase=" << phase << endl;
+
     if (clock_state)	// Do read on clock high transition
     {
 	switch(i2c_state)
@@ -1251,6 +1448,7 @@ void I2C::clock(bool clock_state)
 	    }
 	    break;
 
+/*RRR
 	case CLK_RSTART:
 	    if (phase == 0)
 	    {
@@ -1272,7 +1470,7 @@ void I2C::clock(bool clock_state)
 		setBRG();
 	    }
 	    break;
-
+*/
 
 	  case RX_CMD:
 	  case RX_CMD2:
@@ -1311,6 +1509,7 @@ void I2C::clock(bool clock_state)
 	    break;
 
 	case CLK_START:
+	case CLK_RSTART:
 	    clrBRG();
 	    if (phase == 0 )
 	    {
@@ -1325,10 +1524,12 @@ void I2C::clock(bool clock_state)
 	    }
 	    break;
 
+/* RRR
 	case CLK_RSTART:
 	    if (phase == 0)
         	m_sspmod->setSDA(true);
 	    break;
+*/
 
 	case RX_CMD:
 	case RX_CMD2:
@@ -1466,6 +1667,10 @@ void I2C_1::clock(bool clock_state)
 {
   unsigned int sspcon_val = m_sspcon->value.get();
   unsigned int sspstat_val = m_sspstat->value.get();
+
+  if ((sspcon_val & _SSPCON::SSPM_mask) == _SSPCON::SSPM_MSSPI2Cmaster)
+	return;
+
   if (verbose & 2)
         cout << "I2c_1::clock  SCL=" << clock_state << " SDI=" <<
 	    m_sspmod->get_SDI_State() << " i2c_state=" << i2c_state <<
@@ -1487,6 +1692,7 @@ void I2C_1::clock(bool clock_state)
 	    }
 	    break;
 
+/* RRR
 	case CLK_RSTART:
 	    if (phase == 0)
 	    {
@@ -1508,6 +1714,7 @@ void I2C_1::clock(bool clock_state)
 		setBRG();
 	    }
 	    break;
+*/
 
 
 	  case RX_CMD:
@@ -1563,6 +1770,7 @@ void I2C_1::clock(bool clock_state)
 	    break;
 
 	case CLK_START:
+	case CLK_RSTART:
 	    clrBRG();
 	    if (phase == 0 )
 	    {
@@ -1577,10 +1785,12 @@ void I2C_1::clock(bool clock_state)
 	    }
 	    break;
 
+/* RRR
 	case CLK_RSTART:
 	    if (phase == 0)
         	m_sspmod->setSDA(true);
 	    break;
+*/
 
 	case RX_CMD:
 	case RX_CMD2:
@@ -1833,7 +2043,7 @@ void I2C::setBRG()
     if (future_cycle)
 	cout << "ERROR I2C::setBRG called with future_cycle=" << future_cycle << endl;
       future_cycle = get_cycles().get() +
-	  	((m_sspadd->get() &0x7f)/ 2) + 1;
+	  	((m_sspadd->get() &0x7f)/ 4) + 1;
       get_cycles().set_break(future_cycle, this);
 }
 
@@ -1859,11 +2069,11 @@ void I2C::newSSPBUF(unsigned int newTxByte)
 	{
 	   if (verbose)
 		cout << "I2C::newSSPBUF send " << hex << newTxByte << endl;
-	    m_sspmod->setSCL(false);
 	    m_sspstat->put_value(sspstat_val | _SSPSTAT::BF | _SSPSTAT::RW);
 	    m_SSPsr = newTxByte;
 	    m_sspmod->setSDA((m_SSPsr & 0x80) == 0x80);
 	    bits_transfered = 0;
+	    phase = 0;
 	    i2c_state = CLK_TX_BYTE;
 	    I2Cproto(("%s i2c_state = CLK_TX_BYTE data %x\n", __FUNCTION__, newTxByte));
 	    setBRG();
@@ -1998,8 +2208,8 @@ void I2C::master_rx()
 {
     if (verbose)
         cout << "I2C::master_rx SCL=" << m_sspmod->get_SCL_State() << " SDI=" << m_sspmod->get_SDI_State() << endl;
-    m_sspmod->setSCL(false);
-    m_sspmod->setSDA(true);
+//    m_sspmod->setSCL(false);
+    m_sspmod->setSDA(true);	// SDA controlled by slave
     bits_transfered = 0;
     m_SSPsr = 0;
     i2c_state = CLK_RX_BYTE;
@@ -2027,6 +2237,7 @@ void I2C::start_bit()
 	    cout << "I2C::start_bit bus collision " <<
 	        " SCL=" << m_sspmod->get_SCL_State() <<
 	        " SDI=" << m_sspmod->get_SDI_State() << endl;
+	I2Cproto(("%s i2c_state = CLK_START bus_collide\n", __FUNCTION__));
 	bus_collide();
     }
 }
@@ -2043,6 +2254,9 @@ void I2C::rstart_bit()
     i2c_state = CLK_RSTART;
     I2Cproto(("%s i2c_state = CLK_RSTART\n", __FUNCTION__));
     phase = 0;
+    setBRG();
+    m_sspmod->setSDA(false);
+/*RRR
     m_sspmod->setSCL(false);
 
     if (!m_sspmod->get_SCL_State())
@@ -2052,12 +2266,12 @@ void I2C::rstart_bit()
     }
     else
 	bus_collide();
-
+*/
 
 }
 /*
 	master, begin stop sequence
-		drop SDA (mught cause start if SCL high)
+		drop SDA (might cause start if SCL high)
 		when SCL high, raise SDA (stop condition)
 
 */
@@ -2066,8 +2280,11 @@ void I2C::stop_bit()
     i2c_state = CLK_STOP;
     I2Cproto(("%s i2c_state = CLK_STOP\n", __FUNCTION__));
     phase = 0;
+
+    // Make sure SDA is low
     m_sspmod->setSDA(false);
 
+    
     if (!m_sspmod->get_SDI_State())
     {
 	setBRG();
@@ -2093,7 +2310,6 @@ void I2C::ack_bit()
     m_sspmod->setSCL(false);
     if (!m_sspmod->get_SCL_State())
     {
-        phase++;
 	setBRG();
         m_sspmod->setSDA((m_sspcon2->value.get() & _SSPCON2::ACKDT) ? true : false);
     }

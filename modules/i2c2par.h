@@ -36,7 +36,7 @@ class IOPort;
 class AddAttribute;
 namespace I2C2PAR_Modules {
 
-  class i2c2par : public i2c_slave, public Module, public TriggerObject
+  class i2c2par : public i2c_slave, public Module//, public TriggerObject
   {
 
   public:

@@ -114,7 +114,7 @@ public:
   virtual void create_symbols();
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void create_iopin_map();
-  virtual void create(int ram_top, int eeprom_size);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
   virtual unsigned int register_memory_size () const { return 0x1000; }
   virtual void option_new_bits_6_7(unsigned int bits);
   virtual unsigned int program_memory_size() const { return 2048; }
@@ -125,18 +125,41 @@ public:
 
 
 };
+class P12LF1822 : public P12F1822
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P12LF1822_;};
+
+  static Processor *construct(const char *name);
+  P12LF1822(const char *_name=0, const char *desc=0);
+  ~P12LF1822();
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
+};
 
 class P12F1840 : public P12F1822
 {
 public:
   static Processor *construct(const char *name);
   virtual unsigned int program_memory_size() const { return 4096; }
-  virtual void create(int ram_top, int eeprom_size);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
+  virtual PROCESSOR_TYPE isa(){return _P12F1840_;};
   P12F1840(const char *_name=0, const char *desc=0);
   ~P12F1840();
 
   sfr_register *vrefcon;
 };
+
+class P12LF1840 : public P12F1840
+{
+public:
+  static Processor *construct(const char *name);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
+  virtual PROCESSOR_TYPE isa(){return _P12LF1840_;};
+  P12LF1840(const char *_name=0, const char *desc=0);
+  ~P12LF1840();
+};
+
 class P16F178x : public _14bit_e_processor
 {
 public:
@@ -252,9 +275,20 @@ public:
   static Processor *construct(const char *name);
   virtual void create_sfr_map();
   virtual void create_iopin_map();
-  virtual void create(int ram_top, int eeprom_size);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
   virtual unsigned int program_memory_size() const { return 16384; }
   virtual unsigned int register_memory_size () const { return 0x1000; }
+
+};
+class P16LF1788 : public P16F1788
+{
+public:
+  virtual PROCESSOR_TYPE isa(){return _P16LF1788_;};
+
+ P16LF1788(const char *_name=0, const char *desc=0);
+  ~P16LF1788();
+  static Processor *construct(const char *name);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
 
 };
 class P16F1823 : public P12F1822
@@ -268,20 +302,42 @@ public:
   static Processor *construct(const char *name);
   virtual void create_sfr_map();
   virtual void create_iopin_map();
-  virtual void create(int ram_top, int eeprom_size);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
 
   PicPortBRegister  *m_portc;
   PicTrisRegister  *m_trisc;
   PicLatchRegister *m_latc;
   WPU              *m_wpuc;
 };
+class P16LF1823 : public P16F1823
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16LF1823_;};
+
+ P16LF1823(const char *_name=0, const char *desc=0);
+  ~P16LF1823();
+  static Processor *construct(const char *name);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
+
+};
 class P16F1825 : public P16F1823
 {
 public:
   static Processor *construct(const char *name);
   virtual unsigned int program_memory_size() const { return 8*1024; }
-  virtual void create(int ram_top, int eeprom_size);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
+  virtual PROCESSOR_TYPE isa(){return _P16F1825_;};
   P16F1825(const char *_name=0, const char *desc=0);
   ~P16F1825();
+};
+class P16LF1825 : public P16F1825
+{
+public:
+  static Processor *construct(const char *name);
+  virtual void create(int ram_top, int eeprom_size, int dev_id);
+  virtual PROCESSOR_TYPE isa(){return _P16LF1825_;};
+  P16LF1825(const char *_name=0, const char *desc=0);
+  ~P16LF1825();
 };
 #endif //__P1xF1xxx_H__
