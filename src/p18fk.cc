@@ -116,7 +116,8 @@ P18F14K22::P18F14K22(const char *_name, const char *desc)
     ccptmrs(this),
     pstrcon(this, "pstrcon", "PWM Steering Control Register"),
     sr_module(this),
-    ssp1(this)
+    ssp1(this),
+    osccon2(this, "osccon2", "Oscillator Control Register 2")
 {
 
   if(verbose)
@@ -148,6 +149,7 @@ P18F14K22::~P18F14K22()
     remove_sfr_register(comparator.cmxcon0[0]);
     remove_sfr_register(comparator.cmxcon0[1]);
     remove_sfr_register(comparator.cmxcon1[0]);
+    remove_sfr_register(&osccon2);
 
     remove_sfr_register(&usart.spbrgh);
     remove_sfr_register(&usart.baudcon);
@@ -186,6 +188,7 @@ P18F14K22::~P18F14K22()
     remove_sfr_register(&ssp1.sspcon);
     remove_sfr_register(&ssp1.sspcon2);
     remove_sfr_register(&ssp1.ssp1con3);
+    remove_sfr_register(&osccon2);
 }
 
 
@@ -206,6 +209,7 @@ void P18F14K22::create()
   create_iopin_map();
   
   _16bit_processor::create();
+  remove_sfr_register(&lvdcon);
 
   set_osc_pin_Number(0, 2, &(*m_porta)[5]);
   set_osc_pin_Number(1, 3, &(*m_porta)[4]);
@@ -251,6 +255,8 @@ void P18F14K22::create()
   add_sfr_register(ssp1.sspmsk, 0xf6f, RegisterValue(0xff,0),"sspmask");
 
   eccp1as.setBitMask(0xfc);
+  add_sfr_register(&osccon2, 0xfd2, RegisterValue(0x04,0), "osccon2");
+  ((OSCCON_HS *)osccon)->osccon2 = &osccon2;
 
   // ECCP shutdown trigger
   eccp1as.setIOpin(0, 0, &(*m_portb)[0]);
@@ -410,6 +416,7 @@ void P18F14K22::create_sfr_map()
   add_sfr_register(&osctune,      0xf9b,porv);
   osccon->set_osctune(&osctune);
   osctune.set_osccon(osccon);
+  osccon2.set_osccon(osccon);
  
 
   comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[2], &(*m_porta)[4]);
