@@ -67,6 +67,7 @@ class P18F14K22 : public _16bit_processor
   PSTRCON	pstrcon;
   SR_MODULE	sr_module;
   SSP1_MODULE   ssp1;
+  OSCCON2	osccon2;
 
   WPU		*wpua;
   WPU		*wpub;
