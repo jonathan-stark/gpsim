@@ -11,6 +11,9 @@
 #include "a2dconverter.h"
 #include "pic-ioports.h"
 #include "dsm_module.h"
+#include "cwg.h"
+#include "nco.h"
+#include "clc.h"
 
 #define FOSC0 (1<<0)
 #define FOSC1 (1<<1)
@@ -18,10 +21,13 @@
 #define IESO (1<<12)
 
 
+class APFCON2;
+//class CLC;
+
 class APFCON : public  sfr_register
 {
  public:
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   void set_pins(unsigned int bit, PinModule *pin0, PinModule *pin1)
   {
 	m_bitPin[0][bit] = pin0;
@@ -37,13 +43,28 @@ class APFCON : public  sfr_register
   
   private:
 
+  friend APFCON2;
 PinModule	*m_bitPin[2][8];
 USART_MODULE 	*m_usart;
 SSP1_MODULE 	*m_ssp;
 T1GCON    	*m_t1gcon;
 CCPCON		*m_ccpcon;
+};
+// APFCON for 16f1503
+class APFCON2 : public APFCON
+{
+  public:
 
+    APFCON2(Processor *pCpu, const char *pName, const char *pDesc) :
+	APFCON(pCpu, pName, pDesc), m_nco(0), m_clc(0)
+    {;}
+    virtual void put(unsigned int new_value);
+    void set_CLC(CLC *_clc) { m_clc = _clc;}
+    void set_NCO(NCO *_nco) { m_nco = _nco;}
 
+private:
+  NCO *m_nco;
+  CLC *m_clc;
 };
 
 class P12F1822 : public _14bit_e_processor
@@ -158,6 +179,109 @@ public:
   virtual PROCESSOR_TYPE isa(){return _P12LF1840_;};
   P12LF1840(const char *_name=0, const char *desc=0);
   ~P12LF1840();
+};
+
+class P16F1503 : public _14bit_e_processor
+{
+public:
+ ComparatorModule2 comparator;
+  PIR_SET_2 pir_set_2_def;
+  PIE     pie1;
+  PIR    *pir1;
+  PIE     pie2;
+  PIR    *pir2;
+  PIE     pie3;
+  PIR    *pir3;
+  T2CON_64	  t2con;
+  PR2	  pr2;
+  TMR2    tmr2;
+  T1CON_G   t1con_g;
+  TMRL    tmr1l;
+  TMRH    tmr1h;
+  FVRCON	fvrcon;
+  BORCON	borcon;
+  ANSEL_P 	ansela;
+  ANSEL_P 	anselc;
+  ADCON0  	adcon0;
+  ADCON1_16F 	adcon1;
+  ADCON2_TRIG	adcon2;
+  sfr_register  adresh;
+  sfr_register  adresl;
+  OSCCON_2  	*osccon;
+  OSCTUNE 	osctune;
+  OSCSTAT 	oscstat;
+  WDTCON  	wdtcon;
+  SSP1_MODULE 	ssp;
+  APFCON2	apfcon1;
+  PWMxCON	pwm1con;
+  sfr_register  pwm1dcl;
+  sfr_register  pwm1dch;
+  PWMxCON	pwm2con;
+  sfr_register  pwm2dcl;
+  sfr_register  pwm2dch;
+  PWMxCON	pwm3con;
+  sfr_register  pwm3dcl;
+  sfr_register  pwm3dch;
+  PWMxCON	pwm4con;
+  sfr_register  pwm4dcl;
+  sfr_register  pwm4dch;
+  CWG		cwg;
+  NCO		nco;
+  CLC		clc1;
+  CLC		clc2;
+  CLCDATA	clcdata;
+/* RRR
+  ECCPAS        ccp1as;
+  PSTRCON       pstr1con;
+*/
+
+
+  EEPROM_EXTND     *e;
+  WPU              *m_wpua;
+  IOC              *m_iocap;
+  IOC              *m_iocan;
+  IOCxF            *m_iocaf;
+  PicPortIOCRegister  *m_porta;
+  PicTrisRegister  *m_trisa;
+  PicLatchRegister *m_lata;
+  DACCON0	   *m_daccon0;
+  DACCON1	   *m_daccon1;
+
+  PicPortBRegister  *m_portc;
+  PicTrisRegister  *m_trisc;
+  PicLatchRegister *m_latc;
+
+  
+  virtual PIR *get_pir2() { return (NULL); }
+  virtual PIR *get_pir1() { return (pir1); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_2_def); }
+  virtual EEPROM_EXTND *get_eeprom() { return ((EEPROM_EXTND *)eeprom); }
+  virtual unsigned int program_memory_size() const { return 2048; }
+  virtual unsigned int register_memory_size () const { return 0x1000; }
+ P16F1503(const char *_name=0, const char *desc=0);
+  ~P16F1503();
+  virtual void create_iopin_map();
+  virtual void create_sfr_map();
+  virtual void create_symbols();
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+  virtual void create(int ram_top, int dev_id);
+  virtual void option_new_bits_6_7(unsigned int bits);
+  virtual void enter_sleep();
+  virtual void exit_sleep();
+  virtual void oscillator_select(unsigned int mode, bool clkout);
+  virtual void program_memory_wp(unsigned int mode);
+  static Processor *construct(const char *name);
+
+  unsigned int ram_size;
+
+
+};
+class P16LF1503 : public P16F1503
+{
+public:
+  static Processor *construct(const char *name);
+  P16LF1503(const char *_name=0, const char *desc=0);
+  ~P16LF1503(){;}
 };
 
 class P16F178x : public _14bit_e_processor

@@ -124,6 +124,8 @@ void ADCON0::start_conversion(void)
     return;
   }
 
+  put(value.get() | GO_bit);
+
   guint64 fc = get_cycles().get() + (2 * Tad) /
 		p_cpu->get_ClockCycles_per_Instruction();
 
@@ -262,7 +264,7 @@ void ADCON0::callback(void)
 {
   int channel;
 
-  Dprintf((" ADCON0 Callback: 0x%" PRINTF_GINT64_MODIFIER "x\n",get_cycles().get()));
+  Dprintf((" ADCON0 Callback: 0x%" PRINTF_GINT64_MODIFIER "x ad_state=0x%x\n",get_cycles().get(), ad_state));
 
   //
   // The a/d converter is simulated with a state machine.
@@ -381,6 +383,7 @@ void ADCON0_DIF::put(unsigned int new_value)
 }
 void ADCON0_DIF::put_conversion(void)
 {
+  
   int channel = adcon2->value.get() & 0x0f;
   double dRefSep = m_dSampledVrefHi - m_dSampledVrefLo;
   double dNormalizedVoltage;
@@ -1302,7 +1305,8 @@ void  DACCON0::compute_dac(unsigned int value)
 
     if(value & DACEN)	// DAC is enabled
     {
-	Vout = (Vhigh - Vlow) * daccon1_reg/bit_resolution - Vlow;
+	// Max Vout will be 1 step below Vhigh.
+	Vout = (Vhigh - Vlow) * daccon1_reg/bit_resolution + Vlow;
     }
     else if (value & DACLPS)
 	Vout = Vhigh;
@@ -1314,6 +1318,7 @@ void  DACCON0::compute_dac(unsigned int value)
 
     if (verbose)
         printf("%s-%d adcon1 %p FVRCDA_AD_chan %u Vout %.2f\n", __FUNCTION__, __LINE__, adcon1, FVRCDA_AD_chan, Vout);
+    Dprintf(("DAC DACEN %d output %.2f adcon1=%p Vhigh %.2f bit_res %d daccon1_reg %d\n", (bool)(value & DACEN), Vout, adcon1, Vhigh, bit_resolution, daccon1_reg));
     if(adcon1) adcon1->setVoltRef(FVRCDA_AD_chan, Vout);
     if(cmModule) cmModule->set_DAC_volt(Vout);
     if(cpscon0) cpscon0->set_DAC_volt(Vout);
@@ -1405,6 +1410,7 @@ void  DACCON1::put_value(unsigned int new_value)
 {
   unsigned int masked_value = (new_value & bit_mask);
   value.put(masked_value);
+  Dprintf(("DAC daccon0=%p new_value 0x%x bit_mask 0x%x\n", daccon0, new_value, bit_mask));
   if (daccon0) daccon0->set_dcaccon1_reg(masked_value);
 
   update();
@@ -1416,5 +1422,120 @@ void  DACCON1::put_value(unsigned int new_value)
 ADCON2_DIF::ADCON2_DIF(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu, pName, pDesc)
 {
+}
+
+#ifdef RRR
+//------------------------------------------------------
+// ADCON0
+//
+ADCON0_32::ADCON0_32(Processor *pCpu, const char *pName, const char *pDesc)
+	: ADCON0(pCpu, pName, pDesc)
+{
+}
+void ADCON0_32::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+
+
+  set_Tad(new_value);
+
+  unsigned int old_value=value.get();
+  // SET: Reflect it first!
+  value.put(new_value);
+  if(new_value & ADON) {
+    // The A/D converter is being turned on (or maybe left on)
+
+    if((new_value & ~old_value) & GO_bit) {
+      if (verbose)
+	printf("starting A2D conversion\n");
+      Dprintf(("starting A2D conversion\n"));
+      // The 'GO' bit is being turned on, which is request to initiate
+      // and A/D conversion
+      start_conversion();
+    }
+  } else
+    stop_conversion();
+
+}
+void ADCON0_32::put_conversion(void)
+{
+  
+  double dRefSep = m_dSampledVrefHi - m_dSampledVrefLo;
+  double dNormalizedVoltage;
+  double m_dSampledVLo;
+
+  if (channel == 0x0e) // shift AN21 to adcon0 channel
+	channel = 0x15;
+  if (channel == 0x0f)	// use ADNREF for V-
+	m_dSampledVLo = getVrefLo();
+  else
+	m_dSampledVLo = getChannelVoltage(channel);
+
+  dNormalizedVoltage = (m_dSampledVoltage - m_dSampledVLo)/dRefSep;
+  dNormalizedVoltage = dNormalizedVoltage>1.0 ? 1.0 : dNormalizedVoltage;
+
+  int converted = (int)(m_A2DScale*dNormalizedVoltage + 0.5);
+
+  Dprintf(("put_conversion: V+:%g V-:%g Vrefhi:%g Vreflo:%g conversion:%d normV:%g\n",
+	m_dSampledVoltage, m_dSampledVLo,
+	   m_dSampledVrefHi,m_dSampledVrefLo,converted,dNormalizedVoltage));
+
+  if (verbose)
+	printf ("result=0x%02x\n", converted);
+
+  Dprintf(("%u-bit result 0x%x ADFM %d\n", m_nBits, converted, get_ADFM()));
+
+    if(!get_ADFM()) { // signed
+
+	int sign = 0;
+	if (converted < 0)
+	{
+		sign = 1;
+		converted = -converted;
+	}
+
+	converted = ((converted << (16-m_nBits)) % 0xffff) | sign;
+    }
+      adresl->put(converted & 0xff);
+      adres->put((converted >> 8) & 0xff);
+
+}
+#endif //RRR
+//------------------------------------------------------
+// ADCON2_TRIG for A2D with start trigger ie 16f1503
+//
+ADCON2_TRIG::ADCON2_TRIG(Processor *pCpu, const char *pName, const char *pDesc)
+  : sfr_register(pCpu, pName, pDesc), valid_bits(0xf0), m_adcon0(0)
+{
+}
+
+void ADCON2_TRIG::put(unsigned int new_value)
+{
+    new_value &= valid_bits;
+    trace.raw(write_trace.get() | value.get());
+    put_value(new_value);
+}
+void ADCON2_TRIG::setCMxsync(unsigned int cm, bool output)
+{
+     unsigned int select = value.get() >> 4;
+     printf("setCMxsync() %s cm=%d output=%d\n", name().c_str(), cm, output);
+     if (select)
+     {
+     }
+     assert(cm < 4);
+     CMxsync[cm] = output;
+}
+void ADCON2_TRIG::t0_overflow()
+{
+    unsigned int select = value.get() >> 4;
+
+    if (select == 0x02) 
+    {
+	if (m_adcon0 && (m_adcon0->value.get() & ADCON0::ADON))
+	{
+	    Dprintf(("trigger from timer 0\n"));
+	    m_adcon0->start_conversion();
+	}
+    }
 }
 

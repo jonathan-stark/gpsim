@@ -27,6 +27,8 @@ License along with this library; if not, see
 class TMR0_Interface;
 
 class T1GCON;
+class ADCON2_TRIG;
+class CLC;
 //---------------------------------------------------------
 // TMR0 - Timer
 class TMR0 : public sfr_register, public TriggerObject, public SignalSink
@@ -77,6 +79,8 @@ public:
   virtual void sleep();
   virtual void wake();
   void set_t1gcon(T1GCON *_t1gcon) { m_t1gcon = _t1gcon; }
+  void set_adcon2(ADCON2_TRIG *_adcon2) { m_adcon2 = _adcon2; }
+  void set_clc(CLC *_clc, int index) { m_clc[index] = _clc;}
 
   enum {
 	STOPPED = 0,
@@ -86,6 +90,8 @@ public:
 
 protected:
   T1GCON 	*m_t1gcon;
+  ADCON2_TRIG   *m_adcon2;
+  CLC		*m_clc[4];
 
 private:
   bool 		m_bLastClockedState;

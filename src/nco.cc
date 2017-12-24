@@ -18,6 +18,9 @@ License along with this library; if not, see
 <http://www.gnu.org/licenses/lgpl-2.1.html>.
 */
 
+// NUMERICALLY CONTROLLED OSCILLATOR (NCO) MODULE
+
+
 //#define DEBUG
 #if defined(DEBUG)
 #include "../config.h"
@@ -28,6 +31,7 @@ License along with this library; if not, see
 
 #include "pic-processor.h"
 #include "nco.h"
+#include "clc.h"
 
 
 class NCO_Interface : public Interface
@@ -95,13 +99,15 @@ private:
 	nco1accu(this, pCpu, "nco1accu", "NCOx Accumulator Register-Upper Byte"),
 	nco1inch(this, pCpu, "nco1inch", "NCOx Increment Register-High Byte"),
 	nco1incl(this, pCpu, "nco1incl", "NCOx Increment Register-Low Byte"),
-	pir(0), 
+	pir(0), m_NCOif(0),
 	cpu(pCpu), pinNCOclk(0), pinNCO1(0), NCO1src(0), srcNCO1active(false),
         inc_load(0), inc(1), acc(0), future_cycle(0), last_cycle(0), 
         nco_interface(0), CLKsink(0), CLKstate(false), NCOoverflow(false),
         accFlag(false), pulseWidth(0)
     {
 	acc_hold[0] = acc_hold[1] = acc_hold[2] = 0;
+	for(int i=0; i< 4; i++)
+	    m_clc[i] = 0;
     }
 
     NCO::~NCO()
@@ -194,7 +200,12 @@ private:
 	    nco1con.value.put(value);
 	    outputNCO1(value & NxOUT);
 	    NCOoverflow = false;
-	    pir->set_nco1if();
+	    if (m_NCOif)
+		m_NCOif->Trigger();
+	    else if (pir)
+	      pir->set_nco1if();
+	    else
+		fprintf(stderr, "NCO interrupt method not configured\n");
 	}
 	acc += inc;
 	Dprintf(("NCO::NCOincrement() acc=0x%x inc=0x%x\n", acc, inc));
@@ -241,7 +252,12 @@ private:
 	    }
 	    nco1con.value.put(value);
 	    outputNCO1(value & NxOUT);
-	    pir->set_nco1if();
+	    if (m_NCOif)
+		m_NCOif->Trigger();
+	    else if (pir)
+	      pir->set_nco1if();
+	    else
+		fprintf(stderr, "NCO interrupt method not configured\n");
 	}
 	else if (pulseWidth)
 	{
@@ -307,6 +323,9 @@ private:
     // Set output value for output pin
     void NCO::outputNCO1(bool level)
     {
+	for (int i = 0; i < 4; i++)
+	    if (m_clc[i]) m_clc[i]->NCO_out(level);
+
 	if (NCO1src)
 	{
 	    bool polarity = nco1con.value.get() & NxPOL;
@@ -338,7 +357,7 @@ private:
 	    else
 		pinNCO1->getPin().newGUIname(pinNCO1->getPin().name().c_str());
 	    pinNCO1->setSource(0);
-	    srcNCO1active = true;
+	    srcNCO1active = false;
 	    pinNCO1->updatePinModule();
         }
     }
@@ -385,6 +404,20 @@ private:
     {
         pinNCOclk = pIN;
         pinNCO1 = pOUT;
+    }
+
+    // remap NCO1 pin, called from APFCON
+    void NCO::setNCOxPin(PinModule *pNCOx)
+    {
+	if (pNCOx == pinNCO1) return;
+        if (srcNCO1active)	// old pin active disconnect
+        {
+	    oeNCO1(false);
+	    if (NCO1src) delete NCO1src;
+	    NCO1src = 0;
+        }
+	pinNCO1 = pNCOx;
+	if (nco1con.value.get() & NxOE) oeNCO1(true);
     }
 
     // link from Configurable Logic Cell

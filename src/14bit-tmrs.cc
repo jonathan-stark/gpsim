@@ -28,6 +28,7 @@ License along with this library; if not, see
 #include "14bit-tmrs.h"
 #include "stimuli.h"
 #include "a2dconverter.h"
+#include "clc.h"
 
 //
 // 14bit-tmrs.cc
@@ -1039,6 +1040,8 @@ PWMxCON::PWMxCON(Processor *pCpu, const char *pName, const char *pDesc, char _in
 	pwmdcl(0), pwmdch(0), m_cwg(0), index(_index)
 {
 	mValidBits = 0xd0;
+	for(int i=0; i<4; i++)
+	    m_clc[i] = 0;
 }
 void PWMxCON::put(unsigned int new_value)
 {
@@ -1099,6 +1102,8 @@ void PWMxCON::pwm_match(int level)
 	if (reg != value.get())
 	    put_value(reg);
 	if (m_cwg) m_cwg->out_pwm(level, index);
+        for(int i = 0; i<4; i++)
+	    if (m_clc[i]) m_clc[i]->out_pwm(level, index);
 	if (reg & PWMxOE)
 	{
             m_cOutputState = level ? '1' : '0';
@@ -1514,7 +1519,6 @@ T1CON_G::T1CON_G(Processor *pCpu, const char *pName, const char *pDesc)
 
 T1CON_G::~T1CON_G()
 {
-    delete freq_attribute;
 }
 void T1CON_G::put(unsigned int new_value)
 {
@@ -1662,6 +1666,8 @@ TMRL::TMRL(Processor *pCpu, const char *pName, const char *pDesc)
   tmrh    = 0;
   t1con   = 0;
   compare_queue = 0;
+  for(int i=0; i<4; i++)
+      m_clc[i] = 0;
 }
 
 TMRL::~TMRL()
@@ -1857,6 +1863,8 @@ void TMRL::increment()
       if (verbose & 4)
           cout << "TMRL:increment interrupt now=" << dec << get_cycles().get() << " value_16bit "  << value_16bit << endl;
       m_Interrupt->Trigger();
+      for(int i=0; i<4; i++)
+	if (m_clc[i]) m_clc[i]->t1_overflow();
     }
   }
 
@@ -2255,6 +2263,9 @@ void TMRL::callback()
       if (m_Interrupt)
 	m_Interrupt->Trigger();
 
+      for(int i=0; i<4; i++)
+	if (m_clc[i]) m_clc[i]->t1_overflow();
+
       // Reset the timer to 0.
 
       synchronized_cycle = get_cycles().get();
@@ -2402,6 +2413,8 @@ TMR2::TMR2(Processor *pCpu, const char *pName, const char *pDesc)
   ssp_module[0] = ssp_module[1] = 0;
   value.put(0);
   future_cycle = 0;
+  for (int i = 0; i< 4; i++)
+	m_clc[i] = 0;
   for ( int cc=0; cc<MAX_PWM_CHANS; cc++ )
       ccp[cc] = 0;
 }
@@ -2959,6 +2972,8 @@ void TMR2::callback()
 
 	// This (implicitly) resets the timer to zero:
 	last_cycle = get_cycles().get();
+        for(int i =0; i<4; i++)
+	    if(m_clc[i]) m_clc[i]->t2_match();
 
         if (ssp_module[0])
              ssp_module[0]->tmr2_clock();

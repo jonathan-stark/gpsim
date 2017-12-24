@@ -62,6 +62,7 @@ enum
   EECON1(Processor *pCpu, const char *pName, const char *pDesc);
 
   void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
   unsigned int get();
 
   inline void set_eeprom(EEPROM *ee) { eeprom = ee; }
@@ -69,10 +70,12 @@ enum
   inline unsigned int get_valid_bits() { return (valid_bits); }
   inline void set_bits(unsigned int b) { valid_bits |= b; }
   inline void clear_bits(unsigned int b) { valid_bits &= ~b; }
+  inline void set_always_on(unsigned int b) { always_on_bits = b; }
 
 
   //private:
   unsigned int valid_bits;
+  unsigned int always_on_bits;
   EEPROM *eeprom;
 };
 

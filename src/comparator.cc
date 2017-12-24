@@ -39,6 +39,7 @@ License along with this library; if not, see
 #include "comparator.h"
 #include "a2d_v2.h"
 #include "ctmu.h"
+#include "clc.h"
 
 //#define DEBUG
 #if defined(DEBUG)
@@ -1390,6 +1391,8 @@ ComparatorModule2::ComparatorModule2(Processor *pCpu)
     eccpas[0] = eccpas[1] = eccpas[2] = 0;
     sr_module = 0;
     ctmu_module = 0;
+    for(int i=0; i<4; i++)
+	m_clc[i] = 0;
 }
 ComparatorModule2::~ComparatorModule2()
 {
@@ -1420,6 +1423,9 @@ void ComparatorModule2::set_cmout(unsigned int bit, bool value)
         else
             cmout->value.put(cmout->value.get() & ~(1<<bit));
     }
+
+    for (i=0; i<4; i++)
+	   if (m_clc[i]) m_clc[i]->CxOUT_sync(value, bit);
 
     switch(bit)
     {
