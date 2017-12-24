@@ -76,10 +76,10 @@ private:
 };
 
 // Report state changes on incoming CLK pin
-class CLKSignalSink : public SignalSink
+class ncoCLKSignalSink : public SignalSink
 {
 public:
-  CLKSignalSink(NCO *_nco)
+  ncoCLKSignalSink(NCO *_nco)
     : m_nco(_nco)
   {
   }
@@ -369,7 +369,7 @@ private:
 	    CLKgui = pinNCOclk->getPin().GUIname();
 	    pinNCOclk->getPin().newGUIname("NCLK");
 	    if (!CLKsink)
-		CLKsink = new CLKSignalSink(this);
+		CLKsink = new ncoCLKSignalSink(this);
 	    pinNCOclk->addSink(CLKsink);
 	    CLKstate = pinNCOclk->getPin().getState();
 	}

@@ -27,7 +27,7 @@ NUMERICALLY CONTROLLED OSCILLATOR (NCO) MODULE
 
 class NCO;
 class NCO_Interface;
-class CLKSignalSink;
+class ncoCLKSignalSink;
 class NCOSigSource;
 class PIR;
 class CLC;
@@ -158,7 +158,7 @@ private:
     guint64	    future_cycle;
     guint64	    last_cycle;		// Time of last acc update
     NCO_Interface   *nco_interface;
-    CLKSignalSink   *CLKsink;
+    ncoCLKSignalSink   *CLKsink;
     bool	    CLKstate;
     bool	    NCOoverflow;
     bool	    accFlag;		// acc buffer needs updating

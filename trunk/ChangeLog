@@ -1,4 +1,8 @@
 2017-12-24 Roy Rankin <rrankin@ihug.com.au>
+	* src/nco.cc src/nco.h
+	: Fix sinks with same name causing core dump
+
+2017-12-24 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc src/14bit-tmrs.h src/Makefile.am src/a2dconverter.cc
 	  src/a2dconverter.h src/clc.cc src/clc.h src/comparator.cc 
 	  src/comparator.h src/cwg.cc src/cwg.h src/nco.cc src/nco.h 
