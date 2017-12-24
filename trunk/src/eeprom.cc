@@ -63,8 +63,14 @@ void EECON1::put(unsigned int new_value)
 
 
   trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
+}
+
+void EECON1::put_value(unsigned int new_value)
+{
 
   new_value &= valid_bits;
+  new_value |= always_on_bits;
 
   //cout << "EECON1::put new_value " << hex << new_value << "  valid_bits " << valid_bits << '\n';
   Dprintf(("new_value %x valid_bits %x\n", new_value, valid_bits));
@@ -120,14 +126,12 @@ void EECON1::put(unsigned int new_value)
       } 
       else 
       {
-
         //eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
         eeprom->get_reg_eecon2()->read();
         eeprom->callback();
         value.put(value.get() & ~RD);
       }
   }
-
 }
 
 unsigned int EECON1::get()
@@ -143,6 +147,7 @@ EECON1::EECON1(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc)
 {
   valid_bits = EECON1_VALID_BITS;
+  always_on_bits = 0;
 }
 
 void EECON2::put(unsigned int new_value)
@@ -758,7 +763,6 @@ void EEPROM_EXTND::start_program_memory_read()
 {
 
   rd_adr = eeadr.value.get() | (eeadrh.value.get() << 8);
-
   get_cycles().set_break(get_cycles().get() + 2, this);
   cpu_pic->pc->increment();
 
@@ -799,22 +803,24 @@ void EEPROM_EXTND::callback()
     //cout << "eeread\n";
 
     eecon2.unarm();
-    if(eecon1.value.get() & EECON1::EEPGD) {
-      // read program memory
+    if (eecon1.value.get() & EECON1::CFGS) // Read Config data
+    {
+	unsigned int read_data;
+	read_data = cpu->get_config_word(config_word_base | rd_adr);
+
+        Dprintf(("read_data=0x%x config_word_base=0x%x rd_adr=0x%x\n", read_data, config_word_base, rd_adr));
+        if (read_data == 0xffffffff) read_data = 0;
+	eedata.value.put(read_data & 0xff);
+	eedatah.value.put((read_data>>8) & 0xff);
+    } 
+    else if(eecon1.value.get() & EECON1::EEPGD) // read program memory
+    {
 
         int opcode = cpu->pma->get_opcode(rd_adr);
         eedata.value.put(opcode & 0xff);
         eedatah.value.put((opcode>>8) & 0xff);
 
     }
-    else if (eecon1.value.get() & EECON1::CFGS) // Read Config data
-    {
-	unsigned int read_data;
-	read_data = cpu->get_config_word(config_word_base | rd_adr);
-        if (read_data == 0xffffffff) read_data = 0;
-	eedata.value.put(read_data & 0xff);
-	eedatah.value.put((read_data>>8) & 0xff);
-    } 
     else	// read eeprom data 
     {
       if (eeadr.value.get() < rom_size)
@@ -866,7 +872,8 @@ void EEPROM_EXTND::callback()
 	write_latches[index] = wr_data;
 	break;
 
-    case EECON1::CFGS:	// write config word memory
+    case EECON1::CFGS:			// write config word memory
+    case EECON1::CFGS|EECON1::EEPGD:
 	index = wr_adr & (num_write_latches - 1);
         wr_adr &= ~(num_write_latches - 1);
 	write_latches[index] = wr_data;

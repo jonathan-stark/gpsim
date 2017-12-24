@@ -42,6 +42,8 @@ class CMxSignalSource;
 class VRSignalSource;
 class CMCON;
 class TMRL;
+class ADCON2_TRIG;
+class CLC;
 
   enum compare_inputs
    {
@@ -674,5 +676,7 @@ class ComparatorModule2
   SR_MODULE	*sr_module;
   CTMU		*ctmu_module;
   ECCPAS 	*eccpas[3];
+  ADCON2_TRIG   *m_adcon2;
+  CLC		*m_clc[4];
 };
 #endif // __COMPARATOR_H__

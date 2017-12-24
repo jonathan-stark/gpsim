@@ -394,7 +394,7 @@ void CWG::releasePinSource(PinModule *pin)
 
 void CWG::out_pwm(bool level, char index)
 {
-    assert(index <= 2);
+    if (index >= 2) return;
     if ((level != pwm_state[index-1]) 
          && (con0_value & GxEN)
 	 && ((int)(con1_value & (GxIS0|GxIS1)) == index-1))

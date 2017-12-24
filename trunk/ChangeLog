@@ -1,3 +1,15 @@
+2017-12-24 Roy Rankin <rrankin@ihug.com.au>
+	* src/14bit-tmrs.cc src/14bit-tmrs.h src/Makefile.am src/a2dconverter.cc
+	  src/a2dconverter.h src/clc.cc src/clc.h src/comparator.cc 
+	  src/comparator.h src/cwg.cc src/cwg.h src/nco.cc src/nco.h 
+	  src/tmr0.cc src/tmr0.h
+	: Developing Configurable Logic Cell(CLC)
+	* src/p1xf1xxx.cc src/p1xf1xxx.h src/pic-processor.cc 
+	  src/pic-processor.h
+	: Add p16f1503 and p16lf1503 processors 
+	* src/eeprom.cc src/eeprom.h
+	: Allow read only a one bits
+
 2017-12-12 Roy Rankin <rrankin@ihug.com.au>
 	* src/p18fk.cc src/p18fk.h
 	: Fix 234 Seg fault with pic18f14k22 cod

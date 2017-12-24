@@ -293,6 +293,7 @@ public:
 
 class ADCON2_DIF;
 /* A/D converter with 12 or 10 bit differential input with ADCON2
+   32 possible input channels
  */
 
 class ADCON0_DIF : public ADCON0
@@ -631,7 +632,7 @@ private:
     unsigned int bit_mask;
     DACCON0	*daccon0;
 };
-
+// Differential input and trigger conversion start
 class ADCON2_DIF : public sfr_register, public TriggerObject
 {
 public:
@@ -652,6 +653,58 @@ public:
   ADCON2_DIF(Processor *pCpu, const char *pName, const char *pDesc);
 
 private:
+
+
+};
+
+#ifdef RRR
+// A2D up to 32 channels
+class ADCON0_32 : public ADCON0
+{
+  enum
+    {
+      ADON = 1<<0,
+      GO   = 1<<1,
+      CHS0 = 1<<2,
+      CHS1 = 1<<3,
+      CHS2 = 1<<4,
+      CHS3 = 1<<5,
+      CHS4 = 1<<6,
+    };
+public:
+  ADCON0_32(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void put(unsigned int new_value);
+  virtual void put_conversion(void);
+
+private:
+
+};
+#endif //RRR
+// Trigger conversion start (16f1503)
+class ADCON2_TRIG : public sfr_register
+{
+public:
+
+  enum
+    {
+      TRIGSEL0 = 1<<4,
+      TRIGSEL1 = 1<<5,
+      TRIGSEL2 = 1<<6,
+      TRIGSEL3 = 1<<7,
+    };
+
+
+  ADCON2_TRIG(Processor *pCpu, const char *pName, const char *pDesc);
+  virtual void put(unsigned int new_value);
+  void setValidBits(unsigned int mask) { valid_bits = mask;}
+  void setAdcon0(ADCON0 *_adcon0) { m_adcon0 = _adcon0; }
+  void setCMxsync(unsigned int cm, bool output);
+  void t0_overflow();
+
+private:
+  unsigned int 	valid_bits;
+  bool 		CMxsync[4];
+  ADCON0	*m_adcon0;
 
 
 };

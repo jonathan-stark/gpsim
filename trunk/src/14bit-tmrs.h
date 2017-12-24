@@ -41,6 +41,7 @@ class PIR_SET;
 class InterruptSource;
 class TMR1_Interface;
 class CWG;
+class CLC;
 
 class _14bit_processor;
 
@@ -305,11 +306,13 @@ public:
     { pwmdcl = _pwmdcl; pwmdch = _pwmdch;}
   PWMxCON(Processor *pCpu, const char *pName, const char *pDesc=0, char _index=1);
   void set_cwg(CWG *_cwg) { m_cwg = _cwg;}
+  void set_clc(CLC *_clc, int i) { m_clc[i] = _clc;}
 
 private:
     sfr_register *pwmdcl;
     sfr_register *pwmdch;
     CWG		  *m_cwg;
+    CLC		  *m_clc[4];
     char	  index;
 };
 
@@ -364,9 +367,9 @@ enum
   T1GINV  = 1<<7
 };
 
-  TMRL  *tmrl;
+  TMRL       *tmrl;
   TMR1_Freq_Attribute *freq_attribute;
-  Processor *cpu;
+  Processor  *cpu;
 
   T1CON(Processor *pCpu, const char *pName, const char *pDesc=0);
   ~T1CON();
@@ -614,6 +617,7 @@ public:
 
   void set_T1GSS(bool arg);
   virtual void increment();   // Used when TMR1 is attached to an external clock
+  CLC       *m_clc[4];
 
 private:
   TMR1_Interface *tmr1_interface;
@@ -788,6 +792,7 @@ public:
   T2CON 	*t2con;
   SSP_MODULE	*ssp_module[2];
   T1GCON	*m_txgcon;
+  CLC           *m_clc[4];
 
   virtual void callback();
   virtual void callback_print();

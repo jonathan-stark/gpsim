@@ -31,6 +31,8 @@ License along with this library; if not, see
 
 #include <string>
 #include "stimuli.h"
+#include "a2dconverter.h"
+#include "clc.h"
 
 #include "xref.h"
 
@@ -77,6 +79,8 @@ TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
   prescale=1;
   m_bLastClockedState=false;
   new_name("tmr0");
+  for(int i=0; i<4; i++)
+	m_clc[i] = 0;
 }
 
 //------------------------------------------------------------------------
@@ -419,6 +423,9 @@ void TMR0::set_t0if()
 	// is cleared, so I am assuming it is just a pulse. RRR
 	m_t1gcon->T0_gate(false);
   }
+  if (m_adcon2) m_adcon2->t0_overflow();
+  for(int i =0; i < 4; i++)
+	if (m_clc[i]) m_clc[i]->t0_overflow();
 }
 
 
