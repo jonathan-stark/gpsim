@@ -228,6 +228,8 @@ ${RT}       p16f684 sim_wdt_16f684
 
 ${RT}       p1xf18xx sim_p12f1822
 ${RT}       p1xf18xx sim_p12f1822_usart
+${RT}       p1xf18xx sim_p16f1503
+${RT}       p1xf18xx sim_p16f1503_nco
 ${RT}       p1xf18xx sim_p16f1823
 ${RT}       p1xf18xx sim_p16f1823_comp
 ${RT}       p1xf18xx sim_p16f1823_i2c

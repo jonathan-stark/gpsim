@@ -1064,12 +1064,12 @@ P16F1503::P16F1503(const char *_name, const char *desc)
     pwm4con(this, "pwm4con", "PWM 4 Control Register", 3),
     pwm4dcl(this, "pwm4dcl", "PWM 4 DUTY CYCLE LOW BITS"),
     pwm4dch(this, "pwm4dch", "PWM 4 DUTY CYCLE HIGH BITS"),
-    cwg(this), nco(this), clc1(this, 0), clc2(this, 1),
-    clcdata(this, "clcdata", "CLC Data Output")
-
-//RRR    pstr1con(this, "pstr1con", "Pulse Sterring Control Register")
-
-
+    cwg(this), nco(this), 
+    clcdata(this, "clcdata", "CLC Data Output"), 
+    clc1(this, 0, &clcdata), clc2(this, 1, &clcdata),
+	frc(600000., CLC::FRC_IN), 
+	lfintosc(32000., CLC::LFINTOSC),  // 32kHz is within tolerance or 31kHz 
+	hfintosc(16e6, CLC::HFINTOSC)
 {
   m_portc= new PicPortBRegister(this,"portc","", intcon, 8,0x3f);
   m_trisc = new PicTrisRegister(this,"trisc","", m_portc, false, 0x3f);
@@ -1375,6 +1375,8 @@ void P16F1503::create_sfr_map()
 
   nco.setIOpins(&(*m_porta)[5], &(*m_portc)[1]);
   nco.m_NCOif = new InterruptSource(pir2, 4);
+  nco.set_clc(&clc1, 0);
+  nco.set_clc(&clc2, 1);
 
 
   add_sfr_register(&pwm1dcl,  0x611, RegisterValue(0,0));
@@ -1414,8 +1416,17 @@ void P16F1503::create_sfr_map()
   add_sfr_register(&clc2.clcxgls2, 0xf1e, RegisterValue(0,0), "clc2gls2");
   add_sfr_register(&clc2.clcxgls3, 0xf1f, RegisterValue(0,0), "clc2gls3");
 
-  clc1.clcdata = &clcdata;
-  clc2.clcdata = &clcdata;
+  clc1.frc = &frc;
+  clc2.frc = &frc;
+  clc1.lfintosc = &lfintosc;
+  clc2.lfintosc = &lfintosc;
+  clc1.hfintosc = &hfintosc;
+  clc2.hfintosc = &hfintosc;
+  clc1.p_nco = &nco;
+  clcdata.set_clc(&clc1, &clc2);
+  frc.set_clc(&clc1, &clc2);
+  lfintosc.set_clc(&clc1, &clc2);
+  hfintosc.set_clc(&clc1, &clc2);
   tmr0.set_clc(&clc1, 0);
   tmr0.set_clc(&clc2, 1);
   t1con_g.tmrl->m_clc[0] = tmr2.m_clc[0] = &clc1;
@@ -1425,6 +1436,8 @@ void P16F1503::create_sfr_map()
 
   clc1.set_clcPins(&(*m_porta)[3], &(*m_portc)[4], &(*m_porta)[2]);
   clc2.set_clcPins(&(*m_portc)[3], &(*m_porta)[5], &(*m_portc)[0]);
+  clc1.setInterruptSource(new InterruptSource(pir3, 1));
+  clc2.setInterruptSource(new InterruptSource(pir3, 2));
 
   tmr2.ssp_module[0] = &ssp;
 
@@ -1439,6 +1452,7 @@ void P16F1503::create_sfr_map()
     );
     apfcon1.set_ValidBits(0x3b);
     apfcon1.set_ssp(&ssp);
+    apfcon1.set_CLC(&clc1);
     apfcon1.set_t1gcon(&t1con_g.t1gcon);
     apfcon1.set_NCO(&nco);
     apfcon1.set_pins(0, &(*m_portc)[1], &(*m_porta)[4]); //NCO
@@ -1464,51 +1478,47 @@ void P16F1503::create_sfr_map()
 
     pr2.tmr2    = &tmr2;
 
-  pwm1con.set_pwmdc(&pwm1dcl, &pwm1dch);
-  pwm1con.setIOPin1(&(*m_portc)[5]);
-  pwm1con.set_tmr2(&tmr2);
-  pwm1con.set_cwg(&cwg);
-  pwm1con.set_clc(&clc1, 0);
-  pwm1con.set_clc(&clc2, 1);
-  pwm2con.set_pwmdc(&pwm2dcl, &pwm2dch);
-  pwm2con.setIOPin1(&(*m_portc)[3]);
-  pwm2con.set_tmr2(&tmr2);
-  pwm2con.set_cwg(&cwg);
-  pwm2con.set_clc(&clc1, 0);
-  pwm2con.set_clc(&clc2, 1);
-  pwm3con.set_pwmdc(&pwm3dcl, &pwm3dch);
-  pwm3con.setIOPin1(&(*m_porta)[2]);
-  pwm3con.set_tmr2(&tmr2);
-  pwm3con.set_cwg(&cwg);
-  pwm3con.set_clc(&clc1, 0);
-  pwm3con.set_clc(&clc2, 1);
-  pwm4con.set_pwmdc(&pwm4dcl, &pwm4dch);
-  pwm4con.setIOPin1(&(*m_portc)[1]);
-  pwm4con.set_tmr2(&tmr2);
-  pwm4con.set_cwg(&cwg);
-  pwm4con.set_clc(&clc1, 0);
-  pwm4con.set_clc(&clc2, 1);
-
-  cwg.set_IOpins(&(*m_portc)[5], &(*m_portc)[4], &(*m_porta)[2]);
-
-/* RRR
-*/
-
-
+    pwm1con.set_pwmdc(&pwm1dcl, &pwm1dch);
+    pwm1con.setIOPin1(&(*m_portc)[5]);
+    pwm1con.set_tmr2(&tmr2);
+    pwm1con.set_cwg(&cwg);
+    pwm1con.set_clc(&clc1, 0);
+    pwm1con.set_clc(&clc2, 1);
+    pwm2con.set_pwmdc(&pwm2dcl, &pwm2dch);
+    pwm2con.setIOPin1(&(*m_portc)[3]);
+    pwm2con.set_tmr2(&tmr2);
+    pwm2con.set_cwg(&cwg);
+    pwm2con.set_clc(&clc1, 0);
+    pwm2con.set_clc(&clc2, 1);
+    pwm3con.set_pwmdc(&pwm3dcl, &pwm3dch);
+    pwm3con.setIOPin1(&(*m_porta)[2]);
+    pwm3con.set_tmr2(&tmr2);
+    pwm3con.set_cwg(&cwg);
+    pwm3con.set_clc(&clc1, 0);
+    pwm3con.set_clc(&clc2, 1);
+    pwm4con.set_pwmdc(&pwm4dcl, &pwm4dch);
+    pwm4con.setIOPin1(&(*m_portc)[1]);
+    pwm4con.set_tmr2(&tmr2);
+    pwm4con.set_cwg(&cwg);
+    pwm4con.set_clc(&clc1, 0);
+    pwm4con.set_clc(&clc2, 1);
+  
+    cwg.set_IOpins(&(*m_portc)[5], &(*m_portc)[4], &(*m_porta)[2]);
+  
     ansela.config(0x17, 0);
     ansela.setValidBits(0x17);
     ansela.setAdcon1(&adcon1);
-
+  
     anselc.config(0x0f, 4);
     anselc.setValidBits(0x0f);
     anselc.setAdcon1(&adcon1);
     ansela.setAnsel(&anselc);
     anselc.setAnsel(&ansela);
-
+  
     adcon0.setAdresLow(&adresl);
     adcon0.setAdres(&adresh);
     adcon0.setAdcon1(&adcon1);
-  //  adcon0.setAdcon2(&adcon2);
+    //  adcon0.setAdcon2(&adcon2);
     adcon0.setIntcon(intcon);
     adcon0.setA2DBits(10);
     adcon0.setPir(pir1);
@@ -1516,9 +1526,9 @@ void P16F1503::create_sfr_map()
     adcon0.setChannel_shift(2);
     adcon0.setGo(1);
     adcon2.setAdcon0(&adcon0);
-
+  
     tmr0.set_adcon2(&adcon2);
-
+  
     adcon1.setAdcon0(&adcon0);
     adcon1.setNumberOfChannels(32); // not all channels are used
     adcon1.setIOPin(0, &(*m_porta)[0]);
@@ -1531,14 +1541,14 @@ void P16F1503::create_sfr_map()
     adcon1.setIOPin(7, &(*m_portc)[3]);
     adcon1.setValidBits(0xf7);
     adcon1.setVrefHiConfiguration(0, 0);
-//RRR    adcon1.setVrefLoConfiguration(0, 2);
+  //RRR    adcon1.setVrefLoConfiguration(0, 2);
     adcon1.set_FVR_chan(0x1f);
-
+  
     comparator.cmxcon1[0]->set_INpinNeg(&(*m_porta)[0], &(*m_portc)[1],  &(*m_portc)[2],  &(*m_portc)[3]);
     comparator.cmxcon1[1]->set_INpinNeg(&(*m_porta)[0], &(*m_portc)[1],  &(*m_portc)[2],  &(*m_portc)[3]);
     comparator.cmxcon1[0]->set_INpinPos(&(*m_porta)[0]);
     comparator.cmxcon1[1]->set_INpinPos(&(*m_portc)[0]);
-
+  
     comparator.cmxcon1[0]->set_OUTpin(&(*m_porta)[2]);
     comparator.cmxcon1[1]->set_OUTpin(&(*m_portc)[4]);
     comparator.cmxcon0[0]->setBitMask(0xbf);

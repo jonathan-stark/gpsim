@@ -1,3 +1,13 @@
+2018-01-24 Roy Rankin <rrankin@ihug.com.au>
+	* src/clc.cc src/clc.h src/nco.cc src/nco.h src/p12f6xx.cc 
+	  src/p12f6xx.h src/p1xf1xxx.cc src/p1xf1xxx.h
+	: CLC operational for p16f1503 and p10f320  
+	*  regression/i2c/Makefile regression/p10f32x/Makefile
+	   regression/p1xf18xx/Makefile regression/p1xf18xx/p16f1503.asm 
+	   regression/p1xf18xx/p16f1503_nco.asm 
+	   regression/p1xf18xx/p16f1788_comp.asm regression/run_regression.sh
+	: New regression tests
+
 2017-12-24 Roy Rankin <rrankin@ihug.com.au>
 	* src/nco.cc src/nco.h
 	: Fix sinks with same name causing core dump

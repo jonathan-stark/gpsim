@@ -652,7 +652,8 @@ P10F32X::P10F32X(const char *_name, const char *desc)
     pwm2con(this, "pwm2con", "PWM CONTROL REGISTER 2", 2),
     pwm2dcl(this, "pwm2dcl", "PWM DUTY CYCLE LOW BITS"),
     pwm2dch(this, "pwm2dch", "PWM DUTY CYCLE HIGH BITS"),
-    pm_rw(this), cwg(this), nco(this)
+    pm_rw(this), cwg(this), nco(this), clcdata(this),
+    clc1(this, 0, &clcdata)
 
 {
   m_iocaf = new IOCxF(this, "iocaf", "Interrupt-On-Change flag Register", 0x0f);
@@ -711,6 +712,14 @@ P10F32X::~P10F32X()
   remove_sfr_register(&nco.nco1inch);
   remove_sfr_register(&nco.nco1con);
   remove_sfr_register(&nco.nco1clk);
+  remove_sfr_register(&clc1.clcxcon);
+  remove_sfr_register(&clc1.clcxpol);
+  remove_sfr_register(&clc1.clcxsel0);
+  remove_sfr_register(&clc1.clcxsel1);
+  remove_sfr_register(&clc1.clcxgls0);
+  remove_sfr_register(&clc1.clcxgls1);
+  remove_sfr_register(&clc1.clcxgls2);
+  remove_sfr_register(&clc1.clcxgls3);
   remove_sfr_register(&cwg.cwg1con0);
   remove_sfr_register(&cwg.cwg1con1);
   remove_sfr_register(&cwg.cwg1con2);
@@ -817,6 +826,14 @@ void P10F32X::create_sfr_map()
   add_sfr_register(&nco.nco1clk,  0x2e, RegisterValue(0,0));
 
   add_sfr_register(&wdtcon,   0x30, RegisterValue(0x16,0));
+  add_sfr_register(&clc1.clcxcon, 0x31, RegisterValue(0,0), "clc1con");
+  add_sfr_register(&clc1.clcxpol, 0x32, RegisterValue(0,0), "clc1pol");
+  add_sfr_register(&clc1.clcxsel0, 0x33, RegisterValue(0,0), "clc1sel0");
+  add_sfr_register(&clc1.clcxsel1, 0x34, RegisterValue(0,0), "clc1sel1");
+  add_sfr_register(&clc1.clcxgls0, 0x35, RegisterValue(0,0), "clc1gls0");
+  add_sfr_register(&clc1.clcxgls1, 0x36, RegisterValue(0,0), "clc1gls1");
+  add_sfr_register(&clc1.clcxgls2, 0x37, RegisterValue(0,0), "clc1gls2");
+  add_sfr_register(&clc1.clcxgls3, 0x38, RegisterValue(0,0), "clc1gls3");
   add_sfr_register(&cwg.cwg1con0, 0x39, RegisterValue(0,0)); 
   add_sfr_register(&cwg.cwg1con1, 0x3a); 
   add_sfr_register(&cwg.cwg1con2, 0x3b); 
@@ -859,13 +876,19 @@ void P10F32X::create_sfr_map()
   pwm1con.setIOPin1(&(*m_porta)[0]);
   pwm1con.set_tmr2(&tmr2);
   pwm1con.set_cwg(&cwg);
+  pwm1con.set_clc(&clc1, 0);
   pwm2con.set_pwmdc(&pwm2dcl, &pwm2dch);
   pwm2con.setIOPin1(&(*m_porta)[1]);
   pwm2con.set_tmr2(&tmr2);
   pwm2con.set_cwg(&cwg);
+  pwm2con.set_clc(&clc1, 0);
 
   cwg.set_IOpins(&(*m_porta)[0], &(*m_porta)[1], &(*m_porta)[2]);
 
+  clc1.p_nco = &nco;
+  clc1.set_clcPins(&(*m_porta)[0], &(*m_porta)[2], &(*m_porta)[1]);
+  tmr0.set_clc(&clc1, 0);
+  clc1.setInterruptSource(new InterruptSource(pir1, (1<<3)));
   nco.setIOpins(&(*m_porta)[1], &(*m_porta)[2]);
   nco.pir = pir1;
 
