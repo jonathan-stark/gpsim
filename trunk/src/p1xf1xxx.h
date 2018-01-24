@@ -227,9 +227,12 @@ public:
   sfr_register  pwm4dch;
   CWG		cwg;
   NCO		nco;
+  CLCDATA	clcdata;
   CLC		clc1;
   CLC		clc2;
-  CLCDATA	clcdata;
+  OSC_SIM	frc;
+  OSC_SIM	lfintosc;
+  OSC_SIM	hfintosc;
 /* RRR
   ECCPAS        ccp1as;
   PSTRCON       pstr1con;

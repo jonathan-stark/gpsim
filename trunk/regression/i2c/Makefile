@@ -5,11 +5,14 @@
 include ../make.regression
 
 
-all :   p16f876a.cod p16f88.cod p16f819.cod
+all :   p16f876a.cod p16f88.cod p16f819.cod p16f876a_2par.cod
 
 
 p%.cod : p%.o
-	gplink --map -s $*.lkr -o $@  $<
+	gplink --map -o $@  $<
+
+ds1307.cod : ds1307.o
+	gplink --map -o $@  $<
 
 p16f88.cod: p16f88.asm i2c_low.inc
 

@@ -32,6 +32,7 @@ License along with this library; if not, see
 #include "pm_rd.h"
 #include "cwg.h"
 #include "nco.h"
+#include "clc.h"
 
 class WPU;
 class IOC;
@@ -156,7 +157,9 @@ public:
   sfr_register  pwm2dch;
   PM_RW		pm_rw;
   CWG		cwg;
-  NCO		nco;
+  NCO2		nco;
+  CLCDATA	clcdata;
+  CLC1		clc1;
 
   PicPortIOCRegister  *m_porta;
   PicTrisRegister  *m_trisa;

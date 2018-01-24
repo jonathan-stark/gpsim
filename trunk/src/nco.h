@@ -108,6 +108,11 @@ public:
 	// NCOxCLK
 	NxPW_mask = 0xe0,
 	NxCLKS_mask = 0x03,
+	// the follow are pseudo values returned from clock_src()
+	HFINTOSC = 0,
+	FOSC = 1,
+	LC1_OUT = 2,
+	NCO1CLK = 3
 
 	};
 
@@ -120,6 +125,7 @@ public:
     NCOxINCL nco1incl;
     NCO(Processor *pCpu);
     ~NCO();
+    virtual int clock_src();
     void current_value();
     void set_acc_buf();
     void set_inc_buf();
@@ -164,6 +170,15 @@ private:
     bool	    accFlag;		// acc buffer needs updating
     unsigned int    pulseWidth;
     CLC		    *m_clc[4];
+};
+
+// NCO with clock layout ala 10f320
+class NCO2 : public NCO
+{
+public:
+    NCO2(Processor *pCpu);
+    virtual int clock_src();
+
 };
 
 #endif //__NCO_h__
