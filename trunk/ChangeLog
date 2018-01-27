@@ -1,3 +1,9 @@
+2018-01-27 Roy Rankin <rrankin@ihug.com.au>
+	* src/makefile.mingw
+	: Add new files for windows build
+	* src/tmr0.cc src/uart.cc
+	: Fix bug 235 	Core dump when specifying processor
+
 2018-01-24 Roy Rankin <rrankin@ihug.com.au>
 	* src/clc.cc src/clc.h src/nco.cc src/nco.h src/p12f6xx.cc 
 	  src/p12f6xx.h src/p1xf1xxx.cc src/p1xf1xxx.h

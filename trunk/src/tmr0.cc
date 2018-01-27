@@ -69,7 +69,7 @@ class TMR0_Interface : public Interface
 //--------------------------------------------------
 TMR0::TMR0(Processor *pCpu, const char *pName, const char *pDesc)
   : sfr_register(pCpu,pName,pDesc),
-    m_pOptionReg(0), m_t1gcon(0), t0xcs(false), tmr0_interface(0)
+    m_pOptionReg(0), m_t1gcon(0), m_adcon2(0), t0xcs(false), tmr0_interface(0)
 {
   value.put(0);
   synchronized_cycle=0;

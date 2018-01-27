@@ -54,6 +54,7 @@ src_OBJECTS =			\
 	cod.o			\
 	comparator.o		\
 	ctmu.o			\
+	cwg.o			\
 	dsm_module.o		\
 	eeprom.o		\
 	errors.o		\

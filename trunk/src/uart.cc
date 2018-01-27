@@ -200,6 +200,7 @@ _TXSTA::_TXSTA(Processor *pCpu, const char *pName, const char *pDesc, USART_MODU
     m_PinModule(0),
     m_source(0),
     m_control(0),
+    m_clkSink(0),
     SourceActive(false),
     m_cTxState('?'),
     bInvertPin(0)
