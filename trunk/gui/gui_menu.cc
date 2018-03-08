@@ -803,6 +803,9 @@ fileopen_dialog(GtkAction *action, gpointer user_data)
         "Open failed. Could not open \"%s\"", filename);
       gui_message(msg);
       g_free(msg);
+    } else {
+      GtkAction *menu_item = gtk_ui_manager_get_action(ui, "/menu/FileMenu/Open");
+      gtk_action_set_sensitive(menu_item, FALSE);
     }
     g_free(filename);
   }

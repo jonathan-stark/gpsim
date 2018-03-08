@@ -1,3 +1,7 @@
+2018-03-03 Errol van de l'Isle <errol@mail.uk>
+	* gui/gui_menu.cc
+	: Grey out the open file option on succesful open with the GUI
+
 2018-01-27 Roy Rankin <rrankin@ihug.com.au>
 	* src/makefile.mingw
 	: Add new files for windows build
@@ -5,12 +9,12 @@
 	: Fix bug 235 	Core dump when specifying processor
 
 2018-01-24 Roy Rankin <rrankin@ihug.com.au>
-	* src/clc.cc src/clc.h src/nco.cc src/nco.h src/p12f6xx.cc 
+	* src/clc.cc src/clc.h src/nco.cc src/nco.h src/p12f6xx.cc
 	  src/p12f6xx.h src/p1xf1xxx.cc src/p1xf1xxx.h
-	: CLC operational for p16f1503 and p10f320  
+	: CLC operational for p16f1503 and p10f320
 	*  regression/i2c/Makefile regression/p10f32x/Makefile
-	   regression/p1xf18xx/Makefile regression/p1xf18xx/p16f1503.asm 
-	   regression/p1xf18xx/p16f1503_nco.asm 
+	   regression/p1xf18xx/Makefile regression/p1xf18xx/p16f1503.asm
+	   regression/p1xf18xx/p16f1503_nco.asm
 	   regression/p1xf18xx/p16f1788_comp.asm regression/run_regression.sh
 	: New regression tests
 
@@ -20,13 +24,13 @@
 
 2017-12-24 Roy Rankin <rrankin@ihug.com.au>
 	* src/14bit-tmrs.cc src/14bit-tmrs.h src/Makefile.am src/a2dconverter.cc
-	  src/a2dconverter.h src/clc.cc src/clc.h src/comparator.cc 
-	  src/comparator.h src/cwg.cc src/cwg.h src/nco.cc src/nco.h 
+	  src/a2dconverter.h src/clc.cc src/clc.h src/comparator.cc
+	  src/comparator.h src/cwg.cc src/cwg.h src/nco.cc src/nco.h
 	  src/tmr0.cc src/tmr0.h
 	: Developing Configurable Logic Cell(CLC)
-	* src/p1xf1xxx.cc src/p1xf1xxx.h src/pic-processor.cc 
+	* src/p1xf1xxx.cc src/p1xf1xxx.h src/pic-processor.cc
 	  src/pic-processor.h
-	: Add p16f1503 and p16lf1503 processors 
+	: Add p16f1503 and p16lf1503 processors
 	* src/eeprom.cc src/eeprom.h
 	: Allow read only a one bits
 
@@ -57,18 +61,18 @@
 
 2017-10-15 Roy Rankin <rrankin@ihug.com.au>
 	* src/ssp.cc src/ssp.h
-	: bug #232 pic12f1822: I2C reads not working 
+	: bug #232 pic12f1822: I2C reads not working
 
 2017-10-02 Roy Rankin <rrankin@ihug.com.au>
 	* gpsim/main.cc
 	: Fix core dump
-	* regression/p10f32x/Makefile regression/p10f32x/p10f320.asm 
+	* regression/p10f32x/Makefile regression/p10f32x/p10f320.asm
 	  regression/p10f32x/p10f320_cwg.asm regression/p10f32x/p10f320_nco.asm
 	  regression/run_regression.sh src/14bit-tmrs.cc src/14bit-tmrs.h
 	  src/Makefile.am src/ctmu.cc src/cwg.cc src/cwg.h src/nco.cc src/nco.h
 	  src/p12f6xx.cc src/p12f6xx.h src/pir.h
-	: Add Complementary Waveform Generator (CWG) and 
-	  Numerically Controlled Oscillator (NCOx) to p10f32x 
+	: Add Complementary Waveform Generator (CWG) and
+	  Numerically Controlled Oscillator (NCOx) to p10f32x
 
 2017-09-22 Roy Rankin <rrankin@ihug.com.au>
 	* gui/gtkextra/gtkitementry.c
@@ -82,19 +86,19 @@
 
 2017-09-18 Roy Rankin <rrankin@ihug.com.au>
 	* modules/i2c2par.cc
-	: Fix Bug #231 i2c2par: Non-default slave addresses not honoured 
+	: Fix Bug #231 i2c2par: Non-default slave addresses not honoured
 
 2017-09-16 Roy Rankin <rrankin@ihug.com.au>
 	* src/uart.cc
-	: Fix Bug #230 PIC12F1822: RS232 Tx doesn't work unless Rx also enabled 
+	: Fix Bug #230 PIC12F1822: RS232 Tx doesn't work unless Rx also enabled
 	* src/a2dconverter.cc
 	: Turn off debug output
 
 2017-09-08 Roy Rankin <rrankin@ihug.com.au>
-	* regression/p10f32x regression/p10f32x/Makefile 
-	  regression/p10f32x/p10f320.asm src/14bit-processors.cc 
-	  src/14bit-processors.h src/14bit-registers.cc src/14bit-registers.h 
-	  src/14bit-tmrs.cc src/14bit-tmrs.h src/a2dconverter.cc 
+	* regression/p10f32x regression/p10f32x/Makefile
+	  regression/p10f32x/p10f320.asm src/14bit-processors.cc
+	  src/14bit-processors.h src/14bit-registers.cc src/14bit-registers.h
+	  src/14bit-tmrs.cc src/14bit-tmrs.h src/a2dconverter.cc
 	  src/a2dconverter.h src/p12f6xx.cc src/p12f6xx.h src/pic-processor.cc
           src/pic-processor.h src/pm_rd.cc src/pm_rd.h
 	: Add P10[L]F32x processors - partial functionality
@@ -105,7 +109,7 @@
 	* configure.ac
 	: Change to development release 0.30.1
 	* src/trace.cc
-	: bug 225 Program counter traces always decoded as single cycles due 
+	: bug 225 Program counter traces always decoded as single cycles due
 	  to regression in r601
 
 2017-06-12 Roy Rankin <rrankin@ihug.com.au>
@@ -113,7 +117,7 @@
 	: Change to release 0.30.0
 	* extras/i2c2par extras/i2c2par/Makefile.am extras/i2c2par/examples
 	  extras/i2c2par/examples/Makefile.am extras/i2c2par/examples/i2c2par.asm
-	  extras/i2c2par/i2c2par.cc extras/i2c2par/i2c2par.h 
+	  extras/i2c2par/i2c2par.cc extras/i2c2par/i2c2par.h
 	  extras/i2c2par/makefile.mingw extras/i2c2par/module_manager.cc
 	: Delete i2c2par source in extras as it is already included
 	* extras/lcd/raw_lcd.cc extras/lcd/raw_lcd.h
@@ -121,36 +125,36 @@
 	* plat/win32/gpsim.nsi
 	: Fix windows cleanup
 	* extras/lcd/examples/lcd_916.asm extras/lcd/examples/lcd_917.asm
-	  extras/lcd/examples/lcd_mod.asm regression/a2d/p16c71.asm 
+	  extras/lcd/examples/lcd_mod.asm regression/a2d/p16c71.asm
 	  regression/a2d/p16f819.asm regression/a2d/p16f871.asm
 	  regression/a2d/p16f873a.asm regression/a2d/p16f874a.asm
-	  regression/a2d/p16f88.asm regression/ccp/pwm_877a.asm 
-	  regression/comparator/compar_882.asm regression/epwm/p16f882.asm 
+	  regression/a2d/p16f88.asm regression/ccp/pwm_877a.asm
+	  regression/comparator/compar_882.asm regression/epwm/p16f882.asm
 	  regression/epwm/p16f887.asm regression/epwm/p18f1220.asm
 	  regression/epwm/p18f2321.asm regression/epwm/p18f26k22.asm
-	  regression/epwm/p18f4321.asm regression/i2c/p16f819.asm 
-	  regression/i2c/p16f88.asm 
-	  regression/instructions_14bit/instructions_14bit.asm 
-	  regression/logic_test/logic_test.asm regression/node_test/node_test.asm 
-	  regression/p16f684/a2d_684.asm regression/p16f684/epwm.asm 
-	  regression/p16f690/epwm.asm regression/p16f84/p16f84.asm 
-	  regression/p16f88x/a2d.asm regression/p16f88x/comparator.asm 
-	  regression/p16f88x/epwm.asm regression/p16f88x/i2c_slave.asm 
-	  regression/p16f88x/p16f882.asm regression/p16f88x/p16f883.asm 
-	  regression/p16f88x/p16f886.asm regression/p16f88x/p16f887.asm 
-	  regression/p16f91x/i2c_slave.asm regression/p16f91x/p16f913.asm 
-	  regression/p16f91x/p16f914.asm regression/p16f91x/p16f916.asm 
-	  regression/p16f91x/p16f917.asm regression/p16f91x/pwm_914.asm 
-	  regression/p1xf18xx/p16f1823_spi.asm regression/psp/p16f871.asm 
-	  regression/psp/p18f452.asm regression/psp/p18f6520.asm 
-	  regression/register_stim/register_stim.asm 
+	  regression/epwm/p18f4321.asm regression/i2c/p16f819.asm
+	  regression/i2c/p16f88.asm
+	  regression/instructions_14bit/instructions_14bit.asm
+	  regression/logic_test/logic_test.asm regression/node_test/node_test.asm
+	  regression/p16f684/a2d_684.asm regression/p16f684/epwm.asm
+	  regression/p16f690/epwm.asm regression/p16f84/p16f84.asm
+	  regression/p16f88x/a2d.asm regression/p16f88x/comparator.asm
+	  regression/p16f88x/epwm.asm regression/p16f88x/i2c_slave.asm
+	  regression/p16f88x/p16f882.asm regression/p16f88x/p16f883.asm
+	  regression/p16f88x/p16f886.asm regression/p16f88x/p16f887.asm
+	  regression/p16f91x/i2c_slave.asm regression/p16f91x/p16f913.asm
+	  regression/p16f91x/p16f914.asm regression/p16f91x/p16f916.asm
+	  regression/p16f91x/p16f917.asm regression/p16f91x/pwm_914.asm
+	  regression/p1xf18xx/p16f1823_spi.asm regression/psp/p16f871.asm
+	  regression/psp/p18f452.asm regression/psp/p18f6520.asm
+	  regression/register_stim/register_stim.asm
 	  regression/resistor/resistor.asm regression/switch_test/switch_test.asm
 	: Align interrupt code
 
 2017-06-10 Roy Rankin <rrankin@ihug.com.au>
-	* PROCESSORS doc/gpsim.html src/p18x.cc src/p18x.h src/pic-processor.cc 
+	* PROCESSORS doc/gpsim.html src/p18x.cc src/p18x.h src/pic-processor.cc
 	  src/pic-processor.h
-	: patch #46 Support for 18F258/18F458 
+	: patch #46 Support for 18F258/18F458
 	* src/16bit-registers.h src/pic-registers.cc src/registers.h
 	:  bug #229 PCL of 16-bit devices isn't shown properly in RAM view
 	* src/comparator.h
@@ -179,7 +183,7 @@
 2017-06-01 Roy Rankin <rrankin@ihug.com.au>
 	* src/makefile.mingw plat/win32/gpsim.nsi extras/makefile.mingw
 	  gpsim/makefile.mingw gui/makefile.mingw plat/win32/make.mingw
-	  extras/ds1307/examples/Makefile extras/Makefile.am 
+	  extras/ds1307/examples/Makefile extras/Makefile.am
 	  src/uart.cc src/uart.h
 	: Fix windows build
 	* extras/lcd/Makefile.am extras/lcd/examples/lcd_916.asm
@@ -198,7 +202,7 @@
 	* src/p16f88x.cc
 	: fix 16f685 program memory r/w
 	* src/p16f8x.cc src/p16f8x.h src/14bit-registers.cc
-	  src/14bit-registers.h src/p1xf1xxx.cc 
+	  src/14bit-registers.h src/p1xf1xxx.cc
 	  regression/p18f26k22/osccon_26k22.asm
 	: Fix osccon wake issue
 
@@ -209,10 +213,10 @@
 	  regression/p16f91x/p16f914.asm regression/p16f91x/p16f916.asm
 	  regression/p16f91x/p16f917.asm regression/p16f91x/pwm_914.asm
 	  regression/p16f91x/usart_917.asm regression/p18f26k22/osccon_26k22.asm
-	  regression/run_regression.sh src/14bit-processors.cc 
+	  regression/run_regression.sh src/14bit-processors.cc
 	  src/14bit-registers.cc src/14bit-registers.h src/Makefile.am
 	  src/a2dconverter.cc src/a2dconverter.h src/comparator.cc src/comparator.h
-	  src/eeprom.cc src/lcd_module.cc src/lcd_module.h src/p16f91x.cc 
+	  src/eeprom.cc src/lcd_module.cc src/lcd_module.h src/p16f91x.cc
 	  src/p16f91x.h src/pic-processor.cc src/pic-processor.h src/pir.cc
 	  src/pir.h
 	: Add P16f91x processors (LCD functionality pending)
@@ -236,13 +240,13 @@
 	: Bug #226 OSCCON not setting LTS bit for p16f685, 2 clock startup
 	* src/p1xf1xxx.cc src/p1xf1xxx.h
 	: Add DSM functionality
-	* extras/solar/solar.cc extras/solar/solar.h src/a2dconverter.cc 
+	* extras/solar/solar.cc extras/solar/solar.h src/a2dconverter.cc
 	  src/cod.cc src/trace.cc
 	: fix debug format
-	
+
 2017-04-19 Roy Rankin <rrankin@ihug.com.au>
 	* src/p18x.cc src/p18x.h src/pic-processor.cc src/pic-processor.h
-	: Feature request #55 Add P18f2525 processor 
+	: Feature request #55 Add P18f2525 processor
 
 2017-03-23 Errol van de l'Isle <evandel@cix.co.uk>
 	* cli/cmd_module.cc cli/input.cc extras/rs232-gen/rs232-gen.c
